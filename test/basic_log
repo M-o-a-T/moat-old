@@ -4,13 +4,17 @@
 .
 2 EVENT: say.hello
 .
+9 RUN: SayWorker: TellMe
+9  at: <WorkSequence:2 (3)> for ↯.say.hello
+9  ev: EVENT: say.hello
+.
 The 'TellMe' worker is saying: hello
 .
 2 END: say.hello
 .
-3 <WorkSequence (3)>
+3 <WorkSequence:3 (3)>
 3 │  EVENT: say more.greeting
-3 ├─╴<WorkSequence (2)>
+3 ├─╴<WorkSequence:4 (2)>
 3 │  │  EVENT: say more.greeting
 3 │  │  by SayMoreWorker: say something
 3 │  ├─╴SayWorker: TellOne
@@ -19,7 +23,23 @@ The 'TellMe' worker is saying: hello
 .
 3 EVENT: say more.greeting
 .
+13 RUN: <WorkSequence:4 (2)>
+13    : │  EVENT: say more.greeting
+13    : │  by SayMoreWorker: say something
+13    : ├─╴SayWorker: TellOne
+13    : └─╴SayWorker: TellTwo
+13  at: <WorkSequence:3 (3)> for ↯.say more.greeting
+13  ev: EVENT: say more.greeting
+.
+14 RUN: SayWorker: TellOne
+14  at: <WorkSequence:4 (2)> for ↯.say more.greeting
+14  ev: EVENT: say more.greeting
+.
 The 'TellOne' worker is saying: greeting
+.
+15 RUN: SayWorker: TellTwo
+15  at: <WorkSequence:4 (2)> for ↯.say more.greeting
+15  ev: EVENT: say more.greeting
 .
 The 'TellTwo' worker is saying: greeting
 .

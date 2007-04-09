@@ -40,6 +40,8 @@ class WorkItem(object):
 		return repr(self)
 
 
+seqnum = 0
+
 class WorkSequence(WorkItem):
 	"""\ 
 		A WorkSequence encapsulates things that are to be done in
@@ -50,15 +52,18 @@ class WorkSequence(WorkItem):
 		to be generated.
 		"""
 	def __init__(self, event, worker):
+		global seqnum
+		seqnum += 1
 		self.work = []
 		self.event = event
 		self.worker = worker
 		self.id = self.event.id
+		self.iid = seqnum
 
 	def __repr__(self):
 		if not hasattr(self,"work"):
-			return "<%s (?)>" % (self.__class__.__name__,)
-		return "<%s (%d)>" % (self.__class__.__name__, len(self.work))
+			return "<%s:%d (?)>" % (self.__class__.__name__,self.iid)
+		return "<%s:%d (%d)>" % (self.__class__.__name__, self.iid, len(self.work))
 	
 	def __str__(self):
 		return repr(self)
@@ -76,15 +81,25 @@ class WorkSequence(WorkItem):
 		if not self.work:
 			print "empty workqueue:",self.event
 			return None
+
+		from homevent.logging import log_run
+		ev = self.event
 		try:
 			for w in self.work:
-				r = w.run(self.event)
+				log_run(self,w,ev)
+				r = w.run(ev)
+				if isinstance(r,Event):
+					ev = r
 		except Exception,ex:
 			if isinstance(self.event,ExceptionEvent):
 				raise RuntimeError("nested exceptions",self.event,ex)
 
 			from homevent.run import process_event
-			r = process_event(ExceptionEvent(ex, within=self))
+			r = ExceptionEvent(ex, within=self)
+			log_run(self,None,r)
+			process_event(r)
+#		else:
+#			log_run(self)
 		return r
 		
 	def report(self, verbose=False):

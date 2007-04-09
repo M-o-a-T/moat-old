@@ -13,7 +13,7 @@ from homevent.run import register_worker
 from homevent.worker import Worker
 from homevent.event import ExceptionEvent,Event
 
-__all__ = ("Logger","register_logger","unregister_logger","log",
+__all__ = ("Logger","register_logger","unregister_logger","log","log_run",
 	"TRACE","DEBUG","INFO","WARN","ERROR","PANIC")
 
 loggers = []
@@ -98,9 +98,46 @@ class LogDoneWorker(LogWorker):
 	def report(self,*a,**k):
 		return ("... done.",)
 
+class log_run(Event):
+	"""\
+		Log executing a single step.
+		"""
+	def __init__(self,seq,worker=None,event=None):
+		if worker:
+			super(log_run,self).__init__("WORK",worker.name)
+		else:
+			super(log_run,self).__init__("WORK","END")
+		self.seq = seq
+		self.worker = worker
+		self.event = event
+		if isinstance(worker,LogWorker):
+			return
+		log(self)
+	def report(self, verbose=False):
+		if verbose:
+			p = "RUN: "
+			if self.worker:
+				for r in self.worker.report(verbose):
+					yield p+r
+					p = "   : "
+				if p == "   : ":
+					p = " at: "
+			if self.seq:
+				for r in self.seq.report(False):
+					yield p+r
+					p = "   : "
+			if self.event:
+				p = " ev: "
+				for r in self.event.report(verbose):
+					yield p+r
+					p = "   : "
+		else:
+			yield "RUN: "+str(self.worker)
+
 log = LogWorker()
 register_worker(log)
 log = log.run
+
 register_worker(LogDoneWorker())
 
 def register_logger(logger):
