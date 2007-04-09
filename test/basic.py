@@ -18,10 +18,7 @@ h.register_worker(SayMoreWorker("say something"))
 h.process_event(startup_ev)
 
 h.process_event(hello_ev)
-
-e = h.collect_event(hello2_ev)
-h.log(e)
-e.run(hello2_ev)
+h.process_event(hello2_ev)
 
 h.process_event(shutdown_ev)
 

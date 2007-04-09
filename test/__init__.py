@@ -34,7 +34,10 @@ class run_logger(object):
 		global s
 		if hasattr(event,"report"):
 			for r in event.report(99):
-				self.spop(str(event.id)+" "+str(r))
+				if isinstance(event,(h.logging.log_run,h.logging.log_created)):
+					self.spop(str(r))
+				else:
+					self.spop(str(event.id)+" "+str(r))
 		else:
 			self.spop(str(event))
 		self.spop(".")

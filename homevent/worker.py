@@ -84,9 +84,11 @@ class WorkSequence(WorkItem):
 
 		from homevent.logging import log_run
 		ev = self.event
+		step = 0
 		try:
 			for w in self.work:
-				log_run(self,w,ev)
+				step += 1
+				log_run(self,w,ev,step)
 				r = w.run(ev)
 				if isinstance(r,Event):
 					ev = r
@@ -104,7 +106,7 @@ class WorkSequence(WorkItem):
 		
 	def report(self, verbose=False):
 		if not verbose:
-			yield str(self)+" for "+str(self.event)
+			yield str(self) # +" for "+str(self.event)
 			return
 
 		yield str(self)
@@ -121,14 +123,16 @@ class WorkSequence(WorkItem):
 				w="   "
 
 		pr = None
+		step=1
 		for w in self.work:
 			if pr:
-				prefix = "├─╴"
+				prefix = "├"+str(step)+"╴"
 				for r in pr.report(verbose-1):
 					yield prefix+r
 					prefix="│  "
+				step += 1
 			pr = w
-		prefix = "└─╴"
+		prefix = "└"+str(step)+"╴"
 		for r in pr.report(verbose-1):
 			yield prefix+r
 			prefix="   "
@@ -158,7 +162,7 @@ class Worker(object):
 		if not hasattr(self,"name"):
 			return "%s(<uninitialized>)" % (self.__class__.__name__,)
 		return "%s(%s)" % \
-			(self.__class__.__name__, ",".join(repr(n) for n in self.name))
+			(self.__class__.__name__, repr(self.name))
 
 	def __str__(self):
 		return "⇒%s:%s" % (self.__class__.__name__, self.name)

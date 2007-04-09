@@ -1,49 +1,62 @@
+NEW: <WorkSequence:1 (2)>
+   : │  EVENT: startup
+   : └2╴... done.
+.
 1 EVENT: startup
 .
 1 END: startup
 .
+NEW: <WorkSequence:2 (3)>
+   : │  EVENT: say.hello
+   : ├2╴SayWorker: TellMe
+   : └3╴... done.
+.
 2 EVENT: say.hello
 .
-9 RUN: SayWorker: TellMe
-9  at: <WorkSequence:2 (3)> for ↯.say.hello
-9  ev: EVENT: say.hello
+RUN: SayWorker: TellMe
+ at: <WorkSequence:2 (3)> (step 2)
+ ev: EVENT: say.hello
 .
 The 'TellMe' worker is saying: hello
 .
 2 END: say.hello
 .
-3 <WorkSequence:3 (3)>
-3 │  EVENT: say more.greeting
-3 ├─╴<WorkSequence:4 (2)>
-3 │  │  EVENT: say more.greeting
-3 │  │  by SayMoreWorker: say something
-3 │  ├─╴SayWorker: TellOne
-3 │  └─╴SayWorker: TellTwo
-3 └─╴... done.
+NEW: <WorkSequence:3 (3)>
+   : │  EVENT: say more.greeting
+   : ├2╴<WorkSequence:4 (2)>
+   : │  │  EVENT: say more.greeting
+   : │  │  by SayMoreWorker: say something
+   : │  ├1╴SayWorker: TellOne
+   : │  └2╴SayWorker: TellTwo
+   : └3╴... done.
 .
 3 EVENT: say more.greeting
 .
-13 RUN: <WorkSequence:4 (2)>
-13    : │  EVENT: say more.greeting
-13    : │  by SayMoreWorker: say something
-13    : ├─╴SayWorker: TellOne
-13    : └─╴SayWorker: TellTwo
-13  at: <WorkSequence:3 (3)> for ↯.say more.greeting
-13  ev: EVENT: say more.greeting
+RUN: <WorkSequence:4 (2)>
+   : │  EVENT: say more.greeting
+   : │  by SayMoreWorker: say something
+   : ├1╴SayWorker: TellOne
+   : └2╴SayWorker: TellTwo
+ at: <WorkSequence:3 (3)> (step 2)
+ ev: EVENT: say more.greeting
 .
-14 RUN: SayWorker: TellOne
-14  at: <WorkSequence:4 (2)> for ↯.say more.greeting
-14  ev: EVENT: say more.greeting
+RUN: SayWorker: TellOne
+ at: <WorkSequence:4 (2)> (step 1)
+ ev: EVENT: say more.greeting
 .
 The 'TellOne' worker is saying: greeting
 .
-15 RUN: SayWorker: TellTwo
-15  at: <WorkSequence:4 (2)> for ↯.say more.greeting
-15  ev: EVENT: say more.greeting
+RUN: SayWorker: TellTwo
+ at: <WorkSequence:4 (2)> (step 2)
+ ev: EVENT: say more.greeting
 .
 The 'TellTwo' worker is saying: greeting
 .
 3 END: say more.greeting
+.
+NEW: <WorkSequence:5 (2)>
+   : │  EVENT: shutdown
+   : └2╴... done.
 .
 4 EVENT: shutdown
 .

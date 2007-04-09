@@ -13,7 +13,8 @@ from homevent.run import register_worker
 from homevent.worker import Worker
 from homevent.event import ExceptionEvent,Event
 
-__all__ = ("Logger","register_logger","unregister_logger","log","log_run",
+__all__ = ("Logger","register_logger","unregister_logger",
+	"log","log_run","log_created",
 	"TRACE","DEBUG","INFO","WARN","ERROR","PANIC")
 
 loggers = []
@@ -36,7 +37,10 @@ class Logger(object):
 		if level >= self.level:
 			if hasattr(event,"report"):
 				for r in event.report(99):
-					print event.id,r
+					if isinstance(event,(log_run,log_created)):
+						print r
+					else:
+						print event,r
 			else:
 				print str(event)
 			print "."
@@ -102,7 +106,7 @@ class log_run(Event):
 	"""\
 		Log executing a single step.
 		"""
-	def __init__(self,seq,worker=None,event=None):
+	def __init__(self,seq,worker=None,event=None,step=None):
 		if worker:
 			super(log_run,self).__init__("WORK",worker.name)
 		else:
@@ -110,12 +114,17 @@ class log_run(Event):
 		self.seq = seq
 		self.worker = worker
 		self.event = event
+		self.step = step
 		if isinstance(worker,LogWorker):
 			return
 		log(self)
 	def report(self, verbose=False):
 		if verbose:
 			p = "RUN: "
+			if self.step:
+				q = " (step "+str(self.step)+")"
+			else:
+				q = ""
 			if self.worker:
 				for r in self.worker.report(verbose):
 					yield p+r
@@ -124,8 +133,9 @@ class log_run(Event):
 					p = " at: "
 			if self.seq:
 				for r in self.seq.report(False):
-					yield p+r
+					yield p+r+q
 					p = "   : "
+					q = ""
 			if self.event:
 				p = " ev: "
 				for r in self.event.report(verbose):
@@ -133,6 +143,23 @@ class log_run(Event):
 					p = "   : "
 		else:
 			yield "RUN: "+str(self.worker)
+
+class log_created(Event):
+	"""\
+		Log executing a single step.
+		"""
+	def __init__(self,seq):
+		super(log_created,self).__init__("NEW",str(seq.iid))
+		self.seq = seq
+		log(self)
+	def report(self, verbose=False):
+		if verbose:
+			p = "NEW: "
+			for r in self.seq.report(verbose):
+				yield p+r
+				p = "   : "
+		else:
+			yield "NEW: "+str(self.seq)
 
 log = LogWorker()
 register_worker(log)
