@@ -5,6 +5,6 @@ all:
 install:
 	@echo Not implemented yet.
 test:
-	$(MAKE) -C test --no-print-directory
+	@$(MAKE) -C test --no-print-directory
 
 .PHONY: test
