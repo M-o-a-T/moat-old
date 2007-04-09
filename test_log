@@ -1,0 +1,31 @@
+1 EVENT: startup
+.
+1 END: startup
+.
+2 EVENT: say.hello
+.
+The 'TellMe' worker is saying: hello
+.
+2 END: say.hello
+.
+3 <WorkSequence (3)>
+3 │  EVENT: say more.greeting
+3 ├─╴<WorkSequence (2)>
+3 │  │  EVENT: say more.greeting
+3 │  │  by SayMoreWorker: say something
+3 │  ├─╴SayWorker: TellOne
+3 │  └─╴SayWorker: TellTwo
+3 └─╴... done.
+.
+3 EVENT: say more.greeting
+.
+The 'TellOne' worker is saying: greeting
+.
+The 'TellTwo' worker is saying: greeting
+.
+3 END: say more.greeting
+.
+4 EVENT: shutdown
+.
+4 END: shutdown
+.
