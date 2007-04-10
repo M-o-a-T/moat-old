@@ -4,6 +4,9 @@
 This part of the code defines what an event is.
 """
 
+import warnings
+from twisted.python import failure
+
 class EventNoNameError(ValueError):
 	"""\
 		You tried to create an unnamed event. That's stupid.
@@ -49,33 +52,32 @@ class Event(object):
 	def __setitem__(self,i,j):
 		raise RuntimeError("You cannot modify an event!")
 
-class ExceptionEvent(Event):
+class ExceptionEvent(Event, failure.Failure):
 	"""\
-		This event reports that something went wrong.
+		This event tracks that something went wrong.
 		"""
-	def __init__(self,exc,within=None):
-		import sys
-		self.exc = sys.exc_info()
-		super(ExceptionEvent,self).__init__("error", exc.__class__.__name__)
+	def __init__(self, e1=None,e2=None,e3=None, within=()):
+		Event.__init__(self,"exception",e1.__name__)
+		failure.Failure.__init__(self, e1,e2,e3)
 
 		self.within=within
 		if within:
-			self.id = self.within.id
+			self.id = self.within[0].id
 	
 	def report(self, verbose=False):
 		if verbose:
 			from traceback import format_exception
-			exc = format_exception(*self.exc)
+			exc = format_exception(self.type,self.value,self.tb)
 			p = "ERROR: "
 			for r in exc:
 				for l in r.rstrip("\n").split("\n"):
 					yield p+l
-					p="    …: "
+					p="     : "
 		else:
-			yield "ERROR: "+str(self.exc)
-		if self.within:
+			yield "ERROR: "+failure.Failure.__str__(self)
+		for w in self.within:
 			p = "   in: "
-			for r in self.within.report(verbose):
+			for r in w.report(verbose):
 				yield p+r
-				p = "    …: "
+				p = "     : "
 

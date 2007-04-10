@@ -9,6 +9,9 @@ something about it.
 
 from homevent.event import Event, ExceptionEvent
 
+from twisted.internet import defer
+from twisted.python import failure
+
 class WorkerError(AssertionError):
 	"""\
 		You tried to run a worker that's not been . That's stupid.
@@ -77,33 +80,42 @@ class WorkSequence(WorkItem):
 			w = wn
 		self.work.append(w)
 
-	def run(self, event):
+	def run(self, event=None):
 		if not self.work:
 			print "empty workqueue:",self.event
 			return None
 
 		from homevent.logging import log_run
-		ev = self.event
-		step = 0
-		try:
-			for w in self.work:
-				step += 1
-				log_run(self,w,ev,step)
-				r = w.run(ev)
-				if isinstance(r,Event):
-					ev = r
-		except Exception,ex:
-			if isinstance(self.event,ExceptionEvent):
-				raise RuntimeError("nested exceptions",self.event,ex)
+		if event is None:
+			event = self.event
+		if not isinstance(event,defer.Deferred):
+			event = defer.succeed(event)
 
-			from homevent.run import process_event
-			r = ExceptionEvent(ex, within=self)
-			log_run(self,None,r)
-			process_event(r)
-#		else:
-#			log_run(self)
-		return r
-		
+		def do_std(r,step,w):
+			try:
+				log_run(self,w,r,step)
+				res = w.run(r)
+			except Exception:
+				res = ExceptionEvent(within=(self,w))
+			else:
+				if res is None:
+					res = r
+				if isinstance(res,failure.Failure) \
+						and not isinstance(res, Event):
+					res = ExceptionEvent(res.type,res.value,res.tb, \
+						within=(self,w))
+			return res
+
+		step = 0
+		for w in self.work:
+			step += 1
+			if isinstance(w,ExcWorker):
+				event.addBoth(do_std,step,w)
+			else:
+				event.addCallback(do_std,step,w)
+
+		return event
+
 	def report(self, verbose=False):
 		if not verbose:
 			yield str(self) # +" for "+str(self.event)
@@ -194,6 +206,12 @@ class SeqWorker(Worker):
 	"""\
 		This worker will return a WorkSequence.
 		Its do_event() code MUST NOT have any side effects!
+		"""
+	pass
+
+class ExcWorker(Worker):
+	"""\
+		This worker will accept exception events.
 		"""
 	pass
 

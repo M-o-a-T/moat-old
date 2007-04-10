@@ -78,10 +78,10 @@ class LogWorker(Worker):
 		else:
 			try:
 				Logger(TRACE).log(event)
-			except Exception,e:
+			except Exception:
 				if isinstance(event,ExceptionEvent):
 					raise RuntimeError("nested exception",event,e)
-				exc.append(e)
+				exc.append(sys.exc_info())
 		if exc:
 			from homevent.run import process_event
 			for e in exc:
