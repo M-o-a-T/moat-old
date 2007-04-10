@@ -8,6 +8,7 @@ something about it.
 """
 
 from homevent.event import Event, ExceptionEvent
+from homevent.constants import MIN_PRIO,MAX_PRIO
 
 from twisted.internet import defer
 from twisted.python import failure
@@ -107,7 +108,6 @@ class WorkSequence(WorkItem):
 			return res
 
 		step = 0
-		from homevent.run import MIN_PRIO,MAX_PRIO
 		for w in self.work:
 			if not hasattr(w,"prio") or (w.prio >= MIN_PRIO and w.prio <= MAX_PRIO):
 				step += 1
@@ -138,7 +138,6 @@ class WorkSequence(WorkItem):
 
 		pr = None
 		step=1
-		from homevent.run import MIN_PRIO,MAX_PRIO
 		for w in self.work:
 			if hasattr(w,"prio") and (w.prio < MIN_PRIO or w.prio > MAX_PRIO):
 				continue

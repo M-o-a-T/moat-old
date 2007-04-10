@@ -4,14 +4,11 @@
 This is the core of the event dispatcher.
 """
 
+from homevent.constants import SYS_PRIO,MIN_PRIO,MAX_PRIO
 from homevent.worker import WorkSequence
 
 workers = {}
 work_prios = []
-
-SYS_PRIO=-10
-MIN_PRIO=0
-MAX_PRIO=99
 
 def register_worker(w):
 	"""\
