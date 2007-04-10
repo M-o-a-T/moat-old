@@ -9,6 +9,10 @@ from homevent.worker import WorkSequence
 workers = {}
 work_prios = []
 
+SYS_PRIO=-10
+MIN_PRIO=0
+MAX_PRIO=99
+
 def register_worker(w):
 	"""\
 		Register a worker with a given priority.
@@ -20,8 +24,8 @@ def register_worker(w):
 	if w.prio not in workers:
 		workers[w.prio] = []
 		work_prios = sorted(workers.keys())
-	elif not w.prio:
-		raise RuntimeError("More than one prio-zero worker is registered!")
+	elif w.prio < MIN_PRIO or w.prio > MAX_PRIO:
+		raise RuntimeError("More than one system worker (prio:%d) is registered!" % (w.prio,))
 	workers[w.prio].append(w)
 	
 def unregister_worker(w):
@@ -29,6 +33,8 @@ def unregister_worker(w):
 		Deregister a worker.
 		"""
 	workers[w.prio].remove(w)
+	if not workers[w.prio]: # last worker removed
+		del workers[w.prio]
 
 def collect_event(e):
 	"""\
@@ -50,5 +56,5 @@ def process_event(e):
 		Process an event. This is the procedure you'll be feeding
 		externally-generated events to.
 		"""
-	collect_event(e).run(e)
+	return collect_event(e).run()
 	

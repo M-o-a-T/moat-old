@@ -30,7 +30,7 @@ class WorkItem(object):
 		"""
 	name = "No Work"
 
-	def run(self):
+	def run(self,*a,**k):
 		pass
 	
 	def report(self, verbose=False):
@@ -73,14 +73,14 @@ class WorkSequence(WorkItem):
 	
 	def append(self, w):
 		if isinstance(w,SeqWorker):
-			wn = w.run(self.event)
+			wn = w.run(event=self.event)
 			if not isinstance(wn,WorkSequence):
 				raise RuntimeError("%s: returned %s, not a WorkSequence" \
 					% (w,wn))
 			w = wn
 		self.work.append(w)
 
-	def run(self, event=None):
+	def run(self, event=None,*a,**k):
 		if not self.work:
 			print "empty workqueue:",self.event
 			return None
@@ -94,7 +94,7 @@ class WorkSequence(WorkItem):
 		def do_std(r,step,w):
 			try:
 				log_run(self,w,r,step)
-				res = w.run(r)
+				res = w.run(res=r, event=self.event, queue=self)
 			except Exception:
 				res = ExceptionEvent(within=(self,w))
 			else:
@@ -107,8 +107,10 @@ class WorkSequence(WorkItem):
 			return res
 
 		step = 0
+		from homevent.run import MIN_PRIO,MAX_PRIO
 		for w in self.work:
-			step += 1
+			if not hasattr(w,"prio") or (w.prio >= MIN_PRIO and w.prio <= MAX_PRIO):
+				step += 1
 			if isinstance(w,ExcWorker):
 				event.addBoth(do_std,step,w)
 			else:
@@ -136,7 +138,10 @@ class WorkSequence(WorkItem):
 
 		pr = None
 		step=1
+		from homevent.run import MIN_PRIO,MAX_PRIO
 		for w in self.work:
+			if hasattr(w,"prio") and (w.prio < MIN_PRIO or w.prio > MAX_PRIO):
+				continue
 			if pr:
 				prefix = "├"+str(step)+"╴"
 				for r in pr.report(verbose-1):
@@ -192,7 +197,7 @@ class Worker(object):
 			"""
 		raise AssertionError("You need to override does_event()")
 	
-	def run(self, event):
+	def run(self, event,*a,**k):
 		"""\
 			Actually do the work on this event.
 

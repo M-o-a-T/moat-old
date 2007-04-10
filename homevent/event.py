@@ -57,8 +57,11 @@ class ExceptionEvent(Event, failure.Failure):
 		This event tracks that something went wrong.
 		"""
 	def __init__(self, e1=None,e2=None,e3=None, within=()):
-		Event.__init__(self,"exception",e1.__name__)
 		failure.Failure.__init__(self, e1,e2,e3)
+		try:
+			Event.__init__(self,"exception",self.type.__name__)
+		except AttributeError: # old-style class!
+			Event.__init__(self,"exception",str(self.type))
 
 		self.within=within
 		if within:

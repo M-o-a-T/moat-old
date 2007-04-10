@@ -9,9 +9,10 @@ part of the system.
 
 """
 
-from homevent.run import register_worker
+from homevent.run import register_worker,SYS_PRIO,MAX_PRIO
 from homevent.worker import Worker
 from homevent.event import ExceptionEvent,Event
+import sys
 
 __all__ = ("Logger","register_logger","unregister_logger",
 	"log","log_run","log_created",
@@ -50,7 +51,7 @@ class LogWorker(Worker):
 		This class is the one which logs everything. Specifically,
 		it logs the start of 
 		"""
-	prio = 0
+	prio = SYS_PRIO
 
 	def __init__(self):
 		super(LogWorker,self).__init__("Logger")
@@ -60,7 +61,7 @@ class LogWorker(Worker):
 		return ()
 	def does_event(self,event):
 		return True
-	def run(self,event):
+	def run(self,event,*a,**k):
 		"""\
 			Run through all loggers. If one of then throws an exception,
 			drop the logger and process it.
@@ -70,22 +71,20 @@ class LogWorker(Worker):
 			for l in loggers[:]:
 				try:
 					l.log(event)
-				except Exception,e:
+				except Exception:
 					loggers.remove(l)
-					if isinstance(event,ExceptionEvent):
-						raise RuntimeError("nested exception",event,e)
-					exc.append(e)
+					exc.append(sys.exc_info())
 		else:
 			try:
 				Logger(TRACE).log(event)
 			except Exception:
 				if isinstance(event,ExceptionEvent):
-					raise RuntimeError("nested exception",event,e)
+					raise RuntimeError("nested exception",event,sys.exc_info())
 				exc.append(sys.exc_info())
 		if exc:
 			from homevent.run import process_event
 			for e in exc:
-				process_event(ExceptionEvent(e))
+				process_event(ExceptionEvent(*e))
 
 class LogEndEvent(Event):
 	def __init__(self,event):
@@ -95,9 +94,9 @@ class LogEndEvent(Event):
 		yield  "END: "+".".join(self.names[1:])
 
 class LogDoneWorker(LogWorker):
-	prio = 99
+	prio = MAX_PRIO
 
-	def run(self, event):
+	def run(self, event,*a,**k):
 		super(LogDoneWorker,self).run(LogEndEvent(event))
 	def report(self,*a,**k):
 		return ("... done.",)

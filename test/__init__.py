@@ -3,6 +3,15 @@
 
 import homevent as h
 import sys
+from twisted.internet import reactor
+
+def mainloop(main):
+	h.start_up()
+	def doit():
+		main()
+		h.shut_down()
+	reactor.callLater(0,doit)
+	reactor.run()
 
 class run_logger(object):
 	"""\
@@ -47,16 +56,16 @@ class SayWorker(h.Worker):
 	prio = 5
 	def does_event(self,e):
 		return e[0]=="say"
-	def run(self,e):
-		h.log("The '"+self.name+"' worker is saying: "+" ".join(e[1:]))
+	def run(self,event,*a,**k):
+		h.log("The '"+self.name+"' worker is saying: "+" ".join(event[1:]))
 
 class SayMoreWorker(h.SeqWorker):
 	"""A WorkSequence-generating worker which logs something twice."""
 	prio = 5
 	def does_event(self,e):
 		return e[0]=="say more"
-	def run(self,e):
-		w = h.WorkSequence(e,self)
+	def run(self,event,*a,**k):
+		w = h.WorkSequence(event,self)
 		w.append(SayWorker("TellOne"))
 		w.append(SayWorker("TellTwo"))
 		return w

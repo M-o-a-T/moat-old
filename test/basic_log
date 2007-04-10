@@ -1,43 +1,58 @@
-NEW: <WorkSequence:1 (2)>
+NEW: <WorkSequence:1 (4)>
    : │  EVENT: startup
-   : └2╴... done.
+   : └1╴... done.
 .
 1 EVENT: startup
 .
+RUN: <WorkSequence:1 (4)>
+ ev: EVENT: startup
+.
 1 END: startup
 .
-NEW: <WorkSequence:2 (3)>
-   : │  EVENT: say.hello
-   : ├2╴SayWorker: TellMe
-   : └3╴... done.
+RUN: <WorkSequence:1 (4)> (step 1)
+ ev: EVENT: startup
 .
-2 EVENT: say.hello
+NEW: <WorkSequence:2 (5)>
+   : │  EVENT: say.hello
+   : ├1╴SayWorker: TellMe
+   : └2╴... done.
+.
+3 EVENT: say.hello
+.
+RUN: <WorkSequence:2 (5)>
+ ev: EVENT: say.hello
 .
 RUN: SayWorker: TellMe
- at: <WorkSequence:2 (3)> (step 2)
+ at: <WorkSequence:2 (5)> (step 1)
  ev: EVENT: say.hello
 .
 The 'TellMe' worker is saying: hello
 .
-2 END: say.hello
+3 END: say.hello
 .
-NEW: <WorkSequence:3 (3)>
+RUN: <WorkSequence:2 (5)> (step 2)
+ ev: EVENT: say.hello
+.
+NEW: <WorkSequence:3 (5)>
    : │  EVENT: say more.greeting
-   : ├2╴<WorkSequence:4 (2)>
+   : ├1╴<WorkSequence:4 (2)>
    : │  │  EVENT: say more.greeting
    : │  │  by SayMoreWorker: say something
    : │  ├1╴SayWorker: TellOne
    : │  └2╴SayWorker: TellTwo
-   : └3╴... done.
+   : └2╴... done.
 .
-3 EVENT: say more.greeting
+4 EVENT: say more.greeting
+.
+RUN: <WorkSequence:3 (5)>
+ ev: EVENT: say more.greeting
 .
 RUN: <WorkSequence:4 (2)>
    : │  EVENT: say more.greeting
    : │  by SayMoreWorker: say something
    : ├1╴SayWorker: TellOne
    : └2╴SayWorker: TellTwo
- at: <WorkSequence:3 (3)> (step 2)
+ at: <WorkSequence:3 (5)> (step 1)
  ev: EVENT: say more.greeting
 .
 RUN: SayWorker: TellOne
@@ -52,13 +67,22 @@ RUN: SayWorker: TellTwo
 .
 The 'TellTwo' worker is saying: greeting
 .
-3 END: say more.greeting
+4 END: say more.greeting
 .
-NEW: <WorkSequence:5 (2)>
+RUN: <WorkSequence:3 (5)> (step 2)
+ ev: EVENT: say more.greeting
+.
+NEW: <WorkSequence:5 (4)>
    : │  EVENT: shutdown
-   : └2╴... done.
+   : └1╴... done.
 .
-4 EVENT: shutdown
+2 EVENT: shutdown
 .
-4 END: shutdown
+RUN: <WorkSequence:5 (4)>
+ ev: EVENT: shutdown
+.
+2 END: shutdown
+.
+RUN: <WorkSequence:5 (4)> (step 1)
+ ev: EVENT: shutdown
 .
