@@ -1,0 +1,48 @@
+Init FooHandler: 1 ()
+Init BarHandler: 2 ()
+Init WhatHandler: 3 ()
+Init FoiledHandler: 4 ()
+Init ForHandler: 5 ()
+# call foo.input()
+Input FooHandler: ()
+# call foo.input("bar")
+Input FooHandler: ('bar',)
+# call foo.input("bar","baz")
+Input FooHandler: ('bar', 'baz')
+# call bar.input_block("baz","quux")
+# which returns a SubBar object "subbar"
+Create SubBar: ('baz', 'quux')
+Init SubBar: 6 ('baz', 'quux')
+# call WhatHandler(subbar).input("ever")
+Init WhatHandler: 7 (‹SubBar(6)›,)
+Input WhatHandler:('ever',)
+# call ForHandler(subbar).input_block("ever","and","ever")
+# which returns a SubFor object "subfor"
+Init ForHandler: 8 (‹SubBar(6)›,)
+Create SubFor: ('ever', 'and', 'ever')
+Init SubFor: 9 ('ever', 'and', 'ever')
+# call FoiledHandler(subfor).input("again")
+Init FoiledHandler: 10 (‹SubFor(9)›,)
+Input FoiledHandler: ('again',)
+# call WhatHandler(subbar).input("else")
+Init WhatHandler: 11 (‹SubBar(6)›,)
+Input WhatHandler:('else',)
+Input FooHandler: ('again',)
+# help
+Known sub-words:
+foo  We foo around.
+bar  Have a bar, man!
+help show doc texts
+# help foo
+foo We foo around.
+# help bar
+bar Have a bar, man!
+Known words:
+what What is this?
+for  for you!
+# help bar for
+for for you!
+Known words:
+foiled not clingfilm
+# help bar for foiled
+foiled not clingfilm

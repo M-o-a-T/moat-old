@@ -17,7 +17,8 @@ class run_logger(object):
 	"""\
 		This class checks that the current log matches the stored log.
 		"""
-	def __init__(self,name):
+	def __init__(self,name, dot=True):
+		self.dot=dot
 		try:
 			self.data=open(name+"_log")
 		except IOError:
@@ -49,7 +50,12 @@ class run_logger(object):
 					self.spop(str(event.id)+" "+str(r))
 		else:
 			self.spop(str(event))
-		self.spop(".")
+		if self.dot:
+			self.spop(".")
+	def write(self,s):
+		s = s.rstrip()
+		if s != "":
+			self.log(s)
 
 class SayWorker(h.Worker):
 	"""A cheap worker which just logs something convenient."""
