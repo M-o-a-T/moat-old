@@ -19,20 +19,25 @@ class Event(object):
 	"""\
 		This is an event. It happens and gets analyzed by the system.
 		"""
-	def __init__(self, *name):
+	def __init__(self, *names):
 		"""\
 			Events have at least one name. For example:
 				Event("startup")
 				Event("sw12","toggle")
 				Event("lamp12","dim","10")
 			"""
-		if not len(name):
+		if not len(names):
 			raise EventNoNameError
-		self.names = name
+		self.names = names
 
 		global event_id
 		event_id += 1
 		self.id = event_id
+
+	def __len__(self):
+		return len(self.names)
+	def __bool__(self):
+		return True
 
 	def __repr__(self):
 		if not hasattr(self,"names"):
