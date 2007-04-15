@@ -82,7 +82,7 @@ class LogWorker(ExcWorker):
 		if exc:
 			from traceback import print_exception
 			for e in exc:
-				log_exc("Logging error", error=e)
+				log_exc("Logging error", err=e)
 
 	def process_exc(self,err):
 		log_exc(err=err,msg="while logging")
@@ -91,7 +91,7 @@ def log_exc(msg=None, err=None):
 	if not isinstance(err,Failure):
 		if err is None:
 			err = sys.exc_info()
-		elif not isinstance(err,Tuple):
+		elif not isinstance(err,tuple):
 			err = (None,Err,None)
 		err = Failure(err[1],err[0],err[2])
 
@@ -165,6 +165,11 @@ class log_run(Event):
 					yield p+r+q
 					p = " "*len(self.prefix)+": "
 					q = ""
+				p = " "*(len(self.prefix)-2)+"ev: "
+				for r in self.seq.event.report(False):
+					yield p+r
+					p = " "*len(self.prefix)+": "
+
 		else:
 			yield self.prefix+": "+str(self.worker)
 

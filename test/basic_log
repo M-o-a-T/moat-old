@@ -13,64 +13,132 @@ RUN: <WorkSequence:1 (4)> (step 1)
  ev: EVENT: startup
 .
 NEW: <WorkSequence:2 (5)>
-   : │  EVENT: say.hello
+   : │  EVENT: say¦hello
    : ├1╴SayWorker: TellMe
    : └2╴... done.
 .
-3 EVENT: say.hello
+3 EVENT: say¦hello
 .
 RUN: <WorkSequence:2 (5)>
- ev: EVENT: say.hello
+ ev: EVENT: say¦hello
 .
 RUN: SayWorker: TellMe
  at: <WorkSequence:2 (5)> (step 1)
- ev: EVENT: say.hello
+ ev: EVENT: say¦hello
 .
 The 'TellMe' worker is saying: hello
 .
-3 END: say.hello
+3 END: say¦hello
 .
 RUN: <WorkSequence:2 (5)> (step 2)
- ev: EVENT: say.hello
+ ev: EVENT: say¦hello
 .
 NEW: <WorkSequence:3 (5)>
-   : │  EVENT: say more.greeting
+   : │  EVENT: say more¦greeting
    : ├1╴<WorkSequence:4 (2)>
-   : │  │  EVENT: say more.greeting
+   : │  │  EVENT: say more¦greeting
    : │  │  by SayMoreWorker: say something
    : │  ├1╴SayWorker: TellOne
    : │  └2╴SayWorker: TellTwo
    : └2╴... done.
 .
-4 EVENT: say more.greeting
+4 EVENT: say more¦greeting
 .
 RUN: <WorkSequence:3 (5)>
- ev: EVENT: say more.greeting
+ ev: EVENT: say more¦greeting
 .
 RUN: <WorkSequence:4 (2)>
-   : │  EVENT: say more.greeting
+   : │  EVENT: say more¦greeting
    : │  by SayMoreWorker: say something
    : ├1╴SayWorker: TellOne
    : └2╴SayWorker: TellTwo
  at: <WorkSequence:3 (5)> (step 1)
- ev: EVENT: say more.greeting
+ ev: EVENT: say more¦greeting
 .
 RUN: SayWorker: TellOne
  at: <WorkSequence:4 (2)> (step 1)
- ev: EVENT: say more.greeting
+ ev: EVENT: say more¦greeting
 .
 The 'TellOne' worker is saying: greeting
 .
 RUN: SayWorker: TellTwo
  at: <WorkSequence:4 (2)> (step 2)
- ev: EVENT: say more.greeting
+ ev: EVENT: say more¦greeting
 .
 The 'TellTwo' worker is saying: greeting
 .
-4 END: say more.greeting
+4 END: say more¦greeting
 .
 RUN: <WorkSequence:3 (5)> (step 2)
- ev: EVENT: say more.greeting
+ ev: EVENT: say more¦greeting
+.
+NEW: <WorkSequence:5 (4)>
+   : │  EVENT: shutdown
+   : └1╴... done.
+.
+2 EVENT: shutdown
+.
+RUN: <WorkSequence:5 (4)>
+ ev: EVENT: shutdown
+.
+2 END: shutdown
+.
+RUN: <WorkSequence:5 (4)> (step 1)
+ ev: EVENT: shutdown
+.
+__init__.py ...
+modules.py ...
+ERROR, line 8
+expect: .
+got   :
+ ev: EVENT: startup
+.
+1 END: startup
+.
+RUN: <WorkSequence:1 (4)> (step 1)
+ ev: EVENT: startup
+.
+NEW: <WorkSequence:2 (4)>
+   : │  EVENT: load¦homevent.sample_module
+   : └1╴... done.
+.
+3 EVENT: load¦homevent.sample_module
+.
+RUN: <WorkSequence:2 (4)>
+ ev: EVENT: load¦homevent.sample_module
+.
+3 END: load¦homevent.sample_module
+.
+RUN: <WorkSequence:2 (4)> (step 1)
+ ev: EVENT: load¦homevent.sample_module
+.
+NEW: <WorkSequence:3 (4)>
+   : │  EVENT: load¦homevent.sample_module
+   : └1╴... done.
+.
+3 EVENT: load¦homevent.sample_module
+.
+RUN: <WorkSequence:3 (4)>
+ ev: EVENT: load¦homevent.sample_module
+.
+3 END: load¦homevent.sample_module
+.
+RUN: <WorkSequence:3 (4)> (step 1)
+ ev: EVENT: load¦homevent.sample_module
+.
+NEW: <WorkSequence:4 (4)>
+   : │  EVENT: say more¦greeting
+   : └1╴... done.
+.
+4 EVENT: say more¦greeting
+.
+RUN: <WorkSequence:4 (4)>
+ ev: EVENT: say more¦greeting
+.
+4 END: say more¦greeting
+.
+RUN: <WorkSequence:4 (4)> (step 1)
+ ev: EVENT: say more¦greeting
 .
 NEW: <WorkSequence:5 (4)>
    : │  EVENT: shutdown

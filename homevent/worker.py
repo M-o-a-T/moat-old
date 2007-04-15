@@ -35,6 +35,7 @@ class WorkItem(object):
 		to … well … do nothing.
 		"""
 	name = "No Work"
+	prio = MIN_PRIO # not relevant here, but a required attribute
 
 	def run(self,*a,**k):
 		pass
