@@ -2,26 +2,16 @@
 # -*- coding: utf-8 -*-
 
 """\
-This code reads a config file.
+This code parses a config file.
 
-Currently, it understands:
+By itself, it understands nothing whatsoever. This package includes a
+"help" command:
 
-include NAME
-		- read that file too
+	help [word...]
+		- show what "word" does
 
-load NAME
-		- load the module/package homevent.NAME
-
-unload NAME
-		- ... and remove it again.
-
-config NAME:
-	foo bar baz
-		- pass these lines to this module's config() code
-		- see there for further documentation
-
-Modules can register more words. Of particular interest are the
-switchboard and timer modules.
+See the homevent.config module and the test/parser.py script
+for typical usage.
 
 """
 
@@ -72,7 +62,8 @@ def parse_tokens(stream, level=0, logger=None, words=main_words):
 	last_block = None
 	hdl = None
 
-	from token import NAME,DEDENT,INDENT,OP,NEWLINE,ENDMARKER
+	from token import NUMBER,NAME,DEDENT,INDENT,OP,NEWLINE,ENDMARKER, \
+		STRING
 	from tokenize import COMMENT,NL
 
 	for t,txt,beg,end,line in stream:
@@ -96,9 +87,21 @@ def parse_tokens(stream, level=0, logger=None, words=main_words):
 				return
 			elif t == NL:
 				continue
-		elif state == 1: # after first word
+		elif state == 1 or state == 2: # after first word
 			if t == NAME:
 				args.append(txt)
+				state = 2
+				continue
+			elif t == NUMBER:
+				args.append(eval(txt,{},{}))
+				state = 1
+				continue
+			elif t == STRING:
+				args.append(eval(txt,{},{}))
+				state = 1
+				continue
+			elif t == OP and txt == "." and state == 2:
+				state = 5
 				continue
 			elif t == OP and txt == ":":
 				parse_tokens(stream, words=hdl.input_block(*args), level=level+1, logger=logger)
@@ -115,6 +118,11 @@ def parse_tokens(stream, level=0, logger=None, words=main_words):
 		elif state == 4:
 			if t == INDENT:
 				state = 0
+				continue
+		elif state == 5:
+			if t == NAME:
+				args[-1] += "."+txt
+				state = 2
 				continue
 
 		raise SyntaxError("Unknown token '%s' (%d, state %d) in line %d" % (txt,t,state,beg[0]))

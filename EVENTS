@@ -1,0 +1,32 @@
+Startup and shutdown
+--------------------
+
+startup init
+	-- happens immediately after loading modules and parsing the config.
+startup done
+	-- happens when all the startup and init stuff is finished.
+
+
+Module load/unload
+------------------
+
+module load NAME [params...]
+module unload NAME [params...]
+	-- trigger: load/unload a module.
+
+module load-start NAME [params...]
+	-- begin loading the thing. Triggered before doing the work.
+module load-done NAME [params...]
+	-- end loading the thing.
+module load-fail NAME [params...]
+	-- loading the module ran into a problem.
+
+module unload-start NAME [params...]
+	-- begin unloading the thing.
+module unload-done NAME [params...]
+	-- end unloading the thing. Unload may not fail.
+module unload-fail NAME [params...]
+	-- unloading the module ran into a problem.
+	   (Most likely, the thing simply doesn't exist.)
+
+

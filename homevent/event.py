@@ -34,10 +34,6 @@ class Event(object):
 		event_id += 1
 		self.id = event_id
 
-	def __len__(self):
-		return len(self.names)
-	def __bool__(self):
-		return True
 
 	def __repr__(self):
 		if not hasattr(self,"names"):
@@ -45,47 +41,49 @@ class Event(object):
 		return "Event(%s)" % ",".join(repr(n) for n in self.names)
 
 	def __str__(self):
-		return "↯."+".".join(self.names)
+		try:
+			return "↯."+"¦".join(self.names)
+		except Exception:
+			return "↯ REPORT_ERROR: "+repr(self.names)
 
 	def report(self, verbose=False):
-		yield "EVENT: "+".".join(self.names)
+		try:
+			yield "EVENT: "+"¦".join(self.names)
+		except Exception:
+			yield "EVENT: REPORT_ERROR: "+repr(self.names)
 	
 	def __getitem__(self,i):
 		"""… so that you can write e[0] instead of e.names[0]"""
 		return self.names[i]
 	
+	def __getslice__(self,i,j):
+		"""… so that you can write e[2:] instead of e.names[2:]"""
+		return self.names[i:j]
+	
 	def __setitem__(self,i,j):
 		raise RuntimeError("You cannot modify an event!")
 
-class ExceptionEvent(Event, failure.Failure):
-	"""\
-		This event tracks that something went wrong.
-		"""
-	def __init__(self, e1=None,e2=None,e3=None, within=()):
-		failure.Failure.__init__(self, e1,e2,e3)
-		try:
-			Event.__init__(self,"exception",self.type.__name__)
-		except AttributeError: # old-style class!
-			Event.__init__(self,"exception",str(self.type))
+	def __len__(self):
+		return len(self.names)
+	def __bool__(self):
+		return True
 
-		self.within=within
-		if within:
-			self.id = self.within[0].id
-	
-	def report(self, verbose=False):
-		if verbose:
-			from traceback import format_exception
-			exc = format_exception(self.type,self.value,self.tb)
-			p = "ERROR: "
-			for r in exc:
-				for l in r.rstrip("\n").split("\n"):
-					yield p+l
-					p="     : "
-		else:
-			yield "ERROR: "+failure.Failure.__str__(self)
-		for w in self.within:
-			p = "   in: "
-			for r in w.report(verbose):
-				yield p+r
-				p = "     : "
+#Monkey-patch t.p.f.Failure to answer to our report() call
+from twisted.python.failure import Failure
 
+def report(self, verbose=False):
+	if verbose:
+		from traceback import format_exception
+		p = "ERROR: "
+		for l in self.getTraceback().rstrip("\n").split("\n"):
+			yield p+l
+			p="     : "
+		if hasattr(self,"within"):
+			for w in self.within:
+				p = "   in: "
+				for r in w.report(verbose):
+					yield p+r
+					p = "     : "
+	else:
+		yield "ERROR: "+self.getErrorMessage()
+Failure.report = report

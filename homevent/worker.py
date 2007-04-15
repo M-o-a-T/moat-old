@@ -7,17 +7,22 @@ Briefly: a worker is something that recognizes an event and does
 something about it.
 """
 
-from homevent.event import Event, ExceptionEvent
+from homevent.event import Event
 from homevent.constants import MIN_PRIO,MAX_PRIO
 
 from twisted.internet import defer
 from twisted.python import failure
 
-class WorkerError(AssertionError):
+class DropException:
 	"""\
-		You tried to run a worker that's not been . That's stupid.
+		A sentinel which log_end returns in order to not propagate exceptions beyond a Deferred's lifetime.
 		"""
 	pass
+
+class HaltSequence(Exception):
+	"""Do not execute the following workers."""
+	pass
+	
 
 class WorkItem(object):
 	"""\
@@ -61,7 +66,8 @@ class WorkSequence(WorkItem):
 		self.work = []
 		self.event = event
 		self.worker = worker
-		self.id = self.event.id
+		if hasattr(event,"id"):
+			self.id = self.event.id
 		self.iid = seqnum
 
 	def __repr__(self):
@@ -81,35 +87,38 @@ class WorkSequence(WorkItem):
 			w = wn
 		self.work.append(w)
 
-	def run(self, event=None,*a,**k):
+	def run(self, *a,**k):
 		if not self.work:
 			print "empty workqueue:",self.event
 			return None
 
-		from homevent.logging import log_run
-		if event is None:
-			event = self.event
+		from homevent.logging import log_run,log_halted
+		event = self.event
 		if not isinstance(event,defer.Deferred):
 			event = defer.succeed(event)
 
-		def do_std(r,step,w):
+		def do_std(res,step,w):
 			try:
-				log_run(self,w,r,step)
-				res = w.run(res=r, event=self.event, queue=self)
+				log_run(self,w,step)
+				r = w.run(event=self.event, queue=self)
+			except HaltSequence:
+				log_halted(self,w,step)
+				return
 			except Exception:
-				res = ExceptionEvent(within=(self,w))
-			else:
-				if res is None:
-					res = r
-				if isinstance(res,failure.Failure) \
-						and not isinstance(res, Event):
-					res = ExceptionEvent(res.type,res.value,res.tb, \
-						within=(self,w))
-			return res
+				if isinstance(res,failure.Failure):
+					from homevent.logging import log_exc
+					log_exc("Unhandled nested exception")
+				else:
+					r = failure.Failure()
+			if isinstance(r,failure.Failure):
+				if not hasattr(r,"within"):
+					r.within=[w]
+				r.within.append(self)
+				return process_failure(r)
 
 		step = 0
 		for w in self.work:
-			if not hasattr(w,"prio") or (w.prio >= MIN_PRIO and w.prio <= MAX_PRIO):
+			if w.prio >= MIN_PRIO and w.prio <= MAX_PRIO:
 				step += 1
 			if isinstance(w,ExcWorker):
 				event.addBoth(do_std,step,w)
@@ -128,7 +137,7 @@ class WorkSequence(WorkItem):
 			prefix = "│  "
 		else:
 			prefix = "   "
-		for r in self.event.report(verbose):
+		for r in self.event.report(False):
 			yield prefix+r
 		if self.worker:
 			w="by "
@@ -139,7 +148,7 @@ class WorkSequence(WorkItem):
 		pr = None
 		step=1
 		for w in self.work:
-			if hasattr(w,"prio") and (w.prio < MIN_PRIO or w.prio > MAX_PRIO):
+			if w.prio < MIN_PRIO or w.prio > MAX_PRIO:
 				continue
 			if pr:
 				prefix = "├"+str(step)+"╴"
@@ -164,6 +173,7 @@ class Worker(object):
 	"""\
 		This is a generic worker. It accepts an event and does things to it.
 		"""
+	prio = (MIN_PRIO+MAX_PRIO)/2
 	def __init__(self, name):
 		"""\
 			Initialize this worker.
@@ -203,27 +213,30 @@ class Worker(object):
 			You need to override this. Don't forget to set self.id, if
 			appropriate.
 			"""
-		raise AssertionError("You need to override do_event()")
+		raise AssertionError("You need to override run()")
 	
 
 class SeqWorker(Worker):
 	"""\
 		This worker will return a WorkSequence.
-		Its do_event() code MUST NOT have any side effects!
+		Its run() code MUST NOT have any side effects!
 		"""
 	pass
 
+
 class ExcWorker(Worker):
 	"""\
-		This worker will accept exception events.
+		This worker will handle failures.
 		"""
-	pass
+	def process_exc(self,err):
+		raise AssertionError("You need to override process_exc()")
+
 
 class DoNothingWorker(Worker):
 	def __init__(self):
 		super(DoNothingWorker,self).__init__("no-op")
 	def does_event(self,event):
 		return True
-	def run(self, event):
+	def run(self, event, *a,**k):
 		pass
 

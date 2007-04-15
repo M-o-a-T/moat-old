@@ -10,12 +10,13 @@ part of the system.
 """
 
 from homevent.run import register_worker,SYS_PRIO,MAX_PRIO
-from homevent.worker import Worker
-from homevent.event import ExceptionEvent,Event
+from homevent.worker import Worker,ExcWorker
+from homevent.event import Event
+from twisted.python.failure import Failure
 import sys
 
 __all__ = ("Logger","register_logger","unregister_logger",
-	"log","log_run","log_created",
+	"log","log_run","log_created","log_halted",
 	"TRACE","DEBUG","INFO","WARN","ERROR","PANIC")
 
 loggers = []
@@ -38,18 +39,17 @@ class Logger(object):
 		if level >= self.level:
 			if hasattr(event,"report"):
 				for r in event.report(99):
-					if isinstance(event,(log_run,log_created)):
-						print r
-					else:
-						print event,r
+					print r
 			else:
 				print str(event)
 			print "."
+	def log_failure(self, err):
+		err.printTraceback() # (detail='verbose')
 
-class LogWorker(Worker):
+class LogWorker(ExcWorker):
 	"""\
 		This class is the one which logs everything. Specifically,
-		it logs the start of 
+		it logs the start of every event execution.
 		"""
 	prio = SYS_PRIO
 
@@ -78,26 +78,55 @@ class LogWorker(Worker):
 			try:
 				Logger(TRACE).log(event)
 			except Exception:
-				if isinstance(event,ExceptionEvent):
-					raise RuntimeError("nested exception",event,sys.exc_info())
 				exc.append(sys.exc_info())
 		if exc:
-			from homevent.run import process_event
+			from traceback import print_exception
 			for e in exc:
-				process_event(ExceptionEvent(*e))
+				log_exc("Logging error", error=e)
+
+	def process_exc(self,err):
+		log_exc(err=err,msg="while logging")
+
+def log_exc(msg=None, err=None):
+	if not isinstance(err,Failure):
+		if err is None:
+			err = sys.exc_info()
+		elif not isinstance(err,Tuple):
+			err = (None,Err,None)
+		err = Failure(err[1],err[0],err[2])
+
+	if loggers:
+		for l in loggers[:]:
+			try:
+				l.log_failure(err)
+			except Exception,e:
+				loggers.remove(l)
+				log_exc("Logger removed",e)
+				
+	else:
+		Logger(TRACE).log_failure(err)
+
 
 class LogEndEvent(Event):
 	def __init__(self,event):
-		super(LogEndEvent,self).__init__("END",*event.names)
-		self.id = event.id
+		if isinstance(event,Failure):
+			super(LogEndEvent,self).__init__("END",event.type.__name__)
+		else:
+			super(LogEndEvent,self).__init__("END",*event.names)
+			self.id = event.id
+
 	def report(self, verbose=False):
-		yield  "END: "+".".join(self.names[1:])
+		try:
+			yield  "END: "+"¦".join(self.names[1:])
+		except Exception:
+			yield  "END: REPORT_ERROR: "+repr(self.names[1:])
 
 class LogDoneWorker(LogWorker):
 	prio = MAX_PRIO
 
 	def run(self, event,*a,**k):
 		super(LogDoneWorker,self).run(LogEndEvent(event))
+
 	def report(self,*a,**k):
 		return ("... done.",)
 
@@ -105,21 +134,22 @@ class log_run(Event):
 	"""\
 		Log executing a single step.
 		"""
-	def __init__(self,seq,worker=None,event=None,step=None):
+	prefix="RUN"
+	def __init__(self,seq,worker=None,step=None):
 		if worker:
 			super(log_run,self).__init__("WORK",worker.name)
 		else:
 			super(log_run,self).__init__("WORK","END")
 		self.seq = seq
 		self.worker = worker
-		self.event = event
 		self.step = step
 		if isinstance(worker,LogWorker):
 			return
 		log(self)
+
 	def report(self, verbose=False):
 		if verbose:
-			p = "RUN: "
+			p = self.prefix+": "
 			if self.step:
 				q = " (step "+str(self.step)+")"
 			else:
@@ -127,25 +157,23 @@ class log_run(Event):
 			if self.worker:
 				for r in self.worker.report(verbose):
 					yield p+r
-					p = "   : "
-				if p == "   : ":
-					p = " at: "
+					p = " "*len(self.prefix)+": "
+				if p == " "*len(self.prefix)+": ":
+					p = " "*(len(self.prefix)-2)+"at: "
 			if self.seq:
 				for r in self.seq.report(False):
 					yield p+r+q
-					p = "   : "
+					p = " "*len(self.prefix)+": "
 					q = ""
-			if self.event:
-				p = " ev: "
-				for r in self.event.report(verbose):
-					yield p+r
-					p = "   : "
 		else:
-			yield "RUN: "+str(self.worker)
+			yield self.prefix+": "+str(self.worker)
+
+class log_halted(Event):
+	prefix="HALT"
 
 class log_created(Event):
 	"""\
-		Log executing a single step.
+		Log creating an event.
 		"""
 	def __init__(self,seq):
 		super(log_created,self).__init__("NEW",str(seq.iid))
