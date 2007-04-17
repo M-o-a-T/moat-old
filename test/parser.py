@@ -155,4 +155,11 @@ def logger(s,t,c,*x):
 	if t == COMMENT:
 		log(c.rstrip())
 
-hp.parse(input, logger=logger)
+
+def main():
+	d = hp.parse(input, logger=logger)
+	d.addErrback(lambda _: _.printTraceback())
+	d.addBoth(lambda _: h.shut_down())
+
+h.mainloop(main)
+

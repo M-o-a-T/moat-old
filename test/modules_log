@@ -12,59 +12,190 @@ RUN: <WorkSequence:1 (4)>
 RUN: <WorkSequence:1 (4)> (step 1)
  ev: EVENT: startup
 .
-NEW: <WorkSequence:2 (4)>
-   : │  EVENT: load¦homevent.sample_module
-   : └1╴... done.
+NEW: <WorkSequence:2 (5)>
+   : │  EVENT: module¦load¦homevent.sample_module
+   : ├1╴Loader: Module Loader
+   : └2╴... done.
 .
-3 EVENT: load¦homevent.sample_module
+3 EVENT: module¦load¦homevent.sample_module
 .
-RUN: <WorkSequence:2 (4)>
- ev: EVENT: load¦homevent.sample_module
+RUN: <WorkSequence:2 (5)>
+ ev: EVENT: module¦load¦homevent.sample_module
 .
-3 END: load¦homevent.sample_module
-.
-RUN: <WorkSequence:2 (4)> (step 1)
- ev: EVENT: load¦homevent.sample_module
+RUN: Loader: Module Loader
+ at: <WorkSequence:2 (5)> (step 1)
+ ev: EVENT: module¦load¦homevent.sample_module
 .
 NEW: <WorkSequence:3 (4)>
-   : │  EVENT: load¦homevent.sample_module
+   : │  EVENT: module¦load-start¦homevent.sample_module
    : └1╴... done.
 .
-3 EVENT: load¦homevent.sample_module
+15 EVENT: module¦load-start¦homevent.sample_module
 .
 RUN: <WorkSequence:3 (4)>
- ev: EVENT: load¦homevent.sample_module
+ ev: EVENT: module¦load-start¦homevent.sample_module
 .
-3 END: load¦homevent.sample_module
+15 END: module¦load-start¦homevent.sample_module
 .
 RUN: <WorkSequence:3 (4)> (step 1)
- ev: EVENT: load¦homevent.sample_module
+ ev: EVENT: module¦load-start¦homevent.sample_module
+.
+Loading!
 .
 NEW: <WorkSequence:4 (4)>
-   : │  EVENT: say more¦greeting
+   : │  EVENT: module¦load-done¦homevent.sample_module
    : └1╴... done.
 .
-4 EVENT: say more¦greeting
+22 EVENT: module¦load-done¦homevent.sample_module
 .
 RUN: <WorkSequence:4 (4)>
- ev: EVENT: say more¦greeting
+ ev: EVENT: module¦load-done¦homevent.sample_module
 .
-4 END: say more¦greeting
+22 END: module¦load-done¦homevent.sample_module
 .
 RUN: <WorkSequence:4 (4)> (step 1)
- ev: EVENT: say more¦greeting
+ ev: EVENT: module¦load-done¦homevent.sample_module
 .
-NEW: <WorkSequence:5 (4)>
+3 END: module¦load¦homevent.sample_module
+.
+RUN: <WorkSequence:2 (5)> (step 2)
+ ev: EVENT: module¦load¦homevent.sample_module
+.
+NEW: <WorkSequence:5 (5)>
+   : │  EVENT: module¦load¦homevent.sample_module
+   : ├1╴Loader: Module Loader
+   : └2╴... done.
+.
+3 EVENT: module¦load¦homevent.sample_module
+.
+RUN: <WorkSequence:5 (5)>
+ ev: EVENT: module¦load¦homevent.sample_module
+.
+RUN: Loader: Module Loader
+ at: <WorkSequence:5 (5)> (step 1)
+ ev: EVENT: module¦load¦homevent.sample_module
+.
+NEW: <WorkSequence:6 (4)>
+   : │  EVENT: module¦load-start¦homevent.sample_module
+   : └1╴... done.
+.
+36 EVENT: module¦load-start¦homevent.sample_module
+.
+RUN: <WorkSequence:6 (4)>
+ ev: EVENT: module¦load-start¦homevent.sample_module
+.
+36 END: module¦load-start¦homevent.sample_module
+.
+RUN: <WorkSequence:6 (4)> (step 1)
+ ev: EVENT: module¦load-start¦homevent.sample_module
+.
+NEW: <WorkSequence:7 (4)>
+   : │  ERROR: ('This module already exists', ('homevent.sample_module',))
+   : └1╴... done.
+.
+ERROR: Traceback (most recent call last):
+     :   File "/usr/lib/python2.5/site-packages/twisted/internet/defer.py", line 191, in addCallback
+     :     callbackKeywords=kw)
+     :   File "/usr/lib/python2.5/site-packages/twisted/internet/defer.py", line 182, in addCallbacks
+     :     self._runCallbacks()
+     :   File "/usr/lib/python2.5/site-packages/twisted/internet/defer.py", line 317, in _runCallbacks
+     :     self.result = callback(self.result, *args, **kw)
+     :   File "/daten/src/git/homevent/homevent/module.py", line 131, in <lambda>
+     :     d.addCallback(lambda _: doit())
+     : --- <exception caught here> ---
+     :   File "/daten/src/git/homevent/homevent/module.py", line 80, in doit
+     :     raise RuntimeError("This module already exists",event[2:])
+     : exceptions.RuntimeError: ('This module already exists', ('homevent.sample_module',))
+   in: EVENT: module¦load¦homevent.sample_module
+   in: Loader: Module Loader
+.
+RUN: <WorkSequence:7 (4)>
+ ev: ERROR: ('This module already exists', ('homevent.sample_module',))
+.
+47 END: RuntimeError
+.
+RUN: <WorkSequence:7 (4)> (step 1)
+ ev: ERROR: ('This module already exists', ('homevent.sample_module',))
+.
+NEW: <WorkSequence:8 (4)>
+   : │  EVENT: module¦load-fail¦homevent.sample_module
+   : └1╴... done.
+.
+49 EVENT: module¦load-fail¦homevent.sample_module
+.
+RUN: <WorkSequence:8 (4)>
+ ev: EVENT: module¦load-fail¦homevent.sample_module
+.
+49 END: module¦load-fail¦homevent.sample_module
+.
+RUN: <WorkSequence:8 (4)> (step 1)
+ ev: EVENT: module¦load-fail¦homevent.sample_module
+.
+3 END: module¦load¦homevent.sample_module
+.
+RUN: <WorkSequence:5 (5)> (step 2)
+ ev: EVENT: module¦load¦homevent.sample_module
+.
+NEW: <WorkSequence:9 (5)>
+   : │  EVENT: module¦unload¦homevent.sample_module
+   : ├1╴Unloader: Module Remover
+   : └2╴... done.
+.
+4 EVENT: module¦unload¦homevent.sample_module
+.
+RUN: <WorkSequence:9 (5)>
+ ev: EVENT: module¦unload¦homevent.sample_module
+.
+RUN: Unloader: Module Remover
+ at: <WorkSequence:9 (5)> (step 1)
+ ev: EVENT: module¦unload¦homevent.sample_module
+.
+NEW: <WorkSequence:10 (4)>
+   : │  EVENT: module¦unload-start¦homevent.sample_module
+   : └1╴... done.
+.
+63 EVENT: module¦unload-start¦homevent.sample_module
+.
+RUN: <WorkSequence:10 (4)>
+ ev: EVENT: module¦unload-start¦homevent.sample_module
+.
+63 END: module¦unload-start¦homevent.sample_module
+.
+RUN: <WorkSequence:10 (4)> (step 1)
+ ev: EVENT: module¦unload-start¦homevent.sample_module
+.
+Unloading!
+.
+NEW: <WorkSequence:11 (4)>
+   : │  EVENT: module¦unload-done¦homevent.sample_module
+   : └1╴... done.
+.
+70 EVENT: module¦unload-done¦homevent.sample_module
+.
+RUN: <WorkSequence:11 (4)>
+ ev: EVENT: module¦unload-done¦homevent.sample_module
+.
+70 END: module¦unload-done¦homevent.sample_module
+.
+RUN: <WorkSequence:11 (4)> (step 1)
+ ev: EVENT: module¦unload-done¦homevent.sample_module
+.
+4 END: module¦unload¦homevent.sample_module
+.
+RUN: <WorkSequence:9 (5)> (step 2)
+ ev: EVENT: module¦unload¦homevent.sample_module
+.
+NEW: <WorkSequence:12 (4)>
    : │  EVENT: shutdown
    : └1╴... done.
 .
 2 EVENT: shutdown
 .
-RUN: <WorkSequence:5 (4)>
+RUN: <WorkSequence:12 (4)>
  ev: EVENT: shutdown
 .
 2 END: shutdown
 .
-RUN: <WorkSequence:5 (4)> (step 1)
+RUN: <WorkSequence:12 (4)> (step 1)
  ev: EVENT: shutdown
 .

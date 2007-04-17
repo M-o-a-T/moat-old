@@ -16,6 +16,8 @@ for typical usage.
 """
 
 from tokenize import generate_tokens
+import Queue
+from twisted.internet import reactor,threads
 
 main_words = {}
 
@@ -41,91 +43,161 @@ def unregister_statement(handler, words=main_words):
 		"""
 	del words[handler.name]
 
+class Parser(object):
+	def __init__(self, words=main_words, logger=None, level=0, queue=None):
+		self.words = words
+		self.logger=logger
+		self.level=level
+		if queue:
+			self.queue = queue
+		else:
+			self.queue = Queue.Queue()
+		self.result = threads.deferToThread(self._parse)
+
+	def line(self, line):
+		"""Feed a Python-style input line to the parser."""
+		self.queue.put(line)
+
+	def readline(self):
+		q = self.queue
+		if q is None:
+			return ""
+		from time import sleep
+		l = q.get()
+		if l is None:
+			self.queue = None
+			return ""
+		return l
+
+	def done(self):
+		q = self.queue
+		if q is not None:
+			q.put(None)
+
+	def _parse(self):
+		"""\
+			Iterator. It gets fed tokens, assembles them into
+			statements, and calls the code in 'words' with them.
+			"""
+		if self.level:
+			state=3
+		else:
+			state=0
+		last_block = None
+		hdl = None
+		stack = []
+		level = self.level
+		words = self.words
+
+		from token import NUMBER,NAME,DEDENT,INDENT,OP,NEWLINE,ENDMARKER, \
+			STRING
+		from tokenize import COMMENT,NL
+
+		# States: 0 newline, 1 after first word, 2 OK to extend word
+		#         3+4 need newline+indent after sub-level start, 5 extending word
+		# TODO: write a nice .dot file for this stuff
+		for t,txt,beg,end,line in generate_tokens(self.readline):
+			if self.logger: self.logger(state,t,txt,beg,end,line)
+			if t == COMMENT:
+				continue
+			if state == 0: # begin of statement
+				if t == NAME:
+					try:
+						hdl = words[txt]
+					except KeyError:
+						try:
+							hdl = words["*"]
+						except KeyError:
+							raise NameError("'%s': not found; line %d" % (txt,beg[0]))
+						else:
+							args = [txt]
+					else:
+						args = []
+					state=1
+					continue
+				elif t == DEDENT and level>0:
+					if hasattr(words,"end_block"):
+						words.end_block()
+					if stack:
+						words = stack.pop()
+						continue
+					else:
+						return
+					
+				elif t == ENDMARKER:
+					stack.append(words)
+					while stack:
+						words = stack.pop()
+						if hasattr(words,"end_block"):
+							words.end_block()
+					return
+				elif t == NL:
+					continue
+			elif state == 1 or state == 2: # after first word
+				if t == NAME:
+					args.append(txt)
+					state = 2
+					continue
+				elif t == OP and txt == "*" and state == 1:
+					args.append(txt)
+					state = 1
+					continue
+				elif t == NUMBER:
+					args.append(eval(txt,{},{}))
+					state = 1
+					continue
+				elif t == STRING:
+					args.append(eval(txt,{},{}))
+					state = 1
+					continue
+				elif t == OP and txt == "." and state == 2:
+					state = 5
+					continue
+				elif t == OP and txt == ":":
+					stack.append(words)
+					words = (hdl.input_block(*args))
+					level += 1
+					state = 3
+					continue
+				elif t == NEWLINE:
+					hdl.input(*args)
+					# reactor.callFromThread(hdl.input,*args)
+					state=0
+					continue
+			elif state == 3:
+				if t == NEWLINE:
+					state = 4
+					continue
+			elif state == 4:
+				if t == INDENT:
+					state = 0
+					continue
+			elif state == 5:
+				if t == NAME:
+					args[-1] += "."+txt
+					state = 2
+					continue
+
+			raise SyntaxError("Unknown token '%s' (%d, state %d) in line %d" % (txt,t,state,beg[0]))
+
+def _parse(g,input, *a,**k):
+	while True:
+		l = input.readline()
+		if not l:
+			break
+		g.line(l)
+	g.done()
+
 def parse(input, *a,**k):
 	"""\
 		Read input (which must be something with a readline() method)
 		and run through the tokenizer.
 		"""
-	return parse_tokens(generate_tokens(input.readline), *a,**k)
+	g = Parser(*a,**k)
+	d = threads.deferToThread(_parse,g,input,*a,**k)
+	d.addCallback(lambda _: g.result)
+	return d
 
-def parse_tokens(stream, level=0, logger=None, words=main_words):
-	"""\
-		Read input stream, which must be an iterable(!) returning tokens,
-		as returned by tokenize.generate_tokens().
-		Call the code in 'words'.
-		"""
-	words=words
-	if level:
-		state=3
-	else:
-		state=0
-	last_block = None
-	hdl = None
-
-	from token import NUMBER,NAME,DEDENT,INDENT,OP,NEWLINE,ENDMARKER, \
-		STRING
-	from tokenize import COMMENT,NL
-
-	for t,txt,beg,end,line in stream:
-		if logger: logger(state,t,txt,beg,end,line)
-		if t == COMMENT:
-			continue
-		if state == 0: # begin of statement
-			if t == NAME:
-				try:
-					hdl = words[txt]
-				except KeyError:
-					raise NameError("'%s': not found; line %d" % (txt,beg[0]))
-				state=1
-				args = []
-				continue
-			elif t == DEDENT and level>0:
-				if hasattr(words,"end_block"):
-					words.end_block()
-				return
-			elif t == ENDMARKER:
-				return
-			elif t == NL:
-				continue
-		elif state == 1 or state == 2: # after first word
-			if t == NAME:
-				args.append(txt)
-				state = 2
-				continue
-			elif t == NUMBER:
-				args.append(eval(txt,{},{}))
-				state = 1
-				continue
-			elif t == STRING:
-				args.append(eval(txt,{},{}))
-				state = 1
-				continue
-			elif t == OP and txt == "." and state == 2:
-				state = 5
-				continue
-			elif t == OP and txt == ":":
-				parse_tokens(stream, words=hdl.input_block(*args), level=level+1, logger=logger)
-				state=0
-				continue
-			elif t == NEWLINE:
-				hdl.input(*args)
-				state=0
-				continue
-		elif state == 3:
-			if t == NEWLINE:
-				state = 4
-				continue
-		elif state == 4:
-			if t == INDENT:
-				state = 0
-				continue
-		elif state == 5:
-			if t == NAME:
-				args[-1] += "."+txt
-				state = 2
-				continue
-
-		raise SyntaxError("Unknown token '%s' (%d, state %d) in line %d" % (txt,t,state,beg[0]))
 
 class Statement(object):
 	"""\
@@ -261,5 +333,8 @@ if __name__ == "__main__":
 		print " ".join((str(d) for d in x))
 
 	import sys
-	parse(sys.stdin, logger=logger)
+	d = parse(sys.stdin, logger=logger)
+	d.addBoth(lambda _: reactor.stop())
+
+	reactor.run()
 

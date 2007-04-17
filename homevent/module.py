@@ -76,6 +76,9 @@ class Loader(Worker):
 		def doit():
 			self.mod = None
 			try:
+				if tuple(event[2:]) in modules:
+					raise RuntimeError("This module already exists",event[2:])
+
 				# first, drop it from sys.modules so that it gets reloaded
 				n = event[2]
 				while "." in n:
@@ -85,17 +88,17 @@ class Loader(Worker):
 					n = n[:n.rindex(".")]
 
 				mod = namedAny(event[2])
+				if hasattr(mod,"main"):
+					mod = mod.main
+				if callable(mod):
+					mod = mod(*event[2:])
+				elif len(event) > 3:
+					raise RuntimeError("You cannot parameterize this module.")
+				if mod.name in modules:
+					raise RuntimeError("This module already exists(2)",mod.name)
+				self.mod = mod
+				modules[mod.name] = mod
 				try:
-					if hasattr(mod,"main"):
-						mod = mod.main
-					if callable(mod):
-						mod = mod(*event[2:])
-					elif len(event) > 3:
-						raise RuntimeError("You cannot parameterize this module.")
-					self.mod = mod
-					if mod.name in modules:
-						raise RuntimeError("This module already exists",mod.name)
-					modules[mod.name] = mod
 					mod.load()
 					return True
 				except Exception:
@@ -162,9 +165,9 @@ class Unloader(Worker):
 
 		def notdone(exc):
 			process_failure(exc)
-			return process_event(Event("module","unload-fail",*sn.module.name), return_errors=True)
+			return process_event(Event("module","unload-fail",*event[2:]), return_errors=True)
 
-		d = process_event(Event("module","unload-start",*event[2:]))
+		d = process_event(Event("module","unload-start",*event[2:]), return_errors=True)
 		d.addCallback(lambda _: doit())
 		d.addCallbacks(lambda _: done(), notdone)
 		return d

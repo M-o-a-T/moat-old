@@ -3,6 +3,15 @@ Init BarHandler: 2 ()
 Init WhatHandler: 3 ()
 Init FoiledHandler: 4 ()
 Init ForHandler: 5 ()
+NEW: <WorkSequence:1 (4)>
+   : │  EVENT: startup
+   : └1╴... done.
+1 EVENT: startup
+RUN: <WorkSequence:1 (4)>
+ ev: EVENT: startup
+1 END: startup
+RUN: <WorkSequence:1 (4)> (step 1)
+ ev: EVENT: startup
 # call foo.input()
 Input FooHandler: ()
 # call foo.input("bar")
@@ -46,3 +55,12 @@ Known words:
 foiled not clingfilm
 # help bar for foiled
 foiled not clingfilm
+NEW: <WorkSequence:2 (4)>
+   : │  EVENT: shutdown
+   : └1╴... done.
+2 EVENT: shutdown
+RUN: <WorkSequence:2 (4)>
+ ev: EVENT: shutdown
+2 END: shutdown
+RUN: <WorkSequence:2 (4)> (step 1)
+ ev: EVENT: shutdown

@@ -7,11 +7,13 @@ This part of the code controls the main loop.
 from twisted.internet import reactor,defer
 
 from homevent.event import Event
-from homevent.worker import ExcWorker
+from homevent.worker import ExcWorker,HaltSequence
 from homevent.run import register_worker,unregister_worker, SYS_PRIO,MAX_PRIO,\
 	process_event
+from homevent.parser import Statement
 
-__all__ = ("start_up","shut_down", "startup_event","shutdown_event")
+__all__ = ("start_up","shut_down", "startup_event","shutdown_event",
+	"ShutdownHandler","mainloop")
 
 startup_event = Event("startup")
 shutdown_event = Event("shutdown")
@@ -29,7 +31,7 @@ class Shutdown_Worker_1(ExcWorker):
 		return True
 	def run(self,queue,*a,**k):
 		if not running:
-			raise RuntimeError("Not running. No new work is accepted!")
+			raise HaltSequence("Not running. No new work is accepted!")
 		active_queues.append(queue)
 	def report(self,*a,**k):
 		return ()
@@ -72,4 +74,24 @@ def shut_down():
 	if not active_queues:
 		reactor.stop()
 
+class ShutdownHandler(Statement):
+	"""A command handler to stop the whole thing."""
+	name="shutdown"
+	doc="""\
+shutdown      stops executing the program.
+shutdown now  ... but does not wait for active events to terminate.
+"""
+	def input(self,*w):
+		if len(w):
+			if w == ("now,"):
+				reactor.stop()
+				return
+			raise ValueError("'quit' does not take arguments (except ‹now›).")
+		shut_down()
+
+def mainloop(main=None):
+	if main:
+		reactor.callWhenRunning(main)
+	start_up()
+	reactor.run()
 

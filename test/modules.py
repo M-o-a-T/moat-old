@@ -6,12 +6,12 @@ import sys
 from homevent.module import Loader,Unloader
 from homevent.run import process_event
 
-from test import mainloop, run_logger,SayWorker,SayMoreWorker
+from test import run_logger,SayWorker,SayMoreWorker
 run_logger("modules")
 
-load_ev = h.Event("load","homevent.sample_module")
-unload_ev = h.Event("say more","greeting")
-	
+load_ev = h.Event("module","load","homevent.sample_module")
+unload_ev = h.Event("module","unload","homevent.sample_module")
+
 h.register_worker(Loader())
 h.register_worker(Unloader())
 
@@ -19,6 +19,7 @@ def main():
 	d = h.process_event(load_ev)
 	d.addCallback(lambda _: process_event(load_ev))
 	d.addCallback(lambda _: process_event(unload_ev))
+	d.addBoth(lambda _: h.shut_down())
 
-mainloop(main)
+h.mainloop(main)
 

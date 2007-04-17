@@ -5,14 +5,6 @@ import homevent as h
 import sys
 from twisted.internet import reactor
 
-def mainloop(main):
-	h.start_up()
-	def doit():
-		main()
-		h.shut_down()
-	reactor.callLater(0,doit)
-	reactor.run()
-
 class run_logger(object):
 	"""\
 		This class checks that the current log matches the stored log.
@@ -27,6 +19,12 @@ class run_logger(object):
 		self.line=0
 		h.register_logger(self)
 
+	def __del__(self):
+		if self.data:
+			sp = self.data.readline()
+			if sp:
+				print "ERROR, line",self.line,"-- more data in log"
+		
 	def spop(self,sx):
 		self.line += 1
 		if not self.data:
@@ -44,7 +42,7 @@ class run_logger(object):
 		global s
 		if hasattr(event,"report"):
 			for r in event.report(99):
-				if isinstance(event,(h.logging.log_run,h.logging.log_created)):
+				if not hasattr(event,"id") or isinstance(event,(h.logging.log_run,h.logging.log_created)):
 					self.spop(str(r))
 				else:
 					self.spop(str(event.id)+" "+str(r))
