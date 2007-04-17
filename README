@@ -1,0 +1,99 @@
+(NB: If you see strange escape characters or other line noise in this file,
+or in fact any other file or output of this package, you forgot to
+switch your system to UTF-8.)
+
+«homevent» is a contraction of "home event". Its principal author is
+Matthias Urlichs <matthias@urlichs.de>. I wrote it because while playing
+around with some home automation stuff, I found that none of the free
+systems out there fit my needs particularly well, plus they were not
+talking to each other.
+
+The system I'm concerned with are:
+
+* FS20
+
+This is a German wireless system operating in the 868-MHz range. It's
+not at all secure and generally doesn't use two-way handshakes. Wall
+switches cost at €15, a heating controller is €40, so it's not too bad.
+
+There's a FS20 controller for USB, whcih I'm currently using. Alternately,
+you can cannibalize a sender and a receiver, and connect them to your
+computer directly. I plan to use a spare USB sound interface for that
+because I want to control the heating system directly, and the USB thing
+doesn't let you do that.
+
+FS20-on-USB (actually, a serial port behind a FTDI controller) is
+supported by a Perl script which would support integration with other
+systems. The main problem is that I do not like Perl. :-/
+
+* 1-wire
+
+This is a two-wire bus system -- one of these wires is Ground, so
+apparently it doesn't count ☺. In practice, you do need a separate power
+supply. Personally, I use a cheap shielded four-wire cable (LIYCY).
+
+The bus can be connected rather haphazardly if your wires are not *that*
+long, or you can use special branch controllers if you need to be more
+careful. It works admirably in my house.
+
+The system is not that fast. In practice, you can poll a simple on/off
+sensor 250 times a second, so the practical limit with cheap sensors is
+40 switches on a bus — 100 if you get somewhat-more-expensive "event
+counter" chips.
+
+On the plus side: the peripherals, including voltage and (calibrated!)
+temperature sensors, are really cheap, and a little bit of electronics
+knowledge goes a long way. (Who needs "when's sunrise" code, when you
+can add a real daylight sensor to your system for less than €5?) There
+are also inexpensive LCD panels for remote status displays which don't
+warrant their own computer.
+
+Linux support for 1-wire comes either as an incomplete kernel module,
+or a user-space daemon (<http://owfs.sourceforge.net>) with support for
+multiple scripting languages. I'm using the latter.
+
+* LIRC
+
+I use infrared to control the window blinds. Good motors cost around
+€110 wholesale (or €210 retail ☹).
+
+LIRC is a reasonably integral part of most modern Linux distributions,
+so the idea to use it as a simple way to control a couple of Linux
+programs ("if I turn off the room lights in my living room at night,
+please pause Rhythmbox and/or Totem, turn off power to the stereo, and
+let the computer hibernate") has a lot of appeal... and if the lights
+are not controlled centrally, see above for the cheap light sensor.
+
+Other systems and projects
+--------------------------
+
+* plutohome
+
+Really large. Not my kettle of fish: writing my own system is bound to
+be quicker than figuring out how to hook 1-wire sensors into this beast
+of hundreds of C++ classes.
+
+* misterhome
+
+Looks interesting, but frankly I hate Perl. Writing a home automation
+*configuration* in Perl is not what I want to do.
+
+* fhem
+
+Focuses on FS20. Might be OK as a front-end.
+
+* xap
+
+This protocol tries to be both high-level enough to serve as a generic
+home control infrastructure and low-level enough to be understandable in
+dumb devices. My take is that a high-level protocol needs to be more
+structured (dare I say XML?) and low-level devices are better handled by
+an adapter — the protocol is too verbose for slow interfaces.
+
+The available software is somewhat Windows-centric. The Python module
+for it (100% C, one woners why) is one of the most ugly pieces of code
+I've *ever* seen.
+
+Writing a front-end adapter might work, and there are some good ideas
+in the data structures it models.
+
