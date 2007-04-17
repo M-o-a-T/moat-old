@@ -94,16 +94,16 @@ NEW: <WorkSequence:7 (4)>
    : └1╴... done.
 .
 ERROR: Traceback (most recent call last):
-     :   File "/usr/lib/python2.5/site-packages/twisted/internet/defer.py", line 191, in addCallback
+     :   File "internet/defer.py, in addCallback
      :     callbackKeywords=kw)
-     :   File "/usr/lib/python2.5/site-packages/twisted/internet/defer.py", line 182, in addCallbacks
+     :   File "internet/defer.py, in addCallbacks
      :     self._runCallbacks()
-     :   File "/usr/lib/python2.5/site-packages/twisted/internet/defer.py", line 317, in _runCallbacks
+     :   File "internet/defer.py, in _runCallbacks
      :     self.result = callback(self.result, *args, **kw)
-     :   File "/daten/src/git/homevent/homevent/module.py", line 131, in <lambda>
+     :   File "homevent/module.py, in <lambda>
      :     d.addCallback(lambda _: doit())
      : --- <exception caught here> ---
-     :   File "/daten/src/git/homevent/homevent/module.py", line 80, in doit
+     :   File "homevent/module.py, in doit
      :     raise RuntimeError("This module already exists",event[2:])
      : exceptions.RuntimeError: ('This module already exists', ('homevent.sample_module',))
    in: EVENT: module¦load¦homevent.sample_module

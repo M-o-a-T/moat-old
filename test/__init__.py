@@ -3,7 +3,10 @@
 
 import homevent as h
 import sys
+import re
 from twisted.internet import reactor
+
+r_fli = re.compile(r'(:\s+File ").*/([^/]+/[^/]+)", line \d+, in')
 
 class run_logger(object):
 	"""\
@@ -27,6 +30,9 @@ class run_logger(object):
 		
 	def spop(self,sx):
 		self.line += 1
+		def rep(m):
+			return m.group(1)+m.group(2)+", in"
+		sx = r_fli.sub(rep,sx)
 		if not self.data:
 			print sx
 			return
