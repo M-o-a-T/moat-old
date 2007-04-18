@@ -19,33 +19,12 @@ from tokenize import generate_tokens
 import Queue
 from twisted.internet import reactor,threads
 
-main_words = {}
-
-def register_statement(handler, words=main_words):
-	"""\
-		Register a handler for a token. handler.input() is called
-		with the rest of the words on the line. handler.name is the
-		first word on the line, which is used to find the handler.
-
-		If the statement is a multi-line section (the stuff after
-		colon-ized lines, above), handler.input_block() line is called
-		instead. It must return something where its words may be looked
-		up in. handler.end_block() will be called when the block is finished,
-		if it exists.
-		"""
-	if handler.name in words:
-		raise ValueError("A handler for '%s' is already registered." % (handler.name,))
-	words[handler.name] = handler
-
-def unregister_statement(handler, words=main_words):
-	"""\
-		Remove this statement.
-		"""
-	del words[handler.name]
-
 class Parser(object):
-	def __init__(self, words=main_words, logger=None, level=0, queue=None):
+	def __init__(self, words=None, out=None, logger=None, level=0, queue=None):
+		if words is None:
+			words = main_words(None, out=out)
 		self.words = words
+		self.out=out
 		self.logger=logger
 		self.level=level
 		if queue:
@@ -102,22 +81,11 @@ class Parser(object):
 				continue
 			if state == 0: # begin of statement
 				if t == NAME:
-					try:
-						hdl = words[txt]
-					except KeyError:
-						try:
-							hdl = words["*"]
-						except KeyError:
-							raise NameError("'%s': not found; line %d" % (txt,beg[0]))
-						else:
-							args = [txt]
-					else:
-						args = []
+					args = [txt]
 					state=1
 					continue
 				elif t == DEDENT and level>0:
-					if hasattr(words,"end_block"):
-						words.end_block()
+					words.end_block()
 					if stack:
 						words = stack.pop()
 						continue
@@ -155,12 +123,14 @@ class Parser(object):
 					continue
 				elif t == OP and txt == ":":
 					stack.append(words)
-					words = (hdl.input_block(*args))
+					words,w = words.lookup_block(*args)
+					words.input_block(*w)
 					level += 1
 					state = 3
 					continue
 				elif t == NEWLINE:
-					hdl.input(*args)
+					fn,w = words.lookup_block(*args)
+					fn.input(*w)
 					# reactor.callFromThread(hdl.input,*args)
 					state=0
 					continue
@@ -180,7 +150,7 @@ class Parser(object):
 
 			raise SyntaxError("Unknown token '%s' (%d, state %d) in line %d" % (txt,t,state,beg[0]))
 
-def _parse(g,input, *a,**k):
+def _parse(g,input):
 	while True:
 		l = input.readline()
 		if not l:
@@ -194,14 +164,14 @@ def parse(input, *a,**k):
 		and run through the tokenizer.
 		"""
 	g = Parser(*a,**k)
-	d = threads.deferToThread(_parse,g,input,*a,**k)
+	d = threads.deferToThread(_parse,g,input)
 	d.addCallback(lambda _: g.result)
 	return d
 
 
 class Statement(object):
 	"""\
-		Interface class for short statements. Doesn't really do anything.
+		Base class for handling short statements. Doesn't really do anything.
 		"""
 	name="(unassigned!)"
 	doc="(unassigned short help text!)"
@@ -209,125 +179,167 @@ class Statement(object):
 #This statement has a help text that has not been overridden.
 #Programmer error!
 #"""
+	def __repr__(self):
+		return "<Statement <%s>>" % (self.name,)
+
+	def __init__(self,parent, out=None):
+		self.parent = parent
+		self.out = out
+
 	def input(self,*words):
 		raise NotImplementedError("You need to override '%s.input' (called with %s)" % (self.name,repr(words)))
 	
 	def input_block(self,*words):
-		raise NotImplementedError("You need to override '%s.input' (called with %s)" % (self.name,repr(words)))
+		raise NotImplementedError("'%s' is not a StatementBlock (called with %s)" % (self.name,repr(words)))
 	
-
-	def __getitem__(self,w):
-		return self.words[w]
 
 class StatementBlockHelper(object):
 	def __init__(self,obj,words):
 		self.obj = obj
-		self.words = words
 
 	def __getitem__(self,w):
-		return self.words[w](*self.obj)
+		return self.obj._lookup_word[w]
 
 class StatementBlock(Statement):
 	"""\
-		Base class for objects returned by compound statements.
+		Base class for handling compound statements.
 		"""
+	__words = None
 
-	words = None
+	def __repr__(self):
+		return "<StatementBlock <%s> %d>" % (self.name,len(self.__words))
+
+	def input_block(self,*w):
+		"""\
+			Override this if you want to replace the default lookup
+			code for sub-statements.
+			"""
+		if self.__words is None:
+			raise NotImplementedError("No words in "+self.__class__.__name__)
+		pass
+	
+	def lookup_block(self,*w):
+		"""\
+			Standard method which looks up a sub-object, and the words to
+			call it with.
+			"""
+		try:
+			res = self.__words[w[0]]
+		except KeyError:
+			res = self.__words["*"]
+			return res(self),w
+		else:
+			return res(self),w[1:]
+
+		return ( self.__words[w[0]](self), w[1:] )
 
 	def end_block(self):
 		"""\
-			Override this if you want a notification that your statement
-			has processed its last line.
+			Override this if you want a notification that your sub-statement
+			is complete.
 			"""
 		pass
 	
-	def input_block(self,*w):
-		"""\
-			"""
-		if self.words is None:
-			raise NotImplementedError("No words in "+self.__class__.__name__)
-		obj = self.input_obj(*w)
-		return StatementBlockHelper(obj,self.words)
-
-	def input_obj(self,*w):
-		"""\
-			Override this method to return an initial argument list for
-			the command handlers that process this sub-block.
-
-			Thus, if this is the handler for "foo", and this input is
-			processed:
-				foo bar:
-					baz quux
-			this code should return something related to "bar".
-			The class registered for "baz" will get inited with it,
-			and then gets called with .input("quux").
-			"""
-		raise NotImplementedError("You need to override '%s.input_obj' (called with %s)" % (self.name,repr(words)))
+	@classmethod
+	def _get_wordlist(self):
+		"""Called by Help to get the list of words."""
+		return self.__words
+	@classmethod
+	def _lookup_word(self,w):
+		"""Called by StatementBlockHelper to get the handler for a word."""
+		return self.__words[w]
+	@classmethod
+	def iterkeys(self):
+		return self.__words.iterkeys()
+	@classmethod
+	def itervalues(self):
+		return self.__words.itervalues()
+	@classmethod
+	def iteritems(self):
+		return self.__words.iteritems()
 
 	@classmethod
 	def register_statement(self,handler):
 		"""\
-			Register a handler for sub-statements.
-			The handler registered here will be called with the word
-			list to initialize a Statement or StatementBlock object.
-			"""
-		if self.words is None:
-			self.words = {}
-		register_statement(handler,self.words)
-
-	@classmethod
-	def unregister_statement(self,handler):
-		unregister_statement(handler,self.words)
+			Register a handler for a token. handler.input() is called
+			with the rest of the words on the line. handler.name is the
+			first word on the line, which is used to find the handler.
 	
+			If the statement is a multi-line section (the stuff after
+			colon-ized lines, above), handler.input_block() line is called
+			instead. It must return something where its words may be looked
+			up in. handler.end_block() will be called when the block is finished,
+			if it exists.
+			"""
+		if self.__words is None:
+			self.__words = {}
+		if handler.name in self.__words:
+			raise ValueError("A handler for '%s' is already registered." % (handler.name,))
+		self.__words[handler.name] = handler
+
+	def unregister_statement(self,handler):
+		"""\
+			Remove this statement.
+			"""
+		del self.__words[handler.name]
+
 
 class Help(Statement):
 	name="help"
 	doc="show doc texts"
-	def __init__(self,out=None):
+	def __init__(self,parent,out=None):
+		super(Help,self).__init__(parent)
 		if out is None:
-			from sys import stdout
-			out = stdout
+			out = parent.out
+			if out is None:
+				from sys import stdout
+				out = stdout
 		self.out=out
 
 	def input(self,*wl):
-		words = main_words
-		last = None
+		words = self.parent
 
 		for w in wl:
-			if words is None:
-				print >>self.out,"No more arguments:",w
-				break
 			try:
-				last = words[w]
-			except KeyError:
-				print >>self.out,"Unknown argument:",w
-				break
-			else:
-				try:
-					words = last.words
-				except AttributeError:
-					words = None
-
-		if last:
-			try:
-				doc = ":\n"+last.long_doc
+				wlist = words._get_wordlist()
 			except AttributeError:
-				doc = " "+last.doc
-			print >>self.out,last.name+doc
+				wlist = None
+
+			if wlist is None:
+				self.out("No more arguments: "+str(w))
+				break
+			try:
+				words = wlist[w]
+			except KeyError:
+				self.out("Unknown argument: "+str(w))
+				break
 
 		if words:
-			if last:
-				print >>self.out,"Known words:"
+			try:
+				doc = ":\n"+words.long_doc
+			except AttributeError:
+				doc = " "+words.doc
+			self.out(words.name+doc)
+
+			try:
+				wlist = words._get_wordlist()
+			except AttributeError:
+				pass
 			else:
-				print >>self.out,"Known sub-words:"
-			maxlen=0
-			for h in words.iterkeys():
-				if len(h) > maxlen: maxlen = len(h)
-			for h in words.itervalues():
-				print >>self.out, h.name+(" "*(maxlen+1-len(h.name)))+h.doc
+				if wl:
+					self.out("Known words:")
+				maxlen=0
+				for h in words.iterkeys():
+					if len(h) > maxlen: maxlen = len(h)
+				for h in words.itervalues():
+					self.out(h.name+(" "*(maxlen+1-len(h.name)))+h.doc)
+
+class main_words(StatementBlock):
+	name = "Main"
+	doc = "word list:"
 
 if __name__ == "__main__":
-	register_statement(Help())
+	main_words.register_statement(Help)
 
 	def logger(*x):
 		print " ".join((str(d) for d in x))

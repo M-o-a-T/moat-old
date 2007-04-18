@@ -1,8 +1,3 @@
-Init FooHandler: 1 ()
-Init BarHandler: 2 ()
-Init WhatHandler: 3 ()
-Init FoiledHandler: 4 ()
-Init ForHandler: 5 ()
 NEW: <WorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
@@ -12,33 +7,32 @@ RUN: <WorkSequence:1 (4)>
 1 END: startup
 RUN: <WorkSequence:1 (4)> (step 1)
  ev: EVENT: startup
-# call foo.input()
-Input FooHandler: ()
-# call foo.input("bar")
-Input FooHandler: ('bar',)
-# call foo.input("bar","baz")
-Input FooHandler: ('bar', 'baz')
-# call bar.input_block("baz","quux")
-# which returns a SubBar object "subbar"
-Create SubBar: ('baz', 'quux')
-Init SubBar: 6 ('baz', 'quux')
-# call WhatHandler(subbar).input("ever")
-Init WhatHandler: 7 (‹SubBar(6)›,)
-Input WhatHandler:('ever',)
-# call ForHandler(subbar).input_block("ever","and","ever")
-# which returns a SubFor object "subfor"
-Init ForHandler: 8 (‹SubBar(6)›,)
-Create SubFor: ('ever', 'and', 'ever')
-Init SubFor: 9 ('ever', 'and', 'ever')
-# call FoiledHandler(subfor).input("again")
-Init FoiledHandler: 10 (‹SubFor(9)›,)
-Input FoiledHandler: ('again',)
-# call WhatHandler(subbar).input("else")
-Init WhatHandler: 11 (‹SubBar(6)›,)
-Input WhatHandler:('else',)
-Input FooHandler: ('again',)
+# call FooHandler(main).input()
+Init foo(1) from <StatementBlock <Main> 3>: ()
+Input foo(1): ()
+# call FooHandler(main).input("bar")
+Init foo(2) from <StatementBlock <Main> 3>: ()
+Input foo(2): ('bar',)
+# call FooHandler(main).input("bar","baz")
+Init foo(3) from <StatementBlock <Main> 3>: ()
+Input foo(3): ('bar', 'baz')
+# call BarHandler(main).input_block("baz","quux")
+Init bar(4) from <StatementBlock <Main> 3>: ()
+# call WhatHandler(bar).input("ever")
+Init what(5) from ‹StatementBlock <bar> 2 (4)›: ()
+Input what(5): ('ever',)
+# call ForHandler(bar).input_block("ever","and","ever")
+Init for(6) from ‹StatementBlock <bar> 2 (4)›: ()
+# call FoiledHandler(for).input("again")
+Init foiled(7) from ‹StatementBlock <for> 1 (6)›: ()
+Input foiled(7): ('again',)
+# call WhatHandler(bar).input("else")
+Init what(8) from ‹StatementBlock <bar> 2 (4)›: ()
+Input what(8): ('else',)
+Init foo(9) from <StatementBlock <Main> 3>: ()
+Input foo(9): ('again',)
 # help
-Known sub-words:
+Main word list:
 foo  We foo around.
 bar  Have a bar, man!
 help show doc texts
