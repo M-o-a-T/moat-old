@@ -3,6 +3,7 @@
 
 import homevent as h
 import homevent.parser as hp
+from homevent.context import Context
 from StringIO import StringIO
 from test import run_logger
 
@@ -11,67 +12,77 @@ log = logger.log
 
 input = StringIO("""\
 
-# call FooHandler(main).input()
+# call FooHandler(main).input("foo")
 foo
-# call FooHandler(main).input("bar")
+# call FooHandler(main).input("foo","baz")
+foo baz
+# call FooHandler(main).input("foo","baz")
 foo bar
-# call FooHandler(main).input("bar","baz")
+# call BarHandler(main).input("foo","bar","baz")
 foo bar baz
-# call BarHandler(main).input_block("baz","quux")
-bar baz quux:
+# call BarHandler(main).input_complex("baz","quux")
+foo bar baz quux:
 	# call WhatHandler(bar).input("ever")
 	what ever
-	# call ForHandler(bar).input_block("ever","and","ever")
+	# call ForHandler(bar).input_complex("ever","and","ever")
 	for ever and ever:
 		# call FoiledHandler(for).input("again")
 		foiled again
 	# call WhatHandler(bar).input("else")
 	what else
+# call FooHandler(main).input("foo","again")
 foo again
 
 # help
 help
-# help foo
+help help
+# help foo => we foo around
 help foo
-# help bar
-help bar
-# help bar for
-help bar for
-# help bar for foiled
-help bar for foiled
+# help foo baz: complains
+help foo baz
+# help foo bar => have a bar
+help foo bar
+# help bar for => for you
+help foo bar for
+# help foo bar for foiled => not clingfilm
+help foo bar for foiled
 
+#EOF
 """)
 
 _id=0
 class sbr(object):
 	def __repr__(self):
 		return "‹%s (%d)›" % (super(sbr,self).__repr__()[1:-1], self.id)
-	def __init__(self,parent,*w):
+	def __init__(self,parent=None,*a,**k):
+		super(sbr,self).__init__(*a,**k)
 		global _id
 		_id += 1
 		self.id = _id
-		log("Init %s(%d) from %s: %s" % (self.name,self.id, parent,repr(w)))
+		log("Init %s(%d) from %s" % (self.name,self.id, repr(parent)))
 	def input(self,*w):
 		log("Input %s(%d): %s" % (self.name,self.id,repr(w)))
+	def input_complex(self,*w):
+		log("InputComplex %s(%d): %s" % (self.name,self.id,repr(w)))
 
 class FooHandler(sbr,hp.Statement):
-	name="foo"
+	name=("foo",)
 	doc="We foo around."
 
-class BarHandler(sbr,hp.StatementBlock):
-	name="bar"
+class BarHandler(sbr,hp.ComplexStatement):
+	name=("foo","bar",)
 	doc="Have a bar, man!"
 	
-class ForHandler(sbr,hp.StatementBlock):
-	name="for"
+class ForHandler(sbr,hp.ComplexStatement):
+	name=("for",)
 	doc="for you!"
 	
-class WhatHandler(sbr,hp.StatementBlock):
-	name="what"
+class WhatHandler(sbr,hp.ComplexStatement):
+	name=("what",)
 	doc="What is this?"
 
 class FoiledHandler(sbr,hp.Statement):
-	name="foiled"
+	name=("foiled",)
 	doc="not clingfilm"
 
 BarHandler.register_statement(WhatHandler)
@@ -87,8 +98,29 @@ def logger(s,t,c,*x):
 	if t == COMMENT:
 		log(c.rstrip())
 
+class TestInterpreter(hp.Interpreter):
+    def complex_statement(self,args):
+        fn = self.ctx.words.lookup(args)
+        fn = fn(self.ctx)
+        fn.input_complex(args)
+        return TestInterpreter(ctx=self.ctx(words=fn))
+	def done(self):
+		log("... moving up")
+
+class logwrite(object):
+	def __init__(self,log):
+		self.log = log
+		self.buf = ""
+	def write(self,data):
+		self.buf += data
+		if self.buf[-1] == "\n":
+			if len(self.buf) > 1:
+				for l in self.buf.rstrip("\n").split("\n"):
+					self.log(l)
+			self.buf=""
+
 def main():
-	d = hp.parse(input, logger=logger, out=log)
+	d = hp.parse(input, TestInterpreter(Context(out=logwrite(log))), Context(logger=logger)) # , out=log)
 	d.addErrback(lambda _: _.printTraceback())
 	d.addBoth(lambda _: h.shut_down())
 

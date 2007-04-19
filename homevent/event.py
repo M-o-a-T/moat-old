@@ -78,6 +78,8 @@ def report(self, verbose=False):
 		for l in self.getTraceback().rstrip("\n").split("\n"):
 			yield p+l
 			p="     : "
+		if hasattr(self,"cmd"):
+			yield "   at: "+cmd.file+":"+str(cmd.line)
 		if hasattr(self,"within"):
 			for w in self.within:
 				p = "   in: "

@@ -7,6 +7,7 @@ import re
 from twisted.internet import reactor
 
 r_fli = re.compile(r'(:\s+File ").*/([^/]+/[^/]+)", line \d+, in')
+r_hex = re.compile(r'object at 0x[0-9a-fA-F]+')
 
 class run_logger(object):
 	"""\
@@ -33,15 +34,15 @@ class run_logger(object):
 		def rep(m):
 			return m.group(1)+m.group(2)+", in"
 		sx = r_fli.sub(rep,sx)
+		sx = r_hex.sub("obj",sx)
 		if not self.data:
 			print sx
 			return
 		sp = self.data.readline().rstrip("\n")
-		if sp != sx:
+		if sp.rstrip() != sx.rstrip():
 			print "ERROR, line",self.line
-			print "expect:",sp
-			print "got   :"
-			print sx
+			print "expect:",repr(sp)
+			print "got   :",repr(sx)
 			self.data = None
 
 	def log(self, event, level=0):
