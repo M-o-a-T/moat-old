@@ -464,6 +464,11 @@ def parse(input, proc, ctx=None):
 	d.addCallback(lambda _: g.result)         # analyze the result
 	return d
 
+class ParserProtocol(LineProtocol,Parser):
+	def __init__(self, proc, producer, ctx=None):
+		Parser.__init__(proc,ctx)
+		LineProtocol.init(self)
+		*TODO*
 
 if __name__ == "__main__":
 	main_words.register_statement(Help)
