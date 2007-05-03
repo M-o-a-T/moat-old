@@ -6,7 +6,7 @@ from homevent.run import register_worker
 from homevent.parser import parse, register_statement, Help
 from homevent.config import Load,Unload,WorkerList,ModList
 from homevent.reactor import ShutdownHandler,mainloop
-from homevent.twisted import StdInDescriptor
+from homevent.twist import StdInDescriptor
 from twisted.internet import reactor
 
 register_worker(Loader())
