@@ -69,6 +69,17 @@ class Context(object):
 		else:
 			return "Ctx(%s)" % (res,)
 
+	def _error(self,e):
+		"""\
+			Error handling support.
+			If the context has an error handler, call that with the
+				context and the error.
+			Otherwise simply raise the error.
+			"""
+		if "errhandler" not in self:
+			raise e
+		return self.errhandler(self,e)
+
 def default_context(ctx,**defaults):
 	"""\
 		Create a new context with default content.

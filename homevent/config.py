@@ -30,13 +30,13 @@ switchboard and timer modules.
 
 """
 
-from homevent.parser import Statement,Help,register_statement
+from homevent.parser import Statement,Help
 from homevent.run import process_event
 from homevent.event import Event
 from homevent.module import modules
 
 class Load(Statement):
-	name="load"
+	name=("load",)
 	doc="load a module"
 	long_doc = """\
 load NAME [args]...
@@ -47,7 +47,7 @@ load NAME [args]...
 		process_event(Event("module","load",*wl))
 
 class Unload(Statement):
-	name="unload"
+	name=("unload",)
 	doc="unload a module"
 	long_doc = """\
 unload NAME [args]...
@@ -58,7 +58,7 @@ unload NAME [args]...
 		process_event(Event("module","unload",*wl))
 
 class ModList(Statement):
-	name="modlist"
+	name=("modlist",)
 	doc="list of modules"
 	long_doc="""\
 modlist
@@ -75,7 +75,7 @@ modlist NAME [args...]
 				print " ".join(m.name)
 
 class WorkerList(Statement):
-	name="worklist"
+	name=("worklist",)
 	doc="list of workers"
 	long_doc="""\
 workerlist

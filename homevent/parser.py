@@ -19,6 +19,9 @@ from tokenize import generate_tokens
 import Queue
 from twisted.internet import reactor,threads
 from homevent.context import Context
+from twisted.internet.interfaces import IPushProducer,IPullProducer
+from twisted.protocols.basic import LineReceiver
+
 
 class Processor(object):
 	"""Base class: Process input lines and do something with them."""
@@ -92,8 +95,12 @@ class CollectProcessor(CollectProcessorBase):
 class CollectParentProcessor(CollectProcessorBase):
 	"""A processor which calls .add() and .done() on its parent."""
 
-class Parser(object):
-	def __init__(self, proc, queue=None, ctx=None):
+class Parser(LineReceiver):
+	"""The input parser object. It serves as a LineReceiver and a 
+	   normal (bit non-throttle-able) producer."""
+	delimiter="\n"
+
+	def __init__(self, proc, queue=None, ctx=None, delimiter=None):
 		"""Parse an input stream and pass the commands to the processor
 		@proc."""
 		if queue:
@@ -101,28 +108,70 @@ class Parser(object):
 		else:
 			self.queue = Queue.Queue()
 		self.result = threads.deferToThread(self._parse)
-		self.proc = proc
-		self.ctx = ctx() or Context()
 
-	def line(self, line):
-		"""Feed a Python-style input line to the parser."""
-		self.queue.put(line)
+		if ctx is None:
+			self.ctx = Context()
+			self.ctx.out=self
+		else:
+			if "out" not in ctx:
+				ctx.out=self
+			self.ctx = ctx()
+
+		if "filename" not in self.ctx:
+			self.ctx.filename="<stdin?>"
+		if delimiter:
+			self.delimiter=delimiter
+		self.proc = proc
+		self.p_wait = []
+		self.restart_producer = False
+
+		def close_me(r):
+			if self.transport:
+				self.transport.loseConnection()
+			return r
+		self.result.addBoth(close_me)
+
+	def run(self, producer, *a,**k):
+		"""Parse this producer's stream."""
+		s = producer(self,*a,**k)
+		return self.result
+
+	def lineReceived(self, data):
+		"""Standard LineReceiver method"""
+		self.p_wait.append(data)
+
+		try:
+			while self.p_wait:
+				self.queue.put(self.p_wait.pop(0))
+		except Queue.Full:
+			self.pauseProducing()
 
 	def readline(self):
+		"""Queued ReadLine, to be called form a thread"""
 		q = self.queue
 		if q is None:
 			return ""
-		from time import sleep
-		l = q.get()
+		try:
+			l = q.get(block=0)
+		except Queue.Empty:
+			reactor.callFromThread(self.resumeProducing)
+			l = q.get()
 		if l is None:
 			self.queue = None
 			return ""
-		return l
+		return l+"\n"
 
-	def done(self):
+	def connectionLost(self,reason):
 		q = self.queue
+		self.queue = None
 		if q is not None:
 			q.put(None)
+
+	def write(self,data):
+		"""Mimic a normal 'file' output"""
+		#for d in data.rstrip("\n").split("\n"):
+		#	self.sendLine(data)
+		self.transport.write(data)
 
 	def _parse(self):
 		"""\
@@ -130,6 +179,7 @@ class Parser(object):
 			statements, and calls the processor with them.
 			"""
 		state=0
+		pop_after=False
 		last_block = None
 		hdl = None
 		stack = []
@@ -143,7 +193,7 @@ class Parser(object):
 		#         3+4 need newline+indent after sub-level start, 5 extending word
 		# TODO: write a nice .dot file for this stuff
 		for t,txt,beg,end,line in generate_tokens(self.readline):
-			if "logger" in self.ctx: self.ctx.logger(state,t,txt,beg,end,line)
+			if "logger" in self.ctx: self.ctx.logger("T",state,t,txt,beg,end,line)
 			if t == COMMENT:
 				continue
 			if state == 0: # begin of statement
@@ -195,23 +245,44 @@ class Parser(object):
 					continue
 				elif t == NEWLINE:
 					proc.simple_statement(args)
+					if pop_after:
+						proc.done()
+						proc = stack.pop()
+						pop_after=False
 					state=0
 					continue
 			elif state == 3:
 				if t == NEWLINE:
 					state = 4
 					continue
+				elif t == NAME:
+					args = [txt]
+					state = 1
+					pop_after = True
+					continue
+				else:
+					proc = stack.pop()
 			elif state == 4:
 				if t == INDENT:
 					state = 0
 					continue
+				elif t == NEWLINE:
+					# ignore
+					continue
+				else:
+					proc = stack.pop()
 			elif state == 5:
 				if t == NAME:
 					args[-1] += "."+txt
 					state = 2
 					continue
 
-			raise SyntaxError("Unknown token '%s' (%d, state %d) in %s:%d" % (txt,t,state,fname,beg[0]))
+			if pop_after:
+				proc = stack.pop()
+				pop_after = False
+
+			self.ctx._error(SyntaxError("Unknown token %s (%d, state %d) in %s:%d" % (repr(txt),t,state,self.ctx.filename,beg[0])))
+			state=0
 
 
 class Statement(object):
@@ -225,7 +296,7 @@ class Statement(object):
 #Programmer error!
 #"""
 	def __init__(self,parent=None, args=(), ctx=None):
-		assert isinstance(self.name,tuple)
+		assert isinstance(self.name,tuple),"Name is "+repr(self.name)
 		self.parent = parent
 		self.ctx = ctx or Context()
 	
@@ -291,7 +362,7 @@ class ComplexStatement(Statement):
 					return fn
 			n = n-1
 
-		raise KeyError("Cannot find word",self.name,self.__words,args)
+		return self.ctx._error(KeyError("Cannot find word",self.name,self.__words,args))
 		
 	def get_processor(self):
 		"""\
@@ -351,16 +422,27 @@ class ComplexStatement(Statement):
 		del self.__words[handler.name]
 
 
+class IgnoreStatement(SimpleStatement):
+	"""Used for error exits"""
+	def __call__(self,**k): return self
+	def input(self,wl): pass
+	def input_complex(self,wl): pass
+	def processor(self,**k): return self
+	def done(self): pass
+	def simple_statement(self,args): pass
+
 class Help(SimpleStatement):
 	name=("help",)
 	doc="show doc texts"
 	long_doc="""\
 The "help" command shows which words are recognized at each level.
 "help foo" also shows the sub-commands, i.e. what would be allowed
-in place of the "XXX" …
+in place of the "XXX" in the following statement:
 
 	foo:
 		XXX
+
+Statements may be multi-word and follow generic Python syntax.
 """
 
 	def input(self,wl):
@@ -437,8 +519,12 @@ class Interpreter(Processor):
 		me = self.ctx.words
 		fn = me.lookup(args)
 		fn = fn(parent=me, ctx=self.ctx)
-		fn.input_complex(args)
-		return fn.processor(parent=fn,ctx=self.ctx(words=fn))
+		try:
+			fn.input_complex(args)
+		except AttributeError,e:
+			return self.ctx._error(e)
+		else:
+			return fn.processor(parent=fn,ctx=self.ctx(words=fn))
 	
 	def done(self):
 		print >>self.ctx.out,"Exiting"
@@ -452,23 +538,18 @@ def _parse(g,input):
 		g.line(l)
 	g.done()
 
-def parse(input, proc, ctx=None):
+def parse(input, proc=None, ctx=None):
 	"""\
 		Read input (which must be something with a readline() method),
 		run through the tokenizer, pass to @cmd's add().
 		"""
 	if not ctx: ctx=Context
 	ctx = ctx(fname="<stdin>")
+	if proc is None: proc = main_words(ctx)
 	g = Parser(proc, ctx=ctx)
 	d = threads.deferToThread(_parse,g,input) # read the input
 	d.addCallback(lambda _: g.result)         # analyze the result
 	return d
-
-class ParserProtocol(LineProtocol,Parser):
-	def __init__(self, proc, producer, ctx=None):
-		Parser.__init__(proc,ctx)
-		LineProtocol.init(self)
-		*TODO*
 
 if __name__ == "__main__":
 	main_words.register_statement(Help)
@@ -478,7 +559,10 @@ if __name__ == "__main__":
 
 	import sys
 	d = parse(sys.stdin, logger=logger)
-	d.addBoth(lambda _: reactor.stop())
+	def die(_):
+		from homevent.reactor import stop_mainloop
+		stop_mainloop()
+	d.addBoth(die)
 
 	reactor.run()
 
