@@ -13,6 +13,7 @@ from homevent.constants import MIN_PRIO,MAX_PRIO
 from twisted.internet import defer,threads
 from twisted.python import failure
 from Queue import Queue,Empty
+import os
 
 class DropException:
 	"""\
@@ -90,7 +91,10 @@ class WorkSequence(WorkItem):
 		self.work.append(w)
 
 	def run(self, *a,**k):
-		return threads.deferToThread(self._run(*a,**k))
+		if "HOMEVENT_TEST" in os.environ:
+			return self._run(*a,**k)
+		else:
+			return threads.deferToThread(self._run(*a,**k))
 
 	def _run(self, *a,**k):
 		if not self.work:

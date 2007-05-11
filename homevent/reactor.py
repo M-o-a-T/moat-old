@@ -7,7 +7,7 @@ This part of the code controls the main loop.
 from twisted.internet import reactor,defer
 
 from homevent.event import Event
-from homevent.worker import ExcWorker,HaltSequence
+from homevent.worker import Worker,ExcWorker,HaltSequence
 from homevent.run import register_worker,unregister_worker, SYS_PRIO,MAX_PRIO,\
 	process_event
 from homevent.parser import Statement, dropConnections
@@ -31,9 +31,9 @@ class Shutdown_Worker_1(ExcWorker):
 	def does_event(self,ev):
 		return True
 	def run(self,queue,*a,**k):
+		active_queues.append(queue)
 		if not running:
 			raise HaltSequence("Not running. No new work is accepted!")
-		active_queues.append(queue)
 	def report(self,*a,**k):
 		return ()
 
@@ -51,7 +51,7 @@ class Shutdown_Worker_2(ExcWorker):
 	def report(self,*a,**k):
 		return ()
 
-class Shutdown_Worker(ExcWorker):
+class Shutdown_Worker(Worker):
 	"""\
 		This worker does the actual shutdown.
 		"""
@@ -72,18 +72,19 @@ def start_up():
 	register_worker(Shutdown_Worker("shutdown handler"))
 
 	global running
-	running = True
-
-	process_event(startup_event)
+	if not running:
+		running = True
+		process_event(startup_event)
 	
 def shut_down():
 	"""\
 		Code to be called last. The Twisted mainloop is running and will
 		be stopped when all events have progressed.
 		"""
-	process_event(shutdown_event)
 	global running
-	running = False
+	if running:
+		process_event(shutdown_event)
+		running = False
 
 	if not active_queues:
 		stop_mainloop()

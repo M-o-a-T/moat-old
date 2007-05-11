@@ -7,74 +7,63 @@ RUN: <WorkSequence:1 (4)>
 1 END: startup
 RUN: <WorkSequence:1 (4)> (step 1)
  ev: EVENT: startup
-# call FooHandler(main).input("foo")
-Init ('foo',)(1) from ‹main_words ('Main',) 3›
+Init ('foo',)(1) from ‹main_words ('Main',) 4›
 Input ('foo',)(1): (['foo'],)
-# call FooHandler(main).input("foo","baz")
-Init ('foo',)(2) from ‹main_words ('Main',) 3›
+Init ('foo',)(2) from ‹main_words ('Main',) 4›
 Input ('foo',)(2): (['foo', 'baz'],)
-# call FooHandler(main).input("foo","baz")
-Init ('foo', 'bar')(3) from ‹main_words ('Main',) 3›
+Init ('foo', 'bar')(3) from ‹main_words ('Main',) 4›
 Input ('foo', 'bar')(3): (['foo', 'bar'],)
-# call BarHandler(main).input("foo","bar","baz")
-Init ('foo', 'bar')(4) from ‹main_words ('Main',) 3›
+Init ('foo', 'bar')(4) from ‹main_words ('Main',) 4›
 Input ('foo', 'bar')(4): (['foo', 'bar', 'baz'],)
-# call BarHandler(main).input_complex("baz","quux")
-Init ('foo', 'bar')(5) from Ctx(Ctx({'out': <__main__.logwrite obj>}),{'words': ‹main_words ('Main',) 3›})
+Init ('foo', 'bar')(5) from Ctx(Ctx({'out': <__main__.logwrite obj>}),{'words': ‹main_words ('Main',) 4›})
 InputComplex ('foo', 'bar')(5): (['foo', 'bar', 'baz', 'quux'],)
-# call WhatHandler(bar).input("ever")
 Init ('what',)(6) from ‹��BarHandler ('foo', 'bar') 2� (5)›
 Input ('what',)(6): (['what', 'ever'],)
-# call ForHandler(bar).input_complex("ever","and","ever")
-Init ('for',)(7) from Ctx(Ctx(Ctx({'out': <__main__.logwrite obj>}),{'words': ‹main_words ('Main',) 3›}),{'words': ‹��BarHandler ('foo', 'bar') 2� (5)›})
+Init ('for',)(7) from Ctx(Ctx(Ctx({'out': <__main__.logwrite obj>}),{'words': ‹main_words ('Main',) 4›}),{'words': ‹��BarHandler ('foo', 'bar') 2� (5)›})
 InputComplex ('for',)(7): (['for', 'ever', 'and', 'ever'],)
-# call FoiledHandler(for).input("again")
 Init ('foiled',)(8) from ‹��ForHandler ('for',) 1� (7)›
 Input ('foiled',)(8): (['foiled', 'again'],)
-# call WhatHandler(bar).input("else")
 Exiting
 Init ('what',)(9) from ‹��BarHandler ('foo', 'bar') 2� (5)›
 Input ('what',)(9): (['what', 'else'],)
-# call FooHandler(main).input("foo","again")
 Exiting
-Init ('foo',)(10) from ‹main_words ('Main',) 3›
+Init ('foo',)(10) from ‹main_words ('Main',) 4›
 Input ('foo',)(10): (['foo', 'again'],)
-# help
 Main : word list:
-foo     : We foo around.
-foo bar : Have a bar, man!
-help    : show doc texts
+foo      : We foo around.
+foo bar  : Have a bar, man!
+help     : show doc texts
+shutdown : stops executing the program.
 help:
 The "help" command shows which words are recognized at each level.
 "help foo" also shows the sub-commands, i.e. what would be allowed
-in place of the "XXX" …
+in place of the "XXX" in the following statement:
 
 	foo:
 		XXX
-# help foo => we foo around
+
+Statements may be multi-word and follow generic Python syntax.
 foo : We foo around.
-# help foo baz: complains
 Not a command: baz
 foo : We foo around.
-# help foo bar => have a bar
 foo bar : Have a bar, man!
 Known words:
 for  : for you!
 what : What is this?
-# help bar for => for you
 for : for you!
 Known words:
 foiled : not clingfilm
-# help foo bar for foiled => not clingfilm
 foiled : not clingfilm
-#EOF
-Exiting
-NEW: <WorkSequence:2 (4)>
+NEW: <WorkSequence:2 (5)>
    : │  EVENT: shutdown
    : └1╴... done.
 2 EVENT: shutdown
-RUN: <WorkSequence:2 (4)>
+RUN: <WorkSequence:2 (5)>
  ev: EVENT: shutdown
 2 END: shutdown
-RUN: <WorkSequence:2 (4)> (step 1)
+RUN: shutting down
+ at: <WorkSequence:2 (5)> (step 1)
  ev: EVENT: shutdown
+RUN: <WorkSequence:2 (5)> (step 1)
+ ev: EVENT: shutdown
+Exiting

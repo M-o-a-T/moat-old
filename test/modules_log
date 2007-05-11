@@ -185,17 +185,21 @@ RUN: <WorkSequence:11 (4)> (step 1)
 RUN: <WorkSequence:9 (5)> (step 2)
  ev: EVENT: module¦unload¦homevent.sample_module
 .
-NEW: <WorkSequence:12 (4)>
+NEW: <WorkSequence:12 (5)>
    : │  EVENT: shutdown
    : └1╴... done.
 .
 2 EVENT: shutdown
 .
-RUN: <WorkSequence:12 (4)>
+RUN: <WorkSequence:12 (5)>
  ev: EVENT: shutdown
 .
 2 END: shutdown
 .
-RUN: <WorkSequence:12 (4)> (step 1)
+RUN: shutting down
+ at: <WorkSequence:12 (5)> (step 1)
+ ev: EVENT: shutdown
+.
+RUN: <WorkSequence:12 (5)> (step 1)
  ev: EVENT: shutdown
 .

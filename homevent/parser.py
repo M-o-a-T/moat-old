@@ -133,7 +133,10 @@ class Parser(LineReceiver):
 		self.p_wait = []
 		self.restart_producer = False
 
-		self.result.addBoth(self.endConnection)
+		def ex(_):
+			self.endConnection()
+			return _
+		self.result.addBoth(ex)
 
 	def endConnection(self, res=None):
 		"""Called to stop"""
@@ -146,7 +149,10 @@ class Parser(LineReceiver):
 			d.callback(r)
 			return _
 		self.result.addBoth(ex)
-		self.transport.loseConnection()
+		if self.transport:
+			self.transport.loseConnection()
+		else:
+			self.connectionLost("no transport")
 
 	def run(self, producer, *a,**k):
 		"""Parse this producer's stream."""
@@ -159,9 +165,16 @@ class Parser(LineReceiver):
 
 		try:
 			while self.p_wait:
-				self.queue.put(self.p_wait.pop(0))
+				item = self.p_wait.pop(0)
+				self.queue.put(item, block=(self.transport is None))
 		except Queue.Full:
-			self.pauseProducing()
+			self.p_wait.insert(0,item)
+			if self.transport:
+				self.pauseProducing()
+
+	def _resumeProducing(self):
+		if self.transport:
+			self.resumeProducing()
 
 	def readline(self):
 		"""Queued ReadLine, to be called form a thread"""
@@ -171,20 +184,24 @@ class Parser(LineReceiver):
 		try:
 			l = q.get(block=0)
 		except Queue.Empty:
-			reactor.callFromThread(self.resumeProducing)
+			reactor.callFromThread(self._resumeProducing)
 			l = q.get()
 		if l is None:
 			self.queue = None
 			return ""
 		return l+"\n"
 
+	def startParsing(self):
+		if not self.transport:
+			self.connectionMade()
+
 	def connectionMade(self):
 		_conns.append(self)
 
 	def connectionLost(self,reason):
-		_conns.remove(self)
+		if self in _conns:
+			_conns.remove(self)
 		q = self.queue
-		self.queue = None
 		if q is not None:
 			q.put(None)
 
@@ -210,6 +227,12 @@ class Parser(LineReceiver):
 			STRING
 		from tokenize import COMMENT,NL
 
+		def gt(rl):
+			g = generate_tokens(self.readline)
+			while True:
+				r = g.next()
+				yield r
+
 		# States: 0 newline, 1 after first word, 2 OK to extend word
 		#         3+4 need newline+indent after sub-level start, 5 extending word
 		# TODO: write a nice .dot file for this stuff
@@ -229,14 +252,13 @@ class Parser(LineReceiver):
 						continue
 					else:
 						return
-					
 				elif t == ENDMARKER:
 					proc.done()
 					while stack:
 						proc = stack.pop()
 						proc.done()
 					return
-				elif t == NL:
+				elif t in(NL,NEWLINE):
 					continue
 			elif state == 1 or state == 2: # after first word
 				if t == NAME:
@@ -560,12 +582,13 @@ class Interpreter(Processor):
 
 def _parse(g,input):
 	"""Internal code for parse() which reads the input in a separate thread"""
+	g.startParsing()
 	while True:
 		l = input.readline()
 		if not l:
 			break
-		g.line(l)
-	g.done()
+		g.lineReceived(l)
+	g.endConnection()
 
 def parse(input, proc=None, ctx=None):
 	"""\

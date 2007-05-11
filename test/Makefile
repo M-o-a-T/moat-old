@@ -1,6 +1,7 @@
 #!/usr/bin/make -f
 
 export PYTHONPATH=$(shell pwd)/..
+export HOMEVENT_TEST=1
 
 test:
 	@set -e; \

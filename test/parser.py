@@ -4,6 +4,7 @@
 import homevent as h
 import homevent.parser as hp
 from homevent.context import Context
+from homevent.reactor import ShutdownHandler
 from StringIO import StringIO
 from test import run_logger
 
@@ -47,6 +48,7 @@ help foo bar for
 # help foo bar for foiled => not clingfilm
 help foo bar for foiled
 
+shutdown
 #EOF
 """)
 
@@ -91,12 +93,14 @@ ForHandler.register_statement(FoiledHandler)
 hp.main_words.register_statement(FooHandler)
 hp.main_words.register_statement(BarHandler)
 hp.main_words.register_statement(hp.Help)
+hp.main_words.register_statement(ShutdownHandler)
 
 from tokenize import COMMENT
 
 def logger(s,t,c,*x):
-	if t == COMMENT:
-		log(c.rstrip())
+	pass
+	#if t == COMMENT:
+	#	log(c.rstrip())
 
 class TestInterpreter(hp.Interpreter):
     def complex_statement(self,args):

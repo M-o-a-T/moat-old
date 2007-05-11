@@ -72,17 +72,21 @@ The 'TellTwo' worker is saying: greeting
 RUN: <WorkSequence:3 (5)> (step 2)
  ev: EVENT: say more¦greeting
 .
-NEW: <WorkSequence:5 (4)>
+NEW: <WorkSequence:5 (5)>
    : │  EVENT: shutdown
    : └1╴... done.
 .
 2 EVENT: shutdown
 .
-RUN: <WorkSequence:5 (4)>
+RUN: <WorkSequence:5 (5)>
  ev: EVENT: shutdown
 .
 2 END: shutdown
 .
-RUN: <WorkSequence:5 (4)> (step 1)
+RUN: shutting down
+ at: <WorkSequence:5 (5)> (step 1)
+ ev: EVENT: shutdown
+.
+RUN: <WorkSequence:5 (5)> (step 1)
  ev: EVENT: shutdown
 .
