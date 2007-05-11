@@ -6,7 +6,7 @@ import sys
 from homevent.module import Loader,Unloader
 from homevent.run import process_event
 
-from test import run_logger,SayWorker,SayMoreWorker
+from test import run_logger
 run_logger("modules")
 
 load_ev = h.Event("module","load","homevent.sample_module")
