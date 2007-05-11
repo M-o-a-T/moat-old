@@ -17,7 +17,7 @@ for typical usage.
 
 from tokenize import generate_tokens
 import Queue
-from twisted.internet import reactor,threads
+from twisted.internet import reactor,threads,defer
 from homevent.context import Context
 from twisted.internet.interfaces import IPushProducer,IPullProducer
 from twisted.protocols.basic import LineReceiver
@@ -95,9 +95,17 @@ class CollectProcessor(CollectProcessorBase):
 class CollectParentProcessor(CollectProcessorBase):
 	"""A processor which calls .add() and .done() on its parent."""
 
+_conns = []
+def dropConnections():
+	d = defer.Deferred()
+	d.callback(None)
+	for c in _conns:
+		d.addBoth(c.endConnection)
+	return d
+
 class Parser(LineReceiver):
 	"""The input parser object. It serves as a LineReceiver and a 
-	   normal (bit non-throttle-able) producer."""
+	   normal (but non-throttle-able) producer."""
 	delimiter="\n"
 
 	def __init__(self, proc, queue=None, ctx=None, delimiter=None):
@@ -125,11 +133,20 @@ class Parser(LineReceiver):
 		self.p_wait = []
 		self.restart_producer = False
 
-		def close_me(r):
-			if self.transport:
-				self.transport.loseConnection()
-			return r
-		self.result.addBoth(close_me)
+		self.result.addBoth(self.endConnection)
+
+	def endConnection(self, res=None):
+		"""Called to stop"""
+		d = defer.Deferred()
+		reactor.callFromThread(self._endConnection,d,res)
+		return d
+
+	def _endConnection(self,d,r):
+		def ex(_):
+			d.callback(r)
+			return _
+		self.result.addBoth(ex)
+		self.transport.loseConnection()
 
 	def run(self, producer, *a,**k):
 		"""Parse this producer's stream."""
@@ -161,7 +178,11 @@ class Parser(LineReceiver):
 			return ""
 		return l+"\n"
 
+	def connectionMade(self):
+		_conns.append(self)
+
 	def connectionLost(self,reason):
+		_conns.remove(self)
 		q = self.queue
 		self.queue = None
 		if q is not None:
@@ -238,13 +259,21 @@ class Parser(LineReceiver):
 					state = 5
 					continue
 				elif t == OP and txt == ":":
-					p = proc.complex_statement(args)
+					try:
+						p = proc.complex_statement(args)
+					except Exception,e:
+						p = self.ctx._error(e)
+						
 					stack.append(proc)
 					proc = p
 					state = 3
 					continue
 				elif t == NEWLINE:
-					proc.simple_statement(args)
+					try:
+						proc.simple_statement(args)
+					except Exception,e:
+						self.ctx._error(e)
+						
 					if pop_after:
 						proc.done()
 						proc = stack.pop()

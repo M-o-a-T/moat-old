@@ -10,7 +10,7 @@ from homevent.event import Event
 from homevent.worker import ExcWorker,HaltSequence
 from homevent.run import register_worker,unregister_worker, SYS_PRIO,MAX_PRIO,\
 	process_event
-from homevent.parser import Statement
+from homevent.parser import Statement, dropConnections
 from twisted.internet import reactor
 
 __all__ = ("start_up","shut_down", "startup_event","shutdown_event",
@@ -33,6 +33,7 @@ class Shutdown_Worker_1(ExcWorker):
 	def run(self,queue,*a,**k):
 		if not running:
 			raise HaltSequence("Not running. No new work is accepted!")
+		print "ADD RUN",queue
 		active_queues.append(queue)
 	def report(self,*a,**k):
 		return ()
@@ -41,15 +42,28 @@ class Shutdown_Worker_2(ExcWorker):
 	"""\
 		This worker counts event runs and makes sure that all are
 		processed."""
-	prio = MAX_PRIO+1
+	prio = MAX_PRIO+2
 	def does_event(self,ev):
 		return True
 	def run(self,queue,*a,**k):
+		print "DEL RUN",queue
 		active_queues.remove(queue)
 		if not running and not active_queues:
 			stop_mainloop()
 	def report(self,*a,**k):
 		return ()
+
+class Shutdown_Worker(ExcWorker):
+	"""\
+		This worker does the actual shutdown.
+		"""
+	prio = MAX_PRIO+1
+	def does_event(self,ev):
+		return (ev is shutdown_event)
+	def run(self,queue,*a,**k):
+		return dropConnections()
+	def report(self,*a,**k):
+		yield "shutting down"
 
 def start_up():
 	"""\
@@ -57,6 +71,7 @@ def start_up():
 		"""
 	register_worker(Shutdown_Worker_1("shutdown first"))
 	register_worker(Shutdown_Worker_2("shutdown last"))
+	register_worker(Shutdown_Worker("shutdown handler"))
 
 	global running
 	running = True
@@ -93,7 +108,7 @@ shutdown now  ... but does not wait for active events to terminate.
 	def input(self,w):
 		w = w[1:] # drop the "shutdown"
 		if len(w):
-			if w == ("now",):
+			if tuple(w) == ("now",):
 				stop_mainloop()
 				return
 			raise ValueError("'shutdown' does not take arguments (except ‹now›).",w)
