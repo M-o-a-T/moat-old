@@ -33,7 +33,6 @@ class Shutdown_Worker_1(ExcWorker):
 	def run(self,queue,*a,**k):
 		if not running:
 			raise HaltSequence("Not running. No new work is accepted!")
-		print "ADD RUN",queue
 		active_queues.append(queue)
 	def report(self,*a,**k):
 		return ()
@@ -46,7 +45,6 @@ class Shutdown_Worker_2(ExcWorker):
 	def does_event(self,ev):
 		return True
 	def run(self,queue,*a,**k):
-		print "DEL RUN",queue
 		active_queues.remove(queue)
 		if not running and not active_queues:
 			stop_mainloop()
