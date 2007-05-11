@@ -43,8 +43,8 @@ load NAME [args]...
 	loads the named homevent module and calls its load() function.
 	Emits an "module load NAME [args]" event.
 """
-	def input(self,*wl):
-		process_event(Event("module","load",*wl))
+	def input(self,wl):
+		process_event(Event("module","load",*wl[len(self.name):]))
 
 class Unload(Statement):
 	name=("unload",)
@@ -54,8 +54,8 @@ unload NAME [args]...
 	unloads the named homevent module after calling its unload() function.
 	Emits an "module unload NAME [args]" event.
 """
-	def input(self,*wl):
-		process_event(Event("module","unload",*wl))
+	def input(self,wl):
+		process_event(Event("module","unload",*wl[len(self.name):]))
 
 class ModList(Statement):
 	name=("modlist",)
@@ -67,31 +67,38 @@ modlist NAME [args...]
 	shows the documentation string of that module.
 	
 """
-	def input(self,*wl):
-		if wl:
-			print  " ".join(modules[wl].name),modules[wl].__doc__
-		else:
+	def input(self,wl):
+		wl = wl[len(self.name):]
+		if not len(wl):
 			for m in modules.itervalues():
-				print " ".join(m.name)
+				print >>self.ctx.out, " ".join(m.name)
+			print >>self.ctx.out, "."
+		elif len(wl) == 1:
+			print  >>self.ctx.out, " ".join(modules[wl[0]].name),modules[wl[0]].__doc__
+		else:
+			raise SyntaxError("Only one name allowed.")
 
 class WorkerList(Statement):
 	name=("worklist",)
 	doc="list of workers"
 	long_doc="""\
-workerlist
+worklist
 	shows a list of available workers (code that reacts on events)
-#workerlist NAME
-#	shows the documentation string of that worker.
+worklist NAME
+	shows the documentation string of that worker.
 """
-	def input(self,*wl):
+	def input(self,wl):
+		wl = wl[len(self.name):]
 		from homevent.run import list_workers
 		if not wl:
 			for w in list_workers():
-				print w.prio,w.name
+				print >>self.ctx.out, w.prio,w.name
+			print >>self.ctx.out, "."
 		elif len(wl) == 1:
 			for w in list_workers(wl[0]):
-				print w.name,w.__doc__
+				print >>self.ctx.out, w.name,w.__doc__
+			print >>self.ctx.out, "."
 		else:
-			print "Too many parameters!"
+			raise SyntaxError("Too many parameters")
 			return
 
