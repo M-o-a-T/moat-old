@@ -10,8 +10,9 @@ something about it.
 from homevent.event import Event
 from homevent.constants import MIN_PRIO,MAX_PRIO
 
-from twisted.internet import defer
+from twisted.internet import defer,threads
 from twisted.python import failure
+from Queue import Queue,Empty
 
 class DropException:
 	"""\
@@ -89,6 +90,9 @@ class WorkSequence(WorkItem):
 		self.work.append(w)
 
 	def run(self, *a,**k):
+		return threads.deferToThread(self._run(*a,**k))
+
+	def _run(self, *a,**k):
 		if not self.work:
 			print "empty workqueue:",self.event
 			return None
@@ -112,10 +116,13 @@ class WorkSequence(WorkItem):
 				else:
 					r = failure.Failure()
 			if isinstance(r,failure.Failure):
+				from homevent.run import process_failure
+
 				if not hasattr(r,"within"):
 					r.within=[w]
 				r.within.append(self)
 				return process_failure(r)
+			return r
 
 		step = 0
 		for w in self.work:
