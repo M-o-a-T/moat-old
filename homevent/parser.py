@@ -227,12 +227,6 @@ class Parser(LineReceiver):
 			STRING
 		from tokenize import COMMENT,NL
 
-		def gt(rl):
-			g = generate_tokens(self.readline)
-			while True:
-				r = g.next()
-				yield r
-
 		# States: 0 newline, 1 after first word, 2 OK to extend word
 		#         3+4 need newline+indent after sub-level start, 5 extending word
 		# TODO: write a nice .dot file for this stuff
