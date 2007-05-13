@@ -7,6 +7,7 @@ Briefly: a worker is something that recognizes an event and does
 something about it.
 """
 
+from homevent.context import Context
 from homevent.event import Event
 from homevent.constants import MIN_PRIO,MAX_PRIO
 
@@ -71,6 +72,10 @@ class WorkSequence(WorkItem):
 		self.worker = worker
 		if hasattr(event,"id"):
 			self.id = self.event.id
+		if hasattr(event,"ctx"):
+			self.ctx = event.ctx
+		else:
+			self.ctx = Context()
 		self.iid = seqnum
 
 	def __repr__(self):

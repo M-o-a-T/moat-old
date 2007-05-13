@@ -44,7 +44,7 @@ load NAME [args]...
 	Emits an "module load NAME [args]" event.
 """
 	def input(self,wl):
-		process_event(Event("module","load",*wl[len(self.name):]))
+		process_event(Event(self.ctx, "module","load",*wl[len(self.name):]))
 
 class Unload(Statement):
 	name=("unload",)
@@ -55,7 +55,7 @@ unload NAME [args]...
 	Emits an "module unload NAME [args]" event.
 """
 	def input(self,wl):
-		process_event(Event("module","unload",*wl[len(self.name):]))
+		process_event(Event(self.ctx, "module","unload",*wl[len(self.name):]))
 
 class ModList(Statement):
 	name=("modlist",)

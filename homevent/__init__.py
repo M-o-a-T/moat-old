@@ -4,6 +4,7 @@
 This is the core of the event dispatcher.
 """
 
+from homevent.context import Context
 from homevent.event import Event
 from homevent.worker import Worker,SeqWorker,WorkSequence
 from homevent.run import process_event,register_worker,collect_event

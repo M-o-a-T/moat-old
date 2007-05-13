@@ -116,7 +116,7 @@ class Loader(Worker):
 
 		def done(res):
 			if res:
-				return process_event(Event("module","load-done",*self.mod.name), return_errors=True)
+				return process_event(Event(event.ctx, "module","load-done",*self.mod.name), return_errors=True)
 
 			if self.mod:
 				try:
@@ -128,13 +128,16 @@ class Loader(Worker):
 				name = event[2:]
 			else:
 				name = self.mod.name
-			return process_event(Event("module","load-fail",*name), return_errors=True)
+			return process_event(Event(event.ctx, "module","load-fail",*name), return_errors=True)
 
 #		def rx(_):
 #			print "RX",_
 #			return _
 #		d.addCallback(rx)
-		d.addCallback(lambda _: process_event(Event("module","load-start",*event[2:]), return_errors=True))
+
+		def do_start(_):
+			return process_event(Event(event.ctx, "module","load-start",*event[2:]), return_errors=True)
+		d.addCallback(do_start)
 		d.addCallback(doit)
 		d.addCallback(done)
 
@@ -172,13 +175,15 @@ class Unloader(Worker):
 			unload_module(sn.module)
 
 		def done(_):
-			return process_event(Event("module","unload-done",*sn.module.name), return_errors=True)
+			return process_event(Event(event.ctx, "module","unload-done",*sn.module.name), return_errors=True)
 
 		def notdone(exc):
 			process_failure(exc)
-			return process_event(Event("module","unload-fail",*event[2:]), return_errors=True)
+			return process_event(Event(event.ctx, "module","unload-fail",*event[2:]), return_errors=True)
 
-		d.addCallback(lambda _: process_event(Event("module","unload-start",*event[2:]), return_errors=True))
+		def do_start(_):
+			return process_event(Event(event.ctx, "module","unload-start",*event[2:]), return_errors=True)
+		d.addCallback(do_start)
 		d.addCallback(doit)
 		d.addCallbacks(done, notdone)
 
