@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import homevent as h
+from homevent.logging import Logger
 import sys
 import re
 from twisted.internet import reactor
@@ -9,7 +10,7 @@ from twisted.internet import reactor
 r_fli = re.compile(r'(:\s+File ").*/([^/]+/[^/]+)", line \d+, in')
 r_hex = re.compile(r'object at 0x[0-9a-fA-F]+')
 
-class run_logger(object):
+class run_logger(Logger):
 	"""\
 		This class checks that the current log matches the stored log.
 		"""
@@ -29,7 +30,7 @@ class run_logger(object):
 			if sp:
 				print "ERROR, line",self.line,"-- more data in log"
 		
-	def spop(self,sx):
+	def _log(self,sx):
 		self.line += 1
 		def rep(m):
 			return m.group(1)+m.group(2)+", in"
@@ -45,18 +46,23 @@ class run_logger(object):
 			print "got   :",repr(sx)
 			self.data = None
 
-	def log(self, event, level=0):
-		global s
+	def log(self, sx):
+		self._log(sx)
+		if self.dot:
+			self._log(".")
+
+	def log_event(self, event, level=0):
 		if hasattr(event,"report"):
 			for r in event.report(99):
 				if not hasattr(event,"id") or isinstance(event,(h.logging.log_run,h.logging.log_created)):
-					self.spop(str(r))
+					self._log(str(r))
 				else:
-					self.spop(str(event.id)+" "+str(r))
+					self._log(str(event.id)+" "+str(r))
 		else:
-			self.spop(str(event))
+			self._log(str(event))
 		if self.dot:
-			self.spop(".")
+			self._log(".")
+
 	def write(self,s):
 		s = s.rstrip()
 		if s != "":
