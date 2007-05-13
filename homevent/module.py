@@ -100,11 +100,7 @@ class Loader(Worker):
 					except OSError:
 						continue
 
-					try:
-						mod = md["init"]
-					except KeyError:
-						mod = Dummy()
-						mod.name = m
+					mod = md["init"]
 					if callable(mod):
 						mod = mod(*m)
 					elif len(event) > 3:
