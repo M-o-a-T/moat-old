@@ -22,7 +22,7 @@ main_words.register_statement(WorkerList)
 main_words.register_statement(ModList)
 main_words.register_statement(ShutdownHandler)
 
-def logger(t,*x):
+def parse_logger(t,*x):
 	print t+":"+" ".join((repr(d) for d in x))
 
 class StdIO(StandardIO):
@@ -38,7 +38,8 @@ def err(p,e):
 	return IgnoreStatement()
 	
 def ready():
-	c=Context(logger=logger, errhandler=err)
+	c=Context(errhandler=err)
+	#c.logger=parse_logger
 	i = Interpreter(ctx=c)
 	p = Parser(i, ctx=c)
 	r = p.run(StdIO)
