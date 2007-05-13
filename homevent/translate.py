@@ -63,7 +63,7 @@ Every "*foo" in the event description is mapped to the corresponding
 		self.in_sub = False
 	def input(self,*w):
 		if not self.in_sub:
-			raise InputError("‹on ...› can only be used as a compound statement")
+			raise SyntaxError("‹on ...› can only be used as a compound statement")
 
 	def input_obj(self,*w):
 		log("Create SubBar: "+repr(w))
