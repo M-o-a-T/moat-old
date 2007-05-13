@@ -94,7 +94,7 @@ class WorkSequence(WorkItem):
 		if "HOMEVENT_TEST" in os.environ:
 			return self._run(*a,**k)
 		else:
-			return threads.deferToThread(self._run(*a,**k))
+			return threads.deferToThread(self._run,*a,**k)
 
 	def _run(self, *a,**k):
 		if not self.work:
@@ -119,16 +119,21 @@ class WorkSequence(WorkItem):
 					log_exc("Unhandled nested exception")
 				else:
 					r = failure.Failure()
-			if isinstance(r,failure.Failure):
+			def err_handler(r):
 				from homevent.run import process_failure
 
 				if not hasattr(r,"within"):
 					r.within=[w]
 				r.within.append(self)
 				return process_failure(r)
+			if isinstance(r,failure.Failure):
+				err_handler(r)
+			elif isinstance(r,defer.Deferred):
+				r.addErrback(err_handler)
 			return r
 
 		step = 0
+
 		for w in self.work:
 			if w.prio >= MIN_PRIO and w.prio <= MAX_PRIO:
 				step += 1
