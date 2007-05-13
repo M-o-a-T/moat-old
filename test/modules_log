@@ -94,14 +94,14 @@ NEW: <WorkSequence:7 (4)>
    : └1╴... done.
 .
 ERROR: Traceback (most recent call last):
-     :   File "internet/defer.py, in addCallback
-     :     callbackKeywords=kw)
-     :   File "internet/defer.py, in addCallbacks
+     :   File "internet/defer.py, in _runCallbacks
+     :     self.result = callback(self.result, *args, **kw)
+     :   File "internet/defer.py, in _continue
+     :     self.unpause()
+     :   File "internet/defer.py, in unpause
      :     self._runCallbacks()
      :   File "internet/defer.py, in _runCallbacks
      :     self.result = callback(self.result, *args, **kw)
-     :   File "homevent/module.py, in <lambda>
-     :     d.addCallback(lambda _: doit())
      : --- <exception caught here> ---
      :   File "homevent/module.py, in doit
      :     raise RuntimeError("This module already exists",event[2:])
