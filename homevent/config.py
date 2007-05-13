@@ -91,23 +91,23 @@ loaddir - "NAME"
 			w = wl[-1]
 			if len(wl) == 1 and w not in ("+","-"):
 				if not os.path.isdir(w):
-					raise RuntimeError("«%s»: not found" % (w,))
+					raise RuntimeError("‹%s›: not found" % (w,))
 				if wl[0] not in ModuleDirs:
 					ModuleDirs.append(w)
 				else:
-					raise RuntimeError("«%s»: already listed" % (w,))
+					raise RuntimeError("‹%s›: already listed" % (w,))
 			elif len(wl) == 2 and wl[0] == "+":
 				if not os.path.isdir(w):
-					raise RuntimeError("«%s»: not found" % (w,))
+					raise RuntimeError("‹%s›: not found" % (w,))
 				if wl[1] not in ModuleDirs:
 					ModuleDirs.insert(0,w)
 				else:
-					raise RuntimeError("«%s»: already listed" % (w,))
+					raise RuntimeError("‹%s›: already listed" % (w,))
 			elif len(wl) == 2 and wl[0] == "-":
 				try:
 					ModuleDirs.remove(w)
 				except ValueError:
-					raise RuntimeError("«%s»: not listed" % (w,))
+					raise RuntimeError("‹%s›: not listed" % (w,))
 			else:
 				raise SyntaxError("Usage: loaddir [ [ - ] name ]")
 
