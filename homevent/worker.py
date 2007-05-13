@@ -102,9 +102,7 @@ class WorkSequence(WorkItem):
 			return threads.deferToThread(self._run,*a,**k)
 
 	def _run(self, *a,**k):
-		if not self.work:
-			print "empty workqueue:",self.event
-			return None
+		assert self.work,"enpty workqueue"
 
 		from homevent.logging import log_run,log_halted
 		event = self.event
