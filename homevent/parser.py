@@ -259,7 +259,7 @@ class Parser(LineReceiver):
 					args.append(txt)
 					state = 2
 					continue
-				elif t == OP and txt == "*" and state == 1:
+				elif t == OP and txt in ("*","-") and state == 1:
 					args.append(txt)
 					state = 1
 					continue
