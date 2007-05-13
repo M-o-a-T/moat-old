@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """\
-This code repreents a loadable module for homevent.
+This code processes module load/unload events.
 
 """
 
