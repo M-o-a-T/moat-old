@@ -5,7 +5,7 @@ from homevent.module import Loader,Unloader
 from homevent.run import register_worker
 from homevent.parser import Parser, main_words, Help, Interpreter, IgnoreStatement
 from homevent.config import Load,Unload,WorkerList,ModList,LoadDir
-from homevent.reactor import ShutdownHandler,mainloop,stop_mainloop
+from homevent.reactor import ShutdownHandler,mainloop,shut_down
 from homevent.twist import StdInDescriptor
 from twisted.internet import reactor
 from twisted.internet._posixstdio import StandardIO ## XXX unstable interface!
@@ -31,7 +31,7 @@ class StdIO(StandardIO):
 		super(StdIO,self).connectionLost(self)
 		if not reason.check(ConnectionDone):
 			print "EOF:",reason
-		stop_mainloop()
+		shut_down()
 def reporter(err):
 	print "Error:",err
 def err(p,e):
