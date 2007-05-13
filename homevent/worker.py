@@ -134,13 +134,22 @@ class WorkSequence(WorkItem):
 
 		step = 0
 
+#		def pr1(_,s):
+#			print "before step",_,s
+#			return _
+#		def pr2(_,s):
+#			print "after step",_,s
+#			return _
 		for w in self.work:
 			if w.prio >= MIN_PRIO and w.prio <= MAX_PRIO:
 				step += 1
 			if isinstance(w,ExcWorker):
+#				event.addBoth(pr1,step)
 				event.addBoth(do_std,step,w)
 			else:
+#				event.addCallback(pr1,step)
 				event.addCallback(do_std,step,w)
+#			event.addBoth(pr2,step)
 
 		return event
 
