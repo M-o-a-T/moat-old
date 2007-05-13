@@ -18,10 +18,11 @@ for typical usage.
 from tokenize import generate_tokens
 import Queue
 from twisted.internet import reactor,threads,defer
-from homevent.context import Context
 from twisted.internet.interfaces import IPushProducer,IPullProducer
 from twisted.protocols.basic import LineReceiver
 
+from homevent.context import Context
+from homevent.io import Outputter
 
 class Processor(object):
 	"""Base class: Process input lines and do something with them."""
@@ -59,7 +60,7 @@ class CollectProcessorBase(Processor):
 		"""
 
 	def __init__(self, parent=None, ctx=None, args=None, verify=False):
-		super(CollectProcessor,self).__init__(parent=self, ctx=ctx)
+		super(CollectProcessorBase,self).__init__(parent=self, ctx=ctx)
 		self.args = args
 		self.statements = []
 		self.verify = verify
@@ -95,15 +96,7 @@ class CollectProcessor(CollectProcessorBase):
 class CollectParentProcessor(CollectProcessorBase):
 	"""A processor which calls .add() and .done() on its parent."""
 
-_conns = []
-def dropConnections():
-	d = defer.Deferred()
-	d.callback(None)
-	for c in _conns:
-		d.addBoth(c.endConnection)
-	return d
-
-class Parser(LineReceiver):
+class Parser(Outputter,LineReceiver):
 	"""The input parser object. It serves as a LineReceiver and a 
 	   normal (but non-throttle-able) producer."""
 	delimiter="\n"
@@ -111,6 +104,8 @@ class Parser(LineReceiver):
 	def __init__(self, proc, queue=None, ctx=None, delimiter=None):
 		"""Parse an input stream and pass the commands to the processor
 		@proc."""
+		super(Parser,self).__init__()
+
 		if queue:
 			self.queue = queue
 		else:
@@ -134,14 +129,15 @@ class Parser(LineReceiver):
 		self.restart_producer = False
 
 		def ex(_):
-			self.endConnection()
+			self.loseConnection()
 			return _
 		self.result.addBoth(ex)
+		self.addDropCallback(self.endConnection)
 
 	def endConnection(self, res=None):
 		"""Called to stop"""
 		d = defer.Deferred()
-		reactor.callFromThread(self._endConnection,d,res)
+		reactor.callLater(0,self._endConnection,d,res)
 		return d
 
 	def _endConnection(self,d,r):
@@ -194,22 +190,6 @@ class Parser(LineReceiver):
 	def startParsing(self):
 		if not self.transport:
 			self.connectionMade()
-
-	def connectionMade(self):
-		_conns.append(self)
-
-	def connectionLost(self,reason):
-		if self in _conns:
-			_conns.remove(self)
-		q = self.queue
-		if q is not None:
-			q.put(None)
-
-	def write(self,data):
-		"""Mimic a normal 'file' output"""
-		#for d in data.rstrip("\n").split("\n"):
-		#	self.sendLine(data)
-		self.transport.write(data)
 
 	def _parse(self):
 		"""\
@@ -582,7 +562,7 @@ def _parse(g,input):
 		if not l:
 			break
 		g.lineReceived(l)
-	g.endConnection()
+	g.loseConnection()
 
 def parse(input, proc=None, ctx=None):
 	"""\
