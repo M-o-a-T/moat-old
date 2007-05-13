@@ -6,18 +6,20 @@ This part of the code controls the main loop.
 
 from twisted.internet import reactor,defer
 
+from homevent.context import Context
 from homevent.event import Event
 from homevent.worker import Worker,ExcWorker,HaltSequence
 from homevent.run import register_worker,unregister_worker, SYS_PRIO,MAX_PRIO,\
 	process_event
-from homevent.parser import Statement, dropConnections
+from homevent.parser import Statement
+from homevent.io import dropConnections
 from twisted.internet import reactor
 
 __all__ = ("start_up","shut_down", "startup_event","shutdown_event",
 	"ShutdownHandler","mainloop")
 
-startup_event = Event("startup")
-shutdown_event = Event("shutdown")
+startup_event = Event(Context(), "startup")
+shutdown_event = Event(Context(), "shutdown")
 
 active_queues = []
 running = False

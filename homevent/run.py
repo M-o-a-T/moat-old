@@ -4,6 +4,7 @@
 This is the core of the event dispatcher.
 """
 
+from twisted.python import failure
 from homevent.constants import SYS_PRIO,MIN_PRIO,MAX_PRIO
 from homevent.worker import WorkSequence,ExcWorker
 
@@ -83,11 +84,13 @@ def process_event(e, return_errors=False):
 		d.addErrback(lambda _: None)
 	return d
 	
-def process_failure(e):
+def process_failure(e=None):
 	"""\
 		Process a failure event. This is the internal procedure that
 		will mangle your errors.
 		"""
+	if e is None:
+		e = failure.Failure()
 	d = collect_failure(e).run()
 #	def rv(_):
 #		print "RVB",_

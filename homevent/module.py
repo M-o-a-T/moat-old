@@ -14,6 +14,14 @@ from homevent.worker import Worker
 from homevent.event import Event
 from homevent.run import process_event,process_failure
 import sys
+import os
+
+ModuleDirs = []
+def par(_): return os.path.join(os.pardir,_)
+if os.path.exists("modules"):
+	ModuleDirs.append("modules")
+elif os.path.exists(par("modules")) and os.path.exists(par("Makefile")):
+	ModuleDirs.append(par("modules"))
 
 class ModuleExistsError(RuntimeError):
 	"""A module with that name already exists."""
@@ -79,35 +87,43 @@ class Loader(Worker):
 		def doit(_):
 			self.mod = None
 			try:
-				if tuple(event[2:]) in modules:
+				m = event[2:]
+				if tuple(m) in modules:
 					raise RuntimeError("This module already exists",event[2:])
 
-				# first, drop it from sys.modules so that it gets reloaded
-				n = event[2]
-				while "." in n:
-					if n in sys.modules:
-						del sys.modules[n]
-						break
-					n = n[:n.rindex(".")]
+				for d in ModuleDirs:
+					p = os.path.join(d,*m)+".py"
+					md = dict()
+					try:
+						c = compile(open(p,"r").read(), m[-1]+".py", "exec",0,True)
+						eval(c,md)
+					except OSError:
+						continue
 
-				mod = namedAny(event[2])
-				if hasattr(mod,"main"):
-					mod = mod.main
-				if callable(mod):
-					mod = mod(*event[2:])
-				elif len(event) > 3:
-					raise RuntimeError("You cannot parameterize this module.")
-				if mod.name in modules:
-					raise RuntimeError("This module already exists(2)",mod.name)
-				self.mod = mod
-				modules[mod.name] = mod
-				try:
-					mod.load()
+					try:
+						mod = md["init"]
+					except KeyError:
+						mod = Dummy()
+						mod.name = m
+					if callable(mod):
+						mod = mod(*m)
+					elif len(event) > 3:
+						raise RuntimeError("You cannot parameterize this module.")
+					if mod.name in modules:
+						raise RuntimeError("This module already exists(2)",mod.name)
+					if not hasattr(mod,"load"):
+						mod.load = md["load"]
+						mod.unload = md["unload"]
+
+					try:
+						modules[m] = mod
+						mod.load()
+					except:
+						del modules[m]
+						raise
+
+					self.mod = mod
 					return True
-				except Exception:
-					if hasattr(mod,"name") and mod.name in modules:
-						del modules[mod.name]
-					raise
 			except Exception:
 				exc = failure.Failure()
 				exc.within = [event,self]
@@ -116,7 +132,7 @@ class Loader(Worker):
 
 		def done(res):
 			if res:
-				return process_event(Event("module","load-done",*self.mod.name), return_errors=True)
+				return process_event(Event(event.ctx, "module","load-done",*self.mod.name), return_errors=True)
 
 			if self.mod:
 				try:
@@ -128,13 +144,16 @@ class Loader(Worker):
 				name = event[2:]
 			else:
 				name = self.mod.name
-			return process_event(Event("module","load-fail",*name), return_errors=True)
+			return process_event(Event(event.ctx, "module","load-fail",*name), return_errors=True)
 
 #		def rx(_):
 #			print "RX",_
 #			return _
 #		d.addCallback(rx)
-		d.addCallback(lambda _: process_event(Event("module","load-start",*event[2:]), return_errors=True))
+
+		def do_start(_):
+			return process_event(Event(event.ctx, "module","load-start",*event[2:]), return_errors=True)
+		d.addCallback(do_start)
 		d.addCallback(doit)
 		d.addCallback(done)
 
@@ -172,13 +191,15 @@ class Unloader(Worker):
 			unload_module(sn.module)
 
 		def done(_):
-			return process_event(Event("module","unload-done",*sn.module.name), return_errors=True)
+			return process_event(Event(event.ctx, "module","unload-done",*sn.module.name), return_errors=True)
 
 		def notdone(exc):
 			process_failure(exc)
-			return process_event(Event("module","unload-fail",*event[2:]), return_errors=True)
+			return process_event(Event(event.ctx, "module","unload-fail",*event[2:]), return_errors=True)
 
-		d.addCallback(lambda _: process_event(Event("module","unload-start",*event[2:]), return_errors=True))
+		def do_start(_):
+			return process_event(Event(event.ctx, "module","unload-start",*event[2:]), return_errors=True)
+		d.addCallback(do_start)
 		d.addCallback(doit)
 		d.addCallbacks(done, notdone)
 

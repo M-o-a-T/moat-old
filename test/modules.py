@@ -9,8 +9,8 @@ from homevent.run import process_event
 from test import run_logger
 run_logger("modules")
 
-load_ev = h.Event("module","load","homevent.sample_module")
-unload_ev = h.Event("module","unload","homevent.sample_module")
+load_ev = h.Event(h.Context(),"module","load","example")
+unload_ev = h.Event(h.Context(),"module","unload","example")
 
 h.register_worker(Loader())
 h.register_worker(Unloader())

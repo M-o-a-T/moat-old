@@ -7,8 +7,8 @@ import sys
 from test import run_logger,SayWorker,SayMoreWorker
 run_logger("basic")
 
-hello_ev = h.Event("say","hello")
-hello2_ev = h.Event("say more","greeting")
+hello_ev = h.Event(h.Context(), "say","hello")
+hello2_ev = h.Event(h.Context(), "say more","greeting")
 	
 h.register_worker(SayWorker("TellMe"))
 h.register_worker(SayMoreWorker("say something"))

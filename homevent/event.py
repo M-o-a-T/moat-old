@@ -19,16 +19,19 @@ class Event(object):
 	"""\
 		This is an event. It happens and gets analyzed by the system.
 		"""
-	def __init__(self, *names):
+	def __init__(self, ctx, *names):
 		"""\
-			Events have at least one name. For example:
-				Event("startup")
-				Event("sw12","toggle")
-				Event("lamp12","dim","10")
+			Events have a context and at least one name. For example:
+				Event(ctx, "startup")
+				Event(ctx, "switch","toggle","sw12")
+				Event(ctx, "switch","dim","livingroom","lamp12")
+				Event(ctx, "timer","timeout","t123")
 			"""
 		if not len(names):
 			raise EventNoNameError
+		#print "E_INIT",names,"with",ctx
 		self.names = names
+		self.ctx = ctx
 
 		global event_id
 		event_id += 1

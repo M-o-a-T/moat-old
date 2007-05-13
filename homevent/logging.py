@@ -12,6 +12,7 @@ part of the system.
 from homevent.run import register_worker,SYS_PRIO,MAX_PRIO
 from homevent.worker import Worker,ExcWorker
 from homevent.event import Event
+from homevent.context import Context
 from twisted.python.failure import Failure
 import sys
 
@@ -110,9 +111,9 @@ def log_exc(msg=None, err=None):
 class LogEndEvent(Event):
 	def __init__(self,event):
 		if isinstance(event,Failure):
-			super(LogEndEvent,self).__init__("END",event.type.__name__)
+			super(LogEndEvent,self).__init__(Context(),"END",event.type.__name__)
 		else:
-			super(LogEndEvent,self).__init__("END",*event.names)
+			super(LogEndEvent,self).__init__(event.ctx,"END",*event.names)
 			self.id = event.id
 
 	def report(self, verbose=False):
@@ -137,9 +138,9 @@ class log_run(Event):
 	prefix="RUN"
 	def __init__(self,seq,worker=None,step=None):
 		if worker:
-			super(log_run,self).__init__("WORK",worker.name)
+			super(log_run,self).__init__(seq.ctx,"WORK",worker.name)
 		else:
-			super(log_run,self).__init__("WORK","END")
+			super(log_run,self).__init__(seq.ctx,"WORK","END")
 		self.seq = seq
 		self.worker = worker
 		self.step = step

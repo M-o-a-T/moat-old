@@ -4,8 +4,8 @@
 from homevent.module import Loader,Unloader
 from homevent.run import register_worker
 from homevent.parser import Parser, main_words, Help, Interpreter, IgnoreStatement
-from homevent.config import Load,Unload,WorkerList,ModList
-from homevent.reactor import ShutdownHandler,mainloop,stop_mainloop
+from homevent.config import Load,Unload,WorkerList,ModList,LoadDir
+from homevent.reactor import ShutdownHandler,mainloop,shut_down
 from homevent.twist import StdInDescriptor
 from twisted.internet import reactor
 from twisted.internet._posixstdio import StandardIO ## XXX unstable interface!
@@ -20,6 +20,7 @@ main_words.register_statement(Load)
 main_words.register_statement(Unload)
 main_words.register_statement(WorkerList)
 main_words.register_statement(ModList)
+main_words.register_statement(LoadDir)
 main_words.register_statement(ShutdownHandler)
 
 def parse_logger(t,*x):
@@ -30,7 +31,7 @@ class StdIO(StandardIO):
 		super(StdIO,self).connectionLost(self)
 		if not reason.check(ConnectionDone):
 			print "EOF:",reason
-		stop_mainloop()
+		shut_down()
 def reporter(err):
 	print "Error:",err
 def err(p,e):

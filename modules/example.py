@@ -24,4 +24,4 @@ class SampleModule(Module):
 	def unload(self):
 		log("Unloading!")
 	
-main = SampleModule
+init = SampleModule
