@@ -130,6 +130,10 @@ class Loader(Worker):
 				name = self.mod.name
 			return process_event(Event("module","load-fail",*name), return_errors=True)
 
+#		def rx(_):
+#			print "RX",_
+#			return _
+#		d.addCallback(rx)
 		d.addCallback(lambda _: process_event(Event("module","load-start",*event[2:]), return_errors=True))
 		d.addCallback(doit)
 		d.addCallback(done)
