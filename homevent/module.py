@@ -14,6 +14,14 @@ from homevent.worker import Worker
 from homevent.event import Event
 from homevent.run import process_event,process_failure
 import sys
+import os
+
+ModuleDirs = []
+def par(_): return os.path.join(os.pardir,_)
+if os.path.exists("modules"):
+	ModuleDirs.append("modules")
+elif os.path.exists(par("modules")) and os.path.exists(par("Makefile")):
+	ModuleDirs.append(par("modules"))
 
 class ModuleExistsError(RuntimeError):
 	"""A module with that name already exists."""
@@ -79,35 +87,35 @@ class Loader(Worker):
 		def doit(_):
 			self.mod = None
 			try:
-				if tuple(event[2:]) in modules:
+				m = event[2:]
+				if tuple(m) in modules:
 					raise RuntimeError("This module already exists",event[2:])
 
-				# first, drop it from sys.modules so that it gets reloaded
-				n = event[2]
-				while "." in n:
-					if n in sys.modules:
-						del sys.modules[n]
-						break
-					n = n[:n.rindex(".")]
+				for d in ModuleDirs:
+					p = os.path.join(d,*m)+".py"
+					md = dict()
+					try:
+						c = compile(open(p,"r").read(), m[-1]+".py", "exec",0,True)
+						eval(c,md)
+					except OSError:
+						continue
 
-				mod = namedAny(event[2])
-				if hasattr(mod,"main"):
-					mod = mod.main
-				if callable(mod):
-					mod = mod(*event[2:])
-				elif len(event) > 3:
-					raise RuntimeError("You cannot parameterize this module.")
-				if mod.name in modules:
-					raise RuntimeError("This module already exists(2)",mod.name)
-				self.mod = mod
-				modules[mod.name] = mod
-				try:
-					mod.load()
+					mod = md["main"]
+					if callable(mod):
+						mod = mod(*m)
+					elif len(event) > 3:
+						raise RuntimeError("You cannot parameterize this module.")
+					if mod.name in modules:
+						raise RuntimeError("This module already exists(2)",mod.name)
+					try:
+						modules[m] = mod
+						mod.load()
+					except:
+						del modules[m]
+						raise
+
+					self.mod = mod
 					return True
-				except Exception:
-					if hasattr(mod,"name") and mod.name in modules:
-						del modules[mod.name]
-					raise
 			except Exception:
 				exc = failure.Failure()
 				exc.within = [event,self]

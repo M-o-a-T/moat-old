@@ -13,84 +13,84 @@ RUN: <WorkSequence:1 (4)> (step 1)
  ev: EVENT: startup
 .
 NEW: <WorkSequence:2 (5)>
-   : │  EVENT: module¦load¦homevent.modules.example
+   : │  EVENT: module¦load¦example
    : ├1╴Loader: Module Loader
    : └2╴... done.
 .
-3 EVENT: module¦load¦homevent.modules.example
+3 EVENT: module¦load¦example
 .
 RUN: <WorkSequence:2 (5)>
- ev: EVENT: module¦load¦homevent.modules.example
+ ev: EVENT: module¦load¦example
 .
 RUN: Loader: Module Loader
  at: <WorkSequence:2 (5)> (step 1)
- ev: EVENT: module¦load¦homevent.modules.example
+ ev: EVENT: module¦load¦example
 .
 NEW: <WorkSequence:3 (4)>
-   : │  EVENT: module¦load-start¦homevent.modules.example
+   : │  EVENT: module¦load-start¦example
    : └1╴... done.
 .
-15 EVENT: module¦load-start¦homevent.modules.example
+15 EVENT: module¦load-start¦example
 .
 RUN: <WorkSequence:3 (4)>
- ev: EVENT: module¦load-start¦homevent.modules.example
+ ev: EVENT: module¦load-start¦example
 .
-15 END: module¦load-start¦homevent.modules.example
+15 END: module¦load-start¦example
 .
 RUN: <WorkSequence:3 (4)> (step 1)
- ev: EVENT: module¦load-start¦homevent.modules.example
+ ev: EVENT: module¦load-start¦example
 .
 Loading!
 .
 NEW: <WorkSequence:4 (4)>
-   : │  EVENT: module¦load-done¦homevent.modules.example
+   : │  EVENT: module¦load-done¦example
    : └1╴... done.
 .
-22 EVENT: module¦load-done¦homevent.modules.example
+22 EVENT: module¦load-done¦example
 .
 RUN: <WorkSequence:4 (4)>
- ev: EVENT: module¦load-done¦homevent.modules.example
+ ev: EVENT: module¦load-done¦example
 .
-22 END: module¦load-done¦homevent.modules.example
+22 END: module¦load-done¦example
 .
 RUN: <WorkSequence:4 (4)> (step 1)
- ev: EVENT: module¦load-done¦homevent.modules.example
+ ev: EVENT: module¦load-done¦example
 .
-3 END: module¦load¦homevent.modules.example
+3 END: module¦load¦example
 .
 RUN: <WorkSequence:2 (5)> (step 2)
- ev: EVENT: module¦load¦homevent.modules.example
+ ev: EVENT: module¦load¦example
 .
 NEW: <WorkSequence:5 (5)>
-   : │  EVENT: module¦load¦homevent.modules.example
+   : │  EVENT: module¦load¦example
    : ├1╴Loader: Module Loader
    : └2╴... done.
 .
-3 EVENT: module¦load¦homevent.modules.example
+3 EVENT: module¦load¦example
 .
 RUN: <WorkSequence:5 (5)>
- ev: EVENT: module¦load¦homevent.modules.example
+ ev: EVENT: module¦load¦example
 .
 RUN: Loader: Module Loader
  at: <WorkSequence:5 (5)> (step 1)
- ev: EVENT: module¦load¦homevent.modules.example
+ ev: EVENT: module¦load¦example
 .
 NEW: <WorkSequence:6 (4)>
-   : │  EVENT: module¦load-start¦homevent.modules.example
+   : │  EVENT: module¦load-start¦example
    : └1╴... done.
 .
-36 EVENT: module¦load-start¦homevent.modules.example
+36 EVENT: module¦load-start¦example
 .
 RUN: <WorkSequence:6 (4)>
- ev: EVENT: module¦load-start¦homevent.modules.example
+ ev: EVENT: module¦load-start¦example
 .
-36 END: module¦load-start¦homevent.modules.example
+36 END: module¦load-start¦example
 .
 RUN: <WorkSequence:6 (4)> (step 1)
- ev: EVENT: module¦load-start¦homevent.modules.example
+ ev: EVENT: module¦load-start¦example
 .
 NEW: <WorkSequence:7 (4)>
-   : │  ERROR: ('This module already exists', ('homevent.modules.example',))
+   : │  ERROR: ('This module already exists', ('example',))
    : └1╴... done.
 .
 ERROR: Traceback (most recent call last):
@@ -105,85 +105,85 @@ ERROR: Traceback (most recent call last):
      : --- <exception caught here> ---
      :   File "homevent/module.py, in doit
      :     raise RuntimeError("This module already exists",event[2:])
-     : exceptions.RuntimeError: ('This module already exists', ('homevent.modules.example',))
-   in: EVENT: module¦load¦homevent.modules.example
+     : exceptions.RuntimeError: ('This module already exists', ('example',))
+   in: EVENT: module¦load¦example
    in: Loader: Module Loader
 .
 RUN: <WorkSequence:7 (4)>
- ev: ERROR: ('This module already exists', ('homevent.modules.example',))
+ ev: ERROR: ('This module already exists', ('example',))
 .
 47 END: RuntimeError
 .
 RUN: <WorkSequence:7 (4)> (step 1)
- ev: ERROR: ('This module already exists', ('homevent.modules.example',))
+ ev: ERROR: ('This module already exists', ('example',))
 .
 NEW: <WorkSequence:8 (4)>
-   : │  EVENT: module¦load-fail¦homevent.modules.example
+   : │  EVENT: module¦load-fail¦example
    : └1╴... done.
 .
-49 EVENT: module¦load-fail¦homevent.modules.example
+49 EVENT: module¦load-fail¦example
 .
 RUN: <WorkSequence:8 (4)>
- ev: EVENT: module¦load-fail¦homevent.modules.example
+ ev: EVENT: module¦load-fail¦example
 .
-49 END: module¦load-fail¦homevent.modules.example
+49 END: module¦load-fail¦example
 .
 RUN: <WorkSequence:8 (4)> (step 1)
- ev: EVENT: module¦load-fail¦homevent.modules.example
+ ev: EVENT: module¦load-fail¦example
 .
-3 END: module¦load¦homevent.modules.example
+3 END: module¦load¦example
 .
 RUN: <WorkSequence:5 (5)> (step 2)
- ev: EVENT: module¦load¦homevent.modules.example
+ ev: EVENT: module¦load¦example
 .
 NEW: <WorkSequence:9 (5)>
-   : │  EVENT: module¦unload¦homevent.modules.example
+   : │  EVENT: module¦unload¦example
    : ├1╴Unloader: Module Remover
    : └2╴... done.
 .
-4 EVENT: module¦unload¦homevent.modules.example
+4 EVENT: module¦unload¦example
 .
 RUN: <WorkSequence:9 (5)>
- ev: EVENT: module¦unload¦homevent.modules.example
+ ev: EVENT: module¦unload¦example
 .
 RUN: Unloader: Module Remover
  at: <WorkSequence:9 (5)> (step 1)
- ev: EVENT: module¦unload¦homevent.modules.example
+ ev: EVENT: module¦unload¦example
 .
 NEW: <WorkSequence:10 (4)>
-   : │  EVENT: module¦unload-start¦homevent.modules.example
+   : │  EVENT: module¦unload-start¦example
    : └1╴... done.
 .
-63 EVENT: module¦unload-start¦homevent.modules.example
+63 EVENT: module¦unload-start¦example
 .
 RUN: <WorkSequence:10 (4)>
- ev: EVENT: module¦unload-start¦homevent.modules.example
+ ev: EVENT: module¦unload-start¦example
 .
-63 END: module¦unload-start¦homevent.modules.example
+63 END: module¦unload-start¦example
 .
 RUN: <WorkSequence:10 (4)> (step 1)
- ev: EVENT: module¦unload-start¦homevent.modules.example
+ ev: EVENT: module¦unload-start¦example
 .
 Unloading!
 .
 NEW: <WorkSequence:11 (4)>
-   : │  EVENT: module¦unload-done¦homevent.modules.example
+   : │  EVENT: module¦unload-done¦example
    : └1╴... done.
 .
-70 EVENT: module¦unload-done¦homevent.modules.example
+70 EVENT: module¦unload-done¦example
 .
 RUN: <WorkSequence:11 (4)>
- ev: EVENT: module¦unload-done¦homevent.modules.example
+ ev: EVENT: module¦unload-done¦example
 .
-70 END: module¦unload-done¦homevent.modules.example
+70 END: module¦unload-done¦example
 .
 RUN: <WorkSequence:11 (4)> (step 1)
- ev: EVENT: module¦unload-done¦homevent.modules.example
+ ev: EVENT: module¦unload-done¦example
 .
-4 END: module¦unload¦homevent.modules.example
+4 END: module¦unload¦example
 .
 RUN: <WorkSequence:9 (5)> (step 2)
- ev: EVENT: module¦unload¦homevent.modules.example
+ ev: EVENT: module¦unload¦example
 .
 NEW: <WorkSequence:12 (5)>
    : │  EVENT: shutdown
