@@ -100,13 +100,21 @@ class Loader(Worker):
 					except OSError:
 						continue
 
-					mod = md["main"]
+					try:
+						mod = md["init"]
+					except KeyError:
+						mod = Dummy()
+						mod.name = m
 					if callable(mod):
 						mod = mod(*m)
 					elif len(event) > 3:
 						raise RuntimeError("You cannot parameterize this module.")
 					if mod.name in modules:
 						raise RuntimeError("This module already exists(2)",mod.name)
+					if not hasattr(mod,"load"):
+						mod.load = md["load"]
+						mod.unload = md["unload"]
+
 					try:
 						modules[m] = mod
 						mod.load()
