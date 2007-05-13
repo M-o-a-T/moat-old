@@ -11,6 +11,13 @@ Currently, it understands:
 #	include NAME
 #		- read that file too
 
+	loaddir
+		- list module directories
+	loaddir "NAME"
+		- add a module directory
+	loaddir - "NAME"
+		- drop a module directory
+
 	load NAME
 		- load the module/package homevent.NAME
 
@@ -36,7 +43,8 @@ Modules can register more words.
 from homevent.parser import Statement,Help
 from homevent.run import process_event
 from homevent.event import Event
-from homevent.module import modules
+from homevent.module import modules, ModuleDirs
+import os
 
 class Load(Statement):
 	name=("load",)
@@ -59,6 +67,50 @@ unload NAME [args]...
 """
 	def input(self,wl):
 		process_event(Event(self.ctx, "module","unload",*wl[len(self.name):]))
+
+class LoadDir(Statement):
+	name=("loaddir",)
+	doc="list or change the module directory list"
+	long_doc = """\
+loaddir
+	lists directories where "load" imports modules from
+loaddir "NAME"
+	adds the named directory to the end of the import list
+loaddir + "NAME"
+	adds the named directory to the beginning of the import list
+loaddir - "NAME"
+	removes the named directory from the import list
+"""
+	def input(self,wl):
+		wl = wl[len(self.name):]
+		if len(wl) == 0:
+			for m in ModuleDirs:
+				print >>self.ctx.out, m
+			print >>self.ctx.out, "."
+		else:
+			w = wl[-1]
+			if len(wl) == 1 and w not in ("+","-"):
+				if not os.path.isdir(w):
+					raise RuntimeError("«%s»: not found" % (w,))
+				if wl[0] not in ModuleDirs:
+					ModuleDirs.append(w)
+				else:
+					raise RuntimeError("«%s»: already listed" % (w,))
+			elif len(wl) == 2 and wl[0] == "+":
+				if not os.path.isdir(w):
+					raise RuntimeError("«%s»: not found" % (w,))
+				if wl[1] not in ModuleDirs:
+					ModuleDirs.insert(0,w)
+				else:
+					raise RuntimeError("«%s»: already listed" % (w,))
+			elif len(wl) == 2 and wl[0] == "-":
+				try:
+					ModuleDirs.remove(w)
+				except ValueError:
+					raise RuntimeError("«%s»: not listed" % (w,))
+			else:
+				raise SyntaxError("Usage: loaddir [ [ - ] name ]")
+
 
 class ModList(Statement):
 	name=("modlist",)
