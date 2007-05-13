@@ -26,9 +26,20 @@ trigger FOO...
 			raise SyntaxError("Events need at least one parameter")
 		process_event(Event(self.ctx,*w))
 
-def load():
-	main_words.register_statement(TriggerHandler)
-	
-def unload():
-	main_words.unregister_statement(TriggerHandler)
+from homevent.module import Module
+from homevent.logging import log
 
+class EventsModule(Module):
+	"""\
+		This module contains basic event handling code.
+		"""
+
+	info = "Basic event handling"
+
+	def load(self):
+		main_words.register_statement(TriggerHandler)
+	
+	def unload(self):
+		main_words.unregister_statement(TriggerHandler)
+
+init = EventsModule
