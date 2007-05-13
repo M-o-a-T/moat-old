@@ -8,6 +8,7 @@ This code repreents a loadable module for homevent.
 
 from twisted.python.reflect import namedAny
 from twisted.python import failure
+from twisted.internet import reactor,defer
 from types import ModuleType
 from homevent.worker import Worker
 from homevent.event import Event
@@ -73,7 +74,9 @@ class Loader(Worker):
 		return True
 
 	def run(self,event, *a,**k):
-		def doit():
+		d = defer.Deferred()
+
+		def doit(_):
 			self.mod = None
 			try:
 				if tuple(event[2:]) in modules:
@@ -127,9 +130,11 @@ class Loader(Worker):
 				name = self.mod.name
 			return process_event(Event("module","load-fail",*name), return_errors=True)
 
-		d = process_event(Event("module","load-start",*event[2:]), return_errors=True)
-		d.addCallback(lambda _: doit())
+		d.addCallback(lambda _: process_event(Event("module","load-start",*event[2:]), return_errors=True))
+		d.addCallback(doit)
 		d.addCallback(done)
+
+		reactor.callLater(0,d.callback,None)
 		return d
 	
 
@@ -154,21 +159,25 @@ class Unloader(Worker):
 		return True
 
 	def run(self,event, *a,**k):
+		d = defer.Deferred()
 		sn = Dummy()
-		def doit():
+
+		def doit(_):
 			sn.name = tuple(event[2:])
 			sn.module = modules[sn.name]
 			unload_module(sn.module)
 
-		def done():
+		def done(_):
 			return process_event(Event("module","unload-done",*sn.module.name), return_errors=True)
 
 		def notdone(exc):
 			process_failure(exc)
 			return process_event(Event("module","unload-fail",*event[2:]), return_errors=True)
 
-		d = process_event(Event("module","unload-start",*event[2:]), return_errors=True)
-		d.addCallback(lambda _: doit())
-		d.addCallbacks(lambda _: done(), notdone)
+		d.addCallback(lambda _: process_event(Event("module","unload-start",*event[2:]), return_errors=True))
+		d.addCallback(doit)
+		d.addCallbacks(done, notdone)
+
+		reactor.callLater(0,d.callback,None)
 		return d
 	
