@@ -75,6 +75,10 @@ def process_event(e, return_errors=False):
 		externally-generated events to.
 		"""
 	d = collect_event(e).run()
+#	def rv(_):
+#		print "RVA",_
+#		return _
+#	d.addBoth(rv)
 	if not return_errors:
 		d.addErrback(lambda _: None)
 	return d
@@ -85,6 +89,10 @@ def process_failure(e):
 		will mangle your errors.
 		"""
 	d = collect_failure(e).run()
+#	def rv(_):
+#		print "RVB",_
+#		return _
+#	d.addBoth(rv)
 	d.addErrback(lambda _: None)
 	return d
 	
