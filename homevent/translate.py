@@ -41,9 +41,21 @@ def unregister_actor(handler):
 		"""
 	del handlers[handler.name]
 
-class EventHandler(hp.StatementBlock):
-	name="on"
+class OnEventHandler(hp.StatementBlock):
+	name=("on",)
 	doc="on [event...]: [statements]"
+	long_doc="""\
+The OnEvent handler executes a statement (or a statement sequence)
+when an event occurs.
+
+Syntax:
+	on [event...]:
+		statement
+		...
+
+Every "*foo" in the event description is mapped to the corresponding
+"$foo" argument in the list.
+"""
 	def __repr__(self):
 		return "‹"+self.__class__.__name__+"("+str(self.id)+")›"
 	def __init__(self,*w):
