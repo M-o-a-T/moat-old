@@ -387,7 +387,7 @@ class ComplexStatement(Statement):
 					return fn
 			n = n-1
 
-		return self.ctx._error(KeyError("Cannot find word",self.name,self.__words,args))
+		return self.ctx._error(KeyError("Cannot find word '%s' in '%s'" % (" ".join(args), " ".join(self.name))))
 		
 	def get_processor(self):
 		"""\
