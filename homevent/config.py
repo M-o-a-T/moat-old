@@ -8,8 +8,8 @@ Currently, it understands:
 
 	help (see homevent.parser)
 
-	include NAME
-		- read that file too
+#	include NAME
+#		- read that file too
 
 	load NAME
 		- load the module/package homevent.NAME
@@ -17,16 +17,19 @@ Currently, it understands:
 	unload NAME
 		- ... and remove it again.
 
-	modules
+	modlist
 		- list the installed modules
 
-	config NAME:
-		foo bar baz
-		- pass these lines to this module's config() code
-		- see there for further documentation
+	worklist
+		- list the installed workers
 
-Modules can register more words. Of particular interest are the
-switchboard and timer modules.
+#	config NAME:
+#		foo bar baz
+#		- pass these lines to this module's config() code
+#		- see there for further documentation
+
+Modules can register more words.
+#Of particular interest are the switchboard and timer modules.
 
 """
 
