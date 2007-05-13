@@ -18,7 +18,7 @@ class run_logger(object):
 		try:
 			self.data=open(name+"_log")
 		except IOError:
-			print "ERROR, no log file"
+			print >>sys.stderr,"ERROR, no log file"
 			self.data = None
 		self.line=0
 		h.register_logger(self)
