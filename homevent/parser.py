@@ -440,6 +440,7 @@ class ComplexStatement(Statement):
 			raise ValueError("A handler for '%s' is already registered." % (handler.name,))
 		self.__words[handler.name] = handler
 
+	@classmethod
 	def unregister_statement(self,handler):
 		"""\
 			Remove this statement.
