@@ -37,23 +37,26 @@ class Logger(object):
 		self.level = level
 		self.out = out
 
-	def _log(self, data):
+	def _log(self, level, data):
 		print >>self.out,data
 
 	def log(self, level, *a):
+		print "GRUMBLE",level,self.level
 		if level >= self.level:
-			self._log(" ".join(a))
+			self._log(level," ".join(a))
 
 	def log_event(self, event, level=DEBUG):
 		if level >= self.level:
-			if hasattr(event,"report"):
-				for r in event.report(99):
-					self._log(r)
-			else:
-				self._log(str(event))
-			self._log(".")
-	def log_failure(self, err):
-		self._log(err.getTraceback())
+			for r in event.report(99):
+				self._log(level,r)
+			self._log(level,".")
+
+	def log_failure(self, err, level=WARN):
+		if level >= self.level:
+			self._log(level,err.getTraceback())
+	
+	def end_logging(self):
+		loggers.remove(self)
 
 class LogWorker(ExcWorker):
 	"""\
@@ -81,7 +84,7 @@ class LogWorker(ExcWorker):
 				try:
 					l.log_event(event)
 				except Exception:
-					loggers.remove(l)
+					l.end_logging()
 					exc.append(sys.exc_info())
 		else:
 			try:
@@ -97,6 +100,8 @@ class LogWorker(ExcWorker):
 		log_exc(err=err,msg="while logging")
 
 def log_exc(msg=None, err=None):
+	print "LOG_EXC_ERR_IGITT"
+	print err
 	if not isinstance(err,Failure):
 		if err is None:
 			err = sys.exc_info()
@@ -109,7 +114,7 @@ def log_exc(msg=None, err=None):
 			try:
 				l.log_failure(err)
 			except Exception,e:
-				loggers.remove(l)
+				l.end_logging()
 				log_exc("Logger removed",e)
 				
 	else:
