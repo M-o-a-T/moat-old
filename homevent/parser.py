@@ -23,6 +23,7 @@ from twisted.protocols.basic import LineReceiver
 
 from homevent.context import Context
 from homevent.io import Outputter
+from homevent.run import process_failure
 
 class Processor(object):
 	"""Base class: Process input lines and do something with them."""
@@ -200,13 +201,28 @@ class Parser(Outputter,LineReceiver):
 		self.p_pop_after=False
 		self.p_stack = []
 		self.p_args = []
+		self.p_gen = generate_tokens(self.readline)
+		self._do_parse()
 
+	def _do_parse(self):
 		# States: 0 newline, 1 after first word, 2 OK to extend word
 		#         3+4 need newline+indent after sub-level start, 5 extending word
 		# TODO: write a nice .dot file for this stuff
-		for t,txt,beg,end,line in generate_tokens(self.readline):
+		for t,txt,beg,end,line in self.p_gen:
 			try:
-				self._parseStep(t,txt,beg,end,line)
+				res = self._parseStep(t,txt,beg,end,line)
+				if isinstance(res,defer.Deferred):
+					if self.transport:
+						self.pauseProducing()
+					def res_p(_):
+						if self.transport:
+							self.resumeProducing()
+						return p
+					res.addBoth(res_p)
+					res.addCallback(self._do_parse)
+					res.addErrback(process_failure)
+					return
+
 			except StopIteration:
 				return
 
