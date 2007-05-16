@@ -196,118 +196,122 @@ class Parser(Outputter,LineReceiver):
 			Iterator. It gets fed tokens, assembles them into
 			statements, and calls the processor with them.
 			"""
-		state=0
-		pop_after=False
-		last_block = None
-		hdl = None
-		stack = []
-		proc = self.proc
-
-		from token import NUMBER,NAME,DEDENT,INDENT,OP,NEWLINE,ENDMARKER, \
-			STRING
-		from tokenize import COMMENT,NL
+		self.p_state=0
+		self.p_pop_after=False
+		self.p_stack = []
+		self.p_args = []
 
 		# States: 0 newline, 1 after first word, 2 OK to extend word
 		#         3+4 need newline+indent after sub-level start, 5 extending word
 		# TODO: write a nice .dot file for this stuff
 		for t,txt,beg,end,line in generate_tokens(self.readline):
-			if "logger" in self.ctx: self.ctx.logger("T",state,t,txt,beg,end,line)
-			if t == COMMENT:
-				continue
-			if state == 0: # begin of statement
-				if t == NAME:
-					args = [txt]
-					state=1
-					continue
-				elif t == DEDENT:
-					proc.done()
-					if stack:
-						proc = stack.pop()
-						continue
-					else:
-						return
-				elif t == ENDMARKER:
-					proc.done()
-					while stack:
-						proc = stack.pop()
-						proc.done()
+			try:
+				self._parseStep(t,txt,beg,end,line)
+			except StopIteration:
+				return
+
+	def _parseStep(self, t,txt,beg,end,line):
+		from token import NUMBER,NAME,DEDENT,INDENT,OP,NEWLINE,ENDMARKER, \
+			STRING
+		from tokenize import COMMENT,NL
+
+		if "logger" in self.ctx: self.ctx.logger("T",self.p_state,t,txt,beg,end,line)
+		if t == COMMENT:
+			return
+		if self.p_state == 0: # begin of statement
+			if t == NAME:
+				self.p_args = [txt]
+				self.p_state=1
+				return
+			elif t == DEDENT:
+				self.proc.done()
+				if self.p_stack:
+					self.proc = self.p_stack.pop()
 					return
-				elif t in(NL,NEWLINE):
-					continue
-			elif state == 1 or state == 2: # after first word
-				if t == NAME:
-					args.append(txt)
-					state = 2
-					continue
-				elif t == OP and txt in ("*","+","-") and state == 1:
-					args.append(txt)
-					state = 1
-					continue
-				elif t == NUMBER:
-					args.append(eval(txt,{},{}))
-					state = 1
-					continue
-				elif t == STRING:
-					args.append(eval(txt,{},{}))
-					state = 1
-					continue
-				elif t == OP and txt == "." and state == 2:
-					state = 5
-					continue
-				elif t == OP and txt == ":":
-					try:
-						p = proc.complex_statement(args)
-					except Exception,e:
-						p = self.ctx._error(e)
-						
-					stack.append(proc)
-					proc = p
-					state = 3
-					continue
-				elif t == NEWLINE:
-					try:
-						proc.simple_statement(args)
-					except Exception,e:
-						self.ctx._error(e)
-						
-					if pop_after:
-						proc.done()
-						proc = stack.pop()
-						pop_after=False
-					state=0
-					continue
-			elif state == 3:
-				if t == NEWLINE:
-					state = 4
-					continue
-				elif t == NAME:
-					args = [txt]
-					state = 1
-					pop_after = True
-					continue
 				else:
-					proc = stack.pop()
-			elif state == 4:
-				if t == INDENT:
-					state = 0
-					continue
-				elif t == NEWLINE:
-					# ignore
-					continue
-				else:
-					proc = stack.pop()
-			elif state == 5:
-				if t == NAME:
-					args[-1] += "."+txt
-					state = 2
-					continue
+					raise StopIteration
+			elif t == ENDMARKER:
+				self.proc.done()
+				while self.p_stack:
+					self.proc = self.p_stack.pop()
+					self.proc.done()
+				raise StopIteration
+			elif t in(NL,NEWLINE):
+				return
+		elif self.p_state == 1 or self.p_state == 2: # after first word
+			if t == NAME:
+				self.p_args.append(txt)
+				self.p_state = 2
+				return
+			elif t == OP and txt in ("*","+","-") and self.p_state == 1:
+				self.p_args.append(txt)
+				self.p_state = 1
+				return
+			elif t == NUMBER:
+				self.p_args.append(eval(txt,{},{}))
+				self.p_state = 1
+				return
+			elif t == STRING:
+				self.p_args.append(eval(txt,{},{}))
+				self.p_state = 1
+				return
+			elif t == OP and txt == "." and self.p_state == 2:
+				self.p_state = 5
+				return
+			elif t == OP and txt == ":":
+				try:
+					p = self.proc.complex_statement(self.p_args)
+				except Exception,e:
+					p = self.ctx._error(e)
+					
+				self.p_stack.append(self.proc)
+				self.proc = p
+				self.p_state = 3
+				return
+			elif t == NEWLINE:
+				try:
+					self.proc.simple_statement(self.p_args)
+				except Exception,e:
+					self.ctx._error(e)
+					
+				if self.p_pop_after:
+					self.proc.done()
+					self.proc = self.p_stack.pop()
+					self.p_pop_after=False
+				self.p_state=0
+				return
+		elif self.p_state == 3:
+			if t == NEWLINE:
+				self.p_state = 4
+				return
+			elif t == NAME:
+				self.p_args = [txt]
+				self.p_state = 1
+				self.p_pop_after = True
+				return
+			else:
+				self.proc = self.p_stack.pop()
+		elif self.p_state == 4:
+			if t == INDENT:
+				self.p_state = 0
+				return
+			elif t == NEWLINE:
+				# ignore
+				return
+			else:
+				self.proc = self.p_stack.pop()
+		elif self.p_state == 5:
+			if t == NAME:
+				self.p_args[-1] += "."+txt
+				self.p_state = 2
+				return
 
-			if pop_after:
-				proc = stack.pop()
-				pop_after = False
+		if self.p_pop_after:
+			self.proc = self.p_stack.pop()
+			self.p_pop_after = False
 
-			self.ctx._error(SyntaxError("Unknown token %s (%d, state %d) in %s:%d" % (repr(txt),t,state,self.ctx.filename,beg[0])))
-			state=0
+		self.ctx._error(SyntaxError("Unknown token %s (%d, state %d) in %s:%d" % (repr(txt),t,self.p_state,self.ctx.filename,beg[0])))
+		self.p_state=0
 
 
 class Statement(object):
