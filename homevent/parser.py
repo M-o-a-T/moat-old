@@ -288,7 +288,7 @@ class Parser(Outputter,LineReceiver):
 				except defer.AlreadyCalledError: pass
 				return
 			except Exception:
-				try: self.errback(failure.Failure())
+				try: self.result.errback(failure.Failure())
 				except defer.AlreadyCalledError: pass
 
 	def _parseStep(self, t,txt,beg,end,line):
@@ -324,7 +324,7 @@ class Parser(Outputter,LineReceiver):
 				self.p_args.append(txt)
 				self.p_state = 2
 				return
-			elif t == OP and txt in ("*","+","-") and self.p_state == 1:
+			elif t == OP and txt in ("*","+","-"):
 				self.p_args.append(txt)
 				self.p_state = 1
 				return
@@ -478,7 +478,7 @@ class ComplexStatement(Statement):
 					return fn
 			n = n-1
 
-		return self.ctx._error(KeyError("Cannot find word '%s' in '%s'" % (" ".join(args), " ".join(self.name))))
+		return self.ctx._error(KeyError("Cannot find word '%s' in '%s'" % (" ".join(str(x) for x in args), " ".join(self.name))))
 		
 	def get_processor(self):
 		"""\
