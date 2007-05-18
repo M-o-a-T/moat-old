@@ -41,9 +41,8 @@ class Logger(object):
 		print >>self.out,data
 
 	def log(self, level, *a):
-		print "GRUMBLE",level,self.level
 		if level >= self.level:
-			self._log(level," ".join(a))
+			self._log(level," ".join(str(x) for x in a))
 
 	def log_event(self, event, level=DEBUG):
 		if level >= self.level:
@@ -100,7 +99,6 @@ class LogWorker(ExcWorker):
 		log_exc(err=err,msg="while logging")
 
 def log_exc(msg=None, err=None):
-	print "LOG_EXC_ERR_IGITT"
 	print err
 	if not isinstance(err,Failure):
 		if err is None:
