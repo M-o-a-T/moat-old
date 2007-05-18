@@ -15,6 +15,7 @@ def dropConnections():
 	d = defer.succeed(None)
 	def go_away(_,c):
 		c.loseConnection()
+		return _
 	for c in _conns:
 		d.addBoth(go_away,c)
 	return d
@@ -53,9 +54,6 @@ class Outputter(object,LineReceiver): # "object" because L-R is old-style
 	def connectionLost(self,reason):
 		if self in _conns:
 			_conns.remove(self)
-		q = self.queue
-		if q is not None:
-			q.put(None)
 
 	def write(self,data):
 		"""Mimic a normal 'file' output"""

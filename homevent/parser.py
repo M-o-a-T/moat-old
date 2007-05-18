@@ -19,7 +19,9 @@ from tokenize import generate_tokens
 import Queue
 from twisted.internet import reactor,threads,defer
 from twisted.internet.interfaces import IPushProducer,IPullProducer
+from twisted.python import failure
 from twisted.protocols.basic import LineReceiver
+from threading import Lock
 
 from homevent.context import Context
 from homevent.io import Outputter
@@ -102,16 +104,16 @@ class Parser(Outputter,LineReceiver):
 	   normal (but non-throttle-able) producer."""
 	delimiter="\n"
 
-	def __init__(self, proc, queue=None, ctx=None, delimiter=None):
+	def __init__(self, proc, ctx=None, delimiter=None):
 		"""Parse an input stream and pass the commands to the processor
 		@proc."""
 		super(Parser,self).__init__()
 
-		if queue:
-			self.queue = queue
-		else:
-			self.queue = Queue.Queue()
-		self.result = threads.deferToThread(self._parse)
+		self.line_queue = Queue.Queue(10)
+		self.symbol_queue = Queue.Queue()
+		self.result = defer.Deferred()
+		self.more_parsing = None
+		self.ending = False
 
 		if ctx is None:
 			self.ctx = Context()
@@ -127,6 +129,7 @@ class Parser(Outputter,LineReceiver):
 			self.delimiter=delimiter
 		self.proc = proc
 		self.p_wait = []
+		self.p_wait_lock = Lock()
 		self.restart_producer = False
 
 		def ex(_):
@@ -138,57 +141,83 @@ class Parser(Outputter,LineReceiver):
 	def endConnection(self, res=None):
 		"""Called to stop"""
 		d = defer.Deferred()
-		reactor.callLater(0,self._endConnection,d,res)
+		#reactor.callLater(0,self._endConnection,d,res)
+		self._endConnection(d,res)
 		return d
 
 	def _endConnection(self,d,r):
 		def ex(_):
 			d.callback(r)
 			return _
+		if self.ending:
+			self.result.addBoth(ex)
+			return
+
+		self.ending = True
+		q = self.line_queue
+		if q is not None:
+			try:
+				q.put(None, block=(self.transport is None))
+			except Queue.Full:
+				reactor.callInThread(q.put,None,block=True)
 		self.result.addBoth(ex)
 		if self.transport:
 			self.transport.loseConnection()
-		else:
-			self.connectionLost("no transport")
+
+	def connectionLost(self,reason):
+		super(Parser,self).connectionLost(reason)
+		self.endConnection()
 
 	def run(self, producer, *a,**k):
 		"""Parse this producer's stream."""
 		s = producer(self,*a,**k)
+		self.startParsing()
 		return self.result
 
 	def lineReceived(self, data):
 		"""Standard LineReceiver method"""
-		self.p_wait.append(data)
+		if data is not None:
+			self.p_wait.append(data)
+
+		if not self.p_wait_lock.acquire(False):
+			return
 
 		try:
 			while self.p_wait:
 				item = self.p_wait.pop(0)
-				self.queue.put(item, block=(self.transport is None))
+				self.line_queue.put(item, block=(self.transport is None))
 		except Queue.Full:
 			self.p_wait.insert(0,item)
-			if self.transport:
-				self.pauseProducing()
+			self._pauseProducing()
+
+		self.p_wait_lock.release()
+
+	def _pauseProducing(self):
+		if self.transport:
+			self.pauseProducing()
 
 	def _resumeProducing(self):
+		self.lineReceived(None)
 		if self.transport:
 			self.resumeProducing()
 
 	def readline(self):
-		"""Queued ReadLine, to be called form a thread"""
-		q = self.queue
+		"""Queued ReadLine, to be called from the _sym_parse thread ONLY"""
+		q = self.line_queue
 		if q is None:
 			return ""
 		try:
-			l = q.get(block=0)
+			l = q.get(block=False)
 		except Queue.Empty:
 			reactor.callFromThread(self._resumeProducing)
-			l = q.get()
+			l = q.get(block=True)
 		if l is None:
-			self.queue = None
+			self.line_queue = None
 			return ""
 		return l+"\n"
 
 	def startParsing(self):
+		self._parse() # goes to a different thread
 		if not self.transport:
 			self.connectionMade()
 
@@ -202,29 +231,65 @@ class Parser(Outputter,LineReceiver):
 		self.p_stack = []
 		self.p_args = []
 		self.p_gen = generate_tokens(self.readline)
+		reactor.callInThread(self._sym_parse)
 		self._do_parse()
+
+	def _sym_parse(self):
+		"""Thread transferring input lines to symbols."""
+		from token import ENDMARKER
+
+		while True:
+			t = self.p_gen.next()
+			try:
+				self.symbol_queue.put(t, block=False)
+			except Queue.Full:
+				reactor.callFromThread(self._pauseProducing)
+				self.symbol_queue.put(t, block=True)
+				reactor.callFromThread(self._resumeProducing)
+			q = self.more_parsing
+			if q is not None:
+				self.more_parsing = None
+				def cb(q):
+					try: q.callback(None)
+					except defer.AlreadyCalledError: pass
+				reactor.callFromThread(cb,q)
+			if t[0] == ENDMARKER:
+				return
 
 	def _do_parse(self):
 		# States: 0 newline, 1 after first word, 2 OK to extend word
 		#         3+4 need newline+indent after sub-level start, 5 extending word
 		# TODO: write a nice .dot file for this stuff
-		for t,txt,beg,end,line in self.p_gen:
+
+		if self.more_parsing is not None:
+			return
+		while True:
+			try:
+				t,txt,beg,end,line = self.symbol_queue.get(block=False)
+			except Queue.Empty:
+				# possible race condition: new 
+				self.more_parsing = d = defer.Deferred()
+				if not self.symbol_queue.empty():
+					try: d.callback(None)
+					except defer.AlreadyCalledError: pass
+				d.addCallback(lambda _: self._do_parse())
+				return
 			try:
 				res = self._parseStep(t,txt,beg,end,line)
 				if isinstance(res,defer.Deferred):
-					if self.transport:
-						self.pauseProducing()
-					def res_p(_):
-						if self.transport:
-							self.resumeProducing()
-						return p
-					res.addBoth(res_p)
-					res.addCallback(self._do_parse)
-					res.addErrback(process_failure)
+					def in_main():
+						res.addCallback(lambda _: self._do_parse())
+						res.addErrback(process_failure)
+					reactor.callLater(0,in_main)
 					return
 
 			except StopIteration:
+				try: self.result.callback(None)
+				except defer.AlreadyCalledError: pass
 				return
+			except Exception:
+				try: self.errback(failure.Failure())
+				except defer.AlreadyCalledError: pass
 
 	def _parseStep(self, t,txt,beg,end,line):
 		from token import NUMBER,NAME,DEDENT,INDENT,OP,NEWLINE,ENDMARKER, \
@@ -279,23 +344,29 @@ class Parser(Outputter,LineReceiver):
 					p = self.proc.complex_statement(self.p_args)
 				except Exception,e:
 					p = self.ctx._error(e)
+
+				def have_p(_):
+					self.p_stack.append(self.proc)
+					self.proc = _
+					self.p_state = 3
+				if isinstance(p,defer.Deferred):
+					p.addBoth(have_p)
+				else:
+					have_p(p)
 					
-				self.p_stack.append(self.proc)
-				self.proc = p
-				self.p_state = 3
-				return
+				return p
 			elif t == NEWLINE:
 				try:
-					self.proc.simple_statement(self.p_args)
+					r = self.proc.simple_statement(self.p_args)
 				except Exception,e:
-					self.ctx._error(e)
+					r = self.ctx._error(e)
 					
 				if self.p_pop_after:
 					self.proc.done()
 					self.proc = self.p_stack.pop()
 					self.p_pop_after=False
 				self.p_state=0
-				return
+				return r
 		elif self.p_state == 3:
 			if t == NEWLINE:
 				self.p_state = 4
@@ -559,7 +630,7 @@ class Interpreter(Processor):
 	def simple_statement(self,args):
 		me = self.ctx.words
 		fn = me.lookup(args)
-		fn(parent=me, ctx=self.ctx).input(args)
+		return fn(parent=me, ctx=self.ctx).input(args)
 
 	def complex_statement(self,args):
 		me = self.ctx.words
@@ -573,7 +644,8 @@ class Interpreter(Processor):
 			return fn.processor(parent=fn,ctx=self.ctx(words=fn))
 	
 	def done(self):
-		print >>self.ctx.out,"Exiting"
+		#print >>self.ctx.out,"Exiting"
+		pass
 
 def _parse(g,input):
 	"""Internal code for parse() which reads the input in a separate thread"""
@@ -583,6 +655,7 @@ def _parse(g,input):
 		if not l:
 			break
 		g.lineReceived(l)
+	reactor.callFromThread(g.endConnection)
 	g.loseConnection()
 
 def parse(input, proc=None, ctx=None):

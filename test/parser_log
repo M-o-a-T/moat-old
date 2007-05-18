@@ -23,10 +23,8 @@ Init ('for',)(7) from Ctx(Ctx(Ctx({'out': <__main__.logwrite obj>}),{'words': â€
 InputComplex ('for',)(7): (['for', 'ever', 'and', 'ever'],)
 Init ('foiled',)(8) from â€¹€¹ForHandler ('for',) 1â€ (7)â€º
 Input ('foiled',)(8): (['foiled', 'again'],)
-Exiting
 Init ('what',)(9) from â€¹€¹BarHandler ('foo', 'bar') 2â€ (5)â€º
 Input ('what',)(9): (['what', 'else'],)
-Exiting
 Init ('foo',)(10) from â€¹main_words ('Main',) 4â€º
 Input ('foo',)(10): (['foo', 'again'],)
 Main : word list:
@@ -66,4 +64,3 @@ RUN: shutting down
  ev: EVENT: shutdown
 RUN: <WorkSequence:2 (5)> (step 1)
  ev: EVENT: shutdown
-Exiting
