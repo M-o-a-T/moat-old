@@ -11,6 +11,7 @@ from twisted.internet import reactor
 from twisted.internet._posixstdio import StandardIO ## XXX unstable interface!
 from twisted.internet.error import ConnectionDone
 from homevent.context import Context
+from traceback import print_exc
 
 register_worker(Loader())
 register_worker(Unloader())
@@ -36,6 +37,8 @@ def reporter(err):
 	print "Error:",err
 def err(p,e):
 	print >>p.out,e
+	print_exc(file=p.out)
+
 	return IgnoreStatement()
 	
 def ready():
