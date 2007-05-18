@@ -46,7 +46,8 @@ class run_logger(Logger):
 			print "got   :",repr(sx)
 			self.data = None
 
-	def log(self, sx):
+	def log(self, *a):
+		sx=" ".join(str(x) for x in a)
 		self._log(sx)
 		if self.dot:
 			self._log(".")
