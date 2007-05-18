@@ -59,13 +59,10 @@ wait for FOO...
 		else:
 			raise SyntaxError("unknown unit",w[1])
 		w = m * w[0]
+		if w < 0:
+			return # no waiting
 		r = defer.Deferred()
-		print "S stop"
-		def cb():
-			print "S go"
-			r.callback(None)
-		reactor.callLater(w,cb)
-		#reactor.callLater(w,r.callback,None)
+		reactor.callLater(w,r.callback,None)
 		return r
 
 from homevent.module import Module
