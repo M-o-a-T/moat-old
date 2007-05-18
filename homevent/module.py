@@ -70,6 +70,30 @@ class Module(object):
 
 modules = {}
 
+def load_module(*m):
+	for d in ModuleDirs:
+		p = os.path.join(d,m[-1])+".py"
+		md = dict()
+		try:
+			c = compile(open(p,"r").read(), m[-1]+".py", "exec",0,True)
+			eval(c,md)
+		except OSError:
+			continue
+
+		mod = md["init"]
+		if callable(mod):
+			mod = mod(*m)
+		elif len(event) > 3:
+			raise RuntimeError("You cannot parameterize this module.")
+		if mod.name in modules:
+			raise ModuleExistsError("This module already exists(2)",mod.name)
+		if not hasattr(mod,"load"):
+			mod.load = md["load"]
+			mod.unload = md["unload"]
+
+		modules[mod.name] = m
+		return mod
+
 class Loader(Worker):
 	"""Loads a module."""
 	def __init__(self):
@@ -89,42 +113,27 @@ class Loader(Worker):
 			try:
 				m = event[2:]
 				if tuple(m) in modules:
-					raise RuntimeError("This module already exists",event[2:])
+					raise ModuleExistsError("This module already exists",event[2:])
 
-				for d in ModuleDirs:
-					p = os.path.join(d,*m)+".py"
-					md = dict()
-					try:
-						c = compile(open(p,"r").read(), m[-1]+".py", "exec",0,True)
-						eval(c,md)
-					except OSError:
-						continue
+				mod = load_module(*m)
+				try:
+					modules[m] = mod
+					mod.load()
+				except:
+					del modules[m]
+					raise
 
-					mod = md["init"]
-					if callable(mod):
-						mod = mod(*m)
-					elif len(event) > 3:
-						raise RuntimeError("You cannot parameterize this module.")
-					if mod.name in modules:
-						raise RuntimeError("This module already exists(2)",mod.name)
-					if not hasattr(mod,"load"):
-						mod.load = md["load"]
-						mod.unload = md["unload"]
+				self.mod = mod
+				return True
 
-					try:
-						modules[m] = mod
-						mod.load()
-					except:
-						del modules[m]
-						raise
-
-					self.mod = mod
-					return True
 			except Exception:
 				exc = failure.Failure()
 				exc.within = [event,self]
-				process_failure(exc)
-				return False
+				if "HOMEVENT_TEST" in os.environ:
+					return process_failure(exc)
+				else:
+					process_failure(exc)
+					return False
 
 		def done(res):
 			if res:
