@@ -8,7 +8,7 @@ This code represents a sample loadable module for homevent.
 from homevent.module import Module
 from homevent.logging import log
 
-class SampleModule(Module):
+class ExampleModule(Module):
 	"""\
 		This is a sample loadable module.
 		"""
@@ -16,7 +16,7 @@ class SampleModule(Module):
 	info = "yeah, test me baby"
 
 	def __init__(self, name, *args):
-		super(SampleModule,self).__init__(name,*args)
+		super(ExampleModule,self).__init__(name,*args)
 	
 	def load(self):
 		log("Loading!")
@@ -24,4 +24,4 @@ class SampleModule(Module):
 	def unload(self):
 		log("Unloading!")
 	
-init = SampleModule
+init = ExampleModule

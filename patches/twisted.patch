@@ -1,0 +1,32 @@
+--- /tmp/base.py	2007-05-16 18:11:23.000000000 +0200
++++ twisted/internet/base.py	2007-05-16 18:11:55.000000000 +0200
+@@ -408,6 +408,8 @@
+ 
+     def _continueSystemEvent(self, eventType):
+         sysEvtTriggers = self._eventTriggers.get(eventType)
++        if not sysEvtTriggers:
++            return
+         for callList in sysEvtTriggers[1], sysEvtTriggers[2]:
+             for callable, args, kw in callList:
+                 try:
+--- twisted/internet/defer.py	2007-04-14 11:01:51.000000000 +0200
++++ /tmp/defer.py	2007-05-16 18:15:42.000000000 +0200
+@@ -234,9 +234,16 @@
+         'processing chain'. Also, if the success-callback returns a Failure
+         or raises an Exception, processing will continue on the *error*-
+         callback chain.
++
++        You cannot pass a Deferred as a result; the Deferred's (eventual)
++        value will be used instead.
+         """
+-        assert not isinstance(result, Deferred)
+-        self._startRunCallbacks(result)
++        if isinstance(result, Deferred):
++            def moveResult(_):
++                self.callback(_)
++            result.addBoth(moveResult)
++        else:
++            self._startRunCallbacks(result)
+ 
+ 
+     def errback(self, fail=None):

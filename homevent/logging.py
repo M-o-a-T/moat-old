@@ -33,19 +33,29 @@ class Logger(object):
 	"""\
 		This class implements one particular way to log things.
 		"""
-	def __init__(self, level):
+	def __init__(self, level, out=sys.stdout):
 		self.level = level
+		self.out = out
 
-	def log(self, event, level=DEBUG):
+	def _log(self, level, data):
+		print >>self.out,data
+
+	def log(self, level, *a):
 		if level >= self.level:
-			if hasattr(event,"report"):
-				for r in event.report(99):
-					print r
-			else:
-				print str(event)
-			print "."
-	def log_failure(self, err):
-		err.printTraceback() # (detail='verbose')
+			self._log(level," ".join(str(x) for x in a))
+
+	def log_event(self, event, level=DEBUG):
+		if level >= self.level:
+			for r in event.report(99):
+				self._log(level,r)
+			self._log(level,".")
+
+	def log_failure(self, err, level=WARN):
+		if level >= self.level:
+			self._log(level,err.getTraceback())
+	
+	def end_logging(self):
+		loggers.remove(self)
 
 class LogWorker(ExcWorker):
 	"""\
@@ -71,13 +81,13 @@ class LogWorker(ExcWorker):
 		if loggers:
 			for l in loggers[:]:
 				try:
-					l.log(event)
+					l.log_event(event)
 				except Exception:
-					loggers.remove(l)
+					l.end_logging()
 					exc.append(sys.exc_info())
 		else:
 			try:
-				Logger(TRACE).log(event)
+				Logger(TRACE).log_event(event)
 			except Exception:
 				exc.append(sys.exc_info())
 		if exc:
@@ -89,6 +99,7 @@ class LogWorker(ExcWorker):
 		log_exc(err=err,msg="while logging")
 
 def log_exc(msg=None, err=None):
+	print err
 	if not isinstance(err,Failure):
 		if err is None:
 			err = sys.exc_info()
@@ -101,7 +112,7 @@ def log_exc(msg=None, err=None):
 			try:
 				l.log_failure(err)
 			except Exception,e:
-				loggers.remove(l)
+				l.end_logging()
 				log_exc("Logger removed",e)
 				
 	else:
@@ -146,7 +157,7 @@ class log_run(Event):
 		self.step = step
 		if isinstance(worker,LogWorker):
 			return
-		log(self)
+		log_event(self)
 
 	def report(self, verbose=False):
 		if verbose:
@@ -184,7 +195,7 @@ class log_created(Event):
 	def __init__(self,seq):
 		super(log_created,self).__init__("NEW",str(seq.iid))
 		self.seq = seq
-		log(self)
+		log_event(self)
 	def report(self, verbose=False):
 		if verbose:
 			p = "NEW: "
@@ -194,9 +205,33 @@ class log_created(Event):
 		else:
 			yield "NEW: "+str(self.seq)
 
-log = LogWorker()
-register_worker(log)
-log = log.run
+def log(level, *a):
+	"""\
+		Run through all loggers. If one of then throws an exception,
+		drop the logger and process it.
+		"""
+	exc = []
+	if loggers:
+		for l in loggers[:]:
+			try:
+				l.log(level, *a)
+			except Exception:
+				loggers.remove(l)
+				exc.append(sys.exc_info())
+	else:
+		try:
+			Logger(TRACE).log(level,*a)
+		except Exception:
+			exc.append(sys.exc_info())
+	if exc:
+		from traceback import print_exception
+		for e in exc:
+			log_exc("Logging error", err=e)
+
+log_event = LogWorker()
+register_worker(log_event)
+log_event = log_event.run
+
 
 register_worker(LogDoneWorker())
 

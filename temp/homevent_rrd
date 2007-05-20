@@ -1,0 +1,155 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+#rrdtool create licht.vorne.rrd --step 60 DS:licht:GAUGE:60:0:5 RRA:AVERAGE:0.9:1:2880  RRA:MIN:0.9:60:1440 RRA:MAX:0.9:60:1440 RRA:AVERAGE:0.9:60:1440  RRA:MIN:0.9:1440:1000 RRA:MAX:0.9:1440:1000 RRA:AVERAGE:0.9:1440:1000
+
+import ow
+import time
+import rrdtool
+
+ow.init("localhost:4304")
+
+sensors = {}
+rrd_info={}
+
+def get_address(sensor):
+	r = sensor.address
+	return r[2:-2]
+
+class Sensor(object):
+	def __init__(self,real,attr=None):
+		super(Sensor,self).__init__()
+		self.real = real
+		if attr is not None:
+			self.attr = attr
+		if self.real.address not in sensors:
+			sensors[self.addr] = self
+			self.found()
+
+	def __repr__(self):
+		return "<%s:%s:%s>" % (self.__class__.__name__,self.addr,self.real.type)
+
+	def _get_addr(self):
+		return get_address(self.real)
+	addr = property(_get_addr)
+
+	def _get_value(self):
+		"""will break if self.attr is not set"""
+		return getattr(self.real,self.attr)
+	value = property(_get_value)
+	
+	def found(self):
+		"""Called if this sensor is new on the bus"""
+		pass
+
+	def poll(self):
+		"""Called periodically"""
+		pass
+
+	def gone(self):
+		"""Called if this sensor has vanished from the bus"""
+		pass
+
+class RRDSensor(Sensor):
+	def found(self):
+		"""Called if this sensor is new on the bus"""
+		try:
+			what,where,attr = rrd_info[self.addr]
+		except KeyError:
+			self.attr = None
+		else:
+			self.what = what
+			self.where = where
+			self.attr = attr
+
+	def poll(self):
+		if self.attr is not None:
+			v = float(self.value)
+			#print self.what, self.where,v
+			rrdtool.update("/var/lib/homevent/rrd/%s.%s.rrd" % (self.what,self.where), "-t",self.what,"N:"+str(float(v)))
+
+class RRDSensor2(RRDSensor):
+	def found(self):
+		what,where,attr = rrd_info[self.addr]
+		self.what = what
+		self.where = where
+		self.attr = "volt_D"
+		self.pio = 1
+		self.real.PIO_A = "1"
+
+	def _get_value(self):
+		v = float(getattr(self.real,self.attr))
+		if self.pio:
+			if v > 4.2:
+				self.pio = 0
+				self.real.PIO_A = "0"
+				vn = float(getattr(self.real,self.attr))
+				print "v",self.pio,v,vn
+				v=vn
+		else:
+			if v < 0.95:
+				self.pio = 1
+				self.real.PIO_A = "1"
+				vn = float(getattr(self.real,self.attr))
+
+				print "v",self.pio,v,vn
+				v=vn
+		if self.pio:
+			d = 0
+		else:
+			d = 4.2-0.95
+		v = (v+d)*5/(5+4.2-0.95)
+		print v
+		return v
+	value = property(_get_value)
+
+def enum(s):
+	for sx in s.sensors():
+		yield sx
+		for sy in enum(sx):
+			yield sy
+
+# 65AD39010800	temp hinten temperature Fühler Terrasse
+def read_rrd_params(path):
+	old_rrd_info = rrd_info.copy()
+	for l in open("/etc/homevent/1wire.rrd.cf"):
+		try:
+			id,what,where,attr,_ = l.split(None,4)
+		except ValueError:
+			pass
+		else:
+			try: del old_rrd_info[id]
+			except KeyError: pass
+			if what != "-":
+				rrd_info[id] = (what,where,attr)
+
+	for r in old_rrd_info.iterkeys():
+		del rrd_info[r]
+
+def re_enum_bus():
+	old_sensors = sensors.copy()
+	for s in enum(ow.Sensor("/uncached")):
+		addr = get_address(s)
+		try:
+			del old_sensors[addr]
+		except KeyError:
+			pass
+		if addr not in rrd_info:
+			Sensor(s)
+		elif rrd_info[addr][2] == "thr_vorne":
+			RRDSensor2(s)
+		else:
+			RRDSensor(s)
+	for addr,s in old_sensors.iteritems():
+		del sensors[addr]
+		s.gone()
+
+
+read_rrd_params("/etc/homevent/1wire.rrd.cf")
+re_enum_bus()
+
+while True:
+	for s in sensors.itervalues():
+		s.poll()
+	time.sleep(10)
+
