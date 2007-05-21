@@ -24,7 +24,7 @@ Currently, it understands:
 	unload NAME
 		- ... and remove it again.
 
-	modlist
+	list modules
 		- list the installed modules
 
 	worklist
@@ -69,16 +69,16 @@ unload NAME [args]...
 		process_event(Event(self.ctx, "module","unload",*wl[len(self.name):]))
 
 class LoadDir(Statement):
-	name=("loaddir",)
+	name=("load","dir")
 	doc="list or change the module directory list"
 	long_doc = """\
-loaddir
+load dir
 	lists directories where "load" imports modules from
-loaddir "NAME"
+load dir "NAME"
 	adds the named directory to the end of the import list
-loaddir + "NAME"
+load dir + "NAME"
 	adds the named directory to the beginning of the import list
-loaddir - "NAME"
+load dir - "NAME"
 	removes the named directory from the import list
 """
 	def input(self,wl):
@@ -113,12 +113,12 @@ loaddir - "NAME"
 
 
 class ModList(Statement):
-	name=("modlist",)
+	name=("list","modules")
 	doc="list of modules"
 	long_doc="""\
-modlist
+list module
 	shows a list of loaded modules.
-modlist NAME [args...]
+list module NAME [args...]
 	shows the documentation string of that module.
 	
 """
@@ -134,12 +134,12 @@ modlist NAME [args...]
 			raise SyntaxError("Only one name allowed.")
 
 class WorkerList(Statement):
-	name=("worklist",)
+	name=("list","worker")
 	doc="list of workers"
 	long_doc="""\
-worklist
+list worker
 	shows a list of available workers (code that reacts on events)
-worklist NAME
+list worker NAME
 	shows the documentation string of that worker.
 """
 	def input(self,wl):
@@ -150,7 +150,7 @@ worklist NAME
 				print >>self.ctx.out, w.prio,w.name
 			print >>self.ctx.out, "."
 		elif len(wl) == 1:
-			for w in list_workers(wl[0]):
+			for w in list_workers(wl[0]): # should return only one
 				print >>self.ctx.out, w.name,w.__doc__
 			print >>self.ctx.out, "."
 		else:
