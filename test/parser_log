@@ -15,11 +15,11 @@ Init ('foo', 'bar')(3) from â€¹main_words ('Main',) 4â€º
 Input ('foo', 'bar')(3): (['foo', 'bar'],)
 Init ('foo', 'bar')(4) from â€¹main_words ('Main',) 4â€º
 Input ('foo', 'bar')(4): (['foo', 'bar', 'baz'],)
-Init ('foo', 'bar')(5) from Ctx(Ctx({'out': <__main__.logwrite obj>}),{'words': â€¹main_words ('Main',) 4â€º})
+Init ('foo', 'bar')(5) from Ctx(Ctx({'out': <test.logwrite obj>}),{'words': â€¹main_words ('Main',) 4â€º})
 InputComplex ('foo', 'bar')(5): (['foo', 'bar', 'baz', 'quux'],)
 Init ('what',)(6) from â€¹€¹BarHandler ('foo', 'bar') 2â€ (5)â€º
 Input ('what',)(6): (['what', 'ever'],)
-Init ('for',)(7) from Ctx(Ctx(Ctx({'out': <__main__.logwrite obj>}),{'words': â€¹main_words ('Main',) 4â€º}),{'words': â€¹€¹BarHandler ('foo', 'bar') 2â€ (5)â€º})
+Init ('for',)(7) from Ctx(Ctx(Ctx({'out': <test.logwrite obj>}),{'words': â€¹main_words ('Main',) 4â€º}),{'words': â€¹€¹BarHandler ('foo', 'bar') 2â€ (5)â€º})
 InputComplex ('for',)(7): (['for', 'ever', 'and', 'ever'],)
 Init ('foiled',)(8) from â€¹€¹ForHandler ('for',) 1â€ (7)â€º
 Input ('foiled',)(8): (['foiled', 'again'],)

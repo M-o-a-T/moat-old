@@ -87,3 +87,21 @@ class SayMoreWorker(h.SeqWorker):
 		w.append(SayWorker("TellOne"))
 		w.append(SayWorker("TellTwo"))
 		return w
+
+def logger(s,t,c,*x):
+	pass
+	#if t == COMMENT:
+	#	log(c.rstrip())
+
+class logwrite(object):
+	def __init__(self,log):
+		self.log = log
+		self.buf = ""
+	def write(self,data):
+		self.buf += data
+		if self.buf[-1] == "\n":
+			if len(self.buf) > 1:
+				for l in self.buf.rstrip("\n").split("\n"):
+					self.log(l)
+			self.buf=""
+
