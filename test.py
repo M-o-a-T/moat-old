@@ -11,7 +11,7 @@ from twisted.internet import reactor
 from twisted.internet._posixstdio import StandardIO ## XXX unstable interface!
 from twisted.internet.error import ConnectionDone
 from homevent.context import Context
-from homevent.translate import load as ht_load
+from homevent.handler import load as ht_load
 from traceback import print_exc
 
 register_worker(Loader())
