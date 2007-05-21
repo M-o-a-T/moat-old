@@ -17,6 +17,7 @@ for typical usage.
 
 from tokenize import generate_tokens
 import Queue
+import sys
 from twisted.internet import reactor,threads,defer
 from twisted.internet.interfaces import IPushProducer,IPullProducer
 from twisted.python import failure
@@ -29,8 +30,9 @@ from homevent.run import process_failure
 
 class Processor(object):
 	"""Base class: Process input lines and do something with them."""
-	def __init__(self, ctx=None):
+	def __init__(self, parent=None, ctx=None):
 		self.ctx = ctx or Context()
+		self.parent = parent
 	
 	def simple_statement(self,args):
 		"""\
@@ -62,11 +64,13 @@ class CollectProcessorBase(Processor):
 		You need to override .store() in order to specify _where_.
 		"""
 
-	def __init__(self, parent=None, ctx=None, args=None, verify=False):
+	verify = False
+	def __init__(self, parent=None, ctx=None, args=None, verify=None):
 		super(CollectProcessorBase,self).__init__(parent=self, ctx=ctx)
 		self.args = args
 		self.statements = []
-		self.verify = verify
+		if verify is not None:
+			self.verify = verify
 		self.ctx = ctx
 
 	def simple_statement(self,args):
@@ -84,7 +88,8 @@ class CollectProcessorBase(Processor):
 			ctx = self.ctx(words=subdict)
 		else:
 			ctx = self.ctx
-		subc = CollectProcessor(parent=self, ctx=ctx, args=args)
+		print "A",self
+		subc = CollectProcessor(parent=self.parent, ctx=ctx, args=args)
 		self.store(subc)
 		return subc
 
@@ -96,8 +101,40 @@ class CollectProcessor(CollectProcessorBase):
 	def done(self):
 		self.parent.done()
 
-class CollectParentProcessor(CollectProcessorBase):
-	"""A processor which calls .add() and .done() on its parent."""
+class ImmediateCollectProcessor(CollectProcessor):
+	"""\
+		A processor which stores all (sub-)statements, recursively --
+		except those that are marked as Immediate, which get executed.
+		"""
+
+	def __init__(self, parent=None, ctx=None, args=None, verify=False):
+		super(CollectProcessorBase,self).__init__(parent=parent, ctx=ctx)
+
+	def simple_statement(self,args):
+		me = self.ctx.words
+		fn = me.lookup(args)
+
+		if self.verify:
+			self.ctx.words.lookup(args) # discard the result
+		if fn.immediate:
+			return fn(parent=me, ctx=self.ctx).input(args)
+		self.store(args)
+
+	def complex_statement(self,args):
+		me = self.ctx.words
+		fn = me.lookup(args)
+		fn = fn(parent=me, ctx=self.ctx)
+		if fn.immediate:
+			try:
+				fn.input_complex(args)
+			except AttributeError,e:
+				return self.ctx._error(e)
+			else:
+				return fn.processor(parent=fn,ctx=self.ctx(words=fn))
+		else:
+			subc = ImmediateCollectProcessor(parent=fn, ctx=ctx, args=args)
+			self.store(subc)
+			return subc
 
 class Parser(Outputter,LineReceiver):
 	"""The input parser object. It serves as a LineReceiver and a 
@@ -411,6 +448,8 @@ class Statement(object):
 #This statement has a help text that has not been overridden.
 #Programmer error!
 #"""
+	immediate = False # don't enqueue this
+
 	def __init__(self,parent=None, args=(), ctx=None):
 		assert isinstance(self.name,tuple),"Name is "+repr(self.name)
 		self.parent = parent
@@ -425,6 +464,7 @@ class Statement(object):
 		if len(args) < len(self.name): return False
 		return self.name == tuple(args[0:len(self.name)])
 
+
 class SimpleStatement(Statement):
 	"""\
 		Base class for simple statements.
@@ -432,6 +472,7 @@ class SimpleStatement(Statement):
 
 	def input(self,words):
 		raise NotImplementedError("You need to override '%s.input' (called with %s)" % (self.__class__.__name__,repr(words)))
+
 
 class ComplexStatement(Statement):
 	"""\
@@ -456,7 +497,7 @@ class ComplexStatement(Statement):
 		return self.matches(args)
 
 	def input_complex(self,args):
-		raise NotImplementedError("You need to override '%s.input' (called with %s)" % (self.__class__.__name__,repr(args)))
+		raise NotImplementedError("You need to override '%s.input_complex' (called with %s)" % (self.__class__.__name__,repr(args)))
 
 	def lookup(self,args):
 		"""\
@@ -483,9 +524,10 @@ class ComplexStatement(Statement):
 	def get_processor(self):
 		"""\
 			Returns the translator that should process my substatements.
-			By default, returns a CollectParentProcessor.
+			By default, returns a CollectProcessor.
 			"""
-		return CollectParentProcessor(self)
+		print "B",self
+		return CollectProcessor(parent=self, ctx=self.ctx)
 	processor = property(get_processor,doc="which processor works for my content?")
 
 	def store(self,s):
@@ -547,6 +589,7 @@ class IgnoreStatement(SimpleStatement):
 	def processor(self,**k): return self
 	def done(self): pass
 	def simple_statement(self,args): pass
+
 
 class Help(SimpleStatement):
 	name=("help",)
@@ -635,13 +678,17 @@ class Interpreter(Processor):
 	def complex_statement(self,args):
 		me = self.ctx.words
 		fn = me.lookup(args)
-		fn = fn(parent=me, ctx=self.ctx)
+		try:
+			fn = fn(parent=me, ctx=self.ctx)
+		except TypeError,e:
+			print >>sys.stderr,"For",repr(fn),"::"
+			raise
 		try:
 			fn.input_complex(args)
 		except AttributeError,e:
 			return self.ctx._error(e)
 		else:
-			return fn.processor(parent=fn,ctx=self.ctx(words=fn))
+			return fn.processor ## (parent=fn,ctx=self.ctx(words=fn))
 	
 	def done(self):
 		#print >>self.ctx.out,"Exiting"

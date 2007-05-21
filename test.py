@@ -11,6 +11,7 @@ from twisted.internet import reactor
 from twisted.internet._posixstdio import StandardIO ## XXX unstable interface!
 from twisted.internet.error import ConnectionDone
 from homevent.context import Context
+from homevent.translate import load as ht_load
 from traceback import print_exc
 
 register_worker(Loader())
@@ -23,6 +24,7 @@ main_words.register_statement(WorkerList)
 main_words.register_statement(ModList)
 main_words.register_statement(LoadDir)
 main_words.register_statement(ShutdownHandler)
+ht_load()
 
 def parse_logger(t,*x):
 	print t+":"+" ".join((repr(d) for d in x))
