@@ -88,7 +88,6 @@ class CollectProcessorBase(Processor):
 			ctx = self.ctx(words=subdict)
 		else:
 			ctx = self.ctx
-		print "A",self
 		subc = CollectProcessor(parent=self.parent, ctx=ctx, args=args)
 		self.store(subc)
 		return subc
@@ -526,7 +525,6 @@ class ComplexStatement(Statement):
 			Returns the translator that should process my substatements.
 			By default, returns a CollectProcessor.
 			"""
-		print "B",self
 		return CollectProcessor(parent=self, ctx=self.ctx)
 	processor = property(get_processor,doc="which processor works for my content?")
 
