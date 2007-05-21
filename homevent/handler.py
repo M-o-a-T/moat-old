@@ -69,7 +69,10 @@ Every "*foo" in the event description is mapped to the corresponding
 		try:
 			return "‹"+self.__class__.__name__+"("+str(self.handler_id)+")›"
 		except AttributeError:
-			return "‹"+self.__class__.__name__+"(?)›"
+			try:
+				return "‹"+self.__class__.__name__+repr(self.args)+"›"
+			except AttributeError:
+				return "‹"+self.__class__.__name__+"(?)›"
 
 	def input(self,*w):
 		raise SyntaxError("‹on ...› can only be used as a complex statement")
@@ -80,19 +83,19 @@ Every "*foo" in the event description is mapped to the corresponding
 		self.args = w
 
 	def add(self,*a,**k):
-		print "add",a,k
+		log(TRACE, "add",a,k)
 
 	def done(self):
 		global _onHandler_id
 		_onHandler_id += 1
 		self.handler_id = _onHandler_id
-		print "NewHandler",self.handler_id
+		log(TRACE,"NewHandler",self.handler_id)
 		onHandlers[self.handler_id] = self
 
 class OffEventHandler(SimpleStatement):
 	name = ("drop","on")
 	doc = "forget about this event handler"
-	def input(self,*w):
+	def input(self,w):
 		w = w[len(self.name):]
 		if len(w) == 1:
 			del onHandlers[w[0]]
@@ -103,19 +106,22 @@ class OnListHandler(SimpleStatement):
 	name = ("list","on")
 	doc = "list event handlers"
 	def input(self,w):
-		print w
 		w = w[len(self.name):]
 		if not len(w):
-			fl = len(str(max(onHandlers.iterkeys())))
-			for id in sorted(onHandlers.iterkeys()):
-				h = onHandlers[id]
-				print >>self.ctx.out,str(id)+" "*(fl-len(str(id))+1),": ", \
-					" ".join(h.name)
+			try:
+				fl = len(str(max(onHandlers.iterkeys())))
+			except ValueError:
+				print >>self.ctx.out,"No handlers are defined."
+			else:
+				for id in sorted(onHandlers.iterkeys()):
+					h = onHandlers[id]
+					print >>self.ctx.out,str(id)+" "*(fl-len(str(id))+1),": ", \
+						" ".join(h.args)
 		elif len(w) == 1:
 			h = onHandlers[w[0]]
 			print >>self.ctx.out, h.handler_id,":"," ".join(h.name)
-			if hasattr(h,"realname"): print "Name:",h.realname
-			if hasattr(h,"doc"): print "Doc:",h.doc
+			if hasattr(h,"realname"): print >>self.ctx.out,"Name:",h.realname
+			if hasattr(h,"doc"): print >>self.ctx.out,"Doc:",h.doc
 		else:
 			raise SyntaxError("Usage: list on ‹handler_id›")
 
@@ -127,12 +133,11 @@ class DoNothingHandler(SimpleStatement):
 This statement does not do anything. It's a placeholder if you want to
 explicitly state that some event does not result in any action.
 """
-	def input(self,*w):
+	def input(self,w):
 		w = w[len(self.name):]
 		if len(w):
 			raise SyntaxError("Usage: do nothing")
 		log(TRACE,"NOW: do nothing")
-		print self.parent
 
 
 def load():
