@@ -129,8 +129,6 @@ class ImmediateCollectProcessor(CollectProcessor):
 		me = self.ctx.words
 		fn = me.lookup(args)
 
-		if self.verify:
-			self.ctx.words.lookup(args) # discard the result
 		if fn.immediate:
 			return fn(parent=me, ctx=self.ctx).run(event=InputEvent(self.ctx, *args))
 		self.store(args)
