@@ -4,7 +4,7 @@
 	"""
 
 from twisted.internet.abstract import FileDescriptor
-from twisted.internet import fdesc
+from twisted.internet import fdesc,defer,reactor
 from posix import write
 import sys
 
@@ -28,3 +28,8 @@ class StdOutDescriptor(FileDescriptor):
 		finally:
 			fdesc.setBlocking(1)
 	
+def deferToLater(p,*a,**k):
+	d = defer.Deferred()
+	d.addCallback(lambda _: p(*a,**k))
+	reactor.callLater(0,d.callback,None)
+	return d

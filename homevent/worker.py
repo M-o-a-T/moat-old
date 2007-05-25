@@ -10,8 +10,10 @@ something about it.
 from homevent.context import Context
 from homevent.event import Event
 from homevent.constants import MIN_PRIO,MAX_PRIO
+from homevent.twist import deferToLater
 
-from twisted.internet import defer,threads
+from twisted.internet import defer
+from twisted.internet.threads import deferToThread
 from twisted.python import failure
 from Queue import Queue,Empty
 import os
@@ -97,9 +99,9 @@ class WorkSequence(WorkItem):
 
 	def run(self, *a,**k):
 		if "HOMEVENT_TEST" in os.environ:
-			return self._run(*a,**k)
+			return deferToLater(self._run,*a,**k)
 		else:
-			return threads.deferToThread(self._run,*a,**k)
+			return deferToThread(self._run,*a,**k)
 
 	def _run(self, *a,**k):
 		assert self.work,"empty workqueue"
