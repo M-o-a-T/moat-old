@@ -75,7 +75,7 @@ class WorkSequence(WorkItem):
 		if hasattr(event,"id"):
 			self.id = self.event.id
 		if hasattr(event,"ctx"):
-			self.ctx = event.ctx
+			self.ctx = event.ctx()
 		else:
 			self.ctx = Context()
 		self.iid = seqnum
