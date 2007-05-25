@@ -13,25 +13,25 @@ log = tlogger.log
 
 input = StringIO("""\
 
-# call FooHandler(main).input("foo")
+# call FooHandler(main).run(⌁.foo)
 foo
-# call FooHandler(main).input("foo","baz")
+# call FooHandler(main).run(⌁.foo¦baz)
 foo baz
-# call FooHandler(main).input("foo","baz")
+# call FooHandler(main).run(⌁.foo¦baz)
 foo bar
-# call BarHandler(main).input("foo","bar","baz")
+# call BarHandler(main).run(⌁.foo¦bar¦baz)
 foo bar baz
 # call BarHandler(main).input_complex("baz","quux")
 foo bar baz quux:
-	# call WhatHandler(bar).input("ever")
+	# call WhatHandler(bar).run(⌁.what¦ever)
 	what ever
 	# call ForHandler(bar).input_complex("ever","and","ever")
 	for ever and ever:
-		# call FoiledHandler(for).input("again")
+		# call FoiledHandler(for).run(⌁.foiled¦again)
 		foiled again
-	# call WhatHandler(bar).input("else")
+	# call WhatHandler(bar).run(⌁.what¦else)
 	what else
-# call FooHandler(main).input("foo","again")
+# call FooHandler(main).run(⌁.foo¦again)
 foo again
 
 # help
@@ -62,7 +62,7 @@ class sbr(object):
 		_id += 1
 		self.id = _id
 		log("Init %s(%d) from %s" % (self.name,self.id, repr(parent)))
-	def input(self,event,**k):
+	def run(self,event,**k):
 		log("Input %s(%d): %s" % (self.name,self.id,event))
 	def input_complex(self,*w):
 		log("InputComplex %s(%d): %s" % (self.name,self.id,repr(w)))

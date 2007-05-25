@@ -74,7 +74,7 @@ Every "*foo" in the event description is mapped to the corresponding
 			except AttributeError:
 				return "‹"+self.__class__.__name__+"(?)›"
 
-	def input(self,event,**k):
+	def run(self,event,**k):
 		raise SyntaxError("‹on ...› can only be used as a complex statement")
 
 	def input_complex(self,w):
@@ -95,7 +95,7 @@ Every "*foo" in the event description is mapped to the corresponding
 class OffEventHandler(SimpleStatement):
 	name = ("drop","on")
 	doc = "forget about this event handler"
-	def input(self,event,**k):
+	def run(self,event,**k):
 		w = event[len(self.name):]
 		if len(w) == 1:
 			del onHandlers[w[0]]
@@ -105,7 +105,7 @@ class OffEventHandler(SimpleStatement):
 class OnListHandler(SimpleStatement):
 	name = ("list","on")
 	doc = "list event handlers"
-	def input(self,event,**k):
+	def run(self,event,**k):
 		w = event[len(self.name):]
 		if not len(w):
 			try:
@@ -133,7 +133,7 @@ class DoNothingHandler(SimpleStatement):
 This statement does not do anything. It's a placeholder if you want to
 explicitly state that some event does not result in any action.
 """
-	def input(self,event,**k):
+	def run(self,event,**k):
 		w = event[len(self.name):]
 		if len(w):
 			raise SyntaxError("Usage: do nothing")

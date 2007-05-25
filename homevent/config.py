@@ -54,7 +54,7 @@ load NAME [args]...
 	loads the named homevent module and calls its load() function.
 	Emits an "module load NAME [args]" event.
 """
-	def input(self,event,**k):
+	def run(self,event,**k):
 		process_event(Event(self.ctx, "module","load",*event[len(self.name):]))
 
 class Unload(Statement):
@@ -65,7 +65,7 @@ unload NAME [args]...
 	unloads the named homevent module after calling its unload() function.
 	Emits an "module unload NAME [args]" event.
 """
-	def input(self,event,**k):
+	def run(self,event,**k):
 		process_event(Event(self.ctx, "module","unload",*event[len(self.name):]))
 
 class LoadDir(Statement):
@@ -81,7 +81,7 @@ load dir + "NAME"
 load dir - "NAME"
 	removes the named directory from the import list
 """
-	def input(self,event,**k):
+	def run(self,event,**k):
 		wl = event[len(self.name):]
 		if len(wl) == 0:
 			for m in ModuleDirs:
@@ -122,7 +122,7 @@ list module NAME [args...]
 	shows the documentation string of that module.
 	
 """
-	def input(self,event,**k):
+	def run(self,event,**k):
 		wl = event[len(self.name):]
 		if not len(wl):
 			for m in modules.itervalues():
@@ -142,7 +142,7 @@ list worker
 list worker NAME
 	shows the documentation string of that worker.
 """
-	def input(self,event,**k):
+	def run(self,event,**k):
 		wl = event[len(self.name):]
 		from homevent.run import list_workers
 		if not wl:

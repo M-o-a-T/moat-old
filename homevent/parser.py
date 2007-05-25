@@ -132,7 +132,7 @@ class ImmediateCollectProcessor(CollectProcessor):
 		if self.verify:
 			self.ctx.words.lookup(args) # discard the result
 		if fn.immediate:
-			return fn(parent=me, ctx=self.ctx).input(event=InputEvent(self.ctx, *args))
+			return fn(parent=me, ctx=self.ctx).run(event=InputEvent(self.ctx, *args))
 		self.store(args)
 
 	def complex_statement(self,args):
@@ -485,8 +485,8 @@ class SimpleStatement(Statement):
 		Base class for simple statements.
 		"""
 
-	def input(self,event,**k):
-		raise NotImplementedError("You need to override '%s.input' (called with %s)" % (self.__class__.__name__,repr(event)))
+	def run(self,event,**k):
+		raise NotImplementedError("You need to override '%s.run' (called with %s)" % (self.__class__.__name__,repr(event)))
 
 
 class ComplexStatement(Statement):
@@ -571,7 +571,7 @@ class ComplexStatement(Statement):
 	@classmethod
 	def register_statement(self,handler):
 		"""\
-			Register a handler for a token. handler.input() is called
+			Register a handler for a token. handler.run() is called
 			with the rest of the words on the line. handler.name is the
 			first word on the line, which is used to find the handler.
 	
@@ -598,7 +598,7 @@ class ComplexStatement(Statement):
 class IgnoreStatement(SimpleStatement):
 	"""Used for error exits"""
 	def __call__(self,**k): return self
-	def input(self,**k): pass
+	def run(self,**k): pass
 	def input_complex(self,wl): pass
 	def processor(self,**k): return self
 	def done(self): pass
@@ -619,7 +619,7 @@ in place of the "XXX" in the following statement:
 Statements may be multi-word and follow generic Python syntax.
 """
 
-	def input(self,event,**k):
+	def run(self,event,**k):
 		words = self.parent
 
 		wl = event[len(self.name):]
@@ -687,7 +687,7 @@ class Interpreter(Processor):
 	def simple_statement(self,args):
 		me = self.ctx.words
 		fn = me.lookup(args)
-		return fn(parent=me, ctx=self.ctx).input(event=InputEvent(self.ctx, *args))
+		return fn(parent=me, ctx=self.ctx).run(event=InputEvent(self.ctx, *args))
 
 	def complex_statement(self,args):
 		me = self.ctx.words

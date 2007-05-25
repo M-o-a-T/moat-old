@@ -106,7 +106,7 @@ class ShutdownHandler(Statement):
 shutdown      stops executing the program.
 shutdown now  ... but does not wait for active events to terminate.
 """
-	def input(self,event,**k):
+	def run(self,event,**k):
 		w = event[len(self.name):] # drop the "shutdown"
 		if len(w):
 			if tuple(w) == ("now",):
