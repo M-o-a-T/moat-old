@@ -505,10 +505,6 @@ class ComplexStatement(Statement):
 	def __repr__(self):
 		return "‹%s %s %d›" % (self.__class__.__name__,repr(self.name),len(self.__words))
 
-	@classmethod
-	def matches_complex(self,args):
-		return self.matches(args)
-
 	def input_complex(self,args):
 		raise NotImplementedError("You need to override '%s.input_complex' (called with %s)" % (self.__class__.__name__,repr(args)))
 
