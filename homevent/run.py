@@ -52,6 +52,7 @@ def collect_event(e):
 		for w in workers[wp]:
 			if w.does_event(e):
 				work.append(w)
+				break
 	log_created(work)
 	return work
 
