@@ -14,10 +14,10 @@ RUN: <WorkSequence:1 (4)> (step 1)
 NEW: <WorkSequence:2 (4)>
    : │  EVENT: foo
    : └1╴... done.
-9 EVENT: foo
+11 EVENT: foo
 RUN: <WorkSequence:2 (4)>
  ev: EVENT: foo
-9 END: foo
+11 END: foo
 RUN: <WorkSequence:2 (4)> (step 1)
  ev: EVENT: foo
 No handlers are defined.

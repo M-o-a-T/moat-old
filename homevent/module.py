@@ -79,20 +79,29 @@ def load_module(*m):
 			eval(c,md)
 		except OSError:
 			continue
+		break
 
-		mod = md["init"]
-		if callable(mod):
-			mod = mod(*m)
-		elif len(event) > 3:
-			raise RuntimeError("You cannot parameterize this module.")
-		if mod.name in modules:
-			raise ModuleExistsError("This module already exists(2)",mod.name)
-		if not hasattr(mod,"load"):
-			mod.load = md["load"]
-			mod.unload = md["unload"]
+	mod = md["init"]
+	if callable(mod):
+		mod = mod(*m)
+	elif len(event) > 3:
+		raise RuntimeError("You cannot parameterize this module.")
+	if mod.name in modules:
+		raise ModuleExistsError("This module already exists(2)",mod.name)
+	if not hasattr(mod,"load"):
+		mod.load = md["load"]
+		mod.unload = md["unload"]
 
-		modules[mod.name] = m
-		return mod
+	try:
+		mod.load()
+	except BaseException,e:
+		try:
+			mod.unload()
+		finally:
+			raise e
+
+	modules[mod.name] = mod
+	return mod
 
 class Loader(Worker):
 	"""Loads a module."""
@@ -111,18 +120,11 @@ class Loader(Worker):
 		def doit(_):
 			self.mod = None
 			try:
-				m = event[2:]
-				if tuple(m) in modules:
-					raise ModuleExistsError("This module already exists",event[2:])
+				m = tuple(event[2:]) # skip "load" "module"
+				if m in modules:
+					raise ModuleExistsError("This module already exists",m)
 
 				mod = load_module(*m)
-				try:
-					modules[m] = mod
-					mod.load()
-				except:
-					del modules[m]
-					raise
-
 				self.mod = mod
 				return True
 
@@ -130,6 +132,7 @@ class Loader(Worker):
 				exc = failure.Failure()
 				exc.within = [event,self]
 				if "HOMEVENT_TEST" in os.environ:
+					# If we're testing, process the eception synchronously
 					return process_failure(exc)
 				else:
 					process_failure(exc)

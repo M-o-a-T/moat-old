@@ -40,8 +40,8 @@ class Event(object):
 
 	def __repr__(self):
 		if not hasattr(self,"names"):
-			return "Event(<uninitialized>)"
-		return "Event(%s)" % ",".join(repr(n) for n in self.names)
+			return "%s(<uninitialized>)" % (self.__class__.__name__,)
+		return "%s(%s)" % (self.__class__.__name__, ",".join(repr(n) for n in self.names))
 
 	def __str__(self):
 		try:
@@ -61,7 +61,8 @@ class Event(object):
 	
 	def __getslice__(self,i,j):
 		"""… so that you can write e[2:] instead of e.names[2:]"""
-		return self.names[i:j]
+		return list(self.names[i:j])
+		# list() because the result may need to be modified by the caller
 	
 	def __setitem__(self,i,j):
 		raise RuntimeError("You cannot modify an event!")

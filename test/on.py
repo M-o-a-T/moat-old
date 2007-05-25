@@ -25,7 +25,7 @@ list on
 
 hp.main_words.register_statement(ShutdownHandler)
 ht_load()
-load_module("events").load()
+load_module("events")
 
 def main():
 	d = hp.parse(input, hp.Interpreter(Context(out=logwrite(log))), Context(logger=logger)) # , out=log)

@@ -23,8 +23,8 @@ class TriggerHandler(SimpleStatement):
 trigger FOO...
 	- creates a FOO... event
 """
-	def input(self,w):
-		w = w[len(self.name):]
+	def input(self,event,**k):
+		w = event[len(self.name):]
 		if not w:
 			raise SyntaxError("Events need at least one parameter")
 		return process_event(Event(self.ctx,*w))
@@ -46,8 +46,8 @@ wait for FOO...
 		timer_nr += 1
 		self.nr = timer_nr
 
-	def input(self,w):
-		w = w[len(self.name):]
+	def input(self,event,**k):
+		w = event[len(self.name):]
 		s = 0
 		if not w:
 			raise SyntaxError("Timers need a value")

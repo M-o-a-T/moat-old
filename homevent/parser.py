@@ -27,6 +27,22 @@ from threading import Lock
 from homevent.context import Context
 from homevent.io import Outputter
 from homevent.run import process_failure
+from homevent.event import Event
+
+class InputEvent(Event):
+	"""An event that's just a line from the interpreter"""
+	def __str__(self):
+		try:
+			return "⌁."+"¦".join(self.names)
+		except Exception:
+			return "⌁ REPORT_ERROR: "+repr(self.names)
+
+	def report(self, verbose=False):
+		try:
+			yield "IEVENT: "+"¦".join(self.names)
+		except Exception:
+			yield "IEVENT: REPORT_ERROR: "+repr(self.names)
+
 
 class Processor(object):
 	"""Base class: Process input lines and do something with them."""
@@ -116,7 +132,7 @@ class ImmediateCollectProcessor(CollectProcessor):
 		if self.verify:
 			self.ctx.words.lookup(args) # discard the result
 		if fn.immediate:
-			return fn(parent=me, ctx=self.ctx).input(args)
+			return fn(parent=me, ctx=self.ctx).input(event=InputEvent(self.ctx, *args))
 		self.store(args)
 
 	def complex_statement(self,args):
@@ -469,8 +485,8 @@ class SimpleStatement(Statement):
 		Base class for simple statements.
 		"""
 
-	def input(self,words):
-		raise NotImplementedError("You need to override '%s.input' (called with %s)" % (self.__class__.__name__,repr(words)))
+	def input(self,event,**k):
+		raise NotImplementedError("You need to override '%s.input' (called with %s)" % (self.__class__.__name__,repr(event)))
 
 
 class ComplexStatement(Statement):
@@ -582,7 +598,7 @@ class ComplexStatement(Statement):
 class IgnoreStatement(SimpleStatement):
 	"""Used for error exits"""
 	def __call__(self,**k): return self
-	def input(self,wl): pass
+	def input(self,**k): pass
 	def input_complex(self,wl): pass
 	def processor(self,**k): return self
 	def done(self): pass
@@ -603,10 +619,10 @@ in place of the "XXX" in the following statement:
 Statements may be multi-word and follow generic Python syntax.
 """
 
-	def input(self,wl):
+	def input(self,event,**k):
 		words = self.parent
 
-		wl = wl[1:]
+		wl = event[len(self.name):]
 		while wl:
 			try:
 				wlist = words._get_wordlist()
@@ -671,7 +687,7 @@ class Interpreter(Processor):
 	def simple_statement(self,args):
 		me = self.ctx.words
 		fn = me.lookup(args)
-		return fn(parent=me, ctx=self.ctx).input(args)
+		return fn(parent=me, ctx=self.ctx).input(event=InputEvent(self.ctx, *args))
 
 	def complex_statement(self,args):
 		me = self.ctx.words

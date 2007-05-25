@@ -53,8 +53,8 @@ log WARN
 log
 	- reports available logging levels
 """
-	def input(self,w):
-		w = w[len(self.name):]
+	def input(self,event,**k):
+		w = event[len(self.name):]
 		out = self.ctx.out
 		if not len(w):
 			for s,v in LogName.iteritems():

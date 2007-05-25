@@ -104,7 +104,7 @@ ERROR: Traceback (most recent call last):
      :     self.result = callback(self.result, *args, **kw)
      : --- <exception caught here> ---
      :   File "homevent/module.py, in doit
-     :     raise ModuleExistsError("This module already exists",event[2:])
+     :     raise ModuleExistsError("This module already exists",m)
      : homevent.module.ModuleExistsError: ('This module already exists', ('example',))
    in: EVENT: module¦load¦example
    in: Loader: Module Loader

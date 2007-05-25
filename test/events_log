@@ -10,10 +10,10 @@ RUN: <WorkSequence:1 (4)> (step 1)
 NEW: <WorkSequence:2 (4)>
    : │  EVENT: foo
    : └1╴... done.
-9 EVENT: foo
+10 EVENT: foo
 RUN: <WorkSequence:2 (4)>
  ev: EVENT: foo
-9 END: foo
+10 END: foo
 RUN: <WorkSequence:2 (4)> (step 1)
  ev: EVENT: foo
 0 Timer 1 :: 0.5
@@ -21,10 +21,10 @@ RUN: <WorkSequence:2 (4)> (step 1)
 NEW: <WorkSequence:3 (4)>
    : │  EVENT: bar
    : └1╴... done.
-16 EVENT: bar
+19 EVENT: bar
 RUN: <WorkSequence:3 (4)>
  ev: EVENT: bar
-16 END: bar
+19 END: bar
 RUN: <WorkSequence:3 (4)> (step 1)
  ev: EVENT: bar
 NEW: <WorkSequence:4 (5)>

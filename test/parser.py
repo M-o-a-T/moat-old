@@ -62,8 +62,8 @@ class sbr(object):
 		_id += 1
 		self.id = _id
 		log("Init %s(%d) from %s" % (self.name,self.id, repr(parent)))
-	def input(self,*w):
-		log("Input %s(%d): %s" % (self.name,self.id,repr(w)))
+	def input(self,event,**k):
+		log("Input %s(%d): %s" % (self.name,self.id,event))
 	def input_complex(self,*w):
 		log("InputComplex %s(%d): %s" % (self.name,self.id,repr(w)))
 

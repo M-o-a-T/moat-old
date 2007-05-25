@@ -8,25 +8,25 @@ RUN: <WorkSequence:1 (4)>
 RUN: <WorkSequence:1 (4)> (step 1)
  ev: EVENT: startup
 Init ('foo',)(1) from ‹main_words ('Main',) 4›
-Input ('foo',)(1): (['foo'],)
+Input ('foo',)(1): ⌁.foo
 Init ('foo',)(2) from ‹main_words ('Main',) 4›
-Input ('foo',)(2): (['foo', 'baz'],)
+Input ('foo',)(2): ⌁.foo¦baz
 Init ('foo', 'bar')(3) from ‹main_words ('Main',) 4›
-Input ('foo', 'bar')(3): (['foo', 'bar'],)
+Input ('foo', 'bar')(3): ⌁.foo¦bar
 Init ('foo', 'bar')(4) from ‹main_words ('Main',) 4›
-Input ('foo', 'bar')(4): (['foo', 'bar', 'baz'],)
+Input ('foo', 'bar')(4): ⌁.foo¦bar¦baz
 Init ('foo', 'bar')(5) from Ctx(Ctx({'out': <test.logwrite obj>}),{'words': ‹main_words ('Main',) 4›})
 InputComplex ('foo', 'bar')(5): (['foo', 'bar', 'baz', 'quux'],)
 Init ('what',)(6) from ‹��BarHandler ('foo', 'bar') 2� (5)›
-Input ('what',)(6): (['what', 'ever'],)
+Input ('what',)(6): ⌁.what¦ever
 Init ('for',)(7) from Ctx(Ctx(Ctx({'out': <test.logwrite obj>}),{'words': ‹main_words ('Main',) 4›}),{'words': ‹��BarHandler ('foo', 'bar') 2� (5)›})
 InputComplex ('for',)(7): (['for', 'ever', 'and', 'ever'],)
 Init ('foiled',)(8) from ‹��ForHandler ('for',) 1� (7)›
-Input ('foiled',)(8): (['foiled', 'again'],)
+Input ('foiled',)(8): ⌁.foiled¦again
 Init ('what',)(9) from ‹��BarHandler ('foo', 'bar') 2� (5)›
-Input ('what',)(9): (['what', 'else'],)
+Input ('what',)(9): ⌁.what¦else
 Init ('foo',)(10) from ‹main_words ('Main',) 4›
-Input ('foo',)(10): (['foo', 'again'],)
+Input ('foo',)(10): ⌁.foo¦again
 Main : word list:
 foo      : We foo around.
 foo bar  : Have a bar, man!
