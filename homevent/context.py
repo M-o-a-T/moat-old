@@ -11,13 +11,19 @@ class VanishedAttribute: pass
 class Context(object):
 	"""A stackable context type of thing."""
 	def __init__(self,parent=None,**k):
-		self._parent = parent
+		if parent is not None:
+			self._parent = [parent]
+		else:
+			self._parent = []
 		self._store = {}
 		self._store.update(**k)
 
-	def __call__(self,**k):
+	def __call__(self,ctx=None,**k):
 		"""A simple way to create a stacked clone"""
-		return Context(self,**k)
+		c = Context(self,**k)
+		if ctx is not None:
+			c._parent.insert(0,ctx)
+		return c
 
 	def __getattribute__(self,key):
 		if key.startswith("_"):
@@ -26,11 +32,14 @@ class Context(object):
 		if key in store:
 			r = store[key]
 		else:
-			parent = self._parent
-			if parent:
-				r = getattr(parent,key)
-			else:
-				raise KeyError(self,key)
+			r = VanishedAttribute
+			for p in self._parent:
+				try:
+					r = getattr(p,key)
+				except KeyError:
+					pass
+				else:
+					break
 		if r is VanishedAttribute:
 			raise KeyError(self,key)
 		return r
@@ -48,26 +57,31 @@ class Context(object):
 	def __contains__(self,key):
 		store = self._store
 		if key in store: return store[key] is not VanishedAttribute
-		parent = self._parent
-		return parent and key in parent
+		for p in self._parent:
+			if key in p:
+				return True
+		return False
 	
 	def __nonzero__(self):
-		return bool(self._store) or bool(self._parent)
+		if bool(self._store):
+			return True
+		for p in self._parent:
+			if bool(p):
+				return True
+		return False
 	
 	def __repr__(self):
-		parent = self._parent
-		if parent:
-			res = repr(self._parent)
-		else:
-			res = ""
+		res = ""
+		for p in self._parent:
+			if res != "":
+				res += ","
+			res += repr(p)
 		store = self._store
 		if store:
-			if parent:
-				return "Ctx(%s,%s)" % (res,repr(store))
-			else:
-				return "Ctx(%s)" % (repr(store),)
-		else:
-			return "Ctx(%s)" % (res,)
+			if res != "":
+				res += ","
+			res += repr(store)
+		return "Ctx(%s)" % (res,)
 
 	def _error(self,e):
 		"""\
