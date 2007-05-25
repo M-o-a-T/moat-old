@@ -127,11 +127,12 @@ class ImmediateCollectProcessor(CollectProcessor):
 
 	def simple_statement(self,args):
 		me = self.ctx.words
-		fn = me.lookup(args)
 
+		event=InputEvent(self.ctx, *args)
+		fn = me.lookup(event)
 		if fn.immediate:
-			return fn(parent=me, ctx=self.ctx).run(event=InputEvent(self.ctx, *args))
-		self.store(args)
+			return fn(parent=me, ctx=self.ctx).run(event)
+		self.store(event)
 
 	def complex_statement(self,args):
 		me = self.ctx.words
@@ -369,6 +370,8 @@ class Parser(Outputter,LineReceiver):
 				raise StopIteration
 			elif t in(NL,NEWLINE):
 				return
+			elif t == OP and txt == ".":
+				return # "I am done"
 		elif self.p_state == 1 or self.p_state == 2: # after first word
 			if t == NAME:
 				self.p_args.append(txt)
@@ -409,7 +412,8 @@ class Parser(Outputter,LineReceiver):
 				try:
 					r = self.proc.simple_statement(self.p_args)
 				except Exception,e:
-					r = self.ctx._error(e)
+					#r = self.ctx._error(e)
+					raise
 					
 				if self.p_pop_after:
 					self.proc.done()

@@ -16,8 +16,10 @@ log = run_logger("on",dot=False).log
 input = StringIO("""\
 on foo:
 	do nothing
+on bar *:
+	trigger foo
 list on
-trigger foo
+trigger bar baz
 #drop on foo
 drop on 1
 list on

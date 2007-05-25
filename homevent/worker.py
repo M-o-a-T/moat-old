@@ -1,5 +1,7 @@
 # *-* coding: utf-8 *-*
 
+from __future__ import division
+
 """\
 This part of the code defines what a (generic) worker is.
 
@@ -204,7 +206,7 @@ class Worker(object):
 	"""\
 		This is a generic worker. It accepts an event and does things to it.
 		"""
-	prio = (MIN_PRIO+MAX_PRIO)/2
+	prio = (MIN_PRIO+MAX_PRIO)//2
 	def __init__(self, name):
 		"""\
 			Initialize this worker.

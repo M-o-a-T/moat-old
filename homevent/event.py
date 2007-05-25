@@ -71,6 +71,22 @@ class Event(object):
 		return len(self.names)
 	def __bool__(self):
 		return True
+	def __iter__(self):
+		return self.names.__iter__()
+
+	def clone(self, ctx):
+		"""\
+			Copy an event, applying substitutions.
+			This code dies with an AttributeError if there are no
+			matching substitutes. This is intentional.
+			"""
+		w = []
+
+		for n in self.names:
+			if n.startswith('$'):
+				n = getattr(ctx,n[1:])
+			w.append(n)
+		return self.__class__(ctx, *w)
 
 #Monkey-patch t.p.f.Failure to answer to our report() call
 from twisted.python.failure import Failure

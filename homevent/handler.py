@@ -1,5 +1,6 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
+
+from __future__ import division
 
 """\
 This code does basic configurable event mangling.
@@ -21,6 +22,7 @@ Otherwise a "alarm livingroom" would be triggered.
 from homevent.parser import SimpleStatement,ComplexStatement,\
 	ImmediateCollectProcessor, main_words
 from homevent.logging import log_event,log, TRACE
+from homevent.run import register_worker,unregister_worker,MIN_PRIO,MAX_PRIO
 
 __all__ = ["register_actor","unregister_actor"]
 
@@ -45,6 +47,7 @@ def unregister_actor(handler):
 	del handlers[handler.name]
 
 class OnEventHandler(ComplexStatement):
+	"""This is also a worker."""
 	name=("on",)
 	doc="on [event...]: [statements]"
 	long_doc="""\
@@ -60,6 +63,8 @@ Every "*foo" in the event description is mapped to the corresponding
 "$foo" argument in the list.
 """
 	in_sub = False
+	prio = (MIN_PRIO+MAX_PRIO)//2+1
+	procs = None
 
 	def get_processor(self):
 		return ImmediateCollectProcessor(parent=self, ctx=self.ctx(words=self))
@@ -74,23 +79,64 @@ Every "*foo" in the event description is mapped to the corresponding
 			except AttributeError:
 				return "‹"+self.__class__.__name__+"(?)›"
 
+	def does_event(self,event):
+		ie = iter(event)
+		ia = iter(self.args)
+		ctx = {}
+		pos = 0
+		while True:
+			try: e = ie.next()
+			except StopIteration: e = StopIteration
+			try: a = ia.next()
+			except StopIteration: a = StopIteration
+			if e is StopIteration and a is StopIteration:
+				return True
+			if e is StopIteration or a is StopIteration:
+				return False
+			if a.startswith('*'):
+				if a == '*':
+					pos += 1
+					a = str(pos)
+				else:
+					a = a[1:]
+				ctx[a] = e
+			elif a != e:
+				return False
+
 	def run(self,event,**k):
-		raise SyntaxError("‹on ...› can only be used as a complex statement")
+		if self.procs is None:
+			raise SyntaxError("‹on ...› can only be used as a complex statement")
+		for a in self.procs:
+			print "RUN ME ::", a
 
 	def input_complex(self,w):
 		w = w[len(self.name):]
 		log(TRACE, "Create OnEvtHandler: "+repr(w))
 		self.args = w
+		self.procs = []
 
-	def add(self,*a,**k):
-		log(TRACE, "add",a,k)
+	def add(self,*a):
+		log(TRACE, "add",a)
+		self.procs.append(a)
 
 	def done(self):
 		global _onHandler_id
 		_onHandler_id += 1
 		self.handler_id = _onHandler_id
 		log(TRACE,"NewHandler",self.handler_id)
+		self.name = "¦".join(self.args)
+		register_worker(self)
 		onHandlers[self.handler_id] = self
+	
+	def report(self, verbose=False):
+		yield "ON "+"¦".join(self.args)
+		if not verbose: return
+		yield "   prio: "+str(self.prio)
+		pref="proc"
+		for p in self.procs:
+			yield "   "+pref+": "+str(p)
+			pref="    "
+	
 
 class OffEventHandler(SimpleStatement):
 	name = ("drop","on")
@@ -98,6 +144,8 @@ class OffEventHandler(SimpleStatement):
 	def run(self,event,**k):
 		w = event[len(self.name):]
 		if len(w) == 1:
+			worker = onHandlers[w[0]]
+			unregister_worker(worker)
 			del onHandlers[w[0]]
 		else:
 			raise SyntaxError("Usage: drop on ‹handler_id›")

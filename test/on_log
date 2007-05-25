@@ -8,19 +8,31 @@ RUN: <WorkSequence:1 (4)>
 RUN: <WorkSequence:1 (4)> (step 1)
  ev: EVENT: startup
 0 Create OnEvtHandler: ['foo']
-0 add (['do', 'nothing'],) {}
+0 add (InputEvent('do','nothing'),)
 0 NewHandler 1
+0 Create OnEvtHandler: ['bar', '*']
+0 add (InputEvent('trigger','foo'),)
+0 NewHandler 2
 1  :  foo
-NEW: <WorkSequence:2 (4)>
-   : │  EVENT: foo
-   : └1╴... done.
-11 EVENT: foo
-RUN: <WorkSequence:2 (4)>
- ev: EVENT: foo
-11 END: foo
-RUN: <WorkSequence:2 (4)> (step 1)
- ev: EVENT: foo
-No handlers are defined.
+2  :  bar *
+NEW: <WorkSequence:2 (5)>
+   : │  EVENT: bar¦baz
+   : ├1╴ON bar¦*
+   : │     prio: 51
+   : │     proc: (InputEvent('trigger','foo'),)
+   : └2╴... done.
+13 EVENT: bar¦baz
+RUN: <WorkSequence:2 (5)>
+ ev: EVENT: bar¦baz
+RUN: ON bar¦*
+   :    prio: 51
+   :    proc: (InputEvent('trigger','foo'),)
+ at: <WorkSequence:2 (5)> (step 1)
+ ev: EVENT: bar¦baz
+13 END: bar¦baz
+RUN: <WorkSequence:2 (5)> (step 2)
+ ev: EVENT: bar¦baz
+2  :  bar *
 NEW: <WorkSequence:3 (5)>
    : │  EVENT: shutdown
    : └1╴... done.
