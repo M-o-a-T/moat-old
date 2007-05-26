@@ -22,9 +22,17 @@ class Context(object):
 		"""A simple way to create a stacked clone"""
 		c = Context(self,**k)
 		if ctx is not None:
-			c._parent.insert(0,ctx)
+			assert self not in ctx._parents()
+			if ctx not in self._parents():
+				c._parent.insert(0,ctx)
 		return c
 
+	def _parents(self):
+		for p in self._parent:
+			yield p
+			for pp in p._parents():
+				yield pp
+		
 	def __getattribute__(self,key):
 		if key.startswith("_"):
 			return super(Context,self).__getattribute__(key)
