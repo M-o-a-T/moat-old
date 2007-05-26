@@ -32,7 +32,7 @@ from homevent.event import Event
 # We need to hack tokenize
 import tokenize as t
 import re
-t.Operator = re.sub(r"~",r"~|\$",t.Operator,count=1)
+t.Operator = re.sub(r"\(",r"(\$[0-9]+|[$*]([a-z][a-z0-9]*)?|",t.Operator,count=1)
 t.Funny = t.group(t.Operator, t.Bracket, t.Special)
 t.PlainToken = t.group(t.Number, t.Funny, t.String, t.Name)
 t.Token = t.Ignore + t.PlainToken
@@ -403,8 +403,9 @@ class Parser(Outputter,LineReceiver):
 				self.p_args.append(eval(txt,{},{}))
 				self.p_state = 1
 				return
-			elif t == OP and txt == "$" and self.p_state == 1:
-				self.p_state = 6
+			elif t == OP and txt[0] in ("$","*"):
+				self.p_args.append(txt)
+				self.p_state = 1
 				return
 			elif t == OP and txt == "." and self.p_state == 2:
 				self.p_state = 5
@@ -463,19 +464,6 @@ class Parser(Outputter,LineReceiver):
 				self.p_args[-1] += "."+txt
 				self.p_state = 2
 				return
-		elif self.p_state == 6:
-			if t == NAME:
-				self.p_args.append("$"+txt)
-				self.p_state = 1
-				return
-			elif t == NUMBER:
-				try:
-					self.p_args.append("$"+str(int(txt)))
-				except ValueError:
-					pass
-				else:
-					self.p_state = 1
-					return
 
 		if self.p_pop_after:
 			self.proc = self.p_stack.pop()
