@@ -27,7 +27,21 @@ trigger FOO...
 		w = event[len(self.name):]
 		if not w:
 			raise SyntaxError("Events need at least one parameter")
+		process_event(Event(self.ctx,*w))
+
+class SyncTriggerHandler(TriggerHandler):
+	name=("sync","trigger")
+	doc="send an event and wait for it"
+	long_doc="""\
+sync trigger FOO...
+	- creates a FOO... event and wait until it is processed
+"""
+	def run(self,event,**k):
+		w = event[len(self.name):]
+		if not w:
+			raise SyntaxError("Events need at least one parameter")
 		return process_event(Event(self.ctx,*w))
+
 
 timer_nr = 0
 
@@ -108,14 +122,18 @@ class EventsModule(Module):
 
 	def load(self):
 		main_words.register_statement(TriggerHandler)
+		main_words.register_statement(SyncTriggerHandler)
 		main_words.register_statement(WaitHandler)
 		OnEventHandler.register_statement(TriggerHandler)
+		OnEventHandler.register_statement(SyncTriggerHandler)
 		OnEventHandler.register_statement(WaitHandler)
 	
 	def unload(self):
 		main_words.unregister_statement(TriggerHandler)
+		main_words.unregister_statement(SyncTriggerHandler)
 		main_words.unregister_statement(WaitHandler)
 		OnEventHandler.unregister_statement(TriggerHandler)
+		OnEventHandler.unregister_statement(SyncTriggerHandler)
 		OnEventHandler.unregister_statement(WaitHandler)
 
 init = EventsModule

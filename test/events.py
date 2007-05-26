@@ -12,9 +12,9 @@ from test import run_logger, logger,logwrite
 log = run_logger("events",dot=False).log
 
 input = StringIO("""\
-trigger foo
+sync trigger foo
 wait for 1m -90s 0.5min +.5s
-trigger bar
+sync trigger bar
 """)
 
 hp.main_words.register_statement(ShutdownHandler)
