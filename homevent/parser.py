@@ -29,6 +29,20 @@ from homevent.io import Outputter
 from homevent.run import process_failure
 from homevent.event import Event
 
+# We need to hack tokenize
+import tokenize as t
+import re
+t.Operator = re.sub(r"~",r"~|\$",t.Operator,count=1)
+t.Funny = t.group(t.Operator, t.Bracket, t.Special)
+t.PlainToken = t.group(t.Number, t.Funny, t.String, t.Name)
+t.Token = t.Ignore + t.PlainToken
+t.tokenprog = re.compile(t.Token)
+t.PseudoToken = t.Whitespace + t.group(t.PseudoExtras, t.Number, t.Funny, t.ContStr, t.Name)
+t.pseudoprog = re.compile(t.PseudoToken)
+
+del t
+del re
+
 class InputEvent(Event):
 	"""An event that's just a line from the interpreter"""
 	def __str__(self):
@@ -110,8 +124,8 @@ class CollectProcessorBase(Processor):
 
 class CollectProcessor(CollectProcessorBase):
 	"""A processor which adds all statements to its parent."""
-	def store(self,proc):
-		self.parent.add(proc)
+	def store(self,proc,event):
+		self.parent.add(proc,event)
 
 	def done(self):
 		self.parent.done()
@@ -131,8 +145,8 @@ class ImmediateCollectProcessor(CollectProcessor):
 		event=InputEvent(self.ctx, *args)
 		fn = me.lookup(event)
 		if fn.immediate:
-			return fn(parent=me, ctx=self.ctx).run(event)
-		self.store(event)
+			return fn(parent=me, ctx=self.ctx).run(event.clone())
+		self.store(fn,event)
 
 	def complex_statement(self,args):
 		me = self.ctx.words
@@ -372,7 +386,7 @@ class Parser(Outputter,LineReceiver):
 				return
 			elif t == OP and txt == ".":
 				return # "I am done"
-		elif self.p_state == 1 or self.p_state == 2: # after first word
+		elif self.p_state in (1,2): # after first word
 			if t == NAME:
 				self.p_args.append(txt)
 				self.p_state = 2
@@ -388,6 +402,9 @@ class Parser(Outputter,LineReceiver):
 			elif t == STRING:
 				self.p_args.append(eval(txt,{},{}))
 				self.p_state = 1
+				return
+			elif t == OP and txt == "$" and self.p_state == 1:
+				self.p_state = 6
 				return
 			elif t == OP and txt == "." and self.p_state == 2:
 				self.p_state = 5
@@ -446,6 +463,19 @@ class Parser(Outputter,LineReceiver):
 				self.p_args[-1] += "."+txt
 				self.p_state = 2
 				return
+		elif self.p_state == 6:
+			if t == NAME:
+				self.p_args.append("$"+txt)
+				self.p_state = 1
+				return
+			elif t == NUMBER:
+				try:
+					self.p_args.append("$"+str(int(txt)))
+				except ValueError:
+					pass
+				else:
+					self.p_state = 1
+					return
 
 		if self.p_pop_after:
 			self.proc = self.p_stack.pop()
@@ -685,7 +715,7 @@ class Interpreter(Processor):
 	def simple_statement(self,args):
 		me = self.ctx.words
 		fn = me.lookup(args)
-		return fn(parent=me, ctx=self.ctx).run(event=InputEvent(self.ctx, *args))
+		return fn(parent=me, ctx=self.ctx).run(event=InputEvent(self.ctx, *args).clone())
 
 	def complex_statement(self,args):
 		me = self.ctx.words

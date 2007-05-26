@@ -74,7 +74,7 @@ class Event(object):
 	def __iter__(self):
 		return self.names.__iter__()
 
-	def clone(self, ctx):
+	def clone(self, ctx=None):
 		"""\
 			Copy an event, applying substitutions.
 			This code dies with an AttributeError if there are no
@@ -82,8 +82,13 @@ class Event(object):
 			"""
 		w = []
 
+		if ctx is None:
+			ctx = self.ctx
+		else:
+			ctx = self.ctx(ctx=ctx)
+
 		for n in self.names:
-			if n.startswith('$'):
+			if hasattr(n,"startswith") and n.startswith('$'):
 				n = getattr(ctx,n[1:])
 			w.append(n)
 		return self.__class__(ctx, *w)
