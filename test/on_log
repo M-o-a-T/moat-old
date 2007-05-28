@@ -13,73 +13,131 @@ RUN: <WorkSequence:1 (4)> (step 1)
 0 Create OnEvtHandler: ['foo']
 0 NewHandler 2
 0 Create OnEvtHandler: ['foo']
-0 add <class 'TriggerHandler'> ⌁.trigger¦OuchNo
+0 add <class 'SyncTriggerHandler'> ⌁.sync¦trigger¦OuchNo
 0 NewHandler 3
 0 Create OnEvtHandler: ['bar', '*']
-0 add <class 'TriggerHandler'> ⌁.trigger¦foo
+0 add <class 'SyncTriggerHandler'> ⌁.sync¦trigger¦foo
 0 NewHandler 4
-1  :  foo
-2  :  foo
-3  :  foo
-4  :  bar *
+1  : foo ‹Do nothing›
+2  : foo ‹Skip Next›
+3  : foo ‹not executed›
+4  : bar¦*
 NEW: <WorkSequence:2 (5)>
    : │  EVENT: bar¦baz
    : ├1╴ON bar¦*
    : │     prio: 51
-   : │     proc: TriggerHandler ⌁.trigger¦foo
+   : │     proc: SyncTriggerHandler ⌁.sync¦trigger¦foo
    : └2╴... done.
-24 EVENT: bar¦baz
+30 EVENT: bar¦baz
 RUN: <WorkSequence:2 (5)>
  ev: EVENT: bar¦baz
 RUN: ON bar¦*
    :    prio: 51
-   :    proc: TriggerHandler ⌁.trigger¦foo
+   :    proc: SyncTriggerHandler ⌁.sync¦trigger¦foo
  at: <WorkSequence:2 (5)> (step 1)
  ev: EVENT: bar¦baz
 NEW: <WorkSequence:3 (7)>
    : │  EVENT: foo
    : ├1╴ON foo
+   : │     name: Do nothing
    : │     prio: 50
    : │     proc: DoNothingHandler ⌁.do¦nothing
    : ├2╴ON foo
+   : │     name: Skip Next
    : │     prio: 55
    : ├3╴ON foo
+   : │     name: not executed
    : │     prio: 60
-   : │     proc: TriggerHandler ⌁.trigger¦OuchNo
+   : │     proc: SyncTriggerHandler ⌁.sync¦trigger¦OuchNo
    : └4╴... done.
-24 END: bar¦baz
-RUN: <WorkSequence:2 (5)> (step 2)
- ev: EVENT: bar¦baz
-30 EVENT: foo
+36 EVENT: foo
 RUN: <WorkSequence:3 (7)>
  ev: EVENT: foo
 RUN: ON foo
+   :    name: Do nothing
    :    prio: 50
    :    proc: DoNothingHandler ⌁.do¦nothing
  at: <WorkSequence:3 (7)> (step 1)
  ev: EVENT: foo
 0 NOW: do nothing
 RUN: ON foo
+   :    name: Skip Next
    :    prio: 55
  at: <WorkSequence:3 (7)> (step 2)
  ev: EVENT: foo
-ADD SKIPME
-SKIPME
-30 END: foo
+36 END: foo
 RUN: <WorkSequence:3 (7)> (step 4)
  ev: EVENT: foo
-2  :  foo
-3  :  foo
-4  :  bar *
+30 END: bar¦baz
+RUN: <WorkSequence:2 (5)> (step 2)
+ ev: EVENT: bar¦baz
 NEW: <WorkSequence:4 (5)>
+   : │  EVENT: bar¦baz
+   : ├1╴ON bar¦*
+   : │     prio: 51
+   : │     proc: SyncTriggerHandler ⌁.sync¦trigger¦foo
+   : └2╴... done.
+53 EVENT: bar¦baz
+RUN: <WorkSequence:4 (5)>
+ ev: EVENT: bar¦baz
+RUN: ON bar¦*
+   :    prio: 51
+   :    proc: SyncTriggerHandler ⌁.sync¦trigger¦foo
+ at: <WorkSequence:4 (5)> (step 1)
+ ev: EVENT: bar¦baz
+NEW: <WorkSequence:5 (6)>
+   : │  EVENT: foo
+   : ├1╴ON foo
+   : │     name: Do nothing
+   : │     prio: 50
+   : │     proc: DoNothingHandler ⌁.do¦nothing
+   : ├2╴ON foo
+   : │     name: not executed
+   : │     prio: 60
+   : │     proc: SyncTriggerHandler ⌁.sync¦trigger¦OuchNo
+   : └3╴... done.
+59 EVENT: foo
+RUN: <WorkSequence:5 (6)>
+ ev: EVENT: foo
+RUN: ON foo
+   :    name: Do nothing
+   :    prio: 50
+   :    proc: DoNothingHandler ⌁.do¦nothing
+ at: <WorkSequence:5 (6)> (step 1)
+ ev: EVENT: foo
+0 NOW: do nothing
+RUN: ON foo
+   :    name: not executed
+   :    prio: 60
+   :    proc: SyncTriggerHandler ⌁.sync¦trigger¦OuchNo
+ at: <WorkSequence:5 (6)> (step 2)
+ ev: EVENT: foo
+NEW: <WorkSequence:6 (4)>
+   : │  EVENT: OuchNo
+   : └1╴... done.
+67 EVENT: OuchNo
+RUN: <WorkSequence:6 (4)>
+ ev: EVENT: OuchNo
+67 END: OuchNo
+RUN: <WorkSequence:6 (4)> (step 1)
+ ev: EVENT: OuchNo
+59 END: foo
+RUN: <WorkSequence:5 (6)> (step 3)
+ ev: EVENT: foo
+53 END: bar¦baz
+RUN: <WorkSequence:4 (5)> (step 2)
+ ev: EVENT: bar¦baz
+3  : foo ‹not executed›
+4  : bar¦*
+NEW: <WorkSequence:7 (5)>
    : │  EVENT: shutdown
    : └1╴... done.
 2 EVENT: shutdown
-RUN: <WorkSequence:4 (5)>
+RUN: <WorkSequence:7 (5)>
  ev: EVENT: shutdown
 2 END: shutdown
 RUN: shutting down
- at: <WorkSequence:4 (5)> (step 1)
+ at: <WorkSequence:7 (5)> (step 1)
  ev: EVENT: shutdown
-RUN: <WorkSequence:4 (5)> (step 1)
+RUN: <WorkSequence:7 (5)> (step 1)
  ev: EVENT: shutdown

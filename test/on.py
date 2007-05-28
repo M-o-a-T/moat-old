@@ -16,18 +16,22 @@ log = run_logger("on",dot=False).log
 input = StringIO("""\
 on foo:
 	prio 50
+	name "Do nothing"
 	do nothing
 on foo:
 	prio 55
+	name "Skip Next"
 	skip next
 on foo:
 	prio 60
-	trigger OuchNo
+	name "not executed"
+	sync trigger OuchNo
 on bar *:
-	trigger foo
+	sync trigger foo
 list on
 trigger bar baz
-#drop on foo
+drop on "Skip Next"
+trigger bar baz
 drop on 1
 list on
 """)

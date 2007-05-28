@@ -29,6 +29,7 @@ from twisted.internet import defer
 __all__ = ["register_actor","unregister_actor"]
 
 onHandlers = {}
+onHandlerNames = {}
 _onHandler_id = 0
 
 def register_actor(handler):
@@ -76,6 +77,7 @@ Every "*foo" in the event description is mapped to the corresponding
 	prio = (MIN_PRIO+MAX_PRIO)//2+1
 	procs = None
 	skip = False
+	displayname = None
 
 	def get_processor(self):
 		return ImmediateCollectProcessor(parent=self, ctx=self.ctx(words=self))
@@ -170,12 +172,18 @@ Every "*foo" in the event description is mapped to the corresponding
 		self.handler_id = _onHandler_id
 		log(TRACE,"NewHandler",self.handler_id)
 		self.name = "¦".join(self.args)
+		if self.displayname is not None:
+			self.name += " ‹"+self.displayname+"›"
 		register_worker(self)
 		onHandlers[self.handler_id] = self
+		if self.displayname is not None:
+			onHandlerNames[self.displayname] = self
 	
 	def report(self, verbose=False):
 		yield "ON "+"¦".join(self.args)
 		if not verbose: return
+		if self.displayname is not None:
+			yield "   name: "+self.displayname
 		yield "   prio: "+str(self.prio)
 		pref="proc"
 		for p,e in self.procs:
@@ -188,15 +196,18 @@ Every "*foo" in the event description is mapped to the corresponding
 
 class OffEventHandler(SimpleStatement):
 	name = ("drop","on")
-	doc = "forget about this event handler"
+	doc = "forget about an event handler"
 	def run(self,event,**k):
 		w = event[len(self.name):]
 		if len(w) == 1:
-			worker = onHandlers[w[0]]
+			try: worker = onHandlers[w[0]]
+			except KeyError: worker = onHandlerNames[w[0]]
 			unregister_worker(worker)
-			del onHandlers[w[0]]
+			del onHandlers[worker.handler_id]
+			if worker.displayname is not None:
+				del onHandlerNames[worker.displayname]
 		else:
-			raise SyntaxError("Usage: drop on ‹handler_id›")
+			raise SyntaxError("Usage: drop on ‹handler_id/name›")
 
 class OnListHandler(SimpleStatement):
 	name = ("list","on")
@@ -211,12 +222,15 @@ class OnListHandler(SimpleStatement):
 			else:
 				for id in sorted(onHandlers.iterkeys()):
 					h = onHandlers[id]
-					print >>self.ctx.out,str(id)+" "*(fl-len(str(id))+1),": ", \
-						" ".join(h.args)
+					n = "¦".join(h.args)
+					if h.displayname is not None:
+						n += " ‹"+h.displayname+"›"
+					print >>self.ctx.out,str(id)+" "*(fl-len(str(id))+1),":",n
 		elif len(w) == 1:
-			h = onHandlers[w[0]]
-			print >>self.ctx.out, h.handler_id,":"," ".join(h.name)
-			if hasattr(h,"realname"): print >>self.ctx.out,"Name:",h.realname
+			try: h = onHandlers[w[0]]
+			except KeyError: h = onHandlerNames[w[0]]
+			print >>self.ctx.out, h.handler_id,":","¦".join(h.name)
+			if h.displayname is not None: print >>self.ctx.out,"Name:",h.displayname
 			if hasattr(h,"doc"): print >>self.ctx.out,"Doc:",h.doc
 		else:
 			raise SyntaxError("Usage: list on ‹handler_id›")
@@ -238,7 +252,24 @@ Only one handler within each priority is actually executed.
 			prio = int(w[0])
 		except ValueError:
 			raise SyntaxError("Usage: prio ‹priority› ⇐ integer priorities only")
+		if prio < MIN_PRIO or prio > MAX_PRIO:
+			raise ValueError("Priority value (%d): needs to be between %d and %d" % (prio,MIN_PRIO,MAX_PRIO))
 		self.parent.prio = prio
+
+
+class OnName(SimpleStatement):
+	name = ("name",)
+	doc = "name an event handler"
+	immediate = True
+	long_doc="""\
+This statement assigns a name to an event handler.
+(Useful when you want to delete it...)
+"""
+	def run(self,event,**k):
+		w = event[len(self.name):]
+		if len(w) != 1:
+			raise SyntaxError('Usage: name "‹text›"')
+		self.parent.displayname = w[0]
 
 
 class OnSkip(SimpleStatement):
@@ -276,6 +307,7 @@ def load():
 	OnEventHandler.register_statement(DoNothingHandler)
 	OnEventHandler.register_statement(OnPrio)
 	OnEventHandler.register_statement(OnSkip)
+	OnEventHandler.register_statement(OnName)
 
 def unload():
 	main_words.unregister_statement(OnEventHandler)
@@ -284,4 +316,5 @@ def unload():
 	OnEventHandler.unregister_statement(DoNothingHandler)
 	OnEventHandler.unregister_statement(OnPrio)
 	OnEventHandler.unregister_statement(OnSkip)
+	OnEventHandler.unregister_statement(OnName)
 
