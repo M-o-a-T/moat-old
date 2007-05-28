@@ -179,7 +179,10 @@ Every "*foo" in the event description is mapped to the corresponding
 		yield "   prio: "+str(self.prio)
 		pref="proc"
 		for p,e in self.procs:
-			yield "   "+pref+": "+p.__name__+" "+str(e)
+			try:
+				yield "   "+pref+": "+p.__name__+" "+str(e)
+			except AttributeError:
+				yield "   "+pref+": "+repr(p)+" "+str(e)
 			pref="    "
 	
 
