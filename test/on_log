@@ -10,18 +10,25 @@ RUN: <WorkSequence:1 (4)> (step 1)
 0 Create OnEvtHandler: ['foo']
 0 add <class 'homevent.handler.DoNothingHandler'> ⌁.do¦nothing
 0 NewHandler 1
+0 Create OnEvtHandler: ['foo']
+0 NewHandler 2
+0 Create OnEvtHandler: ['foo']
+0 add <class 'TriggerHandler'> ⌁.trigger¦OuchNo
+0 NewHandler 3
 0 Create OnEvtHandler: ['bar', '*']
 0 add <class 'TriggerHandler'> ⌁.trigger¦foo
-0 NewHandler 2
+0 NewHandler 4
 1  :  foo
-2  :  bar *
+2  :  foo
+3  :  foo
+4  :  bar *
 NEW: <WorkSequence:2 (5)>
    : │  EVENT: bar¦baz
    : ├1╴ON bar¦*
    : │     prio: 51
    : │     proc: TriggerHandler ⌁.trigger¦foo
    : └2╴... done.
-15 EVENT: bar¦baz
+24 EVENT: bar¦baz
 RUN: <WorkSequence:2 (5)>
  ev: EVENT: bar¦baz
 RUN: ON bar¦*
@@ -29,28 +36,41 @@ RUN: ON bar¦*
    :    proc: TriggerHandler ⌁.trigger¦foo
  at: <WorkSequence:2 (5)> (step 1)
  ev: EVENT: bar¦baz
-NEW: <WorkSequence:3 (5)>
+NEW: <WorkSequence:3 (7)>
    : │  EVENT: foo
    : ├1╴ON foo
-   : │     prio: 51
+   : │     prio: 50
    : │     proc: DoNothingHandler ⌁.do¦nothing
-   : └2╴... done.
-15 END: bar¦baz
+   : ├2╴ON foo
+   : │     prio: 55
+   : ├3╴ON foo
+   : │     prio: 60
+   : │     proc: TriggerHandler ⌁.trigger¦OuchNo
+   : └4╴... done.
+24 END: bar¦baz
 RUN: <WorkSequence:2 (5)> (step 2)
  ev: EVENT: bar¦baz
-21 EVENT: foo
-RUN: <WorkSequence:3 (5)>
+30 EVENT: foo
+RUN: <WorkSequence:3 (7)>
  ev: EVENT: foo
 RUN: ON foo
-   :    prio: 51
+   :    prio: 50
    :    proc: DoNothingHandler ⌁.do¦nothing
- at: <WorkSequence:3 (5)> (step 1)
+ at: <WorkSequence:3 (7)> (step 1)
  ev: EVENT: foo
 0 NOW: do nothing
-21 END: foo
-RUN: <WorkSequence:3 (5)> (step 2)
+RUN: ON foo
+   :    prio: 55
+ at: <WorkSequence:3 (7)> (step 2)
  ev: EVENT: foo
-2  :  bar *
+ADD SKIPME
+SKIPME
+30 END: foo
+RUN: <WorkSequence:3 (7)> (step 4)
+ ev: EVENT: foo
+2  :  foo
+3  :  foo
+4  :  bar *
 NEW: <WorkSequence:4 (5)>
    : │  EVENT: shutdown
    : └1╴... done.

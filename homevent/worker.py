@@ -127,11 +127,13 @@ class WorkSequence(WorkItem):
 				else:
 					r = failure.Failure()
 			def err_handler(r):
-				from homevent.run import process_failure
-
 				if not hasattr(r,"within"):
 					r.within=[w]
 				r.within.append(self)
+				if r.check(HaltSequence):
+					return r
+
+				from homevent.run import process_failure
 				return process_failure(r)
 			if isinstance(r,failure.Failure):
 				err_handler(r)

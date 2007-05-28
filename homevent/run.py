@@ -30,9 +30,12 @@ def unregister_worker(w):
 	"""\
 		Deregister a worker.
 		"""
+	global work_prios
 	workers[w.prio].remove(w)
 	if not workers[w.prio]: # last worker removed
 		del workers[w.prio]
+		work_prios = sorted(workers.keys())
+
 
 def list_workers(name=None):
 	for p in work_prios:

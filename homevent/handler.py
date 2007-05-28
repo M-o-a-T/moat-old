@@ -23,6 +23,7 @@ from homevent.parser import SimpleStatement,ComplexStatement,\
 	ImmediateCollectProcessor, main_words
 from homevent.logging import log_event,log, TRACE
 from homevent.run import register_worker,unregister_worker,MIN_PRIO,MAX_PRIO
+from homevent.worker import HaltSequence
 from twisted.internet import defer
 
 __all__ = ["register_actor","unregister_actor"]
@@ -74,6 +75,7 @@ Every "*foo" in the event description is mapped to the corresponding
 	in_sub = False
 	prio = (MIN_PRIO+MAX_PRIO)//2+1
 	procs = None
+	skip = False
 
 	def get_processor(self):
 		return ImmediateCollectProcessor(parent=self, ctx=self.ctx(words=self))
@@ -145,6 +147,10 @@ Every "*foo" in the event description is mapped to the corresponding
 			def go(_,p,e):
 				return p(parent=self, ctx=self.ctx).run(e.clone(ctx))
 			d.addCallback(go,proc,event)
+		if self.skip:
+			def skipper(_):
+				raise HaltSequence(_)
+			d.addCallback(skipper)
 		d.callback(None)
 		return d
 
@@ -213,6 +219,39 @@ class OnListHandler(SimpleStatement):
 			raise SyntaxError("Usage: list on ‹handler_id›")
 
 
+class OnPrio(SimpleStatement):
+	name = ("prio",)
+	doc = "prioritize event handler"
+	immediate = True
+	long_doc="""\
+This statement prioritizes an event handler.
+Only one handler within each priority is actually executed.
+"""
+	def run(self,event,**k):
+		w = event[len(self.name):]
+		if len(w) != 1:
+			raise SyntaxError("Usage: prio ‹priority›")
+		try:
+			prio = int(w[0])
+		except ValueError:
+			raise SyntaxError("Usage: prio ‹priority› ⇐ integer priorities only")
+		self.parent.prio = prio
+
+
+class OnSkip(SimpleStatement):
+	name = ("skip","next")
+	immediate = True
+	doc = "skip later event handlers"
+	long_doc="""\
+This statement causes higher-priority handlers to be skipped.
+NOTE: Commands in the same handler, after this one, *are* executed.
+"""
+	def run(self,event,**k):
+		w = event[len(self.name):]
+		if len(w):
+			raise SyntaxError("Usage: skip next")
+		self.parent.skip = True
+
 class DoNothingHandler(SimpleStatement):
 	name = ("do","nothing")
 	doc = "do not do anything"
@@ -232,10 +271,14 @@ def load():
 	main_words.register_statement(OffEventHandler)
 	main_words.register_statement(OnListHandler)
 	OnEventHandler.register_statement(DoNothingHandler)
+	OnEventHandler.register_statement(OnPrio)
+	OnEventHandler.register_statement(OnSkip)
 
 def unload():
 	main_words.unregister_statement(OnEventHandler)
 	main_words.unregister_statement(OffEventHandler)
 	main_words.unregister_statement(OnListHandler)
 	OnEventHandler.unregister_statement(DoNothingHandler)
+	OnEventHandler.unregister_statement(OnPrio)
+	OnEventHandler.unregister_statement(OnSkip)
 

@@ -15,7 +15,14 @@ log = run_logger("on",dot=False).log
 
 input = StringIO("""\
 on foo:
+	prio 50
 	do nothing
+on foo:
+	prio 55
+	skip next
+on foo:
+	prio 60
+	trigger OuchNo
 on bar *:
 	trigger foo
 list on
