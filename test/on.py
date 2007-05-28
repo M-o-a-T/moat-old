@@ -5,7 +5,6 @@ import homevent as h
 import homevent.parser as hp
 from homevent.context import Context
 from homevent.reactor import ShutdownHandler
-from homevent.reactor import ShutdownHandler
 from homevent.module import load_module
 from homevent.handler import load as ht_load
 from StringIO import StringIO
