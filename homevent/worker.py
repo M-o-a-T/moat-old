@@ -131,6 +131,7 @@ class WorkSequence(WorkItem):
 					r.within=[w]
 				r.within.append(self)
 				if r.check(HaltSequence):
+					log_halted(self,w,step)
 					return r
 
 				from homevent.run import process_failure
