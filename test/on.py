@@ -22,13 +22,16 @@ on foo:
 	prio 55
 	name "Skip Next"
 	skip next
+	doc "Causes the prio-60 thing to not be executed"
 on foo:
 	prio 60
 	name "not executed"
 	sync trigger OuchNo
+	doc "Is not executed because of the former 'skip next' (until that's gone)"
 on bar *:
 	sync trigger foo
 list on
+list on "not executed"
 trigger bar baz
 drop on "Skip Next"
 trigger bar baz

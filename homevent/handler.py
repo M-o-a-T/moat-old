@@ -229,9 +229,9 @@ class OnListHandler(SimpleStatement):
 		elif len(w) == 1:
 			try: h = onHandlers[w[0]]
 			except KeyError: h = onHandlerNames[w[0]]
-			print >>self.ctx.out, h.handler_id,":","¦".join(h.name)
+			print >>self.ctx.out, h.handler_id,":","¦".join(h.args)
 			if h.displayname is not None: print >>self.ctx.out,"Name:",h.displayname
-			if hasattr(h,"doc"): print >>self.ctx.out,"Doc:",h.doc
+			if hasattr(h,"displaydoc"): print >>self.ctx.out,"Doc:",h.displaydoc
 		else:
 			raise SyntaxError("Usage: list on ‹handler_id›")
 
@@ -272,6 +272,21 @@ This statement assigns a name to an event handler.
 		self.parent.displayname = w[0]
 
 
+class OnDoc(SimpleStatement):
+	name = ("doc",)
+	doc = "document an event handler"
+	immediate = True
+	long_doc="""\
+This statement assigns a documentation string to an event handler.
+(Useful when you want to document what the thing does ...)
+"""
+	def run(self,event,**k):
+		w = event[len(self.name):]
+		if len(w) != 1:
+			raise SyntaxError('Usage: doc "‹text›"')
+		self.parent.displaydoc = w[0]
+
+
 class OnSkip(SimpleStatement):
 	name = ("skip","next")
 	immediate = True
@@ -308,6 +323,7 @@ def load():
 	OnEventHandler.register_statement(OnPrio)
 	OnEventHandler.register_statement(OnSkip)
 	OnEventHandler.register_statement(OnName)
+	OnEventHandler.register_statement(OnDoc)
 
 def unload():
 	main_words.unregister_statement(OnEventHandler)
@@ -317,4 +333,5 @@ def unload():
 	OnEventHandler.unregister_statement(OnPrio)
 	OnEventHandler.unregister_statement(OnSkip)
 	OnEventHandler.unregister_statement(OnName)
+	OnEventHandler.unregister_statement(OnDoc)
 
