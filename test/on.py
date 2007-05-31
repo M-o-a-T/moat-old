@@ -32,9 +32,9 @@ on bar *:
 	sync trigger foo
 list on
 list on "not executed"
-trigger bar baz
+sync trigger bar baz
 drop on "Skip Next"
-trigger bar baz
+sync trigger bar baz
 drop on 1
 list on
 shutdown

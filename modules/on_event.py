@@ -77,7 +77,6 @@ Every "*foo" in the event description is mapped to the corresponding
 """
 	in_sub = False
 	prio = (MIN_PRIO+MAX_PRIO)//2+1
-	skip = False
 	displayname = None
 
 	def get_processor(self):
@@ -134,12 +133,7 @@ Every "*foo" in the event description is mapped to the corresponding
 	def process(self,event,**k):
 		ctx = self.ctx(ctx=event.ctx)
 		self.grab_args(event,ctx)
-		d = super(OnEventHandler,self).run(ctx,**k)
-		if self.skip:
-			def skipper(_):
-				raise HaltSequence(_)
-			d.addCallback(skipper)
-		return d
+		return super(OnEventHandler,self).run(ctx,**k)
 
 	def run(self,ctx,**k):
 		if self.procs is None:
@@ -264,18 +258,13 @@ This statement assigns a documentation string to an event handler.
 
 class OnSkip(SimpleStatement):
 	name = ("skip","next")
-	immediate = True
 	doc = "skip later event handlers"
 	long_doc="""\
 This statement causes higher-priority handlers to be skipped.
 NOTE: Commands in the same handler, after this one, *are* executed.
 """
 	def run(self,ctx,**k):
-		event = self.params(ctx)
-		w = event[len(self.name):]
-		if len(w):
-			raise SyntaxError("Usage: skip next")
-		self.parent.skip = True
+		raise HaltSequence()
 
 
 class OnEventModule(Module):
