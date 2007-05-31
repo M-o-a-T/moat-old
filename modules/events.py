@@ -13,7 +13,6 @@ from homevent.parser import SimpleStatement, main_words
 from homevent.event import Event
 from homevent.run import process_event
 from homevent.logging import log,TRACE
-from homevent.handler import OnEventHandler
 from twisted.internet import reactor,defer
 
 class TriggerHandler(SimpleStatement):
@@ -127,16 +126,10 @@ class EventsModule(Module):
 		main_words.register_statement(TriggerHandler)
 		main_words.register_statement(SyncTriggerHandler)
 		main_words.register_statement(WaitHandler)
-		OnEventHandler.register_statement(TriggerHandler)
-		OnEventHandler.register_statement(SyncTriggerHandler)
-		OnEventHandler.register_statement(WaitHandler)
 	
 	def unload(self):
 		main_words.unregister_statement(TriggerHandler)
 		main_words.unregister_statement(SyncTriggerHandler)
 		main_words.unregister_statement(WaitHandler)
-		OnEventHandler.unregister_statement(TriggerHandler)
-		OnEventHandler.unregister_statement(SyncTriggerHandler)
-		OnEventHandler.unregister_statement(WaitHandler)
 
 init = EventsModule

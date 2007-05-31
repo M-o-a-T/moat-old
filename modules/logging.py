@@ -17,7 +17,6 @@ from homevent.module import Module
 from homevent.parser import SimpleStatement, main_words
 from homevent.logging import TRACE,DEBUG,INFO,WARN,ERROR,PANIC
 from homevent.logging import log, Logger, register_logger,unregister_logger
-from homevent.handler import OnEventHandler
 
 NONE=9
 
@@ -92,10 +91,8 @@ class LoggingModule(Module):
 	
 	def load(self):
 		main_words.register_statement(LogHandler)
-		OnEventHandler.register_statement(LogHandler)
 	
 	def unload(self):
 		main_words.unregister_statement(LogHandler)
-		OnEventHandler.unregister_statement(LogHandler)
 	
 init = LoggingModule

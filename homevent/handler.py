@@ -77,10 +77,17 @@ Every "*foo" in the event description is mapped to the corresponding
 	procs = None
 	skip = False
 	displayname = None
+	main = main_words()
 
 	def get_processor(self):
 		return ImmediateCollectProcessor(parent=self, ctx=self.ctx(words=self))
 	processor = property(get_processor)
+
+	def lookup(self, args):
+		try:
+			return super(OnEventHandler,self).lookup(args)
+		except KeyError:
+			return self.main.lookup(args)
 
 	def does_event(self,event):
 		ie = iter(event)
