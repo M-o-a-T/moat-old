@@ -24,6 +24,9 @@ from homevent.statement import SimpleStatement,MainStatementList, main_words
 from homevent.logging import log_event,log, TRACE
 from homevent.run import register_worker,unregister_worker,MIN_PRIO,MAX_PRIO
 from homevent.worker import HaltSequence,Worker
+from homevent.module import Module
+from homevent.logging import log
+
 from twisted.internet import defer
 
 __all__ = ["register_actor","unregister_actor"]
@@ -274,21 +277,31 @@ NOTE: Commands in the same handler, after this one, *are* executed.
 			raise SyntaxError("Usage: skip next")
 		self.parent.skip = True
 
-def load():
-	main_words.register_statement(OnEventHandler)
-	main_words.register_statement(OffEventHandler)
-	main_words.register_statement(OnListHandler)
-	OnEventHandler.register_statement(OnPrio)
-	OnEventHandler.register_statement(OnSkip)
-	OnEventHandler.register_statement(OnName)
-	OnEventHandler.register_statement(OnDoc)
 
-def unload():
-	main_words.unregister_statement(OnEventHandler)
-	main_words.unregister_statement(OffEventHandler)
-	main_words.unregister_statement(OnListHandler)
-	OnEventHandler.unregister_statement(OnPrio)
-	OnEventHandler.unregister_statement(OnSkip)
-	OnEventHandler.unregister_statement(OnName)
-	OnEventHandler.unregister_statement(OnDoc)
+class OnEventModule(Module):
+	"""\
+		This module registers the "on EVENT:" handler.
+		"""
+
+	info = "the 'on EVENT:' handler"
+
+	def load(self):
+		main_words.register_statement(OnEventHandler)
+		main_words.register_statement(OffEventHandler)
+		main_words.register_statement(OnListHandler)
+		OnEventHandler.register_statement(OnPrio)
+		OnEventHandler.register_statement(OnSkip)
+		OnEventHandler.register_statement(OnName)
+		OnEventHandler.register_statement(OnDoc)
+	
+	def unload(self):
+		main_words.unregister_statement(OnEventHandler)
+		main_words.unregister_statement(OffEventHandler)
+		main_words.unregister_statement(OnListHandler)
+		OnEventHandler.unregister_statement(OnPrio)
+		OnEventHandler.unregister_statement(OnSkip)
+		OnEventHandler.unregister_statement(OnName)
+		OnEventHandler.unregister_statement(OnDoc)
+	
+init = OnEventModule
 

@@ -7,7 +7,6 @@ import homevent.interpreter as hi
 from homevent.context import Context
 from homevent.reactor import ShutdownHandler
 from homevent.module import load_module
-from homevent.handler import load as ht_load
 from StringIO import StringIO
 from test import run_logger, logger,logwrite
 
@@ -33,7 +32,6 @@ shutdown
 """)
 
 h.main_words.register_statement(ShutdownHandler)
-ht_load()
 load_module("events")
 load_module("example2")
 

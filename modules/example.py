@@ -15,9 +15,6 @@ class ExampleModule(Module):
 
 	info = "yeah, test me baby"
 
-	def __init__(self, name, *args):
-		super(ExampleModule,self).__init__(name,*args)
-	
 	def load(self):
 		log("Loading!")
 	

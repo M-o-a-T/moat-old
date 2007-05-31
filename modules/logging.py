@@ -86,9 +86,6 @@ class LoggingModule(Module):
 
 	info = "control logging"
 
-	def __init__(self, name, *args):
-		super(LoggingModule,self).__init__(name,*args)
-	
 	def load(self):
 		main_words.register_statement(LogHandler)
 	

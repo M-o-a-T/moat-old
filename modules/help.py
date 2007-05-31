@@ -79,11 +79,8 @@ class HelpModule(Module):
 		This module implements the Help command.
 		"""
 
-	info = "yeah, test me baby"
+	info = "implements the 'help' statement"
 
-	def __init__(self, name, *args):
-		super(HelpModule,self).__init__(name,*args)
-	
 	def load(self):
 		main_words.register_statement(Help)
 	

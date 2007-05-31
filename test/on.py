@@ -7,7 +7,6 @@ import homevent.interpreter as hi
 from homevent.context import Context
 from homevent.reactor import ShutdownHandler
 from homevent.module import load_module
-from homevent.handler import load as ht_load
 from homevent.statement import main_words,DoNothingHandler
 from StringIO import StringIO
 from test import run_logger, logger,logwrite
@@ -43,8 +42,8 @@ shutdown
 
 h.main_words.register_statement(DoNothingHandler)
 h.main_words.register_statement(ShutdownHandler)
-ht_load()
 load_module("events")
+load_module("on_event")
 
 def main():
 	d = hp.parse(input, hi.Interpreter(Context(out=logwrite(log))), Context(logger=logger)) # , out=log)
