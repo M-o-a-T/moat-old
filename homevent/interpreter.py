@@ -42,6 +42,14 @@ class Processor(object):
 		self.ctx = ctx or Context()
 		self.parent = parent
 	
+	def lookup(self, args):
+		me = self.ctx.words
+		event = InputEvent(self.ctx, *args)
+		fn = me.lookup(event)
+		fn = fn(parent=me, ctx=self.ctx)
+		fn.called(event)
+		return fn
+
 	def simple_statement(self,args):
 		"""\
 			A simple statement is a sequence of words. Analyze them.
@@ -66,7 +74,7 @@ class Processor(object):
 			"""
 		pass
 
-class CollectProcessorBase(Processor):
+class CollectProcessor(Processor):
 	"""\
 		A processor which simply stores all (sub-)statements, recursively.
 		You need to override .store() in order to specify _where_.
@@ -74,42 +82,30 @@ class CollectProcessorBase(Processor):
 
 	verify = False
 	def __init__(self, parent=None, ctx=None, args=None, verify=None):
-		super(CollectProcessorBase,self).__init__(parent=parent, ctx=ctx)
+		super(CollectProcessor,self).__init__(parent=parent, ctx=ctx)
 		self.args = args
 		self.statements = []
 		if verify is not None:
 			self.verify = verify
 		self.ctx = ctx
 
-	def _common_statement(self, args):
-		me = self.ctx.words
-		event = InputEvent(self.ctx, *args)
-		fn = me.lookup(event)
-		fn = fn(parent=me, ctx=self.ctx)
-		fn.called(event)
-		return fn
-
 	def simple_statement(self,args):
-		fn = self._common_statement(args)
+		fn = self.lookup(args)
 		self.store(fn)
 
 	def complex_statement(self,args):
-		fn = self._common_statement(args)
+		fn = self.lookup(args)
 		self.store(fn)
 
-		subc = CollectProcessor(parent=fn, ctx=ctx, args=args)
+		fn.start_block()
+		subc = CollectProcessor(parent=fn, ctx=self.ctx, args=args)
 		return subc
 	
-	def store(self,proc):
-		raise NotImplementedError("Did not override 'store()'")
-
-class CollectProcessor(CollectProcessorBase):
-	"""A processor which adds all statements to its parent."""
-	def store(self,proc):
-		self.parent.add(proc)
-
 	def done(self):
 		return self.parent.end_block()
+
+	def store(self,proc):
+		self.parent.add(proc)
 
 class ImmediateCollectProcessor(CollectProcessor):
 	"""\
@@ -118,16 +114,16 @@ class ImmediateCollectProcessor(CollectProcessor):
 		"""
 
 	def __init__(self, parent=None, ctx=None, args=None, verify=False):
-		super(CollectProcessorBase,self).__init__(parent=parent, ctx=ctx)
+		super(ImmediateCollectProcessor,self).__init__(parent=parent, ctx=ctx)
 
 	def simple_statement(self,args):
-		fn = self._common_statement(args)
+		fn = self.lookup(args)
 		if fn.immediate:
 			return fn.run(self.ctx)
 		self.store(fn)
 
 	def complex_statement(self,args):
-		fn = self._common_statement(args)
+		fn = self.lookup(args)
 		if fn.immediate:
 			try:
 				fn.start_block()
@@ -147,6 +143,24 @@ class ImmediateCollectProcessor(CollectProcessor):
 		return d
 
 
+class RunMe(object):
+	"""\
+		This is a wrapper for the top-level interpretzer
+		which runs a block as soon as it is finished.
+		"""
+	def __init__(self,proc,fn):
+		self.proc = proc
+		self.fn = fn
+		self.fnp = self.fn.processor
+
+	def simple_statement(self,args):
+		return self.fnp.simple_statement(args)
+	def complex_statement(self,args):
+		return self.fnp.complex_statement(args)
+	def done(self):
+		self.fnp.done()
+		return self.fn.run(self.proc.ctx)
+	
 class Interpreter(Processor):
 	"""\
 		A basic interpreter for the main loop, which runs every
@@ -159,29 +173,37 @@ class Interpreter(Processor):
 		else:
 			self.ctx = ctx
 
+	def prompt(self, _=None):
+		return _
+
 	def simple_statement(self,args):
-		me = self.ctx.words
-		fn = me.lookup(args)
-		fn = fn(parent=me, ctx=self.ctx)
-		fn.called(InputEvent(self.ctx, *args).clone())
-		return fn.run(self.ctx)
+		fn = self.lookup(args)
+		d = defer.maybeDeferred(fn.run,self.ctx)
+		d.addBoth(self.prompt)
+		return d
 
 	def complex_statement(self,args):
-		me = self.ctx.words
-		fn = me.lookup(args)
 		try:
-			fn = fn(parent=me, ctx=self.ctx)
+			fn = self.lookup(args)
 		except TypeError,e:
 			print >>self.ctx.out,"For",repr(fn),"::"
 			raise
-		fn.called(args)
 		try:
 			fn.start_block()
 		except AttributeError,e:
 			return self.ctx._error(e)
 		else:
-			return fn.processor ## (parent=fn,ctx=self.ctx(words=fn))
+			return RunMe(self,fn)
 	
 	def done(self):
 		#print >>self.ctx.out,"Exiting"
 		pass
+
+class InteractiveInterpreter(Interpreter):
+	"""An interpreter which prints a prompt"""
+	intro = ">> "
+
+	def prompt(self, _=None):
+		self.ctx.out.write(self.intro)
+		return _
+

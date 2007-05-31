@@ -74,7 +74,6 @@ Every "*foo" in the event description is mapped to the corresponding
 """
 	in_sub = False
 	prio = (MIN_PRIO+MAX_PRIO)//2+1
-	procs = None
 	skip = False
 	displayname = None
 
@@ -140,16 +139,8 @@ Every "*foo" in the event description is mapped to the corresponding
 		return d
 
 	def run(self,ctx,**k):
-		raise SyntaxError("‹on ...› can only be used as a complex statement")
-
-	def start_block(self):
-		super(OnEventHandler,self).start_block()
-		w = self.args[len(self.name):]
-		log(TRACE, "Create OnEvtHandler: "+repr(w))
-		self.args = w
-
-	def end_block(self):
-		super(OnEventHandler,self).end_block()
+		if self.procs is None:
+			raise SyntaxError("‹on ...› can only be used as a complex statement")
 
 		global _onHandler_id
 		_onHandler_id += 1
@@ -162,7 +153,13 @@ Every "*foo" in the event description is mapped to the corresponding
 		onHandlers[self.handler_id] = self
 		if self.displayname is not None:
 			onHandlerNames[self.displayname] = self
-	
+
+	def start_block(self):
+		super(OnEventHandler,self).start_block()
+		w = self.args[len(self.name):]
+		log(TRACE, "Create OnEvtHandler: "+repr(w))
+		self.args = w
+
 
 class OffEventHandler(SimpleStatement):
 	name = ("drop","on")
@@ -277,26 +274,10 @@ NOTE: Commands in the same handler, after this one, *are* executed.
 			raise SyntaxError("Usage: skip next")
 		self.parent.skip = True
 
-class DoNothingHandler(SimpleStatement):
-	name = ("do","nothing")
-	doc = "do not do anything"
-	long_doc="""\
-This statement does not do anything. It's a placeholder if you want to
-explicitly state that some event does not result in any action.
-"""
-	def run(self,ctx,**k):
-		event = self.params(ctx)
-		w = event[len(self.name):]
-		if len(w):
-			raise SyntaxError("Usage: do nothing")
-		log(TRACE,"NOW: do nothing")
-
-
 def load():
 	main_words.register_statement(OnEventHandler)
 	main_words.register_statement(OffEventHandler)
 	main_words.register_statement(OnListHandler)
-	OnEventHandler.register_statement(DoNothingHandler)
 	OnEventHandler.register_statement(OnPrio)
 	OnEventHandler.register_statement(OnSkip)
 	OnEventHandler.register_statement(OnName)
@@ -306,7 +287,6 @@ def unload():
 	main_words.unregister_statement(OnEventHandler)
 	main_words.unregister_statement(OffEventHandler)
 	main_words.unregister_statement(OnListHandler)
-	OnEventHandler.unregister_statement(DoNothingHandler)
 	OnEventHandler.unregister_statement(OnPrio)
 	OnEventHandler.unregister_statement(OnSkip)
 	OnEventHandler.unregister_statement(OnName)

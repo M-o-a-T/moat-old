@@ -31,7 +31,7 @@ NEW: <WorkSequence:2 (5)>
    : │     prio: 51
    : │     proc: ‹SyncTriggerHandler ⌁.sync¦trigger¦foo›
    : └2╴... done.
-39 EVENT: bar¦baz
+40 EVENT: bar¦baz
 RUN: <WorkSequence:2 (5)>
  ev: EVENT: bar¦baz
 RUN: ON bar¦*
@@ -53,7 +53,7 @@ NEW: <WorkSequence:3 (7)>
    : │     prio: 60
    : │     proc: ‹SyncTriggerHandler ⌁.sync¦trigger¦OuchNo›
    : └4╴... done.
-45 EVENT: foo
+46 EVENT: foo
 RUN: <WorkSequence:3 (7)>
  ev: EVENT: foo
 RUN: ON foo
@@ -68,10 +68,10 @@ RUN: ON foo
    :    prio: 55
  at: <WorkSequence:3 (7)> (step 2)
  ev: EVENT: foo
-45 END: foo
+46 END: foo
 RUN: <WorkSequence:3 (7)> (step 4)
  ev: EVENT: foo
-39 END: bar¦baz
+40 END: bar¦baz
 RUN: <WorkSequence:2 (5)> (step 2)
  ev: EVENT: bar¦baz
 NEW: <WorkSequence:4 (5)>
@@ -80,7 +80,7 @@ NEW: <WorkSequence:4 (5)>
    : │     prio: 51
    : │     proc: ‹SyncTriggerHandler ⌁.sync¦trigger¦foo›
    : └2╴... done.
-65 EVENT: bar¦baz
+64 EVENT: bar¦baz
 RUN: <WorkSequence:4 (5)>
  ev: EVENT: bar¦baz
 RUN: ON bar¦*
@@ -99,7 +99,7 @@ NEW: <WorkSequence:5 (6)>
    : │     prio: 60
    : │     proc: ‹SyncTriggerHandler ⌁.sync¦trigger¦OuchNo›
    : └3╴... done.
-71 EVENT: foo
+70 EVENT: foo
 RUN: <WorkSequence:5 (6)>
  ev: EVENT: foo
 RUN: ON foo
@@ -118,16 +118,16 @@ RUN: ON foo
 NEW: <WorkSequence:6 (4)>
    : │  EVENT: OuchNo
    : └1╴... done.
-79 EVENT: OuchNo
+78 EVENT: OuchNo
 RUN: <WorkSequence:6 (4)>
  ev: EVENT: OuchNo
-79 END: OuchNo
+78 END: OuchNo
 RUN: <WorkSequence:6 (4)> (step 1)
  ev: EVENT: OuchNo
-71 END: foo
+70 END: foo
 RUN: <WorkSequence:5 (6)> (step 3)
  ev: EVENT: foo
-65 END: bar¦baz
+64 END: bar¦baz
 RUN: <WorkSequence:4 (5)> (step 2)
  ev: EVENT: bar¦baz
 3  : foo ‹not executed›

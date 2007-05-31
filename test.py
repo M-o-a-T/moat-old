@@ -3,7 +3,7 @@
 
 from homevent.module import Loader,Unloader
 from homevent.run import register_worker
-from homevent.interpreter import Interpreter
+from homevent.interpreter import InteractiveInterpreter
 from homevent.parser import Parser
 from homevent.statement import IgnoreStatement, main_words
 from homevent.config import Load,Unload,WorkerList,ModList,LoadDir
@@ -49,7 +49,7 @@ def err(p,e):
 def ready():
 	c=Context(errhandler=err)
 	#c.logger=parse_logger
-	i = Interpreter(ctx=c)
+	i = InteractiveInterpreter(ctx=c)
 	p = Parser(i, ctx=c)
 	r = p.run(StdIO)
 	r.addErrback(reporter)

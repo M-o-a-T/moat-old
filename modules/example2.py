@@ -13,8 +13,6 @@ class Block(MainStatementList):
 	"""This just groups statements. For show, really -- but also for testing."""
 	name=("block",)
 	doc="group multiple statements"
-	def end_block(self):
-		return self.run(self.ctx)
 
 class ExampleModule(Module):
 	"""\

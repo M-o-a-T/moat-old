@@ -26,7 +26,8 @@ block:
 wait for 0.1
 block:
 	sync trigger foo4
-	sync trigger bar4
+	block:
+		sync trigger bar4
 wait for 0.1
 shutdown
 """)

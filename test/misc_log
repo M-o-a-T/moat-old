@@ -10,19 +10,19 @@ RUN: <WorkSequence:1 (4)> (step 1)
 NEW: <WorkSequence:2 (4)>
    : │  EVENT: foo1
    : └1╴... done.
-12 EVENT: foo1
+11 EVENT: foo1
 RUN: <WorkSequence:2 (4)>
  ev: EVENT: foo1
-12 END: foo1
+11 END: foo1
 RUN: <WorkSequence:2 (4)> (step 1)
  ev: EVENT: foo1
 NEW: <WorkSequence:3 (4)>
    : │  EVENT: bar1
    : └1╴... done.
-22 EVENT: bar1
+20 EVENT: bar1
 RUN: <WorkSequence:3 (4)>
  ev: EVENT: bar1
-22 END: bar1
+20 END: bar1
 RUN: <WorkSequence:3 (4)> (step 1)
  ev: EVENT: bar1
 0 Timer 1 :: 0.1
@@ -30,19 +30,19 @@ RUN: <WorkSequence:3 (4)> (step 1)
 NEW: <WorkSequence:4 (4)>
    : │  EVENT: foo2
    : └1╴... done.
-35 EVENT: foo2
+31 EVENT: foo2
 RUN: <WorkSequence:4 (4)>
  ev: EVENT: foo2
-35 END: foo2
+31 END: foo2
 RUN: <WorkSequence:4 (4)> (step 1)
  ev: EVENT: foo2
 NEW: <WorkSequence:5 (4)>
    : │  EVENT: bar2
    : └1╴... done.
-45 EVENT: bar2
+40 EVENT: bar2
 RUN: <WorkSequence:5 (4)>
  ev: EVENT: bar2
-45 END: bar2
+40 END: bar2
 RUN: <WorkSequence:5 (4)> (step 1)
  ev: EVENT: bar2
 0 Timer 2 :: 0.1
@@ -55,38 +55,39 @@ NEW: <WorkSequence:6 (4)>
 NEW: <WorkSequence:7 (4)>
    : │  EVENT: bar3
    : └1╴... done.
-58 EVENT: foo3
+53 EVENT: foo3
 RUN: <WorkSequence:6 (4)>
  ev: EVENT: foo3
-58 END: foo3
+53 END: foo3
 RUN: <WorkSequence:6 (4)> (step 1)
  ev: EVENT: foo3
-61 EVENT: bar3
+56 EVENT: bar3
 RUN: <WorkSequence:7 (4)>
  ev: EVENT: bar3
-61 END: bar3
+56 END: bar3
 RUN: <WorkSequence:7 (4)> (step 1)
  ev: EVENT: bar3
 0 Timer 3 :: 0.1
 0 Timeout 3
 0 add ‹SyncTriggerHandler ⌁.sync¦trigger¦foo4›
+0 add ‹BlockInputEvent('block')›
 0 add ‹SyncTriggerHandler ⌁.sync¦trigger¦bar4›
 NEW: <WorkSequence:8 (4)>
    : │  EVENT: foo4
    : └1╴... done.
-79 EVENT: foo4
+75 EVENT: foo4
 RUN: <WorkSequence:8 (4)>
  ev: EVENT: foo4
-79 END: foo4
+75 END: foo4
 RUN: <WorkSequence:8 (4)> (step 1)
  ev: EVENT: foo4
 NEW: <WorkSequence:9 (4)>
    : │  EVENT: bar4
    : └1╴... done.
-87 EVENT: bar4
+83 EVENT: bar4
 RUN: <WorkSequence:9 (4)>
  ev: EVENT: bar4
-87 END: bar4
+83 END: bar4
 RUN: <WorkSequence:9 (4)> (step 1)
  ev: EVENT: bar4
 0 Timer 4 :: 0.1

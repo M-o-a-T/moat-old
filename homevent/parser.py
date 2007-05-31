@@ -111,6 +111,7 @@ class Parser(Outputter,LineReceiver):
 	def run(self, producer, *a,**k):
 		"""Parse this producer's stream."""
 		s = producer(self,*a,**k)
+		self.proc.prompt()
 		self.startParsing()
 		return self.result
 
