@@ -29,12 +29,12 @@ on foo:
 	sync trigger OuchNo
 	doc "Is not executed because of the former 'skip next' (until that's gone)"
 on bar *:
-	sync trigger foo
+	sync trigger $1
 list on
 list on "not executed"
-sync trigger bar baz
+sync trigger bar foo
 drop on "Skip Next"
-sync trigger bar baz
+sync trigger bar foo
 drop on 1
 list on
 shutdown

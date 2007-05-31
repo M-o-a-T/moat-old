@@ -17,7 +17,7 @@ RUN: <WorkSequence:1 (4)> (step 1)
 0 add ‹SyncTriggerHandler ⌁.sync¦trigger¦OuchNo›
 0 NewHandler 3
 0 Create OnEvtHandler: ['bar', '*']
-0 add ‹SyncTriggerHandler ⌁.sync¦trigger¦foo›
+0 add ‹SyncTriggerHandler ⌁.sync¦trigger¦$1›
 0 NewHandler 4
 1  : foo ‹Do nothing›
 2  : foo ‹Skip Next›
@@ -27,19 +27,19 @@ RUN: <WorkSequence:1 (4)> (step 1)
 Name: not executed
 Doc: Is not executed because of the former 'skip next' (until that's gone)
 NEW: <WorkSequence:2 (5)>
-   : │  EVENT: bar¦baz
+   : │  EVENT: bar¦foo
    : ├1╴ON bar¦*
    : │     prio: 51
-   : │     proc: ‹SyncTriggerHandler ⌁.sync¦trigger¦foo›
+   : │     proc: ‹SyncTriggerHandler ⌁.sync¦trigger¦$1›
    : └2╴... done.
-39 EVENT: bar¦baz
+39 EVENT: bar¦foo
 RUN: <WorkSequence:2 (5)>
- ev: EVENT: bar¦baz
+ ev: EVENT: bar¦foo
 RUN: ON bar¦*
    :    prio: 51
-   :    proc: ‹SyncTriggerHandler ⌁.sync¦trigger¦foo›
+   :    proc: ‹SyncTriggerHandler ⌁.sync¦trigger¦$1›
  at: <WorkSequence:2 (5)> (step 1)
- ev: EVENT: bar¦baz
+ ev: EVENT: bar¦foo
 NEW: <WorkSequence:3 (7)>
    : │  EVENT: foo
    : ├1╴ON foo
@@ -74,23 +74,23 @@ RUN: ON foo
 45 END: foo
 RUN: <WorkSequence:3 (7)> (step 4)
  ev: EVENT: foo
-39 END: bar¦baz
+39 END: bar¦foo
 RUN: <WorkSequence:2 (5)> (step 2)
- ev: EVENT: bar¦baz
+ ev: EVENT: bar¦foo
 NEW: <WorkSequence:4 (5)>
-   : │  EVENT: bar¦baz
+   : │  EVENT: bar¦foo
    : ├1╴ON bar¦*
    : │     prio: 51
-   : │     proc: ‹SyncTriggerHandler ⌁.sync¦trigger¦foo›
+   : │     proc: ‹SyncTriggerHandler ⌁.sync¦trigger¦$1›
    : └2╴... done.
-63 EVENT: bar¦baz
+63 EVENT: bar¦foo
 RUN: <WorkSequence:4 (5)>
- ev: EVENT: bar¦baz
+ ev: EVENT: bar¦foo
 RUN: ON bar¦*
    :    prio: 51
-   :    proc: ‹SyncTriggerHandler ⌁.sync¦trigger¦foo›
+   :    proc: ‹SyncTriggerHandler ⌁.sync¦trigger¦$1›
  at: <WorkSequence:4 (5)> (step 1)
- ev: EVENT: bar¦baz
+ ev: EVENT: bar¦foo
 NEW: <WorkSequence:5 (6)>
    : │  EVENT: foo
    : ├1╴ON foo
@@ -130,9 +130,9 @@ RUN: <WorkSequence:6 (4)> (step 1)
 69 END: foo
 RUN: <WorkSequence:5 (6)> (step 3)
  ev: EVENT: foo
-63 END: bar¦baz
+63 END: bar¦foo
 RUN: <WorkSequence:4 (5)> (step 2)
- ev: EVENT: bar¦baz
+ ev: EVENT: bar¦foo
 3  : foo ‹not executed›
 4  : bar¦*
 NEW: <WorkSequence:7 (5)>
