@@ -3,11 +3,13 @@
 
 from homevent.module import Loader,Unloader
 from homevent.run import register_worker
-from homevent.parser import Parser, main_words, Help, Interpreter
+from homevent.interpreter import main_words,Interpreter
+from homevent.parser import Parser
 from homevent.statement import IgnoreStatement
 from homevent.config import Load,Unload,WorkerList,ModList,LoadDir
 from homevent.reactor import ShutdownHandler,mainloop,shut_down
 from homevent.twist import StdInDescriptor
+from homevent.module import load_module
 from twisted.internet import reactor
 from twisted.internet._posixstdio import StandardIO ## XXX unstable interface!
 from twisted.internet.error import ConnectionDone
@@ -18,7 +20,6 @@ from traceback import print_exc
 register_worker(Loader())
 register_worker(Unloader())
 
-main_words.register_statement(Help)
 main_words.register_statement(Load)
 main_words.register_statement(Unload)
 main_words.register_statement(WorkerList)
@@ -26,6 +27,7 @@ main_words.register_statement(ModList)
 main_words.register_statement(LoadDir)
 main_words.register_statement(ShutdownHandler)
 ht_load()
+load_module("help")
 
 def parse_logger(t,*x):
 	print t+":"+" ".join((repr(d) for d in x))

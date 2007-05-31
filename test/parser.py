@@ -3,9 +3,11 @@
 
 import homevent as h
 import homevent.parser as hp
+import homevent.interpreter as hi
 import homevent.statement as hs
 from homevent.context import Context
 from homevent.reactor import ShutdownHandler
+from homevent.module import load_module
 from StringIO import StringIO
 from test import run_logger, logger,logwrite
 
@@ -75,15 +77,15 @@ class FooHandler(sbr,hs.Statement):
 	name=("foo",)
 	doc="We foo around."
 
-class BarHandler(sbr,hp.ComplexStatement):
+class BarHandler(sbr,hs.ComplexStatement):
 	name=("foo","bar",)
 	doc="Have a bar, man!"
 	
-class ForHandler(sbr,hp.ComplexStatement):
+class ForHandler(sbr,hs.ComplexStatement):
 	name=("for",)
 	doc="for you!"
 	
-class WhatHandler(sbr,hp.ComplexStatement):
+class WhatHandler(sbr,hs.ComplexStatement):
 	name=("what",)
 	doc="What is this?"
 
@@ -94,12 +96,12 @@ class FoiledHandler(sbr,hs.Statement):
 BarHandler.register_statement(WhatHandler)
 BarHandler.register_statement(ForHandler)
 ForHandler.register_statement(FoiledHandler)
-hp.main_words.register_statement(FooHandler)
-hp.main_words.register_statement(BarHandler)
-hp.main_words.register_statement(hp.Help)
-hp.main_words.register_statement(ShutdownHandler)
+hi.main_words.register_statement(FooHandler)
+hi.main_words.register_statement(BarHandler)
+hi.main_words.register_statement(ShutdownHandler)
+load_module("help")
 
-class TestInterpreter(hp.Interpreter):
+class TestInterpreter(hi.Interpreter):
 	def complex_statement(self,args):
 		fn = self.ctx.words.lookup(args)
 		fn = fn(self.ctx)

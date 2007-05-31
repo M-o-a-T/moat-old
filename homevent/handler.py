@@ -19,7 +19,7 @@ Otherwise a "alarm livingroom" would be triggered.
 
 """
 
-from homevent.parser import ImmediateCollectProcessor, main_words
+from homevent.interpreter import ImmediateCollectProcessor, main_words
 from homevent.statement import SimpleStatement,StatementList
 from homevent.logging import log_event,log, TRACE
 from homevent.run import register_worker,unregister_worker,MIN_PRIO,MAX_PRIO

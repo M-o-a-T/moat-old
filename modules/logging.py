@@ -14,7 +14,8 @@ log
 """
 
 from homevent.module import Module
-from homevent.parser import SimpleStatement, main_words
+from homevent.statement import SimpleStatement
+from homevent.interpreter import main_words
 from homevent.logging import TRACE,DEBUG,INFO,WARN,ERROR,PANIC
 from homevent.logging import log, Logger, register_logger,unregister_logger
 

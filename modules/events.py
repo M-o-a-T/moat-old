@@ -9,7 +9,8 @@ trigger FOO...
 
 """
 
-from homevent.parser import SimpleStatement, main_words
+from homevent.statement import SimpleStatement
+from homevent.interpreter import main_words
 from homevent.event import Event
 from homevent.run import process_event
 from homevent.logging import log,TRACE

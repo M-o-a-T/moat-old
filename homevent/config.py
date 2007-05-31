@@ -6,8 +6,6 @@ This code reads a config file.
 
 Currently, it understands:
 
-	help (see homevent.parser)
-
 #	include NAME
 #		- read that file too
 
@@ -41,7 +39,6 @@ Modules can register more words.
 """
 
 from homevent.statement import Statement
-from homevent.parser import Help
 from homevent.run import process_event
 from homevent.event import Event
 from homevent.module import modules, ModuleDirs

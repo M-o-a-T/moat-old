@@ -2,13 +2,9 @@
 # -*- coding: utf-8 -*-
 
 """\
-This code parses a config file.
+This code parses input lines.
 
-By itself, it understands nothing whatsoever. This package includes a
-"help" command:
-
-	help [word...]
-		- show what "word" does
+By itself, it understands nothing whatsoever.
 
 See the homevent.config module and the test/parser.py script
 for typical usage.
@@ -17,9 +13,7 @@ for typical usage.
 
 from tokenize import generate_tokens
 import Queue
-import sys
 from twisted.internet import reactor,threads,defer
-from twisted.internet.interfaces import IPushProducer,IPullProducer
 from twisted.python import failure
 from twisted.protocols.basic import LineReceiver
 from threading import Lock
@@ -28,7 +22,7 @@ from homevent.context import Context
 from homevent.io import Outputter
 from homevent.run import process_failure
 from homevent.event import Event
-from homevent.statement import SimpleStatement,ComplexStatement
+
 
 # We need to hack tokenize
 import tokenize as t
@@ -44,129 +38,6 @@ t.pseudoprog = re.compile(t.PseudoToken)
 del t
 del re
 
-class InputEvent(Event):
-	"""An event that's just a line from the interpreter"""
-	def __str__(self):
-		try:
-			return "⌁."+"¦".join(self.names)
-		except Exception:
-			return "⌁ REPORT_ERROR: "+repr(self.names)
-
-	def report(self, verbose=False):
-		try:
-			yield "IEVENT: "+"¦".join(self.names)
-		except Exception:
-			yield "IEVENT: REPORT_ERROR: "+repr(self.names)
-
-
-class Processor(object):
-	"""Base class: Process input lines and do something with them."""
-	def __init__(self, parent=None, ctx=None):
-		self.ctx = ctx or Context()
-		self.parent = parent
-	
-	def simple_statement(self,args):
-		"""\
-			A simple statement is a sequence of words. Analyze them.
-			"""
-		raise NotImplementedError("I cannot understand simple statements.",args)
-
-	def complex_statement(self,args):
-		"""\
-			A complex statement is a sequence of words followed by a
-			colon and at least one sub-statement. This procedure needs
-			to reply with a new translator which will (one hopes) accept
-			all the sub-statements.
-
-			Needs to return a processor for the sub-statements.
-			"""
-		raise NotImplementedError("I cannot understand complex statements.",args)
-	
-	def done(self):
-		"""\
-			Called on a sub-translator to note that there will be no
-			more statements.
-			"""
-		pass
-
-class CollectProcessorBase(Processor):
-	"""\
-		A processor which simply stores all (sub-)statements, recursively.
-		You need to override .store() in order to specify _where_.
-		"""
-
-	verify = False
-	def __init__(self, parent=None, ctx=None, args=None, verify=None):
-		super(CollectProcessorBase,self).__init__(parent=self, ctx=ctx)
-		self.args = args
-		self.statements = []
-		if verify is not None:
-			self.verify = verify
-		self.ctx = ctx
-
-	def simple_statement(self,args):
-		if self.verify:
-			self.ctx.words.lookup(args) # discard the result
-		self.store(args)
-
-	def complex_statement(self,args):
-		"""\
-			Note that this code uses a standard CollectProcessor for
-			sub-blocks. That is intentional.
-			"""
-		if verify:
-			subdict,args = self.ctx.words.lookup(args)
-			ctx = self.ctx(words=subdict)
-		else:
-			ctx = self.ctx
-		subc = CollectProcessor(parent=self.parent, ctx=ctx, args=args)
-		self.store(subc)
-		return subc
-
-class CollectProcessor(CollectProcessorBase):
-	"""A processor which adds all statements to its parent."""
-	def store(self,proc):
-		self.parent.add(proc)
-
-	def done(self):
-		self.parent.end_block()
-
-class ImmediateCollectProcessor(CollectProcessor):
-	"""\
-		A processor which stores all (sub-)statements, recursively --
-		except those that are marked as Immediate, which get executed.
-		"""
-
-	def __init__(self, parent=None, ctx=None, args=None, verify=False):
-		super(CollectProcessorBase,self).__init__(parent=parent, ctx=ctx)
-
-	def simple_statement(self,args):
-		me = self.ctx.words
-
-		event=InputEvent(self.ctx, *args)
-		fn = me.lookup(event)
-		fn =  fn(parent=me, ctx=self.ctx)
-		fn.called(event)
-		if fn.immediate:
-			return fn.run(self.ctx)
-		self.store(fn)
-
-	def complex_statement(self,args):
-		me = self.ctx.words
-		fn = me.lookup(args)
-		fn = fn(parent=me, ctx=self.ctx)
-		fn.called(args)
-		if fn.immediate:
-			try:
-				fn.start_block()
-			except AttributeError,e:
-				return self.ctx._error(e)
-			else:
-				return fn.processor(parent=fn,ctx=self.ctx(words=fn))
-		else:
-			subc = ImmediateCollectProcessor(parent=fn, ctx=ctx, args=args)
-			self.store(subc)
-			return subc
 
 class Parser(Outputter,LineReceiver):
 	"""The input parser object. It serves as a LineReceiver and a 
@@ -477,113 +348,6 @@ class Parser(Outputter,LineReceiver):
 		self.p_state=0
 
 
-class Help(SimpleStatement):
-	name=("help",)
-	doc="show doc texts"
-	long_doc="""\
-The "help" command shows which words are recognized at each level.
-"help foo" also shows the sub-commands, i.e. what would be allowed
-in place of the "XXX" in the following statement:
-
-	foo:
-		XXX
-
-Statements may be multi-word and follow generic Python syntax.
-"""
-
-	def run(self,ctx,**k):
-		event = self.params(ctx)
-		words = self.parent
-
-		wl = event[len(self.name):]
-		while wl:
-			try:
-				wlist = words._get_wordlist()
-			except AttributeError:
-				break
-
-			n = len(wl)
-			while n >= 0:
-				try:
-					words = wlist[tuple(wl[:n])]
-				except KeyError:
-					pass
-				else:
-					wl = wl[n:]
-					break
-				n = n-1
-			if n < 0:
-				break
-
-		if wl:
-			print >>self.ctx.out,"Not a command:"," ".join(wl)
-
-		try:
-			doc = ":\n"+words.long_doc.rstrip("\n")
-		except AttributeError:
-			doc = " : "+words.doc
-		print >>self.ctx.out," ".join(words.name)+doc
-
-		try:
-			wlist = words._get_wordlist()
-		except AttributeError:
-			pass
-		else:
-			if words is not self.parent:
-				print >>self.ctx.out,"Known words:"
-			maxlen=0
-			for h in words.iterkeys():
-				hlen = len(" ".join(h))
-				if hlen > maxlen: maxlen = hlen
-			def nam(a,b):
-				return cmp(a.name,b.name)
-			for h in sorted(words.itervalues(),nam):
-				hname = " ".join(h.name)
-				print >>self.ctx.out,hname+(" "*(maxlen+1-len(hname)))+": "+h.doc
-
-class main_words(ComplexStatement):
-	name = ("Main",)
-	doc = "word list:"
-
-class Interpreter(Processor):
-	"""\
-		A basic interpreter for the main loop, which runs every
-		statement immediately.
-		"""
-	def __init__(self, ctx=None):
-		super(Interpreter,self).__init__(ctx)
-		if "words" not in ctx:
-			self.ctx = ctx(words=main_words(ctx=ctx))
-		else:
-			self.ctx = ctx
-
-	def simple_statement(self,args):
-		me = self.ctx.words
-		fn = me.lookup(args)
-		fn = fn(parent=me, ctx=self.ctx)
-		fn.called(InputEvent(self.ctx, *args).clone())
-		return fn.run(self.ctx)
-
-	def complex_statement(self,args):
-		me = self.ctx.words
-		fn = me.lookup(args)
-		try:
-			fn = fn(parent=me, ctx=self.ctx)
-		except TypeError,e:
-			print >>sys.stderr,"For",repr(fn),"::"
-			raise
-		fn.called(args)
-		try:
-			fn.start_block()
-		except AttributeError,e:
-			return self.ctx._error(e)
-		else:
-			return fn.processor ## (parent=fn,ctx=self.ctx(words=fn))
-	
-	def done(self):
-		#print >>self.ctx.out,"Exiting"
-		pass
-
 def _parse(g,input):
 	"""Internal code for parse() which reads the input in a separate thread"""
 	g.startParsing()
@@ -608,18 +372,4 @@ def parse(input, proc=None, ctx=None):
 	d.addCallback(lambda _: g.result)         # analyze the result
 	return d
 
-if __name__ == "__main__":
-	main_words.register_statement(Help)
-
-	def logger(*x):
-		print " ".join((str(d) for d in x))
-
-	import sys
-	d = parse(sys.stdin, logger=logger)
-	def die(_):
-		from homevent.reactor import stop_mainloop
-		stop_mainloop()
-	d.addBoth(die)
-
-	reactor.run()
 
