@@ -98,8 +98,7 @@ class CollectProcessor(Processor):
 		self.store(fn)
 
 		fn.start_block()
-		subc = CollectProcessor(parent=fn, ctx=self.ctx, args=args)
-		return subc
+		return fn.processor
 	
 	def done(self):
 		return self.parent.end_block()
@@ -107,6 +106,26 @@ class CollectProcessor(Processor):
 	def store(self,proc):
 		self.parent.add(proc)
 
+
+class RunMe(object):
+	"""\
+		This is a wrapper which runs a block as soon as it is finished.
+		Needed for complex statements which are marked "immediate", and
+		the top-level interpreter loop.
+		"""
+	def __init__(self,proc,fn):
+		self.proc = proc
+		self.fn = fn
+		self.fnp = self.fn.processor
+
+	def simple_statement(self,args):
+		return self.fnp.simple_statement(args)
+	def complex_statement(self,args):
+		return self.fnp.complex_statement(args)
+	def done(self):
+		self.fnp.done()
+		return self.fn.run(self.proc.ctx)
+	
 class ImmediateCollectProcessor(CollectProcessor):
 	"""\
 		A processor which stores all (sub-)statements, recursively --
@@ -124,43 +143,16 @@ class ImmediateCollectProcessor(CollectProcessor):
 
 	def complex_statement(self,args):
 		fn = self.lookup(args)
+		self.store(fn)
+
+		fn.start_block()
+
 		if fn.immediate:
-			try:
-				fn.start_block()
-			except AttributeError,e:
-				return self.ctx._error(e)
-			else:
-				return fn.processor(parent=fn,ctx=self.ctx(words=fn))
+			return RunMe(self,fn)
 		else:
-			subc = ImmediateCollectProcessor(parent=fn, ctx=ctx, args=args)
-			self.store(fn)
-			return subc
-
-	def done(self):
-		d = defer.maybeDeferred(self.parent.end_block)
-		if self.parent.immediate:
-			d.addCallback(lambda _: self.parent.run(self.ctx))
-		return d
-
-
-class RunMe(object):
-	"""\
-		This is a wrapper for the top-level interpretzer
-		which runs a block as soon as it is finished.
-		"""
-	def __init__(self,proc,fn):
-		self.proc = proc
-		self.fn = fn
-		self.fnp = self.fn.processor
-
-	def simple_statement(self,args):
-		return self.fnp.simple_statement(args)
-	def complex_statement(self,args):
-		return self.fnp.complex_statement(args)
-	def done(self):
-		self.fnp.done()
-		return self.fn.run(self.proc.ctx)
+			return fn.processor
 	
+
 class Interpreter(Processor):
 	"""\
 		A basic interpreter for the main loop, which runs every

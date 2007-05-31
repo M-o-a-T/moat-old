@@ -29,7 +29,8 @@ on foo:
 	sync trigger OuchNo
 	doc "Is not executed because of the former 'skip next' (until that's gone)"
 on bar *:
-	sync trigger $1
+	block:
+		sync trigger $1
 list on
 list on "not executed"
 sync trigger bar foo
@@ -42,6 +43,7 @@ shutdown
 
 h.main_words.register_statement(DoNothingHandler)
 h.main_words.register_statement(ShutdownHandler)
+load_module("example2")
 load_module("trigger")
 load_module("on_event")
 

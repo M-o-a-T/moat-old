@@ -17,6 +17,7 @@ RUN: <WorkSequence:1 (4)> (step 1)
 0 add ‹SyncTriggerHandler ⌁.sync¦trigger¦OuchNo›
 0 NewHandler 3
 0 Create OnEvtHandler: ['bar', '*']
+0 add ‹BlockInputEvent('block')›
 0 add ‹SyncTriggerHandler ⌁.sync¦trigger¦$1›
 0 NewHandler 4
 1  : foo ‹Do nothing›
@@ -30,14 +31,14 @@ NEW: <WorkSequence:2 (5)>
    : │  EVENT: bar¦foo
    : ├1╴ON bar¦*
    : │     prio: 51
-   : │     proc: ‹SyncTriggerHandler ⌁.sync¦trigger¦$1›
+   : │     proc: ‹BlockInputEvent('block')›
    : └2╴... done.
-39 EVENT: bar¦foo
+40 EVENT: bar¦foo
 RUN: <WorkSequence:2 (5)>
  ev: EVENT: bar¦foo
 RUN: ON bar¦*
    :    prio: 51
-   :    proc: ‹SyncTriggerHandler ⌁.sync¦trigger¦$1›
+   :    proc: ‹BlockInputEvent('block')›
  at: <WorkSequence:2 (5)> (step 1)
  ev: EVENT: bar¦foo
 NEW: <WorkSequence:3 (7)>
@@ -55,7 +56,7 @@ NEW: <WorkSequence:3 (7)>
    : │     prio: 60
    : │     proc: ‹SyncTriggerHandler ⌁.sync¦trigger¦OuchNo›
    : └4╴... done.
-45 EVENT: foo
+46 EVENT: foo
 RUN: <WorkSequence:3 (7)>
  ev: EVENT: foo
 RUN: ON foo
@@ -71,24 +72,24 @@ RUN: ON foo
    :    proc: ‹OnSkip ⌁.skip¦next›
  at: <WorkSequence:3 (7)> (step 2)
  ev: EVENT: foo
-45 END: foo
+46 END: foo
 RUN: <WorkSequence:3 (7)> (step 4)
  ev: EVENT: foo
-39 END: bar¦foo
+40 END: bar¦foo
 RUN: <WorkSequence:2 (5)> (step 2)
  ev: EVENT: bar¦foo
 NEW: <WorkSequence:4 (5)>
    : │  EVENT: bar¦foo
    : ├1╴ON bar¦*
    : │     prio: 51
-   : │     proc: ‹SyncTriggerHandler ⌁.sync¦trigger¦$1›
+   : │     proc: ‹BlockInputEvent('block')›
    : └2╴... done.
-63 EVENT: bar¦foo
+64 EVENT: bar¦foo
 RUN: <WorkSequence:4 (5)>
  ev: EVENT: bar¦foo
 RUN: ON bar¦*
    :    prio: 51
-   :    proc: ‹SyncTriggerHandler ⌁.sync¦trigger¦$1›
+   :    proc: ‹BlockInputEvent('block')›
  at: <WorkSequence:4 (5)> (step 1)
  ev: EVENT: bar¦foo
 NEW: <WorkSequence:5 (6)>
@@ -102,7 +103,7 @@ NEW: <WorkSequence:5 (6)>
    : │     prio: 60
    : │     proc: ‹SyncTriggerHandler ⌁.sync¦trigger¦OuchNo›
    : └3╴... done.
-69 EVENT: foo
+70 EVENT: foo
 RUN: <WorkSequence:5 (6)>
  ev: EVENT: foo
 RUN: ON foo
@@ -121,16 +122,16 @@ RUN: ON foo
 NEW: <WorkSequence:6 (4)>
    : │  EVENT: OuchNo
    : └1╴... done.
-77 EVENT: OuchNo
+78 EVENT: OuchNo
 RUN: <WorkSequence:6 (4)>
  ev: EVENT: OuchNo
-77 END: OuchNo
+78 END: OuchNo
 RUN: <WorkSequence:6 (4)> (step 1)
  ev: EVENT: OuchNo
-69 END: foo
+70 END: foo
 RUN: <WorkSequence:5 (6)> (step 3)
  ev: EVENT: foo
-63 END: bar¦foo
+64 END: bar¦foo
 RUN: <WorkSequence:4 (5)> (step 2)
  ev: EVENT: bar¦foo
 3  : foo ‹not executed›
