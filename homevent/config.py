@@ -40,7 +40,8 @@ Modules can register more words.
 
 """
 
-from homevent.parser import Statement,Help
+from homevent.statement import Statement
+from homevent.parser import Help
 from homevent.run import process_event
 from homevent.event import Event
 from homevent.module import modules, ModuleDirs

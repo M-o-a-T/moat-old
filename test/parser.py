@@ -3,6 +3,7 @@
 
 import homevent as h
 import homevent.parser as hp
+import homevent.statement as hs
 from homevent.context import Context
 from homevent.reactor import ShutdownHandler
 from StringIO import StringIO
@@ -67,7 +68,7 @@ class sbr(object):
 	def input_complex(self,*w):
 		log("InputComplex %s(%d): %s" % (self.name,self.id,repr(w)))
 
-class FooHandler(sbr,hp.Statement):
+class FooHandler(sbr,hs.Statement):
 	name=("foo",)
 	doc="We foo around."
 
@@ -83,7 +84,7 @@ class WhatHandler(sbr,hp.ComplexStatement):
 	name=("what",)
 	doc="What is this?"
 
-class FoiledHandler(sbr,hp.Statement):
+class FoiledHandler(sbr,hs.Statement):
 	name=("foiled",)
 	doc="not clingfilm"
 

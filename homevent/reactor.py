@@ -11,7 +11,7 @@ from homevent.event import Event
 from homevent.worker import Worker,ExcWorker,HaltSequence
 from homevent.run import register_worker,unregister_worker, SYS_PRIO,MAX_PRIO,\
 	process_event
-from homevent.parser import Statement
+from homevent.statement import Statement
 from homevent.io import dropConnections
 from twisted.internet import reactor
 
