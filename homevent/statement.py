@@ -37,19 +37,37 @@ class Statement(object):
 #"""
 	immediate = False # don't enqueue this
 
-	def __init__(self,parent=None, args=(), ctx=None):
+	def __init__(self,parent=None, ctx=None):
 		assert isinstance(self.name,tuple),"Name is "+repr(self.name)
 		self.parent = parent
 		self.ctx = ctx or Context()
+		self.args = None
 	
 	def __repr__(self):
-		return "‹%s %s›" % (self.__class__.__name__,repr(self.name))
+		if self.args:
+			return "‹%s %s›" % (self.__class__.__name__,str(self.args))
+		else:
+			return "‹%s %s›" % (self.__class__.__name__,repr(self.name))
 
 	@classmethod
 	def matches(self,args):
 		"""Check if this statement can process this list of words."""
 		if len(args) < len(self.name): return False
 		return self.name == tuple(args[0:len(self.name)])
+	
+	def called(self, args):
+		"""\
+			Tell this statement about the arguments it's called with.
+			(This is actually an (Input)Event.)
+			"""
+		self.args = args
+	
+	def params(self,ctx):
+		"""\
+			Internal method: Return the argument list, as modified by
+			the context.
+			"""
+		return self.args.clone(ctx)
 
 
 class SimpleStatement(Statement):
@@ -57,7 +75,7 @@ class SimpleStatement(Statement):
 		Base class for simple statements.
 		"""
 
-	def run(self,event,**k):
+	def run(self,ctx,**k):
 		raise NotImplementedError("You need to override '%s.run' (called with %s)" % (self.__class__.__name__,repr(event)))
 
 
@@ -79,8 +97,8 @@ class ComplexStatement(Statement):
 	def __repr__(self):
 		return "‹%s %s %d›" % (self.__class__.__name__,repr(self.name),len(self.__words))
 
-	def input_complex(self,args):
-		raise NotImplementedError("You need to override '%s.input_complex' (called with %s)" % (self.__class__.__name__,repr(args)))
+	def input_complex(self):
+		raise NotImplementedError("You need to override '%s.input_complex' (called with %s)" % (self.__class__.__name__,repr(self.args)))
 
 	def lookup(self,args):
 		"""\
@@ -167,7 +185,7 @@ class IgnoreStatement(SimpleStatement):
 	"""Used for error exits"""
 	def __call__(self,**k): return self
 	def run(self,**k): pass
-	def input_complex(self,wl): pass
+	def input_complex(self): pass
 	def processor(self,**k): return self
 	def done(self): pass
 	def simple_statement(self,args): pass

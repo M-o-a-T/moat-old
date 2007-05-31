@@ -55,7 +55,8 @@ log WARN
 log
 	- reports available logging levels
 """
-	def run(self,event,**k):
+	def run(self,ctx,**k):
+		event = self.params(ctx)
 		w = event[len(self.name):]
 		out = self.ctx.out
 		if not len(w):

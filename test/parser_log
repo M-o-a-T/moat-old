@@ -16,15 +16,17 @@ Input ('foo', 'bar')(3): ⌁.foo¦bar
 Init ('foo', 'bar')(4) from ‹main_words ('Main',) 4›
 Input ('foo', 'bar')(4): ⌁.foo¦bar¦baz
 Init ('foo', 'bar')(5) from Ctx(Ctx({'out': <test.logwrite obj>}),{'words': ‹main_words ('Main',) 4›})
-InputComplex ('foo', 'bar')(5): (['foo', 'bar', 'baz', 'quux'],)
+InputComplex ('foo', 'bar')(5): ['foo', 'bar', 'baz', 'quux']
 Init ('what',)(6) from ‹��BarHandler ('foo', 'bar') 2� (5)›
 Input ('what',)(6): ⌁.what¦ever
 Init ('for',)(7) from Ctx(Ctx(Ctx({'out': <test.logwrite obj>}),{'words': ‹main_words ('Main',) 4›}),{'words': ‹��BarHandler ('foo', 'bar') 2� (5)›})
-InputComplex ('for',)(7): (['for', 'ever', 'and', 'ever'],)
+InputComplex ('for',)(7): ['for', 'ever', 'and', 'ever']
 Init ('foiled',)(8) from ‹��ForHandler ('for',) 1� (7)›
 Input ('foiled',)(8): ⌁.foiled¦again
+... moving up
 Init ('what',)(9) from ‹��BarHandler ('foo', 'bar') 2� (5)›
 Input ('what',)(9): ⌁.what¦else
+... moving up
 Init ('foo',)(10) from ‹main_words ('Main',) 4›
 Input ('foo',)(10): ⌁.foo¦again
 Main : word list:

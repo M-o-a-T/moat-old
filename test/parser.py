@@ -63,10 +63,13 @@ class sbr(object):
 		_id += 1
 		self.id = _id
 		log("Init %s(%d) from %s" % (self.name,self.id, repr(parent)))
-	def run(self,event,**k):
+	def run(self,ctx,**k):
+		event = self.params(ctx)
 		log("Input %s(%d): %s" % (self.name,self.id,event))
-	def input_complex(self,*w):
-		log("InputComplex %s(%d): %s" % (self.name,self.id,repr(w)))
+	def called(self,args):
+		self.args = args
+	def input_complex(self):
+		log("InputComplex %s(%d): %s" % (self.name,self.id,repr(self.args)))
 
 class FooHandler(sbr,hs.Statement):
 	name=("foo",)
@@ -97,11 +100,12 @@ hp.main_words.register_statement(hp.Help)
 hp.main_words.register_statement(ShutdownHandler)
 
 class TestInterpreter(hp.Interpreter):
-    def complex_statement(self,args):
-        fn = self.ctx.words.lookup(args)
-        fn = fn(self.ctx)
-        fn.input_complex(args)
-        return TestInterpreter(ctx=self.ctx(words=fn))
+	def complex_statement(self,args):
+		fn = self.ctx.words.lookup(args)
+		fn = fn(self.ctx)
+		fn.called(args)
+		fn.input_complex()
+		return TestInterpreter(ctx=self.ctx(words=fn))
 	def done(self):
 		log("... moving up")
 

@@ -23,7 +23,8 @@ class TriggerHandler(SimpleStatement):
 trigger FOO...
 	- creates a FOO... event
 """
-	def run(self,event,**k):
+	def run(self,ctx,**k):
+		event = self.params(ctx)
 		w = event[len(self.name):]
 		if not w:
 			raise SyntaxError("Events need at least one parameter")
@@ -36,7 +37,8 @@ class SyncTriggerHandler(TriggerHandler):
 sync trigger FOO...
 	- creates a FOO... event and wait until it is processed
 """
-	def run(self,event,**k):
+	def run(self,ctx,**k):
+		event = self.params(ctx)
 		w = event[len(self.name):]
 		if not w:
 			raise SyntaxError("Events need at least one parameter")
@@ -60,7 +62,8 @@ wait for FOO...
 		timer_nr += 1
 		self.nr = timer_nr
 
-	def run(self,event,**k):
+	def run(self,ctx,**k):
+		event = self.params(ctx)
 		w = event[len(self.name):]
 		s = 0
 		if not w:

@@ -145,10 +145,10 @@ Every "*foo" in the event description is mapped to the corresponding
 		ctx = self.ctx(ctx=event.ctx)
 		self.grab_args(event,ctx)
 		d = defer.Deferred()
-		for proc,event in self.procs:
-			def go(_,p,e):
-				return p(parent=self, ctx=self.ctx).run(e.clone(ctx))
-			d.addCallback(go,proc,event)
+		for proc in self.procs:
+			def go(_,p):
+				return p.run(ctx)
+			d.addCallback(go,proc)
 		if self.skip:
 			def skipper(_):
 				raise HaltSequence(_)
@@ -156,15 +156,15 @@ Every "*foo" in the event description is mapped to the corresponding
 		d.callback(None)
 		return d
 
-	def input_complex(self,w):
-		w = w[len(self.name):]
+	def input_complex(self):
+		w = self.args[len(self.name):]
 		log(TRACE, "Create OnEvtHandler: "+repr(w))
 		self.args = w
 		self.procs = []
 
-	def add(self,proc,event):
-		log(TRACE, "add",proc,event)
-		self.procs.append((proc,event))
+	def add(self,proc):
+		log(TRACE, "add",proc)
+		self.procs.append(proc)
 
 	def done(self):
 		global _onHandler_id
@@ -186,18 +186,19 @@ Every "*foo" in the event description is mapped to the corresponding
 			yield "   name: "+self.displayname
 		yield "   prio: "+str(self.prio)
 		pref="proc"
-		for p,e in self.procs:
+		for p in self.procs:
 			try:
-				yield "   "+pref+": "+p.__name__+" "+str(e)
+				yield "   "+pref+": "+p.__name__+" "+str(p.args)
 			except AttributeError:
-				yield "   "+pref+": "+repr(p)+" "+str(e)
+				yield "   "+pref+": "+repr(p)
 			pref="    "
 	
 
 class OffEventHandler(SimpleStatement):
 	name = ("drop","on")
 	doc = "forget about an event handler"
-	def run(self,event,**k):
+	def run(self,ctx,**k):
+		event = self.params(ctx)
 		w = event[len(self.name):]
 		if len(w) == 1:
 			try: worker = onHandlers[w[0]]
@@ -212,7 +213,8 @@ class OffEventHandler(SimpleStatement):
 class OnListHandler(SimpleStatement):
 	name = ("list","on")
 	doc = "list event handlers"
-	def run(self,event,**k):
+	def run(self,ctx,**k):
+		event = self.params(ctx)
 		w = event[len(self.name):]
 		if not len(w):
 			try:
@@ -244,7 +246,8 @@ class OnPrio(SimpleStatement):
 This statement prioritizes an event handler.
 Only one handler within each priority is actually executed.
 """
-	def run(self,event,**k):
+	def run(self,ctx,**k):
+		event = self.params(ctx)
 		w = event[len(self.name):]
 		if len(w) != 1:
 			raise SyntaxError("Usage: prio ‹priority›")
@@ -265,7 +268,8 @@ class OnName(SimpleStatement):
 This statement assigns a name to an event handler.
 (Useful when you want to delete it...)
 """
-	def run(self,event,**k):
+	def run(self,ctx,**k):
+		event = self.params(ctx)
 		w = event[len(self.name):]
 		if len(w) != 1:
 			raise SyntaxError('Usage: name "‹text›"')
@@ -280,7 +284,8 @@ class OnDoc(SimpleStatement):
 This statement assigns a documentation string to an event handler.
 (Useful when you want to document what the thing does ...)
 """
-	def run(self,event,**k):
+	def run(self,ctx,**k):
+		event = self.params(ctx)
 		w = event[len(self.name):]
 		if len(w) != 1:
 			raise SyntaxError('Usage: doc "‹text›"')
@@ -295,7 +300,8 @@ class OnSkip(SimpleStatement):
 This statement causes higher-priority handlers to be skipped.
 NOTE: Commands in the same handler, after this one, *are* executed.
 """
-	def run(self,event,**k):
+	def run(self,ctx,**k):
+		event = self.params(ctx)
 		w = event[len(self.name):]
 		if len(w):
 			raise SyntaxError("Usage: skip next")
@@ -308,7 +314,8 @@ class DoNothingHandler(SimpleStatement):
 This statement does not do anything. It's a placeholder if you want to
 explicitly state that some event does not result in any action.
 """
-	def run(self,event,**k):
+	def run(self,ctx,**k):
+		event = self.params(ctx)
 		w = event[len(self.name):]
 		if len(w):
 			raise SyntaxError("Usage: do nothing")

@@ -125,8 +125,8 @@ class CollectProcessorBase(Processor):
 
 class CollectProcessor(CollectProcessorBase):
 	"""A processor which adds all statements to its parent."""
-	def store(self,proc,event):
-		self.parent.add(proc,event)
+	def store(self,proc):
+		self.parent.add(proc)
 
 	def done(self):
 		self.parent.done()
@@ -145,17 +145,20 @@ class ImmediateCollectProcessor(CollectProcessor):
 
 		event=InputEvent(self.ctx, *args)
 		fn = me.lookup(event)
+		fn =  fn(parent=me, ctx=self.ctx)
+		fn.called(event)
 		if fn.immediate:
-			return fn(parent=me, ctx=self.ctx).run(event.clone())
-		self.store(fn,event)
+			return fn.run(self.ctx)
+		self.store(fn)
 
 	def complex_statement(self,args):
 		me = self.ctx.words
 		fn = me.lookup(args)
 		fn = fn(parent=me, ctx=self.ctx)
+		fn.called(args)
 		if fn.immediate:
 			try:
-				fn.input_complex(args)
+				fn.input_complex()
 			except AttributeError,e:
 				return self.ctx._error(e)
 			else:
@@ -488,7 +491,8 @@ in place of the "XXX" in the following statement:
 Statements may be multi-word and follow generic Python syntax.
 """
 
-	def run(self,event,**k):
+	def run(self,ctx,**k):
+		event = self.params(ctx)
 		words = self.parent
 
 		wl = event[len(self.name):]
@@ -556,7 +560,9 @@ class Interpreter(Processor):
 	def simple_statement(self,args):
 		me = self.ctx.words
 		fn = me.lookup(args)
-		return fn(parent=me, ctx=self.ctx).run(event=InputEvent(self.ctx, *args).clone())
+		fn = fn(parent=me, ctx=self.ctx)
+		fn.called(InputEvent(self.ctx, *args).clone())
+		return fn.run(self.ctx)
 
 	def complex_statement(self,args):
 		me = self.ctx.words
@@ -566,8 +572,9 @@ class Interpreter(Processor):
 		except TypeError,e:
 			print >>sys.stderr,"For",repr(fn),"::"
 			raise
+		fn.called(args)
 		try:
-			fn.input_complex(args)
+			fn.input_complex()
 		except AttributeError,e:
 			return self.ctx._error(e)
 		else:

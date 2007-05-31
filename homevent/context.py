@@ -22,8 +22,9 @@ class Context(object):
 		"""A simple way to create a stacked clone"""
 		c = Context(self,**k)
 		if ctx is not None:
-			assert self not in ctx._parents()
-			if ctx not in self._parents():
+			if self in ctx._parents():
+				c = Context(ctx,**k) # duh
+			elif ctx not in self._parents():
 				c._parent.insert(0,ctx)
 		return c
 
