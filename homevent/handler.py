@@ -156,7 +156,7 @@ Every "*foo" in the event description is mapped to the corresponding
 		d.callback(None)
 		return d
 
-	def input_complex(self):
+	def start_block(self):
 		w = self.args[len(self.name):]
 		log(TRACE, "Create OnEvtHandler: "+repr(w))
 		self.args = w
@@ -166,7 +166,7 @@ Every "*foo" in the event description is mapped to the corresponding
 		log(TRACE, "add",proc)
 		self.procs.append(proc)
 
-	def done(self):
+	def end_block(self):
 		global _onHandler_id
 		_onHandler_id += 1
 		self.handler_id = _onHandler_id

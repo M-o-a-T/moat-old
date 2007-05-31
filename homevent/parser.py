@@ -129,7 +129,7 @@ class CollectProcessor(CollectProcessorBase):
 		self.parent.add(proc)
 
 	def done(self):
-		self.parent.done()
+		self.parent.end_block()
 
 class ImmediateCollectProcessor(CollectProcessor):
 	"""\
@@ -158,7 +158,7 @@ class ImmediateCollectProcessor(CollectProcessor):
 		fn.called(args)
 		if fn.immediate:
 			try:
-				fn.input_complex()
+				fn.start_block()
 			except AttributeError,e:
 				return self.ctx._error(e)
 			else:
@@ -574,7 +574,7 @@ class Interpreter(Processor):
 			raise
 		fn.called(args)
 		try:
-			fn.input_complex()
+			fn.start_block()
 		except AttributeError,e:
 			return self.ctx._error(e)
 		else:

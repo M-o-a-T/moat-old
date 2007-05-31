@@ -97,8 +97,8 @@ class ComplexStatement(Statement):
 	def __repr__(self):
 		return "‹%s %s %d›" % (self.__class__.__name__,repr(self.name),len(self.__words))
 
-	def input_complex(self):
-		raise NotImplementedError("You need to override '%s.input_complex' (called with %s)" % (self.__class__.__name__,repr(self.args)))
+	def start_block(self):
+		raise NotImplementedError("You need to override '%s.start_block' (called with %s)" % (self.__class__.__name__,repr(self.args)))
 
 	def lookup(self,args):
 		"""\
@@ -133,7 +133,7 @@ class ComplexStatement(Statement):
 	def store(self,s):
 		self.statements.append(s)
 
-	def done(self):
+	def end_block(self):
 		"""\
 			Override this if you want a notification that your sub-statement
 			is complete.
@@ -185,9 +185,9 @@ class IgnoreStatement(SimpleStatement):
 	"""Used for error exits"""
 	def __call__(self,**k): return self
 	def run(self,**k): pass
-	def input_complex(self): pass
+	def start_block(self): pass
 	def processor(self,**k): return self
-	def done(self): pass
+	def end_block(self): pass
 	def simple_statement(self,args): pass
 
 

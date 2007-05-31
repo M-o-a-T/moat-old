@@ -22,11 +22,11 @@ foo baz
 foo bar
 # call BarHandler(main).run(⌁.foo¦bar¦baz)
 foo bar baz
-# call BarHandler(main).input_complex("baz","quux")
+# call BarHandler(main).start_block("baz","quux")
 foo bar baz quux:
 	# call WhatHandler(bar).run(⌁.what¦ever)
 	what ever
-	# call ForHandler(bar).input_complex("ever","and","ever")
+	# call ForHandler(bar).start_block("ever","and","ever")
 	for ever and ever:
 		# call FoiledHandler(for).run(⌁.foiled¦again)
 		foiled again
@@ -68,7 +68,7 @@ class sbr(object):
 		log("Input %s(%d): %s" % (self.name,self.id,event))
 	def called(self,args):
 		self.args = args
-	def input_complex(self):
+	def start_block(self):
 		log("InputComplex %s(%d): %s" % (self.name,self.id,repr(self.args)))
 
 class FooHandler(sbr,hs.Statement):
@@ -104,7 +104,7 @@ class TestInterpreter(hp.Interpreter):
 		fn = self.ctx.words.lookup(args)
 		fn = fn(self.ctx)
 		fn.called(args)
-		fn.input_complex()
+		fn.start_block()
 		return TestInterpreter(ctx=self.ctx(words=fn))
 	def done(self):
 		log("... moving up")
