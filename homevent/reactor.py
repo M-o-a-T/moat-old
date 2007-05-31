@@ -32,7 +32,7 @@ class Shutdown_Worker_1(ExcWorker):
 
 	def does_event(self,ev):
 		return True
-	def run(self,queue,*a,**k):
+	def process(self,queue,*a,**k):
 		active_queues.append(queue)
 		if not running:
 			raise HaltSequence("Not running. No new work is accepted!")
@@ -46,7 +46,7 @@ class Shutdown_Worker_2(ExcWorker):
 	prio = MAX_PRIO+2
 	def does_event(self,ev):
 		return True
-	def run(self,queue,*a,**k):
+	def process(self,queue,*a,**k):
 		active_queues.remove(queue)
 		if not running and not active_queues:
 			stop_mainloop()
@@ -60,7 +60,7 @@ class Shutdown_Worker(Worker):
 	prio = MAX_PRIO+1
 	def does_event(self,ev):
 		return (ev is shutdown_event)
-	def run(self,queue,*a,**k):
+	def process(self,queue,*a,**k):
 		return dropConnections()
 	def report(self,*a,**k):
 		yield "shutting down"

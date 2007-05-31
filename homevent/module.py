@@ -114,7 +114,7 @@ class Loader(Worker):
 		if event[1] != "load": return False
 		return True
 
-	def run(self,event, *a,**k):
+	def process(self,event, *a,**k):
 		d = defer.Deferred()
 
 		def doit(_):
@@ -189,7 +189,7 @@ class Unloader(Worker):
 		if event[1] != "unload": return False
 		return True
 
-	def run(self,event, *a,**k):
+	def process(self,event, *a,**k):
 		d = defer.Deferred()
 		sn = Dummy()
 

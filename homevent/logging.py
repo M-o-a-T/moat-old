@@ -72,7 +72,7 @@ class LogWorker(ExcWorker):
 		return ()
 	def does_event(self,event):
 		return True
-	def run(self,event,*a,**k):
+	def process(self,event,*a,**k):
 		"""\
 			Run through all loggers. If one of then throws an exception,
 			drop the logger and process it.
@@ -136,8 +136,8 @@ class LogEndEvent(Event):
 class LogDoneWorker(LogWorker):
 	prio = MAX_PRIO
 
-	def run(self, event,*a,**k):
-		super(LogDoneWorker,self).run(LogEndEvent(event))
+	def process(self, event,*a,**k):
+		super(LogDoneWorker,self).process(LogEndEvent(event))
 
 	def report(self,*a,**k):
 		return ("... done.",)
@@ -230,7 +230,7 @@ def log(level, *a):
 
 log_event = LogWorker()
 register_worker(log_event)
-log_event = log_event.run
+log_event = log_event.process
 
 
 register_worker(LogDoneWorker())

@@ -129,9 +129,7 @@ Every "*foo" in the event description is mapped to the corresponding
 			elif a != e:
 				raise BadArgs(a,e)
 		
-	def run(self,event,**k):
-		if self.procs is None:
-			raise SyntaxError("‹on ...› can only be used as a complex statement")
+	def process(self,event,**k):
 		ctx = self.ctx(ctx=event.ctx)
 		self.grab_args(event,ctx)
 		d = super(OnEventHandler,self).run(ctx,**k)
@@ -140,6 +138,9 @@ Every "*foo" in the event description is mapped to the corresponding
 				raise HaltSequence(_)
 			d.addCallback(skipper)
 		return d
+
+	def run(self,ctx,**k):
+		raise SyntaxError("‹on ...› can only be used as a complex statement")
 
 	def start_block(self):
 		super(OnEventHandler,self).start_block()

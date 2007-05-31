@@ -79,7 +79,7 @@ def process_event(e, return_errors=False):
 		Process an event. This is the procedure you'll be feeding
 		externally-generated events to.
 		"""
-	d = collect_event(e).run()
+	d = collect_event(e).process()
 #	def rv(_):
 #		print "RVA",_
 #		return _
@@ -95,7 +95,7 @@ def process_failure(e=None):
 		"""
 	if e is None:
 		e = failure.Failure()
-	d = collect_failure(e).run()
+	d = collect_failure(e).process()
 #	def rv(_):
 #		print "RVB",_
 #		return _

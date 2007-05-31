@@ -75,7 +75,7 @@ class SayWorker(h.Worker):
 	prio = 5
 	def does_event(self,e):
 		return e[0]=="say"
-	def run(self,event,*a,**k):
+	def process(self,event,*a,**k):
 		h.log("The '"+self.name+"' worker is saying: "+" ".join(event[1:]))
 
 class SayMoreWorker(h.SeqWorker):
@@ -83,7 +83,7 @@ class SayMoreWorker(h.SeqWorker):
 	prio = 5
 	def does_event(self,e):
 		return e[0]=="say more"
-	def run(self,event,*a,**k):
+	def process(self,event,*a,**k):
 		w = h.WorkSequence(event,self)
 		w.append(SayWorker("TellOne"))
 		w.append(SayWorker("TellTwo"))

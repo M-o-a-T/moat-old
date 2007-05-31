@@ -44,7 +44,7 @@ class WorkItem(object):
 	name = "No Work"
 	prio = MIN_PRIO # not relevant here, but a required attribute
 
-	def run(self,*a,**k):
+	def process(self,*a,**k):
 		pass
 	
 	def report(self, verbose=False):
@@ -92,20 +92,20 @@ class WorkSequence(WorkItem):
 	
 	def append(self, w):
 		if isinstance(w,SeqWorker):
-			wn = w.run(event=self.event)
+			wn = w.process(event=self.event)
 			if not isinstance(wn,WorkSequence):
 				raise RuntimeError("%s: returned %s, not a WorkSequence" \
 					% (w,wn))
 			w = wn
 		self.work.append(w)
 
-	def run(self, *a,**k):
+	def process(self, *a,**k):
 		if "HOMEVENT_TEST" in os.environ:
-			return deferToLater(self._run,*a,**k)
+			return deferToLater(self._process,*a,**k)
 		else:
-			return deferToThread(self._run,*a,**k)
+			return deferToThread(self._process,*a,**k)
 
-	def _run(self, *a,**k):
+	def _process(self, *a,**k):
 		assert self.work,"empty workqueue"
 
 		from homevent.logging import log_run,log_halted
@@ -116,7 +116,7 @@ class WorkSequence(WorkItem):
 		def do_std(res,step,w):
 			try:
 				log_run(self,w,step)
-				r = w.run(event=self.event, queue=self)
+				r = w.process(event=self.event, queue=self)
 			except HaltSequence:
 				log_halted(self,w,step)
 				return
@@ -242,20 +242,20 @@ class Worker(object):
 			"""
 		raise AssertionError("You need to override does_event()")
 	
-	def run(self, event,*a,**k):
+	def process(self, event,*a,**k):
 		"""\
 			Actually do the work on this event.
 
 			You need to override this. Don't forget to set self.id, if
 			appropriate.
 			"""
-		raise AssertionError("You need to override run()")
+		raise AssertionError("You need to override process()")
 	
 
 class SeqWorker(Worker):
 	"""\
 		This worker will return a WorkSequence.
-		Its run() code MUST NOT have any side effects!
+		Its process() code MUST NOT have any side effects!
 		"""
 	pass
 
@@ -273,6 +273,6 @@ class DoNothingWorker(Worker):
 		super(DoNothingWorker,self).__init__("no-op")
 	def does_event(self,event):
 		return True
-	def run(self, event, *a,**k):
+	def process(self, event, *a,**k):
 		pass
 
