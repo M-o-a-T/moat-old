@@ -23,7 +23,7 @@ log PANIC
 log WARN "This is not logged either"
 """)
 
-hi.main_words.register_statement(ShutdownHandler)
+h.main_words.register_statement(ShutdownHandler)
 ht_load()
 load_module("logging")
 

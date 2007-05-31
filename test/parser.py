@@ -96,9 +96,9 @@ class FoiledHandler(sbr,hs.Statement):
 BarHandler.register_statement(WhatHandler)
 BarHandler.register_statement(ForHandler)
 ForHandler.register_statement(FoiledHandler)
-hi.main_words.register_statement(FooHandler)
-hi.main_words.register_statement(BarHandler)
-hi.main_words.register_statement(ShutdownHandler)
+h.main_words.register_statement(FooHandler)
+h.main_words.register_statement(BarHandler)
+h.main_words.register_statement(ShutdownHandler)
 load_module("help")
 
 class TestInterpreter(hi.Interpreter):

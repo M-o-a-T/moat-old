@@ -7,8 +7,7 @@ This code implements the Help command.
 
 from homevent.module import Module
 from homevent.logging import log
-from homevent.statement import SimpleStatement
-from homevent.interpreter import main_words
+from homevent.statement import SimpleStatement, main_words
 
 class Help(SimpleStatement):
 	name=("help",)

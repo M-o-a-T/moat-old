@@ -17,7 +17,7 @@ for typical usage.
 
 from homevent.context import Context
 from homevent.event import Event
-from homevent.statement import ComplexStatement
+from homevent.statement import ComplexStatement, main_words
 
 
 class InputEvent(Event):
@@ -182,12 +182,3 @@ class Interpreter(Processor):
 	def done(self):
 		#print >>self.ctx.out,"Exiting"
 		pass
-
-class main_words(ComplexStatement):
-	"""\
-		This is the top-level dictionary.
-		It is named in a strange way as to make the Help output look nice.
-		"""
-	name = ("Main",)
-	doc = "word list:"
-

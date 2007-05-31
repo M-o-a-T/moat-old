@@ -18,7 +18,7 @@ wait for 1m -90s 0.5min +.5s
 sync trigger bar
 """)
 
-hi.main_words.register_statement(ShutdownHandler)
+h.main_words.register_statement(ShutdownHandler)
 load_module("events")
 
 def main():

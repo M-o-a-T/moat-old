@@ -19,8 +19,8 @@ Otherwise a "alarm livingroom" would be triggered.
 
 """
 
-from homevent.interpreter import ImmediateCollectProcessor, main_words
-from homevent.statement import SimpleStatement,StatementList
+from homevent.interpreter import ImmediateCollectProcessor
+from homevent.statement import SimpleStatement,MainStatementList, main_words
 from homevent.logging import log_event,log, TRACE
 from homevent.run import register_worker,unregister_worker,MIN_PRIO,MAX_PRIO
 from homevent.worker import HaltSequence,Worker
@@ -57,7 +57,7 @@ class BadArgCount(RuntimeError):
 	def __str__(self):
 		return "The number of event arguments does not match"
 
-class OnEventHandler(StatementList,Worker):
+class OnEventHandler(MainStatementList,Worker):
 	name=("on",)
 	doc="on [event...]: [statements]"
 	long_doc="""\
@@ -77,17 +77,10 @@ Every "*foo" in the event description is mapped to the corresponding
 	procs = None
 	skip = False
 	displayname = None
-	main = main_words()
 
 	def get_processor(self):
 		return ImmediateCollectProcessor(parent=self, ctx=self.ctx(words=self))
 	processor = property(get_processor)
-
-	def lookup(self, args):
-		try:
-			return super(OnEventHandler,self).lookup(args)
-		except KeyError:
-			return self.main.lookup(args)
 
 	def does_event(self,event):
 		ie = iter(event)

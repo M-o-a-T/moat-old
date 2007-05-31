@@ -3,9 +3,9 @@
 
 from homevent.module import Loader,Unloader
 from homevent.run import register_worker
-from homevent.interpreter import main_words,Interpreter
+from homevent.interpreter import Interpreter
 from homevent.parser import Parser
-from homevent.statement import IgnoreStatement
+from homevent.statement import IgnoreStatement, main_words
 from homevent.config import Load,Unload,WorkerList,ModList,LoadDir
 from homevent.reactor import ShutdownHandler,mainloop,shut_down
 from homevent.twist import StdInDescriptor

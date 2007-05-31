@@ -258,6 +258,28 @@ class StatementList(ComplexStatement):
 			pref="    "
 	
 
+class main_words(ComplexStatement):
+	"""\
+		This is the top-level dictionary.
+		It is named in a strange way as to make the Help output look nice.
+		"""
+	name = ("Main",)
+	doc = "word list:"
+
+
+class MainStatementList(StatementList):
+	"""\
+		A Statement list that inherits (some) words that it understands
+		from the main word list
+		"""
+	main = main_words()
+	def lookup(self, args):
+		try:
+			return super(MainStatementList,self).lookup(args)
+		except (KeyError,NotImplementedError):
+			return self.main.lookup(args)
+
+
 class OffEventHandler(SimpleStatement):
 	name = ("drop","on")
 	doc = "forget about an event handler"
