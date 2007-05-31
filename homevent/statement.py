@@ -386,23 +386,3 @@ explicitly state that some event does not result in any action.
 		log(TRACE,"NOW: do nothing")
 
 
-def load():
-	main_words.register_statement(OnEventHandler)
-	main_words.register_statement(OffEventHandler)
-	main_words.register_statement(OnListHandler)
-	OnEventHandler.register_statement(DoNothingHandler)
-	OnEventHandler.register_statement(OnPrio)
-	OnEventHandler.register_statement(OnSkip)
-	OnEventHandler.register_statement(OnName)
-	OnEventHandler.register_statement(OnDoc)
-
-def unload():
-	main_words.unregister_statement(OnEventHandler)
-	main_words.unregister_statement(OffEventHandler)
-	main_words.unregister_statement(OnListHandler)
-	OnEventHandler.unregister_statement(DoNothingHandler)
-	OnEventHandler.unregister_statement(OnPrio)
-	OnEventHandler.unregister_statement(OnSkip)
-	OnEventHandler.unregister_statement(OnName)
-	OnEventHandler.unregister_statement(OnDoc)
-
