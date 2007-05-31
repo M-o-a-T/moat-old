@@ -21,6 +21,7 @@ shutdown
 
 h.main_words.register_statement(ShutdownHandler)
 load_module("events")
+load_module("wait")
 
 def main():
 	d = hp.parse(input, hi.Interpreter(Context(out=logwrite(log))), Context(logger=logger)) # , out=log)
