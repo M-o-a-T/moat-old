@@ -57,8 +57,8 @@ Statements may be multi-word and follow generic Python syntax.
 		print >>self.ctx.out," ".join(words.name)+doc
 
 		try:
-			wlist = words._get_wordlist()
-		except AttributeError:
+			words._get_wordlist()
+		except AttributeError: # it's empty
 			pass
 		else:
 			if words is not self.parent:
