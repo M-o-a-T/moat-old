@@ -54,7 +54,7 @@ load NAME [args]...
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		process_event(Event(self.ctx, "module","load",*event[len(self.name):]))
+		return process_event(Event(self.ctx, "module","load",*event[len(self.name):]))
 
 class Unload(Statement):
 	name=("unload",)
@@ -66,7 +66,7 @@ unload NAME [args]...
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		process_event(Event(self.ctx, "module","unload",*event[len(self.name):]))
+		return process_event(Event(self.ctx, "module","unload",*event[len(self.name):]))
 
 class LoadDir(Statement):
 	name=("load","dir")
