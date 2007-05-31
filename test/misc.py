@@ -32,7 +32,7 @@ shutdown
 """)
 
 h.main_words.register_statement(ShutdownHandler)
-load_module("events")
+load_module("trigger")
 load_module("wait")
 load_module("example2")
 

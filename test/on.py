@@ -42,7 +42,7 @@ shutdown
 
 h.main_words.register_statement(DoNothingHandler)
 h.main_words.register_statement(ShutdownHandler)
-load_module("events")
+load_module("trigger")
 load_module("on_event")
 
 def main():

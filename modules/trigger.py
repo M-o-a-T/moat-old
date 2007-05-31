@@ -12,8 +12,7 @@ trigger FOO...
 from homevent.statement import SimpleStatement, main_words
 from homevent.event import Event
 from homevent.run import process_event
-from homevent.logging import log,TRACE
-from twisted.internet import reactor,defer
+
 
 class TriggerHandler(SimpleStatement):
 	name=("trigger",)
@@ -46,7 +45,7 @@ sync trigger FOO...
 
 from homevent.module import Module
 
-class EventsModule(Module):
+class TriggerModule(Module):
 	"""\
 		This module contains basic event handling code.
 		"""
@@ -61,4 +60,4 @@ class EventsModule(Module):
 		main_words.unregister_statement(TriggerHandler)
 		main_words.unregister_statement(SyncTriggerHandler)
 
-init = EventsModule
+init = TriggerModule

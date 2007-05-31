@@ -10,7 +10,7 @@ from homevent.module import load_module
 from StringIO import StringIO
 from test import run_logger, logger,logwrite
 
-log = run_logger("events",dot=False).log
+log = run_logger("trigger",dot=False).log
 
 input = StringIO("""\
 sync trigger foo
@@ -20,7 +20,7 @@ shutdown
 """)
 
 h.main_words.register_statement(ShutdownHandler)
-load_module("events")
+load_module("trigger")
 load_module("wait")
 
 def main():
