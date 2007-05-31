@@ -6,6 +6,8 @@
 	See test/context.py for usage examples.
 	"""
 
+import sys
+
 class VanishedAttribute: pass
 
 class Context(object):
@@ -100,7 +102,7 @@ class Context(object):
 			Otherwise simply raise the error.
 			"""
 		if "errhandler" not in self:
-			raise e
+			raise e.__class__,e,sys.exc_info()[2]
 		return self.errhandler(self,e)
 
 def default_context(ctx,**defaults):
