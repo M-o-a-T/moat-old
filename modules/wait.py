@@ -19,10 +19,10 @@ from twisted.internet import reactor,defer
 timer_nr = 0
 
 class WaitHandler(Statement):
-	name=("wait","for")
+	name=("wait",)
 	doc="delay for N seconds"
 	long_doc="""\
-wait for FOO...
+wait FOO...
 	- delay processsing for FOO seconds
 	  append "s/m/h/d/w" for seconds/minutes/hours/days/weeks
 	  # you can do basic +/- calculations (2m - 10s); you do need the spaces

@@ -14,7 +14,7 @@ log = run_logger("trigger",dot=False).log
 
 input = StringIO("""\
 sync trigger foo
-wait for 1m -90s 0.5min +.5s
+wait 1m -90s 0.5min +.5s
 sync trigger bar
 shutdown
 """)

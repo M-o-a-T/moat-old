@@ -15,19 +15,19 @@ log = run_logger("misc",dot=False).log
 input = StringIO("""\
 trigger foo1
 trigger bar1
-wait for 0.1
+wait 0.1
 sync trigger foo2
 sync trigger bar2
-wait for 0.1
+wait 0.1
 block:
 	trigger foo3
 	trigger bar3
-wait for 0.1
+wait 0.1
 block:
 	sync trigger foo4
 	block:
 		sync trigger bar4
-wait for 0.1
+wait 0.1
 shutdown
 """)
 
