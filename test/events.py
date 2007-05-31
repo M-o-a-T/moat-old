@@ -16,6 +16,7 @@ input = StringIO("""\
 sync trigger foo
 wait for 1m -90s 0.5min +.5s
 sync trigger bar
+shutdown
 """)
 
 h.main_words.register_statement(ShutdownHandler)

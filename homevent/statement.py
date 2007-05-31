@@ -128,6 +128,7 @@ class ComplexStatement(Statement):
 			Returns the translator that should process my substatements.
 			By default, returns a CollectProcessor.
 			"""
+		from homevent.interpreter import CollectProcessor
 		return CollectProcessor(parent=self, ctx=self.ctx)
 	processor = property(get_processor,doc="which processor works for my content?")
 
@@ -185,7 +186,7 @@ class ComplexStatement(Statement):
 class IgnoreStatement(SimpleStatement):
 	"""Used for error exits"""
 	def __call__(self,**k): return self
-	def run(self,**k): pass
+	def run(self,*a,**k): pass
 	def start_block(self): pass
 	def processor(self,**k): return self
 	def end_block(self): pass
@@ -208,10 +209,6 @@ class StatementList(ComplexStatement):
 		"""
 	in_sub = False
 	procs = None
-
-	def get_processor(self):
-		return CollectProcessor(parent=self, ctx=self.ctx(words=self))
-	processor = property(get_processor)
 
 	def __repr__(self):
 		try:

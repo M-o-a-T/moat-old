@@ -245,10 +245,10 @@ class Parser(Outputter,LineReceiver):
 				self.p_state=1
 				return
 			elif t == DEDENT:
-				self.proc.done()
+				r = self.proc.done()
 				if self.p_stack:
 					self.proc = self.p_stack.pop()
-					return
+					return r
 				else:
 					raise StopIteration
 			elif t == ENDMARKER:
@@ -305,11 +305,13 @@ class Parser(Outputter,LineReceiver):
 				try:
 					r = self.proc.simple_statement(self.p_args)
 				except Exception,e:
-					#r = self.ctx._error(e)
-					raise
+					r = self.ctx._error(e)
 					
 				if self.p_pop_after:
-					self.proc.done()
+					if isinstance(r,defer.Deferred):
+						r.addCallback(lambda _,p: p.done(), self.proc)
+					else:
+						r = self.proc.done()
 					self.proc = self.p_stack.pop()
 					self.p_pop_after=False
 				self.p_state=0

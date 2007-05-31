@@ -19,6 +19,7 @@ from homevent.context import Context
 from homevent.event import Event
 from homevent.statement import ComplexStatement, main_words
 
+from twisted.internet import defer
 
 class InputEvent(Event):
 	"""An event that's just a line from the interpreter"""
@@ -73,31 +74,34 @@ class CollectProcessorBase(Processor):
 
 	verify = False
 	def __init__(self, parent=None, ctx=None, args=None, verify=None):
-		super(CollectProcessorBase,self).__init__(parent=self, ctx=ctx)
+		super(CollectProcessorBase,self).__init__(parent=parent, ctx=ctx)
 		self.args = args
 		self.statements = []
 		if verify is not None:
 			self.verify = verify
 		self.ctx = ctx
 
+	def _common_statement(self, args):
+		me = self.ctx.words
+		event = InputEvent(self.ctx, *args)
+		fn = me.lookup(event)
+		fn = fn(parent=me, ctx=self.ctx)
+		fn.called(event)
+		return fn
+
 	def simple_statement(self,args):
-		if self.verify:
-			self.ctx.words.lookup(args) # discard the result
-		self.store(args)
+		fn = self._common_statement(args)
+		self.store(fn)
 
 	def complex_statement(self,args):
-		"""\
-			Note that this code uses a standard CollectProcessor for
-			sub-blocks. That is intentional.
-			"""
-		if verify:
-			subdict,args = self.ctx.words.lookup(args)
-			ctx = self.ctx(words=subdict)
-		else:
-			ctx = self.ctx
-		subc = CollectProcessor(parent=self.parent, ctx=ctx, args=args)
-		self.store(subc)
+		fn = self._common_statement(args)
+		self.store(fn)
+
+		subc = CollectProcessor(parent=fn, ctx=ctx, args=args)
 		return subc
+	
+	def store(self,proc):
+		raise NotImplementedError("Did not override 'store()'")
 
 class CollectProcessor(CollectProcessorBase):
 	"""A processor which adds all statements to its parent."""
@@ -105,7 +109,7 @@ class CollectProcessor(CollectProcessorBase):
 		self.parent.add(proc)
 
 	def done(self):
-		self.parent.end_block()
+		return self.parent.end_block()
 
 class ImmediateCollectProcessor(CollectProcessor):
 	"""\
@@ -117,21 +121,13 @@ class ImmediateCollectProcessor(CollectProcessor):
 		super(CollectProcessorBase,self).__init__(parent=parent, ctx=ctx)
 
 	def simple_statement(self,args):
-		me = self.ctx.words
-
-		event=InputEvent(self.ctx, *args)
-		fn = me.lookup(event)
-		fn =  fn(parent=me, ctx=self.ctx)
-		fn.called(event)
+		fn = self._common_statement(args)
 		if fn.immediate:
 			return fn.run(self.ctx)
 		self.store(fn)
 
 	def complex_statement(self,args):
-		me = self.ctx.words
-		fn = me.lookup(args)
-		fn = fn(parent=me, ctx=self.ctx)
-		fn.called(args)
+		fn = self._common_statement(args)
 		if fn.immediate:
 			try:
 				fn.start_block()
@@ -141,8 +137,15 @@ class ImmediateCollectProcessor(CollectProcessor):
 				return fn.processor(parent=fn,ctx=self.ctx(words=fn))
 		else:
 			subc = ImmediateCollectProcessor(parent=fn, ctx=ctx, args=args)
-			self.store(subc)
+			self.store(fn)
 			return subc
+
+	def done(self):
+		d = defer.maybeDeferred(self.parent.end_block)
+		if self.parent.immediate:
+			d.addCallback(lambda _: self.parent.run(self.ctx))
+		return d
+
 
 class Interpreter(Processor):
 	"""\

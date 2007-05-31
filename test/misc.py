@@ -11,38 +11,30 @@ from homevent.handler import load as ht_load
 from StringIO import StringIO
 from test import run_logger, logger,logwrite
 
-log = run_logger("on",dot=False).log
+log = run_logger("misc",dot=False).log
 
 input = StringIO("""\
-on foo:
-	prio 50
-	name "Do nothing"
-	do nothing
-on foo:
-	prio 55
-	name "Skip Next"
-	skip next
-	doc "Causes the prio-60 thing to not be executed"
-on foo:
-	prio 60
-	name "not executed"
-	sync trigger OuchNo
-	doc "Is not executed because of the former 'skip next' (until that's gone)"
-on bar *:
-	sync trigger foo
-list on
-list on "not executed"
-trigger bar baz
-drop on "Skip Next"
-trigger bar baz
-drop on 1
-list on
+trigger foo1
+trigger bar1
+wait for 0.1
+sync trigger foo2
+sync trigger bar2
+wait for 0.1
+block:
+	trigger foo3
+	trigger bar3
+wait for 0.1
+block:
+	sync trigger foo4
+	sync trigger bar4
+wait for 0.1
 shutdown
 """)
 
 h.main_words.register_statement(ShutdownHandler)
 ht_load()
 load_module("events")
+load_module("example2")
 
 def main():
 	d = hp.parse(input, hi.Interpreter(Context(out=logwrite(log))), Context(logger=logger)) # , out=log)
