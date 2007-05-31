@@ -22,6 +22,7 @@ from homevent.context import Context
 from homevent.io import Outputter
 from homevent.run import process_failure
 from homevent.event import Event
+from homevent.statement import global_words
 
 
 # We need to hack tokenize
@@ -126,7 +127,8 @@ class Parser(Outputter,LineReceiver):
 		try:
 			while self.p_wait:
 				item = self.p_wait.pop(0)
-				self.line_queue.put(item, block=(self.transport is None))
+				q = self.line_queue
+				if q: q.put(item, block=(self.transport is None))
 		except Queue.Full:
 			self.p_wait.insert(0,item)
 			self._pauseProducing()
@@ -369,7 +371,7 @@ def parse(input, proc=None, ctx=None):
 		"""
 	if not ctx: ctx=Context
 	ctx = ctx(fname="<stdin>")
-	if proc is None: proc = main_words(ctx)
+	if proc is None: proc = global_words(ctx)
 	g = Parser(proc, ctx=ctx)
 	d = threads.deferToThread(_parse,g,input) # read the input
 	d.addCallback(lambda _: g.result)         # analyze the result

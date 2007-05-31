@@ -102,18 +102,21 @@ class ComplexStatement(Statement):
 	def start_block(self):
 		raise NotImplementedError("You need to override '%s.start_block' (called with %s)" % (self.__class__.__name__,repr(self.args)))
 
+	def __getitem__(self,key):
+		if self.__words is None:
+			raise NotImplementedError("No word list in "+self.__class__.__name__)
+		return self.__words[key]
+
 	def lookup(self,args):
 		"""\
 			Override this if you want to replace the default lookup
 			code for sub-statements.
 			"""
-		if self.__words is None:
-			raise NotImplementedError("No word list in "+self.__class__.__name__)
 		
 		n = len(args)
 		while n >= 0:
 			try:
-				fn = self.__words[tuple(args[:n])]
+				fn = self[tuple(args[:n])]
 			except KeyError:
 				pass
 			else:
@@ -149,13 +152,19 @@ class ComplexStatement(Statement):
 		return self.__words
 	@classmethod
 	def iterkeys(self):
-		return self.__words.iterkeys()
+		k = self._get_wordlist()
+		if k is None: return ()
+		return k.iterkeys()
 	@classmethod
 	def itervalues(self):
-		return self.__words.itervalues()
+		k = self._get_wordlist()
+		if k is None: return ()
+		return k.itervalues()
 	@classmethod
 	def iteritems(self):
-		return self.__words.iteritems()
+		k = self._get_wordlist()
+		if k is None: return ()
+		return k.iteritems()
 
 	@classmethod
 	def register_statement(self,handler):
@@ -263,6 +272,31 @@ class main_words(ComplexStatement):
 		"""
 	name = ("Main",)
 	doc = "word list:"
+
+
+class global_words(ComplexStatement):
+	"""Words that only make sense at top level. It pulls in the main word list."""
+	name = ("Global",)
+	doc = "word list:"
+
+	@classmethod
+	def _get_wordlist(self):
+		"""Yes, this is inefficient. So? It's not used often."""
+		d1 = super(global_words,self)._get_wordlist()
+		d2 = main_words._get_wordlist()
+		if not d1: return d2
+		if d2:
+			d1 = d1.copy()
+			d1.update(d2)
+		return d1
+
+	@classmethod
+	def __getitem__(self,key):
+		"""This uses a more efficient method. ;-)"""
+		try: return super(global_words,self)._get_wordlist()[key]
+		except (KeyError,NotImplementedError,TypeError): pass
+		return main_words._get_wordlist()[key]
+
 
 
 class MainStatementList(StatementList):

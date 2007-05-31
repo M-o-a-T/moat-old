@@ -7,7 +7,7 @@ import homevent.interpreter as hi
 from homevent.context import Context
 from homevent.reactor import ShutdownHandler
 from homevent.module import load_module
-from homevent.statement import main_words,DoNothingHandler
+from homevent.statement import DoNothingHandler
 from StringIO import StringIO
 from test import run_logger, logger,logwrite
 

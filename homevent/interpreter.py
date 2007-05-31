@@ -17,7 +17,7 @@ for typical usage.
 
 from homevent.context import Context
 from homevent.event import Event
-from homevent.statement import ComplexStatement, main_words
+from homevent.statement import ComplexStatement, global_words
 
 from twisted.internet import defer
 
@@ -161,7 +161,7 @@ class Interpreter(Processor):
 	def __init__(self, ctx=None):
 		super(Interpreter,self).__init__(ctx)
 		if "words" not in ctx:
-			self.ctx = ctx(words=main_words(ctx=ctx))
+			self.ctx = ctx(words=global_words(ctx=ctx))
 		else:
 			self.ctx = ctx
 

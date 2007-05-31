@@ -20,7 +20,8 @@ Otherwise a "alarm livingroom" would be triggered.
 """
 
 from homevent.interpreter import ImmediateCollectProcessor
-from homevent.statement import Statement,MainStatementList, main_words
+from homevent.statement import Statement,MainStatementList, main_words,\
+	global_words
 from homevent.logging import log_event,log, TRACE
 from homevent.run import register_worker,unregister_worker,MIN_PRIO,MAX_PRIO
 from homevent.worker import HaltSequence,Worker
@@ -277,7 +278,7 @@ class OnEventModule(Module):
 	def load(self):
 		main_words.register_statement(OnEventHandler)
 		main_words.register_statement(OffEventHandler)
-		main_words.register_statement(OnListHandler)
+		global_words.register_statement(OnListHandler)
 		OnEventHandler.register_statement(OnPrio)
 		OnEventHandler.register_statement(OnSkip)
 		OnEventHandler.register_statement(OnName)
@@ -286,7 +287,7 @@ class OnEventModule(Module):
 	def unload(self):
 		main_words.unregister_statement(OnEventHandler)
 		main_words.unregister_statement(OffEventHandler)
-		main_words.unregister_statement(OnListHandler)
+		global_words.unregister_statement(OnListHandler)
 		OnEventHandler.unregister_statement(OnPrio)
 		OnEventHandler.unregister_statement(OnSkip)
 		OnEventHandler.unregister_statement(OnName)

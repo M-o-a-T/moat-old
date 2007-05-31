@@ -7,7 +7,7 @@ This code implements the Help command.
 
 from homevent.module import Module
 from homevent.logging import log
-from homevent.statement import Statement, main_words
+from homevent.statement import Statement, global_words
 
 class Help(Statement):
 	name=("help",)
@@ -61,17 +61,17 @@ Statements may be multi-word and follow generic Python syntax.
 		except AttributeError: # it's empty
 			pass
 		else:
-			if words is not self.parent:
-				print >>self.ctx.out,"Known words:"
 			maxlen=0
 			for h in words.iterkeys():
 				hlen = len(" ".join(h))
 				if hlen > maxlen: maxlen = hlen
-			def nam(a,b):
-				return cmp(a.name,b.name)
-			for h in sorted(words.itervalues(),nam):
-				hname = " ".join(h.name)
-				print >>self.ctx.out,hname+(" "*(maxlen+1-len(hname)))+": "+h.doc
+			if maxlen:
+				print >>self.ctx.out,"Known words:"
+				def nam(a,b):
+					return cmp(a.name,b.name)
+				for h in sorted(words.itervalues(),nam):
+					hname = " ".join(h.name)
+					print >>self.ctx.out,hname+(" "*(maxlen+1-len(hname)))+": "+h.doc
 
 
 class HelpModule(Module):
@@ -82,9 +82,9 @@ class HelpModule(Module):
 	info = "implements the 'help' statement"
 
 	def load(self):
-		main_words.register_statement(Help)
+		global_words.register_statement(Help)
 	
 	def unload(self):
-		main_words.unregister_statement(Help)
+		global_words.unregister_statement(Help)
 	
 init = HelpModule

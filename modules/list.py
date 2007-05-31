@@ -6,7 +6,7 @@ This code represents a sample loadable module for homevent.
 """
 
 from homevent.logging import log
-from homevent.statement import Statement, main_words
+from homevent.statement import Statement, global_words
 from homevent.module import modules, ModuleDirs, Module
 from homevent.run import list_workers
 
@@ -66,11 +66,11 @@ class ListModule(Module):
 	info = "provides a couple of common 'list FOO' functions"
 
 	def load(self):
-		main_words.register_statement(WorkerList)
-		main_words.register_statement(ModList)
+		global_words.register_statement(WorkerList)
+		global_words.register_statement(ModList)
 	
 	def unload(self):
-		main_words.unregister_statement(WorkerList)
-		main_words.unregister_statement(ModList)
+		global_words.unregister_statement(WorkerList)
+		global_words.unregister_statement(ModList)
 	
 init = ListModule
