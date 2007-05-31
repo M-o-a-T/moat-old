@@ -19,11 +19,11 @@ Otherwise a "alarm livingroom" would be triggered.
 
 """
 
-from homevent.parser import SimpleStatement,ComplexStatement,\
-	ImmediateCollectProcessor, main_words
+from homevent.parser import ImmediateCollectProcessor, main_words
+from homevent.statement import SimpleStatement,StatementList
 from homevent.logging import log_event,log, TRACE
 from homevent.run import register_worker,unregister_worker,MIN_PRIO,MAX_PRIO
-from homevent.worker import HaltSequence
+from homevent.worker import HaltSequence,Worker
 from twisted.internet import defer
 
 __all__ = ["register_actor","unregister_actor"]
@@ -57,8 +57,7 @@ class BadArgCount(RuntimeError):
 	def __str__(self):
 		return "The number of event arguments does not match"
 
-class OnEventHandler(ComplexStatement):
-	"""This is also a worker."""
+class OnEventHandler(StatementList,Worker):
 	name=("on",)
 	doc="on [event...]: [statements]"
 	long_doc="""\
@@ -82,15 +81,6 @@ Every "*foo" in the event description is mapped to the corresponding
 	def get_processor(self):
 		return ImmediateCollectProcessor(parent=self, ctx=self.ctx(words=self))
 	processor = property(get_processor)
-
-	def __repr__(self):
-		try:
-			return "‹"+self.__class__.__name__+"("+str(self.handler_id)+")›"
-		except AttributeError:
-			try:
-				return "‹"+self.__class__.__name__+repr(self.args)+"›"
-			except AttributeError:
-				return "‹"+self.__class__.__name__+"(?)›"
 
 	def does_event(self,event):
 		ie = iter(event)
@@ -144,29 +134,22 @@ Every "*foo" in the event description is mapped to the corresponding
 			raise SyntaxError("‹on ...› can only be used as a complex statement")
 		ctx = self.ctx(ctx=event.ctx)
 		self.grab_args(event,ctx)
-		d = defer.Deferred()
-		for proc in self.procs:
-			def go(_,p):
-				return p.run(ctx)
-			d.addCallback(go,proc)
+		d = super(OnEventHandler,self).run(ctx,**k)
 		if self.skip:
 			def skipper(_):
 				raise HaltSequence(_)
 			d.addCallback(skipper)
-		d.callback(None)
 		return d
 
 	def start_block(self):
+		super(OnEventHandler,self).start_block()
 		w = self.args[len(self.name):]
 		log(TRACE, "Create OnEvtHandler: "+repr(w))
 		self.args = w
-		self.procs = []
-
-	def add(self,proc):
-		log(TRACE, "add",proc)
-		self.procs.append(proc)
 
 	def end_block(self):
+		super(OnEventHandler,self).end_block()
+
 		global _onHandler_id
 		_onHandler_id += 1
 		self.handler_id = _onHandler_id
@@ -178,20 +161,6 @@ Every "*foo" in the event description is mapped to the corresponding
 		onHandlers[self.handler_id] = self
 		if self.displayname is not None:
 			onHandlerNames[self.displayname] = self
-	
-	def report(self, verbose=False):
-		yield "ON "+"¦".join(self.args)
-		if not verbose: return
-		if self.displayname is not None:
-			yield "   name: "+self.displayname
-		yield "   prio: "+str(self.prio)
-		pref="proc"
-		for p in self.procs:
-			try:
-				yield "   "+pref+": "+p.__name__+" "+str(p.args)
-			except AttributeError:
-				yield "   "+pref+": "+repr(p)
-			pref="    "
 	
 
 class OffEventHandler(SimpleStatement):
