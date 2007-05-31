@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import homevent as h
-from homevent.logging import Logger
+from homevent.logging import Logger, TRACE
 import sys
 import re
 from twisted.internet import reactor
@@ -23,6 +23,7 @@ class run_logger(Logger):
 			self.data = None
 		self.line=0
 		h.register_logger(self)
+		self.level = TRACE
 
 	def __del__(self):
 		if self.data:
