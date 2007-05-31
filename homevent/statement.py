@@ -70,12 +70,6 @@ class Statement(object):
 			"""
 		return self.args.clone(ctx)
 
-
-class SimpleStatement(Statement):
-	"""\
-		Base class for simple statements.
-		"""
-
 	def run(self,ctx,**k):
 		raise NotImplementedError("You need to override '%s.run' (called with %s)" % (self.__class__.__name__,repr(event)))
 
@@ -83,12 +77,19 @@ class SimpleStatement(Statement):
 class ComplexStatement(Statement):
 	"""\
 		Base class for handling complex statements. This class has a
-		word list which can be used to attach meaningful sub-statements.
+		word list which can be used to attach distinct sub-statements.
 
 		A statement may want to be available in both complex and simple
-		versions, which means multiply-inheriting from both
-		SimpleStatement and ComplexStatement.
+		versions. The difference is that the complex version will have
+		calls to start_block() and end_block(). Thus, you need to throw
+		an error in .run() if using your statement in simple form does
+		not make sense (e.g. a plain "if foo" without sub-statements).
+
+		If you want sub-statements that are executed at runtime (as
+		opposed to interpreter time), you want to inherit from
+		StatementList instead.
 		"""
+
 	__words = None
 
 	def __init__(self,*a,**k):
@@ -183,7 +184,7 @@ class ComplexStatement(Statement):
 		del self.__words[handler.name]
 
 
-class IgnoreStatement(SimpleStatement):
+class IgnoreStatement(Statement):
 	"""Used for error exits"""
 	def __call__(self,**k): return self
 	def run(self,*a,**k): pass
@@ -277,7 +278,7 @@ class MainStatementList(StatementList):
 			return self.main.lookup(args)
 
 
-class OffEventHandler(SimpleStatement):
+class OffEventHandler(Statement):
 	name = ("drop","on")
 	doc = "forget about an event handler"
 	def run(self,ctx,**k):
@@ -293,7 +294,7 @@ class OffEventHandler(SimpleStatement):
 		else:
 			raise SyntaxError("Usage: drop on ‹handler_id/name›")
 
-class OnListHandler(SimpleStatement):
+class OnListHandler(Statement):
 	name = ("list","on")
 	doc = "list event handlers"
 	def run(self,ctx,**k):
@@ -321,7 +322,7 @@ class OnListHandler(SimpleStatement):
 			raise SyntaxError("Usage: list on ‹handler_id›")
 
 
-class DoNothingHandler(SimpleStatement):
+class DoNothingHandler(Statement):
 	name = ("do","nothing")
 	doc = "do not do anything"
 	long_doc="""\

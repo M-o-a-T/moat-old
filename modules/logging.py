@@ -14,7 +14,7 @@ log
 """
 
 from homevent.module import Module
-from homevent.statement import SimpleStatement, main_words
+from homevent.statement import Statement, main_words
 from homevent.logging import TRACE,DEBUG,INFO,WARN,ERROR,PANIC
 from homevent.logging import log, Logger, register_logger,unregister_logger
 
@@ -43,7 +43,7 @@ class OutLogger(Logger):
 		del self.out.logger
 
 
-class LogHandler(SimpleStatement):
+class LogHandler(Statement):
 	name=("log",)
 	doc="configure reporting"
 	long_doc="""\

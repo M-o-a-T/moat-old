@@ -20,7 +20,7 @@ Otherwise a "alarm livingroom" would be triggered.
 """
 
 from homevent.interpreter import ImmediateCollectProcessor
-from homevent.statement import SimpleStatement,MainStatementList, main_words
+from homevent.statement import Statement,MainStatementList, main_words
 from homevent.logging import log_event,log, TRACE
 from homevent.run import register_worker,unregister_worker,MIN_PRIO,MAX_PRIO
 from homevent.worker import HaltSequence,Worker
@@ -158,7 +158,7 @@ Every "*foo" in the event description is mapped to the corresponding
 		self.args = w
 
 
-class OffEventHandler(SimpleStatement):
+class OffEventHandler(Statement):
 	name = ("drop","on")
 	doc = "forget about an event handler"
 	def run(self,ctx,**k):
@@ -174,7 +174,7 @@ class OffEventHandler(SimpleStatement):
 		else:
 			raise SyntaxError("Usage: drop on ‹handler_id/name›")
 
-class OnListHandler(SimpleStatement):
+class OnListHandler(Statement):
 	name = ("list","on")
 	doc = "list event handlers"
 	def run(self,ctx,**k):
@@ -202,7 +202,7 @@ class OnListHandler(SimpleStatement):
 			raise SyntaxError("Usage: list on ‹handler_id›")
 
 
-class OnPrio(SimpleStatement):
+class OnPrio(Statement):
 	name = ("prio",)
 	doc = "prioritize event handler"
 	immediate = True
@@ -224,7 +224,7 @@ Only one handler within each priority is actually executed.
 		self.parent.prio = prio
 
 
-class OnName(SimpleStatement):
+class OnName(Statement):
 	name = ("name",)
 	doc = "name an event handler"
 	immediate = True
@@ -240,7 +240,7 @@ This statement assigns a name to an event handler.
 		self.parent.displayname = w[0]
 
 
-class OnDoc(SimpleStatement):
+class OnDoc(Statement):
 	name = ("doc",)
 	doc = "document an event handler"
 	immediate = True
@@ -256,7 +256,7 @@ This statement assigns a documentation string to an event handler.
 		self.parent.displaydoc = w[0]
 
 
-class OnSkip(SimpleStatement):
+class OnSkip(Statement):
 	name = ("skip","next")
 	doc = "skip later event handlers"
 	long_doc="""\

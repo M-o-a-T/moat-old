@@ -9,12 +9,12 @@ trigger FOO...
 
 """
 
-from homevent.statement import SimpleStatement, main_words
+from homevent.statement import Statement, main_words
 from homevent.event import Event
 from homevent.run import process_event
 
 
-class TriggerHandler(SimpleStatement):
+class TriggerHandler(Statement):
 	name=("trigger",)
 	doc="send an event"
 	long_doc="""\

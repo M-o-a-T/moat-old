@@ -9,7 +9,7 @@ wait FOO...
 
 """
 
-from homevent.statement import SimpleStatement, main_words
+from homevent.statement import Statement, main_words
 from homevent.event import Event
 from homevent.run import process_event
 from homevent.logging import log,TRACE
@@ -18,7 +18,7 @@ from twisted.internet import reactor,defer
 
 timer_nr = 0
 
-class WaitHandler(SimpleStatement):
+class WaitHandler(Statement):
 	name=("wait","for")
 	doc="delay for N seconds"
 	long_doc="""\
