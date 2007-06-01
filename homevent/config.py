@@ -9,11 +9,11 @@ Currently, it understands:
 #	include NAME
 #		- read that file too
 
-	loaddir
+	load dir
 		- list module directories
-	loaddir "NAME"
+	load dir "NAME"
 		- add a module directory
-	loaddir - "NAME"
+	load dir - "NAME"
 		- drop a module directory
 
 	load NAME
@@ -21,12 +21,6 @@ Currently, it understands:
 
 	unload NAME
 		- ... and remove it again.
-
-	list modules
-		- list the installed modules
-
-	worklist
-		- list the installed workers
 
 #	config NAME:
 #		foo bar baz
