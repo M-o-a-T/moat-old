@@ -9,6 +9,7 @@ from homevent.module import Module
 from homevent.logging import log
 from homevent.statement import main_words, MainStatementList
 from homevent.run import process_failure
+from homevent.worker import HaltSequence
 
 class Block(MainStatementList):
 	"""This just groups statements. For show, really — but also for testing."""
@@ -23,6 +24,10 @@ class Async(MainStatementList):
 
 	def run(self,*a,**k):
 		d = super(Async,self).run(*a,**k)
+		def catch_halt(_):
+			_.trap(HaltSequence)
+			return None
+		d.addErrback(catch_halt)
 		d.addErrback(process_failure)
 		# note that d is *not* returned. This is intentional.
 
