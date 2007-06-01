@@ -24,6 +24,7 @@ RUN: <WorkSequence:1 (4)> (step 1)
 2  : foo ‹Skip Next›
 3  : foo ‹not executed›
 4  : bar¦*
+.
 3 : foo
 Name: not executed
 Doc: Is not executed because of the former 'skip next' (until that's gone)
@@ -136,6 +137,7 @@ RUN: <WorkSequence:4 (5)> (step 2)
  ev: EVENT: bar¦foo
 3  : foo ‹not executed›
 4  : bar¦*
+.
 NEW: <WorkSequence:7 (5)>
    : │  EVENT: shutdown
    : └1╴... done.

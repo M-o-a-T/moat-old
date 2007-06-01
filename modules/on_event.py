@@ -185,7 +185,7 @@ class OnListHandler(Statement):
 			try:
 				fl = len(str(max(onHandlers.iterkeys())))
 			except ValueError:
-				print >>self.ctx.out,"No handlers are defined."
+				pass # max() on an empty sequence
 			else:
 				for id in sorted(onHandlers.iterkeys()):
 					h = onHandlers[id]
@@ -193,6 +193,7 @@ class OnListHandler(Statement):
 					if h.displayname is not None:
 						n += " ‹"+h.displayname+"›"
 					print >>self.ctx.out,str(id)+" "*(fl-len(str(id))+1),":",n
+			print >>self.ctx.out,"."
 		elif len(w) == 1:
 			try: h = onHandlers[w[0]]
 			except KeyError: h = onHandlerNames[w[0]]
