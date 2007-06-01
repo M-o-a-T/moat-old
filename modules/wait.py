@@ -9,16 +9,31 @@ wait FOO...
 
 """
 
-from homevent.statement import Statement, main_words
+from homevent.statement import AttributedStatement, Statement, main_words,\
+	global_words
 from homevent.event import Event
 from homevent.run import process_event
 from homevent.logging import log,TRACE
+from homevent.module import Module
+from time import time
+from twisted.python.failure import Failure
+
 from twisted.internet import reactor,defer
 
 
 timer_nr = 0
+waiters={}
 
-class WaitHandler(Statement):
+
+class WaitCancelled(RuntimeError):
+	"""An error signalling that a wait was killed."""
+	pass
+
+class DupWaiterError(RuntimeError):
+	"""A waiter with that name already exists"""
+	pass
+
+class WaitHandler(AttributedStatement):
 	name=("wait",)
 	doc="delay for N seconds"
 	long_doc="""\
@@ -32,6 +47,7 @@ wait FOO...
 		global timer_nr
 		timer_nr += 1
 		self.nr = timer_nr
+		self.displayname="wait_"+str(self.nr)
 
 	def run(self,ctx,**k):
 		event = self.params(ctx)
@@ -77,15 +93,94 @@ wait FOO...
 			log(TRACE,"No time out:",s)
 			return # no waiting
 		log(TRACE,"Timer",self.nr,"::",s)
+
 		r = defer.Deferred()
 		def doit():
 			log(TRACE,"Timeout",self.nr)
+			del waiters[self.displayname]
 			r.callback(None)
-		reactor.callLater(s,doit)
+		if self.displayname in waiters:
+			raise DupWaiterError
+		waiters[self.displayname] = self
+		self.timer_start=time()
+		self.timer_val = s
+		self.timer_defer = r
+		self.timer_id = reactor.callLater(s,doit)
 		return r
 
+	def cancel(self, err=WaitCancelled):
+		reactor.cancelCallLater(self.timer_id)
+		self.timer_defer.errback(Failure(err(self)))
+	
+	def retime(self, timeout):
+		reactor.cancelCallLater(self.timer_id)
+		self.timer_val = timeout
+		self.timer_id = reactor.callLater(s,doit)
 
-from homevent.module import Module
+
+class WaitName(Statement):
+	name = ("name",)
+	doc = "name a wait handler"
+	long_doc="""\
+This statement assigns a name to a wait statement
+(Useful when you want to cancel it later...)
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		w = event[len(self.name):]
+		if len(w) != 1:
+			raise SyntaxError('Usage: name "‹text›"')
+		self.parent.displayname = w[0]
+
+
+class WaitList(Statement):
+	name=("list","wait")
+	doc="list of waiting code"
+	long_doc="""\
+list wait
+	shows a list of running wait statements.
+list wait NAME
+	shows details for that wait statement.
+	
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		wl = event[len(self.name):]
+		if not len(wl):
+			for w in waiters.itervalues():
+				print >>self.ctx.out, w.displayname
+			print >>self.ctx.out, "."
+		elif len(wl) == 1:
+			w = waiters[wl[0]]
+			print  >>self.ctx.out, "Name: ",w.displayname
+			print  >>self.ctx.out, "Started: ",w.timer_start
+			print  >>self.ctx.out, "Timeout: ",w.timer_val
+			print  >>self.ctx.out, "Remaining: ",w.timer_start+w.timer_val-time()
+			while True:
+				w = getattr(w,"parent",None)
+				if w is None: break
+				n = getattr(w,"displayname",None)
+				if n is None:
+					try:
+						n = str(w.args)
+					except AttributeError:
+						pass
+					if n is None:
+						try:
+							n = " ".join(w.name)
+						except AttributeError:
+							n = w.__class__.__name__
+				if n is not None:
+					print  >>self.ctx.out, "in: ",n
+			print  >>self.ctx.out, "."
+				
+				
+		else:
+			raise SyntaxError("Only one name allowed.")
+
+
+WaitHandler.register_statement(WaitName)
+
 
 class EventsModule(Module):
 	"""\
@@ -96,8 +191,12 @@ class EventsModule(Module):
 
 	def load(self):
 		main_words.register_statement(WaitHandler)
+		#main_words.register_statement(WaitCancel)
+		global_words.register_statement(WaitList)
 	
 	def unload(self):
 		main_words.unregister_statement(WaitHandler)
+		#main_words.unregister_statement(WaitCancel)
+		global_words.unregister_statement(WaitList)
 
 init = EventsModule

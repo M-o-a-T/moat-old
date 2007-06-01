@@ -17,7 +17,6 @@ for typical usage.
 
 from homevent.context import Context
 from homevent.event import Event
-from homevent.statement import ComplexStatement, global_words
 
 from twisted.internet import defer
 
@@ -152,6 +151,24 @@ class ImmediateCollectProcessor(CollectProcessor):
 		else:
 			return fn.processor
 	
+class ImmediateProcessor(CollectProcessor):
+	"""\
+		A processor which directly executes all (sub-)statements.
+		"""
+
+	def __init__(self, parent=None, ctx=None, args=None, verify=False):
+		super(ImmediateProcessor,self).__init__(parent=parent, ctx=ctx)
+
+	def simple_statement(self,args):
+		fn = self.lookup(args)
+		return fn.run(self.ctx)
+
+	def complex_statement(self,args):
+		fn = self.lookup(args)
+		self.store(fn)
+		fn.start_block()
+
+		return RunMe(self,fn)
 
 class Interpreter(Processor):
 	"""\
@@ -161,6 +178,7 @@ class Interpreter(Processor):
 	def __init__(self, ctx=None):
 		super(Interpreter,self).__init__(ctx)
 		if "words" not in ctx:
+			from homevent.statement import global_words
 			self.ctx = ctx(words=global_words(ctx=ctx))
 		else:
 			self.ctx = ctx

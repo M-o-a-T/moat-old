@@ -30,6 +30,7 @@ Input ('what',)(9): ⌁.what¦else
 Init ('foo',)(10) from ‹global_words ('Global',) 1›
 Input ('foo',)(10): ⌁.foo¦again
 Global : word list:
+Known words:
 foo      : We foo around.
 foo bar  : Have a bar, man!
 help     : show doc texts

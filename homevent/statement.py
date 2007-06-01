@@ -133,7 +133,7 @@ class ComplexStatement(Statement):
 			By default, returns a CollectProcessor.
 			"""
 		from homevent.interpreter import CollectProcessor
-		return CollectProcessor(parent=self, ctx=self.ctx)
+		return CollectProcessor(parent=self, ctx=self.ctx(words=self))
 	processor = property(get_processor,doc="which processor works for my content?")
 
 	def store(self,s):
@@ -192,6 +192,19 @@ class ComplexStatement(Statement):
 			"""
 		del self.__words[handler.name]
 
+class AttributedStatement(ComplexStatement):
+	"""A statement that can be parameterited."""
+
+	def get_processor(self):
+		"""Run sub-statements immediately."""
+		from homevent.interpreter import ImmediateProcessor
+		return ImmediateProcessor(parent=self, ctx=self.ctx(words=self))
+	processor = property(get_processor,doc="which processor works for my content?")
+
+	def start_block(self): pass
+	def end_block(self): pass
+	def add(self,proc):
+		raise RuntimeError("Non-immediate substatement on ‹%s›?" % (" ".join(self.name),))
 
 class IgnoreStatement(Statement):
 	"""Used for error exits"""
