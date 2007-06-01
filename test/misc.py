@@ -19,6 +19,8 @@ wait 0.1
 sync trigger foo2
 sync trigger bar2
 wait 0.1
+skip this:
+	trigger never the same
 block:
 	trigger foo3
 	trigger bar3
@@ -27,7 +29,11 @@ block:
 	sync trigger foo4
 	block:
 		sync trigger bar4
-wait 0.1
+async:
+	wait 0.1
+	trigger foo5
+wait 0.2
+trigger bar5
 shutdown
 """)
 

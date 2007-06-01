@@ -5,7 +5,7 @@ NEW: <WorkSequence:1 (4)>
 RUN: <WorkSequence:1 (4)>
  ev: EVENT: startup
 1 END: startup
-RUN: <WorkSequence:1 (4)> (step 1)
+RUN: <WorkSequence:1 (4)>
  ev: EVENT: startup
 NEW: <WorkSequence:2 (4)>
    : │  EVENT: foo1
@@ -14,7 +14,7 @@ NEW: <WorkSequence:2 (4)>
 RUN: <WorkSequence:2 (4)>
  ev: EVENT: foo1
 11 END: foo1
-RUN: <WorkSequence:2 (4)> (step 1)
+RUN: <WorkSequence:2 (4)>
  ev: EVENT: foo1
 NEW: <WorkSequence:3 (4)>
    : │  EVENT: bar1
@@ -23,7 +23,7 @@ NEW: <WorkSequence:3 (4)>
 RUN: <WorkSequence:3 (4)>
  ev: EVENT: bar1
 20 END: bar1
-RUN: <WorkSequence:3 (4)> (step 1)
+RUN: <WorkSequence:3 (4)>
  ev: EVENT: bar1
 0 Timer 1 :: 0.1
 0 Timeout 1
@@ -34,7 +34,7 @@ NEW: <WorkSequence:4 (4)>
 RUN: <WorkSequence:4 (4)>
  ev: EVENT: foo2
 31 END: foo2
-RUN: <WorkSequence:4 (4)> (step 1)
+RUN: <WorkSequence:4 (4)>
  ev: EVENT: foo2
 NEW: <WorkSequence:5 (4)>
    : │  EVENT: bar2
@@ -43,10 +43,11 @@ NEW: <WorkSequence:5 (4)>
 RUN: <WorkSequence:5 (4)>
  ev: EVENT: bar2
 40 END: bar2
-RUN: <WorkSequence:5 (4)> (step 1)
+RUN: <WorkSequence:5 (4)>
  ev: EVENT: bar2
 0 Timer 2 :: 0.1
 0 Timeout 2
+0 add ‹TriggerHandler ⌁.trigger¦never¦the¦same›
 0 add ‹TriggerHandler ⌁.trigger¦foo3›
 0 add ‹TriggerHandler ⌁.trigger¦bar3›
 NEW: <WorkSequence:6 (4)>
@@ -55,17 +56,17 @@ NEW: <WorkSequence:6 (4)>
 NEW: <WorkSequence:7 (4)>
    : │  EVENT: bar3
    : └1╴... done.
-53 EVENT: foo3
+55 EVENT: foo3
 RUN: <WorkSequence:6 (4)>
  ev: EVENT: foo3
-53 END: foo3
-RUN: <WorkSequence:6 (4)> (step 1)
+55 END: foo3
+RUN: <WorkSequence:6 (4)>
  ev: EVENT: foo3
-56 EVENT: bar3
+58 EVENT: bar3
 RUN: <WorkSequence:7 (4)>
  ev: EVENT: bar3
-56 END: bar3
-RUN: <WorkSequence:7 (4)> (step 1)
+58 END: bar3
+RUN: <WorkSequence:7 (4)>
  ev: EVENT: bar3
 0 Timer 3 :: 0.1
 0 Timeout 3
@@ -75,32 +76,54 @@ RUN: <WorkSequence:7 (4)> (step 1)
 NEW: <WorkSequence:8 (4)>
    : │  EVENT: foo4
    : └1╴... done.
-75 EVENT: foo4
+77 EVENT: foo4
 RUN: <WorkSequence:8 (4)>
  ev: EVENT: foo4
-75 END: foo4
-RUN: <WorkSequence:8 (4)> (step 1)
+77 END: foo4
+RUN: <WorkSequence:8 (4)>
  ev: EVENT: foo4
 NEW: <WorkSequence:9 (4)>
    : │  EVENT: bar4
    : └1╴... done.
-83 EVENT: bar4
+85 EVENT: bar4
 RUN: <WorkSequence:9 (4)>
  ev: EVENT: bar4
-83 END: bar4
-RUN: <WorkSequence:9 (4)> (step 1)
+85 END: bar4
+RUN: <WorkSequence:9 (4)>
  ev: EVENT: bar4
+0 add ‹WaitHandler ('wait',) 2›
+0 add ‹TriggerHandler ⌁.trigger¦foo5›
 0 Timer 4 :: 0.1
+0 Timer 5 :: 0.2
 0 Timeout 4
-NEW: <WorkSequence:10 (5)>
+NEW: <WorkSequence:10 (4)>
+   : │  EVENT: foo5
+   : └1╴... done.
+99 EVENT: foo5
+RUN: <WorkSequence:10 (4)>
+ ev: EVENT: foo5
+99 END: foo5
+RUN: <WorkSequence:10 (4)>
+ ev: EVENT: foo5
+0 Timeout 5
+NEW: <WorkSequence:11 (4)>
+   : │  EVENT: bar5
+   : └1╴... done.
+108 EVENT: bar5
+RUN: <WorkSequence:11 (4)>
+ ev: EVENT: bar5
+108 END: bar5
+RUN: <WorkSequence:11 (4)>
+ ev: EVENT: bar5
+NEW: <WorkSequence:12 (5)>
    : │  EVENT: shutdown
    : └1╴... done.
 2 EVENT: shutdown
-RUN: <WorkSequence:10 (5)>
+RUN: <WorkSequence:12 (5)>
  ev: EVENT: shutdown
 2 END: shutdown
 RUN: shutting down
- at: <WorkSequence:10 (5)> (step 1)
+ at: <WorkSequence:12 (5)>
  ev: EVENT: shutdown
-RUN: <WorkSequence:10 (5)> (step 1)
+RUN: <WorkSequence:12 (5)>
  ev: EVENT: shutdown

@@ -9,7 +9,7 @@ RUN: <WorkSequence:1 (4)>
 .
 1 END: startup
 .
-RUN: <WorkSequence:1 (4)> (step 1)
+RUN: <WorkSequence:1 (4)>
  ev: EVENT: startup
 .
 NEW: <WorkSequence:2 (5)>
@@ -37,7 +37,7 @@ RUN: <WorkSequence:3 (4)>
 .
 15 END: module¦load-start¦example
 .
-RUN: <WorkSequence:3 (4)> (step 1)
+RUN: <WorkSequence:3 (4)>
  ev: EVENT: module¦load-start¦example
 .
 Loading!
@@ -53,12 +53,12 @@ RUN: <WorkSequence:4 (4)>
 .
 22 END: module¦load-done¦example
 .
-RUN: <WorkSequence:4 (4)> (step 1)
+RUN: <WorkSequence:4 (4)>
  ev: EVENT: module¦load-done¦example
 .
 3 END: module¦load¦example
 .
-RUN: <WorkSequence:2 (5)> (step 2)
+RUN: <WorkSequence:2 (5)> (step 1)
  ev: EVENT: module¦load¦example
 .
 NEW: <WorkSequence:5 (5)>
@@ -86,7 +86,7 @@ RUN: <WorkSequence:6 (4)>
 .
 36 END: module¦load-start¦example
 .
-RUN: <WorkSequence:6 (4)> (step 1)
+RUN: <WorkSequence:6 (4)>
  ev: EVENT: module¦load-start¦example
 .
 NEW: <WorkSequence:7 (4)>
@@ -114,7 +114,7 @@ RUN: <WorkSequence:7 (4)>
 .
 47 END: ModuleExistsError
 .
-RUN: <WorkSequence:7 (4)> (step 1)
+RUN: <WorkSequence:7 (4)>
  ev: ERROR: ('This module already exists', ('example',))
 .
 NEW: <WorkSequence:8 (4)>
@@ -128,12 +128,12 @@ RUN: <WorkSequence:8 (4)>
 .
 49 END: module¦load-fail¦example
 .
-RUN: <WorkSequence:8 (4)> (step 1)
+RUN: <WorkSequence:8 (4)>
  ev: EVENT: module¦load-fail¦example
 .
 3 END: module¦load¦example
 .
-RUN: <WorkSequence:5 (5)> (step 2)
+RUN: <WorkSequence:5 (5)> (step 1)
  ev: EVENT: module¦load¦example
 .
 NEW: <WorkSequence:9 (5)>
@@ -161,7 +161,7 @@ RUN: <WorkSequence:10 (4)>
 .
 63 END: module¦unload-start¦example
 .
-RUN: <WorkSequence:10 (4)> (step 1)
+RUN: <WorkSequence:10 (4)>
  ev: EVENT: module¦unload-start¦example
 .
 Unloading!
@@ -177,12 +177,12 @@ RUN: <WorkSequence:11 (4)>
 .
 70 END: module¦unload-done¦example
 .
-RUN: <WorkSequence:11 (4)> (step 1)
+RUN: <WorkSequence:11 (4)>
  ev: EVENT: module¦unload-done¦example
 .
 4 END: module¦unload¦example
 .
-RUN: <WorkSequence:9 (5)> (step 2)
+RUN: <WorkSequence:9 (5)> (step 1)
  ev: EVENT: module¦unload¦example
 .
 NEW: <WorkSequence:12 (5)>
@@ -197,9 +197,9 @@ RUN: <WorkSequence:12 (5)>
 2 END: shutdown
 .
 RUN: shutting down
- at: <WorkSequence:12 (5)> (step 1)
+ at: <WorkSequence:12 (5)>
  ev: EVENT: shutdown
 .
-RUN: <WorkSequence:12 (5)> (step 1)
+RUN: <WorkSequence:12 (5)>
  ev: EVENT: shutdown
 .

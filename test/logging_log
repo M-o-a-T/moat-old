@@ -5,7 +5,7 @@ NEW: <WorkSequence:1 (4)>
 RUN: <WorkSequence:1 (4)>
  ev: EVENT: startup
 1 END: startup
-RUN: <WorkSequence:1 (4)> (step 1)
+RUN: <WorkSequence:1 (4)>
  ev: EVENT: startup
 0 This is not logged
 1 This is logged
@@ -28,7 +28,7 @@ RUN: <WorkSequence:2 (5)>
  ev: EVENT: shutdown
 2 END: shutdown
 RUN: shutting down
- at: <WorkSequence:2 (5)> (step 1)
+ at: <WorkSequence:2 (5)>
  ev: EVENT: shutdown
-RUN: <WorkSequence:2 (5)> (step 1)
+RUN: <WorkSequence:2 (5)>
  ev: EVENT: shutdown

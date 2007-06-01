@@ -17,16 +17,16 @@ async:
 	wait 10:
 		name FooBar
 	trigger FooBar
-wait 0.1:
+wait 0.2:
 	name FooBar
 	update
+wait 0.1
 trigger DoNow
-wait 0.2
 async:
-	wait 0.2:
+	wait 0.7:
 		name FooBaz
 	trigger Heya
-wait 0.1
+wait 0.4
 drop wait FooBaz
 wait 0.2
 # observe no HeYa event

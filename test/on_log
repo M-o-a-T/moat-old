@@ -5,7 +5,7 @@ NEW: <WorkSequence:1 (4)>
 RUN: <WorkSequence:1 (4)>
  ev: EVENT: startup
 1 END: startup
-RUN: <WorkSequence:1 (4)> (step 1)
+RUN: <WorkSequence:1 (4)>
  ev: EVENT: startup
 0 Create OnEvtHandler: ['foo']
 0 add ‹DoNothingHandler ⌁.do¦nothing›
@@ -74,10 +74,10 @@ RUN: ON foo
  at: <WorkSequence:3 (7)> (step 2)
  ev: EVENT: foo
 46 END: foo
-RUN: <WorkSequence:3 (7)> (step 4)
+RUN: <WorkSequence:3 (7)> (step 3)
  ev: EVENT: foo
 40 END: bar¦foo
-RUN: <WorkSequence:2 (5)> (step 2)
+RUN: <WorkSequence:2 (5)> (step 1)
  ev: EVENT: bar¦foo
 NEW: <WorkSequence:4 (5)>
    : │  EVENT: bar¦foo
@@ -127,13 +127,13 @@ NEW: <WorkSequence:6 (4)>
 RUN: <WorkSequence:6 (4)>
  ev: EVENT: OuchNo
 78 END: OuchNo
-RUN: <WorkSequence:6 (4)> (step 1)
+RUN: <WorkSequence:6 (4)>
  ev: EVENT: OuchNo
 70 END: foo
-RUN: <WorkSequence:5 (6)> (step 3)
+RUN: <WorkSequence:5 (6)> (step 2)
  ev: EVENT: foo
 64 END: bar¦foo
-RUN: <WorkSequence:4 (5)> (step 2)
+RUN: <WorkSequence:4 (5)> (step 1)
  ev: EVENT: bar¦foo
 3  : foo ‹not executed›
 4  : bar¦*
@@ -146,7 +146,7 @@ RUN: <WorkSequence:7 (5)>
  ev: EVENT: shutdown
 2 END: shutdown
 RUN: shutting down
- at: <WorkSequence:7 (5)> (step 1)
+ at: <WorkSequence:7 (5)>
  ev: EVENT: shutdown
-RUN: <WorkSequence:7 (5)> (step 1)
+RUN: <WorkSequence:7 (5)>
  ev: EVENT: shutdown

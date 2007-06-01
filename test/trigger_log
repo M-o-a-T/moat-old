@@ -5,7 +5,7 @@ NEW: <WorkSequence:1 (4)>
 RUN: <WorkSequence:1 (4)>
  ev: EVENT: startup
 1 END: startup
-RUN: <WorkSequence:1 (4)> (step 1)
+RUN: <WorkSequence:1 (4)>
  ev: EVENT: startup
 NEW: <WorkSequence:2 (4)>
    : │  EVENT: foo
@@ -14,7 +14,7 @@ NEW: <WorkSequence:2 (4)>
 RUN: <WorkSequence:2 (4)>
  ev: EVENT: foo
 11 END: foo
-RUN: <WorkSequence:2 (4)> (step 1)
+RUN: <WorkSequence:2 (4)>
  ev: EVENT: foo
 0 Timer 1 :: 0.5
 0 Timeout 1
@@ -25,7 +25,7 @@ NEW: <WorkSequence:3 (4)>
 RUN: <WorkSequence:3 (4)>
  ev: EVENT: bar
 22 END: bar
-RUN: <WorkSequence:3 (4)> (step 1)
+RUN: <WorkSequence:3 (4)>
  ev: EVENT: bar
 NEW: <WorkSequence:4 (5)>
    : │  EVENT: shutdown
@@ -35,7 +35,7 @@ RUN: <WorkSequence:4 (5)>
  ev: EVENT: shutdown
 2 END: shutdown
 RUN: shutting down
- at: <WorkSequence:4 (5)> (step 1)
+ at: <WorkSequence:4 (5)>
  ev: EVENT: shutdown
-RUN: <WorkSequence:4 (5)> (step 1)
+RUN: <WorkSequence:4 (5)>
  ev: EVENT: shutdown

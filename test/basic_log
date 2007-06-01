@@ -9,7 +9,7 @@ RUN: <WorkSequence:1 (4)>
 .
 1 END: startup
 .
-RUN: <WorkSequence:1 (4)> (step 1)
+RUN: <WorkSequence:1 (4)>
  ev: EVENT: startup
 .
 NEW: <WorkSequence:2 (5)>
@@ -30,7 +30,7 @@ The 'TellMe' worker is saying: hello
 .
 3 END: say¦hello
 .
-RUN: <WorkSequence:2 (5)> (step 2)
+RUN: <WorkSequence:2 (5)> (step 1)
  ev: EVENT: say¦hello
 .
 NEW: <WorkSequence:3 (5)>
@@ -69,7 +69,7 @@ The 'TellTwo' worker is saying: greeting
 .
 4 END: say more¦greeting
 .
-RUN: <WorkSequence:3 (5)> (step 2)
+RUN: <WorkSequence:3 (5)> (step 1)
  ev: EVENT: say more¦greeting
 .
 NEW: <WorkSequence:5 (5)>
@@ -84,9 +84,9 @@ RUN: <WorkSequence:5 (5)>
 2 END: shutdown
 .
 RUN: shutting down
- at: <WorkSequence:5 (5)> (step 1)
+ at: <WorkSequence:5 (5)>
  ev: EVENT: shutdown
 .
-RUN: <WorkSequence:5 (5)> (step 1)
+RUN: <WorkSequence:5 (5)>
  ev: EVENT: shutdown
 .
