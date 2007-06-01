@@ -280,7 +280,7 @@ class OnEventModule(Module):
 		main_words.register_statement(OffEventHandler)
 		global_words.register_statement(OnListHandler)
 		OnEventHandler.register_statement(OnPrio)
-		OnEventHandler.register_statement(OnSkip)
+		main_words.register_statement(OnSkip)
 		OnEventHandler.register_statement(OnName)
 		OnEventHandler.register_statement(OnDoc)
 	
@@ -289,7 +289,7 @@ class OnEventModule(Module):
 		main_words.unregister_statement(OffEventHandler)
 		global_words.unregister_statement(OnListHandler)
 		OnEventHandler.unregister_statement(OnPrio)
-		OnEventHandler.unregister_statement(OnSkip)
+		main_words.unregister_statement(OnSkip)
 		OnEventHandler.unregister_statement(OnName)
 		OnEventHandler.unregister_statement(OnDoc)
 	
