@@ -134,7 +134,7 @@ class LogEndEvent(Event):
 			yield  "END: REPORT_ERROR: "+repr(self.names[1:])
 
 class LogDoneWorker(LogWorker):
-	prio = MAX_PRIO
+	prio = MAX_PRIO+1
 
 	def process(self, event,*a,**k):
 		super(LogDoneWorker,self).process(LogEndEvent(event))

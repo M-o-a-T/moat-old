@@ -184,7 +184,7 @@ class WorkSequence(WorkItem):
 		pr = None
 		step=1
 		for w in self.work:
-			if w.prio < MIN_PRIO or w.prio > MAX_PRIO:
+			if w.prio < MIN_PRIO or w.prio > MAX_PRIO+1: # Logger
 				continue
 			if pr:
 				prefix = "├"+str(step)+"╴"

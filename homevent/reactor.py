@@ -43,7 +43,7 @@ class Shutdown_Worker_2(ExcWorker):
 	"""\
 		This worker counts event runs and makes sure that all are
 		processed."""
-	prio = MAX_PRIO+2
+	prio = MAX_PRIO+3
 	def does_event(self,ev):
 		return True
 	def process(self,queue,*a,**k):
@@ -57,7 +57,7 @@ class Shutdown_Worker(Worker):
 	"""\
 		This worker does the actual shutdown.
 		"""
-	prio = MAX_PRIO+1
+	prio = MAX_PRIO+2
 	def does_event(self,ev):
 		return (ev is shutdown_event)
 	def process(self,queue,*a,**k):
