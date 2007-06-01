@@ -31,6 +31,19 @@ class Async(MainStatementList):
 		d.addErrback(process_failure)
 		# note that d is *not* returned. This is intentional.
 
+class SkipThis(MainStatementList):
+	"""This runs statements exactly never."""
+	name=("skip","this")
+	doc="do not run these statements"
+	long_doc="""\
+skip this:
+	trigger foo
+	# These statements need to be valid, but they're never excecuted.
+"""
+
+	def run(self,*a,**k):
+		pass
+
 class BlockModule(Module):
 	"""\
 		This is a sample loadable module,
@@ -42,9 +55,11 @@ class BlockModule(Module):
 	def load(self):
 		main_words.register_statement(Block)
 		main_words.register_statement(Async)
+		main_words.register_statement(SkipThis)
 	
 	def unload(self):
 		main_words.unregister_statement(Block)
 		main_words.unregister_statement(Async)
+		main_words.unregister_statement(SkipThis)
 	
 init = BlockModule

@@ -15,6 +15,7 @@ from homevent.event import Event
 from homevent.run import process_event
 from homevent.logging import log,TRACE
 from homevent.module import Module
+from homevent.worker import HaltSequence
 from time import time
 from twisted.python.failure import Failure
 
@@ -42,6 +43,8 @@ wait FOO...
 	  append "s/m/h/d/w" for seconds/minutes/hours/days/weeks
 	  # you can do basic +/- calculations (2m - 10s); you do need the spaces
 """
+	is_update = False
+
 	def __init__(self,*a,**k):
 		super(WaitHandler,self).__init__(*a,**k)
 		global timer_nr
@@ -89,33 +92,43 @@ wait FOO...
 				else:
 					m = 1 # "1min 59sec"
 					
+		if self.is_update:
+			if s < 0: s = 0
+			w = waiters[self.displayname]
+			w.retime(s)
+			return
+			
 		if s < 0:
 			log(TRACE,"No time out:",s)
 			return # no waiting
 		log(TRACE,"Timer",self.nr,"::",s)
 
 		r = defer.Deferred()
-		def doit():
-			log(TRACE,"Timeout",self.nr)
-			del waiters[self.displayname]
-			r.callback(None)
 		if self.displayname in waiters:
-			raise DupWaiterError
+			raise DupWaiterError(self.displayname)
 		waiters[self.displayname] = self
 		self.timer_start=time()
 		self.timer_val = s
 		self.timer_defer = r
-		self.timer_id = reactor.callLater(s,doit)
+		self.timer_id = reactor.callLater(s, self.doit)
 		return r
 
+	def doit(self):
+		log(TRACE,"Timeout",self.nr)
+		del waiters[self.displayname]
+		r = self.timer_defer
+		self.timer_defer = None
+		r.callback(None)
+
 	def cancel(self, err=WaitCancelled):
-		reactor.cancelCallLater(self.timer_id)
+		self.timer_id.cancel()
+		self.timer_id = None
 		self.timer_defer.errback(Failure(err(self)))
 	
 	def retime(self, timeout):
-		reactor.cancelCallLater(self.timer_id)
-		self.timer_val = timeout
-		self.timer_id = reactor.callLater(s,doit)
+		self.timer_id.cancel()
+		self.timer_val = time()-self.timer_start+timeout
+		self.timer_id = reactor.callLater(timeout, self.doit)
 
 
 class WaitName(Statement):
@@ -133,9 +146,37 @@ This statement assigns a name to a wait statement
 		self.parent.displayname = w[0]
 
 
+class WaitCancel(Statement):
+	name = ("drop","wait")
+	doc = "abort a wait handler"
+	long_doc="""\
+This statement aborts a wait handler.
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		wl = event[len(self.name):]
+		if len(wl) != 1:
+			raise SyntaxError('Usage: drop wait "‹name›"')
+		w = waiters[wl[0]]
+		w.cancel(err=HaltSequence)
+
+class WaitUpdate(Statement):
+	name = ("update",)
+	doc = "change the timeout of an existing wait handler"
+	long_doc="""\
+This statement updates the timeout of an existing wait handler.
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		w = event[len(self.name):]
+		if len(w):
+			raise SyntaxError('Usage: update')
+		self.parent.is_update = True
+
+
 class WaitList(Statement):
 	name=("list","wait")
-	doc="list of waiting code"
+	doc="list of waiting statements"
 	long_doc="""\
 list wait
 	shows a list of running wait statements.
@@ -180,6 +221,7 @@ list wait NAME
 
 
 WaitHandler.register_statement(WaitName)
+WaitHandler.register_statement(WaitUpdate)
 
 
 class EventsModule(Module):
@@ -191,12 +233,12 @@ class EventsModule(Module):
 
 	def load(self):
 		main_words.register_statement(WaitHandler)
-		#main_words.register_statement(WaitCancel)
+		main_words.register_statement(WaitCancel)
 		global_words.register_statement(WaitList)
 	
 	def unload(self):
 		main_words.unregister_statement(WaitHandler)
-		#main_words.unregister_statement(WaitCancel)
+		main_words.unregister_statement(WaitCancel)
 		global_words.unregister_statement(WaitList)
 
 init = EventsModule
