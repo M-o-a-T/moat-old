@@ -12,7 +12,7 @@ from homevent.run import list_workers
 
 
 class ModList(Statement):
-	name=("list","modules")
+	name=("list","module")
 	doc="list of modules"
 	long_doc="""\
 list module
