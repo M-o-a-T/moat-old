@@ -5,6 +5,7 @@ import homevent as h
 from homevent.logging import Logger, TRACE
 import sys
 import re
+import os
 from twisted.internet import reactor
 
 r_fli = re.compile(r'(:\s+File ").*/([^/]+/[^/]+)", line \d+, in')
@@ -17,7 +18,7 @@ class run_logger(Logger):
 	def __init__(self,name, dot=True):
 		self.dot=dot
 		try:
-			self.data=open(name+"_log")
+			self.data=open(os.path.join("real",name),"w")
 		except IOError:
 			print >>sys.stderr,"ERROR, no log file"
 			self.data = None
@@ -25,27 +26,13 @@ class run_logger(Logger):
 		h.register_logger(self)
 		self.level = TRACE
 
-	def __del__(self):
-		if self.data:
-			sp = self.data.readline()
-			if sp:
-				print "ERROR, line",self.line,"-- more data in log"
-		
 	def _log(self,sx):
 		self.line += 1
 		def rep(m):
 			return m.group(1)+m.group(2)+", in"
 		sx = r_fli.sub(rep,sx)
 		sx = r_hex.sub("obj",sx)
-		if not self.data:
-			print sx
-			return
-		sp = self.data.readline().rstrip("\n")
-		if sp.rstrip() != sx.rstrip():
-			print "ERROR, line",self.line
-			print "expect:",repr(sp)
-			print "got   :",repr(sx)
-			self.data = None
+		print >>self.data, sx
 
 	def log(self, *a):
 		sx=" ".join(str(x) for x in a)

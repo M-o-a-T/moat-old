@@ -10,7 +10,7 @@ from homevent.module import load_module
 from StringIO import StringIO
 from test import run_logger, logger,logwrite
 
-log = run_logger("misc",dot=False).log
+log = run_logger("wait",dot=False).log
 
 input = StringIO("""\
 async:

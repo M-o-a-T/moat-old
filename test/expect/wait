@@ -10,32 +10,34 @@ RUN: <WorkSequence:1 (4)>
 0 add ‹WaitHandler ('wait',) 2›
 0 add ‹TriggerHandler ⌁.trigger¦FooBar›
 0 Timer 1 :: 10
+0 Timer 3 :: 0.1
+0 Timeout 3
 NEW: <WorkSequence:2 (4)>
    : │  EVENT: DoNow
    : └1╴... done.
-23 EVENT: DoNow
+25 EVENT: DoNow
 RUN: <WorkSequence:2 (4)>
  ev: EVENT: DoNow
-23 END: DoNow
+25 END: DoNow
 RUN: <WorkSequence:2 (4)>
  ev: EVENT: DoNow
 0 add ‹WaitHandler ('wait',) 2›
 0 add ‹TriggerHandler ⌁.trigger¦Heya›
+0 Timer 4 :: 0.7
+0 Timer 5 :: 0.4
 0 Timeout 1
 NEW: <WorkSequence:3 (4)>
    : │  EVENT: FooBar
    : └1╴... done.
-36 EVENT: FooBar
+41 EVENT: FooBar
 RUN: <WorkSequence:3 (4)>
  ev: EVENT: FooBar
-36 END: FooBar
+41 END: FooBar
 RUN: <WorkSequence:3 (4)>
  ev: EVENT: FooBar
-0 Timer 3 :: 0.7
-0 Timer 4 :: 0.4
-0 Timeout 4
-0 Timer 5 :: 0.2
 0 Timeout 5
+0 Timer 6 :: 0.2
+0 Timeout 6
 NEW: <WorkSequence:4 (5)>
    : │  EVENT: shutdown
    : └1╴... done.
