@@ -1,0 +1,315 @@
+=====
+block
+=====
+
+This module implements two quick-and-dirty compound statements to
+control execution flow.
+
+------
+block:
+------
+
+This just groups more than one statement into a sequence. It's not very
+useful by itself, but a good "if true" replacement.
+
+------
+async:
+------
+
+Like "block:", but does *not* wait for completion before continuing to
+interpret input: the statements will run in a parallel thread.
+
+	load logging
+	load wait
+	async:
+		log TRACE One
+		wait 1
+		log TRACE two
+
+A "skip next" command inside the async: block will terminate executing
+that block, but cannot have any effect beyond that.
+
+----------
+skip this:
+----------
+
+This will cause the following block to not be executed.
+(It still needs to be composed of known words.)
+It's a handy "comment this out" statement.
+
+=======
+example
+=======
+
+A snippet of module loader code to help you get going.
+
+====
+help
+====
+
+This module implements the help command.
+
+"help" is able to examine sub-commands, so if the "foo" command has a
+sub-command named "bar", "help foo bar" will list its info.
+
+Of course, if you also happen to have a top-level "foo bar" command,
+you're SOL. So don't do that. ☺
+
+====
+list
+====
+
+This module implements a couple of rarely-used commands to list and
+examine internal data structures.
+
+-----------
+list module
+-----------
+
+Shows the list of loaded modules, terminated by a single dot.
+
+You can append the name of a loaded module to examine details.
+
+-----------
+list worker
+-----------
+
+Shows the list of program snippets that listen for events, ordered by
+priority.
+
+You can append the name of a worker to examine details.
+
+=======
+logging
+=======
+
+This module controls debug output.
+
+---
+log
+---
+
+Without arguments, it shows a list of the available logging levels,
+sorted by priority.
+
+	log
+
+With one argument, it states that debug output of all levels up to the
+one specified by the argument shoudl be reported.
+
+	log DEBUG
+
+With more than one argument, the first argument specifies the level at
+which the rest of the arguments will get logged.
+
+	log TRACE "You are here."
+
+Log output will go to all terminals which listen to logging at that level
+(or less).
+
+========
+on_event
+========
+
+This is the main event handler module. It translates system events to
+executed code, which usually includes triggering even more events.
+
+---
+on:
+---
+
+
+	load logging
+	on foo *whatever:
+		name FooBar
+		prio 10
+		log TRACE "Yes, we get to foo the" $whatever "now!"
+		# and whatever else you'd like to do here
+
+	load trigger
+	trigger foo bar
+
+----
+name
+----
+
+This sub-statement names this particular event handler.
+
+Event handlers have system-assigned numbers as well as names, so you can
+still delete a handler without naming it.
+
+----
+prio
+----
+
+Priority. Default priority is 50. Allowed priorities go from 0 to 100.
+
+Lower-priority handlers are executed first. Only one matching handler
+per priority gets executed; which one, depends on random chance (and,
+of course, any attached conditions).
+
+This does mean that higher-priority handlers do not start running until
+their lower-priority counterparts are completed. If that is not what you
+want, use an async: handler in the low-priority handler.
+
+---------
+skip next
+---------
+
+This command skips everything that comes after it. This includes not
+only every command afterwards, but also all higher-priority event
+handlers.
+
+One important usage of this is an alarm system. If you have turned on
+your alarm system, you want something entirely different to happen if,
+say, somebody turns on the office light.
+
+	load trigger
+	on switch * office *:
+		prio 10
+		only if state on alarm
+		trigger alert intruder
+		skip next
+	on switch on office whatever:
+		do-whatever-to-turn-this-light-on
+
+This means that you can have localized knowledge of special requirements
+and don't need to sprinkle "don't do anything if the alarm is on"
+conditions throughout your code.
+
+Not that the effects of a "skip next" end at the end of an event; they
+do not propagate through a "sync trigger" handler:
+
+	on foo:
+		log TRACE one
+		sync trigger bar
+		log TRACE two
+	on bar:
+		skip next
+		log TRACE "beware: this is ignored"
+
+will still print
+
+	TRACE> one
+	TRACE> two
+
+-------
+list on
+-------
+
+Lists all event handlers.
+
+You can append the name or number of a handler to show details for
+that handler.
+
+-------
+drop on
+-------
+
+Deletes a handler from the system. You need to specify either its number
+or its name.
+
+	drop on FooBar
+
+=====
+state
+=====
+
+TODO.
+
+=======
+trigger
+=======
+
+This module implements a way to create new events from script code.
+
+-------
+trigger
+-------
+
+Launches a new event. The event is run asynchronously, i.e. execution
+will continue while the event is processed.
+
+	trigger foo bar
+
+------------
+sync trigger
+------------
+
+The event is run synchronously, i.e. execution will stall until this
+event has been processed. That means if the trigger says
+
+	on foo bar:
+		switch on lamp
+		wait 1h
+		switch off lamp
+
+then the statement after the "sync trigger" will be executed exactly one
+hour later.
+
+====
+wait
+====
+
+This module implements a method to wait for a specified amount of time.
+
+----
+wait
+----
+
+This statement will delay execution by the specified amount.
+
+	wait 10min + 5sec
+
+You can use it as a compound statement to specify details.
+
+----
+name
+----
+
+Assign a name to a wait statement. This name causes the waiter to be
+unique, i.e. there can only be one wait statement with that name in the
+whole system. If you try to execute a wait statement with the same
+name as one that's still pending, an error will be triggered.
+
+	wait 5min:
+		name "Brew some tea"
+
+If you do not name a wait statement, it will have a system-assigned
+unique name.
+
+------
+update
+------
+
+This marks a wait: statement as updating another waiter, instead of
+waiting itself. For example:
+
+	async:
+		wait 10sec:
+			name Test
+		trigger FooBar
+
+	wait 1sec:
+		name Test
+		update
+	
+	trigger DoNow
+
+will trigger the FooBar event after one second; the DoNow event will
+trigger immediately. Obviously, both wait statements need the same name.
+An error will be raised if the original statement is no longer active.
+
+---------
+list wait
+---------
+
+This command shows which wait statements are currently active.
+
+You can append the name of a wait statement to show additional details.
+
+---------
+drop wait
+---------
+
+Cancels 
