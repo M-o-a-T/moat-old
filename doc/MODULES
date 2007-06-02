@@ -118,6 +118,12 @@ executed code, which usually includes triggering even more events.
 on:
 ---
 
+Execute statements when an event happens. The parameters of the event
+need to correspond 1:1 to the parameters of the "on:" command.
+
+A limited form of wildcard is available: A parameter "*" matches
+anything; the actual value is available as "$1" (for the first '*') etc.
+Alternately, you can name the parameters:
 
 	load logging
 	on foo *whatever:
@@ -128,6 +134,10 @@ on:
 
 	load trigger
 	trigger foo bar
+
+Right now there is no support for pattern matching or variable number of
+arguments. (One solution is to design your event names in such a way that
+you don't need that.)
 
 ----
 name
@@ -150,7 +160,7 @@ of course, any attached conditions).
 
 This does mean that higher-priority handlers do not start running until
 their lower-priority counterparts are completed. If that is not what you
-want, use an async: handler in the low-priority handler.
+want, use an async: block in the low-priority handler.
 
 ---------
 skip next
