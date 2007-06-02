@@ -19,7 +19,7 @@ Otherwise a "alarm livingroom" would be triggered.
 
 """
 
-from homevent.interpreter import ImmediateCollectProcessor
+from homevent.interpreter import CollectProcessor
 from homevent.statement import Statement,MainStatementList, main_words,\
 	global_words
 from homevent.logging import log_event,log, TRACE
@@ -61,10 +61,6 @@ Every "*foo" in the event description is mapped to the corresponding
 	in_sub = False
 	prio = (MIN_PRIO+MAX_PRIO)//2+1
 	displayname = None
-
-	def get_processor(self):
-		return ImmediateCollectProcessor(parent=self, ctx=self.ctx(words=self))
-	processor = property(get_processor)
 
 	def does_event(self,event):
 		ie = iter(event)

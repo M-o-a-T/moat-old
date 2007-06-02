@@ -90,14 +90,20 @@ class CollectProcessor(Processor):
 
 	def simple_statement(self,args):
 		fn = self.lookup(args)
+		if fn.immediate:
+			return fn.run(self.ctx)
 		self.store(fn)
 
 	def complex_statement(self,args):
 		fn = self.lookup(args)
-		self.store(fn)
 
 		fn.start_block()
-		return fn.processor
+
+		if fn.immediate:
+			return RunMe(self,fn)
+		else:
+			self.store(fn)
+			return fn.processor
 	
 	def done(self):
 		return self.parent.end_block()
@@ -122,35 +128,11 @@ class RunMe(object):
 	def complex_statement(self,args):
 		return self.fnp.complex_statement(args)
 	def done(self):
-		self.fnp.done()
-		return self.fn.run(self.proc.ctx)
-	
-class ImmediateCollectProcessor(CollectProcessor):
-	"""\
-		A processor which stores all (sub-)statements, recursively --
-		except those that are marked as Immediate, which get executed.
-		"""
+		d = defer.maybeDeferred(self.fnp.done)
+		d.addCallback(lambda _: self.fn.run(self.proc.ctx))
+		d.addErrback(self.proc.ctx._error)
+		return d
 
-	def __init__(self, parent=None, ctx=None, args=None, verify=False):
-		super(ImmediateCollectProcessor,self).__init__(parent=parent, ctx=ctx)
-
-	def simple_statement(self,args):
-		fn = self.lookup(args)
-		if fn.immediate:
-			return fn.run(self.ctx)
-		self.store(fn)
-
-	def complex_statement(self,args):
-		fn = self.lookup(args)
-		self.store(fn)
-
-		fn.start_block()
-
-		if fn.immediate:
-			return RunMe(self,fn)
-		else:
-			return fn.processor
-	
 class ImmediateProcessor(CollectProcessor):
 	"""\
 		A processor which directly executes all (sub-)statements.

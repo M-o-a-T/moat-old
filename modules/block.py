@@ -11,11 +11,25 @@ from homevent.statement import main_words, MainStatementList
 from homevent.run import process_failure
 from homevent.worker import HaltSequence
 
+
 class Block(MainStatementList):
-	"""This just groups statements. For show, really — but also for testing."""
+	"""\
+		This just groups statements. Necessary e.g. for top-level if:
+	statements"""
 	name=("block",)
 	doc="group multiple statements"
-	# The MainStatementList run() already does everything we want
+	long_doc="""\
+Group multiple statements. This is necessary for some commands (like else:)
+which cannot be used on top level due to implementation restrictions.
+
+	block:
+		if foo:
+			bar
+		else:
+			baz
+"""
+	pass # super.run() already does everything we want
+
 
 class Async(MainStatementList):
 	"""This runs statements in the background."""
@@ -31,6 +45,7 @@ class Async(MainStatementList):
 		d.addErrback(process_failure)
 		# note that d is *not* returned. This is intentional.
 
+
 class SkipThis(MainStatementList):
 	"""This runs statements exactly never."""
 	name=("skip","this")
@@ -43,6 +58,7 @@ skip this:
 
 	def run(self,*a,**k):
 		pass
+
 
 class BlockModule(Module):
 	"""\

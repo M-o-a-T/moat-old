@@ -71,7 +71,7 @@ RUN: <WorkSequence:7 (4)>
 0 Timer 3 :: 0.1
 0 Timeout 3
 0 add ‹SyncTriggerHandler ⌁.sync¦trigger¦foo4›
-0 add ‹BlockInputEvent('block')›
+0 add ‹Block ⌁.block›
 0 add ‹SyncTriggerHandler ⌁.sync¦trigger¦bar4›
 NEW: <WorkSequence:8 (4)>
    : │  EVENT: foo4

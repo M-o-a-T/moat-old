@@ -17,7 +17,7 @@ RUN: <WorkSequence:1 (4)>
 0 add ‹SyncTriggerHandler ⌁.sync¦trigger¦OuchNo›
 0 NewHandler 3
 0 Create OnEvtHandler: ['bar', '*']
-0 add ‹BlockInputEvent('block')›
+0 add ‹Block ⌁.block›
 0 add ‹SyncTriggerHandler ⌁.sync¦trigger¦$1›
 0 NewHandler 4
 1  : foo ‹Do nothing›
@@ -32,14 +32,14 @@ NEW: <WorkSequence:2 (5)>
    : │  EVENT: bar¦foo
    : ├1╴ON bar¦*
    : │     prio: 51
-   : │     proc: ‹BlockInputEvent('block')›
+   : │     proc: ‹Block ⌁.block›
    : └2╴... done.
 40 EVENT: bar¦foo
 RUN: <WorkSequence:2 (5)>
  ev: EVENT: bar¦foo
 RUN: ON bar¦*
    :    prio: 51
-   :    proc: ‹BlockInputEvent('block')›
+   :    proc: ‹Block ⌁.block›
  at: <WorkSequence:2 (5)> (step 1)
  ev: EVENT: bar¦foo
 NEW: <WorkSequence:3 (7)>
@@ -83,14 +83,14 @@ NEW: <WorkSequence:4 (5)>
    : │  EVENT: bar¦foo
    : ├1╴ON bar¦*
    : │     prio: 51
-   : │     proc: ‹BlockInputEvent('block')›
+   : │     proc: ‹Block ⌁.block›
    : └2╴... done.
 64 EVENT: bar¦foo
 RUN: <WorkSequence:4 (5)>
  ev: EVENT: bar¦foo
 RUN: ON bar¦*
    :    prio: 51
-   :    proc: ‹BlockInputEvent('block')›
+   :    proc: ‹Block ⌁.block›
  at: <WorkSequence:4 (5)> (step 1)
  ev: EVENT: bar¦foo
 NEW: <WorkSequence:5 (6)>

@@ -238,7 +238,7 @@ class StatementList(ComplexStatement):
 			return "‹"+self.__class__.__name__+"("+str(self.handler_id)+")›"
 		except AttributeError:
 			try:
-				return "‹"+self.__class__.__name__+repr(self.args)+"›"
+				return "‹"+self.__class__.__name__+" "+str(self.args)+"›"
 			except AttributeError:
 				return "‹"+self.__class__.__name__+"(?)›"
 
@@ -257,7 +257,8 @@ class StatementList(ComplexStatement):
 		self.procs = []
 
 	def add(self,proc):
-		log(TRACE, "add",proc)
+		log(TRACE, "add", str(proc))
+		assert not proc.immediate,"Immediate proc added?"
 		self.procs.append(proc)
 
 	def end_block(self):
