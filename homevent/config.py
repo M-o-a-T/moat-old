@@ -51,10 +51,10 @@ load NAME [args]...
 		return process_event(Event(self.ctx, "module","load",*event[len(self.name):]))
 
 class Unload(Statement):
-	name=("unload",)
+	name=("drop","load",)
 	doc="unload a module"
 	long_doc = """\
-unload NAME [args]...
+drop load NAME [args]...
 	unloads the named homevent module after calling its unload() function.
 	Emits an "module unload NAME [args]" event.
 """
