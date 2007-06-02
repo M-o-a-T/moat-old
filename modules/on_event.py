@@ -34,22 +34,6 @@ onHandlers = {}
 onHandlerNames = {}
 _onHandler_id = 0
 
-def register_actor(handler):
-	"""\
-		Register a handler for a statement in an "on..." block.
-		
-		See homevent.parser.Statement and StatementBlock for details.
-		"""
-	if handler.name in handlers:
-		raise ValueError("A handler for '%s' is already registered." % (handler.
-name,))
-	handlers[handler.name] = handler
-
-def unregister_actor(handler):
-	"""\
-		Remove this actor.
-		"""
-	del handlers[handler.name]
 
 class BadArgs(RuntimeError):
 	def __str__(self):
