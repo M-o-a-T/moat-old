@@ -232,7 +232,10 @@ class Parser(Outputter,LineReceiver):
 
 				try:
 					self.proc.error(self,_)
-				except AttributeError:
+				except BaseException,e:
+					if not isinstance(e,AttributeError):
+						from traceback import print_exc
+						print_exc()
 					try: self.result.errback(_)
 					except defer.AlreadyCalledError: pass
 
