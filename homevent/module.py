@@ -75,7 +75,7 @@ def load_module(*m):
 		p = os.path.join(d,m[-1])+".py"
 		md = dict()
 		try:
-			c = compile(open(p,"r").read(), m[-1]+".py", "exec",0,True)
+			c = compile(open(p,"r").read(), p, "exec",0,True)
 			eval(c,md)
 		except OSError:
 			continue
