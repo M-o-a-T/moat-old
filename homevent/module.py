@@ -95,10 +95,11 @@ def load_module(*m):
 	try:
 		mod.load()
 	except BaseException,e:
+		a,b,c = sys.exc_info()
 		try:
 			mod.unload()
 		finally:
-			raise e
+			raise a,b,c
 
 	modules[mod.name] = mod
 	return mod
