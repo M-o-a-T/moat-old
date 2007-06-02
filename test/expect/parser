@@ -67,4 +67,3 @@ RUN: shutting down
  ev: EVENT: shutdown
 RUN: <WorkSequence:2 (5)>
  ev: EVENT: shutdown
-... moving up

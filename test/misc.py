@@ -34,6 +34,7 @@ async:
 	trigger foo5
 wait 0.2
 trigger bar5
+wait 0.1
 shutdown
 """)
 

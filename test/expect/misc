@@ -56,6 +56,7 @@ NEW: <WorkSequence:6 (4)>
 NEW: <WorkSequence:7 (4)>
    : │  EVENT: bar3
    : └1╴... done.
+0 Timer 3 :: 0.1
 55 EVENT: foo3
 RUN: <WorkSequence:6 (4)>
  ev: EVENT: foo3
@@ -68,7 +69,6 @@ RUN: <WorkSequence:7 (4)>
 58 END: bar3
 RUN: <WorkSequence:7 (4)>
  ev: EVENT: bar3
-0 Timer 3 :: 0.1
 0 Timeout 3
 0 add ‹SyncTriggerHandler ⌁.sync¦trigger¦foo4›
 0 add ‹Block ⌁.block›
@@ -109,12 +109,14 @@ RUN: <WorkSequence:10 (4)>
 NEW: <WorkSequence:11 (4)>
    : │  EVENT: bar5
    : └1╴... done.
+0 Timer 6 :: 0.1
 108 EVENT: bar5
 RUN: <WorkSequence:11 (4)>
  ev: EVENT: bar5
 108 END: bar5
 RUN: <WorkSequence:11 (4)>
  ev: EVENT: bar5
+0 Timeout 6
 NEW: <WorkSequence:12 (5)>
    : │  EVENT: shutdown
    : └1╴... done.

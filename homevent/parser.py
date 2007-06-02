@@ -217,22 +217,20 @@ class Parser(Outputter,LineReceiver):
 					except defer.AlreadyCalledError: pass
 				d.addCallback(lambda _: self._do_parse())
 				return
-			try:
-				res = self._parseStep(t,txt,beg,end,line)
-				if isinstance(res,defer.Deferred):
-					def in_main():
-						res.addCallback(lambda _: self._do_parse())
-						res.addErrback(process_failure)
-					reactor.callLater(0,in_main)
-					return
-
-			except StopIteration:
+			def stopIter(_):
+				_.trap(StopIteration)
 				try: self.result.callback(None)
 				except defer.AlreadyCalledError: pass
-				return
-			except Exception:
-				try: self.result.errback(failure.Failure())
+
+			def stopErr(_):
+				try: self.result.errback(_)
 				except defer.AlreadyCalledError: pass
+
+			res = defer.maybeDeferred(self._parseStep,t,txt,beg,end,line)
+			res.addCallback(lambda _: self._do_parse())
+			res.addErrback(stopIter)
+			res.addErrback(stopErr)
+			return
 
 	def _parseStep(self, t,txt,beg,end,line):
 		from token import NUMBER,NAME,DEDENT,INDENT,OP,NEWLINE,ENDMARKER, \
@@ -289,32 +287,21 @@ class Parser(Outputter,LineReceiver):
 				self.p_state = 5
 				return
 			elif t == OP and txt == ":":
-				try:
-					p = self.proc.complex_statement(self.p_args)
-				except Exception,e:
-					p = self.ctx._error(e)
+				p = defer.maybeDeferred(self.proc.complex_statement,self.p_args)
+				p.addErrback(self.ctx._error)
 
 				def have_p(_):
 					self.p_stack.append(self.proc)
 					self.proc = _
 					self.p_state = 3
-				if isinstance(p,defer.Deferred):
-					p.addBoth(have_p)
-				else:
-					have_p(p)
-					
+				p.addBoth(have_p)
 				return p
 			elif t == NEWLINE:
-				try:
-					r = self.proc.simple_statement(self.p_args)
-				except Exception,e:
-					r = self.ctx._error(e)
+				r = defer.maybeDeferred(self.proc.simple_statement,self.p_args)
+				r.addErrback(self.ctx._error)
 					
 				if self.p_pop_after:
-					if isinstance(r,defer.Deferred):
-						r.addCallback(lambda _,p: p.done(), self.proc)
-					else:
-						r = self.proc.done()
+					r.addCallback(lambda _,p: p.done(), self.proc)
 					self.proc = self.p_stack.pop()
 					self.p_pop_after=False
 				self.p_state=0

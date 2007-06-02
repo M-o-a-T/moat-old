@@ -22,6 +22,7 @@ wait 0.2:
 	update
 wait 0.1
 trigger DoNow
+wait 0.1
 async:
 	wait 0.7:
 		name FooBaz
