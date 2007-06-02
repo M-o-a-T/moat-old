@@ -1,0 +1,138 @@
+NEW: <WorkSequence:1 (4)>
+   : │  EVENT: startup
+   : └1╴... done.
+1 EVENT: startup
+RUN: <WorkSequence:1 (4)>
+ ev: EVENT: startup
+1 END: startup
+RUN: <WorkSequence:1 (4)>
+ ev: EVENT: startup
+0 add ‹IfStatement ⌁.if¦exists¦state¦foo¦bar›
+0 add ‹LogHandler ⌁.log¦TRACE¦No‽›
+0 add ‹LogHandler ⌁.log¦TRACE¦Yes!›
+0 Yes!
+0 Set to ONE
+NEW: <WorkSequence:2 (4)>
+   : │  EVENT: state¦-¦one¦foo¦bar
+   : └1╴... done.
+20 EVENT: state¦-¦one¦foo¦bar
+RUN: <WorkSequence:2 (4)>
+ ev: EVENT: state¦-¦one¦foo¦bar
+20 END: state¦-¦one¦foo¦bar
+RUN: <WorkSequence:2 (4)>
+ ev: EVENT: state¦-¦one¦foo¦bar
+0 Set to TWO
+NEW: <WorkSequence:3 (4)>
+   : │  EVENT: state¦one¦two¦foo¦bar
+   : └1╴... done.
+31 EVENT: state¦one¦two¦foo¦bar
+RUN: <WorkSequence:3 (4)>
+ ev: EVENT: state¦one¦two¦foo¦bar
+31 END: state¦one¦two¦foo¦bar
+RUN: <WorkSequence:3 (4)>
+ ev: EVENT: state¦one¦two¦foo¦bar
+0 Create OnEvtHandler: ['state', '*', 'three', 'foo', 'bar']
+0 add ‹LogHandler ⌁.log¦TRACE¦Set¦to¦FOUR›
+0 add ‹SetStateHandler ⌁.set¦state¦four¦foo¦bar›
+0 NewHandler 1
+0 add ‹LogHandler ⌁.log¦TRACE¦Set¦to¦THREE›
+0 add ‹SetStateHandler ⌁.set¦state¦three¦foo¦bar›
+0 Set to THREE
+NEW: <WorkSequence:4 (5)>
+   : │  EVENT: state¦two¦three¦foo¦bar
+   : ├1╴ON state¦*¦three¦foo¦bar
+   : │     prio: 51
+   : │     proc: ‹LogHandler ⌁.log¦TRACE¦Set¦to¦FOUR›
+   : │         : ‹SetStateHandler ⌁.set¦state¦four¦foo¦bar›
+   : └2╴... done.
+46 EVENT: state¦two¦three¦foo¦bar
+RUN: <WorkSequence:4 (5)>
+ ev: EVENT: state¦two¦three¦foo¦bar
+RUN: ON state¦*¦three¦foo¦bar
+   :    prio: 51
+   :    proc: ‹LogHandler ⌁.log¦TRACE¦Set¦to¦FOUR›
+   :        : ‹SetStateHandler ⌁.set¦state¦four¦foo¦bar›
+ at: <WorkSequence:4 (5)> (step 1)
+ ev: EVENT: state¦two¦three¦foo¦bar
+0 Set to FOUR
+NEW: <WorkSequence:5 (4)>
+   : │  ERROR: Trying to change state to 'four' while changing from 'two' to 'three'
+   : └1╴... done.
+ERROR: Traceback (most recent call last):
+     :   File "modules/on_event.py, in process
+     :     return super(OnEventHandler,self).run(ctx,**k)
+     :   File "homevent/statement.py, in run
+     :     d.callback(None)
+     :   File "internet/defer.py, in callback
+     :     self._startRunCallbacks(result)
+     :   File "internet/defer.py, in _startRunCallbacks
+     :     self._runCallbacks()
+     : --- <exception caught here> ---
+     :   File "internet/defer.py, in _runCallbacks
+     :     self.result = callback(self.result, *args, **kw)
+     :   File "homevent/statement.py, in go
+     :     return p.run(ctx)
+     :   File "modules/state.py, in run
+     :     raise StateChangeError(s,value)
+     : __builtin__.StateChangeError: Trying to change state to 'four' while changing from 'two' to 'three'
+   in: ON state¦*¦three¦foo¦bar
+     :    prio: 51
+     :    proc: ‹LogHandler ⌁.log¦TRACE¦Set¦to¦FOUR›
+     :        : ‹SetStateHandler ⌁.set¦state¦four¦foo¦bar›
+   in: <WorkSequence:4 (5)>
+     : │  EVENT: state¦two¦three¦foo¦bar
+     : ├1╴ON state¦*¦three¦foo¦bar
+     : │     prio: 51
+     : │     proc: ‹LogHandler ⌁.log¦TRACE¦Set¦to¦FOUR›
+     : │         : ‹SetStateHandler ⌁.set¦state¦four¦foo¦bar›
+     : └2╴... done.
+RUN: <WorkSequence:5 (4)>
+ ev: ERROR: Trying to change state to 'four' while changing from 'two' to 'three'
+57 END: StateChangeError
+RUN: <WorkSequence:5 (4)>
+ ev: ERROR: Trying to change state to 'four' while changing from 'two' to 'three'
+46 END: state¦two¦three¦foo¦bar
+RUN: <WorkSequence:4 (5)> (step 1)
+ ev: EVENT: state¦two¦three¦foo¦bar
+0 Timer 1 :: 0.1
+0 Timeout 1
+foo bar = three
+.
+Name: foo bar
+Value: three
+Last Value: two
+Last Change: 1180810894.28
+0 add ‹IfStatement ⌁.if¦state¦three¦foo¦bar›
+0 add ‹LogHandler ⌁.log¦TRACE¦Yes!›
+0 add ‹LogHandler ⌁.log¦TRACE¦No‽›
+0 Yes!
+0 add ‹IfStatement ⌁.if¦exists¦state¦foo¦bar›
+0 add ‹LogHandler ⌁.log¦TRACE¦Yes!›
+0 add ‹LogHandler ⌁.log¦TRACE¦No‽›
+0 Yes!
+0 add ‹IfStatement ⌁.if¦last¦state¦two¦foo¦bar›
+0 add ‹LogHandler ⌁.log¦TRACE¦Yes!›
+0 add ‹LogHandler ⌁.log¦TRACE¦No‽›
+0 Yes!
+NEW: <WorkSequence:6 (4)>
+   : │  EVENT: state¦three¦-¦foo¦bar
+   : └1╴... done.
+91 EVENT: state¦three¦-¦foo¦bar
+RUN: <WorkSequence:6 (4)>
+ ev: EVENT: state¦three¦-¦foo¦bar
+91 END: state¦three¦-¦foo¦bar
+RUN: <WorkSequence:6 (4)>
+ ev: EVENT: state¦three¦-¦foo¦bar
+.
+NEW: <WorkSequence:7 (5)>
+   : │  EVENT: shutdown
+   : └1╴... done.
+2 EVENT: shutdown
+RUN: <WorkSequence:7 (5)>
+ ev: EVENT: shutdown
+2 END: shutdown
+RUN: shutting down
+ at: <WorkSequence:7 (5)>
+ ev: EVENT: shutdown
+RUN: <WorkSequence:7 (5)>
+ ev: EVENT: shutdown
