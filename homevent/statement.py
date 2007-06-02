@@ -26,6 +26,14 @@ from homevent.event import Event
 from homevent.logging import log_event,log, TRACE
 
 
+class UnknownWordError(KeyError):
+	def __init__(self,word,where):
+		self.word = word
+		self.where = where
+
+	def __str__(self):
+		return "Cannot find word ‹%s› in ‹%s›" % (" ".join(str(x) for x in self.word), " ".join(self.where.name))
+
 class Statement(object):
 	"""\
 		Abstract base class for handling statements.
@@ -125,7 +133,7 @@ class ComplexStatement(Statement):
 					return fn
 			n = n-1
 
-		raise KeyError("Cannot find word '%s' in '%s'" % (" ".join(str(x) for x in args), " ".join(self.name)))
+		raise UnknownWordError(args,self)
 		
 	def get_processor(self):
 		"""\

@@ -37,14 +37,9 @@ class StdIO(StandardIO):
 		shut_down()
 def reporter(err):
 	print "Error:",err
-def err(p,e):
-	print >>p.out,e
-	print_exc(file=p.out)
-
-	return IgnoreStatement()
 	
 def ready():
-	c=Context(errhandler=err)
+	c=Context()
 	#c.logger=parse_logger
 	i = InteractiveInterpreter(ctx=c)
 	p = Parser(i, ctx=c)

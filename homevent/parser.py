@@ -164,15 +164,18 @@ class Parser(Outputter,LineReceiver):
 		if not self.transport:
 			self.connectionMade()
 
+	def init_state(self):
+		self.p_state=0
+		self.p_pop_after=False
+		self.p_stack = []
+		self.p_args = []
+
 	def _parse(self):
 		"""\
 			Iterator. It gets fed tokens, assembles them into
 			statements, and calls the processor with them.
 			"""
-		self.p_state=0
-		self.p_pop_after=False
-		self.p_stack = []
-		self.p_args = []
+		self.init_state()
 		self.p_gen = generate_tokens(self.readline)
 		reactor.callInThread(self._sym_parse)
 		self._do_parse()
@@ -217,20 +220,25 @@ class Parser(Outputter,LineReceiver):
 					except defer.AlreadyCalledError: pass
 				d.addCallback(lambda _: self._do_parse())
 				return
-			def stopIter(_):
-				_.trap(StopIteration)
-				try: self.result.callback(None)
-				except defer.AlreadyCalledError: pass
 
-			def stopErr(_):
-				try: self.result.errback(_)
-				except defer.AlreadyCalledError: pass
+			def handle_error(_):
+				if _.check(StopIteration):
+					try: self.result.callback(None)
+					except defer.AlreadyCalledError: pass
+					return
+
+				if self.p_stack:
+					self.proc = self.p_stack[0]
+
+				try:
+					self.proc.error(self,_)
+				except AttributeError:
+					try: self.result.errback(_)
+					except defer.AlreadyCalledError: pass
 
 			res = defer.maybeDeferred(self._parseStep,t,txt,beg,end,line)
-			res.addCallback(lambda _: self._do_parse())
-			res.addErrback(stopIter)
-			res.addErrback(stopErr)
-			return
+			res.addCallbacks(lambda _: self._do_parse(), handle_error)
+			return res
 
 	def _parseStep(self, t,txt,beg,end,line):
 		from token import NUMBER,NAME,DEDENT,INDENT,OP,NEWLINE,ENDMARKER, \
@@ -288,7 +296,6 @@ class Parser(Outputter,LineReceiver):
 				return
 			elif t == OP and txt == ":":
 				p = defer.maybeDeferred(self.proc.complex_statement,self.p_args)
-				p.addErrback(self.ctx._error)
 
 				def have_p(_):
 					self.p_stack.append(self.proc)
@@ -298,7 +305,6 @@ class Parser(Outputter,LineReceiver):
 				return p
 			elif t == NEWLINE:
 				r = defer.maybeDeferred(self.proc.simple_statement,self.p_args)
-				r.addErrback(self.ctx._error)
 					
 				if self.p_pop_after:
 					r.addCallback(lambda _,p: p.done(), self.proc)
@@ -336,8 +342,7 @@ class Parser(Outputter,LineReceiver):
 			self.proc = self.p_stack.pop()
 			self.p_pop_after = False
 
-		self.ctx._error(SyntaxError("Unknown token %s (%d, state %d) in %s:%d" % (repr(txt),t,self.p_state,self.ctx.filename,beg[0])))
-		self.p_state=0
+		raise SyntaxError("Unknown token %s (%d, state %d) in %s:%d" % (repr(txt),t,self.p_state,self.ctx.filename,beg[0]))
 
 
 def _parse(g,input):

@@ -19,6 +19,8 @@ from homevent.context import Context
 from homevent.event import Event
 
 from twisted.internet import defer
+from twisted.python.failure import Failure
+import sys
 
 class InputEvent(Event):
 	"""An event that's just a line from the interpreter"""
@@ -72,6 +74,15 @@ class Processor(object):
 			more statements.
 			"""
 		pass
+	
+	def error(self,parser,err):
+		if isinstance(err,Failure):
+			err.raiseException()
+		else:
+			raise err.__class__,e,sys.exc_info()[2]
+
+	def prompt(self, _=None):
+		return _
 
 class CollectProcessor(Processor):
 	"""\
@@ -130,7 +141,7 @@ class RunMe(object):
 	def done(self):
 		d = defer.maybeDeferred(self.fnp.done)
 		d.addCallback(lambda _: self.fn.run(self.proc.ctx))
-		d.addErrback(self.proc.ctx._error)
+		d.addCallback(lambda _: self.proc.prompt())
 		return d
 
 class ImmediateProcessor(CollectProcessor):
@@ -165,9 +176,6 @@ class Interpreter(Processor):
 		else:
 			self.ctx = ctx
 
-	def prompt(self, _=None):
-		return _
-
 	def simple_statement(self,args):
 		fn = self.lookup(args)
 		d = defer.maybeDeferred(fn.run,self.ctx)
@@ -180,22 +188,34 @@ class Interpreter(Processor):
 		except TypeError,e:
 			print >>self.ctx.out,"For",repr(fn),"::"
 			raise
-		try:
-			fn.start_block()
-		except AttributeError,e:
-			return self.ctx._error(e)
-		else:
-			return RunMe(self,fn)
+
+		fn.start_block()
+		return RunMe(self,fn)
 	
 	def done(self):
 		#print >>self.ctx.out,"Exiting"
 		pass
 
 class InteractiveInterpreter(Interpreter):
-	"""An interpreter which prints a prompt"""
+	"""An interpreter which prints a prompt and recovers from errors"""
 	intro = ">> "
 
 	def prompt(self, _=None):
 		self.ctx.out.write(self.intro)
 		return _
+	
+	def error(self,parser,err):
+		from homevent.statement import UnknownWordError
+
+		err = Failure(err)
+		#err.printDetailedTraceback(file=parser.ctx.out)
+		#err.printTraceback(file=parser.ctx.out)
+		if err.check(UnknownWordError):
+			print >>parser.ctx.out, "ERROR:",err.getErrorMessage()
+		else:
+			print >>parser.ctx.out, "ERROR:"
+			err.printBriefTraceback(file=parser.ctx.out)
+		parser.init_state()
+		self.prompt()
+		return parser._do_parse()
 
