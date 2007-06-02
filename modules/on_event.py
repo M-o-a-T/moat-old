@@ -30,8 +30,6 @@ from homevent.logging import log
 
 from twisted.internet import defer
 
-__all__ = ["register_actor","unregister_actor"]
-
 onHandlers = {}
 onHandlerNames = {}
 _onHandler_id = 0
