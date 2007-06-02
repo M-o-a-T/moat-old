@@ -335,7 +335,7 @@ class MainStatementList(StatementList):
 
 
 class OffEventHandler(Statement):
-	name = ("drop","on")
+	name = ("del","on")
 	doc = "forget about an event handler"
 	def run(self,ctx,**k):
 		event = self.params(ctx)
@@ -348,7 +348,7 @@ class OffEventHandler(Statement):
 			if worker.displayname is not None:
 				del onHandlerNames[worker.displayname]
 		else:
-			raise SyntaxError("Usage: drop on ‹handler_id/name›")
+			raise SyntaxError("Usage: del on ‹handler_id/name›")
 
 class OnListHandler(Statement):
 	name = ("list","on")

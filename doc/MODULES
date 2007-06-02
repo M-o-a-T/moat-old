@@ -212,14 +212,14 @@ Lists all event handlers.
 You can append the name or number of a handler to show details for
 that handler.
 
--------
-drop on
--------
+------
+del on
+------
 
 Deletes a handler from the system. You need to specify either its number
 or its name.
 
-	drop on FooBar
+	del on FooBar
 
 =====
 state
@@ -318,8 +318,8 @@ This command shows which wait statements are currently active.
 
 You can append the name of a wait statement to show additional details.
 
----------
-drop wait
----------
+--------
+del wait
+--------
 
 Cancels 

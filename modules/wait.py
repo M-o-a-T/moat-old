@@ -147,7 +147,7 @@ This statement assigns a name to a wait statement
 
 
 class WaitCancel(Statement):
-	name = ("drop","wait")
+	name = ("del","wait")
 	doc = "abort a wait handler"
 	long_doc="""\
 This statement aborts a wait handler.
@@ -156,7 +156,7 @@ This statement aborts a wait handler.
 		event = self.params(ctx)
 		wl = event[len(self.name):]
 		if len(wl) != 1:
-			raise SyntaxError('Usage: drop wait "‹name›"')
+			raise SyntaxError('Usage: del wait "‹name›"')
 		w = waiters[wl[0]]
 		w.cancel(err=HaltSequence)
 

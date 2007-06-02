@@ -14,7 +14,7 @@ Currently, it understands:
 	load dir "NAME"
 		- add a module directory
 	load dir - "NAME"
-		- drop a module directory
+		- remove a module directory
 
 	load NAME
 		- load the module/package homevent.NAME
@@ -51,10 +51,10 @@ load NAME [args]...
 		return process_event(Event(self.ctx, "module","load",*event[len(self.name):]))
 
 class Unload(Statement):
-	name=("drop","load",)
+	name=("del","load",)
 	doc="unload a module"
 	long_doc = """\
-drop load NAME [args]...
+del load NAME [args]...
 	unloads the named homevent module after calling its unload() function.
 	Emits an "module unload NAME [args]" event.
 """

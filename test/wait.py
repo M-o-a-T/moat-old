@@ -28,7 +28,7 @@ async:
 		name FooBaz
 	trigger Heya
 wait 0.4
-drop wait FooBaz
+del wait FooBaz
 wait 0.2
 # observe no HeYa event
 shutdown

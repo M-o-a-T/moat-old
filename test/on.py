@@ -34,9 +34,9 @@ on bar *:
 list on
 list on "not executed"
 sync trigger bar foo
-drop on "Skip Next"
+del on "Skip Next"
 sync trigger bar foo
-drop on 1
+del on 1
 list on
 shutdown
 """)
