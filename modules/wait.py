@@ -18,6 +18,7 @@ from homevent.module import Module
 from homevent.worker import HaltSequence
 from homevent.check import Check,register_condition,unregister_condition
 from time import time
+import os
 from twisted.python.failure import Failure
 
 from twisted.internet import reactor,defer
@@ -113,6 +114,14 @@ wait FOO...
 		self.timer_defer = r
 		self.timer_id = reactor.callLater(s, self.doit)
 		return r
+	
+	def get_value(self):
+		val = self.timer_start+self.timer_val-time()
+		if "HOMEVENT_TEST" in os.environ:
+			return int(val+1) # otherwise the logs will have timing diffs
+		return val
+		
+	value = property(get_value)
 
 	def doit(self):
 		log(TRACE,"Timeout",self.nr)
@@ -226,6 +235,22 @@ class ExistsWaiterCheck(Check):
 		return name in waiters
 
 
+class VarWaitHandler(Statement):
+	name=("var","wait")
+	doc="assign a variable to report when a waiter will time out"
+	long_doc="""\
+var wait NAME name...
+	: $NAME tells how many seconds in the future the wait record ‹name…›
+	  will trigger
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		w = event[:]
+		var = w[0]
+		name = tuple(w[1:])
+		setattr(self.parent.ctx,var,waiters[name])
+
+
 WaitHandler.register_statement(WaitName)
 WaitHandler.register_statement(WaitUpdate)
 
@@ -240,12 +265,14 @@ class EventsModule(Module):
 	def load(self):
 		main_words.register_statement(WaitHandler)
 		main_words.register_statement(WaitCancel)
+		main_words.register_statement(VarWaitHandler)
 		global_words.register_statement(WaitList)
 		register_condition(ExistsWaiterCheck)
 	
 	def unload(self):
 		main_words.unregister_statement(WaitHandler)
 		main_words.unregister_statement(WaitCancel)
+		main_words.unregister_statement(VarWaitHandler)
 		global_words.unregister_statement(WaitList)
 		unregister_condition(ExistsWaiterCheck)
 

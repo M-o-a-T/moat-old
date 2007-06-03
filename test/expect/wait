@@ -46,6 +46,30 @@ RUN: <WorkSequence:3 (4)>
 0 add ‹LogHandler ⌁.log¦DEBUG¦Yes›
 0 add ‹LogHandler ⌁.log¦DEBUG¦No1›
 1 Yes
+0 Create OnEvtHandler: ['whatever']
+0 add ‹VarWaitHandler ⌁.var¦wait¦x¦Foo¦Baz›
+0 add ‹LogHandler ⌁.log¦TRACE¦We¦wait¦$x›
+0 NewHandler 1
+NEW: <WorkSequence:4 (5)>
+   : │  EVENT: whatever
+   : ├1╴ON whatever
+   : │     prio: 51
+   : │     proc: ‹VarWaitHandler ⌁.var¦wait¦x¦Foo¦Baz›
+   : │         : ‹LogHandler ⌁.log¦TRACE¦We¦wait¦$x›
+   : └2╴... done.
+70 EVENT: whatever
+RUN: <WorkSequence:4 (5)>
+ ev: EVENT: whatever
+RUN: ON whatever
+   :    prio: 51
+   :    proc: ‹VarWaitHandler ⌁.var¦wait¦x¦Foo¦Baz›
+   :        : ‹LogHandler ⌁.log¦TRACE¦We¦wait¦$x›
+ at: <WorkSequence:4 (5)> (step 1)
+ ev: EVENT: whatever
+0 We wait 1
+70 END: whatever
+RUN: <WorkSequence:4 (5)> (step 1)
+ ev: EVENT: whatever
 0 Timer 7 :: 0.3
 0 Timeout 7
 0 add ‹IfStatement ⌁.if¦exists¦wait¦Foo¦Baz›
@@ -54,15 +78,15 @@ RUN: <WorkSequence:3 (4)>
 1 Yes
 0 Timer 8 :: 0.2
 0 Timeout 8
-NEW: <WorkSequence:4 (5)>
+NEW: <WorkSequence:5 (5)>
    : │  EVENT: shutdown
    : └1╴... done.
 2 EVENT: shutdown
-RUN: <WorkSequence:4 (5)>
+RUN: <WorkSequence:5 (5)>
  ev: EVENT: shutdown
 2 END: shutdown
 RUN: shutting down
- at: <WorkSequence:4 (5)>
+ at: <WorkSequence:5 (5)>
  ev: EVENT: shutdown
-RUN: <WorkSequence:4 (5)>
+RUN: <WorkSequence:5 (5)>
  ev: EVENT: shutdown

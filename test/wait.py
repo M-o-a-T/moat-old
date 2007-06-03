@@ -32,6 +32,10 @@ block:
 		log DEBUG Yes
 	else:
 		log DEBUG No1
+on whatever:
+	var wait x Foo Baz
+	log TRACE We wait $x
+sync trigger whatever
 wait 0.3
 del wait Foo Baz
 block:
@@ -50,6 +54,7 @@ load_module("wait")
 load_module("block")
 load_module("logging")
 load_module("ifelse")
+load_module("on_event")
 
 run("wait",input)
 
