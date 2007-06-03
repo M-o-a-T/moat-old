@@ -26,6 +26,7 @@ from homevent.run import process_event
 from homevent.event import Event
 from homevent.check import Check,register_condition,unregister_condition
 from time import time
+import os
 
 states = {}
 
@@ -107,7 +108,8 @@ list state name...
 			print >>self.ctx.out, "Value:",s.value
 			if hasattr(s,"old_value"):
 				print >>self.ctx.out, "Last Value:",s.old_value
-				print >>self.ctx.out, "Last Change:",s.time
+				if "HOMEVENT_TEST" not in os.environ:
+					print >>self.ctx.out, "Last Change:",s.time
 		else:
 			for s in states.itervalues():
 				print >>self.ctx.out,"%s = %s" % (" ".join(s.name),s.value)

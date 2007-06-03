@@ -101,7 +101,6 @@ foo bar = three
 Name: foo bar
 Value: three
 Last Value: two
-Last Change: 1180810894.28
 0 add ‹IfStatement ⌁.if¦state¦three¦foo¦bar›
 0 add ‹LogHandler ⌁.log¦TRACE¦Yes!›
 0 add ‹LogHandler ⌁.log¦TRACE¦No‽›
