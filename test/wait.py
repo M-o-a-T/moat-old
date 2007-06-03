@@ -9,20 +9,20 @@ from test import run
 input = """\
 async:
 	wait 10:
-		name FooBar
+		name Foo Bar
 	trigger FooBar
 wait 0.2:
-	name FooBar
+	name Foo Bar
 	update
 wait 0.1
 trigger DoNow
 wait 0.1
 async:
 	wait 0.7:
-		name FooBaz
+		name Foo Baz
 	trigger Heya
 wait 0.4
-del wait FooBaz
+del wait Foo Baz
 wait 0.2
 # observe no HeYa event
 shutdown

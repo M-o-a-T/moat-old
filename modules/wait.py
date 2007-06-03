@@ -50,7 +50,7 @@ wait FOO...
 		global timer_nr
 		timer_nr += 1
 		self.nr = timer_nr
-		self.displayname="wait_"+str(self.nr)
+		self.displayname=("_wait",str(self.nr))
 
 	def run(self,ctx,**k):
 		event = self.params(ctx)
@@ -140,9 +140,9 @@ This statement assigns a name to a wait statement
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		if len(event) != 1:
-			raise SyntaxError('Usage: name "‹text›"')
-		self.parent.displayname = event[0]
+		if not len(event):
+			raise SyntaxError('Usage: name ‹name…›')
+		self.parent.displayname = tuple(event)
 
 
 class WaitCancel(Statement):
@@ -153,9 +153,9 @@ This statement aborts a wait handler.
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		if len(event) != 1:
-			raise SyntaxError('Usage: del wait "‹name›"')
-		w = waiters[event[0]]
+		if not len(event):
+			raise SyntaxError('Usage: del wait ‹name…›')
+		w = waiters[tuple(event)]
 		w.cancel(err=HaltSequence)
 
 class WaitUpdate(Statement):
@@ -186,11 +186,11 @@ list wait NAME
 		event = self.params(ctx)
 		if not len(event):
 			for w in waiters.itervalues():
-				print >>self.ctx.out, w.displayname
+				print >>self.ctx.out, " ".join(w.displayname)
 			print >>self.ctx.out, "."
-		elif len(event) == 1:
-			w = waiters[event[0]]
-			print  >>self.ctx.out, "Name: ",w.displayname
+		else:
+			w = waiters[tuple(event)]
+			print  >>self.ctx.out, "Name: "," ".join(w.displayname)
 			print  >>self.ctx.out, "Started: ",w.timer_start
 			print  >>self.ctx.out, "Timeout: ",w.timer_val
 			print  >>self.ctx.out, "Remaining: ",w.timer_start+w.timer_val-time()
@@ -198,7 +198,9 @@ list wait NAME
 				w = getattr(w,"parent",None)
 				if w is None: break
 				n = getattr(w,"displayname",None)
-				if n is None:
+				if n is not None:
+					n = " ".join(n)
+				else:
 					try:
 						n = str(w.args)
 					except AttributeError:
@@ -211,10 +213,6 @@ list wait NAME
 				if n is not None:
 					print  >>self.ctx.out, "in: ",n
 			print  >>self.ctx.out, "."
-				
-				
-		else:
-			raise SyntaxError("Only one name allowed.")
 
 
 WaitHandler.register_statement(WaitName)
