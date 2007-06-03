@@ -304,7 +304,7 @@ class Parser(Outputter,LineReceiver):
 					self.p_stack.append(self.proc)
 					self.proc = _
 					self.p_state = 3
-				p.addBoth(have_p)
+				p.addCallback(have_p)
 				return p
 			elif t == NEWLINE:
 				r = defer.maybeDeferred(self.proc.simple_statement,self.p_args)
