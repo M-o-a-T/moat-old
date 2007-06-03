@@ -46,6 +46,10 @@ block:
 		log TRACE "Yes!"
 	else:
 		log TRACE "No‽"
+on whatever:
+	var state x foo bar
+	log TRACE We got $x
+sync trigger whatever
 del state foo bar
 list state
 shutdown
@@ -58,6 +62,7 @@ load_module("wait")
 load_module("on_event")
 load_module("logging")
 load_module("ifelse")
+load_module("trigger")
 
 def main():
 	d = hp.parse(input, hi.Interpreter(Context(out=logwrite(log))), Context(logger=logger)) # , out=log)

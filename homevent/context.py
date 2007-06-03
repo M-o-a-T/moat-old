@@ -53,12 +53,17 @@ class Context(object):
 					break
 		if r is VanishedAttribute:
 			raise KeyError(self,key)
+		if hasattr(r,"value"): r = r.value
 		return r
 
 	def __setattr__(self,key,val):
 		if key.startswith("_"):
 			return super(Context,self).__setattr__(key,val)
-		self._store[key] = val
+		try:
+			s = self._store[key]
+			s.value = val
+		except (KeyError, AttributeError):
+			self._store[key] = val
 
 	def __delattr__(self,key):
 		if key.startswith("_"):

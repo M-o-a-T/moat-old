@@ -113,25 +113,49 @@ Last Value: two
 0 add ‹LogHandler ⌁.log¦TRACE¦Yes!›
 0 add ‹LogHandler ⌁.log¦TRACE¦No‽›
 0 Yes!
-NEW: <WorkSequence:6 (4)>
+0 Create OnEvtHandler: ['whatever']
+0 add ‹VarStateHandler ⌁.var¦state¦x¦foo¦bar›
+0 add ‹LogHandler ⌁.log¦TRACE¦We¦got¦$x›
+0 NewHandler 2
+NEW: <WorkSequence:6 (5)>
+   : │  EVENT: whatever
+   : ├1╴ON whatever
+   : │     prio: 51
+   : │     proc: ‹VarStateHandler ⌁.var¦state¦x¦foo¦bar›
+   : │         : ‹LogHandler ⌁.log¦TRACE¦We¦got¦$x›
+   : └2╴... done.
+94 EVENT: whatever
+RUN: <WorkSequence:6 (5)>
+ ev: EVENT: whatever
+RUN: ON whatever
+   :    prio: 51
+   :    proc: ‹VarStateHandler ⌁.var¦state¦x¦foo¦bar›
+   :        : ‹LogHandler ⌁.log¦TRACE¦We¦got¦$x›
+ at: <WorkSequence:6 (5)> (step 1)
+ ev: EVENT: whatever
+0 We got three
+94 END: whatever
+RUN: <WorkSequence:6 (5)> (step 1)
+ ev: EVENT: whatever
+NEW: <WorkSequence:7 (4)>
    : │  EVENT: state¦three¦-¦foo¦bar
    : └1╴... done.
-91 EVENT: state¦three¦-¦foo¦bar
-RUN: <WorkSequence:6 (4)>
+106 EVENT: state¦three¦-¦foo¦bar
+RUN: <WorkSequence:7 (4)>
  ev: EVENT: state¦three¦-¦foo¦bar
-91 END: state¦three¦-¦foo¦bar
-RUN: <WorkSequence:6 (4)>
+106 END: state¦three¦-¦foo¦bar
+RUN: <WorkSequence:7 (4)>
  ev: EVENT: state¦three¦-¦foo¦bar
 .
-NEW: <WorkSequence:7 (5)>
+NEW: <WorkSequence:8 (5)>
    : │  EVENT: shutdown
    : └1╴... done.
 2 EVENT: shutdown
-RUN: <WorkSequence:7 (5)>
+RUN: <WorkSequence:8 (5)>
  ev: EVENT: shutdown
 2 END: shutdown
 RUN: shutting down
- at: <WorkSequence:7 (5)>
+ at: <WorkSequence:8 (5)>
  ev: EVENT: shutdown
-RUN: <WorkSequence:7 (5)>
+RUN: <WorkSequence:8 (5)>
  ev: EVENT: shutdown

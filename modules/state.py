@@ -12,8 +12,8 @@ del state NAME
 	forgets about that state
 if state X NAME
 	checks if the state is that
-#var state X NAME
-#	makes the state named NAME available as the variable X
+var state X NAME
+	makes the state named NAME available as the variable X
 list state [NAME]
 	shows all states / only that one
 
@@ -142,6 +142,20 @@ del state name...
 		return d
 
 
+class VarStateHandler(Statement):
+	name=("var","state")
+	doc="assign a variable to report a state"
+	long_doc="""\
+var NAME name...
+	: $NAME refers to the state ‹name…›, in the enclosing block
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		w = event[len(self.name):]
+		var = w[0]
+		name = tuple(w[1:])
+		setattr(self.parent.ctx,var,states[name])
+
 
 class StateCheck(Check):
 	name=("state",)
@@ -191,6 +205,7 @@ class StateModule(Module):
 
 	def load(self):
 		main_words.register_statement(SetStateHandler)
+		main_words.register_statement(VarStateHandler)
 		global_words.register_statement(ListStateHandler)
 		global_words.register_statement(DelStateHandler)
 		register_condition(StateCheck)
@@ -199,6 +214,7 @@ class StateModule(Module):
 	
 	def unload(self):
 		main_words.unregister_statement(SetStateHandler)
+		main_words.unregister_statement(VarStateHandler)
 		global_words.unregister_statement(ListStateHandler)
 		global_words.unregister_statement(DelStateHandler)
 		unregister_condition(StateCheck)
