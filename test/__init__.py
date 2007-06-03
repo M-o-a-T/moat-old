@@ -3,6 +3,10 @@
 
 import homevent as h
 from homevent.logging import Logger, TRACE
+from homevent.interpreter import Interpreter
+from homevent.parser import parse
+from homevent.context import Context
+from cStringIO import StringIO
 import sys
 import re
 import os
@@ -76,7 +80,7 @@ class SayMoreWorker(h.SeqWorker):
 		w.append(SayWorker("TellTwo"))
 		return w
 
-def logger(s,t,c,*x):
+def parse_logger(s,t,c,*x):
 	pass
 	#if t == COMMENT:
 	#	log(c.rstrip())
@@ -92,4 +96,16 @@ class logwrite(object):
 				for l in self.buf.rstrip("\n").split("\n"):
 					self.log(l)
 			self.buf=""
+
+def run(name,input, interpreter=Interpreter, logger=None):
+	if logger is None:
+		logger = run_logger(name,dot=False).log
+	input = StringIO(input)
+
+	def _main():
+		d = parse(input, interpreter(Context(out=logwrite(logger))),Context(logger=parse_logger))
+		d.addErrback(lambda _: _.printTraceback())
+		d.addBoth(lambda _: h.shut_down())
+
+	h.mainloop(_main)
 

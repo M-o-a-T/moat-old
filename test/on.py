@@ -1,19 +1,13 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import homevent as h
-import homevent.parser as hp
-import homevent.interpreter as hi
-from homevent.context import Context
 from homevent.reactor import ShutdownHandler
 from homevent.module import load_module
-from homevent.statement import DoNothingHandler
-from StringIO import StringIO
-from test import run_logger, logger,logwrite
+from homevent.statement import DoNothingHandler, main_words
 
-log = run_logger("on",dot=False).log
+from test import run
 
-input = StringIO("""\
+input = """\
 on foo:
 	prio 50
 	name "Do nothing"
@@ -39,18 +33,13 @@ sync trigger bar foo
 del on 1
 list on
 shutdown
-""")
+"""
 
-h.main_words.register_statement(DoNothingHandler)
-h.main_words.register_statement(ShutdownHandler)
+main_words.register_statement(DoNothingHandler)
+main_words.register_statement(ShutdownHandler)
 load_module("block")
 load_module("trigger")
 load_module("on_event")
 
-def main():
-	d = hp.parse(input, hi.Interpreter(Context(out=logwrite(log))), Context(logger=logger)) # , out=log)
-	d.addErrback(lambda _: _.printTraceback())
-	d.addBoth(lambda _: h.shut_down())
-
-h.mainloop(main)
+run("on",input)
 

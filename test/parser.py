@@ -2,19 +2,15 @@
 # -*- coding: utf-8 -*-
 
 import homevent as h
-import homevent.parser as hp
-import homevent.interpreter as hi
-import homevent.statement as hs
-from homevent.context import Context
+from homevent.interpreter import Interpreter
+from homevent.statement import Statement,ComplexStatement
 from homevent.reactor import ShutdownHandler
 from homevent.module import load_module
-from StringIO import StringIO
-from test import run_logger, logger,logwrite
+from test import run, run_logger
+ 
+log = run_logger("parser",dot=False).log
 
-tlogger = run_logger("parser",dot=False)
-log = tlogger.log
-
-input = StringIO("""\
+input = """\
 
 # call FooHandler(main).run(⌁.foo)
 foo
@@ -53,7 +49,7 @@ help foo bar for foiled
 
 shutdown
 #EOF
-""")
+"""
 
 _id=0
 class sbr(object):
@@ -73,23 +69,23 @@ class sbr(object):
 	def start_block(self):
 		log("InputComplex %s(%d): %s" % (self.name,self.id,repr(self.args)))
 
-class FooHandler(sbr,hs.Statement):
+class FooHandler(sbr,Statement):
 	name=("foo",)
 	doc="We foo around."
 
-class BarHandler(sbr,hs.ComplexStatement):
+class BarHandler(sbr,ComplexStatement):
 	name=("foo","bar",)
 	doc="Have a bar, man!"
 	
-class ForHandler(sbr,hs.ComplexStatement):
+class ForHandler(sbr,ComplexStatement):
 	name=("for",)
 	doc="for you!"
 	
-class WhatHandler(sbr,hs.ComplexStatement):
+class WhatHandler(sbr,ComplexStatement):
 	name=("what",)
 	doc="What is this?"
 
-class FoiledHandler(sbr,hs.Statement):
+class FoiledHandler(sbr,Statement):
 	name=("foiled",)
 	doc="not clingfilm"
 
@@ -101,7 +97,7 @@ h.main_words.register_statement(BarHandler)
 h.main_words.register_statement(ShutdownHandler)
 load_module("help")
 
-class TestInterpreter(hi.Interpreter):
+class TestInterpreter(Interpreter):
 	def complex_statement(self,args):
 		fn = self.ctx.words.lookup(args)
 		fn = fn(self.ctx)
@@ -111,10 +107,4 @@ class TestInterpreter(hi.Interpreter):
 	def done(self):
 		log("... moving up")
 
-def main():
-	d = hp.parse(input, TestInterpreter(Context(out=logwrite(log))), Context(logger=logger)) # , out=log)
-	d.addErrback(lambda _: _.printTraceback())
-	d.addBoth(lambda _: h.shut_down())
-
-h.mainloop(main)
-
+run("parser", input, interpreter=TestInterpreter, logger=log)
