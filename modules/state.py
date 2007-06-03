@@ -144,7 +144,7 @@ class VarStateHandler(Statement):
 	name=("var","state")
 	doc="assign a variable to report a state"
 	long_doc="""\
-var NAME name...
+var state NAME name...
 	: $NAME refers to the state ‹name…›, in the enclosing block
 """
 	def run(self,ctx,**k):
