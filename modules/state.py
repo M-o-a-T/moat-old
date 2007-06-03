@@ -61,7 +61,7 @@ set state X name...
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		w = event[len(self.name):]
+		w = event[:]
 		if len(w) < 2:
 			raise SyntaxError("Usage: set state ‹value› ‹name…›")
 		value = w[0]
@@ -101,9 +101,8 @@ list state name...
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		w = event[len(self.name):]
-		if len(w):
-			s = states[tuple(w)]
+		if len(event):
+			s = states[tuple(event)]
 			print >>self.ctx.out, "Name:"," ".join(s.name)
 			print >>self.ctx.out, "Value:",s.value
 			if hasattr(s,"old_value"):
@@ -125,18 +124,17 @@ del state name...
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		w = tuple(event[len(self.name):])
-		if not len(w):
+		if not len(event):
 			raise SyntaxError("Usage: del state ‹name…›")
 
-		s = states[w]
+		s = states[tuple(event)]
 		if s.working:
 			raise StateChangeError(s,"‹deleted›")
 		s.working = True
 		s.time = time()
-		d = process_event(Event(self.ctx,"state",s.value,"-",*w))
+		d = process_event(Event(self.ctx,"state",s.value,"-",*event))
 		def clear_chg(_):
-			del states[w]
+			del states[tuple(event)]
 			return _
 		d.addBoth(clear_chg)
 		return d
@@ -151,7 +149,7 @@ var NAME name...
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		w = event[len(self.name):]
+		w = event[:]
 		var = w[0]
 		name = tuple(w[1:])
 		setattr(self.parent.ctx,var,states[name])

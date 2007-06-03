@@ -23,10 +23,9 @@ trigger FOO...
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		w = event[len(self.name):]
-		if not w:
+		if not event:
 			raise SyntaxError("Events need at least one parameter")
-		process_event(Event(self.ctx,*w))
+		process_event(Event(self.ctx,*event))
 
 class SyncTriggerHandler(TriggerHandler):
 	name=("sync","trigger")
@@ -37,10 +36,9 @@ sync trigger FOO...
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		w = event[len(self.name):]
-		if not w:
+		if not event:
 			raise SyntaxError("Events need at least one parameter")
-		return process_event(Event(self.ctx,*w))
+		return process_event(Event(self.ctx,*event))
 
 
 from homevent.module import Module

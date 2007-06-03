@@ -27,7 +27,7 @@ Statements may be multi-word and follow generic Python syntax.
 		event = self.params(ctx)
 		words = self.parent
 
-		wl = event[len(self.name):]
+		wl = event[:]
 		while wl:
 			try:
 				wlist = words._get_wordlist()

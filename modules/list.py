@@ -23,13 +23,12 @@ list module NAME [args...]
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		wl = event[len(self.name):]
-		if not len(wl):
+		if not len(event):
 			for m in modules.itervalues():
 				print >>self.ctx.out, " ".join(m.name)
 			print >>self.ctx.out, "."
-		elif len(wl) == 1:
-			print  >>self.ctx.out, " ".join(modules[wl[0]].name),modules[wl[0]].__doc__
+		elif len(event) == 1:
+			print  >>self.ctx.out, " ".join(modules[event[0]].name),modules[event[0]].__doc__
 		else:
 			raise SyntaxError("Only one name allowed.")
 
@@ -44,13 +43,12 @@ list worker NAME
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		wl = event[len(self.name):]
-		if not wl:
+		if not len(event):
 			for w in list_workers():
 				print >>self.ctx.out, w.prio,w.name
 			print >>self.ctx.out, "."
-		elif len(wl) == 1:
-			for w in list_workers(wl[0]): # should return only one
+		elif len(event) == 1:
+			for w in list_workers(event[0]): # should return only one
 				print >>self.ctx.out, w.name,w.__doc__
 			print >>self.ctx.out, "."
 		else:

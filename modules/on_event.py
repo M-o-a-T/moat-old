@@ -132,7 +132,7 @@ Every "*foo" in the event description is mapped to the corresponding
 
 	def start_block(self):
 		super(OnEventHandler,self).start_block()
-		w = self.args[len(self.name):]
+		w = self.params(self.ctx)[:]
 		log(TRACE, "Create OnEvtHandler: "+repr(w))
 		self.args = w
 
@@ -142,10 +142,9 @@ class OffEventHandler(Statement):
 	doc = "forget about an event handler"
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		w = event[len(self.name):]
-		if len(w) == 1:
-			try: worker = onHandlers[w[0]]
-			except KeyError: worker = onHandlerNames[w[0]]
+		if len(event) == 1:
+			try: worker = onHandlers[event[0]]
+			except KeyError: worker = onHandlerNames[event[0]]
 			unregister_worker(worker)
 			del onHandlers[worker.handler_id]
 			if worker.displayname is not None:
@@ -158,8 +157,7 @@ class OnListHandler(Statement):
 	doc = "list event handlers"
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		w = event[len(self.name):]
-		if not len(w):
+		if not len(event):
 			try:
 				fl = len(str(max(onHandlers.iterkeys())))
 			except ValueError:
@@ -172,9 +170,9 @@ class OnListHandler(Statement):
 						n += " ‹"+h.displayname+"›"
 					print >>self.ctx.out,str(id)+" "*(fl-len(str(id))+1),":",n
 			print >>self.ctx.out,"."
-		elif len(w) == 1:
-			try: h = onHandlers[w[0]]
-			except KeyError: h = onHandlerNames[w[0]]
+		elif len(event) == 1:
+			try: h = onHandlers[event[0]]
+			except KeyError: h = onHandlerNames[event[0]]
 			print >>self.ctx.out, h.handler_id,":","¦".join(h.args)
 			if h.displayname is not None: print >>self.ctx.out,"Name:",h.displayname
 			if hasattr(h,"displaydoc"): print >>self.ctx.out,"Doc:",h.displaydoc
@@ -192,11 +190,10 @@ Only one handler within each priority is actually executed.
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		w = event[len(self.name):]
-		if len(w) != 1:
+		if len(event) != 1:
 			raise SyntaxError("Usage: prio ‹priority›")
 		try:
-			prio = int(w[0])
+			prio = int(event[0])
 		except ValueError:
 			raise SyntaxError("Usage: prio ‹priority› ⇐ integer priorities only")
 		if prio < MIN_PRIO or prio > MAX_PRIO:
@@ -214,10 +211,9 @@ This statement assigns a name to an event handler.
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		w = event[len(self.name):]
-		if len(w) != 1:
+		if len(event) != 1:
 			raise SyntaxError('Usage: name "‹text›"')
-		self.parent.displayname = w[0]
+		self.parent.displayname = event[0]
 
 
 class OnDoc(Statement):
@@ -230,10 +226,9 @@ This statement assigns a documentation string to an event handler.
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		w = event[len(self.name):]
-		if len(w) != 1:
+		if len(event) != 1:
 			raise SyntaxError('Usage: doc "‹text›"')
-		self.parent.displaydoc = w[0]
+		self.parent.displaydoc = event[0]
 
 
 class OnSkip(Statement):

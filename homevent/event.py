@@ -27,8 +27,7 @@ class Event(object):
 				Event(ctx, "switch","dim","livingroom","lamp12")
 				Event(ctx, "timer","timeout","t123")
 			"""
-		if not len(names):
-			raise EventNoNameError
+		self._name_check(names)
 		#print "E_INIT",names,"with",ctx
 		self.names = names
 		self.ctx = ctx
@@ -37,6 +36,9 @@ class Event(object):
 		event_id += 1
 		self.id = event_id
 
+	def _name_check(self,names):
+		if not len(names):
+			raise EventNoNameError
 
 	def __repr__(self):
 		if not hasattr(self,"names"):
@@ -74,7 +76,7 @@ class Event(object):
 	def __iter__(self):
 		return self.names.__iter__()
 
-	def clone(self, ctx=None):
+	def clone(self, ctx=None, drop=0):
 		"""\
 			Copy an event, applying substitutions.
 			This code dies with an AttributeError if there are no
@@ -87,7 +89,7 @@ class Event(object):
 		else:
 			ctx = self.ctx(ctx=ctx)
 
-		for n in self.names:
+		for n in self.names[drop:]:
 			if hasattr(n,"startswith") and n.startswith('$'):
 				n = getattr(ctx,n[1:])
 			w.append(n)

@@ -50,7 +50,7 @@ Syntax:
 			raise SyntaxError("‹if ...› can only be used as a complex statement")
 
 		event = self.params(ctx)
-		w = event[len(self.name):]
+		w = event[:]
 
 		if w[0] == "not":
 			want=False

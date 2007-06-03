@@ -45,7 +45,7 @@ NEW: <WorkSequence:4 (5)>
    : │     proc: ‹LogHandler ⌁.log¦TRACE¦Set¦to¦FOUR›
    : │         : ‹SetStateHandler ⌁.set¦state¦four¦foo¦bar›
    : └2╴... done.
-46 EVENT: state¦two¦three¦foo¦bar
+47 EVENT: state¦two¦three¦foo¦bar
 RUN: <WorkSequence:4 (5)>
  ev: EVENT: state¦two¦three¦foo¦bar
 RUN: ON state¦*¦three¦foo¦bar
@@ -88,10 +88,10 @@ ERROR: Traceback (most recent call last):
      : └2╴... done.
 RUN: <WorkSequence:5 (4)>
  ev: ERROR: Trying to change state to 'four' while changing from 'two' to 'three'
-57 END: StateChangeError
+58 END: StateChangeError
 RUN: <WorkSequence:5 (4)>
  ev: ERROR: Trying to change state to 'four' while changing from 'two' to 'three'
-46 END: state¦two¦three¦foo¦bar
+47 END: state¦two¦three¦foo¦bar
 RUN: <WorkSequence:4 (5)> (step 1)
  ev: EVENT: state¦two¦three¦foo¦bar
 0 Timer 1 :: 0.1
@@ -124,7 +124,7 @@ NEW: <WorkSequence:6 (5)>
    : │     proc: ‹VarStateHandler ⌁.var¦state¦x¦foo¦bar›
    : │         : ‹LogHandler ⌁.log¦TRACE¦We¦got¦$x›
    : └2╴... done.
-94 EVENT: whatever
+96 EVENT: whatever
 RUN: <WorkSequence:6 (5)>
  ev: EVENT: whatever
 RUN: ON whatever
@@ -134,16 +134,16 @@ RUN: ON whatever
  at: <WorkSequence:6 (5)> (step 1)
  ev: EVENT: whatever
 0 We got three
-94 END: whatever
+96 END: whatever
 RUN: <WorkSequence:6 (5)> (step 1)
  ev: EVENT: whatever
 NEW: <WorkSequence:7 (4)>
    : │  EVENT: state¦three¦-¦foo¦bar
    : └1╴... done.
-106 EVENT: state¦three¦-¦foo¦bar
+108 EVENT: state¦three¦-¦foo¦bar
 RUN: <WorkSequence:7 (4)>
  ev: EVENT: state¦three¦-¦foo¦bar
-106 END: state¦three¦-¦foo¦bar
+108 END: state¦three¦-¦foo¦bar
 RUN: <WorkSequence:7 (4)>
  ev: EVENT: state¦three¦-¦foo¦bar
 .

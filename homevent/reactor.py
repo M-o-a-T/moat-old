@@ -108,12 +108,11 @@ shutdown now  ... but does not wait for active events to terminate.
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		w = event[len(self.name):] # drop the "shutdown"
-		if len(w):
-			if tuple(w) == ("now",):
+		if len(event):
+			if tuple(event) == ("now",):
 				stop_mainloop()
 				return
-			raise ValueError("'shutdown' does not take arguments (except ‹now›).",w)
+			raise ValueError("'shutdown' does not take arguments (except ‹now›).",event)
 		shut_down()
 
 def mainloop(main=None):

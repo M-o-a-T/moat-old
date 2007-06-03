@@ -56,17 +56,16 @@ log
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		w = event[len(self.name):]
 		out = self.ctx.out
-		if not len(w):
+		if not len(event):
 			for s,v in LogName.iteritems():
 				print >>out,"%d = %s" % (s,v)
 			print >>out,"."
 			return None
-		if len(w) > 1:
-			log(globals()[w[0]], *w[1:])
+		if len(event) > 1:
+			log(globals()[event[0]], *event[1:])
 		else:
-			level = globals()[w[0]]
+			level = globals()[event[0]]
 			if level == NONE:
 				if hasattr(out,"logger"):
 					unregister_logger(out.logger)

@@ -48,7 +48,7 @@ load NAME [args]...
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		return process_event(Event(self.ctx, "module","load",*event[len(self.name):]))
+		return process_event(Event(self.ctx, "module","load",*event))
 
 class Unload(Statement):
 	name=("del","load",)
@@ -60,7 +60,7 @@ del load NAME [args]...
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		return process_event(Event(self.ctx, "module","unload",*event[len(self.name):]))
+		return process_event(Event(self.ctx, "module","unload",*event))
 
 class LoadDir(Statement):
 	name=("load","dir")
@@ -77,28 +77,27 @@ load dir - "NAME"
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		wl = event[len(self.name):]
-		if len(wl) == 0:
+		if len(event) == 0:
 			for m in ModuleDirs:
 				print >>self.ctx.out, m
 			print >>self.ctx.out, "."
 		else:
-			w = wl[-1]
-			if len(wl) == 1 and w not in ("+","-"):
+			w = event[-1]
+			if len(event) == 1 and w not in ("+","-"):
 				if not os.path.isdir(w):
 					raise RuntimeError("‹%s›: not found" % (w,))
-				if wl[0] not in ModuleDirs:
+				if event[0] not in ModuleDirs:
 					ModuleDirs.append(w)
 				else:
 					raise RuntimeError("‹%s›: already listed" % (w,))
-			elif len(wl) == 2 and wl[0] == "+":
+			elif len(event) == 2 and event[0] == "+":
 				if not os.path.isdir(w):
 					raise RuntimeError("‹%s›: not found" % (w,))
-				if wl[1] not in ModuleDirs:
+				if event[1] not in ModuleDirs:
 					ModuleDirs.insert(0,w)
 				else:
 					raise RuntimeError("‹%s›: already listed" % (w,))
-			elif len(wl) == 2 and wl[0] == "-":
+			elif len(event) == 2 and event[0] == "-":
 				try:
 					ModuleDirs.remove(w)
 				except ValueError:

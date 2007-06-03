@@ -54,7 +54,7 @@ wait FOO...
 
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		w = event[len(self.name):]
+		w = event[:]
 		s = 0
 		if not w:
 			raise SyntaxError("Timers need a value")
@@ -140,10 +140,9 @@ This statement assigns a name to a wait statement
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		w = event[len(self.name):]
-		if len(w) != 1:
+		if len(event) != 1:
 			raise SyntaxError('Usage: name "‹text›"')
-		self.parent.displayname = w[0]
+		self.parent.displayname = event[0]
 
 
 class WaitCancel(Statement):
@@ -154,10 +153,9 @@ This statement aborts a wait handler.
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		wl = event[len(self.name):]
-		if len(wl) != 1:
+		if len(event) != 1:
 			raise SyntaxError('Usage: del wait "‹name›"')
-		w = waiters[wl[0]]
+		w = waiters[event[0]]
 		w.cancel(err=HaltSequence)
 
 class WaitUpdate(Statement):
@@ -168,9 +166,9 @@ This statement updates the timeout of an existing wait handler.
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		w = event[len(self.name):]
-		if len(w):
+		if len(event):
 			raise SyntaxError('Usage: update')
+		assert hasattr(self.parent,"is_update"), "Not within a wait statement?"
 		self.parent.is_update = True
 
 
@@ -186,13 +184,12 @@ list wait NAME
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		wl = event[len(self.name):]
-		if not len(wl):
+		if not len(event):
 			for w in waiters.itervalues():
 				print >>self.ctx.out, w.displayname
 			print >>self.ctx.out, "."
-		elif len(wl) == 1:
-			w = waiters[wl[0]]
+		elif len(event) == 1:
+			w = waiters[event[0]]
 			print  >>self.ctx.out, "Name: ",w.displayname
 			print  >>self.ctx.out, "Started: ",w.timer_start
 			print  >>self.ctx.out, "Timeout: ",w.timer_val

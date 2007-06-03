@@ -24,6 +24,9 @@ import sys
 
 class InputEvent(Event):
 	"""An event that's just a line from the interpreter"""
+	def _name_check(self,names):
+		pass
+
 	def __str__(self):
 		try:
 			return "⌁."+"¦".join(self.names)

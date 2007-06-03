@@ -76,7 +76,7 @@ class Statement(object):
 			Internal method: Return the argument list, as modified by
 			the context.
 			"""
-		return self.args.clone(ctx)
+		return self.args.clone(ctx,drop=len(self.name))
 
 	def run(self,ctx,**k):
 		raise NotImplementedError("You need to override '%s.run' (called with %s)" % (self.__class__.__name__,repr(event)))
@@ -339,10 +339,9 @@ class OffEventHandler(Statement):
 	doc = "forget about an event handler"
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		w = event[len(self.name):]
-		if len(w) == 1:
-			try: worker = onHandlers[w[0]]
-			except KeyError: worker = onHandlerNames[w[0]]
+		if len(event) == 1:
+			try: worker = onHandlers[event[0]]
+			except KeyError: worker = onHandlerNames[event[0]]
 			unregister_worker(worker)
 			del onHandlers[worker.handler_id]
 			if worker.displayname is not None:
@@ -355,8 +354,7 @@ class OnListHandler(Statement):
 	doc = "list event handlers"
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		w = event[len(self.name):]
-		if not len(w):
+		if not len(event):
 			try:
 				fl = len(str(max(onHandlers.iterkeys())))
 			except ValueError:
@@ -368,9 +366,9 @@ class OnListHandler(Statement):
 					if h.displayname is not None:
 						n += " ‹"+h.displayname+"›"
 					print >>self.ctx.out,str(id)+" "*(fl-len(str(id))+1),":",n
-		elif len(w) == 1:
-			try: h = onHandlers[w[0]]
-			except KeyError: h = onHandlerNames[w[0]]
+		elif len(event) == 1:
+			try: h = onHandlers[event[0]]
+			except KeyError: h = onHandlerNames[event[0]]
 			print >>self.ctx.out, h.handler_id,":","¦".join(h.args)
 			if h.displayname is not None: print >>self.ctx.out,"Name:",h.displayname
 			if hasattr(h,"displaydoc"): print >>self.ctx.out,"Doc:",h.displaydoc
@@ -387,8 +385,7 @@ explicitly state that some event does not result in any action.
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		w = event[len(self.name):]
-		if len(w):
+		if len(event):
 			raise SyntaxError("Usage: do nothing")
 		log(TRACE,"NOW: do nothing")
 
