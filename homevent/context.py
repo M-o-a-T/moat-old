@@ -53,7 +53,8 @@ class Context(object):
 					break
 		if r is VanishedAttribute:
 			raise KeyError(self,key)
-		if hasattr(r,"value"): r = r.value
+		try: r = r.value
+		except AttributeError: pass
 		return r
 
 	def __setattr__(self,key,val):
