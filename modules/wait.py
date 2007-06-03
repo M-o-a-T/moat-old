@@ -16,6 +16,7 @@ from homevent.run import process_event
 from homevent.logging import log,TRACE
 from homevent.module import Module
 from homevent.worker import HaltSequence
+from homevent.check import Check,register_condition,unregister_condition
 from time import time
 from twisted.python.failure import Failure
 
@@ -123,6 +124,7 @@ wait FOO...
 	def cancel(self, err=WaitCancelled):
 		self.timer_id.cancel()
 		self.timer_id = None
+		del waiters[self.displayname]
 		self.timer_defer.errback(Failure(err(self)))
 	
 	def retime(self, timeout):
@@ -214,6 +216,15 @@ list wait NAME
 					print  >>self.ctx.out, "in: ",n
 			print  >>self.ctx.out, "."
 
+class ExistsWaiterCheck(Check):
+	name=("exists","wait")
+	doc="check if a waiter exists at all"
+	def check(self,*args):
+		if not len(args):
+			raise SyntaxError("Usage: if exists wait ‹name…›")
+		name = tuple(args)
+		return name in waiters
+
 
 WaitHandler.register_statement(WaitName)
 WaitHandler.register_statement(WaitUpdate)
@@ -230,10 +241,12 @@ class EventsModule(Module):
 		main_words.register_statement(WaitHandler)
 		main_words.register_statement(WaitCancel)
 		global_words.register_statement(WaitList)
+		register_condition(ExistsWaiterCheck)
 	
 	def unload(self):
 		main_words.unregister_statement(WaitHandler)
 		main_words.unregister_statement(WaitCancel)
 		global_words.unregister_statement(WaitList)
+		unregister_condition(ExistsWaiterCheck)
 
 init = EventsModule
