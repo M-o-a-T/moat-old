@@ -16,6 +16,7 @@ from homevent.run import process_event
 from homevent.logging import log,TRACE
 from homevent.module import Module
 from homevent.worker import HaltSequence
+from homevent.time import time_delta
 from homevent.check import Check,register_condition,unregister_condition
 from time import time
 import os
@@ -56,43 +57,7 @@ wait FOO...
 
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		w = event[:]
-		s = 0
-		if not w:
-			raise SyntaxError("Timers need a value")
-		m = 1
-		while w:
-			if len(w) == 1:
-				pass
-			elif w[1] in ("s","sec","second","seconds"):
-				w.pop(1)
-			elif w[1] in ("m","min","minute","minutes"):
-				m = 60
-				w.pop(1)
-			elif w[1] in ("h","hr","hour","hours"):
-				m = 60*60
-				w.pop(1)
-			elif w[1] in ("d","dy","day","days"):
-				m = 60*60*24
-				w.pop(1)
-			elif w[1] in ("w","wk","week","weeks"):
-				m = 60*60*24*7
-				w.pop(1)
-			elif w[1] in ("+","-"):
-				pass
-			else:
-				raise SyntaxError("unknown unit",w[1])
-			s += m * w[0]
-			w.pop(0)
-			if w:
-				if w[0] == "+":
-					w.pop(0)
-					m = 1
-				elif w[0] == "-":
-					w.pop(0)
-					m = -1
-				else:
-					m = 1 # "1min 59sec"
+		s = time_delta(event)
 					
 		if self.is_update:
 			if s < 0: s = 0
