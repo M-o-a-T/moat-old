@@ -37,6 +37,12 @@ This will cause the following block to not be executed.
 (It still needs to be composed of known words.)
 It's a handy "comment this out" statement.
 
+====
+bool
+====
+
+Simple conditionals "true" and "false". See 'ifelse' for details.
+
 =======
 example
 =======
@@ -54,6 +60,32 @@ sub-command named "bar", "help foo bar" will list its info.
 
 Of course, if you also happen to have a top-level "foo bar" command,
 you're SOL. So don't do that. ☺
+
+======
+ifelse
+======
+
+This module implements basic conditional blocks.
+
+	laod ifelse
+	load bool
+	load logging
+	block:
+		if true:
+			log TRACE "Everything is OK."
+		else:
+			log PANIC "Something is *seriously* broken!"
+
+"else if" is also available.
+
+"else" does not work at top level, due to an implementation
+decision that's difficult to circumvent, but you can always use a block:
+wrapper (as in the example, above).
+
+This module does not by itself implement anything you can actually test
+for; that's in other modules.
+
+"help conditions" lists which conditions you can test for.
 
 ====
 list
@@ -139,7 +171,6 @@ Right now there is no support for pattern matching or variable number of
 arguments. (One solution is to design your event names in such a way that
 you don't need that.)
 
-----
 name
 ----
 
@@ -148,7 +179,6 @@ This sub-statement names this particular event handler.
 Event handlers have system-assigned numbers as well as names, so you can
 still delete a handler without naming it.
 
-----
 prio
 ----
 
@@ -225,7 +255,133 @@ or its name.
 state
 =====
 
-TODO.
+This module limits state variables. These are not yet persistent, but
+they will be.
+
+---------
+set state
+---------
+
+Sets a state to some value.
+
+	set state on livingroom lamp1
+
+This will trigger an event if the old state was not "on":
+
+	state - on livingroom lamp1
+
+"-" is used when the state variable is new.
+
+The event is processed synchronously. It is an error for an event
+handler to change the same state variables.
+
+For this reason, you need to wrap any activity that's either long-term,
+or likely to change the state again, in an async: block. In other
+words, this is broken and will cause you a lot of headache:
+
+	# DO NOT DO THIS
+	load onewire
+	load on_event
+	load wait
+	load trigger
+
+	on state * on outside *lamp:
+		trigger onewire switch on outside $lamp
+		wait for 5min:
+			name outside $lamp
+		trigger onewire switch off outside $lamp
+
+The correct solution would be, depending on whether you want the switch
+to prolong the timeout …:
+
+	# DO THIS (the switch turns off the lamp)
+	load block
+	load ifelse
+
+	on state * on outside *lamp:
+		if exists wait outside $lamp:
+			wait for 5min:
+				name outside $lamp
+				update
+		else:
+			async:
+				trigger onewire switch on outside $lamp
+				wait for 5min:
+					name outside $lamp
+				trigger onewire switch off outside $lamp
+
+… or turn the lamp off prematurely:
+
+	# DO THIS (the switch turns off the lamp)
+	on state * on outside *lamp:
+		async:
+			if exists wait outside $lamp:
+				del wait outside $lamp
+			else:
+				trigger onewire switch on outside $lamp
+				wait for 5min:
+					name outside $lamp
+			trigger onewire switch off outside $lamp
+
+Note that in the last example, the trigger statement is outside the if:
+statement. That is intentional; see "del wait", below, for details.
+
+---------
+del state
+---------
+
+Causes the system to forget a state variable. A notification event is
+triggered:
+
+	state on - livingroom lamp1
+
+The rules on events, above, still apply.
+
+----------
+list state
+----------
+
+Shows all state variables.
+
+You can append the name of a variable to show additional details.
+
+---------
+var state
+---------
+
+Sometimes you need a state for further processing.
+
+Arguments are the name of the variable, and the state name.
+
+	block:
+		var state light livingroom lamp1
+		log DEBUG "The light is" $light
+
+-----
+Tests
+-----
+
+state
+-----
+
+True if a state has a particular value.
+
+	if state on livingroom lamp1:
+		log DEBUG "Save energy, man!"
+
+last state
+----------
+
+True if a state had a particular value before it was changed to the
+current one. As above, the previous value for a new state is "-".
+
+exists state
+------------
+
+True if the state has been defined at all.
+
+	if exists state NAME:
+		log DEBUG "Yay!"
 
 =======
 trigger
@@ -263,9 +419,9 @@ wait
 
 This module implements a method to wait for a specified amount of time.
 
-----
-wait
-----
+--------
+wait for
+--------
 
 This statement will delay execution by the specified amount.
 
@@ -273,7 +429,7 @@ This statement will delay execution by the specified amount.
 
 You can use it as a compound statement to specify details.
 
-----
+
 name
 ----
 
@@ -288,7 +444,6 @@ name as one that's still pending, an error will be triggered.
 If you do not name a wait statement, it will have a system-assigned
 unique name.
 
-------
 update
 ------
 
@@ -310,6 +465,48 @@ will trigger the FooBar event after one second; the DoNow event will
 trigger immediately. Obviously, both wait statements need the same name.
 An error will be raised if the original statement is no longer active.
 
+----------
+wait until
+----------
+
+This powerful statement lets you wait until some (fixed) conditions
+related to the current time are true.
+
+	async:
+		wait until 0 min 0 sec
+		log DEBUG full hour
+
+If the conditions are already true, this statement will not wait at all.
+
+---------------
+wait until next
+---------------
+
+Like above, except that it'll wait until the next time the statement is
+true.
+
+	async:
+		while True:
+			wait until next 0 min
+			trigger play sound "hourly chime.ogg"
+
+This will prevent repeating the gong for a full minute. ;-)
+
+----------
+wait while
+----------
+
+This will wait until the condition is no longer true.
+The above could therefore also have been written as:
+
+	async:
+		while True:
+			wait while 0 min
+			wait until 0 min
+			trigger play sound "hourly chime.ogg"
+
+except that it's ugly. ☺
+
 ---------
 list wait
 ---------
@@ -322,4 +519,14 @@ You can append the name of a wait statement to show additional details.
 del wait
 --------
 
-Cancels 
+Cancels a given wait. The statements which waited for it are *not*
+executed — this includes stuff in upper blocks, other event handlers
+which tried to process whatever was blocked by the wait, etc.
+
+This is the reason why, in the last example under "set state", above,
+the command to turn off the lamp is outside the if: statement.
+
+If you do want these statements to run, update the waiter to zero
+seconds instead of canceling it.
+
+
