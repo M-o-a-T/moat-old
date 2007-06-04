@@ -105,7 +105,10 @@ class ComplexStatement(Statement):
 		self.statements = []
 
 	def __repr__(self):
-		return "‹%s %s %d›" % (self.__class__.__name__,repr(self.name),len(self.__words))
+		if self.__words is None:
+			return "‹%s %s›" % (self.__class__.__name__,repr(self.name))
+		else:
+			return "‹%s %s %d›" % (self.__class__.__name__,repr(self.name),len(self.__words))
 
 	def start_block(self):
 		raise NotImplementedError("You need to override '%s.start_block' (called with %s)" % (self.__class__.__name__,repr(self.args)))
