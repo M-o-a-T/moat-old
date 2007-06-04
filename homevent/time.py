@@ -40,7 +40,7 @@ def time_delta(args):
 		elif w[1] in ("m","mo","month","months"):
 			m = 60*60*24*30 ## inexact!
 			w.pop(1)
-		elif unit in ("y","yr","year","years"):
+		elif w[1] in ("y","yr","year","years"):
 			m = 60*60*24*365 ## inexact!
 			w.pop(1)
 		elif w[1] in ("+","-"):
