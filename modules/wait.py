@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+from __future__ import division
+
 """\
 This code does basic timeout handling.
 
@@ -13,10 +15,9 @@ from homevent.statement import AttributedStatement, Statement, main_words,\
 	global_words
 from homevent.event import Event
 from homevent.run import process_event
-from homevent.logging import log,TRACE
 from homevent.module import Module
 from homevent.worker import HaltSequence
-from homevent.time import time_delta, time_until
+from homevent.times import time_delta, time_until, unixtime,unixdelta, now
 from homevent.check import Check,register_condition,unregister_condition
 from time import time
 import os
@@ -28,14 +29,117 @@ timer_nr = 0
 waiters={}
 
 
-class WaitCancelled(RuntimeError):
+class WaitError(RuntimeError):
+	def __init__(self,w):
+		self.waiter = w
+	def __str__(self):
+		return self.text % (" ".join(self.waiter.name),)
+
+class WaitLocked(WaitError):
+	text = "Tried to process waiter ‹%s› while it was locked"
+
+class WaitCancelled(WaitError):
 	"""An error signalling that a wait was killed."""
-	pass
+	text = "Waiter ‹%s› was cancelled"
 
-class DupWaiterError(RuntimeError):
-	"""A waiter with that name already exists"""
-	pass
+class DupWaiterError(WaitError):
+	text = "A waiter ‹%s› already exists"
 
+
+
+class Waiter(object):
+	"""This is the thing that waits."""
+	def __init__(self,parent,name):
+		self.ctx = parent.ctx
+		self.start = now()
+		try:
+			self.parent = parent.parent
+		except AttributeError:
+			pass
+		self.defer = defer.Deferred()
+		self.name = name
+		self.locked = False
+		if self.name in waiters:
+			raise DupWaiterError(self.name)
+	
+	def _callit(self,_=None):
+		self.locked = False
+		self.id = reactor.callLater(self.value, self.doit)
+
+	def init(self,dest):
+		self.end = dest
+		if self.value <= 0:
+			return defer.succeed(None)
+
+		if self.name in waiters:
+			return DupWaiterError(self)
+		waiters[self.name] = self
+		self.locked = True
+		d = process_event(Event(self.ctx,"wait","start",unixtime(self.end),*self.name))
+		d.addCallback(self._callit)
+		d.addCallback(lambda _: self.defer)
+		return d
+
+	def get_value(self):
+		val = self.end-now()
+		d = unixdelta(val)
+		if "HOMEVENT_TEST" in os.environ:
+			return int(d+1) # otherwise the logs will have timing diffs
+		if d < 0: d = 0
+		return d
+	value = property(get_value)
+
+	def doit(self):
+		if self.locked:
+			print "doit LOCKED"
+			self.id = None
+			return
+		self.locked = True
+
+		d = process_event(Event(self.ctx,"wait","done",unixtime(self.end),*self.name))
+		def done(_):
+			self.defer.callback(_)
+			del waiters[self.name]
+		d.addCallbacks(done)
+
+	def cancel(self, err=WaitCancelled):
+		if self.locked:
+			raise WaitLocked(self)
+		self.locked = True
+
+		if self.id:
+			self.id.cancel()
+			self.id = None
+
+		d = process_event(Event(self.ctx,"wait","cancel",unixtime(self.end),*self.name))
+		def errgen(_):
+			return Failure(err(self))
+		def done(_):
+			del waiters[self.name]
+			self.defer.callback(_)
+		d.addCallback(errgen)
+		d.addBoth(done)
+		return d
+	
+	def retime(self, dest):
+		if self.locked:
+			raise WaitLocked(self)
+		self.locked = True
+
+		self.id.cancel()
+		self.id = None
+
+		old_end = self.end
+		self.end = dest
+		d = process_event(Event(self.ctx,"wait","update",unixtime(self.end),*self.name))
+		def err(_):
+			self.end = old_end
+			self._callit()
+			return _
+		d.addCallbacks(self._callit, err)
+		return d
+
+	
 class WaitHandler(AttributedStatement):
 	name=("wait","for")
 	doc="delay for N seconds"
@@ -52,62 +156,22 @@ wait for FOO...
 		global timer_nr
 		timer_nr += 1
 		self.nr = timer_nr
-		self.displayname=("_wait",str(self.nr))
+		self.displayname=("_wait",self.nr)
 
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		s = time_delta(event)
-		return self._waitfor(s)
+		return self._waitfor(now()+s)
 					
-	def _waitfor(self,sec):
+	def _waitfor(self,dest):
 		if self.is_update:
-			if sec < 0: sec = 0
-			w = waiters[self.displayname]
-			w.retime(sec)
-			return
+			return waiters[self.displayname].retime(dest)
 			
-		if sec < 0:
-			log(TRACE,"No time out:",sec)
-			return # no waiting
-		log(TRACE,"Timer",self.nr,"::",sec)
+		w = Waiter(self, self.displayname)
+		d = w.init(dest)
+		return d
 
-		r = defer.Deferred()
-		if self.displayname in waiters:
-			raise DupWaiterError(self.displayname)
-		waiters[self.displayname] = self
-		self.timer_start=time()
-		self.timer_val = sec
-		self.timer_defer = r
-		self.timer_id = reactor.callLater(sec, self.doit)
-		return r
 	
-	def get_value(self):
-		val = self.timer_start+self.timer_val-time()
-		if "HOMEVENT_TEST" in os.environ:
-			return int(val+1) # otherwise the logs will have timing diffs
-		return val
-		
-	value = property(get_value)
-
-	def doit(self):
-		log(TRACE,"Timeout",self.nr)
-		del waiters[self.displayname]
-		r = self.timer_defer
-		self.timer_defer = None
-		r.callback(None)
-
-	def cancel(self, err=WaitCancelled):
-		self.timer_id.cancel()
-		self.timer_id = None
-		del waiters[self.displayname]
-		self.timer_defer.errback(Failure(err(self)))
-	
-	def retime(self, timeout):
-		self.timer_id.cancel()
-		self.timer_val = time()-self.timer_start+timeout
-		self.timer_id = reactor.callLater(timeout, self.doit)
-
-
 class WaitForHandler(WaitHandler):
 	name=("wait","until")
 	doc="delay until some timespec matches"
@@ -124,14 +188,9 @@ wait until FOO...
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 
-		if "HOMEVENT_TEST" in os.environ:
-			n = dt.datetime(2003,4,5,6,7,8)
-		else:
-			n = dt.datetime.now()
-
+		n = now()
 		s = time_until(event, now=n)
-		s = s.seconds+s.days*24*60*60
-		return self._waitfor(s)
+		return self._waitfor(n+s)
 					
 
 class WaitWhileHandler(WaitHandler):
@@ -149,14 +208,9 @@ wait while FOO...
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 
-		if "HOMEVENT_TEST" in os.environ:
-			n = dt.datetime(2003,4,5,6,7,8)
-		else:
-			n = dt.datetime.now()
-
+		n = now()
 		s = time_until(event, now=n, invert=True)
-		s = s.seconds+s.days*24*60*60
-		return self._waitfor(s)
+		return self._waitfor(n+s)
 					
 
 class WaitForNextHandler(WaitHandler):
@@ -174,23 +228,18 @@ wait until next FOO...
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 
-		if "HOMEVENT_TEST" in os.environ:
-			n = dt.datetime(2003,4,5,6,7,8)
-		else:
-			n = dt.datetime.now()
-
+		n = now()
 		s = time_until(event, now=n, invert=True)
 		s += time_until(event, now=n+s)
-		s = s.seconds+s.days*24*60*60
-		return self._waitfor(s)
+		return self._waitfor(n+s)
 					
 
 class WaitName(Statement):
 	name = ("name",)
 	doc = "name a wait handler"
 	long_doc="""\
-This statement assigns a name to a wait statement
-(Useful when you want to cancel it later...)
+name ‹whatever you want›
+	This statement assigns a name to a wait statement.
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
@@ -203,14 +252,16 @@ class WaitCancel(Statement):
 	name = ("del","wait")
 	doc = "abort a wait handler"
 	long_doc="""\
-This statement aborts a wait handler.
+del wait ‹whatever the name is›
+	This statement aborts a wait handler.
+	Everything that depended on the handler's completion will be skipped!
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		if not len(event):
 			raise SyntaxError('Usage: del wait ‹name…›')
 		w = waiters[tuple(event)]
-		w.cancel(err=HaltSequence)
+		return w.cancel(err=HaltSequence)
 
 class WaitUpdate(Statement):
 	name = ("update",)
@@ -240,20 +291,21 @@ list wait NAME
 		event = self.params(ctx)
 		if not len(event):
 			for w in waiters.itervalues():
-				print >>self.ctx.out, " ".join(w.displayname)
+				print >>self.ctx.out, " ".join(str(x) for x in w.name)
 			print >>self.ctx.out, "."
 		else:
 			w = waiters[tuple(event)]
-			print  >>self.ctx.out, "Name: "," ".join(w.displayname)
-			print  >>self.ctx.out, "Started: ",w.timer_start
-			print  >>self.ctx.out, "Timeout: ",w.timer_val
-			print  >>self.ctx.out, "Remaining: ",w.timer_start+w.timer_val-time()
+			print  >>self.ctx.out, "Name: "," ".join(str(x) for x in w.name)
+			print  >>self.ctx.out, "Started: ",w.start
+			print  >>self.ctx.out, "Ending: ",w.end
+			print  >>self.ctx.out, "Remaining: ",w.value
 			while True:
 				w = getattr(w,"parent",None)
 				if w is None: break
 				n = getattr(w,"displayname",None)
 				if n is not None:
-					n = " ".join(n)
+					if not isinstance(n,basesting):
+						n = " ".join(str(x) for x in n)
 				else:
 					try:
 						n = str(w.args)
@@ -261,7 +313,10 @@ list wait NAME
 						pass
 					if n is None:
 						try:
-							n = " ".join(w.name)
+							if isinstance(w.name,basestring):
+								n = w.name
+							else:
+								n = " ".join(str(x) for x in w.name)
 						except AttributeError:
 							n = w.__class__.__name__
 				if n is not None:
@@ -276,6 +331,15 @@ class ExistsWaiterCheck(Check):
 			raise SyntaxError("Usage: if exists wait ‹name…›")
 		name = tuple(args)
 		return name in waiters
+
+class LockedWaiterCheck(Check):
+	name=("locked","wait")
+	doc="check if a waiter is locked"
+	def check(self,*args):
+		if not len(args):
+			raise SyntaxError("Usage: if locked wait ‹name…›")
+		name = tuple(args)
+		return waiters[name].locked
 
 
 class VarWaitHandler(Statement):
@@ -314,6 +378,7 @@ class EventsModule(Module):
 		main_words.register_statement(VarWaitHandler)
 		global_words.register_statement(WaitList)
 		register_condition(ExistsWaiterCheck)
+		register_condition(LockedWaiterCheck)
 	
 	def unload(self):
 		main_words.unregister_statement(WaitHandler)
@@ -324,5 +389,6 @@ class EventsModule(Module):
 		main_words.unregister_statement(VarWaitHandler)
 		global_words.unregister_statement(WaitList)
 		unregister_condition(ExistsWaiterCheck)
+		unregister_condition(LockedWaiterCheck)
 
 init = EventsModule

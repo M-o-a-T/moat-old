@@ -94,8 +94,24 @@ RUN: <WorkSequence:5 (4)>
 47 END: state¦two¦three¦foo¦bar
 RUN: <WorkSequence:4 (5)> (step 1)
  ev: EVENT: state¦two¦three¦foo¦bar
-0 Timer 1 :: 0.1
-0 Timeout 1
+NEW: <WorkSequence:6 (4)>
+   : │  EVENT: wait¦start¦1049515628.1¦_wait¦1
+   : └1╴... done.
+65 EVENT: wait¦start¦1049515628.1¦_wait¦1
+RUN: <WorkSequence:6 (4)>
+ ev: EVENT: wait¦start¦1049515628.1¦_wait¦1
+65 END: wait¦start¦1049515628.1¦_wait¦1
+RUN: <WorkSequence:6 (4)>
+ ev: EVENT: wait¦start¦1049515628.1¦_wait¦1
+NEW: <WorkSequence:7 (4)>
+   : │  EVENT: wait¦done¦1049515628.1¦_wait¦1
+   : └1╴... done.
+72 EVENT: wait¦done¦1049515628.1¦_wait¦1
+RUN: <WorkSequence:7 (4)>
+ ev: EVENT: wait¦done¦1049515628.1¦_wait¦1
+72 END: wait¦done¦1049515628.1¦_wait¦1
+RUN: <WorkSequence:7 (4)>
+ ev: EVENT: wait¦done¦1049515628.1¦_wait¦1
 foo bar = three
 .
 Name: foo bar
@@ -117,45 +133,45 @@ Last Value: two
 0 add ‹VarStateHandler ⌁.var¦state¦x¦foo¦bar›
 0 add ‹LogHandler ⌁.log¦TRACE¦We¦got¦$x›
 0 NewHandler 2
-NEW: <WorkSequence:6 (5)>
+NEW: <WorkSequence:8 (5)>
    : │  EVENT: whatever
    : ├1╴ON whatever
    : │     prio: 51
    : │     proc: ‹VarStateHandler ⌁.var¦state¦x¦foo¦bar›
    : │         : ‹LogHandler ⌁.log¦TRACE¦We¦got¦$x›
    : └2╴... done.
-96 EVENT: whatever
-RUN: <WorkSequence:6 (5)>
+110 EVENT: whatever
+RUN: <WorkSequence:8 (5)>
  ev: EVENT: whatever
 RUN: ON whatever
    :    prio: 51
    :    proc: ‹VarStateHandler ⌁.var¦state¦x¦foo¦bar›
    :        : ‹LogHandler ⌁.log¦TRACE¦We¦got¦$x›
- at: <WorkSequence:6 (5)> (step 1)
+ at: <WorkSequence:8 (5)> (step 1)
  ev: EVENT: whatever
 0 We got three
-96 END: whatever
-RUN: <WorkSequence:6 (5)> (step 1)
+110 END: whatever
+RUN: <WorkSequence:8 (5)> (step 1)
  ev: EVENT: whatever
-NEW: <WorkSequence:7 (4)>
+NEW: <WorkSequence:9 (4)>
    : │  EVENT: state¦three¦-¦foo¦bar
    : └1╴... done.
-108 EVENT: state¦three¦-¦foo¦bar
-RUN: <WorkSequence:7 (4)>
+122 EVENT: state¦three¦-¦foo¦bar
+RUN: <WorkSequence:9 (4)>
  ev: EVENT: state¦three¦-¦foo¦bar
-108 END: state¦three¦-¦foo¦bar
-RUN: <WorkSequence:7 (4)>
+122 END: state¦three¦-¦foo¦bar
+RUN: <WorkSequence:9 (4)>
  ev: EVENT: state¦three¦-¦foo¦bar
 .
-NEW: <WorkSequence:8 (5)>
+NEW: <WorkSequence:10 (5)>
    : │  EVENT: shutdown
    : └1╴... done.
 2 EVENT: shutdown
-RUN: <WorkSequence:8 (5)>
+RUN: <WorkSequence:10 (5)>
  ev: EVENT: shutdown
 2 END: shutdown
 RUN: shutting down
- at: <WorkSequence:8 (5)>
+ at: <WorkSequence:10 (5)>
  ev: EVENT: shutdown
-RUN: <WorkSequence:8 (5)>
+RUN: <WorkSequence:10 (5)>
  ev: EVENT: shutdown

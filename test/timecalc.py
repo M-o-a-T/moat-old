@@ -3,7 +3,7 @@
 
 # Tests to figure out how long until a time spec fits / does not fit
 
-from homevent.time import time_until
+from homevent.times import time_until
 import datetime
 import sys
 

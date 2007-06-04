@@ -1,13 +1,29 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+from __future__ import division
+
 """\
 This code does some standard time handling.
 
 """
 
 import datetime as dt
+from time import mktime
+import os
 from calendar import isleap,monthrange
+
+def now():
+	if "HOMEVENT_TEST" in os.environ:
+		return dt.datetime(2003,4,5,6,7,8)
+	else:
+		return dt.datetime.now()
+
+def unixdelta(delta):
+	return delta.days*24*60*60 + delta.seconds + delta.microseconds/1e6;
+
+def unixtime(tm):
+	return mktime(tm.timetuple()) + tm.microsecond / 1e6
 
 def isodate(yr,wk,wdy):
 	res = dt.date(yr,1,1)
@@ -58,7 +74,8 @@ def time_delta(args):
 				m = -1
 			else:
 				m = 1 # "1min 59sec"
-	return s
+	return dt.timedelta(0,s)
+
 
 class _store(object): pass
 
