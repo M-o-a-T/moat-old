@@ -166,6 +166,15 @@ class StateCheck(Check):
 		return states[name].value == value
 
 
+class StateLockedCheck(Check):
+	name=("locked","state")
+	doc="check if a state is being updated"
+	def check(self,*args):
+		if len(args) < 2:
+			raise SyntaxError("Usage: if state locked ‹name…›")
+		return states[tuple(args)].working
+
+
 class LastStateCheck(Check):
 	name=("last","state")
 	doc="check if a state had a particular value before"
@@ -207,6 +216,7 @@ class StateModule(Module):
 		global_words.register_statement(ListStateHandler)
 		global_words.register_statement(DelStateHandler)
 		register_condition(StateCheck)
+		register_condition(StateLockedCheck)
 		register_condition(LastStateCheck)
 		register_condition(ExistsStateCheck)
 	
@@ -216,6 +226,7 @@ class StateModule(Module):
 		global_words.unregister_statement(ListStateHandler)
 		global_words.unregister_statement(DelStateHandler)
 		unregister_condition(StateCheck)
+		unregister_condition(StateLockedCheck)
 		unregister_condition(LastStateCheck)
 		unregister_condition(ExistsStateCheck)
 	
