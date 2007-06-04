@@ -129,7 +129,7 @@ class LogEndEvent(Event):
 
 	def report(self, verbose=False):
 		try:
-			yield  "END: "+"¦".join(self.names[1:])
+			yield  "END: "+"¦".join(str(x) for x in self.names[1:])
 		except Exception:
 			yield  "END: REPORT_ERROR: "+repr(self.names[1:])
 

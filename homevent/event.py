@@ -47,13 +47,13 @@ class Event(object):
 
 	def __str__(self):
 		try:
-			return "↯."+"¦".join(self.names)
+			return "↯."+"¦".join(str(x) for x in self.names)
 		except Exception:
 			return "↯ REPORT_ERROR: "+repr(self.names)
 
 	def report(self, verbose=False):
 		try:
-			yield "EVENT: "+"¦".join(self.names)
+			yield "EVENT: "+"¦".join(str(x) for x in self.names)
 		except Exception:
 			yield "EVENT: REPORT_ERROR: "+repr(self.names)
 	
