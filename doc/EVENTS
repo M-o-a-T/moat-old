@@ -29,4 +29,30 @@ module unload-fail NAME [params...]
 	-- unloading the module ran into a problem.
 	   (Most likely, the thing simply doesn't exist.)
 
+State
+-----
+
+state OLD NEW NAME
+	-- a state changes.
+	   OLD is "-" if the state is newly created.
+	   NEW is "-" if the state is deleted.
+	   This event is triggered synchronously; while it executes, new
+	   changes on the same NAME are forbidden.
+
+Wait
+----
+
+wait start TIME NAME
+	-- a wait until that time (expressed in Unixtime seconds) is started.
+
+wait update TIME NAME
+	-- the wait time is changed.
+
+wait done TIME NAME
+	-- the wait has completed.
+
+wait cancel TIME NAME
+	-- the wait is being cancelled.
+
+	TIME always refers to the time when the event is triggered (Unix seconds).
 

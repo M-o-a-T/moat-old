@@ -1,0 +1,136 @@
+HomEvent command syntax
+=======================
+
+Basic guideline: Simple.
+
+Statements
+----------
+
+The HomEvenT configuration language is built on statements. Each
+statement does exactly one thing. Statements are formed with words.
+The word (or words) at the beginning select which statement gets to
+run. You use "help" to list the statements HomEvenT knows about.
+
+Sometimes there's more than one statement that "fits". For instance, 
+the basic "help" command shows:
+
+	load        : load a module
+	load dir    : list or change the module directory list
+
+Thus if you type
+
+	>> load foobar
+
+the first command gets executed with one word as its argument (‹foobar›),
+whereas if you type
+
+	>> load dir
+
+the second command runs (without arguments).
+
+A word is (mostly) anything that's not separated by a space.
+Numbers are recognized, and so are quoted strings.
+
+For instance, this is a quick way to do nothing for a few seconds:
+
+	>> load wait
+	>> wait for 10 sec
+
+
+Quick intermission
+------------------
+
+In thes examples, there are a couple of "load" statements. They're here
+because the language itself is quite minimal and relies on external
+parts to do almost everything (except for loading other external parts,
+of course ☺). These "load"s are given so that you can type the examples
+interactively. See the file "doc/MODULES" for more information on which
+parts are where and what you can do with them.
+
+
+Blocks
+------
+
+Some commands take on responsibility for yet more commands.
+A simple example which should be readily understandable is:
+
+	load block
+	load logging
+	load ifelse
+	load bool
+
+	if true:
+		log DEBUG "Everything is OK."
+		log DEBUG "… we hope."
+	.
+
+(NB: If you don't immediately understand what the three lines starting
+with "if:" are supposed to do, go get professional help. We'll explain
+the other stuff shortly.)
+
+In other words: If you end a command with a colon, you then can indent
+the following stuff and it gets attached to the original command
+somehow. We need to give the "following stuff" a good name: "block".
+
+The end of a block is signalled with something that is not indented, at
+which time the whole thing is processed. There are exceptions, of which
+more below.
+
+What you use to indent (tabs or spaces) and how far you indent is
+irrelevant and a matter of personal taste, but don't use both tabs and
+spaces in the same block.
+
+The single dot at the end of the example is there to tell the
+interpreter that you're done with the block, but you wish to see what it
+does before entering any more commands.
+
+
+Another use for blocks is that the HomEvenT way to make simple ideas
+somewhat less simple is to convert the original simple idea from a
+simple statement into a block, and attach a complicating command to it.
+
+To figure out how to do that, the "help" command is a bit more
+intelligent than you might have realized. Let's use the "wait for …"
+command as a convenient example:
+
+	>> load wait
+	>> help 
+	[…]
+	wait for        : delay for N seconds
+	wait until      : delay until some timespec matches
+	[…]
+	>> help wait for
+	wait for:
+	wait for FOO...
+	        - delay processsing for FOO seconds
+	          append "s/m/h/d/w" for seconds/minutes/hours/days/weeks
+	          # you can do basic +/- calculations (2m - 10s); you do need the spaces
+	Known words:
+	name   : name a wait handler
+	update : change the timeout of an existing wait handler
+
+So, the "wait for" command actually understands a couple of special
+words if you attach a block to it. You can find out more about what they
+do:
+
+	>> help wait for name
+	name:
+	name ‹whatever you want›
+    	This statement assigns a name to a wait statement.
+
+Note that this is just convenient syntax; "wait for name" is not a
+command that does anything sensible.
+
+Not surprisingly, this means that this command should work:
+
+	>> wait for 10 sec:
+		name "Delay until self-destruct"
+	.
+
+… and it does.
+
+The End
+-------
+
+You now know all there is to know about the general syntax of HomEvenT
+commands; you should now proceed to doc/TUTORIAL.

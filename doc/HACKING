@@ -1,0 +1,116 @@
+====================
+How to hack HomEvent
+====================
+
+
+First, understand Twisted, especially the Deferred concept.
+
+
+Second, look at a few modules. See how they work (hopefully ;-).
+
+
+Third, stop thinking in terms of linear execution. I'll give you a short
+example.
+
+The HomEvent code you write may contain things like …
+
+	async:
+		trigger event one
+		wait for 10 sec
+		trigger event two
+
+… but there really is no such thing as a Python thread which sits there
+patiently sleeping (or, worse, twiddling its thumbs) until ten seconds
+have passed. Instead, there's a Deferred() object that has those three
+command enqueued onto it (that's done by
+homevent.statement.CompoundStatement.run() — and all *that* does is to
+queue all the "run" methods of the sub-statements onto that Deferred
+thing.
+
+So why does the wait work?
+
+The magic part is when module.wait.WaitHandler.run() (indirectly)
+creates yet another Deferred() and returns _that_, which causes Twisted
+to stop running the commands in the first one until the second one
+returns a result.
+
+Which, incidentally, is caused by the timer going off. ☺
+
+
+Fourth, every statement has a parent (the block above it) and a context.
+These things are hierarchical and inherit their values from both the 
+execution and runtime contexts. And they can be dynamic. So, all a "var
+…" statement does is to add some value to its parent context.
+
+The parser doesn't even know anything special about things like "if:".
+All it knows is that some statements get to be executed immediately.
+Thus the "else:" simply adds itself to the "if:" it assumes to be
+present in the last slot of the parent statement. If not, it gets a
+Python error because things break horribly, which it then translates
+back to something understandable.
+
+That's why the parser can be so terminally dumb.
+
+
+Fifth, yes, the command syntax *is* terminally stupid. That's
+intentional. I don't want to invent yet another programming language or,
+worse, force people to program their house in Python.
+
+I want the thing to have minimal but understandable syntax.
+See doc/SYNTAX. You don't get any simpler than that.
+I don't even have arithmetic yet, simply because I don't think I need
+it. Arithmetic should be encapsulated in Python code and exported to the
+system as nice understandable statements.
+
+On that topic: HomEvenT understands multi-word commands by the simple
+expedient of selecting for the longest common prefix. That does mean
+that if you have both "load" and "load dir" commands you cannot load a
+module named "dir" because that selects the wron gcommand. (Duh.)
+In your own hacking, keep the number of conflicts to a minimum.
+
+Also, HomEvenT has no such concept as patterm matching, string
+concatenation, and whatnot, that goes beyond a simple "this list of
+words looks the same as that one if you disregard anything that startes
+with an asterisk in the second list", which is how event matching works.
+That's also intentional. Instead of convoluted single-string names, use
+simple names: HomEvenT uses multi-part names for its internal objects
+*everywhere*. In your own hacking, please do likewise.
+
+Event matching also assigns variable names. Variables are interpolated
+by saying "$varname". There are a couple of other expedient way to
+get variables. They all start with "var". Look at the state module for
+an example.
+
+You can't assign to variables. You can, however, map a variable to a
+state and change the state, which incidentally also triggers an event.
+That is also intentional. I want people to think in states (which are
+persistent) and events (which are not), not variables (which may or may
+not be persistent, but cannot be used to sanely recover your system
+state if you need to reboot your computer for some reason — not unless
+you think really hard about what you're doing, which I don't want people
+to force to do).
+
+
+Sixth, encapsulate things in loadable modules whenever possible. But
+don't let those modules depend on each other.
+
+Look at how "if:" and "while:" work as a good example. There's minimal
+infrastructure for collecting and processing conditions in the main
+code. Some modules implement commands that do checks (if:), and some
+others provide test conditions ("if exists state").
+
+When inventing command names, don't use compound nouns ("if
+exists_state") or subsystem-specific prefixes ("externalwhatever set
+foo_bar on") — use existing conventions ("if state exists", "set
+externalwhatever on foo bar").
+
+The reason for the somewhat convoluted syntax of the last command is
+that variable-length stuff goes at the end, and names of things in
+HomEvenT are (supposed to be) always variable-length. In other words,
+your code should use "tuple(event[place:])" as the lookup key.
+Again, see the existing code for plenty of examples.
+
+
+Seventh, patches to make HomEvenT do new shiny interesting things (or
+even boring everyday things that it can't do yet) are definitely wanted!
+

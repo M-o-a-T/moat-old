@@ -87,6 +87,8 @@ for; that's in other modules.
 
 "help conditions" lists which conditions you can test for.
 
+All conditions can be negated by writing "if not" instead of "if".
+
 ====
 list
 ====
@@ -383,6 +385,42 @@ True if the state has been defined at all.
 	if exists state NAME:
 		log DEBUG "Yay!"
 
+locked state
+------------
+
+True if the state is currently being updated, i.e. an event handler is
+working (and blocking!) on it.
+
+Ideally, you should split up your design into more events instead of
+doing a test like this, but if you *have* to …
+
+	async:
+		while locked state SOMETHING:
+			wait for 1 sec
+		set state SOMETHING off
+
+Obviously, a loop like this should never run synchronously.
+
+
+
+====
+time
+====
+
+Sometimes you need the current (or some future) time for further
+processing.
+
+--------
+var time
+--------
+
+This statement assigns the current time, or some attribute thereof, to a
+variable.
+
+	block:
+		var time now + 10sec
+		wait until = $now
+
 =======
 trigger
 =======
@@ -530,3 +568,35 @@ If you do want these statements to run, update the waiter to zero
 seconds instead of canceling it.
 
 
+-----
+Tests
+-----
+
+if wait before/after
+--------------------
+
+You can use this test to find out whether an event triggers before or
+after another one.
+
+	async:
+		wait for 10min:
+			name YAWN
+	block:
+		var time tomorrow time += 0h 0min 0sec
+		if wait after $tomorrow YAWN:
+			log DEBUG the YAWN timer ends on a different day
+
+
+if exists wait
+--------------
+
+You can use this statement to test if a waiter is pending.
+
+See the example under "set state", above.
+
+
+if locked wait
+--------------
+
+You can use this statement to test whether a notification event on that
+waiter is running.
