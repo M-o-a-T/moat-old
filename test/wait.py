@@ -8,10 +8,10 @@ from test import run
 
 input = """\
 async:
-	wait 10:
+	wait for 10:
 		name Foo Bar
 	trigger FooBar
-wait 0.2:
+wait for 0.2:
 	name Foo Bar
 	update
 block:
@@ -19,14 +19,14 @@ block:
 		log DEBUG No2
 	else:
 		log DEBUG Yes
-wait 0.1
+wait for 0.1
 trigger DoNow
-wait 0.1
+wait for 0.1
 async:
-	wait 0.7:
+	wait until 8 min:
 		name Foo Baz
 	trigger Heya
-wait 0.1
+wait for 0.1
 block:
 	if exists wait Foo Baz:
 		log DEBUG Yes
@@ -36,14 +36,14 @@ on whatever:
 	var wait x Foo Baz
 	log TRACE We wait $x
 sync trigger whatever
-wait 0.3
+wait for 0.3
 del wait Foo Baz
 block:
 	if exists wait Foo Baz:
 		log DEBUG No3
 	else:
 		log DEBUG Yes
-wait 0.2
+wait for 0.2
 # observe no HeYa event
 shutdown
 """

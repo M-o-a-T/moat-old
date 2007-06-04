@@ -16,14 +16,13 @@ from homevent.run import process_event
 from homevent.logging import log,TRACE
 from homevent.module import Module
 from homevent.worker import HaltSequence
-from homevent.time import time_delta
+from homevent.time import time_delta, time_until
 from homevent.check import Check,register_condition,unregister_condition
 from time import time
 import os
 from twisted.python.failure import Failure
-
 from twisted.internet import reactor,defer
-
+import datetime as dt
 
 timer_nr = 0
 waiters={}
@@ -38,10 +37,10 @@ class DupWaiterError(RuntimeError):
 	pass
 
 class WaitHandler(AttributedStatement):
-	name=("wait",)
+	name=("wait","for")
 	doc="delay for N seconds"
 	long_doc="""\
-wait FOO...
+wait for FOO...
 	- delay processsing for FOO seconds
 	  append "s/m/h/d/w" for seconds/minutes/hours/days/weeks
 	  # you can do basic +/- calculations (2m - 10s); you do need the spaces
@@ -58,26 +57,28 @@ wait FOO...
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		s = time_delta(event)
+		return self._waitfor(s)
 					
+	def _waitfor(self,sec):
 		if self.is_update:
-			if s < 0: s = 0
+			if sec < 0: sec = 0
 			w = waiters[self.displayname]
-			w.retime(s)
+			w.retime(sec)
 			return
 			
-		if s < 0:
-			log(TRACE,"No time out:",s)
+		if sec < 0:
+			log(TRACE,"No time out:",sec)
 			return # no waiting
-		log(TRACE,"Timer",self.nr,"::",s)
+		log(TRACE,"Timer",self.nr,"::",sec)
 
 		r = defer.Deferred()
 		if self.displayname in waiters:
 			raise DupWaiterError(self.displayname)
 		waiters[self.displayname] = self
 		self.timer_start=time()
-		self.timer_val = s
+		self.timer_val = sec
 		self.timer_defer = r
-		self.timer_id = reactor.callLater(s, self.doit)
+		self.timer_id = reactor.callLater(sec, self.doit)
 		return r
 	
 	def get_value(self):
@@ -106,6 +107,83 @@ wait FOO...
 		self.timer_val = time()-self.timer_start+timeout
 		self.timer_id = reactor.callLater(timeout, self.doit)
 
+
+class WaitForHandler(WaitHandler):
+	name=("wait","until")
+	doc="delay until some timespec matches"
+	long_doc="""\
+wait until FOO...
+	- delay processsing until FOO matches the current time.
+	  Return immediately if it matches already.
+	  N sec / min / hour / day / month / year
+	  mo/tu/we/th/fr/sa/su: day of week; N mon…sun: month's Nth monday etc
+	  N wk: ISO week number
+	  negative values go from the end of a period, e.g. month
+"""
+
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+
+		if "HOMEVENT_TEST" in os.environ:
+			n = dt.datetime(2003,4,5,6,7,8)
+		else:
+			n = dt.datetime.now()
+
+		s = time_until(event, now=n)
+		s = s.seconds+s.days*24*60*60
+		return self._waitfor(s)
+					
+
+class WaitWhileHandler(WaitHandler):
+	name=("wait","while")
+	doc="delay while some timespec matches"
+	long_doc="""\
+wait while FOO...
+	- delay processsing while FOO matches the current time
+	  N sec / min / hour / day / month / year
+	  mo/tu/we/th/fr/sa/su: day of week; N mon…sun: month's Nth monday etc
+	  N wk: ISO week number
+	  negative values go from the end of a period, e.g. month
+"""
+
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+
+		if "HOMEVENT_TEST" in os.environ:
+			n = dt.datetime(2003,4,5,6,7,8)
+		else:
+			n = dt.datetime.now()
+
+		s = time_until(event, now=n, invert=True)
+		s = s.seconds+s.days*24*60*60
+		return self._waitfor(s)
+					
+
+class WaitForNextHandler(WaitHandler):
+	name=("wait","until","next")
+	doc="delay for some timespec does not match and then match again"
+	long_doc="""\
+wait until next FOO...
+	- delay processsing until FOO starts matching the current time
+	  N sec / min / hour / day / month / year
+	  mo/tu/we/th/fr/sa/su: day of week; N mon…sun: month's Nth monday etc
+	  N wk: ISO week number
+	  negative values go from the end of a period, e.g. month
+"""
+
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+
+		if "HOMEVENT_TEST" in os.environ:
+			n = dt.datetime(2003,4,5,6,7,8)
+		else:
+			n = dt.datetime.now()
+
+		s = time_until(event, now=n, invert=True)
+		s += time_until(event, now=n+s)
+		s = s.seconds+s.days*24*60*60
+		return self._waitfor(s)
+					
 
 class WaitName(Statement):
 	name = ("name",)
@@ -229,6 +307,9 @@ class EventsModule(Module):
 
 	def load(self):
 		main_words.register_statement(WaitHandler)
+		main_words.register_statement(WaitForHandler)
+		main_words.register_statement(WaitWhileHandler)
+		main_words.register_statement(WaitForNextHandler)
 		main_words.register_statement(WaitCancel)
 		main_words.register_statement(VarWaitHandler)
 		global_words.register_statement(WaitList)
@@ -236,6 +317,9 @@ class EventsModule(Module):
 	
 	def unload(self):
 		main_words.unregister_statement(WaitHandler)
+		main_words.unregister_statement(WaitForHandler)
+		main_words.unregister_statement(WaitWhileHandler)
+		main_words.unregister_statement(WaitForNextHandler)
 		main_words.unregister_statement(WaitCancel)
 		main_words.unregister_statement(VarWaitHandler)
 		global_words.unregister_statement(WaitList)

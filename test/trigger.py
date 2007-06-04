@@ -8,7 +8,7 @@ from test import run
 
 input = """\
 sync trigger foo
-wait 1m -90s 0.5min +.5s
+wait for 1m -90s 0.5min +.5s
 sync trigger bar
 shutdown
 """

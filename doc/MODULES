@@ -23,7 +23,7 @@ interpret input: the statements will run in a parallel thread.
 	load wait
 	async:
 		log TRACE One
-		wait 1
+		wait for 1
 		log TRACE two
 
 A "skip next" command inside the async: block will terminate executing
@@ -251,7 +251,7 @@ event has been processed. That means if the trigger says
 
 	on foo bar:
 		switch on lamp
-		wait 1h
+		wait for 1h
 		switch off lamp
 
 then the statement after the "sync trigger" will be executed exactly one
@@ -269,7 +269,7 @@ wait
 
 This statement will delay execution by the specified amount.
 
-	wait 10min + 5sec
+	wait for 10min + 5sec
 
 You can use it as a compound statement to specify details.
 
@@ -282,7 +282,7 @@ unique, i.e. there can only be one wait statement with that name in the
 whole system. If you try to execute a wait statement with the same
 name as one that's still pending, an error will be triggered.
 
-	wait 5min:
+	wait for 5min:
 		name "Brew some tea"
 
 If you do not name a wait statement, it will have a system-assigned
@@ -296,11 +296,11 @@ This marks a wait: statement as updating another waiter, instead of
 waiting itself. For example:
 
 	async:
-		wait 10sec:
+		wait for 10sec:
 			name Test
 		trigger FooBar
 
-	wait 1sec:
+	wait for 1sec:
 		name Test
 		update
 	

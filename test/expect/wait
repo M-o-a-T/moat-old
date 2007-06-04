@@ -7,7 +7,7 @@ RUN: <WorkSequence:1 (4)>
 1 END: startup
 RUN: <WorkSequence:1 (4)>
  ev: EVENT: startup
-0 add ‹WaitHandler ('wait',) 2›
+0 add ‹WaitHandler ('wait', 'for') 2›
 0 add ‹TriggerHandler ⌁.trigger¦FooBar›
 0 Timer 1 :: 10
 0 add ‹IfStatement ⌁.if¦exists¦wait¦Foo¦Baz›
@@ -37,9 +37,9 @@ RUN: <WorkSequence:3 (4)>
 RUN: <WorkSequence:3 (4)>
  ev: EVENT: FooBar
 0 Timeout 4
-0 add ‹WaitHandler ('wait',) 2›
+0 add ‹WaitForHandler ('wait', 'until') 2›
 0 add ‹TriggerHandler ⌁.trigger¦Heya›
-0 Timer 5 :: 0.7
+0 Timer 5 :: 52
 0 Timer 6 :: 0.1
 0 Timeout 6
 0 add ‹IfStatement ⌁.if¦exists¦wait¦Foo¦Baz›
@@ -66,7 +66,7 @@ RUN: ON whatever
    :        : ‹LogHandler ⌁.log¦TRACE¦We¦wait¦$x›
  at: <WorkSequence:4 (5)> (step 1)
  ev: EVENT: whatever
-0 We wait 1
+0 We wait 52
 70 END: whatever
 RUN: <WorkSequence:4 (5)> (step 1)
  ev: EVENT: whatever
