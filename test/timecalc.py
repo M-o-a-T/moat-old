@@ -17,7 +17,7 @@ def chk(iso,a,invert=False):
 	res = time_until(a,now=now,invert=invert)
 	if res is None:
 		if iso == "-": return
-	res = str(now + res)
+	res = str(res)
 	if iso == res: return
 
 	global err

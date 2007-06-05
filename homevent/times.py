@@ -9,7 +9,7 @@ This code does some standard time handling.
 """
 
 import datetime as dt
-from time import mktime
+from time import time,mktime
 import os
 from calendar import isleap,monthrange
 
@@ -33,9 +33,20 @@ def isodate(yr,wk,wdy):
 def time_delta(args):
 	w = list(args)
 	s = 0
+	n = now()
 	if not w:
 		raise SyntaxError("Empty time delta")
 	m = 1
+
+	try:
+		sv = float(w[0])
+	except (IndexError,ValueError):
+		pass
+	else:
+		if sv > 1000000000: # 30 years plus: Forget it, that's a unixtime.
+			n = dt.datetime.fromtimestamp(s)
+			w.pop(0)
+
 	while w:
 		if len(w) == 1:
 			pass
@@ -74,7 +85,7 @@ def time_delta(args):
 				m = -1
 			else:
 				m = 1 # "1min 59sec"
-	return dt.timedelta(0,s)
+	return n + dt.timedelta(0,s)
 
 
 class _store(object): pass
@@ -93,6 +104,8 @@ def collect_words(w):
 	p.dow = None # week_of_year, weekday, which weekday?
 	p.nth = None
 
+	p.now = now()
+
 	weekdays = {
 		"mon":0, "tue":1, "wed":2, "thu":3, "fri":4, "sat":5,"sun":6,
 		"mo":0, "tu":1, "we":2, "th":3, "fr":4, "sa":5,"su":6,
@@ -100,6 +113,15 @@ def collect_words(w):
 	f = None
 
 	w = list(w)
+	try:
+		s = float(w[0])
+	except (IndexError,ValueError):
+		pass
+	else:
+		if s > 1000000000: # 30 years plus. Forget it, that's a unixtime.
+			p.now = dt.datetime.fromtimestamp(s)
+			w.pop(0)
+
 	while w:
 		if w[0] == "+":
 			w.pop(0)
@@ -166,9 +188,7 @@ def time_until(args, now=None, invert=False):
 		"""
 	p = collect_words(args)
 
-	if now is None:
-		now = dt.datetime()
-	p.res = now
+	p.res = p.now
 	
 	# Theory of operation:
 	# For each step, there are four cases:
@@ -241,47 +261,47 @@ def time_until(args, now=None, invert=False):
 	# Intermission: figure out how long until the condition is False
 	if invert:
 		p.delta = None
-		zero = dt.timedelta(0)
 		def get_delta(fn, sn=None,ln=None):
-			if p.delta is zero: return
+			if p.delta is not None and p.delta == p.now: return
 			if getattr(p,sn) is None:
 				return
-			if getattr(now,ln) != getattr(p,sn):
-				p.delta = zero
+			if getattr(p.now,ln) != getattr(p,sn):
+				p.delta = p.now
 				return
-			p.res = now
+			p.res = p.now
 			fn(True)
-			d = p.res - now
+			d = p.res
 			if p.delta is None or p.delta > d: p.delta = d
 
 		get_delta(check_year,"yr","year")
 		get_delta(check_month,"mn","month")
 		get_delta(check_day,"dy","day")
-		if p.delta is zero: return zero
+		if p.delta is not None and p.delta == p.now: return p.now
 
 		get_delta(check_hour,"h","hour")
 		get_delta(check_min,"m","minute")
 		get_delta(check_sec,"s","second")
-		if p.delta is zero: return zero
+		if p.delta is not None and p.delta == p.now: return p.now
 
 		if p.wk: # week of the year
-			yr,wk,dow = now.isocalendar()
-			if p.wk != wk: return zero
-			p.res = now
+			yr,wk,dow = p.now.isocalendar()
+			if p.wk != wk: return p.now
+			p.res = p.now
 			check_day(True)
-			d = p.res - now + dt.timedelta(7-dow) # until end-of-week
+			d = p.res + dt.timedelta(7-dow) # until end-of-week
 			if p.delta is None or p.delta > d: p.delta = d
 		if p.dow is not None:
-			yr,wk,dow = now.isocalendar()
+			yr,wk,dow = p.now.isocalendar()
 			dow -= 1 # 1…7 ⇒ 0…6
-			if p.dow != dow: return zero
-			p.res = now
+			if p.dow != dow: return p.now
+			p.res = p.now
 			check_day(True)
-			d = p.res - now
-			if p.delta is None or p.delta > d: p.delta = d
+			if p.delta is None or p.delta > p.res: p.delta = p.res
 		if p.nth: # may be zero
+			p.res = p.now
 			if p.nth != nth():
-				return zero
+				return p.now
+
 		return p.delta
 
 
@@ -300,10 +320,10 @@ def time_until(args, now=None, invert=False):
 	def upd(delta):
 		if not delta: return
 		p.res = p.res + dt.timedelta(delta)
-		if p.res > now:
+		if p.res > p.now:
 			p.res = p.res.replace(hour=0,minute=0,second=0)
-		if p.res < now:
-			p.res = now
+		if p.res < p.now:
+			p.res = p.now
 		
 	def nth():
 		if p.nth > 0:
@@ -344,6 +364,6 @@ def time_until(args, now=None, invert=False):
 	check_min  (False)
 	check_sec  (False)
 
-	return p.res - now
+	return p.res
 
 

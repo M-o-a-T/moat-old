@@ -91,7 +91,6 @@ class Waiter(object):
 
 	def doit(self):
 		if self.locked:
-			print "doit LOCKED"
 			self.id = None
 			return
 		self.locked = True
@@ -160,8 +159,7 @@ wait for FOO...
 
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		s = time_delta(event)
-		return self._waitfor(now()+s)
+		return self._waitfor(time_delta(event))
 					
 	def _waitfor(self,dest):
 		if self.is_update:
@@ -188,9 +186,7 @@ wait until FOO...
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 
-		n = now()
-		s = time_until(event, now=n)
-		return self._waitfor(n+s)
+		return self._waitfor(time_until(event))
 					
 
 class WaitWhileHandler(WaitHandler):
@@ -208,9 +204,7 @@ wait while FOO...
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 
-		n = now()
-		s = time_until(event, now=n, invert=True)
-		return self._waitfor(n+s)
+		return self._waitfor(time_until(event, invert=True))
 					
 
 class WaitForNextHandler(WaitHandler):
@@ -228,10 +222,8 @@ wait until next FOO...
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 
-		n = now()
-		s = time_until(event, now=n, invert=True)
-		s += time_until(event, now=n+s)
-		return self._waitfor(n+s)
+		s = time_until(event, invert=True)
+		return self._waitfor(time_until(event, now=s))
 					
 
 class WaitName(Statement):
