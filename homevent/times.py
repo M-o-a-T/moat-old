@@ -340,7 +340,9 @@ def time_until(args, now=None, invert=False):
 		if p.mn is None and p.dy is None:
 			# No month/day specified, so assume that we can go back a bit.
 			# (iso day 1 of week 1 of year X may be in December X-1.)
+			# … but not into the past, please!
 			upd(1-dow)
+			if p.res < p.now: p.res = p.now
 
 	if p.dow is not None:
 		yr,wk,dow = p.res.isocalendar()
