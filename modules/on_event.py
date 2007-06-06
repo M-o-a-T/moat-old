@@ -27,6 +27,8 @@ from homevent.run import register_worker,unregister_worker,MIN_PRIO,MAX_PRIO
 from homevent.worker import HaltSequence,Worker
 from homevent.module import Module
 from homevent.logging import log
+from homevent.check import Check,register_condition,unregister_condition
+
 
 from twisted.internet import defer
 
@@ -124,7 +126,7 @@ Every "*foo" in the event description is mapped to the corresponding
 		log(TRACE,"NewHandler",self.handler_id)
 		self.name = "¦".join(self.args)
 		if self.displayname is not None:
-			self.name += " ‹"+self.displayname+"›"
+			self.name += " ‹"+" ".join(self.displayname)+"›"
 		register_worker(self)
 		onHandlers[self.handler_id] = self
 		if self.displayname is not None:
@@ -142,15 +144,18 @@ class OffEventHandler(Statement):
 	doc = "forget about an event handler"
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		if len(event) == 1:
-			try: worker = onHandlers[event[0]]
-			except KeyError: worker = onHandlerNames[event[0]]
-			unregister_worker(worker)
-			del onHandlers[worker.handler_id]
-			if worker.displayname is not None:
-				del onHandlerNames[worker.displayname]
-		else:
+		if not len(event):
 			raise SyntaxError("Usage: del on ‹handler_id/name›")
+		try: worker = onHandlerNames[tuple(event)]
+		except KeyError:
+			if len(event) == 1:
+				worker = onHandlers[event[0]]
+			else:
+				raise
+		unregister_worker(worker)
+		del onHandlers[worker.handler_id]
+		if worker.displayname is not None:
+			del onHandlerNames[worker.displayname]
 
 class OnListHandler(Statement):
 	name = ("list","on")
@@ -167,17 +172,16 @@ class OnListHandler(Statement):
 					h = onHandlers[id]
 					n = "¦".join(h.args)
 					if h.displayname is not None:
-						n += " ‹"+h.displayname+"›"
+						n += " ‹"+" ".join(h.displayname)+"›"
 					print >>self.ctx.out,str(id)+" "*(fl-len(str(id))+1),":",n
 			print >>self.ctx.out,"."
-		elif len(event) == 1:
-			try: h = onHandlers[event[0]]
-			except KeyError: h = onHandlerNames[event[0]]
-			print >>self.ctx.out, h.handler_id,":","¦".join(h.args)
-			if h.displayname is not None: print >>self.ctx.out,"Name:",h.displayname
-			if hasattr(h,"displaydoc"): print >>self.ctx.out,"Doc:",h.displaydoc
 		else:
-			raise SyntaxError("Usage: list on ‹handler_id›")
+			try: h = onHandlers[event[0]]
+			except KeyError: h = onHandlerNames[tuple(event)]
+			print >>self.ctx.out, h.handler_id,":","¦".join(h.args)
+			if h.displayname is not None:
+				print >>self.ctx.out,"Name:"," ".join(h.displayname)
+			if hasattr(h,"displaydoc"): print >>self.ctx.out,"Doc:",h.displaydoc
 
 
 class OnPrio(Statement):
@@ -211,9 +215,9 @@ This statement assigns a name to an event handler.
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		if len(event) != 1:
+		if not len(event):
 			raise SyntaxError('Usage: name "‹text›"')
-		self.parent.displayname = event[0]
+		self.parent.displayname = tuple(event)
 
 
 class OnDoc(Statement):
@@ -242,6 +246,16 @@ NOTE: Commands in the same handler, after this one, *are* executed.
 		raise HaltSequence()
 
 
+class OnExistsCheck(Check):
+	name=("exists","on")
+	doc="check if a handler exists"
+	def check(self,*args):
+		if not len(args):
+			raise SyntaxError("Usage: if exists on ‹name…›")
+		name = tuple(args)
+		return name in onHandlerNames
+
+
 class OnEventModule(Module):
 	"""\
 		This module registers the "on EVENT:" handler.
@@ -257,6 +271,7 @@ class OnEventModule(Module):
 		main_words.register_statement(OnSkip)
 		OnEventHandler.register_statement(OnName)
 		OnEventHandler.register_statement(OnDoc)
+		register_condition(OnExistsCheck)
 	
 	def unload(self):
 		main_words.unregister_statement(OnEventHandler)
@@ -266,6 +281,7 @@ class OnEventModule(Module):
 		main_words.unregister_statement(OnSkip)
 		OnEventHandler.unregister_statement(OnName)
 		OnEventHandler.unregister_statement(OnDoc)
+		unregister_condition(OnExistsCheck)
 	
 init = OnEventModule
 

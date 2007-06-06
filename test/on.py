@@ -10,25 +10,25 @@ from test import run
 input = """\
 on foo:
 	prio 50
-	name "Do nothing"
+	name Do nothing
 	do nothing
 on foo:
 	prio 55
-	name "Skip Next"
+	name Skip Next
 	skip next
 	doc "Causes the prio-60 thing to not be executed"
 on foo:
 	prio 60
-	name "not executed"
+	name not executed
 	sync trigger OuchNo
 	doc "Is not executed because of the former 'skip next' (until that's gone)"
 on bar *:
 	block:
 		sync trigger $1
 list on
-list on "not executed"
+list on not executed
 sync trigger bar foo
-del on "Skip Next"
+del on Skip Next
 sync trigger bar foo
 del on 1
 list on

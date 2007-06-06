@@ -253,6 +253,17 @@ or its name.
 
 	del on FooBar
 
+------------
+if exists on
+------------
+
+A test whether a handler exists. Handy to avoid a runtime error if you
+don't know whether one exists.
+
+	if exists on FooBar:
+		del on FooBar
+
+
 =====
 state
 =====

@@ -279,7 +279,10 @@ class StatementList(ComplexStatement):
 		yield "ON "+"¦".join(self.args)
 		if not verbose: return
 		if self.displayname is not None:
-			yield "   name: "+self.displayname
+			if isinstance(self.displayname,basestring):
+				yield "   name: "+self.displayname
+			else:
+				yield "   name: "+" ".join(self.displayname)
 		yield "   prio: "+str(self.prio)
 		pref="proc"
 		for p in self.procs:
@@ -367,13 +370,20 @@ class OnListHandler(Statement):
 					h = onHandlers[id]
 					n = "¦".join(h.args)
 					if h.displayname is not None:
-						n += " ‹"+h.displayname+"›"
+						if isinstance(h.displayname,basestring):
+							n += " ‹"+h.displayname+"›"
+						else:
+							n += " ‹"+" ".join(h.displayname)+"›"
 					print >>self.ctx.out,str(id)+" "*(fl-len(str(id))+1),":",n
 		elif len(event) == 1:
 			try: h = onHandlers[event[0]]
 			except KeyError: h = onHandlerNames[event[0]]
 			print >>self.ctx.out, h.handler_id,":","¦".join(h.args)
-			if h.displayname is not None: print >>self.ctx.out,"Name:",h.displayname
+			if h.displayname is not None:
+				if isinstance(h.displayname,basestring):
+					print >>self.ctx.out,"Name:",h.displayname
+				else:
+					print >>self.ctx.out,"Name:"," ".join(h.displayname)
 			if hasattr(h,"displaydoc"): print >>self.ctx.out,"Doc:",h.displaydoc
 		else:
 			raise SyntaxError("Usage: list on ‹handler_id›")
