@@ -2,24 +2,19 @@
 # -*- coding: utf-8 -*-
 
 import homevent as h
-import sys
-from homevent.module import Loader,Unloader
-from homevent.run import process_event
+from homevent.reactor import ShutdownHandler
+from homevent.module import Load,Unload
+from test import run
 
-from test import run_logger
-run_logger("modules")
+input = """\
+load example
+del load example
+shutdown
+"""
 
-load_ev = h.Event(h.Context(),"module","load","example")
-unload_ev = h.Event(h.Context(),"module","unload","example")
+h.main_words.register_statement(ShutdownHandler)
+h.main_words.register_statement(Load)
+h.main_words.register_statement(Unload)
 
-h.register_worker(Loader())
-h.register_worker(Unloader())
-
-def main():
-	d = h.process_event(load_ev)
-	d.addCallback(lambda _: process_event(load_ev))
-	d.addCallback(lambda _: process_event(unload_ev))
-	d.addBoth(lambda _: h.shut_down())
-
-h.mainloop(main)
+run("modules",input)
 

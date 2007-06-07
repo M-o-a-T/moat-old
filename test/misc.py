@@ -20,15 +20,10 @@ block:
 	trigger bar3
 wait for 0.1
 block:
-	sync trigger foo4
-	block:
-		sync trigger bar4
-async:
-	wait for 0.1
-	trigger foo5
-wait for 0.2
-trigger bar5
-wait for 0.1
+	if exists file "misc2":
+		include "misc2"
+	else:
+		include "test/misc2"
 shutdown
 """
 
@@ -36,6 +31,8 @@ h.main_words.register_statement(ShutdownHandler)
 load_module("trigger")
 load_module("wait")
 load_module("block")
+load_module("file")
+load_module("ifelse")
 
 run("misc",input)
 

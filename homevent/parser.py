@@ -372,4 +372,13 @@ def parse(input, proc=None, ctx=None):
 	d.addCallback(lambda _: g.result)         # analyze the result
 	return d
 
+def read_config(ctx,name, interpreter=None):
+	"""Read a configuration file."""
+	if interpreter is None:
+		from homevent.interpreter import Interpreter
+		interpreter = Interpreter
+	input = open(name,"rU")
+	ctx = ctx()
+	return parse(input, Interpreter(ctx),ctx)
+
 

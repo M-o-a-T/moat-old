@@ -2,17 +2,16 @@
 # -*- coding: utf-8 -*-
 
 """\
-This code processes module load/unload events.
+This code implements module loading and unloading.
 
 """
 
 from twisted.python.reflect import namedAny
 from twisted.python import failure
 from twisted.internet import reactor,defer
-from types import ModuleType
-from homevent.worker import Worker
+from homevent.run import process_event
+from homevent.statement import Statement
 from homevent.event import Event
-from homevent.run import process_event,process_failure
 import sys
 import os
 
@@ -105,72 +104,6 @@ def load_module(*m):
 	modules[mod.name] = mod
 	return mod
 
-class Loader(Worker):
-	"""Loads a module."""
-	def __init__(self):
-		super(Loader,self).__init__("Module Loader")
-
-	def does_event(self,event):
-		if len(event) < 3: return False
-		if event[0] != "module": return False
-		if event[1] != "load": return False
-		return True
-
-	def process(self,event, *a,**k):
-		d = defer.Deferred()
-
-		def doit(_):
-			self.mod = None
-			try:
-				m = tuple(event[2:]) # skip "load" "module"
-				if m in modules:
-					raise ModuleExistsError("This module already exists",m)
-
-				mod = load_module(*m)
-				self.mod = mod
-				return True
-
-			except Exception:
-				exc = failure.Failure()
-				exc.within = [event,self]
-				if "HOMEVENT_TEST" in os.environ:
-					# If we're testing, process the eception synchronously
-					return process_failure(exc)
-				else:
-					process_failure(exc)
-					return False
-
-		def done(res):
-			if res:
-				return process_event(Event(event.ctx, "module","load-done",*self.mod.name), return_errors=True)
-
-			if self.mod:
-				try:
-					self.mod.unload()
-				except Exception:
-					pass
-
-			if self.mod is None or not hasattr(self.mod,"name"):
-				name = event[2:]
-			else:
-				name = self.mod.name
-			return process_event(Event(event.ctx, "module","load-fail",*name), return_errors=True)
-
-#		def rx(_):
-#			print "RX",_
-#			return _
-#		d.addCallback(rx)
-
-		def do_start(_):
-			return process_event(Event(event.ctx, "module","load-start",*event[2:]), return_errors=True)
-		d.addCallback(do_start)
-		d.addCallback(doit)
-		d.addCallback(done)
-
-		reactor.callLater(0,d.callback,None)
-		return d
-	
-
 def unload_module(module):
 	"""\
 		Unloads a module.
@@ -178,41 +111,79 @@ def unload_module(module):
 	del modules[module.name]
 	module.unload()
 
-class Dummy(object): pass
 
-class Unloader(Worker):
-	"""Unloads a module."""
-	def __init__(self):
-		super(Unloader,self).__init__("Module Remover")
-
-	def does_event(self,event):
-		if len(event) < 3: return False
-		if event[0] != "module": return False
-		if event[1] != "unload": return False
-		return True
-
-	def process(self,event, *a,**k):
-		d = defer.Deferred()
-		sn = Dummy()
-
-		def doit(_):
-			sn.name = tuple(event[2:])
-			sn.module = modules[sn.name]
-			unload_module(sn.module)
-
-		def done(_):
-			return process_event(Event(event.ctx, "module","unload-done",*sn.module.name), return_errors=True)
-
-		def notdone(exc):
-			process_failure(exc)
-			return process_event(Event(event.ctx, "module","unload-fail",*event[2:]), return_errors=True)
-
-		def do_start(_):
-			return process_event(Event(event.ctx, "module","unload-start",*event[2:]), return_errors=True)
-		d.addCallback(do_start)
-		d.addCallback(doit)
-		d.addCallbacks(done, notdone)
-
-		reactor.callLater(0,d.callback,None)
+class Load(Statement):
+	name=("load",)
+	doc="load a module"
+	long_doc = """\
+load NAME [args]...
+	loads the named module and calls its load() function.
+	Emits an "module load NAME [args]" event.
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		d = defer.maybeDeferred(load_module,*event)
+		d.addCallback(lambda _: process_event(Event(self.ctx, "module","load",*event)))
 		return d
-	
+
+
+class Unload(Statement):
+	name=("del","load",)
+	doc="unload a module"
+	long_doc = """\
+del load NAME [args]...
+	unloads the named module after calling its unload() function.
+	Emits an "module unload NAME [args]" event before unloading.
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		m = modules[tuple(event)]
+		d = process_event(Event(self.ctx, "module","unload",*event))
+		d.addCallback(lambda _: unload_module(m))
+		return d
+
+
+class LoadDir(Statement):
+	name=("load","dir")
+	doc="list or change the module directory list"
+	long_doc = """\
+load dir
+	lists directories where "load" imports modules from
+load dir "NAME"
+	adds the named directory to the end of the import list
+load dir + "NAME"
+	adds the named directory to the beginning of the import list
+load dir - "NAME"
+	removes the named directory from the import list
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if len(event) == 0:
+			for m in ModuleDirs:
+				print >>self.ctx.out, m
+			print >>self.ctx.out, "."
+		else:
+			w = event[-1]
+			if len(event) == 1 and w not in ("+","-"):
+				if not os.path.isdir(w):
+					raise RuntimeError("‹%s›: not found" % (w,))
+				if event[0] not in ModuleDirs:
+					ModuleDirs.append(w)
+				else:
+					raise RuntimeError("‹%s›: already listed" % (w,))
+			elif len(event) == 2 and event[0] == "+":
+				if not os.path.isdir(w):
+					raise RuntimeError("‹%s›: not found" % (w,))
+				if event[1] not in ModuleDirs:
+					ModuleDirs.insert(0,w)
+				else:
+					raise RuntimeError("‹%s›: already listed" % (w,))
+			elif len(event) == 2 and event[0] == "-":
+				try:
+					ModuleDirs.remove(w)
+				except ValueError:
+					raise RuntimeError("‹%s›: not listed" % (w,))
+			else:
+				raise SyntaxError("Usage: loaddir [ [ - ] name ]")
+
+

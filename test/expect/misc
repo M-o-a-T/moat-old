@@ -118,25 +118,28 @@ RUN: <WorkSequence:13 (4)>
 107 END: wait¦done¦1049515628.1¦_wait¦3
 RUN: <WorkSequence:13 (4)>
  ev: EVENT: wait¦done¦1049515628.1¦_wait¦3
+0 add ‹IfStatement ⌁.if¦exists¦file¦misc2›
+0 add ‹Include ⌁.include¦misc2›
+0 add ‹Include ⌁.include¦test/misc2›
 0 add ‹SyncTriggerHandler ⌁.sync¦trigger¦foo4›
 0 add ‹Block ⌁.block›
 0 add ‹SyncTriggerHandler ⌁.sync¦trigger¦bar4›
 NEW: <WorkSequence:14 (4)>
    : │  EVENT: foo4
    : └1╴... done.
-119 EVENT: foo4
+126 EVENT: foo4
 RUN: <WorkSequence:14 (4)>
  ev: EVENT: foo4
-119 END: foo4
+126 END: foo4
 RUN: <WorkSequence:14 (4)>
  ev: EVENT: foo4
 NEW: <WorkSequence:15 (4)>
    : │  EVENT: bar4
    : └1╴... done.
-127 EVENT: bar4
+134 EVENT: bar4
 RUN: <WorkSequence:15 (4)>
  ev: EVENT: bar4
-127 END: bar4
+134 END: bar4
 RUN: <WorkSequence:15 (4)>
  ev: EVENT: bar4
 0 add ‹WaitHandler ('wait', 'for') 2›
@@ -147,38 +150,44 @@ NEW: <WorkSequence:16 (4)>
 NEW: <WorkSequence:17 (4)>
    : │  EVENT: wait¦start¦1049515628.2¦_wait¦5
    : └1╴... done.
-138 EVENT: wait¦start¦1049515628.1¦_wait¦4
+145 EVENT: wait¦start¦1049515628.1¦_wait¦4
 RUN: <WorkSequence:16 (4)>
  ev: EVENT: wait¦start¦1049515628.1¦_wait¦4
-138 END: wait¦start¦1049515628.1¦_wait¦4
+145 END: wait¦start¦1049515628.1¦_wait¦4
 RUN: <WorkSequence:16 (4)>
  ev: EVENT: wait¦start¦1049515628.1¦_wait¦4
-142 EVENT: wait¦start¦1049515628.2¦_wait¦5
+149 EVENT: wait¦start¦1049515628.2¦_wait¦5
 RUN: <WorkSequence:17 (4)>
  ev: EVENT: wait¦start¦1049515628.2¦_wait¦5
-142 END: wait¦start¦1049515628.2¦_wait¦5
+149 END: wait¦start¦1049515628.2¦_wait¦5
 RUN: <WorkSequence:17 (4)>
  ev: EVENT: wait¦start¦1049515628.2¦_wait¦5
 NEW: <WorkSequence:18 (4)>
    : │  EVENT: wait¦done¦1049515628.1¦_wait¦4
    : └1╴... done.
+161 EVENT: wait¦done¦1049515628.1¦_wait¦4
+RUN: <WorkSequence:18 (4)>
+ ev: EVENT: wait¦done¦1049515628.1¦_wait¦4
+161 END: wait¦done¦1049515628.1¦_wait¦4
+RUN: <WorkSequence:18 (4)>
+ ev: EVENT: wait¦done¦1049515628.1¦_wait¦4
 NEW: <WorkSequence:19 (4)>
-   : │  EVENT: wait¦done¦1049515628.2¦_wait¦5
-   : └1╴... done.
-154 EVENT: wait¦done¦1049515628.1¦_wait¦4
-RUN: <WorkSequence:18 (4)>
- ev: EVENT: wait¦done¦1049515628.1¦_wait¦4
-154 END: wait¦done¦1049515628.1¦_wait¦4
-RUN: <WorkSequence:18 (4)>
- ev: EVENT: wait¦done¦1049515628.1¦_wait¦4
-NEW: <WorkSequence:20 (4)>
    : │  EVENT: foo5
    : └1╴... done.
-156 EVENT: wait¦done¦1049515628.2¦_wait¦5
+NEW: <WorkSequence:20 (4)>
+   : │  EVENT: wait¦done¦1049515628.2¦_wait¦5
+   : └1╴... done.
+169 EVENT: foo5
 RUN: <WorkSequence:19 (4)>
+ ev: EVENT: foo5
+169 END: foo5
+RUN: <WorkSequence:19 (4)>
+ ev: EVENT: foo5
+171 EVENT: wait¦done¦1049515628.2¦_wait¦5
+RUN: <WorkSequence:20 (4)>
  ev: EVENT: wait¦done¦1049515628.2¦_wait¦5
-156 END: wait¦done¦1049515628.2¦_wait¦5
-RUN: <WorkSequence:19 (4)>
+171 END: wait¦done¦1049515628.2¦_wait¦5
+RUN: <WorkSequence:20 (4)>
  ev: EVENT: wait¦done¦1049515628.2¦_wait¦5
 NEW: <WorkSequence:21 (4)>
    : │  EVENT: bar5
@@ -186,31 +195,25 @@ NEW: <WorkSequence:21 (4)>
 NEW: <WorkSequence:22 (4)>
    : │  EVENT: wait¦start¦1049515628.1¦_wait¦6
    : └1╴... done.
-164 EVENT: foo5
-RUN: <WorkSequence:20 (4)>
- ev: EVENT: foo5
-164 END: foo5
-RUN: <WorkSequence:20 (4)>
- ev: EVENT: foo5
-173 EVENT: bar5
+185 EVENT: bar5
 RUN: <WorkSequence:21 (4)>
  ev: EVENT: bar5
-173 END: bar5
+185 END: bar5
 RUN: <WorkSequence:21 (4)>
  ev: EVENT: bar5
-177 EVENT: wait¦start¦1049515628.1¦_wait¦6
+189 EVENT: wait¦start¦1049515628.1¦_wait¦6
 RUN: <WorkSequence:22 (4)>
  ev: EVENT: wait¦start¦1049515628.1¦_wait¦6
-177 END: wait¦start¦1049515628.1¦_wait¦6
+189 END: wait¦start¦1049515628.1¦_wait¦6
 RUN: <WorkSequence:22 (4)>
  ev: EVENT: wait¦start¦1049515628.1¦_wait¦6
 NEW: <WorkSequence:23 (4)>
    : │  EVENT: wait¦done¦1049515628.1¦_wait¦6
    : └1╴... done.
-194 EVENT: wait¦done¦1049515628.1¦_wait¦6
+201 EVENT: wait¦done¦1049515628.1¦_wait¦6
 RUN: <WorkSequence:23 (4)>
  ev: EVENT: wait¦done¦1049515628.1¦_wait¦6
-194 END: wait¦done¦1049515628.1¦_wait¦6
+201 END: wait¦done¦1049515628.1¦_wait¦6
 RUN: <WorkSequence:23 (4)>
  ev: EVENT: wait¦done¦1049515628.1¦_wait¦6
 NEW: <WorkSequence:24 (5)>

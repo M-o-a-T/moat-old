@@ -1,25 +1,19 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from homevent.module import Loader,Unloader
 from homevent.run import register_worker
 from homevent.interpreter import InteractiveInterpreter
 from homevent.parser import Parser
 from homevent.statement import IgnoreStatement, main_words, global_words
-from homevent.config import Load,Unload,LoadDir,Include
+from homevent.module import load_module, Load,Unload,LoadDir
 from homevent.reactor import ShutdownHandler,mainloop,shut_down
 from homevent.twist import StdInDescriptor
-from homevent.module import load_module
 from twisted.internet import reactor
 from twisted.internet._posixstdio import StandardIO ## XXX unstable interface!
 from twisted.internet.error import ConnectionDone
 from homevent.context import Context
 from traceback import print_exc
 
-register_worker(Loader())
-register_worker(Unloader())
-
-global_words.register_statement(Include)
 global_words.register_statement(Load)
 global_words.register_statement(Unload)
 global_words.register_statement(LoadDir)

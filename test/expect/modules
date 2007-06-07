@@ -1,205 +1,41 @@
 NEW: <WorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
-.
 1 EVENT: startup
-.
 RUN: <WorkSequence:1 (4)>
  ev: EVENT: startup
-.
 1 END: startup
-.
 RUN: <WorkSequence:1 (4)>
  ev: EVENT: startup
-.
-NEW: <WorkSequence:2 (5)>
-   : │  EVENT: module¦load¦example
-   : ├1╴Loader: Module Loader
-   : └2╴... done.
-.
-3 EVENT: module¦load¦example
-.
-RUN: <WorkSequence:2 (5)>
- ev: EVENT: module¦load¦example
-.
-RUN: Loader: Module Loader
- at: <WorkSequence:2 (5)> (step 1)
- ev: EVENT: module¦load¦example
-.
-NEW: <WorkSequence:3 (4)>
-   : │  EVENT: module¦load-start¦example
-   : └1╴... done.
-.
-15 EVENT: module¦load-start¦example
-.
-RUN: <WorkSequence:3 (4)>
- ev: EVENT: module¦load-start¦example
-.
-15 END: module¦load-start¦example
-.
-RUN: <WorkSequence:3 (4)>
- ev: EVENT: module¦load-start¦example
-.
 Loading!
-.
-NEW: <WorkSequence:4 (4)>
-   : │  EVENT: module¦load-done¦example
-   : └1╴... done.
-.
-22 EVENT: module¦load-done¦example
-.
-RUN: <WorkSequence:4 (4)>
- ev: EVENT: module¦load-done¦example
-.
-22 END: module¦load-done¦example
-.
-RUN: <WorkSequence:4 (4)>
- ev: EVENT: module¦load-done¦example
-.
-3 END: module¦load¦example
-.
-RUN: <WorkSequence:2 (5)> (step 1)
- ev: EVENT: module¦load¦example
-.
-NEW: <WorkSequence:5 (5)>
+NEW: <WorkSequence:2 (4)>
    : │  EVENT: module¦load¦example
-   : ├1╴Loader: Module Loader
-   : └2╴... done.
-.
-3 EVENT: module¦load¦example
-.
-RUN: <WorkSequence:5 (5)>
- ev: EVENT: module¦load¦example
-.
-RUN: Loader: Module Loader
- at: <WorkSequence:5 (5)> (step 1)
- ev: EVENT: module¦load¦example
-.
-NEW: <WorkSequence:6 (4)>
-   : │  EVENT: module¦load-start¦example
    : └1╴... done.
-.
-36 EVENT: module¦load-start¦example
-.
-RUN: <WorkSequence:6 (4)>
- ev: EVENT: module¦load-start¦example
-.
-36 END: module¦load-start¦example
-.
-RUN: <WorkSequence:6 (4)>
- ev: EVENT: module¦load-start¦example
-.
-NEW: <WorkSequence:7 (4)>
-   : │  ERROR: ('This module already exists', ('example',))
-   : └1╴... done.
-.
-ERROR: Traceback (most recent call last):
-     :   File "internet/defer.py, in _runCallbacks
-     :     self.result = callback(self.result, *args, **kw)
-     :   File "internet/defer.py, in _continue
-     :     self.unpause()
-     :   File "internet/defer.py, in unpause
-     :     self._runCallbacks()
-     :   File "internet/defer.py, in _runCallbacks
-     :     self.result = callback(self.result, *args, **kw)
-     : --- <exception caught here> ---
-     :   File "homevent/module.py, in doit
-     :     raise ModuleExistsError("This module already exists",m)
-     : homevent.module.ModuleExistsError: ('This module already exists', ('example',))
-   in: EVENT: module¦load¦example
-   in: Loader: Module Loader
-.
-RUN: <WorkSequence:7 (4)>
- ev: ERROR: ('This module already exists', ('example',))
-.
-47 END: ModuleExistsError
-.
-RUN: <WorkSequence:7 (4)>
- ev: ERROR: ('This module already exists', ('example',))
-.
-NEW: <WorkSequence:8 (4)>
-   : │  EVENT: module¦load-fail¦example
-   : └1╴... done.
-.
-49 EVENT: module¦load-fail¦example
-.
-RUN: <WorkSequence:8 (4)>
- ev: EVENT: module¦load-fail¦example
-.
-49 END: module¦load-fail¦example
-.
-RUN: <WorkSequence:8 (4)>
- ev: EVENT: module¦load-fail¦example
-.
-3 END: module¦load¦example
-.
-RUN: <WorkSequence:5 (5)> (step 1)
+11 EVENT: module¦load¦example
+RUN: <WorkSequence:2 (4)>
  ev: EVENT: module¦load¦example
-.
-NEW: <WorkSequence:9 (5)>
+11 END: module¦load¦example
+RUN: <WorkSequence:2 (4)>
+ ev: EVENT: module¦load¦example
+NEW: <WorkSequence:3 (4)>
    : │  EVENT: module¦unload¦example
-   : ├1╴Unloader: Module Remover
-   : └2╴... done.
-.
-4 EVENT: module¦unload¦example
-.
-RUN: <WorkSequence:9 (5)>
- ev: EVENT: module¦unload¦example
-.
-RUN: Unloader: Module Remover
- at: <WorkSequence:9 (5)> (step 1)
- ev: EVENT: module¦unload¦example
-.
-NEW: <WorkSequence:10 (4)>
-   : │  EVENT: module¦unload-start¦example
    : └1╴... done.
-.
-63 EVENT: module¦unload-start¦example
-.
-RUN: <WorkSequence:10 (4)>
- ev: EVENT: module¦unload-start¦example
-.
-63 END: module¦unload-start¦example
-.
-RUN: <WorkSequence:10 (4)>
- ev: EVENT: module¦unload-start¦example
-.
+20 EVENT: module¦unload¦example
+RUN: <WorkSequence:3 (4)>
+ ev: EVENT: module¦unload¦example
+20 END: module¦unload¦example
+RUN: <WorkSequence:3 (4)>
+ ev: EVENT: module¦unload¦example
 Unloading!
-.
-NEW: <WorkSequence:11 (4)>
-   : │  EVENT: module¦unload-done¦example
-   : └1╴... done.
-.
-70 EVENT: module¦unload-done¦example
-.
-RUN: <WorkSequence:11 (4)>
- ev: EVENT: module¦unload-done¦example
-.
-70 END: module¦unload-done¦example
-.
-RUN: <WorkSequence:11 (4)>
- ev: EVENT: module¦unload-done¦example
-.
-4 END: module¦unload¦example
-.
-RUN: <WorkSequence:9 (5)> (step 1)
- ev: EVENT: module¦unload¦example
-.
-NEW: <WorkSequence:12 (5)>
+NEW: <WorkSequence:4 (5)>
    : │  EVENT: shutdown
    : └1╴... done.
-.
 2 EVENT: shutdown
-.
-RUN: <WorkSequence:12 (5)>
+RUN: <WorkSequence:4 (5)>
  ev: EVENT: shutdown
-.
 2 END: shutdown
-.
 RUN: shutting down
- at: <WorkSequence:12 (5)>
+ at: <WorkSequence:4 (5)>
  ev: EVENT: shutdown
-.
-RUN: <WorkSequence:12 (5)>
+RUN: <WorkSequence:4 (5)>
  ev: EVENT: shutdown
-.
