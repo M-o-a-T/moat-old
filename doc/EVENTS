@@ -1,11 +1,10 @@
 Startup and shutdown
 --------------------
 
-startup init
-	-- happens immediately after loading modules and parsing the config.
-startup done
-	-- happens when all the startup and init stuff is finished.
-
+startup
+	-- after loading modules and parsing the config.
+shutdown
+	-- closing down
 
 Module load/unload
 ------------------
