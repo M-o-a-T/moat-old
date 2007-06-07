@@ -40,7 +40,7 @@ del t
 del re
 
 
-class Parser(Outputter,LineReceiver):
+class Parser(Outputter):
 	"""The input parser object. It serves as a LineReceiver and a 
 	   normal (but non-throttle-able) producer."""
 	delimiter="\n"
