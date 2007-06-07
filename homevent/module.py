@@ -36,7 +36,7 @@ class Module(object):
 	name = "Module"
 	info = "some idiot programmer forgot to override me"
 
-	def __init__(self, name, *args):
+	def __init__(self, *name):
 		"""\
 			Initialize a module. The arguments are passed in from the 
 			"load" command and may modify the module name, which needs
@@ -47,7 +47,8 @@ class Module(object):
 
 			Do not override the assignment (below) without good reason.
 			"""
-		self.name = (name,)+args
+		assert len(name) > 0, "A module must be named!"
+		self.name = name
 	
 	def load(self):
 		"""\
@@ -84,7 +85,7 @@ def load_module(*m):
 	mod = md["init"]
 	if callable(mod):
 		mod = mod(*m)
-	elif len(event) > 3:
+	elif len(event) > 1:
 		raise RuntimeError("You cannot parameterize this module.")
 	if mod.name in modules:
 		raise ModuleExistsError("This module already exists(2)",mod.name)
