@@ -3,8 +3,7 @@ block:
 	block:
 		sync trigger bar4
 async:
-	wait for 0.1
 	trigger foo5
-wait for 0.2
+wait for 0.1
 trigger bar5
 wait for 0.1

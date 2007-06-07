@@ -37,25 +37,34 @@ RUN: <WorkSequence:3 (4)>
 0 NewHandler 1
 0 add ‹LogHandler ⌁.log¦TRACE¦Set¦to¦THREE›
 0 add ‹SetStateHandler ⌁.set¦state¦three¦foo¦bar›
+NEW: <WorkSequence:4 (4)>
+   : │  EVENT: wait¦start¦1049515628.1¦_wait¦1
+   : └1╴... done.
+47 EVENT: wait¦start¦1049515628.1¦_wait¦1
+RUN: <WorkSequence:4 (4)>
+ ev: EVENT: wait¦start¦1049515628.1¦_wait¦1
+47 END: wait¦start¦1049515628.1¦_wait¦1
+RUN: <WorkSequence:4 (4)>
+ ev: EVENT: wait¦start¦1049515628.1¦_wait¦1
 0 Set to THREE
-NEW: <WorkSequence:4 (5)>
+NEW: <WorkSequence:5 (5)>
    : │  EVENT: state¦two¦three¦foo¦bar
    : ├1╴ON state¦*¦three¦foo¦bar
    : │     prio: 51
    : │     proc: ‹LogHandler ⌁.log¦TRACE¦Set¦to¦FOUR›
    : │         : ‹SetStateHandler ⌁.set¦state¦four¦foo¦bar›
    : └2╴... done.
-47 EVENT: state¦two¦three¦foo¦bar
-RUN: <WorkSequence:4 (5)>
+56 EVENT: state¦two¦three¦foo¦bar
+RUN: <WorkSequence:5 (5)>
  ev: EVENT: state¦two¦three¦foo¦bar
 RUN: ON state¦*¦three¦foo¦bar
    :    prio: 51
    :    proc: ‹LogHandler ⌁.log¦TRACE¦Set¦to¦FOUR›
    :        : ‹SetStateHandler ⌁.set¦state¦four¦foo¦bar›
- at: <WorkSequence:4 (5)> (step 1)
+ at: <WorkSequence:5 (5)> (step 1)
  ev: EVENT: state¦two¦three¦foo¦bar
 0 Set to FOUR
-NEW: <WorkSequence:5 (4)>
+NEW: <WorkSequence:6 (4)>
    : │  ERROR: Trying to change state to 'four' while changing from 'two' to 'three'
    : └1╴... done.
 ERROR: Traceback (most recent call last):
@@ -79,30 +88,21 @@ ERROR: Traceback (most recent call last):
      :    prio: 51
      :    proc: ‹LogHandler ⌁.log¦TRACE¦Set¦to¦FOUR›
      :        : ‹SetStateHandler ⌁.set¦state¦four¦foo¦bar›
-   in: <WorkSequence:4 (5)>
+   in: <WorkSequence:5 (5)>
      : │  EVENT: state¦two¦three¦foo¦bar
      : ├1╴ON state¦*¦three¦foo¦bar
      : │     prio: 51
      : │     proc: ‹LogHandler ⌁.log¦TRACE¦Set¦to¦FOUR›
      : │         : ‹SetStateHandler ⌁.set¦state¦four¦foo¦bar›
      : └2╴... done.
-RUN: <WorkSequence:5 (4)>
+RUN: <WorkSequence:6 (4)>
  ev: ERROR: Trying to change state to 'four' while changing from 'two' to 'three'
-58 END: StateChangeError
-RUN: <WorkSequence:5 (4)>
+67 END: StateChangeError
+RUN: <WorkSequence:6 (4)>
  ev: ERROR: Trying to change state to 'four' while changing from 'two' to 'three'
-47 END: state¦two¦three¦foo¦bar
-RUN: <WorkSequence:4 (5)> (step 1)
+56 END: state¦two¦three¦foo¦bar
+RUN: <WorkSequence:5 (5)> (step 1)
  ev: EVENT: state¦two¦three¦foo¦bar
-NEW: <WorkSequence:6 (4)>
-   : │  EVENT: wait¦start¦1049515628.1¦_wait¦1
-   : └1╴... done.
-65 EVENT: wait¦start¦1049515628.1¦_wait¦1
-RUN: <WorkSequence:6 (4)>
- ev: EVENT: wait¦start¦1049515628.1¦_wait¦1
-65 END: wait¦start¦1049515628.1¦_wait¦1
-RUN: <WorkSequence:6 (4)>
- ev: EVENT: wait¦start¦1049515628.1¦_wait¦1
 NEW: <WorkSequence:7 (4)>
    : │  EVENT: wait¦done¦1049515628.1¦_wait¦1
    : └1╴... done.
