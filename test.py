@@ -6,7 +6,7 @@ from homevent.run import register_worker
 from homevent.interpreter import InteractiveInterpreter
 from homevent.parser import Parser
 from homevent.statement import IgnoreStatement, main_words, global_words
-from homevent.config import Load,Unload,LoadDir
+from homevent.config import Load,Unload,LoadDir,Include
 from homevent.reactor import ShutdownHandler,mainloop,shut_down
 from homevent.twist import StdInDescriptor
 from homevent.module import load_module
@@ -19,6 +19,7 @@ from traceback import print_exc
 register_worker(Loader())
 register_worker(Unloader())
 
+global_words.register_statement(Include)
 global_words.register_statement(Load)
 global_words.register_statement(Unload)
 global_words.register_statement(LoadDir)

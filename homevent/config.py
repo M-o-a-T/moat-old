@@ -6,8 +6,8 @@ This code reads a config file.
 
 Currently, it understands:
 
-#	include NAME
-#		- read that file too
+	include NAME
+		- read that file too
 
 	load dir
 		- list module directories
@@ -36,7 +36,27 @@ from homevent.statement import Statement
 from homevent.run import process_event
 from homevent.event import Event
 from homevent.module import modules, ModuleDirs
+from homevent.parser import parse
+from homevent.interpreter import Interpreter
 import os
+
+
+class Include(Statement):
+	name=("include",)
+	doc="load a configuration file"
+	long_doc = """\
+include 'NAME'
+	reads and processes the configuration file. The name probably needs
+	to be quoted.
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if len(event) != 1:
+			raise SyntaxError("Usage: include 'filename'")
+		input = open(event[0],"rU")
+		ctx = ctx()
+		return parse(input, Interpreter(ctx),ctx)
+
 
 class Load(Statement):
 	name=("load",)
@@ -49,6 +69,7 @@ load NAME [args]...
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		return process_event(Event(self.ctx, "module","load",*event))
+
 
 class Unload(Statement):
 	name=("del","load",)
