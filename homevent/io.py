@@ -20,7 +20,7 @@ def dropConnections():
 		d.addBoth(go_away,c)
 	return d
 
-class Outputter(object,LineReceiver): # "object" because L-R is old-style
+class Outputter(object): # "object" because L-R is old-style
 	"""Wraps standard output behavior"""
 	def __init__(self):
 		super(Outputter,self).__init__()

@@ -30,6 +30,7 @@ class StdIO(StandardIO):
 		if not reason.check(ConnectionDone):
 			print "EOF:",reason
 		shut_down()
+
 def reporter(err):
 	print "Error:",err
 	
@@ -37,8 +38,8 @@ def ready():
 	c=Context()
 	#c.logger=parse_logger
 	i = InteractiveInterpreter(ctx=c)
-	p = Parser(i, ctx=c)
-	r = p.run(StdIO)
+	p = Parser(i, StdIO, ctx=c)
+	r = p.result
 	r.addErrback(reporter)
 	print """Ready. Type «help» if you don't know what to do."""
 

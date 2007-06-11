@@ -13,6 +13,7 @@ for typical usage.
 
 from tokenize import generate_tokens
 import Queue
+import sys
 from twisted.internet import reactor,threads,defer
 from twisted.python import failure
 from twisted.protocols.basic import LineReceiver
@@ -40,12 +41,44 @@ del t
 del re
 
 
-class Parser(Outputter):
+class myReceiver(Outputter):
+	"""This is a mixin to feed a parser"""
+	delimiter = '\n'
+
+	def __init__(self,parser):
+		super(myReceiver,self).__init__()
+		self.parser = parser
+	
+	def connectionLost(self,reason):
+		super(myReceiver,self).connectionLost(reason)
+		self.parser.endConnection()
+		self.parser = None
+
+	def lineReceived(self, data):
+		self.parser.add_line(data)
+	
+	def makeConnection(self,transport):
+		assert self.parser is not None, "Need to set the parser"
+		super(myReceiver,self).makeConnection(transport)
+
+	def connectionMade(self):
+		super(myReceiver,self).connectionMade()
+		def go():
+			self.parser.proc.prompt()
+			self.parser.startParsing()
+		reactor.callLater(0,go)
+
+
+class termReader(myReceiver,LineReceiver):
+	pass
+
+
+class Parser(object):
 	"""The input parser object. It serves as a LineReceiver and a 
 	   normal (but non-throttle-able) producer."""
 	delimiter="\n"
 
-	def __init__(self, proc, ctx=None, delimiter=None):
+	def __init__(self, proc, transport, ctx=None, delimiter=None, protocol=termReader):
 		"""Parse an input stream and pass the commands to the processor
 		@proc."""
 		super(Parser,self).__init__()
@@ -56,28 +89,39 @@ class Parser(Outputter):
 		self.more_parsing = None
 		self.ending = False
 
+		self.proc = proc
+		self.p_wait = []
+		self.p_wait_lock = Lock()
+		self.restart_producer = False
+
+		if transport is None:
+			r = None
+			s = sys.stdout
+		else:
+			r = protocol(self)
+			s = transport(r)
+		self.line = r
+
 		if ctx is None:
 			self.ctx = Context()
-			self.ctx.out=self
+			self.ctx.out=s
 		else:
 			if "out" not in ctx:
-				ctx.out=self
+				ctx.out=s
 			self.ctx = ctx()
 
 		if "filename" not in self.ctx:
 			self.ctx.filename="<stdin?>"
 		if delimiter:
 			self.delimiter=delimiter
-		self.proc = proc
-		self.p_wait = []
-		self.p_wait_lock = Lock()
-		self.restart_producer = False
 
 		def ex(_):
-			self.loseConnection()
+			if self.line is not None:
+				self.line.loseConnection()
 			return _
 		self.result.addBoth(ex)
-		self.addDropCallback(self.endConnection)
+		if r:
+			r.addDropCallback(self.endConnection)
 
 	def endConnection(self, res=None):
 		"""Called to stop"""
@@ -98,29 +142,19 @@ class Parser(Outputter):
 		q = self.line_queue
 		if q is not None:
 			try:
-				q.put(None, block=(self.transport is None))
+				q.put(None, block=(self.line is None))
 			except Queue.Full:
 				reactor.callInThread(q.put,None,block=True)
 		self.result.addBoth(ex)
-		if self.transport:
-			self.transport.loseConnection()
+		if self.line is not None:
+			self.line.loseConnection()
 
-	def connectionLost(self,reason):
-		super(Parser,self).connectionLost(reason)
-		self.endConnection()
-
-	def run(self, producer, *a,**k):
-		"""Parse this producer's stream."""
-		s = producer(self,*a,**k)
-		self.proc.prompt()
-		self.startParsing()
-		return self.result
-
-	def lineReceived(self, data):
+	def add_line(self, data):
 		"""Standard LineReceiver method"""
-		if data is not None:
-			self.p_wait.append(data)
+		self.p_wait.append(data)
+		self.process_line_buffer()
 
+	def process_line_buffer(self):
 		if not self.p_wait_lock.acquire(False):
 			return
 
@@ -128,21 +162,25 @@ class Parser(Outputter):
 			while self.p_wait:
 				item = self.p_wait.pop(0)
 				q = self.line_queue
-				if q: q.put(item, block=(self.transport is None))
+				if q: q.put(item, block=(self.line is None))
 		except Queue.Full:
 			self.p_wait.insert(0,item)
 			self._pauseProducing()
 
 		self.p_wait_lock.release()
 
-	def _pauseProducing(self):
-		if self.transport:
-			self.pauseProducing()
+	def pauseProducing(self):
+		if self.line is not None:
+			self.line.pauseProducing()
 
-	def _resumeProducing(self):
-		self.lineReceived(None)
-		if self.transport:
-			self.resumeProducing()
+	def stopProducing(self):
+		if self.line is not None:
+			self.line.stopProducing()
+
+	def resumeProducing(self):
+		self.process_line_buffer()
+		if self.line is not None:
+			self.line.resumeProducing()
 
 	def readline(self):
 		"""Queued ReadLine, to be called from the _sym_parse thread ONLY"""
@@ -152,17 +190,12 @@ class Parser(Outputter):
 		try:
 			l = q.get(block=False)
 		except Queue.Empty:
-			reactor.callFromThread(self._resumeProducing)
+			reactor.callFromThread(self.resumeProducing)
 			l = q.get(block=True)
 		if l is None:
 			self.line_queue = None
 			return ""
 		return l+"\n"
-
-	def startParsing(self):
-		self._parse() # goes to a different thread
-		if not self.transport:
-			self.connectionMade()
 
 	def init_state(self):
 		self.p_state=0
@@ -170,7 +203,7 @@ class Parser(Outputter):
 		self.p_stack = []
 		self.p_args = []
 
-	def _parse(self):
+	def startParsing(self):
 		"""\
 			Iterator. It gets fed tokens, assembles them into
 			statements, and calls the processor with them.
@@ -191,7 +224,7 @@ class Parser(Outputter):
 			except Queue.Full:
 				reactor.callFromThread(self._pauseProducing)
 				self.symbol_queue.put(t, block=True)
-				reactor.callFromThread(self._resumeProducing)
+				reactor.callFromThread(self.resumeProducing)
 			q = self.more_parsing
 			if q is not None:
 				self.more_parsing = None
@@ -355,9 +388,8 @@ def _parse(g,input):
 		l = input.readline()
 		if not l:
 			break
-		g.lineReceived(l)
+		g.add_line(l)
 	reactor.callFromThread(g.endConnection)
-	g.loseConnection()
 
 def parse(input, proc=None, ctx=None):
 	"""\
@@ -367,7 +399,7 @@ def parse(input, proc=None, ctx=None):
 	if not ctx: ctx=Context
 	ctx = ctx(fname="<stdin>")
 	if proc is None: proc = global_words(ctx)
-	g = Parser(proc, ctx=ctx)
+	g = Parser(proc, None, ctx=ctx)
 	d = threads.deferToThread(_parse,g,input) # read the input
 	d.addCallback(lambda _: g.result)         # analyze the result
 	return d

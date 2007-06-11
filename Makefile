@@ -10,5 +10,7 @@ test:
 	@$(MAKE) -C test --no-print-directory
 i interactive:
 	python test.py
+d debug:
+	pdb test.py
 
 .PHONY: test i interactive
