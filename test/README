@@ -1,0 +1,12 @@
+These are the tests. Every module should have one.
+
+The tests don't use the unittest stuff; they do their work by logging
+their actions. The Makefile compares real and expected results.
+
+I did that so that, in early development, I could see instantly if any
+change affects something internal, even if the outward result looks
+the same — simply because the outward result might be too under-
+specified, i.e. some changes mean there's a problem but the tests
+themselves don't catch it yet.
+
+TODO: re-visit that decision ‽
