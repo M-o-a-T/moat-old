@@ -13,6 +13,7 @@ from zope.interface import implements
 from twisted.conch import interfaces as conchinterfaces
 from twisted.conch.insults import insults
 from twisted.internet import reactor
+from twisted.internet.threads import deferToThread
 import base64,os
 import sys
 from homevent.module import Module
@@ -56,23 +57,6 @@ class SSHDemoRealm:
 			return interfaces[0], SSHDemoAvatar(avatarId), lambda: None
 		else:
 			raise Exception, "No supported interfaces found."
-def getRSAKeys():
-	if not (os.path.exists('public.key') and os.path.exists('private.key')):
-		# generate a RSA keypair
-		print "Generating RSA keypair..."
-		from Crypto.PublicKey import RSA
-		KEY_LENGTH = 1024
-		rsaKey = RSA.generate(KEY_LENGTH, common.entropy.get_bytes)
-		publicKeyString = keys.makePublicKeyString(rsaKey)
-		privateKeyString = keys.makePrivateKeyString(rsaKey)
-		# save keys for next time
-		file('public.key', 'w+b').write(publicKeyString)
-		file('private.key', 'w+b').write(privateKeyString)
-		print "done."
-	else:
-		publicKeyString = file('public.key').read()
-		privateKeyString = file('private.key').read()
-	return publicKeyString, privateKeyString
 
 class PublicKeyCredentialsChecker:
 	implements(checkers.ICredentialsChecker)
@@ -94,15 +78,69 @@ class PublicKeyCredentialsChecker:
 		else:
 			return failure.Failure(error.ConchError("No such user"))
 
-sshFactory = factory.SSHFactory()
-sshFactory.portal = portal.Portal(SSHDemoRealm())
-authorizedKeys = {
-		"smurf": "AAAAB3NzaC1kc3MAAACBAOvddksPhkNQIxJWTvWh6+NYR2yUBSMs2lwC4PSbmUOdjyoU9pwcF1ARJNIUxPrFBfT6bsP1W4RY/FAbS8rNsIwiaTqbqtiE8Dm9ea1ofIRBQFjsECRKjsWxBIOSOpQLhAin0CFmzZBJd4GZYVc6MV1j3uvi8pprqC5DkOMmq5wxAAAAFQD+uUSzVO526t0smxAi2eyDQMhmZQAAAIBhc6+jU7kNxv9dFaZ2QlqzhYiD4h3flWg1x4dMhkLIoZqYryOtSu+Cj2cda4ES94N/cRir3fTEKvjHA9Lpw0Ul4kdLdoebu8Kum6jspTRqTMi9CrAZ5Ub27P4jy/N/ahVUtGWQZAdxeNQEEXo8z6b+oCul5H8aFYxr1rvbtpdK8wAAAIEAx1zIfnMecvXNcxa1tVruWFXU6bN0GC1Z0scYhjaYCgZPOZwlywIDd4ui4t9DyPxh+ZyPjcyDtqjOABFU5qVR0QoyIH7DRBzBi91ovDM2Fu+k2kfng4ewhUbN6If2jgX6DBwqS6HhCmA210+P+G+K9+RarStL/43TgQvog5zDDLM="
-	}
-sshFactory.portal.registerChecker(PublicKeyCredentialsChecker(authorizedKeys))
-pubKeyString, privKeyString = getRSAKeys()
-sshFactory.publicKeys = {'ssh-rsa': keys.getPublicKeyString(data=pubKeyString)}
-sshFactory.privateKeys = {'ssh-rsa': keys.getPrivateKeyObject(data=privKeyString)}
+
+NotYet = object()
+sshFactory = NotYet
+authorizedKeys = {}
+
+class SSHdir(Statement):
+	name = ("ssh","directory")
+	doc = "set the directory where the SSH module stores its files"
+	long_doc="""\
+Usage: ssh directory "/some/path"
+This command sets the directory where SSH stores its keys.
+You need to call this exactly once.
+"""
+	def run(self,ctx,**k):
+		global sshFactory
+		event = self.params(ctx)
+		if len(event) != 1:
+			raise SyntaxError('Usage: ssh path "‹directory›"')
+		path = event[0]
+		if not os.path.isdir(path):
+			raise RuntimeError("This is not a directory")
+		if sshFactory is not NotYet:
+			raise RuntimeError("You can set the SSH path only once!")
+		sshFactory = None
+		d = deferToThread(self._run,ctx,path)
+		def ex(_):
+			sshFactory = NotYet
+			return _
+		d.addErrback(ex)
+		return d
+
+
+	def _run(self,ctx,path):
+		global sshFactory
+		event = self.params(ctx)
+		pub_path = os.path.join(path,"host.pub.key")
+		priv_path = os.path.join(path,"host.priv.key")
+
+		f = factory.SSHFactory()
+		f.portal = portal.Portal(SSHDemoRealm())
+		f.portal.registerChecker(PublicKeyCredentialsChecker(authorizedKeys))
+
+		if not (os.path.exists(pub_path) and os.path.exists(priv_path)):
+			# generate a RSA keypair
+			print "Generating RSA keypair..."
+			from Crypto.PublicKey import RSA
+			KEY_LENGTH = 1024
+			rsaKey = RSA.generate(KEY_LENGTH, common.entropy.get_bytes)
+			publicKeyString = keys.makePublicKeyString(rsaKey)
+			privateKeyString = keys.makePrivateKeyString(rsaKey)
+			# save keys for next time
+			file(pub_path, 'w+b').write(publicKeyString)
+			mask = os.umask(077)
+			file(priv_path, 'w+b').write(privateKeyString)
+			os.umask(mask)
+			print "done."
+		else:
+			publicKeyString = file(pub_path).read()
+			privateKeyString = file(priv_path).read()
+
+		f.publicKeys = {'ssh-rsa': keys.getPublicKeyString(data=publicKeyString)}
+		f.privateKeys = {'ssh-rsa': keys.getPrivateKeyObject(data=privateKeyString)}
+		sshFactory = f
 
 
 
@@ -117,6 +155,11 @@ on a specific port. (There is no default port.)
 		event = self.params(ctx)
 		if len(event) != 1:
 			raise SyntaxError('Usage: listen ssh ‹port›')
+		if sshFactory is NotYet:
+			raise RuntimeError('ssh path has not been set yet')
+		if sshFactory is None:
+			raise RuntimeError('ssh keys are not ready yet')
+
 		self.parent.displayname = tuple(event)
 		reactor.listenTCP(int(event[0]), sshFactory)
 
@@ -177,12 +220,14 @@ class SSHmodule(Module):
 		main_words.register_statement(SSHlistauth)
 		main_words.register_statement(SSHauth)
 		main_words.register_statement(SSHnoauth)
+		main_words.register_statement(SSHdir)
 	
 	def unload(self):
 		main_words.unregister_statement(SSHlisten)
 		main_words.unregister_statement(SSHlistauth)
 		main_words.unregister_statement(SSHauth)
 		main_words.unregister_statement(SSHnoauth)
+		main_words.unregister_statement(SSHdir)
 	
 init = SSHmodule
 
