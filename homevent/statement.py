@@ -403,3 +403,17 @@ explicitly state that some event does not result in any action.
 		log(TRACE,"NOW: do nothing")
 
 
+class ExitHandler(Statement):
+	name = ("exit",)
+	doc = "stop processing input"
+	long_doc="""\
+This statement causes the input channel which runs it to terminate.
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if len(event):
+			raise SyntaxError("Usage: exit")
+		ctx.out.loseConnection()
+
+global_words.register_statement(ExitHandler)
+

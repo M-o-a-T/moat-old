@@ -41,16 +41,28 @@ del t
 del re
 
 
-class myReceiver(Outputter):
+class ParseReceiver(Outputter):
 	"""This is a mixin to feed a parser"""
 	delimiter = '\n'
 
-	def __init__(self,parser):
-		super(myReceiver,self).__init__()
+	def __init__(self, parser=None, *a,**k):
+		super(ParseReceiver,self).__init__(*a,**k)
+		if parser is None:
+			from homevent.interpreter import InteractiveInterpreter
+
+			def reporter(err):
+				print >>sys.stderr,"Error:",err
+			c=Context()
+			#c.logger=parse_logger
+			i = InteractiveInterpreter(ctx=c)
+			p = Parser(i, StdIO, ctx=c)
+			r = p.result
+			r.addErrback(reporter)
+			parser = p
 		self.parser = parser
 	
 	def connectionLost(self,reason):
-		super(myReceiver,self).connectionLost(reason)
+		super(ParseReceiver,self).connectionLost(reason)
 		self.parser.endConnection()
 		self.parser = None
 
@@ -58,19 +70,44 @@ class myReceiver(Outputter):
 		self.parser.add_line(data)
 	
 	def makeConnection(self,transport):
+		assert not hasattr(self,"goforit"),"Go for it"
+		self.goforit=True
 		assert self.parser is not None, "Need to set the parser"
-		super(myReceiver,self).makeConnection(transport)
+		print self.parser.ctx
+		if "out" not in self.parser.ctx:
+			self.parser.ctx.out = transport
+
+		super(ParseReceiver,self).makeConnection(transport)
 
 	def connectionMade(self):
-		super(myReceiver,self).connectionMade()
-		def go():
-			self.parser.proc.prompt()
-			self.parser.startParsing()
-		reactor.callLater(0,go)
+		super(ParseReceiver,self).connectionMade()
+		self.parser.startParsing(self)
+		self.parser.proc.prompt()
 
+def parser_builder(cls=None,interpreter=None,*a,**k):
+	"""\
+		Return something that builds a receiver class when called with
+		no arguments
+		"""
+	if cls is None: cls = LineReceiver
+	try:
+		ctx = k.pop("ctx")
+	except KeyError:
+		ctx = Context
+	if interpreter is None:
+		from homevent.interpreter import InteractiveInterpreter
+		interpreter = InteractiveInterpreter
 
-class termReader(myReceiver,LineReceiver):
-	pass
+	class mixer(ParseReceiver,cls):
+		pass
+	def gen_builder(*x,**y):
+		c = ctx()
+		k["ctx"] = c
+		i = interpreter(ctx=c)
+		p = Parser(i, *a,**k)
+		m = mixer(p, *x,**y)
+		return m
+	return gen_builder
 
 
 class Parser(object):
@@ -78,7 +115,7 @@ class Parser(object):
 	   normal (but non-throttle-able) producer."""
 	delimiter="\n"
 
-	def __init__(self, proc, transport, ctx=None, delimiter=None, protocol=termReader):
+	def __init__(self, proc, ctx=None, delimiter=None):
 		"""Parse an input stream and pass the commands to the processor
 		@proc."""
 		super(Parser,self).__init__()
@@ -94,21 +131,10 @@ class Parser(object):
 		self.p_wait_lock = Lock()
 		self.restart_producer = False
 
-		if transport is None:
-			r = None
-			s = sys.stdout
-		else:
-			r = protocol(self)
-			s = transport(r)
-		self.line = r
-
 		if ctx is None:
 			self.ctx = Context()
-			self.ctx.out=s
 		else:
-			if "out" not in ctx:
-				ctx.out=s
-			self.ctx = ctx()
+			self.ctx = ctx
 
 		if "filename" not in self.ctx:
 			self.ctx.filename="<stdin?>"
@@ -120,8 +146,6 @@ class Parser(object):
 				self.line.loseConnection()
 			return _
 		self.result.addBoth(ex)
-		if r:
-			r.addDropCallback(self.endConnection)
 
 	def endConnection(self, res=None):
 		"""Called to stop"""
@@ -170,16 +194,16 @@ class Parser(object):
 		self.p_wait_lock.release()
 
 	def pauseProducing(self):
-		if self.line is not None:
+		if self.line is not None and hasattr(self.line,"pauseProducing"):
 			self.line.pauseProducing()
 
 	def stopProducing(self):
-		if self.line is not None:
+		if self.line is not None and hasattr(self.line,"stopProducing"):
 			self.line.stopProducing()
 
 	def resumeProducing(self):
 		self.process_line_buffer()
-		if self.line is not None:
+		if self.line is not None and hasattr(self.line,"resumeProducing"):
 			self.line.resumeProducing()
 
 	def readline(self):
@@ -203,11 +227,18 @@ class Parser(object):
 		self.p_stack = []
 		self.p_args = []
 
-	def startParsing(self):
+	def startParsing(self, protocol=None):
 		"""\
 			Iterator. It gets fed tokens, assembles them into
 			statements, and calls the processor with them.
 			"""
+		if protocol is not None:
+			protocol.addDropCallback(self.endConnection)
+		self.line = protocol
+
+		if "out" not in self.ctx:
+			self.ctx.out=sys.stdout
+
 		self.init_state()
 		self.p_gen = generate_tokens(self.readline)
 		reactor.callInThread(self._sym_parse)
@@ -399,7 +430,7 @@ def parse(input, proc=None, ctx=None):
 	if not ctx: ctx=Context
 	ctx = ctx(fname="<stdin>")
 	if proc is None: proc = global_words(ctx)
-	g = Parser(proc, None, ctx=ctx)
+	g = Parser(proc, ctx=ctx)
 	d = threads.deferToThread(_parse,g,input) # read the input
 	d.addCallback(lambda _: g.result)         # analyze the result
 	return d

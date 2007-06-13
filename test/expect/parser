@@ -7,19 +7,19 @@ RUN: <WorkSequence:1 (4)>
 1 END: startup
 RUN: <WorkSequence:1 (4)>
  ev: EVENT: startup
-Init ('foo',)(1) from ‹global_words ('Global',) 1›
+Init ('foo',)(1) from ‹global_words ('Global',) 2›
 Input ('foo',)(1): ⌁.
-Init ('foo',)(2) from ‹global_words ('Global',) 1›
+Init ('foo',)(2) from ‹global_words ('Global',) 2›
 Input ('foo',)(2): ⌁.baz
-Init ('foo', 'bar')(3) from ‹global_words ('Global',) 1›
+Init ('foo', 'bar')(3) from ‹global_words ('Global',) 2›
 Input ('foo', 'bar')(3): ⌁.
-Init ('foo', 'bar')(4) from ‹global_words ('Global',) 1›
+Init ('foo', 'bar')(4) from ‹global_words ('Global',) 2›
 Input ('foo', 'bar')(4): ⌁.baz
-Init ('foo', 'bar')(5) from Ctx(Ctx({'out': <test.logwrite obj>}),{'words': ‹global_words ('Global',) 1›})
+Init ('foo', 'bar')(5) from Ctx(Ctx({'out': <test.logwrite obj>}),{'words': ‹global_words ('Global',) 2›})
 InputComplex ('foo', 'bar')(5): ['foo', 'bar', 'baz', 'quux']
 Init ('what',)(6) from ‹��BarHandler ('foo', 'bar') 2� (5)›
 Input ('what',)(6): ⌁.ever
-Init ('for',)(7) from Ctx(Ctx(Ctx({'out': <test.logwrite obj>}),{'words': ‹global_words ('Global',) 1›}),{'words': ‹��BarHandler ('foo', 'bar') 2� (5)›})
+Init ('for',)(7) from Ctx(Ctx(Ctx({'out': <test.logwrite obj>}),{'words': ‹global_words ('Global',) 2›}),{'words': ‹��BarHandler ('foo', 'bar') 2� (5)›})
 InputComplex ('for',)(7): ['for', 'ever', 'and', 'ever']
 Init ('foiled',)(8) from ‹��ForHandler ('for',) 1� (7)›
 Input ('foiled',)(8): ⌁.again
@@ -27,10 +27,11 @@ Input ('foiled',)(8): ⌁.again
 Init ('what',)(9) from ‹��BarHandler ('foo', 'bar') 2� (5)›
 Input ('what',)(9): ⌁.else
 ... moving up
-Init ('foo',)(10) from ‹global_words ('Global',) 1›
+Init ('foo',)(10) from ‹global_words ('Global',) 2›
 Input ('foo',)(10): ⌁.again
 Global : word list:
 Known words:
+exit     : stop processing input
 foo      : We foo around.
 foo bar  : Have a bar, man!
 help     : show doc texts

@@ -3,7 +3,7 @@
 
 from homevent.run import register_worker
 from homevent.interpreter import InteractiveInterpreter
-from homevent.parser import Parser
+from homevent.parser import parser_builder
 from homevent.statement import IgnoreStatement, main_words, global_words
 from homevent.module import load_module, Load,Unload,LoadDir
 from homevent.reactor import ShutdownHandler,mainloop,shut_down
@@ -37,9 +37,9 @@ def reporter(err):
 def ready():
 	c=Context()
 	#c.logger=parse_logger
-	i = InteractiveInterpreter(ctx=c)
-	p = Parser(i, StdIO, ctx=c)
-	r = p.result
+	p = parser_builder(None, InteractiveInterpreter, ctx=c)()
+	s = StdIO(p)
+	r = p.parser.result
 	r.addErrback(reporter)
 	print """Ready. Type «help» if you don't know what to do."""
 
