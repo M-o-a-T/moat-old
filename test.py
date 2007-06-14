@@ -4,7 +4,8 @@
 from homevent.interpreter import InteractiveInterpreter
 from homevent.parser import parser_builder
 from homevent.statement import main_words, global_words
-from homevent.module import load_module, Load,Unload,LoadDir
+from homevent.check import register_condition
+from homevent.module import load_module, Load,Unload,LoadDir,ModuleExists
 from homevent.reactor import ShutdownHandler,mainloop,shut_down
 from twisted.internet import reactor
 from twisted.internet._posixstdio import StandardIO ## XXX unstable interface!
@@ -15,6 +16,7 @@ from traceback import print_exc
 global_words.register_statement(Load)
 global_words.register_statement(Unload)
 global_words.register_statement(LoadDir)
+register_condition(ModuleExists)
 main_words.register_statement(ShutdownHandler)
 load_module("help")
 load_module("list")
