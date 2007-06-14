@@ -15,19 +15,11 @@ log
 
 from homevent.module import Module
 from homevent.statement import Statement, main_words
-from homevent.logging import TRACE,DEBUG,INFO,WARN,ERROR,PANIC
-from homevent.logging import log, Logger, register_logger,unregister_logger
+from homevent.logging import TRACE,DEBUG,INFO,WARN,ERROR,PANIC,NONE
+from homevent.logging import log, Logger, register_logger,unregister_logger,
+	LogNames
 
-NONE=9
 
-LogName={
-	TRACE:"TRACE",
-	DEBUG:"DEBUG",
-	WARN:"WARN",
-	INFO:"INFO",
-	ERROR:"ERROR",
-	PANIC:"PANIC",
-}
 class OutLogger(Logger):
 	"""\
 		This class implements one particular way to log things.
@@ -36,7 +28,7 @@ class OutLogger(Logger):
 		if txt == ".":
 			print >>self.out,txt
 		else:
-			print >>self.out,LogName[level]+"> "+txt
+			print >>self.out,LogNames[level]+"> "+txt
 
 	def end_logging(self):
 		super(OutLogger,self).end_logging()
@@ -58,7 +50,7 @@ log
 		event = self.params(ctx)
 		out = self.ctx.out
 		if not len(event):
-			for s,v in LogName.iteritems():
+			for s,v in LogNames.iteritems():
 				print >>out,"%d = %s" % (s,v)
 			print >>out,"."
 			return None

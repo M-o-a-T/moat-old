@@ -17,8 +17,8 @@ from twisted.python.failure import Failure
 import sys
 
 __all__ = ("Logger","register_logger","unregister_logger",
-	"log","log_run","log_created","log_halted",
-	"TRACE","DEBUG","INFO","WARN","ERROR","PANIC")
+	"log","log_run","log_created","log_halted","LogNames",
+	"TRACE","DEBUG","INFO","WARN","ERROR","PANIC","NONE")
 
 loggers = []
 
@@ -28,6 +28,17 @@ INFO=2
 WARN=3
 ERROR=4
 PANIC=5
+NONE=9
+
+LogNames={
+	TRACE:"TRACE",
+	DEBUG:"DEBUG",
+	WARN:"WARN",
+	INFO:"INFO",
+	ERROR:"ERROR",
+	PANIC:"PANIC",
+	NONE:"NONE",
+}
 
 class Logger(object):
 	"""\
