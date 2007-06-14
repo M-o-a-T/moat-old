@@ -8,27 +8,27 @@ from test import run
 
 input = """\
 block:
-	if path exists "..":
+	if exists path "..":
 		log DEBUG Yes
 	else:
 		log DEBUG No1
-	if path exists "...":
+	if exists path "...":
 		log DEBUG No2
 	else:
 		log DEBUG Yes
-	if directory exists "..":
+	if exists directory "..":
 		log DEBUG Yes
 	else:
 		log DEBUG No3
-	if directory exists "README":
+	if exists directory "README":
 		log DEBUG No4
 	else:
 		log DEBUG Yes
-	if file exists "README":
+	if exists file "README":
 		log DEBUG Yes
 	else:
 		log DEBUG No5
-	if file exists "..":
+	if exists file "..":
 		log DEBUG No6
 	else:
 		log DEBUG Yes

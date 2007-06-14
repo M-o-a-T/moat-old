@@ -16,7 +16,7 @@ RUN: <WorkSequence:2 (4)>
 11 END: module¦load¦ssh
 RUN: <WorkSequence:2 (4)>
  ev: EVENT: module¦load¦ssh
-0 add ‹IfStatement ⌁.if¦directory¦exists¦keys›
+0 add ‹IfStatement ⌁.if¦exists¦directory¦keys›
 0 add ‹SSHdir ⌁.ssh¦directory¦keys›
 0 add ‹SSHdir ⌁.ssh¦directory¦../keys›
 NEW: <WorkSequence:3 (5)>

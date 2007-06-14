@@ -20,7 +20,7 @@ block:
 	trigger bar3
 wait for 0.1
 block:
-	if file exists "misc2":
+	if exists file "misc2":
 		include "misc2"
 	else:
 		include "test/misc2"

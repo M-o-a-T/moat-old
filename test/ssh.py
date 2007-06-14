@@ -13,7 +13,7 @@ global_words.register_statement(Load)
 input = """\
 load ssh
 block:
-	if directory exists "keys":
+	if exists directory "keys":
 		ssh directory "keys"
 	else:
 		ssh directory "../keys"
