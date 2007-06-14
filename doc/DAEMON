@@ -1,0 +1,77 @@
+===================
+The HomEvenT daemon
+===================
+
+The daemon (daemon.py) is the "normal" way to run the HomEvenT main loop.
+
+-------------------
+Starting the daemon
+-------------------
+
+The arguments to the daemon are a number of configuration files. Parsing
+the files will stop if one of them does not exist. If that's not what
+you want, install a master config file which does:
+
+	if not exists module path:
+		load path
+	if not exists module file:
+		load file
+
+	if exists file "foo.cfg":
+		include "foo.cfg"
+	if exists file "bar.cfg":
+		include "bar.cfg"
+
+The daemon by default logs system panic messages only. Use the "--trace"
+option to change that, as in
+
+	daemon.py --trace DEBUG main.cfg
+
+Logging is to stdout. If you want syslog, pipe its output through
+"logger" (Debian provides that in the "bsdutils" package).
+
+-------
+Signals
+-------
+
+SIGQUIT will stop the daemon when it's idle (i.e. no events are
+currently being processed).
+
+SIGINT (a.k.a. pressing ^C) will stop it immediately (more or less).
+
+SIGHUP will cause the configuration files to be reloaded. Unless you
+write them correctly, that will cause numerous errors.
+
+
+-------------------
+Configuration files
+-------------------
+
+You need to make sure that the config files you use can be loaded more
+than once. Specifically, that means not loading a module which is
+already loaded, deleting event handlers if they're already defined,
+keeping the "drop on …" in the file if you want to remove a handler
+(or remove it manually, if you enable SSH access)
+
+Specifically, replace
+
+	load foo
+
+with
+
+	if not exists module foo:
+		load foo
+
+and
+
+	on foo bar:
+		…
+
+with
+
+	if exists on foo bar:
+		del on doo bar
+	on foo bar:
+		…
+
+
