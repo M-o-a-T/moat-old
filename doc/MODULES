@@ -263,6 +263,74 @@ don't know whether one exists.
 	if exists on FooBar:
 		del on FooBar
 
+====
+path
+====
+
+This module implements file existence checks.
+
+---------------------
+if exists file "name"
+---------------------
+
+True if the name points to a file (or to a link which points to a file).
+
+--------------------------
+if exists directory "name"
+--------------------------
+
+True if the name points to a directory (or to a link which points to a
+directory).
+
+---------------------
+if exists path "name"
+---------------------
+
+True if the name points to something (file, directory, device, …)
+
+
+===
+ssh
+===
+
+This module provides secure shell access to HomEvenT.
+
+You need to load it this way:
+
+	load block
+	load ssh
+	async:
+		ssh directory "/some/persistent/path"
+		listen ssh 50022
+		auth ssh NAME "PUBLIC_KEY"
+
+The port number is, of course, your choice.
+
+ssh needs a persistent host key, which is stored in the directory in
+question. You should use "async:" because the first time you do this,
+creating the host key may take some time. The directory in question
+will then contain a private host key. You need to protect that file so
+that nobody can impersonate your HomEvenT server.
+
+After that, "ssh -l NAME -p 50022 localhost" will connect you to the 
+HomEvenT command line. Basic line editing and (non-persistent) history
+is provided.
+
+To authorize, the SSH connection does not allow passwords. Passwords
+need to be stored someplace secure, and HomEvenT does not aspire to be
+able to do that. Instead, you need to create a public key if you don't
+already have one:
+
+	ssh-keygen
+
+The resulting public file (typically named with a ".pub" extension)
+contains a number of words (separated by spaces). One is very long and
+typically starts aith a couple of "A" characters. Use that as the
+PUBLIC_KEY, above.
+
+You can add multiple users. You can of course safely re-use your
+existing public key if you already have one.
+
 
 =====
 state
