@@ -18,6 +18,7 @@ WARN> This is logged too
 3 = WARN
 4 = ERROR
 5 = PANIC
+9 = NONE
 .
 3 This is not logged either
 NEW: <WorkSequence:2 (5)>

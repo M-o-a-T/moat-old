@@ -16,7 +16,7 @@ log
 from homevent.module import Module
 from homevent.statement import Statement, main_words
 from homevent.logging import TRACE,DEBUG,INFO,WARN,ERROR,PANIC,NONE
-from homevent.logging import log, Logger, register_logger,unregister_logger,
+from homevent.logging import log, Logger, register_logger,unregister_logger,\
 	LogNames
 
 
