@@ -1,0 +1,140 @@
+NEW: <WorkSequence:1 (4)>
+   : │  EVENT: startup
+   : └1╴... done.
+1 EVENT: startup
+RUN: <WorkSequence:1 (4)>
+ ev: EVENT: startup
+1 END: startup
+RUN: <WorkSequence:1 (4)>
+ ev: EVENT: startup
+wait
+on_event
+trigger
+block
+list
+.
+on_event 		This module registers the "on EVENT:" handler.
+		
+-10 Logger
+-9 shutdown first
+101 Logger
+102 shutdown handler
+103 shutdown last
+.
+.
+0 Create OnEvtHandler: ['foo']
+0 add ‹Block ⌁.block›
+0 add ‹WaitHandler ('wait', 'for') 2›
+0 NewHandler 1
+NEW: <WorkSequence:2 (4)>
+   : │  EVENT: wait¦start¦1049515628.1¦_wait¦2
+   : └1╴... done.
+25 EVENT: wait¦start¦1049515628.1¦_wait¦2
+RUN: <WorkSequence:2 (4)>
+ ev: EVENT: wait¦start¦1049515628.1¦_wait¦2
+25 END: wait¦start¦1049515628.1¦_wait¦2
+RUN: <WorkSequence:2 (4)>
+ ev: EVENT: wait¦start¦1049515628.1¦_wait¦2
+NEW: <WorkSequence:3 (4)>
+   : │  EVENT: wait¦done¦1049515628.1¦_wait¦2
+   : └1╴... done.
+32 EVENT: wait¦done¦1049515628.1¦_wait¦2
+RUN: <WorkSequence:3 (4)>
+ ev: EVENT: wait¦done¦1049515628.1¦_wait¦2
+32 END: wait¦done¦1049515628.1¦_wait¦2
+RUN: <WorkSequence:3 (4)>
+ ev: EVENT: wait¦done¦1049515628.1¦_wait¦2
+NEW: <WorkSequence:4 (5)>
+   : │  EVENT: foo
+   : ├1╴on foo ‹OnEventHandler›
+   : │  prio: 51
+   : │  step: block ‹Block›
+   : │      : step: wait for 0.3 ‹WaitHandler›
+   : └2╴... done.
+NEW: <WorkSequence:5 (4)>
+   : │  EVENT: wait¦start¦1049515628.1¦_wait¦3
+   : └1╴... done.
+41 EVENT: foo
+RUN: <WorkSequence:4 (5)>
+ ev: EVENT: foo
+RUN: on foo ‹OnEventHandler›
+   : prio: 51
+   : step: block ‹Block›
+   :     : step: wait for 0.3 ‹WaitHandler›
+ at: <WorkSequence:4 (5)> (step 1)
+ ev: EVENT: foo
+NEW: <WorkSequence:6 (4)>
+   : │  EVENT: wait¦start¦1049515628.3¦foo¦waiter
+   : └1╴... done.
+45 EVENT: wait¦start¦1049515628.1¦_wait¦3
+RUN: <WorkSequence:5 (4)>
+ ev: EVENT: wait¦start¦1049515628.1¦_wait¦3
+45 END: wait¦start¦1049515628.1¦_wait¦3
+RUN: <WorkSequence:5 (4)>
+ ev: EVENT: wait¦start¦1049515628.1¦_wait¦3
+51 EVENT: wait¦start¦1049515628.3¦foo¦waiter
+RUN: <WorkSequence:6 (4)>
+ ev: EVENT: wait¦start¦1049515628.3¦foo¦waiter
+51 END: wait¦start¦1049515628.3¦foo¦waiter
+RUN: <WorkSequence:6 (4)>
+ ev: EVENT: wait¦start¦1049515628.3¦foo¦waiter
+NEW: <WorkSequence:7 (4)>
+   : │  EVENT: wait¦done¦1049515628.1¦_wait¦3
+   : └1╴... done.
+NEW: <WorkSequence:8 (4)>
+   : │  EVENT: wait¦done¦1049515628.3¦foo¦waiter
+   : └1╴... done.
+63 EVENT: wait¦done¦1049515628.1¦_wait¦3
+RUN: <WorkSequence:7 (4)>
+ ev: EVENT: wait¦done¦1049515628.1¦_wait¦3
+63 END: wait¦done¦1049515628.1¦_wait¦3
+RUN: <WorkSequence:7 (4)>
+ ev: EVENT: wait¦done¦1049515628.1¦_wait¦3
+4 No Work
+.
+<WorkSequence:4 (5)>
+│  EVENT: foo
+╞1╕on foo ‹OnEventHandler›
+│ │prio: 51
+│ │step: block ‹Block›
+│ ╵    : step: wait for 0.3 ‹WaitHandler›
+└2╴... done.
+NEW: <WorkSequence:9 (4)>
+   : │  EVENT: wait¦start¦1049515628.3¦_wait¦4
+   : └1╴... done.
+65 EVENT: wait¦done¦1049515628.3¦foo¦waiter
+RUN: <WorkSequence:8 (4)>
+ ev: EVENT: wait¦done¦1049515628.3¦foo¦waiter
+65 END: wait¦done¦1049515628.3¦foo¦waiter
+RUN: <WorkSequence:8 (4)>
+ ev: EVENT: wait¦done¦1049515628.3¦foo¦waiter
+41 END: foo
+RUN: <WorkSequence:4 (5)> (step 1)
+ ev: EVENT: foo
+78 EVENT: wait¦start¦1049515628.3¦_wait¦4
+RUN: <WorkSequence:9 (4)>
+ ev: EVENT: wait¦start¦1049515628.3¦_wait¦4
+78 END: wait¦start¦1049515628.3¦_wait¦4
+RUN: <WorkSequence:9 (4)>
+ ev: EVENT: wait¦start¦1049515628.3¦_wait¦4
+NEW: <WorkSequence:10 (4)>
+   : │  EVENT: wait¦done¦1049515628.3¦_wait¦4
+   : └1╴... done.
+93 EVENT: wait¦done¦1049515628.3¦_wait¦4
+RUN: <WorkSequence:10 (4)>
+ ev: EVENT: wait¦done¦1049515628.3¦_wait¦4
+93 END: wait¦done¦1049515628.3¦_wait¦4
+RUN: <WorkSequence:10 (4)>
+ ev: EVENT: wait¦done¦1049515628.3¦_wait¦4
+NEW: <WorkSequence:11 (5)>
+   : │  EVENT: shutdown
+   : └1╴... done.
+2 EVENT: shutdown
+RUN: <WorkSequence:11 (5)>
+ ev: EVENT: shutdown
+2 END: shutdown
+RUN: shutting down
+ at: <WorkSequence:11 (5)>
+ ev: EVENT: shutdown
+RUN: <WorkSequence:11 (5)>
+ ev: EVENT: shutdown
