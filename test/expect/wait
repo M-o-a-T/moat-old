@@ -77,23 +77,29 @@ RUN: <WorkSequence:6 (4)>
 NEW: <WorkSequence:7 (4)>
    : │  EVENT: wait¦done¦1049515628.2¦Foo¦Bar
    : └1╴... done.
-NEW: <WorkSequence:8 (4)>
-   : │  EVENT: wait¦done¦1049515628.1¦_wait¦4
-   : └1╴... done.
 73 EVENT: wait¦done¦1049515628.2¦Foo¦Bar
 RUN: <WorkSequence:7 (4)>
  ev: EVENT: wait¦done¦1049515628.2¦Foo¦Bar
 73 END: wait¦done¦1049515628.2¦Foo¦Bar
 RUN: <WorkSequence:7 (4)>
  ev: EVENT: wait¦done¦1049515628.2¦Foo¦Bar
-NEW: <WorkSequence:9 (4)>
+NEW: <WorkSequence:8 (4)>
    : │  EVENT: FooBar
    : └1╴... done.
-75 EVENT: wait¦done¦1049515628.1¦_wait¦4
+81 EVENT: FooBar
 RUN: <WorkSequence:8 (4)>
+ ev: EVENT: FooBar
+81 END: FooBar
+RUN: <WorkSequence:8 (4)>
+ ev: EVENT: FooBar
+NEW: <WorkSequence:9 (4)>
+   : │  EVENT: wait¦done¦1049515628.1¦_wait¦4
+   : └1╴... done.
+88 EVENT: wait¦done¦1049515628.1¦_wait¦4
+RUN: <WorkSequence:9 (4)>
  ev: EVENT: wait¦done¦1049515628.1¦_wait¦4
-75 END: wait¦done¦1049515628.1¦_wait¦4
-RUN: <WorkSequence:8 (4)>
+88 END: wait¦done¦1049515628.1¦_wait¦4
+RUN: <WorkSequence:9 (4)>
  ev: EVENT: wait¦done¦1049515628.1¦_wait¦4
 NEW: <WorkSequence:10 (4)>
    : │  EVENT: DoNow
@@ -101,22 +107,16 @@ NEW: <WorkSequence:10 (4)>
 NEW: <WorkSequence:11 (4)>
    : │  EVENT: wait¦start¦1049515628.1¦_wait¦5
    : └1╴... done.
-83 EVENT: FooBar
-RUN: <WorkSequence:9 (4)>
- ev: EVENT: FooBar
-83 END: FooBar
-RUN: <WorkSequence:9 (4)>
- ev: EVENT: FooBar
-92 EVENT: DoNow
+97 EVENT: DoNow
 RUN: <WorkSequence:10 (4)>
  ev: EVENT: DoNow
-92 END: DoNow
+97 END: DoNow
 RUN: <WorkSequence:10 (4)>
  ev: EVENT: DoNow
-96 EVENT: wait¦start¦1049515628.1¦_wait¦5
+101 EVENT: wait¦start¦1049515628.1¦_wait¦5
 RUN: <WorkSequence:11 (4)>
  ev: EVENT: wait¦start¦1049515628.1¦_wait¦5
-96 END: wait¦start¦1049515628.1¦_wait¦5
+101 END: wait¦start¦1049515628.1¦_wait¦5
 RUN: <WorkSequence:11 (4)>
  ev: EVENT: wait¦start¦1049515628.1¦_wait¦5
 NEW: <WorkSequence:12 (4)>
@@ -167,18 +167,18 @@ RUN: <WorkSequence:15 (4)>
 0 NewHandler 1
 NEW: <WorkSequence:16 (5)>
    : │  EVENT: whatever
-   : ├1╴ON whatever
-   : │     prio: 51
-   : │     proc: ‹VarWaitHandler ⌁.var¦wait¦x¦Foo¦Baz›
-   : │         : ‹LogHandler ⌁.log¦TRACE¦We¦wait¦$x›
+   : ├1╴on whatever ‹OnEventHandler›
+   : │  prio: 51
+   : │  step: var wait x Foo Baz ‹VarWaitHandler›
+   : │  step: log TRACE We wait $x ‹LogHandler›
    : └2╴... done.
 162 EVENT: whatever
 RUN: <WorkSequence:16 (5)>
  ev: EVENT: whatever
-RUN: ON whatever
-   :    prio: 51
-   :    proc: ‹VarWaitHandler ⌁.var¦wait¦x¦Foo¦Baz›
-   :        : ‹LogHandler ⌁.log¦TRACE¦We¦wait¦$x›
+RUN: on whatever ‹OnEventHandler›
+   : prio: 51
+   : step: var wait x Foo Baz ‹VarWaitHandler›
+   : step: log TRACE We wait $x ‹LogHandler›
  at: <WorkSequence:16 (5)> (step 1)
  ev: EVENT: whatever
 0 We wait 53

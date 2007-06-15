@@ -30,123 +30,94 @@ Name: not executed
 Doc: Is not executed because of the former 'skip next' (until that's gone)
 NEW: <WorkSequence:2 (5)>
    : │  EVENT: bar¦foo
-   : ├1╴ON bar¦*
-   : │     prio: 51
-   : │     proc: ‹Block ⌁.block›
+   : ├1╴on bar * ‹OnEventHandler›
+   : │  prio: 51
+   : │  step: block ‹Block›
+   : │      : step: sync trigger $1 ‹SyncTriggerHandler›
    : └2╴... done.
 44 EVENT: bar¦foo
 RUN: <WorkSequence:2 (5)>
  ev: EVENT: bar¦foo
-RUN: ON bar¦*
-   :    prio: 51
-   :    proc: ‹Block ⌁.block›
+RUN: on bar * ‹OnEventHandler›
+   : prio: 51
+   : step: block ‹Block›
+   :     : step: sync trigger $1 ‹SyncTriggerHandler›
  at: <WorkSequence:2 (5)> (step 1)
  ev: EVENT: bar¦foo
-NEW: <WorkSequence:3 (7)>
+NEW: <WorkSequence:3 (5)>
    : │  EVENT: foo
-   : ├1╴ON foo
-   : │     name: Do nothing
-   : │     prio: 50
-   : │     proc: ‹DoNothingHandler ⌁.do¦nothing›
-   : ├2╴ON foo
-   : │     name: Skip Next
-   : │     prio: 55
-   : │     proc: ‹OnSkip ⌁.skip¦next›
-   : ├3╴ON foo
-   : │     name: not executed
-   : │     prio: 60
-   : │     proc: ‹SyncTriggerHandler ⌁.sync¦trigger¦OuchNo›
-   : └4╴... done.
+   : ├1╴on foo ‹OnEventHandler›
+   : │  name: Do nothing
+   : │  prio: 50
+   : │  step: do nothing ‹DoNothingHandler›
+   : └2╴... done.
 50 EVENT: foo
-RUN: <WorkSequence:3 (7)>
+RUN: <WorkSequence:3 (5)>
  ev: EVENT: foo
-RUN: ON foo
-   :    name: Do nothing
-   :    prio: 50
-   :    proc: ‹DoNothingHandler ⌁.do¦nothing›
- at: <WorkSequence:3 (7)> (step 1)
+RUN: on foo ‹OnEventHandler›
+   : name: Do nothing
+   : prio: 50
+   : step: do nothing ‹DoNothingHandler›
+ at: <WorkSequence:3 (5)> (step 1)
  ev: EVENT: foo
 0 NOW: do nothing
-RUN: ON foo
-   :    name: Skip Next
-   :    prio: 55
-   :    proc: ‹OnSkip ⌁.skip¦next›
- at: <WorkSequence:3 (7)> (step 2)
- ev: EVENT: foo
 50 END: foo
-RUN: <WorkSequence:3 (7)> (step 3)
+RUN: <WorkSequence:3 (5)> (step 1)
  ev: EVENT: foo
 44 END: bar¦foo
 RUN: <WorkSequence:2 (5)> (step 1)
  ev: EVENT: bar¦foo
 NEW: <WorkSequence:4 (5)>
    : │  EVENT: bar¦foo
-   : ├1╴ON bar¦*
-   : │     prio: 51
-   : │     proc: ‹Block ⌁.block›
+   : ├1╴on bar * ‹OnEventHandler›
+   : │  prio: 51
+   : │  step: block ‹Block›
+   : │      : step: sync trigger $1 ‹SyncTriggerHandler›
    : └2╴... done.
-68 EVENT: bar¦foo
+66 EVENT: bar¦foo
 RUN: <WorkSequence:4 (5)>
  ev: EVENT: bar¦foo
-RUN: ON bar¦*
-   :    prio: 51
-   :    proc: ‹Block ⌁.block›
+RUN: on bar * ‹OnEventHandler›
+   : prio: 51
+   : step: block ‹Block›
+   :     : step: sync trigger $1 ‹SyncTriggerHandler›
  at: <WorkSequence:4 (5)> (step 1)
  ev: EVENT: bar¦foo
-NEW: <WorkSequence:5 (6)>
+NEW: <WorkSequence:5 (5)>
    : │  EVENT: foo
-   : ├1╴ON foo
-   : │     name: Do nothing
-   : │     prio: 50
-   : │     proc: ‹DoNothingHandler ⌁.do¦nothing›
-   : ├2╴ON foo
-   : │     name: not executed
-   : │     prio: 60
-   : │     proc: ‹SyncTriggerHandler ⌁.sync¦trigger¦OuchNo›
-   : └3╴... done.
-74 EVENT: foo
-RUN: <WorkSequence:5 (6)>
+   : ├1╴on foo ‹OnEventHandler›
+   : │  name: Do nothing
+   : │  prio: 50
+   : │  step: do nothing ‹DoNothingHandler›
+   : └2╴... done.
+72 EVENT: foo
+RUN: <WorkSequence:5 (5)>
  ev: EVENT: foo
-RUN: ON foo
-   :    name: Do nothing
-   :    prio: 50
-   :    proc: ‹DoNothingHandler ⌁.do¦nothing›
- at: <WorkSequence:5 (6)> (step 1)
+RUN: on foo ‹OnEventHandler›
+   : name: Do nothing
+   : prio: 50
+   : step: do nothing ‹DoNothingHandler›
+ at: <WorkSequence:5 (5)> (step 1)
  ev: EVENT: foo
 0 NOW: do nothing
-RUN: ON foo
-   :    name: not executed
-   :    prio: 60
-   :    proc: ‹SyncTriggerHandler ⌁.sync¦trigger¦OuchNo›
- at: <WorkSequence:5 (6)> (step 2)
+72 END: foo
+RUN: <WorkSequence:5 (5)> (step 1)
  ev: EVENT: foo
-NEW: <WorkSequence:6 (4)>
-   : │  EVENT: OuchNo
-   : └1╴... done.
-82 EVENT: OuchNo
-RUN: <WorkSequence:6 (4)>
- ev: EVENT: OuchNo
-82 END: OuchNo
-RUN: <WorkSequence:6 (4)>
- ev: EVENT: OuchNo
-74 END: foo
-RUN: <WorkSequence:5 (6)> (step 2)
- ev: EVENT: foo
-68 END: bar¦foo
+66 END: bar¦foo
 RUN: <WorkSequence:4 (5)> (step 1)
  ev: EVENT: bar¦foo
 3  : foo ‹not executed›
 4  : bar¦*
 .
-NEW: <WorkSequence:7 (5)>
+NEW: <WorkSequence:6 (5)>
    : │  EVENT: shutdown
    : └1╴... done.
 2 EVENT: shutdown
-RUN: <WorkSequence:7 (5)>
+RUN: <WorkSequence:6 (5)>
  ev: EVENT: shutdown
 2 END: shutdown
 RUN: shutting down
- at: <WorkSequence:7 (5)>
+ at: <WorkSequence:6 (5)>
  ev: EVENT: shutdown
-RUN: <WorkSequence:7 (5)>
+RUN: <WorkSequence:6 (5)>
  ev: EVENT: shutdown

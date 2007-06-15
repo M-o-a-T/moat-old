@@ -68,6 +68,9 @@ class WorkSequence(WorkItem):
 		'event' and 'worker' are the events which caused this sequence
 		to be generated.
 		"""
+	in_step = None
+	in_worker = None
+
 	def __init__(self, event, worker):
 		global seqnum
 		seqnum += 1
@@ -107,6 +110,8 @@ class WorkSequence(WorkItem):
 
 	def _process(self, *a,**k):
 		assert self.work,"empty workqueue"
+		self.in_step = 0
+		self.in_worker = None
 
 		from homevent.logging import log_run,log_halted
 		event = self.event
@@ -114,6 +119,8 @@ class WorkSequence(WorkItem):
 			event = defer.succeed(event)
 
 		def do_std(res,step,w):
+			self.in_step = step
+			self.in_worker = w
 			try:
 				log_run(self,w,step)
 				r = w.process(event=self.event, queue=self)
@@ -168,6 +175,10 @@ class WorkSequence(WorkItem):
 			yield str(self) # +" for "+str(self.event)
 			return
 
+		if verbose > 2:
+			v = verbose
+		else:
+			v = 1
 		yield str(self)
 		if self.work:
 			prefix = "│  "
@@ -183,20 +194,41 @@ class WorkSequence(WorkItem):
 
 		pr = None
 		step=1
+
+		def pstep(a,b,c):
+			if self.in_step and self.in_step == step:
+				p_first = a+str(step)+"╕"
+				p_mid = c+" "+"│"
+				p_last = c+" "+"╵"
+				p_single = a+" "+"═"
+				rep = pr.report(verbose-1)
+			else:
+				p_first = b+str(step)+"╴"
+				p_mid = c+"  "
+				p_last = c+"  "
+				p_single = b+str(step)+"╴"
+				rep = pr.report(v)
+			rp=None
+
+			pf=p_first
+			pl=p_single
+			for r in rep:
+				if rp:
+					yield pf+rp
+					pf=p_mid
+					pl=p_last
+				rp=r
+			if rp:
+				yield pl+rp
+
 		for w in self.work:
 			if w.prio < MIN_PRIO or w.prio > MAX_PRIO+1: # Logger
 				continue
 			if pr:
-				prefix = "├"+str(step)+"╴"
-				for r in pr.report(verbose-1):
-					yield prefix+r
-					prefix="│  "
+				for _ in pstep("╞","├","│"): yield _
 				step += 1
 			pr = w
-		prefix = "└"+str(step)+"╴"
-		for r in pr.report(verbose-1):
-			yield prefix+r
-			prefix="   "
+		for _ in pstep("╘","└"," "): yield _
 
 def ConcurrentWorkSequence(WorkSequence):
 	"""\

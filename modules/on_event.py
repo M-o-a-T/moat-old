@@ -45,28 +45,21 @@ class BadArgCount(RuntimeError):
 	def __str__(self):
 		return "The number of event arguments does not match"
 
-class OnEventHandler(MainStatementList,Worker):
-	name=("on",)
-	doc="on [event...]: [statements]"
-	long_doc="""\
-The OnEvent handler executes a statement (or a statement sequence)
-when an event occurs.
+class OnEventWorker(Worker):
+	def __init__(self,parent):
+		self.parent = parent
+		self.name = "¦".join(self.parent.arglist)
+		if self.parent.displayname is not None:
+			self.name += " ‹"+" ".join(self.parent.displayname)+"›"
 
-Syntax:
-	on [event...]:
-		statement
-		...
-
-Every "*foo" in the event description is mapped to the corresponding
-"$foo" argument in the list.
-"""
-	in_sub = False
-	prio = (MIN_PRIO+MAX_PRIO)//2+1
-	displayname = None
+		global _onHandler_id
+		_onHandler_id += 1
+		self.handler_id = _onHandler_id
+		log(TRACE,"NewHandler",self.handler_id)
 
 	def does_event(self,event):
 		ie = iter(event)
-		ia = iter(self.args)
+		ia = iter(self.parent.arglist)
 		ctx = {}
 		pos = 0
 		while True:
@@ -88,9 +81,39 @@ Every "*foo" in the event description is mapped to the corresponding
 			elif a != e:
 				return False
 
+	def process(self,event,**k):
+		return self.parent.process(event,**k)
+
+	def report(self, verbose=False):
+		if not verbose:
+			for r in super(OnEventWorker,self).report(verbose):
+				yield r
+		else:
+			for r in self.parent.report(verbose):
+				yield r
+
+class OnEventHandler(MainStatementList):
+	name=("on",)
+	doc="on [event...]: [statements]"
+	long_doc="""\
+The OnEvent handler executes a statement (or a statement sequence)
+when an event occurs.
+
+Syntax:
+	on [event...]:
+		statement
+		...
+
+Every "*foo" in the event description is mapped to the corresponding
+"$foo" argument in the list.
+"""
+	in_sub = False
+	prio = (MIN_PRIO+MAX_PRIO)//2+1
+	displayname = None
+
 	def grab_args(self,event,ctx):
 		ie = iter(event)
-		ia = iter(self.args)
+		ia = iter(self.arglist)
 		pos = 0
 		while True:
 			try: e = ie.next()
@@ -120,24 +143,28 @@ Every "*foo" in the event description is mapped to the corresponding
 		if self.procs is None:
 			raise SyntaxError("‹on ...› can only be used as a complex statement")
 
-		global _onHandler_id
-		_onHandler_id += 1
-		self.handler_id = _onHandler_id
-		log(TRACE,"NewHandler",self.handler_id)
-		self.name = "¦".join(self.args)
+		worker = OnEventWorker(self)
+		register_worker(worker)
+		onHandlers[worker.handler_id] = worker
 		if self.displayname is not None:
-			self.name += " ‹"+" ".join(self.displayname)+"›"
-		register_worker(self)
-		onHandlers[self.handler_id] = self
-		if self.displayname is not None:
-			onHandlerNames[self.displayname] = self
+			onHandlerNames[self.displayname] = worker
 
 	def start_block(self):
 		super(OnEventHandler,self).start_block()
 		w = self.params(self.ctx)[:]
 		log(TRACE, "Create OnEvtHandler: "+repr(w))
-		self.args = w
+		self.arglist = w
 
+	def _report(self, verbose=False):
+		if self.displayname is not None:
+			if isinstance(self.displayname,basestring):
+				yield "name: "+self.displayname
+			else:
+				yield "name: "+" ".join(self.displayname)
+		yield "prio: "+str(self.prio)
+
+		for r in super(OnEventHandler,self)._report(verbose):
+			yield r
 
 class OffEventHandler(Statement):
 	name = ("del","on")
@@ -154,8 +181,8 @@ class OffEventHandler(Statement):
 				raise
 		unregister_worker(worker)
 		del onHandlers[worker.handler_id]
-		if worker.displayname is not None:
-			del onHandlerNames[worker.displayname]
+		if worker.parent.displayname is not None:
+			del onHandlerNames[worker.parent.displayname]
 
 class OnListHandler(Statement):
 	name = ("list","on")
@@ -170,18 +197,18 @@ class OnListHandler(Statement):
 			else:
 				for id in sorted(onHandlers.iterkeys()):
 					h = onHandlers[id]
-					n = "¦".join(h.args)
-					if h.displayname is not None:
-						n += " ‹"+" ".join(h.displayname)+"›"
+					n = "¦".join(h.parent.arglist)
+					if h.parent.displayname is not None:
+						n += " ‹"+" ".join(h.parent.displayname)+"›"
 					print >>self.ctx.out,str(id)+" "*(fl-len(str(id))+1),":",n
 			print >>self.ctx.out,"."
 		else:
 			try: h = onHandlers[event[0]]
 			except KeyError: h = onHandlerNames[tuple(event)]
-			print >>self.ctx.out, h.handler_id,":","¦".join(h.args)
-			if h.displayname is not None:
-				print >>self.ctx.out,"Name:"," ".join(h.displayname)
-			if hasattr(h,"displaydoc"): print >>self.ctx.out,"Doc:",h.displaydoc
+			print >>self.ctx.out, h.handler_id,":","¦".join(h.parent.arglist)
+			if h.parent.displayname is not None:
+				print >>self.ctx.out,"Name:"," ".join(h.parent.displayname)
+			if hasattr(h.parent,"displaydoc"): print >>self.ctx.out,"Doc:",h.parent.displaydoc
 
 
 class OnPrio(Statement):

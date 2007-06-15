@@ -49,18 +49,18 @@ RUN: <WorkSequence:4 (4)>
 0 Set to THREE
 NEW: <WorkSequence:5 (5)>
    : │  EVENT: state¦two¦three¦foo¦bar
-   : ├1╴ON state¦*¦three¦foo¦bar
-   : │     prio: 51
-   : │     proc: ‹LogHandler ⌁.log¦TRACE¦Set¦to¦FOUR›
-   : │         : ‹SetStateHandler ⌁.set¦state¦four¦foo¦bar›
+   : ├1╴on state * three foo bar ‹OnEventHandler›
+   : │  prio: 51
+   : │  step: log TRACE Set to FOUR ‹LogHandler›
+   : │  step: set state four foo bar ‹SetStateHandler›
    : └2╴... done.
 56 EVENT: state¦two¦three¦foo¦bar
 RUN: <WorkSequence:5 (5)>
  ev: EVENT: state¦two¦three¦foo¦bar
-RUN: ON state¦*¦three¦foo¦bar
-   :    prio: 51
-   :    proc: ‹LogHandler ⌁.log¦TRACE¦Set¦to¦FOUR›
-   :        : ‹SetStateHandler ⌁.set¦state¦four¦foo¦bar›
+RUN: on state * three foo bar ‹OnEventHandler›
+   : prio: 51
+   : step: log TRACE Set to FOUR ‹LogHandler›
+   : step: set state four foo bar ‹SetStateHandler›
  at: <WorkSequence:5 (5)> (step 1)
  ev: EVENT: state¦two¦three¦foo¦bar
 0 Set to FOUR
@@ -84,16 +84,16 @@ ERROR: Traceback (most recent call last):
      :   File "modules/state.py, in run
      :     raise StateChangeError(s,value)
      : __builtin__.StateChangeError: Trying to change state to 'four' while changing from 'two' to 'three'
-   in: ON state¦*¦three¦foo¦bar
-     :    prio: 51
-     :    proc: ‹LogHandler ⌁.log¦TRACE¦Set¦to¦FOUR›
-     :        : ‹SetStateHandler ⌁.set¦state¦four¦foo¦bar›
+   in: on state * three foo bar ‹OnEventHandler›
+     : prio: 51
+     : step: log TRACE Set to FOUR ‹LogHandler›
+     : step: set state four foo bar ‹SetStateHandler›
    in: <WorkSequence:5 (5)>
      : │  EVENT: state¦two¦three¦foo¦bar
-     : ├1╴ON state¦*¦three¦foo¦bar
-     : │     prio: 51
-     : │     proc: ‹LogHandler ⌁.log¦TRACE¦Set¦to¦FOUR›
-     : │         : ‹SetStateHandler ⌁.set¦state¦four¦foo¦bar›
+     : ╞1╕on state * three foo bar ‹OnEventHandler›
+     : │ │prio: 51
+     : │ │step: log TRACE Set to FOUR ‹LogHandler›
+     : │ ╵step: set state four foo bar ‹SetStateHandler›
      : └2╴... done.
 RUN: <WorkSequence:6 (4)>
  ev: ERROR: Trying to change state to 'four' while changing from 'two' to 'three'
@@ -135,18 +135,18 @@ Last Value: two
 0 NewHandler 2
 NEW: <WorkSequence:8 (5)>
    : │  EVENT: whatever
-   : ├1╴ON whatever
-   : │     prio: 51
-   : │     proc: ‹VarStateHandler ⌁.var¦state¦x¦foo¦bar›
-   : │         : ‹LogHandler ⌁.log¦TRACE¦We¦got¦$x›
+   : ├1╴on whatever ‹OnEventHandler›
+   : │  prio: 51
+   : │  step: var state x foo bar ‹VarStateHandler›
+   : │  step: log TRACE We got $x ‹LogHandler›
    : └2╴... done.
 110 EVENT: whatever
 RUN: <WorkSequence:8 (5)>
  ev: EVENT: whatever
-RUN: ON whatever
-   :    prio: 51
-   :    proc: ‹VarStateHandler ⌁.var¦state¦x¦foo¦bar›
-   :        : ‹LogHandler ⌁.log¦TRACE¦We¦got¦$x›
+RUN: on whatever ‹OnEventHandler›
+   : prio: 51
+   : step: var state x foo bar ‹VarStateHandler›
+   : step: log TRACE We got $x ‹LogHandler›
  at: <WorkSequence:8 (5)> (step 1)
  ev: EVENT: whatever
 0 We got three

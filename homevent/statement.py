@@ -80,6 +80,9 @@ class Statement(object):
 
 	def run(self,ctx,**k):
 		raise NotImplementedError("You need to override '%s.run' (called with %s)" % (self.__class__.__name__,repr(event)))
+	
+	def report(self,verbose):
+		yield " ".join(str(x) for x in self.args)+" ‹"+self.__class__.__name__+"›"
 
 
 class ComplexStatement(Statement):
@@ -276,21 +279,19 @@ class StatementList(ComplexStatement):
 		pass
 	
 	def report(self, verbose=False):
-		yield "ON "+"¦".join(self.args)
+		for r in super(StatementList,self).report(verbose):
+			yield r
 		if not verbose: return
-		if self.displayname is not None:
-			if isinstance(self.displayname,basestring):
-				yield "   name: "+self.displayname
-			else:
-				yield "   name: "+" ".join(self.displayname)
-		yield "   prio: "+str(self.prio)
-		pref="proc"
-		for p in self.procs:
-			try:
-				yield "   "+pref+": "+p.__name__+" "+str(p.args)
-			except AttributeError:
-				yield "   "+pref+": "+repr(p)
-			pref="    "
+		for r in self._report(verbose):
+			yield r
+
+	def _report(self, verbose=False):
+		if self.procs:
+			for p in self.procs:
+				pref="step"
+				for r in p.report(verbose-1):
+					yield pref+": "+r
+					pref="    "
 	
 
 class main_words(ComplexStatement):
@@ -415,5 +416,31 @@ This statement causes the input channel which runs it to terminate.
 			raise SyntaxError("Usage: exit")
 		ctx.out.loseConnection()
 
+
+class LoopMixin(object):
+	"""\
+		A mix-in for statements which repeat themselves.
+		Your run() needs to end with "return self.loop(res,condproc,args…)".
+		The body will execute as long as condproc(args…) == res.
+		"""
+
+	def loop(self,res=None,cond=None,*ca):
+		"""Repeat the body until cond(*ca) == res"""
+		d = defer.Deferred()
+		e = defer.succeed(None)
+		def rfail(_):
+			d.errback(_)
+		def chk(_):
+			if cond(*ca) != res:
+				d.callback(None)
+				return None
+
+			e.addCallback(lambda _: super(LoopMixin,self).run(ctx,**k))
+			e.addCallback(lambda _: reactor.callLater(0,chk))
+			e.addErrback(rfail)
+
+		reactor.callLater(0,chk)
+
+		return d
 global_words.register_statement(ExitHandler)
 
