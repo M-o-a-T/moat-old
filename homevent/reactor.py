@@ -16,12 +16,13 @@ from homevent.io import dropConnections
 from twisted.internet import reactor
 
 __all__ = ("start_up","shut_down", "startup_event","shutdown_event",
-	"ShutdownHandler","mainloop")
+	"ShutdownHandler","mainloop", "active_queues")
 
 startup_event = Event(Context(), "startup")
 shutdown_event = Event(Context(), "shutdown")
 
-active_queues = []
+active_q_id = 0
+active_queues = {}
 running = False
 
 class Shutdown_Worker_1(ExcWorker):
@@ -33,7 +34,10 @@ class Shutdown_Worker_1(ExcWorker):
 	def does_event(self,ev):
 		return True
 	def process(self,queue,*a,**k):
-		active_queues.append(queue)
+		global active_q_id
+		active_q_id += 1
+		queue.aq_id = active_q_id
+		active_queues[queue.aq_id] = queue
 		if not running:
 			raise HaltSequence("Not running. No new work is accepted!")
 	def report(self,*a,**k):
@@ -47,7 +51,8 @@ class Shutdown_Worker_2(ExcWorker):
 	def does_event(self,ev):
 		return True
 	def process(self,queue,*a,**k):
-		active_queues.remove(queue)
+		del active_queues[queue.aq_id]
+		del queue.aq_id
 		if not running and not active_queues:
 			stop_mainloop()
 	def report(self,*a,**k):

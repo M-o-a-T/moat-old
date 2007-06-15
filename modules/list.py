@@ -9,6 +9,7 @@ from homevent.logging import log
 from homevent.statement import Statement, global_words
 from homevent.module import modules, ModuleDirs, Module
 from homevent.run import list_workers
+from homevent.reactor import active_queues
 
 
 class ModList(Statement):
@@ -28,9 +29,33 @@ list module NAME [args...]
 				print >>self.ctx.out, " ".join(m.name)
 			print >>self.ctx.out, "."
 		elif len(event) == 1:
-			print  >>self.ctx.out, " ".join(modules[event[0]].name),modules[event[0]].__doc__
+			m = modules[tuple(event)]
+			print  >>self.ctx.out, " ".join(m.name),m.__doc__
 		else:
 			raise SyntaxError("Only one name allowed.")
+
+class EventList(Statement):
+	name=("list","event")
+	doc="list of events that are currently processed"
+	long_doc="""\
+list event
+	shows a list of running events.
+list event ID
+	shows details of that event.
+	
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if not len(event):
+			for m in active_queues.itervalues():
+				print >>self.ctx.out, m.aq_id,m.name
+			print >>self.ctx.out, "."
+		elif len(event) == 1:
+			m = active_queues[event[0]]
+			for r in m.report(99):
+				print  >>self.ctx.out, r
+		else:
+			raise SyntaxError("Only one ID allowed.")
 
 class WorkerList(Statement):
 	name=("list","worker")
@@ -65,10 +90,12 @@ class ListModule(Module):
 
 	def load(self):
 		global_words.register_statement(WorkerList)
+		global_words.register_statement(EventList)
 		global_words.register_statement(ModList)
 	
 	def unload(self):
 		global_words.unregister_statement(WorkerList)
+		global_words.unregister_statement(EventList)
 		global_words.unregister_statement(ModList)
 	
 init = ListModule
