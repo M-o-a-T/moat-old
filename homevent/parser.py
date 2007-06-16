@@ -58,7 +58,6 @@ class ParseReceiver(Outputter):
 		assert not hasattr(self,"goforit"),"Go for it"
 		self.goforit=True
 		assert self.parser is not None, "Need to set the parser"
-		print self.parser.ctx
 		if "out" not in self.parser.ctx:
 			self.parser.ctx.out = transport
 
