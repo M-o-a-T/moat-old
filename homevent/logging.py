@@ -109,8 +109,7 @@ class LogWorker(ExcWorker):
 	def process_exc(self,err):
 		log_exc(err=err,msg="while logging")
 
-def log_exc(msg=None, err=None):
-	print err
+def log_exc(msg=None, err=None, level=ERROR):
 	if not isinstance(err,Failure):
 		if err is None:
 			err = sys.exc_info()
@@ -120,14 +119,23 @@ def log_exc(msg=None, err=None):
 
 	if loggers:
 		for l in loggers[:]:
+			if msg:
+				try:
+					l.log(level,msg)
+				except Exception,e:
+					l.end_logging()
+					log_exc("Logger removed",e)
 			try:
-				l.log_failure(err)
+				l.log_failure(err, level=level)
 			except Exception,e:
 				l.end_logging()
 				log_exc("Logger removed",e)
 				
 	else:
-		Logger(TRACE).log_failure(err)
+		l = Logger(TRACE)
+		if msg:
+			l.log(level,msg)
+		l.log_failure(err, level=level)
 
 
 class LogEndEvent(Event):
