@@ -154,8 +154,6 @@ class Parser(object):
 			except Queue.Full:
 				reactor.callInThread(q.put,None,block=True)
 		self.result.addBoth(ex)
-		if self.line is not None:
-			self.line.loseConnection()
 
 	def add_line(self, data):
 		"""Standard LineReceiver method"""
@@ -173,7 +171,7 @@ class Parser(object):
 				if q: q.put(item, block=(self.line is None))
 		except Queue.Full:
 			self.p_wait.insert(0,item)
-			self._pauseProducing()
+			self.pauseProducing()
 
 		self.p_wait_lock.release()
 
@@ -237,7 +235,7 @@ class Parser(object):
 			try:
 				self.symbol_queue.put(t, block=False)
 			except Queue.Full:
-				reactor.callFromThread(self._pauseProducing)
+				reactor.callFromThread(self.pauseProducing)
 				self.symbol_queue.put(t, block=True)
 				reactor.callFromThread(self.resumeProducing)
 			q = self.more_parsing

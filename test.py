@@ -9,7 +9,7 @@ from homevent.module import load_module, Load,Unload,LoadDir,ModuleExists
 from homevent.reactor import ShutdownHandler,mainloop,shut_down
 from twisted.internet import reactor
 from twisted.internet._posixstdio import StandardIO ## XXX unstable interface!
-from twisted.internet.error import ConnectionDone
+from twisted.internet.error import ConnectionDone,ConnectionLost
 from homevent.context import Context
 from traceback import print_exc
 
@@ -27,7 +27,7 @@ def parse_logger(t,*x):
 class StdIO(StandardIO):
 	def connectionLost(self,reason):
 		super(StdIO,self).connectionLost(self)
-		if not reason.check(ConnectionDone):
+		if not reason.check(ConnectionDone,ConnectionLost):
 			print "EOF:",reason
 
 def reporter(err):
