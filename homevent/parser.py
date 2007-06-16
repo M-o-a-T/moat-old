@@ -11,7 +11,7 @@ for typical usage.
 
 """
 
-from tokenize import generate_tokens
+from homevent.tokize import generate_tokens
 import Queue
 import sys
 from twisted.internet import reactor,threads,defer
@@ -24,21 +24,6 @@ from homevent.io import Outputter
 from homevent.run import process_failure
 from homevent.event import Event
 from homevent.statement import global_words
-
-
-# We need to hack tokenize
-import tokenize as t
-import re
-t.Operator = re.sub(r"\(",r"(\$[0-9]+|[$*]([a-z][a-z0-9]*)?|",t.Operator,count=1)
-t.Funny = t.group(t.Operator, t.Bracket, t.Special)
-t.PlainToken = t.group(t.Number, t.Funny, t.String, t.Name)
-t.Token = t.Ignore + t.PlainToken
-t.tokenprog = re.compile(t.Token)
-t.PseudoToken = t.Whitespace + t.group(t.PseudoExtras, t.Number, t.Funny, t.ContStr, t.Name)
-t.pseudoprog = re.compile(t.PseudoToken)
-
-del t
-del re
 
 
 class ParseReceiver(Outputter):
@@ -310,7 +295,7 @@ class Parser(object):
 	def _parseStep(self, t,txt,beg,end,line):
 		from token import NUMBER,NAME,DEDENT,INDENT,OP,NEWLINE,ENDMARKER, \
 			STRING
-		from tokenize import COMMENT,NL
+		from tokize import COMMENT,NL
 
 		if "logger" in self.ctx: self.ctx.logger("T",self.p_state,t,txt,beg,end,line)
 		if t == COMMENT:
