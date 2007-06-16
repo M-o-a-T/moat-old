@@ -29,7 +29,6 @@ class StdIO(StandardIO):
 		super(StdIO,self).connectionLost(self)
 		if not reason.check(ConnectionDone):
 			print "EOF:",reason
-		shut_down()
 
 def reporter(err):
 	print "Error:",err
@@ -41,6 +40,7 @@ def ready():
 	s = StdIO(p)
 	r = p.parser.result
 	r.addErrback(reporter)
+	r.addBoth(lambda _: shut_down())
 	print """Ready. Type «help» if you don't know what to do."""
 
 reactor.callLater(0.1,ready)
