@@ -19,7 +19,7 @@ class run_logger(Logger):
 	"""\
 		This class checks that the current log matches the stored log.
 		"""
-	def __init__(self,name, dot=True):
+	def __init__(self,name, dot=True, level=TRACE):
 		self.dot=dot
 		try:
 			self.data=open(os.path.join("real",name),"w")
@@ -28,7 +28,7 @@ class run_logger(Logger):
 			self.data = None
 		self.line=0
 		h.register_logger(self)
-		self.level = TRACE
+		self.level = level
 
 	def _log(self,sx):
 		self.line += 1
