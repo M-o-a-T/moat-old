@@ -11,14 +11,16 @@ for typical usage.
 
 """
 
+from zope.interface import implements
 from homevent.tokize import generate_tokens
 import Queue
 import sys
-from twisted.internet import reactor,threads,defer
+from twisted.internet import reactor,threads,defer,interfaces
 from twisted.python import failure
 from twisted.protocols.basic import LineReceiver
 from threading import Lock
 
+from homevent.logging import log,TRACE
 from homevent.context import Context
 from homevent.io import Outputter
 from homevent.run import process_failure
@@ -28,6 +30,7 @@ from homevent.statement import global_words
 
 class ParseReceiver(Outputter):
 	"""This is a mixin to feed a parser"""
+	implements(interfaces.IHalfCloseableProtocol)
 	delimiter = '\n'
 
 	def __init__(self, parser=None, *a,**k):
@@ -46,10 +49,28 @@ class ParseReceiver(Outputter):
 			parser = p
 		self.parser = parser
 	
+	def readConnectionLost(self):
+		try:
+			rl = super(ParseReceiver,self).readConnectionLost
+		except AttributeError:
+			pass
+		else:
+			rl()
+		if self.parser:
+			self.parser.endConnection()
+			self.parser = None
+		
 	def connectionLost(self,reason):
-		super(ParseReceiver,self).connectionLost(reason)
-		self.parser.endConnection()
-		self.parser = None
+		self.readConnectionLost()
+		self.writeConnectionLost()
+
+	def writeConnectionLost(self):
+		try:
+			rl = super(ParseReceiver,self).writeConnectionLost
+		except AttributeError:
+			super(ParseReceiver,self).connectionLost("unknown")
+		else:
+			rl()
 
 	def lineReceived(self, data):
 		self.parser.add_line(data)
@@ -105,7 +126,7 @@ class Parser(object):
 		super(Parser,self).__init__()
 
 		self.line_queue = Queue.Queue(10)
-		self.symbol_queue = Queue.Queue()
+		self.symbol_queue = Queue.Queue(1)
 		self.result = defer.Deferred()
 		self.more_parsing = None
 		self.ending = False
@@ -200,7 +221,9 @@ class Parser(object):
 			l = q.get(block=True)
 		if l is None:
 			self.line_queue = None
+			log(TRACE,">> EOF")
 			return ""
+		log(TRACE,">>",l)
 		return l+"\n"
 
 	def init_state(self):

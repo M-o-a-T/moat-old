@@ -1,17 +1,18 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from homevent.interpreter import InteractiveInterpreter
+from homevent.interpreter import InteractiveInterpreter,Interpreter
 from homevent.parser import parser_builder
 from homevent.statement import main_words, global_words
 from homevent.check import register_condition
 from homevent.module import load_module, Load,Unload,LoadDir,ModuleExists
 from homevent.reactor import ShutdownHandler,mainloop,shut_down
-from twisted.internet import reactor
+from twisted.internet import reactor,interfaces
 from twisted.internet._posixstdio import StandardIO ## XXX unstable interface!
 from twisted.internet.error import ConnectionDone,ConnectionLost
 from homevent.context import Context
 from traceback import print_exc
+import os
 
 global_words.register_statement(Load)
 global_words.register_statement(Unload)
@@ -36,7 +37,11 @@ def reporter(err):
 def ready():
 	c=Context()
 	#c.logger=parse_logger
-	p = parser_builder(None, InteractiveInterpreter, ctx=c)()
+	if os.isatty(0):
+		i = InteractiveInterpreter
+	else:
+		i = Interpreter
+	p = parser_builder(None, i, ctx=c)()
 	s = StdIO(p)
 	r = p.parser.result
 	r.addErrback(reporter)
