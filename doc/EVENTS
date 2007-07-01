@@ -42,3 +42,31 @@ wait cancel TIME NAME
 
 	TIME always refers to the time when the event is triggered (Unix seconds).
 
+OneWire (OWFS)
+--------------
+
+These are low-level events, reporting a particular device. Usually you
+are interested in actual measurements, reported in "data" events.
+
+onewire connect HOST PORT
+	-- the connection to this server is up.
+
+onewire disconnect HOST PORT
+	-- the server connection has failed.
+
+	Note that retries are automatic.
+
+onewire new TYP DEVICE
+	-- The device with the given type has appeared on a 1-wire bus
+	   for the first time. This event is followed by an "up" event for
+	   the same device.
+
+onewire up TYP DEVICE
+	-- The device with the given type is now available.
+
+onewire down TYP DEVICE
+	-- The device with the given type is no longer available.
+	   This may be a temporary condition. Until you see an "up" event,
+	   however, trying to send polls or similar to it won't work.
+
+
