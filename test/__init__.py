@@ -30,31 +30,38 @@ class run_logger(Logger):
 		h.register_logger(self)
 		self.level = level
 
-	def _log(self,sx):
+	def _log(self,level, sx):
 		self.line += 1
 		def rep(m):
 			return m.group(1)+m.group(2)+", in"
 		sx = r_fli.sub(rep,sx)
 		sx = r_hex.sub("obj",sx)
-		print >>self.data, sx
+		if level is None:
+			print >>self.data, sx
+		else:
+			print >>self.data, level,sx
 
-	def log(self, *a):
+	def log(self, level, *a):
+		if level < self.level:
+			return
 		sx=" ".join(str(x) for x in a)
-		self._log(sx)
+		self._log(level,sx)
 		if self.dot:
 			self._log(".")
 
 	def log_event(self, event, level=0):
+		if level < self.level:
+			return
 		if hasattr(event,"report"):
 			for r in event.report(99):
 				if not hasattr(event,"id") or isinstance(event,(h.logging.log_run,h.logging.log_created)):
-					self._log(str(r))
+					self._log(level,str(r))
 				else:
-					self._log(str(event.id)+" "+str(r))
+					self._log(level,str(event.id)+" "+str(r))
 		else:
-			self._log(str(event))
+			self._log(level,str(event))
 		if self.dot:
-			self._log(".")
+			self._log(None,".")
 
 	def write(self,s):
 		s = s.rstrip()
