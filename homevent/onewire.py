@@ -319,9 +319,13 @@ class OWFSqueue(OWFSreceiver):
 		self.watcher_id = None
 		self.n_msgs = 0
 		self.n_calls = 0
+		self.up_event = False
 
 	def connectionFailed(self,reason):
-		print "C FAIL"
+		if self.up_event:
+			self.up_event = False
+			process_event(Event(Context(),"onewire","disconnect",self._factory.host,self._factory.port)).addErrback(process_failure)
+
 		if not self._factory.continueTrying:
 			self._factory.resetDelay()
 
@@ -352,9 +356,7 @@ class OWFSqueue(OWFSreceiver):
 				t.error(reason)
 
 	def connectionLost(self,reason):
-		print "C LOST"
 		if self.open and not self.persist:
-			print "C LOST END"
 			if self.n_msgs > 0:
 				self.open.done()
 			else:
@@ -368,7 +370,10 @@ class OWFSqueue(OWFSreceiver):
 
 
 	def connectionMade(self):
-		print "C CONNECT"
+		if not self.up_event:
+			self.up_event = True
+			process_event(Event(Context(),"onewire","connect",self._factory.host,self._factory.port)).addErrback(process_failure)
+
 		super(OWFSqueue,self).connectionMade()
 		self._factory.resetDelay()
 
@@ -381,7 +386,6 @@ class OWFSqueue(OWFSreceiver):
 			self._do_next()
 
 		if self.open is None:
-			print "C CONNECT nop"
 			self.n_calls = 0
 			if not self.nop:
 				self.nop = reactor.callLater(1,self.nopper)
@@ -405,11 +409,9 @@ class OWFSqueue(OWFSreceiver):
 				break
 
 		if self.transport and not self.persist and self.n_calls:
-			print "C DISC"
 			self.transport.loseConnection()
 
 		if not self.open:
-			print "C none"
 			if not self.nop:
 				if self.persist:
 					delay = 10
@@ -420,7 +422,6 @@ class OWFSqueue(OWFSreceiver):
 			return
 
 		if self.transport is None:
-			print "C no T"
 			if not self.persist:
 				log(TRACE,"OWFS reconnect now",self.open.prio,self.open)
 				if self._factory.connector is not None:
@@ -433,9 +434,6 @@ class OWFSqueue(OWFSreceiver):
 			log(TRACE,"OWFS run",self.open.prio,self.open)
 			self.n_calls += 1
 			self.open.send()
-
-		else:
-			print "C no run"
 
 	def queue(self,msg):
 		log(TRACE,"OWFS queue",msg.prio,msg)
@@ -561,10 +559,7 @@ class OWFSqueue(OWFSreceiver):
 	
 	def run_watcher(self):
 		if self.watcher_id is None:
-			print "W START"
 			self.watcher()
-		else:
-			print "W -start: running"
 
 
 class OWFSfactory(object,protocol.ReconnectingClientFactory):
@@ -572,12 +567,10 @@ class OWFSfactory(object,protocol.ReconnectingClientFactory):
     protocol = OWFSqueue
 
     def clientConnectionFailed(self, connector, reason):
-		print "F FAIL"
 		log(WARN,reason)
 		super(OWFSfactory,self).clientConnectionFailed(connector, reason)
 
     def clientConnectionLost(self, connector, reason):
-		print "F LOST"
 		q = self.protocol()
 		if q.persist:
 			log(INFO,reason)
@@ -586,11 +579,8 @@ class OWFSfactory(object,protocol.ReconnectingClientFactory):
 		super(OWFSfactory,self).clientConnectionLost(connector, reason)
 		q._do_next()
 		if q.open:
-			print "F LOST reconn"
 			self.stopTrying()
 			connector.connect()
-		else:
-			print "F LOST noOpen"
 
 
 ow_buses = {}
@@ -603,6 +593,8 @@ def connect(host="localhost", port=4304, persist=False):
 	def retq():
 		return q
 	f.protocol = retq
+	f.host = host
+	f.port = port
 	ow_buses[(host,port)] = f
 	reactor.connectTCP(host, port, f)
 
