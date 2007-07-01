@@ -89,20 +89,13 @@ class LogWorker(ExcWorker):
 			drop the logger and process it.
 			"""
 		exc = []
-		if loggers:
-			for l in loggers[:]:
-				try:
-					l.log_event(event)
-				except Exception:
-					l.end_logging()
-					exc.append(sys.exc_info())
-		else:
+		for l in loggers[:]:
 			try:
-				Logger(TRACE).log_event(event)
+				l.log_event(event)
 			except Exception:
+				l.end_logging()
 				exc.append(sys.exc_info())
 		if exc:
-			from traceback import print_exception
 			for e in exc:
 				log_exc("Logging error", err=e)
 
@@ -117,26 +110,18 @@ def log_exc(msg=None, err=None, level=ERROR):
 			err = (None,Err,None)
 		err = Failure(err[1],err[0],err[2])
 
-	if loggers:
-		for l in loggers[:]:
-			if msg:
-				try:
-					l.log(level,msg)
-				except Exception,e:
-					l.end_logging()
-					log_exc("Logger removed",e)
+	for l in loggers[:]:
+		if msg:
 			try:
-				l.log_failure(err, level=level)
+				l.log(level,msg)
 			except Exception,e:
 				l.end_logging()
 				log_exc("Logger removed",e)
-				
-	else:
-		l = Logger(TRACE)
-		if msg:
-			l.log(level,msg)
-		l.log_failure(err, level=level)
-
+		try:
+			l.log_failure(err, level=level)
+		except Exception,e:
+			l.end_logging()
+			log_exc("Logger removed",e)
 
 class LogEndEvent(Event):
 	def __init__(self,event):
@@ -230,17 +215,11 @@ def log(level, *a):
 		drop the logger and process it.
 		"""
 	exc = []
-	if loggers:
-		for l in loggers[:]:
-			try:
-				l.log(level, *a)
-			except Exception:
-				loggers.remove(l)
-				exc.append(sys.exc_info())
-	else:
+	for l in loggers[:]:
 		try:
-			Logger(TRACE).log(level,*a)
+			l.log(level, *a)
 		except Exception:
+			loggers.remove(l)
 			exc.append(sys.exc_info())
 	if exc:
 		from traceback import print_exception
