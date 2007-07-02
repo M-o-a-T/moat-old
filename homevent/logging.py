@@ -92,7 +92,8 @@ class LogWorker(ExcWorker):
 		for l in loggers[:]:
 			try:
 				l.log_event(event)
-			except Exception:
+			except Exception,e:
+				print >>sys.stderr,"LOGGER CRASH 1",e
 				l.end_logging()
 				exc.append(sys.exc_info())
 		if exc:
@@ -115,11 +116,13 @@ def log_exc(msg=None, err=None, level=ERROR):
 			try:
 				l.log(level,msg)
 			except Exception,e:
+				print >>sys.stderr,"LOGGER CRASH 2",e
 				l.end_logging()
 				log_exc("Logger removed",e)
 		try:
 			l.log_failure(err, level=level)
 		except Exception,e:
+			print >>sys.stderr,"LOGGER CRASH 3",e
 			l.end_logging()
 			log_exc("Logger removed",e)
 
@@ -134,7 +137,8 @@ class LogEndEvent(Event):
 	def report(self, verbose=False):
 		try:
 			yield  "END: "+"¦".join(str(x) for x in self.names[1:])
-		except Exception:
+		except Exception,e:
+			print >>sys.stderr,"LOGGER CRASH 4",e
 			yield  "END: REPORT_ERROR: "+repr(self.names[1:])
 
 class LogDoneWorker(LogWorker):
@@ -218,7 +222,8 @@ def log(level, *a):
 	for l in loggers[:]:
 		try:
 			l.log(level, *a)
-		except Exception:
+		except Exception,e:
+			print >>sys.stderr,"LOGGER CRASH 0",e
 			loggers.remove(l)
 			exc.append(sys.exc_info())
 	if exc:
