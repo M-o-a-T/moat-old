@@ -10,13 +10,13 @@ from twisted.protocols.basic import LineReceiver
 from twisted.internet import defer
 from homevent.run import process_failure
 
-_conns = []
+conns = []
 def dropConnections():
 	d = defer.succeed(None)
 	def go_away(_,c):
 		c.loseConnection()
 		return _
-	for c in _conns:
+	for c in conns:
 		d.addBoth(go_away,c)
 	return d
 
@@ -37,7 +37,7 @@ class Outputter(object): # "object" because L-R is old-style
 	
 	def connectionMade(self):
 		super(Outputter,self).connectionMade()
-		_conns.append(self)
+		conns.append(self)
 
 	def loseConnection(self):
 		try:
@@ -59,8 +59,8 @@ class Outputter(object): # "object" because L-R is old-style
 			d.addBoth(call_it,proc,a,k)
 
 	def connectionLost(self,reason):
-		if self in _conns:
-			_conns.remove(self)
+		if self in conns:
+			conns.remove(self)
 
 	def write(self,data):
 		"""Mimic a normal 'file' output"""

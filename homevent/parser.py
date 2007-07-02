@@ -22,7 +22,7 @@ from threading import Lock
 
 from homevent.logging import log,TRACE
 from homevent.context import Context
-from homevent.io import Outputter
+from homevent.io import Outputter,conns
 from homevent.run import process_failure
 from homevent.event import Event
 from homevent.statement import global_words
@@ -119,6 +119,7 @@ class Parser(object):
 	"""The input parser object. It serves as a LineReceiver and a 
 	   normal (but non-throttle-able) producer."""
 	delimiter="\n"
+	line = None
 
 	def __init__(self, proc, ctx=None, delimiter=None):
 		"""Parse an input stream and pass the commands to the processor
@@ -127,8 +128,8 @@ class Parser(object):
 
 		self.line_queue = Queue.Queue(10)
 		self.symbol_queue = Queue.Queue(1)
+		self.next_symbol_queue = Queue.Queue(0)
 		self.result = defer.Deferred()
-		self.more_parsing = None
 		self.ending = False
 
 		self.proc = proc
@@ -160,20 +161,18 @@ class Parser(object):
 		return d
 
 	def _endConnection(self,d,r):
+		if not self.ending:
+			self.ending = True
+			q = self.line_queue
+			if q is not None:
+				try:
+					q.put(None, block=False)
+				except Queue.Full:
+					reactor.callInThread(q.put,None,block=True)
+
 		def ex(_):
 			d.callback(r)
 			return _
-		if self.ending:
-			self.result.addBoth(ex)
-			return
-
-		self.ending = True
-		q = self.line_queue
-		if q is not None:
-			try:
-				q.put(None, block=(self.line is None))
-			except Queue.Full:
-				reactor.callInThread(q.put,None,block=True)
 		self.result.addBoth(ex)
 
 	def add_line(self, data):
@@ -189,7 +188,8 @@ class Parser(object):
 			while self.p_wait:
 				item = self.p_wait.pop(0)
 				q = self.line_queue
-				if q: q.put(item, block=(self.line is None))
+				if q:
+					q.put(item, block=(self.line is None))
 		except Queue.Full:
 			self.p_wait.insert(0,item)
 			self.pauseProducing()
@@ -217,13 +217,11 @@ class Parser(object):
 		try:
 			l = q.get(block=False)
 		except Queue.Empty:
-			reactor.callFromThread(self.resumeProducing)
+			reactor.callInThread(self.resumeProducing)
 			l = q.get(block=True)
 		if l is None:
 			self.line_queue = None
-			log(TRACE,">> EOF")
 			return ""
-		log(TRACE,">>",l)
 		return l+"\n"
 
 	def init_state(self):
@@ -245,6 +243,9 @@ class Parser(object):
 			self.ctx.out=sys.stdout
 
 		self.init_state()
+		reactor.callInThread(self._startParsing)
+
+	def _startParsing(self):
 		self.p_gen = generate_tokens(self.readline)
 		reactor.callInThread(self._sym_parse)
 		self._do_parse()
@@ -254,20 +255,13 @@ class Parser(object):
 		from token import ENDMARKER
 
 		while True:
+			nq = self.next_symbol_queue
+			if not nq or not nq.get(block=True):
+				return
+
 			t = self.p_gen.next()
-			try:
-				self.symbol_queue.put(t, block=False)
-			except Queue.Full:
-				reactor.callFromThread(self.pauseProducing)
-				self.symbol_queue.put(t, block=True)
-				reactor.callFromThread(self.resumeProducing)
-			q = self.more_parsing
-			if q is not None:
-				self.more_parsing = None
-				def cb(q):
-					try: q.callback(None)
-					except defer.AlreadyCalledError: pass
-				reactor.callFromThread(cb,q)
+			self.symbol_queue.put(t, block=True)
+
 			if t[0] == ENDMARKER:
 				return
 
@@ -276,24 +270,18 @@ class Parser(object):
 		#         3+4 need newline+indent after sub-level start, 5 extending word
 		# TODO: write a nice .dot file for this stuff
 
-		if self.more_parsing is not None:
-			return
 		while True:
-			try:
-				t,txt,beg,end,line = self.symbol_queue.get(block=False)
-			except Queue.Empty:
-				# possible race condition: new 
-				self.more_parsing = d = defer.Deferred()
-				if not self.symbol_queue.empty():
-					try: d.callback(None)
-					except defer.AlreadyCalledError: pass
-				d.addCallback(lambda _: self._do_parse())
+			nq = self.next_symbol_queue
+			if not nq:
 				return
+			nq.put(True,block=True)
+			t,txt,beg,end,line = self.symbol_queue.get(block=True)
 
 			def handle_error(_):
 				if _.check(StopIteration):
-					try: self.result.callback(None)
-					except defer.AlreadyCalledError: pass
+					def tr():
+						self.result.callback(None)
+					reactor.callLater(0,tr)
 					return
 
 				if self.p_stack:
@@ -416,11 +404,32 @@ class Parser(object):
 
 		raise SyntaxError("Unknown token %s (%d, state %d) in %s:%d" % (repr(txt),t,self.p_state,self.ctx.filename,beg[0]))
 
+class _drop(object):
+	def __init__(self,g):
+		self.g = g
+		self.lost = False
+		conns.append(self)
+	def loseConnection(self):
+		self.lost = True
+		if self.g.next_symbol_queue:
+			self.g.next_symbol_queue.put(False,block=True)
+			self.g.next_symbol_queue = None
+	def drop(self,_):
+		conns.remove(self)
+		self.loseConnection()
+		return _
 
 def _parse(g,input):
 	"""Internal code for parse() which reads the input in a separate thread"""
 	g.startParsing()
-	while True:
+	x = _drop(g)
+	def d(_):
+		x.drop(_)
+		return _
+	#g.result.addBoth(x.drop)
+	g.result.addBoth(d)
+
+	while not x.lost:
 		l = input.readline()
 		if not l:
 			break

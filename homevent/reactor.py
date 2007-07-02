@@ -13,6 +13,7 @@ from homevent.run import register_worker,unregister_worker, SYS_PRIO,MAX_PRIO,\
 	process_event
 from homevent.statement import Statement
 from homevent.io import dropConnections
+from homevent.twist import deferToLater
 from twisted.internet import reactor
 
 __all__ = ("start_up","shut_down", "startup_event","shutdown_event",
@@ -83,7 +84,7 @@ def start_up():
 		running = True
 		process_event(startup_event)
 	
-def shut_down():
+def _shut_down():
 	"""\
 		Code to be called last. The Twisted mainloop is running and will
 		be stopped when all events have progressed.
@@ -94,10 +95,16 @@ def shut_down():
 		running = False
 
 	if not active_queues:
-		stop_mainloop()
+		_stop_mainloop()
+
+def shut_down():
+	deferToLater(_shut_down)
 
 def stop_mainloop():
 	"""Sanely halt the Twisted mainloop."""
+	deferToLater(_stop_mainloop)
+
+def _stop_mainloop():
 	try:
 		reactor.stop()
 	except RuntimeError:

@@ -5,6 +5,8 @@
 
 from twisted.internet.abstract import FileDescriptor
 from twisted.internet import fdesc,defer,reactor
+from twisted.python.threadable import isInIOThread
+
 from posix import write
 import sys
 
@@ -31,5 +33,9 @@ class StdOutDescriptor(FileDescriptor):
 def deferToLater(p,*a,**k):
 	d = defer.Deferred()
 	d.addCallback(lambda _: p(*a,**k))
-	reactor.callLater(0,d.callback,None)
+	if isInIOThread():
+		reactor.callLater(0,d.callback,None)
+	else:
+		reactor.callFromThread(d.callback,None)
+	reactor.wakeUp()
 	return d

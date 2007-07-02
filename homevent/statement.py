@@ -24,6 +24,7 @@ from homevent.io import Outputter
 from homevent.run import process_failure
 from homevent.event import Event
 from homevent.logging import log_event,log, TRACE
+from homevent.twist import deferToLater
 
 
 class UnknownWordError(KeyError):
@@ -436,10 +437,10 @@ class LoopMixin(object):
 				return None
 
 			e.addCallback(lambda _: super(LoopMixin,self).run(ctx,**k))
-			e.addCallback(lambda _: reactor.callLater(0,chk))
+			e.addCallback(lambda _: deferToLater(chk))
 			e.addErrback(rfail)
 
-		reactor.callLater(0,chk)
+		deferToLater(chk)
 
 		return d
 global_words.register_statement(ExitHandler)

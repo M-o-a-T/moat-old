@@ -7,6 +7,7 @@ from homevent.check import register_condition
 from homevent.context import Context
 from homevent.parser import read_config
 from homevent.run import process_failure
+from homevent.twist import deferToLater
 from homevent.reactor import ShutdownHandler,mainloop,shut_down,\
 	stop_mainloop
 from homevent.logging import TRACE,DEBUG,INFO,WARN,ERROR,PANIC,\
@@ -60,10 +61,10 @@ def _readcf():
 	d.addErrback(process_failure)
 
 def readcf():
-	reactor.callLater(0,_readcf)
+	deferToLater(_readcf)
 
-signal(SIGINT, lambda a,b: reactor.callLater(0,stop_mainloop))
-signal(SIGQUIT,lambda a,b: reactor.callLater(0,shut_down))
+signal(SIGINT, lambda a,b: deferToLater(stop_mainloop))
+signal(SIGQUIT,lambda a,b: deferToLater(shut_down))
 signal(SIGHUP, lambda a,b: readcf())
 
 readcf()

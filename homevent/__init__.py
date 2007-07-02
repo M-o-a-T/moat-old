@@ -16,3 +16,14 @@ __all__ = ("Event","Worker","SeqWorker","WorkSequence",
 	"collect_event","process_event", "register_worker", "mainloop")
 # Do not export "log" by default; it's too generic.
 
+from twisted.internet import reactor
+def wake_up(old_call):
+	
+	def do_call(t,p,*a,**k):
+		r = old_call(t,p,*a,**k)
+		reactor.wakeUp()
+		return r
+	return do_call
+
+reactor.callLater = wake_up(reactor.callLater)
+
