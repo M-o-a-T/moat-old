@@ -36,18 +36,18 @@ class run_logger(Logger):
 			return m.group(1)+m.group(2)+", in"
 		sx = r_fli.sub(rep,sx)
 		sx = r_hex.sub("obj",sx)
-		if level is None:
-			print >>self.data, sx
-		else:
+		if level is not None:
 			print >>self.data, level,sx
+		else:
+			print >>self.data, sx
 
 	def log(self, level, *a):
-		if level < self.level:
+		if level is not None and level < self.level:
 			return
 		sx=" ".join(str(x) for x in a)
 		self._log(level,sx)
 		if self.dot:
-			self._log(".")
+			self._log(None,".")
 
 	def log_event(self, event, level=0):
 		if level < self.level:
@@ -55,18 +55,18 @@ class run_logger(Logger):
 		if hasattr(event,"report"):
 			for r in event.report(99):
 				if not hasattr(event,"id") or isinstance(event,(h.logging.log_run,h.logging.log_created)):
-					self._log(level,str(r))
+					self._log(None,str(r))
 				else:
-					self._log(level,str(event.id)+" "+str(r))
+					self._log(None,str(event.id)+" "+str(r))
 		else:
-			self._log(level,str(event))
+			self._log(None,str(event))
 		if self.dot:
 			self._log(None,".")
 
 	def write(self,s):
 		s = s.rstrip()
 		if s != "":
-			self.log(s)
+			self.log(None,s)
 
 class SayWorker(h.Worker):
 	"""A cheap worker which just logs something convenient."""
@@ -74,7 +74,7 @@ class SayWorker(h.Worker):
 	def does_event(self,e):
 		return e[0]=="say"
 	def process(self,event,*a,**k):
-		h.log("The '"+self.name+"' worker is saying: "+" ".join(event[1:]))
+		h.log(TRACE,"The '"+self.name+"' worker is saying: "+" ".join(event[1:]))
 
 class SayMoreWorker(h.SeqWorker):
 	"""A WorkSequence-generating worker which logs something twice."""
@@ -101,7 +101,7 @@ class logwrite(object):
 		if self.buf[-1] == "\n":
 			if len(self.buf) > 1:
 				for l in self.buf.rstrip("\n").split("\n"):
-					self.log(l)
+					self.log(None,l)
 			self.buf=""
 
 def run(name,input, interpreter=Interpreter, logger=None):
