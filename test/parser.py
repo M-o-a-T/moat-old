@@ -60,14 +60,14 @@ class sbr(object):
 		global _id
 		_id += 1
 		self.id = _id
-		log("Init %s(%d) from %s" % (self.name,self.id, repr(parent)))
+		log(None,"Init %s(%d) from %s" % (self.name,self.id, repr(parent)))
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		log("Input %s(%d): %s" % (self.name,self.id,event))
+		log(None,"Input %s(%d): %s" % (self.name,self.id,event))
 	def called(self,args):
 		self.args = args
 	def start_block(self):
-		log("InputComplex %s(%d): %s" % (self.name,self.id,repr(self.args)))
+		log(None,"InputComplex %s(%d): %s" % (self.name,self.id,repr(self.args)))
 
 class FooHandler(sbr,Statement):
 	name=("foo",)
@@ -105,6 +105,6 @@ class TestInterpreter(Interpreter):
 		fn.start_block()
 		return TestInterpreter(ctx=self.ctx(words=fn))
 	def done(self):
-		log("... moving up")
+		log(None,"... moving up")
 
 run("parser", input, interpreter=TestInterpreter, logger=log)

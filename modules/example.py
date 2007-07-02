@@ -6,7 +6,7 @@ This code represents a sample loadable module for homevent.
 """
 
 from homevent.module import Module
-from homevent.logging import log
+from homevent.logging import log,DEBUG
 
 class ExampleModule(Module):
 	"""\
@@ -16,9 +16,9 @@ class ExampleModule(Module):
 	info = "yeah, test me baby"
 
 	def load(self):
-		log("Loading!")
+		log(DEBUG,"Loading!")
 	
 	def unload(self):
-		log("Unloading!")
+		log(DEBUG,"Unloading!")
 	
 init = ExampleModule
