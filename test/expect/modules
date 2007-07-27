@@ -7,7 +7,7 @@ RUN: <WorkSequence:1 (4)>
 1 END: startup
 RUN: <WorkSequence:1 (4)>
  ev: EVENT: startup
-Loading!
+1 Loading!
 NEW: <WorkSequence:2 (4)>
    : │  EVENT: module¦load¦example
    : └1╴... done.
@@ -26,7 +26,7 @@ RUN: <WorkSequence:3 (4)>
 20 END: module¦unload¦example
 RUN: <WorkSequence:3 (4)>
  ev: EVENT: module¦unload¦example
-Unloading!
+1 Unloading!
 NEW: <WorkSequence:4 (5)>
    : │  EVENT: shutdown
    : └1╴... done.
