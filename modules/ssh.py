@@ -18,9 +18,12 @@ import base64,os
 import sys
 from homevent.module import Module
 from homevent.logging import log
-from homevent.parser import parser_builder
+from homevent.context import Context
+from homevent.parser import parser_builder,parse
 from homevent.statement import main_words,Statement
-from homevent.interpreter import InteractiveInterpreter
+from homevent.interpreter import InteractiveInterpreter,Interpreter
+from cStringIO import StringIO
+
 
 class SSHDemoProtocol(recvline.HistoricRecvLine):
 	def __init__(self, user):
@@ -46,7 +49,13 @@ class SSHDemoAvatar(avatar.ConchUser):
 	def getPty(self, terminal, windowSize, attrs):
 		return None
 	def execCommand(self, protocol, cmd):
-		raise NotImplementedError
+		input = StringIO(cmd)
+		d = parse(input, Interpreter(Context(out=protocol)),Context())
+		d.addErrback(lambda _: _.printTraceback(file=protocol))
+		def shut(_):
+			protocol.loseConnection()
+		d.addBoth(shut)
+
 	def closed(self):
 		pass
 
@@ -122,7 +131,6 @@ You need to call this exactly once.
 
 		if not (os.path.exists(pub_path) and os.path.exists(priv_path)):
 			# generate a RSA keypair
-			print "Generating RSA keypair..."
 			from Crypto.PublicKey import RSA
 			KEY_LENGTH = 1024
 			rsaKey = RSA.generate(KEY_LENGTH, common.entropy.get_bytes)
@@ -131,12 +139,12 @@ You need to call this exactly once.
 			# save keys for next time
 			file(pub_path, 'w+b').write(publicKeyString)
 			mask = os.umask(077)
-			file(priv_path, 'w+b').write(privateKeyString)
-			os.umask(mask)
-			print "done."
-		else:
-			publicKeyString = file(pub_path).read()
-			privateKeyString = file(priv_path).read()
+			try:
+				file(priv_path, 'w+b').write(privateKeyString)
+			finally:
+				os.umask(mask)
+		publicKeyString = file(pub_path).read()
+		privateKeyString = file(priv_path).read()
 
 		f.publicKeys = {'ssh-rsa': keys.getPublicKeyString(data=publicKeyString)}
 		f.privateKeys = {'ssh-rsa': keys.getPrivateKeyObject(data=privateKeyString)}
