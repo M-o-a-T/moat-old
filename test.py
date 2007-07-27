@@ -12,7 +12,7 @@ from twisted.internet._posixstdio import StandardIO ## XXX unstable interface!
 from twisted.internet.error import ConnectionDone,ConnectionLost
 from homevent.context import Context
 from traceback import print_exc
-import os
+import os,sys
 
 global_words.register_statement(Load)
 global_words.register_statement(Unload)
@@ -35,7 +35,14 @@ def reporter(err):
 	print "Error:",err
 	
 def ready():
-	c=Context()
+	if len(sys.argv) > 1 and sys.argv[1] == "P":
+		# Log parser stuff
+		from test import run_logger
+		from homevent.logging import DEBUG
+		logger = run_logger("testing_123",dot=False, level=DEBUG)
+		c=Context(logger=logger.log)
+	else:
+		c=Context()
 	#c.logger=parse_logger
 	if os.isatty(0):
 		i = InteractiveInterpreter
