@@ -97,8 +97,8 @@ class Waiter(object):
 
 		d = process_event(Event(self.ctx,"wait","done",unixtime(self.end),*self.name))
 		def done(_):
-			self.defer.callback(_)
 			del waiters[self.name]
+			self.defer.callback(_)
 		d.addCallbacks(done)
 
 	def cancel(self, err=WaitCancelled):

@@ -14,7 +14,6 @@ async:
 wait for 0.1
 list wait
 list wait Foo Bar
-list wait _wait 2
 wait for 0.2:
 	name Foo Bar
 	update
