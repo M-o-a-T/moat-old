@@ -305,7 +305,8 @@ class Parser(object):
 			STRING
 		from tokize import COMMENT,NL
 
-		if "logger" in self.ctx: self.ctx.logger("T",self.p_state,t,txt,beg,end,line)
+		if "logger" in self.ctx:
+			self.ctx.logger("T",self.p_state,t,repr(txt),beg,end,repr(line))
 		if t == COMMENT:
 			return
 		if self.p_state == 0: # begin of statement
