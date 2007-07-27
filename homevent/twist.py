@@ -4,7 +4,7 @@
 	"""
 
 from twisted.internet.abstract import FileDescriptor
-from twisted.internet import fdesc,defer,reactor
+from twisted.internet import fdesc,defer,reactor,base
 from twisted.python.threadable import isInIOThread
 
 from posix import write
@@ -39,3 +39,39 @@ def deferToLater(p,*a,**k):
 		reactor.callFromThread(d.callback,None)
 	reactor.wakeUp()
 	return d
+
+
+# self.client.transport can be None
+from twisted.conch.ssh import session,channel
+def tlc(self):
+	if self.client and self.client.transport:
+		self.client.transport.loseConnection()
+	channel.SSHChannel.loseConnection(self)
+session.SSHSession.loseConnection = tlc
+
+
+# Allow a Deferred to be initialized with another Deferred
+def acb(self, result):
+	if isinstance(result, defer.Deferred):
+		result.addBoth(self.callback)
+	else:
+		self._startRunCallbacks(result)
+defer.Deferred.callback = acb
+
+
+# falls flat on its face without the test
+def _cse(self, eventType):
+	sysEvtTriggers = self._eventTriggers.get(eventType)
+	if not sysEvtTriggers:
+		return
+	for callList in sysEvtTriggers[1], sysEvtTriggers[2]:
+		for callable, args, kw in callList:
+			try:
+				callable(*args, **kw)
+			except:
+				log.deferr()
+	# now that we've called all callbacks, no need to store
+	# references to them anymore, in fact this can cause problems.
+	del self._eventTriggers[eventType]
+base.ReactorBase._continueSystemEvent = _cse
+
