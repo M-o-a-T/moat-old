@@ -33,7 +33,7 @@ class WaitError(RuntimeError):
 	def __init__(self,w):
 		self.waiter = w
 	def __str__(self):
-		return self.text % (" ".join(self.waiter.name),)
+		return self.text % (" ".join(map(str,self.waiter.name)),)
 
 class WaitLocked(WaitError):
 	text = "Tried to process waiter ‹%s› while it was locked"
@@ -60,7 +60,7 @@ class Waiter(object):
 		self.name = name
 		self.locked = False
 		if self.name in waiters:
-			raise DupWaiterError(self.name)
+			raise DupWaiterError(self)
 	
 	def _callit(self,_=None):
 		self.locked = False
