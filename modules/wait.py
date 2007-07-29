@@ -296,7 +296,7 @@ list wait NAME
 				if w is None: break
 				n = getattr(w,"displayname",None)
 				if n is not None:
-					if not isinstance(n,basesting):
+					if not isinstance(n,basestring):
 						n = " ".join(str(x) for x in n)
 				else:
 					try:
