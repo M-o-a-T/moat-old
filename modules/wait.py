@@ -14,11 +14,13 @@ wait FOO...
 from homevent.statement import AttributedStatement, Statement, main_words,\
 	global_words
 from homevent.event import Event
-from homevent.run import process_event
+from homevent.run import process_event,register_worker,unregister_worker
+from homevent.reactor import shutdown_event
 from homevent.module import Module
-from homevent.worker import HaltSequence
+from homevent.worker import HaltSequence,ExcWorker
 from homevent.times import time_delta, time_until, unixtime,unixdelta, now
 from homevent.check import Check,register_condition,unregister_condition
+from homevent.constants import SYS_PRIO
 from time import time
 import os
 from twisted.python.failure import Failure
@@ -353,6 +355,25 @@ var wait NAME name...
 WaitHandler.register_statement(WaitName)
 WaitHandler.register_statement(WaitUpdate)
 
+class Shutdown_Worker_Wait(ExcWorker):
+    """\
+        This worker kills off all waiters.
+        """
+    prio = SYS_PRIO+2
+
+    def does_event(self,ev):
+        return (ev is shutdown_event)
+    def process(self,queue,*a,**k):
+		d = defer.succeed(None)
+		for w in waiters.values():
+			def tilt(_,waiter):
+				return waiter.cancel(err=HaltSequence)
+			d.addBoth(tilt,w)
+		return d
+
+    def report(self,*a,**k):
+        return ()
+
 
 class EventsModule(Module):
 	"""\
@@ -360,6 +381,7 @@ class EventsModule(Module):
 		"""
 
 	info = "Basic event handling"
+	worker = Shutdown_Worker_Wait("Wait killer")
 
 	def load(self):
 		main_words.register_statement(WaitHandler)
@@ -371,6 +393,7 @@ class EventsModule(Module):
 		global_words.register_statement(WaitList)
 		register_condition(ExistsWaiterCheck)
 		register_condition(LockedWaiterCheck)
+		register_worker(self.worker)
 	
 	def unload(self):
 		main_words.unregister_statement(WaitHandler)
@@ -382,5 +405,6 @@ class EventsModule(Module):
 		global_words.unregister_statement(WaitList)
 		unregister_condition(ExistsWaiterCheck)
 		unregister_condition(LockedWaiterCheck)
+		unregister_worker(self.worker)
 
 init = EventsModule
