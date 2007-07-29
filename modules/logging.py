@@ -30,6 +30,9 @@ class OutLogger(Logger):
 		else:
 			print >>self.out,LogNames[level]+"> "+txt
 
+	def flush(self):
+		self.out.flush()
+
 	def end_logging(self):
 		super(OutLogger,self).end_logging()
 		del self.out.logger

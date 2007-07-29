@@ -30,6 +30,10 @@ class StdIO(StandardIO):
 		super(StdIO,self).connectionLost(self)
 		if not reason.check(ConnectionDone,ConnectionLost):
 			print "EOF:",reason
+	def write(self,data):
+		sys.stdout.write(data)
+	def flush(self):
+		sys.stdout.flush()
 
 def reporter(err):
 	print "Error:",err

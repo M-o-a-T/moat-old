@@ -103,6 +103,12 @@ class logwrite(object):
 				for l in self.buf.rstrip("\n").split("\n"):
 					self.log(None,l)
 			self.buf=""
+	def flush(self):
+		if self.buf:
+			l = self.buf
+			self.buf = ""
+			self.log(None,l)
+		pass
 
 def run(name,input, interpreter=Interpreter, logger=None):
 	if logger is None:

@@ -54,18 +54,24 @@ class Logger(object):
 	def log(self, level, *a):
 		if level >= self.level:
 			self._log(level," ".join(str(x) for x in a))
+			self.flush()
 
 	def log_event(self, event, level=DEBUG):
 		if level >= self.level:
 			for r in event.report(99):
 				self._log(level,r)
 			self._log(level,".")
+			self.flush()
 
 	def log_failure(self, err, level=WARN):
 		if level >= self.level:
 			self._log(level,err.getTraceback())
 	
+	def flush(self):
+		pass
+
 	def end_logging(self):
+		self.flush()
 		loggers.remove(self)
 
 class LogWorker(ExcWorker):
@@ -93,7 +99,8 @@ class LogWorker(ExcWorker):
 			try:
 				l.log_event(event)
 			except Exception,e:
-				print >>sys.stderr,"LOGGER CRASH 1",e
+				print >>sys.stderr,"LOGGER CRASH 1"
+				print >>sys.stderr,e
 				l.end_logging()
 				exc.append(sys.exc_info())
 		if exc:
@@ -116,13 +123,15 @@ def log_exc(msg=None, err=None, level=ERROR):
 			try:
 				l.log(level,msg)
 			except Exception,e:
-				print >>sys.stderr,"LOGGER CRASH 2",e
+				print >>sys.stderr,"LOGGER CRASH 2"
+				print >>sys.stderr,e
 				l.end_logging()
 				log_exc("Logger removed",e)
 		try:
 			l.log_failure(err, level=level)
 		except Exception,e:
-			print >>sys.stderr,"LOGGER CRASH 3",e
+			print >>sys.stderr,"LOGGER CRASH 3"
+			print >>sys.stderr,e
 			l.end_logging()
 			log_exc("Logger removed",e)
 
@@ -138,7 +147,8 @@ class LogEndEvent(Event):
 		try:
 			yield  "END: "+"¦".join(str(x) for x in self.names[1:])
 		except Exception,e:
-			print >>sys.stderr,"LOGGER CRASH 4",e
+			print >>sys.stderr,"LOGGER CRASH 4"
+			print >>sys.stderr,e
 			yield  "END: REPORT_ERROR: "+repr(self.names[1:])
 
 class LogDoneWorker(LogWorker):
@@ -223,7 +233,8 @@ def log(level, *a):
 		try:
 			l.log(level, *a)
 		except Exception,e:
-			print >>sys.stderr,"LOGGER CRASH 0",e
+			print >>sys.stderr,"LOGGER CRASH 0"
+			print >>sys.stderr,e
 			loggers.remove(l)
 			exc.append(sys.exc_info())
 	if exc:
