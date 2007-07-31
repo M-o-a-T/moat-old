@@ -20,7 +20,7 @@ def dropConnections():
 		d.addBoth(go_away,c)
 	return d
 
-class Outputter(object): # "object" because L-R is old-style
+class Outputter(object):
 	"""Wraps standard output behavior"""
 	def __init__(self, *a,**k):
 		super(Outputter,self).__init__(*a,**k)
@@ -43,7 +43,8 @@ class Outputter(object): # "object" because L-R is old-style
 		try:
 			lc = super(Outputter,self).loseConnection
 		except AttributeError:
-			pass
+			if self.transport:
+				self.transport.loseConnection()
 		else:
 			lc()
 

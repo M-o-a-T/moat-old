@@ -5,6 +5,7 @@
 
 from twisted.internet.abstract import FileDescriptor
 from twisted.internet import fdesc,defer,reactor,base
+from twisted.python import log
 from twisted.python.threadable import isInIOThread
 
 from posix import write
@@ -30,13 +31,32 @@ class StdOutDescriptor(FileDescriptor):
 		finally:
 			fdesc.setBlocking(1)
 	
+_running = 0
+_callme = None
+def call_when_idle(p):
+	global _callme
+	assert _callme is None, "Only one idle callback allowed"
+	_callme = p
+def _defer(d):
+	global _running
+	global _callme
+	d.callback(None)
+	_running -= 1
+	if _callme and not _running:
+		cm = _callme
+		_callme = None
+		cm()
+
+
 def deferToLater(p,*a,**k):
+	global _running
+	_running += 1
 	d = defer.Deferred()
 	d.addCallback(lambda _: p(*a,**k))
 	if isInIOThread():
-		reactor.callLater(0,d.callback,None)
+		reactor.callLater(0,_defer,d)
 	else:
-		reactor.callFromThread(d.callback,None)
+		reactor.callFromThread(_defer,d)
 	reactor.wakeUp()
 	return d
 
@@ -75,3 +95,29 @@ def _cse(self, eventType):
 	del self._eventTriggers[eventType]
 base.ReactorBase._continueSystemEvent = _cse
 
+
+# hack callInThread to log what it's doing
+if False:
+	from threading import Lock
+	_syn = Lock()
+	_cic = reactor.callInThread
+	_thr = {}
+	_thr_id = 0
+	def _tcall(tid,p,a,k):
+		_thr[tid] = (p,a,k)
+		try:
+			return p(*a,**k)
+		finally:
+			_syn.acquire()
+			del _thr[tid]
+			print "-THR",tid,_thr
+			_syn.release()
+	def cic(p,*a,**k):
+		_syn.acquire()
+		global _thr_id
+		_thr_id += 1
+		tid = _thr_id
+		_syn.release()
+		print "+THR",tid,p,a,k
+		return _cic(_tcall,tid,p,a,k)
+	reactor.callInThread = cic

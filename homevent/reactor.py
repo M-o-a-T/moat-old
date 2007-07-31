@@ -13,7 +13,7 @@ from homevent.run import register_worker,unregister_worker, SYS_PRIO,MAX_PRIO,\
 	process_event
 from homevent.statement import Statement
 from homevent.io import dropConnections
-from homevent.twist import deferToLater
+from homevent.twist import deferToLater,call_when_idle
 from twisted.internet import reactor
 
 __all__ = ("start_up","shut_down", "startup_event","shutdown_event",
@@ -25,6 +25,7 @@ shutdown_event = Event(Context(), "shutdown")
 active_q_id = 0
 active_queues = {}
 running = False
+stopping = False
 
 class Shutdown_Worker_1(ExcWorker):
 	"""\
@@ -104,11 +105,15 @@ def stop_mainloop():
 	"""Sanely halt the Twisted mainloop."""
 	deferToLater(_stop_mainloop)
 
+def reactorstop():
+	reactor.stop()
+
 def _stop_mainloop():
-	try:
-		reactor.stop()
-	except RuntimeError:
-		pass
+	global stopping
+	if not stopping:
+		stopping = True
+		dropConnections()
+		call_when_idle(reactorstop)
 
 class ShutdownHandler(Statement):
 	"""A command handler to stop the whole thing."""

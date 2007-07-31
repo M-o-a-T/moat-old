@@ -26,6 +26,7 @@ from homevent.io import Outputter,conns
 from homevent.run import process_failure
 from homevent.event import Event
 from homevent.statement import global_words
+from homevent.twist import deferToLater
 
 
 class ParseReceiver(Outputter):
@@ -157,7 +158,8 @@ class Parser(object):
 		"""Called to stop"""
 		d = defer.Deferred()
 		#reactor.callLater(0,self._endConnection,d,res)
-		self._endConnection(d,res)
+		e = deferToLater(self._endConnection,d,res)
+		e.addErrback(process_failure)
 		return d
 
 	def _endConnection(self,d,r):
@@ -171,6 +173,11 @@ class Parser(object):
 					reactor.callInThread(q.put,None,block=True)
 
 		def ex(_):
+			q = self.next_symbol_queue
+			if q:
+				self.next_symbol_queue = None
+				q.put(False,block=True)
+
 			d.callback(r)
 			return _
 		self.result.addBoth(ex)
@@ -268,20 +275,21 @@ class Parser(object):
 	def _do_parse(self):
 		# States: 0 newline, 1 after first word, 2 OK to extend word
 		#         3+4 need newline+indent after sub-level start, 5 extending word
-		# TODO: write a nice .dot file for this stuff
+		def call_done():
+			try: self.result.callback(None)
+			except defer.AlreadyCalledError: pass
 
 		while True:
 			nq = self.next_symbol_queue
 			if not nq:
+				#deferToLater(call_done)
 				return
 			nq.put(True,block=True)
 			t,txt,beg,end,line = self.symbol_queue.get(block=True)
 
 			def handle_error(_):
 				if _.check(StopIteration):
-					def tr():
-						self.result.callback(None)
-					reactor.callLater(0,tr)
+					deferToLater(call_done)
 					return
 
 				if self.p_stack:
@@ -412,9 +420,10 @@ class _drop(object):
 		conns.append(self)
 	def loseConnection(self):
 		self.lost = True
-		if self.g.next_symbol_queue:
-			self.g.next_symbol_queue.put(False,block=True)
+		q = self.g.next_symbol_queue
+		if q:
 			self.g.next_symbol_queue = None
+			q.put(False,block=True)
 	def drop(self,_):
 		conns.remove(self)
 		self.loseConnection()
@@ -435,7 +444,7 @@ def _parse(g,input):
 		if not l:
 			break
 		g.add_line(l)
-	reactor.callFromThread(g.endConnection)
+	g.endConnection()
 
 def parse(input, proc=None, ctx=None):
 	"""\

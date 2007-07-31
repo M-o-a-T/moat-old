@@ -296,8 +296,7 @@ class ExcWorker(Worker):
 	"""\
 		This worker will handle failures.
 		"""
-	def process_exc(self,err):
-		raise AssertionError("You need to override process_exc()")
+	pass
 
 
 class DoNothingWorker(Worker):
