@@ -48,6 +48,9 @@ class DupWaiterError(WaitError):
 	text = "A waiter ‹%s› already exists"
 
 
+def _trigger(_,d):
+	d.callback(None)
+	return _
 
 class Waiter(object):
 	"""This is the thing that waits."""
@@ -60,13 +63,26 @@ class Waiter(object):
 			pass
 		self.defer = defer.Deferred()
 		self.name = name
-		self.locked = False
+		self.queue = defer.succeed(None)
 		if self.name in waiters:
 			raise DupWaiterError(self)
 	
 	def _callit(self,_=None):
-		self.locked = False
 		self.id = reactor.callLater(self.value, self.doit)
+
+	def _lock(self):
+		d = defer.Deferred()
+		e = defer.Deferred()
+
+		f = self.queue
+		self.queue = e
+
+		f.addBoth(_trigger,d)
+		return d,e
+	
+	def _unlock(self,d,e):
+		d.addBoth(_trigger,e)
+		
 
 	def init(self,dest):
 		self.end = dest
@@ -76,9 +92,11 @@ class Waiter(object):
 		if self.name in waiters:
 			return DupWaiterError(self)
 		waiters[self.name] = self
-		self.locked = True
-		d = process_event(Event(self.ctx,"wait","start",unixtime(self.end),*self.name))
+
+		d,e = self._lock()
+		d.addCallback(lambda _: process_event(Event(self.ctx,"wait","start",unixtime(self.end),*self.name)))
 		d.addCallback(self._callit)
+		self._unlock(d,e)
 		d.addCallback(lambda _: self.defer)
 		return d
 
@@ -92,27 +110,22 @@ class Waiter(object):
 	value = property(get_value)
 
 	def doit(self):
-		if self.locked:
-			self.id = None
-			return
-		self.locked = True
-
-		d = process_event(Event(self.ctx,"wait","done",unixtime(self.end),*self.name))
+		d,e = self._lock()
+		self.queue = None
+		d.addCallback(lambda _: process_event(Event(self.ctx,"wait","done",unixtime(self.end),*self.name)))
 		def done(_):
 			del waiters[self.name]
 			self.defer.callback(_)
 		d.addCallbacks(done)
 
 	def cancel(self, err=WaitCancelled):
-		if self.locked:
-			raise WaitLocked(self)
-		self.locked = True
-
-		if self.id:
-			self.id.cancel()
-			self.id = None
-
-		d = process_event(Event(self.ctx,"wait","cancel",unixtime(self.end),*self.name))
+		d,e = self._lock()
+		def stoptimer():
+			if self.id:
+				self.id.cancel()
+				self.id = None
+		d.addCallback(lambda _: stoptimer())
+		d.addCallback(lambda _: process_event(Event(self.ctx,"wait","cancel",unixtime(self.end),*self.name)))
 		def errgen(_):
 			return Failure(err(self))
 		def done(_):
@@ -120,24 +133,27 @@ class Waiter(object):
 			self.defer.callback(_)
 		d.addCallback(errgen)
 		d.addBoth(done)
+		self._unlock(d,e)
 		return d
 	
 	def retime(self, dest):
-		if self.locked:
-			raise WaitLocked(self)
-		self.locked = True
-
-		self.id.cancel()
-		self.id = None
-
-		old_end = self.end
-		self.end = dest
-		d = process_event(Event(self.ctx,"wait","update",unixtime(self.end),*self.name))
+		d,e = self._lock()
+		def stoptimer():
+			if self.id:
+				self.id.cancel()
+				self.id = None
+		d.addCallback(lambda _: stoptimer())
+		def endupdate():
+			old_end = self.end
+			self.end = dest
+		d.addCallback(lambda _: endupdate())
+		d.addCallback(lambda _: process_event(Event(self.ctx,"wait","update",unixtime(self.end),*self.name)))
 		def err(_):
 			self.end = old_end
 			self._callit()
 			return _
 		d.addCallbacks(self._callit, err)
+		self._unlock(d,e)
 		return d
 
 	
