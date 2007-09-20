@@ -11,6 +11,7 @@ from homevent.run import process_event,register_worker,collect_event
 from homevent.logging import log,register_logger
 from homevent.reactor import start_up,shut_down, mainloop
 from homevent.statement import main_words,global_words
+from homevent.check import register_condition
 
 __all__ = ("Event","Worker","SeqWorker","WorkSequence",
 	"collect_event","process_event", "register_worker", "mainloop")

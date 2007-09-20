@@ -1,0 +1,27 @@
+if not exists module bool: load bool
+if not exists module ifelse: load ifelse
+if not exists module logging: load logging
+if true:
+	log TRACE
+if not exists module block: load block
+if not exists module trigger: load trigger
+if not exists module wait: load wait
+if not exists module onewire: load onewire
+if not exists module on_event: load on_event
+#
+on onewire scanned A * *:
+	name scanned
+
+	del on scanned
+	var onewire X "_DEV_" _ATTR_
+	trigger thermo $X
+	del wait yawn
+
+connect onewire A _HOST_ _PORT_
+#
+wait for 15:
+	name yawn
+
+dir onewire A
+disconnect onewire A
+wait for 1

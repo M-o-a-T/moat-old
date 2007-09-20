@@ -5,3 +5,5 @@
 *.pyc
 *-pyo
 test/real
+test/onewire2
+onewire_params
