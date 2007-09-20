@@ -21,6 +21,8 @@ class run_logger(Logger):
 		"""
 	def __init__(self,name, dot=True, level=TRACE):
 		self.dot=dot
+		self.name = name
+		self.try_init()
 		try:
 			self.data=open(os.path.join("real",name),"w")
 		except IOError:
@@ -29,6 +31,25 @@ class run_logger(Logger):
 		self.line=0
 		h.register_logger(self)
 		self.level = level
+
+	def __delete__(self):
+		self.try_exit()
+
+	def try_init(self):
+		scp = os.path.join("scripts",self.name+"_init")
+		if os.path.exists(scp):
+			res = os.spawnlp(os.P_WAIT, scp)
+			if res != 0:
+				print >>sys.stderr,"Init Script for %s failed: %d" % (self.name,res)
+				sys.exit(0)
+			
+	def try_exit(self):
+		scp = os.path.join("scripts",self.name+"_exit")
+		if os.path.exists(scp):
+			res = os.spawnlp(os.P_WAIT, scp)
+			if res != 0:
+				print >>sys.stderr,"Exit Script for %s failed: %d" % (self.name,res)
+				sys.exit(1)
 
 	def _log(self,level, sx):
 		self.line += 1
