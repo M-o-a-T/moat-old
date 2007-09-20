@@ -15,6 +15,7 @@ from homevent.event import Event
 from homevent.context import Context
 from twisted.python.failure import Failure
 import sys
+from traceback import print_exc
 
 __all__ = ("Logger","register_logger","unregister_logger",
 	"log","log_run","log_created","log_halted","LogNames",
@@ -102,7 +103,7 @@ class LogWorker(ExcWorker):
 				l.log_event(event)
 			except Exception,e:
 				print >>sys.stderr,"LOGGER CRASH 1"
-				print >>sys.stderr,e
+				print_exc(file=sys.stderr)
 				l.end_logging()
 				exc.append(sys.exc_info())
 		if exc:
@@ -126,14 +127,14 @@ def log_exc(msg=None, err=None, level=ERROR):
 				l.log(level,msg)
 			except Exception,e:
 				print >>sys.stderr,"LOGGER CRASH 2"
-				print >>sys.stderr,e
+				print_exc(file=sys.stderr)
 				l.end_logging()
 				log_exc("Logger removed",e)
 		try:
 			l.log_failure(err, level=level)
 		except Exception,e:
 			print >>sys.stderr,"LOGGER CRASH 3"
-			print >>sys.stderr,e
+			print_exc(file=sys.stderr)
 			l.end_logging()
 			log_exc("Logger removed",e)
 
@@ -150,7 +151,7 @@ class LogEndEvent(Event):
 			yield  "END: "+"¦".join(str(x) for x in self.names[1:])
 		except Exception,e:
 			print >>sys.stderr,"LOGGER CRASH 4"
-			print >>sys.stderr,e
+			print_exc(file=sys.stderr)
 			yield  "END: REPORT_ERROR: "+repr(self.names[1:])
 
 class LogDoneWorker(LogWorker):
@@ -235,7 +236,7 @@ def log(level, *a):
 			l.log(level, *a)
 		except Exception,e:
 			print >>sys.stderr,"LOGGER CRASH 0"
-			print >>sys.stderr,e
+			print_exc(file=sys.stderr)
 			loggers.remove(l)
 			exc.append(sys.exc_info())
 	if exc:
