@@ -163,15 +163,17 @@ RUN: <WorkSequence:9 (4)>
 RUN: <WorkSequence:9 (4)>
  ev: EVENT: state¦three¦-¦foo¦bar
 .
-NEW: <WorkSequence:10 (5)>
+NEW: <WorkSequence:10 (6)>
    : │  EVENT: shutdown
    : └1╴... done.
 2 EVENT: shutdown
-RUN: <WorkSequence:10 (5)>
+RUN: <WorkSequence:10 (6)>
+ ev: EVENT: shutdown
+RUN: <WorkSequence:10 (6)>
  ev: EVENT: shutdown
 2 END: shutdown
 RUN: shutting down
- at: <WorkSequence:10 (5)>
+ at: <WorkSequence:10 (6)>
  ev: EVENT: shutdown
-RUN: <WorkSequence:10 (5)>
+RUN: <WorkSequence:10 (6)>
  ev: EVENT: shutdown

@@ -17,6 +17,7 @@ on_event 		This module registers the "on EVENT:" handler.
 		
 -10 Logger
 -9 shutdown first
+-8 Wait killer
 101 Logger
 102 shutdown handler
 103 shutdown last
@@ -126,15 +127,17 @@ RUN: <WorkSequence:10 (4)>
 93 END: wait¦done¦1049515628.3¦_wait¦4
 RUN: <WorkSequence:10 (4)>
  ev: EVENT: wait¦done¦1049515628.3¦_wait¦4
-NEW: <WorkSequence:11 (5)>
+NEW: <WorkSequence:11 (6)>
    : │  EVENT: shutdown
    : └1╴... done.
 2 EVENT: shutdown
-RUN: <WorkSequence:11 (5)>
+RUN: <WorkSequence:11 (6)>
+ ev: EVENT: shutdown
+RUN: <WorkSequence:11 (6)>
  ev: EVENT: shutdown
 2 END: shutdown
 RUN: shutting down
- at: <WorkSequence:11 (5)>
+ at: <WorkSequence:11 (6)>
  ev: EVENT: shutdown
-RUN: <WorkSequence:11 (5)>
+RUN: <WorkSequence:11 (6)>
  ev: EVENT: shutdown

@@ -10,28 +10,28 @@ RUN: <WorkSequence:1 (4)>
 NEW: <WorkSequence:2 (4)>
    : │  EVENT: foo1
    : └1╴... done.
+NEW: <WorkSequence:3 (4)>
+   : │  EVENT: bar1
+   : └1╴... done.
+NEW: <WorkSequence:4 (4)>
+   : │  EVENT: wait¦start¦1049515628.1¦_wait¦1
+   : └1╴... done.
 11 EVENT: foo1
 RUN: <WorkSequence:2 (4)>
  ev: EVENT: foo1
 11 END: foo1
 RUN: <WorkSequence:2 (4)>
  ev: EVENT: foo1
-NEW: <WorkSequence:3 (4)>
-   : │  EVENT: bar1
-   : └1╴... done.
-20 EVENT: bar1
+15 EVENT: bar1
 RUN: <WorkSequence:3 (4)>
  ev: EVENT: bar1
-20 END: bar1
+15 END: bar1
 RUN: <WorkSequence:3 (4)>
  ev: EVENT: bar1
-NEW: <WorkSequence:4 (4)>
-   : │  EVENT: wait¦start¦1049515628.1¦_wait¦1
-   : └1╴... done.
-29 EVENT: wait¦start¦1049515628.1¦_wait¦1
+19 EVENT: wait¦start¦1049515628.1¦_wait¦1
 RUN: <WorkSequence:4 (4)>
  ev: EVENT: wait¦start¦1049515628.1¦_wait¦1
-29 END: wait¦start¦1049515628.1¦_wait¦1
+19 END: wait¦start¦1049515628.1¦_wait¦1
 RUN: <WorkSequence:4 (4)>
  ev: EVENT: wait¦start¦1049515628.1¦_wait¦1
 NEW: <WorkSequence:5 (4)>
@@ -197,15 +197,17 @@ RUN: <WorkSequence:21 (4)>
 185 END: wait¦done¦1049515628.1¦_wait¦5
 RUN: <WorkSequence:21 (4)>
  ev: EVENT: wait¦done¦1049515628.1¦_wait¦5
-NEW: <WorkSequence:22 (5)>
+NEW: <WorkSequence:22 (6)>
    : │  EVENT: shutdown
    : └1╴... done.
 2 EVENT: shutdown
-RUN: <WorkSequence:22 (5)>
+RUN: <WorkSequence:22 (6)>
+ ev: EVENT: shutdown
+RUN: <WorkSequence:22 (6)>
  ev: EVENT: shutdown
 2 END: shutdown
 RUN: shutting down
- at: <WorkSequence:22 (5)>
+ at: <WorkSequence:22 (6)>
  ev: EVENT: shutdown
-RUN: <WorkSequence:22 (5)>
+RUN: <WorkSequence:22 (6)>
  ev: EVENT: shutdown

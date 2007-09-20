@@ -112,15 +112,17 @@ RUN: <WorkSequence:11 (4)>
  ev: EVENT: wait¦done¦1049515628.6¦_wait¦3
 1 testing
 1 Done
-NEW: <WorkSequence:12 (5)>
+NEW: <WorkSequence:12 (6)>
    : │  EVENT: shutdown
    : └1╴... done.
 2 EVENT: shutdown
-RUN: <WorkSequence:12 (5)>
+RUN: <WorkSequence:12 (6)>
+ ev: EVENT: shutdown
+RUN: <WorkSequence:12 (6)>
  ev: EVENT: shutdown
 2 END: shutdown
 RUN: shutting down
- at: <WorkSequence:12 (5)>
+ at: <WorkSequence:12 (6)>
  ev: EVENT: shutdown
-RUN: <WorkSequence:12 (5)>
+RUN: <WorkSequence:12 (6)>
  ev: EVENT: shutdown

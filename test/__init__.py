@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import homevent as h
-from homevent.logging import Logger, TRACE
+from homevent.logging import Logger, TRACE, log
 from homevent.interpreter import Interpreter
 from homevent.parser import parse
 from homevent.context import Context
@@ -25,7 +25,7 @@ class run_logger(Logger):
 			self.data=open(os.path.join("real",name),"w")
 		except IOError:
 			print >>sys.stderr,"ERROR, no log file"
-			self.data = None
+			self.data = sys.stderr
 		self.line=0
 		h.register_logger(self)
 		self.level = level
@@ -90,7 +90,7 @@ class SayMoreWorker(h.SeqWorker):
 def parse_logger(s,t,c,*x):
 	pass
 	#if t == COMMENT:
-	#	log(c.rstrip())
+	#log(TRACE, "%s %s %s %s" % tuple(map(repr,(s,t,c,x))))
 
 class logwrite(object):
 	def __init__(self,log):

@@ -12,12 +12,12 @@ for typical usage.
 """
 
 from zope.interface import implements
-from homevent.tokize import generate_tokens
+from homevent.tokize import tokizer
 import Queue
 import sys
 from twisted.internet import reactor,threads,defer,interfaces
 from twisted.python import failure
-from twisted.protocols.basic import LineReceiver
+from twisted.protocols.basic import LineOnlyReceiver,FileSender,_PauseableMixin
 from threading import Lock
 
 from homevent.logging import log,TRACE
@@ -28,6 +28,42 @@ from homevent.event import Event
 from homevent.statement import global_words
 from homevent.twist import deferToLater
 
+PLOG = False
+
+class SimpleReceiver(LineOnlyReceiver,object):
+	delimiter = "\n"
+
+	def __init__(self, parser):
+		super(SimpleReceiver,self).__init__()
+		self.parser = parser
+
+	def lineReceived(self, data):
+		if PLOG: print "S LINE",repr(data)
+		self.parser.add_line(data)
+	
+	def write(self, data):
+		if PLOG: print "S WRITE",self.transport,repr(data)
+		self.dataReceived(data)
+	
+	def registerProducer(self, producer, streaming):
+		if PLOG: print "S START"
+		self.parser.registerProducer(producer, streaming)
+	
+	def unregisterProducer(self):
+		if PLOG: print "S STOP"
+		self.parser.unregisterProducer()
+	
+def buildReceiver(stream,parser):
+	"""\
+		Convert a simple input stream to a line-based pauseable protocol
+		and registers it with the parser.
+		"""
+	rc = SimpleReceiver(parser)
+	fs = FileSender()
+	fs.disconnecting = False
+	rc.makeConnection(fs)
+	r = fs.beginFileTransfer(stream, rc)
+	r.addBoth(parser.endConnection)
 
 class ParseReceiver(Outputter):
 	"""This is a mixin to feed a parser"""
@@ -49,6 +85,8 @@ class ParseReceiver(Outputter):
 			r.addErrback(reporter)
 			parser = p
 		self.parser = parser
+		parser.registerProducer(self)
+		#parser.startParsing()
 	
 	def readConnectionLost(self):
 		try:
@@ -95,7 +133,11 @@ def parser_builder(cls=None,interpreter=None,*a,**k):
 		Return something that builds a receiver class when called with
 		no arguments
 		"""
-	if cls is None: cls = LineReceiver
+	if cls is None:
+		cls = LineOnlyReceiver
+		impl = interfaces.IPushProducer
+	else:
+		impl = None
 	try:
 		ctx = k.pop("ctx")
 	except KeyError:
@@ -105,7 +147,10 @@ def parser_builder(cls=None,interpreter=None,*a,**k):
 		interpreter = InteractiveInterpreter
 
 	class mixer(ParseReceiver,cls):
+		if impl:
+			implements(impl)
 		pass
+
 	def gen_builder(*x,**y):
 		c = ctx()
 		k["ctx"] = c
@@ -117,17 +162,15 @@ def parser_builder(cls=None,interpreter=None,*a,**k):
 
 
 class Parser(object):
-	"""The input parser object. It serves as a LineReceiver and a 
-	   normal (but non-throttle-able) producer."""
-	delimiter="\n"
+	"""The input parser object. It is a consumer of lines."""
 	line = None
+	implements(interfaces.IFinishableConsumer)
 
-	def __init__(self, proc, ctx=None, delimiter=None):
+	def __init__(self, proc, ctx=None):
 		"""Parse an input stream and pass the commands to the processor
 		@proc."""
 		super(Parser,self).__init__()
 
-		self.line_queue = Queue.Queue(10)
 		self.symbol_queue = Queue.Queue(1)
 		self.next_symbol_queue = Queue.Queue(0)
 		self.result = defer.Deferred()
@@ -136,6 +179,7 @@ class Parser(object):
 		self.proc = proc
 		self.p_wait = []
 		self.p_wait_lock = Lock()
+		self.p_queued = None
 		self.restart_producer = False
 
 		if ctx is None:
@@ -145,42 +189,81 @@ class Parser(object):
 
 		if "filename" not in self.ctx:
 			self.ctx.filename="<stdin?>"
-		if delimiter:
-			self.delimiter=delimiter
 
 		def ex(_):
 			if self.line is not None:
-				self.line.loseConnection()
+				if hasattr(self.line,"loseConnection"):
+					self.line.loseConnection()
+				elif hasattr(self.line,"stopProducing"):
+					self.line.stopProducing()
 			return _
 		self.result.addBoth(ex)
+
+	def registerProducer(self, producer, streaming=None):
+		if PLOG: print >>sys.stderr,"PRODUCE",streaming,producer
+		if streaming is None:
+			if interfaces.IPushProducer.implementedBy(producer.__class__):
+				streaming = True
+			elif interfaces.IPullProducer.implementedBy(producer.__class__):
+				streaming = False
+			elif interfaces.IProducer.implementedBy(producer.__class__):
+				raise RuntimeError("Some sort of producer: "+str(producer))
+			else:
+				if hasattr(producer,"pauseProducing"):
+					raise RuntimeError("A PushProducer: "+str(producer.__class__.__mro__))
+				elif hasattr(producer,"resumeProducing"):
+					raise RuntimeError("A PullProducer: "+str(producer.__class__.__mro__))
+				else:
+					#raise RuntimeError("Not a producer: "+str(producer.__class__.__mro__))
+					buildReceiver(producer,self)
+					return
+		self.line = producer
+
+		self.streaming = streaming
+		self.stream_off = True
+	
+	def unregisterProducer(self):
+		if PLOG: print >>sys.stderr,"PRODUCE UNREG",self.line
+		self.line = None
+		self.finish()
+	
+	def finish(self):
+		self.endConnection()
 
 	def endConnection(self, res=None):
 		"""Called to stop"""
 		d = defer.Deferred()
-		#reactor.callLater(0,self._endConnection,d,res)
 		e = deferToLater(self._endConnection,d,res)
 		e.addErrback(process_failure)
 		return d
 
 	def _endConnection(self,d,r):
+		if self.p_queued:
+			if PLOG: print "LINE> STOP"
+			q = self.p_queued
+			self.p_queued = None
+			q.errback(failure.Failure(StopIteration()))
+
 		if not self.ending:
+			if PLOG: print "LINE> ENDING"
 			self.ending = True
-			q = self.line_queue
-			if q is not None:
-				try:
-					q.put(None, block=False)
-				except Queue.Full:
-					reactor.callInThread(q.put,None,block=True)
+			self.p_wait.append(None)
+			self.process_line_buffer()
+		if PLOG: print "LINE> END"
 
 		def ex(_):
-			q = self.next_symbol_queue
-			if q:
-				self.next_symbol_queue = None
-				q.put(False,block=True)
-
 			d.callback(r)
+			self._last_symbol()
 			return _
 		self.result.addBoth(ex)
+
+	def _last_symbol(self):
+		q = self.next_symbol_queue
+		if q:
+			if PLOG: print >>sys.stderr,"WANT TOKEN last"
+			self.next_symbol_queue = None
+			q.put(False,block=True)
+		if PLOG: print >>sys.stderr,"WANT TOKEN last2"
 
 	def add_line(self, data):
 		"""Standard LineReceiver method"""
@@ -191,45 +274,83 @@ class Parser(object):
 		if not self.p_wait_lock.acquire(False):
 			return
 
-		try:
-			while self.p_wait:
-				item = self.p_wait.pop(0)
-				q = self.line_queue
-				if q:
-					q.put(item, block=(self.line is None))
-		except Queue.Full:
-			self.p_wait.insert(0,item)
-			self.pauseProducing()
+		if self.p_queued:
+			self.resumeProducing()
 
+		while self.p_wait and self.p_queued:
+			item = self.p_wait.pop(0)
+			if PLOG: print >>sys.stderr,"LINE>",repr(item)
+			q = self.p_queued
+			self.p_queued = None
+			if item is None:
+				q.errback(failure.Failure(StopIteration()))
+			else:
+				q.callback(item)
+		if PLOG:
+			if self.p_wait:
+				print >>sys.stderr,"LINE: input available"
+			if self.p_queued:
+				print >>sys.stderr,"LINE: wait for input"
+
+		if self.p_wait:
+			self.pauseProducing()
 		self.p_wait_lock.release()
 
 	def pauseProducing(self):
-		if self.line is not None and hasattr(self.line,"pauseProducing"):
+		if self.line is not None and hasattr(self.line,"pauseProducing") \
+				and not self.stream_off and not self.ending:
+			if PLOG: print >>sys.stderr,"LINE pause"
 			self.line.pauseProducing()
+			if self.streaming:
+				self.stream_off = True
+		elif PLOG:
+			if self.line is None:
+				print >>sys.stderr,"LINE_PAUSE no line"
+			if not hasattr(self.line,"pauseProducing"):
+				print >>sys.stderr,"LINE_PAUSE cannot pause"
+			if self.stream_off:
+				print >>sys.stderr,"LINE_PAUSE already off"
+			if self.ending:
+				print >>sys.stderr,"LINE_PAUSE ending"
 
 	def stopProducing(self):
-		if self.line is not None and hasattr(self.line,"stopProducing"):
+		if self.line is not None and hasattr(self.line,"stopProducing") \
+				and not self.ending:
+			if PLOG: print >>sys.stderr,"LINE stop"
 			self.line.stopProducing()
+		elif PLOG:
+			if self.line is None:
+				print >>sys.stderr,"LINE_STOP no line"
+			if not hasattr(self.line,"stopProducing"):
+				print >>sys.stderr,"LINE_STOP cannot stop"
+			if self.ending:
+				print >>sys.stderr,"LINE_STOP ending"
 
 	def resumeProducing(self):
 		self.process_line_buffer()
-		if self.line is not None and hasattr(self.line,"resumeProducing"):
+		if self.line is not None and hasattr(self.line,"resumeProducing") \
+				and self.stream_off and not self.ending:
+			if PLOG: print >>sys.stderr,"LINE resume",self.line
 			self.line.resumeProducing()
+			if self.streaming:
+				self.stream_off = False
+		elif PLOG:
+			if self.line is None:
+				print >>sys.stderr,"LINE_RES no line"
+			if not hasattr(self.line,"resumeProducing"):
+				print >>sys.stderr,"LINE_RES cannot resume"
+			if not self.stream_off:
+				print >>sys.stderr,"LINE_RES already on"
+			if self.ending:
+				print >>sys.stderr,"LINE_RES ending"
 
-	def readline(self):
-		"""Queued ReadLine, to be called from the _sym_parse thread ONLY"""
-		q = self.line_queue
-		if q is None:
-			return ""
-		try:
-			l = q.get(block=False)
-		except Queue.Empty:
-			reactor.callInThread(self.resumeProducing)
-			l = q.get(block=True)
-		if l is None:
-			self.line_queue = None
-			return ""
-		return l+"\n"
+	def read_a_line(self):
+		if PLOG: print >>sys.stderr,"P READ_A_LINE"
+		if self.p_queued:
+			raise RuntimeError("read_a_line: already waiting")
+		q = self.p_queued = defer.Deferred()
+		self.process_line_buffer()
+		return q
 
 	def init_state(self):
 		self.p_state=0
@@ -242,71 +363,59 @@ class Parser(object):
 			Iterator. It gets fed tokens, assembles them into
 			statements, and calls the processor with them.
 			"""
+		if PLOG: print >>sys.stderr,"P START",protocol
+
 		if protocol is not None:
 			protocol.addDropCallback(self.endConnection)
-		self.line = protocol
+			self.line = protocol
+		assert self.line is not None, "no input whatsoever?"
+
 
 		if "out" not in self.ctx:
 			self.ctx.out=sys.stdout
 
 		self.init_state()
-		reactor.callInThread(self._startParsing)
 
-	def _startParsing(self):
-		self.p_gen = generate_tokens(self.readline)
-		reactor.callInThread(self._sym_parse)
-		self._do_parse()
+		self.p_gen = tokizer(self.read_a_line, self._do_parse)
+		def pg_done(_):
+			if PLOG:
+				print >>sys.stderr,"P DONE",_
+			try: self.result.callback(_)
+			except defer.AlreadyCalledError: pass
+			else: self.endConnection()
+		def pg_err(_):
+			if PLOG: print >>sys.stderr,"P ERROR",_
+			try: self.result.errback(_)
+			except defer.AlreadyCalledError: pass
+			else: self.endConnection()
+		self.p_gen.addCallbacks(pg_done,pg_err)
 
-	def _sym_parse(self):
-		"""Thread transferring input lines to symbols."""
-		from token import ENDMARKER
-
-		while True:
-			nq = self.next_symbol_queue
-			if not nq or not nq.get(block=True):
-				return
-
-			t = self.p_gen.next()
-			self.symbol_queue.put(t, block=True)
-
-			if t[0] == ENDMARKER:
-				return
-
-	def _do_parse(self):
+	def _do_parse(self, t,txt,beg,end,line):
 		# States: 0 newline, 1 after first word, 2 OK to extend word
 		#         3+4 need newline+indent after sub-level start, 5 extending word
-		def call_done():
-			try: self.result.callback(None)
-			except defer.AlreadyCalledError: pass
+		if PLOG: print >>sys.stderr,"PARSE",t,repr(txt)
 
-		while True:
-			nq = self.next_symbol_queue
-			if not nq:
-				#deferToLater(call_done)
-				return
-			nq.put(True,block=True)
-			t,txt,beg,end,line = self.symbol_queue.get(block=True)
+		def handle_error(_):
+			if _.check(StopIteration):
+				_.raiseException()
 
-			def handle_error(_):
-				if _.check(StopIteration):
-					deferToLater(call_done)
-					return
+			if self.p_stack:
+				self.proc = self.p_stack[0]
 
-				if self.p_stack:
-					self.proc = self.p_stack[0]
-
+			try:
+				if PLOG: print >>sys.stderr,"PERR",self,self.proc
+				self.proc.error(self,_)
+				if PLOG: print >>sys.stderr,"PERR OK"
+			except BaseException,e:
 				try:
-					self.proc.error(self,_)
-				except BaseException,e:
-					if not isinstance(e,AttributeError):
-						from traceback import print_exc
-						print_exc()
-					try: self.result.errback(_)
-					except defer.AlreadyCalledError: pass
+					if PLOG: print >>sys.stderr,"RESULT error",_
+					self.result.errback(_)
+				except defer.AlreadyCalledError: pass
+				else: self.endConnection()
 
-			res = defer.maybeDeferred(self._parseStep,t,txt,beg,end,line)
-			res.addCallbacks(lambda _: self._do_parse(), handle_error)
-			return res
+		res = defer.maybeDeferred(self._parseStep,t,txt,beg,end,line)
+		res.addErrback(handle_error)
+		return res
 
 	def _parseStep(self, t,txt,beg,end,line):
 		from token import NUMBER,NAME,DEDENT,INDENT,OP,NEWLINE,ENDMARKER, \
@@ -364,6 +473,9 @@ class Parser(object):
 				self.p_state = 5
 				return
 			elif t == OP and txt == ":":
+				if PLOG:
+					print >>sys.stderr,"RUN2"
+					print >>sys.stderr,self.proc.complex_statement,self.p_args
 				p = defer.maybeDeferred(self.proc.complex_statement,self.p_args)
 
 				def have_p(_):
@@ -373,6 +485,9 @@ class Parser(object):
 				p.addCallback(have_p)
 				return p
 			elif t == NEWLINE:
+				if PLOG:
+					print >>sys.stderr,"RUN3"
+					print >>sys.stderr,self.proc.simple_statement,self.p_args
 				r = defer.maybeDeferred(self.proc.simple_statement,self.p_args)
 					
 				if self.p_pop_after:
@@ -420,44 +535,30 @@ class _drop(object):
 		conns.append(self)
 	def loseConnection(self):
 		self.lost = True
-		q = self.g.next_symbol_queue
-		if q:
-			self.g.next_symbol_queue = None
-			q.put(False,block=True)
+		if PLOG: print >>sys.stderr,"LAST_SYM _drop"
+		self.g._last_symbol()
 	def drop(self,_):
+		if PLOG: print >>sys.stderr,"LAST_SYM drop"
 		conns.remove(self)
 		self.loseConnection()
 		return _
 
-def _parse(g,input):
-	"""Internal code for parse() which reads the input in a separate thread"""
-	g.startParsing()
-	x = _drop(g)
-	def d(_):
-		x.drop(_)
-		return _
-	#g.result.addBoth(x.drop)
-	g.result.addBoth(d)
-
-	while not x.lost:
-		l = input.readline()
-		if not l:
-			break
-		g.add_line(l)
-	g.endConnection()
-
 def parse(input, proc=None, ctx=None):
 	"""\
-		Read input (which must be something with a readline() method),
-		run through the tokenizer, pass to @cmd's add().
+		Read non-blocking input, run through the tokenizer, pass to the
+		parser.
 		"""
 	if not ctx: ctx=Context
-	ctx = ctx(fname="<stdin>")
+	if ctx is Context or "fname" not in ctx:
+		ctx = ctx(fname="<stdin>")
 	if proc is None: proc = global_words(ctx)
+
 	g = Parser(proc, ctx=ctx)
-	d = threads.deferToThread(_parse,g,input) # read the input
-	d.addCallback(lambda _: g.result)         # analyze the result
-	return d
+	x = _drop(g)
+	g.result.addBoth(x.drop)
+	g.registerProducer(input)
+	g.startParsing()
+	return g.result
 
 def read_config(ctx,name, interpreter=None):
 	"""Read a configuration file."""

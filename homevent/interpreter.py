@@ -220,5 +220,5 @@ class InteractiveInterpreter(Interpreter):
 			err.printBriefTraceback(file=parser.ctx.out)
 		parser.init_state()
 		self.prompt()
-		return parser._do_parse()
+		return
 

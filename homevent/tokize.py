@@ -7,6 +7,9 @@ __credits__ = \
 import string, re
 from token import *
 import tokenize as t
+from twisted.internet.defer import inlineCallbacks, returnValue, maybeDeferred
+
+TLOG = False
 
 COMMENT = t.COMMENT
 NL = t.NL
@@ -62,7 +65,40 @@ tokenprog, pseudoprog = map(
 
 tabsize = 8
 
-def generate_tokens(readline):
+def tokenlogwrap(tx):
+	def txw(inp,outp):
+		def iw():
+			r = maybeDeferred(inp)
+			def irep(_):
+				print "IN",_
+				return _
+			if TLOG: r.addBoth(irep)
+			return r
+		def ow(*a,**k):
+			if TLOG: print "TOKEN:",repr(a)
+			r = maybeDeferred(outp,*a,**k)
+			def orep(_):
+				if TLOG: print "TOKEN::",_
+				return _
+			def orepf(_):
+				if _.check(StopIteration):
+					if TLOG: print "TOKEN:: STOP_INPUT"
+				else:
+					if TLOG: print "TOKEN::",_
+				return _
+			r.addCallbacks(orep,orepf)
+			return r
+		res = tx(iw,ow)
+		def rep(_):
+			print "TOKEN END::",_
+			return _
+		if TLOG: res.addBoth(rep)
+		return res
+	return txw
+	
+@tokenlogwrap
+@inlineCallbacks
+def tokizer(input,output):
     """see tokenize.generate_tokens."""
 
     lnum = parenlev = continued = 0
@@ -73,7 +109,7 @@ def generate_tokens(readline):
 
     while 1:                                   # loop over lines in stream
         try:
-            line = readline()
+            line = (yield input())+"\n"
         except StopIteration:
             line = ''
         lnum = lnum + 1
@@ -85,12 +121,12 @@ def generate_tokens(readline):
             endmatch = endprog.match(line)
             if endmatch:
                 pos = end = endmatch.end(0)
-                yield (STRING, contstr + line[:end],
+                yield output(STRING, contstr + line[:end],
                            strstart, (lnum, end), contline + line)
                 contstr, needcont = '', 0
                 contline = None
             elif needcont and line[-2:] != '\\\n' and line[-3:] != '\\\r\n':
-                yield (ERRORTOKEN, contstr + line,
+                yield output(ERRORTOKEN, contstr + line,
                            strstart, (lnum, len(line)), contline)
                 contstr = ''
                 contline = None
@@ -112,20 +148,20 @@ def generate_tokens(readline):
             if pos == max: break
 
             if line[pos] in '#\r\n':           # skip comments or blank lines
-                yield ((NL, COMMENT)[line[pos] == '#'], line[pos:],
+                yield output((NL, COMMENT)[line[pos] == '#'], line[pos:],
                            (lnum, pos), (lnum, len(line)), line)
                 continue
 
             if column > indents[-1]:           # count indents or dedents
                 indents.append(column)
-                yield (INDENT, line[:pos], (lnum, 0), (lnum, pos), line)
+                yield output(INDENT, line[:pos], (lnum, 0), (lnum, pos), line)
             while column < indents[-1]:
                 if column not in indents:
                     raise IndentationError(
                         "unindent does not match any outer indentation level",
                         ("<tokenize>", lnum, pos, line))
                 indents = indents[:-1]
-                yield (DEDENT, '', (lnum, pos), (lnum, pos), line)
+                yield output(DEDENT, '', (lnum, pos), (lnum, pos), line)
 
         else:                                  # continued statement
             if not line:
@@ -141,19 +177,19 @@ def generate_tokens(readline):
 
                 if initial in numchars or \
                    (initial == '.' and token != '.'):      # ordinary number
-                    yield (NUMBER, token, spos, epos, line)
+                    yield output(NUMBER, token, spos, epos, line)
                 elif initial in '\r\n':
-                    yield (parenlev > 0 and NL or NEWLINE,
+                    yield output(parenlev > 0 and NL or NEWLINE,
                                token, spos, epos, line)
                 elif initial == '#':
-                    yield (COMMENT, token, spos, epos, line)
+                    yield output(COMMENT, token, spos, epos, line)
                 elif token in triple_quoted:
                     endprog = endprogs[token]
                     endmatch = endprog.match(line, pos)
                     if endmatch:                           # all on one line
                         pos = endmatch.end(0)
                         token = line[start:pos]
-                        yield (STRING, token, spos, (lnum, pos), line)
+                        yield output(STRING, token, spos, (lnum, pos), line)
                     else:
                         strstart = (lnum, start)           # multiple lines
                         contstr = line[start:]
@@ -170,21 +206,21 @@ def generate_tokens(readline):
                         contline = line
                         break
                     else:                                  # ordinary string
-                        yield (STRING, token, spos, epos, line)
+                        yield output(STRING, token, spos, epos, line)
                 elif initial in namechars:                 # ordinary name
-                    yield (NAME, token, spos, epos, line)
+                    yield output(NAME, token, spos, epos, line)
                 elif initial == '\\':                      # continued stmt
                     continued = 1
                 else:
                     if initial in '([{': parenlev = parenlev + 1
                     elif initial in ')]}': parenlev = parenlev - 1
-                    yield (OP, token, spos, epos, line)
+                    yield output(OP, token, spos, epos, line)
             else:
-                yield (ERRORTOKEN, line[pos],
+                yield output(ERRORTOKEN, line[pos],
                            (lnum, pos), (lnum, pos+1), line)
                 pos = pos + 1
 
     for indent in indents[1:]:                 # pop remaining indent levels
-        yield (DEDENT, '', (lnum, 0), (lnum, 0), '')
-    yield (ENDMARKER, '', (lnum, 0), (lnum, 0), '')
+        yield output(DEDENT, '', (lnum, 0), (lnum, 0), '')
+    yield output(ENDMARKER, '', (lnum, 0), (lnum, 0), '')
 

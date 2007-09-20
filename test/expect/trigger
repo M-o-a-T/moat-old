@@ -43,15 +43,17 @@ RUN: <WorkSequence:5 (4)>
 36 END: bar
 RUN: <WorkSequence:5 (4)>
  ev: EVENT: bar
-NEW: <WorkSequence:6 (5)>
+NEW: <WorkSequence:6 (6)>
    : │  EVENT: shutdown
    : └1╴... done.
 2 EVENT: shutdown
-RUN: <WorkSequence:6 (5)>
+RUN: <WorkSequence:6 (6)>
+ ev: EVENT: shutdown
+RUN: <WorkSequence:6 (6)>
  ev: EVENT: shutdown
 2 END: shutdown
 RUN: shutting down
- at: <WorkSequence:6 (5)>
+ at: <WorkSequence:6 (6)>
  ev: EVENT: shutdown
-RUN: <WorkSequence:6 (5)>
+RUN: <WorkSequence:6 (6)>
  ev: EVENT: shutdown
