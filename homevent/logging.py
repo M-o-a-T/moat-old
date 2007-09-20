@@ -238,7 +238,6 @@ def log(level, *a):
 			loggers.remove(l)
 			exc.append(sys.exc_info())
 	if exc:
-		from traceback import print_exception
 		for e in exc:
 			log_exc("Logging error", err=e)
 
