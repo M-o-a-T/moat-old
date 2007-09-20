@@ -25,27 +25,28 @@ from homevent.interpreter import InteractiveInterpreter,Interpreter
 from cStringIO import StringIO
 
 
-class SSHDemoProtocol(recvline.HistoricRecvLine):
+class SSHprotocol(recvline.HistoricRecvLine):
 	def __init__(self, user):
 		self.user = user
-		super(SSHDemoProtocol,self).__init__()
+		super(SSHprotocol,self).__init__()
 	def connectionMade(self):
-		super(SSHDemoProtocol,self).connectionMade()
+		super(SSHprotocol,self).connectionMade()
 		if not hasattr(self,"transport"):
 			self.transport = self.terminal
 		self.terminal.write("This is the HomEvenT command line.")
 		self.terminal.nextLine()
 
-class SSHDemoAvatar(avatar.ConchUser):
+class SSHavatar(avatar.ConchUser):
 	implements(conchinterfaces.ISession)
 	def __init__(self, username):
 		avatar.ConchUser.__init__(self)
 		self.username = username
 		self.channelLookup.update({'session':session.SSHSession})
 	def openShell(self, protocol):
-		serverProtocol = insults.ServerProtocol(parser_builder(SSHDemoProtocol, None), self)
+		serverProtocol = insults.ServerProtocol(parser_builder(SSHprotocol, None), self)
 		serverProtocol.makeConnection(protocol)
 		protocol.makeConnection(session.wrapProtocol(serverProtocol))
+		self.protocol = protocol # for self.eofReceived()
 	def getPty(self, terminal, windowSize, attrs):
 		return None
 	def execCommand(self, protocol, cmd):
@@ -56,14 +57,16 @@ class SSHDemoAvatar(avatar.ConchUser):
 			protocol.loseConnection()
 		d.addBoth(shut)
 
+	def eofReceived(self):
+		self.protocol.loseConnection()
 	def closed(self):
 		pass
 
-class SSHDemoRealm:
+class SSHrealm:
 	implements(portal.IRealm)
 	def requestAvatar(self, avatarId, mind, *interfaces):
 		if conchinterfaces.IConchUser in interfaces:
-			return interfaces[0], SSHDemoAvatar(avatarId), lambda: None
+			return interfaces[0], SSHavatar(avatarId), lambda: None
 		else:
 			raise Exception, "No supported interfaces found."
 
@@ -126,7 +129,7 @@ You need to call this exactly once.
 		priv_path = os.path.join(path,"host.priv.key")
 
 		f = factory.SSHFactory()
-		f.portal = portal.Portal(SSHDemoRealm())
+		f.portal = portal.Portal(SSHrealm())
 		f.portal.registerChecker(PublicKeyCredentialsChecker(authorizedKeys))
 
 		if not (os.path.exists(pub_path) and os.path.exists(priv_path)):
