@@ -119,7 +119,7 @@ class ComplexStatement(Statement):
 
 	def __getitem__(self,key):
 		if self.__words is None:
-			raise NotImplementedError("No word list in "+self.__class__.__name__)
+			raise KeyError("Lookup ‹%s›: No word list in %s" % (key,self.__class__.__name__))
 		return self.__words[key]
 
 	def lookup(self,args):
