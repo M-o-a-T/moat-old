@@ -7,7 +7,7 @@ from homevent.statement import main_words, global_words
 from homevent.check import register_condition
 from homevent.module import load_module, Load,Unload,LoadDir,ModuleExists
 from homevent.reactor import ShutdownHandler,mainloop,shut_down
-from twisted.internet import reactor,interfaces
+from twisted.internet import reactor,interfaces,fdesc
 from twisted.internet._posixstdio import StandardIO ## XXX unstable interface!
 from twisted.internet.error import ConnectionDone,ConnectionLost
 from homevent.context import Context
@@ -26,6 +26,9 @@ def parse_logger(t,*x):
 	print t+":"+" ".join((repr(d) for d in x))
 
 class StdIO(StandardIO):
+	def __init__(self,*a,**k):
+		super(StdIO,self).__init__(*a,**k)
+		fdesc.setBlocking(self._writer.fd)
 	def connectionLost(self,reason):
 		super(StdIO,self).connectionLost(self)
 		if not reason.check(ConnectionDone,ConnectionLost):
