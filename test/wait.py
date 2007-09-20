@@ -11,10 +11,11 @@ async:
 	wait for 10:
 		name Foo Bar
 	trigger FooBar
-wait for 0.1
+wait for 0.1:
+	name X1
 list wait
 list wait Foo Bar
-wait for 0.2:
+wait for 0.1:
 	name Foo Bar
 	update
 block:
@@ -22,9 +23,11 @@ block:
 		log DEBUG No2
 	else:
 		log DEBUG Yes
-wait for 0.1
+wait for 0.2:
+	name X2
 trigger DoNow
-wait for 0.1
+wait for 0.1:
+	name X3
 async:
 	wait until 8 min:
 		name Foo Baz

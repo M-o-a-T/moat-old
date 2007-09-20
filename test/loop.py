@@ -8,14 +8,14 @@ from test import run
 
 input = """\
 async:
-	wait for 2:
+	wait for 1.9:
 		name Foo Bar
 wait for 0.1
 block:
 	log DEBUG Start
 	while exists wait Foo Bar:
 		log DEBUG waiting
-		wait for 0.6
+		wait for 0.7
 		log DEBUG testing
 	log DEBUG Done
 

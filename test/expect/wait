@@ -6,20 +6,20 @@ NEW: <WorkSequence:1 (4)>
 0 add ‹WaitHandler ('wait', 'for') 2›
 0 add ‹TriggerHandler ⌁.trigger¦FooBar›
 NEW: <WorkSequence:2 (4)>
-   : │  EVENT: wait¦start¦1049515628.1¦_wait¦2
+   : │  EVENT: wait¦start¦1049515628.1¦X1
    : └1╴... done.
-16 EVENT: wait¦start¦1049515628.1¦_wait¦2
-16 END: wait¦start¦1049515628.1¦_wait¦2
+18 EVENT: wait¦start¦1049515628.1¦X1
+18 END: wait¦start¦1049515628.1¦X1
 NEW: <WorkSequence:3 (4)>
    : │  EVENT: wait¦start¦1049515638.0¦Foo¦Bar
    : └1╴... done.
-24 EVENT: wait¦start¦1049515638.0¦Foo¦Bar
-24 END: wait¦start¦1049515638.0¦Foo¦Bar
+26 EVENT: wait¦start¦1049515638.0¦Foo¦Bar
+26 END: wait¦start¦1049515638.0¦Foo¦Bar
 NEW: <WorkSequence:4 (4)>
-   : │  EVENT: wait¦done¦1049515628.1¦_wait¦2
+   : │  EVENT: wait¦done¦1049515628.1¦X1
    : └1╴... done.
-31 EVENT: wait¦done¦1049515628.1¦_wait¦2
-31 END: wait¦done¦1049515628.1¦_wait¦2
+33 EVENT: wait¦done¦1049515628.1¦X1
+33 END: wait¦done¦1049515628.1¦X1
 Foo Bar
 .
 Name:  Foo Bar
@@ -30,66 +30,66 @@ in:  ⌁.async
 in:  None
 .
 NEW: <WorkSequence:5 (4)>
-   : │  EVENT: wait¦update¦1049515628.2¦Foo¦Bar
+   : │  EVENT: wait¦update¦1049515628.1¦Foo¦Bar
    : └1╴... done.
-48 EVENT: wait¦update¦1049515628.2¦Foo¦Bar
-48 END: wait¦update¦1049515628.2¦Foo¦Bar
+50 EVENT: wait¦update¦1049515628.1¦Foo¦Bar
+50 END: wait¦update¦1049515628.1¦Foo¦Bar
 0 add ‹IfStatement ⌁.if¦exists¦wait¦Foo¦Baz›
 0 add ‹LogHandler ⌁.log¦DEBUG¦No2›
 0 add ‹LogHandler ⌁.log¦DEBUG¦Yes›
 1 Yes
 NEW: <WorkSequence:6 (4)>
-   : │  EVENT: wait¦start¦1049515628.1¦_wait¦4
+   : │  EVENT: wait¦start¦1049515628.2¦X2
    : └1╴... done.
-64 EVENT: wait¦start¦1049515628.1¦_wait¦4
-64 END: wait¦start¦1049515628.1¦_wait¦4
+68 EVENT: wait¦start¦1049515628.2¦X2
+68 END: wait¦start¦1049515628.2¦X2
 NEW: <WorkSequence:7 (4)>
-   : │  EVENT: wait¦done¦1049515628.2¦Foo¦Bar
+   : │  EVENT: wait¦done¦1049515628.1¦Foo¦Bar
    : └1╴... done.
-71 EVENT: wait¦done¦1049515628.2¦Foo¦Bar
-71 END: wait¦done¦1049515628.2¦Foo¦Bar
+75 EVENT: wait¦done¦1049515628.1¦Foo¦Bar
+75 END: wait¦done¦1049515628.1¦Foo¦Bar
 NEW: <WorkSequence:8 (4)>
    : │  EVENT: FooBar
    : └1╴... done.
-79 EVENT: FooBar
-79 END: FooBar
+83 EVENT: FooBar
+83 END: FooBar
 NEW: <WorkSequence:9 (4)>
-   : │  EVENT: wait¦done¦1049515628.1¦_wait¦4
+   : │  EVENT: wait¦done¦1049515628.2¦X2
    : └1╴... done.
-86 EVENT: wait¦done¦1049515628.1¦_wait¦4
-86 END: wait¦done¦1049515628.1¦_wait¦4
+90 EVENT: wait¦done¦1049515628.2¦X2
+90 END: wait¦done¦1049515628.2¦X2
 NEW: <WorkSequence:10 (4)>
    : │  EVENT: DoNow
    : └1╴... done.
 NEW: <WorkSequence:11 (4)>
-   : │  EVENT: wait¦start¦1049515628.1¦_wait¦5
+   : │  EVENT: wait¦start¦1049515628.1¦X3
    : └1╴... done.
-95 EVENT: DoNow
-95 END: DoNow
-99 EVENT: wait¦start¦1049515628.1¦_wait¦5
-99 END: wait¦start¦1049515628.1¦_wait¦5
+99 EVENT: DoNow
+99 END: DoNow
+105 EVENT: wait¦start¦1049515628.1¦X3
+105 END: wait¦start¦1049515628.1¦X3
 NEW: <WorkSequence:12 (4)>
-   : │  EVENT: wait¦done¦1049515628.1¦_wait¦5
+   : │  EVENT: wait¦done¦1049515628.1¦X3
    : └1╴... done.
-111 EVENT: wait¦done¦1049515628.1¦_wait¦5
-111 END: wait¦done¦1049515628.1¦_wait¦5
+117 EVENT: wait¦done¦1049515628.1¦X3
+117 END: wait¦done¦1049515628.1¦X3
 0 add ‹WaitForHandler ('wait', 'until') 2›
 0 add ‹TriggerHandler ⌁.trigger¦Heya›
 NEW: <WorkSequence:13 (4)>
    : │  EVENT: wait¦start¦1049515628.1¦_wait¦7
    : └1╴... done.
-125 EVENT: wait¦start¦1049515628.1¦_wait¦7
-125 END: wait¦start¦1049515628.1¦_wait¦7
+131 EVENT: wait¦start¦1049515628.1¦_wait¦7
+131 END: wait¦start¦1049515628.1¦_wait¦7
 NEW: <WorkSequence:14 (4)>
    : │  EVENT: wait¦start¦1049515680.0¦Foo¦Baz
    : └1╴... done.
-133 EVENT: wait¦start¦1049515680.0¦Foo¦Baz
-133 END: wait¦start¦1049515680.0¦Foo¦Baz
+139 EVENT: wait¦start¦1049515680.0¦Foo¦Baz
+139 END: wait¦start¦1049515680.0¦Foo¦Baz
 NEW: <WorkSequence:15 (4)>
    : │  EVENT: wait¦done¦1049515628.1¦_wait¦7
    : └1╴... done.
-140 EVENT: wait¦done¦1049515628.1¦_wait¦7
-140 END: wait¦done¦1049515628.1¦_wait¦7
+146 EVENT: wait¦done¦1049515628.1¦_wait¦7
+146 END: wait¦done¦1049515628.1¦_wait¦7
 0 add ‹IfStatement ⌁.if¦exists¦wait¦Foo¦Baz›
 0 add ‹LogHandler ⌁.log¦DEBUG¦Yes›
 0 add ‹LogHandler ⌁.log¦DEBUG¦No1›
@@ -105,7 +105,7 @@ NEW: <WorkSequence:16 (5)>
    : │  step: var wait x Foo Baz ‹VarWaitHandler›
    : │  step: log TRACE We wait $x ‹LogHandler›
    : └2╴... done.
-160 EVENT: whatever
+166 EVENT: whatever
 RUN: on whatever ‹OnEventHandler›
    : prio: 51
    : step: var wait x Foo Baz ‹VarWaitHandler›
@@ -113,22 +113,22 @@ RUN: on whatever ‹OnEventHandler›
  at: <WorkSequence:16 (5)> (step 1)
  ev: EVENT: whatever
 0 We wait 53
-160 END: whatever
+166 END: whatever
 NEW: <WorkSequence:17 (4)>
    : │  EVENT: wait¦start¦1049515628.3¦_wait¦8
    : └1╴... done.
-172 EVENT: wait¦start¦1049515628.3¦_wait¦8
-172 END: wait¦start¦1049515628.3¦_wait¦8
+178 EVENT: wait¦start¦1049515628.3¦_wait¦8
+178 END: wait¦start¦1049515628.3¦_wait¦8
 NEW: <WorkSequence:18 (4)>
    : │  EVENT: wait¦done¦1049515628.3¦_wait¦8
    : └1╴... done.
-179 EVENT: wait¦done¦1049515628.3¦_wait¦8
-179 END: wait¦done¦1049515628.3¦_wait¦8
+185 EVENT: wait¦done¦1049515628.3¦_wait¦8
+185 END: wait¦done¦1049515628.3¦_wait¦8
 NEW: <WorkSequence:19 (4)>
    : │  EVENT: wait¦cancel¦1049515680.0¦Foo¦Baz
    : └1╴... done.
-188 EVENT: wait¦cancel¦1049515680.0¦Foo¦Baz
-188 END: wait¦cancel¦1049515680.0¦Foo¦Baz
+194 EVENT: wait¦cancel¦1049515680.0¦Foo¦Baz
+194 END: wait¦cancel¦1049515680.0¦Foo¦Baz
 0 add ‹IfStatement ⌁.if¦exists¦wait¦Foo¦Baz›
 0 add ‹LogHandler ⌁.log¦DEBUG¦No3›
 0 add ‹LogHandler ⌁.log¦DEBUG¦Yes›
@@ -136,13 +136,13 @@ NEW: <WorkSequence:19 (4)>
 NEW: <WorkSequence:20 (4)>
    : │  EVENT: wait¦start¦1049515628.2¦_wait¦9
    : └1╴... done.
-204 EVENT: wait¦start¦1049515628.2¦_wait¦9
-204 END: wait¦start¦1049515628.2¦_wait¦9
+210 EVENT: wait¦start¦1049515628.2¦_wait¦9
+210 END: wait¦start¦1049515628.2¦_wait¦9
 NEW: <WorkSequence:21 (4)>
    : │  EVENT: wait¦done¦1049515628.2¦_wait¦9
    : └1╴... done.
-211 EVENT: wait¦done¦1049515628.2¦_wait¦9
-211 END: wait¦done¦1049515628.2¦_wait¦9
+217 EVENT: wait¦done¦1049515628.2¦_wait¦9
+217 END: wait¦done¦1049515628.2¦_wait¦9
 NEW: <WorkSequence:22 (6)>
    : │  EVENT: shutdown
    : └1╴... done.
