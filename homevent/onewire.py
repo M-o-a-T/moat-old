@@ -423,10 +423,12 @@ class OWFSfactory(object,ReconnectingClientFactory):
 
 	protocol = OWFSqueue
 
-	def __init__(self, host="localhost", port=4304, persist = False, *a,**k):
+	def __init__(self, host="localhost", port=4304, persist = False, name=None, *a,**k):
 		self.conn = None
 		self.host = host
 		self.port = port
+		if self.name is None:
+			self.name = "%s:%s" % (host,port)
 		self._init_queues()
 		self.persist = persist
 		self.up_event = False
@@ -499,13 +501,13 @@ class OWFSfactory(object,ReconnectingClientFactory):
 	def finalFailure(self):
 		if self.up_event:
 			self.up_event = False
-			process_event(Event(Context(),"onewire","disconnect",self.host,self.port)).addErrback(process_failure)
+			process_event(Event(Context(),"onewire","disconnect",self.name)).addErrback(process_failure)
 
 	def clientConnectionFailed(self, connector, reason):
 		self.conn = None
 		log(WARN,reason)
 		super(OWFSfactory,self).clientConnectionFailed(connector, reason)
-		process_event(Event(Context(),"onewire","broken", self.host,self.port)).addErrback(process_failure)
+		process_event(Event(Context(),"onewire","broken", self.name)).addErrback(process_failure)
 
 	def clientConnectionLost(self, connector, reason):
 		self.conn = None
@@ -528,7 +530,7 @@ class OWFSfactory(object,ReconnectingClientFactory):
 
 		if not self.up_event:
 			self.up_event = True
-			process_event(Event(Context(),"onewire","connect",self.host,self.port)).addErrback(process_failure)
+			process_event(Event(Context(),"onewire","connect",self.name)).addErrback(process_failure)
 
 		cmd = self.get_queued()
 		conn.send(cmd)
@@ -623,7 +625,7 @@ class OWFSfactory(object,ReconnectingClientFactory):
 				e.addErrback(dropit,dev)
 
 			def num(_):
-				log(DEBUG,"OWFS done bus update: %d old, %d new" % (len(old_ids), len(new_ids)))
+				process_event(Event(Context(),"onewire","scanned",self.name,len(old_ids), len(new_ids))).addErrback(process_failure)
 				return len(old_ids)
 			e.addCallback(num)
 			return e

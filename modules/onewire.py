@@ -34,7 +34,7 @@ connect onewire NAME [[host] port]
 		if len(event) < 1 or len(event) > 3:
 			raise SyntaxError("Usage: connect onewire NAME ‹host?› ‹port›")
 		name = event[0]
-		k={}
+		k={'name': name}
 		if len(event) > 2:
 			k['host'] = event[1]
 		if len(event) > 1:
