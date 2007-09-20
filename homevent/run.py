@@ -69,7 +69,7 @@ def collect_failure(e):
 	work = WorkSequence(e,None)
 	for wp in work_prios:
 		for w in workers[wp]:
-			if isinstance(w,ExcWorker):
+			if isinstance(w,ExcWorker) and w.does_failure(e):
 				work.append(w)
 	log_created(work)
 	return work

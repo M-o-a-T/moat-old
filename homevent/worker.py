@@ -295,7 +295,11 @@ class SeqWorker(Worker):
 class ExcWorker(Worker):
 	"""\
 		This worker will handle failures.
+		does_failure() will be checked for original failures only.
 		"""
+
+	def does_failure(self,event):
+		return False
 	pass
 
 

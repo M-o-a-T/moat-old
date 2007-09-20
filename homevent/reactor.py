@@ -35,6 +35,8 @@ class Shutdown_Worker_1(ExcWorker):
 
 	def does_event(self,ev):
 		return True
+	def does_failure(self,ev):
+		return True
 	def process(self,queue,*a,**k):
 		global active_q_id
 		active_q_id += 1
@@ -51,6 +53,8 @@ class Shutdown_Worker_2(ExcWorker):
 		processed."""
 	prio = MAX_PRIO+3
 	def does_event(self,ev):
+		return True
+	def does_failure(self,ev):
 		return True
 	def process(self,queue,*a,**k):
 		del active_queues[queue.aq_id]

@@ -89,6 +89,8 @@ class LogWorker(ExcWorker):
 		return ()
 	def does_event(self,event):
 		return True
+	def does_failure(self,event):
+		return True
 	def process(self,event,*a,**k):
 		"""\
 			Run through all loggers. If one of then throws an exception,
