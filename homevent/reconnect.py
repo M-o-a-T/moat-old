@@ -5,8 +5,10 @@ This is a somewhat-mangled version of the ReconnectingClientFactory
 from Twisted.
 """
 
+import random
+
 from twisted.internet import interfaces, error, protocol
-from homevent.logging import TRACE,log
+from homevent.logging import TRACE,DEBUG,INFO, log
 from twisted.internet import reactor
 
 class ReconnectingClientFactory(protocol.ClientFactory):
