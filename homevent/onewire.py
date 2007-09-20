@@ -217,7 +217,7 @@ class OWFScall(object):
 
 
 class OWFStimeout(object):
-	"""A mix-in that provides possibly-"benign" timeouts."""
+	"""A mix-in that provides possibly-"benign" timeouts and NOP handling."""
 	timeout = 1.5
 	error_on_timeout = True
 
@@ -245,9 +245,13 @@ class OWFStimeout(object):
 		self.do_timeout()
 		return super(OWFStimeout,self).sendMsg(*a,**k)
 
-	def msgReceived(self, *a,**k):
+	def msgReceived(self, typ, *a,**k):
 		self.drop_timeout()
-		return super(OWFStimeout,self).msgReceived(*a,**k)
+		if typ == OWMsg.nop:
+			self.do_timeout()
+			return True
+		else:
+			return super(OWFStimeout,self).msgReceived(typ,*a,**k)
 	
 	def error(self,*a,**k):
 		self.drop_timeout()
@@ -357,10 +361,13 @@ class OWFSqueue(OWFSreceiver):
 			return
 		try:
 			if self.msg.msgReceived(typ,data):
+				log(TRACE,"OWFS recv again")
 				return
 		except Exception,e:
+			log(TRACE,"OWFS recv err")
 			self.is_done(e)
 		else:
+			log(TRACE,"OWFS recv done")
 			self.is_done()
 	
 	def errReceived(self,err):
@@ -498,6 +505,7 @@ class OWFSfactory(object,ReconnectingClientFactory):
 		self.conn = None
 		log(WARN,reason)
 		super(OWFSfactory,self).clientConnectionFailed(connector, reason)
+		process_event(Event(Context(),"onewire","broken", self.host,self.port)).addErrback(process_failure)
 
 	def clientConnectionLost(self, connector, reason):
 		self.conn = None
@@ -587,7 +595,7 @@ class OWFSfactory(object,ReconnectingClientFactory):
 
 	def update_all(self):
 		log(TRACE,"OWFS start bus update")
-		old_ids = ow_devices.copy()
+		old_ids = devices.copy()
 		new_ids = {}
 
 		def got_dev(dev):
@@ -604,7 +612,7 @@ class OWFSfactory(object,ReconnectingClientFactory):
 					dev.go_down()
 			
 			def dropit(_,dev):
-				del ow_devices[dev.id]
+				del devices[dev.id]
 				process_failure(_)
 
 			for dev in new_ids.itervalues():
@@ -653,13 +661,14 @@ def connect(host="localhost", port=4304, persist=False):
 	ow_buses[(host,port)] = f
 	reactor.connectTCP(host, port, f)
 	f.run_watcher()
+	return f
 
-def disconnect(host="localhost", port=4304):
-	f = ow_buses.pop((host,port))
+def disconnect(f):
+	assert f==ow_buses.pop((host,port))
 	f.drop()
 
 
-ow_devices = {}
+devices = {}
 
 _call_id = 0
 
@@ -668,11 +677,11 @@ class OWFSdevice(object):
 	"""This represents a bus device with attributes."""
 	def __new__(cls,id, bus=None, path=()):
 		try:
-			self = ow_devices[id]
+			self = devices[id]
 		except KeyError: # new device
 			self = super(OWFSdevice,cls).__new__(cls)
 			self._init(id,bus,path)
-			ow_devices[id] = self
+			devices[id] = self
 			return self
 		else: # old device, found again
 			if bus is not None:
@@ -750,7 +759,7 @@ class OWFSdevice(object):
 		if not self.bus:
 			raise DisconnectedError(self)
 
-		p = self.path + path
+		p = self.path + tuple(path)
 		if self.id is not None:
 			p += (self.id,)
 		if key is not None:
