@@ -110,7 +110,7 @@ if False:
 		finally:
 			_syn.acquire()
 			del _thr[tid]
-			print "-THR",tid,_thr
+			print >>sys.stderr,"-THR",tid," ".join(map(str,_thr.keys()))
 			_syn.release()
 	def cic(p,*a,**k):
 		_syn.acquire()
@@ -118,6 +118,6 @@ if False:
 		_thr_id += 1
 		tid = _thr_id
 		_syn.release()
-		print "+THR",tid,p,a,k
+		print >>sys.stderr,"+THR",tid,p,a,k
 		return _cic(_tcall,tid,p,a,k)
 	reactor.callInThread = cic
