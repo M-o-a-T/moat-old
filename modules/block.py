@@ -10,6 +10,8 @@ from homevent.logging import log
 from homevent.statement import main_words, MainStatementList
 from homevent.run import process_failure
 from homevent.worker import HaltSequence
+from homevent.twist import deferToLater
+
 from twisted.internet import defer,reactor
 import os
 
@@ -42,9 +44,9 @@ class Async(MainStatementList):
 		d = defer.Deferred()
 		d.addCallback(lambda _: super(Async,self).run(*a,**k))
 		if "HOMEVENT_TEST" in os.environ:
-			reactor.callLater(0.05,d.callback,None)
+			deferToLater(reactor.callLater,0.05,d.callback,None)
 		else:
-			d.callback(None)
+			deferToLater(d.callback,None)
 		def catch_halt(_):
 			_.trap(HaltSequence)
 			return None
