@@ -3,8 +3,28 @@
 
 import homevent as h
 import sys
+from homevent.logging import TRACE
 
-from test import run_logger,SayWorker,SayMoreWorker
+class SayWorker(h.Worker):
+	"""A cheap worker which just logs something convenient."""
+	prio = 5
+	def does_event(self,e):
+		return e[0]=="say"
+	def process(self,event,*a,**k):
+		h.log(TRACE,"The '"+self.name+"' worker is saying: "+" ".join(event[1:]))
+
+class SayMoreWorker(h.SeqWorker):
+	"""A WorkSequence-generating worker which logs something twice."""
+	prio = 5
+	def does_event(self,e):
+		return e[0]=="say more"
+	def process(self,event,*a,**k):
+		w = h.WorkSequence(event,self)
+		w.append(SayWorker("TellOne"))
+		w.append(SayWorker("TellTwo"))
+		return w
+
+from test import run_logger
 run_logger("basic")
 
 hello_ev = h.Event(h.Context(), "say","hello")
