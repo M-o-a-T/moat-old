@@ -15,6 +15,7 @@ from zope.interface import implements
 from homevent.tokize import tokizer
 import Queue
 import sys
+import os
 from twisted.internet import reactor,threads,defer,interfaces
 from twisted.python import failure
 from twisted.protocols.basic import LineOnlyReceiver,FileSender,_PauseableMixin
@@ -28,7 +29,7 @@ from homevent.event import Event
 from homevent.statement import global_words
 from homevent.twist import deferToLater
 
-PLOG = False
+PLOG = os.getenv("HOMEVENT_LOG_PARSE",False)
 
 class SimpleReceiver(LineOnlyReceiver,object):
 	delimiter = "\n"

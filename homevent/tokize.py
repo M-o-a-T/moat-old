@@ -4,12 +4,12 @@ __author__ = 'Matthias Urlichs <matthias@urlichs.de>'
 __credits__ = \
     'GvR, ESR, Tim Peters, Thomas Wouters, Fred Drake, Skip Montanaro, Ka-Ping Yee'
 
-import string, re
+import string, re, os
 from token import *
 import tokenize as t
 from twisted.internet.defer import inlineCallbacks, returnValue, maybeDeferred
 
-TLOG = False
+TLOG = os.getenv("HOMEVENT_LOG_TOKEN",False)
 
 COMMENT = t.COMMENT
 NL = t.NL
