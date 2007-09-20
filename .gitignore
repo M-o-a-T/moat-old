@@ -1,5 +1,7 @@
 *.swp
 *.swo
+*.swn
+*.swm
 *.pyc
 *-pyo
 test/real
