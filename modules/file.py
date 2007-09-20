@@ -21,8 +21,8 @@ class Include(Statement):
 	doc="load a configuration file"
 	long_doc = """\
 include 'NAME'
-	reads and processes the configuration file. The name probably needs
-	to be quoted.
+	reads and processes the named configuration file.
+	The name probably needs to be quoted.
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
