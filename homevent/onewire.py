@@ -175,11 +175,12 @@ class OWFScall(object):
 		raise NotImplemetedError("You need to override send().")
 
 	def sendMsg(self,conn, typ,data, rlen=0):
-			d = defer.maybeDeferred(conn.sendMsg, typ,data,rlen)
-			d.addErrback(self.error)
+		d = defer.maybeDeferred(conn.sendMsg, typ,data,rlen)
+		d.addErrback(self.error)
 
 	def dataReceived(self, data):
 		# child object expect this
+		log(TRACE,"OWFS done: ",self)
 		self.d.callback(data)
 
 	def msgReceived(self, typ, data):
@@ -195,6 +196,7 @@ class OWFScall(object):
 	def error(self,msg):
 		"""An error occurred."""
 		if not self.d.called:
+			log(TRACE,"OWFS done error: ",self,msg)
 			self.d.errback(msg)
 		else:
 			process_failure(msg)
@@ -320,6 +322,7 @@ class DIRmsg(OWFStimeout,OWFScall):
 			return True
 	
 	def done(self, _=None):
+		log(TRACE,"OWFS doneDIR",self)
 		self.d.callback(_)
 		return super(DIRmsg,self).done()
 
@@ -340,6 +343,7 @@ class OWFSqueue(OWFSreceiver):
 	def send(self,msg):
 		assert self.msg is None, "OWFS Message already in transit!"
 		self.msg = msg
+		log(TRACE,"OWFS send for %s"%(self.msg,))
 		msg.send(self)
 
 	def connectionFailed(self,reason):
@@ -424,16 +428,19 @@ class OWFSfactory(object,ReconnectingClientFactory):
 	protocol = OWFSqueue
 
 	def __init__(self, host="localhost", port=4304, persist = False, name=None, *a,**k):
+		if name is None:
+			name = "%s:%s" % (host,port)
+
 		self.conn = None
 		self.host = host
 		self.port = port
-		if self.name is None:
-			self.name = "%s:%s" % (host,port)
+		self.name = name
 		self._init_queues()
 		self.persist = persist
 		self.up_event = False
 		self.root = OWFSroot(self)
 		self.watcher_id = None
+		self.nop = None
 
 	def _init_queues(self):
 		self.queues = []
@@ -532,8 +539,7 @@ class OWFSfactory(object,ReconnectingClientFactory):
 			self.up_event = True
 			process_event(Event(Context(),"onewire","connect",self.name)).addErrback(process_failure)
 
-		cmd = self.get_queued()
-		conn.send(cmd)
+		conn.send(self.get_queued())
 
 	def _drop(self):
 		e = DisconnectedError()
@@ -657,9 +663,9 @@ class OWFSfactory(object,ReconnectingClientFactory):
 
 ow_buses = {}
 
-def connect(host="localhost", port=4304, persist=False):
+def connect(host="localhost", port=4304, name=None, persist=False):
 	assert (host,port) not in ow_buses, "already known host/port tuple"
-	f = OWFSfactory(host,port)
+	f = OWFSfactory(host=host, port=port, name=name, persist=persist)
 	ow_buses[(host,port)] = f
 	reactor.connectTCP(host, port, f)
 	f.run_watcher()
