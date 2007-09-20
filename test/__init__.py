@@ -32,11 +32,10 @@ class run_logger(Logger):
 		h.register_logger(self)
 		self.level = level
 
-	def __delete__(self):
-		self.try_exit()
-
 	def try_init(self):
 		scp = os.path.join("scripts",self.name+"_init")
+		if not os.path.exists(scp):
+			scp = os.path.join("test",scp)
 		if os.path.exists(scp):
 			res = os.spawnlp(os.P_WAIT, scp)
 			if res != 0:
@@ -45,10 +44,16 @@ class run_logger(Logger):
 			
 	def try_exit(self):
 		scp = os.path.join("scripts",self.name+"_exit")
+		if not os.path.exists(scp):
+			scp = os.path.join("test",scp)
 		if os.path.exists(scp):
+			sys.stdout.flush()
+			sys.stderr.flush()
+			self.data.flush()
 			res = os.spawnlp(os.P_WAIT, scp)
 			if res != 0:
 				print >>sys.stderr,"Exit Script for %s failed: %d" % (self.name,res)
+				sys.stderr.flush()
 				sys.exit(1)
 
 	def _log(self,level, sx):
@@ -113,14 +118,17 @@ class logwrite(object):
 		pass
 
 def run(name,input, interpreter=Interpreter, logger=None):
+	ht = None
 	if logger is None:
-		logger = run_logger(name,dot=False).log
+		ht = run_logger(name,dot=False)
+		logger = ht.log
 	input = StringIO(input)
 
 	def _main():
 		d = parse(input, interpreter(Context(out=logwrite(logger))),Context(logger=parse_logger))
 		d.addErrback(lambda _: _.printTraceback())
 		d.addBoth(lambda _: h.shut_down())
+		if ht is not None: d.addBoth(lambda _: ht.try_exit())
 
 	h.mainloop(_main)
 
