@@ -4,13 +4,7 @@ NEW: <WorkSequence:1 (4)>
 .
 1 EVENT: startup
 .
-RUN: <WorkSequence:1 (4)>
- ev: EVENT: startup
-.
 1 END: startup
-.
-RUN: <WorkSequence:1 (4)>
- ev: EVENT: startup
 .
 NEW: <WorkSequence:2 (5)>
    : │  EVENT: say¦hello
@@ -19,9 +13,6 @@ NEW: <WorkSequence:2 (5)>
 .
 3 EVENT: say¦hello
 .
-RUN: <WorkSequence:2 (5)>
- ev: EVENT: say¦hello
-.
 RUN: SayWorker: TellMe
  at: <WorkSequence:2 (5)> (step 1)
  ev: EVENT: say¦hello
@@ -29,9 +20,6 @@ RUN: SayWorker: TellMe
 0 The 'TellMe' worker is saying: hello
 .
 3 END: say¦hello
-.
-RUN: <WorkSequence:2 (5)> (step 1)
- ev: EVENT: say¦hello
 .
 NEW: <WorkSequence:3 (5)>
    : │  EVENT: say more¦greeting
@@ -43,9 +31,6 @@ NEW: <WorkSequence:3 (5)>
    : └2╴... done.
 .
 4 EVENT: say more¦greeting
-.
-RUN: <WorkSequence:3 (5)>
- ev: EVENT: say more¦greeting
 .
 RUN: <WorkSequence:4 (2)>
    : │  EVENT: say more¦greeting
@@ -69,24 +54,11 @@ RUN: SayWorker: TellTwo
 .
 4 END: say more¦greeting
 .
-RUN: <WorkSequence:3 (5)> (step 1)
- ev: EVENT: say more¦greeting
-.
 NEW: <WorkSequence:5 (5)>
    : │  EVENT: shutdown
    : └1╴... done.
 .
 2 EVENT: shutdown
 .
-RUN: <WorkSequence:5 (5)>
- ev: EVENT: shutdown
-.
 2 END: shutdown
-.
-RUN: shutting down
- at: <WorkSequence:5 (5)>
- ev: EVENT: shutdown
-.
-RUN: <WorkSequence:5 (5)>
- ev: EVENT: shutdown
 .

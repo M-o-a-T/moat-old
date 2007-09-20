@@ -2,11 +2,7 @@ NEW: <WorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
 1 EVENT: startup
-RUN: <WorkSequence:1 (4)>
- ev: EVENT: startup
 1 END: startup
-RUN: <WorkSequence:1 (4)>
- ev: EVENT: startup
 0 add ‹IfStatement ⌁.if¦exists¦state¦foo¦bar›
 0 add ‹LogHandler ⌁.log¦TRACE¦No‽›
 0 add ‹LogHandler ⌁.log¦TRACE¦Yes!›
@@ -16,21 +12,13 @@ NEW: <WorkSequence:2 (4)>
    : │  EVENT: state¦-¦one¦foo¦bar
    : └1╴... done.
 20 EVENT: state¦-¦one¦foo¦bar
-RUN: <WorkSequence:2 (4)>
- ev: EVENT: state¦-¦one¦foo¦bar
 20 END: state¦-¦one¦foo¦bar
-RUN: <WorkSequence:2 (4)>
- ev: EVENT: state¦-¦one¦foo¦bar
 0 Set to TWO
 NEW: <WorkSequence:3 (4)>
    : │  EVENT: state¦one¦two¦foo¦bar
    : └1╴... done.
 31 EVENT: state¦one¦two¦foo¦bar
-RUN: <WorkSequence:3 (4)>
- ev: EVENT: state¦one¦two¦foo¦bar
 31 END: state¦one¦two¦foo¦bar
-RUN: <WorkSequence:3 (4)>
- ev: EVENT: state¦one¦two¦foo¦bar
 0 Create OnEvtHandler: ['state', '*', 'three', 'foo', 'bar']
 0 add ‹LogHandler ⌁.log¦TRACE¦Set¦to¦FOUR›
 0 add ‹SetStateHandler ⌁.set¦state¦four¦foo¦bar›
@@ -41,11 +29,7 @@ NEW: <WorkSequence:4 (4)>
    : │  EVENT: wait¦start¦1049515628.1¦_wait¦1
    : └1╴... done.
 47 EVENT: wait¦start¦1049515628.1¦_wait¦1
-RUN: <WorkSequence:4 (4)>
- ev: EVENT: wait¦start¦1049515628.1¦_wait¦1
 47 END: wait¦start¦1049515628.1¦_wait¦1
-RUN: <WorkSequence:4 (4)>
- ev: EVENT: wait¦start¦1049515628.1¦_wait¦1
 0 Set to THREE
 NEW: <WorkSequence:5 (5)>
    : │  EVENT: state¦two¦three¦foo¦bar
@@ -55,8 +39,6 @@ NEW: <WorkSequence:5 (5)>
    : │  step: set state four foo bar ‹SetStateHandler›
    : └2╴... done.
 56 EVENT: state¦two¦three¦foo¦bar
-RUN: <WorkSequence:5 (5)>
- ev: EVENT: state¦two¦three¦foo¦bar
 RUN: on state * three foo bar ‹OnEventHandler›
    : prio: 51
    : step: log TRACE Set to FOUR ‹LogHandler›
@@ -95,23 +77,13 @@ ERROR: Traceback (most recent call last):
      : │ │step: log TRACE Set to FOUR ‹LogHandler›
      : │ ╵step: set state four foo bar ‹SetStateHandler›
      : └2╴... done.
-RUN: <WorkSequence:6 (4)>
- ev: ERROR: Trying to change state to 'four' while changing from 'two' to 'three'
 67 END: StateChangeError
-RUN: <WorkSequence:6 (4)>
- ev: ERROR: Trying to change state to 'four' while changing from 'two' to 'three'
 56 END: state¦two¦three¦foo¦bar
-RUN: <WorkSequence:5 (5)> (step 1)
- ev: EVENT: state¦two¦three¦foo¦bar
 NEW: <WorkSequence:7 (4)>
    : │  EVENT: wait¦done¦1049515628.1¦_wait¦1
    : └1╴... done.
 72 EVENT: wait¦done¦1049515628.1¦_wait¦1
-RUN: <WorkSequence:7 (4)>
- ev: EVENT: wait¦done¦1049515628.1¦_wait¦1
 72 END: wait¦done¦1049515628.1¦_wait¦1
-RUN: <WorkSequence:7 (4)>
- ev: EVENT: wait¦done¦1049515628.1¦_wait¦1
 foo bar = three
 .
 Name: foo bar
@@ -141,8 +113,6 @@ NEW: <WorkSequence:8 (5)>
    : │  step: log TRACE We got $x ‹LogHandler›
    : └2╴... done.
 110 EVENT: whatever
-RUN: <WorkSequence:8 (5)>
- ev: EVENT: whatever
 RUN: on whatever ‹OnEventHandler›
    : prio: 51
    : step: var state x foo bar ‹VarStateHandler›
@@ -151,29 +121,14 @@ RUN: on whatever ‹OnEventHandler›
  ev: EVENT: whatever
 0 We got three
 110 END: whatever
-RUN: <WorkSequence:8 (5)> (step 1)
- ev: EVENT: whatever
 NEW: <WorkSequence:9 (4)>
    : │  EVENT: state¦three¦-¦foo¦bar
    : └1╴... done.
 122 EVENT: state¦three¦-¦foo¦bar
-RUN: <WorkSequence:9 (4)>
- ev: EVENT: state¦three¦-¦foo¦bar
 122 END: state¦three¦-¦foo¦bar
-RUN: <WorkSequence:9 (4)>
- ev: EVENT: state¦three¦-¦foo¦bar
 .
 NEW: <WorkSequence:10 (6)>
    : │  EVENT: shutdown
    : └1╴... done.
 2 EVENT: shutdown
-RUN: <WorkSequence:10 (6)>
- ev: EVENT: shutdown
-RUN: <WorkSequence:10 (6)>
- ev: EVENT: shutdown
 2 END: shutdown
-RUN: shutting down
- at: <WorkSequence:10 (6)>
- ev: EVENT: shutdown
-RUN: <WorkSequence:10 (6)>
- ev: EVENT: shutdown

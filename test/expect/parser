@@ -2,11 +2,7 @@ NEW: <WorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
 1 EVENT: startup
-RUN: <WorkSequence:1 (4)>
- ev: EVENT: startup
 1 END: startup
-RUN: <WorkSequence:1 (4)>
- ev: EVENT: startup
 Init ('foo',)(1) from ‹global_words ('Global',) 3›
 Input ('foo',)(1): ⌁.
 Init ('foo',)(2) from ‹global_words ('Global',) 3›
@@ -62,11 +58,4 @@ NEW: <WorkSequence:2 (5)>
    : │  EVENT: shutdown
    : └1╴... done.
 2 EVENT: shutdown
-RUN: <WorkSequence:2 (5)>
- ev: EVENT: shutdown
 2 END: shutdown
-RUN: shutting down
- at: <WorkSequence:2 (5)>
- ev: EVENT: shutdown
-RUN: <WorkSequence:2 (5)>
- ev: EVENT: shutdown

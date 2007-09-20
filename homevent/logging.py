@@ -9,7 +9,7 @@ part of the system.
 
 """
 
-from homevent.run import register_worker,SYS_PRIO,MAX_PRIO
+from homevent.run import register_worker,SYS_PRIO,MIN_PRIO,MAX_PRIO
 from homevent.worker import Worker,ExcWorker
 from homevent.event import Event
 from homevent.context import Context
@@ -175,9 +175,8 @@ class log_run(Event):
 		self.seq = seq
 		self.worker = worker
 		self.step = step
-		if isinstance(worker,LogWorker):
-			return
-		log_event(self)
+		if not worker or worker.prio >= MIN_PRIO and worker.prio < MAX_PRIO:
+			log_event(self)
 
 	def report(self, verbose=False):
 		if verbose:

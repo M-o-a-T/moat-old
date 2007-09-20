@@ -2,11 +2,7 @@ NEW: <WorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
 1 EVENT: startup
-RUN: <WorkSequence:1 (4)>
- ev: EVENT: startup
 1 END: startup
-RUN: <WorkSequence:1 (4)>
- ev: EVENT: startup
 0 add ‹IfStatement ⌁.if¦true›
 0 add ‹LogHandler ⌁.log¦DEBUG¦Yes›
 0 add ‹LogHandler ⌁.log¦DEBUG¦No1›
@@ -42,11 +38,4 @@ NEW: <WorkSequence:2 (5)>
    : │  EVENT: shutdown
    : └1╴... done.
 2 EVENT: shutdown
-RUN: <WorkSequence:2 (5)>
- ev: EVENT: shutdown
 2 END: shutdown
-RUN: shutting down
- at: <WorkSequence:2 (5)>
- ev: EVENT: shutdown
-RUN: <WorkSequence:2 (5)>
- ev: EVENT: shutdown

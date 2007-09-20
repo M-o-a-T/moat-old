@@ -2,20 +2,12 @@ NEW: <WorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
 1 EVENT: startup
-RUN: <WorkSequence:1 (4)>
- ev: EVENT: startup
 1 END: startup
-RUN: <WorkSequence:1 (4)>
- ev: EVENT: startup
 NEW: <WorkSequence:2 (4)>
    : │  EVENT: module¦load¦ssh
    : └1╴... done.
 11 EVENT: module¦load¦ssh
-RUN: <WorkSequence:2 (4)>
- ev: EVENT: module¦load¦ssh
 11 END: module¦load¦ssh
-RUN: <WorkSequence:2 (4)>
- ev: EVENT: module¦load¦ssh
 0 add ‹IfStatement ⌁.if¦exists¦directory¦keys›
 0 add ‹SSHdir ⌁.ssh¦directory¦keys›
 0 add ‹SSHdir ⌁.ssh¦directory¦../keys›
@@ -23,11 +15,4 @@ NEW: <WorkSequence:3 (5)>
    : │  EVENT: shutdown
    : └1╴... done.
 2 EVENT: shutdown
-RUN: <WorkSequence:3 (5)>
- ev: EVENT: shutdown
 2 END: shutdown
-RUN: shutting down
- at: <WorkSequence:3 (5)>
- ev: EVENT: shutdown
-RUN: <WorkSequence:3 (5)>
- ev: EVENT: shutdown

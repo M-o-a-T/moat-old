@@ -2,11 +2,7 @@ NEW: <WorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
 1 EVENT: startup
-RUN: <WorkSequence:1 (4)>
- ev: EVENT: startup
 1 END: startup
-RUN: <WorkSequence:1 (4)>
- ev: EVENT: startup
 0 Create OnEvtHandler: ['foo']
 0 add ‹DoNothingHandler ⌁.do¦nothing›
 0 NewHandler 1
@@ -36,8 +32,6 @@ NEW: <WorkSequence:2 (5)>
    : │      : step: sync trigger $1 ‹SyncTriggerHandler›
    : └2╴... done.
 44 EVENT: bar¦foo
-RUN: <WorkSequence:2 (5)>
- ev: EVENT: bar¦foo
 RUN: on bar * ‹OnEventHandler›
    : prio: 51
    : step: block ‹Block›
@@ -52,8 +46,6 @@ NEW: <WorkSequence:3 (5)>
    : │  step: do nothing ‹DoNothingHandler›
    : └2╴... done.
 50 EVENT: foo
-RUN: <WorkSequence:3 (5)>
- ev: EVENT: foo
 RUN: on foo ‹OnEventHandler›
    : name: Do nothing
    : prio: 50
@@ -62,11 +54,7 @@ RUN: on foo ‹OnEventHandler›
  ev: EVENT: foo
 0 NOW: do nothing
 50 END: foo
-RUN: <WorkSequence:3 (5)> (step 1)
- ev: EVENT: foo
 44 END: bar¦foo
-RUN: <WorkSequence:2 (5)> (step 1)
- ev: EVENT: bar¦foo
 NEW: <WorkSequence:4 (5)>
    : │  EVENT: bar¦foo
    : ├1╴on bar * ‹OnEventHandler›
@@ -75,8 +63,6 @@ NEW: <WorkSequence:4 (5)>
    : │      : step: sync trigger $1 ‹SyncTriggerHandler›
    : └2╴... done.
 66 EVENT: bar¦foo
-RUN: <WorkSequence:4 (5)>
- ev: EVENT: bar¦foo
 RUN: on bar * ‹OnEventHandler›
    : prio: 51
    : step: block ‹Block›
@@ -91,8 +77,6 @@ NEW: <WorkSequence:5 (5)>
    : │  step: do nothing ‹DoNothingHandler›
    : └2╴... done.
 72 EVENT: foo
-RUN: <WorkSequence:5 (5)>
- ev: EVENT: foo
 RUN: on foo ‹OnEventHandler›
    : name: Do nothing
    : prio: 50
@@ -101,11 +85,7 @@ RUN: on foo ‹OnEventHandler›
  ev: EVENT: foo
 0 NOW: do nothing
 72 END: foo
-RUN: <WorkSequence:5 (5)> (step 1)
- ev: EVENT: foo
 66 END: bar¦foo
-RUN: <WorkSequence:4 (5)> (step 1)
- ev: EVENT: bar¦foo
 3  : foo ‹not executed›
 4  : bar¦*
 .
@@ -113,11 +93,4 @@ NEW: <WorkSequence:6 (5)>
    : │  EVENT: shutdown
    : └1╴... done.
 2 EVENT: shutdown
-RUN: <WorkSequence:6 (5)>
- ev: EVENT: shutdown
 2 END: shutdown
-RUN: shutting down
- at: <WorkSequence:6 (5)>
- ev: EVENT: shutdown
-RUN: <WorkSequence:6 (5)>
- ev: EVENT: shutdown
