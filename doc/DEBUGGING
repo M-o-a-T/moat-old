@@ -1,0 +1,120 @@
+==================
+HomEvenT debugging
+==================
+
+… or, “what to do when something goes wrong”.
+
+Nothing happens
+===============
+
+Twisted Deferred handling can be quite difficult to follow. The basic
+premise is that anything that causes a Deferred to be created must
+also cause it to be triggered at some time.
+
+Every Deferred also needs an error handler at the end. That handler's
+job is to create an error event which will get logged.
+
+In HomEvenT, any pending trigger should be displayed by a "list FOO"
+command. That should clear up most of the mystery.
+
+Strange things happen
+=====================
+
+This problem is mostly related to event handling.
+
+First thing to do: Turn on debugging. You will get a whole lot of
+messages like this:
+
+	NEW: <WorkSequence:2 (5)>
+	   : │  EVENT: say¦hello
+	   : ├1╴SayWorker: TellMe
+	   : └2╴... done.
+	.
+
+For the ‹say¦hello› event, this work sequence has been created, based on
+whatever “on …” triggers (or, as in this sample, other event-handling
+code) you have installed.
+
+This particular sequence contains one command (and some other cruft
+for logging and housekeeping, which is cleverly hidden behind the “… done”
+tag, among other places, because showing that every time you do
+something is not helpful.
+
+	3 EVENT: say¦hello
+	.
+The event has triggered.
+
+	RUN: SayWorker: TellMe
+	 at: <WorkSequence:2 (5)> (step 1)
+	 ev: EVENT: say¦hello
+	.
+
+A step of WorkSequence:2 is being executed (the first one, in this
+case). The code is in the “SayWorker” class (you can grep the code for
+“class SayWorker” to find it), with the argument ‹TellMe›. The command
+name is included in the argument list so that it's easier to see what's
+going on.
+
+	0 The 'TellMe' worker is saying: hello
+	.
+
+… whatever the code does …
+
+	3 END: say¦hello
+	.
+
+Processing of this event has finished.
+
+Manual tests
+============
+
+“make i” starts up an interactive interpreter with minimal support.
+It does, of course, allow you to use ‹load› and ‹include› statements.
+
+The reasonable thing to do is write a small setup script which loads
+everything you need, and which then sets up the problem space so that
+you can poke around in it interactively. Don't forget logging if you
+need it.
+
+Environment variables
+=====================
+
+HOMEVENT_TEST
+-------------
+
+Setting this makes various parts of HomEvenT more testable:
+
+* it causes OneWire bus scans to run more often
+
+* The date is frozen to 2003-04-05 06:07:08 (timeouts still work; this
+  is a convenience so that you'll be able to compare test logs)
+
+* Threading is disabled to make interactive debugging possible
+ 
+HOMEVENT_LOG_ONEWIRE
+--------------------
+
+This causes a very verbose tracing of everything whatsoever that happens
+on the 1wire bus (or rather, on the TCP connection to the server), as
+well as the things the 1wire low-level code does with it. You usually do
+not need this.
+
+The trace goes to standard error.
+
+HOMEVENT_LOG_PARSE
+------------------
+
+This causes a very verbose tracing of the internal workings of the
+config file parser. You usually do not need this.
+
+The trace goes to standard error.
+
+HOMEVENT_LOG_TOKEN
+------------------
+
+This causes a very verbose tracing of the internal workings of the
+config file tokenizer. You usually do not need this, as the common case
+of a parsing problem is "I forgot to quote something", which is easily
+remedied. ☺
+
+The trace goes to standard error.
