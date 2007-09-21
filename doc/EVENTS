@@ -2,7 +2,9 @@ Startup and shutdown
 --------------------
 
 startup
-	-- after loading modules and parsing the configuration.
+	-- triggered after loading initial modules and parsing the
+	   configuration files.
+
 shutdown
 	-- closing down
 
@@ -11,6 +13,7 @@ Module load/unload
 
 module load NAME [params...]
 	-- a module has been loaded (and can be used)
+
 module unload NAME [params...]
 	-- a module will be unloaded (any usage needs to be dropped)
 
@@ -23,13 +26,14 @@ state OLD NEW NAME
 	   NEW is "-" if the state is deleted.
 
 	   This event is triggered synchronously; while it executes, new
-	   state changes on the same NAME are forbidden.
+	   state changes on the same NAME are forbidden and will cause an
+	   error.
 
 Wait
 ----
 
 wait start TIME NAME
-	-- a wait until that time (expressed in Unixtime seconds) is started.
+	-- a wait has been started.
 
 wait update TIME NAME
 	-- the wait time has been changed.
@@ -40,7 +44,8 @@ wait done TIME NAME
 wait cancel TIME NAME
 	-- the wait is cancelled.
 
-	TIME always refers to the time when the event is triggered (Unix seconds).
+TIME always refers to the time when the event will be triggered
+(Unix seconds).
 
 OneWire (OWFS)
 --------------
@@ -48,25 +53,36 @@ OneWire (OWFS)
 These are low-level events, reporting a particular device. Usually you
 are interested in actual measurements, reported in "data" events.
 
-onewire connect HOST PORT
+onewire connect NAME
 	-- the connection to this server is up.
 
-onewire disconnect HOST PORT
+onewire disconnect NAME
 	-- the server connection has failed.
 
 	Note that retries are automatic.
 
-onewire new TYP DEVICE
+onewire broken NAME
+	-- communication with this bus has failed.
+	   (It will be retried automatically.)
+
+onewire scanning NAME
+	-- the bus will be scanned after this event has been handled.
+	   An error during event handling will prevent scanning.
+
+onewire scanned NAME
+	-- scanning of this bus has completed.
+
+onewire new TYPE DEVICE
 	-- The device with the given type has appeared on a 1-wire bus
 	   for the first time. This event is followed by an "up" event for
 	   the same device.
 
-onewire up TYP DEVICE
+onewire up TYPE DEVICE
 	-- The device with the given type is now available.
 
-onewire down TYP DEVICE
+onewire down TYPE DEVICE
 	-- The device with the given type is no longer available.
 	   This may be a temporary condition. Until you see an "up" event,
-	   however, trying to send polls or similar to it won't work.
-
+	   however, trying to communicate with the device will cause an
+	   error.
 

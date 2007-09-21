@@ -289,6 +289,130 @@ if exists path "name"
 True if the name points to something (file, directory, device, …)
 
 
+=======
+onewire
+=======
+
+This module provides access to 1wire devices. This is a serial bus by
+Dallas Semiconductor (who bought Maxim, which developed this bus). It
+can run on cheap wiring (one pair, preferably twisted) and does not
+require a separate power supply; usually, though, 1wire buses run over
+Cat5 cable and do have power.
+
+HomEvenT does not access the 1wire bus directly. Instead, it talks to
+one or more “owserver” processes which may run on separate hosts. Check
+the “owfs” project at ‹http://owfs.sourceforge.net› for details.
+
+The owfs server translates the machine-readable attributes of a device
+to nice, human-readable parameters and values. Check its documentation
+for details.
+
+1wire uses °C for temperature measurements. Provide a patch
+to set the Fahrenheit flag if you *really* want to change that.
+
+One can attach and remove devices to and from a 1wire bus while the bus
+is running. Also, electrical problems like interference may cause bus
+operation to be sporadic. HomEvenT therefore retries some bus
+operations, but of course it can't fix everything.
+
+---------------
+connect onewire
+---------------
+
+Establish a named server connection. 
+
+	connect onewire MAIN localhost 4304
+	connect onewire MAIN 4304
+	connect onewire MAIN
+
+The above three statements are equivalent.
+
+HomEvenT will periodically scan the bus and provide events for newly
+connected or removed devices.
+
+------------------
+disconnect onewire
+------------------
+
+Remove the named connection.
+
+	disconnect onewire MAIN
+
+-----------
+dir onewire
+-----------
+
+Causes a directory listing on the bus. This is strictly for human
+consumption.
+
+	dir onewire MAIN
+	dir onewire MAIN "bus.0"
+	dir onewire MAIN "1F.C9B004000000" "main"
+	dir onewire MAIN "1F.C9B004000000" "main" "20.394309000000"
+
+
+If you know the device ID, you can list the contents of that device's
+directory.
+
+	dir onewire "10.68D839010800"
+
+-----------
+var onewire
+-----------
+
+Reads the contents of a named 1wire device register.
+
+The value is read once, when the statement is executed – not when the
+variable is accessed. Use the ‹monitor› command if you want to look for
+changes.
+
+	block:
+		var onewire TEMP "10.68D839010800" temperature
+		trigger temp current $TEMP
+
+-----------
+set onewire
+-----------
+
+Writes a value to a 1wire device register.
+
+	set onewire 37.5 "10.68D839010800" temphigh
+
+
+-----
+Tests
+-----
+
+exists onewire
+--------------
+
+Check if a device has ever been found.
+
+	if not exists onewire "10.68D839010800":
+		trigger OhNo
+
+exists onewire bus
+------------------
+
+Check if a connection has been created.
+
+	if not exists onewire bus MAIN: connect onewire MAIN
+
+connected onewire
+-----------------
+
+Check if a device has been seen and is currently on a well-connected
+bus.
+
+	if connected onewire "10.68D839010800":
+		set onewire 5 "10.68D839010800" templow
+
+connected onewire bus
+---------------------
+
+Check if the bus is currently connected to a server.
+
+
 ===
 ssh
 ===
@@ -536,15 +660,35 @@ wait
 
 This module implements a method to wait for a specified amount of time.
 
+All time parameters accept a timestamp as their first argument. This
+timestamp defaults to (and cannot be smaller than) the current time; it
+specifies the absolute minimum time at which the wait trigger.
+
+
+      N sec / min / hour / day / month / week / year
+	        mo/tu/we/th/fr/sa/su: day of week; N mon…sun: month's Nth
+			monday etc
+			      N wk: ISO week number
+
 --------
 wait for
 --------
 
 This statement will delay execution by the specified amount.
 
-	wait for 10min + 5sec
+	wait for 10min - 5sec
 
-You can use it as a compound statement to specify details.
+Used as a compound statement, you can specify details.
+
+The following interval specifications are accepted:
+
+	s sec second seconds
+	m min minute minutes
+	h hr hour hours
+	d dy day days
+	w wk week weeks
+	m mo month months
+	y yr year years
 
 
 name
@@ -557,6 +701,7 @@ name as one that's still pending, an error will be triggered.
 
 	wait for 5min:
 		name "Brew some tea"
+
 
 If you do not name a wait statement, it will have a system-assigned
 unique name.
@@ -579,7 +724,8 @@ waiting itself. For example:
 	trigger DoNow
 
 will trigger the FooBar event after one second; the DoNow event will
-trigger immediately. Obviously, both wait statements need the same name.
+trigger immediately. 
+
 An error will be raised if the original statement is no longer active.
 
 ----------
@@ -595,12 +741,46 @@ related to the current time are true.
 
 If the conditions are already true, this statement will not wait at all.
 
+The following (absolute) time specifications are accepted. You need to
+specify a number in front of them, because it's always *some* day:
+
+	s sec second seconds
+	m min minute minutes
+	h hr hour hours
+	d dy day days (of the month)
+	w wk week weeks (of the year)
+	m mo month months
+	y yr year years
+
+Naming a day with a preceding number means the n'th day in that week; as
+above, the number can be negative. Without a number, the next day of
+that name will be used which matches all the other criteria.
+
+	mo mon monday
+	tu tue tuesday
+	we wed wednesday
+	th thu thursday
+	fr fri friday
+	sa sat saturday
+	su sun sunday
+
+Week 1 is the first week in the year which has a Thursday, even if
+it spans the previous year: "tue 1 wk 2004yr" will return 2003-12-30.
+
+"3 wed 4mo 2003yr" is 2003-04-16, as that's the third Wednesday of that
+month. "-3 wed" means the same thing, because April of 2004 has five
+Wednesdays.
+
+Note that negative values always apply to the end of the next-larger
+interval. "11hr -10sec" means 11:00:50 because the next-larger interval
+to seconds is a minute. The only exception are numbered days, which
+refer to the month.
+
 ---------------
 wait until next
 ---------------
 
-Like above, except that it'll wait until the next time the statement is
-true.
+Like above, except that it will wait until the next time the time matches.
 
 	async:
 		while True:
@@ -646,6 +826,17 @@ the command to turn off the lamp is outside the if: statement.
 If you do want these statements to run, update the waiter to zero
 seconds instead of canceling it.
 
+--------
+var wait
+--------
+
+You can access the time when a wait command will end.
+
+	var wait THEN NAME
+
+This is useful, of course, for adding this timestamp to other wait
+statements. See also the “time” module.
+
 
 -----
 Tests
@@ -679,3 +870,5 @@ if locked wait
 
 You can use this statement to test whether a notification event on that
 waiter is running.
+
+
