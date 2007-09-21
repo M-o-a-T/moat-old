@@ -672,8 +672,12 @@ class OWFSfactory(object,ReconnectingClientFactory):
 		d = defer.succeed(None)
 		d.addCallback(_call,self.update_all)
 		def monitor(_):
-			if _: d = 60
-			else: d = 300
+			if "HOMEVENT_TEST" in os.environ:
+				if _: d = 10
+				else: d = 30
+			else:
+				if _: d = 60
+				else: d = 300
 			self.watcher_id = reactor.callLater(d,self.watcher)
 		d.addCallbacks(monitor,process_failure)
 	
