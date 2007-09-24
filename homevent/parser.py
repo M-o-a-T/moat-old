@@ -29,7 +29,7 @@ from homevent.event import Event
 from homevent.statement import global_words
 from homevent.twist import deferToLater
 
-PLOG = os.getenv("HOMEVENT_LOG_PARSE",False)
+PLOG = ("HOMEVENT_LOG_PARSE" in os.environ)
 
 class SimpleReceiver(LineOnlyReceiver,object):
 	delimiter = "\n"

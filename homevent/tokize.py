@@ -9,7 +9,7 @@ from token import *
 import tokenize as t
 from twisted.internet.defer import inlineCallbacks, returnValue, maybeDeferred
 
-TLOG = os.getenv("HOMEVENT_LOG_TOKEN",False)
+TLOG = ("HOMEVENT_LOG_TOKEN" in os.environ)
 
 COMMENT = t.COMMENT
 NL = t.NL
