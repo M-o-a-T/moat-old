@@ -43,6 +43,96 @@ bool
 
 Simple conditionals "true" and "false". See 'ifelse' for details.
 
+======
+errors
+======
+
+Basic error handling.
+
+Usually, an error causes all processing to be aborted which waits for
+the failed statement to complete. In a non-async block, that happens
+to be the entire rest of the script. This module provides some ways to
+change that, as well as a command to explicitly trigger an error.
+
+---
+try
+---
+
+This command catches all errors which happen inside.
+
+	try:
+		set onewire FOO nonexistent
+
+-----
+catch
+-----
+
+This command needs to follow a ‹try› or ‹catch› block. It grabs the
+error from that block.
+
+	block:
+		try:
+			trigger error foo bar
+		catch:
+			log DEBUG Somebody did a $1 with a $2
+
+As you see, the error's parameters are passed in.
+
+As an alternate form, you may mention the parameters explicitly.
+If the error has not been triggered manually, or does not fit the list
+in some way, processing continues to the next ‹catch› block.
+
+	block:
+		try:
+			trigger error foo bar
+		catch foo *what:
+			log DEBUG Somebody must have been fooing around with the $what
+		catch:
+			log DEBUG Somebody did a $1 with a $2
+
+Finally, named system errors can be caught:
+	
+	block:
+		try:
+			log TRACE $foobar
+		catch KeyError:
+			log DEBUG somebody did something stupid
+			log error DEBUG
+
+Errors within the ‹catch› block fall down to the next ‹catch› statement.
+If there is none, the error is handled normally.
+
+
+-------------
+trigger error
+-------------
+
+As seen in the above examples, this statement will cause an error to be
+emitted.
+
+	block:
+		try:
+			block:
+				trigger error foo bar
+				log TRACE this will never be seen
+			log TRACE Neither will this be
+		catch:
+			log TRACE HEY we got an error of $1
+
+------------
+report error
+------------
+
+Caught errors are normally not reported because the ‹catch› block is
+supposed to handle them. If you want (or need) to, however, you can 
+
+	block:
+		try:
+			trigger error foo bar
+		catch:
+			log error DEBUG
+
+
 =======
 example
 =======

@@ -1,0 +1,144 @@
+NEW: <WorkSequence:1 (4)>
+   : │  EVENT: startup
+   : └1╴... done.
+1 EVENT: startup
+1 END: startup
+0 add ‹TryStatement ⌁.try›
+0 add ‹LogHandler ⌁.log¦DEBUG¦Yes¦A›
+0 add ‹TryStatement ⌁.try›
+0 add ‹LogHandler ⌁.log¦DEBUG¦Yes¦B›
+0 add ‹LogHandler ⌁.log¦DEBUG¦No¦1›
+0 add ‹TryStatement ⌁.try›
+0 add ‹LogHandler ⌁.log¦DEBUG¦Yes¦C›
+0 add ‹LogHandler ⌁.log¦DEBUG¦No¦11›
+0 add ‹LogHandler ⌁.log¦DEBUG¦No¦12›
+0 add ‹TryStatement ⌁.try›
+0 add ‹LogHandler ⌁.log¦DEBUG¦Yes¦D›
+0 add ‹TriggerStatement ⌁.trigger¦error¦Foo¦A›
+0 add ‹LogHandler ⌁.log¦DEBUG¦No¦21›
+0 add ‹TryStatement ⌁.try›
+0 add ‹LogHandler ⌁.log¦DEBUG¦Yes¦E›
+0 add ‹TriggerStatement ⌁.trigger¦error¦Foo¦B›
+0 add ‹LogHandler ⌁.log¦DEBUG¦No¦31›
+0 add ‹LogHandler ⌁.log¦DEBUG¦Yes¦F¦$2›
+0 add ‹TryStatement ⌁.try›
+0 add ‹LogHandler ⌁.log¦DEBUG¦Yes¦G›
+0 add ‹TriggerStatement ⌁.trigger¦error¦Foo¦C›
+0 add ‹LogHandler ⌁.log¦DEBUG¦No¦41›
+0 add ‹LogHandler ⌁.log¦DEBUG¦Yes¦H¦$2›
+0 add ‹LogHandler ⌁.log¦DEBUG¦No¦42›
+0 add ‹TryStatement ⌁.try›
+0 add ‹LogHandler ⌁.log¦DEBUG¦Yes¦I›
+0 add ‹TriggerStatement ⌁.trigger¦error¦Foo¦D›
+0 add ‹LogHandler ⌁.log¦DEBUG¦No¦51›
+0 add ‹LogHandler ⌁.log¦DEBUG¦Yes¦J¦$2›
+0 add ‹TriggerStatement ⌁.trigger¦error¦Foo¦E›
+0 add ‹LogHandler ⌁.log¦DEBUG¦No¦52›
+0 add ‹TryStatement ⌁.try›
+0 add ‹LogHandler ⌁.log¦DEBUG¦Yes¦K›
+0 add ‹TriggerStatement ⌁.trigger¦error¦Foo¦F›
+0 add ‹LogHandler ⌁.log¦DEBUG¦No¦61›
+0 add ‹LogHandler ⌁.log¦DEBUG¦Yes¦L¦$2›
+0 add ‹TriggerStatement ⌁.trigger¦error¦Foo¦G›
+0 add ‹LogHandler ⌁.log¦DEBUG¦No¦62›
+0 add ‹LogHandler ⌁.log¦DEBUG¦Yes¦M¦$2›
+0 add ‹TryStatement ⌁.try›
+0 add ‹LogHandler ⌁.log¦DEBUG¦$foobar›
+0 add ‹LogHandler ⌁.log¦DEBUG¦No¦71›
+0 add ‹LogHandler ⌁.log¦DEBUG¦Yes¦N¦KEY›
+0 add ‹LogHandler ⌁.log¦DEBUG¦No¦72›
+0 add ‹TryStatement ⌁.try›
+0 add ‹TriggerStatement ⌁.trigger¦error¦Foo¦Bar›
+0 add ‹LogHandler ⌁.log¦DEBUG¦No¦81›
+0 add ‹LogHandler ⌁.log¦DEBUG¦No¦82›
+0 add ‹LogHandler ⌁.log¦DEBUG¦No¦83›
+0 add ‹LogHandler ⌁.log¦DEBUG¦Yes¦O›
+0 add ‹LogHandler ⌁.log¦DEBUG¦No¦84›
+0 add ‹TryStatement ⌁.try›
+0 add ‹TriggerStatement ⌁.trigger¦error¦Foo¦Bar›
+0 add ‹LogHandler ⌁.log¦DEBUG¦No¦91›
+0 add ‹LogHandler ⌁.log¦DEBUG¦No¦92›
+0 add ‹LogHandler ⌁.log¦DEBUG¦No¦93›
+0 add ‹LogHandler ⌁.log¦DEBUG¦Yes¦P¦$a¦$b›
+0 add ‹LogHandler ⌁.log¦DEBUG¦No¦94›
+1 Yes A
+1 Yes B
+1 Yes C
+1 Yes D
+0 Triggered:
+0 RaisedError: Foo A
+NEW: <WorkSequence:2 (4)>
+   : │  ERROR: RaisedError: Foo A
+   : └1╴... done.
+ERROR: Traceback (most recent call last):
+     :   File "modules/errors.py, in _run
+     :     d = super(TryStatement,self).run(ctx,**k)
+     :   File "homevent/statement.py, in run
+     :     d.callback(None)
+     :   File "homevent/twist.py, in acb
+     :     self._startRunCallbacks(result)
+     :   File "internet/defer.py, in _startRunCallbacks
+     :     self._runCallbacks()
+     : --- <exception caught here> ---
+     :   File "internet/defer.py, in _runCallbacks
+     :     self.result = callback(self.result, *args, **kw)
+     :   File "homevent/statement.py, in go
+     :     return p.run(ctx)
+     :   File "modules/errors.py, in run
+     :     raise err
+     : __builtin__.RaisedError: RaisedError: Foo A
+119 END: RaisedError
+1 Yes E
+0 Triggered:
+0 RaisedError: Foo B
+1 Yes F B
+1 Yes G
+0 Triggered:
+0 RaisedError: Foo C
+1 Yes H C
+1 Yes I
+0 Triggered:
+0 RaisedError: Foo D
+1 Yes J D
+0 Triggered:
+0 RaisedError: Foo E
+NEW: <WorkSequence:3 (4)>
+   : │  ERROR: RaisedError: Foo E
+   : └1╴... done.
+ERROR: Traceback (most recent call last):
+     :   File "modules/errors.py, in _run
+     :     d = super(TryStatement,self).run(ctx,**k)
+     :   File "homevent/statement.py, in run
+     :     d.callback(None)
+     :   File "homevent/twist.py, in acb
+     :     self._startRunCallbacks(result)
+     :   File "internet/defer.py, in _startRunCallbacks
+     :     self._runCallbacks()
+     : --- <exception caught here> ---
+     :   File "internet/defer.py, in _runCallbacks
+     :     self.result = callback(self.result, *args, **kw)
+     :   File "homevent/statement.py, in go
+     :     return p.run(ctx)
+     :   File "modules/errors.py, in run
+     :     raise err
+     : __builtin__.RaisedError: RaisedError: Foo E
+138 END: RaisedError
+1 Yes K
+0 Triggered:
+0 RaisedError: Foo F
+1 Yes L F
+0 Triggered:
+0 RaisedError: Foo G
+1 Yes M G
+1 Yes N KEY
+0 Triggered:
+0 RaisedError: Foo Bar
+1 Yes O
+0 Triggered:
+0 RaisedError: Foo Bar
+1 Yes P Foo Bar
+NEW: <WorkSequence:4 (5)>
+   : │  EVENT: shutdown
+   : └1╴... done.
+2 EVENT: shutdown
+2 END: shutdown
