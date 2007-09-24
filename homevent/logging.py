@@ -59,8 +59,11 @@ class Logger(object):
 
 	def log_event(self, event, level=DEBUG):
 		if level >= self.level:
-			for r in event.report(99):
-				self._log(level,r)
+			if hasattr(event,"report"):
+				for r in event.report(99):
+					self._log(level,r)
+			else:
+				self._log(level,str(event))
 			self._log(level,".")
 			self.flush()
 

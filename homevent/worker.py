@@ -184,8 +184,11 @@ class WorkSequence(WorkItem):
 			prefix = "│  "
 		else:
 			prefix = "   "
-		for r in self.event.report(False):
-			yield prefix+r
+		if hasattr(self.event,"report"):
+			for r in self.event.report(False):
+				yield prefix+r
+		else:
+			yield prefix+str(self.event)
 		if self.worker:
 			w="by "
 			for r in self.worker.report(verbose):
