@@ -15,7 +15,7 @@ log
 
 from homevent.module import Module
 from homevent.statement import Statement, main_words
-from homevent.logging import TRACE,DEBUG,INFO,WARN,ERROR,PANIC,NONE
+from homevent import logging
 from homevent.logging import log, Logger, register_logger,unregister_logger,\
 	LogNames
 
@@ -58,10 +58,10 @@ log
 			print >>out,"."
 			return None
 		if len(event) > 1:
-			log(globals()[event[0]], *event[1:])
+			log(getattr(logging,event[0].upper()), *event[1:])
 		else:
-			level = globals()[event[0]]
-			if level == NONE:
+			level = getattr(logging,event[0].upper())
+			if level == logging.NONE:
 				if hasattr(out,"logger"):
 					unregister_logger(out.logger)
 					del out.logger
