@@ -394,12 +394,12 @@ class Shutdown_Worker_Wait(ExcWorker):
         return ()
 
 
-class EventsModule(Module):
+class WaitModule(Module):
 	"""\
-		This module contains basic event handling code.
+		This module contains the handlers for explicit delays.
 		"""
 
-	info = "Basic event handling"
+	info = "Delay handling"
 	worker = Shutdown_Worker_Wait("Wait killer")
 
 	def load(self):
@@ -426,4 +426,4 @@ class EventsModule(Module):
 		unregister_condition(LockedWaiterCheck)
 		unregister_worker(self.worker)
 
-init = EventsModule
+init = WaitModule
