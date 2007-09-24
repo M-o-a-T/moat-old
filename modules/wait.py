@@ -67,6 +67,9 @@ class Waiter(object):
 		if self.name in waiters:
 			raise DupWaiterError(self)
 	
+	def __repr__(self):
+		return u"‹%s %s %d›" % (self.__class__.__name__, self.name,self.value)
+
 	def _callit(self,_=None):
 		self.id = reactor.callLater(self.value, self.doit)
 
