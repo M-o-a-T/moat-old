@@ -50,7 +50,7 @@ class OnEventWorker(Worker):
 		self.parent = parent
 		self.name = "¦".join(self.parent.arglist)
 		if self.parent.displayname is not None:
-			self.name += " ‹"+" ".join(self.parent.displayname)+"›"
+			self.name += u" ‹"+" ".join(self.parent.displayname)+u"›"
 
 		global _onHandler_id
 		_onHandler_id += 1
@@ -141,7 +141,7 @@ Every "*foo" in the event description is mapped to the corresponding
 
 	def run(self,ctx,**k):
 		if self.procs is None:
-			raise SyntaxError("‹on ...› can only be used as a complex statement")
+			raise SyntaxError(u"‹on ...› can only be used as a complex statement")
 
 		worker = OnEventWorker(self)
 		register_worker(worker)
@@ -172,7 +172,7 @@ class OffEventHandler(Statement):
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		if not len(event):
-			raise SyntaxError("Usage: del on ‹handler_id/name›")
+			raise SyntaxError(u"Usage: del on ‹handler_id/name›")
 		try: worker = onHandlerNames[tuple(event)]
 		except KeyError:
 			if len(event) == 1:
@@ -199,7 +199,7 @@ class OnListHandler(Statement):
 					h = onHandlers[id]
 					n = "¦".join(h.parent.arglist)
 					if h.parent.displayname is not None:
-						n += " ‹"+" ".join(h.parent.displayname)+"›"
+						n += u" ‹"+" ".join(h.parent.displayname)+u"›"
 					print >>self.ctx.out,str(id)+" "*(fl-len(str(id))+1),":",n
 			print >>self.ctx.out,"."
 		else:
@@ -222,11 +222,11 @@ Only one handler within each priority is actually executed.
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		if len(event) != 1:
-			raise SyntaxError("Usage: prio ‹priority›")
+			raise SyntaxError(u"Usage: prio ‹priority›")
 		try:
 			prio = int(event[0])
 		except ValueError:
-			raise SyntaxError("Usage: prio ‹priority› ⇐ integer priorities only")
+			raise SyntaxError(u"Usage: prio ‹priority› ⇐ integer priorities only")
 		if prio < MIN_PRIO or prio > MAX_PRIO:
 			raise ValueError("Priority value (%d): needs to be between %d and %d" % (prio,MIN_PRIO,MAX_PRIO))
 		self.parent.prio = prio
@@ -243,7 +243,7 @@ This statement assigns a name to an event handler.
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		if not len(event):
-			raise SyntaxError('Usage: name "‹text›"')
+			raise SyntaxError(u'Usage: name "‹text›"')
 		self.parent.displayname = tuple(event)
 
 
@@ -258,7 +258,7 @@ This statement assigns a documentation string to an event handler.
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		if len(event) != 1:
-			raise SyntaxError('Usage: doc "‹text›"')
+			raise SyntaxError(u'Usage: doc "‹text›"')
 		self.parent.displaydoc = event[0]
 
 
@@ -278,7 +278,7 @@ class OnExistsCheck(Check):
 	doc="check if a handler exists"
 	def check(self,*args):
 		if not len(args):
-			raise SyntaxError("Usage: if exists on ‹name…›")
+			raise SyntaxError(u"Usage: if exists on ‹name…›")
 		name = tuple(args)
 		return name in onHandlerNames
 

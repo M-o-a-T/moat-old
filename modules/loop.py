@@ -51,7 +51,7 @@ Syntax:
 	def run(self,ctx,**k):
 		want = True
 		if self.procs is None:
-			raise SyntaxError("‹while ...› can only be used as a complex statement")
+			raise SyntaxError(u"‹while ...› can only be used as a complex statement")
 
 		event = self.params(ctx)
 		w = event[:]
@@ -79,11 +79,11 @@ Syntax:
 """
 	def run(self,ctx,**k):
 		if self.procs is None:
-			raise SyntaxError("‹repeat› can only be used as a complex statement")
+			raise SyntaxError(u"‹repeat› can only be used as a complex statement")
 
 		event = self.params(ctx)
 		if len(event):
-			raise SyntaxError("‹repeat› does not take arguments")
+			raise SyntaxError(u"‹repeat› does not take arguments")
 
 		return self._loop(ctx)
 

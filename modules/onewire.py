@@ -32,7 +32,7 @@ connect onewire NAME [[host] port]
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		if len(event) < 1 or len(event) > 3:
-			raise SyntaxError("Usage: connect onewire NAME ‹host?› ‹port›")
+			raise SyntaxError(u"Usage: connect onewire NAME ‹host?› ‹port›")
 		name = event[0]
 		k={'name': name}
 		if len(event) > 2:
@@ -66,7 +66,7 @@ disconnect onewire NAME
 class OWFSvar(Statement):
 	name=("var","onewire")
 	doc="assign a variable to get a value off onewire"
-	long_doc="""\
+	long_doc=u"""\
 var onewire NAME dev attr
 	: Device ‹dev›'s attribute ‹attr› is read from the bus and stored
 	  in the variable ‹NAME›.
@@ -88,7 +88,7 @@ var onewire NAME dev attr
 class OWFSset(Statement):
 	name=("set","onewire")
 	doc="send a value to a onewire device"
-	long_doc="""\
+	long_doc=u"""\
 set onewire VALUE dev attr
 	: ‹VALUE› is written to device ‹dev›'s attribute ‹attr›.
 """

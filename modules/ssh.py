@@ -107,7 +107,7 @@ You need to call this exactly once.
 		global sshFactory
 		event = self.params(ctx)
 		if len(event) != 1:
-			raise SyntaxError('Usage: ssh path "‹directory›"')
+			raise SyntaxError(u'Usage: ssh path "‹directory›"')
 		path = event[0]
 		if not os.path.isdir(path):
 			raise RuntimeError("This is not a directory")
@@ -165,7 +165,7 @@ on a specific port. (There is no default port.)
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		if len(event) != 1:
-			raise SyntaxError('Usage: listen ssh ‹port›')
+			raise SyntaxError(u'Usage: listen ssh ‹port›')
 		if sshFactory is NotYet:
 			raise RuntimeError('ssh path has not been set yet')
 		if sshFactory is None:
@@ -178,17 +178,17 @@ on a specific port. (There is no default port.)
 class SSHauth(Statement):
 	name = ("auth","ssh")
 	doc = "authorize a user to connect"
-	long_doc="""\
+	long_doc=u"""\
 Usage: auth ssh ‹username› "‹ssh pubkey›"
 This command allows the named used to connect with their SSH key.
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		if len(event) != 2:
-			raise SyntaxError('Usage: auth ssh ‹username› "‹ssh pubkey›"')
+			raise SyntaxError(u'Usage: auth ssh ‹username› "‹ssh pubkey›"')
 		pubkey=event[1]
 		if " " in pubkey:
-			raise SyntaxError('The ‹ssh pubkey› does not contain spaces.')
+			raise SyntaxError(u'The ‹ssh pubkey› does not contain spaces.')
 		authorizedKeys[event[0]] = pubkey
 
 
@@ -207,7 +207,7 @@ class SSHlistauth(Statement):
 class SSHnoauth(Statement):
 	name = ("no","auth","ssh")
 	doc = "forbid authorize a user to connect"
-	long_doc="""\
+	long_doc=u"""\
 Usage: no auth ssh ‹username›
 This command blocks the named user from accessing the server.
 Existing connections are not affected.
@@ -215,7 +215,7 @@ Existing connections are not affected.
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		if len(event) != 1:
-			raise SyntaxError('Usage: no auth ssh ‹username›')
+			raise SyntaxError(u'Usage: no auth ssh ‹username›')
 		del authorizedKeys[event[0]]
 
 

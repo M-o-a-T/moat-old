@@ -63,7 +63,7 @@ set state X name...
 		event = self.params(ctx)
 		w = event[:]
 		if len(w) < 2:
-			raise SyntaxError("Usage: set state ‹value› ‹name…›")
+			raise SyntaxError(u"Usage: set state ‹value› ‹name…›")
 		value = w[0]
 		name = tuple(w[1:])
 		try:
@@ -125,11 +125,11 @@ del state name...
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		if not len(event):
-			raise SyntaxError("Usage: del state ‹name…›")
+			raise SyntaxError(u"Usage: del state ‹name…›")
 
 		s = states[tuple(event)]
 		if s.working:
-			raise StateChangeError(s,"‹deleted›")
+			raise StateChangeError(s,u"‹deleted›")
 		s.working = True
 		s.time = time()
 		d = process_event(Event(self.ctx,"state",s.value,"-",*event))
@@ -143,7 +143,7 @@ del state name...
 class VarStateHandler(Statement):
 	name=("var","state")
 	doc="assign a variable to report a state"
-	long_doc="""\
+	long_doc=u"""\
 var state NAME name...
 	: $NAME refers to the state ‹name…›, in the enclosing block
 """
@@ -160,7 +160,7 @@ class StateCheck(Check):
 	doc="check if a state has a particular value"
 	def check(self,*args):
 		if len(args) < 2:
-			raise SyntaxError("Usage: if state ‹value› ‹name…›")
+			raise SyntaxError(u"Usage: if state ‹value› ‹name…›")
 		value = args[0]
 		name = tuple(args[1:])
 		return states[name].value == value
@@ -171,7 +171,7 @@ class StateLockedCheck(Check):
 	doc="check if a state is being updated"
 	def check(self,*args):
 		if len(args) < 2:
-			raise SyntaxError("Usage: if state locked ‹name…›")
+			raise SyntaxError(u"Usage: if state locked ‹name…›")
 		return states[tuple(args)].working
 
 
@@ -180,7 +180,7 @@ class LastStateCheck(Check):
 	doc="check if a state had a particular value before"
 	def check(self,*args):
 		if len(args) < 2:
-			raise SyntaxError("Usage: if last state ‹value› ‹name…›")
+			raise SyntaxError(u"Usage: if last state ‹value› ‹name…›")
 		value = args[0]
 		name = tuple(args[1:])
 
@@ -196,7 +196,7 @@ class ExistsStateCheck(Check):
 	doc="check if a state exists at all"
 	def check(self,*args):
 		if len(args) < 1:
-			raise SyntaxError("Usage: if exists state ‹name…›")
+			raise SyntaxError(u"Usage: if exists state ‹name…›")
 		name = tuple(args)
 		return name in states
 

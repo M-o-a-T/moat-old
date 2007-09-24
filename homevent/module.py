@@ -167,23 +167,23 @@ load dir - "NAME"
 			w = event[-1]
 			if len(event) == 1 and w not in ("+","-"):
 				if not os.path.isdir(w):
-					raise RuntimeError("‹%s›: not found" % (w,))
+					raise RuntimeError(u"‹%s›: not found" % (w,))
 				if event[0] not in ModuleDirs:
 					ModuleDirs.append(w)
 				else:
-					raise RuntimeError("‹%s›: already listed" % (w,))
+					raise RuntimeError(u"‹%s›: already listed" % (w,))
 			elif len(event) == 2 and event[0] == "+":
 				if not os.path.isdir(w):
-					raise RuntimeError("‹%s›: not found" % (w,))
+					raise RuntimeError(u"‹%s›: not found" % (w,))
 				if event[1] not in ModuleDirs:
 					ModuleDirs.insert(0,w)
 				else:
-					raise RuntimeError("‹%s›: already listed" % (w,))
+					raise RuntimeError(u"‹%s›: already listed" % (w,))
 			elif len(event) == 2 and event[0] == "-":
 				try:
 					ModuleDirs.remove(w)
 				except ValueError:
-					raise RuntimeError("‹%s›: not listed" % (w,))
+					raise RuntimeError(u"‹%s›: not listed" % (w,))
 			else:
 				raise SyntaxError("Usage: loaddir [ [ - ] name ]")
 

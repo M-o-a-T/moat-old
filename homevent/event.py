@@ -58,11 +58,11 @@ class Event(object):
 			yield "EVENT: REPORT_ERROR: "+repr(self.names)
 	
 	def __getitem__(self,i):
-		"""… so that you can write e[0] instead of e.names[0]"""
+		u"""… so that you can write e[0] instead of e.names[0]"""
 		return self.names[i]
 	
 	def __getslice__(self,i,j):
-		"""… so that you can write e[2:] instead of e.names[2:]"""
+		u"""… so that you can write e[2:] instead of e.names[2:]"""
 		return list(self.names[i:j])
 		# list() because the result may need to be modified by the caller
 	

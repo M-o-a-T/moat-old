@@ -24,7 +24,7 @@ class Check(Statement):
 	"""Abstrace base class for condition checks"""
 	immediate = True
 	def run(self,*a,**k):
-		raise SyntaxError("‹%s› is not a statement you can execute.", " ".join(self.name))
+		raise SyntaxError(u"‹%s› is not a statement you can execute.", " ".join(self.name))
 
 	def check(self,*args):
 		raise NotImplementedError("You need to override check().")
@@ -40,7 +40,7 @@ help conditions : list the things you can test for.
 """
 	immediate = True
 	def run(self,*a,**k):
-		raise SyntaxError("‹conditions› is not a statement you can execute.")
+		raise SyntaxError(u"‹conditions› is not a statement you can execute.")
 	
 	def check_condition(self,ctx,*args):
 		"""Check if a condition is met"""

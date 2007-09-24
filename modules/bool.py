@@ -27,7 +27,7 @@ class BoolModule(Module):
 		This module implements basic boolean conditions
 		"""
 
-	info = "Boolean conditions. There can be only … two."
+	info = u"Boolean conditions. There can be only … two."
 
 	def load(self):
 		register_condition(TrueCheck)

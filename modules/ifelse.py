@@ -47,7 +47,7 @@ Syntax:
 	def run(self,ctx,**k):
 		want=True
 		if self.procs is None:
-			raise SyntaxError("‹if ...› can only be used as a complex statement")
+			raise SyntaxError(u"‹if ...› can only be used as a complex statement")
 
 		event = self.params(ctx)
 		w = event[:]

@@ -32,7 +32,7 @@ class HaltSequence(Exception):
 	
 
 class WorkItem(object):
-	"""\
+	u"""\
 		One particular thing to do.
 
 		*Everything* that this system does needs to be represented as a

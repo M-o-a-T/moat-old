@@ -38,14 +38,14 @@ class WaitError(RuntimeError):
 		return self.text % (" ".join(map(str,self.waiter.name)),)
 
 class WaitLocked(WaitError):
-	text = "Tried to process waiter ‹%s› while it was locked"
+	text = u"Tried to process waiter ‹%s› while it was locked"
 
 class WaitCancelled(WaitError):
 	"""An error signalling that a wait was killed."""
-	text = "Waiter ‹%s› was cancelled"
+	text = u"Waiter ‹%s› was cancelled"
 
 class DupWaiterError(WaitError):
-	text = "A waiter ‹%s› already exists"
+	text = u"A waiter ‹%s› already exists"
 
 
 def _trigger(_,d):
@@ -194,7 +194,7 @@ wait for FOO...
 class WaitForHandler(WaitHandler):
 	name=("wait","until")
 	doc="delay until some timespec matches"
-	long_doc="""\
+	long_doc=u"""\
 wait until FOO...
 	- delay processsing until FOO matches the current time.
 	  Return immediately if it matches already.
@@ -213,7 +213,7 @@ wait until FOO...
 class WaitWhileHandler(WaitHandler):
 	name=("wait","while")
 	doc="delay while some timespec matches"
-	long_doc="""\
+	long_doc=u"""\
 wait while FOO...
 	- delay processsing while FOO matches the current time
 	  N sec / min / hour / day / month / year
@@ -231,7 +231,7 @@ wait while FOO...
 class WaitForNextHandler(WaitHandler):
 	name=("wait","until","next")
 	doc="delay for some timespec does not match and then match again"
-	long_doc="""\
+	long_doc=u"""\
 wait until next FOO...
 	- delay processsing until FOO starts matching the current time
 	  N sec / min / hour / day / month / year
@@ -250,21 +250,21 @@ wait until next FOO...
 class WaitName(Statement):
 	name = ("name",)
 	doc = "name a wait handler"
-	long_doc="""\
+	long_doc=u"""\
 name ‹whatever you want›
 	This statement assigns a name to a wait statement.
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		if not len(event):
-			raise SyntaxError('Usage: name ‹name…›')
+			raise SyntaxError(u'Usage: name ‹name…›')
 		self.parent.displayname = tuple(event)
 
 
 class WaitCancel(Statement):
 	name = ("del","wait")
 	doc = "abort a wait handler"
-	long_doc="""\
+	long_doc=u"""\
 del wait ‹whatever the name is›
 	This statement aborts a wait handler.
 	Everything that depended on the handler's completion will be skipped!
@@ -272,7 +272,7 @@ del wait ‹whatever the name is›
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		if not len(event):
-			raise SyntaxError('Usage: del wait ‹name…›')
+			raise SyntaxError(u'Usage: del wait ‹name…›')
 		w = waiters[tuple(event)]
 		return w.cancel(err=HaltSequence)
 
@@ -341,7 +341,7 @@ class ExistsWaiterCheck(Check):
 	doc="check if a waiter exists at all"
 	def check(self,*args):
 		if not len(args):
-			raise SyntaxError("Usage: if exists wait ‹name…›")
+			raise SyntaxError(u"Usage: if exists wait ‹name…›")
 		name = tuple(args)
 		return name in waiters
 
@@ -350,7 +350,7 @@ class LockedWaiterCheck(Check):
 	doc="check if a waiter is locked"
 	def check(self,*args):
 		if not len(args):
-			raise SyntaxError("Usage: if locked wait ‹name…›")
+			raise SyntaxError(u"Usage: if locked wait ‹name…›")
 		name = tuple(args)
 		return waiters[name].locked
 
@@ -358,7 +358,7 @@ class LockedWaiterCheck(Check):
 class VarWaitHandler(Statement):
 	name=("var","wait")
 	doc="assign a variable to report when a waiter will time out"
-	long_doc="""\
+	long_doc=u"""\
 var wait NAME name...
 	: $NAME tells how many seconds in the future the wait record ‹name…›
 	  will trigger

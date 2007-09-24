@@ -63,7 +63,7 @@ Syntax:
 	def run(self,ctx,**k):
 		want=True
 		if self.procs is None:
-			raise SyntaxError("‹if ...› can only be used as a complex statement")
+			raise SyntaxError(u"‹if ...› can only be used as a complex statement")
 
 		event = self.params(ctx)
 		if len(event):
@@ -184,11 +184,11 @@ Syntax:
 
 class TriggerStatement(Statement):
 	name=("trigger","error")
-	doc="trigger error NAME…"
-	long_doc="""\
+	doc=u"trigger error NAME…"
+	long_doc=u"""\
 This command causes an error to be reported.
 
-The names are user-assigned; they'll be accessible as $1..$n in "catch" blocks.
+The names are user-assigned; they'll be accessible as $1…$n in "catch" blocks.
 Syntax:
 	try:
 		trigger error BAD StuffHappened
@@ -199,7 +199,7 @@ Syntax:
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		if not len(event):
-			raise SyntaxError("Usage: trigger error NAME…")
+			raise SyntaxError(u"Usage: trigger error NAME…")
 		err = RaisedError(*event[:])
 		logging.log_exc(msg="Triggered:", err=err, level=logging.TRACE)
 		raise err

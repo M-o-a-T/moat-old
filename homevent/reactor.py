@@ -133,7 +133,7 @@ shutdown now  ... but does not wait for active events to terminate.
 			if tuple(event) == ("now",):
 				stop_mainloop()
 				return
-			raise ValueError("'shutdown' does not take arguments (except ‹now›).",event)
+			raise ValueError(u"'shutdown' does not take arguments (except ‹now›).",event)
 		shut_down()
 
 def mainloop(main=None):

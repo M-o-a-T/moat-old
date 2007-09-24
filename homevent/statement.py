@@ -33,7 +33,7 @@ class UnknownWordError(KeyError):
 		self.where = where
 
 	def __str__(self):
-		return "Cannot find word ‹%s› in ‹%s›" % (" ".join(str(x) for x in self.word), " ".join(self.where.name))
+		return u"Cannot find word ‹%s› in ‹%s›" % (" ".join(str(x) for x in self.word), " ".join(self.where.name))
 
 class Statement(object):
 	"""\
@@ -55,9 +55,9 @@ class Statement(object):
 	
 	def __repr__(self):
 		if self.args:
-			return "‹%s %s›" % (self.__class__.__name__,str(self.args))
+			return u"‹%s %s›" % (self.__class__.__name__,str(self.args))
 		else:
-			return "‹%s %s›" % (self.__class__.__name__,repr(self.name))
+			return u"‹%s %s›" % (self.__class__.__name__,repr(self.name))
 
 	@classmethod
 	def matches(self,args):
@@ -83,7 +83,7 @@ class Statement(object):
 		raise NotImplementedError("You need to override '%s.run' (called with %s)" % (self.__class__.__name__,repr(event)))
 	
 	def report(self,verbose):
-		yield " ".join(str(x) for x in self.args)+" ‹"+self.__class__.__name__+"›"
+		yield " ".join(str(x) for x in self.args)+u" ‹"+self.__class__.__name__+u"›"
 
 
 class ComplexStatement(Statement):
@@ -110,16 +110,16 @@ class ComplexStatement(Statement):
 
 	def __repr__(self):
 		if self.__words is None:
-			return "‹%s %s›" % (self.__class__.__name__,repr(self.name))
+			return u"‹%s %s›" % (self.__class__.__name__,repr(self.name))
 		else:
-			return "‹%s %s %d›" % (self.__class__.__name__,repr(self.name),len(self.__words))
+			return u"‹%s %s %d›" % (self.__class__.__name__,repr(self.name),len(self.__words))
 
 	def start_block(self):
 		raise NotImplementedError("You need to override '%s.start_block' (called with %s)" % (self.__class__.__name__,repr(self.args)))
 
 	def __getitem__(self,key):
 		if self.__words is None:
-			raise KeyError("Lookup ‹%s›: No word list in %s" % (key,self.__class__.__name__))
+			raise KeyError(u"Lookup ‹%s›: No word list in %s" % (key,self.__class__.__name__))
 		return self.__words[key]
 
 	def lookup(self,args):
@@ -219,7 +219,7 @@ class AttributedStatement(ComplexStatement):
 	def start_block(self): pass
 	def end_block(self): pass
 	def add(self,proc):
-		raise RuntimeError("Non-immediate substatement on ‹%s›?" % (" ".join(self.name),))
+		raise RuntimeError(u"Non-immediate substatement on ‹%s›?" % (" ".join(self.name),))
 
 class IgnoreStatement(Statement):
 	"""Used for error exits"""
@@ -250,12 +250,12 @@ class StatementList(ComplexStatement):
 
 	def __repr__(self):
 		try:
-			return "‹"+self.__class__.__name__+"("+str(self.handler_id)+")›"
+			return u"‹"+self.__class__.__name__+"("+str(self.handler_id)+u")›"
 		except AttributeError:
 			try:
-				return "‹"+self.__class__.__name__+" "+str(self.args)+"›"
+				return u"‹"+self.__class__.__name__+" "+str(self.args)+u"›"
 			except AttributeError:
-				return "‹"+self.__class__.__name__+"(?)›"
+				return u"‹"+self.__class__.__name__+u"(?)›"
 
 	def run(self,ctx,**k):
 		if self.procs is None:
@@ -355,7 +355,7 @@ class OffEventHandler(Statement):
 			if worker.displayname is not None:
 				del onHandlerNames[worker.displayname]
 		else:
-			raise SyntaxError("Usage: del on ‹handler_id/name›")
+			raise SyntaxError(u"Usage: del on ‹handler_id/name›")
 
 class OnListHandler(Statement):
 	name = ("list","on")
@@ -373,9 +373,9 @@ class OnListHandler(Statement):
 					n = "¦".join(h.args)
 					if h.displayname is not None:
 						if isinstance(h.displayname,basestring):
-							n += " ‹"+h.displayname+"›"
+							n += u" ‹"+h.displayname+u"›"
 						else:
-							n += " ‹"+" ".join(h.displayname)+"›"
+							n += u" ‹"+" ".join(h.displayname)+u"›"
 					print >>self.ctx.out,str(id)+" "*(fl-len(str(id))+1),":",n
 		elif len(event) == 1:
 			try: h = onHandlers[event[0]]
@@ -388,7 +388,7 @@ class OnListHandler(Statement):
 					print >>self.ctx.out,"Name:"," ".join(h.displayname)
 			if hasattr(h,"displaydoc"): print >>self.ctx.out,"Doc:",h.displaydoc
 		else:
-			raise SyntaxError("Usage: list on ‹handler_id›")
+			raise SyntaxError(u"Usage: list on ‹handler_id›")
 
 
 class DoNothingHandler(Statement):
@@ -419,7 +419,7 @@ This statement causes the input channel which runs it to terminate.
 
 
 class LoopMixin(object):
-	"""\
+	u"""\
 		A mix-in for statements which repeat themselves.
 		Your run() needs to end with "return self.loop(res,condproc,args…)".
 		The body will execute as long as condproc(args…) == res.
