@@ -14,6 +14,8 @@ lines:
   (find one with "owdir"; a thermometer is good, it's named "10.SOMETHING")
   (do not give the path to the device, the test will find it on its own!)
 * some parameter to read ("temperature")
+* some parameter to write ("temphigh")
+* the value to write (50)
 * hostname where a owserver daemon is running; default localhost
 * port on which the owserver listens (default, 4304)
 
@@ -25,6 +27,8 @@ fi
 (
 	read dev
 	read attr
+	read attr2
+	read val
 	read host
 	read port
 
@@ -38,6 +42,7 @@ fi
 
 	echo Testing 1wire on $host:$port for $dev/$attr
 	sed -e "s/_HOST_/$host/g" -e "s/_PORT_/$port/g" \
+	    -e "s/_ATTR2_/$attr2/g" -e "s/_VAL_/$val/g" \
 	    -e "s/_DEV_/$dev/g"   -e "s/_ATTR_/$attr/g" < onewire2_in >onewire2
 ) < ../onewire_params
 exit $?

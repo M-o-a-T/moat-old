@@ -94,8 +94,6 @@ TRACE> add ‹TriggerHandler ⌁.trigger¦thermo¦$X›
 TRACE> add ‹WaitCancel ⌁.del¦wait¦yawn›
 0 NewHandler 1
 TRACE> NewHandler 1
-0 OWFS start bus update
-TRACE> OWFS start bus update
 NEW: <WorkSequence:8 (4)>
    : ├1╴on onewire scanned A * * ‹OnEventHandler›
    : │  name: scanned
@@ -155,8 +153,8 @@ DEBUG>    : └1╴... done.
 359 EVENT: thermo¦DATA
 DEBUG> EVENT: thermo¦DATA
 .
-359 END: thermo¦22
-DEBUG> END: thermo¦22
+359 END: thermo¦DATA
+DEBUG> END: thermo¦DATA
 .
 362 EVENT: wait¦cancel¦1049515643.0¦yawn
 DEBUG> EVENT: wait¦cancel¦1049515643.0¦yawn

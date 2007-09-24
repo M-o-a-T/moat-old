@@ -17,6 +17,8 @@ fi
 (
 	read dev
 	read attr
+	read attr2
+	read val
 	read host
 	read port
 
@@ -30,8 +32,10 @@ fi
 
 	sed -e "s/$host/_HOST_/g" -e "s/$port/_PORT_/g" \
 	    -e "s/$dev/_DEV_/g"   -e "s/$attr/_ATTR_/g" \
+	    -e "s/$attr2/_ATTR2_/g"   -e "s/$val/_VAL_/g" \
 		-e "s/ATTRgetmsg.* _DEV_ _ATTR_.*: '.*'/ATTRgetmsg DATA/" \
 		-e "s/EVENT: thermo.*/EVENT: thermo¦DATA/" \
+		-e "s/END: thermo.*/END: thermo¦DATA/" \
 		-e "s/instance at 0x[0-9a-fA-F]*/instance at FOO/g" \
 		-e "/EVENT: onewire.*scanning/,/EVENT: onewire.*scanned/d" \
 		-i real/onewire

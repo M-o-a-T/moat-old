@@ -109,6 +109,8 @@ class OWFSdir(Statement):
 dir onewire NAME path...
 	List the 1wire devices or attributes on the named bus, at this path.
 	(You probably need to quote the device IDs.)
+	Alternately, you can list a device's attributes by just passing the
+	device ID; the system knows on which bus it is and where.
 """
 
 	def run(self,ctx,**k):
@@ -117,26 +119,60 @@ dir onewire NAME path...
 		def reporter(data):
 			print >>ctx.out,data
 
-		dev = event[0]
 		if len(event) < 1:
-			raise SyntaxError("Usage: dir onewire DEVICE [PATH...]")
-		d = buses[event[0]].root.dir(path=event[1:], proc=reporter)
+			raise SyntaxError("Usage: dir onewire BUS [PATH...] / DEV")
+		if len(event) == 1 and event[0] in devices:
+			dev = devices[event[0]]
+			path = ()
+		else:
+			dev = buses[event[0]].root
+			path = event[1:]
+		d = dev.dir(path=path, proc=reporter)
 		return d
 
 
 class OWFSconnected(Check):
 	name=("connected","onewire")
-	doc="Test if the named onewire server connection exists"
+	doc="Test if a onewire device is accessible"
 	def check(self,*args):
-		assert len(args)==1,"This test requires the connection name"
+		assert len(args)==1,"This test requires the device ID"
 		try:
-			bus = devices[args[0]]
+			dev = devices[args[0]]
 		except KeyError:
 			return False
 		else:
+			if not dev.is_up: return False
 			bus = dev.bus
-			if bus is None: return false
+			if bus is None: return False
 			return bus.conn is not None
+
+
+class OWFSconnectedbus(Check):
+	name=("connected","onewire","bus")
+	doc="Test if the named onewire server connection is running"
+	def check(self,*args):
+		assert len(args)==1,"This test requires the connection name"
+		try:
+			bus = buses[args[0]]
+		except KeyError:
+			return False
+		else:
+			return bus.conn is not None
+
+
+class OWFSexists(Check):
+	name=("exists","onewire")
+	doc="Test if the onewire device exists"
+	def check(self,*args):
+		assert len(args)==1,"This test requires the connection name"
+		return args[0] in devices
+
+class OWFSexistsbus(Check):
+	name=("exists","onewire","bus")
+	doc="Test if the named onewire server connection exists"
+	def check(self,*args):
+		assert len(args)==1,"This test requires the connection name"
+		return args[0] in buses
 
 
 class OWFSmodule(Module):
@@ -153,6 +189,9 @@ class OWFSmodule(Module):
 		main_words.register_statement(OWFSvar)
 		main_words.register_statement(OWFSset)
 		register_condition(OWFSconnected)
+		register_condition(OWFSexists)
+		register_condition(OWFSconnectedbus)
+		register_condition(OWFSexistsbus)
 	
 	def unload(self):
 		main_words.unregister_statement(OWFSconnect)
@@ -161,5 +200,8 @@ class OWFSmodule(Module):
 		main_words.unregister_statement(OWFSvar)
 		main_words.unregister_statement(OWFSset)
 		unregister_condition(OWFSconnected)
+		unregister_condition(OWFSexists)
+		unregister_condition(OWFSconnectedbus)
+		unregister_condition(OWFSexistsbus)
 	
 init = OWFSmodule

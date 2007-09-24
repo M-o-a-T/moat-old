@@ -22,7 +22,7 @@ from twisted.python import failure
 import struct
 import os
 
-OWLOG = os.getenv("HOMEVENT_LOG_ONEWIRE",False)
+OWLOG = ("HOMEVENT_LOG_ONEWIRE" in os.environ)
 
 N_PRIO = 3
 PRIO_URGENT = 0
@@ -565,7 +565,7 @@ class OWFSfactory(object,ReconnectingClientFactory):
 		conn.send(self.get_queued())
 
 	def _drop(self):
-		e = DisconnectedError()
+		e = DisconnectedError(self)
 		q = self.queues
 		self.queues = []
 		for s in q:
@@ -581,8 +581,8 @@ class OWFSfactory(object,ReconnectingClientFactory):
 		if self.conn and self.conn.msg:
 			def d(_):
 				self._drop()
-				return d
-			self.msg.d.addBoth(d)
+				return _
+			self.conn.msg.d.addBoth(d)
 		else:
 			self._drop()
 		
@@ -625,11 +625,15 @@ class OWFSfactory(object,ReconnectingClientFactory):
 		return doit(self.root)
 
 	def update_all(self):
+		d = process_event(Event(Context(),"onewire","scanning",self.name))
+		d.addCallback(_call,self._update_all)
+		d.addErrback(process_failure)
+		return d
+
+	def _update_all(self):
 		log(TRACE,"OWFS start bus update")
 		old_ids = devices.copy()
 		new_ids = {}
-		process_event(Event(Context(),"onewire","scanning",self.name)).addErrback(process_failure)
-
 		def got_dev(dev):
 			if dev in old_ids:
 				del old_ids[dev.id]
@@ -645,13 +649,13 @@ class OWFSfactory(object,ReconnectingClientFactory):
 			
 			def dropit(_,dev):
 				del devices[dev.id]
-				process_failure(_)
+				return process_failure(_)
 
 			for dev in new_ids.itervalues():
 				if not hasattr(dev,"typ"):
 					e.addCallback(_call,dev.get,"type")
 					e.addCallback(dev._setattr,"typ")
-				e.addCallback(lambda _,dev: dev.go_up(), dev)
+				e.addCallback(_call,dev.go_up)
 				e.addErrback(dropit,dev)
 
 			def num(_):
@@ -700,7 +704,7 @@ def connect(host="localhost", port=4304, name=None, persist=False):
 	return f
 
 def disconnect(f):
-	assert f==ow_buses.pop((host,port))
+	assert f==ow_buses.pop((f.host,f.port))
 	f.drop()
 
 
@@ -748,16 +752,21 @@ class OWFSdevice(object):
 			return
 		d = defer.succeed(None)
 		if self.is_up is None:
-			d.addCallback(lambda _: process_event(Event(self.ctx,"onewire","new",self.typ,self.id)))
+			d.addCallback(_call,process_event,Event(self.ctx,"onewire","new",self.typ,self.id))
 		self.is_up = True
-		d.addCallback(lambda _: process_event(Event(self.ctx,"onewire","up",self.typ,self.id)))
+		d.addCallback(_call,process_event,Event(self.ctx,"onewire","up",self.typ,self.id))
 		return d
 
 	def go_down(self, _=None):
 		if not self.is_up:
 			return
 		self.is_up = False
-		return process_event(Event(self.ctx,"onewire","down",self.typ,self.id))
+		if _ is not None:
+			d = process_failure(_)
+		else:
+			d = defer.succeed(None)
+		d.addBoth(_call,process_event,Event(self.ctx,"onewire","down",self.typ,self.id))
+		return d
 
 
 	def get(self,key):

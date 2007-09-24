@@ -8,6 +8,7 @@ if not exists module trigger: load trigger
 if not exists module wait: load wait
 if not exists module onewire: load onewire
 if not exists module on_event: load on_event
+if not exists module errors: load errors
 #
 on onewire scanned A * *:
 	name scanned
@@ -19,9 +20,12 @@ on onewire scanned A * *:
 
 connect onewire A _HOST_ _PORT_
 #
-wait for 15:
-	name yawn
+try:
+	wait for 15:
+		name yawn
 
 dir onewire A
+dir onewire "_DEV_"
+set onewire _VAL_ "_DEV_" _ATTR2_
 disconnect onewire A
 wait for 1
