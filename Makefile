@@ -8,11 +8,11 @@ install:
 	@echo Not implemented yet.
 test:
 	@$(MAKE) -C test --no-print-directory
+ow:
+	sh test/interactive/onewire.sh
 i interactive:
-	python test.py
-p parser:
-	python test.py P
+	python test/interactive/main.py
 d debug:
-	pdb test.py
+	pdb test/interactive/main.py
 
 .PHONY: test i interactive

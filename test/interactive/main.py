@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from homevent.interpreter import InteractiveInterpreter,Interpreter
-from homevent.parser import parser_builder
+from homevent.parser import parser_builder,read_config
 from homevent.statement import main_words, global_words
 from homevent.check import register_condition
 from homevent.module import load_module, Load,Unload,LoadDir,ModuleExists
@@ -19,8 +19,11 @@ global_words.register_statement(Unload)
 global_words.register_statement(LoadDir)
 register_condition(ModuleExists)
 main_words.register_statement(ShutdownHandler)
+
 load_module("help")
 load_module("list")
+load_module("file")
+load_module("path")
 
 def parse_logger(t,*x):
 	print t+":"+" ".join((repr(d) for d in x))
@@ -42,15 +45,10 @@ def reporter(err):
 	print "Error:",err
 	
 def ready():
-	if len(sys.argv) > 1 and sys.argv[1] == "P":
-		# Log parser stuff
-		from test import run_logger
-		from homevent.logging import DEBUG
-		logger = run_logger("testing_123",dot=False, level=DEBUG)
-		c=Context(logger=logger.log)
-	else:
-		c=Context()
-	#c.logger=parse_logger
+	c=Context()
+	for f in sys.argv[1:]:
+		read_config(c,f)
+	
 	if os.isatty(0):
 		i = InteractiveInterpreter
 	else:
