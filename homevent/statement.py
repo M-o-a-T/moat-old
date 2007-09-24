@@ -208,7 +208,7 @@ class ComplexStatement(Statement):
 		del self.__words[handler.name]
 
 class AttributedStatement(ComplexStatement):
-	"""A statement that can be parameterited."""
+	"""A statement that can be parameterized."""
 
 	def get_processor(self):
 		"""Run sub-statements immediately."""
