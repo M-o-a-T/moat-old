@@ -66,7 +66,10 @@ class Logger(object):
 
 	def log_failure(self, err, level=WARN):
 		if level >= self.level:
-			self._log(level,err.getTraceback())
+			if err.frames:
+				self._log(level,err.getTraceback())
+			else:
+				self._log(level,str(err.value))
 	
 	def flush(self):
 		pass
@@ -118,7 +121,7 @@ def log_exc(msg=None, err=None, level=ERROR):
 		if err is None:
 			err = sys.exc_info()
 		elif not isinstance(err,tuple):
-			err = (None,Err,None)
+			err = (None,err,None)
 		err = Failure(err[1],err[0],err[2])
 
 	for l in loggers[:]:
