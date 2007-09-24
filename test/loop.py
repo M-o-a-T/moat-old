@@ -10,7 +10,7 @@ input = """\
 async:
 	wait for 1.9:
 		name Foo Bar
-wait for 0.1
+wait for 0.2
 block:
 	log DEBUG Start
 	while exists wait Foo Bar:

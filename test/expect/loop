@@ -5,20 +5,20 @@ NEW: <WorkSequence:1 (4)>
 1 END: startup
 0 add ‹WaitHandler ('wait', 'for') 2›
 NEW: <WorkSequence:2 (4)>
-   : │  EVENT: wait¦start¦1049515628.1¦_wait¦2
+   : │  EVENT: wait¦start¦1049515628.2¦_wait¦2
    : └1╴... done.
-15 EVENT: wait¦start¦1049515628.1¦_wait¦2
-15 END: wait¦start¦1049515628.1¦_wait¦2
+15 EVENT: wait¦start¦1049515628.2¦_wait¦2
+15 END: wait¦start¦1049515628.2¦_wait¦2
 NEW: <WorkSequence:3 (4)>
    : │  EVENT: wait¦start¦1049515629.9¦Foo¦Bar
    : └1╴... done.
 23 EVENT: wait¦start¦1049515629.9¦Foo¦Bar
 23 END: wait¦start¦1049515629.9¦Foo¦Bar
 NEW: <WorkSequence:4 (4)>
-   : │  EVENT: wait¦done¦1049515628.1¦_wait¦2
+   : │  EVENT: wait¦done¦1049515628.2¦_wait¦2
    : └1╴... done.
-30 EVENT: wait¦done¦1049515628.1¦_wait¦2
-30 END: wait¦done¦1049515628.1¦_wait¦2
+30 EVENT: wait¦done¦1049515628.2¦_wait¦2
+30 END: wait¦done¦1049515628.2¦_wait¦2
 0 add ‹LogHandler ⌁.log¦DEBUG¦Start›
 0 add ‹WhileStatement ⌁.while¦exists¦wait¦Foo¦Bar›
 0 add ‹LogHandler ⌁.log¦DEBUG¦waiting›
