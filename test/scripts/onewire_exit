@@ -38,6 +38,7 @@ fi
 		-e "s/END: thermo.*/END: thermo¦DATA/" \
 		-e "s/instance at 0x[0-9a-fA-F]*/instance at FOO/g" \
 		-e "/EVENT: onewire.*scanning/,/EVENT: onewire.*scanned/d" \
+		-e "/DirStart/,/DirStop/d" \
 		-i real/onewire
 ) < ../onewire_params
 exit $?

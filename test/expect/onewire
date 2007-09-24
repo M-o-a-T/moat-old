@@ -82,6 +82,21 @@ DEBUG> EVENT: module¦load¦on_event
 85 END: module¦load¦on_event
 DEBUG> END: module¦load¦on_event
 .
+0 add ‹Load ⌁.load¦errors›
+TRACE> add ‹Load ⌁.load¦errors›
+NEW: <WorkSequence:8 (4)>
+   : │  EVENT: module¦load¦errors
+   : └1╴... done.
+DEBUG> NEW: <WorkSequence:8 (4)>
+DEBUG>    : │  EVENT: module¦load¦errors
+DEBUG>    : └1╴... done.
+.
+96 EVENT: module¦load¦errors
+DEBUG> EVENT: module¦load¦errors
+.
+96 END: module¦load¦errors
+DEBUG> END: module¦load¦errors
+.
 0 Create OnEvtHandler: ['onewire', 'scanned', 'A', '*', '*']
 TRACE> Create OnEvtHandler: ['onewire', 'scanned', 'A', '*', '*']
 0 add ‹OffEventHandler ⌁.del¦on¦scanned›
@@ -94,7 +109,7 @@ TRACE> add ‹TriggerHandler ⌁.trigger¦thermo¦$X›
 TRACE> add ‹WaitCancel ⌁.del¦wait¦yawn›
 0 NewHandler 1
 TRACE> NewHandler 1
-NEW: <WorkSequence:8 (4)>
+NEW: <WorkSequence:9 (4)>
    : ├1╴on onewire scanned A * * ‹OnEventHandler›
    : │  name: scanned
    : │  prio: 51
@@ -103,7 +118,7 @@ NEW: <WorkSequence:8 (4)>
    : │  step: trigger thermo $X ‹TriggerHandler›
    : │  step: del wait yawn ‹WaitCancel›
    : └2╴... done.
-DEBUG> NEW: <WorkSequence:43 (5)>
+DEBUG> NEW: <WorkSequence:44 (5)>
 DEBUG>    : │  EVENT: onewire¦scanned¦A¦0¦16
 DEBUG>    : ├1╴on onewire scanned A * * ‹OnEventHandler›
 DEBUG>    : │  name: scanned
@@ -114,7 +129,7 @@ DEBUG>    : │  step: trigger thermo $X ‹TriggerHandler›
 DEBUG>    : │  step: del wait yawn ‹WaitCancel›
 DEBUG>    : └2╴... done.
 .
-351 EVENT: onewire¦scanned¦A¦0¦16
+364 EVENT: onewire¦scanned¦A¦0¦16
 DEBUG> EVENT: onewire¦scanned¦A¦0¦16
 .
 RUN: on onewire scanned A * * ‹OnEventHandler›
@@ -124,7 +139,7 @@ RUN: on onewire scanned A * * ‹OnEventHandler›
    : step: var onewire X _DEV_ _ATTR_ ‹OWFSvar›
    : step: trigger thermo $X ‹TriggerHandler›
    : step: del wait yawn ‹WaitCancel›
- at: <WorkSequence:43 (5)> (step 1)
+ at: <WorkSequence:44 (5)> (step 1)
  ev: EVENT: onewire¦scanned¦A¦0¦16
 DEBUG> RUN: on onewire scanned A * * ‹OnEventHandler›
 DEBUG>    : name: scanned
@@ -133,32 +148,79 @@ DEBUG>    : step: del on scanned ‹OffEventHandler›
 DEBUG>    : step: var onewire X _DEV_ _ATTR_ ‹OWFSvar›
 DEBUG>    : step: trigger thermo $X ‹TriggerHandler›
 DEBUG>    : step: del wait yawn ‹WaitCancel›
-DEBUG>  at: <WorkSequence:43 (5)> (step 1)
+DEBUG>  at: <WorkSequence:44 (5)> (step 1)
 DEBUG>  ev: EVENT: onewire¦scanned¦A¦0¦16
 .
-NEW: <WorkSequence:44 (4)>
+NEW: <WorkSequence:45 (4)>
    : │  EVENT: thermo¦DATA
    : └1╴... done.
-DEBUG> NEW: <WorkSequence:44 (4)>
+DEBUG> NEW: <WorkSequence:45 (4)>
 DEBUG>    : │  EVENT: thermo¦DATA
 DEBUG>    : └1╴... done.
 .
-NEW: <WorkSequence:45 (4)>
+NEW: <WorkSequence:46 (4)>
    : │  EVENT: wait¦cancel¦1049515643.0¦yawn
    : └1╴... done.
-DEBUG> NEW: <WorkSequence:45 (4)>
+DEBUG> NEW: <WorkSequence:46 (4)>
 DEBUG>    : │  EVENT: wait¦cancel¦1049515643.0¦yawn
 DEBUG>    : └1╴... done.
 .
-359 EVENT: thermo¦DATA
+372 EVENT: thermo¦DATA
 DEBUG> EVENT: thermo¦DATA
 .
-359 END: thermo¦DATA
+372 END: thermo¦DATA
 DEBUG> END: thermo¦DATA
 .
-362 EVENT: wait¦cancel¦1049515643.0¦yawn
+375 EVENT: wait¦cancel¦1049515643.0¦yawn
 DEBUG> EVENT: wait¦cancel¦1049515643.0¦yawn
 .
-362 END: wait¦cancel¦1049515643.0¦yawn
+375 END: wait¦cancel¦1049515643.0¦yawn
 DEBUG> END: wait¦cancel¦1049515643.0¦yawn
+.
+NEW: <WorkSequence:47 (4)>
+   : │  ERROR: ‹Waiter ('yawn',) 16›
+   : └1╴... done.
+DEBUG> NEW: <WorkSequence:47 (4)>
+DEBUG>    : │  ERROR: ‹Waiter ('yawn',) 16›
+DEBUG>    : └1╴... done.
+.
+364 END: onewire¦scanned¦A¦0¦16
+DEBUG> END: onewire¦scanned¦A¦0¦16
+.
+ERROR: Traceback (most recent call last):
+     : Failure: homevent.worker.HaltSequence: ‹Waiter ('yawn',) 16›
+DEBUG> ERROR: Traceback (most recent call last):
+DEBUG>      : Failure: homevent.worker.HaltSequence: ‹Waiter ('yawn',) 16›
+.
+394 END: HaltSequence
+DEBUG> END: HaltSequence
+.
+TRACE> DirStop
+0 Drop OWFS bus A
+TRACE> Drop OWFS bus A
+NEW: <WorkSequence:48 (4)>
+   : │  EVENT: wait¦start¦1049515629.0¦_wait¦2
+   : └1╴... done.
+DEBUG> NEW: <WorkSequence:48 (4)>
+DEBUG>    : │  EVENT: wait¦start¦1049515629.0¦_wait¦2
+DEBUG>    : └1╴... done.
+.
+412 EVENT: wait¦start¦1049515629.0¦_wait¦2
+DEBUG> EVENT: wait¦start¦1049515629.0¦_wait¦2
+.
+412 END: wait¦start¦1049515629.0¦_wait¦2
+DEBUG> END: wait¦start¦1049515629.0¦_wait¦2
+.
+NEW: <WorkSequence:49 (4)>
+   : │  EVENT: wait¦done¦1049515629.0¦_wait¦2
+   : └1╴... done.
+DEBUG> NEW: <WorkSequence:49 (4)>
+DEBUG>    : │  EVENT: wait¦done¦1049515629.0¦_wait¦2
+DEBUG>    : └1╴... done.
+.
+419 EVENT: wait¦done¦1049515629.0¦_wait¦2
+DEBUG> EVENT: wait¦done¦1049515629.0¦_wait¦2
+.
+419 END: wait¦done¦1049515629.0¦_wait¦2
+DEBUG> END: wait¦done¦1049515629.0¦_wait¦2
 .

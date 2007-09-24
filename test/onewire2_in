@@ -24,8 +24,11 @@ try:
 	wait for 15:
 		name yawn
 
+log TRACE DirStart
 dir onewire A
+log TRACE DirDev
 dir onewire "_DEV_"
+log TRACE DirStop
 set onewire _VAL_ "_DEV_" _ATTR2_
 disconnect onewire A
 wait for 1
