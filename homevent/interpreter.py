@@ -205,6 +205,7 @@ class InteractiveInterpreter(Interpreter):
 
 	def prompt(self, _=None):
 		self.ctx.out.write(self.intro)
+		self.ctx.out.flush()
 		return _
 	
 	def error(self,parser,err):
