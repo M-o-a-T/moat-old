@@ -24,7 +24,7 @@ from homevent.check import check_condition
 
 class IfStatement(MainStatementList):
 	name=("if",)
-	doc="if test: [statements]"
+	doc="Test if a condition holds"
 	long_doc="""\
 The "if" statement executes a block only if a condition is met.
 
@@ -64,7 +64,7 @@ Syntax:
 
 class ElseStatement(MainStatementList):
 	name=("else",)
-	doc="else: [statements]"
+	doc="Alternate code if a condition is not met"
 	long_doc="""\
 The "else" statement executes a block only if a previous condition is not met.
 
@@ -88,7 +88,7 @@ Implementation restriction: can't be used at top level. (Wrap with 'block:'.)
 
 class ElseIfStatement(ElseStatement,IfStatement):
 	name=("else","if")
-	doc="else if: [statements]"
+	doc="Alternate test if a condition is not met"
 	long_doc="""\
 The "else if" statement executes a block only if a previous condition is
 not met.
