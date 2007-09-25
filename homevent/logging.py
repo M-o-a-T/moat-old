@@ -148,6 +148,8 @@ class LogEndEvent(Event):
 	def __init__(self,event):
 		if isinstance(event,Failure):
 			super(LogEndEvent,self).__init__(Context(),"END",event.type.__name__)
+		elif not hasattr(event,"ctx"):
+			super(LogEndEvent,self).__init__(Context(),"END",event.__class__.__name__)
 		else:
 			super(LogEndEvent,self).__init__(event.ctx,"END",*event.names)
 			self.id = event.id
