@@ -22,6 +22,13 @@ class FalseCheck(Check):
 		assert not args,"Falsehood doesn't have arguments"
 		return False
 
+class NoneCheck(Check):
+	name=("null",)
+	doc="check if the argument has a value."
+	def check(self,*args):
+		assert len(args)==1,u"The ‹null› check requires one argument"
+		return args[0] is None
+
 class BoolModule(Module):
 	"""\
 		This module implements basic boolean conditions
@@ -32,9 +39,11 @@ class BoolModule(Module):
 	def load(self):
 		register_condition(TrueCheck)
 		register_condition(FalseCheck)
+		register_condition(NoneCheck)
 	
 	def unload(self):
 		unregister_condition(TrueCheck)
 		unregister_condition(FalseCheck)
+		unregister_condition(NoneCheck)
 	
 init = BoolModule

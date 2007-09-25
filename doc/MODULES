@@ -41,7 +41,33 @@ It's a handy "comment this out" statement.
 bool
 ====
 
-Simple conditionals "true" and "false". See 'ifelse' for details.
+This module provides a cuple of basic conditionals. 
+See “ifelse” for details.
+
+true
+----
+
+Always true.
+
+false
+-----
+
+Always false.
+
+null ARG
+--------
+
+This conitional tests whether the argument is not set.
+This is important e.g. for monitoring.
+
+	monitor foo:
+		…
+	on monitor value *FOO foo:
+		var monitor OLDFOO foo
+		if null $OLDFOO:
+			log TRACE first time fooing around
+		else:
+			log TRACE checking $FOO against old $OLDFOO
 
 ======
 errors
@@ -508,6 +534,11 @@ variable VAR.
 	block:
 		var monitor temp tempsens livingroom
 		log INFO It is now $temp deg warm inside
+
+This variable will contain the old value during the ‹monitor value›
+event; this means that it will not be set at all until this event has
+been completed the first time. See the ‹null› test (in the “bool”
+module) for an example.
 
 -----
 Tests
