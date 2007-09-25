@@ -132,7 +132,7 @@ var monitor NAME name...
 		w = event[:]
 		var = w[0]
 		name = tuple(w[1:])
-		setattr(self.parent.ctx,var,monitors[name])
+		setattr(self.parent.ctx,var,monitors[name].value)
 
 
 class MonitorModule(Module):

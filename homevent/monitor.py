@@ -88,11 +88,13 @@ class Monitor(object):
 		monitors[self.name] = self
 
 	def __repr__(self):
-		if self.active:
-			act = "running "+str(self.value)
-			# TODO: add delay until next check
-		else:
+		if not self.active:
 			act = "off"
+		elif self.running:
+			act = "run "+str(self.step)
+		else:
+			act = "on "+str(self.value)
+			# TODO: add delay until next check
 		return u"‹%s %s %s›" % (self.__class__.__name__, self.name,act)
 
 	def _schedule(self):
