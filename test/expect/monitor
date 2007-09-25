@@ -1,0 +1,231 @@
+NEW: <WorkSequence:1 (4)>
+   : │  EVENT: startup
+   : └1╴... done.
+1 EVENT: startup
+1 END: startup
+NEW: <WorkSequence:2 (4)>
+   : │  EVENT: wait¦start¦1049515629.0¦_wait¦1
+   : └1╴... done.
+DEBUG> NEW: <WorkSequence:2 (4)>
+DEBUG>    : │  EVENT: wait¦start¦1049515629.0¦_wait¦1
+DEBUG>    : └1╴... done.
+.
+0 filter [42] on ('foo',)
+TRACE> filter [42] on ('foo',)
+NEW: <WorkSequence:3 (4)>
+   : │  EVENT: monitor¦value¦42.0¦foo
+   : └1╴... done.
+DEBUG> NEW: <WorkSequence:3 (4)>
+DEBUG>    : │  EVENT: monitor¦value¦42.0¦foo
+DEBUG>    : └1╴... done.
+.
+0 Start run ('foo',)
+TRACE> Start run ('foo',)
+19 EVENT: wait¦start¦1049515629.0¦_wait¦1
+DEBUG> EVENT: wait¦start¦1049515629.0¦_wait¦1
+.
+19 END: wait¦start¦1049515629.0¦_wait¦1
+DEBUG> END: wait¦start¦1049515629.0¦_wait¦1
+.
+21 EVENT: monitor¦value¦42.0¦foo
+DEBUG> EVENT: monitor¦value¦42.0¦foo
+.
+21 END: monitor¦value¦42.0¦foo
+DEBUG> END: monitor¦value¦42.0¦foo
+.
+0 End run ('foo',)
+TRACE> End run ('foo',)
+0 filter [40] on ('foo',)
+TRACE> filter [40] on ('foo',)
+NEW: <WorkSequence:4 (4)>
+   : │  EVENT: monitor¦value¦40.0¦foo
+   : └1╴... done.
+DEBUG> NEW: <WorkSequence:4 (4)>
+DEBUG>    : │  EVENT: monitor¦value¦40.0¦foo
+DEBUG>    : └1╴... done.
+.
+0 Start run ('foo',)
+TRACE> Start run ('foo',)
+33 EVENT: monitor¦value¦40.0¦foo
+DEBUG> EVENT: monitor¦value¦40.0¦foo
+.
+33 END: monitor¦value¦40.0¦foo
+DEBUG> END: monitor¦value¦40.0¦foo
+.
+0 End run ('foo',)
+TRACE> End run ('foo',)
+0 filter [42] on ('foo',)
+TRACE> filter [42] on ('foo',)
+NEW: <WorkSequence:5 (4)>
+   : │  EVENT: monitor¦value¦42.0¦foo
+   : └1╴... done.
+DEBUG> NEW: <WorkSequence:5 (4)>
+DEBUG>    : │  EVENT: monitor¦value¦42.0¦foo
+DEBUG>    : └1╴... done.
+.
+0 Start run ('foo',)
+TRACE> Start run ('foo',)
+40 EVENT: monitor¦value¦42.0¦foo
+DEBUG> EVENT: monitor¦value¦42.0¦foo
+.
+40 END: monitor¦value¦42.0¦foo
+DEBUG> END: monitor¦value¦42.0¦foo
+.
+0 End run ('foo',)
+TRACE> End run ('foo',)
+0 filter [41] on ('foo',)
+TRACE> filter [41] on ('foo',)
+NEW: <WorkSequence:6 (4)>
+   : │  EVENT: monitor¦value¦41.0¦foo
+   : └1╴... done.
+DEBUG> NEW: <WorkSequence:6 (4)>
+DEBUG>    : │  EVENT: monitor¦value¦41.0¦foo
+DEBUG>    : └1╴... done.
+.
+0 Start run ('foo',)
+TRACE> Start run ('foo',)
+47 EVENT: monitor¦value¦41.0¦foo
+DEBUG> EVENT: monitor¦value¦41.0¦foo
+.
+47 END: monitor¦value¦41.0¦foo
+DEBUG> END: monitor¦value¦41.0¦foo
+.
+0 End run ('foo',)
+TRACE> End run ('foo',)
+0 filter [40] on ('foo',)
+TRACE> filter [40] on ('foo',)
+NEW: <WorkSequence:7 (4)>
+   : │  EVENT: monitor¦value¦40.0¦foo
+   : └1╴... done.
+DEBUG> NEW: <WorkSequence:7 (4)>
+DEBUG>    : │  EVENT: monitor¦value¦40.0¦foo
+DEBUG>    : └1╴... done.
+.
+0 Start run ('foo',)
+TRACE> Start run ('foo',)
+54 EVENT: monitor¦value¦40.0¦foo
+DEBUG> EVENT: monitor¦value¦40.0¦foo
+.
+54 END: monitor¦value¦40.0¦foo
+DEBUG> END: monitor¦value¦40.0¦foo
+.
+0 End run ('foo',)
+TRACE> End run ('foo',)
+NEW: <WorkSequence:8 (4)>
+   : │  EVENT: wait¦done¦1049515629.0¦_wait¦1
+   : └1╴... done.
+DEBUG> NEW: <WorkSequence:8 (4)>
+DEBUG>    : │  EVENT: wait¦done¦1049515629.0¦_wait¦1
+DEBUG>    : └1╴... done.
+.
+61 EVENT: wait¦done¦1049515629.0¦_wait¦1
+DEBUG> EVENT: wait¦done¦1049515629.0¦_wait¦1
+.
+61 END: wait¦done¦1049515629.0¦_wait¦1
+DEBUG> END: wait¦done¦1049515629.0¦_wait¦1
+.
+foo
+.
+Name:  foo
+Value:  40.0
+Up:  Yes
+Steps:  1 / 1 / 1
+Data:  40
+.
+NEW: <WorkSequence:9 (4)>
+   : │  EVENT: wait¦start¦1049515628.8¦_wait¦2
+   : └1╴... done.
+DEBUG> NEW: <WorkSequence:9 (4)>
+DEBUG>    : │  EVENT: wait¦start¦1049515628.8¦_wait¦2
+DEBUG>    : └1╴... done.
+.
+74 EVENT: wait¦start¦1049515628.8¦_wait¦2
+DEBUG> EVENT: wait¦start¦1049515628.8¦_wait¦2
+.
+74 END: wait¦start¦1049515628.8¦_wait¦2
+DEBUG> END: wait¦start¦1049515628.8¦_wait¦2
+.
+0 filter [38] on ('foo',)
+TRACE> filter [38] on ('foo',)
+NEW: <WorkSequence:10 (4)>
+   : │  EVENT: monitor¦value¦38.0¦foo
+   : └1╴... done.
+DEBUG> NEW: <WorkSequence:10 (4)>
+DEBUG>    : │  EVENT: monitor¦value¦38.0¦foo
+DEBUG>    : └1╴... done.
+.
+0 Start run ('foo',)
+TRACE> Start run ('foo',)
+81 EVENT: monitor¦value¦38.0¦foo
+DEBUG> EVENT: monitor¦value¦38.0¦foo
+.
+81 END: monitor¦value¦38.0¦foo
+DEBUG> END: monitor¦value¦38.0¦foo
+.
+0 End run ('foo',)
+TRACE> End run ('foo',)
+0 filter [38] on ('foo',)
+TRACE> filter [38] on ('foo',)
+NEW: <WorkSequence:11 (4)>
+   : │  EVENT: monitor¦value¦38.0¦foo
+   : └1╴... done.
+DEBUG> NEW: <WorkSequence:11 (4)>
+DEBUG>    : │  EVENT: monitor¦value¦38.0¦foo
+DEBUG>    : └1╴... done.
+.
+0 Start run ('foo',)
+TRACE> Start run ('foo',)
+88 EVENT: monitor¦value¦38.0¦foo
+DEBUG> EVENT: monitor¦value¦38.0¦foo
+.
+88 END: monitor¦value¦38.0¦foo
+DEBUG> END: monitor¦value¦38.0¦foo
+.
+0 End run ('foo',)
+TRACE> End run ('foo',)
+0 filter [36] on ('foo',)
+TRACE> filter [36] on ('foo',)
+NEW: <WorkSequence:12 (4)>
+   : │  EVENT: monitor¦value¦36.0¦foo
+   : └1╴... done.
+DEBUG> NEW: <WorkSequence:12 (4)>
+DEBUG>    : │  EVENT: monitor¦value¦36.0¦foo
+DEBUG>    : └1╴... done.
+.
+0 Start run ('foo',)
+TRACE> Start run ('foo',)
+95 EVENT: monitor¦value¦36.0¦foo
+DEBUG> EVENT: monitor¦value¦36.0¦foo
+.
+95 END: monitor¦value¦36.0¦foo
+DEBUG> END: monitor¦value¦36.0¦foo
+.
+0 End run ('foo',)
+TRACE> End run ('foo',)
+NEW: <WorkSequence:13 (4)>
+   : │  EVENT: wait¦done¦1049515628.8¦_wait¦2
+   : └1╴... done.
+DEBUG> NEW: <WorkSequence:13 (4)>
+DEBUG>    : │  EVENT: wait¦done¦1049515628.8¦_wait¦2
+DEBUG>    : └1╴... done.
+.
+102 EVENT: wait¦done¦1049515628.8¦_wait¦2
+DEBUG> EVENT: wait¦done¦1049515628.8¦_wait¦2
+.
+102 END: wait¦done¦1049515628.8¦_wait¦2
+DEBUG> END: wait¦done¦1049515628.8¦_wait¦2
+.
+.
+NEW: <WorkSequence:14 (7)>
+   : │  EVENT: shutdown
+   : └1╴... done.
+DEBUG> NEW: <WorkSequence:14 (7)>
+DEBUG>    : │  EVENT: shutdown
+DEBUG>    : └1╴... done.
+.
+2 EVENT: shutdown
+DEBUG> EVENT: shutdown
+.
+2 END: shutdown
+DEBUG> END: shutdown
+.
