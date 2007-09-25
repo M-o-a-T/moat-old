@@ -14,16 +14,17 @@ from homevent.context import Context
 from traceback import print_exc
 import os,sys
 
-global_words.register_statement(Load)
-global_words.register_statement(Unload)
-global_words.register_statement(LoadDir)
-register_condition(ModuleExists)
+main_words.register_statement(Load)
+main_words.register_statement(Unload)
+main_words.register_statement(LoadDir)
 main_words.register_statement(ShutdownHandler)
+register_condition(ModuleExists)
 
 load_module("help")
 load_module("list")
 load_module("file")
 load_module("path")
+load_module("ifelse")
 
 def parse_logger(t,*x):
 	print t+":"+" ".join((repr(d) for d in x))
@@ -53,12 +54,12 @@ def ready():
 		i = InteractiveInterpreter
 	else:
 		i = Interpreter
+	print """Ready. Type «help» if you don't know what to do."""
 	p = parser_builder(None, i, ctx=c)()
 	s = StdIO(p)
 	r = p.parser.result
 	r.addErrback(reporter)
 	r.addBoth(lambda _: shut_down())
-	print """Ready. Type «help» if you don't know what to do."""
 
 reactor.callLater(0.1,ready)
 mainloop()
