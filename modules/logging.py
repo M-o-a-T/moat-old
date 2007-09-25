@@ -19,6 +19,7 @@ from homevent import logging
 from homevent.logging import log, Logger, register_logger,unregister_logger,\
 	LogNames
 
+import sys
 
 class OutLogger(Logger):
 	"""\
@@ -51,7 +52,10 @@ log
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		out = self.ctx.out
+		try:
+			out = self.ctx.out
+		except KeyError:
+			out = sys.stderr
 		if not len(event):
 			for s,v in LogNames.iteritems():
 				print >>out,"%d = %s" % (s,v)
@@ -69,8 +73,12 @@ log
 				if hasattr(out,"logger"):
 					out.logger.level = level
 				else:
-					out.logger = OutLogger(out=self.ctx.out, level=level)
-					register_logger(out.logger)
+					try: out = self.ctx.out
+					except KeyError: out = sys.stderr
+					logger = OutLogger(out=out, level=level)
+					register_logger(logger)
+					try: out.logger = logger
+					except AttributeError: pass # file objects don't
 
 
 class LoggingModule(Module):
