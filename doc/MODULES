@@ -353,6 +353,187 @@ don't know whether one exists.
 	if exists on FooBar:
 		del on FooBar
 
+=======
+monitor
+=======
+
+You may want HomEvenT to watch external variables (temperature, wind,
+whatever). Reading external data may be subject to hard errors (the
+external bus is down), soft errors (intermittent false readings),
+and other problems.
+
+This module periodically samples 
+
+load monitor
+load tests
+monitor fake 10 30 1:
+	name tempsens livingroom
+	delay for 10sec
+	require 3 1.5
+	retry 5 1sec
+
+--------------------------
+monitor SUBSYSTEM DEVICE …
+--------------------------
+
+This is the basic command to set up a monitor. How to address an
+external device is up to that subsystem; see the appropriate bus module
+on how to specify the parameters necessary to address the device in
+question.
+
+This command has a couple of parameters:
+
+name NAME
+---------
+
+The name of that monitor. If you don't name it, the system will assign
+something boring and non-descriptive.
+
+delay for TIME
+--------------
+
+Interval between two measurement attempts. See the ‹wait for› command for
+specifics.
+
+delay until TIME
+----------------
+
+An alternate way to specify the time of each measurement attempt. See
+the ‹wait until next› command for specifics. (The first measurement after
+turning on the monitor will use ‹wait until› semantics.)
+
+You can specify both ‹delay for› and ‹delay until›. Both will apply.
+
+require NUM RANGE
+-----------------
+
+Require NUM measurements which are within RANGE of each other for the
+monitor to return a valid result.
+
+The system will report the average of at least NUM values, after the 
+data which differ most from the average have been discarded.
+
+retry NUM TIME
+--------------
+
+If the measurement has to be repeated because the requirement, above, is
+not met, delay for TIME; don't retry more often than NUM times.
+
+If the requirements are not met after NUM times, stop measuring and
+report an error.
+
+alarm INTERVAL
+--------------
+
+If a valid measurement results in a value whose difference to the
+last-reported datum exceeds INTERVAL, an alarm event is posted.
+
+high LIMIT
+----------
+If a valid measurement reaches or exceeds the limit, an alarm event is
+posted.
+
+You can append a second value; if you do, the monitored value must be
+below that value for the alarm to be re-enabled.
+
+low LIMIT
+---------
+If a valid measurement reaches or exceeds the limit, an alarm event is
+posted.
+
+You can append a second value; if you do, the monitored value must be
+above that value for the alarm to be re-enabled.
+
+limit LOW HIGH
+--------------
+Measurements which are not within the range defined by LOW and HIGH will
+be treated as errors. Use a star ("*") to specify that no limit should
+apply.
+
+
+stopped
+-------
+
+This subcommand actually tells the monitor to not start executing
+immediately. A common reason for this is that the event handlers
+which use the monitor have not been set up yet.
+
+--------------------
+update monitor NAME:
+--------------------
+
+This command is the same as the one above, except that it modifies an
+existing monitor instead of creating a new one.
+
+The "name" and "paused" commands are not available.
+
+----------------
+del monitor NAME
+----------------
+
+Remove this monitor from the system.
+
+------------
+list monitor
+------------
+
+Displays a list of known monitors. You may add the name for further
+details on a particular monitor.
+
+	list monitor
+	list monitor tempsens livingroom
+
+------------------
+start monitor NAME
+------------------
+
+Start monitoring this variable. No effect if already running.
+
+-----------------
+stop monitor NAME
+-----------------
+
+Stop monitoring this variable. No effect if already stopped.
+
+--------------------
+var monitor VAR NAME
+--------------------
+
+This statement assigns the value that has been reported last to the
+variable VAR.
+
+	monitor …:
+		name tempsens livingroom
+		…
+	block:
+		var monitor temp tempsens livingroom
+		log INFO It is now $temp deg warm inside
+
+-----
+Tests
+-----
+
+if exists monitor NAME
+----------------------
+
+Checks if this monitor has been set up.
+
+if running monitor NAME
+-----------------------
+
+Checks if the monitor is currently operational.
+
+if low monitor NAME
+--------------------
+
+Checks if the monitor is currently below the low threshold.
+
+if high monitor NAME
+--------------------
+
+Checks if the monitor is currently above the high threshold.
+
+
 ====
 path
 ====

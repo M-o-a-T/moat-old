@@ -17,6 +17,49 @@ module load NAME [params...]
 module unload NAME [params...]
 	-- a module will be unloaded (any usage needs to be dropped)
 
+Monitor
+-------
+
+monitor start NAME
+	-- The system will start monitoring this value. An error while
+	   handling this event will prevent the monitoring from happening.
+
+monitor stop NAME
+	-- The system has stopped monitoring this value because a direct
+	   command stopped the monitor. The handler may not directly
+	   re-start this monitor.
+
+monitor error NAME
+	-- The system has detected an error monitoring this value.
+	   Monitoring is stopped. Restarting the monitor is OK from within
+	   the handler, but you should add some kind of back-off.
+
+monitor alarm VAL NAME
+	-- The difference between the old and new value of this monitor is
+	   too large.
+	   If this event triggers an error, no "value" event will be
+	   generated.
+
+monitor value VAL NAME
+	-- Monitoring has determined that the new value for NAME is VAL.
+	   While this handler is running, the monitor's "var monitor"
+	   variable will still contain the old value!
+
+	   If this handler triggers an error, the new value will not be
+	   stored.
+
+monitor low NAME
+	-- The monitored value is lower than the specified limit.
+
+monitor high NAME
+	-- The monitored value is higher than the specified limit.
+
+monitor low_ok NAME
+	-- The monitored value is no longer lower than the specified limit.
+
+monitor high_ok NAME
+	-- The monitored value is no longer higher than the specified limit.
+
 State
 -----
 
