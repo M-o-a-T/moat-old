@@ -634,11 +634,15 @@ class OWFSfactory(object,ReconnectingClientFactory):
 		log(TRACE,"OWFS start bus update")
 		old_ids = devices.copy()
 		new_ids = {}
+		seen_ids = {}
 		def got_dev(dev):
-			if dev in old_ids:
+			if dev in seen_ids:
+				return
+			if dev.id in old_ids:
 				del old_ids[dev.id]
 			else:
 				new_ids[dev.id] = dev
+			seen_ids[dev.id] = dev
 		d = self.all_devices(got_dev)
 
 		def cleanup(_):
@@ -659,7 +663,7 @@ class OWFSfactory(object,ReconnectingClientFactory):
 				e.addErrback(dropit,dev)
 
 			def num(_):
-				process_event(Event(Context(),"onewire","scanned",self.name,len(old_ids), len(new_ids))).addErrback(process_failure)
+				process_event(Event(Context(),"onewire","scanned",self.name,len(old_ids), len(new_ids), len(devices))).addErrback(process_failure)
 				return len(old_ids)
 			e.addCallback(num)
 			return e
