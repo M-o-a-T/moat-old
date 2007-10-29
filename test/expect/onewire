@@ -97,8 +97,8 @@ DEBUG> EVENT: module¦load¦errors
 96 END: module¦load¦errors
 DEBUG> END: module¦load¦errors
 .
-0 Create OnEvtHandler: ['onewire', 'scanned', 'A', '*', '*']
-TRACE> Create OnEvtHandler: ['onewire', 'scanned', 'A', '*', '*']
+0 Create OnEvtHandler: ['onewire', 'scanned', 'A', '*', '*', '*']
+TRACE> Create OnEvtHandler: ['onewire', 'scanned', 'A', '*', '*', '*']
 0 add ‹OffEventHandler ⌁.del¦on¦scanned›
 TRACE> add ‹OffEventHandler ⌁.del¦on¦scanned›
 0 add ‹OWFSvar ⌁.var¦onewire¦X¦_DEV_¦_ATTR_›
@@ -110,7 +110,7 @@ TRACE> add ‹WaitCancel ⌁.del¦wait¦yawn›
 0 NewHandler 1
 TRACE> NewHandler 1
 NEW: <WorkSequence:9 (4)>
-   : ├1╴on onewire scanned A * * ‹OnEventHandler›
+   : ├1╴on onewire scanned A * * * ‹OnEventHandler›
    : │  name: scanned
    : │  prio: 51
    : │  step: del on scanned ‹OffEventHandler›
@@ -119,8 +119,8 @@ NEW: <WorkSequence:9 (4)>
    : │  step: del wait yawn ‹WaitCancel›
    : └2╴... done.
 DEBUG> NEW: <WorkSequence:44 (5)>
-DEBUG>    : │  EVENT: onewire¦scanned¦A¦0¦16
-DEBUG>    : ├1╴on onewire scanned A * * ‹OnEventHandler›
+DEBUG>    : │  EVENT: onewire¦scanned¦A¦0¦16¦16
+DEBUG>    : ├1╴on onewire scanned A * * * ‹OnEventHandler›
 DEBUG>    : │  name: scanned
 DEBUG>    : │  prio: 51
 DEBUG>    : │  step: del on scanned ‹OffEventHandler›
@@ -129,10 +129,10 @@ DEBUG>    : │  step: trigger thermo $X ‹TriggerHandler›
 DEBUG>    : │  step: del wait yawn ‹WaitCancel›
 DEBUG>    : └2╴... done.
 .
-364 EVENT: onewire¦scanned¦A¦0¦16
-DEBUG> EVENT: onewire¦scanned¦A¦0¦16
+364 EVENT: onewire¦scanned¦A¦0¦16¦16
+DEBUG> EVENT: onewire¦scanned¦A¦0¦16¦16
 .
-RUN: on onewire scanned A * * ‹OnEventHandler›
+RUN: on onewire scanned A * * * ‹OnEventHandler›
    : name: scanned
    : prio: 51
    : step: del on scanned ‹OffEventHandler›
@@ -140,8 +140,8 @@ RUN: on onewire scanned A * * ‹OnEventHandler›
    : step: trigger thermo $X ‹TriggerHandler›
    : step: del wait yawn ‹WaitCancel›
  at: <WorkSequence:44 (5)> (step 1)
- ev: EVENT: onewire¦scanned¦A¦0¦16
-DEBUG> RUN: on onewire scanned A * * ‹OnEventHandler›
+ ev: EVENT: onewire¦scanned¦A¦0¦16¦16
+DEBUG> RUN: on onewire scanned A * * * ‹OnEventHandler›
 DEBUG>    : name: scanned
 DEBUG>    : prio: 51
 DEBUG>    : step: del on scanned ‹OffEventHandler›
@@ -149,7 +149,7 @@ DEBUG>    : step: var onewire X _DEV_ _ATTR_ ‹OWFSvar›
 DEBUG>    : step: trigger thermo $X ‹TriggerHandler›
 DEBUG>    : step: del wait yawn ‹WaitCancel›
 DEBUG>  at: <WorkSequence:44 (5)> (step 1)
-DEBUG>  ev: EVENT: onewire¦scanned¦A¦0¦16
+DEBUG>  ev: EVENT: onewire¦scanned¦A¦0¦16¦16
 .
 NEW: <WorkSequence:45 (4)>
    : │  EVENT: thermo¦DATA
@@ -184,8 +184,8 @@ DEBUG> NEW: <WorkSequence:47 (4)>
 DEBUG>    : │  ERROR: ‹Waiter ('yawn',) 16›
 DEBUG>    : └1╴... done.
 .
-364 END: onewire¦scanned¦A¦0¦16
-DEBUG> END: onewire¦scanned¦A¦0¦16
+364 END: onewire¦scanned¦A¦0¦16¦16
+DEBUG> END: onewire¦scanned¦A¦0¦16¦16
 .
 ERROR: Traceback (most recent call last):
      : Failure: homevent.worker.HaltSequence: ‹Waiter ('yawn',) 16›
