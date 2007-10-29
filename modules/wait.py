@@ -365,9 +365,8 @@ var wait NAME name...
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		w = event[:]
-		var = w[0]
-		name = tuple(w[1:])
+		var = event[0]
+		name = tuple(event[1:])
 		setattr(self.parent.ctx,var,waiters[name])
 
 
