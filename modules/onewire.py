@@ -119,16 +119,46 @@ dir onewire NAME path...
 		def reporter(data):
 			print >>ctx.out,data
 
-		if len(event) < 1:
-			raise SyntaxError("Usage: dir onewire BUS [PATH...] / DEV")
-		if len(event) == 1 and event[0] in devices:
-			dev = devices[event[0]]
-			path = ()
+		if not len(event):
+			for d in devices.itervalues():
+				print >>ctx.out, (d.typ if hasattr(d,"typ") else "?"), d.id
+			print >>ctx.out,"."
 		else:
-			dev = buses[event[0]].root
-			path = event[1:]
-		d = dev.dir(path=path, proc=reporter)
-		return d
+			if len(event) == 1 and event[0] in devices:
+				dev = devices[event[0]]
+				path = ()
+			else:
+				dev = buses[event[0]].root
+				path = event[1:]
+			d = dev.dir(path=path, proc=reporter)
+			return d
+
+
+class OWFSlist(Statement):
+	name=("list","onewire")
+	doc="List known onewire buses"
+	long_doc="""\
+list onewire [NAME]
+	List the 1wire buses.
+	If you specify the bus name, additional details will be printed.
+"""
+
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+
+		if not len(event):
+			for b in buses.itervalues():
+				print >>ctx.out,b.name
+			print >>ctx.out,"."
+		elif len(event) != 1:
+			raise SyntaxError("Usage: list onewire [BUS]")
+		else:
+			b = buses[event[0]]
+			print "Name:",b.name
+			print "Host:",b.host
+			print "Port:",b.port
+			print >>ctx.out,"."
+
 
 
 class OWFSconnected(Check):
@@ -186,6 +216,7 @@ class OWFSmodule(Module):
 		main_words.register_statement(OWFSconnect)
 		main_words.register_statement(OWFSdisconnect)
 		main_words.register_statement(OWFSdir)
+		main_words.register_statement(OWFSlist)
 		main_words.register_statement(OWFSvar)
 		main_words.register_statement(OWFSset)
 		register_condition(OWFSconnected)
@@ -197,6 +228,7 @@ class OWFSmodule(Module):
 		main_words.unregister_statement(OWFSconnect)
 		main_words.unregister_statement(OWFSdisconnect)
 		main_words.unregister_statement(OWFSdir)
+		main_words.unregister_statement(OWFSlist)
 		main_words.unregister_statement(OWFSvar)
 		main_words.unregister_statement(OWFSset)
 		unregister_condition(OWFSconnected)

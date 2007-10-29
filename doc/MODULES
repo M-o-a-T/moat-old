@@ -658,6 +658,10 @@ directory.
 
 	dir onewire "10.68D839010800"
 
+Without arguments, a list of all bus IDs known to the system is printed.
+
+	dir onewire
+
 -----------
 var onewire
 -----------
@@ -671,6 +675,14 @@ changes.
 	block:
 		var onewire TEMP "10.68D839010800" temperature
 		trigger temp current $TEMP
+
+------------
+list onewire
+------------
+
+Show which buses are connected to the system.
+
+With the bus name as additional argument, shows details about that bus.
 
 -----------
 set onewire

@@ -112,8 +112,11 @@ onewire scanning NAME
 	-- the bus will be scanned after this event has been handled.
 	   An error during event handling will prevent scanning.
 
-onewire scanned NAME
+onewire scanned NAME del new sum
 	-- scanning of this bus has completed.
+	   "del": Number of devices that were dropped
+	   "new": Number of newly-discovered devices
+	   "sum": Number of devices now connected to on the bus
 
 onewire new TYPE DEVICE
 	-- The device with the given type has appeared on a 1-wire bus
