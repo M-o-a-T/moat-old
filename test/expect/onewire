@@ -159,10 +159,10 @@ DEBUG>    : │  EVENT: thermo¦DATA
 DEBUG>    : └1╴... done.
 .
 NEW: <WorkSequence:46 (4)>
-   : │  EVENT: wait¦cancel¦1049515643.0¦yawn
+   : │  EVENT: wait¦cancel¦1049515638.0¦yawn
    : └1╴... done.
 DEBUG> NEW: <WorkSequence:46 (4)>
-DEBUG>    : │  EVENT: wait¦cancel¦1049515643.0¦yawn
+DEBUG>    : │  EVENT: wait¦cancel¦1049515638.0¦yawn
 DEBUG>    : └1╴... done.
 .
 372 EVENT: thermo¦DATA
@@ -171,26 +171,26 @@ DEBUG> EVENT: thermo¦DATA
 372 END: thermo¦DATA
 DEBUG> END: thermo¦DATA
 .
-375 EVENT: wait¦cancel¦1049515643.0¦yawn
-DEBUG> EVENT: wait¦cancel¦1049515643.0¦yawn
+375 EVENT: wait¦cancel¦1049515638.0¦yawn
+DEBUG> EVENT: wait¦cancel¦1049515638.0¦yawn
 .
-375 END: wait¦cancel¦1049515643.0¦yawn
-DEBUG> END: wait¦cancel¦1049515643.0¦yawn
+375 END: wait¦cancel¦1049515638.0¦yawn
+DEBUG> END: wait¦cancel¦1049515638.0¦yawn
 .
 NEW: <WorkSequence:47 (4)>
-   : │  ERROR: ‹Waiter ('yawn',) 16›
+   : │  ERROR: ‹Waiter ('yawn',) 11›
    : └1╴... done.
 DEBUG> NEW: <WorkSequence:47 (4)>
-DEBUG>    : │  ERROR: ‹Waiter ('yawn',) 16›
+DEBUG>    : │  ERROR: ‹Waiter ('yawn',) 11›
 DEBUG>    : └1╴... done.
 .
 364 END: onewire¦scanned¦A¦0¦16¦16
 DEBUG> END: onewire¦scanned¦A¦0¦16¦16
 .
 ERROR: Traceback (most recent call last):
-     : Failure: homevent.worker.HaltSequence: ‹Waiter ('yawn',) 16›
+     : Failure: homevent.worker.HaltSequence: ‹Waiter ('yawn',) 11›
 DEBUG> ERROR: Traceback (most recent call last):
-DEBUG>      : Failure: homevent.worker.HaltSequence: ‹Waiter ('yawn',) 16›
+DEBUG>      : Failure: homevent.worker.HaltSequence: ‹Waiter ('yawn',) 11›
 .
 394 END: HaltSequence
 DEBUG> END: HaltSequence

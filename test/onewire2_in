@@ -21,7 +21,7 @@ on onewire scanned A * * *:
 connect onewire A _HOST_ _PORT_
 #
 try:
-	wait for 15:
+	wait for 10:
 		name yawn
 
 log TRACE DirStart
