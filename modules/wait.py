@@ -308,10 +308,10 @@ list wait NAME
 			print >>self.ctx.out, "."
 		else:
 			w = waiters[tuple(event)]
-			print  >>self.ctx.out, "Name: "," ".join(str(x) for x in w.name)
-			print  >>self.ctx.out, "Started: ",w.start
-			print  >>self.ctx.out, "Ending: ",w.end
-			print  >>self.ctx.out, "Remaining: ",w.value
+			print  >>self.ctx.out, "Name:"," ".join(str(x) for x in w.name)
+			print  >>self.ctx.out, "Started:",w.start
+			print  >>self.ctx.out, "Ending:",w.end
+			print  >>self.ctx.out, "Remaining:",w.value
 			while True:
 				w = getattr(w,"parent",None)
 				if w is None: break
@@ -333,7 +333,7 @@ list wait NAME
 						except AttributeError:
 							n = w.__class__.__name__
 				if n is not None:
-					print  >>self.ctx.out, "in: ",n
+					print  >>self.ctx.out, "in:",n
 			print  >>self.ctx.out, "."
 
 class ExistsWaiterCheck(Check):

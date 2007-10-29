@@ -22,12 +22,12 @@ NEW: <WorkSequence:4 (4)>
 33 END: wait¦done¦1049515628.1¦X1
 Foo Bar
 .
-Name:  Foo Bar
-Started:  2003-04-05 06:07:08
-Ending:  2003-04-05 06:07:18
-Remaining:  11
-in:  ⌁.async
-in:  None
+Name: Foo Bar
+Started: 2003-04-05 06:07:08
+Ending: 2003-04-05 06:07:18
+Remaining: 11
+in: ⌁.async
+in: None
 .
 NEW: <WorkSequence:5 (4)>
    : │  EVENT: wait¦update¦1049515628.1¦Foo¦Bar
