@@ -1,0 +1,13 @@
+You need:
+
+* Linux.
+  Probably.
+  This code has not been tested at all under other OSes,
+  *especially* not M$ Windows.
+* Python 2.5.
+* Twisted.
+* At least one of 1wire, LIRC, FS20, …
+  … or the ability to integrate your own peripheral.
+  (If so, please contribute your enhancements!)
+* Some willingness to work with textual configuration files.
+* Some idea of what you're actually trying to accomplish.

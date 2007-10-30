@@ -60,6 +60,17 @@ monitor low_ok NAME
 monitor high_ok NAME
 	-- The monitored value is no longer higher than the specified limit.
 
+The next two events will only be sent when a passive monitor (which is
+fed by "set monitor" statements instead of actively being subclassed) is
+running.
+
+monitor checking NAME
+	-- The monitored value needs an update.
+
+monitor checked NAME
+	-- The monitored value has been updated successfully.
+
+
 State
 -----
 
