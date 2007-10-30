@@ -12,3 +12,5 @@ test:
 	done; \
 	if ! diff -ru expect real >/tmp/diff.$$$$ ; then less /tmp/diff.$$$$; \
 		rm /tmp/diff.$$$$; exit 1; else rm /tmp/diff.$$$$; exit 0; fi
+diff:
+	@-diff -ru expect real | less

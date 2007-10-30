@@ -7,7 +7,10 @@ all:
 install:
 	@echo Not implemented yet.
 test:
-	@$(MAKE) -C test --no-print-directory
+	@$(MAKE) -C test --no-print-directory test
+diff:
+	@$(MAKE) -C test --no-print-directory diff
+
 ow:
 	sh test/interactive/onewire.sh
 i interactive:
