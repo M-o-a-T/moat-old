@@ -110,7 +110,7 @@ if False:
 		finally:
 			_syn.acquire()
 			del _thr[tid]
-			print >>sys.stderr,"-THR",tid," ".join(map(str,_thr.keys()))
+			print >>sys.stderr,"-THR",tid," ".join(str(x) for x in _thr.keys())
 			_syn.release()
 	def cic(p,*a,**k):
 		_syn.acquire()

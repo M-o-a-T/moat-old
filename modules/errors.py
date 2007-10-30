@@ -36,7 +36,8 @@ class RaisedError(RuntimeError):
 	def __repr__(self):
 		return u"‹%s: %s›" % (self.__class__.__name__, repr(self.params))
 	def __str__(self):
-		return u"%s: %s" % (self.__class__.__name__, " ".join(map(str,self.params)))
+		return u"%s: %s" % (self.__class__.__name__, " ".join(str(x) for
+		x in self.params))
 
 class TryStatement(MainStatementList):
 	name=("try",)

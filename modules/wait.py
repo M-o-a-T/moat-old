@@ -35,7 +35,7 @@ class WaitError(RuntimeError):
 	def __init__(self,w):
 		self.waiter = w
 	def __str__(self):
-		return self.text % (" ".join(map(str,self.waiter.name)),)
+		return self.text % (" ".join(str(x) for x in self.waiter.name),)
 
 class WaitLocked(WaitError):
 	text = u"Tried to process waiter ‹%s› while it was locked"
