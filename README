@@ -15,6 +15,9 @@ some devices can only be controlled by infrared, some are in places
 where nothing except stringing some wire would work.
 
 
+The rest of the documentation is in the doc/ subdirectory.
+You'll probably want to start with the tutorial.
+
 
 The components I'm concerned with are:
 
