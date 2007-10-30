@@ -1,0 +1,73 @@
+NEW: <WorkSequence:1 (4)>
+   : │  EVENT: startup
+   : └1╴... done.
+1 EVENT: startup
+1 END: startup
+0 add ‹IfStatement ⌁.if¦exists¦rrd¦t›
+0 add ‹LogHandler ⌁.log¦DEBUG¦No1›
+0 add ‹LogHandler ⌁.log¦DEBUG¦Yes›
+1 Yes
+0 add ‹IfStatement ⌁.if¦exists¦rrd¦t›
+0 add ‹LogHandler ⌁.log¦DEBUG¦Yes›
+0 add ‹LogHandler ⌁.log¦DEBUG¦No2›
+1 Yes
+t : /tmp/rrdtest.rrd test
+.
+Name: t
+File: /tmp/rrdtest.rrd
+Dataset: test
+min: 0.0
+max: 5.0
+unknown_sec: 0
+minimal_heartbeat: 60
+value: 0.0
+ds_name: test
+type: GAUGE
+last_ds: UNKN
+NEW: <WorkSequence:2 (4)>
+   : │  EVENT: wait¦start¦1049515628.5¦_wait¦1
+   : └1╴... done.
+33 EVENT: wait¦start¦1049515628.5¦_wait¦1
+33 END: wait¦start¦1049515628.5¦_wait¦1
+NEW: <WorkSequence:3 (4)>
+   : │  EVENT: wait¦done¦1049515628.5¦_wait¦1
+   : └1╴... done.
+40 EVENT: wait¦done¦1049515628.5¦_wait¦1
+40 END: wait¦done¦1049515628.5¦_wait¦1
+NEW: <WorkSequence:4 (4)>
+   : │  EVENT: wait¦start¦1049515628.5¦_wait¦2
+   : └1╴... done.
+51 EVENT: wait¦start¦1049515628.5¦_wait¦2
+51 END: wait¦start¦1049515628.5¦_wait¦2
+NEW: <WorkSequence:5 (4)>
+   : │  EVENT: wait¦done¦1049515628.5¦_wait¦2
+   : └1╴... done.
+58 EVENT: wait¦done¦1049515628.5¦_wait¦2
+58 END: wait¦done¦1049515628.5¦_wait¦2
+Name: t
+File: /tmp/rrdtest.rrd
+Dataset: test
+min: 0.0
+max: 5.0
+unknown_sec: 0
+minimal_heartbeat: 60
+value: None
+ds_name: test
+type: GAUGE
+last_ds: 12
+0 add ‹VarRRDHandler ⌁.var¦rrd¦x¦last_ds¦t›
+0 add ‹TriggerHandler ⌁.trigger¦last¦$x›
+NEW: <WorkSequence:6 (4)>
+   : │  EVENT: last¦12
+   : └1╴... done.
+0 add ‹IfStatement ⌁.if¦exists¦rrd¦t›
+0 add ‹LogHandler ⌁.log¦DEBUG¦No3›
+0 add ‹LogHandler ⌁.log¦DEBUG¦Yes›
+1 Yes
+74 EVENT: last¦12
+74 END: last¦12
+NEW: <WorkSequence:7 (6)>
+   : │  EVENT: shutdown
+   : └1╴... done.
+2 EVENT: shutdown
+2 END: shutdown

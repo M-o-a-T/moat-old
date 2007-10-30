@@ -728,6 +728,107 @@ Check if the bus is currently connected to a server.
 
 
 ===
+rrd
+===
+
+This module provides basic access to RRD databases.
+
+RRD is an acronym for "round-robin database". They're ideal for storing
+data for which you want to generate both short-term and long-term
+graphs. Basically, a number of data sources get consolidated into one or
+more archives. The HomEvenT support of rrdtool is concerned *only*
+with supplying data to rrd.
+
+You create these databases with 'rrdtool'.
+
+A typical RRD create statement looks like this:
+
+	rrdtool create /path/to/the.rrd DS:test:GAUGE:60:0:5 RRA:...
+
+"test" is the name of the data source. An RRD archive can have multiple
+data sources.
+
+Note that the RRD file is not kept open between accesses;
+the Python-RRD library doesn't afford that.
+
+
+---
+rrd
+---
+
+Supply a mnemonic name for an RRD.
+
+	rrd "/path/to/the.rrd" test foo bar
+
+This names the data source "test" in the RRD file at /path/to/the.rrd
+"foo bar". As usual, the name can consist of multiple words to simplify
+event handling later on.
+
+
+-------
+del rrd
+-------
+
+Removes that name from the system.
+
+	del rrd foo bar
+
+
+--------
+list rrd
+--------
+
+Enumerates the RRDs known to the system.
+
+	>>> list rrd
+	foo bar : /path/to/the.rrd test
+
+When you supply the RRD nam as an argument, details for the RRD data
+source are printed. Names and values are the same as reported by the
+"rrdtool info" command, for the data source in question.
+
+Right now there is no way to query for other RRD information; it's out
+of scope for HomEvenT.
+
+
+-------
+set rrd
+-------
+
+This allows you to actually store a value in an RRD data set.
+
+	on foobar *OLD *NEW:
+		rrd set $NEW foo bar
+
+The last_ds attribute will then be equal to $NEW, and other RRD values
+will have been updated as appropriate.
+
+
+-------
+var rrd
+-------
+
+This statement assigns the current value of an RRD dataset's attribute
+to a name.
+
+	block:
+		var rrd whatever last_ds foo bar
+		log DEBUG "Your last foobar was" $whatever
+
+
+-----
+Tests
+-----
+
+exists rrd NAME
+---------------
+
+Check if an RRD has already been created.
+
+	if exists rrd foo bar: del rrd foo bar
+
+
+===
 ssh
 ===
 
