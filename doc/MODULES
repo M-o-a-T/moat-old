@@ -595,11 +595,11 @@ True if the name points to something (file, directory, device, …)
 onewire
 =======
 
-This module provides access to 1wire devices. This is a serial bus by
-Dallas Semiconductor (who bought Maxim, which developed this bus). It
-can run on cheap wiring (one pair, preferably twisted) and does not
-require a separate power supply; usually, though, 1wire buses run over
-Cat5 cable and do have power.
+This module provides basic access to 1wire devices. 1wire is a serial
+bus by Dallas Semiconductor (who bought Maxim, which developed this
+bus). It can run on cheap wiring (one pair, preferably twisted) and does
+not require a separate power supply; usually, though, 1wire buses run
+over Cat5 cable and do have powered wires.
 
 HomEvenT does not access the 1wire bus directly. Instead, it talks to
 one or more “owserver” processes which may run on separate hosts. Check
@@ -617,6 +617,14 @@ is running. Also, electrical problems like interference may cause bus
 operation to be sporadic. HomEvenT therefore retries some bus
 operations, but of course it can't fix everything.
 
+HomEvenT's 1wire bus scanner tries to prioritize bus accesses in order
+to not block other tasks too long. However, 1wire definitely is not a
+real-time bus; you can have *either* a complicated bus topology or
+devices which do A/D conversion, *or* a bus with switches or other
+real-time input or output devices; you definitely shouldn't connect both
+to the same bus.
+
+
 ---------------
 connect onewire
 ---------------
@@ -629,8 +637,8 @@ Establish a named server connection.
 
 The above three statements are equivalent.
 
-HomEvenT will periodically scan the bus and provide events for newly
-connected or removed devices.
+HomEvenT will scan the bus every five minutes (or every minute if there
+was an error) and provide events for newly connected or removed devices.
 
 ------------------
 disconnect onewire
