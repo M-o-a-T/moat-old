@@ -2,55 +2,66 @@
 or in fact any other file or output of this package, you forgot to
 switch your system to UTF-8.)
 
-«homevent» is a contraction of "home event". Its principal author is
-Matthias Urlichs <matthias@urlichs.de>. I wrote it because while playing
-around with some home automation stuff, I found that none of the free
-systems out there fit my needs particularly well, plus they were not
-talking to each other.
+«HomEvenT» is a contraction of "home event", plus funky capitalization.
+Its principal author is Matthias Urlichs <matthias@urlichs.de>.
 
-The system I'm concerned with are:
+I wrote it because while playing around with some home automation stuff,
+I found that none of the free systems out there fit my needs
+particularly well, plus they are not talking to each other.
+
+In my home, I really need a heterogenous infrastructure: some switches
+need to be wireless, in others existing wired switches need to survive;
+some devices can only be controlled by infrared, some are in places
+where nothing except stringing some wire would work.
+
+
+
+The components I'm concerned with are:
 
 * FS20
 
 This is a German wireless system operating in the 868-MHz range. It's
 not at all secure and generally doesn't use two-way handshakes. Wall
-switches cost at €15, a heating controller is €40, so it's not too bad.
+switches cost €15, a heating controller is €40, so it's not too bad.
 
 There's a FS20 controller for USB, whcih I'm currently using. Alternately,
-you can cannibalize a sender and a receiver, and connect them to your
-computer directly. I plan to use a spare USB sound interface for that
-because I want to control the heating system directly, and the USB thing
-doesn't let you do that.
+you can buy a sender and a receiver, and connect them to your computer
+directly. Somehow. I plan to use an USB sound interface for that, because
+I want to control the heating system directly, and the commercial
+controller doesn't let you do that.
 
-FS20-on-USB (actually, a serial port behind a FTDI controller) is
-supported by a Perl script which would support integration with other
-systems. The main problem is that I do not like Perl. :-/
+That controller is supported by a large and well-maintained server
+written in Perl. The main problem I have with it is that I do not like
+Perl :-/ the other is that it's 100% synchronous code, which does not
+integrate at all well with the 1wire bus.
 
 * 1-wire
 
 This is a two-wire bus system -- one of these wires is Ground, so
-apparently it doesn't count ☺. In practice, you do need a separate power
+apparently it doesn't count. ☺ In practice, you do need a separate power
 supply. Personally, I use a cheap shielded four-wire cable (LIYCY).
 
 The bus can be connected rather haphazardly if your wires are not *that*
 long, or you can use special branch controllers if you need to be more
-careful. It works admirably in my house.
+careful. It works admirably well in my house.
 
 The system is not that fast. In practice, you can poll a simple on/off
-sensor 250 times a second, so the practical limit with cheap sensors is
-40 switches on a bus — 100 if you get somewhat-more-expensive "event
-counter" chips.
+sensor 250 times a second, so the limit with cheap sensors is 40
+switches on a bus — 100, if you get somewhat-more-expensive "event
+counter" chips instead of dumb sensors. You can also connect a variety
+of sensors and A/D converters to that bus, but not at the same time
+because doing so will block the bus for up to a second. :-/
 
 On the plus side: the peripherals, including voltage and (calibrated!)
 temperature sensors, are really cheap, and a little bit of electronics
 knowledge goes a long way. (Who needs "when's sunrise" code, when you
 can add a real daylight sensor to your system for less than €5?) There
 are also inexpensive LCD panels for remote status displays which don't
-warrant their own computer.
+warrant their own control computer.
 
 Linux support for 1-wire comes either as an incomplete kernel module,
 or a user-space daemon (<http://owfs.sourceforge.net>) with support for
-multiple scripting languages. I'm using the latter.
+networking and multiple scripting languages. I'm using the latter.
 
 * LIRC
 
@@ -80,7 +91,7 @@ Looks interesting, but frankly I hate Perl. Writing a home automation
 
 * fhem
 
-Focuses on FS20. Might be OK as a front-end.
+Focuses on FS20. Might be OK as a front-end. Again, too much Perl.
 
 * xap
 
@@ -91,8 +102,8 @@ structured (dare I say XML?) and low-level devices are better handled by
 an adapter — the protocol is too verbose for slow interfaces.
 
 The available software is somewhat Windows-centric. The Python module
-for it (100% C, one woners why) is one of the most ugly pieces of code
-I've *ever* seen.
+for it (100% written in C, one wonders why) is one of the most ugly
+pieces of code I've *ever* seen.
 
 Writing a front-end adapter might work, and there are some good ideas
 in the data structures it models.
