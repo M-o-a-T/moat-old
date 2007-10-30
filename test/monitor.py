@@ -23,6 +23,23 @@ list monitor foo bar
 wait for 0.8
 del monitor foo bar
 list monitor
+
+on monitor checking baz zaz:
+	async:
+		set monitor 10 baz zaz
+		wait for 0.2
+		set monitor 13 baz zaz
+		wait for 0.2
+		set monitor 14 baz zaz
+	
+monitor passive:
+	name baz zaz
+	delay for 0.3
+	require 2 2
+list monitor baz zaz
+
+wait for 0.8
+
 shutdown
 """
 

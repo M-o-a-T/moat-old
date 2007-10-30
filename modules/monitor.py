@@ -13,7 +13,7 @@ monitor FOO...
 
 from homevent.monitor import monitors, MonitorDelayFor,MonitorDelayUntil,\
 	MonitorRequire,MonitorRetry,MonitorAlarm,MonitorHigh,MonitorLow,\
-	MonitorLimit, MonitorDiff
+	MonitorLimit, MonitorDiff, MonitorHandler, NoWatcherError
 from homevent.statement import AttributedStatement, Statement, main_words,\
 	global_words
 from homevent.module import Module
@@ -97,9 +97,26 @@ list monitor NAME
 
 			print  >>self.ctx.out, "Steps: ",m.steps,"/",m.points,"/",m.maxpoints
 			if m.data:
-				print  >>self.ctx.out, "Data: "," ".join(map(str,m.data))
+				print  >>self.ctx.out, "Data: "," ".join(str(x) for x in m.data)
 			
 			print  >>self.ctx.out, "."
+
+class MonitorSet(Statement):
+	name=("set","monitor")
+	doc="feed a value to a passive monitor"
+	long_doc="""\
+set monitor VALUE NAME
+	Sends the value to this named (passive) monitor.
+	
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if len(event) < 2:
+			raise SyntaxError(u"Usage: set monitor ‹value› ‹name…›")
+		m = monitors[tuple(event[1:])]
+		if not m.watcher:
+			raise NoWatcherError(m)
+		m.watcher.callback(event[0])
 
 class ExistsMonitorCheck(Check):
 	name=("exists","monitor")
@@ -143,7 +160,9 @@ class MonitorModule(Module):
 	info = "Monitoring"
 
 	def load(self):
+		main_words.register_statement(MonitorHandler)
 		main_words.register_statement(MonitorUpdate)
+		main_words.register_statement(MonitorSet)
 		main_words.register_statement(MonitorCancel)
 		main_words.register_statement(VarMonitorHandler)
 		global_words.register_statement(MonitorList)
@@ -151,7 +170,9 @@ class MonitorModule(Module):
 		register_condition(RunningMonitorCheck)
 	
 	def unload(self):
+		main_words.unregister_statement(MonitorHandler)
 		main_words.unregister_statement(MonitorUpdate)
+		main_words.unregister_statement(MonitorSet)
 		main_words.unregister_statement(MonitorCancel)
 		main_words.unregister_statement(VarMonitorHandler)
 		global_words.unregister_statement(MonitorList)

@@ -28,7 +28,7 @@ class Tester(Monitor):
 		super(Tester,self).__init__(*a,**k)
 		self.rand = Random(self._seed)
 
-	def one_value(self):
+	def one_value(self, step):
 		if self._val is None:
 			lo = self._min
 			hi = self._max

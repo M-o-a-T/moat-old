@@ -44,18 +44,26 @@ class MonitorError(RuntimeError):
 class DupMonitorError(MonitorError):
     text = u"A monitor ‹%s› already exists"
 
+class DupWatcherError(MonitorError):
+    text = u"Already waiting for ‹%s›"
+
+class NoWatcherError(MonitorError):
+    text = u"Not waiting for ‹%s›"
+
 class Monitor(object):
 	"""This is the thing that watches."""
 	active = False # enabled?
 	running = None # Deferred while measuring
 	timer = None # callLater() timer
 	timerd = None # deferred triggered by the timer
+	passive = None # active or passive monitoring?
+	watcher = None # if passive: Deferred for the next value to feed in
 
 	delay = (1,"sec") # between two measurements at a time
 	delay_for = (1,"sec") # between one set of measurements and the next one
 	delay_until = () # "absolute" timespec
 
-	step = 0 # how many measurements have been taken
+	steps = 0 # how many measurements have been taken
 	data = () # valid values
 	alarm = None # float: allowed range between one measurement and the next
 	is_high = False # high alarm triggered?
@@ -65,7 +73,7 @@ class Monitor(object):
 	low_lim = None # alarm if below this
 	low_ok_lim = None # alarm rescinded if above this
 	points = 1 # required for good value
-	maxpoints = 1  # max # steps
+	maxpoints = None  # max # steps
 	range = None # allowed range of data within a measurement
 	diff = None # required difference for a "value" event
 
@@ -75,7 +83,7 @@ class Monitor(object):
 	stopped_at = None # last time when measuring ended
 
 	def __init__(self,parent,name):
-
+		self.passive = (self.__class__ == Monitor)
 		self.ctx = parent.ctx
 		try:
 			self.parent = parent.parent
@@ -91,7 +99,7 @@ class Monitor(object):
 		if not self.active:
 			act = "off"
 		elif self.running:
-			act = "run "+str(self.step)
+			act = "run "+str(self.steps)
 		else:
 			act = "on "+str(self.value)
 			# TODO: add delay until next check
@@ -133,11 +141,13 @@ class Monitor(object):
 
 		data = self.data
 		while True:
-			lo = min(self.data)
-			hi = max(self.data)
+			lo = min(data)
+			hi = max(data)
 			if hi-lo <= self.range:
 				return avg
-			if len(data) == self.points: break
+
+			if len(data) == self.points:
+				break
 
 			new_data = []
 			extr = None # stored outlier
@@ -155,22 +165,50 @@ class Monitor(object):
 					nsum += val
 					new_data.append(val)
 			data = new_data
-			avg = sum/len(data)
+			avg = nsum/len(data)
 		return None
 
 	def _run(self):
 		self.timer = None
-		assert not self.running,"Concurrent calls"
-		self.running = self._run_me()
+		assert not self.running,u"Concurrent calls on ‹%s›"%(" ".join(str(x) for x in self.name),)
+
+		def mon_stop(_):
+			d = process_event(Event(self.ctx, "monitor","checked",*self.name))
+			d.addBoth(lambda x: _)
+			return d
+
+		def mon_send(_):
+			if self.new_value is not None:
+				return process_event(Event(Context(),"monitor","value",self.new_value,*self.name))
+
+		def mon_new(_):
+			if self.new_value is not None:
+				self.value = self.new_value
+			return _
+
+		def mon_redo(_):
+			self.running = None
+			self._schedule()
+			return _
+
+		self.running = defer.succeed(None)
+		self.running.addCallback(lambda _: self._run_me())
+		if self.passive:
+			self.running.addBoth(mon_stop)
+		self.running.addCallback(mon_send)
+		self.running.addCallback(mon_new)
 		self.running.addErrback(process_failure)
+		self.running.addBoth(mon_redo)
 		log(TRACE,"Start run",self.name)
+
 	@defer.inlineCallbacks
 	def _run_me(self):
 		self.steps = 0
 		self.data = []
+		self.new_value = None
 
 		def delay():
-			assert not self.timer,"No timer set"
+			assert not self.timer,"No timer set on ‹%s›"%(" ".join(str(x) for x in self.name),)
 			self.timerd = defer.Deferred()
 			def kick():
 				d = self.timerd
@@ -183,18 +221,18 @@ class Monitor(object):
 				self.timer = reactor.callLater(self.delay, kick)
 
 		try:
-			while self.steps < self.maxpoints:
+			while self.maxpoints is None or self.steps < self.maxpoints:
 				if not self.active:
 					return
-				if self.steps:
+				if self.steps and not self.passive:
 					yield delay()
 				self.steps += 1
 				try:
-					val = yield self.one_value()
+					val = yield self.one_value(self.steps)
 		
 				except Exception,e:
 					self.active = False
-					yield process_failure()
+					yield process_failure(e)
 
 				else:
 					self.data.append(val)
@@ -210,12 +248,13 @@ class Monitor(object):
 										self.alarm is not None and \
 										abs(self.value-avg) > self.alarm:
 									yield process_event(Event(Context(),"monitor","alarm",avg,*self.name))
-								yield process_event(Event(Context(),"monitor","value",avg,*self.name))
 							except Exception,e:
 								yield process_failure()
 							else:
-								self.value = avg
+								self.new_value = avg
 						return
+					else:
+						log(TRACE,"More data", self.data, "for", u"‹"+" ".join(str(x) for x in self.name)+u"›")
 				
 			self.active = False
 		
@@ -226,17 +265,31 @@ class Monitor(object):
 
 		finally:
 			log(TRACE,"End run",self.name)
-			self.running = None
 			self.stopped_at = now()
-			self._schedule()
 
 
-	def one_value(self):
+	def one_value(self, step):
 		"""\
 			The main code. It needs to get one value from the remote side
 			by returning a Deferred.
 			"""
-		return defer.fail(Failure(AssertionError("%s: You need to override one_value()" % (self.__class__.__name__,))))
+		w = self.watcher
+		self.watcher = None
+		if w is not None:
+			w.errback(DupWatcherError(self))
+
+		self.watcher = defer.Deferred()
+		def got_it(_,w):
+			if self.watcher == w:
+				self.watcher = None
+			return _
+		self.watcher.addBoth(got_it,self.watcher)
+
+		if self.passive and step==1:
+			d = process_event(Event(self.ctx, "monitor","checking",*self.name), return_errors=True)
+			d.addErrback(self.watcher.errback)
+
+		return self.watcher
 
 	def up(self):
 		if not self.active:
@@ -269,20 +322,18 @@ class Monitor(object):
 monitor_nr = 0
 	
 class MonitorHandler(AttributedStatement):
-	name=("monitor","whatever")
-	doc="Bad boy/girl! Don't register this statement!"
+	name=("monitor","passive")
+	doc="A monitor which waits for values"
 	long_doc="""\
-monitor whatever
-	- programmer error!
-	  The MonitorHandler needs to be subclassed. Don't register!
+monitor passive
+	- Handle monitoring by explicit "set" commands.
 	"""
 
 	monitor = Monitor
 	stopped = False
 
 	def __init__(self,*a,**k):
-		if self.monitor is Monitor:
-			raise NotImplementedError("Need to assign a subclass to .monitor!")
+		self.passive = (self.monitor is Monitor)
 
 		super(MonitorHandler,self).__init__(*a,**k)
 
@@ -368,20 +419,20 @@ require ‹num› ‹range›
 		if len(event) != 2:
 			raise SyntaxError(u'Usage: require ‹num› ‹range›')
 		if event[0] == "*":
-			self.parent.values["point"] = None
+			self.parent.values["points"] = None
 		else:
 			try:
 				val = int(event[0])
 				if val <= 0:
 					raise ValueError
-				self.parent.values["point"] = val
+				self.parent.values["points"] = val
 			except ValueError:
 				raise SyntaxError(u'Usage: require: ‹num› needs to be a positive integer')
 		if event[1] == "*":
 			self.parent.values["range"] = None
 		else:
 			try:
-				val = float(events[1])
+				val = float(event[1])
 				if val < 0:
 					raise ValueError
 				self.parent.values["range"] = val
