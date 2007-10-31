@@ -1,8 +1,6 @@
 if not exists module bool: load bool
 if not exists module ifelse: load ifelse
 if not exists module logging: load logging
-if true:
-	log TRACE
 if not exists module block: load block
 if not exists module trigger: load trigger
 if not exists module wait: load wait

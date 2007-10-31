@@ -30,12 +30,11 @@ import datetime as dt
 timer_nr = 0
 waiters={}
 
-startup = unixtime(now())
-def ixtime(t):
-	t = unixtime(t)
-	if "HOMEVENT_TEST" in os.environ:
-		return "%.1f" % (t-startup,)
-	return t
+if "HOMEVENT_TEST" in os.environ:
+	from test import ixtime
+else:
+	def ixtime(t):
+		return unixtime(t)
 
 class WaitError(RuntimeError):
 	def __init__(self,w):

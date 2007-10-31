@@ -13,9 +13,12 @@ from time import time,mktime
 import os
 from calendar import isleap,monthrange
 
+startup = dt.datetime.now()
 def now():
 	if "HOMEVENT_TEST" in os.environ:
-		return dt.datetime(2003,4,5,6,7,8)
+		res = dt.datetime(2003,4,5,6,7,8) + (dt.datetime.now()-startup)
+		res -= dt.timedelta(0,0,res.microsecond%100000)
+		return res
 	else:
 		return dt.datetime.now()
 

@@ -7,7 +7,7 @@ from homevent.module import load_module
 from test import run
 
 input = """\
-log TRACE
+#log TRACE
 on monitor value *VAL foo bar:
 	var monitor OLDVAL foo bar
 	if null $OLDVAL:
@@ -18,6 +18,11 @@ monitor test 0 100 2:
 	name foo bar
 	delay for 0.4
 wait for 1
+block:
+	if waiting monitor foo bar:
+		log DEBUG No0
+	else:
+		log DEBUG Yes
 list monitor
 list monitor foo bar
 wait for 0.8
@@ -38,7 +43,18 @@ monitor passive:
 	require 2 2
 list monitor baz zaz
 
-wait for 0.8
+wait for 0.2
+block:
+	if waiting monitor baz zaz:
+		log DEBUG Yes
+	else:
+		log DEBUG No1
+wait for 0.5
+block:
+	if waiting monitor baz zaz:
+		log DEBUG No2
+	else:
+		log DEBUG Yes
 
 shutdown
 """

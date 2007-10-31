@@ -137,6 +137,17 @@ class RunningMonitorCheck(Check):
 		return monitors[name].active
 
 
+class WaitingMonitorCheck(Check):
+	name=("waiting","monitor")
+	doc="check if a passive monitor is requesting data"
+	def check(self,*args):
+		if not len(args):
+			raise SyntaxError(u"Usage: if waiting monitor ‹name…›")
+		name = tuple(args)
+		m = monitors[name]
+		return m.active and m.watcher is not None
+
+
 class VarMonitorHandler(Statement):
 	name=("var","monitor")
 	doc="assign a variable to the current value of a monitor"
@@ -168,6 +179,7 @@ class MonitorModule(Module):
 		global_words.register_statement(MonitorList)
 		register_condition(ExistsMonitorCheck)
 		register_condition(RunningMonitorCheck)
+		register_condition(WaitingMonitorCheck)
 	
 	def unload(self):
 		main_words.unregister_statement(MonitorHandler)
@@ -178,5 +190,6 @@ class MonitorModule(Module):
 		global_words.unregister_statement(MonitorList)
 		unregister_condition(ExistsMonitorCheck)
 		unregister_condition(RunningMonitorCheck)
+		unregister_condition(WaitingMonitorCheck)
 
 init = MonitorModule

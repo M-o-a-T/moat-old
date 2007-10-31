@@ -6,11 +6,19 @@ from homevent.logging import Logger, TRACE, log
 from homevent.interpreter import Interpreter
 from homevent.parser import parse
 from homevent.context import Context
+from homevent.times import unixtime,now
 from cStringIO import StringIO
 import sys
 import re
 import os
 from twisted.internet import reactor
+
+startup=now()
+def ixtime(t=None):
+	if t is None:
+		t = now()
+	t = unixtime(t)
+	return "%.1f" % (t-unixtime(startup),)
 
 r_fli = re.compile(r'(:\s+File ").*/([^/]+/[^/]+)", line \d+, in')
 r_hex = re.compile(r'object at 0x[0-9a-fA-F]+')
@@ -78,6 +86,9 @@ class run_logger(Logger):
 	def log_event(self, event, level=0):
 		if level < self.level:
 			return
+
+		if "HOMEVENT_TEST" in os.environ and int(os.environ["HOMEVENT_TEST"]) > 1:
+			self._log(None,"@ "+ixtime())
 		if hasattr(event,"report"):
 			for r in event.report(99):
 				if not hasattr(event,"id") or isinstance(event,(h.logging.log_run,h.logging.log_created)):
