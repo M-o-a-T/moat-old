@@ -79,12 +79,12 @@ NEW: <WorkSequence:45 (4)>
    : │  EVENT: thermo¦DATA
    : └1╴... done.
 NEW: <WorkSequence:46 (4)>
-   : │  EVENT: wait¦cancel¦10.4¦yawn
+   : │  EVENT: wait¦cancel¦10.1¦yawn
    : └1╴... done.
 368 EVENT: thermo¦DATA
 368 END: thermo¦DATA
-371 EVENT: wait¦cancel¦10.4¦yawn
-371 END: wait¦cancel¦10.4¦yawn
+371 EVENT: wait¦cancel¦10.1¦yawn
+371 END: wait¦cancel¦10.1¦yawn
 NEW: <WorkSequence:47 (4)>
    : │  ERROR: ‹Waiter ('yawn',) 7›
    : └1╴... done.
@@ -94,12 +94,12 @@ ERROR: Traceback (most recent call last):
 390 END: HaltSequence
 0 Drop OWFS bus A
 NEW: <WorkSequence:48 (4)>
-   : │  EVENT: wait¦start¦4.8¦_wait¦2
+   : │  EVENT: wait¦start¦4.2¦_wait¦2
    : └1╴... done.
-408 EVENT: wait¦start¦4.8¦_wait¦2
-408 END: wait¦start¦4.8¦_wait¦2
+408 EVENT: wait¦start¦4.2¦_wait¦2
+408 END: wait¦start¦4.2¦_wait¦2
 NEW: <WorkSequence:49 (4)>
-   : │  EVENT: wait¦done¦4.8¦_wait¦2
+   : │  EVENT: wait¦done¦4.2¦_wait¦2
    : └1╴... done.
-415 EVENT: wait¦done¦4.8¦_wait¦2
-415 END: wait¦done¦4.8¦_wait¦2
+415 EVENT: wait¦done¦4.2¦_wait¦2
+415 END: wait¦done¦4.2¦_wait¦2

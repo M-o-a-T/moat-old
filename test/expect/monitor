@@ -77,9 +77,31 @@ RUN: on monitor value *VAL foo bar ‹OnEventHandler›
  ev: EVENT: monitor¦value¦42.0¦foo¦bar
 0 Go from 40.0 to 42.0
 53 END: monitor¦value¦42.0¦foo¦bar
+NEW: <WorkSequence:6 (4)>
+   : │  EVENT: wait¦done¦1.0¦_wait¦1
+   : └1╴... done.
+64 EVENT: wait¦done¦1.0¦_wait¦1
+64 END: wait¦done¦1.0¦_wait¦1
+0 add ‹IfStatement ⌁.if¦waiting¦monitor¦foo¦bar›
+0 add ‹LogHandler ⌁.log¦DEBUG¦No0›
+0 add ‹LogHandler ⌁.log¦DEBUG¦Yes›
+1 Yes
+foo bar
+.
+Name:  foo bar
+Value:  42.0
+Up:  Yes
+Steps:  1 / 1 / None
+Data:  42
+.
+NEW: <WorkSequence:7 (4)>
+   : │  EVENT: wait¦start¦1.8¦_wait¦2
+   : └1╴... done.
+84 EVENT: wait¦start¦1.8¦_wait¦2
+84 END: wait¦start¦1.8¦_wait¦2
 0 filter [41] on ('foo', 'bar')
 0 End run ('foo', 'bar')
-NEW: <WorkSequence:6 (5)>
+NEW: <WorkSequence:8 (5)>
    : │  EVENT: monitor¦value¦41.0¦foo¦bar
    : ├1╴on monitor value *VAL foo bar ‹OnEventHandler›
    : │  prio: 51
@@ -88,19 +110,19 @@ NEW: <WorkSequence:6 (5)>
    : │      : step: log TRACE First value is $VAL ‹LogHandler›
    : └2╴... done.
 0 Start run ('foo', 'bar')
-64 EVENT: monitor¦value¦41.0¦foo¦bar
+91 EVENT: monitor¦value¦41.0¦foo¦bar
 RUN: on monitor value *VAL foo bar ‹OnEventHandler›
    : prio: 51
    : step: var monitor OLDVAL foo bar ‹VarMonitorHandler›
    : step: if null $OLDVAL ‹IfStatement›
    :     : step: log TRACE First value is $VAL ‹LogHandler›
- at: <WorkSequence:6 (5)> (step 1)
+ at: <WorkSequence:8 (5)> (step 1)
  ev: EVENT: monitor¦value¦41.0¦foo¦bar
 0 Go from 42.0 to 41.0
-64 END: monitor¦value¦41.0¦foo¦bar
+91 END: monitor¦value¦41.0¦foo¦bar
 0 filter [40] on ('foo', 'bar')
 0 End run ('foo', 'bar')
-NEW: <WorkSequence:7 (5)>
+NEW: <WorkSequence:9 (5)>
    : │  EVENT: monitor¦value¦40.0¦foo¦bar
    : ├1╴on monitor value *VAL foo bar ‹OnEventHandler›
    : │  prio: 51
@@ -109,106 +131,21 @@ NEW: <WorkSequence:7 (5)>
    : │      : step: log TRACE First value is $VAL ‹LogHandler›
    : └2╴... done.
 0 Start run ('foo', 'bar')
-75 EVENT: monitor¦value¦40.0¦foo¦bar
+102 EVENT: monitor¦value¦40.0¦foo¦bar
 RUN: on monitor value *VAL foo bar ‹OnEventHandler›
    : prio: 51
    : step: var monitor OLDVAL foo bar ‹VarMonitorHandler›
    : step: if null $OLDVAL ‹IfStatement›
    :     : step: log TRACE First value is $VAL ‹LogHandler›
- at: <WorkSequence:7 (5)> (step 1)
+ at: <WorkSequence:9 (5)> (step 1)
  ev: EVENT: monitor¦value¦40.0¦foo¦bar
 0 Go from 41.0 to 40.0
-75 END: monitor¦value¦40.0¦foo¦bar
-0 filter [38] on ('foo', 'bar')
-0 End run ('foo', 'bar')
-NEW: <WorkSequence:8 (5)>
-   : │  EVENT: monitor¦value¦38.0¦foo¦bar
-   : ├1╴on monitor value *VAL foo bar ‹OnEventHandler›
-   : │  prio: 51
-   : │  step: var monitor OLDVAL foo bar ‹VarMonitorHandler›
-   : │  step: if null $OLDVAL ‹IfStatement›
-   : │      : step: log TRACE First value is $VAL ‹LogHandler›
-   : └2╴... done.
-0 Start run ('foo', 'bar')
-86 EVENT: monitor¦value¦38.0¦foo¦bar
-RUN: on monitor value *VAL foo bar ‹OnEventHandler›
-   : prio: 51
-   : step: var monitor OLDVAL foo bar ‹VarMonitorHandler›
-   : step: if null $OLDVAL ‹IfStatement›
-   :     : step: log TRACE First value is $VAL ‹LogHandler›
- at: <WorkSequence:8 (5)> (step 1)
- ev: EVENT: monitor¦value¦38.0¦foo¦bar
-0 Go from 40.0 to 38.0
-86 END: monitor¦value¦38.0¦foo¦bar
-NEW: <WorkSequence:9 (4)>
-   : │  EVENT: wait¦done¦1.0¦_wait¦1
-   : └1╴... done.
-97 EVENT: wait¦done¦1.0¦_wait¦1
-97 END: wait¦done¦1.0¦_wait¦1
-0 add ‹IfStatement ⌁.if¦waiting¦monitor¦foo¦bar›
-0 add ‹LogHandler ⌁.log¦DEBUG¦No0›
-0 add ‹LogHandler ⌁.log¦DEBUG¦Yes›
-1 Yes
-foo bar
-.
-Name:  foo bar
-Value:  38.0
-Up:  Yes
-Steps:  1 / 1 / None
-Data:  38
-.
+102 END: monitor¦value¦40.0¦foo¦bar
 NEW: <WorkSequence:10 (4)>
-   : │  EVENT: wait¦start¦2.9¦_wait¦2
+   : │  EVENT: wait¦done¦1.8¦_wait¦2
    : └1╴... done.
-117 EVENT: wait¦start¦2.9¦_wait¦2
-117 END: wait¦start¦2.9¦_wait¦2
-0 filter [38] on ('foo', 'bar')
-0 End run ('foo', 'bar')
-NEW: <WorkSequence:11 (5)>
-   : │  EVENT: monitor¦value¦38.0¦foo¦bar
-   : ├1╴on monitor value *VAL foo bar ‹OnEventHandler›
-   : │  prio: 51
-   : │  step: var monitor OLDVAL foo bar ‹VarMonitorHandler›
-   : │  step: if null $OLDVAL ‹IfStatement›
-   : │      : step: log TRACE First value is $VAL ‹LogHandler›
-   : └2╴... done.
-0 Start run ('foo', 'bar')
-124 EVENT: monitor¦value¦38.0¦foo¦bar
-RUN: on monitor value *VAL foo bar ‹OnEventHandler›
-   : prio: 51
-   : step: var monitor OLDVAL foo bar ‹VarMonitorHandler›
-   : step: if null $OLDVAL ‹IfStatement›
-   :     : step: log TRACE First value is $VAL ‹LogHandler›
- at: <WorkSequence:11 (5)> (step 1)
- ev: EVENT: monitor¦value¦38.0¦foo¦bar
-0 Go from 38.0 to 38.0
-124 END: monitor¦value¦38.0¦foo¦bar
-0 filter [36] on ('foo', 'bar')
-0 End run ('foo', 'bar')
-NEW: <WorkSequence:12 (5)>
-   : │  EVENT: monitor¦value¦36.0¦foo¦bar
-   : ├1╴on monitor value *VAL foo bar ‹OnEventHandler›
-   : │  prio: 51
-   : │  step: var monitor OLDVAL foo bar ‹VarMonitorHandler›
-   : │  step: if null $OLDVAL ‹IfStatement›
-   : │      : step: log TRACE First value is $VAL ‹LogHandler›
-   : └2╴... done.
-0 Start run ('foo', 'bar')
-135 EVENT: monitor¦value¦36.0¦foo¦bar
-RUN: on monitor value *VAL foo bar ‹OnEventHandler›
-   : prio: 51
-   : step: var monitor OLDVAL foo bar ‹VarMonitorHandler›
-   : step: if null $OLDVAL ‹IfStatement›
-   :     : step: log TRACE First value is $VAL ‹LogHandler›
- at: <WorkSequence:12 (5)> (step 1)
- ev: EVENT: monitor¦value¦36.0¦foo¦bar
-0 Go from 38.0 to 36.0
-135 END: monitor¦value¦36.0¦foo¦bar
-NEW: <WorkSequence:13 (4)>
-   : │  EVENT: wait¦done¦2.9¦_wait¦2
-   : └1╴... done.
-146 EVENT: wait¦done¦2.9¦_wait¦2
-146 END: wait¦done¦2.9¦_wait¦2
+113 EVENT: wait¦done¦1.8¦_wait¦2
+113 END: wait¦done¦1.8¦_wait¦2
 .
 0 Create OnEvtHandler: ['monitor', 'checking', 'baz', 'zaz']
 0 add ‹Async ⌁.async›
@@ -223,10 +160,10 @@ Value:  None
 Up:  Yes
 Steps:  0 / 2 / None
 .
-NEW: <WorkSequence:14 (4)>
-   : │  EVENT: wait¦start¦3.3¦_wait¦5
+NEW: <WorkSequence:11 (4)>
+   : │  EVENT: wait¦start¦2.1¦_wait¦5
    : └1╴... done.
-NEW: <WorkSequence:15 (5)>
+NEW: <WorkSequence:12 (5)>
    : │  EVENT: monitor¦checking¦baz¦zaz
    : ├1╴on monitor checking baz zaz ‹OnEventHandler›
    : │  prio: 51
@@ -238,9 +175,9 @@ NEW: <WorkSequence:15 (5)>
    : │      : step: set monitor 14 baz zaz ‹MonitorSet›
    : └2╴... done.
 0 Start run ('baz', 'zaz')
-176 EVENT: wait¦start¦3.3¦_wait¦5
-176 END: wait¦start¦3.3¦_wait¦5
-178 EVENT: monitor¦checking¦baz¦zaz
+143 EVENT: wait¦start¦2.1¦_wait¦5
+143 END: wait¦start¦2.1¦_wait¦5
+145 EVENT: monitor¦checking¦baz¦zaz
 RUN: on monitor checking baz zaz ‹OnEventHandler›
    : prio: 51
    : step: async ‹Async›
@@ -249,57 +186,70 @@ RUN: on monitor checking baz zaz ‹OnEventHandler›
    :     : step: set monitor 13 baz zaz ‹MonitorSet›
    :     : step: wait for 0.2 ‹WaitHandler›
    :     : step: set monitor 14 baz zaz ‹MonitorSet›
- at: <WorkSequence:15 (5)> (step 1)
+ at: <WorkSequence:12 (5)> (step 1)
  ev: EVENT: monitor¦checking¦baz¦zaz
-178 END: monitor¦checking¦baz¦zaz
+145 END: monitor¦checking¦baz¦zaz
 0 filter [10] on ('baz', 'zaz')
 0 More data [10] for ‹baz zaz›
-NEW: <WorkSequence:16 (4)>
-   : │  EVENT: wait¦start¦3.4¦_wait¦3
+NEW: <WorkSequence:13 (4)>
+   : │  EVENT: wait¦start¦2.1¦_wait¦3
    : └1╴... done.
-193 EVENT: wait¦start¦3.4¦_wait¦3
-193 END: wait¦start¦3.4¦_wait¦3
-NEW: <WorkSequence:17 (4)>
-   : │  EVENT: wait¦done¦3.3¦_wait¦5
+160 EVENT: wait¦start¦2.1¦_wait¦3
+160 END: wait¦start¦2.1¦_wait¦3
+NEW: <WorkSequence:14 (4)>
+   : │  EVENT: wait¦done¦2.1¦_wait¦5
    : └1╴... done.
-200 EVENT: wait¦done¦3.3¦_wait¦5
-200 END: wait¦done¦3.3¦_wait¦5
+167 EVENT: wait¦done¦2.1¦_wait¦5
+167 END: wait¦done¦2.1¦_wait¦5
 0 add ‹IfStatement ⌁.if¦waiting¦monitor¦baz¦zaz›
 0 add ‹LogHandler ⌁.log¦DEBUG¦Yes›
 0 add ‹LogHandler ⌁.log¦DEBUG¦No1›
 1 Yes
-NEW: <WorkSequence:18 (4)>
-   : │  EVENT: wait¦start¦4.6¦_wait¦6
+NEW: <WorkSequence:15 (4)>
+   : │  EVENT: wait¦start¦2.6¦_wait¦6
    : └1╴... done.
-216 EVENT: wait¦start¦4.6¦_wait¦6
-216 END: wait¦start¦4.6¦_wait¦6
-NEW: <WorkSequence:19 (4)>
-   : │  EVENT: wait¦done¦3.4¦_wait¦3
+183 EVENT: wait¦start¦2.6¦_wait¦6
+183 END: wait¦start¦2.6¦_wait¦6
+NEW: <WorkSequence:16 (4)>
+   : │  EVENT: wait¦done¦2.1¦_wait¦3
    : └1╴... done.
-223 EVENT: wait¦done¦3.4¦_wait¦3
-223 END: wait¦done¦3.4¦_wait¦3
+190 EVENT: wait¦done¦2.1¦_wait¦3
+190 END: wait¦done¦2.1¦_wait¦3
 0 filter [10, 13] on ('baz', 'zaz')
 0 More data [10, 13] for ‹baz zaz›
+NEW: <WorkSequence:17 (4)>
+   : │  EVENT: wait¦start¦2.3¦_wait¦4
+   : └1╴... done.
+199 EVENT: wait¦start¦2.3¦_wait¦4
+199 END: wait¦start¦2.3¦_wait¦4
+NEW: <WorkSequence:18 (4)>
+   : │  EVENT: wait¦done¦2.3¦_wait¦4
+   : └1╴... done.
+206 EVENT: wait¦done¦2.3¦_wait¦4
+206 END: wait¦done¦2.3¦_wait¦4
+0 filter [10, 13, 14] on ('baz', 'zaz')
+0 End run ('baz', 'zaz')
+NEW: <WorkSequence:19 (4)>
+   : │  EVENT: monitor¦checked¦baz¦zaz
+   : └1╴... done.
+214 EVENT: monitor¦checked¦baz¦zaz
+214 END: monitor¦checked¦baz¦zaz
 NEW: <WorkSequence:20 (4)>
-   : │  EVENT: wait¦start¦4.4¦_wait¦4
+   : │  EVENT: monitor¦value¦13.5¦baz¦zaz
    : └1╴... done.
-232 EVENT: wait¦start¦4.4¦_wait¦4
-232 END: wait¦start¦4.4¦_wait¦4
+221 EVENT: monitor¦value¦13.5¦baz¦zaz
+221 END: monitor¦value¦13.5¦baz¦zaz
 NEW: <WorkSequence:21 (4)>
-   : │  EVENT: wait¦done¦4.6¦_wait¦6
+   : │  EVENT: wait¦done¦2.6¦_wait¦6
    : └1╴... done.
-239 EVENT: wait¦done¦4.6¦_wait¦6
-239 END: wait¦done¦4.6¦_wait¦6
+228 EVENT: wait¦done¦2.6¦_wait¦6
+228 END: wait¦done¦2.6¦_wait¦6
 0 add ‹IfStatement ⌁.if¦waiting¦monitor¦baz¦zaz›
 0 add ‹LogHandler ⌁.log¦DEBUG¦No2›
 0 add ‹LogHandler ⌁.log¦DEBUG¦Yes›
-1 No2
+1 Yes
 NEW: <WorkSequence:22 (7)>
    : │  EVENT: shutdown
    : └1╴... done.
 2 EVENT: shutdown
-NEW: <WorkSequence:23 (4)>
-   : │  EVENT: wait¦cancel¦4.4¦_wait¦4
-   : └1╴... done.
-260 EVENT: wait¦cancel¦4.4¦_wait¦4
-260 END: wait¦cancel¦4.4¦_wait¦4
+2 END: shutdown

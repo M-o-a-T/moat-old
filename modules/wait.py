@@ -112,8 +112,6 @@ class Waiter(object):
 	def get_value(self):
 		val = self.end-now()
 		d = unixdelta(val)
-		if "HOMEVENT_TEST" in os.environ:
-			return int(d+1) # otherwise the logs will have timing diffs
 		if d < 0: d = 0
 		return d
 	value = property(get_value)

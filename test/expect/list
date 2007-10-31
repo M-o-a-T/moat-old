@@ -41,7 +41,7 @@ NEW: <WorkSequence:4 (5)>
    : │      : step: wait for 0.3 ‹WaitHandler›
    : └2╴... done.
 NEW: <WorkSequence:5 (4)>
-   : │  EVENT: wait¦start¦2.0¦_wait¦3
+   : │  EVENT: wait¦start¦0.2¦_wait¦3
    : └1╴... done.
 41 EVENT: foo
 RUN: on foo ‹OnEventHandler›
@@ -51,20 +51,17 @@ RUN: on foo ‹OnEventHandler›
  at: <WorkSequence:4 (5)> (step 1)
  ev: EVENT: foo
 NEW: <WorkSequence:6 (4)>
-   : │  EVENT: wait¦start¦2.2¦foo¦waiter
+   : │  EVENT: wait¦start¦0.4¦foo¦waiter
    : └1╴... done.
-45 EVENT: wait¦start¦2.0¦_wait¦3
-45 END: wait¦start¦2.0¦_wait¦3
-51 EVENT: wait¦start¦2.2¦foo¦waiter
-51 END: wait¦start¦2.2¦foo¦waiter
+45 EVENT: wait¦start¦0.2¦_wait¦3
+45 END: wait¦start¦0.2¦_wait¦3
+51 EVENT: wait¦start¦0.4¦foo¦waiter
+51 END: wait¦start¦0.4¦foo¦waiter
 NEW: <WorkSequence:7 (4)>
-   : │  EVENT: wait¦done¦2.0¦_wait¦3
+   : │  EVENT: wait¦done¦0.2¦_wait¦3
    : └1╴... done.
-NEW: <WorkSequence:8 (4)>
-   : │  EVENT: wait¦done¦2.2¦foo¦waiter
-   : └1╴... done.
-63 EVENT: wait¦done¦2.0¦_wait¦3
-63 END: wait¦done¦2.0¦_wait¦3
+63 EVENT: wait¦done¦0.2¦_wait¦3
+63 END: wait¦done¦0.2¦_wait¦3
 4 No Work
 .
 <WorkSequence:4 (5)>
@@ -74,19 +71,22 @@ NEW: <WorkSequence:8 (4)>
 │ │step: block ‹Block›
 │ ╵    : step: wait for 0.3 ‹WaitHandler›
 └2╴... done.
+NEW: <WorkSequence:8 (4)>
+   : │  EVENT: wait¦start¦0.5¦_wait¦4
+   : └1╴... done.
+76 EVENT: wait¦start¦0.5¦_wait¦4
+76 END: wait¦start¦0.5¦_wait¦4
 NEW: <WorkSequence:9 (4)>
-   : │  EVENT: wait¦start¦3.6¦_wait¦4
+   : │  EVENT: wait¦done¦0.4¦foo¦waiter
    : └1╴... done.
-65 EVENT: wait¦done¦2.2¦foo¦waiter
-65 END: wait¦done¦2.2¦foo¦waiter
+83 EVENT: wait¦done¦0.4¦foo¦waiter
+83 END: wait¦done¦0.4¦foo¦waiter
 41 END: foo
-78 EVENT: wait¦start¦3.6¦_wait¦4
-78 END: wait¦start¦3.6¦_wait¦4
 NEW: <WorkSequence:10 (4)>
-   : │  EVENT: wait¦done¦3.6¦_wait¦4
+   : │  EVENT: wait¦done¦0.5¦_wait¦4
    : └1╴... done.
-93 EVENT: wait¦done¦3.6¦_wait¦4
-93 END: wait¦done¦3.6¦_wait¦4
+93 EVENT: wait¦done¦0.5¦_wait¦4
+93 END: wait¦done¦0.5¦_wait¦4
 NEW: <WorkSequence:11 (6)>
    : │  EVENT: shutdown
    : └1╴... done.

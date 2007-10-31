@@ -34,15 +34,15 @@ NEW: <WorkSequence:7 (4)>
 54 EVENT: bar2
 54 END: bar2
 NEW: <WorkSequence:8 (4)>
-   : │  EVENT: wait¦start¦2.8¦_wait¦2
+   : │  EVENT: wait¦start¦0.2¦_wait¦2
    : └1╴... done.
-63 EVENT: wait¦start¦2.8¦_wait¦2
-63 END: wait¦start¦2.8¦_wait¦2
+63 EVENT: wait¦start¦0.2¦_wait¦2
+63 END: wait¦start¦0.2¦_wait¦2
 NEW: <WorkSequence:9 (4)>
-   : │  EVENT: wait¦done¦2.8¦_wait¦2
+   : │  EVENT: wait¦done¦0.2¦_wait¦2
    : └1╴... done.
-70 EVENT: wait¦done¦2.8¦_wait¦2
-70 END: wait¦done¦2.8¦_wait¦2
+70 EVENT: wait¦done¦0.2¦_wait¦2
+70 END: wait¦done¦0.2¦_wait¦2
 0 add ‹TriggerHandler ⌁.trigger¦never¦the¦same›
 0 add ‹TriggerHandler ⌁.trigger¦foo3›
 0 add ‹TriggerHandler ⌁.trigger¦bar3›
@@ -53,19 +53,19 @@ NEW: <WorkSequence:11 (4)>
    : │  EVENT: bar3
    : └1╴... done.
 NEW: <WorkSequence:12 (4)>
-   : │  EVENT: wait¦start¦4.6¦_wait¦3
+   : │  EVENT: wait¦start¦0.3¦_wait¦3
    : └1╴... done.
 83 EVENT: foo3
 83 END: foo3
 86 EVENT: bar3
 86 END: bar3
-90 EVENT: wait¦start¦4.6¦_wait¦3
-90 END: wait¦start¦4.6¦_wait¦3
+90 EVENT: wait¦start¦0.3¦_wait¦3
+90 END: wait¦start¦0.3¦_wait¦3
 NEW: <WorkSequence:13 (4)>
-   : │  EVENT: wait¦done¦4.6¦_wait¦3
+   : │  EVENT: wait¦done¦0.3¦_wait¦3
    : └1╴... done.
-107 EVENT: wait¦done¦4.6¦_wait¦3
-107 END: wait¦done¦4.6¦_wait¦3
+107 EVENT: wait¦done¦0.3¦_wait¦3
+107 END: wait¦done¦0.3¦_wait¦3
 0 add ‹IfStatement ⌁.if¦exists¦file¦misc2›
 0 add ‹Include ⌁.include¦misc2›
 0 add ‹Include ⌁.include¦test/misc2›
@@ -84,35 +84,35 @@ NEW: <WorkSequence:15 (4)>
 134 END: bar4
 0 add ‹TriggerHandler ⌁.trigger¦foo5›
 NEW: <WorkSequence:16 (4)>
-   : │  EVENT: wait¦start¦5.7¦_wait¦4
+   : │  EVENT: wait¦start¦0.4¦_wait¦4
    : └1╴... done.
-145 EVENT: wait¦start¦5.7¦_wait¦4
-145 END: wait¦start¦5.7¦_wait¦4
+145 EVENT: wait¦start¦0.4¦_wait¦4
+145 END: wait¦start¦0.4¦_wait¦4
 NEW: <WorkSequence:17 (4)>
    : │  EVENT: foo5
    : └1╴... done.
 153 EVENT: foo5
 153 END: foo5
 NEW: <WorkSequence:18 (4)>
-   : │  EVENT: wait¦done¦5.7¦_wait¦4
+   : │  EVENT: wait¦done¦0.4¦_wait¦4
    : └1╴... done.
-160 EVENT: wait¦done¦5.7¦_wait¦4
-160 END: wait¦done¦5.7¦_wait¦4
+160 EVENT: wait¦done¦0.4¦_wait¦4
+160 END: wait¦done¦0.4¦_wait¦4
 NEW: <WorkSequence:19 (4)>
    : │  EVENT: bar5
    : └1╴... done.
 NEW: <WorkSequence:20 (4)>
-   : │  EVENT: wait¦start¦6.7¦_wait¦5
+   : │  EVENT: wait¦start¦0.5¦_wait¦5
    : └1╴... done.
 169 EVENT: bar5
 169 END: bar5
-173 EVENT: wait¦start¦6.7¦_wait¦5
-173 END: wait¦start¦6.7¦_wait¦5
+173 EVENT: wait¦start¦0.5¦_wait¦5
+173 END: wait¦start¦0.5¦_wait¦5
 NEW: <WorkSequence:21 (4)>
-   : │  EVENT: wait¦done¦6.7¦_wait¦5
+   : │  EVENT: wait¦done¦0.5¦_wait¦5
    : └1╴... done.
-185 EVENT: wait¦done¦6.7¦_wait¦5
-185 END: wait¦done¦6.7¦_wait¦5
+185 EVENT: wait¦done¦0.5¦_wait¦5
+185 END: wait¦done¦0.5¦_wait¦5
 NEW: <WorkSequence:22 (6)>
    : │  EVENT: shutdown
    : └1╴... done.
