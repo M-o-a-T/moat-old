@@ -1,8 +1,5 @@
 #!/bin/sh
 
-rm -f /tmp/rrdtest.rrd || true
-
 sed -re "s/: wait¦(start|stop|done|cancel)¦[0-9.]*¦/: wait¦\1¦×××¦/g" \
-	-e 's/^unknown_sec:.1$/unknown_sec: 0/' \
-	-i real/rrd
+	-i real/list
 exit $?

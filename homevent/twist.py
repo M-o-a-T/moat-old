@@ -10,6 +10,8 @@ from twisted.python.threadable import isInIOThread
 
 from posix import write
 import sys
+import os
+import datetime as dt
 
 class StdInDescriptor(FileDescriptor):
 	def fileno(self):
@@ -95,6 +97,21 @@ def _cse(self, eventType):
 	del self._eventTriggers[eventType]
 base.ReactorBase._continueSystemEvent = _cse
 
+
+# When testing, we log the time an operation takes. Unfortunately, since
+# we're accurate up to 1/10th second, that means that the timestamp
+# values in the logs will jitter merrily when they're near the
+# 1/10th-second tick.
+
+if "HOMEVENT_TEST" in os.environ:
+	realLater = reactor.callLater
+	def later(delta,proc,*a,**k):
+		if delta > 0:
+			nd = 0.1+2*delta
+			d = dt.datetime.now()
+			delta = nd - ((nd*1000000+d.microsecond)%100000)/1000000
+		return realLater(delta,proc,*a,**k)
+	reactor.callLater = later
 
 # hack callInThread to log what it's doing
 if False:
