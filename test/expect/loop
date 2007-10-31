@@ -5,20 +5,20 @@ NEW: <WorkSequence:1 (4)>
 1 END: startup
 0 add ‹WaitHandler ('wait', 'for') 2›
 NEW: <WorkSequence:2 (4)>
-   : │  EVENT: wait¦start¦1049515628.2¦_wait¦2
+   : │  EVENT: wait¦start¦0.2¦_wait¦2
    : └1╴... done.
-15 EVENT: wait¦start¦1049515628.2¦_wait¦2
-15 END: wait¦start¦1049515628.2¦_wait¦2
+15 EVENT: wait¦start¦0.2¦_wait¦2
+15 END: wait¦start¦0.2¦_wait¦2
 NEW: <WorkSequence:3 (4)>
-   : │  EVENT: wait¦start¦1049515629.9¦Foo¦Bar
+   : │  EVENT: wait¦start¦1.9¦Foo¦Bar
    : └1╴... done.
-23 EVENT: wait¦start¦1049515629.9¦Foo¦Bar
-23 END: wait¦start¦1049515629.9¦Foo¦Bar
+23 EVENT: wait¦start¦1.9¦Foo¦Bar
+23 END: wait¦start¦1.9¦Foo¦Bar
 NEW: <WorkSequence:4 (4)>
-   : │  EVENT: wait¦done¦1049515628.2¦_wait¦2
+   : │  EVENT: wait¦done¦0.2¦_wait¦2
    : └1╴... done.
-30 EVENT: wait¦done¦1049515628.2¦_wait¦2
-30 END: wait¦done¦1049515628.2¦_wait¦2
+30 EVENT: wait¦done¦0.2¦_wait¦2
+30 END: wait¦done¦0.2¦_wait¦2
 0 add ‹LogHandler ⌁.log¦DEBUG¦Start›
 0 add ‹WhileStatement ⌁.while¦exists¦wait¦Foo¦Bar›
 0 add ‹LogHandler ⌁.log¦DEBUG¦waiting›
@@ -28,32 +28,32 @@ NEW: <WorkSequence:4 (4)>
 1 Start
 1 waiting
 NEW: <WorkSequence:5 (4)>
-   : │  EVENT: wait¦start¦1049515628.7¦_wait¦3
+   : │  EVENT: wait¦start¦0.7¦_wait¦3
    : └1╴... done.
-48 EVENT: wait¦start¦1049515628.7¦_wait¦3
-48 END: wait¦start¦1049515628.7¦_wait¦3
+48 EVENT: wait¦start¦0.7¦_wait¦3
+48 END: wait¦start¦0.7¦_wait¦3
 NEW: <WorkSequence:6 (4)>
-   : │  EVENT: wait¦done¦1049515628.7¦_wait¦3
+   : │  EVENT: wait¦done¦0.7¦_wait¦3
    : └1╴... done.
-55 EVENT: wait¦done¦1049515628.7¦_wait¦3
-55 END: wait¦done¦1049515628.7¦_wait¦3
+55 EVENT: wait¦done¦0.7¦_wait¦3
+55 END: wait¦done¦0.7¦_wait¦3
 1 testing
 1 waiting
 NEW: <WorkSequence:7 (4)>
-   : │  EVENT: wait¦start¦1049515628.7¦_wait¦3
+   : │  EVENT: wait¦start¦0.7¦_wait¦3
    : └1╴... done.
-65 EVENT: wait¦start¦1049515628.7¦_wait¦3
-65 END: wait¦start¦1049515628.7¦_wait¦3
+65 EVENT: wait¦start¦0.7¦_wait¦3
+65 END: wait¦start¦0.7¦_wait¦3
 NEW: <WorkSequence:8 (4)>
-   : │  EVENT: wait¦done¦1049515629.9¦Foo¦Bar
+   : │  EVENT: wait¦done¦1.9¦Foo¦Bar
    : └1╴... done.
-72 EVENT: wait¦done¦1049515629.9¦Foo¦Bar
-72 END: wait¦done¦1049515629.9¦Foo¦Bar
+72 EVENT: wait¦done¦1.9¦Foo¦Bar
+72 END: wait¦done¦1.9¦Foo¦Bar
 NEW: <WorkSequence:9 (4)>
-   : │  EVENT: wait¦done¦1049515628.7¦_wait¦3
+   : │  EVENT: wait¦done¦0.7¦_wait¦3
    : └1╴... done.
-79 EVENT: wait¦done¦1049515628.7¦_wait¦3
-79 END: wait¦done¦1049515628.7¦_wait¦3
+79 EVENT: wait¦done¦0.7¦_wait¦3
+79 END: wait¦done¦0.7¦_wait¦3
 1 testing
 1 Done
 NEW: <WorkSequence:10 (6)>

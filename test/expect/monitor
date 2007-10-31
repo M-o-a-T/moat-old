@@ -16,10 +16,10 @@ TRACE> add ‹LogHandler ⌁.log¦TRACE¦Go¦from¦$OLDVAL¦to¦$VAL›
 0 NewHandler 1
 TRACE> NewHandler 1
 NEW: <WorkSequence:2 (4)>
-   : │  EVENT: wait¦start¦1049515629.0¦_wait¦1
+   : │  EVENT: wait¦start¦1.0¦_wait¦1
    : └1╴... done.
 DEBUG> NEW: <WorkSequence:2 (4)>
-DEBUG>    : │  EVENT: wait¦start¦1049515629.0¦_wait¦1
+DEBUG>    : │  EVENT: wait¦start¦1.0¦_wait¦1
 DEBUG>    : └1╴... done.
 .
 0 filter [42] on ('foo', 'bar')
@@ -45,11 +45,11 @@ DEBUG>    : └2╴... done.
 .
 0 Start run ('foo', 'bar')
 TRACE> Start run ('foo', 'bar')
-26 EVENT: wait¦start¦1049515629.0¦_wait¦1
-DEBUG> EVENT: wait¦start¦1049515629.0¦_wait¦1
+26 EVENT: wait¦start¦1.0¦_wait¦1
+DEBUG> EVENT: wait¦start¦1.0¦_wait¦1
 .
-26 END: wait¦start¦1049515629.0¦_wait¦1
-DEBUG> END: wait¦start¦1049515629.0¦_wait¦1
+26 END: wait¦start¦1.0¦_wait¦1
+DEBUG> END: wait¦start¦1.0¦_wait¦1
 .
 28 EVENT: monitor¦value¦42.0¦foo¦bar
 DEBUG> EVENT: monitor¦value¦42.0¦foo¦bar
@@ -259,17 +259,17 @@ TRACE> Go from 41.0 to 40.0
 DEBUG> END: monitor¦value¦40.0¦foo¦bar
 .
 NEW: <WorkSequence:8 (4)>
-   : │  EVENT: wait¦done¦1049515629.0¦_wait¦1
+   : │  EVENT: wait¦done¦1.0¦_wait¦1
    : └1╴... done.
 DEBUG> NEW: <WorkSequence:8 (4)>
-DEBUG>    : │  EVENT: wait¦done¦1049515629.0¦_wait¦1
+DEBUG>    : │  EVENT: wait¦done¦1.0¦_wait¦1
 DEBUG>    : └1╴... done.
 .
-88 EVENT: wait¦done¦1049515629.0¦_wait¦1
-DEBUG> EVENT: wait¦done¦1049515629.0¦_wait¦1
+88 EVENT: wait¦done¦1.0¦_wait¦1
+DEBUG> EVENT: wait¦done¦1.0¦_wait¦1
 .
-88 END: wait¦done¦1049515629.0¦_wait¦1
-DEBUG> END: wait¦done¦1049515629.0¦_wait¦1
+88 END: wait¦done¦1.0¦_wait¦1
+DEBUG> END: wait¦done¦1.0¦_wait¦1
 .
 foo bar
 .
@@ -280,17 +280,17 @@ Steps:  1 / 1 / None
 Data:  40
 .
 NEW: <WorkSequence:9 (4)>
-   : │  EVENT: wait¦start¦1049515628.8¦_wait¦2
+   : │  EVENT: wait¦start¦0.8¦_wait¦2
    : └1╴... done.
 DEBUG> NEW: <WorkSequence:9 (4)>
-DEBUG>    : │  EVENT: wait¦start¦1049515628.8¦_wait¦2
+DEBUG>    : │  EVENT: wait¦start¦0.8¦_wait¦2
 DEBUG>    : └1╴... done.
 .
-101 EVENT: wait¦start¦1049515628.8¦_wait¦2
-DEBUG> EVENT: wait¦start¦1049515628.8¦_wait¦2
+101 EVENT: wait¦start¦0.8¦_wait¦2
+DEBUG> EVENT: wait¦start¦0.8¦_wait¦2
 .
-101 END: wait¦start¦1049515628.8¦_wait¦2
-DEBUG> END: wait¦start¦1049515628.8¦_wait¦2
+101 END: wait¦start¦0.8¦_wait¦2
+DEBUG> END: wait¦start¦0.8¦_wait¦2
 .
 0 filter [38] on ('foo', 'bar')
 TRACE> filter [38] on ('foo', 'bar')
@@ -431,17 +431,17 @@ TRACE> Go from 38.0 to 36.0
 DEBUG> END: monitor¦value¦36.0¦foo¦bar
 .
 NEW: <WorkSequence:13 (4)>
-   : │  EVENT: wait¦done¦1049515628.8¦_wait¦2
+   : │  EVENT: wait¦done¦0.8¦_wait¦2
    : └1╴... done.
 DEBUG> NEW: <WorkSequence:13 (4)>
-DEBUG>    : │  EVENT: wait¦done¦1049515628.8¦_wait¦2
+DEBUG>    : │  EVENT: wait¦done¦0.8¦_wait¦2
 DEBUG>    : └1╴... done.
 .
-141 EVENT: wait¦done¦1049515628.8¦_wait¦2
-DEBUG> EVENT: wait¦done¦1049515628.8¦_wait¦2
+141 EVENT: wait¦done¦0.8¦_wait¦2
+DEBUG> EVENT: wait¦done¦0.8¦_wait¦2
 .
-141 END: wait¦done¦1049515628.8¦_wait¦2
-DEBUG> END: wait¦done¦1049515628.8¦_wait¦2
+141 END: wait¦done¦0.8¦_wait¦2
+DEBUG> END: wait¦done¦0.8¦_wait¦2
 .
 .
 0 Create OnEvtHandler: ['monitor', 'checking', 'baz', 'zaz']
@@ -466,10 +466,10 @@ Up:  Yes
 Steps:  0 / 2 / None
 .
 NEW: <WorkSequence:14 (4)>
-   : │  EVENT: wait¦start¦1049515628.8¦_wait¦5
+   : │  EVENT: wait¦start¦0.8¦_wait¦5
    : └1╴... done.
 DEBUG> NEW: <WorkSequence:14 (4)>
-DEBUG>    : │  EVENT: wait¦start¦1049515628.8¦_wait¦5
+DEBUG>    : │  EVENT: wait¦start¦0.8¦_wait¦5
 DEBUG>    : └1╴... done.
 .
 NEW: <WorkSequence:15 (5)>
@@ -497,11 +497,11 @@ DEBUG>    : └2╴... done.
 .
 0 Start run ('baz', 'zaz')
 TRACE> Start run ('baz', 'zaz')
-171 EVENT: wait¦start¦1049515628.8¦_wait¦5
-DEBUG> EVENT: wait¦start¦1049515628.8¦_wait¦5
+171 EVENT: wait¦start¦0.8¦_wait¦5
+DEBUG> EVENT: wait¦start¦0.8¦_wait¦5
 .
-171 END: wait¦start¦1049515628.8¦_wait¦5
-DEBUG> END: wait¦start¦1049515628.8¦_wait¦5
+171 END: wait¦start¦0.8¦_wait¦5
+DEBUG> END: wait¦start¦0.8¦_wait¦5
 .
 173 EVENT: monitor¦checking¦baz¦zaz
 DEBUG> EVENT: monitor¦checking¦baz¦zaz
@@ -535,30 +535,30 @@ TRACE> filter [10] on ('baz', 'zaz')
 0 More data [10] for ‹baz zaz›
 TRACE> More data [10] for ‹baz zaz›
 NEW: <WorkSequence:16 (4)>
-   : │  EVENT: wait¦start¦1049515628.2¦_wait¦3
+   : │  EVENT: wait¦start¦0.2¦_wait¦3
    : └1╴... done.
 DEBUG> NEW: <WorkSequence:16 (4)>
-DEBUG>    : │  EVENT: wait¦start¦1049515628.2¦_wait¦3
+DEBUG>    : │  EVENT: wait¦start¦0.2¦_wait¦3
 DEBUG>    : └1╴... done.
 .
-188 EVENT: wait¦start¦1049515628.2¦_wait¦3
-DEBUG> EVENT: wait¦start¦1049515628.2¦_wait¦3
+188 EVENT: wait¦start¦0.2¦_wait¦3
+DEBUG> EVENT: wait¦start¦0.2¦_wait¦3
 .
-188 END: wait¦start¦1049515628.2¦_wait¦3
-DEBUG> END: wait¦start¦1049515628.2¦_wait¦3
+188 END: wait¦start¦0.2¦_wait¦3
+DEBUG> END: wait¦start¦0.2¦_wait¦3
 .
 NEW: <WorkSequence:17 (4)>
-   : │  EVENT: wait¦done¦1049515628.8¦_wait¦5
+   : │  EVENT: wait¦done¦0.8¦_wait¦5
    : └1╴... done.
 DEBUG> NEW: <WorkSequence:17 (4)>
-DEBUG>    : │  EVENT: wait¦done¦1049515628.8¦_wait¦5
+DEBUG>    : │  EVENT: wait¦done¦0.8¦_wait¦5
 DEBUG>    : └1╴... done.
 .
-195 EVENT: wait¦done¦1049515628.8¦_wait¦5
-DEBUG> EVENT: wait¦done¦1049515628.8¦_wait¦5
+195 EVENT: wait¦done¦0.8¦_wait¦5
+DEBUG> EVENT: wait¦done¦0.8¦_wait¦5
 .
-195 END: wait¦done¦1049515628.8¦_wait¦5
-DEBUG> END: wait¦done¦1049515628.8¦_wait¦5
+195 END: wait¦done¦0.8¦_wait¦5
+DEBUG> END: wait¦done¦0.8¦_wait¦5
 .
 NEW: <WorkSequence:18 (7)>
    : │  EVENT: shutdown
@@ -571,15 +571,15 @@ DEBUG>    : └1╴... done.
 DEBUG> EVENT: shutdown
 .
 NEW: <WorkSequence:19 (4)>
-   : │  EVENT: wait¦cancel¦1049515628.2¦_wait¦3
+   : │  EVENT: wait¦cancel¦0.2¦_wait¦3
    : └1╴... done.
 DEBUG> NEW: <WorkSequence:19 (4)>
-DEBUG>    : │  EVENT: wait¦cancel¦1049515628.2¦_wait¦3
+DEBUG>    : │  EVENT: wait¦cancel¦0.2¦_wait¦3
 DEBUG>    : └1╴... done.
 .
-209 EVENT: wait¦cancel¦1049515628.2¦_wait¦3
-DEBUG> EVENT: wait¦cancel¦1049515628.2¦_wait¦3
+209 EVENT: wait¦cancel¦0.2¦_wait¦3
+DEBUG> EVENT: wait¦cancel¦0.2¦_wait¦3
 .
-209 END: wait¦cancel¦1049515628.2¦_wait¦3
-DEBUG> END: wait¦cancel¦1049515628.2¦_wait¦3
+209 END: wait¦cancel¦0.2¦_wait¦3
+DEBUG> END: wait¦cancel¦0.2¦_wait¦3
 .

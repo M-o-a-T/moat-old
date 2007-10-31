@@ -26,10 +26,10 @@ NEW: <WorkSequence:3 (4)>
 0 add ‹LogHandler ⌁.log¦TRACE¦Set¦to¦THREE›
 0 add ‹SetStateHandler ⌁.set¦state¦three¦foo¦bar›
 NEW: <WorkSequence:4 (4)>
-   : │  EVENT: wait¦start¦1049515628.1¦_wait¦1
+   : │  EVENT: wait¦start¦0.1¦_wait¦1
    : └1╴... done.
-47 EVENT: wait¦start¦1049515628.1¦_wait¦1
-47 END: wait¦start¦1049515628.1¦_wait¦1
+47 EVENT: wait¦start¦0.1¦_wait¦1
+47 END: wait¦start¦0.1¦_wait¦1
 0 Set to THREE
 NEW: <WorkSequence:5 (5)>
    : │  EVENT: state¦two¦three¦foo¦bar
@@ -80,10 +80,10 @@ ERROR: Traceback (most recent call last):
 67 END: StateChangeError
 56 END: state¦two¦three¦foo¦bar
 NEW: <WorkSequence:7 (4)>
-   : │  EVENT: wait¦done¦1049515628.1¦_wait¦1
+   : │  EVENT: wait¦done¦0.1¦_wait¦1
    : └1╴... done.
-72 EVENT: wait¦done¦1049515628.1¦_wait¦1
-72 END: wait¦done¦1049515628.1¦_wait¦1
+72 EVENT: wait¦done¦0.1¦_wait¦1
+72 END: wait¦done¦0.1¦_wait¦1
 foo bar = three
 .
 Name: foo bar

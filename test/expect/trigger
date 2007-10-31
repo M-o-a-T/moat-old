@@ -9,15 +9,15 @@ NEW: <WorkSequence:2 (4)>
 11 EVENT: foo
 11 END: foo
 NEW: <WorkSequence:3 (4)>
-   : │  EVENT: wait¦start¦1049515628.5¦_wait¦1
+   : │  EVENT: wait¦start¦0.5¦_wait¦1
    : └1╴... done.
-20 EVENT: wait¦start¦1049515628.5¦_wait¦1
-20 END: wait¦start¦1049515628.5¦_wait¦1
+20 EVENT: wait¦start¦0.5¦_wait¦1
+20 END: wait¦start¦0.5¦_wait¦1
 NEW: <WorkSequence:4 (4)>
-   : │  EVENT: wait¦done¦1049515628.5¦_wait¦1
+   : │  EVENT: wait¦done¦0.5¦_wait¦1
    : └1╴... done.
-27 EVENT: wait¦done¦1049515628.5¦_wait¦1
-27 END: wait¦done¦1049515628.5¦_wait¦1
+27 EVENT: wait¦done¦0.5¦_wait¦1
+27 END: wait¦done¦0.5¦_wait¦1
 NEW: <WorkSequence:5 (4)>
    : │  EVENT: bar
    : └1╴... done.

@@ -30,6 +30,12 @@ import datetime as dt
 timer_nr = 0
 waiters={}
 
+startup = unixtime(now())
+def ixtime(t):
+	t = unixtime(t)
+	if "HOMEVENT_TEST" in os.environ:
+		return "%.1f" % (t-startup,)
+	return t
 
 class WaitError(RuntimeError):
 	def __init__(self,w):
@@ -90,14 +96,15 @@ class Waiter(object):
 	def init(self,dest):
 		self.end = dest
 		if self.value <= 0:
-			return defer.succeed(None)
+			self.defer.callback(None)
+			return self.defer
 
 		if self.name in waiters:
 			return DupWaiterError(self)
 		waiters[self.name] = self
 
 		d,e = self._lock()
-		d.addCallback(lambda _: process_event(Event(self.ctx,"wait","start",unixtime(self.end),*self.name)))
+		d.addCallback(lambda _: process_event(Event(self.ctx,"wait","start",ixtime(self.end),*self.name)))
 		d.addCallback(self._callit)
 		self._unlock(d,e)
 		d.addCallback(lambda _: self.defer)
@@ -114,21 +121,24 @@ class Waiter(object):
 
 	def doit(self):
 		d,e = self._lock()
-		self.queue = None
-		d.addCallback(lambda _: process_event(Event(self.ctx,"wait","done",unixtime(self.end),*self.name)))
+		d.addCallback(lambda _: process_event(Event(self.ctx,"wait","done",ixtime(self.end),*self.name)))
 		def done(_):
 			del waiters[self.name]
 			self.defer.callback(_)
+			self._unlock(d,e)
 		d.addCallbacks(done)
 
 	def cancel(self, err=WaitCancelled):
 		d,e = self._lock()
+		if self.defer.called:
+			self._unlock(d,e)
+			return
 		def stoptimer():
 			if self.id:
 				self.id.cancel()
 				self.id = None
 		d.addCallback(lambda _: stoptimer())
-		d.addCallback(lambda _: process_event(Event(self.ctx,"wait","cancel",unixtime(self.end),*self.name)))
+		d.addCallback(lambda _: process_event(Event(self.ctx,"wait","cancel",ixtime(self.end),*self.name)))
 		def errgen(_):
 			return Failure(err(self))
 		def done(_):
@@ -150,7 +160,7 @@ class Waiter(object):
 			old_end = self.end
 			self.end = dest
 		d.addCallback(lambda _: endupdate())
-		d.addCallback(lambda _: process_event(Event(self.ctx,"wait","update",unixtime(self.end),*self.name)))
+		d.addCallback(lambda _: process_event(Event(self.ctx,"wait","update",ixtime(self.end),*self.name)))
 		def err(_):
 			self.end = old_end
 			self._callit()
