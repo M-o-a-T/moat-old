@@ -5,8 +5,9 @@ switch your system to UTF-8.)
 «HomEvenT» is a contraction of "home event", plus funky capitalization.
 Its principal author is Matthias Urlichs <matthias@urlichs.de>.
 
-I wrote it because while playing around with some home automation stuff,
-I found that none of the free systems out there fit my needs
+
+I wrote HomEvenT because while playing around with some home automation
+stuff, I found that none of the free systems out there fit my needs
 particularly well, plus they are not talking to each other.
 
 In my home, I really need a heterogenous infrastructure: some switches
@@ -17,6 +18,9 @@ where nothing except stringing some wire would work.
 
 The rest of the documentation is in the doc/ subdirectory.
 You'll probably want to start with the tutorial.
+
+Interactive tests and experiments are easy:
+just type “make i”, then “help”.
 
 
 The components I'm concerned with are:

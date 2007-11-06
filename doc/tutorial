@@ -2,26 +2,42 @@
 HomEvenT Tutorial
 =================
 
+-----
+Intro
+-----
+
+This tutorial teaches you some basic concepts of HomEvenT.
+
+It doesn't interface with the real world; instead, it tries to introduce
+you to the way HomEvenT works.
+
+It is not a command reference. See the “modules” documentation for that.
+
+it is not a syntax reference. See the “syntax” documentation for that.
+
+You can play with HomEvenT by typing “make i”, then “help”.
+
+
 Events
 ------
 
 HomEvenT is, as the name implies, based on the central concept of an
-event. Something happens and you react to it.
+event. Something happens, and HomEvenT reacts to it.
 
-Example: Somebody presses the light switch and the light goes on.
+Example: Somebody presses the light switch. The light … lights up. ☺
 
 Except, perhaps, if the alarm system is activated. Then, *all* the light
-go on, and the siren, and the call to Security.
+go on, and the siren, and the call to Security. ☹
 
 Or except if it's an outside light and it's daylight.
 
 Anyway, after the light has been on for some time, we might want it to
 go off again on its own. Or when the dark storm clouds have gone away
 and it's bright enough again. Or, surprise, when somebody pushes the
-"Off" switch.
+"off" switch.
 
 All of the above can be represented by two things: "Events" and
-"States". Events occur when something happens. States is the stuff that
+"States". Events occur when something happens. States are what
 the system knows about the world.
 
 Changing a state is also an event. Or at least it can be. We'll get to
@@ -35,6 +51,10 @@ There's an "on event" statement which we can use to listen for events.
 
 We're going to use the "log" statement to simulate changing the outside
 world.
+
+A complete list of pre-defined events is available in the “events”
+documentation file.
+
 
 Simple case
 -----------
@@ -58,6 +78,7 @@ Make the light go on.
 
 That was easy, but you don't need a computer for that.
 
+
 Toggle switches
 ---------------
 
@@ -68,11 +89,11 @@ other hand, are cheaper when they have discrete on/off states.
 Thus, we need to remember what the state is. Sometimes the external
 hardware does that for us, but not always — and frankly, I want the
 computer to be in charge of the external gizmos and not the other way
-round.
+'round.
 
-Fortunately, there's a module for the state stuff.
+Fortunately, there's a module for state handling.
 
-Let's continue the previous example:
+Let's improve the previous example:
 
 	>> load state
 	>> set state off lamp1
@@ -91,13 +112,14 @@ Let's continue the previous example:
 
 That was almost too easy, but we're not done yet.
 
+
 Modularization
 --------------
 
 For starters, most systems aren't quite that simple: you want more
-switches, and some of those may control more than one lamp. It's not a
+switches, some of which might control more than one lamp. It's not a
 good idea to give all your switches the same name even if they happen to
-do the same thing now: you can't change things later.
+do the same thing *now*: you can't change things later.
 
 The easy "solution" would be to duplicate the above code a whole lot,
 but that's not a good idea. You lose track of what-does-what rather
@@ -143,7 +165,7 @@ Fortunately, events can have placeholders. They look like this:
 
 That works for every lamp there is, and it even auto-creates an initial
 state if you forgot to do that manually (otherwise you'll get a cryptic
-error message).
+error message instead of a lit lamp).
 
 Note that the quoting changed in the "log DEBUG" statements. The reason
 for that is the HomEvenT is stupid and replaces those $things only when
@@ -152,12 +174,14 @@ they're on their own.
 Oops
 ----
 
-Unfortunately, that simple wildcard means that if we ever want to toggle
-things that are not lamps, the whole thing will get horribly confused.
+Unfortunately, that simple "on toggle" wildcard means that if we ever
+want to toggle things that are not lamps, the whole thing will get
+horribly confused.
 
-There's no way to say "on toggle lamp*lamp" or whatever. That's
-intentional. Fortunately, there's a better way: after all, nobody said
-event names (and state names) can only be one word!
+There's no way to say "on toggle lamp*lamp" or whatever, in order to
+react only to events whose names start with the four characters "lamp".
+That's intentional, because there's a better way: after all, nobody said
+event names (and state names) can only consist of one word.
 
 	>> on pushed toggle sw1:
 		trigger toggle lamp lamp1
@@ -179,12 +203,11 @@ State change events
 -------------------
 
 However, there's still the problem that everywhere we change a lamp, we
-must never forget to also change the corresponding state, and vice
+must not forget to also change the corresponding state, and vice
 versa. That's still tedious and error-prone.
 
-Fortunately, there's a solution, which is that state changes are also
-events, which get internally created by HomEvenT. Thus, we can do this
-instead:
+The solution is that state changes also trigger events, which get
+created by HomEvenT internally. Thus, we can do this instead:
 
 	>> on toggle lamp *lamp:
 		if not exists state lamp $lamp:
@@ -200,15 +223,13 @@ instead:
 		log DEBUG "turn off lamp" $lamp
 	.
 
-The single star means "I don't care"; it's the old value of the state.
-It will be "-" when the state is created; likewise, if you destroy a
-state, the new value will be "-".
+The single star means "I don't care"; it represents the old value of the
+state. Check the “events” document for details.
 
 Auto-turn-off
 -------------
 
-I hope you'll remember from the SYNTAX document that we have a "wait"
-statement, so the easy (but wrong) solution is:
+The easy (but wrong) solution is:
 
 	>> load wait
 	>> on toggle lamp *lamp:
@@ -219,16 +240,18 @@ statement, so the easy (but wrong) solution is:
 	>> # THE ABOVE EXAMPLE WILL NOT WORK CORRECTLY
 
 The problem is: what happens when somebody presses the switch again
-during those five minutes. Do you want the thing turned off now, stay on
+during those five minutes? Do you want the thing turned off now, stay on
 for the original five minutes, stay on for the new five minutes, or stay
 on for a total of ten minutes? Depending on your preference, all of
-those might make sense. What does *not* make sense is the behavior of
-the above code, which makes the lamp go out after the original five
-minutes *and* after the new five minutes, which doesn't matter unless
-somebody turns the lamp on yet again. It'll now go out much sooner.
-Imagine the happy confusion if this is a staircase of a large building
-and many people keep pushing the button to turn the light back on.
-*Ouch*.
+those might make sense.
+
+What does *not* make sense is the behavior of the above code, which
+makes the lamp go out after the original five minutes *and* after the
+new five minutes, which doesn't matter unless somebody turns the lamp on
+yet again. It'll now go out much sooner. Imagine the happy confusion if
+this is a staircase of a large building and many people keep pushing the
+button to turn the light back on. *Ouch*.
+
 
 Anyway, let's continue with solutions that actually work.
 
@@ -244,32 +267,36 @@ First solution: turn the thing off.
 		set state off lamp $lamp
 	.
 
+(For your own interactive tests, you may want to reduce the "5 min"
+timer to something less boring.)
+
 Watch what happens. The first time the button is pressed, the "else:"
 part is executed: the lamp gets turned on and the wait gets started.
 The "set state off" command sits in the to-be-done queue behind the
 "wait" and, well, waits.
 
 If you press the button again before the time is up, the "del wait"
-cancels the original wait statement and (this is the important part)
+cancels the original wait statement plus (this is the important part)
 everything else that was sitting around waiting for it to finish. So
 the original "set state off" command is now forgotten. Fortunately,
 the "set state off" from the second button press is still there.
 End result: The light goes off.
 
-There's an important improvement here, which again becomes important
-when you design bigger and better systems. The subtle point is that
-you shouldn't base your decision on the current state of the lamp, but
-the fact that you have a change-of-lamp-state pending. So, instead of
+We might be able to improve this code, which again becomes important
+when you design bigger and better systems. The subtle point is that you
+shouldn't base your decision on the current state of the lamp, but the
+fact that you have a change-of-lamp-state pending. So, instead of
 
 	if state on lamp $lamp:
 
-you write
+you might want to write
 
 	if exists wait lamp $lamp:
 
-The distinction may seem moot now, but systems get complicated fast and
-it's important to keep separate concepts, well, separate, if you don't
-want to confuse yourself.
+The difference obviously doesn't matter in this simple snippet;
+depending on how you structure your code, the one or the other way
+of doing this may make more sense.
+
 
 Second solution: Keep the original timeout, i.e. do nothing.
 
@@ -283,12 +310,13 @@ This is absurdly simple.
 			set state off lamp $lamp
 	.
 
-Note that here, I use the "if state on" decision because I want
-that switch to be dead whenever the lamp is on, not just because I'm
-waiting for it to turn itself off. Again, if you have a larger system
-with alternate means to control your lamp, things may be different.
+Note that here, I intentionally use the "if state on" decision because I
+want that switch to be dead whenever the lamp is on, not just because
+I'm waiting for it to turn itself off. Again, if you have a larger
+system with alternate means to control your lamp, things may be
+different.
 
-Third solution: re-start the time 
+Third solution: re-start the timer.
 
 	>> on toggle lamp *lamp:
 		if exists wait lamp $lamp:
@@ -306,19 +334,23 @@ Here I use the "update" word of "wait for". This tells the wait
 statement to go to the version of the wait that's already running and
 play with that, instead of waiting itself.
 
-Fourth solution: extend the time
+
+Fourth solution: extend the time.
 
 TODO
+
 
 Alternate solution
 ------------------
 
 You might want to attach the fact that the lamp should go off to the
 turn-on event instead. The distinction is whether you want the lamp to
-*always* turn off after *five minutes*, or just because it's been
+*always* turn off after five minutes, or just because it's been
 switched on by somebody. If you only have manual switches, the
 distinction is meaningless, but you might also have motion detectors
-or daylight sensors or a presence simulation.
+or daylight sensors or some other way of presence detection (e.g., when
+first the outside door sensor and then the bedroom door sensor fire,
+it's reasonable to assume that somebody must be *somewhere* in your home).
 
 Anyway, in principle, this is easy:
 
@@ -330,17 +362,17 @@ Anyway, in principle, this is easy:
 	. 
 	>> # THE ABOVE EXAMPLE WILL NOT WORK
 
-However, this solution will crash with a nasty error message instead of
-turning the light off.
+Unfortunately, this solution will crash with a nasty error message
+instead of turning the light off.
 
 The reason for that disaster is that state-change events are running
 synchronously, i.e. the "set state" command waits for them to complete
 before continuing. They're also forbidden to change the state they're
 reporting about, otherwise you could get cute endless ping-pong effects.
 (Actually, that problem exists regardless … but at least the main cause
-of such chanins is broken.)
+of such chains is broken.)
 
-The solution is the "async:" block, which is just a normal block that
+The solution is an "async:" block, which is just a normal block that
 doesn't force the rest of the world to wait until the statements inside
 (which are still run in sequence!) complete:
 
@@ -352,20 +384,19 @@ doesn't force the rest of the world to wait until the statements inside
 			set state off lamp $lamp
 	.
 
-Note that we don't need a statement which figures out what the current
-state is, because the "set state" command only sends its event if the
-state actually changes.
+(Exercise: Of course, you need a “on state * off …” block to cancel the
+timer, but by now you should be able to write that yourself.)
 
-Adapting the solutions above to this way of handling things is left as
-an exercise. ☺
 
 Improvement
 -----------
 
-All those wait statements look complicated. What if you forget one of
-them when the lamp is turned off, as in the first bad-ass example?
+All those wait statements that get triggered when lamps are turned on
+sure look complicated. What if you forget one of them when the lamp is
+turned off, as in the first broken example?
 
-Easy. You can auto-kill them.
+Easy. You can auto-kill them. (This incidentally is also the solution to
+the exercise at the end of the previous section. Don't tell anybody.)
 
 	>> on state * off lamp *lamp:
 		prio 90
