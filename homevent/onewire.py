@@ -531,13 +531,13 @@ class OWFSfactory(object,ReconnectingClientFactory):
 	def finalFailure(self):
 		if self.up_event:
 			self.up_event = False
-			process_event(Event(Context(),"onewire","disconnect",self.name)).addErrback(process_failure)
+			process_event(Event(Context(),"onewire","disconnect",self.name),return_errors=True).addErrback(process_failure)
 
 	def clientConnectionFailed(self, connector, reason):
 		self.conn = None
 		log(WARN,reason)
 		super(OWFSfactory,self).clientConnectionFailed(connector, reason)
-		process_event(Event(Context(),"onewire","broken", self.name)).addErrback(process_failure)
+		process_event(Event(Context(),"onewire","broken", self.name),return_errors=True).addErrback(process_failure)
 
 	def clientConnectionLost(self, connector, reason):
 		self.conn = None
@@ -560,7 +560,7 @@ class OWFSfactory(object,ReconnectingClientFactory):
 
 		if not self.up_event:
 			self.up_event = True
-			process_event(Event(Context(),"onewire","connect",self.name)).addErrback(process_failure)
+			process_event(Event(Context(),"onewire","connect",self.name),return_errors=True).addErrback(process_failure)
 
 		conn.send(self.get_queued())
 
@@ -625,7 +625,7 @@ class OWFSfactory(object,ReconnectingClientFactory):
 		return doit(self.root)
 
 	def update_all(self):
-		d = process_event(Event(Context(),"onewire","scanning",self.name))
+		d = process_event(Event(Context(),"onewire","scanning",self.name),return_errors=True)
 		d.addCallback(_call,self._update_all)
 		d.addErrback(process_failure)
 		return d
@@ -663,7 +663,7 @@ class OWFSfactory(object,ReconnectingClientFactory):
 				e.addErrback(dropit,dev)
 
 			def num(_):
-				process_event(Event(Context(),"onewire","scanned",self.name,len(old_ids), len(new_ids), len(devices))).addErrback(process_failure)
+				process_event(Event(Context(),"onewire","scanned",self.name,len(old_ids), len(new_ids), len(devices)),return_errors=True).addErrback(process_failure)
 				return len(old_ids)
 			e.addCallback(num)
 			return e
