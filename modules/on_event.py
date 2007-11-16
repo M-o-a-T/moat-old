@@ -276,6 +276,9 @@ NOTE: Commands in the same handler, after this one, *are* executed.
 class OnExistsCheck(Check):
 	name=("exists","on")
 	doc="check if a handler exists"
+	long_doc="""\
+if exists on FOO BAR: check if a handler for this event exists
+"""
 	def check(self,*args):
 		if not len(args):
 			raise SyntaxError(u"Usage: if exists on ‹name…›")
