@@ -18,7 +18,7 @@ from homevent.times import time_delta, time_until, unixdelta, now
 from homevent.constants import SYS_PRIO
 from homevent.twist import deferToLater
 from homevent.context import Context
-from homevent.logging import log,TRACE
+from homevent.logging import log,TRACE,DEBUG
 
 from time import time
 import os,sys
@@ -179,7 +179,11 @@ class Monitor(object):
 
 		def mon_send(_):
 			if self.new_value is not None:
-				return process_event(Event(Context(),"monitor","value",self.new_value,*self.name))
+				if hasattr(self,"delta"):
+					if self.value is not None:
+						return process_event(Event(Context(),"monitor","value",self.new_value-self.value,*self.name))
+				else:
+					return process_event(Event(Context(),"monitor","value",self.new_value,*self.name))
 
 		def mon_new(_):
 			if self.new_value is not None:
@@ -235,6 +239,7 @@ class Monitor(object):
 					yield process_failure(e)
 
 				else:
+					log(DEBUG,"raw",val,*self.name)
 					if hasattr(self,"factor"):
 						val = val * self.factor + self.offset
 					self.data.append(val)
@@ -664,6 +669,23 @@ scale ‹factor› ‹offset›
 		else:
 			self.parent.values["offset"] = float(event[1])
 MonitorHandler.register_statement(MonitorScale)
+
+
+class MonitorDelta(Statement):
+	name = ("delta",)
+	doc = "report difference"
+	long_doc=u"""\
+delta
+	Report the difference between the old and new values.
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		lo = hi = None
+		if len(event):
+			raise SyntaxError(u'Usage: delta')
+
+		self.parent.values["delta"] = 1
+MonitorHandler.register_statement(MonitorDelta)
 
 
 class MonitorStopped(Statement):
