@@ -3,6 +3,34 @@
 if not exists module onewire: load onewire
 if not exists module monitor: load monitor
 if not exists module logging: load logging
+if not exists module on_event: load on_event
+if not exists module rrd: load rrd
+
+if exists monitor light sensor: del monitor light sensor
+monitor onewire "394309000000" volt.D:
+	name light sensor
+	delay for 10
+	require 2 0.1
+	switch PIO.A 4.2 0.95 
+	scale .60606060 0
+	stopped
+
+if exists on light sensor present: del on light sensor present
+on onewire up * "394309000000":
+	name light sensor present
+	start monitor light sensor
+if exists on light sensor gone: del on light sensor gone
+on onewire down * "394309000000":
+	name light sensor gone
+	stop monitor light sensor
+
+if exists rrd light: del rrd light
+rrd "/tmp/licht.vorne.rrd" licht light
+
+if exists on light value: del on light value
+on monitor value *val light sensor:
+	name light value
+	set rrd $val light
 
 connect onewire A "smurf.noris.de" 4304
 
