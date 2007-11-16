@@ -484,6 +484,15 @@ This subcommand actually tells the monitor to not start executing
 immediately. A common reason for this is that the event handlers
 which use the monitor have not been set up yet.
 
+delta
+-----
+
+This command tells the monitor to report differences between one value
+and the next, instead of absolute measurements. You can use this e.g. to
+get events for a counter's increments instead of the absolute value.
+
+There's no handling of overflows yet.
+
 --------------------
 update monitor NAME:
 --------------------
@@ -491,7 +500,7 @@ update monitor NAME:
 This command is the same as the one above, except that it modifies an
 existing monitor instead of creating a new one.
 
-The "name" and "paused" commands are not available.
+The "delta", "name" and "stopped" commands are not available.
 
 ----------------
 del monitor NAME
@@ -540,6 +549,8 @@ event; this means that it will not be set at all until this event has
 been completed the first time. See the ‹null› test (in the “bool”
 module) for an example.
 
+Note that for "delta" monitors, this will contain the absolute value.
+
 -----
 Tests
 -----
@@ -564,6 +575,23 @@ if high monitor NAME
 
 Checks if the monitor is currently above the high threshold.
 
+-------------------
+The passive monitor
+-------------------
+
+If there is no dedicated monitoring for a device, you can set up a
+passive monitor. It will send start/stop events when you should
+start/stop feeding raw values to it.
+
+monitor passive:
+----------------
+
+Set up the monitor.
+
+set monitor VALUE NAME
+----------------------
+
+Feed a raw measurement to this monitor.
 
 ====
 path
@@ -700,6 +728,54 @@ Writes a value to a 1wire device register.
 
 	set onewire 37.5 "10.68D839010800" temphigh
 
+---------------
+monitor onewire
+---------------
+
+This monitor watches a onewire device.
+
+switch
+------
+
+This dedicated monitoring subcommand allows you to control an output
+port to extend the range of your measurement.
+
+	switch ‹port› ‹low› ‹high›
+
+Initially, the port is set to zero. If the measured value is higer than
+‹high›, the port is set to one, the measurement is repeated, and the
+difference between ‹high› and ‹low› is added to the value. If the
+measured value then goes below ‹low›, the port is set to zero again.
+
+If ‹low› is larger than ‹high›, the port is set to one initially.
+‹low› and ‹high› are swapped. (Doing anything else doesn't make sense …)
+
+One common test subject is a photoresistor.
+
+	+5V --- PHOTO --+-- R1 --+-- R2 --- GND
+	                |        |
+	              sensor    port
+
+The port is a pull-down output: thus, this setup switches resistance
+between R1 and R1+R2, which allows us to measure the wide range of
+resistance which a typical photoresistor exhibits.
+
+‹low› and ‹high› need to be calculated so that
+
+* when the photoresistor's resistance is such that the voltage at the
+  sensor is at ‹high›, switching on the port will set the voltage to
+  ‹low›
+* the rate of change is roughly equal.
+
+These conditions are satisfied when R(photo) = sqrt(R1*(R1+R2)).
+So if R1=100Ω and R2=10kΩ, R(photo) would be 1005Ω, V(high) 4.55 Volt
+and V(low) 0.45 Volt.
+
+	switch PIO.D 4.55 0.45
+
+Of course, these values may be somewhat off due to tolerances in
+resistor values and input voltage. The debug output and a
+high-resolution RRD graph are good tools for fine-tuning these values.
 
 -----
 Tests
