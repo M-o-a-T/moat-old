@@ -211,14 +211,16 @@ class OWFSmon(Monitor):
 		super(OWFSmon,self).__init__(*a,**k)
 
 	def one_value(self, step):
-		d = self.device.get(self.attribute)
+		dev = devices[self.device]
+		d = dev.get(self.attribute)
 		if self.switch is not None:
+			log(TRACE,"switch",self.switch)
 			def switcher(val):
 				if not self.switched:
 					if val > self.high:
 						log(TRACE,"switch high",self.switch)
-						val = self.device.set(self.switch,self.to_high)
-						val.addCallback(lambda _: self.device.get(self.switch))
+						val = dev.set(self.switch,self.to_high)
+						val.addCallback(lambda _: dev.get(self.switch))
 						val.addCallback(lambda _: _ + self.high - self.low)
 						def did_high(_):
 							self.switched = True
@@ -227,8 +229,8 @@ class OWFSmon(Monitor):
 				else:
 					if val < self.low:
 						log(TRACE,"switch low",self.switch)
-						val = self.device.set(self.switch,self.to_low)
-						val.addCallback(lambda _: self.device.get(self.switch))
+						val = dev.set(self.switch,self.to_low)
+						val.addCallback(lambda _: dev.get(self.switch))
 						def did_low(_):
 							self.switched = False
 							return _
@@ -236,16 +238,26 @@ class OWFSmon(Monitor):
 					else:
 						val += self.high - self.low
 				return val
-			d.add_callback(switcher)
+			d.addCallback(switcher)
+		else:
+			log(TRACE,"no switch")
 		return d
 
 	def up(self):
+		dev = devices[self.device]
+		d = defer.maybeDeferred(super(OWFSmon,self).up)
 		if self.switch is not None and self.switched is None:
-			d = self.device.set(self.switch,self.to_low)
+			d.addCallback(lambda _: dev.set(self.switch,self.to_low))
 			def did(_):
 				self.switched = False
 			d.addCallback(did)
-			return d
+		return d
+
+	def down(self):
+		if self.switch is not None:
+			self.switched = None
+		return super(OWFSmon,self).down()
+		
 
 class OWFSmonitor(MonitorHandler):
 	name=("monitor","onewire")
@@ -259,11 +271,12 @@ monitor onewire ‹device› ‹attribute›
 		event = self.params(ctx)
 		if len(event) != 2:
 			raise SyntaxError("Usage: monitor onewire ‹device› ‹attribute›")
-		self.values["device"] = devices[event[0]]
+		self.values["device"] = event[0]
 		self.values["attribute"] = event[1]
-		self.values["switch"] = None
+		if "switch" not in self.values:
+			self.values["switch"] = None
 
-		super(OWFSMonitor,self).run(ctx,**k)
+		super(OWFSmonitor,self).run(ctx,**k)
 
 
 class MonitorSwitch(Statement):
@@ -280,18 +293,19 @@ switch ‹port› ‹low› ‹high›
 		event = self.params(ctx)
 		if len(event) != 3:
 			raise SyntaxError(u'Usage: switch ‹port› ‹low› ‹high›')
-		self.values["switch"] = event[0]
-		self.values["low"] = event[1]
-		self.values["high"] = event[2]
-		if self.values["low"] > self.values["high"]:
-			self.values["low"] = event[2]
-			self.values["high"] = event[1]
-			self.values["to_low"] = 1
-			self.values["to_high"] = 0
+		val = self.parent.values
+		val["switch"] = event[0]
+		val["low"] = event[1]
+		val["high"] = event[2]
+		if val["low"] > val["high"]:
+			val["low"] = event[2]
+			val["high"] = event[1]
+			val["to_low"] = 1
+			val["to_high"] = 0
 		else:
-			self.values["to_low"] = 0
-			self.values["to_high"] = 1
-		self.values["switched"] = None
+			val["to_low"] = 0
+			val["to_high"] = 1
+		val["switched"] = None
 MonitorHandler.register_statement(MonitorSwitch)
 
 
