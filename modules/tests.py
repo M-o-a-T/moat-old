@@ -42,7 +42,7 @@ class Tester(Monitor):
 class TestMonitor(MonitorHandler):
 	name=("monitor","test")
 	monitor = Tester
-	doc="crete a fake sequence"
+	doc="create a fake sequence"
 	long_doc="""\
 monitor test MIN MAX STEP
 	- creates a pseudo-random-valued monitor.
