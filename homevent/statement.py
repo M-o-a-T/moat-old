@@ -197,7 +197,7 @@ class ComplexStatement(Statement):
 		if self.__words is None:
 			self.__words = {}
 		if handler.name in self.__words:
-			raise ValueError("A handler for '%s' is already registered." % (handler.name,))
+			raise ValueError("A handler for '%s' is already registered." % (handler.name,self.__words[handler.name]))
 		self.__words[handler.name] = handler
 
 	@classmethod
