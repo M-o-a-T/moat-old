@@ -14,6 +14,7 @@ from twisted.internet import protocol,defer,reactor
 from twisted.protocols.basic import _PauseableMixin
 from twisted.python import failure
 from homevent.onewire import connect,disconnect, devices
+from homevent.monitor import Monitor,MonitorHandler
 import struct
 
 
@@ -205,6 +206,96 @@ class OWFSexistsbus(Check):
 		return args[0] in buses
 
 
+class OWFSmon(Monitor):
+	def __init__(self,*a,**k):
+		super(OWFSmon,self).__init__(*a,**k)
+
+	def one_value(self, step):
+		d = self.device.get(self.attribute)
+		if self.switch is not None:
+			def switcher(val):
+				if not self.switched:
+					if val > self.high:
+						log(TRACE,"switch high",self.switch)
+						val = self.device.set(self.switch,self.to_high)
+						val.addCallback(lambda _: self.device.get(self.switch))
+						val.addCallback(lambda _: _ + self.high - self.low)
+						def did_high(_):
+							self.switched = True
+							return _
+						val.addCallback(did_high)
+				else:
+					if val < self.low:
+						log(TRACE,"switch low",self.switch)
+						val = self.device.set(self.switch,self.to_low)
+						val.addCallback(lambda _: self.device.get(self.switch))
+						def did_low(_):
+							self.switched = False
+							return _
+						val.addCallback(did_low)
+					else:
+						val += self.high - self.low
+				return val
+			d.add_callback(switcher)
+		return d
+
+	def up(self):
+		if self.switch is not None and self.switched is None:
+			d = self.device.set(self.switch,self.to_low)
+			def did(_):
+				self.switched = False
+			d.addCallback(did)
+			return d
+
+class OWFSmonitor(MonitorHandler):
+	name=("monitor","onewire")
+	monitor = OWFSmon
+	doc="watch a value on the onewire bus"
+	long_doc="""\
+monitor onewire ‹device› ‹attribute›
+	- creates a monitor for a specific value on the bus.
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if len(event) != 2:
+			raise SyntaxError("Usage: monitor onewire ‹device› ‹attribute›")
+		self.values["device"] = devices[event[0]]
+		self.values["attribute"] = event[1]
+		self.values["switch"] = None
+
+		super(OWFSMonitor,self).run(ctx,**k)
+
+
+class MonitorSwitch(Statement):
+	name = ("switch",)
+	doc = "switch between resolutions"
+	long_doc=u"""\
+switch ‹port› ‹low› ‹high›
+	Auto-switch ranges. Initially, set the port to off. When the value
+	gets above ‹high›, turn it on and offset the result by ‹high›-‹low›.
+	If ‹low› is larger than ‹high›, swap them and turn the port on
+	initially.
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if len(event) != 3:
+			raise SyntaxError(u'Usage: switch ‹port› ‹low› ‹high›')
+		self.values["switch"] = event[0]
+		self.values["low"] = event[1]
+		self.values["high"] = event[2]
+		if self.values["low"] > self.values["high"]:
+			self.values["low"] = event[2]
+			self.values["high"] = event[1]
+			self.values["to_low"] = 1
+			self.values["to_high"] = 0
+		else:
+			self.values["to_low"] = 0
+			self.values["to_high"] = 1
+		self.values["switched"] = None
+MonitorHandler.register_statement(MonitorSwitch)
+
+
+
 class OWFSmodule(Module):
 	"""\
 		Basic onewire access.
@@ -219,6 +310,7 @@ class OWFSmodule(Module):
 		main_words.register_statement(OWFSlist)
 		main_words.register_statement(OWFSvar)
 		main_words.register_statement(OWFSset)
+		main_words.register_statement(OWFSmonitor)
 		register_condition(OWFSconnected)
 		register_condition(OWFSexists)
 		register_condition(OWFSconnectedbus)
@@ -231,6 +323,7 @@ class OWFSmodule(Module):
 		main_words.unregister_statement(OWFSlist)
 		main_words.unregister_statement(OWFSvar)
 		main_words.unregister_statement(OWFSset)
+		main_words.unregister_statement(OWFSmonitor)
 		unregister_condition(OWFSconnected)
 		unregister_condition(OWFSexists)
 		unregister_condition(OWFSconnectedbus)
