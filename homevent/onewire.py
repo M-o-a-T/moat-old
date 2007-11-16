@@ -607,8 +607,8 @@ class OWFSfactory(object,ReconnectingClientFactory):
 						f.addCallback(_call,doit,dev,path=path+(b,),key=None)
 				else:
 					p = dev.path
-					if dev.id:
-						p += (dev.id,)
+					if dev.bus_id:
+						p += (dev.bus_id,)
 					p += path
 					if key:
 						p += (key,)
@@ -616,7 +616,7 @@ class OWFSfactory(object,ReconnectingClientFactory):
 					for b in entries:
 						dn = OWFSdevice(id=b,bus=self,path=p)
 						f.addCallback(_call,proc,dn)
-						if b.startswith("1F."): # Bus adapter
+						if b.startswith("1F."): # Bus multiplexer
 							f.addCallback(_call,doit,dn,key="main")
 							f.addCallback(_call,doit,dn,key="aux")
 				return f
@@ -723,12 +723,13 @@ _call_id = 0
 class OWFSdevice(object):
 	"""This represents a bus device with attributes."""
 	def __new__(cls,id, bus=None, path=()):
+		short_id = id[id.index(".")+1:]
 		try:
-			self = devices[id]
+			self = devices[short_id]
 		except KeyError: # new device
 			self = super(OWFSdevice,cls).__new__(cls)
-			self._init(id,bus,path)
-			devices[id] = self
+			self._init(bus, short_id,id ,path)
+			devices[short_id] = self
 			return self
 		else: # old device, found again
 			if bus is not None and hasattr(self,'typ'):
@@ -737,15 +738,18 @@ class OWFSdevice(object):
 				self.go_up()
 			return self
 
-	def _init(self,id, bus,path=()):
-		self.id = id
+	def _init(self, bus, short_id=None, id=None, path=()):
+		if OWLOG: print "OW NEW", bus,short_id,id,path
+		self.bus_id = id
+		self.id = short_id
 		self.bus = bus
 		self.path = path
 		self.is_up = None
 		self.ctx = Context()
-		
+       
 	def _setattr(self,val,key):
 		"""Helper. Needed for new devices to set the device type."""
+
 		setattr(self,key,val)
 
 	def __repr__(self):
@@ -780,7 +784,7 @@ class OWFSdevice(object):
 		if not self.bus:
 			raise DisconnectedError(self)
 
-		msg = ATTRgetmsg(self.path+(self.id,key))
+		msg = ATTRgetmsg(self.path+(self.bus_id,key))
 		self.bus.queue(msg)
 
 		def got(_):
@@ -801,7 +805,7 @@ class OWFSdevice(object):
 		if not self.bus:
 			raise DisconnectedError(self)
 
-		msg = ATTRsetmsg(self.path+(self.id,key),val)
+		msg = ATTRsetmsg(self.path+(self.bus_id,key),val)
 		self.bus.queue(msg)
 		msg.d.addErrback(self.go_down)
 		return msg.d
@@ -812,8 +816,8 @@ class OWFSdevice(object):
 			raise DisconnectedError(self)
 
 		p = self.path + tuple(path)
-		if self.id is not None:
-			p += (self.id,)
+		if self.bus_id is not None:
+			p += (self.bus_id,)
 		if key is not None:
 			p += (key,)
 		msg = DIRmsg(p,proc)
@@ -826,6 +830,6 @@ class OWFSroot(OWFSdevice):
 	"""Represents the root device of an owfs tree"""
 	def __new__(cls,bus):
 		self = object.__new__(cls)
-		self._init(None,bus)
+		self._init(bus)
 		return self
 
