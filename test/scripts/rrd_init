@@ -2,4 +2,4 @@
 set -e
 
 rm -f /tmp/rrdtest.rrd || true
-rrdtool create /tmp/rrdtest.rrd --step 2 DS:test:GAUGE:60:0:5 RRA:AVERAGE:0.9:1:120
+rrdtool create /tmp/rrdtest.rrd --step 2 DS:test:GAUGE:60:0:20 RRA:AVERAGE:0.9:1:120

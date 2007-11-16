@@ -17,7 +17,7 @@ Name: t
 File: /tmp/rrdtest.rrd
 Dataset: test
 min: 0.0
-max: 5.0
+max: 20.0
 unknown_sec: 0
 minimal_heartbeat: 60
 value: 0.0
@@ -48,10 +48,10 @@ Name: t
 File: /tmp/rrdtest.rrd
 Dataset: test
 min: 0.0
-max: 5.0
+max: 20.0
 unknown_sec: 0
 minimal_heartbeat: 60
-value: None
+value: 1.316064
 ds_name: test
 type: GAUGE
 last_ds: 12
