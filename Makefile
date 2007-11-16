@@ -17,5 +17,7 @@ i interactive:
 	python test/interactive/main.py
 d debug:
 	pdb test/interactive/main.py
+r run:
+	python daemon.py -t TRACE smurf.ow
 
 .PHONY: test i interactive

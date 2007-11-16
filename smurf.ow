@@ -1,0 +1,8 @@
+# OneWire stuff, hopefully somewhat working :-/
+
+if not exists module onewire: load onewire
+if not exists module monitor: load monitor
+if not exists module logging: load logging
+
+connect onewire A "smurf.noris.de" 4304
+

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from homevent.statement import main_words, global_words, Statement
-from homevent.module import Load,Unload,LoadDir,ModuleExists
+from homevent.module import Load,Unload,LoadDir,ModuleExists,load_module
 from homevent.check import register_condition
 from homevent.context import Context
 from homevent.parser import read_config
@@ -17,11 +17,12 @@ import sys
 
 from twisted.internet import reactor,defer
 
-global_words.register_statement(Load)
-global_words.register_statement(Unload)
-global_words.register_statement(LoadDir)
+main_words.register_statement(Load)
+main_words.register_statement(Unload)
+main_words.register_statement(LoadDir)
 register_condition(ModuleExists)
 main_words.register_statement(ShutdownHandler)
+load_module("ifelse")
 
 from optparse import OptionParser
 parser = OptionParser(conflict_handler="resolve")
