@@ -235,6 +235,8 @@ class Monitor(object):
 					yield process_failure(e)
 
 				else:
+					if hasattr(self,"factor"):
+						val = val * self.factor + self.offset
 					self.data.append(val)
 
 					avg = self.filter_data()
@@ -638,6 +640,32 @@ limit ‹low› ‹high›
 MonitorHandler.register_statement(MonitorLimit)
 
 
+class MonitorScale(Statement):
+	name = ("scale",)
+	doc = "adapt values"
+	long_doc=u"""\
+scale ‹factor› ‹offset›
+	Adjust raw measurements by first multiplying by ‹factor›,
+	then adding ‹offset›.
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		lo = hi = None
+		if len(event) != 2:
+			raise SyntaxError(u'Usage: scale ‹factor› ‹offset›')
+
+		if event[0] == "*":
+			self.parent.values["factor"] = 1
+		else:
+			self.parent.values["factor"] = float(event[0])
+
+		if event[1] == "*":
+			self.parent.values["offset"] = 1
+		else:
+			self.parent.values["offset"] = float(event[1])
+MonitorHandler.register_statement(MonitorScale)
+
+
 class MonitorStopped(Statement):
 	name = ("stopped",)
 	doc = "start disabled"
@@ -651,7 +679,7 @@ stopped
 		if len(event):
 			raise SyntaxError(u'Usage: stopped')
 		self.parent.stopped = True
-
+MonitorHandler.register_statement(MonitorStopped)
 
 class Shutdown_Worker_Monitor(ExcWorker):
     """\

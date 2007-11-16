@@ -13,7 +13,7 @@ monitor FOO...
 
 from homevent.monitor import monitors, MonitorDelayFor,MonitorDelayUntil,\
 	MonitorRequire,MonitorRetry,MonitorAlarm,MonitorHigh,MonitorLow,\
-	MonitorLimit, MonitorDiff, MonitorHandler, NoWatcherError
+	MonitorLimit, MonitorScale, MonitorDiff, MonitorHandler, NoWatcherError
 from homevent.statement import AttributedStatement, Statement, main_words,\
 	global_words
 from homevent.module import Module
@@ -49,8 +49,9 @@ This statement updates the parameters of an existing monitor.
 		if active:
 			monitor.up()
 
-for cmd in (MonitorDelayFor,MonitorDelayUntil, MonitorRequire, \
-		MonitorRetry,MonitorAlarm,MonitorHigh,MonitorLow,MonitorDiff):
+for cmd in (MonitorDelayFor, MonitorDelayUntil, MonitorRequire, \
+		MonitorRetry, MonitorAlarm, MonitorLimit, MonitorScale, \
+		MonitorHigh, MonitorLow, MonitorDiff):
 	MonitorUpdate.register_statement(cmd)
 
 class MonitorCancel(Statement):
@@ -58,14 +59,41 @@ class MonitorCancel(Statement):
 	doc = "abort a monitor handler"
 	long_doc=u"""\
 del monitor ‹whatever the name is›
-	This statement aborts a monitor handler.
-	Everything that depended on the handler's completion will be skipped!
+	This statement removes a monitor from the system.
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		if not len(event):
 			raise SyntaxError(u'Usage: del monitor ‹name…›')
 		m = monitors.pop(tuple(event))
+		return m.down()
+
+class MonitorStart(Statement):
+	name = ("start","monitor")
+	doc = "Start a monitor"
+	long_doc=u"""\
+start monitor ‹name›
+	This statement starts a monitor handler.
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if not len(event):
+			raise SyntaxError(u'Usage: start monitor ‹name…›')
+		m = monitors[tuple(event)]
+		return m.up()
+
+class MonitorStop(Statement):
+	name = ("stop","monitor")
+	doc = "Stop a monitor"
+	long_doc=u"""\
+stop monitor ‹name›
+	This statement stops a monitor handler.
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if not len(event):
+			raise SyntaxError(u'Usage: stop monitor ‹name…›')
+		m = monitors[tuple(event)]
 		return m.down()
 
 class MonitorList(Statement):
@@ -175,6 +203,8 @@ class MonitorModule(Module):
 		main_words.register_statement(MonitorUpdate)
 		main_words.register_statement(MonitorSet)
 		main_words.register_statement(MonitorCancel)
+		main_words.register_statement(MonitorStart)
+		main_words.register_statement(MonitorStop)
 		main_words.register_statement(VarMonitorHandler)
 		global_words.register_statement(MonitorList)
 		register_condition(ExistsMonitorCheck)
@@ -186,6 +216,8 @@ class MonitorModule(Module):
 		main_words.unregister_statement(MonitorUpdate)
 		main_words.unregister_statement(MonitorSet)
 		main_words.unregister_statement(MonitorCancel)
+		main_words.unregister_statement(MonitorStart)
+		main_words.unregister_statement(MonitorStop)
 		main_words.unregister_statement(VarMonitorHandler)
 		global_words.unregister_statement(MonitorList)
 		unregister_condition(ExistsMonitorCheck)
