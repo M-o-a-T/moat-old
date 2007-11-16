@@ -201,7 +201,8 @@ class OWFScall(object):
 	def dataReceived(self, data):
 		# child object expect this
 		if OWLOG: print "OWFS done: ",self
-		self.d.callback(data)
+		if self.d is not None:
+			self.d.callback(data)
 
 	def msgReceived(self, typ, data):
 		if typ < 0:
@@ -210,7 +211,7 @@ class OWFScall(object):
 
 	def done(self, _=None):
 		"""Processing is finished."""
-		if not self.d.called:
+		if self.d is not None and not self.d.called:
 			raise RuntimeError("Did not trigger the result in msgReceived()",_)
 	
 	def error(self,err):
@@ -366,6 +367,7 @@ class OWFSqueue(OWFSreceiver):
 		if OWLOG: print "OWFS send for",self.msg
 		msg.send(self)
 
+
 	def connectionFailed(self,reason):
 		super(OWFSqueue,self).connectionFailed(reason)
 		self.retry()
@@ -388,7 +390,8 @@ class OWFSqueue(OWFSreceiver):
 				if OWLOG: print "OWFS recv again"
 				return
 		except Exception,e:
-			if OWLOG: print "OWFS recv err",e
+			#if OWLOG: print "OWFS recv err",e
+			process_failure()
 			self.is_done(e)
 		else:
 			if OWLOG: print "OWFS recv done"
