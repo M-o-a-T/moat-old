@@ -1,3 +1,4 @@
+1 EVENT: startup
 NEW: <WorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
@@ -34,6 +35,7 @@ NEW: <WorkSequence:1 (4)>
 1 Yes
 1 Yes
 1 Yes
+2 EVENT: shutdown
 NEW: <WorkSequence:2 (5)>
    : │  EVENT: shutdown
    : └1╴... done.

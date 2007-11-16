@@ -1,3 +1,4 @@
+1 EVENT: startup
 NEW: <WorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
@@ -7,6 +8,7 @@ NEW: <WorkSequence:1 (4)>
 0 add ‹Include ⌁.include¦onewire2›
 0 add ‹Include ⌁.include¦test/onewire2›
 0 add ‹Load ⌁.load¦bool›
+20 EVENT: module¦load¦bool
 NEW: <WorkSequence:2 (4)>
    : │  EVENT: module¦load¦bool
    : └1╴... done.
@@ -14,6 +16,7 @@ NEW: <WorkSequence:2 (4)>
 20 END: module¦load¦bool
 0 add ‹Load ⌁.load¦ifelse›
 0 add ‹Load ⌁.load¦logging›
+34 EVENT: module¦load¦logging
 NEW: <WorkSequence:3 (4)>
    : │  EVENT: module¦load¦logging
    : └1╴... done.
@@ -21,30 +24,35 @@ NEW: <WorkSequence:3 (4)>
 34 END: module¦load¦logging
 0 add ‹Load ⌁.load¦block›
 0 add ‹Load ⌁.load¦trigger›
+48 EVENT: module¦load¦trigger
 NEW: <WorkSequence:4 (4)>
    : │  EVENT: module¦load¦trigger
    : └1╴... done.
 48 EVENT: module¦load¦trigger
 48 END: module¦load¦trigger
 0 add ‹Load ⌁.load¦wait›
+59 EVENT: module¦load¦wait
 NEW: <WorkSequence:5 (4)>
    : │  EVENT: module¦load¦wait
    : └1╴... done.
 59 EVENT: module¦load¦wait
 59 END: module¦load¦wait
 0 add ‹Load ⌁.load¦onewire›
+70 EVENT: module¦load¦onewire
 NEW: <WorkSequence:6 (4)>
    : │  EVENT: module¦load¦onewire
    : └1╴... done.
 70 EVENT: module¦load¦onewire
 70 END: module¦load¦onewire
 0 add ‹Load ⌁.load¦on_event›
+81 EVENT: module¦load¦on_event
 NEW: <WorkSequence:7 (4)>
    : │  EVENT: module¦load¦on_event
    : └1╴... done.
 81 EVENT: module¦load¦on_event
 81 END: module¦load¦on_event
 0 add ‹Load ⌁.load¦errors›
+92 EVENT: module¦load¦errors
 NEW: <WorkSequence:8 (4)>
    : │  EVENT: module¦load¦errors
    : └1╴... done.
@@ -56,7 +64,8 @@ NEW: <WorkSequence:8 (4)>
 0 add ‹TriggerHandler ⌁.trigger¦thermo¦$X›
 0 add ‹WaitCancel ⌁.del¦wait¦yawn›
 0 NewHandler 1
-NEW: <WorkSequence:9 (4)>
+NEW: <WorkSequence:44 (5)>
+   : │  EVENT: onewire¦scanned¦A¦0¦16¦16
    : ├1╴on onewire scanned A * * * ‹OnEventHandler›
    : │  name: scanned
    : │  prio: 51
@@ -75,9 +84,11 @@ RUN: on onewire scanned A * * * ‹OnEventHandler›
    : step: del wait yawn ‹WaitCancel›
  at: <WorkSequence:44 (5)> (step 1)
  ev: EVENT: onewire¦scanned¦A¦0¦16¦16
+368 EVENT: thermo¦DATA
 NEW: <WorkSequence:45 (4)>
    : │  EVENT: thermo¦DATA
    : └1╴... done.
+371 EVENT: wait¦cancel¦×××¦yawn
 NEW: <WorkSequence:46 (4)>
    : │  EVENT: wait¦cancel¦×××¦yawn
    : └1╴... done.
@@ -93,11 +104,13 @@ ERROR: Traceback (most recent call last):
      : Failure: homevent.worker.HaltSequence: ‹Waiter ('yawn',) 6›
 390 END: HaltSequence
 0 Drop OWFS bus A
+408 EVENT: wait¦start¦×××¦_wait¦2
 NEW: <WorkSequence:48 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦2
    : └1╴... done.
 408 EVENT: wait¦start¦×××¦_wait¦2
 408 END: wait¦start¦×××¦_wait¦2
+415 EVENT: wait¦done¦×××¦_wait¦2
 NEW: <WorkSequence:49 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦2
    : └1╴... done.

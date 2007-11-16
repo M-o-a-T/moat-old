@@ -1,3 +1,4 @@
+1 EVENT: startup
 NEW: <WorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
@@ -23,16 +24,19 @@ on_event 		This module registers the "on EVENT:" handler.
 0 add ‹Block ⌁.block›
 0 add ‹WaitHandler ('wait', 'for') 2›
 0 NewHandler 1
+25 EVENT: wait¦start¦×××¦_wait¦2
 NEW: <WorkSequence:2 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦2
    : └1╴... done.
 25 EVENT: wait¦start¦×××¦_wait¦2
 25 END: wait¦start¦×××¦_wait¦2
+32 EVENT: wait¦done¦×××¦_wait¦2
 NEW: <WorkSequence:3 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦2
    : └1╴... done.
 32 EVENT: wait¦done¦×××¦_wait¦2
 32 END: wait¦done¦×××¦_wait¦2
+41 EVENT: foo
 NEW: <WorkSequence:4 (5)>
    : │  EVENT: foo
    : ├1╴on foo ‹OnEventHandler›
@@ -40,6 +44,7 @@ NEW: <WorkSequence:4 (5)>
    : │  step: block ‹Block›
    : │      : step: wait for 0.3 ‹WaitHandler›
    : └2╴... done.
+45 EVENT: wait¦start¦×××¦_wait¦3
 NEW: <WorkSequence:5 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦3
    : └1╴... done.
@@ -50,6 +55,7 @@ RUN: on foo ‹OnEventHandler›
    :     : step: wait for 0.3 ‹WaitHandler›
  at: <WorkSequence:4 (5)> (step 1)
  ev: EVENT: foo
+51 EVENT: wait¦start¦×××¦foo¦waiter
 NEW: <WorkSequence:6 (4)>
    : │  EVENT: wait¦start¦×××¦foo¦waiter
    : └1╴... done.
@@ -57,6 +63,7 @@ NEW: <WorkSequence:6 (4)>
 45 END: wait¦start¦×××¦_wait¦3
 51 EVENT: wait¦start¦×××¦foo¦waiter
 51 END: wait¦start¦×××¦foo¦waiter
+63 EVENT: wait¦done¦×××¦_wait¦3
 NEW: <WorkSequence:7 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦3
    : └1╴... done.
@@ -71,17 +78,20 @@ NEW: <WorkSequence:7 (4)>
 │ │step: block ‹Block›
 │ ╵    : step: wait for 0.3 ‹WaitHandler›
 └2╴... done.
+76 EVENT: wait¦start¦×××¦_wait¦4
 NEW: <WorkSequence:8 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦4
    : └1╴... done.
 76 EVENT: wait¦start¦×××¦_wait¦4
 76 END: wait¦start¦×××¦_wait¦4
+83 EVENT: wait¦done¦×××¦foo¦waiter
 NEW: <WorkSequence:9 (4)>
    : │  EVENT: wait¦done¦×××¦foo¦waiter
    : └1╴... done.
 83 EVENT: wait¦done¦×××¦foo¦waiter
 83 END: wait¦done¦×××¦foo¦waiter
 41 END: foo
+93 EVENT: wait¦done¦×××¦_wait¦4
 NEW: <WorkSequence:10 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦4
    : └1╴... done.

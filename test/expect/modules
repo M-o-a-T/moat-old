@@ -1,20 +1,24 @@
+1 EVENT: startup
 NEW: <WorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
 1 EVENT: startup
 1 END: startup
 1 Loading!
+11 EVENT: module¦load¦example
 NEW: <WorkSequence:2 (4)>
    : │  EVENT: module¦load¦example
    : └1╴... done.
 11 EVENT: module¦load¦example
 11 END: module¦load¦example
+20 EVENT: module¦unload¦example
 NEW: <WorkSequence:3 (4)>
    : │  EVENT: module¦unload¦example
    : └1╴... done.
 20 EVENT: module¦unload¦example
 20 END: module¦unload¦example
 1 Unloading!
+2 EVENT: shutdown
 NEW: <WorkSequence:4 (5)>
    : │  EVENT: shutdown
    : └1╴... done.

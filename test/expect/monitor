@@ -1,3 +1,4 @@
+1 EVENT: startup
 NEW: <WorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
@@ -9,11 +10,13 @@ NEW: <WorkSequence:1 (4)>
 0 add ‹LogHandler ⌁.log¦TRACE¦First¦value¦is¦$VAL›
 0 add ‹LogHandler ⌁.log¦TRACE¦Go¦from¦$OLDVAL¦to¦$VAL›
 0 NewHandler 1
+24 EVENT: wait¦start¦×××¦_wait¦1
 NEW: <WorkSequence:2 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦1
    : └1╴... done.
 0 filter [42] on ('foo', 'bar')
 0 End run ('foo', 'bar')
+26 EVENT: monitor¦value¦42.0¦foo¦bar
 NEW: <WorkSequence:3 (5)>
    : │  EVENT: monitor¦value¦42.0¦foo¦bar
    : ├1╴on monitor value *VAL foo bar ‹OnEventHandler›
@@ -37,6 +40,7 @@ RUN: on monitor value *VAL foo bar ‹OnEventHandler›
 26 END: monitor¦value¦42.0¦foo¦bar
 0 filter [40] on ('foo', 'bar')
 0 End run ('foo', 'bar')
+42 EVENT: monitor¦value¦40.0¦foo¦bar
 NEW: <WorkSequence:4 (5)>
    : │  EVENT: monitor¦value¦40.0¦foo¦bar
    : ├1╴on monitor value *VAL foo bar ‹OnEventHandler›
@@ -58,6 +62,7 @@ RUN: on monitor value *VAL foo bar ‹OnEventHandler›
 42 END: monitor¦value¦40.0¦foo¦bar
 0 filter [42] on ('foo', 'bar')
 0 End run ('foo', 'bar')
+53 EVENT: monitor¦value¦42.0¦foo¦bar
 NEW: <WorkSequence:5 (5)>
    : │  EVENT: monitor¦value¦42.0¦foo¦bar
    : ├1╴on monitor value *VAL foo bar ‹OnEventHandler›
@@ -77,6 +82,7 @@ RUN: on monitor value *VAL foo bar ‹OnEventHandler›
  ev: EVENT: monitor¦value¦42.0¦foo¦bar
 0 Go from 40.0 to 42.0
 53 END: monitor¦value¦42.0¦foo¦bar
+64 EVENT: wait¦done¦×××¦_wait¦1
 NEW: <WorkSequence:6 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦1
    : └1╴... done.
@@ -94,6 +100,7 @@ Up:  Yes
 Steps:  1 / 1 / None
 Data:  42
 .
+84 EVENT: wait¦start¦×××¦_wait¦2
 NEW: <WorkSequence:7 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦2
    : └1╴... done.
@@ -101,6 +108,7 @@ NEW: <WorkSequence:7 (4)>
 84 END: wait¦start¦×××¦_wait¦2
 0 filter [41] on ('foo', 'bar')
 0 End run ('foo', 'bar')
+91 EVENT: monitor¦value¦41.0¦foo¦bar
 NEW: <WorkSequence:8 (5)>
    : │  EVENT: monitor¦value¦41.0¦foo¦bar
    : ├1╴on monitor value *VAL foo bar ‹OnEventHandler›
@@ -122,6 +130,7 @@ RUN: on monitor value *VAL foo bar ‹OnEventHandler›
 91 END: monitor¦value¦41.0¦foo¦bar
 0 filter [40] on ('foo', 'bar')
 0 End run ('foo', 'bar')
+102 EVENT: monitor¦value¦40.0¦foo¦bar
 NEW: <WorkSequence:9 (5)>
    : │  EVENT: monitor¦value¦40.0¦foo¦bar
    : ├1╴on monitor value *VAL foo bar ‹OnEventHandler›
@@ -141,6 +150,7 @@ RUN: on monitor value *VAL foo bar ‹OnEventHandler›
  ev: EVENT: monitor¦value¦40.0¦foo¦bar
 0 Go from 41.0 to 40.0
 102 END: monitor¦value¦40.0¦foo¦bar
+113 EVENT: wait¦done¦×××¦_wait¦2
 NEW: <WorkSequence:10 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦2
    : └1╴... done.
@@ -160,9 +170,11 @@ Value:  None
 Up:  Yes
 Steps:  0 / 2 / None
 .
+143 EVENT: wait¦start¦×××¦_wait¦5
 NEW: <WorkSequence:11 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦5
    : └1╴... done.
+145 EVENT: monitor¦checking¦baz¦zaz
 NEW: <WorkSequence:12 (5)>
    : │  EVENT: monitor¦checking¦baz¦zaz
    : ├1╴on monitor checking baz zaz ‹OnEventHandler›
@@ -191,11 +203,13 @@ RUN: on monitor checking baz zaz ‹OnEventHandler›
 145 END: monitor¦checking¦baz¦zaz
 0 filter [10] on ('baz', 'zaz')
 0 More data [10] for ‹baz zaz›
+160 EVENT: wait¦start¦×××¦_wait¦3
 NEW: <WorkSequence:13 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦3
    : └1╴... done.
 160 EVENT: wait¦start¦×××¦_wait¦3
 160 END: wait¦start¦×××¦_wait¦3
+167 EVENT: wait¦done¦×××¦_wait¦5
 NEW: <WorkSequence:14 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦5
    : └1╴... done.
@@ -205,11 +219,13 @@ NEW: <WorkSequence:14 (4)>
 0 add ‹LogHandler ⌁.log¦DEBUG¦Yes›
 0 add ‹LogHandler ⌁.log¦DEBUG¦No1›
 1 Yes
+183 EVENT: wait¦start¦×××¦_wait¦6
 NEW: <WorkSequence:15 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦6
    : └1╴... done.
 183 EVENT: wait¦start¦×××¦_wait¦6
 183 END: wait¦start¦×××¦_wait¦6
+190 EVENT: wait¦done¦×××¦_wait¦3
 NEW: <WorkSequence:16 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦3
    : └1╴... done.
@@ -217,11 +233,13 @@ NEW: <WorkSequence:16 (4)>
 190 END: wait¦done¦×××¦_wait¦3
 0 filter [10, 13] on ('baz', 'zaz')
 0 More data [10, 13] for ‹baz zaz›
+199 EVENT: wait¦start¦×××¦_wait¦4
 NEW: <WorkSequence:17 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦4
    : └1╴... done.
 199 EVENT: wait¦start¦×××¦_wait¦4
 199 END: wait¦start¦×××¦_wait¦4
+206 EVENT: wait¦done¦×××¦_wait¦4
 NEW: <WorkSequence:18 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦4
    : └1╴... done.
@@ -229,16 +247,19 @@ NEW: <WorkSequence:18 (4)>
 206 END: wait¦done¦×××¦_wait¦4
 0 filter [10, 13, 14] on ('baz', 'zaz')
 0 End run ('baz', 'zaz')
+214 EVENT: monitor¦checked¦baz¦zaz
 NEW: <WorkSequence:19 (4)>
    : │  EVENT: monitor¦checked¦baz¦zaz
    : └1╴... done.
 214 EVENT: monitor¦checked¦baz¦zaz
 214 END: monitor¦checked¦baz¦zaz
+221 EVENT: monitor¦value¦13.5¦baz¦zaz
 NEW: <WorkSequence:20 (4)>
    : │  EVENT: monitor¦value¦13.5¦baz¦zaz
    : └1╴... done.
 221 EVENT: monitor¦value¦13.5¦baz¦zaz
 221 END: monitor¦value¦13.5¦baz¦zaz
+228 EVENT: wait¦done¦×××¦_wait¦6
 NEW: <WorkSequence:21 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦6
    : └1╴... done.

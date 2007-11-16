@@ -1,28 +1,34 @@
+1 EVENT: startup
 NEW: <WorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
 1 EVENT: startup
 1 END: startup
+11 EVENT: foo
 NEW: <WorkSequence:2 (4)>
    : │  EVENT: foo
    : └1╴... done.
 11 EVENT: foo
 11 END: foo
+20 EVENT: wait¦start¦0.5¦_wait¦1
 NEW: <WorkSequence:3 (4)>
    : │  EVENT: wait¦start¦0.5¦_wait¦1
    : └1╴... done.
 20 EVENT: wait¦start¦0.5¦_wait¦1
 20 END: wait¦start¦0.5¦_wait¦1
+27 EVENT: wait¦done¦0.5¦_wait¦1
 NEW: <WorkSequence:4 (4)>
    : │  EVENT: wait¦done¦0.5¦_wait¦1
    : └1╴... done.
 27 EVENT: wait¦done¦0.5¦_wait¦1
 27 END: wait¦done¦0.5¦_wait¦1
+36 EVENT: bar
 NEW: <WorkSequence:5 (4)>
    : │  EVENT: bar
    : └1╴... done.
 36 EVENT: bar
 36 END: bar
+2 EVENT: shutdown
 NEW: <WorkSequence:6 (6)>
    : │  EVENT: shutdown
    : └1╴... done.

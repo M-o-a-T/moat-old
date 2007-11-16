@@ -1,3 +1,4 @@
+1 EVENT: startup
 NEW: <WorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
@@ -137,6 +138,7 @@ ERROR: Traceback (most recent call last):
 0 Triggered:
 0 RaisedError: Foo Bar
 1 Yes P Foo Bar
+2 EVENT: shutdown
 NEW: <WorkSequence:4 (5)>
    : │  EVENT: shutdown
    : └1╴... done.

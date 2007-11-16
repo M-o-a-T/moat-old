@@ -57,7 +57,7 @@ class Logger(object):
 			self._log(level," ".join(str(x) for x in a))
 			self.flush()
 
-	def log_event(self, event, level=DEBUG):
+	def log_event(self, event, level):
 		if level >= self.level:
 			if hasattr(event,"report"):
 				for r in event.report(99):
@@ -104,9 +104,10 @@ class LogWorker(ExcWorker):
 			drop the logger and process it.
 			"""
 		exc = []
+		level = k.get("level",TRACE)
 		for l in loggers[:]:
 			try:
-				l.log_event(event)
+				l.log_event(event,level=level)
 			except Exception,e:
 				print >>sys.stderr,"LOGGER CRASH 1"
 				print_exc(file=sys.stderr)
@@ -223,7 +224,7 @@ class log_created(Event):
 	def __init__(self,seq):
 		super(log_created,self).__init__("NEW",str(seq.iid))
 		self.seq = seq
-		log_event(self)
+		log_event(self, level=TRACE)
 	def report(self, verbose=False):
 		if verbose:
 			p = "NEW: "

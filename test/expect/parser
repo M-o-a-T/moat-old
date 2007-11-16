@@ -1,3 +1,4 @@
+1 EVENT: startup
 NEW: <WorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
@@ -54,6 +55,7 @@ Known words:
 foiled : not clingfilm
 foiled : not clingfilm
 ... moving up
+2 EVENT: shutdown
 NEW: <WorkSequence:2 (5)>
    : │  EVENT: shutdown
    : └1╴... done.

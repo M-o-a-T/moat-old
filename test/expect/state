@@ -1,3 +1,4 @@
+1 EVENT: startup
 NEW: <WorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
@@ -8,12 +9,14 @@ NEW: <WorkSequence:1 (4)>
 0 add ‹LogHandler ⌁.log¦TRACE¦Yes!›
 0 Yes!
 0 Set to ONE
+20 EVENT: state¦-¦one¦foo¦bar
 NEW: <WorkSequence:2 (4)>
    : │  EVENT: state¦-¦one¦foo¦bar
    : └1╴... done.
 20 EVENT: state¦-¦one¦foo¦bar
 20 END: state¦-¦one¦foo¦bar
 0 Set to TWO
+31 EVENT: state¦one¦two¦foo¦bar
 NEW: <WorkSequence:3 (4)>
    : │  EVENT: state¦one¦two¦foo¦bar
    : └1╴... done.
@@ -25,12 +28,14 @@ NEW: <WorkSequence:3 (4)>
 0 NewHandler 1
 0 add ‹LogHandler ⌁.log¦TRACE¦Set¦to¦THREE›
 0 add ‹SetStateHandler ⌁.set¦state¦three¦foo¦bar›
+47 EVENT: wait¦start¦0.2¦_wait¦1
 NEW: <WorkSequence:4 (4)>
-   : │  EVENT: wait¦start¦0.1¦_wait¦1
+   : │  EVENT: wait¦start¦0.2¦_wait¦1
    : └1╴... done.
-47 EVENT: wait¦start¦0.1¦_wait¦1
-47 END: wait¦start¦0.1¦_wait¦1
+47 EVENT: wait¦start¦0.2¦_wait¦1
+47 END: wait¦start¦0.2¦_wait¦1
 0 Set to THREE
+56 EVENT: state¦two¦three¦foo¦bar
 NEW: <WorkSequence:5 (5)>
    : │  EVENT: state¦two¦three¦foo¦bar
    : ├1╴on state * three foo bar ‹OnEventHandler›
@@ -79,11 +84,12 @@ ERROR: Traceback (most recent call last):
      : └2╴... done.
 67 END: StateChangeError
 56 END: state¦two¦three¦foo¦bar
+72 EVENT: wait¦done¦0.2¦_wait¦1
 NEW: <WorkSequence:7 (4)>
-   : │  EVENT: wait¦done¦0.1¦_wait¦1
+   : │  EVENT: wait¦done¦0.2¦_wait¦1
    : └1╴... done.
-72 EVENT: wait¦done¦0.1¦_wait¦1
-72 END: wait¦done¦0.1¦_wait¦1
+72 EVENT: wait¦done¦0.2¦_wait¦1
+72 END: wait¦done¦0.2¦_wait¦1
 foo bar = three
 .
 Name: foo bar
@@ -105,6 +111,7 @@ Last Value: two
 0 add ‹VarStateHandler ⌁.var¦state¦x¦foo¦bar›
 0 add ‹LogHandler ⌁.log¦TRACE¦We¦got¦$x›
 0 NewHandler 2
+110 EVENT: whatever
 NEW: <WorkSequence:8 (5)>
    : │  EVENT: whatever
    : ├1╴on whatever ‹OnEventHandler›
@@ -121,12 +128,14 @@ RUN: on whatever ‹OnEventHandler›
  ev: EVENT: whatever
 0 We got three
 110 END: whatever
+122 EVENT: state¦three¦-¦foo¦bar
 NEW: <WorkSequence:9 (4)>
    : │  EVENT: state¦three¦-¦foo¦bar
    : └1╴... done.
 122 EVENT: state¦three¦-¦foo¦bar
 122 END: state¦three¦-¦foo¦bar
 .
+2 EVENT: shutdown
 NEW: <WorkSequence:10 (6)>
    : │  EVENT: shutdown
    : └1╴... done.

@@ -1,3 +1,5 @@
+1 EVENT: startup
+.
 NEW: <WorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
@@ -5,6 +7,8 @@ NEW: <WorkSequence:1 (4)>
 1 EVENT: startup
 .
 1 END: startup
+.
+3 EVENT: say¦hello
 .
 NEW: <WorkSequence:2 (5)>
    : │  EVENT: say¦hello
@@ -20,6 +24,8 @@ RUN: SayWorker: TellMe
 0 The 'TellMe' worker is saying: hello
 .
 3 END: say¦hello
+.
+4 EVENT: say more¦greeting
 .
 NEW: <WorkSequence:3 (5)>
    : │  EVENT: say more¦greeting
@@ -53,6 +59,8 @@ RUN: SayWorker: TellTwo
 0 The 'TellTwo' worker is saying: greeting
 .
 4 END: say more¦greeting
+.
+2 EVENT: shutdown
 .
 NEW: <WorkSequence:5 (5)>
    : │  EVENT: shutdown

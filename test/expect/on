@@ -1,3 +1,4 @@
+1 EVENT: startup
 NEW: <WorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
@@ -24,6 +25,7 @@ NEW: <WorkSequence:1 (4)>
 3 : foo
 Name: not executed
 Doc: Is not executed because of the former 'skip next' (until that's gone)
+44 EVENT: bar¦foo
 NEW: <WorkSequence:2 (5)>
    : │  EVENT: bar¦foo
    : ├1╴on bar * ‹OnEventHandler›
@@ -38,6 +40,7 @@ RUN: on bar * ‹OnEventHandler›
    :     : step: sync trigger $1 ‹SyncTriggerHandler›
  at: <WorkSequence:2 (5)> (step 1)
  ev: EVENT: bar¦foo
+50 EVENT: foo
 NEW: <WorkSequence:3 (5)>
    : │  EVENT: foo
    : ├1╴on foo ‹OnEventHandler›
@@ -55,6 +58,7 @@ RUN: on foo ‹OnEventHandler›
 0 NOW: do nothing
 50 END: foo
 44 END: bar¦foo
+66 EVENT: bar¦foo
 NEW: <WorkSequence:4 (5)>
    : │  EVENT: bar¦foo
    : ├1╴on bar * ‹OnEventHandler›
@@ -69,6 +73,7 @@ RUN: on bar * ‹OnEventHandler›
    :     : step: sync trigger $1 ‹SyncTriggerHandler›
  at: <WorkSequence:4 (5)> (step 1)
  ev: EVENT: bar¦foo
+72 EVENT: foo
 NEW: <WorkSequence:5 (5)>
    : │  EVENT: foo
    : ├1╴on foo ‹OnEventHandler›
@@ -89,6 +94,7 @@ RUN: on foo ‹OnEventHandler›
 3  : foo ‹not executed›
 4  : bar¦*
 .
+2 EVENT: shutdown
 NEW: <WorkSequence:6 (5)>
    : │  EVENT: shutdown
    : └1╴... done.
