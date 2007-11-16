@@ -110,6 +110,8 @@ if "HOMEVENT_TEST" in os.environ:
 			nd = 0.1+2*delta
 			d = dt.datetime.now()
 			delta = nd - ((nd*1000000+d.microsecond)%100000)/1000000
+		if delta < 0:
+			delta = 0
 		return realLater(delta,proc,*a,**k)
 	reactor.callLater = later
 
