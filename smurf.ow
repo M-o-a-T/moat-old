@@ -15,6 +15,13 @@ monitor onewire "394309000000" volt.D:
 	scale .60606060 0
 	stopped
 
+if exists monitor rain sensor: del monitor rain sensor
+monitor onewire "82EA09000000" counters.A:
+	name rain sensor
+	delay for 10
+	delta
+	stopped
+
 if exists on light sensor present: del on light sensor present
 on onewire up * "394309000000":
 	name light sensor present
@@ -24,13 +31,30 @@ on onewire down * "394309000000":
 	name light sensor gone
 	stop monitor light sensor
 
+if exists on rain sensor present: del on rain sensor present
+on onewire up * "82EA09000000":
+	name rain sensor present
+	start monitor rain sensor
+if exists on rain sensor gone: del on rain sensor gone
+on onewire down * "82EA09000000":
+	name rain sensor gone
+	stop monitor rain sensor
+
 if exists rrd light: del rrd light
 rrd "/tmp/licht.vorne.rrd" licht light
+
+if exists rrd rain: del rrd rain
+rrd "/tmp/regen.garage.rrd" regen rain
 
 if exists on light value: del on light value
 on monitor value *val light sensor:
 	name light value
 	set rrd $val light
+
+if exists on rain value: del on rain value
+on monitor value *val rain sensor:
+	name rain value
+	set rrd $val rain
 
 connect onewire A "smurf.noris.de" 4304
 
