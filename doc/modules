@@ -962,6 +962,36 @@ The command "exit" will terminate your ssh connection.
 
 Using a HomEvenT command on the ssh command line is not yet supported.
 
+-------------------
+auth ssh USER "KEY"
+-------------------
+
+Allow that user to log in with that public key.
+
+-----------------
+del auth ssh USER
+-----------------
+
+Prevent that user from logging in.
+
+---------------------
+ssh directory "/path"
+---------------------
+
+SSH needs a persistent host key. This directory will be used to
+store (or retrieve) the key.
+
+SSH will not be operational until after this command has completed.
+
+---------------
+listen ssh PORT
+---------------
+
+Accept SSH connections on this port. The standard SSH port is 22, but
+usually your normal system SSH occupies that port. Besides, port numbers
+below 1024 can only be allocated by root. You do not want to run
+HomEvenT with root privileges!
+
 =====
 state
 =====

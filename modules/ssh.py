@@ -205,17 +205,17 @@ class SSHlistauth(Statement):
 
 
 class SSHnoauth(Statement):
-	name = ("no","auth","ssh")
+	name = ("del","auth","ssh")
 	doc = "forbid authorize a user to connect"
 	long_doc=u"""\
-Usage: no auth ssh ‹username›
+Usage: del auth ssh ‹username›
 This command blocks the named user from accessing the server.
 Existing connections are not affected.
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		if len(event) != 1:
-			raise SyntaxError(u'Usage: no auth ssh ‹username›')
+			raise SyntaxError(u'Usage: del auth ssh ‹username›')
 		del authorizedKeys[event[0]]
 
 
