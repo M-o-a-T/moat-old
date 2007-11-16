@@ -926,6 +926,7 @@ You need to load it this way:
 		ssh directory "/some/persistent/path"
 		listen ssh 50022
 		auth ssh NAME "PUBLIC_KEY"
+	.
 
 The port number is, of course, your choice.
 
@@ -935,25 +936,31 @@ creating the host key may take some time. The directory in question
 will then contain a private host key. You need to protect that file so
 that nobody can impersonate your HomEvenT server.
 
-After that, "ssh -l NAME -p 50022 localhost" will connect you to the 
+After that, "ssh -l NAME -p 50022 localhost" will connect you to a
 HomEvenT command line. Basic line editing and (non-persistent) history
 is provided.
 
-To authorize, the SSH connection does not allow passwords. Passwords
-need to be stored someplace secure, and HomEvenT does not aspire to be
-able to do that. Instead, you need to create a public key if you don't
-already have one:
+The SSH connection does not accept passwords for authorization:
+passwords need to be stored someplace secure, and HomEvenT does not
+aspire to be able to do that. Instead, you need to create a public key
+(assuming that you don't already have one):
 
 	ssh-keygen
 
 The resulting public file (typically named with a ".pub" extension)
 contains a number of words (separated by spaces). One is very long and
-typically starts aith a couple of "A" characters. Use that as the
+typically starts with a couple of "A" characters. Use that as the
 PUBLIC_KEY, above.
 
-You can add multiple users. You can of course safely re-use your
+You can add multiple users. You can of course safely use your
 existing public key if you already have one.
 
+There's no provision for limiting access: anybody who can log in to
+the server can do everything.
+
+The command "exit" will terminate your ssh connection.
+
+Using a HomEvenT command on the ssh command line is not yet supported.
 
 =====
 state
