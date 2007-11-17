@@ -1,4 +1,4 @@
-# OneWire stuff, hopefully somewhat working :-/
+# Smurf's home automation stuff. Edit with caution.
 
 if not exists module onewire: load onewire
 if not exists module monitor: load monitor
