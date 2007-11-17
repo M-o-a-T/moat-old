@@ -218,24 +218,26 @@ class OWFSmon(Monitor):
 			def switcher(val):
 				if not self.switched:
 					if val > self.high:
-						log(DEBUG,"switch high",self.switch,val)
+						log(DEBUG,"switch high",self.switch,val,self.to_high)
 						val = dev.set(self.switch,self.to_high)
-						val.addCallback(lambda _: dev.get(self.switch))
+						val.addCallback(lambda _: dev.get(self.attribute))
 						val.addCallback(lambda _: _ + self.high - self.low)
 						def did_high(_):
+							log(DEBUG,"switch add",self.switch,_-self.high+self.low,self.high,self.low)
 							self.switched = True
 							return _
 						val.addCallback(did_high)
 				else:
 					if val < self.low:
-						log(DEBUG,"switch low",self.switch,val)
+						log(DEBUG,"switch low",self.switch,val,self.to_low)
 						val = dev.set(self.switch,self.to_low)
-						val.addCallback(lambda _: dev.get(self.switch))
+						val.addCallback(lambda _: dev.get(self.attribute))
 						def did_low(_):
 							self.switched = False
 							return _
 						val.addCallback(did_low)
 					else:
+						log(DEBUG,"switch add",self.switch,val,self.high,self.low)
 						val += self.high - self.low
 				return val
 			d.addCallback(switcher)
