@@ -1,7 +1,10 @@
 # HomEvenT default startup file
+load dir "/usr/share/homevent/modules"
 
 if not exists module logging: load logging
 
 log ERROR You need to edit the daemon configuration file
+log ERROR I will die now
+log ERROR Please try again ":-)"
 shutdown
 
