@@ -8,6 +8,7 @@ include /usr/share/cdbs/1/class/python-distutils.mk
 cleanbuilddir::
 	rm -f $(CURDIR)/config.*.cdbs-orig
 
-#makebuilddir::
-#	/usr/bin/docbook-to-man debian/gnome-sudoku.sgml > debian/gnome-sudoku.1
 
+install/homevent::
+	mkdir -p debian/homevent/usr/sbin
+	mv debian/homevent/usr/bin/daemon.py debian/homevent/usr/sbin/homevent
