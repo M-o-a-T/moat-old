@@ -15,6 +15,7 @@ DESC=homevent
 
 DAEMON_OPTS=""
 DAEMON_CFG="/etc/homevent/daemon.he"
+export PYTHONPATH=/etc/homevent:/usr/share/homevent
 
 test -x $DAEMON || exit 0
 

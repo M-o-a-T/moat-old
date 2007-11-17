@@ -35,6 +35,7 @@ setup(
     license = 'GPL',
 
 	data_files=[
+		('/usr/share/homevent',['sitecustomize.py']),
 		('/usr/share/homevent/modules',
 			[os.path.join('modules',f) for f in os.listdir('modules')
 				if f.endswith('.py') and not f.startswith('.')]),
