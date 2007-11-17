@@ -1,0 +1,21 @@
+====
+TODO
+====
+
+Dump config
+===========
+
+Each module should be able to print some text that will, when read back
+in, re-create the system state as accurately as possible.
+
+syslog
+======
+
+Instead of printing to stdout/stderr, log.
+
+LIRC
+====
+
+Recognize infrared commands (and send them).
+
+
