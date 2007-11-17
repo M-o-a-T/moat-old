@@ -97,6 +97,8 @@ def process_failure(e=None):
 		"""
 	if e is None:
 		e = failure.Failure()
+	from homevent.logging import log_event,ERROR
+	log_event(e,level=ERROR)
 	d = collect_failure(e).process()
 #	def rv(_):
 #		print "RVB",_
