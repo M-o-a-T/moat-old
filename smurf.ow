@@ -14,6 +14,7 @@ if not exists module state: load state
 if not exists module trigger: load trigger
 if not exists module wait: load wait
 if not exists module loop: load loop
+if not exists module net: load net
 
 
 async:
@@ -98,4 +99,10 @@ on onewire down * "A30032000000":
 	del state motion sensor
 	try: del wait motion sensor
 
+if exists on connect fhz: del on connect fhz
+on net connect fhz:
+	name connect fhz
+	send net fhz inform on
+
 connect onewire A "smurf.noris.de" 4304
+connect net fhz "smurf.noris.de" 7072

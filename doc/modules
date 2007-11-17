@@ -602,6 +602,55 @@ set monitor VALUE NAME
 
 Feed a raw measurement to this monitor.
 
+===
+net
+===
+
+This module implements a simple line-oriented TCP connection.
+
+--------------------------------
+connect net ‹name› ‹host› ‹port›
+--------------------------------
+
+Establish a connection. If broken, the link will automatically be
+restored if possible.
+
+	connect net fhz server.local 7072
+
+---------------------
+disconnect net ‹name›
+---------------------
+
+Drop the named connection.
+
+--------
+list net
+--------
+
+Show all known connections. You can add a connection name for details on
+that connection.
+
+---------------------------
+send net ‹name› ‹whatever…›
+---------------------------
+
+Send the text after the connection name to the server, delimited with a
+line feed.
+
+-----
+Tests
+-----
+
+if exists net ‹name›
+--------------------
+
+Check that a connection with this name has been configured.
+
+if connected net ‹name›
+-----------------------
+
+Check that the connection with this name is up.
+
 ====
 path
 ====

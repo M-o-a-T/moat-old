@@ -1,0 +1,4 @@
+#!/bin/sh
+
+( echo A; sleep 2; echo B ) | nc -l -p 50333 > /tmp/nettest &
+

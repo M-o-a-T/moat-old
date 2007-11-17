@@ -66,39 +66,29 @@ class NETreceiver(object,LineReceiver, _PauseableMixin):
 
 	delimiter = "\n"
 
-	def __init__(self,name,*a,**k):
-		super(NETreceiver,self).__init__(*a,**k)
-		self.name = name
-
 	def lineReceived(self, line):
 		"""Override this.
 		"""
 		line = line.strip().split()
-		process_event(Event(Context(),"net", self.name, *line), return_errors=True).addErrback(process_failure)
+		process_event(Event(Context(),"net", self.factory.name, *line), return_errors=True).addErrback(process_failure)
+
+	def connectionMade(self):
+		super(NETreceiver,self).connectionMade()
+		self.factory.haveConnection(self)
 
 	def loseConnection(self):
 		if self.transport:
 			self.transport.loseConnection()
-		self.retry()
-
-	def retry(self,msg=None, err=None):
-		if msg is None:
-			msg = self.msg
-			self.msg = None
-		if not msg:
-			return
-		if msg.may_retry():
-			deferToLater(reactor.callLater,0.5*msg.tries,self.factory.queue,msg)
-		else:
-			msg.error(err)
-
+	
+	def write(self,val):
+		self.transport.write(val+self.delimiter)
 
 
 class NETfactory(object,ReconnectingClientFactory):
 
-	protocol = NETqueue
+	protocol = NETreceiver
 
-	def __init__(self, host="localhost", port=4304, persist = False, name=None, *a,**k):
+	def __init__(self, host="localhost", port=4304, name=None, *a,**k):
 		if name is None:
 			name = "%s:%s" % (host,port)
 
@@ -109,18 +99,6 @@ class NETfactory(object,ReconnectingClientFactory):
 		self.up_event = False
 		self.trace_retry = NETLOG
 
-	def clientConnectionFailed(self, connector, reason):
-		self.conn = None
-		log(WARN,reason)
-		super(NETfactory,self).clientConnectionFailed(connector, reason)
-		process_event(Event(Context(),"net","broken", self.name)).addErrback(process_failure)
-
-	def clientConnectionLost(self, connector, reason):
-		self.conn = None
-		log(INFO,reason)
-
-		connector.connect()
-
 	def haveConnection(self,conn):
 		self.conn = conn
 
@@ -128,24 +106,40 @@ class NETfactory(object,ReconnectingClientFactory):
 			self.up_event = True
 			process_event(Event(Context(),"net","connect",self.name)).addErrback(process_failure)
 
-	def _drop(self):
+	def drop(self):
+		"""Kill my connection"""
 		if self.conn:
 			self.conn.loseConnection()
-
-	def drop(self):
-		"""Kill my connection and forget any devices"""
-		self.stopTrying()
-		self._drop()
+		self.conn = None
 		
+	def clientConnectionFailed(self, connector, reason):
+		self.conn = None
+		log(WARN,reason)
+		super(NETfactory,self).clientConnectionFailed(connector, reason)
+		if self.up_event:
+			self.up_event = False
+			process_event(Event(Context(),"net","disconnect", self.name), return_errors=True).addErrback(process_failure)
+
+	def clientConnectionLost(self, connector, reason):
+		self.conn = None
+		log(INFO,reason)
+		connector.connect()
+
+	def write(self,val):
+		if self.conn:
+			self.conn.write(val)
+		else:
+			raise DisconnectedError(self.name)
+
 
 net_conns = {}
 
-def connect(host="localhost", port=None, name=None, persist=False):
+def connect(host="localhost", port=None, name=None):
 	assert port is not None, "Need to provide a port number"
 	assert name is not None, "Need to provide a name"
 	assert (host,port) not in net_conns, "already known host/port tuple"
 	assert name not in net_conns, "already known name"
-	f = NETfactory(host=host, port=port, name=name, persist=persist)
+	f = NETfactory(host=host, port=port, name=name)
 	net_conns[(host,port)] = f
 	net_conns[name] = f
 	reactor.connectTCP(host, port, f)
@@ -157,30 +151,15 @@ def disconnect(f):
 	f.drop()
 
 
-def setup_receiver(name):
-	def recv(*a,**k):
-		return NETreceiver(name,*a,**k)
-	return recv
-
-class NETfactory(object,protocol.ReconnectingClientFactory):
-
-	def __init__(self,name):
-    	self.protocol = setup_receiver(name)
-		super(NETfactory,self).__init__()
-
-
-    def clientConnectionFailed(self, _, reason):
-		log(INFO,reason)
-		super(NETfactory,self).clientConnectionFailed(_, reason)
-
-    def clientConnectionLost(self, _, reason):
-		log(WARN,reason)
-		super(NETfactory,self).clientConnectionLost(_, reason)
-
-
 class NETconnect(Statement):
 	name = ("connect","net")
 	doc = "connect to an NET server"
+	long_doc="""\
+connect net NAME [host] port
+- connect (asynchronously) to the TCP server at the remote port;
+	name that connection NAME. Default for host is localhost.
+	The system will emit a connection-ready event.
+"""
 
 	def run(self,ctx,**k):
 		event = self.params(ctx)
@@ -190,16 +169,15 @@ class NETconnect(Statement):
 		if len(event) == 2:
 			host = "localhost"
 		else:
-			host = event[0]
+			host = event[1]
 		port = event[-1]
 
-		f = NETfactory(name)
-		reactor.connectTCP(host, port, f)
+		connect(host,port,name)
 
 
 class NETsend(Statement):
 	name=("send","net")
-	doc="send a line to a NET device"
+	doc="send a line to a TCP connection"
 	long_doc="""\
 send net name text...
 	: The text is sent to the named net connection.
@@ -209,13 +187,13 @@ send net name text...
 		name = event[0]
 		val = " ".join(str(s) for s in tuple(event[1:]))
 		
-		d = net_conns[name].sendMsg(NETMsg.write,"/"+"/".join(str(x) for x in name)+'\0'+str(val)+'\0',0)
+		d = net_conns[name].write(val)
 		return d
 
 
 class NETdisconnect(Statement):
 	name=("disconnect","net")
-	doc="send a line to a NET device"
+	doc="disconnect a TCP connection"
 	long_doc="""\
 disconnect net ‹name›
 	: The named net connection is broken.
@@ -233,49 +211,67 @@ class NETlist(Statement):
 	long_doc="""\
 list net ‹name›?
 	: List all network connections.
-      If a name (or host/port pair) is given, lists details of that
-      connection.
+	If a name (or host/port pair) is given, lists details of that
+	connection.
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		if len(event) == 1
-			conn = net_conns(event[0])
+		if len(event) == 1:
+			conn = net_conns[event[0]]
 		elif len(event) == 2:
-			conn = net_conns((event[0],event[1]))
+			conn = net_conns[(event[0],event[1])]
 		elif len(event):
 			raise SyntaxError("Usage: disconnect net ‹name›")
 		else:
-            for a,b in net_conns.iteritems():
+			for a,b in net_conns.iteritems():
 				if isinstance(a,tuple): continue
-                print >>ctx.out,b.name,b.host,b.port
-            print >>ctx.out,"."
+				print >>ctx.out,b.name,b.host,b.port
+			print >>ctx.out,"."
 			return
 
-		print "Name:",conn.name
-		print "Host:",conn.host
-		print "Port:",conn.port
+		print >>ctx.out,"Name:",conn.name
+		print >>ctx.out,"Host:",conn.host
+		print >>ctx.out,"Port:",conn.port
 		print >>ctx.out,"."
 
 class NETconnected(Check):
-    name=("connected","net")
-    doc="Test if a net server connection exists"
-    def check(self,*args):
-        assert not args,"This test doesn't take arguments"
-        return fh_conn is not None
+	name=("connected","net")
+	doc="Test if a net server connection is up"
+	def check(self,*args):
+		if len(args) == 1:
+			conn = net_conns.get(args[0],None)
+		elif len(args) == 2:
+			conn = net_conns.get(tuple(args),None)
+		else:
+			raise SyntaxError(u"Usage: if connected net ‹name›")
+		if conn is None:
+			return False
+		return conn.up_event
 
+class NETexists(Check):
+	name=("exists","net")
+	doc="Test if a net server connection is configured"
+	def check(self,*args):
+		if len(args) == 1:
+			return args[0] in net_conns
+		elif len(args) == 2:
+			return tuple(args) in net_conns
+		else:
+			raise SyntaxError(u"Usage: if connected net ‹name›")
 
 class NETmodule(Module):
 	"""\
-		This is a sample loadable module.
+		Basic TCP connection. Incoming lines are translated to events.
 		"""
 
-	info = "Basic one-wire access"
+	info = "Basic line-based TCP access"
 
 	def load(self):
 		main_words.register_statement(NETconnect)
 		main_words.register_statement(NETdisconnect)
 		main_words.register_statement(NETsend)
 		main_words.register_statement(NETlist)
+		register_condition(NETexists)
 		register_condition(NETconnected)
 	
 	def unload(self):
@@ -283,6 +279,7 @@ class NETmodule(Module):
 		main_words.unregister_statement(NETdisconnect)
 		main_words.unregister_statement(NETsend)
 		main_words.unregister_statement(NETlist)
+		unregister_condition(NETexists)
 		unregister_condition(NETconnected)
 	
 init = NETmodule

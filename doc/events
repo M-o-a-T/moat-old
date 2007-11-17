@@ -70,6 +70,22 @@ monitor checking NAME
 monitor checked NAME
 	-- The monitored value has been updated successfully.
 
+net
+---
+
+net connect NAME
+	-- This connection is up.
+
+net disconnect NAME
+	-- This connection is down.
+
+net NAME whatever...
+	-- The text «whatever» has been received.
+	   Arguments are split by whitespace.
+
+Note that a wildcard handler which listens on every conceivable
+connection does not make sense; nevertheless you probably shouldn't
+name your net connection “connect”. ☺
 
 State
 -----
