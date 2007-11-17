@@ -245,12 +245,14 @@ class OWFSmon(Monitor):
 
 	def up(self):
 		dev = devices[self.device]
-		d = defer.maybeDeferred(super(OWFSmon,self).up)
+		d = defer.succeed(None)
 		if self.switch is not None and self.switched is None:
+			log(DEBUG,"switch low1",self.switch,self.to_low)
 			d.addCallback(lambda _: dev.set(self.switch,self.to_low))
 			def did(_):
 				self.switched = False
 			d.addCallback(did)
+		d.addCallback(lambda _: super(OWFSmon,self).up())
 		return d
 
 	def down(self):
