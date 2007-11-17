@@ -42,12 +42,17 @@ This statement updates the parameters of an existing monitor.
 			raise SyntaxError(u'update monitor: You did not specify any changes?')
 		monitor = monitors[tuple(event)]
 		active = monitor.active
+
+		d = defer.succeed(None)
 		if active:
-			monitor.down()
-		for p,v in self.params.iteritems():
-			setattr(monitor,p,v)
+			d.addCallback(lambda _: monitor.down())
+		def setter(_):
+			for p,v in self.params.iteritems():
+				setattr(monitor,p,v)
+		d.addCallback(setter)
 		if active:
-			monitor.up()
+			d.addCallback(lambda _: monitor.up())
+		return d
 
 for cmd in (MonitorDelayFor, MonitorDelayUntil, MonitorRequire, \
 		MonitorRetry, MonitorAlarm, MonitorLimit, MonitorScale, \
