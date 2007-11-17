@@ -10,13 +10,11 @@ NEW: <WorkSequence:2 (4)>
    : └1╴... done.
 11 EVENT: foo
 11 END: foo
-20 EVENT: wait¦start¦0.5¦_wait¦1
 NEW: <WorkSequence:3 (4)>
    : │  EVENT: wait¦start¦0.5¦_wait¦1
    : └1╴... done.
 20 EVENT: wait¦start¦0.5¦_wait¦1
 20 END: wait¦start¦0.5¦_wait¦1
-27 EVENT: wait¦done¦0.5¦_wait¦1
 NEW: <WorkSequence:4 (4)>
    : │  EVENT: wait¦done¦0.5¦_wait¦1
    : └1╴... done.

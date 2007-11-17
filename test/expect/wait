@@ -6,19 +6,16 @@ NEW: <WorkSequence:1 (4)>
 1 END: startup
 0 add ‹WaitHandler ('wait', 'for') 2›
 0 add ‹TriggerHandler ⌁.trigger¦FooBar›
-18 EVENT: wait¦start¦×××¦X1
 NEW: <WorkSequence:2 (4)>
    : │  EVENT: wait¦start¦×××¦X1
    : └1╴... done.
 18 EVENT: wait¦start¦×××¦X1
 18 END: wait¦start¦×××¦X1
-26 EVENT: wait¦start¦×××¦Foo¦Bar
 NEW: <WorkSequence:3 (4)>
    : │  EVENT: wait¦start¦×××¦Foo¦Bar
    : └1╴... done.
 26 EVENT: wait¦start¦×××¦Foo¦Bar
 26 END: wait¦start¦×××¦Foo¦Bar
-33 EVENT: wait¦done¦×××¦X1
 NEW: <WorkSequence:4 (4)>
    : │  EVENT: wait¦done¦×××¦X1
    : └1╴... done.
@@ -33,7 +30,6 @@ Remaining: 9.9
 in: ⌁.async
 in: None
 .
-50 EVENT: wait¦update¦0.4¦Foo¦Bar
 NEW: <WorkSequence:5 (4)>
    : │  EVENT: wait¦update¦0.4¦Foo¦Bar
    : └1╴... done.
@@ -43,13 +39,11 @@ NEW: <WorkSequence:5 (4)>
 0 add ‹LogHandler ⌁.log¦DEBUG¦No2›
 0 add ‹LogHandler ⌁.log¦DEBUG¦Yes›
 1 Yes
-68 EVENT: wait¦start¦×××¦X2
 NEW: <WorkSequence:6 (4)>
    : │  EVENT: wait¦start¦×××¦X2
    : └1╴... done.
 68 EVENT: wait¦start¦×××¦X2
 68 END: wait¦start¦×××¦X2
-75 EVENT: wait¦done¦×××¦Foo¦Bar
 NEW: <WorkSequence:7 (4)>
    : │  EVENT: wait¦done¦×××¦Foo¦Bar
    : └1╴... done.
@@ -61,7 +55,6 @@ NEW: <WorkSequence:8 (4)>
    : └1╴... done.
 83 EVENT: FooBar
 83 END: FooBar
-90 EVENT: wait¦done¦×××¦X2
 NEW: <WorkSequence:9 (4)>
    : │  EVENT: wait¦done¦×××¦X2
    : └1╴... done.
@@ -71,7 +64,6 @@ NEW: <WorkSequence:9 (4)>
 NEW: <WorkSequence:10 (4)>
    : │  EVENT: DoNow
    : └1╴... done.
-105 EVENT: wait¦start¦×××¦X3
 NEW: <WorkSequence:11 (4)>
    : │  EVENT: wait¦start¦×××¦X3
    : └1╴... done.
@@ -79,7 +71,6 @@ NEW: <WorkSequence:11 (4)>
 99 END: DoNow
 105 EVENT: wait¦start¦×××¦X3
 105 END: wait¦start¦×××¦X3
-117 EVENT: wait¦done¦×××¦X3
 NEW: <WorkSequence:12 (4)>
    : │  EVENT: wait¦done¦×××¦X3
    : └1╴... done.
@@ -87,19 +78,16 @@ NEW: <WorkSequence:12 (4)>
 117 END: wait¦done¦×××¦X3
 0 add ‹WaitForHandler ('wait', 'until') 2›
 0 add ‹TriggerHandler ⌁.trigger¦Heya›
-131 EVENT: wait¦start¦×××¦_wait¦7
 NEW: <WorkSequence:13 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦7
    : └1╴... done.
 131 EVENT: wait¦start¦×××¦_wait¦7
 131 END: wait¦start¦×××¦_wait¦7
-139 EVENT: wait¦start¦×××¦Foo¦Baz
 NEW: <WorkSequence:14 (4)>
    : │  EVENT: wait¦start¦×××¦Foo¦Baz
    : └1╴... done.
 139 EVENT: wait¦start¦×××¦Foo¦Baz
 139 END: wait¦start¦×××¦Foo¦Baz
-146 EVENT: wait¦done¦×××¦_wait¦7
 NEW: <WorkSequence:15 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦7
    : └1╴... done.
@@ -130,19 +118,16 @@ RUN: on whatever ‹OnEventHandler›
  ev: EVENT: whatever
 0 We wait 50.9
 166 END: whatever
-178 EVENT: wait¦start¦×××¦_wait¦8
 NEW: <WorkSequence:17 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦8
    : └1╴... done.
 178 EVENT: wait¦start¦×××¦_wait¦8
 178 END: wait¦start¦×××¦_wait¦8
-185 EVENT: wait¦done¦×××¦_wait¦8
 NEW: <WorkSequence:18 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦8
    : └1╴... done.
 185 EVENT: wait¦done¦×××¦_wait¦8
 185 END: wait¦done¦×××¦_wait¦8
-194 EVENT: wait¦cancel¦×××¦Foo¦Baz
 NEW: <WorkSequence:19 (4)>
    : │  EVENT: wait¦cancel¦×××¦Foo¦Baz
    : └1╴... done.
@@ -152,13 +137,11 @@ NEW: <WorkSequence:19 (4)>
 0 add ‹LogHandler ⌁.log¦DEBUG¦No3›
 0 add ‹LogHandler ⌁.log¦DEBUG¦Yes›
 1 Yes
-210 EVENT: wait¦start¦×××¦_wait¦9
 NEW: <WorkSequence:20 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦9
    : └1╴... done.
 210 EVENT: wait¦start¦×××¦_wait¦9
 210 END: wait¦start¦×××¦_wait¦9
-217 EVENT: wait¦done¦×××¦_wait¦9
 NEW: <WorkSequence:21 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦9
    : └1╴... done.

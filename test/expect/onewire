@@ -88,7 +88,6 @@ RUN: on onewire scanned A * * * ‹OnEventHandler›
 NEW: <WorkSequence:45 (4)>
    : │  EVENT: thermo¦DATA
    : └1╴... done.
-371 EVENT: wait¦cancel¦×××¦yawn
 NEW: <WorkSequence:46 (4)>
    : │  EVENT: wait¦cancel¦×××¦yawn
    : └1╴... done.
@@ -96,21 +95,21 @@ NEW: <WorkSequence:46 (4)>
 368 END: thermo¦DATA
 371 EVENT: wait¦cancel¦×××¦yawn
 371 END: wait¦cancel¦×××¦yawn
+ERROR: Traceback (most recent call last):
+     : Failure: homevent.worker.HaltSequence: ‹Waiter ('yawn',) 5›
 NEW: <WorkSequence:47 (4)>
-   : │  ERROR: ‹Waiter ('yawn',) 6›
+   : │  ERROR: ‹Waiter ('yawn',) 5›
    : └1╴... done.
 360 END: onewire¦scanned¦A¦0¦16¦16
 ERROR: Traceback (most recent call last):
-     : Failure: homevent.worker.HaltSequence: ‹Waiter ('yawn',) 6›
+     : Failure: homevent.worker.HaltSequence: ‹Waiter ('yawn',) 5›
 390 END: HaltSequence
 0 Drop OWFS bus A
-408 EVENT: wait¦start¦×××¦_wait¦2
 NEW: <WorkSequence:48 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦2
    : └1╴... done.
 408 EVENT: wait¦start¦×××¦_wait¦2
 408 END: wait¦start¦×××¦_wait¦2
-415 EVENT: wait¦done¦×××¦_wait¦2
 NEW: <WorkSequence:49 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦2
    : └1╴... done.

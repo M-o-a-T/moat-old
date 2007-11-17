@@ -25,25 +25,21 @@ value: 0.0
 ds_name: test
 type: GAUGE
 last_ds: UNKN
-33 EVENT: wait¦start¦×××¦_wait¦1
 NEW: <WorkSequence:2 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦1
    : └1╴... done.
 33 EVENT: wait¦start¦×××¦_wait¦1
 33 END: wait¦start¦×××¦_wait¦1
-40 EVENT: wait¦done¦×××¦_wait¦1
 NEW: <WorkSequence:3 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦1
    : └1╴... done.
 40 EVENT: wait¦done¦×××¦_wait¦1
 40 END: wait¦done¦×××¦_wait¦1
-51 EVENT: wait¦start¦×××¦_wait¦2
 NEW: <WorkSequence:4 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦2
    : └1╴... done.
 51 EVENT: wait¦start¦×××¦_wait¦2
 51 END: wait¦start¦×××¦_wait¦2
-58 EVENT: wait¦done¦×××¦_wait¦2
 NEW: <WorkSequence:5 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦2
    : └1╴... done.
@@ -56,7 +52,7 @@ min: 0.0
 max: 20.0
 unknown_sec: 0
 minimal_heartbeat: 60
-value: 4.892496
+value: 7.300728
 ds_name: test
 type: GAUGE
 last_ds: 12

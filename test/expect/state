@@ -28,12 +28,11 @@ NEW: <WorkSequence:3 (4)>
 0 NewHandler 1
 0 add ‹LogHandler ⌁.log¦TRACE¦Set¦to¦THREE›
 0 add ‹SetStateHandler ⌁.set¦state¦three¦foo¦bar›
-47 EVENT: wait¦start¦0.2¦_wait¦1
 NEW: <WorkSequence:4 (4)>
-   : │  EVENT: wait¦start¦0.2¦_wait¦1
+   : │  EVENT: wait¦start¦0.1¦_wait¦1
    : └1╴... done.
-47 EVENT: wait¦start¦0.2¦_wait¦1
-47 END: wait¦start¦0.2¦_wait¦1
+47 EVENT: wait¦start¦0.1¦_wait¦1
+47 END: wait¦start¦0.1¦_wait¦1
 0 Set to THREE
 56 EVENT: state¦two¦three¦foo¦bar
 NEW: <WorkSequence:5 (5)>
@@ -51,6 +50,34 @@ RUN: on state * three foo bar ‹OnEventHandler›
  at: <WorkSequence:5 (5)> (step 1)
  ev: EVENT: state¦two¦three¦foo¦bar
 0 Set to FOUR
+ERROR: Traceback (most recent call last):
+     :   File "modules/on_event.py, in process
+     :     return super(OnEventHandler,self).run(ctx,**k)
+     :   File "homevent/statement.py, in run
+     :     d.callback(None)
+     :   File "homevent/twist.py, in acb
+     :     self._startRunCallbacks(result)
+     :   File "internet/defer.py, in _startRunCallbacks
+     :     self._runCallbacks()
+     : --- <exception caught here> ---
+     :   File "internet/defer.py, in _runCallbacks
+     :     self.result = callback(self.result, *args, **kw)
+     :   File "homevent/statement.py, in go
+     :     return p.run(ctx)
+     :   File "modules/state.py, in run
+     :     raise StateChangeError(s,value)
+     : __builtin__.StateChangeError: Trying to change state to 'four' while changing from 'two' to 'three'
+   in: on state * three foo bar ‹OnEventHandler›
+     : prio: 51
+     : step: log TRACE Set to FOUR ‹LogHandler›
+     : step: set state four foo bar ‹SetStateHandler›
+   in: <WorkSequence:5 (5)>
+     : │  EVENT: state¦two¦three¦foo¦bar
+     : ╞1╕on state * three foo bar ‹OnEventHandler›
+     : │ │prio: 51
+     : │ │step: log TRACE Set to FOUR ‹LogHandler›
+     : │ ╵step: set state four foo bar ‹SetStateHandler›
+     : └2╴... done.
 NEW: <WorkSequence:6 (4)>
    : │  ERROR: Trying to change state to 'four' while changing from 'two' to 'three'
    : └1╴... done.
@@ -84,12 +111,11 @@ ERROR: Traceback (most recent call last):
      : └2╴... done.
 67 END: StateChangeError
 56 END: state¦two¦three¦foo¦bar
-72 EVENT: wait¦done¦0.2¦_wait¦1
 NEW: <WorkSequence:7 (4)>
-   : │  EVENT: wait¦done¦0.2¦_wait¦1
+   : │  EVENT: wait¦done¦0.1¦_wait¦1
    : └1╴... done.
-72 EVENT: wait¦done¦0.2¦_wait¦1
-72 END: wait¦done¦0.2¦_wait¦1
+72 EVENT: wait¦done¦0.1¦_wait¦1
+72 END: wait¦done¦0.1¦_wait¦1
 foo bar = three
 .
 Name: foo bar

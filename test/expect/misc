@@ -12,7 +12,6 @@ NEW: <WorkSequence:2 (4)>
 NEW: <WorkSequence:3 (4)>
    : │  EVENT: bar1
    : └1╴... done.
-19 EVENT: wait¦start¦×××¦_wait¦1
 NEW: <WorkSequence:4 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦1
    : └1╴... done.
@@ -22,7 +21,6 @@ NEW: <WorkSequence:4 (4)>
 15 END: bar1
 19 EVENT: wait¦start¦×××¦_wait¦1
 19 END: wait¦start¦×××¦_wait¦1
-36 EVENT: wait¦done¦×××¦_wait¦1
 NEW: <WorkSequence:5 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦1
    : └1╴... done.
@@ -40,13 +38,11 @@ NEW: <WorkSequence:7 (4)>
    : └1╴... done.
 54 EVENT: bar2
 54 END: bar2
-63 EVENT: wait¦start¦×××¦_wait¦2
 NEW: <WorkSequence:8 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦2
    : └1╴... done.
 63 EVENT: wait¦start¦×××¦_wait¦2
 63 END: wait¦start¦×××¦_wait¦2
-70 EVENT: wait¦done¦×××¦_wait¦2
 NEW: <WorkSequence:9 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦2
    : └1╴... done.
@@ -63,7 +59,6 @@ NEW: <WorkSequence:10 (4)>
 NEW: <WorkSequence:11 (4)>
    : │  EVENT: bar3
    : └1╴... done.
-90 EVENT: wait¦start¦×××¦_wait¦3
 NEW: <WorkSequence:12 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦3
    : └1╴... done.
@@ -73,7 +68,6 @@ NEW: <WorkSequence:12 (4)>
 86 END: bar3
 90 EVENT: wait¦start¦×××¦_wait¦3
 90 END: wait¦start¦×××¦_wait¦3
-107 EVENT: wait¦done¦×××¦_wait¦3
 NEW: <WorkSequence:13 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦3
    : └1╴... done.
@@ -98,7 +92,6 @@ NEW: <WorkSequence:15 (4)>
 134 EVENT: bar4
 134 END: bar4
 0 add ‹TriggerHandler ⌁.trigger¦foo5›
-145 EVENT: wait¦start¦×××¦_wait¦4
 NEW: <WorkSequence:16 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦4
    : └1╴... done.
@@ -110,7 +103,6 @@ NEW: <WorkSequence:17 (4)>
    : └1╴... done.
 153 EVENT: foo5
 153 END: foo5
-160 EVENT: wait¦done¦×××¦_wait¦4
 NEW: <WorkSequence:18 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦4
    : └1╴... done.
@@ -120,7 +112,6 @@ NEW: <WorkSequence:18 (4)>
 NEW: <WorkSequence:19 (4)>
    : │  EVENT: bar5
    : └1╴... done.
-173 EVENT: wait¦start¦×××¦_wait¦5
 NEW: <WorkSequence:20 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦5
    : └1╴... done.
@@ -128,7 +119,6 @@ NEW: <WorkSequence:20 (4)>
 169 END: bar5
 173 EVENT: wait¦start¦×××¦_wait¦5
 173 END: wait¦start¦×××¦_wait¦5
-185 EVENT: wait¦done¦×××¦_wait¦5
 NEW: <WorkSequence:21 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦5
    : └1╴... done.
