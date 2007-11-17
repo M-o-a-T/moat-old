@@ -71,8 +71,7 @@ skip this:
 
 class BlockModule(Module):
 	"""\
-		This is a sample loadable module,
-		plus some code you might want to reuse.
+		This module contains a couple of block-level statements.
 		"""
 
 	info = "Block-level statements"
