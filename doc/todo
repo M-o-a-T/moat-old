@@ -30,3 +30,10 @@ LIRC
 
 * generate LIRC commands 
   - this requires that the lircd server connects to *us*.
+
+Parser
+======
+
+Write a (yapps2-based) parser with decent grammar
+instead of the current mess
+
