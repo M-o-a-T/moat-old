@@ -169,8 +169,9 @@ class Monitor(object):
 		return None
 
 	def _run(self):
+		if self.running is not None:
+			return
 		self.timer = None
-		assert not self.running,u"Concurrent calls on ‹%s›"%(" ".join(str(x) for x in self.name),)
 
 		def mon_stop(_):
 			d = process_event(Event(self.ctx, "monitor","checked",*self.name))
