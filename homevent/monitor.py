@@ -223,6 +223,7 @@ class Monitor(object):
 				self.timer = reactor.callLater(unixdelta(time_delta(self.delay)-now()), kick)
 			else:
 				self.timer = reactor.callLater(self.delay, kick)
+			return self.timerd
 
 		try:
 			while self.maxpoints is None or self.steps < self.maxpoints:
