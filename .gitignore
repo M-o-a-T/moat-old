@@ -9,3 +9,9 @@ test/onewire2
 onewire_params
 test/interactive/onewire
 temp
+python-build-stamp-*
+debian/homevent
+debian/*.substvars
+debian/*.debhelper
+debian/files
+build

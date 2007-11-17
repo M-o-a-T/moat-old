@@ -13,6 +13,8 @@ from homevent.reactor import start_up,shut_down, mainloop
 from homevent.statement import main_words,global_words
 from homevent.check import register_condition
 
+VERSION = "0.2"
+
 __all__ = ("Event","Worker","SeqWorker","WorkSequence",
 	"collect_event","process_event", "register_worker", "mainloop")
 # Do not export "log" by default; it's too generic.

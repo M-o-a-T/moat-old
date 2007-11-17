@@ -1,0 +1,12 @@
+# Defaults for homevent initscript
+# sourced by /etc/init.d/homevent
+# installed at /etc/default/homevent by the maintainer scripts
+
+#
+# This is a POSIX shell fragment
+#
+
+# Additional options that are passed to the Daemon.
+#DAEMON_OPTS="-l"
+#
+#DAEMON_CFG=/etc/homevent/daemon.he

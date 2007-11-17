@@ -1,11 +1,13 @@
 #!/usr/bin/make -f
 
 export PYTHONPATH=$(shell pwd)
+DESTDIR ?= "/"
 
 all:
-	@echo Nothing to do yet.
+	@echo Nothing to do.
 install:
-	@echo Not implemented yet.
+	python setup.py --root=$(DESTDIR)
+
 test:
 	@$(MAKE) -C test --no-print-directory test
 diff:
