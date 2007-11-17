@@ -28,7 +28,7 @@ monitor onewire "394309000000" volt.D:
 	name light sensor
 	delay for 10
 	require 2 0.1
-	switch PIO.A 4.2 0.95 
+	switch PIO.A 4.2 0.93 
 	scale .60606060 0
 	stopped
 
