@@ -35,6 +35,18 @@ NEW: <WorkSequence:1 (4)>
 1 Yes
 1 Yes
 1 Yes
+0 add ‹IfStatement ⌁.if¦equal¦2¦2.0›
+0 add ‹LogHandler ⌁.log¦DEBUG¦Yes›
+0 add ‹LogHandler ⌁.log¦DEBUG¦No11›
+0 add ‹IfStatement ⌁.if¦equal¦1¦2›
+0 add ‹LogHandler ⌁.log¦DEBUG¦No12›
+0 add ‹LogHandler ⌁.log¦DEBUG¦Yes›
+0 add ‹IfStatement ⌁.if¦equal¦0¦Foo›
+0 add ‹LogHandler ⌁.log¦DEBUG¦No13›
+0 add ‹LogHandler ⌁.log¦DEBUG¦Yes›
+1 Yes
+1 Yes
+1 Yes
 2 EVENT: shutdown
 NEW: <WorkSequence:2 (5)>
    : │  EVENT: shutdown

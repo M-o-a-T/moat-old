@@ -45,6 +45,19 @@ block:
 	else:
 		log DEBUG Yes
 
+block:
+	if equal 2 2.0:
+		log DEBUG Yes
+	else:
+		log DEBUG No11
+	if equal 1 2:
+		log DEBUG No12
+	else:
+		log DEBUG Yes
+	if equal 0 Foo:
+		log DEBUG No13
+	else:
+		log DEBUG Yes
 shutdown
 """
 
