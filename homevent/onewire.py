@@ -134,7 +134,7 @@ class OWFSreceiver(object,protocol.Protocol, _PauseableMixin):
 				if version != 0:
 					self.errReceived(RuntimeError("Wrong version: %d"%(version,)))
 					return
-				if payload_len < 0 or payload_len < data_len or payload_len and offset+data_len > payload_len:
+				if payload_len < 0 or payload_len > 0 and (payload_len < data_len or offset+data_len > payload_len):
 					self.errReceived(RuntimeError("Wrong length: %d %d %d"%(payload_len,offset,data_len,)))
 					return
 
@@ -144,7 +144,10 @@ class OWFSreceiver(object,protocol.Protocol, _PauseableMixin):
 					self.transport.loseConnection()
 					return
 				self.offset = offset
-				self.data_len = data_len
+				if payload_len:
+					self.data_len = data_len
+				else:
+					self.data_len = 0
 				self.len = payload_len
 				self.typ = ret_value
 			else:
@@ -315,7 +318,8 @@ class ATTRsetmsg(OWFScall):
 		super(ATTRsetmsg,self).__init__()
 
 	def send(self,conn):
-		self.sendMsg(conn, OWMsg.write,self._path(self.path)+'\0'+str(self.value)+'\0',0)
+		val = str(self.value)
+		self.sendMsg(conn, OWMsg.write,self._path(self.path)+'\0'+val,len(val))
 
 	def __repr__(self):
 		return "‹"+self.__class__.__name__+" "+self.path[-2]+" "+self.path[-1]+" "+str(self.value)+"›"
