@@ -36,7 +36,13 @@ MAX_TRIES = 3 # retrying a message until failure
 def _call(_,p,*a,**k):
 	return p(*a,**k)
 
-class DisconnectedError(RuntimeError):
+class DisconnectedBusError(RuntimeError):
+	def __init__(self,dev):
+		self.dev = dev
+	def __str__(self):
+		return "Disconnected: %s" % (self.dev,)
+	
+class DisconnectedDeviceError(RuntimeError):
 	def __init__(self,dev):
 		self.dev = dev
 	def __str__(self):
@@ -498,7 +504,7 @@ class OWFSfactory(object,ReconnectingClientFactory):
 	def queue(self,msg):
 		if OWLOG: print "OWFS queue",msg.prio,msg
 		if not self.continueTrying:
-			return defer.fail(DisconnectedError())
+			return defer.fail(DisconnectedBusError(self.name))
 
 		self.queues[msg.prio].append(msg)
 		msg._queue(self)
@@ -572,7 +578,7 @@ class OWFSfactory(object,ReconnectingClientFactory):
 		conn.send(self.get_queued())
 
 	def _drop(self):
-		e = DisconnectedError(self)
+		e = DisconnectedBusError(self.name)
 		q = self.queues
 		self.queues = []
 		for s in q:
@@ -786,7 +792,7 @@ class OWFSdevice(object):
 
 	def get(self,key):
 		if not self.bus:
-			raise DisconnectedError(self)
+			raise DisconnectedDeviceError(self.id)
 
 		msg = ATTRgetmsg(self.path+(self.bus_id,key))
 		self.bus.queue(msg)
@@ -807,7 +813,7 @@ class OWFSdevice(object):
 
 	def set(self,key,val):
 		if not self.bus:
-			raise DisconnectedError(self)
+			raise DisconnectedDeviceError(self.id)
 
 		msg = ATTRsetmsg(self.path+(self.bus_id,key),val)
 		self.bus.queue(msg)
@@ -817,7 +823,7 @@ class OWFSdevice(object):
 
 	def dir(self, proc, path=(), key=None):
 		if not self.bus:
-			raise DisconnectedError(self)
+			raise DisconnectedDeviceError(self.id)
 
 		p = self.path + tuple(path)
 		if self.bus_id is not None:
