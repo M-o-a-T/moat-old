@@ -1,0 +1,7 @@
+# HomEvenT default startup file
+
+if not exists module logging: load logging
+
+log ERROR You need to edit the daemon configuration file
+shutdown
+

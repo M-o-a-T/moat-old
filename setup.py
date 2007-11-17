@@ -34,9 +34,12 @@ setup(
     url = 'http://homevent.smurf.noris.de',
     license = 'GPL',
 
-	data_files=[('/usr/share/homevent/modules',
-		[os.path.join('modules',f) for f in os.listdir('modules')
-			if f.endswith('.py') and not f.startswith('.')]),],
+	data_files=[
+		('/usr/share/homevent/modules',
+			[os.path.join('modules',f) for f in os.listdir('modules')
+				if f.endswith('.py') and not f.startswith('.')]),
+		('/etc/homevent',['daemon.he']),
+	],
     modules_check = modules_check,
     packages = ['homevent'],
     scripts = [script],
