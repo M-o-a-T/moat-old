@@ -32,7 +32,8 @@ class OutLogger(Logger):
 			print >>self.out,LogNames[level]+"> "+txt
 
 	def flush(self):
-		self.out.flush()
+		if hasattr(self.out,"flush"):
+			self.out.flush()
 
 	def end_logging(self):
 		super(OutLogger,self).end_logging()
