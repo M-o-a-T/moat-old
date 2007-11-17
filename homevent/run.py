@@ -80,7 +80,8 @@ def process_event(e, return_errors=False):
 		externally-generated events to.
 		"""
 	from homevent.logging import log_event,DEBUG
-	log_event(e,level=DEBUG)
+	if e[0] != "wait":
+		log_event(e,level=DEBUG)
 	d = collect_event(e).process()
 #	def rv(_):
 #		print "RVA",_
