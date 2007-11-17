@@ -29,6 +29,18 @@ class NoneCheck(Check):
 		assert len(args)==1,u"The ‹null› check requires one argument"
 		return args[0] is None
 
+class EqualCheck(Check):
+	name=("equal",)
+	doc="check if the arguments are the same."
+	def check(self,*args):
+		assert len(args)==2,u"The ‹equal› check requires two arguments"
+		a,b = args
+		if a is None: return b is None
+		try:
+			return float(a) == float(b)
+		except ValueError:
+			return str(a) == str(b)
+
 class BoolModule(Module):
 	"""\
 		This module implements basic boolean conditions
@@ -40,10 +52,12 @@ class BoolModule(Module):
 		register_condition(TrueCheck)
 		register_condition(FalseCheck)
 		register_condition(NoneCheck)
+		register_condition(EqualCheck)
 	
 	def unload(self):
 		unregister_condition(TrueCheck)
 		unregister_condition(FalseCheck)
 		unregister_condition(NoneCheck)
+		unregister_condition(EqualCheck)
 	
 init = BoolModule

@@ -69,6 +69,15 @@ This is important e.g. for monitoring.
 		else:
 			log TRACE checking $FOO against old $OLDFOO
 
+equal A B
+---------
+
+Test if A and B are equal (either both null, or both same-valued
+floating point numbers, or identical strings).
+
+Obviously, this statement makes sense only if at least one of these
+values is a variable. ☺
+
 ======
 errors
 ======
