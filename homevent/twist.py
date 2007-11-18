@@ -7,6 +7,7 @@ from twisted.internet.abstract import FileDescriptor
 from twisted.internet import fdesc,defer,reactor,base
 from twisted.python import log
 from twisted.python.threadable import isInIOThread
+from twisted.conch.ssh.session import SSHSessionProcessProtocol
 
 from posix import write
 import sys
@@ -140,3 +141,10 @@ if False:
 		print >>sys.stderr,"+THR",tid,p,a,k
 		return _cic(_tcall,tid,p,a,k)
 	reactor.callInThread = cic
+
+_ssw = SSHSessionProcessProtocol.write
+def sws(self,data):
+	if isinstance(data,unicode):
+		data = data.encode("utf-8")
+	return _ssw(self,data)
+SSHSessionProcessProtocol.write = sws
