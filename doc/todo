@@ -35,6 +35,13 @@ LIRC
 
   - this requires that the lircd server connects to *us*.
 
+net
+===
+
+* allow line-oriented external connects
+
+  - limit number per port
+
 Parser
 ======
 
