@@ -21,6 +21,7 @@ from twisted.python import failure
 
 import struct
 import os
+import errno
 
 OWLOG = ("HOMEVENT_LOG_ONEWIRE" in os.environ)
 
@@ -66,8 +67,7 @@ class OWFSerror(EnvironmentError):
 	def __str__(self):
 		if self.typ < 0:
 			try:
-				from errno import errorcode
-				return "OWFS_ERR: %d: %s" % (self.typ,errorcode[self.typ])
+				return "OWFS_ERR: %d: %s" % (self.typ,errno.errorcode[-self.typ])
 			except Exception:
 				pass
 		return "OWFS_ERR %s" % (self.typ,)
@@ -401,7 +401,7 @@ class OWFSqueue(OWFSreceiver):
 				return
 		except Exception,e:
 			#if OWLOG: print "OWFS recv err",e
-			process_failure()
+			#process_failure()
 			self.is_done(e)
 		else:
 			if OWLOG: print "OWFS recv done"
@@ -451,7 +451,9 @@ class OWFSqueue(OWFSreceiver):
 			self.msg = None
 		if not msg:
 			return
-		if msg.may_retry():
+		if isinstance(err,OWFSerror) and err.typ == -errno.EINVAL:
+			msg.error(err)
+		elif msg.may_retry():
 			deferToLater(reactor.callLater,0.5*msg.tries,self.factory.queue,msg)
 		else:
 			msg.error(err)
@@ -786,7 +788,18 @@ class OWFSdevice(object):
 			d = process_failure(_)
 		else:
 			d = defer.succeed(None)
-		d.addBoth(_call,process_event,Event(self.ctx,"onewire","down",self.typ,self.id))
+
+		if _ is None:
+			d.addBoth(_call,process_event,Event(self.ctx,"onewire","down",self.typ,self.id))
+		else:
+			# if this happened during a call, the "down" event may only
+			# complete processing after the call has returned the error,
+			# which causes an inconvenient deadlock.
+			def do_down(_):
+				process_event(Event(self.ctx,"onewire","down",self.typ,self.id),return_errors=True).addErrback(process_failure)
+				return _
+			d.addBoth(do_down)
+
 		return d
 
 
@@ -807,7 +820,11 @@ class OWFSdevice(object):
 					pass
 			return _
 		msg.d.addCallback(got)
-		msg.d.addErrback(self.go_down)
+
+		def down(_):
+			self.go_down(_)
+			return _
+		msg.d.addErrback(down)
 		return msg.d
 
 
