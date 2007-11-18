@@ -2,6 +2,48 @@
 TODO
 ====
 
+Conditional event handlers
+==========================
+
+Implement
+
+	on foo:
+		if bar
+
+to ignore the handler if the condition does not match at the moment.
+
+Do this by having the bare "if" raise a special exception which is
+caught by a wrapper which runs that priority's next matching event
+handler.
+
+Complex conditions
+==================
+
+	test name *a *b:
+		true if TEST
+		false if TEST
+		true
+
+	if test name foo bar:
+		trigger baz
+
+No, I don't want any explicit AND or OR clauses.
+Simply grab the first test that applies.
+Conditionals can of course work here too!
+
+	test name *a *b:
+		name dumb one
+		if WHATEVER (otherwise the test doesn't apply)
+		true if TEST
+		false if TEST
+		true
+	test name *a *b:
+		name dumb two
+		if not WHATEVER
+		return TEST (this is the end result)
+
+Counters on how often a check has matched would be helpful.
+
 Help
 ====
 
