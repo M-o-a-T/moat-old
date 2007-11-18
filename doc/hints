@@ -5,7 +5,76 @@ Hints
 This file is a collection of tips you'll probably need if you construct
 more complex HomEvenT setups.
 
+---------------
+Code complexity
+---------------
 
+Assume we want to do some continuous processing while a condtiion holds.
+(Like, for instance, the presence of a device. We'll name the thing "box".)
+
+You'll be tempted to do something like this:
+
+	if exists on yes box: del on yes box
+	if exists on no box: del on no box
+	on box shows up:
+		name yes box
+		async:
+			while True:
+				try:
+					[ 250 lines which do loads of things to the box ]
+				wait for 10 sec:
+					name box is there
+	on box is gone:
+		name no box
+		try: del wait box is there
+
+Well, don't. The problem with this code is (a) that you'll be unable to
+dig through the indent levels, (b) you'll be unable to easily disable
+one of the 100 things your 250 lines do if you ever need to, and, most
+important, (c) there's no way to update that code without ripping out
+the box. (Or sending a spurious event that may cause other effects,
+somewhere else in your code.)
+
+Things to do with this code:
+
+* replace the while loop with some code that's way more sane.
+
+	on box job:
+		[ 250 lines, intented one levels instead of four ]
+	on box loop:
+		trigger box job
+		wait for 10 sec
+		trigger box loop
+	on box shows up:
+		trigger box loop
+
+* replace the 250 lines with 300 lines. *seriously*
+
+	on box job:
+		trigger box job A
+		trigger box job B
+		trigger box job C
+		[...]
+	on box job A:
+		[...]
+	[...]
+		
+
+You can see for yourself why that makes sense:
+
+* errors don't kill off all the other sub-jobs
+
+* you can easily change timings if some of these jobs don't
+  have to run every ten seconds
+
+* instead of complicated if-then-else blocks that nobody
+  can understand, you can use conditionals
+
+	on box job A:
+		if some_condition
+		[...]
+
+  (as soon as those conditionals are implemented...)
 -----------------------
 State change collisions
 -----------------------
