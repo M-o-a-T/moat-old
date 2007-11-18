@@ -217,9 +217,10 @@ class Monitor(object):
 			self.timerd = defer.Deferred()
 			def kick():
 				d = self.timerd
-				self.timerd = None
-				self.timer = None
-				d.callback(None)
+				if d:
+					self.timerd = None
+					self.timer = None
+					d.callback(None)
 			if isinstance(self.delay,tuple):
 				self.timer = reactor.callLater(unixdelta(time_delta(self.delay)-now()), kick)
 			else:
@@ -227,12 +228,11 @@ class Monitor(object):
 			return self.timerd
 
 		try:
-			while self.maxpoints is None or self.steps < self.maxpoints:
-				if not self.active:
-					return
+			while self.active and (self.maxpoints is None or self.steps < self.maxpoints):
 				if self.steps and not self.passive:
 					yield delay()
 				self.steps += 1
+
 				try:
 					val = yield self.one_value(self.steps)
 		
@@ -307,15 +307,18 @@ class Monitor(object):
 
 	def down(self):
 		d = defer.Deferred()
+
 		if self.active:
 			self.active = False
 			if self.timer:
 				self.timer.cancel()
 				self.timer = None
+
 			e = self.timerd
 			if e:
 				self.timerd = None
 				e.callback(None)
+
 			if self.running:
 				def trigger(_):
 					d.callback(None)
@@ -325,6 +328,7 @@ class Monitor(object):
 				d.callback(None)
 		else:
 			d.callback(None)
+
 		return d
 
 
