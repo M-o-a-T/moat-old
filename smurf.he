@@ -15,6 +15,9 @@ if not exists module trigger: load trigger
 if not exists module wait: load wait
 if not exists module loop: load loop
 if not exists module net: load net
+if not exists module syslog: load syslog
+
+syslog local4 info
 
 
 async:
