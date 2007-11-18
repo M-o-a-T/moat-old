@@ -2,6 +2,14 @@
 TODO
 ====
 
+Help
+====
+
+Group all "list" statements so that the global overview shows only one
+line.
+
+Improve the help messages.
+
 Dump config
 ===========
 
@@ -10,8 +18,10 @@ in, re-create the system state as accurately as possible.
 
 * order is important: modules then event handlers, then everything else,
   except that connections are last
+
   - wait handlers cannot be restored because there's no way to sanely
     jump back into the execution structure
+
   - need to require that wait handlers get properly restarted by code
 
 syslog
@@ -20,20 +30,27 @@ syslog
 Instead of printing to stdout/stderr, log.
 
 * use some standard logging interface
+
   - Python, or Twisted?
 
 LIRC
 ====
 
 * Recognize infrared commands (and send them).
+
   - connect to /dev/lircd, or a remote socket
 
 * generate LIRC commands 
+
   - this requires that the lircd server connects to *us*.
 
 Parser
 ======
 
-Write a (yapps2-based) parser with decent grammar
-instead of the current mess
+* Write a (yapps2-based) parser with decent grammar
+  instead of the current mess
 
+* Add some ability to create a macro handler
+  so that similar code needs to be written only once
+
+  - requires to store code more sensibly before executing any of it
