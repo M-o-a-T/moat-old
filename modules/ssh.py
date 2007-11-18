@@ -61,6 +61,8 @@ class SSHavatar(avatar.ConchUser):
 		self.protocol.loseConnection()
 	def closed(self):
 		pass
+	def windowChanged(self,size):
+		pass
 
 class SSHrealm:
 	implements(portal.IRealm)
