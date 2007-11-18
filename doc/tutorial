@@ -17,6 +17,25 @@ it is not a syntax reference. See the “syntax” documentation for that.
 
 You can play with HomEvenT by typing “make i”, then “help”.
 
+Input and output
+----------------
+
+Doesn't exist.
+
+Seriously.
+
+HomEvenT is not about reading the state of a switch from *somewhere* and
+somehow, magically, turning off a lamp *somewhere* *else*.
+
+That's incidental.
+
+The main point isn't state, it's change of state. The fact that the switch
+is on is not interesting. Often, you can't even find out.
+
+What's interesting is the fact that the switch state changed. HomEvenT
+then reacts to that somehow. One of the reactions may well be "send a
+message to something-or-other that'll turn on a lamp".
+
 
 Events
 ------
@@ -409,4 +428,3 @@ might have forgotten about for whatever reason.
 
 Again, this is an event handler with placeholder, so you only need one
 of these blocks, no matter how many lamps you have.
-

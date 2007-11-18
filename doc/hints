@@ -1,0 +1,37 @@
+=====
+Hints
+=====
+
+This file is a collection of tips you'll probably need if you construct
+more complex HomEvenT setups.
+
+
+-----------------------
+State change collisions
+-----------------------
+
+As I mentioned, you can't change a state while it's being changed.
+
+However, sometimes two people *do* flick the stairwell lights at the
+same time. What will happen?
+
+Well, the second change will trigger an error instead. It'll get logged.
+After the tenth time it happens, you 'll probably add code to catch
+that error and ignore it.
+
+Huh?
+
+Well, think about it. That's exactly what you want to happen, isn't it?
+
+Of course, in more complicated cases things may not be that easy.
+
+The root cause of the collision is, of course, that your state change
+event handler does something that takes time.
+
+(HomEvenT is not multithreaded, it merely behaves as if it was.)
+
+So you can either note that something's going on — "if locked state
+NAME" test really helps here — and remember in some other state variable
+to do the task later, or put the original job into an async: block so that
+it can complete on its own.
+
