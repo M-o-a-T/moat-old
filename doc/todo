@@ -24,15 +24,6 @@ in, re-create the system state as accurately as possible.
 
   - need to require that wait handlers get properly restarted by code
 
-syslog
-======
-
-Instead of printing to stdout/stderr, log.
-
-* use some standard logging interface
-
-  - Python, or Twisted?
-
 LIRC
 ====
 
