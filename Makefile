@@ -20,8 +20,8 @@ i interactive:
 d debug:
 	pdb test/interactive/main.py
 r run:
-	python daemon.py -t DEBUG smurf.he
+	python daemon.py -t DEBUG examples/smurf.he
 tr trace:
-	python daemon.py -t TRACE smurf.he
+	python daemon.py -t TRACE examples/smurf.he
 
 .PHONY: test i interactive
