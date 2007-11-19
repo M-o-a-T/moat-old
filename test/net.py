@@ -7,6 +7,7 @@ from homevent.module import load_module,Load,ModuleExists
 from test import run
 
 input = """\
+wait for 0.2
 connect net foo localhost 50333
 wait for 1
 list net

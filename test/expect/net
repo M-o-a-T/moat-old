@@ -1,0 +1,68 @@
+1 EVENT: startup
+NEW: <WorkSequence:1 (4)>
+   : │  EVENT: startup
+   : └1╴... done.
+1 EVENT: startup
+1 END: startup
+NEW: <WorkSequence:2 (4)>
+   : │  EVENT: wait¦start¦0.2¦_wait¦1
+   : └1╴... done.
+11 EVENT: wait¦start¦0.2¦_wait¦1
+11 END: wait¦start¦0.2¦_wait¦1
+NEW: <WorkSequence:3 (4)>
+   : │  EVENT: wait¦done¦0.2¦_wait¦1
+   : └1╴... done.
+18 EVENT: wait¦done¦0.2¦_wait¦1
+18 END: wait¦done¦0.2¦_wait¦1
+NEW: <WorkSequence:4 (4)>
+   : │  EVENT: wait¦start¦1.5¦_wait¦2
+   : └1╴... done.
+29 EVENT: wait¦start¦1.5¦_wait¦2
+29 END: wait¦start¦1.5¦_wait¦2
+36 EVENT: net¦connect¦foo
+NEW: <WorkSequence:5 (4)>
+   : │  EVENT: net¦connect¦foo
+   : └1╴... done.
+36 EVENT: net¦connect¦foo
+36 END: net¦connect¦foo
+43 EVENT: net¦foo¦A
+NEW: <WorkSequence:6 (4)>
+   : │  EVENT: net¦foo¦A
+   : └1╴... done.
+43 EVENT: net¦foo¦A
+43 END: net¦foo¦A
+50 EVENT: net¦foo¦B
+NEW: <WorkSequence:7 (4)>
+   : │  EVENT: net¦foo¦B
+   : └1╴... done.
+50 EVENT: net¦foo¦B
+50 END: net¦foo¦B
+NEW: <WorkSequence:8 (4)>
+   : │  EVENT: wait¦done¦1.5¦_wait¦2
+   : └1╴... done.
+57 EVENT: wait¦done¦1.5¦_wait¦2
+57 END: wait¦done¦1.5¦_wait¦2
+foo localhost 50333
+.
+Name: foo
+Host: localhost
+Port: 50333
+.
+NEW: <WorkSequence:9 (4)>
+   : │  EVENT: wait¦start¦3.7¦_wait¦3
+   : └1╴... done.
+72 EVENT: wait¦start¦3.7¦_wait¦3
+72 END: wait¦start¦3.7¦_wait¦3
+NEW: <WorkSequence:10 (4)>
+   : │  EVENT: wait¦done¦3.7¦_wait¦3
+   : └1╴... done.
+79 EVENT: wait¦done¦3.7¦_wait¦3
+79 END: wait¦done¦3.7¦_wait¦3
+2 [Failure instance: Traceback (failure with no frames): <class 'twisted.internet.error.ConnectionDone'>: Connection was closed cleanly.
+]
+2 EVENT: shutdown
+NEW: <WorkSequence:11 (6)>
+   : │  EVENT: shutdown
+   : └1╴... done.
+2 EVENT: shutdown
+2 END: shutdown
