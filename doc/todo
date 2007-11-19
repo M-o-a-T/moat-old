@@ -87,9 +87,9 @@ LIRC
 net
 ===
 
-* allow line-oriented external connects
+* allow more than one connection (incoming)
 
-  - limit number per port
+  - send to all of them
 
 Parser
 ======

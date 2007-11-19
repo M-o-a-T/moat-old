@@ -4,64 +4,122 @@ NEW: <WorkSequence:1 (4)>
    : └1╴... done.
 1 EVENT: startup
 1 END: startup
+0 Create OnEvtHandler: ['net', 'connect', 'foo']
+0 add ‹NETsend ⌁.send¦net¦foo¦bar›
+0 add ‹NETlist ⌁.list¦net¦foo›
+0 add ‹NETdisconnect ⌁.disconnect¦net¦foo›
+0 NewHandler 1
+0 Create OnEvtHandler: ['net', 'connect', 'baz']
+0 add ‹NETsend ⌁.send¦net¦baz¦quux›
+0 add ‹NETlist ⌁.list¦net¦baz›
+0 add ‹NETdisconnect ⌁.disconnect¦net¦baz›
+0 NewHandler 2
+0 Create OnEvtHandler: ['net', 'disconnect', 'foo']
+0 add ‹LogHandler ⌁.log¦TRACE¦dis¦foo›
+0 NewHandler 3
+0 Create OnEvtHandler: ['net', 'disconnect', 'baz']
+0 add ‹LogHandler ⌁.log¦TRACE¦dis¦baz›
+0 NewHandler 4
 NEW: <WorkSequence:2 (4)>
    : │  EVENT: wait¦start¦0.2¦_wait¦1
    : └1╴... done.
-11 EVENT: wait¦start¦0.2¦_wait¦1
-11 END: wait¦start¦0.2¦_wait¦1
+27 EVENT: wait¦start¦0.2¦_wait¦1
+27 END: wait¦start¦0.2¦_wait¦1
 NEW: <WorkSequence:3 (4)>
    : │  EVENT: wait¦done¦0.2¦_wait¦1
    : └1╴... done.
-18 EVENT: wait¦done¦0.2¦_wait¦1
-18 END: wait¦done¦0.2¦_wait¦1
+34 EVENT: wait¦done¦0.2¦_wait¦1
+34 END: wait¦done¦0.2¦_wait¦1
 NEW: <WorkSequence:4 (4)>
-   : │  EVENT: wait¦start¦1.5¦_wait¦2
+   : │  EVENT: wait¦start¦1.3¦_wait¦2
    : └1╴... done.
-29 EVENT: wait¦start¦1.5¦_wait¦2
-29 END: wait¦start¦1.5¦_wait¦2
-36 EVENT: net¦connect¦foo
-NEW: <WorkSequence:5 (4)>
+47 EVENT: wait¦start¦1.3¦_wait¦2
+47 END: wait¦start¦1.3¦_wait¦2
+54 EVENT: net¦connect¦foo
+NEW: <WorkSequence:5 (5)>
    : │  EVENT: net¦connect¦foo
-   : └1╴... done.
-36 EVENT: net¦connect¦foo
-36 END: net¦connect¦foo
-43 EVENT: net¦foo¦A
-NEW: <WorkSequence:6 (4)>
-   : │  EVENT: net¦foo¦A
-   : └1╴... done.
-43 EVENT: net¦foo¦A
-43 END: net¦foo¦A
-50 EVENT: net¦foo¦B
-NEW: <WorkSequence:7 (4)>
-   : │  EVENT: net¦foo¦B
-   : └1╴... done.
-50 EVENT: net¦foo¦B
-50 END: net¦foo¦B
-NEW: <WorkSequence:8 (4)>
-   : │  EVENT: wait¦done¦1.5¦_wait¦2
-   : └1╴... done.
-57 EVENT: wait¦done¦1.5¦_wait¦2
-57 END: wait¦done¦1.5¦_wait¦2
-foo localhost 50333
-.
+   : ├1╴on net connect foo ‹OnEventHandler›
+   : │  prio: 51
+   : │  step: send net foo bar ‹NETsend›
+   : │  step: list net foo ‹NETlist›
+   : │  step: disconnect net foo ‹NETdisconnect›
+   : └2╴... done.
+54 EVENT: net¦connect¦foo
+RUN: on net connect foo ‹OnEventHandler›
+   : prio: 51
+   : step: send net foo bar ‹NETsend›
+   : step: list net foo ‹NETlist›
+   : step: disconnect net foo ‹NETdisconnect›
+ at: <WorkSequence:5 (5)> (step 1)
+ ev: EVENT: net¦connect¦foo
 Name: foo
 Host: localhost
 Port: 50333
 .
-NEW: <WorkSequence:9 (4)>
-   : │  EVENT: wait¦start¦3.7¦_wait¦3
-   : └1╴... done.
-72 EVENT: wait¦start¦3.7¦_wait¦3
-72 END: wait¦start¦3.7¦_wait¦3
-NEW: <WorkSequence:10 (4)>
-   : │  EVENT: wait¦done¦3.7¦_wait¦3
-   : └1╴... done.
-79 EVENT: wait¦done¦3.7¦_wait¦3
-79 END: wait¦done¦3.7¦_wait¦3
+62 EVENT: net¦disconnect¦foo
+NEW: <WorkSequence:6 (5)>
+   : │  EVENT: net¦disconnect¦foo
+   : ├1╴on net disconnect foo ‹OnEventHandler›
+   : │  prio: 51
+   : │  step: log TRACE dis foo ‹LogHandler›
+   : └2╴... done.
+54 END: net¦connect¦foo
 2 [Failure instance: Traceback (failure with no frames): <class 'twisted.internet.error.ConnectionDone'>: Connection was closed cleanly.
 ]
+62 EVENT: net¦disconnect¦foo
+RUN: on net disconnect foo ‹OnEventHandler›
+   : prio: 51
+   : step: log TRACE dis foo ‹LogHandler›
+ at: <WorkSequence:6 (5)> (step 1)
+ ev: EVENT: net¦disconnect¦foo
+0 dis foo
+62 END: net¦disconnect¦foo
+74 EVENT: net¦connect¦baz
+NEW: <WorkSequence:7 (5)>
+   : │  EVENT: net¦connect¦baz
+   : ├1╴on net connect baz ‹OnEventHandler›
+   : │  prio: 51
+   : │  step: send net baz quux ‹NETsend›
+   : │  step: list net baz ‹NETlist›
+   : │  step: disconnect net baz ‹NETdisconnect›
+   : └2╴... done.
+74 EVENT: net¦connect¦baz
+RUN: on net connect baz ‹OnEventHandler›
+   : prio: 51
+   : step: send net baz quux ‹NETsend›
+   : step: list net baz ‹NETlist›
+   : step: disconnect net baz ‹NETdisconnect›
+ at: <WorkSequence:7 (5)> (step 1)
+ ev: EVENT: net¦connect¦baz
+Name: baz
+Host: localhost
+Port: 50345
+.
+82 EVENT: net¦disconnect¦baz
+NEW: <WorkSequence:8 (5)>
+   : │  EVENT: net¦disconnect¦baz
+   : ├1╴on net disconnect baz ‹OnEventHandler›
+   : │  prio: 51
+   : │  step: log TRACE dis baz ‹LogHandler›
+   : └2╴... done.
+74 END: net¦connect¦baz
+82 EVENT: net¦disconnect¦baz
+RUN: on net disconnect baz ‹OnEventHandler›
+   : prio: 51
+   : step: log TRACE dis baz ‹LogHandler›
+ at: <WorkSequence:8 (5)> (step 1)
+ ev: EVENT: net¦disconnect¦baz
+0 dis baz
+82 END: net¦disconnect¦baz
+NEW: <WorkSequence:9 (4)>
+   : │  EVENT: wait¦done¦1.3¦_wait¦2
+   : └1╴... done.
+94 EVENT: wait¦done¦1.3¦_wait¦2
+94 END: wait¦done¦1.3¦_wait¦2
+0 ending
+.
 2 EVENT: shutdown
-NEW: <WorkSequence:11 (6)>
+NEW: <WorkSequence:10 (6)>
    : │  EVENT: shutdown
    : └1╴... done.
 2 EVENT: shutdown

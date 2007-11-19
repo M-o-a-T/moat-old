@@ -3,4 +3,4 @@
 trap 'rm -f /tmp/nettest' 0 
 
 set -e
-echo bar | diff -u /tmp/nettest -
+(echo bar;echo quux) | diff -u - /tmp/nettest

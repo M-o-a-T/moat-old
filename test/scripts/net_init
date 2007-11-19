@@ -1,4 +1,7 @@
 #!/bin/sh
 
-( echo A; sleep 2; echo B ) | nc -l -p 50333 > /tmp/nettest &
+(
+echo A | nc -l -p 50333
+echo B | nc localhost 50345
+) > /tmp/nettest &
 
