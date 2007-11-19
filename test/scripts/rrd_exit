@@ -4,5 +4,6 @@ rm -f /tmp/rrdtest.rrd || true
 
 sed -re "s/: wait¦(start|stop|done|cancel)¦[0-9.]*¦/: wait¦\1¦×××¦/g" \
 	-e 's/^unknown_sec:.1$/unknown_sec: 0/' \
+	-e 's/^value: .*$/value: ?/' \
 	-i real/rrd
 exit $?

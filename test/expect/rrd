@@ -21,7 +21,7 @@ min: 0.0
 max: 20.0
 unknown_sec: 0
 minimal_heartbeat: 60
-value: 0.0
+value: ?
 ds_name: test
 type: GAUGE
 last_ds: UNKN
@@ -52,7 +52,7 @@ min: 0.0
 max: 20.0
 unknown_sec: 0
 minimal_heartbeat: 60
-value: 7.300728
+value: ?
 ds_name: test
 type: GAUGE
 last_ds: 12
