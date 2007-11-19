@@ -12,6 +12,7 @@ import sys
 import re
 import os
 from twisted.internet import reactor
+exitcode = 0
 
 startup=now()
 def ixtime(t=None):
@@ -62,7 +63,8 @@ class run_logger(Logger):
 			if res != 0:
 				print >>sys.stderr,"Exit Script for %s failed: %d" % (self.name,res)
 				sys.stderr.flush()
-				sys.exit(1)
+				global exitcode
+				exitcode = 1
 
 	def _log(self,level, sx):
 		self.line += 1
@@ -143,3 +145,4 @@ def run(name,input, interpreter=Interpreter, logger=None):
 
 	h.mainloop(_main)
 
+	sys.exit(exitcode)
