@@ -5,7 +5,9 @@
 from sys import version
 import os
 from homevent import VERSION
-from distutils.core import setup
+
+#from distutils.core import setup
+from setuptools import setup
 
 name='homevent'
 
@@ -23,8 +25,6 @@ def modules_check():
         sys.exit('Error: the Twisted framework is required.')
         raise
 
-script = "daemon.py"
-        
 setup(
     name = name,
     version = VERSION,
@@ -34,15 +34,18 @@ setup(
     url = 'http://homevent.smurf.noris.de',
     license = 'GPL',
 
-	data_files=[
-		('/usr/share/homevent',['sitecustomize.py']),
-		('/usr/share/homevent/modules',
-			[os.path.join('modules',f) for f in os.listdir('modules')
-				if f.endswith('.py') and not f.startswith('.')]),
-		('/etc/homevent',['daemon.he']),
-	],
+	zip_safe = False, 
+#	data_files=[
+#		('/usr/share/homevent',['sitecustomize.py']),
+#		('/usr/share/homevent/modules',
+#			[os.path.join('modules',f) for f in os.listdir('modules')
+#				if f.endswith('.py') and not f.startswith('.')]),
+#		('/etc/homevent',['daemon.he']),
+#	],
     modules_check = modules_check,
-    packages = ['homevent'],
-    scripts = [script],
+    packages = ['','homevent'],
+	package_dir={'homevent': 'homevent', '':'.'},
+	package_data={'': ['modules/*.py','sitecustomize.py']},
+    scripts = ['daemon.py'],
     #cmdclass={'install_data' : my_install_data},
     )

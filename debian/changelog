@@ -2,8 +2,10 @@ homevent (0.2.3) unstable; urgency=low
 
   * Started moving to @inlineCallbacks style where appropriate
   * Allow incoming network connections
+  * Generate something that looks like a proper Python egg
+    and increment the version number
 
- -- Matthias Urlichs <smurf@debian.org>  Mon, 19 Nov 2007 04:01:36 +0100
+ -- Matthias Urlichs <matthias@urlichs.de>  Mon, 19 Nov 2007 08:35:05 +0100
 
 homevent (0.2.2) unstable; urgency=low
 
