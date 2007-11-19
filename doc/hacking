@@ -114,3 +114,75 @@ Again, see the existing code for plenty of examples.
 Seventh, patches to make HomEvenT do new shiny interesting things (or
 even boring everyday things that it can't do yet) are definitely wanted!
 
+
+------------
+Coding Style
+------------
+
+Tabs
+----
+
+I'm using tabs, not spaces.
+
+Yeah, yeah, I know that everybody else advocates spaces.
+
+But tabs are good.
+
+You can make them wider to see how the code lines up more clearly.
+You can replace them with |\t (temporarily of course ☺) to see that
+even better. (Of course you should immediately go and refactor code
+that's so convoluted!) They work in GUI editors with proportional
+fonts where spaces are just too narrow to be useful visually.
+I can use a dumb editor that doesn't convert tab to four spaces
+without messing up my code or hacking the space bar to death
+if I have to.
+
+So there.
+
+Encoding
+--------
+
+Absolutely every file is required to have a
+
+	# *-* coding: utf-8 *-*
+
+line on top. Strings with UTF-8 characters, including docstrings,
+shall be marked as Unicode.
+
+I'm somewhat annoyed at the fact that Python's standard encoding is still
+ASCII instead of UTF-8. I changed that on my system, and frankly HomEvenT
+doesn't work otherwise, simply because I have better things to do than
+to sprinkle .encode("utf-8") into every print()'s and write()'s argument
+list – especially when the latter must only be done when talking to the
+outside world.
+
+The installation puts a sitecustomize.py which effects that change
+someplace where Python can find it when started by HomEvent's
+init script.
+
+Documentation
+-------------
+
+I'm using “typographic” ‘quotes’ for stuff that's, well, quoted.
+(Anybody who still tries to use standalone grave/acute apostrophes
+will be drawn and quartered. These things belong on top of letters
+and nowhere else.)
+
+‹Angle quotes› look much better than less/greater-than signs for denoting
+parameters. An em-dash (—) makes more sense than the stupid double hyphens
+that are left over from typewriters.
+
+If you don't know how to type any of those, learn how, or pop up a
+Unicode map and find them there for copy+paste. If you get confused
+by that, try a game of 乒乓. ☺
+
+Of course, in the interest of being able to sanely edit texts like this
+with ‘normal’ editors, lines still get wrapped at 75 chars or so and
+paragraphs still get separated by two linefeeds. Can't have everything. Yet.
+
+Other
+-----
+
+I tend to use CamelCase class names and underline_separated methods.
+
+๛
