@@ -18,10 +18,10 @@ import os
 
 ModuleDirs = []
 def par(_): return os.path.join(os.pardir,_)
-if os.path.exists("modules"):
-	ModuleDirs.append("modules")
-elif os.path.exists(par("modules")) and os.path.exists(par("Makefile")):
-	ModuleDirs.append(par("modules"))
+#if os.path.exists("modules"):
+#	ModuleDirs.append("modules")
+#elif os.path.exists(par("modules")) and os.path.exists(par("Makefile")):
+#	ModuleDirs.append(par("modules"))
 
 class ModuleExistsError(RuntimeError):
 	"""A module with that name already exists."""
@@ -72,15 +72,22 @@ class Module(object):
 modules = {}
 
 def load_module(*m):
+	md = dict()
 	for d in ModuleDirs:
 		p = os.path.join(d,m[-1])+".py"
-		md = dict()
 		try:
 			c = compile(open(p,"r").read(), p, "exec",0,True)
-			eval(c,md)
-		except OSError:
+		except (OSError,IOError):
+			md = None
 			continue
-		break
+		else:
+			eval(c,md)
+			break
+
+	if not md:
+		from pkg_resources import resource_string
+		c = compile(resource_string("modules", m[-1]+".py"), "modules/"+m[-1]+".py", "exec",0,True)
+		eval(c,md)
 
 	mod = md["init"]
 	if callable(mod):
