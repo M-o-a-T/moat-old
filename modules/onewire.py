@@ -210,46 +210,34 @@ class OWFSmon(Monitor):
 	def __init__(self,*a,**k):
 		super(OWFSmon,self).__init__(*a,**k)
 
+	@defer.inlineCallbacks
 	def one_value(self, step):
 		dev = devices[self.device]
-		d = dev.get(self.attribute)
+		val = yield dev.get(self.attribute)
 		if self.switch is not None:
-			def switcher(val):
-				if not self.switched:
-					if val > self.high:
-						log(DEBUG,"switch high",self.switch,val,self.to_high)
-						val = dev.set(self.switch,self.to_high)
-						val.addCallback(lambda _: dev.get(self.attribute))
-						def did_high(_):
-							self.switched = True
-							return _ + self.high - self.low
-						val.addCallback(did_high)
-				else:
-					if val < self.low:
-						log(DEBUG,"switch low",self.switch,val)
-						val = dev.set(self.switch,self.to_low)
-						val.addCallback(lambda _: dev.get(self.attribute))
-						def did_low(_):
-							self.switched = False
-							return _
-						val.addCallback(did_low)
-					else:
-						val += self.high - self.low
-				return val
-			d.addCallback(switcher)
-		return d
+			if not self.switched:
+				if val > self.high:
+					yield dev.set(self.switch,self.to_high)
+					val = yield dev.get(self.attribute)
+					self.switched = True
+			else:
+				if val < self.low:
+					yield dev.set(self.switch,self.to_low)
+					val = yield dev.get(self.attribute)
+					self.switched = False
+			if self.switched:
+				val += self.high - self.low
+		defer.returnValue(val)
 
+	@defer.inlineCallbacks
 	def up(self):
 		dev = devices[self.device]
-		d = defer.succeed(None)
 		if self.switch is not None and self.switched is None:
 			log(DEBUG,"switch low1",self.switch,self.to_low)
-			d.addCallback(lambda _: dev.set(self.switch,self.to_low))
-			def did(_):
-				self.switched = False
-			d.addCallback(did)
-		d.addCallback(lambda _: super(OWFSmon,self).up())
-		return d
+			yield dev.set(self.switch,self.to_low)
+			self.switched = False
+		res = yield super(OWFSmon,self).up()
+		defer.returnValue(res)
 
 	def down(self):
 		if self.switch is not None:
