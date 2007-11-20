@@ -115,22 +115,22 @@ list monitor NAME
 		event = self.params(ctx)
 		if not len(event):
 			for m in monitors.itervalues():
-				print >>self.ctx.out, " ".join(str(x) for x in m.name)
+				print >>self.ctx.out, " ".join(unicode(x) for x in m.name)
 			print >>self.ctx.out, "."
 		else:
 			m = monitors[tuple(event)]
-			print  >>self.ctx.out, "Name: "," ".join(str(x) for x in m.name)
+			print  >>self.ctx.out, "Name: "," ".join(unicode(x) for x in m.name)
 			print  >>self.ctx.out, "Value: ",m.value
 			print  >>self.ctx.out, "Up: ",("Running" if m.running else "Yes" if m.active else "No")
 			if not "HOMEVENT_TEST" in os.environ:
 				if m.started_at:
-					print  >>self.ctx.out, "Start: ",str(m.started_at)
+					print  >>self.ctx.out, "Start: ",unicode(m.started_at)
 				if m.stopped_at:
-					print  >>self.ctx.out, "Stop: ",str(m.stopped_at)
+					print  >>self.ctx.out, "Stop: ",unicode(m.stopped_at)
 
 			print  >>self.ctx.out, "Steps: ",m.steps,"/",m.points,"/",m.maxpoints
 			if m.data:
-				print  >>self.ctx.out, "Data: "," ".join(str(x) for x in m.data)
+				print  >>self.ctx.out, "Data: "," ".join(unicode(x) for x in m.data)
 			
 			print  >>self.ctx.out, "."
 

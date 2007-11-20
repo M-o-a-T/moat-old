@@ -250,7 +250,7 @@ send net name text...
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		name = event[0]
-		val = " ".join(str(s) for s in tuple(event[1:]))
+		val = " ".join(unicode(s) for s in tuple(event[1:]))
 		
 		d = net_conns[name].write(val)
 		return d

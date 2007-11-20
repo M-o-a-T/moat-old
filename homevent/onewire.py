@@ -49,6 +49,9 @@ class DisconnectedDeviceError(RuntimeError):
 	def __str__(self):
 		return "Disconnected: %s" % (self.dev,)
 	
+class OWFSUnspecdError(RuntimeError):
+	pass
+
 class idErr(RuntimeError):
 	def __init__(self,path):
 		self.path = path
@@ -355,11 +358,11 @@ class ATTRsetmsg(OWFStimeout,OWFScall):
 		super(ATTRsetmsg,self).__init__()
 
 	def send(self,conn):
-		val = str(self.value)
+		val = unicode(self.value)
 		self.sendMsg(conn, OWMsg.write,self._path(self.path)+'\0'+val,len(val))
 
 	def __repr__(self):
-		return "‹"+self.__class__.__name__+" "+self.path[-2]+" "+self.path[-1]+" "+str(self.value)+"›"
+		return u"‹"+self.__class__.__name__+" "+self.path[-2]+" "+self.path[-1]+" "+unicode(self.value)+u"›"
 		
 
 
@@ -466,7 +469,11 @@ class OWFSqueue(OWFSreceiver):
 		elif n_msgs or msg.empty_ok:
 			msg.done()
 		else:
-			self.retry(msg)
+			try:
+				err = failure.Failure()
+			except failure.NoCurrentExceptionError:
+				err = OWFSUnspecdError()
+			self.retry(msg, err)
 		
 
 	def timeout(self, err=None):

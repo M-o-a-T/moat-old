@@ -22,7 +22,7 @@ NEW: <WorkSequence:3 (4)>
    : └1╴... done.
 31 EVENT: state¦one¦two¦foo¦bar
 31 END: state¦one¦two¦foo¦bar
-0 Create OnEvtHandler: ['state', '*', 'three', 'foo', 'bar']
+0 Create OnEvtHandler: state¦*¦three¦foo¦bar
 0 add ‹LogHandler ⌁.log¦TRACE¦Set¦to¦FOUR›
 0 add ‹SetStateHandler ⌁.set¦state¦four¦foo¦bar›
 0 NewHandler 1
@@ -133,7 +133,7 @@ Last Value: two
 0 add ‹LogHandler ⌁.log¦TRACE¦Yes!›
 0 add ‹LogHandler ⌁.log¦TRACE¦No‽›
 0 Yes!
-0 Create OnEvtHandler: ['whatever']
+0 Create OnEvtHandler: whatever
 0 add ‹VarStateHandler ⌁.var¦state¦x¦foo¦bar›
 0 add ‹LogHandler ⌁.log¦TRACE¦We¦got¦$x›
 0 NewHandler 2

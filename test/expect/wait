@@ -24,17 +24,17 @@ NEW: <WorkSequence:4 (4)>
 Foo Bar
 .
 Name: Foo Bar
-Started: 2003-04-05 06:07:08.200000
-Ending: 2003-04-05 06:07:18.200000
+Started: 2003-04-05 06:07:08.100000
+Ending: 2003-04-05 06:07:18.100000
 Remaining: 9.9
 in: ⌁.async
 in: None
 .
 NEW: <WorkSequence:5 (4)>
-   : │  EVENT: wait¦update¦0.4¦Foo¦Bar
+   : │  EVENT: wait¦update¦0.3¦Foo¦Bar
    : └1╴... done.
-50 EVENT: wait¦update¦0.4¦Foo¦Bar
-50 END: wait¦update¦0.4¦Foo¦Bar
+50 EVENT: wait¦update¦0.3¦Foo¦Bar
+50 END: wait¦update¦0.3¦Foo¦Bar
 0 add ‹IfStatement ⌁.if¦exists¦wait¦Foo¦Baz›
 0 add ‹LogHandler ⌁.log¦DEBUG¦No2›
 0 add ‹LogHandler ⌁.log¦DEBUG¦Yes›
@@ -97,7 +97,7 @@ NEW: <WorkSequence:15 (4)>
 0 add ‹LogHandler ⌁.log¦DEBUG¦Yes›
 0 add ‹LogHandler ⌁.log¦DEBUG¦No1›
 1 Yes
-0 Create OnEvtHandler: ['whatever']
+0 Create OnEvtHandler: whatever
 0 add ‹VarWaitHandler ⌁.var¦wait¦x¦Foo¦Baz›
 0 add ‹LogHandler ⌁.log¦TRACE¦We¦wait¦$x›
 0 NewHandler 1
@@ -116,7 +116,7 @@ RUN: on whatever ‹OnEventHandler›
    : step: log TRACE We wait $x ‹LogHandler›
  at: <WorkSequence:16 (5)> (step 1)
  ev: EVENT: whatever
-0 We wait 50.9
+0 We wait 50.8
 166 END: whatever
 NEW: <WorkSequence:17 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦8

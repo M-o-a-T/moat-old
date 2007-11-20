@@ -41,6 +41,8 @@ class WaitError(RuntimeError):
 		self.waiter = w
 	def __str__(self):
 		return self.text % (" ".join(str(x) for x in self.waiter.name),)
+	def __unicode__(self):
+		return self.text % (" ".join(unicode(x) for x in self.waiter.name),)
 
 class WaitLocked(WaitError):
 	text = u"Tried to process waiter ‹%s› while it was locked"
@@ -311,11 +313,11 @@ list wait NAME
 		event = self.params(ctx)
 		if not len(event):
 			for w in waiters.itervalues():
-				print >>self.ctx.out, " ".join(str(x) for x in w.name)
+				print >>self.ctx.out, " ".join(unicode(x) for x in w.name)
 			print >>self.ctx.out, "."
 		else:
 			w = waiters[tuple(event)]
-			print  >>self.ctx.out, "Name:"," ".join(str(x) for x in w.name)
+			print  >>self.ctx.out, "Name:"," ".join(unicode(x) for x in w.name)
 			print  >>self.ctx.out, "Started:",w.start
 			print  >>self.ctx.out, "Ending:",w.end
 			print  >>self.ctx.out, "Remaining:",w.value
@@ -325,10 +327,10 @@ list wait NAME
 				n = getattr(w,"displayname",None)
 				if n is not None:
 					if not isinstance(n,basestring):
-						n = " ".join(str(x) for x in n)
+						n = " ".join(unicode(x) for x in n)
 				else:
 					try:
-						n = str(w.args)
+						n = unicode(w.args)
 					except AttributeError:
 						pass
 					if n is None:
@@ -336,7 +338,7 @@ list wait NAME
 							if isinstance(w.name,basestring):
 								n = w.name
 							else:
-								n = " ".join(str(x) for x in w.name)
+								n = " ".join(unicode(x) for x in w.name)
 						except AttributeError:
 							n = w.__class__.__name__
 				if n is not None:

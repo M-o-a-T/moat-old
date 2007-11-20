@@ -80,7 +80,7 @@ class run_logger(Logger):
 	def log(self, level, *a):
 		if level is not None and level < self.level:
 			return
-		sx=" ".join(str(x) for x in a)
+		sx=" ".join(unicode(x) for x in a)
 		self._log(level,sx)
 		if self.dot:
 			self._log(None,".")
@@ -94,11 +94,11 @@ class run_logger(Logger):
 		if hasattr(event,"report"):
 			for r in event.report(99):
 				if not hasattr(event,"id") or isinstance(event,(h.logging.log_run,h.logging.log_created)):
-					self._log(None,str(r))
+					self._log(None,unicode(r))
 				else:
-					self._log(None,str(event.id)+" "+str(r))
+					self._log(None,str(event.id)+" "+unicode(r))
 		else:
-			self._log(None,str(event))
+			self._log(None,unicode(event))
 		if self.dot:
 			self._log(None,".")
 
@@ -135,6 +135,8 @@ def run(name,input, interpreter=Interpreter, logger=None):
 	if logger is None:
 		ht = run_logger(name,dot=False)
 		logger = ht.log
+	if isinstance(input,unicode):
+		input = input.encode("utf-8")
 	input = StringIO(input)
 
 	def _main():

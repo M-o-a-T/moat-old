@@ -33,6 +33,8 @@ class MonitorError(RuntimeError):
         self.monitor = w
     def __str__(self):
         return self.text % (" ".join(str(x) for x in self.monitor.name),)
+    def __unicode__(self):
+        return self.text % (" ".join(unicode(x) for x in self.monitor.name),)
 
 #class WaitLocked(WaitError):
 #    text = u"Tried to process waiter ‹%s› while it was locked"
@@ -99,9 +101,9 @@ class Monitor(object):
 		if not self.active:
 			act = "off"
 		elif self.running:
-			act = "run "+str(self.steps)
+			act = "run "+unicode(self.steps)
 		else:
-			act = "on "+str(self.value)
+			act = "on "+unicode(self.value)
 			# TODO: add delay until next check
 		return u"‹%s %s %s›" % (self.__class__.__name__, self.name,act)
 
@@ -131,7 +133,7 @@ class Monitor(object):
 		self.timer = reactor.callLater(unixdelta(s-now()), self._run)
 
 	def filter_data(self):
-		log(TRACE,"filter",self.data,"on",self.name)
+		log(TRACE,"filter",self.data,"on", u"¦".join(unicode(x) for x in self.name))
 
 		if len(self.data) < self.points:
 			return None
@@ -213,7 +215,7 @@ class Monitor(object):
 		self.new_value = None
 
 		def delay():
-			assert not self.timer,"No timer set on ‹%s›"%(" ".join(str(x) for x in self.name),)
+			assert not self.timer,u"No timer set on ‹%s›"%(" ".join(unicode(x) for x in self.name),)
 			self.timerd = defer.Deferred()
 			def kick():
 				d = self.timerd
@@ -263,7 +265,7 @@ class Monitor(object):
 								self.new_value = avg
 						return
 					else:
-						log(TRACE,"More data", self.data, "for", u"‹"+" ".join(str(x) for x in self.name)+u"›")
+						log(TRACE,"More data", self.data, "for", u"‹"+" ".join(unicode(x) for x in self.name)+u"›")
 				
 			self.active = False
 		
@@ -273,7 +275,7 @@ class Monitor(object):
 				yield process_failure()
 
 		finally:
-			log(TRACE,"End run",self.name)
+			log(TRACE,"End run", u"¦".join(unicode(x) for x in self.name))
 			self.stopped_at = now()
 
 

@@ -59,7 +59,7 @@ Token = Ignore + PlainToken
 PseudoToken = Whitespace + group(PseudoExtras, Number, Funny, ContStr, Name)
 
 def _comp(exp):
-	return re.compile(exp, re.UNICODE|re.LOCALE)
+	return re.compile(exp, re.UNICODE)
 tokenprog, pseudoprog, namestart, numstart = map(
     _comp, (Token, PseudoToken, r'\w', r'\d'))
 

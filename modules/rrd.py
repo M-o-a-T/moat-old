@@ -87,7 +87,7 @@ set rrd value ‹name…›
 		if len(event) < 2:
 			raise SyntaxError(u'Usage: set rrd ‹value› ‹name…›')
 		fn,var = rrds[tuple(event[1:])]
-		rrdtool.update(fn, "-t",var,"N:"+str(event[0]))
+		rrdtool.update(fn, "-t",var.encode("utf-8"),"N:"+unicode(event[0]).encode("utf-8"))
 
 
 class RRDList(Statement):

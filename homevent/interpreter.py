@@ -29,13 +29,19 @@ class InputEvent(Event):
 
 	def __str__(self):
 		try:
-			return "⌁."+"¦".join(str(x) for x in self.names)
+			return "<InputEvent:"+u"¦".join(str(x) for x in self.names)+">"
 		except Exception:
-			return "⌁ REPORT_ERROR: "+repr(self.names)
+			return "<InputEvent> REPORT_ERROR: "+repr(self.names)
+
+	def __unicode__(self):
+		try:
+			return u"⌁."+u"¦".join(unicode(x) for x in self.names)
+		except Exception:
+			return u"⌁ REPORT_ERROR: "+repr(self.names)
 
 	def report(self, verbose=False):
 		try:
-			yield "IEVENT: "+"¦".join(str(x) for x in self.names)
+			yield "IEVENT: "+u"¦".join(unicode(x) for x in self.names)
 		except Exception:
 			yield "IEVENT: REPORT_ERROR: "+repr(self.names)
 

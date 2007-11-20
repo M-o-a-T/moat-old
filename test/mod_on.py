@@ -7,7 +7,10 @@ from homevent.statement import DoNothingHandler, main_words
 
 from test import run
 
-input = """\
+input = u"""\
+on fuß:
+	name Schau auf deine Füße
+	do nothing
 on foo:
 	prio 50
 	name Do nothing
@@ -32,6 +35,7 @@ del on Skip Next
 sync trigger bar foo
 del on 1
 list on
+trigger fuß
 shutdown
 """
 

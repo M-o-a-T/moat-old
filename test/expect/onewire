@@ -58,7 +58,7 @@ NEW: <WorkSequence:8 (4)>
    : └1╴... done.
 92 EVENT: module¦load¦errors
 92 END: module¦load¦errors
-0 Create OnEvtHandler: ['onewire', 'scanned', 'A', '*', '*', '*']
+0 Create OnEvtHandler: onewire¦scanned¦A¦*¦*¦*
 0 add ‹OffEventHandler ⌁.del¦on¦scanned›
 0 add ‹OWFSvar ⌁.var¦onewire¦X¦_DEV_¦_ATTR_›
 0 add ‹TriggerHandler ⌁.trigger¦thermo¦$X›
@@ -96,13 +96,13 @@ NEW: <WorkSequence:46 (4)>
 371 EVENT: wait¦cancel¦×××¦yawn
 371 END: wait¦cancel¦×××¦yawn
 ERROR: Traceback (most recent call last):
-     : Failure: homevent.worker.HaltSequence: ‹Waiter ('yawn',) 5›
+     : Failure: homevent.worker.HaltSequence: ‹Waiter (u'yawn',) 1›
 NEW: <WorkSequence:47 (4)>
-   : │  ERROR: ‹Waiter ('yawn',) 5›
+   : │  ERROR: ‹Waiter (u'yawn',) 1›
    : └1╴... done.
 360 END: onewire¦scanned¦A¦0¦16¦16
 ERROR: Traceback (most recent call last):
-     : Failure: homevent.worker.HaltSequence: ‹Waiter ('yawn',) 5›
+     : Failure: homevent.worker.HaltSequence: ‹Waiter (u'yawn',) 1›
 390 END: HaltSequence
 0 Drop OWFS bus A
 NEW: <WorkSequence:48 (4)>

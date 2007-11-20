@@ -67,7 +67,7 @@ class sbr(object):
 	def called(self,args):
 		self.args = args
 	def start_block(self):
-		log(None,"InputComplex %s(%d): %s" % (self.name,self.id,repr(self.args)))
+		log(None,"InputComplex %s(%d): %s" % (self.name,self.id,u"¦".join(unicode(x) for x in self.args)))
 
 class FooHandler(sbr,Statement):
 	name=("foo",)

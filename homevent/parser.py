@@ -53,7 +53,7 @@ class SimpleReceiver(LineOnlyReceiver,object):
 	def unregisterProducer(self):
 		if PLOG: print "S STOP"
 		self.parser.unregisterProducer()
-	
+
 def buildReceiver(stream,parser):
 	"""\
 		Convert a simple input stream to a line-based pauseable protocol
@@ -268,6 +268,8 @@ class Parser(object):
 
 	def add_line(self, data):
 		"""Standard LineReceiver method"""
+		if not isinstance(data,unicode):
+			data = data.decode("utf-8")
 		self.p_wait.append(data)
 		self.process_line_buffer()
 
