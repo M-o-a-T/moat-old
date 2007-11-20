@@ -85,7 +85,7 @@ class SysLogger(Logger):
 		if isinstance(txt,unicode):
 			txt = txt.encode("utf-8")
 
-		self.socket.send("<%d>HomEvenT: %s\0" % ((self.facility<<3) | local_levels[level],txt))
+		self.socket.send("<%d>HomEvenT: %s\0" % (self.facility | local_levels[level],txt))
 
 	def flush(self):
 		pass
