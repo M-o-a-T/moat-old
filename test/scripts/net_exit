@@ -1,6 +1,6 @@
 #!/bin/bash
 
-trap 'rm -f /tmp/nettest' 0 
+trap "rm -f /tmp/nettest_$USER" 0 
 
 set -e
-(echo bar;echo quux) | diff -u - /tmp/nettest
+(echo bar;echo quux) | diff -u - /tmp/nettest_$USER

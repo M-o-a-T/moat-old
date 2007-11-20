@@ -3,5 +3,5 @@
 (
 echo A | nc -l -p 50333
 echo B | nc localhost 50345
-) > /tmp/nettest &
+) > /tmp/nettest_$USER &
 
