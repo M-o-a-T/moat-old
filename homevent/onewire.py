@@ -124,6 +124,9 @@ class OWFSreceiver(object,protocol.Protocol, _PauseableMixin):
 		"""
 		raise NotImplementedError
 
+	def ping(self):
+		pass
+
 	def errReceived(self, err):
 		"""Override this.
 		"""
@@ -143,6 +146,7 @@ class OWFSreceiver(object,protocol.Protocol, _PauseableMixin):
 					self.errReceived(RuntimeError("Wrong version: %d"%(version,)))
 					return
 				if payload_len == -1 and data_len == 0 and offset == 0:
+					self.ping()
 					return # server busy
 				if payload_len < 0 or payload_len > 0 and (payload_len < data_len or offset+data_len > payload_len):
 					self.errReceived(RuntimeError("Wrong length: %d %d %d"%(payload_len,offset,data_len,)))
@@ -205,6 +209,9 @@ class OWFScall(object):
 		if self.d is None:
 			self.d = defer.Deferred()
 	
+	def ping(self):
+		pass
+
 	def send(self,conn):
 		raise NotImplemetedError("You need to override send().")
 
@@ -260,7 +267,7 @@ class OWFScall(object):
 
 class OWFStimeout(object):
 	"""A mix-in that provides possibly-"benign" timeouts and NOP handling."""
-	timeout = 1.5
+	timeout = 2.5
 	error_on_timeout = True
 
 	def __init__(self,*a,**k):
@@ -269,10 +276,11 @@ class OWFStimeout(object):
 
 	def has_timeout(self):
 		self.timer = None
-		if self.error_on_timeout:
-			self.conn.conn.is_done(TimedOut(self.path))
-		else:
-			self.conn.conn.is_done()
+		if self.conn and self.conn.conn:
+			if self.error_on_timeout:
+				self.conn.conn.is_done(TimedOut(self.path))
+			else:
+				self.conn.conn.is_done()
 
 	def do_timeout(self):
 		if self.timer is None:
@@ -286,6 +294,10 @@ class OWFStimeout(object):
 	def sendMsg(self,*a,**k):
 		self.do_timeout()
 		return super(OWFStimeout,self).sendMsg(*a,**k)
+
+	def ping(self):
+		self.drop_timeout()
+		self.do_timeout()
 
 	def msgReceived(self, typ, *a,**k):
 		self.drop_timeout()
@@ -391,6 +403,9 @@ class OWFSqueue(OWFSreceiver):
 		if OWLOG: print "OWFS send for",self.msg
 		msg.send(self)
 
+	def ping(self):
+		if self.msg:
+			self.msg.ping()
 
 	def connectionFailed(self,reason):
 		super(OWFSqueue,self).connectionFailed(reason)
