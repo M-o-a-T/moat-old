@@ -114,6 +114,7 @@ class OWFSreceiver(object,protocol.Protocol, _PauseableMixin):
 	data = ""
 	typ = None
 	len = 24
+	pinger = 0
 
 	def __init__(self, persist=False, *a,**k):
 		self.persist = persist
@@ -146,6 +147,10 @@ class OWFSreceiver(object,protocol.Protocol, _PauseableMixin):
 					self.errReceived(RuntimeError("Wrong version: %d"%(version,)))
 					return
 				if payload_len == -1 and data_len == 0 and offset == 0:
+					if self.pinger == 30:
+						process_event(Event(Context(),"onewire","wedged",self.name),return_errors=True).addErrback(process_failure)
+
+					self.pinger += 1
 					self.ping()
 					return # server busy
 				if payload_len < 0 or payload_len > 0 and (payload_len < data_len or offset+data_len > payload_len):
@@ -163,6 +168,7 @@ class OWFSreceiver(object,protocol.Protocol, _PauseableMixin):
 					self.data_len = 0
 				self.len = payload_len
 				self.typ = ret_value
+				self.pinger = 0
 			else:
 				data = self.data[self.offset:self.offset+self.data_len]
 				self.data = self.data[self.len:]
