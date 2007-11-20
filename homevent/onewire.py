@@ -174,7 +174,7 @@ class OWFSreceiver(object,protocol.Protocol, _PauseableMixin):
 		flags = 0
 		if self.persist:
 			flags |= OWFlag.persist
-		flags |= OWFlag.busret
+		#flags |= OWFlag.busret
 		# flags |= 1<<8 ## ?
 		flags |= OWtempformat.celsius << OWtempformat._offset
 		flags |= OWdevformat.fdi << OWdevformat._offset
@@ -192,6 +192,7 @@ class OWFScall(object):
 	tries = 0
 	max_tries = MAX_TRIES
 	xconn = None
+	cached = False
 
 	def __init__(self):
 		self.d = None
@@ -237,9 +238,14 @@ class OWFScall(object):
 
 	def _path(self,path):
 		"""Helper to build an OWFS path from a list"""
-		if not path:
-			return "/uncached"
-		return "/uncached/"+"/".join(path)
+		if self.cached:
+			if not path:
+				return ""
+			return "/"+"/".join(path)
+		else:
+			if not path:
+				return "/uncached"
+			return "/uncached/"+"/".join(path)
 
 	def may_retry(self):
 		if self.d.called:
@@ -343,6 +349,7 @@ class DIRmsg(OWFStimeout,OWFScall):
 	error_on_timeout = False
 	prio = PRIO_BACKGROUND
 	empty_ok = True
+	cached = True
 
 	def __init__(self,path,cb):
 		self.path = path

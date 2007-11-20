@@ -3,11 +3,12 @@ homevent (0.2.4) unstable; urgency=low
   * Fixed packaging.
   * Handle "busy" responses from the OWFS server.
   * Handle OWFS timeouts in non-DIR messages.
+  * Use cached version of OWFS for directory scans.
   * Run as a "homevent" user (Debian packaging)
   * Removed the cdbs build system because it's buggy. See debbug 386970:
     calling dh_pysupport *after* dh_installinit is broken
 
- -- Matthias Urlichs <matthias@urlichs.de>  Tue, 20 Nov 2007 14:56:12 +0100
+ -- Matthias Urlichs <matthias@urlichs.de>  Tue, 20 Nov 2007 15:47:36 +0100
 
 homevent (0.2.3) unstable; urgency=low
 
