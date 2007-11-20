@@ -33,13 +33,22 @@ case "$1" in
   start)
 	echo -n "Starting $DESC: "
 	( start-stop-daemon --start --quiet --pidfile /var/run/$NAME.pid -bm \
+		--chuid homevent --chdir /var/lib/homevent \
 		--exec $DAEMON -- $DAEMON_OPTS $DAEMON_CFG | logger -p $LOGLEVEL -t homevent ) \
 			2>&1 | logger -p $ERRLEVEL -t homevent
 	echo "$NAME."
 	;;
   stop)
 	echo -n "Stopping $DESC: "
-	start-stop-daemon --stop --quiet --pidfile /var/run/$NAME.pid --oknodo 
+	pid=$(cat /var/run/$NAME.pid 2>/dev/null)
+	test -n "$pid" && kill -0 $pid 2>/dev/null || exit 0
+	start-stop-daemon --stop --quiet --pidfile /var/run/$NAME.pid
+	for f in . . . . . . . . . . ; do
+		if ! kill -0 $pid 2>/dev/null; then break; fi
+		echo -n $f
+		sleep 1
+	done
+	if kill -0 $pid 2>/dev/null; then echo "still running?"; exit 1; fi
 	echo "$NAME."
 	;;
   reload)
@@ -53,9 +62,8 @@ case "$1" in
 	|| exit 0
 	;;
   restart)
-    echo -n "Restarting $DESC: "
-	start-stop-daemon --stop --quiet --pidfile /var/run/$NAME.pid
-	sleep 1
+    echo "Restarting $DESC: "
+	$0 stop
 	$0 start
 	;;
   *)

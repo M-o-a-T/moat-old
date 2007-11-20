@@ -2,8 +2,9 @@ homevent (0.2.4) unstable; urgency=low
 
   * Fixed packaging.
   * Handle "busy" responses from the OWFS server.
+  * Run as a "homevent" user (Debian packaging)
 
- -- Matthias Urlichs <matthias@urlichs.de>  Tue, 20 Nov 2007 13:06:33 +0100
+ -- Matthias Urlichs <matthias@urlichs.de>  Tue, 20 Nov 2007 13:07:49 +0100
 
 homevent (0.2.3) unstable; urgency=low
 
