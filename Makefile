@@ -23,8 +23,8 @@ i interactive: FIX
 d debug: FIX
 	pdb test/interactive/main.py
 r run: FIX
-	python daemon.py -t DEBUG examples/smurf.he
+	python scripts/daemon.py -t DEBUG examples/smurf.he
 tr trace: FIX
-	python daemon.py -t TRACE examples/smurf.he
+	python scripts/daemon.py -t TRACE examples/smurf.he
 
 .PHONY: test i interactive
