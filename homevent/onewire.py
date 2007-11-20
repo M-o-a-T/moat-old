@@ -135,19 +135,22 @@ class OWFSreceiver(object,protocol.Protocol, _PauseableMixin):
 		while len(self.data) >= self.len and not self.paused:
 			if self.typ is None:
 				version, payload_len, ret_value, format_flags, data_len, offset = struct.unpack('!6i', self.data[:24])
+				self.data = self.data[24:]
+
 				if OWLOG: print "OW RECV", version, payload_len, ret_value, format_flags, data_len, offset
 
 				if version != 0:
 					self.errReceived(RuntimeError("Wrong version: %d"%(version,)))
 					return
+				if payload_len == -1 and data_len == 0 and offset == 0:
+					return # server busy
 				if payload_len < 0 or payload_len > 0 and (payload_len < data_len or offset+data_len > payload_len):
 					self.errReceived(RuntimeError("Wrong length: %d %d %d"%(payload_len,offset,data_len,)))
 					return
 
-				self.data = self.data[24:]
-
 				if payload_len > self.MAX_LENGTH:
 					self.transport.loseConnection()
+					self.errReceived(RuntimeError("Length exceeded: %d %d %d"%(payload_len,offset,data_len,)))
 					return
 				self.offset = offset
 				if payload_len:
