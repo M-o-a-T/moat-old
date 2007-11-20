@@ -1,15 +1,91 @@
 #!/usr/bin/make -f
+# -*- makefile -*-
+# Sample debian/rules that uses debhelper.
+# This file was originally written by Joey Hess and Craig Small.
+# As a special exception, when this file is copied by dh-make into a
+# dh-make output file, you may use that output file without restriction.
+# This special exception was added by Craig Small in version 0.37 of dh-make.
 
-DEB_PYTHON_SYSTEM=pysupport
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
 
-include /usr/share/cdbs/1/rules/debhelper.mk
-include /usr/share/cdbs/1/class/python-distutils.mk
 
-cleanbuilddir::
-	rm -f $(CURDIR)/config.*.cdbs-orig
+#DPKG_ARCH#
 
-install/homevent::
+CFLAGS = -Wall -g
+
+ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
+	CFLAGS += -O0
+else
+	CFLAGS += -O2
+endif
+
+#CONFIGURE#
+
+build: build-stamp
+
+build-stamp: #CONFIGURE_STAMP# #CONFIG_STATUS#
+	dh_testdir
+
+	# Add here commands to compile the package.
+	python setup.py build --build-base=/daten/src/git/homevent/build
+	#docbook-to-man debian/#PACKAGE#.sgml > #PACKAGE#.1
+
+	touch $@
+
+clean:
+	dh_testdir
+	dh_testroot
+	rm -f build-stamp #CONFIGURE_STAMP#
+
+	dh_clean
+	python setup.py clean -a
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	python setup.py install --root=/daten/src/git/homevent/debian/homevent/ --no-compile -O0
+
 	mkdir -p debian/homevent/usr/sbin
 	mv debian/homevent/usr/bin/daemon.py debian/homevent/usr/sbin/homevent
 	install sitecustomize.py debian/homevent/etc/homevent
 	install daemon.he debian/homevent/etc/homevent
+
+
+
+# Build architecture-independent files here.
+binary-indep: build install
+# We have nothing to do by default.
+
+# Build architecture-dependent files here.
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+	dh_installchangelogs
+	dh_installdocs README
+	dh_installexamples
+#	dh_install
+#	dh_installmenu
+#	dh_installdebconf	
+#	dh_installlogrotate
+#	dh_installemacsen
+#	dh_installpam
+#	dh_installmime
+	dh_pysupport
+	dh_installinit
+	dh_installman
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+	dh_shlibdeps
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install #PHONY_CONFIGURE#
