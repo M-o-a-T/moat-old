@@ -144,7 +144,7 @@ Encoding
 
 Absolutely every file is required to have a
 
-	# *-* coding: utf-8 *-*
+	# -*- coding: utf-8 -*-
 
 line on top. Strings with UTF-8 characters, including docstrings,
 shall be marked as Unicode.

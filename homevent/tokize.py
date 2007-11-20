@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """Tokenization help for Python-like HomEvenT programs."""
 
 __author__ = 'Matthias Urlichs <matthias@urlichs.de>'

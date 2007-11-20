@@ -1,4 +1,4 @@
-# *-* coding: utf-8 *-*
+# -*- coding: utf-8 -*-
 
 """\
 This is a somewhat-mangled version of the ReconnectingClientFactory

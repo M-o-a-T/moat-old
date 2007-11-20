@@ -1,4 +1,4 @@
-# *-* coding: utf-8 *-*
+# -*- coding: utf-8 -*-
 
 """\
 This part of the code defines what an event is.
