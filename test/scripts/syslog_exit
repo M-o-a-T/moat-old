@@ -1,0 +1,12 @@
+#!/bin/sh
+
+set -e
+
+trap "rm -f /tmp/nc_$USER /tmp/nc_$USER.pid /tmp/f.$$" 0 1
+
+kill $(cat /tmp/nc_$USER.pid) || true
+cat >/tmp/f.$$ <<'END'
+<1093>HomEvenT: One Debug
+<1348>HomEvenT: Five Warn
+END
+perl -n -e 'BEGIN { $/="\000"; } chomp; print "$_\n";' < /tmp/nc_$USER | diff -u /tmp/f.$$ -
