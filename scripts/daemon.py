@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+import sys; sys.excepthook = None; del sys
+
 from homevent.statement import main_words, global_words, Statement
 from homevent.module import Load,Unload,LoadDir,ModuleExists,load_module
 from homevent.check import register_condition
@@ -59,7 +61,10 @@ def _readcf():
 		return read_config(c,fn)
 	for f in args:
 		d.addCallback(rcf,f)
-	d.addErrback(process_failure)
+	def err(_):
+		process_failure(_)
+		shut_down()
+	d.addErrback(err)
 
 def readcf():
 	deferToLater(_readcf)
