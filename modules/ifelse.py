@@ -20,7 +20,7 @@ This code implements the "if" command.
 
 from homevent.statement import MainStatementList, main_words,global_words
 from homevent.module import Module
-from homevent.check import check_condition
+from homevent.check import check_condition, TrySomethingElse
 
 class IfStatement(MainStatementList):
 	name=("if",)
@@ -46,8 +46,6 @@ Syntax:
 		
 	def run(self,ctx,**k):
 		want=True
-		if self.procs is None:
-			raise SyntaxError(u"‹if ...› can only be used as a complex statement")
 
 		event = self.params(ctx)
 		w = event[:]
@@ -55,6 +53,12 @@ Syntax:
 		if w[0] == "not":
 			want=False
 			w.pop(0)
+
+		if self.procs is None:
+			if check_condition(ctx,*w) == want:
+				return
+			else:
+				raise TrySomethingElse(*w)
 
 		if check_condition(ctx,*w) == want:
 			return super(IfStatement,self).run(ctx,**k)
