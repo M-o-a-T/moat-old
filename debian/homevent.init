@@ -32,7 +32,7 @@ set -e
 case "$1" in
   start)
 	echo -n "Starting $DESC: "
-	( start-stop-daemon --start --quiet --pidfile /var/run/$NAME.pid \
+	( start-stop-daemon --start --quiet --pidfile /var/run/$NAME.pid -bm \
 		--exec $DAEMON -- $DAEMON_OPTS $DAEMON_CFG | logger -p $LOGLEVEL -t homevent ) \
 			2>&1 | logger -p $ERRLEVEL -t homevent
 	echo "$NAME."
@@ -60,9 +60,7 @@ case "$1" in
 	start-stop-daemon --stop --quiet --pidfile \
 		/var/run/$NAME.pid --exec $DAEMON
 	sleep 1
-	start-stop-daemon --start --quiet --pidfile \
-		/var/run/$NAME.pid --exec $DAEMON -- $DAEMON_OPTS $DAEMON_CFG
-	echo "$NAME."
+	$0 start
 	;;
   *)
 	N=/etc/init.d/$NAME
