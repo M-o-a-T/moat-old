@@ -39,26 +39,22 @@ case "$1" in
 	;;
   stop)
 	echo -n "Stopping $DESC: "
-	start-stop-daemon --stop --quiet --pidfile /var/run/$NAME.pid --oknodo \
-		--exec $DAEMON
+	start-stop-daemon --stop --quiet --pidfile /var/run/$NAME.pid --oknodo 
 	echo "$NAME."
 	;;
   reload)
 	echo "Reloading $DESC configuration files."
-	start-stop-daemon --stop --signal 1 --quiet --pidfile \
-		/var/run/$NAME.pid --exec $DAEMON
+	start-stop-daemon --stop --signal 1 --quiet --pidfile 
 	;;
   force-reload)
 	# check whether $DAEMON is running. If so, restart
-	start-stop-daemon --stop --test --quiet --pidfile \
-		/var/run/$NAME.pid --exec $DAEMON \
+	start-stop-daemon --stop --test --quiet --pidfile /var/run/$NAME.pid \
 	&& $0 restart \
 	|| exit 0
 	;;
   restart)
     echo -n "Restarting $DESC: "
-	start-stop-daemon --stop --quiet --pidfile \
-		/var/run/$NAME.pid --exec $DAEMON
+	start-stop-daemon --stop --quiet --pidfile /var/run/$NAME.pid
 	sleep 1
 	$0 start
 	;;
