@@ -8,30 +8,30 @@ from test import run
 
 input = """\
 block:
-	if exists rrd t:
+	if exists rrd t tt ttt:
 		log DEBUG No1
 	else:
 		log DEBUG Yes
-rrd "/tmp/rrdtest.rrd" test t
+rrd "/tmp/rrdtest.rrd" test t tt ttt
 block:
-	if exists rrd t:
+	if exists rrd t tt ttt:
 		log DEBUG Yes
 	else:
 		log DEBUG No2
 list rrd
-list rrd t
-set rrd 10 t
+list rrd t tt ttt
+set rrd 10 t tt ttt
 wait for 0.5
-set rrd 11 t
+set rrd 11 t tt ttt
 wait for 0.5
-set rrd 12 t
-list rrd t
+set rrd 12 t tt ttt
+list rrd t tt ttt
 block:
-	var rrd x last_ds t
+	var rrd x last_ds t tt ttt
 	trigger last $x
-del rrd t
+del rrd t tt ttt
 block:
-	if exists rrd t:
+	if exists rrd t tt ttt:
 		log DEBUG No3
 	else:
 		log DEBUG Yes

@@ -33,7 +33,7 @@ rrd path dataset NAME
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		if len(event) != 3:
+		if len(event) < 3:
 			raise SyntaxError(u'Usage: rrd "/path/to/the.rrd" ‹varname› ‹name…›')
 		fn = event[0]
 		assert os.path.exists(fn), "the RRD file does not exist: ‹%s›" % (fn,)
@@ -49,7 +49,7 @@ del rrd NAME
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		if len(event) != 1:
+		if not len(event):
 			raise SyntaxError(u'Usage: del rrd ‹name…›')
 		del rrds[tuple(event[:])]
 
