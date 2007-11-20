@@ -187,7 +187,8 @@ class OWFSreceiver(object,protocol.Protocol, _PauseableMixin):
 		flags = 0
 		if self.persist:
 			flags |= OWFlag.persist
-		#flags |= OWFlag.busret
+		# needed for sometimes-broken 1wire daemons
+		flags |= OWFlag.busret
 		# flags |= 1<<8 ## ?
 		flags |= OWtempformat.celsius << OWtempformat._offset
 		flags |= OWdevformat.fdi << OWdevformat._offset
