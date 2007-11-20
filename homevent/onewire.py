@@ -646,13 +646,14 @@ class OWFSfactory(object,ReconnectingClientFactory):
 		
 
 	def all_devices(self, proc):
+		seen_mplex = {}
 		def doit(dev,path=(),key=None):
 			buses = []
 			entries = []
 			def got_entry(name):
 				if key is None and name.startswith("bus."):
 					buses.append(name)
-				else:
+				elif name[2] == ".":
 					entries.append(name)
 
 			def done(_):
@@ -660,20 +661,21 @@ class OWFSfactory(object,ReconnectingClientFactory):
 				if buses:
 					for b in buses:
 						f.addCallback(_call,doit,dev,path=path+(b,),key=None)
-				else:
-					p = dev.path
-					if dev.bus_id:
-						p += (dev.bus_id,)
-					p += path
-					if key:
-						p += (key,)
 
-					for b in entries:
-						dn = OWFSdevice(id=b,bus=self,path=p)
-						f.addCallback(_call,proc,dn)
-						if b.startswith("1F."): # Bus multiplexer
-							f.addCallback(_call,doit,dn,key="main")
-							f.addCallback(_call,doit,dn,key="aux")
+				p = dev.path
+				if dev.bus_id:
+					p += (dev.bus_id,)
+				p += path
+				if key:
+					p += (key,)
+
+				for b in entries:
+					dn = OWFSdevice(id=b,bus=self,path=p)
+					f.addCallback(_call,proc,dn)
+					if b.startswith("1F.") and b not in seen_mplex:
+						seen_mplex[b] = f
+						f.addCallback(_call,doit,dn,key="main")
+						f.addCallback(_call,doit,dn,key="aux")
 				return f
 
 			e = dev.dir(key=key,proc=got_entry,path=path)
