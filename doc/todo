@@ -101,3 +101,8 @@ Parser
   so that similar code needs to be written only once
 
   - requires to store code more sensibly before executing any of it
+
+Syscalls
+========
+
+* add a way to run external programs ("system")

@@ -1,0 +1,6 @@
+====
+Bugs
+====
+
+* ssh: passing a command (as in "ssh root@localhost id", which is a fancy "su") will hang
+
