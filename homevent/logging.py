@@ -64,7 +64,6 @@ class Logger(object):
 					self._log(level,r)
 			else:
 				self._log(level,unicode(event))
-			self._log(level,".")
 			self.flush()
 
 	def log_failure(self, err, level=WARN):
