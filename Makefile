@@ -3,25 +3,28 @@
 export PYTHONPATH=$(shell pwd)
 DESTDIR ?= "/"
 
+FIX:
+	if test ! -d homevent/modules; then ln -s ../modules homevent/modules; fi
+
 all:
 	@echo Nothing to do.
 install:
 	python setup.py --root=$(DESTDIR)
 
-test:
+test: FIX
 	@$(MAKE) -C test --no-print-directory test
-diff:
+diff: FIX
 	@$(MAKE) -C test --no-print-directory diff
 
-ow:
+ow: FIX
 	sh test/interactive/onewire.sh
-i interactive:
+i interactive: FIX
 	python test/interactive/main.py
-d debug:
+d debug: FIX
 	pdb test/interactive/main.py
-r run:
+r run: FIX
 	python daemon.py -t DEBUG examples/smurf.he
-tr trace:
+tr trace: FIX
 	python daemon.py -t TRACE examples/smurf.he
 
 .PHONY: test i interactive

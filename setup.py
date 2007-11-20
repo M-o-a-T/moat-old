@@ -29,23 +29,26 @@ setup(
     name = name,
     version = VERSION,
     description = 'Event handler for home automation',
+    long_description = '''\
+HomEvenT is a scripted event handler, originally intended for home automation.
+Needless to say, it *can* be used for other things.
+
+HomEvenT features a roughly-Pythonic scripting language (with simple syntax
+and event handlers instead of function calls), numerous modules for
+additional I/O, logging, and easy integration into existing systems.
+
+It is based on Twisted.
+''',
     author = 'Matthias Urlichs',
     author_email = 'matthias@urlichs.de',
     url = 'http://homevent.smurf.noris.de',
+	download_url = 'http://netz.smurf.noris.de/cgi/gitweb?p=homevent.git;a=snapshot;h=master',
     license = 'GPL',
 
 	zip_safe = False, 
-#	data_files=[
-#		('/usr/share/homevent',['sitecustomize.py']),
-#		('/usr/share/homevent/modules',
-#			[os.path.join('modules',f) for f in os.listdir('modules')
-#				if f.endswith('.py') and not f.startswith('.')]),
-#		('/etc/homevent',['daemon.he']),
-#	],
     modules_check = modules_check,
-    packages = ['','homevent'],
-	package_dir={'homevent': 'homevent', '':'.'},
-	package_data={'': ['modules/*.py','sitecustomize.py']},
-    scripts = ['daemon.py'],
+    packages = ['homevent','homevent.modules'],
+	package_dir={'homevent': 'homevent', 'homevent.modules':'modules'},
+    scripts = ['scripts/daemon.py'],
     #cmdclass={'install_data' : my_install_data},
     )

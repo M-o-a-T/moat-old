@@ -16,3 +16,5 @@ debian/*.debhelper
 debian/files
 build
 dist
+homevent.egg-info
+homevent/modules

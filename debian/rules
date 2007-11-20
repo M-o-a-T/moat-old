@@ -11,3 +11,5 @@ cleanbuilddir::
 install/homevent::
 	mkdir -p debian/homevent/usr/sbin
 	mv debian/homevent/usr/bin/daemon.py debian/homevent/usr/sbin/homevent
+	install sitecustomize.py debian/homevent/etc/homevent
+	install daemon.he debian/homevent/etc/homevent

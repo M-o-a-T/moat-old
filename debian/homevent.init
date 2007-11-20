@@ -15,7 +15,9 @@ DESC=homevent
 
 DAEMON_OPTS=""
 DAEMON_CFG="/etc/homevent/daemon.he"
-export PYTHONPATH=/etc/homevent:/usr/share/homevent
+LOGLEVEL=user.info
+ERRLEVEL=user.warn
+export PYTHONPATH=/etc/homevent
 
 test -x $DAEMON || exit 0
 
@@ -30,8 +32,9 @@ set -e
 case "$1" in
   start)
 	echo -n "Starting $DESC: "
-	start-stop-daemon --start --quiet --pidfile /var/run/$NAME.pid \
-		--exec $DAEMON -- $DAEMON_OPTS $DAEMON_CFG 2>&1 | logger -t homevent
+	( start-stop-daemon --start --quiet --pidfile /var/run/$NAME.pid \
+		--exec $DAEMON -- $DAEMON_OPTS $DAEMON_CFG | logger -p $LOGLEVEL -t homevent ) \
+			2>&1 | logger -p $ERRLEVEL -t homevent
 	echo "$NAME."
 	;;
   stop)
