@@ -174,6 +174,7 @@ class OWFSreceiver(object,protocol.Protocol, _PauseableMixin):
 		flags = 0
 		if self.persist:
 			flags |= OWFlag.persist
+		flags |= OWFlag.busret
 		# flags |= 1<<8 ## ?
 		flags |= OWtempformat.celsius << OWtempformat._offset
 		flags |= OWdevformat.fdi << OWdevformat._offset
@@ -263,9 +264,9 @@ class OWFStimeout(object):
 	def has_timeout(self):
 		self.timer = None
 		if self.error_on_timeout:
-			self.conn.is_done(TimedOut(self.path))
+			self.conn.conn.is_done(TimedOut(self.path))
 		else:
-			self.conn.is_done()
+			self.conn.conn.is_done()
 
 	def do_timeout(self):
 		if self.timer is None:
@@ -282,11 +283,14 @@ class OWFStimeout(object):
 
 	def msgReceived(self, typ, *a,**k):
 		self.drop_timeout()
-		if typ == OWMsg.nop:
+#		if typ == OWMsg.nop:
+#			self.do_timeout()
+#			return True
+#		else:
+		res = super(OWFStimeout,self).msgReceived(typ,*a,**k)
+		if not res:
 			self.do_timeout()
-			return True
-		else:
-			return super(OWFStimeout,self).msgReceived(typ,*a,**k)
+		return res
 	
 	def error(self,*a,**k):
 		self.drop_timeout()
@@ -304,7 +308,7 @@ class NOPmsg(OWFScall):
 		self.sendMsg(conn,OWMsg.nop,"",0)
 
 
-class ATTRgetmsg(OWFScall):
+class ATTRgetmsg(OWFStimeout,OWFScall):
 	def __init__(self,path, prio=PRIO_STANDARD):
 		self.path = path
 		self.prio = prio
@@ -320,7 +324,7 @@ class ATTRgetmsg(OWFScall):
 	# .dataReceived() already does what's expected
 	
 
-class ATTRsetmsg(OWFScall):
+class ATTRsetmsg(OWFStimeout,OWFScall):
 	def __init__(self,path,value, prio=PRIO_URGENT):
 		self.path = path
 		self.value = value
