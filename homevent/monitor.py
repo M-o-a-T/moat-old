@@ -106,6 +106,48 @@ class Monitor(object):
 			# TODO: add delay until next check
 		return u"‹%s %s %s›" % (self.__class__.__name__, self.name,act)
 
+	@property
+	def up_name(self):
+		if self.running:
+			return "Run"
+		elif self.active:
+			return "Wait"
+		else:
+			return "Off"
+	@property
+	def time_name(self):
+		if self.started_at is None:
+			return "never"
+		if self.running:
+			delta = now() - self.started_at
+		elif self.active:
+			delta = self.started_at - now()
+		else:
+			delta = now() - self.started_at
+		delta = unixdelta(delta)
+
+		res = ""
+		res2= ""
+		if delta < 0:
+			delta = - delta
+			res = "-"
+		if delta > 3600:
+			res += res+"%d hr" % int(delta / 3600)
+			res2 = " "
+			delta %= 3600
+		if delta > 60:
+			res += res+"%d min" % int(delta / 60)
+			res2 = " "
+			delta %= 60
+		if delta > 0.1:
+			res += res2+"%3.1f" % delta
+
+		if len(res) < 2:
+			res = "now"
+		return res
+		# TODO: refactor that into homevent.times
+
+
 	def _schedule(self):
 		if self.running or not self.active: return
 		if self.timer:
@@ -198,6 +240,7 @@ class Monitor(object):
 			return _
 
 		self.running = defer.succeed(None)
+		self.started_at = now()
 		self.running.addCallback(lambda _: self._run_me())
 		if self.passive:
 			self.running.addBoth(mon_stop)
