@@ -141,11 +141,11 @@ class Monitor(object):
 			res2 = " "
 			delta %= 60
 		if delta > 0.1:
-			res += res2+"%3.1f" % delta
+			res += res2+"%3.1f sec" % delta
 
 		if len(res) < 2:
 			res = "now"
-		return res
+		return u"‹"+res+"›"
 		# TODO: refactor that into homevent.times
 
 

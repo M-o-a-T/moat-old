@@ -22,7 +22,7 @@ build: build-stamp
 build-stamp: #CONFIGURE_STAMP# #CONFIG_STATUS#
 	dh_testdir
 
-	python setup.py build --build-base=/daten/src/git/homevent/build
+	python setup.py build --build-base="$(shell pwd)/build"
 
 	touch $@
 
@@ -40,7 +40,7 @@ install: build
 	dh_clean -k
 	dh_installdirs
 
-	python setup.py install --root=/daten/src/git/homevent/debian/homevent/ --no-compile -O0
+	python setup.py install --root="$(shell pwd)/debian/homevent/" --no-compile -O0
 
 	mkdir -p debian/homevent/usr/sbin
 	mv debian/homevent/usr/bin/daemon.py debian/homevent/usr/sbin/homevent
