@@ -8,6 +8,7 @@ This code implements logging to RRD.
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.module import Module
 from homevent.statement import Statement, main_words
+from homevent.times import now
 import os
 import rrdtool
 
@@ -87,7 +88,9 @@ set rrd value ‹name…›
 		if len(event) < 2:
 			raise SyntaxError(u'Usage: set rrd ‹value› ‹name…›')
 		fn,var = rrds[tuple(event[1:])]
-		rrdtool.update(fn, "-t",var.encode("utf-8"),"N:"+unicode(event[0]).encode("utf-8"))
+		# Using "N:" may run into a RRD bug
+		# if we're really close to the next minute
+		rrdtool.update(fn, "-t",var.encode("utf-8"), now().strftime("%s")+":"+unicode(event[0]).encode("utf-8"))
 
 
 class RRDList(Statement):

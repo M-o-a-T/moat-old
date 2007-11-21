@@ -8,8 +8,10 @@ homevent (0.2.4) unstable; urgency=low
   * Removed the cdbs build system because it's buggy. See debbug 386970:
     calling dh_pysupport *after* dh_installinit is broken
   * Fixed syslogging.
+  * Call RRD with specific seconds because it sometimes has problems
+    when a datapoint is very close to the next full minute.
 
- -- Matthias Urlichs <matthias@urlichs.de>  Tue, 20 Nov 2007 18:55:18 +0100
+ -- Matthias Urlichs <matthias@urlichs.de>  Thu, 22 Nov 2007 00:29:25 +0100
 
 homevent (0.2.3) unstable; urgency=low
 
