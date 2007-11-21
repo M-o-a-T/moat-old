@@ -51,6 +51,12 @@ Conditionals can of course work here too!
 
 Counters on how often a check has matched would be helpful.
 
+Flexible debugging
+==================
+
+* Implement a "show on FOO" command that will display all "FOO"
+  events to the current output
+
 Help
 ====
 
