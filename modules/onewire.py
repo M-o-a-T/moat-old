@@ -262,8 +262,8 @@ monitor onewire ‹device› ‹attribute›
 		if "switch" not in self.values:
 			self.values["switch"] = None
 		self.values["params"] = ("onewire",event[0],event[1])
-		if "switch" in self.values:
-			self.values["params"] += (u"±"+self.values["switch"],)
+		if "switch" in self.values and self.values["switch"] is not None:
+			self.values["params"] += (u"±"+unicode(self.values["switch"]),)
 
 		super(OWFSmonitor,self).run(ctx,**k)
 
