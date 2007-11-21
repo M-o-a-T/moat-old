@@ -13,7 +13,7 @@ NEW: <WorkSequence:1 (4)>
 NEW: <WorkSequence:2 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦1
    : └1╴... done.
-1 raw 42 foo bar
+0 raw 42 foo bar
 0 filter [42] on foo¦bar
 0 End run foo¦bar
 26 EVENT: monitor¦value¦42.0¦foo¦bar
@@ -38,7 +38,7 @@ RUN: on monitor value *VAL foo bar ‹OnEventHandler›
  ev: EVENT: monitor¦value¦42.0¦foo¦bar
 0 First value is 42.0
 26 END: monitor¦value¦42.0¦foo¦bar
-1 raw 40 foo bar
+0 raw 40 foo bar
 0 filter [40] on foo¦bar
 0 End run foo¦bar
 42 EVENT: monitor¦value¦40.0¦foo¦bar
@@ -61,7 +61,7 @@ RUN: on monitor value *VAL foo bar ‹OnEventHandler›
  ev: EVENT: monitor¦value¦40.0¦foo¦bar
 0 Go from 42.0 to 40.0
 42 END: monitor¦value¦40.0¦foo¦bar
-1 raw 42 foo bar
+0 raw 42 foo bar
 0 filter [42] on foo¦bar
 0 End run foo¦bar
 53 EVENT: monitor¦value¦42.0¦foo¦bar
@@ -107,7 +107,7 @@ NEW: <WorkSequence:7 (4)>
    : └1╴... done.
 84 EVENT: wait¦start¦×××¦_wait¦2
 84 END: wait¦start¦×××¦_wait¦2
-1 raw 41 foo bar
+0 raw 41 foo bar
 0 filter [41] on foo¦bar
 0 End run foo¦bar
 91 EVENT: monitor¦value¦41.0¦foo¦bar
@@ -130,7 +130,7 @@ RUN: on monitor value *VAL foo bar ‹OnEventHandler›
  ev: EVENT: monitor¦value¦41.0¦foo¦bar
 0 Go from 42.0 to 41.0
 91 END: monitor¦value¦41.0¦foo¦bar
-1 raw 40 foo bar
+0 raw 40 foo bar
 0 filter [40] on foo¦bar
 0 End run foo¦bar
 102 EVENT: monitor¦value¦40.0¦foo¦bar
@@ -203,7 +203,7 @@ RUN: on monitor checking baz zaz ‹OnEventHandler›
  at: <WorkSequence:12 (5)> (step 1)
  ev: EVENT: monitor¦checking¦baz¦zaz
 145 END: monitor¦checking¦baz¦zaz
-1 raw 10 baz zaz
+0 raw 10 baz zaz
 0 filter [10] on baz¦zaz
 0 More data [10] for ‹baz zaz›
 NEW: <WorkSequence:13 (4)>
@@ -230,7 +230,7 @@ NEW: <WorkSequence:16 (4)>
    : └1╴... done.
 190 EVENT: wait¦done¦×××¦_wait¦3
 190 END: wait¦done¦×××¦_wait¦3
-1 raw 13 baz zaz
+0 raw 13 baz zaz
 0 filter [10, 13] on baz¦zaz
 0 More data [10, 13] for ‹baz zaz›
 NEW: <WorkSequence:17 (4)>
@@ -243,7 +243,7 @@ NEW: <WorkSequence:18 (4)>
    : └1╴... done.
 206 EVENT: wait¦done¦×××¦_wait¦4
 206 END: wait¦done¦×××¦_wait¦4
-1 raw 14 baz zaz
+0 raw 14 baz zaz
 0 filter [10, 13, 14] on baz¦zaz
 0 End run baz¦zaz
 214 EVENT: monitor¦checked¦baz¦zaz

@@ -285,7 +285,7 @@ class Monitor(object):
 					yield process_failure(e)
 
 				else:
-					log(DEBUG,"raw",val,*self.name)
+					log(TRACE,"raw",val,*self.name)
 					if hasattr(self,"factor"):
 						val = val * self.factor + self.offset
 					self.data.append(val)
