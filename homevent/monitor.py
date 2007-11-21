@@ -59,6 +59,7 @@ class Monitor(object):
 	timerd = None # deferred triggered by the timer
 	passive = None # active or passive monitoring?
 	watcher = None # if passive: Deferred for the next value to feed in
+	params = None # for reporting
 
 	delay = (1,"sec") # between two measurements at a time
 	delay_for = (1,"sec") # between one set of measurements and the next one
@@ -405,6 +406,8 @@ monitor passive
 		m = self.monitor(self, self.displayname)
 		for p,v in self.values.iteritems():
 			setattr(m,p,v)
+		if m.params is None:
+			m.params = ("passive",) if self.passive else ("unknown",)
 		if not self.stopped:
 			return m.up()
 

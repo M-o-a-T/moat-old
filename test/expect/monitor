@@ -96,6 +96,7 @@ NEW: <WorkSequence:6 (4)>
 foo bar :: 42.0 Wait now
 .
 Name:  foo bar
+Device:  test 0…100
 Value:  42.0
 Up:  Wait
 Time:  now
@@ -168,6 +169,7 @@ NEW: <WorkSequence:10 (4)>
 0 add ‹MonitorSet ⌁.set¦monitor¦14¦baz¦zaz›
 0 NewHandler 2
 Name:  baz zaz
+Device:  passive
 Value:  None
 Up:  Wait
 Time:  never

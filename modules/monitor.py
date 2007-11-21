@@ -119,6 +119,8 @@ list monitor NAME
 		else:
 			m = monitors[tuple(event)]
 			print  >>self.ctx.out, "Name: "," ".join(unicode(x) for x in m.name)
+			if m.params:
+				print  >>self.ctx.out, "Device: "," ".join(unicode(x) for x in m.params)
 			print  >>self.ctx.out, "Value: ",m.value
 			print  >>self.ctx.out, "Up: ",m.up_name
 			print  >>self.ctx.out, "Time: ",m.time_name
