@@ -696,13 +696,13 @@ class OWFSfactory(object,ReconnectingClientFactory):
 		new_ids = {}
 		seen_ids = {}
 		def got_dev(dev):
-			if dev in seen_ids:
+			if dev.id in seen_ids:
 				return
+			seen_ids[dev.id] = dev
 			if dev.id in old_ids:
 				del old_ids[dev.id]
 			else:
 				new_ids[dev.id] = dev
-			seen_ids[dev.id] = dev
 		d = self.all_devices(got_dev)
 
 		def cleanup(_):
