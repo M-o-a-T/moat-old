@@ -226,7 +226,9 @@ class Monitor(object):
 			if self.new_value is not None:
 				if hasattr(self,"delta"):
 					if self.value is not None:
-						return process_event(Event(Context(),"monitor","value",self.new_value-self.value,*self.name))
+						val = self.new_value-self.value
+						if val >= 0 or self.delta == 0:
+							return process_event(Event(Context(),"monitor","value",self.new_value-self.value,*self.name))
 				else:
 					return process_event(Event(Context(),"monitor","value",self.new_value,*self.name))
 
@@ -730,14 +732,19 @@ class MonitorDelta(Statement):
 	long_doc=u"""\
 delta
 	Report the difference between the old and new values.
+delta up
+	Same, but assume that the value only increases.
+	Used for counters.
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		lo = hi = None
-		if len(event):
-			raise SyntaxError(u'Usage: delta')
-
-		self.parent.values["delta"] = 1
+		if len(event) == 0:
+			self.parent.values["delta"] = 0
+		elif len(event) == 1 and event[1] == "up":
+			self.parent.values["delta"] = 1
+		else:
+			raise SyntaxError(u'Usage: delta [up]')
 MonitorHandler.register_statement(MonitorDelta)
 
 

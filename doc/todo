@@ -14,6 +14,12 @@ Code
   sub-second timeouts that currently cause lots of random false
   negatives, esp. on slower machines.
 
+* Improve monitor and ‘delta’ handling
+
+  - high / low limits should apply to the delta
+
+  - introduce proportional change limits etc.
+
 Conditional event handlers
 ==========================
 

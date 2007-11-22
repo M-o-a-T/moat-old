@@ -16,7 +16,6 @@ from homevent.monitor import monitors, MonitorDelayFor,MonitorDelayUntil,\
 from homevent.statement import AttributedStatement, Statement, main_words,\
 	global_words
 from homevent.module import Module
-from homevent.times import time_delta, time_until
 from homevent.check import Check,register_condition,unregister_condition
 import os
 from twisted.python.failure import Failure
