@@ -9,6 +9,17 @@ Code
 
 * convert some heavy users of (single) Deferreds to @inlineCallbacks
 
+* convert the timeout reporting that the test system sees to count
+  "timer ticks", and show these in the logs, instead of the fickle
+  sub-second timeouts that currently cause lots of random false
+  negatives, esp. on slower machines.
+
+* Improve monitor and ‘delta’ handling
+
+  - high / low limits should apply to the delta
+
+  - introduce proportional change limits etc.
+
 Conditional event handlers
 ==========================
 
@@ -50,6 +61,12 @@ Conditionals can of course work here too!
 		return TEST (this is the end result)
 
 Counters on how often a check has matched would be helpful.
+
+Flexible debugging
+==================
+
+* Implement a "show on FOO" command that will display all "FOO"
+  events to the current output
 
 Help
 ====
@@ -101,3 +118,8 @@ Parser
   so that similar code needs to be written only once
 
   - requires to store code more sensibly before executing any of it
+
+Syscalls
+========
+
+* add a way to run external programs ("system")

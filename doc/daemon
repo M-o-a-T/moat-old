@@ -30,6 +30,29 @@ option to change that, as in
 Logging is to stdout. If you want syslog, pipe its output through
 "logger" (Debian provides that in the "bsdutils" package).
 
+Remember that HomEvenT needs the Python default encoding set to UTF-8,
+and thus requires an appropriate sitecustomize.py somewhere in the
+PYTHONPATH when it starts up. (There's no way to change that from within
+the HomEvenT code.)
+
+Logging
+-------
+
+Probably the easiest way to log what HomEvenT is doing is to go
+through syslog. Decide on a 
+
+Since some otuput goes to standard error, the "logger" program is your
+friend. Useful arguments include "-t homevent" and "-p local4.info"
+or whatever you decide.
+
+On Debian
+---------
+
+Start HomEvenT with the included /etc/init.d script.
+
+Note that the supplied default daemon.he script will complain and
+immediately die, at least until you replace it with your own code.
+
 -------
 Signals
 -------

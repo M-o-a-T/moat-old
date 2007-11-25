@@ -135,6 +135,10 @@ onewire broken NAME
 	-- communication with this bus has failed.
 	   (It will be retried automatically.)
 
+onewire wedged NAME
+	-- communication with this bus seems to be impossible
+	   (30 consecutive BUSY replies from the server. Restart it!)
+
 onewire scanning NAME
 	-- the bus will be scanned after this event has been handled.
 	   An error during event handling will prevent scanning.

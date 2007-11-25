@@ -8,6 +8,7 @@ This code implements logging to RRD.
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.module import Module
 from homevent.statement import Statement, main_words
+from homevent.times import now
 import os
 import rrdtool
 
@@ -33,7 +34,7 @@ rrd path dataset NAME
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		if len(event) != 3:
+		if len(event) < 3:
 			raise SyntaxError(u'Usage: rrd "/path/to/the.rrd" ‹varname› ‹name…›')
 		fn = event[0]
 		assert os.path.exists(fn), "the RRD file does not exist: ‹%s›" % (fn,)
@@ -49,7 +50,7 @@ del rrd NAME
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		if len(event) != 1:
+		if not len(event):
 			raise SyntaxError(u'Usage: del rrd ‹name…›')
 		del rrds[tuple(event[:])]
 
@@ -87,7 +88,9 @@ set rrd value ‹name…›
 		if len(event) < 2:
 			raise SyntaxError(u'Usage: set rrd ‹value› ‹name…›')
 		fn,var = rrds[tuple(event[1:])]
-		rrdtool.update(fn, "-t",var,"N:"+str(event[0]))
+		# Using "N:" may run into a RRD bug
+		# if we're really close to the next minute
+		rrdtool.update(fn, "-t",var.encode("utf-8"), now().strftime("%s")+":"+unicode(event[0]).encode("utf-8"))
 
 
 class RRDList(Statement):

@@ -1,13 +1,14 @@
 Source: homevent
 Section: python
 Priority: extra
+XS-Python-Version: 2.4, 2.5
 Maintainer: Matthias Urlichs <matthias@urlichs.de>
-Build-Depends: debhelper (>= 5), cdbs, python-twisted-core
+Build-Depends: debhelper (>= 5), python-twisted-core
 Standards-Version: 3.7.2
 
 Package: homevent
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, ${python:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${python:Depends}, python-setuptools
 Description: A scripted event-based system for home automation et al.
  HomEvenT is a flexible, scripted, network-aware event handler.
  .

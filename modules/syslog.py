@@ -1,4 +1,3 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 """\
@@ -85,7 +84,7 @@ class SysLogger(Logger):
 		if isinstance(txt,unicode):
 			txt = txt.encode("utf-8")
 
-		self.socket.send("<%d>HomEvenT: %s\0" % ((self.facility<<3) | local_levels[level],txt))
+		self.socket.send("<%d>HomEvenT: %s\0" % (self.facility | local_levels[level],txt))
 
 	def flush(self):
 		pass
@@ -166,7 +165,7 @@ list syslog [‹facility› [‹destination›]]
 			raise SyntaxError(u"Usage: no syslog ‹facility› [‹destination›]")
 		elif not len(event):
 			for name,logger in loggers.iteritems():
-				print >>ctx.out,logger.facility_name,logger.level_name," ".join(str(x) for x in name)
+				print >>ctx.out,logger.facility_name,logger.level_name," ".join(unicode(x) for x in name)
 		else:
 			dest = gen_addr(*event[1:])
 			facility = event[0]

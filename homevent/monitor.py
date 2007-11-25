@@ -1,4 +1,3 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 from __future__ import division
@@ -33,6 +32,8 @@ class MonitorError(RuntimeError):
         self.monitor = w
     def __str__(self):
         return self.text % (" ".join(str(x) for x in self.monitor.name),)
+    def __unicode__(self):
+        return self.text % (" ".join(unicode(x) for x in self.monitor.name),)
 
 #class WaitLocked(WaitError):
 #    text = u"Tried to process waiter ‹%s› while it was locked"
@@ -58,6 +59,7 @@ class Monitor(object):
 	timerd = None # deferred triggered by the timer
 	passive = None # active or passive monitoring?
 	watcher = None # if passive: Deferred for the next value to feed in
+	params = None # for reporting
 
 	delay = (1,"sec") # between two measurements at a time
 	delay_for = (1,"sec") # between one set of measurements and the next one
@@ -99,11 +101,53 @@ class Monitor(object):
 		if not self.active:
 			act = "off"
 		elif self.running:
-			act = "run "+str(self.steps)
+			act = "run "+unicode(self.steps)
 		else:
-			act = "on "+str(self.value)
+			act = "on "+unicode(self.value)
 			# TODO: add delay until next check
 		return u"‹%s %s %s›" % (self.__class__.__name__, self.name,act)
+
+	@property
+	def up_name(self):
+		if self.running:
+			return "Run"
+		elif self.active:
+			return "Wait"
+		else:
+			return "Off"
+	@property
+	def time_name(self):
+		if self.started_at is None:
+			return "never"
+		if self.running:
+			delta = now() - self.started_at
+		elif self.active:
+			delta = self.started_at - now()
+		else:
+			delta = now() - self.started_at
+		delta = unixdelta(delta)
+
+		res = ""
+		res2= ""
+		if delta < 0:
+			delta = - delta
+			res = "-"
+		if delta > 3600:
+			res += res+"%d hr" % int(delta / 3600)
+			res2 = " "
+			delta %= 3600
+		if delta > 60:
+			res += res+"%d min" % int(delta / 60)
+			res2 = " "
+			delta %= 60
+		if delta > 0.1:
+			res += res2+"%3.1f sec" % delta
+
+		if len(res) < 2:
+			res = "now"
+		return u"‹"+res+"›"
+		# TODO: refactor that into homevent.times
+
 
 	def _schedule(self):
 		if self.running or not self.active: return
@@ -131,7 +175,7 @@ class Monitor(object):
 		self.timer = reactor.callLater(unixdelta(s-now()), self._run)
 
 	def filter_data(self):
-		log(TRACE,"filter",self.data,"on",self.name)
+		log(TRACE,"filter",self.data,"on", u"¦".join(unicode(x) for x in self.name))
 
 		if len(self.data) < self.points:
 			return None
@@ -182,7 +226,9 @@ class Monitor(object):
 			if self.new_value is not None:
 				if hasattr(self,"delta"):
 					if self.value is not None:
-						return process_event(Event(Context(),"monitor","value",self.new_value-self.value,*self.name))
+						val = self.new_value-self.value
+						if val >= 0 or self.delta == 0:
+							return process_event(Event(Context(),"monitor","value",self.new_value-self.value,*self.name))
 				else:
 					return process_event(Event(Context(),"monitor","value",self.new_value,*self.name))
 
@@ -197,6 +243,7 @@ class Monitor(object):
 			return _
 
 		self.running = defer.succeed(None)
+		self.started_at = now()
 		self.running.addCallback(lambda _: self._run_me())
 		if self.passive:
 			self.running.addBoth(mon_stop)
@@ -213,7 +260,7 @@ class Monitor(object):
 		self.new_value = None
 
 		def delay():
-			assert not self.timer,"No timer set on ‹%s›"%(" ".join(str(x) for x in self.name),)
+			assert not self.timer,u"No timer set on ‹%s›"%(" ".join(unicode(x) for x in self.name),)
 			self.timerd = defer.Deferred()
 			def kick():
 				d = self.timerd
@@ -241,7 +288,7 @@ class Monitor(object):
 					yield process_failure(e)
 
 				else:
-					log(DEBUG,"raw",val,*self.name)
+					log(TRACE,"raw",val,*self.name)
 					if hasattr(self,"factor"):
 						val = val * self.factor + self.offset
 					self.data.append(val)
@@ -263,7 +310,7 @@ class Monitor(object):
 								self.new_value = avg
 						return
 					else:
-						log(TRACE,"More data", self.data, "for", u"‹"+" ".join(str(x) for x in self.name)+u"›")
+						log(TRACE,"More data", self.data, "for", u"‹"+" ".join(unicode(x) for x in self.name)+u"›")
 				
 			self.active = False
 		
@@ -273,7 +320,7 @@ class Monitor(object):
 				yield process_failure()
 
 		finally:
-			log(TRACE,"End run",self.name)
+			log(TRACE,"End run", u"¦".join(unicode(x) for x in self.name))
 			self.stopped_at = now()
 
 
@@ -361,6 +408,8 @@ monitor passive
 		m = self.monitor(self, self.displayname)
 		for p,v in self.values.iteritems():
 			setattr(m,p,v)
+		if m.params is None:
+			m.params = ("passive",) if self.passive else ("unknown",)
 		if not self.stopped:
 			return m.up()
 
@@ -683,14 +732,19 @@ class MonitorDelta(Statement):
 	long_doc=u"""\
 delta
 	Report the difference between the old and new values.
+delta up
+	Same, but assume that the value only increases.
+	Used for counters.
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		lo = hi = None
-		if len(event):
-			raise SyntaxError(u'Usage: delta')
-
-		self.parent.values["delta"] = 1
+		if len(event) == 0:
+			self.parent.values["delta"] = 0
+		elif len(event) == 1 and event[1] == "up":
+			self.parent.values["delta"] = 1
+		else:
+			raise SyntaxError(u'Usage: delta [up]')
 MonitorHandler.register_statement(MonitorDelta)
 
 

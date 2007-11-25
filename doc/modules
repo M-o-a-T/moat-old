@@ -502,6 +502,12 @@ get events for a counter's increments instead of the absolute value.
 
 There's no handling of overflows yet.
 
+You can say "delta up" to not trigger an event for negative values.
+
+Note that at this point, the delta denotation is only used for events;
+the other parameters all apply to the absolute values that get read from
+the hardware. This will probably change in the future.
+
 --------------------
 update monitor NAME:
 --------------------

@@ -152,7 +152,7 @@ Every "*foo" in the event description is mapped to the corresponding
 	def start_block(self):
 		super(OnEventHandler,self).start_block()
 		w = self.params(self.ctx)[:]
-		log(TRACE, "Create OnEvtHandler: "+repr(w))
+		log(TRACE, "Create OnEvtHandler: "+u"¦".join(unicode(x) for x in w))
 		self.arglist = w
 
 	def _report(self, verbose=False):

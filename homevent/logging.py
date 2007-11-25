@@ -1,4 +1,4 @@
-# *-* coding: utf-8 *-*
+# -*- coding: utf-8 -*-
 
 """\
 This part of the code defines the logging part of the homevent system.
@@ -54,7 +54,7 @@ class Logger(object):
 
 	def log(self, level, *a):
 		if level >= self.level:
-			self._log(level," ".join(str(x) for x in a))
+			self._log(level,u" ".join(unicode(x) for x in a))
 			self.flush()
 
 	def log_event(self, event, level):
@@ -63,8 +63,7 @@ class Logger(object):
 				for r in event.report(99):
 					self._log(level,r)
 			else:
-				self._log(level,str(event))
-			self._log(level,".")
+				self._log(level,unicode(event))
 			self.flush()
 
 	def log_failure(self, err, level=WARN):
@@ -72,7 +71,7 @@ class Logger(object):
 			if err.frames:
 				self._log(level,err.getTraceback())
 			else:
-				self._log(level,str(err.value))
+				self._log(level,unicode(err.value))
 	
 	def flush(self):
 		pass
@@ -157,7 +156,7 @@ class LogEndEvent(Event):
 
 	def report(self, verbose=False):
 		try:
-			yield  "END: "+"¦".join(str(x) for x in self.names[1:])
+			yield  u"END: "+u"¦".join(unicode(x) for x in self.names[1:])
 		except Exception,e:
 			print >>sys.stderr,"LOGGER CRASH 4"
 			print_exc(file=sys.stderr)
@@ -192,7 +191,7 @@ class log_run(Event):
 		if verbose:
 			p = self.prefix+": "
 			if self.step:
-				q = " (step "+str(self.step)+")"
+				q = u" (step "+unicode(self.step)+u")"
 			else:
 				q = ""
 			if self.worker:
@@ -212,7 +211,7 @@ class log_run(Event):
 					p = " "*len(self.prefix)+": "
 
 		else:
-			yield self.prefix+": "+str(self.worker)
+			yield self.prefix+u": "+unicode(self.worker)
 
 class log_halted(Event):
 	prefix="HALT"

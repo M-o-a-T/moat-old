@@ -3,11 +3,24 @@ How to hack HomEvent
 ====================
 
 
+---------
+Internals
+---------
+
+Twisted
+-------
+
 First, understand Twisted, especially the Deferred concept.
 
 
+Check existing code
+-------------------
+
 Second, look at a few modules. See how they work (hopefully ;-).
 
+
+Don't think linearly
+--------------------
 
 Third, stop thinking in terms of linear execution. I'll give you a short
 example.
@@ -27,15 +40,17 @@ homevent.statement.CompoundStatement.run() — and all *that* does is to
 queue all the "run" methods of the sub-statements onto that Deferred
 thing.
 
-So why does the wait work?
+So why does the wait, well, wait?
 
-The magic part is when module.wait.WaitHandler.run() (indirectly)
-creates yet another Deferred() and returns _that_, which causes Twisted
-to stop running the commands in the first one until the second one
-returns a result.
+The magic part is that modules.wait.WaitHandler.run() creates yet another
+Deferred() and returns _that_, which causes Twisted to stop running the
+commands in the first one until the second one returns something.
 
-Which, incidentally, is caused by the timer going off. ☺
+And that, incidentally, is caused by the timer going off. ☺
 
+
+Statement chains
+----------------
 
 Fourth, every statement has a parent (the block above it) and a context.
 These things are hierarchical and inherit their values from both the 
@@ -52,28 +67,31 @@ back to something understandable.
 That's why the parser can be so terminally dumb.
 
 
+Syntax
+------
+
 Fifth, yes, the command syntax *is* terminally stupid. That's
 intentional. I don't want to invent yet another programming language or,
 worse, force people to program their house in Python.
 
 I want the thing to have minimal but understandable syntax.
 See doc/SYNTAX. You don't get any simpler than that.
-I don't even have arithmetic yet, simply because I don't think I need
-it. Arithmetic should be encapsulated in Python code and exported to the
-system as nice understandable statements.
+I don't even have arithmetic yet, simply because I don't need it yet.
+(But that will change, and some "var eval" and "if eval" will eventually
+happen.)
 
 On that topic: HomEvenT understands multi-word commands by the simple
 expedient of selecting for the longest common prefix. That does mean
 that if you have both "load" and "load dir" commands you cannot load a
-module named "dir" because that selects the wron gcommand. (Duh.)
+module named "dir" because that selects the wrong command. (Duh.)
 In your own hacking, keep the number of conflicts to a minimum.
 
-Also, HomEvenT has no such concept as patterm matching, string
-concatenation, and whatnot, that goes beyond a simple "this list of
-words looks the same as that one if you disregard anything that startes
+Also, HomEvenT has no such concept as pattern matching, string
+concatenation, and whatnot. , other than a simple(-minded) "this list of
+words looks the same as that one, if you disregard anything that startes
 with an asterisk in the second list", which is how event matching works.
 That's also intentional. Instead of convoluted single-string names, use
-simple names: HomEvenT uses multi-part names for its internal objects
+simple multi-part names: HomEvenT uses them for its internal objects
 *everywhere*. In your own hacking, please do likewise.
 
 Event matching also assigns variable names. Variables are interpolated
@@ -81,15 +99,19 @@ by saying "$varname". There are a couple of other expedient way to
 get variables. They all start with "var". Look at the state module for
 an example.
 
-You can't assign to variables. You can, however, map a variable to a
-state and change the state, which incidentally also triggers an event.
-That is also intentional. I want people to think in states (which are
-persistent) and events (which are not), not variables (which may or may
-not be persistent, but cannot be used to sanely recover your system
-state if you need to reboot your computer for some reason — not unless
-you think really hard about what you're doing, which I don't want people
-to force to do).
+You can't assign to variables. You can, however, get a variable from a
+state and change the state, which incidentally also triggers an event,
+which is a good way to trigger code that causes the value to be read. ☺
+Thus, that is also intentional. I want people to think in states (which
+are persistent) and events (which are not), not variable values (which
+may or may not be persistent, but cannot be used to sanely recover your
+system state if you need to reboot your computer for some reason — not
+unless you think really hard about what you're doing, which I don't want
+people to force to do).
 
+
+Modules
+-------
 
 Sixth, encapsulate things in loadable modules whenever possible. But
 don't let those modules depend on each other.
@@ -111,9 +133,29 @@ your code should use "tuple(event[place:])" as the lookup key.
 Again, see the existing code for plenty of examples.
 
 
-Seventh, patches to make HomEvenT do new shiny interesting things (or
-even boring everyday things that it can't do yet) are definitely wanted!
+Send patches!
+-------------
 
+Seventh, patches to make HomEvenT do new shiny interesting things (or
+even boring everyday things that it can't do yet) are definitely welcome!
+
+
+Test test test
+--------------
+
+Last but not least: Add test cases for every module. Testing is boring
+and somewhat annoying, but critically essential for stability.
+
+If you need to talk to a remote server, try to shim it.
+"nc" is your friend. Most likely you don't need any code
+because you already know what's supposed to happen; if
+necessary, a few random delays don't hurt if that saves
+you from writing a custom daemon just to test stuff.
+Just make sure that you *do* verify the intended output …
+
+HomEvenT, right now, has a very bad test system. It simply traces
+everything and then checks that the traces match. That can (and
+ultimately will) be improved, but right now it's all we have.
 
 ------------
 Coding Style
@@ -144,7 +186,7 @@ Encoding
 
 Absolutely every file is required to have a
 
-	# *-* coding: utf-8 *-*
+	# -*- coding: utf-8 -*-
 
 line on top. Strings with UTF-8 characters, including docstrings,
 shall be marked as Unicode.

@@ -1,4 +1,3 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 from __future__ import division
@@ -17,7 +16,6 @@ from homevent.monitor import monitors, MonitorDelayFor,MonitorDelayUntil,\
 from homevent.statement import AttributedStatement, Statement, main_words,\
 	global_words
 from homevent.module import Module
-from homevent.times import time_delta, time_until
 from homevent.check import Check,register_condition,unregister_condition
 import os
 from twisted.python.failure import Failure
@@ -115,22 +113,25 @@ list monitor NAME
 		event = self.params(ctx)
 		if not len(event):
 			for m in monitors.itervalues():
-				print >>self.ctx.out, " ".join(str(x) for x in m.name)
+				print >>self.ctx.out, " ".join(unicode(x) for x in m.name),"::",m.value,m.up_name,m.time_name
 			print >>self.ctx.out, "."
 		else:
 			m = monitors[tuple(event)]
-			print  >>self.ctx.out, "Name: "," ".join(str(x) for x in m.name)
+			print  >>self.ctx.out, "Name: "," ".join(unicode(x) for x in m.name)
+			if m.params:
+				print  >>self.ctx.out, "Device: "," ".join(unicode(x) for x in m.params)
 			print  >>self.ctx.out, "Value: ",m.value
-			print  >>self.ctx.out, "Up: ",("Running" if m.running else "Yes" if m.active else "No")
+			print  >>self.ctx.out, "Up: ",m.up_name
+			print  >>self.ctx.out, "Time: ",m.time_name
 			if not "HOMEVENT_TEST" in os.environ:
 				if m.started_at:
-					print  >>self.ctx.out, "Start: ",str(m.started_at)
+					print  >>self.ctx.out, "Start: ",unicode(m.started_at)
 				if m.stopped_at:
-					print  >>self.ctx.out, "Stop: ",str(m.stopped_at)
+					print  >>self.ctx.out, "Stop: ",unicode(m.stopped_at)
 
 			print  >>self.ctx.out, "Steps: ",m.steps,"/",m.points,"/",m.maxpoints
 			if m.data:
-				print  >>self.ctx.out, "Data: "," ".join(str(x) for x in m.data)
+				print  >>self.ctx.out, "Data: "," ".join(unicode(x) for x in m.data)
 			
 			print  >>self.ctx.out, "."
 

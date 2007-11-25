@@ -1,0 +1,4 @@
+#!/bin/sh
+
+nc -u -l -p 55514 > /tmp/nc_$USER &
+echo $! >/tmp/nc_$USER.pid

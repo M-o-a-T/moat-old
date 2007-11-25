@@ -1,4 +1,4 @@
-# *-* coding: utf-8 *-*
+# -*- coding: utf-8 -*-
 
 """\
 This part of the code controls the main loop.

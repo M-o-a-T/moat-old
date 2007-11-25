@@ -1,4 +1,4 @@
-# *-* coding: utf-8 *-*
+# -*- coding: utf-8 -*-
 
 from __future__ import division
 
@@ -168,14 +168,14 @@ class WorkSequence(WorkItem):
 
 	def report(self, verbose=False):
 		if not verbose:
-			yield str(self) # +" for "+str(self.event)
+			yield unicode(self) # +" for "+unicode(self.event)
 			return
 
 		if verbose > 2:
 			v = verbose
 		else:
 			v = 1
-		yield str(self)
+		yield unicode(self)
 		if self.work:
 			prefix = "│  "
 		else:
@@ -184,7 +184,7 @@ class WorkSequence(WorkItem):
 			for r in self.event.report(False):
 				yield prefix+r
 		else:
-			yield prefix+str(self.event)
+			yield prefix+unicode(self.event)
 		if self.worker:
 			w="by "
 			for r in self.worker.report(verbose):
@@ -197,15 +197,15 @@ class WorkSequence(WorkItem):
 		def pstep(a,b,c):
 			if self.in_step and self.in_step == step:
 				p_first = a+str(step)+"╕"
-				p_mid = c+" "+"│"
-				p_last = c+" "+"╵"
-				p_single = a+" "+"═"
+				p_mid = c+" "+u"│"
+				p_last = c+" "+u"╵"
+				p_single = a+" "+u"═"
 				rep = pr.report(verbose-1)
 			else:
-				p_first = b+str(step)+"╴"
+				p_first = b+str(step)+u"╴"
 				p_mid = c+"  "
 				p_last = c+"  "
-				p_single = b+str(step)+"╴"
+				p_single = b+str(step)+u"╴"
 				rep = pr.report(v)
 			rp=None
 
@@ -267,7 +267,9 @@ class Worker(object):
 			(self.__class__.__name__, repr(self.name))
 
 	def __str__(self):
-		return "⇒%s:%s" % (self.__class__.__name__, self.name)
+		return "=> %s:%s" % (self.__class__.__name__, self.name)
+	def __unicode__(self):
+		return u"⇒%s:%s" % (self.__class__.__name__, self.name)
 
 	def report(self, verbose=False):
 		yield "%s: %s" % \

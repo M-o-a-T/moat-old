@@ -49,6 +49,9 @@ class DisconnectedDeviceError(RuntimeError):
 	def __str__(self):
 		return "Disconnected: %s" % (self.dev,)
 	
+class OWFSUnspecdError(RuntimeError):
+	pass
+
 class idErr(RuntimeError):
 	def __init__(self,path):
 		self.path = path
@@ -114,6 +117,7 @@ class OWFSreceiver(object,protocol.Protocol, _PauseableMixin):
 	data = ""
 	typ = None
 	len = 24
+	pinger = 0
 
 	def __init__(self, persist=False, *a,**k):
 		self.persist = persist
@@ -123,6 +127,9 @@ class OWFSreceiver(object,protocol.Protocol, _PauseableMixin):
 		"""Override this.
 		"""
 		raise NotImplementedError
+
+	def ping(self):
+		pass
 
 	def errReceived(self, err):
 		"""Override this.
@@ -135,19 +142,27 @@ class OWFSreceiver(object,protocol.Protocol, _PauseableMixin):
 		while len(self.data) >= self.len and not self.paused:
 			if self.typ is None:
 				version, payload_len, ret_value, format_flags, data_len, offset = struct.unpack('!6i', self.data[:24])
+				self.data = self.data[24:]
+
 				if OWLOG: print "OW RECV", version, payload_len, ret_value, format_flags, data_len, offset
 
 				if version != 0:
 					self.errReceived(RuntimeError("Wrong version: %d"%(version,)))
 					return
+				if payload_len == -1 and data_len == 0 and offset == 0:
+					if self.pinger == 30:
+						process_event(Event(Context(),"onewire","wedged",self.name),return_errors=True).addErrback(process_failure)
+
+					self.pinger += 1
+					self.ping()
+					return # server busy
 				if payload_len < 0 or payload_len > 0 and (payload_len < data_len or offset+data_len > payload_len):
 					self.errReceived(RuntimeError("Wrong length: %d %d %d"%(payload_len,offset,data_len,)))
 					return
 
-				self.data = self.data[24:]
-
 				if payload_len > self.MAX_LENGTH:
 					self.transport.loseConnection()
+					self.errReceived(RuntimeError("Length exceeded: %d %d %d"%(payload_len,offset,data_len,)))
 					return
 				self.offset = offset
 				if payload_len:
@@ -156,6 +171,7 @@ class OWFSreceiver(object,protocol.Protocol, _PauseableMixin):
 					self.data_len = 0
 				self.len = payload_len
 				self.typ = ret_value
+				self.pinger = 0
 			else:
 				data = self.data[self.offset:self.offset+self.data_len]
 				self.data = self.data[self.len:]
@@ -171,6 +187,8 @@ class OWFSreceiver(object,protocol.Protocol, _PauseableMixin):
 		flags = 0
 		if self.persist:
 			flags |= OWFlag.persist
+		# needed for sometimes-broken 1wire daemons
+		flags |= OWFlag.busret
 		# flags |= 1<<8 ## ?
 		flags |= OWtempformat.celsius << OWtempformat._offset
 		flags |= OWdevformat.fdi << OWdevformat._offset
@@ -188,6 +206,7 @@ class OWFScall(object):
 	tries = 0
 	max_tries = MAX_TRIES
 	xconn = None
+	cached = False
 
 	def __init__(self):
 		self.d = None
@@ -200,6 +219,9 @@ class OWFScall(object):
 		if self.d is None:
 			self.d = defer.Deferred()
 	
+	def ping(self):
+		pass
+
 	def send(self,conn):
 		raise NotImplemetedError("You need to override send().")
 
@@ -233,9 +255,14 @@ class OWFScall(object):
 
 	def _path(self,path):
 		"""Helper to build an OWFS path from a list"""
-		if not path:
-			return "/uncached"
-		return "/uncached/"+"/".join(path)
+		if self.cached:
+			if not path:
+				return ""
+			return "/"+"/".join(path)
+		else:
+			if not path:
+				return "/uncached"
+			return "/uncached/"+"/".join(path)
 
 	def may_retry(self):
 		if self.d.called:
@@ -250,7 +277,7 @@ class OWFScall(object):
 
 class OWFStimeout(object):
 	"""A mix-in that provides possibly-"benign" timeouts and NOP handling."""
-	timeout = 1.5
+	timeout = 2.5
 	error_on_timeout = True
 
 	def __init__(self,*a,**k):
@@ -259,10 +286,11 @@ class OWFStimeout(object):
 
 	def has_timeout(self):
 		self.timer = None
-		if self.error_on_timeout:
-			self.conn.is_done(TimedOut(self.path))
-		else:
-			self.conn.is_done()
+		if self.conn and self.conn.conn:
+			if self.error_on_timeout:
+				self.conn.conn.is_done(TimedOut(self.path))
+			else:
+				self.conn.conn.is_done()
 
 	def do_timeout(self):
 		if self.timer is None:
@@ -277,13 +305,20 @@ class OWFStimeout(object):
 		self.do_timeout()
 		return super(OWFStimeout,self).sendMsg(*a,**k)
 
+	def ping(self):
+		self.drop_timeout()
+		self.do_timeout()
+
 	def msgReceived(self, typ, *a,**k):
 		self.drop_timeout()
-		if typ == OWMsg.nop:
+#		if typ == OWMsg.nop:
+#			self.do_timeout()
+#			return True
+#		else:
+		res = super(OWFStimeout,self).msgReceived(typ,*a,**k)
+		if not res:
 			self.do_timeout()
-			return True
-		else:
-			return super(OWFStimeout,self).msgReceived(typ,*a,**k)
+		return res
 	
 	def error(self,*a,**k):
 		self.drop_timeout()
@@ -301,7 +336,7 @@ class NOPmsg(OWFScall):
 		self.sendMsg(conn,OWMsg.nop,"",0)
 
 
-class ATTRgetmsg(OWFScall):
+class ATTRgetmsg(OWFStimeout,OWFScall):
 	def __init__(self,path, prio=PRIO_STANDARD):
 		self.path = path
 		self.prio = prio
@@ -317,18 +352,18 @@ class ATTRgetmsg(OWFScall):
 	# .dataReceived() already does what's expected
 	
 
-class ATTRsetmsg(OWFScall):
+class ATTRsetmsg(OWFStimeout,OWFScall):
 	def __init__(self,path,value, prio=PRIO_URGENT):
 		self.path = path
 		self.value = value
 		super(ATTRsetmsg,self).__init__()
 
 	def send(self,conn):
-		val = str(self.value)
+		val = unicode(self.value)
 		self.sendMsg(conn, OWMsg.write,self._path(self.path)+'\0'+val,len(val))
 
 	def __repr__(self):
-		return "‹"+self.__class__.__name__+" "+self.path[-2]+" "+self.path[-1]+" "+str(self.value)+"›"
+		return u"‹"+self.__class__.__name__+" "+self.path[-2]+" "+self.path[-1]+" "+unicode(self.value)+u"›"
 		
 
 
@@ -336,6 +371,7 @@ class DIRmsg(OWFStimeout,OWFScall):
 	error_on_timeout = False
 	prio = PRIO_BACKGROUND
 	empty_ok = True
+	cached = True
 
 	def __init__(self,path,cb):
 		self.path = path
@@ -377,6 +413,9 @@ class OWFSqueue(OWFSreceiver):
 		if OWLOG: print "OWFS send for",self.msg
 		msg.send(self)
 
+	def ping(self):
+		if self.msg:
+			self.msg.ping()
 
 	def connectionFailed(self,reason):
 		super(OWFSqueue,self).connectionFailed(reason)
@@ -431,7 +470,11 @@ class OWFSqueue(OWFSreceiver):
 		elif n_msgs or msg.empty_ok:
 			msg.done()
 		else:
-			self.retry(msg)
+			try:
+				err = failure.Failure()
+			except failure.NoCurrentExceptionError:
+				err = OWFSUnspecdError()
+			self.retry(msg, err)
 		
 
 	def timeout(self, err=None):
@@ -603,13 +646,14 @@ class OWFSfactory(object,ReconnectingClientFactory):
 		
 
 	def all_devices(self, proc):
+		seen_mplex = {}
 		def doit(dev,path=(),key=None):
 			buses = []
 			entries = []
 			def got_entry(name):
 				if key is None and name.startswith("bus."):
 					buses.append(name)
-				else:
+				elif name[2] == ".":
 					entries.append(name)
 
 			def done(_):
@@ -617,20 +661,21 @@ class OWFSfactory(object,ReconnectingClientFactory):
 				if buses:
 					for b in buses:
 						f.addCallback(_call,doit,dev,path=path+(b,),key=None)
-				else:
-					p = dev.path
-					if dev.bus_id:
-						p += (dev.bus_id,)
-					p += path
-					if key:
-						p += (key,)
 
-					for b in entries:
-						dn = OWFSdevice(id=b,bus=self,path=p)
-						f.addCallback(_call,proc,dn)
-						if b.startswith("1F."): # Bus multiplexer
-							f.addCallback(_call,doit,dn,key="main")
-							f.addCallback(_call,doit,dn,key="aux")
+				p = dev.path
+				if dev.bus_id:
+					p += (dev.bus_id,)
+				p += path
+				if key:
+					p += (key,)
+
+				for b in entries:
+					dn = OWFSdevice(id=b,bus=self,path=p)
+					f.addCallback(_call,proc,dn)
+					if b.startswith("1F.") and b not in seen_mplex:
+						seen_mplex[b] = f
+						f.addCallback(_call,doit,dn,key="main")
+						f.addCallback(_call,doit,dn,key="aux")
 				return f
 
 			e = dev.dir(key=key,proc=got_entry,path=path)
@@ -651,13 +696,13 @@ class OWFSfactory(object,ReconnectingClientFactory):
 		new_ids = {}
 		seen_ids = {}
 		def got_dev(dev):
-			if dev in seen_ids:
+			if dev.id in seen_ids:
 				return
+			seen_ids[dev.id] = dev
 			if dev.id in old_ids:
 				del old_ids[dev.id]
 			else:
 				new_ids[dev.id] = dev
-			seen_ids[dev.id] = dev
 		d = self.all_devices(got_dev)
 
 		def cleanup(_):

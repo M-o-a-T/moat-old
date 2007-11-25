@@ -148,3 +148,10 @@ def sws(self,data):
 		data = data.encode("utf-8")
 	return _ssw(self,data)
 SSHSessionProcessProtocol.write = sws
+
+fhw = FileDescriptor.write
+def nfhw(self,data):
+	if isinstance(data,unicode):
+		data = data.encode("utf-8")
+	return fhw(self,data)
+FileDescriptor.write = nfhw

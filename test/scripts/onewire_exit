@@ -39,6 +39,8 @@ fi
 		-e "s/END: thermo.*/END: thermo¦DATA/" \
 		-e "s/instance at 0x[0-9a-fA-F]*/instance at FOO/g" \
 		-e "/EVENT: onewire.*scanning/,/EVENT: onewire.*scanned/d" \
+		-e "/EVENT: onewire.*scanned/d" \
+		-e "s/^[0-9][0-9]*/99/" \
 		-e "/DirStart/,/DirStop/d" \
 		-e "s/: wait¦(start|stop|done|cancel)¦[0-9.]*¦/: wait¦\1¦×××¦/g" \
 		-i real/onewire

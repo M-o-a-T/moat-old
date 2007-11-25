@@ -1,3 +1,27 @@
+homevent (0.2.5) unstable; urgency=low
+
+  * Onwards
+  * Added "delta up" to monitor, denoting a counter that doesn't go down
+    (if that happens, the delta will be ignored but the counter will still
+     be used)
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Thu, 22 Nov 2007 11:52:02 +0100
+
+homevent (0.2.4) unstable; urgency=low
+
+  * Fixed packaging.
+  * Handle "busy" responses from the OWFS server.
+  * Handle OWFS timeouts in non-DIR messages.
+  * Use cached version of OWFS for directory scans.
+  * Run as a "homevent" user (Debian packaging)
+  * Removed the cdbs build system because it's buggy. See debbug 386970:
+    calling dh_pysupport *after* dh_installinit is broken
+  * Fixed syslogging.
+  * Call RRD with specific seconds because it sometimes has problems
+    when a datapoint is very close to the next full minute.
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Thu, 22 Nov 2007 00:29:25 +0100
+
 homevent (0.2.3) unstable; urgency=low
 
   * Started moving to @inlineCallbacks style where appropriate

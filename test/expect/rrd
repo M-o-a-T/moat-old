@@ -4,17 +4,17 @@ NEW: <WorkSequence:1 (4)>
    : └1╴... done.
 1 EVENT: startup
 1 END: startup
-0 add ‹IfStatement ⌁.if¦exists¦rrd¦t›
+0 add ‹IfStatement ⌁.if¦exists¦rrd¦t¦tt¦ttt›
 0 add ‹LogHandler ⌁.log¦DEBUG¦No1›
 0 add ‹LogHandler ⌁.log¦DEBUG¦Yes›
 1 Yes
-0 add ‹IfStatement ⌁.if¦exists¦rrd¦t›
+0 add ‹IfStatement ⌁.if¦exists¦rrd¦t¦tt¦ttt›
 0 add ‹LogHandler ⌁.log¦DEBUG¦Yes›
 0 add ‹LogHandler ⌁.log¦DEBUG¦No2›
 1 Yes
-t : /tmp/rrdtest.rrd test
+t tt ttt : /tmp/rrdtest.rrd test
 .
-Name: t
+Name: t tt ttt
 File: /tmp/rrdtest.rrd
 Dataset: test
 min: 0.0
@@ -28,24 +28,34 @@ last_ds: UNKN
 NEW: <WorkSequence:2 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦1
    : └1╴... done.
-33 EVENT: wait¦start¦×××¦_wait¦1
-33 END: wait¦start¦×××¦_wait¦1
+31 EVENT: wait¦start¦×××¦_wait¦1
+31 END: wait¦start¦×××¦_wait¦1
 NEW: <WorkSequence:3 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦1
    : └1╴... done.
-40 EVENT: wait¦done¦×××¦_wait¦1
-40 END: wait¦done¦×××¦_wait¦1
+38 EVENT: wait¦done¦×××¦_wait¦1
+38 END: wait¦done¦×××¦_wait¦1
 NEW: <WorkSequence:4 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦2
    : └1╴... done.
-51 EVENT: wait¦start¦×××¦_wait¦2
-51 END: wait¦start¦×××¦_wait¦2
+49 EVENT: wait¦start¦×××¦_wait¦2
+49 END: wait¦start¦×××¦_wait¦2
 NEW: <WorkSequence:5 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦2
    : └1╴... done.
-58 EVENT: wait¦done¦×××¦_wait¦2
-58 END: wait¦done¦×××¦_wait¦2
-Name: t
+56 EVENT: wait¦done¦×××¦_wait¦2
+56 END: wait¦done¦×××¦_wait¦2
+NEW: <WorkSequence:6 (4)>
+   : │  EVENT: wait¦start¦×××¦_wait¦3
+   : └1╴... done.
+67 EVENT: wait¦start¦×××¦_wait¦3
+67 END: wait¦start¦×××¦_wait¦3
+NEW: <WorkSequence:7 (4)>
+   : │  EVENT: wait¦done¦×××¦_wait¦3
+   : └1╴... done.
+74 EVENT: wait¦done¦×××¦_wait¦3
+74 END: wait¦done¦×××¦_wait¦3
+Name: t tt ttt
 File: /tmp/rrdtest.rrd
 Dataset: test
 min: 0.0
@@ -56,13 +66,13 @@ value: ?
 ds_name: test
 type: GAUGE
 last_ds: 12
-0 add ‹VarRRDHandler ⌁.var¦rrd¦x¦last_ds¦t›
+0 add ‹VarRRDHandler ⌁.var¦rrd¦x¦last_ds¦t¦tt¦ttt›
 0 add ‹TriggerHandler ⌁.trigger¦last¦$x›
-74 EVENT: last¦12
-NEW: <WorkSequence:6 (4)>
+90 EVENT: last¦12
+NEW: <WorkSequence:8 (4)>
    : │  EVENT: last¦12
    : └1╴... done.
-0 add ‹IfStatement ⌁.if¦exists¦rrd¦t›
+0 add ‹IfStatement ⌁.if¦exists¦rrd¦t¦tt¦ttt›
 0 add ‹LogHandler ⌁.log¦DEBUG¦No3›
 0 add ‹LogHandler ⌁.log¦DEBUG¦Yes›
 1 Yes

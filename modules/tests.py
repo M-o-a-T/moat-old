@@ -1,4 +1,3 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 """\
@@ -53,6 +52,7 @@ monitor test MIN MAX STEP
 			raise SyntaxError("Events need at least one parameter")
 		self.values["_min"] = int(event[0])
 		self.values["_max"] = int(event[1])
+		self.values["params"] = ("test",unicode(event[0])+u"…"+unicode(event[1]))
 		if len(event) > 2:
 			self.values["_step"] = int(event[2])
 

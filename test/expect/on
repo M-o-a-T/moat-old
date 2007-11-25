@@ -4,28 +4,32 @@ NEW: <WorkSequence:1 (4)>
    : └1╴... done.
 1 EVENT: startup
 1 END: startup
-0 Create OnEvtHandler: ['foo']
+0 Create OnEvtHandler: fuß
 0 add ‹DoNothingHandler ⌁.do¦nothing›
 0 NewHandler 1
-0 Create OnEvtHandler: ['foo']
-0 add ‹OnSkip ⌁.skip¦next›
+0 Create OnEvtHandler: foo
+0 add ‹DoNothingHandler ⌁.do¦nothing›
 0 NewHandler 2
-0 Create OnEvtHandler: ['foo']
-0 add ‹SyncTriggerHandler ⌁.sync¦trigger¦OuchNo›
+0 Create OnEvtHandler: foo
+0 add ‹OnSkip ⌁.skip¦next›
 0 NewHandler 3
-0 Create OnEvtHandler: ['bar', '*']
+0 Create OnEvtHandler: foo
+0 add ‹SyncTriggerHandler ⌁.sync¦trigger¦OuchNo›
+0 NewHandler 4
+0 Create OnEvtHandler: bar¦*
 0 add ‹Block ⌁.block›
 0 add ‹SyncTriggerHandler ⌁.sync¦trigger¦$1›
-0 NewHandler 4
-1  : foo ‹Do nothing›
-2  : foo ‹Skip Next›
-3  : foo ‹not executed›
-4  : bar¦*
+0 NewHandler 5
+1  : fuß ‹Schau auf deine Füße›
+2  : foo ‹Do nothing›
+3  : foo ‹Skip Next›
+4  : foo ‹not executed›
+5  : bar¦*
 .
-3 : foo
+4 : foo
 Name: not executed
 Doc: Is not executed because of the former 'skip next' (until that's gone)
-44 EVENT: bar¦foo
+49 EVENT: bar¦foo
 NEW: <WorkSequence:2 (5)>
    : │  EVENT: bar¦foo
    : ├1╴on bar * ‹OnEventHandler›
@@ -33,14 +37,14 @@ NEW: <WorkSequence:2 (5)>
    : │  step: block ‹Block›
    : │      : step: sync trigger $1 ‹SyncTriggerHandler›
    : └2╴... done.
-44 EVENT: bar¦foo
+49 EVENT: bar¦foo
 RUN: on bar * ‹OnEventHandler›
    : prio: 51
    : step: block ‹Block›
    :     : step: sync trigger $1 ‹SyncTriggerHandler›
  at: <WorkSequence:2 (5)> (step 1)
  ev: EVENT: bar¦foo
-50 EVENT: foo
+55 EVENT: foo
 NEW: <WorkSequence:3 (5)>
    : │  EVENT: foo
    : ├1╴on foo ‹OnEventHandler›
@@ -48,7 +52,7 @@ NEW: <WorkSequence:3 (5)>
    : │  prio: 50
    : │  step: do nothing ‹DoNothingHandler›
    : └2╴... done.
-50 EVENT: foo
+55 EVENT: foo
 RUN: on foo ‹OnEventHandler›
    : name: Do nothing
    : prio: 50
@@ -56,9 +60,9 @@ RUN: on foo ‹OnEventHandler›
  at: <WorkSequence:3 (5)> (step 1)
  ev: EVENT: foo
 0 NOW: do nothing
-50 END: foo
-44 END: bar¦foo
-66 EVENT: bar¦foo
+55 END: foo
+49 END: bar¦foo
+71 EVENT: bar¦foo
 NEW: <WorkSequence:4 (5)>
    : │  EVENT: bar¦foo
    : ├1╴on bar * ‹OnEventHandler›
@@ -66,14 +70,14 @@ NEW: <WorkSequence:4 (5)>
    : │  step: block ‹Block›
    : │      : step: sync trigger $1 ‹SyncTriggerHandler›
    : └2╴... done.
-66 EVENT: bar¦foo
+71 EVENT: bar¦foo
 RUN: on bar * ‹OnEventHandler›
    : prio: 51
    : step: block ‹Block›
    :     : step: sync trigger $1 ‹SyncTriggerHandler›
  at: <WorkSequence:4 (5)> (step 1)
  ev: EVENT: bar¦foo
-72 EVENT: foo
+77 EVENT: foo
 NEW: <WorkSequence:5 (5)>
    : │  EVENT: foo
    : ├1╴on foo ‹OnEventHandler›
@@ -81,7 +85,7 @@ NEW: <WorkSequence:5 (5)>
    : │  prio: 50
    : │  step: do nothing ‹DoNothingHandler›
    : └2╴... done.
-72 EVENT: foo
+77 EVENT: foo
 RUN: on foo ‹OnEventHandler›
    : name: Do nothing
    : prio: 50
@@ -89,13 +93,20 @@ RUN: on foo ‹OnEventHandler›
  at: <WorkSequence:5 (5)> (step 1)
  ev: EVENT: foo
 0 NOW: do nothing
-72 END: foo
-66 END: bar¦foo
-3  : foo ‹not executed›
-4  : bar¦*
+77 END: foo
+71 END: bar¦foo
+2  : foo ‹Do nothing›
+4  : foo ‹not executed›
+5  : bar¦*
 .
+95 EVENT: fuß
+NEW: <WorkSequence:6 (4)>
+   : │  EVENT: fuß
+   : └1╴... done.
+95 EVENT: fuß
+95 END: fuß
 2 EVENT: shutdown
-NEW: <WorkSequence:6 (5)>
+NEW: <WorkSequence:7 (5)>
    : │  EVENT: shutdown
    : └1╴... done.
 2 EVENT: shutdown

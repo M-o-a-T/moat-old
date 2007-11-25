@@ -15,7 +15,9 @@ DESC=homevent
 
 DAEMON_OPTS=""
 DAEMON_CFG="/etc/homevent/daemon.he"
-export PYTHONPATH=/etc/homevent:/usr/share/homevent
+LOGLEVEL=user.info
+ERRLEVEL=user.warn
+export PYTHONPATH=/etc/homevent
 
 test -x $DAEMON || exit 0
 
@@ -30,36 +32,39 @@ set -e
 case "$1" in
   start)
 	echo -n "Starting $DESC: "
-	start-stop-daemon --start --quiet --pidfile /var/run/$NAME.pid \
-		--exec $DAEMON -- $DAEMON_OPTS $DAEMON_CFG 2>&1 | logger -t homevent
+	( start-stop-daemon --start --quiet --pidfile /var/run/$NAME.pid -bm \
+		--chuid homevent --chdir /var/lib/homevent \
+		--exec $DAEMON -- $DAEMON_OPTS $DAEMON_CFG | logger -p $LOGLEVEL -t homevent ) \
+			2>&1 | logger -p $ERRLEVEL -t homevent
 	echo "$NAME."
 	;;
   stop)
 	echo -n "Stopping $DESC: "
-	start-stop-daemon --stop --quiet --pidfile /var/run/$NAME.pid \
-		--exec $DAEMON
-	echo "$NAME."
+	pid=$(cat /var/run/$NAME.pid 2>/dev/null)
+	test -n "$pid" && kill -0 $pid 2>/dev/null || exit 0
+	start-stop-daemon --stop --quiet --pidfile /var/run/$NAME.pid
+	for f in . . . . . . . . . . ; do
+		if ! kill -0 $pid 2>/dev/null; then break; fi
+		echo -n $f
+		sleep 1
+	done
+	if kill -0 $pid 2>/dev/null; then echo " -- still running?"; exit 1; fi
+	echo " $NAME."
 	;;
   reload)
 	echo "Reloading $DESC configuration files."
-	start-stop-daemon --stop --signal 1 --quiet --pidfile \
-		/var/run/$NAME.pid --exec $DAEMON
+	start-stop-daemon --stop --signal 1 --quiet --pidfile 
 	;;
   force-reload)
 	# check whether $DAEMON is running. If so, restart
-	start-stop-daemon --stop --test --quiet --pidfile \
-		/var/run/$NAME.pid --exec $DAEMON \
+	start-stop-daemon --stop --test --quiet --pidfile /var/run/$NAME.pid \
 	&& $0 restart \
 	|| exit 0
 	;;
   restart)
-    echo -n "Restarting $DESC: "
-	start-stop-daemon --stop --quiet --pidfile \
-		/var/run/$NAME.pid --exec $DAEMON
-	sleep 1
-	start-stop-daemon --start --quiet --pidfile \
-		/var/run/$NAME.pid --exec $DAEMON -- $DAEMON_OPTS $DAEMON_CFG
-	echo "$NAME."
+    echo "Restarting $DESC: "
+	$0 stop
+	$0 start
 	;;
   *)
 	N=/etc/init.d/$NAME

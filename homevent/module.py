@@ -1,4 +1,3 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 """\
@@ -85,8 +84,16 @@ def load_module(*m):
 			break
 
 	if not md:
-		from pkg_resources import resource_string
-		c = compile(resource_string("modules", m[-1]+".py"), "modules/"+m[-1]+".py", "exec",0,True)
+		if "HOMEVENT_TEST" in os.environ:
+			if os.path.isdir("modules"):
+				p = "modules"
+			else:
+				p = os.path.join(os.pardir,"modules")
+			p = os.path.join(p,m[-1])+".py"
+			c = compile(open(p,"r").read(), p, "exec",0,True)
+		else:
+			from pkg_resources import resource_string
+			c = compile(resource_string("homevent.modules", m[-1]+".py"), os.path.join('homevent','modules',m[-1]+".py"), "exec",0,True)
 		eval(c,md)
 
 	mod = md["init"]

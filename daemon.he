@@ -1,5 +1,5 @@
 # HomEvenT default startup file
-load dir "/usr/share/homevent/modules"
+#load dir "/etc/homevent/modules"
 
 if not exists module logging: load logging
 

@@ -1,4 +1,4 @@
-# *-* coding: utf-8 *-*
+# -*- coding: utf-8 -*-
 
 """\
 This is the core of the event dispatcher.
@@ -13,7 +13,7 @@ from homevent.reactor import start_up,shut_down, mainloop
 from homevent.statement import main_words,global_words
 from homevent.check import register_condition
 
-VERSION = "0.2.3"
+VERSION = "0.2.5"
 
 __all__ = ("Event","Worker","SeqWorker","WorkSequence",
 	"collect_event","process_event", "register_worker", "mainloop")

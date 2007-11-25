@@ -1,4 +1,4 @@
-# *-* coding: utf-8 *-*
+# -*- coding: utf-8 -*-
 
 """\
 This part of the code defines what an event is.
@@ -58,13 +58,19 @@ class Event(object):
 
 	def __str__(self):
 		try:
-			return "↯."+"¦".join(str(x) for x in self.names)
+			return "<Event:"+u"¦".join(unicode(x) for x in self.names)+">"
+		except Exception:
+			return "<Event> REPORT_ERROR: "+repr(self.names)
+
+	def __unicode__(self):
+		try:
+			return u"↯."+u"¦".join(unicode(x) for x in self.names)
 		except Exception:
 			return "↯ REPORT_ERROR: "+repr(self.names)
 
 	def report(self, verbose=False):
 		try:
-			yield "EVENT: "+"¦".join(str(x) for x in self.names)
+			yield u"EVENT: "+u"¦".join(unicode(x) for x in self.names)
 		except Exception:
 			yield "EVENT: REPORT_ERROR: "+repr(self.names)
 	
@@ -117,7 +123,7 @@ def report(self, verbose=False):
 			yield p+l
 			p="     : "
 		if hasattr(self,"cmd"):
-			yield "   at: "+cmd.file+":"+str(cmd.line)
+			yield "   at: "+cmd.file+":"+unicode(cmd.line)
 		if hasattr(self,"within"):
 			for w in self.within:
 				p = "   in: "

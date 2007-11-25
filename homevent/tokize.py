@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """Tokenization help for Python-like HomEvenT programs."""
 
 __author__ = 'Matthias Urlichs <matthias@urlichs.de>'
@@ -60,8 +62,8 @@ PseudoToken = Whitespace + group(PseudoExtras, Number, Funny, ContStr, Name)
 
 def _comp(exp):
 	return re.compile(exp, re.UNICODE)
-tokenprog, pseudoprog = map(
-    _comp, (Token, PseudoToken))
+tokenprog, pseudoprog, namestart, numstart = map(
+    _comp, (Token, PseudoToken, r'\w', r'\d'))
 
 tabsize = 8
 
@@ -102,7 +104,6 @@ def tokizer(input,output):
     """see tokenize.generate_tokens."""
 
     lnum = parenlev = continued = 0
-    namechars, numchars = string.ascii_letters + '_', '0123456789'
     contstr, needcont = '', 0
     contline = None
     indents = [0]
@@ -175,7 +176,7 @@ def tokizer(input,output):
                 spos, epos, pos = (lnum, start), (lnum, end), end
                 token, initial = line[start:end], line[start]
 
-                if initial in numchars or \
+                if numstart.match(initial) or \
                    (initial == '.' and token != '.'):      # ordinary number
                     yield output(NUMBER, token, spos, epos, line)
                 elif initial in '\r\n':
@@ -207,7 +208,7 @@ def tokizer(input,output):
                         break
                     else:                                  # ordinary string
                         yield output(STRING, token, spos, epos, line)
-                elif initial in namechars:                 # ordinary name
+                elif namestart.match(initial):                 # ordinary name
                     yield output(NAME, token, spos, epos, line)
                 elif initial == '\\':                      # continued stmt
                     continued = 1

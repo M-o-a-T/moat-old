@@ -1,4 +1,3 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 """\
@@ -33,7 +32,9 @@ class UnknownWordError(KeyError):
 		self.where = where
 
 	def __str__(self):
-		return u"Cannot find word ‹%s› in ‹%s›" % (" ".join(str(x) for x in self.word), " ".join(self.where.name))
+		return "Cannot find word <%s> in <%s>" % (" ".join(str(x) for x in self.word), " ".join(self.where.name))
+	def __unicode__(self):
+		return u"Cannot find word ‹%s› in ‹%s›" % (" ".join(unicode(x) for x in self.word), " ".join(self.where.name))
 
 class Statement(object):
 	"""\
@@ -55,7 +56,7 @@ class Statement(object):
 	
 	def __repr__(self):
 		if self.args:
-			return u"‹%s %s›" % (self.__class__.__name__,str(self.args))
+			return u"‹%s %s›" % (self.__class__.__name__,unicode(self.args))
 		else:
 			return u"‹%s %s›" % (self.__class__.__name__,repr(self.name))
 
@@ -83,7 +84,7 @@ class Statement(object):
 		raise NotImplementedError("You need to override '%s.run' (called with %s)" % (self.__class__.__name__,repr(event)))
 	
 	def report(self,verbose):
-		yield " ".join(str(x) for x in self.args)+u" ‹"+self.__class__.__name__+u"›"
+		yield " ".join(unicode(x) for x in self.args)+u" ‹"+self.__class__.__name__+u"›"
 
 
 class ComplexStatement(Statement):
@@ -250,10 +251,10 @@ class StatementList(ComplexStatement):
 
 	def __repr__(self):
 		try:
-			return u"‹"+self.__class__.__name__+"("+str(self.handler_id)+u")›"
+			return u"‹"+self.__class__.__name__+"("+unicode(self.handler_id)+u")›"
 		except AttributeError:
 			try:
-				return u"‹"+self.__class__.__name__+" "+str(self.args)+u"›"
+				return u"‹"+self.__class__.__name__+" "+unicode(self.args)+u"›"
 			except AttributeError:
 				return u"‹"+self.__class__.__name__+u"(?)›"
 
@@ -272,7 +273,7 @@ class StatementList(ComplexStatement):
 		self.procs = []
 
 	def add(self,proc):
-		log(TRACE, "add", str(proc))
+		log(TRACE, "add", unicode(proc))
 		assert not proc.immediate,"Immediate proc added?"
 		self.procs.append(proc)
 

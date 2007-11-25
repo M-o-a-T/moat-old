@@ -1,5 +1,6 @@
 #!/bin/sh
 set -e
 
+dt=$(date '+%s' -d "2003-04-05 06:07:08")
 rm -f /tmp/rrdtest.rrd || true
-rrdtool create /tmp/rrdtest.rrd --step 2 DS:test:GAUGE:60:0:20 RRA:AVERAGE:0.9:1:120
+rrdtool create /tmp/rrdtest.rrd --start $dt --step 2 DS:test:GAUGE:60:0:20 RRA:AVERAGE:0.9:1:120
