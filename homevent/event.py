@@ -7,6 +7,17 @@ This part of the code defines what an event is.
 import warnings
 from twisted.python import failure
 
+class TrySomethingElse(RuntimeError):
+	"""Error if a conditional does not match"""
+	def __init__(*args):
+		self.args = args
+	def __str__(self):
+		return "Cannot proceed (%s)" % " ".join((str(x) for x in self.args))
+
+class NeverHappens(BaseException):
+	"""This exception is never raised. Needed for conditional handling."""
+	pass
+
 class EventNoNameError(ValueError):
 	"""\
 		You tried to create an unnamed event. That's stupid.

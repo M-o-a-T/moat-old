@@ -10,7 +10,7 @@ something about it.
 """
 
 from homevent.context import Context
-from homevent.event import Event
+from homevent.event import Event,TrySomethingElse,NeverHappens
 from homevent.constants import MIN_PRIO,MAX_PRIO
 from homevent.twist import deferToLater
 
@@ -108,67 +108,63 @@ class WorkSequence(WorkItem):
 		else:
 			return deferToThread(self._process,*a,**k)
 
+	handle_conditional = False
+
+	@defer.inlineCallbacks
 	def _process(self, *a,**k):
 		assert self.work,"empty workqueue"
 		self.in_step = 0
 		self.in_worker = None
 
 		from homevent.logging import log_run,log_halted
-		event = self.event
-		if not isinstance(event,defer.Deferred):
-			event = defer.succeed(event)
+		event = yield self.event
+		skipping = False
+		excepting = False
+		if self.handle_conditional:
+			DoRetry = TrySomethingElse
+		else:
+			DoRetry = NeverHappens
 
-		def do_std(res,step,w):
-			self.in_step = step
-			self.in_worker = w
-			try:
-				log_run(self,w,step)
-				r = w.process(event=self.event, queue=self)
-			except HaltSequence:
-				log_halted(self,w,step)
-				return
-			except Exception:
-				if isinstance(res,failure.Failure):
-					from homevent.logging import log_exc
-					log_exc("Unhandled nested exception")
-				else:
-					r = failure.Failure()
-			def err_handler(r):
-				if not hasattr(r,"within"):
-					r.within=[w]
-				r.within.append(self)
-				if r.check(HaltSequence):
-					log_halted(self,w,step)
-					return r
-
-				from homevent.run import process_failure
-				return process_failure(r)
-			if isinstance(r,failure.Failure):
-				err_handler(r)
-			elif isinstance(r,defer.Deferred):
-				r.addErrback(err_handler)
-			return r
-
-		step = 0
-
-#		def pr1(_,s):
-#			print "before step",_,s
-#			return _
-#		def pr2(_,s):
-#			print "after step",_,s
-#			return _
+		res = None
 		for w in self.work:
 			if w.prio >= MIN_PRIO and w.prio <= MAX_PRIO:
 				step += 1
-			if isinstance(w,ExcWorker):
-#				event.addBoth(pr1,step)
-				event.addBoth(do_std,step,w)
-			else:
-#				event.addCallback(pr1,step)
-				event.addCallback(do_std,step,w)
-#			event.addBoth(pr2,step)
+				if skipping:
+					continue
 
-		return event
+			self.in_step = step
+			self.in_worker = w
+			r = None
+
+			try:
+				if not excepting or not isinstance(w,ExcWorker):
+					log_run(self,w,step)
+					r = yield w.process(event=self.event, queue=self)
+			except HaltSequence:
+				log_halted(self,w,step)
+				return
+			except TrySomethingElse:
+				pass
+			except Exception:
+				r = failure.Failure()
+				if isinstance(res,failure.Failure):
+					from homevent.logging import log_exc
+					log_exc("Unhandled nested exception", res)
+					from homevent.run import process_failure
+					yield process_failure(res)
+			else:
+				if self.handle_conditional:
+					skipping = True
+
+			if isinstance(r,failure.Failure):
+				excepting = True
+				if not hasattr(r,"within"):
+					r.within=[w]
+				r.within.append(self)
+			if res is None:
+				res = r
+
+		defer.returnValue(res)
 
 	def report(self, verbose=False):
 		if not verbose:
@@ -232,6 +228,15 @@ class WorkSequence(WorkItem):
 				step += 1
 			pr = w
 		for _ in pstep("╘","└"," "): yield _
+
+class ConditionalWorkSequnce(WorkSequence):
+	"""\ 
+		A WorkSequence which completes with the first step that does
+		*not* raise an TrySomethingElse error.
+		"""
+	handle_conditional = True
+
+
 
 def ConcurrentWorkSequence(WorkSequence):
 	"""\

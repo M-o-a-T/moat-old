@@ -21,13 +21,6 @@ This code implements the basic framework for checking conditions.
 from homevent.statement import Statement,ComplexStatement, global_words
 
 
-class TrySomethingElse(RuntimeError):
-	"""Error if a conditional does not match"""
-	def __init__(*args):
-		self.args = args
-	def __str__(self):
-		return "Cannot proceed (%s)" % " ".join((str(x) for x in self.args))
-
 class Check(Statement):
 	"""Abstrace base class for condition checks"""
 	immediate = True
