@@ -104,20 +104,25 @@ class WorkSequence(WorkItem):
 
 	def process(self, *a,**k):
 		if "HOMEVENT_TEST" in os.environ:
-			return deferToLater(self._process,*a,**k)
+			r = deferToLater(self._process,*a,**k)
 		else:
-			return deferToThread(self._process,*a,**k)
+			r = deferToThread(self._process,*a,**k)
+		return r
 
 	handle_conditional = False
 
 	@defer.inlineCallbacks
 	def _process(self, *a,**k):
 		assert self.work,"empty workqueue"
-		self.in_step = 0
+		self.in_step = step = 0
 		self.in_worker = None
+		res = None
 
 		from homevent.logging import log_run,log_halted
-		event = yield self.event
+		try:
+			event = yield self.event
+		except Exception:
+			event = failure.Failure()
 		skipping = False
 		excepting = False
 		if self.handle_conditional:
@@ -125,7 +130,6 @@ class WorkSequence(WorkItem):
 		else:
 			DoRetry = NeverHappens
 
-		res = None
 		for w in self.work:
 			if w.prio >= MIN_PRIO and w.prio <= MAX_PRIO:
 				step += 1
@@ -137,7 +141,7 @@ class WorkSequence(WorkItem):
 			r = None
 
 			try:
-				if not excepting or not isinstance(w,ExcWorker):
+				if not excepting or isinstance(w,ExcWorker):
 					log_run(self,w,step)
 					r = yield w.process(event=self.event, queue=self)
 			except HaltSequence:
