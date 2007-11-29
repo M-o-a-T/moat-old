@@ -9,7 +9,7 @@ from twisted.python import failure
 
 class TrySomethingElse(RuntimeError):
 	"""Error if a conditional does not match"""
-	def __init__(*args):
+	def __init__(self,*args):
 		self.args = args
 	def __str__(self):
 		return "Cannot proceed (%s)" % " ".join((str(x) for x in self.args))
