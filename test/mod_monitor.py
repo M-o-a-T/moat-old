@@ -43,13 +43,13 @@ monitor passive:
 	require 2 2
 list monitor baz zaz
 
-wait for 0.2
+wait for 0.1
 block:
 	if waiting monitor baz zaz:
 		log DEBUG Yes
 	else:
 		log DEBUG No1
-wait for 0.5
+wait for 0.6
 block:
 	if waiting monitor baz zaz:
 		log DEBUG No2

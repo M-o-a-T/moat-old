@@ -11,7 +11,7 @@ async:
 	wait for 10:
 		name Foo Bar
 	trigger FooBar
-wait for 0.1:
+wait for 0.2:
 	name X1
 list wait
 list wait Foo Bar
