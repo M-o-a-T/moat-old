@@ -29,10 +29,10 @@ NEW: <WorkSequence:3 (4)>
 0 add ‹LogHandler ⌁.log¦TRACE¦Set¦to¦THREE›
 0 add ‹SetStateHandler ⌁.set¦state¦three¦foo¦bar›
 NEW: <WorkSequence:4 (4)>
-   : │  EVENT: wait¦start¦0.1¦_wait¦1
+   : │  EVENT: wait¦start¦0.3¦_wait¦1
    : └1╴... done.
-47 EVENT: wait¦start¦0.1¦_wait¦1
-47 END: wait¦start¦0.1¦_wait¦1
+47 EVENT: wait¦start¦0.3¦_wait¦1
+47 END: wait¦start¦0.3¦_wait¦1
 0 Set to THREE
 56 EVENT: state¦two¦three¦foo¦bar
 NEW: <WorkSequence:5 (5)>
@@ -50,22 +50,19 @@ RUN: on state * three foo bar ‹OnEventHandler›
  at: <WorkSequence:5 (5)> (step 1)
  ev: EVENT: state¦two¦three¦foo¦bar
 0 Set to FOUR
+56 END: state¦two¦three¦foo¦bar
 ERROR: Traceback (most recent call last):
-     :   File "modules/on_event.py, in process
-     :     return super(OnEventHandler,self).run(ctx,**k)
-     :   File "homevent/statement.py, in run
-     :     d.callback(None)
-     :   File "homevent/twist.py, in acb
-     :     self._startRunCallbacks(result)
-     :   File "internet/defer.py, in _startRunCallbacks
-     :     self._runCallbacks()
-     : --- <exception caught here> ---
      :   File "internet/defer.py, in _runCallbacks
      :     self.result = callback(self.result, *args, **kw)
-     :   File "homevent/statement.py, in go
-     :     return p.run(ctx)
-     :   File "modules/state.py, in run
-     :     raise StateChangeError(s,value)
+     :   File "homevent/twist.py, in <lambda>
+     :     d.addCallback(lambda _: p(*a,**k))
+     :   File "internet/defer.py, in unwindGenerator
+     :     return _inlineCallbacks(None, f(*args, **kwargs), Deferred())
+     :   File "internet/defer.py, in _inlineCallbacks
+     :     result = g.throw(result.type, result.value, result.tb)
+     : --- <exception caught here> ---
+     :   File "homevent/worker.py, in _process
+     :     r = yield w.process(event=self.event, queue=self)
      : __builtin__.StateChangeError: Trying to change state to 'four' while changing from 'two' to 'three'
    in: on state * three foo bar ‹OnEventHandler›
      : prio: 51
@@ -82,21 +79,17 @@ NEW: <WorkSequence:6 (4)>
    : │  ERROR: Trying to change state to 'four' while changing from 'two' to 'three'
    : └1╴... done.
 ERROR: Traceback (most recent call last):
-     :   File "modules/on_event.py, in process
-     :     return super(OnEventHandler,self).run(ctx,**k)
-     :   File "homevent/statement.py, in run
-     :     d.callback(None)
-     :   File "homevent/twist.py, in acb
-     :     self._startRunCallbacks(result)
-     :   File "internet/defer.py, in _startRunCallbacks
-     :     self._runCallbacks()
-     : --- <exception caught here> ---
      :   File "internet/defer.py, in _runCallbacks
      :     self.result = callback(self.result, *args, **kw)
-     :   File "homevent/statement.py, in go
-     :     return p.run(ctx)
-     :   File "modules/state.py, in run
-     :     raise StateChangeError(s,value)
+     :   File "homevent/twist.py, in <lambda>
+     :     d.addCallback(lambda _: p(*a,**k))
+     :   File "internet/defer.py, in unwindGenerator
+     :     return _inlineCallbacks(None, f(*args, **kwargs), Deferred())
+     :   File "internet/defer.py, in _inlineCallbacks
+     :     result = g.throw(result.type, result.value, result.tb)
+     : --- <exception caught here> ---
+     :   File "homevent/worker.py, in _process
+     :     r = yield w.process(event=self.event, queue=self)
      : __builtin__.StateChangeError: Trying to change state to 'four' while changing from 'two' to 'three'
    in: on state * three foo bar ‹OnEventHandler›
      : prio: 51
@@ -109,13 +102,12 @@ ERROR: Traceback (most recent call last):
      : │ │step: log TRACE Set to FOUR ‹LogHandler›
      : │ ╵step: set state four foo bar ‹SetStateHandler›
      : └2╴... done.
-67 END: StateChangeError
-56 END: state¦two¦three¦foo¦bar
+70 END: StateChangeError
 NEW: <WorkSequence:7 (4)>
-   : │  EVENT: wait¦done¦0.1¦_wait¦1
+   : │  EVENT: wait¦done¦0.3¦_wait¦1
    : └1╴... done.
-72 EVENT: wait¦done¦0.1¦_wait¦1
-72 END: wait¦done¦0.1¦_wait¦1
+72 EVENT: wait¦done¦0.3¦_wait¦1
+72 END: wait¦done¦0.3¦_wait¦1
 foo bar = three
 .
 Name: foo bar
