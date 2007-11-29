@@ -10,7 +10,7 @@ trigger FOO...
 
 from homevent.statement import Statement, main_words
 from homevent.event import Event
-from homevent.run import process_event
+from homevent.run import process_event, process_failure
 
 
 class TriggerHandler(Statement):
@@ -18,20 +18,22 @@ class TriggerHandler(Statement):
 	doc="send an event"
 	long_doc="""\
 trigger FOO...
-	- creates a FOO... event
+	- creates a FOO... event. Errors handling the event are reported
+	  asynchronously.
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		if not event:
 			raise SyntaxError("Events need at least one parameter")
-		process_event(Event(self.ctx,*event))
+		process_event(Event(self.ctx,*event)).addErrback(process_failure)
 
 class SyncTriggerHandler(TriggerHandler):
 	name=("sync","trigger")
 	doc="send an event and wait for it"
 	long_doc="""\
 sync trigger FOO...
-	- creates a FOO... event and wait until it is processed
+	- creates a FOO... event and wait until it is processed. Errors
+	  handling the event are propagated to the caller.
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)

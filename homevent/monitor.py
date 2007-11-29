@@ -315,7 +315,7 @@ class Monitor(object):
 			self.active = False
 		
 			try:
-				yield process_event(Event(Context(),"monitor","error",*self.name), return_errors=True)
+				yield process_event(Event(Context(),"monitor","error",*self.name))
 			except Exception,e:
 				yield process_failure()
 
@@ -342,7 +342,7 @@ class Monitor(object):
 		self.watcher.addBoth(got_it,self.watcher)
 
 		if self.passive and step==1:
-			d = process_event(Event(self.ctx, "monitor","checking",*self.name), return_errors=True)
+			d = process_event(Event(self.ctx, "monitor","checking",*self.name))
 			d.addErrback(self.watcher.errback)
 
 		return self.watcher

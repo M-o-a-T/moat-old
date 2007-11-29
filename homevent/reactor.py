@@ -10,7 +10,7 @@ from homevent.context import Context
 from homevent.event import Event
 from homevent.worker import Worker,ExcWorker,HaltSequence
 from homevent.run import register_worker,unregister_worker, SYS_PRIO,MAX_PRIO,\
-	process_event
+	process_event, process_failure
 from homevent.statement import Statement
 from homevent.io import dropConnections
 from homevent.twist import deferToLater,call_when_idle
@@ -42,8 +42,6 @@ class Shutdown_Worker_1(ExcWorker):
 		active_q_id += 1
 		queue.aq_id = active_q_id
 		active_queues[queue.aq_id] = queue
-		if not running:
-			raise HaltSequence("Not running. No new work is accepted!")
 	def report(self,*a,**k):
 		return ()
 
@@ -87,7 +85,7 @@ def start_up():
 	global running
 	if not running:
 		running = True
-		process_event(startup_event)
+		process_event(startup_event).addErrback(process_failure)
 	
 def _shut_down():
 	"""\
@@ -96,11 +94,11 @@ def _shut_down():
 		"""
 	global running
 	if running:
-		process_event(shutdown_event)
 		running = False
+		process_event(shutdown_event).addErrback(process_failure)
 
-	if not active_queues:
-		_stop_mainloop()
+#	if not active_queues:
+#		_stop_mainloop()
 
 def shut_down():
 	deferToLater(_shut_down)

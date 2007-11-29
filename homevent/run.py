@@ -74,7 +74,7 @@ def collect_failure(e):
 	log_created(work)
 	return work
 
-def process_event(e, return_errors=False):
+def process_event(e, drop_errors=False):
 	"""\
 		Process an event. This is the procedure you'll be feeding
 		externally-generated events to.
@@ -87,7 +87,7 @@ def process_event(e, return_errors=False):
 #		print "RVA",_
 #		return _
 #	d.addBoth(rv)
-	if not return_errors:
+	if drop_errors:
 		d.addErrback(lambda _: None)
 	return d
 	
@@ -98,13 +98,11 @@ def process_failure(e=None):
 		"""
 	if e is None:
 		e = failure.Failure()
-	from homevent.logging import log_event,ERROR
+	from homevent.logging import log_event,ERROR,log_exc
 	log_event(e,level=ERROR)
 	d = collect_failure(e).process()
-#	def rv(_):
-#		print "RVB",_
-#		return _
-#	d.addBoth(rv)
-	d.addErrback(lambda _: None)
+	def err2(_):
+		log_exc(msg="Error in failure handler", err=_, level=ERROR)
+	d.addErrback(err2)
 	return d
 	
