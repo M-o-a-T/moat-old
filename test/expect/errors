@@ -1,5 +1,5 @@
 1 EVENT: startup
-NEW: <WorkSequence:1 (4)>
+NEW: <ConditionalWorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
 1 EVENT: startup
@@ -173,7 +173,7 @@ ERROR: Traceback (most recent call last):
 0 RaisedError: Foo Bar
 1 Yes P Foo Bar
 2 EVENT: shutdown
-NEW: <WorkSequence:4 (5)>
+NEW: <ConditionalWorkSequence:4 (5)>
    : │  EVENT: shutdown
    : └1╴... done.
 2 EVENT: shutdown

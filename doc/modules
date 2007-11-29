@@ -198,13 +198,13 @@ This module implements basic conditional blocks.
 	block:
 		if true:
 			log TRACE "Everything is OK."
+		else if true:
+			log PANIC "This never happens."
 		else:
 			log PANIC "Something is *seriously* broken!"
 
-"else if" is also available.
-
 "else" does not work at top level, due to an implementation
-decision that's difficult to circumvent, but you can always use a block:
+detail that's difficult to circumvent, but you can always use a block:
 wrapper (as in the example, above).
 
 This module does not by itself implement anything you can actually test
@@ -319,33 +319,53 @@ This does mean that higher-priority handlers do not start running until
 their lower-priority counterparts are completed. If that is not what you
 want, use an async: block in the low-priority handler.
 
----------
-skip next
----------
+------------------
+Conditional events
+------------------
 
-This command skips everything that comes after it. This includes not
-only every command afterwards, but also all higher-priority event
-handlers.
+Sometimes, one event handler would be too complicated — handling both
+exceptional circumstances and the "normal case" in one handler calls for
+rather large and ultimately unmanageable if/then/else trees.
 
-One important usage of this is an alarm system. If you have turned on
-your alarm system, you want something entirely different to happen if,
-say, somebody turns on the office light.
+Thus, there is a way to tell a handler "you don't apply, skip this and
+let a different handler process this event". It is simply an “if”
+statement, except that (unlike a normal "if") it doesn't have a colon at
+the end or an indented block below.
 
-	load trigger
+One important usage of this is an alarm system. If you have activated
+your alarm system, you want something entirely different to happen when,
+say, somebody turns on the light in your office.
+
 	on switch * office *:
 		prio 10
-		only if state on alarm
+		if state on alarm
 		trigger alert intruder
-		skip next
+
+	# … some code in an entirely different location
 	on switch on office whatever:
 		do-whatever-to-turn-this-light-on
 
-This means that you can have localized knowledge of special requirements
-and don't need to sprinkle "don't do anything if the alarm is on"
-conditions throughout your code.
+The default priority is 50. Currently there is no way to run a handler
+when a lower-prio handler did not skip ahead; I'm not convinced that
+such a feature is needed.
 
-Not that the effects of a "skip next" end at the end of an event; they
-do not propagate through a "sync trigger" handler:
+------------
+next handler
+------------
+
+This command skips ahead to the next event handler which matches the
+event in question.
+
+It has the same effect as an "if false" conditional (see previous
+section), but it's more readable.
+
+Usually, you use that at the end of a handler to state that the next one
+should also run. Conditionals, on the other hand, are usually used to
+selectively cause an event to be skipped, so they're used at the
+beginning of a handler.
+
+Note that the effects of a "next handler" end at the end of an event
+and do not propagate through a "sync trigger":
 
 	on foo:
 		log TRACE one

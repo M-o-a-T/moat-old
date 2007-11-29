@@ -143,21 +143,24 @@ class WorkSequence(WorkItem):
 			try:
 				if not excepting or isinstance(w,ExcWorker):
 					log_run(self,w,step)
+#					d = w.process(event=self.event, queue=self)
+#					if isinstance(d,defer.Deferred):
+#						def repo(_):
+#							print _
+#							return _
+#						d.addErrback(repo)
+#					r = yield d
 					r = yield w.process(event=self.event, queue=self)
 			except HaltSequence:
+				r = failure.Failure()
 				log_halted(self,w,step)
-				return
+				skipping = True
 			except TrySomethingElse:
 				pass
 			except Exception:
 				r = failure.Failure()
-				if isinstance(res,failure.Failure):
-					from homevent.logging import log_exc
-					log_exc("Unhandled nested exception", res)
-					from homevent.run import process_failure
-					yield process_failure(res)
 			else:
-				if self.handle_conditional:
+				if self.handle_conditional and w.prio >= MIN_PRIO:
 					skipping = True
 
 			if isinstance(r,failure.Failure):
@@ -166,6 +169,12 @@ class WorkSequence(WorkItem):
 					r.within=[w]
 				r.within.append(self)
 			if res is None:
+				res = r
+			elif isinstance(r,failure.Failure):
+				from homevent.logging import log_exc
+				log_exc("Unhandled nested exception", res)
+				from homevent.run import process_failure
+				yield process_failure(res)
 				res = r
 
 		defer.returnValue(res)
@@ -233,7 +242,7 @@ class WorkSequence(WorkItem):
 			pr = w
 		for _ in pstep("╘","└"," "): yield _
 
-class ConditionalWorkSequnce(WorkSequence):
+class ConditionalWorkSequence(WorkSequence):
 	"""\ 
 		A WorkSequence which completes with the first step that does
 		*not* raise an TrySomethingElse error.

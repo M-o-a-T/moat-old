@@ -28,7 +28,7 @@ from homevent.worker import HaltSequence,Worker
 from homevent.module import Module
 from homevent.logging import log
 from homevent.check import Check,register_condition,unregister_condition
-
+from homevent.event import TrySomethingElse
 
 from twisted.internet import defer
 
@@ -144,6 +144,7 @@ Every "*foo" in the event description is mapped to the corresponding
 			raise SyntaxError(u"‹on ...› can only be used as a complex statement")
 
 		worker = OnEventWorker(self)
+		worker.prio = self.prio
 		register_worker(worker)
 		onHandlers[worker.handler_id] = worker
 		if self.displayname is not None:
@@ -208,6 +209,7 @@ class OnListHandler(Statement):
 			print >>self.ctx.out, h.handler_id,":","¦".join(h.parent.arglist)
 			if h.parent.displayname is not None:
 				print >>self.ctx.out,"Name:"," ".join(h.parent.displayname)
+			print >>self.ctx.out,"Prio:",h.prio
 			if hasattr(h.parent,"displaydoc"): print >>self.ctx.out,"Doc:",h.parent.displaydoc
 
 
@@ -217,7 +219,8 @@ class OnPrio(Statement):
 	immediate = True
 	long_doc="""\
 This statement prioritizes an event handler.
-Only one handler within each priority is actually executed.
+If two handlers have the same priority and both match,
+the order they (attempt to) run in is undefined.
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
@@ -263,14 +266,15 @@ This statement assigns a documentation string to an event handler.
 
 
 class OnSkip(Statement):
-	name = ("skip","next")
-	doc = "skip later event handlers"
+	name = ("next","handler")
+	doc = u"skip ahead to the next on… event handler"
 	long_doc="""\
-This statement causes higher-priority handlers to be skipped.
-NOTE: Commands in the same handler, after this one, *are* executed.
+This statement causes processing to skip ahead to the next-higher-priority
+event handler.
+Commands in the same handler, after this one, are *not* executed.
 """
 	def run(self,ctx,**k):
-		raise HaltSequence()
+		raise TrySomethingElse()
 
 
 class OnExistsCheck(Check):

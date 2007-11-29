@@ -1,5 +1,5 @@
 1 EVENT: startup
-NEW: <WorkSequence:1 (4)>
+NEW: <ConditionalWorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
 1 EVENT: startup
@@ -20,23 +20,23 @@ NEW: <WorkSequence:1 (4)>
 0 Create OnEvtHandler: net¦disconnect¦baz
 0 add ‹LogHandler ⌁.log¦TRACE¦dis¦baz›
 0 NewHandler 4
-NEW: <WorkSequence:2 (4)>
+NEW: <ConditionalWorkSequence:2 (4)>
    : │  EVENT: wait¦start¦0.2¦_wait¦1
    : └1╴... done.
 27 EVENT: wait¦start¦0.2¦_wait¦1
 27 END: wait¦start¦0.2¦_wait¦1
-NEW: <WorkSequence:3 (4)>
+NEW: <ConditionalWorkSequence:3 (4)>
    : │  EVENT: wait¦done¦0.2¦_wait¦1
    : └1╴... done.
 34 EVENT: wait¦done¦0.2¦_wait¦1
 34 END: wait¦done¦0.2¦_wait¦1
-NEW: <WorkSequence:4 (4)>
+NEW: <ConditionalWorkSequence:4 (4)>
    : │  EVENT: wait¦start¦1.3¦_wait¦2
    : └1╴... done.
 47 EVENT: wait¦start¦1.3¦_wait¦2
 47 END: wait¦start¦1.3¦_wait¦2
 54 EVENT: net¦connect¦foo
-NEW: <WorkSequence:5 (5)>
+NEW: <ConditionalWorkSequence:5 (5)>
    : │  EVENT: net¦connect¦foo
    : ├1╴on net connect foo ‹OnEventHandler›
    : │  prio: 51
@@ -50,14 +50,14 @@ RUN: on net connect foo ‹OnEventHandler›
    : step: send net foo bar ‹NETsend›
    : step: list net foo ‹NETlist›
    : step: disconnect net foo ‹NETdisconnect›
- at: <WorkSequence:5 (5)> (step 1)
+ at: <ConditionalWorkSequence:5 (5)> (step 1)
  ev: EVENT: net¦connect¦foo
 Name: foo
 Host: localhost
 Port: 50333
 .
 62 EVENT: net¦disconnect¦foo
-NEW: <WorkSequence:6 (5)>
+NEW: <ConditionalWorkSequence:6 (5)>
    : │  EVENT: net¦disconnect¦foo
    : ├1╴on net disconnect foo ‹OnEventHandler›
    : │  prio: 51
@@ -70,12 +70,12 @@ NEW: <WorkSequence:6 (5)>
 RUN: on net disconnect foo ‹OnEventHandler›
    : prio: 51
    : step: log TRACE dis foo ‹LogHandler›
- at: <WorkSequence:6 (5)> (step 1)
+ at: <ConditionalWorkSequence:6 (5)> (step 1)
  ev: EVENT: net¦disconnect¦foo
 0 dis foo
 62 END: net¦disconnect¦foo
 74 EVENT: net¦connect¦baz
-NEW: <WorkSequence:7 (5)>
+NEW: <ConditionalWorkSequence:7 (5)>
    : │  EVENT: net¦connect¦baz
    : ├1╴on net connect baz ‹OnEventHandler›
    : │  prio: 51
@@ -89,14 +89,14 @@ RUN: on net connect baz ‹OnEventHandler›
    : step: send net baz quux ‹NETsend›
    : step: list net baz ‹NETlist›
    : step: disconnect net baz ‹NETdisconnect›
- at: <WorkSequence:7 (5)> (step 1)
+ at: <ConditionalWorkSequence:7 (5)> (step 1)
  ev: EVENT: net¦connect¦baz
 Name: baz
 Host: localhost
 Port: 50345
 .
 82 EVENT: net¦disconnect¦baz
-NEW: <WorkSequence:8 (5)>
+NEW: <ConditionalWorkSequence:8 (5)>
    : │  EVENT: net¦disconnect¦baz
    : ├1╴on net disconnect baz ‹OnEventHandler›
    : │  prio: 51
@@ -107,11 +107,11 @@ NEW: <WorkSequence:8 (5)>
 RUN: on net disconnect baz ‹OnEventHandler›
    : prio: 51
    : step: log TRACE dis baz ‹LogHandler›
- at: <WorkSequence:8 (5)> (step 1)
+ at: <ConditionalWorkSequence:8 (5)> (step 1)
  ev: EVENT: net¦disconnect¦baz
 0 dis baz
 82 END: net¦disconnect¦baz
-NEW: <WorkSequence:9 (4)>
+NEW: <ConditionalWorkSequence:9 (4)>
    : │  EVENT: wait¦done¦1.3¦_wait¦2
    : └1╴... done.
 94 EVENT: wait¦done¦1.3¦_wait¦2
@@ -119,7 +119,7 @@ NEW: <WorkSequence:9 (4)>
 0 ending
 .
 2 EVENT: shutdown
-NEW: <WorkSequence:10 (6)>
+NEW: <ConditionalWorkSequence:10 (6)>
    : │  EVENT: shutdown
    : └1╴... done.
 2 EVENT: shutdown

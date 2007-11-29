@@ -12,26 +12,34 @@ on fuß:
 	name Schau auf deine Füße
 	do nothing
 on foo:
+	prio 49
+	name Skipped One
+	if false
+	log ERROR "This should not be executed"
+on foo:
 	prio 50
-	name Do nothing
-	do nothing
+	name Skipped Two
+	if true:
+		next handler
+	log ERROR "This should also not be executed"
 on foo:
 	prio 55
-	name Skip Next
-	skip next
+	name Last Handler
+	log DEBUG "This is logged once"
 	doc "Causes the prio-60 thing to not be executed"
 on foo:
 	prio 60
 	name not executed
-	sync trigger OuchNo
 	doc "Is not executed because of the former 'skip next' (until that's gone)"
+	log DEBUG "This is logged once too"
 on bar *:
 	block:
 		sync trigger $1
 list on
-list on not executed
+list on Skipped One
+list on Skipped Two
 sync trigger bar foo
-del on Skip Next
+del on Last Handler
 sync trigger bar foo
 del on 1
 list on
@@ -44,6 +52,9 @@ main_words.register_statement(ShutdownHandler)
 load_module("block")
 load_module("trigger")
 load_module("on_event")
+load_module("ifelse")
+load_module("bool")
+load_module("logging")
 
 run("on",input)
 

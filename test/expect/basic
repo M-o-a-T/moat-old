@@ -1,6 +1,6 @@
 1 EVENT: startup
 .
-NEW: <WorkSequence:1 (4)>
+NEW: <ConditionalWorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
 .
@@ -10,7 +10,7 @@ NEW: <WorkSequence:1 (4)>
 .
 3 EVENT: say¦hello
 .
-NEW: <WorkSequence:2 (5)>
+NEW: <ConditionalWorkSequence:2 (5)>
    : │  EVENT: say¦hello
    : ├1╴SayWorker: TellMe
    : └2╴... done.
@@ -18,7 +18,7 @@ NEW: <WorkSequence:2 (5)>
 3 EVENT: say¦hello
 .
 RUN: SayWorker: TellMe
- at: <WorkSequence:2 (5)> (step 1)
+ at: <ConditionalWorkSequence:2 (5)> (step 1)
  ev: EVENT: say¦hello
 .
 0 The 'TellMe' worker is saying: hello
@@ -27,7 +27,7 @@ RUN: SayWorker: TellMe
 .
 4 EVENT: say more¦greeting
 .
-NEW: <WorkSequence:3 (5)>
+NEW: <ConditionalWorkSequence:3 (5)>
    : │  EVENT: say more¦greeting
    : ├1╴<WorkSequence:4 (2)>
    : │  │  EVENT: say more¦greeting
@@ -43,7 +43,7 @@ RUN: <WorkSequence:4 (2)>
    : │  by SayMoreWorker: say something
    : ├1╴SayWorker: TellOne
    : └2╴SayWorker: TellTwo
- at: <WorkSequence:3 (5)> (step 1)
+ at: <ConditionalWorkSequence:3 (5)> (step 1)
  ev: EVENT: say more¦greeting
 .
 RUN: SayWorker: TellOne
@@ -62,7 +62,7 @@ RUN: SayWorker: TellTwo
 .
 2 EVENT: shutdown
 .
-NEW: <WorkSequence:5 (5)>
+NEW: <ConditionalWorkSequence:5 (5)>
    : │  EVENT: shutdown
    : └1╴... done.
 .

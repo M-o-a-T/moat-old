@@ -20,19 +20,6 @@ Code
 
   - introduce proportional change limits etc.
 
-Conditional event handlers
-==========================
-
-Implement
-
-	on foo:
-		if bar
-
-to ignore the handler if the condition does not match at the moment.
-
-Do this by having the bare "if" raise a special exception which is
-caught by a wrapper which runs that priority's next matching event
-handler.
 
 Complex conditions
 ==================

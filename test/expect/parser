@@ -1,5 +1,5 @@
 1 EVENT: startup
-NEW: <WorkSequence:1 (4)>
+NEW: <ConditionalWorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
 1 EVENT: startup
@@ -56,7 +56,7 @@ foiled : not clingfilm
 foiled : not clingfilm
 ... moving up
 2 EVENT: shutdown
-NEW: <WorkSequence:2 (5)>
+NEW: <ConditionalWorkSequence:2 (5)>
    : │  EVENT: shutdown
    : └1╴... done.
 2 EVENT: shutdown

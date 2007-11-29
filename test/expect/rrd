@@ -1,5 +1,5 @@
 1 EVENT: startup
-NEW: <WorkSequence:1 (4)>
+NEW: <ConditionalWorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
 1 EVENT: startup
@@ -25,32 +25,32 @@ value: ?
 ds_name: test
 type: GAUGE
 last_ds: UNKN
-NEW: <WorkSequence:2 (4)>
+NEW: <ConditionalWorkSequence:2 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦1
    : └1╴... done.
 31 EVENT: wait¦start¦×××¦_wait¦1
 31 END: wait¦start¦×××¦_wait¦1
-NEW: <WorkSequence:3 (4)>
+NEW: <ConditionalWorkSequence:3 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦1
    : └1╴... done.
 38 EVENT: wait¦done¦×××¦_wait¦1
 38 END: wait¦done¦×××¦_wait¦1
-NEW: <WorkSequence:4 (4)>
+NEW: <ConditionalWorkSequence:4 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦2
    : └1╴... done.
 49 EVENT: wait¦start¦×××¦_wait¦2
 49 END: wait¦start¦×××¦_wait¦2
-NEW: <WorkSequence:5 (4)>
+NEW: <ConditionalWorkSequence:5 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦2
    : └1╴... done.
 56 EVENT: wait¦done¦×××¦_wait¦2
 56 END: wait¦done¦×××¦_wait¦2
-NEW: <WorkSequence:6 (4)>
+NEW: <ConditionalWorkSequence:6 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦3
    : └1╴... done.
 67 EVENT: wait¦start¦×××¦_wait¦3
 67 END: wait¦start¦×××¦_wait¦3
-NEW: <WorkSequence:7 (4)>
+NEW: <ConditionalWorkSequence:7 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦3
    : └1╴... done.
 74 EVENT: wait¦done¦×××¦_wait¦3
@@ -69,7 +69,7 @@ last_ds: 12
 0 add ‹VarRRDHandler ⌁.var¦rrd¦x¦last_ds¦t¦tt¦ttt›
 0 add ‹TriggerHandler ⌁.trigger¦last¦$x›
 90 EVENT: last¦12
-NEW: <WorkSequence:8 (4)>
+NEW: <ConditionalWorkSequence:8 (4)>
    : │  EVENT: last¦12
    : └1╴... done.
 0 add ‹IfStatement ⌁.if¦exists¦rrd¦t¦tt¦ttt›

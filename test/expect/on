@@ -1,5 +1,5 @@
 1 EVENT: startup
-NEW: <WorkSequence:1 (4)>
+NEW: <ConditionalWorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
 1 EVENT: startup
@@ -8,105 +8,172 @@ NEW: <WorkSequence:1 (4)>
 0 add ‹DoNothingHandler ⌁.do¦nothing›
 0 NewHandler 1
 0 Create OnEvtHandler: foo
-0 add ‹DoNothingHandler ⌁.do¦nothing›
+0 add ‹IfStatement ⌁.if¦false›
+0 add ‹LogHandler ⌁.log¦ERROR¦This should not be executed›
 0 NewHandler 2
 0 Create OnEvtHandler: foo
-0 add ‹OnSkip ⌁.skip¦next›
+0 add ‹IfStatement ⌁.if¦true›
+0 add ‹OnSkip ⌁.next¦handler›
+0 add ‹LogHandler ⌁.log¦ERROR¦This should also not be executed›
 0 NewHandler 3
 0 Create OnEvtHandler: foo
-0 add ‹SyncTriggerHandler ⌁.sync¦trigger¦OuchNo›
+0 add ‹LogHandler ⌁.log¦DEBUG¦This is logged once›
 0 NewHandler 4
+0 Create OnEvtHandler: foo
+0 add ‹LogHandler ⌁.log¦DEBUG¦This is logged once too›
+0 NewHandler 5
 0 Create OnEvtHandler: bar¦*
 0 add ‹Block ⌁.block›
 0 add ‹SyncTriggerHandler ⌁.sync¦trigger¦$1›
-0 NewHandler 5
+0 NewHandler 6
 1  : fuß ‹Schau auf deine Füße›
-2  : foo ‹Do nothing›
-3  : foo ‹Skip Next›
-4  : foo ‹not executed›
-5  : bar¦*
+2  : foo ‹Skipped One›
+3  : foo ‹Skipped Two›
+4  : foo ‹Last Handler›
+5  : foo ‹not executed›
+6  : bar¦*
 .
-4 : foo
-Name: not executed
-Doc: Is not executed because of the former 'skip next' (until that's gone)
-49 EVENT: bar¦foo
-NEW: <WorkSequence:2 (5)>
+2 : foo
+Name: Skipped One
+Prio: 49
+3 : foo
+Name: Skipped Two
+Prio: 50
+61 EVENT: bar¦foo
+NEW: <ConditionalWorkSequence:2 (5)>
    : │  EVENT: bar¦foo
    : ├1╴on bar * ‹OnEventHandler›
    : │  prio: 51
    : │  step: block ‹Block›
    : │      : step: sync trigger $1 ‹SyncTriggerHandler›
    : └2╴... done.
-49 EVENT: bar¦foo
+61 EVENT: bar¦foo
 RUN: on bar * ‹OnEventHandler›
    : prio: 51
    : step: block ‹Block›
    :     : step: sync trigger $1 ‹SyncTriggerHandler›
- at: <WorkSequence:2 (5)> (step 1)
+ at: <ConditionalWorkSequence:2 (5)> (step 1)
  ev: EVENT: bar¦foo
-55 EVENT: foo
-NEW: <WorkSequence:3 (5)>
+67 EVENT: foo
+NEW: <ConditionalWorkSequence:3 (8)>
    : │  EVENT: foo
    : ├1╴on foo ‹OnEventHandler›
-   : │  name: Do nothing
+   : │  name: Skipped One
+   : │  prio: 49
+   : │  step: if false ‹IfStatement›
+   : │  step: log ERROR This should not be executed ‹LogHandler›
+   : ├2╴on foo ‹OnEventHandler›
+   : │  name: Skipped Two
    : │  prio: 50
-   : │  step: do nothing ‹DoNothingHandler›
-   : └2╴... done.
-55 EVENT: foo
+   : │  step: if true ‹IfStatement›
+   : │      : step: next handler ‹OnSkip›
+   : │  step: log ERROR This should also not be executed ‹LogHandler›
+   : ├3╴on foo ‹OnEventHandler›
+   : │  name: Last Handler
+   : │  prio: 55
+   : │  step: log DEBUG This is logged once ‹LogHandler›
+   : ├4╴on foo ‹OnEventHandler›
+   : │  name: not executed
+   : │  prio: 60
+   : │  step: log DEBUG This is logged once too ‹LogHandler›
+   : └5╴... done.
+67 EVENT: foo
 RUN: on foo ‹OnEventHandler›
-   : name: Do nothing
-   : prio: 50
-   : step: do nothing ‹DoNothingHandler›
- at: <WorkSequence:3 (5)> (step 1)
+   : name: Skipped One
+   : prio: 49
+   : step: if false ‹IfStatement›
+   : step: log ERROR This should not be executed ‹LogHandler›
+ at: <ConditionalWorkSequence:3 (8)> (step 1)
  ev: EVENT: foo
-0 NOW: do nothing
-55 END: foo
-49 END: bar¦foo
-71 EVENT: bar¦foo
-NEW: <WorkSequence:4 (5)>
+RUN: on foo ‹OnEventHandler›
+   : name: Skipped Two
+   : prio: 50
+   : step: if true ‹IfStatement›
+   :     : step: next handler ‹OnSkip›
+   : step: log ERROR This should also not be executed ‹LogHandler›
+ at: <ConditionalWorkSequence:3 (8)> (step 2)
+ ev: EVENT: foo
+RUN: on foo ‹OnEventHandler›
+   : name: Last Handler
+   : prio: 55
+   : step: log DEBUG This is logged once ‹LogHandler›
+ at: <ConditionalWorkSequence:3 (8)> (step 3)
+ ev: EVENT: foo
+1 This is logged once
+67 END: foo
+61 END: bar¦foo
+87 EVENT: bar¦foo
+NEW: <ConditionalWorkSequence:4 (5)>
    : │  EVENT: bar¦foo
    : ├1╴on bar * ‹OnEventHandler›
    : │  prio: 51
    : │  step: block ‹Block›
    : │      : step: sync trigger $1 ‹SyncTriggerHandler›
    : └2╴... done.
-71 EVENT: bar¦foo
+87 EVENT: bar¦foo
 RUN: on bar * ‹OnEventHandler›
    : prio: 51
    : step: block ‹Block›
    :     : step: sync trigger $1 ‹SyncTriggerHandler›
- at: <WorkSequence:4 (5)> (step 1)
+ at: <ConditionalWorkSequence:4 (5)> (step 1)
  ev: EVENT: bar¦foo
-77 EVENT: foo
-NEW: <WorkSequence:5 (5)>
+93 EVENT: foo
+NEW: <ConditionalWorkSequence:5 (7)>
    : │  EVENT: foo
    : ├1╴on foo ‹OnEventHandler›
-   : │  name: Do nothing
+   : │  name: Skipped One
+   : │  prio: 49
+   : │  step: if false ‹IfStatement›
+   : │  step: log ERROR This should not be executed ‹LogHandler›
+   : ├2╴on foo ‹OnEventHandler›
+   : │  name: Skipped Two
    : │  prio: 50
-   : │  step: do nothing ‹DoNothingHandler›
-   : └2╴... done.
-77 EVENT: foo
+   : │  step: if true ‹IfStatement›
+   : │      : step: next handler ‹OnSkip›
+   : │  step: log ERROR This should also not be executed ‹LogHandler›
+   : ├3╴on foo ‹OnEventHandler›
+   : │  name: not executed
+   : │  prio: 60
+   : │  step: log DEBUG This is logged once too ‹LogHandler›
+   : └4╴... done.
+93 EVENT: foo
 RUN: on foo ‹OnEventHandler›
-   : name: Do nothing
-   : prio: 50
-   : step: do nothing ‹DoNothingHandler›
- at: <WorkSequence:5 (5)> (step 1)
+   : name: Skipped One
+   : prio: 49
+   : step: if false ‹IfStatement›
+   : step: log ERROR This should not be executed ‹LogHandler›
+ at: <ConditionalWorkSequence:5 (7)> (step 1)
  ev: EVENT: foo
-0 NOW: do nothing
-77 END: foo
-71 END: bar¦foo
-2  : foo ‹Do nothing›
-4  : foo ‹not executed›
-5  : bar¦*
+RUN: on foo ‹OnEventHandler›
+   : name: Skipped Two
+   : prio: 50
+   : step: if true ‹IfStatement›
+   :     : step: next handler ‹OnSkip›
+   : step: log ERROR This should also not be executed ‹LogHandler›
+ at: <ConditionalWorkSequence:5 (7)> (step 2)
+ ev: EVENT: foo
+RUN: on foo ‹OnEventHandler›
+   : name: not executed
+   : prio: 60
+   : step: log DEBUG This is logged once too ‹LogHandler›
+ at: <ConditionalWorkSequence:5 (7)> (step 3)
+ ev: EVENT: foo
+1 This is logged once too
+93 END: foo
+87 END: bar¦foo
+2  : foo ‹Skipped One›
+3  : foo ‹Skipped Two›
+5  : foo ‹not executed›
+6  : bar¦*
 .
-95 EVENT: fuß
-NEW: <WorkSequence:6 (4)>
+115 EVENT: fuß
+NEW: <ConditionalWorkSequence:6 (4)>
    : │  EVENT: fuß
    : └1╴... done.
-95 EVENT: fuß
-95 END: fuß
+115 EVENT: fuß
+115 END: fuß
 2 EVENT: shutdown
-NEW: <WorkSequence:7 (5)>
+NEW: <ConditionalWorkSequence:7 (5)>
    : │  EVENT: shutdown
    : └1╴... done.
 2 EVENT: shutdown

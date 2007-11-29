@@ -6,7 +6,7 @@ This is the core of the event dispatcher.
 
 from twisted.python import failure
 from homevent.constants import SYS_PRIO,MIN_PRIO,MAX_PRIO
-from homevent.worker import WorkSequence,ExcWorker
+from homevent.worker import WorkSequence,ConditionalWorkSequence,ExcWorker
 
 workers = {}
 work_prios = []
@@ -50,12 +50,11 @@ def collect_event(e):
 		"""
 	from homevent.logging import log_created
 
-	work = WorkSequence(e,None)
+	work = ConditionalWorkSequence(e,None)
 	for wp in work_prios:
 		for w in workers[wp]:
 			if w.does_event(e):
 				work.append(w)
-				break
 	log_created(work)
 	return work
 
