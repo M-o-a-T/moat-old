@@ -127,8 +127,10 @@ class Waiter(object):
 		d.addCallbacks(done)
 
 	def cancel(self, err=WaitCancelled):
+		"""Cancel a waiter."""
 		d,e = self._lock()
 		if self.defer.called:
+			# too late?
 			self._unlock(d,e)
 			return
 		def stoptimer():
@@ -138,13 +140,15 @@ class Waiter(object):
 		d.addCallback(lambda _: stoptimer())
 		d.addCallback(lambda _: process_event(Event(self.ctx,"wait","cancel",ixtime(self.end),*self.name)))
 		def errgen(_):
+			# If the 'wait cancel' event didn't return a failure, build one.
 			return Failure(err(self))
 		def done(_):
+			# Now make the wait statement itself return with the error.
 			del waiters[self.name]
 			self.defer.callback(_)
+			self._unlock(d,e)
 		d.addCallback(errgen)
 		d.addBoth(done)
-		self._unlock(d,e)
 		return d
 	
 	def retime(self, dest):
