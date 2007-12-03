@@ -35,11 +35,8 @@ class MonitorError(RuntimeError):
     def __unicode__(self):
         return self.text % (" ".join(unicode(x) for x in self.monitor.name),)
 
-#class WaitLocked(WaitError):
-#    text = u"Tried to process waiter ‹%s› while it was locked"
-#
-class WaitCancelled(WaitError):
-	"""An error signalling that a wait was killed."""
+class DelayCancelled(MonitorError):
+	"""An error signalling that a delay was killed."""
 	text = u"Waiter ‹%s› was cancelled"
 
 class DupMonitorError(MonitorError):
@@ -365,7 +362,7 @@ class Monitor(object):
 			e = self.timerd
 			if e:
 				self.timerd = None
-				e.errback(failure.Failure(WaitCancelled))
+				e.errback(failure.Failure(DelayCancelled))
 
 			if self.running:
 				def trigger(_):
