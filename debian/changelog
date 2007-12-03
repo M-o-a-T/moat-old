@@ -5,7 +5,7 @@ homevent (0.2.5) unstable; urgency=low
      be used)
   * Added conditional events
 
- -- Matthias Urlichs <smurf@debian.org>  Mon, 03 Dec 2007 06:43:50 +0100
+ -- Matthias Urlichs <matthias@urlichs.de>  Mon, 03 Dec 2007 06:43:50 +0100
 
 homevent (0.2.4) unstable; urgency=low
 
