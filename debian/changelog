@@ -1,4 +1,4 @@
-homevent (0.2.5.1) unstable; urgency=low
+homevent (0.2.5.3) unstable; urgency=low
 
   * Added "delta up" to monitor, denoting a counter that doesn't go down
     (if that happens, the delta will be ignored but the counter will still
