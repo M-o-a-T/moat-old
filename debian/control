@@ -3,7 +3,8 @@ Section: python
 Priority: extra
 XS-Python-Version: 2.4, 2.5
 Maintainer: Matthias Urlichs <matthias@urlichs.de>
-Build-Depends: debhelper (>= 5), python-support, python-dev, python-setuptools
+Build-Depends: debhelper (>= 5), python-dev, python-setuptools
+Build-Depends-Indep: python-support
 Standards-Version: 3.7.2
 
 Package: homevent
