@@ -2,6 +2,9 @@
 TODO
 ====
 
+So many ideas, so little time …
+
+
 Code
 ====
 
@@ -19,6 +22,16 @@ Code
   - high / low limits should apply to the delta
 
   - introduce proportional change limits etc.
+
+
+Implement a web server
+======================
+
+* Grab a bunch of variables and feed a template with them
+
+* RSS
+
+* also serve RRD graphs while we're at it
 
 
 Complex conditions
@@ -49,11 +62,13 @@ Conditionals can of course work here too!
 
 Counters on how often a check has matched would be helpful.
 
+
 Flexible debugging
 ==================
 
 * Implement a "show on FOO" command that will display all "FOO"
   events to the current output
+
 
 Help
 ====
@@ -62,6 +77,7 @@ Group all "list" statements so that the global overview shows only one
 line.
 
 Improve the help messages.
+
 
 Dump config
 ===========
@@ -77,6 +93,10 @@ in, re-create the system state as accurately as possible.
 
   - need to require that wait handlers get properly restarted by code
 
+* set a mode that will update existing same-name entries, instead of
+  having to destructively replace them
+
+
 LIRC
 ====
 
@@ -88,12 +108,14 @@ LIRC
 
   - this requires that the lircd server connects to *us*.
 
+
 net
 ===
 
 * allow more than one connection (incoming)
 
   - send to all of them
+
 
 Parser
 ======
@@ -106,7 +128,9 @@ Parser
 
   - requires to store code more sensibly before executing any of it
 
+
 Syscalls
 ========
 
 * add a way to run external programs ("system")
+
