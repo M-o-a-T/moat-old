@@ -38,9 +38,9 @@ class MonitorError(RuntimeError):
 #class WaitLocked(WaitError):
 #    text = u"Tried to process waiter ‹%s› while it was locked"
 #
-#class WaitCancelled(WaitError):
-#    """An error signalling that a wait was killed."""
-#    text = u"Waiter ‹%s› was cancelled"
+class WaitCancelled(WaitError):
+	"""An error signalling that a wait was killed."""
+	text = u"Waiter ‹%s› was cancelled"
 
 class DupMonitorError(MonitorError):
     text = u"A monitor ‹%s› already exists"
@@ -278,6 +278,7 @@ class Monitor(object):
 			while self.active and (self.maxpoints is None or self.steps < self.maxpoints):
 				if self.steps and not self.passive:
 					yield delay()
+
 				self.steps += 1
 
 				try:
@@ -364,7 +365,7 @@ class Monitor(object):
 			e = self.timerd
 			if e:
 				self.timerd = None
-				e.callback(None)
+				e.errback(failure.Failure(WaitCancelled))
 
 			if self.running:
 				def trigger(_):
