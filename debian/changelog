@@ -4,8 +4,9 @@ homevent (0.2.5) unstable; urgency=low
   * Added "delta up" to monitor, denoting a counter that doesn't go down
     (if that happens, the delta will be ignored but the counter will still
      be used)
+  * Added conditional events
 
- -- Matthias Urlichs <matthias@urlichs.de>  Thu, 22 Nov 2007 11:52:02 +0100
+ -- Matthias Urlichs <smurf@debian.org>  Mon, 03 Dec 2007 06:43:50 +0100
 
 homevent (0.2.4) unstable; urgency=low
 
