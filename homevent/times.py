@@ -42,7 +42,7 @@ def time_delta(args, now=None):
 
 	try:
 		sv = float(w[0])
-	except (IndexError,ValueError):
+	except (IndexError,ValueError,TypeError):
 		pass
 	else:
 		if sv > 1000000000: # 30 years plus: Forget it, that's a unixtime.
@@ -118,7 +118,7 @@ def collect_words(w):
 	w = list(w)
 	try:
 		s = float(w[0])
-	except (IndexError,ValueError):
+	except (IndexError,ValueError,TypeError):
 		pass
 	else:
 		if s > 1000000000: # 30 years plus. Forget it, that's a unixtime.

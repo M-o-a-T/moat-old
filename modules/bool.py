@@ -38,7 +38,7 @@ class EqualCheck(Check):
 		if a is None: return b is None
 		try:
 			return float(a) == float(b)
-		except ValueError:
+		except (ValueError,TypeError):
 			return str(a) == str(b)
 
 class LessCheck(Check):
@@ -50,7 +50,7 @@ class LessCheck(Check):
 		if a is None or b is None: return False
 		try:
 			return float(a) < float(b)
-		except ValueError:
+		except (ValueError,TypeError):
 			return str(a) < str(b)
 
 class GreaterCheck(Check):
@@ -62,7 +62,7 @@ class GreaterCheck(Check):
 		if a is None or b is None: return False
 		try:
 			return float(a) > float(b)
-		except ValueError:
+		except (ValueError,TypeError):
 			return str(a) > str(b)
 
 class BoolModule(Module):

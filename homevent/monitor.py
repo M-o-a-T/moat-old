@@ -486,7 +486,7 @@ require ‹num› ‹range›
 				if val <= 0:
 					raise ValueError
 				self.parent.values["points"] = val
-			except ValueError:
+			except (ValueError,TypeError):
 				raise SyntaxError(u'Usage: require: ‹num› needs to be a positive integer')
 		if event[1] == "*":
 			self.parent.values["range"] = None
@@ -496,7 +496,7 @@ require ‹num› ‹range›
 				if val < 0:
 					raise ValueError
 				self.parent.values["range"] = val
-			except ValueError:
+			except (ValueError,TypeError):
 				raise SyntaxError(u'Usage: require: ‹range› needs to be a non-negative number')
 MonitorHandler.register_statement(MonitorRequire)
 
@@ -523,7 +523,7 @@ retry ‹num› ‹delay›
 				if val <= 0:
 					raise ValueError
 				self.parent.values["maxpoints"] = val
-			except ValueError:
+			except (ValueError,TypeError):
 				raise SyntaxError(u'Usage: retry: ‹num› needs to be a positive integer')
 
 		if len(event) == 2:
@@ -537,7 +537,7 @@ retry ‹num› ‹delay›
 					if self.parent.delay <= 0:
 						raise ValueError
 					self.parent.values["delay"] = val
-				except ValueError:
+				except (ValueError,TypeError):
 					raise SyntaxError(u'Usage: retry: ‹delay› needs to be a positive number or timepec')
 		elif len(event) > 2:
 			self.parent.values["delay"] = tuple(event[1:]) # assume a timespec
@@ -564,7 +564,7 @@ alarm ‹range›
 				if val <= 0:
 					raise ValueError
 				self.parent.values["alarm"] = val
-			except ValueError:
+			except (ValueError,TypeError):
 				raise SyntaxError(u'Usage: alarm: ‹range› needs to be a positive number')
 MonitorHandler.register_statement(MonitorAlarm)
 
@@ -589,7 +589,7 @@ diff ‹amount›
 				if val < 0:
 					raise ValueError
 				self.parent.values["diff"] = val
-			except ValueError:
+			except (ValueError,TypeError):
 				raise SyntaxError(u'Usage: diff: ‹amount› needs to be a non-negative number')
 MonitorHandler.register_statement(MonitorDiff)
 
@@ -613,7 +613,7 @@ high ‹value› [‹ok_value›]
 		else:
 			try:
 				self.parent.values["high"] = float(event[0])
-			except ValueError:
+			except (ValueError,TypeError):
 				raise SyntaxError(u'Usage: high: ‹value› needs to be a number')
 		if len(event) == 2:
 			try:
@@ -622,7 +622,7 @@ high ‹value› [‹ok_value›]
 					raise SyntaxError(u'Usage: high: ‹ok_value› needs to be smaller than ‹value›')
 				self.parent.values["ok_high"] = val
 
-			except ValueError:
+			except (ValueError,TypeError):
 				raise SyntaxError(u'Usage: high: ‹ok_value› needs to be a number')
 		else:
 			self.parent.values["ok_high"] = None
@@ -648,7 +648,7 @@ low ‹value› [‹ok_value›]
 		else:
 			try:
 				self.parent.values["low"] = float(event[0])
-			except ValueError:
+			except (ValueError,TypeError):
 				raise SyntaxError(u'Usage: low: ‹value› needs to be a number')
 		if len(event) == 2:
 			try:
@@ -657,7 +657,7 @@ low ‹value› [‹ok_value›]
 					raise SyntaxError(u'Usage: low: ‹ok_value› needs to be greater than ‹value›')
 				self.parent.values["ok_low"] = val
 
-			except ValueError:
+			except (ValueError,TypeError):
 				raise SyntaxError(u'Usage: low: ‹ok_value› needs to be a number')
 		else:
 			self.parent.values["ok_low"] = None
@@ -684,14 +684,14 @@ limit ‹low› ‹high›
 		else:
 			try:
 				self.parent.values["limit_low"] = lo = float(event[0])
-			except ValueError:
+			except (ValueError,TypeError):
 				raise SyntaxError(u'Usage: limit: ‹low› needs to be a number or ‹*›')
 		if event[1] == "*":
 			self.parent.limit_high = "*"
 		else:
 			try:
 				self.parent.values["limit_high"] = hi = float(event[1])
-			except ValueError:
+			except (ValueError,TypeError):
 				raise SyntaxError(u'Usage: limit: ‹high› needs to be a number or ‹*›')
 		if lo is not None and hi is not None and lo >= hi:
 			raise SyntaxError(u'Usage: limit: ‹low› needs to be greater than ‹high›')

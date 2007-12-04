@@ -878,10 +878,10 @@ class OWFSdevice(object):
 		def got(_):
 			try:
 				_ = int(_)
-			except ValueError:
+			except (ValueError,TypeError):
 				try:
 					_ = float(_)
-				except ValueError:
+				except (ValueError,TypeError):
 					pass
 			return _
 		msg.d.addCallback(got)

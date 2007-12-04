@@ -229,7 +229,7 @@ the order they (attempt to) run in is undefined.
 			raise SyntaxError(u"Usage: prio ‹priority›")
 		try:
 			prio = int(event[0])
-		except ValueError:
+		except (ValueError,TypeError):
 			raise SyntaxError(u"Usage: prio ‹priority› ⇐ integer priorities only")
 		if prio < MIN_PRIO or prio > MAX_PRIO:
 			raise ValueError("Priority value (%d): needs to be between %d and %d" % (prio,MIN_PRIO,MAX_PRIO))
