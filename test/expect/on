@@ -7,39 +7,51 @@ NEW: <ConditionalWorkSequence:1 (4)>
 0 Create OnEvtHandler: fuß
 0 add ‹DoNothingHandler ⌁.do¦nothing›
 0 NewHandler 1
+0 Create OnEvtHandler: num¦1
+0 add ‹DoNothingHandler ⌁.do¦nothing›
+0 NewHandler 2
+0 Create OnEvtHandler: num¦2
+0 add ‹DoNothingHandler ⌁.do¦nothing›
+0 NewHandler 3
+0 Create OnEvtHandler: num¦3
+0 add ‹DoNothingHandler ⌁.do¦nothing›
+0 NewHandler 4
 0 Create OnEvtHandler: foo
 0 add ‹IfStatement ⌁.if¦false›
 0 add ‹LogHandler ⌁.log¦ERROR¦This should not be executed›
-0 NewHandler 2
+0 NewHandler 5
 0 Create OnEvtHandler: foo
 0 add ‹IfStatement ⌁.if¦true›
 0 add ‹OnSkip ⌁.next¦handler›
 0 add ‹LogHandler ⌁.log¦ERROR¦This should also not be executed›
-0 NewHandler 3
+0 NewHandler 6
 0 Create OnEvtHandler: foo
 0 add ‹LogHandler ⌁.log¦DEBUG¦This is logged once›
-0 NewHandler 4
+0 NewHandler 7
 0 Create OnEvtHandler: foo
 0 add ‹LogHandler ⌁.log¦DEBUG¦This is logged once too›
-0 NewHandler 5
+0 NewHandler 8
 0 Create OnEvtHandler: bar¦*
 0 add ‹Block ⌁.block›
 0 add ‹SyncTriggerHandler ⌁.sync¦trigger¦$1›
-0 NewHandler 6
+0 NewHandler 9
 1  : fuß ‹Schau auf deine Füße›
-2  : foo ‹Skipped One›
-3  : foo ‹Skipped Two›
-4  : foo ‹Last Handler›
-5  : foo ‹not executed›
-6  : bar¦*
+2  : num¦1 ‹Txt2Num›
+3  : num¦2 ‹Num2Txt›
+4  : num¦3 ‹num2num›
+5  : foo ‹Skipped One›
+6  : foo ‹Skipped Two›
+7  : foo ‹Last Handler›
+8  : foo ‹not executed›
+9  : bar¦*
 .
-2 : foo
+5 : foo
 Name: Skipped One
 Prio: 49
-3 : foo
+6 : foo
 Name: Skipped Two
 Prio: 50
-61 EVENT: bar¦foo
+76 EVENT: bar¦foo
 NEW: <ConditionalWorkSequence:2 (5)>
    : │  EVENT: bar¦foo
    : ├1╴on bar * ‹OnEventHandler›
@@ -47,14 +59,14 @@ NEW: <ConditionalWorkSequence:2 (5)>
    : │  step: block ‹Block›
    : │      : step: sync trigger $1 ‹SyncTriggerHandler›
    : └2╴... done.
-61 EVENT: bar¦foo
+76 EVENT: bar¦foo
 RUN: on bar * ‹OnEventHandler›
    : prio: 51
    : step: block ‹Block›
    :     : step: sync trigger $1 ‹SyncTriggerHandler›
  at: <ConditionalWorkSequence:2 (5)> (step 1)
  ev: EVENT: bar¦foo
-67 EVENT: foo
+82 EVENT: foo
 NEW: <ConditionalWorkSequence:3 (8)>
    : │  EVENT: foo
    : ├1╴on foo ‹OnEventHandler›
@@ -77,7 +89,7 @@ NEW: <ConditionalWorkSequence:3 (8)>
    : │  prio: 60
    : │  step: log DEBUG This is logged once too ‹LogHandler›
    : └5╴... done.
-67 EVENT: foo
+82 EVENT: foo
 RUN: on foo ‹OnEventHandler›
    : name: Skipped One
    : prio: 49
@@ -100,9 +112,9 @@ RUN: on foo ‹OnEventHandler›
  at: <ConditionalWorkSequence:3 (8)> (step 3)
  ev: EVENT: foo
 1 This is logged once
-67 END: foo
-61 END: bar¦foo
-87 EVENT: bar¦foo
+82 END: foo
+76 END: bar¦foo
+102 EVENT: bar¦foo
 NEW: <ConditionalWorkSequence:4 (5)>
    : │  EVENT: bar¦foo
    : ├1╴on bar * ‹OnEventHandler›
@@ -110,14 +122,14 @@ NEW: <ConditionalWorkSequence:4 (5)>
    : │  step: block ‹Block›
    : │      : step: sync trigger $1 ‹SyncTriggerHandler›
    : └2╴... done.
-87 EVENT: bar¦foo
+102 EVENT: bar¦foo
 RUN: on bar * ‹OnEventHandler›
    : prio: 51
    : step: block ‹Block›
    :     : step: sync trigger $1 ‹SyncTriggerHandler›
  at: <ConditionalWorkSequence:4 (5)> (step 1)
  ev: EVENT: bar¦foo
-93 EVENT: foo
+108 EVENT: foo
 NEW: <ConditionalWorkSequence:5 (7)>
    : │  EVENT: foo
    : ├1╴on foo ‹OnEventHandler›
@@ -136,7 +148,7 @@ NEW: <ConditionalWorkSequence:5 (7)>
    : │  prio: 60
    : │  step: log DEBUG This is logged once too ‹LogHandler›
    : └4╴... done.
-93 EVENT: foo
+108 EVENT: foo
 RUN: on foo ‹OnEventHandler›
    : name: Skipped One
    : prio: 49
@@ -159,21 +171,75 @@ RUN: on foo ‹OnEventHandler›
  at: <ConditionalWorkSequence:5 (7)> (step 3)
  ev: EVENT: foo
 1 This is logged once too
-93 END: foo
-87 END: bar¦foo
-2  : foo ‹Skipped One›
-3  : foo ‹Skipped Two›
-5  : foo ‹not executed›
-6  : bar¦*
+108 END: foo
+102 END: bar¦foo
+2  : num¦1 ‹Txt2Num›
+3  : num¦2 ‹Num2Txt›
+4  : num¦3 ‹num2num›
+5  : foo ‹Skipped One›
+6  : foo ‹Skipped Two›
+8  : foo ‹not executed›
+9  : bar¦*
 .
-115 EVENT: fuß
+130 EVENT: fuß
 NEW: <ConditionalWorkSequence:6 (4)>
    : │  EVENT: fuß
    : └1╴... done.
-115 EVENT: fuß
-115 END: fuß
-2 EVENT: shutdown
+134 EVENT: num¦1
 NEW: <ConditionalWorkSequence:7 (5)>
+   : │  EVENT: num¦1
+   : ├1╴on num 1 ‹OnEventHandler›
+   : │  name: Txt2Num
+   : │  prio: 51
+   : │  step: do nothing ‹DoNothingHandler›
+   : └2╴... done.
+138 EVENT: num¦2
+NEW: <ConditionalWorkSequence:8 (5)>
+   : │  EVENT: num¦2
+   : ├1╴on num 2 ‹OnEventHandler›
+   : │  name: Num2Txt
+   : │  prio: 51
+   : │  step: do nothing ‹DoNothingHandler›
+   : └2╴... done.
+142 EVENT: num¦3
+NEW: <ConditionalWorkSequence:9 (5)>
+   : │  EVENT: num¦3
+   : ├1╴on num 3 ‹OnEventHandler›
+   : │  name: num2num
+   : │  prio: 51
+   : │  step: do nothing ‹DoNothingHandler›
+   : └2╴... done.
+130 EVENT: fuß
+130 END: fuß
+134 EVENT: num¦1
+RUN: on num 1 ‹OnEventHandler›
+   : name: Txt2Num
+   : prio: 51
+   : step: do nothing ‹DoNothingHandler›
+ at: <ConditionalWorkSequence:7 (5)> (step 1)
+ ev: EVENT: num¦1
+0 NOW: do nothing
+134 END: num¦1
+138 EVENT: num¦2
+RUN: on num 2 ‹OnEventHandler›
+   : name: Num2Txt
+   : prio: 51
+   : step: do nothing ‹DoNothingHandler›
+ at: <ConditionalWorkSequence:8 (5)> (step 1)
+ ev: EVENT: num¦2
+0 NOW: do nothing
+138 END: num¦2
+142 EVENT: num¦3
+RUN: on num 3 ‹OnEventHandler›
+   : name: num2num
+   : prio: 51
+   : step: do nothing ‹DoNothingHandler›
+ at: <ConditionalWorkSequence:9 (5)> (step 1)
+ ev: EVENT: num¦3
+0 NOW: do nothing
+142 END: num¦3
+2 EVENT: shutdown
+NEW: <ConditionalWorkSequence:10 (5)>
    : │  EVENT: shutdown
    : └1╴... done.
 2 EVENT: shutdown

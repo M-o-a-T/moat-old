@@ -48,9 +48,9 @@ class BadArgCount(RuntimeError):
 class OnEventWorker(Worker):
 	def __init__(self,parent):
 		self.parent = parent
-		self.name = "¦".join(self.parent.arglist)
+		self.name = u"¦".join(unicode(x) for x in self.parent.arglist)
 		if self.parent.displayname is not None:
-			self.name += u" ‹"+" ".join(self.parent.displayname)+u"›"
+			self.name += u" ‹"+" ".join(unicode(x) for x in self.parent.displayname)+u"›"
 
 		global _onHandler_id
 		_onHandler_id += 1
@@ -71,14 +71,14 @@ class OnEventWorker(Worker):
 				return True
 			if e is StopIteration or a is StopIteration:
 				return False
-			if a.startswith('*'):
+			if hasattr(a,"startswith") and a.startswith('*'):
 				if a == '*':
 					pos += 1
 					a = str(pos)
 				else:
 					a = a[1:]
 				ctx[a] = e
-			elif a != e:
+			elif str(a) != str(e):
 				return False
 
 	def process(self,event,**k):
@@ -112,6 +112,7 @@ Every "*foo" in the event description is mapped to the corresponding
 	displayname = None
 
 	def grab_args(self,event,ctx):
+		### This is a pseudo-clone of grab_event()
 		ie = iter(event)
 		ia = iter(self.arglist)
 		pos = 0
@@ -124,14 +125,14 @@ Every "*foo" in the event description is mapped to the corresponding
 				return
 			if e is StopIteration or a is StopIteration:
 				raise BadArgCount
-			if a.startswith('*'):
+			if hasattr(a,"startswith") and a.startswith('*'):
 				if a == '*':
 					pos += 1
 					a = str(pos)
 				else:
 					a = a[1:]
 				setattr(ctx,a,e)
-			elif a != e:
+			elif str(a) != str(e):
 				raise BadArgs(a,e)
 		
 	def process(self,event,**k):
@@ -161,7 +162,7 @@ Every "*foo" in the event description is mapped to the corresponding
 			if isinstance(self.displayname,basestring):
 				yield "name: "+self.displayname
 			else:
-				yield "name: "+" ".join(self.displayname)
+				yield "name: "+" ".join(unicode(x) for x in self.displayname)
 		yield "prio: "+str(self.prio)
 
 		for r in super(OnEventHandler,self)._report(verbose):
@@ -198,17 +199,17 @@ class OnListHandler(Statement):
 			else:
 				for id in sorted(onHandlers.iterkeys()):
 					h = onHandlers[id]
-					n = "¦".join(h.parent.arglist)
+					n = u"¦".join(unicode(x) for x in h.parent.arglist)
 					if h.parent.displayname is not None:
-						n += u" ‹"+" ".join(h.parent.displayname)+u"›"
+						n += u" ‹"+" ".join(unicode(x) for x in h.parent.displayname)+u"›"
 					print >>self.ctx.out,str(id)+" "*(fl-len(str(id))+1),":",n
 			print >>self.ctx.out,"."
 		else:
 			try: h = onHandlers[event[0]]
 			except KeyError: h = onHandlerNames[tuple(event)]
-			print >>self.ctx.out, h.handler_id,":","¦".join(h.parent.arglist)
+			print >>self.ctx.out, h.handler_id,":",u"¦".join(unicode(x) for x in h.parent.arglist)
 			if h.parent.displayname is not None:
-				print >>self.ctx.out,"Name:"," ".join(h.parent.displayname)
+				print >>self.ctx.out,"Name:"," ".join(unicode(x) for x in h.parent.displayname)
 			print >>self.ctx.out,"Prio:",h.prio
 			if hasattr(h.parent,"displaydoc"): print >>self.ctx.out,"Doc:",h.parent.displaydoc
 

@@ -133,14 +133,14 @@ Implementation restriction: can't be used at top level. (Wrap with 'block:'.)
 				return ctx
 			if e is StopIteration or a is StopIteration:
 				return None
-			if a.startswith('*'):
+			if hasattr(a,"startswith") and a.startswith('*'):
 				if a == '*':
 					pos += 1
 					a = str(pos)
 				else: 
 					a = a[1:]
 				setattr(ctx,a,e)
-			elif a != e:
+			elif str(a) != str(e):
 				return None
 
 	def run(self,ctx,**k):

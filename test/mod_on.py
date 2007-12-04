@@ -11,6 +11,15 @@ input = u"""\
 on fuß:
 	name Schau auf deine Füße
 	do nothing
+on num 1:
+	name Txt2Num
+	do nothing
+on num "2":
+	name Num2Txt
+	do nothing
+on num 3:
+	name num2num
+	do nothing
 on foo:
 	prio 49
 	name Skipped One
@@ -44,6 +53,9 @@ sync trigger bar foo
 del on 1
 list on
 trigger fuß
+trigger num "1"
+trigger num 2
+trigger num 3
 shutdown
 """
 
