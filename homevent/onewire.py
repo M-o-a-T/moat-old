@@ -22,6 +22,7 @@ from twisted.python import failure
 import struct
 import os
 import errno
+import sys
 
 OWLOG = ("HOMEVENT_LOG_ONEWIRE" in os.environ)
 
@@ -87,6 +88,8 @@ class OWMsg:
 	dir      = 4
 	size     = 5
 	presence = 6
+	dirall   = 7
+	get      = 8
 
 class OWFlag:
 	cache = 1 # ?
@@ -144,7 +147,9 @@ class OWFSreceiver(object,protocol.Protocol, _PauseableMixin):
 				version, payload_len, ret_value, format_flags, data_len, offset = struct.unpack('!6i', self.data[:24])
 				self.data = self.data[24:]
 
-				if OWLOG: print "OW RECV", version, payload_len, ret_value, format_flags, data_len, offset
+				if OWLOG: print >>sys.stderr,"OW RECV", version, payload_len, ret_value, format_flags, data_len, offset
+				# 0 253 0 2 252 32774
+				if offset & 32768: offset = 0
 
 				if version != 0:
 					self.errReceived(RuntimeError("Wrong version: %d"%(version,)))
@@ -156,9 +161,9 @@ class OWFSreceiver(object,protocol.Protocol, _PauseableMixin):
 					self.pinger += 1
 					self.ping()
 					return # server busy
-				if payload_len < 0 or payload_len > 0 and (payload_len < data_len or offset+data_len > payload_len):
-					self.errReceived(RuntimeError("Wrong length: %d %d %d"%(payload_len,offset,data_len,)))
-					return
+#				if payload_len < 0 or payload_len > 0 and (payload_len < data_len or offset+data_len > payload_len):
+#					self.errReceived(RuntimeError("Wrong length: %d %d %d"%(payload_len,offset,data_len,)))
+#					return
 
 				if payload_len > self.MAX_LENGTH:
 					self.transport.loseConnection()
@@ -193,7 +198,7 @@ class OWFSreceiver(object,protocol.Protocol, _PauseableMixin):
 		flags |= OWtempformat.celsius << OWtempformat._offset
 		flags |= OWdevformat.fdi << OWdevformat._offset
 
-		if OWLOG: print "OW SEND", 0, len(data), typ, flags, rlen, 0, repr(data)
+		if OWLOG: print >>sys.stderr,"OW SEND", 0, len(data), typ, flags, rlen, 0, repr(data)
 		self.transport.write(struct.pack("!6i", \
 			0, len(data), typ, flags, rlen, 0) +data)
 
@@ -231,7 +236,7 @@ class OWFScall(object):
 
 	def dataReceived(self, data):
 		# child object expect this
-		if OWLOG: print "OWFS done: ",self
+		if OWLOG: print >>sys.stderr,"OWFS done: ",self
 		if self.d is not None:
 			self.d.callback(data)
 
@@ -248,7 +253,7 @@ class OWFScall(object):
 	def error(self,err):
 		"""An error occurred."""
 		if not self.d.called:
-			if OWLOG: print "OWFS done error: ",self,err
+			if OWLOG: print >>sys.stderr,"OWFS done error: ",self,err
 			self.d.errback(err)
 		else:
 			process_failure(err)
@@ -372,6 +377,7 @@ class DIRmsg(OWFStimeout,OWFScall):
 	prio = PRIO_BACKGROUND
 	empty_ok = True
 	cached = True
+	dirall = True
 
 	def __init__(self,path,cb):
 		self.path = path
@@ -379,17 +385,27 @@ class DIRmsg(OWFStimeout,OWFScall):
 		super(DIRmsg,self).__init__()
 	
 	def send(self,conn):
-		self.sendMsg(conn, OWMsg.dir, self._path(self.path)+'\0', 0)
+		if self.dirall:
+			self.sendMsg(conn, OWMsg.dirall, self._path(self.path)+'\0', 0)
+		else:
+			self.sendMsg(conn, OWMsg.dir, self._path(self.path)+'\0', 0)
 
 	def dataReceived(self,data):
-		if len(data):
-			try: data = data[data.rindex('/')+1:]
-			except ValueError: pass
-			self.cb(data)
-			return True
+		if self.dirall:
+			for entry in data.split(","):
+				try: entry = entry[entry.rindex('/')+1:]
+				except ValueError: pass
+				self.cb(entry)
+		else:
+			if len(data):
+				try: data = data[data.rindex('/')+1:]
+				except ValueError: pass
+				self.cb(data)
+				return True
 	
+	### TODO: retry with "dir" if the server does not understand "dirall"
 	def done(self, _=None):
-		if OWLOG: print "OWFS doneDIR",self
+		if OWLOG: print >>sys.stderr,"OWFS doneDIR",self
 		self.d.callback(_)
 		return super(DIRmsg,self).done()
 
@@ -410,7 +426,7 @@ class OWFSqueue(OWFSreceiver):
 	def send(self,msg):
 		assert self.msg is None, "OWFS Message already in transit!"
 		self.msg = msg
-		if OWLOG: print "OWFS send for",self.msg
+		if OWLOG: print >>sys.stderr,"OWFS send for",self.msg
 		msg.send(self)
 
 	def ping(self):
@@ -429,21 +445,21 @@ class OWFSqueue(OWFSreceiver):
 		self.factory.haveConnection(self)
 
 	def msgReceived(self, typ, data):
-		if OWLOG: print "OWFS recv for %s: %d: %s"%(self.msg,typ,repr(data))
+		if OWLOG: print >>sys.stderr,"OWFS recv for %s: %d: %s"%(self.msg,typ,repr(data))
 		self.n_msgs += 1
 		if not self.msg:
 			log(ERROR,"Spurious OWFS message",typ,data)
 			return
 		try:
 			if self.msg.msgReceived(typ,data):
-				if OWLOG: print "OWFS recv again"
+				if OWLOG: print >>sys.stderr,"OWFS recv again"
 				return
 		except Exception,e:
-			#if OWLOG: print "OWFS recv err",e
+			#if OWLOG: print >>sys.stderr,"OWFS recv err",e
 			#process_failure()
 			self.is_done(e)
 		else:
-			if OWLOG: print "OWFS recv done"
+			if OWLOG: print >>sys.stderr,"OWFS recv done"
 			self.is_done()
 	
 	def errReceived(self,err):
@@ -461,10 +477,10 @@ class OWFSqueue(OWFSreceiver):
 		self.factory.send_done(disconnect=(res is not None or n_msgs == 0))
 
 		if msg is None:
-			if OWLOG: print "OWFS done NO_MSG",res
+			if OWLOG: print >>sys.stderr,"OWFS done NO_MSG",res
 			return
 
-		if OWLOG: print "OWFS done",msg.prio,self.msg,res
+		if OWLOG: print >>sys.stderr,"OWFS done",msg.prio,self.msg,res
 		if res is not None:
 			self.retry(msg,res)
 		elif n_msgs or msg.empty_ok:
@@ -506,6 +522,7 @@ class OWFSqueue(OWFSreceiver):
 class OWFSfactory(object,ReconnectingClientFactory):
 
 	protocol = OWFSqueue
+	factor = 1.4
 
 	def __init__(self, host="localhost", port=4304, persist = False, name=None, *a,**k):
 		if name is None:
@@ -547,7 +564,7 @@ class OWFSfactory(object,ReconnectingClientFactory):
 		return NOPmsg()
 
 	def queue(self,msg):
-		if OWLOG: print "OWFS queue",msg.prio,msg
+		if OWLOG: print >>sys.stderr,"OWFS queue",msg.prio,msg
 		if not self.continueTrying:
 			msg.d.errback(DisconnectedBusError(self.name))
 			return defer.fail(DisconnectedBusError(self.name))
@@ -799,7 +816,7 @@ class OWFSdevice(object):
 			return self
 
 	def _init(self, bus, short_id=None, id=None, path=()):
-		if OWLOG: print "OW NEW", bus,short_id,id,path
+		if OWLOG: print >>sys.stderr,"OW NEW", bus,short_id,id,path
 		self.bus_id = id
 		self.id = short_id
 		self.bus = bus
