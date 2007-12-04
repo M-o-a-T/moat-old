@@ -5,7 +5,9 @@ This part of the code defines what an event is.
 """
 
 import warnings
+from homevent.twist import track_errors
 from twisted.python import failure
+from traceback import format_stack
 
 class TrySomethingElse(RuntimeError):
 	"""Error if a conditional does not match"""
@@ -128,6 +130,12 @@ def report(self, verbose=False):
 			for w in self.within:
 				p = "   in: "
 				for r in w.report(verbose):
+					yield p+r
+					p = "     : "
+		if track_errors():
+			p = "   by: "
+			for rr in format_stack():
+				for r in rr.rstrip("\n").split("\n"):
 					yield p+r
 					p = "     : "
 	else:

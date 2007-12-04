@@ -2,9 +2,10 @@ homevent (0.2.6) stable; urgency=low
 
   * Onwards.
   * Add a flag to force reporting Python stack traces
+    … including a traceback on the code reporting the error.
   * Make sure event handlers match on numbers.
 
- -- Matthias Urlichs <smurf@debian.org>  Tue, 04 Dec 2007 19:49:14 +0100
+ -- Matthias Urlichs <smurf@debian.org>  Tue, 04 Dec 2007 21:25:00 +0100
 
 homevent (0.2.5.6) stable; urgency=low
 

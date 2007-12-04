@@ -16,9 +16,12 @@ import datetime as dt
 
 tracked_errors = ("HOMEVENT_TRACK_ERRORS" in os.environ)
 
-def track_errors(doit = True):
+def track_errors(doit = None):
 	global tracked_errors
-	tracked_errors = doit
+	res = tracked_errors
+	if doit is not None:
+		tracked_errors = doit
+	return res
 
 class StdInDescriptor(FileDescriptor):
 	def fileno(self):
