@@ -9,7 +9,7 @@ from homevent.check import register_condition
 from homevent.context import Context
 from homevent.parser import read_config
 from homevent.run import process_failure
-from homevent.twist import deferToLater
+from homevent.twist import deferToLater,track_errors
 from homevent.reactor import ShutdownHandler,mainloop,shut_down,\
 	stop_mainloop
 from homevent.logging import TRACE,DEBUG,INFO,WARN,ERROR,PANIC,\
@@ -32,6 +32,8 @@ parser.add_option("-h","--help","-?", action="help",
 	help="print this help text")
 parser.add_option("-t", "--trace", dest="debuglevel", action="store",
 	help="trace level (TRACE,DEBUG,INFO,WARN,ERROR,PANIC,NONE)", default="PANIC")
+parser.add_option("-s", "--stack", dest="stack", action="store_true",
+	help="HomEvenT errors are logged with Python stack traces")
 
 (opts, args) = parser.parse_args()
 if not args:
@@ -53,6 +55,8 @@ if opts.debuglevel != "NONE":
 		register_logger(DoLogger(level=globals()[opts.debuglevel]))
 	else:
 		raise KeyError("'%s' is not a debug level." % (opts.debuglevel,))
+
+track_errors(opts.stack)
 
 def _readcf():
 	d = defer.succeed(None)

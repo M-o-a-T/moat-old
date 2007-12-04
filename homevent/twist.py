@@ -5,7 +5,7 @@
 
 from twisted.internet.abstract import FileDescriptor
 from twisted.internet import fdesc,defer,reactor,base
-from twisted.python import log
+from twisted.python import log,failure
 from twisted.python.threadable import isInIOThread
 from twisted.conch.ssh.session import SSHSessionProcessProtocol
 
@@ -13,6 +13,12 @@ from posix import write
 import sys
 import os
 import datetime as dt
+
+tracked_errors = ("HOMEVENT_TRACK_ERRORS" in os.environ)
+
+def track_errors(doit = True):
+	global tracked_errors
+	tracked_errors = doit
 
 class StdInDescriptor(FileDescriptor):
 	def fileno(self):
@@ -155,3 +161,14 @@ def nfhw(self,data):
 		data = data.encode("utf-8")
 	return fhw(self,data)
 FileDescriptor.write = nfhw
+
+
+_fail = failure.Failure
+class TwistFailure(_fail):
+	def __init__(self, exc_value=None, exc_type=None, exc_tb=None):
+		global tracked_errors
+		if tracked_errors and exc_tb is None and exc_value is not None:
+			try: raise exc_value
+			except Exception: exc_tb = sys.exc_info()[2]
+		_fail.__init__(self,exc_value,exc_type,exc_tb)
+failure.Failure = TwistFailure
