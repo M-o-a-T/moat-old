@@ -78,6 +78,9 @@ floating point numbers, or identical strings).
 Obviously, this statement makes sense only if at least one of these
 values is a variable. ☺
 
+"less" and "greater" tests are also available.
+
+
 ======
 errors
 ======

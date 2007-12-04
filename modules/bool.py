@@ -41,6 +41,30 @@ class EqualCheck(Check):
 		except ValueError:
 			return str(a) == str(b)
 
+class LessCheck(Check):
+	name=("less",)
+	doc="check if the first argument is smaller."
+	def check(self,*args):
+		assert len(args)==2,u"The ‹less› check requires two arguments"
+		a,b = args
+		if a is None or b is None: return False
+		try:
+			return float(a) < float(b)
+		except ValueError:
+			return str(a) < str(b)
+
+class GreaterCheck(Check):
+	name=("greater",)
+	doc="check if the first argument is larger."
+	def check(self,*args):
+		assert len(args)==2,u"The ‹greater› check requires two arguments"
+		a,b = args
+		if a is None or b is None: return False
+		try:
+			return float(a) > float(b)
+		except ValueError:
+			return str(a) > str(b)
+
 class BoolModule(Module):
 	"""\
 		This module implements basic boolean conditions
@@ -53,11 +77,15 @@ class BoolModule(Module):
 		register_condition(FalseCheck)
 		register_condition(NoneCheck)
 		register_condition(EqualCheck)
+		register_condition(LessCheck)
+		register_condition(GreaterCheck)
 	
 	def unload(self):
 		unregister_condition(TrueCheck)
 		unregister_condition(FalseCheck)
 		unregister_condition(NoneCheck)
 		unregister_condition(EqualCheck)
+		unregister_condition(LessCheck)
+		unregister_condition(GreaterCheck)
 	
 init = BoolModule

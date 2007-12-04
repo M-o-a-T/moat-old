@@ -3,7 +3,8 @@
 
 import sys; sys.excepthook = None; del sys
 
-from homevent.statement import main_words, global_words, Statement
+from homevent.statement import main_words, global_words, Statement, \
+	DoNothingHandler
 from homevent.module import Load,Unload,LoadDir,ModuleExists,load_module
 from homevent.check import register_condition
 from homevent.context import Context
@@ -24,6 +25,7 @@ main_words.register_statement(Unload)
 main_words.register_statement(LoadDir)
 register_condition(ModuleExists)
 main_words.register_statement(ShutdownHandler)
+main_words.register_statement(DoNothingHandler)
 load_module("ifelse")
 
 from optparse import OptionParser
