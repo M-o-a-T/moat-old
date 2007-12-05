@@ -33,7 +33,7 @@ PRIO_BACKGROUND = 2
 
 PRIO_STEP = 10 # number of iterations before considering the next queue
 
-MAX_TRIES = 3 # retrying a message until failure
+MAX_TRIES = 5 # retrying a message until failure
 
 def _call(_,p,*a,**k):
 	return p(*a,**k)
@@ -61,13 +61,10 @@ class TimedOut(idErr):
 	def __str__(self):
 		return "Timeout: No data at %s" % (self.path,)
 
-class TooManyTries(idErr):
-	def __str__(self):
-		return "Too many retries: at %s" % (self.path,)
-
 class OWFSerror(EnvironmentError):
 	def __init__(self,typ):
 		self.typ = typ
+		log(DEBUG,"got OWFS ERR %d %s" % (self.typ,errno.errorcode[-self.typ]))
 	def __str__(self):
 		if self.typ < 0:
 			try:
@@ -147,7 +144,7 @@ class OWFSreceiver(object,protocol.Protocol, _PauseableMixin):
 				version, payload_len, ret_value, format_flags, data_len, offset = struct.unpack('!6i', self.data[:24])
 				self.data = self.data[24:]
 
-				if OWLOG: print >>sys.stderr,"OW RECV", version, payload_len, ret_value, format_flags, data_len, offset
+				if OWLOG: log(DEBUG,"OW RECV", version, payload_len, ret_value, format_flags, data_len, offset)
 				# 0 253 0 2 252 32774
 				if offset & 32768: offset = 0
 
@@ -198,7 +195,7 @@ class OWFSreceiver(object,protocol.Protocol, _PauseableMixin):
 		flags |= OWtempformat.celsius << OWtempformat._offset
 		flags |= OWdevformat.fdi << OWdevformat._offset
 
-		if OWLOG: print >>sys.stderr,"OW SEND", 0, len(data), typ, flags, rlen, 0, repr(data)
+		if OWLOG: log(DEBUG,"OW SEND", 0, len(data), typ, flags, rlen, 0, repr(data))
 		self.transport.write(struct.pack("!6i", \
 			0, len(data), typ, flags, rlen, 0) +data)
 
@@ -236,7 +233,7 @@ class OWFScall(object):
 
 	def dataReceived(self, data):
 		# child object expect this
-		if OWLOG: print >>sys.stderr,"OWFS done: ",self
+		if OWLOG: log(DEBUG,"OWFS done: ",self)
 		if self.d is not None:
 			self.d.callback(data)
 
@@ -253,7 +250,7 @@ class OWFScall(object):
 	def error(self,err):
 		"""An error occurred."""
 		if not self.d.called:
-			if OWLOG: print >>sys.stderr,"OWFS done error: ",self,err
+			if OWLOG: log(DEBUG,"OWFS done error: ",self,err)
 			self.d.errback(err)
 		else:
 			process_failure(err)
@@ -275,7 +272,6 @@ class OWFScall(object):
 		self.tries += 1
 		if self.tries < self.max_tries:
 			return True
-		self.error(TooManyTries(self.path))
 		return False
 
 
@@ -405,7 +401,7 @@ class DIRmsg(OWFStimeout,OWFScall):
 	
 	### TODO: retry with "dir" if the server does not understand "dirall"
 	def done(self, _=None):
-		if OWLOG: print >>sys.stderr,"OWFS doneDIR",self
+		if OWLOG: log(DEBUG,"OWFS doneDIR",self)
 		self.d.callback(_)
 		return super(DIRmsg,self).done()
 
@@ -426,7 +422,7 @@ class OWFSqueue(OWFSreceiver):
 	def send(self,msg):
 		assert self.msg is None, "OWFS Message already in transit!"
 		self.msg = msg
-		if OWLOG: print >>sys.stderr,"OWFS send for",self.msg
+		if OWLOG: log(DEBUG,"OWFS send for",self.msg)
 		msg.send(self)
 
 	def ping(self):
@@ -445,21 +441,21 @@ class OWFSqueue(OWFSreceiver):
 		self.factory.haveConnection(self)
 
 	def msgReceived(self, typ, data):
-		if OWLOG: print >>sys.stderr,"OWFS recv for %s: %d: %s"%(self.msg,typ,repr(data))
+		if OWLOG: log(DEBUG,"OWFS recv for %s: %d: %s"%(self.msg,typ,repr(data)))
 		self.n_msgs += 1
 		if not self.msg:
 			log(ERROR,"Spurious OWFS message",typ,data)
 			return
 		try:
 			if self.msg.msgReceived(typ,data):
-				if OWLOG: print >>sys.stderr,"OWFS recv again"
+				if OWLOG: log(DEBUG,"OWFS recv again")
 				return
 		except Exception,e:
-			#if OWLOG: print >>sys.stderr,"OWFS recv err",e
+			if OWLOG: log(DEBUG,"OWFS recv err",e)
 			#process_failure()
 			self.is_done(e)
 		else:
-			if OWLOG: print >>sys.stderr,"OWFS recv done"
+			if OWLOG: log(DEBUG,"OWFS recv done")
 			self.is_done()
 	
 	def errReceived(self,err):
@@ -477,10 +473,10 @@ class OWFSqueue(OWFSreceiver):
 		self.factory.send_done(disconnect=(res is not None or n_msgs == 0))
 
 		if msg is None:
-			if OWLOG: print >>sys.stderr,"OWFS done NO_MSG",res
+			if OWLOG: log(DEBUG,"OWFS done NO_MSG",res)
 			return
 
-		if OWLOG: print >>sys.stderr,"OWFS done",msg.prio,self.msg,res
+		if OWLOG: log(DEBUG,"OWFS done",msg.prio,self.msg,res)
 		if res is not None:
 			self.retry(msg,res)
 		elif n_msgs or msg.empty_ok:
@@ -513,8 +509,11 @@ class OWFSqueue(OWFSreceiver):
 		if isinstance(err,OWFSerror) and err.typ == -errno.EINVAL:
 			msg.error(err)
 		elif msg.may_retry():
-			deferToLater(reactor.callLater,0.5*msg.tries,self.factory.queue,msg)
-		else:
+			if isinstance(err,OWFSerror) and err.typ == -errno.ENOENT:
+				deferToLater(reactor.callLater,5*msg.tries,self.factory.queue,msg)
+			else:
+				deferToLater(reactor.callLater,0.5*msg.tries,self.factory.queue,msg)
+		elif not msg.d.called: # just ignore that
 			msg.error(err)
 
 
@@ -564,7 +563,7 @@ class OWFSfactory(object,ReconnectingClientFactory):
 		return NOPmsg()
 
 	def queue(self,msg):
-		if OWLOG: print >>sys.stderr,"OWFS queue",msg.prio,msg
+		if OWLOG: log(DEBUG,"OWFS queue",msg.prio,msg)
 		if not self.continueTrying:
 			msg.d.errback(DisconnectedBusError(self.name))
 			return defer.fail(DisconnectedBusError(self.name))
@@ -731,6 +730,9 @@ class OWFSfactory(object,ReconnectingClientFactory):
 			
 			def dropit(_,dev):
 				del devices[dev.id]
+				if _.check(OWFSerror):
+					log(WARN,_.getErrorMessage())
+					return
 				return process_failure(_)
 
 			for dev in new_ids.itervalues():
@@ -816,7 +818,7 @@ class OWFSdevice(object):
 			return self
 
 	def _init(self, bus, short_id=None, id=None, path=()):
-		if OWLOG: print >>sys.stderr,"OW NEW", bus,short_id,id,path
+		if OWLOG: log(DEBUG,"OW NEW", bus,short_id,id,path)
 		self.bus_id = id
 		self.id = short_id
 		self.bus = bus
