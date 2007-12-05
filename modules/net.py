@@ -39,10 +39,6 @@ class TimedOut(idErr):
 	def __str__(self):
 		return "Timeout: No data at %s" % (self.path,)
 
-class TooManyTries(idErr):
-	def __str__(self):
-		return "Too many retries: at %s" % (self.path,)
-
 class NETerror(EnvironmentError):
 	def __init__(self,typ):
 		self.typ = typ
