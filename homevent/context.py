@@ -21,13 +21,15 @@ class Context(object):
 		self._store.update(**k)
 
 	def __call__(self,ctx=None,**k):
-		"""A simple way to create a stacked clone"""
-		c = Context(self,**k)
-		if ctx is not None:
-			if self in ctx._parents():
-				c = Context(ctx,**k) # duh
-			elif ctx not in self._parents():
-				c._parent.insert(0,ctx)
+		"""Create a clone with an additional parent context"""
+		if ctx is None:
+			c = Context(self,**k)
+		elif self in ctx._parents():
+			c = Context(ctx,**k)
+		else:
+			c = Context(self,**k)
+			if ctx not in self._parents():
+				c._parent.append(ctx)
 		return c
 
 	def _parents(self):
@@ -93,6 +95,7 @@ class Context(object):
 				res += ","
 			res += repr(store)
 		return "Ctx(%s)" % (res,)
+
 
 def default_context(ctx,**defaults):
 	"""\

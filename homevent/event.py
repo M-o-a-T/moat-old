@@ -106,7 +106,7 @@ class Event(object):
 		if ctx is None:
 			ctx = self.ctx
 		else:
-			ctx = self.ctx(ctx=ctx)
+			ctx = ctx(ctx=self.ctx)
 
 		for n in self.names[drop:]:
 			if hasattr(n,"startswith") and n.startswith('$'):

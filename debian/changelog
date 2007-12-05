@@ -5,8 +5,11 @@ homevent (0.2.6) stable; urgency=low
     … including a traceback on the code reporting the error.
   * Make sure event handlers match on numbers.
   * Add "less" and "greater" checks in addition to "equal".
+  * Fix context concatenation order
+    event parameters picked up values from their caller
+    instead of their own parameters
 
- -- Matthias Urlichs <smurf@debian.org>  Tue, 04 Dec 2007 22:07:41 +0100
+ -- Matthias Urlichs <smurf@debian.org>  Wed, 05 Dec 2007 01:13:57 +0100
 
 homevent (0.2.5.6) stable; urgency=low
 
