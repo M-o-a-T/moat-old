@@ -21,6 +21,7 @@ This code implements the "if" command.
 from homevent.statement import MainStatementList,Statement, \
 	main_words,global_words
 from homevent.module import Module
+from homevent.event import RaisedError
 from homevent.check import check_condition
 from homevent import logging
 from homevent.run import process_failure
@@ -28,17 +29,6 @@ from homevent.run import process_failure
 from twisted.internet import defer
 from twisted.python import failure
 import sys
-
-class RaisedError(RuntimeError):
-	"""An error that has been explicitly raised by a script"""
-	def __init__(self,*params):
-		self.params = params
-	def __repr__(self):
-		return u"‹%s: %s›" % (self.__class__.__name__, repr(self.params))
-	def __str__(self):
-		return u"%s: %s" % (self.__class__.__name__, " ".join(str(x) for x in self.params))
-	def __unicode__(self):
-		return u"%s: %s" % (self.__class__.__name__, " ".join(unicode(x) for x in self.params))
 
 class TryStatement(MainStatementList):
 	name=("try",)

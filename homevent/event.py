@@ -26,6 +26,17 @@ class EventNoNameError(ValueError):
 		"""
 	pass
 
+class RaisedError(RuntimeError):
+	"""An error that has been explicitly raised by a script"""
+	def __init__(self,*params):
+		self.params = params
+	def __repr__(self):
+		return u"‹%s: %s›" % (self.__class__.__name__, repr(self.params))
+	def __str__(self):
+		return u"%s: %s" % (self.__class__.__name__, " ".join(str(x) for x in self.params))
+	def __unicode__(self):
+		return u"%s: %s" % (self.__class__.__name__, " ".join(unicode(x) for x in self.params))
+
 event_id = 0
 
 class Event(object):
@@ -118,7 +129,7 @@ class Event(object):
 from twisted.python.failure import Failure
 
 def report(self, verbose=False):
-	if verbose:
+	if verbose and not self.check(RaisedError):
 		from traceback import format_exception
 		p = "ERROR: "
 		for l in self.getTraceback().rstrip("\n").split("\n"):
