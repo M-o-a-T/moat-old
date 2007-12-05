@@ -33,10 +33,11 @@ class Context(object):
 		return c
 
 	def _parents(self):
-		for p in self._parent:
+		pl = self._parent[:]
+		while pl:
+			p = pl.pop(0)
 			yield p
-			for pp in p._parents():
-				yield pp
+			pl.extend(p._parent)
 		
 	def __getattribute__(self,key):
 		if key.startswith("_"):
@@ -46,9 +47,9 @@ class Context(object):
 			r = store[key]
 		else:
 			r = VanishedAttribute
-			for p in self._parent:
+			for p in self._parents():
 				try:
-					r = getattr(p,key)
+					r = p._store[key]
 				except KeyError:
 					pass
 				else:
@@ -95,8 +96,7 @@ class Context(object):
 				res += ","
 			res += repr(store)
 		return "Ctx(%s)" % (res,)
-
-
+	
 def default_context(ctx,**defaults):
 	"""\
 		Create a new context with default content.
