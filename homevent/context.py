@@ -97,6 +97,17 @@ class Context(object):
 			res += repr(store)
 		return "Ctx(%s)" % (res,)
 	
+	def _dump_get(self,n):
+		from homevent.logging import log,DEBUG
+		log(DEBUG,"CTX:",n,"is",getattr(self,n))
+		self._dump_tree("")
+	def _dump_tree(self,pre):
+		from homevent.logging import log,DEBUG
+		log(DEBUG,"CTX "+pre,unicode(self._store))
+		for p in self._parent:
+			p._dump_tree(pre+"  ")
+
+
 def default_context(ctx,**defaults):
 	"""\
 		Create a new context with default content.
