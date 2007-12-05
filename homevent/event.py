@@ -121,6 +121,7 @@ class Event(object):
 
 		for n in self.names[drop:]:
 			if hasattr(n,"startswith") and n.startswith('$'):
+				#if n == "$s": ctx._dump_get(n[1:])
 				n = getattr(ctx,n[1:])
 			w.append(n)
 		return self.__class__(ctx, *w)
