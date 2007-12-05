@@ -151,7 +151,8 @@ var state NAME name...
 		w = event[:]
 		var = w[0]
 		name = tuple(w[1:])
-		setattr(self.parent.ctx,var,states[name])
+		s = states[name]
+		setattr(self.parent.ctx,var,s.value if not s.working else s.old_value)
 
 
 class StateCheck(Check):
