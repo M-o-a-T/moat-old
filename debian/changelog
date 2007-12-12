@@ -8,8 +8,9 @@ homevent (0.2.6) stable; urgency=low
   * Fix context concatenation order
     event parameters picked up values from their caller
     instead of their own parameters
+  * Logging for subsystems (like "onewire", for which I need it)
 
- -- Matthias Urlichs <smurf@debian.org>  Wed, 05 Dec 2007 01:13:57 +0100
+ -- Matthias Urlichs <matthias@urlichs.de>  Wed, 12 Dec 2007 18:41:24 +0100
 
 homevent (0.2.5.6) stable; urgency=low
 

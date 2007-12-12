@@ -41,6 +41,17 @@ LogNames={
 	NONE:"NONE",
 }
 
+levels = {}
+
+
+def log_level(cls, level=None):
+	"""Get/set the logging level for a particular subsystem"""
+	ret = levels.get(cls,None)
+	if level is not None:
+		levels[cls] = level
+	return levels
+
+
 class Logger(object):
 	"""\
 		This class implements one particular way to log things.
@@ -237,8 +248,17 @@ def log(level, *a):
 	"""\
 		Run through all loggers. If one of then throws an exception,
 		drop the logger and process it.
+
+		Special feature: You can pass a subsystem name as the very first
+		argument. Logging for that subsystem can be enabled by
+		log_level(subsys_name, LEVEL).
 		"""
 	exc = []
+	if isinstance(level,basestring):
+		lim = levels.get(level,NONE)
+		if lim == NONE or lim > level:
+			return
+		level,a[0] = a[0],level
 	for l in loggers[:]:
 		try:
 			l.log(level, *a)

@@ -68,43 +68,11 @@ NEW: <ConditionalWorkSequence:1 (4)>
 1 Yes D
 0 Triggered:
 0 RaisedError: Foo A
-ERROR: Traceback (most recent call last):
-     :   File "modules/errors.py, in _run
-     :     d = super(TryStatement,self).run(ctx,**k)
-     :   File "homevent/statement.py, in run
-     :     d.callback(None)
-     :   File "homevent/twist.py, in acb
-     :     self._startRunCallbacks(result)
-     :   File "internet/defer.py, in _startRunCallbacks
-     :     self._runCallbacks()
-     : --- <exception caught here> ---
-     :   File "internet/defer.py, in _runCallbacks
-     :     self.result = callback(self.result, *args, **kw)
-     :   File "homevent/statement.py, in go
-     :     return p.run(ctx)
-     :   File "modules/errors.py, in run
-     :     raise err
-     : __builtin__.RaisedError: RaisedError: Foo A
+ERROR: RaisedError: Foo A
 NEW: <WorkSequence:2 (4)>
    : │  ERROR: RaisedError: Foo A
    : └1╴... done.
-ERROR: Traceback (most recent call last):
-     :   File "modules/errors.py, in _run
-     :     d = super(TryStatement,self).run(ctx,**k)
-     :   File "homevent/statement.py, in run
-     :     d.callback(None)
-     :   File "homevent/twist.py, in acb
-     :     self._startRunCallbacks(result)
-     :   File "internet/defer.py, in _startRunCallbacks
-     :     self._runCallbacks()
-     : --- <exception caught here> ---
-     :   File "internet/defer.py, in _runCallbacks
-     :     self.result = callback(self.result, *args, **kw)
-     :   File "homevent/statement.py, in go
-     :     return p.run(ctx)
-     :   File "modules/errors.py, in run
-     :     raise err
-     : __builtin__.RaisedError: RaisedError: Foo A
+ERROR: RaisedError: Foo A
 119 END: RaisedError
 1 Yes E
 0 Triggered:
@@ -120,43 +88,11 @@ ERROR: Traceback (most recent call last):
 1 Yes J D
 0 Triggered:
 0 RaisedError: Foo E
-ERROR: Traceback (most recent call last):
-     :   File "modules/errors.py, in _run
-     :     d = super(TryStatement,self).run(ctx,**k)
-     :   File "homevent/statement.py, in run
-     :     d.callback(None)
-     :   File "homevent/twist.py, in acb
-     :     self._startRunCallbacks(result)
-     :   File "internet/defer.py, in _startRunCallbacks
-     :     self._runCallbacks()
-     : --- <exception caught here> ---
-     :   File "internet/defer.py, in _runCallbacks
-     :     self.result = callback(self.result, *args, **kw)
-     :   File "homevent/statement.py, in go
-     :     return p.run(ctx)
-     :   File "modules/errors.py, in run
-     :     raise err
-     : __builtin__.RaisedError: RaisedError: Foo E
+ERROR: RaisedError: Foo E
 NEW: <WorkSequence:3 (4)>
    : │  ERROR: RaisedError: Foo E
    : └1╴... done.
-ERROR: Traceback (most recent call last):
-     :   File "modules/errors.py, in _run
-     :     d = super(TryStatement,self).run(ctx,**k)
-     :   File "homevent/statement.py, in run
-     :     d.callback(None)
-     :   File "homevent/twist.py, in acb
-     :     self._startRunCallbacks(result)
-     :   File "internet/defer.py, in _startRunCallbacks
-     :     self._runCallbacks()
-     : --- <exception caught here> ---
-     :   File "internet/defer.py, in _runCallbacks
-     :     self.result = callback(self.result, *args, **kw)
-     :   File "homevent/statement.py, in go
-     :     return p.run(ctx)
-     :   File "modules/errors.py, in run
-     :     raise err
-     : __builtin__.RaisedError: RaisedError: Foo E
+ERROR: RaisedError: Foo E
 138 END: RaisedError
 1 Yes K
 0 Triggered:

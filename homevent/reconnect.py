@@ -38,7 +38,6 @@ class ReconnectingClientFactory(protocol.ClientFactory):
 	maxRetries = None
 	_callID = None
 	connector = None
-	trace_retry = True
 
 	continueTrying = 1
 
@@ -68,7 +67,7 @@ class ReconnectingClientFactory(protocol.ClientFactory):
 			else:
 				connector = self.connector
 
-		if self.trace_retry: log(TRACE,"Try %s immediately" % (connector,))
+		log(TRACE,"Try %s immediately" % (connector,))
 		self.connector = None
 		connector.connect()
 

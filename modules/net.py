@@ -20,8 +20,6 @@ from twisted.protocols.basic import LineReceiver,_PauseableMixin
 
 import os
 
-NETLOG = ("HOMEVENT_LOG_NET" in os.environ)
-
 def _call(_,p,*a,**k):
 	return p(*a,**k)
 
@@ -92,7 +90,6 @@ class NETcommon_factory(object):
 		self.port = port
 		self.name = name
 		self.up_event = False
-		self.trace_retry = NETLOG
 
 	def haveConnection(self,conn):
 		self.drop()

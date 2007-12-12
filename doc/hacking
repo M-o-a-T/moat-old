@@ -3,6 +3,33 @@ How to hack HomEvent
 ====================
 
 
+-------
+Logging
+-------
+
+In addition to the 'normal' log levels, there are also a few subsystems
+in HomEvenT whose logging can be turned on separately:
+
+	scripts/daemon.py --trace=DEBUG,onewire=TRACE
+
+This statement would enable all debugging levels for the onewire
+subsystem; the console output would not actually contain these because
+of the DEBUG, but you could log them separately from within HomEvenT.
+
+The following subsystems are defined:
+
+* onewire
+
+  This logs all transactions betweenHomEvenT and the onewire server(s).
+
+* parser
+
+  Command parser, slightly higher level.
+
+* token
+
+  Command tokenizer, i.e. lower level.
+
 ---------
 Internals
 ---------
@@ -171,7 +198,7 @@ Yeah, yeah, I know that everybody else advocates spaces.
 But tabs are good.
 
 You can make them wider to see how the code lines up more clearly.
-You can replace them with |\t (temporarily of course ☺) to see that
+You can replace them with \t (temporarily of course ☺) to see that
 even better. (Of course you should immediately go and refactor code
 that's so convoluted!) They work in GUI editors with proportional
 fonts where spaces are just too narrow to be useful visually.

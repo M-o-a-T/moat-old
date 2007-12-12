@@ -14,7 +14,7 @@ from homevent.twist import deferToLater,track_errors
 from homevent.reactor import ShutdownHandler,mainloop,shut_down,\
 	stop_mainloop
 from homevent.logging import TRACE,DEBUG,INFO,WARN,ERROR,PANIC,\
-	Logger,register_logger,LogNames
+	Logger,register_logger,LogNames, log_level
 from signal import signal,SIGINT,SIGHUP,SIGQUIT
 import sys
 
@@ -52,11 +52,14 @@ class DoLogger(Logger):
 
 
 if opts.debuglevel != "NONE":
-	if opts.debuglevel == opts.debuglevel.upper() and \
-			opts.debuglevel in globals():
-		register_logger(DoLogger(level=globals()[opts.debuglevel]))
-	else:
-		raise KeyError("'%s' is not a debug level." % (opts.debuglevel,))
+	for level in opts.debuglevel.split(","):
+		if "=" in level:
+			subsys,level = level.split("=")
+			log_level(subsys, globals()[level])
+		elif level == level.upper() and level in globals():
+			register_logger(DoLogger(level=globals()[level]))
+		else:
+			raise KeyError("'%s' is not a debug level." % (level,))
 
 track_errors(opts.stack)
 

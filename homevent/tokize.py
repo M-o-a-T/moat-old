@@ -10,8 +10,7 @@ import string, re, os
 from token import *
 import tokenize as t
 from twisted.internet.defer import inlineCallbacks, returnValue, maybeDeferred
-
-TLOG = ("HOMEVENT_LOG_TOKEN" in os.environ)
+from homevent.logging import log,TRACE
 
 COMMENT = t.COMMENT
 NL = t.NL
@@ -72,29 +71,29 @@ def tokenlogwrap(tx):
 		def iw():
 			r = maybeDeferred(inp)
 			def irep(_):
-				print "IN",_
+				log("token",TRACE,"IN",_)
 				return _
-			if TLOG: r.addBoth(irep)
+			r.addBoth(irep)
 			return r
 		def ow(*a,**k):
-			if TLOG: print "TOKEN:",repr(a)
+			log("token",TRACE,repr(a))
 			r = maybeDeferred(outp,*a,**k)
 			def orep(_):
-				if TLOG: print "TOKEN::",_
+				log("token",TRACE,"TOKEN::",_)
 				return _
 			def orepf(_):
 				if _.check(StopIteration):
-					if TLOG: print "TOKEN:: STOP_INPUT"
+					log("token",TRACE,"TOKEN:: STOP_INPUT")
 				else:
-					if TLOG: print "TOKEN::",_
+					log("token",TRACE,"TOKEN::",_)
 				return _
 			r.addCallbacks(orep,orepf)
 			return r
 		res = tx(iw,ow)
 		def rep(_):
-			print "TOKEN END::",_
+			log("token",TRACE,"TOKEN END::",_)
 			return _
-		if TLOG: res.addBoth(rep)
+		res.addBoth(rep)
 		return res
 	return txw
 	
