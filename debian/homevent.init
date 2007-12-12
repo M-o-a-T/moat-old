@@ -38,6 +38,10 @@ case "$1" in
 			2>&1 | logger -p $ERRLEVEL -t homevent
 	echo "$NAME."
 	;;
+  debug)
+	shift
+	exec $DAEMON $DAEMON_OPTS $@ $DAEMON_CFG
+	;;
   stop)
 	echo -n "Stopping $DESC: "
 	pid=$(cat /var/run/$NAME.pid 2>/dev/null)
@@ -68,7 +72,7 @@ case "$1" in
 	;;
   *)
 	N=/etc/init.d/$NAME
-	echo "Usage: $N {start|stop|restart|reload|force-reload}" >&2
+	echo "Usage: $N {start|stop|restart|reload|force-reload|debug}" >&2
 	exit 1
 	;;
 esac
