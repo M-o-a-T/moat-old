@@ -40,7 +40,8 @@ case "$1" in
 	;;
   debug)
 	shift
-	exec $DAEMON $DAEMON_OPTS $@ $DAEMON_CFG
+	cd /var/lib/homevent
+	exec sudo -u homevent $DAEMON $DAEMON_OPTS $@ $DAEMON_CFG
 	;;
   stop)
 	echo -n "Stopping $DESC: "
