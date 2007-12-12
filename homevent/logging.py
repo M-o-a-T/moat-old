@@ -258,7 +258,8 @@ def log(level, *a):
 		lim = levels.get(level,NONE)
 		if lim == NONE or lim > level:
 			return
-		level,a[0] = a[0],level
+		level,b = a[0],level
+		a = (b,)+a[1:]
 	for l in loggers[:]:
 		try:
 			l.log(level, *a)
