@@ -103,10 +103,11 @@ class WorkSequence(WorkItem):
 		self.work.append(w)
 
 	def process(self, *a,**k):
-		if "HOMEVENT_TEST" in os.environ:
-			r = deferToLater(self._process,*a,**k)
-		else:
-			r = deferToThread(self._process,*a,**k)
+		r = deferToLater(self._process,*a,**k)
+#		if "HOMEVENT_TEST" in os.environ:
+#			r = deferToLater(self._process,*a,**k)
+#		else:
+#			r = deferToThread(self._process,*a,**k)
 		return r
 
 	handle_conditional = False
