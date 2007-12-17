@@ -130,11 +130,11 @@ class Monitor(object):
 			delta = - delta
 			res = "-"
 		if delta > 3600:
-			res += res+"%d hr" % int(delta / 3600)
+			res += res2+"%d hr" % int(delta / 3600)
 			res2 = " "
 			delta %= 3600
 		if delta > 60:
-			res += res+"%d min" % int(delta / 60)
+			res += res2+"%d min" % int(delta / 60)
 			res2 = " "
 			delta %= 60
 		if delta > 0.1:
