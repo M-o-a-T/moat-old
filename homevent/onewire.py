@@ -460,7 +460,7 @@ class OWFSqueue(OWFSreceiver):
 		self.is_done(err)
 		self.loseConnection()
 
-	def is_done(self, res=None):
+	def is_done(self, err=None):
 		"""Signal that the current transaction has concluded."""
 		msg = self.msg
 		n_msgs = self.n_msgs
@@ -468,15 +468,15 @@ class OWFSqueue(OWFSreceiver):
 		self.msg = None
 		self.n_msgs = 0
 
-		self.factory.send_done(disconnect=(res is not None or n_msgs == 0))
-
 		if msg is None:
-			log("onewire",DEBUG,"done NO_MSG",res)
+			log("onewire",DEBUG,"done NO_MSG",err)
 			return
 
-		log("onewire",DEBUG,"done",msg.prio,self.msg,res)
-		if res is not None:
-			self.retry(msg,res)
+		self.factory.send_done(disconnect=(err is not None or n_msgs == 0))
+
+		log("onewire",DEBUG,"done",msg.prio,self.msg,err)
+		if err is not None:
+			self.retry(msg,err)
 		elif n_msgs or msg.empty_ok:
 			msg.done()
 		else:
@@ -581,6 +581,7 @@ class OWFSfactory(object,ReconnectingClientFactory):
 			self.send_next()
 		elif self.conn:
 			self.conn.loseConnection()
+			self.conn = None
 	
 	def send_next(self, force=True):
 		if force or self.has_queued():
