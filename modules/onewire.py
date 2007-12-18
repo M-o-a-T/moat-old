@@ -155,9 +155,9 @@ list onewire [NAME]
 			raise SyntaxError("Usage: list onewire [BUS]")
 		else:
 			b = buses[event[0]]
-			print "Name:",b.name
-			print "Host:",b.host
-			print "Port:",b.port
+			print >>ctx.out,"Name:",b.name
+			print >>ctx.out,"Host:",b.host
+			print >>ctx.out,"Port:",b.port
 			print >>ctx.out,"."
 
 
