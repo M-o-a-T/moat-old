@@ -10,7 +10,10 @@ Standards-Version: 3.7.2
 Package: homevent
 Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}, ${python:Depends}, python-twisted-core, python-twisted-conch
-Description: A scripted event-based system for home automation et al.
+Description: A scripted event-based monitoring and control system
  HomEvenT is a flexible, scripted, network-aware event handler.
+ It can monitor and control quite a few external buses and peripherals,
+ including 1wire and FS20. It can write values to RRD files and allows
+ access to its command interpreter with SSH.
  .
  The author uses it as a central hub for home automation.
