@@ -562,7 +562,8 @@ class OWFSfactory(object,ReconnectingClientFactory):
 	def queue(self,msg):
 		log("onewire",DEBUG,"queue",msg.prio,msg)
 		if not self.continueTrying:
-			msg.d.errback(DisconnectedBusError(self.name))
+			if msg.d is not None and not msg.d.called:
+				msg.d.errback(DisconnectedBusError(self.name))
 			return defer.fail(DisconnectedBusError(self.name))
 
 		self.queues[msg.prio].append(msg)
