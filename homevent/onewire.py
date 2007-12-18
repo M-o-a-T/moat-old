@@ -730,7 +730,7 @@ class OWFSfactory(object,ReconnectingClientFactory):
 					n_old += 1
 					dev.go_down()
 
-			for dev in devices:
+			for dev in devices.itervalues():
 				if dev.bus is self:
 					n_dev += 1
 			
