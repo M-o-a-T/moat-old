@@ -723,9 +723,16 @@ class OWFSfactory(object,ReconnectingClientFactory):
 
 		def cleanup(_):
 			e = defer.succeed(None)
+			n_old = 0
+			n_dev = 0
 			for dev in old_ids.itervalues():
 				if dev.bus is self:
+					n_old += 1
 					dev.go_down()
+
+			for dev in devices:
+				if dev.bus is self:
+					n_dev += 1
 			
 			def dropit(_,dev):
 				del devices[dev.id]
@@ -742,7 +749,7 @@ class OWFSfactory(object,ReconnectingClientFactory):
 				e.addErrback(dropit,dev)
 
 			def num(_):
-				process_event(Event(Context(),"onewire","scanned",self.name,len(old_ids), len(new_ids), len(devices))).addErrback(process_failure)
+				process_event(Event(Context(),"onewire","scanned",self.name,n_old, len(new_ids), n_dev)).addErrback(process_failure)
 				return len(old_ids)
 			e.addCallback(num)
 			return e
