@@ -14,7 +14,7 @@ from twisted.internet import protocol,defer,reactor
 from twisted.protocols.basic import _PauseableMixin
 from twisted.python import failure
 from homevent.onewire import connect,disconnect, devices
-from homevent.monitor import Monitor,MonitorHandler
+from homevent.monitor import Monitor,MonitorHandler, MonitorAgain
 import struct
 
 
@@ -245,6 +245,65 @@ class OWFSmon(Monitor):
 		return super(OWFSmon,self).down()
 		
 
+class OWFSwindmon(Monitor):
+	def __init__(self,*a,**k):
+		super(OWFSwindmon,self).__init__(*a,**k)
+		self.avg = None
+		self.nval = 0
+
+	def up(self):
+		super(OWFSwindmon,self).up()
+		self.avg = None
+		self.nval = 0
+
+	@defer.inlineCallbacks
+	def one_value(self, step):
+		dev = devices[self.device]
+		val = yield dev.get(self.attribute)
+		val = (float(v.strip()) for v in val.split(","))
+		val = (2 if v > 3 else 0 if v < 1 else 1 for v in val)
+		val = tuple(val)
+		if   val == (2,2,1,2): val = 0
+		elif val == (2,1,1,2): val = 1
+		elif val == (2,1,2,2): val = 2
+		elif val == (1,1,2,2): val = 3
+		elif val == (1,2,2,2): val = 4
+		elif val == (1,2,2,0): val = 5
+		elif val == (2,2,2,0): val = 6
+		elif val == (2,2,0,0): val = 7
+		elif val == (2,2,0,2): val = 8
+		elif val == (2,0,0,2): val = 9
+		elif val == (2,0,2,2): val = 10
+		elif val == (0,0,2,2): val = 11
+		elif val == (0,2,2,2): val = 12
+		elif val == (0,2,2,1): val = 13
+		elif val == (2,2,2,1): val = 14
+		elif val == (2,2,1,1): val = 15
+		else: raise MonitorAgain(val)
+		val = (val - self.direction) % 16
+
+		if self.avg is None:
+			self.avg = val
+		else:
+			# The thing is cyclic, thus, when the value crosses zero, we
+			# need to make sure that the moving average still makes
+			# sense. Otherwise oscillating between 0 and 15 would result
+			# in 7.5, which is clearly wrong.
+			if abs(val - self.avg) > 8:
+				if val > self.avg:
+					val -= 16
+				else:
+					val += 16
+			navg = ((1-self.decay)*self.avg + self.decay*val) % 16
+			self.avg = navg
+
+		self.nval += 1
+		if self.nval < 10*self.decay:
+			raise MonitorAgain("decay not reached")
+
+		defer.returnValue(self.avg)
+
+
 class OWFSmonitor(MonitorHandler):
 	name=("monitor","onewire")
 	monitor = OWFSmon
@@ -296,6 +355,47 @@ switch ‹port› ‹low› ‹high›
 			val["to_high"] = 1
 		val["switched"] = None
 MonitorHandler.register_statement(MonitorSwitch)
+
+
+class MonitorWind(Statement):
+	name = ("wind",)
+	doc = "declare a wind instrument"
+	long_doc=u"""\
+wind ‹offset› ‹weight›
+	The monitored device is an AAG wind (direction) meter.
+	The attribute you're measuring needs to be "volt.ALL".
+
+	Wind direction is a value in the interval [0,16[ (N - E - S - W - N).
+	The offset specifies where "real" North is in the above list.
+	The weight value says how "good" the new value is likely to be; this
+	depends somewhat on how turbulent the air is around your wind vane
+	(more tand should be between 0 and 1 (probably closer to zero).
+
+
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if len(event) > 2:
+			raise SyntaxError(u'Usage: wind ‹offset› ‹weight›')
+		val = self.parent.values
+		assert self.parent.monitor is OWFSmon, \
+			"Wrong monitor (%s)" % (self.parent.monitor,)
+		self.parent.monitor = OWFSwindmon
+
+		if len(event) > 0:
+			val["direction"] = float(event[0])
+			if val["direction"] < 0 or val["direction"] >= 16:
+				raise ValueError("weight needs to be between 0 and 15.99")
+		else:
+			val["direction"] = 0
+
+		if len(event) > 1:
+			val["decay"] = float(event[1])
+			if val["decay"] < 0 or val["decay"] > 1:
+				raise ValueError("weight needs to be between 0 and 1")
+		else:
+			val["decay"] = 0.1
+MonitorHandler.register_statement(MonitorWind)
 
 
 

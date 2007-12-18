@@ -868,6 +868,40 @@ Of course, these values may be somewhat off due to tolerances in
 resistor values and input voltage. The debug output and a
 high-resolution RRD graph are good tools for fine-tuning these values.
 
+wind
+----
+
+This is a special mode to interpret the AAG wind vane position.
+
+The vane moves a magnet which controls a circle of eight reed relais,
+connected to four voltage converters (vielding 0, 2.5, or 5 V). The
+result is a floating-point number from zero (inclusive) to 16
+(exclusive) which indicates the direction from North (0) through East
+(4), South (8) and West (12) to North again (16).
+
+As the vane is mounted on a horizontal bar, it's not always convenient
+to orient it so that it points North. The first (optional) parameter is 
+an offset which is subtracted from the raw data so that the reported 
+value is correct.
+
+Because the vane sometimes swings around rather erratically, a
+configurable moving-average damper will be applied. The second parameter
+(default: 0.1) can be described as "How much do I trust this value to be
+correct".
+
+In my situation, where the vane is mounted on top of a pitched roof,
+I have to say "not a whole lot", and compensate by checking for new
+values fairly often:
+
+	monitor onewire "98D100000000" volt.ALL:
+		name wind dir
+		delay for 0.5
+		wind 14 0.01
+
+Caveat: If the wind changes to the exact opposite direction, the
+moving-average calculation method employed here can arbitrarily delay
+reporting the new correct value.
+
 -----
 Tests
 -----

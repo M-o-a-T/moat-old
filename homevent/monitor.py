@@ -27,6 +27,10 @@ import datetime as dt
 
 monitors = {}
 
+class MonitorAgain(RuntimeError):
+	"""The monitor is not ready yet; retry please"""
+	pass
+
 class MonitorError(RuntimeError):
     def __init__(self,w):
         self.monitor = w
@@ -280,7 +284,10 @@ class Monitor(object):
 
 				try:
 					val = yield self.one_value(self.steps)
-		
+
+				except MonitorAgain:
+					pass
+
 				except Exception,e:
 					self.active = False
 					yield process_failure(e)
