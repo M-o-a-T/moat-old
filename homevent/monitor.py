@@ -354,6 +354,7 @@ class Monitor(object):
 
 	def up(self):
 		if not self.active:
+			self.value = None
 			self.active = True
 			deferToLater(self._run)
 
