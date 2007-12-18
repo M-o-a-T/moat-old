@@ -153,6 +153,15 @@ list onewire [NAME]
 			print >>ctx.out,"."
 		elif len(event) != 1:
 			raise SyntaxError("Usage: list onewire [BUS]")
+		elif event[0] in devices:
+			dev = devices[event[0]]
+			print >>ctx.out,"ID:",dev.bus_id
+			print >>ctx.out,"SID:",dev.id
+			print >>ctx.out,"Up:", "Yes" \
+				if dev.is_up else "Never" if dev.is_up is None else "No"
+			if dev.bus: print >>ctx.out,"Bus:",dev.bus.name
+			if dev.path: print >>ctx.out,"Path:", "/"+"/".join(dev.path)
+
 		else:
 			b = buses[event[0]]
 			print >>ctx.out,"Name:",b.name

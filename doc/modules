@@ -811,6 +811,12 @@ Show which buses are connected to the system.
 
 With the bus name as additional argument, shows details about that bus.
 
+Alternately, you can use a device ID as an additional argument;
+HomEvenT will print details about that device. That information will
+allow you to use standard owfs commands on the device without searching
+the bus for it, which can get tricky if you want to find out where it
+just got disconnected from. :-/
+
 -----------
 set onewire
 -----------
