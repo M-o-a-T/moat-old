@@ -1,4 +1,4 @@
-void dgram(int nlo,int nhi, int nbyt, unsigned char *byt, int qsum)
+void dgram(int nlo,int nhi, int nbyt, unsigned char *byt)
 {
 #define R(x) \
 	do { \
@@ -26,8 +26,7 @@ void dgram(int nlo,int nhi, int nbyt, unsigned char *byt, int qsum)
 	int i;
 	for(i=0;i<12;i++) L();
 	H();
-	while(nbyt--) { qsum += *byt; B(*byt); byt++; }
-	B(qsum);
+	while(nbyt--) { B(*byt); byt++; }
 	L(); for(i=0;i<nhi*100;i++) putchar('\0');
 
 	
@@ -39,7 +38,7 @@ int main(int argc, char *argv[]) {
 	int i;
 
 	while(1) { 
-		dgram(r(4),r(6), 4,"\x8c\x8d\x13\x12",6);
+		dgram(r(4),r(6), 4,"\x8c\x8d\x13\x12\x44");
 		fflush(stdout);
 		sleep(5);
 	}

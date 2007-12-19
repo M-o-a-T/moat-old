@@ -8,13 +8,12 @@
 void flow(int low, int mid, int high)
 {
 	int c;
-	unsigned char buf[20];
-	unsigned char *bp = buf;
+	int len = 0;
 	char hi;
 	char lasthi;
 	int cnt;
 	int qsum;
-	int nby = 0;
+	unsigned int nby = 0;
 
 	unsigned char byt,bit;
 	char syn;
@@ -22,9 +21,9 @@ void flow(int low, int mid, int high)
 	goto init;
 
 	while((c=getchar()) != EOF) {
-		if(!(++nby % 10000))  {
-			printf("%d\r",(nby/10000)%10);
-			fflush(stdout);
+		if(!(++nby & 0x3FFF))  {
+			fprintf(stderr,"%d\r",(nby >> 14)&7); /* bits above */
+			fflush(stderr);
 		}
 		hi = ((c & 0x80) != 0);
 		if(hi == lasthi) {
@@ -52,43 +51,23 @@ void flow(int low, int mid, int high)
 		if(++bit <= 8) {
 			byt = (byt<<1) | hi;
 			continue;
-		} else if(bit == 9) {
-			unsigned char par = byt ^ (byt >> 4);
-			par ^= par >> 2;
-			par ^= par >> 1;
-			if((par&1) == !hi) {
-				printf("? PARITY\n");
-				goto init;
-			} else {
-				int len=bp-buf;
-				if(len == 4 + ((buf[3]&0x20) != 0)) {
-					qsum -= byt;
-					/*
-					if(qsum & 0xFF) {
-						printf("? SUM %x %x\n",qsum,byt);
-						goto init;
-					}
-					*/
-					{
-						int i = 0;
-						printf("%d",len);
-						while(i < len) {
-							printf(" %02x",buf[i++]);
-						}
-						printf(" %d\n",(-qsum)&0xFF);
-						fflush(stdout);
-					}
-					goto init;
-				}
-				qsum += byt;
-				*bp++ = byt;
-				bit=0;
-			}
 		}
-
+		unsigned char par = byt ^ (byt >> 4);
+		par ^= par >> 2;
+		par ^= par >> 1;
+		if((par&1) == !hi)
+			goto init;
+		if(++len > 50)
+			goto init;
+		printf("%02x",byt);
+		bit=0;
 		continue;
+
 init:
-		bp = buf;
+		if(len) {
+			putchar('\n'); fflush(stdout);
+			len = 0;
+		}
 		byt = 0;
 		bit = 0;
 		cnt = 0;
