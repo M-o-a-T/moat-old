@@ -197,6 +197,7 @@ class ComplexStatement(Statement):
 			"""
 		if self.__words is None:
 			self.__words = {}
+		assert isinstance(handler.name,tuple),"Names must be word lists"
 		if handler.name in self.__words:
 			raise ValueError("A handler for '%s' is already registered. (%s)" % (handler.name,self.__words[handler.name]))
 		self.__words[handler.name] = handler
