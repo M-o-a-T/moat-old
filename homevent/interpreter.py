@@ -166,7 +166,6 @@ class ImmediateProcessor(CollectProcessor):
 
 	def complex_statement(self,args):
 		fn = self.lookup(args)
-		self.store(fn)
 		fn.start_block()
 
 		return RunMe(self,fn)
