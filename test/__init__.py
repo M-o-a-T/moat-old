@@ -70,8 +70,9 @@ class run_logger(Logger):
 		self.line += 1
 		def rep(m):
 			return m.group(1)+m.group(2)+", in"
-		sx = r_fli.sub(rep,sx)
-		sx = r_hex.sub("obj",sx)
+		if "HOMEVENT_TEST" in os.environ:
+			sx = r_fli.sub(rep,sx)
+			sx = r_hex.sub("obj",sx)
 		if level is not None:
 			print >>self.data, level,sx
 		else:
