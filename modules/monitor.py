@@ -17,6 +17,8 @@ from homevent.statement import AttributedStatement, Statement, main_words,\
 	global_words
 from homevent.module import Module
 from homevent.check import Check,register_condition,unregister_condition
+from homevent.base import Name
+
 import os
 from twisted.python.failure import Failure
 from twisted.internet import defer
@@ -38,7 +40,7 @@ This statement updates the parameters of an existing monitor.
 			raise SyntaxError(u'Usage: update monitor ‹name…›')
 		if not self.params:
 			raise SyntaxError(u'update monitor: You did not specify any changes?')
-		monitor = monitors[tuple(event)]
+		monitor = monitors[Name(event)]
 		active = monitor.active
 
 		d = defer.succeed(None)
@@ -68,7 +70,7 @@ del monitor ‹whatever the name is›
 		event = self.params(ctx)
 		if not len(event):
 			raise SyntaxError(u'Usage: del monitor ‹name…›')
-		m = monitors.pop(tuple(event))
+		m = monitors.pop(Name(event))
 		return m.down()
 
 class MonitorStart(Statement):
@@ -82,7 +84,7 @@ start monitor ‹name›
 		event = self.params(ctx)
 		if not len(event):
 			raise SyntaxError(u'Usage: start monitor ‹name…›')
-		m = monitors[tuple(event)]
+		m = monitors[Name(event)]
 		return m.up()
 
 class MonitorStop(Statement):
@@ -96,7 +98,7 @@ stop monitor ‹name›
 		event = self.params(ctx)
 		if not len(event):
 			raise SyntaxError(u'Usage: stop monitor ‹name…›')
-		m = monitors[tuple(event)]
+		m = monitors[Name(event)]
 		return m.down()
 
 class MonitorList(Statement):
@@ -116,7 +118,7 @@ list monitor NAME
 				print >>self.ctx.out, " ".join(unicode(x) for x in m.name),"::",m.value,m.up_name,m.time_name
 			print >>self.ctx.out, "."
 		else:
-			m = monitors[tuple(event)]
+			m = monitors[Name(event)]
 			print  >>self.ctx.out, "Name: "," ".join(unicode(x) for x in m.name)
 			if m.params:
 				print  >>self.ctx.out, "Device: "," ".join(unicode(x) for x in m.params)
@@ -147,7 +149,7 @@ set monitor VALUE NAME
 		event = self.params(ctx)
 		if len(event) < 2:
 			raise SyntaxError(u"Usage: set monitor ‹value› ‹name…›")
-		m = monitors[tuple(event[1:])]
+		m = monitors[Name(event[1:])]
 		if not m.watcher:
 			raise NoWatcherError(m)
 		m.watcher.callback(event[0])
@@ -158,7 +160,7 @@ class ExistsMonitorCheck(Check):
 	def check(self,*args):
 		if not len(args):
 			raise SyntaxError(u"Usage: if exists monitor ‹name…›")
-		name = tuple(args)
+		name = Name(args)
 		return name in monitors
 
 class RunningMonitorCheck(Check):
@@ -167,7 +169,7 @@ class RunningMonitorCheck(Check):
 	def check(self,*args):
 		if not len(args):
 			raise SyntaxError(u"Usage: if active monitor ‹name…›")
-		name = tuple(args)
+		name = Name(args)
 		return monitors[name].active
 
 
@@ -177,7 +179,7 @@ class WaitingMonitorCheck(Check):
 	def check(self,*args):
 		if not len(args):
 			raise SyntaxError(u"Usage: if waiting monitor ‹name…›")
-		name = tuple(args)
+		name = Name(args)
 		m = monitors[name]
 		return m.active and m.watcher is not None
 
@@ -191,9 +193,8 @@ var monitor NAME name...
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		w = event[:]
-		var = w[0]
-		name = tuple(w[1:])
+		var = event[0]
+		name = Name(event[1:])
 		setattr(self.parent.ctx,var,monitors[name].value)
 
 

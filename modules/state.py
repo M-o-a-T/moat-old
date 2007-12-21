@@ -24,6 +24,8 @@ from homevent.logging import log, Logger, register_logger,unregister_logger
 from homevent.run import process_event
 from homevent.event import Event
 from homevent.check import Check,register_condition,unregister_condition
+from homevent.base import Name
+
 from time import time
 import os
 
@@ -60,11 +62,10 @@ set state X name...
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		w = event[:]
-		if len(w) < 2:
+		if len(event) < 2:
 			raise SyntaxError(u"Usage: set state ‹value› ‹name…›")
-		value = w[0]
-		name = tuple(w[1:])
+		value = event[0]
+		name = Name(event[1:])
 		try:
 			s = states[name]
 		except KeyError:
@@ -101,7 +102,7 @@ list state name...
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		if len(event):
-			s = states[tuple(event)]
+			s = states[Name(event)]
 			print >>self.ctx.out, "Name:"," ".join(s.name)
 			print >>self.ctx.out, "Value:",s.value
 			if hasattr(s,"old_value"):
@@ -126,14 +127,14 @@ del state name...
 		if not len(event):
 			raise SyntaxError(u"Usage: del state ‹name…›")
 
-		s = states[tuple(event)]
+		s = states[Name(event)]
 		if s.working:
 			raise StateChangeError(s,u"‹deleted›")
 		s.working = True
 		s.time = time()
 		d = process_event(Event(self.ctx,"state",s.value,"-",*event))
 		def clear_chg(_):
-			del states[tuple(event)]
+			del states[Name(event)]
 			return _
 		d.addBoth(clear_chg)
 		return d
@@ -148,9 +149,8 @@ var state NAME name...
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		w = event[:]
-		var = w[0]
-		name = tuple(w[1:])
+		var = event[0]
+		name = Name(event[1:])
 		s = states[name]
 		setattr(self.parent.ctx,var,s.value if not s.working else s.old_value)
 
@@ -162,7 +162,7 @@ class StateCheck(Check):
 		if len(args) < 2:
 			raise SyntaxError(u"Usage: if state ‹value› ‹name…›")
 		value = args[0]
-		name = tuple(args[1:])
+		name = Name(args[1:])
 		return states[name].value == value
 
 
@@ -172,7 +172,7 @@ class StateLockedCheck(Check):
 	def check(self,*args):
 		if len(args) < 2:
 			raise SyntaxError(u"Usage: if state locked ‹name…›")
-		return states[tuple(args)].working
+		return states[Name(args)].working
 
 
 class LastStateCheck(Check):
@@ -182,7 +182,7 @@ class LastStateCheck(Check):
 		if len(args) < 2:
 			raise SyntaxError(u"Usage: if last state ‹value› ‹name…›")
 		value = args[0]
-		name = tuple(args[1:])
+		name = Name(args[1:])
 
 		s = states[name]
 		if hasattr(s,"old_value"):
@@ -197,7 +197,7 @@ class ExistsStateCheck(Check):
 	def check(self,*args):
 		if len(args) < 1:
 			raise SyntaxError(u"Usage: if exists state ‹name…›")
-		name = tuple(args)
+		name = Name(args)
 		return name in states
 
 

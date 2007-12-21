@@ -39,3 +39,6 @@ load_module("net")
 
 run("net",input)
 
+
+import sys
+sys.exit(0)

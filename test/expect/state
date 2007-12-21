@@ -4,7 +4,7 @@ NEW: <ConditionalWorkSequence:1 (4)>
    : └1╴... done.
 1 EVENT: startup
 1 END: startup
-0 add ‹IfStatement ⌁.if¦exists¦state¦foo¦bar›
+0 add ‹IfStatement if¦exists¦state¦foo¦bar›
 0 add ‹LogHandler log¦TRACE¦No‽›
 0 add ‹LogHandler log¦TRACE¦Yes!›
 0 Yes!
@@ -113,15 +113,15 @@ foo bar = three
 Name: foo bar
 Value: three
 Last Value: two
-0 add ‹IfStatement ⌁.if¦state¦three¦foo¦bar›
+0 add ‹IfStatement if¦state¦three¦foo¦bar›
 0 add ‹LogHandler log¦TRACE¦Yes!›
 0 add ‹LogHandler log¦TRACE¦No‽›
 0 Yes!
-0 add ‹IfStatement ⌁.if¦exists¦state¦foo¦bar›
+0 add ‹IfStatement if¦exists¦state¦foo¦bar›
 0 add ‹LogHandler log¦TRACE¦Yes!›
 0 add ‹LogHandler log¦TRACE¦No‽›
 0 Yes!
-0 add ‹IfStatement ⌁.if¦last¦state¦two¦foo¦bar›
+0 add ‹IfStatement if¦last¦state¦two¦foo¦bar›
 0 add ‹LogHandler log¦TRACE¦Yes!›
 0 add ‹LogHandler log¦TRACE¦No‽›
 0 Yes!

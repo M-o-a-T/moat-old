@@ -16,6 +16,7 @@ for typical usage.
 
 from homevent.context import Context
 from homevent.event import Event
+from homevent.base import Name
 
 from twisted.internet import defer
 from twisted.python.failure import Failure
@@ -28,19 +29,20 @@ class InputEvent(Event):
 
 	def __str__(self):
 		try:
-			return "<InputEvent:"+u"¦".join(str(x) for x in self.names)+">"
+			return "<InputEvent:%s>" % (self.names,)
 		except Exception:
 			return "<InputEvent> REPORT_ERROR: "+repr(self.names)
 
 	def __unicode__(self):
 		try:
-			return u"⌁."+u"¦".join(unicode(x) for x in self.names)
+			#return u"⌁."+unicode(self.names)
+			return unicode(self.names)
 		except Exception:
 			return u"⌁ REPORT_ERROR: "+repr(self.names)
 
 	def report(self, verbose=False):
 		try:
-			yield "IEVENT: "+u"¦".join(unicode(x) for x in self.names)
+			yield "IEVENT: "+unicode(self.names)
 		except Exception:
 			yield "IEVENT: REPORT_ERROR: "+repr(self.names)
 
@@ -193,7 +195,7 @@ class Interpreter(Processor):
 		try:
 			fn = self.lookup(args)
 		except TypeError,e:
-			print >>self.ctx.out,"For",repr(fn),"::"
+			print >>self.ctx.out,"For",args,"::"
 			raise
 
 		fn.start_block()

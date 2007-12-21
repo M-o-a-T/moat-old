@@ -24,6 +24,7 @@ from homevent.run import process_failure
 from homevent.event import Event
 from homevent.logging import log_event,log, TRACE
 from homevent.twist import deferToLater
+from homevent.base import Name
 
 
 class UnknownWordError(KeyError):
@@ -42,6 +43,7 @@ class Statement(object):
 		"""
 	name=("unassigned",)
 	doc="(unassigned short help text!)"
+
 #	long_doc="""\
 #This statement has a help text that has not been overridden.
 #Programmer error!
@@ -49,7 +51,9 @@ class Statement(object):
 	immediate = False # don't enqueue this
 
 	def __init__(self,parent=None, ctx=None):
-		assert isinstance(self.name,tuple),"Name is "+repr(self.name)
+		if not isinstance(self.name,Name):
+			assert isinstance(self.name,tuple),"Name is "+repr(self.name)
+			self.name = tuple(self.name)
 		self.parent = parent
 		self.ctx = ctx or Context()
 		self.args = None
@@ -57,9 +61,9 @@ class Statement(object):
 	def __repr__(self):
 		try:
 			if self.args:
-				return u"‹%s %s›" % (self.__class__.__name__,u"¦".join(unicode(x) for x in self.args))
+				return u"‹%s %s›" % (self.__class__.__name__,self.args)
 			else:
-				return u"‹%s: %s›" % (self.__class__.__name__,u"¦".join(unicode(x) for x in self.name))
+				return u"‹%s: %s›" % (self.__class__.__name__,self.name)
 		except Exception:
 				return u"‹%s ?›" % (self.__class__.__name__,)
 
@@ -68,7 +72,7 @@ class Statement(object):
 	def matches(self,args):
 		"""Check if this statement can process this list of words."""
 		if len(args) < len(self.name): return False
-		return self.name == tuple(args[0:len(self.name)])
+		return self.name == Name(args[0:len(self.name)])
 	
 	def called(self, args):
 		"""\
@@ -115,9 +119,9 @@ class ComplexStatement(Statement):
 
 	def __repr__(self):
 		if self.__words is None:
-			return u"‹%s: %s›" % (self.__class__.__name__,u"¦".join(unicode(x) for x in self.name))
+			return u"‹%s: %s›" % (self.__class__.__name__,self.name)
 		else:
-			return u"‹%s: %s %d›" % (self.__class__.__name__,u"¦".join(unicode(x) for x in self.name),len(self.__words))
+			return u"‹%s: %s %d›" % (self.__class__.__name__,self.name,len(self.__words))
 
 	def start_block(self):
 		raise NotImplementedError("You need to override '%s.start_block' (called with %s)" % (self.__class__.__name__,repr(self.args)))
@@ -136,7 +140,7 @@ class ComplexStatement(Statement):
 		n = len(args)
 		while n >= 0:
 			try:
-				fn = self[tuple(args[:n])]
+				fn = self[Name(args[:n])]
 			except KeyError:
 				pass
 			else:
@@ -201,7 +205,9 @@ class ComplexStatement(Statement):
 			"""
 		if self.__words is None:
 			self.__words = {}
-		assert isinstance(handler.name,tuple),"Names must be word lists"
+		if not isinstance(handler.name,Name):
+			assert isinstance(handler.name,tuple),"Names must be word lists"
+			handler.name = Name(handler.name)
 		if handler.name in self.__words:
 			raise ValueError("A handler for '%s' is already registered. (%s)" % (handler.name,self.__words[handler.name]))
 		self.__words[handler.name] = handler
@@ -306,13 +312,13 @@ class main_words(ComplexStatement):
 		This is the top-level dictionary.
 		It is named in a strange way as to make the Help output look nice.
 		"""
-	name = ("Main",)
+	name = Name(("Main",))
 	doc = "word list:"
 
 
 class global_words(ComplexStatement):
 	"""Words that only make sense at top level. It pulls in the main word list."""
-	name = ("Global",)
+	name = Name(("Global",))
 	doc = "word list:"
 
 	@classmethod
@@ -376,7 +382,7 @@ class OnListHandler(Statement):
 			else:
 				for id in sorted(onHandlers.iterkeys()):
 					h = onHandlers[id]
-					n = "¦".join(h.args)
+					n = unicode(h.args)
 					if h.displayname is not None:
 						if isinstance(h.displayname,basestring):
 							n += u" ‹"+h.displayname+u"›"
@@ -386,7 +392,7 @@ class OnListHandler(Statement):
 		elif len(event) == 1:
 			try: h = onHandlers[event[0]]
 			except KeyError: h = onHandlerNames[event[0]]
-			print >>self.ctx.out, h.handler_id,":","¦".join(h.args)
+			print >>self.ctx.out, h.handler_id,":",unicode(h.args)
 			if h.displayname is not None:
 				if isinstance(h.displayname,basestring):
 					print >>self.ctx.out,"Name:",h.displayname

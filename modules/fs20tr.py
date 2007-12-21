@@ -17,6 +17,7 @@ from twisted.internet import protocol,defer,reactor
 from twisted.protocols.basic import _PauseableMixin
 from twisted.python import failure
 from homevent.fs20 import handler,register_handler,unregister_handler
+from homevent.base import Name
 
 buses = {}
 
@@ -29,7 +30,7 @@ class FS20recv(protocol.ProcessProtocol, handler):
 		self.ebuf = ""
 
 	def connectionMade(self):
-		log(DEBUG,"fs20 started",u"¦".join(unicode(x) for x in self.parent.name))
+		log(DEBUG,"fs20 started",self.parent.name)
 		self.transport.closeStdin() # we're not writing anything
 		self._start_timer()
 	
@@ -96,13 +97,13 @@ class FS20recv(protocol.ProcessProtocol, handler):
 		pass
 
 	def outConnectionLost(self):
-		log(DEBUG,"fs20 ending",u"¦".join(unicode(x) for x in self.parent.name))
+		log(DEBUG,"fs20 ending",self.parent.name)
 
 	def errConnectionLost(self):
 		pass
 
 	def processEnded(self, status_object):
-		log(DEBUG,"fs20 ended",status_object.value.exitCode, u"¦".join(unicode(x) for x in self.parent.name))
+		log(DEBUG,"fs20 ended",status_object.value.exitCode, self.parent.name)
 		self.parent.restart()
 
 
@@ -120,7 +121,7 @@ fs20 receiver ‹name…›
 		event = self.params(ctx)
 		if len(event) < 1:
 			raise SyntaxError(u"Usage: fs20 receiver ‹name›")
-		self.name = event[:]
+		self.name = Name(event)
 		if self.cmd is None:
 			raise SyntaxError(u"requires a 'cmd' subcommand")
 		self.start()
@@ -141,7 +142,7 @@ class FS20xmit(protocol.ProcessProtocol, handler):
 		self.ebuf = ""
 
 	def connectionMade(self):
-		log(DEBUG,"fs20 started",u"¦".join(unicode(x) for x in self.parent.name))
+		log(DEBUG,"fs20 started",self.parent.name)
 		self.transport.closeStdout() # we're not reading anything
 		self._start_timer()
 		register_handler(self)
@@ -186,7 +187,7 @@ class FS20xmit(protocol.ProcessProtocol, handler):
 		self._start_timer()
 
 	def inConnectionLost(self):
-		log(DEBUG,"fs20 ending",u"¦".join(unicode(x) for x in self.parent.name))
+		log(DEBUG,"fs20 ending",self.parent.name)
 		unregister_handler(self)
 
 	def outConnectionLost(self):
@@ -196,7 +197,7 @@ class FS20xmit(protocol.ProcessProtocol, handler):
 		pass
 
 	def processEnded(self, status_object):
-		log(DEBUG,"fs20 ended",status_object.value.exitCode, u"¦".join(unicode(x) for x in self.parent.name))
+		log(DEBUG,"fs20 ended",status_object.value.exitCode, self.parent.name)
 		self.parent.restart()
 
 
@@ -214,7 +215,7 @@ fs20 sender ‹name…›
 		event = self.params(ctx)
 		if len(event) < 1:
 			raise SyntaxError(u"Usage: fs20 sender ‹name›")
-		self.name = event[:]
+		self.name = Name(event)
 		if self.cmd is None:
 			raise SyntaxError(u"requires a 'cmd' subcommand")
 		self.start()
@@ -240,7 +241,7 @@ cmd ‹command…›
 		event = self.params(ctx)
 		if not len(event):
 			raise SyntaxError(u"Usage: cmd ‹whatever…›")
-		self.parent.cmd = event[:]
+		self.parent.cmd = Name(event)
 FS20receive.register_statement(FS20cmd)
 FS20transmit.register_statement(FS20cmd)
 

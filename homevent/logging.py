@@ -9,10 +9,11 @@ part of the system.
 
 """
 
-from homevent.run import register_worker,SYS_PRIO,MIN_PRIO,MAX_PRIO
+from homevent.run import register_worker
 from homevent.worker import Worker,ExcWorker
 from homevent.event import Event
 from homevent.context import Context
+from homevent.base import Name,SYS_PRIO,MIN_PRIO,MAX_PRIO
 from twisted.python.failure import Failure
 import sys
 from traceback import print_exc
@@ -167,7 +168,7 @@ class LogEndEvent(Event):
 
 	def report(self, verbose=False):
 		try:
-			yield  u"END: "+u"¦".join(unicode(x) for x in self.names[1:])
+			yield  u"END: "+unicode(Name(self.names[1:]))
 		except Exception,e:
 			print >>sys.stderr,"LOGGER CRASH 4"
 			print_exc(file=sys.stderr)

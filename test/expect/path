@@ -4,22 +4,22 @@ NEW: <ConditionalWorkSequence:1 (4)>
    : └1╴... done.
 1 EVENT: startup
 1 END: startup
-0 add ‹IfStatement ⌁.if¦exists¦path¦..›
+0 add ‹IfStatement if¦exists¦path¦..›
 0 add ‹LogHandler log¦DEBUG¦Yes›
 0 add ‹LogHandler log¦DEBUG¦No1›
-0 add ‹IfStatement ⌁.if¦exists¦path¦...›
+0 add ‹IfStatement if¦exists¦path¦...›
 0 add ‹LogHandler log¦DEBUG¦No2›
 0 add ‹LogHandler log¦DEBUG¦Yes›
-0 add ‹IfStatement ⌁.if¦exists¦directory¦..›
+0 add ‹IfStatement if¦exists¦directory¦..›
 0 add ‹LogHandler log¦DEBUG¦Yes›
 0 add ‹LogHandler log¦DEBUG¦No3›
-0 add ‹IfStatement ⌁.if¦exists¦directory¦README›
+0 add ‹IfStatement if¦exists¦directory¦README›
 0 add ‹LogHandler log¦DEBUG¦No4›
 0 add ‹LogHandler log¦DEBUG¦Yes›
-0 add ‹IfStatement ⌁.if¦exists¦file¦README›
+0 add ‹IfStatement if¦exists¦file¦README›
 0 add ‹LogHandler log¦DEBUG¦Yes›
 0 add ‹LogHandler log¦DEBUG¦No5›
-0 add ‹IfStatement ⌁.if¦exists¦file¦..›
+0 add ‹IfStatement if¦exists¦file¦..›
 0 add ‹LogHandler log¦DEBUG¦No6›
 0 add ‹LogHandler log¦DEBUG¦Yes›
 1 Yes

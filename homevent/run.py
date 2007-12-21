@@ -5,7 +5,7 @@ This is the core of the event dispatcher.
 """
 
 from twisted.python import failure
-from homevent.constants import SYS_PRIO,MIN_PRIO,MAX_PRIO
+from homevent.base import Name,SYS_PRIO,MIN_PRIO,MAX_PRIO
 from homevent.worker import WorkSequence,ConditionalWorkSequence,ExcWorker
 
 workers = {}

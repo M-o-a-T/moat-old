@@ -4,6 +4,14 @@ This code implements a SSH command line for homevent.
 
 """
 
+from homevent.module import Module
+from homevent.logging import log
+from homevent.context import Context
+from homevent.parser import parser_builder,parse
+from homevent.statement import main_words,Statement
+from homevent.interpreter import InteractiveInterpreter,Interpreter
+from homevent.base import Name
+
 from twisted.cred import credentials
 from twisted.conch import error,avatar,recvline
 from twisted.conch.ssh import keys, factory, common, session
@@ -16,12 +24,6 @@ from twisted.internet import reactor
 from twisted.internet.threads import deferToThread
 import base64,os
 import sys
-from homevent.module import Module
-from homevent.logging import log
-from homevent.context import Context
-from homevent.parser import parser_builder,parse
-from homevent.statement import main_words,Statement
-from homevent.interpreter import InteractiveInterpreter,Interpreter
 from cStringIO import StringIO
 
 
@@ -173,7 +175,7 @@ on a specific port. (There is no default port.)
 		if sshFactory is None:
 			raise RuntimeError('ssh keys are not ready yet')
 
-		self.parent.displayname = tuple(event)
+		self.parent.displayname = Name(event)
 		reactor.listenTCP(int(event[0]), sshFactory)
 
 

@@ -27,7 +27,7 @@ Name: Foo Bar
 Started: 2003-04-05 06:07:08.200000
 Ending: 2003-04-05 06:07:18.200000
 Remaining: 9.7
-in: ⌁.async
+in: async
 in: None
 .
 NEW: <ConditionalWorkSequence:5 (4)>
@@ -35,7 +35,7 @@ NEW: <ConditionalWorkSequence:5 (4)>
    : └1╴... done.
 50 EVENT: wait¦update¦0.6¦Foo¦Bar
 50 END: wait¦update¦0.6¦Foo¦Bar
-0 add ‹IfStatement ⌁.if¦exists¦wait¦Foo¦Baz›
+0 add ‹IfStatement if¦exists¦wait¦Foo¦Baz›
 0 add ‹LogHandler log¦DEBUG¦No2›
 0 add ‹LogHandler log¦DEBUG¦Yes›
 1 Yes
@@ -93,7 +93,7 @@ NEW: <ConditionalWorkSequence:15 (4)>
    : └1╴... done.
 146 EVENT: wait¦done¦×××¦_wait¦7
 146 END: wait¦done¦×××¦_wait¦7
-0 add ‹IfStatement ⌁.if¦exists¦wait¦Foo¦Baz›
+0 add ‹IfStatement if¦exists¦wait¦Foo¦Baz›
 0 add ‹LogHandler log¦DEBUG¦Yes›
 0 add ‹LogHandler log¦DEBUG¦No1›
 1 Yes
@@ -116,7 +116,7 @@ RUN: on whatever ‹OnEventHandler›
    : step: log TRACE We wait $x ‹LogHandler›
  at: <ConditionalWorkSequence:16 (5)> (step 1)
  ev: EVENT: whatever
-0 We wait ‹Waiter (u'Foo', u'Baz') 50›
+0 We wait ‹Waiter Foo¦Baz 50›
 166 END: whatever
 NEW: <ConditionalWorkSequence:17 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦8
@@ -133,7 +133,7 @@ NEW: <ConditionalWorkSequence:19 (4)>
    : └1╴... done.
 194 EVENT: wait¦cancel¦×××¦Foo¦Baz
 194 END: wait¦cancel¦×××¦Foo¦Baz
-0 add ‹IfStatement ⌁.if¦exists¦wait¦Foo¦Baz›
+0 add ‹IfStatement if¦exists¦wait¦Foo¦Baz›
 0 add ‹LogHandler log¦DEBUG¦No3›
 0 add ‹LogHandler log¦DEBUG¦Yes›
 1 Yes

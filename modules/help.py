@@ -8,6 +8,7 @@ This code implements the Help command.
 from homevent.module import Module
 from homevent.logging import log
 from homevent.statement import Statement, global_words
+from homevent.base import Name
 
 class Help(Statement):
 	name=("help",)
@@ -37,7 +38,7 @@ Statements may be multi-word and follow generic Python syntax.
 			n = len(wl)
 			while n >= 0:
 				try:
-					words = wlist[tuple(wl[:n])]
+					words = wlist[Name(wl[:n])]
 				except KeyError:
 					pass
 				else:

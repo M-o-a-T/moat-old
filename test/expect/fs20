@@ -62,7 +62,7 @@ NEW: <ConditionalWorkSequence:9 (4)>
    : └1╴... done.
 96 EVENT: module¦load¦errors
 96 END: module¦load¦errors
-0 add ‹IfStatement ⌁.if¦exists¦file¦fs20_emit›
+0 add ‹IfStatement if¦exists¦file¦fs20_emit›
 0 add ‹FS20receive: fs20¦receiver 1›
 0 add ‹FS20transmit: fs20¦sender 1›
 0 add ‹FS20receive: fs20¦receiver 1›
@@ -70,10 +70,10 @@ NEW: <ConditionalWorkSequence:9 (4)>
 1 fs20 started foobar
 1 fs20 started bar¦foo
 NEW: <ConditionalWorkSequence:10 (4)>
-   : │  EVENT: wait¦start¦3.1¦_wait¦1
+   : │  EVENT: wait¦start¦3.2¦_wait¦1
    : └1╴... done.
-131 EVENT: wait¦start¦3.1¦_wait¦1
-131 END: wait¦start¦3.1¦_wait¦1
+131 EVENT: wait¦start¦3.2¦_wait¦1
+131 END: wait¦start¦3.2¦_wait¦1
 138 EVENT: fs20¦error¦Dies ist noch eine Test-Fehlermeldung¦bar¦foo
 NEW: <ConditionalWorkSequence:11 (4)>
    : │  EVENT: fs20¦error¦Dies ist noch eine Test-Fehlermeldung¦bar¦foo
@@ -119,10 +119,10 @@ NEW: <ConditionalWorkSequence:17 (4)>
 1 fs20 ending foobar
 1 fs20 ended 0 foobar
 NEW: <ConditionalWorkSequence:18 (4)>
-   : │  EVENT: wait¦done¦3.1¦_wait¦1
+   : │  EVENT: wait¦done¦3.2¦_wait¦1
    : └1╴... done.
-187 EVENT: wait¦done¦3.1¦_wait¦1
-187 END: wait¦done¦3.1¦_wait¦1
+187 EVENT: wait¦done¦3.2¦_wait¦1
+187 END: wait¦done¦3.2¦_wait¦1
 2 EVENT: shutdown
 NEW: <ConditionalWorkSequence:19 (6)>
    : │  EVENT: shutdown

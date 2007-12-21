@@ -14,7 +14,7 @@ from homevent.reactor import shutdown_event
 from homevent.module import Module
 from homevent.worker import ExcWorker
 from homevent.times import time_delta, time_until, unixdelta, now
-from homevent.constants import SYS_PRIO
+from homevent.base import Name,SYS_PRIO
 from homevent.twist import deferToLater
 from homevent.context import Context
 from homevent.logging import log,TRACE,DEBUG
@@ -92,7 +92,7 @@ class Monitor(object):
 			self.parent = parent.parent
 		except AttributeError:
 			pass
-		self.name = name
+		self.name = Name(name)
 		if self.name in monitors:
 			raise DupMonitorError(self)
 
@@ -176,7 +176,7 @@ class Monitor(object):
 		self.timer = reactor.callLater(unixdelta(s-now()), self._run)
 
 	def filter_data(self):
-		log(TRACE,"filter",self.data,"on", u"¦".join(unicode(x) for x in self.name))
+		log(TRACE,"filter",self.data,"on", self.name)
 
 		if len(self.data) < self.points:
 			return None
@@ -325,7 +325,7 @@ class Monitor(object):
 				yield process_failure()
 
 		finally:
-			log(TRACE,"End run", u"¦".join(unicode(x) for x in self.name))
+			log(TRACE,"End run", self.name)
 			self.stopped_at = now()
 
 
@@ -406,7 +406,7 @@ monitor passive
 		global monitor_nr
 		monitor_nr += 1
 		self.nr = monitor_nr
-		self.displayname=("_monitor",self.nr)
+		self.displayname=Name(("_monitor",self.nr))
 
 		self.values = {}
 
@@ -431,7 +431,7 @@ name ‹whatever you want›
 		event = self.params(ctx)
 		if not len(event):
 			raise SyntaxError(u'Usage: name ‹name…›')
-		self.parent.displayname = tuple(event)
+		self.parent.displayname = Name(event)
 MonitorHandler.register_statement(MonitorName)
 
 

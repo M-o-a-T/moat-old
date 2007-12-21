@@ -73,11 +73,11 @@ NEW: <ConditionalWorkSequence:13 (4)>
    : └1╴... done.
 107 EVENT: wait¦done¦×××¦_wait¦3
 107 END: wait¦done¦×××¦_wait¦3
-0 add ‹IfStatement ⌁.if¦exists¦file¦misc2›
+0 add ‹IfStatement if¦exists¦file¦misc2›
 0 add ‹Include include¦misc2›
 0 add ‹Include include¦test/misc2›
 0 add ‹SyncTriggerHandler sync¦trigger¦foo4›
-0 add ‹Block ⌁.block›
+0 add ‹Block block›
 0 add ‹SyncTriggerHandler sync¦trigger¦bar4›
 126 EVENT: foo4
 NEW: <ConditionalWorkSequence:14 (4)>

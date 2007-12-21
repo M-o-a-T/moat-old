@@ -11,7 +11,7 @@ something about it.
 
 from homevent.context import Context
 from homevent.event import Event,TrySomethingElse,NeverHappens
-from homevent.constants import MIN_PRIO,MAX_PRIO
+from homevent.base import Name,MIN_PRIO,MAX_PRIO
 from homevent.twist import deferToLater
 
 from twisted.internet import defer

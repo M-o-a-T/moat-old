@@ -14,6 +14,7 @@ from homevent.event import Event
 from homevent.run import process_event,process_failure
 from homevent.reconnect import ReconnectingClientFactory
 from homevent.twist import deferToLater
+from homevent.base import Name
 
 from twisted.internet import protocol,defer,reactor
 from twisted.protocols.basic import _PauseableMixin
@@ -915,7 +916,7 @@ class OWFSdevice(object):
 		if not self.bus:
 			raise DisconnectedDeviceError(self.id)
 
-		p = self.path + tuple(path)
+		p = self.path + Name(path)
 		if self.bus_id is not None:
 			p += (self.bus_id,)
 		if key is not None:

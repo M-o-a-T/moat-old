@@ -10,6 +10,7 @@ from homevent.statement import Statement, global_words
 from homevent.module import modules, ModuleDirs, Module
 from homevent.run import list_workers
 from homevent.reactor import active_queues
+from homevent.base import Name
 
 
 class ModList(Statement):
@@ -29,7 +30,7 @@ list module NAME [args...]
 				print >>self.ctx.out, " ".join(m.name)
 			print >>self.ctx.out, "."
 		elif len(event) == 1:
-			m = modules[tuple(event)]
+			m = modules[Name(event)]
 			print  >>self.ctx.out, " ".join(m.name),m.__doc__
 		else:
 			raise SyntaxError("Only one name allowed.")

@@ -4,28 +4,28 @@ NEW: <ConditionalWorkSequence:1 (4)>
    : └1╴... done.
 1 EVENT: startup
 1 END: startup
-Init ('foo',)(1) from ‹global_words: Global 3›
-Input ('foo',)(1): ⌁.
-Init ('foo',)(2) from ‹global_words: Global 3›
-Input ('foo',)(2): ⌁.baz
-Init ('foo', 'bar')(3) from ‹global_words: Global 3›
-Input ('foo', 'bar')(3): ⌁.
-Init ('foo', 'bar')(4) from ‹global_words: Global 3›
-Input ('foo', 'bar')(4): ⌁.baz
-Init ('foo', 'bar')(5) from Ctx(Ctx({'out': <test.logwrite obj>}),{'words': ‹global_words: Global 3›})
-InputComplex ('foo', 'bar')(5): foo¦bar¦baz¦quux
-Init ('what',)(6) from ‹BarHandler: foo¦bar 2 (5)›
-Input ('what',)(6): ⌁.ever
-Init ('for',)(7) from Ctx(Ctx(Ctx({'out': <test.logwrite obj>}),{'words': ‹global_words: Global 3›}),{'words': ‹BarHandler: foo¦bar 2 (5)›})
-InputComplex ('for',)(7): for¦ever¦and¦ever
-Init ('foiled',)(8) from ‹ForHandler: for 1 (7)›
-Input ('foiled',)(8): ⌁.again
+Init foo(1) from ‹global_words: Global 3›
+Input foo(1): <InputEvent:>
+Init foo(2) from ‹global_words: Global 3›
+Input foo(2): <InputEvent:baz>
+Init foo¦bar(3) from ‹global_words: Global 3›
+Input foo¦bar(3): <InputEvent:>
+Init foo¦bar(4) from ‹global_words: Global 3›
+Input foo¦bar(4): <InputEvent:baz>
+Init foo¦bar(5) from Ctx(Ctx({'out': <test.logwrite obj>}),{'words': ‹global_words: Global 3›})
+InputComplex foo¦bar(5): [u'foo', u'bar', u'baz', u'quux']
+Init what(6) from ‹BarHandler: foo¦bar 2 (5)›
+Input what(6): <InputEvent:ever>
+Init for(7) from Ctx(Ctx(Ctx({'out': <test.logwrite obj>}),{'words': ‹global_words: Global 3›}),{'words': ‹BarHandler: foo¦bar 2 (5)›})
+InputComplex for(7): [u'for', u'ever', u'and', u'ever']
+Init foiled(8) from ‹ForHandler: for 1 (7)›
+Input foiled(8): <InputEvent:again>
 ... moving up
-Init ('what',)(9) from ‹BarHandler: foo¦bar 2 (5)›
-Input ('what',)(9): ⌁.else
+Init what(9) from ‹BarHandler: foo¦bar 2 (5)›
+Input what(9): <InputEvent:else>
 ... moving up
-Init ('foo',)(10) from ‹global_words: Global 3›
-Input ('foo',)(10): ⌁.again
+Init foo(10) from ‹global_words: Global 3›
+Input foo(10): <InputEvent:again>
 Global : word list:
 Known words:
 conditions : List of conditions you can use in 'if' statements.

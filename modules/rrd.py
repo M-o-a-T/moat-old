@@ -9,6 +9,8 @@ from homevent.check import Check,register_condition,unregister_condition
 from homevent.module import Module
 from homevent.statement import Statement, main_words
 from homevent.times import now
+from homevent.base import Name
+
 import os
 import rrdtool
 
@@ -19,7 +21,7 @@ class ExistsRRDCheck(Check):
 	doc="Check if the RRD has been created"
 	def check(self,*args):
 		assert len(args), "Need exactly one argument (RRD name)"
-		return tuple(args[:]) in rrds
+		return Name(args) in rrds
 
 
 class RRDHandler(Statement):
@@ -38,7 +40,7 @@ rrd path dataset NAME
 			raise SyntaxError(u'Usage: rrd "/path/to/the.rrd" ‹varname› ‹name…›')
 		fn = event[0]
 		assert os.path.exists(fn), "the RRD file does not exist: ‹%s›" % (fn,)
-		rrds[tuple(event[2:])] = (fn, event[1])
+		rrds[Name(event[2:])] = (fn, event[1])
 
 
 class DelRRDHandler(Statement):
@@ -52,7 +54,7 @@ del rrd NAME
 		event = self.params(ctx)
 		if not len(event):
 			raise SyntaxError(u'Usage: del rrd ‹name…›')
-		del rrds[tuple(event[:])]
+		del rrds[Name(event)]
 
 
 class VarRRDHandler(Statement):
@@ -69,7 +71,7 @@ var rrd variable item NAME
 		event = self.params(ctx)
 		if len(event) < 3:
 			raise SyntaxError(u'Usage: var rrd ‹variable› ‹item› ‹name…›')
-		fn,var = rrds[tuple(event[2:])]
+		fn,var = rrds[Name(event[2:])]
 		setattr(self.parent.ctx,event[0],rrdtool.info(fn)["ds"][var][event[1]])
 
 
@@ -87,7 +89,7 @@ set rrd value ‹name…›
 		event = self.params(ctx)
 		if len(event) < 2:
 			raise SyntaxError(u'Usage: set rrd ‹value› ‹name…›')
-		fn,var = rrds[tuple(event[1:])]
+		fn,var = rrds[Name(event[1:])]
 		# Using "N:" may run into a RRD bug
 		# if we're really close to the next minute
 		rrdtool.update(fn, "-t",var.encode("utf-8"), now().strftime("%s")+":"+unicode(event[0]).encode("utf-8"))
@@ -111,8 +113,9 @@ list rrd ‹name…›
 				print >>self.ctx.out, "%s : %s %s" % (" ".join(k),v1,v2)
 			print >>self.ctx.out, "."
 		else:
-			p,d = rrds[tuple(event[:])]
-			print  >>self.ctx.out, "Name:"," ".join(event[:])
+			n = Name(event)
+			p,d = rrds[n]
+			print  >>self.ctx.out, "Name:",n
 			print  >>self.ctx.out, "File:",p
 			print  >>self.ctx.out, "Dataset:",d
 			for k,v in rrdtool.info(p)["ds"][d].iteritems():

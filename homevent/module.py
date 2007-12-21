@@ -12,6 +12,7 @@ from homevent.run import process_event
 from homevent.statement import Statement
 from homevent.event import Event
 from homevent.check import Check
+from homevent.base import Name
 import sys
 import os
 
@@ -152,7 +153,7 @@ del load NAME [args]...
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		m = modules[tuple(event)]
+		m = modules[Name(event)]
 		d = process_event(Event(self.ctx, "module","unload",*event))
 		d.addCallback(lambda _: unload_module(m))
 		return d
@@ -206,5 +207,5 @@ class ModuleExists(Check):
 	doc="check if that module is loaded"
 	def check(self,*args):
 		assert args,"Need a module name (and optional parameters)"
-		return tuple(args) in modules
+		return Name(args) in modules
 

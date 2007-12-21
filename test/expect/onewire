@@ -4,7 +4,7 @@ NEW: <ConditionalWorkSequence:1 (4)>
    : └1╴... done.
 99 EVENT: startup
 99 END: startup
-99 add ‹IfStatement ⌁.if¦exists¦file¦onewire2›
+99 add ‹IfStatement if¦exists¦file¦onewire2›
 99 add ‹Include include¦onewire2›
 99 add ‹Include include¦test/onewire2›
 99 add ‹Load load¦bool›
@@ -94,13 +94,13 @@ NEW: <ConditionalWorkSequence:46 (4)>
 99 EVENT: wait¦cancel¦×××¦yawn
 99 END: wait¦cancel¦×××¦yawn
 ERROR: Traceback (most recent call last):
-     : Failure: homevent.worker.HaltSequence: ‹Waiter (u'yawn',) 7›
+     : Failure: homevent.worker.HaltSequence: ‹Waiter yawn 6›
 NEW: <WorkSequence:47 (4)>
-   : │  ERROR: ‹Waiter (u'yawn',) 7›
+   : │  ERROR: ‹Waiter yawn 6›
    : └1╴... done.
 99 END: onewire¦scanned¦A¦0¦16¦16
 ERROR: Traceback (most recent call last):
-     : Failure: homevent.worker.HaltSequence: ‹Waiter (u'yawn',) 7›
+     : Failure: homevent.worker.HaltSequence: ‹Waiter yawn 6›
 99 END: HaltSequence
 99 Drop OWFS bus A
 NEW: <ConditionalWorkSequence:48 (4)>

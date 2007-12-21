@@ -14,6 +14,7 @@ from homevent.check import Check,register_condition,unregister_condition
 from homevent.run import process_event,process_failure
 from homevent.event import Event
 from homevent.context import Context
+from homevent.base import Name
 
 from twisted.internet import protocol,defer,reactor
 from twisted.protocols.basic import _PauseableMixin
@@ -81,14 +82,14 @@ class SwitchGroup(group):
 	def __init__(self,code,name):
 		super(SwitchGroup,self).__init__(code,6)
 		self.code = code
-		self.name = name
+		self.name = Name(name)
 		self.devs = {}
 
 	def add(self):
 		if self.code in codes:
 			raise RuntimeError("Device exists (%s)" % (to_hc(self.code),))
 		if self.name in codenames:
-			raise RuntimeError("Device exists (%s)" % (u"¦".join(unicode(x) for x in self.name),))
+			raise RuntimeError("Device exists (%s)" % (self.name,))
 
 		codes[self.code] = self
 		codenames[self.name] = self
@@ -98,11 +99,11 @@ class SwitchGroup(group):
 		del codenames[self.name]
 
 	def __unicode__(self):
-		return u"FS20_SwitchGroup ‹%s›" % (u"¦".join(unicode(x) for x in self.name),)
+		return u"FS20_SwitchGroup ‹%s›" % (self.name,)
 
 	def __repr__(self):
 		try:
-			return u"‹%s:%s:%s›" % (self.__class__.__name__, to_hc(self.code), u"¦".join(unicode(x) for x in self.name))
+			return u"‹%s:%s:%s›" % (self.__class__.__name__, to_hc(self.code), self.name)
 		except Exception:
 			return "‹"+self.__class__.__name__+"›"
 	
@@ -168,7 +169,7 @@ class Switch(object):
 	def __init__(self,code,name, parent=None, handler=None, can_do = None, init = None):
 		self.parent = parent
 		self.code = code
-		self.name = name
+		self.name = Name(name)
 		self.handler = handler
 		self.does = set(can_do) if can_do is not None else set(("on","off"))
 		self.state = None
@@ -190,11 +191,11 @@ class Switch(object):
 		del devnames[self.name]
 
 	def __unicode__(self):
-		return u"FS20_Switch ‹%s›" % (u"¦".join(unicode(x) for x in self.name),)
+		return u"FS20_Switch ‹%s›" % (self.name,)
 
 	def __repr__(self):
 		try:
-			return u"‹%s:%s:%s›" % (self.__class__.__name__, u"¦".join(unicode(x) for x in self.name),u"¦".join(unicode(x) for x in self.parent.name))
+			return u"‹%s:%s:%s›" % (self.__class__.__name__, self.name,self.parent.name)
 		except Exception:
 			return "‹"+self.__class__.__name__+"›"
 		
@@ -274,7 +275,7 @@ fs20 switch ‹house_code› ‹name…›
 			self.hc = codenames[event]
 		except KeyError:
 			code = from_hc(event[0])
-			w = tuple(event[1:])
+			w = Name(event[1:])
 			try:
 				self.hc = codes[code]
 			except KeyError:
@@ -282,7 +283,7 @@ fs20 switch ‹house_code› ‹name…›
 				if code in codes:
 					raise RuntimeError(u"The code ‹%d› is already known" % (code,))
 				if w in codenames:
-					raise RuntimeError(u"The name ‹%s› is already known" % (u"¦".join(unicode(x) for x in w),))
+					raise RuntimeError(u"The name ‹%s› is already known" % (w,))
 
 		try:
 			self.hc = codes[code]
@@ -315,7 +316,7 @@ add ‹code› ‹name…›
 		if len(event) < 2:
 			raise SyntaxError(u"Usage: add ‹code› ‹name…›")
 		code = from_dev(event[0])
-		name = tuple(event[1:])
+		name = Name(event[1:])
 		if code in self.parent.hc.devs:
 			raise RuntimeError(u"The code ‹%d› is already known in ‹%d›" % (to_dev(code),to_hc(self.parent.hc.code)))
 
@@ -340,7 +341,7 @@ del ‹code› | ‹name…›
 		event = self.params(ctx)
 		if not len(event):
 			raise SyntaxError(u"Usage: del ‹code› | ‹name…›")
-		name = tuple(event)
+		name = Name(event)
 		try:
 			d = devnames[name]
 		except KeyError:
@@ -372,11 +373,11 @@ send fs20 ‹msg› -|‹aux› ‹name…›
 		event = self.params(ctx)
 		if len(event) < 3:
 			raise SyntaxError(u"Usage: send fs20 ‹msg› -|‹aux› ‹name…›")
-		name = tuple(event[2:])
+		name = Name(event[2:])
 		try:
 			d = devnames[name]
 		except KeyError:
-			raise RuntimeError(u"Device ‹%s› not found" % (u"¦".join(unicode(x) for x in name),))
+			raise RuntimeError(u"Device ‹%s› not found" % (name,))
 
 		if event[1] == "-":
 			ext = None

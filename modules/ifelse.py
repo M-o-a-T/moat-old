@@ -53,7 +53,7 @@ Syntax:
 
 		if w[0] == "not":
 			want=False
-			w.pop(0)
+			w = w[1:]
 
 		if self.procs is None:
 			if check_condition(ctx,*w) == want:

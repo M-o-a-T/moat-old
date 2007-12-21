@@ -91,7 +91,7 @@ Implementation restriction: can't be used at top level. (Wrap with 'block:'.)
 
 	def start_block(self):
 		super(CatchStatement,self).start_block()
-		self.arglist = self.params(self.ctx)[:]
+		self.arglist = self.params(self.ctx)
 
 	def does_error(self,ctx):
 		err = ctx.error_

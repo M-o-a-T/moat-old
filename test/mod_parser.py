@@ -6,6 +6,8 @@ from homevent.interpreter import Interpreter
 from homevent.statement import Statement,ComplexStatement
 from homevent.reactor import ShutdownHandler
 from homevent.module import load_module
+from homevent.base import Name
+
 from test import run, run_logger
  
 log = run_logger("parser",dot=False).log
@@ -54,7 +56,7 @@ shutdown
 _id=0
 class sbr(object):
 	def __repr__(self):
-		return "‹%s (%d)›" % (super(sbr,self).__repr__()[1:-1], self.id)
+		return u"‹%s (%d)›" % (super(sbr,self).__repr__()[1:-1], self.id)
 	def __init__(self,parent=None,*a,**k):
 		super(sbr,self).__init__(*a,**k)
 		global _id
@@ -67,7 +69,7 @@ class sbr(object):
 	def called(self,args):
 		self.args = args
 	def start_block(self):
-		log(None,"InputComplex %s(%d): %s" % (self.name,self.id,u"¦".join(unicode(x) for x in self.args)))
+		log(None,"InputComplex %s(%d): %s" % (self.name,self.id,self.args))
 
 class FooHandler(sbr,Statement):
 	name=("foo",)

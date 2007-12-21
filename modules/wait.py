@@ -19,7 +19,8 @@ from homevent.module import Module
 from homevent.worker import HaltSequence,ExcWorker
 from homevent.times import time_delta, time_until, unixtime,unixdelta, now
 from homevent.check import Check,register_condition,unregister_condition
-from homevent.constants import SYS_PRIO
+from homevent.base import Name,SYS_PRIO
+
 from time import time
 import os
 from twisted.python.failure import Failure
@@ -270,7 +271,7 @@ name ‹whatever you want›
 		event = self.params(ctx)
 		if not len(event):
 			raise SyntaxError(u'Usage: name ‹name…›')
-		self.parent.displayname = tuple(event)
+		self.parent.displayname = Name(event)
 
 
 class WaitCancel(Statement):
@@ -285,7 +286,7 @@ del wait ‹whatever the name is›
 		event = self.params(ctx)
 		if not len(event):
 			raise SyntaxError(u'Usage: del wait ‹name…›')
-		w = waiters[tuple(event)]
+		w = waiters[Name(event)]
 		return w.cancel(err=HaltSequence)
 
 class WaitUpdate(Statement):
@@ -319,7 +320,7 @@ list wait NAME
 				print >>self.ctx.out, " ".join(unicode(x) for x in w.name)
 			print >>self.ctx.out, "."
 		else:
-			w = waiters[tuple(event)]
+			w = waiters[Name(event)]
 			print  >>self.ctx.out, "Name:"," ".join(unicode(x) for x in w.name)
 			print  >>self.ctx.out, "Started:",w.start
 			print  >>self.ctx.out, "Ending:",w.end
@@ -354,7 +355,7 @@ class ExistsWaiterCheck(Check):
 	def check(self,*args):
 		if not len(args):
 			raise SyntaxError(u"Usage: if exists wait ‹name…›")
-		name = tuple(args)
+		name = Name(args)
 		return name in waiters
 
 class LockedWaiterCheck(Check):
@@ -363,7 +364,7 @@ class LockedWaiterCheck(Check):
 	def check(self,*args):
 		if not len(args):
 			raise SyntaxError(u"Usage: if locked wait ‹name…›")
-		name = tuple(args)
+		name = Name(args)
 		return waiters[name].locked
 
 
@@ -378,7 +379,7 @@ var wait NAME name...
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		var = event[0]
-		name = tuple(event[1:])
+		name = Name(event[1:])
 		setattr(self.parent.ctx,var,waiters[name])
 
 

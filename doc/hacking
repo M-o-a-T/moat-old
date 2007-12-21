@@ -156,8 +156,11 @@ externalwhatever on foo bar").
 The reason for the somewhat convoluted syntax of the last command is
 that variable-length stuff goes at the end, and names of things in
 HomEvenT are (supposed to be) always variable-length. In other words,
-your code should use "tuple(event[place:])" as the lookup key.
+your code should use "Name(event[place:])" as the lookup key.
 Again, see the existing code for plenty of examples.
+
+"Name" is defined in the homevent.base module. It's just a tuple which
+knows how to print itself more nicely.
 
 
 Send patches!

@@ -6,6 +6,7 @@ This part of the code defines what an event is.
 
 import warnings
 from homevent.twist import track_errors
+from homevent.base import Name
 from twisted.python import failure
 from traceback import format_stack
 
@@ -53,7 +54,7 @@ class Event(object):
 			"""
 		self._name_check(names)
 		#print "E_INIT",names,"with",ctx
-		self.names = names
+		self.names = Name(names)
 		self.ctx = ctx
 
 		global event_id
@@ -71,19 +72,19 @@ class Event(object):
 
 	def __str__(self):
 		try:
-			return "<Event:"+u"¦".join(unicode(x) for x in self.names)+">"
+			return "<Event:%s>" % (self.names,)
 		except Exception:
 			return "<Event> REPORT_ERROR: "+repr(self.names)
 
 	def __unicode__(self):
 		try:
-			return u"↯."+u"¦".join(unicode(x) for x in self.names)
+			return u"↯."+unicode(self.names)
 		except Exception:
 			return "↯ REPORT_ERROR: "+repr(self.names)
 
 	def report(self, verbose=False):
 		try:
-			yield u"EVENT: "+u"¦".join(unicode(x) for x in self.names)
+			yield u"EVENT: "+unicode(self.names)
 		except Exception:
 			yield "EVENT: REPORT_ERROR: "+repr(self.names)
 	

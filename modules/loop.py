@@ -58,7 +58,7 @@ Syntax:
 
 		if w[0] == "not":
 			want=False
-			w.pop(0)
+			w = w[1:]
 
 		return self._loop(ctx,want,*w)
 

@@ -13,6 +13,7 @@ from homevent.run import process_failure
 from homevent.context import Context
 from homevent.event import Event
 from homevent.run import process_event,process_failure
+from homevent.base import Name
 
 from twisted.python import failure
 from twisted.internet import protocol,reactor,error
@@ -243,7 +244,7 @@ send net name text...
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		name = event[0]
-		val = " ".join(unicode(s) for s in tuple(event[1:]))
+		val = " ".join(unicode(s) for s in event[1:])
 		
 		d = net_conns[name].write(val)
 		return d
@@ -299,7 +300,7 @@ class NETconnected(Check):
 		if len(args) == 1:
 			conn = net_conns.get(args[0],None)
 		elif len(args) == 2:
-			conn = net_conns.get(tuple(args),None)
+			conn = net_conns.get(Name(args),None)
 		else:
 			raise SyntaxError(u"Usage: if connected net ‹name›")
 		if conn is None:
@@ -313,7 +314,7 @@ class NETexists(Check):
 		if len(args) == 1:
 			return args[0] in net_conns
 		elif len(args) == 2:
-			return tuple(args) in net_conns
+			return Name(args) in net_conns
 		else:
 			raise SyntaxError(u"Usage: if connected net ‹name›")
 

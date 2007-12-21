@@ -6,7 +6,7 @@ NEW: <ConditionalWorkSequence:1 (4)>
 1 END: startup
 0 Create OnEvtHandler: monitor¦value¦*VAL¦foo¦bar
 0 add ‹VarMonitorHandler var¦monitor¦OLDVAL¦foo¦bar›
-0 add ‹IfStatement ⌁.if¦null¦$OLDVAL›
+0 add ‹IfStatement if¦null¦$OLDVAL›
 0 add ‹LogHandler log¦TRACE¦First¦value¦is¦$VAL›
 0 add ‹LogHandler log¦TRACE¦Go¦from¦$OLDVAL¦to¦$VAL›
 0 NewHandler 1
@@ -25,7 +25,7 @@ NEW: <ConditionalWorkSequence:3 (5)>
    : │  step: if null $OLDVAL ‹IfStatement›
    : │      : step: log TRACE First value is $VAL ‹LogHandler›
    : └2╴... done.
-0 Start run (u'foo', u'bar')
+0 Start run foo¦bar
 24 EVENT: wait¦start¦×××¦_wait¦1
 24 END: wait¦start¦×××¦_wait¦1
 26 EVENT: monitor¦value¦42.0¦foo¦bar
@@ -50,7 +50,7 @@ NEW: <ConditionalWorkSequence:4 (5)>
    : │  step: if null $OLDVAL ‹IfStatement›
    : │      : step: log TRACE First value is $VAL ‹LogHandler›
    : └2╴... done.
-0 Start run (u'foo', u'bar')
+0 Start run foo¦bar
 42 EVENT: monitor¦value¦40.0¦foo¦bar
 RUN: on monitor value *VAL foo bar ‹OnEventHandler›
    : prio: 51
@@ -73,7 +73,7 @@ NEW: <ConditionalWorkSequence:5 (5)>
    : │  step: if null $OLDVAL ‹IfStatement›
    : │      : step: log TRACE First value is $VAL ‹LogHandler›
    : └2╴... done.
-0 Start run (u'foo', u'bar')
+0 Start run foo¦bar
 53 EVENT: monitor¦value¦42.0¦foo¦bar
 RUN: on monitor value *VAL foo bar ‹OnEventHandler›
    : prio: 51
@@ -89,7 +89,7 @@ NEW: <ConditionalWorkSequence:6 (4)>
    : └1╴... done.
 64 EVENT: wait¦done¦×××¦_wait¦1
 64 END: wait¦done¦×××¦_wait¦1
-0 add ‹IfStatement ⌁.if¦waiting¦monitor¦foo¦bar›
+0 add ‹IfStatement if¦waiting¦monitor¦foo¦bar›
 0 add ‹LogHandler log¦DEBUG¦No0›
 0 add ‹LogHandler log¦DEBUG¦Yes›
 1 Yes
@@ -120,7 +120,7 @@ NEW: <ConditionalWorkSequence:8 (5)>
    : │  step: if null $OLDVAL ‹IfStatement›
    : │      : step: log TRACE First value is $VAL ‹LogHandler›
    : └2╴... done.
-0 Start run (u'foo', u'bar')
+0 Start run foo¦bar
 91 EVENT: monitor¦value¦41.0¦foo¦bar
 RUN: on monitor value *VAL foo bar ‹OnEventHandler›
    : prio: 51
@@ -143,7 +143,7 @@ NEW: <ConditionalWorkSequence:9 (5)>
    : │  step: if null $OLDVAL ‹IfStatement›
    : │      : step: log TRACE First value is $VAL ‹LogHandler›
    : └2╴... done.
-0 Start run (u'foo', u'bar')
+0 Start run foo¦bar
 102 EVENT: monitor¦value¦40.0¦foo¦bar
 RUN: on monitor value *VAL foo bar ‹OnEventHandler›
    : prio: 51
@@ -161,7 +161,7 @@ NEW: <ConditionalWorkSequence:10 (4)>
 113 END: wait¦done¦×××¦_wait¦2
 .
 0 Create OnEvtHandler: monitor¦checking¦baz¦zaz
-0 add ‹Async ⌁.async›
+0 add ‹Async async›
 0 add ‹MonitorSet set¦monitor¦10¦baz¦zaz›
 0 add ‹WaitHandler: wait¦for 2›
 0 add ‹MonitorSet set¦monitor¦13¦baz¦zaz›
@@ -190,7 +190,7 @@ NEW: <ConditionalWorkSequence:12 (5)>
    : │      : step: wait for 0.2 ‹WaitHandler›
    : │      : step: set monitor 14 baz zaz ‹MonitorSet›
    : └2╴... done.
-0 Start run (u'baz', u'zaz')
+0 Start run baz¦zaz
 143 EVENT: wait¦start¦×××¦_wait¦5
 143 END: wait¦start¦×××¦_wait¦5
 145 EVENT: monitor¦checking¦baz¦zaz
@@ -205,28 +205,28 @@ RUN: on monitor checking baz zaz ‹OnEventHandler›
  at: <ConditionalWorkSequence:12 (5)> (step 1)
  ev: EVENT: monitor¦checking¦baz¦zaz
 145 END: monitor¦checking¦baz¦zaz
-NEW: <ConditionalWorkSequence:13 (4)>
-   : │  EVENT: wait¦done¦×××¦_wait¦5
-   : └1╴... done.
-158 EVENT: wait¦done¦×××¦_wait¦5
-158 END: wait¦done¦×××¦_wait¦5
-0 add ‹IfStatement ⌁.if¦waiting¦monitor¦baz¦zaz›
-0 add ‹LogHandler log¦DEBUG¦Yes›
-0 add ‹LogHandler log¦DEBUG¦No1›
-1 Yes
-NEW: <ConditionalWorkSequence:14 (4)>
-   : │  EVENT: wait¦start¦×××¦_wait¦6
-   : └1╴... done.
-174 EVENT: wait¦start¦×××¦_wait¦6
-174 END: wait¦start¦×××¦_wait¦6
 0 raw 10 baz zaz
 0 filter [10] on baz¦zaz
 0 More data [10] for ‹baz zaz›
-NEW: <ConditionalWorkSequence:15 (4)>
+NEW: <ConditionalWorkSequence:13 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦3
    : └1╴... done.
-183 EVENT: wait¦start¦×××¦_wait¦3
-183 END: wait¦start¦×××¦_wait¦3
+160 EVENT: wait¦start¦×××¦_wait¦3
+160 END: wait¦start¦×××¦_wait¦3
+NEW: <ConditionalWorkSequence:14 (4)>
+   : │  EVENT: wait¦done¦×××¦_wait¦5
+   : └1╴... done.
+167 EVENT: wait¦done¦×××¦_wait¦5
+167 END: wait¦done¦×××¦_wait¦5
+0 add ‹IfStatement if¦waiting¦monitor¦baz¦zaz›
+0 add ‹LogHandler log¦DEBUG¦Yes›
+0 add ‹LogHandler log¦DEBUG¦No1›
+1 Yes
+NEW: <ConditionalWorkSequence:15 (4)>
+   : │  EVENT: wait¦start¦×××¦_wait¦6
+   : └1╴... done.
+183 EVENT: wait¦start¦×××¦_wait¦6
+183 END: wait¦start¦×××¦_wait¦6
 NEW: <ConditionalWorkSequence:16 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦3
    : └1╴... done.
@@ -265,7 +265,7 @@ NEW: <ConditionalWorkSequence:21 (4)>
    : └1╴... done.
 228 EVENT: wait¦done¦×××¦_wait¦6
 228 END: wait¦done¦×××¦_wait¦6
-0 add ‹IfStatement ⌁.if¦waiting¦monitor¦baz¦zaz›
+0 add ‹IfStatement if¦waiting¦monitor¦baz¦zaz›
 0 add ‹LogHandler log¦DEBUG¦No2›
 0 add ‹LogHandler log¦DEBUG¦Yes›
 1 Yes

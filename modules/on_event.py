@@ -29,6 +29,7 @@ from homevent.module import Module
 from homevent.logging import log
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.event import TrySomethingElse
+from homevent.base import Name
 
 from twisted.internet import defer
 
@@ -48,7 +49,7 @@ class BadArgCount(RuntimeError):
 class OnEventWorker(Worker):
 	def __init__(self,parent):
 		self.parent = parent
-		self.name = u"¦".join(unicode(x) for x in self.parent.arglist)
+		self.name = unicode(self.parent.arglist)
 		if self.parent.displayname is not None:
 			self.name += u" ‹"+" ".join(unicode(x) for x in self.parent.displayname)+u"›"
 
@@ -153,8 +154,8 @@ Every "*foo" in the event description is mapped to the corresponding
 
 	def start_block(self):
 		super(OnEventHandler,self).start_block()
-		w = self.params(self.ctx)[:]
-		log(TRACE, "Create OnEvtHandler: "+u"¦".join(unicode(x) for x in w))
+		w = Name(self.params(self.ctx))
+		log(TRACE, "Create OnEvtHandler:", w)
 		self.arglist = w
 
 	def _report(self, verbose=False):
@@ -175,7 +176,7 @@ class OffEventHandler(Statement):
 		event = self.params(ctx)
 		if not len(event):
 			raise SyntaxError(u"Usage: del on ‹handler_id/name›")
-		try: worker = onHandlerNames[tuple(event)]
+		try: worker = onHandlerNames[Name(event)]
 		except KeyError:
 			if len(event) == 1:
 				worker = onHandlers[event[0]]
@@ -199,15 +200,15 @@ class OnListHandler(Statement):
 			else:
 				for id in sorted(onHandlers.iterkeys()):
 					h = onHandlers[id]
-					n = u"¦".join(unicode(x) for x in h.parent.arglist)
+					n = unicode(h.parent.arglist)
 					if h.parent.displayname is not None:
-						n += u" ‹"+" ".join(unicode(x) for x in h.parent.displayname)+u"›"
+						n += u" ‹"+unicode(h.parent.displayname)+u"›"
 					print >>self.ctx.out,str(id)+" "*(fl-len(str(id))+1),":",n
 			print >>self.ctx.out,"."
 		else:
 			try: h = onHandlers[event[0]]
-			except KeyError: h = onHandlerNames[tuple(event)]
-			print >>self.ctx.out, h.handler_id,":",u"¦".join(unicode(x) for x in h.parent.arglist)
+			except KeyError: h = onHandlerNames[Name(event)]
+			print >>self.ctx.out, h.handler_id,":",h.parent.arglist
 			if h.parent.displayname is not None:
 				print >>self.ctx.out,"Name:"," ".join(unicode(x) for x in h.parent.displayname)
 			print >>self.ctx.out,"Prio:",h.prio
@@ -248,7 +249,7 @@ This statement assigns a name to an event handler.
 		event = self.params(ctx)
 		if not len(event):
 			raise SyntaxError(u'Usage: name "‹text›"')
-		self.parent.displayname = tuple(event)
+		self.parent.displayname = Name(event)
 
 
 class OnDoc(Statement):
@@ -287,7 +288,7 @@ if exists on FOO BAR: check if a handler for this event exists
 	def check(self,*args):
 		if not len(args):
 			raise SyntaxError(u"Usage: if exists on ‹name…›")
-		name = tuple(args)
+		name = Name(args)
 		return name in onHandlerNames
 
 
