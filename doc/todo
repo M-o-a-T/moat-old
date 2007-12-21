@@ -27,6 +27,10 @@ Code
   collects the last N values; switch to that when it and the normal one
   differ by >7 or so
 
+* implement a PID controller
+
+* implement a multi-step controller (i.e. simple switch thresholds)
+
 
 FS20
 ====
@@ -44,8 +48,6 @@ FS20
   - interface with the controller
 
   - control the radiators
-
-  - implement a PID controller
 
 * Handle weather devices and similar sensors.
 
