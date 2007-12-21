@@ -4,7 +4,7 @@ NEW: <ConditionalWorkSequence:1 (4)>
    : └1╴... done.
 1 EVENT: startup
 1 END: startup
-0 add ‹WaitHandler ('wait', 'for') 2›
+0 add ‹WaitHandler: wait¦for 2›
 NEW: <ConditionalWorkSequence:2 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦2
    : └1╴... done.
@@ -20,12 +20,12 @@ NEW: <ConditionalWorkSequence:4 (4)>
    : └1╴... done.
 30 EVENT: wait¦done¦×××¦_wait¦2
 30 END: wait¦done¦×××¦_wait¦2
-0 add ‹LogHandler ⌁.log¦DEBUG¦Start›
+0 add ‹LogHandler log¦DEBUG¦Start›
 0 add ‹WhileStatement ⌁.while¦exists¦wait¦Foo¦Bar›
-0 add ‹LogHandler ⌁.log¦DEBUG¦waiting›
-0 add ‹WaitHandler ('wait', 'for') 2›
-0 add ‹LogHandler ⌁.log¦DEBUG¦testing›
-0 add ‹LogHandler ⌁.log¦DEBUG¦Done›
+0 add ‹LogHandler log¦DEBUG¦waiting›
+0 add ‹WaitHandler: wait¦for 2›
+0 add ‹LogHandler log¦DEBUG¦testing›
+0 add ‹LogHandler log¦DEBUG¦Done›
 1 Start
 1 waiting
 NEW: <ConditionalWorkSequence:5 (4)>

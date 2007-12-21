@@ -5,53 +5,53 @@ NEW: <ConditionalWorkSequence:1 (4)>
 99 EVENT: startup
 99 END: startup
 99 add ‹IfStatement ⌁.if¦exists¦file¦onewire2›
-99 add ‹Include ⌁.include¦onewire2›
-99 add ‹Include ⌁.include¦test/onewire2›
-99 add ‹Load ⌁.load¦bool›
+99 add ‹Include include¦onewire2›
+99 add ‹Include include¦test/onewire2›
+99 add ‹Load load¦bool›
 99 EVENT: module¦load¦bool
 NEW: <ConditionalWorkSequence:2 (4)>
    : │  EVENT: module¦load¦bool
    : └1╴... done.
 99 EVENT: module¦load¦bool
 99 END: module¦load¦bool
-99 add ‹Load ⌁.load¦ifelse›
-99 add ‹Load ⌁.load¦logging›
+99 add ‹Load load¦ifelse›
+99 add ‹Load load¦logging›
 99 EVENT: module¦load¦logging
 NEW: <ConditionalWorkSequence:3 (4)>
    : │  EVENT: module¦load¦logging
    : └1╴... done.
 99 EVENT: module¦load¦logging
 99 END: module¦load¦logging
-99 add ‹Load ⌁.load¦block›
-99 add ‹Load ⌁.load¦trigger›
+99 add ‹Load load¦block›
+99 add ‹Load load¦trigger›
 99 EVENT: module¦load¦trigger
 NEW: <ConditionalWorkSequence:4 (4)>
    : │  EVENT: module¦load¦trigger
    : └1╴... done.
 99 EVENT: module¦load¦trigger
 99 END: module¦load¦trigger
-99 add ‹Load ⌁.load¦wait›
+99 add ‹Load load¦wait›
 99 EVENT: module¦load¦wait
 NEW: <ConditionalWorkSequence:5 (4)>
    : │  EVENT: module¦load¦wait
    : └1╴... done.
 99 EVENT: module¦load¦wait
 99 END: module¦load¦wait
-99 add ‹Load ⌁.load¦onewire›
+99 add ‹Load load¦onewire›
 99 EVENT: module¦load¦onewire
 NEW: <ConditionalWorkSequence:6 (4)>
    : │  EVENT: module¦load¦onewire
    : └1╴... done.
 99 EVENT: module¦load¦onewire
 99 END: module¦load¦onewire
-99 add ‹Load ⌁.load¦on_event›
+99 add ‹Load load¦on_event›
 99 EVENT: module¦load¦on_event
 NEW: <ConditionalWorkSequence:7 (4)>
    : │  EVENT: module¦load¦on_event
    : └1╴... done.
 99 EVENT: module¦load¦on_event
 99 END: module¦load¦on_event
-99 add ‹Load ⌁.load¦errors›
+99 add ‹Load load¦errors›
 99 EVENT: module¦load¦errors
 NEW: <ConditionalWorkSequence:8 (4)>
    : │  EVENT: module¦load¦errors
@@ -59,12 +59,12 @@ NEW: <ConditionalWorkSequence:8 (4)>
 99 EVENT: module¦load¦errors
 99 END: module¦load¦errors
 99 Create OnEvtHandler: onewire¦scanned¦A¦*¦*¦*
-99 add ‹OffEventHandler ⌁.del¦on¦scanned›
-99 add ‹OWFSvar ⌁.var¦onewire¦X¦_DEV_¦_ATTR_›
-99 add ‹TriggerHandler ⌁.trigger¦thermo¦$X›
-99 add ‹WaitCancel ⌁.del¦wait¦yawn›
+99 add ‹OffEventHandler del¦on¦scanned›
+99 add ‹OWFSvar var¦onewire¦X¦_DEV_¦_ATTR_›
+99 add ‹TriggerHandler trigger¦thermo¦$X›
+99 add ‹WaitCancel del¦wait¦yawn›
 99 NewHandler 1
-NEW: <ConditionalWorkSequence:46 (5)>
+NEW: <ConditionalWorkSequence:44 (5)>
    : ├1╴on onewire scanned A * * * ‹OnEventHandler›
    : │  name: scanned
    : │  prio: 51
@@ -80,12 +80,13 @@ RUN: on onewire scanned A * * * ‹OnEventHandler›
    : step: var onewire X _DEV_ _ATTR_ ‹OWFSvar›
    : step: trigger thermo $X ‹TriggerHandler›
    : step: del wait yawn ‹WaitCancel›
- at: <ConditionalWorkSequence:46 (5)> (step 1)
+ at: <ConditionalWorkSequence:44 (5)> (step 1)
+99 Try <twisted.internet.tcp.Connector instance at FOO> immediately
 99 EVENT: thermo¦DATA
-NEW: <ConditionalWorkSequence:47 (4)>
+NEW: <ConditionalWorkSequence:45 (4)>
    : │  EVENT: thermo¦DATA
    : └1╴... done.
-NEW: <ConditionalWorkSequence:48 (4)>
+NEW: <ConditionalWorkSequence:46 (4)>
    : │  EVENT: wait¦cancel¦×××¦yawn
    : └1╴... done.
 99 EVENT: thermo¦DATA
@@ -94,20 +95,20 @@ NEW: <ConditionalWorkSequence:48 (4)>
 99 END: wait¦cancel¦×××¦yawn
 ERROR: Traceback (most recent call last):
      : Failure: homevent.worker.HaltSequence: ‹Waiter (u'yawn',) 7›
-NEW: <WorkSequence:49 (4)>
+NEW: <WorkSequence:47 (4)>
    : │  ERROR: ‹Waiter (u'yawn',) 7›
    : └1╴... done.
-99 END: onewire¦scanned¦A¦0¦17¦17
+99 END: onewire¦scanned¦A¦0¦16¦16
 ERROR: Traceback (most recent call last):
      : Failure: homevent.worker.HaltSequence: ‹Waiter (u'yawn',) 7›
 99 END: HaltSequence
 99 Drop OWFS bus A
-NEW: <ConditionalWorkSequence:_VAL_ (4)>
+NEW: <ConditionalWorkSequence:48 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦2
    : └1╴... done.
 99 EVENT: wait¦start¦×××¦_wait¦2
 99 END: wait¦start¦×××¦_wait¦2
-NEW: <ConditionalWorkSequence:51 (4)>
+NEW: <ConditionalWorkSequence:49 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦2
    : └1╴... done.
 99 EVENT: wait¦done¦×××¦_wait¦2

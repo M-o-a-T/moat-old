@@ -5,12 +5,12 @@ NEW: <ConditionalWorkSequence:1 (4)>
 1 EVENT: startup
 1 END: startup
 0 add ‹IfStatement ⌁.if¦exists¦rrd¦t¦tt¦ttt›
-0 add ‹LogHandler ⌁.log¦DEBUG¦No1›
-0 add ‹LogHandler ⌁.log¦DEBUG¦Yes›
+0 add ‹LogHandler log¦DEBUG¦No1›
+0 add ‹LogHandler log¦DEBUG¦Yes›
 1 Yes
 0 add ‹IfStatement ⌁.if¦exists¦rrd¦t¦tt¦ttt›
-0 add ‹LogHandler ⌁.log¦DEBUG¦Yes›
-0 add ‹LogHandler ⌁.log¦DEBUG¦No2›
+0 add ‹LogHandler log¦DEBUG¦Yes›
+0 add ‹LogHandler log¦DEBUG¦No2›
 1 Yes
 t tt ttt : /tmp/rrdtest.rrd test
 .
@@ -66,13 +66,13 @@ value: ?
 ds_name: test
 type: GAUGE
 last_ds: 12
-0 add ‹VarRRDHandler ⌁.var¦rrd¦x¦last_ds¦t¦tt¦ttt›
-0 add ‹TriggerHandler ⌁.trigger¦last¦$x›
+0 add ‹VarRRDHandler var¦rrd¦x¦last_ds¦t¦tt¦ttt›
+0 add ‹TriggerHandler trigger¦last¦$x›
 90 EVENT: last¦12
 NEW: <ConditionalWorkSequence:8 (4)>
    : │  EVENT: last¦12
    : └1╴... done.
 0 add ‹IfStatement ⌁.if¦exists¦rrd¦t¦tt¦ttt›
-0 add ‹LogHandler ⌁.log¦DEBUG¦No3›
-0 add ‹LogHandler ⌁.log¦DEBUG¦Yes›
+0 add ‹LogHandler log¦DEBUG¦No3›
+0 add ‹LogHandler log¦DEBUG¦Yes›
 1 Yes

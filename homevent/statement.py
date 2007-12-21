@@ -55,10 +55,14 @@ class Statement(object):
 		self.args = None
 	
 	def __repr__(self):
-		if self.args:
-			return u"‹%s %s›" % (self.__class__.__name__,unicode(self.args))
-		else:
-			return u"‹%s %s›" % (self.__class__.__name__,repr(self.name))
+		try:
+			if self.args:
+				return u"‹%s %s›" % (self.__class__.__name__,u"¦".join(unicode(x) for x in self.args))
+			else:
+				return u"‹%s: %s›" % (self.__class__.__name__,u"¦".join(unicode(x) for x in self.name))
+		except Exception:
+				return u"‹%s ?›" % (self.__class__.__name__,)
+
 
 	@classmethod
 	def matches(self,args):
@@ -111,9 +115,9 @@ class ComplexStatement(Statement):
 
 	def __repr__(self):
 		if self.__words is None:
-			return u"‹%s %s›" % (self.__class__.__name__,repr(self.name))
+			return u"‹%s: %s›" % (self.__class__.__name__,u"¦".join(unicode(x) for x in self.name))
 		else:
-			return u"‹%s %s %d›" % (self.__class__.__name__,repr(self.name),len(self.__words))
+			return u"‹%s: %s %d›" % (self.__class__.__name__,u"¦".join(unicode(x) for x in self.name),len(self.__words))
 
 	def start_block(self):
 		raise NotImplementedError("You need to override '%s.start_block' (called with %s)" % (self.__class__.__name__,repr(self.args)))
@@ -221,7 +225,7 @@ class AttributedStatement(ComplexStatement):
 	def start_block(self): pass
 	def end_block(self): pass
 	def add(self,proc):
-		raise RuntimeError(u"Non-immediate substatement on ‹%s›?" % (" ".join(self.name),))
+		raise RuntimeError(u"Non-immediate substatement on ‹%s› %s?" % (" ".join(self.name),proc))
 
 class IgnoreStatement(Statement):
 	"""Used for error exits"""

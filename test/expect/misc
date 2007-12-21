@@ -48,9 +48,9 @@ NEW: <ConditionalWorkSequence:9 (4)>
    : └1╴... done.
 70 EVENT: wait¦done¦×××¦_wait¦2
 70 END: wait¦done¦×××¦_wait¦2
-0 add ‹TriggerHandler ⌁.trigger¦never¦the¦same›
-0 add ‹TriggerHandler ⌁.trigger¦foo3›
-0 add ‹TriggerHandler ⌁.trigger¦bar3›
+0 add ‹TriggerHandler trigger¦never¦the¦same›
+0 add ‹TriggerHandler trigger¦foo3›
+0 add ‹TriggerHandler trigger¦bar3›
 83 EVENT: foo3
 NEW: <ConditionalWorkSequence:10 (4)>
    : │  EVENT: foo3
@@ -74,11 +74,11 @@ NEW: <ConditionalWorkSequence:13 (4)>
 107 EVENT: wait¦done¦×××¦_wait¦3
 107 END: wait¦done¦×××¦_wait¦3
 0 add ‹IfStatement ⌁.if¦exists¦file¦misc2›
-0 add ‹Include ⌁.include¦misc2›
-0 add ‹Include ⌁.include¦test/misc2›
-0 add ‹SyncTriggerHandler ⌁.sync¦trigger¦foo4›
+0 add ‹Include include¦misc2›
+0 add ‹Include include¦test/misc2›
+0 add ‹SyncTriggerHandler sync¦trigger¦foo4›
 0 add ‹Block ⌁.block›
-0 add ‹SyncTriggerHandler ⌁.sync¦trigger¦bar4›
+0 add ‹SyncTriggerHandler sync¦trigger¦bar4›
 126 EVENT: foo4
 NEW: <ConditionalWorkSequence:14 (4)>
    : │  EVENT: foo4
@@ -91,7 +91,7 @@ NEW: <ConditionalWorkSequence:15 (4)>
    : └1╴... done.
 134 EVENT: bar4
 134 END: bar4
-0 add ‹TriggerHandler ⌁.trigger¦foo5›
+0 add ‹TriggerHandler trigger¦foo5›
 NEW: <ConditionalWorkSequence:16 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦4
    : └1╴... done.

@@ -22,7 +22,7 @@ on_event 		This module registers the "on EVENT:" handler.
 .
 0 Create OnEvtHandler: foo
 0 add ‹Block ⌁.block›
-0 add ‹WaitHandler ('wait', 'for') 2›
+0 add ‹WaitHandler: wait¦for 2›
 0 NewHandler 1
 NEW: <ConditionalWorkSequence:2 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦2

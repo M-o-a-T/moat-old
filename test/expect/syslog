@@ -18,15 +18,15 @@ NEW: <ConditionalWorkSequence:3 (4)>
 1 Five Debug
 3 Five Warn
 NEW: <ConditionalWorkSequence:4 (4)>
-   : │  EVENT: wait¦start¦0.6¦_wait¦2
+   : │  EVENT: wait¦start¦0.7¦_wait¦2
    : └1╴... done.
-41 EVENT: wait¦start¦0.6¦_wait¦2
-41 END: wait¦start¦0.6¦_wait¦2
+41 EVENT: wait¦start¦0.7¦_wait¦2
+41 END: wait¦start¦0.7¦_wait¦2
 NEW: <ConditionalWorkSequence:5 (4)>
-   : │  EVENT: wait¦done¦0.6¦_wait¦2
+   : │  EVENT: wait¦done¦0.7¦_wait¦2
    : └1╴... done.
-48 EVENT: wait¦done¦0.6¦_wait¦2
-48 END: wait¦done¦0.6¦_wait¦2
+48 EVENT: wait¦done¦0.7¦_wait¦2
+48 END: wait¦done¦0.7¦_wait¦2
 2 EVENT: shutdown
 NEW: <ConditionalWorkSequence:6 (6)>
    : │  EVENT: shutdown
