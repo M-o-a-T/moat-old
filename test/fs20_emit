@@ -1,0 +1,17 @@
+#!/usr/bin/python
+import time,sys
+
+time.sleep(1)
+sys.stderr.write("1\rDies ist eine Test-Fehlermeldung\n2\r")
+sys.stderr.flush()
+time.sleep(0.2)
+sys.stdout.write("8c8d131244\n") # OK
+sys.stdout.write("8c8d131F51\n") # unknown function
+sys.stdout.write("8c89131240\n") # not found, bad house code
+sys.stdout.write("8c8d141245\n") # not found, no device
+sys.stdout.write("8c8d131245\n") # not found, bad checksum
+sys.stdout.flush()
+time.sleep(0.2)
+sys.stderr.write("9\r")
+sys.stderr.flush()
+

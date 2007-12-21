@@ -99,6 +99,50 @@ state OLD NEW NAME
 	   state changes on the same NAME are forbidden and will cause an
 	   error.
 
+FS20
+----
+
+fs20 state  STATE EXT  NAME
+	-- A command has been received. "STATE" is the command that's being
+	   sent to the named device. This includes messages like "toggle" or
+	   "dim_updown".
+	   
+	   EXT is the command's extension byte, or "-" of none has been sent.
+	
+fs20 unknown device HOUSECODE DEVCODE data
+	-- A FS20 command with an unknown device code has been received
+	   on the HOUSECODE address.
+
+fs20 unknown function HOUSECODE FCODE data
+	-- A FS20 command with an unknown function code has been received
+	   on the HOUSECODE address.
+
+fs20 unknown HOUSECODE QSDIFF data
+	-- A FS20 command with an unknown house code / checksum has been
+	   received on the HOUSECODE address.
+	   
+	   QSDIFF is the difference between the received and calculated
+	   checksums. Switches use 6, heating 12. Commands forwarded by
+	   repeaters are currently *not* handled. (Repeaters increment the
+	   checksum of packets they forward.)
+
+fs20 error TEXT NAME
+	-- Error messages (on stderr) from any external commands are
+	   reported by this event. NAME is the sender or receiver which
+	   generated the message.
+
+	   Note that all external error messages need to be terminated by a
+	   linefeed. CR is also used, but documents progress, i.e. the fact
+	   that the external job is still alive and not hanging.
+	   If messages are not printed atomically, leading parts of error
+	   messages may be cut off by interleaved progress messages.
+	   (This happens *very* rarely, if ever.)
+
+fs20 wedged NAME
+	-- The named external sender or receiver has stopped reporting progress.
+	   It will be killed and restarted automatically.
+
+
 Wait
 ----
 

@@ -28,6 +28,28 @@ Code
   differ by >7 or so
 
 
+FS20
+====
+
+* Handle repeaters.
+
+* Implement a FHZ1000/FHZ1300 interface.
+
+* Ignore repeated commands.
+
+* Add send options (how often to repeat immediately / after a delay)
+
+* Handle heating control.
+
+  - interface with the controller
+
+  - control the radiators
+
+  - implement a PID controller
+
+* Handle weather devices and similar sensors.
+
+
 Implement a web server
 ======================
 

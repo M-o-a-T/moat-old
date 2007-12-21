@@ -177,6 +177,100 @@ example
 
 A snippet of module loader code to help you get going.
 
+
+==========
+fs20switch
+==========
+
+Use this module to register FS20 devices.
+
+HomEvenT uses this registration only for naming, but doesn't
+distinguish between senders and receivers, since it treats incoming
+signals as mere events — you need to specify any more convoluted logic
+in your own code.
+
+Incoming messages will be reported as events, of course; see the events
+documentation for details.
+
+--------------------------
+fs20 switch HOUSECODE NAME
+--------------------------
+
+This command declares a group of FS20 devices which share a common
+“house code”, an 8-digit sequence (digits 1,2,3,4 only ⇒ in effect a
+16-bit number).
+
+add DEVCODE NAME
+----------------
+
+This subcommand is used to declare a device.
+The device code is four digits long (1 to 4, again).
+
+	fs20 switch 12344321 inside actors:
+		add 2143 living room light
+
+You can use the same command to modify an existing house code;
+simply use either the code or the name, but not both:
+
+	fs20 switch 12344321:
+		del 2143 living room light
+		add 2144 living room light
+
+Note that the broadcast / group control codes, which are defined as
+having "44" in the first and/or last two digits of the device code,
+are not handled by HomEvenT in any special way. This is intentional:
+your HomEvenT code needs to know (and document) _anyway_ which signal
+affects which device.
+
+
+---------
+send fs20
+---------
+
+Send a FS20 message.
+
+	set fs20 on - living room light
+
+This of course does not guarantee that the lights really turn on.
+Among other reasons, FS20 is not a bidirectional protocol, so messages
+can and do get lost. A common workaround is to add a timer which, when
+somebody pushes the light-on button again within two seconds or so,
+causes the command to repeat instead of turning the light back off.
+
+
+======
+fs20tr
+======
+
+This module allows you to use external processes to send and receive
+FS20 datagrams.
+
+The datagram format is simple: The complete frame, encoded in hex.
+The checksum is not treated in any special way and arbitrary datagram
+lengths are supported.
+
+Note that regulations limit any one sender to take up at most 1% of he
+total available bandwidth. This module does not yet enforce this limit.
+
+The first sender you declare will be the one that's used for
+transmitting when the “set” command does not specify another sender.
+
+-----------
+fs20 sender
+-----------
+
+	fs20 sender foo bar:
+		cmd "/usr/local/bin/fs20" "--send"
+
+-------------
+fs20 receiver
+-------------
+
+	fs20 sender foo baz:
+		cmd "/usr/local/bin/fs20" "--recv"
+
+
+
 ====
 help
 ====

@@ -1,0 +1,8 @@
+#!/usr/bin/python
+import time,sys
+
+sys.stderr.write("1\rDies ist noch eine Test-Fehlermeldung\n2\r")
+sys.stderr.flush()
+for f in sys.stdin:
+	f=f.strip()
+	print "*** RECV",f,"***"
