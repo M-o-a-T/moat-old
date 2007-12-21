@@ -143,7 +143,8 @@ class FS20xmit(protocol.ProcessProtocol, handler):
 
 	def connectionMade(self):
 		log(DEBUG,"fs20 started",self.parent.name)
-		self.transport.closeStdout() # we're not reading anything
+#		if "HOMEVENT_TEST" not in os.environ:
+#			self.transport.closeStdout() # we're not reading anything
 		self._start_timer()
 		register_handler(self)
 	
@@ -162,8 +163,15 @@ class FS20xmit(protocol.ProcessProtocol, handler):
 		process_event(Event(Context(),"fs20","wedged",*self.parent.name)).addErrback(process_failure)
 
 	def send(self,data):
+		data = "".join("%02x" % ord(x)  for x in data)
 		self.transport.write(data+"\n")
 		return defer.succeed(None)
+
+	def outReceived(self, data):
+		data = (self.dbuf+data).split('\n')
+		while len(data) > 1:
+			log(DEBUG,"FS20 sender output",data.pop(0),self.parent.name)
+		self.dbuf = data[0]
 
 	def errReceived(self, data):
 		self._stop_timer()

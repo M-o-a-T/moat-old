@@ -22,7 +22,7 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 
-	python2.5 setup.py build --build-base="$(shell pwd)/build"
+	$(MAKE)
 
 	touch $@
 
@@ -32,7 +32,7 @@ clean:
 	rm -f build-stamp
 
 	dh_clean
-	python2.5 setup.py clean -a
+	$(MAKE) clean
 
 install: build
 	dh_testdir
@@ -40,7 +40,7 @@ install: build
 	dh_clean -k
 	dh_installdirs
 
-	python2.5 setup.py install --root="$(shell pwd)/debian/homevent/" --no-compile -O0
+	$(MAKE) install DESTDIR="$(shell pwd)/debian/homevent/"
 
 	mkdir -p debian/homevent/usr/sbin
 	mv debian/homevent/usr/bin/daemon.py debian/homevent/usr/sbin/homevent

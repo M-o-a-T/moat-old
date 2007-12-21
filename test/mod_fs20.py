@@ -34,21 +34,22 @@ fs20 switch 31413142 foo bar:
 	add 1214 baz quux
 
 block:
-	if exists file "fs20_emit":
+	if exists file "fs20_recv":
 		fs20 receiver foobar:
-			cmd "./fs20_emit"
+			cmd "./fs20_recv"
 		fs20 sender bar foo:
-			cmd "./fs20_send"
+			cmd "./fs20_xmit"
 	else:
 		fs20 receiver foobar:
-			cmd "test/fs20_emit"
+			cmd "test/fs20_recv"
 		fs20 sender bar foo:
-			cmd "test/fs20_send"
+			cmd "test/fs20_xmit"
 #
+wait for 0.5
 send fs20 on - baz quux
 send fs20 off - baz quux
 #
-wait for 3
+wait for 2
 shutdown
 """
 

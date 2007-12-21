@@ -3,6 +3,9 @@ import time,sys
 
 sys.stderr.write("1\rDies ist noch eine Test-Fehlermeldung\n2\r")
 sys.stderr.flush()
-for f in sys.stdin:
+f = sys.stdin.readline()
+while f:
 	f=f.strip()
-	print "*** RECV",f,"***"
+	sys.stdout.write("*** RECV "+f+" ***\n")
+	sys.stdout.flush()
+	f = sys.stdin.readline()

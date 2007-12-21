@@ -8,7 +8,7 @@
 # Version:	@(#)skeleton  1.9  26-Feb-2001  miquels@cistron.nl
 #
 
-PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+PATH=/usr/local/sbin:/usr/local/bin:/usr/lib/homevent:/sbin:/bin:/usr/sbin:/usr/bin
 DAEMON=/usr/sbin/homevent
 NAME=homevent
 DESC=homevent

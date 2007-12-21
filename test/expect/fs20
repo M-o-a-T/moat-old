@@ -62,7 +62,7 @@ NEW: <ConditionalWorkSequence:9 (4)>
    : └1╴... done.
 96 EVENT: module¦load¦errors
 96 END: module¦load¦errors
-0 add ‹IfStatement if¦exists¦file¦fs20_emit›
+0 add ‹IfStatement if¦exists¦file¦fs20_recv›
 0 add ‹FS20receive: fs20¦receiver 1›
 0 add ‹FS20transmit: fs20¦sender 1›
 0 add ‹FS20receive: fs20¦receiver 1›
@@ -70,63 +70,76 @@ NEW: <ConditionalWorkSequence:9 (4)>
 1 fs20 started foobar
 1 fs20 started bar¦foo
 NEW: <ConditionalWorkSequence:10 (4)>
-   : │  EVENT: wait¦start¦3.2¦_wait¦1
+   : │  EVENT: wait¦start¦0.6¦_wait¦1
    : └1╴... done.
-131 EVENT: wait¦start¦3.2¦_wait¦1
-131 END: wait¦start¦3.2¦_wait¦1
-138 EVENT: fs20¦error¦Dies ist noch eine Test-Fehlermeldung¦bar¦foo
+127 EVENT: wait¦start¦0.6¦_wait¦1
+127 END: wait¦start¦0.6¦_wait¦1
+134 EVENT: fs20¦error¦Dies ist noch eine Test-Fehlermeldung¦bar¦foo
 NEW: <ConditionalWorkSequence:11 (4)>
    : │  EVENT: fs20¦error¦Dies ist noch eine Test-Fehlermeldung¦bar¦foo
    : └1╴... done.
-138 EVENT: fs20¦error¦Dies ist noch eine Test-Fehlermeldung¦bar¦foo
-138 END: fs20¦error¦Dies ist noch eine Test-Fehlermeldung¦bar¦foo
-145 EVENT: fs20¦error¦Dies ist eine Test-Fehlermeldung¦foobar
+134 EVENT: fs20¦error¦Dies ist noch eine Test-Fehlermeldung¦bar¦foo
+134 END: fs20¦error¦Dies ist noch eine Test-Fehlermeldung¦bar¦foo
+141 EVENT: fs20¦error¦Dies ist eine Test-Fehlermeldung¦foobar
 NEW: <ConditionalWorkSequence:12 (4)>
    : │  EVENT: fs20¦error¦Dies ist eine Test-Fehlermeldung¦foobar
    : └1╴... done.
-145 EVENT: fs20¦error¦Dies ist eine Test-Fehlermeldung¦foobar
-145 END: fs20¦error¦Dies ist eine Test-Fehlermeldung¦foobar
-152 EVENT: fs20¦state¦toggle¦-¦baz¦quux
+141 EVENT: fs20¦error¦Dies ist eine Test-Fehlermeldung¦foobar
+141 END: fs20¦error¦Dies ist eine Test-Fehlermeldung¦foobar
 NEW: <ConditionalWorkSequence:13 (4)>
+   : │  EVENT: wait¦done¦0.6¦_wait¦1
+   : └1╴... done.
+148 EVENT: wait¦done¦0.6¦_wait¦1
+148 END: wait¦done¦0.6¦_wait¦1
+NEW: <ConditionalWorkSequence:14 (4)>
+   : │  EVENT: wait¦start¦3.2¦_wait¦2
+   : └1╴... done.
+161 EVENT: wait¦start¦3.2¦_wait¦2
+161 END: wait¦start¦3.2¦_wait¦2
+1 FS20 sender output *** RECV 8c8d131143 *** bar¦foo
+1 FS20 sender output *** RECV 8c8d130032 *** bar¦foo
+168 EVENT: fs20¦state¦toggle¦-¦baz¦quux
+NEW: <ConditionalWorkSequence:15 (4)>
    : │  EVENT: fs20¦state¦toggle¦-¦baz¦quux
    : └1╴... done.
-154 EVENT: fs20¦unknown¦function¦31413142¦31¦131f
-NEW: <ConditionalWorkSequence:14 (4)>
+170 EVENT: fs20¦unknown¦function¦31413142¦31¦131f
+NEW: <ConditionalWorkSequence:16 (4)>
    : │  EVENT: fs20¦unknown¦function¦31413142¦31¦131f
    : └1╴... done.
-156 EVENT: fs20¦unknown¦31413132¦6¦8c89131240
-NEW: <ConditionalWorkSequence:15 (4)>
+172 EVENT: fs20¦unknown¦31413132¦6¦8c89131240
+NEW: <ConditionalWorkSequence:17 (4)>
    : │  EVENT: fs20¦unknown¦31413132¦6¦8c89131240
    : └1╴... done.
-158 EVENT: fs20¦unknown¦device¦31413142¦1221¦1412
-NEW: <ConditionalWorkSequence:16 (4)>
+174 EVENT: fs20¦unknown¦device¦31413142¦1221¦1412
+NEW: <ConditionalWorkSequence:18 (4)>
    : │  EVENT: fs20¦unknown¦device¦31413142¦1221¦1412
    : └1╴... done.
-160 EVENT: fs20¦unknown¦31413142¦7¦8c8d131245
-NEW: <ConditionalWorkSequence:17 (4)>
+176 EVENT: fs20¦unknown¦31413142¦7¦8c8d131245
+NEW: <ConditionalWorkSequence:19 (4)>
    : │  EVENT: fs20¦unknown¦31413142¦7¦8c8d131245
    : └1╴... done.
-152 EVENT: fs20¦state¦toggle¦-¦baz¦quux
-152 END: fs20¦state¦toggle¦-¦baz¦quux
-154 EVENT: fs20¦unknown¦function¦31413142¦31¦131f
-154 END: fs20¦unknown¦function¦31413142¦31¦131f
-156 EVENT: fs20¦unknown¦31413132¦6¦8c89131240
-156 END: fs20¦unknown¦31413132¦6¦8c89131240
-158 EVENT: fs20¦unknown¦device¦31413142¦1221¦1412
-158 END: fs20¦unknown¦device¦31413142¦1221¦1412
-160 EVENT: fs20¦unknown¦31413142¦7¦8c8d131245
-160 END: fs20¦unknown¦31413142¦7¦8c8d131245
+168 EVENT: fs20¦state¦toggle¦-¦baz¦quux
+168 END: fs20¦state¦toggle¦-¦baz¦quux
+170 EVENT: fs20¦unknown¦function¦31413142¦31¦131f
+170 END: fs20¦unknown¦function¦31413142¦31¦131f
+172 EVENT: fs20¦unknown¦31413132¦6¦8c89131240
+172 END: fs20¦unknown¦31413132¦6¦8c89131240
+174 EVENT: fs20¦unknown¦device¦31413142¦1221¦1412
+174 END: fs20¦unknown¦device¦31413142¦1221¦1412
+176 EVENT: fs20¦unknown¦31413142¦7¦8c8d131245
+176 END: fs20¦unknown¦31413142¦7¦8c8d131245
 1 fs20 ending foobar
 1 fs20 ended 0 foobar
-NEW: <ConditionalWorkSequence:18 (4)>
-   : │  EVENT: wait¦done¦3.2¦_wait¦1
+NEW: <ConditionalWorkSequence:20 (4)>
+   : │  EVENT: wait¦done¦3.2¦_wait¦2
    : └1╴... done.
-187 EVENT: wait¦done¦3.2¦_wait¦1
-187 END: wait¦done¦3.2¦_wait¦1
+203 EVENT: wait¦done¦3.2¦_wait¦2
+203 END: wait¦done¦3.2¦_wait¦2
 2 EVENT: shutdown
-NEW: <ConditionalWorkSequence:19 (6)>
+NEW: <ConditionalWorkSequence:21 (6)>
    : │  EVENT: shutdown
    : └1╴... done.
 2 EVENT: shutdown
 2 END: shutdown
 1 fs20 ending bar¦foo
+1 fs20 ended 0 bar¦foo

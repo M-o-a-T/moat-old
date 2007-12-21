@@ -19,3 +19,5 @@ dist
 homevent.egg-info
 homevent/modules
 *-stamp
+*.o
+audio/reader
