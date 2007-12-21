@@ -4,7 +4,7 @@ export PYTHONPATH=$(shell pwd)
 DESTDIR ?= "/"
 
 FIX:
-	if test ! -d homevent/modules; then ln -s ../modules homevent/modules; fi
+	@if test ! -d homevent/modules; then ln -s ../modules homevent/modules; fi
 
 all:
 	@echo Nothing to do.
