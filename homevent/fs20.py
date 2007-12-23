@@ -72,7 +72,7 @@ class handler(object):
 	FS20 datagrams. 
 	"""
 	def __init__(self):
-		pass
+		self.last_timestamp = None
 	
 	def send(self, data):
 		"""\
@@ -80,7 +80,15 @@ class handler(object):
 		"""
 		raise NotImplementedError("Dunno how to send datagrams")
 
-	def datagramReceived(self, data, handler=None):
+	def datagramReceived(self, data, handler=None, timestamp=None):
+		if timestamp is None:
+			timestamp = time()
+		if self.last_timestamp:
+			delta = timestamp - self.last_timestamp
+		else:
+			delta = None
+		self.last_timestamp = timestamp
+
 		qs = 0
 		for d in data:
 			qs += ord(d)
@@ -94,7 +102,7 @@ class handler(object):
 			process_event(Event(self.parent.ctx, "fs20","unknown",to_hc(code),qs,"".join("%02x" % ord(x) for x in data))).addErrback(process_failure)
 			
 		else:
-			return g.datagramReceived(data[2:-1], handler)
+			return g.datagramReceived(data[2:-1], handler, timedelta=delta)
 	
 
 class group(object):

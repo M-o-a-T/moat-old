@@ -1,8 +1,9 @@
 #include "flow_internal.h"
 
-void flow_reader(FLOW *f, flow_readproc proc)
+void flow_reader(FLOW *f, flow_readproc proc, void *param)
 {
 	f->reader = proc;
+	f->reader_param = param;
 }
 
 #include <stdio.h>
@@ -10,7 +11,7 @@ static void flow_init(FLOW *f)
 {
 	if(f->readlen) {
 		if (f->reader)
-			(f->reader)(f->readbuf, f->readlen);
+			(f->reader)(f->reader_param, f->readbuf, f->readlen);
 		f->readlen = 0;
 	}
 	f->byt = 0;

@@ -21,3 +21,4 @@ homevent/modules
 *-stamp
 *.o
 audio/reader
+audio/writer

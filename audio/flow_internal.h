@@ -6,6 +6,7 @@ typedef struct _FLOW FLOW;
 
 #include "flow.h"
 
+#include <time.h>
 #include <sys/time.h>
 
 #define FLOWMAX 20 /* allowed packet length */
@@ -20,10 +21,12 @@ typedef struct _FLOW FLOW;
  */
 struct _FLOW {
 	unsigned long rate;
-	unsigned int low,mid,high;
 
 	/* read */
+	unsigned int low,mid,high;
+
 	flow_readproc reader;
+	void *reader_param;
 
 	int readlen;
 	char lasthi;
@@ -36,8 +39,19 @@ struct _FLOW {
 	unsigned char readbuf[FLOWMAX];
 
 	/* write */
-	unsigned long usec_per_byte;
+	unsigned int s_zero, s_one;
+	struct timeval last_sent;
+	unsigned long bytes_sent; /* never more than "rate" */
+
 	flow_writeproc writer;
+	void *writer_param;
+
+	unsigned char *sendbuf;
+	unsigned int sendbuf_len;
+	unsigned int sendbuf_used;
+
+	unsigned char *fillbuf; /* a bunch of zeroes */
+	unsigned int fillbuf_len;
 };
 
 

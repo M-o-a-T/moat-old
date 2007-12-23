@@ -84,6 +84,7 @@ class SwitchGroup(group):
 		self.code = code
 		self.name = Name(name)
 		self.devs = {}
+		self.last_dgram = None
 
 	def add(self):
 		if self.code in codes:
@@ -116,8 +117,14 @@ class SwitchGroup(group):
 
 		self.devs[switch.code] = switch
 
-	def datagramReceived(self,data, handler=None):
+	def datagramReceived(self,data, handler=None, timedelta=None):
 		if len(data) < 2: raise WrongDatagram
+
+		if self.last_dgram is not None and timedelta is not None and \
+				self.last_dgram == data and timedelta < 0.15:
+			return
+		self.last_dgram = data
+
 		fcode = ord(data[1])
 		if fcode & 0x20:
 			if len(data) != 3: raise WrongDatagram

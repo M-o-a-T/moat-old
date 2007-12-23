@@ -34,7 +34,8 @@ static int set_rate(int argc, char *argv[])
 
 /*************** exec some other program **********************/
 
-void printer(unsigned char *buf, unsigned int len)
+void printer(void *unused __attribute__((unused)),
+	unsigned char *buf, unsigned int len)
 {
 	while(len--)
 		printf("%02X",*buf++);
@@ -77,8 +78,8 @@ static int do_exec(int argc, char *argv[])
 	ifd = fdopen(r[0],"r");
 	close(r[1]);
 	
-	f = flow_setup(rate, 3,5,7);
-	flow_reader(f,printer);
+	f = flow_setup(rate, 3,4,5,6,7);
+	flow_reader(f,printer,NULL);
 
 	while((c = getc(ifd)) != EOF) {
 		unsigned char cc = c;

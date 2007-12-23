@@ -13,11 +13,13 @@ from homevent.check import Check,register_condition,unregister_condition
 from homevent.run import process_event,process_failure
 from homevent.context import Context
 from homevent.event import Event
+from homevent.fs20 import handler,register_handler,unregister_handler
+from homevent.base import Name
+
 from twisted.internet import protocol,defer,reactor
 from twisted.protocols.basic import _PauseableMixin
 from twisted.python import failure
-from homevent.fs20 import handler,register_handler,unregister_handler
-from homevent.base import Name
+
 
 buses = {}
 
@@ -28,6 +30,9 @@ class FS20recv(protocol.ProcessProtocol, handler):
 		self.parent = parent
 		self.dbuf = ""
 		self.ebuf = ""
+		self.timestamp = None
+		self.last_timestamp = None
+		self.last_dgram = None
 
 	def connectionMade(self):
 		log(DEBUG,"fs20 started",self.parent.name)
@@ -51,15 +56,21 @@ class FS20recv(protocol.ProcessProtocol, handler):
 	def dataReceived(self,data):
 		db = ""
 		e = ""
-		if len(data)%1:
-			raise ValueError("odd length",data)
-		for d in data:
-			if e:
-				db += chr(eval("0x"+e+d))
-				e=""
-			else:
-				e=d
-		self.datagramReceived(db)
+		if not data: return # empty line
+		if data[0] in "0123456789abcdefABCDEF":
+			if len(data)%1:
+				raise ValueError("odd length",data)
+			for d in data:
+				if e:
+					db += chr(eval("0x"+e+d))
+					e=""
+				else:
+					e=d
+
+			self.datagramReceived(db, timestamp=self.timestamp)
+			self.timestamp = None
+		elif data[0] in "tT":
+			self.timestamp = float(data[1:])
 
 	def outReceived(self, data):
 		self._stop_timer()
