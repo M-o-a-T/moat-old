@@ -5,7 +5,7 @@
 #include <errno.h>
 #include <wait.h>
 
-#include "flow_in.h"
+#include "flow.h"
 
 static int rate = 32000;
 static char *progname;
@@ -34,11 +34,21 @@ static int set_rate(int argc, char *argv[])
 
 /*************** exec some other program **********************/
 
+void printer(unsigned char *buf, unsigned int len)
+{
+	while(len--)
+		printf("%02X",*buf++);
+	putchar('\n');
+	fflush(stdout);
+}
+
 __attribute__((noreturn)) 
 static int do_exec(int argc, char *argv[])
 {
 	int r[2];
 	int pid, c, res;
+	FLOW *f;
+	FILE *ifd;
 
 	if (!argc) usage(2,stderr);
 	if(pipe(r) < 0) {
@@ -64,13 +74,17 @@ static int do_exec(int argc, char *argv[])
 		perror("Program not found!\n");
 		_exit(4);
 	}
-	dup2(r[0],0);
-	close(r[0]);
+	ifd = fdopen(r[0],"r");
 	close(r[1]);
 	
-	flow_setup(rate, 3,5,7);
-	while((c = getchar()) != EOF)
-		flow_char(c);
+	f = flow_setup(rate, 3,5,7);
+	flow_reader(f,printer);
+
+	while((c = getc(ifd)) != EOF) {
+		unsigned char cc = c;
+		flow_read_buf(f,&cc,1);
+	}
+	flow_free(f);
 
 	do {
 		res = waitpid(pid,&c,0);
