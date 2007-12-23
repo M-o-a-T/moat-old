@@ -1,0 +1,47 @@
+Quick note how to use these programs:
+
+
+"reader" expects to fork a program which emits unsigned 8-byte 1-channel
+samples, which it presumably reads from some audio interface. 
+
+"Reader" simply evaluates the high bit (0: no signal; 1: signal). It
+will analyse the data stream and print a hex string each time it
+receives a valid-looking data block (i.e. with correct parity bits).
+Evaluating the checksum at the end is the receiver's job.
+
+It will prefix these hex blocks with a "tFLOAT" number, where FLOAT is
+the current time in Unix seconds. This timestamp should be used to
+filter duplicate data, since many senders transmit more than one block
+for reliability.
+
+
+"writer" reads the same hex sequences "reader" emits, and sends them
+off. To do that it expects to fork a program which reads these sound
+bytes. "Writer" will fill the channel with zero bytes when it is idle.
+
+"Writer" takes a lot of care to send exactly as many samples per seconds
+as the channel rate requires.
+
+
+*Caution*: Your interface should definitely not do any sending when the
+sound output is turned off! Keeping within the spirit, if not the
+letter, of the 1% duty cycle restriction required of the 868.35 MHz
+frequency is *your* responsibility. The "writer" program does not
+attempt to enforce this restriction because it has no knowledge of the
+semantics of the datagrams it builds.
+
+Sound rates below 32k are not recommended. I did not test 22050, but
+16000 is definitely unreliable -- and you'd want *some* safety margin.
+
+
+On my system, these work:
+
+./reader rate 32000 exec pacat -r -d alsa_input.usb_device_d8c_c_noserial_0_if0_alsa_capture_0 --rate=32000 --format=u8 --channels=1
+./writer rate 32000 exec pacat -p -d alsa_output.usb_device_d8c_c_noserial_0_if0_alsa_playback_0 --rate=32000 --format=u8 --channels=1
+
+"pacat" is part of the superb pulseaudio package, which allows me to
+talk to my USB stick in the way *I* want to. (Natively, the thing
+supports neither this sample rate, nor this data format, nor more than
+one recorder at a time.) Use "pabrowse" to discover the names to use for
+your own USB stick.
+

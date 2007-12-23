@@ -65,6 +65,13 @@ FS20
 
 * Handle weather devices and similar sensors.
 
+* Audio: Implement a "keepalive" option
+
+* Audio: Implement an option to control loop speed
+
+* Audio: Directly implement some more sound interfaces
+  (esp. portaudio, native pulseaudio)
+
 
 Implement a web server
 ======================
