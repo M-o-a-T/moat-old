@@ -8,6 +8,8 @@ So many ideas, so little time …
 Code
 ====
 
+* add copyrights everywhere
+
 * more documentation (docstring and comments) are always helpful …
 
 * convert some heavy users of (single) Deferreds to @inlineCallbacks
