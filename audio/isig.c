@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 void dgram(int nlo,int nhi, int nbyt, unsigned char *byt)
 {
 #define R(x) \
@@ -40,7 +42,7 @@ int main(int argc, char *argv[]) {
 	while(1) { 
 		dgram(r(4),r(6), 4,"\x8c\x8d\x13\x12\x44");
 		fflush(stdout);
-		sleep(5);
+		exit(0);
 	}
 
 #if 0
