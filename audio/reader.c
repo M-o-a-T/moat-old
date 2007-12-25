@@ -19,12 +19,14 @@
 #include <string.h>
 #include <errno.h>
 #include <wait.h>
+#include <sys/time.h>
 
 #include "flow.h"
 
 static int rate = 32000;
 static char *progname;
 static int progress = 0;
+static int timestamp = 0;
 
 static int log_min,log_max, log_len=0;
 
@@ -34,6 +36,7 @@ void usage(int exitcode, FILE *out)
 	fprintf(out,"Usage: %s\n", progname);
 	fprintf(out,"  Parameters:\n");
 	fprintf(out,"    rate NUM          -- samples/second; default: 32000\n");
+	fprintf(out,"    timestamp         -- print a timestamp before the data\n");
 	fprintf(out,"    progress          -- print something to stderr, once a second\n");
 	fprintf(out,"    log MIN MAX NUM   -- trace receiver signal\n");
 	fprintf(out,"  Actual work (needs to be last!):\n");
@@ -67,11 +70,22 @@ static int set_progress(int argc, char *argv[])
 	return 0;
 }
 
+static int set_timestamp(int argc, char *argv[])
+{
+	timestamp = 1;
+	return 0;
+}
+
 /*************** exec some other program **********************/
 
 void printer(void *unused __attribute__((unused)),
 	unsigned char *buf, unsigned int len)
 {
+	if(timestamp) {
+		struct timeval tv;
+		gettimeofday(&tv,NULL);
+		printf("t%ld.%06ld\n",tv.tv_sec,tv.tv_usec);
+	}
 	while(len--)
 		printf("%02X",*buf++);
 	putchar('\n');
@@ -150,6 +164,7 @@ struct {
 
 	{"rate", set_rate},
 	{"progress", set_progress},
+	{"timestamp", set_timestamp},
 	{"log", set_log},
 	{"exec", do_exec},
 };

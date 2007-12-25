@@ -10,9 +10,9 @@ each time it receives a valid-looking data block (i.e. with correct
 parity bits). Evaluating the checksum at the end is the receiver's job.
 
 It will prefix these hex blocks with a "tFLOAT" number, where FLOAT is
-the current time in Unix seconds. This timestamp should be used to
-filter duplicate data, since many senders transmit more than one block
-for reliability.
+the current time in Unix seconds, if requested. This timestamp should be
+used to filter duplicate data, since many senders repeat the transmitted
+message once or twice, for increased reliability.
 
 You can instruct the reader to report signal timing details. The "log"
 option takes three arguments: min pulse length and max pulse length (in
