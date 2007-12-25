@@ -24,6 +24,7 @@
 
 static int rate = 32000;
 static char *progname;
+static int progress = 0;
 
 __attribute__((noreturn)) 
 void usage(int exitcode, FILE *out)
@@ -31,6 +32,7 @@ void usage(int exitcode, FILE *out)
 	fprintf(out,"Usage: %s\n", progname);
 	fprintf(out,"  Parameters:\n");
 	fprintf(out,"    rate NUM          -- samples/second; default: 32000\n");
+	fprintf(out,"    progress          -- print something to stderr, once a second\n");
 	fprintf(out,"  Actual work (needs to be last!):\n");
 	fprintf(out,"    exec program args -- run this program, read from stdin\n");
 	exit(exitcode);
@@ -45,6 +47,12 @@ static int set_rate(int argc, char *argv[])
 		usage(2,stderr);
 	}
 	return 1;
+}
+
+static int set_progress(int argc, char *argv[])
+{
+	progress = 1;
+	return 0;
 }
 
 /*************** exec some other program **********************/
@@ -99,6 +107,12 @@ static int do_exec(int argc, char *argv[])
 	while((c = getc(ifd)) != EOF) {
 		unsigned char cc = c;
 		flow_read_buf(f,&cc,1);
+
+		if(progress && progress++ == rate) {
+			progress = 1;
+			fprintf(stderr,"x\r");
+			fflush(stderr);
+		}
 	}
 	flow_free(f);
 
@@ -120,6 +134,7 @@ struct {
 } work[] = {
 
 	{"rate", set_rate},
+	{"progress", set_progress},
 	{"exec", do_exec},
 };
 
