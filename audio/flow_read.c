@@ -14,6 +14,9 @@
  */
 
 #include "flow_internal.h"
+#include <stdio.h>
+#include <malloc.h>
+#include <limits.h>
 
 void flow_reader(FLOW *f, flow_readproc proc, void *param)
 {
@@ -21,7 +24,6 @@ void flow_reader(FLOW *f, flow_readproc proc, void *param)
 	f->reader_param = param;
 }
 
-#include <stdio.h>
 static void flow_init(FLOW *f)
 {
 	if(f->readlen) {
@@ -37,6 +39,22 @@ static void flow_init(FLOW *f)
 	f->qsum = 0;
 }
 
+void flow_report(FLOW *f, unsigned short low, unsigned short high, unsigned short minlen)
+{
+	if (minlen % 1) minlen++; /* needs to be even, for later */
+	f->logbuf = realloc(f->logbuf, sizeof(unsigned short) * minlen);
+	f->log_min = minlen;
+#define r(x) (int)(f->rate*.0001*x)
+	f->log_low = r(low);
+	f->log_high = r(high);
+#undef r
+	f->log_valid = 0;
+}
+
+int flow_read_logging(FLOW *f) {
+	return (f->log_valid == f->log_min);
+}
+
 static inline void flow_char(FLOW *f, unsigned char c)
 {
 	int hi;
@@ -44,22 +62,45 @@ static inline void flow_char(FLOW *f, unsigned char c)
 	hi = ((c & 0x80) != 0);
 	if(hi == f->lasthi) {
 		if (f->cnt > f->high) {
-			if (f->readlen) {
+			if (f->readlen)
 				flow_init(f);
-				f->cnt = f->high+1;
-			}
-		} else {
-			f->cnt++;
 		}
+		if(f->cnt < INT_MAX)
+			f->cnt++;
 		return;
 	}
+	if (f->logbuf && (f->log_valid || hi)) {
+#define R(_x) (f->cnt*100000/f->rate)
+		if (f->cnt >= f->log_low && f->cnt <= f->log_high) {
+			if (f->log_valid < f->log_min) {
+				f->logbuf[f->log_valid++] = f->cnt;
+				if (f->log_valid == f->log_min) {
+					unsigned short i;
+					for(i=0; i < f->log_min; i++) {
+						if (!i) fputs("log ",stderr);
+						else if (i & 1) fputc(hi?'_':' ',stderr);
+						else fputc(hi?' ':'_',stderr);
+						fprintf(stderr,"%lu",R(f->logbuf[i]));
+					}
+					fprintf(stderr,"%c%lu",hi?' ':'_', R(f->cnt));
+				}
+			} else {
+				fprintf(stderr,"%c%lu",hi?' ':'_', R(f->cnt));
+			}
+		} else {
+			if (f->log_valid == f->log_min) 
+				fprintf(stderr,"%c%lu\n",hi?' ':'_', R(f->cnt));
+			f->log_valid = 0;
+		}
+#undef R
+	}
 	f->lasthi = hi;
+	if(f->cnt < f->low || f->cnt > f->high)
+		goto init;
 	if (hi) {
 		f->cnt = 0;
 		return;
 	}
-	if(f->cnt < f->low || f->cnt > f->high)
-		goto init;
 	hi = (f->cnt >= f->mid);
 	f->cnt = 0;
 

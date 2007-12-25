@@ -31,6 +31,8 @@ typedef void(*flow_readproc)(void *param, unsigned char *buf, unsigned int len);
 void flow_reader(FLOW *flow, flow_readproc proc, void *param);
 void flow_read_buf(FLOW *flow, unsigned char *buf, unsigned int len);
 
+void flow_report(FLOW *flow, unsigned short low, unsigned short high, unsigned short minlen);
+int flow_read_logging(FLOW *flow);
 
 /* write */
 typedef int(*flow_writeproc)(void *param, unsigned char *buf, unsigned int len);

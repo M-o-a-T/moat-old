@@ -46,5 +46,6 @@ void flow_free(FLOW *f)
 	if(!f) return;
 	free(f->sendbuf);
 	free(f->fillbuf);
+	free(f->logbuf);
 	free(f);
 }

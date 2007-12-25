@@ -4,15 +4,25 @@ Quick note how to use these programs:
 "reader" expects to fork a program which emits unsigned 8-byte 1-channel
 samples, which it presumably reads from some audio interface. 
 
-"Reader" simply evaluates the high bit (0: no signal; 1: signal). It
-will analyse the data stream and print a hex string each time it
-receives a valid-looking data block (i.e. with correct parity bits).
-Evaluating the checksum at the end is the receiver's job.
+"Reader" simply evaluates the high bit (0: no signal; 1: signal) of the
+input samples. It will analyse the data stream and print a hex string
+each time it receives a valid-looking data block (i.e. with correct
+parity bits). Evaluating the checksum at the end is the receiver's job.
 
 It will prefix these hex blocks with a "tFLOAT" number, where FLOAT is
 the current time in Unix seconds. This timestamp should be used to
 filter duplicate data, since many senders transmit more than one block
 for reliability.
+
+You can instruct the reader to report signal timing details. The "log"
+option takes three arguments: min pulse length and max pulse length (in
+100-µs units), and number of valid samples before reporting.
+The report output is the word "log" and the pulse lengths (in 10-µs
+units), including the first pulse that's not within the limits.
+
+The standard signal timing is to consider everything between 300 and 500
+µsec a zero, and up to 700 µsec a one. There's currently no way to
+change that from the command line.
 
 
 "writer" reads the same hex sequences "reader" emits, and sends them
@@ -21,6 +31,9 @@ bytes. "Writer" will fill the channel with zero bytes when it is idle.
 
 "Writer" takes a lot of care to send exactly as many samples per seconds
 as the channel rate requires.
+
+Zero bits have a pulse width of 400 µsec, one bits are 600 µsec wide.
+There's currently no way to change that from the command line.
 
 
 *Caution*: Your interface should definitely not do any sending when the

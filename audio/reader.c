@@ -26,6 +26,8 @@ static int rate = 32000;
 static char *progname;
 static int progress = 0;
 
+static int log_min,log_max, log_len=0;
+
 __attribute__((noreturn)) 
 void usage(int exitcode, FILE *out)
 {
@@ -33,9 +35,19 @@ void usage(int exitcode, FILE *out)
 	fprintf(out,"  Parameters:\n");
 	fprintf(out,"    rate NUM          -- samples/second; default: 32000\n");
 	fprintf(out,"    progress          -- print something to stderr, once a second\n");
+	fprintf(out,"    log MIN MAX NUM   -- trace receiver signal\n");
 	fprintf(out,"  Actual work (needs to be last!):\n");
 	fprintf(out,"    exec program args -- run this program, read from stdin\n");
 	exit(exitcode);
+}
+
+static int set_log(int argc, char *argv[])
+{
+	if (argc < 3) usage(2,stderr);
+	log_min = atoi(argv[0]);
+	log_max = atoi(argv[1]);
+	log_len = atoi(argv[2]);
+	return 3;
 }
 
 static int set_rate(int argc, char *argv[])
@@ -103,6 +115,7 @@ static int do_exec(int argc, char *argv[])
 	
 	f = flow_setup(rate, 3,4,5,6,7);
 	flow_reader(f,printer,NULL);
+	if(log_len) flow_report(f,log_min,log_max,log_len);
 
 	while((c = getc(ifd)) != EOF) {
 		unsigned char cc = c;
@@ -110,8 +123,10 @@ static int do_exec(int argc, char *argv[])
 
 		if(progress && progress++ == rate) {
 			progress = 1;
-			fprintf(stderr,"x\r");
-			fflush(stderr);
+			if(!flow_read_logging(f)) {
+				fprintf(stderr,"x\r");
+				fflush(stderr);
+			}
 		}
 	}
 	flow_free(f);
@@ -135,6 +150,7 @@ struct {
 
 	{"rate", set_rate},
 	{"progress", set_progress},
+	{"log", set_log},
 	{"exec", do_exec},
 };
 

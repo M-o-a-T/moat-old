@@ -38,20 +38,26 @@ struct _FLOW {
 	unsigned long rate;
 
 	/* read */
-	unsigned int low,mid,high;
+	unsigned short low,mid,high;
 
 	flow_readproc reader;
 	void *reader_param;
 
 	int readlen;
 	char lasthi;
-	int cnt;
+	unsigned int cnt;
 	int qsum;
 
 	unsigned char byt,bit;
 	char syn;
 
 	unsigned char readbuf[FLOWMAX];
+
+	/* read tracing */
+	unsigned short log_low,log_high; /* signal length */
+	unsigned short log_min; /* # valid signals before starting to log */
+	unsigned short *logbuf;
+	unsigned short log_valid;
 
 	/* write */
 	unsigned int s_zero, s_one;
