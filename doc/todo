@@ -72,6 +72,7 @@ FS20
 * Audio: Directly implement some more sound interfaces
   (esp. portaudio, native pulseaudio)
 
+* Suppport weather sensors, window-open sensors, and similar gadgets.
 
 Implement a web server
 ======================
@@ -145,6 +146,7 @@ in, re-create the system state as accurately as possible.
 * set a mode that will update existing same-name entries, instead of
   having to destructively replace them
 
+* serialization of a command that can be fed to an interpreter
 
 LIRC
 ====
