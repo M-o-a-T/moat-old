@@ -57,7 +57,7 @@ struct _FLOW {
 	unsigned short log_low,log_high; /* signal length */
 	unsigned short log_min; /* # valid signals before starting to log */
 	unsigned short *logbuf;
-	unsigned short log_valid;
+	unsigned short log_valid, log_invalid;
 
 	/* write */
 	unsigned int s_zero, s_one;
