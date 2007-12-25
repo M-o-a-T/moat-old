@@ -70,7 +70,7 @@ static inline void flow_char(FLOW *f, unsigned char c)
 		return;
 	}
 	if (f->logbuf && (f->log_valid || hi)) {
-#define R(_x) (f->cnt*100000/f->rate)
+#define R(_x) (_x*100000/f->rate)
 		if (f->cnt >= f->log_low && f->cnt <= f->log_high) {
 			if (f->log_valid < f->log_min) {
 				f->logbuf[f->log_valid++] = f->cnt;
