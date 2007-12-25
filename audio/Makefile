@@ -24,6 +24,7 @@ writer: writer.o flow.o flow_write.o
 
 flow.o: flow.c flow.h flow_internal.h
 flow_read.o: flow_read.c flow.h flow_internal.h
+flow_write.o: flow_read.c flow.h flow_internal.h
 
 install: all
 	install -m 755 reader $(DESTDIR)/usr/lib/homevent/reader
