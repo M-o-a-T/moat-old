@@ -371,6 +371,8 @@ class Parser(object):
 		self.p_pop_after=False
 		self.p_stack = []
 		self.p_args = []
+		if hasattr(self,"p_gen") and self.p_gen:
+			self.p_gen.init()
 
 	def startParsing(self, protocol=None):
 		"""\
@@ -391,6 +393,7 @@ class Parser(object):
 		self.init_state()
 
 		self.p_gen = tokizer(self.read_a_line, self._do_parse)
+		self.p_loop = self.p_gen.run()
 		def pg_done(_):
 			log("parser",TRACE,"P DONE",_)
 			try: self.result.callback(_)
@@ -401,7 +404,7 @@ class Parser(object):
 			try: self.result.errback(_)
 			except defer.AlreadyCalledError: pass
 			else: self.endConnection()
-		self.p_gen.addCallbacks(pg_done,pg_err)
+		self.p_loop.addCallbacks(pg_done,pg_err)
 
 	def _do_parse(self, t,txt,beg,end,line):
 		# States: 0 newline, 1 after first word, 2 OK to extend word
