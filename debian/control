@@ -8,7 +8,7 @@ Build-Depends-Indep: python-support
 Standards-Version: 3.7.2
 
 Package: homevent
-Architecture: all
+Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, ${python:Depends}, python-twisted-core, python-twisted-conch
 Recommends: pulseaudio (>= 0.9.7)
 Description: A scripted event-based monitoring and control system
