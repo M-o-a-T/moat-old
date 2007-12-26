@@ -33,8 +33,7 @@ case "$1" in
   start)
 	echo -n "Starting $DESC: "
 	cd /var/lib/homevent
-	( sudo -u homevent $DAEMON $DAEMON_OPTS $DAEMON_CFG </dev/null | logger -p $LOGLEVEL -t homevent ) 2>&1 | logger -p $ERRLEVEL -t homevent &
-	echo $! > /var/run/homevent.pid
+	( sudo -u homevent $DAEMON --pidfile=/var/run/homevent.pid $DAEMON_OPTS $DAEMON_CFG </dev/null | logger -p $LOGLEVEL -t homevent ) 2>&1 | logger -p $ERRLEVEL -t homevent &
 	echo "$NAME."
 	;;
   debug)

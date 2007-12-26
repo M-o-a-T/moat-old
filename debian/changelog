@@ -13,8 +13,10 @@ homevent (0.2.6) stable; urgency=low
   * Show details on 1wire devices.
   * Send and receive "raw" FS20 data.
   * Support FS20 switches.
+  * Fix stderr/stdout logging when starting HomEvenT
+    via the Debian init script.
 
- -- Matthias Urlichs <matthias@urlichs.de>  Sun, 23 Dec 2007 22:34:57 +0100
+ -- Matthias Urlichs <matthias@urlichs.de>  Wed, 26 Dec 2007 19:56:32 +0100
 
 homevent (0.2.5.6) stable; urgency=low
 

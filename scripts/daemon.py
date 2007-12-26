@@ -32,6 +32,7 @@ from homevent.logging import TRACE,DEBUG,INFO,WARN,ERROR,PANIC,\
 	Logger,register_logger,LogNames, log_level
 from signal import signal,SIGINT,SIGHUP,SIGQUIT
 import sys
+import os
 
 from twisted.internet import reactor,defer
 
@@ -51,6 +52,8 @@ parser.add_option("-t", "--trace", dest="debuglevel", action="store",
 	help="trace level (TRACE,DEBUG,INFO,WARN,ERROR,PANIC,NONE)", default="PANIC")
 parser.add_option("-s", "--stack", dest="stack", action="store_true",
 	help="HomEvenT errors are logged with Python stack traces")
+parser.add_option("-p", "--pidfile", dest="pidfile", action="store",
+	help="file to write our PID to")
 
 (opts, args) = parser.parse_args()
 if not args:
@@ -77,6 +80,11 @@ if opts.debuglevel != "NONE":
 			raise KeyError("'%s' is not a debug level." % (level,))
 
 track_errors(opts.stack)
+
+if opts.pidfile:
+	pid = open(opts.pidfile,"w")
+	print >>pid, os.getpid()
+	pid.close()
 
 def _readcf():
 	d = defer.succeed(None)
