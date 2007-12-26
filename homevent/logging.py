@@ -250,7 +250,11 @@ class log_created(Event):
 	def __init__(self,seq):
 		super(log_created,self).__init__("NEW",str(seq.iid))
 		self.seq = seq
+		lim = levels.get("event",NONE)
+		if lim == NONE or lim > TRACE:
+			return
 		log_event(self, level=TRACE)
+
 	def report(self, verbose=False):
 		if verbose:
 			p = "NEW: "

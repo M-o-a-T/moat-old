@@ -94,7 +94,11 @@ def process_event(e, drop_errors=False):
 		externally-generated events to.
 		"""
 	from homevent.logging import log_event,DEBUG
-	if e[0] != "wait":
+
+	if e[0] == "wait":
+		# Those are particuarly annoying in real world debug situations
+		log_event("event",e,level=TRACE)
+	else:
 		log_event(e,level=DEBUG)
 	d = collect_event(e).process()
 #	def rv(_):
