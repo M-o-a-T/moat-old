@@ -1,5 +1,11 @@
-Quick note how to use these programs:
+=====
+Usage
+=====
 
+Quick note how to use the audio processing programs.
+
+reader
+======
 
 "reader" expects to fork a program which emits unsigned 8-byte 1-channel
 samples, which it presumably reads from some audio interface. 
@@ -24,6 +30,8 @@ The standard signal timing is to consider everything between 300 and 500
 µsec a zero, and up to 700 µsec a one. There's currently no way to
 change that from the command line.
 
+writer
+======
 
 "writer" reads the same hex sequences "reader" emits, and sends them
 off. To do that it expects to fork a program which reads these sound
@@ -36,12 +44,15 @@ Zero bits have a pulse width of 400 µsec, one bits are 600 µsec wide.
 There's currently no way to change that from the command line.
 
 
-*Caution*: Your interface should definitely not do any sending when the
-sound output is turned off! Keeping within the spirit, if not the
-letter, of the 1% duty cycle restriction required of the 868.35 MHz
-frequency is *your* responsibility. The "writer" program does not
-attempt to enforce this restriction because it has no knowledge of the
-semantics of the datagrams it builds.
+Usage
+=====
+
+*Caution*: Your 868.35 MHz transmitter should definitely not do any
+sending when the sound output is turned off! Keeping within the spirit,
+if not the letter, of the 1% duty cycle restriction required of the
+868.35 MHz frequency is *your* responsibility. The "writer" program does
+not attempt to enforce this restriction because it has no knowledge of
+the semantics of the datagrams it sends.
 
 Sound rates below 32k are not recommended. I did not test 22050, but
 16000 is definitely unreliable -- and you'd want *some* safety margin.
@@ -49,8 +60,8 @@ Sound rates below 32k are not recommended. I did not test 22050, but
 
 On my system, these work:
 
-./reader rate 32000 exec pacat -r -d alsa_input.usb_device_d8c_c_noserial_0_if0_alsa_capture_0 --rate=32000 --format=u8 --channels=1
-./writer rate 32000 exec pacat -p -d alsa_output.usb_device_d8c_c_noserial_0_if0_alsa_playback_0 --rate=32000 --format=u8 --channels=1
+	./reader rate 32000 exec pacat -r -d alsa_input.usb_device_d8c_c_noserial_0_if0_alsa_capture_0 --rate=32000 --format=u8 --channels=1
+	./writer rate 32000 exec pacat -p -d alsa_output.usb_device_d8c_c_noserial_0_if0_alsa_playback_0 --rate=32000 --format=u8 --channels=1
 
 "pacat" is part of the superb pulseaudio package, which allows me to
 talk to my USB stick in the way *I* want to. (Natively, the thing
