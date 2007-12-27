@@ -20,16 +20,19 @@ NEW: <ConditionalWorkSequence:1 (4)>
 0 Create OnEvtHandler: net¦disconnect¦baz
 0 add ‹LogHandler log¦TRACE¦dis¦baz›
 0 NewHandler 4
+27 EVENT: wait¦start¦0.2¦_wait¦1
 NEW: <ConditionalWorkSequence:2 (4)>
    : │  EVENT: wait¦start¦0.2¦_wait¦1
    : └1╴... done.
 27 EVENT: wait¦start¦0.2¦_wait¦1
 27 END: wait¦start¦0.2¦_wait¦1
+34 EVENT: wait¦done¦0.2¦_wait¦1
 NEW: <ConditionalWorkSequence:3 (4)>
    : │  EVENT: wait¦done¦0.2¦_wait¦1
    : └1╴... done.
 34 EVENT: wait¦done¦0.2¦_wait¦1
 34 END: wait¦done¦0.2¦_wait¦1
+47 EVENT: wait¦start¦1.3¦_wait¦2
 NEW: <ConditionalWorkSequence:4 (4)>
    : │  EVENT: wait¦start¦1.3¦_wait¦2
    : └1╴... done.
@@ -111,6 +114,7 @@ RUN: on net disconnect baz ‹OnEventHandler›
  ev: EVENT: net¦disconnect¦baz
 0 dis baz
 82 END: net¦disconnect¦baz
+94 EVENT: wait¦done¦1.3¦_wait¦2
 NEW: <ConditionalWorkSequence:9 (4)>
    : │  EVENT: wait¦done¦1.3¦_wait¦2
    : └1╴... done.

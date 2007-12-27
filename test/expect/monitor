@@ -10,6 +10,7 @@ NEW: <ConditionalWorkSequence:1 (4)>
 0 add ‹LogHandler log¦TRACE¦First¦value¦is¦$VAL›
 0 add ‹LogHandler log¦TRACE¦Go¦from¦$OLDVAL¦to¦$VAL›
 0 NewHandler 1
+24 EVENT: wait¦start¦×××¦_wait¦1
 NEW: <ConditionalWorkSequence:2 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦1
    : └1╴... done.
@@ -84,6 +85,7 @@ RUN: on monitor value *VAL foo bar ‹OnEventHandler›
  ev: EVENT: monitor¦value¦42.0¦foo¦bar
 0 Go from 40.0 to 42.0
 53 END: monitor¦value¦42.0¦foo¦bar
+64 EVENT: wait¦done¦×××¦_wait¦1
 NEW: <ConditionalWorkSequence:6 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦1
    : └1╴... done.
@@ -103,6 +105,7 @@ Time:  ‹now›
 Steps:  1 / 1 / None
 Data:  42
 .
+84 EVENT: wait¦start¦×××¦_wait¦2
 NEW: <ConditionalWorkSequence:7 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦2
    : └1╴... done.
@@ -154,6 +157,7 @@ RUN: on monitor value *VAL foo bar ‹OnEventHandler›
  ev: EVENT: monitor¦value¦40.0¦foo¦bar
 0 Go from 41.0 to 40.0
 102 END: monitor¦value¦40.0¦foo¦bar
+113 EVENT: wait¦done¦×××¦_wait¦2
 NEW: <ConditionalWorkSequence:10 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦2
    : └1╴... done.
@@ -175,6 +179,7 @@ Up:  Wait
 Time:  never
 Steps:  0 / 2 / None
 .
+143 EVENT: wait¦start¦×××¦_wait¦5
 NEW: <ConditionalWorkSequence:11 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦5
    : └1╴... done.
@@ -208,11 +213,13 @@ RUN: on monitor checking baz zaz ‹OnEventHandler›
 0 raw 10 baz zaz
 0 filter [10] on baz¦zaz
 0 More data [10] for ‹baz zaz›
+160 EVENT: wait¦start¦×××¦_wait¦3
 NEW: <ConditionalWorkSequence:13 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦3
    : └1╴... done.
 160 EVENT: wait¦start¦×××¦_wait¦3
 160 END: wait¦start¦×××¦_wait¦3
+167 EVENT: wait¦done¦×××¦_wait¦5
 NEW: <ConditionalWorkSequence:14 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦5
    : └1╴... done.
@@ -222,11 +229,13 @@ NEW: <ConditionalWorkSequence:14 (4)>
 0 add ‹LogHandler log¦DEBUG¦Yes›
 0 add ‹LogHandler log¦DEBUG¦No1›
 1 Yes
+183 EVENT: wait¦start¦×××¦_wait¦6
 NEW: <ConditionalWorkSequence:15 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦6
    : └1╴... done.
 183 EVENT: wait¦start¦×××¦_wait¦6
 183 END: wait¦start¦×××¦_wait¦6
+190 EVENT: wait¦done¦×××¦_wait¦3
 NEW: <ConditionalWorkSequence:16 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦3
    : └1╴... done.
@@ -235,11 +244,13 @@ NEW: <ConditionalWorkSequence:16 (4)>
 0 raw 13 baz zaz
 0 filter [10, 13] on baz¦zaz
 0 More data [10, 13] for ‹baz zaz›
+199 EVENT: wait¦start¦×××¦_wait¦4
 NEW: <ConditionalWorkSequence:17 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦4
    : └1╴... done.
 199 EVENT: wait¦start¦×××¦_wait¦4
 199 END: wait¦start¦×××¦_wait¦4
+206 EVENT: wait¦done¦×××¦_wait¦4
 NEW: <ConditionalWorkSequence:18 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦4
    : └1╴... done.
@@ -260,6 +271,7 @@ NEW: <ConditionalWorkSequence:20 (4)>
    : └1╴... done.
 221 EVENT: monitor¦value¦13.5¦baz¦zaz
 221 END: monitor¦value¦13.5¦baz¦zaz
+228 EVENT: wait¦done¦×××¦_wait¦6
 NEW: <ConditionalWorkSequence:21 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦6
    : └1╴... done.

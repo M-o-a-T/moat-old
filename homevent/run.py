@@ -93,11 +93,11 @@ def process_event(e, drop_errors=False):
 		Process an event. This is the procedure you'll be feeding
 		externally-generated events to.
 		"""
-	from homevent.logging import log_event,DEBUG
+	from homevent.logging import log_event,DEBUG,TRACE
 
 	if e[0] == "wait":
 		# Those are particuarly annoying in real world debug situations
-		log_event("event",e,level=TRACE)
+		log_event(e,level=TRACE,subsys="event")
 	else:
 		log_event(e,level=DEBUG)
 	d = collect_event(e).process()

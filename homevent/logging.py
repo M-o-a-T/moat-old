@@ -131,6 +131,12 @@ class LogWorker(ExcWorker):
 			"""
 		exc = []
 		level = k.get("level",TRACE)
+		subsys = k.get("subsys",None)
+		if subsys is not None:
+			lim = levels.get(subsys,NONE)
+			if lim == NONE or lim > TRACE:
+				return
+
 		for l in loggers[:]:
 			try:
 				l.log_event(event,level=level)

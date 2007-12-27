@@ -28,6 +28,7 @@ NEW: <ConditionalWorkSequence:3 (4)>
 0 NewHandler 1
 0 add ‹LogHandler log¦TRACE¦Set¦to¦THREE›
 0 add ‹SetStateHandler set¦state¦three¦foo¦bar›
+47 EVENT: wait¦start¦0.1¦_wait¦1
 NEW: <ConditionalWorkSequence:4 (4)>
    : │  EVENT: wait¦start¦0.1¦_wait¦1
    : └1╴... done.
@@ -103,6 +104,7 @@ ERROR: Traceback (most recent call last):
      : │ ╵step: set state four foo bar ‹SetStateHandler›
      : └2╴... done.
 70 END: StateChangeError
+72 EVENT: wait¦done¦0.1¦_wait¦1
 NEW: <ConditionalWorkSequence:7 (4)>
    : │  EVENT: wait¦done¦0.1¦_wait¦1
    : └1╴... done.

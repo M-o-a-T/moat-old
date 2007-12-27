@@ -12,6 +12,7 @@ NEW: <ConditionalWorkSequence:2 (4)>
 NEW: <ConditionalWorkSequence:3 (4)>
    : │  EVENT: bar1
    : └1╴... done.
+19 EVENT: wait¦start¦×××¦_wait¦1
 NEW: <ConditionalWorkSequence:4 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦1
    : └1╴... done.
@@ -21,6 +22,7 @@ NEW: <ConditionalWorkSequence:4 (4)>
 15 END: bar1
 19 EVENT: wait¦start¦×××¦_wait¦1
 19 END: wait¦start¦×××¦_wait¦1
+36 EVENT: wait¦done¦×××¦_wait¦1
 NEW: <ConditionalWorkSequence:5 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦1
    : └1╴... done.
@@ -38,11 +40,13 @@ NEW: <ConditionalWorkSequence:7 (4)>
    : └1╴... done.
 54 EVENT: bar2
 54 END: bar2
+63 EVENT: wait¦start¦×××¦_wait¦2
 NEW: <ConditionalWorkSequence:8 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦2
    : └1╴... done.
 63 EVENT: wait¦start¦×××¦_wait¦2
 63 END: wait¦start¦×××¦_wait¦2
+70 EVENT: wait¦done¦×××¦_wait¦2
 NEW: <ConditionalWorkSequence:9 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦2
    : └1╴... done.
@@ -59,6 +63,7 @@ NEW: <ConditionalWorkSequence:10 (4)>
 NEW: <ConditionalWorkSequence:11 (4)>
    : │  EVENT: bar3
    : └1╴... done.
+90 EVENT: wait¦start¦×××¦_wait¦3
 NEW: <ConditionalWorkSequence:12 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦3
    : └1╴... done.
@@ -68,6 +73,7 @@ NEW: <ConditionalWorkSequence:12 (4)>
 86 END: bar3
 90 EVENT: wait¦start¦×××¦_wait¦3
 90 END: wait¦start¦×××¦_wait¦3
+107 EVENT: wait¦done¦×××¦_wait¦3
 NEW: <ConditionalWorkSequence:13 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦3
    : └1╴... done.
@@ -92,6 +98,7 @@ NEW: <ConditionalWorkSequence:15 (4)>
 134 EVENT: bar4
 134 END: bar4
 0 add ‹TriggerHandler trigger¦foo5›
+145 EVENT: wait¦start¦×××¦_wait¦4
 NEW: <ConditionalWorkSequence:16 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦4
    : └1╴... done.
@@ -103,6 +110,7 @@ NEW: <ConditionalWorkSequence:17 (4)>
    : └1╴... done.
 153 EVENT: foo5
 153 END: foo5
+160 EVENT: wait¦done¦×××¦_wait¦4
 NEW: <ConditionalWorkSequence:18 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦4
    : └1╴... done.
@@ -112,6 +120,7 @@ NEW: <ConditionalWorkSequence:18 (4)>
 NEW: <ConditionalWorkSequence:19 (4)>
    : │  EVENT: bar5
    : └1╴... done.
+173 EVENT: wait¦start¦×××¦_wait¦5
 NEW: <ConditionalWorkSequence:20 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦5
    : └1╴... done.
@@ -119,6 +128,7 @@ NEW: <ConditionalWorkSequence:20 (4)>
 169 END: bar5
 173 EVENT: wait¦start¦×××¦_wait¦5
 173 END: wait¦start¦×××¦_wait¦5
+185 EVENT: wait¦done¦×××¦_wait¦5
 NEW: <ConditionalWorkSequence:21 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦5
    : └1╴... done.

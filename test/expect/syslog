@@ -4,11 +4,13 @@ NEW: <ConditionalWorkSequence:1 (4)>
    : └1╴... done.
 1 EVENT: startup
 1 END: startup
+11 EVENT: wait¦start¦0.2¦_wait¦1
 NEW: <ConditionalWorkSequence:2 (4)>
    : │  EVENT: wait¦start¦0.2¦_wait¦1
    : └1╴... done.
 11 EVENT: wait¦start¦0.2¦_wait¦1
 11 END: wait¦start¦0.2¦_wait¦1
+18 EVENT: wait¦done¦0.2¦_wait¦1
 NEW: <ConditionalWorkSequence:3 (4)>
    : │  EVENT: wait¦done¦0.2¦_wait¦1
    : └1╴... done.
@@ -17,11 +19,13 @@ NEW: <ConditionalWorkSequence:3 (4)>
 1 One Debug
 1 Five Debug
 3 Five Warn
+41 EVENT: wait¦start¦0.7¦_wait¦2
 NEW: <ConditionalWorkSequence:4 (4)>
    : │  EVENT: wait¦start¦0.7¦_wait¦2
    : └1╴... done.
 41 EVENT: wait¦start¦0.7¦_wait¦2
 41 END: wait¦start¦0.7¦_wait¦2
+48 EVENT: wait¦done¦0.7¦_wait¦2
 NEW: <ConditionalWorkSequence:5 (4)>
    : │  EVENT: wait¦done¦0.7¦_wait¦2
    : └1╴... done.

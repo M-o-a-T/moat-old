@@ -17,7 +17,7 @@
 ##
 
 import homevent as h
-from homevent.logging import Logger, TRACE, log
+from homevent.logging import Logger, TRACE, log, log_level
 from homevent.interpreter import Interpreter
 from homevent.parser import parse
 from homevent.context import Context
@@ -28,6 +28,8 @@ import re
 import os
 from twisted.internet import reactor
 exitcode = 0
+
+log_level("event",TRACE)
 
 startup=now()
 def ixtime(t=None):

@@ -69,6 +69,7 @@ NEW: <ConditionalWorkSequence:9 (4)>
 0 add ‹FS20transmit: fs20¦sender 1›
 1 fs20 started foobar
 1 fs20 started bar¦foo
+127 EVENT: wait¦start¦0.6¦_wait¦1
 NEW: <ConditionalWorkSequence:10 (4)>
    : │  EVENT: wait¦start¦0.6¦_wait¦1
    : └1╴... done.
@@ -80,24 +81,26 @@ NEW: <ConditionalWorkSequence:11 (4)>
    : └1╴... done.
 134 EVENT: fs20¦error¦Dies ist noch eine Test-Fehlermeldung¦bar¦foo
 134 END: fs20¦error¦Dies ist noch eine Test-Fehlermeldung¦bar¦foo
-141 EVENT: fs20¦error¦Dies ist eine Test-Fehlermeldung¦foobar
+141 EVENT: wait¦done¦0.6¦_wait¦1
 NEW: <ConditionalWorkSequence:12 (4)>
-   : │  EVENT: fs20¦error¦Dies ist eine Test-Fehlermeldung¦foobar
-   : └1╴... done.
-141 EVENT: fs20¦error¦Dies ist eine Test-Fehlermeldung¦foobar
-141 END: fs20¦error¦Dies ist eine Test-Fehlermeldung¦foobar
-NEW: <ConditionalWorkSequence:13 (4)>
    : │  EVENT: wait¦done¦0.6¦_wait¦1
    : └1╴... done.
-148 EVENT: wait¦done¦0.6¦_wait¦1
-148 END: wait¦done¦0.6¦_wait¦1
-NEW: <ConditionalWorkSequence:14 (4)>
-   : │  EVENT: wait¦start¦3.2¦_wait¦2
+141 EVENT: wait¦done¦0.6¦_wait¦1
+141 END: wait¦done¦0.6¦_wait¦1
+154 EVENT: wait¦start¦3.0¦_wait¦2
+NEW: <ConditionalWorkSequence:13 (4)>
+   : │  EVENT: wait¦start¦3.0¦_wait¦2
    : └1╴... done.
-161 EVENT: wait¦start¦3.2¦_wait¦2
-161 END: wait¦start¦3.2¦_wait¦2
+154 EVENT: wait¦start¦3.0¦_wait¦2
+154 END: wait¦start¦3.0¦_wait¦2
 1 FS20 sender output *** RECV 8c8d131143 *** bar¦foo
 1 FS20 sender output *** RECV 8c8d130032 *** bar¦foo
+161 EVENT: fs20¦error¦Dies ist eine Test-Fehlermeldung¦foobar
+NEW: <ConditionalWorkSequence:14 (4)>
+   : │  EVENT: fs20¦error¦Dies ist eine Test-Fehlermeldung¦foobar
+   : └1╴... done.
+161 EVENT: fs20¦error¦Dies ist eine Test-Fehlermeldung¦foobar
+161 END: fs20¦error¦Dies ist eine Test-Fehlermeldung¦foobar
 168 EVENT: fs20¦state¦toggle¦-¦baz¦quux
 NEW: <ConditionalWorkSequence:15 (4)>
    : │  EVENT: fs20¦state¦toggle¦-¦baz¦quux
@@ -130,11 +133,12 @@ NEW: <ConditionalWorkSequence:19 (4)>
 176 END: fs20¦unknown¦31413142¦7¦8c8d131245
 1 fs20 ending foobar
 1 fs20 ended 0 foobar
+203 EVENT: wait¦done¦3.0¦_wait¦2
 NEW: <ConditionalWorkSequence:20 (4)>
-   : │  EVENT: wait¦done¦3.2¦_wait¦2
+   : │  EVENT: wait¦done¦3.0¦_wait¦2
    : └1╴... done.
-203 EVENT: wait¦done¦3.2¦_wait¦2
-203 END: wait¦done¦3.2¦_wait¦2
+203 EVENT: wait¦done¦3.0¦_wait¦2
+203 END: wait¦done¦3.0¦_wait¦2
 2 EVENT: shutdown
 NEW: <ConditionalWorkSequence:21 (6)>
    : │  EVENT: shutdown

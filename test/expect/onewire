@@ -64,7 +64,7 @@ NEW: <ConditionalWorkSequence:8 (4)>
 99 add ‹TriggerHandler trigger¦thermo¦$X›
 99 add ‹WaitCancel del¦wait¦yawn›
 99 NewHandler 1
-NEW: <ConditionalWorkSequence:44 (5)>
+NEW: <ConditionalWorkSequence:48 (5)>
    : ├1╴on onewire scanned A * * * ‹OnEventHandler›
    : │  name: scanned
    : │  prio: 51
@@ -80,13 +80,14 @@ RUN: on onewire scanned A * * * ‹OnEventHandler›
    : step: var onewire X _DEV_ _ATTR_ ‹OWFSvar›
    : step: trigger thermo $X ‹TriggerHandler›
    : step: del wait yawn ‹WaitCancel›
- at: <ConditionalWorkSequence:44 (5)> (step 1)
+ at: <ConditionalWorkSequence:48 (5)> (step 1)
 99 Try <twisted.internet.tcp.Connector instance at FOO> immediately
 99 EVENT: thermo¦DATA
-NEW: <ConditionalWorkSequence:45 (4)>
+NEW: <ConditionalWorkSequence:49 (4)>
    : │  EVENT: thermo¦DATA
    : └1╴... done.
-NEW: <ConditionalWorkSequence:46 (4)>
+99 EVENT: wait¦cancel¦×××¦yawn
+NEW: <ConditionalWorkSequence:_VAL_ (4)>
    : │  EVENT: wait¦cancel¦×××¦yawn
    : └1╴... done.
 99 EVENT: thermo¦DATA
@@ -94,21 +95,23 @@ NEW: <ConditionalWorkSequence:46 (4)>
 99 EVENT: wait¦cancel¦×××¦yawn
 99 END: wait¦cancel¦×××¦yawn
 ERROR: Traceback (most recent call last):
-     : Failure: homevent.worker.HaltSequence: ‹Waiter yawn 6›
-NEW: <WorkSequence:47 (4)>
-   : │  ERROR: ‹Waiter yawn 6›
+     : Failure: homevent.worker.HaltSequence: ‹Waiter yawn 8›
+NEW: <WorkSequence:51 (4)>
+   : │  ERROR: ‹Waiter yawn 8›
    : └1╴... done.
-99 END: onewire¦scanned¦A¦0¦16¦16
+99 END: onewire¦scanned¦A¦0¦18¦18
 ERROR: Traceback (most recent call last):
-     : Failure: homevent.worker.HaltSequence: ‹Waiter yawn 6›
+     : Failure: homevent.worker.HaltSequence: ‹Waiter yawn 8›
 99 END: HaltSequence
 99 Drop OWFS bus A
-NEW: <ConditionalWorkSequence:48 (4)>
+99 EVENT: wait¦start¦×××¦_wait¦2
+NEW: <ConditionalWorkSequence:52 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦2
    : └1╴... done.
 99 EVENT: wait¦start¦×××¦_wait¦2
 99 END: wait¦start¦×××¦_wait¦2
-NEW: <ConditionalWorkSequence:49 (4)>
+99 EVENT: wait¦done¦×××¦_wait¦2
+NEW: <ConditionalWorkSequence:53 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦2
    : └1╴... done.
 99 EVENT: wait¦done¦×××¦_wait¦2
