@@ -27,8 +27,9 @@ if [ -f /etc/default/homevent ] ; then
 fi
 test -f "$DAEMON_CFG" || exit 0
 
-mkdir -m700 -p /var/run/homevent
-chown -R homevent /var/run/homevent
+mkdir -p /var/run/homevent /var/cache/homevent
+chmod 755 /var/run/homevent /var/cache/homevent
+chown -R homevent /var/run/homevent /var/cache/homevent
 
 set -e
 
