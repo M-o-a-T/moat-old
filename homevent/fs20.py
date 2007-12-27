@@ -22,6 +22,8 @@ This module is the basis for processing FS20 datagrams.
 from homevent.event import Event
 from homevent.run import process_event,process_failure
 
+from time import time
+
 groups = {}
 handlers = []
 default_handler = None
