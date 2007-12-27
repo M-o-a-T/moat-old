@@ -27,13 +27,16 @@ if [ -f /etc/default/homevent ] ; then
 fi
 test -f "$DAEMON_CFG" || exit 0
 
+mkdir -m700 -p /var/run/homevent
+chown -R homevent /var/run/homevent
+
 set -e
 
 case "$1" in
   start)
 	echo -n "Starting $DESC: "
 	cd /var/lib/homevent
-	( sudo -u homevent $DAEMON --pidfile=/var/run/homevent.pid $DAEMON_OPTS $DAEMON_CFG </dev/null | logger -p $LOGLEVEL -t homevent ) 2>&1 | logger -p $ERRLEVEL -t homevent &
+	( sudo -u homevent $DAEMON --pidfile=/var/run/homevent/pid $DAEMON_OPTS $DAEMON_CFG </dev/null | logger -p $LOGLEVEL -t homevent ) 2>&1 | logger -p $ERRLEVEL -t homevent &
 	echo "$NAME."
 	;;
   debug)
@@ -43,9 +46,9 @@ case "$1" in
 	;;
   stop)
 	echo -n "Stopping $DESC: "
-	pid=$(cat /var/run/$NAME.pid 2>/dev/null)
+	pid=$(cat /var/run/homevent/pid 2>/dev/null)
 	test -n "$pid" && kill -0 $pid 2>/dev/null || exit 0
-	start-stop-daemon --stop --quiet --pidfile /var/run/$NAME.pid
+	start-stop-daemon --stop --quiet --pidfile /var/run/homevent/pid
 	for f in . . . . . . . . . . ; do
 		if ! kill -0 $pid 2>/dev/null; then break; fi
 		echo -n $f
@@ -60,7 +63,7 @@ case "$1" in
 	;;
   force-reload)
 	# check whether $DAEMON is running. If so, restart
-	start-stop-daemon --stop --test --quiet --pidfile /var/run/$NAME.pid \
+	start-stop-daemon --stop --test --quiet --pidfile /var/run/homevent/pid \
 	&& $0 restart \
 	|| exit 0
 	;;
