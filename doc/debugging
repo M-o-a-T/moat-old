@@ -36,8 +36,8 @@ Strange things happen
 
 This problem is mostly related to event handling.
 
-First thing to do: Turn on debugging. You will get a whole lot of
-messages like this:
+First thing to do: Turn on debugging, esp. the "event" subsystem.
+You will get a whole lot of messages, like this:
 
 	NEW: <WorkSequence:2 (5)>
 	   : │  EVENT: say¦hello
@@ -45,18 +45,19 @@ messages like this:
 	   : └2╴... done.
 	.
 
-For the ‹say¦hello› event, this work sequence has been created, based on
-whatever “on …” triggers (or, as in this sample, other event-handling
-code) you have installed.
+This output means: For the ‹say¦hello› event, this sequence of things to
+do has been created. This work is based on whatever “on …” triggers you
+have installed with HomEvenT code (or, as in this sample, other
+event-handling code written in Python).
 
 This particular sequence contains one command (and some other cruft
 for logging and housekeeping, which is cleverly hidden behind the “… done”
 tag, among other places, because showing that every time you do
-something is not helpful.
+something is not helpful).
 
 	3 EVENT: say¦hello
 	.
-The event has triggered.
+The event has started processing.
 
 	RUN: SayWorker: TellMe
 	 at: <WorkSequence:2 (5)> (step 1)
@@ -72,7 +73,7 @@ going on.
 	0 The 'TellMe' worker is saying: hello
 	.
 
-… whatever the code does …
+… whatever the code does … in this case, logging a strange message.
 
 	3 END: say¦hello
 	.
@@ -101,12 +102,30 @@ Setting this makes various parts of HomEvenT more testable:
 * it causes OneWire bus scans to run more often
 
 * The date is frozen to 2003-04-05 06:07:08 (timeouts still work; this
-  is a convenience so that you'll be able to compare test logs)
+  is a convenience feature so that you'll be able to compare test logs)
 
-* Threading is disabled to make interactive debugging possible
- 
-HOMEVENT_LOG_ONEWIRE
---------------------
+Subsystems
+==========
+
+Logging everything is tedious. Finding the bits and pieces you need
+among all the other cruft is worse than the proverbial needle in a
+haystack. (And remember that in earlier times, needles were made of
+bones, so you couldn't even use a magnet to find them. Oh, and
+supermagnets hadn't been invented either. But I digress.) Thus you can
+selectively turn on logging of various bits and pieces of HomEvenT.
+
+All of this is controlled with the daemon.py script's "-t" switch.
+
+event
+-----
+
+Trace which events are being triggered and which code they're executing.
+
+Events are logged at "debug" level (except for "wait" events because
+that's too tedious 
+
+onewire
+-------
 
 This causes a very verbose tracing of everything whatsoever that happens
 on the 1wire bus (or rather, on the TCP connection to the server), as
@@ -115,16 +134,16 @@ not need this.
 
 The trace goes to standard error.
 
-HOMEVENT_LOG_PARSE
-------------------
+parser
+------
 
 This causes a very verbose tracing of the internal workings of the
 config file parser. You usually do not need this.
 
 The trace goes to standard error.
 
-HOMEVENT_LOG_TOKEN
-------------------
+token
+-----
 
 This causes a very verbose tracing of the internal workings of the
 config file tokenizer. You usually do not need this, as the common case
