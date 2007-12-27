@@ -61,10 +61,19 @@ block:
 			cmd "test/fs20_xmit"
 #
 wait for 0.5
+list fs20 receiver
+list fs20 receiver foobar
+list fs20 sender
+list fs20 sender bar foo
 send fs20 on - baz quux
 send fs20 off - baz quux
 #
-wait for 2
+wait for 1
+del fs20 receiver foobar
+del fs20 sender bar foo
+list fs20 receiver
+list fs20 sender
+wait for 0.5
 shutdown
 """
 

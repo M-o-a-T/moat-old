@@ -21,6 +21,7 @@ This module is the basis for processing FS20 datagrams.
 
 from homevent.event import Event
 from homevent.run import process_event,process_failure
+from homevent.context import Context
 
 from time import time
 
@@ -88,8 +89,9 @@ class handler(object):
 	This abstract class defines the interface used to send and receive
 	FS20 datagrams. 
 	"""
-	def __init__(self):
+	def __init__(self,ctx=Context):
 		self.last_timestamp = None
+		self.ctx = ctx()
 	
 	def send(self, data):
 		"""\
@@ -116,7 +118,7 @@ class handler(object):
 		try:
 			g = groups[(code,qs)]
 		except KeyError:
-			process_event(Event(self.parent.ctx, "fs20","unknown",to_hc(code),qs,"".join("%02x" % ord(x) for x in data))).addErrback(process_failure)
+			process_event(Event(self.ctx, "fs20","unknown",to_hc(code),qs,"".join("%02x" % ord(x) for x in data))).addErrback(process_failure)
 			
 		else:
 			return g.datagramReceived(data[2:-1], handler, timedelta=delta)
