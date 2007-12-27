@@ -8,7 +8,7 @@
 # Version:	@(#)skeleton  1.9  26-Feb-2001  miquels@cistron.nl
 #
 
-PATH=/usr/local/sbin:/usr/local/bin:/usr/lib/homevent:/sbin:/bin:/usr/sbin:/usr/bin
+PATH=/usr/lib/homevent:/sbin:/bin:/usr/sbin:/usr/bin
 DAEMON=/usr/sbin/homevent
 NAME=homevent
 DESC=homevent
@@ -37,7 +37,7 @@ case "$1" in
   start)
 	echo -n "Starting $DESC: "
 	cd /var/lib/homevent
-	( sudo -u homevent $DAEMON --pidfile=/var/run/homevent/pid $DAEMON_OPTS $DAEMON_CFG </dev/null | logger -p $LOGLEVEL -t homevent ) 2>&1 | logger -p $ERRLEVEL -t homevent &
+	( sudo -u homevent env PATH=/usr/lib/homevent:/bin:/usr/bin $DAEMON --pidfile=/var/run/homevent/pid $DAEMON_OPTS $DAEMON_CFG </dev/null | logger -p $LOGLEVEL -t homevent ) 2>&1 | logger -p $ERRLEVEL -t homevent &
 	echo "$NAME."
 	;;
   debug)
