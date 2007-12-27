@@ -113,7 +113,7 @@ class FS20recv(protocol.ProcessProtocol, handler):
 				data = data[pi+1:]
 			else:
 				msg = data[:ei]
-				data = data[ei+1]
+				data = data[ei+1:]
 				process_event(Event(Context(),"fs20","error",msg,*self.parent.name)).addErrback(process_failure)
 
 		self.ebuf = data
