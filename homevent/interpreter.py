@@ -234,8 +234,6 @@ class InteractiveInterpreter(Interpreter):
 		from homevent.statement import UnknownWordError
 
 		err = Failure(err)
-		#err.printDetailedTraceback(file=parser.ctx.out)
-		#err.printTraceback(file=parser.ctx.out)
 		if err.check(UnknownWordError):
 			print >>parser.ctx.out, "ERROR:",err.getErrorMessage()
 		else:

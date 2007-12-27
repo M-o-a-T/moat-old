@@ -422,12 +422,22 @@ class Parser(object):
 				log("parser",TRACE,"PERR",self,self.proc)
 				self.proc.error(self,_)
 				log("parser",TRACE,"PERR OK")
-			except BaseException,e:
+			except Exception:
+				import sys,traceback
+				sys.stderr.write("*** Died in the error handler\n");
 				try:
-					log("parser",TRACE,"RESULT error",_)
-					self.result.errback(_)
-				except defer.AlreadyCalledError: pass
-				else: self.endConnection()
+					traceback.print_exc(file=sys.stderr)
+
+					try:
+						log("parser",TRACE,"RESULT error",_)
+						self.result.errback(_)
+					except defer.AlreadyCalledError: pass
+					else: self.endConnection()
+				except Exception:
+					sys.stderr.write("\n*** Here's where we die again^2:\n");
+					traceback.print_exc(file=sys.stderr)
+					raise
+
 
 		res = defer.maybeDeferred(self._parseStep,t,txt,beg,end,line)
 		res.addErrback(handle_error)

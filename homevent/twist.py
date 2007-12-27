@@ -183,11 +183,12 @@ FileDescriptor.write = nfhw
 
 
 _fail = failure.Failure
-class TwistFailure(_fail):
+class TwistMe(BaseException): pass
+class TwistFailure(_fail,BaseException):
 	def __init__(self, exc_value=None, exc_type=None, exc_tb=None):
 		global tracked_errors
 		if tracked_errors and exc_tb is None and exc_value is not None:
-			try: raise exc_value
-			except Exception: exc_tb = sys.exc_info()[2]
+			try: raise TwistMe
+			except TwistMe: exc_tb = sys.exc_info()[2]
 		_fail.__init__(self,exc_value,exc_type,exc_tb)
 failure.Failure = TwistFailure
