@@ -253,17 +253,12 @@ class Switch(object):
 		else:
 			d += chr(switch_codes[state])
 		
-		import sys; print >>sys.stderr,"SEND",repr(d)
 		d = self.parent.send(d, handler=self.handler)
 		def done(_):
 			self.state = state
 			self.ext = ext
 			return _
 		d.addCallback(done)
-		def r(_):
-			import sys; print >>sys.stderr,"SEND RES",_
-			return _
-		d.addBoth(r)
 		return d
 
 	def get(self, state, ext=None, handler=None):

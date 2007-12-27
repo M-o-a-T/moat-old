@@ -143,7 +143,6 @@ class group(object):
 		raise NotImplementedError("Dunno how to process incoming datagrams")
 
 	def send(self, data, handler=None):
-		import sys; print >>sys.stderr,"SENDIT",repr(data)
 		if handler is None:
 			handler = self.handler or default_handler
 
@@ -153,6 +152,5 @@ class group(object):
 			qsum += ord(c)
 		data += chr(qsum & 0xFF)
 
-		import sys; print >>sys.stderr,"SEND BY",repr(handler)
 		return handler.send(data)
 
