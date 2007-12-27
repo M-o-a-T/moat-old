@@ -219,7 +219,6 @@ class OnListHandler(Statement):
 					if h.parent.displayname is not None:
 						n += u" ‹"+unicode(h.parent.displayname)+u"›"
 					print >>self.ctx.out,str(id)+" "*(fl-len(str(id))+1),":",n
-			print >>self.ctx.out,"."
 		else:
 			try: h = onHandlers[event[0]]
 			except KeyError: h = onHandlerNames[Name(event)]
@@ -228,6 +227,7 @@ class OnListHandler(Statement):
 				print >>self.ctx.out,"Name:"," ".join(unicode(x) for x in h.parent.displayname)
 			print >>self.ctx.out,"Prio:",h.prio
 			if hasattr(h.parent,"displaydoc"): print >>self.ctx.out,"Doc:",h.parent.displaydoc
+		print >>self.ctx.out,"."
 
 
 class OnPrio(Statement):

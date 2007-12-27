@@ -48,9 +48,11 @@ NEW: <ConditionalWorkSequence:1 (4)>
 5 : foo
 Name: Skipped One
 Prio: 49
+.
 6 : foo
 Name: Skipped Two
 Prio: 50
+.
 76 EVENT: bar¦foo
 NEW: <ConditionalWorkSequence:2 (5)>
    : │  EVENT: bar¦foo
