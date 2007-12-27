@@ -30,6 +30,7 @@ from twisted.internet import reactor
 exitcode = 0
 
 log_level("event",TRACE)
+log_level("monitor",TRACE)
 
 startup=now()
 def ixtime(t=None):
