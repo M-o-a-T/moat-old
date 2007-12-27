@@ -72,6 +72,9 @@ FS20
 
 * Suppport weather sensors, window-open sensors, and similar gadgets.
 
+* Split the audio processors off to their own subpackage.
+
+
 Implement a web server
 ======================
 
