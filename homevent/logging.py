@@ -284,7 +284,9 @@ def log(level, *a):
 		lim = levels.get(level,NONE)
 		if lim == NONE or lim > level:
 			return
-		level,b = a[0],level
+		# get the real level from a and add the subsystem name to the front
+		b = level
+		level = a[0]
 		a = (b,)+a[1:]
 	for l in loggers[:]:
 		try:
