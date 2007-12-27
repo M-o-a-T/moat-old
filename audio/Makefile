@@ -28,6 +28,7 @@ flow_write.o: flow_read.c flow.h flow_internal.h
 
 install: all
 	install -m 755 reader $(DESTDIR)/usr/lib/homevent/reader
+	install -m 755 writer $(DESTDIR)/usr/lib/homevent/writer
 
 clean:
 	@rm -f *.o reader
