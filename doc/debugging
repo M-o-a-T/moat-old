@@ -124,6 +124,11 @@ Trace which events are being triggered and which code they're executing.
 Events are logged at "debug" level (except for "wait" events because
 that's too tedious 
 
+monitor
+-------
+
+Watch what the “monitor” command (thinks it) is doing.
+
 onewire
 -------
 

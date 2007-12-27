@@ -191,7 +191,7 @@ class Monitor(object):
 		self.timer = reactor.callLater(unixdelta(s-now()), self._run)
 
 	def filter_data(self):
-		log(TRACE,"filter",self.data,"on", self.name)
+		log("monitor",TRACE,"filter",self.data,"on", self.name)
 
 		if len(self.data) < self.points:
 			return None
@@ -267,7 +267,7 @@ class Monitor(object):
 		self.running.addCallback(mon_new)
 		self.running.addErrback(process_failure)
 		self.running.addBoth(mon_redo)
-		log(TRACE,"Start run",self.name)
+		log("monitor",TRACE,"Start run",self.name)
 
 	@defer.inlineCallbacks
 	def _run_me(self):
@@ -308,7 +308,7 @@ class Monitor(object):
 					yield process_failure(e)
 
 				else:
-					log(TRACE,"raw",val,*self.name)
+					log("monitor",TRACE,"raw",val,*self.name)
 					if hasattr(self,"factor"):
 						val = val * self.factor + self.offset
 					self.data.append(val)
@@ -330,7 +330,7 @@ class Monitor(object):
 								self.new_value = avg
 						return
 					else:
-						log(TRACE,"More data", self.data, "for", u"‹"+" ".join(unicode(x) for x in self.name)+u"›")
+						log("monitor",TRACE,"More data", self.data, "for", u"‹"+" ".join(unicode(x) for x in self.name)+u"›")
 				
 			self.active = False
 		
@@ -340,7 +340,7 @@ class Monitor(object):
 				yield process_failure()
 
 		finally:
-			log(TRACE,"End run", self.name)
+			log("monitor",TRACE,"End run", self.name)
 			self.stopped_at = now()
 
 
