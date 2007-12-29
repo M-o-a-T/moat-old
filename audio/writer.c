@@ -21,6 +21,7 @@
 #include <wait.h>
 
 #include <glib.h>
+#include <portaudio.h>
 
 #include "flow.h"
 
@@ -33,10 +34,12 @@ void usage(int exitcode, FILE *out)
 {
 	fprintf(out,"Usage: %s\n", progname);
 	fprintf(out,"  Parameters:\n");
-	fprintf(out,"    rate NUM          -- samples/second; default: 32000\n");
-	fprintf(out,"    progress          -- print something to stderr, once a second\n");
+	fprintf(out,"    rate NUM            -- samples/second; default: 32000\n");
+	fprintf(out,"    progress            -- print something to stderr, once a second\n");
 	fprintf(out,"  Actual work (needs to be last!):\n");
-	fprintf(out,"    exec program args -- run this program, read from stdin\n");
+	fprintf(out,"    exec program args   -- run this program, read from stdin\n");
+	fprintf(out,"    portaudio interface -- read from this sound input\n");
+	fprintf(out,"    portaudio           -- list sound inputs\n");
 	exit(exitcode);
 }
 
@@ -57,6 +60,8 @@ static int set_progress(int argc, char *argv[])
 	return 0;
 }
 
+FLOW *f;
+GMainLoop *mainloop;
 
 /*************** exec some other program **********************/
 
@@ -68,9 +73,7 @@ void printer(unsigned char *buf, unsigned int len)
 	fflush(stdout);
 }
 
-GMainLoop *mainloop;
 GIOChannel *input;
-FLOW *f;
 int wfd;
 
 int writer(void *unused, unsigned char *buf, unsigned int len)
@@ -170,7 +173,7 @@ static int do_exec(int argc, char *argv[])
 	}
 	
 	f = flow_setup(rate, 3,4,5,6,7);
-	flow_writer(f,writer,NULL);
+	flow_writer(f,writer,NULL, 0);
 	mainloop = g_main_loop_new(NULL, 0);
 	input = g_io_channel_unix_new(0);
 	g_io_channel_set_encoding (input, NULL, NULL);
@@ -179,6 +182,122 @@ static int do_exec(int argc, char *argv[])
 	g_main_loop_run(mainloop);
 	exit(0);
 }
+
+
+/************************************************************************/
+
+/* PortAudio. Note that ALSA and non-blocking mode have not yet been
+ * tested because the reader doesn't work with those either.
+ */
+
+static void do_pa_error(PaError err, const char *str)
+{
+	if(!err) return;
+	fprintf(stderr,"PortAudio: %s: %s\n", str, Pa_GetErrorText(err));
+	exit(2);
+}
+
+int pawriter(void *stream, unsigned char *buf, unsigned int len)
+{
+	PaError err = Pa_WriteStream(stream, buf,len);
+	do_pa_error(err,"write");
+	return len;
+}
+
+gboolean idler(void *unused __attribute__((unused)))
+{
+	if(flow_write_idle(f)) {
+		perror("write idle");
+		g_main_loop_quit(mainloop);
+		return 0;
+	}
+	return 1;
+}
+
+__attribute__((noreturn)) 
+static void do_pa_run(PaDeviceIndex idx, PaTime latency)
+{
+	PaError err;
+	struct PaStreamParameters param;
+	PaStream *stream = NULL;
+
+	f = flow_setup(rate, 3,4,5,6,7);
+
+	memset(&param,0,sizeof(param));
+	param.device = idx;
+	param.channelCount = 1;
+	param.sampleFormat = paUInt8;
+	param.suggestedLatency = latency;
+
+	err = Pa_IsFormatSupported(NULL,&param,rate);
+	do_pa_error(err,"unsupported");
+
+	err = Pa_OpenStream(&stream, NULL, &param, (double)rate,
+	         paFramesPerBufferUnspecified,paNoFlag, /* &do_pa_callback */ NULL, f);
+	do_pa_error(err,"open");
+	
+	err = Pa_StartStream(stream);
+	do_pa_error(err,"start");
+
+	flow_writer(f,pawriter,stream, 1);
+
+	mainloop = g_main_loop_new(NULL, 0);
+	input = g_io_channel_unix_new(0);
+	g_io_channel_set_encoding (input, NULL, NULL);
+	g_io_add_watch(input, G_IO_IN|G_IO_ERR|G_IO_HUP, reader,NULL);
+	g_idle_add (idler,NULL);
+	g_main_loop_run(mainloop);
+
+	err = Pa_AbortStream(stream);
+	do_pa_error(err,"end");
+
+	err = Pa_CloseStream(stream);
+	do_pa_error(err,"close");
+
+	err = Pa_Terminate();
+	do_pa_error(err,"exit");
+	exit(err != 0);
+}
+
+__attribute__((noreturn)) 
+static int do_portaudio(int argc, char *argv[])
+{
+	PaError err;
+	PaDeviceIndex idx;
+
+	err = Pa_Initialize();
+	do_pa_error(err,"init");
+
+	if (argc > 1) usage(2,stderr);
+	idx = Pa_GetDeviceCount();
+	if(!idx) {
+		fprintf(stderr,"No devices available!\n");
+		exit(1);
+	} else if (idx < 0)
+		do_pa_error(idx,"Device enum");
+
+	while(idx-- > 0) {
+		const struct PaDeviceInfo *dev = Pa_GetDeviceInfo(idx);
+		if(argc) {
+			if (!strcmp(dev->name,argv[0]))
+				do_pa_run(idx, dev->defaultLowInputLatency);
+		} else
+			printf("%s (%f)\n",dev->name, dev->defaultSampleRate);
+	}
+	if (argc) {
+		fprintf(stderr,"Device '%s' not found.\n",argv[0]);
+		exit(1);
+	}
+	exit(0);
+	/* NOTREACHED */
+}
+
+
+
+
+
+
+
 
 typedef int (*pcall)(int,char **);
 struct {
@@ -189,6 +308,7 @@ struct {
 	{"rate", set_rate},
 	{"progress", set_progress},
 	{"exec", do_exec},
+	{"portaudio", do_portaudio},
 };
 
 int main(int argc, char *argv[])

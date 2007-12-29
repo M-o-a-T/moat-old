@@ -15,7 +15,7 @@
 ##
 
 CFLAGS=-O2 -g -Wall $(shell pkg-config --cflags glib-2.0)
-LDLIBS=$(shell pkg-config --libs glib-2.0)
+LDLIBS=$(shell pkg-config --libs glib-2.0) -lportaudio
 
 all: reader writer
 

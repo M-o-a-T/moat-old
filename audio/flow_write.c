@@ -29,10 +29,11 @@
  * *can* be thus represented.
  */
 
-void flow_writer(FLOW *f, flow_writeproc proc, void *param)
+void flow_writer(FLOW *f, flow_writeproc proc, void *param, int blocking)
 {
 	f->writer = proc;
 	f->writer_param = param;
+	f->blocking = blocking;
 }
 
 int flow_write_buf(FLOW *f, unsigned char *data, unsigned int len)
@@ -119,7 +120,27 @@ int flow_write_idle(FLOW *f)
 	/*
 	 * Here we try to figure out whether to send zero fill-up bytes
 	 * to keep the sound pipe's send buffer full.
-	 *
+	 */
+
+	if (f->blocking) {
+		/*
+		 * No need to count anything if the interface is going to block
+		 * on us anyway.
+		 */
+		n = f->rate/20;
+		if (f->fillbuf_len < n) {
+			free(f->fillbuf);
+			f->fillbuf = malloc(n);
+			if (!f->fillbuf) return -1;
+			f->fillbuf_len = n;
+			memset(f->fillbuf,0,n);
+		}
+		n = (*f->writer)(f->writer_param, f->fillbuf, n);
+		if (n == 0) errno = 0;
+		if (n <= 0) return -1;
+		return 0;
+	}
+	/*
 	 * First, clean up the byte counter..:
 	 */
 	if (f->bytes_sent > f->rate) {

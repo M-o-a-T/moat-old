@@ -73,6 +73,8 @@ struct _FLOW {
 
 	unsigned char *fillbuf; /* a bunch of zeroes */
 	unsigned int fillbuf_len;
+
+	unsigned char blocking;
 };
 
 

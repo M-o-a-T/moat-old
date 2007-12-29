@@ -67,8 +67,11 @@ FS20
 
 * Audio: Implement an option to control loop speed
 
-* Audio: Directly implement some more sound interfaces
-  (esp. portaudio, native pulseaudio)
+* Audio: implement native pulseaudio
+
+* Audio: Figure out why portaudio is broken WRT
+  - async input
+  - ALSA
 
 * Suppport weather sensors, window-open sensors, and similar gadgets.
 

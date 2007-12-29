@@ -134,7 +134,7 @@ init:
 }
 
 
-void flow_read_buf(FLOW *flow, unsigned char *buf, unsigned int len)
+void flow_read_buf(FLOW *flow, const unsigned char *buf, unsigned int len)
 {
 	while(len--)
 		flow_char(flow, *buf++);

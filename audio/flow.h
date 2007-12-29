@@ -26,10 +26,10 @@ FLOW *flow_setup(unsigned int rate,
 void flow_free(FLOW *);
 
 /* read */
-typedef void(*flow_readproc)(void *param, unsigned char *buf, unsigned int len);
+typedef void(*flow_readproc)(void *param, const unsigned char *buf, unsigned int len);
 
 void flow_reader(FLOW *flow, flow_readproc proc, void *param);
-void flow_read_buf(FLOW *flow, unsigned char *buf, unsigned int len);
+void flow_read_buf(FLOW *flow, const unsigned char *buf, unsigned int len);
 
 void flow_report(FLOW *flow, unsigned short low, unsigned short high, unsigned short minlen);
 int flow_read_logging(FLOW *flow);
@@ -37,7 +37,7 @@ int flow_read_logging(FLOW *flow);
 /* write */
 typedef int(*flow_writeproc)(void *param, unsigned char *buf, unsigned int len);
 
-void flow_writer(FLOW *flow, flow_writeproc proc, void *param);
+void flow_writer(FLOW *flow, flow_writeproc proc, void *param, int blocking);
 
 int flow_write_buf(FLOW *flow, unsigned char *data, unsigned int len);
 int flow_write_idle(FLOW *flow);
