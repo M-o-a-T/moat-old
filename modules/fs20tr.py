@@ -25,11 +25,13 @@ from homevent.module import Module
 from homevent.logging import log,DEBUG,TRACE,INFO,WARN
 from homevent.statement import AttributedStatement,Statement, main_words
 from homevent.check import Check,register_condition,unregister_condition
-from homevent.run import process_event,process_failure
+from homevent.run import process_event,process_failure,register_worker,unregister_worker
 from homevent.context import Context
-from homevent.event import Event
+from homevent.event import Event,TrySomethingElse
 from homevent.fs20 import handler,register_handler,unregister_handler
-from homevent.base import Name
+from homevent.base import Name,MIN_PRIO
+from homevent.worker import ExcWorker
+from homevent.reactor import shutdown_event
 
 from twisted.internet import protocol,defer,reactor
 from twisted.protocols.basic import _PauseableMixin
@@ -406,6 +408,29 @@ FS20receive.register_statement(FS20cmd)
 FS20transmit.register_statement(FS20cmd)
 
 
+class FS20tr_shutdown(ExcWorker):
+	"""\
+		This worker kills off all processes.
+		"""
+	prio = MIN_PRIO+1
+
+	def does_event(self,ev):
+		return (ev is shutdown_event)
+	def process(self,queue,*a,**k):
+		for proc in recvs.itervalues():
+			proc.do_stop()
+		for proc in xmits.itervalues():
+			proc.do_stop()
+		raise TrySomethingElse
+
+	def report(self,*a,**k):
+		yield "Shutdown FS20 processes"
+		return
+
+FS20tr_shutdown = FS20tr_shutdown("FS20 process killer")
+
+
+
 class fs20tr(Module):
 	"""\
 		Basic fs20 transceiver access.
@@ -420,6 +445,7 @@ class fs20tr(Module):
 		main_words.register_statement(FS20transmit)
 		main_words.register_statement(FS20listtransmit)
 		main_words.register_statement(FS20deltransmit)
+		register_worker(FS20tr_shutdown)
 	
 	def unload(self):
 		main_words.unregister_statement(FS20receive)
@@ -428,5 +454,6 @@ class fs20tr(Module):
 		main_words.unregister_statement(FS20transmit)
 		main_words.unregister_statement(FS20listtransmit)
 		main_words.unregister_statement(FS20deltransmit)
+		unregister_worker(FS20tr_shutdown)
 	
 init = fs20tr
