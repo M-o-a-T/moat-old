@@ -108,6 +108,9 @@ class handler(object):
 			delta = None
 		self.last_timestamp = timestamp
 
+		if len(data) < 4:
+			return # obviously way too short
+
 		qs = 0
 		for d in data:
 			qs += ord(d)
