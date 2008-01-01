@@ -43,16 +43,24 @@ in place of the "XXX" in the following statement:
 		XXX
 
 Statements may be multi-word and follow generic Python syntax.
+Init foo(11) from None
 foo : We foo around.
-Not a command: baz
+Init foo(12) from None
+Not a command in FooHandler: baz
 foo : We foo around.
+Init foo¦bar(13) from None
 foo bar : Have a bar, man!
 Known words:
 for  : for you!
 what : What is this?
+Init foo¦bar(14) from None
+Init for(15) from None
 for : for you!
 Known words:
 foiled : not clingfilm
+Init foo¦bar(16) from None
+Init for(17) from None
+Init foiled(18) from None
 foiled : not clingfilm
 ... moving up
 2 EVENT: shutdown

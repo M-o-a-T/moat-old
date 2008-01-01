@@ -46,14 +46,14 @@ Statements may be multi-word and follow generic Python syntax.
 		wl = event[:]
 		while wl:
 			try:
-				wlist = words._get_wordlist()
+				wlist = words.__getitem__
 			except AttributeError:
 				break
 
 			n = len(wl)
 			while n >= 0:
 				try:
-					words = wlist[Name(wl[:n])]
+					words = wlist(Name(wl[:n]))()
 				except KeyError:
 					pass
 				else:
@@ -64,7 +64,7 @@ Statements may be multi-word and follow generic Python syntax.
 				break
 
 		if wl:
-			print >>self.ctx.out,"Not a command:"," ".join(wl)
+			print >>self.ctx.out,"Not a command in %s:" % (words.__class__.__name__,)," ".join(wl)
 
 		try:
 			doc = ":\n"+words.long_doc.rstrip("\n")
@@ -73,21 +73,21 @@ Statements may be multi-word and follow generic Python syntax.
 		print >>self.ctx.out," ".join(words.name)+doc
 
 		try:
-			words._get_wordlist()
+			wl = words.iteritems
 		except AttributeError: # it's empty
 			pass
 		else:
 			maxlen=0
-			for h in words.iterkeys():
-				hlen = len(" ".join(h))
+			for n,d in wl():
+				hlen = len(" ".join(n))
 				if hlen > maxlen: maxlen = hlen
 			if maxlen:
 				print >>self.ctx.out,"Known words:"
 				def nam(a,b):
-					return cmp(a.name,b.name)
-				for h in sorted(words.itervalues(),nam):
-					hname = " ".join(h.name)
-					print >>self.ctx.out,hname+(" "*(maxlen+1-len(hname)))+": "+h.doc
+					return cmp(a[0],b[0])
+				for n,d in sorted(wl(),nam):
+					hname = " ".join(n)
+					print >>self.ctx.out,hname+(" "*(maxlen+1-len(hname)))+": "+d.doc
 
 
 class HelpModule(Module):
