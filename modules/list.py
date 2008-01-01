@@ -26,7 +26,7 @@ from homevent.module import modules, ModuleDirs, Module
 from homevent.run import list_workers
 from homevent.reactor import active_queues
 from homevent.base import Name
-from homevent.collect import collections
+from homevent.collect import get_collect,all_collect
 
 
 class List(Statement):
@@ -43,31 +43,20 @@ list coll NAME
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		n = len(event)
-		if not n:
-			for m in collections.itervalues():
+		c = get_collect(event)
+		if c is None:
+			for m in all_collect():
 				print >>self.ctx.out, " ".join(m.name)
-		else:
-			while n:
-				try:
-					coll = collections[Name(event[:n])]
-					if n == len(event):
-						for n,m in coll.iterkeys():
-							m = m.info()
-							if m is not None:
-								print >>self.ctx.out,"%s :: %s" % (n,m)
-							else:
-								print >>self.ctx.out,"%s" % (n,)
-					else:
-						m = coll[Name(event[n:])]
-						for s,t in m.list():
-							print >>self.ctx.out,"%s: %s" % (s,t)
-				except KeyError:
-					n = n-1
+		elif isinstance(c,Collection):
+			for n,m in c.iterkeys():
+				m = m.info()
+				if m is not None:
+					print >>self.ctx.out,"%s :: %s" % (n,m)
 				else:
-					break
-			if n==0:
-				raise RuntimeError("I could not find a module for ‹›." % (Name(event),))
+					print >>self.ctx.out,"%s" % (n,)
+		else:
+			for s,t in c.list():
+				print >>self.ctx.out,"%s: %s" % (s,t)
 
 		print >>self.ctx.out, "."
 
