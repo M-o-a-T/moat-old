@@ -22,23 +22,23 @@ This code implements access to collections.
 
 from homevent.logging import log
 from homevent.statement import Statement, global_words
-from homevent.module import modules, ModuleDirs, Module
+from homevent.module import ModuleDirs, Module
 from homevent.run import list_workers
 from homevent.reactor import active_queues
 from homevent.base import Name
-from homevent.collect import get_collect,all_collect
+from homevent.collect import get_collect,all_collect,Collection
 
 
 class List(Statement):
 	name=("list",)
-	doc="list of stuff"
+	doc="list of / show details for various parts of the system"
 	long_doc="""\
 list
-	shows all known collections
+	shows all known part types
 list coll
-	shows a list of members of that collection
+	shows a list of items of that type
 list coll NAME
-	shows details for that collection member
+	shows details for that item
 	
 """
 	def run(self,ctx,**k):
@@ -48,39 +48,23 @@ list coll NAME
 			for m in all_collect():
 				print >>self.ctx.out, " ".join(m.name)
 		elif isinstance(c,Collection):
-			for n,m in c.iterkeys():
-				m = m.info()
+			for n,m in c.iteritems():
+				m = m.info
+				if callable(m):
+					m = m()
+				elif isinstance(m,basestring):
+					m = m.split("\n")[0].strip()
+
 				if m is not None:
-					print >>self.ctx.out,"%s :: %s" % (n,m)
+					print >>self.ctx.out,u"%s :: %s" % (n,m)
 				else:
-					print >>self.ctx.out,"%s" % (n,)
+					print >>self.ctx.out,u"%s" % (n,)
 		else:
 			for s,t in c.list():
 				print >>self.ctx.out,"%s: %s" % (s,t)
 
 		print >>self.ctx.out, "."
 
-class ModList(Statement):
-	name=("list","module")
-	doc="list of modules"
-	long_doc="""\
-list module
-	shows a list of loaded modules.
-list module NAME [args...]
-	shows the documentation string of that module.
-	
-"""
-	def run(self,ctx,**k):
-		event = self.params(ctx)
-		if not len(event):
-			for m in modules.itervalues():
-				print >>self.ctx.out, " ".join(m.name)
-			print >>self.ctx.out, "."
-		elif len(event) == 1:
-			m = modules[Name(event)]
-			print  >>self.ctx.out, " ".join(m.name),m.__doc__
-		else:
-			raise SyntaxError("Only one name allowed.")
 
 class EventList(Statement):
 	name=("list","event")
@@ -139,13 +123,11 @@ class ListModule(Module):
 	def load(self):
 		global_words.register_statement(WorkerList)
 		global_words.register_statement(EventList)
-		global_words.register_statement(ModList)
 		global_words.register_statement(List)
 	
 	def unload(self):
 		global_words.unregister_statement(WorkerList)
 		global_words.unregister_statement(EventList)
-		global_words.unregister_statement(ModList)
 		global_words.unregister_statement(List)
 	
 init = ListModule

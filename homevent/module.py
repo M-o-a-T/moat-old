@@ -28,6 +28,7 @@ from homevent.statement import Statement
 from homevent.event import Event
 from homevent.check import Check
 from homevent.base import Name
+from homevent.collect import Collection,Collected
 import sys
 import os
 
@@ -42,14 +43,20 @@ class ModuleExistsError(RuntimeError):
 	"""A module with that name already exists."""
 	pass
 
-class Module(object):
+class Modules(Collection):
+	name = "module"
+Modules = Modules()
+
+class Module(Collected):
 	"""\
 		This is a loadable module. See homevent.config.py, the
 		"Loader" and "Unloader" classes, for examples.
 		"""
 
 	name = "Module"
+	storage = Modules.storage
 	info = "some idiot programmer forgot to override me"
+	path = None
 
 	def __init__(self, *name):
 		"""\
@@ -63,7 +70,7 @@ class Module(object):
 			Do not override the assignment (below) without good reason.
 			"""
 		assert len(name) > 0, "A module must be named!"
-		self.name = name
+		super(Module,self).__init__(*name)
 	
 	def load(self):
 		"""\
@@ -83,11 +90,18 @@ class Module(object):
 			"""
 		raise NotImplementedError("You need to undo whatever it is you did in load().")
 	
-
-modules = {}
+	def list(self):
+		yield ("name",self.name)
+		if self.path is not None:
+			yield ("path",self.path)
+		for l in self.info.split("\n"):
+			yield ("info",l)
+	
 
 def load_module(*m):
 	md = dict()
+	mod = None
+	p = None
 	for d in ModuleDirs:
 		p = os.path.join(d,m[-1])+".py"
 		try:
@@ -99,47 +113,51 @@ def load_module(*m):
 			eval(c,md)
 			break
 
-	if not md:
-		if "HOMEVENT_TEST" in os.environ:
-			if os.path.isdir("modules"):
-				p = "modules"
-			else:
-				p = os.path.join(os.pardir,"modules")
-			p = os.path.join(p,m[-1])+".py"
-			c = compile(open(p,"r").read(), p, "exec",0,True)
-		else:
-			from pkg_resources import resource_string
-			c = compile(resource_string("homevent.modules", m[-1]+".py"), os.path.join('homevent','modules',m[-1]+".py"), "exec",0,True)
-		eval(c,md)
-
-	mod = md["init"]
-	if callable(mod):
-		mod = mod(*m)
-	elif len(event) > 1:
-		raise RuntimeError("You cannot parameterize this module.")
-	if mod.name in modules:
-		raise ModuleExistsError("This module already exists(2)",mod.name)
-	if not hasattr(mod,"load"):
-		mod.load = md["load"]
-		mod.unload = md["unload"]
-
 	try:
-		mod.load()
-	except BaseException,e:
-		a,b,c = sys.exc_info()
+		if not md:
+			if "HOMEVENT_TEST" in os.environ:
+				if os.path.isdir("modules"):
+					p = "modules"
+				else:
+					p = os.path.join(os.pardir,"modules")
+				p = os.path.join(p,m[-1])+".py"
+				c = compile(open(p,"r").read(), p, "exec",0,True)
+			else:
+				from pkg_resources import resource_string
+				p = "homevent.modules."+m[-1]+".py"
+				c = compile(resource_string("homevent.modules", m[-1]+".py"), os.path.join('homevent','modules',m[-1]+".py"), "exec",0,True)
+			eval(c,md)
+	
+		mod = md["init"]
+		if callable(mod):
+			mod = mod(*m)
+		elif len(event) > 1:
+			raise RuntimeError("You cannot parameterize this module.")
+		if not hasattr(mod,"load"):
+			mod.load = md["load"]
+			mod.unload = md["unload"]
+	
 		try:
-			mod.unload()
-		finally:
-			raise a,b,c
-
-	modules[mod.name] = mod
+			mod.load()
+		except BaseException,e:
+			a,b,c = sys.exc_info()
+			try:
+				mod.unload()
+			finally:
+				raise a,b,c
+		else:
+			mod.path = p
+	except BaseException:
+		if mod is not None and hasattr(mod,"name") and mod.name in Modules:
+			del Modules[mod.name]
+		raise
 	return mod
 
 def unload_module(module):
 	"""\
 		Unloads a module.
 		"""
-	del modules[module.name]
+	del Modules[module.name]
 	module.unload()
 
 
@@ -159,7 +177,7 @@ load NAME [args]...
 
 
 class Unload(Statement):
-	name=("del","load",)
+	name=("del","module",)
 	doc="unload a module"
 	long_doc = """\
 del load NAME [args]...
@@ -168,14 +186,14 @@ del load NAME [args]...
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		m = modules[Name(event)]
+		m = Modules[Name(event)]
 		d = process_event(Event(self.ctx, "module","unload",*event))
 		d.addCallback(lambda _: unload_module(m))
 		return d
 
 
 class LoadDir(Statement):
-	name=("load","dir")
+	name=("module","dir")
 	doc="list or change the module directory list"
 	long_doc = """\
 load dir
@@ -222,5 +240,5 @@ class ModuleExists(Check):
 	doc="check if that module is loaded"
 	def check(self,*args):
 		assert args,"Need a module name (and optional parameters)"
-		return Name(args) in modules
+		return Name(args) in Modules
 

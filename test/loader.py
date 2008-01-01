@@ -23,7 +23,7 @@ from test import run
 
 input = """\
 load example
-del load example
+del module example
 shutdown
 """
 

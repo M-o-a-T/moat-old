@@ -4,14 +4,16 @@ NEW: <ConditionalWorkSequence:1 (4)>
    : └1╴... done.
 1 EVENT: startup
 1 END: startup
-wait
-on_event
-trigger
-block
-list
+wait :: Delay handling
+on_event :: the 'on EVENT:' handler
+trigger :: Basic event handling
+block :: Block-level statements
+list :: provides a couple of common 'list FOO' functions
 .
-on_event 		This module registers the "on EVENT:" handler.
-		
+name: ('on_event',)
+path: ../modules/on_event.py
+info: the 'on EVENT:' handler
+.
 -10 Logger
 -9 shutdown first
 -8 Wait killer
@@ -20,6 +22,7 @@ on_event 		This module registers the "on EVENT:" handler.
 103 shutdown last
 .
 .
+module
 .
 0 Create OnEvtHandler: foo
 0 add ‹Block block›
