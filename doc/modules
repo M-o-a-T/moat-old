@@ -1465,6 +1465,11 @@ The following interval specifications are accepted:
 	m mo month months
 	y yr year years
 
+Sometimes you want a timer to trigger at precise intervals; say, every
+180 seconds. To do this, specify the last time your timer went off (or
+should have gone off) as the first argument: if that is in the past,
+proper interval calculation will be performed. The minimum interval for
+this is two seconds.
 
 name
 ----

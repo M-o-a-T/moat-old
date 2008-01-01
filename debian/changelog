@@ -16,8 +16,9 @@ homevent (0.2.6) stable; urgency=low
   * Fix stderr/stdout logging when starting HomEvenT
     via the Debian init script.
   * Implemented PortAudio interface.
+  * Implement precise-interval "every N seconds" wait statements.
 
- -- Matthias Urlichs <matthias@urlichs.de>  Sat, 29 Dec 2007 08:26:15 +0100
+ -- Matthias Urlichs <matthias@urlichs.de>  Tue, 01 Jan 2008 12:06:28 +0100
 
 homevent (0.2.5.6) stable; urgency=low
 

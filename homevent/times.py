@@ -50,6 +50,7 @@ def isodate(yr,wk,wdy):
 def time_delta(args, now=None):
 	w = list(args)
 	s = 0
+	step = None
 	if now is None: now = globals()["now"]()
 	if not w:
 		raise SyntaxError("Empty time delta")
@@ -61,7 +62,7 @@ def time_delta(args, now=None):
 		pass
 	else:
 		if sv > 1000000000: # 30 years plus: Forget it, that's a unixtime.
-			now = dt.datetime.fromtimestamp(s)
+			step = dt.datetime.fromtimestamp(s)
 			w.pop(0)
 
 	while w:
@@ -102,7 +103,14 @@ def time_delta(args, now=None):
 				m = -1
 			else:
 				m = 1 # "1min 59sec"
-	return now + dt.timedelta(0,s)
+	s = dt.timedelta(0,s)
+	if step is None:
+		now += s
+	elif now < step-1:
+		now = step + s
+	else:
+		now += s - (now-step) % s
+	return now
 
 
 class _store(object): pass
