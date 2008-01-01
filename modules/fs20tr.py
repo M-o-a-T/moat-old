@@ -324,7 +324,7 @@ class FS20xmit(protocol.ProcessProtocol, my_handler):
 	
 	def do_restart(self):
 		if not self.stopped:
-			reactor.calllater(5,self.do_start)
+			reactor.callLater(5,self.do_start)
 		
 
 class FS20transmit(AttributedStatement):
