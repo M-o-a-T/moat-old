@@ -16,7 +16,7 @@
 ##
 
 """\
-This code represents a sample loadable module for homevent.
+This code implements access to collections.
 
 """
 
@@ -26,7 +26,50 @@ from homevent.module import modules, ModuleDirs, Module
 from homevent.run import list_workers
 from homevent.reactor import active_queues
 from homevent.base import Name
+from homevent.collect import collections
 
+
+class List(Statement):
+	name=("list",)
+	doc="list of stuff"
+	long_doc="""\
+list
+	shows all known collections
+list coll
+	shows a list of members of that collection
+list coll NAME
+	shows details for that collection member
+	
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		n = len(event)
+		if not n:
+			for m in collections.itervalues():
+				print >>self.ctx.out, " ".join(m.name)
+		else:
+			while n:
+				try:
+					coll = collections[Name(event[:n])]
+					if n == len(event):
+						for n,m in coll.iterkeys():
+							m = m.info()
+							if m is not None:
+								print >>self.ctx.out,"%s :: %s" % (n,m)
+							else:
+								print >>self.ctx.out,"%s" % (n,)
+					else:
+						m = coll[Name(event[n:])]
+						for s,t in m.list():
+							print >>self.ctx.out,"%s: %s" % (s,t)
+				except KeyError:
+					n = n-1
+				else:
+					break
+			if n==0:
+				raise RuntimeError("I could not find a module for ‹›." % (Name(event),))
+
+		print >>self.ctx.out, "."
 
 class ModList(Statement):
 	name=("list","module")
@@ -108,10 +151,12 @@ class ListModule(Module):
 		global_words.register_statement(WorkerList)
 		global_words.register_statement(EventList)
 		global_words.register_statement(ModList)
+		global_words.register_statement(List)
 	
 	def unload(self):
 		global_words.unregister_statement(WorkerList)
 		global_words.unregister_statement(EventList)
 		global_words.unregister_statement(ModList)
+		global_words.unregister_statement(List)
 	
 init = ListModule

@@ -26,6 +26,7 @@ list module
 list module on_event
 list worker
 list event
+list
 
 on foo:
 	block:

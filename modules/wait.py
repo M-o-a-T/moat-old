@@ -137,7 +137,7 @@ class Waiter(object):
 		d,e = self._lock()
 		def did_it(_):
 			self.ctx.wait = tm = ixtime(self.end)
-			return process_event(Event(self.ctx,"wait","done",tm, self.name))
+			return process_event(Event(self.ctx,"wait","done",tm, *self.name))
 		d.addCallback(did_it)
 		def done(_):
 			del waiters[self.name]
