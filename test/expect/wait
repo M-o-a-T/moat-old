@@ -101,12 +101,12 @@ NEW: <ConditionalWorkSequence:14 (4)>
    : └1╴... done.
 140 EVENT: wait¦start¦×××¦Foo¦Baz
 140 END: wait¦start¦×××¦Foo¦Baz
-147 EVENT: wait¦done¦×××¦('_wait', 7)
+147 EVENT: wait¦done¦×××¦_wait¦7
 NEW: <ConditionalWorkSequence:15 (4)>
-   : │  EVENT: wait¦done¦×××¦('_wait', 7)
+   : │  EVENT: wait¦done¦×××¦_wait¦7
    : └1╴... done.
-147 EVENT: wait¦done¦×××¦('_wait', 7)
-147 END: wait¦done¦×××¦('_wait', 7)
+147 EVENT: wait¦done¦×××¦_wait¦7
+147 END: wait¦done¦×××¦_wait¦7
 0 add ‹IfStatement if¦exists¦wait¦Foo¦Baz›
 0 add ‹LogHandler log¦DEBUG¦Yes›
 0 add ‹LogHandler log¦DEBUG¦No1›
@@ -138,12 +138,12 @@ NEW: <ConditionalWorkSequence:17 (4)>
    : └1╴... done.
 179 EVENT: wait¦start¦×××¦_wait¦8
 179 END: wait¦start¦×××¦_wait¦8
-186 EVENT: wait¦done¦×××¦('_wait', 8)
+186 EVENT: wait¦done¦×××¦_wait¦8
 NEW: <ConditionalWorkSequence:18 (4)>
-   : │  EVENT: wait¦done¦×××¦('_wait', 8)
+   : │  EVENT: wait¦done¦×××¦_wait¦8
    : └1╴... done.
-186 EVENT: wait¦done¦×××¦('_wait', 8)
-186 END: wait¦done¦×××¦('_wait', 8)
+186 EVENT: wait¦done¦×××¦_wait¦8
+186 END: wait¦done¦×××¦_wait¦8
 195 EVENT: wait¦cancel¦×××¦Foo¦Baz
 NEW: <ConditionalWorkSequence:19 (4)>
    : │  EVENT: wait¦cancel¦×××¦Foo¦Baz
@@ -160,9 +160,9 @@ NEW: <ConditionalWorkSequence:20 (4)>
    : └1╴... done.
 211 EVENT: wait¦start¦×××¦_wait¦9
 211 END: wait¦start¦×××¦_wait¦9
-218 EVENT: wait¦done¦×××¦('_wait', 9)
+218 EVENT: wait¦done¦×××¦_wait¦9
 NEW: <ConditionalWorkSequence:21 (4)>
-   : │  EVENT: wait¦done¦×××¦('_wait', 9)
+   : │  EVENT: wait¦done¦×××¦_wait¦9
    : └1╴... done.
-218 EVENT: wait¦done¦×××¦('_wait', 9)
-218 END: wait¦done¦×××¦('_wait', 9)
+218 EVENT: wait¦done¦×××¦_wait¦9
+218 END: wait¦done¦×××¦_wait¦9
