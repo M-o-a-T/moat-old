@@ -36,7 +36,7 @@ main_words.register_statement(ShutdownHandler)
 register_condition(ModuleExists)
 
 load_module("help")
-load_module("list")
+load_module("data")
 load_module("file")
 load_module("path")
 load_module("ifelse")

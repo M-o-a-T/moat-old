@@ -46,8 +46,8 @@ h.main_words.register_statement(ShutdownHandler)
 load_module("trigger")
 load_module("wait")
 load_module("block")
-load_module("list")
+load_module("data")
 load_module("on_event")
 
-run("list",input)
+run("data",input)
 

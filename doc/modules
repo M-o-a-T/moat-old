@@ -95,6 +95,31 @@ values is a variable. ☺
 "less" and "greater" tests are also available.
 
 
+====
+data
+====
+
+This module implements a couple of rarely-used commands to list and
+examine internal data structures.
+
+-----------
+list module
+-----------
+
+Shows the list of loaded modules, terminated by a single dot.
+
+You can append the name of a loaded module to examine details.
+
+-----------
+list worker
+-----------
+
+Shows the list of program snippets that listen for events, ordered by
+priority.
+
+You can append the name of a worker to examine details.
+
+
 ======
 errors
 ======
@@ -325,29 +350,6 @@ for; that's in other modules.
 
 All conditions can be negated by writing "if not" instead of "if".
 
-====
-list
-====
-
-This module implements a couple of rarely-used commands to list and
-examine internal data structures.
-
------------
-list module
------------
-
-Shows the list of loaded modules, terminated by a single dot.
-
-You can append the name of a loaded module to examine details.
-
------------
-list worker
------------
-
-Shows the list of program snippets that listen for events, ordered by
-priority.
-
-You can append the name of a worker to examine details.
 
 =======
 logging
