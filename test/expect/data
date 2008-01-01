@@ -8,7 +8,7 @@ wait :: Delay handling
 on_event :: the 'on EVENT:' handler
 trigger :: Basic event handling
 block :: Block-level statements
-list :: provides a couple of common 'list FOO' functions
+data :: provides a couple of common 'list FOO' functions
 .
 name: ('on_event',)
 path: ../modules/on_event.py

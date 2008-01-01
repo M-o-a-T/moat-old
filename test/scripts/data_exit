@@ -1,5 +1,5 @@
 #!/bin/sh
 
 sed -re "s/: wait¦(start|stop|done|cancel)¦[0-9.]*¦/: wait¦\1¦×××¦/g" \
-	-i real/list
+	-i real/data
 exit $?
