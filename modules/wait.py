@@ -135,7 +135,10 @@ class Waiter(object):
 
 	def doit(self):
 		d,e = self._lock()
-		d.addCallback(lambda _: process_event(Event(self.ctx,"wait","done",ixtime(self.end),*self.name)))
+		def did_it(_):
+			self.ctx.wait = tm = ixtime(self.end)
+			return process_event(Event(self.ctx,"wait","done",tm, self.name))
+		d.addCallback(did_it)
 		def done(_):
 			del waiters[self.name]
 			self.defer.callback(_)

@@ -1445,6 +1445,9 @@ specifies the absolute minimum time at which the wait trigger.
 			monday etc
 			      N wk: ISO week number
 
+After a wait statement completes, the timestamp at which it went off is
+available in the variable ‹$wait›.
+
 --------
 wait for
 --------

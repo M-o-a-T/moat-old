@@ -38,9 +38,10 @@ block:
 		log DEBUG No2
 	else:
 		log DEBUG Yes
-wait for 0.2:
-	name X2
-trigger DoNow
+block:
+	wait for 0.2:
+		name X2
+	trigger DoNow $wait
 wait for 0.1:
 	name X3
 async:
