@@ -27,7 +27,7 @@ something about it.
 from homevent.context import Context
 from homevent.event import Event,TrySomethingElse,NeverHappens
 from homevent.base import Name,MIN_PRIO,MAX_PRIO
-from homevent.twist import deferToLater
+from homevent.twist import deferToLater, BaseFailure
 
 from twisted.internet import defer
 from twisted.internet.threads import deferToThread
@@ -187,14 +187,14 @@ class WorkSequence(WorkItem):
 				if self.handle_conditional and w.prio >= MIN_PRIO:
 					skipping = True
 
-			if isinstance(r,failure.Failure):
+			if isinstance(r,BaseFailure):
 				excepting = True
 				if not hasattr(r,"within"):
 					r.within=[w]
 				r.within.append(self)
 			if res is None:
 				res = r
-			elif isinstance(r,failure.Failure):
+			elif isinstance(r,BaseFailure):
 				from homevent.logging import log_exc
 				log_exc("Unhandled nested exception", res)
 				from homevent.run import process_failure

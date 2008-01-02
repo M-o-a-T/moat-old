@@ -23,7 +23,6 @@ import warnings
 from homevent.twist import track_errors
 from homevent.base import Name
 from twisted.python import failure
-from traceback import format_stack
 
 class TrySomethingElse(RuntimeError):
 	"""Error if a conditional does not match"""
@@ -143,11 +142,10 @@ class Event(object):
 		return self.__class__(ctx, *w)
 
 #Monkey-patch t.p.f.Failure to answer to our report() call
-from twisted.python.failure import Failure
 
 def report(self, verbose=False):
 	if verbose and not self.check(RaisedError):
-		from traceback import format_exception
+		from traceback import format_stack
 		p = "ERROR: "
 		for l in self.getTraceback().rstrip("\n").split("\n"):
 			yield p+l
@@ -168,4 +166,4 @@ def report(self, verbose=False):
 					p = "     : "
 	else:
 		yield "ERROR: "+self.getErrorMessage()
-Failure.report = report
+failure.Failure.report = report

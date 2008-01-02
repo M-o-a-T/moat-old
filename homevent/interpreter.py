@@ -32,9 +32,10 @@ for typical usage.
 from homevent.context import Context
 from homevent.event import Event
 from homevent.base import Name
+from homevent.twist import BaseFailure
 
 from twisted.internet import defer
-from twisted.python.failure import Failure
+from twisted.python import failure
 import sys
 
 class InputEvent(Event):
@@ -101,7 +102,11 @@ class Processor(object):
 		pass
 	
 	def error(self,parser,err):
-		if isinstance(err,Failure):
+		if isinstance(err,BaseFailure):
+			from traceback import print_tb
+			import sys
+			print >>sys.stderr,"*** TB",err.tb
+			print_tb(err.tb,file=sys.stderr)
 			err.raiseException()
 		else:
 			raise err.__class__,e,sys.exc_info()[2]
@@ -233,7 +238,7 @@ class InteractiveInterpreter(Interpreter):
 	def error(self,parser,err):
 		from homevent.statement import UnknownWordError
 
-		err = Failure(err)
+		err = failure.Failure(err)
 		if err.check(UnknownWordError,SyntaxError):
 			print >>parser.ctx.out, "ERROR:",err.getErrorMessage()
 		else:

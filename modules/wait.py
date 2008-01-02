@@ -38,7 +38,7 @@ from homevent.base import Name,SYS_PRIO
 
 from time import time
 import os
-from twisted.python.failure import Failure
+from twisted.python import failure
 from twisted.internet import reactor,defer
 import datetime as dt
 
@@ -160,7 +160,7 @@ class Waiter(object):
 		d.addCallback(lambda _: process_event(Event(self.ctx,"wait","cancel",ixtime(self.end),*self.name)))
 		def errgen(_):
 			# If the 'wait cancel' event didn't return a failure, build one.
-			return Failure(err(self))
+			return failure.Failure(err(self))
 		def done(_):
 			# Now make the wait statement itself return with the error.
 			del waiters[self.name]

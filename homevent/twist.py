@@ -181,10 +181,9 @@ def nfhw(self,data):
 	return fhw(self,data)
 FileDescriptor.write = nfhw
 
-
-_fail = failure.Failure
+BaseFailure = failure.Failure
 class TwistMe(BaseException): pass
-class TwistFailure(_fail,BaseException):
+class TwistFailure(BaseFailure,BaseException):
 	def __init__(self, exc_value=None, exc_type=None, exc_tb=None):
 		global tracked_errors
 		if tracked_errors and exc_tb is None:
@@ -195,5 +194,12 @@ class TwistFailure(_fail,BaseException):
 			if exc_type is None: exc_type = a
 			if exc_value is None: exc_value = b
 			if exc_tb is None: exc_tb = c
-		_fail.__init__(self,exc_value,exc_type,exc_tb)
+		if not isinstance(exc_value,Exception):
+			raise RuntimeError("Bad Exception: "+str(exc_value))
+		BaseFailure.__init__(self,exc_value,exc_type,exc_tb)
+
+	def cleanFailure(self):
+		"""Do not clean out the damn backtrace. We need it."""
+		pass
+
 failure.Failure = TwistFailure

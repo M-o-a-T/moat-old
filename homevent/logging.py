@@ -29,7 +29,9 @@ from homevent.worker import Worker,ExcWorker
 from homevent.event import Event
 from homevent.context import Context
 from homevent.base import Name,SYS_PRIO,MIN_PRIO,MAX_PRIO
-from twisted.python.failure import Failure
+from homevent.twist import BaseFailure
+
+from twisted.python import failure
 import sys
 from traceback import print_exc
 
@@ -153,12 +155,12 @@ class LogWorker(ExcWorker):
 		log_exc(err=err,msg="while logging")
 
 def log_exc(msg=None, err=None, level=ERROR):
-	if not isinstance(err,Failure):
+	if not isinstance(err,BaseFailure):
 		if err is None:
 			err = sys.exc_info()
 		elif not isinstance(err,tuple):
 			err = (None,err,None)
-		err = Failure(err[1],err[0],err[2])
+		err = failure.Failure(err[1],err[0],err[2])
 
 	for l in loggers[:]:
 		if msg:
@@ -179,7 +181,7 @@ def log_exc(msg=None, err=None, level=ERROR):
 
 class LogEndEvent(Event):
 	def __init__(self,event):
-		if isinstance(event,Failure):
+		if isinstance(event,BaseFailure):
 			super(LogEndEvent,self).__init__(Context(),"END",event.type.__name__)
 		elif not hasattr(event,"ctx"):
 			super(LogEndEvent,self).__init__(Context(),"END",event.__class__.__name__)
