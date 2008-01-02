@@ -10,7 +10,7 @@ trigger :: Basic event handling
 block :: Block-level statements
 data :: provides a couple of common 'list FOO' functions
 .
-name: ('on_event',)
+name: on_event
 path: ../modules/on_event.py
 info: the 'on EVENT:' handler
 .

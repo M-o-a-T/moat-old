@@ -64,14 +64,15 @@ class Collected(object):
 	storage = None # Collection
 
 	def __init__(self, *name):
-		if name:
-			self.name = name
-		elif not self.name:
+		if not name:
+			name = self.name
+		if not name:
 			raise RuntimeError("Unnamed object of '%s'" % (self.__class__.__name__,))
 			
 		if self.storage is None:
 			raise RuntimeError("You didn't declare a storage for '%s'" % (self.__class__.__name__,))
-		name = Name(name)
+
+		self.name = name = Name(name)
 		if name in self.storage:
 			raise RuntimeError(u"Duplicate entry ‹%s› in ‹%s›" % (name,self.storage.name))
 		self.storage[name] = self
