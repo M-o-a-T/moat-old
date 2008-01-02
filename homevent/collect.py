@@ -87,20 +87,32 @@ class Collected(object):
 
 
 def get_collect(name):
-	n = len(name)
-	if not n:
+	c = None
+	if not len(name):
 		return None
-	while n > 0:
-		try:
-			coll = collections[Name(name[:n])]
-			if n < len(name):
-				coll = coll[Name(name[n:])]
-			return coll
+	coll = collections
 
-		except KeyError:
-			n = n-1
-	if n==0:
-		raise RuntimeError("I could not find an entry for ‹%s›." % (Name(name),))
+	while len(name):
+		n = len(name)
+		while n > 0:
+			try:
+				coll = coll[Name(name[:n])]
+			except KeyError:
+				n = n-1
+			else:
+				name = name[n:]
+				if c is None: c = coll
+				break
+
+		if n == 0:
+			try:
+				coll = coll[name[0]]
+			except KeyError:
+				raise KeyError("I could not find an entry for ‹%s› in ‹%s›." % (Name(name),c))
+			else:
+				name = name[1:]
+				if c is None: c = coll
+	return coll
 
 def all_collect(attr="list"):
 	for m in collections.itervalues():
