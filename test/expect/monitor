@@ -95,15 +95,15 @@ NEW: <ConditionalWorkSequence:6 (4)>
 0 add ‹LogHandler log¦DEBUG¦No0›
 0 add ‹LogHandler log¦DEBUG¦Yes›
 1 Yes
-foo bar :: 42.0 Wait ‹now›
+foo bar :: Wait ‹now›
 .
-Name:  foo bar
-Device:  test 0…100
-Value:  42.0
-Up:  Wait
-Time:  ‹now›
-Steps:  1 / 1 / None
-Data:  42
+name: foo bar
+device: test 0…100
+value: 42.0
+up: Wait
+time: ‹now›
+steps: 1 / 1 / None
+data: 42
 .
 84 EVENT: wait¦start¦×××¦_wait¦2
 NEW: <ConditionalWorkSequence:7 (4)>
@@ -172,12 +172,12 @@ NEW: <ConditionalWorkSequence:10 (4)>
 0 add ‹WaitHandler: wait¦for 2›
 0 add ‹MonitorSet set¦monitor¦14¦baz¦zaz›
 0 NewHandler 2
-Name:  baz zaz
-Device:  passive
-Value:  None
-Up:  Wait
-Time:  never
-Steps:  0 / 2 / None
+name: baz zaz
+device: passive
+value: None
+up: Wait
+time: never
+steps: 0 / 2 / None
 .
 143 EVENT: wait¦start¦×××¦_wait¦5
 NEW: <ConditionalWorkSequence:11 (4)>

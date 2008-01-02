@@ -186,16 +186,17 @@ class TwistMe(BaseException): pass
 class TwistFailure(BaseFailure,BaseException):
 	def __init__(self, exc_value=None, exc_type=None, exc_tb=None):
 		global tracked_errors
-		if tracked_errors and exc_tb is None:
-			try:
-				a,b,c = sys.exc_info()
-			except Exception:
-				a,b,c = sys.exc_info()
-			if exc_type is None: exc_type = a
-			if exc_value is None: exc_value = b
-			if exc_tb is None: exc_tb = c
+		try:
+			a,b,c = sys.exc_info()
+		except Exception:
+			a,b,c = sys.exc_info()
+		if exc_type is None: exc_type = a
+		if exc_value is None: exc_value = b
+		if exc_tb is None: exc_tb = c
+
 		if not isinstance(exc_value,Exception):
-			raise RuntimeError("Bad Exception: "+str(exc_value))
+			if not isinstance(exc_value,Exception):
+				raise RuntimeError("Bad Exception: "+str(exc_value))
 		BaseFailure.__init__(self,exc_value,exc_type,exc_tb)
 
 	def cleanFailure(self):

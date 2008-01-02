@@ -25,7 +25,7 @@ monitor FOO...
 
 """
 
-from homevent.monitor import monitors, MonitorDelayFor,MonitorDelayUntil,\
+from homevent.monitor import Monitors, MonitorDelayFor,MonitorDelayUntil,\
 	MonitorRequire,MonitorRetry,MonitorAlarm,MonitorHigh,MonitorLow,\
 	MonitorLimit, MonitorScale, MonitorDiff, MonitorHandler, NoWatcherError
 from homevent.statement import AttributedStatement, Statement, main_words,\
@@ -35,7 +35,6 @@ from homevent.check import Check,register_condition,unregister_condition
 from homevent.base import Name
 
 import os
-from twisted.python.failure import Failure
 from twisted.internet import defer
 
 	
@@ -55,7 +54,7 @@ This statement updates the parameters of an existing monitor.
 			raise SyntaxError(u'Usage: update monitor ‹name…›')
 		if not self.params:
 			raise SyntaxError(u'update monitor: You did not specify any changes?')
-		monitor = monitors[Name(event)]
+		monitor = Monitors[Name(event)]
 		active = monitor.active
 
 		d = defer.succeed(None)
@@ -85,7 +84,7 @@ del monitor ‹whatever the name is›
 		event = self.params(ctx)
 		if not len(event):
 			raise SyntaxError(u'Usage: del monitor ‹name…›')
-		m = monitors.pop(Name(event))
+		m = Monitors.pop(Name(event))
 		return m.down()
 
 class MonitorStart(Statement):
@@ -99,7 +98,7 @@ start monitor ‹name›
 		event = self.params(ctx)
 		if not len(event):
 			raise SyntaxError(u'Usage: start monitor ‹name…›')
-		m = monitors[Name(event)]
+		m = Monitors[Name(event)]
 		return m.up()
 
 class MonitorStop(Statement):
@@ -113,27 +112,17 @@ stop monitor ‹name›
 		event = self.params(ctx)
 		if not len(event):
 			raise SyntaxError(u'Usage: stop monitor ‹name…›')
-		m = monitors[Name(event)]
+		m = Monitors[Name(event)]
 		return m.down()
 
-class MonitorList(Statement):
-	name=("list","monitor")
-	doc="list of monitoring statements"
-	long_doc="""\
-list monitor
-	shows a list of running monitor statements.
-list monitor NAME
-	shows details for that monitor statement.
-	
-"""
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		if not len(event):
-			for m in monitors.itervalues():
+			for m in Monitors.itervalues():
 				print >>self.ctx.out, " ".join(unicode(x) for x in m.name),"::",m.value,m.up_name,m.time_name
 			print >>self.ctx.out, "."
 		else:
-			m = monitors[Name(event)]
+			m = Monitors[Name(event)]
 			print  >>self.ctx.out, "Name: "," ".join(unicode(x) for x in m.name)
 			if m.params:
 				print  >>self.ctx.out, "Device: "," ".join(unicode(x) for x in m.params)
@@ -164,7 +153,7 @@ set monitor VALUE NAME
 		event = self.params(ctx)
 		if len(event) < 2:
 			raise SyntaxError(u"Usage: set monitor ‹value› ‹name…›")
-		m = monitors[Name(event[1:])]
+		m = Monitors[Name(event[1:])]
 		if not m.watcher:
 			raise NoWatcherError(m)
 		m.watcher.callback(event[0])
@@ -176,7 +165,7 @@ class ExistsMonitorCheck(Check):
 		if not len(args):
 			raise SyntaxError(u"Usage: if exists monitor ‹name…›")
 		name = Name(args)
-		return name in monitors
+		return name in Monitors
 
 class RunningMonitorCheck(Check):
 	name=("running","monitor")
@@ -185,7 +174,7 @@ class RunningMonitorCheck(Check):
 		if not len(args):
 			raise SyntaxError(u"Usage: if active monitor ‹name…›")
 		name = Name(args)
-		return monitors[name].active
+		return Monitors[name].active
 
 
 class WaitingMonitorCheck(Check):
@@ -195,7 +184,7 @@ class WaitingMonitorCheck(Check):
 		if not len(args):
 			raise SyntaxError(u"Usage: if waiting monitor ‹name…›")
 		name = Name(args)
-		m = monitors[name]
+		m = Monitors[name]
 		return m.active and m.watcher is not None
 
 
@@ -210,7 +199,7 @@ var monitor NAME name...
 		event = self.params(ctx)
 		var = event[0]
 		name = Name(event[1:])
-		setattr(self.parent.ctx,var,monitors[name].value)
+		setattr(self.parent.ctx,var,Monitors[name].value)
 
 
 class MonitorModule(Module):
@@ -228,7 +217,6 @@ class MonitorModule(Module):
 		main_words.register_statement(MonitorStart)
 		main_words.register_statement(MonitorStop)
 		main_words.register_statement(VarMonitorHandler)
-		global_words.register_statement(MonitorList)
 		register_condition(ExistsMonitorCheck)
 		register_condition(RunningMonitorCheck)
 		register_condition(WaitingMonitorCheck)
@@ -241,7 +229,6 @@ class MonitorModule(Module):
 		main_words.unregister_statement(MonitorStart)
 		main_words.unregister_statement(MonitorStop)
 		main_words.unregister_statement(VarMonitorHandler)
-		global_words.unregister_statement(MonitorList)
 		unregister_condition(ExistsMonitorCheck)
 		unregister_condition(RunningMonitorCheck)
 		unregister_condition(WaitingMonitorCheck)

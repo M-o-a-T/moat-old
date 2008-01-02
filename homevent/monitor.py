@@ -26,21 +26,23 @@ from homevent.statement import AttributedStatement, Statement
 from homevent.event import Event
 from homevent.run import process_event,process_failure,register_worker
 from homevent.reactor import shutdown_event
-from homevent.module import Module
 from homevent.worker import ExcWorker
 from homevent.times import time_delta, time_until, unixdelta, now
 from homevent.base import Name,SYS_PRIO
 from homevent.twist import deferToLater
 from homevent.context import Context
 from homevent.logging import log,TRACE,DEBUG
+from homevent.collect import Collection,Collected
 
 from time import time
 import os,sys
-from twisted.python.failure import Failure
+from twisted.python import failure
 from twisted.internet import reactor,defer
 import datetime as dt
 
-monitors = {}
+class Monitors(Collection):
+    name = "monitor"
+Monitors = Monitors()
 
 class MonitorAgain(RuntimeError):
 	"""The monitor is not ready yet; retry please"""
@@ -67,8 +69,10 @@ class DupWatcherError(MonitorError):
 class NoWatcherError(MonitorError):
     text = u"Not waiting for ‹%s›"
 
-class Monitor(object):
+class Monitor(Collected):
 	"""This is the thing that watches."""
+	storage = Monitors.storage
+
 	active = False # enabled?
 	running = None # Deferred while measuring
 	timer = None # callLater() timer
@@ -95,7 +99,6 @@ class Monitor(object):
 	range = None # allowed range of data within a measurement
 	diff = None # required difference for a "value" event
 
-	name = None # my name
 	value = None # last correct measurement
 	started_at = None # last time when measuring started or will start
 	stopped_at = None # last time when measuring ended
@@ -107,11 +110,7 @@ class Monitor(object):
 			self.parent = parent.parent
 		except AttributeError:
 			pass
-		self.name = Name(name)
-		if self.name in monitors:
-			raise DupMonitorError(self)
-
-		monitors[self.name] = self
+		super(Monitor,self).__init__(*name)
 
 	def __repr__(self):
 		if not self.active:
@@ -122,6 +121,26 @@ class Monitor(object):
 			act = "on "+unicode(self.value)
 			# TODO: add delay until next check
 		return u"‹%s %s %s›" % (self.__class__.__name__, self.name,act)
+
+	def list(self):
+		yield ("name"," ".join(unicode(x) for x in self.name))
+		if self.params:
+			yield ("device"," ".join(unicode(x) for x in self.params))
+		yield ("value",self.value)
+		yield ("up",self.up_name)
+		yield ("time",self.time_name)
+		if not "HOMEVENT_TEST" in os.environ:
+			if self.started_at:
+				yield ("start",unicode(self.started_at))
+			if self.stopped_at:
+				yield ("stop",unicode(self.stopped_at))
+
+		yield ("steps", "%s / %s / %s" % (self.steps,self.points,self.maxpoints))
+		if self.data:
+			yield ("data"," ".join(unicode(x) for x in self.data))
+
+	def info(self):
+		return "%s %s" % (self.up_name,self.time_name)
 
 	@property
 	def up_name(self):
@@ -794,7 +813,7 @@ class Shutdown_Worker_Monitor(ExcWorker):
         return (ev is shutdown_event)
     def process(self,queue,*a,**k):
         d = defer.succeed(None)
-        for m in monitors.values():
+        for m in Monitors.values():
             def tilt(_,monitor):
                 return monitor.down()
             d.addBoth(tilt,m)
