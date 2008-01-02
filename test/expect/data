@@ -14,16 +14,17 @@ name: ('on_event',)
 path: ../modules/on_event.py
 info: the 'on EVENT:' handler
 .
--10 Logger
--9 shutdown first
--8 Wait killer
-101 Logger
-102 shutdown handler
-103 shutdown last
+-10 :: Logger
+-9 :: shutdown first
+-8 :: Wait killer
+101 :: Logger
+102 :: shutdown handler
+103 :: shutdown last
 .
 .
 event
 module
+worker
 .
 0 Create OnEvtHandler: foo
 0 add ‹Block block›

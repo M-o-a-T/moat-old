@@ -19,9 +19,11 @@
 This is the core of the event dispatcher.
 """
 
-from twisted.python import failure
 from homevent.base import Name,SYS_PRIO,MIN_PRIO,MAX_PRIO
 from homevent.worker import WorkSequence,ConditionalWorkSequence,ExcWorker
+from homevent.collect import Collection
+
+from twisted.python import failure
 
 workers = {}
 work_prios = []
@@ -57,6 +59,16 @@ def list_workers(name=None):
 		for w in workers[p]:
 			if name is None or name == w.name:
 				yield w
+
+class Workers(Collection):
+	name = "worker"
+	def iteritems(self):
+		for w in list_workers():
+			yield w.prio,w
+	def __getitem__(self,k):
+		raise SyntaxError("You cannot examine individual worker entries. Sorry.")
+
+Workers = Workers()
 
 def collect_event(e):
 	"""\
