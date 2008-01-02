@@ -16,7 +16,7 @@
 ##
 
 """\
-This code does basic persistent state handling.
+This code does basic non-persistent state handling.
 
 set state X NAME
 	sets the named state to X
@@ -40,11 +40,14 @@ from homevent.run import process_event
 from homevent.event import Event
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.base import Name
+from homevent.collect import Collection,Collected
 
 from time import time
 import os
 
-states = {}
+class States(Collection):
+    name = "state"
+States = States()
 
 class StateChangeError(Exception):
 	def __init__(self,s,v):
@@ -54,18 +57,25 @@ class StateChangeError(Exception):
 		s = self.state
 		return "Trying to change state to '%s' while changing from '%s' to '%s'" % (self.value,s.old_value,s.value)
 
-class State(object):
+class State(Collected):
+	storage = States.storage
+
 	def __init__(self, *name):
-		if name in states:
-			raise RuntimeError("duplicate state: "+" ".join(name))
-		self.name = name
 		self.value = None
 		self.working = False
-		states[self.name] = self
+		super(State,self).__init__(*name)
+	
+	def list(self):
+		yield ("value", self.value)
+		yield ("lock", ("Yes" if self.working else "No"))
+		if hasattr(self,"old_value"):
+			yield ("last value",self.old_value)
+			if "HOMEVENT_TEST" not in os.environ:
+				yield ("last change",self.time)
 
-	def delete(self):
-		del states[self.name]
-
+	def info(self):
+		return self.value
+	
 class SetStateHandler(Statement):
 	name=("set","state")
 	doc="set some state to something"
@@ -82,7 +92,7 @@ set state X name...
 		value = event[0]
 		name = Name(event[1:])
 		try:
-			s = states[name]
+			s = States[name]
 		except KeyError:
 			s = State(*name)
 			old = "-"
@@ -105,31 +115,6 @@ set state X name...
 		return d
 
 
-class ListStateHandler(Statement):
-	name=("list","state")
-	doc="show current state"
-	long_doc="""\
-list state
-	: shows all state variables
-list state name...
-	: shows the current (and previous) value of that state
-"""
-	def run(self,ctx,**k):
-		event = self.params(ctx)
-		if len(event):
-			s = states[Name(event)]
-			print >>self.ctx.out, "Name:"," ".join(s.name)
-			print >>self.ctx.out, "Value:",s.value
-			if hasattr(s,"old_value"):
-				print >>self.ctx.out, "Last Value:",s.old_value
-				if "HOMEVENT_TEST" not in os.environ:
-					print >>self.ctx.out, "Last Change:",s.time
-		else:
-			for s in states.itervalues():
-				print >>self.ctx.out,"%s = %s" % (" ".join(s.name),s.value)
-			print >>self.ctx.out, "."
-
-
 class DelStateHandler(Statement):
 	name=("del","state")
 	doc="delete a state"
@@ -142,14 +127,14 @@ del state name...
 		if not len(event):
 			raise SyntaxError(u"Usage: del state ‹name…›")
 
-		s = states[Name(event)]
+		s = States[Name(event)]
 		if s.working:
 			raise StateChangeError(s,u"‹deleted›")
 		s.working = True
 		s.time = time()
 		d = process_event(Event(self.ctx,"state",s.value,"-",*event))
 		def clear_chg(_):
-			del states[Name(event)]
+			del States[Name(event)]
 			return _
 		d.addBoth(clear_chg)
 		return d
@@ -166,7 +151,7 @@ var state NAME name...
 		event = self.params(ctx)
 		var = event[0]
 		name = Name(event[1:])
-		s = states[name]
+		s = States[name]
 		setattr(self.parent.ctx,var,s.value if not s.working else s.old_value)
 
 
@@ -178,7 +163,7 @@ class StateCheck(Check):
 			raise SyntaxError(u"Usage: if state ‹value› ‹name…›")
 		value = args[0]
 		name = Name(args[1:])
-		return states[name].value == value
+		return States[name].value == value
 
 
 class StateLockedCheck(Check):
@@ -187,7 +172,7 @@ class StateLockedCheck(Check):
 	def check(self,*args):
 		if len(args) < 2:
 			raise SyntaxError(u"Usage: if state locked ‹name…›")
-		return states[Name(args)].working
+		return States[Name(args)].working
 
 
 class LastStateCheck(Check):
@@ -199,7 +184,7 @@ class LastStateCheck(Check):
 		value = args[0]
 		name = Name(args[1:])
 
-		s = states[name]
+		s = States[name]
 		if hasattr(s,"old_value"):
 			return s.old_value == value
 		else:
@@ -213,7 +198,7 @@ class ExistsStateCheck(Check):
 		if len(args) < 1:
 			raise SyntaxError(u"Usage: if exists state ‹name…›")
 		name = Name(args)
-		return name in states
+		return name in States
 
 
 class StateModule(Module):
@@ -228,7 +213,6 @@ class StateModule(Module):
 	def load(self):
 		main_words.register_statement(SetStateHandler)
 		main_words.register_statement(VarStateHandler)
-		global_words.register_statement(ListStateHandler)
 		main_words.register_statement(DelStateHandler)
 		register_condition(StateCheck)
 		register_condition(StateLockedCheck)
@@ -238,7 +222,6 @@ class StateModule(Module):
 	def unload(self):
 		main_words.unregister_statement(SetStateHandler)
 		main_words.unregister_statement(VarStateHandler)
-		global_words.unregister_statement(ListStateHandler)
 		main_words.unregister_statement(DelStateHandler)
 		unregister_condition(StateCheck)
 		unregister_condition(StateLockedCheck)

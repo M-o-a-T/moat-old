@@ -110,11 +110,12 @@ NEW: <ConditionalWorkSequence:7 (4)>
    : └1╴... done.
 72 EVENT: wait¦done¦0.1¦_wait¦1
 72 END: wait¦done¦0.1¦_wait¦1
-foo bar = three
+foo bar :: three
 .
-Name: foo bar
-Value: three
-Last Value: two
+value: three
+lock: No
+last value: two
+.
 0 add ‹IfStatement if¦state¦three¦foo¦bar›
 0 add ‹LogHandler log¦TRACE¦Yes!›
 0 add ‹LogHandler log¦TRACE¦No‽›
