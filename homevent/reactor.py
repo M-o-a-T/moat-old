@@ -29,18 +29,23 @@ from homevent.run import register_worker,unregister_worker, SYS_PRIO,MAX_PRIO,\
 from homevent.statement import Statement
 from homevent.io import dropConnections
 from homevent.twist import deferToLater,call_when_idle
+from homevent.collect import Collection,Collected
+
 from twisted.internet import reactor
 
 __all__ = ("start_up","shut_down", "startup_event","shutdown_event",
-	"ShutdownHandler","mainloop", "active_queues")
+	"ShutdownHandler","mainloop", "Events")
 
 startup_event = Event(Context(), "startup")
 shutdown_event = Event(Context(), "shutdown")
 
 active_q_id = 0
-active_queues = {}
 running = False
 stopping = False
+
+class Events(Collection):
+    name = "event"
+Events = Events()
 
 class Shutdown_Worker_1(ExcWorker):
 	"""\
@@ -56,7 +61,7 @@ class Shutdown_Worker_1(ExcWorker):
 		global active_q_id
 		active_q_id += 1
 		queue.aq_id = active_q_id
-		active_queues[queue.aq_id] = queue
+		Events[queue.aq_id] = queue
 	def report(self,*a,**k):
 		return ()
 
@@ -70,9 +75,9 @@ class Shutdown_Worker_2(ExcWorker):
 	def does_failure(self,ev):
 		return True
 	def process(self,queue,*a,**k):
-		del active_queues[queue.aq_id]
+		del Events[queue.aq_id]
 		del queue.aq_id
-		if not running and not active_queues:
+		if not running and not Events:
 			stop_mainloop()
 	def report(self,*a,**k):
 		return ()
@@ -112,7 +117,7 @@ def _shut_down():
 		running = False
 		process_event(shutdown_event).addErrback(process_failure)
 
-#	if not active_queues:
+#	if not Events:
 #		_stop_mainloop()
 
 def shut_down():

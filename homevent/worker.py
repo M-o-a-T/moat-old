@@ -100,6 +100,14 @@ class WorkSequence(WorkItem):
 			self.ctx = Context()
 		self.iid = seqnum
 
+		self.info = u"Worker %d for ‹%s›" % (self.iid,Name(self.event))
+
+	def list(self):
+		yield ("id",self.iid)
+		yield ("event",Name(self.event))
+		for l in self.report(99):
+			yield ("report",l)
+
 	def __repr__(self):
 		if not hasattr(self,"work"):
 			return "<%s:%d (?)>" % (self.__class__.__name__,self.iid)

@@ -22,9 +22,9 @@ This code implements access to collections.
 
 from homevent.logging import log
 from homevent.statement import Statement, global_words
-from homevent.module import ModuleDirs, Module
+from homevent.module import Module
 from homevent.run import list_workers
-from homevent.reactor import active_queues
+from homevent.reactor import Events
 from homevent.base import Name
 from homevent.collect import get_collect,all_collect,Collection
 
@@ -66,29 +66,6 @@ list coll NAME
 		print >>self.ctx.out, "."
 
 
-class EventList(Statement):
-	name=("list","event")
-	doc="list of events that are currently processed"
-	long_doc="""\
-list event
-	shows a list of running events.
-list event ID
-	shows details of that event.
-	
-"""
-	def run(self,ctx,**k):
-		event = self.params(ctx)
-		if not len(event):
-			for m in active_queues.itervalues():
-				print >>self.ctx.out, m.aq_id,m.name
-			print >>self.ctx.out, "."
-		elif len(event) == 1:
-			m = active_queues[event[0]]
-			for r in m.report(99):
-				print  >>self.ctx.out, r
-		else:
-			raise SyntaxError("Only one ID allowed.")
-
 class WorkerList(Statement):
 	name=("list","worker")
 	doc="list of workers"
@@ -122,12 +99,10 @@ class ListModule(Module):
 
 	def load(self):
 		global_words.register_statement(WorkerList)
-		global_words.register_statement(EventList)
 		global_words.register_statement(List)
 	
 	def unload(self):
 		global_words.unregister_statement(WorkerList)
-		global_words.unregister_statement(EventList)
 		global_words.unregister_statement(List)
 	
 init = ListModule

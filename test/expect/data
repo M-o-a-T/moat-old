@@ -22,6 +22,7 @@ info: the 'on EVENT:' handler
 103 shutdown last
 .
 .
+event
 module
 .
 0 Create OnEvtHandler: foo
@@ -73,15 +74,18 @@ NEW: <ConditionalWorkSequence:7 (4)>
    : └1╴... done.
 65 EVENT: wait¦done¦×××¦_wait¦3
 65 END: wait¦done¦×××¦_wait¦3
-4 No Work
+4 :: Worker 4 for ‹foo›
 .
-<ConditionalWorkSequence:4 (5)>
-│  EVENT: foo
-╞1╕on foo ‹OnEventHandler›
-│ │prio: 51
-│ │step: block ‹Block›
-│ ╵    : step: wait for 0.3 ‹WaitHandler›
-└2╴... done.
+id: 4
+event: foo
+report: <ConditionalWorkSequence:4 (5)>
+report: │  EVENT: foo
+report: ╞1╕on foo ‹OnEventHandler›
+report: │ │prio: 51
+report: │ │step: block ‹Block›
+report: │ ╵    : step: wait for 0.3 ‹WaitHandler›
+report: └2╴... done.
+.
 78 EVENT: wait¦start¦×××¦_wait¦4
 NEW: <ConditionalWorkSequence:8 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦4
