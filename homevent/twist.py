@@ -187,8 +187,13 @@ class TwistMe(BaseException): pass
 class TwistFailure(_fail,BaseException):
 	def __init__(self, exc_value=None, exc_type=None, exc_tb=None):
 		global tracked_errors
-		if tracked_errors and exc_tb is None and exc_value is not None:
-			try: raise TwistMe
-			except TwistMe: exc_tb = sys.exc_info()[2]
+		if tracked_errors and exc_tb is None:
+			try:
+				a,b,c = sys.exc_info()
+			except Exception:
+				a,b,c = sys.exc_info()
+			if exc_type is None: exc_type = a
+			if exc_value is None: exc_value = b
+			if exc_tb is None: exc_tb = c
 		_fail.__init__(self,exc_value,exc_type,exc_tb)
 failure.Failure = TwistFailure
