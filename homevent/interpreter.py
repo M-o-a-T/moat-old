@@ -103,10 +103,6 @@ class Processor(object):
 	
 	def error(self,parser,err):
 		if isinstance(err,BaseFailure):
-			from traceback import print_tb
-			import sys
-			print >>sys.stderr,"*** TB",err.tb
-			print_tb(err.tb,file=sys.stderr)
 			err.raiseException()
 		else:
 			raise err.__class__,e,sys.exc_info()[2]
