@@ -26,6 +26,12 @@ class Collection(dict):
 
 		"""
 
+	def __repr__(self):
+		try:
+			return u"‹Collection %s›" % (self.__class__.__name__,)
+		except Exception:
+			return "<Collection:%s>" % (self.__class__.__name__,)
+
 	def __init__(self):
 		name = self.name
 		if isinstance(name,basestring):
@@ -70,6 +76,12 @@ class Collected(object):
 			raise RuntimeError(u"Duplicate entry ‹%s› in ‹%s›" % (name,self.storage.name))
 		self.storage[name] = self
 
+	def __repr__(self):
+		try:
+			return u"‹Collected %s:%s›" % (self.__class__.__name__,self.name)
+		except Exception:
+			return "<Collected:%s>" % (self.__class__.__name__,)
+
 	def list(self):
 		"""Yield a couple of (left,right) tuples, for enumeration."""
 		raise NotImplementedError("You need to override 'list' in '%s'" % (self.__class__.__name__,))
@@ -85,6 +97,17 @@ class Collected(object):
 			"""
 		return None
 
+
+class CKeyError(KeyError):
+	def __init__(self,name,coll):
+		self.name = name
+		self.coll = coll
+	def __repr__(self):
+		return u"I could not find an entry for ‹%s› in %s." % (Name(self.name),self.coll)
+	def __unicode__(self):
+		return u"I could not find an entry for ‹%s› in %s." % (Name(self.name),self.coll)
+	def __str__(self):
+		return "I could not find an entry for ‹%s› in %s." % (Name(self.name),self.coll)
 
 def get_collect(name):
 	c = None
@@ -108,7 +131,7 @@ def get_collect(name):
 			try:
 				coll = coll[name[0]]
 			except KeyError:
-				raise KeyError("I could not find an entry for ‹%s› in ‹%s›." % (Name(name),c))
+				raise CKeyError(name,c)
 			else:
 				name = name[1:]
 				if c is None: c = coll
