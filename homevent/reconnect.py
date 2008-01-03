@@ -117,7 +117,7 @@ class ReconnectingClientFactory(protocol.ClientFactory):
 			self._callID = None
 			self.connector.connect()
 			self.connector = None
-		self._callID = reactor.callLater(self.delay, reconnector)
+		self._callID = reactor.callLater(True,self.delay, reconnector)
 
 	def stopTrying(self):
 		"""I put a stop to any attempt to reconnect in progress.

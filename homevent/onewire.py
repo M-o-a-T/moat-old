@@ -309,7 +309,7 @@ class OWFStimeout(object):
 
 	def do_timeout(self):
 		if self.timer is None:
-			self.timer = reactor.callLater(self.timeout,self.has_timeout)
+			self.timer = reactor.callLater(True,self.timeout,self.has_timeout)
 
 	def drop_timeout(self):
 		if self.timer:
@@ -612,7 +612,7 @@ class OWFSfactory(object,ReconnectingClientFactory):
 				delay = 10
 			else:
 				delay = 300
-			self.nop = reactor.callLater(delay,self.nopper)
+			self.nop = reactor.callLater(True,delay,self.nopper)
 
 	def nopper(self):
 		self.nop = None
@@ -790,7 +790,7 @@ class OWFSfactory(object,ReconnectingClientFactory):
 			else:
 				if _: d = 60
 				else: d = 300
-			self.watcher_id = reactor.callLater(d,self.watcher)
+			self.watcher_id = reactor.callLater(True,d,self.watcher)
 		d.addCallback(monitor)
 	
 	def run_watcher(self):
