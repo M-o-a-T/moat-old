@@ -51,6 +51,7 @@ load_module("wait")
 load_module("logging")
 load_module("on_event")
 load_module("net")
+load_module("data")
 
 run("net",input)
 

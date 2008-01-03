@@ -6,12 +6,12 @@ NEW: <ConditionalWorkSequence:1 (4)>
 1 END: startup
 0 Create OnEvtHandler: net¦connect¦foo
 0 add ‹NETsend send¦net¦foo¦bar›
-0 add ‹NETlist list¦net¦foo›
+0 add ‹List list¦net¦foo›
 0 add ‹NETdisconnect disconnect¦net¦foo›
 0 NewHandler 1
 0 Create OnEvtHandler: net¦connect¦baz
 0 add ‹NETsend send¦net¦baz¦quux›
-0 add ‹NETlist list¦net¦baz›
+0 add ‹List list¦net¦baz›
 0 add ‹NETdisconnect disconnect¦net¦baz›
 0 NewHandler 2
 0 Create OnEvtHandler: net¦disconnect¦foo
@@ -44,20 +44,21 @@ NEW: <ConditionalWorkSequence:5 (5)>
    : ├1╴on net connect foo ‹OnEventHandler›
    : │  prio: 51
    : │  step: send net foo bar ‹NETsend›
-   : │  step: list net foo ‹NETlist›
+   : │  step: list net foo ‹List›
    : │  step: disconnect net foo ‹NETdisconnect›
    : └2╴... done.
 54 EVENT: net¦connect¦foo
 RUN: on net connect foo ‹OnEventHandler›
    : prio: 51
    : step: send net foo bar ‹NETsend›
-   : step: list net foo ‹NETlist›
+   : step: list net foo ‹List›
    : step: disconnect net foo ‹NETdisconnect›
  at: <ConditionalWorkSequence:5 (5)> (step 1)
  ev: EVENT: net¦connect¦foo
-Name: foo
-Host: localhost
-Port: 50333
+type: client
+host: localhost
+port: 50333
+connected: Yes
 .
 62 EVENT: net¦disconnect¦foo
 NEW: <ConditionalWorkSequence:6 (5)>
@@ -83,20 +84,21 @@ NEW: <ConditionalWorkSequence:7 (5)>
    : ├1╴on net connect baz ‹OnEventHandler›
    : │  prio: 51
    : │  step: send net baz quux ‹NETsend›
-   : │  step: list net baz ‹NETlist›
+   : │  step: list net baz ‹List›
    : │  step: disconnect net baz ‹NETdisconnect›
    : └2╴... done.
 74 EVENT: net¦connect¦baz
 RUN: on net connect baz ‹OnEventHandler›
    : prio: 51
    : step: send net baz quux ‹NETsend›
-   : step: list net baz ‹NETlist›
+   : step: list net baz ‹List›
    : step: disconnect net baz ‹NETdisconnect›
  at: <ConditionalWorkSequence:7 (5)> (step 1)
  ev: EVENT: net¦connect¦baz
-Name: baz
-Host: localhost
-Port: 50345
+type: server
+host: localhost
+port: 50345
+connected: Yes
 .
 82 EVENT: net¦disconnect¦baz
 NEW: <ConditionalWorkSequence:8 (5)>

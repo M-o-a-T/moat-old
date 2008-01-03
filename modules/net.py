@@ -29,6 +29,7 @@ from homevent.context import Context
 from homevent.event import Event
 from homevent.run import process_event,process_failure
 from homevent.base import Name
+from homevent.collect import Collection,Collected
 
 from twisted.python import failure
 from twisted.internet import protocol,reactor,error
@@ -93,9 +94,16 @@ class NETreceiver(object,LineReceiver, _PauseableMixin):
 	def write(self,val):
 		self.transport.write(val+self.delimiter)
 
+class Nets(Collection):
+	name = "net"
+Nets = Nets()
+net_conns = {}
 
-class NETcommon_factory(object):
+
+class NETcommon_factory(Collected):
 	protocol = NETreceiver
+	storage = Nets.storage
+	typ = "???"
 
 	def __init__(self, host="localhost", port=4304, name=None, *a,**k):
 		if name is None:
@@ -106,6 +114,18 @@ class NETcommon_factory(object):
 		self.port = port
 		self.name = name
 		self.up_event = False
+		assert (host,port) not in net_conns, "already known host/port tuple"
+		Collected.__init__(self)
+		net_conns[(host,port)] = self
+
+	def info(self):
+		return "%s %s: %s:%s" % (self.typ, self.name, self.host,self.port)
+		
+	def list(self):
+		yield ("type",self.typ)
+		yield ("host",self.host)
+		yield ("port",self.port)
+		yield ("connected", ("Yes" if self.conn is not None else "No"))
 
 	def haveConnection(self,conn):
 		self.drop()
@@ -144,6 +164,7 @@ class NETcommon_factory(object):
 			self._down_event()
 
 class NETserver_factory(NETcommon_factory,protocol.ServerFactory):
+	typ = "server"
 	def end(self):
 		try: self._port.stopListening()
 		except AttribteError: pass # might be called twice
@@ -151,6 +172,7 @@ class NETserver_factory(NETcommon_factory,protocol.ServerFactory):
 		super(NETserver_factory,self).end()
 
 class NETclient_factory(NETcommon_factory,protocol.ClientFactory):
+	typ = "client"
 	def end(self):
 		try: self.connector.stopConnecting()
 		except error.NotConnectingError: pass
@@ -168,34 +190,23 @@ class NETclient_factory(NETcommon_factory,protocol.ClientFactory):
 		self._down_event()
 
 
-
-net_conns = {}
-
 def connect(host="localhost", port=None, name=None):
 	assert port is not None, "Need to provide a port number"
 	assert name is not None, "Need to provide a name"
-	assert (host,port) not in net_conns, "already known host/port tuple"
-	assert name not in net_conns, "already known name"
 	f = NETclient_factory(host=host, port=port, name=name)
-	net_conns[(host,port)] = f
-	net_conns[name] = f
 	f.connector = reactor.connectTCP(host, port, f)
 	return f
 
 def listen(host="localhost", port=None, name=None):
 	assert port is not None, "Need to provide a port number"
 	assert name is not None, "Need to provide a name"
-	assert (host,port) not in net_conns, "already known host/port tuple"
-	assert name not in net_conns, "already known name"
 	f = NETserver_factory(host=host, port=port, name=name)
-	net_conns[(host,port)] = f
-	net_conns[name] = f
 	f._port = reactor.listenTCP(port, f, interface=host)
 	return f
 
 def disconnect(f):
 	assert f==net_conns.pop((f.host,f.port))
-	assert f==net_conns.pop(f.name)
+	assert f==Nets.pop(f.name)
 	f.end()
 
 
@@ -258,10 +269,10 @@ send net name text...
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		name = event[0]
+		name = Name(event[0])
 		val = " ".join(unicode(s) for s in event[1:])
 		
-		d = net_conns[name].write(val)
+		d = Nets[name].write(val)
 		return d
 
 
@@ -276,44 +287,15 @@ disconnect net ‹name›
 		event = self.params(ctx)
 		if len(event) != 1:
 			raise SyntaxError("Usage: disconnect net ‹name›")
-		name = event[0]
-		disconnect(net_conns[name])
-
-class NETlist(Statement):
-	name=("list","net")
-	doc="list known network connections"
-	long_doc="""\
-list net ‹name›?
-	: List all network connections.
-	If a name (or host/port pair) is given, lists details of that
-	connection.
-"""
-	def run(self,ctx,**k):
-		event = self.params(ctx)
-		if len(event) == 1:
-			conn = net_conns[event[0]]
-		elif len(event) == 2:
-			conn = net_conns[(event[0],event[1])]
-		elif len(event):
-			raise SyntaxError("Usage: disconnect net ‹name›")
-		else:
-			for a,b in net_conns.iteritems():
-				if isinstance(a,tuple): continue
-				print >>ctx.out,b.name,b.host,b.port
-			print >>ctx.out,"."
-			return
-
-		print >>ctx.out,"Name:",conn.name
-		print >>ctx.out,"Host:",conn.host
-		print >>ctx.out,"Port:",conn.port
-		print >>ctx.out,"."
+		name = Name(event[0])
+		disconnect(Nets[name])
 
 class NETconnected(Check):
 	name=("connected","net")
 	doc="Test if a TCP connection is up"
 	def check(self,*args):
 		if len(args) == 1:
-			conn = net_conns.get(args[0],None)
+			conn = Nets.get(Name(args[0]),None)
 		elif len(args) == 2:
 			conn = net_conns.get(Name(args),None)
 		else:
@@ -327,11 +309,11 @@ class NETexists(Check):
 	doc="Test if a TCP connection is configured"
 	def check(self,*args):
 		if len(args) == 1:
-			return args[0] in net_conns
+			return Name(args[0]) in Nets
 		elif len(args) == 2:
 			return Name(args) in net_conns
 		else:
-			raise SyntaxError(u"Usage: if connected net ‹name›")
+			raise SyntaxError(u"Usage: if exists net ‹name›")
 
 class NETmodule(Module):
 	"""\
@@ -345,7 +327,6 @@ class NETmodule(Module):
 		main_words.register_statement(NETconnect)
 		main_words.register_statement(NETdisconnect)
 		main_words.register_statement(NETsend)
-		main_words.register_statement(NETlist)
 		register_condition(NETexists)
 		register_condition(NETconnected)
 	
@@ -354,7 +335,6 @@ class NETmodule(Module):
 		main_words.unregister_statement(NETconnect)
 		main_words.unregister_statement(NETdisconnect)
 		main_words.unregister_statement(NETsend)
-		main_words.unregister_statement(NETlist)
 		unregister_condition(NETexists)
 		unregister_condition(NETconnected)
 	

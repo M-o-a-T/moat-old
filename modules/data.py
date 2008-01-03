@@ -21,7 +21,7 @@ This code implements access to collections.
 """
 
 from homevent.logging import log
-from homevent.statement import Statement, global_words
+from homevent.statement import Statement, main_words
 from homevent.module import Module
 from homevent.run import list_workers
 from homevent.reactor import Events
@@ -80,9 +80,9 @@ class ListModule(Module):
 	info = "provides a couple of common 'list FOO' functions"
 
 	def load(self):
-		global_words.register_statement(List)
+		main_words.register_statement(List)
 	
 	def unload(self):
-		global_words.unregister_statement(List)
+		main_words.unregister_statement(List)
 	
 init = ListModule
