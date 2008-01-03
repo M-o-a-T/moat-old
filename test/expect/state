@@ -53,17 +53,23 @@ RUN: on state * three foo bar ‹OnEventHandler›
 0 Set to FOUR
 56 END: state¦two¦three¦foo¦bar
 ERROR: Traceback (most recent call last):
-     :   File "internet/defer.py, in _runCallbacks
-     :     self.result = callback(self.result, *args, **kw)
      :   File "homevent/twist.py, in <lambda>
      :     d.addCallback(lambda _: p(*a,**k))
      :   File "internet/defer.py, in unwindGenerator
      :     return _inlineCallbacks(None, f(*args, **kwargs), Deferred())
      :   File "internet/defer.py, in _inlineCallbacks
      :     result = g.throw(result.type, result.value, result.tb)
+     :   File "homevent/worker.py, in _process
+     :     r = failure.Failure()
      : --- <exception caught here> ---
      :   File "homevent/worker.py, in _process
      :     r = yield w.process(event=self.event, queue=self)
+     :   File "internet/defer.py, in _runCallbacks
+     :     self.result = callback(self.result, *args, **kw)
+     :   File "homevent/statement.py, in go
+     :     return p.run(ctx)
+     :   File "modules/state.py, in run
+     :     raise StateChangeError(s,value)
      : __builtin__.StateChangeError: Trying to change state to 'four' while changing from 'two' to 'three'
    in: on state * three foo bar ‹OnEventHandler›
      : prio: 51
@@ -80,17 +86,23 @@ NEW: <WorkSequence:6 (4)>
    : │  ERROR: Trying to change state to 'four' while changing from 'two' to 'three'
    : └1╴... done.
 ERROR: Traceback (most recent call last):
-     :   File "internet/defer.py, in _runCallbacks
-     :     self.result = callback(self.result, *args, **kw)
      :   File "homevent/twist.py, in <lambda>
      :     d.addCallback(lambda _: p(*a,**k))
      :   File "internet/defer.py, in unwindGenerator
      :     return _inlineCallbacks(None, f(*args, **kwargs), Deferred())
      :   File "internet/defer.py, in _inlineCallbacks
      :     result = g.throw(result.type, result.value, result.tb)
+     :   File "homevent/worker.py, in _process
+     :     r = failure.Failure()
      : --- <exception caught here> ---
      :   File "homevent/worker.py, in _process
      :     r = yield w.process(event=self.event, queue=self)
+     :   File "internet/defer.py, in _runCallbacks
+     :     self.result = callback(self.result, *args, **kw)
+     :   File "homevent/statement.py, in go
+     :     return p.run(ctx)
+     :   File "modules/state.py, in run
+     :     raise StateChangeError(s,value)
      : __builtin__.StateChangeError: Trying to change state to 'four' while changing from 'two' to 'three'
    in: on state * three foo bar ‹OnEventHandler›
      : prio: 51

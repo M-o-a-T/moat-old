@@ -194,9 +194,8 @@ class TwistFailure(BaseFailure,BaseException):
 		if exc_value is None: exc_value = b
 		if exc_tb is None: exc_tb = c
 
-		if not isinstance(exc_value,Exception):
-			if not isinstance(exc_value,Exception):
-				raise RuntimeError("Bad Exception: "+str(exc_value))
+		if not isinstance(exc_value,BaseException):
+			raise RuntimeError("Bad Exception: "+str(exc_value))
 		BaseFailure.__init__(self,exc_value,exc_type,exc_tb)
 
 	def cleanFailure(self):
