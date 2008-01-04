@@ -25,20 +25,21 @@ input = """\
 on net connect foo:
 	send net foo "bar"
 	list net foo
-	disconnect net foo
-on net connect baz:
-	send net baz "quux"
-	list net baz
-	disconnect net baz
+	del net foo
+on net connect baz zaz:
+	send net "quux":
+		to baz zaz
+	list net baz zaz
+	del net baz zaz
 on net disconnect foo:
 	log TRACE dis foo
-on net disconnect baz:
-	log TRACE dis baz
+on net disconnect baz zaz:
+	log TRACE dis baz zaz
 wait for 0.2:
 	name BEFORE
 	debug force
-listen net baz localhost 50345
-connect net foo localhost 50333
+listen net localhost 50345 :name baz zaz
+net foo localhost 50333
 wait for 0.8:
 	name AFTER
 	debug force

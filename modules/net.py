@@ -22,7 +22,7 @@ This code implements a simple line-oriented protocol via TCP.
 
 from homevent.module import Module
 from homevent.logging import log,log_exc,DEBUG,TRACE,INFO,WARN,ERROR
-from homevent.statement import Statement, main_words
+from homevent.statement import Statement, main_words, AttributedStatement
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.run import process_failure
 from homevent.context import Context
@@ -79,7 +79,7 @@ class NETreceiver(object,LineReceiver, _PauseableMixin):
 		"""Override this.
 		"""
 		line = line.strip().split()
-		process_event(Event(Context(),"net", self.factory.name, *line)).addErrback(process_failure)
+		process_event(Event(Context(),"net", *(self.factory.name + line))).addErrback(process_failure)
 
 	def connectionMade(self):
 		super(NETreceiver,self).connectionMade()
@@ -133,7 +133,7 @@ class NETcommon_factory(Collected):
 
 		if not self.up_event:
 			self.up_event = True
-			process_event(Event(Context(),"net","connect",self.name)).addErrback(process_failure)
+			process_event(Event(Context(),"net","connect",*self.name)).addErrback(process_failure)
 
 	def lostConnection(self,conn):
 		if self.conn == conn:
@@ -143,7 +143,7 @@ class NETcommon_factory(Collected):
 	def _down_event(self):
 		if self.up_event:
 			self.up_event = False
-			process_event(Event(Context(),"net","disconnect",self.name)).addErrback(process_failure)
+			process_event(Event(Context(),"net","disconnect",*self.name)).addErrback(process_failure)
 
 	def drop(self):
 		"""Kill my connection"""
@@ -210,21 +210,27 @@ def disconnect(f):
 	f.end()
 
 
-class NETconnect(Statement):
-	name = ("connect","net")
+class NETconnect(AttributedStatement):
+	name = ("net",)
 	doc = "connect to a TCP port"
 	long_doc="""\
-connect net NAME [host] port
-- connect (asynchronously) to the TCP server at the remote port;
+net NAME [host] port
+  - connect (asynchronously) to the TCP server at the remote port;
 	name that connection NAME. Default for host is localhost.
 	The system will emit a connection-ready event.
+net [host] port :to NAME…
+  - same as above, but use a multi-word name.
 """
+	dest = None
 
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		if len(event) < 2 or len(event) > 3:
-			raise SyntaxError("Usage: connect net ‹name› ‹host›? ‹port›")
-		name = event[0]
+		if len(event) < 1+(self.dest is None) or len(event) > 2+(self.dest is None):
+			raise SyntaxError(u"Usage: net ‹name› ‹host›? ‹port›")
+		name = self.dest
+		if name is None:
+			name = Name(event[0])
+			event = event[1:]
 		if len(event) == 2:
 			host = "localhost"
 		else:
@@ -234,23 +240,30 @@ connect net NAME [host] port
 		connect(host,port,name)
 
 
-class NETlisten(Statement):
+class NETlisten(AttributedStatement):
 	name = ("listen","net")
 	doc = "listen to a TCP socket"
 	long_doc="""\
 listen net NAME [address] port
-- listen (asynchronously) on the given port for a TCP connection.
+  - listen (asynchronously) on the given port for a TCP connection.
 	name that connection NAME. Default for address is loopback.
 	The system will emit a connection-ready event when a client
 	connects. If another client connects, the old one will be
 	disconnected.
+listen net [address] port :to NAME…
+  - same as above, but use a multi-word name.
+
 """
+	dest = None
 
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		if len(event) < 2 or len(event) > 3:
-			raise SyntaxError("Usage: connect net ‹name› ‹host›? ‹port›")
-		name = event[0]
+		if len(event) < 1+(self.dest is None) or len(event) > 2+(self.dest is None):
+			raise SyntaxError(u"Usage: connect net ‹name› ‹host›? ‹port›")
+		name = self.dest
+		if name is None:
+			name = Name(event[0])
+			event = event[1:]
 		if len(event) == 2:
 			host = "localhost"
 		else:
@@ -259,47 +272,81 @@ listen net NAME [address] port
 
 		listen(host,port,name)
 
-
-class NETsend(Statement):
-	name=("send","net")
-	doc="send a line to a TCP connection"
+class NETname(Statement):
+	name=("name",)
+	dest = None
+	doc="specify the name of a new TCP connection"
 	long_doc="""\
-send net name text...
-	: The text is sent to the named net connection.
+net host port :to ‹name…›
+	: Use this form for multi-name network connections.
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		name = Name(event[0])
-		val = " ".join(unicode(s) for s in event[1:])
-		
+		self.parent.dest = Name(event)
+NETconnect.register_statement(NETname)
+NETlisten.register_statement(NETname)
+
+
+
+class NETsend(AttributedStatement):
+	name=("send","net")
+	dest = None
+	doc="send a line to a TCP connection"
+	long_doc="""\
+send net ‹name› text…
+	: The text is sent to the named net connection.
+send net text… :to ‹name…›
+	: as above, but works with a multi-word connection name.
+
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		name = self.dest
+		if name is None:
+			name = Name(event[0])
+			event = event[1:]
+
+		val = u" ".join(unicode(s) for s in event)
 		d = Nets[name].write(val)
 		return d
 
+class NETto(Statement):
+	name=("to",)
+	dest = None
+	doc="specify which TCP connection to use"
+	long_doc="""\
+send net text… :to ‹name…›
+	: Use this form for multi-name network connections.
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		self.parent.dest = Name(event)
+NETsend.register_statement(NETto)
+
 
 class NETdisconnect(Statement):
-	name=("disconnect","net")
+	name=("del","net")
 	doc="disconnect a TCP connection"
 	long_doc="""\
-disconnect net ‹name›
+del net ‹name›
 	: The named net connection is broken.
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		if len(event) != 1:
+		if not len(event):
 			raise SyntaxError("Usage: disconnect net ‹name›")
-		name = Name(event[0])
+		name = Name(event)
 		disconnect(Nets[name])
 
 class NETconnected(Check):
 	name=("connected","net")
 	doc="Test if a TCP connection is up"
 	def check(self,*args):
-		if len(args) == 1:
-			conn = Nets.get(Name(args[0]),None)
-		elif len(args) == 2:
+		conn = None
+		if len(args) == 2:
 			conn = net_conns.get(Name(args),None)
-		else:
-			raise SyntaxError(u"Usage: if connected net ‹name›")
+		if conn is None:
+			conn = Nets.get(Name(args))
 		if conn is None:
 			return False
 		return conn.up_event
@@ -308,12 +355,9 @@ class NETexists(Check):
 	name=("exists","net")
 	doc="Test if a TCP connection is configured"
 	def check(self,*args):
-		if len(args) == 1:
-			return Name(args[0]) in Nets
-		elif len(args) == 2:
-			return Name(args) in net_conns
-		else:
-			raise SyntaxError(u"Usage: if exists net ‹name›")
+		if len(args) == 2 and Name(args) in net_conns:
+			return True
+		return Name(args) in Nets
 
 class NETmodule(Module):
 	"""\

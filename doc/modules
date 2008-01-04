@@ -751,18 +751,40 @@ connection.
 Lines are delimited by LF (\n) characters. CR (\r) is stripped on
 receipt, but not sent.
 
---------------------------------
-connect net ‹name› ‹host› ‹port›
---------------------------------
+------------------------
+net ‹name› ‹host› ‹port›
+------------------------
 
 Establish a connection. If broken, the link will automatically be
 restored if possible.
 
-	connect net fhz server.local 7072
+	net fhz server.local 7072
 
----------------------
-disconnect net ‹name›
----------------------
+If you want to use multi-word connection names, supply the name as an
+additional argument.
+
+    net connect localhost 7:
+        name foo bar
+
+
+-------------------------------
+listen net ‹name› ‹host› ‹port›
+-------------------------------
+
+Same as above, but wait for the remote side to connect to me instead
+of connecting yourself.
+
+At the moment, only one connection is supported. If another client
+connects, the first connection is dropped.
+
+Currently, there is no authorization. You might want to use the kernel
+firewall to control the port, and/or only export non-sensitive
+information.
+
+
+---------------
+del net ‹name…›
+---------------
 
 Drop the named connection.
 
@@ -779,6 +801,23 @@ send net ‹name› ‹whatever…›
 
 Send the text after the connection name to the server, delimited with a
 line feed.
+
+If the connection's name consists of more than one word, use an
+additonal "to" argument:
+
+    # echo port
+    net connect localhost 7:
+        name foo bar
+    
+    send net "This is a test":
+        to foo bar
+
+… except that you need to let the sending be triggered by the
+corresponding "connect" event.
+
+You can also use Smalltalk-ish single-line syntax:
+
+    send net "This is a test" :to foo bar
 
 -----
 Tests
