@@ -6,6 +6,10 @@ export HOMEVENT_TEST=1
 test:
 	@set -e; \
 	rm -rf real; mkdir real; \
+	for f in $(wildcard *.sh) ; do \
+		echo $$f ...; \
+		sh $$f; \
+	done; \
 	for f in $(wildcard *.py) ; do \
 		echo $$f ...; \
 		python $$f; \
