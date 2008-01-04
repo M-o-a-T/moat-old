@@ -18,9 +18,13 @@ on onewire scanned A * * *:
 
 connect onewire A _HOST_ _PORT_
 #
-try:
-	wait for 10:
-		name yawn
+block:
+	try:
+		wait for 10:
+			name yawn
+			debug force
+	catch:
+		do nothing
 
 log TRACE DirStart
 dir onewire A
@@ -29,4 +33,6 @@ dir onewire "_DEV_"
 log TRACE DirStop
 set onewire _VAL_ "_DEV_" _ATTR2_
 disconnect onewire A
-wait for 1
+wait for 1:
+	debug force
+	name END

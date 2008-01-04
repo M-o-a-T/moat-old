@@ -32,6 +32,7 @@ from homevent.fs20 import handler,register_handler,unregister_handler
 from homevent.base import Name,MIN_PRIO
 from homevent.worker import ExcWorker
 from homevent.reactor import shutdown_event
+from homevent.twist import callLater
 
 from twisted.internet import protocol,defer,reactor
 from twisted.protocols.basic import _PauseableMixin
@@ -77,7 +78,7 @@ class FS20recv(protocol.ProcessProtocol, my_handler):
 
 	def _start_timer(self):
 		if self.timer is not None:
-			self.timer = reactor.callLater(True,self.timeout, self.no_data)
+			self.timer = callLater(True,self.timeout, self.no_data)
 
 	def no_data(self):
 		self.timer = None
@@ -162,7 +163,7 @@ class FS20recv(protocol.ProcessProtocol, my_handler):
 	
 	def do_restart(self):
 		if not self.stopped:
-			reactor.callLater(True,5,self.do_start)
+			callLater(True,5,self.do_start)
 		
 
 
@@ -257,7 +258,7 @@ class FS20xmit(protocol.ProcessProtocol, my_handler):
 
 	def _start_timer(self):
 		if self.timer is not None:
-			self.timer = reactor.callLater(True,self.timeout, self.no_data)
+			self.timer = callLater(True,self.timeout, self.no_data)
 
 	def no_data(self):
 		self.timer = None
@@ -324,7 +325,7 @@ class FS20xmit(protocol.ProcessProtocol, my_handler):
 	
 	def do_restart(self):
 		if not self.stopped:
-			reactor.callLater(True,5,self.do_start)
+			callLater(True,5,self.do_start)
 		
 
 class FS20transmit(AttributedStatement):

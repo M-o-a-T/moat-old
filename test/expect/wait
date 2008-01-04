@@ -4,7 +4,7 @@ NEW: <ConditionalWorkSequence:1 (4)>
    : └1╴... done.
 1 EVENT: startup
 1 END: startup
-0 add ‹WaitHandler: wait¦for 2›
+0 add ‹WaitHandler: wait¦for 3›
 0 add ‹TriggerHandler trigger¦FooBar›
 18 EVENT: wait¦start¦×××¦X1
 NEW: <ConditionalWorkSequence:2 (4)>
@@ -27,23 +27,23 @@ NEW: <ConditionalWorkSequence:4 (4)>
 Foo Bar
 .
 Name: Foo Bar
-Started: 2003-04-05 06:07:08.200000
-Ending: 2003-04-05 06:07:18.200000
-Remaining: 9.7
+Started: 2003-04-05 06:07:08.050000
+Ending: 2003-04-05 06:07:18.050000
+Remaining: 9.85
 in: async
 in: None
 .
-50 EVENT: wait¦update¦0.6¦Foo¦Bar
+50 EVENT: wait¦update¦0.3¦Foo¦Bar
 NEW: <ConditionalWorkSequence:5 (4)>
-   : │  EVENT: wait¦update¦0.6¦Foo¦Bar
+   : │  EVENT: wait¦update¦0.3¦Foo¦Bar
    : └1╴... done.
-50 EVENT: wait¦update¦0.6¦Foo¦Bar
-50 END: wait¦update¦0.6¦Foo¦Bar
+50 EVENT: wait¦update¦0.3¦Foo¦Bar
+50 END: wait¦update¦0.3¦Foo¦Bar
 0 add ‹IfStatement if¦exists¦wait¦Foo¦Baz›
 0 add ‹LogHandler log¦DEBUG¦No2›
 0 add ‹LogHandler log¦DEBUG¦Yes›
 1 Yes
-0 add ‹WaitHandler: wait¦for 2›
+0 add ‹WaitHandler: wait¦for 3›
 0 add ‹TriggerHandler trigger¦DoNow¦$wait›
 70 EVENT: wait¦start¦×××¦X2
 NEW: <ConditionalWorkSequence:6 (4)>
@@ -69,16 +69,16 @@ NEW: <ConditionalWorkSequence:9 (4)>
    : └1╴... done.
 92 EVENT: wait¦done¦×××¦X2
 92 END: wait¦done¦×××¦X2
-100 EVENT: DoNow¦0.7
+100 EVENT: DoNow¦0.4
 NEW: <ConditionalWorkSequence:10 (4)>
-   : │  EVENT: DoNow¦0.7
+   : │  EVENT: DoNow¦0.4
    : └1╴... done.
 106 EVENT: wait¦start¦×××¦X3
 NEW: <ConditionalWorkSequence:11 (4)>
    : │  EVENT: wait¦start¦×××¦X3
    : └1╴... done.
-100 EVENT: DoNow¦0.7
-100 END: DoNow¦0.7
+100 EVENT: DoNow¦0.4
+100 END: DoNow¦0.4
 106 EVENT: wait¦start¦×××¦X3
 106 END: wait¦start¦×××¦X3
 118 EVENT: wait¦done¦×××¦X3
@@ -87,7 +87,7 @@ NEW: <ConditionalWorkSequence:12 (4)>
    : └1╴... done.
 118 EVENT: wait¦done¦×××¦X3
 118 END: wait¦done¦×××¦X3
-0 add ‹WaitForHandler: wait¦until 2›
+0 add ‹WaitForHandler: wait¦until 3›
 0 add ‹TriggerHandler trigger¦Heya›
 132 EVENT: wait¦start¦×××¦_wait¦7
 NEW: <ConditionalWorkSequence:13 (4)>
@@ -130,7 +130,7 @@ RUN: on whatever ‹OnEventHandler›
    : step: log TRACE We wait $x ‹LogHandler›
  at: <ConditionalWorkSequence:16 (5)> (step 1)
  ev: EVENT: whatever
-0 We wait ‹Waiter Foo¦Baz 50›
+0 We wait ‹Waiter Foo¦Baz 51›
 167 END: whatever
 179 EVENT: wait¦start¦×××¦_wait¦8
 NEW: <ConditionalWorkSequence:17 (4)>

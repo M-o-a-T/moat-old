@@ -34,10 +34,14 @@ on net disconnect foo:
 	log TRACE dis foo
 on net disconnect baz:
 	log TRACE dis baz
-wait for 0.2
+wait for 0.2:
+	name BEFORE
+	debug force
 listen net baz localhost 50345
 connect net foo localhost 50333
-wait for 0.8
+wait for 0.8:
+	name AFTER
+	debug force
 log TRACE ending
 list net
 shutdown

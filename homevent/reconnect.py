@@ -22,8 +22,10 @@ from Twisted.
 
 import random
 
-from twisted.internet import interfaces, error, protocol
 from homevent.logging import TRACE,DEBUG,INFO, log
+from homevent.twist import callLater
+
+from twisted.internet import interfaces, error, protocol
 from twisted.internet import reactor
 
 class ReconnectingClientFactory(protocol.ClientFactory):
@@ -117,7 +119,7 @@ class ReconnectingClientFactory(protocol.ClientFactory):
 			self._callID = None
 			self.connector.connect()
 			self.connector = None
-		self._callID = reactor.callLater(True,self.delay, reconnector)
+		self._callID = callLater(True,self.delay, reconnector)
 
 	def stopTrying(self):
 		"""I put a stop to any attempt to reconnect in progress.

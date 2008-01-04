@@ -95,13 +95,13 @@ NEW: <ConditionalWorkSequence:6 (4)>
 0 add ‹LogHandler log¦DEBUG¦No0›
 0 add ‹LogHandler log¦DEBUG¦Yes›
 1 Yes
-foo bar :: Wait ‹now›
+foo bar :: Wait ‹0.2 sec›
 .
 name: foo bar
 device: test 0…100
 value: 42.0
 up: Wait
-time: ‹now›
+time: ‹0.2 sec›
 steps: 1 / 1 / None
 data: 42
 .
@@ -167,9 +167,9 @@ NEW: <ConditionalWorkSequence:10 (4)>
 0 Create OnEvtHandler: monitor¦checking¦baz¦zaz
 0 add ‹Async async›
 0 add ‹MonitorSet set¦monitor¦10¦baz¦zaz›
-0 add ‹WaitHandler: wait¦for 2›
+0 add ‹WaitHandler: wait¦for 3›
 0 add ‹MonitorSet set¦monitor¦13¦baz¦zaz›
-0 add ‹WaitHandler: wait¦for 2›
+0 add ‹WaitHandler: wait¦for 3›
 0 add ‹MonitorSet set¦monitor¦14¦baz¦zaz›
 0 NewHandler 2
 name: baz zaz

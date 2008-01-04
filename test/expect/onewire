@@ -81,7 +81,6 @@ RUN: on onewire scanned A * * * ‹OnEventHandler›
    : step: trigger thermo $X ‹TriggerHandler›
    : step: del wait yawn ‹WaitCancel›
  at: <ConditionalWorkSequence:48 (5)> (step 1)
-99 Try <twisted.internet.tcp.Connector instance at FOO> immediately
 99 EVENT: thermo¦DATA
 NEW: <ConditionalWorkSequence:49 (4)>
    : │  EVENT: thermo¦DATA
@@ -94,25 +93,17 @@ NEW: <ConditionalWorkSequence:_VAL_ (4)>
 99 END: thermo¦DATA
 99 EVENT: wait¦cancel¦×××¦yawn
 99 END: wait¦cancel¦×××¦yawn
-ERROR: Traceback (most recent call last):
-     : Failure: homevent.worker.HaltSequence: ‹Waiter yawn 8›
-NEW: <WorkSequence:51 (4)>
-   : │  ERROR: ‹Waiter yawn 8›
-   : └1╴... done.
-99 END: onewire¦scanned¦A¦0¦18¦18
-ERROR: Traceback (most recent call last):
-     : Failure: homevent.worker.HaltSequence: ‹Waiter yawn 8›
-99 END: HaltSequence
+99 NOW: do nothing
 99 Drop OWFS bus A
-99 EVENT: wait¦start¦×××¦_wait¦2
+99 EVENT: wait¦start¦×××¦END
+NEW: <ConditionalWorkSequence:51 (4)>
+   : │  EVENT: wait¦start¦×××¦END
+   : └1╴... done.
+99 EVENT: wait¦start¦×××¦END
+99 END: wait¦start¦×××¦END
+99 EVENT: wait¦done¦×××¦END
 NEW: <ConditionalWorkSequence:52 (4)>
-   : │  EVENT: wait¦start¦×××¦_wait¦2
+   : │  EVENT: wait¦done¦×××¦END
    : └1╴... done.
-99 EVENT: wait¦start¦×××¦_wait¦2
-99 END: wait¦start¦×××¦_wait¦2
-99 EVENT: wait¦done¦×××¦_wait¦2
-NEW: <ConditionalWorkSequence:53 (4)>
-   : │  EVENT: wait¦done¦×××¦_wait¦2
-   : └1╴... done.
-99 EVENT: wait¦done¦×××¦_wait¦2
-99 END: wait¦done¦×××¦_wait¦2
+99 EVENT: wait¦done¦×××¦END
+99 END: wait¦done¦×××¦END

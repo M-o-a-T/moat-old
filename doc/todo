@@ -26,11 +26,6 @@ Code
 
 * convert some heavy users of (single) Deferreds to @inlineCallbacks
 
-* convert the timeout reporting that the test system sees to count
-  "timer ticks", and show these in the logs, instead of the fickle
-  sub-second timeouts that currently cause lots of random false
-  negatives, esp. on slower machines.
-
 * Improve monitor and ‘delta’ handling
 
   - high / low limits should apply to the delta

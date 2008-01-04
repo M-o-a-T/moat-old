@@ -28,7 +28,7 @@ from homevent.context import Context
 from homevent.event import Event
 from homevent.run import process_event,process_failure
 from homevent.reconnect import ReconnectingClientFactory
-from homevent.twist import deferToLater
+from homevent.twist import deferToLater,callLater
 from homevent.base import Name
 
 from twisted.internet import protocol,defer,reactor
@@ -309,7 +309,7 @@ class OWFStimeout(object):
 
 	def do_timeout(self):
 		if self.timer is None:
-			self.timer = reactor.callLater(True,self.timeout,self.has_timeout)
+			self.timer = callLater(True,self.timeout,self.has_timeout)
 
 	def drop_timeout(self):
 		if self.timer:
@@ -524,9 +524,9 @@ class OWFSqueue(OWFSreceiver):
 			msg.error(err)
 		elif msg.may_retry():
 			if isinstance(err,OWFSerror) and err.typ == -errno.ENOENT:
-				deferToLater(reactor.callLater,5*msg.tries,self.factory.queue,msg)
+				deferToLater(callLater,True,5*msg.tries,self.factory.queue,msg)
 			else:
-				deferToLater(reactor.callLater,0.5*msg.tries,self.factory.queue,msg)
+				deferToLater(callLater,True,0.5*msg.tries,self.factory.queue,msg)
 		elif not msg.d.called: # just ignore that
 			msg.error(err)
 
@@ -612,7 +612,7 @@ class OWFSfactory(object,ReconnectingClientFactory):
 				delay = 10
 			else:
 				delay = 300
-			self.nop = reactor.callLater(True,delay,self.nopper)
+			self.nop = callLater(True,delay,self.nopper)
 
 	def nopper(self):
 		self.nop = None
@@ -790,7 +790,7 @@ class OWFSfactory(object,ReconnectingClientFactory):
 			else:
 				if _: d = 60
 				else: d = 300
-			self.watcher_id = reactor.callLater(True,d,self.watcher)
+			self.watcher_id = callLater(True,d,self.watcher)
 		d.addCallback(monitor)
 	
 	def run_watcher(self):

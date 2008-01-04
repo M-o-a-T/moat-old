@@ -22,10 +22,12 @@ from homevent.statement import main_words, global_words
 from homevent.check import register_condition
 from homevent.module import load_module, Load,Unload,LoadDir,ModuleExists
 from homevent.reactor import ShutdownHandler,mainloop,shut_down
+from homevent.context import Context
+from homevent.twist import callLater
+
 from twisted.internet import reactor,interfaces,fdesc
 from twisted.internet._posixstdio import StandardIO ## XXX unstable interface!
 from twisted.internet.error import ConnectionDone,ConnectionLost
-from homevent.context import Context
 from traceback import print_exc
 import os,sys
 
@@ -76,6 +78,6 @@ def ready():
 	r.addErrback(reporter)
 	r.addBoth(lambda _: shut_down())
 
-reactor.callLater(0.1,ready)
+callLater(False,0.1,ready)
 mainloop()
 

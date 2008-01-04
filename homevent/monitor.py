@@ -29,7 +29,7 @@ from homevent.reactor import shutdown_event
 from homevent.worker import ExcWorker
 from homevent.times import time_delta, time_until, unixdelta, now
 from homevent.base import Name,SYS_PRIO
-from homevent.twist import deferToLater
+from homevent.twist import deferToLater, callLater
 from homevent.context import Context
 from homevent.logging import log,TRACE,DEBUG
 from homevent.collect import Collection,Collected
@@ -207,7 +207,7 @@ class Monitor(Collected):
 				s += dt.timedelta(0,self.delay)
 
 		self.started_at = s
-		self.timer = reactor.callLater(unixdelta(s-now()), self._run)
+		self.timer = callLater(False,unixdelta(s-now()), self._run)
 
 	def filter_data(self):
 		log("monitor",TRACE,"filter",self.data,"on", self.name)
@@ -304,9 +304,9 @@ class Monitor(Collected):
 					self.timer = None
 					d.callback(None)
 			if isinstance(self.delay,tuple):
-				self.timer = reactor.callLater(unixdelta(time_delta(self.delay)-now()), kick)
+				self.timer = callLater(False,unixdelta(time_delta(self.delay)-now()), kick)
 			else:
-				self.timer = reactor.callLater(self.delay, kick)
+				self.timer = callLater(False,self.delay, kick)
 			return self.timerd
 
 		try:

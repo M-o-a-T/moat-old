@@ -35,6 +35,7 @@ from homevent.worker import HaltSequence,ExcWorker
 from homevent.times import time_delta, time_until, unixtime,unixdelta, now
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.base import Name,SYS_PRIO
+from homevent.twist import callLater
 
 from time import time
 import os
@@ -76,9 +77,11 @@ def _trigger(_,d):
 
 class Waiter(object):
 	"""This is the thing that waits."""
-	def __init__(self,parent,name):
+	force = False
+	def __init__(self,parent,name,force):
 		self.ctx = parent.ctx
 		self.start = now()
+		self.force = force
 		try:
 			self.parent = parent.parent
 		except AttributeError:
@@ -93,7 +96,7 @@ class Waiter(object):
 		return u"‹%s %s %d›" % (self.__class__.__name__, self.name,self.value)
 
 	def _callit(self,_=None):
-		self.id = reactor.callLater(self.value, self.doit)
+		self.id = callLater(self.force,self.value, self.doit)
 
 	def _lock(self):
 		d = defer.Deferred()
@@ -201,6 +204,7 @@ wait for FOO...
 	  # you can do basic +/- calculations (2m - 10s); you do need the spaces
 """
 	is_update = False
+	force = False
 
 	def __init__(self,*a,**k):
 		super(WaitHandler,self).__init__(*a,**k)
@@ -217,7 +221,7 @@ wait for FOO...
 		if self.is_update:
 			return waiters[self.displayname].retime(dest)
 			
-		w = Waiter(self, self.displayname)
+		w = Waiter(self, self.displayname, self.force)
 		d = w.init(dest)
 		return d
 
@@ -290,6 +294,28 @@ name ‹whatever you want›
 		if not len(event):
 			raise SyntaxError(u'Usage: name ‹name…›')
 		self.parent.displayname = Name(event)
+
+
+class WaitDebug(Statement):
+	name = ("debug",)
+	doc = "Debugging / testing support"
+	long_doc=u"""\
+debug ‹flags›
+	This statement sets internal flags used for debugging.
+Known flags:
+	force
+		Do not optimize this delay away when regression testing.
+		No effect in normal use.
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if not len(event):
+			raise SyntaxError(u'Usage: debug ‹flag…›')
+		for n in event:
+			if n == "force":
+				self.parent.force = True
+			else:
+				raise SyntaxError(u'Flag ‹%s› unknown' % (n,))
 
 
 class WaitCancel(Statement):
@@ -402,6 +428,7 @@ var wait NAME name...
 
 
 WaitHandler.register_statement(WaitName)
+WaitHandler.register_statement(WaitDebug)
 WaitHandler.register_statement(WaitUpdate)
 
 class Shutdown_Worker_Wait(ExcWorker):

@@ -20,25 +20,25 @@ NEW: <ConditionalWorkSequence:1 (4)>
 0 Create OnEvtHandler: net¦disconnect¦baz
 0 add ‹LogHandler log¦TRACE¦dis¦baz›
 0 NewHandler 4
-27 EVENT: wait¦start¦0.2¦_wait¦1
+31 EVENT: wait¦start¦0.2¦BEFORE
 NEW: <ConditionalWorkSequence:2 (4)>
-   : │  EVENT: wait¦start¦0.2¦_wait¦1
+   : │  EVENT: wait¦start¦0.2¦BEFORE
    : └1╴... done.
-27 EVENT: wait¦start¦0.2¦_wait¦1
-27 END: wait¦start¦0.2¦_wait¦1
-34 EVENT: wait¦done¦0.2¦_wait¦1
+31 EVENT: wait¦start¦0.2¦BEFORE
+31 END: wait¦start¦0.2¦BEFORE
+38 EVENT: wait¦done¦0.2¦BEFORE
 NEW: <ConditionalWorkSequence:3 (4)>
-   : │  EVENT: wait¦done¦0.2¦_wait¦1
+   : │  EVENT: wait¦done¦0.2¦BEFORE
    : └1╴... done.
-34 EVENT: wait¦done¦0.2¦_wait¦1
-34 END: wait¦done¦0.2¦_wait¦1
-47 EVENT: wait¦start¦1.3¦_wait¦2
+38 EVENT: wait¦done¦0.2¦BEFORE
+38 END: wait¦done¦0.2¦BEFORE
+55 EVENT: wait¦start¦1.0¦AFTER
 NEW: <ConditionalWorkSequence:4 (4)>
-   : │  EVENT: wait¦start¦1.3¦_wait¦2
+   : │  EVENT: wait¦start¦1.0¦AFTER
    : └1╴... done.
-47 EVENT: wait¦start¦1.3¦_wait¦2
-47 END: wait¦start¦1.3¦_wait¦2
-54 EVENT: net¦connect¦foo
+55 EVENT: wait¦start¦1.0¦AFTER
+55 END: wait¦start¦1.0¦AFTER
+62 EVENT: net¦connect¦foo
 NEW: <ConditionalWorkSequence:5 (5)>
    : │  EVENT: net¦connect¦foo
    : ├1╴on net connect foo ‹OnEventHandler›
@@ -47,7 +47,7 @@ NEW: <ConditionalWorkSequence:5 (5)>
    : │  step: list net foo ‹List›
    : │  step: disconnect net foo ‹NETdisconnect›
    : └2╴... done.
-54 EVENT: net¦connect¦foo
+62 EVENT: net¦connect¦foo
 RUN: on net connect foo ‹OnEventHandler›
    : prio: 51
    : step: send net foo bar ‹NETsend›
@@ -60,25 +60,25 @@ host: localhost
 port: 50333
 connected: Yes
 .
-62 EVENT: net¦disconnect¦foo
+70 EVENT: net¦disconnect¦foo
 NEW: <ConditionalWorkSequence:6 (5)>
    : │  EVENT: net¦disconnect¦foo
    : ├1╴on net disconnect foo ‹OnEventHandler›
    : │  prio: 51
    : │  step: log TRACE dis foo ‹LogHandler›
    : └2╴... done.
-54 END: net¦connect¦foo
-2 [Failure instance: Traceback (failure with no frames): <class 'twisted.internet.error.ConnectionDone'>: Connection was closed cleanly.
-]
-62 EVENT: net¦disconnect¦foo
+62 END: net¦connect¦foo
+70 EVENT: net¦disconnect¦foo
 RUN: on net disconnect foo ‹OnEventHandler›
    : prio: 51
    : step: log TRACE dis foo ‹LogHandler›
  at: <ConditionalWorkSequence:6 (5)> (step 1)
  ev: EVENT: net¦disconnect¦foo
 0 dis foo
-62 END: net¦disconnect¦foo
-74 EVENT: net¦connect¦baz
+70 END: net¦disconnect¦foo
+2 [Failure instance: Traceback (failure with no frames): <class 'twisted.internet.error.ConnectionDone'>: Connection was closed cleanly.
+]
+82 EVENT: net¦connect¦baz
 NEW: <ConditionalWorkSequence:7 (5)>
    : │  EVENT: net¦connect¦baz
    : ├1╴on net connect baz ‹OnEventHandler›
@@ -87,7 +87,7 @@ NEW: <ConditionalWorkSequence:7 (5)>
    : │  step: list net baz ‹List›
    : │  step: disconnect net baz ‹NETdisconnect›
    : └2╴... done.
-74 EVENT: net¦connect¦baz
+82 EVENT: net¦connect¦baz
 RUN: on net connect baz ‹OnEventHandler›
    : prio: 51
    : step: send net baz quux ‹NETsend›
@@ -100,28 +100,28 @@ host: localhost
 port: 50345
 connected: Yes
 .
-82 EVENT: net¦disconnect¦baz
+90 EVENT: net¦disconnect¦baz
 NEW: <ConditionalWorkSequence:8 (5)>
    : │  EVENT: net¦disconnect¦baz
    : ├1╴on net disconnect baz ‹OnEventHandler›
    : │  prio: 51
    : │  step: log TRACE dis baz ‹LogHandler›
    : └2╴... done.
-74 END: net¦connect¦baz
-82 EVENT: net¦disconnect¦baz
+82 END: net¦connect¦baz
+90 EVENT: net¦disconnect¦baz
 RUN: on net disconnect baz ‹OnEventHandler›
    : prio: 51
    : step: log TRACE dis baz ‹LogHandler›
  at: <ConditionalWorkSequence:8 (5)> (step 1)
  ev: EVENT: net¦disconnect¦baz
 0 dis baz
-82 END: net¦disconnect¦baz
-94 EVENT: wait¦done¦1.3¦_wait¦2
+90 END: net¦disconnect¦baz
+102 EVENT: wait¦done¦1.0¦AFTER
 NEW: <ConditionalWorkSequence:9 (4)>
-   : │  EVENT: wait¦done¦1.3¦_wait¦2
+   : │  EVENT: wait¦done¦1.0¦AFTER
    : └1╴... done.
-94 EVENT: wait¦done¦1.3¦_wait¦2
-94 END: wait¦done¦1.3¦_wait¦2
+102 EVENT: wait¦done¦1.0¦AFTER
+102 END: wait¦done¦1.0¦AFTER
 0 ending
 .
 2 EVENT: shutdown
