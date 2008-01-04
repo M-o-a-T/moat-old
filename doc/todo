@@ -38,6 +38,9 @@ Code
 
 * implement a PID controller
 
+* Implement a PWM modulator
+  - both fixed-total and fixed-min/max-pulse modes please
+
 * implement a multi-step controller (i.e. simple switch thresholds)
 
 
