@@ -90,13 +90,20 @@ def deferToLater(p,*a,**k):
 	return d
 
 
-# Bug workaround: Sometimes the Twisted reactor seems to conveniently
-# forget that we just called reactor.callLater().
 wcl = reactor.callLater
 def wake_later(t,p,*a,**k):
+	# Simplification: sometimes we're late starting something.
+	# That is not a bug, that's life.
+	# reactor.callLater asserts >=0, so just make sure that it is.
+	if t < 0: t = 0
+
 	r = wcl(t,p,*a,**k)
+
+	# Bug workaround: Sometimes the Twisted reactor seems not to notice
+	# that we just called reactor.callLater().
 	if reactor.waker:
 		reactor.waker.wakeUp()
+
 	return r
 reactor.callLater = wake_later
 
