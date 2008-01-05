@@ -24,7 +24,7 @@ typedef struct _FLOW FLOW;
 #include <time.h>
 #include <sys/time.h>
 
-#define FLOWMAX 20 /* allowed packet length */
+#define flow_rate(f,x) (int)(f->rate*x/1000000)
 
 /**
  * Analyze incoming 868.35MHz signal.
@@ -37,21 +37,33 @@ typedef struct _FLOW FLOW;
 struct _FLOW {
 	unsigned long rate;
 
+	/* width; 4 or 8 bits */
+	unsigned char bits;
+
+	/* check bit after each byte */
+	unsigned char parity;
+
+	/* most significant bit first? */
+	unsigned char msb;
+
 	/* read */
-	unsigned short low,mid,high;
+	unsigned int r_times[R_IDLE+1];
+	unsigned short r_sync;
 
 	flow_readproc reader;
 	void *reader_param;
 
 	int readlen;
 	char lasthi;
+	char r_mark_one,r_space_one, r_mark_zero,r_space_zero;
 	unsigned int cnt;
 	int qsum;
 
 	unsigned char byt,bit;
 	char syn;
 
-	unsigned char readbuf[FLOWMAX];
+	unsigned char *readbuf;
+	unsigned int read_max;
 
 	/* read tracing */
 	unsigned short log_low,log_high; /* signal length */
@@ -60,7 +72,9 @@ struct _FLOW {
 	unsigned short log_valid, log_invalid;
 
 	/* write */
-	unsigned int s_zero, s_one;
+	unsigned int w_times[W_IDLE+1];
+	unsigned short w_sync;
+
 	struct timeval last_sent;
 	unsigned long bytes_sent; /* never more than "rate" */
 

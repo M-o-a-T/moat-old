@@ -14,13 +14,18 @@
 ##  for more details.
 ##
 
-CFLAGS=-O2 -g -Wall $(shell pkg-config --cflags glib-2.0)
+OPT=2
+CFLAGS=-O$(OPT) -g -Wall $(shell pkg-config --cflags glib-2.0)
 LDLIBS=$(shell pkg-config --libs glib-2.0) -lportaudio
 
 all: reader writer
 
 reader: reader.o flow.o flow_read.o 
 writer: writer.o flow.o flow_write.o 
+
+test:
+	sh ../test/audio.sh
+	@cmp -s ../test/expect/fs20rw ../test/real/fs20rw
 
 flow.o: flow.c flow.h flow_internal.h
 flow_read.o: flow_read.c flow.h flow_internal.h

@@ -96,6 +96,29 @@ void printer(void *unused __attribute__((unused)),
 	fflush(stdout);
 }
 
+static FLOW *
+do_flow_setup(void)
+{
+	FLOW *f;
+	unsigned int x[R_IDLE+1] = {
+		[R_MIN+R_ZERO+R_MARK ] = 300,
+		[R_MIN+R_ZERO+R_SPACE] = 300,
+		[R_MIN+R_ONE +R_MARK ] = 500,
+		[R_MIN+R_ONE +R_SPACE] = 500,
+		[R_MAX+R_ZERO+R_MARK ] = 500,
+		[R_MAX+R_ZERO+R_SPACE] = 500,
+		[R_MAX+R_ONE +R_MARK ] = 700,
+		[R_MAX+R_ONE +R_SPACE] = 700,
+		[R_IDLE] = 900,
+	};
+
+	f = flow_setup(rate, 10, 8, P_EVEN, 1);
+	if (!f) return NULL;
+	flow_setup_reader(f,6,x);
+	flow_reader(f,printer,NULL);
+	return f;
+}
+
 __attribute__((noreturn)) 
 static int do_exec(int argc, char *argv[])
 {
@@ -131,8 +154,7 @@ static int do_exec(int argc, char *argv[])
 	ifd = fdopen(r[0],"r");
 	close(r[1]);
 	
-	f = flow_setup(rate, 3,4,5,6,7);
-	flow_reader(f,printer,NULL);
+	f = do_flow_setup();
 	if(log_len) flow_report(f,log_min,log_max,log_len);
 
 	while((c = getc(ifd)) != EOF) {
@@ -220,8 +242,7 @@ static void do_pa_run(PaDeviceIndex idx, PaTime latency)
 	struct PaStreamParameters param;
 	PaStream *stream = NULL;
 
-	f = flow_setup(rate, 3,4,5,6,7);
-	flow_reader(f,printer,NULL);
+	f = do_flow_setup();
 	if(log_len) flow_report(f,log_min,log_max,log_len);
 
 	memset(&param,0,sizeof(param));

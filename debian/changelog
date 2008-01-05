@@ -1,8 +1,9 @@
 homevent (0.2.7) stable; urgency=low
 
   * Onwards.
+  * Extended audio flow stuff to be parameterizable beyond reason.
 
- -- Matthias Urlichs <matthias@urlichs.de>  Sat, 05 Jan 2008 10:59:57 +0100
+ -- Matthias Urlichs <matthias@urlichs.de>  Sat, 05 Jan 2008 11:01:03 +0100
 
 homevent (0.2.6) stable; urgency=low
 

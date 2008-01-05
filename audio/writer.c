@@ -158,6 +158,22 @@ gboolean timer(void *unused __attribute__((unused)))
 	return 1;
 }
 
+static FLOW *
+do_flow_setup()
+{
+	FLOW *f;
+	unsigned int x[W_IDLE+1] = {
+		[W_ZERO+W_MARK ] = 400,
+		[W_ZERO+W_SPACE] = 400,
+		[W_ONE +W_MARK ] = 600,
+		[W_ONE +W_SPACE] = 600,
+		[W_IDLE] = 2000,
+	};
+	f = flow_setup(rate, 10, 8, P_EVEN, 1);
+	flow_setup_writer(f,10,x);
+	return f;
+}
+
 __attribute__((noreturn)) 
 static int do_exec(int argc, char *argv[])
 {
@@ -172,7 +188,8 @@ static int do_exec(int argc, char *argv[])
 		exit(4);
 	}
 	
-	f = flow_setup(rate, 3,4,5,6,7);
+	f = do_flow_setup();
+
 	flow_writer(f,writer,NULL, 0);
 	mainloop = g_main_loop_new(NULL, 0);
 	input = g_io_channel_unix_new(0);
@@ -221,7 +238,7 @@ static void do_pa_run(PaDeviceIndex idx, PaTime latency)
 	struct PaStreamParameters param;
 	PaStream *stream = NULL;
 
-	f = flow_setup(rate, 3,4,5,6,7);
+	f = do_flow_setup();
 
 	memset(&param,0,sizeof(param));
 	param.device = idx;

@@ -29,6 +29,15 @@
  * *can* be thus represented.
  */
 
+void flow_setup_writer(FLOW *f, unsigned int nsync, unsigned int param[W_IDLE])
+{
+	unsigned int i;
+	f->w_sync = nsync;
+	for(i=W_IDLE+1; i-- > 0;) {
+		f->w_times[i] = flow_rate(f,param[i]);
+	}
+}
+
 void flow_writer(FLOW *f, flow_writeproc proc, void *param, int blocking)
 {
 	f->writer = proc;
@@ -38,9 +47,13 @@ void flow_writer(FLOW *f, flow_writeproc proc, void *param, int blocking)
 
 int flow_write_buf(FLOW *f, unsigned char *data, unsigned int len)
 {
-	unsigned int min_len = 2*9*(len+3)*f->high; /* yes, that's more than necessary. */
 	unsigned char *bp;
-	int n = 0;
+	unsigned char par;
+
+#define M(x) ((f->w_times[x+W_ZERO] > f->w_times[x+W_ONE]) ? \
+		f->w_times[x+W_ZERO] : f->w_times[x+W_ONE])
+	unsigned int min_len = ((f->bits+1)*len+f->w_sync+2)*(M(R_MARK)+M(R_SPACE))+f->w_times[W_IDLE];
+#undef M
 
 	if(f->sendbuf_len < f->sendbuf_used + min_len) {
 		unsigned char *buf = realloc(f->sendbuf, f->sendbuf_used + min_len);
@@ -50,38 +63,61 @@ int flow_write_buf(FLOW *f, unsigned char *data, unsigned int len)
 	}
 	bp = f->sendbuf + f->sendbuf_used;
 
-#define R(x) /* One high/low sequence */ \
-	do { \
-		int _x = (x); \
-		unsigned int _i; \
-		for(_i=0;_i<_x;_i++) *bp++ = '\xFF'; \
-		for(_i=0;_i<_x;_i++) *bp++ = '\0'; \
-		n += 2*_x; \
-	} while(0)
-#define L() R(f->s_zero) /* one short such sequence => 0 bit */
-#define H() R(f->s_one) /* one long sequence => 1 bit */
-#define X(x) do { if((x)) H(); else L(); } while(0) /* one bit */
-#define B(b) /* one byte plus parity */ \
-	do { \
-		unsigned char _m = 0x80; \
-		unsigned char _b = (b); \
-		while(_m) { \
-			X(_b & _m); \
-			_m >>= 1; \
-		} \
-		_b ^= _b >> 4; \
-		_b ^= _b >> 2; \
-		_b ^= _b >> 1; \
-		X(_b & 1); /* parity */ \
-	} while(0) 
+	/* One high/low sequence */
+	inline void R(int _x)
+	{
+		unsigned int _i;
+		for(_i=f->w_times[_x+W_MARK];_i>0;_i--) *bp++ = '\xFF';
+		for(_i=f->w_times[_x+W_SPACE];_i>0;_i--) *bp++ = '\x00';
+	}
+	inline void X(unsigned char _y) /* one bit */
+	{
+		if(_y) {
+			R(W_ONE);
+			par ^= 1;
+		} else
+			R(W_ZERO);
+	}
+
+
+	inline void BM(unsigned char _b) /* one byte plus parity, MSB first */ 
+	{
+		unsigned char _m = 1<<(f->bits-1);
+
+		par=0;
+		while(_m) {
+			X(_b & _m);
+			_m >>= 1;
+		}
+		X(par); /* parity */
+	}
+
+	inline void BL(unsigned char _b) /* one byte plus parity, LSB first */ 
+	{
+		unsigned char par=0;
+		unsigned char _m = f->bits;
+		while(_m--) {
+			X(_b & 1);
+			_b >>= 1;
+		}
+		X(par); /* parity */
+	}
 
 	unsigned int i;
-	for(i=0;i<12;i++) L();  H(); /* sync sequence */
-	while(len--) B(*data++);
-	L(); /* one last bit, to mark the end */
+
+	/* sync sequence */
+	for(i=0;i<f->w_sync;i++)
+		R(0);
+	R(1);
+
+	if(f->msb)
+		while(len--) BM(*data++);
+	else
+		while(len--) BL(*data++);
+	R(0); /* one last bit, to mark the end */
 	     /* this is because the decoder may just look at the pause lengths */
-	for(i=0; i < f->high*3; i++) *bp++ = '\0';
-	f->sendbuf_used += n + 3*f->high;
+	for(i=f->w_times[W_IDLE]; i > 0; i--) *bp++ = '\0';
+	f->sendbuf_used = bp-f->sendbuf;
 	return flow_write_idle(f);
 }
 

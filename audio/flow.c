@@ -20,22 +20,19 @@
 
 #include "flow_internal.h"
 
-FLOW *flow_setup(unsigned int rate,
-	unsigned short _low, unsigned short _l, unsigned short _mid, unsigned short _h, unsigned short _high)
+FLOW *flow_setup(unsigned int rate, unsigned int maxlen, unsigned char bits, 
+                 unsigned char parity, unsigned char msb)
 {
 	FLOW *f = malloc(sizeof(*f));
 	if (!f) return NULL;
 	memset(f,0,sizeof(*f));
 
-#define r(x) (int)(rate*.0001*x)
 	f->rate = rate;
-	f->low = r(_low);
-	f->mid = r(_mid);
-	f->high = r(_high);
+	f->bits = bits;
+	f->parity = parity;
+	f->msb = msb;
+	f->read_max = maxlen;
 
-	f->s_zero = r(_l);
-	f->s_one = r(_h);
-#undef r
 	gettimeofday(&f->last_sent, NULL);
 
 	return f;
@@ -44,6 +41,7 @@ FLOW *flow_setup(unsigned int rate,
 void flow_free(FLOW *f)
 {
 	if(!f) return;
+	free(f->readbuf);
 	free(f->sendbuf);
 	free(f->fillbuf);
 	free(f->logbuf);

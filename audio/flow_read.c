@@ -18,6 +18,17 @@
 #include <malloc.h>
 #include <limits.h>
 
+void flow_setup_reader(FLOW *f, unsigned int nsync, unsigned int param[R_IDLE])
+{
+	unsigned int i;
+	f->r_sync = nsync;
+	for(i=R_IDLE+1; i-- > 0;) {
+		f->r_times[i] = flow_rate(f,param[i]);
+	}
+	if (!f->readbuf)
+		f->readbuf = malloc(f->read_max);
+}
+
 void flow_reader(FLOW *f, flow_readproc proc, void *param)
 {
 	f->reader = proc;
@@ -33,8 +44,6 @@ static void flow_init(FLOW *f)
 	}
 	f->byt = 0;
 	f->bit = 0;
-	f->cnt = 0;
-	f->lasthi = 0;
 	f->syn = 0;
 	f->qsum = 0;
 }
@@ -57,20 +66,17 @@ int flow_read_logging(FLOW *f) {
 
 static inline void flow_char(FLOW *f, unsigned char c)
 {
-	int hi;
+	unsigned char hi;
+	unsigned char ex=0;
 
 	hi = ((c & 0x80) != 0);
-	if(hi == f->lasthi) {
-		if (f->cnt > f->high) {
-			if (f->readlen)
-				flow_init(f);
-		}
-		if(f->cnt < INT_MAX)
-			f->cnt++;
+	if(++f->cnt >= f->r_times[R_IDLE])
+		ex=1;
+	else if(hi == f->lasthi)
 		return;
-	}
+
+#define R(_x) (_x*1000000/f->rate)
 	if (f->logbuf && (f->log_valid || hi)) {
-#define R(_x) (_x*100000/f->rate)
 		if ((f->cnt >= f->log_low || (f->log_valid > 0 && ++f->log_invalid < 6)) && f->cnt <= f->log_high) {
 			if (f->log_valid < f->log_min) {
 				f->logbuf[f->log_valid++] = f->cnt;
@@ -93,41 +99,98 @@ static inline void flow_char(FLOW *f, unsigned char c)
 			f->log_valid = 0;
 			f->log_invalid = 0;
 		}
+	}
 #undef R
+
+	if (ex) { /* R_IDLE exceeed, see above */
+		if (f->lasthi) /* somebody's sending an always-on? */
+			goto init;
+		if (f->r_times[R_SPACE+R_MAX+R_ONE] > 
+			f->r_times[R_SPACE+R_MAX+R_ZERO])
+			f->r_mark_one=1;
+		else
+			f->r_mark_zero=1;
+	} else if (hi) { /* calc space bit */
+		if (f->cnt > f->r_times[R_SPACE+R_MIN+R_ONE]
+		 && f->cnt < f->r_times[R_SPACE+R_MAX+R_ONE])
+			f->r_space_one=1;
+		if (f->cnt > f->r_times[R_SPACE+R_MIN+R_ZERO]
+		 && f->cnt < f->r_times[R_SPACE+R_MAX+R_ZERO])
+			f->r_space_zero=1;
+	} else {
+		if (f->cnt > f->r_times[R_MARK+R_MIN+R_ONE]
+		 && f->cnt < f->r_times[R_MARK+R_MAX+R_ONE])
+			f->r_mark_one=1;
+		if (f->cnt > f->r_times[R_MARK+R_MIN+R_ZERO]
+		 && f->cnt < f->r_times[R_MARK+R_MAX+R_ZERO])
+			f->r_mark_zero=1;
 	}
 	f->lasthi = hi;
-	if(f->cnt < f->low || f->cnt > f->high)
-		goto init;
-	if (hi) {
+	if (!hi && !ex) {
 		f->cnt = 0;
 		return;
 	}
-	hi = (f->cnt >= f->mid);
+	{
+		char r_one=f->r_mark_one+f->r_space_one;
+		char r_zero=f->r_mark_zero+f->r_space_zero;
+
+		f->r_mark_one=0;
+		f->r_space_one=0;
+		f->r_mark_zero=0;
+		f->r_space_zero=0;
+
+		if (r_one == r_zero) goto init;
+		hi = (r_one > r_zero);
+	}
 	f->cnt = 0;
 
 	if (!f->syn) {
 		++f->bit;
 		if(!hi) return;
-		if(f->bit < 6) goto init;
+		if(f->bit < f->r_sync) return;
 		f->bit = 0;
 		f->syn=1;
 		return;
 	}
-	if(++(f->bit) <= 8) {
-		f->byt = (f->byt<<1) | hi;
-		return;
+	if(++(f->bit) <= f->bits) {
+		if (f->msb)
+			f->byt = (f->byt<<1) | hi;
+		else {
+			if(hi)
+				f->byt |= (1<<f->bits);
+		}
+		if (f->parity || f->bit < f->bits)
+			return;
+
+	} else if(f->parity) {
+		unsigned char par;
+		switch(f->parity) {
+		case P_MARK:
+			if (!hi) goto init;
+			break;
+		case P_SPACE:
+			if (hi) goto init;
+			break;
+		default:
+			par = f->byt;
+			par ^= par >> 4;
+			par ^= par >> 2;
+			par ^= par >> 1;
+			if (f->parity == P_EVEN) {
+				if((par&1) == !hi)
+					goto init;
+			} else {
+				if((par&1) == hi)
+					goto init;
+			}
+		}
 	}
-	unsigned char par = f->byt;
-	par ^= par >> 4;
-	par ^= par >> 2;
-	par ^= par >> 1;
-	if((par&1) == !hi)
-		goto init;
-	if(f->readlen >= FLOWMAX)
+	if(f->readlen >= f->read_max)
 		goto init;
 	f->readbuf[f->readlen++] = f->byt;
+	f->byt=0;
 	f->bit=0;
-	return;
+	if(!ex) return;
 
 init:
 	flow_init(f);
