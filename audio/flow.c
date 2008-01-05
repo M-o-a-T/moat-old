@@ -20,30 +20,41 @@
 
 #include "flow_internal.h"
 
-FLOW *flow_setup(unsigned int rate, unsigned int maxlen, unsigned char bits, 
-                 unsigned char parity, unsigned char msb)
+FLOW_STRUCT
+flow_setup(unsigned int rate, unsigned int maxlen, unsigned char bits, 
+           unsigned char parity, unsigned char msb)
 {
-	FLOW *f = malloc(sizeof(*f));
-	if (!f) return NULL;
-	memset(f,0,sizeof(*f));
+#ifndef FLOW_STANDALONE
+	FLOW *flow = malloc(sizeof(*flow));
+	if (!flow) return NULL;
+	memset(flow,0,sizeof(*flow));
+#endif
 
-	f->rate = rate;
-	f->bits = bits;
-	f->parity = parity;
-	f->msb = msb;
-	f->read_max = maxlen;
+	F_rate = rate;
+	F_bits = bits;
+	F_parity = parity;
+	F_msb = msb;
+	F_read_max = maxlen;
 
-	gettimeofday(&f->last_sent, NULL);
+#ifdef F_last_sent
+	gettimeofday(&F_last_sent, NULL);
+#endif
 
-	return f;
+#ifndef FLOW_STANDALONE
+	return flow;
+#endif
 }
 
-void flow_free(FLOW *f)
+void flow_free(FLOW_PARAM1)
 {
-	if(!f) return;
-	free(f->readbuf);
-	free(f->sendbuf);
-	free(f->fillbuf);
-	free(f->logbuf);
-	free(f);
+#ifndef FLOW_STANDALONE
+	if(!flow) return;
+#endif
+	free(F_readbuf);
+	free(F_sendbuf);
+	free(F_fillbuf);
+	free(F_logbuf);
+#ifndef FLOW_STANDALONE
+	free(flow);
+#endif
 }

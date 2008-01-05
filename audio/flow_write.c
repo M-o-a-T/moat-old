@@ -29,46 +29,49 @@
  * *can* be thus represented.
  */
 
-void flow_setup_writer(FLOW *f, unsigned int nsync, unsigned int param[W_IDLE])
+void flow_setup_writer(FLOW_PARAM
+                       unsigned int nsync, unsigned int param[W_IDLE])
 {
 	unsigned int i;
-	f->w_sync = nsync;
+	F_w_sync = nsync;
 	for(i=W_IDLE+1; i-- > 0;) {
-		f->w_times[i] = flow_rate(f,param[i]);
+		F_w_times[i] = flow_rate(f,param[i]);
 	}
 }
 
-void flow_writer(FLOW *f, flow_writeproc proc, void *param, int blocking)
+void flow_writer(FLOW_PARAM
+                 flow_writeproc proc, void *param, int blocking)
 {
-	f->writer = proc;
-	f->writer_param = param;
-	f->blocking = blocking;
+	F_writer = proc;
+	F_writer_param = param;
+	F_blocking = blocking;
 }
 
-int flow_write_buf(FLOW *f, unsigned char *data, unsigned int len)
+int flow_write_buf(FLOW_PARAM
+                   unsigned char *data, unsigned int len)
 {
 	unsigned char *bp;
 	unsigned char par;
 
-#define M(x) ((f->w_times[x+W_ZERO] > f->w_times[x+W_ONE]) ? \
-		f->w_times[x+W_ZERO] : f->w_times[x+W_ONE])
-	unsigned int min_len = ((f->bits+1)*len+f->w_sync+2)*(M(R_MARK)+M(R_SPACE))+f->w_times[W_IDLE];
+#define M(x) ((F_w_times[x+W_ZERO] > F_w_times[x+W_ONE]) ? \
+		F_w_times[x+W_ZERO] : F_w_times[x+W_ONE])
+	unsigned int min_len = ((F_bits+1)*len+F_w_sync+2)*(M(R_MARK)+M(R_SPACE))+F_w_times[W_IDLE];
 #undef M
 
-	if(f->sendbuf_len < f->sendbuf_used + min_len) {
-		unsigned char *buf = realloc(f->sendbuf, f->sendbuf_used + min_len);
+	if(F_sendbuf_len < F_sendbuf_used + min_len) {
+		unsigned char *buf = realloc(F_sendbuf, F_sendbuf_used + min_len);
 		if (buf == NULL) return -1;
-		f->sendbuf = buf;
-		f->sendbuf_len = min_len;
+		F_sendbuf = buf;
+		F_sendbuf_len = min_len;
 	}
-	bp = f->sendbuf + f->sendbuf_used;
+	bp = F_sendbuf + F_sendbuf_used;
 
 	/* One high/low sequence */
 	inline void R(int _x)
 	{
 		unsigned int _i;
-		for(_i=f->w_times[_x+W_MARK];_i>0;_i--) *bp++ = '\xFF';
-		for(_i=f->w_times[_x+W_SPACE];_i>0;_i--) *bp++ = '\x00';
+		for(_i=F_w_times[_x+W_MARK];_i>0;_i--) *bp++ = '\xFF';
+		for(_i=F_w_times[_x+W_SPACE];_i>0;_i--) *bp++ = '\x00';
 	}
 	inline void X(unsigned char _y) /* one bit */
 	{
@@ -82,7 +85,7 @@ int flow_write_buf(FLOW *f, unsigned char *data, unsigned int len)
 
 	inline void BM(unsigned char _b) /* one byte plus parity, MSB first */ 
 	{
-		unsigned char _m = 1<<(f->bits-1);
+		unsigned char _m = 1<<(F_bits-1);
 
 		par=0;
 		while(_m) {
@@ -95,7 +98,7 @@ int flow_write_buf(FLOW *f, unsigned char *data, unsigned int len)
 	inline void BL(unsigned char _b) /* one byte plus parity, LSB first */ 
 	{
 		unsigned char par=0;
-		unsigned char _m = f->bits;
+		unsigned char _m = F_bits;
 		while(_m--) {
 			X(_b & 1);
 			_b >>= 1;
@@ -106,40 +109,44 @@ int flow_write_buf(FLOW *f, unsigned char *data, unsigned int len)
 	unsigned int i;
 
 	/* sync sequence */
-	for(i=0;i<f->w_sync;i++)
+	for(i=0;i<F_w_sync;i++)
 		R(0);
 	R(1);
 
-	if(f->msb)
+	if(F_msb)
 		while(len--) BM(*data++);
 	else
 		while(len--) BL(*data++);
 	R(0); /* one last bit, to mark the end */
 	     /* this is because the decoder may just look at the pause lengths */
-	for(i=f->w_times[W_IDLE]; i > 0; i--) *bp++ = '\0';
-	f->sendbuf_used = bp-f->sendbuf;
-	return flow_write_idle(f);
+	for(i=F_w_times[W_IDLE]; i > 0; i--) *bp++ = '\0';
+	F_sendbuf_used = bp-F_sendbuf;
+	return flow_write_idle(
+#ifndef FLOW_STANDALONE
+                           flow
+#endif
+                               );
 }
 
-int flow_write_idle(FLOW *f)
+int flow_write_idle(FLOW_PARAM1)
 {
 	int n;
 	struct timeval tn;
 
 
-	if(f->sendbuf_used) {
-		n = (*f->writer)(f->writer_param, f->sendbuf, f->sendbuf_used);
-		if (n == f->sendbuf_used) {
-			f->sendbuf_used = 0;
-			f->bytes_sent += n;
+	if(F_sendbuf_used) {
+		n = (*F_writer)(F_writer_param, F_sendbuf, F_sendbuf_used);
+		if (n == F_sendbuf_used) {
+			F_sendbuf_used = 0;
+			F_bytes_sent += n;
 		} else if (n > 0) { /* partial write */
-			f->sendbuf_used -= n;
-			memcpy(f->sendbuf, f->sendbuf + n, f->sendbuf_used);
+			F_sendbuf_used -= n;
+			memcpy(F_sendbuf, F_sendbuf + n, F_sendbuf_used);
 
 			/* Assume that the send buffer is full. Thus, there is no
 			   point in keeping track of any accumulated backlog. */
-			gettimeofday(&f->last_sent, NULL);
-			f->bytes_sent = 0;
+			gettimeofday(&F_last_sent, NULL);
+			F_bytes_sent = 0;
 			return 0;
 		} else if (n == 0) { /* EOF? */
 			errno = 0;
@@ -158,20 +165,20 @@ int flow_write_idle(FLOW *f)
 	 * to keep the sound pipe's send buffer full.
 	 */
 
-	if (f->blocking) {
+	if (F_blocking) {
 		/*
 		 * No need to count anything if the interface is going to block
 		 * on us anyway.
 		 */
-		n = f->rate/20;
-		if (f->fillbuf_len < n) {
-			free(f->fillbuf);
-			f->fillbuf = malloc(n);
-			if (!f->fillbuf) return -1;
-			f->fillbuf_len = n;
-			memset(f->fillbuf,0,n);
+		n = F_rate/20;
+		if (F_fillbuf_len < n) {
+			free(F_fillbuf);
+			F_fillbuf = malloc(n);
+			if (!F_fillbuf) return -1;
+			F_fillbuf_len = n;
+			memset(F_fillbuf,0,n);
 		}
-		n = (*f->writer)(f->writer_param, f->fillbuf, n);
+		n = (*F_writer)(F_writer_param, F_fillbuf, n);
 		if (n == 0) errno = 0;
 		if (n <= 0) return -1;
 		return 0;
@@ -179,28 +186,28 @@ int flow_write_idle(FLOW *f)
 	/*
 	 * First, clean up the byte counter..:
 	 */
-	if (f->bytes_sent > f->rate) {
-		f->last_sent.tv_sec += f->bytes_sent/f->rate;
-		f->bytes_sent %= f->rate;
+	if (F_bytes_sent > F_rate) {
+		F_last_sent.tv_sec += F_bytes_sent/F_rate;
+		F_bytes_sent %= F_rate;
 	}
-	if(timercmp(&f->last_sent, &tn, <)) {
-		long long nb = (tn.tv_sec - f->last_sent.tv_sec) * 1000000 + (tn.tv_usec - f->last_sent.tv_usec);
-		nb = (nb * f->rate) / 1000000 - f->bytes_sent;
+	if(timercmp(&F_last_sent, &tn, <)) {
+		long long nb = (tn.tv_sec - F_last_sent.tv_sec) * 1000000 + (tn.tv_usec - F_last_sent.tv_usec);
+		nb = (nb * F_rate) / 1000000 - F_bytes_sent;
 		if (nb > 0) {
-			if (nb < f->rate/5) { /* 1/5th second */
+			if (nb < F_rate/5) { /* 1/5th second */
 				n = nb;
-				if (f->fillbuf_len < n) {
-					free(f->fillbuf);
-					f->fillbuf = malloc(n);
-					if (!f->fillbuf) return -1;
-					f->fillbuf_len = n;
-					memset(f->fillbuf,0,n);
+				if (F_fillbuf_len < n) {
+					free(F_fillbuf);
+					F_fillbuf = malloc(n);
+					if (!F_fillbuf) return -1;
+					F_fillbuf_len = n;
+					memset(F_fillbuf,0,n);
 				}
-				n = (*f->writer)(f->writer_param, f->fillbuf, n);
+				n = (*F_writer)(F_writer_param, F_fillbuf, n);
 				if (n == 0) errno = 0;
 				if (n <= 0) return -1;
 				if (n == nb) {
-					f->bytes_sent += n;
+					F_bytes_sent += n;
 					return 0;
 				}
 				/* repeat, because the partial writeproc() could have
@@ -211,8 +218,8 @@ int flow_write_idle(FLOW *f)
 			 * too much time has passed since the last call. Either way 
 			 * we restart from now.
 			 */
-			f->last_sent = tn;
-			f->bytes_sent = 0;
+			F_last_sent = tn;
+			F_bytes_sent = 0;
 		}
 	}
 	return 0;

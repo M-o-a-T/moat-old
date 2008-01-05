@@ -21,6 +21,18 @@
 typedef void FLOW;
 #endif
 
+
+#ifdef FLOW_STANDALONE
+#define FLOW_PARAM1
+#define FLOW_PARAM
+#define FLOW_STRUCT void
+#else
+#define FLOW_PARAM1 FLOW *flow
+#define FLOW_PARAM FLOW_PARAM1 ,
+#define FLOW_STRUCT FLOW *
+#endif
+
+
 /* constants for parity */
 #define P_NONE 0
 #define P_ODD 1
@@ -41,11 +53,11 @@ typedef void FLOW;
  * Byte parity is handled by this code; everything else is the job of
  * the application.
  */
-FLOW *flow_setup(unsigned int rate, unsigned int maxlen,
-                 unsigned char bits, unsigned char parity,
-                 unsigned char msb);
+FLOW_STRUCT flow_setup(unsigned int rate, unsigned int maxlen,
+                       unsigned char bits, unsigned char parity,
+                       unsigned char msb);
 
-void flow_free(FLOW *);
+void flow_free(FLOW_PARAM1);
 
 
 /*********** reading ***********/
@@ -81,15 +93,19 @@ void flow_free(FLOW *);
 
 #define R_IDLE 8 /* must be last */
 
-void flow_setup_reader(FLOW *flow, unsigned int nsync, unsigned int len[R_IDLE+1]);
+void flow_setup_reader(FLOW_PARAM
+                       unsigned int nsync, unsigned int len[R_IDLE+1]);
 
 typedef void(*flow_readproc)(void *param, const unsigned char *buf, unsigned int len);
 
-void flow_reader(FLOW *flow, flow_readproc proc, void *param);
-void flow_read_buf(FLOW *flow, const unsigned char *buf, unsigned int len);
+void flow_reader(FLOW_PARAM
+                 flow_readproc proc, void *param);
+void flow_read_buf(FLOW_PARAM
+                   const unsigned char *buf, unsigned int len);
 
-void flow_report(FLOW *flow, unsigned short low, unsigned short high, unsigned short minlen);
-int flow_read_logging(FLOW *flow);
+void flow_report(FLOW_PARAM
+                 unsigned short low, unsigned short high, unsigned short minlen);
+int flow_read_logging(FLOW_PARAM1);
 
 /*********** write ***********/
 
@@ -103,14 +119,17 @@ int flow_read_logging(FLOW *flow);
 
 #define W_IDLE 4 /* must be last */
 
-void flow_setup_writer(FLOW *flow, unsigned int nsync, unsigned int len[W_IDLE+1]);
+void flow_setup_writer(FLOW_PARAM
+                       unsigned int nsync, unsigned int len[W_IDLE+1]);
 
 typedef int(*flow_writeproc)(void *param, unsigned char *buf, unsigned int len);
 
-void flow_writer(FLOW *flow, flow_writeproc proc, void *param, int blocking);
+void flow_writer(FLOW_PARAM
+                 flow_writeproc proc, void *param, int blocking);
 
-int flow_write_buf(FLOW *flow, unsigned char *data, unsigned int len);
-int flow_write_idle(FLOW *flow);
+int flow_write_buf(FLOW_PARAM
+                   unsigned char *data, unsigned int len);
+int flow_write_idle(FLOW_PARAM1);
 /* These return -1/errno when the external write fails, or something else
  * goes wrong*/
 

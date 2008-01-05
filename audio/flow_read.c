@@ -18,153 +18,164 @@
 #include <malloc.h>
 #include <limits.h>
 
-void flow_setup_reader(FLOW *f, unsigned int nsync, unsigned int param[R_IDLE])
+void flow_setup_reader(FLOW_PARAM
+                       unsigned int nsync, unsigned int param[R_IDLE])
 {
 	unsigned int i;
-	f->r_sync = nsync;
+	F_r_sync = nsync;
 	for(i=R_IDLE+1; i-- > 0;) {
-		f->r_times[i] = flow_rate(f,param[i]);
+		F_r_times[i] = flow_rate(f,param[i]);
 	}
-	if (!f->readbuf)
-		f->readbuf = malloc(f->read_max);
+	if (!F_readbuf)
+		F_readbuf = malloc(F_read_max);
 }
 
-void flow_reader(FLOW *f, flow_readproc proc, void *param)
+void flow_reader(FLOW_PARAM
+                 flow_readproc proc, void *param)
 {
-	f->reader = proc;
-	f->reader_param = param;
+	F_reader = proc;
+	F_reader_param = param;
 }
 
-static void flow_init(FLOW *f)
+static void flow_init(FLOW_PARAM1)
 {
-	if(f->readlen) {
-		if (f->reader)
-			(f->reader)(f->reader_param, f->readbuf, f->readlen);
-		f->readlen = 0;
+	if(F_readlen) {
+		if (F_reader)
+			(F_reader)(F_reader_param, F_readbuf, F_readlen);
+		F_readlen = 0;
 	}
-	f->byt = 0;
-	f->bit = 0;
-	f->syn = 0;
-	f->qsum = 0;
+	F_byt = 0;
+	F_bit = 0;
+	F_syn = 0;
+	F_qsum = 0;
 }
 
-void flow_report(FLOW *f, unsigned short low, unsigned short high, unsigned short minlen)
+#ifdef F_LOG
+void
+flow_report(FLOW_PARAM
+            unsigned short low, unsigned short high, unsigned short minlen)
 {
 	if (minlen % 1) minlen++; /* needs to be even, for later */
-	f->logbuf = realloc(f->logbuf, sizeof(unsigned short) * minlen);
-	f->log_min = minlen;
-#define r(x) (int)(f->rate*.0001*x)
-	f->log_low = r(low);
-	f->log_high = r(high);
+	F_logbuf = realloc(F_logbuf, sizeof(unsigned short) * minlen);
+	F_log_min = minlen;
+#define r(x) (int)(F_rate*.0001*x)
+	F_log_low = r(low);
+	F_log_high = r(high);
 #undef r
-	f->log_valid = 0;
+	F_log_valid = 0;
 }
 
-int flow_read_logging(FLOW *f) {
-	return (f->log_valid == f->log_min);
+int
+flow_read_logging(FLOW_PARAM1) {
+	return (F_log_valid == F_log_min);
 }
+#endif
 
-static inline void flow_char(FLOW *f, unsigned char c)
+static inline void
+flow_char(FLOW_PARAM
+          unsigned char c)
 {
 	unsigned char hi;
 	unsigned char ex=0;
 
 	hi = ((c & 0x80) != 0);
-	if(++f->cnt >= f->r_times[R_IDLE])
+	if(++F_cnt >= F_r_times[R_IDLE])
 		ex=1;
-	else if(hi == f->lasthi)
+	else if(hi == F_lasthi)
 		return;
 
-#define R(_x) (_x*1000000/f->rate)
-	if (f->logbuf && (f->log_valid || hi)) {
-		if ((f->cnt >= f->log_low || (f->log_valid > 0 && ++f->log_invalid < 6)) && f->cnt <= f->log_high) {
-			if (f->log_valid < f->log_min) {
-				f->logbuf[f->log_valid++] = f->cnt;
-				if (f->log_valid == f->log_min) {
+#ifdef F_LOG
+#define R(_x) (_x*1000000/F_rate)
+	if (F_logbuf && (F_log_valid || hi)) {
+		if ((F_cnt >= F_log_low || (F_log_valid > 0 && ++F_log_invalid < 6)) && F_cnt <= F_log_high) {
+			if (F_log_valid < F_log_min) {
+				F_logbuf[F_log_valid++] = F_cnt;
+				if (F_log_valid == F_log_min) {
 					unsigned short i;
-					for(i=0; i < f->log_min; i++) {
+					for(i=0; i < F_log_min; i++) {
 						if (!i) fputs("log ",stderr);
 						else if (i & 1) fputc(hi?'_':' ',stderr);
 						else fputc(hi?' ':'_',stderr);
-						fprintf(stderr,"%lu",R(f->logbuf[i]));
+						fprintf(stderr,"%lu",R(F_logbuf[i]));
 					}
-					fprintf(stderr,"%c%lu",hi?' ':'_', R(f->cnt));
+					fprintf(stderr,"%c%lu",hi?' ':'_', R(F_cnt));
 				}
 			} else {
-				fprintf(stderr,"%c%lu",hi?' ':'_', R(f->cnt));
+				fprintf(stderr,"%c%lu",hi?' ':'_', R(F_cnt));
 			}
 		} else {
-			if (f->log_valid == f->log_min) 
-				fprintf(stderr,"%c%lu\n",hi?' ':'_', R(f->cnt));
-			f->log_valid = 0;
-			f->log_invalid = 0;
+			if (F_log_valid == F_log_min) 
+				fprintf(stderr,"%c%lu\n",hi?' ':'_', R(F_cnt));
+			F_log_valid = 0;
+			F_log_invalid = 0;
 		}
 	}
 #undef R
+#endif
 
 	if (ex) { /* R_IDLE exceeed, see above */
-		if (f->lasthi) /* somebody's sending an always-on? */
+		if (F_lasthi) /* somebody's sending an always-on? */
 			goto init;
-		if (f->r_times[R_SPACE+R_MAX+R_ONE] > 
-			f->r_times[R_SPACE+R_MAX+R_ZERO])
-			f->r_mark_one=1;
+		if (F_r_times[R_SPACE+R_MAX+R_ONE] > 
+			F_r_times[R_SPACE+R_MAX+R_ZERO])
+			F_r_mark_one=1;
 		else
-			f->r_mark_zero=1;
+			F_r_mark_zero=1;
 	} else if (hi) { /* calc space bit */
-		if (f->cnt > f->r_times[R_SPACE+R_MIN+R_ONE]
-		 && f->cnt < f->r_times[R_SPACE+R_MAX+R_ONE])
-			f->r_space_one=1;
-		if (f->cnt > f->r_times[R_SPACE+R_MIN+R_ZERO]
-		 && f->cnt < f->r_times[R_SPACE+R_MAX+R_ZERO])
-			f->r_space_zero=1;
+		if (F_cnt > F_r_times[R_SPACE+R_MIN+R_ONE]
+		 && F_cnt < F_r_times[R_SPACE+R_MAX+R_ONE])
+			F_r_space_one=1;
+		if (F_cnt > F_r_times[R_SPACE+R_MIN+R_ZERO]
+		 && F_cnt < F_r_times[R_SPACE+R_MAX+R_ZERO])
+			F_r_space_zero=1;
 	} else {
-		if (f->cnt > f->r_times[R_MARK+R_MIN+R_ONE]
-		 && f->cnt < f->r_times[R_MARK+R_MAX+R_ONE])
-			f->r_mark_one=1;
-		if (f->cnt > f->r_times[R_MARK+R_MIN+R_ZERO]
-		 && f->cnt < f->r_times[R_MARK+R_MAX+R_ZERO])
-			f->r_mark_zero=1;
+		if (F_cnt > F_r_times[R_MARK+R_MIN+R_ONE]
+		 && F_cnt < F_r_times[R_MARK+R_MAX+R_ONE])
+			F_r_mark_one=1;
+		if (F_cnt > F_r_times[R_MARK+R_MIN+R_ZERO]
+		 && F_cnt < F_r_times[R_MARK+R_MAX+R_ZERO])
+			F_r_mark_zero=1;
 	}
-	f->lasthi = hi;
+	F_lasthi = hi;
 	if (!hi && !ex) {
-		f->cnt = 0;
+		F_cnt = 0;
 		return;
 	}
 	{
-		char r_one=f->r_mark_one+f->r_space_one;
-		char r_zero=f->r_mark_zero+f->r_space_zero;
+		char r_one=F_r_mark_one+F_r_space_one;
+		char r_zero=F_r_mark_zero+F_r_space_zero;
 
-		f->r_mark_one=0;
-		f->r_space_one=0;
-		f->r_mark_zero=0;
-		f->r_space_zero=0;
+		F_r_mark_one=0;
+		F_r_space_one=0;
+		F_r_mark_zero=0;
+		F_r_space_zero=0;
 
 		if (r_one == r_zero) goto init;
 		hi = (r_one > r_zero);
 	}
-	f->cnt = 0;
+	F_cnt = 0;
 
-	if (!f->syn) {
-		++f->bit;
+	if (!F_syn) {
+		++F_bit;
 		if(!hi) return;
-		if(f->bit < f->r_sync) return;
-		f->bit = 0;
-		f->syn=1;
+		if(F_bit < F_r_sync) return;
+		F_bit = 0;
+		F_syn=1;
 		return;
 	}
-	if(++(f->bit) <= f->bits) {
-		if (f->msb)
-			f->byt = (f->byt<<1) | hi;
+	if(++(F_bit) <= F_bits) {
+		if (F_msb)
+			F_byt = (F_byt<<1) | hi;
 		else {
 			if(hi)
-				f->byt |= (1<<f->bits);
+				F_byt |= (1<<F_bits);
 		}
-		if (f->parity || f->bit < f->bits)
+		if (F_parity || F_bit < F_bits)
 			return;
 
-	} else if(f->parity) {
+	} else if(F_parity) {
 		unsigned char par;
-		switch(f->parity) {
+		switch(F_parity) {
 		case P_MARK:
 			if (!hi) goto init;
 			break;
@@ -172,11 +183,11 @@ static inline void flow_char(FLOW *f, unsigned char c)
 			if (hi) goto init;
 			break;
 		default:
-			par = f->byt;
+			par = F_byt;
 			par ^= par >> 4;
 			par ^= par >> 2;
 			par ^= par >> 1;
-			if (f->parity == P_EVEN) {
+			if (F_parity == P_EVEN) {
 				if((par&1) == !hi)
 					goto init;
 			} else {
@@ -185,19 +196,25 @@ static inline void flow_char(FLOW *f, unsigned char c)
 			}
 		}
 	}
-	if(f->readlen >= f->read_max)
+	if(F_readlen >= F_read_max)
 		goto init;
-	f->readbuf[f->readlen++] = f->byt;
-	f->byt=0;
-	f->bit=0;
+	F_readbuf[F_readlen++] = F_byt;
+	F_byt=0;
+	F_bit=0;
 	if(!ex) return;
 
 init:
-	flow_init(f);
+	flow_init(
+#ifndef FLOW_STANDALONE
+              flow
+#endif
+	              );
 }
 
 
-void flow_read_buf(FLOW *flow, const unsigned char *buf, unsigned int len)
+void
+flow_read_buf(FLOW_PARAM
+              const unsigned char *buf, unsigned int len)
 {
 	while(len--)
 		flow_char(flow, *buf++);
