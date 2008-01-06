@@ -379,10 +379,23 @@ do_pa_error(PaError err, const char *str)
 	exit(2);
 }
 
+int pa_chans;
+
 int
 pawriter(gchar *buf, guint len)
 {
-	PaError err = Pa_WriteStream(stream, buf,len);
+	PaError err;
+	if(pa_chans > 1) {
+		gchar *xbuf = alloca(len*pa_chans);
+		gchar *xb = xbuf;
+		gchar *b = buf;
+		int i,j;
+		for(i=len;i>0;i--,b++) 
+			for (j=pa_chans;j>0;j++) 
+				*xb++ = *b;
+		buf=xbuf;
+	}
+	err = Pa_WriteStream(stream, buf,len);
 	do_pa_error(err,"write");
 	return len;
 }
@@ -407,13 +420,19 @@ do_pa_run(PaDeviceIndex idx, PaTime latency)
 	PaStream *stream = NULL;
 
 	memset(&param,0,sizeof(param));
+	pa_chans = 1;
 	param.device = idx;
 	param.channelCount = 1;
 	param.sampleFormat = paUInt8;
 	param.suggestedLatency = latency;
 
 	err = Pa_IsFormatSupported(NULL,&param,rate);
-	do_pa_error(err,"unsupported");
+	if(err) {
+		param.channelCount = 2;
+		pa_chans = 2;
+		err = Pa_IsFormatSupported(NULL,&param,rate);
+		do_pa_error(err,"unsupported");
+	}
 
 	err = Pa_OpenStream(&stream, NULL, &param, (double)rate,
 	         paFramesPerBufferUnspecified,paNoFlag, /* &do_pa_callback */ NULL, NULL);
