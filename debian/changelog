@@ -5,6 +5,12 @@ homevent (0.2.7) stable; urgency=low
 
  -- Matthias Urlichs <matthias@urlichs.de>  Sat, 05 Jan 2008 11:01:03 +0100
 
+homevent (0.2.6.1) stable; urgency=low
+
+  * net bugfix
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Sun, 06 Jan 2008 04:22:03 +0100
+
 homevent (0.2.6) stable; urgency=low
 
   * Add a flag to force reporting Python stack traces

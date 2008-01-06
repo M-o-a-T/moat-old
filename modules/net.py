@@ -79,7 +79,7 @@ class NETreceiver(object,LineReceiver, _PauseableMixin):
 		"""Override this.
 		"""
 		line = line.strip().split()
-		process_event(Event(Context(),"net", *(self.factory.name + line))).addErrback(process_failure)
+		process_event(Event(Context(),"net", *(self.factory.name + tuple(line)))).addErrback(process_failure)
 
 	def connectionMade(self):
 		super(NETreceiver,self).connectionMade()
