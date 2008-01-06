@@ -8,5 +8,5 @@ else echo "No audio subdir"; exit 1; fi
 
 make
 
-./writer rate 32000 exec cat < ../test/expect/fs20rw | ./reader rate 32000 exec cat > ../test/real/fs20rw
+./writer rate 32000 fs20 exec cat < ../test/expect/fs20rw | ./reader rate 32000 fs20 exec cat > ../test/real/fs20rw
 

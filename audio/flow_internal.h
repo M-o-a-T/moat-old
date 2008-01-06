@@ -51,6 +51,8 @@ struct _FLOW {
 	/* width; 4 or 8 bits */
 	unsigned char bits;
 #	define F_bits (flow->bits)
+	char id;
+#	define F_id (flow->id)
 
 	/* check bit after each byte */
 	unsigned char parity;
@@ -125,20 +127,6 @@ struct _FLOW {
 	void *writer_param;
 #	define F_writer_param (flow->writer_param)
 
-	unsigned char *sendbuf;
-#	define F_sendbuf (flow->sendbuf)
-	unsigned int sendbuf_len;
-#	define F_sendbuf_len (flow->sendbuf_len)
-	unsigned int sendbuf_used;
-#	define F_sendbuf_used (flow->sendbuf_used)
-
-	unsigned char *fillbuf; /* a bunch of zeroes */
-#	define F_fillbuf (flow->fillbuf)
-	unsigned int fillbuf_len;
-#	define F_fillbuf_len (flow->fillbuf_len)
-
-	unsigned char blocking;
-#	define F_blocking (flow->blocking)
 };
 
 

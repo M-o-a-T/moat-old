@@ -24,16 +24,15 @@
 #include <portaudio.h>
 
 #include "flow.h"
+#include "common.h"
 
-static int rate = 32000;
-static char *progname;
-static int progress = 0;
 static int timestamp = 0;
 
 static int log_min,log_max, log_len=0;
 
 __attribute__((noreturn)) 
-void usage(int exitcode, FILE *out)
+void
+usage(int exitcode, FILE *out)
 {
 	fprintf(out,"Usage: %s\n", progname);
 	fprintf(out,"  Parameters:\n");
@@ -41,6 +40,8 @@ void usage(int exitcode, FILE *out)
 	fprintf(out,"    timestamp           -- print a timestamp before the data\n");
 	fprintf(out,"    progress            -- print something to stderr, once a second\n");
 	fprintf(out,"    log MIN MAX NUM     -- trace receiver signal\n");
+	fprintf(out,"  Protocols (needs at least one):\n");
+	fprintf(out,"    fs20                -- includes heating\n");
 	fprintf(out,"  Actual work (needs to be last!):\n");
 	fprintf(out,"    portaudio interface -- read from this sound input\n");
 	fprintf(out,"    portaudio           -- list sound inputs\n");
@@ -48,7 +49,8 @@ void usage(int exitcode, FILE *out)
 	exit(exitcode);
 }
 
-static int set_log(int argc, char *argv[])
+static int
+set_log(int argc, char *argv[])
 {
 	if (argc < 3) usage(2,stderr);
 	log_min = atoi(argv[0]);
@@ -57,24 +59,8 @@ static int set_log(int argc, char *argv[])
 	return 3;
 }
 
-static int set_rate(int argc, char *argv[])
-{
-	if (!argc) usage(2,stderr);
-	rate = atoi(*argv);
-	if(rate <= 8000) {
-		fprintf(stderr,"rate must be at least 8000.\n");
-		usage(2,stderr);
-	}
-	return 1;
-}
-
-static int set_progress(int argc, char *argv[])
-{
-	progress = 1;
-	return 0;
-}
-
-static int set_timestamp(int argc, char *argv[])
+static int
+set_timestamp(int argc, char *argv[])
 {
 	timestamp = 1;
 	return 0;
@@ -82,24 +68,36 @@ static int set_timestamp(int argc, char *argv[])
 
 /*************** exec some other program **********************/
 
-void printer(void *unused __attribute__((unused)),
+void
+printer(void *_flow,
 	const unsigned char *buf, unsigned int len)
 {
+	FLOW *flow = _flow;
 	if(timestamp) {
 		struct timeval tv;
 		gettimeofday(&tv,NULL);
 		printf("t%ld.%06ld\n",tv.tv_sec,tv.tv_usec);
 	}
+	putchar(flow_id(flow));
 	while(len--)
 		printf("%02X",*buf++);
 	putchar('\n');
 	fflush(stdout);
+	if (!f_log)
+		f_log = flow;
 }
 
-static FLOW *
-do_flow_setup(void)
+void
+do_flow_rw(FLOW *f, unsigned int *x)
 {
-	FLOW *f;
+	flow_setup_reader(f,6,x);
+	flow_reader(f,printer,f);
+}
+
+
+static int
+enable_fs20(int argc, char *argv[])
+{
 	unsigned int x[R_IDLE+1] = {
 		[R_MIN+R_ZERO+R_MARK ] = 300,
 		[R_MIN+R_ZERO+R_SPACE] = 300,
@@ -111,23 +109,21 @@ do_flow_setup(void)
 		[R_MAX+R_ONE +R_SPACE] = 700,
 		[R_IDLE] = 900,
 	};
-
-	f = flow_setup(rate, 10, 8, P_EVEN, 1);
-	if (!f) return NULL;
-	flow_setup_reader(f,6,x);
-	flow_reader(f,printer,NULL);
-	return f;
+	flow_setup(x,'f');
+	return 0;
 }
+
 
 __attribute__((noreturn)) 
 static int do_exec(int argc, char *argv[])
 {
 	int r[2];
 	int pid, c, res;
-	FLOW *f;
 	FILE *ifd;
 
-	if (!argc) usage(2,stderr);
+	if(!f_log) usage(2,stderr);
+	if(!argc) usage(2,stderr);
+
 	if(pipe(r) < 0) {
 		perror("pipe");
 		exit(1);
@@ -154,22 +150,22 @@ static int do_exec(int argc, char *argv[])
 	ifd = fdopen(r[0],"r");
 	close(r[1]);
 	
-	f = do_flow_setup();
-	if(log_len) flow_report(f,log_min,log_max,log_len);
+	if(log_len) flow_report(f_log,log_min,log_max,log_len);
 
 	while((c = getc(ifd)) != EOF) {
 		unsigned char cc = c;
-		flow_read_buf(f,&cc,1);
+		FLOW **f = flows;
+		while(*f) flow_read_buf(*(f++),&cc,1);
 
 		if(progress && progress++ == rate) {
 			progress = 1;
-			if(!flow_read_logging(f)) {
+			if(!flow_read_logging(f_log)) {
 				fprintf(stderr,"x\r");
 				fflush(stderr);
 			}
 		}
 	}
-	flow_free(f);
+	free_flows();
 
 	do {
 		res = waitpid(pid,&c,0);
@@ -237,13 +233,11 @@ static int do_pa_callback(
 __attribute__((noreturn)) 
 static void do_pa_run(PaDeviceIndex idx, PaTime latency)
 {
-	FLOW *f;
 	PaError err;
 	struct PaStreamParameters param;
 	PaStream *stream = NULL;
 
-	f = do_flow_setup();
-	if(log_len) flow_report(f,log_min,log_max,log_len);
+	if(log_len) flow_report(f_log,log_min,log_max,log_len);
 
 	memset(&param,0,sizeof(param));
 	param.device = idx;
@@ -255,7 +249,7 @@ static void do_pa_run(PaDeviceIndex idx, PaTime latency)
 	do_pa_error(err,"unsupported");
 
 	err = Pa_OpenStream(&stream, &param, NULL, (double)rate,
-	         paFramesPerBufferUnspecified,paNoFlag, /* &do_pa_callback */ NULL, f);
+	         paFramesPerBufferUnspecified,paNoFlag, /* &do_pa_callback */ NULL, NULL);
 	do_pa_error(err,"open");
 	
 	err = Pa_StartStream(stream);
@@ -264,11 +258,13 @@ static void do_pa_run(PaDeviceIndex idx, PaTime latency)
 	while(1) {
 #if 1
 		unsigned char buf[128];
+		FLOW **f = flows;
 		err = Pa_ReadStream(stream,buf,sizeof(buf));
 		if (err == paInputOverflowed)
 			fprintf(stderr,"Input overflow\n");
 		else do_pa_error(err, "read");
-		do_pa_callback(buf,NULL,sizeof(buf),NULL,0,f);
+		while(*f)
+			do_pa_callback(buf,NULL,sizeof(buf),NULL,0,*(f++));
 #endif
 		err = Pa_IsStreamActive(stream);
 		if (err < 0) do_pa_error(err, "is_active");
@@ -289,13 +285,16 @@ static void do_pa_run(PaDeviceIndex idx, PaTime latency)
 }
 
 __attribute__((noreturn)) 
-static int do_portaudio(int argc, char *argv[])
+static int
+do_portaudio(int argc, char *argv[])
 {
 	PaError err;
 	PaDeviceIndex idx;
 
 	err = Pa_Initialize();
 	do_pa_error(err,"init");
+
+	if(!f_log) usage(2,stderr);
 
 	if (argc > 1) usage(2,stderr);
 	idx = Pa_GetDeviceCount();
@@ -321,15 +320,21 @@ static int do_portaudio(int argc, char *argv[])
 	/* NOTREACHED */
 }
 
+
+/************************************************************************/
+
+/* Main code
+ */
+
 typedef int (*pcall)(int,char **);
 struct {
 	const char *what;
 	pcall code;
 } work[] = {
-
 	{"rate", set_rate},
 	{"progress", set_progress},
 	{"timestamp", set_timestamp},
+	{"fs20", enable_fs20},
 	{"log", set_log},
 	{"exec", do_exec},
 	{"portaudio", do_portaudio},
@@ -337,6 +342,8 @@ struct {
 
 int main(int argc, char *argv[])
 {
+	init_flows();
+
 	progname = rindex(argv[0],'/');
 	if (!progname) progname = argv[0];
 	else progname++;

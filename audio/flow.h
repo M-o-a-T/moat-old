@@ -53,9 +53,11 @@ typedef void FLOW;
  * Byte parity is handled by this code; everything else is the job of
  * the application.
  */
-FLOW_STRUCT flow_setup(unsigned int rate, unsigned int maxlen,
-                       unsigned char bits, unsigned char parity,
-                       unsigned char msb);
+FLOW_STRUCT flow_create(unsigned int rate, unsigned int maxlen,
+                        unsigned char bits, unsigned char parity,
+                        unsigned char msb, char id);
+
+char flow_id(FLOW_PARAM1);
 
 void flow_free(FLOW_PARAM1);
 
@@ -122,14 +124,13 @@ int flow_read_logging(FLOW_PARAM1);
 void flow_setup_writer(FLOW_PARAM
                        unsigned int nsync, unsigned int len[W_IDLE+1]);
 
-typedef int(*flow_writeproc)(void *param, unsigned char *buf, unsigned int len);
+typedef void(*flow_writeproc)(void *param, unsigned int hi, unsigned int lo);
 
 void flow_writer(FLOW_PARAM
-                 flow_writeproc proc, void *param, int blocking);
+                 flow_writeproc proc, void *param);
 
 int flow_write_buf(FLOW_PARAM
                    unsigned char *data, unsigned int len);
-int flow_write_idle(FLOW_PARAM1);
 /* These return -1/errno when the external write fails, or something else
  * goes wrong*/
 

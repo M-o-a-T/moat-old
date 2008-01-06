@@ -20,41 +20,39 @@
 
 #include "flow_internal.h"
 
-FLOW_STRUCT
-flow_setup(unsigned int rate, unsigned int maxlen, unsigned char bits, 
-           unsigned char parity, unsigned char msb)
-{
 #ifndef FLOW_STANDALONE
+FLOW_STRUCT
+flow_create(unsigned int rate, unsigned int maxlen, unsigned char bits, 
+            unsigned char parity, unsigned char msb, char id)
+{
 	FLOW *flow = malloc(sizeof(*flow));
 	if (!flow) return NULL;
 	memset(flow,0,sizeof(*flow));
-#endif
 
 	F_rate = rate;
 	F_bits = bits;
 	F_parity = parity;
 	F_msb = msb;
 	F_read_max = maxlen;
+	F_id = id;
 
 #ifdef F_last_sent
 	gettimeofday(&F_last_sent, NULL);
 #endif
 
-#ifndef FLOW_STANDALONE
 	return flow;
-#endif
 }
 
 void flow_free(FLOW_PARAM1)
 {
-#ifndef FLOW_STANDALONE
-	if(!flow) return;
-#endif
 	free(F_readbuf);
-	free(F_sendbuf);
-	free(F_fillbuf);
 	free(F_logbuf);
-#ifndef FLOW_STANDALONE
 	free(flow);
-#endif
 }
+
+char flow_id(FLOW_PARAM1)
+{
+	return F_id;
+}
+
+#endif

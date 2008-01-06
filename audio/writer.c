@@ -19,15 +19,226 @@
 #include <string.h>
 #include <errno.h>
 #include <wait.h>
+#include <time.h>
+#include <sys/time.h>
 
 #include <glib.h>
 #include <portaudio.h>
 
 #include "flow.h"
+#include "common.h"
 
-static int rate = 32000;
-static char *progname;
-static int progress = 0;
+GMainLoop *mainloop;
+GIOChannel *input;
+
+int (*the_writer)(gchar *buf, guint len);
+
+gchar *sendbuf;
+guint sendbuf_len;
+guint sendbuf_used;
+
+gchar *fillbuf;
+guint fillbuf_len;
+
+guint bytes_sent;
+struct timeval last_sent;
+char blocking;
+
+static int
+write_idle()
+{
+	int n;
+	struct timeval tn;
+
+	if(sendbuf_used) {
+		n = (*the_writer)(sendbuf, sendbuf_used);
+		if (n == sendbuf_used) {
+			sendbuf_used = 0;
+			bytes_sent += n;
+		} else if (n > 0) { /* partial write */
+			sendbuf_used -= n;
+			memcpy(sendbuf, sendbuf + n, sendbuf_used);
+
+			/* Assume that the send buffer is full. Thus, there is no
+			   point in keeping track of any accumulated backlog. */
+			gettimeofday(&last_sent, NULL);
+			bytes_sent = 0;
+			return 0;
+		} else if (n == 0) { /* EOF? */
+			errno = 0;
+			return -1;
+		} else if ((errno == EINTR) || (errno == EAGAIN)) {
+			return 0;
+		} else {
+			return -1;
+		}
+	}
+
+	gettimeofday(&tn, NULL);
+
+	/*
+	 * Here we try to figure out whether to send zero fill-up bytes
+	 * to keep the sound pipe's send buffer full.
+	 */
+
+	if (blocking) {
+		/*
+		 * No need to count anything if the interface is going to block
+		 * on us anyway.
+		 */
+		n = rate/20;
+		if (fillbuf_len < n) {
+			free(fillbuf);
+			fillbuf = malloc(n);
+			if (!fillbuf) return -1;
+			fillbuf_len = n;
+			memset(fillbuf,0,n);
+		}
+		n = the_writer(fillbuf, n);
+		if (n == 0) errno = 0;
+		if (n <= 0) return -1;
+		return 0;
+	}
+	/*
+	 * First, clean up the byte counter..:
+	 */
+	if (bytes_sent > rate) {
+		last_sent.tv_sec += bytes_sent/rate;
+		bytes_sent %= rate;
+	}
+	if(timercmp(&last_sent, &tn, <)) {
+		long long nb = (tn.tv_sec - last_sent.tv_sec) * 1000000 + (tn.tv_usec - last_sent.tv_usec);
+		nb = (nb * rate) / 1000000 - bytes_sent;
+		if (nb > 0) {
+			if (nb < rate/5) { /* 1/5th second */
+				n = nb;
+				if (fillbuf_len < n) {
+					free(fillbuf);
+					fillbuf = malloc(n);
+					if (!fillbuf) return -1;
+					fillbuf_len = n;
+					memset(fillbuf,0,n);
+				}
+				n = the_writer(fillbuf, n);
+				if (n == 0) errno = 0;
+				if (n <= 0) return -1;
+				if (n == nb) {
+					bytes_sent += n;
+					return 0;
+				}
+				/* repeat, because the partial writeproc() could have
+				 * taken up any amount of time */
+				gettimeofday(&tn, NULL);
+			}
+			/* If we arrive here, either there was a buffer overrun or
+			 * too much time has passed since the last call. Either way 
+			 * we restart from now.
+			 */
+			last_sent = tn;
+			bytes_sent = 0;
+		}
+	}
+	return 0;
+}
+
+static void
+bitwriter(void *unused, unsigned int hi, unsigned int lo)
+{
+	gchar *bp;
+	guint req = hi+lo;
+	if(sendbuf_len < sendbuf_used+req) {
+		sendbuf_len += 100*req;
+		sendbuf = realloc(sendbuf,sendbuf_len);
+		if(!sendbuf) {
+			perror("buffer malloc");
+			exit(3);
+		}
+	}
+	/* fprintf(stderr,"H%d L%d ",hi,lo); */
+	bp = sendbuf+sendbuf_used;
+	memset(bp,'\xFF',hi);
+	memset(bp+hi,0,lo);
+	sendbuf_used += req;
+
+	if(!hi) write_idle();
+	/* if(!hi) fputc('\n',stderr); */
+}
+
+
+static gboolean
+reader (GIOChannel *source, GIOCondition condition, gpointer data __attribute((unused)))
+{
+	GIOStatus res;
+	gchar *str = NULL;
+	gsize len = 0;
+	gsize tpos = 0;
+	GError *err = NULL;
+	gchar *rp,*wp;
+	gchar part;
+	char fid;
+	FLOW **fp = flows;
+
+	if(!(condition & G_IO_IN))
+		goto out;
+	
+	res = g_io_channel_read_line(input, &str,&len,&tpos,&err);
+	if (res != G_IO_STATUS_NORMAL) 
+		goto out;
+
+	if(tpos<2 || !(tpos & 1)) {
+		fprintf(stderr,"Line length is %d\n",len);
+		goto sout;
+	}
+
+	rp = str;
+	wp = str;
+	part = 0;
+
+	fid = *rp++;
+	while(--tpos) {
+		if(*rp >= '0' && *rp <= '9') {
+			part |= *rp++ - '0';
+		} else if(*rp >= 'a' && *rp <= 'f') {
+			part |= *rp++ - 'a' + 10;
+		} else if(*rp >= 'A' && *rp <= 'F') {
+			part |= *rp++ - 'A' + 10;
+		} else {
+			fprintf(stderr,"Unknown hex char %c\n",*rp);
+			goto sout;
+		}
+		if (tpos & 1) {
+			*wp++ = part;
+			part = 0;
+		} else {
+			part <<= 4;
+		}
+	}
+	
+	while(*fp) {
+		if (flow_id(*fp) == fid) {
+			if(flow_write_buf(*fp, (unsigned char *)str,wp-str)) {
+				perror("write buf");
+				g_free(str);
+				goto out;
+			}
+			goto sout;
+		}
+	}
+	fprintf(stderr,"ID '%c': unknown prefix; known: ",fid);
+	for(fp = flows;*fp;fp++)
+		fputc(flow_id(*fp),stderr);
+	fputc('\n',stderr);
+	goto out;
+	
+sout:
+	g_free(str);
+	if(!(condition & ~G_IO_IN))
+		return 1;
+out:
+	g_main_loop_quit(mainloop);
+	return 0;
+}
+
 
 __attribute__((noreturn)) 
 void usage(int exitcode, FILE *out)
@@ -36,6 +247,8 @@ void usage(int exitcode, FILE *out)
 	fprintf(out,"  Parameters:\n");
 	fprintf(out,"    rate NUM            -- samples/second; default: 32000\n");
 	fprintf(out,"    progress            -- print something to stderr, once a second\n");
+	fprintf(out,"  Protocols (needs at least one):\n");
+	fprintf(out,"    fs20                -- includes heating\n");
 	fprintf(out,"  Actual work (needs to be last!):\n");
 	fprintf(out,"    exec program args   -- run this program, read from stdin\n");
 	fprintf(out,"    portaudio interface -- read from this sound input\n");
@@ -43,25 +256,6 @@ void usage(int exitcode, FILE *out)
 	exit(exitcode);
 }
 
-static int set_rate(int argc, char *argv[])
-{
-	if (!argc) usage(2,stderr);
-	rate = atoi(*argv);
-	if(rate <= 8000) {
-		fprintf(stderr,"rate must be at least 8000.\n");
-		usage(2,stderr);
-	}
-	return 1;
-}
-
-static int set_progress(int argc, char *argv[])
-{
-	progress = 1;
-	return 0;
-}
-
-FLOW *f;
-GMainLoop *mainloop;
 
 /*************** exec some other program **********************/
 
@@ -73,10 +267,10 @@ void printer(unsigned char *buf, unsigned int len)
 	fflush(stdout);
 }
 
-GIOChannel *input;
 int wfd;
 
-int writer(void *unused, unsigned char *buf, unsigned int len)
+static int
+writer(gchar *buf, guint len)
 {
 	int res = write(wfd,buf,len);
 	if (progress && (res > 0))  {
@@ -90,67 +284,14 @@ int writer(void *unused, unsigned char *buf, unsigned int len)
 	return res;
 }
 
-gboolean reader (GIOChannel *source, GIOCondition condition, gpointer data __attribute((unused)))
+
+
+
+
+static gboolean
+timer(void *unused __attribute__((unused)))
 {
-	GIOStatus res;
-	gchar *str = NULL;
-	gsize len = 0;
-	gsize tpos = 0;
-	GError *err = NULL;
-	gchar *rp,*wp;
-	gchar part;
-
-	if(!(condition & G_IO_IN))
-		goto out;
-	
-	res = g_io_channel_read_line(input, &str,&len,&tpos,&err);
-	if (res != G_IO_STATUS_NORMAL) 
-		goto out;
-
-	if(!tpos || tpos & 1) {
-		fprintf(stderr,"Line length is %d\n",len);
-		goto sout;
-	}
-
-	rp = str;
-	wp = str;
-	part = 0;
-	while(tpos--) {
-		if(*rp >= '0' && *rp <= '9') {
-			part |= *rp++ - '0';
-		} else if(*rp >= 'a' && *rp <= 'f') {
-			part |= *rp++ - 'a' + 10;
-		} else if(*rp >= 'A' && *rp <= 'F') {
-			part |= *rp++ - 'A' + 10;
-		} else {
-			fprintf(stderr,"Unknown hex char %c\n",*rp);
-			goto sout;
-		}
-		if (tpos & 1) {
-			part <<= 4;
-		} else {
-			*wp++ = part;
-			part = 0;
-		}
-	}
-	if(flow_write_buf(f, (unsigned char *)str,wp-str)) {
-		perror("write buf");
-		g_free(str);
-		goto out;
-	}
-	
-sout:
-	g_free(str);
-	if(!(condition & ~G_IO_IN))
-		return 1;
-out:
-	g_main_loop_quit(mainloop);
-	return 0;
-}
-
-gboolean timer(void *unused __attribute__((unused)))
-{
-	if(flow_write_idle(f)) {
+	if(write_idle()) {
 		perror("write idle");
 		g_main_loop_quit(mainloop);
 		return 0;
@@ -158,10 +299,9 @@ gboolean timer(void *unused __attribute__((unused)))
 	return 1;
 }
 
-static FLOW *
-do_flow_setup()
+static int
+enable_fs20(int argc, char *argv[])
 {
-	FLOW *f;
 	unsigned int x[W_IDLE+1] = {
 		[W_ZERO+W_MARK ] = 400,
 		[W_ZERO+W_SPACE] = 400,
@@ -169,18 +309,26 @@ do_flow_setup()
 		[W_ONE +W_SPACE] = 600,
 		[W_IDLE] = 2000,
 	};
-	f = flow_setup(rate, 10, 8, P_EVEN, 1);
+	flow_setup(x,'f');
+	return 0;
+}
+
+void
+do_flow_rw(FLOW *f, unsigned int *x)
+{
 	flow_setup_writer(f,10,x);
-	return f;
+	flow_writer(f,bitwriter,NULL);
 }
 
 __attribute__((noreturn)) 
-static int do_exec(int argc, char *argv[])
+static int
+do_exec(int argc, char *argv[])
 {
 	GPid pid;
 	GError *err = NULL;
 	
-	if (!argc) usage(2,stderr);
+	if(!f_log) usage(2,stderr);
+	if(!argc) usage(2,stderr);
 
 	if(!g_spawn_async_with_pipes(".",argv,NULL, G_SPAWN_SEARCH_PATH,
 			NULL,NULL, &pid, &wfd,NULL,NULL, &err)) {
@@ -188,9 +336,7 @@ static int do_exec(int argc, char *argv[])
 		exit(4);
 	}
 	
-	f = do_flow_setup();
-
-	flow_writer(f,writer,NULL, 0);
+	the_writer = writer; blocking = 0;
 	mainloop = g_main_loop_new(NULL, 0);
 	input = g_io_channel_unix_new(0);
 	g_io_channel_set_encoding (input, NULL, NULL);
@@ -207,23 +353,28 @@ static int do_exec(int argc, char *argv[])
  * tested because the reader doesn't work with those either.
  */
 
-static void do_pa_error(PaError err, const char *str)
+void *stream;
+
+static void
+do_pa_error(PaError err, const char *str)
 {
 	if(!err) return;
 	fprintf(stderr,"PortAudio: %s: %s\n", str, Pa_GetErrorText(err));
 	exit(2);
 }
 
-int pawriter(void *stream, unsigned char *buf, unsigned int len)
+int
+pawriter(gchar *buf, guint len)
 {
 	PaError err = Pa_WriteStream(stream, buf,len);
 	do_pa_error(err,"write");
 	return len;
 }
 
-gboolean idler(void *unused __attribute__((unused)))
+gboolean
+idler(void *unused __attribute__((unused)))
 {
-	if(flow_write_idle(f)) {
+	if(write_idle()) {
 		perror("write idle");
 		g_main_loop_quit(mainloop);
 		return 0;
@@ -232,13 +383,12 @@ gboolean idler(void *unused __attribute__((unused)))
 }
 
 __attribute__((noreturn)) 
-static void do_pa_run(PaDeviceIndex idx, PaTime latency)
+static void
+do_pa_run(PaDeviceIndex idx, PaTime latency)
 {
 	PaError err;
 	struct PaStreamParameters param;
 	PaStream *stream = NULL;
-
-	f = do_flow_setup();
 
 	memset(&param,0,sizeof(param));
 	param.device = idx;
@@ -250,13 +400,13 @@ static void do_pa_run(PaDeviceIndex idx, PaTime latency)
 	do_pa_error(err,"unsupported");
 
 	err = Pa_OpenStream(&stream, NULL, &param, (double)rate,
-	         paFramesPerBufferUnspecified,paNoFlag, /* &do_pa_callback */ NULL, f);
+	         paFramesPerBufferUnspecified,paNoFlag, /* &do_pa_callback */ NULL, NULL);
 	do_pa_error(err,"open");
 	
 	err = Pa_StartStream(stream);
 	do_pa_error(err,"start");
 
-	flow_writer(f,pawriter,stream, 1);
+	the_writer = pawriter; blocking = 1;
 
 	mainloop = g_main_loop_new(NULL, 0);
 	input = g_io_channel_unix_new(0);
@@ -277,15 +427,18 @@ static void do_pa_run(PaDeviceIndex idx, PaTime latency)
 }
 
 __attribute__((noreturn)) 
-static int do_portaudio(int argc, char *argv[])
+static int
+do_portaudio(int argc, char *argv[])
 {
 	PaError err;
 	PaDeviceIndex idx;
 
+	if(!f_log) usage(2,stderr);
+	if(argc > 1) usage(2,stderr);
+
 	err = Pa_Initialize();
 	do_pa_error(err,"init");
 
-	if (argc > 1) usage(2,stderr);
 	idx = Pa_GetDeviceCount();
 	if(!idx) {
 		fprintf(stderr,"No devices available!\n");
@@ -310,11 +463,10 @@ static int do_portaudio(int argc, char *argv[])
 }
 
 
+/************************************************************************/
 
-
-
-
-
+/* Main code
+ */
 
 typedef int (*pcall)(int,char **);
 struct {
@@ -324,12 +476,15 @@ struct {
 
 	{"rate", set_rate},
 	{"progress", set_progress},
+	{"fs20", enable_fs20},
 	{"exec", do_exec},
 	{"portaudio", do_portaudio},
 };
 
 int main(int argc, char *argv[])
 {
+	init_flows();
+
 	progname = rindex(argv[0],'/');
 	if (!progname) progname = argv[0];
 	else progname++;
