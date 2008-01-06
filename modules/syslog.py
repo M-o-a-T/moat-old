@@ -36,6 +36,7 @@ from homevent.logging import log, Logger, register_logger,unregister_logger,\
 import sys
 import syslog
 import socket
+import errno
 
 facilities = {
 	"kern": syslog.LOG_KERN,
@@ -99,7 +100,14 @@ class SysLogger(Logger):
 		if isinstance(txt,unicode):
 			txt = txt.encode("utf-8")
 
-		self.socket.send("<%d>HomEvenT: %s\0" % (self.facility | local_levels[level],txt))
+		while True:
+			try:
+				self.socket.send("<%d>HomEvenT: %s\0" % (self.facility | local_levels[level],txt))
+			except IOError,err:
+				if err.errno != errno.EINTR:
+					raise
+			else:
+				break
 
 	def flush(self):
 		pass
