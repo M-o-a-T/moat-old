@@ -169,10 +169,10 @@ class handler(object):
 				xs ^= d
 				qs += d
 			if xs != xsum:
-				print >>stderr,"XS",xs,xsum;
+				process_event(Event(self.ctx, "fs20","em","checksum1",xs,xsum,"".join("%x" % ord(x) for x in data))).addErrback(process_failure)
 				return
 			if (qs+5)&15 != qsum:
-				print >>stderr,"QS",qs,qsum;
+				process_event(Event(self.ctx, "fs20","em","checksum2",qs,qsum,"".join("%x" % ord(x) for x in data))).addErrback(process_failure)
 				return
 			try:
 				g = em_procs[data[0]]
@@ -185,6 +185,7 @@ class handler(object):
 				for m,n in r.iteritems():
 					process_event(Event(self.ctx, "fs20","em",g.em_name, (data[1]&7)+1,m,n)).addErrback(process_failure)
 		else:
+			process_event(Event(self.ctx, "fs20","unknown","prefix",prefix,"".join("%02x" % ord(x) for x in data))).addErrback(process_failure)
 			print >>sys.stderr,"Unknown prefix",prefix
 
 
