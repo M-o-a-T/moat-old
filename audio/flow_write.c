@@ -68,6 +68,16 @@ flow_write_buf(FLOW_PARAM
 			R(W_ZERO);
 	}
 
+	inline void Xpar()
+	{
+		switch(F_parity) {
+		case P_NONE: break;
+		case P_MARK: X(1); break;
+		case P_SPACE: X(0); break;
+		case P_ODD: X(par ^ 1); break;
+		case P_EVEN: X(par); break;
+		}
+	}
 
 	inline void BM(unsigned char _b) /* one byte plus parity, MSB first */ 
 	{
@@ -78,7 +88,7 @@ flow_write_buf(FLOW_PARAM
 			X(_b & _m);
 			_m >>= 1;
 		}
-		X(par); /* parity */
+		Xpar();
 	}
 
 	inline void BL(unsigned char _b) /* one byte plus parity, LSB first */ 
@@ -89,7 +99,7 @@ flow_write_buf(FLOW_PARAM
 			X(_b & 1);
 			_b >>= 1;
 		}
-		X(par); /* parity */
+		Xpar(); /* parity */
 	}
 
 	unsigned int i;
