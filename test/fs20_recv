@@ -10,6 +10,11 @@ sys.stdout.write("f8c8d131F51\n") # unknown function
 sys.stdout.write("f8c89131240\n") # not found, bad house code
 sys.stdout.write("f8c8d141245\n") # not found, no device
 sys.stdout.write("f8c8d131245\n") # not found, bad checksum
+sys.stdout.write("e0f01030405\n") # bad checksum 1
+sys.stdout.write("e0f01030d06\n") # bad checksum 2
+sys.stdout.write("e0f01030d05\n") # unknown device type
+sys.stdout.write("e010103030d\n") # bad length
+sys.stdout.write("e01010302010605040703\n") # OK, 12.3 and 45.6
 sys.stdout.flush()
 time.sleep(0.2)
 sys.stderr.write("9\r")

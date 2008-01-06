@@ -136,6 +136,30 @@ NEW: <ConditionalWorkSequence:18 (4)>
 NEW: <ConditionalWorkSequence:19 (4)>
    : │  EVENT: fs20¦unknown¦31413142¦7¦8c8d131245
    : └1╴... done.
+190 EVENT: fs20¦em¦checksum1¦13¦4¦f13
+NEW: <ConditionalWorkSequence:20 (4)>
+   : │  EVENT: fs20¦em¦checksum1¦13¦4¦f13
+   : └1╴... done.
+192 EVENT: fs20¦em¦checksum2¦5¦6¦f13
+NEW: <ConditionalWorkSequence:21 (4)>
+   : │  EVENT: fs20¦em¦checksum2¦5¦6¦f13
+   : └1╴... done.
+194 EVENT: fs20¦unknown¦em¦15¦13
+NEW: <ConditionalWorkSequence:22 (4)>
+   : │  EVENT: fs20¦unknown¦em¦15¦13
+   : └1╴... done.
+196 EVENT: fs20¦em¦bad_length¦thermo_hygro¦2¦3
+NEW: <ConditionalWorkSequence:23 (4)>
+   : │  EVENT: fs20¦em¦bad_length¦thermo_hygro¦2¦3
+   : └1╴... done.
+198 EVENT: fs20¦em¦thermo_hygro¦2¦temperature¦12.3
+NEW: <ConditionalWorkSequence:24 (4)>
+   : │  EVENT: fs20¦em¦thermo_hygro¦2¦temperature¦12.3
+   : └1╴... done.
+200 EVENT: fs20¦em¦thermo_hygro¦2¦humidity¦45.6
+NEW: <ConditionalWorkSequence:25 (4)>
+   : │  EVENT: fs20¦em¦thermo_hygro¦2¦humidity¦45.6
+   : └1╴... done.
 180 EVENT: fs20¦state¦toggle¦-¦baz¦quux
 180 END: fs20¦state¦toggle¦-¦baz¦quux
 182 EVENT: fs20¦unknown¦function¦31413142¦31¦131f
@@ -146,39 +170,51 @@ NEW: <ConditionalWorkSequence:19 (4)>
 186 END: fs20¦unknown¦device¦31413142¦1221¦1412
 188 EVENT: fs20¦unknown¦31413142¦7¦8c8d131245
 188 END: fs20¦unknown¦31413142¦7¦8c8d131245
+190 EVENT: fs20¦em¦checksum1¦13¦4¦f13
+190 END: fs20¦em¦checksum1¦13¦4¦f13
+192 EVENT: fs20¦em¦checksum2¦5¦6¦f13
+192 END: fs20¦em¦checksum2¦5¦6¦f13
+194 EVENT: fs20¦unknown¦em¦15¦13
+194 END: fs20¦unknown¦em¦15¦13
+196 EVENT: fs20¦em¦bad_length¦thermo_hygro¦2¦3
+196 END: fs20¦em¦bad_length¦thermo_hygro¦2¦3
+198 EVENT: fs20¦em¦thermo_hygro¦2¦temperature¦12.3
+198 END: fs20¦em¦thermo_hygro¦2¦temperature¦12.3
+200 EVENT: fs20¦em¦thermo_hygro¦2¦humidity¦45.6
+200 END: fs20¦em¦thermo_hygro¦2¦humidity¦45.6
 1 FS20 ending foobar
 1 FS20 ended 0 foobar
-215 EVENT: wait¦done¦1.5¦_wait¦2
-NEW: <ConditionalWorkSequence:20 (4)>
+257 EVENT: wait¦done¦1.5¦_wait¦2
+NEW: <ConditionalWorkSequence:26 (4)>
    : │  EVENT: wait¦done¦1.5¦_wait¦2
    : └1╴... done.
-215 EVENT: wait¦done¦1.5¦_wait¦2
-215 END: wait¦done¦1.5¦_wait¦2
+257 EVENT: wait¦done¦1.5¦_wait¦2
+257 END: wait¦done¦1.5¦_wait¦2
 foobar
 .
 bar¦foo
 .
-234 EVENT: wait¦start¦2.0¦_wait¦3
-NEW: <ConditionalWorkSequence:21 (4)>
+276 EVENT: wait¦start¦2.0¦_wait¦3
+NEW: <ConditionalWorkSequence:27 (4)>
    : │  EVENT: wait¦start¦2.0¦_wait¦3
    : └1╴... done.
-234 EVENT: wait¦start¦2.0¦_wait¦3
-234 END: wait¦start¦2.0¦_wait¦3
+276 EVENT: wait¦start¦2.0¦_wait¦3
+276 END: wait¦start¦2.0¦_wait¦3
 1 FS20 ending bar¦foo
 1 FS20 ended None bar¦foo
-241 EVENT: wait¦done¦2.0¦_wait¦3
-NEW: <ConditionalWorkSequence:22 (4)>
+283 EVENT: wait¦done¦2.0¦_wait¦3
+NEW: <ConditionalWorkSequence:28 (4)>
    : │  EVENT: wait¦done¦2.0¦_wait¦3
    : └1╴... done.
-241 EVENT: wait¦done¦2.0¦_wait¦3
-241 END: wait¦done¦2.0¦_wait¦3
+283 EVENT: wait¦done¦2.0¦_wait¦3
+283 END: wait¦done¦2.0¦_wait¦3
 2 EVENT: shutdown
-NEW: <ConditionalWorkSequence:23 (7)>
+NEW: <ConditionalWorkSequence:29 (7)>
    : │  EVENT: shutdown
    : ├1╴Shutdown FS20 processes
    : └2╴... done.
 2 EVENT: shutdown
 RUN: Shutdown FS20 processes
- at: <ConditionalWorkSequence:23 (7)> (step 1)
+ at: <ConditionalWorkSequence:29 (7)> (step 1)
  ev: EVENT: shutdown
 2 END: shutdown
