@@ -223,6 +223,7 @@ reader (GIOChannel *source, GIOCondition condition, gpointer data __attribute((u
 			}
 			goto sout;
 		}
+		fp++;
 	}
 	fprintf(stderr,"ID '%c': unknown prefix; known: ",fid);
 	for(fp = flows;*fp;fp++)
