@@ -295,7 +295,7 @@ class FS20xmit(protocol.ProcessProtocol, my_handler):
 				data = data[pi+1:]
 			else:
 				msg = data[:ei]
-				data = data[ei+1]
+				data = data[ei+1:]
 				process_event(Event(Context(),"fs20","error",msg,*self.name)).addErrback(process_failure)
 
 		self.ebuf = data
