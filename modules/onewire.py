@@ -24,12 +24,13 @@ from homevent.module import Module
 from homevent.logging import log,log_exc,DEBUG,TRACE,INFO,WARN
 from homevent.statement import Statement, main_words
 from homevent.check import Check,register_condition,unregister_condition
-from homevent.run import process_failure
+from homevent.onewire import connect,disconnect, devices
+from homevent.monitor import Monitor,MonitorHandler, MonitorAgain
+
 from twisted.internet import protocol,defer,reactor
 from twisted.protocols.basic import _PauseableMixin
 from twisted.python import failure
-from homevent.onewire import connect,disconnect, devices
-from homevent.monitor import Monitor,MonitorHandler, MonitorAgain
+
 import struct
 
 

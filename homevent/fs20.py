@@ -22,7 +22,7 @@ This module is the basis for processing FS20 datagrams.
 """
 
 from homevent.event import Event
-from homevent.run import process_event,process_failure
+from homevent.run import simple_event
 from homevent.context import Context
 
 from time import time
@@ -154,7 +154,7 @@ class handler(object):
 			try:
 				g = groups[(code,qs)]
 			except KeyError:
-				process_event(Event(self.ctx, "fs20","unknown",to_hc(code),qs,"".join("%02x" % ord(x) for x in data))).addErrback(process_failure)
+				simple_event(self.ctx, "fs20","unknown",to_hc(code),qs,"".join("%02x" % ord(x) for x in data))
 				
 			else:
 				return g.datagramReceived(data[2:-1], handler, timedelta=delta)
@@ -169,23 +169,23 @@ class handler(object):
 				xs ^= d
 				qs += d
 			if xs != xsum:
-				process_event(Event(self.ctx, "fs20","em","checksum1",xs,xsum,"".join("%x" % x for x in data))).addErrback(process_failure)
+				simple_event(self.ctx, "fs20","em","checksum1",xs,xsum,"".join("%x" % x for x in data))
 				return
 			if (qs+5)&15 != qsum:
-				process_event(Event(self.ctx, "fs20","em","checksum2",qs,qsum,"".join("%x" % x for x in data))).addErrback(process_failure)
+				simple_event(self.ctx, "fs20","em","checksum2",qs,qsum,"".join("%x" % x for x in data))
 				return
 			try:
 				g = em_procs[data[0]]
 				if not g:
 					raise IndexError(data[0])
 			except IndexError:
-				process_event(Event(self.ctx, "fs20","unknown","em",data[0],"".join("%x"%x for x in data[1:]))).addErrback(process_failure)
+				simple_event(self.ctx, "fs20","unknown","em",data[0],"".join("%x"%x for x in data[1:]))
 			else:
 				r = g(data[1:])
 				for m,n in r.iteritems():
-					process_event(Event(self.ctx, "fs20","em",g.em_name, (data[1]&7)+1,m,n)).addErrback(process_failure)
+					simple_event(self.ctx, "fs20","em",g.em_name, (data[1]&7)+1,m,n)
 		else:
-			process_event(Event(self.ctx, "fs20","unknown","prefix",prefix,"".join("%02x" % ord(x) for x in data))).addErrback(process_failure)
+			simple_event(self.ctx, "fs20","unknown","prefix",prefix,"".join("%02x" % ord(x) for x in data))
 			print >>sys.stderr,"Unknown prefix",prefix
 
 

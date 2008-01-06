@@ -25,7 +25,7 @@ trigger FOO...
 
 from homevent.statement import Statement, main_words
 from homevent.event import Event
-from homevent.run import process_event, process_failure
+from homevent.run import process_event, simple_event
 
 
 class TriggerHandler(Statement):
@@ -40,7 +40,7 @@ trigger FOO...
 		event = self.params(ctx)
 		if not event:
 			raise SyntaxError("Events need at least one parameter")
-		process_event(Event(self.ctx,*event)).addErrback(process_failure)
+		simple_event(self.ctx,*event)
 
 class SyncTriggerHandler(TriggerHandler):
 	name=("sync","trigger")

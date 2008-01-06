@@ -24,10 +24,9 @@ from homevent.module import Module
 from homevent.logging import log,log_exc,DEBUG,TRACE,INFO,WARN,ERROR
 from homevent.statement import Statement, main_words, AttributedStatement
 from homevent.check import Check,register_condition,unregister_condition
-from homevent.run import process_failure
 from homevent.context import Context
 from homevent.event import Event
-from homevent.run import process_event,process_failure
+from homevent.run import simple_event
 from homevent.base import Name
 from homevent.collect import Collection,Collected
 
@@ -79,7 +78,7 @@ class NETreceiver(object,LineReceiver, _PauseableMixin):
 		"""Override this.
 		"""
 		line = line.strip().split()
-		process_event(Event(Context(),"net", *(self.factory.name + tuple(line)))).addErrback(process_failure)
+		simple_event(Context(),"net", *(self.factory.name + tuple(line)))
 
 	def connectionMade(self):
 		super(NETreceiver,self).connectionMade()
@@ -133,7 +132,7 @@ class NETcommon_factory(Collected):
 
 		if not self.up_event:
 			self.up_event = True
-			process_event(Event(Context(),"net","connect",*self.name)).addErrback(process_failure)
+			simple_event(Context(),"net","connect",*self.name)
 
 	def lostConnection(self,conn):
 		if self.conn == conn:
@@ -143,7 +142,7 @@ class NETcommon_factory(Collected):
 	def _down_event(self):
 		if self.up_event:
 			self.up_event = False
-			process_event(Event(Context(),"net","disconnect",*self.name)).addErrback(process_failure)
+			simple_event(Context(),"net","disconnect",*self.name)
 
 	def drop(self):
 		"""Kill my connection"""

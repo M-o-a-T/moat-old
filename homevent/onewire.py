@@ -26,7 +26,7 @@ from homevent.statement import Statement, main_words
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.context import Context
 from homevent.event import Event
-from homevent.run import process_event,process_failure
+from homevent.run import process_event,process_failure,simple_event
 from homevent.reconnect import ReconnectingClientFactory
 from homevent.twist import deferToLater,callLater
 from homevent.base import Name
@@ -167,7 +167,7 @@ class OWFSreceiver(object,protocol.Protocol, _PauseableMixin):
 					return
 				if payload_len == -1 and data_len == 0 and offset == 0:
 					if self.pinger == 30:
-						process_event(Event(Context(),"onewire","wedged",self.name)).addErrback(process_failure)
+						simple_event(Context(),"onewire","wedged",self.name)
 
 					self.pinger += 1
 					self.ping()
@@ -621,13 +621,13 @@ class OWFSfactory(object,ReconnectingClientFactory):
 	def finalFailure(self):
 		if self.up_event:
 			self.up_event = False
-			process_event(Event(Context(),"onewire","disconnect",self.name)).addErrback(process_failure)
+			simple_event(Context(),"onewire","disconnect",self.name)
 
 	def clientConnectionFailed(self, connector, reason):
 		self.conn = None
 		log(WARN,reason)
 		super(OWFSfactory,self).clientConnectionFailed(connector, reason)
-		process_event(Event(Context(),"onewire","broken", self.name)).addErrback(process_failure)
+		simple_event(Context(),"onewire","broken", self.name)
 
 	def clientConnectionLost(self, connector, reason):
 		self.conn = None
@@ -650,7 +650,7 @@ class OWFSfactory(object,ReconnectingClientFactory):
 
 		if not self.up_event:
 			self.up_event = True
-			process_event(Event(Context(),"onewire","connect",self.name)).addErrback(process_failure)
+			simple_event(Context(),"onewire","connect",self.name)
 
 		conn.send(self.get_queued())
 
@@ -765,7 +765,7 @@ class OWFSfactory(object,ReconnectingClientFactory):
 				e.addErrback(dropit,dev)
 
 			def num(_):
-				process_event(Event(Context(),"onewire","scanned",self.name,n_old, len(new_ids), n_dev)).addErrback(process_failure)
+				simple_event(Context(),"onewire","scanned",self.name,n_old, len(new_ids), n_dev)
 				return len(old_ids)
 			e.addCallback(num)
 			return e
@@ -885,7 +885,7 @@ class OWFSdevice(object):
 			# complete processing after the call has returned the error,
 			# which causes an inconvenient deadlock.
 			def do_down(_):
-				process_event(Event(self.ctx,"onewire","down",self.typ,self.id)).addErrback(process_failure)
+				simple_event(self.ctx,"onewire","down",self.typ,self.id)
 				return _
 			d.addBoth(do_down)
 

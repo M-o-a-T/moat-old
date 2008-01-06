@@ -25,7 +25,7 @@ from homevent.module import Module
 from homevent.logging import log,DEBUG,TRACE,INFO,WARN
 from homevent.statement import AttributedStatement,Statement, main_words
 from homevent.check import Check,register_condition,unregister_condition
-from homevent.run import process_event,process_failure,register_worker,unregister_worker
+from homevent.run import simple_event,process_failure,register_worker,unregister_worker
 from homevent.context import Context
 from homevent.event import Event,TrySomethingElse
 from homevent.fs20 import handler,register_handler,unregister_handler, \
@@ -84,7 +84,7 @@ class FS20recv(protocol.ProcessProtocol, my_handler):
 	def no_data(self):
 		self.timer = None
 		self.do_kill()
-		process_event(Event(Context(),"fs20","wedged",*self.name)).addErrback(process_failure)
+		simple_event(Context(),"fs20","wedged",*self.name)
 
 	def dataReceived(self,data):
 		db = ""
@@ -105,7 +105,7 @@ class FS20recv(protocol.ProcessProtocol, my_handler):
 		elif data[0] == PREFIX_TIMESTAMP:
 			self.timestamp = float(data[1:])
 		else:
-			process_event(Event(Context(),"fs20","unknown","prefix",data[0],data[1:])).addErrback(process_failure)
+			simple_event(Context(),"fs20","unknown","prefix",data[0],data[1:])
 
 
 	def outReceived(self, data):
@@ -135,7 +135,7 @@ class FS20recv(protocol.ProcessProtocol, my_handler):
 			else:
 				msg = data[:ei]
 				data = data[ei+1:]
-				process_event(Event(Context(),"fs20","error",msg,*self.name)).addErrback(process_failure)
+				simple_event(Context(),"fs20","error",msg,*self.name)
 
 		self.ebuf = data
 		self._start_timer()
@@ -267,7 +267,7 @@ class FS20xmit(protocol.ProcessProtocol, my_handler):
 	def no_data(self):
 		self.timer = None
 		self.do_kill()
-		process_event(event(Context(),"fs20","wedged",*self.name)).addErrback(process_failure)
+		simple_event(Context(),"fs20","wedged",*self.name)
 
 	def send(self,prefix,data):
 		data = prefix+"".join("%02x" % ord(x)  for x in data)
@@ -296,7 +296,7 @@ class FS20xmit(protocol.ProcessProtocol, my_handler):
 			else:
 				msg = data[:ei]
 				data = data[ei+1:]
-				process_event(Event(Context(),"fs20","error",msg,*self.name)).addErrback(process_failure)
+				simple_event(Context(),"fs20","error",msg,*self.name)
 
 		self.ebuf = data
 		self._start_timer()

@@ -25,7 +25,7 @@ from homevent.logging import log,log_exc,DEBUG,TRACE,INFO,WARN
 from homevent.statement import AttributedStatement,Statement, main_words, \
 	ComplexStatement
 from homevent.check import Check,register_condition,unregister_condition
-from homevent.run import process_event,process_failure
+from homevent.run import simple_event
 from homevent.event import Event
 from homevent.context import Context
 from homevent.base import Name
@@ -151,13 +151,13 @@ class SwitchGroup(group):
 		try:
 			dev = self.devs[dc]
 		except KeyError:
-			process_event(Event(Context(), "fs20","unknown","device", to_hc(self.code), to_dev(dc), "".join("%02x" % ord(x) for x in data))).addErrback(process_failure)
+			simple_event(Context(), "fs20","unknown","device", to_hc(self.code), to_dev(dc), "".join("%02x" % ord(x) for x in data))
 			return
 		else:
 			try:
 				fn = switch_names[fcode & 0x1F]
 			except KeyError:
-				process_event(Event(Context(), "fs20","unknown","function", to_hc(self.code), fcode & 0x1F, "".join("%02x" % ord(x) for x in data))).addErrback(process_failure)
+				simple_event(Context(), "fs20","unknown","function", to_hc(self.code), fcode & 0x1F, "".join("%02x" % ord(x) for x in data))
 				return
 
 			if fcode & 0x80:
@@ -262,9 +262,9 @@ class Switch(object):
 		return d
 
 	def get(self, state, ext=None, handler=None):
-		process_event(Event(Context(), "fs20","state", \
+		simple_event(Context(), "fs20","state", \
 			state, ext if ext is not None else "-",
-			*self.name)).addErrback(process_failure)
+			*self.name)
 
 
 	def getReply(self, ext=None, handler=None):
