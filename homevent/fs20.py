@@ -169,10 +169,10 @@ class handler(object):
 				xs ^= d
 				qs += d
 			if xs != xsum:
-				process_event(Event(self.ctx, "fs20","em","checksum1",xs,xsum,"".join("%x" % ord(x) for x in data))).addErrback(process_failure)
+				process_event(Event(self.ctx, "fs20","em","checksum1",xs,xsum,"".join("%x" % x for x in data))).addErrback(process_failure)
 				return
 			if (qs+5)&15 != qsum:
-				process_event(Event(self.ctx, "fs20","em","checksum2",qs,qsum,"".join("%x" % ord(x) for x in data))).addErrback(process_failure)
+				process_event(Event(self.ctx, "fs20","em","checksum2",qs,qsum,"".join("%x" % x for x in data))).addErrback(process_failure)
 				return
 			try:
 				g = em_procs[data[0]]
