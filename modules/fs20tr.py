@@ -28,7 +28,8 @@ from homevent.check import Check,register_condition,unregister_condition
 from homevent.run import process_event,process_failure,register_worker,unregister_worker
 from homevent.context import Context
 from homevent.event import Event,TrySomethingElse
-from homevent.fs20 import handler,register_handler,unregister_handler
+from homevent.fs20 import handler,register_handler,unregister_handler, \
+	PREFIX,PREFIX_TIMESTAMP
 from homevent.base import Name,MIN_PRIO
 from homevent.worker import ExcWorker
 from homevent.reactor import shutdown_event
@@ -89,20 +90,23 @@ class FS20recv(protocol.ProcessProtocol, my_handler):
 		db = ""
 		e = ""
 		if not data: return # empty line
-		if data[0] in "0123456789abcdefABCDEF":
-			if len(data)%1:
-				raise ValueError("odd length",data)
-			for d in data:
+		if data[0] in PREFIX:
+			for d in data[1:]:
 				if e:
 					db += chr(eval("0x"+e+d))
 					e=""
 				else:
 					e=d
+			if e:
+				raise ValueError("odd length",data)
 
-			self.datagramReceived(db, timestamp=self.timestamp)
+			self.datagramReceived(data[0], db, timestamp=self.timestamp)
 			self.timestamp = None
-		elif data[0] in "tT":
+		elif data[0] == PREFIX_TIMESTAMP:
 			self.timestamp = float(data[1:])
+		else:
+			process_event(Event(Context(),"fs20","unknown","prefix",data[0],data[1:])).addErrback(process_failure)
+
 
 	def outReceived(self, data):
 		self._stop_timer()
@@ -265,8 +269,8 @@ class FS20xmit(protocol.ProcessProtocol, my_handler):
 		self.do_kill()
 		process_event(event(Context(),"fs20","wedged",*self.name)).addErrback(process_failure)
 
-	def send(self,data):
-		data = "".join("%02x" % ord(x)  for x in data)
+	def send(self,prefix,data):
+		data = prefix+"".join("%02x" % ord(x)  for x in data)
 		self.transport.write(data+"\n")
 		return defer.succeed(None)
 

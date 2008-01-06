@@ -108,8 +108,8 @@ NEW: <ConditionalWorkSequence:13 (4)>
    : └1╴... done.
 166 EVENT: wait¦start¦1.5¦_wait¦2
 166 END: wait¦start¦1.5¦_wait¦2
-1 FS20 sender output *** RECV 8c8d131143 *** bar¦foo
-1 FS20 sender output *** RECV 8c8d130032 *** bar¦foo
+1 FS20 sender output *** RECV f8c8d131143 *** bar¦foo
+1 FS20 sender output *** RECV f8c8d130032 *** bar¦foo
 173 EVENT: fs20¦error¦Dies ist eine Test-Fehlermeldung¦foobar
 NEW: <ConditionalWorkSequence:14 (4)>
    : │  EVENT: fs20¦error¦Dies ist eine Test-Fehlermeldung¦foobar

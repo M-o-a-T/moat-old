@@ -25,6 +25,10 @@ from homevent.context import Context
 
 from time import time
 
+PREFIX_FS20 = 'f'
+PREFIX = 'f' # all of them!
+PREFIX_TIMESTAMP = 't'
+
 groups = {}
 handlers = []
 default_handler = None
@@ -93,13 +97,13 @@ class handler(object):
 		self.last_timestamp = None
 		self.ctx = ctx()
 	
-	def send(self, data):
+	def send(self, prefix, data):
 		"""\
 		Send this datagram.
 		"""
 		raise NotImplementedError("Dunno how to send datagrams")
 
-	def datagramReceived(self, data, handler=None, timestamp=None):
+	def datagramReceived(self, prefix, data, handler=None, timestamp=None):
 		if timestamp is None:
 			timestamp = time()
 		if self.last_timestamp:
@@ -108,23 +112,24 @@ class handler(object):
 			delta = None
 		self.last_timestamp = timestamp
 
-		if len(data) < 4:
-			return # obviously way too short
+		if prefix == PREFIX_FS20:
+			if len(data) < 4:
+				return # obviously way too short
 
-		qs = 0
-		for d in data:
-			qs += ord(d)
-		qs -= ord(data[-1]) # the above loop added it, that's nonsense
-		qs = (ord(data[-1]) - qs) & 0xFF # we want the actual difference
-
-		code = ord(data[0])*256+ord(data[1])
-		try:
-			g = groups[(code,qs)]
-		except KeyError:
-			process_event(Event(self.ctx, "fs20","unknown",to_hc(code),qs,"".join("%02x" % ord(x) for x in data))).addErrback(process_failure)
-			
-		else:
-			return g.datagramReceived(data[2:-1], handler, timedelta=delta)
+			qs = 0
+			for d in data:
+				qs += ord(d)
+			qs -= ord(data[-1]) # the above loop added it, that's nonsense
+			qs = (ord(data[-1]) - qs) & 0xFF # we want the actual difference
+	
+			code = ord(data[0])*256+ord(data[1])
+			try:
+				g = groups[(code,qs)]
+			except KeyError:
+				process_event(Event(self.ctx, "fs20","unknown",to_hc(code),qs,"".join("%02x" % ord(x) for x in data))).addErrback(process_failure)
+				
+			else:
+				return g.datagramReceived(data[2:-1], handler, timedelta=delta)
 	
 
 class group(object):
@@ -159,5 +164,5 @@ class group(object):
 			qsum += ord(c)
 		data += chr(qsum & 0xFF)
 
-		return handler.send(data)
+		return handler.send(PREFIX_FS20, data)
 
