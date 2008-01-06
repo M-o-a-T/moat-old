@@ -245,16 +245,18 @@ __attribute__((noreturn))
 void usage(int exitcode, FILE *out)
 {
 	fprintf(out,"Usage: %s\n", progname);
-	fprintf(out,"  Parameters:\n");
+	fprintf(out,"  Parameters (must be given first):\n");
 	fprintf(out,"    rate NUM            -- samples/second; default: 32000\n");
 	fprintf(out,"    progress            -- print something to stderr, once a second\n");
-	fprintf(out,"  Protocols (needs at least one):\n");
+	fprintf(out,"  Protocols (need at least one):\n");
 	fprintf(out,"    fs20                -- switches; includes heating\n");
 	fprintf(out,"    em                  -- environment sensors\n");
-	fprintf(out,"  Actual work (needs to be last!):\n");
-	fprintf(out,"    exec program args   -- run this program, read from stdin\n");
+	fprintf(out,"  Actual work (only one; must be last!):\n");
+	fprintf(out,"    exec program args…  -- run this program\n");
+	fprintf(out,"                           must read data stream on stdin\n");
 	fprintf(out,"    portaudio interface -- read from this sound input\n");
-	fprintf(out,"    portaudio           -- list sound inputs\n");
+	fprintf(out,"    portaudio           -- list available inputs\n");
+	fprintf(out,"                           best: use /dev/dsp* if available\n");
 	exit(exitcode);
 }
 
@@ -503,50 +505,24 @@ do_portaudio(int argc, char *argv[])
 /* Main code
  */
 
-typedef int (*pcall)(int,char **);
-struct {
-	const char *what;
-	pcall code;
-} work[] = {
-
+struct work work1[] = {
 	{"rate", set_rate},
 	{"progress", set_progress},
+	{ NULL,NULL}
+};
+struct work work2[] = {
 	{"fs20", enable_fs20},
 	{"em", enable_em},
+	{ NULL,NULL}
+};
+struct work work3[] = {
 	{"exec", do_exec},
 	{"portaudio", do_portaudio},
+	{ NULL,NULL}
 };
+struct work *works[] = { work1, work2, work3, NULL };
 
 int main(int argc, char *argv[])
 {
-	init_flows();
-
-	progname = rindex(argv[0],'/');
-	if (!progname) progname = argv[0];
-	else progname++;
-
-	if(argc <= 1) usage(0,stdout);
-	argc--; argv++;
-
-	while(argc > 0) {
-		const char *what = argv[0];
-		argc--; argv++;
-		int len;
-		pcall code = NULL;
-
-		for(len=sizeof(work)/sizeof(*work)-1;len>=0;len--) {
-			if(!strcmp(work[len].what,what)) {
-				code=work[len].code;
-				break;
-			}
-		}
-		if(!code) {
-			fprintf(stderr,"%s: unknown keyword\n",what);
-			usage(2,stderr);
-		}
-		len = (*code)(argc,argv);
-		argc -= len; argv += len;
-	}
-	fprintf(stderr,"no action given\n");
-	usage(2,stderr);
+	parse_args(argc,argv,works);
 }

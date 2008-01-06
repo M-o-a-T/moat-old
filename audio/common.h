@@ -38,12 +38,18 @@ int set_rate(int argc, char *argv[]);
 int set_progress(int argc, char *argv[]);
 void flow_setup(unsigned int *params, unsigned char bits, unsigned char parity, unsigned char msb, char prefix);
 
-void init_flows(void);
-void free_flows(void);
-
+typedef int (*pcall)(int,char **);
+struct work {
+	const char *what;
+	pcall code;
+};
+__attribute__((noreturn))
+void parse_args(int argc, char *argv[], struct work **works);
 
 /* This needs to be implemented by the main code! */
 void do_flow_rw(FLOW *f, unsigned int *params);
+
+__attribute__((noreturn))
 void usage(int exitcode, FILE *out);
 
 #endif

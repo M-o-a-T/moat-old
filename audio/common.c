@@ -70,7 +70,7 @@ flow_setup(unsigned int *params, unsigned char bits, unsigned char parity, unsig
 		f_log = f;
 }
 
-void
+static void
 init_flows(void)
 {
 	memset(flows,0,sizeof(flows));
@@ -79,16 +79,42 @@ init_flows(void)
 	progress = 0;
 }
 
-void
-free_flows(void)
+__attribute__((noreturn))
+void parse_args(int argc, char *argv[], struct work **works)
 {
-	FLOW **f = flows;
+	init_flows();
 
-	f_log = NULL;
-	while(*f) {
-		flow_free(*f);
-		*(f++) = NULL;
+	progname = rindex(argv[0],'/');
+	if (!progname) progname = argv[0];
+	else progname++;
+
+	if(argc <= 1) usage(0,stdout);
+	argc--; argv++;
+
+	while(argc > 0) {
+		pcall code = NULL;
+		struct work *work;
+		int len;
+		const char *what = argv[0];
+		argc--; argv++;
+
+		while(*works) {
+			for(work=*works; work->what; work++) {
+				if(!strcmp(work->what,what)) {
+					code=work->code;
+					goto found;
+				}
+			}
+			works++;
+		}
+		if(!code) {
+			fprintf(stderr,"%s: unknown keyword\n",what);
+			usage(2,stderr);
+		}
+	found:
+		len = (*code)(argc,argv);
+		argc -= len; argv += len;
 	}
+	fprintf(stderr,"no action given\n");
+	usage(2,stderr);
 }
-
-
