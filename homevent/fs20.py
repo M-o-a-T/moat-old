@@ -97,9 +97,10 @@ def unregister_handler(h):
 #e01:04 060901 030705 0A03
 #       +19.6°  57.3%
 
-def em_proc_thermo_hygro(data):
+def em_proc_thermo_hygro(ctx, data):
 	if len(data) != 7:
-		raise RuntimeError("em_th: wrong length")
+		simple_event(ctx, "fs20","em","bad_length","thermo_hygro",len(data),"".join("%x"%x for x in data[1:]))
+		return None
 	temp = data[1]/10 + data[2] + data[3]*10
 	if data[0] & 8: temp = -temp
 	hum = data[4]/10 + data[5] + data[6]*10
@@ -172,7 +173,7 @@ class handler(object):
 				simple_event(self.ctx, "fs20","em","checksum1",xs,xsum,"".join("%x" % x for x in data))
 				return
 			if (qs+5)&15 != qsum:
-				simple_event(self.ctx, "fs20","em","checksum2",qs,qsum,"".join("%x" % x for x in data))
+				simple_event(self.ctx, "fs20","em","checksum2",(qs+5)&15,qsum,"".join("%x" % x for x in data))
 				return
 			try:
 				g = em_procs[data[0]]
@@ -181,9 +182,10 @@ class handler(object):
 			except IndexError:
 				simple_event(self.ctx, "fs20","unknown","em",data[0],"".join("%x"%x for x in data[1:]))
 			else:
-				r = g(data[1:])
-				for m,n in r.iteritems():
-					simple_event(self.ctx, "fs20","em",g.em_name, (data[1]&7)+1,m,n)
+				r = g(self.ctx, data[1:])
+				if r is not None:
+					for m,n in r.iteritems():
+						simple_event(self.ctx, "fs20","em",g.em_name, (data[1]&7)+1,m,n)
 		else:
 			simple_event(self.ctx, "fs20","unknown","prefix",prefix,"".join("%02x" % ord(x) for x in data))
 			print >>sys.stderr,"Unknown prefix",prefix
