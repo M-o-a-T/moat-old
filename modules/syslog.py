@@ -103,8 +103,8 @@ class SysLogger(Logger):
 		while True:
 			try:
 				self.socket.send("<%d>HomEvenT: %s\0" % (self.facility | local_levels[level],txt))
-			except IOError,err:
-				if err.errno != errno.EINTR:
+			except socket.error,err:
+				if err.args[0] != errno.EINTR:
 					raise
 			else:
 				break
