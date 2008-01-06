@@ -132,9 +132,6 @@ class handler(object):
 		raise NotImplementedError("Dunno how to send datagrams")
 
 	def datagramReceived(self, prefix, data, handler=None, timestamp=None):
-	  import sys
-	  print >>sys.stderr,"GET",prefix,repr(data)
-	  try:
 		if timestamp is None:
 			timestamp = time()
 		if self.last_timestamp:
@@ -185,16 +182,11 @@ class handler(object):
 				process_event(Event(self.ctx, "fs20","unknown","em",data[0],"".join("%x"%x for x in data[1:]))).addErrback(process_failure)
 			else:
 				r = g(data[1:])
-				print >>sys.stderr,"RES",repr(r)
 				for m,n in r.iteritems():
 					process_event(Event(self.ctx, "fs20","em",g.em_name, (data[1]&7)+1,m,n)).addErrback(process_failure)
 		else:
 			print >>sys.stderr,"Unknown prefix",prefix
 
-	  except:
-		from traceback import print_exc
-		print_exc(file=sys.stderr)
-	
 
 class group(object):
 	"""\
