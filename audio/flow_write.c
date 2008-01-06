@@ -82,7 +82,6 @@ flow_write_buf(FLOW_PARAM
 	inline void BM(unsigned char _b) /* one byte plus parity, MSB first */ 
 	{
 		unsigned char _m = 1<<(F_bits-1);
-
 		par=0;
 		while(_m) {
 			X(_b & _m);
@@ -93,8 +92,8 @@ flow_write_buf(FLOW_PARAM
 
 	inline void BL(unsigned char _b) /* one byte plus parity, LSB first */ 
 	{
-		unsigned char par=0;
 		unsigned char _m = F_bits;
+		par=0;
 		while(_m--) {
 			X(_b & 1);
 			_b >>= 1;
