@@ -1,11 +1,7 @@
 # -*- coding: utf-8 -*-
 
-"""\
-This is the core of the event dispatcher.
-"""
-
 ## 
-##  Copyright © 2007, Matthias Urlichs <matthias@urlichs.de>
+##  Copyright © 2007-2008, Matthias Urlichs <matthias@urlichs.de>
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -18,6 +14,10 @@ This is the core of the event dispatcher.
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+
+"""\
+This is the core of the event dispatcher.
+"""
 
 from homevent.context import Context
 from homevent.event import Event
