@@ -156,6 +156,21 @@ fs20 wedged NAME
 	-- The named external sender or receiver has stopped reporting progress.
 	   It will be killed and restarted automatically.
 
+fs20 em
+-------
+
+These are measurement devices. They have their own (quite limited)
+protocol codes.
+
+fs20 em unknown id data
+    -- this device ID is unknown.
+
+fs20 em type id datum value
+    -- device ‹type›, ID ‹id›, reports that it measured ‹datum› as ‹value›.
+
+    Example:
+
+        fs20¦em¦thermo_hygro¦2¦temperature¦20.3
 
 Wait
 ----

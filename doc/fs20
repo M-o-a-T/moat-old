@@ -1,0 +1,214 @@
+
+.. 
+    Copyright © 2007, Matthias Urlichs <matthias@urlichs.de>
+    .
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    .
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License (included; see the file LICENSE)
+    for more details.
+
+====
+FS20
+====
+
+This file documents the FS20 (and similar) codes which HomEvenT
+implements, and (part of) the code used for doing that.
+
+The FS20 system uses a puled 868.35 MHz carrier. It is very simple: the
+signal is either on or off.
+
+Bits are coded by varying the length of a pulse and/or the length of the
+pause afterwards. Transmission is inited by a sequence of 0 bits,
+followed by a single 1 bit, followed by some number of bytes (or
+nibbles) with a parity bit each, and a checksum byte or two at the end.
+
+There are a few sub-protocols out there. They differ in mark/space
+(“pulse” and “pause”) timing, type of parity, checksum algorithm,
+and of course datagram content.
+
+Parameters
+==========
+
+--
+EM
+--
+
+* 4 bits/byte (“nibble”)
+
+* parity: always 1
+
+* two checksum nibbles: xor and sum(bytes)+xor+5
+
+* Message length: varies
+
+* Message content:
+
+  * device type
+
+  * address (plus one message bit)
+
+  * message: varies by device type; generally uses BCD-coded value(s)
+
+----
+FS20
+----
+
+* 8 bits/byte
+
+* parity: even
+
+* checksum: sum(bytes)+6
+
+* Message length: 4 or 5 bytes
+
+* Message content:
+
+  * address (2 bytes)
+
+  * device code
+
+  * command (5 bits) plus modifier bits (3, including "extension byte present")
+
+  * extension byte, if the appropriate command bit is set
+
+---
+FHT
+---
+
+Same structure as FS20, except for
+
+* checksum: sum(bytes)+12
+
+* Message length: always 5 bytes
+
+* Message:
+
+  * both address bytes are restricted to 0…99 (thus, the max address is 0x6363)
+
+  * command: The extension bit is always set
+
+
+Devices
+=======
+
+--
+EM
+--
+
+All events are prefixed with "fs20" "em" ‹type› ID
+
+The sensor ID ranges form 0 to 7.
+
+The sensors send at fixed intervals. It's theoretically possible to
+distinguish multiple sensors by their time slot, but that's not
+implemented and not something one should rely on.
+
+The commercially-available battery-powered receivers also receive at
+fixed intervals. At the moment, sending EM messages is not implemented,
+so that is not a problem.
+
+Temperature sensor
+------------------
+
+* Type: thermo
+
+* events: temperature
+
+Temperature/humidity sensor
+---------------------------
+
+* Type: thermo_hygro
+
+* events: temperature, humidity
+
+Rain sensor
+-----------
+
+The sensor has a small internal bucket; every time it tips over, the
+bucket counter is incremented.
+
+* Type: rain
+
+* events: buckets
+
+Wind sensor
+-----------
+
+* Type: wind
+
+* events: wind, wind_dir
+
+The wind_dir event consists of two values: the actual direction in
+degrees, and the observed turbulence (0-3).
+
+Temperature/humidity/barometric pressure sensor
+-----------------------------------------------
+
+* Type: thermo_hygro_baro
+
+* events: temperature, humidity, barometer
+
+Light sensor
+------------
+
+* Type: light
+
+* events: light
+
+The light level is probably measured in lux.
+
+Pyrano sensor
+-------------
+
+* Type: pyrano
+
+This sensor measures how much power (i.e., incoming radiation from the
+sun and the sky) the ground is receiving. Unit: probably W/m².
+
+* events: power
+
+Combined sensor
+---------------
+
+* Type: combo
+
+* events: temperature, humidity, wind, rain, rain!
+
+This sensor has a separate rain sensor. The "rain!" event will
+trigger when this sensor becomes wet / dry; the event parameter
+is "yes" or "no".
+
+----
+FS20
+----
+
+TODO
+
+---
+FHT
+---
+
+TODO
+
+Code structure
+==============
+
+Code for transmitting and receiving of raw datagrams is implemented in
+the “audio” folder. It's written in C because embedded systems have
+problems running a full Python interpreter at all, let alone fast enough.
+
+The code is structured the way it is so that a future minimal
+implementation for small embedded devices needs only a few #define
+statements which point to fixed-address variables, instead of
+carrying function and structure pointers around.
+
+The code should work both with fixed-interval timers, as implemented
+e.g. by something attached to a sound interface, and with interrupt-\
+based inputs plus a timer ("when did the signal state last change?").
+
