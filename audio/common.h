@@ -36,7 +36,7 @@ COMMON_EXTERN FLOW *flows[MAXFLOW+1];
 
 int set_rate(int argc, char *argv[]);
 int set_progress(int argc, char *argv[]);
-void flow_setup(unsigned int *params, char prefix);
+void flow_setup(unsigned int *params, unsigned char bits, unsigned char parity, unsigned char msb, char prefix);
 
 void init_flows(void);
 void free_flows(void);

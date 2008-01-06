@@ -45,13 +45,13 @@ set_progress(int argc, char *argv[])
 /*************** exec some other program **********************/
 
 void
-flow_setup(unsigned int *params, char prefix)
+flow_setup(unsigned int *params, unsigned char bits, unsigned char parity, unsigned char msb, char prefix)
 {
 	FLOW *f;
 	FLOW **fp = flows;
 	FLOW **fe = flows+MAXFLOW;
 
-	f = flow_create(rate, 10, 8, P_EVEN, 1, prefix);
+	f = flow_create(rate, 10, bits, parity, msb, prefix);
 	if (!f) {
 		fprintf(stderr,"Could not create stream (%c)\n", prefix);
 		exit(2);

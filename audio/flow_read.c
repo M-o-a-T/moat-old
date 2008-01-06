@@ -58,7 +58,7 @@ flow_report(FLOW_PARAM
 	if (minlen % 1) minlen++; /* needs to be even, for later */
 	F_logbuf = realloc(F_logbuf, sizeof(unsigned short) * minlen);
 	F_log_min = minlen;
-#define r(x) (int)(F_rate*.0001*x)
+#define r(x) (int)(F_rate*.000001*x)
 	F_log_low = r(low);
 	F_log_high = r(high);
 #undef r
@@ -100,9 +100,9 @@ flow_read_time(FLOW_PARAM
 #ifdef F_LOG
 #define R(_x) (_x*1000000/F_rate)
 	if (F_logbuf && (F_log_valid || hi)) {
-		if ((F_cnt >= F_log_low || (F_log_valid > 0 && ++F_log_invalid < 6)) && F_cnt <= F_log_high) {
+		if ((duration >= F_log_low || (F_log_valid > 0 && ++F_log_invalid < 6)) && duration <= F_log_high) {
 			if (F_log_valid < F_log_min) {
-				F_logbuf[F_log_valid++] = F_cnt;
+				F_logbuf[F_log_valid++] = duration;
 				if (F_log_valid == F_log_min) {
 					unsigned short i;
 					for(i=0; i < F_log_min; i++) {
@@ -111,14 +111,14 @@ flow_read_time(FLOW_PARAM
 						else fputc(hi?' ':'_',stderr);
 						fprintf(stderr,"%lu",R(F_logbuf[i]));
 					}
-					fprintf(stderr,"%c%lu",hi?' ':'_', R(F_cnt));
+					fprintf(stderr,"%c%lu",hi?' ':'_', R(duration));
 				}
 			} else {
-				fprintf(stderr,"%c%lu",hi?' ':'_', R(F_cnt));
+				fprintf(stderr,"%c%lu",hi?' ':'_', R(duration));
 			}
 		} else {
 			if (F_log_valid == F_log_min) 
-				fprintf(stderr,"%c%lu\n",hi?' ':'_', R(F_cnt));
+				fprintf(stderr,"%c%lu\n",hi?' ':'_', R(duration));
 			F_log_valid = 0;
 			F_log_invalid = 0;
 		}
@@ -135,25 +135,23 @@ flow_read_time(FLOW_PARAM
 		else
 			F_r_mark_zero=1;
 	} else if (hi) { /* calc space bit */
-		if (F_cnt > F_r_times[R_SPACE+R_MIN+R_ONE]
-		 && F_cnt < F_r_times[R_SPACE+R_MAX+R_ONE])
+		if (duration > F_r_times[R_SPACE+R_MIN+R_ONE]
+		 && duration < F_r_times[R_SPACE+R_MAX+R_ONE])
 			F_r_space_one=1;
-		if (F_cnt > F_r_times[R_SPACE+R_MIN+R_ZERO]
-		 && F_cnt < F_r_times[R_SPACE+R_MAX+R_ZERO])
+		if (duration > F_r_times[R_SPACE+R_MIN+R_ZERO]
+		 && duration < F_r_times[R_SPACE+R_MAX+R_ZERO])
 			F_r_space_zero=1;
 	} else {
-		if (F_cnt > F_r_times[R_MARK+R_MIN+R_ONE]
-		 && F_cnt < F_r_times[R_MARK+R_MAX+R_ONE])
+		if (duration > F_r_times[R_MARK+R_MIN+R_ONE]
+		 && duration < F_r_times[R_MARK+R_MAX+R_ONE])
 			F_r_mark_one=1;
-		if (F_cnt > F_r_times[R_MARK+R_MIN+R_ZERO]
-		 && F_cnt < F_r_times[R_MARK+R_MAX+R_ZERO])
+		if (duration > F_r_times[R_MARK+R_MIN+R_ZERO]
+		 && duration < F_r_times[R_MARK+R_MAX+R_ZERO])
 			F_r_mark_zero=1;
 	}
 	F_lasthi = hi;
-	if (!hi && !ex) {
-		F_cnt = 0;
+	if (!hi && !ex)
 		return;
-	}
 	{
 		char r_one=F_r_mark_one+F_r_space_one;
 		char r_zero=F_r_mark_zero+F_r_space_zero;
@@ -166,7 +164,6 @@ flow_read_time(FLOW_PARAM
 		if (r_one == r_zero) goto init;
 		hi = (r_one > r_zero);
 	}
-	F_cnt = 0;
 
 	if (!F_syn) {
 		++F_bit;
@@ -176,13 +173,14 @@ flow_read_time(FLOW_PARAM
 		F_syn=1;
 		return;
 	}
-	if(++(F_bit) <= F_bits) {
+	if(F_bit < F_bits) {
 		if (F_msb)
 			F_byt = (F_byt<<1) | hi;
 		else {
 			if(hi)
-				F_byt |= (1<<F_bits);
+				F_byt |= (1<<F_bit);
 		}
+		F_bit++;
 		if (F_parity || F_bit < F_bits)
 			return;
 

@@ -41,7 +41,8 @@ usage(int exitcode, FILE *out)
 	fprintf(out,"    progress            -- print something to stderr, once a second\n");
 	fprintf(out,"    log MIN MAX NUM     -- trace receiver signal\n");
 	fprintf(out,"  Protocols (needs at least one):\n");
-	fprintf(out,"    fs20                -- includes heating\n");
+	fprintf(out,"    fs20                -- switches; includes heating\n");
+	fprintf(out,"    em                  -- environment sensors\n");
 	fprintf(out,"  Actual work (needs to be last!):\n");
 	fprintf(out,"    portaudio interface -- read from this sound input\n");
 	fprintf(out,"    portaudio           -- list sound inputs\n");
@@ -109,7 +110,26 @@ enable_fs20(int argc, char *argv[])
 		[R_MAX+R_ONE +R_SPACE] = 700,
 		[R_IDLE] = 900,
 	};
-	flow_setup(x,'f');
+	flow_setup(x,8,P_EVEN,1,'f');
+	return 0;
+}
+
+
+static int
+enable_em(int argc, char *argv[])
+{
+	unsigned int x[R_IDLE+1] = {
+		[R_MIN+R_ZERO+R_MARK ] = 600,
+		[R_MIN+R_ZERO+R_SPACE] = 250,
+		[R_MIN+R_ONE +R_MARK ] = 250,
+		[R_MIN+R_ONE +R_SPACE] = 600,
+		[R_MAX+R_ZERO+R_MARK ] = 999,
+		[R_MAX+R_ZERO+R_SPACE] = 600,
+		[R_MAX+R_ONE +R_MARK ] = 600,
+		[R_MAX+R_ONE +R_SPACE] = 999,
+		[R_IDLE] = 1500,
+	};
+	flow_setup(x,4,P_MARK,0,'e');
 	return 0;
 }
 
@@ -335,6 +355,7 @@ struct {
 	{"progress", set_progress},
 	{"timestamp", set_timestamp},
 	{"fs20", enable_fs20},
+	{"em", enable_em},
 	{"log", set_log},
 	{"exec", do_exec},
 	{"portaudio", do_portaudio},

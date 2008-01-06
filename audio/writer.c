@@ -248,7 +248,8 @@ void usage(int exitcode, FILE *out)
 	fprintf(out,"    rate NUM            -- samples/second; default: 32000\n");
 	fprintf(out,"    progress            -- print something to stderr, once a second\n");
 	fprintf(out,"  Protocols (needs at least one):\n");
-	fprintf(out,"    fs20                -- includes heating\n");
+	fprintf(out,"    fs20                -- switches; includes heating\n");
+	fprintf(out,"    em                  -- environment sensors\n");
 	fprintf(out,"  Actual work (needs to be last!):\n");
 	fprintf(out,"    exec program args   -- run this program, read from stdin\n");
 	fprintf(out,"    portaudio interface -- read from this sound input\n");
@@ -309,7 +310,21 @@ enable_fs20(int argc, char *argv[])
 		[W_ONE +W_SPACE] = 600,
 		[W_IDLE] = 2000,
 	};
-	flow_setup(x,'f');
+	flow_setup(x,8,P_EVEN,1,'f');
+	return 0;
+}
+
+static int
+enable_em(int argc, char *argv[])
+{
+	unsigned int x[W_IDLE+1] = {
+		[W_ZERO+W_MARK ] = 855,
+		[W_ZERO+W_SPACE] = 366,
+		[W_ONE +W_MARK ] = 366,
+		[W_ONE +W_SPACE] = 855,
+		[W_IDLE] = 2000,
+	};
+	flow_setup(x,4,P_MARK,0,'e');
 	return 0;
 }
 
@@ -477,6 +492,7 @@ struct {
 	{"rate", set_rate},
 	{"progress", set_progress},
 	{"fs20", enable_fs20},
+	{"em", enable_em},
 	{"exec", do_exec},
 	{"portaudio", do_portaudio},
 };
