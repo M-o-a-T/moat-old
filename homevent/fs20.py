@@ -15,6 +15,8 @@
 ##  for more details.
 ##
 
+from __future__ import division
+
 """\
 This module is the basis for processing FS20 datagrams.
 """
@@ -26,7 +28,8 @@ from homevent.context import Context
 from time import time
 
 PREFIX_FS20 = 'f'
-PREFIX = 'f' # all of them!
+PREFIX_EM = 'e'
+PREFIX = 'ef' # all of them!
 PREFIX_TIMESTAMP = 't'
 
 groups = {}
@@ -87,6 +90,31 @@ def unregister_handler(h):
 		except IndexError:
 			default_handler = None
 
+# 
+#A1A2A3V1  	T11T12T13T141  	T21T22T23T241 T31T32T33T341  	F11F12F13F141  	F21F22F23F241  	F31F32F33F341 Q1Q2Q3Q41  	S1S2S3S41
+#_0..7_V 	_____0.1°____ 	_____1°______ _____10°_____ 	_____0.1%____ 	_____1%______ 	_____10%_____
+#
+#e01:04 060901 030705 0A03
+#       +19.6°  57.3%
+
+def em_proc_thermo_hygro(data):
+	if len(data) != 7:
+		raise RuntimeError("em_th: wrong length")
+	temp = data[1]/10 + data[2] + data[3]*10
+	if data[0] & 8: temp = -temp
+	hum = data[4]/10 + data[5] + data[6]*10
+	return {"temperature":temp, "humidity":hum}
+em_proc_thermo_hygro.em_name = "thermo_hygro"
+
+em_procs = [ None, # em_proc_thermo,
+             em_proc_thermo_hygro,
+             None, # em_proc_rain,
+             None, # em_proc_wind,
+             None, # em_proc_thermo_hygro_baro,
+             None, # em_proc_light,
+             None, # em_proc_pyrano,
+             None, # em_proc_combined,
+           ]
 
 class handler(object):
 	"""\
@@ -104,6 +132,9 @@ class handler(object):
 		raise NotImplementedError("Dunno how to send datagrams")
 
 	def datagramReceived(self, prefix, data, handler=None, timestamp=None):
+	  import sys
+	  print >>sys.stderr,"GET",prefix,repr(data)
+	  try:
 		if timestamp is None:
 			timestamp = time()
 		if self.last_timestamp:
@@ -130,6 +161,39 @@ class handler(object):
 				
 			else:
 				return g.datagramReceived(data[2:-1], handler, timedelta=delta)
+		elif prefix == PREFIX_EM:
+			if len(data) < 4:
+				return
+			xsum = ord(data[-2])
+			qsum = ord(data[-1])
+			data = tuple(ord(d) for d in data[:-2])
+			xs=0; qs=xsum
+			for d in data:
+				xs ^= d
+				qs += d
+			if xs != xsum:
+				print >>stderr,"XS",xs,xsum;
+				return
+			if (qs+5)&15 != qsum:
+				print >>stderr,"QS",qs,qsum;
+				return
+			try:
+				g = em_procs[data[0]]
+				if not g:
+					raise IndexError(data[0])
+			except IndexError:
+				process_event(Event(self.ctx, "fs20","unknown","em",data[0],"".join("%x"%x for x in data[1:]))).addErrback(process_failure)
+			else:
+				r = g(data[1:])
+				print >>sys.stderr,"RES",repr(r)
+				for m,n in r.iteritems():
+					process_event(Event(self.ctx, "fs20","em",g.em_name, (data[1]&7)+1,m,n)).addErrback(process_failure)
+		else:
+			print >>sys.stderr,"Unknown prefix",prefix
+
+	  except:
+		from traceback import print_exc
+		print_exc(file=sys.stderr)
 	
 
 class group(object):
