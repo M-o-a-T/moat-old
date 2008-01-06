@@ -75,14 +75,27 @@ static inline void
 flow_char(FLOW_PARAM
           unsigned char c)
 {
-	unsigned char hi;
 	unsigned char ex=0;
+	unsigned char hi;
 
 	hi = ((c & 0x80) != 0);
 	if(++F_cnt >= F_r_times[R_IDLE])
 		ex=1;
 	else if(hi == F_lasthi)
 		return;
+	flow_read_time(
+#ifndef FLOW_STANDALONE
+	               flow
+#endif
+	                   , F_cnt, hi);
+	F_cnt = 0;
+}
+
+void
+flow_read_time(FLOW_PARAM
+               unsigned int duration, unsigned char hi)
+{
+	char ex = (duration >= F_r_times[R_IDLE]);
 
 #ifdef F_LOG
 #define R(_x) (_x*1000000/F_rate)

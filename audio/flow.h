@@ -102,8 +102,16 @@ typedef void(*flow_readproc)(void *param, const unsigned char *buf, unsigned int
 
 void flow_reader(FLOW_PARAM
                  flow_readproc proc, void *param);
+
+/* If you have a buffer full of logged data, do this. */
 void flow_read_buf(FLOW_PARAM
                    const unsigned char *buf, unsigned int len);
+
+/* Alternately, if you have interrupts when the input changes,
+ * re-start a timer after every IRQ and do this.
+ * NOTE: 'hi' is a bool and states the *new* signal value. */
+void flow_read_time(FLOW_PARAM
+                    unsigned int duration, unsigned char hi);
 
 void flow_report(FLOW_PARAM
                  unsigned short low, unsigned short high, unsigned short minlen);
