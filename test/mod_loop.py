@@ -23,17 +23,17 @@ from test import run
 
 input = """\
 async:
-	wait for 1.9:
-		name Foo Bar
-wait for 0.2
+	wait Foo Bar: for 1.9
+wait BEFORE: for 0.2
 block:
 	log DEBUG Start
 	while exists wait Foo Bar:
 		log DEBUG waiting
-		wait for 0.7
+		wait DURING: for 0.7
 		log DEBUG testing
 	log DEBUG Done
 
+wait AFTER: for 0.1
 shutdown
 """
 

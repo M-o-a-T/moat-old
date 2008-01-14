@@ -20,7 +20,7 @@ from __future__ import division
 """\
 This code does basic timeout handling.
 
-wait for FOO...
+wait: for FOO...
 	- waits for FOO seconds
 
 """
@@ -233,16 +233,17 @@ class Waiter(Collected):
 
 	
 class WaitHandler(AttributedStatement):
-	name=("wait","for")
+	name=("wait",)
 	doc="delay for N seconds"
-	long_doc="""\
-wait for FOO...
+	long_doc=u"""\
+wait [NAME…]: for FOO…
 	- delay processsing for FOO seconds
 	  append "s/m/h/d/w" for seconds/minutes/hours/days/weeks
 	  # you can do basic +/- calculations (2m - 10s); you do need the spaces
 """
 	is_update = False
 	force = False
+	timespec = None
 
 	def __init__(self,*a,**k):
 		super(WaitHandler,self).__init__(*a,**k)
@@ -253,22 +254,41 @@ wait for FOO...
 
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		return self._waitfor(time_delta(event))
-					
-	def _waitfor(self,dest):
+		if len(event):
+			self.displayname = Name(event)
+
+		if self.timespec is None:
+			raise SyntaxError(u'Usage: wait [name…]: for|until|next ‹timespec›')
 		if self.is_update:
-			return Waiters[self.displayname].retime(dest)
-			
+			return Waiters[self.displayname].retime(self.timespec())
 		w = Waiter(self, self.displayname, self.force)
-		d = w.init(dest)
+		d = w.init(self.timespec())
 		return d
 
+		
+class WaitFor(Statement):
+	name = ("for",)
+	doc = "specify the time to wait"
+	long_doc=u"""\
+for ‹timespec›
+	- specify the absolute time to wait for.
+	  N sec / min / hour / day / month / year
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if not len(event):
+			raise SyntaxError(u'Usage: for ‹timespec…›')
+
+		def delta():
+			return time_delta(event)
+		self.parent.timespec = delta
 	
-class WaitForHandler(WaitHandler):
-	name=("wait","until")
+
+class WaitUntil(Statement):
+	name=("until",)
 	doc="delay until some timespec matches"
 	long_doc=u"""\
-wait until FOO...
+until FOO…
 	- delay processsing until FOO matches the current time.
 	  Return immediately if it matches already.
 	  N sec / min / hour / day / month / year
@@ -279,15 +299,18 @@ wait until FOO...
 
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-
-		return self._waitfor(time_until(event))
+		if not len(event):
+			raise SyntaxError(u'Usage: until ‹timespec…›')
+		def delta():
+			return time_until(event)
+		self.parent.timespec = delta
 					
 
-class WaitWhileHandler(WaitHandler):
-	name=("wait","while")
+class WaitWhile(Statement):
+	name=("while",)
 	doc="delay while some timespec matches"
 	long_doc=u"""\
-wait while FOO...
+while FOO…
 	- delay processsing while FOO matches the current time
 	  N sec / min / hour / day / month / year
 	  mo/tu/we/th/fr/sa/su: day of week; N mon…sun: month's Nth monday etc
@@ -297,16 +320,19 @@ wait while FOO...
 
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-
-		return self._waitfor(time_until(event, invert=True))
+		if not len(event):
+			raise SyntaxError(u'Usage: while ‹timespec…›')
+		def delta():
+			return time_until(event, invert=True)
+		self.parent.timespec = delta
 					
 
-class WaitForNextHandler(WaitHandler):
-	name=("wait","until","next")
-	doc="delay for some timespec does not match and then match again"
+class WaitNext(Statement):
+	name=("next",)
+	doc="delay until some timespec does not match and then matches again"
 	long_doc=u"""\
-wait until next FOO...
-	- delay processsing until FOO starts matching the current time
+next FOO...
+	- delay processsing until the next time FOO matches
 	  N sec / min / hour / day / month / year
 	  mo/tu/we/th/fr/sa/su: day of week; N mon…sun: month's Nth monday etc
 	  N wk: ISO week number
@@ -315,24 +341,14 @@ wait until next FOO...
 
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-
-		s = time_until(event, invert=True)
-		return self._waitfor(time_until(event, now=s))
-					
-
-class WaitName(Statement):
-	name = ("name",)
-	doc = "name a wait handler"
-	long_doc=u"""\
-name ‹whatever you want›
-	This statement assigns a name to a wait statement.
-"""
-	def run(self,ctx,**k):
-		event = self.params(ctx)
 		if not len(event):
-			raise SyntaxError(u'Usage: name ‹name…›')
-		self.parent.displayname = Name(event)
+			raise SyntaxError(u'Usage: until next ‹timespec…›')
 
+		def delta():
+			s = time_until(event, invert=True)
+			return time_until(event, now=s)
+		self.parent.timespec = delta
+					
 
 class WaitDebug(Statement):
 	name = ("debug",)
@@ -419,7 +435,10 @@ var wait NAME name...
 		setattr(self.parent.ctx,var,Waiters[name])
 
 
-WaitHandler.register_statement(WaitName)
+WaitHandler.register_statement(WaitFor)
+WaitHandler.register_statement(WaitUntil)
+WaitHandler.register_statement(WaitWhile)
+WaitHandler.register_statement(WaitNext)
 WaitHandler.register_statement(WaitDebug)
 WaitHandler.register_statement(WaitUpdate)
 
@@ -453,9 +472,6 @@ class WaitModule(Module):
 
 	def load(self):
 		main_words.register_statement(WaitHandler)
-		main_words.register_statement(WaitForHandler)
-		main_words.register_statement(WaitWhileHandler)
-		main_words.register_statement(WaitForNextHandler)
 		main_words.register_statement(WaitCancel)
 		main_words.register_statement(VarWaitHandler)
 		register_condition(ExistsWaiterCheck)
@@ -464,9 +480,6 @@ class WaitModule(Module):
 	
 	def unload(self):
 		main_words.unregister_statement(WaitHandler)
-		main_words.unregister_statement(WaitForHandler)
-		main_words.unregister_statement(WaitWhileHandler)
-		main_words.unregister_statement(WaitForNextHandler)
 		main_words.unregister_statement(WaitCancel)
 		main_words.unregister_statement(VarWaitHandler)
 		unregister_condition(ExistsWaiterCheck)

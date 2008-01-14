@@ -36,8 +36,8 @@ You'll be tempted to do something like this:
 			while True:
 				try:
 					[ 250 lines which do loads of things to the box ]
-				wait for 10 sec:
-					name box is there
+				wait box is there
+                    for 10 sec
 	on box is gone:
 		name no box
 		try: del wait box is there
@@ -57,7 +57,7 @@ Things to do with this code:
 		[ 250 lines, intented one levels instead of four ]
 	on box loop:
 		trigger box job
-		wait for 10 sec
+		wait: for 10 sec
 		trigger box loop
 	on box shows up:
 		trigger box loop

@@ -25,42 +25,42 @@ value: ?
 ds_name: test
 type: GAUGE
 last_ds: UNKN
-31 EVENT: wait¦start¦×××¦_wait¦1
+33 EVENT: wait¦start¦×××¦_wait¦1
 NEW: <ConditionalWorkSequence:2 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦1
    : └1╴... done.
-31 EVENT: wait¦start¦×××¦_wait¦1
-31 END: wait¦start¦×××¦_wait¦1
-38 EVENT: wait¦done¦×××¦_wait¦1
+33 EVENT: wait¦start¦×××¦_wait¦1
+33 END: wait¦start¦×××¦_wait¦1
+40 EVENT: wait¦done¦×××¦_wait¦1
 NEW: <ConditionalWorkSequence:3 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦1
    : └1╴... done.
-38 EVENT: wait¦done¦×××¦_wait¦1
-38 END: wait¦done¦×××¦_wait¦1
-49 EVENT: wait¦start¦×××¦_wait¦2
+40 EVENT: wait¦done¦×××¦_wait¦1
+40 END: wait¦done¦×××¦_wait¦1
+53 EVENT: wait¦start¦×××¦_wait¦2
 NEW: <ConditionalWorkSequence:4 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦2
    : └1╴... done.
-49 EVENT: wait¦start¦×××¦_wait¦2
-49 END: wait¦start¦×××¦_wait¦2
-56 EVENT: wait¦done¦×××¦_wait¦2
+53 EVENT: wait¦start¦×××¦_wait¦2
+53 END: wait¦start¦×××¦_wait¦2
+60 EVENT: wait¦done¦×××¦_wait¦2
 NEW: <ConditionalWorkSequence:5 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦2
    : └1╴... done.
-56 EVENT: wait¦done¦×××¦_wait¦2
-56 END: wait¦done¦×××¦_wait¦2
-67 EVENT: wait¦start¦×××¦_wait¦3
+60 EVENT: wait¦done¦×××¦_wait¦2
+60 END: wait¦done¦×××¦_wait¦2
+73 EVENT: wait¦start¦×××¦_wait¦3
 NEW: <ConditionalWorkSequence:6 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦3
    : └1╴... done.
-67 EVENT: wait¦start¦×××¦_wait¦3
-67 END: wait¦start¦×××¦_wait¦3
-74 EVENT: wait¦done¦×××¦_wait¦3
+73 EVENT: wait¦start¦×××¦_wait¦3
+73 END: wait¦start¦×××¦_wait¦3
+80 EVENT: wait¦done¦×××¦_wait¦3
 NEW: <ConditionalWorkSequence:7 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦3
    : └1╴... done.
-74 EVENT: wait¦done¦×××¦_wait¦3
-74 END: wait¦done¦×××¦_wait¦3
+80 EVENT: wait¦done¦×××¦_wait¦3
+80 END: wait¦done¦×××¦_wait¦3
 Name: t¦tt¦ttt
 File: /tmp/rrdtest.rrd
 Dataset: test
@@ -74,7 +74,7 @@ type: GAUGE
 last_ds: 12
 0 add ‹VarRRDHandler var¦rrd¦x¦last_ds¦t¦tt¦ttt›
 0 add ‹TriggerHandler trigger¦last¦$x›
-90 EVENT: last¦12
+96 EVENT: last¦12
 NEW: <ConditionalWorkSequence:8 (4)>
    : │  EVENT: last¦12
    : └1╴... done.

@@ -37,7 +37,7 @@ interpret input: the statements will run in a parallel thread.
 	load wait
 	async:
 		log TRACE One
-		wait for 1
+		wait: for 1
 		log TRACE two
 
 A "skip next" command inside the async: block will terminate executing
@@ -560,7 +560,7 @@ something boring and non-descriptive.
 delay for TIME
 --------------
 
-Interval between two measurement attempts. See the ‹wait for› command for
+Interval between two measurement attempts. See the ‹wait› command for
 specifics.
 
 delay until TIME
@@ -1308,8 +1308,8 @@ words, this is broken and will cause you a lot of headache:
 
 	on state * on outside *lamp:
 		trigger onewire switch on outside $lamp
-		wait for 5min:
-			name outside $lamp
+		wait outside $lamp
+            for 5min
 		trigger onewire switch off outside $lamp
 
 The correct solution would be, depending on whether you want the switch
@@ -1321,14 +1321,14 @@ to prolong the timeout …:
 
 	on state * on outside *lamp:
 		if exists wait outside $lamp:
-			wait for 5min:
-				name outside $lamp
+			wait outside $lamp:
+			    for 5min
 				update
 		else:
 			async:
 				trigger onewire switch on outside $lamp
-				wait for 5min:
-					name outside $lamp
+				wait outside $lamp:
+                    for 5min
 				trigger onewire switch off outside $lamp
 
 … or turn the lamp off prematurely:
@@ -1340,8 +1340,8 @@ to prolong the timeout …:
 				del wait outside $lamp
 			else:
 				trigger onewire switch on outside $lamp
-				wait for 5min:
-					name outside $lamp
+				wait outside $lamp
+                    for 5min
 			trigger onewire switch off outside $lamp
 
 Note that in the last example, the trigger statement is outside the if:
@@ -1415,7 +1415,7 @@ doing a test like this, but if you *have* to …
 
 	async:
 		while locked state SOMETHING:
-			wait for 1 sec
+			wait: for 1 sec
 		set state SOMETHING off
 
 Obviously, a loop like this should never run synchronously.
@@ -1464,7 +1464,7 @@ event has been processed. That means if the trigger says
 
 	on foo bar:
 		switch on lamp
-		wait for 1h
+		wait: for 1h
 		switch off lamp
 
 then the statement after the "sync trigger" will be executed exactly one
@@ -1489,15 +1489,16 @@ specifies the absolute minimum time at which the wait trigger.
 After a wait statement completes, the timestamp at which it went off is
 available in the variable ‹$wait›.
 
---------
-wait for
---------
+----
+wait
+----
 
 This statement will delay execution by the specified amount.
 
-	wait for 10min - 5sec
+	wait tea ready:
+        for 10min - 5sec
 
-Used as a compound statement, you can specify details.
+It is always used as a compound statement.
 
 The following interval specifications are accepted:
 
@@ -1515,17 +1516,10 @@ should have gone off) as the first argument: if that is in the past,
 proper interval calculation will be performed. The minimum interval for
 this is two seconds.
 
-name
-----
-
-Assign a name to a wait statement. This name causes the waiter to be
-unique, i.e. there can only be one wait statement with that name in the
-whole system. If you try to execute a wait statement with the same
-name as one that's still pending, an error will be triggered.
-
-	wait for 5min:
-		name "Brew some tea"
-
+The direct arguments to ‹wait› assugn a name. This name causes the
+waiter to be unique, i.e. there can only be one wait statement with that
+name in the whole system. If you try to execute a wait statement with
+the same name as one that's still pending, an error will be triggered.
 
 If you do not name a wait statement, it will have a system-assigned
 unique name.
@@ -1537,13 +1531,13 @@ This marks a wait: statement as updating another waiter, instead of
 waiting itself. For example:
 
 	async:
-		wait for 10sec:
-			name Test
+		wait Test:
+            for 10sec
 		trigger FooBar
 
-	wait for 1sec:
-		name Test
+	wait Test:
 		update
+        for 1sec
 	
 	trigger DoNow
 
@@ -1552,15 +1546,14 @@ trigger immediately.
 
 An error will be raised if the original statement is no longer active.
 
-----------
-wait until
-----------
+wait
+----
 
-This powerful statement lets you wait until some (fixed) conditions
-related to the current time are true.
+This powerful alternate to the "for" specification lets you wait until
+some (fixed) conditions related to the current time are true.
 
 	async:
-		wait until 0 min 0 sec
+		wait: until 0 min 0 sec
 		log DEBUG full hour
 
 If the conditions are already true, this statement will not wait at all.
@@ -1600,30 +1593,28 @@ interval. "11hr -10sec" means 11:00:50 because the next-larger interval
 to seconds is a minute. The only exception are numbered days, which
 refer to the month.
 
----------------
-wait until next
----------------
+until next
+----------
 
 Like above, except that it will wait until the next time the time matches.
 
 	async:
 		while True:
-			wait until next 0 min
+			wait: until next 0 min
 			trigger play sound "hourly chime.ogg"
 
 This will prevent repeating the gong for a full minute. ;-)
 
-----------
-wait while
-----------
+while
+-----
 
 This will wait until the condition is no longer true.
 The above could therefore also have been written as:
 
 	async:
 		while True:
-			wait while 0 min
-			wait until 0 min
+			wait: while 0 min
+			wait: until 0 min
 			trigger play sound "hourly chime.ogg"
 
 except that it's ugly. ☺
@@ -1673,8 +1664,7 @@ You can use this test to find out whether an event triggers before or
 after another one.
 
 	async:
-		wait for 10min:
-			name YAWN
+		wait YAWN: for 10min
 	block:
 		var time tomorrow time += 0h 0min 0sec
 		if wait after $tomorrow YAWN:

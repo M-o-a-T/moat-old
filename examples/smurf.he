@@ -94,8 +94,8 @@ on onewire up * "A30032000000":
 				else:
 					set state 0 motion sensor triggered
 				set state $move motion sensor
-			wait for 0.1:
-				name motion sensor
+			wait motion sensoe:
+				for 0.1
 
 if exists on motion sensor gone: del on motion sensor gone
 on onewire down * "A30032000000":

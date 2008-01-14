@@ -276,7 +276,7 @@ The easy (but wrong) solution is:
 	>> load wait
 	>> on toggle lamp *lamp:
 		set state on $lamp
-		wait for 5 min
+		wait: for 5 min
 		set state off lamp $lamp
 	.
 	>> # THE ABOVE EXAMPLE WILL NOT WORK CORRECTLY
@@ -321,8 +321,8 @@ First solution: turn the thing off.
 			del wait lamp $lamp
 		else:
 			set state on lamp $lamp
-			wait for 5 min:
-				name lamp $lamp
+			wait lamp $lamp:
+                for 5 min
 		set state off lamp $lamp
 	.
 
@@ -368,8 +368,8 @@ This is absurdly simple.
 	>> on toggle lamp *lamp:
 		if not state on lamp $lamp:
 			set state on lamp $lamp
-			wait for 5 min:
-				name lamp $lamp
+			wait lamp $lamp:
+                for 5 min
 			set state off lamp $lamp
 	.
 
@@ -384,17 +384,17 @@ Third solution: re-start the timer.
 
 	>> on toggle lamp *lamp:
 		if exists wait lamp $lamp:
-			wait for 5 min:
-				name lamp $lamp
+			wait lamp $lamp:
+                for 5 min
 				update
 		else:
 			set state on lamp $lamp
-			wait for 5 min:
-				name lamp $lamp
+			wait lamp $lamp:
+                for 5 min
 			set state off lamp $lamp
 	.
 
-Here I use the "update" keyword in "wait for". This tells the wait
+Here I use the "update" keyword in "wait". This tells the wait
 statement to go to the version of the (named!) wait that's already
 running and play with that, instead of waiting itself.
 
@@ -406,13 +406,13 @@ new timeout on that.
 	>> on toggle lamp *lamp:
 		if exists wait lamp $lamp:
 			var wait timeout wait lamp $lamp
-			wait for $timeout 5 min:
-				name lamp $lamp
+			wait lamp $lamp:
+                for $timeout 5 min
 				update
 		else:
 			set state on lamp $lamp
-			wait for 5 min:
-				name lamp $lamp
+			wait lamp $lamp:
+                for $timeout 5 min
 			set state off lamp $lamp
 	.
 

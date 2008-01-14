@@ -37,7 +37,7 @@ on state * three foo bar:
 async:
 	log TRACE Set to THREE
 	set state three foo bar
-wait for 0.1
+wait: for 0.1
 list state
 list state foo bar
 block:

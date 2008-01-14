@@ -70,7 +70,7 @@ The HomEvent code you write may contain things like …
 
 	async:
 		trigger event one
-		wait for 10 sec
+		wait: for 10 sec
 		trigger event two
 
 … but there really is no such thing as a Python thread which sits there

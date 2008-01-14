@@ -30,14 +30,14 @@ list
 
 on foo:
 	block:
-		wait for 0.3:
-			name foo waiter
-wait for 0.1
+		wait foo waiter:
+			for 0.3
+wait: for 0.1
 trigger foo
-wait for 0.1
+wait: for 0.1
 list event
 list event 4
-wait for 0.3
+wait: for 0.3
 
 shutdown
 """

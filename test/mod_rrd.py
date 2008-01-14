@@ -35,11 +35,11 @@ block:
 		log DEBUG No2
 list rrd
 list rrd t tt ttt
-wait for 1.1
+wait: for 1.1
 set rrd 10 t tt ttt
-wait for 1.1
+wait: for 1.1
 set rrd 11 t tt ttt
-wait for 1.1
+wait: for 1.1
 set rrd 12 t tt ttt
 list rrd t tt ttt
 block:

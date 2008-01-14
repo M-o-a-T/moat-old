@@ -24,16 +24,16 @@ from test import run
 input = """\
 trigger foo1
 trigger bar1
-wait for 0.1
+wait: for 0.1
 sync trigger foo2
 sync trigger bar2
-wait for 0.1
+wait: for 0.1
 skip this:
 	trigger never the same
 block:
 	trigger foo3
 	trigger bar3
-wait for 0.1
+wait: for 0.1
 block:
 	if exists file "misc2":
 		include "misc2"

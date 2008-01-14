@@ -22,7 +22,8 @@ from homevent.module import load_module
 from test import run
 
 input = """\
-wait for 0.2:
+wait:
+	for 0.2
 	debug force
 syslog local1 trace localhost 55514
 log DEBUG "One Debug"
@@ -32,7 +33,8 @@ syslog local5 info localhost 55514
 log DEBUG "Five Debug"
 log WARN "Five Warn"
 del syslog local5 localhost 55514
-wait for 0.2:
+wait:
+	for 0.2
 	debug force
 """
 

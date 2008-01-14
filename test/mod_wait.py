@@ -23,15 +23,13 @@ from test import run
 
 input = """\
 async:
-	wait for 10:
-		name Foo Bar
+	wait Foo Bar: for 10
 	trigger FooBar
-wait for 0.2:
-	name X1
+wait X1: for 0.2
 list wait
 list wait Foo Bar
-wait for 0.1:
-	name Foo Bar
+wait Foo Bar:
+	for 0.1
 	update
 block:
 	if exists wait Foo Baz:
@@ -39,16 +37,13 @@ block:
 	else:
 		log DEBUG Yes
 block:
-	wait for 0.2:
-		name X2
+	wait X2: for 0.2
 	trigger DoNow $wait
-wait for 0.1:
-	name X3
+wait X3: for 0.1
 async:
-	wait until 8 min:
-		name Foo Baz
+	wait Foo Baz: until 8 min
 	trigger Heya
-wait for 0.1
+wait: for 0.1
 block:
 	if exists wait Foo Baz:
 		log DEBUG Yes
@@ -58,14 +53,14 @@ on whatever:
 	var wait x Foo Baz
 	log TRACE We wait $x
 sync trigger whatever
-wait for 0.3
+wait: for 0.3
 del wait Foo Baz
 block:
 	if exists wait Foo Baz:
 		log DEBUG No3
 	else:
 		log DEBUG Yes
-wait for 0.2
+wait: for 0.2
 # observe no HeYa event
 shutdown
 """

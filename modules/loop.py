@@ -19,7 +19,7 @@
 Around we go
 
 repeat:
-	wait for 1sec
+	wait: for 1sec
 	trigger Ping
 
 while false:

@@ -28,14 +28,14 @@ NEW: <ConditionalWorkSequence:3 (4)>
 0 NewHandler 1
 0 add ‹LogHandler log¦TRACE¦Set¦to¦THREE›
 0 add ‹SetStateHandler set¦state¦three¦foo¦bar›
-47 EVENT: wait¦start¦0.1¦_wait¦1
+49 EVENT: wait¦start¦0.1¦_wait¦1
 NEW: <ConditionalWorkSequence:4 (4)>
    : │  EVENT: wait¦start¦0.1¦_wait¦1
    : └1╴... done.
-47 EVENT: wait¦start¦0.1¦_wait¦1
-47 END: wait¦start¦0.1¦_wait¦1
+49 EVENT: wait¦start¦0.1¦_wait¦1
+49 END: wait¦start¦0.1¦_wait¦1
 0 Set to THREE
-56 EVENT: state¦two¦three¦foo¦bar
+58 EVENT: state¦two¦three¦foo¦bar
 NEW: <ConditionalWorkSequence:5 (5)>
    : │  EVENT: state¦two¦three¦foo¦bar
    : ├1╴on state * three foo bar ‹OnEventHandler›
@@ -43,7 +43,7 @@ NEW: <ConditionalWorkSequence:5 (5)>
    : │  step: log TRACE Set to FOUR ‹LogHandler›
    : │  step: set state four foo bar ‹SetStateHandler›
    : └2╴... done.
-56 EVENT: state¦two¦three¦foo¦bar
+58 EVENT: state¦two¦three¦foo¦bar
 RUN: on state * three foo bar ‹OnEventHandler›
    : prio: 51
    : step: log TRACE Set to FOUR ‹LogHandler›
@@ -51,7 +51,7 @@ RUN: on state * three foo bar ‹OnEventHandler›
  at: <ConditionalWorkSequence:5 (5)> (step 1)
  ev: EVENT: state¦two¦three¦foo¦bar
 0 Set to FOUR
-56 END: state¦two¦three¦foo¦bar
+58 END: state¦two¦three¦foo¦bar
 ERROR: Traceback (most recent call last):
      :   File "homevent/twist.py, in <lambda>
      :     d.addCallback(lambda _: p(*a,**k))
@@ -115,13 +115,13 @@ ERROR: Traceback (most recent call last):
      : │ │step: log TRACE Set to FOUR ‹LogHandler›
      : │ ╵step: set state four foo bar ‹SetStateHandler›
      : └2╴... done.
-70 END: StateChangeError
-72 EVENT: wait¦done¦0.1¦_wait¦1
+72 END: StateChangeError
+74 EVENT: wait¦done¦0.1¦_wait¦1
 NEW: <ConditionalWorkSequence:7 (4)>
    : │  EVENT: wait¦done¦0.1¦_wait¦1
    : └1╴... done.
-72 EVENT: wait¦done¦0.1¦_wait¦1
-72 END: wait¦done¦0.1¦_wait¦1
+74 EVENT: wait¦done¦0.1¦_wait¦1
+74 END: wait¦done¦0.1¦_wait¦1
 foo bar :: three
 .
 value: three
@@ -144,7 +144,7 @@ last value: two
 0 add ‹VarStateHandler var¦state¦x¦foo¦bar›
 0 add ‹LogHandler log¦TRACE¦We¦got¦$x›
 0 NewHandler 2
-110 EVENT: whatever
+112 EVENT: whatever
 NEW: <ConditionalWorkSequence:8 (5)>
    : │  EVENT: whatever
    : ├1╴on whatever ‹OnEventHandler›
@@ -152,7 +152,7 @@ NEW: <ConditionalWorkSequence:8 (5)>
    : │  step: var state x foo bar ‹VarStateHandler›
    : │  step: log TRACE We got $x ‹LogHandler›
    : └2╴... done.
-110 EVENT: whatever
+112 EVENT: whatever
 RUN: on whatever ‹OnEventHandler›
    : prio: 51
    : step: var state x foo bar ‹VarStateHandler›
@@ -160,13 +160,13 @@ RUN: on whatever ‹OnEventHandler›
  at: <ConditionalWorkSequence:8 (5)> (step 1)
  ev: EVENT: whatever
 0 We got three
-110 END: whatever
-122 EVENT: state¦three¦-¦foo¦bar
+112 END: whatever
+124 EVENT: state¦three¦-¦foo¦bar
 NEW: <ConditionalWorkSequence:9 (4)>
    : │  EVENT: state¦three¦-¦foo¦bar
    : └1╴... done.
-122 EVENT: state¦three¦-¦foo¦bar
-122 END: state¦three¦-¦foo¦bar
+124 EVENT: state¦three¦-¦foo¦bar
+124 END: state¦three¦-¦foo¦bar
 .
 2 EVENT: shutdown
 NEW: <ConditionalWorkSequence:10 (6)>

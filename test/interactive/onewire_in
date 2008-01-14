@@ -18,7 +18,6 @@ on onewire scanned A * *:
 
 connect onewire A _HOST_ _PORT_
 #
-wait for 15:
-	name yawn
+wait yawn: for 15
 
 #dir onewire A

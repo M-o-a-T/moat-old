@@ -48,7 +48,7 @@ Numbers are recognized, and so are quoted strings.
 For instance, this is a quick way to do nothing for a few seconds:
 
 	>> load wait
-	>> wait for 10 sec
+	>> wait: for 10 sec
 
 
 Quick intermission
@@ -104,14 +104,18 @@ somewhat less simple is to convert the original simple idea from a
 simple statement into a block, and attach a complicating command to it.
 
 To figure out how to do that, the "help" command is a bit more
-intelligent than you might have realized. Let's use the "wait for …"
+intelligent than you might have realized. Let's use the "wait: for …"
 command as a convenient example:
 
 	>> load wait
 	>> help 
 	[…]
-	wait for        : delay for N seconds
-	wait until      : delay until some timespec matches
+	wait      : delay processing the following statements for some time
+	[…]
+	>> help wait
+    […]
+	Known words:
+	for    : delay for N seconds
 	[…]
 	>> help wait for
 	wait for:
@@ -119,26 +123,21 @@ command as a convenient example:
 	        - delay processsing for FOO seconds
 	          append "s/m/h/d/w" for seconds/minutes/hours/days/weeks
 	          # you can do basic +/- calculations (2m - 10s); you do need the spaces
-	Known words:
-	name   : name a wait handler
-	update : change the timeout of an existing wait handler
 
-So, the "wait for" command actually understands a couple of special
-words if you attach a block to it. You can find out more about what they
-do:
+So, the "wait" command actually understands a couple of special words if
+you attach a block to it. You can find out more about what they do:
 
-	>> help wait for name
-	name:
-	name ‹whatever you want›
+	>> help wait update
+	update:
     	This statement assigns a name to a wait statement.
 
-Note that this is just convenient syntax; "wait for name" is not a
-command that does anything sensible.
+Note that this is just convenient syntax for the ‹help› statement; "wait
+for" is not a command and typing it will result in an error.
 
 Not surprisingly, this means that this command should work:
 
-	>> wait for 10 sec:
-		name "Delay until self-destruct"
+	>> wait "Delay until self-destruct":
+        for 10 sec
 	.
 
 … and it does.
