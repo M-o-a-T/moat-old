@@ -24,6 +24,7 @@ info: the 'on EVENT:' handler
 .
 event
 module
+wait
 worker
 .
 0 Create OnEvtHandler: foo

@@ -20,7 +20,7 @@ from __future__ import division
 """\
 This code does basic timeout handling.
 
-wait FOO...
+wait for FOO...
 	- waits for FOO seconds
 
 """
@@ -36,6 +36,7 @@ from homevent.times import time_delta, time_until, unixtime,unixdelta, now
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.base import Name,SYS_PRIO
 from homevent.twist import callLater
+from homevent.collect import Collection,Collected
 
 from time import time
 import os
@@ -44,7 +45,10 @@ from twisted.internet import reactor,defer
 import datetime as dt
 
 timer_nr = 0
-waiters={}
+
+class Waiters(Collection):
+	name = "wait"
+Waiters = Waiters()
 
 if "HOMEVENT_TEST" in os.environ:
 	from test import ixtime
@@ -75,9 +79,10 @@ def _trigger(_,d):
 	d.callback(None)
 	return _
 
-class Waiter(object):
+class Waiter(Collected):
 	"""This is the thing that waits."""
 	force = False
+	storage = Waiters.storage
 	def __init__(self,parent,name,force):
 		self.ctx = parent.ctx
 		self.start = now()
@@ -87,11 +92,43 @@ class Waiter(object):
 		except AttributeError:
 			pass
 		self.defer = defer.Deferred()
-		self.name = name
 		self.queue = defer.succeed(None)
-		if self.name in waiters:
+		self.name = Name(name)
+		if self.name in Waiters:
 			raise DupWaiterError(self)
 	
+	def list(self):
+		yield("name"," ".join(unicode(x) for x in self.name))
+		yield("started",self.start)
+		yield("ending",self.end)
+		yield("remaining",self.value)
+		w = self
+		while True:
+			w = getattr(w,"parent",None)
+			if w is None: break
+			n = getattr(w,"displayname",None)
+			if n is not None:
+				if not isinstance(n,basestring):
+					n = " ".join(unicode(x) for x in n)
+			else:
+				try:
+					n = unicode(w.args)
+				except AttributeError:
+					pass
+				if n is None:
+					try:
+						if isinstance(w.name,basestring):
+							n = w.name
+						else:
+							n = " ".join(unicode(x) for x in w.name)
+					except AttributeError:
+						n = w.__class__.__name__
+			if n is not None:
+				yield("in",n)
+
+	def info(self):
+		return str(self.value)
+
 	def __repr__(self):
 		return u"‹%s %s %d›" % (self.__class__.__name__, self.name,self.value)
 
@@ -118,9 +155,9 @@ class Waiter(object):
 			self.defer.callback(None)
 			return self.defer
 
-		if self.name in waiters:
+		if self.name in Waiters:
 			return DupWaiterError(self)
-		waiters[self.name] = self
+		Waiters[self.name] = self
 
 		d,e = self._lock()
 		d.addCallback(lambda _: process_event(Event(self.ctx,"wait","start",ixtime(self.end),*self.name)))
@@ -143,7 +180,7 @@ class Waiter(object):
 			return process_event(Event(self.ctx,"wait","done",tm, *self.name))
 		d.addCallback(did_it)
 		def done(_):
-			del waiters[self.name]
+			del Waiters[self.name]
 			self.defer.callback(_)
 			self._unlock(d,e)
 		d.addCallbacks(done)
@@ -166,7 +203,7 @@ class Waiter(object):
 			return failure.Failure(err(self))
 		def done(_):
 			# Now make the wait statement itself return with the error.
-			del waiters[self.name]
+			del Waiters[self.name]
 			self.defer.callback(_)
 			self._unlock(d,e)
 		d.addCallback(errgen)
@@ -219,7 +256,7 @@ wait for FOO...
 					
 	def _waitfor(self,dest):
 		if self.is_update:
-			return waiters[self.displayname].retime(dest)
+			return Waiters[self.displayname].retime(dest)
 			
 		w = Waiter(self, self.displayname, self.force)
 		d = w.init(dest)
@@ -330,7 +367,7 @@ del wait ‹whatever the name is›
 		event = self.params(ctx)
 		if not len(event):
 			raise SyntaxError(u'Usage: del wait ‹name…›')
-		w = waiters[Name(event)]
+		w = Waiters[Name(event)]
 		return w.cancel(err=HaltSequence)
 
 class WaitUpdate(Statement):
@@ -347,52 +384,6 @@ This statement updates the timeout of an existing wait handler.
 		self.parent.is_update = True
 
 
-class WaitList(Statement):
-	name=("list","wait")
-	doc="list of waiting statements"
-	long_doc="""\
-list wait
-	shows a list of running wait statements.
-list wait NAME
-	shows details for that wait statement.
-	
-"""
-	def run(self,ctx,**k):
-		event = self.params(ctx)
-		if not len(event):
-			for w in waiters.itervalues():
-				print >>self.ctx.out, " ".join(unicode(x) for x in w.name)
-			print >>self.ctx.out, "."
-		else:
-			w = waiters[Name(event)]
-			print  >>self.ctx.out, "Name:"," ".join(unicode(x) for x in w.name)
-			print  >>self.ctx.out, "Started:",w.start
-			print  >>self.ctx.out, "Ending:",w.end
-			print  >>self.ctx.out, "Remaining:",w.value
-			while True:
-				w = getattr(w,"parent",None)
-				if w is None: break
-				n = getattr(w,"displayname",None)
-				if n is not None:
-					if not isinstance(n,basestring):
-						n = " ".join(unicode(x) for x in n)
-				else:
-					try:
-						n = unicode(w.args)
-					except AttributeError:
-						pass
-					if n is None:
-						try:
-							if isinstance(w.name,basestring):
-								n = w.name
-							else:
-								n = " ".join(unicode(x) for x in w.name)
-						except AttributeError:
-							n = w.__class__.__name__
-				if n is not None:
-					print  >>self.ctx.out, "in:",n
-			print  >>self.ctx.out, "."
-
 class ExistsWaiterCheck(Check):
 	name=("exists","wait")
 	doc="check if a waiter exists at all"
@@ -400,7 +391,7 @@ class ExistsWaiterCheck(Check):
 		if not len(args):
 			raise SyntaxError(u"Usage: if exists wait ‹name…›")
 		name = Name(args)
-		return name in waiters
+		return name in Waiters
 
 class LockedWaiterCheck(Check):
 	name=("locked","wait")
@@ -409,7 +400,7 @@ class LockedWaiterCheck(Check):
 		if not len(args):
 			raise SyntaxError(u"Usage: if locked wait ‹name…›")
 		name = Name(args)
-		return waiters[name].locked
+		return Waiters[name].locked
 
 
 class VarWaitHandler(Statement):
@@ -424,7 +415,7 @@ var wait NAME name...
 		event = self.params(ctx)
 		var = event[0]
 		name = Name(event[1:])
-		setattr(self.parent.ctx,var,waiters[name])
+		setattr(self.parent.ctx,var,Waiters[name])
 
 
 WaitHandler.register_statement(WaitName)
@@ -441,7 +432,7 @@ class Shutdown_Worker_Wait(ExcWorker):
         return (ev is shutdown_event)
     def process(self,queue,*a,**k):
 		d = defer.succeed(None)
-		for w in waiters.values():
+		for w in Waiters.values():
 			def tilt(_,waiter):
 				return waiter.cancel(err=HaltSequence)
 			d.addBoth(tilt,w)
@@ -466,7 +457,6 @@ class WaitModule(Module):
 		main_words.register_statement(WaitForNextHandler)
 		main_words.register_statement(WaitCancel)
 		main_words.register_statement(VarWaitHandler)
-		global_words.register_statement(WaitList)
 		register_condition(ExistsWaiterCheck)
 		register_condition(LockedWaiterCheck)
 		register_worker(self.worker)
@@ -478,7 +468,6 @@ class WaitModule(Module):
 		main_words.unregister_statement(WaitForNextHandler)
 		main_words.unregister_statement(WaitCancel)
 		main_words.unregister_statement(VarWaitHandler)
-		global_words.unregister_statement(WaitList)
 		unregister_condition(ExistsWaiterCheck)
 		unregister_condition(LockedWaiterCheck)
 		unregister_worker(self.worker)

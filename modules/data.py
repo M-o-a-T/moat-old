@@ -45,7 +45,9 @@ list coll NAME
 		event = self.params(ctx)
 		c = get_collect(event)
 		if c is None:
-			for m in all_collect():
+			def name_cmp(a,b):
+				return cmp(a.name, b.name)
+			for m in sorted(all_collect(), cmp=name_cmp):
 				print >>self.ctx.out, " ".join(m.name)
 		elif isinstance(c,Collection):
 			for n,m in c.iteritems():

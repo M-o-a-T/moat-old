@@ -24,12 +24,12 @@ NEW: <ConditionalWorkSequence:4 (4)>
    : └1╴... done.
 33 EVENT: wait¦done¦×××¦X1
 33 END: wait¦done¦×××¦X1
-Foo Bar
+Foo Bar :: 9.85
 .
-Name: Foo Bar
-Started: 2003-04-05 06:07:08.050000
-Ending: 2003-04-05 06:07:18.050000
-Remaining: 9.85
+name: Foo Bar
+started: 2003-04-05 06:07:08.050000
+ending: 2003-04-05 06:07:18.050000
+remaining: 9.85
 in: async
 in: None
 .
