@@ -31,7 +31,7 @@ started: 2003-04-05 06:07:08.050000
 ending: 2003-04-05 06:07:18.050000
 remaining: 9.85
 in: async
-in: None
+in: Global
 .
 50 EVENT: wait¦update¦0.3¦Foo¦Bar
 NEW: <ConditionalWorkSequence:5 (4)>

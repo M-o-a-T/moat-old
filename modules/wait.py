@@ -112,7 +112,8 @@ class Waiter(Collected):
 					n = " ".join(unicode(x) for x in n)
 			else:
 				try:
-					n = unicode(w.args)
+					if w.args:
+						n = unicode(w.args)
 				except AttributeError:
 					pass
 				if n is None:
