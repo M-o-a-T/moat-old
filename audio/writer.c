@@ -371,7 +371,7 @@ do_exec(int argc, char *argv[])
  * tested because the reader doesn't work with those either.
  */
 
-void *stream;
+PaStream *stream = NULL;
 
 static void
 do_pa_error(PaError err, const char *str)
@@ -419,7 +419,6 @@ do_pa_run(PaDeviceIndex idx, PaTime latency)
 {
 	PaError err;
 	struct PaStreamParameters param;
-	PaStream *stream = NULL;
 
 	memset(&param,0,sizeof(param));
 	pa_chans = 1;
