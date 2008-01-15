@@ -42,8 +42,8 @@ if not exists module trigger: load trigger
 if not exists module wait: load wait
 if not exists module fs20tr: load fs20tr
 if not exists module fs20switch: load fs20switch
+if not exists module fs20em: load fs20em
 if not exists module on_event: load on_event
-if not exists module errors: load errors
 #
 fs20 switch 31413142 foo bar:
 	add 1214 baz quux

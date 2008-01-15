@@ -28,7 +28,6 @@ from homevent.context import Context
 from time import time
 
 PREFIX_FS20 = 'f'
-PREFIX_EM = 'e'
 PREFIX_TIMESTAMP = 't'
 
 PREFIX = {}
@@ -91,33 +90,6 @@ def unregister_handler(h):
 		except IndexError:
 			default_handler = None
 
-# 
-#A1A2A3V1  	T11T12T13T141  	T21T22T23T241 T31T32T33T341  	F11F12F13F141  	F21F22F23F241  	F31F32F33F341 Q1Q2Q3Q41  	S1S2S3S41
-#_0..7_V 	_____0.1°____ 	_____1°______ _____10°_____ 	_____0.1%____ 	_____1%______ 	_____10%_____
-#
-#e01:04 060901 030705 0A03
-#       +19.6°  57.3%
-
-def em_proc_thermo_hygro(ctx, data):
-	if len(data) != 7:
-		simple_event(ctx, "fs20","em","bad_length","thermo_hygro",len(data),"".join("%x"%x for x in data[1:]))
-		return None
-	temp = data[1]/10 + data[2] + data[3]*10
-	if data[0] & 8: temp = -temp
-	hum = data[4]/10 + data[5] + data[6]*10
-	return {"temperature":temp, "humidity":hum}
-em_proc_thermo_hygro.em_name = "thermo_hygro"
-
-em_procs = [ None, # em_proc_thermo,
-             em_proc_thermo_hygro,
-             None, # em_proc_rain,
-             None, # em_proc_wind,
-             None, # em_proc_thermo_hygro_baro,
-             None, # em_proc_light,
-             None, # em_proc_pyrano,
-             None, # em_proc_combined,
-           ]
-
 class handler(object):
 	"""\
 	This abstract class defines the interface used to send and receive
@@ -165,37 +137,6 @@ class recv_handler(object):
 
 		return self.dataReceived(ctx, data, handler, delta)
 
-
-class em_handler(recv_handler):
-	def dataReceived(self, ctx, data, handler=None, timedelta=None):
-		if len(data) < 4:
-			return
-
-		xsum = ord(data[-2])
-		qsum = ord(data[-1])
-		data = tuple(ord(d) for d in data[:-2])
-		xs=0; qs=xsum
-		for d in data:
-			xs ^= d
-			qs += d
-		if xs != xsum:
-			simple_event(ctx, "fs20","em","checksum1",xs,xsum,"".join("%x" % x for x in data))
-			return
-		if (qs+5)&15 != qsum:
-			simple_event(ctx, "fs20","em","checksum2",(qs+5)&15,qsum,"".join("%x" % x for x in data))
-			return
-		try:
-			g = em_procs[data[0]]
-			if not g:
-				raise IndexError(data[0])
-		except IndexError:
-			simple_event(ctx, "fs20","unknown","em",data[0],"".join("%x"%x for x in data[1:]))
-		else:
-			r = g(ctx, data[1:])
-			if r is not None:
-				for m,n in r.iteritems():
-					simple_event(ctx, "fs20","em",g.em_name, (data[1]&7)+1,m,n)
-PREFIX[PREFIX_EM] = em_handler()
 
 class fs20_handler(recv_handler):
 	def dataReceived(self, ctx, data, handler=None, timedelta=None):

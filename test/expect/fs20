@@ -40,18 +40,18 @@ NEW: <ConditionalWorkSequence:7 (4)>
    : └1╴... done.
 74 EVENT: module¦load¦fs20switch
 74 END: module¦load¦fs20switch
-85 EVENT: module¦load¦on_event
+85 EVENT: module¦load¦fs20em
 NEW: <ConditionalWorkSequence:8 (4)>
+   : │  EVENT: module¦load¦fs20em
+   : └1╴... done.
+85 EVENT: module¦load¦fs20em
+85 END: module¦load¦fs20em
+96 EVENT: module¦load¦on_event
+NEW: <ConditionalWorkSequence:9 (4)>
    : │  EVENT: module¦load¦on_event
    : └1╴... done.
-85 EVENT: module¦load¦on_event
-85 END: module¦load¦on_event
-96 EVENT: module¦load¦errors
-NEW: <ConditionalWorkSequence:9 (4)>
-   : │  EVENT: module¦load¦errors
-   : └1╴... done.
-96 EVENT: module¦load¦errors
-96 END: module¦load¦errors
+96 EVENT: module¦load¦on_event
+96 END: module¦load¦on_event
 1 FS20 started foobar
 1 *** added bar¦foo <FS20xmit obj>
 1 FS20 started bar¦foo
