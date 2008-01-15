@@ -34,7 +34,8 @@ from twisted.internet import protocol,defer,reactor
 from twisted.protocols.basic import _PauseableMixin
 from twisted.python import failure
 from homevent.fs20 import handler,register_handler,unregister_handler, \
-	group, from_hc, from_dev, to_hc, to_dev
+	from_hc, from_dev, to_hc, to_dev
+from homevent.fs20sw import group
 
 codes = {}
 codenames = {}

@@ -27,12 +27,10 @@ from homevent.context import Context
 
 from time import time
 
-PREFIX_FS20 = 'f'
 PREFIX_TIMESTAMP = 't'
 
 PREFIX = {}
 
-groups = {}
 handlers = []
 default_handler = None
 
@@ -137,60 +135,4 @@ class recv_handler(object):
 
 		return self.dataReceived(ctx, data, handler, delta)
 
-
-class fs20_handler(recv_handler):
-	def dataReceived(self, ctx, data, handler=None, timedelta=None):
-		if len(data) < 4:
-			return # obviously way too short
-
-		qs = 0
-		for d in data:
-			qs += ord(d)
-		qs -= ord(data[-1]) # the above loop added it, that's nonsense
-		qs = (ord(data[-1]) - qs) & 0xFF # we want the actual difference
-
-		code = ord(data[0])*256+ord(data[1])
-		try:
-			g = groups[(code,qs)]
-		except KeyError:
-			simple_event(ctx, "fs20","unknown",to_hc(code),qs,"".join("%02x" % ord(x) for x in data))
-			
-		else:
-			return g.datagramReceived(data[2:-1], handler, timedelta=timedelta)
-PREFIX[PREFIX_FS20] = fs20_handler()
-
-
-class group(object):
-	"""\
-	This abstract class represents a group of FS20 devices.
-	A group is defined by a common house code and checksum offset.
-	"""
-
-	handler = None
-
-	def __init__(self, code, qsum):
-		self.code = code
-		self.qsum = qsum
-		code = (code, qsum)
-		if code in groups:
-			raise RuntimeError("House code %04x already known" % (code,))
-		groups[code] = self
-	
-	def delete(self):
-		del groups[(self.code, self.qsum)]
-
-	def datagramReceived(self, data, handler=None):
-		raise NotImplementedError("Dunno how to process incoming datagrams")
-
-	def send(self, data, handler=None):
-		if handler is None:
-			handler = self.handler or default_handler
-
-		data = chr(self.code >> 8) + chr(self.code & 0xFF) + data
-		qsum = self.qsum
-		for c in data:
-			qsum += ord(c)
-		data += chr(qsum & 0xFF)
-
-		return handler.send(PREFIX_FS20, data)
 
