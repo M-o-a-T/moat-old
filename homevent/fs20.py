@@ -141,19 +141,36 @@ class handler(object):
 		else:
 			return ext.datagramReceived(self.ctx, data, handler, timestamp)
 
-class em_handler(object):
+
+class recv_handler(object):
+	"""Common handling for incoming datagrams"""
 	last_timestamp = None
+	last_data = None
+
+	def dataReceived(self, ctx, data, handler=None, timedelta=None):
+		raise NotImplementedError("You need to override 'dataReceived'!")
+
 	def datagramReceived(self, ctx, data, handler=None, timestamp=None):
-		if timestamp is None:
-			timestamp = time()
-		if self.last_timestamp:
-			delta = timestamp - self.last_timestamp
-		else:
+		if self.last_data is None or self.last_data != data:
 			delta = None
+			self.last_data = data
+		else:
+			if timestamp is None:
+				timestamp = time()
+			if self.last_timestamp:
+				delta = timestamp - self.last_timestamp
+			else:
+				delta = None
 		self.last_timestamp = timestamp
 
+		return self.dataReceived(ctx, data, handler, delta)
+
+
+class em_handler(recv_handler):
+	def dataReceived(self, ctx, data, handler=None, timedelta=None):
 		if len(data) < 4:
 			return
+
 		xsum = ord(data[-2])
 		qsum = ord(data[-1])
 		data = tuple(ord(d) for d in data[:-2])
@@ -180,17 +197,8 @@ class em_handler(object):
 					simple_event(ctx, "fs20","em",g.em_name, (data[1]&7)+1,m,n)
 PREFIX[PREFIX_EM] = em_handler()
 
-class fs20_handler(object):
-	last_timestamp = None
-	def datagramReceived(self, ctx, data, handler=None, timestamp=None):
-		if timestamp is None:
-			timestamp = time()
-		if self.last_timestamp:
-			delta = timestamp - self.last_timestamp
-		else:
-			delta = None
-		self.last_timestamp = timestamp
-
+class fs20_handler(recv_handler):
+	def dataReceived(self, ctx, data, handler=None, timedelta=None):
 		if len(data) < 4:
 			return # obviously way too short
 
@@ -207,7 +215,7 @@ class fs20_handler(object):
 			simple_event(ctx, "fs20","unknown",to_hc(code),qs,"".join("%02x" % ord(x) for x in data))
 			
 		else:
-			return g.datagramReceived(data[2:-1], handler, timedelta=delta)
+			return g.datagramReceived(data[2:-1], handler, timedelta=timedelta)
 PREFIX[PREFIX_FS20] = fs20_handler()
 
 
