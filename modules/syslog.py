@@ -32,8 +32,8 @@ from homevent.statement import Statement, main_words
 from homevent import logging
 from homevent.logging import log, Logger, register_logger,unregister_logger,\
 	TRACE,DEBUG,INFO,WARN,ERROR,PANIC
+from homevent.collect import Collection,Collected
 
-import sys
 import syslog
 import socket
 import errno
@@ -79,11 +79,21 @@ local_levels = {
 	PANIC: syslog.LOG_EMERG,
 }
 
-class SysLogger(Logger):
+class SysLoggers(Collection):
+	name = "syslog"
+SysLoggers = SysLoggers()
+SysLoggers.does("del")
+
+class iLogger(Logger):
+	def __init__(self):
+		super(iLogger,self).__init__(self.level)
+
+class SysLogger(Collected,iLogger):
 	"""\
 		This class implements one particular way to log things.
 		"""
-	def __init__(self, address="/dev/log", facility="user", level="info"):
+	storage = SysLoggers.storage
+	def __init__(self, name, address="/dev/log", facility="user", level="info"):
 		self.address = address
 		self.facility_name = facility
 		self.level_name = level
@@ -95,6 +105,19 @@ class SysLogger(Logger):
 		else:
 			self.socket = socket.socket (socket.AF_UNIX, socket.SOCK_DGRAM)
 		self.socket.connect (address)
+		super(SysLogger, self).__init__(*name)
+		register_logger(self)
+
+	def list(self):
+		yield("name", self.name)
+		yield("facility", self.facility)
+		yield("facility_name", self.facility_name)
+		yield("address", self.address)
+		yield("level", self.level)
+		yield("level_name", self.level_name)
+		
+	def info(self):
+		return "%s %s" % (self.facility_name,self.level_name)
 
 	def _log(self,level,txt):
 		if isinstance(txt,unicode):
@@ -109,10 +132,12 @@ class SysLogger(Logger):
 			else:
 				break
 
+	def delete(self,ctx):
+		unregister_logger(self)
+		self.delete_done()
+
 	def flush(self):
 		pass
-
-loggers = {}
 
 def gen_addr(a="/dev/log",b=None):
 	"""Return an address from one or two arguments"""
@@ -145,59 +170,12 @@ syslog ‹facility› ‹level› [‹destination›]
 		dest = gen_addr(*event[2:])
 
 		facility = event[0]
-		logger = SysLogger(address=dest, facility=facility, level=event[1])
 
-		name = (facility, dest)
-		try:
-			old_logger = loggers.pop(name)
-		except KeyError:
-			pass
+		if isinstance(dest,tuple):
+			name = (facility,) + dest
 		else:
-			unregister_logger(old_logger)
-		register_logger(logger)
-		loggers[name] = logger
-
-class NoSyslogHandler(Statement):
-	name=("del","syslog")
-	doc="remove reporting to syslog"
-	long_doc=u"""\
-del syslog ‹facility› [‹destination›]
-	- removes a syslogger.
-"""
-	def run(self,ctx,**k):
-		event = self.params(ctx)
-		if len(event) < 1 or len(event) > 3:
-			raise SyntaxError(u"Usage: no syslog ‹facility› [‹destination›]")
-		dest = gen_addr(*event[1:])
-
-		facility = event[0]
-		name = (facility, dest)
-		unregister_logger(loggers.pop(name))
-
-
-class SyslogLister(Statement):
-	name=("list","syslog")
-	doc="list syslog reporters"
-	long_doc=u"""\
-list syslog [‹facility› [‹destination›]]
-	- Show loggers. If you add the destination, list additional details.
-"""
-	def run(self,ctx,**k):
-		event = self.params(ctx)
-		if len(event) > 3:
-			raise SyntaxError(u"Usage: no syslog ‹facility› [‹destination›]")
-		elif not len(event):
-			for name,logger in loggers.iteritems():
-				print >>ctx.out,logger.facility_name,logger.level_name," ".join(unicode(x) for x in name)
-		else:
-			dest = gen_addr(*event[1:])
-			facility = event[0]
-			name = (facility, dest)
-			logger = loggers[name]
-			print >>ctx.out,"Facility:", logger.facility
-			print >>ctx.out,"Address:", logger.address
-			print >>ctx.out,"Level:", logger.level
-		print >>ctx.out,"."
+			name = (facility,dest)
+		SysLogger(name=name, address=dest, facility=facility, level=event[1])
 
 
 
@@ -210,12 +188,8 @@ class SyslogModule(Module):
 
 	def load(self):
 		main_words.register_statement(SyslogHandler)
-		main_words.register_statement(SyslogLister)
-		main_words.register_statement(NoSyslogHandler)
 	
 	def unload(self):
 		main_words.unregister_statement(SyslogHandler)
-		main_words.unregister_statement(Sysloglister)
-		main_words.unregister_statement(NoSyslogHandler)
 	
 init = SyslogModule
