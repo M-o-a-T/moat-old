@@ -79,11 +79,14 @@ class _OnHandlers(Collection):
 		assert val.name==key, repr(val.name)+" != "+repr(key)
 		onHandlers[val.handler_id] = val
 		super(_OnHandlers,self).__setitem__(key,val)
+		register_worker(val)
 
 	def __delitem__(self,key):
 		val = self[key]
+		unregister_worker(val)
 		del onHandlers[val.handler_id]
 		super(_OnHandlers,self).__delitem__(val.name)
+
 	def pop(self,key):
 		val = self[key]
 		del OnHandlers[val.name]
@@ -116,7 +119,6 @@ class OnEventWorker(Collected,iWorker):
 		if name is None:
 			name = Name(("_on",self.handler_id))
 		super(OnEventWorker,self).__init__(*name)
-		register_worker(self)
 
 #		self.name = unicode(self.parent.arglist)
 #		if self.parent.displayname is not None:
@@ -254,7 +256,6 @@ class OffEventHandler(Statement):
 		if not len(event):
 			raise SyntaxError(u"Usage: del on ‹handler_id/name›")
 		worker = OnHandlers[Name(event)]
-		unregister_worker(worker)
 		del OnHandlers[worker.name]
 
 
