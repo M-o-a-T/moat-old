@@ -45,7 +45,8 @@ if not exists module fs20switch: load fs20switch
 if not exists module fs20em: load fs20em
 if not exists module on_event: load on_event
 #
-fs20 switch 31413142 foo bar:
+fs20 switch foo bar:
+	code 31413142
 	add 1214 baz quux
 
 block:

@@ -242,13 +242,18 @@ in your own code.
 Incoming messages will be reported as events, of course; see the events
 documentation for details.
 
---------------------------
-fs20 switch HOUSECODE NAME
---------------------------
+----------------
+fs20 switch NAME
+----------------
 
 This command declares a group of FS20 devices which share a common
 “house code”, an 8-digit sequence (digits 1,2,3,4 only ⇒ in effect a
 16-bit number).
+
+code HOUSECODE
+--------------
+
+This specifies the house code for the group.
 
 add DEVCODE NAME
 ----------------
@@ -256,13 +261,13 @@ add DEVCODE NAME
 This subcommand is used to declare a device.
 The device code is four digits long (1 to 4, again).
 
-	fs20 switch 12344321 inside actors:
+	fs20 switch inside actors:
+        code 12344321
 		add 2143 living room light
 
-You can use the same command to modify an existing house code;
-simply use either the code or the name, but not both:
+You can use the same command to modify an existing house code.
 
-	fs20 switch 12344321:
+	fs20 switch inside actors:
 		del 2143 living room light
 		add 2144 living room light
 

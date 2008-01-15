@@ -286,38 +286,60 @@ fs20 switch ‹house_code› ‹name…›
 		super(ComplexStatement,self).__init__(*a,**k)
 		self.actions = 0
 		self.new_hc = None
+		self.hc = None
+		self.new_sw = []
 
 	def start_block(self):
 		event = self.params(self.ctx)
-		if len(event) < 2:
-			raise SyntaxError(u"Usage: fs20 switch ‹house_code›? ‹name…›")
-
-		self.new_hc = False
-		try:
-			self.hc = codenames[event]
-		except KeyError:
-			code = from_hc(event[0])
-			w = Name(event[1:])
-			try:
-				self.hc = codes[code]
-			except KeyError:
-				if not w: raise
-				if code in codes:
-					raise RuntimeError(u"The code ‹%d› is already known" % (code,))
-				if w in codenames:
-					raise RuntimeError(u"The name ‹%s› is already known" % (w,))
+		if not len(event):
+			raise SyntaxError(u"Usage: fs20 switch ‹name…›")
 
 		try:
-			self.hc = codes[code]
+			self.hc = codenames[Name(event)]
 		except KeyError:
-			self.hc = SwitchGroup(code,w)
 			self.new_hc = True
+		else:
+			self.new_hc = False
 
 	def run(self,ctx,**k):
+		event = self.params(self.ctx)
+
 		if self.new_hc is None:
 			raise SyntaxError(u"‹fs20 switch› without sub-statements does nothing!")
+		if self.code is None and self.hc is None:
+			raise SyntaxError(u"A new ‹fs20 switch› needs a ‹code› sub-statement!")
+		if self.code is not None:
+			if self.hc is not None:
+				self.hc.code = self.code ## update
+			else:
+				self.hc = SwitchGroup(self.code, Name(event))
+
 		if self.new_hc:
 			self.hc.add()
+		for s in self.new_sw:
+			if s.code in self.hc.devs:
+				raise RuntimeError(u"The code ‹%d› is already known in ‹%d›" % (to_dev(s.code),to_hc(self.hc.code)))
+			s.parent = self.hc
+			s.add()
+
+	def add_sw(self,s):
+		self.new_sw.append(s)
+
+
+class FS20code(Statement):
+	name = ("code",)
+	doc = "Set the house code for a new switch group"
+	long_doc=u"""\
+fs20 ‹name…›:
+	code 12343212
+  - Set the house code for a new switch group.
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if len(event) != 1:
+			raise SyntaxError(u"Usage: code ‹code›")
+		self.parent.code = from_hc(event[0])
+FS20switches.register_statement(FS20code)
 
 
 class FS20addswitch(AttributedStatement):
@@ -339,11 +361,8 @@ add ‹code› ‹name…›
 			raise SyntaxError(u"Usage: add ‹code› ‹name…›")
 		code = from_dev(event[0])
 		name = Name(event[1:])
-		if code in self.parent.hc.devs:
-			raise RuntimeError(u"The code ‹%d› is already known in ‹%d›" % (to_dev(code),to_hc(self.parent.hc.code)))
 
-		sw = Switch(code, name, parent=self.parent.hc)
-		sw.add()
+		self.parent.add_sw(Switch(code, name))
 FS20switches.register_statement(FS20addswitch)
 
 
