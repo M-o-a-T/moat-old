@@ -187,7 +187,7 @@ def get_collect(name, allow_collection=False):
 			else:
 				name = name[1:]
 				if c is None: c = coll
-	if not allow_collection and isinstance(coll,Collection):
+	if not allow_collection and not isinstance(coll,Collected):
 		raise CCollError(name)
 	return coll
 
