@@ -4,69 +4,54 @@ NEW: <ConditionalWorkSequence:1 (4)>
    : └1╴... done.
 1 EVENT: startup
 1 END: startup
-0 add ‹Load load¦bool›
 13 EVENT: module¦load¦bool
 NEW: <ConditionalWorkSequence:2 (4)>
    : │  EVENT: module¦load¦bool
    : └1╴... done.
 13 EVENT: module¦load¦bool
 13 END: module¦load¦bool
-0 add ‹Load load¦ifelse›
-0 add ‹Load load¦logging›
 27 EVENT: module¦load¦logging
 NEW: <ConditionalWorkSequence:3 (4)>
    : │  EVENT: module¦load¦logging
    : └1╴... done.
 27 EVENT: module¦load¦logging
 27 END: module¦load¦logging
-0 add ‹Load load¦block›
-0 add ‹Load load¦trigger›
 41 EVENT: module¦load¦trigger
 NEW: <ConditionalWorkSequence:4 (4)>
    : │  EVENT: module¦load¦trigger
    : └1╴... done.
 41 EVENT: module¦load¦trigger
 41 END: module¦load¦trigger
-0 add ‹Load load¦wait›
 52 EVENT: module¦load¦wait
 NEW: <ConditionalWorkSequence:5 (4)>
    : │  EVENT: module¦load¦wait
    : └1╴... done.
 52 EVENT: module¦load¦wait
 52 END: module¦load¦wait
-0 add ‹Load load¦fs20tr›
 63 EVENT: module¦load¦fs20tr
 NEW: <ConditionalWorkSequence:6 (4)>
    : │  EVENT: module¦load¦fs20tr
    : └1╴... done.
 63 EVENT: module¦load¦fs20tr
 63 END: module¦load¦fs20tr
-0 add ‹Load load¦fs20switch›
 74 EVENT: module¦load¦fs20switch
 NEW: <ConditionalWorkSequence:7 (4)>
    : │  EVENT: module¦load¦fs20switch
    : └1╴... done.
 74 EVENT: module¦load¦fs20switch
 74 END: module¦load¦fs20switch
-0 add ‹Load load¦on_event›
 85 EVENT: module¦load¦on_event
 NEW: <ConditionalWorkSequence:8 (4)>
    : │  EVENT: module¦load¦on_event
    : └1╴... done.
 85 EVENT: module¦load¦on_event
 85 END: module¦load¦on_event
-0 add ‹Load load¦errors›
 96 EVENT: module¦load¦errors
 NEW: <ConditionalWorkSequence:9 (4)>
    : │  EVENT: module¦load¦errors
    : └1╴... done.
 96 EVENT: module¦load¦errors
 96 END: module¦load¦errors
-0 add ‹IfStatement if¦exists¦file¦fs20_recv›
-0 add ‹FS20receive: fs20¦receiver 1›
-0 add ‹FS20transmit: fs20¦sender 1›
-0 add ‹FS20receive: fs20¦receiver 1›
-0 add ‹FS20transmit: fs20¦sender 1›
 1 FS20 started foobar
 1 *** added bar¦foo <FS20xmit obj>
 1 FS20 started bar¦foo

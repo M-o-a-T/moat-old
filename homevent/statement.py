@@ -299,7 +299,6 @@ class StatementList(ComplexStatement):
 		self.procs = []
 
 	def add(self,proc):
-		log(TRACE, "add", unicode(proc))
 		assert not proc.immediate,"Immediate proc added?"
 		self.procs.append(proc)
 

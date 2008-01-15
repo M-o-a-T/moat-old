@@ -5,20 +5,12 @@ NEW: <ConditionalWorkSequence:1 (4)>
 1 EVENT: startup
 1 END: startup
 0 Create OnEvtHandler: net¦connect¦foo
-0 add ‹NETsend: send¦net 1›
-0 add ‹List list¦net¦foo›
-0 add ‹Del del¦net¦foo›
 0 NewHandler 1
 0 Create OnEvtHandler: net¦connect¦baz¦zaz
-0 add ‹NETsend: send¦net 1›
-0 add ‹List list¦net¦baz¦zaz›
-0 add ‹Del del¦net¦baz¦zaz›
 0 NewHandler 2
 0 Create OnEvtHandler: net¦disconnect¦foo
-0 add ‹LogHandler log¦TRACE¦dis¦foo›
 0 NewHandler 3
 0 Create OnEvtHandler: net¦disconnect¦baz¦zaz
-0 add ‹LogHandler log¦TRACE¦dis¦baz¦zaz›
 0 NewHandler 4
 33 EVENT: wait¦start¦0.2¦BEFORE
 NEW: <ConditionalWorkSequence:2 (4)>

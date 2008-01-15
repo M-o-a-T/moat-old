@@ -4,8 +4,6 @@ NEW: <ConditionalWorkSequence:1 (4)>
    : └1╴... done.
 1 EVENT: startup
 1 END: startup
-0 add ‹WaitHandler: wait 6›
-0 add ‹TriggerHandler trigger¦FooBar›
 18 EVENT: wait¦start¦×××¦X1
 NEW: <ConditionalWorkSequence:2 (4)>
    : │  EVENT: wait¦start¦×××¦X1
@@ -39,12 +37,7 @@ NEW: <ConditionalWorkSequence:5 (4)>
    : └1╴... done.
 50 EVENT: wait¦update¦0.3¦Foo¦Bar
 50 END: wait¦update¦0.3¦Foo¦Bar
-0 add ‹IfStatement if¦exists¦wait¦Foo¦Baz›
-0 add ‹LogHandler log¦DEBUG¦No2›
-0 add ‹LogHandler log¦DEBUG¦Yes›
 1 Yes
-0 add ‹WaitHandler: wait 6›
-0 add ‹TriggerHandler trigger¦DoNow¦$wait›
 70 EVENT: wait¦start¦×××¦X2
 NEW: <ConditionalWorkSequence:6 (4)>
    : │  EVENT: wait¦start¦×××¦X2
@@ -87,8 +80,6 @@ NEW: <ConditionalWorkSequence:12 (4)>
    : └1╴... done.
 118 EVENT: wait¦done¦×××¦X3
 118 END: wait¦done¦×××¦X3
-0 add ‹WaitHandler: wait 6›
-0 add ‹TriggerHandler trigger¦Heya›
 134 EVENT: wait¦start¦×××¦_wait¦7
 NEW: <ConditionalWorkSequence:13 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦7
@@ -107,13 +98,8 @@ NEW: <ConditionalWorkSequence:15 (4)>
    : └1╴... done.
 149 EVENT: wait¦done¦×××¦_wait¦7
 149 END: wait¦done¦×××¦_wait¦7
-0 add ‹IfStatement if¦exists¦wait¦Foo¦Baz›
-0 add ‹LogHandler log¦DEBUG¦Yes›
-0 add ‹LogHandler log¦DEBUG¦No1›
 1 Yes
 0 Create OnEvtHandler: whatever
-0 add ‹VarWaitHandler var¦wait¦x¦Foo¦Baz›
-0 add ‹LogHandler log¦TRACE¦We¦wait¦$x›
 0 NewHandler 1
 169 EVENT: whatever
 NEW: <ConditionalWorkSequence:16 (5)>
@@ -150,9 +136,6 @@ NEW: <ConditionalWorkSequence:19 (4)>
    : └1╴... done.
 199 EVENT: wait¦cancel¦×××¦Foo¦Baz
 199 END: wait¦cancel¦×××¦Foo¦Baz
-0 add ‹IfStatement if¦exists¦wait¦Foo¦Baz›
-0 add ‹LogHandler log¦DEBUG¦No3›
-0 add ‹LogHandler log¦DEBUG¦Yes›
 1 Yes
 217 EVENT: wait¦start¦×××¦_wait¦9
 NEW: <ConditionalWorkSequence:20 (4)>

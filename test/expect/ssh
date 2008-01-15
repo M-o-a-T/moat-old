@@ -10,9 +10,6 @@ NEW: <ConditionalWorkSequence:2 (4)>
    : └1╴... done.
 11 EVENT: module¦load¦ssh
 11 END: module¦load¦ssh
-0 add ‹IfStatement if¦exists¦directory¦keys›
-0 add ‹SSHdir ssh¦directory¦keys›
-0 add ‹SSHdir ssh¦directory¦../keys›
 smurf :: SSH public key
 .
 .

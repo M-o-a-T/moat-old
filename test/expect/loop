@@ -4,7 +4,6 @@ NEW: <ConditionalWorkSequence:1 (4)>
    : └1╴... done.
 1 EVENT: startup
 1 END: startup
-0 add ‹WaitHandler: wait 6›
 17 EVENT: wait¦start¦×××¦BEFORE
 NEW: <ConditionalWorkSequence:2 (4)>
    : │  EVENT: wait¦start¦×××¦BEFORE
@@ -23,12 +22,6 @@ NEW: <ConditionalWorkSequence:4 (4)>
    : └1╴... done.
 32 EVENT: wait¦done¦×××¦BEFORE
 32 END: wait¦done¦×××¦BEFORE
-0 add ‹LogHandler log¦DEBUG¦Start›
-0 add ‹WhileStatement while¦exists¦wait¦Foo¦Bar›
-0 add ‹LogHandler log¦DEBUG¦waiting›
-0 add ‹WaitHandler: wait 6›
-0 add ‹LogHandler log¦DEBUG¦testing›
-0 add ‹LogHandler log¦DEBUG¦Done›
 1 Start
 1 waiting
 52 EVENT: wait¦start¦×××¦DURING

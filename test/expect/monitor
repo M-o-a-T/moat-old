@@ -5,10 +5,6 @@ NEW: <ConditionalWorkSequence:1 (4)>
 1 EVENT: startup
 1 END: startup
 0 Create OnEvtHandler: monitor¦value¦*VAL¦foo¦bar
-0 add ‹VarMonitorHandler var¦monitor¦OLDVAL¦foo¦bar›
-0 add ‹IfStatement if¦null¦$OLDVAL›
-0 add ‹LogHandler log¦TRACE¦First¦value¦is¦$VAL›
-0 add ‹LogHandler log¦TRACE¦Go¦from¦$OLDVAL¦to¦$VAL›
 0 NewHandler 1
 26 EVENT: wait¦start¦×××¦_wait¦1
 NEW: <ConditionalWorkSequence:2 (4)>
@@ -91,9 +87,6 @@ NEW: <ConditionalWorkSequence:6 (4)>
    : └1╴... done.
 66 EVENT: wait¦done¦×××¦_wait¦1
 66 END: wait¦done¦×××¦_wait¦1
-0 add ‹IfStatement if¦waiting¦monitor¦foo¦bar›
-0 add ‹LogHandler log¦DEBUG¦No0›
-0 add ‹LogHandler log¦DEBUG¦Yes›
 1 Yes
 foo bar :: Wait ‹0.2 sec›
 .
@@ -165,12 +158,6 @@ NEW: <ConditionalWorkSequence:10 (4)>
 117 END: wait¦done¦×××¦_wait¦2
 .
 0 Create OnEvtHandler: monitor¦checking¦baz¦zaz
-0 add ‹Async async›
-0 add ‹MonitorSet set¦monitor¦10¦baz¦zaz›
-0 add ‹WaitHandler: wait 6›
-0 add ‹MonitorSet set¦monitor¦13¦baz¦zaz›
-0 add ‹WaitHandler: wait 6›
-0 add ‹MonitorSet set¦monitor¦14¦baz¦zaz›
 0 NewHandler 2
 name: baz zaz
 device: passive
@@ -225,9 +212,6 @@ NEW: <ConditionalWorkSequence:14 (4)>
    : └1╴... done.
 177 EVENT: wait¦done¦×××¦_wait¦5
 177 END: wait¦done¦×××¦_wait¦5
-0 add ‹IfStatement if¦waiting¦monitor¦baz¦zaz›
-0 add ‹LogHandler log¦DEBUG¦Yes›
-0 add ‹LogHandler log¦DEBUG¦No1›
 1 Yes
 195 EVENT: wait¦start¦×××¦_wait¦6
 NEW: <ConditionalWorkSequence:15 (4)>
@@ -277,7 +261,4 @@ NEW: <ConditionalWorkSequence:21 (4)>
    : └1╴... done.
 240 EVENT: wait¦done¦×××¦_wait¦6
 240 END: wait¦done¦×××¦_wait¦6
-0 add ‹IfStatement if¦waiting¦monitor¦baz¦zaz›
-0 add ‹LogHandler log¦DEBUG¦No2›
-0 add ‹LogHandler log¦DEBUG¦Yes›
 1 Yes

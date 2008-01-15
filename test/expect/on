@@ -5,35 +5,22 @@ NEW: <ConditionalWorkSequence:1 (4)>
 1 EVENT: startup
 1 END: startup
 0 Create OnEvtHandler: fuß
-0 add ‹DoNothingHandler do¦nothing›
 0 NewHandler 1
 0 Create OnEvtHandler: num¦1
-0 add ‹DoNothingHandler do¦nothing›
 0 NewHandler 2
 0 Create OnEvtHandler: num¦2
-0 add ‹DoNothingHandler do¦nothing›
 0 NewHandler 3
 0 Create OnEvtHandler: num¦3
-0 add ‹DoNothingHandler do¦nothing›
 0 NewHandler 4
 0 Create OnEvtHandler: foo
-0 add ‹IfStatement if¦false›
-0 add ‹LogHandler log¦ERROR¦This should not be executed›
 0 NewHandler 5
 0 Create OnEvtHandler: foo
-0 add ‹IfStatement if¦true›
-0 add ‹OnSkip next¦handler›
-0 add ‹LogHandler log¦ERROR¦This should also not be executed›
 0 NewHandler 6
 0 Create OnEvtHandler: foo
-0 add ‹LogHandler log¦DEBUG¦This is logged once›
 0 NewHandler 7
 0 Create OnEvtHandler: foo
-0 add ‹LogHandler log¦DEBUG¦This is logged once too›
 0 NewHandler 8
 0 Create OnEvtHandler: bar¦*
-0 add ‹Block block›
-0 add ‹SyncTriggerHandler sync¦trigger¦$1›
 0 NewHandler 9
 Skipped One :: foo (49)
 Skipped Two :: foo (50)

@@ -4,9 +4,6 @@ NEW: <ConditionalWorkSequence:1 (4)>
    : └1╴... done.
 1 EVENT: startup
 1 END: startup
-0 add ‹IfStatement if¦exists¦state¦foo¦bar›
-0 add ‹LogHandler log¦TRACE¦No‽›
-0 add ‹LogHandler log¦TRACE¦Yes!›
 0 Yes!
 0 Set to ONE
 20 EVENT: state¦-¦one¦foo¦bar
@@ -23,11 +20,7 @@ NEW: <ConditionalWorkSequence:3 (4)>
 31 EVENT: state¦one¦two¦foo¦bar
 31 END: state¦one¦two¦foo¦bar
 0 Create OnEvtHandler: state¦*¦three¦foo¦bar
-0 add ‹LogHandler log¦TRACE¦Set¦to¦FOUR›
-0 add ‹SetStateHandler set¦state¦four¦foo¦bar›
 0 NewHandler 1
-0 add ‹LogHandler log¦TRACE¦Set¦to¦THREE›
-0 add ‹SetStateHandler set¦state¦three¦foo¦bar›
 49 EVENT: wait¦start¦0.1¦_wait¦1
 NEW: <ConditionalWorkSequence:4 (4)>
    : │  EVENT: wait¦start¦0.1¦_wait¦1
@@ -128,21 +121,10 @@ value: three
 lock: No
 last value: two
 .
-0 add ‹IfStatement if¦state¦three¦foo¦bar›
-0 add ‹LogHandler log¦TRACE¦Yes!›
-0 add ‹LogHandler log¦TRACE¦No‽›
 0 Yes!
-0 add ‹IfStatement if¦exists¦state¦foo¦bar›
-0 add ‹LogHandler log¦TRACE¦Yes!›
-0 add ‹LogHandler log¦TRACE¦No‽›
 0 Yes!
-0 add ‹IfStatement if¦last¦state¦two¦foo¦bar›
-0 add ‹LogHandler log¦TRACE¦Yes!›
-0 add ‹LogHandler log¦TRACE¦No‽›
 0 Yes!
 0 Create OnEvtHandler: whatever
-0 add ‹VarStateHandler var¦state¦x¦foo¦bar›
-0 add ‹LogHandler log¦TRACE¦We¦got¦$x›
 0 NewHandler 2
 112 EVENT: whatever
 NEW: <ConditionalWorkSequence:8 (5)>

@@ -29,8 +29,6 @@ wait
 worker
 .
 0 Create OnEvtHandler: foo
-0 add ‹Block block›
-0 add ‹WaitHandler: wait 6›
 0 NewHandler 1
 29 EVENT: wait¦start¦×××¦_wait¦2
 NEW: <ConditionalWorkSequence:2 (4)>
