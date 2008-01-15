@@ -18,7 +18,7 @@
 
 import homevent as h
 from homevent.reactor import ShutdownHandler
-from homevent.module import Load,Unload
+from homevent.module import Load,load_module
 from test import run
 
 input = """\
@@ -29,7 +29,8 @@ shutdown
 
 h.main_words.register_statement(ShutdownHandler)
 h.main_words.register_statement(Load)
-h.main_words.register_statement(Unload)
+
+load_module("data")
 
 run("modules",input)
 

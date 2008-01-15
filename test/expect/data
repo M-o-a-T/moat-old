@@ -5,7 +5,7 @@ NEW: <ConditionalWorkSequence:1 (4)>
 1 EVENT: startup
 1 END: startup
 block :: Block-level statements
-data :: provides a couple of common 'list FOO' functions
+data :: provides a couple of common data access functions
 on_event :: the 'on EVENT:' handler
 trigger :: Basic event handling
 wait :: Delay handling

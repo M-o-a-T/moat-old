@@ -67,7 +67,6 @@ class Workers(Collection):
 			yield w.prio,w
 	def __getitem__(self,k):
 		raise SyntaxError("You cannot examine individual worker entries. Sorry.")
-
 Workers = Workers()
 
 def collect_event(e):

@@ -32,22 +32,20 @@ from homevent.collect import get_collect,all_collect,Collection
 class List(Statement):
 	name=("list",)
 	doc="list of / show details for various parts of the system"
-	long_doc="""\
+	long_doc=u"""\
 list
-	shows all known part types
-list coll
+	shows all known types
+list ‹type›
 	shows a list of items of that type
-list coll NAME
+list ‹type› ‹name…›
 	shows details for that item
 	
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		c = get_collect(event)
+		c = get_collect(event, allow_collection=True)
 		if c is None:
-			def name_cmp(a,b):
-				return cmp(a.name, b.name)
-			for m in sorted(all_collect(), cmp=name_cmp):
+			for m in all_collect():
 				print >>self.ctx.out, " ".join(m.name)
 		elif isinstance(c,Collection):
 			for n,m in c.iteritems():
@@ -74,17 +72,43 @@ list coll NAME
 		print >>self.ctx.out, "."
 
 
-class ListModule(Module):
+class Del(Statement):
+	name=("del",)
+	doc="delete a part of the system"
+	long_doc=u"""\
+del ‹type› ‹name…›
+	remove that item
+	-- see ‹list› 
+	
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if not event:
+			for m in all_collect("del"):
+				print >>self.ctx.out, " ".join(m.name)
+			print >>self.ctx.out, "."
+			return
+		c = get_collect(event)
+		if c is None:
+			raise SyntaxError(u"Usage: del ‹type› ‹name…›")
+		if not hasattr(c,"delete"):
+			raise SyntaxError(u"You cannot delete those items.")
+		return c.delete(ctx)
+
+
+class DataModule(Module):
 	"""\
-		This module provides a couple of common 'list FOO' functions.
+		This module provides a couple of common data access functions.
 		"""
 
-	info = "provides a couple of common 'list FOO' functions"
+	info = "provides a couple of common data access functions"
 
 	def load(self):
 		main_words.register_statement(List)
+		main_words.register_statement(Del)
 	
 	def unload(self):
 		main_words.unregister_statement(List)
+		main_words.unregister_statement(Del)
 	
-init = ListModule
+init = DataModule

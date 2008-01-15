@@ -73,19 +73,6 @@ for cmd in (MonitorDelayFor, MonitorDelayUntil, MonitorRequire, \
 		MonitorHigh, MonitorLow, MonitorDiff):
 	MonitorUpdate.register_statement(cmd)
 
-class MonitorCancel(Statement):
-	name = ("del","monitor")
-	doc = "abort a monitor handler"
-	long_doc=u"""\
-del monitor ‹whatever the name is›
-	This statement removes a monitor from the system.
-"""
-	def run(self,ctx,**k):
-		event = self.params(ctx)
-		if not len(event):
-			raise SyntaxError(u'Usage: del monitor ‹name…›')
-		m = Monitors.pop(Name(event))
-		return m.down()
 
 class MonitorStart(Statement):
 	name = ("start","monitor")
@@ -213,7 +200,6 @@ class MonitorModule(Module):
 		main_words.register_statement(MonitorHandler)
 		main_words.register_statement(MonitorUpdate)
 		main_words.register_statement(MonitorSet)
-		main_words.register_statement(MonitorCancel)
 		main_words.register_statement(MonitorStart)
 		main_words.register_statement(MonitorStop)
 		main_words.register_statement(VarMonitorHandler)
@@ -225,7 +211,6 @@ class MonitorModule(Module):
 		main_words.unregister_statement(MonitorHandler)
 		main_words.unregister_statement(MonitorUpdate)
 		main_words.unregister_statement(MonitorSet)
-		main_words.unregister_statement(MonitorCancel)
 		main_words.unregister_statement(MonitorStart)
 		main_words.unregister_statement(MonitorStop)
 		main_words.unregister_statement(VarMonitorHandler)

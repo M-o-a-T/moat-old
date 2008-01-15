@@ -49,6 +49,7 @@ timer_nr = 0
 class Waiters(Collection):
 	name = "wait"
 Waiters = Waiters()
+Waiters.can_do("del")
 
 if "HOMEVENT_TEST" in os.environ:
 	from test import ixtime
@@ -181,10 +182,13 @@ class Waiter(Collected):
 			return process_event(Event(self.ctx,"wait","done",tm, *self.name))
 		d.addCallback(did_it)
 		def done(_):
-			del Waiters[self.name]
+			self.delete_done()
 			self.defer.callback(_)
 			self._unlock(d,e)
 		d.addCallbacks(done)
+
+	def delete(self,ctx):
+		return self.cancel(err=HaltSequence)
 
 	def cancel(self, err=WaitCancelled):
 		"""Cancel a waiter."""
@@ -204,7 +208,7 @@ class Waiter(Collected):
 			return failure.Failure(err(self))
 		def done(_):
 			# Now make the wait statement itself return with the error.
-			del Waiters[self.name]
+			self.delete_done()
 			self.defer.callback(_)
 			self._unlock(d,e)
 		d.addCallback(errgen)
@@ -372,21 +376,6 @@ Known flags:
 				raise SyntaxError(u'Flag ‹%s› unknown' % (n,))
 
 
-class WaitCancel(Statement):
-	name = ("del","wait")
-	doc = "abort a wait handler"
-	long_doc=u"""\
-del wait ‹whatever the name is›
-	This statement aborts a wait handler.
-	Everything that depended on the handler's completion will be skipped!
-"""
-	def run(self,ctx,**k):
-		event = self.params(ctx)
-		if not len(event):
-			raise SyntaxError(u'Usage: del wait ‹name…›')
-		w = Waiters[Name(event)]
-		return w.cancel(err=HaltSequence)
-
 class WaitUpdate(Statement):
 	name = ("update",)
 	doc = "change the timeout of an existing wait handler"
@@ -472,7 +461,6 @@ class WaitModule(Module):
 
 	def load(self):
 		main_words.register_statement(WaitHandler)
-		main_words.register_statement(WaitCancel)
 		main_words.register_statement(VarWaitHandler)
 		register_condition(ExistsWaiterCheck)
 		register_condition(LockedWaiterCheck)
@@ -480,7 +468,6 @@ class WaitModule(Module):
 	
 	def unload(self):
 		main_words.unregister_statement(WaitHandler)
-		main_words.unregister_statement(WaitCancel)
 		main_words.unregister_statement(VarWaitHandler)
 		unregister_condition(ExistsWaiterCheck)
 		unregister_condition(LockedWaiterCheck)

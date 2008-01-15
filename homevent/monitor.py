@@ -43,6 +43,7 @@ import datetime as dt
 class Monitors(Collection):
     name = "monitor"
 Monitors = Monitors()
+Monitors.can_do("del")
 
 class MonitorAgain(RuntimeError):
 	"""The monitor is not ready yet; retry please"""
@@ -391,6 +392,14 @@ class Monitor(Collected):
 			self.value = None
 			self.active = True
 			deferToLater(self._run)
+
+	def delete(self,ctx):
+		d = self.down()
+		def done(_):
+			self.delete_done()
+			return _
+		d.addCallback(done)
+		return d
 
 	def down(self):
 		d = defer.Deferred()

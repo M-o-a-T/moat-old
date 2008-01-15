@@ -48,6 +48,8 @@ class Collection(dict):
 			return "<Collection:%s>" % (self.__class__.__name__,)
 
 	def __init__(self):
+		self._can_do = set(("list",))
+
 		name = self.name
 		if isinstance(name,basestring):
 			name = name.split()
@@ -58,11 +60,21 @@ class Collection(dict):
 	
 		collections[name] = self
 	
+	def does(self,name):
+		assert name not in self._can_do
+		self._can_do.add(name)
+
+	def can_do(self,name):
+		return name in self._can_do
+
 	def iteritems(self):
 		def name_cmp(a,b):
 			return cmp(self[a].name,self[b].name)
 		for k in sorted(self.iterkeys(),cmp=name_cmp):
 			yield k,self[k]
+
+	def itervalues(self):
+		return sorted(super(Collection,self).itervalues())
 
 	# The Collected's storage needs to be a weak reference so that it
 	# will be freed when the module is unloaded.
@@ -115,6 +127,9 @@ class Collected(object):
 		"""Remove myself from a collection"""
 		raise NotImplementedError("You need to override 'del' in '%s'" % (self.__class__.__name__,))
 
+	def delete_done(self):
+		del self.storage[self.name]
+
 	def info(self):
 		"""\
 			Return a one-line string with additional data (but not the name!),
@@ -128,13 +143,25 @@ class CKeyError(KeyError):
 		self.name = name
 		self.coll = coll
 	def __repr__(self):
-		return u"I could not find an entry for ‹%s› in %s." % (Name(self.name),self.coll)
+		return u"‹%s ‹%s› %s›" % (self.__class__.__name__, Name(self.name),self.coll)
 	def __unicode__(self):
 		return u"I could not find an entry for ‹%s› in %s." % (Name(self.name),self.coll)
 	def __str__(self):
 		return "I could not find an entry for ‹%s› in %s." % (Name(self.name),self.coll)
 
-def get_collect(name):
+
+class CCollError(KeyError):
+	def __init__(self,name):
+		self.name = name
+	def __repr__(self):
+		return u"‹%s %s›" % (self.__class__.__name__, Name(self.name))
+	def __unicode__(self):
+		return u"‹%s› is a group, not an item." % (Name(self.name),)
+	def __str__(self):
+		return "‹%s› is a group, not an item." % (Name(self.name),)
+
+
+def get_collect(name, allow_collection=False):
 	c = None
 	if not len(name):
 		return None
@@ -160,8 +187,12 @@ def get_collect(name):
 			else:
 				name = name[1:]
 				if c is None: c = coll
+	if not allow_collection and isinstance(coll,Collection):
+		raise CCollError(name)
 	return coll
 
-def all_collect(attr="list"):
-	for m in collections.itervalues():
-		yield m
+def all_collect(name="list"):
+	def byname(a,b): return cmp(a.name,b.name)
+	for m in sorted(collections.itervalues(),cmp=byname):
+		if m.can_do(name):
+			yield m

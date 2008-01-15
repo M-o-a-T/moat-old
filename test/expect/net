@@ -7,12 +7,12 @@ NEW: <ConditionalWorkSequence:1 (4)>
 0 Create OnEvtHandler: net¦connect¦foo
 0 add ‹NETsend: send¦net 1›
 0 add ‹List list¦net¦foo›
-0 add ‹NETdisconnect del¦net¦foo›
+0 add ‹Del del¦net¦foo›
 0 NewHandler 1
 0 Create OnEvtHandler: net¦connect¦baz¦zaz
 0 add ‹NETsend: send¦net 1›
 0 add ‹List list¦net¦baz¦zaz›
-0 add ‹NETdisconnect del¦net¦baz¦zaz›
+0 add ‹Del del¦net¦baz¦zaz›
 0 NewHandler 2
 0 Create OnEvtHandler: net¦disconnect¦foo
 0 add ‹LogHandler log¦TRACE¦dis¦foo›
@@ -45,14 +45,14 @@ NEW: <ConditionalWorkSequence:5 (5)>
    : │  prio: 51
    : │  step: send net foo bar ‹NETsend›
    : │  step: list net foo ‹List›
-   : │  step: del net foo ‹NETdisconnect›
+   : │  step: del net foo ‹Del›
    : └2╴... done.
 66 EVENT: net¦connect¦foo
 RUN: on net connect foo ‹OnEventHandler›
    : prio: 51
    : step: send net foo bar ‹NETsend›
    : step: list net foo ‹List›
-   : step: del net foo ‹NETdisconnect›
+   : step: del net foo ‹Del›
  at: <ConditionalWorkSequence:5 (5)> (step 1)
  ev: EVENT: net¦connect¦foo
 type: client
@@ -85,14 +85,14 @@ NEW: <ConditionalWorkSequence:7 (5)>
    : │  prio: 51
    : │  step: send net quux ‹NETsend›
    : │  step: list net baz zaz ‹List›
-   : │  step: del net baz zaz ‹NETdisconnect›
+   : │  step: del net baz zaz ‹Del›
    : └2╴... done.
 86 EVENT: net¦connect¦baz¦zaz
 RUN: on net connect baz zaz ‹OnEventHandler›
    : prio: 51
    : step: send net quux ‹NETsend›
    : step: list net baz zaz ‹List›
-   : step: del net baz zaz ‹NETdisconnect›
+   : step: del net baz zaz ‹Del›
  at: <ConditionalWorkSequence:7 (5)> (step 1)
  ev: EVENT: net¦connect¦baz¦zaz
 type: server

@@ -40,6 +40,7 @@ load_module("block")
 load_module("file")
 load_module("ifelse")
 load_module("path")
+load_module("data")
 
 run("onewire",input)
 

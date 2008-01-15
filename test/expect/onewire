@@ -59,27 +59,27 @@ NEW: <ConditionalWorkSequence:8 (4)>
 99 EVENT: module¦load¦errors
 99 END: module¦load¦errors
 99 Create OnEvtHandler: onewire¦scanned¦A¦*¦*¦*
-99 add ‹OffEventHandler del¦on¦scanned›
+99 add ‹Del del¦on¦scanned›
 99 add ‹OWFSvar var¦onewire¦X¦_DEV_¦_ATTR_›
 99 add ‹TriggerHandler trigger¦thermo¦$X›
-99 add ‹WaitCancel del¦wait¦yawn›
+99 add ‹Del del¦wait¦yawn›
 99 NewHandler 1
 NEW: <ConditionalWorkSequence:48 (5)>
    : ├1╴on onewire scanned A * * * ‹OnEventHandler›
    : │  name: scanned
    : │  prio: 51
-   : │  step: del on scanned ‹OffEventHandler›
+   : │  step: del on scanned ‹Del›
    : │  step: var onewire X _DEV_ _ATTR_ ‹OWFSvar›
    : │  step: trigger thermo $X ‹TriggerHandler›
-   : │  step: del wait yawn ‹WaitCancel›
+   : │  step: del wait yawn ‹Del›
    : └2╴... done.
 RUN: on onewire scanned A * * * ‹OnEventHandler›
    : name: scanned
    : prio: 51
-   : step: del on scanned ‹OffEventHandler›
+   : step: del on scanned ‹Del›
    : step: var onewire X _DEV_ _ATTR_ ‹OWFSvar›
    : step: trigger thermo $X ‹TriggerHandler›
-   : step: del wait yawn ‹WaitCancel›
+   : step: del wait yawn ‹Del›
  at: <ConditionalWorkSequence:48 (5)> (step 1)
 99 EVENT: thermo¦DATA
 NEW: <ConditionalWorkSequence:49 (4)>

@@ -48,6 +48,7 @@ import os
 class States(Collection):
     name = "state"
 States = States()
+States.can_do("del")
 
 class StateChangeError(Exception):
 	def __init__(self,s,v):
@@ -65,6 +66,18 @@ class State(Collected):
 		self.working = False
 		super(State,self).__init__(*name)
 	
+	def delete(self,ctx):
+		if self.working:
+			raise StateChangeError(self,u"‹deleted›")
+		self.working = True
+		self.time = time()
+		d = process_event(Event(ctx,"state",self.value,"-",*self.name))
+		def clear_chg(_):
+			self.delete_done()
+			return _
+		d.addBoth(clear_chg)
+		return d
+
 	def list(self):
 		yield ("value", self.value)
 		yield ("lock", ("Yes" if self.working else "No"))
@@ -110,31 +123,6 @@ set state X name...
 		d = process_event(Event(self.ctx,"state",old,value,*name))
 		def clear_chg(_):
 			s.working = False
-			return _
-		d.addBoth(clear_chg)
-		return d
-
-
-class DelStateHandler(Statement):
-	name=("del","state")
-	doc="delete a state"
-	long_doc="""\
-del state name...
-	: deletes all memory of that state
-"""
-	def run(self,ctx,**k):
-		event = self.params(ctx)
-		if not len(event):
-			raise SyntaxError(u"Usage: del state ‹name…›")
-
-		s = States[Name(event)]
-		if s.working:
-			raise StateChangeError(s,u"‹deleted›")
-		s.working = True
-		s.time = time()
-		d = process_event(Event(self.ctx,"state",s.value,"-",*event))
-		def clear_chg(_):
-			del States[Name(event)]
 			return _
 		d.addBoth(clear_chg)
 		return d
@@ -213,7 +201,6 @@ class StateModule(Module):
 	def load(self):
 		main_words.register_statement(SetStateHandler)
 		main_words.register_statement(VarStateHandler)
-		main_words.register_statement(DelStateHandler)
 		register_condition(StateCheck)
 		register_condition(StateLockedCheck)
 		register_condition(LastStateCheck)
@@ -222,7 +209,6 @@ class StateModule(Module):
 	def unload(self):
 		main_words.unregister_statement(SetStateHandler)
 		main_words.unregister_statement(VarStateHandler)
-		main_words.unregister_statement(DelStateHandler)
 		unregister_condition(StateCheck)
 		unregister_condition(StateLockedCheck)
 		unregister_condition(LastStateCheck)

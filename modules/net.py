@@ -96,6 +96,8 @@ class NETreceiver(object,LineReceiver, _PauseableMixin):
 class Nets(Collection):
 	name = "net"
 Nets = Nets()
+Nets.can_do("del")
+
 net_conns = {}
 
 
@@ -125,6 +127,12 @@ class NETcommon_factory(Collected):
 		yield ("host",self.host)
 		yield ("port",self.port)
 		yield ("connected", ("Yes" if self.conn is not None else "No"))
+
+	def delete(self,ctx):
+		assert self==net_conns.pop((self.host,self.port))
+		self.end()
+		self.delete_done()
+
 
 	def haveConnection(self,conn):
 		self.drop()
@@ -202,11 +210,6 @@ def listen(host="localhost", port=None, name=None):
 	f = NETserver_factory(host=host, port=port, name=name)
 	f._port = reactor.listenTCP(port, f, interface=host)
 	return f
-
-def disconnect(f):
-	assert f==net_conns.pop((f.host,f.port))
-	assert f==Nets.pop(f.name)
-	f.end()
 
 
 class NETconnect(AttributedStatement):
@@ -323,20 +326,6 @@ send net text… :to ‹name…›
 NETsend.register_statement(NETto)
 
 
-class NETdisconnect(Statement):
-	name=("del","net")
-	doc="disconnect a TCP connection"
-	long_doc="""\
-del net ‹name›
-	: The named net connection is broken.
-"""
-	def run(self,ctx,**k):
-		event = self.params(ctx)
-		if not len(event):
-			raise SyntaxError("Usage: disconnect net ‹name›")
-		name = Name(event)
-		disconnect(Nets[name])
-
 class NETconnected(Check):
 	name=("connected","net")
 	doc="Test if a TCP connection is up"
@@ -368,7 +357,6 @@ class NETmodule(Module):
 	def load(self):
 		main_words.register_statement(NETlisten)
 		main_words.register_statement(NETconnect)
-		main_words.register_statement(NETdisconnect)
 		main_words.register_statement(NETsend)
 		register_condition(NETexists)
 		register_condition(NETconnected)
@@ -376,7 +364,6 @@ class NETmodule(Module):
 	def unload(self):
 		main_words.unregister_statement(NETlisten)
 		main_words.unregister_statement(NETconnect)
-		main_words.unregister_statement(NETdisconnect)
 		main_words.unregister_statement(NETsend)
 		unregister_condition(NETexists)
 		unregister_condition(NETconnected)

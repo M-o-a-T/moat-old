@@ -46,6 +46,7 @@ class ModuleExistsError(RuntimeError):
 class Modules(Collection):
 	name = "module"
 Modules = Modules()
+Modules.can_do("del")
 
 class Module(Collected):
 	"""\
@@ -90,6 +91,15 @@ class Module(Collected):
 			"""
 		raise NotImplementedError("You need to undo whatever it is you did in load().")
 	
+	def delete(self,ctx):
+		d = process_event(Event(ctx, "module","unload",*self.name))
+		def doit(_):
+			self.delete_done()
+			self.unload()
+			return _
+		d.addCallback(doit)
+		return d
+
 	def list(self):
 		yield ("name",self.name)
 		if self.path is not None:
@@ -157,8 +167,6 @@ def unload_module(module):
 	"""\
 		Unloads a module.
 		"""
-	del Modules[module.name]
-	module.unload()
 
 
 class Load(Statement):
@@ -173,22 +181,6 @@ load NAME [args]...
 		event = self.params(ctx)
 		d = defer.maybeDeferred(load_module,*event)
 		d.addCallback(lambda _: process_event(Event(self.ctx, "module","load",*event)))
-		return d
-
-
-class Unload(Statement):
-	name=("del","module",)
-	doc="unload a module"
-	long_doc = """\
-del load NAME [args]...
-	unloads the named module after calling its unload() function.
-	Emits an "module unload NAME [args]" event before unloading.
-"""
-	def run(self,ctx,**k):
-		event = self.params(ctx)
-		m = Modules[Name(event)]
-		d = process_event(Event(self.ctx, "module","unload",*event))
-		d.addCallback(lambda _: unload_module(m))
 		return d
 
 

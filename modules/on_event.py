@@ -92,6 +92,7 @@ class _OnHandlers(Collection):
 		del OnHandlers[val.name]
 		return val
 OnHandlers = _OnHandlers()
+OnHandlers.can_do("del")
 
 class BadArgs(RuntimeError):
 	def __str__(self):
@@ -161,6 +162,9 @@ class OnEventWorker(Collected,iWorker):
 		else:
 			for r in self.parent.report(verbose):
 				yield r
+
+	def delete(self,ctx):
+		self.delete_done()
 
 	def info(self):
 		return u"%s (%d)" % (unicode(self.parent.arglist),self.prio)
@@ -246,17 +250,6 @@ Every "*foo" in the event description is mapped to the corresponding
 
 		for r in super(OnEventHandler,self)._report(verbose):
 			yield r
-
-
-class OffEventHandler(Statement):
-	name = ("del","on")
-	doc = "forget about an event handler"
-	def run(self,ctx,**k):
-		event = self.params(ctx)
-		if not len(event):
-			raise SyntaxError(u"Usage: del on ‹handler_id/name›")
-		worker = OnHandlers[Name(event)]
-		del OnHandlers[worker.name]
 
 
 class OnPrio(Statement):
@@ -345,7 +338,6 @@ class OnEventModule(Module):
 
 	def load(self):
 		main_words.register_statement(OnEventHandler)
-		main_words.register_statement(OffEventHandler)
 		OnEventHandler.register_statement(OnPrio)
 		main_words.register_statement(OnSkip)
 		OnEventHandler.register_statement(OnName)
@@ -354,7 +346,6 @@ class OnEventModule(Module):
 	
 	def unload(self):
 		main_words.unregister_statement(OnEventHandler)
-		main_words.unregister_statement(OffEventHandler)
 		OnEventHandler.unregister_statement(OnPrio)
 		main_words.unregister_statement(OnSkip)
 		OnEventHandler.unregister_statement(OnName)
