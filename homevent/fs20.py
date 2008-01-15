@@ -29,8 +29,9 @@ from time import time
 
 PREFIX_FS20 = 'f'
 PREFIX_EM = 'e'
-PREFIX = 'ef' # all of them!
 PREFIX_TIMESTAMP = 't'
+
+PREFIX = {}
 
 groups = {}
 handlers = []
@@ -120,7 +121,7 @@ em_procs = [ None, # em_proc_thermo,
 class handler(object):
 	"""\
 	This abstract class defines the interface used to send and receive
-	FS20 datagrams. 
+	FS20-and-related datagrams. 
 	"""
 	def __init__(self,ctx=Context):
 		self.last_timestamp = None
@@ -133,6 +134,16 @@ class handler(object):
 		raise NotImplementedError("Dunno how to send datagrams")
 
 	def datagramReceived(self, prefix, data, handler=None, timestamp=None):
+		try:
+			ext = PREFIX[prefix]
+		except KeyError:
+			simple_event(self.ctx, "fs20","unknown","prefix",prefix,"".join("%02x" % ord(x) for x in data))
+		else:
+			return ext.datagramReceived(self.ctx, data, handler, timestamp)
+
+class em_handler(object):
+	last_timestamp = None
+	def datagramReceived(self, ctx, data, handler=None, timestamp=None):
 		if timestamp is None:
 			timestamp = time()
 		if self.last_timestamp:
@@ -141,54 +152,63 @@ class handler(object):
 			delta = None
 		self.last_timestamp = timestamp
 
-		if prefix == PREFIX_FS20:
-			if len(data) < 4:
-				return # obviously way too short
-
-			qs = 0
-			for d in data:
-				qs += ord(d)
-			qs -= ord(data[-1]) # the above loop added it, that's nonsense
-			qs = (ord(data[-1]) - qs) & 0xFF # we want the actual difference
-	
-			code = ord(data[0])*256+ord(data[1])
-			try:
-				g = groups[(code,qs)]
-			except KeyError:
-				simple_event(self.ctx, "fs20","unknown",to_hc(code),qs,"".join("%02x" % ord(x) for x in data))
-				
-			else:
-				return g.datagramReceived(data[2:-1], handler, timedelta=delta)
-		elif prefix == PREFIX_EM:
-			if len(data) < 4:
-				return
-			xsum = ord(data[-2])
-			qsum = ord(data[-1])
-			data = tuple(ord(d) for d in data[:-2])
-			xs=0; qs=xsum
-			for d in data:
-				xs ^= d
-				qs += d
-			if xs != xsum:
-				simple_event(self.ctx, "fs20","em","checksum1",xs,xsum,"".join("%x" % x for x in data))
-				return
-			if (qs+5)&15 != qsum:
-				simple_event(self.ctx, "fs20","em","checksum2",(qs+5)&15,qsum,"".join("%x" % x for x in data))
-				return
-			try:
-				g = em_procs[data[0]]
-				if not g:
-					raise IndexError(data[0])
-			except IndexError:
-				simple_event(self.ctx, "fs20","unknown","em",data[0],"".join("%x"%x for x in data[1:]))
-			else:
-				r = g(self.ctx, data[1:])
-				if r is not None:
-					for m,n in r.iteritems():
-						simple_event(self.ctx, "fs20","em",g.em_name, (data[1]&7)+1,m,n)
+		if len(data) < 4:
+			return
+		xsum = ord(data[-2])
+		qsum = ord(data[-1])
+		data = tuple(ord(d) for d in data[:-2])
+		xs=0; qs=xsum
+		for d in data:
+			xs ^= d
+			qs += d
+		if xs != xsum:
+			simple_event(ctx, "fs20","em","checksum1",xs,xsum,"".join("%x" % x for x in data))
+			return
+		if (qs+5)&15 != qsum:
+			simple_event(ctx, "fs20","em","checksum2",(qs+5)&15,qsum,"".join("%x" % x for x in data))
+			return
+		try:
+			g = em_procs[data[0]]
+			if not g:
+				raise IndexError(data[0])
+		except IndexError:
+			simple_event(ctx, "fs20","unknown","em",data[0],"".join("%x"%x for x in data[1:]))
 		else:
-			simple_event(self.ctx, "fs20","unknown","prefix",prefix,"".join("%02x" % ord(x) for x in data))
-			print >>sys.stderr,"Unknown prefix",prefix
+			r = g(ctx, data[1:])
+			if r is not None:
+				for m,n in r.iteritems():
+					simple_event(ctx, "fs20","em",g.em_name, (data[1]&7)+1,m,n)
+PREFIX[PREFIX_EM] = em_handler()
+
+class fs20_handler(object):
+	last_timestamp = None
+	def datagramReceived(self, ctx, data, handler=None, timestamp=None):
+		if timestamp is None:
+			timestamp = time()
+		if self.last_timestamp:
+			delta = timestamp - self.last_timestamp
+		else:
+			delta = None
+		self.last_timestamp = timestamp
+
+		if len(data) < 4:
+			return # obviously way too short
+
+		qs = 0
+		for d in data:
+			qs += ord(d)
+		qs -= ord(data[-1]) # the above loop added it, that's nonsense
+		qs = (ord(data[-1]) - qs) & 0xFF # we want the actual difference
+
+		code = ord(data[0])*256+ord(data[1])
+		try:
+			g = groups[(code,qs)]
+		except KeyError:
+			simple_event(ctx, "fs20","unknown",to_hc(code),qs,"".join("%02x" % ord(x) for x in data))
+			
+		else:
+			return g.datagramReceived(data[2:-1], handler, timedelta=delta)
+PREFIX[PREFIX_FS20] = fs20_handler()
 
 
 class group(object):
