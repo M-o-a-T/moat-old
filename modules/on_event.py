@@ -54,6 +54,15 @@ onHandlers = {}
 
 class _OnHandlers(Collection):
 	name = "on"
+
+	def iteritems(self):
+		def priosort(a,b):
+			a=self[a]
+			b=self[b]
+			return cmp(a.prio,b.prio) or cmp(a.name,b.name)
+		for i in sorted(self.iterkeys(), cmp=priosort):
+			yield i,self[i]
+
 	def __getitem__(self,key):
 		try:
 			return super(_OnHandlers,self).__getitem__(key)
@@ -151,6 +160,19 @@ class OnEventWorker(Collected,iWorker):
 			for r in self.parent.report(verbose):
 				yield r
 
+	def info(self):
+		return u"%s (%d)" % (unicode(self.parent.arglist),self.prio)
+
+	def list(self):
+		yield("id", str(self.handler_id))
+		if self.parent.displayname is not None:
+			yield("name"," ".join(unicode(x) for x in self.parent.displayname))
+		yield("args",self.parent.arglist)
+		yield("prio",self.prio)
+		if hasattr(self.parent,"displaydoc"):
+			yield("doc",self.parent.displaydoc)
+
+
 
 class OnEventHandler(MainStatementList):
 	name=("on",)
@@ -234,33 +256,6 @@ class OffEventHandler(Statement):
 		worker = OnHandlers[Name(event)]
 		unregister_worker(worker)
 		del OnHandlers[worker.name]
-
-
-class OnListHandler(Statement):
-	name = ("list","on")
-	doc = "list event handlers"
-	def run(self,ctx,**k):
-		event = self.params(ctx)
-		if not len(event):
-			try:
-				fl = len(str(max(onHandlers.iterkeys())))
-			except ValueError:
-				pass # max() on an empty sequence
-			else:
-				for id in sorted(onHandlers.iterkeys()):
-					h = onHandlers[id]
-					n = unicode(h.parent.arglist)
-					if h.parent.displayname is not None:
-						n += u" ‹"+unicode(h.parent.displayname)+u"›"
-					print >>self.ctx.out,str(id)+" "*(fl-len(str(id))+1),":",n
-		else:
-			h = OnHandlers[Name(event)]
-			print >>self.ctx.out, h.handler_id,":",h.parent.arglist
-			if h.parent.displayname is not None:
-				print >>self.ctx.out,"Name:"," ".join(unicode(x) for x in h.parent.displayname)
-			print >>self.ctx.out,"Prio:",h.prio
-			if hasattr(h.parent,"displaydoc"): print >>self.ctx.out,"Doc:",h.parent.displaydoc
-		print >>self.ctx.out,"."
 
 
 class OnPrio(Statement):
@@ -350,7 +345,6 @@ class OnEventModule(Module):
 	def load(self):
 		main_words.register_statement(OnEventHandler)
 		main_words.register_statement(OffEventHandler)
-		global_words.register_statement(OnListHandler)
 		OnEventHandler.register_statement(OnPrio)
 		main_words.register_statement(OnSkip)
 		OnEventHandler.register_statement(OnName)
@@ -360,7 +354,6 @@ class OnEventModule(Module):
 	def unload(self):
 		main_words.unregister_statement(OnEventHandler)
 		main_words.unregister_statement(OffEventHandler)
-		global_words.unregister_statement(OnListHandler)
 		OnEventHandler.unregister_statement(OnPrio)
 		main_words.unregister_statement(OnSkip)
 		OnEventHandler.unregister_statement(OnName)

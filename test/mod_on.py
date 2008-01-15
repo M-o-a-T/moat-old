@@ -81,6 +81,7 @@ load_module("trigger")
 load_module("on_event")
 load_module("ifelse")
 load_module("bool")
+load_module("data")
 load_module("logging")
 
 run("on",input)

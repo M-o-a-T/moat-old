@@ -35,23 +35,25 @@ NEW: <ConditionalWorkSequence:1 (4)>
 0 add ‹Block block›
 0 add ‹SyncTriggerHandler sync¦trigger¦$1›
 0 NewHandler 9
-1  : fuß ‹Schau¦auf¦deine¦Füße›
-2  : num¦1 ‹Txt2Num›
-3  : num¦2 ‹Num2Txt›
-4  : num¦3 ‹num2num›
-5  : foo ‹Skipped¦One›
-6  : foo ‹Skipped¦Two›
-7  : foo ‹Last¦Handler›
-8  : foo ‹not¦executed›
-9  : bar¦*
+Skipped One :: foo (49)
+Skipped Two :: foo (50)
+Num2Txt :: num¦2 (51)
+Schau auf deine Füße :: fuß (51)
+Txt2Num :: num¦1 (51)
+_on 9 :: bar¦* (51)
+num2num :: num¦3 (51)
+Last Handler :: foo (55)
+not executed :: foo (60)
 .
-5 : foo
-Name: Skipped One
-Prio: 49
+id: 5
+name: Skipped One
+args: foo
+prio: 49
 .
-6 : foo
-Name: Skipped Two
-Prio: 50
+id: 6
+name: Skipped Two
+args: foo
+prio: 50
 .
 76 EVENT: bar¦foo
 NEW: <ConditionalWorkSequence:2 (5)>
@@ -175,13 +177,13 @@ RUN: on foo ‹OnEventHandler›
 1 This is logged once too
 108 END: foo
 102 END: bar¦foo
-2  : num¦1 ‹Txt2Num›
-3  : num¦2 ‹Num2Txt›
-4  : num¦3 ‹num2num›
-5  : foo ‹Skipped¦One›
-6  : foo ‹Skipped¦Two›
-8  : foo ‹not¦executed›
-9  : bar¦*
+Skipped One :: foo (49)
+Skipped Two :: foo (50)
+Num2Txt :: num¦2 (51)
+Txt2Num :: num¦1 (51)
+_on 9 :: bar¦* (51)
+num2num :: num¦3 (51)
+not executed :: foo (60)
 .
 130 EVENT: fuß
 NEW: <ConditionalWorkSequence:6 (4)>

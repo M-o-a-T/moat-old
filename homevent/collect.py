@@ -57,6 +57,10 @@ class Collection(dict):
 			return RuntimeError(u"A collection ‹%s› already exists" %(name,))
 	
 		collections[name] = self
+	
+	def iteritems(self):
+		for k in sorted(self.iterkeys()):
+			yield k,self[k]
 
 	# The Collected's storage needs to be a weak reference so that it
 	# will be freed when the module is unloaded.
