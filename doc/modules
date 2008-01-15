@@ -263,16 +263,18 @@ The device code is four digits long (1 to 4, again).
 
 	fs20 switch inside actors:
         code 12344321
-		add 2143 living room light
+		add living room light:
+            code 2143
 
 You can use the same command to modify an existing house code.
 
 	fs20 switch inside actors:
-		del 2143 living room light
-		add 2144 living room light
+		del living room light
+		add living room light
+            code 2144
 
-Note that the broadcast / group control codes, which are defined as
-having "44" in the first and/or last two digits of the device code,
+Note that the broadcast and/or group control codes, which are defined as
+having "44" in the last and/or first two digits of the device code,
 are not handled by HomEvenT in any special way. This is intentional:
 your HomEvenT code needs to know (and document) _anyway_ which signal
 affects which device.

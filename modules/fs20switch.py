@@ -283,11 +283,12 @@ fs20 switch ‹house_code› ‹name…›
 """
 
 	def __init__(self,*a,**k):
-		super(ComplexStatement,self).__init__(*a,**k)
+		super(FS20switches,self).__init__(*a,**k)
 		self.actions = 0
 		self.new_hc = None
 		self.hc = None
 		self.new_sw = []
+		self.old_sw = []
 
 	def start_block(self):
 		event = self.params(self.ctx)
@@ -306,22 +307,29 @@ fs20 switch ‹house_code› ‹name…›
 
 		if self.new_hc is None:
 			raise SyntaxError(u"‹fs20 switch› without sub-statements does nothing!")
-		if self.code is None and self.hc is None:
-			raise SyntaxError(u"A new ‹fs20 switch› needs a ‹code› sub-statement!")
-		if self.code is not None:
-			if self.hc is not None:
-				self.hc.code = self.code ## update
-			else:
-				self.hc = SwitchGroup(self.code, Name(event))
+		if self.hc is None:
+			if self.code is None:
+				raise SyntaxError(u"A new ‹fs20 switch› needs a ‹code› sub-statement!")
+			self.hc = SwitchGroup(self.code, Name(event))
+		elif self.code is not None:
+			self.hc.code = self.code ## update
 
 		if self.new_hc:
 			self.hc.add()
+
+		for s in self.old_sw:
+			if s.parent != self.hc:
+				raise RuntimeError("The named device has house code %d, not %d" % (to_hc(s.parent.code),to_hc(self.hc.code)))
+			s.delete()
+
 		for s in self.new_sw:
 			if s.code in self.hc.devs:
 				raise RuntimeError(u"The code ‹%d› is already known in ‹%d›" % (to_dev(s.code),to_hc(self.hc.code)))
 			s.parent = self.hc
 			s.add()
 
+	def del_sw(self,s):
+		self.old_sw.append(s)
 	def add_sw(self,s):
 		self.new_sw.append(s)
 
@@ -346,54 +354,64 @@ class FS20addswitch(AttributedStatement):
 	name = ("add",)
 	doc = "Add a new named switch"
 	long_doc=u"""\
-add ‹code› ‹name…›
+add ‹name…›:
+	code ‹code›
   - Add a new named FS20 switch. By default, it can do "on" and "off".
 """
 	immediate = True
 
 	def __init__(self,*a,**k):
-		super(ComplexStatement,self).__init__(*a,**k)
-		self.code = None
-		
-	def run(self,ctx,**k):
-		event = self.params(ctx)
-		if len(event) < 2:
-			raise SyntaxError(u"Usage: add ‹code› ‹name…›")
-		code = from_dev(event[0])
-		name = Name(event[1:])
-
-		self.parent.add_sw(Switch(code, name))
-FS20switches.register_statement(FS20addswitch)
-
-
-class FS20delswitch(AttributedStatement):
-	name = ("del",)
-	doc = "Delete a switch (by name or code)"
-	long_doc=u"""\
-del ‹code› | ‹name…›
-  - Delete a named FS20 switch. You can use the device code or its name.
-"""
-
-	def __init__(self,*a,**k):
-		super(ComplexStatement,self).__init__(*a,**k)
+		super(FS20addswitch,self).__init__(*a,**k)
 		self.code = None
 		
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		if not len(event):
-			raise SyntaxError(u"Usage: del ‹code› | ‹name…›")
+			raise SyntaxError(u"Usage: add ‹name…›")
 		name = Name(event)
-		try:
-			d = devnames[name]
-		except KeyError:
-			if len(name) > 1: raise
-			d = from_dev(name[0])
-			d = self.parent.hc.devs[d]
-		else:
-			if d.parent != self.parent.hc:
-				raise RuntimeError("The named device has houce code %d, not %d" % (to_hc(d.parent.code),to_hc(self.parent.hc.code)))
+		if self.code is None:
+			raise SyntaxError(u"Usage: “add” needs a “code” sub-statement")
 
-		d.delete()
+		self.parent.add_sw(Switch(self.code, name))
+FS20switches.register_statement(FS20addswitch)
+
+
+class FS20swcode(Statement):
+	name = ("code",)
+	doc = "Set the device code for a new switch"
+	long_doc=u"""\
+fs20 ‹name…›:
+	add ‹name…›:
+		code 1232
+  - Set the device code for a new switch.
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if len(event) != 1:
+			raise SyntaxError(u"Usage: code ‹code›")
+		self.parent.code = from_dev(event[0])
+FS20addswitch.register_statement(FS20swcode)
+
+
+
+class FS20delswitch(AttributedStatement):
+	name = ("del",)
+	doc = "Delete a switch"
+	long_doc=u"""\
+del ‹name…›
+  - Delete a named FS20 switch.
+"""
+
+	def __init__(self,*a,**k):
+		super(FS20delswitch,self).__init__(*a,**k)
+		
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if not len(event):
+			raise SyntaxError(u"Usage: del ‹name…›")
+		name = Name(event)
+		d = devnames[name]
+		self.parent.del_sw(d)
 FS20switches.register_statement(FS20delswitch)
 
 
@@ -407,7 +425,7 @@ send fs20 ‹msg› -|‹aux› ‹name…›
 """
 
 	def __init__(self,*a,**k):
-		super(AttributedStatement,self).__init__(*a,**k)
+		super(FS20send,self).__init__(*a,**k)
 		self.code = None
 		
 	def run(self,ctx,**k):

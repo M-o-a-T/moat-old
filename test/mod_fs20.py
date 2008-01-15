@@ -47,7 +47,8 @@ if not exists module on_event: load on_event
 #
 fs20 switch foo bar:
 	code 31413142
-	add 1214 baz quux
+	add baz quux:
+		code 1214
 
 block:
 	if exists file "fs20_recv":
