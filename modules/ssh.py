@@ -27,6 +27,7 @@ from homevent.parser import parser_builder,parse
 from homevent.statement import main_words,Statement
 from homevent.interpreter import InteractiveInterpreter,Interpreter
 from homevent.base import Name
+from homevent.collect import Collection,Collected
 
 from twisted.cred import credentials
 from twisted.conch import error,avatar,recvline
@@ -38,8 +39,8 @@ from twisted.conch import interfaces as conchinterfaces
 from twisted.conch.insults import insults
 from twisted.internet import reactor
 from twisted.internet.threads import deferToThread
+
 import base64,os
-import sys
 from cStringIO import StringIO
 
 
@@ -93,11 +94,13 @@ class SSHrealm:
 class PublicKeyCredentialsChecker:
 	implements(checkers.ICredentialsChecker)
 	credentialInterfaces = (credentials.ISSHPrivateKey,)
-	def __init__(self, authorizedKeys):
-		self.authorizedKeys = authorizedKeys
+
 	def requestAvatarId(self, credentials):
-		if self.authorizedKeys.has_key(credentials.username):
-			userKey = self.authorizedKeys[credentials.username]
+		try:
+			userKey = AuthKeys[Name(credentials.username)].key
+		except KeyError:
+			return failure.Failure(error.ConchError("No such user"))
+		else:
 			if not credentials.blob == base64.decodestring(userKey):
 				raise failure.failure(error.ConchError("I don't recognize that key"))
 			if not credentials.signature:
@@ -107,13 +110,28 @@ class PublicKeyCredentialsChecker:
 				return credentials.username
 			else:
 				return failure.Failure(error.ConchError("Incorrect signature"))
-		else:
-			return failure.Failure(error.ConchError("No such user"))
 
 
 NotYet = object()
 sshFactory = NotYet
-authorizedKeys = {}
+
+class AuthKeys(Collection):
+	name = Name(("ssh","auth"))
+AuthKeys = AuthKeys()
+AuthKeys.does("del")
+
+class AuthKey(Collected):
+	storage = AuthKeys.storage
+	info = "SSH public key"
+	def __init__(self,name,key):
+		self.key = key
+		super(AuthKey,self).__init__(name)
+	def delete(self,ctx):
+		self.delete_done()
+	def list(self):
+		yield ("name",self.name)
+		yield ("key",self.key)
+		
 
 class SSHdir(Statement):
 	name = ("ssh","directory")
@@ -150,7 +168,7 @@ You need to call this exactly once.
 
 		f = factory.SSHFactory()
 		f.portal = portal.Portal(SSHrealm())
-		f.portal.registerChecker(PublicKeyCredentialsChecker(authorizedKeys))
+		f.portal.registerChecker(PublicKeyCredentialsChecker())
 
 		if not (os.path.exists(pub_path) and os.path.exists(priv_path)):
 			# generate a RSA keypair
@@ -209,34 +227,7 @@ This command allows the named used to connect with their SSH key.
 		pubkey=event[1]
 		if " " in pubkey:
 			raise SyntaxError(u'The ‹ssh pubkey› does not contain spaces.')
-		authorizedKeys[event[0]] = pubkey
-
-
-class SSHlistauth(Statement):
-	name = ("list","auth","ssh")
-	doc = "show the list of authorized users"
-	def run(self,ctx,**k):
-		event = self.params(ctx)
-		if len(event):
-			raise SyntaxError('Usage: list auth ssh')
-		for u in authorizedKeys.iterkeys():
-			print >>ctx.out,u
-		print >>ctx.out,"."
-
-
-class SSHnoauth(Statement):
-	name = ("del","auth","ssh")
-	doc = "forbid authorize a user to connect"
-	long_doc=u"""\
-Usage: del auth ssh ‹username›
-This command blocks the named user from accessing the server.
-Existing connections are not affected.
-"""
-	def run(self,ctx,**k):
-		event = self.params(ctx)
-		if len(event) != 1:
-			raise SyntaxError(u'Usage: del auth ssh ‹username›')
-		del authorizedKeys[event[0]]
+		AuthKey(event[0],pubkey)
 
 
 class SSHmodule(Module):
@@ -248,16 +239,12 @@ class SSHmodule(Module):
 
 	def load(self):
 		main_words.register_statement(SSHlisten)
-		main_words.register_statement(SSHlistauth)
 		main_words.register_statement(SSHauth)
-		main_words.register_statement(SSHnoauth)
 		main_words.register_statement(SSHdir)
 	
 	def unload(self):
 		main_words.unregister_statement(SSHlisten)
-		main_words.unregister_statement(SSHlistauth)
 		main_words.unregister_statement(SSHauth)
-		main_words.unregister_statement(SSHnoauth)
 		main_words.unregister_statement(SSHdir)
 	
 init = SSHmodule
