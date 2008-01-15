@@ -16,21 +16,32 @@ NEW: <ConditionalWorkSequence:3 (4)>
    : └1╴... done.
 22 EVENT: wait¦done¦0.2¦_wait¦1
 22 END: wait¦done¦0.2¦_wait¦1
+.
 1 One Debug
 1 Five Debug
 3 Five Warn
-49 EVENT: wait¦start¦0.4¦_wait¦2
+local5 localhost 55514 :: local5 info
+.
+name: local5¦localhost¦55514
+facility: 168
+facility_name: local5
+address: (u'localhost', 55514)
+level: 2
+level_name: info
+.
+.
+57 EVENT: wait¦start¦0.4¦_wait¦2
 NEW: <ConditionalWorkSequence:4 (4)>
    : │  EVENT: wait¦start¦0.4¦_wait¦2
    : └1╴... done.
-49 EVENT: wait¦start¦0.4¦_wait¦2
-49 END: wait¦start¦0.4¦_wait¦2
-56 EVENT: wait¦done¦0.4¦_wait¦2
+57 EVENT: wait¦start¦0.4¦_wait¦2
+57 END: wait¦start¦0.4¦_wait¦2
+64 EVENT: wait¦done¦0.4¦_wait¦2
 NEW: <ConditionalWorkSequence:5 (4)>
    : │  EVENT: wait¦done¦0.4¦_wait¦2
    : └1╴... done.
-56 EVENT: wait¦done¦0.4¦_wait¦2
-56 END: wait¦done¦0.4¦_wait¦2
+64 EVENT: wait¦done¦0.4¦_wait¦2
+64 END: wait¦done¦0.4¦_wait¦2
 2 EVENT: shutdown
 NEW: <ConditionalWorkSequence:6 (6)>
    : │  EVENT: shutdown
