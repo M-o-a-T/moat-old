@@ -369,55 +369,6 @@ class MainStatementList(StatementList):
 			return self.main.lookup(args)
 
 
-class OffEventHandler(Statement):
-	name = ("del","on")
-	doc = "forget about an event handler"
-	def run(self,ctx,**k):
-		event = self.params(ctx)
-		if len(event) == 1:
-			try: worker = onHandlers[event[0]]
-			except KeyError: worker = onHandlerNames[event[0]]
-			unregister_worker(worker)
-			del onHandlers[worker.handler_id]
-			if worker.displayname is not None:
-				del onHandlerNames[worker.displayname]
-		else:
-			raise SyntaxError(u"Usage: del on ‹handler_id/name›")
-
-class OnListHandler(Statement):
-	name = ("list","on")
-	doc = "list event handlers"
-	def run(self,ctx,**k):
-		event = self.params(ctx)
-		if not len(event):
-			try:
-				fl = len(str(max(onHandlers.iterkeys())))
-			except ValueError:
-				print >>self.ctx.out,"No handlers are defined."
-			else:
-				for id in sorted(onHandlers.iterkeys()):
-					h = onHandlers[id]
-					n = unicode(h.args)
-					if h.displayname is not None:
-						if isinstance(h.displayname,basestring):
-							n += u" ‹"+h.displayname+u"›"
-						else:
-							n += u" ‹"+" ".join(h.displayname)+u"›"
-					print >>self.ctx.out,str(id)+" "*(fl-len(str(id))+1),":",n
-		elif len(event) == 1:
-			try: h = onHandlers[event[0]]
-			except KeyError: h = onHandlerNames[event[0]]
-			print >>self.ctx.out, h.handler_id,":",unicode(h.args)
-			if h.displayname is not None:
-				if isinstance(h.displayname,basestring):
-					print >>self.ctx.out,"Name:",h.displayname
-				else:
-					print >>self.ctx.out,"Name:"," ".join(h.displayname)
-			if hasattr(h,"displaydoc"): print >>self.ctx.out,"Doc:",h.displaydoc
-		else:
-			raise SyntaxError(u"Usage: list on ‹handler_id›")
-
-
 class DoNothingHandler(Statement):
 	name = ("do","nothing")
 	doc = "do not do anything"

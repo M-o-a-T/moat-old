@@ -24,6 +24,7 @@ info: the 'on EVENT:' handler
 .
 event
 module
+on
 wait
 worker
 .

@@ -77,6 +77,7 @@ class Collected(object):
 		where foo is the associated Collection object.
 		"""
 	storage = None # Collection
+	name = None
 
 	def __init__(self, *name):
 		if not name:
@@ -90,6 +91,8 @@ class Collected(object):
 		self.name = name = Name(name)
 		if name in self.storage:
 			raise RuntimeError(u"Duplicate entry ‹%s› in ‹%s›" % (name,self.storage.name))
+
+		super(Collected,self).__init__()
 		self.storage[name] = self
 
 	def __repr__(self):

@@ -45,13 +45,41 @@ from homevent.logging import log
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.event import TrySomethingElse
 from homevent.base import Name
+from homevent.collect import Collection,Collected
 
 from twisted.internet import defer
 
-onHandlers = {}
-onHandlerNames = {}
 _onHandler_id = 0
+onHandlers = {}
 
+class _OnHandlers(Collection):
+	name = "on"
+	def __getitem__(self,key):
+		try:
+			return super(_OnHandlers,self).__getitem__(key)
+		except KeyError:
+			try:
+				return onHandlers[key]
+			except KeyError:
+				if len(key) == 1:
+					return onHandlers[key[0]]
+				else:
+					raise
+
+	def __setitem__(self,key,val):
+		assert val.name==key, repr(val.name)+" != "+repr(key)
+		onHandlers[val.handler_id] = val
+		super(_OnHandlers,self).__setitem__(key,val)
+
+	def __delitem__(self,key):
+		val = self[key]
+		del onHandlers[val.handler_id]
+		super(_OnHandlers,self).__delitem__(val.name)
+	def pop(self,key):
+		val = self[key]
+		del OnHandlers[val.name]
+		return val
+OnHandlers = _OnHandlers()
 
 class BadArgs(RuntimeError):
 	def __str__(self):
@@ -61,16 +89,31 @@ class BadArgCount(RuntimeError):
 	def __str__(self):
 		return "The number of event arguments does not match"
 
-class OnEventWorker(Worker):
-	def __init__(self,parent):
+
+class iWorker(Worker):
+	def __init__(self):
+		super(iWorker,self).__init__(self.name)
+
+class OnEventWorker(Collected,iWorker):
+	storage = OnHandlers.storage
+	def __init__(self,parent, name=None, prio=(MIN_PRIO+MAX_PRIO)//2+1):
+		self.prio = prio
 		self.parent = parent
-		self.name = unicode(self.parent.arglist)
-		if self.parent.displayname is not None:
-			self.name += u" ‹"+" ".join(unicode(x) for x in self.parent.displayname)+u"›"
 
 		global _onHandler_id
 		_onHandler_id += 1
 		self.handler_id = _onHandler_id
+
+		if name is None:
+			name = Name(("_on",self.handler_id))
+		super(OnEventWorker,self).__init__(*name)
+		register_worker(self)
+
+#		self.name = unicode(self.parent.arglist)
+#		if self.parent.displayname is not None:
+#			self.name += u" ‹"+" ".join(unicode(x) for x in self.parent.displayname)+u"›"
+
+		
 		log(TRACE,"NewHandler",self.handler_id)
 
 	def does_event(self,event):
@@ -107,6 +150,7 @@ class OnEventWorker(Worker):
 		else:
 			for r in self.parent.report(verbose):
 				yield r
+
 
 class OnEventHandler(MainStatementList):
 	name=("on",)
@@ -160,12 +204,7 @@ Every "*foo" in the event description is mapped to the corresponding
 		if self.procs is None:
 			raise SyntaxError(u"‹on ...› can only be used as a complex statement")
 
-		worker = OnEventWorker(self)
-		worker.prio = self.prio
-		register_worker(worker)
-		onHandlers[worker.handler_id] = worker
-		if self.displayname is not None:
-			onHandlerNames[self.displayname] = worker
+		worker = OnEventWorker(self,name=self.displayname,prio=self.prio)
 
 	def start_block(self):
 		super(OnEventHandler,self).start_block()
@@ -184,6 +223,7 @@ Every "*foo" in the event description is mapped to the corresponding
 		for r in super(OnEventHandler,self)._report(verbose):
 			yield r
 
+
 class OffEventHandler(Statement):
 	name = ("del","on")
 	doc = "forget about an event handler"
@@ -191,16 +231,10 @@ class OffEventHandler(Statement):
 		event = self.params(ctx)
 		if not len(event):
 			raise SyntaxError(u"Usage: del on ‹handler_id/name›")
-		try: worker = onHandlerNames[Name(event)]
-		except KeyError:
-			if len(event) == 1:
-				worker = onHandlers[event[0]]
-			else:
-				raise
+		worker = OnHandlers[Name(event)]
 		unregister_worker(worker)
-		del onHandlers[worker.handler_id]
-		if worker.parent.displayname is not None:
-			del onHandlerNames[worker.parent.displayname]
+		del OnHandlers[worker.name]
+
 
 class OnListHandler(Statement):
 	name = ("list","on")
@@ -220,8 +254,7 @@ class OnListHandler(Statement):
 						n += u" ‹"+unicode(h.parent.displayname)+u"›"
 					print >>self.ctx.out,str(id)+" "*(fl-len(str(id))+1),":",n
 		else:
-			try: h = onHandlers[event[0]]
-			except KeyError: h = onHandlerNames[Name(event)]
+			h = OnHandlers[Name(event)]
 			print >>self.ctx.out, h.handler_id,":",h.parent.arglist
 			if h.parent.displayname is not None:
 				print >>self.ctx.out,"Name:"," ".join(unicode(x) for x in h.parent.displayname)
@@ -304,7 +337,7 @@ if exists on FOO BAR: check if a handler for this event exists
 		if not len(args):
 			raise SyntaxError(u"Usage: if exists on ‹name…›")
 		name = Name(args)
-		return name in onHandlerNames
+		return name in OnHandlers
 
 
 class OnEventModule(Module):
