@@ -12,11 +12,11 @@ NEW: <ConditionalWorkSequence:1 (4)>
 0 add ‹LogHandler log¦DEBUG¦Yes›
 0 add ‹LogHandler log¦DEBUG¦No2›
 1 Yes
-t tt ttt : /tmp/rrdtest.rrd test
+t tt ttt :: /tmp/rrdtest.rrd test
 .
-Name: t¦tt¦ttt
-File: /tmp/rrdtest.rrd
-Dataset: test
+name: t¦tt¦ttt
+file: /tmp/rrdtest.rrd
+dataset: test
 min: 0.0
 max: 20.0
 unknown_sec: 0
@@ -25,6 +25,7 @@ value: ?
 ds_name: test
 type: GAUGE
 last_ds: UNKN
+.
 33 EVENT: wait¦start¦×××¦_wait¦1
 NEW: <ConditionalWorkSequence:2 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦1
@@ -61,9 +62,9 @@ NEW: <ConditionalWorkSequence:7 (4)>
    : └1╴... done.
 80 EVENT: wait¦done¦×××¦_wait¦3
 80 END: wait¦done¦×××¦_wait¦3
-Name: t¦tt¦ttt
-File: /tmp/rrdtest.rrd
-Dataset: test
+name: t¦tt¦ttt
+file: /tmp/rrdtest.rrd
+dataset: test
 min: 0.0
 max: 20.0
 unknown_sec: 0
@@ -72,6 +73,7 @@ value: ?
 ds_name: test
 type: GAUGE
 last_ds: 12
+.
 0 add ‹VarRRDHandler var¦rrd¦x¦last_ds¦t¦tt¦ttt›
 0 add ‹TriggerHandler trigger¦last¦$x›
 96 EVENT: last¦12

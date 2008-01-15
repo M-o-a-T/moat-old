@@ -57,6 +57,7 @@ block:
 h.main_words.register_statement(ShutdownHandler)
 load_module("trigger")
 load_module("ifelse")
+load_module("data")
 load_module("rrd")
 load_module("logging")
 load_module("block")
