@@ -62,7 +62,7 @@ list coll NAME
 						m = m.split("\n")[0].strip()
 
 				if isinstance(n,Name):
-					n = u" ".join(n)
+					n = u" ".join(unicode(x) for x in n)
 				if m is not None:
 					print >>self.ctx.out,u"%s :: %s" % (n,m)
 				else:
