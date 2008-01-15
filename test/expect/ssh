@@ -13,6 +13,9 @@ NEW: <ConditionalWorkSequence:2 (4)>
 0 add ‹IfStatement if¦exists¦directory¦keys›
 0 add ‹SSHdir ssh¦directory¦keys›
 0 add ‹SSHdir ssh¦directory¦../keys›
+smurf :: SSH public key
+.
+.
 2 EVENT: shutdown
 NEW: <ConditionalWorkSequence:3 (5)>
    : │  EVENT: shutdown
