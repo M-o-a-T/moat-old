@@ -59,7 +59,9 @@ class Collection(dict):
 		collections[name] = self
 	
 	def iteritems(self):
-		for k in sorted(self.iterkeys()):
+		def name_cmp(a,b):
+			return cmp(self[a].name,self[b].name)
+		for k in sorted(self.iterkeys(),cmp=name_cmp):
 			yield k,self[k]
 
 	# The Collected's storage needs to be a weak reference so that it
