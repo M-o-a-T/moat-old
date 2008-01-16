@@ -769,7 +769,7 @@ scale ‹factor› ‹offset›
 			self.parent.values["factor"] = float(event[0])
 
 		if event[1] == "*":
-			self.parent.values["offset"] = 1
+			self.parent.values["offset"] = 0
 		else:
 			self.parent.values["offset"] = float(event[1])
 MonitorHandler.register_statement(MonitorScale)
