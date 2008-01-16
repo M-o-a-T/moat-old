@@ -137,9 +137,9 @@ NEW: <ConditionalWorkSequence:22 (4)>
 NEW: <ConditionalWorkSequence:23 (4)>
    : │  EVENT: fs20¦em¦bad_length¦thermo_hygro¦2¦3
    : └1╴... done.
-211 EVENT: fs20¦unknown¦em¦thermo_hygro¦2¦2321654
+211 EVENT: fs20¦unknown¦em¦thermo_hygro¦2¦temperature¦12.3¦humidity¦45.6
 NEW: <ConditionalWorkSequence:24 (4)>
-   : │  EVENT: fs20¦unknown¦em¦thermo_hygro¦2¦2321654
+   : │  EVENT: fs20¦unknown¦em¦thermo_hygro¦2¦temperature¦12.3¦humidity¦45.6
    : └1╴... done.
 213 EVENT: fs20¦em¦temperature¦12.3¦inside
 NEW: <ConditionalWorkSequence:25 (4)>
@@ -167,8 +167,8 @@ NEW: <ConditionalWorkSequence:26 (4)>
 207 END: fs20¦unknown¦em¦15¦13
 209 EVENT: fs20¦em¦bad_length¦thermo_hygro¦2¦3
 209 END: fs20¦em¦bad_length¦thermo_hygro¦2¦3
-211 EVENT: fs20¦unknown¦em¦thermo_hygro¦2¦2321654
-211 END: fs20¦unknown¦em¦thermo_hygro¦2¦2321654
+211 EVENT: fs20¦unknown¦em¦thermo_hygro¦2¦temperature¦12.3¦humidity¦45.6
+211 END: fs20¦unknown¦em¦thermo_hygro¦2¦temperature¦12.3¦humidity¦45.6
 213 EVENT: fs20¦em¦temperature¦12.3¦inside
 213 END: fs20¦em¦temperature¦12.3¦inside
 215 EVENT: fs20¦em¦humidity¦45.6¦inside

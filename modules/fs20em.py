@@ -127,12 +127,19 @@ class em_handler(recv_handler):
 		except IndexError:
 			simple_event(ctx, "fs20","unknown","em",data[0],"".join("%x"%x for x in data[1:]))
 		else:
+			r = g(ctx, data[1:])
 			try:
 				hdl = EMcodes[data[0]][data[1]&7]
 			except KeyError:
-				simple_event(ctx, "fs20","unknown","em",g.em_name,data[1]&7,"".join("%x"%x for x in data[1:]))
+				if r is None:
+					simple_event(ctx, "fs20","unknown","em",g.em_name,data[1]&7,"".join("%x"%x for x in data[1:]))
+				else:
+					def flat(r):
+						for a,b in r.iteritems():
+							yield a
+							yield b
+					simple_event(ctx, "fs20","unknown","em",g.em_name,data[1]&7,*tuple(flat(r)))
 			else:
-				r = g(ctx, data[1:])
 				if r is not None:
 					for h in hdl:
 						h.event(ctx,r)
