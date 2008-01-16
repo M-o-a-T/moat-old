@@ -246,6 +246,20 @@ You can get the list of known types with "help fs20 em".
 
 Device IDs range from zero to seven.
 
+scale type factor offset
+------------------------
+
+Raw values of TYPE get multiplied by FACTOR, then OFFSET is added,
+just before generating the event for a measurement.
+
+You can use a star instead of writing one or zero, respectively, to
+document that you didn't measure the value (as opposed to knowing that
+the value is zero).
+
+    fs20 em inside
+        code thermo_hygro 1
+        scale humidity * 1.2
+
 ----------------
 del fs20 em NAME
 ----------------
@@ -632,6 +646,16 @@ not met, delay for TIME; don't retry more often than NUM times.
 
 If the requirements are not met after NUM times, stop measuring and
 report an error.
+
+scale factor offset
+-------------------
+
+Raw values get multiplied by FACTOR, then OFFSET is added,
+just before processing them further.
+
+You can use a star instead of writing one or zero, respectively, to
+document that you didn't measure the value (as opposed to knowing that
+the value is zero).
 
 alarm INTERVAL
 --------------

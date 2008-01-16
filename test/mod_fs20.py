@@ -52,6 +52,7 @@ fs20 switch foo bar:
 
 fs20 em inside:
 	code thermo_hygro 1
+	scale temperature * "-1.2"
 
 block:
 	if exists file "fs20_recv":

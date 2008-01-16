@@ -74,9 +74,11 @@ EMcodes = {}
 
 class EM(Collected):
 	storage = EMs.storage
-	def __init__(self,name,group,code):
+	def __init__(self,name,group,code, faktor={},offset={}):
 		self.group = group
 		self.code = code
+		self.offset = offset
+		self.faktor = faktor
 		try: g = EMcodes[group]
 		except KeyError: EMcodes[group] = g = {}
 		try: c = g[code]
@@ -86,6 +88,11 @@ class EM(Collected):
 
 	def event(self,ctx,data):
 		for m,n in data.iteritems():
+			try: n = n * self.faktor[m]
+			except KeyError: pass
+			try: n = n + self.offset[m]
+			except KeyError: pass
+
 			simple_event(ctx, "fs20","em", m,n, *self.name)
 
 	def info(self):
@@ -95,6 +102,8 @@ class EM(Collected):
 		yield("group",self.group)
 		yield("groupname",em_procs[self.group].em_name)
 		yield("code",self.code)
+		for k,v in self.faktor: yield ("faktor_"+k,v)
+		for k,v in self.offset: yield ("offset_"+k,v)
 	
 	def delete(self):
 		EMcodes[self.group][self.code].remove(self)
@@ -157,6 +166,11 @@ Known types:
 
 	group = None
 	code = None
+	def __init__(self,*a,**k):
+		self.faktor={}
+		self.offset={}
+		super(FS20em,self).__init__(*a,**k)
+
 	def run(self,ctx,**k):
 		event = self.params(self.ctx)
 
@@ -164,7 +178,29 @@ Known types:
 			raise SyntaxError(u"‹fs20 em› needs a name")
 		if self.code is None:
 			raise SyntaxError(u"‹fs20 em› needs a 'code' sub-statement")
-		EM(Name(event), self.group,self.code)
+		EM(Name(event), self.group,self.code, self.faktor,self.offset)
+
+class FS20emScale(Statement):
+	name = ("scale",)
+	doc = "adapt values"
+	long_doc=u"""\
+scale ‹type› ‹factor› ‹offset›
+	Adjust raw measurements for ‹type› by first multiplying by ‹factor›,
+	then adding ‹offset›.
+	‹type› is the same as reported in the subsequent event.
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		lo = hi = None
+		if len(event) != 3:
+			raise SyntaxError(u'Usage: scale ‹type› ‹factor› ‹offset›')
+
+		name = event[0]
+		if event[1] != "*":
+			self.parent.factor[name] = float(event[1])
+		if event[2] != "*":
+			self.parent.offset[name] = float(event[2])
+FS20em.register_statement(FS20emScale)
 
 class FS20emcode(Statement):
 	name = ("code",)
