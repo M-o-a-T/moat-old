@@ -1,6 +1,5 @@
-homevent (0.2.7) stable; urgency=low
+homevent (0.2.8) stable; urgency=low
 
-  * Onwards.
   * Extended audio flow stuff to be parameterizable beyond reason.
   * wait NAME: for TIME
     instead of

@@ -53,9 +53,9 @@ __all__ = [x for x in dir(token) if x[0] != '_'] + ["COMMENT","NL",
 del x
 del token
 
-
+PlusMinus = r"[+\-]"
 Name = r'\w+'
-Number = group(Floatnumber, Intnumber)
+Number = maybe(PlusMinus) + group(Floatnumber, Intnumber)
 
 # Because of leftmost-then-longest match semantics, be sure to put the
 # longest operators first (e.g., if = came before ==, == would get
@@ -76,8 +76,8 @@ PseudoToken = Whitespace + group(PseudoExtras, Number, Funny, ContStr, Name)
 
 def _comp(exp):
 	return re.compile(exp, re.UNICODE)
-tokenprog, pseudoprog, namestart, numstart = map(
-    _comp, (Token, PseudoToken, r'\w', r'\d'))
+tokenprog, pseudoprog, namestart, num = map(
+    _comp, (Token, PseudoToken, r'\w', Number))
 
 tabsize = 8
 
@@ -181,7 +181,7 @@ class tokizer(object):
 					spos, epos, pos = (self.lnum, start), (self.lnum, end), end
 					token, initial = line[start:end], line[start]
 
-					if numstart.match(initial) or \
+					if num.match(token) or \
 					(initial == '.' and token != '.'):      # ordinary number
 						yield self.output(NUMBER, token, spos, epos, line)
 					elif initial in '\r\n':
