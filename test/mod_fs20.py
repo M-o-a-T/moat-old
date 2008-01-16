@@ -50,6 +50,9 @@ fs20 switch foo bar:
 	add baz quux:
 		code 1214
 
+fs20 em inside:
+	code thermo_hygro 1
+
 block:
 	if exists file "fs20_recv":
 		fs20 receiver foobar:

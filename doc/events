@@ -172,6 +172,16 @@ fs20 em type id datum value
 
         fs20¦em¦thermo_hygro¦2¦temperature¦20.3
 
+fs20 unknown em type id data
+    -- this device has not been registered yet.
+
+fs20 em kind value name…
+    -- the device registered as ‹name…› reported something.
+
+    Example:
+
+    fs20 em temperature 19.3 inside livingroom
+
 Wait
 ----
 

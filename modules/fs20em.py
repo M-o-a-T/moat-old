@@ -23,14 +23,14 @@ This code implements basic commands to access FS20 switches.
 """
 
 from homevent.module import Module
-#from homevent.statement import AttributedStatement,Statement, main_words, \
-#	ComplexStatement
+from homevent.statement import AttributedStatement,Statement, main_words
 #from homevent.check import Check,register_condition,unregister_condition
 from homevent.run import simple_event
 #from homevent.event import Event
 #from homevent.context import Context
-#from homevent.base import Name
+from homevent.base import Name
 from homevent.fs20 import recv_handler, PREFIX
+from homevent.collect import Collection,Collected
 
 #from twisted.internet import protocol,defer,reactor
 #from twisted.protocols.basic import _PauseableMixin
@@ -65,6 +65,43 @@ em_procs = [ None, # em_proc_thermo,
              None, # em_proc_combined,
            ]
 
+class EMs(Collection):
+	name = Name(("fs20","em"))
+EMs = EMs()
+EMs.does("del")
+
+EMcodes = {}
+
+class EM(Collected):
+	storage = EMs.storage
+	def __init__(self,name,group,code):
+		self.group = group
+		self.code = code
+		try: g = EMcodes[group]
+		except KeyError: EMcodes[group] = g = {}
+		try: c = g[code]
+		except KeyError: g[code] = c = []
+		c.append(self)
+		super(EM,self).__init__(*name)
+
+	def event(self,ctx,data):
+		for m,n in data.iteritems():
+			simple_event(ctx, "fs20","em", m,n, *self.name)
+
+	def info(self):
+		return "%s %d" % (em_procs[self.group].em_name, self.code)
+
+	def list(self):
+		yield("group",self.group)
+		yield("groupname",em_procs[self.group].em_name)
+		yield("code",self.code)
+	
+	def delete(self):
+		EMcodes[self.group][self.code].remove(self)
+		self.delete_done()
+		if not EMcodes[self.group][self.code]: # empty array
+			del EMcodes[self.group][self.code]
+		
 class em_handler(recv_handler):
 	def dataReceived(self, ctx, data, handler=None, timedelta=None):
 		if len(data) < 4:
@@ -90,10 +127,71 @@ class em_handler(recv_handler):
 		except IndexError:
 			simple_event(ctx, "fs20","unknown","em",data[0],"".join("%x"%x for x in data[1:]))
 		else:
-			r = g(ctx, data[1:])
-			if r is not None:
-				for m,n in r.iteritems():
-					simple_event(ctx, "fs20","em",g.em_name, (data[1]&7)+1,m,n)
+			try:
+				hdl = EMcodes[data[0]][data[1]&7]
+			except KeyError:
+				simple_event(ctx, "fs20","unknown","em",g.em_name,data[1]&7,"".join("%x"%x for x in data[1:]))
+			else:
+				r = g(ctx, data[1:])
+				if r is not None:
+					for h in hdl:
+						h.event(ctx,r)
+
+class FS20em(AttributedStatement):
+	name = ("fs20","em")
+	doc = "declare an FS20 EM monitor"
+	long_doc = u"""\
+fs20 em ‹name…›:
+	code ‹type› ‹id›
+	- declare an FS20 environment monitor
+Known types: 
+"""
+	long_doc += "  "+" ".join(n.em_name for n in em_procs if n is not None)+"\n"
+
+	group = None
+	code = None
+	def run(self,ctx,**k):
+		event = self.params(self.ctx)
+
+		if not len(event):
+			raise SyntaxError(u"‹fs20 em› needs a name")
+		if self.code is None:
+			raise SyntaxError(u"‹fs20 em› needs a 'code' sub-statement")
+		EM(Name(event), self.group,self.code)
+
+class FS20emcode(Statement):
+	name = ("code",)
+	doc = "declare the code type and number for an EM device"
+	long_doc = u"""\
+code ‹type› ‹id›
+	- declare the type and ID of an EM device
+Known types:
+"""
+	long_doc += "  "+" ".join(n.em_name for n in em_procs if n is not None)+"\n"
+
+	def run(self,ctx,**k):
+		event = self.params(self.ctx)
+		if len(event) != 2:
+			raise SyntaxError(u"Usage: ‹fs20 em› ‹name…›: ‹code› ‹type› ‹id›")
+		id = 0
+		for p in em_procs:
+			if p is not None and p.em_name == event[0]:
+				self.parent.group = id
+				try:
+					id = int(event[1])
+				except (TypeError,ValueError):
+					raise SyntaxError(u"‹fs20 em› ‹name…›: ‹code›: ID must be a number")
+				else:
+					if id<0 or id>7:
+						raise SyntaxError(u"‹fs20 em› ‹name…›: ‹code›: ID between 0 and 7 please")
+					self.parent.code = id
+				return
+			id += 1
+		raise SyntaxError(u"Usage: ‹fs20 em› ‹name…›: ‹code›: Unknown type")
+
+FS20em.register_statement(FS20emcode)
+
+
 
 
 class fs20em(Module):
@@ -105,8 +203,10 @@ class fs20em(Module):
 
 	def load(self):
 		PREFIX[PREFIX_EM] = em_handler()
+		main_words.register_statement(FS20em)
 	
 	def unload(self):
 		del PREFIX[PREFIX_EM]
+		main_words.unregister_statement(FS20em)
 	
 init = fs20em

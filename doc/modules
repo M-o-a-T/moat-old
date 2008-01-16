@@ -221,11 +221,36 @@ A snippet of module loader code to help you get going.
 fs20em
 ======
 
-This module adds decoding of FS20 EM devices. See the event
-documentation for the output format.
+This module adds decoding of FS20 EM devices.
 
-You also need to tell the decoder to actually analyze and forward these
-messages. See the audio documentation for details.
+You also need to tell the radio receiver+decoder to actually analyze and
+forward these messages. See the audio documentation for details.
+
+Appropriate events are emitted every time an EM message is received.
+
+-------------
+fs20 em NAME…
+-------------
+
+Register a device.
+
+    fs20 em inside
+        code thermo_hygro 1
+
+code TYPE ID
+------------
+
+Tells HomEvenT which type of device this is and the ID that's set on it.
+
+You can get the list of known types with "help fs20 em".
+
+Device IDs range from zero to seven.
+
+----------------
+del fs20 em NAME
+----------------
+
+Forget about this device.
 
 
 ==========
