@@ -61,6 +61,7 @@ Syntax:
 	in_sub = False
 	displayname = None
 	catch_do = None
+	
 
 	def add_catch(self,proc):
 		if self.catch_do is None:

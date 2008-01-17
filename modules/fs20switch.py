@@ -28,6 +28,7 @@ from homevent.run import simple_event
 from homevent.event import Event
 from homevent.context import Context
 from homevent.base import Name
+from homevent.collect import Collection,Collected
 
 from twisted.internet import protocol,defer,reactor
 from twisted.protocols.basic import _PauseableMixin
@@ -37,9 +38,7 @@ from homevent.fs20 import handler,register_handler,unregister_handler, \
 from homevent.fs20sw import group
 
 codes = {}
-codenames = {}
 devs = {}
-devnames = {}
 
 switch_codes = {
 	"off": 0x00,
@@ -89,29 +88,42 @@ class CannotDoError(RuntimeError):
 		return u"%s cannot do ‹%s›" % (unicode(self.switch), self.what)
 		
 
-class SwitchGroup(group):
+class SwitchGroups(Collection):
+	name = Name(("fs20","code"))
+SwitchGroups = SwitchGroups()
+
+class igroup(group):
+	def __init__(self):
+		super(igroup,self).__init__(self.code,6)
+
+class SwitchGroup(Collected,igroup):
 	"""\
 	Switches which share a house code.
 	"""
+	storage = SwitchGroups.storage
 	def __init__(self,code,name):
-		super(SwitchGroup,self).__init__(code,6)
 		self.code = code
 		self.name = Name(name)
 		self.devs = {}
 		self.last_dgram = None
+		super(SwitchGroup,self).__init__()
 
-	def add(self):
 		if self.code in codes:
 			raise RuntimeError("Device exists (%s)" % (to_hc(self.code),))
-		if self.name in codenames:
-			raise RuntimeError("Device exists (%s)" % (self.name,))
-
 		codes[self.code] = self
-		codenames[self.name] = self
+
+	def info(self):
+		return str(to_hc(self.code))
+
+	def list(self):
+		yield("name",self.name)
+		yield("code",to_hc(self.code))
+		for d in self.devs.itervalues():
+			yield("device",d.name)
 
 	def delete(self):
 		del codes[self.code]
-		del codenames[self.name]
+		self.delete_done()
 
 	def __unicode__(self):
 		return u"FS20_SwitchGroup ‹%s›" % (self.name,)
@@ -178,8 +190,11 @@ class SwitchGroup(group):
 
 		return res
 
+class Switches(Collection):
+	name = Name(("fs20","switch"))
+Switches = Switches()
 
-class Switch(object):
+class Switch(Collected):
 	"""\
 	This is the internal representation of a single fs20-addressable
 	switch, dimmer, or similar entity.
@@ -187,6 +202,7 @@ class Switch(object):
 	Note that at this time, no internal state is stored by this module.
 	If needed, you'll have to do that yourself.
 	"""
+	storage = Switches.storage
 	def __init__(self,code,name, parent=None, handler=None, can_do = None, init = None):
 		self.parent = parent
 		self.code = code
@@ -195,21 +211,33 @@ class Switch(object):
 		self.does = set(can_do) if can_do is not None else set(("on","off"))
 		self.state = None
 		self.ext = None
+		super(Switch,self).__init__()
 	
+	def info(self):
+		return str(to_hc(self.parent.code))+" "+str(to_dev(self.code))
+
+	def list(self):
+		yield ("name",self.name)
+		yield ("code",to_dev(self.code))
+		yield ("parent",self.parent.name)
+		yield ("parentcode", to_hc(self.parent.code))
+
+		for d in self.does:
+			yield ("does",d)
+		if self.state is not None:
+			yield ("state",self.state)
+
 	def add(self):
 		if not self.parent:
 			raise RuntimeError("no parent set")
 		if self.code in self.parent.devs:
 			raise RuntimeError("duplicate code")
-		if self.name in devnames:
-			raise RuntimeError("duplicate name")
 
 		self.parent.add_switch(self)
-		devnames[self.name] = self
 
 	def delete(self):
 		del self.parent.devs[self.code]
-		del devnames[self.name]
+		self.delete_done()
 
 	def __unicode__(self):
 		return u"FS20_Switch ‹%s›" % (self.name,)
@@ -295,7 +323,7 @@ fs20 switch ‹house_code› ‹name…›
 			raise SyntaxError(u"Usage: fs20 switch ‹name…›")
 
 		try:
-			self.hc = codenames[Name(event)]
+			self.hc = SwitchGroups[Name(event)]
 		except KeyError:
 			self.new_hc = True
 		else:
@@ -312,9 +340,6 @@ fs20 switch ‹house_code› ‹name…›
 			self.hc = SwitchGroup(self.code, Name(event))
 		elif self.code is not None:
 			self.hc.code = self.code ## update
-
-		if self.new_hc:
-			self.hc.add()
 
 		for s in self.old_sw:
 			if s.parent != self.hc:
@@ -409,8 +434,7 @@ del ‹name…›
 		if not len(event):
 			raise SyntaxError(u"Usage: del ‹name…›")
 		name = Name(event)
-		d = devnames[name]
-		self.parent.del_sw(d)
+		self.parent.del_sw(Switches[name])
 FS20switches.register_statement(FS20delswitch)
 
 
@@ -433,7 +457,7 @@ send fs20 ‹msg› -|‹aux› ‹name…›
 			raise SyntaxError(u"Usage: send fs20 ‹msg› -|‹aux› ‹name…›")
 		name = Name(event[2:])
 		try:
-			d = devnames[name]
+			d = Switches[name]
 		except KeyError:
 			raise RuntimeError(u"Device ‹%s› not found" % (name,))
 

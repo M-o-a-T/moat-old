@@ -45,10 +45,18 @@ if not exists module fs20switch: load fs20switch
 if not exists module fs20em: load fs20em
 if not exists module on_event: load on_event
 #
+list fs20 code
+list fs20 switch
+
 fs20 switch foo bar:
 	code 31413142
 	add baz quux:
 		code 1214
+
+list fs20 code
+list fs20 code foo bar
+list fs20 switch
+list fs20 switch baz quux
 
 fs20 em inside:
 	code thermo_hygro 1
@@ -95,6 +103,7 @@ h.register_condition(ModuleExists)
 
 load_module("block")
 load_module("file")
+load_module("data")
 load_module("ifelse")
 load_module("path")
 

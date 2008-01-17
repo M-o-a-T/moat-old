@@ -43,6 +43,11 @@ log TRACE DirStart
 dir onewire A
 log TRACE DirDev
 dir onewire "_DEV_"
+block:
+	if exists onewire "_DEV_":
+		log TRACE yes
+	else:
+		log TRACE no
 log TRACE DirStop
 set onewire _VAL_ "_DEV_" _ATTR2_
 disconnect onewire A
