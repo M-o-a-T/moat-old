@@ -30,7 +30,7 @@ from homevent.check import register_condition
 
 import homevent.twist # for side effects
 
-VERSION = "0.2.8"
+VERSION = "0.2.9"
 
 __all__ = ("Event","Worker","SeqWorker","WorkSequence",
 	"collect_event","process_event", "register_worker", "mainloop")
