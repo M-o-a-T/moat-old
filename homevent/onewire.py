@@ -536,6 +536,7 @@ class OWFSfactory(object,ReconnectingClientFactory):
 
 	protocol = OWFSqueue
 	factor = 1.4
+	do_rescan = False
 
 	def __init__(self, host="localhost", port=4304, persist = False, name=None, *a,**k):
 		if name is None:
@@ -551,6 +552,7 @@ class OWFSfactory(object,ReconnectingClientFactory):
 		self.root = OWFSroot(self)
 		self.watcher_id = None
 		self.nop = None
+		self.watch_trigger = []
 
 	def _init_queues(self):
 		self.queues = []
@@ -784,7 +786,16 @@ class OWFSfactory(object,ReconnectingClientFactory):
 		d.addErrback(process_failure)
 
 		def monitor(_):
-			if "HOMEVENT_TEST" in os.environ:
+			t = self.watch_trigger
+			self.watch_trigger = []
+			while t:
+				d = t.pop()
+				d.succeed(_)
+
+			if self.do_rescan:
+				self.do_rescan = False
+				d = 0.1
+			elif "HOMEVENT_TEST" in os.environ:
 				if _: d = 10
 				else: d = 30
 			else:
@@ -792,12 +803,18 @@ class OWFSfactory(object,ReconnectingClientFactory):
 				else: d = 300
 			self.watcher_id = callLater(True,d,self.watcher)
 		d.addCallback(monitor)
+		return d
 	
 	def run_watcher(self):
 		if self.watcher_id is not True:
 			if self.watcher_id is not None:
 				self.watcher_id.cancel()
-			self.watcher()
+			return self.watcher()
+		else:
+			self.do_rescan = True
+			d = defer.Deferred()
+			self.watch_trigger.append(d)
+			return d
 
 
 

@@ -983,6 +983,16 @@ Remove the named connection.
 
 	disconnect onewire MAIN
 
+------------
+scan onewire
+------------
+
+Scan a onewire bus. The command waits until the bus has been scaned
+completely.
+
+Note that this should only be used in exceptional circumstances, as a
+scan is executed periodically anyway.
+
 -----------
 dir onewire
 -----------

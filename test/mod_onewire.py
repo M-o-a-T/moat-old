@@ -62,6 +62,8 @@ block:
 		log TRACE no
 log TRACE DirStop
 #set onewire 30 "000010EF0000" templow ## not when testing
+scan onewire A
+dir onewire A
 disconnect onewire A
 wait END:
 	for 1

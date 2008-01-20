@@ -423,6 +423,28 @@ wind ‹offset› ‹weight›
 MonitorHandler.register_statement(MonitorWind)
 
 
+class OWFSscan(Statement):
+	name=("scan","onewire")
+	doc="(Re-)scan a onewire bus"
+	long_doc="""\
+scan onewire NAME
+	Re-scan this 1wire bus.
+	Note that this is done periodically anyway.
+"""
+
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+
+		if len(event) != 1:
+			raise SyntaxError("Usage: scan onewire BUS")
+		else:
+			try:
+				dev = buses[event[0]]
+			except KeyError:
+				raise RuntimeError("scan onewire: unknown bus ‹%s›" % (event[0],))
+			else:
+				return dev.run_watcher()
+
 
 class OWFSmodule(Module):
 	"""\
@@ -436,6 +458,7 @@ class OWFSmodule(Module):
 		main_words.register_statement(OWFSdisconnect)
 		main_words.register_statement(OWFSdir)
 		main_words.register_statement(OWFSlist)
+		main_words.register_statement(OWFSscan)
 		main_words.register_statement(OWFSvar)
 		main_words.register_statement(OWFSset)
 		main_words.register_statement(OWFSmonitor)
@@ -449,6 +472,7 @@ class OWFSmodule(Module):
 		main_words.unregister_statement(OWFSdisconnect)
 		main_words.unregister_statement(OWFSdir)
 		main_words.unregister_statement(OWFSlist)
+		main_words.unregister_statement(OWFSscan)
 		main_words.unregister_statement(OWFSvar)
 		main_words.unregister_statement(OWFSset)
 		main_words.unregister_statement(OWFSmonitor)
