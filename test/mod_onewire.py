@@ -23,11 +23,49 @@ from homevent.statement import DoNothingHandler
 from test import run
 
 input = """\
+if not exists module bool: load bool
+if not exists module ifelse: load ifelse
+if not exists module logging: load logging
+if not exists module block: load block
+if not exists module trigger: load trigger
+if not exists module wait: load wait
+if not exists module onewire: load onewire
+if not exists module on_event: load on_event
+if not exists module errors: load errors
+#
+on onewire scanned A * * *:
+	name scanned
+
+	del on scanned
+	var onewire X "000010EF0000" temperature
+	trigger thermo $X
+	del wait yawn
+
+connect onewire A localhost 54300
+#
 block:
-	if exists file "onewire2":
-		include "onewire2"
+	try:
+		wait yawn:
+			for 10
+			debug force
+	catch:
+		do nothing
+
+log TRACE DirStart
+dir onewire A
+log TRACE DirDev
+dir onewire "000010EF0000"
+block:
+	if exists onewire "000010EF0000":
+		log TRACE yes
 	else:
-		include "test/onewire2"
+		log TRACE no
+log TRACE DirStop
+#set onewire 30 "000010EF0000" templow ## not when testing
+disconnect onewire A
+wait END:
+	for 1
+	debug force
 shutdown
 """
 

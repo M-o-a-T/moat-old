@@ -1,93 +1,166 @@
-99 EVENT: startup
+1 EVENT: startup
 NEW: <ConditionalWorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
-99 EVENT: startup
-99 END: startup
-99 EVENT: module¦load¦bool
+1 EVENT: startup
+1 END: startup
+13 EVENT: module¦load¦bool
 NEW: <ConditionalWorkSequence:2 (4)>
    : │  EVENT: module¦load¦bool
    : └1╴... done.
-99 EVENT: module¦load¦bool
-99 END: module¦load¦bool
-99 EVENT: module¦load¦logging
+13 EVENT: module¦load¦bool
+13 END: module¦load¦bool
+27 EVENT: module¦load¦logging
 NEW: <ConditionalWorkSequence:3 (4)>
    : │  EVENT: module¦load¦logging
    : └1╴... done.
-99 EVENT: module¦load¦logging
-99 END: module¦load¦logging
-99 EVENT: module¦load¦trigger
+27 EVENT: module¦load¦logging
+27 END: module¦load¦logging
+41 EVENT: module¦load¦trigger
 NEW: <ConditionalWorkSequence:4 (4)>
    : │  EVENT: module¦load¦trigger
    : └1╴... done.
-99 EVENT: module¦load¦trigger
-99 END: module¦load¦trigger
-99 EVENT: module¦load¦wait
+41 EVENT: module¦load¦trigger
+41 END: module¦load¦trigger
+52 EVENT: module¦load¦wait
 NEW: <ConditionalWorkSequence:5 (4)>
    : │  EVENT: module¦load¦wait
    : └1╴... done.
-99 EVENT: module¦load¦wait
-99 END: module¦load¦wait
-99 EVENT: module¦load¦onewire
+52 EVENT: module¦load¦wait
+52 END: module¦load¦wait
+63 EVENT: module¦load¦onewire
 NEW: <ConditionalWorkSequence:6 (4)>
    : │  EVENT: module¦load¦onewire
    : └1╴... done.
-99 EVENT: module¦load¦onewire
-99 END: module¦load¦onewire
-99 EVENT: module¦load¦on_event
+63 EVENT: module¦load¦onewire
+63 END: module¦load¦onewire
+74 EVENT: module¦load¦on_event
 NEW: <ConditionalWorkSequence:7 (4)>
    : │  EVENT: module¦load¦on_event
    : └1╴... done.
-99 EVENT: module¦load¦on_event
-99 END: module¦load¦on_event
-99 EVENT: module¦load¦errors
+74 EVENT: module¦load¦on_event
+74 END: module¦load¦on_event
+85 EVENT: module¦load¦errors
 NEW: <ConditionalWorkSequence:8 (4)>
    : │  EVENT: module¦load¦errors
    : └1╴... done.
-99 EVENT: module¦load¦errors
-99 END: module¦load¦errors
-99 Create OnEvtHandler: onewire¦scanned¦A¦*¦*¦*
-99 NewHandler 1
-NEW: <ConditionalWorkSequence:48 (5)>
+85 EVENT: module¦load¦errors
+85 END: module¦load¦errors
+0 Create OnEvtHandler: onewire¦scanned¦A¦*¦*¦*
+0 NewHandler 1
+102 EVENT: onewire¦scanning¦A
+NEW: <ConditionalWorkSequence:9 (4)>
+   : │  EVENT: onewire¦scanning¦A
+   : └1╴... done.
+0 New OWFS bus A <homevent.onewire.OWFSfactory obj>
+116 EVENT: wait¦start¦10.0¦yawn
+NEW: <ConditionalWorkSequence:10 (4)>
+   : │  EVENT: wait¦start¦10.0¦yawn
+   : └1╴... done.
+102 EVENT: onewire¦scanning¦A
+102 END: onewire¦scanning¦A
+0 OWFS start bus update
+116 EVENT: wait¦start¦10.0¦yawn
+116 END: wait¦start¦10.0¦yawn
+128 EVENT: onewire¦connect¦A
+NEW: <ConditionalWorkSequence:11 (4)>
+   : │  EVENT: onewire¦connect¦A
+   : └1╴... done.
+128 EVENT: onewire¦connect¦A
+128 END: onewire¦connect¦A
+135 EVENT: onewire¦new¦DS18S20¦000010EF0000
+NEW: <ConditionalWorkSequence:12 (4)>
+   : │  EVENT: onewire¦new¦DS18S20¦000010EF0000
+   : └1╴... done.
+135 EVENT: onewire¦new¦DS18S20¦000010EF0000
+135 END: onewire¦new¦DS18S20¦000010EF0000
+137 EVENT: onewire¦up¦DS18S20¦000010EF0000
+NEW: <ConditionalWorkSequence:13 (4)>
+   : │  EVENT: onewire¦up¦DS18S20¦000010EF0000
+   : └1╴... done.
+137 EVENT: onewire¦up¦DS18S20¦000010EF0000
+137 END: onewire¦up¦DS18S20¦000010EF0000
+149 EVENT: onewire¦scanned¦A¦0¦1¦1
+NEW: <ConditionalWorkSequence:14 (5)>
+   : │  EVENT: onewire¦scanned¦A¦0¦1¦1
    : ├1╴on onewire scanned A * * * ‹OnEventHandler›
    : │  name: scanned
    : │  prio: 51
    : │  step: del on scanned ‹Del›
-   : │  step: var onewire X _DEV_ _ATTR_ ‹OWFSvar›
+   : │  step: var onewire X 000010EF0000 temperature ‹OWFSvar›
    : │  step: trigger thermo $X ‹TriggerHandler›
    : │  step: del wait yawn ‹Del›
    : └2╴... done.
+149 EVENT: onewire¦scanned¦A¦0¦1¦1
 RUN: on onewire scanned A * * * ‹OnEventHandler›
    : name: scanned
    : prio: 51
    : step: del on scanned ‹Del›
-   : step: var onewire X _DEV_ _ATTR_ ‹OWFSvar›
+   : step: var onewire X 000010EF0000 temperature ‹OWFSvar›
    : step: trigger thermo $X ‹TriggerHandler›
    : step: del wait yawn ‹Del›
- at: <ConditionalWorkSequence:48 (5)> (step 1)
-99 EVENT: thermo¦DATA
-NEW: <ConditionalWorkSequence:49 (4)>
-   : │  EVENT: thermo¦DATA
+ at: <ConditionalWorkSequence:14 (5)> (step 1)
+ ev: EVENT: onewire¦scanned¦A¦0¦1¦1
+157 EVENT: thermo¦1.6
+NEW: <ConditionalWorkSequence:15 (4)>
+   : │  EVENT: thermo¦1.6
    : └1╴... done.
-99 EVENT: wait¦cancel¦×××¦yawn
-NEW: <ConditionalWorkSequence:_VAL_ (4)>
-   : │  EVENT: wait¦cancel¦×××¦yawn
+160 EVENT: wait¦cancel¦10.0¦yawn
+NEW: <ConditionalWorkSequence:16 (4)>
+   : │  EVENT: wait¦cancel¦10.0¦yawn
    : └1╴... done.
-99 EVENT: thermo¦DATA
-99 END: thermo¦DATA
-99 EVENT: wait¦cancel¦×××¦yawn
-99 END: wait¦cancel¦×××¦yawn
-99 NOW: do nothing
-99 Drop OWFS bus A
-99 EVENT: wait¦start¦×××¦END
-NEW: <ConditionalWorkSequence:51 (4)>
-   : │  EVENT: wait¦start¦×××¦END
+157 EVENT: thermo¦1.6
+157 END: thermo¦1.6
+160 EVENT: wait¦cancel¦10.0¦yawn
+160 END: wait¦cancel¦10.0¦yawn
+0 NOW: do nothing
+0 DirStart
+149 END: onewire¦scanned¦A¦0¦1¦1
+10.000010EF0000
+bus.0
+settings
+system
+statistics
+structure
+simultaneous
+alarm
+0 DirDev
+address
+crc8
+die
+family
+id
+locator
+power
+present
+r_address
+r_id
+r_locator
+temperature
+temphigh
+templow
+trim
+trimblanket
+trimvalid
+type
+0 yes
+0 DirStop
+0 Drop OWFS bus A
+201 EVENT: wait¦start¦1.0¦END
+NEW: <ConditionalWorkSequence:17 (4)>
+   : │  EVENT: wait¦start¦1.0¦END
    : └1╴... done.
-99 EVENT: wait¦start¦×××¦END
-99 END: wait¦start¦×××¦END
-99 EVENT: wait¦done¦×××¦END
-NEW: <ConditionalWorkSequence:52 (4)>
-   : │  EVENT: wait¦done¦×××¦END
+201 EVENT: wait¦start¦1.0¦END
+201 END: wait¦start¦1.0¦END
+208 EVENT: wait¦done¦1.0¦END
+NEW: <ConditionalWorkSequence:18 (4)>
+   : │  EVENT: wait¦done¦1.0¦END
    : └1╴... done.
-99 EVENT: wait¦done¦×××¦END
-99 END: wait¦done¦×××¦END
+208 EVENT: wait¦done¦1.0¦END
+208 END: wait¦done¦1.0¦END
+2 EVENT: shutdown
+NEW: <ConditionalWorkSequence:19 (7)>
+   : │  EVENT: shutdown
+   : └1╴... done.
+2 EVENT: shutdown
+2 END: shutdown
