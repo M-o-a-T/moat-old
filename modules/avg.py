@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ##
-##  Copyright © 2007-2008, Matthias Urlichs <matthias@urlichs.de>
+##  Copyright © 2008, Matthias Urlichs <matthias@urlichs.de>
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
