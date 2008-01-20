@@ -124,6 +124,7 @@ statistics
 structure
 simultaneous
 alarm
+.
 0 DirDev
 address
 crc8
@@ -143,23 +144,46 @@ trim
 trimblanket
 trimvalid
 type
+.
 0 yes
 0 DirStop
-0 Drop OWFS bus A
-201 EVENT: wait¦start¦1.0¦END
+195 EVENT: onewire¦scanning¦A
 NEW: <ConditionalWorkSequence:17 (4)>
+   : │  EVENT: onewire¦scanning¦A
+   : └1╴... done.
+195 EVENT: onewire¦scanning¦A
+195 END: onewire¦scanning¦A
+0 OWFS start bus update
+202 EVENT: onewire¦scanned¦A¦0¦0¦1
+NEW: <ConditionalWorkSequence:18 (4)>
+   : │  EVENT: onewire¦scanned¦A¦0¦0¦1
+   : └1╴... done.
+202 EVENT: onewire¦scanned¦A¦0¦0¦1
+202 END: onewire¦scanned¦A¦0¦0¦1
+10.000010EF0000
+bus.0
+settings
+system
+statistics
+structure
+simultaneous
+alarm
+.
+0 Drop OWFS bus A
+219 EVENT: wait¦start¦1.0¦END
+NEW: <ConditionalWorkSequence:19 (4)>
    : │  EVENT: wait¦start¦1.0¦END
    : └1╴... done.
-201 EVENT: wait¦start¦1.0¦END
-201 END: wait¦start¦1.0¦END
-208 EVENT: wait¦done¦1.0¦END
-NEW: <ConditionalWorkSequence:18 (4)>
+219 EVENT: wait¦start¦1.0¦END
+219 END: wait¦start¦1.0¦END
+226 EVENT: wait¦done¦1.0¦END
+NEW: <ConditionalWorkSequence:20 (4)>
    : │  EVENT: wait¦done¦1.0¦END
    : └1╴... done.
-208 EVENT: wait¦done¦1.0¦END
-208 END: wait¦done¦1.0¦END
+226 EVENT: wait¦done¦1.0¦END
+226 END: wait¦done¦1.0¦END
 2 EVENT: shutdown
-NEW: <ConditionalWorkSequence:19 (7)>
+NEW: <ConditionalWorkSequence:21 (7)>
    : │  EVENT: shutdown
    : └1╴... done.
 2 EVENT: shutdown

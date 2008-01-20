@@ -148,6 +148,10 @@ dir onewire NAME path...
 				dev = buses[event[0]].root
 				path = event[1:]
 			d = dev.dir(path=path, proc=reporter)
+
+			def term(_):
+				print >>ctx.out,"."
+			d.addCallback(term)
 			return d
 
 
@@ -183,7 +187,7 @@ list onewire [NAME]
 			print >>ctx.out,"Name:",b.name
 			print >>ctx.out,"Host:",b.host
 			print >>ctx.out,"Port:",b.port
-			print >>ctx.out,"."
+		print >>ctx.out,"."
 
 
 
