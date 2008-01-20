@@ -1572,6 +1572,122 @@ variable.
 		var time now + 10sec
 		wait until = $now
 
+
+========
+timeslot
+========
+
+Some events happen, or need to happen, at pre-defined intervals.
+Examples:
+
+* send a status message to a controller every 116 seconds which doesn't
+  have its receiver turned on at other times
+
+* turn on my receiver every 116 seconds and listen for a status message
+
+HomEvenT controls this with time slots.
+
+----------------
+timeslot ‹name…›
+----------------
+
+Define a named timeslot.
+
+A slot has these states:
+
+* off: It's not active and will not trigger.
+
+* next: Between intervals.
+
+* pre: At the beginning of the interval, before the event is triggered.
+
+* during: While the event is executing.
+
+* post: After the event, while still within the slot.
+
+
+every ‹time spec›
+-----------------
+
+Declare how much time shall elapse between interval starts.
+
+There is no default.
+
+for ‹time spec›
+---------------
+
+Declare how long the interval in question should be.
+
+The default is one second.
+
+stopped
+-------
+
+Typically the timeslot is started immediately. This command leaves the
+slot in the "off" state until it is started.
+
+offset ‹0…1›
+------------
+
+The timeslot's "during" event triggers sometime within the slot. This
+parameter specifies when that should happen.
+
+The default is 0.5, i.e. in the middle of the interval.
+
+-----------------------
+update timeslot ‹name…›
+-----------------------
+
+Modify an existing slot. You can use all of the above parameters, except
+"stop".
+
+----------------------
+start timeslot ‹name…›
+----------------------
+
+Start to run this slot. The event is not triggered. If the slot has never
+been started yet, the start time will be the current time plus one
+"every" interval.
+
+The timeslot may not be active unless "now" is used; see below.
+
+now
+---
+
+Re-sync the slot. The event is triggered immediately, except if the
+event handler is currently running or the timeslot is in the "post" state.
+
+
+------------------------
+var timeslot VAR ‹name…›
+------------------------
+
+Set the variable to the slot's state.
+
+
+-----
+Tests
+-----
+
+
+if exists timeslot ‹name…›
+--------------------------
+
+Test if the slot has been declared.
+
+
+if running timeslot ‹name…›
+---------------------------
+
+Test if the slot is active, i.e. will trigger sometime soon.
+
+
+if in timeslot ‹name…›
+----------------------
+
+Test whether the timeslot is in "pre", "during", or "post" state.
+
+
 =======
 trigger
 =======

@@ -1,0 +1,164 @@
+1 EVENT: startup
+NEW: <ConditionalWorkSequence:1 (4)>
+   : │  EVENT: startup
+   : └1╴... done.
+1 EVENT: startup
+1 END: startup
+0 Create OnEvtHandler: timeslot¦foo¦bar
+0 NewHandler 1
+.
+name: foo bar
+run: off
+.
+1 Yes
+1 Yes
+58 EVENT: wait¦start¦9.5¦_wait¦2
+NEW: <ConditionalWorkSequence:2 (4)>
+   : │  EVENT: wait¦start¦9.5¦_wait¦2
+   : └1╴... done.
+58 EVENT: wait¦start¦9.5¦_wait¦2
+58 END: wait¦start¦9.5¦_wait¦2
+65 EVENT: wait¦done¦9.5¦_wait¦2
+NEW: <ConditionalWorkSequence:3 (4)>
+   : │  EVENT: wait¦done¦9.5¦_wait¦2
+   : └1╴... done.
+65 EVENT: wait¦done¦9.5¦_wait¦2
+65 END: wait¦done¦9.5¦_wait¦2
+name: foo bar
+run: next
+next: 0.5 sec
+.
+1 Yes
+1 Yes
+93 EVENT: wait¦start¦10.5¦_wait¦3
+NEW: <ConditionalWorkSequence:4 (4)>
+   : │  EVENT: wait¦start¦10.5¦_wait¦3
+   : └1╴... done.
+93 EVENT: wait¦start¦10.5¦_wait¦3
+93 END: wait¦start¦10.5¦_wait¦3
+100 EVENT: wait¦done¦10.5¦_wait¦3
+NEW: <ConditionalWorkSequence:5 (4)>
+   : │  EVENT: wait¦done¦10.5¦_wait¦3
+   : └1╴... done.
+100 EVENT: wait¦done¦10.5¦_wait¦3
+100 END: wait¦done¦10.5¦_wait¦3
+name: foo bar
+run: pre
+next: -0.5 sec
+slot: 0.25
+.
+1 Yes
+1 Yes
+129 EVENT: wait¦start¦11.5¦_wait¦4
+NEW: <ConditionalWorkSequence:6 (4)>
+   : │  EVENT: wait¦start¦11.5¦_wait¦4
+   : └1╴... done.
+129 EVENT: wait¦start¦11.5¦_wait¦4
+129 END: wait¦start¦11.5¦_wait¦4
+136 EVENT: timeslot¦foo¦bar
+NEW: <ConditionalWorkSequence:7 (5)>
+   : │  EVENT: timeslot¦foo¦bar
+   : ├1╴on timeslot foo bar ‹OnEventHandler›
+   : │  prio: 51
+   : │  step: var timeslot X foo bar ‹VarTimeslotHandler›
+   : │  step: log TRACE got it $X ‹LogHandler›
+   : │  step: if equal $X during ‹IfStatement›
+   : │      : step: log DEBUG Yes ‹LogHandler›
+   : │  step: wait GOT EVENT ‹WaitHandler›
+   : │  step: if in timeslot foo bar ‹IfStatement›
+   : │      : step: log DEBUG Yes ‹LogHandler›
+   : └2╴... done.
+136 EVENT: timeslot¦foo¦bar
+RUN: on timeslot foo bar ‹OnEventHandler›
+   : prio: 51
+   : step: var timeslot X foo bar ‹VarTimeslotHandler›
+   : step: log TRACE got it $X ‹LogHandler›
+   : step: if equal $X during ‹IfStatement›
+   :     : step: log DEBUG Yes ‹LogHandler›
+   : step: wait GOT EVENT ‹WaitHandler›
+   : step: if in timeslot foo bar ‹IfStatement›
+   :     : step: log DEBUG Yes ‹LogHandler›
+ at: <ConditionalWorkSequence:7 (5)> (step 1)
+ ev: EVENT: timeslot¦foo¦bar
+0 got it during
+1 Yes
+146 EVENT: wait¦start¦11.1¦GOT¦EVENT
+NEW: <ConditionalWorkSequence:8 (4)>
+   : │  EVENT: wait¦start¦11.1¦GOT¦EVENT
+   : └1╴... done.
+146 EVENT: wait¦start¦11.1¦GOT¦EVENT
+146 END: wait¦start¦11.1¦GOT¦EVENT
+153 EVENT: wait¦done¦11.1¦GOT¦EVENT
+NEW: <ConditionalWorkSequence:9 (4)>
+   : │  EVENT: wait¦done¦11.1¦GOT¦EVENT
+   : └1╴... done.
+153 EVENT: wait¦done¦11.1¦GOT¦EVENT
+153 END: wait¦done¦11.1¦GOT¦EVENT
+1 Yes
+136 END: timeslot¦foo¦bar
+165 EVENT: wait¦done¦11.5¦_wait¦4
+NEW: <ConditionalWorkSequence:10 (4)>
+   : │  EVENT: wait¦done¦11.5¦_wait¦4
+   : └1╴... done.
+165 EVENT: wait¦done¦11.5¦_wait¦4
+165 END: wait¦done¦11.5¦_wait¦4
+name: foo bar
+run: post
+next: -1.5 sec
+slot: 0.75
+.
+1 Yes
+1 Yes
+193 EVENT: wait¦start¦12.5¦_wait¦5
+NEW: <ConditionalWorkSequence:11 (4)>
+   : │  EVENT: wait¦start¦12.5¦_wait¦5
+   : └1╴... done.
+193 EVENT: wait¦start¦12.5¦_wait¦5
+193 END: wait¦start¦12.5¦_wait¦5
+200 EVENT: wait¦done¦12.5¦_wait¦5
+NEW: <ConditionalWorkSequence:12 (4)>
+   : │  EVENT: wait¦done¦12.5¦_wait¦5
+   : └1╴... done.
+200 EVENT: wait¦done¦12.5¦_wait¦5
+200 END: wait¦done¦12.5¦_wait¦5
+name: foo bar
+run: next
+last: 2.5 sec
+next: 7.5 sec
+.
+1 Yes
+1 Yes
+228 EVENT: wait¦start¦20.5¦_wait¦6
+NEW: <ConditionalWorkSequence:13 (4)>
+   : │  EVENT: wait¦start¦20.5¦_wait¦6
+   : └1╴... done.
+228 EVENT: wait¦start¦20.5¦_wait¦6
+228 END: wait¦start¦20.5¦_wait¦6
+235 EVENT: wait¦done¦20.5¦_wait¦6
+NEW: <ConditionalWorkSequence:14 (4)>
+   : │  EVENT: wait¦done¦20.5¦_wait¦6
+   : └1╴... done.
+235 EVENT: wait¦done¦20.5¦_wait¦6
+235 END: wait¦done¦20.5¦_wait¦6
+name: foo bar
+run: pre
+last: 10.5 sec
+next: -0.5 sec
+slot: 0.25
+.
+1 Yes
+1 Yes
+1 Yes
+1 Yes
+name: foo bar
+run: off
+last: 10.5 sec
+next: -0.5 sec
+.
+1 Yes
+2 EVENT: shutdown
+NEW: <ConditionalWorkSequence:15 (7)>
+   : │  EVENT: shutdown
+   : └1╴... done.
+2 EVENT: shutdown
+2 END: shutdown

@@ -246,3 +246,11 @@ onewire down TYPE DEVICE
 	   however, trying to communicate with the device will cause an
 	   error.
 
+timeslot
+--------
+
+timeslot NAME
+    -- the timeslot has been reached.
+       Note that this event triggers sometime within the slot, as
+       defined with the "offset" parameter.
+
