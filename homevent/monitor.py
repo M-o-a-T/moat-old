@@ -35,9 +35,9 @@ from homevent.logging import log,TRACE,DEBUG
 from homevent.collect import Collection,Collected
 
 from time import time
-import os,sys
+import os
 from twisted.python import failure
-from twisted.internet import reactor,defer
+from twisted.internet import defer
 import datetime as dt
 
 class Monitors(Collection):
