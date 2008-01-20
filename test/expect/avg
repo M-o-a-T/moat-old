@@ -1,0 +1,80 @@
+1 EVENT: startup
+NEW: <ConditionalWorkSequence:1 (4)>
+   : │  EVENT: startup
+   : └1╴... done.
+1 EVENT: startup
+1 END: startup
+.
+test :: (new)
+.
+name: test
+cur_value: None
+.
+21 EVENT: wait¦start¦0.2¦_wait¦1
+NEW: <ConditionalWorkSequence:2 (4)>
+   : │  EVENT: wait¦start¦0.2¦_wait¦1
+   : └1╴... done.
+21 EVENT: wait¦start¦0.2¦_wait¦1
+21 END: wait¦start¦0.2¦_wait¦1
+28 EVENT: wait¦done¦0.2¦_wait¦1
+NEW: <ConditionalWorkSequence:3 (4)>
+   : │  EVENT: wait¦done¦0.2¦_wait¦1
+   : └1╴... done.
+28 EVENT: wait¦done¦0.2¦_wait¦1
+28 END: wait¦done¦0.2¦_wait¦1
+name: test
+cur_value: 2.0
+last_time: 0.0
+total_time: 0.0
+last_value: 2.0
+value: 2.0
+.
+43 EVENT: wait¦start¦1.2¦_wait¦2
+NEW: <ConditionalWorkSequence:4 (4)>
+   : │  EVENT: wait¦start¦1.2¦_wait¦2
+   : └1╴... done.
+43 EVENT: wait¦start¦1.2¦_wait¦2
+43 END: wait¦start¦1.2¦_wait¦2
+50 EVENT: wait¦done¦1.2¦_wait¦2
+NEW: <ConditionalWorkSequence:5 (4)>
+   : │  EVENT: wait¦done¦1.2¦_wait¦2
+   : └1╴... done.
+50 EVENT: wait¦done¦1.2¦_wait¦2
+50 END: wait¦done¦1.2¦_wait¦2
+name: test
+cur_value: 2.0
+last_time: 1.0
+total_time: 0.0
+last_value: 2.0
+value: 2.0
+.
+name: test
+cur_value: 5.0
+last_time: 0.0
+total_time: 1.0
+last_value: 2.0
+value: 2.0
+.
+1 Yes
+1 Yes
+83 EVENT: wait¦start¦3.2¦_wait¦3
+NEW: <ConditionalWorkSequence:6 (4)>
+   : │  EVENT: wait¦start¦3.2¦_wait¦3
+   : └1╴... done.
+83 EVENT: wait¦start¦3.2¦_wait¦3
+83 END: wait¦start¦3.2¦_wait¦3
+90 EVENT: wait¦done¦3.2¦_wait¦3
+NEW: <ConditionalWorkSequence:7 (4)>
+   : │  EVENT: wait¦done¦3.2¦_wait¦3
+   : └1╴... done.
+90 EVENT: wait¦done¦3.2¦_wait¦3
+90 END: wait¦done¦3.2¦_wait¦3
+1 Yes
+1 Yes
+.
+2 EVENT: shutdown
+NEW: <ConditionalWorkSequence:8 (7)>
+   : │  EVENT: shutdown
+   : └1╴... done.
+2 EVENT: shutdown
+2 END: shutdown

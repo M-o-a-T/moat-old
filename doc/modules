@@ -12,6 +12,61 @@
     GNU General Public License (included; see the file LICENSE)
     for more details.
 
+===
+avg
+===
+
+This module adds basic averaging capability. Measurement data, which
+can arrive at any time, are accumulated.
+
+-----------
+avg ‹name…›
+-----------
+
+Creates a new average with that name. Its value is initially empty. You
+feed new data into the average whenever they arrive, and a new average
+will be calculated dynamically.
+
+This averaging module is based on the naïve premise that the measured
+doesn't change until you set a new value, i.e. there's no interpolation.
+This is arguably the worst way to handle things, but it's deterministic.
+
+---------------------
+set avg value ‹name…›
+---------------------
+
+Feed a new value into this average. Values can arrive at any time.
+
+-------------------
+var avg VAR ‹name…›
+-------------------
+
+Set VAR to the current value of this average. This is based on the
+premise that the value that's been fed into the agerage by the last
+"set" command has not changed in the meantime.
+
+Note that if you do this immediately after feeding a new value into
+an average, said new value will not have accrued any time. Thus,
+
+    avg test
+    set avg 1 test
+    wait: for 1
+    set avg 2 test
+    var avg X test
+    log The value is $X
+
+will log something like 1.0001. Wait another second to get the
+expected 1.5.
+
+-----
+Tests
+-----
+
+if exists avg ‹name…›
+---------------------
+
+Checks whether this averager has been created.
+
 =====
 block
 =====

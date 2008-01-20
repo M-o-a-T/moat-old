@@ -1,8 +1,9 @@
 homevent (0.2.9) unstable; urgency=low
 
   * Onwards.
+  * Add averaging handler.
 
- -- Matthias Urlichs <matthias@urlichs.de>  Sun, 20 Jan 2008 19:18:26 +0100
+ -- Matthias Urlichs <matthias@urlichs.de>  Sun, 20 Jan 2008 19:32:14 +0100
 
 homevent (0.2.8) stable; urgency=low
 

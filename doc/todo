@@ -43,6 +43,11 @@ Code
 
 * implement a multi-step controller (i.e. simple switch thresholds)
 
+* implement more averaging modes
+  - count "set" commands
+  - floating (i.e. decaying) average
+  - send an event when the average changes by more than X
+    - which needs a timer!
 
 FS20
 ====
