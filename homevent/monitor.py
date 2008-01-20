@@ -27,7 +27,8 @@ from homevent.event import Event
 from homevent.run import process_event,process_failure,register_worker
 from homevent.reactor import shutdown_event
 from homevent.worker import ExcWorker
-from homevent.times import time_delta, time_until, unixdelta, now
+from homevent.times import time_delta, time_until, unixdelta, now, \
+	humandelta
 from homevent.base import Name,SYS_PRIO
 from homevent.twist import deferToLater, callLater
 from homevent.context import Context
@@ -162,25 +163,8 @@ class Monitor(Collected):
 		else:
 			delta = now() - self.started_at
 		delta = unixdelta(delta)
+		res = humandelta(delta)
 
-		res = ""
-		res2= ""
-		if delta < 0:
-			delta = - delta
-			res = "-"
-		if delta > 3600:
-			res += res2+"%d hr" % int(delta / 3600)
-			res2 = " "
-			delta %= 3600
-		if delta > 60:
-			res += res2+"%d min" % int(delta / 60)
-			res2 = " "
-			delta %= 60
-		if delta > 0.1:
-			res += res2+"%3.1f sec" % delta
-
-		if len(res) < 2:
-			res = "now"
 		return u"‹"+res+"›"
 		# TODO: refactor that into homevent.times
 

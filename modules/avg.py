@@ -32,7 +32,7 @@ var avg X NAME...
 from homevent.statement import Statement, main_words
 from homevent.module import Module
 from homevent.check import Check,register_condition,unregister_condition
-from homevent.times import unixdelta, now
+from homevent.times import unixdelta, now, humandelta
 from homevent.base import Name
 from homevent.collect import Collection,Collected
 
@@ -43,9 +43,6 @@ class Avgs(Collection):
 Avgs = Avgs()
 Avgs.can_do("del")
 
-
-def secs(tm):
-	return tm.seconds+tm.microseconds/1000000;
 
 class Avg(Collected):
 	"""This is the thing that averages."""
@@ -73,11 +70,11 @@ class Avg(Collected):
 		n = now()
 		t = n-self.last_tm
 		nt = self.total_tm+t
-		nts = secs(nt)
+		nts = unixdelta(nt)
 		if nts == 0: ## called right after init'ing
 			r = self.value
 		else:
-			r = (self.avg*secs(self.total_tm) + self.value*secs(t)) / nts
+			r = (self.avg*unixdelta(self.total_tm) + self.value*unixdelta(t)) / nts
 		if mod:
 			self.total_tm = nt
 			self.avg = r
@@ -100,8 +97,8 @@ class Avg(Collected):
 		yield ("name"," ".join(unicode(x) for x in self.name))
 		yield ("cur_value",self.value)
 		if self.last_tm is not None:
-			yield ("last_time",unixdelta(now()-self.last_tm))
-			yield ("total_time",unixdelta(self.total_tm))
+			yield ("last_time",humandelta(unixdelta(now()-self.last_tm)))
+			yield ("total_time",humandelta(unixdelta(self.total_tm)))
 			yield ("last_value",self.avg)
 			yield ("value",self._calc())
 

@@ -24,8 +24,8 @@ NEW: <ConditionalWorkSequence:3 (4)>
 28 END: wait¦done¦0.2¦_wait¦1
 name: test
 cur_value: 2.0
-last_time: 0.0
-total_time: 0.0
+last_time: now
+total_time: now
 last_value: 2.0
 value: 2.0
 .
@@ -43,15 +43,15 @@ NEW: <ConditionalWorkSequence:5 (4)>
 50 END: wait¦done¦1.2¦_wait¦2
 name: test
 cur_value: 2.0
-last_time: 1.0
-total_time: 0.0
+last_time: 1.0 sec
+total_time: now
 last_value: 2.0
 value: 2.0
 .
 name: test
 cur_value: 5.0
-last_time: 0.0
-total_time: 1.0
+last_time: now
+total_time: 1.0 sec
 last_value: 2.0
 value: 2.0
 .

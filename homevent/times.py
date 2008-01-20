@@ -38,6 +38,29 @@ def now():
 def unixdelta(delta):
 	return delta.days*24*60*60 + delta.seconds + delta.microseconds/1e6;
 
+units = ((24*60*60,"dy"),
+         (60*60,"hr"),
+		 (60,"min")) # seconds are explicit, below
+
+def humandelta(delta):
+	res = ""
+	res2= ""
+	if delta < 0:
+		delta = - delta
+		res = "-"
+	for lim, name in units:
+		if delta > lim:
+			res += res2+"%d %s" % (delta // lim, name)
+			res2 = " "
+			delta %= lim
+	if delta > 0.1:
+		res += res2+"%3.1f sec" % delta
+
+	if len(res) < 2:
+		res = "now"
+
+	return res
+
 def unixtime(tm):
 	return mktime(tm.timetuple()) + tm.microsecond / 1e6
 
@@ -102,7 +125,8 @@ def time_delta(args, now=None):
 				m = -1
 			else:
 				m = 1 # "1min 59sec"
-	s = dt.timedelta(0,s)
+	if not isinstance(now,(int,float)):
+		s = dt.timedelta(0,s)
 	if step is None:
 		now += s
 	elif now < step-1:
