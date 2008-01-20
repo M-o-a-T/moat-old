@@ -18,3 +18,4 @@ PATH=/usr/local/sbin:/usr/sbin/:$PATH
 
 owserver --foreground -p 54300 --tester=10 &
 echo $! > /tmp/owtest_$USER
+sleep 1
