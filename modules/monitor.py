@@ -18,10 +18,10 @@
 from __future__ import division
 
 """\
-This code does basic timeout handling.
+This code does basic monitoring.
 
-monitor FOO...
-	- monitors for FOO seconds
+monitor TYPE args
+	- monitors some kind of device
 
 """
 
