@@ -1678,8 +1678,8 @@ trigger immediately.
 
 An error will be raised if the original statement is no longer active.
 
-wait
-----
+until
+-----
 
 This powerful alternate to the "for" specification lets you wait until
 some (fixed) conditions related to the current time are true.
