@@ -258,5 +258,8 @@ timeslot begin NAME
 timeslot end NAME
     -- the timeslot has ended.
 
+timeslot error NAME
+    -- One of the other slot events has raised an error.
+       The timeslot is stopped.
 
 

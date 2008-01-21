@@ -93,7 +93,7 @@ class Timeslot(Collected):
 			yield ("slot",(unixdelta(now()-self.next))/self.duration)
 
 	def info(self):
-		if self.running != "off":
+		if self.running not in ("off","error"):
 			tm = unixdelta(self.last-now())
 		elif self.last is not None:
 			tm = unixdelta(now()-self.last)
@@ -115,11 +115,11 @@ class Timeslot(Collected):
 			if self.running == "pre":
 				self.running = "during"
 				self.slotter = callLater(False,unixdelta(self.next+dt.timedelta(0,self.duration)-now()), self.do_post)
-			elif self.running != "off":
+			elif self.running not in ("off","error"):
 				log(ERROR,"timeslot error pre2",self.running)
 			return _
-		d.addBoth(post)
-		d.addErrback(process_failure)
+		d.addCallback(post)
+		d.addErrback(self.dead)
 	
 	def do_sync(self):
 		self.down()
@@ -140,11 +140,18 @@ class Timeslot(Collected):
 				self.last = self.next
 				self.next = time_delta(self.interval, now=self.next)
 				self.waiter = callLater(False, unixdelta(self.next-now()), self.do_pre)
-			elif self.running != "off":
+			elif self.running not in("off","error"):
 				log(ERROR,"timeslot error post2",self.running)
 			return _
-		d.addBoth(post)
-		d.addErrback(process_failure)
+		d.addCallback(post)
+		d.addErrback(self.dead)
+
+
+	def dead(self,_):
+		self.running = "error"
+		process_failure(_)
+		self.down()
+		simple_event(self.ctx,"timeslot","error",*self.name)
 
 
 	def delete(self,ctx):
@@ -154,7 +161,7 @@ class Timeslot(Collected):
 
 
 	def up(self, resync = False):
-		if self.running != "off":
+		if self.running not in ("off","error"):
 			if not resync:
 				raise AlreadyRunningError(self)
 		if resync:
