@@ -22,6 +22,9 @@ from homevent.interpreter import Interpreter
 from homevent.parser import parse
 from homevent.context import Context
 from homevent.times import unixtime,now
+from homevent.statement import Statement,main_words
+from homevent.base import Name
+
 from cStringIO import StringIO
 import sys
 import re
@@ -148,6 +151,16 @@ class logwrite(object):
 			self.buf = ""
 			self.log(None,l)
 		pass
+
+class ctxdump(Statement):
+	name=("dump","context")
+	doc="dump the variable context"
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		print >>sys.stderr,"CTX:",Name(event)
+		for s in ctx._report():
+			print >>sys.stderr,"   :",s
+main_words.register_statement(ctxdump)
 
 def run(name,input, interpreter=Interpreter, logger=None):
 	ht = None

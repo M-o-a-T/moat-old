@@ -28,12 +28,13 @@ Init foo(10) from ‹global_words: Global 3›
 Input foo(10): <InputEvent:again>
 Global : word list:
 Known words:
-conditions : List of conditions you can use in 'if' statements.
-exit       : stop processing input
-foo        : We foo around.
-foo bar    : Have a bar, man!
-help       : show doc texts
-shutdown   : stops executing the program.
+conditions   : List of conditions you can use in 'if' statements.
+dump context : dump the variable context
+exit         : stop processing input
+foo          : We foo around.
+foo bar      : Have a bar, man!
+help         : show doc texts
+shutdown     : stops executing the program.
 help:
 The "help" command shows which words are recognized at each level.
 "help foo" also shows the sub-commands, i.e. what would be allowed

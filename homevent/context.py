@@ -22,7 +22,7 @@
 	See test/context.py for usage examples.
 	"""
 
-import sys
+import sys,inspect
 
 class VanishedAttribute: pass
 
@@ -35,6 +35,10 @@ class Context(object):
 			self._parent = []
 		self._store = {}
 		self._store.update(**k)
+		f = inspect.currentframe(1)
+		if f.f_code.co_name == "__call__":
+			f = inspect.currentframe(2)
+		self._created = (f.f_code.co_name ,f.f_code.co_filename ,f.f_lineno )
 
 	def __call__(self,ctx=None,**k):
 		"""Create a clone with an additional parent context"""
@@ -44,7 +48,7 @@ class Context(object):
 			c = Context(ctx,**k)
 		else:
 			c = Context(self,**k)
-			if ctx not in self._parents():
+			if ctx not in c._parents():
 				c._parent.append(ctx)
 		return c
 
@@ -122,6 +126,18 @@ class Context(object):
 		log(DEBUG,"CTX "+pre,unicode(self._store))
 		for p in self._parent:
 			p._dump_tree(pre+"  ")
+	def _report(self):
+		f = self._created
+		yield "@%x %s %s:%d" % (id(self),f[0],f[1],f[2])
+		for a,b in self._store.iteritems():
+			yield "%s: %s" % (unicode(a),repr(b))
+		for p in self._parent:
+			pre="p"
+			for r in p._report():
+				yield pre+": "+r
+				pre=" "
+		
+		
 
 
 def default_context(ctx,**defaults):
