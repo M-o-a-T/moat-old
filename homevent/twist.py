@@ -257,6 +257,8 @@ def callLater(force,delta,p,*a,**k):
 		delta = delta - now()
 	if isinstance(delta,dt.timedelta):
 		delta = unixdelta(delta)
+	if delta < 0: # we're late
+		delta = 0 # but let's hope not too late
 	if "HOMEVENT_TEST" in os.environ:
 		return CallLater(force,delta,p,*a,**k)
 
