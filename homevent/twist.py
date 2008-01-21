@@ -251,6 +251,12 @@ if "HOMEVENT_TEST" in os.environ:
 		def __le__(self,*a,**k): self._die("__le__",*a,**k)
 
 def callLater(force,delta,p,*a,**k):
+	from homevent.times import unixdelta,now
+
+	if isinstance(delta,dt.datetime):
+		delta = delta - now()
+	if isinstance(delta,dt.timedelta):
+		delta = unixdelta(delta)
 	if "HOMEVENT_TEST" in os.environ:
 		return CallLater(force,delta,p,*a,**k)
 

@@ -45,6 +45,8 @@ units = ((24*60*60,"dy"),
 def humandelta(delta):
 	res = ""
 	res2= ""
+	if isinstance(delta,dt.timedelta):
+		delta = unixdelta(delta)
 	if delta < 0:
 		delta = - delta
 		res = "-"

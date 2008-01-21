@@ -114,7 +114,7 @@ class Timeslot(Collected):
 		def post(_):
 			if self.running == "pre":
 				self.running = "during"
-				self.slotter = callLater(False,unixdelta(self.next+dt.timedelta(0,self.duration)-now()), self.do_post)
+				self.slotter = callLater(False,self.next+dt.timedelta(0,self.duration), self.do_post)
 			elif self.running not in ("off","error"):
 				log(ERROR,"timeslot error pre2",self.running)
 			return _
@@ -124,7 +124,7 @@ class Timeslot(Collected):
 	def do_sync(self):
 		self.down()
 		self.running = "during"
-		self.slotter = callLater(False,unixdelta(self.next+dt.timedelta(0,self.duration)-now()), self.do_post)
+		self.slotter = callLater(False,self.next+dt.timedelta(0,self.duration), self.do_post)
 	
 	def do_post(self):
 		self.slotter = None
@@ -139,7 +139,7 @@ class Timeslot(Collected):
 				self.running = "next"
 				self.last = self.next
 				self.next = time_delta(self.interval, now=self.next)
-				self.waiter = callLater(False, unixdelta(self.next-now()), self.do_pre)
+				self.waiter = callLater(False, self.next, self.do_pre)
 			elif self.running not in("off","error"):
 				log(ERROR,"timeslot error post2",self.running)
 			return _
@@ -169,7 +169,7 @@ class Timeslot(Collected):
 		else:
 			self.running = "next"
 			self.next = time_delta(self.interval, now=self.last)
-			self.waiter = callLater(False, unixdelta(self.next-now()), self.do_pre)
+			self.waiter = callLater(False, self.next, self.do_pre)
 		
 
 	def down(self):

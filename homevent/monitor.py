@@ -192,7 +192,7 @@ class Monitor(Collected):
 				s += dt.timedelta(0,self.delay)
 
 		self.started_at = s
-		self.timer = callLater(False,unixdelta(s-now()), self._run)
+		self.timer = callLater(False,s, self._run)
 
 	def filter_data(self):
 		log("monitor",TRACE,"filter",self.data,"on", self.name)
@@ -289,7 +289,7 @@ class Monitor(Collected):
 					self.timer = None
 					d.callback(None)
 			if isinstance(self.delay,tuple):
-				self.timer = callLater(False,unixdelta(time_delta(self.delay)-now()), kick)
+				self.timer = callLater(False,time_delta(self.delay), kick)
 			else:
 				self.timer = callLater(False,self.delay, kick)
 			return self.timerd
