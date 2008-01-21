@@ -198,30 +198,54 @@ NEW: <ConditionalWorkSequence:27 (4)>
    : └1╴... done.
 291 EVENT: wait¦done¦1.5¦_wait¦2
 291 END: wait¦done¦1.5¦_wait¦2
+317 EVENT: wait¦start¦2.2¦_wait¦5
+NEW: <ConditionalWorkSequence:28 (4)>
+   : │  EVENT: wait¦start¦2.2¦_wait¦5
+   : └1╴... done.
+317 EVENT: wait¦start¦2.2¦_wait¦5
+317 END: wait¦start¦2.2¦_wait¦5
+325 EVENT: wait¦start¦1.6¦_wait¦3
+NEW: <ConditionalWorkSequence:29 (4)>
+   : │  EVENT: wait¦start¦1.6¦_wait¦3
+   : └1╴... done.
+325 EVENT: wait¦start¦1.6¦_wait¦3
+325 END: wait¦start¦1.6¦_wait¦3
+332 EVENT: wait¦done¦1.6¦_wait¦3
+NEW: <ConditionalWorkSequence:30 (4)>
+   : │  EVENT: wait¦done¦1.6¦_wait¦3
+   : └1╴... done.
+332 EVENT: wait¦done¦1.6¦_wait¦3
+332 END: wait¦done¦1.6¦_wait¦3
+341 EVENT: wait¦start¦1.8¦_wait¦4
+NEW: <ConditionalWorkSequence:31 (4)>
+   : │  EVENT: wait¦start¦1.8¦_wait¦4
+   : └1╴... done.
+341 EVENT: wait¦start¦1.8¦_wait¦4
+341 END: wait¦start¦1.8¦_wait¦4
+348 EVENT: wait¦done¦1.8¦_wait¦4
+NEW: <ConditionalWorkSequence:32 (4)>
+   : │  EVENT: wait¦done¦1.8¦_wait¦4
+   : └1╴... done.
+348 EVENT: wait¦done¦1.8¦_wait¦4
+348 END: wait¦done¦1.8¦_wait¦4
+1 FS20 ending bar¦foo
+1 FS20 ended None bar¦foo
+356 EVENT: wait¦done¦2.2¦_wait¦5
+NEW: <ConditionalWorkSequence:33 (4)>
+   : │  EVENT: wait¦done¦2.2¦_wait¦5
+   : └1╴... done.
+356 EVENT: wait¦done¦2.2¦_wait¦5
+356 END: wait¦done¦2.2¦_wait¦5
 foobar
 .
-bar¦foo
 .
-312 EVENT: wait¦start¦2.0¦_wait¦3
-NEW: <ConditionalWorkSequence:28 (4)>
-   : │  EVENT: wait¦start¦2.0¦_wait¦3
-   : └1╴... done.
-312 EVENT: wait¦start¦2.0¦_wait¦3
-312 END: wait¦start¦2.0¦_wait¦3
-319 EVENT: wait¦done¦2.0¦_wait¦3
-NEW: <ConditionalWorkSequence:29 (4)>
-   : │  EVENT: wait¦done¦2.0¦_wait¦3
-   : └1╴... done.
-319 EVENT: wait¦done¦2.0¦_wait¦3
-319 END: wait¦done¦2.0¦_wait¦3
 2 EVENT: shutdown
-NEW: <ConditionalWorkSequence:30 (7)>
+NEW: <ConditionalWorkSequence:34 (7)>
    : │  EVENT: shutdown
    : ├1╴Shutdown FS20 processes
    : └2╴... done.
 2 EVENT: shutdown
 RUN: Shutdown FS20 processes
- at: <ConditionalWorkSequence:30 (7)> (step 1)
+ at: <ConditionalWorkSequence:34 (7)> (step 1)
  ev: EVENT: shutdown
 2 END: shutdown
-1 FS20 ending bar¦foo

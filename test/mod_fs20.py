@@ -87,13 +87,20 @@ send fs20 off - baz quux
 wait:
 	for 1
 	debug force
-del fs20 receiver foobar
-del fs20 sender bar foo
+async:
+	wait:
+		for 0.1
+		debug force
+	del fs20 receiver foobar
+	wait:
+		for 0.1
+		debug force
+	del fs20 sender bar foo
+wait:
+	for 0.7
+	debug force
 list fs20 receiver
 list fs20 sender
-wait:
-	for 0.5
-	debug force
 shutdown
 """
 
