@@ -49,10 +49,6 @@ Code
   - send an event when the average changes by more than X
     - which needs a timer!
 
-* improve the timeslot handler
-  use pre and post events instead of a "central" event
-  only use the offset for re-syncing
-
 
 FS20
 ====

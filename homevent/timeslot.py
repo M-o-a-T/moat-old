@@ -103,50 +103,49 @@ class Timeslot(Collected):
 
 	def do_pre(self):
 		self.waiter = None
-		if self.running == "next" and self.slotter is None:
-			self._do_pre()
-		else:
-			self.waiter = None
-			log(ERROR,"timeslot error next",self.running)
-
-	def _do_pre(self):
-		self.waiter = None
-		self.running = "pre"
-		self.next = now()
-		self.slotter = callLater(False,unixdelta(self.next+dt.timedelta(0,self.duration*self.shift)-now()), self.do_event)
-	
-	def do_event(self):
-		self.slotter = None
-		if self.running == "pre":
-			self._do_event()
-		elif self.running != "off":
+		if self.running != "next" or self.slotter is not None:
 			log(ERROR,"timeslot error pre",self.running)
+			return
 
-	def _do_event(self):
-		self.running = "during"
-		d = process_event(Event(self.ctx,"timeslot",*self.name))
+		self.running = "pre"
+		if self.next is None:
+			self.next = now()
+		d = process_event(Event(self.ctx,"timeslot","begin",*self.name))
 		def post(_):
-			if self.running == "during":
-				self.running = "post"
+			if self.running == "pre":
+				self.running = "during"
 				self.slotter = callLater(False,unixdelta(self.next+dt.timedelta(0,self.duration)-now()), self.do_post)
 			elif self.running != "off":
-				log(ERROR,"timeslot error during",self.running)
+				log(ERROR,"timeslot error pre2",self.running)
 			return _
 		d.addBoth(post)
 		d.addErrback(process_failure)
 	
+	def do_sync(self):
+		self.down()
+		self.running = "during"
+		self.slotter = callLater(False,unixdelta(self.next+dt.timedelta(0,self.duration)-now()), self.do_post)
+	
 	def do_post(self):
 		self.slotter = None
-		if self.running == "post":
-			self._do_post()
-		elif self.running != "off":
+		if self.running != "during" or self.waiter is not None:
 			log(ERROR,"timeslot error post",self.running)
+			return
 
-	def _do_post(self):
-		self.running = "next"
-		self.last = self.next
-		self.next = time_delta(self.interval, now=self.next)
-		self.waiter = callLater(False, unixdelta(self.next-now()), self._do_pre)
+		self.running = "post"
+		d = process_event(Event(self.ctx,"timeslot","end",*self.name))
+		def post(_):
+			if self.running == "post":
+				self.running = "next"
+				self.last = self.next
+				self.next = time_delta(self.interval, now=self.next)
+				self.waiter = callLater(False, unixdelta(self.next-now()), self.do_pre)
+			elif self.running != "off":
+				log(ERROR,"timeslot error post2",self.running)
+			return _
+		d.addBoth(post)
+		d.addErrback(process_failure)
+
 
 	def delete(self,ctx):
 		self.down()
@@ -159,17 +158,11 @@ class Timeslot(Collected):
 			if not resync:
 				raise AlreadyRunningError(self)
 		if resync:
-			old_run = self.running
-			self.down()
-			self.next = now()-dt.timedelta(0,self.duration*self.shift)
-			if old_run in ("during","post"):
-				self._do_post()
-			else:
-				self._do_event()
+			self.do_sync()
 		else:
 			self.running = "next"
 			self.next = time_delta(self.interval, now=self.last)
-			self.waiter = callLater(False, unixdelta(self.next-now()), self._do_pre)
+			self.waiter = callLater(False, unixdelta(self.next-now()), self.do_pre)
 		
 
 	def down(self):

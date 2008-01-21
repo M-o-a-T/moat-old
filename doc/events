@@ -249,8 +249,14 @@ onewire down TYPE DEVICE
 timeslot
 --------
 
-timeslot NAME
+timeslot begin NAME
     -- the timeslot has been reached.
-       Note that this event triggers sometime within the slot, as
-       defined with the "offset" parameter.
+       Note that this event is not sent when you explicitly re-sync the
+       timeslot while it's in "next" state. This is intentional -- we
+       can't send an event into the past.
+
+timeslot end NAME
+    -- the timeslot has ended.
+
+
 

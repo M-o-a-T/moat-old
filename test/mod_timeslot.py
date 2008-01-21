@@ -23,19 +23,61 @@ from test import run
 
 input = """\
 #log TRACE
-on timeslot foo bar:
+on timeslot begin foo bar:
+	wait GOT EVENT A:
+		for 0.3
 	var timeslot X foo bar
-	log TRACE got it $X
-	if equal $X "during":
+	if equal $X "pre":
 		log DEBUG Yes
 	else:
-		log DEBUG No2
-	wait GOT EVENT:
-		for 0.1
+		log DEBUG No2 $X
 	if in timeslot foo bar:
 		log DEBUG Yes
 	else:
 		log DEBUG No2a
+	async:
+		wait AFTER EVENT A:
+			for 0.5
+		var timeslot X foo bar
+		log TRACE got it $X
+		if equal $X "during":
+			log DEBUG Yes
+		else:
+			log DEBUG No2x $X
+		wait GOT EVENT AX:
+			for 0.1
+		if in timeslot foo bar:
+			log DEBUG Yes
+		else:
+			log DEBUG No2ax
+
+on timeslot end foo bar:
+	wait GOT EVENT B:
+		for 0.1
+	var timeslot X foo bar
+	if equal $X "post":
+		log DEBUG Yes
+	else:
+		log DEBUG No9 $X
+	if in timeslot foo bar:
+		log DEBUG Yes
+	else:
+		log DEBUG No9a
+	async:
+		wait AFTER EVENT B:
+			for 0.5
+		var timeslot X foo bar
+		log TRACE got it $X
+		if equal $X "next":
+			log DEBUG Yes
+		else:
+			log DEBUG No9x $X
+		wait GOT EVENT AX:
+			for 0.1
+		if in timeslot foo bar:
+			log DEBUG No9ax
+		else:
+			log DEBUG Yes
 
 list timeslot
 timeslot foo bar:
@@ -59,7 +101,7 @@ block:
 		var timeslot X foo bar
 		log DEBUG NoR $X
 
-wait: for 9.5
+wait A before: for 9.5
 list timeslot foo bar
 block:
 	var timeslot X foo bar
@@ -72,11 +114,11 @@ block:
 	else:
 		log DEBUG Yes
 
-wait: for 1
+wait B during: for 1
 list timeslot foo bar
 block:
 	var timeslot X foo bar
-	if equal $X "pre":
+	if equal $X "during":
 		log DEBUG Yes
 	else:
 		log DEBUG No1 $X
@@ -86,20 +128,7 @@ block:
 		var timeslot X foo bar
 		log DEBUG No1a
 
-wait: for 1
-list timeslot foo bar
-block:
-	var timeslot X foo bar
-	if equal $X "post":
-		log DEBUG Yes
-	else:
-		log DEBUG No3 $X
-	if in timeslot foo bar:
-		log DEBUG Yes
-	else:
-		log DEBUG No3a
-
-wait: for 1
+wait C after: for 2
 list timeslot foo bar
 block:
 	var timeslot X foo bar
@@ -112,11 +141,11 @@ block:
 	else:
 		log DEBUG Yes
 
-wait: for 8
+wait D during again: for 8
 list timeslot foo bar
 block:
 	var timeslot X foo bar
-	if equal $X "pre":
+	if equal $X "during":
 		log DEBUG Yes
 	else:
 		log DEBUG No5 $X

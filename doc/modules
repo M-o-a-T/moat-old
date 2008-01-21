@@ -1599,11 +1599,15 @@ A slot has these states:
 
 * next: Between intervals.
 
-* pre: At the beginning of the interval, before the event is triggered.
+* pre: At the beginning of the interval, while the "begin" event is triggered.
 
-* during: While the event is executing.
+* during: Between the "begin" and "end" events.
 
-* post: After the event, while still within the slot.
+* post: At the end of the interval, while the "end" event is triggered.
+
+A timeslot can be re-synchronized. As the sync point often lies in the
+middle of the slot, no begin event will be issued when re-syncing -- the
+correct time for issuing that event has already passed.
 
 
 every ‹time spec›
