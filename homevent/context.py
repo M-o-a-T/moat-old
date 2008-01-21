@@ -53,11 +53,15 @@ class Context(object):
 		return c
 
 	def _parents(self):
-		pl = self._parent[:]
-		while pl:
-			p = pl.pop(0)
+#		pl = self._parent[:]
+#		while pl:
+#			p = pl.pop(0)
+#			yield p
+#			pl.extend(p._parent)
+		for p in self._parent:
 			yield p
-			pl.extend(p._parent)
+			for pp in p._parents():
+				yield pp
 		
 	def __getattribute__(self,key):
 		if key.startswith("_"):
