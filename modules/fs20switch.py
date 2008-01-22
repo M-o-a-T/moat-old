@@ -438,7 +438,7 @@ del ‹name…›
 FS20switches.register_statement(FS20delswitch)
 
 
-class FS20send(AttributedStatement):
+class FS20send(Statement):
 	name = ("send","fs20")
 	doc = "Send a message to a FS20 device"
 	long_doc=u"""\
@@ -447,10 +447,6 @@ send fs20 ‹msg› -|‹aux› ‹name…›
     The ‹aux› value, if given, results in an extended message.
 """
 
-	def __init__(self,*a,**k):
-		super(FS20send,self).__init__(*a,**k)
-		self.code = None
-		
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		if len(event) < 3:
