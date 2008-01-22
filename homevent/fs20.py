@@ -39,7 +39,7 @@ class WrongDatagram(TypeError):
 	pass
 
 def to_hc(code, _len=8):
-	"""convert a number to an n-digit 1234 value"""
+	"""convert a number to an n(=8)-digit 1234 value"""
 	sft = 2*(_len-1)
 	res = 0
 	if isinstance(code,basestring):
@@ -51,7 +51,7 @@ def to_hc(code, _len=8):
 	return res
 
 def from_hc(code, _len=8):
-	"""convert an-digit 1234 value to a number"""
+	"""convert a n(=8)-digit 1234 value to a number"""
 	res = 0
 	sft = 0
 	if isinstance(code,basestring):
@@ -66,11 +66,12 @@ def from_hc(code, _len=8):
 	return res
 
 def to_dev(code):
+	"""convert a number to a four-digit 1234 value"""
 	return to_hc(code, _len=4)
 def from_dev(code):
+	"""convert a four-digit 1234 value to a number"""
 	return from_hc(code, _len=4)
 		
-
 def register_handler(h):
 	global default_handler
 	if h in handlers:
