@@ -29,13 +29,13 @@ from homevent.event import Event
 from homevent.context import Context
 from homevent.base import Name
 from homevent.collect import Collection,Collected
+from homevent.fs20 import handler,register_handler,unregister_handler, \
+	from_hc, from_dev, to_hc, to_dev, WrongDatagram
+from homevent.fs20sw import group
 
 from twisted.internet import protocol,defer,reactor
 from twisted.protocols.basic import _PauseableMixin
 from twisted.python import failure
-from homevent.fs20 import handler,register_handler,unregister_handler, \
-	from_hc, from_dev, to_hc, to_dev
-from homevent.fs20sw import group
 
 codes = {}
 devs = {}
