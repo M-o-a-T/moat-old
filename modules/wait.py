@@ -158,7 +158,7 @@ class Waiter(Collected):
 			return self.defer
 
 		if self.name in Waiters:
-			return DupWaiterError(self)
+			raise DupWaiterError(self)
 		Waiters[self.name] = self
 
 		d,e = self._lock()

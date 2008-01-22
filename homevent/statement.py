@@ -422,3 +422,28 @@ class LoopMixin(object):
 		return d
 global_words.register_statement(ExitHandler)
 
+
+class HelpSubProxy(object):
+	def __init__(self,x,name):
+		self.x = x
+		self.n=name
+
+	@property
+	def doc(self): return self.x.doc
+	@property
+	def long_doc(self): return self.x.long_doc
+	@property
+	def name(self): return Name(getattr(self.x,self.n))
+
+	def __call__(self): return self
+	
+class HelpSub(object):
+	# help support
+	def __getitem__(self,k):
+		sname=getattr(self,"helpsubname","name")
+		return HelpSubProxy(self.helpsub.__getitem__(k),sname)
+	def iteritems(self):
+		sname=getattr(self,"helpsubname","name")
+		for i,j in self.helpsub.iteritems():
+			yield (i,HelpSubProxy(j,sname))
+
