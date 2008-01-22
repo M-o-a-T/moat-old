@@ -106,10 +106,10 @@ class SwitchGroup(Collected,igroup):
 		self.name = Name(name)
 		self.devs = {}
 		self.last_dgram = None
-		super(SwitchGroup,self).__init__()
 
 		if self.code in codes:
 			raise RuntimeError("Device exists (%s)" % (to_hc(self.code),))
+		super(SwitchGroup,self).__init__()
 		codes[self.code] = self
 
 	def info(self):
