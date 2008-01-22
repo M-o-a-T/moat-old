@@ -461,7 +461,7 @@ send fs20 ‹msg› -|‹aux› ‹name…›
 			ext = None
 		else:
 			ext = int(event[1])
-		d.set(event[0],ext)
+		return d.set(event[0],ext)
 
 
 
