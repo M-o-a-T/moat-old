@@ -3,8 +3,9 @@ homevent (0.2.9) unstable; urgency=low
   * Onwards.
   * Add averaging handler.
   * Add time-slot handler.
+  * Make twisted-conch (recommended but) optional.
 
- -- Matthias Urlichs <matthias@urlichs.de>  Sun, 20 Jan 2008 22:34:17 +0100
+ -- Matthias Urlichs <matthias@urlichs.de>  Tue, 22 Jan 2008 16:44:17 +0100
 
 homevent (0.2.8) stable; urgency=low
 

@@ -28,6 +28,7 @@ from homevent.statement import main_words,Statement
 from homevent.interpreter import InteractiveInterpreter,Interpreter
 from homevent.base import Name
 from homevent.collect import Collection,Collected
+import homevent.twist_ssh # monkey patches
 
 from twisted.cred import credentials
 from twisted.conch import error,avatar,recvline

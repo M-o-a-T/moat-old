@@ -24,7 +24,6 @@ from twisted.internet.abstract import FileDescriptor
 from twisted.internet import fdesc,defer,reactor,base
 from twisted.python import log,failure
 from twisted.python.threadable import isInIOThread
-from twisted.conch.ssh.session import SSHSessionProcessProtocol
 
 from posix import write
 import sys
@@ -269,14 +268,6 @@ def _callLater(delta,p,*a,**k):
 if "HOMEVENT_TEST" in os.environ:
 	reactor.callLater = _callLater
 
-# self.client.transport can be None
-from twisted.conch.ssh import session,channel
-def tlc(self):
-	if self.client and self.client.transport:
-		self.client.transport.loseConnection()
-	channel.SSHChannel.loseConnection(self)
-session.SSHSession.loseConnection = tlc
-
 
 # Allow a Deferred to be initialized with another Deferred
 def acb(self, result):
@@ -329,13 +320,6 @@ if False:
 		print >>sys.stderr,"+THR",tid,p,a,k
 		return _cic(_tcall,tid,p,a,k)
 	reactor.callInThread = cic
-
-_ssw = SSHSessionProcessProtocol.write
-def sws(self,data):
-	if isinstance(data,unicode):
-		data = data.encode("utf-8")
-	return _ssw(self,data)
-SSHSessionProcessProtocol.write = sws
 
 fhw = FileDescriptor.write
 def nfhw(self,data):
