@@ -49,9 +49,14 @@ Code
   - send an event when the average changes by more than X
     - which needs a timer!
 
+* timeslots: store last start time someplace.
 
 FS20
 ====
+
+* EM:
+  - Warn when timeslots get too close together
+  - Store last values someplace.
 
 * Handle repeaters.
 

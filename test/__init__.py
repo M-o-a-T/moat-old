@@ -34,6 +34,7 @@ exitcode = 0
 
 log_level("event",TRACE)
 log_level("monitor",TRACE)
+log_level("fs20",TRACE)
 
 startup=now()
 def ixtime(t=None):

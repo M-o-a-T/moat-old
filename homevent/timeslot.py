@@ -160,6 +160,13 @@ class Timeslot(Collected):
 		return
 
 
+	def is_up(self):
+		return self.running not in ("off","error")
+	def is_in(self):
+		return self.running in ("pre","during","post")
+	def is_out(self):
+		return self.running == "next"
+		
 	def up(self, resync = False):
 		if self.running not in ("off","error"):
 			if not resync:
@@ -171,6 +178,13 @@ class Timeslot(Collected):
 			self.next = time_delta(self.interval, now=self.last)
 			self.waiter = callLater(False, self.next, self.do_pre)
 		
+	def maybe_up(self, resync = False):
+		if self.running not in ("off","error"):
+			return
+		if self.last is not None:
+			self.running = "next"
+			self.next = time_delta(self.interval, now=self.last)
+			self.waiter = callLater(False, self.next, self.do_pre)
 
 	def down(self):
 		if self.waiter:

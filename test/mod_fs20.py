@@ -85,7 +85,7 @@ send fs20 on - baz quux
 send fs20 off - baz quux
 #
 wait:
-	for 1
+	for 2
 	debug force
 async:
 	wait:

@@ -292,6 +292,7 @@ Register a device.
     fs20 em inside
         code thermo_hygro 1
 
+
 code TYPE ID
 ------------
 
@@ -300,6 +301,7 @@ Tells HomEvenT which type of device this is and the ID that's set on it.
 You can get the list of known types with "help fs20 em".
 
 Device IDs range from zero to seven.
+
 
 scale type factor offset
 ------------------------
@@ -314,6 +316,28 @@ the value is zero).
     fs20 em inside
         code thermo_hygro 1
         scale humidity * 1.2
+
+
+timeslot [sec]
+--------------
+
+There are only eight possible addresses for each device type, but they
+send at pre-defined and reasonably accurate intervals. Using this
+command, the system tries to separate them by installing a timeslot
+(with sane values and the same name) for this devices.
+
+The optional value is the duration of the time slot; it defaults to one
+second. If you have a slow computer, increasing this value may be
+necessary.
+
+Note that you need to declare one timeslot-equipped FS20-EM device,
+insert the batteries, and wait for correct measurement events to show up
+before you declare the timeslot for any other device. Otherwise HomEvenT
+will have no way to determine which device is which.
+
+In addition to using a timeslot, HomEvenT tries to separate devices by
+considering the previous measurement: if a data packet can be placed in
+two slots, the device with the closest values will be used.
 
 ----------------
 del fs20 em NAME

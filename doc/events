@@ -162,18 +162,15 @@ fs20 em
 These are measurement devices. They have their own (quite limited)
 protocol codes.
 
-fs20 em unknown id data
+fs20 unknown em ‹id› data
     -- this device ID is unknown.
 
-fs20 em type id datum value
+fs20 unknown em ‹type› ‹id› datum value …
     -- device ‹type›, ID ‹id›, reports that it measured ‹datum› as ‹value›.
 
     Example:
 
-        fs20¦em¦thermo_hygro¦2¦temperature¦20.3
-
-fs20 unknown em type id data
-    -- this device has not been registered yet.
+        fs20¦unknown¦em¦thermo_hygro¦2¦temperature¦20.3
 
 fs20 em kind value name…
     -- the device registered as ‹name…› reported something.
@@ -181,6 +178,30 @@ fs20 em kind value name…
     Example:
 
     fs20 em temperature 19.3 inside livingroom
+
+fs20 conflict em sync ‹type› ‹id› datum value …
+    -- The data packet fits more than one timeslot, but the values are
+       too close so HomEvenT cannot reliably associate the data to a
+       single device.
+
+fs20 conflict em unsync ‹type› ‹id› datum value …
+    -- The data packet fits no running timeslot. There are multiple
+       unsynced timeslots and the values are too close, so HomEvenT
+       cannot reliably associate the data to a single device.
+
+fs20 conflict em untimed ‹type› ‹id› datum value …
+    -- The data packet fits no running timeslot. There are multiple
+       devices without timeslot and the values are too close, so
+       HomEvenT cannot reliably associate the data to a single device.
+
+fs20 unknown em untimed ‹type› ‹id› datum value …
+    -- The data packet fits no running timeslot. There are no
+       devices without timeslot, so HomEvenT cannot associate
+       the data to any device.
+
+fs20 unknown em unregistered ‹type› ‹id› datum value …
+    -- No devices for that type and ID have been registered.
+
 
 Wait
 ----

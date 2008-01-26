@@ -40,6 +40,8 @@ from twisted.protocols.basic import _PauseableMixin
 from twisted.python import failure
 from twisted.internet.error import ProcessExitedAlready
 
+import os
+
 recvs = {}
 xmits = {}
 
@@ -66,6 +68,7 @@ class FS20recv(protocol.ProcessProtocol, my_handler):
 		self.last_dgram = None
 		recvs[self.name] = self
 		self.stopped = False
+		self.waiting = None
 
 	def connectionMade(self):
 		log(DEBUG,"FS20 started",self.name)
@@ -104,20 +107,47 @@ class FS20recv(protocol.ProcessProtocol, my_handler):
 			self.timestamp = None
 		elif data[0] == PREFIX_TIMESTAMP:
 			self.timestamp = float(data[1:])
+		elif data[0] == "+" and "HOMEVENT_TEST" in os.environ:
+			from homevent.twist import current_slot
+			d = defer.Deferred()
+			try:
+				f,c = data[1:].split(" ",1)
+			except ValueError:
+				f=data[1:]
+				c="Timer"
+			f=float(f)
+			log("fs20",DEBUG,"Wait until",f," -- now:",current_slot(),"::",c)
+			callLater(False,f-current_slot(),d.callback,None)
+			return d
 		else:
 			simple_event(Context(),"fs20","unknown","prefix",data[0],data[1:])
 
 
+	def cont(self, _=None):
+		while self.waiting:
+			try:
+				msg = self.waiting.pop(0)
+				log("fs20",DEBUG,msg)
+				d = self.dataReceived(msg)
+			except Exception:
+				process_failure()
+			else:
+				if d:
+					d.addCallback(self.cont)
+					return
+		self.waiting = None
+		self._start_timer()
+
 	def outReceived(self, data):
 		self._stop_timer()
 		data = (self.dbuf+data).split('\n')
-		while len(data) > 1:
-			try:
-				self.dataReceived(data.pop(0))
-			except Exception:
-				process_failure()
-		self.dbuf = data[0]
-		self._start_timer()
+		self.dbuf = data.pop()
+
+		if self.waiting is not None:
+			self.waiting.extend(data)
+			return
+		self.waiting = data
+		self.cont()
 
 	def errReceived(self, data):
 		self._stop_timer()
@@ -250,7 +280,7 @@ class FS20xmit(protocol.ProcessProtocol, my_handler):
 
 	def connectionMade(self):
 		log(DEBUG,"FS20 started",self.name)
-#		if "homevent_test" not in os.environ:
+#		if "HOMEVENT_TEST" not in os.environ:
 #			self.transport.closestdout() # we're not reading anything
 		self._start_timer()
 		register_handler(self)
