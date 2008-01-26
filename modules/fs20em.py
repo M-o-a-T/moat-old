@@ -32,6 +32,7 @@ from homevent.base import Name
 from homevent.fs20 import recv_handler, PREFIX
 from homevent.collect import Collection,Collected
 from homevent.logging import log,TRACE,DEBUG
+from homevent.times import now,humandelta
 
 #from twisted.internet import protocol,defer,reactor
 #from twisted.protocols.basic import _PauseableMixin
@@ -82,7 +83,8 @@ class EM(Collected):
 		self.code = code
 		self.offset = offset
 		self.faktor = faktor
-		self.last = None
+		self.last = None # timestamp
+		self.last_data = None # data values
 		try: g = EMcodes[group]
 		except KeyError: EMcodes[group] = g = {}
 		try: c = g[code]
@@ -114,9 +116,15 @@ class EM(Collected):
 			except KeyError: pass
 
 			simple_event(ctx, "fs20","em", m,n, *self.name)
+		self.last = now()
+		self.last_data = data
 
 	def info(self):
-		return "%s %d" % (em_procs[self.group].em_name, self.code)
+		if self.last is not None:
+			return "%s %d: %s" % (em_procs[self.group].em_name, self.code,
+				humandelta(now()-self.last))
+		else:
+			return "%s %d: (never)" % (em_procs[self.group].em_name, self.code)
 
 	def list(self):
 		yield("name",self.name)
@@ -124,7 +132,9 @@ class EM(Collected):
 		yield("groupname",em_procs[self.group].em_name)
 		yield("code",self.code)
 		if self.last:
-			for k,v in self.last.iteritems(): yield ("last_"+k,v)
+			yield ("last",humandelta(now()-self.last))
+		if self.last_data:
+			for k,v in self.last_data.iteritems(): yield ("last_"+k,v)
 		for k,v in self.faktor: yield ("faktor_"+k,v)
 		for k,v in self.offset: yield ("offset_"+k,v)
 		if self.slot:
@@ -158,13 +168,13 @@ def mfilter(val, hdl):
 	if len(hdl) < 2:
 		return hdl
 	for h in hdl:
-		if h.last is None:
+		if h.last_data is None:
 			return hdl
 	dm = []
 	for k in val.iterkeys():
 		try:
 			for h in hdl:
-				if k not in h.last:
+				if k not in h.last_data:
 					raise SomeNull
 			dm.append(k)
 		except SomeNull: pass
@@ -176,7 +186,7 @@ def mfilter(val, hdl):
 	for h in hdl:
 		dn = 0
 		for k in dm:
-			dn += abs(h.last[k] - val[k])
+			dn += abs(h.last_data[k] - val[k])
 
 		if d is None or dn < d*2/3:
 			d = dn
@@ -384,8 +394,8 @@ set fs20 em ‹type› ‹value› ‹name…›
 		if len(event) < 3:
 			raise SyntaxError(u"Usage: set fs20 em ‹type› ‹value› ‹name…›")
 		d = EMs[Name(event[2:])]
-		if d.last is None: d.last = {}
-		d.last[event[0]] = float(event[1])
+		if d.last_data is None: d.last_data = {}
+		d.last_data[event[0]] = float(event[1])
 
 
 class fs20em(Module):

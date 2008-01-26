@@ -70,6 +70,9 @@ fs20 em two:
 set fs20 em temperature 12 one
 set fs20 em temperature 15 two
 
+list fs20 em one
+list fs20 em two
+
 block:
 	if exists file "fs20_recv":
 		fs20 receiver foobar:
