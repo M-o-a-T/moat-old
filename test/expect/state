@@ -1,34 +1,34 @@
-1 EVENT: startup
+EVENT: startup
 NEW: <ConditionalWorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
-1 EVENT: startup
-1 END: startup
+EVENT: startup
+END: startup
 0 Yes!
 0 Set to ONE
-20 EVENT: state¦-¦one¦foo¦bar
+EVENT: state¦-¦one¦foo¦bar
 NEW: <ConditionalWorkSequence:2 (4)>
    : │  EVENT: state¦-¦one¦foo¦bar
    : └1╴... done.
-20 EVENT: state¦-¦one¦foo¦bar
-20 END: state¦-¦one¦foo¦bar
+EVENT: state¦-¦one¦foo¦bar
+END: state¦-¦one¦foo¦bar
 0 Set to TWO
-31 EVENT: state¦one¦two¦foo¦bar
+EVENT: state¦one¦two¦foo¦bar
 NEW: <ConditionalWorkSequence:3 (4)>
    : │  EVENT: state¦one¦two¦foo¦bar
    : └1╴... done.
-31 EVENT: state¦one¦two¦foo¦bar
-31 END: state¦one¦two¦foo¦bar
+EVENT: state¦one¦two¦foo¦bar
+END: state¦one¦two¦foo¦bar
 0 Create OnEvtHandler: state¦*¦three¦foo¦bar
 0 NewHandler 1
-49 EVENT: wait¦start¦0.1¦_wait¦1
+EVENT: wait¦start¦0.1¦_wait¦1
 NEW: <ConditionalWorkSequence:4 (4)>
    : │  EVENT: wait¦start¦0.1¦_wait¦1
    : └1╴... done.
-49 EVENT: wait¦start¦0.1¦_wait¦1
-49 END: wait¦start¦0.1¦_wait¦1
+EVENT: wait¦start¦0.1¦_wait¦1
+END: wait¦start¦0.1¦_wait¦1
 0 Set to THREE
-58 EVENT: state¦two¦three¦foo¦bar
+EVENT: state¦two¦three¦foo¦bar
 NEW: <ConditionalWorkSequence:5 (5)>
    : │  EVENT: state¦two¦three¦foo¦bar
    : ├1╴on state * three foo bar ‹OnEventHandler›
@@ -36,7 +36,7 @@ NEW: <ConditionalWorkSequence:5 (5)>
    : │  step: log TRACE Set to FOUR ‹LogHandler›
    : │  step: set state four foo bar ‹SetStateHandler›
    : └2╴... done.
-58 EVENT: state¦two¦three¦foo¦bar
+EVENT: state¦two¦three¦foo¦bar
 RUN: on state * three foo bar ‹OnEventHandler›
    : prio: 51
    : step: log TRACE Set to FOUR ‹LogHandler›
@@ -44,7 +44,7 @@ RUN: on state * three foo bar ‹OnEventHandler›
  at: <ConditionalWorkSequence:5 (5)> (step 1)
  ev: EVENT: state¦two¦three¦foo¦bar
 0 Set to FOUR
-58 END: state¦two¦three¦foo¦bar
+END: state¦two¦three¦foo¦bar
 ERROR: Traceback (most recent call last):
      :   File "homevent/twist.py, in <lambda>
      :     d.addCallback(lambda _: p(*a,**k))
@@ -108,13 +108,13 @@ ERROR: Traceback (most recent call last):
      : │ │step: log TRACE Set to FOUR ‹LogHandler›
      : │ ╵step: set state four foo bar ‹SetStateHandler›
      : └2╴... done.
-72 END: StateChangeError
-74 EVENT: wait¦done¦0.1¦_wait¦1
+END: StateChangeError
+EVENT: wait¦done¦0.1¦_wait¦1
 NEW: <ConditionalWorkSequence:7 (4)>
    : │  EVENT: wait¦done¦0.1¦_wait¦1
    : └1╴... done.
-74 EVENT: wait¦done¦0.1¦_wait¦1
-74 END: wait¦done¦0.1¦_wait¦1
+EVENT: wait¦done¦0.1¦_wait¦1
+END: wait¦done¦0.1¦_wait¦1
 foo bar :: three
 .
 value: three
@@ -126,7 +126,7 @@ last value: two
 0 Yes!
 0 Create OnEvtHandler: whatever
 0 NewHandler 2
-112 EVENT: whatever
+EVENT: whatever
 NEW: <ConditionalWorkSequence:8 (5)>
    : │  EVENT: whatever
    : ├1╴on whatever ‹OnEventHandler›
@@ -134,7 +134,7 @@ NEW: <ConditionalWorkSequence:8 (5)>
    : │  step: var state x foo bar ‹VarStateHandler›
    : │  step: log TRACE We got $x ‹LogHandler›
    : └2╴... done.
-112 EVENT: whatever
+EVENT: whatever
 RUN: on whatever ‹OnEventHandler›
    : prio: 51
    : step: var state x foo bar ‹VarStateHandler›
@@ -142,17 +142,17 @@ RUN: on whatever ‹OnEventHandler›
  at: <ConditionalWorkSequence:8 (5)> (step 1)
  ev: EVENT: whatever
 0 We got three
-112 END: whatever
-124 EVENT: state¦three¦-¦foo¦bar
+END: whatever
+EVENT: state¦three¦-¦foo¦bar
 NEW: <ConditionalWorkSequence:9 (4)>
    : │  EVENT: state¦three¦-¦foo¦bar
    : └1╴... done.
-124 EVENT: state¦three¦-¦foo¦bar
-124 END: state¦three¦-¦foo¦bar
+EVENT: state¦three¦-¦foo¦bar
+END: state¦three¦-¦foo¦bar
 .
-2 EVENT: shutdown
+EVENT: shutdown
 NEW: <ConditionalWorkSequence:10 (6)>
    : │  EVENT: shutdown
    : └1╴... done.
-2 EVENT: shutdown
-2 END: shutdown
+EVENT: shutdown
+END: shutdown

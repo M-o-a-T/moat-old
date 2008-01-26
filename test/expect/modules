@@ -1,26 +1,26 @@
-1 EVENT: startup
+EVENT: startup
 NEW: <ConditionalWorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
-1 EVENT: startup
-1 END: startup
+EVENT: startup
+END: startup
 1 Loading!
-11 EVENT: module¦load¦example
+EVENT: module¦load¦example
 NEW: <ConditionalWorkSequence:2 (4)>
    : │  EVENT: module¦load¦example
    : └1╴... done.
-11 EVENT: module¦load¦example
-11 END: module¦load¦example
-20 EVENT: module¦unload¦example
+EVENT: module¦load¦example
+END: module¦load¦example
+EVENT: module¦unload¦example
 NEW: <ConditionalWorkSequence:3 (4)>
    : │  EVENT: module¦unload¦example
    : └1╴... done.
-20 EVENT: module¦unload¦example
-20 END: module¦unload¦example
+EVENT: module¦unload¦example
+END: module¦unload¦example
 1 Unloading!
-2 EVENT: shutdown
+EVENT: shutdown
 NEW: <ConditionalWorkSequence:4 (5)>
    : │  EVENT: shutdown
    : └1╴... done.
-2 EVENT: shutdown
-2 END: shutdown
+EVENT: shutdown
+END: shutdown

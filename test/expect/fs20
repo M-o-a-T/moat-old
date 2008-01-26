@@ -1,57 +1,57 @@
-1 EVENT: startup
+EVENT: startup
 NEW: <ConditionalWorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
-1 EVENT: startup
-1 END: startup
-13 EVENT: module¦load¦bool
+EVENT: startup
+END: startup
+EVENT: module¦load¦bool
 NEW: <ConditionalWorkSequence:2 (4)>
    : │  EVENT: module¦load¦bool
    : └1╴... done.
-13 EVENT: module¦load¦bool
-13 END: module¦load¦bool
-27 EVENT: module¦load¦logging
+EVENT: module¦load¦bool
+END: module¦load¦bool
+EVENT: module¦load¦logging
 NEW: <ConditionalWorkSequence:3 (4)>
    : │  EVENT: module¦load¦logging
    : └1╴... done.
-27 EVENT: module¦load¦logging
-27 END: module¦load¦logging
-41 EVENT: module¦load¦trigger
+EVENT: module¦load¦logging
+END: module¦load¦logging
+EVENT: module¦load¦trigger
 NEW: <ConditionalWorkSequence:4 (4)>
    : │  EVENT: module¦load¦trigger
    : └1╴... done.
-41 EVENT: module¦load¦trigger
-41 END: module¦load¦trigger
-52 EVENT: module¦load¦wait
+EVENT: module¦load¦trigger
+END: module¦load¦trigger
+EVENT: module¦load¦wait
 NEW: <ConditionalWorkSequence:5 (4)>
    : │  EVENT: module¦load¦wait
    : └1╴... done.
-52 EVENT: module¦load¦wait
-52 END: module¦load¦wait
-63 EVENT: module¦load¦fs20tr
+EVENT: module¦load¦wait
+END: module¦load¦wait
+EVENT: module¦load¦fs20tr
 NEW: <ConditionalWorkSequence:6 (4)>
    : │  EVENT: module¦load¦fs20tr
    : └1╴... done.
-63 EVENT: module¦load¦fs20tr
-63 END: module¦load¦fs20tr
-74 EVENT: module¦load¦fs20switch
+EVENT: module¦load¦fs20tr
+END: module¦load¦fs20tr
+EVENT: module¦load¦fs20switch
 NEW: <ConditionalWorkSequence:7 (4)>
    : │  EVENT: module¦load¦fs20switch
    : └1╴... done.
-74 EVENT: module¦load¦fs20switch
-74 END: module¦load¦fs20switch
-85 EVENT: module¦load¦fs20em
+EVENT: module¦load¦fs20switch
+END: module¦load¦fs20switch
+EVENT: module¦load¦fs20em
 NEW: <ConditionalWorkSequence:8 (4)>
    : │  EVENT: module¦load¦fs20em
    : └1╴... done.
-85 EVENT: module¦load¦fs20em
-85 END: module¦load¦fs20em
-96 EVENT: module¦load¦on_event
+EVENT: module¦load¦fs20em
+END: module¦load¦fs20em
+EVENT: module¦load¦on_event
 NEW: <ConditionalWorkSequence:9 (4)>
    : │  EVENT: module¦load¦on_event
    : └1╴... done.
-96 EVENT: module¦load¦on_event
-96 END: module¦load¦on_event
+EVENT: module¦load¦on_event
+END: module¦load¦on_event
 .
 .
 foo bar :: 31413142
@@ -84,24 +84,24 @@ last_temperature: 15.0
 1 FS20 started foobar
 1 *** added bar¦foo <FS20xmit obj>
 1 FS20 started bar¦foo
-170 EVENT: wait¦start¦0.5¦_wait¦1
+EVENT: wait¦start¦0.5¦_wait¦1
 NEW: <ConditionalWorkSequence:10 (4)>
    : │  EVENT: wait¦start¦0.5¦_wait¦1
    : └1╴... done.
-170 EVENT: wait¦start¦0.5¦_wait¦1
-170 END: wait¦start¦0.5¦_wait¦1
-177 EVENT: fs20¦error¦Dies ist noch eine Test-Fehlermeldung¦bar¦foo
+EVENT: wait¦start¦0.5¦_wait¦1
+END: wait¦start¦0.5¦_wait¦1
+EVENT: fs20¦error¦Dies ist noch eine Test-Fehlermeldung¦bar¦foo
 NEW: <ConditionalWorkSequence:11 (4)>
    : │  EVENT: fs20¦error¦Dies ist noch eine Test-Fehlermeldung¦bar¦foo
    : └1╴... done.
-177 EVENT: fs20¦error¦Dies ist noch eine Test-Fehlermeldung¦bar¦foo
-177 END: fs20¦error¦Dies ist noch eine Test-Fehlermeldung¦bar¦foo
-184 EVENT: wait¦done¦0.5¦_wait¦1
+EVENT: fs20¦error¦Dies ist noch eine Test-Fehlermeldung¦bar¦foo
+END: fs20¦error¦Dies ist noch eine Test-Fehlermeldung¦bar¦foo
+EVENT: wait¦done¦0.5¦_wait¦1
 NEW: <ConditionalWorkSequence:12 (4)>
    : │  EVENT: wait¦done¦0.5¦_wait¦1
    : └1╴... done.
-184 EVENT: wait¦done¦0.5¦_wait¦1
-184 END: wait¦done¦0.5¦_wait¦1
+EVENT: wait¦done¦0.5¦_wait¦1
+END: wait¦done¦0.5¦_wait¦1
 foobar
 .
 name: foobar
@@ -116,181 +116,181 @@ command: ./fs20_xmit
 running: yes
 stopped: no
 .
-209 EVENT: wait¦start¦3.5¦_wait¦2
+EVENT: wait¦start¦3.5¦_wait¦2
 NEW: <ConditionalWorkSequence:13 (4)>
    : │  EVENT: wait¦start¦3.5¦_wait¦2
    : └1╴... done.
-209 EVENT: wait¦start¦3.5¦_wait¦2
-209 END: wait¦start¦3.5¦_wait¦2
+EVENT: wait¦start¦3.5¦_wait¦2
+END: wait¦start¦3.5¦_wait¦2
 1 FS20 sender output *** RECV f8c8d131143 *** bar¦foo
 1 FS20 sender output *** RECV f8c8d130032 *** bar¦foo
-216 EVENT: fs20¦error¦Dies ist eine Test-Fehlermeldung¦foobar
+EVENT: fs20¦error¦Dies ist eine Test-Fehlermeldung¦foobar
 NEW: <ConditionalWorkSequence:14 (4)>
    : │  EVENT: fs20¦error¦Dies ist eine Test-Fehlermeldung¦foobar
    : └1╴... done.
-216 EVENT: fs20¦error¦Dies ist eine Test-Fehlermeldung¦foobar
-216 END: fs20¦error¦Dies ist eine Test-Fehlermeldung¦foobar
+EVENT: fs20¦error¦Dies ist eine Test-Fehlermeldung¦foobar
+END: fs20¦error¦Dies ist eine Test-Fehlermeldung¦foobar
 1 fs20 +2 wait
 1 fs20 Wait until 2.0  -- now: 0.5 :: wait
 1 fs20 +2.1 switch OK
 1 fs20 Wait until 2.1  -- now: 2.0 :: switch OK
 1 fs20 f8c8d131244
-223 EVENT: fs20¦state¦toggle¦-¦baz¦quux
+EVENT: fs20¦state¦toggle¦-¦baz¦quux
 NEW: <ConditionalWorkSequence:15 (4)>
    : │  EVENT: fs20¦state¦toggle¦-¦baz¦quux
    : └1╴... done.
 1 fs20 +2.2 switch unknown function
 1 fs20 Wait until 2.2  -- now: 2.1 :: switch unknown function
-223 EVENT: fs20¦state¦toggle¦-¦baz¦quux
-223 END: fs20¦state¦toggle¦-¦baz¦quux
+EVENT: fs20¦state¦toggle¦-¦baz¦quux
+END: fs20¦state¦toggle¦-¦baz¦quux
 1 fs20 f8c8d131F51
-230 EVENT: fs20¦unknown¦function¦31413142¦31¦131f
+EVENT: fs20¦unknown¦function¦31413142¦31¦131f
 NEW: <ConditionalWorkSequence:16 (4)>
    : │  EVENT: fs20¦unknown¦function¦31413142¦31¦131f
    : └1╴... done.
 1 fs20 +2.3 switch housecode not found
 1 fs20 Wait until 2.3  -- now: 2.2 :: switch housecode not found
-230 EVENT: fs20¦unknown¦function¦31413142¦31¦131f
-230 END: fs20¦unknown¦function¦31413142¦31¦131f
+EVENT: fs20¦unknown¦function¦31413142¦31¦131f
+END: fs20¦unknown¦function¦31413142¦31¦131f
 1 fs20 f8c89131240
-237 EVENT: fs20¦unknown¦31413132¦6¦8c89131240
+EVENT: fs20¦unknown¦31413132¦6¦8c89131240
 NEW: <ConditionalWorkSequence:17 (4)>
    : │  EVENT: fs20¦unknown¦31413132¦6¦8c89131240
    : └1╴... done.
 1 fs20 +2.4 switch device not found
 1 fs20 Wait until 2.4  -- now: 2.3 :: switch device not found
-237 EVENT: fs20¦unknown¦31413132¦6¦8c89131240
-237 END: fs20¦unknown¦31413132¦6¦8c89131240
+EVENT: fs20¦unknown¦31413132¦6¦8c89131240
+END: fs20¦unknown¦31413132¦6¦8c89131240
 1 fs20 f8c8d141245
-244 EVENT: fs20¦unknown¦device¦31413142¦1221¦1412
+EVENT: fs20¦unknown¦device¦31413142¦1221¦1412
 NEW: <ConditionalWorkSequence:18 (4)>
    : │  EVENT: fs20¦unknown¦device¦31413142¦1221¦1412
    : └1╴... done.
 1 fs20 +2.5 switch bad checksum
 1 fs20 Wait until 2.5  -- now: 2.4 :: switch bad checksum
-244 EVENT: fs20¦unknown¦device¦31413142¦1221¦1412
-244 END: fs20¦unknown¦device¦31413142¦1221¦1412
+EVENT: fs20¦unknown¦device¦31413142¦1221¦1412
+END: fs20¦unknown¦device¦31413142¦1221¦1412
 1 fs20 f8c8d131245
-251 EVENT: fs20¦unknown¦31413142¦7¦8c8d131245
+EVENT: fs20¦unknown¦31413142¦7¦8c8d131245
 NEW: <ConditionalWorkSequence:19 (4)>
    : │  EVENT: fs20¦unknown¦31413142¦7¦8c8d131245
    : └1╴... done.
 1 fs20 +3.1 env bad checksum 1
 1 fs20 Wait until 3.1  -- now: 2.5 :: env bad checksum 1
-251 EVENT: fs20¦unknown¦31413142¦7¦8c8d131245
-251 END: fs20¦unknown¦31413142¦7¦8c8d131245
+EVENT: fs20¦unknown¦31413142¦7¦8c8d131245
+END: fs20¦unknown¦31413142¦7¦8c8d131245
 1 fs20 e0f01030405
-258 EVENT: fs20¦em¦checksum1¦13¦4¦f13
+EVENT: fs20¦em¦checksum1¦13¦4¦f13
 NEW: <ConditionalWorkSequence:20 (4)>
    : │  EVENT: fs20¦em¦checksum1¦13¦4¦f13
    : └1╴... done.
 1 fs20 +3.2 env bad checksum 2
 1 fs20 Wait until 3.2  -- now: 3.1 :: env bad checksum 2
-258 EVENT: fs20¦em¦checksum1¦13¦4¦f13
-258 END: fs20¦em¦checksum1¦13¦4¦f13
+EVENT: fs20¦em¦checksum1¦13¦4¦f13
+END: fs20¦em¦checksum1¦13¦4¦f13
 1 fs20 e0f01030d06
-265 EVENT: fs20¦em¦checksum2¦5¦6¦f13
+EVENT: fs20¦em¦checksum2¦5¦6¦f13
 NEW: <ConditionalWorkSequence:21 (4)>
    : │  EVENT: fs20¦em¦checksum2¦5¦6¦f13
    : └1╴... done.
 1 fs20 +3.3 env unknown devtype
 1 fs20 Wait until 3.3  -- now: 3.2 :: env unknown devtype
-265 EVENT: fs20¦em¦checksum2¦5¦6¦f13
-265 END: fs20¦em¦checksum2¦5¦6¦f13
+EVENT: fs20¦em¦checksum2¦5¦6¦f13
+END: fs20¦em¦checksum2¦5¦6¦f13
 1 fs20 e0f01030d05
-272 EVENT: fs20¦unknown¦em¦15¦13
+EVENT: fs20¦unknown¦em¦15¦13
 NEW: <ConditionalWorkSequence:22 (4)>
    : │  EVENT: fs20¦unknown¦em¦15¦13
    : └1╴... done.
 1 fs20 +3.4 env bad length
 1 fs20 Wait until 3.4  -- now: 3.3 :: env bad length
-272 EVENT: fs20¦unknown¦em¦15¦13
-272 END: fs20¦unknown¦em¦15¦13
+EVENT: fs20¦unknown¦em¦15¦13
+END: fs20¦unknown¦em¦15¦13
 1 fs20 e010103030d
-279 EVENT: fs20¦em¦bad_length¦thermo_hygro¦2¦3
+EVENT: fs20¦em¦bad_length¦thermo_hygro¦2¦3
 NEW: <ConditionalWorkSequence:23 (4)>
    : │  EVENT: fs20¦em¦bad_length¦thermo_hygro¦2¦3
    : └1╴... done.
 1 fs20 +3.5 env unknown device
 1 fs20 Wait until 3.5  -- now: 3.4 :: env unknown device
-279 EVENT: fs20¦em¦bad_length¦thermo_hygro¦2¦3
-279 END: fs20¦em¦bad_length¦thermo_hygro¦2¦3
-286 EVENT: wait¦done¦3.5¦_wait¦2
+EVENT: fs20¦em¦bad_length¦thermo_hygro¦2¦3
+END: fs20¦em¦bad_length¦thermo_hygro¦2¦3
+EVENT: wait¦done¦3.5¦_wait¦2
 NEW: <ConditionalWorkSequence:24 (4)>
    : │  EVENT: wait¦done¦3.5¦_wait¦2
    : └1╴... done.
 1 fs20 e01020302010605040401
-288 EVENT: fs20¦unknown¦em¦unregistered¦thermo_hygro¦2¦temperature¦12.3¦humidity¦45.6
+EVENT: fs20¦unknown¦em¦unregistered¦thermo_hygro¦2¦temperature¦12.3¦humidity¦45.6
 NEW: <ConditionalWorkSequence:25 (4)>
    : │  EVENT: fs20¦unknown¦em¦unregistered¦thermo_hygro¦2¦temperature¦12.3¦humidity¦45.6
    : └1╴... done.
 1 fs20 +3.6 env OK: temphumid inside
 1 fs20 Wait until 3.6  -- now: 3.5 :: env OK: temphumid inside
-286 EVENT: wait¦done¦3.5¦_wait¦2
-286 END: wait¦done¦3.5¦_wait¦2
-299 EVENT: wait¦start¦103.5¦_wait¦3
+EVENT: wait¦done¦3.5¦_wait¦2
+END: wait¦done¦3.5¦_wait¦2
+EVENT: wait¦start¦103.5¦_wait¦3
 NEW: <ConditionalWorkSequence:26 (4)>
    : │  EVENT: wait¦start¦103.5¦_wait¦3
    : └1╴... done.
-288 EVENT: fs20¦unknown¦em¦unregistered¦thermo_hygro¦2¦temperature¦12.3¦humidity¦45.6
-288 END: fs20¦unknown¦em¦unregistered¦thermo_hygro¦2¦temperature¦12.3¦humidity¦45.6
-299 EVENT: wait¦start¦103.5¦_wait¦3
-299 END: wait¦start¦103.5¦_wait¦3
+EVENT: fs20¦unknown¦em¦unregistered¦thermo_hygro¦2¦temperature¦12.3¦humidity¦45.6
+END: fs20¦unknown¦em¦unregistered¦thermo_hygro¦2¦temperature¦12.3¦humidity¦45.6
+EVENT: wait¦start¦103.5¦_wait¦3
+END: wait¦start¦103.5¦_wait¦3
 1 fs20 e01010302010605040703
-311 EVENT: fs20¦em¦temperature¦11.1¦inside
+EVENT: fs20¦em¦temperature¦11.1¦inside
 NEW: <ConditionalWorkSequence:27 (4)>
    : │  EVENT: fs20¦em¦temperature¦11.1¦inside
    : └1╴... done.
-313 EVENT: fs20¦em¦humidity¦45.6¦inside
+EVENT: fs20¦em¦humidity¦45.6¦inside
 NEW: <ConditionalWorkSequence:28 (4)>
    : │  EVENT: fs20¦em¦humidity¦45.6¦inside
    : └1╴... done.
 1 fs20 +3.7 env dup: smackmiddle
 1 fs20 Wait until 3.7  -- now: 3.6 :: env dup: smackmiddle
-311 EVENT: fs20¦em¦temperature¦11.1¦inside
-311 END: fs20¦em¦temperature¦11.1¦inside
-313 EVENT: fs20¦em¦humidity¦45.6¦inside
-313 END: fs20¦em¦humidity¦45.6¦inside
+EVENT: fs20¦em¦temperature¦11.1¦inside
+END: fs20¦em¦temperature¦11.1¦inside
+EVENT: fs20¦em¦humidity¦45.6¦inside
+END: fs20¦em¦humidity¦45.6¦inside
 1 fs20 e0103050301040302000B
-325 EVENT: fs20¦conflict¦em¦untimed¦thermo_hygro¦3¦temperature¦13.5¦humidity¦23.4
+EVENT: fs20¦conflict¦em¦untimed¦thermo_hygro¦3¦temperature¦13.5¦humidity¦23.4
 NEW: <ConditionalWorkSequence:29 (4)>
    : │  EVENT: fs20¦conflict¦em¦untimed¦thermo_hygro¦3¦temperature¦13.5¦humidity¦23.4
    : └1╴... done.
 1 fs20 +3.7 env OK: temphumid one
 1 fs20 Wait until 3.7  -- now: 3.7 :: env OK: temphumid one
 1 fs20 e0103030201040302070F
-327 EVENT: fs20¦em¦temperature¦12.3¦one
+EVENT: fs20¦em¦temperature¦12.3¦one
 NEW: <ConditionalWorkSequence:30 (4)>
    : │  EVENT: fs20¦em¦temperature¦12.3¦one
    : └1╴... done.
-329 EVENT: fs20¦em¦humidity¦23.4¦one
+EVENT: fs20¦em¦humidity¦23.4¦one
 NEW: <ConditionalWorkSequence:31 (4)>
    : │  EVENT: fs20¦em¦humidity¦23.4¦one
    : └1╴... done.
-325 EVENT: fs20¦conflict¦em¦untimed¦thermo_hygro¦3¦temperature¦13.5¦humidity¦23.4
-325 END: fs20¦conflict¦em¦untimed¦thermo_hygro¦3¦temperature¦13.5¦humidity¦23.4
-327 EVENT: fs20¦em¦temperature¦12.3¦one
-327 END: fs20¦em¦temperature¦12.3¦one
-329 EVENT: fs20¦em¦humidity¦23.4¦one
-329 END: fs20¦em¦humidity¦23.4¦one
-346 EVENT: wait¦done¦103.5¦_wait¦3
+EVENT: fs20¦conflict¦em¦untimed¦thermo_hygro¦3¦temperature¦13.5¦humidity¦23.4
+END: fs20¦conflict¦em¦untimed¦thermo_hygro¦3¦temperature¦13.5¦humidity¦23.4
+EVENT: fs20¦em¦temperature¦12.3¦one
+END: fs20¦em¦temperature¦12.3¦one
+EVENT: fs20¦em¦humidity¦23.4¦one
+END: fs20¦em¦humidity¦23.4¦one
+EVENT: wait¦done¦103.5¦_wait¦3
 NEW: <ConditionalWorkSequence:32 (4)>
    : │  EVENT: wait¦done¦103.5¦_wait¦3
    : └1╴... done.
-346 EVENT: wait¦done¦103.5¦_wait¦3
-346 END: wait¦done¦103.5¦_wait¦3
-361 EVENT: wait¦start¦103.6¦_wait¦4
+EVENT: wait¦done¦103.5¦_wait¦3
+END: wait¦done¦103.5¦_wait¦3
+EVENT: wait¦start¦103.6¦_wait¦4
 NEW: <ConditionalWorkSequence:33 (4)>
    : │  EVENT: wait¦start¦103.6¦_wait¦4
    : └1╴... done.
-361 EVENT: wait¦start¦103.6¦_wait¦4
-361 END: wait¦start¦103.6¦_wait¦4
-368 EVENT: wait¦done¦103.6¦_wait¦4
+EVENT: wait¦start¦103.6¦_wait¦4
+END: wait¦start¦103.6¦_wait¦4
+EVENT: wait¦done¦103.6¦_wait¦4
 NEW: <ConditionalWorkSequence:34 (4)>
    : │  EVENT: wait¦done¦103.6¦_wait¦4
    : └1╴... done.
-368 EVENT: wait¦done¦103.6¦_wait¦4
-368 END: wait¦done¦103.6¦_wait¦4
+EVENT: wait¦done¦103.6¦_wait¦4
+END: wait¦done¦103.6¦_wait¦4
 inside :: thermo_hygro 1: 1 min 40.0 sec
 one :: thermo_hygro 3: 1 min 39.9 sec
 two :: thermo_hygro 3: (never)
@@ -309,55 +309,55 @@ groupname: thermo_hygro
 code: 3
 last_temperature: 15.0
 .
-400 EVENT: wait¦start¦104.3¦_wait¦7
+EVENT: wait¦start¦104.3¦_wait¦7
 NEW: <ConditionalWorkSequence:35 (4)>
    : │  EVENT: wait¦start¦104.3¦_wait¦7
    : └1╴... done.
-400 EVENT: wait¦start¦104.3¦_wait¦7
-400 END: wait¦start¦104.3¦_wait¦7
-408 EVENT: wait¦start¦103.8¦_wait¦5
+EVENT: wait¦start¦104.3¦_wait¦7
+END: wait¦start¦104.3¦_wait¦7
+EVENT: wait¦start¦103.8¦_wait¦5
 NEW: <ConditionalWorkSequence:36 (4)>
    : │  EVENT: wait¦start¦103.8¦_wait¦5
    : └1╴... done.
-408 EVENT: wait¦start¦103.8¦_wait¦5
-408 END: wait¦start¦103.8¦_wait¦5
-415 EVENT: wait¦done¦103.8¦_wait¦5
+EVENT: wait¦start¦103.8¦_wait¦5
+END: wait¦start¦103.8¦_wait¦5
+EVENT: wait¦done¦103.8¦_wait¦5
 NEW: <ConditionalWorkSequence:37 (4)>
    : │  EVENT: wait¦done¦103.8¦_wait¦5
    : └1╴... done.
-415 EVENT: wait¦done¦103.8¦_wait¦5
-415 END: wait¦done¦103.8¦_wait¦5
-424 EVENT: wait¦start¦103.9¦_wait¦6
+EVENT: wait¦done¦103.8¦_wait¦5
+END: wait¦done¦103.8¦_wait¦5
+EVENT: wait¦start¦103.9¦_wait¦6
 NEW: <ConditionalWorkSequence:38 (4)>
    : │  EVENT: wait¦start¦103.9¦_wait¦6
    : └1╴... done.
-424 EVENT: wait¦start¦103.9¦_wait¦6
-424 END: wait¦start¦103.9¦_wait¦6
+EVENT: wait¦start¦103.9¦_wait¦6
+END: wait¦start¦103.9¦_wait¦6
 1 FS20 ending foobar
 1 FS20 ended None foobar
-431 EVENT: wait¦done¦103.9¦_wait¦6
+EVENT: wait¦done¦103.9¦_wait¦6
 NEW: <ConditionalWorkSequence:39 (4)>
    : │  EVENT: wait¦done¦103.9¦_wait¦6
    : └1╴... done.
-431 EVENT: wait¦done¦103.9¦_wait¦6
-431 END: wait¦done¦103.9¦_wait¦6
+EVENT: wait¦done¦103.9¦_wait¦6
+END: wait¦done¦103.9¦_wait¦6
 1 FS20 ending bar¦foo
 1 FS20 ended None bar¦foo
-439 EVENT: wait¦done¦104.3¦_wait¦7
+EVENT: wait¦done¦104.3¦_wait¦7
 NEW: <ConditionalWorkSequence:40 (4)>
    : │  EVENT: wait¦done¦104.3¦_wait¦7
    : └1╴... done.
-439 EVENT: wait¦done¦104.3¦_wait¦7
-439 END: wait¦done¦104.3¦_wait¦7
+EVENT: wait¦done¦104.3¦_wait¦7
+END: wait¦done¦104.3¦_wait¦7
 .
 .
-2 EVENT: shutdown
+EVENT: shutdown
 NEW: <ConditionalWorkSequence:41 (7)>
    : │  EVENT: shutdown
    : ├1╴Shutdown FS20 processes
    : └2╴... done.
-2 EVENT: shutdown
+EVENT: shutdown
 RUN: Shutdown FS20 processes
  at: <ConditionalWorkSequence:41 (7)> (step 1)
  ev: EVENT: shutdown
-2 END: shutdown
+END: shutdown

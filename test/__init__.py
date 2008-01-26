@@ -116,10 +116,7 @@ class run_logger(Logger):
 			self._log(None,"@ "+ixtime())
 		if hasattr(event,"report"):
 			for r in event.report(99):
-				if not hasattr(event,"id") or isinstance(event,(h.logging.log_run,h.logging.log_created)):
-					self._log(None,unicode(r))
-				else:
-					self._log(None,str(event.id)+" "+unicode(r))
+				self._log(None,unicode(r))
 		else:
 			self._log(None,unicode(event))
 		if self.dot:

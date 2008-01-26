@@ -1,36 +1,36 @@
-1 EVENT: startup
+EVENT: startup
 NEW: <ConditionalWorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
-1 EVENT: startup
-1 END: startup
-11 EVENT: foo
+EVENT: startup
+END: startup
+EVENT: foo
 NEW: <ConditionalWorkSequence:2 (4)>
    : │  EVENT: foo
    : └1╴... done.
-11 EVENT: foo
-11 END: foo
-22 EVENT: wait¦start¦0.5¦_wait¦1
+EVENT: foo
+END: foo
+EVENT: wait¦start¦0.5¦_wait¦1
 NEW: <ConditionalWorkSequence:3 (4)>
    : │  EVENT: wait¦start¦0.5¦_wait¦1
    : └1╴... done.
-22 EVENT: wait¦start¦0.5¦_wait¦1
-22 END: wait¦start¦0.5¦_wait¦1
-29 EVENT: wait¦done¦0.5¦_wait¦1
+EVENT: wait¦start¦0.5¦_wait¦1
+END: wait¦start¦0.5¦_wait¦1
+EVENT: wait¦done¦0.5¦_wait¦1
 NEW: <ConditionalWorkSequence:4 (4)>
    : │  EVENT: wait¦done¦0.5¦_wait¦1
    : └1╴... done.
-29 EVENT: wait¦done¦0.5¦_wait¦1
-29 END: wait¦done¦0.5¦_wait¦1
-38 EVENT: bar
+EVENT: wait¦done¦0.5¦_wait¦1
+END: wait¦done¦0.5¦_wait¦1
+EVENT: bar
 NEW: <ConditionalWorkSequence:5 (4)>
    : │  EVENT: bar
    : └1╴... done.
-38 EVENT: bar
-38 END: bar
-2 EVENT: shutdown
+EVENT: bar
+END: bar
+EVENT: shutdown
 NEW: <ConditionalWorkSequence:6 (6)>
    : │  EVENT: shutdown
    : └1╴... done.
-2 EVENT: shutdown
-2 END: shutdown
+EVENT: shutdown
+END: shutdown

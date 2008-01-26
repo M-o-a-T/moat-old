@@ -1,9 +1,9 @@
-1 EVENT: startup
+EVENT: startup
 NEW: <ConditionalWorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
-1 EVENT: startup
-1 END: startup
+EVENT: startup
+END: startup
 0 This is not logged
 1 This is logged
 DEBUG> This is logged
@@ -18,9 +18,9 @@ WARN> This is logged too
 9 = NONE
 .
 3 This is not logged either
-2 EVENT: shutdown
+EVENT: shutdown
 NEW: <ConditionalWorkSequence:2 (5)>
    : │  EVENT: shutdown
    : └1╴... done.
-2 EVENT: shutdown
-2 END: shutdown
+EVENT: shutdown
+END: shutdown
