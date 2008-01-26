@@ -44,32 +44,37 @@ list ‹type› ‹name…›
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		c = get_collect(event, allow_collection=True)
-		if c is None:
-			for m in all_collect():
-				print >>self.ctx.out, " ".join(m.name)
-		elif isinstance(c,Collection):
-			for n,m in c.iteritems():
-				try:
-					m = m.info
-				except AttributeError:
-					m = m.name
-				else:
-					if callable(m):
-						m = m()
-					if isinstance(m,basestring):
-						m = m.split("\n")[0].strip()
+		try:
+			if c is None:
+				for m in all_collect():
+					print >>self.ctx.out, " ".join(m.name)
+			elif isinstance(c,Collection):
+				for n,m in c.iteritems():
+					try:
+						m = m.info
+					except AttributeError:
+						m = m.name
+					else:
+						if callable(m):
+							m = m()
+						if isinstance(m,basestring):
+							m = m.split("\n")[0].strip()
 
-				if isinstance(n,Name):
-					n = u" ".join(unicode(x) for x in n)
-				if m is not None:
-					print >>self.ctx.out,u"%s :: %s" % (n,m)
-				else:
-					print >>self.ctx.out,u"%s" % (n,)
-		else:
-			for s,t in c.list():
-				print >>self.ctx.out,"%s: %s" % (s,t)
+					if isinstance(n,Name):
+						n = u" ".join(unicode(x) for x in n)
+					if m is not None:
+						print >>self.ctx.out,u"%s :: %s" % (n,m)
+					else:
+						print >>self.ctx.out,u"%s" % (n,)
+			else:
+				for s,t in c.list():
+					print >>self.ctx.out,"%s: %s" % (s,t)
 
-		print >>self.ctx.out, "."
+		except Exception,e:
+			print >>self.ctx.out, "* ERROR *",repr(e)
+			
+		finally:
+			print >>self.ctx.out, "."
 
 
 class Del(Statement):
