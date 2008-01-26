@@ -258,35 +258,29 @@ NEW: <ConditionalWorkSequence:30 (4)>
 NEW: <ConditionalWorkSequence:31 (4)>
    : │  EVENT: fs20¦em¦bad_length¦thermo_hygro¦2¦3
    : └1╴... done.
-352 EVENT: fs20¦unknown¦em¦no_data¦thermo_hygro¦1¦13
-NEW: <ConditionalWorkSequence:32 (4)>
-   : │  EVENT: fs20¦unknown¦em¦no_data¦thermo_hygro¦1¦13
-   : └1╴... done.
 1 fs20 +3.5 env unknown device
 1 fs20 Wait until 3.5  -- now: 3.4 :: env unknown device
 350 EVENT: fs20¦em¦bad_length¦thermo_hygro¦2¦3
 350 END: fs20¦em¦bad_length¦thermo_hygro¦2¦3
-352 EVENT: fs20¦unknown¦em¦no_data¦thermo_hygro¦1¦13
-352 END: fs20¦unknown¦em¦no_data¦thermo_hygro¦1¦13
 1 fs20 e01020302010605040401
-364 EVENT: fs20¦unknown¦em¦unregistered¦thermo_hygro¦2¦temperature¦12.3¦humidity¦45.6
-NEW: <ConditionalWorkSequence:33 (4)>
+357 EVENT: fs20¦unknown¦em¦unregistered¦thermo_hygro¦2¦temperature¦12.3¦humidity¦45.6
+NEW: <ConditionalWorkSequence:32 (4)>
    : │  EVENT: fs20¦unknown¦em¦unregistered¦thermo_hygro¦2¦temperature¦12.3¦humidity¦45.6
    : └1╴... done.
 1 fs20 +3.6 env OK temphumid
 1 fs20 Wait until 3.6  -- now: 3.5 :: env OK temphumid
-364 EVENT: fs20¦unknown¦em¦unregistered¦thermo_hygro¦2¦temperature¦12.3¦humidity¦45.6
-364 END: fs20¦unknown¦em¦unregistered¦thermo_hygro¦2¦temperature¦12.3¦humidity¦45.6
+357 EVENT: fs20¦unknown¦em¦unregistered¦thermo_hygro¦2¦temperature¦12.3¦humidity¦45.6
+357 END: fs20¦unknown¦em¦unregistered¦thermo_hygro¦2¦temperature¦12.3¦humidity¦45.6
 1 fs20 e01010302010605040703
-371 EVENT: fs20¦em¦temperature¦11.1¦inside
-NEW: <ConditionalWorkSequence:34 (4)>
+364 EVENT: fs20¦em¦temperature¦11.1¦inside
+NEW: <ConditionalWorkSequence:33 (4)>
    : │  EVENT: fs20¦em¦temperature¦11.1¦inside
    : └1╴... done.
-373 EVENT: fs20¦em¦humidity¦45.6¦inside
-NEW: <ConditionalWorkSequence:35 (4)>
+366 EVENT: fs20¦em¦humidity¦45.6¦inside
+NEW: <ConditionalWorkSequence:34 (4)>
    : │  EVENT: fs20¦em¦humidity¦45.6¦inside
    : └1╴... done.
-371 EVENT: fs20¦em¦temperature¦11.1¦inside
-371 END: fs20¦em¦temperature¦11.1¦inside
-373 EVENT: fs20¦em¦humidity¦45.6¦inside
-373 END: fs20¦em¦humidity¦45.6¦inside
+364 EVENT: fs20¦em¦temperature¦11.1¦inside
+364 END: fs20¦em¦temperature¦11.1¦inside
+366 EVENT: fs20¦em¦humidity¦45.6¦inside
+366 END: fs20¦em¦humidity¦45.6¦inside

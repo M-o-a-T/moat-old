@@ -197,7 +197,6 @@ class em_handler(recv_handler):
 		else:
 			r = g(ctx, data[1:])
 			if r is None:
-				simple_event(ctx, "fs20","unknown","em","no_data",g.em_name,data[1]&7,"".join("%x"%x for x in data[1:]))
 				return
 			try:
 				hdl = EMcodes[data[0]][data[1]&7]
