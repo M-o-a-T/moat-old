@@ -31,6 +31,7 @@ from homevent.run import simple_event
 from homevent.base import Name
 from homevent.fs20 import recv_handler, PREFIX
 from homevent.collect import Collection,Collected
+from homevent.logging import log,TRACE,DEBUG
 
 #from twisted.internet import protocol,defer,reactor
 #from twisted.protocols.basic import _PauseableMixin
@@ -118,11 +119,16 @@ class EM(Collected):
 		return "%s %d" % (em_procs[self.group].em_name, self.code)
 
 	def list(self):
+		yield("name",self.name)
 		yield("group",self.group)
 		yield("groupname",em_procs[self.group].em_name)
 		yield("code",self.code)
+		if self.last:
+			for k,v in self.last: yield ("last_"+k,v)
 		for k,v in self.faktor: yield ("faktor_"+k,v)
 		for k,v in self.offset: yield ("offset_"+k,v)
+		if self.slot:
+			for k,v in self.slot.list(): yield ("slot_"+k,v)
 	
 	def delete(self):
 		EMcodes[self.group][self.code].remove(self)
@@ -139,31 +145,48 @@ class EM(Collected):
 		d.addBoth(done)
 		return d
 		
+
+class SomeNull(Exception): pass
+
 def mfilter(val, hdl):
 	"""\
 		Try to find the device that's closest to the last-reported values.
-		This only works when all devices have previous measurements and
-		are in separate value domains.
+		This only works when all devices have some common previous
+		measurement.
+		‹val› is the reported type/value hash, ‹hdl› a list of devices.
 		"""
+	if len(hdl) < 2:
+		return hdl
 	for h in hdl:
 		if h.last is None:
 			return hdl
+	dm = []
+	for k in val.iterkeys():
+		try:
+			for h in hdl:
+				if k not in h.last:
+					raise SomeNull
+			dm.append(k)
+		except SomeNull: pass
+	if not dm:
+		return hdl
+
 	d = None
 	f = None
 	for h in hdl:
 		dn = 0
-		for k,v in val:
-			dn += abs(h.last[k] - v)
+		for k in dm:
+			dn += abs(h.last[k] - val[k])
 
-		if d is None or d < dn*2/3:
+		if d is None or dn < d*2/3:
 			d = dn
 			f = h
-		elif dn < d*2/3: # not enough separation
+		elif dn < d*3/2: # not enough separation
 			if d < dn: d = dn
 			f = None
 	if f is None:
 		return hdl
-	return [f]
+	return (f,)
 	
 def flat(r):
 	for a,b in r.iteritems():
@@ -347,6 +370,22 @@ Known types:
 FS20em.register_statement(FS20emcode)
 
 
+class FS20emVal(Statement):
+	name = ("set","fs20","em")
+	doc = "Set the last-reported value for a device"
+	long_doc = u"""\
+set fs20 em ‹type› ‹value› ‹name…›
+	- Set a last-reported value. This is used to distinguish devices
+	  which are set to the same ID after start-up.
+"""
+
+	def run(self,ctx,**k):
+		event = self.params(self.ctx)
+		if len(event) < 3:
+			raise SyntaxError(u"Usage: set fs20 em ‹type› ‹value› ‹name…›")
+		d = EMs[Name(event[2:])]
+		if d.last is None: d.last = {}
+		d.last[event[0]] = float(event[1])
 
 
 class fs20em(Module):
@@ -359,9 +398,11 @@ class fs20em(Module):
 	def load(self):
 		PREFIX[PREFIX_EM] = em_handler()
 		main_words.register_statement(FS20em)
+		main_words.register_statement(FS20emVal)
 	
 	def unload(self):
 		del PREFIX[PREFIX_EM]
 		main_words.unregister_statement(FS20em)
+		main_words.unregister_statement(FS20emVal)
 	
 init = fs20em

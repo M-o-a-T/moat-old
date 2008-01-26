@@ -38,10 +38,18 @@ sys.stdout.write("e010103030d\n") # bad length
 sys.stdout.write("+3.5 env unknown device\n")
 sys.stdout.write("e01020302010605040401\n") # unknown device
 
-sys.stdout.write("+3.6 env OK temphumid\n")
+sys.stdout.write("+3.6 env OK: temphumid inside\n")
 sys.stdout.write("e01010302010605040703\n") # OK, 12.3 and 45.6
+
+sys.stdout.write("+3.7 env dup: smackmiddle\n")
+sys.stdout.write("e0103050301040302000B\n") # not OK, smack in the middle
+
+sys.stdout.write("+3.7 env OK: temphumid one\n")
+sys.stdout.write("e0103030201040302070F\n") # OK, match with ONE
+
 sys.stdout.flush()
 time.sleep(0.2)
 sys.stderr.write("9\r")
 sys.stderr.flush()
 
+time.sleep(5)

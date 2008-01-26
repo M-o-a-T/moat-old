@@ -9,3 +9,4 @@ while f:
 	sys.stdout.write("*** RECV "+f+" ***\n")
 	sys.stdout.flush()
 	f = sys.stdin.readline()
+time.sleep(3)
