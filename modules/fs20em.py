@@ -124,7 +124,7 @@ class EM(Collected):
 		yield("groupname",em_procs[self.group].em_name)
 		yield("code",self.code)
 		if self.last:
-			for k,v in self.last: yield ("last_"+k,v)
+			for k,v in self.last.iteritems(): yield ("last_"+k,v)
 		for k,v in self.faktor: yield ("faktor_"+k,v)
 		for k,v in self.offset: yield ("offset_"+k,v)
 		if self.slot:
