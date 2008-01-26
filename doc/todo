@@ -55,7 +55,7 @@ FS20
 ====
 
 * EM:
-  - Warn when timeslots get too close together
+  - Warn when timeslots start to wander too close together
   - Store last values someplace.
 
 * Handle repeaters.
