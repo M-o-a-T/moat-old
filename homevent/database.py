@@ -21,6 +21,7 @@ This is the core of database access.
 
 from homevent.base import Name
 from storm.twisted.store import DeferredStore
+from twisted.internet.defer import inlineCallbacks,returnValue
 
 SafeNames = {
 	"Name":Name,
@@ -39,69 +40,46 @@ class DbStore(object):
 	def start(self):
 		return self.store.start()
 	
+	@inlineCallbacks
 	def get(self, key):
-		d = self.store.find(DbTable,
-			DbTable.category == self.category,
-			DbTable.name == repr(key))
-
-		def got1(r):
-			return r.one()
-		def got2(r):
+		try:
+			r = yield self.store.find(DbTable,
+				DbTable.category == self.category,
+				DbTable.name == repr(key))
+			r = yield r.one()
 			r = r.value
 			r = eval(r,SafeNames,{})
-			return r
-		d.addCallback(got1)
-		d.addCallback(got2)
-		def cmt(_):
-			e = self.store.commit()
-			e.addCallback(lambda x: _)
-			return e
-		def rlb(_):
-			e = self.store.rollback()
-			e.addBoth(lambda x: _)
-			return e
-		d.addCallback(cmt)
-		d.addErrback(rlb)
-		return d
+			yield self.store.commit()
+			returnValue(r)
+		except BaseException,e:
+			yield self.store.rollback()
+			raise e
 
+	@inlineCallbacks
 	def delete(self, key):
-		d = self.store.find(DbTable,
-			DbTable.category == self.category,
-			DbTable.name == repr(key))
-		def got1(r):
-			return r.one()
-		def got2(r):
-			return self.store.remove(r)
-		d.addCallback(got1)
-		d.addCallback(got2)
-		def cmt(_):
-			e = self.store.commit()
-			e.addCallback(lambda x: _)
-			return e
-		def rlb(_):
-			e = self.store.rollback()
-			e.addBoth(lambda x: _)
-			return e
-		d.addCallback(cmt)
-		d.addErrback(rlb)
-		return d
+		try:
+			r = yield self.store.find(DbTable,
+				DbTable.category == self.category,
+				DbTable.name == repr(key))
+			r = yield r.one()
+			yield self.store.remove(r)
+			yield self.store.commit()
+		except BaseException,e:
+			yield self.store.rollback()
+			raise e
 
+	@inlineCallbacks
 	def set(self, key, val):
-		e = DbTable()
-		e.category = self.category
-		e.name = repr(key)
-		e.value = repr(val)
-		d = self.store.add(e)
-		def cmt(_):
-			e = self.store.commit()
-			e.addCallback(lambda x: _)
-			return e
-		def rlb(_):
-			e = self.store.rollback()
-			e.addBoth(lambda x: _)
-			return e
-		d.addCallback(cmt)
-		d.addErrback(rlb)
-		return d
+		try:
+			e = DbTable()
+			e.category = self.category
+			e.name = repr(key)
+			e.value = repr(val)
+
+			yield self.store.add(e)
+			yield self.store.commit()
+		except BaseException,e:
+			yield self.store.rollback()
+			raise e
 	
 
