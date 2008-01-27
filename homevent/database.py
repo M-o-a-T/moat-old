@@ -47,6 +47,8 @@ class DbStore(object):
 				DbTable.category == self.category,
 				DbTable.name == repr(key))
 			r = yield r.one()
+			if r is None:
+				raise KeyError(key)
 			r = r.value
 			r = eval(r,SafeNames,{})
 			yield self.store.commit()
@@ -62,6 +64,8 @@ class DbStore(object):
 				DbTable.category == self.category,
 				DbTable.name == repr(key))
 			r = yield r.one()
+			if r is None:
+				raise KeyError(key)
 			yield self.store.remove(r)
 			yield self.store.commit()
 		except BaseException,e:
@@ -71,15 +75,18 @@ class DbStore(object):
 	@inlineCallbacks
 	def set(self, key, val):
 		try:
-			e = DbTable()
-			e.category = self.category
-			e.name = repr(key)
+			e = yield self.store.find(DbTable,
+				DbTable.category == self.category,
+				DbTable.name == repr(key))
+			e = yield e.one()
+			if e is None:
+				e = DbTable()
+				e.category = self.category
+				e.name = repr(key)
+				yield self.store.add(e)
 			e.value = repr(val)
-
-			yield self.store.add(e)
 			yield self.store.commit()
 		except BaseException,e:
 			yield self.store.rollback()
 			raise e
 	
-

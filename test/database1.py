@@ -23,16 +23,19 @@ from homevent.base import Name
 s = DbStore(Name(("Foo","bar")))
 def main():
 	d = s.start()
-	d.addCallback(lambda _: s.set("one",2))
+	d.addCallback(lambda _: s.set("one",4))
 	d.addCallback(lambda _: s.set(3,(4,5,6)))
 
-	def getter(_):
-		e = s.get(3)
+	def getter(_,a,b):
+		e = s.get(a)
 		def chk(_):
-			assert _ == (4,5,6), "Check CallBack %r" % (_,)
+			assert _ == b, "Check CallBack %r %r %r" % (_,a,b)
 		e.addCallback(chk)
 		return e
-	d.addCallback(getter)
+	d.addCallback(getter,"one",4)
+	d.addCallback(getter,3,(4,5,6))
+	d.addCallback(lambda _: s.set("one",2))
+	d.addCallback(getter,"one",2)
 
 	def err(_):
 		#_.printDetailedTraceback()
