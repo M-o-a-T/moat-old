@@ -3,13 +3,13 @@ Section: python
 Priority: extra
 XS-Python-Version: 2.4, 2.5
 Maintainer: Matthias Urlichs <matthias@urlichs.de>
-Build-Depends: debhelper (>= 5), python2.5-dev, python-setuptools, python-twisted-core, python-twisted-conch, libglib2.0-dev (>= 2.14), portaudio19-dev
+Build-Depends: debhelper (>= 5), python2.5-dev, python-setuptools, python-twisted-core, python-twisted-conch, libglib2.0-dev (>= 2.14), portaudio19-dev, python-storm (>= 42:0)
 Build-Depends-Indep: python-support
 Standards-Version: 3.7.2
 
 Package: homevent
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, ${python:Depends}, python-twisted-core
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${python:Depends}, python-twisted-core, python-storm (>= 42:0)
 Recommends: pulseaudio (>= 0.9.7), python-twisted-conch
 Description: A scripted event-based monitoring and control system
  HomEvenT is a flexible, scripted, network-aware event handler.
