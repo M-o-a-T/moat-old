@@ -41,8 +41,8 @@ from homevent.event import Event
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.base import Name
 from homevent.collect import Collection,Collected
+from homevent.times import now,humandelta
 
-from time import time
 import os
 
 class States(Collection):
@@ -70,7 +70,7 @@ class State(Collected):
 		if self.working:
 			raise StateChangeError(self,u"‹deleted›")
 		self.working = True
-		self.time = time()
+		self.time = now()
 		d = process_event(Event(ctx,"state",self.value,"-",*self.name))
 		def clear_chg(_):
 			self.delete_done()
@@ -83,11 +83,14 @@ class State(Collected):
 		yield ("lock", ("Yes" if self.working else "No"))
 		if hasattr(self,"old_value"):
 			yield ("last value",self.old_value)
-			if "HOMEVENT_TEST" not in os.environ:
-				yield ("last change",self.time)
+			yield ("last change",humandelta(now()-self.time))
 
 	def info(self):
-		return self.value
+		if hasattr(self,"old_value"):
+			return u"%s — %s " % (self.value,humandelta(now()-self.time))
+		else:
+			return unicode(self.value)
+
 	
 class SetStateHandler(Statement):
 	name=("set","state")
@@ -119,7 +122,7 @@ set state X name...
 		s.working = True
 		s.old_value = s.value
 		s.value = value
-		s.time = time()
+		s.time = now()
 		d = process_event(Event(self.ctx,"state",old,value,*name))
 		def clear_chg(_):
 			s.working = False

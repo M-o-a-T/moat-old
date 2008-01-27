@@ -115,11 +115,12 @@ NEW: <ConditionalWorkSequence:7 (4)>
    : └1╴... done.
 EVENT: wait¦done¦0.1¦_wait¦1
 END: wait¦done¦0.1¦_wait¦1
-foo bar :: three
+foo bar :: three — now
 .
 value: three
 lock: No
 last value: two
+last change: now
 .
 0 Yes!
 0 Yes!
