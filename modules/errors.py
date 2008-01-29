@@ -16,21 +16,15 @@
 ##
 
 """\
-We need code for conditionals.
+Error handling.
 
-test foo bar:
-	true if state on what ever
-	false
-
-if test foo bar:
+try:
 	do-something
-else:
+catch KeyError:
 	do-something-else
+catch:
+	do-last-resort
 
-on what ever:
-	if test foo bar
-
-This code implements the "if" command.
 """
 
 from homevent.statement import MainStatementList,Statement, \

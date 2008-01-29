@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ##
-##  Copyright © 2007, Matthias Urlichs <matthias@urlichs.de>
+##  Copyright © 2007-2008, Matthias Urlichs <matthias@urlichs.de>
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -38,6 +38,8 @@ from homevent.module import Module
 from homevent.check import check_condition
 from homevent.event import TrySomethingElse
 
+from twisted.internet.defer import inlineCallbacks, returnValue
+
 class IfStatement(MainStatementList):
 	name=("if",)
 	doc="Test if a condition holds"
@@ -60,6 +62,7 @@ Syntax:
 		else:
 			self.else_do.add_else(proc)
 		
+	@inlineCallbacks
 	def run(self,ctx,**k):
 		want=True
 
@@ -71,15 +74,15 @@ Syntax:
 			w = w[1:]
 
 		if self.procs is None:
-			if check_condition(ctx,*w) == want:
+			if (yield check_condition(ctx,*w)) == want:
 				return
 			else:
 				raise TrySomethingElse(*w)
 
-		if check_condition(ctx,*w) == want:
-			return super(IfStatement,self).run(ctx,**k)
+		if (yield check_condition(ctx,*w)) == want:
+			returnValue(super(IfStatement,self).run(ctx,**k))
 		elif self.else_do is not None:
-			return self.else_do.run(ctx,**k)
+			returnValue(self.else_do.run(ctx,**k))
 
 
 class ElseStatement(MainStatementList):

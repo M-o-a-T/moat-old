@@ -6,6 +6,8 @@ EVENT: startup
 END: startup
 0 Yes!
 0 Yes!
+0 Yes!
+0 Yes!
 0 Set to ONE
 EVENT: state¦-¦one¦foo¦bar
 NEW: <ConditionalWorkSequence:2 (4)>
@@ -13,6 +15,7 @@ NEW: <ConditionalWorkSequence:2 (4)>
    : └1╴... done.
 EVENT: state¦-¦one¦foo¦bar
 END: state¦-¦one¦foo¦bar
+0 Yes!
 0 Set to TWO
 EVENT: state¦one¦two¦foo¦bar
 NEW: <ConditionalWorkSequence:3 (4)>
@@ -45,24 +48,13 @@ RUN: on state * three foo bar ‹OnEventHandler›
 0 Set to FOUR
 1 Yes! (Shit happens.)
 END: state¦two¦three¦foo¦bar
-EVENT: wait¦start¦0.1¦_wait¦1
-NEW: <ConditionalWorkSequence:5 (4)>
-   : │  EVENT: wait¦start¦0.1¦_wait¦1
-   : └1╴... done.
-EVENT: wait¦start¦0.1¦_wait¦1
-END: wait¦start¦0.1¦_wait¦1
-EVENT: wait¦done¦0.1¦_wait¦1
-NEW: <ConditionalWorkSequence:6 (4)>
-   : │  EVENT: wait¦done¦0.1¦_wait¦1
-   : └1╴... done.
-EVENT: wait¦done¦0.1¦_wait¦1
-END: wait¦done¦0.1¦_wait¦1
 foo bar :: three — now
 .
 value: three
 lock: No
 last value: two
 last change: now
+persistent: yes
 .
 0 Yes!
 0 Yes!
@@ -70,7 +62,7 @@ last change: now
 0 Create OnEvtHandler: whatever
 0 NewHandler 2
 EVENT: whatever
-NEW: <ConditionalWorkSequence:7 (5)>
+NEW: <ConditionalWorkSequence:5 (5)>
    : │  EVENT: whatever
    : ├1╴on whatever ‹OnEventHandler›
    : │  prio: 51
@@ -82,19 +74,14 @@ RUN: on whatever ‹OnEventHandler›
    : prio: 51
    : step: var state x foo bar ‹VarStateHandler›
    : step: log TRACE We got $x ‹LogHandler›
- at: <ConditionalWorkSequence:7 (5)> (step 1)
+ at: <ConditionalWorkSequence:5 (5)> (step 1)
  ev: EVENT: whatever
 0 We got three
 END: whatever
-EVENT: state¦three¦-¦foo¦bar
-NEW: <ConditionalWorkSequence:8 (4)>
-   : │  EVENT: state¦three¦-¦foo¦bar
-   : └1╴... done.
-EVENT: state¦three¦-¦foo¦bar
-END: state¦three¦-¦foo¦bar
+foo bar :: three — now
 .
 EVENT: shutdown
-NEW: <ConditionalWorkSequence:9 (6)>
+NEW: <ConditionalWorkSequence:6 (5)>
    : │  EVENT: shutdown
    : └1╴... done.
 EVENT: shutdown

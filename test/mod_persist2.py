@@ -28,67 +28,43 @@ block:
 		log TRACE "No‽ 1"
 	else:
 		log TRACE "Yes!"
-state foo bar
+	if known state foo bar:
+		log TRACE "Yes!"
+	else:
+		log TRACE "No‽ 3"
+state foo bar:
+	saved
 block:
 	if exists state foo bar:
 		log TRACE "Yes!"
 	else:
 		log TRACE "No‽ 2"
+	if known state foo bar:
+		log TRACE "Yes!"
+	else:
+		log TRACE "No‽ 4"
 
-log TRACE Set to ONE
-set state one foo bar
-log TRACE Set to TWO
-set state two foo bar
-on state * three foo bar:
-	log TRACE Set to FOUR
-	try:
-		set state four foo bar
-		log DEBUG "No! (No shit happened.)"
-	catch StateChangeError:
-		log DEBUG "Yes! (Shit happens.)"
 block:
-	try:
-		log TRACE Set to THREE
-		set state three foo bar
-	catch:
-		log DEBUG "No! Error! Woe!"
-wait: for 0.1
-list state
-list state foo bar
-block:
-	if state three foo bar:
-		log TRACE "Yes!"
-	else:
-		log TRACE "No‽"
-block:
-	if exists state foo bar:
-		log TRACE "Yes!"
-	else:
-		log TRACE "No‽"
-block:
-	if last state two foo bar:
-		log TRACE "Yes!"
-	else:
-		log TRACE "No‽"
-on whatever:
 	var state x foo bar
-	log TRACE We got $x
-sync trigger whatever
+	log TRACE We still have $x
 del state foo bar
 list state
+block:
+	if known state foo bar:
+		log TRACE "No‽ 9"
+	else:
+		log TRACE "Yes!"
 shutdown
 """
 
 h.main_words.register_statement(ShutdownHandler)
 load_module("state")
 load_module("block")
-load_module("wait")
 load_module("data")
 load_module("on_event")
 load_module("logging")
 load_module("ifelse")
 load_module("trigger")
-load_module("errors")
 
-run("state",input)
+run("persist2",input)
 
