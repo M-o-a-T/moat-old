@@ -20,7 +20,8 @@ This is the core of database access.
 """
 
 from homevent.base import Name
-from storm.twisted.store import DeferredStore
+from storm.twisted.store import DeferredStore,StorePool
+
 from twisted.internet.defer import inlineCallbacks,returnValue
 
 SafeNames = {
@@ -34,16 +35,20 @@ from he_storage import DbTable,database
 class DbStore(object):
 	"""This object implements a simple Deferred-enabled storage"""
 	def __init__(self,cat):
-		self.store = DeferredStore(database)
+		self.pool = StorePool(database, 2, 5)
 		self.category = repr(cat)
 	
 	def start(self):
-		return self.store.start()
+		return self.pool.start()
+	
+	def stop(self):
+		return self.pool.stop()
 	
 	@inlineCallbacks
 	def get(self, key):
+		store = yield self.pool.getStore()
 		try:
-			r = yield self.store.find(DbTable,
+			r = yield store.find(DbTable,
 				DbTable.category == self.category,
 				DbTable.name == repr(key))
 			r = yield r.one()
@@ -51,31 +56,54 @@ class DbStore(object):
 				raise KeyError(key)
 			r = r.value
 			r = eval(r,SafeNames,{})
-			yield self.store.commit()
+			yield store.commit()
 			returnValue(r)
 		except BaseException,e:
-			yield self.store.rollback()
+			yield store.rollback()
 			raise e
+		finally:
+			self.pool.returnStore(store)
+
+	@inlineCallbacks
+	def all(self, callback):
+		store = yield self.pool.getStore()
+		try:
+			r = yield store.find(DbTable,
+				DbTable.category == self.category)
+
+			def call_it(r):
+				for info in r:
+					callback(r)
+			yield store.thread.deferToThread(call_it,r)
+		except BaseException,e:
+			yield store.rollback()
+			raise e
+		finally:
+			self.pool.returnStore(store)
 
 	@inlineCallbacks
 	def delete(self, key):
+		store = yield self.pool.getStore()
 		try:
-			r = yield self.store.find(DbTable,
+			r = yield store.find(DbTable,
 				DbTable.category == self.category,
 				DbTable.name == repr(key))
 			r = yield r.one()
 			if r is None:
 				raise KeyError(key)
-			yield self.store.remove(r)
-			yield self.store.commit()
+			yield store.remove(r)
+			yield store.commit()
 		except BaseException,e:
-			yield self.store.rollback()
+			yield store.rollback()
 			raise e
+		finally:
+			self.pool.returnStore(store)
 
 	@inlineCallbacks
 	def set(self, key, val):
+		store = yield self.pool.getStore()
 		try:
-			e = yield self.store.find(DbTable,
+			e = yield store.find(DbTable,
 				DbTable.category == self.category,
 				DbTable.name == repr(key))
 			e = yield e.one()
@@ -83,10 +111,12 @@ class DbStore(object):
 				e = DbTable()
 				e.category = self.category
 				e.name = repr(key)
-				yield self.store.add(e)
+				yield store.add(e)
 			e.value = repr(val)
-			yield self.store.commit()
+			yield store.commit()
 		except BaseException,e:
-			yield self.store.rollback()
+			yield store.rollback()
 			raise e
+		finally:
+			self.pool.returnStore(store)
 	

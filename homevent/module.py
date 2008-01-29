@@ -20,15 +20,16 @@ This code implements module loading and unloading.
 
 """
 
-from twisted.python.reflect import namedAny
-from twisted.python import failure
-from twisted.internet import reactor,defer
 from homevent.run import process_event
 from homevent.statement import Statement
 from homevent.event import Event
 from homevent.check import Check
 from homevent.base import Name
 from homevent.collect import Collection,Collected
+
+from twisted.python import failure
+from twisted.internet.defer import inlineCallbacks,returnValue
+
 import sys
 import os
 
@@ -91,14 +92,11 @@ class Module(Collected):
 			"""
 		raise NotImplementedError("You need to undo whatever it is you did in load().")
 	
+	@inlineCallbacks
 	def delete(self,ctx):
-		d = process_event(Event(ctx, "module","unload",*self.name))
-		def doit(_):
-			self.delete_done()
-			self.unload()
-			return _
-		d.addCallback(doit)
-		return d
+		yield process_event(Event(ctx, "module","unload",*self.name))
+		yield self.unload()
+		yield self.delete_done()
 
 	def list(self):
 		yield ("name",self.name)
@@ -107,7 +105,7 @@ class Module(Collected):
 		for l in self.info.split("\n"):
 			yield ("info",l)
 	
-
+@inlineCallbacks
 def load_module(*m):
 	md = dict()
 	mod = None
@@ -148,11 +146,11 @@ def load_module(*m):
 			mod.unload = md["unload"]
 	
 		try:
-			mod.load()
+			yield mod.load()
 		except BaseException,e:
 			a,b,c = sys.exc_info()
 			try:
-				mod.unload()
+				yield mod.unload()
 			finally:
 				raise a,b,c
 		else:
@@ -161,12 +159,7 @@ def load_module(*m):
 		if mod is not None and hasattr(mod,"name") and mod.name in Modules:
 			del Modules[mod.name]
 		raise
-	return mod
-
-def unload_module(module):
-	"""\
-		Unloads a module.
-		"""
+	returnValue(mod)
 
 
 class Load(Statement):
@@ -177,11 +170,11 @@ load NAME [args]...
 	loads the named module and calls its load() function.
 	Emits an "module load NAME [args]" event.
 """
+	@inlineCallbacks
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		d = defer.maybeDeferred(load_module,*event)
-		d.addCallback(lambda _: process_event(Event(self.ctx, "module","load",*event)))
-		return d
+		yield load_module(*event)
+		yield process_event(Event(self.ctx, "module","load",*event))
 
 
 class LoadDir(Statement):
