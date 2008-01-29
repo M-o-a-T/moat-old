@@ -350,13 +350,13 @@ class ExistsStateCheck(Check):
 		return name in States
 
 
-class KnownStateCheck(Check):
-	name=("known","state")
+class SavedStateCheck(Check):
+	name=("saved","state")
 	doc="check if a state is stored in the persistent database"
 	@inlineCallbacks
 	def check(self,*args):
 		if len(args) < 1:
-			raise SyntaxError(u"Usage: if known state ‹name…›")
+			raise SyntaxError(u"Usage: if saved state ‹name…›")
 
 		global Db
 		if Db is None:
@@ -386,7 +386,7 @@ class StateModule(Module):
 		register_condition(StateLockedCheck)
 		register_condition(LastStateCheck)
 		register_condition(ExistsStateCheck)
-		register_condition(KnownStateCheck)
+		register_condition(SavedStateCheck)
 	
 	def unload(self):
 		main_words.unregister_statement(StateHandler)
@@ -397,6 +397,6 @@ class StateModule(Module):
 		unregister_condition(StateLockedCheck)
 		unregister_condition(LastStateCheck)
 		unregister_condition(ExistsStateCheck)
-		unregister_condition(KnownStateCheck)
+		unregister_condition(SavedStateCheck)
 	
 init = StateModule

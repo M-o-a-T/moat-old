@@ -51,6 +51,10 @@ Code
 
 * timeslots: store last start time someplace.
 
+* state handling: wait for a state to be unlocked instead of blindly
+  assuming that it must be recursive; store in the context whether
+  that's the case
+
 FS20
 ====
 

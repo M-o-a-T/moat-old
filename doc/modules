@@ -1432,8 +1432,8 @@ HomEvenT with root privileges!
 state
 =====
 
-This module limits state variables. These are not yet persistent, but
-they will be.
+This module limits state variables. These can be persistent if you want
+them to.
 
 -----
 state
@@ -1443,16 +1443,33 @@ Create a new state.
 
     state foo bar
 
+saved
+-----
+
+The state will be read from the database if it exists there.
+
+It will also be written every time it's changed with a "set state"
+command.
+
+The state will not be read from the database at any other time.
+
+
 trigger new
 -----------
 
 Send a new-value event when the state is created. The old value is
 the string "-"; so is the new value unless you set it to something else.
 
+trigger old
+-----------
+
+Like above, but used when the state is restored from the database.
+
 value ‹whatever›
 ----------------
 
 Set the initial value
+
 
 ---------
 set state
@@ -1462,17 +1479,23 @@ Sets a state to some value.
 
 	set state on livingroom lamp1
 
-This will trigger an event if the old state was not "on":
+This will trigger the following event, assuming that the old state was "off":
 
 	state off on livingroom lamp1
 
 The old state is "-" if the state variable has not been set before.
 
 The event is processed synchronously. It is an error for an event
-handler to change the same state variable.
+handler to change the same state variable. Setting a variable to the
+value it already has is not a change and will not result in an error, or
+an event for that matter.
 
-For this reason, you need to wrap any activity that's either long-term,
-or likely to change the state again, in an async: block. In other
+NB: that error, like the event that triggered it, is handled synchronously.
+However, it will *not* be propagated out of the original "set state" command
+because that command did change the variable's value as intended.
+
+For this reason, you need to wrap any activity that's long-term (and/or
+or likely to change the state again) in an async: block. In other
 words, this is broken and will cause you a lot of headache:
 
 	# DO NOT DO THIS
@@ -1533,6 +1556,8 @@ triggered:
 
 The rules on events, above, still apply.
 
+This command will remove a saved state from the database.
+
 ----------
 list state
 ----------
@@ -1578,6 +1603,11 @@ True if the state has been defined at all.
 
 	if exists state NAME:
 		log DEBUG "Yay!"
+
+saved state
+-----------
+
+As above, but tests whether a saved state exists in the database.
 
 locked state
 ------------

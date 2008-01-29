@@ -28,7 +28,7 @@ block:
 		log TRACE "No‽ 1"
 	else:
 		log TRACE "Yes!"
-	if known state foo bar:
+	if saved state foo bar:
 		log TRACE "No‽ 3"
 	else:
 		log TRACE "Yes!"
@@ -39,7 +39,7 @@ block:
 		log TRACE "Yes!"
 	else:
 		log TRACE "No‽ 2"
-	if known state foo bar:
+	if saved state foo bar:
 		log TRACE "No‽ 4"
 	else:
 		log TRACE "Yes!"
@@ -47,7 +47,7 @@ block:
 log TRACE Set to ONE
 set state one foo bar
 block:
-	if known state foo bar:
+	if saved state foo bar:
 		log TRACE "Yes!"
 	else:
 		log TRACE "No‽ 5"
