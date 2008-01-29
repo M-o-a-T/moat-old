@@ -36,7 +36,7 @@ list state [NAME]
 from homevent.module import Module
 from homevent.statement import Statement, main_words, AttributedStatement
 from homevent.logging import log, Logger, register_logger,unregister_logger
-from homevent.run import process_event
+from homevent.run import process_event,process_failure
 from homevent.event import Event
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.base import Name
@@ -261,7 +261,7 @@ set state X name...
 			s.old_value = s.value
 			yield s.set_value(value if value != "-" else None)
 			s.time = now()
-			yield process_event(Event(self.ctx,"state",old,value,*s.name))
+			yield process_event(Event(self.ctx,"state",old,value,*s.name)).addErrback(process_failure)
 		finally:
 			s.working = False
 

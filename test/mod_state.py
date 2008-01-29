@@ -52,6 +52,21 @@ block:
 		set state three foo bar
 	catch:
 		log DEBUG "No! Error! Woe!"
+on state * twohalf foo bar:
+	log TRACE Set to FOUR
+	set state fourtoo foo bar
+block:
+	try:
+		log TRACE Set to TWOHALF
+		set state twohalf foo bar
+	catch:
+		log DEBUG "No! Error Propagation!"
+block:
+	try:
+		log TRACE Set to THREE
+		set state three foo bar
+	catch:
+		log DEBUG "No! Error! Woe!"
 wait: for 0.1
 list state
 list state foo bar
@@ -59,17 +74,17 @@ block:
 	if state three foo bar:
 		log TRACE "Yes!"
 	else:
-		log TRACE "No‽"
+		log TRACE "No‽ 3"
 block:
 	if exists state foo bar:
 		log TRACE "Yes!"
 	else:
-		log TRACE "No‽"
+		log TRACE "No‽ 4"
 block:
-	if last state two foo bar:
+	if last state twohalf foo bar:
 		log TRACE "Yes!"
 	else:
-		log TRACE "No‽"
+		log TRACE "No‽ 5"
 on whatever:
 	var state x foo bar
 	log TRACE We got $x
