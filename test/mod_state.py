@@ -22,11 +22,19 @@ from homevent.module import load_module
 from test import run
 
 input = """\
+
 block:
 	if exists state foo bar:
-		log TRACE "No‽"
+		log TRACE "No‽ 1"
 	else:
 		log TRACE "Yes!"
+state foo bar
+block:
+	if exists state foo bar:
+		log TRACE "Yes!"
+	else:
+		log TRACE "No‽ 2"
+
 log TRACE Set to ONE
 set state one foo bar
 log TRACE Set to TWO

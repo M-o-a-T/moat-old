@@ -5,6 +5,7 @@ NEW: <ConditionalWorkSequence:1 (4)>
 EVENT: startup
 END: startup
 0 Yes!
+0 Yes!
 0 Set to ONE
 EVENT: state¦-¦one¦foo¦bar
 NEW: <ConditionalWorkSequence:2 (4)>
@@ -46,68 +47,50 @@ RUN: on state * three foo bar ‹OnEventHandler›
 0 Set to FOUR
 END: state¦two¦three¦foo¦bar
 ERROR: Traceback (most recent call last):
-     :   File "homevent/twist.py, in <lambda>
-     :     d.addCallback(lambda _: p(*a,**k))
-     :   File "internet/defer.py, in unwindGenerator
-     :     return _inlineCallbacks(None, f(*args, **kwargs), Deferred())
-     :   File "internet/defer.py, in _inlineCallbacks
-     :     result = g.throw(result.type, result.value, result.tb)
-     :   File "homevent/worker.py, in _process
-     :     r = failure.Failure()
-     : --- <exception caught here> ---
-     :   File "homevent/worker.py, in _process
-     :     r = yield w.process(event=self.event, queue=self)
+     :   File "internet/defer.py, in unpause
+     :     self._runCallbacks()
      :   File "internet/defer.py, in _runCallbacks
      :     self.result = callback(self.result, *args, **kw)
-     :   File "homevent/statement.py, in go
-     :     return p.run(ctx)
+     :   File "internet/defer.py, in gotResult
+     :     _inlineCallbacks(r, g, deferred)
+     :   File "internet/defer.py, in _inlineCallbacks
+     :     deferred.errback()
+     : --- <exception caught here> ---
+     :   File "internet/defer.py, in _inlineCallbacks
+     :     result = g.throw(result.type, result.value, result.tb)
+     :   File "modules/state.py, in run
+     :     yield process_event(Event(self.ctx,"state",old,value,*s.name))
+     :   File "homevent/worker.py, in _process
+     :     r = yield w.process(event=self.event, queue=self)
+     :   File "internet/defer.py, in _inlineCallbacks
+     :     result = g.send(result)
      :   File "modules/state.py, in run
      :     raise StateChangeError(s,value)
      : __builtin__.StateChangeError: Trying to change state to 'four' while changing from 'two' to 'three'
-   in: on state * three foo bar ‹OnEventHandler›
-     : prio: 51
-     : step: log TRACE Set to FOUR ‹LogHandler›
-     : step: set state four foo bar ‹SetStateHandler›
-   in: <ConditionalWorkSequence:5 (5)>
-     : │  EVENT: state¦two¦three¦foo¦bar
-     : ╞1╕on state * three foo bar ‹OnEventHandler›
-     : │ │prio: 51
-     : │ │step: log TRACE Set to FOUR ‹LogHandler›
-     : │ ╵step: set state four foo bar ‹SetStateHandler›
-     : └2╴... done.
 NEW: <WorkSequence:6 (4)>
    : │  ERROR: Trying to change state to 'four' while changing from 'two' to 'three'
    : └1╴... done.
 ERROR: Traceback (most recent call last):
-     :   File "homevent/twist.py, in <lambda>
-     :     d.addCallback(lambda _: p(*a,**k))
-     :   File "internet/defer.py, in unwindGenerator
-     :     return _inlineCallbacks(None, f(*args, **kwargs), Deferred())
-     :   File "internet/defer.py, in _inlineCallbacks
-     :     result = g.throw(result.type, result.value, result.tb)
-     :   File "homevent/worker.py, in _process
-     :     r = failure.Failure()
-     : --- <exception caught here> ---
-     :   File "homevent/worker.py, in _process
-     :     r = yield w.process(event=self.event, queue=self)
+     :   File "internet/defer.py, in unpause
+     :     self._runCallbacks()
      :   File "internet/defer.py, in _runCallbacks
      :     self.result = callback(self.result, *args, **kw)
-     :   File "homevent/statement.py, in go
-     :     return p.run(ctx)
+     :   File "internet/defer.py, in gotResult
+     :     _inlineCallbacks(r, g, deferred)
+     :   File "internet/defer.py, in _inlineCallbacks
+     :     deferred.errback()
+     : --- <exception caught here> ---
+     :   File "internet/defer.py, in _inlineCallbacks
+     :     result = g.throw(result.type, result.value, result.tb)
+     :   File "modules/state.py, in run
+     :     yield process_event(Event(self.ctx,"state",old,value,*s.name))
+     :   File "homevent/worker.py, in _process
+     :     r = yield w.process(event=self.event, queue=self)
+     :   File "internet/defer.py, in _inlineCallbacks
+     :     result = g.send(result)
      :   File "modules/state.py, in run
      :     raise StateChangeError(s,value)
      : __builtin__.StateChangeError: Trying to change state to 'four' while changing from 'two' to 'three'
-   in: on state * three foo bar ‹OnEventHandler›
-     : prio: 51
-     : step: log TRACE Set to FOUR ‹LogHandler›
-     : step: set state four foo bar ‹SetStateHandler›
-   in: <ConditionalWorkSequence:5 (5)>
-     : │  EVENT: state¦two¦three¦foo¦bar
-     : ╞1╕on state * three foo bar ‹OnEventHandler›
-     : │ │prio: 51
-     : │ │step: log TRACE Set to FOUR ‹LogHandler›
-     : │ ╵step: set state four foo bar ‹SetStateHandler›
-     : └2╴... done.
 END: StateChangeError
 EVENT: wait¦done¦0.1¦_wait¦1
 NEW: <ConditionalWorkSequence:7 (4)>

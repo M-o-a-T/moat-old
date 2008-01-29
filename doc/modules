@@ -1435,6 +1435,25 @@ state
 This module limits state variables. These are not yet persistent, but
 they will be.
 
+-----
+state
+-----
+
+Create a new state.
+
+    state foo bar
+
+trigger new
+-----------
+
+Send a new-value event when the state is created. The old value is
+the string "-"; so is the new value unless you set it to something else.
+
+value ‹whatever›
+----------------
+
+Set the initial value
+
 ---------
 set state
 ---------
@@ -1445,12 +1464,12 @@ Sets a state to some value.
 
 This will trigger an event if the old state was not "on":
 
-	state - on livingroom lamp1
+	state off on livingroom lamp1
 
-"-" is used when the state variable is new.
+The old state is "-" if the state variable has not been set before.
 
 The event is processed synchronously. It is an error for an event
-handler to change the same state variables.
+handler to change the same state variable.
 
 For this reason, you need to wrap any activity that's either long-term,
 or likely to change the state again, in an async: block. In other
@@ -1463,10 +1482,10 @@ words, this is broken and will cause you a lot of headache:
 	load trigger
 
 	on state * on outside *lamp:
-		trigger onewire switch on outside $lamp
+		trigger switch on outside $lamp
 		wait outside $lamp
             for 5min
-		trigger onewire switch off outside $lamp
+		trigger switch off outside $lamp
 
 The correct solution would be, depending on whether you want the switch
 to prolong the timeout …:
@@ -1482,10 +1501,10 @@ to prolong the timeout …:
 				update
 		else:
 			async:
-				trigger onewire switch on outside $lamp
+				trigger switch on outside $lamp
 				wait outside $lamp:
                     for 5min
-				trigger onewire switch off outside $lamp
+				trigger switch off outside $lamp
 
 … or turn the lamp off prematurely:
 
@@ -1495,10 +1514,10 @@ to prolong the timeout …:
 			if exists wait outside $lamp:
 				del wait outside $lamp
 			else:
-				trigger onewire switch on outside $lamp
+				trigger switch on outside $lamp
 				wait outside $lamp
                     for 5min
-			trigger onewire switch off outside $lamp
+			trigger switch off outside $lamp
 
 Note that in the last example, the trigger statement is outside the if:
 statement. That is intentional; see "del wait", below, for details.
