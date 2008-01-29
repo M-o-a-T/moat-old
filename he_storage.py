@@ -40,7 +40,11 @@ class DbTable(object):
 #database = create_database("backend://username:password@hostname/database_name")
 
 import os
-dbf = "/tmp/homevent.db.%d" % (os.getuid(),)
+if "HOMEVENT_TEST" in os.environ:
+	dbf = "/tmp/homevent.db.%d" % (os.getuid(),)
+else:
+	dbf = "/var/lib/homevent/state.db"
+
 if os.path.exists(dbf):
 	database = create_database("sqlite:"+dbf)
 else:
