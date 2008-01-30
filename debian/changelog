@@ -7,8 +7,9 @@ homevent (0.2.9) unstable; urgency=low
   * Add averaging handler.
   * Add time-slot handler.
   * Make twisted-conch (recommended but) optional.
+  * Add PWM module.
 
- -- Matthias Urlichs <matthias@urlichs.de>  Tue, 29 Jan 2008 21:23:40 +0100
+ -- Matthias Urlichs <matthias@urlichs.de>  Wed, 30 Jan 2008 01:33:52 +0100
 
 homevent (0.2.8) stable; urgency=low
 

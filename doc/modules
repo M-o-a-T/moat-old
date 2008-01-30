@@ -1005,6 +1005,97 @@ if exists path "name"
 True if the name points to something (file, directory, device, …)
 
 
+===
+pwm
+===
+
+This module implements pulse-width (and related) modulation. That is, it
+translates a number between 0 and 1 into a sequence of on/off events, so
+that the fraction of time the signal is on equals that number.
+
+Modes exist for pulse width modulation (constant time between off ⇒ on
+events) and pulse density modulation (the "on" time is constant but the
+"off" time varies, or vice versa).
+
+Support for minimal interval duration (e.g. a furnace needs to be on for
+at least a minute, otherwise there'd be wasted gas but no actual heat)
+is not yet implemented.
+
+
+---
+pwm
+---
+
+Create a new PWM. Note that you do need a couple of sub-commands,
+depending on the PWM's type.
+
+type
+----
+
+This (required) sub-statement controls the type of the pulse modulator.
+Implemented are "PWM", "PDM" (constant 'on' time) and "iPDM" (constant
+'off' time).
+
+    pwm foo bar:
+        type PDM
+
+interval
+--------
+
+This (required) sub-statement sets the common interval. For PWM style
+controllers, this is the total control interval; for PDM, the duration
+of the pulse or pause.
+
+    pwm foo:
+        interval 12
+
+----------
+update pwm
+----------
+
+Change the parameters of a PWM. Use sub-statements as above.
+
+Currently, changing the PWM type is not supported.
+
+
+-------
+set pwm
+-------
+
+Sets the PWM's goal value. The PWM is started if it's not running
+already.
+
+    set pwm 0.123 foo
+
+There is no way to explicitly stop a PWM off; however, setting the value
+to zero will set the state to "off" and not emit any further events,
+which is more or less the same thing.
+
+-----
+Tests
+-----
+
+
+exists pwm
+----------
+
+Tests if a PWM has been defined.
+
+    if exists pwm foo:
+        del pwm foo
+
+on pwm
+------
+
+Tests if the PWM is running, i.e. has had a value assigned to it.
+
+    if on pwm foo:
+        do whatever
+
+NB: Testing if the PWM is currently in its "on" phase is not supported
+directly. If you need that, capture the event and set a state variable.
+
+
 =======
 onewire
 =======

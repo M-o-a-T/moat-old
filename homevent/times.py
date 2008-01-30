@@ -71,24 +71,9 @@ def isodate(yr,wk,wdy):
 	_,_,dy = res.isocalendar()
 	return res + dt.timedelta(7*(wk-1) + wdy-dy)
 
-def time_delta(args, now=None):
-	w = list(args)
-	s = 0
-	step = None
-	if now is None: now = globals()["now"]()
-	if not w:
-		raise SyntaxError("Empty time delta")
-	m = 1
-
-	try:
-		sv = float(w[0])
-	except (IndexError,ValueError,TypeError):
-		pass
-	else:
-		if sv > 1000000000: # 30 years plus: Forget it, that's a unixtime.
-			step = dt.datetime.fromtimestamp(s)
-			w.pop(0)
-
+def simple_time_delta(w):
+	s=0
+	m=1
 	while w:
 		if len(w) == 1:
 			pass
@@ -127,6 +112,25 @@ def time_delta(args, now=None):
 				m = -1
 			else:
 				m = 1 # "1min 59sec"
+	return s
+
+def time_delta(args, now=None):
+	w = list(args)
+	step = None
+	if now is None: now = globals()["now"]()
+	if not w:
+		raise SyntaxError("Empty time delta")
+
+	try:
+		sv = float(w[0])
+	except (IndexError,ValueError,TypeError):
+		pass
+	else:
+		if sv > 1000000000: # 30 years plus: Forget it, that's a unixtime.
+			step = dt.datetime.fromtimestamp(sv)
+			w.pop(0)
+
+	s = simple_time_delta(w)
 	if not isinstance(now,(int,float)):
 		s = dt.timedelta(0,s)
 	if step is None:

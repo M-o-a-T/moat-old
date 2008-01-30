@@ -196,7 +196,7 @@ if "HOMEVENT_TEST" in os.environ:
 			#print >>sys.stderr,"ADD %d %d: abs %d now %d  %s" % (id(self),self.q2,self.abs,slot,self.proc)
 			if not slot_running:
 				#print >>sys.stderr,"TRIGGER"
-				rcl(0,_slot_run)
+				rcl(0.01,_slot_run)
 			#else:
 				#print >>sys.stderr,"NO TRIGGER"
 		
@@ -216,7 +216,7 @@ if "HOMEVENT_TEST" in os.environ:
 			slotid += 1
 			self.slotid = slotid
 			if force and delta and self.abs > realslot:
-				self.force = rcl((self.abs-realslot)/GRAN, self._run_force)
+				self.force = rcl((self.abs-realslot)/GRAN+0.01, self._run_force)
 			elif force:
 				self.q2 = True
 			self._enqueue()
@@ -228,7 +228,7 @@ if "HOMEVENT_TEST" in os.environ:
 			if self.force:
 				self.force.cancel()
 				self.force = False
-				rcl(0,_slot_run)
+				rcl(0.01,_slot_run)
 
 		def _run_force(self):
 			global realslot
@@ -236,7 +236,7 @@ if "HOMEVENT_TEST" in os.environ:
 			realslot = self.abs
 
 			self.force = None
-			rcl(0,_slot_run)
+			rcl(0.01,_slot_run)
 			
 		def _run(self):
 			if self.dead: return
