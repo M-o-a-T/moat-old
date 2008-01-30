@@ -1,0 +1,190 @@
+1 EVENT: startup
+NEW: <ConditionalWorkSequence:1 (4)>
+   : │  EVENT: startup
+   : └1╴... done.
+1 EVENT: startup
+1 END: startup
+1 Yes
+0 Create OnEvtHandler: pcm¦set¦*X¦foo¦bar
+0 NewHandler 1
+1 Yes
+foo bar :: (new)
+.
+type: PWM
+name: foo bar
+.
+45 EVENT: wait¦start¦0.5¦_wait¦2
+NEW: <ConditionalWorkSequence:2 (4)>
+   : │  EVENT: wait¦start¦0.5¦_wait¦2
+   : └1╴... done.
+45 EVENT: wait¦start¦0.5¦_wait¦2
+45 END: wait¦start¦0.5¦_wait¦2
+52 EVENT: wait¦done¦0.5¦_wait¦2
+NEW: <ConditionalWorkSequence:3 (4)>
+   : │  EVENT: wait¦done¦0.5¦_wait¦2
+   : └1╴... done.
+52 EVENT: wait¦done¦0.5¦_wait¦2
+52 END: wait¦done¦0.5¦_wait¦2
+type: PWM
+name: foo bar
+current: 0.1
+next: 8.5 sec
+t_off: 9.0 sec
+t_on: 1.0 sec
+.
+65 EVENT: wait¦start¦9.0¦_wait¦3
+NEW: <ConditionalWorkSequence:4 (4)>
+   : │  EVENT: wait¦start¦9.0¦_wait¦3
+   : └1╴... done.
+65 EVENT: wait¦start¦9.0¦_wait¦3
+65 END: wait¦start¦9.0¦_wait¦3
+72 EVENT: pcm¦set¦on¦foo¦bar
+NEW: <ConditionalWorkSequence:5 (5)>
+   : │  EVENT: pcm¦set¦on¦foo¦bar
+   : ├1╴on pcm set *X foo bar ‹OnEventHandler›
+   : │  prio: 51
+   : │  step: log DEBUG PCM is now $X ‹LogHandler›
+   : │  step: wait ‹WaitHandler›
+   : └2╴... done.
+74 EVENT: wait¦done¦9.0¦_wait¦3
+NEW: <ConditionalWorkSequence:6 (4)>
+   : │  EVENT: wait¦done¦9.0¦_wait¦3
+   : └1╴... done.
+72 EVENT: pcm¦set¦on¦foo¦bar
+RUN: on pcm set *X foo bar ‹OnEventHandler›
+   : prio: 51
+   : step: log DEBUG PCM is now $X ‹LogHandler›
+   : step: wait ‹WaitHandler›
+ at: <ConditionalWorkSequence:5 (5)> (step 1)
+ ev: EVENT: pcm¦set¦on¦foo¦bar
+1 PCM is now on
+81 EVENT: wait¦start¦9.1¦_wait¦1
+NEW: <ConditionalWorkSequence:7 (4)>
+   : │  EVENT: wait¦start¦9.1¦_wait¦1
+   : └1╴... done.
+74 EVENT: wait¦done¦9.0¦_wait¦3
+74 END: wait¦done¦9.0¦_wait¦3
+type: PWM
+name: foo bar
+state: on
+current: 0.1
+next: now
+t_off: 9.0 sec
+t_on: 1.0 sec
+.
+94 EVENT: wait¦start¦24.0¦_wait¦4
+NEW: <ConditionalWorkSequence:8 (4)>
+   : │  EVENT: wait¦start¦24.0¦_wait¦4
+   : └1╴... done.
+81 EVENT: wait¦start¦9.1¦_wait¦1
+81 END: wait¦start¦9.1¦_wait¦1
+94 EVENT: wait¦start¦24.0¦_wait¦4
+94 END: wait¦start¦24.0¦_wait¦4
+106 EVENT: wait¦done¦9.1¦_wait¦1
+NEW: <ConditionalWorkSequence:9 (4)>
+   : │  EVENT: wait¦done¦9.1¦_wait¦1
+   : └1╴... done.
+106 EVENT: wait¦done¦9.1¦_wait¦1
+106 END: wait¦done¦9.1¦_wait¦1
+72 END: pcm¦set¦on¦foo¦bar
+116 EVENT: pcm¦set¦off¦foo¦bar
+NEW: <ConditionalWorkSequence:10 (5)>
+   : │  EVENT: pcm¦set¦off¦foo¦bar
+   : ├1╴on pcm set *X foo bar ‹OnEventHandler›
+   : │  prio: 51
+   : │  step: log DEBUG PCM is now $X ‹LogHandler›
+   : │  step: wait ‹WaitHandler›
+   : └2╴... done.
+116 EVENT: pcm¦set¦off¦foo¦bar
+RUN: on pcm set *X foo bar ‹OnEventHandler›
+   : prio: 51
+   : step: log DEBUG PCM is now $X ‹LogHandler›
+   : step: wait ‹WaitHandler›
+ at: <ConditionalWorkSequence:10 (5)> (step 1)
+ ev: EVENT: pcm¦set¦off¦foo¦bar
+1 PCM is now off
+123 EVENT: wait¦start¦10.1¦_wait¦1
+NEW: <ConditionalWorkSequence:11 (4)>
+   : │  EVENT: wait¦start¦10.1¦_wait¦1
+   : └1╴... done.
+123 EVENT: wait¦start¦10.1¦_wait¦1
+123 END: wait¦start¦10.1¦_wait¦1
+130 EVENT: wait¦done¦10.1¦_wait¦1
+NEW: <ConditionalWorkSequence:12 (4)>
+   : │  EVENT: wait¦done¦10.1¦_wait¦1
+   : └1╴... done.
+130 EVENT: wait¦done¦10.1¦_wait¦1
+130 END: wait¦done¦10.1¦_wait¦1
+116 END: pcm¦set¦off¦foo¦bar
+140 EVENT: pcm¦set¦on¦foo¦bar
+NEW: <ConditionalWorkSequence:13 (5)>
+   : │  EVENT: pcm¦set¦on¦foo¦bar
+   : ├1╴on pcm set *X foo bar ‹OnEventHandler›
+   : │  prio: 51
+   : │  step: log DEBUG PCM is now $X ‹LogHandler›
+   : │  step: wait ‹WaitHandler›
+   : └2╴... done.
+140 EVENT: pcm¦set¦on¦foo¦bar
+RUN: on pcm set *X foo bar ‹OnEventHandler›
+   : prio: 51
+   : step: log DEBUG PCM is now $X ‹LogHandler›
+   : step: wait ‹WaitHandler›
+ at: <ConditionalWorkSequence:13 (5)> (step 1)
+ ev: EVENT: pcm¦set¦on¦foo¦bar
+1 PCM is now on
+147 EVENT: wait¦start¦19.1¦_wait¦1
+NEW: <ConditionalWorkSequence:14 (4)>
+   : │  EVENT: wait¦start¦19.1¦_wait¦1
+   : └1╴... done.
+147 EVENT: wait¦start¦19.1¦_wait¦1
+147 END: wait¦start¦19.1¦_wait¦1
+154 EVENT: wait¦done¦19.1¦_wait¦1
+NEW: <ConditionalWorkSequence:15 (4)>
+   : │  EVENT: wait¦done¦19.1¦_wait¦1
+   : └1╴... done.
+154 EVENT: wait¦done¦19.1¦_wait¦1
+154 END: wait¦done¦19.1¦_wait¦1
+140 END: pcm¦set¦on¦foo¦bar
+164 EVENT: pcm¦set¦off¦foo¦bar
+NEW: <ConditionalWorkSequence:16 (5)>
+   : │  EVENT: pcm¦set¦off¦foo¦bar
+   : ├1╴on pcm set *X foo bar ‹OnEventHandler›
+   : │  prio: 51
+   : │  step: log DEBUG PCM is now $X ‹LogHandler›
+   : │  step: wait ‹WaitHandler›
+   : └2╴... done.
+164 EVENT: pcm¦set¦off¦foo¦bar
+RUN: on pcm set *X foo bar ‹OnEventHandler›
+   : prio: 51
+   : step: log DEBUG PCM is now $X ‹LogHandler›
+   : step: wait ‹WaitHandler›
+ at: <ConditionalWorkSequence:16 (5)> (step 1)
+ ev: EVENT: pcm¦set¦off¦foo¦bar
+1 PCM is now off
+171 EVENT: wait¦start¦20.1¦_wait¦1
+NEW: <ConditionalWorkSequence:17 (4)>
+   : │  EVENT: wait¦start¦20.1¦_wait¦1
+   : └1╴... done.
+171 EVENT: wait¦start¦20.1¦_wait¦1
+171 END: wait¦start¦20.1¦_wait¦1
+178 EVENT: wait¦done¦20.1¦_wait¦1
+NEW: <ConditionalWorkSequence:18 (4)>
+   : │  EVENT: wait¦done¦20.1¦_wait¦1
+   : └1╴... done.
+178 EVENT: wait¦done¦20.1¦_wait¦1
+178 END: wait¦done¦20.1¦_wait¦1
+164 END: pcm¦set¦off¦foo¦bar
+188 EVENT: wait¦done¦24.0¦_wait¦4
+NEW: <ConditionalWorkSequence:19 (4)>
+   : │  EVENT: wait¦done¦24.0¦_wait¦4
+   : └1╴... done.
+188 EVENT: wait¦done¦24.0¦_wait¦4
+188 END: wait¦done¦24.0¦_wait¦4
+foo bar :: 0.100000 1.0 sec / 9.0 sec
+.
+2 EVENT: shutdown
+NEW: <ConditionalWorkSequence:20 (7)>
+   : │  EVENT: shutdown
+   : └1╴... done.
+2 EVENT: shutdown
+2 END: shutdown

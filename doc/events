@@ -101,6 +101,16 @@ Note that a wildcard handler which listens on every conceivable
 connection does not make sense; nevertheless you probably shouldn't
 name your net connection “connect”. ☺
 
+PWM
+---
+
+pwm set on|off NAME…
+    -- change the pulse level.
+
+pwm error NAME…
+    -- A "pwm set" event caused an error.
+       (That error was reported in detail, just before triggering this event.)
+
 State
 -----
 

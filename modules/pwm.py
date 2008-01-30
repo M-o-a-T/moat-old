@@ -43,10 +43,10 @@ from homevent.base import Name,SYS_PRIO
 from homevent.twist import callLater
 from homevent.collect import Collection,Collected
 
-from time import time
-import os
 from twisted.python import failure
-from twisted.internet import defer
+from twisted.internet.defer import succeed,inlineCallbacks
+
+import os
 import datetime as dt
 
 timer_nr = 0
@@ -120,7 +120,7 @@ class CommonPM(Collected):
 		if self.state:
 			d = process_event(Event(self.ctx,"pcm","set",self.names[0],*self.name))
 		else:
-			d = defer.succeed(None)
+			d = succeed(None)
 		def done(_):
 			self.delete_done
 		d.addCallback(done)
@@ -141,6 +141,7 @@ class CommonPM(Collected):
 		d = self.do_switch()
 		d.addErrback(process_failure)
 
+	@inlineCallbacks
 	def do_switch(self):
 		"""Click"""
 		if self.state:
@@ -150,22 +151,17 @@ class CommonPM(Collected):
 			self.state = 1
 			tn = self.t_on
 
-		def sw_done(_):
+		yield process_event(Event(self.ctx,"pcm","set",self.names[self.state],*self.name))
+		try:
 			self.last = self.next
 			if tn is not None:
 				self.next = self.last + dt.timedelta(0,tn)
 				self.timer = callLater(False,self.next,self.do_timed_switch)
 			else:
 				self.next = None
-			return _
-		d = process_event(Event(self.ctx,"pcm","set",self.names[self.state],*self.name))
-		d.addCallback(sw_done)
-
-		def sw_err(_):
-			process_failure(_)
-			simple_event(self.ctx,"pcm","error",*self.name)
-		d.addErrback(sw_err)
-		return d
+		except Exception,e:
+			yield process_failure(e)
+			yield simple_event(self.ctx,"pcm","error",*self.name)
 		
 	def get_value(self):
 		return self._value
@@ -394,12 +390,33 @@ var pcm NAME name...
 		setattr(self.parent.ctx,var,PWMs[name].value)
 
 
+class Shutdown_Worker_PWM(ExcWorker):
+	"""\
+		This worker turns off all PWMs.
+		"""
+	prio = SYS_PRIO+4
+
+	def does_event(self,ev):
+		return (ev is shutdown_event)
+	def process(self,queue,*a,**k):
+		d = succeed(None)
+		for p in PWMs.values():
+			def tilt(_,pwm):
+				return pwm.set_value(0)
+			d.addBoth(tilt,p)
+		return d
+
+	def report(self,*a,**k):
+		return ()
+
+
 class PWMModule(Module):
 	"""\
-		This module contains controllers for PWM.
+		This module contains controllers for PWMs.
 		"""
 
 	info = "controllers for pulse-width modulation"
+	worker = Shutdown_Worker_PWM("PWM killer")
 
 	def load(self):
 		main_words.register_statement(PWMHandler)
@@ -408,6 +425,7 @@ class PWMModule(Module):
 		main_words.register_statement(VarPWMHandler)
 		register_condition(ExistsPWMCheck)
 		register_condition(OnPWMCheck)
+		register_worker(self.worker)
 	
 	def unload(self):
 		main_words.unregister_statement(PWMHandler)
@@ -416,5 +434,6 @@ class PWMModule(Module):
 		main_words.unregister_statement(VarPWMHandler)
 		unregister_condition(ExistsPWMCheck)
 		unregister_condition(OnPWMCheck)
+		unregister_worker(self.worker)
 
 init = PWMModule
