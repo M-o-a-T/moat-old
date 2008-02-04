@@ -33,7 +33,7 @@ static task_head *tail_now;
 
 void _queue_task(task_head *task)
 {
-	DBGS("Q %x",task);
+	// DBGS("Q %x",task);
 	assert(!task->next,"Queue Ouch1");
 	assert(tail_now != task,"Queue Ouch2");
 	if(tail_now) {
@@ -92,25 +92,33 @@ void dequeue_task(task_head *task)
 unsigned char
 run_tasks(void)
 {
+	cli();
 	task_head *task = head_now;
-	if(!task) return 0;
+	if(!task) {
+		sei();
+		return 0;
+	}
+	sei();
+
 	while(task) {
-		cli();
 		task_head *tn = task->next;
+		cli();
 		if (task == tail_now) {
 			task = head_now;
 			head_now = NULL;
 			tail_now = NULL;
+			sei();
 			assert(!tn, "TaskQ1");
 		} else {
+			sei();
 			assert(tn, "TaskQ2");
 		}
-		sei();
-		DBGS("R %x",task);
+		// DBGS("R %x",task);
 		task->next = NULL;
 		(*task->proc)(task->data);
 		task = tn;
 	}
+	sei();
 	return 1;
 }
 

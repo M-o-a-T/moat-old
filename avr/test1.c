@@ -37,15 +37,20 @@ void runit(unsigned int dummy) {
 
 task_head ts = TASK_HEAD(runit);
 
+extern void check_do_qtask(void);
+
 int __attribute__((noreturn)) main(void)
 {
 	setup_stdio();
-	fputs_P(PSTR("Startup"),stderr);
+	fputs_P(PSTR(":Startup\n"),stderr);
+	fputs_P(PSTR(":*********************************************\n"),stderr);
+	//while(uart_getc() == 0x100);
 	while(1) {
 		if(doit) {
 			doit=0;
 			queue_task_sec(&ts,1);
 		}
 		run_tasks();
+		check_do_qtask();
 	}
 }

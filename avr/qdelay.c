@@ -35,6 +35,13 @@ task_head *head_sec;
 void setup_delay_timer();
 void clear_delay_timer();
 
+//#define TESTING
+#ifdef TESTING
+#define THOUSAND 10
+#else
+#define THOUSAND 1000
+#endif
+
 static void
 run_task_later(unsigned int dummy)
 {
@@ -72,7 +79,7 @@ void setup_delay_timer()
 		return;
 	}
 	delay = head_usec->delay;
-	DBGS("setup dly %u",delay);
+	//DBGS("setup dly %u",delay);
 	if(delay > 255)
 		delay = 255;
 
@@ -89,7 +96,7 @@ void setup_delay_timer()
 
 void clear_delay_timer(void)
 {
-	DBG("clear dly");
+	//DBG("clear dly");
 	TIMSK2 &= ~_BV(TOIE2);
 	TCCR2B = 0; /* off */
 	PRR |= _BV(PRTIM2);
@@ -97,11 +104,18 @@ void clear_delay_timer(void)
 
 static task_head timer_task = TASK_HEAD(run_task_later);
 
+volatile unsigned char do_qtask = 0;
 ISR(SIG_OVERFLOW2)
 {
 	TIMSK2 &= ~_BV(TOIE2);
-	DBG("TQ");
 	_queue_task(&timer_task);
+}
+void check_do_qtask(void)
+{
+	if(do_qtask) {
+		do_qtask = 0;
+		queue_task(&timer_task);
+	}
 }
 
 void _queue_task_later(task_head *task, uint16_t delay)
@@ -109,6 +123,7 @@ void _queue_task_later(task_head *task, uint16_t delay)
 	unsigned char do_setup = FALSE;
 	assert (!task->delay,"QTL again");
 	if(delay == 0) {
+		DBG("LTN");
 		queue_task(task);
 		return;
 	}
@@ -162,34 +177,37 @@ void run_task_msec(unsigned int dummy)
 	task_head *tp = head_msec;
 	tp->delay -= 1;
 	while(tp) {
-//		if(tp->delay > 0)
-//			break;
+		if(tp->delay > 0)
+			break;
 		task_head *tn = tp->next;
 		tp->next = NULL;
+		DBG("TPM");
 		queue_task(tp);
 		tp = tn;
 	}
 	head_msec = tp;
 	if(tp)
-		queue_task_usec(&msec_task,1000);
+		queue_task_usec(&msec_task,THOUSAND);
 }
 
 
 void queue_task_msec(task_head *task, uint16_t delay)
 {
 	DBGS("ma:%x %d",task,delay);
+#ifndef TESTING
 	if(delay < 10) {
 		DBG("mb");
 		queue_task_usec(task, delay*1000);
 		DBG("mc");
 		return;
 	}
+#endif /* TESTING */
 	DBG("md");
 
 	task_head **tp = &head_msec;
 	task_head *tn = *tp;
 	if(!tn)
-		queue_task_usec(&msec_task,1000);
+		queue_task_usec(&msec_task,THOUSAND);
 
 	while(tn) {
 		if (tn->delay > delay) {
@@ -215,34 +233,37 @@ void run_task_sec(unsigned int dummy)
 	task_head *tp = head_sec;
 	tp->delay -= 1;
 	while(tp) {
-//		if(tp->delay > 0)
-//			break;
+		if(tp->delay > 0)
+			break;
 		task_head *tn = tp->next;
 		tp->next = NULL;
+		DBG("TPS");
 		queue_task(tp);
 		tp = tn;
 	}
 	head_sec = tp;
 	if(tp)
-		queue_task_msec(&sec_task,1000);
+		queue_task_msec(&sec_task,THOUSAND);
 }
 
 
 void queue_task_sec(task_head *task, uint16_t delay)
 {
 	DBGS("sa:%x %d",task,delay);
+#ifndef TESTING
 	if(delay < 10) {
 		DBG("sb");
 		queue_task_msec(task, delay*1000);
 		DBG("sc");
 		return;
 	}
+#endif /* TESTING */
 	DBG("sd");
 
 	task_head **tp = &head_sec;
 	task_head *tn = *tp;
 	if(!tn)
-		queue_task_msec(&sec_task,1000);
+		queue_task_msec(&sec_task,THOUSAND);
 
 	while(tn) {
 		if (tn->delay > delay) {

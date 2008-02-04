@@ -27,13 +27,13 @@
 
 void report_error(char *err) /* Program memory */
 {
-	unsigned char sreg = SREG;
+	//unsigned char sreg = SREG;
 	cli();
-	uart_init(57600);
+	//uart_init(57600);
 	uart_puts_p(PSTR("\n:ERROR: "));
 	uart_puts_p(err);
 	uart_putc('\n');
-	sreg = SREG;
+	//sreg = SREG;
 	reset();
 }
 
@@ -67,3 +67,7 @@ void setup_stdio(void)
 	stderr = &uart_err;
 }
 
+ISR(BADISR_vect)
+{
+	report_error(PSTR("Bad IRQ!"));
+}

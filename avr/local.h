@@ -25,6 +25,6 @@
 #endif
 
 #define ASSERTIONS
-#define DEBUGGING
+//#define DEBUGGING
 
 #endif /* LOCAL_H */

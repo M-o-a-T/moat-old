@@ -124,7 +124,7 @@ esrec: $(PRG)_eeprom.srec
 	$(OBJCOPY) -j .eeprom --change-section-lma .eeprom=0 -O binary $< $@
 
 burn: bin
-	sudo avrdude -c usbtiny -p m168 -U $(PGM).bin
+	sudo avrdude -c usbtiny -p m168 -U $(PRG).bin
 
 # Every thing below here is used by avr-libc's build system and can be ignored
 # by the casual user.
