@@ -22,3 +22,7 @@ homevent/modules
 *.o
 audio/reader
 audio/writer
+*.bin
+*.elf
+*.lst
+*.map
