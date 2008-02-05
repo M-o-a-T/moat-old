@@ -27,7 +27,7 @@
 volatile char doit=1;
 int run = 0;
 
-void runit(unsigned int dummy) {
+void runit(task_head *dummy) {
 	//uart_puti(++run);
 	//uart_puts_p(PSTR(" Test123\n"));
 	fprintf(stderr,"%d Test\n",++run);
@@ -43,7 +43,7 @@ int __attribute__((noreturn)) main(void)
 {
 	setup_stdio();
 	fputs_P(PSTR(":Startup\n"),stderr);
-	fputs_P(PSTR(":*********************************************\n"),stderr);
+	//fputs_P(PSTR(":*********************************************\n"),stderr);
 	//while(uart_getc() == 0x100);
 	while(1) {
 		if(doit) {

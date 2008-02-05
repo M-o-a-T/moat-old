@@ -115,7 +115,7 @@ run_tasks(void)
 		}
 		// DBGS("R %x",task);
 		task->next = NULL;
-		(*task->proc)(task->data);
+		(*task->proc)(task);
 		task = tn;
 	}
 	sei();

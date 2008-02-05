@@ -43,7 +43,7 @@ void clear_delay_timer();
 #endif
 
 static void
-run_task_later(unsigned int dummy)
+run_task_later(task_head *dummy)
 {
 	task_head *tp = head_usec;
 
@@ -169,10 +169,10 @@ void _queue_task_later(task_head *task, uint16_t delay)
 
 /* miliseconds */
 
-void run_task_msec(unsigned int dummy);
+void run_task_msec(task_head *dummy);
 
 static task_head msec_task = TASK_HEAD(run_task_msec);
-void run_task_msec(unsigned int dummy)
+void run_task_msec(task_head *dummy)
 {
 	task_head *tp = head_msec;
 	tp->delay -= 1;
@@ -225,10 +225,10 @@ void queue_task_msec(task_head *task, uint16_t delay)
 
 /* seconds */
 
-void run_task_sec(unsigned int dummy);
+void run_task_sec(task_head *dummy);
 
 static task_head sec_task = TASK_HEAD(run_task_sec);
-void run_task_sec(unsigned int dummy)
+void run_task_sec(task_head *dummy)
 {
 	task_head *tp = head_sec;
 	tp->delay -= 1;

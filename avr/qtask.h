@@ -23,17 +23,15 @@
 #include <stdlib.h>
 #include <avr/interrupt.h>
 
-typedef void (*task_proc)(uint16_t data);
-
 struct _task_head;
+typedef void (*task_proc)(struct _task_head *);
+
 typedef struct _task_head {
 	struct _task_head *next;
 	uint16_t delay; /* for a delayed job */
 
 	task_proc proc;
-	uint16_t data; /* input for the procedure */
 } task_head;
-
 
 #define TASK_HEAD(_proc) { .proc = _proc, .next = NULL }
 
