@@ -48,23 +48,23 @@ run_task_later(task_head *dummy)
 	task_head *tp = head_usec;
 
 	assert(tp, "RTL head?");
-	DBGS("TR %x is %u",tp,tp->delay);
+	//DBGS("TR %x is %u",tp,tp->delay);
 	if(tp->delay > 255) {
 		tp->delay -= 255;
-		DBGS("TR now %u",tp->delay);
+		//DBGS("TR now %u",tp->delay);
 	} else {
 		tp->delay = 0;
 		while(tp) {
 			task_head *tn = tp->next;
 			tp->next = NULL;
-			DBGS("TR run %x",tp);
+			//DBGS("TR run %x",tp);
 			queue_task(tp);
 			tp = tn;
 			if(tp->delay > 0)
 				break;
 		}
 		head_usec = tp;
-		DBGS("TR head %x",tp);
+		//DBGS("TR head %x",tp);
 	}
 	setup_delay_timer();
 }
@@ -104,18 +104,12 @@ void clear_delay_timer(void)
 
 static task_head timer_task = TASK_HEAD(run_task_later);
 
-volatile unsigned char do_qtask = 0;
 ISR(SIG_OVERFLOW2)
 {
+	assert(head_usec,"RTL no head IRQ");
 	TIMSK2 &= ~_BV(TOIE2);
+	//DBG("Q RTL");
 	_queue_task(&timer_task);
-}
-void check_do_qtask(void)
-{
-	if(do_qtask) {
-		do_qtask = 0;
-		queue_task(&timer_task);
-	}
 }
 
 void _queue_task_later(task_head *task, uint16_t delay)
@@ -123,7 +117,7 @@ void _queue_task_later(task_head *task, uint16_t delay)
 	unsigned char do_setup = FALSE;
 	assert (!task->delay,"QTL again");
 	if(delay == 0) {
-		DBG("LTN");
+		//DBG("LTN");
 		queue_task(task);
 		return;
 	}
@@ -133,7 +127,7 @@ void _queue_task_later(task_head *task, uint16_t delay)
 		TIMSK2 &= ~_BV(TOIE2);
 		sei();
 		assert(head_usec,"QTL noHead");
-		DBGS("QTL first %x %u  at %u",head_usec,head_usec->delay,tn);
+		//DBGS("QTL first %x %u  at %u",head_usec,head_usec->delay,tn);
 
 		if(head_usec->delay > 255) {
 			head_usec->delay -= tn;
@@ -143,10 +137,10 @@ void _queue_task_later(task_head *task, uint16_t delay)
 		do_setup = TRUE;
 	} else {
 		sei();
-		if(head_usec)
-			DBGS("QTL_first %x %u",head_usec,head_usec->delay);
-		else
-			DBG("QTL_first empty");
+//		if(head_usec)
+//			DBGS("QTL_first %x %u",head_usec,head_usec->delay);
+//		else
+//			DBG("QTL_first empty");
 	}
 
 	task_head **tp = &head_usec;
@@ -163,6 +157,8 @@ void _queue_task_later(task_head *task, uint16_t delay)
 	task->next = tn;
 	*tp = task;
 	task->delay = delay;
+
+	assert(head_usec,"RTL no head?");
 	if(do_setup || head_usec->next == NULL)
 		setup_delay_timer();
 }
@@ -181,7 +177,7 @@ void run_task_msec(task_head *dummy)
 			break;
 		task_head *tn = tp->next;
 		tp->next = NULL;
-		DBG("TPM");
+		//DBG("TPM");
 		queue_task(tp);
 		tp = tn;
 	}
@@ -193,16 +189,16 @@ void run_task_msec(task_head *dummy)
 
 void queue_task_msec(task_head *task, uint16_t delay)
 {
-	DBGS("ma:%x %d",task,delay);
+	//DBGS("ma:%x %d",task,delay);
 #ifndef TESTING
 	if(delay < 10) {
-		DBG("mb");
+		//DBG("mb");
 		queue_task_usec(task, delay*1000);
-		DBG("mc");
+		//DBG("mc");
 		return;
 	}
 #endif /* TESTING */
-	DBG("md");
+	//DBG("md");
 
 	task_head **tp = &head_msec;
 	task_head *tn = *tp;
@@ -237,7 +233,7 @@ void run_task_sec(task_head *dummy)
 			break;
 		task_head *tn = tp->next;
 		tp->next = NULL;
-		DBG("TPS");
+		//DBG("TPS");
 		queue_task(tp);
 		tp = tn;
 	}
@@ -249,16 +245,16 @@ void run_task_sec(task_head *dummy)
 
 void queue_task_sec(task_head *task, uint16_t delay)
 {
-	DBGS("sa:%x %d",task,delay);
+	//DBGS("sa:%x %d",task,delay);
 #ifndef TESTING
 	if(delay < 10) {
-		DBG("sb");
+		//DBG("sb");
 		queue_task_msec(task, delay*1000);
-		DBG("sc");
+		//DBG("sc");
 		return;
 	}
 #endif /* TESTING */
-	DBG("sd");
+	//DBG("sd");
 
 	task_head **tp = &head_sec;
 	task_head *tn = *tp;

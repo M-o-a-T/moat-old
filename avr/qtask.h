@@ -23,6 +23,8 @@
 #include <stdlib.h>
 #include <avr/interrupt.h>
 
+#define MAGIC_QUEUED ((unsigned int)-42)
+
 struct _task_head;
 typedef void (*task_proc)(struct _task_head *);
 
@@ -40,6 +42,16 @@ static inline void queue_task(task_head *task)
 {
 	cli();
 	_queue_task(task);
+	sei();
+}
+
+static inline void queue_task_if(task_head *task)
+{
+	cli();
+	if(task->delay != MAGIC_QUEUED) {
+		task->delay = MAGIC_QUEUED;
+		_queue_task(task);
+	}
 	sei();
 }
 

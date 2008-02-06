@@ -33,7 +33,7 @@ static task_head *tail_now;
 
 void _queue_task(task_head *task)
 {
-	// DBGS("Q %x",task);
+	//DBGS("Q %x",task);
 	assert(!task->next,"Queue Ouch1");
 	assert(tail_now != task,"Queue Ouch2");
 	if(tail_now) {
@@ -98,24 +98,26 @@ run_tasks(void)
 		sei();
 		return 0;
 	}
-	sei();
+	//sei();
 
 	while(task) {
+		//cli();
 		task_head *tn = task->next;
-		cli();
 		if (task == tail_now) {
-			task = head_now;
+			//DBGS("TaskQ1 %x %x  %x %x",task,tn,head_now,tail_now);
 			head_now = NULL;
 			tail_now = NULL;
-			sei();
 			assert(!tn, "TaskQ1");
 		} else {
-			sei();
+			//DBGS("TaskQ2 %x %x  %x %x",task,tn,head_now,tail_now);
 			assert(tn, "TaskQ2");
 		}
 		// DBGS("R %x",task);
+		task->delay = 0;
 		task->next = NULL;
+		sei();
 		(*task->proc)(task);
+		cli();
 		task = tn;
 	}
 	sei();

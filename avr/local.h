@@ -24,7 +24,7 @@
 #define F_CPU 16000000 /* 16 MHz */
 #endif
 
-#define ASSERTIONS
+//#define ASSERTIONS
 //#define DEBUGGING
 
 #endif /* LOCAL_H */

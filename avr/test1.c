@@ -24,33 +24,36 @@
 #include "qdelay.h"
 #include "util.h"
 
-volatile char doit=1;
 int run = 0;
 
-void runit(task_head *dummy) {
-	//uart_puti(++run);
-	//uart_puts_p(PSTR(" Test123\n"));
-	fprintf(stderr,"%d Test\n",++run);
+void runit1(task_head *dummy);
+void runit10(task_head *dummy);
 
-	doit=1;
+task_head ts1 = TASK_HEAD(runit1);
+task_head ts2 = TASK_HEAD(runit10);
+
+void runit1(task_head *dummy) {
+	fprintf(stderr,"%d Test\n",++run);
+	queue_task_msec(&ts1,1000);
 }
 
-task_head ts = TASK_HEAD(runit);
+void runit10(task_head *dummy) {
+	fprintf(stderr,"%d Test slow\n",++run);
 
-extern void check_do_qtask(void);
+	queue_task_msec(&ts2,9900);
+}
 
 int __attribute__((noreturn)) main(void)
 {
 	setup_stdio();
 	fputs_P(PSTR(":Startup\n"),stderr);
-	//fputs_P(PSTR(":*********************************************\n"),stderr);
 	//while(uart_getc() == 0x100);
+	fputs_P(PSTR(":*********************************************\n"),stderr);
+
+	queue_task_sec(&ts1,1);
+	queue_task_sec(&ts2,10);
+
 	while(1) {
-		if(doit) {
-			doit=0;
-			queue_task_sec(&ts,1);
-		}
 		run_tasks();
-		check_do_qtask();
 	}
 }

@@ -28,7 +28,11 @@ NOTES:
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
+#include <stdlib.h>
 #include "uart.h"
+#include "util.h"
+#include "qtask.h"
+#include "assert.h"
 
 
 /*
@@ -120,7 +124,64 @@ static volatile unsigned char UART_RxHead;
 static volatile unsigned char UART_RxTail;
 static volatile unsigned char UART_LastRxError;
 
+void __attribute__((weak)) line_reader(task_head *tsk)
+{
+	unsigned char *buf = (unsigned char *)(tsk+1);
+	printf_P(PSTR(".IN: <%s>\n"),buf);
+	free(tsk);
+}
 
+static volatile unsigned char lines;
+static void rcv(task_head *dummy)
+{
+	while(TRUE) {
+		cli();
+		if(!lines) {
+			sei();
+			return;
+		}
+		lines--;
+		sei();
+
+		unsigned char bytes = 1;
+		unsigned char tmptail = (UART_RxTail + 1) & UART_RX_BUFFER_MASK;
+		//DBGS("Chk %d %d",tmptail,UART_RxBuf[tmptail]);
+		while(UART_RxBuf[tmptail]) {
+			assert (tmptail != UART_RxTail, "RCV Buffer chaos");
+			bytes += 1;
+			tmptail = (tmptail + 1) & UART_RX_BUFFER_MASK;
+			//DBGS("Chk %d %d",tmptail,UART_RxBuf[tmptail]);
+		}
+		task_head *tsk = malloc(sizeof(*tsk)+bytes);
+		unsigned char *buf = (unsigned char *)(tsk+1);
+		*tsk = (task_head) TASK_HEAD(line_reader);
+
+		tmptail = (UART_RxTail + 1) & UART_RX_BUFFER_MASK;
+		while(--bytes) {
+			*buf++ = UART_RxBuf[tmptail];
+			tmptail = (tmptail + 1) & UART_RX_BUFFER_MASK;
+		}
+		*buf = 0;
+		UART_RxTail = tmptail;
+		queue_task(tsk);
+	}
+}
+
+static void rcv_over(task_head *dummy)
+{
+	puts_P(PSTR("-buffer full!\n"));
+	UART_RxHead = 0; UART_RxTail = 0; lines = 0;
+}
+
+static void rcv_err(task_head *dummy)
+{
+	puts_P(PSTR(":serial error!\n"));
+	UART_RxHead = 0; UART_RxTail = 0; lines = 0;
+}
+
+static task_head recv_task = TASK_HEAD(rcv);
+static task_head recv_overflow = TASK_HEAD(rcv_over);
+static task_head recv_err = TASK_HEAD(rcv_err);
 
 SIGNAL(UART0_RECEIVE_INTERRUPT)
 /*************************************************************************
@@ -133,12 +194,9 @@ Purpose:  called when the UART has received a character
     unsigned char usr;
     unsigned char lastRxError;
  
- 
-    /* read UART status register and UART data register */ 
     usr  = UART0_STATUS;
     data = UART0_DATA;
     
-    /* */
 #if defined( AT90_UART )
     lastRxError = (usr & (_BV(FE)|_BV(DOR)) );
 #elif defined( ATMEGA_USART )
@@ -154,12 +212,19 @@ Purpose:  called when the UART has received a character
     
     if ( tmphead == UART_RxTail ) {
         /* error: receive buffer overflow */
-        lastRxError = UART_BUFFER_OVERFLOW >> 8;
-    }else{
+		queue_task_if(&recv_overflow);
+    } else if(lastRxError) {
+		queue_task_if(&recv_err);
+	} else {
         /* store new index */
-        UART_RxHead = tmphead;
         /* store received data in buffer */
-        UART_RxBuf[tmphead] = data;
+		if(data == '\n' || data == '\r') {
+        	UART_RxBuf[tmphead] = 0;
+			lines++;
+			queue_task_if(&recv_task);
+		} else
+        	UART_RxBuf[tmphead] = data;
+        UART_RxHead = tmphead;
     }
     UART_LastRxError = lastRxError;   
 }
@@ -266,16 +331,14 @@ unsigned int uart_getc(void)
     unsigned char data;
 
 
-    if ( UART_RxHead == UART_RxTail ) {
+    if (UART_RxHead == UART_RxTail) {
         return UART_NO_DATA;   /* no data available */
     }
     
-    /* calculate /store buffer index */
     tmptail = (UART_RxTail + 1) & UART_RX_BUFFER_MASK;
-    UART_RxTail = tmptail; 
     
-    /* get data from receive buffer */
     data = UART_RxBuf[tmptail];
+    UART_RxTail = tmptail; 
     
     return (UART_LastRxError << 8) + data;
 
