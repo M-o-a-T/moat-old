@@ -48,6 +48,97 @@ flow_writer(FLOW_PARAM
 	F_writer_param = param;
 }
 
+#if 1
+int
+flow_write_buf(FLOW_PARAM
+               unsigned char *data, unsigned int len)
+{
+	if(F_writer_state != FW_idle)
+		return -1;
+	F_writer_state = FW_sync;
+	F_writer_byte = 0;
+	F_writer_bit = 0;
+	F_writer_parity = 0;
+	F_writer_data = data;
+	F_writer_len = len;
+	if(F_writer) {
+		unsigned int t1,t2;
+		do {
+			flow_write_step(FLOW_ARG &t1,&t2);
+			F_writer(F_writer_param, t1,t2);
+		} while (t1 != 0);
+		F_writer(F_writer_param, 0,F_w_times[W_IDLE]);
+	}
+	return 0;
+}
+
+void
+flow_write_step(FLOW_PARAM
+                unsigned int *hi, unsigned int *lo)
+{
+#define RI() do { \
+	*hi=0; \
+	*lo=F_w_times[W_IDLE]; \
+	return; \
+} while(0)
+#define R(_x) do { \
+	if(_x) { \
+		*hi=F_w_times[W_MARK|W_ONE]; \
+		*lo=F_w_times[W_SPACE|W_ONE]; \
+	} else { \
+		*hi=F_w_times[W_MARK|W_ZERO]; \
+		*lo=F_w_times[W_SPACE|W_ZERO]; \
+	} \
+	return; \
+} while(0)
+
+	if(F_writer_state == FW_idle)
+		RI();
+	else if(F_writer_state == FW_sync) {
+		F_writer_bit ++;
+		if (F_writer_bit > F_w_sync) {
+			F_writer_state = FW_data;
+			F_writer_bit = 0;
+			R(1);
+		} else {
+			R(0);
+		}
+	} else if(F_writer_byte >= F_writer_len) {
+		F_writer_state = FW_idle;
+		R(0);
+	} else if(F_writer_bit >= F_bits) {
+		F_writer_bit ++;
+		unsigned char bit;
+		switch(F_parity) {
+		case P_NONE: flow_error("Oops Parity");
+		case P_MARK: bit=1; break;
+		case P_SPACE: bit=0; break;
+		case P_ODD: bit=F_writer_parity^1; break;
+		case P_EVEN: bit=F_writer_parity; break;
+		}
+		F_writer_byte++;
+		F_writer_bit=0;
+		F_writer_parity=0;
+		R(bit & 1);
+	} else {
+		unsigned char bit;
+		if(F_msb)
+			bit = F_writer_data[F_writer_byte] >> (F_bits-1-F_writer_bit);
+		else
+			bit = F_writer_data[F_writer_byte] >> F_writer_bit;
+		F_writer_bit ++;
+		F_writer_parity ^= bit;
+
+		if(F_writer_bit == F_bits && F_writer_parity == P_NONE) {
+			F_writer_byte++;
+			F_writer_bit=0;
+			F_writer_parity=0;
+		}
+		R(bit & 1);
+	}
+}
+
+#else
 int
 flow_write_buf(FLOW_PARAM
                unsigned char *data, unsigned int len)
@@ -118,4 +209,5 @@ flow_write_buf(FLOW_PARAM
 	F_writer(F_writer_param, 0,F_w_times[W_IDLE]);
 	return 0;
 }
+#endif
 

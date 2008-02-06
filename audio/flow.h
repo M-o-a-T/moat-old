@@ -26,10 +26,14 @@ typedef void FLOW;
 #define FLOW_PARAM1
 #define FLOW_PARAM
 #define FLOW_STRUCT void
+#define FLOW_ARG1
+#define FLOW_ARG
 #else
 #define FLOW_PARAM1 FLOW *flow
 #define FLOW_PARAM FLOW_PARAM1 ,
 #define FLOW_STRUCT FLOW *
+#define FLOW_ARG1 flow
+#define FLOW_ARG FLOW_ARG1 ,
 #endif
 
 
@@ -61,6 +65,7 @@ char flow_id(FLOW_PARAM1);
 
 void flow_free(FLOW_PARAM1);
 
+void flow_error(const char *msg);
 
 /*********** reading ***********/
 
@@ -141,6 +146,11 @@ int flow_write_buf(FLOW_PARAM
                    unsigned char *data, unsigned int len);
 /* These return -1/errno when the external write fails, or something else
  * goes wrong*/
+
+void flow_write_step(FLOW_PARAM
+                     unsigned int *hi, unsigned int *lo);
+/* Get the next thing to be done, in terms of W_XXX */
+
 
 /*
  * There is no read_idle procedure because data is supposed to come in

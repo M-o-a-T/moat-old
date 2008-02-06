@@ -55,4 +55,9 @@ char flow_id(FLOW_PARAM1)
 	return F_id;
 }
 
+void flow_error(const char *msg)
+{
+	fputs(msg,stderr);
+}
+
 #endif

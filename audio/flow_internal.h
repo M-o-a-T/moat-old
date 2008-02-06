@@ -127,6 +127,19 @@ struct _FLOW {
 	void *writer_param;
 #	define F_writer_param (flow->writer_param)
 
+	/* writer state */
+	enum { FW_idle, FW_sync, FW_data } writer_state;
+#	define F_writer_state (flow->writer_state)
+	unsigned char writer_byte;
+#	define F_writer_byte (flow->writer_byte)
+	unsigned char writer_bit;
+#	define F_writer_bit (flow->writer_bit)
+	unsigned char writer_parity;
+#	define F_writer_parity (flow->writer_parity)
+	unsigned char *writer_data;
+#	define F_writer_data (flow->writer_data)
+	unsigned short writer_len;
+#	define F_writer_len (flow->writer_len)
 };
 
 
