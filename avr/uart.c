@@ -1,3 +1,34 @@
+/*
+ *  Copyright © 2008, Matthias Urlichs <matthias@urlichs.de>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License (included; see the file LICENSE)
+ *  for more details.
+ */
+
+/** This file implements UART handling.
+ * For data reception, you need to implement this procedure:
+ *
+ * void line_reader(task_head *tsk)
+ *
+ * Each input line (without CRLF, data appended to the struct) is passed
+ * to the function. Don't forget to free() 'tsk': it's not done for you.
+ *
+ * Note that there is no echo and no line editor.
+ *
+ * The sender will use two stop bits in order to circumvent
+ * syncronization issues (missed start bit, wire plugged in
+ * after startup) with continuous transfers.
+ *
+ * This code is based on work by: */
+
 /*************************************************************************
 Title:     Interrupt UART library with receive/transmit circular buffers
 Author:    Peter Fleury <pfleury@gmx.ch>   http://jump.to/fleury
@@ -29,6 +60,7 @@ NOTES:
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include "uart.h"
 #include "util.h"
 #include "qtask.h"
@@ -169,14 +201,18 @@ static void rcv(task_head *dummy)
 
 static void rcv_over(task_head *dummy)
 {
+	cli();
 	puts_P(PSTR("-buffer full!\n"));
 	UART_RxHead = 0; UART_RxTail = 0; lines = 0;
+	sei();
 }
 
 static void rcv_err(task_head *dummy)
 {
+	cli();
 	puts_P(PSTR(":serial error!\n"));
 	UART_RxHead = 0; UART_RxTail = 0; lines = 0;
+	sei();
 }
 
 static task_head recv_task = TASK_HEAD(rcv);
@@ -237,7 +273,6 @@ Purpose:  called when the UART is ready to transmit the next byte
 **************************************************************************/
 {
     unsigned char tmptail;
-
     
     if ( UART_TxHead != UART_TxTail) {
         /* calculate and store new buffer index */
@@ -245,7 +280,7 @@ Purpose:  called when the UART is ready to transmit the next byte
         UART_TxTail = tmptail;
         /* get one byte from buffer and write it to UART */
         UART0_DATA = UART_TxBuf[tmptail];  /* start transmission */
-    }else{
+    } else {
         /* tx buffer empty, disable UDRE interrupt */
         UART0_CONTROL &= ~_BV(UART0_UDRIE);
     }
@@ -319,32 +354,6 @@ void uart_init(unsigned int baudrate)
 }/* uart_init */
 
 
-/*************************************************************************
-Function: uart_getc()
-Purpose:  return byte from ringbuffer  
-Returns:  lower byte:  received byte from ringbuffer
-          higher byte: last receive error
-**************************************************************************/
-unsigned int uart_getc(void)
-{    
-    unsigned char tmptail;
-    unsigned char data;
-
-
-    if (UART_RxHead == UART_RxTail) {
-        return UART_NO_DATA;   /* no data available */
-    }
-    
-    tmptail = (UART_RxTail + 1) & UART_RX_BUFFER_MASK;
-    
-    data = UART_RxBuf[tmptail];
-    UART_RxTail = tmptail; 
-    
-    return (UART_LastRxError << 8) + data;
-
-}/* uart_getc */
-
-
 inline void _uart_putc_now(unsigned char data)
 {
 	while(!(UCSR0A & _BV(UDRE0))) ;
@@ -381,9 +390,7 @@ void uart_putc(unsigned char data)
 
     tmphead  = (UART_TxHead + 1) & UART_TX_BUFFER_MASK;
     
-    while ( tmphead == UART_TxTail ){
-        ;/* wait for free space in buffer */
-    }
+    while (tmphead == UART_TxTail) ; /* wait for free space in buffer */
     
     UART_TxBuf[tmphead] = data;
     UART_TxHead = tmphead;
@@ -423,6 +430,7 @@ void uart_puts_p(const char *progmem_s )
 
 }/* uart_puts_p */
 
+#if 0 /* unused */
 /*************************************************************************
 Function: uart_puti()
 Purpose:  transmit integer as ASCII to UART
@@ -471,4 +479,4 @@ void uart_puthex_byte(const unsigned char  b)
     uart_puthex_nibble(b>>4);
     uart_puthex_nibble(b);
 } /* uart_puthex_byte */
-
+#endif
