@@ -1,0 +1,5 @@
+		[W_ZERO+W_MARK ] = 400,
+		[W_ZERO+W_SPACE] = 400,
+		[W_ONE +W_MARK ] = 600,
+		[W_ONE +W_SPACE] = 600,
+		[W_IDLE] = 2000,

@@ -101,15 +101,7 @@ static int
 enable_fs20(int argc, char *argv[])
 {
 	unsigned int x[R_IDLE+1] = {
-		[R_MIN+R_ZERO+R_MARK ] = 300,
-		[R_MIN+R_ZERO+R_SPACE] = 300,
-		[R_MIN+R_ONE +R_MARK ] = 500,
-		[R_MIN+R_ONE +R_SPACE] = 500,
-		[R_MAX+R_ZERO+R_MARK ] = 500,
-		[R_MAX+R_ZERO+R_SPACE] = 500,
-		[R_MAX+R_ONE +R_MARK ] = 700,
-		[R_MAX+R_ONE +R_SPACE] = 700,
-		[R_IDLE] = 900,
+#include "timing.fs20.read.h"
 	};
 	flow_setup(x,8,P_EVEN,1,'f');
 	return 0;
@@ -120,15 +112,7 @@ static int
 enable_em(int argc, char *argv[])
 {
 	unsigned int x[R_IDLE+1] = {
-		[R_MIN+R_ZERO+R_MARK ] = 600,
-		[R_MIN+R_ZERO+R_SPACE] = 250,
-		[R_MIN+R_ONE +R_MARK ] = 250,
-		[R_MIN+R_ONE +R_SPACE] = 600,
-		[R_MAX+R_ZERO+R_MARK ] = 999,
-		[R_MAX+R_ZERO+R_SPACE] = 600,
-		[R_MAX+R_ONE +R_MARK ] = 600,
-		[R_MAX+R_ONE +R_SPACE] = 999,
-		[R_IDLE] = 1500,
+#include "timing.em.read.h"
 	};
 	flow_setup(x,4,P_MARK,0,'e');
 	return 0;

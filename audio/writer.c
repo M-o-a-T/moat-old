@@ -307,11 +307,7 @@ static int
 enable_fs20(int argc, char *argv[])
 {
 	unsigned int x[W_IDLE+1] = {
-		[W_ZERO+W_MARK ] = 400,
-		[W_ZERO+W_SPACE] = 400,
-		[W_ONE +W_MARK ] = 600,
-		[W_ONE +W_SPACE] = 600,
-		[W_IDLE] = 2000,
+#include "timing.fs20.write.h"
 	};
 	flow_setup(x,8,P_EVEN,1,'f');
 	return 0;
@@ -321,11 +317,7 @@ static int
 enable_em(int argc, char *argv[])
 {
 	unsigned int x[W_IDLE+1] = {
-		[W_ZERO+W_MARK ] = 855,
-		[W_ZERO+W_SPACE] = 366,
-		[W_ONE +W_MARK ] = 366,
-		[W_ONE +W_SPACE] = 855,
-		[W_IDLE] = 2000,
+#include "timing.em.write.h"
 	};
 	flow_setup(x,4,P_MARK,0,'e');
 	return 0;
