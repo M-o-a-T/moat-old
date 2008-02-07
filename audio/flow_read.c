@@ -18,6 +18,7 @@
 #include <malloc.h>
 #include <limits.h>
 
+#ifndef FLOW_STANDALONE
 void flow_setup_reader(FLOW_PARAM
                        unsigned int nsync, unsigned int param[R_IDLE])
 {
@@ -36,6 +37,7 @@ void flow_reader(FLOW_PARAM
 	F_reader = proc;
 	F_reader_param = param;
 }
+#endif
 
 static void flow_init(FLOW_PARAM1)
 {
@@ -71,27 +73,7 @@ flow_read_logging(FLOW_PARAM1) {
 }
 #endif
 
-static inline void
-flow_char(FLOW_PARAM
-          unsigned char c)
-{
-	unsigned char ex=0;
-	unsigned char hi;
-
-	hi = ((c & 0x80) != 0);
-	if(++F_cnt >= F_r_times[R_IDLE])
-		ex=1;
-	else if(hi == F_lasthi)
-		return;
-	flow_read_time(
-#ifndef FLOW_STANDALONE
-	               flow
-#endif
-	                   , F_cnt, hi);
-	F_cnt = 0;
-}
-
-void
+STATIC void
 flow_read_time(FLOW_PARAM
                unsigned int duration, unsigned char hi)
 {
@@ -215,13 +197,27 @@ flow_read_time(FLOW_PARAM
 	if(!ex) return;
 
 init:
-	flow_init(
-#ifndef FLOW_STANDALONE
-              flow
-#endif
-	              );
+	flow_init(FLOW_ARG1);
 }
 
+
+#ifndef FLOW_STANDALONE
+static inline void
+flow_char(FLOW_PARAM
+          unsigned char c)
+{
+	unsigned char ex=0;
+	unsigned char hi;
+
+	hi = ((c & 0x80) != 0);
+	if(++F_cnt >= F_r_times[R_IDLE])
+		ex=1;
+	else if(hi == F_lasthi)
+		return;
+	flow_read_time(FLOW_ARG
+	               F_cnt, hi);
+	F_cnt = 0;
+}
 
 void
 flow_read_buf(FLOW_PARAM
@@ -230,6 +226,5 @@ flow_read_buf(FLOW_PARAM
 	while(len--)
 		flow_char(flow, *buf++);
 }
-
-
+#endif
 

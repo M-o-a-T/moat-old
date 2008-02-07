@@ -22,6 +22,7 @@ typedef struct _FLOW FLOW;
 #ifdef FLOW_STANDALONE /* marker "do we need a 'struct FLOW *flow'? */
 #error FLOW_STANDALONE and flow_internal.h do not mix
 #endif
+#define STATIC
 
 #include "flow.h"
 
@@ -116,11 +117,6 @@ struct _FLOW {
 #	define F_w_times (flow->w_times)
 	unsigned short w_sync;
 #	define F_w_sync (flow->w_sync)
-
-	struct timeval last_sent;
-#	define F_last_sent (flow->last_sent)
-	unsigned long bytes_sent; /* never more than "rate" */
-#	define F_bytes_sent (flow->bytes_sent)
 
 	flow_writeproc writer;
 #	define F_writer (flow->writer)

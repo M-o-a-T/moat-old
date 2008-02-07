@@ -29,6 +29,7 @@
  * *can* be thus represented.
  */
 
+#ifndef FLOW_STANDALONE
 void
 flow_setup_writer(FLOW_PARAM
                   unsigned int nsync, unsigned int param[W_IDLE])
@@ -47,9 +48,9 @@ flow_writer(FLOW_PARAM
 	F_writer = proc;
 	F_writer_param = param;
 }
+#endif
 
-#if 1
-int
+STATIC int
 flow_write_buf(FLOW_PARAM
                unsigned char *data, unsigned int len)
 {
@@ -61,6 +62,7 @@ flow_write_buf(FLOW_PARAM
 	F_writer_parity = 0;
 	F_writer_data = data;
 	F_writer_len = len;
+#ifndef FLOW_STANDALONE
 	if(F_writer) {
 		unsigned int t1,t2;
 		do {
@@ -69,10 +71,11 @@ flow_write_buf(FLOW_PARAM
 		} while (t1 != 0);
 		F_writer(F_writer_param, 0,F_w_times[W_IDLE]);
 	}
+#endif
 	return 0;
 }
 
-void
+STATIC void
 flow_write_step(FLOW_PARAM
                 unsigned int *hi, unsigned int *lo)
 {
@@ -110,11 +113,15 @@ flow_write_step(FLOW_PARAM
 		F_writer_bit ++;
 		unsigned char bit;
 		switch(F_parity) {
-		case P_NONE: flow_error("Oops Parity");
-		case P_MARK: bit=1; break;
+		default:
+		case P_NONE:
+			flow_error("Oops Parity");
+			*hi=0; *lo=0;
+			return;
+		case P_MARK:  bit=1; break;
 		case P_SPACE: bit=0; break;
-		case P_ODD: bit=F_writer_parity^1; break;
-		case P_EVEN: bit=F_writer_parity; break;
+		case P_ODD:   bit=F_writer_parity^1; break;
+		case P_EVEN:  bit=F_writer_parity; break;
 		}
 		F_writer_byte++;
 		F_writer_bit=0;
@@ -138,76 +145,4 @@ flow_write_step(FLOW_PARAM
 	}
 }
 
-#else
-int
-flow_write_buf(FLOW_PARAM
-               unsigned char *data, unsigned int len)
-{
-	unsigned char par;
-
-	/* One high/low sequence */
-	inline void R(int _x)
-	{
-		F_writer(F_writer_param, F_w_times[_x+W_MARK],F_w_times[_x+W_SPACE]);
-	}
-	inline void X(unsigned char _y) /* one bit */
-	{
-		if(_y) {
-			R(W_ONE);
-			par ^= 1;
-		} else
-			R(W_ZERO);
-	}
-
-	inline void Xpar()
-	{
-		switch(F_parity) {
-		case P_NONE: break;
-		case P_MARK: X(1); break;
-		case P_SPACE: X(0); break;
-		case P_ODD: X(par ^ 1); break;
-		case P_EVEN: X(par); break;
-		}
-	}
-
-	inline void BM(unsigned char _b) /* one byte plus parity, MSB first */ 
-	{
-		unsigned char _m = 1<<(F_bits-1);
-		par=0;
-		while(_m) {
-			X(_b & _m);
-			_m >>= 1;
-		}
-		Xpar();
-	}
-
-	inline void BL(unsigned char _b) /* one byte plus parity, LSB first */ 
-	{
-		unsigned char _m = F_bits;
-		par=0;
-		while(_m--) {
-			X(_b & 1);
-			_b >>= 1;
-		}
-		Xpar(); /* parity */
-	}
-
-	unsigned int i;
-
-	/* sync sequence */
-	for(i=0;i<F_w_sync;i++)
-		R(0);
-	R(1);
-
-	if(F_msb)
-		while(len--) BM(*data++);
-	else
-		while(len--) BL(*data++);
-	R(0); /* one last bit, to mark the end */
-	     /* this is because the decoder may just look at the pause lengths */
-
-	F_writer(F_writer_param, 0,F_w_times[W_IDLE]);
-	return 0;
-}
-#endif
 

@@ -36,10 +36,6 @@ flow_create(unsigned int rate, unsigned int maxlen, unsigned char bits,
 	F_read_max = maxlen;
 	F_id = id;
 
-#ifdef F_last_sent
-	gettimeofday(&F_last_sent, NULL);
-#endif
-
 	return flow;
 }
 
