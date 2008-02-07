@@ -44,9 +44,24 @@ void clear_delay_timer();
 
 volatile unsigned int offset = 0;
 
+void queue_task_sync(void)
+{
+	unsigned char tn = TCNT2;
+	TCNT2 = 0;
+	tn = OCR2A - tn;
+	if (head_usec)
+		head_usec->delay -= tn;
+	OCR2A = tn;
+}
+
+static void run_task_later(task_head *dummy);
+
+static task_head timer_task = TASK_HEAD(run_task_later);
+
 static void
 run_task_later(task_head *dummy)
 {
+	assert(!(TIMSK2 & _BV(OCIE2A)),"RTL called with active timer");
 	task_head *tp = head_usec;
 
 	if(!tp) {
@@ -72,17 +87,11 @@ run_task_later(task_head *dummy)
 		tp->delay -= offset;
 		offset = 0;
 	}
+	cli();
 	head_usec = tp;
-	setup_delay_timer();
-}
 
-static task_head timer_task = TASK_HEAD(run_task_later);
-
-void setup_delay_timer()
-{
+	/* now setup the timeout */
 	unsigned int delay;
-	unsigned char sreg = SREG;
-
 	if(head_usec) {
 		delay = head_usec->delay;
 		if(delay > 255)
@@ -91,13 +100,12 @@ void setup_delay_timer()
 		delay = (255 < DLY(50)) ? 255 : DLY(50);
 	//DBGS("setup dly %u",delay);
 
-	cli();
 	PRR &= ~_BV(PRTIM2);
 	OCR2A = delay;
 	if(TCCR2B & 0x07) { /* timer running? */
 		if(TCNT2 >= delay) {
 			_queue_task_if(&timer_task);
-			SREG = sreg;
+			sei();
 			return;
 		}
 	} else {
@@ -108,7 +116,7 @@ void setup_delay_timer()
 	TIFR2 |= _BV(OCF2B);
 	TIMSK2 |= _BV(OCIE2A);
 
-	SREG = sreg;
+	sei();
 }
 
 void clear_delay_timer(void)
