@@ -55,14 +55,15 @@ void do_uart_init(void)
      uart_init(UART_BAUD_SELECT(57600,16000000));
 }
 
-FILE uart_io = FDEV_SETUP_STREAM(uart_putc, uart_getc, _FDEV_SETUP_RW);
+//FILE uart_io = FDEV_SETUP_STREAM(uart_putc, uart_getc, _FDEV_SETUP_RW);
+FILE uart_io = FDEV_SETUP_STREAM(uart_putc, NULL, _FDEV_SETUP_WRITE);
 FILE uart_err = FDEV_SETUP_STREAM(uart_putc_now, NULL, _FDEV_SETUP_WRITE);
 
 void setup_stdio(void)
 {
 	do_uart_init();
 	
-	stdin = &uart_io;
+	//stdin = &uart_io;
 	stdout = &uart_io;
 	stderr = &uart_err;
 }
