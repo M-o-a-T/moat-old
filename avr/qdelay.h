@@ -30,6 +30,8 @@
 
 void _queue_task_later(task_head *task, uint16_t delay);
 #define DLY(_d) (_d)*(F_CPU/1000000L)/64
+#define RDLY(_d) (_d)*64/(F_CPU/1000000L)
+
 #if 0 /* def DEBUGGING */
 static inline void
 queue_task_usec(task_head *_t, uint16_t _d)

@@ -22,6 +22,7 @@
 
 #include <stdlib.h>
 #include <avr/interrupt.h>
+#include "assert.h"
 
 #define MAGIC_QUEUED ((unsigned int)-42)
 
@@ -45,13 +46,19 @@ static inline void queue_task(task_head *task)
 	sei();
 }
 
-static inline void queue_task_if(task_head *task)
+static inline void _queue_task_if(task_head *task)
 {
-	cli();
 	if(task->delay != MAGIC_QUEUED) {
+		assert(!task->delay,"QueueTask");
 		task->delay = MAGIC_QUEUED;
 		_queue_task(task);
 	}
+}
+
+static inline void queue_task_if(task_head *task)
+{
+	cli();
+	_queue_task_if(task);
 	sei();
 }
 

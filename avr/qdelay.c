@@ -42,30 +42,37 @@ void clear_delay_timer();
 #define THOUSAND 1000
 #endif
 
+volatile unsigned int offset = 0;
+
 static void
 run_task_later(task_head *dummy)
 {
 	task_head *tp = head_usec;
 
-	assert(tp, "RTL head?");
-	//DBGS("TR %x is %u",tp,tp->delay);
-	if(tp->delay > 255) {
-		tp->delay -= 255;
-		//DBGS("TR now %u",tp->delay);
-	} else {
-		tp->delay = 0;
-		while(tp) {
-			task_head *tn = tp->next;
-			tp->next = NULL;
-			//DBGS("TR run %x",tp);
-			queue_task(tp);
-			tp = tn;
-			if(tp->delay > 0)
-				break;
-		}
-		head_usec = tp;
-		//DBGS("TR head %x",tp);
+	if(!tp) {
+		clear_delay_timer();
+		return;
 	}
+
+	while(tp) {
+		if(tp->delay > offset)
+			break;
+
+		offset -= tp->delay;
+		tp->delay = 0;
+
+		task_head *tn = tp->next;
+		tp->next = NULL;
+		//DBGS("TR run %x",tp);
+		queue_task(tp);
+
+		tp = tn;
+	}
+	if(tp) {
+		tp->delay -= offset;
+		offset = 0;
+	}
+	head_usec = tp;
 	setup_delay_timer();
 }
 
@@ -76,21 +83,20 @@ void setup_delay_timer()
 	unsigned int delay;
 	unsigned char sreg = SREG;
 
-	if(!head_usec) {
-		clear_delay_timer();
-		return;
-	}
-	delay = head_usec->delay;
+	if(head_usec) {
+		delay = head_usec->delay;
+		if(delay > 255)
+			delay = 255;
+	} else
+		delay = (255 < DLY(50)) ? 255 : DLY(50);
 	//DBGS("setup dly %u",delay);
-	if(delay > 255)
-		delay = 255;
 
 	cli();
 	PRR &= ~_BV(PRTIM2);
 	OCR2A = delay;
-	if(TCCR2B & 0x03) {
-		if(TCNT2 > delay) {
-			_queue_task(&timer_task);
+	if(TCCR2B & 0x07) { /* timer running? */
+		if(TCNT2 >= delay) {
+			_queue_task_if(&timer_task);
 			SREG = sreg;
 			return;
 		}
@@ -111,14 +117,16 @@ void clear_delay_timer(void)
 	TIMSK2 &= ~_BV(OCIE2A);
 	TCCR2B = 0; /* off */
 	PRR |= _BV(PRTIM2);
+	offset = 0;
 }
 
 ISR(TIMER2_COMPA_vect)
 {
-	assert(head_usec,"RTL no head IRQ");
 	TIMSK2 &= ~_BV(OCIE2A);
+	offset += OCR2A;
+	OCR2A = 0xFF;
 	//DBG("Q RTL");
-	_queue_task(&timer_task);
+	_queue_task_if(&timer_task);
 }
 
 void _queue_task_later(task_head *task, uint16_t delay)
@@ -132,21 +140,16 @@ void _queue_task_later(task_head *task, uint16_t delay)
 	}
 	cli();
 	if(TIMSK2 & _BV(OCIE2A)) {
-		unsigned char tn = TCNT2;
-		TCNT2 = 0;
 		TIMSK2 &= ~_BV(OCIE2A);
+		unsigned char tn = TCNT2 || OCR2A;
+		OCR2A = 0xFF;
+		TCNT2 = 0;
+		//DBGS("OFF %u - %u (old +%u)",delay, tn,offset);
+		offset += tn;
 		sei();
-		assert(head_usec,"QTL noHead");
 		//DBGS("QTL first %x %u  at %u",head_usec,head_usec->delay,tn);
-
-		if(head_usec->delay >= tn)
-			head_usec->delay -= tn;
-		else {
-			TCNT2 = head_usec->delay - tn;
-			head_usec->delay = 0;
-		}
-		do_setup = TRUE;
 	} else {
+		//DBGS("OFF %u - old +%u",delay, offset);
 		sei();
 //		if(head_usec)
 //			DBGS("QTL_first %x %u",head_usec,head_usec->delay);
@@ -166,16 +169,11 @@ void _queue_task_later(task_head *task, uint16_t delay)
 		tn = *tp;
 	}
 	task->next = tn;
-	*tp = task;
 	task->delay = delay;
-
+	*tp = task;
 	assert(head_usec,"RTL no head?");
-	if(do_setup || head_usec->next == NULL) {
-		if (head_usec->delay == 0)
-			queue_task(&timer_task);
-		else
-			setup_delay_timer();
-	}
+
+	queue_task_if(&timer_task);
 }
 
 /* miliseconds */
@@ -204,16 +202,10 @@ void run_task_msec(task_head *dummy)
 
 void queue_task_msec(task_head *task, uint16_t delay)
 {
-	//DBGS("ma:%x %d",task,delay);
-#ifndef TESTING
-	if(delay < 10) {
-		//DBG("mb");
+	if(delay < 65535/RDLY(1000)) {
 		queue_task_usec(task, delay*1000);
-		//DBG("mc");
 		return;
 	}
-#endif /* TESTING */
-	//DBG("md");
 
 	task_head **tp = &head_msec;
 	task_head *tn = *tp;
@@ -260,16 +252,10 @@ void run_task_sec(task_head *dummy)
 
 void queue_task_sec(task_head *task, uint16_t delay)
 {
-	//DBGS("sa:%x %d",task,delay);
-#ifndef TESTING
-	if(delay < 10) {
-		//DBG("sb");
+	if(delay <= 65535/1000) {
 		queue_task_msec(task, delay*1000);
-		//DBG("sc");
 		return;
 	}
-#endif /* TESTING */
-	//DBG("sd");
 
 	task_head **tp = &head_sec;
 	task_head *tn = *tp;
