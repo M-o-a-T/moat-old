@@ -69,6 +69,8 @@ run_task_later(task_head *dummy)
 	setup_delay_timer();
 }
 
+static task_head timer_task = TASK_HEAD(run_task_later);
+
 void setup_delay_timer()
 {
 	unsigned int delay;
@@ -85,11 +87,20 @@ void setup_delay_timer()
 
 	cli();
 	PRR &= ~_BV(PRTIM2);
-	TCCR2B = 4; /* prescale 64x */
-
-	TIFR2 |= _BV(TOV2);
-	TCNT2 = -delay; /* counting up -- time until wrap-around */
-	TIMSK2 |= _BV(TOIE2);
+	OCR2A = delay;
+	if(TCCR2B & 0x03) {
+		if(TCNT2 > delay) {
+			_queue_task(&timer_task);
+			SREG = sreg;
+			return;
+		}
+	} else {
+		TCCR2A = 0x02; /* CTC mode */
+		TCCR2B = 4; /* prescale 64x */
+		TCNT2 = 0;
+	}
+	TIFR2 |= _BV(OCF2B);
+	TIMSK2 |= _BV(OCIE2A);
 
 	SREG = sreg;
 }
@@ -97,17 +108,15 @@ void setup_delay_timer()
 void clear_delay_timer(void)
 {
 	//DBG("clear dly");
-	TIMSK2 &= ~_BV(TOIE2);
+	TIMSK2 &= ~_BV(OCIE2A);
 	TCCR2B = 0; /* off */
 	PRR |= _BV(PRTIM2);
 }
 
-static task_head timer_task = TASK_HEAD(run_task_later);
-
-ISR(SIG_OVERFLOW2)
+ISR(TIMER2_COMPA_vect)
 {
 	assert(head_usec,"RTL no head IRQ");
-	TIMSK2 &= ~_BV(TOIE2);
+	TIMSK2 &= ~_BV(OCIE2A);
 	//DBG("Q RTL");
 	_queue_task(&timer_task);
 }
@@ -122,17 +131,19 @@ void _queue_task_later(task_head *task, uint16_t delay)
 		return;
 	}
 	cli();
-	if(TIMSK2 & _BV(TOIE2)) {
+	if(TIMSK2 & _BV(OCIE2A)) {
 		unsigned char tn = TCNT2;
-		TIMSK2 &= ~_BV(TOIE2);
+		TCNT2 = 0;
+		TIMSK2 &= ~_BV(OCIE2A);
 		sei();
 		assert(head_usec,"QTL noHead");
 		//DBGS("QTL first %x %u  at %u",head_usec,head_usec->delay,tn);
 
-		if(head_usec->delay > 255) {
+		if(head_usec->delay >= tn)
 			head_usec->delay -= tn;
-		} else {
-			head_usec->delay = (unsigned char)-tn;
+		else {
+			TCNT2 = head_usec->delay - tn;
+			head_usec->delay = 0;
 		}
 		do_setup = TRUE;
 	} else {
@@ -159,8 +170,12 @@ void _queue_task_later(task_head *task, uint16_t delay)
 	task->delay = delay;
 
 	assert(head_usec,"RTL no head?");
-	if(do_setup || head_usec->next == NULL)
-		setup_delay_timer();
+	if(do_setup || head_usec->next == NULL) {
+		if (head_usec->delay == 0)
+			queue_task(&timer_task);
+		else
+			setup_delay_timer();
+	}
 }
 
 /* miliseconds */
