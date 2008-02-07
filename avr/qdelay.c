@@ -113,7 +113,7 @@ run_task_later(task_head *dummy)
 		TCCR2B = 4; /* prescale 64x */
 		TCNT2 = 0;
 	}
-	TIFR2 |= _BV(OCF2B);
+	TIFR2 |= _BV(OCF2A);
 	TIMSK2 |= _BV(OCIE2A);
 
 	sei();
