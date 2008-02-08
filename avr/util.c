@@ -25,7 +25,7 @@
 #include "uart.h"
 #include "util.h"
 
-void report_error(char *err) /* Program memory */
+void _report_error(char *err) /* Program memory */
 {
 	//unsigned char sreg = SREG;
 	cli();
@@ -72,5 +72,5 @@ void setup_stdio(void)
 /* BADISR_vect doesn't work */
 ISR(__vector_default)
 {
-	report_error(PSTR("Bad IRQ!"));
+	report_error("Bad IRQ!");
 }

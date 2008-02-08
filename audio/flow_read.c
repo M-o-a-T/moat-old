@@ -22,12 +22,14 @@
 #endif
 #include <limits.h>
 
-#ifndef DBG
+#ifdef DBG
+#undef DBG
+#endif
 #define DBG(x) do {} while(0)
+#ifdef DBGS
+#undef DBGS
 #endif
-#ifndef DBGS
 #define DBGS(x ...) do{}while(0)
-#endif
 
 #ifndef FLOW_STANDALONE
 void flow_setup_reader(FLOW_PARAM
@@ -50,10 +52,12 @@ void flow_reader(FLOW_PARAM
 }
 #endif
 
+/* fake inline procedure to turn off compiler warning in standalone mode */
+static inline void *readadr() { return (void *)F_reader; }
 static void flow_init(FLOW_PARAM1)
 {
 	if(F_readlen) {
-		if (F_reader) {
+		if (readadr()) {
 			DBGS("flow init, %d bytes, call reader",F_readlen);
 			F_reader(F_reader_param, F_readbuf, F_readlen);
 		} else {

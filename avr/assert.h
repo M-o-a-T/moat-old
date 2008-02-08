@@ -26,7 +26,7 @@
 #include <avr/pgmspace.h>
 
 #define assert(_a,_b) do { \
-		if(!(_a)) report_error(PSTR(_b)); \
+		if(!(_a)) report_error(_b); \
 	} while(0)
 #else
 #define assert(_a,_b) do{} while(0)

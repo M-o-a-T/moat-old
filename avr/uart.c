@@ -259,7 +259,7 @@ Purpose:  called when the UART has received a character
 		if(data == '\n' || data == '\r') {
         	UART_RxBuf[tmphead] = 0;
 			lines++;
-			queue_task_if(&recv_task);
+			_queue_task_if(&recv_task);
 		} else
         	UART_RxBuf[tmphead] = data;
         UART_RxHead = tmphead;
@@ -384,21 +384,41 @@ void uart_putc(unsigned char data)
 
 	if(data == '\n')
 		uart_putc('\r');
-
+#if 1
     if(!(SREG & _BV(SREG_I))) {
 		_uart_putc_now(data);
 		return;
 	}
+#endif
 
-    tmphead  = (UART_TxHead + 1) & UART_TX_BUFFER_MASK;
+	unsigned char sreg = SREG;
+	cli();
+	while(1) {
+    	tmphead  = (UART_TxHead + 1) & UART_TX_BUFFER_MASK;
     
-    while (tmphead == UART_TxTail) ; /* wait for free space in buffer */
+    	if (tmphead != UART_TxTail) {
+			break;
+		} else if(sreg & _BV(SREG_I)) {
+			/* This test is of course superfluous the second time
+			 * around, but it doesn't hurt, so keep this simple
+			 */
+			_uart_putc_now(data);
+			sreg = SREG;
+			return;
+		} else {
+			sei();
+			nop();
+			cli();
+		}
+	}
     
     UART_TxBuf[tmphead] = data;
     UART_TxHead = tmphead;
 
     /* enable UDRE interrupt */
     UART0_CONTROL    |= _BV(UART0_UDRIE);
+
+	SREG = sreg;
 
 }/* uart_putc */
 

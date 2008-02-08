@@ -53,7 +53,7 @@ void read_data(unsigned char param, unsigned char *data, unsigned char len)
 
 
 static enum {
-	OV_NO, OV_FIRST=5, OV_WORK_NO=10, OV_WORK_OVER
+	OV_NO, OV_YES, OV_FIRST=5, OV_RESET,
 	} overflow = OV_FIRST;
 static unsigned short last_icr;
 static unsigned short this_icr;
@@ -61,77 +61,64 @@ static unsigned short this_icr;
 static void do_times(task_head *dummy);
 static task_head times_task = TASK_HEAD(do_times);
 
-static void do_times1(task_head *dummy);
-static task_head times1_task = TASK_HEAD(do_times1);
-
-static void do_reset(void);
-
-static void do_times(task_head *dummy)
-{
-	unsigned char hi = (PINB & _BV(PB0)) ? 0 : 1;
-	/* inverted because we want the state _before_ the trailing edge */
-	switch(overflow)
-	{
-	default:
-		DBG("?? rx times exit1");
-		return;
-	case OV_WORK_NO:
-		{
-		unsigned short icr = this_icr;
-#ifdef SLOW
-		icr <<= 2; /* clock is 4 ticks for some reason */
-#else
-		icr >>= 1; /* clock is .5µs, we want µs */
-#endif
-		//DBGS("Time %u: %d", icr, hi);
-		flow_head *fp;
-		for(fp=flows;fp;fp=fp->next) {
-			fp->read_time(icr,hi);
-		}
-		queue_task_usec(&times1_task,10);
-		}
-	}
-}
-static void do_times1(task_head *dummy)
-{
-	cli();
-	if(TIFR1 & _BV(ICF1)) {
-		DBG("RX: Change while working");
-		do_reset();
-		sei();
-		return;
-	}
-	switch(overflow) {
-	case OV_WORK_NO:
-		overflow = OV_NO;
-		break;
-	default:
-		DBGS("?? rx times exit2 %d",overflow);
-		do_reset();
-		sei();
-		return;
-	}
-	TIMSK1 |= _BV(ICIE1);
-	//DBG("... ready");
-	sei();
-}
-
 static void do_reset1(task_head *dummy);
 static task_head reset1_task = TASK_HEAD(do_reset1);
 
 static void do_reset2(task_head *dummy);
 static task_head reset2_task = TASK_HEAD(do_reset2);
 
+static void do_reset(void);
+
+static unsigned short w1t,w2t;
+static void do_times(task_head *dummy)
+{
+	w1t=TCNT1;
+	unsigned char hi = (PINB & _BV(PB0)) ? 0 : 1;
+	/* inverted because we want the state _before_ the trailing edge */
+	switch(overflow)
+	{
+	default:
+		DBGS("?? rx times exit:%d",overflow);
+		return;
+	case OV_NO:
+	case OV_YES:
+		break;
+	case OV_RESET:
+	case OV_FIRST:
+		return;
+	}
+
+	unsigned short icr = this_icr;
+#ifdef SLOW
+	icr <<= 2; /* undo the shift from the sender */
+#else
+	icr >>= 1; /* clock is .5µs, we want µs */
+#endif
+	//DBGS("Time %u: %d", icr, hi);
+	flow_head *fp;
+	for(fp=flows;fp;fp=fp->next) {
+		fp->read_time(icr,hi);
+	}
+	w2t = TCNT1;
+}
+
 static void do_reset(void)
 {
-	DBG("rcv reset");
+	switch(overflow)
+	{
+	case OV_RESET:
+		DBGS("No Reset, %d",overflow);
+		return;
+	default:
+		break;
+	}
+	//DBGS("Reset, %d",overflow);
 	TIMSK1 &= ~(_BV(ICIE1)|_BV(OCIE1A));
-	overflow = OV_FIRST;
+	overflow = OV_RESET;
 	_queue_task(&reset1_task);
 }
 static void do_reset1(task_head *dummy)
 {
-	DBG("rcv reset1");
 	flow_head *fp;
 	for(fp=flows;fp;fp=fp->next) {
 		fp->read_reset();
@@ -143,9 +130,19 @@ static void do_reset2(task_head *dummy)
 	cli();
 	TIFR1 |= _BV(ICF1);
 	TIMSK1 |= _BV(ICIE1);
-	DBG("reset done");
+	TCCR1B |= _BV(ICES1);
+	overflow = OV_FIRST;
+	//DBG("reset done");
 	sei();
 }
+
+#ifdef SLOW
+#define OCR_INCR1 50
+#define OCR_INCR2 1000
+#else
+#define OCR_INCR1 200
+#define OCR_INCR2 5000
+#endif
 
 ISR(TIMER1_CAPT_vect)
 {
@@ -154,39 +151,48 @@ ISR(TIMER1_CAPT_vect)
 	TCCR1B ^= _BV(ICES1);
 	switch(overflow) {
 	case OV_FIRST:
-		DBGS("FirstEdge %u",icr);
-		TIFR1 |= _BV(OCF1A);
 		TIMSK1 |= _BV(OCIE1A);
-		TIMSK1 &= ~_BV(ICIE1);
-		OCR1A = icr + 1000;
-		overflow = OV_WORK_NO;
-		queue_task_usec(&times1_task,10);
 		break;
+		
 	case OV_NO:
-		//DBGS("Edge %u  last %u  this %u",icr, last_icr,this_icr);
-		overflow = OV_WORK_NO;
-		OCR1A = icr + 1000;
+		//DBGS("Edge %u  last %u  this %u",icr, last_icr,icr);
+		OCR1A = icr + OCR_INCR1;
 		TIMSK1 &= ~_BV(ICIE1);
+		if(times_task.delay) {
+			DBGS("Work is too slow! %x %x  %x %x",last_icr,icr, w1t,w2t);
+			do_reset();
+			return;
+		}
+
 		_queue_task(&times_task);
 		break;
 
-	case OV_WORK_NO:
-		DBGS("EdgeWork %u",icr);
-		overflow = OV_WORK_OVER;
-		TIMSK1 &= ~(_BV(ICIE1)|_BV(OCIE1A));
-		break;
 	default:
-		report_error(PSTR("Recv Capture ?"));
-		break;
+		report_error("Recv Capture ?");
+		return;
 	}
+	OCR1A = icr + OCR_INCR1;
+	TIFR1 |= _BV(OCF1A);
+	TIMSK1 &= ~_BV(ICIE1);
 	last_icr = icr;
+	overflow = OV_YES;
 }
 
 ISR(TIMER1_COMPA_vect)
 {
-	DBG("OCR end");
-
-	do_reset();
+	if(overflow == OV_YES) {
+		if(TIFR1 & _BV(ICF1)) {
+			DBG("RX: Change while working");
+			do_reset();
+			return;
+		}
+		overflow = OV_NO;
+		OCR1A = TCNT1 + OCR_INCR2;
+		TIMSK1 |= _BV(ICIE1);
+	} else {
+		DBG("OCR end");
+		do_reset();
+	}
 }
 
 void rx_chain(void)

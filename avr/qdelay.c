@@ -62,10 +62,14 @@ static void
 run_task_later(task_head *dummy)
 {
 	assert(!(TIMSK2 & _BV(OCIE2A)),"RTL called with active timer");
-	task_head *tp = head_usec;
+	task_head *tp;
+	
+	cli();
+	tp = head_usec;
 
 	if(!tp) {
 		clear_delay_timer();
+		sei();
 		return;
 	}
 
@@ -78,8 +82,8 @@ run_task_later(task_head *dummy)
 
 		task_head *tn = tp->next;
 		tp->next = NULL;
-		//DBGS("TR run %x",tp);
-		queue_task(tp);
+		//DBGS("TR r %x",tp);
+		_queue_task(tp);
 
 		tp = tn;
 	}
@@ -87,7 +91,6 @@ run_task_later(task_head *dummy)
 		tp->delay -= offset;
 		offset = 0;
 	}
-	cli();
 	head_usec = tp;
 
 	/* now setup the timeout */
@@ -139,31 +142,41 @@ ISR(TIMER2_COMPA_vect)
 
 void _queue_task_later(task_head *task, uint16_t delay)
 {
-	assert (!task->delay,"QTL again");
+#ifdef ASSERTIONS
+	if(task->delay) {
+		fprintf_P(stderr,PSTR(":QTL again %x"),task);
+		report_error("QTL again");
+	}
+#endif
+	//assert (!task->delay,"QTL again");
 	if(delay == 0) {
-		//DBG("LTN");
+		DBG("LTN");
 		queue_task(task);
 		return;
 	}
+	unsigned char sreg = SREG;
 	cli();
+	//DBGS("TR q %x",task);
 	if(TIMSK2 & _BV(OCIE2A)) {
+		//DBG("dq2");
 		TIMSK2 &= ~_BV(OCIE2A);
 		unsigned char tn = TCNT2 || OCR2A;
 		OCR2A = 0xFF;
 		TCNT2 = 0;
 		//DBGS("OFF %u - %u (old +%u)",delay, tn,offset);
 		offset += tn;
-		sei();
+		//DBG("dq3");
 		//DBGS("QTL first %x %u  at %u",head_usec,head_usec->delay,tn);
 	} else {
 		//DBGS("OFF %u - old +%u",delay, offset);
-		sei();
+		//DBG("dq4");
 //		if(head_usec)
 //			DBGS("QTL_first %x %u",head_usec,head_usec->delay);
 //		else
 //			DBG("QTL_first empty");
 	}
 
+	//DBG("dq5");
 	task_head **tp = &head_usec;
 	task_head *tn = *tp;
 	while(tn) {
@@ -173,14 +186,20 @@ void _queue_task_later(task_head *task, uint16_t delay)
 		}
 		delay -= tn->delay;
 		tp = &(tn->next);
+		//DBG("dq6");
 		tn = *tp;
+		//DBG("dq7");
 	}
+	//DBG("dq8");
 	task->next = tn;
 	task->delay = delay;
 	*tp = task;
 	assert(head_usec,"RTL no head?");
 
-	queue_task_if(&timer_task);
+	//DBG("dq9");
+	_queue_task_if(&timer_task);
+	//DBG("dqz");
+	SREG = sreg;
 }
 
 /* miliseconds */

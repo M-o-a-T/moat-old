@@ -33,7 +33,8 @@
 #include <avr/pgmspace.h>
 #endif
 
-void __attribute__((noreturn)) report_error(char *err); /* Program memory */
+void __attribute__((noreturn)) _report_error(char *err); /* Program memory */
+#define report_error(x) _report_error(PSTR(x))
 
 void __attribute__((noreturn)) reset(void);
 
@@ -45,6 +46,10 @@ void setup_stdio(void);
 #else
 #define DBG(x) do{}while(0)
 #define DBGS(x ...) do{}while(0)
+#endif
+
+#ifndef nop
+#define nop() __asm__ __volatile__ ("nop")
 #endif
 
 #endif /* UTIL_H */

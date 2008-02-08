@@ -24,7 +24,7 @@
 #include <avr/interrupt.h>
 #include "assert.h"
 
-#define MAGIC_QUEUED ((unsigned int)-42)
+#define TASK_MAGIC 0xBEEF
 
 struct _task_head;
 typedef void (*task_proc)(struct _task_head *);
@@ -38,9 +38,65 @@ typedef struct _task_head {
 
 #define TASK_HEAD(_proc) (task_head) { .proc = _proc, .next = NULL }
 
-void _queue_task(task_head *task); /* call with IRQ disabled */
+void real_queue_task(task_head *task); /* call with IRQ disabled */
+
+#ifdef QTASK_DEBUG
+static inline void r_queue_task(task_head *task,char *f,int l)
+{
+	assert(!(SREG & _BV(SREG_I)),"_queue_task from non-IRQ");
+	if(task->delay)
+		fprintf_P(stderr,f,l);
+	real_queue_task(task);
+}
+#define _queue_task(x) r_queue_task(x,PSTR(":QTD " __FILE__ ":%d\n"),__LINE__)
+
 static inline void queue_task(task_head *task)
 {
+	assert(SREG & _BV(SREG_I),"queue_task from IRQ");
+	cli();
+	_queue_task(task);
+	sei();
+}
+static inline void x_queue_task_if(task_head *task,char *f,int l)
+{
+	if(SREG & _BV(SREG_I)) {
+		fprintf_P(stderr,f,l);
+		report_error("dud");
+	}
+	assert(!(SREG & _BV(SREG_I)),"_queue_task_if from non-IRQ");
+	if(task->delay != TASK_MAGIC) {
+		assert(!task->delay,"QueueTask");
+		_queue_task(task);
+	}
+}
+#define _queue_task_if(t) x_queue_task_if(t,PSTR(": _qti "__FILE__":%d"),__LINE__)
+
+static inline void xqueue_task_if(task_head *task, char *f,int l)
+{
+	if(!(SREG & _BV(SREG_I))) {
+		fprintf_P(stderr,f,l);
+		report_error("dud");
+	}
+	assert(SREG & _BV(SREG_I),"queue_task_if from IRQ");
+	cli();
+	_queue_task_if(task);
+	sei();
+}
+#define queue_task_if(t) xqueue_task_if(t,PSTR(": _qtn "__FILE__":%d"),__LINE__)
+
+
+#else
+
+
+static inline void _queue_task(task_head *task)
+{
+	assert(!(SREG & _BV(SREG_I)),"_queue_task from non-IRQ");
+	real_queue_task(task);
+}
+
+static inline void queue_task(task_head *task)
+{
+	assert(SREG & _BV(SREG_I),"queue_task from IRQ");
 	cli();
 	_queue_task(task);
 	sei();
@@ -48,19 +104,21 @@ static inline void queue_task(task_head *task)
 
 static inline void _queue_task_if(task_head *task)
 {
-	if(task->delay != MAGIC_QUEUED) {
+	assert(!(SREG & _BV(SREG_I)),"_queue_task_if from non-IRQ");
+	if(task->delay != TASK_MAGIC) {
 		assert(!task->delay,"QueueTask");
-		task->delay = MAGIC_QUEUED;
 		_queue_task(task);
 	}
 }
-
 static inline void queue_task_if(task_head *task)
 {
+	assert(SREG & _BV(SREG_I),"queue_task_if from IRQ");
 	cli();
 	_queue_task_if(task);
 	sei();
 }
+
+#endif
 
 void dequeue_task(task_head *task);
 

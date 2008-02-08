@@ -14,11 +14,7 @@
  */
 
 #include <stdio.h>
-#ifdef FLOW_STANDALONE
 #include <stdlib.h>
-#else
-#include <malloc.h>
-#endif
 #include <string.h>
 #include <errno.h>
 #include "flow_internal.h"
@@ -54,16 +50,13 @@ flow_writer(FLOW_PARAM
 }
 #endif
 
-STATIC int
+STATIC void
 flow_write_init(FLOW_PARAM1)
 {
-	if(F_writer_state != FW_idle)
-		return -1;
 	F_writer_state = FW_sync;
 	F_writer_byte = 0;
 	F_writer_bit = 0;
 	F_writer_parity = 0;
-	return 0;;
 }
 
 #ifndef FLOW_STANDALONE
@@ -71,8 +64,7 @@ STATIC int
 flow_write_buf(FLOW_PARAM
                unsigned char *data, unsigned int len)
 {
-	int res = flow_write_init(FLOW_ARG1);
-	if (res) return res;
+	flow_write_init(FLOW_ARG1);
 
 #ifndef FLOW_STANDALONE
 	F_writer_data = data;

@@ -55,11 +55,15 @@ write_head *sendq_head;
 unsigned char tx_ring_buf[TX_RING_SIZE];
 unsigned char tx_ring_head;
 unsigned char tx_ring_tail;
+unsigned char more_data;
 
 static void
 next_tx_data(task_head *dummy)
 {
 	/* TODO: check if a receiver is receiving something! */
+	if(more_data == 2)
+		fputs_P(PSTR(":TX buffer underrun\n"),stderr);
+
 	write_head *tn = F_writer_task->next;
 	free(F_writer_task);
 	F_writer_task = tn;
@@ -69,8 +73,10 @@ next_tx_data(task_head *dummy)
 		queue_task_if(&start_tx);
 	} else {
 		sendq_head = NULL;
-		DBG("Turn off writer");
-		TIMSK0 &= ~_BV(OCIE0A);
+		//DBG("Turn off writer");
+		TCCR0B = 0;
+		if(PIND & _BV(PD6))
+			TCCR0B |= _BV(FOC0A);
 		PRR |= _BV(PRTIM0);
 	}
 }
@@ -80,6 +86,13 @@ fill_tx_buf(task_head *dummy)
 {
 	unsigned int hi,lo;
 	unsigned char tmptx1,tmptx2;
+	if(more_data != 1)
+		return;
+	if(tx_ring_head == tx_ring_tail) {
+		fputs_P(PSTR(":TX buffer: ran empty!\n"),stderr);
+		more_data=2;
+		return;
+	}
 	tmptx1 = (tx_ring_head+1)&TX_RING_MASK;
 	while(tmptx1 != tx_ring_tail) {
 		tmptx2 = (tmptx1+1)&TX_RING_MASK;
@@ -88,7 +101,8 @@ fill_tx_buf(task_head *dummy)
 		}
 		flow_proc->write_step(&hi,&lo);
 		if(!hi) {
-			//DBG("FillBuf End");
+			//DBG("TxE");
+			more_data=0;
 			break;
 		}
 		assert(hi<1024,"HI overflow");
@@ -97,6 +111,9 @@ fill_tx_buf(task_head *dummy)
 		tx_ring_buf[tmptx2] = lo>>2;
 		tx_ring_head = tmptx2;
 		tmptx1 = (tmptx2+1)&TX_RING_MASK;
+	}
+	if(tmptx1 == tx_ring_tail) {
+		//DBG("FillBuf limit1");
 	}
 }
 
@@ -110,13 +127,10 @@ send_tx_data(task_head *dummy)
 		queue_task(&next_tx);
 		return;
 	}
-	DBGS("Tx %c %u",flow_proc->type,F_writer_len);
+	//DBGS("Tx %c %u",flow_proc->type,F_writer_len);
 	
 	unsigned int nhi,nlo;
-	if(flow_proc->write_init()) {
-		report_error(PSTR("Write in progress?"));
-		return;
-	}
+	flow_proc->write_init();
 	flow_proc->write_step(&nhi,&nlo);
 	if(!nhi) {
 		DBG("TxBroken1");
@@ -150,9 +164,10 @@ send_tx_data(task_head *dummy)
 	tx_ring_buf[1] = nlo >> 2;
 	tx_ring_head = 1;
 	tx_ring_tail = 0;
-	sei();
 	//DBG("Tx Setup Done");
-	_queue_task_if(&fill_tx);
+	more_data = 1;
+	sei();
+	queue_task_if(&fill_tx);
 }
 
 void
@@ -160,12 +175,12 @@ send_tx(write_head *task) {
 	assert(!task->next,"SendFS20 next");
 
 	if(sendq_head) {
-		DBG("Send Q next");
+		//DBG("Send Q next");
 		sendq_head->next = task;
 		sendq_head = task;
 		return;
 	}
-	DBG("Send Q now");
+	//DBG("Send Q now");
 	sendq_head = task;
 	F_writer_task = task;
 	queue_task_if(&start_tx);
@@ -175,9 +190,15 @@ send_tx(write_head *task) {
 ISR(TIMER0_COMPA_vect)
 {
 	if(tx_ring_head == tx_ring_tail) {
-		DBG("T0 END");
-		TIMSK2 &= ~_BV(OCIE2A);
+		//DBG("T0 END");
+		TIMSK0 &= ~_BV(OCIE0A);
 		TCCR0B = 0;
+		if(PIND & _BV(PD6)) {
+			TCCR0B |= _BV(FOC0A);
+			fputs_P(PSTR(":Tx on after send!\n"),stderr);
+		}
+		if(more_data == 1)
+			more_data = 2;
 		queue_task_usec(&next_tx, flow_proc->write_idle);
 	}
 	unsigned char tmptx = (tx_ring_tail+1) & TX_RING_MASK;

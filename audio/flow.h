@@ -150,7 +150,7 @@ typedef void(*flow_writeproc)(void *param, unsigned int hi, unsigned int lo);
 void flow_writer(FLOW_PARAM
                  flow_writeproc proc, void *param);
 
-int flow_write_init(FLOW_PARAM1);
+void flow_write_init(FLOW_PARAM1);
 
 int flow_write_buf(FLOW_PARAM
                    unsigned char *data, unsigned int len);

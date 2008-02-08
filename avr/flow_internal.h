@@ -39,7 +39,7 @@ typedef struct _flow_head {
 	struct _flow_head *next;
 
 	/* Initialize internal data */
-	int (*write_init)(void);
+	void (*write_init)(void);
 
 	/* Generate a hi/low timing sequence */
 	void (*write_step)(unsigned int *hi, unsigned int *lo);

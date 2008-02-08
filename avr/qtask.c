@@ -31,11 +31,21 @@ static task_head *head_now;
 static task_head *tail_now;
 
 
-void _queue_task(task_head *task)
+void real_queue_task(task_head *task)
 {
 	//DBGS("Q %x",task);
+	assert(!(SREG & _BV(SREG_I)),"queue_task from non-IRQ");
 	assert(!task->next,"Queue Ouch1");
+	assert(!task->delay,"Queue Delay");
 	assert(tail_now != task,"Queue Ouch2");
+#ifdef ASSERTIONS
+	if((unsigned short)task->proc >= 0x2000) {
+		cli();
+		fprintf_P(stderr,PSTR("TaskPtr %x %s %x"),task,&task->proc,__builtin_return_address(0));
+		report_error("Ouch");
+
+	}
+#endif
 	if(tail_now) {
 		assert(head_now,"Queue broken1");
 		tail_now->next = task;
@@ -44,6 +54,7 @@ void _queue_task(task_head *task)
 		head_now = task;
 	}
 	tail_now = task;
+	task->delay = TASK_MAGIC;
 }
 
 #if 0
@@ -56,7 +67,7 @@ void dequeue_task(task_head *task)
 	task_head *th;
 
 	cli();
-	if(task->delay) {
+	if(task->delay != TASK_MAGIC) {
 		if (head_later == task) {
 			head_later = task->next;
 			setup_delay_timer();
@@ -112,12 +123,13 @@ run_tasks(void)
 			//DBGS("TaskQ2 %x %x  %x %x",task,tn,head_now,tail_now);
 			assert(tn, "TaskQ2");
 		}
-		// DBGS("R %x",task);
+		//DBGS("R %x %x",task,task->proc);
 		task->delay = 0;
 		task->next = NULL;
 		sei();
 		(*task->proc)(task);
 		cli();
+		//DBG("Rdone");
 		task = tn;
 	}
 	sei();
