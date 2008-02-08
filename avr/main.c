@@ -27,21 +27,29 @@
 #include "util.h"
 #include "flow_data.h"
 
-long run = 0;
+unsigned long run = 0;
 
 void runit1(task_head *dummy);
 
 task_head idle_task = TASK_HEAD(runit1);
 
 void runit1(task_head *dummy) {
-	fprintf_P(stderr,PSTR(":%ld\r"),++run);
+	char buf[12];
+	++run;
+	//fprintf_P(stderr,PSTR(":%ld\r"),++run);
+	fputc(':',stderr);
+	fputs(ltoa(run,buf,10),stderr);
+	fputc('\r',stderr);
 	queue_task_msec(&idle_task,1000);
 }
 
 void line_reader(task_head *tsk)
 {
 	unsigned char *rp = (unsigned char *)(tsk+1);
-	fprintf_P(stderr,PSTR(":IN: <%s>\n"),rp);
+	//fprintf_P(stderr,PSTR(":IN: <%s>\n"),rp);
+	fputs_P(PSTR(":IN: <"),stderr);
+	fputs(rp,stderr);
+	fputs_P(PSTR(">\n"),stderr);
 	if(!*rp) goto out;
 
 	write_head *cb = malloc(sizeof(write_head)+((strlen((char *)rp)-1)>>1));
@@ -61,7 +69,11 @@ void line_reader(task_head *tsk)
 		} else if(*rp >= 'A' && *rp <= 'F') {
 			part |= *rp++ - 'A' + 10;
 		} else {
-			fprintf_P(stderr,PSTR(":Unknown hex char %02x\n"),*rp);
+			char buf[3];
+			//fprintf_P(stderr,PSTR(":Unknown hex char %02x\n"),*rp);
+			fputs_P(PSTR(":Unknown hex char 0x"),stderr);
+			fputs(itoa(*rp,buf,16),stderr);
+			fputc('\n',stderr);
 			goto out;
 		}
 		if (++nibble&1) {

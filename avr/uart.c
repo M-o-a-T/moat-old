@@ -159,7 +159,7 @@ static volatile unsigned char UART_LastRxError;
 void __attribute__((weak)) line_reader(task_head *tsk)
 {
 	unsigned char *buf = (unsigned char *)(tsk+1);
-	printf_P(PSTR(".IN: <%s>\n"),buf);
+	//printf_P(PSTR(".IN: <%s>\n"),buf);
 	free(tsk);
 }
 
@@ -204,7 +204,7 @@ static void rcv(task_head *dummy)
 static void rcv_over(task_head *dummy)
 {
 	cli();
-	puts_P(PSTR("-buffer full!\n"));
+	fputs_P(PSTR(":UART buffer full!\n"),stderr);
 	UART_RxHead = 0; UART_RxTail = 0; lines = 0;
 	sei();
 }

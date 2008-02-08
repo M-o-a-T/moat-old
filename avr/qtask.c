@@ -38,14 +38,15 @@ void real_queue_task(task_head *task)
 	assert(!task->next,"Queue Ouch1");
 	assert(!task->delay,"Queue Delay");
 	assert(tail_now != task,"Queue Ouch2");
-#ifdef ASSERTIONS
-	if((unsigned short)task->proc >= 0x2000) {
+#if 0 /* def ASSERTIONS */
+	if((unsigned short)task->proc >= 0x4000) {
 		cli();
 		fprintf_P(stderr,PSTR("TaskPtr %x %s %x"),task,&task->proc,__builtin_return_address(0));
 		report_error("Ouch");
-
 	}
 #endif
+	assert(task->proc < 0x4000,"Invalid task pointer");
+
 	if(tail_now) {
 		assert(head_now,"Queue broken1");
 		tail_now->next = task;

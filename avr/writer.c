@@ -123,7 +123,10 @@ send_tx_data(task_head *dummy)
 	if(F_writer_type == fs20_head.type)
 		flow_proc = &fs20_head;
 	else {
-		fprintf_P(stderr,PSTR("Unknown type '%c'\n"),F_writer_type);
+		//fprintf_P(stderr,PSTR("Unknown type '%c'\n"),F_writer_type);
+		fputs_P(PSTR("Unknown type '"),stderr);
+		fputc(F_writer_type,stderr);
+		fputs_P(PSTR("%c'\n"),stderr);
 		queue_task(&next_tx);
 		return;
 	}
