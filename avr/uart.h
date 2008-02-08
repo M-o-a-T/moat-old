@@ -54,7 +54,7 @@ Extension: uart_puti, uart_puthex_nibble, uart_puthex_byte
 /** Size of the circular receive buffer, must be power of 2 */
 #define UART_RX_BUFFER_SIZE 32
 /** Size of the circular transmit buffer, must be power of 2 */
-#define UART_TX_BUFFER_SIZE 32
+#define UART_TX_BUFFER_SIZE 128
 
 
 #ifndef P

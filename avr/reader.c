@@ -78,7 +78,7 @@ static void do_times(task_head *dummy)
 	case OV_WORK_NO:
 		{
 		unsigned short icr = this_icr;
-#ifdef DEBUGGING
+#ifdef SLOW
 		icr <<= 2; /* clock is 4 ticks for some reason */
 #else
 		icr >>= 1; /* clock is .5µs, we want µs */
@@ -199,7 +199,7 @@ void rx_init(void) __attribute__((naked)) __attribute__((section(".init3")));
 void rx_init(void)
 {
 	PRR &= ~_BV(PRTIM1);
-#ifdef DEBUGGING
+#ifdef SLOW
 	TCCR1B = _BV(ICES1)|_BV(CS12)|_BV(CS11)|_BV(CS10); /* ext input */
 #else
 	TCCR1B = _BV(ICNC1)|_BV(ICES1)|_BV(CS11); /* 2MHz, noice cancel */

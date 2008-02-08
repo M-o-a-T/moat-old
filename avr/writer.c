@@ -17,8 +17,6 @@
  * This file defines basics for the FS20 writer.
  */
 
-#define DEBUGGING
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <avr/io.h>
@@ -134,7 +132,7 @@ send_tx_data(task_head *dummy)
 
 	TCCR0A = _BV(COM0A0)|_BV(WGM01); /* CTC mode */
 	//TCCR0A = _BV(COM0A0)|_BV(WGM01)|_BV(WGM00); /* Fast PWN mode */
-#ifdef DEBUGGING
+#ifdef SLOW
 	/* external clock, 2ms tick (see bottom of this file) */
 	TCCR0B = _BV(CS02)|_BV(CS01)|_BV(CS00);
 	//TCCR0B = _BV(WGM02)|_BV(CS02)|_BV(CS01)|_BV(CS00);
@@ -197,13 +195,13 @@ void tx_init(void)
 {
 	PORTD &=~ _BV(PD6);
 	DDRD |= _BV (PD6);
-#ifdef DEBUGGING
+#ifdef SLOW
 	PORTD &= ~_BV(PD4);
 	DDRD |= _BV (PD4);
 #endif
 }
 
-#ifdef DEBUGGING
+#ifdef SLOW
 static void flip_tx_clock(task_head *dummy);
 task_head tx_clock = TASK_HEAD(flip_tx_clock);
 static void flip_tx_clock(task_head *dummy)

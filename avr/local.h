@@ -26,5 +26,6 @@
 
 #define ASSERTIONS
 #define DEBUGGING
+#define SLOW
 
 #endif /* LOCAL_H */

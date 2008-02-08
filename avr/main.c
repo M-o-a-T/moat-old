@@ -106,7 +106,7 @@ int __attribute__((noreturn)) main(void)
 	fputs_P(PSTR(":Startup\n"),stderr);
 
 	queue_task_sec(&idle_task,1);
-#ifdef DEBUGGING
+#ifdef SLOW
 	extern task_head tx_clock;
 	queue_task_msec(&tx_clock,10);
 #endif
