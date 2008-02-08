@@ -107,6 +107,7 @@ run_task_later(task_head *dummy)
 	OCR2A = delay-1;
 	if(TCCR2B & (_BV(CS22)|_BV(CS21)|_BV(CS20))) { /* timer running? */
 		if(TCNT2 >= delay) {
+			TIMSK2 &= ~_BV(OCIE2A);
 			_queue_task_if(&timer_task);
 			sei();
 			return;
