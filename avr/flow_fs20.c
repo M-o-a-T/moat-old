@@ -14,17 +14,24 @@
  */
 
 /*
- * This header defines misc utility stuff.
+ * This code defines the timing handler for FS20.
  */
 
-#ifndef LOCAL_H
-#define LOCAL_H
+#include "util.h"
+#include "flow_internal.h"
+#include "flow_fs20_internal.h"
 
-#ifndef F_CPU
-#define F_CPU 16000000 /* 16 MHz */
-#endif
+#define STATIC static
+#include "flow_write.c"
+#include "flow_read.c"
 
-#define ASSERTIONS
-#define DEBUGGING
+flow_head fs20_head = {
+	.type= 'f', // for fs20
+	.write_idle= 2000,
+	.write_init= flow_write_init,
+	.write_step= flow_write_step,
+	.read_reset= flow_init,
+	.read_at_work=flow_read_at_work,
+	.read_time = flow_read_time,
+};
 
-#endif /* LOCAL_H */

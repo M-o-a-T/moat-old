@@ -185,8 +185,10 @@ static void rcv(task_head *dummy)
 			//DBGS("Chk %d %d",tmptail,UART_RxBuf[tmptail]);
 		}
 		task_head *tsk = malloc(sizeof(*tsk)+bytes);
+		if(!tsk)
+			report_error("out of memory");
 		unsigned char *buf = (unsigned char *)(tsk+1);
-		*tsk = (task_head) TASK_HEAD(line_reader);
+		*tsk = TASK_HEAD(line_reader);
 
 		tmptail = (UART_RxTail + 1) & UART_RX_BUFFER_MASK;
 		while(--bytes) {
@@ -449,6 +451,7 @@ void uart_putl( const long val )
     char buffer[sizeof(long)*8+1];
     uart_puts( ltoa(val, buffer, 10) );
 }/* uart_puti */
+#endif
 
 /*************************************************************************
 Function: uart_puthex_nibble()
@@ -479,4 +482,3 @@ void uart_puthex_byte(const unsigned char  b)
     uart_puthex_nibble(b>>4);
     uart_puthex_nibble(b);
 } /* uart_puthex_byte */
-#endif

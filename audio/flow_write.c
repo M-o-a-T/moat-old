@@ -14,7 +14,11 @@
  */
 
 #include <stdio.h>
+#ifdef FLOW_STANDALONE
+#include <stdlib.h>
+#else
 #include <malloc.h>
+#endif
 #include <string.h>
 #include <errno.h>
 #include "flow_internal.h"
@@ -51,8 +55,7 @@ flow_writer(FLOW_PARAM
 #endif
 
 STATIC int
-flow_write_buf(FLOW_PARAM
-               unsigned char *data, unsigned int len)
+flow_write_init(FLOW_PARAM1)
 {
 	if(F_writer_state != FW_idle)
 		return -1;
@@ -60,9 +63,20 @@ flow_write_buf(FLOW_PARAM
 	F_writer_byte = 0;
 	F_writer_bit = 0;
 	F_writer_parity = 0;
+	return 0;;
+}
+
+#ifndef FLOW_STANDALONE
+STATIC int
+flow_write_buf(FLOW_PARAM
+               unsigned char *data, unsigned int len)
+{
+	int res = flow_write_init(FLOW_ARG1);
+	if (res) return res;
+
+#ifndef FLOW_STANDALONE
 	F_writer_data = data;
 	F_writer_len = len;
-#ifndef FLOW_STANDALONE
 	if(F_writer) {
 		unsigned int t1,t2;
 		do {
@@ -74,6 +88,7 @@ flow_write_buf(FLOW_PARAM
 #endif
 	return 0;
 }
+#endif
 
 STATIC void
 flow_write_step(FLOW_PARAM
@@ -95,21 +110,26 @@ flow_write_step(FLOW_PARAM
 	return; \
 } while(0)
 
-	if(F_writer_state == FW_idle)
+	if(F_writer_state == FW_idle) {
+		//DBG("W idle");
 		RI();
-	else if(F_writer_state == FW_sync) {
+	} else if(F_writer_state == FW_sync) {
 		F_writer_bit ++;
 		if (F_writer_bit > F_w_sync) {
 			F_writer_state = FW_data;
 			F_writer_bit = 0;
+			//DBG("W last_syn");
 			R(1);
 		} else {
+			//DBG("W syn");
 			R(0);
 		}
 	} else if(F_writer_byte >= F_writer_len) {
 		F_writer_state = FW_idle;
+		//DBG("W end_bit");
 		R(0);
 	} else if(F_writer_bit >= F_bits) {
+		//DBG("W parity");
 		F_writer_bit ++;
 		unsigned char bit;
 		switch(F_parity) {
@@ -128,6 +148,7 @@ flow_write_step(FLOW_PARAM
 		F_writer_parity=0;
 		R(bit & 1);
 	} else {
+		//DBGS("W bit %u/%u",F_writer_byte,F_writer_bit);
 		unsigned char bit;
 		if(F_msb)
 			bit = F_writer_data[F_writer_byte] >> (F_bits-1-F_writer_bit);

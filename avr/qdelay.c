@@ -49,9 +49,9 @@ void queue_task_sync(void)
 	unsigned char tn = TCNT2;
 	TCNT2 = 0;
 	tn = OCR2A - tn;
+	OCR2A = tn;
 	if (head_usec)
 		head_usec->delay -= tn;
-	OCR2A = tn;
 }
 
 static void run_task_later(task_head *dummy);
@@ -101,16 +101,16 @@ run_task_later(task_head *dummy)
 	//DBGS("setup dly %u",delay);
 
 	PRR &= ~_BV(PRTIM2);
-	OCR2A = delay;
-	if(TCCR2B & 0x07) { /* timer running? */
+	OCR2A = delay-1;
+	if(TCCR2B & (_BV(CS22)|_BV(CS21)|_BV(CS20))) { /* timer running? */
 		if(TCNT2 >= delay) {
 			_queue_task_if(&timer_task);
 			sei();
 			return;
 		}
 	} else {
-		TCCR2A = 0x02; /* CTC mode */
-		TCCR2B = 4; /* prescale 64x */
+		TCCR2A = _BV(WGM21); /* CTC mode */
+		TCCR2B = _BV(CS22); /* prescale 64x, 4 µs/Tick */
 		TCNT2 = 0;
 	}
 	TIFR2 |= _BV(OCF2A);
@@ -123,7 +123,7 @@ void clear_delay_timer(void)
 {
 	//DBG("clear dly");
 	TIMSK2 &= ~_BV(OCIE2A);
-	TCCR2B = 0; /* off */
+	TCCR2B &= ~(_BV(CS22)|_BV(CS21)|_BV(CS20)); /* off */
 	PRR |= _BV(PRTIM2);
 	offset = 0;
 }
@@ -131,7 +131,7 @@ void clear_delay_timer(void)
 ISR(TIMER2_COMPA_vect)
 {
 	TIMSK2 &= ~_BV(OCIE2A);
-	offset += OCR2A;
+	offset += OCR2A+1;
 	OCR2A = 0xFF;
 	//DBG("Q RTL");
 	_queue_task_if(&timer_task);
@@ -139,7 +139,6 @@ ISR(TIMER2_COMPA_vect)
 
 void _queue_task_later(task_head *task, uint16_t delay)
 {
-	unsigned char do_setup = FALSE;
 	assert (!task->delay,"QTL again");
 	if(delay == 0) {
 		//DBG("LTN");

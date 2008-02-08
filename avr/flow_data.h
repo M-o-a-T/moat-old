@@ -14,17 +14,21 @@
  */
 
 /*
- * This header defines misc utility stuff.
+ * This header defines misc flow stuff.
  */
 
-#ifndef LOCAL_H
-#define LOCAL_H
+#ifndef FLOW_DATA_H
+#define FLOW_DATA_H
 
-#ifndef F_CPU
-#define F_CPU 16000000 /* 16 MHz */
-#endif
+struct _write_head;
+typedef struct _write_head {
+	struct _write_head *next;
+	unsigned char type;
+	unsigned char len;
+	unsigned char data[0];
+} write_head;
 
-#define ASSERTIONS
-#define DEBUGGING
+void send_tx(write_head *data);
+void read_data(unsigned char param, unsigned char *data, unsigned char len);
 
-#endif /* LOCAL_H */
+#endif /* FLOW_DATA_H */

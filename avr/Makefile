@@ -1,5 +1,6 @@
-PRG            = demo
-OBJ            = $(PRG).o
+PRG            = main
+OBJ            = main.o uart.o util.o qtask.o qdelay.o writer.o \
+	flow_fs20.c reader.o
 #MCU_TARGET     = at90s2313
 #MCU_TARGET     = at90s2333
 #MCU_TARGET     = at90s4414
@@ -58,7 +59,7 @@ LIBS           =
 
 # You should not have to change anything below here.
 
-CC             = avr-gcc
+CC             = avr-gcc -I. -I../audio
 
 # Override is only needed by avr-lib build system.
 
@@ -74,11 +75,22 @@ $(PRG).elf: $(OBJ)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^ $(LIBS)
 
 # dependencies:
+#avr-gcc -I. -I../audio -MM -mmcu=$(MCU_TARGET) *.c
 demo.o: demo.c iocompat.h
-test1.o: test1.c local.h uart.h qtask.h qdelay.h
-uart.o: uart.c uart.h
-util.o: util.c util.h uart.h
-qtask.o: qtask.c qtask.h local.h util.h assert.h
+flow_fs20.o: flow_fs20.c flow_internal.h qtask.h assert.h local.h util.h \
+  ../audio/flow.h flow_data.h flow_fs20_internal.h \
+  ../audio/timing.fs20.read.h ../audio/timing.fs20.write.h \
+  ../audio/flow_write.c ../audio/flow_internal.h ../audio/flow_read.c
+main.o: main.c uart.h qtask.h assert.h local.h util.h qdelay.h \
+  flow_data.h
+qdelay.o: qdelay.c local.h qtask.h assert.h util.h qdelay.h
+qtask.o: qtask.c local.h qtask.h assert.h util.h
+reader.o: reader.c qtask.h assert.h local.h util.h qdelay.h \
+  flow_internal.h ../audio/flow.h flow_data.h
+uart.o: uart.c uart.h util.h local.h qtask.h assert.h
+util.o: util.c uart.h util.h local.h
+writer.o: writer.c qtask.h assert.h local.h util.h qdelay.h \
+  flow_internal.h ../audio/flow.h flow_data.h
 
 clean:
 	rm -rf *.o $(PRG).elf *.eps *.png *.pdf *.bak 
@@ -147,5 +159,3 @@ pdf: $(PRG).pdf
 %.png: %.fig
 	$(FIG2DEV) -L png $< $@
 
-test:
-	$(MAKE) PRG=test1 OBJ="test1.o uart.o util.o qtask.o qdelay.o"

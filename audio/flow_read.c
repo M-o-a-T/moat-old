@@ -15,8 +15,19 @@
 
 #include "flow_internal.h"
 #include <stdio.h>
+#ifdef FLOW_STANDALONE
+#include <stdlib.h>
+#else
 #include <malloc.h>
+#endif
 #include <limits.h>
+
+#ifndef DBG
+#define DBG(x) do {} while(0)
+#endif
+#ifndef DBGS
+#define DBGS(x ...) do{}while(0)
+#endif
 
 #ifndef FLOW_STANDALONE
 void flow_setup_reader(FLOW_PARAM
@@ -42,9 +53,15 @@ void flow_reader(FLOW_PARAM
 static void flow_init(FLOW_PARAM1)
 {
 	if(F_readlen) {
-		if (F_reader)
-			(F_reader)(F_reader_param, F_readbuf, F_readlen);
+		if (F_reader) {
+			DBGS("flow init, %d bytes, call reader",F_readlen);
+			F_reader(F_reader_param, F_readbuf, F_readlen);
+		} else {
+			DBGS("flow init, %d bytes, NO reader",F_readlen);
+		}
 		F_readlen = 0;
+	} else {
+		DBG("flow init: no data");
 	}
 	F_byt = 0;
 	F_bit = 0;
@@ -109,6 +126,7 @@ flow_read_time(FLOW_PARAM
 #endif
 
 	if (ex) { /* R_IDLE exceeed, see above */
+		DBG("Idle Exc");
 		if (F_lasthi) /* somebody's sending an always-on? */
 			goto init;
 		if (F_r_times[R_SPACE+R_MAX+R_ONE] > 
@@ -132,8 +150,10 @@ flow_read_time(FLOW_PARAM
 			F_r_mark_zero=1;
 	}
 	F_lasthi = hi;
-	if (!hi && !ex)
+	if (!hi && !ex) {
+		DBGS("x low %d",duration);
 		return;
+	}
 	{
 		char r_one=F_r_mark_one+F_r_space_one;
 		char r_zero=F_r_mark_zero+F_r_space_zero;
@@ -143,16 +163,24 @@ flow_read_time(FLOW_PARAM
 		F_r_mark_zero=0;
 		F_r_space_zero=0;
 
-		if (r_one == r_zero) goto init;
+		if (r_one == r_zero) {
+			DBGS("one/zero %d/%d %d",r_one,r_zero,duration);
+			goto init;
+		}
 		hi = (r_one > r_zero);
 	}
 
 	if (!F_syn) {
 		++F_bit;
 		if(!hi) return;
-		if(F_bit < F_r_sync) return;
+		if(F_bit < F_r_sync) {
+			DBG("short syn");
+			F_bit = 0;
+			return;
+		}
 		F_bit = 0;
 		F_syn=1;
+		DBG("SYN!");
 		return;
 	}
 	if(F_bit < F_bits) {
@@ -164,16 +192,23 @@ flow_read_time(FLOW_PARAM
 		}
 		F_bit++;
 		if (F_parity || F_bit < F_bits)
+			DBGS("Bit %d/%d",F_readlen,F_bit);
 			return;
 
 	} else if(F_parity) {
 		unsigned char par;
 		switch(F_parity) {
 		case P_MARK:
-			if (!hi) goto init;
+			if (!hi) {
+				DBG("Bad ParMark");
+				goto init;
+			}
 			break;
 		case P_SPACE:
-			if (hi) goto init;
+			if (hi) {
+				DBG("Bad ParSpace");
+				goto init;
+			}
 			break;
 		default:
 			par = F_byt;
@@ -181,20 +216,28 @@ flow_read_time(FLOW_PARAM
 			par ^= par >> 2;
 			par ^= par >> 1;
 			if (F_parity == P_EVEN) {
-				if((par&1) == !hi)
+				if((par&1) == !hi) {
+					DBGS("Bad ParEven %d",hi);
 					goto init;
+				}
 			} else {
-				if((par&1) == hi)
+				if((par&1) == hi) {
+					DBGS("Bad ParEven %d",hi);
 					goto init;
+				}
 			}
 		}
 	}
-	if(F_readlen >= F_read_max)
+	if(F_readlen >= F_read_max) {
+		DBG("MaxLen");
 		goto init;
+	}
+	DBGS("Got Byte %d: %02x",F_readlen,F_byt);
 	F_readbuf[F_readlen++] = F_byt;
 	F_byt=0;
 	F_bit=0;
 	if(!ex) return;
+	DBG("FINISH");
 
 init:
 	flow_init(FLOW_ARG1);
@@ -206,12 +249,11 @@ static inline void
 flow_char(FLOW_PARAM
           unsigned char c)
 {
-	unsigned char ex=0;
 	unsigned char hi;
 
 	hi = ((c & 0x80) != 0);
 	if(++F_cnt >= F_r_times[R_IDLE])
-		ex=1;
+		;
 	else if(hi == F_lasthi)
 		return;
 	flow_read_time(FLOW_ARG
@@ -228,3 +270,8 @@ flow_read_buf(FLOW_PARAM
 }
 #endif
 
+STATIC unsigned char
+flow_read_at_work(FLOW_PARAM1)
+{
+	return F_syn ? 1 : (F_bit>2);
+}

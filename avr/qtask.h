@@ -36,7 +36,7 @@ typedef struct _task_head {
 	task_proc proc;
 } task_head;
 
-#define TASK_HEAD(_proc) { .proc = _proc, .next = NULL }
+#define TASK_HEAD(_proc) (task_head) { .proc = _proc, .next = NULL }
 
 void _queue_task(task_head *task); /* call with IRQ disabled */
 static inline void queue_task(task_head *task)
