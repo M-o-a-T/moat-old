@@ -1,6 +1,6 @@
 PRG            = main
 OBJ            = main.o uart.o util.o qtask.o qdelay.o writer.o \
-	flow_fs20.o reader.o
+	flow_fs20.o flow_em.o reader.o
 #MCU_TARGET     = at90s2313
 #MCU_TARGET     = at90s2333
 #MCU_TARGET     = at90s4414

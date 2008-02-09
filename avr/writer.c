@@ -31,7 +31,7 @@
 #include "flow_internal.h"
 #include "flow.h"
 
-extern flow_head fs20_head;
+extern flow_head *flows;
 
 flow_head *flow_proc;
 
@@ -120,13 +120,17 @@ fill_tx_buf(task_head *dummy)
 static void
 send_tx_data(task_head *dummy)
 {
-	if(F_writer_type == fs20_head.type)
-		flow_proc = &fs20_head;
-	else {
+	flow_proc = flows;
+	while(flow_proc) {
+		if(flow_proc->type == F_writer_type)
+			break;
+		flow_proc = flow_proc->next;
+	}
+	if(!flow_proc) {
 		//fprintf_P(stderr,PSTR("Unknown type '%c'\n"),F_writer_type);
 		fputs_P(PSTR("Unknown type '"),stderr);
 		fputc(F_writer_type,stderr);
-		fputs_P(PSTR("%c'\n"),stderr);
+		fputs_P(PSTR("'\n"),stderr);
 		queue_task(&next_tx);
 		return;
 	}

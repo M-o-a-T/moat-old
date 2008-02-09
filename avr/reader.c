@@ -32,7 +32,9 @@
 #include "flow.h"
 
 extern flow_head fs20_head;
-static flow_head *flows;
+extern flow_head em_head;
+
+flow_head *flows;
 
 extern void read_response(task_head *task);
 
@@ -197,8 +199,10 @@ ISR(TIMER1_COMPA_vect)
 
 void rx_chain(void)
 {
-	flows = &fs20_head;
-	fs20_head.next = NULL;
+	static flow_head **fp = &flows;
+	*fp = &fs20_head; fp = &((*fp)->next);
+	*fp = &em_head; fp = &((*fp)->next);
+	*fp = NULL;
 }
 
 void rx_init(void) __attribute__((naked)) __attribute__((section(".init3")));
