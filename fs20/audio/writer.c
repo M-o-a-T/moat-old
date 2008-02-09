@@ -310,7 +310,7 @@ enable_ ## name(int argc, char *argv[]) \
 	unsigned int x[W_IDLE+1] = { \
 		T_write \
 	}; \
-	flow_setup(x,8,P_EVEN,1,'f'); \
+	flow_setup(x,F_bits,F_parity,F_msb,F_id); \
 	return 0; \
 }
 #include "def_enable.h"
