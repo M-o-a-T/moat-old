@@ -48,7 +48,7 @@ void line_reader(task_head *tsk)
 	unsigned char *rp = (unsigned char *)(tsk+1);
 	//fprintf_P(stderr,PSTR(":IN: <%s>\n"),rp);
 	fputs_P(PSTR(":IN: <"),stderr);
-	fputs(rp,stderr);
+	fputs((char *)rp,stderr);
 	fputs_P(PSTR(">\n"),stderr);
 	if(!*rp) goto out;
 
