@@ -3,7 +3,7 @@ Section: python
 Priority: extra
 XS-Python-Version: 2.4, 2.5
 Maintainer: Matthias Urlichs <matthias@urlichs.de>
-Build-Depends: debhelper (>= 5), python2.5-dev, python-setuptools, python-twisted-core, python-twisted-conch, libglib2.0-dev (>= 2.14), portaudio19-dev
+Build-Depends: debhelper (>= 5), python2.5-dev, python-setuptools, python-twisted-core, python-twisted-conch, libglib2.0-dev (>= 2.14), portaudio19-dev, avr-libc, gcc-avr
 Build-Depends-Indep: python-support
 Standards-Version: 3.7.2
 

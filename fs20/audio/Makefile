@@ -35,7 +35,9 @@ reader.o: reader.c ../common/flow.h common.h def_enable.h \
 writer.o: writer.c ../common/flow.h common.h def_enable.h \
   ../params/data.fs20.h ../params/data.none.h ../params/data.em.h
 flow_read.o: ../common/flow_read.c flow_internal.h ../common/flow.h
+	$(CC) $(CFLAGS) -c -o $@ $<
 flow_write.o: ../common/flow_write.c flow_internal.h ../common/flow.h
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 install: all
 	install -m 755 reader $(DESTDIR)/usr/lib/homevent/reader
