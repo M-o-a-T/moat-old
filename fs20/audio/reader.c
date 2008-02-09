@@ -102,7 +102,7 @@ static int \
 enable_ ## name(int argc, char *argv[]) \
 { \
 	unsigned int x[R_IDLE+1] = {\
-T_read \
+		T_read \
 	};\
 	flow_setup(x,F_bits,F_parity,F_msb,F_id);\
 	return 0;\

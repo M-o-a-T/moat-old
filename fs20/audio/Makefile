@@ -22,8 +22,8 @@ LDLIBS=$(shell pkg-config --libs glib-2.0) -lportaudio
 all: reader writer
 
 test:
-	sh ../test/audio.sh
-	@cmp -s ../test/expect/fs20rw ../test/real/fs20rw
+	sh ../../test/audio.sh
+	@cmp -s ../../test/expect/fs20rw ../../test/real/fs20rw
 
 reader: reader.o flow.o flow_read.o common.o
 writer: writer.o flow.o flow_write.o common.o
