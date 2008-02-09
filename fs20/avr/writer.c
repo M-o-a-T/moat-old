@@ -57,23 +57,30 @@ unsigned char tx_ring_head;
 unsigned char tx_ring_tail;
 unsigned char more_data;
 
+static void _mesg(char *s, write_head *t)
+{
+	char num[6];
+	fputs_P(s,stdout);
+	fputc(' ',stdout);
+	fputs(itoa((short)t,num,10),stdout);
+	fputc('\n',stdout);
+}
+#define qmesg(s,t) _mesg(PSTR(s),t)
+#define mesg(s) qmesg(s,F_writer_task)
+	
 static void
 next_tx_data(task_head *dummy)
 {
 	/* TODO: check if a receiver is receiving something! */
-	if(more_data == 2)
-		fputs_P(PSTR(":TX buffer underrun\n"),stderr);
 
 	write_head *tn = F_writer_task->next;
 	free(F_writer_task);
 	F_writer_task = tn;
 
 	if(tn) {
-		DBG("Next writer");
 		queue_task_if(&start_tx);
 	} else {
 		sendq_head = NULL;
-		//DBG("Turn off writer");
 		TCCR0B = 0;
 		if(PIND & _BV(PD6))
 			TCCR0B |= _BV(FOC0A);
@@ -89,7 +96,7 @@ fill_tx_buf(task_head *dummy)
 	if(more_data != 1)
 		return;
 	if(tx_ring_head == tx_ring_tail) {
-		fputs_P(PSTR(":TX buffer: ran empty!\n"),stderr);
+		mesg("-BufUnderrun");
 		more_data=2;
 		return;
 	}
@@ -101,7 +108,6 @@ fill_tx_buf(task_head *dummy)
 		}
 		flow_proc->write_step(&hi,&lo);
 		if(!hi) {
-			//DBG("TxE");
 			more_data=0;
 			break;
 		}
@@ -127,20 +133,17 @@ send_tx_data(task_head *dummy)
 		flow_proc = flow_proc->next;
 	}
 	if(!flow_proc) {
-		//fprintf_P(stderr,PSTR("Unknown type '%c'\n"),F_writer_type);
-		fputs_P(PSTR("Unknown type '"),stderr);
-		fputc(F_writer_type,stderr);
-		fputs_P(PSTR("'\n"),stderr);
+		mesg("-Unknown");
 		queue_task(&next_tx);
 		return;
 	}
 	//DBGS("Tx %c %u",flow_proc->type,F_writer_len);
-	
+
 	unsigned int nhi,nlo;
 	flow_proc->write_init();
 	flow_proc->write_step(&nhi,&nlo);
 	if(!nhi) {
-		DBG("TxBroken1");
+		mesg("-Broken");
 		queue_task(&next_tx);
 		return;
 	}
@@ -181,6 +184,7 @@ void
 send_tx(write_head *task) {
 	assert(!task->next,"SendFS20 next");
 
+	qmesg("+",task);
 	if(sendq_head) {
 		//DBG("Send Q next");
 		sendq_head->next = task;
@@ -204,8 +208,11 @@ ISR(TIMER0_COMPA_vect)
 			TCCR0B |= _BV(FOC0A);
 			fputs_P(PSTR(":Tx on after send!\n"),stderr);
 		}
-		if(more_data == 1)
+		if(more_data == 1) {
 			more_data = 2;
+			mesg("-BufUnderrun");
+		} else if (!more_data)
+			mesg("+OK");
 		queue_task_usec(&next_tx, flow_proc->write_idle);
 	}
 	unsigned char tmptx = (tx_ring_tail+1) & TX_RING_MASK;
