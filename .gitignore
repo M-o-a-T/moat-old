@@ -20,8 +20,11 @@ homevent.egg-info
 homevent/modules
 *-stamp
 *.o
-audio/reader
-audio/writer
+fs20/audio/reader
+fs20/audio/writer
+fs20/avr/*.elf
+fs20/avr/*.lst
+fs20/avr/*.bin
 *.bin
 *.elf
 *.lst

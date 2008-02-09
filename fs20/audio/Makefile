@@ -15,23 +15,27 @@
 ##
 
 OPT=2
-CFLAGS=-O$(OPT) -g -Wall $(shell pkg-config --cflags glib-2.0)
+CFLAGS=-I. -I../params -I../common \
+	 -O$(OPT) -g -Wall $(shell pkg-config --cflags glib-2.0)
 LDLIBS=$(shell pkg-config --libs glib-2.0) -lportaudio
 
 all: reader writer
-
-reader: reader.o flow.o flow_read.o common.o
-writer: writer.o flow.o flow_write.o common.o
 
 test:
 	sh ../test/audio.sh
 	@cmp -s ../test/expect/fs20rw ../test/real/fs20rw
 
-reader.o: reader.c common.h flow.h
-writer.o: writer.c common.h flow.h
-flow.o: flow.c flow.h flow_internal.h
-flow_read.o: flow_read.c flow.h flow_internal.h
-flow_write.o: flow_read.c flow.h flow_internal.h
+reader: reader.o flow.o flow_read.o common.o
+writer: writer.o flow.o flow_write.o common.o
+
+common.o: common.c common.h ../common/flow.h
+flow.o: flow.c flow_internal.h ../common/flow.h
+reader.o: reader.c ../common/flow.h common.h def_enable.h \
+  ../params/data.fs20.h ../params/data.none.h ../params/data.em.h
+writer.o: writer.c ../common/flow.h common.h def_enable.h \
+  ../params/data.fs20.h ../params/data.none.h ../params/data.em.h
+flow_read.o: ../common/flow_read.c flow_internal.h ../common/flow.h
+flow_write.o: ../common/flow_write.c flow_internal.h ../common/flow.h
 
 install: all
 	install -m 755 reader $(DESTDIR)/usr/lib/homevent/reader

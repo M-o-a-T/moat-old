@@ -70,4 +70,7 @@ EXTERN write_head *F_writer_task;
 #define F_writer_len  (F_writer_task->len)
 #define F_writer_type (F_writer_task->type)
 
+#   define F_reader read_data
+#   define F_reader_param F_id
+
 #endif /* FLOW_INTERNAL_H */

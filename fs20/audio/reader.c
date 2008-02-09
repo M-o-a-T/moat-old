@@ -97,27 +97,17 @@ do_flow_rw(FLOW *f, unsigned int *x)
 }
 
 
-static int
-enable_fs20(int argc, char *argv[])
-{
-	unsigned int x[R_IDLE+1] = {
-#include "timing.fs20.read.h"
-	};
-	flow_setup(x,8,P_EVEN,1,'f');
-	return 0;
+#define DATA(name) \
+static int \
+enable_ ## name(int argc, char *argv[]) \
+{ \
+	unsigned int x[R_IDLE+1] = {\
+T_read \
+	};\
+	flow_setup(x,F_bits,F_parity,F_msb,F_id);\
+	return 0;\
 }
-
-
-static int
-enable_em(int argc, char *argv[])
-{
-	unsigned int x[R_IDLE+1] = {
-#include "timing.em.read.h"
-	};
-	flow_setup(x,4,P_MARK,0,'e');
-	return 0;
-}
-
+#include "def_enable.h"
 
 __attribute__((noreturn)) 
 static int do_exec(int argc, char *argv[])

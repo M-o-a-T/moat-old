@@ -1,5 +1,0 @@
-		[W_ZERO+W_MARK ] = 855,
-		[W_ZERO+W_SPACE] = 366,
-		[W_ONE +W_MARK ] = 366,
-		[W_ONE +W_SPACE] = 855,
-		[W_IDLE] = 2000,

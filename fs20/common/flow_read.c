@@ -53,11 +53,11 @@ void flow_reader(FLOW_PARAM
 #endif
 
 /* fake inline procedure to turn off compiler warning in standalone mode */
-static inline void *readadr() { return (void *)F_reader; }
+static inline void *readadr(FLOW_PARAM1) { return (void *)F_reader; }
 static void flow_init(FLOW_PARAM1)
 {
 	if(F_readlen) {
-		if (readadr()) {
+		if (readadr(FLOW_ARG1)) {
 			DBGS("flow init, %d bytes, call reader",F_readlen);
 			F_reader(F_reader_param, F_readbuf, F_readlen);
 		} else {

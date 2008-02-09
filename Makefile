@@ -21,15 +21,15 @@ FIX:
 	@if test ! -d homevent/modules; then ln -s ../modules homevent/modules; fi
 
 all:
-	@$(MAKE) -C audio --no-print-directory all
+	@$(MAKE) -C fs20 --no-print-directory all
 	python2.5 setup.py build --build-base="$(DESTDIR)"
 install:
-	@$(MAKE) -C audio --no-print-directory install ROOT=$(DESTDIR)
+	@$(MAKE) -C fs20 --no-print-directory install ROOT=$(DESTDIR)
 	python2.5 setup.py install --root="$(DESTDIR)" --no-compile -O0
 
 clean:
 	python2.5 setup.py clean --build-base="$(DESTDIR)"
-	@$(MAKE) -C audio --no-print-directory clean
+	@$(MAKE) -C fs20 --no-print-directory clean
 
 
 test: FIX
