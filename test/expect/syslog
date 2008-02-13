@@ -1,21 +1,21 @@
-1 EVENT: startup
+EVENT: startup
 NEW: <ConditionalWorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
-1 EVENT: startup
-1 END: startup
-15 EVENT: wait¦start¦0.2¦_wait¦1
+EVENT: startup
+END: startup
+EVENT: wait¦start¦0.2¦_wait¦1
 NEW: <ConditionalWorkSequence:2 (4)>
    : │  EVENT: wait¦start¦0.2¦_wait¦1
    : └1╴... done.
-15 EVENT: wait¦start¦0.2¦_wait¦1
-15 END: wait¦start¦0.2¦_wait¦1
-22 EVENT: wait¦done¦0.2¦_wait¦1
+EVENT: wait¦start¦0.2¦_wait¦1
+END: wait¦start¦0.2¦_wait¦1
+EVENT: wait¦done¦0.2¦_wait¦1
 NEW: <ConditionalWorkSequence:3 (4)>
    : │  EVENT: wait¦done¦0.2¦_wait¦1
    : └1╴... done.
-22 EVENT: wait¦done¦0.2¦_wait¦1
-22 END: wait¦done¦0.2¦_wait¦1
+EVENT: wait¦done¦0.2¦_wait¦1
+END: wait¦done¦0.2¦_wait¦1
 .
 1 One Debug
 1 Five Debug
@@ -30,21 +30,21 @@ level: 2
 level_name: info
 .
 .
-57 EVENT: wait¦start¦0.4¦_wait¦2
+EVENT: wait¦start¦0.4¦_wait¦2
 NEW: <ConditionalWorkSequence:4 (4)>
    : │  EVENT: wait¦start¦0.4¦_wait¦2
    : └1╴... done.
-57 EVENT: wait¦start¦0.4¦_wait¦2
-57 END: wait¦start¦0.4¦_wait¦2
-64 EVENT: wait¦done¦0.4¦_wait¦2
+EVENT: wait¦start¦0.4¦_wait¦2
+END: wait¦start¦0.4¦_wait¦2
+EVENT: wait¦done¦0.4¦_wait¦2
 NEW: <ConditionalWorkSequence:5 (4)>
    : │  EVENT: wait¦done¦0.4¦_wait¦2
    : └1╴... done.
-64 EVENT: wait¦done¦0.4¦_wait¦2
-64 END: wait¦done¦0.4¦_wait¦2
-2 EVENT: shutdown
+EVENT: wait¦done¦0.4¦_wait¦2
+END: wait¦done¦0.4¦_wait¦2
+EVENT: shutdown
 NEW: <ConditionalWorkSequence:6 (6)>
    : │  EVENT: shutdown
    : └1╴... done.
-2 EVENT: shutdown
-2 END: shutdown
+EVENT: shutdown
+END: shutdown

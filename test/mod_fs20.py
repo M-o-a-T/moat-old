@@ -62,6 +62,17 @@ fs20 em inside:
 	code thermo_hygro 1
 	scale temperature * -1.2
 
+fs20 em one:
+	code thermo_hygro 3
+fs20 em two:
+	code thermo_hygro 3
+
+set fs20 em temperature 12 one
+set fs20 em temperature 15 two
+
+list fs20 em one
+list fs20 em two
+
 block:
 	if exists file "fs20_recv":
 		fs20 receiver foobar:
@@ -85,8 +96,17 @@ send fs20 on - baz quux
 send fs20 off - baz quux
 #
 wait:
-	for 1
+	for 3
 	debug force
+wait:
+	for 100
+wait:
+	for 0.1
+	debug reset
+	debug force
+list fs20 em
+list fs20 em one
+list fs20 em two
 async:
 	wait:
 		for 0.1

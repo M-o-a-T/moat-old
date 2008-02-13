@@ -109,13 +109,16 @@ reactor.callLater = wake_later
 
 
 # When testing, we log the time an operation takes. Unfortunately, since
-# we're accurate up to 1/10th second, that means that the timestamp
-# values in the logs will jitter merrily when they're near the
-# 1/10th-second tick.
+# the logged values are accurate up to 1/10th second, that means that
+# the timestamp values in the logs will jitter merrily when something
+# takes longer than 1/10th of a second, which is not at all difficult
+# when the test runs for the first time.
 #
-# In addition, tests shouldn't take longer than necessary. Thus, this
-# code fakes timeouts by sorting stuff into bins and running these
-# in-order, but it does not actually wait for anything unless the
+# In addition, tests shouldn't take longer than necessary, so needless
+# waiting is frowned upon.
+
+# Thus, this code fakes timeouts by sorting stuff into bins and running
+# these in-order, but it does not actually wait for anything unless the
 # "force" flag is set, which denotes that the given timeout affects
 # something "real" and therefore may be ignored.
 
@@ -175,6 +178,11 @@ if "HOMEVENT_TEST" in os.environ:
 		finally:
 			slot_running = False
 
+	def reset_slots():
+		global realslot
+		realslot = slot
+		return
+
 	class CallLater(object):
 		dead = False
 		force = None
@@ -188,7 +196,7 @@ if "HOMEVENT_TEST" in os.environ:
 			#print >>sys.stderr,"ADD %d %d: abs %d now %d  %s" % (id(self),self.q2,self.abs,slot,self.proc)
 			if not slot_running:
 				#print >>sys.stderr,"TRIGGER"
-				rcl(0,_slot_run)
+				rcl(0.01,_slot_run)
 			#else:
 				#print >>sys.stderr,"NO TRIGGER"
 		
@@ -208,7 +216,7 @@ if "HOMEVENT_TEST" in os.environ:
 			slotid += 1
 			self.slotid = slotid
 			if force and delta and self.abs > realslot:
-				self.force = rcl((self.abs-realslot)/GRAN, self._run_force)
+				self.force = rcl((self.abs-realslot)/GRAN+0.01, self._run_force)
 			elif force:
 				self.q2 = True
 			self._enqueue()
@@ -220,7 +228,7 @@ if "HOMEVENT_TEST" in os.environ:
 			if self.force:
 				self.force.cancel()
 				self.force = False
-				rcl(0,_slot_run)
+				rcl(0.01,_slot_run)
 
 		def _run_force(self):
 			global realslot
@@ -228,7 +236,7 @@ if "HOMEVENT_TEST" in os.environ:
 			realslot = self.abs
 
 			self.force = None
-			rcl(0,_slot_run)
+			rcl(0.01,_slot_run)
 			
 		def _run(self):
 			if self.dead: return
@@ -248,6 +256,10 @@ if "HOMEVENT_TEST" in os.environ:
 		def activate_delay(self,*a,**k): self._die("activate_delay",*a,**k)
 		def active(self,*a,**k): self._die("active",*a,**k)
 		def __le__(self,*a,**k): self._die("__le__",*a,**k)
+
+else:
+	def reset_slots():
+		pass
 
 def callLater(force,delta,p,*a,**k):
 	from homevent.times import unixdelta,now

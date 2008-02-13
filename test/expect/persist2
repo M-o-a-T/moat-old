@@ -4,15 +4,19 @@ NEW: <ConditionalWorkSequence:1 (4)>
    : └1╴... done.
 EVENT: startup
 END: startup
-EVENT: module¦load¦ssh
+0 Yes!
+0 Yes!
+0 Yes!
+0 Yes!
+0 We still have three
+EVENT: state¦three¦-¦foo¦bar
 NEW: <ConditionalWorkSequence:2 (4)>
-   : │  EVENT: module¦load¦ssh
+   : │  EVENT: state¦three¦-¦foo¦bar
    : └1╴... done.
-EVENT: module¦load¦ssh
-END: module¦load¦ssh
-smurf :: SSH public key
+EVENT: state¦three¦-¦foo¦bar
+END: state¦three¦-¦foo¦bar
 .
-.
+0 Yes!
 EVENT: shutdown
 NEW: <ConditionalWorkSequence:3 (5)>
    : │  EVENT: shutdown

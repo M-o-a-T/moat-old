@@ -16,7 +16,7 @@
 ##
 
 """\
-This code does basic non-persistent state handling.
+This code does basic state handling (both persistent and not).
 
 set state X NAME
 	sets the named state to X
@@ -34,16 +34,20 @@ list state [NAME]
 """
 
 from homevent.module import Module
-from homevent.statement import Statement, main_words,global_words
+from homevent.statement import Statement, main_words, AttributedStatement
 from homevent.logging import log, Logger, register_logger,unregister_logger
-from homevent.run import process_event
+from homevent.run import process_event,process_failure
 from homevent.event import Event
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.base import Name
 from homevent.collect import Collection,Collected
+from homevent.times import now,humandelta
 
-from time import time
-import os
+from twisted.internet.defer import inlineCallbacks,returnValue
+
+import os,sys
+
+Db = None
 
 class States(Collection):
     name = "state"
@@ -66,29 +70,167 @@ class State(Collected):
 		self.working = False
 		super(State,self).__init__(*name)
 	
+	def init(self):
+		pass
+
+	@inlineCallbacks
 	def delete(self,ctx):
 		if self.working:
 			raise StateChangeError(self,u"‹deleted›")
 		self.working = True
-		self.time = time()
-		d = process_event(Event(ctx,"state",self.value,"-",*self.name))
-		def clear_chg(_):
+		self.time = now()
+		try:
+			if self.value is not None:
+				yield process_event(Event(ctx,"state",self.value,"-",*self.name))
+		finally:
 			self.delete_done()
-			return _
-		d.addBoth(clear_chg)
-		return d
+
+	def set_value(self, val):
+		self.value = val
 
 	def list(self):
 		yield ("value", self.value)
 		yield ("lock", ("Yes" if self.working else "No"))
 		if hasattr(self,"old_value"):
 			yield ("last value",self.old_value)
-			if "HOMEVENT_TEST" not in os.environ:
-				yield ("last change",self.time)
+			yield ("last change",humandelta(now()-self.time))
 
 	def info(self):
-		return self.value
+		if hasattr(self,"old_value"):
+			return u"%s — %s " % (self.value,humandelta(now()-self.time))
+		else:
+			return unicode(self.value)
+
+class SavedState(State):
+	def __init__(self, *name):
+		super(SavedState,self).__init__(*name)
+		del self.value
 	
+	@inlineCallbacks
+	def init(self):
+		global Db
+		if Db is None:
+			from homevent.database import DbStore
+			Db = DbStore("state")
+			yield Db.start()
+		try:
+			self.value = yield Db.get(self.name)
+		except KeyError:
+			self.value = None
+
+	@inlineCallbacks
+	def set_value(self,val):
+		if val is None:
+			yield Db.delete(self.name)
+		else:
+			yield Db.set(self.name,val)
+		self.value = val
+
+	@inlineCallbacks
+	def delete(self,ctx):
+		yield Db.delete(self.name)
+		yield super(SavedState,self).delete(ctx)
+
+	def list(self):
+		for r in super(SavedState,self).list(): yield r
+		yield ("persistent","yes")
+
+	
+class StateHandler(AttributedStatement):
+	name=("state",)
+	doc="Create a state variable"
+	long_doc="""\
+state name...
+	: creates an empty named state
+"""
+	trigger = None
+	ptrigger = None
+	coll = State
+
+	@inlineCallbacks
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if not len(event):
+			raise SyntaxError(u"Usage: state ‹name…›")
+		s = self.coll(*event)
+		yield s.init()
+		s.working = True
+		try:
+			if hasattr(self,"value") and s.value is None:
+				yield s.set_value(self.value)
+			s.time = now()
+			if s.value is None and self.trigger \
+					or s.value is not None and self.ptrigger:
+				old = s.old_value if s.old_value is not None else "-"
+				val = s.value
+				if val is None: val = "-"
+				yield process_event(Event(self.ctx,"state",old,self.value,*s.name))
+		except BaseException:
+			s.delete_done()
+			raise
+		finally:
+			s.working = False
+
+class ValueHandler(Statement):
+	name=("value",)
+	doc="Set the initial value"
+	long_doc="""\
+value ‹whatever›
+	: sets the initial value of the state, without sending an event
+"""
+
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if len(event) != 1:
+			raise SyntaxError(u"Usage: value ‹whatever›")
+
+		if hasattr(self.parent,"value"):
+			raise SyntaxError(u"The 'value' substatement can only be used once")
+		elif event[0] != "-":
+			self.parent.value = event[0]
+		else:
+			self.parent.value = None
+StateHandler.register_statement(ValueHandler)
+
+class SavedHandler(Statement):
+	name=("saved",)
+	doc="Keep the state between runs"
+	long_doc="""\
+saved 
+	: save/restore the state between invocations of HomEvenT
+"""
+
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if len(event):
+			raise SyntaxError(u"Usage: saved")
+		self.parent.coll = SavedState
+StateHandler.register_statement(SavedHandler)
+
+class TriggerHandler(Statement):
+	name=("trigger",)
+	doc="Signal when a state is created"
+	long_doc="""\
+trigger new
+	: sends a standard value-changed signal upon state creation
+trigger old
+	: same, when a saved state is restored
+"""
+
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if not len(event):
+			raise SyntaxError(u"Usage: trigger new")
+		for v in event:
+			if v == "new":
+				self.parent.trigger = True
+			elif v == "old":
+				self.parent.ptrigger = True
+			else:
+				raise SyntaxError(u"Usage: trigger new")
+StateHandler.register_statement(TriggerHandler)
+
+
 class SetStateHandler(Statement):
 	name=("set","state")
 	doc="set some state to something"
@@ -98,34 +240,53 @@ set state X name...
 	: triggers an event if that changed
 	: raises an error if that event tries to change the state again
 """
+	@inlineCallbacks
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		if len(event) < 2:
 			raise SyntaxError(u"Usage: set state ‹value› ‹name…›")
 		value = event[0]
 		name = Name(event[1:])
-		try:
-			s = States[name]
-		except KeyError:
-			s = State(*name)
+		s = States[name]
+		old = s.value
+		if old is None:
 			old = "-"
-		else:
-			old = s.value
-
 		if value == old:
-			return None # no change!
+			return # no change!
+
 		if s.working:
 			raise StateChangeError(s,value)
 		s.working = True
-		s.old_value = s.value
-		s.value = value
-		s.time = time()
-		d = process_event(Event(self.ctx,"state",old,value,*name))
-		def clear_chg(_):
+		try:
+			s.old_value = s.value
+			yield s.set_value(value if value != "-" else None)
+			s.time = now()
+			yield process_event(Event(self.ctx,"state",old,value,*s.name)).addErrback(process_failure)
+		finally:
 			s.working = False
-			return _
-		d.addBoth(clear_chg)
-		return d
+
+class ForgetStateHandler(Statement):
+	name=("forget","state")
+	doc="delete a saved state from the persistent database"
+	long_doc="""\
+forget state name...
+	- removes this saved state from the database
+	  The value will be re-added the next time the state is changed!
+"""
+	@inlineCallbacks
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if not len(event):
+			raise SyntaxError(u"Usage: forget state ‹name…›")
+		name = Name(event)
+
+		global Db
+		if Db is None:
+			from homevent.database import DbStore
+			Db = DbStore("state")
+			yield Db.start()
+
+		yield Db.delete(name)
 
 
 class VarStateHandler(Statement):
@@ -189,29 +350,53 @@ class ExistsStateCheck(Check):
 		return name in States
 
 
+class SavedStateCheck(Check):
+	name=("saved","state")
+	doc="check if a state is stored in the persistent database"
+	@inlineCallbacks
+	def check(self,*args):
+		if len(args) < 1:
+			raise SyntaxError(u"Usage: if saved state ‹name…›")
+
+		global Db
+		if Db is None:
+			from homevent.database import DbStore
+			Db = DbStore("state")
+			yield Db.start()
+		try:
+			yield Db.get(Name(args))
+		except KeyError:
+			returnValue(False)
+		else:
+			returnValue(True)
+
+
 class StateModule(Module):
 	"""\
 		This is a module to store system state.
-
-		Persistency is planned.
 		"""
 
-	info = "store NONpersistent state"
+	info = "store state"
 
 	def load(self):
+		main_words.register_statement(StateHandler)
 		main_words.register_statement(SetStateHandler)
 		main_words.register_statement(VarStateHandler)
 		register_condition(StateCheck)
 		register_condition(StateLockedCheck)
 		register_condition(LastStateCheck)
 		register_condition(ExistsStateCheck)
+		register_condition(SavedStateCheck)
 	
 	def unload(self):
+		main_words.unregister_statement(StateHandler)
 		main_words.unregister_statement(SetStateHandler)
 		main_words.unregister_statement(VarStateHandler)
+		main_words.unregister_statement(ForgetStateHandler)
 		unregister_condition(StateCheck)
 		unregister_condition(StateLockedCheck)
 		unregister_condition(LastStateCheck)
 		unregister_condition(ExistsStateCheck)
+		unregister_condition(SavedStateCheck)
 	
 init = StateModule

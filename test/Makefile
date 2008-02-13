@@ -18,6 +18,7 @@ export PYTHONPATH=$(shell pwd)/..
 export HOMEVENT_TEST=1
 
 test:
+	@rm -f /tmp/homevent.db.$$(id -u) 2>/dev/null
 	@set -e; \
 	rm -rf real; mkdir real; \
 	for f in $(wildcard *.sh) ; do \

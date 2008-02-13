@@ -28,15 +28,29 @@ block:
 		log TRACE "No‽ 1"
 	else:
 		log TRACE "Yes!"
-state foo bar
+	if saved state foo bar:
+		log TRACE "No‽ 3"
+	else:
+		log TRACE "Yes!"
+state foo bar:
+	saved
 block:
 	if exists state foo bar:
 		log TRACE "Yes!"
 	else:
 		log TRACE "No‽ 2"
+	if saved state foo bar:
+		log TRACE "No‽ 4"
+	else:
+		log TRACE "Yes!"
 
 log TRACE Set to ONE
 set state one foo bar
+block:
+	if saved state foo bar:
+		log TRACE "Yes!"
+	else:
+		log TRACE "No‽ 5"
 log TRACE Set to TWO
 set state two foo bar
 on state * three foo bar:
@@ -52,44 +66,27 @@ block:
 		set state three foo bar
 	catch:
 		log DEBUG "No! Error! Woe!"
-on state * twohalf foo bar:
-	log TRACE Set to FOUR
-	set state fourtoo foo bar
-block:
-	try:
-		log TRACE Set to TWOHALF
-		set state twohalf foo bar
-	catch:
-		log DEBUG "No! Error Propagation!"
-block:
-	try:
-		log TRACE Set to THREE
-		set state three foo bar
-	catch:
-		log DEBUG "No! Error! Woe!"
-wait: for 0.1
 list state
 list state foo bar
 block:
 	if state three foo bar:
 		log TRACE "Yes!"
 	else:
-		log TRACE "No‽ 3"
+		log TRACE "No‽ 8"
 block:
 	if exists state foo bar:
 		log TRACE "Yes!"
 	else:
-		log TRACE "No‽ 4"
+		log TRACE "No‽ 7"
 block:
-	if last state twohalf foo bar:
+	if last state two foo bar:
 		log TRACE "Yes!"
 	else:
-		log TRACE "No‽ 5"
+		log TRACE "No‽ 6"
 on whatever:
 	var state x foo bar
 	log TRACE We got $x
 sync trigger whatever
-del state foo bar
 list state
 shutdown
 """
@@ -97,7 +94,6 @@ shutdown
 h.main_words.register_statement(ShutdownHandler)
 load_module("state")
 load_module("block")
-load_module("wait")
 load_module("data")
 load_module("on_event")
 load_module("logging")
@@ -105,5 +101,5 @@ load_module("ifelse")
 load_module("trigger")
 load_module("errors")
 
-run("state",input)
+run("persist1",input)
 

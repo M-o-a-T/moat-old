@@ -1,86 +1,86 @@
-1 EVENT: startup
+EVENT: startup
 NEW: <ConditionalWorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
-1 EVENT: startup
-1 END: startup
-17 EVENT: wait¦start¦×××¦BEFORE
+EVENT: startup
+END: startup
+EVENT: wait¦start¦×××¦BEFORE
 NEW: <ConditionalWorkSequence:2 (4)>
    : │  EVENT: wait¦start¦×××¦BEFORE
    : └1╴... done.
-17 EVENT: wait¦start¦×××¦BEFORE
-17 END: wait¦start¦×××¦BEFORE
-25 EVENT: wait¦start¦×××¦Foo¦Bar
+EVENT: wait¦start¦×××¦BEFORE
+END: wait¦start¦×××¦BEFORE
+EVENT: wait¦start¦×××¦Foo¦Bar
 NEW: <ConditionalWorkSequence:3 (4)>
    : │  EVENT: wait¦start¦×××¦Foo¦Bar
    : └1╴... done.
-25 EVENT: wait¦start¦×××¦Foo¦Bar
-25 END: wait¦start¦×××¦Foo¦Bar
-32 EVENT: wait¦done¦×××¦BEFORE
+EVENT: wait¦start¦×××¦Foo¦Bar
+END: wait¦start¦×××¦Foo¦Bar
+EVENT: wait¦done¦×××¦BEFORE
 NEW: <ConditionalWorkSequence:4 (4)>
    : │  EVENT: wait¦done¦×××¦BEFORE
    : └1╴... done.
-32 EVENT: wait¦done¦×××¦BEFORE
-32 END: wait¦done¦×××¦BEFORE
+EVENT: wait¦done¦×××¦BEFORE
+END: wait¦done¦×××¦BEFORE
 1 Start
 1 waiting
-52 EVENT: wait¦start¦×××¦DURING
+EVENT: wait¦start¦×××¦DURING
 NEW: <ConditionalWorkSequence:5 (4)>
    : │  EVENT: wait¦start¦×××¦DURING
    : └1╴... done.
-52 EVENT: wait¦start¦×××¦DURING
-52 END: wait¦start¦×××¦DURING
-59 EVENT: wait¦done¦×××¦DURING
+EVENT: wait¦start¦×××¦DURING
+END: wait¦start¦×××¦DURING
+EVENT: wait¦done¦×××¦DURING
 NEW: <ConditionalWorkSequence:6 (4)>
    : │  EVENT: wait¦done¦×××¦DURING
    : └1╴... done.
-59 EVENT: wait¦done¦×××¦DURING
-59 END: wait¦done¦×××¦DURING
+EVENT: wait¦done¦×××¦DURING
+END: wait¦done¦×××¦DURING
 1 testing
 1 waiting
-69 EVENT: wait¦start¦×××¦DURING
+EVENT: wait¦start¦×××¦DURING
 NEW: <ConditionalWorkSequence:7 (4)>
    : │  EVENT: wait¦start¦×××¦DURING
    : └1╴... done.
-69 EVENT: wait¦start¦×××¦DURING
-69 END: wait¦start¦×××¦DURING
-76 EVENT: wait¦done¦×××¦DURING
+EVENT: wait¦start¦×××¦DURING
+END: wait¦start¦×××¦DURING
+EVENT: wait¦done¦×××¦DURING
 NEW: <ConditionalWorkSequence:8 (4)>
    : │  EVENT: wait¦done¦×××¦DURING
    : └1╴... done.
-76 EVENT: wait¦done¦×××¦DURING
-76 END: wait¦done¦×××¦DURING
+EVENT: wait¦done¦×××¦DURING
+END: wait¦done¦×××¦DURING
 1 testing
 1 waiting
-86 EVENT: wait¦start¦×××¦DURING
+EVENT: wait¦start¦×××¦DURING
 NEW: <ConditionalWorkSequence:9 (4)>
    : │  EVENT: wait¦start¦×××¦DURING
    : └1╴... done.
-86 EVENT: wait¦start¦×××¦DURING
-86 END: wait¦start¦×××¦DURING
-93 EVENT: wait¦done¦×××¦Foo¦Bar
+EVENT: wait¦start¦×××¦DURING
+END: wait¦start¦×××¦DURING
+EVENT: wait¦done¦×××¦Foo¦Bar
 NEW: <ConditionalWorkSequence:10 (4)>
    : │  EVENT: wait¦done¦×××¦Foo¦Bar
    : └1╴... done.
-93 EVENT: wait¦done¦×××¦Foo¦Bar
-93 END: wait¦done¦×××¦Foo¦Bar
-100 EVENT: wait¦done¦×××¦DURING
+EVENT: wait¦done¦×××¦Foo¦Bar
+END: wait¦done¦×××¦Foo¦Bar
+EVENT: wait¦done¦×××¦DURING
 NEW: <ConditionalWorkSequence:11 (4)>
    : │  EVENT: wait¦done¦×××¦DURING
    : └1╴... done.
-100 EVENT: wait¦done¦×××¦DURING
-100 END: wait¦done¦×××¦DURING
+EVENT: wait¦done¦×××¦DURING
+END: wait¦done¦×××¦DURING
 1 testing
 1 Done
-113 EVENT: wait¦start¦×××¦AFTER
+EVENT: wait¦start¦×××¦AFTER
 NEW: <ConditionalWorkSequence:12 (4)>
    : │  EVENT: wait¦start¦×××¦AFTER
    : └1╴... done.
-113 EVENT: wait¦start¦×××¦AFTER
-113 END: wait¦start¦×××¦AFTER
-120 EVENT: wait¦done¦×××¦AFTER
+EVENT: wait¦start¦×××¦AFTER
+END: wait¦start¦×××¦AFTER
+EVENT: wait¦done¦×××¦AFTER
 NEW: <ConditionalWorkSequence:13 (4)>
    : │  EVENT: wait¦done¦×××¦AFTER
    : └1╴... done.
-120 EVENT: wait¦done¦×××¦AFTER
-120 END: wait¦done¦×××¦AFTER
+EVENT: wait¦done¦×××¦AFTER
+END: wait¦done¦×××¦AFTER

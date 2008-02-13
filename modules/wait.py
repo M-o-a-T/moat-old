@@ -35,7 +35,7 @@ from homevent.worker import HaltSequence,ExcWorker
 from homevent.times import time_delta, time_until, unixtime,unixdelta, now
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.base import Name,SYS_PRIO
-from homevent.twist import callLater
+from homevent.twist import callLater, reset_slots
 from homevent.collect import Collection,Collected
 
 from time import time
@@ -158,7 +158,7 @@ class Waiter(Collected):
 			return self.defer
 
 		if self.name in Waiters:
-			return DupWaiterError(self)
+			raise DupWaiterError(self)
 		Waiters[self.name] = self
 
 		d,e = self._lock()
@@ -372,6 +372,8 @@ Known flags:
 		for n in event:
 			if n == "force":
 				self.parent.force = True
+			elif n == "reset":
+				reset_slots()
 			else:
 				raise SyntaxError(u'Flag ‹%s› unknown' % (n,))
 

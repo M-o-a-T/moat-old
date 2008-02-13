@@ -1,0 +1,88 @@
+EVENT: startup
+NEW: <ConditionalWorkSequence:1 (4)>
+   : │  EVENT: startup
+   : └1╴... done.
+EVENT: startup
+END: startup
+0 Yes!
+0 Yes!
+0 Yes!
+0 Yes!
+0 Set to ONE
+EVENT: state¦-¦one¦foo¦bar
+NEW: <ConditionalWorkSequence:2 (4)>
+   : │  EVENT: state¦-¦one¦foo¦bar
+   : └1╴... done.
+EVENT: state¦-¦one¦foo¦bar
+END: state¦-¦one¦foo¦bar
+0 Yes!
+0 Set to TWO
+EVENT: state¦one¦two¦foo¦bar
+NEW: <ConditionalWorkSequence:3 (4)>
+   : │  EVENT: state¦one¦two¦foo¦bar
+   : └1╴... done.
+EVENT: state¦one¦two¦foo¦bar
+END: state¦one¦two¦foo¦bar
+0 Create OnEvtHandler: state¦*¦three¦foo¦bar
+0 NewHandler 1
+0 Set to THREE
+EVENT: state¦two¦three¦foo¦bar
+NEW: <ConditionalWorkSequence:4 (5)>
+   : │  EVENT: state¦two¦three¦foo¦bar
+   : ├1╴on state * three foo bar ‹OnEventHandler›
+   : │  prio: 51
+   : │  step: log TRACE Set to FOUR ‹LogHandler›
+   : │  step: try ‹TryStatement›
+   : │      : step: set state four foo bar ‹SetStateHandler›
+   : │      : step: log DEBUG No! (No shit happened.) ‹LogHandler›
+   : └2╴... done.
+EVENT: state¦two¦three¦foo¦bar
+RUN: on state * three foo bar ‹OnEventHandler›
+   : prio: 51
+   : step: log TRACE Set to FOUR ‹LogHandler›
+   : step: try ‹TryStatement›
+   :     : step: set state four foo bar ‹SetStateHandler›
+   :     : step: log DEBUG No! (No shit happened.) ‹LogHandler›
+ at: <ConditionalWorkSequence:4 (5)> (step 1)
+ ev: EVENT: state¦two¦three¦foo¦bar
+0 Set to FOUR
+1 Yes! (Shit happens.)
+END: state¦two¦three¦foo¦bar
+foo bar :: three — now
+.
+value: three
+lock: No
+last value: two
+last change: now
+persistent: yes
+.
+0 Yes!
+0 Yes!
+0 Yes!
+0 Create OnEvtHandler: whatever
+0 NewHandler 2
+EVENT: whatever
+NEW: <ConditionalWorkSequence:5 (5)>
+   : │  EVENT: whatever
+   : ├1╴on whatever ‹OnEventHandler›
+   : │  prio: 51
+   : │  step: var state x foo bar ‹VarStateHandler›
+   : │  step: log TRACE We got $x ‹LogHandler›
+   : └2╴... done.
+EVENT: whatever
+RUN: on whatever ‹OnEventHandler›
+   : prio: 51
+   : step: var state x foo bar ‹VarStateHandler›
+   : step: log TRACE We got $x ‹LogHandler›
+ at: <ConditionalWorkSequence:5 (5)> (step 1)
+ ev: EVENT: whatever
+0 We got three
+END: whatever
+foo bar :: three — now
+.
+EVENT: shutdown
+NEW: <ConditionalWorkSequence:6 (5)>
+   : │  EVENT: shutdown
+   : └1╴... done.
+EVENT: shutdown
+END: shutdown

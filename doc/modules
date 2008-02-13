@@ -292,6 +292,7 @@ Register a device.
     fs20 em inside
         code thermo_hygro 1
 
+
 code TYPE ID
 ------------
 
@@ -300,6 +301,7 @@ Tells HomEvenT which type of device this is and the ID that's set on it.
 You can get the list of known types with "help fs20 em".
 
 Device IDs range from zero to seven.
+
 
 scale type factor offset
 ------------------------
@@ -314,6 +316,28 @@ the value is zero).
     fs20 em inside
         code thermo_hygro 1
         scale humidity * 1.2
+
+
+timeslot [sec]
+--------------
+
+There are only eight possible addresses for each device type, but they
+send at pre-defined and reasonably accurate intervals. Using this
+command, the system tries to separate them by installing a timeslot
+(with sane values and the same name) for this devices.
+
+The optional value is the duration of the time slot; it defaults to one
+second. If you have a slow computer, increasing this value may be
+necessary.
+
+Note that you need to declare one timeslot-equipped FS20-EM device,
+insert the batteries, and wait for correct measurement events to show up
+before you declare the timeslot for any other device. Otherwise HomEvenT
+will have no way to determine which device is which.
+
+In addition to using a timeslot, HomEvenT tries to separate devices by
+considering the previous measurement: if a data packet can be placed in
+two slots, the device with the closest values will be used.
 
 ----------------
 del fs20 em NAME
@@ -981,6 +1005,97 @@ if exists path "name"
 True if the name points to something (file, directory, device, …)
 
 
+===
+pwm
+===
+
+This module implements pulse-width (and related) modulation. That is, it
+translates a number between 0 and 1 into a sequence of on/off events, so
+that the fraction of time the signal is on equals that number.
+
+Modes exist for pulse width modulation (constant time between off ⇒ on
+events) and pulse density modulation (the "on" time is constant but the
+"off" time varies, or vice versa).
+
+Support for minimal interval duration (e.g. a furnace needs to be on for
+at least a minute, otherwise there'd be wasted gas but no actual heat)
+is not yet implemented.
+
+
+---
+pwm
+---
+
+Create a new PWM. Note that you do need a couple of sub-commands,
+depending on the PWM's type.
+
+type
+----
+
+This (required) sub-statement controls the type of the pulse modulator.
+Implemented are "PWM", "PDM" (constant 'on' time) and "iPDM" (constant
+'off' time).
+
+    pwm foo bar:
+        type PDM
+
+interval
+--------
+
+This (required) sub-statement sets the common interval. For PWM style
+controllers, this is the total control interval; for PDM, the duration
+of the pulse or pause.
+
+    pwm foo:
+        interval 12
+
+----------
+update pwm
+----------
+
+Change the parameters of a PWM. Use sub-statements as above.
+
+Currently, changing the PWM type is not supported.
+
+
+-------
+set pwm
+-------
+
+Sets the PWM's goal value. The PWM is started if it's not running
+already.
+
+    set pwm 0.123 foo
+
+There is no way to explicitly stop a PWM off; however, setting the value
+to zero will set the state to "off" and not emit any further events,
+which is more or less the same thing.
+
+-----
+Tests
+-----
+
+
+exists pwm
+----------
+
+Tests if a PWM has been defined.
+
+    if exists pwm foo:
+        del pwm foo
+
+on pwm
+------
+
+Tests if the PWM is running, i.e. has had a value assigned to it.
+
+    if on pwm foo:
+        do whatever
+
+NB: Testing if the PWM is currently in its "on" phase is not supported
+directly. If you need that, capture the event and set a state variable.
+
+
 =======
 onewire
 =======
@@ -1408,8 +1523,44 @@ HomEvenT with root privileges!
 state
 =====
 
-This module limits state variables. These are not yet persistent, but
-they will be.
+This module limits state variables. These can be persistent if you want
+them to.
+
+-----
+state
+-----
+
+Create a new state.
+
+    state foo bar
+
+saved
+-----
+
+The state will be read from the database if it exists there.
+
+It will also be written every time it's changed with a "set state"
+command.
+
+The state will not be read from the database at any other time.
+
+
+trigger new
+-----------
+
+Send a new-value event when the state is created. The old value is
+the string "-"; so is the new value unless you set it to something else.
+
+trigger old
+-----------
+
+Like above, but used when the state is restored from the database.
+
+value ‹whatever›
+----------------
+
+Set the initial value
+
 
 ---------
 set state
@@ -1419,17 +1570,23 @@ Sets a state to some value.
 
 	set state on livingroom lamp1
 
-This will trigger an event if the old state was not "on":
+This will trigger the following event, assuming that the old state was "off":
 
-	state - on livingroom lamp1
+	state off on livingroom lamp1
 
-"-" is used when the state variable is new.
+The old state is "-" if the state variable has not been set before.
 
 The event is processed synchronously. It is an error for an event
-handler to change the same state variables.
+handler to change the same state variable. Setting a variable to the
+value it already has is not a change and will not result in an error, or
+an event for that matter.
 
-For this reason, you need to wrap any activity that's either long-term,
-or likely to change the state again, in an async: block. In other
+NB: that error, like the event that triggered it, is handled synchronously.
+However, it will *not* be propagated out of the original "set state" command
+because that command did change the variable's value as intended.
+
+For this reason, you need to wrap any activity that's long-term (and/or
+or likely to change the state again) in an async: block. In other
 words, this is broken and will cause you a lot of headache:
 
 	# DO NOT DO THIS
@@ -1439,10 +1596,10 @@ words, this is broken and will cause you a lot of headache:
 	load trigger
 
 	on state * on outside *lamp:
-		trigger onewire switch on outside $lamp
+		trigger switch on outside $lamp
 		wait outside $lamp
             for 5min
-		trigger onewire switch off outside $lamp
+		trigger switch off outside $lamp
 
 The correct solution would be, depending on whether you want the switch
 to prolong the timeout …:
@@ -1458,10 +1615,10 @@ to prolong the timeout …:
 				update
 		else:
 			async:
-				trigger onewire switch on outside $lamp
+				trigger switch on outside $lamp
 				wait outside $lamp:
                     for 5min
-				trigger onewire switch off outside $lamp
+				trigger switch off outside $lamp
 
 … or turn the lamp off prematurely:
 
@@ -1471,10 +1628,10 @@ to prolong the timeout …:
 			if exists wait outside $lamp:
 				del wait outside $lamp
 			else:
-				trigger onewire switch on outside $lamp
+				trigger switch on outside $lamp
 				wait outside $lamp
                     for 5min
-			trigger onewire switch off outside $lamp
+			trigger switch off outside $lamp
 
 Note that in the last example, the trigger statement is outside the if:
 statement. That is intentional; see "del wait", below, for details.
@@ -1489,6 +1646,8 @@ triggered:
 	state on - livingroom lamp1
 
 The rules on events, above, still apply.
+
+This command will remove a saved state from the database.
 
 ----------
 list state
@@ -1535,6 +1694,11 @@ True if the state has been defined at all.
 
 	if exists state NAME:
 		log DEBUG "Yay!"
+
+saved state
+-----------
+
+As above, but tests whether a saved state exists in the database.
 
 locked state
 ------------

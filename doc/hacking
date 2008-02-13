@@ -197,9 +197,16 @@ necessary, a few random delays don't hurt if that saves
 you from writing a custom daemon just to test stuff.
 Just make sure that you *do* verify the intended output …
 
-HomEvenT, right now, has a very bad test system. It simply traces
-everything and then checks that the traces match. That can (and
-ultimately will) be improved, but right now it's all we have.
+HomEvenT, right now, has a test system that could do with some
+improvement. It simply traces everything and then checks that the traces
+match.
+
+While testing, "wait" statements are only used to prevent everything from
+happening at once; they don't really slow down anything unless the
+"debug force" sub-command is given; see e.g. the FS20 testcase. A "debug
+reset" sub-command can be used to update HomEvenT's idea of how much
+time has really elapsed; use this if you have real-time wait commands
+which follow fake ones.
 
 ------------
 Coding Style

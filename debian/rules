@@ -46,6 +46,7 @@ install: build
 	mv debian/homevent/usr/bin/daemon.py debian/homevent/usr/sbin/homevent
 	install sitecustomize.py debian/homevent/etc/homevent
 	install daemon.he debian/homevent/etc/homevent
+	install he_storage.py debian/homevent/etc/homevent
 
 
 

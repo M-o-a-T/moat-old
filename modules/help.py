@@ -22,7 +22,7 @@ This code implements the Help command.
 
 from homevent.module import Module
 from homevent.logging import log
-from homevent.statement import Statement, global_words
+from homevent.statement import Statement, global_words, HelpSub
 from homevent.base import Name
 
 class Help(Statement):
@@ -82,7 +82,9 @@ Statements may be multi-word and follow generic Python syntax.
 				hlen = len(" ".join(n))
 				if hlen > maxlen: maxlen = hlen
 			if maxlen:
-				print >>self.ctx.out,"Known words:"
+				n = getattr(words,"helpsubname","word")
+				print >>self.ctx.out,"Known "+n+"s:"
+
 				def nam(a,b):
 					return cmp(a[0],b[0])
 				for n,d in sorted(wl(),nam):

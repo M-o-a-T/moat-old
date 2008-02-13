@@ -5,19 +5,51 @@ time.sleep(1)
 sys.stderr.write("1\rDies ist eine Test-Fehlermeldung\n2\r")
 sys.stderr.flush()
 time.sleep(0.2)
-sys.stdout.write("f8c8d131244\n") # OK
+
+sys.stdout.write("+2 wait\n") # wait
+
+sys.stdout.write("+2.1 switch OK\n")
+sys.stdout.write("f8c8d131244\n")
+
+sys.stdout.write("+2.2 switch unknown function\n")
 sys.stdout.write("f8c8d131F51\n") # unknown function
+
+sys.stdout.write("+2.3 switch housecode not found\n")
 sys.stdout.write("f8c89131240\n") # not found, bad house code
+
+sys.stdout.write("+2.4 switch device not found\n")
 sys.stdout.write("f8c8d141245\n") # not found, no device
+
+sys.stdout.write("+2.5 switch bad checksum\n")
 sys.stdout.write("f8c8d131245\n") # not found, bad checksum
+
+sys.stdout.write("+3.1 env bad checksum 1\n")
 sys.stdout.write("e0f01030405\n") # bad checksum 1
+
+sys.stdout.write("+3.2 env bad checksum 2\n")
 sys.stdout.write("e0f01030d06\n") # bad checksum 2
+
+sys.stdout.write("+3.3 env unknown devtype\n")
 sys.stdout.write("e0f01030d05\n") # unknown device type
+
+sys.stdout.write("+3.4 env bad length\n")
 sys.stdout.write("e010103030d\n") # bad length
+
+sys.stdout.write("+3.5 env unknown device\n")
 sys.stdout.write("e01020302010605040401\n") # unknown device
+
+sys.stdout.write("+3.6 env OK: temphumid inside\n")
 sys.stdout.write("e01010302010605040703\n") # OK, 12.3 and 45.6
+
+sys.stdout.write("+3.7 env dup: smackmiddle\n")
+sys.stdout.write("e0103050301040302000B\n") # not OK, smack in the middle
+
+sys.stdout.write("+3.7 env OK: temphumid one\n")
+sys.stdout.write("e0103030201040302070F\n") # OK, match with ONE
+
 sys.stdout.flush()
 time.sleep(0.2)
 sys.stderr.write("9\r")
 sys.stderr.flush()
 
+time.sleep(5)

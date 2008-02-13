@@ -38,8 +38,11 @@ Code
 
 * implement a PID controller
 
-* Implement a PWM modulator
-  - both fixed-total and fixed-min/max-pulse modes please
+* Improve the PWM modulator
+  - add minimum times for off and on
+    - which either clamp the value, or get skipped when the duty cycle
+      cannot reach the value
+  - add override
 
 * implement a multi-step controller (i.e. simple switch thresholds)
 
@@ -49,9 +52,18 @@ Code
   - send an event when the average changes by more than X
     - which needs a timer!
 
+* timeslots: store last start time someplace.
+
+* state handling: wait for a state to be unlocked instead of blindly
+  assuming that it must be recursive; store in the context whether
+  that's the case
 
 FS20
 ====
+
+* EM:
+  - Warn when timeslots start to wander too close together
+  - Store last values someplace.
 
 * Handle repeaters.
 

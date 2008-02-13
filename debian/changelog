@@ -1,11 +1,15 @@
 homevent (0.2.9) unstable; urgency=low
 
   * Onwards.
+  * Add a database back-end for storing state
+    based on the Storm ORM, with Twisted extension.
+    - Add persistent state.
   * Add averaging handler.
   * Add time-slot handler.
   * Make twisted-conch (recommended but) optional.
+  * Add PWM module.
 
- -- Matthias Urlichs <matthias@urlichs.de>  Tue, 22 Jan 2008 16:44:17 +0100
+ -- Matthias Urlichs <matthias@urlichs.de>  Wed, 30 Jan 2008 01:33:52 +0100
 
 homevent (0.2.8) stable; urgency=low
 

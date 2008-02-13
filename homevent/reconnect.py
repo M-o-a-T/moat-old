@@ -84,7 +84,7 @@ class ReconnectingClientFactory(protocol.ClientFactory):
 			else:
 				connector = self.connector
 
-		log(TRACE,"Try %s immediately" % (connector,))
+		# log(TRACE,"Try %s immediately" % (connector,))
 		self.connector = None
 		connector.connect()
 

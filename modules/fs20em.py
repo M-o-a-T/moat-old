@@ -31,6 +31,8 @@ from homevent.run import simple_event
 from homevent.base import Name
 from homevent.fs20 import recv_handler, PREFIX
 from homevent.collect import Collection,Collected
+from homevent.logging import log,TRACE,DEBUG
+from homevent.times import now,humandelta
 
 #from twisted.internet import protocol,defer,reactor
 #from twisted.protocols.basic import _PauseableMixin
@@ -54,6 +56,8 @@ def em_proc_thermo_hygro(ctx, data):
 	hum = data[4]/10 + data[5] + data[6]*10
 	return {"temperature":temp, "humidity":hum}
 em_proc_thermo_hygro.em_name = "thermo_hygro"
+em_proc_thermo_hygro.interval = 177
+em_proc_thermo_hygro.interval_mod = -0.5
 
 em_procs = [ None, # em_proc_thermo,
              em_proc_thermo_hygro,
@@ -74,17 +78,35 @@ EMcodes = {}
 
 class EM(Collected):
 	storage = EMs.storage
-	def __init__(self,name,group,code, faktor={},offset={}):
+	def __init__(self,name,group,code, faktor={},offset={}, slot=None):
 		self.group = group
 		self.code = code
 		self.offset = offset
 		self.faktor = faktor
+		self.last = None # timestamp
+		self.last_data = None # data values
 		try: g = EMcodes[group]
 		except KeyError: EMcodes[group] = g = {}
 		try: c = g[code]
 		except KeyError: g[code] = c = []
 		c.append(self)
+
+		self._slot = slot
+		if slot is not None:
+			from homevent.timeslot import Timeslot
+			ts = Timeslot(self,name)
+			p = em_procs[self.group]
+			ts.interval = p.em_interval + code * p.em_interval_mod
+			ts.maybe_up()
 		super(EM,self).__init__(*name)
+
+	def get_slot(self):
+		if self._slot is None:
+			return None
+		else:
+			from homevent.timeslot import Timeslots
+			return Timeslots[self.name]
+	slot = property(get_slot)
 
 	def event(self,ctx,data):
 		for m,n in data.iteritems():
@@ -94,23 +116,93 @@ class EM(Collected):
 			except KeyError: pass
 
 			simple_event(ctx, "fs20","em", m,n, *self.name)
+		self.last = now()
+		self.last_data = data
 
 	def info(self):
-		return "%s %d" % (em_procs[self.group].em_name, self.code)
+		if self.last is not None:
+			return "%s %d: %s" % (em_procs[self.group].em_name, self.code,
+				humandelta(now()-self.last))
+		else:
+			return "%s %d: (never)" % (em_procs[self.group].em_name, self.code)
 
 	def list(self):
+		yield("name",self.name)
 		yield("group",self.group)
 		yield("groupname",em_procs[self.group].em_name)
 		yield("code",self.code)
+		if self.last:
+			yield ("last",humandelta(now()-self.last))
+		if self.last_data:
+			for k,v in self.last_data.iteritems(): yield ("last_"+k,v)
 		for k,v in self.faktor: yield ("faktor_"+k,v)
 		for k,v in self.offset: yield ("offset_"+k,v)
+		if self.slot:
+			for k,v in self.slot.list(): yield ("slot_"+k,v)
 	
 	def delete(self):
 		EMcodes[self.group][self.code].remove(self)
-		self.delete_done()
-		if not EMcodes[self.group][self.code]: # empty array
-			del EMcodes[self.group][self.code]
+		if self._slot:
+			d = defer.maybeDeferred(self.slot.delete)
+		else:
+			d = defer.succeed(None)
+
+		def done(_):
+			self.delete_done()
+			if not EMcodes[self.group][self.code]: # empty array
+				del EMcodes[self.group][self.code]
+			return _
+		d.addBoth(done)
+		return d
 		
+
+class SomeNull(Exception): pass
+
+def mfilter(val, hdl):
+	"""\
+		Try to find the device that's closest to the last-reported values.
+		This only works when all devices have some common previous
+		measurement.
+		‹val› is the reported type/value hash, ‹hdl› a list of devices.
+		"""
+	if len(hdl) < 2:
+		return hdl
+	for h in hdl:
+		if h.last_data is None:
+			return hdl
+	dm = []
+	for k in val.iterkeys():
+		try:
+			for h in hdl:
+				if k not in h.last_data:
+					raise SomeNull
+			dm.append(k)
+		except SomeNull: pass
+	if not dm:
+		return hdl
+
+	d = None
+	f = None
+	for h in hdl:
+		dn = 0
+		for k in dm:
+			dn += abs(h.last_data[k] - val[k])
+
+		if d is None or dn < d*2/3:
+			d = dn
+			f = h
+		elif dn < d*3/2: # not enough separation
+			if d < dn: d = dn
+			f = None
+	if f is None:
+		return hdl
+	return (f,)
+	
+def flat(r):
+	for a,b in r.iteritems():
+		yield a
+		yield b
+
 class em_handler(recv_handler):
 	def dataReceived(self, ctx, data, handler=None, timedelta=None):
 		if len(data) < 4:
@@ -137,21 +229,52 @@ class em_handler(recv_handler):
 			simple_event(ctx, "fs20","unknown","em",data[0],"".join("%x"%x for x in data[1:]))
 		else:
 			r = g(ctx, data[1:])
+			if r is None:
+				return
 			try:
 				hdl = EMcodes[data[0]][data[1]&7]
 			except KeyError:
-				if r is None:
-					simple_event(ctx, "fs20","unknown","em",g.em_name,data[1]&7,"".join("%x"%x for x in data[1:]))
-				else:
-					def flat(r):
-						for a,b in r.iteritems():
-							yield a
-							yield b
-					simple_event(ctx, "fs20","unknown","em",g.em_name,data[1]&7,*tuple(flat(r)))
+				simple_event(ctx, "fs20","unknown","em","unregistered",g.em_name,data[1]&7,*tuple(flat(r)))
 			else:
-				if r is not None:
-					for h in hdl:
-						h.event(ctx,r)
+				# If there is more than one device on the same
+				# address, this code tries to find the one that's
+				# most likely to be the one responsible.
+				hi = [] # in slot
+				hr = [] # slot not running
+				hn = [] # device without slot
+				for h in hdl:
+					if h.slot is None:
+						hn.append(h)
+					elif h.slot.is_in():
+						hi.append(h)
+					elif not h.slot.is_out():
+						hr.append(h)
+				if hi:
+					hi = mfilter(r,hi)
+					if len(hi) > 1:
+						simple_event(ctx, "fs20","conflict","em","sync",g.em_name,data[1]&7, *tuple(flat(r)))
+					else:
+						hi[0].slot.do_sync()
+						hi[0].event(ctx,r)
+				elif hr:
+					hr = mfilter(r,hr)
+					if len(hr) > 1:
+						simple_event(ctx, "fs20","conflict","em","unsync",g.em_name,data[1]&7, *tuple(flat(r)))
+					else:
+						hr[0].slot.up(True)
+						hr[0].event(ctx,r)
+				elif hn:
+					hn = mfilter(r,hn)
+					if len(hn) > 1:
+						simple_event(ctx, "fs20","conflict","em","untimed",g.em_name,data[1]&7, *tuple(flat(r)))
+					else:
+						# no timeslot here
+						hn[0].event(ctx,r)
+				elif hdl:
+					simple_event(ctx, "fs20","unknown","em","untimed",g.em_name,data[1]&7, *tuple(flat(r)))
+				else:
+					simple_event(ctx, "fs20","unknown","em","unregistered",g.em_name,data[1]&7, *tuple(flat(r)))
+
 
 class FS20em(AttributedStatement):
 	name = ("fs20","em")
@@ -166,6 +289,7 @@ Known types:
 
 	group = None
 	code = None
+	slot = None
 	def __init__(self,*a,**k):
 		self.faktor={}
 		self.offset={}
@@ -178,7 +302,7 @@ Known types:
 			raise SyntaxError(u"‹fs20 em› needs a name")
 		if self.code is None:
 			raise SyntaxError(u"‹fs20 em› needs a 'code' sub-statement")
-		EM(Name(event), self.group,self.code, self.faktor,self.offset)
+		EM(Name(event), self.group,self.code, self.faktor,self.offset, self.slot)
 
 class FS20emScale(Statement):
 	name = ("scale",)
@@ -201,6 +325,28 @@ scale ‹type› ‹factor› ‹offset›
 		if event[2] != "*":
 			self.parent.offset[name] = float(event[2])
 FS20em.register_statement(FS20emScale)
+
+class FS20emSlot(Statement):
+	name = ("timeslot",)
+	doc = "create a time slot"
+	long_doc=u"""\
+timeslot [‹seconds›]
+	Create a timeslot with the same name as this device.
+	Only measurements arriving in that timeslot will be considered.
+	You can simply stop the timeslot if you need to re-sync.
+	The optional seconds parameter is the duration of the slot;
+	it defaults to one second.
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if len(event) > 1:
+			raise SyntaxError(u'Usage: timeslot [‹seconds›]')
+		if len(event):
+			sec = float(event[0])
+		else:
+			sec = 1
+		self.parent.slot = sec
+FS20em.register_statement(FS20emSlot)
 
 class FS20emcode(Statement):
 	name = ("code",)
@@ -231,10 +377,25 @@ Known types:
 				return
 			id += 1
 		raise SyntaxError(u"Usage: ‹fs20 em› ‹name…›: ‹code›: Unknown type")
-
 FS20em.register_statement(FS20emcode)
 
 
+class FS20emVal(Statement):
+	name = ("set","fs20","em")
+	doc = "Set the last-reported value for a device"
+	long_doc = u"""\
+set fs20 em ‹type› ‹value› ‹name…›
+	- Set a last-reported value. This is used to distinguish devices
+	  which are set to the same ID after start-up.
+"""
+
+	def run(self,ctx,**k):
+		event = self.params(self.ctx)
+		if len(event) < 3:
+			raise SyntaxError(u"Usage: set fs20 em ‹type› ‹value› ‹name…›")
+		d = EMs[Name(event[2:])]
+		if d.last_data is None: d.last_data = {}
+		d.last_data[event[0]] = float(event[1])
 
 
 class fs20em(Module):
@@ -247,9 +408,11 @@ class fs20em(Module):
 	def load(self):
 		PREFIX[PREFIX_EM] = em_handler()
 		main_words.register_statement(FS20em)
+		main_words.register_statement(FS20emVal)
 	
 	def unload(self):
 		del PREFIX[PREFIX_EM]
 		main_words.unregister_statement(FS20em)
+		main_words.unregister_statement(FS20emVal)
 	
 init = fs20em

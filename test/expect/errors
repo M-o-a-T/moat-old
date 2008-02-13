@@ -1,9 +1,9 @@
-1 EVENT: startup
+EVENT: startup
 NEW: <ConditionalWorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
-1 EVENT: startup
-1 END: startup
+EVENT: startup
+END: startup
 1 Yes A
 1 Yes B
 1 Yes C
@@ -15,7 +15,7 @@ NEW: <WorkSequence:2 (4)>
    : │  ERROR: RaisedError: Foo A
    : └1╴... done.
 ERROR: RaisedError: Foo A
-119 END: RaisedError
+END: RaisedError
 1 Yes E
 0 Triggered:
 0 RaisedError: Foo B
@@ -35,7 +35,7 @@ NEW: <WorkSequence:3 (4)>
    : │  ERROR: RaisedError: Foo E
    : └1╴... done.
 ERROR: RaisedError: Foo E
-138 END: RaisedError
+END: RaisedError
 1 Yes K
 0 Triggered:
 0 RaisedError: Foo F
@@ -50,9 +50,9 @@ ERROR: RaisedError: Foo E
 0 Triggered:
 0 RaisedError: Foo Bar
 1 Yes P Foo Bar
-2 EVENT: shutdown
+EVENT: shutdown
 NEW: <ConditionalWorkSequence:4 (5)>
    : │  EVENT: shutdown
    : └1╴... done.
-2 EVENT: shutdown
-2 END: shutdown
+EVENT: shutdown
+END: shutdown
