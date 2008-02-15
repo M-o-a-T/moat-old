@@ -58,8 +58,27 @@ Code
   assuming that it must be recursive; store in the context whether
   that's the case
 
-FS20
-====
+FS20 / AVR
+==========
+
+* Document the stuff that exists now
+
+* Create schematics for AVR
+
+* AVR: write an 1wire client
+
+* AVR: write send/receive interlock
+
+* AVR: write high-level code to talk to FHT controllers
+
+* AVR: Implement 1% sender uptime rule
+
+* AVR: Implement send delay for low-priority signals when we're in a
+  receive timeslot (collision avoidance)
+
+* AVR: Reduce the need for three timers, one is sufficient
+
+* Create schematics for audio
 
 * EM:
   - Warn when timeslots start to wander too close together
