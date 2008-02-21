@@ -102,32 +102,6 @@ stop monitor ‹name›
 		m = Monitors[Name(event)]
 		return m.down()
 
-	def run(self,ctx,**k):
-		event = self.params(ctx)
-		if not len(event):
-			for m in Monitors.itervalues():
-				print >>self.ctx.out, " ".join(unicode(x) for x in m.name),"::",m.value,m.up_name,m.time_name
-			print >>self.ctx.out, "."
-		else:
-			m = Monitors[Name(event)]
-			print  >>self.ctx.out, "Name: "," ".join(unicode(x) for x in m.name)
-			if m.params:
-				print  >>self.ctx.out, "Device: "," ".join(unicode(x) for x in m.params)
-			print  >>self.ctx.out, "Value: ",m.value
-			print  >>self.ctx.out, "Up: ",m.up_name
-			print  >>self.ctx.out, "Time: ",m.time_name
-			if not "HOMEVENT_TEST" in os.environ:
-				if m.started_at:
-					print  >>self.ctx.out, "Start: ",unicode(m.started_at)
-				if m.stopped_at:
-					print  >>self.ctx.out, "Stop: ",unicode(m.stopped_at)
-
-			print  >>self.ctx.out, "Steps: ",m.steps,"/",m.points,"/",m.maxpoints
-			if m.data:
-				print  >>self.ctx.out, "Data: "," ".join(unicode(x) for x in m.data)
-			
-			print  >>self.ctx.out, "."
-
 class MonitorSet(Statement):
 	name=("set","monitor")
 	doc="feed a value to a passive monitor"
