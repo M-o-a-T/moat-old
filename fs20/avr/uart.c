@@ -204,7 +204,7 @@ static void rcv(task_head *dummy)
 static void rcv_over(task_head *dummy)
 {
 	cli();
-	fputs_P(PSTR(":UART buffer full!\n"),stderr);
+	fputs_P(PSTR("\n-UART buffer full\n"),stderr);
 	UART_RxHead = 0; UART_RxTail = 0; lines = 0;
 	sei();
 }
@@ -212,7 +212,7 @@ static void rcv_over(task_head *dummy)
 static void rcv_err(task_head *dummy)
 {
 	cli();
-	puts_P(PSTR(":serial error!\n"));
+	puts_P(PSTR("\n-serial recv error\n"));
 	UART_RxHead = 0; UART_RxTail = 0; lines = 0;
 	sei();
 }
@@ -250,9 +250,9 @@ Purpose:  called when the UART has received a character
     
     if ( tmphead == UART_RxTail ) {
         /* error: receive buffer overflow */
-		queue_task_if(&recv_overflow);
+		_queue_task_if(&recv_overflow);
     } else if(lastRxError) {
-		queue_task_if(&recv_err);
+		_queue_task_if(&recv_err);
 	} else {
         /* store new index */
         /* store received data in buffer */
