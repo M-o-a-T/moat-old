@@ -45,7 +45,7 @@ void real_queue_task(task_head *task)
 		report_error("Ouch");
 	}
 #endif
-	assert((unsigned short))task->proc < 0x4000,"Invalid task pointer");
+	assert((unsigned short)task->proc < 0x4000,"Invalid task pointer");
 
 	if(tail_now) {
 		assert(head_now,"Queue broken1");
