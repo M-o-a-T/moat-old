@@ -158,7 +158,7 @@ static volatile unsigned char UART_LastRxError;
 
 void __attribute__((weak)) line_reader(task_head *tsk)
 {
-	unsigned char *buf = (unsigned char *)(tsk+1);
+	//unsigned char *buf = (unsigned char *)(tsk+1);
 	//printf_P(PSTR(".IN: <%s>\n"),buf);
 	free(tsk);
 }
