@@ -1,6 +1,8 @@
 PRG            = main
 OBJ            = main.o uart.o util.o qtask.o qdelay.o writer.o \
 	flow_fs20.o flow_em.o reader.o
+PORT=/dev/ttyUSB1
+
 #MCU_TARGET     = at90s2313
 #MCU_TARGET     = at90s2333
 #MCU_TARGET     = at90s4414
@@ -139,7 +141,7 @@ esrec: $(PRG)_eeprom.srec
 	$(OBJCOPY) -j .eeprom --change-section-lma .eeprom=0 -O binary $< $@
 
 burn: bin
-	sudo avrdude -V -c usbtiny -p m168 -U $(PRG).bin
+	sudo avrdude -V -c usbtiny -p m168 -P $(PORT) -U $(PRG).bin
 
 # Every thing below here is used by avr-libc's build system and can be ignored
 # by the casual user.

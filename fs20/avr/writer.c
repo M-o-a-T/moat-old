@@ -57,16 +57,23 @@ unsigned char tx_ring_head;
 unsigned char tx_ring_tail;
 unsigned char more_data;
 
-static void _mesg(char *s, write_head *t)
+static void _mesg(char i, char *s, write_head *t)
 {
 	char num[6];
-	fputs_P(s,stdout);
+	fputc(i,stdout);
+	fputs(itoa((short)t,num,10),stdout);
 	fputc(' ',stdout);
+	fputs_P(s,stdout);
+	fputc('\n',stdout);
+}
+#define mesg(c,s) _mesg(c,PSTR(s),F_writer_task)
+static void qmesg(write_head *t)
+{
+	char num[6];
+	fputc('+',stdout);
 	fputs(itoa((short)t,num,10),stdout);
 	fputc('\n',stdout);
 }
-#define qmesg(s,t) _mesg(PSTR(s),t)
-#define mesg(s) qmesg(s,F_writer_task)
 	
 static void
 next_tx_data(task_head *dummy)
@@ -96,7 +103,7 @@ fill_tx_buf(task_head *dummy)
 	if(more_data != 1)
 		return;
 	if(tx_ring_head == tx_ring_tail) {
-		mesg("-BufUnderrun");
+		mesg('-',"BufUnderrun");
 		more_data=2;
 		return;
 	}
@@ -133,7 +140,7 @@ send_tx_data(task_head *dummy)
 		flow_proc = flow_proc->next;
 	}
 	if(!flow_proc) {
-		mesg("-Unknown");
+		mesg('-',"Unknown");
 		queue_task(&next_tx);
 		return;
 	}
@@ -143,7 +150,7 @@ send_tx_data(task_head *dummy)
 	flow_proc->write_init();
 	flow_proc->write_step(&nhi,&nlo);
 	if(!nhi) {
-		mesg("-Broken");
+		mesg('-',"Broken");
 		queue_task(&next_tx);
 		return;
 	}
@@ -184,7 +191,7 @@ void
 send_tx(write_head *task) {
 	assert(!task->next,"SendFS20 next");
 
-	qmesg("+",task);
+	qmesg(task);
 	if(sendq_head) {
 		//DBG("Send Q next");
 		sendq_head->next = task;
@@ -210,9 +217,9 @@ ISR(TIMER0_COMPA_vect)
 		}
 		if(more_data == 1) {
 			more_data = 2;
-			mesg("-BufUnderrun");
+			mesg('-',"BufUnderrun");
 		} else if (!more_data)
-			mesg("+OK");
+			mesg('+',"OK");
 		queue_task_usec(&next_tx, flow_proc->write_idle);
 	}
 	unsigned char tmptx = (tx_ring_tail+1) & TX_RING_MASK;

@@ -39,6 +39,8 @@ Parameters
 EM
 --
 
+* Message code 'e'
+
 * 4 bits/byte (“nibble”)
 
 * parity: always 1
@@ -58,6 +60,8 @@ EM
 ----
 FS20
 ----
+
+* Message code 'f'
 
 * 8 bits/byte
 
@@ -200,7 +204,7 @@ Code structure
 ==============
 
 Code for transmitting and receiving of raw datagrams is implemented in
-the “audio” folder. It's written in C because embedded systems have
+the “fs20/common” folder. It's written in C because embedded systems have
 problems running a full Python interpreter at all, let alone fast enough.
 
 The code is structured the way it is so that a future minimal
@@ -208,7 +212,41 @@ implementation for small embedded devices needs only a few #define
 statements which point to fixed-address variables, instead of
 carrying function and structure pointers around.
 
-The code should work both with fixed-interval timers, as implemented
+The code works both with fixed-interval timers, as implemented
 e.g. by something attached to a sound interface, and with interrupt-\
 based inputs plus a timer ("when did the signal state last change?").
+
+
+Audio
+-----
+
+The “fs20/audio” folder contains a minimal sender/receiver implementation.
+Due to latency in the audio path, the receiver is not turned off when
+the sender is active or vice versa.
+
+This should not be used in production environments.
+
+AVR
+---
+
+The “fs20/avr” folder contains an implementation of the sender/receiver
+code for the AVR 168 at 16 MHz. The sender is connected to PD6, the
+receiver to PB0, and a TTL-level serial interface to PD= (RX) and PD1
+(TX). Interlock between sender and receiver is TODO.
+
+The AVR code will ack messages with a string that starts with a + character;
+negative acknowledge is introduced with a - character. System restart,
+after a program crash, is signalled with a *. Any other system message
+should be introduced with a :. Received datagrams are introduced by 
+their message code.
+
+If a space and a number follows the +, the message has been queued. Any
+following messages which start with that number (after the introducing
+character) pertain to that message.
+
+The following additional message codes are used:
+
+* P: Ping.
+
+  The system sends a keepalive message every N seconds (default 1).
 

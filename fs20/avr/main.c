@@ -28,19 +28,44 @@
 #include "flow_data.h"
 
 unsigned long run = 0;
+unsigned int ping_timer = 1;
 
 void runit1(task_head *dummy);
 
 task_head idle_task = TASK_HEAD(runit1);
 
 void runit1(task_head *dummy) {
-	char buf[12];
+	char buf[9];
 	++run;
-	//fprintf_P(stderr,PSTR(":%ld\r"),++run);
-	fputc(':',stderr);
-	fputs(ltoa(run,buf,10),stderr);
+	fputc('P',stderr);
+	ltoa(run,buf,16);
+	if(strlen(buf)&1)
+		fputc('0',stderr);
+	fputs(buf,stderr);
 	fputc('\r',stderr);
-	queue_task_msec(&idle_task,1000);
+	queue_task_sec(&idle_task,ping_timer);
+}
+
+inline void set_ping(write_head *cb)
+{
+	unsigned int pingtimer = 0;
+	unsigned char *bp = cb->data;
+	if(cb->len < 1 || cb->len > 2) {
+		fputs_P(PSTR("-Bad length\n"),stderr);
+	} else {
+		while(cb->len--)
+			pingtimer = (pingtimer<<8) | (*bp++);
+		if(pingtimer) {
+			char buf[10];
+			ping_timer = pingtimer;
+			fputs_P(PSTR("+OK, ping "),stderr);
+			fputs(itoa(pingtimer,buf,10),stderr);
+			fputc('\n',stderr);
+		} else
+			fputs_P(PSTR("-Zero\n"),stderr);
+		ping_timer = pingtimer;
+	}
+	free(cb);
 }
 
 void line_reader(task_head *tsk)
@@ -70,8 +95,7 @@ void line_reader(task_head *tsk)
 			part |= *rp++ - 'A' + 10;
 		} else {
 			char buf[3];
-			//fprintf_P(stderr,PSTR(":Unknown hex char %02x\n"),*rp);
-			fputs_P(PSTR(":Unknown hex char 0x"),stderr);
+			fputs_P(PSTR("-Unknown hex char 0x"),stderr);
 			fputs(itoa(*rp,buf,16),stderr);
 			fputc('\n',stderr);
 			goto out;
@@ -84,11 +108,18 @@ void line_reader(task_head *tsk)
 		}
 	}
 	if(nibble&1) {
-		fputs_P(PSTR(":Odd string length!\n"),stderr);
+		fputs_P(PSTR("-Odd string length!\n"),stderr);
 		goto out;
 	}
 	cb->len = nibble>>1;
-	send_tx(cb);
+	switch(cb->type) {
+	case 'P':
+		set_ping(cb);
+		break;
+	default:
+		send_tx(cb);
+		break;
+	}
 
 out:
 	free(tsk);
