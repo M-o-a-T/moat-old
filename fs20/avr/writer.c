@@ -167,8 +167,8 @@ send_tx_data(task_head *dummy)
 	//TCCR0B = _BV(WGM02)|_BV(CS02)|_BV(CS01)|_BV(CS00);
 #else
 	/* prescale 64x, 4µs/Tick */
-	TCCR0B = _BV(CS01)|_BV(CS00);
-	//TCCR0B = _BV(WGM02)|_BV(CS01)|_BV(CS00);
+	TCCR0B = _BV(CS01)|_BV(CS00)|_BV(FOC0A);
+	//TCCR0B = _BV(WGM02)|_BV(CS01)|_BV(CS00)|_BV(FOC0A);
 #endif
 	OCR0A = (nhi>>2)-1;
 	TCNT0 = 0;
@@ -211,7 +211,7 @@ ISR(TIMER0_COMPA_vect)
 		TCCR0B = 0;
 		if(PIND & _BV(PD6)) {
 			TCCR0B |= _BV(FOC0A);
-			fputs_P(PSTR(":Tx on after send!\n"),stderr);
+			//fputs_P(PSTR(":Tx on after send!\n"),stderr);
 		}
 		if(more_data == 1) {
 			more_data = 2;

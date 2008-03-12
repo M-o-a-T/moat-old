@@ -75,8 +75,7 @@ static unsigned short w1t,w2t;
 static void do_times(task_head *dummy)
 {
 	w1t=TCNT1;
-	unsigned char hi = (PINB & _BV(PB0)) ? 0 : 1;
-	/* inverted because we want the state _before_ the trailing edge */
+	unsigned char hi = (PINB & _BV(PB0)) ? 1 : 0;
 	switch(overflow)
 	{
 	default:
