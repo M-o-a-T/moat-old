@@ -64,11 +64,13 @@ run_task_later(task_head *dummy)
 	task_head *tp;
 	
 	cli();
+	PORTD &= _BV(PINB7);
 	assert(!(TIMSK2 & _BV(OCIE2A)),"RTL called with active timer");
 	tp = head_usec;
 
 	if(!tp) {
 		clear_delay_timer();
+		PORTD |= _BV(PINB7);
 		sei();
 		return;
 	}
@@ -109,6 +111,7 @@ run_task_later(task_head *dummy)
 		if(TCNT2 >= delay) {
 			TIMSK2 &= ~_BV(OCIE2A);
 			_queue_task_if(&timer_task);
+			PORTD |= _BV(PINB7);
 			sei();
 			return;
 		}
@@ -120,6 +123,7 @@ run_task_later(task_head *dummy)
 	TIFR2 |= _BV(OCF2A);
 	TIMSK2 |= _BV(OCIE2A);
 
+	PORTD |= _BV(PINB7);
 	sei();
 }
 
@@ -134,11 +138,13 @@ void clear_delay_timer(void)
 
 ISR(TIMER2_COMPA_vect)
 {
+	PORTD &= _BV(PINB7);
 	TIMSK2 &= ~_BV(OCIE2A);
 	offset += OCR2A+1;
 	OCR2A = 0xFF;
 	//DBG("Q RTL");
 	_queue_task_if(&timer_task);
+	PORTD |= _BV(PINB7);
 }
 
 void _queue_task_later(task_head *task, uint16_t delay)
@@ -157,6 +163,7 @@ void _queue_task_later(task_head *task, uint16_t delay)
 	}
 	unsigned char sreg = SREG;
 	cli();
+	PORTD &= _BV(PINB7);
 	if(TIMSK2 & _BV(OCIE2A)) {
 		TIMSK2 &= ~_BV(OCIE2A);
 		unsigned char tn = TCNT2 || OCR2A;
@@ -182,6 +189,7 @@ void _queue_task_later(task_head *task, uint16_t delay)
 	assert(head_usec,"RTL no head?");
 
 	_queue_task_if(&timer_task);
+	if(sreg & _BV(SREG_I)) PORTD |= _BV(PINB7);
 	SREG = sreg;
 }
 

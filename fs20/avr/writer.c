@@ -157,6 +157,7 @@ send_tx_data(task_head *dummy)
 
 	//DBG("Tx Setup");
 	cli();
+	PORTD &= _BV(PINB7);
 	PRR &= ~_BV(PRTIM0);
 
 	TCCR0A = _BV(COM0A0)|_BV(WGM01); /* CTC mode */
@@ -181,6 +182,7 @@ send_tx_data(task_head *dummy)
 	tx_ring_tail = 0;
 	//DBG("Tx Setup Done");
 	more_data = 1;
+	PORTD |= _BV(PINB7);
 	sei();
 	queue_task_if(&fill_tx);
 }
@@ -205,6 +207,7 @@ send_tx(write_head *task) {
 
 ISR(TIMER0_COMPA_vect)
 {
+	PORTD &= ~_BV(PINB7);
 	if(tx_ring_head == tx_ring_tail) {
 		//DBG("T0 END");
 		TIMSK0 &= ~_BV(OCIE0A);
@@ -228,6 +231,7 @@ ISR(TIMER0_COMPA_vect)
 		//DBG("T0 QF");
 		_queue_task_if(&fill_tx);
 	}
+	PORTD |= _BV(PINB7);
 }
 
 void tx_init(void) __attribute__((naked)) __attribute__((section(".init3")));

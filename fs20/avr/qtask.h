@@ -54,7 +54,9 @@ static inline void queue_task(task_head *task)
 {
 	assert(SREG & _BV(SREG_I),"queue_task from IRQ");
 	cli();
+	PORTD &= _BV(PINB7);
 	_queue_task(task);
+	PORTD |= _BV(PINB7);
 	sei();
 }
 static inline void x_queue_task_if(task_head *task,char *f,int l)
@@ -79,7 +81,9 @@ static inline void xqueue_task_if(task_head *task, char *f,int l)
 	}
 	assert(SREG & _BV(SREG_I),"queue_task_if from IRQ");
 	cli();
+	PORTD &= _BV(PINB7);
 	_queue_task_if(task);
+	PORTD |= _BV(PINB7);
 	sei();
 }
 #define queue_task_if(t) xqueue_task_if(t,PSTR(": _qtn "__FILE__":%d"),__LINE__)
@@ -98,7 +102,9 @@ static inline void queue_task(task_head *task)
 {
 	assert(SREG & _BV(SREG_I),"queue_task from IRQ");
 	cli();
+	PORTD &= _BV(PINB7);
 	_queue_task(task);
+	PORTD |= _BV(PINB7);
 	sei();
 }
 
@@ -114,7 +120,9 @@ static inline void queue_task_if(task_head *task)
 {
 	assert(SREG & _BV(SREG_I),"queue_task_if from IRQ");
 	cli();
+	PORTD &= _BV(PINB7);
 	_queue_task_if(task);
+	PORTD |= _BV(PINB7);
 	sei();
 }
 

@@ -168,11 +168,14 @@ static void rcv(task_head *dummy)
 {
 	while(TRUE) {
 		cli();
+		PORTD &= _BV(PINB7);
 		if(!lines) {
+			PORTD |= _BV(PINB7);
 			sei();
 			return;
 		}
 		lines--;
+		PORTD |= _BV(PINB7);
 		sei();
 
 		unsigned char bytes = 1;
@@ -204,16 +207,20 @@ static void rcv(task_head *dummy)
 static void rcv_over(task_head *dummy)
 {
 	cli();
+	PORTD &= _BV(PINB7);
 	fputs_P(PSTR("\n-UART buffer full\n"),stderr);
 	UART_RxHead = 0; UART_RxTail = 0; lines = 0;
+	PORTD |= _BV(PINB7);
 	sei();
 }
 
 static void rcv_err(task_head *dummy)
 {
 	cli();
+	PORTD &= _BV(PINB7);
 	fputs_P(PSTR("\n-serial recv error\n"),stderr);
 	UART_RxHead = 0; UART_RxTail = 0; lines = 0;
+	PORTD |= _BV(PINB7);
 	sei();
 }
 
@@ -366,9 +373,12 @@ inline void uart_putc_now(unsigned char data)
 {
 	unsigned char sreg = SREG;
 	cli();
+	PORTD &= _BV(PINB7);
 	if(data == '\n')
 		_uart_putc_now('\r');
 	_uart_putc_now(data);
+
+	if(sreg & _BV(SREG_I)) PORTD |= _BV(PINB7);
 	SREG = sreg;
 }
 
@@ -393,6 +403,7 @@ void uart_putc(unsigned char data)
 
 	unsigned char sreg = SREG;
 	cli();
+	PORTD &= _BV(PINB7);
 	while(1) {
     	tmphead  = (UART_TxHead + 1) & UART_TX_BUFFER_MASK;
     
@@ -403,12 +414,15 @@ void uart_putc(unsigned char data)
 			 * around, but it doesn't hurt, so keep this simple
 			 */
 			_uart_putc_now(data);
+			if(sreg & _BV(SREG_I)) PORTD |= _BV(PINB7);
 			sreg = SREG;
 			return;
 		} else {
+			PORTD |= _BV(PINB7);
 			sei();
 			nop();
 			cli();
+			PORTD &= _BV(PINB7);
 		}
 	}
     
@@ -418,6 +432,7 @@ void uart_putc(unsigned char data)
     /* enable UDRE interrupt */
     UART0_CONTROL    |= _BV(UART0_UDRIE);
 
+	if(sreg & _BV(SREG_I)) PORTD |= _BV(PINB7);
 	SREG = sreg;
 
 }/* uart_putc */

@@ -29,6 +29,7 @@ void _report_error(char *err) /* Program memory */
 {
 	//unsigned char sreg = SREG;
 	cli();
+	PORTD &= _BV(PINB7);
 	//uart_init(57600);
 	uart_puts_p(PSTR("\n:ERROR: "));
 	uart_puts_p(err);

@@ -71,6 +71,8 @@ ioinit (void)			/* Note [6] */
 
     /* Enable timer 1 overflow interrupt. */
     TIMSK = _BV (TOIE1);
+
+	PORTD |= _BV(PINB7);
     sei ();
 }
 

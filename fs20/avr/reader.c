@@ -60,6 +60,8 @@ static enum {
 static unsigned short last_icr;
 static unsigned short this_icr;
 
+unsigned char *rmsg;
+
 static void do_times(task_head *dummy);
 static task_head times_task = TASK_HEAD(do_times);
 
@@ -76,6 +78,7 @@ static void do_times(task_head *dummy)
 {
 	w1t=TCNT1;
 	unsigned char hi = (PINB & _BV(PB0)) ? 1 : 0;
+	PORTB |= _BV(PINB3);
 	switch(overflow)
 	{
 	default:
@@ -101,6 +104,7 @@ static void do_times(task_head *dummy)
 		fp->read_time(icr,hi);
 	}
 	w2t = TCNT1;
+	PORTB &= ~_BV(PINB3);
 }
 
 static void do_reset(void)
@@ -113,9 +117,12 @@ static void do_reset(void)
 	default:
 		break;
 	}
+
 	//DBGS("Reset, %d",overflow);
 	TIMSK1 &= ~(_BV(ICIE1)|_BV(OCIE1A));
+	PORTB &= ~_BV(PINB2);
 	overflow = OV_RESET;
+	if(!rmsg) rmsg = PSTR("??? Reset");
 	_queue_task(&reset1_task);
 }
 static void do_reset1(task_head *dummy)
@@ -129,11 +136,17 @@ static void do_reset1(task_head *dummy)
 static void do_reset2(task_head *dummy)
 {
 	cli();
+	PORTD &= _BV(PINB7);
 	TIFR1 |= _BV(ICF1);
 	TIMSK1 |= _BV(ICIE1);
+	PORTB |= _BV(PINB2);
+	PORTB &= _BV(PINB3);
+	PORTB &= _BV(PINB4);
+	PORTB &= _BV(PINB5);
 	TCCR1B |= _BV(ICES1);
 	overflow = OV_FIRST;
 	//DBG("reset done");
+	PORTD |= _BV(PINB7);
 	sei();
 }
 
@@ -141,12 +154,13 @@ static void do_reset2(task_head *dummy)
 #define OCR_INCR1 50
 #define OCR_INCR2 1000
 #else
-#define OCR_INCR1 200
-#define OCR_INCR2 5000
+#define OCR_INCR1 500 /* 250 µs minimum signal time */
+#define OCR_INCR2 2000 /* 1 ms maximum signal time */
 #endif
 
 ISR(TIMER1_CAPT_vect)
 {
+	PORTD &= ~_BV(PINB7);
 	unsigned short icr = ICR1;
 	this_icr = icr-last_icr;
 	TCCR1B ^= _BV(ICES1);
@@ -157,11 +171,12 @@ ISR(TIMER1_CAPT_vect)
 		
 	case OV_NO:
 		//DBGS("Edge %u  last %u  this %u",icr, last_icr,icr);
-		OCR1A = icr + OCR_INCR1;
-		TIMSK1 &= ~_BV(ICIE1);
 		if(times_task.delay) {
 			DBGS("Work is too slow! %x %x  %x %x",last_icr,icr, w1t,w2t);
+			rmsg = PSTR("Slow Work");
+			PORTB |= _BV(PINB3);
 			do_reset();
+			PORTD |= _BV(PINB7);
 			return;
 		}
 
@@ -175,32 +190,43 @@ ISR(TIMER1_CAPT_vect)
 	OCR1A = icr + OCR_INCR1;
 	TIFR1 |= _BV(OCF1A);
 	TIMSK1 &= ~_BV(ICIE1);
+	PORTB &= ~_BV(PINB2);
 	last_icr = icr;
+
 	overflow = OV_YES;
+	PORTD |= _BV(PINB7);
 }
 
 ISR(TIMER1_COMPA_vect)
 {
+	PORTD &= ~_BV(PINB7);
 	if(overflow == OV_YES) {
 		if(TIFR1 & _BV(ICF1)) {
 			DBG("RX: Change while working");
+			rmsg = PSTR("Overflow");
+			PORTB |= _BV(PINB4);
 			do_reset();
+			PORTD |= _BV(PINB7);
 			return;
 		}
 		overflow = OV_NO;
-		OCR1A = TCNT1 + OCR_INCR2;
+		OCR1A = TCNT1 + (OCR_INCR2-OCR_INCR1);
 		TIMSK1 |= _BV(ICIE1);
+		PORTB |= _BV(PINB2);
 	} else {
 		DBG("OCR end");
+		rmsg = PSTR("OCR end");
+		PORTB |= _BV(PINB5);
 		do_reset();
 	}
+	PORTD |= _BV(PINB7);
 }
 
 void rx_chain(void)
 {
 	static flow_head **fp = &flows;
 	*fp = &fs20_head; fp = &((*fp)->next);
-	*fp = &em_head; fp = &((*fp)->next);
+	//*fp = &em_head; fp = &((*fp)->next);
 	*fp = NULL;
 }
 
@@ -214,7 +240,21 @@ void rx_init(void)
 	TCCR1B = _BV(ICNC1)|_BV(ICES1)|_BV(CS11); /* 2MHz, noice cancel */
 #endif
 	TIMSK1 = _BV(ICIE1);
+	PORTB |= _BV(PINB2);
 	TIFR1 = _BV(ICF1);
 	TCNT1 = 0;
+
+// Debugging
+	DDRB |= 0xFE;
+	DDRD |= 0x80;
+	PORTB &=~ 0xFE;
+	PORTD |= 0x80;
 }
 
+void show_hl(char x)
+{
+	if(x)
+		PORTB |= _BV(PORTB1);
+	else
+		PORTB &=~ _BV(PORTB1);
+}

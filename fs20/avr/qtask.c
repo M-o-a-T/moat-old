@@ -41,6 +41,7 @@ void real_queue_task(task_head *task)
 #if 0 /* def ASSERTIONS */
 	if((unsigned short)task->proc >= 0x4000) {
 		cli();
+		PORTD &= _BV(PINB7);
 		printf_P(PSTR("TaskPtr %x %s %x"),task,&task->proc,__builtin_return_address(0));
 		report_error("Ouch");
 	}
@@ -68,6 +69,7 @@ void dequeue_task(task_head *task)
 	task_head *th;
 
 	cli();
+	PORTD &= _BV(PINB7);
 	if(task->delay != TASK_MAGIC) {
 		if (head_later == task) {
 			head_later = task->next;
@@ -96,6 +98,7 @@ void dequeue_task(task_head *task)
 			}
 		}
 	}
+	if(sreg & _BV(SREG_I) PORTD |= _BV(PINB7);
 	sreg = SREG;
 }
 #endif
@@ -105,8 +108,10 @@ unsigned char
 run_tasks(void)
 {
 	cli();
+	PORTD &= _BV(PINB7);
 	task_head *task = head_now;
 	if(!task) {
+		PORTD |= _BV(PINB7);
 		sei();
 		return 0;
 	}
@@ -127,12 +132,15 @@ run_tasks(void)
 		//DBGS("R %x %x",task,task->proc);
 		task->delay = 0;
 		task->next = NULL;
+		PORTD |= _BV(PINB7);
 		sei();
 		(*task->proc)(task);
 		cli();
+		PORTD &= _BV(PINB7);
 		//DBG("Rdone");
 		task = tn;
 	}
+	PORTD |= _BV(PINB7);
 	sei();
 	return 1;
 }

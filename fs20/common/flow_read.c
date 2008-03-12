@@ -25,11 +25,16 @@
 #ifdef DBG
 #undef DBG
 #endif
-#define DBG(x) do {} while(0)
+//#define DBG(x) do {} while(0)
+#define DBG(x) fputs_P(PSTR(":" x "\n"),stderr)
+
 #ifdef DBGS
 #undef DBGS
 #endif
-#define DBGS(x ...) do{}while(0)
+//#define DBGS(x ...) do{}while(0)
+#define DBGS(x, y ...) fprintf_P(stderr, PSTR(":" x "\n"), y)
+
+extern void show_hl(unsigned char);
 
 #ifndef FLOW_STANDALONE
 void flow_setup_reader(FLOW_PARAM
@@ -52,25 +57,36 @@ void flow_reader(FLOW_PARAM
 }
 #endif
 
+extern char *rmsg;
+
 /* fake inline procedure to turn off compiler warning in standalone mode */
 static inline void *readadr(FLOW_PARAM1) { return (void *)F_reader; }
 static void flow_init(FLOW_PARAM1)
 {
 	if(F_readlen) {
 		if (readadr(FLOW_ARG1)) {
-			DBGS("flow init, %d bytes, call reader",F_readlen);
+			//DBGS("flow init, %d bytes, call reader",F_readlen);
 			F_reader(F_reader_param, F_readbuf, F_readlen);
 		} else {
-			DBGS("flow init, %d bytes, NO reader",F_readlen);
+			//DBGS("flow init, %d bytes, NO reader",F_readlen);
 		}
 		F_readlen = 0;
 	} else {
-		DBG("flow init: no data");
+		//DBG("flow init: no data");
+		if(F_syn || F_bit>3) {
+			if(!rmsg)
+				rmsg = PSTR("??? X Reset");
+			fputs_P(PSTR(":I "),stderr);
+			fputs_P(rmsg,stderr);
+			fputc('\n',stderr);
+			rmsg = NULL;
+		}
 	}
 	F_byt = 0;
 	F_bit = 0;
 	F_syn = 0;
 	F_qsum = 0;
+	show_hl(0);
 }
 
 #ifdef F_LOG
@@ -130,9 +146,11 @@ flow_read_time(FLOW_PARAM
 #endif
 
 	if (ex) { /* R_IDLE exceeed, see above */
-		DBG("Idle Exc");
-		if (F_lasthi) /* somebody's sending an always-on? */
+		DBGS("Idle Exc %d %c",duration,F_lasthi?'H':'L');
+		if (F_lasthi) { /* somebody's sending an always-on? */
+			rmsg = PSTR("");
 			goto init;
+		}
 		if (F_r_times[R_SPACE+R_MAX+R_ONE] > 
 			F_r_times[R_SPACE+R_MAX+R_ZERO])
 			F_r_mark_one=1;
@@ -155,7 +173,7 @@ flow_read_time(FLOW_PARAM
 	}
 	F_lasthi = hi;
 	if (!hi && !ex) {
-		DBGS("x low %d",duration);
+		// DBGS("x low %d",duration);
 		return;
 	}
 	{
@@ -168,7 +186,8 @@ flow_read_time(FLOW_PARAM
 		F_r_space_zero=0;
 
 		if (r_one == r_zero) {
-			DBGS("one/zero %d/%d %d",r_one,r_zero,duration);
+			if(F_syn || F_bit>3) DBGS("one/zero %d/%d %d",r_one,r_zero,duration);
+			rmsg = PSTR("");
 			goto init;
 		}
 		hi = (r_one > r_zero);
@@ -176,17 +195,23 @@ flow_read_time(FLOW_PARAM
 
 	if (!F_syn) {
 		++F_bit;
-		if(!hi) return;
+		if(!hi) {
+			show_hl(1);
+			return;
+		}
+		show_hl(0);
 		if(F_bit < F_r_sync) {
-			DBG("short syn");
+			if(F_bit>3) DBGS("short syn %d <%d",F_bit,F_r_sync);
 			F_bit = 0;
 			return;
 		}
 		F_bit = 0;
 		F_syn=1;
-		DBG("SYN!");
+		//DBG("SYN!");
 		return;
 	}
+	show_hl(hi);
+
 	if(F_bit < F_bits) {
 		if (F_msb)
 			F_byt = (F_byt<<1) | hi;
@@ -196,7 +221,7 @@ flow_read_time(FLOW_PARAM
 		}
 		F_bit++;
 		if (F_parity || F_bit < F_bits)
-			DBGS("Bit %d/%d",F_readlen,F_bit);
+			//DBGS("Bit %d/%d",F_readlen,F_bit);
 			return;
 
 	} else if(F_parity) {
@@ -205,12 +230,14 @@ flow_read_time(FLOW_PARAM
 		case P_MARK:
 			if (!hi) {
 				DBG("Bad ParMark");
+				rmsg = PSTR("");
 				goto init;
 			}
 			break;
 		case P_SPACE:
 			if (hi) {
 				DBG("Bad ParSpace");
+				rmsg = PSTR("");
 				goto init;
 			}
 			break;
@@ -222,11 +249,13 @@ flow_read_time(FLOW_PARAM
 			if (F_parity == P_EVEN) {
 				if((par&1) == !hi) {
 					DBGS("Bad ParEven %d",hi);
+					rmsg = PSTR("");
 					goto init;
 				}
 			} else {
 				if((par&1) == hi) {
 					DBGS("Bad ParEven %d",hi);
+					rmsg = PSTR("");
 					goto init;
 				}
 			}
@@ -234,14 +263,16 @@ flow_read_time(FLOW_PARAM
 	}
 	if(F_readlen >= F_read_max) {
 		DBG("MaxLen");
+		rmsg = PSTR("");
 		goto init;
 	}
-	DBGS("Got Byte %d: %02x",F_readlen,F_byt);
+	//DBGS("Got Byte %d: %02x",F_readlen,F_byt);
 	F_readbuf[F_readlen++] = F_byt;
 	F_byt=0;
 	F_bit=0;
 	if(!ex) return;
 	DBG("FINISH");
+	rmsg = PSTR("");
 
 init:
 	flow_init(FLOW_ARG1);
