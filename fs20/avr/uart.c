@@ -212,7 +212,7 @@ static void rcv_over(task_head *dummy)
 static void rcv_err(task_head *dummy)
 {
 	cli();
-	puts_P(PSTR("\n-serial recv error\n"));
+	fputs_P(PSTR("\n-serial recv error\n"),stderr);
 	UART_RxHead = 0; UART_RxTail = 0; lines = 0;
 	sei();
 }

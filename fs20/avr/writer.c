@@ -59,20 +59,18 @@ unsigned char more_data;
 
 static void _mesg(char i, char *s, write_head *t)
 {
-	char num[6];
-	fputc(i,stdout);
-	fputs(itoa((short)t,num,10),stdout);
-	fputc(' ',stdout);
+	putchar(i);
+	p_short((unsigned short)t);
+	putchar(' ');
 	fputs_P(s,stdout);
-	fputc('\n',stdout);
+	putchar('\n');
 }
 #define mesg(c,s) _mesg(c,PSTR(s),F_writer_task)
 static void qmesg(write_head *t)
 {
-	char num[6];
-	fputc('+',stdout);
-	fputs(itoa((short)t,num,10),stdout);
-	fputc('\n',stdout);
+	putchar('+');
+	p_short((unsigned short)t);
+	putchar('\n');
 }
 	
 static void

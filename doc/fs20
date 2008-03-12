@@ -240,7 +240,7 @@ after a program crash, is signalled with a *. Any other system message
 should be introduced with a :. Received datagrams are introduced by 
 their message code.
 
-If a space and a number follows the +, the message has been queued. Any
+If only a number follows the +, the message has been queued. Any
 following messages which start with that number (after the introducing
 character) pertain to that message.
 

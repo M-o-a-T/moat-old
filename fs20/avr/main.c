@@ -35,14 +35,10 @@ void runit1(task_head *dummy);
 task_head idle_task = TASK_HEAD(runit1);
 
 void runit1(task_head *dummy) {
-	char buf[9];
 	++run;
-	fputc('P',stderr);
-	ltoa(run,buf,16);
-	if(strlen(buf)&1)
-		fputc('0',stderr);
-	fputs(buf,stderr);
-	fputc('\r',stderr);
+	putchar('P');
+	p_long(run);
+	putchar('\r');
 	queue_task_sec(&idle_task,ping_timer);
 }
 
@@ -51,18 +47,15 @@ inline void set_ping(write_head *cb)
 	unsigned int pingtimer = 0;
 	unsigned char *bp = cb->data;
 	if(cb->len < 1 || cb->len > 2) {
-		fputs_P(PSTR("-Bad length\n"),stderr);
+		p_str("-Bad length\n");
 	} else {
 		while(cb->len--)
 			pingtimer = (pingtimer<<8) | (*bp++);
 		if(pingtimer) {
-			char buf[10];
 			ping_timer = pingtimer;
-			fputs_P(PSTR("+OK, ping "),stderr);
-			fputs(itoa(pingtimer,buf,10),stderr);
-			fputc('\n',stderr);
+			p_str("+OK\n");
 		} else
-			fputs_P(PSTR("-Zero\n"),stderr);
+			p_str("-Zero\n");
 		ping_timer = pingtimer;
 	}
 	free(cb);
@@ -71,10 +64,6 @@ inline void set_ping(write_head *cb)
 void line_reader(task_head *tsk)
 {
 	unsigned char *rp = (unsigned char *)(tsk+1);
-	//fprintf_P(stderr,PSTR(":IN: <%s>\n"),rp);
-	fputs_P(PSTR(":IN: <"),stderr);
-	fputs((char *)rp,stderr);
-	fputs_P(PSTR(">\n"),stderr);
 	if(!*rp) goto out;
 
 	write_head *cb = malloc(sizeof(write_head)+((strlen((char *)rp)-1)>>1));
@@ -94,10 +83,9 @@ void line_reader(task_head *tsk)
 		} else if(*rp >= 'A' && *rp <= 'F') {
 			part |= *rp++ - 'A' + 10;
 		} else {
-			char buf[3];
-			fputs_P(PSTR("-Unknown hex char 0x"),stderr);
-			fputs(itoa(*rp,buf,16),stderr);
-			fputc('\n',stderr);
+			p_str("-Unknown hex char 0x");
+			p_byte(*rp);
+			putchar('\n');
 			goto out;
 		}
 		if (++nibble&1) {
@@ -108,7 +96,7 @@ void line_reader(task_head *tsk)
 		}
 	}
 	if(nibble&1) {
-		fputs_P(PSTR("-Odd string length!\n"),stderr);
+		p_str("-Odd string length!\n");
 		goto out;
 	}
 	cb->len = nibble>>1;
@@ -133,10 +121,10 @@ void read_response(task_head *task)
 	unsigned char len = *buf++;
 
 	DBGS("Data! %c:%d",type,len);
-	uart_putc(type);
+	putchar(type);
 	while(len--)
-		uart_puthex_byte(*buf++);
-	uart_putc('\n');
+		p_byte(*buf++);
+	putchar('\n');
 	free(task);
 }
 
@@ -146,7 +134,7 @@ int __attribute__((noreturn)) main(void)
 	rx_chain();
 
 	setup_stdio();
-	fputs_P(PSTR(":Startup\n"),stderr);
+	p_str("*Startup\n");
 
 	queue_task_sec(&idle_task,1);
 #ifdef SLOW

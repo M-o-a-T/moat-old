@@ -74,3 +74,40 @@ ISR(__vector_default)
 {
 	report_error("Bad IRQ!");
 }
+
+/* Hex spew */
+void p_nibble(const unsigned char b)
+{
+    unsigned char  c = b & 0x0f;
+    if (c>9) c += 'A'-10;
+    else c += '0';
+    putchar(c);
+}
+void p_byte(const unsigned char  b)
+{
+    p_nibble(b>>4);
+    p_nibble(b);
+}
+void p_short(const unsigned short b)
+{
+	if(b & 0xFF00)
+		p_byte(b>>8);
+	p_byte(b);
+}
+void _p_short(const unsigned short b)
+{
+	p_byte(b>>8);
+	p_byte(b);
+}
+void p_long(const unsigned long b)
+{
+	if(b & 0xFFFF0000) {
+		p_short(b>>16);
+		_p_short(b);
+	} else 
+		p_short(b);
+}
+void _p_str(const char *s)
+{
+	fputs_P(s,stdout);
+}

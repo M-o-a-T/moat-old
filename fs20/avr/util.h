@@ -52,4 +52,12 @@ void setup_stdio(void);
 #define nop() __asm__ __volatile__ ("nop")
 #endif
 
+/* Hex spew */
+void p_nibble(const unsigned char b);
+void p_byte(const unsigned char  b);
+void p_short(const unsigned short b);
+void p_long(const unsigned long b);
+void _p_str(const char *s);
+#define p_str(s) _p_str(PSTR(s))
+
 #endif /* UTIL_H */

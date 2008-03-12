@@ -146,7 +146,7 @@ void _queue_task_later(task_head *task, uint16_t delay)
 #ifdef ASSERTIONS
 	//assert (!task->delay,"QTL again");
 	if(task->delay) {
-		//fprintf_P(stderr,PSTR(":QTL again %x"),task);
+		//printf_P(PSTR(":QTL again %x"),task);
 		report_error("QTL again");
 	}
 #endif

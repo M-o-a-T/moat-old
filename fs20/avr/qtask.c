@@ -41,7 +41,7 @@ void real_queue_task(task_head *task)
 #if 0 /* def ASSERTIONS */
 	if((unsigned short)task->proc >= 0x4000) {
 		cli();
-		fprintf_P(stderr,PSTR("TaskPtr %x %s %x"),task,&task->proc,__builtin_return_address(0));
+		printf_P(PSTR("TaskPtr %x %s %x"),task,&task->proc,__builtin_return_address(0));
 		report_error("Ouch");
 	}
 #endif

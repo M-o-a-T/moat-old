@@ -45,7 +45,7 @@ static inline void r_queue_task(task_head *task,char *f,int l)
 {
 	assert(!(SREG & _BV(SREG_I)),"_queue_task from non-IRQ");
 	if(task->delay)
-		fprintf_P(stderr,f,l);
+		printf_P(f,l);
 	real_queue_task(task);
 }
 #define _queue_task(x) r_queue_task(x,PSTR(":QTD " __FILE__ ":%d\n"),__LINE__)
@@ -60,7 +60,7 @@ static inline void queue_task(task_head *task)
 static inline void x_queue_task_if(task_head *task,char *f,int l)
 {
 	if(SREG & _BV(SREG_I)) {
-		fprintf_P(stderr,f,l);
+		printf_P(f,l);
 		report_error("dud");
 	}
 	assert(!(SREG & _BV(SREG_I)),"_queue_task_if from non-IRQ");
@@ -74,7 +74,7 @@ static inline void x_queue_task_if(task_head *task,char *f,int l)
 static inline void xqueue_task_if(task_head *task, char *f,int l)
 {
 	if(!(SREG & _BV(SREG_I))) {
-		fprintf_P(stderr,f,l);
+		printf_P(f,l);
 		report_error("dud");
 	}
 	assert(SREG & _BV(SREG_I),"queue_task_if from IRQ");
