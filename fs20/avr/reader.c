@@ -54,9 +54,11 @@ void read_data(unsigned char param, unsigned char *data, unsigned char len)
 }
 
 
-static enum {
-	OV_NO, OV_YES, OV_FIRST=5, OV_RESET,
-	} overflow = OV_FIRST;
+enum ov {
+	OV_NO, OV_YES, OV_FIRST=5, OV_RESET, OV_RESET_Q
+	};
+static enum ov overflow = OV_FIRST;
+
 static unsigned short last_icr;
 static unsigned short this_icr;
 
@@ -69,7 +71,7 @@ static task_head reset1_task = TASK_HEAD(do_reset1);
 static void do_reset2(task_head *dummy);
 static task_head reset2_task = TASK_HEAD(do_reset2);
 
-static void do_reset(void);
+static void do_reset(enum ov over);
 
 static unsigned short w1t,w2t;
 static void do_times(task_head *dummy)
@@ -103,7 +105,7 @@ static void do_times(task_head *dummy)
 	w2t = TCNT1;
 }
 
-static void do_reset(void)
+static void do_reset(enum ov over)
 {
 	switch(overflow)
 	{
@@ -115,7 +117,7 @@ static void do_reset(void)
 	}
 	//DBGS("Reset, %d",overflow);
 	TIMSK1 &= ~(_BV(ICIE1)|_BV(OCIE1A));
-	overflow = OV_RESET;
+	overflow = over;
 	_queue_task(&reset1_task);
 }
 static void do_reset1(task_head *dummy)
@@ -124,7 +126,10 @@ static void do_reset1(task_head *dummy)
 	for(fp=flows;fp;fp=fp->next) {
 		fp->read_reset();
 	}
-	queue_task_msec(&reset2_task,20);
+	if(overflow == OV_RESET)
+		queue_task_msec(&reset2_task,20);
+	else
+		do_reset2(dummy);
 }
 static void do_reset2(task_head *dummy)
 {
@@ -157,11 +162,9 @@ ISR(TIMER1_CAPT_vect)
 		
 	case OV_NO:
 		//DBGS("Edge %u  last %u  this %u",icr, last_icr,icr);
-		OCR1A = icr + OCR_INCR1;
-		TIMSK1 &= ~_BV(ICIE1);
 		if(times_task.delay) {
 			DBGS("Work is too slow! %x %x  %x %x",last_icr,icr, w1t,w2t);
-			do_reset();
+			do_reset(OV_RESET);
 			return;
 		}
 
@@ -184,15 +187,15 @@ ISR(TIMER1_COMPA_vect)
 	if(overflow == OV_YES) {
 		if(TIFR1 & _BV(ICF1)) {
 			DBG("RX: Change while working");
-			do_reset();
+			do_reset(OV_RESET_Q);
 			return;
 		}
 		overflow = OV_NO;
-		OCR1A = TCNT1 + OCR_INCR2;
+		OCR1A = TCNT1 + (OCR_INCR2-OCR_INCR1);
 		TIMSK1 |= _BV(ICIE1);
 	} else {
 		DBG("OCR end");
-		do_reset();
+		do_reset(OV_RESET_Q);
 	}
 }
 
