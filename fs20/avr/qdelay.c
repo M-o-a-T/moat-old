@@ -284,3 +284,43 @@ void queue_task_sec(task_head *task, uint16_t delay)
 	*tp = task;
 	task->delay = delay;
 }
+
+
+static char
+dequeue_in(task_head **head, task_head *task)
+{
+	task_head *th = *head;
+	while(th) {
+		if(th == task) {
+			*head = th = task->next;
+			if(th)
+				th->delay += task->delay;
+			task->delay = 0;
+			return 1;
+		}
+		head = &(th->next);
+		th = *head;
+	}
+	return 0;
+}
+
+void
+dequeue_task_later(task_head *task)
+{
+	unsigned char sreg = SREG;
+	cli();
+
+	//assert(task->delay != TASK_MAGIC, "nondelayed task");
+	if(task->delay == TASK_MAGIC) {
+		dequeue_task(task);
+		goto out;
+	}
+
+	dequeue_in(&head_usec,task) || \
+	dequeue_in(&head_msec,task) || \
+	dequeue_in(&head_sec,task);
+	/* Not finding the thing is Not An Error. */
+
+out:
+	SREG = sreg;
+}

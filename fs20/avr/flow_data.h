@@ -31,4 +31,9 @@ typedef struct _write_head {
 void send_tx(write_head *data);
 void read_data(unsigned char param, unsigned char *data, unsigned char len);
 
+void writer_disable(void);
+void writer_enable(void);
+void reader_disable(void);
+void reader_enable(void);
+
 #endif /* FLOW_DATA_H */

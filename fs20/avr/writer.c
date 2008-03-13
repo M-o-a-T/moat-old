@@ -52,10 +52,11 @@ write_head *sendq_head;
 #error TX timeout buffer size is not a power of 2
 #endif
 
-unsigned char tx_ring_buf[TX_RING_SIZE];
-unsigned char tx_ring_head;
-unsigned char tx_ring_tail;
-unsigned char more_data;
+static unsigned char tx_ring_buf[TX_RING_SIZE];
+static unsigned char tx_ring_head;
+static unsigned char tx_ring_tail;
+static unsigned char more_data;
+static unsigned char disabled;
 
 static void _mesg(char i, char *s, write_head *t)
 {
@@ -76,8 +77,6 @@ static void qmesg(write_head *t)
 static void
 next_tx_data(task_head *dummy)
 {
-	/* TODO: check if a receiver is receiving something! */
-
 	write_head *tn = F_writer_task->next;
 	free(F_writer_task);
 	F_writer_task = tn;
@@ -91,6 +90,23 @@ next_tx_data(task_head *dummy)
 			TCCR0B |= _BV(FOC0A);
 		PRR |= _BV(PRTIM0);
 	}
+}
+
+void
+writer_disable()
+{
+	if(!disabled)
+		disabled = 1;
+}
+
+void
+writer_enable()
+{
+	if(disabled > 1) {
+		disabled = 0;
+		queue_task_if(&start_tx);
+	} else
+		disabled = 0;
 }
 
 static void
@@ -144,11 +160,17 @@ send_tx_data(task_head *dummy)
 	}
 	//DBGS("Tx %c %u",flow_proc->type,F_writer_len);
 
+	if(disabled) {
+		if(disabled==1) disabled=2;
+		return;
+	}
+	reader_disable();
 	unsigned int nhi,nlo;
 	flow_proc->write_init();
 	flow_proc->write_step(&nhi,&nlo);
 	if(!nhi) {
 		mesg('-',"Broken");
+		reader_enable();
 		queue_task(&next_tx);
 		return;
 	}
@@ -219,6 +241,7 @@ ISR(TIMER0_COMPA_vect)
 		} else if (!more_data)
 			mesg('+',"OK");
 		queue_task_usec(&next_tx, flow_proc->write_idle);
+		reader_enable();
 	}
 	unsigned char tmptx = (tx_ring_tail+1) & TX_RING_MASK;
 	OCR0A = tx_ring_buf[tmptx];

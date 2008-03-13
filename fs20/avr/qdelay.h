@@ -46,6 +46,8 @@ queue_task_usec(task_head *_t, uint16_t _d)
 void queue_task_msec(task_head *task, uint16_t delay);
 void queue_task_sec(task_head *task, uint16_t delay);
 
+void dequeue_task_later(task_head *task);
+
 void queue_task_sync(void);
 /* Call this from interrupt! to drop accumulated timeouts */
 

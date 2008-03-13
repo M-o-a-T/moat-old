@@ -31,33 +31,27 @@
 #include "flow_internal.h"
 #include "flow.h"
 
+#define NPULSE 5
+#define WRITE_DELAY 20
+#ifdef SLOW
+#define OCR_INCR1 50
+#define OCR_INCR2 1000
+#else
+#define OCR_INCR1 200
+#define OCR_INCR2 5000
+#endif
+
 extern flow_head fs20_head;
 extern flow_head em_head;
 
 flow_head *flows;
 
-extern void read_response(task_head *task);
-
-void read_data(unsigned char param, unsigned char *data, unsigned char len)
-{
-	task_head *task = malloc(sizeof(task_head)+2+len);
-	if(!task)
-		report_error("out of memory");
-	DBGS("read_data: type %c  len %d",param,len);
-	*task = TASK_HEAD(read_response);
-	unsigned char *buf = (unsigned char *)(task+1);
-	*buf++ = param;
-	*buf++ = len;
-	while(len--)
-		*buf++ = *data++;
-	queue_task(task);
-}
-
-
 enum ov {
-	OV_NO, OV_YES, OV_FIRST=5, OV_RESET, OV_RESET_Q
+	OV_NO, OV_YES, OV_FIRST=5, OV_RESET, OV_RESET_Q, OV_RESET_DIS, OV_RESET_DLY
 	};
 static enum ov overflow = OV_FIRST;
+static short pulses;
+static short enable_delay = 1;
 
 static unsigned short last_icr;
 static unsigned short this_icr;
@@ -71,13 +65,38 @@ static task_head reset1_task = TASK_HEAD(do_reset1);
 static void do_reset2(task_head *dummy);
 static task_head reset2_task = TASK_HEAD(do_reset2);
 
+static void do_writer_enable(task_head *dummy);
+static task_head writer_enable_task = TASK_HEAD(do_writer_enable);
+
 static void do_reset(enum ov over);
 
-static unsigned short w1t,w2t;
+extern void read_response(task_head *task);
+void read_data(unsigned char param, unsigned char *data, unsigned char len)
+{
+	task_head *task = malloc(sizeof(task_head)+2+len);
+	if(!task)
+		report_error("out of memory");
+	DBGS("read_data: type %c  len %d",param,len);
+	*task = TASK_HEAD(read_response);
+	unsigned char *buf = (unsigned char *)(task+1);
+	*buf++ = param;
+	*buf++ = len;
+	while(len--)
+		*buf++ = *data++;
+	queue_task(task);
+	enable_delay = WRITE_DELAY;
+}
+
+
+//static unsigned short w1t,w2t;
 static void do_times(task_head *dummy)
 {
-	w1t=TCNT1;
+	//w1t=TCNT1;
 	unsigned char hi = (PINB & _BV(PB0)) ? 1 : 0;
+	if(++pulses == NPULSE) {
+		writer_disable();
+		dequeue_task_later(&writer_enable_task);
+	}
 	switch(overflow)
 	{
 	default:
@@ -102,7 +121,34 @@ static void do_times(task_head *dummy)
 	for(fp=flows;fp;fp=fp->next) {
 		fp->read_time(icr,hi);
 	}
-	w2t = TCNT1;
+	//w2t = TCNT1;
+}
+
+static void do_writer_enable(task_head *dummy)
+{
+	writer_enable();
+}
+
+void reader_disable()
+{
+	cli();
+	if(overflow >= OV_RESET) {
+		overflow = OV_RESET_DIS;
+		sei();
+		return;
+	}
+	do_reset(OV_RESET_DLY);
+	sei();
+}
+
+void reader_enable()
+{
+	cli();
+	if(overflow == OV_RESET_DLY)
+		overflow = OV_RESET;
+	else
+		do_reset2(NULL);
+	sei();
 }
 
 static void do_reset(enum ov over)
@@ -126,13 +172,26 @@ static void do_reset1(task_head *dummy)
 	for(fp=flows;fp;fp=fp->next) {
 		fp->read_reset();
 	}
+
+
 	if(overflow == OV_RESET)
 		queue_task_msec(&reset2_task,20);
+	else if(overflow == OV_RESET_DLY)
+		overflow = OV_RESET_DIS;
 	else
 		do_reset2(dummy);
+
+	if(pulses >= NPULSE)
+		queue_task_msec(&writer_enable_task,enable_delay);
+	pulses = 0;
+	enable_delay = 1;
 }
 static void do_reset2(task_head *dummy)
 {
+	if(overflow == OV_RESET_DLY) {
+		overflow = OV_RESET_DIS;
+		return;
+	}
 	cli();
 	TIFR1 |= _BV(ICF1);
 	TIMSK1 |= _BV(ICIE1);
@@ -142,13 +201,6 @@ static void do_reset2(task_head *dummy)
 	sei();
 }
 
-#ifdef SLOW
-#define OCR_INCR1 50
-#define OCR_INCR2 1000
-#else
-#define OCR_INCR1 200
-#define OCR_INCR2 5000
-#endif
 
 ISR(TIMER1_CAPT_vect)
 {
@@ -163,7 +215,7 @@ ISR(TIMER1_CAPT_vect)
 	case OV_NO:
 		//DBGS("Edge %u  last %u  this %u",icr, last_icr,icr);
 		if(times_task.delay) {
-			DBGS("Work is too slow! %x %x  %x %x",last_icr,icr, w1t,w2t);
+			//DBGS("Work is too slow! %x %x  %x %x",last_icr,icr, w1t,w2t);
 			do_reset(OV_RESET);
 			return;
 		}

@@ -58,47 +58,41 @@ void real_queue_task(task_head *task)
 	task->delay = TASK_MAGIC;
 }
 
-#if 0
 void dequeue_task(task_head *task)
 {
 	/* This should, ideally, never happen. */
 	/* Therefore, blocking IRQs while running this is OK. */
 
-	uchar_t sreg = SREG;
+	unsigned char sreg = SREG;
 	task_head *th;
 
 	cli();
+	if(!task->delay)
+		goto out;
+#if 0
 	if(task->delay != TASK_MAGIC) {
-		if (head_later == task) {
-			head_later = task->next;
-			setup_delay_timer();
-		} else {
-			th = head_later;
-			assert(th, "DeQL TaskListEmpty");
-		doit:
-			while(th->next != task) {
-				assert(th->next, "DeQL TaskNotFound");
-				th = th->next;
-			}
-			th->next = task->next;
-		}
+		dequeue_task_later(task);
+		goto out;
+	} 
+#endif
+	assert(task->delay == TASK_MAGIC, "DeQ delayed");
+
+	if(head_now == task) {
+		head_now = NULL;
+		tail_now = NULL;
+		assert(!th->next, "DeQ TaskNextSet");
 	} else {
-		if(head_now == task) {
-			head_now = NULL;
-			tail_now = NULL;
-			assert(!th->next, "DeQ TaskNextSet");
-		} else {
-			th = head_now;
-			assert(th, "DeQL TaskListEmpty");
-			while(th->next != task) {
-				assert(th->next, "DeQ TaskNotFound");
-				th = th->next;
-			}
+		th = head_now;
+		assert(th, "DeQL TaskListEmpty");
+		while(th->next != task) {
+			assert(th->next, "DeQ TaskNotFound");
+			th = th->next;
 		}
 	}
+	task->delay = 0;
+out:
 	sreg = SREG;
 }
-#endif
 
 /* return 1 if something was done */
 unsigned char
