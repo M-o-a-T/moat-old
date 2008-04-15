@@ -283,14 +283,21 @@ class OWFSwindmon(Monitor):
 	def up(self):
 		super(OWFSwindmon,self).up()
 		self.avg = None
+		self.wind_delta = 0
 		self.nval = 0
+
+	def list(self):
+		for x in super(OWFSwindmon,self).list():
+			yield x
+		yield ("delta",self.wind_delta)
+		yield ("values",self.nval)
 
 	@defer.inlineCallbacks
 	def one_value(self, step):
 		dev = devices[self.device]
 		val = yield dev.get(self.attribute)
 		val = (float(v.strip()) for v in val.split(","))
-		val = (2 if v > 3 else 0 if v < 1 else 1 for v in val)
+		val = (2 if v > 3.5 else 0 if v < 1 else 1 for v in val)
 		val = tuple(val)
 		if   val == (2,2,1,2): val = 0
 		elif val == (2,1,1,2): val = 1
@@ -313,6 +320,7 @@ class OWFSwindmon(Monitor):
 
 		if self.avg is None:
 			self.avg = val
+			decay = self.decay
 		else:
 			# The thing is cyclic, thus, when the value crosses zero, we
 			# need to make sure that the moving average still makes
@@ -323,11 +331,33 @@ class OWFSwindmon(Monitor):
 					val -= 16
 				else:
 					val += 16
-			navg = ((1-self.decay)*self.avg + self.decay*val) % 16
+
+			# Get the (moving average of) the delta, which needs to
+			# update faster than the actual wind value, otherwise
+			# the system will be too erratic when the wind becomes more
+			# turbulent.
+
+			delta = abs(val - self.avg)
+			decay = 1-(3*(1-self.decay))
+			self.wind_delta = ((1-decay)*self.wind_delta + decay*delta)
+
+			if self.wind_delta > 6:
+				# Wind appears to have changed completely.
+				# Reset, to avoid oscillating around the "negative" value.
+				log(DEBUG,"wind_dir reset", unicode(self.name),self.avg,self.wind_delta)
+				self.wind_delta = 8 - self.wind_delta
+				self.nval = 0
+				self.avg = (self.avg+8) % 16
+
+			# Scale the decay for the actual value,
+			# depending on how erratic the wind is
+			decay = self.decay / (10 ** (self.wind_delta/6))
+			navg = ((1-decay)*self.avg + decay*val) % 16
 			self.avg = navg
 
 		self.nval += 1
-		if self.nval < 10*self.decay:
+		if self.nval < 1/decay:
+			log(TRACE,"wind_dir again", unicode(self.name),self.nval,decay)
 			raise MonitorAgain("decay not reached")
 
 		defer.returnValue(self.avg)
@@ -394,12 +424,12 @@ wind ‹offset› ‹weight›
 	The monitored device is an AAG wind (direction) meter.
 	The attribute you're measuring needs to be "volt.ALL".
 
-	Wind direction is a value in the interval [0,16[ (N - E - S - W - N).
+	Wind direction is returned as a value in the interval [0,16[
+	(N - E - S - W - N).
 	The offset specifies where "real" North is in the above list.
 	The weight value says how "good" the new value is likely to be; this
 	depends somewhat on how turbulent the air is around your wind vane
-	(more tand should be between 0 and 1 (probably closer to zero).
-
+	and should be between 0 and 1 (probably closer to zero).
 
 """
 	def run(self,ctx,**k):

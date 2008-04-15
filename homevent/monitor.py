@@ -401,6 +401,7 @@ class Monitor(Collected):
 
 			if self.running:
 				def trigger(_):
+					self.stopped_at = now()
 					d.callback(None)
 					return _
 				self.running.addBoth(trigger)
