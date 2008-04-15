@@ -715,12 +715,12 @@ Require NUM measurements which are within RANGE of each other for the
 monitor to return a valid result.
 
 The system will report the average of at least NUM values, after the 
-data which differ most from the average have been discarded.
+most extreme data have been discarded.
 
 retry NUM TIME
 --------------
 
-If the measurement has to be repeated because the requirement, above, is
+If the measurement has to be repeated because the requirement above, is
 not met, delay for TIME; don't retry more often than NUM times.
 
 If the requirements are not met after NUM times, stop measuring and
@@ -732,9 +732,9 @@ scale factor offset
 Raw values get multiplied by FACTOR, then OFFSET is added,
 just before processing them further.
 
-You can use a star instead of writing one or zero, respectively, to
-document that you didn't measure the value (as opposed to knowing that
-the value is zero).
+You can use a star instead of writing a factor of one or an offset of
+zero, to document that you didn't measure the value (as opposed to
+*knowing* that the value is one or zero, respectively).
 
 alarm INTERVAL
 --------------
@@ -768,9 +768,9 @@ apply.
 stopped
 -------
 
-This subcommand actually tells the monitor to not start executing
-immediately. A common reason for this is that the event handlers
-which use the monitor have not been set up yet.
+This subcommand tells the monitor to not start executing immediately.
+A common reason for this is that the event handlers which use the
+monitor have not been set up yet.
 
 delta
 -----
@@ -784,8 +784,9 @@ There's no handling of overflows yet.
 You can say "delta up" to not trigger an event for negative values.
 
 Note that at this point, the delta denotation is only used for events;
-the other parameters all apply to the absolute values that get read from
-the hardware. This will probably change in the future.
+the other parameters of the "monitor" statement all apply to the
+absolute values that get read from the hardware. This will probably
+change in the future.
 
 --------------------
 update monitor NAME:
@@ -1309,10 +1310,13 @@ The actual dampening for the values is
 
     ‹wind parameter› / (10 ^ (‹difference› / 6))
 
-thus the given dampening value will be used when the vane doesn't move
+Thus, the given dampening value will be used when the vane doesn't move
 much, but it'll be scaled down by a factor of five or so when the system
-is very erratic. (Note that the maximum averaged difference under random
-conditions is four.)
+is very erratic (note that the maximum averaged difference under random
+conditions is four), thus making sure that the system reacts quickly
+when the turbulence is low.
+
+Do not use the "require" and "retry" parameters: they don't make sense here.
 
 Values will start being reported when enough data have been collected;
 the threshold is the inverse of the above calculation. Using the ‹delta›

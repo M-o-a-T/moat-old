@@ -278,11 +278,13 @@ class OWFSwindmon(Monitor):
 	def __init__(self,*a,**k):
 		super(OWFSwindmon,self).__init__(*a,**k)
 		self.avg = None
+		self.qavg = None
 		self.nval = 0
 
 	def up(self):
 		super(OWFSwindmon,self).up()
 		self.avg = None
+		self.qavg = None
 		self.wind_delta = 0
 		self.nval = 0
 
@@ -290,6 +292,7 @@ class OWFSwindmon(Monitor):
 		for x in super(OWFSwindmon,self).list():
 			yield x
 		yield ("delta",self.wind_delta)
+		yield ("qavg",self.qavg)
 		yield ("values",self.nval)
 
 	@defer.inlineCallbacks
@@ -320,40 +323,66 @@ class OWFSwindmon(Monitor):
 
 		if self.avg is None:
 			self.avg = val
+			self.qavg = val
 			decay = self.decay
 		else:
-			# The thing is cyclic, thus, when the value crosses zero, we
-			# need to make sure that the moving average still makes
-			# sense. Otherwise oscillating between 0 and 15 would result
-			# in 7.5, which is clearly wrong.
-			if abs(val - self.avg) > 8:
-				if val > self.avg:
+			# Principle of operation:
+			# - Get a quickly-moving average of the current position
+			# - Get a quickly-moving average of differences between
+			#   that and the current measurement
+			# - Use that to scale the "real" average of the current position
+			#
+			# The idea is that the average shall converge quickly under
+			# calm conditions, but not when there's gusty wind that
+			# pushes the vane around.
+			#
+			# Since the values are modulo 16, we need to shift the
+			# values around. The average between 15 and 2, given a decay
+			# factor of 1/3, shall be 0. Thus, if the difference between
+			# the old and new value is >8, the value needs an offset.
+
+			# "quickly moving" means "somewhat faster".
+			# The square root (0.5) is a bit too aggressive
+			decay = self.decay ** 0.7
+
+			# shift the value around
+			if abs(val - self.qavg) > 8:
+				if val > self.qavg:
 					val -= 16
 				else:
 					val += 16
+			self.qavg = ((1-decay)*self.qavg + decay*val) % 16
 
 			# Get the (moving average of) the delta, which needs to
 			# update faster than the actual wind value, otherwise
 			# the system will be too erratic when the wind becomes more
 			# turbulent.
 
-			delta = abs(val - self.avg)
-			decay = 1-(3*(1-self.decay))
-			self.wind_delta = ((1-decay)*self.wind_delta + decay*delta)
+			self.wind_delta = ((1-decay)*self.wind_delta
+			                + decay*abs(val - self.qavg))
+
+			# shift the value around, this time for real
+			val %= 16
+			if abs(val - self.avg) > 8:
+				if val > self.avg:
+					val -= 16
+				else:
+					val += 16
 
 			if self.wind_delta > 6:
 				# Wind appears to have changed completely.
-				# Reset, to avoid oscillating around the "negative" value.
-				log(DEBUG,"wind_dir reset", unicode(self.name),self.avg,self.wind_delta)
+				# Reset, to avoid oscillating.
+				log(DEBUG,"wind reset", unicode(self.name),self.avg,self.wind_delta)
 				self.wind_delta = 8 - self.wind_delta
 				self.nval = 0
 				self.avg = (self.avg+8) % 16
-
-			# Scale the decay for the actual value,
-			# depending on how erratic the wind is
-			decay = self.decay / (10 ** (self.wind_delta/6))
-			navg = ((1-decay)*self.avg + decay*val) % 16
-			self.avg = navg
+				self.qavg = (self.qavg+8) % 16
+				decay = self.decay / 10
+			else:
+				# Scale the decay for the actual value,
+				# depending on how erratic the wind is
+				decay = self.decay / (10 ** (self.wind_delta/6))
+				self.avg = ((1-decay)*self.avg + decay*val) % 16
 
 		self.nval += 1
 		if self.nval < 1/decay:
