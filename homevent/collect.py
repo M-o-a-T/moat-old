@@ -47,18 +47,23 @@ class Collection(dict):
 		except Exception:
 			return "<Collection:%s>" % (self.__class__.__name__,)
 
-	def __init__(self):
-		self._can_do = set(("list",))
+	def __new__(cls):
+		self = dict.__new__(cls)
 
 		name = self.name
 		if isinstance(name,basestring):
 			name = name.split()
 		name = Name(name)
-		self.name = name
 		if name in collections:
-			return RuntimeError(u"A collection ‹%s› already exists" %(name,))
-	
+			return collections[name]
+
+		self.name = name
+		self._can_do = set(("list",))
 		collections[name] = self
+		return self
+
+	def __init__(self):
+		pass
 	
 	def does(self,name):
 		assert name not in self._can_do
