@@ -233,10 +233,10 @@ net [host] port :to NAME…
 		if name is None:
 			name = Name(event[0])
 			event = event[1:]
-		if len(event) == 2:
+		if len(event) == 1:
 			host = "localhost"
 		else:
-			host = event[1]
+			host = event[0]
 		port = event[-1]
 
 		connect(host,port,name)
