@@ -196,8 +196,10 @@ def get_collect(name, allow_collection=False):
 		raise CCollError(name)
 	return coll
 
-def all_collect(name="list"):
+def all_collect(name="list", skip=False):
 	def byname(a,b): return cmp(a.name,b.name)
 	for m in sorted(collections.itervalues(),cmp=byname):
+		if skip and not m:
+			continue
 		if m.can_do(name):
 			yield m

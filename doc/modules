@@ -157,6 +157,48 @@ data
 This module implements a couple of rarely-used commands to list and
 examine internal data structures.
 
+----
+list
+----
+
+This generic command lists all data structures that the system is
+willing to tell you more about.
+
+The first form lists all names of data structures.
+It skips structure with no current members.
+
+You can append the name of a data structure to show a list of
+data structures of a particular type.
+
+You can then append the name of a data structure to show some
+additional details about that particular item.
+
+    >> list
+    module
+    .
+    >> list module
+    data :: provides a couple of common data access functions
+    net :: Basic line-based TCP access
+    .
+    >> list module net
+    name: net
+    path: homevent.modules.net.py
+    info: Basic line-based TCP access
+    .
+    >> 
+
+
+---
+del
+---
+
+    Many things which the “list” command shows you can be removed from
+    the system.
+
+    >> list module net
+
+    The individual modules' documentation will tell you more.
+
 -----------
 list module
 -----------
@@ -164,15 +206,6 @@ list module
 Shows the list of loaded modules, terminated by a single dot.
 
 You can append the name of a loaded module to examine details.
-
------------
-list worker
------------
-
-Shows the list of program snippets that listen for events, ordered by
-priority.
-
-You can append the name of a worker to examine details.
 
 
 ======

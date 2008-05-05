@@ -34,7 +34,7 @@ class List(Statement):
 	doc="list of / show details for various parts of the system"
 	long_doc=u"""\
 list
-	shows all known types
+	shows all known types (but skips empty types)
 list ‹type›
 	shows a list of items of that type
 list ‹type› ‹name…›
@@ -46,7 +46,7 @@ list ‹type› ‹name…›
 		c = get_collect(event, allow_collection=True)
 		try:
 			if c is None:
-				for m in all_collect():
+				for m in all_collect(skip=True):
 					print >>self.ctx.out, " ".join(m.name)
 			elif isinstance(c,Collection):
 				for n,m in c.iteritems():
