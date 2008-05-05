@@ -31,12 +31,20 @@ it is not a syntax reference. See the “syntax” documentation for that.
 
 You can play with HomEvenT by typing “make i”, then “help”.
 
-Input and output
-----------------
+Basic command syntax is described in the “syntax” document.
+Read that before continuing.
 
-Doesn't exist.
 
-Seriously.
+Switches and devices and stuff
+------------------------------
+
+Don't exist, as far as HomEvenT is concerned.
+
+This may be a rather strange statement, given that HomEvenT is all about
+home control, which is a sophisticated way of turning a device (like a
+lamp) on and off when you press a switch, so, like, duh?
+
+Don't worry, I'll explain.
 
 HomEvenT is not about reading the state of a switch from *somewhere* and
 somehow, magically, turning off a lamp *somewhere* *else*.
@@ -49,6 +57,12 @@ is on is not interesting. Often, you can't even find out.
 What's interesting is the fact that the switch state changed. HomEvenT
 then reacts to that somehow. One of the reactions may well be "send a
 message to something-or-other that'll turn on a lamp".
+
+How HomEvenT learns about that change and how it can control external
+devices is a question that's answered adequately (I hope) in the “modules”
+documentation. This document is not about specific modules; here,
+I address the generic structure of how to control things in a sane
+manner. Hopefully.
 
 
 Events
@@ -73,8 +87,8 @@ All of the above can be represented by two things: "Events" and
 "States". Events occur when something happens. States are what
 the system knows about the world.
 
-Changing a state is also an event. Or at least it can be. We'll get to
-that shortly.
+Changing a state is also an event in itself. Or at least it can be.
+We'll get to that shortly.
 
 For the purpose of this tutorial, we don't have any outside world that
 can trigger events, but we have a "trigger" statement which can simulate
@@ -87,7 +101,6 @@ world.
 
 A complete list of pre-defined events is available in the “events”
 documentation file.
-
 
 Simple case
 -----------
@@ -118,14 +131,16 @@ Toggle switches
 The first complication is that push-button switches are easier to do
 than on/off switches when you talk to computers, because the computer
 only needs to understand one kind of event (a button is pressed) instead
-of two (switch on vs. switch off). So are remote controls because the
+of two (switch on vs. switch off). So are remote controls, because the
 number of buttons on them is limited; we'd like to be able to control
-four lights with a four-button remote, not just two.
+four lights with a four-button remote, not just two. Of course, this
+pre-supposes that the person holding the remote can easily determine
+the state of the device they want to control.
 
 On the other hand, while toggle relays (to control the lights) do exist,
 they're more expensive, less reliable, and the computer never really
 knows what their actual state is unless it has a light sensor next to
-the lamp..
+the lamp. This is bad.
 
 Thus, we need to remember what the state is supposed to be. Sometimes
 the external hardware does that for us (i.e., you can ask the relay
@@ -292,17 +307,21 @@ makes the lamp go out five minutes after *any* button press. Consider:
 
 * now: I push the button. Lamp lights.
 
-* 1min: You push the button by accident because you habitually do that
+* 2min: You push the button by accident because you habitually do that
   every time you enter the room. Of course, nothing happens because the
   lamp is already on.
 
-* 5min: The light goes out (from the first push). You still need it,
-  though, and so you turn it on again.
+* 3min: We leave the room. You habitually push the button because
+  you forgot that the lamp is now on a timer.
 
-* 6min: The light goes out (second push). You start to wonder why the
+* 5min: The light goes out (from the first push).
+
+* 6min: You come back into the room and turn on the light.
+
+* 7min: The light goes out (second push). You start to wonder why the
   damn thing won't stay on, and push the button again.
 
-* 10min: The light goes out again (third push). You wonder what happened
+* 8min: The light goes out again (third push). You wonder what happened
   to the five-minute-promise, grumble about the randomness of it all,
   and turn the light back on.
 
@@ -353,10 +372,10 @@ you might want to write
 	if exists wait lamp $lamp:
 
 The difference obviously doesn't matter in this simple snippet;
-depending on how you structure your code, the one or the other way
+depending on how you structure your code, one or the other way
 of doing this may make more sense.
 
-NB: The name spaces of "state" and "wait" are separate. For convenience
+NB: The namespaces of "state" and "wait" are separate. For convenience
 I've named both the same in the above code snippet, but they aren't
 related in any way (except by your code, of course).
 
@@ -395,8 +414,8 @@ Third solution: re-start the timer.
 	.
 
 Here I use the "update" keyword in "wait". This tells the wait
-statement to go to the version of the (named!) wait that's already
-running and play with that, instead of waiting itself.
+statement to play with the timeout of some wait that's already
+running, instead of waiting itself.
 
 
 Fourth solution: extend the time. That's easy, we just need to figure 
@@ -429,9 +448,8 @@ turn-on event instead. The distinction is whether you want the lamp to
 *always* turn off after five minutes, or just because it's been
 switched on by somebody. If you only have manual switches, the
 distinction is meaningless, but you might also have motion detectors
-or daylight sensors or some other way of presence detection (e.g., when
-first the outside door sensor and then the bedroom door sensor fire,
-it's reasonable to assume that somebody must be *somewhere* in your home).
+or daylight sensors or door switches or some other way of presence
+detection.
 
 Anyway, in principle, this is easy:
 
@@ -465,6 +483,12 @@ doesn't force the rest of the world to wait until the statements inside
 			set state off lamp $lamp
 	.
 
-Exercise: Of course, you need a “on state * off …” block to cancel the
-timer, but by now you should be able to write that yourself.
+Of course, you still need a “on state * off …” block which cancels
+the timer, but by now you should be able to write that yourself.
 
+
+---------------------
+More complex examples
+---------------------
+
+TODO.

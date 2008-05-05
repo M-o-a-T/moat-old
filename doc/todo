@@ -19,6 +19,12 @@ TODO
 So many ideas, so little time …
 
 
+Documentation
+=============
+
+* Write some more tutorial stuff.
+
+
 Code
 ====
 
@@ -161,9 +167,6 @@ Flexible debugging
 
 Help
 ====
-
-Group all "list" statements so that the global overview shows only one
-line.
 
 Improve the help messages.
 

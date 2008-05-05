@@ -54,7 +54,7 @@ For instance, this is a quick way to do nothing for a few seconds:
 Quick intermission
 ------------------
 
-In thes examples, there are a couple of "load" statements. They're here
+In these examples, there are a couple of "load" statements. They're here
 because the language itself is quite minimal and relies on external
 parts to do almost everything (except for loading other external parts,
 of course ☺). These "load"s are given so that you can type the examples
@@ -142,8 +142,43 @@ Not surprisingly, this means that this command should work:
 
 … and it does.
 
+Semantics
+---------
+
+Of course, the next part is to figure out what a command actually does.
+You already encountered "help". By itself, it lists a bunch of commands:
+
+    >> help
+    Global : word list:
+    Known words:
+    conditions : List of conditions you can use in 'if' statements.
+    help       : show doc texts
+    net        : connect to a TCP port
+    shutdown   : stops executing the program.
+
+(This is after "load net". Some words have been omitted.)
+
+This means that the top level knows, for instance, "net".
+You can then query what that command understands:
+
+    >> help net
+    net:
+    net ‹name› ‹host› ‹port›
+        [...]
+    Known words:
+    name : specify the name of a new TCP connection
+
+… and you can dig even deeper:
+
+    >> help net name
+    name:
+    net ‹host› ‹port› :name ‹name…›
+        : Use this form for multi-name network connections.
+
+No "Known words" are reported here, so you're done.
+
 The End
 -------
 
 You now know all there is to know about the general syntax of HomEvenT
-commands; you should now proceed to doc/TUTORIAL.
+commands; you should now proceed to doc/tutorial.
