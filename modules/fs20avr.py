@@ -39,25 +39,17 @@ from twisted.internet import protocol,defer,reactor
 from twisted.protocols.basic import _PauseableMixin
 from twisted.python import failure
 from twisted.internet.error import ProcessExitedAlready
+from twisted.internet.serialport import SerialPort
 
 import os
 
 avrs = {}
 
-class my_handler(handler):
-	def do_kill(self):
-		if self.transport:
-			try:
-				self.transport.signalProcess("KILL")
-			except ProcessExitedAlready:
-				pass
-
-class FS20ctl(protocol.ProcessProtocol, my_handler):
+class FS20common(handler):
 	stopped = True
-	def __init__(self, name, cmd, ctx=Context, timeout=3):
-		super(FS20ctl,self).__init__(ctx=ctx)
+	def __init__(self, name, ctx=Context, timeout=3):
+		super(FS20common,self).__init__(ctx=ctx)
 		self.name = name
-		self.cmd = cmd
 		self.timeout = timeout
 		self.timer = None
 		self.dbuf = ""
@@ -90,7 +82,7 @@ class FS20ctl(protocol.ProcessProtocol, my_handler):
 		simple_event(Context(),"fs20","wedged",*self.name)
 
 
-	def dataReceived(self,data):
+	def _dataReceived(self,data):
 		db = ""
 		e = ""
 		if not data: return # empty line
@@ -113,31 +105,7 @@ class FS20ctl(protocol.ProcessProtocol, my_handler):
 		else:
 			simple_event(Context(),"fs20","unknown","prefix",data[0],data[1:])
 
-
-	def cont(self, _=None):
-		while self.waiting:
-			try:
-				msg = self.waiting.pop(0)
-				log("fs20",DEBUG,msg)
-				d = self.dataReceived(msg)
-			except Exception:
-				process_failure()
-			else:
-				if d:
-					d.addCallback(self.cont)
-					return
-		self.waiting = None
-		self._start_timer()
-
-	def errReceived(self, data):
-		self._stop_timer()
-		data = (self.ebuf+data).split('\n')
-		self.ebuf = data.pop()
-		for d in data:
-			simple_event(Context(),"fs20","error",*d)
-		self._start_timer()
-
-	def outReceived(self, data):
+	def dataReceived(self, data):
 		self._stop_timer()
 		while True:
 			xi = len(data)+1
@@ -157,11 +125,27 @@ class FS20ctl(protocol.ProcessProtocol, my_handler):
 					msg = self.lbuf
 					self.lbuf = None
 				try:
-					self.dataReceived(msg)
+					self._dataReceived(msg)
 				except Exception:
 					process_failure()
 
 		self.dbuf = data
+		self._start_timer()
+
+
+	def cont(self, _=None):
+		while self.waiting:
+			try:
+				msg = self.waiting.pop(0)
+				log("fs20",DEBUG,msg)
+				d = self._dataReceived(msg)
+			except Exception:
+				process_failure()
+			else:
+				if d:
+					d.addCallback(self.cont)
+					return
+		self.waiting = None
 		self._start_timer()
 
 	def inConnectionLost(self):
@@ -182,10 +166,9 @@ class FS20ctl(protocol.ProcessProtocol, my_handler):
 		else:
 			self.do_restart()
 
-
 	def do_start(self):
 		if not self.stopped:
-			reactor.spawnProcess(self, self.cmd[0], self.cmd, {})
+			self._start()
 	
 	def do_stop(self):
 		self.stopped = True
@@ -201,6 +184,94 @@ class FS20ctl(protocol.ProcessProtocol, my_handler):
 		return defer.succeed(None)
 
 
+class my_handler(handler):
+	def do_kill(self):
+		if self.transport:
+			try:
+				self.transport.signalProcess("KILL")
+			except ProcessExitedAlready:
+				pass
+
+class FS20cmd(FS20common, protocol.ProcessProtocol, my_handler):
+	stopped = True
+	def __init__(self, name, cmd, ctx=Context, timeout=3):
+		self.cmd = cmd
+		super(FS20cmd,self).__init__(name=name,timeout=timeout,ctx=ctx)
+
+	def inConnectionLost(self):
+		log(DEBUG,"FS20 ending",self.name)
+		unregister_handler(self)
+		pass
+
+	def outConnectionLost(self):
+		log(DEBUG,"FS20 ending",self.name)
+
+	def errConnectionLost(self):
+		pass
+
+	def processEnded(self, status_object):
+		log(DEBUG,"FS20 ended",status_object.value.exitCode, self.name)
+		if self.stopped:
+			del avrs[self.name]
+		else:
+			self.do_restart()
+
+	def outReceived(self, data):
+		self.dataReceived(data)
+
+	def errReceived(self, data):
+		self._stop_timer()
+		data = (self.ebuf+data).split('\n')
+		self.ebuf = data.pop()
+		for d in data:
+			simple_event(Context(),"fs20","error",*d)
+		self._start_timer()
+
+	def _start(self):
+		reactor.spawnProcess(self, self.cmd[0], self.cmd, {})
+	
+
+class FS20port(FS20common, SerialPort):
+	stopped = True
+	def __init__(self, name, port, baud=57600, ctx=Context, timeout=3):
+		self.port = cmd
+		self.baud = baud
+		super(FS20cmd,self).__init__(name=name,timeout=timeout,ctx=ctx)
+		SerialPort.__init__(self,)
+
+	def inConnectionLost(self):
+		log(DEBUG,"FS20 ending",self.name)
+		unregister_handler(self)
+		pass
+
+	def outConnectionLost(self):
+		log(DEBUG,"FS20 ending",self.name)
+
+	def errConnectionLost(self):
+		pass
+
+	def processEnded(self, status_object):
+		log(DEBUG,"FS20 ended",status_object.value.exitCode, self.name)
+		if self.stopped:
+			del avrs[self.name]
+		else:
+			self.do_restart()
+
+	def outReceived(self, data):
+		self.dataReceived(data)
+
+	def errReceived(self, data):
+		self._stop_timer()
+		data = (self.ebuf+data).split('\n')
+		self.ebuf = data.pop()
+		for d in data:
+			simple_event(Context(),"fs20","error",*d)
+		self._start_timer()
+
+	def _start(self):
+		reactor.spawnProcess(self, self.cmd[0], self.cmd, {})
+	
+
 class FS20avr(AttributedStatement):
 	name = ("fs20","avr")
 	doc = "AVR-based FS20 transceiver"
@@ -210,18 +281,29 @@ fs20 avr ‹name…›
 """
 
 	cmd = None
+	port = None
+	baud = None
 
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		if len(event) < 1:
 			raise SyntaxError(u"Usage: fs20 avr ‹name…›")
-		if self.cmd is None:
-			raise SyntaxError(u"requires a 'cmd' subcommand")
 
 		name = Name(event)
 		if name in avrs:
 			raise RuntimeError(u"‹%s› is already defined" % (name,))
-		FS20ctl(name=name, cmd=self.cmd, ctx=ctx).do_start()
+		
+		if if self.cmd is not None:
+			if self.port is not None:
+				raise SyntaxError(u"You cannot use 'port' and 'cmd' at the same time.")
+			FS20port(name=name, port=self.port, baud=self.baud, ctx=ctx).do_start()
+
+		else:
+			if self.port is not None:
+				raise SyntaxError(u"requires a 'cmd' or 'port' subcommand")
+
+			FS20cmd(name=name, cmd=self.cmd, ctx=ctx).do_start()
+
 
 
 class FS20listavr(Statement):
@@ -264,7 +346,6 @@ del fs20 avr ‹name…›
 
 
 
-
 class FS20cmd(Statement):
 	name = ("cmd",)
 	doc = "set the command to use"
@@ -280,6 +361,26 @@ cmd ‹command…›
 		if not len(event):
 			raise syntaxerror(u"Usage: cmd ‹whatever…›")
 		self.parent.cmd = Name(event)
+FS20avr.register_statement(FS20cmd)
+
+
+class FS20cmd(Statement):
+	name = ("port",)
+	doc = "set the serial port to use"
+	long_doc=u"""\
+port ‹device› [‹baud›]
+  - set the serial port to use. Don't forget quoting.
+    The baud rate defaults to 57600.
+"""
+
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if not len(event) or len(event) > 2:
+			raise syntaxerror(u"Usage: port ‹device› [‹baud›]")
+		self.parent.port = event[0]
+		if len(event) > 1:
+			self.parent
+
 FS20avr.register_statement(FS20cmd)
 
 
