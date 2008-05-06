@@ -36,15 +36,18 @@ from homevent.net import NetListen,NetConnect,NetSend,NetExists,NetConnected,\
 
 import os
 
-class NETreceiver(NetReceiver):
-	pass
-
 class Nets(Collection):
 	name = "net"
 Nets = Nets()
 Nets.can_do("del")
 
 net_conns = {}
+
+
+class NETreceiver(NetReceiver):
+	def lineReceived(self, line):
+		line = line.strip().split()
+		simple_event(Context(),"net", *(self.factory.name + tuple(line)))
 
 
 class NETcommon_factory(object): # mix-in

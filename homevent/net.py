@@ -72,8 +72,8 @@ class NetReceiver(object,LineReceiver, _PauseableMixin):
 	def lineReceived(self, line):
 		"""Override this.
 		"""
-		line = line.strip().split()
-		simple_event(Context(),"net", *(self.factory.name + tuple(line)))
+		self.loseConnection()
+		raise ProgrammingError("You need to override NetReceiver.lineReceived")
 
 	def connectionMade(self):
 		super(NetReceiver,self).connectionMade()
