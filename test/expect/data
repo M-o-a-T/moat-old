@@ -22,11 +22,7 @@ info: the 'on EVENT:' handler
 103 :: shutdown last
 .
 .
-event
 module
-on
-wait
-worker
 .
 0 Create OnEvtHandler: foo
 0 NewHandler 1
