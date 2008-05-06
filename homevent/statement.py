@@ -110,6 +110,11 @@ class Statement(object):
 		yield " ".join(unicode(x) for x in self.args)+u" ‹"+self.__class__.__name__+u"›"
 
 
+class WordLister(type):
+	def __init__(cls, name, bases, dct):
+		super(WordLister, cls).__init__(name, bases, dct)
+		cls._words = {}
+
 class ComplexStatement(Statement):
 	"""\
 		Base class for handling complex statements. This class has a
@@ -126,25 +131,30 @@ class ComplexStatement(Statement):
 		StatementList instead.
 		"""
 
-	__words = None
+	__metaclass__ = WordLister
 
 	def __init__(self,*a,**k):
 		super(ComplexStatement,self).__init__(*a,**k)
 		self.statements = []
 
 	def __repr__(self):
-		if self.__words is None:
+		if self._words is None:
 			return u"‹%s: %s›" % (self.__class__.__name__,self.name)
 		else:
-			return u"‹%s: %s %d›" % (self.__class__.__name__,self.name,len(self.__words))
+			return u"‹%s: %s %d›" % (self.__class__.__name__,self.name,len(self._words))
 
 	def start_block(self):
 		raise NotImplementedError("You need to override '%s.start_block' (called with %s)" % (self.__class__.__name__,repr(self.args)))
 
+	@classmethod
 	def __getitem__(self,key):
-		if self.__words is None:
-			raise KeyError(u"Lookup ‹%s›: No word list in %s" % (key,self.__class__.__name__))
-		return self.__words[key]
+		for o in self.__mro__:
+			if hasattr(o,"_words"):
+				try:
+					return o._words[key]
+				except KeyError:
+					pass
+		raise KeyError(self,key)
 
 	def lookup(self,args):
 		"""\
@@ -153,7 +163,7 @@ class ComplexStatement(Statement):
 			"""
 		
 		n = len(args)
-		while n >= 0:
+		while n > 0:
 			try:
 				fn = self[Name(args[:n])]
 			except KeyError:
@@ -188,7 +198,14 @@ class ComplexStatement(Statement):
 	@classmethod
 	def _get_wordlist(self):
 		"""Called by Help to get my list of words."""
-		return self.__words
+		wl = {}
+		for o in self.__mro__:
+			if hasattr(o,"_words"):
+				for k,v in o._words.iteritems():
+					if k not in wl:
+						wl[k] = v
+		return wl
+
 	@classmethod
 	def iterkeys(self):
 		k = self._get_wordlist()
@@ -218,21 +235,20 @@ class ComplexStatement(Statement):
 			up in. handler.end_block() will be called when the block is finished,
 			if it exists.
 			"""
-		if self.__words is None:
-			self.__words = {}
 		if not isinstance(handler.name,Name):
 			assert isinstance(handler.name,tuple),"Names must be word lists"
 			handler.name = Name(handler.name)
-		if handler.name in self.__words:
-			raise ValueError("A handler for '%s' is already registered. (%s)" % (handler.name,self.__words[handler.name]))
-		self.__words[handler.name] = handler
+
+		if handler.name in self._words:
+			raise ValueError("A handler for '%s' is already registered. (%s)" % (handler.name,self._words[handler.name]))
+		self._words[handler.name] = handler
 
 	@classmethod
 	def unregister_statement(self,handler):
 		"""\
 			Remove this statement.
 			"""
-		del self.__words[handler.name]
+		del self._words[handler.name]
 
 class AttributedStatement(ComplexStatement):
 	"""A statement that can be parameterized."""
@@ -349,9 +365,9 @@ class global_words(ComplexStatement):
 	@classmethod
 	def __getitem__(self,key):
 		"""This uses a more efficient method. ;-)"""
-		try: return super(global_words,self)._get_wordlist()[key]
-		except (KeyError,NotImplementedError,TypeError): pass
-		return main_words._get_wordlist()[key]
+		try: return super(global_words,self).__getitem__(key)
+		except KeyError: pass
+		return main_words.__getitem__(key)
 
 
 
