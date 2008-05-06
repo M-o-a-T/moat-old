@@ -199,12 +199,9 @@ class NetConnect(AttributedStatement):
 	doc = "connect to a TCP port (base class)"
 	dest = None
 	#client = None # descendant of NetClientFactory
-
-	@property
-	def long_doc(self):
-		return u"""\
-You need to override the long_doc descroption of ‹%s›.
-""" % (self.__class__.__name__,)
+	long_doc = u"""\
+You need to override the long_doc description.
+"""
 
 	def run(self,ctx,**k):
 		event = self.params(ctx)
@@ -227,11 +224,9 @@ You need to override the long_doc descroption of ‹%s›.
 class NetListen(AttributedStatement):
 	#name = ("listen","net")
 	doc = "listen to a TCP socket (base class)"
-	@property
-	def long_doc(self):
-		return u"""\
-You need to override the long_doc descroption of ‹%s›.
 
+	long_doc = u"""\
+You need to override the long_doc description.
 """
 	dest = None
 	#server = None # descendant of NetServerFactory
@@ -259,12 +254,10 @@ class NetName(Statement):
 	dest = None
 	doc="specify the name of a new TCP connection"
 
-	@property
-	def long_doc(self):
-		return u"""\
-%s ‹host› ‹port› :name ‹name…›
-	: Use this form for multi-name network connections.
-""" % (self.parent.name,)
+	long_doc = u"""\
+name ‹name…›
+  - Use this form for network connections with multi-word names.
+"""
 
 	def run(self,ctx,**k):
 		event = self.params(ctx)
@@ -281,9 +274,9 @@ class NetSend(AttributedStatement):
 	doc="send a line to a TCP connection"
 	long_doc=u"""\
 send net ‹name› text…
-	: The text is sent to the named net connection.
+  - The text is sent to the named net connection.
 send net text… :to ‹name…›
-	: as above, but works with a multi-word connection name.
+  - as above, but works with a multi-word connection name.
 
 """
 	def run(self,ctx,**k):
@@ -302,12 +295,10 @@ class NetTo(Statement):
 	dest = None
 	doc="specify which TCP connection to use"
 
-	@property
-	def long_doc(self):
-		return u"""\
-%s text… :to ‹name…›
-	: Use this form for multi-name network connections.
-""" % (self.parent.name,)
+	long_doc = u"""\
+to ‹name…›
+  - Use this form for network connections with multi-word names.
+"""
 
 	def run(self,ctx,**k):
 		event = self.params(ctx)

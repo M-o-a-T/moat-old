@@ -70,8 +70,8 @@ net NAME [host] port
   - connect (asynchronously) to the TCP server at the remote port;
 	name that connection NAME. Default for host is localhost.
 	The system will emit a connection-ready event.
-net [host] port :to NAME…
-  - same as above, but use a multi-word name.
+net [host] port :name NAME…
+  - same as above, but allows you to use a multi-word name.
 """
 	dest = None
 
