@@ -94,21 +94,10 @@ listen net [address] port :to NAME…
 	dest = None
 
 
-class NETname(NetName):
-	pass
-NETconnect.register_statement(NETname)
-NETlisten.register_statement(NETname)
-
-
 class NETsend(NetSend):
 	storage = Nets.storage
 	storage2 = net_conns
 	name=("send","net")
-
-class NETto(NetTo):
-	pass
-NETsend.register_statement(NETto)
-
 
 class NETconnected(NetConnected):
 	storage = Nets.storage
