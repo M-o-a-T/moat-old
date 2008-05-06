@@ -31,7 +31,8 @@ from twisted.internet import protocol,reactor,error
 from twisted.protocols.basic import LineReceiver,_PauseableMixin
 
 from homevent.net import NetListen,NetConnect,NetSend,NetExists,NetConnected,\
-	NetReceiver,NetCommonFactory,DisconnectedError
+	NetReceiver,NetCommonFactory,DisconnectedError,\
+	NetName,NetTo, NetClientFactory,NetServerFactory
 
 import os
 
@@ -46,15 +47,15 @@ Nets.can_do("del")
 net_conns = {}
 
 
-class NETcommon_factory(NetCommonFactory):
+class NETcommon_factory(object): # mix-in
 	protocol = NETreceiver
 	storage = Nets.storage
 	storage2 = net_conns
 
-class NETserver_factory(NETcommon_factory,protocol.ServerFactory):
+class NETserver_factory(NETcommon_factory, NetServerFactory):
 	pass
 
-class NETclient_factory(NETcommon_factory,protocol.ClientFactory):
+class NETclient_factory(NETcommon_factory, NetClientFactory):
 	pass
 
 class NETconnect(NetConnect):
@@ -71,7 +72,8 @@ net [host] port :to NAME…
 """
 	dest = None
 
-class NETlisten(AttributedStatement):
+
+class NETlisten(NetListen):
 	name = ("listen","net")
 	server = NETserver_factory
 	doc = "listen to a TCP socket"
@@ -88,27 +90,11 @@ listen net [address] port :to NAME…
 """
 	dest = None
 
-	def run(self,ctx,**k):
-		event = self.params(ctx)
-		if len(event) < 1+(self.dest is None) or len(event) > 2+(self.dest is None):
-			raise SyntaxError(u"Usage: listen net ‹name› ‹host›? ‹port›")
-		name = self.dest
-		if name is None:
-			name = Name(event[0])
-			event = event[1:]
-		if len(event) == 2:
-			host = "localhost"
-		else:
-			host = event[1]
-		port = event[-1]
 
-		listen(host,port,name)
-
-#class NETname(NetName):
-#	pass
-#NETconnect.register_statement(NETname)
-#NETlisten.register_statement(NETname)
-
+class NETname(NetName):
+	pass
+NETconnect.register_statement(NETname)
+NETlisten.register_statement(NETname)
 
 
 class NETsend(NetSend):
@@ -116,9 +102,9 @@ class NETsend(NetSend):
 	storage2 = net_conns
 	name=("send","net")
 
-#class NETto(NetTo):
-#	pass
-#NETsend.register_statement(NETto)
+class NETto(NetTo):
+	pass
+NETsend.register_statement(NETto)
 
 
 class NETconnected(NetConnected):

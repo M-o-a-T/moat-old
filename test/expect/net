@@ -74,8 +74,6 @@ RUN: on net disconnect foo ‹OnEventHandler›
  ev: EVENT: net¦disconnect¦foo
 0 dis foo
 END: net¦disconnect¦foo
-2 [Failure instance: Traceback (failure with no frames): <class 'twisted.internet.error.ConnectionDone'>: Connection was closed cleanly.
-]
 EVENT: net¦connect¦baz¦zaz
 NEW: <ConditionalWorkSequence:8 (5)>
    : │  EVENT: net¦connect¦baz¦zaz

@@ -188,7 +188,8 @@ class NetClientFactory(NetCommonFactory,protocol.ClientFactory):
 		self._down_event()
 
 	def clientConnectionLost(self, connector, reason):
-		log(INFO,reason)
+		if not reason.check(error.ConnectionDone):
+			log(INFO,reason)
 		self.conn = None
 		self._down_event()
 
