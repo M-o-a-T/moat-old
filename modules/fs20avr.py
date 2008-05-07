@@ -21,8 +21,9 @@ microcontroller.
 
 """
 
+from homevent.base import Name,MIN_PRIO
 from homevent.module import Module
-from homevent.logging import log,DEBUG,TRACE,INFO,WARN
+from homevent.logging import log,DEBUG,TRACE,INFO,WARN,ERROR
 from homevent.statement import AttributedStatement,Statement, main_words
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.run import simple_event,process_failure,register_worker,unregister_worker
@@ -30,12 +31,16 @@ from homevent.context import Context
 from homevent.event import Event,TrySomethingElse
 from homevent.fs20 import handler,register_handler,unregister_handler, \
 	PREFIX,PREFIX_TIMESTAMP
-from homevent.base import Name,MIN_PRIO
 from homevent.worker import ExcWorker
 from homevent.reactor import shutdown_event
 from homevent.twist import callLater
+from homevent.collect import Collection,Collected
 
-from twisted.internet import protocol,defer,reactor
+from homevent.net import NetListen,NetConnect,NetSend,NetExists,NetConnected,\
+	NetReceiver,NetCommonFactory,DisconnectedError,\
+	NetName,NetTo, NetClientFactory,NetServerFactory
+
+from twisted.internet import protocol,reactor,error,defer
 from twisted.protocols.basic import _PauseableMixin
 from twisted.python import failure
 from twisted.internet.error import ProcessExitedAlready
@@ -43,13 +48,14 @@ from twisted.internet.serialport import SerialPort
 
 import os
 
-avrs = {}
+class AVRcommon(handler):
+	"""\
+		This class implements the protocol for handling AVR messages.
+		"""
 
-class FS20common(handler):
 	stopped = True
 	def __init__(self, name, ctx=Context, timeout=3):
-		super(FS20common,self).__init__(ctx=ctx)
-		self.name = name
+		super(AVRcommon,self).__init__(ctx=ctx)
 		self.timeout = timeout
 		self.timer = None
 		self.dbuf = ""
@@ -58,12 +64,12 @@ class FS20common(handler):
 		self.timestamp = None
 		self.last_timestamp = None
 		self.last_dgram = None
-		avrs[self.name] = self
 		self.stopped = False
 		self.waiting = None
 
 	def connectionMade(self):
-		log(DEBUG,"FS20 started",self.name)
+		log(DEBUG,"AVR started",self.factory.name)
+		self.factory.haveConnection(self)
 		self._start_timer()
 		register_handler(self)
 	
@@ -80,7 +86,6 @@ class FS20common(handler):
 		self.timer = None
 		self.do_kill()
 		simple_event(Context(),"fs20","wedged",*self.name)
-
 
 	def _dataReceived(self,data):
 		db = ""
@@ -148,23 +153,38 @@ class FS20common(handler):
 		self.waiting = None
 		self._start_timer()
 
-	def inConnectionLost(self):
-		log(DEBUG,"FS20 ending",self.name)
+	def send(self,prefix,data):
+		data = prefix+"".join("%02x" % ord(x)  for x in data)
+		self.transport.write(data+"\n")
+		return defer.succeed(None)
+
+
+	# standard stuff
+
+	def connectionLost(self,reason):
+		log(DEBUG,"AVR ending",self.factory.name,reason)
 		unregister_handler(self)
-		pass
+
+	# process stuff
+
+	def inConnectionLost(self):
+		self.connectionLost("in lost")
 
 	def outConnectionLost(self):
-		log(DEBUG,"FS20 ending",self.name)
+		log(DEBUG,"AVR ending",self.name)
 
 	def errConnectionLost(self):
 		pass
 
 	def processEnded(self, status_object):
-		log(DEBUG,"FS20 ended",status_object.value.exitCode, self.name)
+		log(DEBUG,"AVR ended",status_object.value.exitCode, self.factory.name)
 		if self.stopped:
-			del avrs[self.name]
+			del AVRs[self.name]
 		else:
 			self.do_restart()
+
+
+	# my stuff
 
 	def do_start(self):
 		if not self.stopped:
@@ -178,111 +198,128 @@ class FS20common(handler):
 		if not self.stopped:
 			callLater(True,5,self.do_start)
 		
-	def send(self,prefix,data):
-		data = prefix+"".join("%02x" % ord(x)  for x in data)
-		self.transport.write(data+"\n")
-		return defer.succeed(None)
-
-
-class my_handler(handler):
 	def do_kill(self):
-		if self.transport:
-			try:
-				self.transport.signalProcess("KILL")
-			except ProcessExitedAlready:
-				pass
+		raise NotImplementedError("Need to override do_kill()")
 
-class FS20cmd(FS20common, protocol.ProcessProtocol, my_handler):
-	stopped = True
-	def __init__(self, name, cmd, ctx=Context, timeout=3):
-		self.cmd = cmd
-		super(FS20cmd,self).__init__(name=name,timeout=timeout,ctx=ctx)
 
-	def inConnectionLost(self):
-		log(DEBUG,"FS20 ending",self.name)
-		unregister_handler(self)
-		pass
+#class my_handler(handler):
+#	def do_kill(self):
+#		if self.transport:
+#			try:
+#				self.transport.signalProcess("KILL")
+#			except ProcessExitedAlready:
+#				pass
+#
+#
+#class FS20cmd(FS20common, protocol.ProcessProtocol, my_handler):
+#	stopped = True
+#	def __init__(self, name, cmd, ctx=Context, timeout=3):
+#		self.cmd = cmd
+#		super(FS20cmd,self).__init__(name=name,timeout=timeout,ctx=ctx)
+#
+#	def inConnectionLost(self):
+#		log(DEBUG,"FS20 ending",self.name)
+#		unregister_handler(self)
+#		pass
+#
+#	def outConnectionLost(self):
+#		log(DEBUG,"FS20 ending",self.name)
+#
+#	def errConnectionLost(self):
+#		pass
+#
+#	def processEnded(self, status_object):
+#		log(DEBUG,"FS20 ended",status_object.value.exitCode, self.name)
+#		if self.stopped:
+#			del avrs[self.name]
+#		else:
+#			self.do_restart()
+#
+#	def outReceived(self, data):
+#		self.dataReceived(data)
+#
+#	def errReceived(self, data):
+#		self._stop_timer()
+#		data = (self.ebuf+data).split('\n')
+#		self.ebuf = data.pop()
+#		for d in data:
+#			simple_event(Context(),"fs20","error",*d)
+#		self._start_timer()
+#
+#	def _start(self):
+#		reactor.spawnProcess(self, self.cmd[0], self.cmd, {})
+#	
+#
+#class FS20port(SerialPort):
+#	stopped = True
+#	def __init__(self, name, port, baud=57600, ctx=Context, timeout=3):
+#		self.port = cmd
+#		self.baud = baud
+#		super(FS20cmd,self).__init__(name=name,timeout=timeout,ctx=ctx)
+#		SerialPort.__init__(self,FS20common,port,reactor,57600)
+#
+#	def connectionLost(self):
+#		log(DEBUG,"FS20 ending",self.name)
+#		unregister_handler(self)
+#		del avrs[self.name]
+#		super(FS20port,self).connectionLost()
+#
+#	def dataReceived(self, data):
+#		self._dataReceived(data)
+#
+#	def _start(self):
+#		
+#		reactor.spawnProcess(self, self.cmd[0], self.cmd, {})
+#	
 
-	def outConnectionLost(self):
-		log(DEBUG,"FS20 ending",self.name)
 
-	def errConnectionLost(self):
-		pass
+class AVRs(Collection):
+	name = Name("fs20","avr")
+AVRs = AVRs()
+AVRs.can_do("del")
 
-	def processEnded(self, status_object):
-		log(DEBUG,"FS20 ended",status_object.value.exitCode, self.name)
-		if self.stopped:
-			del avrs[self.name]
-		else:
-			self.do_restart()
+avr_conns = {}
 
-	def outReceived(self, data):
-		self.dataReceived(data)
 
-	def errReceived(self, data):
-		self._stop_timer()
-		data = (self.ebuf+data).split('\n')
-		self.ebuf = data.pop()
-		for d in data:
-			simple_event(Context(),"fs20","error",*d)
-		self._start_timer()
+class AVRreceiver(AVRcommon,NetReceiver):
+	storage = AVRs.storage
+	storage2 = avr_conns
 
-	def _start(self):
-		reactor.spawnProcess(self, self.cmd[0], self.cmd, {})
+class AVRclient_factory(NetClientFactory):
+	storage = AVRs.storage
+	storage2 = avr_conns
+
+	def down_event(self):
+		simple_event(Context(),"fs20","avr","disconnect",*self.name)
+
+	def not_up_event(self):
+		simple_event(Context(),"fs20","avr","error",*self.name)
+
+	def up_event(self):
+		simple_event(Context(),"fs20","avr","connect",*self.name)
+
+	def protocol(self):
+		return AVRreceiver(self.name)
+
+	# Collected stuff
+	def info(self):
+		return "%s:%s" % (self.host,self.port)
 	
 
-class FS20port(FS20common, SerialPort):
-	stopped = True
-	def __init__(self, name, port, baud=57600, ctx=Context, timeout=3):
-		self.port = cmd
-		self.baud = baud
-		super(FS20cmd,self).__init__(name=name,timeout=timeout,ctx=ctx)
-		SerialPort.__init__(self,)
-
-	def inConnectionLost(self):
-		log(DEBUG,"FS20 ending",self.name)
-		unregister_handler(self)
-		pass
-
-	def outConnectionLost(self):
-		log(DEBUG,"FS20 ending",self.name)
-
-	def errConnectionLost(self):
-		pass
-
-	def processEnded(self, status_object):
-		log(DEBUG,"FS20 ended",status_object.value.exitCode, self.name)
-		if self.stopped:
-			del avrs[self.name]
-		else:
-			self.do_restart()
-
-	def outReceived(self, data):
-		self.dataReceived(data)
-
-	def errReceived(self, data):
-		self._stop_timer()
-		data = (self.ebuf+data).split('\n')
-		self.ebuf = data.pop()
-		for d in data:
-			simple_event(Context(),"fs20","error",*d)
-		self._start_timer()
-
-	def _start(self):
-		reactor.spawnProcess(self, self.cmd[0], self.cmd, {})
-	
-
-class FS20avr(AttributedStatement):
-	name = ("fs20","avr")
-	doc = "AVR-based FS20 transceiver"
-	long_doc="""\
-fs20 avr ‹name…›
-  - declare an external device or process that understands FS20 datagrams.
-"""
-
+class AVRconnect(NetConnect):
 	cmd = None
+	host = None
 	port = None
 	baud = None
+
+	name = ("fs20","avr")
+	doc = "connect to a TCP port"
+	long_doc="""\
+fs20 avr NAME :remote host port
+  - connect (asynchronously) to the TCP server at the remote port;
+	name that connection NAME. Default for port is 54083.
+	The system will emit a connection-ready event.
+"""
 
 	def run(self,ctx,**k):
 		event = self.params(ctx)
@@ -290,70 +327,33 @@ fs20 avr ‹name…›
 			raise SyntaxError(u"Usage: fs20 avr ‹name…›")
 
 		name = Name(event)
-		if name in avrs:
+		if name in AVRs:
 			raise RuntimeError(u"‹%s› is already defined" % (name,))
 		
-		if if self.cmd is not None:
-			if self.port is not None:
-				raise SyntaxError(u"You cannot use 'port' and 'cmd' at the same time.")
-			FS20port(name=name, port=self.port, baud=self.baud, ctx=ctx).do_start()
+		n = (self.cmd is not None) + (self.host is not None) + (self.baud is not None)
+		if n == 0:
+			raise SyntaxError(u"You need to specify either a serial port, a TCP port, or a command line.")
+		if n > 1:
+			raise SyntaxError(u"You need to specify either a serial port, a TCP port, or a command line, but not more.")
+
+
+		if self.cmd:
+			AVRcmd(name=name, cmd=self.cmd, ctx=ctx)
+
+		elif self.host:
+			f = AVRclient_factory(host=self.host, port=self.port, name=name)
+			f.connector = reactor.connectTCP(self.host, self.port, f)
 
 		else:
-			if self.port is not None:
-				raise SyntaxError(u"requires a 'cmd' or 'port' subcommand")
-
-			FS20cmd(name=name, cmd=self.cmd, ctx=ctx).do_start()
+			AVRhost(name=name, port=self.port, baud=self.baud, ctx=ctx)
 
 
-
-class FS20listavr(Statement):
-	name = ("list","fs20","avr")
-	doc = "list external FS20 transceivers"
-	long_doc="""\
-list fs20 avr
-  - List known FS20 transceivers.
-    With a name as parameter, list details for that device.
-"""
-
-	def run(self,ctx,**k):
-		event = self.params(ctx)
-		if len(event) < 1:
-			for b in avrs.itervalues():
-				print >>self.ctx.out,b.name
-		else:
-			b = avrs[Name(event)]
-			print >>self.ctx.out,"name:",b.name
-			print >>self.ctx.out,"command:",Name(b.cmd)
-			print >>self.ctx.out,"running:","yes" if b.transport else "no"
-			print >>self.ctx.out,"stopped:","yes" if b.stopped else "no"
-		print >>self.ctx.out,"."
-
-
-class FS20delavr(Statement):
-	name = ("del","fs20","avr")
-	doc = "kill of an external fs20 transceiver"
-	long_doc="""\
-del fs20 avr ‹name…›
-  - kill and delete the transceiver.
-"""
-
-	def run(self,ctx,**k):
-		event = self.params(ctx)
-		if not len(event):
-			raise syntaxerror(u"usage: del fs20 avr ‹name…›")
-		b = avrs[Name(event)]
-		b.do_stop()
-
-
-
-class FS20cmd(Statement):
+class AVRcmd(AttributedStatement):
 	name = ("cmd",)
-	doc = "set the command to use"
-	long_doc=u"""\
-cmd ‹command…›
-  - set the actual command to use. Don't forget quoting.
-	If you need it to be interpreted by a shell, use
-		sh "-c" "your command | pipe | or | whatever"
+	doc = "pipe through a command"
+	long_doc = u"""\
+cmd ‹words…›
+  - talk to the AVR using this command
 """
 
 	def run(self,ctx,**k):
@@ -361,10 +361,10 @@ cmd ‹command…›
 		if not len(event):
 			raise syntaxerror(u"Usage: cmd ‹whatever…›")
 		self.parent.cmd = Name(event)
-FS20avr.register_statement(FS20cmd)
+AVRconnect.register_statement(AVRcmd)
 
 
-class FS20cmd(Statement):
+class AVRport(Statement):
 	name = ("port",)
 	doc = "set the serial port to use"
 	long_doc=u"""\
@@ -379,21 +379,53 @@ port ‹device› [‹baud›]
 			raise syntaxerror(u"Usage: port ‹device› [‹baud›]")
 		self.parent.port = event[0]
 		if len(event) > 1:
-			self.parent
+			self.parent.baud = int(event[1])
+		else:
+			self.parent.baud = 57600
+AVRconnect.register_statement(AVRport)
 
-FS20avr.register_statement(FS20cmd)
+
+class AVRremote(Statement):
+	name = ("remote",)
+	doc = "set the TCP port to use"
+	long_doc=u"""\
+remote ‹host› ‹port›?
+  - set the remote host and port to use.
+    The port defaults to 54083.
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if not len(event) or len(event) > 2:
+			raise syntaxerror(u"Usage: remote ‹host› [‹port›]")
+		self.parent.host = event[0]
+		if len(event) > 1:
+			self.parent.port = int(event[1])
+		else:
+			self.parent.port = 54083
+AVRconnect.register_statement(AVRremote)
+
+
+class AVRconnected(NetConnected):
+	storage = AVRs.storage
+	storage2 = avr_conns
+	name=("connected","fs20","avr")
+
+class AVRexists(NetExists):
+	storage = AVRs.storage
+	storage2 = avr_conns
+	name = ("exists","fs20","avr")
 
 
 class FS20avr_shutdown(ExcWorker):
 	"""\
-		This worker kills off all processes.
+		This worker kills off all connections and processes.
 		"""
 	prio = MIN_PRIO+1
 
 	def does_event(self,ev):
 		return (ev is shutdown_event)
 	def process(self,queue,*a,**k):
-		for proc in avrs.itervalues():
+		for proc in AVRs.itervalues():
 			proc.do_stop()
 		raise TrySomethingElse
 
@@ -405,23 +437,21 @@ FS20avr_shutdown = FS20avr_shutdown("FS20 process killer")
 
 
 
-class fs20avr(Module):
+class AVRmodule(Module):
 	"""\
-		Basic fs20 transceiver access.
+		Various ways to talk to an AVR-based on-air module.
 		"""
 
-	info = "Basic fs20 transceiver"
+	info = "AVR-based fs20 transceiver"
 
 	def load(self):
-		main_words.register_statement(FS20avr)
-		main_words.register_statement(FS20listavr)
-		main_words.register_statement(FS20delavr)
-		register_worker(FS20avr_shutdown)
+		main_words.register_statement(AVRconnect)
+		register_condition(AVRexists)
+		register_condition(AVRconnected)
 	
 	def unload(self):
-		main_words.unregister_statement(FS20avr)
-		main_words.unregister_statement(FS20listavr)
-		main_words.unregister_statement(FS20delavr)
-		unregister_worker(FS20avr_shutdown)
+		main_words.unregister_statement(AVRconnect)
+		unregister_condition(AVRexists)
+		unregister_condition(AVRconnected)
 	
-init = fs20avr
+init = AVRmodule
