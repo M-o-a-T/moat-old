@@ -25,7 +25,6 @@ from homevent.statement import Statement, main_words, AttributedStatement
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.context import Context
 from homevent.event import Event
-from homevent.run import simple_event
 from homevent.base import Name
 from homevent.collect import Collection,Collected
 
@@ -110,7 +109,7 @@ class NetCommonFactory(Collected):
 		self.host = host
 		self.port = port
 		self.name = name
-		self.up_event = False
+		self.did_up_event = False
 		assert (host,port) not in self.storage2, "already known host/port tuple"
 		Collected.__init__(self)
 		self.storage2[(host,port)] = self
@@ -134,9 +133,9 @@ class NetCommonFactory(Collected):
 		self.drop()
 		self.conn = conn
 
-		if not self.up_event:
-			self.up_event = True
-			simple_event(Context(),"net","connect",*self.name)
+		if not self.did_up_event:
+			self.did_up_event = True
+			self.up_event()
 
 	def lostConnection(self,conn):
 		if self.conn == conn:
@@ -144,9 +143,16 @@ class NetCommonFactory(Collected):
 			self._down_event()
 
 	def _down_event(self):
-		if self.up_event:
-			self.up_event = False
-			simple_event(Context(),"net","disconnect",*self.name)
+		if self.did_up_event:
+			self.did_up_event = False
+			self.down_event()
+	
+	def down_event(self):
+		raise ProgrammingError("You need to override NetCommonFactory.down_event")
+
+	def up_event(self):
+		self.drop()
+		raise ProgrammingError("You need to override NetCommonFactory.up_event")
 
 	def drop(self):
 		"""Kill my connection"""
@@ -209,16 +215,18 @@ You need to override the long_doc description.
 			raise SyntaxError(u"Usage: net ‹name› ‹host›? ‹port›")
 		name = self.dest
 		if name is None:
-			name = Name(event[0])
+			self.dest = Name(event[0])
 			event = event[1:]
 		if len(event) == 1:
-			host = "localhost"
+			self.host = "localhost"
 		else:
-			host = event[0]
-		port = event[-1]
+			self.host = event[0]
+		self.port = event[-1]
+		self.start_up()
 
-		f = self.client(host=host, port=port, name=name)
-		f.connector = reactor.connectTCP(host, port, f)
+	def start_up(self):
+		f = self.client(host=self.host, port=self.port, name=self.dest)
+		f.connector = reactor.connectTCP(self.host, self.port, f)
 
 
 class NetListen(AttributedStatement):
@@ -237,16 +245,18 @@ You need to override the long_doc description.
 			raise SyntaxError(u"Usage: listen net ‹name› ‹host›? ‹port›")
 		name = self.dest
 		if name is None:
-			name = Name(event[0])
+			self.dest = Name(event[0])
 			event = event[1:]
 		if len(event) == 2:
-			host = "localhost"
+			self.host = "localhost"
 		else:
-			host = event[1]
-		port = event[-1]
+			self.host = event[1]
+		self.port = event[-1]
+		self.start_up()
 
-		f = self.server(host=host, port=port, name=name)
-		f._port = reactor.listenTCP(port, f, interface=host)
+	def start_up(self):
+		f = self.server(host=self.host, port=self.port, name=self.dest)
+		f._port = reactor.listenTCP(self.port, f, interface=self.host)
 
 
 class NetName(Statement):
@@ -320,7 +330,7 @@ class NetConnected(Check):
 			conn = self.storage.get(Name(args))
 		if conn is None:
 			return False
-		return conn.up_event
+		return conn.did_up_event
 
 class NetExists(Check):
 	#storage = Nets.storage

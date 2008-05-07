@@ -26,6 +26,8 @@ from homevent.statement import Statement, main_words, AttributedStatement
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.base import Name
 from homevent.collect import Collection,Collected
+from homevent.run import simple_event
+from homevent.context import Context
 
 from twisted.internet import protocol,reactor,error
 from twisted.protocols.basic import LineReceiver,_PauseableMixin
@@ -55,11 +57,19 @@ class NETcommon_factory(object): # mix-in
 	storage = Nets.storage
 	storage2 = net_conns
 
+	def down_event(self):
+		simple_event(Context(),"net","disconnect",*self.name)
+
+	def up_event(self):
+		simple_event(Context(),"net","connect",*self.name)
+
+
 class NETserver_factory(NETcommon_factory, NetServerFactory):
 	pass
 
 class NETclient_factory(NETcommon_factory, NetClientFactory):
 	pass
+
 
 class NETconnect(NetConnect):
 	name = ("net",)
