@@ -78,7 +78,8 @@ EMcodes = {}
 
 class EM(Collected):
 	storage = EMs.storage
-	def __init__(self,name,group,code, faktor={},offset={}, slot=None):
+	def __init__(self,name,group,code,ctx, faktor={},offset={}, slot=None):
+		self.ctx = ctx
 		self.group = group
 		self.code = code
 		self.offset = offset
@@ -302,7 +303,7 @@ Known types:
 			raise SyntaxError(u"‹fs20 em› needs a name")
 		if self.code is None:
 			raise SyntaxError(u"‹fs20 em› needs a 'code' sub-statement")
-		EM(Name(event), self.group,self.code, self.faktor,self.offset, self.slot)
+		EM(Name(event), self.group,self.code,ctx, self.faktor,self.offset, self.slot)
 
 class FS20emScale(Statement):
 	name = ("scale",)
