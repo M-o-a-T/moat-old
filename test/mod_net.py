@@ -29,6 +29,7 @@ wait BAD:
 del net foop
 on net connect foo:
 	send net foo "bar"
+	list net
 	list net foo
 	del net foo
 on net connect baz zaz:

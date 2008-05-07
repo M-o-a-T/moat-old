@@ -111,11 +111,11 @@ class NetCommonFactory(Collected):
 		self.name = name
 		self.did_up_event = False
 		assert (host,port) not in self.storage2, "already known host/port tuple"
-		Collected.__init__(self)
+		super(NetCommonFactory,self).__init__()
 		self.storage2[(host,port)] = self
 
 	def info(self):
-		return "%s %s: %s:%s" % (self.typ, self.name, self.host,self.port)
+		return "%s %s:%s" % (self.typ, self.host,self.port)
 		
 	def list(self):
 		yield ("type",self.typ)
