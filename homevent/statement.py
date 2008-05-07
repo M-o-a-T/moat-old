@@ -342,13 +342,13 @@ class main_words(ComplexStatement):
 		This is the top-level dictionary.
 		It is named in a strange way as to make the Help output look nice.
 		"""
-	name = Name(("Main",))
+	name = Name("Main")
 	doc = "word list:"
 
 
 class global_words(ComplexStatement):
 	"""Words that only make sense at top level. It pulls in the main word list."""
-	name = Name(("Global",))
+	name = Name("Global")
 	doc = "word list:"
 
 	@classmethod

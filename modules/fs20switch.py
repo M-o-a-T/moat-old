@@ -89,7 +89,7 @@ class CannotDoError(RuntimeError):
 		
 
 class SwitchGroups(Collection):
-	name = Name(("fs20","code"))
+	name = Name("fs20","code")
 SwitchGroups = SwitchGroups()
 
 class igroup(group):
@@ -191,7 +191,7 @@ class SwitchGroup(Collected,igroup):
 		return res
 
 class Switches(Collection):
-	name = Name(("fs20","switch"))
+	name = Name("fs20","switch")
 Switches = Switches()
 
 class Switch(Collected):

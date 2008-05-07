@@ -70,7 +70,7 @@ em_procs = [ None, # em_proc_thermo,
            ]
 
 class EMs(Collection):
-	name = Name(("fs20","em"))
+	name = Name("fs20","em")
 EMs = EMs()
 EMs.does("del")
 

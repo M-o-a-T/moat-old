@@ -117,7 +117,7 @@ NotYet = object()
 sshFactory = NotYet
 
 class AuthKeys(Collection):
-	name = Name(("ssh","auth"))
+	name = Name("ssh","auth")
 AuthKeys = AuthKeys()
 AuthKeys.does("del")
 

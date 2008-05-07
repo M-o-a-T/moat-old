@@ -20,7 +20,7 @@ import homevent as h
 from homevent.database import DbStore
 from homevent.base import Name
 
-s = DbStore(Name(("Foo","bar")))
+s = DbStore(Name("Foo","bar"))
 def main():
 	d = s.start()
 	d.addCallback(lambda _: s.set("one",4))

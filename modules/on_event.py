@@ -118,7 +118,7 @@ class OnEventWorker(Collected,iWorker):
 		self.handler_id = _onHandler_id
 
 		if name is None:
-			name = Name(("_on",self.handler_id))
+			name = Name("_on",self.handler_id)
 		super(OnEventWorker,self).__init__(*name)
 
 #		self.name = unicode(self.parent.arglist)

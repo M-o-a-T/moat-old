@@ -434,7 +434,7 @@ monitor passive
 		global monitor_nr
 		monitor_nr += 1
 		self.nr = monitor_nr
-		self.displayname=Name(("_monitor",self.nr))
+		self.displayname=Name("_monitor",self.nr)
 
 		self.values = {}
 
