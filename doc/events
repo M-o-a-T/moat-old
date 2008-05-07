@@ -93,6 +93,9 @@ net connect NAME
 net disconnect NAME
 	-- This connection is down.
 
+net error NAME
+    -- This connection could not be established.
+
 net NAME whatever...
 	-- The text «whatever» has been received.
 	   Arguments are split by whitespace.

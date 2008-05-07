@@ -22,6 +22,11 @@ from homevent.module import load_module,Load,ModuleExists
 from test import run
 
 input = """\
+net foop localhost 50334
+wait BAD:
+	for 0.2
+	debug force
+del net foop
 on net connect foo:
 	send net foo "bar"
 	list net foo

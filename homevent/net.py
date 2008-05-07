@@ -72,7 +72,7 @@ class NetReceiver(object,LineReceiver, _PauseableMixin):
 		"""Override this.
 		"""
 		self.loseConnection()
-		raise ProgrammingError("You need to override NetReceiver.lineReceived")
+		raise NotImplementedError("You need to override NetReceiver.lineReceived")
 
 	def connectionMade(self):
 		super(NetReceiver,self).connectionMade()
@@ -147,12 +147,15 @@ class NetCommonFactory(Collected):
 			self.did_up_event = False
 			self.down_event()
 	
+	def not_up_event(self):
+		raise NotImplementedError("You need to override NetCommonFactory.not_up_event")
+
 	def down_event(self):
-		raise ProgrammingError("You need to override NetCommonFactory.down_event")
+		raise NotImplementedError("You need to override NetCommonFactory.down_event")
 
 	def up_event(self):
 		self.drop()
-		raise ProgrammingError("You need to override NetCommonFactory.up_event")
+		raise NotImplementedError("You need to override NetCommonFactory.up_event")
 
 	def drop(self):
 		"""Kill my connection"""
@@ -190,8 +193,10 @@ class NetClientFactory(NetCommonFactory,protocol.ClientFactory):
 
 	def clientConnectionFailed(self, connector, reason):
 		log(WARN,reason)
-		self.conn = None
-		self._down_event()
+		if not self.conn:
+			self.not_up_event()
+		else:
+			self._down_event()
 
 	def clientConnectionLost(self, connector, reason):
 		if not reason.check(error.ConnectionDone):

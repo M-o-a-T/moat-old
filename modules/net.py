@@ -60,6 +60,9 @@ class NETcommon_factory(object): # mix-in
 	def down_event(self):
 		simple_event(Context(),"net","disconnect",*self.name)
 
+	def not_up_event(self):
+		simple_event(Context(),"net","error",*self.name)
+
 	def up_event(self):
 		simple_event(Context(),"net","connect",*self.name)
 
