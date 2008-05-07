@@ -112,6 +112,7 @@ class AVRcommon(handler):
 
 	def dataReceived(self, data):
 		self._stop_timer()
+		data = self.dbuf+data
 		while True:
 			xi = len(data)+1
 			try: pi = data.index('\r')
