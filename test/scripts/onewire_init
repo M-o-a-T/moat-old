@@ -16,6 +16,7 @@
 
 PATH=/usr/local/sbin:/usr/sbin/:$PATH
 
-owserver --foreground -p 54300 --tester=10 &
+owserver --foreground -p 54300 --tester=10  --error_level 5 --error_print 2 \
+	> /tmp/owlog_$USER 2>&1 &
 echo $! > /tmp/owtest_$USER
 sleep 1

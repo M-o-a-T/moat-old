@@ -15,4 +15,8 @@
 ##
 
 kill $(cat /tmp/owtest_$USER)
-exit $?
+rc=$?
+
+test $rc = 0 && rm -f /tmp/owlog_$USER
+rm -f /tmp/owtest_$USER
+exit $rc
