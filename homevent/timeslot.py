@@ -95,14 +95,14 @@ class Timeslot(Collected):
 		yield ("name"," ".join(unicode(x) for x in self.name))
 		yield ("run",self.running)
 		if self.interval is not None:
-			yield ("interval",self.interval)
+			yield ("interval"," ".join(str(x) for x in self.interval))
 		yield ("duration",self.duration)
 		if self.last is not None:
 			yield ("last",humandelta(now()-self.last))
 		if self.next is not None:
 			yield ("next",humandelta(self.next-now()))
 		if self.slotter is not None:
-			yield ("slot",(unixdelta(now()-self.next))/self.duration)
+			yield ("slot",(unixdelta(self.next-now()))/self.duration)
 
 	def info(self):
 		if self.running not in ("off","error"):
@@ -122,13 +122,17 @@ class Timeslot(Collected):
 		self.running = "pre"
 		if self.next is None:
 			self.next = now()
+		self.last = self.next
 		d = process_event(Event(self.ctx,"timeslot","begin",*self.name))
 		def post(_):
 			if self.running == "pre":
 				self.running = "during"
-				self.slotter = callLater(False,self.next+dt.timedelta(0,self.duration), self.do_post)
+				self.next += dt.timedelta(0,self.duration)
+				self.slotter = callLater(False,self.next, self.do_post)
 			elif self.running not in ("off","error"):
 				log(ERROR,"timeslot error pre2",self.running)
+			else:
+				self.next = None
 			return _
 		d.addCallback(post)
 		d.addErrback(self.dead)
@@ -136,8 +140,8 @@ class Timeslot(Collected):
 	def do_sync(self):
 		self.down()
 		self.running = "during"
-		self.next = now()
-		self.slotter = callLater(False,self.next+dt.timedelta(0,self.duration/2), self.do_post)
+		self.next = now()+dt.timedelta(0,self.duration/2)
+		self.slotter = callLater(False,self.next, self.do_post)
 	
 	def do_post(self):
 		self.slotter = None
@@ -150,8 +154,7 @@ class Timeslot(Collected):
 		def post(_):
 			if self.running == "post":
 				self.running = "next"
-				self.last = self.next
-				self.next = time_delta(self.interval, now=self.next)
+				self.next = time_delta(self.interval, now=self.next)-dt.timedelta(0,self.duration)
 				self.waiter = callLater(False, self.next, self.do_pre)
 			elif self.running not in("off","error"):
 				log(ERROR,"timeslot error post2",self.running)
@@ -209,5 +212,6 @@ class Timeslot(Collected):
 			self.slotter = None
 #		self.parent.slot_down()
 		self.running = "off"
+		self.next = None
 
 

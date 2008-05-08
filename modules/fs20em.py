@@ -98,6 +98,7 @@ class EM(Collected,Timeslotted):
 			ts = Timeslot(self,name)
 			p = em_procs[self.group]
 			ts.interval = (p.interval + code * p.interval_mod,)
+			ts.duration = slot
 			ts.maybe_up()
 		super(EM,self).__init__(*name)
 
