@@ -305,6 +305,67 @@ example
 A snippet of module loader code to help you get going.
 
 
+=======
+fs20avr
+=======
+
+This module interfaces to an AVR microcontroller which implements the
+FS20 on-air protocols. This eats much fewer resources and will be much
+more reliable than using a soundcard interface or similar with the
+fs20tr module.
+
+See the fs20/avr directory for details.
+
+The controller is expected to send keepalive messages every second.
+
+----------------
+fs20 avr ‹name…›
+----------------
+
+Register a new interface.
+
+remote ‹host› [‹port›]
+----------------------
+
+The interface is accessed by opening a TCP connection to the specified
+host and port.
+
+The port defaults to 54083.
+
+port ‹device› [‹speed›]
+-----------------------
+
+The interface is accessed by opening a specific serial port.
+
+The port speed defaults to 57600 baud.
+
+This method is not implemented yet.
+
+cmd ‹command…›
+--------------
+
+The interface is accessed by talking to the given program vis
+stdin+stdout.
+
+This method is not implemented yet.
+
+
+-----
+Tests
+-----
+
+exists fs20 avr ‹name…›
+-----------------------
+
+Check whether an AVR interface with that name exists.
+
+connected fs20 avr ‹name…›
+--------------------------
+
+Check whether the connection to that device is operational.
+
+
+
 ======
 fs20em
 ======
