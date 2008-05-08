@@ -45,6 +45,13 @@ class Timeslots(Collection):
 Timeslots = Timeslots()
 Timeslots.can_do("del")
 
+class Timeslotted(object):
+	pass
+#	def slot_up(self):
+#		pass
+#	def slot_down(self):
+#		pass
+
 class TimeslotError(RuntimeError):
     def __init__(self,w):
         self.timeslot = w
@@ -78,6 +85,7 @@ class Timeslot(Collected):
 
 	def __init__(self,parent,name):
 		self.ctx = parent.ctx
+		self.parent = parent
 		super(Timeslot,self).__init__(*name)
 
 	def __repr__(self):
@@ -86,6 +94,9 @@ class Timeslot(Collected):
 	def list(self):
 		yield ("name"," ".join(unicode(x) for x in self.name))
 		yield ("run",self.running)
+		if self.interval is not None:
+			yield ("interval",self.interval)
+		yield ("duration",self.duration)
 		if self.last is not None:
 			yield ("last",humandelta(now()-self.last))
 		if self.next is not None:
@@ -125,9 +136,8 @@ class Timeslot(Collected):
 	def do_sync(self):
 		self.down()
 		self.running = "during"
-		if self.next is None:
-			self.next = now()
-		self.slotter = callLater(False,self.next+dt.timedelta(0,self.duration), self.do_post)
+		self.next = now()
+		self.slotter = callLater(False,self.next+dt.timedelta(0,self.duration/2), self.do_post)
 	
 	def do_post(self):
 		self.slotter = None
@@ -170,7 +180,7 @@ class Timeslot(Collected):
 	def is_out(self):
 		return self.running == "next"
 		
-	def up(self, resync = False):
+	def up(self, resync=False):
 		if self.running not in ("off","error"):
 			if not resync:
 				raise AlreadyRunningError(self)
@@ -180,6 +190,7 @@ class Timeslot(Collected):
 			self.running = "next"
 			self.next = time_delta(self.interval, now=self.last)
 			self.waiter = callLater(False, self.next, self.do_pre)
+#			self.parent.slot_up()
 		
 	def maybe_up(self, resync = False):
 		if self.running not in ("off","error"):
@@ -196,6 +207,7 @@ class Timeslot(Collected):
 		if self.slotter:
 			self.slotter.cancel()
 			self.slotter = None
+#		self.parent.slot_down()
 		self.running = "off"
 
 

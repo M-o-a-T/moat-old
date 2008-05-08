@@ -33,6 +33,7 @@ from homevent.fs20 import recv_handler, PREFIX
 from homevent.collect import Collection,Collected
 from homevent.logging import log,TRACE,DEBUG
 from homevent.times import now,humandelta
+from homevent.timeslot import Timeslots,Timeslotted,Timeslot
 
 #from twisted.internet import protocol,defer,reactor
 #from twisted.protocols.basic import _PauseableMixin
@@ -76,7 +77,7 @@ EMs.does("del")
 
 EMcodes = {}
 
-class EM(Collected):
+class EM(Collected,Timeslotted):
 	storage = EMs.storage
 	def __init__(self,name,group,code,ctx, faktor={},offset={}, slot=None):
 		self.ctx = ctx
@@ -94,10 +95,9 @@ class EM(Collected):
 
 		self._slot = slot
 		if slot is not None:
-			from homevent.timeslot import Timeslot
 			ts = Timeslot(self,name)
 			p = em_procs[self.group]
-			ts.interval = p.em_interval + code * p.em_interval_mod
+			ts.interval = (p.interval + code * p.interval_mod,)
 			ts.maybe_up()
 		super(EM,self).__init__(*name)
 
@@ -105,7 +105,6 @@ class EM(Collected):
 		if self._slot is None:
 			return None
 		else:
-			from homevent.timeslot import Timeslots
 			return Timeslots[self.name]
 	slot = property(get_slot)
 

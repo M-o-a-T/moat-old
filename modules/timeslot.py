@@ -25,7 +25,7 @@ timeslot FOO...
 
 """
 
-from homevent.timeslot import Timeslots, Timeslot
+from homevent.timeslot import Timeslots, Timeslot, Timeslotted
 from homevent.statement import AttributedStatement, Statement, main_words,\
 	global_words
 from homevent.module import Module
@@ -36,7 +36,7 @@ import os
 from twisted.internet import defer
 
 
-class TimeslotHandler(AttributedStatement):
+class TimeslotHandler(AttributedStatement, Timeslotted):
 	name=("timeslot",)
 	doc="A timeslot which waits for values"
 	long_doc="""\
@@ -74,8 +74,6 @@ every ‹time interval›
 		event = self.params(ctx)
 		if not len(event):
 			raise SyntaxError(u'Usage: interval ‹timespec›')
-		elif len(event) == 1:
-			self.parent.values['interval'] = (event[0],)
 		else:
 			self.parent.values['interval'] = tuple(event)
 TimeslotHandler.register_statement(TimeslotInterval)
