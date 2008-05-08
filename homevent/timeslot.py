@@ -72,8 +72,9 @@ class Timeslot(Collected):
 	waiter = None # trigger for next event
 	slotter = None # trigger for time slot
 	shift = 0.5 # position during the slot when the event will trigger
+
 	duration = 1 # length of slot
-	interval = None # time between slots
+	interval = None # time between slots; set externally
 
 	def __init__(self,parent,name):
 		self.ctx = parent.ctx
@@ -94,11 +95,11 @@ class Timeslot(Collected):
 
 	def info(self):
 		if self.running not in ("off","error"):
-			tm = unixdelta(self.last-now())
+			tm = unixdelta(self.next-now())
 		elif self.last is not None:
 			tm = unixdelta(now()-self.last)
 		else:
-			rm = "never"
+			tm = "never"
 		return "%s %s" % (self.running,tm)
 
 	def do_pre(self):
@@ -124,6 +125,8 @@ class Timeslot(Collected):
 	def do_sync(self):
 		self.down()
 		self.running = "during"
+		if self.next is None:
+			self.next = now()
 		self.slotter = callLater(False,self.next+dt.timedelta(0,self.duration), self.do_post)
 	
 	def do_post(self):
