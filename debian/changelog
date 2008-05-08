@@ -1,3 +1,10 @@
+homevent (0.2.10) stable; urgency=low
+
+  * Add rudimentary AVR interface (TCP only).
+  * Production version
+
+ -- Matthias Urlichs <smurf@debian.org>  Thu, 08 May 2008 11:52:45 +0200
+
 homevent (0.2.9) unstable; urgency=low
 
   * Onwards.
