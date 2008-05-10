@@ -746,7 +746,10 @@ class OWFSfactory(object,ReconnectingClientFactory):
 			for dev in old_ids.itervalues():
 				if dev.bus is self:
 					n_old += 1
-					dev.go_down()
+					## Just because something vanishes from the listing
+					## doesn't mean it's dead; the bus may be a bit wacky
+					# dev.go_down()
+					log(DEBUG,"Bus wacky?",self.name,dev.id)
 
 			for dev in devices.itervalues():
 				if dev.bus is self:

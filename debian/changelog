@@ -2,8 +2,9 @@ homevent (0.2.10) stable; urgency=low
 
   * Add rudimentary AVR interface (TCP only).
   * Production version
+  * Ignore duplicate-data-in-rrd errors
 
- -- Matthias Urlichs <smurf@debian.org>  Thu, 08 May 2008 11:52:45 +0200
+ -- Matthias Urlichs <smurf@debian.org>  Sat, 10 May 2008 09:13:10 +0200
 
 homevent (0.2.9) unstable; urgency=low
 

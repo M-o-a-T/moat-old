@@ -120,8 +120,13 @@ set rrd value ‹name…›
 		s = RRDs[Name(event[1:])]
 		# Using "N:" may run into a RRD bug
 		# if we're really close to the next minute
-		rrdtool.update(s.upath, "-t",s.udataset, now().strftime("%s")+":"+unicode(event[0]).encode("utf-8"))
-
+		try:
+			rrdtool.update(s.upath, "-t",s.udataset, now().strftime("%s")+":"+unicode(event[0]).encode("utf-8"))
+		except Exception,e:
+			if "minimum one second step" in str(e):
+				pass
+			else:
+				raise
 
 class RRDModule(Module):
 	"""\
