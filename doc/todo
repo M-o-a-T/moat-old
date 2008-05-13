@@ -60,6 +60,8 @@ Code
 
 * timeslots: store last start time someplace.
 
+* timeslots: alert after specified number of cycles without re-sync
+
 * state handling: wait for a state to be unlocked instead of blindly
   assuming that it must be recursive; store in the context whether
   that's the case
@@ -89,6 +91,8 @@ FS20 / AVR
 * EM:
   - Warn when timeslots start to wander too close together
   - Store last values someplace.
+  - Auto-re-sync when the timeslot has been missed (i.e. only one slot
+    is unsynced)
 
 * Handle repeaters.
 
