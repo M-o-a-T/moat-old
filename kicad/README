@@ -1,0 +1,30 @@
+====================
+Schematics and stuff
+====================
+
+These are kicad files. Kicad is a schematics drawing and board layout
+program, similar to Eagle (but free).
+
+
+funk.*
+======
+
+Hardware for the code in fs20/avr. Note that the schematic and layout
+are well-intended and probably work, but they're completely untested.
+
+The FTDI breakout board is available here:
+
+	http://www.adafruit.com/index.php?main_page=product_info&products_id=58
+
+because I am too lazy / shaky to actually solder fiddly SMB chips.
+Feel free to modify the layout to use an FTDI directly.
+
+My test setup uses a Boarduino:
+
+	http://www.adafruit.com/index.php?main_page=product_info&cPath=19&products_id=72
+
+Note that I do not use their boot loader; you'll need AVRdude and a
+supported interface. I use this one:
+
+	http://www.adafruit.com/index.php?main_page=product_info&cPath=16&products_id=46
+

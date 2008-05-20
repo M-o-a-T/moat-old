@@ -1,0 +1,163 @@
+# EESchema Netlist Version 1.1 created  11/3/2008-11:21:14
+(
+ ( 47BED617 C2 C1 100n
+  ( 1 +5V )
+  ( 2 GND )
+ )
+ ( 47BED634 C2 C2 10p
+  ( 1 N-000019 )
+  ( 2 GND )
+ )
+ ( 47BED638 C2 C3 10p
+  ( 1 N-000018 )
+  ( 2 GND )
+ )
+ ( 47D53E05 C2 C6 1u
+  ( 1 +3.3V )
+  ( 2 GND )
+ )
+ ( 47D53AEB D3 D2 1N4001
+  ( 1 +3.3V )
+  ( 2 +5V )
+ )
+ ( 47D53EC9 D3 D6 2.7
+  ( 1 GND )
+  ( 2 N-000012 )
+ )
+ ( 47BE9953 28DIP-ELL300 IC1 ATMEGA_X8
+  ( 1 N-000006 )
+  ( 2 N-000003 )
+  ( 3 N-000004 )
+  ( 4 ? )
+  ( 5 ? )
+  ( 6 ? )
+  ( 7 +5V )
+  ( 8 GND )
+  ( 9 N-000019 )
+  ( 10 N-000018 )
+  ( 11 ? )
+  ( 12 N-000002 )
+  ( 13 ? )
+  ( 14 N-000007 )
+  ( 15 ? )
+  ( 16 ? )
+  ( 17 N-000010 )
+  ( 18 N-000009 )
+  ( 19 N-000005 )
+  ( 20 +5V )
+  ( 21 ? )
+  ( 22 GND )
+  ( 23 ? )
+  ( 24 ? )
+  ( 25 ? )
+  ( 26 ? )
+  ( 27 ? )
+  ( 28 ? )
+ )
+ ( 47BEE7E9 6DIP-ELL300 JP1 PROG
+  ( 1 N-000009 )
+  ( 2 +5V )
+  ( 3 N-000005 )
+  ( 4 N-000010 )
+  ( 5 N-000006 )
+  ( 6 GND )
+ )
+ ( 47BED5AF FTDI M1 FTDI_MOD
+  ( 1 GND )
+  ( 2 +5V )
+  ( 3 N-000003 )
+  ( 4 N-000004 )
+  ( 5 ? )
+  ( 6 ? )
+  ( 7 ? )
+  ( 8 ? )
+ )
+ ( 47BED6E9 R3 R2 10k
+  ( 1 N-000006 )
+  ( 2 +5V )
+ )
+ ( 47D53EB0 R3 R4 1k
+  ( 1 N-000012 )
+  ( 2 N-000002 )
+ )
+ ( 47D53B25 R3 R5 160
+  ( 1 N-000013 )
+  ( 2 GND )
+ )
+ ( 47D53B22 R3 R6 220
+  ( 1 +3.3V )
+  ( 2 N-000013 )
+ )
+ ( 47BE929D Rx_868 RX1 RX_868MHZ
+  ( 1 N-000007 )
+  ( 2 +3.3V )
+  ( 3 GND )
+  ( 4 GND )
+ )
+ ( 47BE91D5 Tx_686 TX1 TX_868MHZ
+  ( 1 +3.3V )
+  ( 2 GND )
+  ( 3 N-000012 )
+ )
+ ( 47D6679D TO92_inline U1 LM317LZ
+  ( 1 N-000013 )
+  ( 2 +3.3V )
+  ( 3 +5V )
+ )
+ ( 47BE999A C2 X1 16_MHz
+  ( 1 N-000019 )
+  ( 2 N-000018 )
+ )
+)
+*
+{ Allowed footprints by component:
+$component C1
+ SM*
+ C?
+ C1-1
+$endlist
+$component C2
+ SM*
+ C?
+ C1-1
+$endlist
+$component C3
+ SM*
+ C?
+ C1-1
+$endlist
+$component C6
+ CP*
+ SM*
+$endlist
+$component D2
+ D?
+ S*
+$endlist
+$component D6
+ D?
+ SO*
+ SM*
+$endlist
+$component R2
+ R?
+ SM0603
+ SM0805
+$endlist
+$component R4
+ R?
+ SM0603
+ SM0805
+$endlist
+$component R5
+ R?
+ SM0603
+ SM0805
+$endlist
+$component R6
+ R?
+ SM0603
+ SM0805
+$endlist
+$endfootprintlist
+}
