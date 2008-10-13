@@ -167,7 +167,7 @@ class OWFSreceiver(object,protocol.Protocol, _PauseableMixin):
 					return
 				if payload_len == -1 and data_len == 0 and offset == 0:
 					if self.pinger == 30:
-						simple_event(Context(),"onewire","wedged",self.name)
+						simple_event(Context(),"onewire","wedged",self.transport.factory.name)
 
 					self.pinger += 1
 					self.ping()
