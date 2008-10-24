@@ -1864,6 +1864,29 @@ Obviously, a loop like this should never run synchronously.
 
 
 
+======
+syslog
+======
+
+This module allows you to set up logging through syslog.
+
+------
+syslog ‹facility› ‹level› [‹destination›]
+------
+
+Sets up a logger which transmits messages to syslog.
+
+    The 'facility' and 'level' arguments are the well-known strings
+    from syslog; read "man syslog.conf" for details.
+
+    The destination can be a local file name (must be a Unix datagram
+    socket) or a host/port tuple (must be a UDP socket).
+
+    There are no separate commands to list or delete loggers;
+    syslog is part of logging, so you can use those from the
+    "logging" module.
+
+
 ====
 time
 ====
