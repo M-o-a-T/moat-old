@@ -609,6 +609,30 @@ which the rest of the arguments will get logged.
 Log output will go to all terminals which listen to logging at that level
 (or less).
 
+--------
+list log
+--------
+
+Show the currently-configured loggers.
+
+You can add a logger's name to show further details amout that logger.
+
+---------------
+del log ‹name…›
+---------------
+
+Delete the named logger.
+
+------------------------
+log limit ‹kind› ‹level›
+------------------------
+
+Limit logging of the named kind of event to that level. This is useful
+when you want to trace someting, but aren't interested in all the "event"
+messages that the system generates.
+
+
+
 ========
 on_event
 ========

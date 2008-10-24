@@ -70,7 +70,7 @@ def log_level(cls, level=None):
 	ret = levels.get(cls,None)
 	if level is not None:
 		levels[cls] = level
-	return levels
+	return ret
 
 logger_nr = 0
 

@@ -30,7 +30,7 @@ log
 from homevent.module import Module
 from homevent.statement import Statement, main_words
 from homevent import logging
-from homevent.logging import log, Logger, LogNames
+from homevent.logging import log, Logger, LogNames, log_level
 
 import sys
 
@@ -97,6 +97,30 @@ log
 						raise
 
 
+class LogLevelHandler(Statement):
+	name=("log","limit")
+	doc="limit logging level"
+	long_doc="""\
+log limit event DEBUG
+	- limit this kind of event to the given level;
+      messages that are more detailed than that will be suppressed.
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if len(event) < 1 or len(event) > 2:
+			SyntaxError(u"Usage: log limit ‹type› ‹level›")
+		name = event[0]
+		if len(event) == 2:
+			level = getattr(logging,event[1].upper())
+			log_level(name,level)
+		else:
+			try:
+				out = self.ctx.out
+			except KeyError:
+				out = sys.stderr
+			print >>out, LogNames(log_level(name))
+
+
 class LoggingModule(Module):
 	"""\
 		This is a module to control logging stuff to the current channel.
@@ -106,8 +130,9 @@ class LoggingModule(Module):
 
 	def load(self):
 		main_words.register_statement(LogHandler)
+		main_words.register_statement(LogLevelHandler)
 	
 	def unload(self):
-		main_words.unregister_statement(LogHandler)
+		main_words.unregister_statement(LogLevelHandler)
 	
 init = LoggingModule

@@ -22,6 +22,8 @@ from homevent.module import load_module
 from test import run
 
 input = """\
+log limit parser NONE
+log limit token NONE
 log DEBUG
 log TRACE "This is not logged"
 log DEBUG "This is logged"
@@ -29,9 +31,15 @@ log WARN "This is logged too"
 log
 log PANIC
 log WARN "This is not logged either"
+log limit event TRACE
+log TRACE
+sync trigger Logged
+log limit event ERROR
+sync trigger Not Logged
 """
 
 h.main_words.register_statement(ShutdownHandler)
 load_module("logging")
+load_module("trigger")
 
 run("logging",input)
