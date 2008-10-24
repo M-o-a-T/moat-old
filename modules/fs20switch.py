@@ -214,7 +214,7 @@ class Switch(Collected):
 		super(Switch,self).__init__()
 	
 	def info(self):
-		return str(to_hc(self.parent.code))+" "+str(to_dev(self.code))
+		return str(self.parent.name)+" "+str(to_dev(self.code))
 
 	def list(self):
 		yield ("name",self.name)
