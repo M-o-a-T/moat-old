@@ -25,7 +25,7 @@ from homevent.logging import log
 from homevent.context import Context
 from homevent.parser import parser_builder,parse
 from homevent.statement import main_words,Statement
-from homevent.interpreter import InteractiveInterpreter,Interpreter
+from homevent.interpreter import Interpreter
 from homevent.base import Name
 from homevent.collect import Collection,Collected
 import homevent.twist_ssh # monkey patches
@@ -55,6 +55,10 @@ class SSHprotocol(recvline.HistoricRecvLine):
 			self.transport = self.terminal
 		self.terminal.write("This is the HomEvenT command line.")
 		self.terminal.nextLine()
+
+	def handle_RETURN(self):
+		self.transport.write("\n");
+		super(SSHprotocol,self).handle_RETURN()
 
 class SSHavatar(avatar.ConchUser):
 	implements(conchinterfaces.ISession)
