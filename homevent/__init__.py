@@ -23,7 +23,7 @@ from homevent.context import Context
 from homevent.event import Event
 from homevent.worker import Worker,SeqWorker,WorkSequence
 from homevent.run import process_event,register_worker,collect_event
-from homevent.logging import log,register_logger
+from homevent.logging import log
 from homevent.reactor import start_up,shut_down, mainloop
 from homevent.statement import main_words,global_words
 from homevent.check import register_condition

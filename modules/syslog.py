@@ -30,13 +30,14 @@ log
 from homevent.module import Module
 from homevent.statement import Statement, main_words
 from homevent import logging
-from homevent.logging import log, Logger, register_logger,unregister_logger,\
+from homevent.logging import log, Logger, \
 	TRACE,DEBUG,INFO,WARN,ERROR,PANIC
 from homevent.collect import Collection,Collected
 
 import syslog
 import socket
 import errno
+import os
 
 facilities = {
 	"kern": syslog.LOG_KERN,
@@ -79,21 +80,13 @@ local_levels = {
 	PANIC: syslog.LOG_EMERG,
 }
 
-class SysLoggers(Collection):
-	name = "syslog"
-SysLoggers = SysLoggers()
-SysLoggers.does("del")
 
-class iLogger(Logger):
-	def __init__(self):
-		super(iLogger,self).__init__(self.level)
-
-class SysLogger(Collected,iLogger):
+class SysLogger(Logger):
 	"""\
 		This class implements one particular way to log things.
 		"""
-	storage = SysLoggers.storage
 	def __init__(self, name, address="/dev/log", facility="user", level="info"):
+		self.name = name
 		self.address = address
 		self.facility_name = facility
 		self.level_name = level
@@ -105,11 +98,10 @@ class SysLogger(Collected,iLogger):
 		else:
 			self.socket = socket.socket (socket.AF_UNIX, socket.SOCK_DGRAM)
 		self.socket.connect (address)
-		super(SysLogger, self).__init__(*name)
-		register_logger(self)
+		super(SysLogger, self).__init__(self.level)
 
 	def list(self):
-		yield("name", self.name)
+		for x in super(SysLogger,self).list(): yield x
 		yield("facility", self.facility)
 		yield("facility_name", self.facility_name)
 		yield("address", self.address)
@@ -125,16 +117,15 @@ class SysLogger(Collected,iLogger):
 
 		while True:
 			try:
-				self.socket.send("<%d>HomEvenT: %s\0" % (self.facility | local_levels[level],txt))
+				self.socket.send("<%d>HomEvenT: %s%s" % (
+				                  self.facility | local_levels[level],
+								  txt,
+				                  "\0" if "HOMEVENT_TEST" not in os.environ else "\n"))
 			except socket.error,err:
 				if err.args[0] != errno.EINTR:
 					raise
 			else:
 				break
-
-	def delete(self,ctx):
-		unregister_logger(self)
-		self.delete_done()
 
 	def flush(self):
 		pass

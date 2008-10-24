@@ -16,6 +16,8 @@
 
 PATH=/usr/local/sbin:/usr/sbin/:$PATH
 
+if ! type -p owserver >/dev/null 2>&1 ; then echo "owserver: not found!"; exit 1 ; fi
+
 owserver --foreground -p 54300 --tester=10  --error_level 5 --error_print 2 \
 	> /tmp/owlog_$USER 2>&1 &
 echo $! > /tmp/owtest_$USER

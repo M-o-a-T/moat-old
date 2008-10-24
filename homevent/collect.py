@@ -128,7 +128,7 @@ class Collected(object):
 		"""Yield a couple of (left,right) tuples, for enumeration."""
 		raise NotImplementedError("You need to override 'list' in '%s'" % (self.__class__.__name__,))
 
-	def delete(self):
+	def delete(self, ctx=None):
 		"""Remove myself from a collection"""
 		raise NotImplementedError("You need to override 'del' in '%s'" % (self.__class__.__name__,))
 

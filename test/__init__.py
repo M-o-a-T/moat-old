@@ -52,7 +52,8 @@ class run_logger(Logger):
 		"""
 	def __init__(self,name, dot=True, level=TRACE):
 		self.dot=dot
-		self.name = name
+		self.filename = name
+		self.name = Name(name)
 		self.try_init()
 		try:
 			self.data=open(os.path.join("real",name),"w")
@@ -60,21 +61,20 @@ class run_logger(Logger):
 			print >>sys.stderr,"ERROR, no log file"
 			self.data = sys.stderr
 		self.line=0
-		h.register_logger(self)
-		self.level = level
+		super(run_logger,self).__init__(level)
 
 	def try_init(self):
-		scp = os.path.join("scripts",self.name+"_init")
+		scp = os.path.join("scripts",self.filename+"_init")
 		if not os.path.exists(scp):
 			scp = os.path.join("test",scp)
 		if os.path.exists(scp):
 			res = os.spawnlp(os.P_WAIT, scp)
 			if res != 0:
-				print >>sys.stderr,"Init Script for %s failed: %d" % (self.name,res)
+				print >>sys.stderr,"Init Script for %s failed: %d" % (self.filename,res)
 				sys.exit(0)
 			
 	def try_exit(self):
-		scp = os.path.join("scripts",self.name+"_exit")
+		scp = os.path.join("scripts",self.filename+"_exit")
 		if not os.path.exists(scp):
 			scp = os.path.join("test",scp)
 		if os.path.exists(scp):
@@ -83,7 +83,7 @@ class run_logger(Logger):
 			self.data.flush()
 			res = os.spawnlp(os.P_WAIT, scp)
 			if res != 0:
-				print >>sys.stderr,"Exit Script for %s failed: %d" % (self.name,res)
+				print >>sys.stderr,"Exit Script for %s failed: %d" % (self.filename,res)
 				sys.stderr.flush()
 				global exitcode
 				exitcode = 1

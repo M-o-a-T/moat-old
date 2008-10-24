@@ -30,8 +30,7 @@ log
 from homevent.module import Module
 from homevent.statement import Statement, main_words
 from homevent import logging
-from homevent.logging import log, Logger, register_logger,unregister_logger,\
-	LogNames
+from homevent.logging import log, Logger, LogNames
 
 import sys
 
@@ -82,7 +81,7 @@ log
 			level = getattr(logging,event[0].upper())
 			if level == logging.NONE:
 				if hasattr(out,"logger"):
-					unregister_logger(out.logger)
+					out.logger.delete()
 					del out.logger
 			else:
 				if hasattr(out,"logger"):
@@ -91,9 +90,11 @@ log
 					try: out = self.ctx.out
 					except KeyError: out = sys.stderr
 					logger = OutLogger(out=out, level=level)
-					register_logger(logger)
 					try: out.logger = logger
 					except AttributeError: pass # file objects don't
+					except:
+						logger.delete()
+						raise
 
 
 class LoggingModule(Module):

@@ -25,18 +25,18 @@ input = """\
 wait:
 	for 0.2
 	debug force
-list syslog
+list log
 syslog local1 trace localhost 55514
 log DEBUG "One Debug"
-del syslog local1 localhost 55514
+del log local1 localhost 55514
 
 syslog local5 info localhost 55514
 log DEBUG "Five Debug"
 log WARN "Five Warn"
-list syslog
-list syslog local5 localhost 55514
-del syslog local5 localhost 55514
-list syslog
+list log
+list log local5 localhost 55514
+del log local5 localhost 55514
+list log
 wait:
 	for 0.2
 	debug force

@@ -35,7 +35,6 @@ list state [NAME]
 
 from homevent.module import Module
 from homevent.statement import Statement, main_words, AttributedStatement
-from homevent.logging import log, Logger, register_logger,unregister_logger
 from homevent.run import process_event,process_failure
 from homevent.event import Event
 from homevent.check import Check,register_condition,unregister_condition

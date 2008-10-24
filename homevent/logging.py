@@ -30,16 +30,19 @@ from homevent.event import Event
 from homevent.context import Context
 from homevent.base import Name,SYS_PRIO,MIN_PRIO,MAX_PRIO
 from homevent.twist import BaseFailure
+from homevent.collect import Collection,Collected
 
 from twisted.python import failure
 import sys
 from traceback import print_exc
 
-__all__ = ("Logger","register_logger","unregister_logger",
+__all__ = ("Logger",
 	"log","log_run","log_created","log_halted","LogNames",
 	"TRACE","DEBUG","INFO","WARN","ERROR","PANIC","NONE")
 
-loggers = []
+class Loggers(Collection):
+	name = Name("log",)
+Loggers = Loggers()
 
 TRACE=0
 DEBUG=1
@@ -69,15 +72,40 @@ def log_level(cls, level=None):
 		levels[cls] = level
 	return levels
 
+logger_nr = 0
 
-class Logger(object):
+class Logger(Collected):
 	"""\
 		This class implements one particular way to log things.
 		"""
+	storage = Loggers.storage
 	def __init__(self, level, out=sys.stdout):
 		self.level = level
 		self.out = out
 
+		global logger_nr
+		logger_nr += 1
+
+		if not hasattr(self,"name") or self.name is None:
+			self.name = Name(self.__class__.__name__, "x"+str(logger_nr))
+
+		super(Logger,self).__init__()
+
+
+	# Collection stuff
+	def list(self):
+		yield ("Name",self.name)
+		yield ("Type",self.__class__.__name__)
+		yield ("Level",LogNames[self.level])
+		yield ("Out",repr(self.out))
+
+	def info(self):
+		return LogNames[self.level]+" "+repr(self.out)
+
+	def delete(self, ctx=None):
+		self.delete_done()
+
+		
 	def _log(self, level, data):
 		print >>self.out,data
 
@@ -107,7 +135,7 @@ class Logger(object):
 
 	def end_logging(self):
 		self.flush()
-		loggers.remove(self)
+		self.delete()
 
 class LogWorker(ExcWorker):
 	"""\
@@ -139,7 +167,7 @@ class LogWorker(ExcWorker):
 			if lim == NONE or lim > TRACE:
 				return
 
-		for l in loggers[:]:
+		for l in Loggers.values():
 			try:
 				l.log_event(event,level=level)
 			except Exception,e:
@@ -162,7 +190,7 @@ def log_exc(msg=None, err=None, level=ERROR):
 			err = (None,err,None)
 		err = failure.Failure(err[1],err[0],err[2])
 
-	for l in loggers[:]:
+	for l in Loggers.values():
 		if msg:
 			try:
 				l.log(level,msg)
@@ -290,13 +318,14 @@ def log(level, *a):
 		b = level
 		level = a[0]
 		a = (b,)+a[1:]
-	for l in loggers[:]:
+
+	for l in Loggers.values():
 		try:
 			l.log(level, *a)
 		except Exception,e:
 			print >>sys.stderr,"LOGGER CRASH 0"
 			print_exc(file=sys.stderr)
-			loggers.remove(l)
+			l.delete()
 			exc.append(sys.exc_info())
 	if exc:
 		for e in exc:
@@ -309,7 +338,3 @@ log_event = log_event.process
 
 register_worker(LogDoneWorker())
 
-def register_logger(logger):
-	loggers.append(logger)
-def unregister_logger(logger):
-	loggers.remove(logger)
