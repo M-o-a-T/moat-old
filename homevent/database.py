@@ -46,7 +46,7 @@ class DbStore(object):
 	
 	@inlineCallbacks
 	def get(self, key):
-		store = yield self.pool.getStore()
+		store = yield self.pool.get()
 		try:
 			r = yield store.find(DbTable,
 				DbTable.category == self.category,
@@ -62,11 +62,11 @@ class DbStore(object):
 			yield store.rollback()
 			raise e
 		finally:
-			self.pool.returnStore(store)
+			self.pool.put(store)
 
 	@inlineCallbacks
 	def all(self, callback):
-		store = yield self.pool.getStore()
+		store = yield self.pool.get()
 		try:
 			r = yield store.find(DbTable,
 				DbTable.category == self.category)
@@ -79,11 +79,11 @@ class DbStore(object):
 			yield store.rollback()
 			raise e
 		finally:
-			self.pool.returnStore(store)
+			self.pool.put(store)
 
 	@inlineCallbacks
 	def delete(self, key):
-		store = yield self.pool.getStore()
+		store = yield self.pool.get()
 		try:
 			r = yield store.find(DbTable,
 				DbTable.category == self.category,
@@ -97,11 +97,11 @@ class DbStore(object):
 			yield store.rollback()
 			raise e
 		finally:
-			self.pool.returnStore(store)
+			self.pool.put(store)
 
 	@inlineCallbacks
 	def set(self, key, val):
-		store = yield self.pool.getStore()
+		store = yield self.pool.get()
 		try:
 			e = yield store.find(DbTable,
 				DbTable.category == self.category,
@@ -118,5 +118,5 @@ class DbStore(object):
 			yield store.rollback()
 			raise e
 		finally:
-			self.pool.returnStore(store)
+			self.pool.put(store)
 	
