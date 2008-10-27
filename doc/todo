@@ -28,6 +28,8 @@ Documentation
 Code
 ====
 
+* implement logging to SQL
+
 * more documentation (docstring and comments) are always helpful …
 
 * convert some heavy users of (single) Deferreds to @inlineCallbacks
