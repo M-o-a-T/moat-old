@@ -92,7 +92,7 @@ class _OnHandlers(Collection):
 		del OnHandlers[val.name]
 		return val
 OnHandlers = _OnHandlers()
-OnHandlers.can_do("del")
+OnHandlers.does("del")
 
 class BadArgs(RuntimeError):
 	def __str__(self):

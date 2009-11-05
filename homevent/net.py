@@ -91,7 +91,7 @@ class NetReceiver(object,LineReceiver, _PauseableMixin):
 #class Nets(Collection):
 #	name = "net"
 #Nets = Nets()
-#Nets.can_do("del")
+#Nets.does("del")
 #
 #net_conns = {}
 

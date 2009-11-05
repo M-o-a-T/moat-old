@@ -47,7 +47,7 @@ class ModuleExistsError(RuntimeError):
 class Modules(Collection):
 	name = "module"
 Modules = Modules()
-Modules.can_do("del")
+Modules.does("del")
 
 class Module(Collected):
 	"""\

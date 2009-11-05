@@ -46,7 +46,7 @@ list ‹type› ‹name…›
 		c = get_collect(event, allow_collection=True)
 		try:
 			if c is None:
-				for m in all_collect(skip=True):
+				for m in all_collect(skip=False):
 					print >>self.ctx.out, " ".join(m.name)
 			elif isinstance(c,Collection):
 				for n,m in c.iteritems():

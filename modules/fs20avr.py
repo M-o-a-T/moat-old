@@ -277,7 +277,7 @@ class AVRcommon(handler):
 class AVRs(Collection):
 	name = Name("fs20","avr")
 AVRs = AVRs()
-AVRs.can_do("del")
+AVRs.does("del")
 
 avr_conns = {}
 

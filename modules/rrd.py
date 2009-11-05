@@ -33,7 +33,7 @@ import rrdtool
 class RRDs(Collection):
 	name = "rrd"
 RRDs = RRDs()
-RRDs.can_do("del")
+RRDs.does("del")
 
 class RRD(Collected):
 	storage = RRDs

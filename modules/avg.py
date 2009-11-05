@@ -41,7 +41,7 @@ from datetime import timedelta
 class Avgs(Collection):
     name = "avg"
 Avgs = Avgs()
-Avgs.can_do("del")
+Avgs.does("del")
 
 
 class Avg(Collected):

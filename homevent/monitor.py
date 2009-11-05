@@ -44,7 +44,7 @@ import datetime as dt
 class Monitors(Collection):
     name = "monitor"
 Monitors = Monitors()
-Monitors.can_do("del")
+Monitors.does("del")
 
 class MonitorAgain(RuntimeError):
 	"""The monitor is not ready yet; retry please"""

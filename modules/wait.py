@@ -49,7 +49,7 @@ timer_nr = 0
 class Waiters(Collection):
 	name = "wait"
 Waiters = Waiters()
-Waiters.can_do("del")
+Waiters.does("del")
 
 if "HOMEVENT_TEST" in os.environ:
 	from test import ixtime

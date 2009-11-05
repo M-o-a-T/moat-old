@@ -54,7 +54,7 @@ timer_nr = 0
 class PWMs(Collection):
 	name = "pwm"
 PWMs = PWMs()
-PWMs.can_do("del")
+PWMs.does("del")
 
 
 class PWMError(RuntimeError):

@@ -41,7 +41,7 @@ import os
 class Nets(Collection):
 	name = "net"
 Nets = Nets()
-Nets.can_do("del")
+Nets.does("del")
 
 net_conns = {}
 

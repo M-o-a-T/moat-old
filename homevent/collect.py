@@ -50,15 +50,15 @@ class Collection(dict):
 	def __new__(cls):
 		self = dict.__new__(cls)
 
-		name = self.name
-		if isinstance(name,basestring):
-			name = name.split()
-		name = Name(name)
+		name = Name(self.name)
 		if name in collections:
 			return collections[name]
 
 		self.name = name
-		self._can_do = set(("list",))
+
+		self._can_do = set()
+		self.does("list")
+
 		collections[name] = self
 		return self
 
@@ -67,9 +67,10 @@ class Collection(dict):
 	
 	def does(self,name):
 		assert name not in self._can_do
-		self._can_do.add(name)
+		self._can_do.add(Name(name))
 
 	def can_do(self,name):
+		name = Name(name)
 		return name in self._can_do
 
 	def iteritems(self):

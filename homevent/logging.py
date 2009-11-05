@@ -41,7 +41,7 @@ __all__ = ("Logger",
 	"TRACE","DEBUG","INFO","WARN","ERROR","PANIC","NONE")
 
 class Loggers(Collection):
-	name = Name("log",)
+	name = "log"
 Loggers = Loggers()
 
 TRACE=0

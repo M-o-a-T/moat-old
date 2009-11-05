@@ -43,7 +43,7 @@ import datetime as dt
 class Timeslots(Collection):
     name = "timeslot"
 Timeslots = Timeslots()
-Timeslots.can_do("del")
+Timeslots.does("del")
 
 class Timeslotted(object):
 	pass

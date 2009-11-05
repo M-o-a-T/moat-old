@@ -51,7 +51,7 @@ Db = None
 class States(Collection):
     name = "state"
 States = States()
-States.can_do("del")
+States.does("del")
 
 class StateChangeError(Exception):
 	def __init__(self,s,v):
