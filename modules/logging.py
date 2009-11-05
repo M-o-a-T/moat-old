@@ -133,6 +133,7 @@ class LoggingModule(Module):
 		main_words.register_statement(LogLevelHandler)
 	
 	def unload(self):
+		main_words.unregister_statement(LogHandler)
 		main_words.unregister_statement(LogLevelHandler)
 	
 init = LoggingModule
