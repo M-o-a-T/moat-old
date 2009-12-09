@@ -167,25 +167,19 @@ class CommonPM(Collected):
 		return self._value
 	def set_value(self,val=None):
 		if val is None: val = self._value
-		if self.state:
-			do = self.t_on
-		else:
-			do = self.t_off
+		assert 0<=val<=1, u"Value is '%s', not in 0…1" % (val,)
+
+		do = self.t_on if self.state else self.t_off
 		self.t_off,self.t_on = self.new_value(val)
-		if self.state:
-			dn = self.t_on
-		else:
-			dn = self.t_off
+		dn = self.t_on if self.state else self.t_off
 
 		self._value = val
+
 		if do != dn:
 			if self.timer is not None:
 				self.timer.cancel()
 			if dn is not None:
-				if self.last is None:
-					self.next = now() + dt.timedelta(0,dn)
-				else:
-					self.next = self.last + dt.timedelta(0,dn)
+				self.next = (self.last if self.last is not None else now()) + dt.timedelta(0,dn)
 				self.timer = callLater(False,self.next,self.do_timed_switch)
 	value = property(get_value,set_value)
 
@@ -210,9 +204,9 @@ A standard pulse width-modulated signal with mostly-constant period
 			super(StdPCM,self).arg(k,v)
 
 	def new_value(self,val):
-		assert 0<=val<=1, u"Value is '%s', not in 0…1" % (val,)
 		if val == 0: return (None,0) # off
 		if val == 1: return (0,None) # on
+
 		return (self.interval * (1-val), self.interval * val)
 
 
@@ -225,7 +219,6 @@ A pulse density modulated signal with constant 'on' time
 	interval=None
 
 	def new_value(self,val):
-		assert 0<=val<=1, u"Value is '%s', not in 0…1" % (val,)
 		if val == 0: return (None,0) # off
 		if val == 1: return (0,None) # on
 
@@ -240,7 +233,6 @@ A pulse density modulated signal with constant 'off' time
 	interval=None
 
 	def new_value(self,val):
-		assert 0<=val<=1, u"Value is '%s', not in 0…1" % (val,)
 		if val == 0: return (None,0) # off
 		if val == 1: return (0,None) # on
 
@@ -255,8 +247,7 @@ class PWMHandler(AttributedStatement):
 pwm NAME…: type 
 	- create a pulse-width modulator
 	  This modulator translates a floating-point value to a periodic
-      on/off event whose latter's duty cycle equals that value.
-      former.
+      on/off event whose duty cycle equals that value.
 """
 	pwm = None
 
@@ -346,7 +337,7 @@ class PWMSet(Statement):
 	doc = "change the destination value of an existing PWM controller"
 	long_doc="""\
 This statement sets a PWM controller's value.
-It will not do anything before you do that.
+The PWM will not do anything before you do that.
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
@@ -380,7 +371,7 @@ class VarPWMHandler(Statement):
 	name=("var","pwm")
 	doc="assign a variable to the PWM's value"
 	long_doc=u"""\
-var pcm NAME name...
+var pwm NAME name...
 	: $NAME contains the PWM controller's set goal
 """
 	def run(self,ctx,**k):
