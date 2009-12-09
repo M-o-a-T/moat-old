@@ -50,7 +50,7 @@ class DbStore(object):
 		try:
 			r = yield store.find(DbTable,
 				DbTable.category == self.category,
-				DbTable.name == repr(key))
+				DbTable.name == " ".join(Name(key)))
 			r = yield r.one()
 			if r is None:
 				raise KeyError(key)
@@ -87,7 +87,7 @@ class DbStore(object):
 		try:
 			r = yield store.find(DbTable,
 				DbTable.category == self.category,
-				DbTable.name == repr(key))
+				DbTable.name == " ".join(Name(key)))
 			r = yield r.one()
 			if r is None:
 				raise KeyError(key)
@@ -105,12 +105,12 @@ class DbStore(object):
 		try:
 			e = yield store.find(DbTable,
 				DbTable.category == self.category,
-				DbTable.name == repr(key))
+				DbTable.name == " ".join(Name(key)))
 			e = yield e.one()
 			if e is None:
 				e = DbTable()
 				e.category = self.category
-				e.name = repr(key)
+				e.name = " ".join(Name(key))
 				yield store.add(e)
 			e.value = repr(val)
 			yield store.commit()
