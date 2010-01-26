@@ -32,7 +32,7 @@ from homevent.run import process_event,register_worker,unregister_worker
 from homevent.reactor import shutdown_event
 from homevent.module import Module
 from homevent.worker import HaltSequence,ExcWorker
-from homevent.times import time_delta, time_until, unixtime,unixdelta, now
+from homevent.times import time_delta, time_until, unixtime,unixdelta, now, humandelta
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.base import Name,SYS_PRIO
 from homevent.twist import callLater, reset_slots
@@ -102,7 +102,7 @@ class Waiter(Collected):
 		yield("name"," ".join(unicode(x) for x in self.name))
 		yield("started",self.start)
 		yield("ending",self.end)
-		yield("remaining",self.value)
+		yield("remaining", humandelta(self.value))
 		w = self
 		while True:
 			w = getattr(w,"parent",None)
