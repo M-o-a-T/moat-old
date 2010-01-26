@@ -690,7 +690,7 @@ class OWFSfactory(object,ReconnectingClientFactory):
 				elif len(name)>3 and name[2] == ".":
 					entries.append(name)
 				else:
-					log(DEBUG,"got unrecognized OWFS name %s" % (name,)
+					log(DEBUG,"got unrecognized OWFS name %s" % (name,))
 
 			def done(_):
 				f = defer.succeed(None)

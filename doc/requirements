@@ -18,7 +18,7 @@ You need:
   Probably.
   This code has not been tested at all under other OSes,
   *especially* not M$ Windows.
-* Python 2.5.
+* Python >= 2.5. (Bot yet tested with 3.x.)
 * Twisted.
 * At least one of 1wire, LIRC, FS20, …
   … or the ability to integrate your own peripheral.

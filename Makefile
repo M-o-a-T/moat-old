@@ -22,13 +22,14 @@ FIX:
 
 all:
 	@$(MAKE) -C fs20 --no-print-directory all
-	python2.5 setup.py build --build-base="$(DESTDIR)"
+	python setup.py build --build-base="$(DESTDIR)"
 install:
 	@$(MAKE) -C fs20 --no-print-directory install ROOT=$(DESTDIR)
-	python2.5 setup.py install --root="$(DESTDIR)" --no-compile -O0
+	python setup.py install --prefix=/usr --root="$(DESTDIR)" --no-compile -O0
 
 clean:
-	python2.5 setup.py clean --build-base="$(DESTDIR)"
+	python setup.py clean --build-base="$(DESTDIR)"
+	rm -rf build
 	@$(MAKE) -C fs20 --no-print-directory clean
 
 

@@ -1393,10 +1393,10 @@ high-resolution RRD graph are good tools for fine-tuning these values.
 wind
 ----
 
-This is a special mode to interpret the AAG wind vane position.
+This is a special mode to interpret the (old) AAG wind vane's position.
 
 The vane moves a magnet which controls a circle of eight reed relais,
-connected to four voltage converters (vielding 0, 2.5, or 5 V). The
+connected to four voltage converters (yielding 0, 2.5, or 5 V). The
 result is a floating-point number from zero (inclusive) to 16
 (exclusive) which indicates the direction from North (0) through East
 (4), South (8) and West (12) to North again (16).
@@ -1406,13 +1406,14 @@ to orient it so that it points North. The first (optional) parameter is
 an offset which is subtracted from the raw data so that the reported 
 value is correct.
 
-Because the vane sometimes swings around rather erratically, a
+Because the vane swings around rather erratically in turbulent wind
+conditions (unavoidable when it's mounted on top of a sloped roof), a
 configurable moving-average damper will be applied. The second parameter
 (default: 0.1) can be described as "How much do I trust this value to be
 correct".
 
 If the answer is "not a whole lot" because the vane swings around like
-crazy no matter what wind conditions you have, you can compensate by
+crazy no matter which wind conditions you have, you can compensate by
 checking for new values fairly often. It also makes sense to only report
 new data when the value changes by a non-trivial amount.
 
