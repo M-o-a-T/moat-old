@@ -11,6 +11,7 @@ Package: homevent
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, ${python:Depends}, python-twisted-core
 Recommends: pulseaudio (>= 0.9.7), python-twisted-conch, python-rrdtool
+Suggests: socat
 Description: A scripted event-based monitoring and control system
  HomEvenT is a flexible, scripted, network-aware event handler.
  It can monitor and control quite a few external buses and peripherals,
