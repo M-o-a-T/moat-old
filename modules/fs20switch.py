@@ -23,14 +23,12 @@ This code implements basic commands to access FS20 switches.
 from homevent.module import Module
 from homevent.logging import log,log_exc,DEBUG,TRACE,INFO,WARN
 from homevent.statement import AttributedStatement,Statement, main_words
-from homevent.check import Check,register_condition,unregister_condition
 from homevent.run import simple_event
 from homevent.event import Event
 from homevent.context import Context
 from homevent.base import Name
 from homevent.collect import Collection,Collected
-from homevent.fs20 import handler,register_handler,unregister_handler, \
-	from_hc, from_dev, to_hc, to_dev, WrongDatagram
+from homevent.fs20 import from_hc, from_dev, to_hc, to_dev, WrongDatagram
 from homevent.fs20sw import group
 
 from twisted.internet import protocol,defer,reactor
