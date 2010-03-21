@@ -2,12 +2,12 @@ EVENT: startup
 NEW: <ConditionalWorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
-EVENT: startup
-END: startup
 EVENT: wait¦start¦×××¦BEFORE
 NEW: <ConditionalWorkSequence:2 (4)>
    : │  EVENT: wait¦start¦×××¦BEFORE
    : └1╴... done.
+EVENT: startup
+END: startup
 EVENT: wait¦start¦×××¦BEFORE
 END: wait¦start¦×××¦BEFORE
 EVENT: wait¦start¦×××¦Foo¦Bar

@@ -2,16 +2,15 @@ EVENT: startup
 NEW: <ConditionalWorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
-EVENT: startup
-END: startup
 EVENT: wait¦start¦0.2¦BAD
 NEW: <ConditionalWorkSequence:2 (4)>
    : │  EVENT: wait¦start¦0.2¦BAD
    : └1╴... done.
+EVENT: startup
+END: startup
 EVENT: wait¦start¦0.2¦BAD
 END: wait¦start¦0.2¦BAD
-3 [Failure instance: Traceback (failure with no frames): <class 'twisted.internet.error.ConnectionRefusedError'>: Connection was refused by other side: 111: Connection refused.
-]
+3 
 EVENT: net¦error¦foop
 NEW: <ConditionalWorkSequence:3 (4)>
    : │  EVENT: net¦error¦foop
@@ -108,10 +107,6 @@ NEW: <ConditionalWorkSequence:11 (5)>
    : │  step: list net baz zaz ‹List›
    : │  step: del net baz zaz ‹Del›
    : └2╴... done.
-EVENT: net¦baz¦zaz¦B
-NEW: <ConditionalWorkSequence:12 (4)>
-   : │  EVENT: net¦baz¦zaz¦B
-   : └1╴... done.
 EVENT: net¦connect¦baz¦zaz
 RUN: on net connect baz zaz ‹OnEventHandler›
    : prio: 51
@@ -126,25 +121,23 @@ port: 50345
 connected: Yes
 .
 EVENT: net¦disconnect¦baz¦zaz
-NEW: <ConditionalWorkSequence:13 (5)>
+NEW: <ConditionalWorkSequence:12 (5)>
    : │  EVENT: net¦disconnect¦baz¦zaz
    : ├1╴on net disconnect baz zaz ‹OnEventHandler›
    : │  prio: 51
    : │  step: log TRACE dis baz zaz ‹LogHandler›
    : └2╴... done.
 END: net¦connect¦baz¦zaz
-EVENT: net¦baz¦zaz¦B
-END: net¦baz¦zaz¦B
 EVENT: net¦disconnect¦baz¦zaz
 RUN: on net disconnect baz zaz ‹OnEventHandler›
    : prio: 51
    : step: log TRACE dis baz zaz ‹LogHandler›
- at: <ConditionalWorkSequence:13 (5)> (step 1)
+ at: <ConditionalWorkSequence:12 (5)> (step 1)
  ev: EVENT: net¦disconnect¦baz¦zaz
 0 dis baz zaz
 END: net¦disconnect¦baz¦zaz
 EVENT: wait¦done¦1.2¦AFTER
-NEW: <ConditionalWorkSequence:14 (4)>
+NEW: <ConditionalWorkSequence:13 (4)>
    : │  EVENT: wait¦done¦1.2¦AFTER
    : └1╴... done.
 EVENT: wait¦done¦1.2¦AFTER
@@ -152,7 +145,7 @@ END: wait¦done¦1.2¦AFTER
 0 ending
 .
 EVENT: shutdown
-NEW: <ConditionalWorkSequence:15 (6)>
+NEW: <ConditionalWorkSequence:14 (6)>
    : │  EVENT: shutdown
    : └1╴... done.
 EVENT: shutdown

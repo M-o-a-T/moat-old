@@ -26,9 +26,12 @@ wait:
 	for 0.2
 	debug force
 list log
-syslog local1 trace localhost 55514
-log DEBUG "One Debug"
-del log local1 localhost 55514
+#syslog local1 trace localhost 55514
+#log DEBUG "One Debug"
+#del log local1 localhost 55514
+## commented out because the next syslog call opens a new socket
+## and netcat (used as a test listener) binds to the first one,
+## which causes the second syslog line to not get received
 
 syslog local5 info localhost 55514
 log DEBUG "Five Debug"
@@ -38,7 +41,7 @@ list log local5 localhost 55514
 del log local5 localhost 55514
 list log
 wait:
-	for 0.2
+	for 0.8
 	debug force
 """
 

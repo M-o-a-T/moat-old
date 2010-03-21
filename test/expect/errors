@@ -2,8 +2,6 @@ EVENT: startup
 NEW: <ConditionalWorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
-EVENT: startup
-END: startup
 1 Yes A
 1 Yes B
 1 Yes C
@@ -14,6 +12,8 @@ ERROR: RaisedError: Foo A
 NEW: <WorkSequence:2 (4)>
    : │  ERROR: RaisedError: Foo A
    : └1╴... done.
+EVENT: startup
+END: startup
 ERROR: RaisedError: Foo A
 END: RaisedError
 1 Yes E

@@ -2,8 +2,6 @@ EVENT: startup
 NEW: <ConditionalWorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
-EVENT: startup
-END: startup
 1 Yes
 0 Create OnEvtHandler: pcm¦set¦*X¦foo¦bar
 0 NewHandler 1
@@ -17,6 +15,8 @@ EVENT: wait¦start¦0.5¦_wait¦2
 NEW: <ConditionalWorkSequence:2 (4)>
    : │  EVENT: wait¦start¦0.5¦_wait¦2
    : └1╴... done.
+EVENT: startup
+END: startup
 EVENT: wait¦start¦0.5¦_wait¦2
 END: wait¦start¦0.5¦_wait¦2
 EVENT: wait¦done¦0.5¦_wait¦2

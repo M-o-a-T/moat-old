@@ -2,12 +2,12 @@ EVENT: startup
 NEW: <ConditionalWorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
-EVENT: startup
-END: startup
 EVENT: wait¦start¦×××¦X1
 NEW: <ConditionalWorkSequence:2 (4)>
    : │  EVENT: wait¦start¦×××¦X1
    : └1╴... done.
+EVENT: startup
+END: startup
 EVENT: wait¦start¦×××¦X1
 END: wait¦start¦×××¦X1
 EVENT: wait¦start¦×××¦Foo¦Bar
@@ -27,7 +27,7 @@ Foo Bar :: 9.85
 name: Foo Bar
 started: 2003-04-05 06:07:08.050000
 ending: 2003-04-05 06:07:18.050000
-remaining: 9.85
+remaining: 9.8 sec
 in: async
 in: Global
 .

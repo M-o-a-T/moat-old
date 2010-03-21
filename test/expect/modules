@@ -2,13 +2,13 @@ EVENT: startup
 NEW: <ConditionalWorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
-EVENT: startup
-END: startup
 1 Loading!
 EVENT: module¦load¦example
 NEW: <ConditionalWorkSequence:2 (4)>
    : │  EVENT: module¦load¦example
    : └1╴... done.
+EVENT: startup
+END: startup
 EVENT: module¦load¦example
 END: module¦load¦example
 EVENT: module¦unload¦example

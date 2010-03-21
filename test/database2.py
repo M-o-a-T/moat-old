@@ -33,8 +33,8 @@ def main():
 		e.addCallback(chk)
 		return e
 	d.addCallback(getter,"one",2)
-	d.addCallback(getter,3,(4,5,6))
-	d.addCallback(lambda _: s.delete(3))
+	d.addCallback(getter,("two","three"),(4,5,6))
+	d.addCallback(lambda _: s.delete(("two","three")))
 	d.addCallback(lambda _: s.delete("one"))
 
 	def err(_):

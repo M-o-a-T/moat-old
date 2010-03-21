@@ -155,8 +155,8 @@ shutdown now  ... but does not wait for active events to terminate.
 		shut_down()
 
 def mainloop(main=None):
+	start_up()
 	if main:
 		reactor.callWhenRunning(main)
-	start_up()
 	reactor.run()
 

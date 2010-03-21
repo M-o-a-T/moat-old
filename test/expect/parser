@@ -2,8 +2,6 @@ EVENT: startup
 NEW: <ConditionalWorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
-EVENT: startup
-END: startup
 Init foo(1) from ‹global_words: Global 3›
 Input foo(1): <InputEvent:>
 Init foo(2) from ‹global_words: Global 3›
@@ -63,6 +61,8 @@ Init foo¦bar(16) from None
 Init for(17) from None
 Init foiled(18) from None
 foiled : not clingfilm
+EVENT: startup
+END: startup
 ... moving up
 EVENT: shutdown
 NEW: <ConditionalWorkSequence:2 (5)>

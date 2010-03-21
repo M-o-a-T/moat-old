@@ -2,9 +2,9 @@ EVENT: startup
 NEW: <ConditionalWorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
+0 Yes!
 EVENT: startup
 END: startup
-0 Yes!
 0 Yes!
 0 Yes!
 0 Yes!

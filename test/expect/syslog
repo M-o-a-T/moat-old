@@ -2,12 +2,12 @@ EVENT: startup
 NEW: <ConditionalWorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
-EVENT: startup
-END: startup
 EVENT: wait¦start¦0.2¦_wait¦1
 NEW: <ConditionalWorkSequence:2 (4)>
    : │  EVENT: wait¦start¦0.2¦_wait¦1
    : └1╴... done.
+EVENT: startup
+END: startup
 EVENT: wait¦start¦0.2¦_wait¦1
 END: wait¦start¦0.2¦_wait¦1
 EVENT: wait¦done¦0.2¦_wait¦1
@@ -16,32 +16,37 @@ NEW: <ConditionalWorkSequence:3 (4)>
    : └1╴... done.
 EVENT: wait¦done¦0.2¦_wait¦1
 END: wait¦done¦0.2¦_wait¦1
+syslog :: TRACE <open file '<stdout>', mode 'w' at 0x401f6070>
 .
-1 One Debug
 1 Five Debug
 3 Five Warn
 local5 localhost 55514 :: local5 info
+syslog :: TRACE <open file '<stdout>', mode 'w' at 0x401f6070>
 .
-name: local5¦localhost¦55514
+Name: local5¦localhost¦55514
+Type: SysLogger
+Level: INFO
+Out: <open file '<stdout>', mode 'w' at 0x401f6070>
 facility: 168
 facility_name: local5
 address: (u'localhost', 55514)
 level: 2
 level_name: info
 .
+syslog :: TRACE <open file '<stdout>', mode 'w' at 0x401f6070>
 .
-EVENT: wait¦start¦0.4¦_wait¦2
+EVENT: wait¦start¦1.0¦_wait¦2
 NEW: <ConditionalWorkSequence:4 (4)>
-   : │  EVENT: wait¦start¦0.4¦_wait¦2
+   : │  EVENT: wait¦start¦1.0¦_wait¦2
    : └1╴... done.
-EVENT: wait¦start¦0.4¦_wait¦2
-END: wait¦start¦0.4¦_wait¦2
-EVENT: wait¦done¦0.4¦_wait¦2
+EVENT: wait¦start¦1.0¦_wait¦2
+END: wait¦start¦1.0¦_wait¦2
+EVENT: wait¦done¦1.0¦_wait¦2
 NEW: <ConditionalWorkSequence:5 (4)>
-   : │  EVENT: wait¦done¦0.4¦_wait¦2
+   : │  EVENT: wait¦done¦1.0¦_wait¦2
    : └1╴... done.
-EVENT: wait¦done¦0.4¦_wait¦2
-END: wait¦done¦0.4¦_wait¦2
+EVENT: wait¦done¦1.0¦_wait¦2
+END: wait¦done¦1.0¦_wait¦2
 EVENT: shutdown
 NEW: <ConditionalWorkSequence:6 (6)>
    : │  EVENT: shutdown

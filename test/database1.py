@@ -24,7 +24,7 @@ s = DbStore(Name("Foo","bar"))
 def main():
 	d = s.start()
 	d.addCallback(lambda _: s.set("one",4))
-	d.addCallback(lambda _: s.set(3,(4,5,6)))
+	d.addCallback(lambda _: s.set(("two","three"),(4,5,6)))
 
 	def getter(_,a,b):
 		e = s.get(a)
@@ -33,7 +33,7 @@ def main():
 		e.addCallback(chk)
 		return e
 	d.addCallback(getter,"one",4)
-	d.addCallback(getter,3,(4,5,6))
+	d.addCallback(getter,("two","three"),(4,5,6))
 	d.addCallback(lambda _: s.set("one",2))
 	d.addCallback(getter,"one",2)
 

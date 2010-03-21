@@ -2,8 +2,6 @@ EVENT: startup
 NEW: <ConditionalWorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
-EVENT: startup
-END: startup
 block :: Block-level statements
 data :: provides a couple of common data access functions
 on_event :: the 'on EVENT:' handler
@@ -22,7 +20,12 @@ info: the 'on EVENT:' handler
 103 :: shutdown last
 .
 .
+event
+log
 module
+on
+wait
+worker
 .
 0 Create OnEvtHandler: foo
 0 NewHandler 1
@@ -30,6 +33,8 @@ EVENT: wait¦start¦×××¦_wait¦2
 NEW: <ConditionalWorkSequence:2 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦2
    : └1╴... done.
+EVENT: startup
+END: startup
 EVENT: wait¦start¦×××¦_wait¦2
 END: wait¦start¦×××¦_wait¦2
 EVENT: wait¦done¦×××¦_wait¦2

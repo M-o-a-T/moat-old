@@ -2,14 +2,14 @@ EVENT: startup
 NEW: <ConditionalWorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
-EVENT: startup
-END: startup
 0 Create OnEvtHandler: monitor¦value¦*VAL¦foo¦bar
 0 NewHandler 1
 EVENT: wait¦start¦×××¦_wait¦1
 NEW: <ConditionalWorkSequence:2 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦1
    : └1╴... done.
+EVENT: startup
+END: startup
 0 monitor raw 42 foo bar
 0 monitor filter [42] on foo¦bar
 0 monitor End run foo¦bar

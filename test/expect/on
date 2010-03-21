@@ -2,8 +2,6 @@ EVENT: startup
 NEW: <ConditionalWorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
-EVENT: startup
-END: startup
 0 Create OnEvtHandler: fuß
 0 NewHandler 1
 0 Create OnEvtHandler: num¦1
@@ -50,6 +48,8 @@ NEW: <ConditionalWorkSequence:2 (5)>
    : │  step: block ‹Block›
    : │      : step: sync trigger $1 ‹SyncTriggerHandler›
    : └2╴... done.
+EVENT: startup
+END: startup
 EVENT: bar¦foo
 RUN: on bar * ‹OnEventHandler›
    : prio: 51

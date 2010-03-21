@@ -44,8 +44,11 @@ sys.stdout.write("e01010302010605040703\n") # OK, 12.3 and 45.6
 sys.stdout.write("+3.7 env dup: smackmiddle\n")
 sys.stdout.write("e0103050301040302000B\n") # not OK, smack in the middle
 
-sys.stdout.write("+3.7 env OK: temphumid one\n")
+sys.stdout.write("+3.8 env OK: temphumid one\n")
 sys.stdout.write("e0103030201040302070F\n") # OK, match with ONE
+
+sys.stdout.write("+3.9 env OK: temphumid one also\n")
+sys.stdout.write("m31234123f7\n") # OK, match with ONE
 
 sys.stdout.flush()
 time.sleep(0.2)

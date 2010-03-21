@@ -2,8 +2,6 @@ EVENT: startup
 NEW: <ConditionalWorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
-EVENT: startup
-END: startup
 0 Yes!
 0 Yes!
 0 Set to ONE
@@ -11,6 +9,8 @@ EVENT: state¦-¦one¦foo¦bar
 NEW: <ConditionalWorkSequence:2 (4)>
    : │  EVENT: state¦-¦one¦foo¦bar
    : └1╴... done.
+EVENT: startup
+END: startup
 EVENT: state¦-¦one¦foo¦bar
 END: state¦-¦one¦foo¦bar
 0 Set to TWO
@@ -66,12 +66,12 @@ RUN: on state * twohalf foo bar ‹OnEventHandler›
 0 Set to FOUR
 END: state¦three¦twohalf¦foo¦bar
 ERROR: Traceback (most recent call last):
-     :   File "homevent/twist.py, in <lambda>
-     :     d.addCallback(lambda _: p(*a,**k))
      :   File "internet/defer.py, in unwindGenerator
      :     return _inlineCallbacks(None, f(*args, **kwargs), Deferred())
      :   File "internet/defer.py, in _inlineCallbacks
-     :     result = g.throw(result.type, result.value, result.tb)
+     :     result = result.throwExceptionIntoGenerator(g)
+     :   File "python/failure.py, in throwExceptionIntoGenerator
+     :     return g.throw(self.type, self.value, self.tb)
      :   File "homevent/worker.py, in _process
      :     r = failure.Failure()
      : --- <exception caught here> ---
@@ -97,12 +97,12 @@ NEW: <WorkSequence:6 (4)>
    : │  ERROR: Trying to change state to 'fourtoo' while changing from 'three' to 'twohalf'
    : └1╴... done.
 ERROR: Traceback (most recent call last):
-     :   File "homevent/twist.py, in <lambda>
-     :     d.addCallback(lambda _: p(*a,**k))
      :   File "internet/defer.py, in unwindGenerator
      :     return _inlineCallbacks(None, f(*args, **kwargs), Deferred())
      :   File "internet/defer.py, in _inlineCallbacks
-     :     result = g.throw(result.type, result.value, result.tb)
+     :     result = result.throwExceptionIntoGenerator(g)
+     :   File "python/failure.py, in throwExceptionIntoGenerator
+     :     return g.throw(self.type, self.value, self.tb)
      :   File "homevent/worker.py, in _process
      :     r = failure.Failure()
      : --- <exception caught here> ---
