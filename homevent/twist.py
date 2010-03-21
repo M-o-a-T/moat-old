@@ -39,6 +39,9 @@ def track_errors(doit = None):
 		tracked_errors = doit
 	return res
 
+
+# nonblocking versions of stdin/stdout
+
 class StdInDescriptor(FileDescriptor):
 	def fileno(self):
 		return 0
@@ -59,6 +62,10 @@ class StdOutDescriptor(FileDescriptor):
 		finally:
 			fdesc.setBlocking(1)
 	
+
+# count the number of active defer-to-later handlers
+# so that we don't exit when one of them is still running,
+# because that causes a deadlock.
 _running = 0
 _callme = None
 def call_when_idle(p):
@@ -75,7 +82,9 @@ def _defer(d):
 		_callme = None
 		cm()
 
-
+# also, don't require an isInIOThread() test each time we want to defer something
+# from some thread which may or may not be the main one:
+# use this function instead
 def deferToLater(p,*a,**k):
 	global _running
 	_running += 1
@@ -89,11 +98,11 @@ def deferToLater(p,*a,**k):
 	return d
 
 
+# Simplification: sometimes we're late starting something.
+# That is not a bug, that's life.
+# reactor.callLater asserts >=0, so just make sure that it is.
 wcl = reactor.callLater
 def wake_later(t,p,*a,**k):
-	# Simplification: sometimes we're late starting something.
-	# That is not a bug, that's life.
-	# reactor.callLater asserts >=0, so just make sure that it is.
 	if t < 0: t = 0
 
 	r = wcl(t,p,*a,**k)
@@ -281,7 +290,9 @@ if "HOMEVENT_TEST" in os.environ:
 	reactor.callLater = _callLater
 
 
-# Allow a Deferred to be initialized with another Deferred
+# Allow a Deferred to be called with another Deferred
+# so that the result of the second is fed to the first
+# (without checking for this case each time)
 def acb(self, result):
 	if isinstance(result, defer.Deferred):
 		result.addBoth(self.callback)
@@ -333,6 +344,7 @@ if False:
 		return _cic(_tcall,tid,p,a,k)
 	reactor.callInThread = cic
 
+# Always encode Unicode strings in utf-8
 fhw = FileDescriptor.write
 def nfhw(self,data):
 	if isinstance(data,unicode):
@@ -340,6 +352,7 @@ def nfhw(self,data):
 	return fhw(self,data)
 FileDescriptor.write = nfhw
 
+# Simplify failure handling
 BaseFailure = failure.Failure
 class TwistFailure(BaseFailure,BaseException):
 	def __init__(self, exc_value=None, exc_type=None, exc_tb=None):
