@@ -120,7 +120,7 @@ reactor.callLater = wake_later
 # Thus, this code fakes timeouts by sorting stuff into bins and running
 # these in-order, but it does not actually wait for anything unless the
 # "force" flag is set, which denotes that the given timeout affects
-# something "real" and therefore may be ignored.
+# something "real" and therefore may not be ignored.
 
 rcl = reactor.callLater
 slot = None
@@ -341,7 +341,6 @@ def nfhw(self,data):
 FileDescriptor.write = nfhw
 
 BaseFailure = failure.Failure
-class TwistMe(BaseException): pass
 class TwistFailure(BaseFailure,BaseException):
 	def __init__(self, exc_value=None, exc_type=None, exc_tb=None):
 		global tracked_errors
