@@ -18,7 +18,7 @@
 from __future__ import division
 
 """\
-This code implements basic commands to access FS20 switches.
+This code implements a listener for environment monitoring.
 
 """
 
@@ -40,6 +40,7 @@ from homevent.timeslot import Timeslots,Timeslotted,Timeslot
 #from twisted.python import failure
 
 PREFIX_EM = 'e'
+PREFIX_EM2 = 'm'
 
 # 
 #A1A2A3V1  	T11T12T13T141  	T21T22T23T241 T31T32T33T341  	F11F12F13F141  	F21F22F23F241  	F31F32F33F341 Q1Q2Q3Q41  	S1S2S3S41
@@ -205,6 +206,7 @@ def flat(r):
 		yield b
 
 class em_handler(recv_handler):
+	"""Message: e0102030405"""
 	def dataReceived(self, ctx, data, handler=None, timedelta=None):
 		if len(data) < 4:
 			return
@@ -275,6 +277,19 @@ class em_handler(recv_handler):
 					simple_event(ctx, "fs20","unknown","em","untimed",g.em_name,data[1]&7, *tuple(flat(r)))
 				else:
 					simple_event(ctx, "fs20","unknown","em","unregistered",g.em_name,data[1]&7, *tuple(flat(r)))
+
+class em2_handler(em_handler):
+	"""Message: m214365"""
+	def dataReceived(self, ctx, data, handler=None, timedelta=None):
+		if len(data) < 4:
+			return
+		xd = ""
+		db = None
+		for d in data:
+			d = ord(d)
+			xd += chr(d&0x0F) + chr(d>>4)
+
+		super(em2_handler,self).dataReceived(ctx, xd, handler, timedelta)
 
 
 class FS20em(AttributedStatement):
@@ -408,11 +423,13 @@ class fs20em(Module):
 
 	def load(self):
 		PREFIX[PREFIX_EM] = em_handler()
+		PREFIX[PREFIX_EM2] = em2_handler()
 		main_words.register_statement(FS20em)
 		main_words.register_statement(FS20emVal)
 	
 	def unload(self):
 		del PREFIX[PREFIX_EM]
+		del PREFIX[PREFIX_EM2]
 		main_words.unregister_statement(FS20em)
 		main_words.unregister_statement(FS20emVal)
 	
