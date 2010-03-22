@@ -1,3 +1,9 @@
+homevent (0.2.12) karmic; urgency=low
+
+  * understand EM messages from modified CUL sticks
+
+ -- Matthias Urlichs <smurf@debian.org>  Sun, 21 Mar 2010 19:28:11 +0100
+
 homevent (0.2.11) karmic; urgency=low
 
   * Test release
