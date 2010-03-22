@@ -99,12 +99,14 @@ class AVRcommon(handler):
 				else:
 					e=d
 			if e:
-				raise ValueError("odd length",data)
+				log("fs20",WARN,"fs20 odd length "+data)
 
 			self.datagramReceived(data[0], db, timestamp=self.timestamp)
 			self.timestamp = None
 		elif data[0] == PREFIX_TIMESTAMP:
 			self.timestamp = float(data[1:])
+		elif data[0] == "P":
+			pass # idle
 		elif data[0] == "+":
 			log("fs20",DEBUG,"fs20 trace "+data)
 		else:
@@ -406,6 +408,11 @@ remote ‹host› ‹port›?
 AVRconnect.register_statement(AVRremote)
 
 
+class AVRsend(NetSend):
+    storage = AVRs.storage
+    storage2 = avr_conns
+    name=("send","fs20","avr","raw")
+
 class AVRconnected(NetConnected):
 	storage = AVRs.storage
 	storage2 = avr_conns
@@ -447,11 +454,13 @@ class AVRmodule(Module):
 
 	def load(self):
 		main_words.register_statement(AVRconnect)
+		main_words.register_statement(AVRsend)
 		register_condition(AVRexists)
 		register_condition(AVRconnected)
 	
 	def unload(self):
 		main_words.unregister_statement(AVRconnect)
+		main_words.unregister_statement(AVRsend)
 		unregister_condition(AVRexists)
 		unregister_condition(AVRconnected)
 	
