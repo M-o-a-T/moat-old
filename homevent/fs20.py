@@ -122,12 +122,13 @@ class recv_handler(object):
 		raise NotImplementedError("You need to override 'dataReceived'!")
 
 	def datagramReceived(self, ctx, data, handler=None, timestamp=None):
+		if timestamp is None:
+			timestamp = time()
 		if self.last_data is None or self.last_data != data:
 			delta = None
 			self.last_data = data
+			self.last_timestamp = timestamp
 		else:
-			if timestamp is None:
-				timestamp = time()
 			if self.last_timestamp:
 				delta = timestamp - self.last_timestamp
 			else:
