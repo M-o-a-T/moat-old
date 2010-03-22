@@ -1,0 +1,42 @@
+if not exists module bool: load bool
+if not exists module ifelse: load ifelse
+if not exists module logging: load logging
+if not exists module block: load block
+if not exists module trigger: load trigger
+if not exists module wait: load wait
+if not exists module onewire: load onewire
+if not exists module on_event: load on_event
+if not exists module fs20switch: load fs20switch
+if not exists module fs20avr: load fs20avr
+log DEBUG
+
+on fs20 avr connect cul *name:
+       send fs20 avr raw X01 :to cul $name
+
+on fs20 avr disconnect cul *name:
+       del fs20 avr cul $name
+       async:
+               wait cul $name :for 30
+               fs20 avr cul $name :remote $name 54084
+
+fs20 avr cul localhost :remote localhost 54084
+
+
+fs20 switch EG:
+        code 31413142
+        add Hand A:
+                code 1211
+        add Hand B:
+                code 1212
+        add Hand C:
+                code 1213
+        add Hand D:
+                code 1214
+
+fs20 switch infra:
+        code 31413143
+        add Stecker A:
+                code 1112
+
+
+
