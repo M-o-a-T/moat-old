@@ -215,3 +215,45 @@ class Timeslot(Collected):
 		self.next = None
 
 
+class SomeNull(Exception): pass
+
+def collision_filter(val, hdl):
+	"""\
+		Try to find the device that's closest to the last-reported values.
+		This only works when all devices have some common previous
+		measurement.
+		‹val› is the reported type/value hash, ‹hdl› a list of devices.
+		"""
+	if len(hdl) < 2:
+		return hdl
+	for h in hdl:
+		if h.last_data is None:
+			return hdl
+	dm = []
+	for k in val.iterkeys():
+		try:
+			for h in hdl:
+				if k not in h.last_data:
+					raise SomeNull
+			dm.append(k)
+		except SomeNull: pass
+	if not dm:
+		return hdl
+
+	d = None
+	f = None
+	for h in hdl:
+		dn = 0
+		for k in dm:
+			dn += abs(h.last_data[k] - val[k])
+
+		if d is None or dn < d*2/3:
+			d = dn
+			f = h
+		elif dn < d*3/2: # not enough separation
+			if d < dn: d = dn
+			f = None
+	if f is None:
+		return hdl
+	return (f,)
+	

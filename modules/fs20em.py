@@ -33,7 +33,7 @@ from homevent.fs20 import recv_handler, PREFIX
 from homevent.collect import Collection,Collected
 from homevent.logging import log,TRACE,DEBUG
 from homevent.times import now,humandelta
-from homevent.timeslot import Timeslots,Timeslotted,Timeslot
+from homevent.timeslot import Timeslots,Timeslotted,Timeslot,collision_filter
 
 #from twisted.internet import protocol,defer,reactor
 #from twisted.protocols.basic import _PauseableMixin
@@ -158,48 +158,6 @@ class EM(Collected,Timeslotted):
 		return d
 		
 
-class SomeNull(Exception): pass
-
-def mfilter(val, hdl):
-	"""\
-		Try to find the device that's closest to the last-reported values.
-		This only works when all devices have some common previous
-		measurement.
-		‹val› is the reported type/value hash, ‹hdl› a list of devices.
-		"""
-	if len(hdl) < 2:
-		return hdl
-	for h in hdl:
-		if h.last_data is None:
-			return hdl
-	dm = []
-	for k in val.iterkeys():
-		try:
-			for h in hdl:
-				if k not in h.last_data:
-					raise SomeNull
-			dm.append(k)
-		except SomeNull: pass
-	if not dm:
-		return hdl
-
-	d = None
-	f = None
-	for h in hdl:
-		dn = 0
-		for k in dm:
-			dn += abs(h.last_data[k] - val[k])
-
-		if d is None or dn < d*2/3:
-			d = dn
-			f = h
-		elif dn < d*3/2: # not enough separation
-			if d < dn: d = dn
-			f = None
-	if f is None:
-		return hdl
-	return (f,)
-	
 def flat(r):
 	for a,b in r.iteritems():
 		yield a
@@ -253,21 +211,21 @@ class em_handler(recv_handler):
 					elif not h.slot.is_out():
 						hr.append(h)
 				if hi:
-					hi = mfilter(r,hi)
+					hi = collision_filter(r,hi)
 					if len(hi) > 1:
 						simple_event(ctx, "fs20","conflict","em","sync",g.em_name,data[1]&7, *tuple(flat(r)))
 					else:
 						hi[0].slot.do_sync()
 						hi[0].event(ctx,r)
 				elif hr:
-					hr = mfilter(r,hr)
+					hr = collision_filter(r,hr)
 					if len(hr) > 1:
 						simple_event(ctx, "fs20","conflict","em","unsync",g.em_name,data[1]&7, *tuple(flat(r)))
 					else:
 						hr[0].slot.up(True)
 						hr[0].event(ctx,r)
 				elif hn:
-					hn = mfilter(r,hn)
+					hn = collision_filter(r,hn)
 					if len(hn) > 1:
 						simple_event(ctx, "fs20","conflict","em","untimed",g.em_name,data[1]&7, *tuple(flat(r)))
 					else:
@@ -419,7 +377,7 @@ class fs20em(Module):
 		Basic fs20 EM reception.
 		"""
 
-	info = "Basic fs20 switches"
+	info = "Basic fs20 environment monitor"
 
 	def load(self):
 		PREFIX[PREFIX_EM] = em_handler()
