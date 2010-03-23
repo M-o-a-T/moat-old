@@ -51,8 +51,15 @@ class RRD(Collected):
 		yield ("name",self.name)
 		yield ("file",self.path)
 		yield ("dataset",self.dataset)
-		for k,v in rrdtool.info(self.upath)["ds"][self.udataset].iteritems():
-			yield (k,v)
+		try:
+			for k,v in rrdtool.info(self.upath)["ds"][self.udataset].iteritems():
+				yield (k,v)
+		except KeyError:
+			s="ds[%s]." % (self.udataset)
+			d=rrdtool.info(self.upath)
+			# mainly for testing
+			for k in sorted(x for x in d.keys() if x.startswith(s)):
+				yield (k[len(s):],d[k])
 
 	def info(self):
 		return "%s %s" % (self.path,self.dataset)
@@ -100,7 +107,10 @@ var rrd variable item NAME
 		if len(event) < 3:
 			raise SyntaxError(u'Usage: var rrd ‹variable› ‹item› ‹name…›')
 		s = RRDs[Name(event[2:])]
-		setattr(self.parent.ctx,event[0],rrdtool.info(s.upath)["ds"][s.dataset][event[1]])
+		try:
+			setattr(self.parent.ctx,event[0],rrdtool.info(s.upath)["ds"][s.dataset][event[1]])
+		except KeyError:
+			setattr(self.parent.ctx,event[0],rrdtool.info(s.upath)["ds[%s].%s" % (s.dataset,event[1])])
 
 
 class RRDset(Statement):

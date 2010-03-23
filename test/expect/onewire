@@ -2,12 +2,12 @@ EVENT: startup
 NEW: <ConditionalWorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
-EVENT: startup
-END: startup
 EVENT: module¦load¦bool
 NEW: <ConditionalWorkSequence:2 (4)>
    : │  EVENT: module¦load¦bool
    : └1╴... done.
+EVENT: startup
+END: startup
 EVENT: module¦load¦bool
 END: module¦load¦bool
 EVENT: module¦load¦logging
@@ -66,8 +66,18 @@ EVENT: onewire¦connect¦A
 NEW: <ConditionalWorkSequence:11 (4)>
    : │  EVENT: onewire¦connect¦A
    : └1╴... done.
+1 got unrecognized OWFS name uncached
+1 got unrecognized OWFS name settings
+1 got unrecognized OWFS name system
+1 got unrecognized OWFS name statistics
+1 got unrecognized OWFS name structure
+1 got unrecognized OWFS name simultaneous
+1 got unrecognized OWFS name alarm
 EVENT: onewire¦connect¦A
 END: onewire¦connect¦A
+1 got unrecognized OWFS name interface
+1 got unrecognized OWFS name simultaneous
+1 got unrecognized OWFS name alarm
 EVENT: onewire¦new¦DS18S20¦000010EF0000
 NEW: <ConditionalWorkSequence:12 (4)>
    : │  EVENT: onewire¦new¦DS18S20¦000010EF0000
@@ -118,6 +128,7 @@ END: wait¦cancel¦10.0¦yawn
 END: onewire¦scanned¦A¦0¦1¦1
 10.000010EF0000
 bus.0
+uncached
 settings
 system
 statistics
@@ -127,8 +138,9 @@ alarm
 .
 0 DirDev
 address
+alias
 crc8
-die
+errata
 family
 id
 locator
@@ -140,9 +152,6 @@ r_locator
 temperature
 temphigh
 templow
-trim
-trimblanket
-trimvalid
 type
 .
 0 yes
@@ -154,6 +163,16 @@ NEW: <ConditionalWorkSequence:17 (4)>
 EVENT: onewire¦scanning¦A
 END: onewire¦scanning¦A
 0 OWFS start bus update
+1 got unrecognized OWFS name uncached
+1 got unrecognized OWFS name settings
+1 got unrecognized OWFS name system
+1 got unrecognized OWFS name statistics
+1 got unrecognized OWFS name structure
+1 got unrecognized OWFS name simultaneous
+1 got unrecognized OWFS name alarm
+1 got unrecognized OWFS name interface
+1 got unrecognized OWFS name simultaneous
+1 got unrecognized OWFS name alarm
 EVENT: onewire¦scanned¦A¦0¦0¦1
 NEW: <ConditionalWorkSequence:18 (4)>
    : │  EVENT: onewire¦scanned¦A¦0¦0¦1
@@ -162,6 +181,7 @@ EVENT: onewire¦scanned¦A¦0¦0¦1
 END: onewire¦scanned¦A¦0¦0¦1
 10.000010EF0000
 bus.0
+uncached
 settings
 system
 statistics

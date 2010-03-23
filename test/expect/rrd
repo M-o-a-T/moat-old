@@ -2,8 +2,6 @@ EVENT: startup
 NEW: <ConditionalWorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
-EVENT: startup
-END: startup
 1 Yes
 1 Yes
 t tt ttt :: /tmp/rrdtest.rrd test
@@ -11,19 +9,20 @@ t tt ttt :: /tmp/rrdtest.rrd test
 name: t¦tt¦ttt
 file: /tmp/rrdtest.rrd
 dataset: test
-min: 0.0
+last_ds: U
 max: 20.0
-unknown_sec: 0
+min: 0.0
 minimal_heartbeat: 60
-value: ?
-ds_name: test
 type: GAUGE
-last_ds: UNKN
+unknown_sec: 0
+value: ?
 .
 EVENT: wait¦start¦×××¦_wait¦1
 NEW: <ConditionalWorkSequence:2 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦1
    : └1╴... done.
+EVENT: startup
+END: startup
 EVENT: wait¦start¦×××¦_wait¦1
 END: wait¦start¦×××¦_wait¦1
 EVENT: wait¦done¦×××¦_wait¦1
@@ -59,14 +58,13 @@ END: wait¦done¦×××¦_wait¦3
 name: t¦tt¦ttt
 file: /tmp/rrdtest.rrd
 dataset: test
-min: 0.0
-max: 20.0
-unknown_sec: 0
-minimal_heartbeat: 60
-value: ?
-ds_name: test
-type: GAUGE
 last_ds: 12
+max: 20.0
+min: 0.0
+minimal_heartbeat: 60
+type: GAUGE
+unknown_sec: 0
+value: ?
 .
 EVENT: last¦12
 NEW: <ConditionalWorkSequence:8 (4)>
