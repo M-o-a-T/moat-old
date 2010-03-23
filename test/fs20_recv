@@ -50,6 +50,24 @@ sys.stdout.write("e0103030201040302070F\n") # OK, match with ONE
 sys.stdout.write("+3.9 env OK: temphumid one also\n")
 sys.stdout.write("m31234123f7\n") # OK, match with ONE
 
+sys.stdout.write("+4.0 energy bad_length\n")
+sys.stdout.write("n03095517DE000017DE\n")
+
+sys.stdout.write("+4.1 energy bad_checksum\n")
+sys.stdout.write("n03095517DE000017DE5E\n")
+
+sys.stdout.write("+4.2 energy unknown_type\n")
+sys.stdout.write("n02095517DE000017DE5E\n")
+
+sys.stdout.write("+4.3 energy unknown_type\n")
+sys.stdout.write("n030A5517DE000017DE5C\n")
+
+sys.stdout.write("+4.4 energy first\n")
+sys.stdout.write("n03095517DE000017DE5F\n")
+
+sys.stdout.write("+4.5 energy second\n")
+sys.stdout.write("n03095617DF000017DF5C\n")
+
 sys.stdout.flush()
 time.sleep(0.2)
 sys.stderr.write("9\r")

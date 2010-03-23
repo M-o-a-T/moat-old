@@ -8,16 +8,27 @@ if not exists module onewire: load onewire
 if not exists module on_event: load on_event
 if not exists module fs20switch: load fs20switch
 if not exists module fs20avr: load fs20avr
+if not exists module fs20em: load fs20em
+if not exists module fs20en: load fs20en
 log DEBUG
 
+fs20 em innen arbeit:
+	code thermo_hygro 0
+	scale humidity * 1.4
+	timeslot 2
+
+fs20 en gas:
+	code gas_meter 0
+
 on fs20 avr connect cul *name:
-       send fs20 avr raw X01 :to cul $name
+       #send fs20 avr raw X01 :to cul $name
+       send fs20 avr raw X01 :to cul localhost
 
 on fs20 avr disconnect cul *name:
-       del fs20 avr cul $name
+       del fs20 avr cul localhost
        async:
                wait cul $name :for 30
-               fs20 avr cul $name :remote $name 54084
+               fs20 avr cul $name :remote localhost 54084
 
 fs20 avr cul localhost :remote localhost 54084
 

@@ -43,6 +43,7 @@ if not exists module wait: load wait
 if not exists module fs20tr: load fs20tr
 if not exists module fs20switch: load fs20switch
 if not exists module fs20em: load fs20em
+if not exists module fs20en: load fs20en
 if not exists module on_event: load on_event
 #
 list fs20 code
@@ -57,6 +58,9 @@ list fs20 code
 list fs20 code foo bar
 list fs20 switch
 list fs20 switch baz quux
+
+fs20 en gas:
+	code gas_meter 9
 
 fs20 em inside:
 	code thermo_hygro 1

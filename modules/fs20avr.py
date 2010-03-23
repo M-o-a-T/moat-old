@@ -94,7 +94,10 @@ class AVRcommon(handler):
 		if data[0] in PREFIX:
 			for d in data[1:]:
 				if e:
-					db += chr(eval("0x"+e+d))
+					try:
+						db += chr(eval("0x"+e+d))
+					except SyntaxError:
+						raise SyntaxError("0x"+e+d)
 					e=""
 				else:
 					e=d
