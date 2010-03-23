@@ -107,6 +107,10 @@ NEW: <ConditionalWorkSequence:11 (5)>
    : │  step: list net baz zaz ‹List›
    : │  step: del net baz zaz ‹Del›
    : └2╴... done.
+EVENT: net¦baz¦zaz¦B
+NEW: <ConditionalWorkSequence:12 (4)>
+   : │  EVENT: net¦baz¦zaz¦B
+   : └1╴... done.
 EVENT: net¦connect¦baz¦zaz
 RUN: on net connect baz zaz ‹OnEventHandler›
    : prio: 51
@@ -121,23 +125,25 @@ port: 50345
 connected: Yes
 .
 EVENT: net¦disconnect¦baz¦zaz
-NEW: <ConditionalWorkSequence:12 (5)>
+NEW: <ConditionalWorkSequence:13 (5)>
    : │  EVENT: net¦disconnect¦baz¦zaz
    : ├1╴on net disconnect baz zaz ‹OnEventHandler›
    : │  prio: 51
    : │  step: log TRACE dis baz zaz ‹LogHandler›
    : └2╴... done.
 END: net¦connect¦baz¦zaz
+EVENT: net¦baz¦zaz¦B
+END: net¦baz¦zaz¦B
 EVENT: net¦disconnect¦baz¦zaz
 RUN: on net disconnect baz zaz ‹OnEventHandler›
    : prio: 51
    : step: log TRACE dis baz zaz ‹LogHandler›
- at: <ConditionalWorkSequence:12 (5)> (step 1)
+ at: <ConditionalWorkSequence:13 (5)> (step 1)
  ev: EVENT: net¦disconnect¦baz¦zaz
 0 dis baz zaz
 END: net¦disconnect¦baz¦zaz
 EVENT: wait¦done¦1.2¦AFTER
-NEW: <ConditionalWorkSequence:13 (4)>
+NEW: <ConditionalWorkSequence:14 (4)>
    : │  EVENT: wait¦done¦1.2¦AFTER
    : └1╴... done.
 EVENT: wait¦done¦1.2¦AFTER
@@ -145,7 +151,7 @@ END: wait¦done¦1.2¦AFTER
 0 ending
 .
 EVENT: shutdown
-NEW: <ConditionalWorkSequence:14 (6)>
+NEW: <ConditionalWorkSequence:15 (6)>
    : │  EVENT: shutdown
    : └1╴... done.
 EVENT: shutdown
