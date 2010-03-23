@@ -300,6 +300,8 @@ send net text… :to ‹name…›
 		if name is None:
 			name = Name(event[0])
 			event = event[1:]
+		else:
+			name = Name(name.apply(ctx))
 
 		val = u" ".join(unicode(s) for s in event)
 		d = self.storage[name].write(val)
@@ -316,8 +318,7 @@ to ‹name…›
 """
 
 	def run(self,ctx,**k):
-		event = self.params(ctx)
-		self.parent.dest = Name(event)
+		self.parent.dest = self.par(ctx)
 NetSend.register_statement(NetTo)
 
 

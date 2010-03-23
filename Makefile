@@ -42,9 +42,11 @@ ow: FIX
 	sh test/interactive/onewire.sh
 f fs20: FIX
 	python test/interactive/main.py test/interactive/fs20
+fd fs20debug: FIX
+	pdb test/interactive/main.py test/interactive/fs20
 i interactive: FIX
 	python test/interactive/main.py
-d debug: FIX
+id interactivedebug d debug: FIX
 	pdb test/interactive/main.py
 r run: FIX
 	python scripts/daemon.py -t DEBUG examples/smurf.he

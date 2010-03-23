@@ -21,14 +21,14 @@ fs20 en gas:
 	code gas_meter 0
 
 on fs20 avr connect cul *name:
-       #send fs20 avr raw X01 :to cul $name
-       send fs20 avr raw X01 :to cul localhost
+	async:
+		send fs20 avr raw X01 :to cul $name
 
 on fs20 avr disconnect cul *name:
-       del fs20 avr cul localhost
-       async:
-               wait cul $name :for 30
-               fs20 avr cul $name :remote localhost 54084
+	async:
+		del fs20 avr cul $name
+		wait cul $name :for 30
+		fs20 avr cul $name :remote $name 54084
 
 fs20 avr cul localhost :remote localhost 54084
 

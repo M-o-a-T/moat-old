@@ -314,8 +314,7 @@ class AVRclient_factory(NetClientFactory):
 
 class AVRconnect(NetConnect):
 	cmd = None
-	host = None
-	port = None
+	hostinfo = None
 	baud = None
 
 	name = ("fs20","avr")
@@ -336,7 +335,7 @@ fs20 avr NAME :remote host port
 		if name in AVRs:
 			raise RuntimeError(u"‹%s› is already defined" % (name,))
 		
-		n = (self.cmd is not None) + (self.host is not None) + (self.baud is not None)
+		n = (self.cmd is not None) + (self.hostinfo is not None) + (self.baud is not None)
 		if n == 0:
 			raise SyntaxError(u"You need to specify either a serial port, a TCP port, or a command line.")
 		if n > 1:
@@ -344,11 +343,18 @@ fs20 avr NAME :remote host port
 
 
 		if self.cmd:
-			AVRcmd(name=name, cmd=self.cmd, ctx=ctx)
+			AVRcmd(name=name, cmd=Name(self.cmd.apply(ctx)), ctx=ctx)
 
-		elif self.host:
-			f = AVRclient_factory(host=self.host, port=self.port, name=name)
-			f.connector = reactor.connectTCP(self.host, self.port, f)
+		elif self.hostinfo:
+			event = self.hostinfo.apply(ctx)
+			host = event[0]
+			if len(event) > 1:
+				port = int(event[1])
+			else:
+				port = 54083
+			
+			f = AVRclient_factory(host=host, port=port, name=name)
+			f.connector = reactor.connectTCP(host, port, f)
 
 		else:
 			AVRhost(name=name, port=self.port, baud=self.baud, ctx=ctx)
@@ -363,10 +369,10 @@ cmd ‹words…›
 """
 
 	def run(self,ctx,**k):
-		event = self.params(ctx)
+		event = self.par(ctx)
 		if not len(event):
 			raise syntaxerror(u"Usage: cmd ‹whatever…›")
-		self.parent.cmd = Name(event)
+		self.parent.cmd = event
 AVRconnect.register_statement(AVRcmd)
 
 
@@ -400,14 +406,13 @@ remote ‹host› ‹port›?
     The port defaults to 54083.
 """
 	def run(self,ctx,**k):
-		event = self.params(ctx)
+		import sys
+		print >>sys.stderr,"I",self
+		event = self.par(ctx)
+		print >>sys.stderr,"E",event
 		if not len(event) or len(event) > 2:
-			raise syntaxerror(u"Usage: remote ‹host› [‹port›]")
-		self.parent.host = event[0]
-		if len(event) > 1:
-			self.parent.port = int(event[1])
-		else:
-			self.parent.port = 54083
+			raise SyntaxError(u"Usage: remote ‹host› [‹port›]")
+		self.parent.hostinfo = event
 AVRconnect.register_statement(AVRremote)
 
 

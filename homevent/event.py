@@ -121,7 +121,7 @@ class Event(object):
 	def __iter__(self):
 		return self.names.__iter__()
 
-	def clone(self, ctx=None, drop=0):
+	def apply(self, ctx=None, drop=0):
 		"""\
 			Copy an event, applying substitutions.
 			This code dies with an AttributeError if there are no
@@ -145,6 +145,19 @@ class Event(object):
 				n = r
 			w.append(n)
 		return self.__class__(ctx, *w)
+
+	def dup(self, ctx=None, drop=0):
+		"""\
+			Copy an event, NOT applying substitutions.
+			"""
+		w = []
+
+		if ctx is None:
+			ctx = self.ctx
+		else:
+			ctx = ctx(ctx=self.ctx)
+
+		return self.__class__(ctx, *self.names[drop:])
 
 #Monkey-patch t.p.f.Failure to answer to our report() call
 

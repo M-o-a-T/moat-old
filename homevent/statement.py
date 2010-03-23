@@ -101,7 +101,14 @@ class Statement(object):
 			Internal method: Return the argument list, as modified by
 			the context.
 			"""
-		return self.args.clone(ctx,drop=len(self.name))
+		return self.args.apply(ctx,drop=len(self.name))
+
+	def par(self,ctx):
+		"""\
+			Internal method: Return the argument lis, but don't apply
+			the context yet.
+			"""
+		return self.args.dup(ctx,drop=len(self.name))
 
 	def run(self,ctx,**k):
 		raise NotImplementedError("You need to override '%s.run' (called with %s)" % (self.__class__.__name__,repr(event)))
