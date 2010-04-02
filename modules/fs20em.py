@@ -137,8 +137,8 @@ class EM(Collected,Timeslotted):
 			yield ("last",humandelta(now()-self.last))
 		if self.last_data:
 			for k,v in self.last_data.iteritems(): yield ("last_"+k,v)
-		for k,v in self.faktor: yield ("faktor_"+k,v)
-		for k,v in self.offset: yield ("offset_"+k,v)
+		for k,v in self.faktor.iteritems(): yield ("faktor_"+k,v)
+		for k,v in self.offset.iteritems(): yield ("offset_"+k,v)
 		if self.slot:
 			for k,v in self.slot.list(): yield ("slot_"+k,v)
 	
