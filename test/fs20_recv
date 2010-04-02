@@ -68,6 +68,9 @@ sys.stdout.write("n03095517DE000017DE5F\n")
 sys.stdout.write("+4.5 energy second\n")
 sys.stdout.write("n03095617DF000017DF5C\n")
 
+sys.stdout.write("+4.6 energy third\n")
+sys.stdout.write("n03095617DF000017DF5C\n")
+
 sys.stdout.flush()
 time.sleep(0.2)
 sys.stderr.write("9\r")

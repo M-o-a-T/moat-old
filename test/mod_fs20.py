@@ -61,6 +61,7 @@ list fs20 switch baz quux
 
 fs20 en gas:
 	code gas_meter 9
+	delta
 
 fs20 em inside:
 	code thermo_hygro 1

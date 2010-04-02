@@ -76,12 +76,13 @@ encodes = {}
 
 class en(Collected,Timeslotted):
 	storage = ens.storage
-	def __init__(self,name,group,code,ctx, faktor={}, slot=None):
+	def __init__(self,name,group,code,ctx, faktor={}, slot=None, delta=None):
 		self.ctx = ctx
 		self.group = group
 		self.code = code
 		self.faktor = faktor
 		self.last = None # timestamp
+		self.delta = delta
 		self.last_data = None # data values
 		try: g = encodes[group]
 		except KeyError: encodes[group] = g = {}
@@ -109,7 +110,14 @@ class en(Collected,Timeslotted):
 		for m,n in data.iteritems():
 			try: n = n * self.faktor[m]
 			except KeyError: pass
-			simple_event(ctx, "fs20","en", m,n, *self.name)
+			else: data[m] = n
+			if self.delta is not None:
+				if self.last_data:
+					val = n-self.last_data[m]
+					if val >= 0 or self.delta == 0:
+						simple_event(ctx, "fs20","en", m,val, *self.name)
+			else:
+				simple_event(ctx, "fs20","en", m,n, *self.name)
 		self.last = now()
 		self.last_data = data
 
@@ -252,6 +260,7 @@ Known types:
 	group = None
 	code = None
 	slot = None
+	delta = None
 	def __init__(self,*a,**k):
 		self.faktor={}
 		super(FS20en,self).__init__(*a,**k)
@@ -263,7 +272,29 @@ Known types:
 			raise SyntaxError(u"‹fs20 en› needs a name")
 		if self.code is None:
 			raise SyntaxError(u"‹fs20 en› needs a 'code' sub-statement")
-		en(Name(event), self.group,self.code,ctx, self.faktor, self.slot)
+		en(Name(event), self.group,self.code,ctx, self.faktor, self.slot, self.delta)
+
+class FS20enDelta(Statement):
+        name = ("delta",)
+        doc = "report difference"
+        long_doc=u"""\
+delta
+        Report the difference between the old and new values.
+delta up
+        Same, but assume that the value only increases.
+        Used for counters.
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		lo = hi = None
+		if len(event) == 0:
+			self.parent.delta = 0
+		elif len(event) == 1 and event[1] == "up":
+			self.parent.delta = 1
+		else:
+			raise SyntaxError(u'Usage: delta')
+FS20en.register_statement(FS20enDelta)
+
 
 class FS20enScale(Statement):
 	name = ("scale",)
