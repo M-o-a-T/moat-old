@@ -55,7 +55,7 @@ PREFIX_ENERGY = 'n'
 # 8+9     value
 
 def en_proc_gas(ctx, data):
-	cnt = data[0]*256+data[1]
+	cnt = data[0]+256*data[1]
 	return {"counter":cnt}
 en_proc_gas.en_name = "gas_meter"
 en_proc_gas.interval = 0
