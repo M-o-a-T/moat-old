@@ -112,7 +112,7 @@ class ReconnectingClientFactory(protocol.ClientFactory):
 			self.delay = random.normalvariate(self.delay,
 												self.delay * self.jitter)
 
-		log(DEBUG,"%s will retry in %d seconds" % (connector, self.delay,))
+		log(DEBUG,u"%s:%s will retry in %d seconds" % (self.__class__.__name__, self.name if hasattr(self,"name") else connector, self.delay,))
 
 		def reconnector():
 			log(DEBUG,"%s retrying now" % (connector,))
