@@ -324,26 +324,26 @@ NEW: <ConditionalWorkSequence:37 (4)>
 EVENT: fs20¦unknown¦en¦2¦295517de0017de
 END: fs20¦unknown¦en¦2¦295517de0017de
 1 fs20 n030A5517DE000017DE5C
-EVENT: fs20¦unknown¦en¦unregistered¦gas_meter¦10¦counter¦6110
+EVENT: fs20¦unknown¦en¦unregistered¦gas_meter¦10¦counter¦56855
 NEW: <ConditionalWorkSequence:38 (4)>
-   : │  EVENT: fs20¦unknown¦en¦unregistered¦gas_meter¦10¦counter¦6110
+   : │  EVENT: fs20¦unknown¦en¦unregistered¦gas_meter¦10¦counter¦56855
    : └1╴... done.
 1 fs20 +4.4 energy first
 1 fs20 Wait until 4.4  -- now: 4.3 :: energy first
-EVENT: fs20¦unknown¦en¦unregistered¦gas_meter¦10¦counter¦6110
-END: fs20¦unknown¦en¦unregistered¦gas_meter¦10¦counter¦6110
+EVENT: fs20¦unknown¦en¦unregistered¦gas_meter¦10¦counter¦56855
+END: fs20¦unknown¦en¦unregistered¦gas_meter¦10¦counter¦56855
 1 fs20 n03095517DE000017DE5F
 1 fs20 +4.5 energy second
 1 fs20 Wait until 4.5  -- now: 4.4 :: energy second
 1 fs20 n03095617DF000017DF5C
-EVENT: fs20¦en¦counter¦1¦gas
+EVENT: fs20¦en¦counter¦256¦gas
 NEW: <ConditionalWorkSequence:39 (4)>
-   : │  EVENT: fs20¦en¦counter¦1¦gas
+   : │  EVENT: fs20¦en¦counter¦256¦gas
    : └1╴... done.
 1 fs20 +4.6 energy third
 1 fs20 Wait until 4.6  -- now: 4.5 :: energy third
-EVENT: fs20¦en¦counter¦1¦gas
-END: fs20¦en¦counter¦1¦gas
+EVENT: fs20¦en¦counter¦256¦gas
+END: fs20¦en¦counter¦256¦gas
 1 fs20 n03095617DF000017DF5C
 EVENT: fs20¦en¦counter¦0¦gas
 NEW: <ConditionalWorkSequence:40 (4)>
