@@ -68,7 +68,7 @@ log
 		event = self.params(ctx)
 		try:
 			out = self.ctx.out
-		except KeyError:
+		except AttributeError:
 			out = sys.stderr
 		if not len(event):
 			for s,v in LogNames.iteritems():
