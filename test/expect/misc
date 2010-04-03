@@ -1,124 +1,103 @@
-EVENT: startup
 NEW: <ConditionalWorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
-EVENT: foo1
 NEW: <ConditionalWorkSequence:2 (4)>
-   : │  EVENT: foo1
+   : │  IEVENT: foo1
    : └1╴... done.
-EVENT: bar1
 NEW: <ConditionalWorkSequence:3 (4)>
-   : │  EVENT: bar1
+   : │  IEVENT: bar1
    : └1╴... done.
-EVENT: wait¦start¦×××¦_wait¦1
 NEW: <ConditionalWorkSequence:4 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦1
    : └1╴... done.
 EVENT: startup
 END: startup
-EVENT: foo1
+IEVENT: foo1
 END: foo1
-EVENT: bar1
+IEVENT: bar1
 END: bar1
 EVENT: wait¦start¦×××¦_wait¦1
 END: wait¦start¦×××¦_wait¦1
-EVENT: wait¦done¦×××¦_wait¦1
 NEW: <ConditionalWorkSequence:5 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦1
    : └1╴... done.
 EVENT: wait¦done¦×××¦_wait¦1
 END: wait¦done¦×××¦_wait¦1
-EVENT: foo2
 NEW: <ConditionalWorkSequence:6 (4)>
-   : │  EVENT: foo2
+   : │  IEVENT: foo2
    : └1╴... done.
-EVENT: foo2
+IEVENT: foo2
 END: foo2
-EVENT: bar2
 NEW: <ConditionalWorkSequence:7 (4)>
-   : │  EVENT: bar2
+   : │  IEVENT: bar2
    : └1╴... done.
-EVENT: bar2
+IEVENT: bar2
 END: bar2
-EVENT: wait¦start¦×××¦_wait¦2
 NEW: <ConditionalWorkSequence:8 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦2
    : └1╴... done.
 EVENT: wait¦start¦×××¦_wait¦2
 END: wait¦start¦×××¦_wait¦2
-EVENT: wait¦done¦×××¦_wait¦2
 NEW: <ConditionalWorkSequence:9 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦2
    : └1╴... done.
 EVENT: wait¦done¦×××¦_wait¦2
 END: wait¦done¦×××¦_wait¦2
-EVENT: foo3
 NEW: <ConditionalWorkSequence:10 (4)>
-   : │  EVENT: foo3
+   : │  IEVENT: foo3
    : └1╴... done.
-EVENT: bar3
 NEW: <ConditionalWorkSequence:11 (4)>
-   : │  EVENT: bar3
+   : │  IEVENT: bar3
    : └1╴... done.
-EVENT: wait¦start¦×××¦_wait¦3
 NEW: <ConditionalWorkSequence:12 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦3
    : └1╴... done.
-EVENT: foo3
+IEVENT: foo3
 END: foo3
-EVENT: bar3
+IEVENT: bar3
 END: bar3
 EVENT: wait¦start¦×××¦_wait¦3
 END: wait¦start¦×××¦_wait¦3
-EVENT: wait¦done¦×××¦_wait¦3
 NEW: <ConditionalWorkSequence:13 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦3
    : └1╴... done.
 EVENT: wait¦done¦×××¦_wait¦3
 END: wait¦done¦×××¦_wait¦3
-EVENT: foo4
 NEW: <ConditionalWorkSequence:14 (4)>
-   : │  EVENT: foo4
+   : │  IEVENT: foo4
    : └1╴... done.
-EVENT: foo4
+IEVENT: foo4
 END: foo4
-EVENT: bar4
 NEW: <ConditionalWorkSequence:15 (4)>
-   : │  EVENT: bar4
+   : │  IEVENT: bar4
    : └1╴... done.
-EVENT: bar4
+IEVENT: bar4
 END: bar4
-EVENT: wait¦start¦×××¦_wait¦4
 NEW: <ConditionalWorkSequence:16 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦4
    : └1╴... done.
 EVENT: wait¦start¦×××¦_wait¦4
 END: wait¦start¦×××¦_wait¦4
-EVENT: foo5
 NEW: <ConditionalWorkSequence:17 (4)>
-   : │  EVENT: foo5
+   : │  IEVENT: foo5
    : └1╴... done.
-EVENT: foo5
+IEVENT: foo5
 END: foo5
-EVENT: wait¦done¦×××¦_wait¦4
 NEW: <ConditionalWorkSequence:18 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦4
    : └1╴... done.
 EVENT: wait¦done¦×××¦_wait¦4
 END: wait¦done¦×××¦_wait¦4
-EVENT: bar5
 NEW: <ConditionalWorkSequence:19 (4)>
-   : │  EVENT: bar5
+   : │  IEVENT: bar5
    : └1╴... done.
-EVENT: wait¦start¦×××¦_wait¦5
 NEW: <ConditionalWorkSequence:20 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦5
    : └1╴... done.
-EVENT: bar5
+IEVENT: bar5
 END: bar5
 EVENT: wait¦start¦×××¦_wait¦5
 END: wait¦start¦×××¦_wait¦5
-EVENT: wait¦done¦×××¦_wait¦5
 NEW: <ConditionalWorkSequence:21 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦5
    : └1╴... done.

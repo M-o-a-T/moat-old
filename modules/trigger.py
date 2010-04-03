@@ -25,7 +25,7 @@ trigger FOO...
 
 from homevent.statement import Statement, AttributedStatement, main_words
 from homevent.event import Event
-from homevent.run import process_event, simple_event
+from homevent.run import process_event, run_event
 from homevent import logging
 
 
@@ -41,15 +41,15 @@ trigger FOO...
 	loglevel = None
 
 	def run(self,ctx,**k):
+		if self.loglevel is not None:
+			ctx = ctx(loglevel=self.loglevel)
 		event = self.params(ctx)
 		if not event:
 			raise SyntaxError("Events need at least one parameter")
-		if self.loglevel is not None:
-			ctx = ctx(loglevel=self.loglevel)
-		return self.run2(ctx,event)
+		return self.run2(event)
 
-	def run2(self,ctx,event):
-		simple_event(ctx,*event)
+	def run2(self,event):
+		run_event(event)
 
 class SyncTriggerHandler(TriggerHandler):
 	name=("sync","trigger")
@@ -59,8 +59,8 @@ sync trigger FOO...
 	- creates a FOO... event and wait until it is processed. Errors
 	  handling the event are propagated to the caller.
 """
-	def run2(self,ctx,event):
-		return process_event(Event(ctx,*event))
+	def run2(self,event):
+		return process_event(event)
 
 class TriggerLog(Statement):
 	name = ("log",)

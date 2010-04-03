@@ -1,4 +1,3 @@
-EVENT: startup
 NEW: <ConditionalWorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
@@ -10,7 +9,6 @@ NEW: <ConditionalWorkSequence:1 (4)>
 1 Yes
 EVENT: startup
 END: startup
-EVENT: shutdown
 NEW: <ConditionalWorkSequence:2 (5)>
    : │  EVENT: shutdown
    : └1╴... done.

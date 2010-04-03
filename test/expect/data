@@ -1,4 +1,3 @@
-EVENT: startup
 NEW: <ConditionalWorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
@@ -29,7 +28,6 @@ worker
 .
 0 Create OnEvtHandler: foo
 0 NewHandler 1
-EVENT: wait¦start¦×××¦_wait¦2
 NEW: <ConditionalWorkSequence:2 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦2
    : └1╴... done.
@@ -37,32 +35,28 @@ EVENT: startup
 END: startup
 EVENT: wait¦start¦×××¦_wait¦2
 END: wait¦start¦×××¦_wait¦2
-EVENT: wait¦done¦×××¦_wait¦2
 NEW: <ConditionalWorkSequence:3 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦2
    : └1╴... done.
 EVENT: wait¦done¦×××¦_wait¦2
 END: wait¦done¦×××¦_wait¦2
-EVENT: foo
 NEW: <ConditionalWorkSequence:4 (5)>
-   : │  EVENT: foo
+   : │  IEVENT: foo
    : ├1╴on foo ‹OnEventHandler›
    : │  prio: 51
    : │  step: block ‹Block›
    : │      : step: wait foo waiter ‹WaitHandler›
    : └2╴... done.
-EVENT: wait¦start¦×××¦_wait¦3
 NEW: <ConditionalWorkSequence:5 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦3
    : └1╴... done.
-EVENT: foo
+IEVENT: foo
 RUN: on foo ‹OnEventHandler›
    : prio: 51
    : step: block ‹Block›
    :     : step: wait foo waiter ‹WaitHandler›
  at: <ConditionalWorkSequence:4 (5)> (step 1)
- ev: EVENT: foo
-EVENT: wait¦start¦×××¦foo¦waiter
+ ev: IEVENT: foo
 NEW: <ConditionalWorkSequence:6 (4)>
    : │  EVENT: wait¦start¦×××¦foo¦waiter
    : └1╴... done.
@@ -70,7 +64,6 @@ EVENT: wait¦start¦×××¦_wait¦3
 END: wait¦start¦×××¦_wait¦3
 EVENT: wait¦start¦×××¦foo¦waiter
 END: wait¦start¦×××¦foo¦waiter
-EVENT: wait¦done¦×××¦_wait¦3
 NEW: <ConditionalWorkSequence:7 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦3
    : └1╴... done.
@@ -81,27 +74,24 @@ END: wait¦done¦×××¦_wait¦3
 id: 4
 event: foo
 report: <ConditionalWorkSequence:4 (5)>
-report: │  EVENT: foo
+report: │  IEVENT: foo
 report: ╞1╕on foo ‹OnEventHandler›
 report: │ │prio: 51
 report: │ │step: block ‹Block›
 report: │ ╵    : step: wait foo waiter ‹WaitHandler›
 report: └2╴... done.
 .
-EVENT: wait¦start¦×××¦_wait¦4
 NEW: <ConditionalWorkSequence:8 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦4
    : └1╴... done.
 EVENT: wait¦start¦×××¦_wait¦4
 END: wait¦start¦×××¦_wait¦4
-EVENT: wait¦done¦×××¦foo¦waiter
 NEW: <ConditionalWorkSequence:9 (4)>
    : │  EVENT: wait¦done¦×××¦foo¦waiter
    : └1╴... done.
 EVENT: wait¦done¦×××¦foo¦waiter
 END: wait¦done¦×××¦foo¦waiter
 END: foo
-EVENT: wait¦done¦×××¦_wait¦4
 NEW: <ConditionalWorkSequence:10 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦4
    : └1╴... done.

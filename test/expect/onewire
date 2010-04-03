@@ -1,8 +1,6 @@
-EVENT: startup
 NEW: <ConditionalWorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
-EVENT: module¦load¦bool
 NEW: <ConditionalWorkSequence:2 (4)>
    : │  EVENT: module¦load¦bool
    : └1╴... done.
@@ -10,37 +8,31 @@ EVENT: startup
 END: startup
 EVENT: module¦load¦bool
 END: module¦load¦bool
-EVENT: module¦load¦logging
 NEW: <ConditionalWorkSequence:3 (4)>
    : │  EVENT: module¦load¦logging
    : └1╴... done.
 EVENT: module¦load¦logging
 END: module¦load¦logging
-EVENT: module¦load¦trigger
 NEW: <ConditionalWorkSequence:4 (4)>
    : │  EVENT: module¦load¦trigger
    : └1╴... done.
 EVENT: module¦load¦trigger
 END: module¦load¦trigger
-EVENT: module¦load¦wait
 NEW: <ConditionalWorkSequence:5 (4)>
    : │  EVENT: module¦load¦wait
    : └1╴... done.
 EVENT: module¦load¦wait
 END: module¦load¦wait
-EVENT: module¦load¦onewire
 NEW: <ConditionalWorkSequence:6 (4)>
    : │  EVENT: module¦load¦onewire
    : └1╴... done.
 EVENT: module¦load¦onewire
 END: module¦load¦onewire
-EVENT: module¦load¦on_event
 NEW: <ConditionalWorkSequence:7 (4)>
    : │  EVENT: module¦load¦on_event
    : └1╴... done.
 EVENT: module¦load¦on_event
 END: module¦load¦on_event
-EVENT: module¦load¦errors
 NEW: <ConditionalWorkSequence:8 (4)>
    : │  EVENT: module¦load¦errors
    : └1╴... done.
@@ -48,12 +40,10 @@ EVENT: module¦load¦errors
 END: module¦load¦errors
 0 Create OnEvtHandler: onewire¦scanned¦A¦*¦*¦*
 0 NewHandler 1
-EVENT: onewire¦scanning¦A
 NEW: <ConditionalWorkSequence:9 (4)>
    : │  EVENT: onewire¦scanning¦A
    : └1╴... done.
 0 New OWFS bus A <homevent.onewire.OWFSfactory obj>
-EVENT: wait¦start¦10.0¦yawn
 NEW: <ConditionalWorkSequence:10 (4)>
    : │  EVENT: wait¦start¦10.0¦yawn
    : └1╴... done.
@@ -62,7 +52,6 @@ END: onewire¦scanning¦A
 0 OWFS start bus update
 EVENT: wait¦start¦10.0¦yawn
 END: wait¦start¦10.0¦yawn
-EVENT: onewire¦connect¦A
 NEW: <ConditionalWorkSequence:11 (4)>
    : │  EVENT: onewire¦connect¦A
    : └1╴... done.
@@ -78,19 +67,16 @@ END: onewire¦connect¦A
 1 got unrecognized OWFS name interface
 1 got unrecognized OWFS name simultaneous
 1 got unrecognized OWFS name alarm
-EVENT: onewire¦new¦DS18S20¦000010EF0000
 NEW: <ConditionalWorkSequence:12 (4)>
    : │  EVENT: onewire¦new¦DS18S20¦000010EF0000
    : └1╴... done.
 EVENT: onewire¦new¦DS18S20¦000010EF0000
 END: onewire¦new¦DS18S20¦000010EF0000
-EVENT: onewire¦up¦DS18S20¦000010EF0000
 NEW: <ConditionalWorkSequence:13 (4)>
    : │  EVENT: onewire¦up¦DS18S20¦000010EF0000
    : └1╴... done.
 EVENT: onewire¦up¦DS18S20¦000010EF0000
 END: onewire¦up¦DS18S20¦000010EF0000
-EVENT: onewire¦scanned¦A¦0¦1¦1
 NEW: <ConditionalWorkSequence:14 (5)>
    : │  EVENT: onewire¦scanned¦A¦0¦1¦1
    : ├1╴on onewire scanned A * * * ‹OnEventHandler›
@@ -111,15 +97,13 @@ RUN: on onewire scanned A * * * ‹OnEventHandler›
    : step: del wait yawn ‹Del›
  at: <ConditionalWorkSequence:14 (5)> (step 1)
  ev: EVENT: onewire¦scanned¦A¦0¦1¦1
-EVENT: thermo¦1.6
 NEW: <ConditionalWorkSequence:15 (4)>
-   : │  EVENT: thermo¦1.6
+   : │  IEVENT: thermo¦1.6
    : └1╴... done.
-EVENT: wait¦cancel¦10.0¦yawn
 NEW: <ConditionalWorkSequence:16 (4)>
    : │  EVENT: wait¦cancel¦10.0¦yawn
    : └1╴... done.
-EVENT: thermo¦1.6
+IEVENT: thermo¦1.6
 END: thermo¦1.6
 EVENT: wait¦cancel¦10.0¦yawn
 END: wait¦cancel¦10.0¦yawn
@@ -156,7 +140,6 @@ type
 .
 0 yes
 0 DirStop
-EVENT: onewire¦scanning¦A
 NEW: <ConditionalWorkSequence:17 (4)>
    : │  EVENT: onewire¦scanning¦A
    : └1╴... done.
@@ -173,7 +156,6 @@ END: onewire¦scanning¦A
 1 got unrecognized OWFS name interface
 1 got unrecognized OWFS name simultaneous
 1 got unrecognized OWFS name alarm
-EVENT: onewire¦scanned¦A¦0¦0¦1
 NEW: <ConditionalWorkSequence:18 (4)>
    : │  EVENT: onewire¦scanned¦A¦0¦0¦1
    : └1╴... done.
@@ -190,19 +172,16 @@ simultaneous
 alarm
 .
 0 Drop OWFS bus A
-EVENT: wait¦start¦1.0¦END
 NEW: <ConditionalWorkSequence:19 (4)>
    : │  EVENT: wait¦start¦1.0¦END
    : └1╴... done.
 EVENT: wait¦start¦1.0¦END
 END: wait¦start¦1.0¦END
-EVENT: wait¦done¦1.0¦END
 NEW: <ConditionalWorkSequence:20 (4)>
    : │  EVENT: wait¦done¦1.0¦END
    : └1╴... done.
 EVENT: wait¦done¦1.0¦END
 END: wait¦done¦1.0¦END
-EVENT: shutdown
 NEW: <ConditionalWorkSequence:21 (7)>
    : │  EVENT: shutdown
    : └1╴... done.

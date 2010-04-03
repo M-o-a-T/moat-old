@@ -1,4 +1,3 @@
-EVENT: startup
 NEW: <ConditionalWorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
@@ -50,7 +49,6 @@ END: RaisedError
 0 Triggered:
 0 RaisedError: Foo Bar
 1 Yes P Foo Bar
-EVENT: shutdown
 NEW: <ConditionalWorkSequence:4 (5)>
    : │  EVENT: shutdown
    : └1╴... done.

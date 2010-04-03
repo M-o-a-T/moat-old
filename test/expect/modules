@@ -1,9 +1,7 @@
-EVENT: startup
 NEW: <ConditionalWorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
 1 Loading!
-EVENT: module¦load¦example
 NEW: <ConditionalWorkSequence:2 (4)>
    : │  EVENT: module¦load¦example
    : └1╴... done.
@@ -11,14 +9,12 @@ EVENT: startup
 END: startup
 EVENT: module¦load¦example
 END: module¦load¦example
-EVENT: module¦unload¦example
 NEW: <ConditionalWorkSequence:3 (4)>
    : │  EVENT: module¦unload¦example
    : └1╴... done.
 EVENT: module¦unload¦example
 END: module¦unload¦example
 1 Unloading!
-EVENT: shutdown
 NEW: <ConditionalWorkSequence:4 (5)>
    : │  EVENT: shutdown
    : └1╴... done.

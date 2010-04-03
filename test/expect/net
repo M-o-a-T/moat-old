@@ -1,8 +1,6 @@
-EVENT: startup
 NEW: <ConditionalWorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
-EVENT: wait¦start¦0.2¦BAD
 NEW: <ConditionalWorkSequence:2 (4)>
    : │  EVENT: wait¦start¦0.2¦BAD
    : └1╴... done.
@@ -11,13 +9,11 @@ END: startup
 EVENT: wait¦start¦0.2¦BAD
 END: wait¦start¦0.2¦BAD
 3 
-EVENT: net¦error¦foop
 NEW: <ConditionalWorkSequence:3 (4)>
    : │  EVENT: net¦error¦foop
    : └1╴... done.
 EVENT: net¦error¦foop
 END: net¦error¦foop
-EVENT: wait¦done¦0.2¦BAD
 NEW: <ConditionalWorkSequence:4 (4)>
    : │  EVENT: wait¦done¦0.2¦BAD
    : └1╴... done.
@@ -31,25 +27,21 @@ END: wait¦done¦0.2¦BAD
 0 NewHandler 3
 0 Create OnEvtHandler: net¦disconnect¦baz¦zaz
 0 NewHandler 4
-EVENT: wait¦start¦0.4¦BEFORE
 NEW: <ConditionalWorkSequence:5 (4)>
    : │  EVENT: wait¦start¦0.4¦BEFORE
    : └1╴... done.
 EVENT: wait¦start¦0.4¦BEFORE
 END: wait¦start¦0.4¦BEFORE
-EVENT: wait¦done¦0.4¦BEFORE
 NEW: <ConditionalWorkSequence:6 (4)>
    : │  EVENT: wait¦done¦0.4¦BEFORE
    : └1╴... done.
 EVENT: wait¦done¦0.4¦BEFORE
 END: wait¦done¦0.4¦BEFORE
-EVENT: wait¦start¦1.2¦AFTER
 NEW: <ConditionalWorkSequence:7 (4)>
    : │  EVENT: wait¦start¦1.2¦AFTER
    : └1╴... done.
 EVENT: wait¦start¦1.2¦AFTER
 END: wait¦start¦1.2¦AFTER
-EVENT: net¦connect¦foo
 NEW: <ConditionalWorkSequence:8 (5)>
    : │  EVENT: net¦connect¦foo
    : ├1╴on net connect foo ‹OnEventHandler›
@@ -59,7 +51,6 @@ NEW: <ConditionalWorkSequence:8 (5)>
    : │  step: list net foo ‹List›
    : │  step: del net foo ‹Del›
    : └2╴... done.
-EVENT: net¦foo¦A
 NEW: <ConditionalWorkSequence:9 (4)>
    : │  EVENT: net¦foo¦A
    : └1╴... done.
@@ -80,7 +71,6 @@ host: localhost
 port: 50333
 connected: Yes
 .
-EVENT: net¦disconnect¦foo
 NEW: <ConditionalWorkSequence:10 (5)>
    : │  EVENT: net¦disconnect¦foo
    : ├1╴on net disconnect foo ‹OnEventHandler›
@@ -98,7 +88,6 @@ RUN: on net disconnect foo ‹OnEventHandler›
  ev: EVENT: net¦disconnect¦foo
 0 dis foo
 END: net¦disconnect¦foo
-EVENT: net¦connect¦baz¦zaz
 NEW: <ConditionalWorkSequence:11 (5)>
    : │  EVENT: net¦connect¦baz¦zaz
    : ├1╴on net connect baz zaz ‹OnEventHandler›
@@ -107,7 +96,6 @@ NEW: <ConditionalWorkSequence:11 (5)>
    : │  step: list net baz zaz ‹List›
    : │  step: del net baz zaz ‹Del›
    : └2╴... done.
-EVENT: net¦baz¦zaz¦B
 NEW: <ConditionalWorkSequence:12 (4)>
    : │  EVENT: net¦baz¦zaz¦B
    : └1╴... done.
@@ -124,7 +112,6 @@ host: localhost
 port: 50345
 connected: Yes
 .
-EVENT: net¦disconnect¦baz¦zaz
 NEW: <ConditionalWorkSequence:13 (5)>
    : │  EVENT: net¦disconnect¦baz¦zaz
    : ├1╴on net disconnect baz zaz ‹OnEventHandler›
@@ -142,7 +129,6 @@ RUN: on net disconnect baz zaz ‹OnEventHandler›
  ev: EVENT: net¦disconnect¦baz¦zaz
 0 dis baz zaz
 END: net¦disconnect¦baz¦zaz
-EVENT: wait¦done¦1.2¦AFTER
 NEW: <ConditionalWorkSequence:14 (4)>
    : │  EVENT: wait¦done¦1.2¦AFTER
    : └1╴... done.
@@ -150,7 +136,6 @@ EVENT: wait¦done¦1.2¦AFTER
 END: wait¦done¦1.2¦AFTER
 0 ending
 .
-EVENT: shutdown
 NEW: <ConditionalWorkSequence:15 (6)>
    : │  EVENT: shutdown
    : └1╴... done.

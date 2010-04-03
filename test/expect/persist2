@@ -1,4 +1,3 @@
-EVENT: startup
 NEW: <ConditionalWorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
@@ -9,7 +8,6 @@ END: startup
 0 Yes!
 0 Yes!
 0 We still have three
-EVENT: state¦three¦-¦foo¦bar
 NEW: <ConditionalWorkSequence:2 (4)>
    : │  EVENT: state¦three¦-¦foo¦bar
    : └1╴... done.
@@ -17,7 +15,6 @@ EVENT: state¦three¦-¦foo¦bar
 END: state¦three¦-¦foo¦bar
 .
 0 Yes!
-EVENT: shutdown
 NEW: <ConditionalWorkSequence:3 (5)>
    : │  EVENT: shutdown
    : └1╴... done.

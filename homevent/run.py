@@ -130,10 +130,13 @@ def process_failure(e=None):
 	d.addErrback(err2)
 	return d
 	
+def run_event(event):
+	process_event(event).addErrback(process_failure)
+	
 def simple_event(ctx, *args):
-	"""
+	"""\
 		A shortcut for triggering a "simple" background event
 		"""
 	from homevent.event import Event
-	process_event(Event(ctx, *args)).addErrback(process_failure)
+	run_event(Event(ctx, *args))
 

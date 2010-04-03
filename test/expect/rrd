@@ -1,4 +1,3 @@
-EVENT: startup
 NEW: <ConditionalWorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
@@ -17,7 +16,6 @@ type: GAUGE
 unknown_sec: 0
 value: ?
 .
-EVENT: wait¦start¦×××¦_wait¦1
 NEW: <ConditionalWorkSequence:2 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦1
    : └1╴... done.
@@ -25,31 +23,26 @@ EVENT: startup
 END: startup
 EVENT: wait¦start¦×××¦_wait¦1
 END: wait¦start¦×××¦_wait¦1
-EVENT: wait¦done¦×××¦_wait¦1
 NEW: <ConditionalWorkSequence:3 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦1
    : └1╴... done.
 EVENT: wait¦done¦×××¦_wait¦1
 END: wait¦done¦×××¦_wait¦1
-EVENT: wait¦start¦×××¦_wait¦2
 NEW: <ConditionalWorkSequence:4 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦2
    : └1╴... done.
 EVENT: wait¦start¦×××¦_wait¦2
 END: wait¦start¦×××¦_wait¦2
-EVENT: wait¦done¦×××¦_wait¦2
 NEW: <ConditionalWorkSequence:5 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦2
    : └1╴... done.
 EVENT: wait¦done¦×××¦_wait¦2
 END: wait¦done¦×××¦_wait¦2
-EVENT: wait¦start¦×××¦_wait¦3
 NEW: <ConditionalWorkSequence:6 (4)>
    : │  EVENT: wait¦start¦×××¦_wait¦3
    : └1╴... done.
 EVENT: wait¦start¦×××¦_wait¦3
 END: wait¦start¦×××¦_wait¦3
-EVENT: wait¦done¦×××¦_wait¦3
 NEW: <ConditionalWorkSequence:7 (4)>
    : │  EVENT: wait¦done¦×××¦_wait¦3
    : └1╴... done.
@@ -66,8 +59,7 @@ type: GAUGE
 unknown_sec: 0
 value: ?
 .
-EVENT: last¦12
 NEW: <ConditionalWorkSequence:8 (4)>
-   : │  EVENT: last¦12
+   : │  IEVENT: last¦12
    : └1╴... done.
 1 Yes

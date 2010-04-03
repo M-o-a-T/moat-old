@@ -1,4 +1,3 @@
-EVENT: startup
 NEW: <ConditionalWorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
@@ -16,30 +15,24 @@ WARN> This is logged too
 9 = NONE
 .
 3 This is not logged either
-DEBUG> EVENT: Logged
-EVENT: Logged
 TRACE> NEW: <ConditionalWorkSequence:2 (4)>
-TRACE>    : │  EVENT: Logged
+TRACE>    : │  IEVENT: Logged
 TRACE>    : └1╴... done.
 NEW: <ConditionalWorkSequence:2 (4)>
-   : │  EVENT: Logged
+   : │  IEVENT: Logged
    : └1╴... done.
 TRACE> EVENT: startup
 EVENT: startup
 TRACE> END: startup
 END: startup
-TRACE> EVENT: Logged
-EVENT: Logged
+TRACE> IEVENT: Logged
+IEVENT: Logged
 TRACE> END: Logged
 END: Logged
-DEBUG> EVENT: Not¦Logged
-EVENT: Not¦Logged
-TRACE> EVENT: Not¦Logged
-EVENT: Not¦Logged
+TRACE> IEVENT: Not¦Logged
+IEVENT: Not¦Logged
 TRACE> END: Not¦Logged
 END: Not¦Logged
-DEBUG> EVENT: shutdown
-EVENT: shutdown
 TRACE> EVENT: shutdown
 EVENT: shutdown
 TRACE> END: shutdown

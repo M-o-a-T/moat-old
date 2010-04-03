@@ -1,37 +1,31 @@
-EVENT: startup
 NEW: <ConditionalWorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
-EVENT: foo
 NEW: <ConditionalWorkSequence:2 (4)>
-   : │  EVENT: foo
+   : │  IEVENT: foo
    : └1╴... done.
 EVENT: startup
 END: startup
-EVENT: foo
+IEVENT: foo
 END: foo
-EVENT: wait¦start¦0.5¦_wait¦1
 NEW: <ConditionalWorkSequence:3 (4)>
    : │  EVENT: wait¦start¦0.5¦_wait¦1
    : └1╴... done.
 EVENT: wait¦start¦0.5¦_wait¦1
 END: wait¦start¦0.5¦_wait¦1
-EVENT: wait¦done¦0.5¦_wait¦1
 NEW: <ConditionalWorkSequence:4 (4)>
    : │  EVENT: wait¦done¦0.5¦_wait¦1
    : └1╴... done.
 EVENT: wait¦done¦0.5¦_wait¦1
 END: wait¦done¦0.5¦_wait¦1
-EVENT: bar
 NEW: <ConditionalWorkSequence:5 (4)>
-   : │  EVENT: bar
+   : │  IEVENT: bar
    : └1╴... done.
-EVENT: bar
+IEVENT: bar
 END: bar
 NEW: <ConditionalWorkSequence:6 (4)>
-   : │  EVENT: baz¦notlogged
+   : │  IEVENT: baz¦notlogged
    : └1╴... done.
-EVENT: shutdown
 NEW: <ConditionalWorkSequence:7 (6)>
    : │  EVENT: shutdown
    : └1╴... done.

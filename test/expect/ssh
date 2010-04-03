@@ -1,8 +1,6 @@
-EVENT: startup
 NEW: <ConditionalWorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
-EVENT: module¦load¦ssh
 NEW: <ConditionalWorkSequence:2 (4)>
    : │  EVENT: module¦load¦ssh
    : └1╴... done.
@@ -13,7 +11,6 @@ END: module¦load¦ssh
 smurf :: SSH public key
 .
 .
-EVENT: shutdown
 NEW: <ConditionalWorkSequence:3 (5)>
    : │  EVENT: shutdown
    : └1╴... done.

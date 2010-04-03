@@ -1,10 +1,6 @@
-EVENT: startup
-.
 NEW: <ConditionalWorkSequence:1 (4)>
    : │  EVENT: startup
    : └1╴... done.
-.
-EVENT: say¦hello
 .
 NEW: <ConditionalWorkSequence:2 (5)>
    : │  EVENT: say¦hello
@@ -24,8 +20,6 @@ RUN: SayWorker: TellMe
 0 The 'TellMe' worker is saying: hello
 .
 END: say¦hello
-.
-EVENT: say more¦greeting
 .
 NEW: <ConditionalWorkSequence:3 (5)>
    : │  EVENT: say more¦greeting
@@ -59,8 +53,6 @@ RUN: SayWorker: TellTwo
 0 The 'TellTwo' worker is saying: greeting
 .
 END: say more¦greeting
-.
-EVENT: shutdown
 .
 NEW: <ConditionalWorkSequence:5 (5)>
    : │  EVENT: shutdown
