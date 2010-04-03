@@ -161,6 +161,11 @@ class LogWorker(ExcWorker):
 			"""
 		exc = []
 		level = k.get("level",TRACE)
+		try:
+			if event.loglevel == NONE or event.loglevel > level:
+				return
+		except AttributeError:
+			pass
 		subsys = k.get("subsys",None)
 		if subsys is not None:
 			lim = levels.get(subsys,NONE)

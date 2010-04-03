@@ -28,8 +28,11 @@ NEW: <ConditionalWorkSequence:5 (4)>
    : └1╴... done.
 EVENT: bar
 END: bar
+NEW: <ConditionalWorkSequence:6 (4)>
+   : │  EVENT: baz¦notlogged
+   : └1╴... done.
 EVENT: shutdown
-NEW: <ConditionalWorkSequence:6 (6)>
+NEW: <ConditionalWorkSequence:7 (6)>
    : │  EVENT: shutdown
    : └1╴... done.
 EVENT: shutdown

@@ -23,12 +23,13 @@ trigger FOO...
 
 """
 
-from homevent.statement import Statement, main_words
+from homevent.statement import Statement, AttributedStatement, main_words
 from homevent.event import Event
 from homevent.run import process_event, simple_event
+from homevent import logging
 
 
-class TriggerHandler(Statement):
+class TriggerHandler(AttributedStatement):
 	name=("trigger",)
 	doc="send an event"
 	long_doc="""\
@@ -36,11 +37,19 @@ trigger FOO...
 	- creates a FOO... event. Errors handling the event are reported
 	  asynchronously.
 """
+
+	loglevel = None
+
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		if not event:
 			raise SyntaxError("Events need at least one parameter")
-		simple_event(self.ctx,*event)
+		if self.loglevel is not None:
+			ctx = ctx(loglevel=self.loglevel)
+		return self.run2(ctx,event)
+
+	def run2(self,ctx,event):
+		simple_event(ctx,*event)
 
 class SyncTriggerHandler(TriggerHandler):
 	name=("sync","trigger")
@@ -50,11 +59,33 @@ sync trigger FOO...
 	- creates a FOO... event and wait until it is processed. Errors
 	  handling the event are propagated to the caller.
 """
+	def run2(self,ctx,event):
+		return process_event(Event(ctx,*event))
+
+class TriggerLog(Statement):
+	name = ("log",)
+	doc = "set log level"
+	long_doc=u"""\
+log LEVEL
+	Set the level at which the generated event gets logged.
+	See 'help log' for possible levels.
+"""
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		if not event:
-			raise SyntaxError("Events need at least one parameter")
-		return process_event(Event(self.ctx,*event))
+		lo = hi = None
+		if len(event) == 1:
+			level = event[0].upper()
+			try:
+				level = getattr(logging,level)
+			except KeyError:
+				raise SyntaxError(u'Usage: log LEVEL')
+			else:
+				self.parent.loglevel = level
+		else:
+			raise SyntaxError(u'Usage: log LEVEL')
+TriggerHandler.register_statement(TriggerLog)
+SyncTriggerHandler.register_statement(TriggerLog)
+
 
 
 from homevent.module import Module

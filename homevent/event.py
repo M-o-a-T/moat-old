@@ -58,6 +58,7 @@ class Event(object):
 	"""\
 		This is an event. It happens and gets analyzed by the system.
 		"""
+	loglevel = None
 	def __init__(self, ctx, *names):
 		"""\
 			Events have a context and at least one name. For example:
@@ -70,6 +71,10 @@ class Event(object):
 		#print "E_INIT",names,"with",ctx
 		self.names = Name(names)
 		self.ctx = ctx
+		try:
+			self.loglevel = ctx.loglevel
+		except AttributeError:
+			pass
 
 		global event_id
 		event_id += 1

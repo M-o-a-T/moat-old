@@ -25,6 +25,7 @@ input = """\
 sync trigger foo
 wait: for 1m -90s 0.5min +.5s
 sync trigger bar
+sync trigger baz notlogged :log NONE
 shutdown
 """
 
