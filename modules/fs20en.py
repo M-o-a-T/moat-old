@@ -114,6 +114,7 @@ class en(Collected,Timeslotted):
 			if self.delta is not None:
 				if self.last_data:
 					val = n-self.last_data[m]
+					if val < 0: val = val + 0x10000 # 16-bit rollover
 					if val >= 0 or self.delta == 0:
 						simple_event(ctx, "fs20","en", m,val, *self.name)
 			else:
