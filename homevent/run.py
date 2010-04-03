@@ -106,11 +106,7 @@ def process_event(e, drop_errors=False):
 		"""
 	from homevent.logging import log_event,DEBUG,TRACE
 
-	if e[0] == "wait":
-		# Those are particuarly annoying in real world debug situations
-		log_event(e,level=TRACE,subsys="event")
-	else:
-		log_event(e,level=DEBUG)
+	log_event(e,level=DEBUG)
 	d = collect_event(e).process()
 #	def rv(_):
 #		print "RVA",_

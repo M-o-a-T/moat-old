@@ -37,6 +37,7 @@ from homevent.check import Check,register_condition,unregister_condition
 from homevent.base import Name,SYS_PRIO
 from homevent.twist import callLater, reset_slots
 from homevent.collect import Collection,Collected
+from homevent.logging import TRACE
 
 from time import time
 import os
@@ -162,7 +163,7 @@ class Waiter(Collected):
 		Waiters[self.name] = self
 
 		d,e = self._lock()
-		d.addCallback(lambda _: process_event(Event(self.ctx,"wait","start",ixtime(self.end),*self.name)))
+		d.addCallback(lambda _: process_event(Event(self.ctx(loglevel=TRACE),"wait","start",ixtime(self.end),*self.name)))
 		d.addCallback(self._callit)
 		self._unlock(d,e)
 		d.addCallback(lambda _: self.defer)
@@ -179,7 +180,7 @@ class Waiter(Collected):
 		d,e = self._lock()
 		def did_it(_):
 			self.ctx.wait = tm = ixtime(self.end)
-			return process_event(Event(self.ctx,"wait","done",tm, *self.name))
+			return process_event(Event(self.ctx(loglevel=TRACE),"wait","done",tm, *self.name))
 		d.addCallback(did_it)
 		def done(_):
 			self.delete_done()
@@ -202,7 +203,7 @@ class Waiter(Collected):
 				self.id.cancel()
 				self.id = None
 		d.addCallback(lambda _: stoptimer())
-		d.addCallback(lambda _: process_event(Event(self.ctx,"wait","cancel",ixtime(self.end),*self.name)))
+		d.addCallback(lambda _: process_event(Event(self.ctx(loglevel=TRACE),"wait","cancel",ixtime(self.end),*self.name)))
 		def errgen(_):
 			# If the 'wait cancel' event didn't return a failure, build one.
 			return failure.Failure(err(self))
@@ -226,7 +227,7 @@ class Waiter(Collected):
 			old_end = self.end
 			self.end = dest
 		d.addCallback(lambda _: endupdate())
-		d.addCallback(lambda _: process_event(Event(self.ctx,"wait","update",ixtime(self.end),*self.name)))
+		d.addCallback(lambda _: process_event(Event(self.ctx(loglevel=TRACE),"wait","update",ixtime(self.end),*self.name)))
 		def err(_):
 			self.end = old_end
 			self._callit()
