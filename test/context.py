@@ -30,7 +30,7 @@ assert d.bla=="fasel"
 assert d.foo=="bar"
 try:
 	c.bla
-except KeyError:
+except AttributeError:
 	pass
 else:
 	assert False

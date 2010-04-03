@@ -82,7 +82,7 @@ block:
 	try:
 		log DEBUG $foobar
 		log DEBUG No 71
-	catch KeyError:
+	catch AttributeError:
 		log DEBUG Yes N KEY
 	catch:
 		log DEBUG No 72

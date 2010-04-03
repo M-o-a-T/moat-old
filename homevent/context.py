@@ -79,7 +79,7 @@ class Context(object):
 				else:
 					break
 		if r is VanishedAttribute:
-			raise KeyError(self,key)
+			raise AttributeError(self,key)
 		return r
 
 	def __setattr__(self,key,val):
