@@ -690,7 +690,7 @@ class OWFSfactory(object,ReconnectingClientFactory):
 				elif len(name)>3 and name[2] == ".":
 					entries.append(name)
 				else:
-					log(DEBUG,"got unrecognized OWFS name %s" % (name,))
+					log(TRACE,"got unrecognized OWFS name %s" % (name,))
 
 			def done(_):
 				f = defer.succeed(None)
@@ -749,9 +749,9 @@ class OWFSfactory(object,ReconnectingClientFactory):
 				if dev.bus is self:
 					n_old += 1
 					## Just because something vanishes from the listing
-					## doesn't mean it's dead; the bus may be a bit wacky
+					## doesn't mean it's dead; the bus may be a bit unstable
 					# dev.go_down()
-					log(DEBUG,"Bus wacky?",self.name,dev.id)
+					log(DEBUG,"Bus unstable?",self.name,dev.id)
 
 			for dev in devices.itervalues():
 				if dev.bus is self:

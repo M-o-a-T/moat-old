@@ -116,7 +116,7 @@ class Timeslot(Collected):
 	def do_pre(self):
 		self.waiter = None
 		if self.running != "next" or self.slotter is not None:
-			log(ERROR,"timeslot error pre",self.running)
+			log(ERROR,"timeslot error pre",self.running,*self.name)
 			return
 
 		self.running = "pre"
@@ -130,7 +130,7 @@ class Timeslot(Collected):
 				self.next += dt.timedelta(0,self.duration)
 				self.slotter = callLater(False,self.next, self.do_post)
 			elif self.running not in ("off","error"):
-				log(ERROR,"timeslot error pre2",self.running)
+				log(ERROR,"timeslot error pre2",self.running,*self.name)
 			else:
 				self.next = None
 			return _
@@ -146,7 +146,7 @@ class Timeslot(Collected):
 	def do_post(self):
 		self.slotter = None
 		if self.running != "during" or self.waiter is not None:
-			log(ERROR,"timeslot error post",self.running)
+			log(ERROR,"timeslot error post",self.running,*self.name)
 			return
 
 		self.running = "post"
@@ -157,7 +157,7 @@ class Timeslot(Collected):
 				self.next = time_delta(self.interval, now=self.next)-dt.timedelta(0,self.duration)
 				self.waiter = callLater(False, self.next, self.do_pre)
 			elif self.running not in("off","error"):
-				log(ERROR,"timeslot error post2",self.running)
+				log(ERROR,"timeslot error post2",self.running,*self.name)
 			return _
 		d.addCallback(post)
 		d.addErrback(self.dead)
