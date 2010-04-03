@@ -97,7 +97,8 @@ class AVRcommon(handler):
 					try:
 						db += chr(eval("0x"+e+d))
 					except SyntaxError:
-						raise SyntaxError("0x"+e+d)
+						simple_event(Context(),"fs20","unknown","hex",data)
+						return
 					e=""
 				else:
 					e=d
