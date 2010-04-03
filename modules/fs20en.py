@@ -290,7 +290,7 @@ delta up
 		lo = hi = None
 		if len(event) == 0:
 			self.parent.delta = 0
-		elif len(event) == 1 and event[1] == "up":
+		elif len(event) == 1 and event[0] == "up":
 			self.parent.delta = 1
 		else:
 			raise SyntaxError(u'Usage: delta')
