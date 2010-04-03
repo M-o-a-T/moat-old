@@ -260,7 +260,7 @@ Finally, named system errors can be caught:
 	block:
 		try:
 			log TRACE $foobar
-		catch KeyError:
+		catch AttributeError:
 			log DEBUG somebody did something stupid
 			log error DEBUG
 

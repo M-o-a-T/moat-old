@@ -92,6 +92,10 @@ The "catch" statement executes a block only if a previous "try" block
 Syntax:
 	try:
 		statement
+	catch what ever error got raised:
+		statement
+	catch ExceptionName:
+		statement
 	catch:
 		statement
 		...
