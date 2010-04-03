@@ -26,6 +26,7 @@ trigger FOO...
 from homevent.statement import Statement, AttributedStatement, main_words
 from homevent.event import Event
 from homevent.run import process_event, run_event
+from homevent.context import Context
 from homevent import logging
 
 
@@ -39,14 +40,17 @@ trigger FOO...
 """
 
 	loglevel = None
+	recurse = None
 
 	def run(self,ctx,**k):
+		if self.recurse:
+			ctx = Context()
 		if self.loglevel is not None:
 			ctx = ctx(loglevel=self.loglevel)
 		event = self.params(ctx)
 		if not event:
 			raise SyntaxError("Events need at least one parameter")
-		return self.run2(event)
+		return self.run2(Event(ctx,*event))
 
 	def run2(self,event):
 		run_event(event)
@@ -85,6 +89,25 @@ log LEVEL
 			raise SyntaxError(u'Usage: log LEVEL')
 TriggerHandler.register_statement(TriggerLog)
 SyncTriggerHandler.register_statement(TriggerLog)
+
+class TriggerRecurse(Statement):
+	name = ("recursive",)
+	doc = "mark the execution context as recursive"
+	long_doc=u"""\
+recursive
+	Mark the event as one that might cause itself.
+	Without this statement, a long environment chain
+	will be created which ultimately causes a crash.
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		lo = hi = None
+		if len(event) == 0:
+			self.parent.recurse = True
+		else:
+			raise SyntaxError(u'Usage: recursive')
+TriggerHandler.register_statement(TriggerRecurse)
+SyncTriggerHandler.register_statement(TriggerRecurse)
 
 
 

@@ -50,6 +50,8 @@ class Context(object):
 			c = Context(self,**k)
 			if ctx not in c._parents():
 				c._parent.append(ctx)
+		if len(list(self._parents())) > 100:
+			raise RuntimeError("Too many nested contexts")
 		return c
 
 	def _parents(self):
