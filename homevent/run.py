@@ -106,7 +106,6 @@ def process_event(e, drop_errors=False):
 		"""
 	from homevent.logging import log_event,DEBUG,TRACE
 
-	log_event(e,level=DEBUG)
 	d = collect_event(e).process()
 #	def rv(_):
 #		print "RVA",_
