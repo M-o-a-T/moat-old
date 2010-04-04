@@ -88,7 +88,7 @@ log
 					out.logger.level = level
 				else:
 					try: out = self.ctx.out
-					except KeyError: out = sys.stderr
+					except AttributeError: out = sys.stderr
 					logger = OutLogger(out=out, level=level)
 					try: out.logger = logger
 					except AttributeError: pass # file objects don't
@@ -116,7 +116,7 @@ log limit event DEBUG
 		else:
 			try:
 				out = self.ctx.out
-			except KeyError:
+			except AttributeError:
 				out = sys.stderr
 			print >>out, LogNames(log_level(name))
 

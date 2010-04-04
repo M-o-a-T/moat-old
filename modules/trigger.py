@@ -81,7 +81,7 @@ log LEVEL
 			level = event[0].upper()
 			try:
 				level = getattr(logging,level)
-			except KeyError:
+			except AttributeError:
 				raise SyntaxError(u'Usage: log LEVEL')
 			else:
 				self.parent.loglevel = level
