@@ -68,14 +68,15 @@ class Timeslot(Collected):
 	"""This is the thing that watches."""
 	storage = Timeslots.storage
 
-	last = None # last time I was called / next time I will be called
-	next = None # last time I was called / next time I will be called
+	last = None # last time I was called
+	next = None # next time I should be called
 	running = "off" # state
 		# off: not running
 		# next: wait for next event, not in slot
 		# pre: wait for event trigger, in slot
 		# during: event in progress, in slot (obviously)
 		# post: after event, in slot
+		# error: timer is dead / out of sync
 	waiter = None # trigger for next event
 	slotter = None # trigger for time slot
 	shift = 0.5 # position during the slot when the event will trigger
