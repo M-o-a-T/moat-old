@@ -163,21 +163,21 @@ class SwitchGroup(Collected,igroup):
 		except KeyError:
 			simple_event(Context(), "fs20","unknown","device", to_hc(self.code), to_dev(dc), "".join("%02x" % ord(x) for x in data))
 			return
-		else:
-			try:
-				fn = switch_names[fcode & 0x1F]
-			except KeyError:
-				simple_event(Context(), "fs20","unknown","function", to_hc(self.code), fcode & 0x1F, "".join("%02x" % ord(x) for x in data))
-				return
 
-			if fcode & 0x80:
-				hdl = dev.getReply
-			else:
-				hdl = dev.get
-			if ext is not None:
-				res = defer.maybeDeferred(hdl,fn,ext,handler=handler)
-			else:
-				res = defer.maybeDeferred(hdl,fn,handler=handler)
+		try:
+			fn = switch_names[fcode & 0x1F]
+		except KeyError:
+			simple_event(Context(), "fs20","unknown","function", to_hc(self.code), fcode & 0x1F, "".join("%02x" % ord(x) for x in data))
+			return
+
+		if fcode & 0x80:
+			hdl = dev.getReply
+		else:
+			hdl = dev.get
+		if ext is not None:
+			res = defer.maybeDeferred(hdl,fn,ext,handler=handler)
+		else:
+			res = defer.maybeDeferred(hdl,fn,handler=handler)
 
 		def send_cpl(_):
 			data = chr(dc)+chr(fcode|0x80)+data[2:]
