@@ -18,6 +18,8 @@
 """\
 This code implements the base for TCP clients and servers.
 
+Your code needs to supply storage and factory class variables.
+Look at module/net.py for a basic example.
 """
 
 from homevent.logging import log,log_exc,DEBUG,TRACE,INFO,WARN,ERROR
