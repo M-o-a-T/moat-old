@@ -846,7 +846,7 @@ _call_id = 0
 class OWFSdevice(object):
 	"""This represents a bus device with attributes."""
 	def __new__(cls,id, bus=None, path=()):
-		short_id = id[id.index(".")+1:]
+		short_id = id[id.index(".")+1:].lower()
 		try:
 			self = devices[short_id]
 		except KeyError: # new device
@@ -864,7 +864,7 @@ class OWFSdevice(object):
 	def _init(self, bus, short_id=None, id=None, path=()):
 		log("onewire",DEBUG,"NEW", bus,short_id,id,path)
 		self.bus_id = id
-		self.id = short_id
+		self.id = short_id.lower()
 		self.bus = bus
 		self.path = path
 		self.is_up = None

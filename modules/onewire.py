@@ -95,6 +95,7 @@ var onewire NAME dev attr
 		if len(event) != 3:
 			raise SyntaxError("Usage: var onewire NAME DEVICE ATTRIBUTE")
 		var, dev, attr = event[:]
+		dev = dev.lower()
 		
 		def got(val):
 			setattr(self.parent.ctx,var,val)
@@ -114,6 +115,7 @@ set onewire VALUE dev attr
 		if len(event) != 3:
 			raise SyntaxError("Usage: set onewire VALUE DEVICE ATTRIBUTE")
 		val, dev, attr = event[:]
+		dev = dev.lower()
 		
 		d = devices[dev].set(attr, val)
 		return d
@@ -141,8 +143,8 @@ dir onewire NAME path...
 				print >>ctx.out, (d.typ if hasattr(d,"typ") else "?"), d.id
 			print >>ctx.out,"."
 		else:
-			if len(event) == 1 and event[0] in devices:
-				dev = devices[event[0]]
+			if len(event) == 1 and event[0].lower() in devices:
+				dev = devices[event[0].lower()]
 				path = ()
 			else:
 				dev = buses[event[0]].root
@@ -173,8 +175,8 @@ list onewire [NAME]
 			print >>ctx.out,"."
 		elif len(event) != 1:
 			raise SyntaxError("Usage: list onewire [BUS]")
-		elif event[0] in devices:
-			dev = devices[event[0]]
+		elif event[0].lower() in devices:
+			dev = devices[event[0].lower()]
 			print >>ctx.out,"ID:",dev.bus_id
 			print >>ctx.out,"SID:",dev.id
 			print >>ctx.out,"Up:", "Yes" \
@@ -197,7 +199,7 @@ class OWFSconnected(Check):
 	def check(self,*args):
 		assert len(args)==1,"This test requires the device ID"
 		try:
-			dev = devices[args[0]]
+			dev = devices[args[0].lower()]
 		except KeyError:
 			return False
 		else:
@@ -225,7 +227,7 @@ class OWFSexists(Check):
 	doc="Test if the onewire device exists"
 	def check(self,*args):
 		assert len(args)==1,"This test requires the connection name"
-		return args[0] in devices
+		return args[0].lower() in devices
 
 class OWFSexistsbus(Check):
 	name=("exists","onewire","bus")
@@ -404,7 +406,7 @@ monitor onewire ‹device› ‹attribute›
 		event = self.params(ctx)
 		if len(event) != 2:
 			raise SyntaxError("Usage: monitor onewire ‹device› ‹attribute›")
-		self.values["device"] = event[0]
+		self.values["device"] = event[0].lower()
 		self.values["attribute"] = event[1]
 		if "switch" not in self.values:
 			self.values["switch"] = None
