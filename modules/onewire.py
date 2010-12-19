@@ -287,14 +287,13 @@ class OWFSwindmon(Monitor):
 		super(OWFSwindmon,self).up()
 		self.avg = None
 		self.qavg = None
-		self.wind_delta = 0
 		self.nval = 0
 
 	def list(self):
 		for x in super(OWFSwindmon,self).list():
 			yield x
-		yield ("delta",self.wind_delta)
-		yield ("qavg",self.qavg)
+		yield ("average",self.avg)
+		yield ("turbulence",1-self.qavg)
 		yield ("values",self.nval)
 
 	@defer.inlineCallbacks
@@ -322,76 +321,35 @@ class OWFSwindmon(Monitor):
 		elif val == (2,2,1,1): val = 15
 		else: raise MonitorAgain(val)
 		val = (val - self.direction) % 16
+		self._process_value(val)
+		defer.returnValue(self.avg)
 
+	def _process_value(self,val):
 		if self.avg is None:
 			self.avg = val
-			self.qavg = val
+			self.qavg = 0.5
 			decay = self.decay
 		else:
 			# Principle of operation:
-			# - Get a quickly-moving average of the current position
-			# - Get a quickly-moving average of differences between
-			#   that and the current measurement
-			# - Use that to scale the "real" average of the current position
+			# Imagine the wind vane traveling on the circumference of
+			# a circle (r=1). Calculate a moving average from this
+			# point's locations within the circle. Its distance from
+			# the center is our confidence in the current value.
 			#
-			# The idea is that the average shall converge quickly under
-			# calm conditions, but not when there's gusty wind that
-			# pushes the vane around.
-			#
-			# Since the values are modulo 16, we need to shift the
-			# values around. The average between 15 and 2, given a decay
-			# factor of 1/3, shall be 0. Thus, if the difference between
-			# the old and new value is >8, the value needs an offset.
+			## c² = a²+b²-2 a b cos A
+			## A = acos( (a²+b²-c²) / 2 a b)
+			from math import pi,cos,acos,sqrt
+			def hypot(a,b,alpha): return sqrt(a*a+b*b-2*a*b*cos(alpha))
+			def angle(a,b,c): return acos((a*a+b*b-c*c)/(2*a*b))
 
-			# "quickly moving" means "somewhat faster".
-			# The square root (0.5) is a bit too aggressive
-			decay = self.decay ** 0.7
-
-			# shift the value around
-			if abs(val - self.qavg) > 8:
-				if val > self.qavg:
-					val -= 16
-				else:
-					val += 16
-			self.qavg = ((1-decay)*self.qavg + decay*val) % 16
-
-			# Get the (moving average of) the delta, which needs to
-			# update faster than the actual wind value, otherwise
-			# the system will be too erratic when the wind becomes more
-			# turbulent.
-
-			self.wind_delta = ((1-decay)*self.wind_delta
-			                + decay*abs(val - self.qavg))
-
-			# shift the value around, this time for real
-			val %= 16
-			if abs(val - self.avg) > 8:
-				if val > self.avg:
-					val -= 16
-				else:
-					val += 16
-
-			if self.wind_delta > 6:
-				# Wind appears to have changed completely.
-				# Reset, to avoid oscillating.
-				log(DEBUG,"wind reset", unicode(self.name),self.avg,self.wind_delta)
-				self.wind_delta = 8 - self.wind_delta
-				self.nval = 0
-				self.avg = (self.avg+8) % 16
-				self.qavg = (self.qavg+8) % 16
-				decay = self.decay / 10
-			else:
-				# Scale the decay for the actual value,
-				# depending on how erratic the wind is
-				decay = self.decay / (10 ** (self.wind_delta/6))
-				self.avg = ((1-decay)*self.avg + decay*val) % 16
-
-		self.nval += 1
-		if self.nval < 1/decay:
-			log(TRACE,"wind_dir again", unicode(self.name),self.nval,decay)
-			raise MonitorAgain("decay not reached")
-
-		defer.returnValue(self.avg)
+			al = ((self.avg-val)%16)*pi/8 # between avg and new, at center
+			d = hypot(1,self.qavg,al)
+			nal = angle(1,d,self.qavg) # at corner of wind vane
+			d = (1-self.decay)*d
+			self.qavg = hypot(1,d,nal)
+			nal = angle(1,self.qavg,d) # between avg and new, at center
+			if self.avg < val: nal = -nal
+			self.avg = (val+nal*8/pi)%16
 
 
 class OWFSmonitor(MonitorHandler):

@@ -40,10 +40,6 @@ Code
 
   - introduce proportional change limits etc.
 
-* Improve wind vane handling: Add a short-term moving average which
-  collects the last N values; switch to that when it and the normal one
-  differ by >7 or so
-
 * implement a PID controller
 
 * Improve the PWM modulator
