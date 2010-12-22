@@ -112,6 +112,8 @@ class OnEventWorker(Collected,iWorker):
 	def __init__(self,parent, name=None, prio=(MIN_PRIO+MAX_PRIO)//2+1):
 		self.prio = prio
 		self.parent = parent
+		self.count = 0
+		self.last = None
 
 		global _onHandler_id
 		_onHandler_id += 1
@@ -153,6 +155,8 @@ class OnEventWorker(Collected,iWorker):
 				return False
 
 	def process(self,event,**k):
+		self.last = now()
+		self.count += 1
 		return self.parent.process(event,**k)
 
 	def report(self, verbose=False):
@@ -175,6 +179,9 @@ class OnEventWorker(Collected,iWorker):
 			yield("name"," ".join(unicode(x) for x in self.parent.displayname))
 		yield("args",self.parent.arglist)
 		yield("prio",self.prio)
+		yield("count",self.count)
+		if self.last:
+			yield("last",humandelta(now()-self.last))
 		if hasattr(self.parent,"displaydoc"):
 			yield("doc",self.parent.displaydoc)
 
