@@ -136,7 +136,7 @@ class Waiter(Collected):
 		return u"‹%s %s %d›" % (self.__class__.__name__, self.name,self.value)
 
 	def _callit(self,_=None):
-		self.id = callLater(self.force,self.value, self.doit)
+		self.wait_id = callLater(self.force,self.value, self.doit)
 
 	def _lock(self):
 		d = defer.Deferred()
@@ -199,9 +199,9 @@ class Waiter(Collected):
 			self._unlock(d,e)
 			return
 		def stoptimer():
-			if self.id:
-				self.id.cancel()
-				self.id = None
+			if self.wait_id:
+				self.wait_id.cancel()
+				self.wait_id = None
 		d.addCallback(lambda _: stoptimer())
 		d.addCallback(lambda _: process_event(Event(self.ctx(loglevel=TRACE),"wait","cancel",ixtime(self.end),*self.name)))
 		def errgen(_):
@@ -219,9 +219,9 @@ class Waiter(Collected):
 	def retime(self, dest):
 		d,e = self._lock()
 		def stoptimer():
-			if self.id:
-				self.id.cancel()
-				self.id = None
+			if self.wait_id:
+				self.wait_id.cancel()
+				self.wait_id = None
 		d.addCallback(lambda _: stoptimer())
 		def endupdate():
 			old_end = self.end

@@ -71,20 +71,20 @@ shutdown
 _id=0
 class sbr(object):
 	def __repr__(self):
-		return u"‹%s (%d)›" % (super(sbr,self).__repr__()[1:-1], self.id)
+		return u"‹%s (%d)›" % (super(sbr,self).__repr__()[1:-1], self.sid)
 	def __init__(self,parent=None,*a,**k):
 		super(sbr,self).__init__(*a,**k)
 		global _id
 		_id += 1
-		self.id = _id
-		log(None,"Init %s(%d) from %s" % (self.name,self.id, repr(parent)))
+		self.sid = _id
+		log(None,"Init %s(%d) from %s" % (self.name,self.sid, repr(parent)))
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		log(None,"Input %s(%d): %s" % (self.name,self.id,event))
+		log(None,"Input %s(%d): %s" % (self.name,self.sid,event))
 	def called(self,args):
 		self.args = args
 	def start_block(self):
-		log(None,"InputComplex %s(%d): %s" % (self.name,self.id,self.args))
+		log(None,"InputComplex %s(%d): %s" % (self.name,self.sid,self.args))
 
 class FooHandler(sbr,Statement):
 	name=("foo",)
