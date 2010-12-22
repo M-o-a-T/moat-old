@@ -64,6 +64,9 @@ Code
   assuming that it must be recursive; store in the context whether
   that's the case
 
+* delayed state changes, e.g. light coming up, to prevent spurious
+  events from car headlights etc.
+
 FS20 / AVR
 ==========
 
