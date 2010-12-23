@@ -300,6 +300,9 @@ class Parser(object):
 			if item is None:
 				q.errback(failure.Failure(StopIteration()))
 			else:
+				if "HOMEVENT_TEST" in os.environ:
+					while item.startswith('>> '):
+						item = item[3:]
 				q.callback(item)
 		if self.p_wait:
 			log("parser",TRACE,"LINE: input available")
