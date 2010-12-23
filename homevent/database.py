@@ -20,103 +20,80 @@ This is the core of database access.
 """
 
 from homevent.base import Name
-from storm.twisted.store import DeferredStore,StorePool
+from smurf.Db.twisted import DbThread,NoData,ManyData
 
-from twisted.internet.defer import inlineCallbacks,returnValue
+from twisted.internet.defer import inlineCallbacks,returnValue,DeferredList,returnValue
+import sys
 
 SafeNames = {
 	"Name":Name,
 }
 
-from he_storage import DbTable,database
 
 #Db = DeferredStore(self.database)
 
 class DbStore(object):
 	"""This object implements a simple Deferred-enabled storage"""
-	def __init__(self,cat):
-		self.pool = StorePool(database, 2, 5)
-		self.category = repr(cat)
-	
-	def start(self):
-		return self.pool.start()
-	
-	def stop(self):
-		return self.pool.stop()
+	running = False
+	def __init__(self,category,name=None):
+		if name is None:
+			import os
+			if "HOMEVENT_TEST" in os.environ:
+				name = "HOMEVENT_TEST"
+			else:
+				name = "HOMEVENT"
+		self.db = DbThread(name)
+		self.category = category
+		db=self.db()
+		r = db.Do("CREATE TABLE HE_State ("
+			  " category varchar(50),"
+			  " name varchar(200),"
+			  " value BLOB,"
+			  " id INTEGER AUTO_INCREMENT PRIMARY KEY,"
+		      " UNIQUE (category,name))", _empty=1)
+		r.addErrback(lambda _: db.Do("CREATE TABLE HE_State ("
+			  " category varchar(50),"
+			  " name varchar(200),"
+			  " value BLOB,"
+			  " id INTEGER PRIMARY KEY,"
+		      " UNIQUE (category,name))", _empty=1))
+		r.addErrback(lambda _: False)
+		db.addDone(r)
+		r = DeferredList((db.done,r),fireOnOneErrback=True)
+		def filter(res):
+			self.running = True
+			return res
+		r.addBoth(filter)
+		self.init_done = r
 	
 	@inlineCallbacks
 	def get(self, key):
-		store = yield self.pool.get()
-		try:
-			r = yield store.find(DbTable,
-				DbTable.category == self.category,
-				DbTable.name == " ".join(Name(key)).encode("utf-8"))
-			r = yield r.one()
-			if r is None:
-				raise KeyError(key)
-			r = r.value
-			r = eval(r,SafeNames,{})
-			yield store.commit()
-			returnValue(r)
-		except BaseException,e:
-			yield store.rollback()
-			raise e
-		finally:
-			self.pool.put(store)
+		key = " ".join(Name(key)).encode("utf-8")
+		with self.db() as db:
+			try:
+				r, = yield db.DoFn("select value from HE_State where category=${cat} and name=${name}", cat=self.category, name=key)
+			except NoData:
+				raise KeyError((self.category,key))
+			else:
+				r = eval(r,SafeNames,{})
+		returnValue(r)
 
-	@inlineCallbacks
 	def all(self, callback):
-		store = yield self.pool.get()
-		try:
-			r = yield store.find(DbTable,
-				DbTable.category == self.category)
+		with self.db() as db:
+			return db.DoSelect("select name,value from HE_State where category=${cat}", cat=self.category, callback=callback)
 
-			def call_it(r):
-				for info in r:
-					callback(r)
-			yield store.thread.deferToThread(call_it,r)
-		except BaseException,e:
-			yield store.rollback()
-			raise e
-		finally:
-			self.pool.put(store)
-
-	@inlineCallbacks
 	def delete(self, key):
-		store = yield self.pool.get()
-		try:
-			r = yield store.find(DbTable,
-				DbTable.category == self.category,
-				DbTable.name == " ".join(Name(key)).encode("utf-8"))
-			r = yield r.one()
-			if r is None:
-				raise KeyError(key)
-			yield store.remove(r)
-			yield store.commit()
-		except BaseException,e:
-			yield store.rollback()
-			raise e
-		finally:
-			self.pool.put(store)
+		key = " ".join(Name(key)).encode("utf-8")
+		with self.db() as db:
+			return db.Do("delete from HE_State where category=${cat} and name=${name}", cat=self.category,name=key)
 
 	@inlineCallbacks
 	def set(self, key, val):
-		store = yield self.pool.get()
-		try:
-			e = yield store.find(DbTable,
-				DbTable.category == self.category,
-				DbTable.name == " ".join(Name(key)).encode("utf-8"))
-			e = yield e.one()
-			if e is None:
-				e = DbTable()
-				e.category = self.category
-				e.name = " ".join(Name(key)).encode("utf-8")
-				yield store.add(e)
-			e.value = repr(val)
-			yield store.commit()
-		except BaseException,e:
-			yield store.rollback()
-			raise e
-		finally:
-			self.pool.put(store)
+		key = " ".join(Name(key)).encode("utf-8")
+		with self.db() as db:
+			r = yield db.Do("update HE_State set value=${val} where category=${cat} and name=${name}", cat=self.category,name=key,val=repr(val), _empty=1)
+			if r == 0:
+				r = yield db.Do("insert into HE_State (category,name,value) VALUES(${cat},${name},${val})", cat=self.category,name=key,val=repr(val))
+		returnValue(r)
+
 	

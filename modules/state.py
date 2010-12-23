@@ -88,6 +88,7 @@ class State(Collected):
 		self.value = val
 
 	def list(self):
+		yield (super(State,self),)
 		yield ("value", self.value)
 		yield ("lock", ("Yes" if self.working else "No"))
 		if hasattr(self,"old_value"):
@@ -110,8 +111,8 @@ class SavedState(State):
 		global Db
 		if Db is None:
 			from homevent.database import DbStore
-			Db = DbStore("state")
-			yield Db.start()
+			Db = DbStore(category="state")
+			yield Db.init_done
 		try:
 			self.value = yield Db.get(self.name)
 		except KeyError:
@@ -131,7 +132,7 @@ class SavedState(State):
 		yield super(SavedState,self).delete(ctx)
 
 	def list(self):
-		for r in super(SavedState,self).list(): yield r
+		yield (super(SavedState,self),)
 		yield ("persistent","yes")
 
 	
