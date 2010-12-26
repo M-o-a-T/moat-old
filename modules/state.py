@@ -88,7 +88,7 @@ class State(Collected):
 		self.value = val
 
 	def list(self):
-		yield (super(State,self),)
+		yield super(State,self)
 		yield ("value", self.value)
 		yield ("lock", ("Yes" if self.working else "No"))
 		if hasattr(self,"old_value"):
@@ -132,7 +132,7 @@ class SavedState(State):
 		yield super(SavedState,self).delete(ctx)
 
 	def list(self):
-		yield (super(SavedState,self),)
+		yield super(SavedState,self)
 		yield ("persistent","yes")
 
 	

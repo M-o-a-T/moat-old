@@ -28,6 +28,24 @@ from homevent.reactor import Events
 from homevent.base import Name
 from homevent.collect import get_collect,all_collect,Collection
 
+from traceback import print_exc
+
+def flatten(out,s,p=""):
+	s = list(s)
+	t = s.pop()
+	if p != "":
+		s.insert(0,p)
+	p = u" ".join((str(ss) for ss in s))
+	if hasattr(t,"list") and callable(t.list):
+		t = t.list()
+	if hasattr(t,"next"):
+		pp = " "*len(p)
+		for tt in t:
+			flatten(out,tt,p)
+			p = pp
+	else:
+		print >>out,p+u": "+unicode(t)
+
 
 class List(Statement):
 	name=("list",)
@@ -67,11 +85,11 @@ list ‹type› ‹name…›
 					else:
 						print >>self.ctx.out,u"%s" % (n,)
 			else:
-				for s,t in c.list():
-					print >>self.ctx.out,"%s: %s" % (s,t)
+				flatten(self.ctx.out,(c,))
 
 		except Exception,e:
 			print >>self.ctx.out, "* ERROR *",repr(e)
+			print_exc(file=self.ctx.out)
 			
 		finally:
 			print >>self.ctx.out, "."
