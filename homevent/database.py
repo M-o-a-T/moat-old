@@ -43,7 +43,7 @@ class DbStore(object):
 			else:
 				name = "HOMEVENT"
 		self.db = DbThread(name)
-		self.category = category
+		self.category = " ".join(Name(category)).encode("utf-8")
 		db=self.db()
 		r = db.Do("CREATE TABLE HE_State ("
 			  " category varchar(50),"
@@ -76,16 +76,27 @@ class DbStore(object):
 				raise KeyError((self.category,key))
 			else:
 				r = eval(r,SafeNames,{})
+			yield db.commit()
 		returnValue(r)
 
 	def all(self, callback):
 		with self.db() as db:
 			return db.DoSelect("select name,value from HE_State where category=${cat}", cat=self.category, callback=callback)
 
+	@inlineCallbacks
 	def delete(self, key):
 		key = " ".join(Name(key)).encode("utf-8")
 		with self.db() as db:
-			return db.Do("delete from HE_State where category=${cat} and name=${name}", cat=self.category,name=key)
+			try:
+				r = yield db.Do("delete from HE_State where category=${cat} and name=${name}", cat=self.category,name=key)
+			except NoData:
+				raise KeyError((self.category,key))
+			yield db.commit()
+		returnValue(r)
+
+	def clear(self):
+		with self.db() as db:
+			return db.Do("delete from HE_State where category=${cat}", cat=self.category, _empty=1)
 
 	@inlineCallbacks
 	def set(self, key, val):
@@ -94,6 +105,7 @@ class DbStore(object):
 			r = yield db.Do("update HE_State set value=${val} where category=${cat} and name=${name}", cat=self.category,name=key,val=repr(val), _empty=1)
 			if r == 0:
 				r = yield db.Do("insert into HE_State (category,name,value) VALUES(${cat},${name},${val})", cat=self.category,name=key,val=repr(val))
+			yield db.commit()
 		returnValue(r)
 
 	

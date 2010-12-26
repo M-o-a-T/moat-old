@@ -273,6 +273,7 @@ forget state name...
 	- removes this saved state from the database
 	  The value will be re-added the next time the state is changed!
 """
+
 	@inlineCallbacks
 	def run(self,ctx,**k):
 		event = self.params(ctx)
@@ -283,8 +284,8 @@ forget state name...
 		global Db
 		if Db is None:
 			from homevent.database import DbStore
-			Db = DbStore("state")
-			yield Db.start()
+			Db = DbStore(category="state")
+			yield Db.init_done
 
 		yield Db.delete(name)
 
@@ -353,6 +354,7 @@ class ExistsStateCheck(Check):
 class SavedStateCheck(Check):
 	name=("saved","state")
 	doc="check if a state is stored in the persistent database"
+
 	@inlineCallbacks
 	def check(self,*args):
 		if len(args) < 1:
@@ -361,8 +363,8 @@ class SavedStateCheck(Check):
 		global Db
 		if Db is None:
 			from homevent.database import DbStore
-			Db = DbStore("state")
-			yield Db.start()
+			Db = DbStore(category="state")
+			yield Db.init_done
 		try:
 			yield Db.get(Name(args))
 		except KeyError:

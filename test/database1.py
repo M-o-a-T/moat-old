@@ -22,7 +22,8 @@ from homevent.base import Name
 
 s = DbStore(Name("Foo","bar"))
 def main():
-	d = s.start()
+	d = s.init_done
+	d.addCallback(lambda _: s.clear())
 	d.addCallback(lambda _: s.set("one",4))
 	d.addCallback(lambda _: s.set(("two","three"),(4,5,6)))
 

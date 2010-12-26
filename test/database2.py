@@ -22,7 +22,7 @@ from homevent.base import Name
 
 s = DbStore(Name("Foo","bar"))
 def main():
-	d = s.start()
+	d = s.init_done
 	#d.addCallback(lambda _: s.set("one",2))
 	#d.addCallback(lambda _: s.set(3,(4,5,6)))
 
