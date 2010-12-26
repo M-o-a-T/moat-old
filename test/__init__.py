@@ -29,6 +29,7 @@ from cStringIO import StringIO
 import sys
 import re
 import os
+from subprocess import Popen
 from twisted.internet import reactor
 exitcode = 0
 
@@ -68,7 +69,8 @@ class run_logger(Logger):
 		if not os.path.exists(scp):
 			scp = os.path.join("test",scp)
 		if os.path.exists(scp):
-			res = os.spawnlp(os.P_WAIT, scp)
+			job = Popen(scp)
+			res = job.wait()
 			if res != 0:
 				print >>sys.stderr,"Init Script for %s failed: %d" % (self.filename,res)
 				sys.exit(0)
@@ -81,7 +83,8 @@ class run_logger(Logger):
 			sys.stdout.flush()
 			sys.stderr.flush()
 			self.data.flush()
-			res = os.spawnlp(os.P_WAIT, scp)
+			job = Popen(scp)
+			res = job.wait()
 			if res != 0:
 				print >>sys.stderr,"Exit Script for %s failed: %d" % (self.filename,res)
 				sys.stderr.flush()
