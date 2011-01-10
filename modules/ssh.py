@@ -192,8 +192,9 @@ You need to call this exactly once.
 		publicKeyString = file(pub_path).read()
 		privateKeyString = file(priv_path).read()
 
-		f.publicKeys = {'ssh-rsa': keys.getPublicKeyString(data=publicKeyString)}
-		f.privateKeys = {'ssh-rsa': keys.getPrivateKeyObject(data=privateKeyString)}
+		k = keys.Key.fromFile(priv_path)
+		f.publicKeys = {'ssh-rsa': k.public()}
+		f.privateKeys = {'ssh-rsa': k}
 		sshFactory = f
 
 
