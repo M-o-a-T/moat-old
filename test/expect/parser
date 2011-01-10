@@ -1,4 +1,6 @@
-NEW: <ConditionalWorkSequence:1 (4)>
+NEW: <ConditionalWorkSequence:6 (4)>
+   : │  id: 6
+   : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
 Init foo(1) from ‹global_words: Global 3›
@@ -63,7 +65,9 @@ foiled : not clingfilm
 EVENT: startup
 END: startup
 ... moving up
-NEW: <ConditionalWorkSequence:2 (5)>
+NEW: <ConditionalWorkSequence:7 (5)>
+   : │  id: 7
+   : │  call count: 0
    : │  EVENT: shutdown
    : └1╴... done.
 EVENT: shutdown

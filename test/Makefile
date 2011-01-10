@@ -14,11 +14,11 @@
 ##  for more details.
 ##
 
-export PYTHONPATH=$(shell pwd)/..
+export PYTHONPATH=$(shell pwd)/..:$(shell pwd)/../../smurf/python
 export HOMEVENT_TEST=1
 
 test:
-	@rm -f /tmp/homevent.db.$$(id -u) 2>/dev/null
+	@rm -f /tmp/homevent.$$(id -un).db /tmp/homevent.db.$$(id -u) 2>/dev/null
 	@set -e; \
 	rm -rf real; mkdir real; \
 	for f in $(wildcard *.sh) ; do \

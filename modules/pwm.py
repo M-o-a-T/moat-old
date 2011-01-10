@@ -389,7 +389,8 @@ class Shutdown_Worker_PWM(ExcWorker):
 
 	def does_event(self,ev):
 		return (ev is shutdown_event)
-	def process(self,queue,*a,**k):
+	def process(self, **k):
+		super(Shutdown_Worker_PWM,self).process(**k)
 		d = succeed(None)
 		for p in PWMs.values():
 			def tilt(_,pwm):

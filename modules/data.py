@@ -31,6 +31,10 @@ from homevent.collect import get_collect,all_collect,Collection
 from traceback import print_exc
 
 def flatten(out,s,p=""):
+	if hasattr(s,"list") and callable(s.list):
+		for ss in s.list():
+			flatten(out,ss,p)
+		return
 	s = list(s)
 	t = s.pop()
 	if p != "":

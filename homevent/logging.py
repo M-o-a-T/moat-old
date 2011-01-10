@@ -154,15 +154,20 @@ class LogWorker(ExcWorker):
 		return True
 	def does_failure(self,event):
 		return True
-	def process(self,event,*a,**k):
+	def process(self,event=None,**k):
 		"""\
 			Run through all loggers. If one of then throws an exception,
 			drop the logger and process it.
 			"""
+		super(LogWorker,self).process(event=event,**k)
 		exc = []
 		level = k.get("level",TRACE)
 		try:
-			if event.loglevel == NONE or event.loglevel > level:
+			if event is None:
+				loglevel = NONE
+			else:
+				loglevel = event.loglevel
+			if loglevel == NONE or loglevel > level:
 				return
 		except AttributeError:
 			pass
@@ -174,7 +179,7 @@ class LogWorker(ExcWorker):
 
 		for l in Loggers.values():
 			try:
-				l.log_event(event,level=level)
+				l.log_event(event=event,level=level)
 			except Exception,e:
 				print >>sys.stderr,"LOGGER CRASH 1"
 				print_exc(file=sys.stderr)
@@ -219,22 +224,22 @@ class LogEndEvent(Event):
 		elif not hasattr(event,"ctx"):
 			super(LogEndEvent,self).__init__(Context(),"END",event.__class__.__name__)
 		else:
-			super(LogEndEvent,self).__init__(event.ctx,"END",*event.names)
+			super(LogEndEvent,self).__init__(event.ctx,"END",*event.name)
 			self.id = event.id
 
 	def report(self, verbose=False):
 		try:
-			yield  u"END: "+unicode(Name(self.names[1:]))
+			yield  u"END: "+unicode(Name(self.name[1:]))
 		except Exception,e:
 			print >>sys.stderr,"LOGGER CRASH 4"
 			print_exc(file=sys.stderr)
-			yield  "END: REPORT_ERROR: "+repr(self.names[1:])
+			yield  "END: REPORT_ERROR: "+repr(self.name[1:])
 
 class LogDoneWorker(LogWorker):
 	prio = MAX_PRIO+1
 
-	def process(self, event,*a,**k):
-		super(LogDoneWorker,self).process(LogEndEvent(event))
+	def process(self, event=None,**k):
+		super(LogDoneWorker,self).process(event=LogEndEvent(event),**k)
 
 	def report(self,*a,**k):
 		return ("... done.",)
@@ -289,7 +294,7 @@ class log_created(Event):
 		Log creating an event.
 		"""
 	def __init__(self,seq):
-		super(log_created,self).__init__("NEW",str(seq.iid))
+		super(log_created,self).__init__("NEW",str(seq.id))
 		self.seq = seq
 		lim = levels.get("event",NONE)
 		if lim == NONE or lim > TRACE:

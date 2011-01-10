@@ -42,7 +42,7 @@ from twisted.internet import defer
 import datetime as dt
 
 class Monitors(Collection):
-    name = "monitor"
+	name = "monitor"
 Monitors = Monitors()
 Monitors.does("del")
 
@@ -51,25 +51,25 @@ class MonitorAgain(RuntimeError):
 	pass
 
 class MonitorError(RuntimeError):
-    def __init__(self,w):
-        self.monitor = w
-    def __str__(self):
-        return self.text % (" ".join(str(x) for x in self.monitor.name),)
-    def __unicode__(self):
-        return self.text % (" ".join(unicode(x) for x in self.monitor.name),)
+	def __init__(self,w):
+		self.monitor = w
+	def __str__(self):
+		return self.text % (" ".join(str(x) for x in self.monitor.name),)
+	def __unicode__(self):
+		return self.text % (" ".join(unicode(x) for x in self.monitor.name),)
 
 class DelayCancelled(MonitorError):
 	"""An error signalling that a delay was killed."""
 	text = u"Waiter ‹%s› was cancelled"
 
 class DupMonitorError(MonitorError):
-    text = u"A monitor ‹%s› already exists"
+	text = u"A monitor ‹%s› already exists"
 
 class DupWatcherError(MonitorError):
-    text = u"Already waiting for ‹%s›"
+	text = u"Already waiting for ‹%s›"
 
 class NoWatcherError(MonitorError):
-    text = u"Not waiting for ‹%s›"
+	text = u"Not waiting for ‹%s›"
 
 class Monitor(Collected):
 	"""This is the thing that watches."""
@@ -798,23 +798,24 @@ stopped
 MonitorHandler.register_statement(MonitorStopped)
 
 class Shutdown_Worker_Monitor(ExcWorker):
-    """\
-        This worker kills off all monitors.
-        """
-    prio = SYS_PRIO+3
+	"""\
+		This worker kills off all monitors.
+		"""
+	prio = SYS_PRIO+3
 
-    def does_event(self,ev):
-        return (ev is shutdown_event)
-    def process(self,queue,*a,**k):
-        d = defer.succeed(None)
-        for m in Monitors.values():
-            def tilt(_,monitor):
-                return monitor.down()
-            d.addBoth(tilt,m)
-        return d
+	def does_event(self,ev):
+		return (ev is shutdown_event)
+	def process(self, **k):
+		super(Shutdown_Worker_Monitor,self).process(**k)
+		d = defer.succeed(None)
+		for m in Monitors.values():
+			def tilt(_,monitor):
+				return monitor.down()
+			d.addBoth(tilt,m)
+		return d
 
-    def report(self,*a,**k):
-        return ()
+	def report(self,*a,**k):
+		return ()
 
 
 register_worker(Shutdown_Worker_Monitor("Monitor killer"))

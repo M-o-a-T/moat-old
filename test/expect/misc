@@ -1,104 +1,146 @@
-NEW: <ConditionalWorkSequence:1 (4)>
+NEW: <ConditionalWorkSequence:7 (4)>
+   : │  id: 7
+   : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
-NEW: <ConditionalWorkSequence:2 (4)>
-   : │  IEVENT: foo1
+NEW: <ConditionalWorkSequence:8 (4)>
+   : │  id: 8
+   : │  call count: 0
+   : │  EVENT: foo1
    : └1╴... done.
-NEW: <ConditionalWorkSequence:3 (4)>
-   : │  IEVENT: bar1
+NEW: <ConditionalWorkSequence:9 (4)>
+   : │  id: 9
+   : │  call count: 0
+   : │  EVENT: bar1
    : └1╴... done.
-NEW: <ConditionalWorkSequence:4 (4)>
+NEW: <ConditionalWorkSequence:10 (4)>
+   : │  id: 10
+   : │  call count: 0
    : │  EVENT: wait¦start¦×××¦_wait¦1
    : └1╴... done.
 EVENT: startup
 END: startup
-IEVENT: foo1
+EVENT: foo1
 END: foo1
-IEVENT: bar1
+EVENT: bar1
 END: bar1
 EVENT: wait¦start¦×××¦_wait¦1
 END: wait¦start¦×××¦_wait¦1
-NEW: <ConditionalWorkSequence:5 (4)>
+NEW: <ConditionalWorkSequence:11 (4)>
+   : │  id: 11
+   : │  call count: 0
    : │  EVENT: wait¦done¦×××¦_wait¦1
    : └1╴... done.
 EVENT: wait¦done¦×××¦_wait¦1
 END: wait¦done¦×××¦_wait¦1
-NEW: <ConditionalWorkSequence:6 (4)>
-   : │  IEVENT: foo2
+NEW: <ConditionalWorkSequence:12 (4)>
+   : │  id: 12
+   : │  call count: 0
+   : │  EVENT: foo2
    : └1╴... done.
-IEVENT: foo2
+EVENT: foo2
 END: foo2
-NEW: <ConditionalWorkSequence:7 (4)>
-   : │  IEVENT: bar2
+NEW: <ConditionalWorkSequence:13 (4)>
+   : │  id: 13
+   : │  call count: 0
+   : │  EVENT: bar2
    : └1╴... done.
-IEVENT: bar2
+EVENT: bar2
 END: bar2
-NEW: <ConditionalWorkSequence:8 (4)>
+NEW: <ConditionalWorkSequence:14 (4)>
+   : │  id: 14
+   : │  call count: 0
    : │  EVENT: wait¦start¦×××¦_wait¦2
    : └1╴... done.
 EVENT: wait¦start¦×××¦_wait¦2
 END: wait¦start¦×××¦_wait¦2
-NEW: <ConditionalWorkSequence:9 (4)>
+NEW: <ConditionalWorkSequence:15 (4)>
+   : │  id: 15
+   : │  call count: 0
    : │  EVENT: wait¦done¦×××¦_wait¦2
    : └1╴... done.
 EVENT: wait¦done¦×××¦_wait¦2
 END: wait¦done¦×××¦_wait¦2
-NEW: <ConditionalWorkSequence:10 (4)>
-   : │  IEVENT: foo3
+NEW: <ConditionalWorkSequence:16 (4)>
+   : │  id: 16
+   : │  call count: 0
+   : │  EVENT: foo3
    : └1╴... done.
-NEW: <ConditionalWorkSequence:11 (4)>
-   : │  IEVENT: bar3
+NEW: <ConditionalWorkSequence:17 (4)>
+   : │  id: 17
+   : │  call count: 0
+   : │  EVENT: bar3
    : └1╴... done.
-NEW: <ConditionalWorkSequence:12 (4)>
+NEW: <ConditionalWorkSequence:18 (4)>
+   : │  id: 18
+   : │  call count: 0
    : │  EVENT: wait¦start¦×××¦_wait¦3
    : └1╴... done.
-IEVENT: foo3
+EVENT: foo3
 END: foo3
-IEVENT: bar3
+EVENT: bar3
 END: bar3
 EVENT: wait¦start¦×××¦_wait¦3
 END: wait¦start¦×××¦_wait¦3
-NEW: <ConditionalWorkSequence:13 (4)>
+NEW: <ConditionalWorkSequence:19 (4)>
+   : │  id: 19
+   : │  call count: 0
    : │  EVENT: wait¦done¦×××¦_wait¦3
    : └1╴... done.
 EVENT: wait¦done¦×××¦_wait¦3
 END: wait¦done¦×××¦_wait¦3
-NEW: <ConditionalWorkSequence:14 (4)>
-   : │  IEVENT: foo4
+NEW: <ConditionalWorkSequence:20 (4)>
+   : │  id: 20
+   : │  call count: 0
+   : │  EVENT: foo4
    : └1╴... done.
-IEVENT: foo4
+EVENT: foo4
 END: foo4
-NEW: <ConditionalWorkSequence:15 (4)>
-   : │  IEVENT: bar4
+NEW: <ConditionalWorkSequence:21 (4)>
+   : │  id: 21
+   : │  call count: 0
+   : │  EVENT: bar4
    : └1╴... done.
-IEVENT: bar4
+EVENT: bar4
 END: bar4
-NEW: <ConditionalWorkSequence:16 (4)>
+NEW: <ConditionalWorkSequence:22 (4)>
+   : │  id: 22
+   : │  call count: 0
    : │  EVENT: wait¦start¦×××¦_wait¦4
    : └1╴... done.
 EVENT: wait¦start¦×××¦_wait¦4
 END: wait¦start¦×××¦_wait¦4
-NEW: <ConditionalWorkSequence:17 (4)>
-   : │  IEVENT: foo5
+NEW: <ConditionalWorkSequence:23 (4)>
+   : │  id: 23
+   : │  call count: 0
+   : │  EVENT: foo5
    : └1╴... done.
-IEVENT: foo5
+EVENT: foo5
 END: foo5
-NEW: <ConditionalWorkSequence:18 (4)>
+NEW: <ConditionalWorkSequence:24 (4)>
+   : │  id: 24
+   : │  call count: 0
    : │  EVENT: wait¦done¦×××¦_wait¦4
    : └1╴... done.
 EVENT: wait¦done¦×××¦_wait¦4
 END: wait¦done¦×××¦_wait¦4
-NEW: <ConditionalWorkSequence:19 (4)>
-   : │  IEVENT: bar5
+NEW: <ConditionalWorkSequence:25 (4)>
+   : │  id: 25
+   : │  call count: 0
+   : │  EVENT: bar5
    : └1╴... done.
-NEW: <ConditionalWorkSequence:20 (4)>
+NEW: <ConditionalWorkSequence:26 (4)>
+   : │  id: 26
+   : │  call count: 0
    : │  EVENT: wait¦start¦×××¦_wait¦5
    : └1╴... done.
-IEVENT: bar5
+EVENT: bar5
 END: bar5
 EVENT: wait¦start¦×××¦_wait¦5
 END: wait¦start¦×××¦_wait¦5
-NEW: <ConditionalWorkSequence:21 (4)>
+NEW: <ConditionalWorkSequence:27 (4)>
+   : │  id: 27
+   : │  call count: 0
    : │  EVENT: wait¦done¦×××¦_wait¦5
    : └1╴... done.
 EVENT: wait¦done¦×××¦_wait¦5

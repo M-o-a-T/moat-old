@@ -148,3 +148,7 @@ class IfElseModule(Module):
 		main_words.unregister_statement(ElseIfStatement)
 	
 init = IfElseModule
+
+import warnings
+warnings.filterwarnings('ignore', message="returnValue.*", category=DeprecationWarning, lineno=85)
+

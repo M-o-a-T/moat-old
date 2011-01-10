@@ -1,23 +1,29 @@
-NEW: <ConditionalWorkSequence:1 (4)>
+NEW: <ConditionalWorkSequence:8 (4)>
+   : │  id: 8
+   : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
 1 Yes
 0 Create OnEvtHandler: pcm¦set¦*X¦foo¦bar
-0 NewHandler 1
+0 NewHandler 9
 1 Yes
 foo bar :: (new)
 .
 type: PWM
 name: foo bar
 .
-NEW: <ConditionalWorkSequence:2 (4)>
+NEW: <ConditionalWorkSequence:10 (4)>
+   : │  id: 10
+   : │  call count: 0
    : │  EVENT: wait¦start¦0.5¦_wait¦2
    : └1╴... done.
 EVENT: startup
 END: startup
 EVENT: wait¦start¦0.5¦_wait¦2
 END: wait¦start¦0.5¦_wait¦2
-NEW: <ConditionalWorkSequence:3 (4)>
+NEW: <ConditionalWorkSequence:11 (4)>
+   : │  id: 11
+   : │  call count: 0
    : │  EVENT: wait¦done¦0.5¦_wait¦2
    : └1╴... done.
 EVENT: wait¦done¦0.5¦_wait¦2
@@ -29,19 +35,25 @@ next: 8.5 sec
 t_off: 9.0 sec
 t_on: 1.0 sec
 .
-NEW: <ConditionalWorkSequence:4 (4)>
+NEW: <ConditionalWorkSequence:12 (4)>
+   : │  id: 12
+   : │  call count: 0
    : │  EVENT: wait¦start¦9.0¦_wait¦3
    : └1╴... done.
 EVENT: wait¦start¦9.0¦_wait¦3
 END: wait¦start¦9.0¦_wait¦3
-NEW: <ConditionalWorkSequence:5 (5)>
+NEW: <ConditionalWorkSequence:13 (5)>
+   : │  id: 13
+   : │  call count: 0
    : │  EVENT: pcm¦set¦on¦foo¦bar
    : ├1╴on pcm set *X foo bar ‹OnEventHandler›
    : │  prio: 51
    : │  step: log DEBUG PCM is now $X ‹LogHandler›
    : │  step: wait ‹WaitHandler›
    : └2╴... done.
-NEW: <ConditionalWorkSequence:6 (4)>
+NEW: <ConditionalWorkSequence:14 (4)>
+   : │  id: 14
+   : │  call count: 0
    : │  EVENT: wait¦done¦9.0¦_wait¦3
    : └1╴... done.
 EVENT: pcm¦set¦on¦foo¦bar
@@ -49,10 +61,12 @@ RUN: on pcm set *X foo bar ‹OnEventHandler›
    : prio: 51
    : step: log DEBUG PCM is now $X ‹LogHandler›
    : step: wait ‹WaitHandler›
- at: <ConditionalWorkSequence:5 (5)> (step 1)
+ at: <ConditionalWorkSequence:13 (5)> (step 1)
  ev: EVENT: pcm¦set¦on¦foo¦bar
 1 PCM is now on
-NEW: <ConditionalWorkSequence:7 (4)>
+NEW: <ConditionalWorkSequence:15 (4)>
+   : │  id: 15
+   : │  call count: 0
    : │  EVENT: wait¦start¦9.1¦_wait¦1
    : └1╴... done.
 EVENT: wait¦done¦9.0¦_wait¦3
@@ -65,20 +79,26 @@ next: now
 t_off: 9.0 sec
 t_on: 1.0 sec
 .
-NEW: <ConditionalWorkSequence:8 (4)>
+NEW: <ConditionalWorkSequence:16 (4)>
+   : │  id: 16
+   : │  call count: 0
    : │  EVENT: wait¦start¦24.0¦_wait¦4
    : └1╴... done.
 EVENT: wait¦start¦9.1¦_wait¦1
 END: wait¦start¦9.1¦_wait¦1
 EVENT: wait¦start¦24.0¦_wait¦4
 END: wait¦start¦24.0¦_wait¦4
-NEW: <ConditionalWorkSequence:9 (4)>
+NEW: <ConditionalWorkSequence:17 (4)>
+   : │  id: 17
+   : │  call count: 0
    : │  EVENT: wait¦done¦9.1¦_wait¦1
    : └1╴... done.
 EVENT: wait¦done¦9.1¦_wait¦1
 END: wait¦done¦9.1¦_wait¦1
 END: pcm¦set¦on¦foo¦bar
-NEW: <ConditionalWorkSequence:10 (5)>
+NEW: <ConditionalWorkSequence:18 (5)>
+   : │  id: 18
+   : │  call count: 0
    : │  EVENT: pcm¦set¦off¦foo¦bar
    : ├1╴on pcm set *X foo bar ‹OnEventHandler›
    : │  prio: 51
@@ -90,21 +110,27 @@ RUN: on pcm set *X foo bar ‹OnEventHandler›
    : prio: 51
    : step: log DEBUG PCM is now $X ‹LogHandler›
    : step: wait ‹WaitHandler›
- at: <ConditionalWorkSequence:10 (5)> (step 1)
+ at: <ConditionalWorkSequence:18 (5)> (step 1)
  ev: EVENT: pcm¦set¦off¦foo¦bar
 1 PCM is now off
-NEW: <ConditionalWorkSequence:11 (4)>
+NEW: <ConditionalWorkSequence:19 (4)>
+   : │  id: 19
+   : │  call count: 0
    : │  EVENT: wait¦start¦10.1¦_wait¦1
    : └1╴... done.
 EVENT: wait¦start¦10.1¦_wait¦1
 END: wait¦start¦10.1¦_wait¦1
-NEW: <ConditionalWorkSequence:12 (4)>
+NEW: <ConditionalWorkSequence:20 (4)>
+   : │  id: 20
+   : │  call count: 0
    : │  EVENT: wait¦done¦10.1¦_wait¦1
    : └1╴... done.
 EVENT: wait¦done¦10.1¦_wait¦1
 END: wait¦done¦10.1¦_wait¦1
 END: pcm¦set¦off¦foo¦bar
-NEW: <ConditionalWorkSequence:13 (5)>
+NEW: <ConditionalWorkSequence:21 (5)>
+   : │  id: 21
+   : │  call count: 0
    : │  EVENT: pcm¦set¦on¦foo¦bar
    : ├1╴on pcm set *X foo bar ‹OnEventHandler›
    : │  prio: 51
@@ -116,21 +142,27 @@ RUN: on pcm set *X foo bar ‹OnEventHandler›
    : prio: 51
    : step: log DEBUG PCM is now $X ‹LogHandler›
    : step: wait ‹WaitHandler›
- at: <ConditionalWorkSequence:13 (5)> (step 1)
+ at: <ConditionalWorkSequence:21 (5)> (step 1)
  ev: EVENT: pcm¦set¦on¦foo¦bar
 1 PCM is now on
-NEW: <ConditionalWorkSequence:14 (4)>
+NEW: <ConditionalWorkSequence:22 (4)>
+   : │  id: 22
+   : │  call count: 0
    : │  EVENT: wait¦start¦19.1¦_wait¦1
    : └1╴... done.
 EVENT: wait¦start¦19.1¦_wait¦1
 END: wait¦start¦19.1¦_wait¦1
-NEW: <ConditionalWorkSequence:15 (4)>
+NEW: <ConditionalWorkSequence:23 (4)>
+   : │  id: 23
+   : │  call count: 0
    : │  EVENT: wait¦done¦19.1¦_wait¦1
    : └1╴... done.
 EVENT: wait¦done¦19.1¦_wait¦1
 END: wait¦done¦19.1¦_wait¦1
 END: pcm¦set¦on¦foo¦bar
-NEW: <ConditionalWorkSequence:16 (5)>
+NEW: <ConditionalWorkSequence:24 (5)>
+   : │  id: 24
+   : │  call count: 0
    : │  EVENT: pcm¦set¦off¦foo¦bar
    : ├1╴on pcm set *X foo bar ‹OnEventHandler›
    : │  prio: 51
@@ -142,28 +174,36 @@ RUN: on pcm set *X foo bar ‹OnEventHandler›
    : prio: 51
    : step: log DEBUG PCM is now $X ‹LogHandler›
    : step: wait ‹WaitHandler›
- at: <ConditionalWorkSequence:16 (5)> (step 1)
+ at: <ConditionalWorkSequence:24 (5)> (step 1)
  ev: EVENT: pcm¦set¦off¦foo¦bar
 1 PCM is now off
-NEW: <ConditionalWorkSequence:17 (4)>
+NEW: <ConditionalWorkSequence:25 (4)>
+   : │  id: 25
+   : │  call count: 0
    : │  EVENT: wait¦start¦20.1¦_wait¦1
    : └1╴... done.
 EVENT: wait¦start¦20.1¦_wait¦1
 END: wait¦start¦20.1¦_wait¦1
-NEW: <ConditionalWorkSequence:18 (4)>
+NEW: <ConditionalWorkSequence:26 (4)>
+   : │  id: 26
+   : │  call count: 0
    : │  EVENT: wait¦done¦20.1¦_wait¦1
    : └1╴... done.
 EVENT: wait¦done¦20.1¦_wait¦1
 END: wait¦done¦20.1¦_wait¦1
 END: pcm¦set¦off¦foo¦bar
-NEW: <ConditionalWorkSequence:19 (4)>
+NEW: <ConditionalWorkSequence:27 (4)>
+   : │  id: 27
+   : │  call count: 0
    : │  EVENT: wait¦done¦24.0¦_wait¦4
    : └1╴... done.
 EVENT: wait¦done¦24.0¦_wait¦4
 END: wait¦done¦24.0¦_wait¦4
 foo bar :: 0.100000 1.0 sec / 9.0 sec
 .
-NEW: <ConditionalWorkSequence:20 (7)>
+NEW: <ConditionalWorkSequence:28 (7)>
+   : │  id: 28
+   : │  call count: 0
    : │  EVENT: shutdown
    : └1╴... done.
 EVENT: shutdown

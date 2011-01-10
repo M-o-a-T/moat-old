@@ -864,7 +864,8 @@ class OWFSdevice(object):
 	def _init(self, bus, short_id=None, id=None, path=()):
 		log("onewire",DEBUG,"NEW", bus,short_id,id,path)
 		self.bus_id = id
-		self.id = short_id.lower()
+		if short_id:
+			self.id = short_id.lower()
 		self.bus = bus
 		self.path = path
 		self.is_up = None

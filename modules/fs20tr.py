@@ -451,7 +451,8 @@ class FS20tr_shutdown(ExcWorker):
 
 	def does_event(self,ev):
 		return (ev is shutdown_event)
-	def process(self,queue,*a,**k):
+	def process(self, **k):
+		super(FS20tr_shutdown.__class__,self).process(**k)
 		for proc in recvs.itervalues():
 			proc.do_stop()
 		for proc in xmits.itervalues():

@@ -1,4 +1,6 @@
-NEW: <ConditionalWorkSequence:1 (4)>
+NEW: <ConditionalWorkSequence:7 (4)>
+   : │  id: 7
+   : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
 block :: Block-level statements
@@ -11,12 +13,12 @@ name: on_event
 path: ../modules/on_event.py
 info: the 'on EVENT:' handler
 .
--10 :: Logger
--9 :: shutdown first
--8 :: Wait killer
-101 :: Logger
-102 :: shutdown handler
-103 :: shutdown last
+1 :: Logger
+4 :: shutdown first
+3 :: Wait killer
+2 :: Logger
+6 :: shutdown handler
+5 :: shutdown last
 .
 .
 event
@@ -27,72 +29,80 @@ wait
 worker
 .
 0 Create OnEvtHandler: foo
-0 NewHandler 1
-NEW: <ConditionalWorkSequence:2 (4)>
+0 NewHandler 8
+NEW: <ConditionalWorkSequence:9 (4)>
+   : │  id: 9
+   : │  call count: 0
    : │  EVENT: wait¦start¦×××¦_wait¦2
    : └1╴... done.
 EVENT: startup
 END: startup
 EVENT: wait¦start¦×××¦_wait¦2
 END: wait¦start¦×××¦_wait¦2
-NEW: <ConditionalWorkSequence:3 (4)>
+NEW: <ConditionalWorkSequence:10 (4)>
+   : │  id: 10
+   : │  call count: 0
    : │  EVENT: wait¦done¦×××¦_wait¦2
    : └1╴... done.
 EVENT: wait¦done¦×××¦_wait¦2
 END: wait¦done¦×××¦_wait¦2
-NEW: <ConditionalWorkSequence:4 (5)>
-   : │  IEVENT: foo
+NEW: <ConditionalWorkSequence:11 (5)>
+   : │  id: 11
+   : │  call count: 0
+   : │  EVENT: foo
    : ├1╴on foo ‹OnEventHandler›
    : │  prio: 51
    : │  step: block ‹Block›
    : │      : step: wait foo waiter ‹WaitHandler›
    : └2╴... done.
-NEW: <ConditionalWorkSequence:5 (4)>
+NEW: <ConditionalWorkSequence:12 (4)>
+   : │  id: 12
+   : │  call count: 0
    : │  EVENT: wait¦start¦×××¦_wait¦3
    : └1╴... done.
-IEVENT: foo
+EVENT: foo
 RUN: on foo ‹OnEventHandler›
    : prio: 51
    : step: block ‹Block›
    :     : step: wait foo waiter ‹WaitHandler›
- at: <ConditionalWorkSequence:4 (5)> (step 1)
- ev: IEVENT: foo
-NEW: <ConditionalWorkSequence:6 (4)>
+ at: <ConditionalWorkSequence:11 (5)> (step 1)
+ ev: EVENT: foo
+NEW: <ConditionalWorkSequence:13 (4)>
+   : │  id: 13
+   : │  call count: 0
    : │  EVENT: wait¦start¦×××¦foo¦waiter
    : └1╴... done.
 EVENT: wait¦start¦×××¦_wait¦3
 END: wait¦start¦×××¦_wait¦3
 EVENT: wait¦start¦×××¦foo¦waiter
 END: wait¦start¦×××¦foo¦waiter
-NEW: <ConditionalWorkSequence:7 (4)>
+NEW: <ConditionalWorkSequence:14 (4)>
+   : │  id: 14
+   : │  call count: 0
    : │  EVENT: wait¦done¦×××¦_wait¦3
    : └1╴... done.
 EVENT: wait¦done¦×××¦_wait¦3
 END: wait¦done¦×××¦_wait¦3
-4 :: Worker 4 for ‹foo›
+4 :: foo
 .
-id: 4
-event: foo
-report: <ConditionalWorkSequence:4 (5)>
-report: │  IEVENT: foo
-report: ╞1╕on foo ‹OnEventHandler›
-report: │ │prio: 51
-report: │ │step: block ‹Block›
-report: │ ╵    : step: wait foo waiter ‹WaitHandler›
-report: └2╴... done.
-.
-NEW: <ConditionalWorkSequence:8 (4)>
+NEW: <ConditionalWorkSequence:15 (4)>
+   : │  id: 15
+   : │  call count: 0
    : │  EVENT: wait¦start¦×××¦_wait¦4
    : └1╴... done.
 EVENT: wait¦start¦×××¦_wait¦4
 END: wait¦start¦×××¦_wait¦4
-NEW: <ConditionalWorkSequence:9 (4)>
+NEW: <ConditionalWorkSequence:16 (4)>
+   : │  id: 16
+   : │  call count: 0
    : │  EVENT: wait¦done¦×××¦foo¦waiter
    : └1╴... done.
 EVENT: wait¦done¦×××¦foo¦waiter
 END: wait¦done¦×××¦foo¦waiter
 END: foo
-NEW: <ConditionalWorkSequence:10 (4)>
+NEW: <ConditionalWorkSequence:17 (4)>
+   : │  id: 17
+   : │  call count: 0
    : │  EVENT: wait¦done¦×××¦_wait¦4
    : └1╴... done.
 EVENT: wait¦done¦×××¦_wait¦4

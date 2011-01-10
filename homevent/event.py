@@ -59,7 +59,7 @@ class Event(object):
 		This is an event. It happens and gets analyzed by the system.
 		"""
 	loglevel = None
-	def __init__(self, ctx, *names):
+	def __init__(self, ctx, *name):
 		"""\
 			Events have a context and at least one name. For example:
 				Event(ctx, "startup")
@@ -67,9 +67,9 @@ class Event(object):
 				Event(ctx, "switch","dim","livingroom","lamp12")
 				Event(ctx, "timer","timeout","t123")
 			"""
-		self._name_check(names)
-		#print "E_INIT",names,"with",ctx
-		self.names = Name(names)
+		self._name_check(name)
+		#print "E_INIT",name,"with",ctx
+		self.name = Name(name)
 		self.ctx = ctx
 		try:
 			self.loglevel = ctx.loglevel
@@ -80,51 +80,58 @@ class Event(object):
 		event_id += 1
 		self.id = event_id
 
-	def _name_check(self,names):
-		if not len(names):
+	def _name_check(self,name):
+		if not len(name):
 			raise EventNoNameError
 
 	def __repr__(self):
-		if not hasattr(self,"names"):
+		if not hasattr(self,"name"):
 			return "%s(<uninitialized>)" % (self.__class__.__name__,)
-		return "%s(%s)" % (self.__class__.__name__, ",".join(repr(n) for n in self.names))
+		return "%s(%s)" % (self.__class__.__name__, ",".join(repr(n) for n in self.name))
 
 	def __str__(self):
 		try:
-			return "<Event:%s>" % (self.names,)
+			return "<Event:%s>" % (self.name,)
 		except Exception:
-			return "<Event> REPORT_ERROR: "+repr(self.names)
+			return "<Event> REPORT_ERROR: "+repr(self.name)
 
 	def __unicode__(self):
 		try:
-			return u"↯."+unicode(self.names)
+			return u"↯."+unicode(self.name)
 		except Exception:
-			return "↯ REPORT_ERROR: "+repr(self.names)
+			return "↯ REPORT_ERROR: "+repr(self.name)
 
 	def report(self, verbose=False):
 		try:
-			yield u"EVENT: "+unicode(self.names)
+			yield u"EVENT: "+unicode(self.name)
 		except Exception:
-			yield "EVENT: REPORT_ERROR: "+repr(self.names)
+			yield "EVENT: REPORT_ERROR: "+repr(self.name)
+	
+	def list(self):
+		yield (unicode(self.name),)
+		if self.__class__ is not Event:
+			yield ("type",self.__class__.__name__)
+		if self.loglevel is not None:
+			yield ("log level",self.loglevel)
 	
 	def __getitem__(self,i):
-		u"""… so that you can write e[0] instead of e.names[0]"""
-		return self.names[i]
+		u"""… so that you can write e[0] instead of e.name[0]"""
+		return self.name[i]
 	
 	def __getslice__(self,i,j):
-		u"""… so that you can write e[2:] instead of e.names[2:]"""
-		return list(self.names[i:j])
+		u"""… so that you can write e[2:] instead of e.name[2:]"""
+		return list(self.name[i:j])
 		# list() because the result may need to be modified by the caller
 	
 	def __setitem__(self,i,j):
 		raise RuntimeError("You cannot modify an event!")
 
 	def __len__(self):
-		return len(self.names)
+		return len(self.name)
 	def __bool__(self):
 		return True
 	def __iter__(self):
-		return self.names.__iter__()
+		return self.name.__iter__()
 
 	def apply(self, ctx=None, drop=0):
 		"""\
@@ -139,7 +146,7 @@ class Event(object):
 		else:
 			ctx = ctx(ctx=self.ctx)
 
-		for n in self.names[drop:]:
+		for n in self.name[drop:]:
 			if hasattr(n,"startswith") and n.startswith('$'):
 				r = getattr(ctx,n[1:])
 #				if n == "$X":
@@ -162,7 +169,7 @@ class Event(object):
 		else:
 			ctx = ctx(ctx=self.ctx)
 
-		return self.__class__(ctx, *self.names[drop:])
+		return self.__class__(ctx, *self.name[drop:])
 
 #Monkey-patch t.p.f.Failure to answer to our report() call
 

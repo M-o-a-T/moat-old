@@ -1,4 +1,6 @@
-NEW: <ConditionalWorkSequence:1 (4)>
+NEW: <ConditionalWorkSequence:6 (4)>
+   : │  id: 6
+   : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
 0 Yes!
@@ -8,14 +10,18 @@ END: startup
 0 Yes!
 0 Yes!
 0 We still have three
-NEW: <ConditionalWorkSequence:2 (4)>
+NEW: <ConditionalWorkSequence:7 (4)>
+   : │  id: 7
+   : │  call count: 0
    : │  EVENT: state¦three¦-¦foo¦bar
    : └1╴... done.
 EVENT: state¦three¦-¦foo¦bar
 END: state¦three¦-¦foo¦bar
 .
 0 Yes!
-NEW: <ConditionalWorkSequence:3 (5)>
+NEW: <ConditionalWorkSequence:8 (5)>
+   : │  id: 8
+   : │  call count: 0
    : │  EVENT: shutdown
    : └1╴... done.
 EVENT: shutdown

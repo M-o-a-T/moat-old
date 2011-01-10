@@ -28,6 +28,7 @@ from homevent.context import Context
 from homevent.event import Event,TrySomethingElse,NeverHappens
 from homevent.base import Name,MIN_PRIO,MAX_PRIO
 from homevent.twist import deferToLater, BaseFailure
+from homevent.times import humandelta, now
 
 from twisted.internet import defer
 from twisted.internet.threads import deferToThread
@@ -46,6 +47,8 @@ class HaltSequence(Exception):
 	pass
 	
 
+seqnum = 0
+
 class WorkItem(object):
 	u"""\
 		One particular thing to do.
@@ -56,23 +59,65 @@ class WorkItem(object):
 		This class itself is a dummy and does nothing, so you can use it
 		to … well … do nothing.
 		"""
-	name = "No Work"
+	name = None
 	prio = MIN_PRIO # not relevant here, but a required attribute
+	id = 0
+	call_count = 0
+	last_call = None
+	last_args = None
 
-	def process(self,*a,**k):
-		pass
+	def __init__(self):
+		self._get_id()
+
+	def _get_id(self):
+		if not self.id:
+			global seqnum
+			seqnum += 1
+			self.id = seqnum
+		return self.id
+
+	def process(self, **k):
+		self.call_count += 1 
+		self.last_call = now()
+		self.last_args = k
 	
 	def report(self, verbose=False):
-		yield "WORK: "+self.name
+		if self.name:
+			yield "WORK: "+self.name
+		if self.id:
+			yield "id: "+str(self.id)
+		yield "call count: "+str(self.call_count)
+		if self.last_call:
+			yield "last call: "+humandelta(now()-self.last_call)
+		if self.last_args:
+			for a,b in self.last_args.iteritems():
+				yield "last %s: %s" % (a,b)
+
+	def list(self):
+		yield (unicode(self),)
+		yield ("id",self.id)
+		if hasattr(self,"event"):
+			yield ("event",Name(self.event))
+		if self.name:
+			yield ("name",Name(self.name))
+		yield ("call count",str(self.call_count))
+		if self.last_call:
+			yield ("last call",humandelta(now()-self.last_call))
+		if self.last_args:
+			for a,b in self.last_args.iteritems():
+				yield ("last",a,b)
+		for r in self.report(verbose=98):
+			yield ("code",r)
+
 
 	def __repr__(self):
-		return "<Item:%s>" % (self.name)
+		if self.id:
+			return "<Item %d:%s>" % (self.id,self.name)
+		return "<Item:%s>" % (self.name,)
 
 	def __str__(self):
 		return repr(self)
 
-
-seqnum = 0
 
 class WorkSequence(WorkItem):
 	"""\ 
@@ -87,31 +132,23 @@ class WorkSequence(WorkItem):
 	in_worker = None
 
 	def __init__(self, event, worker):
-		global seqnum
-		seqnum += 1
+		super(WorkSequence,self).__init__()
 		self.work = []
 		self.event = event
 		self.worker = worker
-		if hasattr(event,"id"):
-			self.id = self.event.id
+#		if hasattr(event,"id"):
+#			self.id = self.event.id
 		if hasattr(event,"ctx"):
 			self.ctx = event.ctx()
 		else:
 			self.ctx = Context()
-		self.iid = seqnum
 
-		self.info = u"Worker %d for ‹%s›" % (self.iid,Name(self.event))
-
-	def list(self):
-		yield ("id",self.iid)
-		yield ("event",Name(self.event))
-		for l in self.report(99):
-			yield ("report",l)
+		self.info = u"Worker %d for ‹%s›" % (self.id,Name(self.event))
 
 	def __repr__(self):
 		if not hasattr(self,"work"):
-			return "<%s:%d (?)>" % (self.__class__.__name__,self.iid)
-		return "<%s:%d (%d)>" % (self.__class__.__name__, self.iid, len(self.work))
+			return "<%s:%d (?)>" % (self.__class__.__name__,self.id)
+		return "<%s:%d (%d)>" % (self.__class__.__name__, self.id, len(self.work))
 	
 	def __str__(self):
 		return repr(self)
@@ -125,8 +162,9 @@ class WorkSequence(WorkItem):
 			w = wn
 		self.work.append(w)
 
-	def process(self, *a,**k):
-		r = deferToLater(self._process,*a,**k)
+	def process(self, **k):
+		super(WorkSequence,self).process(**k)
+		r = deferToLater(self._process)
 #		if "HOMEVENT_TEST" in os.environ:
 #			r = deferToLater(self._process,*a,**k)
 #		else:
@@ -136,7 +174,7 @@ class WorkSequence(WorkItem):
 	handle_conditional = False
 
 	@defer.inlineCallbacks
-	def _process(self, *a,**k):
+	def _process(self):
 		assert self.work,"empty workqueue"
 		self.in_step = step = 0
 		self.in_worker = None
@@ -201,7 +239,7 @@ class WorkSequence(WorkItem):
 				yield process_failure(res)
 				res = r
 
-		defer.returnValue(res)
+		defer.returnValue(res) ## may warn; mapped off at bottom of file
 
 	def report(self, verbose=False):
 		if not verbose:
@@ -212,16 +250,19 @@ class WorkSequence(WorkItem):
 			v = verbose
 		else:
 			v = 1
-		yield unicode(self)
-		if self.work:
-			prefix = "│  "
-		else:
-			prefix = "   "
-		if hasattr(self.event,"report"):
-			for r in self.event.report(False):
+		if verbose != 98:
+			yield unicode(self)
+			if self.work:
+				prefix = "│  "
+			else:
+				prefix = "   "
+			for r in super(WorkSequence,self).report(verbose):
 				yield prefix+r
-		else:
-			yield prefix+unicode(self.event)
+			if hasattr(self.event,"report"):
+				for r in self.event.report(False):
+					yield prefix+r
+			else:
+				yield prefix+unicode(self.event)
 		if self.worker:
 			w="by "
 			for r in self.worker.report(verbose):
@@ -282,7 +323,7 @@ def ConcurrentWorkSequence(WorkSequence):
 	# TODO
 	pass
 
-class Worker(object):
+class Worker(WorkItem):
 	"""\
 		This is a generic worker. It accepts an event and does things to it.
 		"""
@@ -294,14 +335,18 @@ class Worker(object):
 			You need to pass a hopefully-unique name (in addition to any
 			other arguments your subclass needs).
 			"""
+		super(Worker,self).__init__()
 		self.name = name
-		self.id = 0
 
 	def __repr__(self):
 		if not hasattr(self,"name"):
 			return "%s(<uninitialized>)" % (self.__class__.__name__,)
-		return "%s(%s)" % \
-			(self.__class__.__name__, repr(self.name))
+		if self.id:
+			return "%s(%d:%s)" % \
+				(self.__class__.__name__, self.id,repr(self.name))
+		else:
+			return "%s(%s)" % \
+				(self.__class__.__name__, repr(self.name))
 
 	def __str__(self):
 		return "=> %s:%s" % (self.__class__.__name__, self.name)
@@ -321,14 +366,14 @@ class Worker(object):
 			"""
 		raise AssertionError("You need to override does_event()")
 	
-	def process(self, event,*a,**k):
-		"""\
-			Actually do the work on this event.
-
-			You need to override this. Don't forget to set self.id, if
-			appropriate.
-			"""
-		raise AssertionError("You need to override process()")
+#	def process(self, **k):
+#		"""\
+#			Actually do the work on this event.
+#
+#			You need to override this. Don't forget to call super() first.
+#			"""
+#		super(Worker,self).process(**k)
+#		raise AssertionError("%s: You need to override process()" % (self.__class__.__name__,))
 	
 
 class SeqWorker(Worker):
@@ -355,6 +400,9 @@ class DoNothingWorker(Worker):
 		super(DoNothingWorker,self).__init__("no-op")
 	def does_event(self,event):
 		return True
-	def process(self, event, *a,**k):
-		pass
+	def process(self, **k):
+		super(DoNothingWorker,self).process(**k)
+
+import warnings
+warnings.filterwarnings('ignore', message="returnValue.*", category=DeprecationWarning, lineno=242)
 

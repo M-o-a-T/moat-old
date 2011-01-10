@@ -1,4 +1,6 @@
-NEW: <ConditionalWorkSequence:1 (4)>
+NEW: <ConditionalWorkSequence:8 (4)>
+   : │  id: 8
+   : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
 .
@@ -7,14 +9,18 @@ test :: (new)
 name: test
 cur_value: None
 .
-NEW: <ConditionalWorkSequence:2 (4)>
+NEW: <ConditionalWorkSequence:9 (4)>
+   : │  id: 9
+   : │  call count: 0
    : │  EVENT: wait¦start¦0.2¦_wait¦1
    : └1╴... done.
 EVENT: startup
 END: startup
 EVENT: wait¦start¦0.2¦_wait¦1
 END: wait¦start¦0.2¦_wait¦1
-NEW: <ConditionalWorkSequence:3 (4)>
+NEW: <ConditionalWorkSequence:10 (4)>
+   : │  id: 10
+   : │  call count: 0
    : │  EVENT: wait¦done¦0.2¦_wait¦1
    : └1╴... done.
 EVENT: wait¦done¦0.2¦_wait¦1
@@ -26,12 +32,16 @@ total_time: now
 last_value: 2.0
 value: 2.0
 .
-NEW: <ConditionalWorkSequence:4 (4)>
+NEW: <ConditionalWorkSequence:11 (4)>
+   : │  id: 11
+   : │  call count: 0
    : │  EVENT: wait¦start¦1.2¦_wait¦2
    : └1╴... done.
 EVENT: wait¦start¦1.2¦_wait¦2
 END: wait¦start¦1.2¦_wait¦2
-NEW: <ConditionalWorkSequence:5 (4)>
+NEW: <ConditionalWorkSequence:12 (4)>
+   : │  id: 12
+   : │  call count: 0
    : │  EVENT: wait¦done¦1.2¦_wait¦2
    : └1╴... done.
 EVENT: wait¦done¦1.2¦_wait¦2
@@ -52,12 +62,16 @@ value: 2.0
 .
 1 Yes
 1 Yes
-NEW: <ConditionalWorkSequence:6 (4)>
+NEW: <ConditionalWorkSequence:13 (4)>
+   : │  id: 13
+   : │  call count: 0
    : │  EVENT: wait¦start¦3.2¦_wait¦3
    : └1╴... done.
 EVENT: wait¦start¦3.2¦_wait¦3
 END: wait¦start¦3.2¦_wait¦3
-NEW: <ConditionalWorkSequence:7 (4)>
+NEW: <ConditionalWorkSequence:14 (4)>
+   : │  id: 14
+   : │  call count: 0
    : │  EVENT: wait¦done¦3.2¦_wait¦3
    : └1╴... done.
 EVENT: wait¦done¦3.2¦_wait¦3
@@ -65,7 +79,9 @@ END: wait¦done¦3.2¦_wait¦3
 1 Yes
 1 Yes
 .
-NEW: <ConditionalWorkSequence:8 (7)>
+NEW: <ConditionalWorkSequence:15 (7)>
+   : │  id: 15
+   : │  call count: 0
    : │  EVENT: shutdown
    : └1╴... done.
 EVENT: shutdown

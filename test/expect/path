@@ -1,4 +1,6 @@
-NEW: <ConditionalWorkSequence:1 (4)>
+NEW: <ConditionalWorkSequence:6 (4)>
+   : │  id: 6
+   : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
 1 Yes
@@ -9,7 +11,9 @@ NEW: <ConditionalWorkSequence:1 (4)>
 1 Yes
 EVENT: startup
 END: startup
-NEW: <ConditionalWorkSequence:2 (5)>
+NEW: <ConditionalWorkSequence:7 (5)>
+   : │  id: 7
+   : │  call count: 0
    : │  EVENT: shutdown
    : └1╴... done.
 EVENT: shutdown

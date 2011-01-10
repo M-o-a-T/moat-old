@@ -1,21 +1,29 @@
-NEW: <ConditionalWorkSequence:1 (4)>
+NEW: <ConditionalWorkSequence:6 (4)>
+   : │  id: 6
+   : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
 1 Loading!
-NEW: <ConditionalWorkSequence:2 (4)>
+NEW: <ConditionalWorkSequence:7 (4)>
+   : │  id: 7
+   : │  call count: 0
    : │  EVENT: module¦load¦example
    : └1╴... done.
 EVENT: startup
 END: startup
 EVENT: module¦load¦example
 END: module¦load¦example
-NEW: <ConditionalWorkSequence:3 (4)>
+NEW: <ConditionalWorkSequence:8 (4)>
+   : │  id: 8
+   : │  call count: 0
    : │  EVENT: module¦unload¦example
    : └1╴... done.
 EVENT: module¦unload¦example
 END: module¦unload¦example
 1 Unloading!
-NEW: <ConditionalWorkSequence:4 (5)>
+NEW: <ConditionalWorkSequence:9 (5)>
+   : │  id: 9
+   : │  call count: 0
    : │  EVENT: shutdown
    : └1╴... done.
 EVENT: shutdown

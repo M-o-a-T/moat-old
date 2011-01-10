@@ -441,7 +441,8 @@ class FS20avr_shutdown(ExcWorker):
 
 	def does_event(self,ev):
 		return (ev is shutdown_event)
-	def process(self,queue,*a,**k):
+	def process(self, **k):
+		super(FS20avr_shutdown,self).process(**k)
 		for proc in AVRs.itervalues():
 			proc.do_stop()
 		raise TrySomethingElse

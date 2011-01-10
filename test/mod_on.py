@@ -65,7 +65,7 @@ list on Skipped Two
 sync trigger bar foo
 del on Last Handler
 sync trigger bar foo
-del on 1
+del on fuß
 list on
 trigger fuß
 trigger num "1"

@@ -100,10 +100,12 @@ class Waiter(Collected):
 			raise DupWaiterError(self)
 	
 	def list(self):
-		yield("name"," ".join(unicode(x) for x in self.name))
+		yield super(Waiter,self)
 		yield("started",self.start)
 		yield("ending",self.end)
-		yield("remaining", humandelta(self.value))
+		yield("total", humandelta(self.end-self.start))
+		yield("waited", humandelta(now()-self.start))
+		yield("remaining", self.value)
 		w = self
 		while True:
 			w = getattr(w,"parent",None)
@@ -442,7 +444,8 @@ class Shutdown_Worker_Wait(ExcWorker):
 
     def does_event(self,ev):
         return (ev is shutdown_event)
-    def process(self,queue,*a,**k):
+    def process(self, **k):
+		super(Shutdown_Worker_Wait,self).process(**k)
 		d = defer.succeed(None)
 		for w in Waiters.values():
 			def tilt(_,waiter):

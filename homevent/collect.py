@@ -127,12 +127,13 @@ class Collected(object):
 
 	def list(self):
 		"""Yield a couple of (left,right) tuples, for enumeration."""
-		raise NotImplementedError("You need to override 'list' in '%s'" % (self.__class__.__name__,))
+		yield (unicode(self),)
+		yield ("name",self.name)
 
-	def delete(self, ctx=None):
-		"""Remove myself from a collection"""
-		raise NotImplementedError("You need to override 'del' in '%s'" % (self.__class__.__name__,))
-
+#	def delete(self, ctx=None):
+#		"""Remove myself from a collection"""
+#		raise NotImplementedError("You need to override 'del' in '%s'" % (self.__class__.__name__,))
+#
 	def delete_done(self):
 		del self.storage[self.name]
 

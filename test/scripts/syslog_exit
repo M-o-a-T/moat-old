@@ -18,10 +18,13 @@ set -e
 
 trap "rm -f /tmp/nc_$USER /tmp/nc_$USER.pid /tmp/f.$$" 0 1
 
+if test -d test; then cd test; fi
+
 kill -9 $(cat /tmp/nc_$USER.pid) || true
 cat >/tmp/f.$$ <<'END'
 <172>HomEvenT: Five Warn
 END
+perl -p -e 's/\0/\n/g' -i /tmp/nc_$USER
 sed -e "s/ at 0x[0-9A-Fa-f]*/ at 0x×××/g" \
 	-i real/syslog
 

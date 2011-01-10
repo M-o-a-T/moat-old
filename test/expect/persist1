@@ -1,4 +1,6 @@
-NEW: <ConditionalWorkSequence:1 (4)>
+NEW: <ConditionalWorkSequence:6 (4)>
+   : │  id: 6
+   : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
 0 Yes!
@@ -8,22 +10,28 @@ END: startup
 0 Yes!
 0 Yes!
 0 Set to ONE
-NEW: <ConditionalWorkSequence:2 (4)>
+NEW: <ConditionalWorkSequence:7 (4)>
+   : │  id: 7
+   : │  call count: 0
    : │  EVENT: state¦-¦one¦foo¦bar
    : └1╴... done.
 EVENT: state¦-¦one¦foo¦bar
 END: state¦-¦one¦foo¦bar
 0 Yes!
 0 Set to TWO
-NEW: <ConditionalWorkSequence:3 (4)>
+NEW: <ConditionalWorkSequence:8 (4)>
+   : │  id: 8
+   : │  call count: 0
    : │  EVENT: state¦one¦two¦foo¦bar
    : └1╴... done.
 EVENT: state¦one¦two¦foo¦bar
 END: state¦one¦two¦foo¦bar
 0 Create OnEvtHandler: state¦*¦three¦foo¦bar
-0 NewHandler 1
+0 NewHandler 9
 0 Set to THREE
-NEW: <ConditionalWorkSequence:4 (5)>
+NEW: <ConditionalWorkSequence:10 (5)>
+   : │  id: 10
+   : │  call count: 0
    : │  EVENT: state¦two¦three¦foo¦bar
    : ├1╴on state * three foo bar ‹OnEventHandler›
    : │  prio: 51
@@ -39,43 +47,51 @@ RUN: on state * three foo bar ‹OnEventHandler›
    : step: try ‹TryStatement›
    :     : step: set state four foo bar ‹SetStateHandler›
    :     : step: log DEBUG No! (No shit happened.) ‹LogHandler›
- at: <ConditionalWorkSequence:4 (5)> (step 1)
+ at: <ConditionalWorkSequence:10 (5)> (step 1)
  ev: EVENT: state¦two¦three¦foo¦bar
 0 Set to FOUR
 1 Yes! (Shit happens.)
 END: state¦two¦three¦foo¦bar
 foo bar :: three — now
 .
-value: three
-lock: No
-last value: two
-last change: now
-persistent: yes
+* ERROR * TypeError("'super' object is not iterable",)
+Traceback (most recent call last):
+  File "../modules/data.py", line 92, in run
+    flatten(self.ctx.out,(c,))
+  File "../modules/data.py", line 44, in flatten
+    flatten(out,tt,p)
+  File "../modules/data.py", line 34, in flatten
+    s = list(s)
+TypeError: 'super' object is not iterable
 .
 0 Yes!
 0 Yes!
 0 Yes!
 0 Create OnEvtHandler: whatever
-0 NewHandler 2
-NEW: <ConditionalWorkSequence:5 (5)>
-   : │  IEVENT: whatever
+0 NewHandler 11
+NEW: <ConditionalWorkSequence:12 (5)>
+   : │  id: 12
+   : │  call count: 0
+   : │  EVENT: whatever
    : ├1╴on whatever ‹OnEventHandler›
    : │  prio: 51
    : │  step: var state x foo bar ‹VarStateHandler›
    : │  step: log TRACE We got $x ‹LogHandler›
    : └2╴... done.
-IEVENT: whatever
+EVENT: whatever
 RUN: on whatever ‹OnEventHandler›
    : prio: 51
    : step: var state x foo bar ‹VarStateHandler›
    : step: log TRACE We got $x ‹LogHandler›
- at: <ConditionalWorkSequence:5 (5)> (step 1)
- ev: IEVENT: whatever
+ at: <ConditionalWorkSequence:12 (5)> (step 1)
+ ev: EVENT: whatever
 0 We got three
 END: whatever
 foo bar :: three — now
 .
-NEW: <ConditionalWorkSequence:6 (5)>
+NEW: <ConditionalWorkSequence:13 (5)>
+   : │  id: 13
+   : │  call count: 0
    : │  EVENT: shutdown
    : └1╴... done.
 EVENT: shutdown

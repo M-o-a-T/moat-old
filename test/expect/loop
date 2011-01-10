@@ -1,72 +1,98 @@
-NEW: <ConditionalWorkSequence:1 (4)>
+NEW: <ConditionalWorkSequence:7 (4)>
+   : │  id: 7
+   : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
-NEW: <ConditionalWorkSequence:2 (4)>
+NEW: <ConditionalWorkSequence:8 (4)>
+   : │  id: 8
+   : │  call count: 0
    : │  EVENT: wait¦start¦×××¦BEFORE
    : └1╴... done.
 EVENT: startup
 END: startup
 EVENT: wait¦start¦×××¦BEFORE
 END: wait¦start¦×××¦BEFORE
-NEW: <ConditionalWorkSequence:3 (4)>
+NEW: <ConditionalWorkSequence:9 (4)>
+   : │  id: 9
+   : │  call count: 0
    : │  EVENT: wait¦start¦×××¦Foo¦Bar
    : └1╴... done.
 EVENT: wait¦start¦×××¦Foo¦Bar
 END: wait¦start¦×××¦Foo¦Bar
-NEW: <ConditionalWorkSequence:4 (4)>
+NEW: <ConditionalWorkSequence:10 (4)>
+   : │  id: 10
+   : │  call count: 0
    : │  EVENT: wait¦done¦×××¦BEFORE
    : └1╴... done.
 EVENT: wait¦done¦×××¦BEFORE
 END: wait¦done¦×××¦BEFORE
 1 Start
 1 waiting
-NEW: <ConditionalWorkSequence:5 (4)>
+NEW: <ConditionalWorkSequence:11 (4)>
+   : │  id: 11
+   : │  call count: 0
    : │  EVENT: wait¦start¦×××¦DURING
    : └1╴... done.
 EVENT: wait¦start¦×××¦DURING
 END: wait¦start¦×××¦DURING
-NEW: <ConditionalWorkSequence:6 (4)>
+NEW: <ConditionalWorkSequence:12 (4)>
+   : │  id: 12
+   : │  call count: 0
    : │  EVENT: wait¦done¦×××¦DURING
    : └1╴... done.
 EVENT: wait¦done¦×××¦DURING
 END: wait¦done¦×××¦DURING
 1 testing
 1 waiting
-NEW: <ConditionalWorkSequence:7 (4)>
+NEW: <ConditionalWorkSequence:13 (4)>
+   : │  id: 13
+   : │  call count: 0
    : │  EVENT: wait¦start¦×××¦DURING
    : └1╴... done.
 EVENT: wait¦start¦×××¦DURING
 END: wait¦start¦×××¦DURING
-NEW: <ConditionalWorkSequence:8 (4)>
+NEW: <ConditionalWorkSequence:14 (4)>
+   : │  id: 14
+   : │  call count: 0
    : │  EVENT: wait¦done¦×××¦DURING
    : └1╴... done.
 EVENT: wait¦done¦×××¦DURING
 END: wait¦done¦×××¦DURING
 1 testing
 1 waiting
-NEW: <ConditionalWorkSequence:9 (4)>
+NEW: <ConditionalWorkSequence:15 (4)>
+   : │  id: 15
+   : │  call count: 0
    : │  EVENT: wait¦start¦×××¦DURING
    : └1╴... done.
 EVENT: wait¦start¦×××¦DURING
 END: wait¦start¦×××¦DURING
-NEW: <ConditionalWorkSequence:10 (4)>
+NEW: <ConditionalWorkSequence:16 (4)>
+   : │  id: 16
+   : │  call count: 0
    : │  EVENT: wait¦done¦×××¦Foo¦Bar
    : └1╴... done.
 EVENT: wait¦done¦×××¦Foo¦Bar
 END: wait¦done¦×××¦Foo¦Bar
-NEW: <ConditionalWorkSequence:11 (4)>
+NEW: <ConditionalWorkSequence:17 (4)>
+   : │  id: 17
+   : │  call count: 0
    : │  EVENT: wait¦done¦×××¦DURING
    : └1╴... done.
 EVENT: wait¦done¦×××¦DURING
 END: wait¦done¦×××¦DURING
 1 testing
 1 Done
-NEW: <ConditionalWorkSequence:12 (4)>
+NEW: <ConditionalWorkSequence:18 (4)>
+   : │  id: 18
+   : │  call count: 0
    : │  EVENT: wait¦start¦×××¦AFTER
    : └1╴... done.
 EVENT: wait¦start¦×××¦AFTER
 END: wait¦start¦×××¦AFTER
-NEW: <ConditionalWorkSequence:13 (4)>
+NEW: <ConditionalWorkSequence:19 (4)>
+   : │  id: 19
+   : │  call count: 0
    : │  EVENT: wait¦done¦×××¦AFTER
    : └1╴... done.
 EVENT: wait¦done¦×××¦AFTER

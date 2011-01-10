@@ -27,6 +27,7 @@ from twisted.python import failure
 
 workers = {}
 work_prios = []
+worker_ids = {}
 
 def register_worker(w):
 	"""\
@@ -42,6 +43,7 @@ def register_worker(w):
 	elif w.prio < MIN_PRIO or w.prio > MAX_PRIO:
 		raise RuntimeError("More than one system worker (prio:%d) is registered!" % (w.prio,))
 	workers[w.prio].append(w)
+	worker_ids[w.id] = w
 	
 def unregister_worker(w):
 	"""\
@@ -49,6 +51,7 @@ def unregister_worker(w):
 		"""
 	global work_prios
 	workers[w.prio].remove(w)
+	del worker_ids[w.id]
 	if not workers[w.prio]: # last worker removed
 		del workers[w.prio]
 		work_prios = sorted(workers.keys())
@@ -64,9 +67,13 @@ class Workers(Collection):
 	name = "worker"
 	def iteritems(self):
 		for w in list_workers():
-			yield w.prio,w
+			yield w.id,w
 	def __getitem__(self,k):
-		raise SyntaxError("You cannot examine individual worker entries. Sorry.")
+		if isinstance(k,Name):
+			if len(k) != 1:
+				raise SyntaxError,"Worker IDs are single numbers"
+			k = k[0]
+		return worker_ids[int(k)]
 Workers = Workers()
 
 def collect_event(e):
@@ -106,7 +113,7 @@ def process_event(e, drop_errors=False):
 		"""
 	from homevent.logging import log_event,DEBUG,TRACE
 
-	d = collect_event(e).process()
+	d = collect_event(e).process(event=e)
 #	def rv(_):
 #		print "RVA",_
 #		return _
@@ -123,8 +130,8 @@ def process_failure(e=None):
 	if e is None:
 		e = failure.Failure()
 	from homevent.logging import log_event,ERROR,log_exc
-	log_event(e,level=ERROR)
-	d = collect_failure(e).process()
+	log_event(event=e,level=ERROR)
+	d = collect_failure(e).process(event=e)
 	def err2(_):
 		log_exc(msg="Error in failure handler", err=_, level=ERROR)
 	d.addErrback(err2)

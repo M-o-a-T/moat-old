@@ -49,8 +49,8 @@ from homevent.collect import Collection,Collected
 
 from twisted.internet import defer
 
-_onHandler_id = 0
 onHandlers = {}
+onHandlers2 = {}
 
 class _OnHandlers(Collection):
 	name = "on"
@@ -67,29 +67,36 @@ class _OnHandlers(Collection):
 		try:
 			return super(_OnHandlers,self).__getitem__(key)
 		except KeyError:
-			try:
+			if key in onHandlers:
 				return onHandlers[key]
-			except KeyError:
-				if len(key) == 1:
+			if key in onHandlers2:
+				return onHandlers2[key]
+			if hasattr(key,"__len__") and len(key) == 1:
+				if key[0] in onHandlers:
 					return onHandlers[key[0]]
-				else:
-					raise
+				if key[0] in onHandlers2:
+					return onHandlers2[key[0]]
+			raise
 
 	def __setitem__(self,key,val):
 		assert val.name==key, repr(val.name)+" != "+repr(key)
-		onHandlers[val.handler_id] = val
+		onHandlers[val.id] = val
+		onHandlers2[val.parent.arglist] = val
 		super(_OnHandlers,self).__setitem__(key,val)
 		register_worker(val)
 
 	def __delitem__(self,key):
 		val = self[key]
 		unregister_worker(val)
-		del onHandlers[val.handler_id]
+		del onHandlers[val.id]
+		del onHandlers2[val.parent.arglist]
 		super(_OnHandlers,self).__delitem__(val.name)
 
 	def pop(self,key):
-		val = self[key]
-		del OnHandlers[val.name]
+		val = self[key] if key else self.keys()[0]
+		unregister_worker(val)
+		del OnHandlers[val.id]
+		del OnHandlers2[val.parent.arglist]
 		return val
 OnHandlers = _OnHandlers()
 OnHandlers.does("del")
@@ -104,6 +111,7 @@ class BadArgCount(RuntimeError):
 
 
 class iWorker(Worker):
+	"""This is a helper class, to pass the event name to Worker.__init__()"""
 	def __init__(self):
 		super(iWorker,self).__init__(self.name)
 
@@ -112,15 +120,9 @@ class OnEventWorker(Collected,iWorker):
 	def __init__(self,parent, name=None, prio=(MIN_PRIO+MAX_PRIO)//2+1):
 		self.prio = prio
 		self.parent = parent
-		self.count = 0
-		self.last = None
-
-		global _onHandler_id
-		_onHandler_id += 1
-		self.handler_id = _onHandler_id
 
 		if name is None:
-			name = Name("_on",self.handler_id)
+			name = Name("_on",self._get_id())
 		super(OnEventWorker,self).__init__(*name)
 
 #		self.name = unicode(self.parent.arglist)
@@ -128,7 +130,7 @@ class OnEventWorker(Collected,iWorker):
 #			self.name += u" ‹"+" ".join(unicode(x) for x in self.parent.displayname)+u"›"
 
 		
-		log(TRACE,"NewHandler",self.handler_id)
+		log(TRACE,"NewHandler",self.id)
 
 	def does_event(self,event):
 		ie = iter(event)
@@ -154,10 +156,9 @@ class OnEventWorker(Collected,iWorker):
 			elif str(a) != str(e):
 				return False
 
-	def process(self,event,**k):
-		self.last = now()
-		self.count += 1
-		return self.parent.process(event,**k)
+	def process(self, **k):
+		super(OnEventWorker,self).process(**k)
+		return self.parent.process(**k)
 
 	def report(self, verbose=False):
 		if not verbose:
@@ -174,14 +175,14 @@ class OnEventWorker(Collected,iWorker):
 		return u"%s (%d)" % (unicode(self.parent.arglist),self.prio)
 
 	def list(self):
-		yield("id", str(self.handler_id))
+		for r in super(OnEventWorker,self).list():
+			yield r
+		yield("id",self.id)
+		yield("prio",self.prio)
 		if self.parent.displayname is not None:
-			yield("name"," ".join(unicode(x) for x in self.parent.displayname))
+			yield("pname"," ".join(unicode(x) for x in self.parent.displayname))
 		yield("args",self.parent.arglist)
 		yield("prio",self.prio)
-		yield("count",self.count)
-		if self.last:
-			yield("last",humandelta(now()-self.last))
 		if hasattr(self.parent,"displaydoc"):
 			yield("doc",self.parent.displaydoc)
 
@@ -230,10 +231,13 @@ Every "*foo" in the event description is mapped to the corresponding
 			elif str(a) != str(e):
 				raise BadArgs(a,e)
 		
-	def process(self,event,**k):
-		ctx = self.ctx(ctx=event.ctx)
-		self.grab_args(event,ctx)
-		return super(OnEventHandler,self).run(ctx,**k)
+	def process(self, event=None,**k):
+		if event:
+			ctx = self.ctx(ctx=event.ctx)
+			self.grab_args(event,ctx)
+		else:
+			ctx = self.ctx()
+		return super(OnEventHandler,self).run(ctx)
 
 	def run(self,ctx,**k):
 		if self.procs is None:

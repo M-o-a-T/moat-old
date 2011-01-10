@@ -57,11 +57,13 @@ class Shutdown_Worker_1(ExcWorker):
 		return True
 	def does_failure(self,ev):
 		return True
-	def process(self,queue,*a,**k):
-		global active_q_id
-		active_q_id += 1
-		queue.aq_id = active_q_id
-		Events[queue.aq_id] = queue
+	def process(self, queue=None,**k):
+		super(Shutdown_Worker_1,self).process(queue=queue,**k)
+		if queue is not None:
+			global active_q_id
+			active_q_id += 1
+			queue.aq_id = active_q_id
+			Events[queue.aq_id] = queue
 	def report(self,*a,**k):
 		return ()
 
@@ -74,9 +76,11 @@ class Shutdown_Worker_2(ExcWorker):
 		return True
 	def does_failure(self,ev):
 		return True
-	def process(self,queue,*a,**k):
-		del Events[queue.aq_id]
-		del queue.aq_id
+	def process(self, event=None,queue=None,**k):
+		super(Shutdown_Worker_2,self).process(queue=queue,**k)
+		if queue is not None:
+			del Events[queue.aq_id]
+			del queue.aq_id
 		if not running and not Events:
 			stop_mainloop()
 	def report(self,*a,**k):
@@ -89,7 +93,8 @@ class Shutdown_Worker(Worker):
 	prio = MAX_PRIO+2
 	def does_event(self,ev):
 		return (ev is shutdown_event)
-	def process(self,queue,*a,**k):
+	def process(self, **k):
+		super(Shutdown_Worker,self).process(**k)
 		return dropConnections()
 	def report(self,*a,**k):
 		yield "shutting down"

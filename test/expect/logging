@@ -1,4 +1,6 @@
-NEW: <ConditionalWorkSequence:1 (4)>
+NEW: <ConditionalWorkSequence:6 (4)>
+   : │  id: 6
+   : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
 0 This is not logged
@@ -15,22 +17,26 @@ WARN> This is logged too
 9 = NONE
 .
 3 This is not logged either
-TRACE> NEW: <ConditionalWorkSequence:2 (4)>
-TRACE>    : │  IEVENT: Logged
+TRACE> NEW: <ConditionalWorkSequence:7 (4)>
+TRACE>    : │  id: 7
+TRACE>    : │  call count: 0
+TRACE>    : │  EVENT: Logged
 TRACE>    : └1╴... done.
-NEW: <ConditionalWorkSequence:2 (4)>
-   : │  IEVENT: Logged
+NEW: <ConditionalWorkSequence:7 (4)>
+   : │  id: 7
+   : │  call count: 0
+   : │  EVENT: Logged
    : └1╴... done.
 TRACE> EVENT: startup
 EVENT: startup
 TRACE> END: startup
 END: startup
-TRACE> IEVENT: Logged
-IEVENT: Logged
+TRACE> EVENT: Logged
+EVENT: Logged
 TRACE> END: Logged
 END: Logged
-TRACE> IEVENT: Not¦Logged
-IEVENT: Not¦Logged
+TRACE> EVENT: Not¦Logged
+EVENT: Not¦Logged
 TRACE> END: Not¦Logged
 END: Not¦Logged
 TRACE> EVENT: shutdown

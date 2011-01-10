@@ -1,48 +1,60 @@
-NEW: <ConditionalWorkSequence:1 (4)>
+NEW: <ConditionalWorkSequence:7 (4)>
+   : │  id: 7
+   : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
-NEW: <ConditionalWorkSequence:2 (4)>
+NEW: <ConditionalWorkSequence:8 (4)>
+   : │  id: 8
+   : │  call count: 0
    : │  EVENT: wait¦start¦0.2¦_wait¦1
    : └1╴... done.
 EVENT: startup
 END: startup
 EVENT: wait¦start¦0.2¦_wait¦1
 END: wait¦start¦0.2¦_wait¦1
-NEW: <ConditionalWorkSequence:3 (4)>
+NEW: <ConditionalWorkSequence:9 (4)>
+   : │  id: 9
+   : │  call count: 0
    : │  EVENT: wait¦done¦0.2¦_wait¦1
    : └1╴... done.
 EVENT: wait¦done¦0.2¦_wait¦1
 END: wait¦done¦0.2¦_wait¦1
-syslog :: TRACE <open file '<stdout>', mode 'w' at 0x401f8070>
+syslog :: TRACE <open file '<stdout>', mode 'w' at 0x2ba3f9b8e150>
 .
 1 Five Debug
 3 Five Warn
 local5 localhost 55514 :: local5 info
-syslog :: TRACE <open file '<stdout>', mode 'w' at 0x401f8070>
+syslog :: TRACE <open file '<stdout>', mode 'w' at 0x2ba3f9b8e150>
 .
 Name: local5¦localhost¦55514
 Type: SysLogger
 Level: INFO
-Out: <open file '<stdout>', mode 'w' at 0x401f8070>
+Out: <open file '<stdout>', mode 'w' at 0x2ba3f9b8e150>
 facility: 168
 facility_name: local5
 address: (u'localhost', 55514)
 level: 2
 level_name: info
 .
-syslog :: TRACE <open file '<stdout>', mode 'w' at 0x401f8070>
+syslog :: TRACE <open file '<stdout>', mode 'w' at 0x2ba3f9b8e150>
 .
-NEW: <ConditionalWorkSequence:4 (4)>
+NEW: <ConditionalWorkSequence:10 (4)>
+   : │  id: 10
+   : │  call count: 0
    : │  EVENT: wait¦start¦1.0¦_wait¦2
    : └1╴... done.
 EVENT: wait¦start¦1.0¦_wait¦2
 END: wait¦start¦1.0¦_wait¦2
-NEW: <ConditionalWorkSequence:5 (4)>
+NEW: <ConditionalWorkSequence:11 (4)>
+   : │  id: 11
+   : │  call count: 0
    : │  EVENT: wait¦done¦1.0¦_wait¦2
    : └1╴... done.
 EVENT: wait¦done¦1.0¦_wait¦2
 END: wait¦done¦1.0¦_wait¦2
-NEW: <ConditionalWorkSequence:6 (6)>
+NEW: <ConditionalWorkSequence:12 (6)>
+   : │  id: 12
+   : │  call count: 0
    : │  EVENT: shutdown
    : └1╴... done.
 EVENT: shutdown

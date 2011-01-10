@@ -40,27 +40,27 @@ import sys
 
 class InputEvent(Event):
 	"""An event that's just a line from the interpreter"""
-	def _name_check(self,names):
+	def _name_check(self,name):
 		pass
 
 	def __str__(self):
 		try:
-			return "<InputEvent:%s>" % (self.names,)
+			return "<InputEvent:%s>" % (self.name,)
 		except Exception:
-			return "<InputEvent> REPORT_ERROR: "+repr(self.names)
+			return "<InputEvent> REPORT_ERROR: "+repr(self.name)
 
 	def __unicode__(self):
 		try:
-			#return u"⌁."+unicode(self.names)
-			return unicode(self.names)
+			#return u"⌁."+unicode(self.name)
+			return unicode(self.name)
 		except Exception:
-			return u"⌁ REPORT_ERROR: "+repr(self.names)
+			return u"⌁ REPORT_ERROR: "+repr(self.name)
 
 	def report(self, verbose=False):
 		try:
-			yield "IEVENT: "+unicode(self.names)
+			yield "IEVENT: "+unicode(self.name)
 		except Exception:
-			yield "IEVENT: REPORT_ERROR: "+repr(self.names)
+			yield "IEVENT: REPORT_ERROR: "+repr(self.name)
 
 
 class Processor(object):

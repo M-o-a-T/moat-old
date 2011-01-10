@@ -1,32 +1,46 @@
-NEW: <ConditionalWorkSequence:1 (4)>
+NEW: <ConditionalWorkSequence:7 (4)>
+   : │  id: 7
+   : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
-NEW: <ConditionalWorkSequence:2 (4)>
-   : │  IEVENT: foo
+NEW: <ConditionalWorkSequence:8 (4)>
+   : │  id: 8
+   : │  call count: 0
+   : │  EVENT: foo
    : └1╴... done.
 EVENT: startup
 END: startup
-IEVENT: foo
+EVENT: foo
 END: foo
-NEW: <ConditionalWorkSequence:3 (4)>
+NEW: <ConditionalWorkSequence:9 (4)>
+   : │  id: 9
+   : │  call count: 0
    : │  EVENT: wait¦start¦0.5¦_wait¦1
    : └1╴... done.
 EVENT: wait¦start¦0.5¦_wait¦1
 END: wait¦start¦0.5¦_wait¦1
-NEW: <ConditionalWorkSequence:4 (4)>
+NEW: <ConditionalWorkSequence:10 (4)>
+   : │  id: 10
+   : │  call count: 0
    : │  EVENT: wait¦done¦0.5¦_wait¦1
    : └1╴... done.
 EVENT: wait¦done¦0.5¦_wait¦1
 END: wait¦done¦0.5¦_wait¦1
-NEW: <ConditionalWorkSequence:5 (4)>
-   : │  IEVENT: bar
+NEW: <ConditionalWorkSequence:11 (4)>
+   : │  id: 11
+   : │  call count: 0
+   : │  EVENT: bar
    : └1╴... done.
-IEVENT: bar
+EVENT: bar
 END: bar
-NEW: <ConditionalWorkSequence:6 (4)>
-   : │  IEVENT: baz¦notlogged
+NEW: <ConditionalWorkSequence:12 (4)>
+   : │  id: 12
+   : │  call count: 0
+   : │  EVENT: baz¦notlogged
    : └1╴... done.
-NEW: <ConditionalWorkSequence:7 (6)>
+NEW: <ConditionalWorkSequence:13 (6)>
+   : │  id: 13
+   : │  call count: 0
    : │  EVENT: shutdown
    : └1╴... done.
 EVENT: shutdown

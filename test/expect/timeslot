@@ -1,10 +1,12 @@
-NEW: <ConditionalWorkSequence:1 (4)>
+NEW: <ConditionalWorkSequence:8 (4)>
+   : │  id: 8
+   : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
 0 Create OnEvtHandler: timeslot¦begin¦foo¦bar
-0 NewHandler 1
+0 NewHandler 9
 0 Create OnEvtHandler: timeslot¦end¦foo¦bar
-0 NewHandler 2
+0 NewHandler 10
 .
 name: foo bar
 run: off
@@ -13,14 +15,18 @@ duration: 2.0
 .
 1 Yes
 1 Yes
-NEW: <ConditionalWorkSequence:2 (4)>
+NEW: <ConditionalWorkSequence:11 (4)>
+   : │  id: 11
+   : │  call count: 0
    : │  EVENT: wait¦start¦9.5¦A¦before
    : └1╴... done.
 EVENT: startup
 END: startup
 EVENT: wait¦start¦9.5¦A¦before
 END: wait¦start¦9.5¦A¦before
-NEW: <ConditionalWorkSequence:3 (4)>
+NEW: <ConditionalWorkSequence:12 (4)>
+   : │  id: 12
+   : │  call count: 0
    : │  EVENT: wait¦done¦9.5¦A¦before
    : └1╴... done.
 EVENT: wait¦done¦9.5¦A¦before
@@ -33,12 +39,16 @@ next: 0.5 sec
 .
 1 Yes
 1 Yes
-NEW: <ConditionalWorkSequence:4 (4)>
+NEW: <ConditionalWorkSequence:13 (4)>
+   : │  id: 13
+   : │  call count: 0
    : │  EVENT: wait¦start¦10.5¦B¦during
    : └1╴... done.
 EVENT: wait¦start¦10.5¦B¦during
 END: wait¦start¦10.5¦B¦during
-NEW: <ConditionalWorkSequence:5 (5)>
+NEW: <ConditionalWorkSequence:14 (5)>
+   : │  id: 14
+   : │  call count: 0
    : │  EVENT: timeslot¦begin¦foo¦bar
    : ├1╴on timeslot begin foo bar ‹OnEventHandler›
    : │  prio: 51
@@ -76,14 +86,18 @@ RUN: on timeslot begin foo bar ‹OnEventHandler›
    :     : step: wait GOT EVENT AX ‹WaitHandler›
    :     : step: if in timeslot foo bar ‹IfStatement›
    :     :     : step: log DEBUG Yes ‹LogHandler›
- at: <ConditionalWorkSequence:5 (5)> (step 1)
+ at: <ConditionalWorkSequence:14 (5)> (step 1)
  ev: EVENT: timeslot¦begin¦foo¦bar
-NEW: <ConditionalWorkSequence:6 (4)>
+NEW: <ConditionalWorkSequence:15 (4)>
+   : │  id: 15
+   : │  call count: 0
    : │  EVENT: wait¦start¦10.3¦GOT¦EVENT¦A
    : └1╴... done.
 EVENT: wait¦start¦10.3¦GOT¦EVENT¦A
 END: wait¦start¦10.3¦GOT¦EVENT¦A
-NEW: <ConditionalWorkSequence:7 (4)>
+NEW: <ConditionalWorkSequence:16 (4)>
+   : │  id: 16
+   : │  call count: 0
    : │  EVENT: wait¦done¦10.3¦GOT¦EVENT¦A
    : └1╴... done.
 EVENT: wait¦done¦10.3¦GOT¦EVENT¦A
@@ -91,12 +105,16 @@ END: wait¦done¦10.3¦GOT¦EVENT¦A
 1 Yes
 1 Yes
 END: timeslot¦begin¦foo¦bar
-NEW: <ConditionalWorkSequence:8 (4)>
+NEW: <ConditionalWorkSequence:17 (4)>
+   : │  id: 17
+   : │  call count: 0
    : │  EVENT: wait¦start¦10.9¦AFTER¦EVENT¦A
    : └1╴... done.
 EVENT: wait¦start¦10.9¦AFTER¦EVENT¦A
 END: wait¦start¦10.9¦AFTER¦EVENT¦A
-NEW: <ConditionalWorkSequence:9 (4)>
+NEW: <ConditionalWorkSequence:18 (4)>
+   : │  id: 18
+   : │  call count: 0
    : │  EVENT: wait¦done¦10.5¦B¦during
    : └1╴... done.
 EVENT: wait¦done¦10.5¦B¦during
@@ -111,30 +129,40 @@ slot: 0.75
 .
 1 Yes
 1 Yes
-NEW: <ConditionalWorkSequence:10 (4)>
+NEW: <ConditionalWorkSequence:19 (4)>
+   : │  id: 19
+   : │  call count: 0
    : │  EVENT: wait¦start¦12.5¦C¦after
    : └1╴... done.
 EVENT: wait¦start¦12.5¦C¦after
 END: wait¦start¦12.5¦C¦after
-NEW: <ConditionalWorkSequence:11 (4)>
+NEW: <ConditionalWorkSequence:20 (4)>
+   : │  id: 20
+   : │  call count: 0
    : │  EVENT: wait¦done¦10.9¦AFTER¦EVENT¦A
    : └1╴... done.
 EVENT: wait¦done¦10.9¦AFTER¦EVENT¦A
 END: wait¦done¦10.9¦AFTER¦EVENT¦A
 0 got it during
 1 Yes
-NEW: <ConditionalWorkSequence:12 (4)>
+NEW: <ConditionalWorkSequence:21 (4)>
+   : │  id: 21
+   : │  call count: 0
    : │  EVENT: wait¦start¦11.0¦GOT¦EVENT¦AX
    : └1╴... done.
 EVENT: wait¦start¦11.0¦GOT¦EVENT¦AX
 END: wait¦start¦11.0¦GOT¦EVENT¦AX
-NEW: <ConditionalWorkSequence:13 (4)>
+NEW: <ConditionalWorkSequence:22 (4)>
+   : │  id: 22
+   : │  call count: 0
    : │  EVENT: wait¦done¦11.0¦GOT¦EVENT¦AX
    : └1╴... done.
 EVENT: wait¦done¦11.0¦GOT¦EVENT¦AX
 END: wait¦done¦11.0¦GOT¦EVENT¦AX
 1 Yes
-NEW: <ConditionalWorkSequence:14 (5)>
+NEW: <ConditionalWorkSequence:23 (5)>
+   : │  id: 23
+   : │  call count: 0
    : │  EVENT: timeslot¦end¦foo¦bar
    : ├1╴on timeslot end foo bar ‹OnEventHandler›
    : │  prio: 51
@@ -172,14 +200,18 @@ RUN: on timeslot end foo bar ‹OnEventHandler›
    :     : step: wait GOT EVENT AX ‹WaitHandler›
    :     : step: if in timeslot foo bar ‹IfStatement›
    :     :     : step: log DEBUG No9ax ‹LogHandler›
- at: <ConditionalWorkSequence:14 (5)> (step 1)
+ at: <ConditionalWorkSequence:23 (5)> (step 1)
  ev: EVENT: timeslot¦end¦foo¦bar
-NEW: <ConditionalWorkSequence:15 (4)>
+NEW: <ConditionalWorkSequence:24 (4)>
+   : │  id: 24
+   : │  call count: 0
    : │  EVENT: wait¦start¦12.1¦GOT¦EVENT¦B
    : └1╴... done.
 EVENT: wait¦start¦12.1¦GOT¦EVENT¦B
 END: wait¦start¦12.1¦GOT¦EVENT¦B
-NEW: <ConditionalWorkSequence:16 (4)>
+NEW: <ConditionalWorkSequence:25 (4)>
+   : │  id: 25
+   : │  call count: 0
    : │  EVENT: wait¦done¦12.1¦GOT¦EVENT¦B
    : └1╴... done.
 EVENT: wait¦done¦12.1¦GOT¦EVENT¦B
@@ -187,12 +219,16 @@ END: wait¦done¦12.1¦GOT¦EVENT¦B
 1 Yes
 1 Yes
 END: timeslot¦end¦foo¦bar
-NEW: <ConditionalWorkSequence:17 (4)>
+NEW: <ConditionalWorkSequence:26 (4)>
+   : │  id: 26
+   : │  call count: 0
    : │  EVENT: wait¦start¦12.6¦AFTER¦EVENT¦B
    : └1╴... done.
 EVENT: wait¦start¦12.6¦AFTER¦EVENT¦B
 END: wait¦start¦12.6¦AFTER¦EVENT¦B
-NEW: <ConditionalWorkSequence:18 (4)>
+NEW: <ConditionalWorkSequence:27 (4)>
+   : │  id: 27
+   : │  call count: 0
    : │  EVENT: wait¦done¦12.5¦C¦after
    : └1╴... done.
 EVENT: wait¦done¦12.5¦C¦after
@@ -206,30 +242,40 @@ next: 7.5 sec
 .
 1 Yes
 1 Yes
-NEW: <ConditionalWorkSequence:19 (4)>
+NEW: <ConditionalWorkSequence:28 (4)>
+   : │  id: 28
+   : │  call count: 0
    : │  EVENT: wait¦start¦20.5¦D¦during¦again
    : └1╴... done.
 EVENT: wait¦start¦20.5¦D¦during¦again
 END: wait¦start¦20.5¦D¦during¦again
-NEW: <ConditionalWorkSequence:20 (4)>
+NEW: <ConditionalWorkSequence:29 (4)>
+   : │  id: 29
+   : │  call count: 0
    : │  EVENT: wait¦done¦12.6¦AFTER¦EVENT¦B
    : └1╴... done.
 EVENT: wait¦done¦12.6¦AFTER¦EVENT¦B
 END: wait¦done¦12.6¦AFTER¦EVENT¦B
 0 got it next
 1 Yes
-NEW: <ConditionalWorkSequence:21 (4)>
+NEW: <ConditionalWorkSequence:30 (4)>
+   : │  id: 30
+   : │  call count: 0
    : │  EVENT: wait¦start¦12.8¦GOT¦EVENT¦AX
    : └1╴... done.
 EVENT: wait¦start¦12.8¦GOT¦EVENT¦AX
 END: wait¦start¦12.8¦GOT¦EVENT¦AX
-NEW: <ConditionalWorkSequence:22 (4)>
+NEW: <ConditionalWorkSequence:31 (4)>
+   : │  id: 31
+   : │  call count: 0
    : │  EVENT: wait¦done¦12.8¦GOT¦EVENT¦AX
    : └1╴... done.
 EVENT: wait¦done¦12.8¦GOT¦EVENT¦AX
 END: wait¦done¦12.8¦GOT¦EVENT¦AX
 1 Yes
-NEW: <ConditionalWorkSequence:23 (5)>
+NEW: <ConditionalWorkSequence:32 (5)>
+   : │  id: 32
+   : │  call count: 0
    : │  EVENT: timeslot¦begin¦foo¦bar
    : ├1╴on timeslot begin foo bar ‹OnEventHandler›
    : │  prio: 51
@@ -267,14 +313,18 @@ RUN: on timeslot begin foo bar ‹OnEventHandler›
    :     : step: wait GOT EVENT AX ‹WaitHandler›
    :     : step: if in timeslot foo bar ‹IfStatement›
    :     :     : step: log DEBUG Yes ‹LogHandler›
- at: <ConditionalWorkSequence:23 (5)> (step 1)
+ at: <ConditionalWorkSequence:32 (5)> (step 1)
  ev: EVENT: timeslot¦begin¦foo¦bar
-NEW: <ConditionalWorkSequence:24 (4)>
+NEW: <ConditionalWorkSequence:33 (4)>
+   : │  id: 33
+   : │  call count: 0
    : │  EVENT: wait¦start¦20.3¦GOT¦EVENT¦A
    : └1╴... done.
 EVENT: wait¦start¦20.3¦GOT¦EVENT¦A
 END: wait¦start¦20.3¦GOT¦EVENT¦A
-NEW: <ConditionalWorkSequence:25 (4)>
+NEW: <ConditionalWorkSequence:34 (4)>
+   : │  id: 34
+   : │  call count: 0
    : │  EVENT: wait¦done¦20.3¦GOT¦EVENT¦A
    : └1╴... done.
 EVENT: wait¦done¦20.3¦GOT¦EVENT¦A
@@ -282,12 +332,16 @@ END: wait¦done¦20.3¦GOT¦EVENT¦A
 1 Yes
 1 Yes
 END: timeslot¦begin¦foo¦bar
-NEW: <ConditionalWorkSequence:26 (4)>
+NEW: <ConditionalWorkSequence:35 (4)>
+   : │  id: 35
+   : │  call count: 0
    : │  EVENT: wait¦start¦20.9¦AFTER¦EVENT¦A
    : └1╴... done.
 EVENT: wait¦start¦20.9¦AFTER¦EVENT¦A
 END: wait¦start¦20.9¦AFTER¦EVENT¦A
-NEW: <ConditionalWorkSequence:27 (4)>
+NEW: <ConditionalWorkSequence:36 (4)>
+   : │  id: 36
+   : │  call count: 0
    : │  EVENT: wait¦done¦20.5¦D¦during¦again
    : └1╴... done.
 EVENT: wait¦done¦20.5¦D¦during¦again
@@ -311,11 +365,15 @@ duration: 2.0
 last: 0.5 sec
 .
 1 Yes
-NEW: <ConditionalWorkSequence:28 (7)>
+NEW: <ConditionalWorkSequence:37 (7)>
+   : │  id: 37
+   : │  call count: 0
    : │  EVENT: shutdown
    : └1╴... done.
 EVENT: shutdown
-NEW: <ConditionalWorkSequence:29 (4)>
+NEW: <ConditionalWorkSequence:38 (4)>
+   : │  id: 38
+   : │  call count: 0
    : │  EVENT: wait¦cancel¦20.9¦AFTER¦EVENT¦A
    : └1╴... done.
 EVENT: wait¦cancel¦20.9¦AFTER¦EVENT¦A

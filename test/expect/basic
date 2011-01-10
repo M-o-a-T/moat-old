@@ -1,8 +1,12 @@
-NEW: <ConditionalWorkSequence:1 (4)>
+NEW: <ConditionalWorkSequence:8 (4)>
+   : │  id: 8
+   : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
 .
-NEW: <ConditionalWorkSequence:2 (5)>
+NEW: <ConditionalWorkSequence:9 (5)>
+   : │  id: 9
+   : │  call count: 0
    : │  EVENT: say¦hello
    : ├1╴SayWorker: TellMe
    : └2╴... done.
@@ -14,16 +18,20 @@ END: startup
 EVENT: say¦hello
 .
 RUN: SayWorker: TellMe
- at: <ConditionalWorkSequence:2 (5)> (step 1)
+ at: <ConditionalWorkSequence:9 (5)> (step 1)
  ev: EVENT: say¦hello
 .
 0 The 'TellMe' worker is saying: hello
 .
 END: say¦hello
 .
-NEW: <ConditionalWorkSequence:3 (5)>
+NEW: <ConditionalWorkSequence:10 (5)>
+   : │  id: 10
+   : │  call count: 0
    : │  EVENT: say more¦greeting
-   : ├1╴<WorkSequence:4 (2)>
+   : ├1╴<WorkSequence:11 (2)>
+   : │  │  id: 11
+   : │  │  call count: 0
    : │  │  EVENT: say more¦greeting
    : │  │  by SayMoreWorker: say something
    : │  ├1╴SayWorker: TellOne
@@ -32,29 +40,33 @@ NEW: <ConditionalWorkSequence:3 (5)>
 .
 EVENT: say more¦greeting
 .
-RUN: <WorkSequence:4 (2)>
+RUN: <WorkSequence:11 (2)>
+   : │  id: 11
+   : │  call count: 0
    : │  EVENT: say more¦greeting
    : │  by SayMoreWorker: say something
    : ├1╴SayWorker: TellOne
    : └2╴SayWorker: TellTwo
- at: <ConditionalWorkSequence:3 (5)> (step 1)
+ at: <ConditionalWorkSequence:10 (5)> (step 1)
  ev: EVENT: say more¦greeting
 .
 RUN: SayWorker: TellOne
- at: <WorkSequence:4 (2)> (step 1)
+ at: <WorkSequence:11 (2)> (step 1)
  ev: EVENT: say more¦greeting
 .
 0 The 'TellOne' worker is saying: greeting
 .
 RUN: SayWorker: TellTwo
- at: <WorkSequence:4 (2)> (step 2)
+ at: <WorkSequence:11 (2)> (step 2)
  ev: EVENT: say more¦greeting
 .
 0 The 'TellTwo' worker is saying: greeting
 .
 END: say more¦greeting
 .
-NEW: <ConditionalWorkSequence:5 (5)>
+NEW: <ConditionalWorkSequence:14 (5)>
+   : │  id: 14
+   : │  call count: 0
    : │  EVENT: shutdown
    : └1╴... done.
 .
