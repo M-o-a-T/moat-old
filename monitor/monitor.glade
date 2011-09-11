@@ -210,7 +210,6 @@
                         <signal name="select_cursor_row" handler="on_data_view_select_cursor_row"/>
                         <signal name="move_cursor" handler="on_data_view_move_cursor"/>
                         <signal name="cursor_changed" handler="on_data_view_cursor_changed"/>
-                        <signal name="notify" handler="on_note"/>
                       </widget>
                     </child>
                   </widget>
