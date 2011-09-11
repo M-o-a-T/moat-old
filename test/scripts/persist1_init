@@ -1,0 +1,3 @@
+#!/bin/sh
+
+rm -f /mp/homevent.$USER.db*

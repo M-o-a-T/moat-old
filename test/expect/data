@@ -83,7 +83,19 @@ NEW: <ConditionalWorkSequence:14 (4)>
    : └1╴... done.
 EVENT: wait¦done¦×××¦_wait¦3
 END: wait¦done¦×××¦_wait¦3
-4 :: foo
+4 :: Worker 11 for ‹foo›
+.
+: <ConditionalWorkSequence:11 (5)>
+id: 11
+event: foo
+call count: 1
+last call: now
+last event: foo
+code: ╞1╕on foo ‹OnEventHandler›
+code: │ │prio: 51
+code: │ │step: block ‹Block›
+code: │ ╵    : step: wait foo waiter ‹WaitHandler›
+code: └2╴... done.
 .
 NEW: <ConditionalWorkSequence:15 (4)>
    : │  id: 15

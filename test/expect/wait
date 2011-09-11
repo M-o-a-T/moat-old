@@ -28,7 +28,8 @@ EVENT: wait¦done¦×××¦X1
 END: wait¦done¦×××¦X1
 Foo Bar :: 9.85
 .
-(u'\u2039Waiter Foo\xa6Bar 9\u203a',): ('name', Name(u'Foo', u'Bar'))
+: ‹Waiter Foo¦Bar 9›
+name: Foo¦Bar
 started: 2003-04-05 06:07:08.050000
 ending: 2003-04-05 06:07:18.050000
 total: 10.0 sec

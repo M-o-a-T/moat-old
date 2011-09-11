@@ -180,15 +180,12 @@ EVENT: wait¦done¦0.1¦_wait¦1
 END: wait¦done¦0.1¦_wait¦1
 foo bar :: three — now
 .
-* ERROR * TypeError("'super' object is not iterable",)
-Traceback (most recent call last):
-  File "../modules/data.py", line 92, in run
-    flatten(self.ctx.out,(c,))
-  File "../modules/data.py", line 44, in flatten
-    flatten(out,tt,p)
-  File "../modules/data.py", line 34, in flatten
-    s = list(s)
-TypeError: 'super' object is not iterable
+: ‹Collected State:foo¦bar›
+name: foo¦bar
+value: three
+lock: No
+last value: twohalf
+last change: now
 .
 0 Yes!
 0 Yes!

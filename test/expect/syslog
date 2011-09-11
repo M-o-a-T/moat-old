@@ -19,24 +19,24 @@ NEW: <ConditionalWorkSequence:9 (4)>
    : └1╴... done.
 EVENT: wait¦done¦0.2¦_wait¦1
 END: wait¦done¦0.2¦_wait¦1
-syslog :: TRACE <open file '<stdout>', mode 'w' at 0x2ba3f9b8e150>
+syslog :: TRACE <open file '<stdout>', mode 'w' at 0x×××××××××××××××××××××××××××>
 .
 1 Five Debug
 3 Five Warn
 local5 localhost 55514 :: local5 info
-syslog :: TRACE <open file '<stdout>', mode 'w' at 0x2ba3f9b8e150>
+syslog :: TRACE <open file '<stdout>', mode 'w' at 0x×××××××××××××××××××××××××××>
 .
 Name: local5¦localhost¦55514
 Type: SysLogger
 Level: INFO
-Out: <open file '<stdout>', mode 'w' at 0x2ba3f9b8e150>
+Out: <open file '<stdout>', mode 'w' at 0x×××××××××××××××××××××××××××>
 facility: 168
 facility_name: local5
 address: (u'localhost', 55514)
 level: 2
 level_name: info
 .
-syslog :: TRACE <open file '<stdout>', mode 'w' at 0x2ba3f9b8e150>
+syslog :: TRACE <open file '<stdout>', mode 'w' at 0x×××××××××××××××××××××××××××>
 .
 NEW: <ConditionalWorkSequence:10 (4)>
    : │  id: 10

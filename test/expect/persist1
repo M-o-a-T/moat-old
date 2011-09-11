@@ -54,15 +54,13 @@ RUN: on state * three foo bar ‹OnEventHandler›
 END: state¦two¦three¦foo¦bar
 foo bar :: three — now
 .
-* ERROR * TypeError("'super' object is not iterable",)
-Traceback (most recent call last):
-  File "../modules/data.py", line 92, in run
-    flatten(self.ctx.out,(c,))
-  File "../modules/data.py", line 44, in flatten
-    flatten(out,tt,p)
-  File "../modules/data.py", line 34, in flatten
-    s = list(s)
-TypeError: 'super' object is not iterable
+: ‹Collected SavedState:foo¦bar›
+name: foo¦bar
+value: three
+lock: No
+last value: two
+last change: now
+persistent: yes
 .
 0 Yes!
 0 Yes!

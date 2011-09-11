@@ -45,7 +45,7 @@ f fs20: FIX
 fd fs20debug: FIX
 	pdb test/interactive/main.py test/interactive/fs20
 i interactive: FIX
-	env HOMEVENT_TEST=1 python test/interactive/main.py
+	env HOMEVENT_TEST=1 python-dbg test/interactive/main.py
 id interactivedebug d debug: FIX
 	pdb test/interactive/main.py
 r run: FIX

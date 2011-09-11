@@ -33,12 +33,16 @@ not executed :: foo (60)
 .
 : ⇒OnEventWorker:Skipped¦One
 name: Skipped¦One
+id: 11
+prio: 49
 pname: Skipped One
 args: foo
 prio: 49
 .
 : ⇒OnEventWorker:Skipped¦Two
 name: Skipped¦Two
+id: 12
+prio: 50
 pname: Skipped Two
 args: foo
 prio: 50

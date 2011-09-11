@@ -25,7 +25,7 @@ cat >/tmp/f.$$ <<'END'
 <172>HomEvenT: Five Warn
 END
 perl -p -e 's/\0/\n/g' -i /tmp/nc_$USER
-sed -e "s/ at 0x[0-9A-Fa-f]*/ at 0x×××/g" \
+sed -e "s/ at 0x[0-9A-Fa-f]*/ at 0x×××/" \
 	-i real/syslog
 
 diff -u /tmp/f.$$ /tmp/nc_$USER

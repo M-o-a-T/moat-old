@@ -70,18 +70,21 @@ class _OnHandlers(Collection):
 			if key in onHandlers:
 				return onHandlers[key]
 			if key in onHandlers2:
-				return onHandlers2[key]
+				return onHandlers2[key][0]
 			if hasattr(key,"__len__") and len(key) == 1:
 				if key[0] in onHandlers:
 					return onHandlers[key[0]]
 				if key[0] in onHandlers2:
-					return onHandlers2[key[0]]
+					return onHandlers2[key[0]][0]
 			raise
 
 	def __setitem__(self,key,val):
 		assert val.name==key, repr(val.name)+" != "+repr(key)
 		onHandlers[val.id] = val
-		onHandlers2[val.parent.arglist] = val
+		try:
+			onHandlers2[val.parent.arglist].append(val)
+		except KeyError:
+			onHandlers2[val.parent.arglist] = [val]
 		super(_OnHandlers,self).__setitem__(key,val)
 		register_worker(val)
 
@@ -89,14 +92,19 @@ class _OnHandlers(Collection):
 		val = self[key]
 		unregister_worker(val)
 		del onHandlers[val.id]
-		del onHandlers2[val.parent.arglist]
+		onHandlers2[val.parent.arglist].remove(val)
+		if not onHandlers2[val.parent.arglist]:
+			del onHandlers2[val.parent.arglist]
 		super(_OnHandlers,self).__delitem__(val.name)
 
 	def pop(self,key):
 		val = self[key] if key else self.keys()[0]
 		unregister_worker(val)
 		del OnHandlers[val.id]
-		del OnHandlers2[val.parent.arglist]
+		try:
+			del OnHandlers2[val.parent.arglist]
+		except KeyError:
+			pass
 		return val
 OnHandlers = _OnHandlers()
 OnHandlers.does("del")
