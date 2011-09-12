@@ -131,6 +131,27 @@ class MonitorUI(object):
 	def on_menu_test2(self,x):
 		self.add_event("Test 2")
 
+	def on_menu_prefs(self,x):
+		self['prefs_status'].hide()
+		self['prefs'].show()
+	def on_prefs_delete_event(self,*x):
+		self['prefs'].hide()
+		return True
+
+	def on_prefs_ok(self,*x):
+		print "OK",x
+		self['prefs'].hide()
+	def on_prefs_test(self,*x):
+		print "TEST",x
+	def on_prefs_cancel(self,*x):
+		print "CANCEL",x
+		self['prefs'].hide()
+	def on_prefs_port_ins(self,*x):
+		print "PI",x
+	def on_prefs_port_insa(self,*x):
+		print "PIa",x
+	def on_prefs_port_pre(self,*x):
+		print "PE",x
 
 
 import sys
