@@ -308,7 +308,6 @@
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="tooltip" translatable="yes">The server's port, usually 32368</property>
-                                <property name="max_length">5</property>
                                 <property name="invisible_char">●</property>
                                 <property name="activates_default">True</property>
                                 <property name="truncate_multiline">True</property>

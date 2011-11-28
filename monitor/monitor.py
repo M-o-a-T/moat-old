@@ -12,6 +12,10 @@ import os
 from time import time
 from datetime import datetime
 
+from twisted.internet import gtk2reactor
+gtk2reactor.install()
+from twisted.internet import reactor
+
 APPNAME="monitor"
 APPVERSION="0.1"
 
@@ -161,6 +165,7 @@ if __name__ == "__main__":
 	widgets.init_done()
 	#glib.timeout_add(60*1000, db_idle)
 
-	gtk.main()
+	#gtk.main()
+	reactor.run()
 
 # END #
