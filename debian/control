@@ -3,15 +3,20 @@ Section: python
 Priority: extra
 XS-Python-Version: 2.6
 Maintainer: Matthias Urlichs <matthias@urlichs.de>
-Build-Depends: debhelper (>= 5), python2.6-dev, python-setuptools, python-twisted-core, python-twisted-conch, libglib2.0-dev (>= 2.14), python-rrdtool, owfs, rrdtool
-X-Also-Depends: portaudio19-dev, avr-libc, gcc-avr
+Build-Depends: debhelper (>= 5), python-all-dev, python-setuptools, python-twisted-core (>= 11.1), python-twisted-conch, libglib2.0-dev (>= 2.14), python-rrdtool, rrdtool,
+ owserver | owfs,
+ python-dbg,
+ python-sqlmix (>= 0.9.23),
+ portaudio19-dev
+X-Also-Depends: avr-libc, gcc-avr
 Build-Depends-Indep: python-support
 Standards-Version: 3.7.2
 
 Package: homevent
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, ${python:Depends}, python-twisted-core
-Recommends: pulseaudio (>= 0.9.7), python-twisted-conch, python-rrdtool, owfs
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${python:Depends}, python-twisted-core (>= 11.1)
+Recommends: pulseaudio (>= 0.9.7), python-twisted-conch, python-rrdtool, owfs,
+ python-sqlmix (>= 0.9.23),
 Suggests: socat
 Description: A scripted event-based monitoring and control system
  HomEvenT is a flexible, scripted, network-aware event handler.

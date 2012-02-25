@@ -20,7 +20,7 @@ This is the core of database access.
 """
 
 from homevent.base import Name
-from smurf.Db.twisted import DbThread,NoData,ManyData
+from sqlmix.twisted import DbPool,NoData,ManyData
 
 from twisted.internet.defer import inlineCallbacks,returnValue,DeferredList,returnValue
 import sys
@@ -35,6 +35,8 @@ SafeNames = {
 class DbStore(object):
 	"""This object implements a simple Deferred-enabled storage"""
 	running = False
+	init_done = None
+
 	def __init__(self,category,name=None):
 		if name is None:
 			import os
@@ -42,7 +44,7 @@ class DbStore(object):
 				name = "HOMEVENT_TEST"
 			else:
 				name = "HOMEVENT"
-		self.db = DbThread(name)
+		self.db = DbPool(name)
 		self.category = " ".join(Name(category)).encode("utf-8")
 		db=self.db()
 		r = db.Do("CREATE TABLE HE_State ("
@@ -58,8 +60,8 @@ class DbStore(object):
 			  " id INTEGER PRIMARY KEY,"
 		      " UNIQUE (category,name))", _empty=1))
 		r.addErrback(lambda _: False)
-		db.addDone(r)
-		r = DeferredList((db.done,r),fireOnOneErrback=True)
+		db.release(r)
+		#r = DeferredList((db.done,r),fireOnOneErrback=True)
 		def filter(res):
 			self.running = True
 			return res
@@ -76,7 +78,6 @@ class DbStore(object):
 				raise KeyError((self.category,key))
 			else:
 				r = eval(r,SafeNames,{})
-			yield db.commit()
 		returnValue(r)
 
 	def all(self, callback):
@@ -91,7 +92,6 @@ class DbStore(object):
 				r = yield db.Do("delete from HE_State where category=${cat} and name=${name}", cat=self.category,name=key)
 			except NoData:
 				raise KeyError((self.category,key))
-			yield db.commit()
 		returnValue(r)
 
 	def clear(self):
@@ -105,7 +105,6 @@ class DbStore(object):
 			r = yield db.Do("update HE_State set value=${val} where category=${cat} and name=${name}", cat=self.category,name=key,val=repr(val), _empty=1)
 			if r == 0:
 				r = yield db.Do("insert into HE_State (category,name,value) VALUES(${cat},${name},${val})", cat=self.category,name=key,val=repr(val))
-			yield db.commit()
 		returnValue(r)
 
 	

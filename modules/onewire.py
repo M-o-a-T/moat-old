@@ -334,19 +334,22 @@ class OWFSwindmon(Monitor):
 			# Imagine the wind vane traveling on the circumference of
 			# a circle (r=1). Calculate a moving average from this
 			# point's locations within the circle. Its distance from
-			# the center is our confidence in the current value.
+			# the center is the accurracy of the current value.
 			#
-			## c² = a²+b²-2 a b cos A
-			## A = acos( (a²+b²-c²) / 2 a b)
+			## c² = a²+b²-2 a b cos α  ⇒
+			## α = acos( (a²+b²-c²) / 2 a b )
 			from math import pi,cos,acos,sqrt
-			def hypot(a,b,alpha): return sqrt(a*a+b*b-2*a*b*cos(alpha))
+			def distance(a,b,alpha): return sqrt(a*a+b*b-2*a*b*cos(alpha))
 			def angle(a,b,c): return acos((a*a+b*b-c*c)/(2*a*b))
 
-			al = ((self.avg-val)%16)*pi/8 # between avg and new, at center
-			d = hypot(1,self.qavg,al)
+			# Angle between the old average and the new point
+			# (center of the circle)
+			al = ((self.avg-val)%16)*pi/8
+
+			d = distance(1,self.qavg,al)
 			nal = angle(1,d,self.qavg) # at corner of wind vane
 			d = (1-self.decay)*d
-			self.qavg = hypot(1,d,nal)
+			self.qavg = distance(1,d,nal)
 			nal = angle(1,self.qavg,d) # between avg and new, at center
 			if self.avg < val: nal = -nal
 			self.avg = (val+nal*8/pi)%16

@@ -355,7 +355,7 @@ FileDescriptor.write = nfhw
 # Simplify failure handling
 BaseFailure = failure.Failure
 class TwistFailure(BaseFailure,BaseException):
-	def __init__(self, exc_value=None, exc_type=None, exc_tb=None):
+	def __init__(self, exc_value=None, exc_type=None, exc_tb=None, captureVars=False):
 		global tracked_errors
 		try:
 			a,b,c = sys.exc_info()
@@ -369,7 +369,7 @@ class TwistFailure(BaseFailure,BaseException):
 			raise failure.NoCurrentExceptionError
 		if not isinstance(exc_value,BaseException):
 			exc_type = RuntimeError("Bad Exception: "+str(exc_value))
-		BaseFailure.__init__(self,exc_value,exc_type,exc_tb)
+		BaseFailure.__init__(self,exc_value,exc_type,exc_tb,captureVars)
 
 	def cleanFailure(self):
 		"""Do not clean out the damn backtrace. We need it."""
