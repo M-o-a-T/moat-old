@@ -228,7 +228,7 @@ def collect_words(w):
 			p.wk = val
 		elif unit in weekdays:
 			assert p.dow is None, "You already specified the day of week"
-			assert val != 0 and abs(val) <= 4, "Months only have 5 days each, max (use -1 if you mean the last one)"
+			assert val != 0 and abs(val) <= 4, "Months have max. 5 of each weekday. (use -1 if you mean the last one)"
 			p.dow = weekdays[unit]
 			p.nth = val
 			continue
@@ -338,7 +338,7 @@ def time_until(args, now=None, invert=False):
 		get_delta(check_sec,"s","second")
 		if p.delta is not None and p.delta == p.now: return p.now
 
-		if p.wk: # week of the year
+		if p.wk is not None: # week of the year
 			yr,wk,dow = p.now.isocalendar()
 			if p.wk != wk: return p.now
 			p.res = p.now
@@ -360,7 +360,7 @@ def time_until(args, now=None, invert=False):
 		return p.delta
 
 
-	# Now here's the fun part...
+	# Now here's the fun part: figure out how long until the condition is true
 	# first, check absolute values
 	check_year (False)
 	check_month(False)

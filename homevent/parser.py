@@ -33,7 +33,9 @@ import os
 from twisted.internet import reactor,threads,defer,interfaces
 from twisted.python import failure
 from twisted.protocols.basic import LineOnlyReceiver,FileSender,_PauseableMixin
-from threading import Lock
+from gevent.thread import allocate_lock as Lock
+from gevent import spawn
+from geventreactor import waitForDeferred
 
 from homevent.logging import log,TRACE,DEBUG
 from homevent.context import Context
@@ -93,10 +95,8 @@ class ParseReceiver(Outputter):
 			c=Context()
 			#c.logger=parse_logger
 			i = InteractiveInterpreter(ctx=c)
-			p = Parser(i, StdIO, ctx=c)
-			r = p.result
-			r.addErrback(reporter)
-			parser = p
+			parser = Parser(i, StdIO, ctx=c)
+			parser.result.addErrback(reporter)
 		self.parser = parser
 		parser.registerProducer(self)
 		#parser.startParsing()
@@ -177,6 +177,7 @@ def parser_builder(cls=None,interpreter=None,*a,**k):
 class Parser(object):
 	"""The input parser object. It is a consumer of lines."""
 	line = None
+	p_gen = None
 	implements(interfaces.IFinishableConsumer)
 
 	def __init__(self, proc, ctx=None):
@@ -184,8 +185,6 @@ class Parser(object):
 		@proc."""
 		super(Parser,self).__init__()
 
-		self.symbol_queue = Queue.Queue(1)
-		self.next_symbol_queue = Queue.Queue(0)
 		self.result = defer.Deferred()
 		self.ending = False
 
@@ -203,14 +202,14 @@ class Parser(object):
 		if "filename" not in self.ctx:
 			self.ctx.filename="<stdin?>"
 
-		def ex(_):
+		def ex1(_):
 			if self.line is not None:
 				if hasattr(self.line,"loseConnection"):
 					self.line.loseConnection()
 				elif hasattr(self.line,"stopProducing"):
 					self.line.stopProducing()
 			return _
-		self.result.addBoth(ex)
+		self.result.addBoth(ex1)
 
 	def registerProducer(self, producer, streaming=None):
 		log("parser",DEBUG,"PRODUCE",streaming,producer)
@@ -264,19 +263,10 @@ class Parser(object):
 			self.process_line_buffer()
 		log("parser",DEBUG,"LINE> END")
 
-		def ex(_):
-			d.callback(r)
-			self._last_symbol()
-			return _
-		self.result.addBoth(ex)
+		d.callback(r)
 
 	def _last_symbol(self):
-		q = self.next_symbol_queue
-		if q:
-			log("parser",TRACE,"WANT TOKEN last")
-			self.next_symbol_queue = None
-			q.put(False,block=True)
-		log("parser",TRACE,"WANT TOKEN last2")
+		pass
 
 	def add_line(self, data):
 		"""Standard LineReceiver method"""
@@ -374,7 +364,7 @@ class Parser(object):
 		self.p_pop_after=False
 		self.p_stack = []
 		self.p_args = []
-		if hasattr(self,"p_gen") and self.p_gen:
+		if self.p_gen:
 			self.p_gen.init()
 
 	def startParsing(self, protocol=None):
@@ -396,34 +386,44 @@ class Parser(object):
 		self.init_state()
 
 		self.p_gen = tokizer(self.read_a_line, self._do_parse)
-		self.p_loop = self.p_gen.run()
+		self.p_loop = spawn(self.p_gen.run)
 		def pg_done(_):
+			_=_.get()
+			self.p_gen = None
 			log("parser",TRACE,"P DONE",_)
 			try: self.result.callback(_)
 			except defer.AlreadyCalledError: pass
-			else: self.endConnection()
+			else:
+				self.endConnection()
 		def pg_err(_):
+			self.p_gen = None
 			log("parser",TRACE,"P ERROR",_)
 			try: self.result.errback(_)
 			except defer.AlreadyCalledError: pass
 			else: self.endConnection()
-		self.p_loop.addCallbacks(pg_done,pg_err)
+		self.p_loop.link_value(pg_done)
+		self.p_loop.link_exception(pg_err)
 
 	def _do_parse(self, t,txt,beg,end,line):
 		# States: 0 newline, 1 after first word, 2 OK to extend word
 		#         3+4 need newline+indent after sub-level start, 5 extending word
 		log("parser",TRACE,"PARSE",t,repr(txt))
 
-		def handle_error(_):
-			if _.check(StopIteration):
-				_.raiseException()
+		try:
+			res = self._parseStep(t,txt,beg,end,line)
+			if isinstance(res,defer.Deferred):
+				waitForDeferred(res)
 
+		except StopIteration:
+			return
+
+		except Exception as ex:
 			if self.p_stack:
 				self.proc = self.p_stack[0]
 
 			try:
 				log("parser",TRACE,"PERR",self,self.proc)
-				self.proc.error(self,_)
+				self.proc.error(self,ex)
 				log("parser",TRACE,"PERR OK")
 			except Exception:
 				import sys,traceback
@@ -432,8 +432,8 @@ class Parser(object):
 					traceback.print_exc(file=sys.stderr)
 
 					try:
-						log("parser",TRACE,"RESULT error",_)
-						self.result.errback(_)
+						log("parser",TRACE,"RESULT error",ex)
+						self.result.errback(ex)
 					except defer.AlreadyCalledError: pass
 					else: self.endConnection()
 				except Exception:
@@ -441,15 +441,10 @@ class Parser(object):
 					traceback.print_exc(file=sys.stderr)
 					raise
 
-
-		res = defer.maybeDeferred(self._parseStep,t,txt,beg,end,line)
-		res.addErrback(handle_error)
-		return res
-
 	def _parseStep(self, t,txt,beg,end,line):
 		from token import NUMBER,NAME,DEDENT,INDENT,OP,NEWLINE,ENDMARKER, \
 			STRING
-		from tokize import COMMENT,NL
+		from homevent.tokize import COMMENT,NL
 
 		if "logger" in self.ctx:
 			self.ctx.logger("T",self.p_state,t,repr(txt),beg,end,repr(line))
@@ -461,10 +456,10 @@ class Parser(object):
 				self.p_state=1
 				return
 			elif t == DEDENT:
-				r = self.proc.done()
+				self.proc.done()
 				if self.p_stack:
 					self.proc = self.p_stack.pop()
-					return r
+					return
 				else:
 					raise StopIteration
 			elif t == ENDMARKER:
@@ -504,25 +499,23 @@ class Parser(object):
 			elif t == OP and txt == ":":
 				log("parser",TRACE,"RUN2")
 				log("parser",TRACE,self.proc.complex_statement,self.p_args)
-				p = defer.maybeDeferred(self.proc.complex_statement,self.p_args)
+				_ = waitForDeferred(self.proc.complex_statement(self.p_args))
 
-				def have_p(_):
-					self.p_stack.append(self.proc)
-					self.proc = _
-					self.p_state = 3
-				p.addCallback(have_p)
-				return p
+				self.p_stack.append(self.proc)
+				self.proc = _
+				self.p_state = 3
+				return
 			elif t == NEWLINE:
 				log("parser",TRACE,"RUN3")
 				log("parser",TRACE,self.proc.simple_statement,self.p_args)
-				r = defer.maybeDeferred(self.proc.simple_statement,self.p_args)
+				waitForDeferred(self.proc.simple_statement(self.p_args))
 					
 				if self.p_pop_after:
-					r.addCallback(lambda _,p: p.done(), self.proc)
+					self.proc.done()
 					self.proc = self.p_stack.pop()
 					self.p_pop_after=False
 				self.p_state=0
-				return r
+				return
 		elif self.p_state == 3:
 			if t == NEWLINE:
 				self.p_state = 4

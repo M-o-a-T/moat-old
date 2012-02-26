@@ -27,14 +27,15 @@ something about it.
 from homevent.context import Context
 from homevent.event import Event,TrySomethingElse,NeverHappens
 from homevent.base import Name,MIN_PRIO,MAX_PRIO
-from homevent.twist import deferToLater, BaseFailure
+from homevent.twist import BaseFailure
 from homevent.times import humandelta, now
 
-from twisted.internet import defer
-from twisted.internet.threads import deferToThread
 from twisted.python import failure
-from Queue import Queue,Empty
-import os
+
+from homevent.geventreactor import waitForGreenlet
+from gevent import spawn
+
+#import os
 
 class DropException:
 	"""\
@@ -164,16 +165,15 @@ class WorkSequence(WorkItem):
 
 	def process(self, **k):
 		super(WorkSequence,self).process(**k)
-		r = deferToLater(self._process)
+		r = spawn(self._process)
 #		if "HOMEVENT_TEST" in os.environ:
 #			r = deferToLater(self._process,*a,**k)
 #		else:
 #			r = deferToThread(self._process,*a,**k)
-		return r
+		return waitForGreenlet(r)
 
 	handle_conditional = False
 
-	@defer.inlineCallbacks
 	def _process(self):
 		assert self.work,"empty workqueue"
 		self.in_step = step = 0
@@ -182,15 +182,11 @@ class WorkSequence(WorkItem):
 
 		from homevent.logging import log_run,log_halted
 		try:
-			event = yield self.event
+			event = self.event
 		except Exception:
 			event = failure.Failure()
 		skipping = False
 		excepting = False
-		if self.handle_conditional:
-			DoRetry = TrySomethingElse
-		else:
-			DoRetry = NeverHappens
 
 		for w in self.work:
 			if w.prio >= MIN_PRIO and w.prio <= MAX_PRIO:
@@ -205,14 +201,7 @@ class WorkSequence(WorkItem):
 			try:
 				if not excepting or isinstance(w,ExcWorker):
 					log_run(self,w,step)
-#					d = w.process(event=self.event, queue=self)
-#					if isinstance(d,defer.Deferred):
-#						def repo(_):
-#							print _
-#							return _
-#						d.addErrback(repo)
-#					r = yield d
-					r = yield w.process(event=self.event, queue=self)
+					r = w.process(event=self.event, queue=self)
 			except HaltSequence:
 				r = failure.Failure()
 				log_halted(self,w,step)
@@ -236,10 +225,10 @@ class WorkSequence(WorkItem):
 				from homevent.logging import log_exc
 				log_exc("Unhandled nested exception", res)
 				from homevent.run import process_failure
-				yield process_failure(res)
+				process_failure(res)
 				res = r
 
-		defer.returnValue(res) ## may warn; mapped off at bottom of file
+		return res
 
 	def report(self, verbose=False):
 		if not verbose:
@@ -310,7 +299,7 @@ class WorkSequence(WorkItem):
 class ConditionalWorkSequence(WorkSequence):
 	"""\ 
 		A WorkSequence which completes with the first step that does
-		*not* raise an TrySomethingElse error.
+		*not* raise a TrySomethingElse error.
 		"""
 	handle_conditional = True
 

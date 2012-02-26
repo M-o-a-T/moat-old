@@ -24,6 +24,7 @@ from homevent.module import load_module, Load,LoadDir,ModuleExists
 from homevent.reactor import ShutdownHandler,mainloop,shut_down
 from homevent.context import Context
 from homevent.twist import callLater
+from homevent.geventreactor import waitForDeferred
 
 from twisted.internet import reactor,interfaces,fdesc
 from twisted.internet._posixstdio import StandardIO ## XXX unstable interface!
@@ -61,6 +62,11 @@ class StdIO(StandardIO):
 def reporter(err):
 	print "Error:",err
 	
+def looper():
+	while True:
+		print "L"
+		sleep(1)
+
 def ready():
 	c=Context()
 	for f in sys.argv[1:]:
@@ -74,9 +80,14 @@ def ready():
 	p = parser_builder(None, i, ctx=c)()
 	s = StdIO(p)
 	r = p.parser.result
-	r.addErrback(reporter)
-	r.addBoth(lambda _: shut_down())
+	try:
+		r = waitForDeferred(r)
+	except Exception as e:
+		reporter(e)
+	shut_down()
 
+from gevent import spawn,sleep
+#spawn(looper)
 callLater(False,0.1,ready)
 mainloop()
 

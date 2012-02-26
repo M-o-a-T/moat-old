@@ -24,6 +24,10 @@ from twisted.internet.abstract import FileDescriptor
 from twisted.internet import fdesc,defer,reactor,base
 from twisted.python import log,failure
 from twisted.python.threadable import isInIOThread
+from homevent import geventreactor
+
+import gevent
+from gevent.event import AsyncResult
 
 from posix import write
 import sys
@@ -66,36 +70,37 @@ class StdOutDescriptor(FileDescriptor):
 # count the number of active defer-to-later handlers
 # so that we don't exit when one of them is still running,
 # because that causes a deadlock.
-_running = 0
-_callme = None
-def call_when_idle(p):
-	global _callme
-	assert _callme is None, "Only one idle callback allowed"
-	_callme = p
-def _defer(d):
-	global _running
-	global _callme
-	d.callback(None)
-	_running -= 1
-	if _callme and not _running:
-		cm = _callme
-		_callme = None
-		cm()
-
+#_running = 0
+#_callme = None
+#def call_when_idle(p):
+#	global _callme
+#	assert _callme is None, "Only one idle callback allowed"
+#	_callme = p
+#def _defer(d):
+#	global _running
+#	global _callme
+#	d.callback(None)
+#	_running -= 1
+#	if _callme and not _running:
+#		cm = _callme
+#		_callme = None
+#		cm()
+#
 # also, don't require an isInIOThread() test each time we want to defer something
 # from some thread which may or may not be the main one:
 # use this function instead
-def deferToLater(p,*a,**k):
-	global _running
-	_running += 1
-	d = defer.Deferred()
-	d.addCallback(lambda _: p(*a,**k))
-	if isInIOThread():
-		reactor.callLater(0,_defer,d)
-	else:
-		reactor.callFromThread(_defer,d)
-	reactor.wakeUp()
-	return d
+#def deferToLater(p,*a,**k):
+#	global _running
+#	_running += 1
+#	d = defer.Deferred()
+#	d.addCallback(lambda _: p(*a,**k))
+#	if isInIOThread():
+#		reactor.callLater(0,_defer,d)
+#	else:
+#		reactor.callFromThread(_defer,d)
+#	reactor.wakeUp()
+#	return d
+deferToLater = geventreactor.deferToGreenlet
 
 
 # Simplification: sometimes we're late starting something.
@@ -270,6 +275,24 @@ else:
 	def reset_slots():
 		pass
 
+def sleepUntil(force,delta):
+	from homevent.times import unixdelta,now
+
+	if isinstance(delta,dt.datetime):
+		delta = delta - now()
+	if isinstance(delta,dt.timedelta):
+		delta = unixdelta(delta)
+	if delta < 0: # we're late
+		delta = 0 # but let's hope not too late
+
+	if "HOMEVENT_TEST" in os.environ:
+		ev = AsyncResult()
+		CallLater(force,delta, ev.set,None)
+		ev.get(block=True)
+
+	sleep(delta)
+
+
 def callLater(force,delta,p,*a,**k):
 	from homevent.times import unixdelta,now
 
@@ -376,3 +399,46 @@ class TwistFailure(BaseFailure,BaseException):
 		pass
 
 failure.Failure = TwistFailure
+
+gjob=0
+gspawn = gevent.spawn
+
+#def _completer(g,job):
+#	def pr_ok(v):
+#		print >>sys.stderr,"G RES %d %s" % (job,v)
+#	def pr_err(v):
+#		print >>sys.stderr,"G ERR %d %s" % (job,v)
+#	g.link_value(pr_ok)
+#	g.link_exception(pr_err)
+def do_spawn(func,*a,**k):
+	global gjob
+	gjob += 1
+	job = gjob
+#	print >>sys.stderr,"SPAWN %d %s %s %s" % (job,func,a,k)
+	g = gspawn(func,*a,**k)
+#	_completer(g,job)
+	return g
+import gevent.greenlet as ggr
+gevent.spawn = do_spawn
+ggr.Greenlet.spawn = do_spawn
+
+
+gwait = 0
+class log_wait(object):
+	"""Usage:
+		>>> with log_wait("foo","bar","baz"):
+		...    do_something_blocking()
+	"""
+
+	def __init__(self,*a):
+		global gwait
+		gwait += 1
+		self.a = a
+		self.w = gwait
+
+	def __enter__(self):
+		print >>sys.stderr,"+WAIT", self.w, self.a
+		return self
+	def __exit__(self, a,b,c):
+		print >>sys.stderr,"-WAIT", self.w, self.a
+		return False

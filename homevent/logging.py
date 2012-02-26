@@ -32,7 +32,10 @@ from homevent.base import Name,SYS_PRIO,MIN_PRIO,MAX_PRIO
 from homevent.twist import BaseFailure
 from homevent.collect import Collection,Collected
 
-from twisted.python import failure
+from gevent import spawn
+from gevent.queue import Queue,Full
+from gevent.select import select
+
 import sys
 from traceback import print_exc
 
@@ -90,7 +93,12 @@ class Logger(Collected):
 			self.name = Name(self.__class__.__name__, "x"+str(logger_nr))
 
 		super(Logger,self).__init__()
+		self.q = Queue(100)
+		self.job = spawn(self._writer)
 
+	def _writer(self):
+		for r in self.q:
+			self._log(*r)
 
 	# Collection stuff
 	def list(self):
@@ -103,32 +111,38 @@ class Logger(Collected):
 		return LogNames[self.level]+" "+repr(self.out)
 
 	def delete(self, ctx=None):
+		self.job.kill()
+		self.job = None
 		self.delete_done()
 
-		
+	def _wlog(self, *a):
+		self.q.put(a, block=False)
+
 	def _log(self, level, data):
+		if hasattr(self.out,'fileno'):
+			select((),(self.out,))
 		print >>self.out,data
 
 	def log(self, level, *a):
 		if level >= self.level:
-			self._log(level,u" ".join(unicode(x) for x in a))
+			self._wlog(level,u" ".join(unicode(x) for x in a))
 			self.flush()
 
 	def log_event(self, event, level):
 		if level >= self.level:
 			if hasattr(event,"report"):
 				for r in event.report(99):
-					self._log(level,r)
+					self._wlog(level,r)
 			else:
-				self._log(level,unicode(event))
+				self._wlog(level,unicode(event))
 			self.flush()
 
 	def log_failure(self, err, level=WARN):
 		if level >= self.level:
 			if err.frames:
-				self._log(level,err.getTraceback())
+				self._wlog(level,err.getTraceback())
 			else:
-				self._log(level,unicode(err.value))
+				self._wlog(level,unicode(err.value))
 	
 	def flush(self):
 		pass
@@ -180,7 +194,7 @@ class LogWorker(ExcWorker):
 		for l in Loggers.values():
 			try:
 				l.log_event(event=event,level=level)
-			except Exception,e:
+			except Exception as e:
 				print >>sys.stderr,"LOGGER CRASH 1"
 				print_exc(file=sys.stderr)
 				l.end_logging()
@@ -198,20 +212,20 @@ def log_exc(msg=None, err=None, level=ERROR):
 			err = sys.exc_info()
 		elif not isinstance(err,tuple):
 			err = (None,err,None)
-		err = failure.Failure(err[1],err[0],err[2])
+		err = BaseFailure(err[1],err[0],err[2])
 
 	for l in Loggers.values():
 		if msg:
 			try:
 				l.log(level,msg)
-			except Exception,e:
+			except Exception as e:
 				print >>sys.stderr,"LOGGER CRASH 2"
 				print_exc(file=sys.stderr)
 				l.end_logging()
 				log_exc("Logger removed",e)
 		try:
 			l.log_failure(err, level=level)
-		except Exception,e:
+		except Exception as e:
 			print >>sys.stderr,"LOGGER CRASH 3"
 			print_exc(file=sys.stderr)
 			l.end_logging()
@@ -230,7 +244,7 @@ class LogEndEvent(Event):
 	def report(self, verbose=False):
 		try:
 			yield  u"END: "+unicode(Name(self.name[1:]))
-		except Exception,e:
+		except Exception as e:
 			print >>sys.stderr,"LOGGER CRASH 4"
 			print_exc(file=sys.stderr)
 			yield  "END: REPORT_ERROR: "+repr(self.name[1:])
@@ -332,7 +346,7 @@ def log(level, *a):
 	for l in Loggers.values():
 		try:
 			l.log(level, *a)
-		except Exception,e:
+		except Exception as e:
 			print >>sys.stderr,"LOGGER CRASH 0"
 			print_exc(file=sys.stderr)
 			l.delete()

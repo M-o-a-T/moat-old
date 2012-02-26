@@ -19,6 +19,14 @@
 This is the core of the event dispatcher.
 """
 
+from homevent import geventreactor
+geventreactor.install()
+
+from gevent import monkey
+monkey.patch_all()
+del monkey
+
+
 from homevent.context import Context
 from homevent.event import Event
 from homevent.worker import Worker,SeqWorker,WorkSequence
@@ -28,9 +36,9 @@ from homevent.reactor import start_up,shut_down, mainloop
 from homevent.statement import main_words,global_words
 from homevent.check import register_condition
 
-import homevent.twist # for side effects
+#import homevent.twist # for side effects
 
-VERSION = "0.2.10"
+VERSION = "0.2.20"
 
 __all__ = ("Event","Worker","SeqWorker","WorkSequence",
 	"collect_event","process_event", "register_worker", "mainloop")

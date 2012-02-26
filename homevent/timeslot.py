@@ -29,7 +29,7 @@ from homevent.reactor import shutdown_event
 from homevent.times import time_delta, time_until, unixdelta, now, \
 	humandelta
 from homevent.base import Name
-from homevent.twist import deferToLater, callLater
+from homevent.twist import callLater
 from homevent.context import Context
 from homevent.logging import log,TRACE,DEBUG,ERROR
 from homevent.collect import Collection,Collected
@@ -37,7 +37,6 @@ from homevent.collect import Collection,Collected
 from time import time
 import os
 from twisted.python import failure
-from twisted.internet import defer
 import datetime as dt
 
 class Timeslots(Collection):

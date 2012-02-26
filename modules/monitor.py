@@ -57,15 +57,12 @@ This statement updates the parameters of an existing monitor.
 		monitor = Monitors[Name(event)]
 		active = monitor.active
 
-		d = defer.succeed(None)
 		if active:
-			d.addCallback(lambda _: monitor.down())
-		def setter(_):
-			for p,v in self.params.iteritems():
-				setattr(monitor,p,v)
-		d.addCallback(setter)
+			monitor.down()
+		for p,v in self.params.iteritems():
+			setattr(monitor,p,v)
 		if active:
-			d.addCallback(lambda _: monitor.up())
+			monitor.up()
 		return d
 
 for cmd in (MonitorDelayFor, MonitorDelayUntil, MonitorRequire, \
@@ -115,9 +112,7 @@ set monitor VALUE NAME
 		if len(event) < 2:
 			raise SyntaxError(u"Usage: set monitor ‹value› ‹name…›")
 		m = Monitors[Name(event[1:])]
-		if not m.watcher:
-			raise NoWatcherError(m)
-		m.watcher.callback(event[0])
+		m.watcher.put(event[0], block=True, timeout=0.1)
 
 class ExistsMonitorCheck(Check):
 	name=("exists","monitor")

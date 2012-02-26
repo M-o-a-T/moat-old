@@ -35,8 +35,10 @@ from homevent.base import Name
 from homevent.twist import BaseFailure
 
 from twisted.internet import defer
-from twisted.python import failure
+from homevent.geventreactor import waitForDeferred
+
 import sys
+import traceback
 
 class InputEvent(Event):
 	"""An event that's just a line from the interpreter"""
@@ -113,7 +115,8 @@ class Processor(object):
 class CollectProcessor(Processor):
 	"""\
 		A processor which simply stores all (sub-)statements, recursively.
-		You need to override .store() in order to specify _where_.
+		You need to override .store() in order to specify where;
+		default is the parent statement.
 		"""
 
 	verify = False
@@ -128,7 +131,10 @@ class CollectProcessor(Processor):
 	def simple_statement(self,args):
 		fn = self.lookup(args)
 		if fn.immediate:
-			return fn.run(self.ctx)
+			res = fn.run(self.ctx)
+			if isinstance(res,defer.Deferred):
+				waitForDeferred(res)
+			return
 		self.store(fn)
 
 	def complex_statement(self,args):
@@ -158,17 +164,18 @@ class RunMe(object):
 	def __init__(self,proc,fn):
 		self.proc = proc
 		self.fn = fn
-		self.fnp = self.fn.processor
+		self.fnp = fn.processor
 
 	def simple_statement(self,args):
 		return self.fnp.simple_statement(args)
 	def complex_statement(self,args):
 		return self.fnp.complex_statement(args)
 	def done(self):
-		d = defer.maybeDeferred(self.fnp.done)
-		d.addCallback(lambda _: self.fn.run(self.proc.ctx))
-		d.addCallback(lambda _: self.proc.prompt())
-		return d
+		self.fnp.done()
+		res = self.fn.run(self.proc.ctx)
+		if isinstance(res,defer.Deferred):
+			waitForDeferred(res)
+		self.proc.prompt()
 
 class ImmediateProcessor(CollectProcessor):
 	"""\
@@ -180,7 +187,10 @@ class ImmediateProcessor(CollectProcessor):
 
 	def simple_statement(self,args):
 		fn = self.lookup(args)
-		return fn.run(self.ctx)
+		res = fn.run(self.ctx)
+		if isinstance(res,defer.Deferred):
+			waitForDeferred(res)
+		return res
 
 	def complex_statement(self,args):
 		fn = self.lookup(args)
@@ -203,9 +213,12 @@ class Interpreter(Processor):
 
 	def simple_statement(self,args):
 		fn = self.lookup(args)
-		d = defer.maybeDeferred(fn.run,self.ctx)
-		d.addBoth(self.prompt)
-		return d
+		try:
+			fn.run(self.ctx)
+		except Exception as ex:
+			self.prompt(ex)
+		else:
+			self.prompt()
 
 	def complex_statement(self,args):
 		try:
@@ -234,12 +247,11 @@ class InteractiveInterpreter(Interpreter):
 	def error(self,parser,err):
 		from homevent.statement import UnknownWordError
 
-		err = failure.Failure(err)
-		if err.check(UnknownWordError,SyntaxError):
-			print >>parser.ctx.out, "ERROR:",err.getErrorMessage()
+		if isinstance(err,(UnknownWordError,SyntaxError)):
+			print >>parser.ctx.out, "ERROR:", err
 		else:
 			print >>parser.ctx.out, "ERROR:"
-			err.printBriefTraceback(file=parser.ctx.out)
+			traceback.print_exception(err.__class__,err,sys.exc_info()[2], file=parser.ctx.out)
 		parser.init_state()
 		self.prompt()
 		return

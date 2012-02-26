@@ -30,15 +30,17 @@ from homevent.worker import ExcWorker
 from homevent.times import time_delta, time_until, unixdelta, now, \
 	humandelta
 from homevent.base import Name,SYS_PRIO
-from homevent.twist import deferToLater, callLater
+from homevent.twist import log_wait, sleepUntil
 from homevent.context import Context
 from homevent.logging import log,TRACE,DEBUG
 from homevent.collect import Collection,Collected
 
+from gevent.event import AsyncResult,Event
+from gevent.queue import Channel
+from gevent import sleep
+
 from time import time
 import os
-from twisted.python import failure
-from twisted.internet import defer
 import datetime as dt
 
 class Monitors(Collection):
@@ -75,12 +77,10 @@ class Monitor(Collected):
 	"""This is the thing that watches."""
 	storage = Monitors.storage
 
-	active = False # enabled?
-	running = None # Deferred while measuring
-	timer = None # callLater() timer
-	timerd = None # deferred triggered by the timer
+	active = None # greenlet running the monitor loop
+	running = None # Event. OFF while measuring (so that we can wait for that to end)
 	passive = None # active or passive monitoring?
-	watcher = None # if passive: Deferred for the next value to feed in
+	watcher = None # if passive: channel for the next value
 	params = None # for reporting
 
 	delay = (1,"sec") # between two measurements at a time
@@ -108,6 +108,8 @@ class Monitor(Collected):
 	def __init__(self,parent,name):
 		self.passive = (self.__class__ == Monitor)
 		self.ctx = parent.ctx
+		self.watcher = Channel(1)
+		self.running = Event()
 		try:
 			self.parent = parent.parent
 		except AttributeError:
@@ -117,7 +119,7 @@ class Monitor(Collected):
 	def __repr__(self):
 		if not self.active:
 			act = "off"
-		elif self.running:
+		elif not self.running.is_set():
 			act = "run "+unicode(self.steps)
 		else:
 			act = "on "+unicode(self.value)
@@ -146,7 +148,7 @@ class Monitor(Collected):
 
 	@property
 	def up_name(self):
-		if self.running:
+		if not self.running.is_set():
 			return "Run"
 		elif self.active:
 			return "Wait"
@@ -156,7 +158,7 @@ class Monitor(Collected):
 	def time_name(self):
 		if self.started_at is None:
 			return "never"
-		if self.running:
+		if not self.running.is_set():
 			delta = now() - self.started_at
 		elif self.active:
 			delta = self.started_at - now()
@@ -170,11 +172,6 @@ class Monitor(Collected):
 
 
 	def _schedule(self):
-		if self.running or not self.active: return
-		if self.timer:
-			self.timer.cancel()
-			self.timer = None
-
 		s = self.stopped_at or now()
 		if self.delay_for:
 			if isinstance(self.delay_for,tuple):
@@ -192,7 +189,8 @@ class Monitor(Collected):
 				s += dt.timedelta(0,self.delay)
 
 		self.started_at = s
-		self.timer = callLater(False,s, self._run)
+		with log_wait("monitor","sleep",*self.name):
+			sleepUntil(False,s)
 
 	def filter_data(self):
 		log("monitor",TRACE,"filter",self.data,"on", self.name)
@@ -232,84 +230,68 @@ class Monitor(Collected):
 			avg = nsum/len(data)
 		return None
 
-	def _run(self):
-		if self.running is not None:
-			return
-		self.timer = None
-
-		def mon_stop(_):
-			d = process_event(Event(self.ctx, "monitor","checked",*self.name))
-			d.addBoth(lambda x: _)
-			return d
-
+	def _do_measure(self):
 		def mon_send(_):
 			if self.new_value is not None:
 				if hasattr(self,"delta"):
 					if self.value is not None:
 						val = self.new_value-self.value
 						if val >= 0 or self.delta == 0:
-							return process_event(Event(Context(),"monitor","value",self.new_value-self.value,*self.name))
+							process_event(Event(Context(),"monitor","value",self.new_value-self.value,*self.name))
 				else:
-					return process_event(Event(Context(),"monitor","value",self.new_value,*self.name))
+					process_event(Event(Context(),"monitor","value",self.new_value,*self.name))
 
-		def mon_new(_):
+		log("monitor",TRACE,"Start run",self.name)
+		try:
+			self.running.clear()
+			self.started_at = now()
+			self._measure()
+			if self.passive:
+				process_event(Event(self.ctx, "monitor","checked",*self.name))
+			mon_send()
 			if self.new_value is not None:
 				self.value = self.new_value
-			return _
-
-		def mon_redo(_):
-			self.running = None
+		except Exception as e:
+			process_failure(e)
+		finally:
+			log("monitor",TRACE,"Stop run",self.name)
+			self.running.set()
 			self._schedule()
-			return _
 
-		self.running = defer.succeed(None)
-		self.started_at = now()
-		self.running.addCallback(lambda _: self._run_me())
-		if self.passive:
-			self.running.addBoth(mon_stop)
-		self.running.addCallback(mon_send)
-		self.running.addCallback(mon_new)
-		self.running.addErrback(process_failure)
-		self.running.addBoth(mon_redo)
-		log("monitor",TRACE,"Start run",self.name)
+	def _run_loop(self):
+		"""Main monitor loop."""
+		while True:
+			self._do_monitor()
+			self._schedule()
 
-	@defer.inlineCallbacks
-	def _run_me(self):
+	def _monitor(self):
+		"""This implements a monitor sequence."""
 		self.steps = 0
 		self.data = []
 		self.new_value = None
 
 		def delay():
-			assert not self.timer,u"No timer set on ‹%s›"%(" ".join(unicode(x) for x in self.name),)
-			self.timerd = defer.Deferred()
-			def kick():
-				d = self.timerd
-				if d:
-					self.timerd = None
-					self.timer = None
-					d.callback(None)
 			if isinstance(self.delay,tuple):
-				self.timer = callLater(False,time_delta(self.delay), kick)
+				sleep(time_delta(self.delay))
 			else:
-				self.timer = callLater(False,self.delay, kick)
-			return self.timerd
+				sleep(self.delay)
 
 		try:
 			while self.active and (self.maxpoints is None or self.steps < self.maxpoints):
 				if self.steps and not self.passive:
-					yield delay()
+					delay()
 
 				self.steps += 1
 
 				try:
-					val = yield self.one_value(self.steps)
+					val = self.one_value(self.steps)
 
 				except MonitorAgain:
 					pass
 
-				except Exception,e:
-					self.active = False
-					yield process_failure(e)
+				except Exception as e:
+					process_failure(e)
+					break
 
 				else:
 					log("monitor",TRACE,"raw",val,*self.name)
@@ -327,91 +309,52 @@ class Monitor(Collected):
 								if self.value is not None and \
 										self.alarm is not None and \
 										abs(self.value-avg) > self.alarm:
-									yield process_event(Event(Context(),"monitor","alarm",avg,*self.name))
-							except Exception,e:
-								yield process_failure()
+									process_event(Event(Context(),"monitor","alarm",avg,*self.name))
+							except Exception as e:
+								process_failure()
 							else:
 								self.new_value = avg
 						return
 					else:
 						log("monitor",TRACE,"More data", self.data, "for", u"‹"+" ".join(unicode(x) for x in self.name)+u"›")
 				
-			self.active = False
+			self.active = None
 		
 			try:
-				yield process_event(Event(Context(),"monitor","error",*self.name))
-			except Exception,e:
-				yield process_failure()
+				process_event(Event(Context(),"monitor","error",*self.name))
+			except Exception as e:
+				process_failure()
 
 		finally:
 			log("monitor",TRACE,"End run", self.name)
 			self.stopped_at = now()
+			self.active = None
 
 
 	def one_value(self, step):
 		"""\
-			The main code. It needs to get one value from the remote side
-			by returning a Deferred.
+			Get one value from the remote side.
+			Override this for active monitoring.
 			"""
-		w = self.watcher
-		self.watcher = None
-		if w is not None:
-			w.errback(DupWatcherError(self))
-
-		self.watcher = defer.Deferred()
-		def got_it(_,w):
-			if self.watcher == w:
-				self.watcher = None
-			return _
-		self.watcher.addBoth(got_it,self.watcher)
-
 		if self.passive and step==1:
-			d = process_event(Event(self.ctx, "monitor","checking",*self.name))
-			d.addErrback(self.watcher.errback)
+			process_event(Event(self.ctx, "monitor","checking",*self.name))
 
-		return self.watcher
+		with log_wait("monitor","one_value",*self.name):
+			return self.watcher.get(block=True, timeout=None)
 
 	def up(self):
 		if not self.active:
 			self.value = None
-			self.active = True
-			deferToLater(self._run)
+			self.active = gevent.spawn(self._run_loop)
 
 	def delete(self,ctx):
-		d = self.down()
-		def done(_):
-			self.delete_done()
-			return _
-		d.addCallback(done)
-		return d
+		self.down()
+		self.delete_done()
 
 	def down(self):
-		d = defer.Deferred()
-
 		if self.active:
-			self.active = False
-			if self.timer:
-				self.timer.cancel()
-				self.timer = None
-
-			e = self.timerd
-			if e:
-				self.timerd = None
-				e.errback(failure.Failure(DelayCancelled))
-
-			if self.running:
-				def trigger(_):
-					self.stopped_at = now()
-					d.callback(None)
-					return _
-				self.running.addBoth(trigger)
-			else:
-				d.callback(None)
-		else:
-			d.callback(None)
-
-		return d
-
+			self.active.kill()
+			assert self.active is None
 
 monitor_nr = 0
 	
@@ -807,12 +750,8 @@ class Shutdown_Worker_Monitor(ExcWorker):
 		return (ev is shutdown_event)
 	def process(self, **k):
 		super(Shutdown_Worker_Monitor,self).process(**k)
-		d = defer.succeed(None)
 		for m in Monitors.values():
-			def tilt(_,monitor):
-				return monitor.down()
-			d.addBoth(tilt,m)
-		return d
+			monitor.down()
 
 	def report(self,*a,**k):
 		return ()

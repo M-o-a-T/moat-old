@@ -27,9 +27,6 @@ from homevent.check import Check
 from homevent.base import Name
 from homevent.collect import Collection,Collected
 
-from twisted.python import failure
-from twisted.internet.defer import inlineCallbacks,returnValue
-
 import sys
 import os
 
@@ -92,11 +89,10 @@ class Module(Collected):
 			"""
 		raise NotImplementedError("You need to undo whatever it is you did in load().")
 	
-	@inlineCallbacks
 	def delete(self,ctx):
-		yield process_event(Event(ctx, "module","unload",*self.name))
-		yield self.unload()
-		yield self.delete_done()
+		process_event(Event(ctx, "module","unload",*self.name))
+		self.unload()
+		self.delete_done()
 
 	def list(self):
 		yield ("name",self.name)
@@ -105,7 +101,6 @@ class Module(Collected):
 		for l in self.info.split("\n"):
 			yield ("info",l)
 	
-@inlineCallbacks
 def load_module(*m):
 	md = dict()
 	mod = None
@@ -146,11 +141,11 @@ def load_module(*m):
 			mod.unload = md["unload"]
 	
 		try:
-			yield mod.load()
+			mod.load()
 		except BaseException,e:
 			a,b,c = sys.exc_info()
 			try:
-				yield mod.unload()
+				mod.unload()
 			finally:
 				raise a,b,c
 		else:
@@ -159,7 +154,7 @@ def load_module(*m):
 		if mod is not None and hasattr(mod,"name") and mod.name in Modules:
 			del Modules[mod.name]
 		raise
-	returnValue(mod)
+	return mod
 
 
 class Load(Statement):
@@ -170,11 +165,10 @@ load NAME [args]...
 	loads the named module and calls its load() function.
 	Emits an "module load NAME [args]" event.
 """
-	@inlineCallbacks
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		yield load_module(*event)
-		yield process_event(Event(self.ctx, "module","load",*event))
+		load_module(*event)
+		process_event(Event(self.ctx, "module","load",*event))
 
 
 class LoadDir(Statement):

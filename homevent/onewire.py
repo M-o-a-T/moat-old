@@ -28,7 +28,7 @@ from homevent.context import Context
 from homevent.event import Event
 from homevent.run import process_event,process_failure,simple_event
 from homevent.reconnect import ReconnectingClientFactory
-from homevent.twist import deferToLater,callLater
+from homevent.twist import callLater
 from homevent.base import Name
 
 from twisted.internet import protocol,defer,reactor
@@ -242,8 +242,10 @@ class OWFScall(object):
 		raise NotImplemetedError("You need to override send().")
 
 	def sendMsg(self,conn, typ,data, rlen=0):
-		d = defer.maybeDeferred(conn.sendMsg, typ,data,rlen)
-		d.addErrback(self.error)
+		try:
+			conn.sendMsg(typ,data,rlen)
+		except Exception as ex:
+			self.error(ex)
 
 	def dataReceived(self, data):
 		# child object expect this
@@ -524,9 +526,9 @@ class OWFSqueue(OWFSreceiver):
 			msg.error(err)
 		elif msg.may_retry():
 			if isinstance(err,OWFSerror) and err.typ == -errno.ENOENT:
-				deferToLater(callLater,True,5*msg.tries,self.factory.queue,msg)
+				callLater(True,5*msg.tries,self.factory.queue,msg)
 			else:
-				deferToLater(callLater,True,0.5*msg.tries,self.factory.queue,msg)
+				callLater(True,0.5*msg.tries,self.factory.queue,msg)
 		elif not msg.d.called: # just ignore that
 			msg.error(err)
 

@@ -138,7 +138,10 @@ def process_failure(e=None):
 	return d
 	
 def run_event(event):
-	process_event(event).addErrback(process_failure)
+	try:
+		process_event(event)
+	except Exception as ex:
+		process_failure(ex)
 	
 def simple_event(ctx, *args):
 	"""\

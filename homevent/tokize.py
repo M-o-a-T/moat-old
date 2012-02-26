@@ -24,8 +24,9 @@ __credits__ = \
 import string, re, os
 from token import *
 import tokenize as t
-from twisted.internet.defer import inlineCallbacks, returnValue, maybeDeferred
+from twisted.internet.defer import maybeDeferred, Deferred
 from homevent.logging import log,TRACE
+from geventreactor import waitForDeferred
 
 COMMENT = t.COMMENT
 NL = t.NL
@@ -108,12 +109,14 @@ class tokizer(object):
 		r.addCallbacks(orep,orepf)
 		return r
 		
-	@inlineCallbacks
 	def run(self):
 		while True:                                # loop over lines in stream
 
 			try:
-				line = (yield self.input())+"\n"
+				line = self.input()
+				if isinstance(line,Deferred):
+					line = waitForDeferred(line)
+				line += "\n"
 				log("token",TRACE,"IN",line)
 			except StopIteration:
 				line = ''
@@ -127,12 +130,12 @@ class tokizer(object):
 				endmatch = endprog.match(line)
 				if endmatch:
 					pos = end = endmatch.end(0)
-					yield self.output(STRING, self.contstr + line[:end],
+					self.output(STRING, self.contstr + line[:end],
 							strstart, (self.lnum, end), self.contline + line)
 					self.contstr, self.needcont = '', 0
 					self.contline = None
 				elif self.needcont and line[-2:] != '\\\n' and line[-3:] != '\\\r\n':
-					yield self.output(ERRORTOKEN, self.contstr + line,
+					self.output(ERRORTOKEN, self.contstr + line,
 							strstart, (self.lnum, len(line)), self.contline)
 					self.contstr = ''
 					self.contline = None
@@ -154,20 +157,20 @@ class tokizer(object):
 				if pos == max: break
 
 				if line[pos] in '#\r\n':           # skip comments or blank lines
-					yield self.output((NL, COMMENT)[line[pos] == '#'], line[pos:],
+					self.output((NL, COMMENT)[line[pos] == '#'], line[pos:],
 							(self.lnum, pos), (self.lnum, len(line)), line)
 					continue
 
 				if column > self.indents[-1]:           # count indents or dedents
 					self.indents.append(column)
-					yield self.output(INDENT, line[:pos], (self.lnum, 0), (self.lnum, pos), line)
+					self.output(INDENT, line[:pos], (self.lnum, 0), (self.lnum, pos), line)
 				while column < self.indents[-1]:
 					if column not in self.indents:
 						raise IndentationError(
 							"unindent does not match any outer indentation level",
 							("<tokenize>", self.lnum, pos, line))
 					self.indents = self.indents[:-1]
-					yield self.output(DEDENT, '', (self.lnum, pos), (self.lnum, pos), line)
+					self.output(DEDENT, '', (self.lnum, pos), (self.lnum, pos), line)
 
 			else:                                  # continued statement
 				if not line:
@@ -183,19 +186,19 @@ class tokizer(object):
 
 					if num.match(token) or \
 					(initial == '.' and token != '.'):      # ordinary number
-						yield self.output(NUMBER, token, spos, epos, line)
+						self.output(NUMBER, token, spos, epos, line)
 					elif initial in '\r\n':
-						yield self.output(self.parenlev > 0 and NL or NEWLINE,
+						self.output(self.parenlev > 0 and NL or NEWLINE,
 								token, spos, epos, line)
 					elif initial == '#':
-						yield self.output(COMMENT, token, spos, epos, line)
+						self.output(COMMENT, token, spos, epos, line)
 					elif token in triple_quoted:
 						endprog = endprogs[token]
 						endmatch = endprog.match(line, pos)
 						if endmatch:                           # all on one line
 							pos = endmatch.end(0)
 							token = line[start:pos]
-							yield self.output(STRING, token, spos, (self.lnum, pos), line)
+							self.output(STRING, token, spos, (self.lnum, pos), line)
 						else:
 							strstart = (self.lnum, start)           # multiple lines
 							self.contstr = line[start:]
@@ -212,21 +215,20 @@ class tokizer(object):
 							self.contline = line
 							break
 						else:                                  # ordinary string
-							yield self.output(STRING, token, spos, epos, line)
+							self.output(STRING, token, spos, epos, line)
 					elif namestart.match(initial):                 # ordinary name
-						yield self.output(NAME, token, spos, epos, line)
+						self.output(NAME, token, spos, epos, line)
 					elif initial == '\\':                      # continued stmt
 						self.continued = 1
 					else:
 						if initial in '([{': self.parenlev = self.parenlev + 1
 						elif initial in ')]}': self.parenlev = self.parenlev - 1
-						yield self.output(OP, token, spos, epos, line)
+						self.output(OP, token, spos, epos, line)
 				else:
-					yield self.output(ERRORTOKEN, line[pos],
+					self.output(ERRORTOKEN, line[pos],
 							(self.lnum, pos), (self.lnum, pos+1), line)
 					pos = pos + 1
 
 		for indent in self.indents[1:]:                 # pop remaining indent levels
-			yield self.output(DEDENT, '', (self.lnum, 0), (self.lnum, 0), '')
-		yield self.output(ENDMARKER, '', (self.lnum, 0), (self.lnum, 0), '')
-
+			self.output(DEDENT, '', (self.lnum, 0), (self.lnum, 0), '')
+		self.output(ENDMARKER, '', (self.lnum, 0), (self.lnum, 0), '')

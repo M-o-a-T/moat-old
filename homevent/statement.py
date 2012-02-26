@@ -30,17 +30,14 @@ for typical usage.
 """
 
 import sys
-from twisted.internet import reactor,threads,defer
-from twisted.python import failure
-
 from homevent.context import Context
-from homevent.io import Outputter
-from homevent.run import process_failure
 from homevent.event import Event
 from homevent.logging import log_event,log, TRACE
-from homevent.twist import deferToLater
 from homevent.base import Name
 
+from twisted.internet import defer
+
+from homevent.geventreactor import waitForDeferred
 
 class UnknownWordError(KeyError):
 	def __init__(self,word,where):
@@ -310,13 +307,10 @@ class StatementList(ComplexStatement):
 	def run(self,ctx,**k):
 		if self.procs is None:
 			raise SyntaxError("This can only be used as a complex statement")
-		d = defer.Deferred()
 		for proc in self.procs:
-			def go(_,p):
-				return p.run(ctx)
-			d.addCallback(go,proc)
-		d.callback(None)
-		return d
+			res = proc.run(ctx)
+			if isinstance(res,defer.Deferred):
+				waitForDeferred(res)
 
 	def start_block(self):
 		self.procs = []
@@ -417,32 +411,6 @@ This statement causes the input channel which runs it to terminate.
 			raise SyntaxError("Usage: exit")
 		ctx.out.loseConnection()
 
-
-class LoopMixin(object):
-	u"""\
-		A mix-in for statements which repeat themselves.
-		Your run() needs to end with "return self.loop(res,condproc,args…)".
-		The body will execute as long as condproc(args…) == res.
-		"""
-
-	def loop(self,res=None,cond=None,*ca):
-		"""Repeat the body until cond(*ca) == res"""
-		d = defer.Deferred()
-		e = defer.succeed(None)
-		def rfail(_):
-			d.errback(_)
-		def chk(_):
-			if cond(*ca) != res:
-				d.callback(None)
-				return None
-
-			e.addCallback(lambda _: super(LoopMixin,self).run(ctx,**k))
-			e.addCallback(lambda _: deferToLater(chk))
-			e.addErrback(rfail)
-
-		deferToLater(chk)
-
-		return d
 global_words.register_statement(ExitHandler)
 
 

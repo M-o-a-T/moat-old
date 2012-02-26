@@ -12,8 +12,6 @@ import os
 from time import time
 from datetime import datetime
 
-from twisted.internet import gtk2reactor
-gtk2reactor.install()
 from twisted.internet import reactor
 
 APPNAME="monitor"
