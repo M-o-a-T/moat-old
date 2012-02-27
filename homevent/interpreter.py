@@ -134,7 +134,7 @@ class CollectProcessor(Processor):
 			res = fn.run(self.ctx)
 			if isinstance(res,defer.Deferred):
 				waitForDeferred(res)
-			return
+			return res
 		self.store(fn)
 
 	def complex_statement(self,args):
@@ -170,6 +170,8 @@ class RunMe(object):
 		return self.fnp.simple_statement(args)
 	def complex_statement(self,args):
 		return self.fnp.complex_statement(args)
+	def prompt2(self):
+		self.proc.prompt2()
 	def done(self):
 		self.fnp.done()
 		res = self.fn.run(self.proc.ctx)
@@ -216,9 +218,8 @@ class Interpreter(Processor):
 		try:
 			fn.run(self.ctx)
 		except Exception as ex:
-			self.prompt(ex)
-		else:
-			self.prompt()
+			self.error(self,ex)
+		self.prompt()
 
 	def complex_statement(self,args):
 		try:
@@ -237,12 +238,16 @@ class Interpreter(Processor):
 class InteractiveInterpreter(Interpreter):
 	"""An interpreter which prints a prompt and recovers from errors"""
 	intro = ">> "
+	intro2 = ".. "
 
-	def prompt(self, _=None):
+	def prompt(self):
 		self.ctx.out.write(self.intro)
 		if hasattr(self.ctx.out,"flush"):
 			self.ctx.out.flush()
-		return _
+	def prompt2(self):
+		self.ctx.out.write(self.intro2)
+		if hasattr(self.ctx.out,"flush"):
+			self.ctx.out.flush()
 	
 	def error(self,parser,err):
 		from homevent.statement import UnknownWordError
@@ -252,7 +257,7 @@ class InteractiveInterpreter(Interpreter):
 		else:
 			print >>parser.ctx.out, "ERROR:"
 			traceback.print_exception(err.__class__,err,sys.exc_info()[2], file=parser.ctx.out)
-		parser.init_state()
-		self.prompt()
+		if hasattr(parser,'init_state'):
+			parser.init_state()
 		return
 

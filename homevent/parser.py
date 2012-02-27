@@ -424,6 +424,7 @@ class Parser(object):
 			try:
 				log("parser",TRACE,"PERR",self,self.proc)
 				self.proc.error(self,ex)
+				self.proc.prompt()
 				log("parser",TRACE,"PERR OK")
 			except Exception:
 				import sys,traceback
@@ -469,6 +470,7 @@ class Parser(object):
 					self.proc.done()
 				raise StopIteration
 			elif t in(NL,NEWLINE):
+				self.proc.prompt()
 				return
 			elif t == OP and txt == ".":
 				return # "I am done"
@@ -519,6 +521,7 @@ class Parser(object):
 		elif self.p_state == 3:
 			if t == NEWLINE:
 				self.p_state = 4
+				self.proc.prompt2()
 				return
 			elif t == NAME:
 				self.p_args = [txt]

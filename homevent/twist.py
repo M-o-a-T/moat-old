@@ -442,3 +442,15 @@ class log_wait(object):
 	def __exit__(self, a,b,c):
 		print >>sys.stderr,"-WAIT", self.w, self.a
 		return False
+
+# avoids a warning from threading module on shutdown
+sys.modules['dummy_threading'] = None
+#import threading as t
+#def t_delete(self):
+#    try:
+#        with t._active_limbo_lock:
+#            del t._active[t._get_ident()]
+#    except KeyError:
+#        if 'dummy_threading' not in sys.modules and 'greenlet' not in sys.modules:
+#            raise
+#t.Thread.__delete = t_delete
