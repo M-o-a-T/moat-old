@@ -37,7 +37,10 @@ from homevent.check import Check,register_condition,unregister_condition
 from homevent.base import Name,SYS_PRIO
 from homevent.twist import callLater, reset_slots
 from homevent.collect import Collection,Collected
-from homevent.logging import TRACE
+from homevent import logging
+
+from gevent import spawn
+from gevent.queue import Channel,Empty
 
 from time import time
 import os
@@ -53,7 +56,8 @@ Waiters = Waiters()
 Waiters.does("del")
 
 if "HOMEVENT_TEST" in os.environ:
-	from test import ixtime
+	from test import ixtime,ttime
+	time=ttime
 else:
 	def ixtime(t):
 		return unixtime(t)
@@ -66,8 +70,8 @@ class WaitError(RuntimeError):
 	def __unicode__(self):
 		return self.text % (" ".join(unicode(x) for x in self.waiter.name),)
 
-class WaitLocked(WaitError):
-	text = u"Tried to process waiter ‹%s› while it was locked"
+class WaitDone(WaitError):
+	text = u"waiter ‹%s› is finished"
 
 class WaitCancelled(WaitError):
 	"""An error signalling that a wait was killed."""
@@ -75,11 +79,6 @@ class WaitCancelled(WaitError):
 
 class DupWaiterError(WaitError):
 	text = u"A waiter ‹%s› already exists"
-
-
-def _trigger(_,d):
-	d.callback(None)
-	return _
 
 class Waiter(Collected):
 	"""This is the thing that waits."""
@@ -89,6 +88,7 @@ class Waiter(Collected):
 		self.ctx = parent.ctx
 		self.start = now()
 		self.force = force
+		self.q = Channel()
 		try:
 			self.parent = parent.parent
 		except AttributeError:
@@ -137,105 +137,70 @@ class Waiter(Collected):
 	def __repr__(self):
 		return u"‹%s %s %d›" % (self.__class__.__name__, self.name,self.value)
 
-	def _callit(self,_=None):
-		self.wait_id = callLater(self.force,self.value, self.doit)
+	def _job(self):
+		end = unixtime(self.end)
+		while True:
+			tm = time()
+			timeout = end - tm
+			if timeout < 0:
+				return
+			try:
+				cmd = self.q.get(timeout=timeout)
+			except Empty:
+				return
 
-	def _lock(self):
-		d = defer.Deferred()
-		e = defer.Deferred()
+			q = cmd[0]
+			a = cmd[2] if len(cmd)>2 else None
+			cmd = cmd[1]
+			if cmd == "cancel":
+				q.put(None)
+				return
+			elif cmd == "update":
+				q.put(None)
+				self.end = a
+				end = ixtime(a)
+			elif cmd == "remain":
+				q.put(end-time())
+			else:
+				q.put(RuntimeError('Unknown command: '+cmd))
 
-		f = self.queue
-		self.queue = e
-
-		f.addBoth(_trigger,d)
-		return d,e
-	
-	def _unlock(self,d,e):
-		d.addBoth(_trigger,e)
-		
 
 	def init(self,dest):
-		self.end = dest
-		if self.value <= 0:
-			self.defer.callback(None)
-			return self.defer
-
 		if self.name in Waiters:
 			raise DupWaiterError(self)
+
+		self.q = Channel()
+		self.end = dest
+		self.job = spawn(self._job)
+		self.job.link(lambda _: self.delete_done())
+
 		Waiters[self.name] = self
 
-		d,e = self._lock()
-		d.addCallback(lambda _: process_event(Event(self.ctx(loglevel=TRACE),"wait","start",ixtime(self.end),*self.name)))
-		d.addCallback(self._callit)
-		self._unlock(d,e)
-		d.addCallback(lambda _: self.defer)
-		return d
+	def _cmd(self,cmd,*a):
+		if self.job.ready():
+			raise WaitDone(self)
 
-	def get_value(self):
-		val = self.end-now()
-		d = unixdelta(val)
-		if d < 0: d = 0
-		return d
-	value = property(get_value)
+		q = Channel()
+		self.q.put((q,cmd)+tuple(a))
+		return q.get()
 
-	def doit(self):
-		d,e = self._lock()
-		def did_it(_):
-			self.ctx.wait = tm = ixtime(self.end)
-			return process_event(Event(self.ctx(loglevel=TRACE),"wait","done",tm, *self.name))
-		d.addCallback(did_it)
-		def done(_):
-			self.delete_done()
-			self.defer.callback(_)
-			self._unlock(d,e)
-		d.addCallbacks(done)
+	@property
+	def value(self):
+		if self.job.ready():
+			return 0
+		return self._cmd("remain")
 
 	def delete(self,ctx):
-		return self.cancel(err=HaltSequence)
+		self.job.kill()
 
 	def cancel(self, err=WaitCancelled):
 		"""Cancel a waiter."""
-		d,e = self._lock()
-		if self.defer.called:
-			# too late?
-			self._unlock(d,e)
-			return
-		def stoptimer():
-			if self.wait_id:
-				self.wait_id.cancel()
-				self.wait_id = None
-		d.addCallback(lambda _: stoptimer())
-		d.addCallback(lambda _: process_event(Event(self.ctx(loglevel=TRACE),"wait","cancel",ixtime(self.end),*self.name)))
-		def errgen(_):
-			# If the 'wait cancel' event didn't return a failure, build one.
-			return failure.Failure(err(self))
-		def done(_):
-			# Now make the wait statement itself return with the error.
-			self.delete_done()
-			self.defer.callback(_)
-			self._unlock(d,e)
-		d.addCallback(errgen)
-		d.addBoth(done)
-		return d
-	
+		process_event(Event(self.ctx(loglevel=logging.TRACE),"wait","cancel",ixtime(self.end),*self.name))
+		self._cmd("cancel")
+
 	def retime(self, dest):
-		d,e = self._lock()
-		def stoptimer():
-			if self.wait_id:
-				self.wait_id.cancel()
-				self.wait_id = None
-		d.addCallback(lambda _: stoptimer())
-		def endupdate():
-			old_end = self.end
-			self.end = dest
-		d.addCallback(lambda _: endupdate())
-		d.addCallback(lambda _: process_event(Event(self.ctx(loglevel=TRACE),"wait","update",ixtime(self.end),*self.name)))
-		def err(_):
-			self.end = old_end
-			self._callit()
-			return _
-		d.addCallbacks(self._callit, err)
-		self._unlock(d,e)
+		process_event(Event(self.ctx(loglevel=logging.TRACE),"wait","update",dest,*self.name))
+		self._cmd("retime",dest)
 		return d
 
 	
@@ -269,8 +234,15 @@ wait [NAME…]: for FOO…
 		if self.is_update:
 			return Waiters[self.displayname].retime(self.timespec())
 		w = Waiter(self, self.displayname, self.force)
-		d = w.init(self.timespec())
-		return d
+		w.init(self.timespec())
+		process_event(Event(self.ctx(loglevel=logging.TRACE),"wait","start",ixtime(w.end),*w.name))
+		try:
+			r = w.job.get()
+		except Exception as ex:
+			logging.log_exc(msg=u"Wait %s died:"%(self.name,), err=ex, level=logging.TRACE)
+			raise
+		else:
+			process_event(Event(self.ctx(loglevel=logging.TRACE),"wait","done",time(), *w.name))
 
 		
 class WaitFor(Statement):
@@ -404,16 +376,6 @@ class ExistsWaiterCheck(Check):
 		name = Name(args)
 		return name in Waiters
 
-class LockedWaiterCheck(Check):
-	name=("locked","wait")
-	doc="check if a waiter is locked"
-	def check(self,*args):
-		if not len(args):
-			raise SyntaxError(u"Usage: if locked wait ‹name…›")
-		name = Name(args)
-		return Waiters[name].locked
-
-
 class VarWaitHandler(Statement):
 	name=("var","wait")
 	doc="assign a variable to report when a waiter will time out"
@@ -446,12 +408,8 @@ class Shutdown_Worker_Wait(ExcWorker):
         return (ev is shutdown_event)
     def process(self, **k):
 		super(Shutdown_Worker_Wait,self).process(**k)
-		d = defer.succeed(None)
 		for w in Waiters.values():
-			def tilt(_,waiter):
-				return waiter.cancel(err=HaltSequence)
-			d.addBoth(tilt,w)
-		return d
+			w.cancel(err=HaltSequence)
 
     def report(self,*a,**k):
         return ()
@@ -469,14 +427,12 @@ class WaitModule(Module):
 		main_words.register_statement(WaitHandler)
 		main_words.register_statement(VarWaitHandler)
 		register_condition(ExistsWaiterCheck)
-		register_condition(LockedWaiterCheck)
 		register_worker(self.worker)
 	
 	def unload(self):
 		main_words.unregister_statement(WaitHandler)
 		main_words.unregister_statement(VarWaitHandler)
 		unregister_condition(ExistsWaiterCheck)
-		unregister_condition(LockedWaiterCheck)
 		unregister_worker(self.worker)
 
 init = WaitModule
