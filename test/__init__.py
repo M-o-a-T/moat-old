@@ -29,6 +29,7 @@ from cStringIO import StringIO
 import sys
 import re
 import os
+from time import time
 from subprocess import Popen
 from twisted.internet import reactor
 exitcode = 0
@@ -41,8 +42,9 @@ startup=now()
 def ixtime(t=None):
 	if t is None:
 		t = now()
-	t = unixtime(t)
-	return "%.1f" % (t-unixtime(startup),)
+	return unixtime(t)
+def ttime():
+	return time()-unixtime(startup)
 
 r_fli = re.compile(r'(:\s+File ").*/([^/]+/[^/]+)", line \d+, in')
 r_hex = re.compile(r'object at 0x[0-9a-fA-F]+')
