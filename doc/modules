@@ -1722,8 +1722,8 @@ words, this is broken and will cause you a lot of headache:
 
 	on state * on outside *lamp:
 		trigger switch on outside $lamp
-		wait outside $lamp
-            for 5min
+		wait outside $lamp:
+			for 5min
 		trigger switch off outside $lamp
 
 The correct solution would be, depending on whether you want the switch
@@ -2080,7 +2080,7 @@ should have gone off) as the first argument: if that is in the past,
 proper interval calculation will be performed. The minimum interval for
 this is two seconds.
 
-The direct arguments to ‹wait› assugn a name. This name causes the
+The direct arguments to ‹wait› assign a name. This name causes the
 waiter to be unique, i.e. there can only be one wait statement with that
 name in the whole system. If you try to execute a wait statement with
 the same name as one that's still pending, an error will be triggered.
@@ -2147,6 +2147,7 @@ that name will be used which matches all the other criteria.
 
 Week 1 is the first week in the year which has a Thursday, even if
 it spans the previous year: "tue 1 wk 2004yr" will return 2003-12-30.
+There is no week zero.
 
 "3 wed 4mo 2003yr" is 2003-04-16, as that's the third Wednesday of that
 month. "-3 wed" means the same thing, because April of 2004 has five
@@ -2195,7 +2196,7 @@ You can append the name of a wait statement to show additional details.
 del wait
 --------
 
-Cancels a given wait. The statements which waited for it are *not*
+Aborts a given wait. The statements which waited for it are *not*
 executed — this includes stuff in upper blocks, other event handlers
 which tried to process whatever was blocked by the wait, etc.
 
@@ -2241,12 +2242,5 @@ if exists wait
 You can use this statement to test if a waiter is pending.
 
 See the example under "set state", above.
-
-
-if locked wait
---------------
-
-You can use this statement to test whether a notification event on that
-waiter is running.
 
 
