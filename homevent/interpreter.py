@@ -260,4 +260,8 @@ class InteractiveInterpreter(Interpreter):
 		if hasattr(parser,'init_state'):
 			parser.init_state()
 		return
+	
+	def done(self):
+		self.ctx.out.write("\n")
+		
 
