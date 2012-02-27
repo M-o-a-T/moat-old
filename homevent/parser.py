@@ -521,7 +521,7 @@ class Parser(object):
 		elif self.p_state == 3:
 			if t == NEWLINE:
 				self.p_state = 4
-				self.proc.prompt2()
+				#self.proc.prompt2()
 				return
 			elif t == NAME:
 				self.p_args = [txt]
