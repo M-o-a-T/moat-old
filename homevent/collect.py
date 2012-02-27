@@ -114,10 +114,13 @@ class Collected(object):
 
 		self.name = name = Name(name)
 		if name in self.storage:
-			raise RuntimeError(u"Duplicate entry ‹%s› in ‹%s›" % (name,self.storage.name))
+			self.dup_error(name)
 
 		super(Collected,self).__init__()
 		self.storage[name] = self
+
+	def dup_error(self,name):
+		raise RuntimeError(u"Duplicate entry ‹%s› in ‹%s›" % (name,self.storage.name))
 
 	def __repr__(self):
 		try:

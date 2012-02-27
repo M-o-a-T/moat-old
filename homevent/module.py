@@ -89,6 +89,9 @@ class Module(Collected):
 			"""
 		raise NotImplementedError("You need to undo whatever it is you did in load().")
 	
+	def dup_error(self,name):
+		raise RuntimeError(u"Module ‹%s› already exists" % (name,))
+
 	def delete(self,ctx):
 		process_event(Event(ctx, "module","unload",*self.name))
 		self.unload()
