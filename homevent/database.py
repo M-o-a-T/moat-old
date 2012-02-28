@@ -32,7 +32,6 @@ SafeNames = {
 class DbStore(object):
 	"""This object implements a simple Deferred-enabled storage"""
 	running = False
-	init_done = None
 
 	def __init__(self,category,name=None):
 		if name is None:

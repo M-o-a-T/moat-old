@@ -106,30 +106,25 @@ class SavedState(State):
 		super(SavedState,self).__init__(*name)
 		del self.value
 	
-	@inlineCallbacks
-	def init(self):
 		global Db
 		if Db is None:
 			from homevent.database import DbStore
 			Db = DbStore(category="state")
-			yield Db.init_done
 		try:
-			self.value = yield Db.get(self.name)
+			self.value = Db.get(self.name)
 		except KeyError:
 			self.value = None
 
-	@inlineCallbacks
 	def set_value(self,val):
 		if val is None:
-			yield Db.delete(self.name)
+			Db.delete(self.name)
 		else:
-			yield Db.set(self.name,val)
+			Db.set(self.name,val)
 		self.value = val
 
-	@inlineCallbacks
 	def delete(self,ctx):
-		yield Db.delete(self.name)
-		yield super(SavedState,self).delete(ctx)
+		Db.delete(self.name)
+		super(SavedState,self).delete(ctx)
 
 	def list(self):
 		yield super(SavedState,self)
@@ -147,24 +142,22 @@ state name...
 	ptrigger = None
 	coll = State
 
-	@inlineCallbacks
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		if not len(event):
 			raise SyntaxError(u"Usage: state ‹name…›")
 		s = self.coll(*event)
-		yield s.init()
 		s.working = True
 		try:
 			if hasattr(self,"value") and s.value is None:
-				yield s.set_value(self.value)
+				s.set_value(self.value)
 			s.time = now()
 			if s.value is None and self.trigger \
 					or s.value is not None and self.ptrigger:
 				old = s.old_value if s.old_value is not None else "-"
 				val = s.value
 				if val is None: val = "-"
-				yield process_event(Event(self.ctx,"state",old,self.value,*s.name))
+				process_event(Event(self.ctx,"state",old,self.value,*s.name))
 		except BaseException:
 			s.delete_done()
 			raise
@@ -274,7 +267,6 @@ forget state name...
 	  The value will be re-added the next time the state is changed!
 """
 
-	@inlineCallbacks
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		if not len(event):
@@ -285,9 +277,8 @@ forget state name...
 		if Db is None:
 			from homevent.database import DbStore
 			Db = DbStore(category="state")
-			yield Db.init_done
 
-		yield Db.delete(name)
+		Db.delete(name)
 
 
 class VarStateHandler(Statement):
@@ -355,7 +346,6 @@ class SavedStateCheck(Check):
 	name=("saved","state")
 	doc="check if a state is stored in the persistent database"
 
-	@inlineCallbacks
 	def check(self,*args):
 		if len(args) < 1:
 			raise SyntaxError(u"Usage: if saved state ‹name…›")
@@ -364,9 +354,8 @@ class SavedStateCheck(Check):
 		if Db is None:
 			from homevent.database import DbStore
 			Db = DbStore(category="state")
-			yield Db.init_done
 		try:
-			yield Db.get(Name(args))
+			Db.get(Name(args))
 		except KeyError:
 			returnValue(False)
 		else:
