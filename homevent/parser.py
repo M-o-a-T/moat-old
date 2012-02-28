@@ -319,7 +319,6 @@ class Parser(object):
 		if protocol is not None:
 			protocol.addDropCallback(self.endConnection)
 			self.line = protocol
-		assert self.line is not None, "no input whatsoever?"
 
 		if "out" not in self.ctx:
 			self.ctx.out=sys.stdout
@@ -327,6 +326,9 @@ class Parser(object):
 		self.init_state()
 
 		self.p_gen = tokizer(self._do_parse)
+
+		if hasattr(self.line,'resumeProducing'):
+			self.line.resumeProducing()
 
 #		def pg_done(_):
 #			_=_.get()
@@ -346,6 +348,8 @@ class Parser(object):
 #		self.p_loop.link_exception(pg_err)
 
 	def prompt(self):
+		if not self.do_prompt:
+			return
 		if self.p_state == 0:
 			self.ctx.out.write(">> ")
 		else:
