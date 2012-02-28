@@ -33,6 +33,8 @@ import os
 from twisted.internet import reactor,threads,defer,interfaces
 from twisted.python import failure
 from twisted.protocols.basic import LineOnlyReceiver,FileSender,_PauseableMixin
+
+from gevent import spawn
 from gevent.thread import allocate_lock as Lock
 from geventreactor import waitForDeferred
 
@@ -327,7 +329,12 @@ class Parser(object):
 
 		self.p_gen = tokizer(self._do_parse)
 
+		### There should be a better way than this.
 		if hasattr(self.line,'resumeProducing'):
+			spawn(self._do_resume)
+
+	def _do_resume(self):
+		while not self.ending and not self.line.disconnecting:
 			self.line.resumeProducing()
 
 #		def pg_done(_):

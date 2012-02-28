@@ -23,6 +23,7 @@ from test import run
 
 input = """\
 load example
+"""+("# This is a filler to test processing of really long files.\n"*10000)+"""\
 del module example
 shutdown
 """
