@@ -67,6 +67,8 @@ class InputEvent(Event):
 
 class Processor(object):
 	"""Base class: Process input lines and do something with them."""
+	do_prompt = False
+
 	def __init__(self, parent=None, ctx=None):
 		self.ctx = ctx or Context()
 		self.parent = parent
@@ -108,9 +110,6 @@ class Processor(object):
 			err.raiseException()
 		else:
 			raise err.__class__,e,sys.exc_info()[2]
-
-	def prompt(self, _=None):
-		return _
 
 class CollectProcessor(Processor):
 	"""\
@@ -170,14 +169,11 @@ class RunMe(object):
 		return self.fnp.simple_statement(args)
 	def complex_statement(self,args):
 		return self.fnp.complex_statement(args)
-	def prompt2(self):
-		self.proc.prompt2()
 	def done(self):
 		self.fnp.done()
 		res = self.fn.run(self.proc.ctx)
 		if isinstance(res,defer.Deferred):
 			waitForDeferred(res)
-		self.proc.prompt()
 
 class ImmediateProcessor(CollectProcessor):
 	"""\
@@ -219,7 +215,6 @@ class Interpreter(Processor):
 			fn.run(self.ctx)
 		except Exception as ex:
 			self.error(self,ex)
-		self.prompt()
 
 	def complex_statement(self,args):
 		try:
@@ -237,18 +232,8 @@ class Interpreter(Processor):
 
 class InteractiveInterpreter(Interpreter):
 	"""An interpreter which prints a prompt and recovers from errors"""
-	intro = ">> "
-	intro2 = ".. "
+	do_prompt = True
 
-	def prompt(self):
-		self.ctx.out.write(self.intro)
-		if hasattr(self.ctx.out,"flush"):
-			self.ctx.out.flush()
-	def prompt2(self):
-		self.ctx.out.write(self.intro2)
-		if hasattr(self.ctx.out,"flush"):
-			self.ctx.out.flush()
-	
 	def error(self,parser,err):
 		from homevent.statement import UnknownWordError
 

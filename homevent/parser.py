@@ -34,7 +34,6 @@ from twisted.internet import reactor,threads,defer,interfaces
 from twisted.python import failure
 from twisted.protocols.basic import LineOnlyReceiver,FileSender,_PauseableMixin
 from gevent.thread import allocate_lock as Lock
-from gevent import spawn
 from geventreactor import waitForDeferred
 
 from homevent.logging import log,TRACE,DEBUG
@@ -128,8 +127,6 @@ class ParseReceiver(Outputter):
 		self.parser.add_line(data)
 	
 	def makeConnection(self,transport):
-		assert not hasattr(self,"goforit"),"Go for it"
-		self.goforit=True
 		assert self.parser is not None, "Need to set the parser"
 		if "out" not in self.parser.ctx:
 			self.parser.ctx.out = transport
@@ -139,7 +136,9 @@ class ParseReceiver(Outputter):
 	def connectionMade(self):
 		super(ParseReceiver,self).connectionMade()
 		self.parser.startParsing(self)
-		self.parser.proc.prompt()
+		self.parser.do_prompt = self.parser.proc.do_prompt
+		if self.parser.do_prompt:
+			self.parser.prompt()
 
 def parser_builder(cls=None,interpreter=None,*a,**k):
 	"""\
@@ -178,6 +177,7 @@ class Parser(object):
 	"""The input parser object. It is a consumer of lines."""
 	line = None
 	p_gen = None
+	do_prompt = False
 	implements(interfaces.IFinishableConsumer)
 
 	def __init__(self, proc, ctx=None):
@@ -189,9 +189,6 @@ class Parser(object):
 		self.ending = False
 
 		self.proc = proc
-		self.p_wait = []
-		self.p_wait_lock = Lock()
-		self.p_queued = None
 		self.restart_producer = False
 
 		if ctx is None:
@@ -236,7 +233,6 @@ class Parser(object):
 	
 	def unregisterProducer(self):
 		log("parser",DEBUG,"PRODUCE UNREG",self.line)
-		self.line = None
 		self.finish()
 	
 	def finish(self):
@@ -244,64 +240,18 @@ class Parser(object):
 
 	def endConnection(self, res=None):
 		"""Called to stop"""
-		d = defer.Deferred()
-		e = deferToLater(self._endConnection,d,res)
-		e.addErrback(process_failure)
-		return d
-
-	def _endConnection(self,d,r):
-		if self.p_queued:
-			log("parser",DEBUG,"LINE> STOP")
-			q = self.p_queued
-			self.p_queued = None
-			q.errback(failure.Failure(StopIteration()))
-
 		if not self.ending:
 			log("parser",DEBUG,"LINE> ENDING")
 			self.ending = True
-			self.p_wait.append(None)
-			self.process_line_buffer()
+			self.p_gen.feed(None)
+			self.result.callback(None)
 		log("parser",DEBUG,"LINE> END")
-
-		d.callback(r)
-
-	def _last_symbol(self):
-		pass
 
 	def add_line(self, data):
 		"""Standard LineReceiver method"""
 		if not isinstance(data,unicode):
 			data = data.decode("utf-8")
-		self.p_wait.append(data)
-		self.process_line_buffer()
-
-	def process_line_buffer(self):
-		if not self.p_wait_lock.acquire(False):
-			return
-
-		if self.p_queued:
-			self.resumeProducing()
-
-		while self.p_wait and self.p_queued:
-			item = self.p_wait.pop(0)
-			log("parser",TRACE,"LINE>",repr(item))
-			q = self.p_queued
-			self.p_queued = None
-			if item is None:
-				q.errback(failure.Failure(StopIteration()))
-			else:
-				if "HOMEVENT_TEST" in os.environ:
-					while item.startswith('>> '):
-						item = item[3:]
-				q.callback(item)
-		if self.p_wait:
-			log("parser",TRACE,"LINE: input available")
-		if self.p_queued:
-			log("parser",TRACE,"LINE: wait for input")
-
-		if self.p_wait:
-			self.pauseProducing()
-		self.p_wait_lock.release()
+		self.p_gen.feed(data)
 
 	def pauseProducing(self):
 		if self.line is not None and hasattr(self.line,"pauseProducing") \
@@ -351,14 +301,6 @@ class Parser(object):
 			if self.ending:
 				log("parser",TRACE,"LINE_RES ending")
 
-	def read_a_line(self):
-		log("parser",TRACE,"P READ_A_LINE")
-		if self.p_queued:
-			raise RuntimeError("read_a_line: already waiting")
-		q = self.p_queued = defer.Deferred()
-		self.process_line_buffer()
-		return q
-
 	def init_state(self):
 		self.p_state=0
 		self.p_pop_after=False
@@ -379,30 +321,36 @@ class Parser(object):
 			self.line = protocol
 		assert self.line is not None, "no input whatsoever?"
 
-
 		if "out" not in self.ctx:
 			self.ctx.out=sys.stdout
 
 		self.init_state()
 
-		self.p_gen = tokizer(self.read_a_line, self._do_parse)
-		self.p_loop = spawn(self.p_gen.run)
-		def pg_done(_):
-			_=_.get()
-			self.p_gen = None
-			log("parser",TRACE,"P DONE",_)
-			try: self.result.callback(_)
-			except defer.AlreadyCalledError: pass
-			else:
-				self.endConnection()
-		def pg_err(_):
-			self.p_gen = None
-			log("parser",TRACE,"P ERROR",_)
-			try: self.result.errback(_)
-			except defer.AlreadyCalledError: pass
-			else: self.endConnection()
-		self.p_loop.link_value(pg_done)
-		self.p_loop.link_exception(pg_err)
+		self.p_gen = tokizer(self._do_parse)
+
+#		def pg_done(_):
+#			_=_.get()
+#			self.p_gen = None
+#			log("parser",TRACE,"P DONE",_)
+#			try: self.result.callback(_)
+#			except defer.AlreadyCalledError: pass
+#			else:
+#				self.endConnection()
+#		def pg_err(_):
+#			self.p_gen = None
+#			log("parser",TRACE,"P ERROR",_)
+#			try: self.result.errback(_)
+#			except defer.AlreadyCalledError: pass
+#			else: self.endConnection()
+#		self.p_loop.link_value(pg_done)
+#		self.p_loop.link_exception(pg_err)
+
+	def prompt(self):
+		if self.p_state == 0:
+			self.ctx.out.write(">> ")
+		else:
+			self.ctx.out.write(".. ")
+		self.ctx.out.flush()
 
 	def _do_parse(self, t,txt,beg,end,line):
 		# States: 0 newline, 1 after first word, 2 OK to extend word
@@ -424,7 +372,7 @@ class Parser(object):
 			try:
 				log("parser",TRACE,"PERR",self,self.proc)
 				self.proc.error(self,ex)
-				self.proc.prompt()
+				self.prompt()
 				log("parser",TRACE,"PERR OK")
 			except Exception:
 				import sys,traceback
@@ -470,7 +418,7 @@ class Parser(object):
 					self.proc.done()
 				raise StopIteration
 			elif t in(NL,NEWLINE):
-				self.proc.prompt()
+				self.prompt()
 				return
 			elif t == OP and txt == ".":
 				return # "I am done"
@@ -517,11 +465,12 @@ class Parser(object):
 					self.proc = self.p_stack.pop()
 					self.p_pop_after=False
 				self.p_state=0
+				self.prompt()
 				return
 		elif self.p_state == 3:
 			if t == NEWLINE:
 				self.p_state = 4
-				#self.proc.prompt2()
+				self.prompt()
 				return
 			elif t == NAME:
 				self.p_args = [txt]
@@ -559,7 +508,6 @@ class _drop(object):
 	def loseConnection(self):
 		self.lost = True
 		log("parser",DEBUG,"LAST_SYM _drop")
-		self.g._last_symbol()
 	def drop(self,_):
 		log("parser",DEBUG,"LAST_SYM drop")
 		conns.remove(self)

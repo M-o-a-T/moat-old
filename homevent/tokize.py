@@ -83,8 +83,7 @@ tokenprog, pseudoprog, namestart, num = map(
 tabsize = 8
 
 class tokizer(object):
-	def __init__(self, input,output):
-		self.input = input
+	def __init__(self, output):
 		self._output = output
 		self.init()
 	
@@ -94,28 +93,19 @@ class tokizer(object):
 		self.contline = None
 		self.indents = [0]
 
-	def output(self,*a,**k):
+	def output(self,*a):
 		log("token",TRACE,repr(a))
-		r = maybeDeferred(self._output,*a,**k)
-		def orep(_):
-			log("token",TRACE,"TOKEN::",_)
-			return _
-		def orepf(_):
-			if _.check(StopIteration):
-				log("token",TRACE,"TOKEN:: STOP_INPUT")
-			else:
-				log("token",TRACE,"TOKEN::",_)
-			return _
-		r.addCallbacks(orep,orepf)
-		return r
+		self._output(*a)
 		
-	def run(self):
-		while True:                                # loop over lines in stream
+	def feed_end(self):
+		for indent in self.indents[1:]:                 # pop remaining indent levels
+			self.output(DEDENT, '', (self.lnum, 0), (self.lnum, 0), '')
+		self.output(ENDMARKER, '', (self.lnum, 0), (self.lnum, 0), '')
 
+	def feed(self,line):
 			try:
-				line = self.input()
-				if isinstance(line,Deferred):
-					line = waitForDeferred(line)
+				if line is None:
+					raise StopIteration
 				line += "\n"
 				log("token",TRACE,"IN",line)
 			except StopIteration:
@@ -139,14 +129,14 @@ class tokizer(object):
 							strstart, (self.lnum, len(line)), self.contline)
 					self.contstr = ''
 					self.contline = None
-					continue
+					return
 				else:
 					self.contstr += line
 					self.contline += line
-					continue
+					return
 
 			elif self.parenlev == 0 and not self.continued:  # new statement
-				if not line: break
+				if not line: return self.feed_end()
 				column = 0
 				while pos < max:                   # measure leading whitespace
 					if line[pos] == ' ': column = column + 1
@@ -154,12 +144,12 @@ class tokizer(object):
 					elif line[pos] == '\f': column = 0
 					else: break
 					pos = pos + 1
-				if pos == max: break
+				if pos == max: return self.feed_end()
 
 				if line[pos] in '#\r\n':           # skip comments or blank lines
 					self.output((NL, COMMENT)[line[pos] == '#'], line[pos:],
 							(self.lnum, pos), (self.lnum, len(line)), line)
-					continue
+					return
 
 				if column > self.indents[-1]:           # count indents or dedents
 					self.indents.append(column)
@@ -229,6 +219,3 @@ class tokizer(object):
 							(self.lnum, pos), (self.lnum, pos+1), line)
 					pos = pos + 1
 
-		for indent in self.indents[1:]:                 # pop remaining indent levels
-			self.output(DEDENT, '', (self.lnum, 0), (self.lnum, 0), '')
-		self.output(ENDMARKER, '', (self.lnum, 0), (self.lnum, 0), '')
