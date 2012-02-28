@@ -27,7 +27,7 @@ test:
 	done; \
 	for f in $(wildcard *.py) ; do \
 		echo $$f ...; \
-		python-dbg $$f; \
+		python $$f; \
 	done; \
 	if ! diff -ru expect real >/tmp/diff.$$$$ ; then less /tmp/diff.$$$$; \
 		rm /tmp/diff.$$$$; exit 1; else rm /tmp/diff.$$$$; exit 0; fi
