@@ -38,8 +38,6 @@ from homevent.module import Module
 from homevent.check import check_condition
 from homevent.event import TrySomethingElse
 
-from twisted.internet.defer import inlineCallbacks, returnValue
-
 class IfStatement(MainStatementList):
 	name=("if",)
 	doc="Test if a condition holds"
@@ -62,7 +60,6 @@ Syntax:
 		else:
 			self.else_do.add_else(proc)
 		
-	@inlineCallbacks
 	def run(self,ctx,**k):
 		want=True
 
@@ -74,15 +71,15 @@ Syntax:
 			w = w[1:]
 
 		if self.procs is None:
-			if (yield check_condition(ctx,*w)) == want:
+			if check_condition(ctx,*w) == want:
 				return
 			else:
 				raise TrySomethingElse(*w)
 
-		if (yield check_condition(ctx,*w)) == want:
-			returnValue(super(IfStatement,self).run(ctx,**k))
+		if check_condition(ctx,*w) == want:
+			return super(IfStatement,self).run(ctx,**k)
 		elif self.else_do is not None:
-			returnValue(self.else_do.run(ctx,**k))
+			return self.else_do.run(ctx,**k)
 
 
 class ElseStatement(MainStatementList):
@@ -148,7 +145,4 @@ class IfElseModule(Module):
 		main_words.unregister_statement(ElseIfStatement)
 	
 init = IfElseModule
-
-import warnings
-warnings.filterwarnings('ignore', message="returnValue.*", category=DeprecationWarning, lineno=85)
 

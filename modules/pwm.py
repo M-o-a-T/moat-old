@@ -43,9 +43,6 @@ from homevent.base import Name,SYS_PRIO
 from homevent.twist import callLater
 from homevent.collect import Collection,Collected
 
-from twisted.python import failure
-from twisted.internet.defer import succeed,inlineCallbacks
-
 import os
 import datetime as dt
 
@@ -117,14 +114,13 @@ class CommonPM(Collected):
 		if self.timer:
 			self.timer.cancel()
 			self.timer = None
-		if self.state:
-			d = process_event(Event(self.ctx,"pcm","set",self.names[0],*self.name))
-		else:
-			d = succeed(None)
-		def done(_):
-			self.delete_done
-		d.addCallback(done)
-		d.addErrback(process_failure)
+		try:
+			if self.state:
+				process_event(Event(self.ctx,"pcm","set",self.names[0],*self.name))
+		except Exception as ex:
+			process_failure(ex)
+		finally:
+			self.delete_done()
 
 	def __repr__(self):
 		return u"‹%s %s %d›" % (self.__class__.__name__, self.name,self._value)
@@ -141,7 +137,6 @@ class CommonPM(Collected):
 		d = self.do_switch()
 		d.addErrback(process_failure)
 
-	@inlineCallbacks
 	def do_switch(self):
 		"""Click"""
 		if self.state:
@@ -151,7 +146,7 @@ class CommonPM(Collected):
 			self.state = 1
 			tn = self.t_on
 
-		yield process_event(Event(self.ctx,"pcm","set",self.names[self.state],*self.name))
+		process_event(Event(self.ctx,"pcm","set",self.names[self.state],*self.name))
 		try:
 			self.last = self.next
 			if tn is not None:
@@ -160,8 +155,8 @@ class CommonPM(Collected):
 			else:
 				self.next = None
 		except Exception,e:
-			yield process_failure(e)
-			yield simple_event(self.ctx,"pcm","error",*self.name)
+			process_failure(e)
+			simple_event(self.ctx,"pcm","error",*self.name)
 		
 	def get_value(self):
 		return self._value
@@ -391,12 +386,8 @@ class Shutdown_Worker_PWM(ExcWorker):
 		return (ev is shutdown_event)
 	def process(self, **k):
 		super(Shutdown_Worker_PWM,self).process(**k)
-		d = succeed(None)
 		for p in PWMs.values():
-			def tilt(_,pwm):
-				return pwm.set_value(0)
-			d.addBoth(tilt,p)
-		return d
+			pwm.set_value(0)
 
 	def report(self,*a,**k):
 		return ()

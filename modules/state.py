@@ -42,8 +42,6 @@ from homevent.base import Name
 from homevent.collect import Collection,Collected
 from homevent.times import now,humandelta
 
-from twisted.internet.defer import inlineCallbacks,returnValue
-
 import os,sys
 
 Db = None
@@ -72,7 +70,6 @@ class State(Collected):
 	def init(self):
 		pass
 
-	@inlineCallbacks
 	def delete(self,ctx):
 		if self.working:
 			raise StateChangeError(self,u"‹deleted›")
@@ -80,7 +77,7 @@ class State(Collected):
 		self.time = now()
 		try:
 			if self.value is not None:
-				yield process_event(Event(ctx,"state",self.value,"-",*self.name))
+				process_event(Event(ctx,"state",self.value,"-",*self.name))
 		finally:
 			self.delete_done()
 
@@ -233,7 +230,6 @@ set state X name...
 	: triggers an event if that changed
 	: raises an error if that event tries to change the state again
 """
-	@inlineCallbacks
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		if len(event) < 2:
@@ -252,9 +248,9 @@ set state X name...
 		s.working = True
 		try:
 			s.old_value = s.value
-			yield s.set_value(value if value != "-" else None)
+			s.set_value(value if value != "-" else None)
 			s.time = now()
-			yield process_event(Event(self.ctx,"state",old,value,*s.name)).addErrback(process_failure)
+			process_event(Event(self.ctx,"state",old,value,*s.name)).addErrback(process_failure)
 		finally:
 			s.working = False
 
@@ -357,9 +353,9 @@ class SavedStateCheck(Check):
 		try:
 			Db.get(Name(args))
 		except KeyError:
-			returnValue(False)
+			return False
 		else:
-			returnValue(True)
+			return True
 
 
 class StateModule(Module):

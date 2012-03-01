@@ -241,34 +241,31 @@ class OWFSmon(Monitor):
 	def __init__(self,*a,**k):
 		super(OWFSmon,self).__init__(*a,**k)
 
-	@defer.inlineCallbacks
 	def one_value(self, step):
 		dev = devices[self.device]
-		val = yield dev.get(self.attribute)
+		val = dev.get(self.attribute)
 		if self.switch is not None:
 			if not self.switched:
 				if val > self.high:
-					yield dev.set(self.switch,self.to_high)
-					val = yield dev.get(self.attribute)
+					dev.set(self.switch,self.to_high)
+					val = dev.get(self.attribute)
 					self.switched = True
 			else:
 				if val < self.low:
-					yield dev.set(self.switch,self.to_low)
-					val = yield dev.get(self.attribute)
+					dev.set(self.switch,self.to_low)
+					val = dev.get(self.attribute)
 					self.switched = False
 			if self.switched:
 				val += self.high - self.low
-		defer.returnValue(val)
+		return val
 
-	@defer.inlineCallbacks
 	def up(self):
 		dev = devices[self.device]
 		if self.switch is not None and self.switched is None:
 			log(DEBUG,"switch low1",self.switch,self.to_low)
-			yield dev.set(self.switch,self.to_low)
+			dev.set(self.switch,self.to_low)
 			self.switched = False
-		res = yield super(OWFSmon,self).up()
-		defer.returnValue(res)
+		return super(OWFSmon,self).up()
 
 	def down(self):
 		if self.switch is not None:
@@ -296,10 +293,9 @@ class OWFSwindmon(Monitor):
 		yield ("turbulence",1-self.qavg)
 		yield ("values",self.nval)
 
-	@defer.inlineCallbacks
 	def one_value(self, step):
 		dev = devices[self.device]
-		val = yield dev.get(self.attribute)
+		val = dev.get(self.attribute)
 		val = (float(v.strip()) for v in val.split(","))
 		val = (2 if v > 3.5 else 0 if v < 1 else 1 for v in val)
 		val = tuple(val)
@@ -322,7 +318,7 @@ class OWFSwindmon(Monitor):
 		else: raise MonitorAgain(val)
 		val = (val - self.direction) % 16
 		self._process_value(val)
-		defer.returnValue(self.avg)
+		return self.avg
 
 	def _process_value(self,val):
 		if self.avg is None:
