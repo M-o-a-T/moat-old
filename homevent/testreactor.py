@@ -93,10 +93,13 @@ class TestReactor(GeventReactor):
 				finally:
 					self._wait = 0
 
-				now = seconds()
 				while callqueue:
 					c = callqueue[0]
-					if c.getTime() > now and not isinstance(c,FakeDelayedCall):
+					if isinstance(c,FakeDelayedCall):
+						now = seconds()
+					else:
+						now = self.realSeconds()
+					if c.getTime() > now:
 						break
 					del callqueue[0]
 					try:

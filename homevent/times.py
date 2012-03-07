@@ -35,8 +35,8 @@ if "HOMEVENT_TEST" in os.environ:
 	def now(force=False):
 		if force:
 			return dt.datetime.now()
-		return dt.datetime(2003,4,5,6,7,8) + \
-			dt.timedelta(0, current_slot // SLOT, (current_slot % SLOT) * (1e6 / SLOT) )
+		r = dt.datetime.utcfromtimestamp(1049519228) # 2003-04-05 06:07:08 UTC
+		return r + dt.timedelta(0, current_slot // SLOT, (current_slot % SLOT) * (1e6 / SLOT) )
 	def slot_update(tm):
 		"""Update the time slot until the given time is reached"""
 		if isinstance(tm,dt.datetime):
@@ -71,15 +71,15 @@ def humandelta(delta):
 	res = ""
 	res2= ""
 	if isinstance(delta,dt.timedelta):
-		if d.days < 0:
+		if delta.days < 0:
 			assert delta.seconds >= 0
 			# right now this code only handles positive seconds
 			# timedelta(0,-1) => timedelta(-1,24*60*60-1)
 			res = "-"
 			delta = - delta
-		if d.days > 0:
+		if delta.days > 0:
 			res = "%d dy"%(d.days)
-		delta = delta.seconds + delta.microsecond / 1e6
+		delta = delta.seconds + delta.microseconds / 1e6
 	elif delta < 0:
 		delta = - delta
 		res = "-"
