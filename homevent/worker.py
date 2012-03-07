@@ -165,12 +165,7 @@ class WorkSequence(WorkItem):
 
 	def process(self, **k):
 		super(WorkSequence,self).process(**k)
-		r = spawn(self._process)
-#		if "HOMEVENT_TEST" in os.environ:
-#			r = deferToLater(self._process,*a,**k)
-#		else:
-#			r = deferToThread(self._process,*a,**k)
-		return waitForGreenlet(r)
+		self._process()
 
 	handle_conditional = False
 
