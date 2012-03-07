@@ -261,7 +261,7 @@ wait [NAME…]: for FOO…
 			logging.log_exc(msg=u"Wait %s died:"%(self.name,), err=ex, level=logging.TRACE)
 			raise
 		else:
-			process_event(Event(self.ctx(loglevel=logging.TRACE),"wait","done",time(), *w.name))
+			process_event(Event(self.ctx(loglevel=logging.TRACE),"wait","done",unixtime(now(self.force)), *w.name))
 
 		
 class WaitFor(Statement):
