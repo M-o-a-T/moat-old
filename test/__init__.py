@@ -32,6 +32,8 @@ import os
 from time import time
 from subprocess import Popen
 from twisted.internet import reactor
+from tokenize import tok_name
+
 exitcode = 0
 
 log_level("event",TRACE)
@@ -133,9 +135,11 @@ class run_logger(Logger):
 			self.log(None,s)
 
 def parse_logger(s,t,c,*x):
-	pass
-	#if t == COMMENT:
-	#log(TRACE, "%s %s %s %s" % tuple(map(repr,(s,t,c,x))))
+	try:
+		c = tok_name[c]
+	except KeyError:
+		pass
+	log(TRACE, "%s %s %s %s" % (s,t,c, " ".join(map(str,x))))
 
 class logwrite(object):
 	def __init__(self,log):
@@ -175,7 +179,7 @@ def run(name,input, interpreter=Interpreter, logger=None):
 	input = StringIO(input)
 
 	def _main():
-		d = parse(input, interpreter(Context(out=logwrite(logger))),Context(logger=parse_logger))
+		d = parse(input, interpreter(Context(out=logwrite(logger))),Context(logger=parse_logger,filename=name))
 		d.addErrback(lambda _: _.printTraceback())
 		d.addBoth(lambda _: h.shut_down())
 		if ht is not None: d.addBoth(lambda _: ht.try_exit())
