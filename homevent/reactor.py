@@ -108,7 +108,10 @@ def start_up():
 	global running
 	if not running:
 		running = True
-		process_event(startup_event).addErrback(process_failure)
+		try:
+			process_event(startup_event)
+		except Exception:
+			process_failure()
 	
 def _shut_down():
 	"""\

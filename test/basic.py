@@ -54,9 +54,11 @@ h.register_worker(SayWorker("TellMe"))
 h.register_worker(SayMoreWorker("say something"))
 
 def main():
-	d = h.process_event(hello_ev)
-	d.addCallback(lambda _: h.process_event(hello2_ev))
-	d.addBoth(lambda _: h.shut_down())
+	try:
+		h.process_event(hello_ev)
+		h.process_event(hello2_ev)
+	finally:
+		h.shut_down()
 
 h.mainloop(main)
 

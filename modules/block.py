@@ -55,19 +55,18 @@ class Async(MainStatementList):
 	name=("async",)
 	doc="run multiple statements asynchronously"
 
+	def _run(self,a,k):
+		try:
+			super(Async,self).run(*a,**k)
+		except HaltSequence:
+			pass
+		except Exception as err:
+			process_failure(err)
+
 	def run(self,*a,**k):
-		d = defer.Deferred()
-		d.addCallback(lambda _: super(Async,self).run(*a,**k))
-		if "HOMEVENT_TEST" in os.environ:
-			deferToLater(callLater,False,0.05,d.callback,None)
-		else:
-			deferToLater(d.callback,None)
-		def catch_halt(_):
-			_.trap(HaltSequence)
-			return None
-		d.addErrback(catch_halt)
-		d.addErrback(process_failure)
-		# note that d is *not* returned. This is intentional.
+		self.job = gevent.spawn(self._run,a,k)
+		# TODO: some sort of global job list
+		# so that they can be stopped when ending the program
 
 
 class SkipThis(MainStatementList):

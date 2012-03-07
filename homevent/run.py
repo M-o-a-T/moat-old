@@ -113,15 +113,12 @@ def process_event(e, drop_errors=False):
 		"""
 	from homevent.logging import log_event,DEBUG,TRACE
 
-	d = collect_event(e).process(event=e)
-#	def rv(_):
-#		print "RVA",_
-#		return _
-#	d.addBoth(rv)
-	if drop_errors:
-		d.addErrback(lambda _: None)
-	return d
-	
+	try:
+		collect_event(e).process(event=e)
+	except Exception:
+		if not drop_errors:
+			raise
+
 def process_failure(e=None):
 	"""\
 		Process a failure event. This is the internal procedure that
@@ -131,11 +128,10 @@ def process_failure(e=None):
 		e = failure.Failure()
 	from homevent.logging import log_event,ERROR,log_exc
 	log_event(event=e,level=ERROR)
-	d = collect_failure(e).process(event=e)
-	def err2(_):
-		log_exc(msg="Error in failure handler", err=_, level=ERROR)
-	d.addErrback(err2)
-	return d
+	try:
+		collect_failure(e).process(event=e)
+	except Exception as err:
+		log_exc(msg="Error in failure handler", err=err, level=ERROR)
 	
 def run_event(event):
 	try:
