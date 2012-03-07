@@ -35,11 +35,11 @@ from homevent.worker import HaltSequence,ExcWorker
 from homevent.times import time_delta, time_until, unixtime,unixdelta, now, humandelta
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.base import Name,SYS_PRIO
-from homevent.twist import callLater, reset_slots
 from homevent.collect import Collection,Collected
+from homevent.twist import callLater
 from homevent import logging
 
-from gevent import spawn
+import gevent
 from gevent.queue import Channel,Empty
 
 from time import time
@@ -84,6 +84,8 @@ class Waiter(Collected):
 	"""This is the thing that waits."""
 	force = False
 	storage = Waiters.storage
+	_plinger = None
+	_running = False
 	def __init__(self,parent,name,force):
 		self.ctx = parent.ctx
 		self.start = now()
@@ -135,32 +137,47 @@ class Waiter(Collected):
 		return str(self.value)
 
 	def __repr__(self):
-		return u"‹%s %s %d›" % (self.__class__.__name__, self.name,self.value)
+		return u"‹%s %s %s›" % (self.__class__.__name__, self.name,self.value)
 
+	def _pling(self):
+		self._plinger = None
+		self._cmd("timeout")
+
+	def _set_pling(self):
+		timeout = unixtime(self.end) - unixtime(now(self.force))
+		if timeout < 0:
+			timeout = 0.01
+		if self._plinger:
+			self._plinger.cancel()
+		self._plinger = callLater(self.force, timeout, self._pling)
+		
 	def _job(self):
-		end = unixtime(self.end)
+		self._set_pling()
+		self._running = True
 		while True:
-			tm = time()
-			timeout = end - tm
-			if timeout < 0:
-				return
-			try:
-				cmd = self.q.get(timeout=timeout)
-			except Empty:
-				return
+			cmd = self.q.get()
 
 			q = cmd[0]
 			a = cmd[2] if len(cmd)>2 else None
 			cmd = cmd[1]
-			if cmd == "cancel":
+			if cmd == "timeout":
+				assert self._plinger is None
 				q.put(None)
-				return
+				self.q = None
+				return True
+			elif cmd == "cancel":
+				if self._plinger:
+					self._plinger.cancel()
+					self._plinger = None
+				q.put(None)
+				self.q = None
+				return False
 			elif cmd == "update":
 				q.put(None)
 				self.end = a
-				end = ixtime(a)
+				self._set_pling()
 			elif cmd == "remain":
-				q.put(end-time())
+				q.put(unixtime(self.end)-unixtime(now(self.force)))
 			else:
 				q.put(RuntimeError('Unknown command: '+cmd))
 
@@ -171,13 +188,13 @@ class Waiter(Collected):
 
 		self.q = Channel()
 		self.end = dest
-		self.job = spawn(self._job)
+		self.job = gevent.spawn(self._job)
 		self.job.link(lambda _: self.delete_done())
 
 		Waiters[self.name] = self
 
 	def _cmd(self,cmd,*a):
-		if self.job.ready():
+		if self.q is None:
 			raise WaitDone(self)
 
 		q = Channel()
@@ -186,8 +203,10 @@ class Waiter(Collected):
 
 	@property
 	def value(self):
-		if self.job.ready():
+		if self.q is None:
 			return 0
+		if not self._running:
+			return "??"
 		return self._cmd("remain")
 
 	def delete(self,ctx):
@@ -259,7 +278,7 @@ for ‹timespec›
 			raise SyntaxError(u'Usage: for ‹timespec…›')
 
 		def delta():
-			return time_delta(event)
+			return time_delta(event, now=now(self.parent.force))
 		self.parent.timespec = delta
 	
 
@@ -281,7 +300,7 @@ until FOO…
 		if not len(event):
 			raise SyntaxError(u'Usage: until ‹timespec…›')
 		def delta():
-			return time_until(event)
+			return time_until(event, now=now(self.parent.force))
 		self.parent.timespec = delta
 					
 
@@ -302,7 +321,7 @@ while FOO…
 		if not len(event):
 			raise SyntaxError(u'Usage: while ‹timespec…›')
 		def delta():
-			return time_until(event, invert=True)
+			return time_until(event, invert=True, now=now(self.parent.force))
 		self.parent.timespec = delta
 					
 
@@ -324,7 +343,7 @@ next FOO...
 			raise SyntaxError(u'Usage: until next ‹timespec…›')
 
 		def delta():
-			s = time_until(event, invert=True)
+			s = time_until(event, invert=True, now=now(self.parent.force))
 			return time_until(event, now=s)
 		self.parent.timespec = delta
 					
@@ -347,8 +366,6 @@ Known flags:
 		for n in event:
 			if n == "force":
 				self.parent.force = True
-			elif n == "reset":
-				reset_slots()
 			else:
 				raise SyntaxError(u'Flag ‹%s› unknown' % (n,))
 

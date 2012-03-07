@@ -1,3 +1,9 @@
+homevent (0.3.0) smurf; urgency=low
+
+  * Use gevent framework, severely cutting down on Deferred objects.
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Thu, 01 Mar 2012 08:23:19 +0100
+
 homevent (0.2.14) maverick; urgency=low
 
   * improve wind vane calculations

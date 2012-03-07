@@ -23,8 +23,8 @@ from __future__ import division
 from twisted.internet.abstract import FileDescriptor
 from twisted.internet import fdesc,defer,reactor,base
 from twisted.python import log,failure
-from twisted.python.threadable import isInIOThread
-from homevent import geventreactor
+
+from homevent.geventreactor import DelayedCall,deferToGreenlet
 
 import gevent
 from gevent.event import AsyncResult
@@ -100,33 +100,15 @@ class StdOutDescriptor(FileDescriptor):
 #		reactor.callFromThread(_defer,d)
 #	reactor.wakeUp()
 #	return d
-deferToLater = geventreactor.deferToGreenlet
-
-
-# Simplification: sometimes we're late starting something.
-# That is not a bug, that's life.
-# reactor.callLater asserts >=0, so just make sure that it is.
-wcl = reactor.callLater
-def wake_later(t,p,*a,**k):
-	if t < 0: t = 0
-
-	r = wcl(t,p,*a,**k)
-
-	# Bug workaround: Sometimes the Twisted reactor seems not to notice
-	# that we just called reactor.callLater().
-	if reactor.waker:
-		reactor.waker.wakeUp()
-
-	return r
-reactor.callLater = wake_later
-
+deferToLater = deferToGreenlet
 
 
 # When testing, we log the time an operation takes. Unfortunately, since
 # the logged values are accurate up to 1/10th second, that means that
 # the timestamp values in the logs will jitter merrily when something
-# takes longer than 1/10th of a second, which is not at all difficult
-# when the test runs for the first time.
+# takes longer than 1/10th of a second. When the test runs for the first
+# time (cold file system cache) or on a slower or busy machine, this is not
+# at all uncommon.
 #
 # In addition, tests shouldn't take longer than necessary, so needless
 # waiting is frowned upon.
@@ -136,145 +118,13 @@ reactor.callLater = wake_later
 # "force" flag is set, which denotes that the given timeout affects
 # something "real" and therefore may not be ignored.
 
-rcl = reactor.callLater
+
 slot = None
 GRAN = 20
 def current_slot():
 	if slot is None: return slot
 	return slot/GRAN
 	
-if "HOMEVENT_TEST" in os.environ:
-	import heapq
-	slotid = 0
-	slot = 0
-	slots = []
-	slotjobs = [{},{}]
-	realslot = 0
-	slot_running = False
-	_real = None
-
-	def _slot_run():
-		global slot
-		global realslot
-		global slot_running
-		if slot_running:
-			#print >>sys.stderr,"DUP TRIGGER"
-			return
-		try:
-			slot_running = True
-			while slots:
-				nx = slots[0]
-				#print >>sys.stderr,"RUNNER now %d  do %d" % (slot,nx)
-
-				nxjobs = slotjobs[False][nx]
-				if not nxjobs:
-					nxjobs = slotjobs[True][nx]
-				if not nxjobs:
-					#print >>sys.stderr,"RUNNER EMPTY %d" % (nx,)
-					_nx = heapq.heappop(slots)
-					assert nx == _nx
-					del slotjobs[False][nx]
-					del slotjobs[True][nx]
-					continue
-				job = nxjobs.pop(0)
-				if job.dead:
-					#print >>sys.stderr,"RUNNER SKIP %d %s" % (job.abs, job.proc)
-					continue
-				if job.force:
-					#print >>sys.stderr,"RUNNER FORCE %d %s" % (job.abs, job.proc)
-					nxjobs.insert(0,job) # should not happen often
-					return
-				if slot < nx: slot = nx
-				job._run()
-
-		except:
-			log.deferr()
-		finally:
-			slot_running = False
-
-	def reset_slots():
-		global realslot
-		realslot = slot
-		return
-
-	class CallLater(object):
-		dead = False
-		force = None
-		q2 = False
-		def _enqueue(self):
-			if self.abs not in slotjobs[self.q2]:
-				heapq.heappush(slots,self.abs)
-				slotjobs[False][self.abs] = []
-				slotjobs[True][self.abs] = []
-			slotjobs[self.q2][self.abs].append(self)
-			#print >>sys.stderr,"ADD %d %d: abs %d now %d  %s" % (id(self),self.q2,self.abs,slot,self.proc)
-			if not slot_running:
-				#print >>sys.stderr,"TRIGGER"
-				rcl(0.01,_slot_run)
-			#else:
-				#print >>sys.stderr,"NO TRIGGER"
-		
-		def __repr__(self):
-			return "<CL:"+repr(self.abs)+":"+repr(self.proc)+">"
-			
-		def __init__(self,force,delta,proc,*arg,**kwarg):
-			global slot
-			global slotid
-
-			delta = int(delta * GRAN + 0.2)
-			self.delta = delta
-			self.abs = delta + slot
-			self.proc = proc
-			self.arg = arg
-			self.kwarg = kwarg
-			slotid += 1
-			self.slotid = slotid
-			if force and delta and self.abs > realslot:
-				self.force = rcl((self.abs-realslot)/GRAN+0.01, self._run_force)
-			elif force:
-				self.q2 = True
-			self._enqueue()
-			
-		def cancel(self):
-			# take the cheap way out
-			#print >>sys.stderr,"DEL",id(self),self.q2,self.delta,self.proc
-			self.dead = True
-			if self.force:
-				self.force.cancel()
-				self.force = False
-				rcl(0.01,_slot_run)
-
-		def _run_force(self):
-			global realslot
-			#print >>sys.stderr,"RUNNER CONTINUE %d %d %s" % (id(self), self.abs, self.proc)
-			realslot = self.abs
-
-			self.force = None
-			rcl(0.01,_slot_run)
-			
-		def _run(self):
-			if self.dead: return
-			#print >>sys.stderr,"RUN",id(self),self.q2,self.abs,self.proc
-			try:
-				self.proc(*self.arg,**self.kwarg)
-			except:
-				log.deferr()
-
-		def _die(self,info,*a,**k):
-			from traceback import print_stack
-			print >>sys.stderr,"OUCH",info,a,k
-			print_stack(file=sys.stderr)
-		def getTime(self,*a,**k): self._die("getTime",*a,**k)
-		def reset(self,*a,**k): self._die("reset",*a,**k)
-		def delay(self,*a,**k): self._die("delay",*a,**k)
-		def activate_delay(self,*a,**k): self._die("activate_delay",*a,**k)
-		def active(self,*a,**k): self._die("active",*a,**k)
-		def __le__(self,*a,**k): self._die("__le__",*a,**k)
-
-else:
-	def reset_slots():
-		pass
-
 def sleepUntil(force,delta):
 	from homevent.times import unixdelta,now
 
@@ -287,10 +137,10 @@ def sleepUntil(force,delta):
 
 	if "HOMEVENT_TEST" in os.environ:
 		ev = AsyncResult()
-		CallLater(force,delta, ev.set,None)
+		callLater(force,delta, ev.set,None)
 		ev.get(block=True)
-
-	sleep(delta)
+	else:
+		sleep(delta)
 
 
 def callLater(force,delta,p,*a,**k):
@@ -302,15 +152,16 @@ def callLater(force,delta,p,*a,**k):
 		delta = unixdelta(delta)
 	if delta < 0: # we're late
 		delta = 0 # but let's hope not too late
-	if "HOMEVENT_TEST" in os.environ:
-		return CallLater(force,delta,p,*a,**k)
+	if force:
+		cl = DelayedCall
+	elif "HOMEVENT_TEST" in os.environ:
+		from homevent.testreactor import FakeDelayedCall
+		cl = FakeDelayedCall
+	else:
+		cl = DelayedCall
+	cl = cl(reactor,reactor.seconds()+delta, gevent.spawn,(p,)+a,k,seconds=reactor.seconds)
 
-	return rcl(delta,p,*a,**k)
-def _callLater(delta,p,*a,**k):
-	return callLater(2,delta,p,*a,**k)
-
-if "HOMEVENT_TEST" in os.environ:
-	reactor.callLater = _callLater
+	return reactor.callLater(cl)
 
 
 # Allow a Deferred to be called with another Deferred
@@ -400,28 +251,27 @@ class TwistFailure(BaseFailure,BaseException):
 
 failure.Failure = TwistFailure
 
-gjob=0
-gspawn = gevent.spawn
-
-#def _completer(g,job):
-#	def pr_ok(v):
-#		print >>sys.stderr,"G RES %d %s" % (job,v)
-#	def pr_err(v):
-#		print >>sys.stderr,"G ERR %d %s" % (job,v)
-#	g.link_value(pr_ok)
-#	g.link_exception(pr_err)
-def do_spawn(func,*a,**k):
-	global gjob
-	gjob += 1
-	job = gjob
-#	print >>sys.stderr,"SPAWN %d %s %s %s" % (job,func,a,k)
-	g = gspawn(func,*a,**k)
-#	_completer(g,job)
-	return g
-import gevent.greenlet as ggr
-gevent.spawn = do_spawn
-ggr.Greenlet.spawn = do_spawn
-
+if False:
+	gjob=0
+	gspawn = gevent.spawn
+	def _completer(g,job):
+		def pr_ok(v):
+			print >>sys.stderr,"G RES %d %s" % (job,v)
+		def pr_err(v):
+			print >>sys.stderr,"G ERR %d %s" % (job,v)
+		g.link_value(pr_ok)
+		g.link_exception(pr_err)
+	def do_spawn(func,*a,**k):
+		global gjob
+		gjob += 1
+		job = gjob
+		print >>sys.stderr,"SPAWN %d %s %s %s" % (job,func,a,k)
+		g = gspawn(func,*a,**k)
+		_completer(g,job)
+		return g
+	import gevent.greenlet as ggr
+	gevent.spawn = do_spawn
+	ggr.Greenlet.spawn = do_spawn
 
 gwait = 0
 class log_wait(object):

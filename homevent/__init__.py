@@ -19,14 +19,19 @@
 This is the core of the event dispatcher.
 """
 
-from homevent import geventreactor
-geventreactor.install()
+import os
+if "HOMEVENT_TEST" in os.environ:
+	from homevent.testreactor import install
+else:
+	from homevent.geventreactor import install
+install()
+del install
 
 from gevent import monkey
 monkey.patch_all()
 del monkey
 
-
+# Convenience imports
 from homevent.context import Context
 from homevent.event import Event
 from homevent.worker import Worker,SeqWorker,WorkSequence
@@ -36,11 +41,12 @@ from homevent.reactor import start_up,shut_down, mainloop
 from homevent.statement import main_words,global_words
 from homevent.check import register_condition
 
-#import homevent.twist # for side effects
+from homevent import twist # for side effects
 
-VERSION = "0.2.20"
+VERSION = "0.3"
 
-__all__ = ("Event","Worker","SeqWorker","WorkSequence",
-	"collect_event","process_event", "register_worker", "mainloop")
+__all__ = ("Context", "Event", "Worker","SeqWorker","WorkSequence",
+	"collect_event","process_event","register_worker", "mainloop",
+	"main_words","global_words", "register_condition")
 # Do not export "log" by default; it's too generic.
 

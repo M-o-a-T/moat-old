@@ -32,8 +32,6 @@ Code
 
 * more documentation (docstring and comments) are always helpful …
 
-* convert some heavy users of (single) Deferreds to @inlineCallbacks
-
 * Improve monitor and ‘delta’ handling
 
   - high / low limits should apply to the delta
