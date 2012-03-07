@@ -109,7 +109,7 @@ class Processor(object):
 		if isinstance(err,BaseFailure):
 			err.raiseException()
 		else:
-			raise err.__class__,e,sys.exc_info()[2]
+			raise err.__class__,err,sys.exc_info()[2]
 
 class CollectProcessor(Processor):
 	"""\

@@ -393,7 +393,8 @@ class Parser(object):
 
 					try:
 						log("parser",TRACE,"RESULT error",ex)
-						self.result.errback(ex)
+						if self.result is not None:
+							self.result.errback(ex)
 					except defer.AlreadyCalledError: pass
 					else: self.endConnection()
 				except Exception:

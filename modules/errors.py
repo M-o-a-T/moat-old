@@ -74,12 +74,13 @@ Syntax:
 		return self._run(ctx,**k)
 
 	def _run(self,ctx,**k):
-		d = super(TryStatement,self).run(ctx,**k)
-		if self.catch_do:
-			d.addErrback(lambda _: self.catch_do.run(ctx(error_=_), **k))
-		else:
-			d.addErrback(process_failure)
-		return d
+		try:
+			super(TryStatement,self).run(ctx,**k)
+		except Exception as err:
+			if self.catch_do:
+				self.catch_do.run(ctx(error_=err), **k)
+			else:
+				process_failure(err)
 
 
 class CatchStatement(TryStatement):
