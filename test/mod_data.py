@@ -32,12 +32,12 @@ on foo:
 	block:
 		wait foo waiter:
 			for 0.3
-wait: for 0.1
+wait vorher: for 0.1
 trigger foo
-wait: for 0.1
+wait nachher: for 0.1
 list event
-list event 4
-wait: for 0.3
+list event 5
+wait ende: for 0.3
 
 shutdown
 """
