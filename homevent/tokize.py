@@ -100,7 +100,6 @@ class tokizer(object):
 	def feed_end(self):
 		for indent in self.indents[1:]:                 # pop remaining indent levels
 			self.output(DEDENT, '', (self.lnum, 0), (self.lnum, 0), '')
-		self.output(ENDMARKER, '', (self.lnum, 0), (self.lnum, 0), '')
 
 	def feed(self,line):
 			try:
@@ -136,7 +135,10 @@ class tokizer(object):
 					return
 
 			elif self.parenlev == 0 and not self.continued:  # new statement
-				if not line: return self.feed_end()
+				if not line:
+					self.feed_end()
+					self.output(ENDMARKER, '', (self.lnum, 0), (self.lnum, 0), '')
+					return 
 				column = 0
 				while pos < max:                   # measure leading whitespace
 					if line[pos] == ' ': column = column + 1
@@ -154,13 +156,15 @@ class tokizer(object):
 				if column > self.indents[-1]:           # count indents or dedents
 					self.indents.append(column)
 					self.output(INDENT, line[:pos], (self.lnum, 0), (self.lnum, pos), line)
-				while column < self.indents[-1]:
-					if column not in self.indents:
+				if column < self.indents[-1]:
+					while column < self.indents[-1]:
+						self.indents.pop()
+						self.output(DEDENT, '', (self.lnum, pos), (self.lnum, pos), line)
+
+					if column != self.indents[-1]:
 						raise IndentationError(
 							"unindent does not match any outer indentation level",
 							("<tokenize>", self.lnum, pos, line))
-					self.indents = self.indents[:-1]
-					self.output(DEDENT, '', (self.lnum, pos), (self.lnum, pos), line)
 
 			else:                                  # continued statement
 				if not line:
