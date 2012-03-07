@@ -30,6 +30,7 @@ from twisted.internet import reactor,interfaces,fdesc
 from twisted.internet._posixstdio import StandardIO ## XXX unstable interface!
 from twisted.internet.error import ConnectionDone,ConnectionLost
 from traceback import print_exc
+from tokenize import tok_name
 import os,sys
 
 main_words.register_statement(Load)
@@ -43,8 +44,14 @@ load_module("file")
 load_module("path")
 load_module("ifelse")
 
+syms = {}
 def parse_logger(t,*x):
-	print t+":"+" ".join((repr(d) for d in x))
+	x=list(x)
+	try:
+		x[1] = tok_name[x[1]]
+	except KeyError:
+		pass
+	print t+":"+" ".join(str(d) for d in x)
 
 class StdIO(StandardIO):
 	def __init__(self,*a,**k):
@@ -72,6 +79,7 @@ def ready():
 	for f in sys.argv[1:]:
 		read_config(c,f)
 	
+	#c.logger=parse_logger
 	if os.isatty(0):
 		i = InteractiveInterpreter
 	else:
