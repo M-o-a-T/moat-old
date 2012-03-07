@@ -41,6 +41,7 @@ trigger FOO...
 
 	loglevel = None
 	recurse = None
+	sync = False
 
 	def run(self,ctx,**k):
 		if self.recurse:
@@ -50,21 +51,11 @@ trigger FOO...
 		event = self.params(ctx)
 		if not event:
 			raise SyntaxError("Events need at least one parameter")
-		return self.run2(Event(ctx,*event))
 
-	def run2(self,event):
-		run_event(event)
-
-class SyncTriggerHandler(TriggerHandler):
-	name=("sync","trigger")
-	doc="send an event and wait for it"
-	long_doc="""\
-sync trigger FOO...
-	- creates a FOO... event and wait until it is processed. Errors
-	  handling the event are propagated to the caller.
-"""
-	def run2(self,event):
-		return process_event(event)
+		if self.sync:
+			process_event(event)
+		else:
+			run_event(event)
 
 class TriggerLog(Statement):
 	name = ("log",)
@@ -88,7 +79,6 @@ log LEVEL
 		else:
 			raise SyntaxError(u'Usage: log LEVEL')
 TriggerHandler.register_statement(TriggerLog)
-SyncTriggerHandler.register_statement(TriggerLog)
 
 class TriggerRecurse(Statement):
 	name = ("recursive",)
@@ -106,8 +96,22 @@ recursive
 			self.parent.recurse = True
 		else:
 			raise SyntaxError(u'Usage: recursive')
-TriggerHandler.register_statement(TriggerRecurse)
-SyncTriggerHandler.register_statement(TriggerRecurse)
+
+class TriggerSync(Statement):
+	name = ("sync",)
+	doc = "execute the event synchronously"
+	long_doc=u"""\
+sync
+	The event handler is waited for. Errors are propagated to the caller.
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		lo = hi = None
+		if len(event) == 0:
+			self.parent.recurse = True
+		else:
+			raise SyntaxError(u'Usage: recursive')
+TriggerHandler.register_statement(TriggerSync)
 
 
 
@@ -122,10 +126,8 @@ class TriggerModule(Module):
 
 	def load(self):
 		main_words.register_statement(TriggerHandler)
-		main_words.register_statement(SyncTriggerHandler)
 	
 	def unload(self):
 		main_words.unregister_statement(TriggerHandler)
-		main_words.unregister_statement(SyncTriggerHandler)
 
 init = TriggerModule

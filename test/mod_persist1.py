@@ -86,7 +86,7 @@ block:
 on whatever:
 	var state x foo bar
 	log TRACE We got $x
-sync trigger whatever
+trigger whatever :sync
 list state
 shutdown
 """

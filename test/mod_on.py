@@ -58,13 +58,13 @@ on foo:
 	log DEBUG "This is logged once too"
 on bar *:
 	block:
-		sync trigger $1
+		trigger $1 :sync
 list on
 list on Skipped One
 list on Skipped Two
-sync trigger bar foo
+trigger bar foo :sync
 del on Last Handler
-sync trigger bar foo
+trigger bar foo :sync
 del on fuß
 list on
 trigger fuß

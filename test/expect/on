@@ -54,7 +54,7 @@ NEW: <ConditionalWorkSequence:16 (5)>
    : ├1╴on bar * ‹OnEventHandler›
    : │  prio: 51
    : │  step: block ‹Block›
-   : │      : step: sync trigger $1 ‹SyncTriggerHandler›
+   : │      : step: trigger $1 ‹SyncTriggerHandler›
    : └2╴... done.
 EVENT: startup
 END: startup
@@ -62,7 +62,7 @@ EVENT: bar¦foo
 RUN: on bar * ‹OnEventHandler›
    : prio: 51
    : step: block ‹Block›
-   :     : step: sync trigger $1 ‹SyncTriggerHandler›
+   :     : step: trigger $1 ‹SyncTriggerHandler›
  at: <ConditionalWorkSequence:16 (5)> (step 1)
  ev: EVENT: bar¦foo
 NEW: <ConditionalWorkSequence:17 (8)>
@@ -121,13 +121,13 @@ NEW: <ConditionalWorkSequence:18 (5)>
    : ├1╴on bar * ‹OnEventHandler›
    : │  prio: 51
    : │  step: block ‹Block›
-   : │      : step: sync trigger $1 ‹SyncTriggerHandler›
+   : │      : step: trigger $1 ‹SyncTriggerHandler›
    : └2╴... done.
 EVENT: bar¦foo
 RUN: on bar * ‹OnEventHandler›
    : prio: 51
    : step: block ‹Block›
-   :     : step: sync trigger $1 ‹SyncTriggerHandler›
+   :     : step: trigger $1 ‹SyncTriggerHandler›
  at: <ConditionalWorkSequence:18 (5)> (step 1)
  ev: EVENT: bar¦foo
 NEW: <ConditionalWorkSequence:19 (7)>

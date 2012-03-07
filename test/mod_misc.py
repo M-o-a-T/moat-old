@@ -25,8 +25,8 @@ input = """\
 trigger foo1
 trigger bar1
 wait: for 0.1
-sync trigger foo2
-sync trigger bar2
+trigger foo2 :sync
+trigger bar2 :sync
 wait: for 0.1
 skip this:
 	trigger never the same

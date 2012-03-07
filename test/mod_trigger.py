@@ -22,10 +22,12 @@ from homevent.module import load_module
 from test import run
 
 input = """\
-sync trigger foo
+trigger foo :sync
 wait: for 1m -90s 0.5min +.5s
-sync trigger bar
-sync trigger baz notlogged :log NONE
+trigger bar :sync
+trigger baz notlogged :
+	log NONE
+	sync
 shutdown
 """
 

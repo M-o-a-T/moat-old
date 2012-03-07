@@ -52,7 +52,7 @@ block:
 on whatever:
 	var wait x Foo Baz
 	log TRACE We wait $x
-sync trigger whatever
+trigger whatever :sync
 wait: for 0.3
 del wait Foo Baz
 block:

@@ -1,7 +1,7 @@
 block:
-	sync trigger foo4
+	trigger foo4 :sync
 	block:
-		sync trigger bar4
+		trigger bar4 :sync
 async:
 	trigger foo5
 wait: for 0.1

@@ -732,11 +732,11 @@ selectively cause an event to be skipped, so they're used at the
 beginning of a handler.
 
 Note that the effects of a "next handler" end at the end of an event
-and do not propagate through a "sync trigger":
+and do not propagate through a "trigger :sync":
 
 	on foo:
 		log TRACE one
-		sync trigger bar
+		trigger bar :sync
 		log TRACE two
 	on bar:
 		skip next
@@ -2019,20 +2019,55 @@ will continue while the event is processed.
 
 	trigger foo bar
 
-------------
-sync trigger
-------------
+sync
+----
 
-The event is run synchronously, i.e. execution will stall until this
-event has been processed. That means if the trigger says
+If you set this keyword, then event is run synchronously, i.e. execution
+will stall until it has been processed. For example, if the trigger
+says
 
 	on foo bar:
 		switch on lamp
-		wait: for 1h
+		wait lamp: for 1h
 		switch off lamp
 
-then the statement after the "sync trigger" will be executed exactly one
-hour later.
+	trigger foo bar :sync
+	log DEBUG One hour later
+
+the debug statement will wait. Without the sync, it would be printed
+immediately.
+
+recurse
+-------
+
+Sometimes, a chain of events may result in a recursive call:
+
+	on foo bar:
+		wait :for 1h
+		trigger foo bar
+
+This works; the problem is that the call's environment (i.e. any variables,
+where to send debugging output to, etc.) are linked in a chain: each call
+refers the previous call's data. This this statement will eat memory.
+
+To prevent that, use the trigger's "recurse" flag:
+
+	on foo bar:
+		wait :for 1h
+		trigger foo bar:
+			recurse
+
+The event will then inherit an empty environment.
+
+
+log
+---
+
+Event execution is normally logged at the TRACE level.
+You can change the level with this statement.
+
+	trigger bad foobar:
+		log ERROR
 
 ====
 wait

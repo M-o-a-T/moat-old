@@ -33,9 +33,9 @@ log PANIC
 log WARN "This is not logged either"
 log limit event TRACE
 log TRACE
-sync trigger Logged
+trigger Logged :sync
 log limit event ERROR
-sync trigger Not Logged
+trigger Not Logged :sync
 """
 
 h.main_words.register_statement(ShutdownHandler)
