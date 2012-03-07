@@ -47,7 +47,12 @@ if "HOMEVENT_TEST" in os.environ:
 			return
 
 		global current_slot
-		current_slot += int(td*SLOT+0.99)
+		inc = int(td*SLOT+0.99)
+		if inc > 10:
+			inc = 5
+		else:
+			inc = 1
+		current_slot += inc
 
 else:
 	def now(force=False):

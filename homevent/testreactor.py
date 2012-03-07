@@ -72,13 +72,14 @@ class TestReactor(GeventReactor):
 				if len(callqueue) > 0:
 					c = callqueue[0]
 					if isinstance(c,FakeDelayedCall):
-						delay = now+0.01
 						slot_update(c.time)
+						self._wake = seconds()
+						delay = 0.01
 					else:
 						delay = c.getTime()
 						now = self.realSeconds()
-					self._wake = delay
-					delay -= now
+						self._wake = delay
+						delay -= now
 				else:
 					self._wake = now+10
 					delay = 10
