@@ -27,6 +27,7 @@ for typical usage.
 
 from zope.interface import implements
 from homevent.tokize import tokizer
+from tokenize import tok_name
 import Queue
 import sys
 import os
@@ -510,7 +511,7 @@ class Parser(object):
 			self.proc = self.p_stack.pop()
 			self.p_pop_after = False
 
-		raise SyntaxError("Unknown token %s (%d, state %d) in %s:%d" % (repr(txt),t,self.p_state,self.ctx.filename,beg[0]))
+		raise SyntaxError("Unknown token %s (%s, state %d) in %s:%d" % (repr(txt),tok_name[t] if t in tok_name else t,self.p_state,self.ctx.filename,beg[0]))
 
 class _drop(object):
 	def __init__(self,g):
