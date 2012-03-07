@@ -357,7 +357,7 @@ class Parser(object):
 	def prompt(self):
 		if not self.do_prompt:
 			return
-		if self.p_state == 0:
+		if self.p_state == 0 and not self.p_stack:
 			self.ctx.out.write(">> ")
 		else:
 			self.ctx.out.write(".. ")
