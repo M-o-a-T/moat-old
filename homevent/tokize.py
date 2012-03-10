@@ -26,7 +26,6 @@ from token import *
 import tokenize as t
 from twisted.internet.defer import maybeDeferred, Deferred
 from homevent.logging import log,TRACE
-from geventreactor import waitForDeferred
 from gevent.queue import Channel,Timeout
 import gevent
 
