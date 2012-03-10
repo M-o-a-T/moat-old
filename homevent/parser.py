@@ -247,7 +247,9 @@ class Parser(object):
 			log("parser",DEBUG,"LINE> ENDING")
 			self.ending = True
 			self.p_gen.feed(None)
-			self.result.callback(None)
+
+			try: self.result.callback(None)
+			except defer.AlreadyCalledError: pass
 		log("parser",DEBUG,"LINE> END")
 
 	def add_line(self, data):

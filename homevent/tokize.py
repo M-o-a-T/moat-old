@@ -21,12 +21,14 @@ __author__ = 'Matthias Urlichs <matthias@urlichs.de>'
 __credits__ = \
     'GvR, ESR, Tim Peters, Thomas Wouters, Fred Drake, Skip Montanaro, Ka-Ping Yee'
 
-import string, re, os
+import string, re, os, sys
 from token import *
 import tokenize as t
 from twisted.internet.defer import maybeDeferred, Deferred
 from homevent.logging import log,TRACE
 from geventreactor import waitForDeferred
+from gevent.queue import Channel,Timeout
+import gevent
 
 COMMENT = t.COMMENT
 NL = t.NL
@@ -85,6 +87,9 @@ tabsize = 8
 class tokizer(object):
 	def __init__(self, output):
 		self._output = output
+		self.q = Channel()
+		self.job = gevent.spawn(self._job)
+		self.job.link(self._end)
 		self.init()
 	
 	def init(self):
@@ -102,6 +107,28 @@ class tokizer(object):
 			self.output(DEDENT, '', (self.lnum, 0), (self.lnum, 0), '')
 
 	def feed(self,line):
+		if self.q:
+			if line is None:
+				q,self.q = self.q,None
+				if gevent.getcurrent() is not self.job:
+					q.put(None)
+			else:
+				self.q.put(line)
+		else:
+			raise RuntimeError("reader died: "+repr(line))
+
+	def _end(self, res):
+		if self.q:
+			q,self.q = self.q,None
+			try:
+				q.get_nowait()
+			except Timeout:
+				pass
+
+	def _job(self):
+		while self.q:
+			line = self.q.get()
+
 			try:
 				if line is None:
 					raise StopIteration
@@ -128,17 +155,17 @@ class tokizer(object):
 							strstart, (self.lnum, len(line)), self.contline)
 					self.contstr = ''
 					self.contline = None
-					return
+					continue
 				else:
 					self.contstr += line
 					self.contline += line
-					return
+					continue
 
 			elif self.parenlev == 0 and not self.continued:  # new statement
 				if not line:
 					self.feed_end()
 					self.output(ENDMARKER, '', (self.lnum, 0), (self.lnum, 0), '')
-					return 
+					continue
 				column = 0
 				while pos < max:                   # measure leading whitespace
 					if line[pos] == ' ': column = column + 1
@@ -146,12 +173,14 @@ class tokizer(object):
 					elif line[pos] == '\f': column = 0
 					else: break
 					pos = pos + 1
-				if pos == max: return self.feed_end()
+				if pos == max:
+					self.feed_end()
+					continue
 
 				if line[pos] in '#\r\n':           # skip comments or blank lines
 					self.output((NL, COMMENT)[line[pos] == '#'], line[pos:],
 							(self.lnum, pos), (self.lnum, len(line)), line)
-					return
+					continue
 
 				if column > self.indents[-1]:           # count indents or dedents
 					self.indents.append(column)
