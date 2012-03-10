@@ -33,7 +33,7 @@ from homevent.fs20 import handler,register_handler,unregister_handler, \
 from homevent.base import Name,MIN_PRIO
 from homevent.worker import ExcWorker
 from homevent.reactor import shutdown_event
-from homevent.twist import callLater
+from homevent.twist import callLater,log_wait
 
 from twisted.internet import protocol,defer,reactor
 from twisted.protocols.basic import _PauseableMixin
@@ -108,17 +108,20 @@ class FS20recv(protocol.ProcessProtocol, my_handler):
 		elif data[0] == PREFIX_TIMESTAMP:
 			self.timestamp = float(data[1:])
 		elif data[0] == "+" and "HOMEVENT_TEST" in os.environ:
-			from homevent.twist import current_slot
-			d = defer.Deferred()
+			from homevent.times import test_runtime
+			from gevent.queue import Queue
 			try:
 				f,c = data[1:].split(" ",1)
 			except ValueError:
 				f=data[1:]
 				c="Timer"
 			f=float(f)
-			log("fs20",DEBUG,"Wait until",f," -- now:",current_slot(),"::",c)
-			callLater(False,f-current_slot(),d.callback,None)
-			return d
+			log("fs20",DEBUG,"Wait until",f," -- now:",test_runtime(),"::",c)
+
+			with log_wait("Timer wait for "+str(f)):
+				q = Queue()
+				callLater(False,f-test_runtime(),q.put,None)
+				q.get()
 		else:
 			simple_event(Context(),"fs20","unknown","prefix",data[0],data[1:])
 
