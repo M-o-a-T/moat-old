@@ -25,10 +25,9 @@ from homevent.logging import log
 from homevent.statement import main_words, MainStatementList
 from homevent.run import process_failure
 from homevent.worker import HaltSequence
-from homevent.twist import deferToLater,callLater
 
-from twisted.internet import defer,reactor
 import os
+import gevent
 
 
 class Block(MainStatementList):
