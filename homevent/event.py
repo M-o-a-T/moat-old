@@ -71,10 +71,8 @@ class Event(object):
 		#print "E_INIT",name,"with",ctx
 		self.name = Name(name)
 		self.ctx = ctx
-		try:
+		if "loglevel" in ctx:
 			self.loglevel = ctx.loglevel
-		except AttributeError:
-			pass
 
 		global event_id
 		event_id += 1
