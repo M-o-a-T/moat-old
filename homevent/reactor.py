@@ -121,7 +121,10 @@ def _shut_down():
 	global running
 	if running:
 		running = False
-		process_event(shutdown_event).addErrback(process_failure)
+		try:
+			process_event(shutdown_event)
+		except Exception:
+			process_failure()
 
 #	if not Events:
 #		_stop_mainloop()

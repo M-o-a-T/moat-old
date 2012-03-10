@@ -250,7 +250,10 @@ set state X name...
 			s.old_value = s.value
 			s.set_value(value if value != "-" else None)
 			s.time = now()
-			process_event(Event(self.ctx,"state",old,value,*s.name)).addErrback(process_failure)
+			try:
+				process_event(Event(self.ctx,"state",old,value,*s.name))
+			except Exception:
+				process_failure()
 		finally:
 			s.working = False
 
