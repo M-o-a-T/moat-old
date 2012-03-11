@@ -336,7 +336,7 @@ def log(level, *a):
 	exc = []
 	if isinstance(level,basestring):
 		lim = levels.get(level,NONE)
-		if lim == NONE or lim > level:
+		if lim > level:
 			return
 		# get the real level from a and add the subsystem name to the front
 		b = level
