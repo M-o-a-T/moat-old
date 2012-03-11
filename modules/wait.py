@@ -220,7 +220,6 @@ class Waiter(Collected):
 	def retime(self, dest):
 		process_event(Event(self.ctx(loglevel=logging.TRACE),"wait","update",dest,*self.name))
 		self._cmd("retime",dest)
-		return d
 
 	
 class WaitHandler(AttributedStatement):
@@ -412,7 +411,8 @@ WaitHandler.register_statement(WaitFor)
 WaitHandler.register_statement(WaitUntil)
 WaitHandler.register_statement(WaitWhile)
 WaitHandler.register_statement(WaitNext)
-WaitHandler.register_statement(WaitDebug)
+if "HOMEVENT_TEST" in os.environ:
+	WaitHandler.register_statement(WaitDebug)
 WaitHandler.register_statement(WaitUpdate)
 
 class Shutdown_Worker_Wait(ExcWorker):
