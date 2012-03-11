@@ -104,10 +104,7 @@ wait:
 	for 3
 	debug force
 wait:
-	for 100
-wait:
 	for 0.1
-	debug reset
 	debug force
 list fs20 em
 list fs20 em one
