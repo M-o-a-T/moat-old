@@ -46,23 +46,6 @@ Syntax:
 
 """
 
-	def _loop(self,ctx, want=None,*w):
-		d=defer.Deferred()
-
-		def again(_=None):
-			if want is not None and check_condition(ctx,*w) != want:
-				d.callback(False)
-				return
-			e = super(WhileStatement,self).run(ctx)
-
-			e.addCallback(again)
-			def ex(_):
-				d.errback(_)
-			e.addErrback(ex)
-		again()
-		return d
-		
-
 	def run(self,ctx,**k):
 		want = True
 		if self.procs is None:
@@ -75,8 +58,8 @@ Syntax:
 			want=False
 			w = w[1:]
 
-		return self._loop(ctx,want,*w)
-
+		while check_condition(ctx,*w) != want:
+			super(WhileStatement,self).run(ctx)
 
 
 class RepeatStatement(WhileStatement):
@@ -100,7 +83,8 @@ Syntax:
 		if len(event):
 			raise SyntaxError(u"‹repeat› does not take arguments")
 
-		return self._loop(ctx)
+		while True:
+			super(RepeatStatement,self).run(ctx)
 
 
 class LoopModule(Module):
