@@ -4,6 +4,6 @@ block:
 		trigger bar4 :sync
 async:
 	trigger foo5
-wait: for 0.1
+wait D: for 0.1
 trigger bar5
-wait: for 0.1
+wait E: for 0.1
