@@ -119,12 +119,6 @@ deferToLater = deferToGreenlet
 # something "real" and therefore may not be ignored.
 
 
-slot = None
-GRAN = 20
-def current_slot():
-	if slot is None: return slot
-	return slot/GRAN
-	
 def sleepUntil(force,delta):
 	from homevent.times import unixdelta,now
 
@@ -147,19 +141,23 @@ def callLater(force,delta,p,*a,**k):
 	from homevent.times import unixdelta,now
 
 	if isinstance(delta,dt.datetime):
-		delta = delta - now()
+		delta = delta - now(force)
 	if isinstance(delta,dt.timedelta):
 		delta = unixdelta(delta)
 	if delta < 0: # we're late
 		delta = 0 # but let's hope not too late
-	if force:
-		cl = DelayedCall
-	elif "HOMEVENT_TEST" in os.environ:
-		from homevent.testreactor import FakeDelayedCall
-		cl = FakeDelayedCall
+	if "HOMEVENT_TEST" in os.environ:
+		if force:
+			cl = DelayedCall
+			delta += reactor.realSeconds()
+		else:
+			from homevent.testreactor import FakeDelayedCall
+			cl = FakeDelayedCall
+			delta += reactor.seconds()
 	else:
 		cl = DelayedCall
-	cl = cl(reactor,reactor.seconds()+delta, gevent.spawn,(p,)+a,k,seconds=reactor.seconds)
+		delta += reactor.seconds()
+	cl = cl(reactor,delta, gevent.spawn,(p,)+a,k,seconds=reactor.seconds)
 
 	return reactor.callLater(cl)
 
@@ -287,10 +285,15 @@ class log_wait(object):
 		self.w = gwait
 
 	def __enter__(self):
-		print >>sys.stderr,"+WAIT", self.w, self.a
+		global _log
+		if _log is None:
+			from homevent.logging import log as xlog
+			_log = xlog
+		_log(DEBUG,"+WAIT", self.w, *self.a)
 		return self
 	def __exit__(self, a,b,c):
-		print >>sys.stderr,"-WAIT", self.w, self.a
+		global _log
+		_log(DEBUG,"-WAIT", self.w, *self.a)
 		return False
 
 # avoids a warning from threading module on shutdown

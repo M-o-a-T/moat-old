@@ -108,8 +108,7 @@ class FS20recv(protocol.ProcessProtocol, my_handler):
 		elif data[0] == PREFIX_TIMESTAMP:
 			self.timestamp = float(data[1:])
 		elif data[0] == "+" and "HOMEVENT_TEST" in os.environ:
-			from homevent.times import test_runtime
-			from gevent.queue import Queue
+			from homevent.times import sleep,test_runtime
 			try:
 				f,c = data[1:].split(" ",1)
 			except ValueError:
@@ -117,11 +116,7 @@ class FS20recv(protocol.ProcessProtocol, my_handler):
 				c="Timer"
 			f=float(f)
 			log("fs20",DEBUG,"Wait until",f," -- now:",test_runtime(),"::",c)
-
-			with log_wait("Timer wait for "+str(f)):
-				q = Queue()
-				callLater(False,f-test_runtime(),q.put,None)
-				q.get()
+			sleep(False,f-test_runtime())
 		else:
 			simple_event(Context(),"fs20","unknown","prefix",data[0],data[1:])
 

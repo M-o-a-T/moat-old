@@ -27,6 +27,9 @@ from time import time,mktime
 import os
 from calendar import isleap,monthrange
 
+import gevent
+from gevent.queue import Queue
+
 startup = dt.datetime.now()
 
 if "HOMEVENT_TEST" in os.environ:
@@ -37,6 +40,10 @@ if "HOMEVENT_TEST" in os.environ:
 			return dt.datetime.now()
 		r = dt.datetime.utcfromtimestamp(1049519228) # 2003-04-05 06:07:08 UTC
 		return r + dt.timedelta(0, current_slot // SLOT, (current_slot % SLOT) * (1e6 / SLOT) )
+
+	def test_runtime():
+		return current_slot / SLOT
+
 	def slot_update(tm):
 		"""Update the time slot until the given time is reached"""
 		if isinstance(tm,dt.datetime):
@@ -46,19 +53,31 @@ if "HOMEVENT_TEST" in os.environ:
 		if td < 0:
 			return
 
+		# Do not increase by more than one, because another greenlet (one
+		# which requires shrter timeouts) might run in parallel 
 		global current_slot
-		inc = int(td*SLOT+0.99)
-		if inc > 10:
-			inc = 5
-		else:
-			inc = 1
-		current_slot += inc
+		current_slot += 1
+
+	def sleep(force,timeout):
+		from homevent.twist import log_wait,callLater
+		with log_wait("%s timer wait for %s" % ("Forced" if force else "Fake", timeout)):
+			if force:
+				gevent.sleep(timeout)
+				return
+			q = Queue()
+			callLater(False,timeout,q.put,None)
+			q.get()
 
 else:
 	def now(force=False):
 		return dt.datetime.now()
+	def test_runtime():
+		raise RuntimeError("We are not testing!")
 	def slot_update(tm):
 		raise RuntimeError("We are not testing!")
+	def sleep(_,timeout):
+		with log_wait("Timer wait for %s" % (timeout,)):
+			gevent.sleep(timeout)
 
 def unixdelta(delta):
 	return delta.days*24*60*60 + delta.seconds + delta.microseconds/1e6;

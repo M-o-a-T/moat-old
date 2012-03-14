@@ -24,21 +24,19 @@ from homevent.times import slot_update,unixtime,now
 from homevent.geventreactor import DelayedCall,deferToGreenlet,GeventReactor,Reschedule
 
 import gevent
+import sys
 from gevent.event import AsyncResult
 
 from bisect import insort
 
-
-slot = None
-GRAN = 20
-def current_slot():
-	if slot is None: return slot
-	return slot/GRAN
-	
 class FakeDelayedCall(DelayedCall):
-	"""a delayedcall which won't actually obey time"""
+	"""a DelayedCall which won't actually obey time"""
 	"""The interesting stuff happens inside the reactor"""
 	pass
+def realGetSeconds(self):
+	return self.getTime() - unixtime(now(True))
+FakeDelayedCall.getSeconds = DelayedCall.getSeconds
+DelayedCall.getSeconds = realGetSeconds
 
 class TestReactor(GeventReactor):
 	"""A subclass of geventreactor which supports fake timeouts"""
@@ -72,7 +70,6 @@ class TestReactor(GeventReactor):
 				if len(callqueue) > 0:
 					c = callqueue[0]
 					if isinstance(c,FakeDelayedCall):
-						slot_update(c.time)
 						self._wake = seconds()
 						delay = 0.01
 					else:
@@ -81,6 +78,7 @@ class TestReactor(GeventReactor):
 						self._wake = delay
 						delay -= now
 				else:
+					c = None
 					self._wake = now+10
 					delay = 10
 				if delay > 10:
@@ -90,6 +88,9 @@ class TestReactor(GeventReactor):
 					gevent.sleep(max(0,delay))
 				except Reschedule:
 					continue
+				else:
+					if isinstance(c,FakeDelayedCall):
+						slot_update(c.time)
 				finally:
 					self._wait = 0
 
