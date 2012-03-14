@@ -25,7 +25,7 @@ from homevent.check import register_condition
 from homevent.context import Context
 from homevent.parser import read_config
 from homevent.run import process_failure
-from homevent.twist import deferToLater,track_errors
+from homevent.twist import track_errors
 from homevent.reactor import ShutdownHandler,mainloop,shut_down,\
 	stop_mainloop
 from homevent.logging import TRACE,DEBUG,INFO,WARN,ERROR,PANIC,\
@@ -33,8 +33,9 @@ from homevent.logging import TRACE,DEBUG,INFO,WARN,ERROR,PANIC,\
 from signal import signal,SIGINT,SIGHUP,SIGQUIT
 import sys
 import os
+import gevent
 
-from twisted.internet import reactor,defer
+from twisted.internet import reactor
 
 main_words.register_statement(Load)
 main_words.register_statement(LoadDir)
@@ -86,22 +87,27 @@ if opts.pidfile:
 	pid.close()
 
 def _readcf():
-	d = defer.succeed(None)
 	c = Context()
-	def rcf(_,fn):
-		return read_config(c,fn)
-	for f in args:
-		d.addCallback(rcf,f)
-	def err(_):
-		process_failure(_)
+	try:
+		for f in args:
+			read_config(c,f)
+	except Exception:
+		process_failure()
 		shut_down()
-	d.addErrback(err)
 
+reading = None
 def readcf():
-	deferToLater(_readcf)
+	global reading
+	if reading:
+		return
+	reading = gevent.spawn(_readcf)
+	def read_done(_):
+		global reading
+		reading = False
+	reading.link(read_done)
 
-signal(SIGINT, lambda a,b: deferToLater(stop_mainloop))
-signal(SIGQUIT,lambda a,b: deferToLater(shut_down))
+signal(SIGINT, lambda a,b: gevent.spawn(stop_mainloop))
+signal(SIGQUIT,lambda a,b: gevent.spawn(shut_down))
 signal(SIGHUP, lambda a,b: readcf())
 
 readcf()
