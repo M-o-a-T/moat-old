@@ -26,7 +26,8 @@ from token import *
 import tokenize as t
 from twisted.internet.defer import maybeDeferred, Deferred
 from homevent.logging import log,TRACE
-from gevent.queue import Channel,Timeout
+from homevent.event import StopParsing
+from gevent.queue import Channel,Empty
 import gevent
 
 COMMENT = t.COMMENT
@@ -84,8 +85,9 @@ tokenprog, pseudoprog, namestart, num = map(
 tabsize = 8
 
 class tokizer(object):
-	def __init__(self, output):
+	def __init__(self, output, parent=None):
 		self._output = output
+		self.parent = parent
 		self.q = Channel()
 		self.job = gevent.spawn(self._job)
 		self.job.link(self._end)
@@ -113,7 +115,7 @@ class tokizer(object):
 					q.put(None)
 			else:
 				self.q.put(line)
-		else:
+		elif line is not None:
 			raise RuntimeError("reader died: "+repr(line))
 
 	def _end(self, res):
@@ -121,17 +123,23 @@ class tokizer(object):
 			q,self.q = self.q,None
 			try:
 				q.get_nowait()
-			except Timeout:
+			except Empty:
 				pass
 
 	def _job(self):
-		while self.q:
-			line = self.q.get()
+		line = "x"
+		while line:
+			if self.q:
+				line = self.q.get()
+			else:
+				line = None
+			self._do_line(line)
 
+	def _do_line(self,line):
+		try:
 			try:
 				if line is None:
 					raise StopIteration
-				line += "\n"
 				log("token",TRACE,"IN",line)
 			except StopIteration:
 				line = ''
@@ -154,17 +162,17 @@ class tokizer(object):
 							strstart, (self.lnum, len(line)), self.contline)
 					self.contstr = ''
 					self.contline = None
-					continue
+					return
 				else:
 					self.contstr += line
 					self.contline += line
-					continue
+					return
 
 			elif self.parenlev == 0 and not self.continued:  # new statement
 				if not line:
 					self.feed_end()
 					self.output(ENDMARKER, '', (self.lnum, 0), (self.lnum, 0), '')
-					continue
+					return
 				column = 0
 				while pos < max:                   # measure leading whitespace
 					if line[pos] == ' ': column = column + 1
@@ -174,12 +182,12 @@ class tokizer(object):
 					pos = pos + 1
 				if pos == max:
 					self.feed_end()
-					continue
+					return
 
 				if line[pos] in '#\r\n':           # skip comments or blank lines
 					self.output((NL, COMMENT)[line[pos] == '#'], line[pos:],
 							(self.lnum, pos), (self.lnum, len(line)), line)
-					continue
+					return
 
 				if column > self.indents[-1]:           # count indents or dedents
 					self.indents.append(column)
@@ -210,8 +218,7 @@ class tokizer(object):
 					(initial == '.' and token != '.'):      # ordinary number
 						self.output(NUMBER, token, spos, epos, line)
 					elif initial in '\r\n':
-						self.output(self.parenlev > 0 and NL or NEWLINE,
-								token, spos, epos, line)
+						self.output(NL if self.parenlev > 0 else NEWLINE, token, spos, epos, line)
 					elif initial == '#':
 						self.output(COMMENT, token, spos, epos, line)
 					elif token in triple_quoted:
@@ -250,4 +257,10 @@ class tokizer(object):
 					self.output(ERRORTOKEN, line[pos],
 							(self.lnum, pos), (self.lnum, pos+1), line)
 					pos = pos + 1
+
+		except StopParsing as e:
+			self.q = None
+			if self.parent:
+				self.parent.kill(e)
+			return
 

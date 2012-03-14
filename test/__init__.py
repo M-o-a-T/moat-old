@@ -29,6 +29,7 @@ from cStringIO import StringIO
 import sys
 import re
 import os
+import traceback
 from time import time
 from subprocess import Popen
 from twisted.internet import reactor
@@ -179,10 +180,16 @@ def run(name,input, interpreter=Interpreter, logger=None):
 	input = StringIO(input)
 
 	def _main():
-		d = parse(input, interpreter(Context(out=logwrite(logger))),Context(logger=parse_logger,filename=name))
-		d.addErrback(lambda _: _.printTraceback())
-		d.addBoth(lambda _: h.shut_down())
-		if ht is not None: d.addBoth(lambda _: ht.try_exit())
+		parse_ctx = Context(filename=name)
+		parse_ctx.logger=parse_logger
+		try:
+			parse(input, interpreter(Context(out=logwrite(logger))),parse_ctx)
+		except Exception as e:
+			traceback.print_exc(file=sys.stderr)
+		finally:
+			h.shut_down()
+			if ht is not None:
+				ht.try_exit()
 
 	h.mainloop(_main)
 

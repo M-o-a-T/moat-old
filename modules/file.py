@@ -26,7 +26,7 @@ This code reads a config file.
 from homevent.statement import Statement, main_words
 from homevent.module import Module
 from homevent.check import Check,register_condition,unregister_condition
-from homevent.parser import read_config
+from homevent.parser import parse
 import os
 
 
@@ -42,7 +42,7 @@ include 'NAME'
 		event = self.params(ctx)
 		if len(event) != 1:
 			raise SyntaxError("Usage: include 'filename'")
-		return read_config(ctx,event[0])
+		parse(event[0],ctx=ctx)
 
 
 class FileModule(Module):

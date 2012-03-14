@@ -17,7 +17,7 @@
 ##
 
 from homevent.interpreter import InteractiveInterpreter,Interpreter
-from homevent.parser import parser_builder,read_config
+from homevent.parser import parse
 from homevent.statement import main_words, global_words
 from homevent.check import register_condition
 from homevent.module import load_module, Load,LoadDir,ModuleExists
@@ -78,6 +78,7 @@ def ready():
 	c=Context()
 	for f in sys.argv[1:]:
 		read_config(c,f)
+		parse(f, interpreter, ctx=c)
 	
 	#c.logger=parse_logger
 	if os.isatty(0):
@@ -85,11 +86,8 @@ def ready():
 	else:
 		i = Interpreter
 	print """Ready. Type «help» if you don't know what to do."""
-	p = parser_builder(None, i, ctx=c)()
-	s = StdIO(p)
-	r = p.parser.result
 	try:
-		r = waitForDeferred(r)
+		parse(sys.stdin, interpreter=i, ctx=c)
 	except Exception as e:
 		reporter(e)
 	shut_down()

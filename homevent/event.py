@@ -31,6 +31,10 @@ class TrySomethingElse(RuntimeError):
 	def __str__(self):
 		return "Cannot proceed (%s)" % " ".join((str(x) for x in self.args))
 
+class StopParsing(BaseException):
+	"""Quit the current parser."""
+	pass
+
 class NeverHappens(BaseException):
 	"""This exception is never raised. Needed for conditional handling."""
 	pass

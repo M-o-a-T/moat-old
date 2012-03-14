@@ -31,7 +31,7 @@ for typical usage.
 
 import sys
 from homevent.context import Context
-from homevent.event import Event
+from homevent.event import Event,StopParsing
 from homevent.logging import log_event,log, TRACE
 from homevent.base import Name
 
@@ -409,7 +409,7 @@ This statement causes the input channel which runs it to terminate.
 		event = self.params(ctx)
 		if len(event):
 			raise SyntaxError("Usage: exit")
-		ctx.out.loseConnection()
+		raise StopParsing
 
 global_words.register_statement(ExitHandler)
 

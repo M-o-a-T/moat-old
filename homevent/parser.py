@@ -35,15 +35,16 @@ from twisted.internet import reactor,threads,defer,interfaces
 from twisted.python import failure
 from twisted.protocols.basic import LineOnlyReceiver,FileSender,_PauseableMixin
 
-from gevent import spawn
+import gevent
 from gevent.thread import allocate_lock as Lock
+from gevent.select import select
 from geventreactor import waitForDeferred
 
 from homevent.logging import log,TRACE,DEBUG
 from homevent.context import Context
 from homevent.io import Outputter,conns
 from homevent.run import process_failure
-from homevent.event import Event
+from homevent.event import Event,StopParsing
 from homevent.statement import global_words
 from homevent.twist import deferToLater
 
@@ -70,18 +71,6 @@ class SimpleReceiver(LineOnlyReceiver,object):
 		log("parser",TRACE,"S STOP")
 		self.parser.unregisterProducer()
 
-def buildReceiver(stream,parser):
-	"""\
-		Convert a simple input stream to a line-based pauseable protocol
-		and registers it with the parser.
-		"""
-	rc = SimpleReceiver(parser)
-	fs = FileSender()
-	fs.disconnecting = False
-	rc.makeConnection(fs)
-	r = fs.beginFileTransfer(stream, rc)
-	r.addBoth(parser.endConnection)
-
 class ParseReceiver(Outputter):
 	"""This is a mixin to feed a parser"""
 	implements(interfaces.IHalfCloseableProtocol)
@@ -97,8 +86,7 @@ class ParseReceiver(Outputter):
 			c=Context()
 			#c.logger=parse_logger
 			i = InteractiveInterpreter(ctx=c)
-			parser = Parser(i, StdIO, ctx=c)
-			parser.result.addErrback(reporter)
+			parser = Parser(interpreter=i, input=StdIO, ctx=c)
 		self.parser = parser
 		parser.registerProducer(self)
 		#parser.startParsing()
@@ -181,18 +169,13 @@ class Parser(object):
 	line = None
 	p_gen = None
 	do_prompt = False
-	implements(interfaces.IFinishableConsumer)
 
-	def __init__(self, proc, ctx=None):
+	def __init__(self, input, interpreter, ctx=None):
 		"""Parse an input stream and pass the commands to the processor
 		@proc."""
 		super(Parser,self).__init__()
 
-		self.result = defer.Deferred()
 		self.ending = False
-
-		self.proc = proc
-		self.restart_producer = False
 
 		if ctx is None:
 			self.ctx = Context()
@@ -201,110 +184,62 @@ class Parser(object):
 
 		if "filename" not in self.ctx:
 			self.ctx.filename="<stdin?>"
+		self.input = input
+		self.proc = interpreter
+		self.do_prompt = interpreter.do_prompt
 
-		def ex1(_):
-			if self.line is not None:
-				if hasattr(self.line,"loseConnection"):
-					self.line.loseConnection()
-				elif hasattr(self.line,"stopProducing"):
-					self.line.stopProducing()
-			return _
-		self.result.addBoth(ex1)
+	def run(self):
+		self.init_state()
+		self.prompt()
+		self.job = gevent.spawn(self._run)
+		self.p_gen = tokizer(self._do_parse,self.job)
+		def nojob(_):
+			self.job = None
 
-	def registerProducer(self, producer, streaming=None):
-		log("parser",DEBUG,"PRODUCE",streaming,producer)
-		if streaming is None:
-			if interfaces.IPushProducer.implementedBy(producer.__class__):
-				streaming = True
-			elif interfaces.IPullProducer.implementedBy(producer.__class__):
-				streaming = False
-			elif interfaces.IProducer.implementedBy(producer.__class__):
-				raise RuntimeError("Some sort of producer: "+str(producer))
-			else:
-				if hasattr(producer,"pauseProducing"):
-					raise RuntimeError("A PushProducer: "+str(producer.__class__.__mro__))
-				elif hasattr(producer,"resumeProducing"):
-					raise RuntimeError("A PullProducer: "+str(producer.__class__.__mro__))
-				else:
-					#raise RuntimeError("Not a producer: "+str(producer.__class__.__mro__))
-					buildReceiver(producer,self)
-					return
-		self.line = producer
-
-		self.streaming = streaming
-		self.stream_off = True
+		self.job.link(nojob)
+		try:
+			e = self.job.get()
+			if isinstance(e,(tuple,list)) and len(e)==3 and isinstance(e[1],BaseException):
+				e1,e2,e3 = e
+				raise e1,e2,e3
+		except StopParsing:
+			pass
+		
+	def _run(self):
+		try:
+			while True:
+				if hasattr(self.input,"fileno"):
+					r,_,_ = select((self.input,),(),())
+					if not r:
+						return
+				l = self.input.readline()
 	
-	def unregisterProducer(self):
-		log("parser",DEBUG,"PRODUCE UNREG",self.line)
-		self.finish()
+				if not l:
+					break
+				self.add_line(l)
+		
+		except BaseException as e:
+			return sys.exc_info()
+		finally:
+			self.endConnection(kill=False)
+			if not hasattr(self.input,"fileno") or self.input.fileno() > 2:
+				self.input.close()
+			self.input = None
+		return "Bla"
 	
-	def finish(self):
-		self.endConnection()
 
-	def endConnection(self, res=None):
+	def endConnection(self, res=None, kill=True):
 		"""Called to stop"""
-		if not self.ending:
-			log("parser",DEBUG,"LINE> ENDING")
-			self.ending = True
+		if self.job:
 			self.p_gen.feed(None)
-
-			try: self.result.callback(None)
-			except defer.AlreadyCalledError: pass
-		log("parser",DEBUG,"LINE> END")
+			if kill:
+				self.job.kill()
 
 	def add_line(self, data):
 		"""Standard LineReceiver method"""
 		if not isinstance(data,unicode):
 			data = data.decode("utf-8")
 		self.p_gen.feed(data)
-
-	def pauseProducing(self):
-		if self.line is not None and hasattr(self.line,"pauseProducing") \
-				and not self.stream_off and not self.ending:
-			log("parser",TRACE,"LINE pause")
-			self.line.pauseProducing()
-			if self.streaming:
-				self.stream_off = True
-		else:
-			if self.line is None:
-				log("parser",TRACE,"LINE_PAUSE no line")
-			if not hasattr(self.line,"pauseProducing"):
-				log("parser",TRACE,"LINE_PAUSE cannot pause")
-			if self.stream_off:
-				log("parser",TRACE,"LINE_PAUSE already off")
-			if self.ending:
-				log("parser",TRACE,"LINE_PAUSE ending")
-
-	def stopProducing(self):
-		if self.line is not None and hasattr(self.line,"stopProducing") \
-				and not self.ending:
-			log("parser",TRACE,"LINE stop")
-			self.line.stopProducing()
-		else:
-			if self.line is None:
-				log("parser",TRACE,"LINE_STOP no line")
-			if not hasattr(self.line,"stopProducing"):
-				log("parser",TRACE,"LINE_STOP cannot stop")
-			if self.ending:
-				log("parser",TRACE,"LINE_STOP ending")
-
-	def resumeProducing(self):
-		self.process_line_buffer()
-		if self.line is not None and hasattr(self.line,"resumeProducing") \
-				and self.stream_off and not self.ending:
-			log("parser",TRACE,"LINE resume",self.line)
-			self.line.resumeProducing()
-			if self.streaming:
-				self.stream_off = False
-		else:
-			if self.line is None:
-				log("parser",TRACE,"LINE_RES no line")
-			if not hasattr(self.line,"resumeProducing"):
-				log("parser",TRACE,"LINE_RES cannot resume")
-			if not self.stream_off:
-				log("parser",TRACE,"LINE_RES already on")
-			if self.ending:
-				log("parser",TRACE,"LINE_RES ending")
 
 	def init_state(self):
 		self.p_state=0
@@ -313,49 +248,6 @@ class Parser(object):
 		self.p_args = []
 		if self.p_gen:
 			self.p_gen.init()
-
-	def startParsing(self, protocol=None):
-		"""\
-			Iterator. It gets fed tokens, assembles them into
-			statements, and calls the processor with them.
-			"""
-		log("parser",DEBUG,"P START",protocol)
-
-		if protocol is not None:
-			protocol.addDropCallback(self.endConnection)
-			self.line = protocol
-
-		if "out" not in self.ctx:
-			self.ctx.out=sys.stdout
-
-		self.init_state()
-
-		self.p_gen = tokizer(self._do_parse)
-
-		### There should be a better way than this.
-		if hasattr(self.line,'resumeProducing'):
-			spawn(self._do_resume)
-
-	def _do_resume(self):
-		while not self.ending and not self.line.disconnecting:
-			self.line.resumeProducing()
-
-#		def pg_done(_):
-#			_=_.get()
-#			self.p_gen = None
-#			log("parser",TRACE,"P DONE",_)
-#			try: self.result.callback(_)
-#			except defer.AlreadyCalledError: pass
-#			else:
-#				self.endConnection()
-#		def pg_err(_):
-#			self.p_gen = None
-#			log("parser",TRACE,"P ERROR",_)
-#			try: self.result.errback(_)
-#			except defer.AlreadyCalledError: pass
-#			else: self.endConnection()
-#		self.p_loop.link_value(pg_done)
-#		self.p_loop.link_exception(pg_err)
 
 	def prompt(self):
 		if not self.do_prompt:
@@ -384,7 +276,6 @@ class Parser(object):
 				self.proc = self.p_stack[0]
 
 			try:
-				log("parser",TRACE,"PERR",self,self.proc)
 				self.proc.error(self,ex)
 				self.prompt()
 				log("parser",TRACE,"PERR OK")
@@ -396,8 +287,6 @@ class Parser(object):
 
 					try:
 						log("parser",TRACE,"RESULT error",ex)
-						if self.result is not None:
-							self.result.errback(ex)
 					except defer.AlreadyCalledError: pass
 					else: self.endConnection()
 				except Exception:
@@ -464,22 +353,29 @@ class Parser(object):
 			elif t == OP and txt == ":":
 				log("parser",TRACE,"RUN2")
 				log("parser",TRACE,self.proc.complex_statement,self.p_args)
+				self.p_state = 3
 				_ = waitForDeferred(self.proc.complex_statement(self.p_args))
 
 				self.p_stack.append(self.proc)
 				self.proc = _
-				self.p_state = 3
 				return
 			elif t == NEWLINE:
 				log("parser",TRACE,"RUN3")
 				log("parser",TRACE,self.proc.simple_statement,self.p_args)
+				# defer setting state to zero when pop_after is set
+				# because that would break one-line compound statements
+				# ("wait :for 2").
+				# On the other hand, setting it later anyway breaks
+				# statements which terminate the parser ("exit")
+				if not self.p_pop_after:
+					self.p_state=0
 				waitForDeferred(self.proc.simple_statement(self.p_args))
 					
 				if self.p_pop_after:
 					self.proc.done()
 					self.proc = self.p_stack.pop()
 					self.p_pop_after=False
-				self.p_state=0
+					self.p_state=0
 				self.prompt()
 				return
 		elif self.p_state == 3:
@@ -529,30 +425,31 @@ class _drop(object):
 		self.loseConnection()
 		return _
 
-def parse(input, proc=None, ctx=None):
+def parse(input, interpreter=None, ctx=None, out=None, words=None):
 	"""\
 		Read non-blocking input, run through the tokenizer, pass to the
 		parser.
 		"""
-	if not ctx: ctx=Context
-	if ctx is Context or "fname" not in ctx:
-		ctx = ctx(fname="<stdin>")
-	if proc is None: proc = global_words(ctx)
+	if ctx is None: ctx=Context
+	if ctx is Context or "filename" not in ctx:
+		ctx = ctx(filename=(input if isinstance(input,basestring) else "<stdin>"))
+	if out is not None:
+		ctx.out = out
+	else:
+		ctx.out = sys.stdout
+		if "words" not in ctx:
+			if words is None: words = global_words(ctx)
+			ctx.words = words
 
-	g = Parser(proc, ctx=ctx)
-	x = _drop(g)
-	g.result.addBoth(x.drop)
-	g.registerProducer(input)
-	g.startParsing()
-	return g.result
-
-def read_config(ctx,name, interpreter=None):
-	"""Read a configuration file."""
 	if interpreter is None:
 		from homevent.interpreter import Interpreter
 		interpreter = Interpreter
-	input = open(name,"rU")
-	ctx = ctx()
-	return parse(input, Interpreter(ctx),ctx)
+	if isinstance(interpreter,type):
+		interpreter = interpreter(ctx)
 
+	if isinstance(input,basestring):
+		input = open(input,"rU")
 
+	parser = Parser(interpreter=interpreter, input=input, ctx=ctx)
+	parser.run()
+	
