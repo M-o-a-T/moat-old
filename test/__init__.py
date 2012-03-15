@@ -181,7 +181,7 @@ def run(name,input, interpreter=Interpreter, logger=None):
 
 	def _main():
 		parse_ctx = Context(filename=name)
-		parse_ctx.logger=parse_logger
+		#parse_ctx.logger=parse_logger
 		try:
 			parse(input, interpreter(Context(out=logwrite(logger))),parse_ctx)
 		except Exception as e:
