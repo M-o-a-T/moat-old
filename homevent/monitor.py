@@ -35,12 +35,12 @@ from homevent.context import Context
 from homevent.logging import log,TRACE,DEBUG
 from homevent.collect import Collection,Collected
 
-from gevent.event import AsyncResult,Event
+from gevent.event import AsyncResult,Event as gEvent
 from gevent.queue import Channel
 import gevent
 
 from time import time
-import os
+import os,sys
 import datetime as dt
 
 class Monitors(Collection):
@@ -109,7 +109,7 @@ class Monitor(Collected):
 		self.passive = (self.__class__ == Monitor)
 		self.ctx = parent.ctx
 		self.watcher = Channel()
-		self.running = Event()
+		self.running = gEvent()
 		try:
 			self.parent = parent.parent
 		except AttributeError:
@@ -127,6 +127,7 @@ class Monitor(Collected):
 		return u"‹%s %s %s›" % (self.__class__.__name__, self.name,act)
 
 	def list(self):
+		"""status iterator"""
 		yield ("name"," ".join(unicode(x) for x in self.name))
 		if self.params:
 			yield ("device"," ".join(unicode(x) for x in self.params))
@@ -144,6 +145,7 @@ class Monitor(Collected):
 			yield ("data"," ".join(unicode(x) for x in self.data))
 
 	def info(self):
+		"""list one-liner"""
 		return "%s %s" % (self.up_name,self.time_name)
 
 	@property
@@ -172,6 +174,7 @@ class Monitor(Collected):
 
 
 	def _schedule(self):
+		"""Sleep until the next time this monitor should run"""
 		s = self.stopped_at or now()
 		if self.delay_for:
 			if isinstance(self.delay_for,tuple):
@@ -193,6 +196,7 @@ class Monitor(Collected):
 			sleepUntil(False,s)
 
 	def filter_data(self):
+		"""Discard outlier values and calculate average"""
 		log("monitor",TRACE,"filter",self.data,"on", self.name)
 
 		if len(self.data) < self.points:
@@ -261,7 +265,7 @@ class Monitor(Collected):
 	def _run_loop(self):
 		"""Main monitor loop."""
 		while True:
-			self._do_monitor()
+			self._monitor()
 			self._schedule()
 
 	def _monitor(self):
@@ -333,7 +337,7 @@ class Monitor(Collected):
 
 	def one_value(self, step):
 		"""\
-			Get one value from the remote side.
+			Get one value from some "set monitor" command.
 			Override this for active monitoring.
 			"""
 		if self.passive and step==1:
@@ -346,6 +350,11 @@ class Monitor(Collected):
 		if not self.job:
 			self.value = None
 			self.job = gevent.spawn(self._run_loop)
+			process_event(Event(Context(),"monitor","start",*self.name))
+			def tell_ended(_):
+				process_event(Event(Context(),"monitor","stop",*self.name))
+				
+			self.job.link(tell_ended)
 
 	def delete(self,ctx):
 		self.down()
