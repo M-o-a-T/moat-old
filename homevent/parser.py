@@ -30,7 +30,7 @@ from homevent.tokize import tokizer
 from tokenize import tok_name
 import Queue
 import sys
-import os
+import os,fcntl,errno
 from twisted.internet import reactor,threads,defer,interfaces
 from twisted.python import failure
 from twisted.protocols.basic import LineOnlyReceiver,FileSender,_PauseableMixin
@@ -47,6 +47,16 @@ from homevent.run import process_failure
 from homevent.event import Event,StopParsing
 from homevent.statement import global_words
 from homevent.twist import deferToLater
+
+def set_blocking(flag,file):
+	"""if FLAG is true, the file descriptor will not block upon reading."""
+	if not hasattr(file,"fileno"):
+		return
+
+	# make stdin a (non-)blocking file
+	fd = file.fileno()
+	fl = fcntl.fcntl(fd, fcntl.F_GETFL)
+	fcntl.fcntl(fd, fcntl.F_SETFL, (fl & ~os.O_NONBLOCK) if flag else (fl | os.O_NONBLOCK))
 
 class SimpleReceiver(LineOnlyReceiver,object):
 	delimiter = "\n"
@@ -207,12 +217,17 @@ class Parser(object):
 		
 	def _run(self):
 		try:
+			set_blocking(False,self.input)
 			while True:
-				if hasattr(self.input,"fileno"):
+				try:
+					l = self.input.readline()
+				except EnvironmentError as e:
+					if e.errno != errno.EAGAIN or not hasattr(self.input,"fileno"):
+						raise
 					r,_,_ = select((self.input,),(),())
 					if not r:
 						return
-				l = self.input.readline()
+					continue
 	
 				if not l:
 					break
@@ -221,6 +236,7 @@ class Parser(object):
 		except BaseException as e:
 			return sys.exc_info()
 		finally:
+			set_blocking(True,self.input)
 			self.endConnection(kill=False)
 			if not hasattr(self.input,"fileno") or self.input.fileno() > 2:
 				self.input.close()
