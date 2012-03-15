@@ -336,11 +336,11 @@ def log(level, *a):
 	exc = []
 	if isinstance(level,basestring):
 		lim = levels.get(level,NONE)
-		if lim > level:
-			return
 		# get the real level from a and add the subsystem name to the front
 		b = level
 		level = a[0]
+		if lim > level:
+			return
 		a = (b,)+a[1:]
 
 	for l in Loggers.values():
