@@ -272,6 +272,8 @@ if False:
 	ggr.Greenlet.spawn = do_spawn
 
 gwait = 0
+_log = None
+DEBUG = None
 class log_wait(object):
 	"""Usage:
 		>>> with log_wait("foo","bar","baz"):
@@ -286,13 +288,14 @@ class log_wait(object):
 
 	def __enter__(self):
 		global _log
+		global DEBUG
 		if _log is None:
-			from homevent.logging import log as xlog
+			from homevent.logging import log as xlog, DEBUG as xDEBUG
 			_log = xlog
+			DEBUG = xDEBUG
 		_log(DEBUG,"+WAIT", self.w, *self.a)
 		return self
 	def __exit__(self, a,b,c):
-		global _log
 		_log(DEBUG,"-WAIT", self.w, *self.a)
 		return False
 
