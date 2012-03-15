@@ -37,7 +37,7 @@ from homevent.collect import Collection,Collected
 
 from gevent.event import AsyncResult,Event
 from gevent.queue import Channel
-from gevent import sleep
+import gevent
 
 from time import time
 import os
@@ -77,8 +77,8 @@ class Monitor(Collected):
 	"""This is the thing that watches."""
 	storage = Monitors.storage
 
-	active = None # greenlet running the monitor loop
-	running = None # Event. OFF while measuring (so that we can wait for that to end)
+	job = None # greenlet running the monitor loop
+	running = None # Event. OFF while measuring (so that we can wait for that to end; currently unused)
 	passive = None # active or passive monitoring?
 	watcher = None # if passive: channel for the next value
 	params = None # for reporting
@@ -108,7 +108,7 @@ class Monitor(Collected):
 	def __init__(self,parent,name):
 		self.passive = (self.__class__ == Monitor)
 		self.ctx = parent.ctx
-		self.watcher = Channel(1)
+		self.watcher = Channel()
 		self.running = Event()
 		try:
 			self.parent = parent.parent
@@ -117,7 +117,7 @@ class Monitor(Collected):
 		super(Monitor,self).__init__(*name)
 
 	def __repr__(self):
-		if not self.active:
+		if not self.job:
 			act = "off"
 		elif not self.running.is_set():
 			act = "run "+unicode(self.steps)
@@ -150,7 +150,7 @@ class Monitor(Collected):
 	def up_name(self):
 		if not self.running.is_set():
 			return "Run"
-		elif self.active:
+		elif self.job:
 			return "Wait"
 		else:
 			return "Off"
@@ -160,7 +160,7 @@ class Monitor(Collected):
 			return "never"
 		if not self.running.is_set():
 			delta = now() - self.started_at
-		elif self.active:
+		elif self.job:
 			delta = self.started_at - now()
 		else:
 			delta = now() - self.started_at
@@ -272,12 +272,12 @@ class Monitor(Collected):
 
 		def delay():
 			if isinstance(self.delay,tuple):
-				sleep(time_delta(self.delay))
+				sleepUntil(False,time_delta(self.delay))
 			else:
-				sleep(self.delay)
+				sleepUntil(False,self.delay)
 
 		try:
-			while self.active and (self.maxpoints is None or self.steps < self.maxpoints):
+			while self.job and (self.maxpoints is None or self.steps < self.maxpoints):
 				if self.steps and not self.passive:
 					delay()
 
@@ -318,7 +318,7 @@ class Monitor(Collected):
 					else:
 						log("monitor",TRACE,"More data", self.data, "for", u"‹"+" ".join(unicode(x) for x in self.name)+u"›")
 				
-			self.active = None
+			self.job = None
 		
 			try:
 				process_event(Event(Context(),"monitor","error",*self.name))
@@ -328,7 +328,7 @@ class Monitor(Collected):
 		finally:
 			log("monitor",TRACE,"End run", self.name)
 			self.stopped_at = now()
-			self.active = None
+			self.job = None
 
 
 	def one_value(self, step):
@@ -343,18 +343,18 @@ class Monitor(Collected):
 			return self.watcher.get(block=True, timeout=None)
 
 	def up(self):
-		if not self.active:
+		if not self.job:
 			self.value = None
-			self.active = gevent.spawn(self._run_loop)
+			self.job = gevent.spawn(self._run_loop)
 
 	def delete(self,ctx):
 		self.down()
 		self.delete_done()
 
 	def down(self):
-		if self.active:
-			self.active.kill()
-			assert self.active is None
+		if self.job:
+			self.job.kill()
+			assert self.job is None
 
 monitor_nr = 0
 	
