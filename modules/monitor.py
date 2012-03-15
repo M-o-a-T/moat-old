@@ -55,7 +55,7 @@ This statement updates the parameters of an existing monitor.
 		if not self.params:
 			raise SyntaxError(u'update monitor: You did not specify any changes?')
 		monitor = Monitors[Name(event)]
-		active = monitor.active
+		active = monitor.job is not None
 
 		if active:
 			monitor.down()
@@ -130,7 +130,7 @@ class RunningMonitorCheck(Check):
 		if not len(args):
 			raise SyntaxError(u"Usage: if active monitor ‹name…›")
 		name = Name(args)
-		return Monitors[name].active
+		return Monitors[name].job is not None
 
 
 class WaitingMonitorCheck(Check):
@@ -141,7 +141,7 @@ class WaitingMonitorCheck(Check):
 			raise SyntaxError(u"Usage: if waiting monitor ‹name…›")
 		name = Name(args)
 		m = Monitors[name]
-		return m.active and m.watcher is not None
+		return m.job and m.watcher is not None
 
 
 class VarMonitorHandler(Statement):
