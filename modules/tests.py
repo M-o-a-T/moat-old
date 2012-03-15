@@ -27,7 +27,6 @@ from homevent.statement import Statement, main_words
 from homevent.event import Event
 from homevent.run import process_event
 from homevent.monitor import Monitor,MonitorHandler
-from twisted.internet import defer
 
 from random import Random
 
@@ -50,7 +49,7 @@ class Tester(Monitor):
 			lo = max(self._min,self._val - self._step)
 			hi = min(self._max,self._val + self._step)
 		self._val = self.rand.randint(lo,hi)
-		return defer.succeed(self._val)
+		return self._val
 		
 
 class TestMonitor(MonitorHandler):
