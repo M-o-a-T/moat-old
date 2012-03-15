@@ -237,7 +237,7 @@ class Parser(object):
 			return sys.exc_info()
 		finally:
 			set_blocking(True,self.input)
-			self.endConnection(kill=False)
+			gevent.spawn(self.endConnection,kill=False)
 			if not hasattr(self.input,"fileno") or self.input.fileno() > 2:
 				self.input.close()
 			self.input = None
