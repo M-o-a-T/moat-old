@@ -31,6 +31,8 @@ from homevent.collect import Collection,Collected
 
 from twisted.internet import reactor
 
+import gevent
+
 __all__ = ("start_up","shut_down", "startup_event","shutdown_event",
 	"ShutdownHandler","mainloop", "Events")
 
@@ -163,6 +165,6 @@ shutdown now  ... but does not wait for active events to terminate.
 def mainloop(main=None):
 	start_up()
 	if main:
-		reactor.callWhenRunning(main)
+		reactor.callWhenRunning(gevent.spawn,main)
 	reactor.run()
 
