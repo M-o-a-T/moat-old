@@ -223,7 +223,8 @@ class WorkSequence(WorkItem):
 				process_failure(res)
 				res = r
 
-		return res
+		if isinstance(res,BaseFailure):
+			res.raiseException()
 
 	def report(self, verbose=False):
 		if not verbose:

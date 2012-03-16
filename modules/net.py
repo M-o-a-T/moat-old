@@ -33,8 +33,8 @@ from twisted.internet import protocol,reactor,error
 from twisted.protocols.basic import LineReceiver,_PauseableMixin
 
 from homevent.net import NetListen,NetConnect,NetSend,NetExists,NetConnected,\
-	NetReceiver,NetCommonFactory,DisconnectedError,\
-	NetName,NetTo, NetClientFactory,NetServerFactory
+	DisconnectedError,NetListener,NetActiveConnector,NetPassiveConnector,\
+	NetName,NetTo
 
 import os
 
@@ -43,40 +43,43 @@ class Nets(Collection):
 Nets = Nets()
 Nets.does("del")
 
+netlisten_conns = {}
+class NetListens(Collection):
+	name = "netserver"
+NetListens = NetListens()
+NetListens.does("del")
+
 net_conns = {}
 
 
-class NETreceiver(NetReceiver):
+class NETreceiver(LineReceiver):
+	storage = Nets.storage
+	storage2 = net_conns
+
 	def lineReceived(self, line):
 		line = line.strip().split()
 		simple_event(Context(),"net", *(self.factory.name + tuple(line)))
 
-
-class NETcommon_factory(object): # mix-in
-	protocol = NETreceiver
-	storage = Nets.storage
-	storage2 = net_conns
-
 	def down_event(self):
 		simple_event(Context(),"net","disconnect",*self.name)
-
-	def not_up_event(self):
-		simple_event(Context(),"net","error",*self.name)
 
 	def up_event(self):
 		simple_event(Context(),"net","connect",*self.name)
 
-
-class NETserver_factory(NETcommon_factory, NetServerFactory):
+class NETactive(NETreceiver, NetActiveConnector):
+	typ = "net_active"
 	pass
 
-class NETclient_factory(NETcommon_factory, NetClientFactory):
+class NETpassive(NETreceiver, NetPassiveConnector):
+	typ = "net_passive"
 	pass
 
+class NETlistener(NetListener):
+	storage = NetListens.storage
 
 class NETconnect(NetConnect):
 	name = ("net",)
-	client = NETclient_factory
+	client = NETactive
 	doc = "connect to a TCP port"
 	long_doc="""\
 net NAME [host] port
@@ -88,10 +91,15 @@ net [host] port :name NAME…
 """
 	dest = None
 
+	def error(self,e):
+		log(WARN, self.dest, e[1])
+		simple_event(self.ctx, "net","error",*self.dest)
+
 
 class NETlisten(NetListen):
 	name = ("listen","net")
-	server = NETserver_factory
+	listener = NETlistener
+	connector = NETpassive
 	doc = "listen to a TCP socket"
 	long_doc="""\
 listen net NAME [address] port

@@ -125,7 +125,8 @@ def process_failure(e=None):
 		will mangle your errors.
 		"""
 	if e is None:
-		e = failure.Failure()
+		_,e,t = sys.last_exc()
+		e.traceback = t
 	from homevent.logging import log_event,ERROR,log_exc
 	log_event(event=e,level=ERROR)
 	try:
@@ -136,8 +137,8 @@ def process_failure(e=None):
 def run_event(event):
 	try:
 		process_event(event)
-	except Exception as ex:
-		process_failure(ex)
+	except Exception:
+		process_failure()
 	
 def simple_event(ctx, *args):
 	"""\

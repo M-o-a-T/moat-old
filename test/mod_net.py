@@ -22,11 +22,18 @@ from homevent.module import load_module,Load,ModuleExists
 from test import run
 
 input = """\
-net foop localhost 50334
+async:
+	net foop localhost 50334
 wait BAD:
 	for 0.2
 	debug force
-del net foop
+block:
+	if exists net foop:
+		log DEBUG No1
+		del net foop
+	else:
+		log DEBUG Yes
+
 on net connect foo:
 	send net foo "bar"
 	list net
@@ -45,12 +52,22 @@ wait BEFORE:
 	for 0.2
 	debug force
 listen net localhost 50345 :name baz zaz
-net foo localhost 50333
+async:
+	net foo localhost 50333
 wait AFTER:
 	for 0.8
 	debug force
 log TRACE ending
 list net
+block:
+	if exists net foo:
+		list net foo
+		del net foo
+		log DEBUG No2
+	else:
+		log DEBUG Yes
+wait END:
+	for 0.2
 shutdown
 """
 
@@ -63,6 +80,8 @@ load_module("logging")
 load_module("on_event")
 load_module("net")
 load_module("data")
+load_module("block")
+load_module("ifelse")
 
 run("net",input)
 

@@ -28,12 +28,18 @@ from homevent.check import Check,register_condition,unregister_condition
 from homevent.context import Context
 from homevent.event import Event
 from homevent.base import Name
+from homevent.run import process_failure
 from homevent.collect import Collection,Collected
 
 from twisted.internet import protocol,reactor,error
 from twisted.protocols.basic import LineReceiver,_PauseableMixin
 
 import os
+import sys
+import socket
+
+import gevent
+from gevent.server import StreamServer
 
 class DisconnectedError(RuntimeError):
 	def __init__(self,dev):
@@ -64,11 +70,12 @@ class NetError(EnvironmentError):
 	def __repr__(self):
 		return "NetError(%d)" % (self.typ,)
 
-class NetReceiver(object,LineReceiver, _PauseableMixin):
-	"""A receiver for the line protocol.
-	"""
+
+class LineReceiver(object):
+	"""A receiver for the basic line protocol."""
 
 	delimiter = "\n"
+	buffer = ""
 
 	def lineReceived(self, line):
 		"""Override this.
@@ -76,18 +83,24 @@ class NetReceiver(object,LineReceiver, _PauseableMixin):
 		self.loseConnection()
 		raise NotImplementedError("You need to override NetReceiver.lineReceived")
 
-	def connectionMade(self):
-		super(NetReceiver,self).connectionMade()
-		self.factory.haveConnection(self)
+	def dataReceived(self,val):
+		buffer = self.buffer + val
+		data = []
 
-	def loseConnection(self):
-		if self.transport:
-			self.transport.loseConnection()
-		if self.factory:
-			self.factory.lostConnection(self)
-	
+		i = buffer.index(delimiter)
+		while i >= 0:
+			data.append(buffer[:i])
+			buffer = buffer[i+len(delimiter):]
+
+		self.buffer = buffer
+		for d in data:
+			try:
+				self.lineReceived(d)
+			except Exception:
+				process_failure()
+		
 	def write(self,val):
-		self.transport.write(val+self.delimiter)
+		super(LineReceiver,self).write(val+self.delimiter)
 
 
 #class Nets(Collection):
@@ -97,24 +110,45 @@ class NetReceiver(object,LineReceiver, _PauseableMixin):
 #
 #net_conns = {}
 
-class NetCommonFactory(Collected):
-	#protocol = NetReceiver
+class NetCommonConnector(Collected):
+	"""This class represents one remote network connection."""
 	#storage = Nets.storage
 	#storage2 = net_conns
-	typ = "???"
+	typ = "???common"
 
-	def __init__(self, host="localhost", port=4304, name=None, *a,**k):
-		if name is None:
-			name = "%s:%s" % (host,port)
-
-		self.conn = None
+	def __init__(self, socket, name, host,port, *a,**k):
+		self.socket = socket
 		self.host = host
 		self.port = port
 		self.name = name
-		self.did_up_event = False
 		assert (host,port) not in self.storage2, "already known host/port tuple"
-		super(NetCommonFactory,self).__init__()
+		super(NetCommonConnector,self).__init__()
 		self.storage2[(host,port)] = self
+
+		def dead(_):
+			self.job = None
+			if self.socket is not None:
+				self.socket.close()
+				self.down_event()
+
+		self.job = gevent.spawn(self._reader)
+		self.job.link(dead)
+
+		try:
+			self.up_event()
+		except Exception:
+			self.end()
+			raise
+
+	def _reader(self):
+		while True:
+			r = self.socket.recv(4096)
+			if r is None:
+				return
+			self.dataReceived(r)
+	
+	def dataReceived(self):
+		raise NotImplementedError("You need to override NetCommonConnector.dataReceived()")
 
 	def info(self):
 		return "%s %s:%s" % (self.typ, self.host,self.port)
@@ -123,95 +157,51 @@ class NetCommonFactory(Collected):
 		yield ("type",self.typ)
 		yield ("host",self.host)
 		yield ("port",self.port)
-		yield ("connected", ("Yes" if self.conn is not None else "No"))
 
 	def delete(self,ctx):
 		assert self==self.storage2.pop((self.host,self.port))
 		self.end()
 		self.delete_done()
 
-
-	def haveConnection(self,conn):
-		self.drop()
-		self.conn = conn
-
-		if not self.did_up_event:
-			self.did_up_event = True
-			self.up_event()
-
-	def lostConnection(self,conn):
-		if self.conn == conn:
-			self.conn = None
-			self._down_event()
-
-	def _down_event(self):
-		if self.did_up_event:
-			self.did_up_event = False
-			self.down_event()
-	
-	def not_up_event(self):
-		raise NotImplementedError("You need to override NetCommonFactory.not_up_event")
+	def up_event(self):
+		self.end()
+		raise NotImplementedError("You need to override NetCommonConnector.up_event()")
 
 	def down_event(self):
-		raise NotImplementedError("You need to override NetCommonFactory.down_event")
+		raise NotImplementedError("You need to override NetCommonConnector.down_event()")
 
-	def up_event(self):
-		self.drop()
-		raise NotImplementedError("You need to override NetCommonFactory.up_event")
-
-	def drop(self):
-		"""Kill my connection"""
-		if self.conn:
-			self.conn.loseConnection()
-		
 	def write(self,val):
-		if self.conn:
-			self.conn.write(val)
+		if self.socket:
+			self.socket.write(val)
 		else:
 			raise DisconnectedError(self.name)
 
 	def end(self):
-		c = self.conn
-		self.conn = None
+		r,self.job = self.job,None
+		if r:
+			r.kill()
+
+		c,self.socket = self.socket,None
 		if c:
-			c.loseConnection()
-			self._down_event()
+			c.close()
+			self.down_event()
 
-class NetServerFactory(NetCommonFactory,protocol.ServerFactory):
-	typ = "server"
-	def end(self):
-		try: self._port.stopListening()
-		except AttribteError: pass # might be called twice
-		del self._port
-		super(NetServerFactory,self).end()
 
-class NetClientFactory(NetCommonFactory,protocol.ClientFactory):
-	typ = "client"
-	def end(self):
-		try: self.connector.stopConnecting()
-		except error.NotConnectingError: pass
-		del self.connector
-		super(NetClientFactory,self).end()
+##### active connections
 
-	def clientConnectionFailed(self, connector, reason):
-		log(WARN,reason)
-		if not self.conn:
-			self.not_up_event()
-		else:
-			self._down_event()
-
-	def clientConnectionLost(self, connector, reason):
-		if not reason.check(error.ConnectionDone):
-			log(INFO,reason)
-		self.conn = None
-		self._down_event()
+class NetActiveConnector(NetCommonConnector):
+	"""A connection created by opening a connection via a NetConnect command."""
+	typ = "???active"
+	pass
 
 
 class NetConnect(AttributedStatement):
 	#name = ("net",)
 	doc = "connect to a TCP port (base class)"
 	dest = None
-	#client = None # descendant of NetClientFactory
+	job = None
+	recv = None
+	client = NetActiveConnector
 	long_doc = u"""\
 You need to override the long_doc description.
 """
@@ -232,8 +222,84 @@ You need to override the long_doc description.
 		self.start_up()
 
 	def start_up(self):
-		f = self.client(host=self.host, port=self.port, name=self.dest)
-		f.connector = reactor.connectTCP(self.host, self.port, f)
+		s = None
+		e = None
+		for res in socket.getaddrinfo(self.host, self.port, socket.AF_UNSPEC, socket.SOCK_STREAM):
+			af, socktype, proto, canonname, sa = res
+			try:
+				s = socket.socket(af, socktype, proto)
+			except socket.error:
+				if e is None:
+					e = sys.exc_info()
+				s = None
+				continue
+			try:
+				s.connect(sa)
+			except socket.error:
+				if e is None:
+					e = sys.exc_info()
+				s.close()
+				s = None
+				continue
+			break
+		if s is None:
+			self.error(e)
+			return
+		self.client(s,name=self.dest, host=self.host,port=self.port)
+
+	def error(self,e):
+		raise e[0],e[1],e[2]
+
+
+##### passive connections
+
+name_seq = 0
+class NetPassiveConnector(NetCommonConnector):
+	"""A connection created by accepting a connection via a NetListener."""
+	typ = "???passive"
+
+	def __init__(self,socket,address,name):
+		global name_seq
+		name_seq += 1
+
+		name = name+("N"+str(name_seq),)
+		super(NetPassiveConnector,self).__init__(socket, name=name, host=address[0],port=address[1])
+
+
+class NetListener(Collected):
+	"""Something which accepts connections to a specific address/port."""
+	#storage = Nets.storage
+	server = None
+	connector = None
+
+	def __init__(self, name, host,port, *a,**k):
+		super(NetListener,self).__init__(name)
+		self.name = name
+		self.host = host
+		self.port = port
+
+	def _init2(self, server, connector):
+		"""The server and this object are cross-connected, so this step finishes initialization."""
+		self.server = server
+		self.connector = connector
+	
+	def connected(self, socket, address):
+		if not self.connector:
+			socket.close()
+			return
+		self.connector(socket,address)
+
+	def info(self):
+		return "%s %s:%s" % (self.typ, self.name,self.connector.name)
+		
+	def list(self):
+		yield ("host", self.host)
+		yield ("port", self.port)
+		yield ("connector", self.connector.name)
+
+	def delete(self,ctx):
+		self.server.stop()
+		self.delete_done()
 
 
 class NetListen(AttributedStatement):
@@ -244,6 +310,8 @@ class NetListen(AttributedStatement):
 You need to override the long_doc description.
 """
 	dest = None
+	listener = NetListener
+	connector = NetPassiveConnector
 	#server = None # descendant of NetServerFactory
 
 	def run(self,ctx,**k):
@@ -262,8 +330,9 @@ You need to override the long_doc description.
 		self.start_up()
 
 	def start_up(self):
-		f = self.server(host=self.host, port=self.port, name=self.dest)
-		f._port = reactor.listenTCP(self.port, f, interface=self.host)
+		r = self.listener(name=self.dest, host=self.host,port=self.port)
+		s = StreamServer((self.host, self.port), r.connected)
+		r._init2(s, self.connector)
 
 
 class NetName(Statement):
@@ -297,6 +366,7 @@ send net text… :to ‹name…›
 
 """
 	def run(self,ctx,**k):
+		import pdb;pdb.set_trace()
 		event = self.params(ctx)
 		name = self.dest
 		if name is None:
