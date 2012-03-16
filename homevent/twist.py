@@ -120,10 +120,15 @@ def fix_exception(e, tb=None):
 		e.report = _report
 
 def print_exception(e=None,file=sys.stderr):
-	traceback.print_exception(e.__class__, e, e.__traceback__, file=sys.stderr)
+	print >>file,format_exception(e)
 
-def format_exception(e=None,file=sys.stderr):
-	return traceback.format_exception(e.__class__, e, e.__traceback__)
+def format_exception(e=None):
+	tb = getattr(e,"__traceback__",None)
+	if tb is not None:
+		return traceback.format_exception(e.__class__, e, e.__traceback__)
+	else:
+		return unicode(e)
+
 
 def reraise(e):
 	"""Re-raise an exception, with its original traceback"""

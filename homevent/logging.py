@@ -29,7 +29,7 @@ from homevent.worker import Worker,ExcWorker
 from homevent.event import Event
 from homevent.context import Context
 from homevent.base import Name,SYS_PRIO,MIN_PRIO,MAX_PRIO
-from homevent.twist import fix_exception,print_exception
+from homevent.twist import fix_exception,print_exception,format_exception
 from homevent.collect import Collection,Collected
 
 from gevent import spawn
@@ -138,10 +138,7 @@ class Logger(Collected):
 
 	def log_failure(self, err, level=WARN):
 		if level >= self.level:
-			if err.frames:
-				self._wlog(level,err.getTraceback())
-			else:
-				self._wlog(level,unicode(err.value))
+			self._wlog(level,format_exception(err))
 	
 	def flush(self):
 		pass
