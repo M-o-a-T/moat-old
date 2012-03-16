@@ -138,7 +138,7 @@ def reraise(e):
 		tb = sys.exc_info()[2]
 	else:
 		del e.__traceback__
-	raise e.__class__,e,e.__traceback__
+	raise e.__class__,e,tb
 
 
 # count the number of active defer-to-later handlers
