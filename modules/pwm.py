@@ -154,7 +154,7 @@ class CommonPM(Collected):
 				self.timer = callLater(False,self.next,self.do_timed_switch)
 			else:
 				self.next = None
-		except Exception,e:
+		except Exception as e:
 			process_failure(e)
 			simple_event(self.ctx,"pcm","error",*self.name)
 		

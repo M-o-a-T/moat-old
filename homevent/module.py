@@ -145,7 +145,7 @@ def load_module(*m):
 	
 		try:
 			mod.load()
-		except BaseException,e:
+		except BaseException as e:
 			a,b,c = sys.exc_info()
 			try:
 				mod.unload()

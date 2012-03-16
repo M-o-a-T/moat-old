@@ -91,7 +91,7 @@ list ‹type› ‹name…›
 			else:
 				flatten(self.ctx.out,(c,))
 
-		except Exception,e:
+		except Exception as e:
 			print >>self.ctx.out, "* ERROR *",repr(e)
 			print_exc(file=self.ctx.out)
 			

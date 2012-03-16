@@ -132,7 +132,7 @@ set rrd value ‹name…›
 		# if we're really close to the next minute
 		try:
 			rrdtool.update(s.upath, "-t",s.udataset, now().strftime("%s")+":"+unicode(event[0]).encode("utf-8"))
-		except Exception,e:
+		except Exception as e:
 			if "minimum one second step" in str(e):
 				pass
 			else:

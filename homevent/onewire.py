@@ -466,7 +466,7 @@ class OWFSqueue(OWFSreceiver):
 			if self.msg.msgReceived(typ,data):
 				log("onewire",DEBUG,"recv again")
 				return
-		except Exception,e:
+		except Exception as e:
 			log("onewire",DEBUG,"recv err",e)
 			#process_failure()
 			self.is_done(e)
