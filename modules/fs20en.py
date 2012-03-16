@@ -37,7 +37,6 @@ from homevent.timeslot import Timeslots,Timeslotted,Timeslot,collision_filter
 
 #from twisted.internet import protocol,defer,reactor
 #from twisted.protocols.basic import _PauseableMixin
-#from twisted.python import failure
 
 PREFIX_ENERGY = 'n'
 

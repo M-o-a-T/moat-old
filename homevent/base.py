@@ -41,3 +41,15 @@ class Name(tuple):
 		return self.prefix + self.delim.join((unicode(x) for x in self)) + self.suffix
 	def __repr__(self):
 		return self.__class__.__name__+super(Name,self).__repr__()
+
+class RaisedError(RuntimeError):
+	"""An error that has been explicitly raised by a script"""
+	def __init__(self,*params):
+		self.params = params
+	def __repr__(self):
+		return u"‹%s: %s›" % (self.__class__.__name__, repr(self.params))
+	def __str__(self):
+		return u"%s: %s" % (self.__class__.__name__, " ".join(str(x) for x in self.params))
+	def __unicode__(self):
+		return u"%s: %s" % (self.__class__.__name__, " ".join(unicode(x) for x in self.params))
+

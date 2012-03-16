@@ -29,7 +29,6 @@ from homevent.monitor import Monitor,MonitorHandler, MonitorAgain
 
 from twisted.internet import protocol,defer,reactor
 from twisted.protocols.basic import _PauseableMixin
-from twisted.python import failure
 
 import struct
 

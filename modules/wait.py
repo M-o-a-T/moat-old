@@ -44,7 +44,6 @@ from gevent.queue import Channel,Empty
 
 from time import time
 import os
-from twisted.python import failure
 from twisted.internet import reactor,defer
 import datetime as dt
 

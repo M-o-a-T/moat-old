@@ -33,7 +33,6 @@ from homevent.fs20sw import group
 
 from twisted.internet import protocol,defer,reactor
 from twisted.protocols.basic import _PauseableMixin
-from twisted.python import failure
 
 codes = {}
 devs = {}

@@ -42,7 +42,6 @@ from homevent.net import NetListen,NetConnect,NetSend,NetExists,NetConnected,\
 
 from twisted.internet import protocol,reactor,error,defer
 from twisted.protocols.basic import _PauseableMixin
-from twisted.python import failure
 from twisted.internet.error import ProcessExitedAlready
 from twisted.internet.serialport import SerialPort
 

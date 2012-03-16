@@ -20,9 +20,7 @@ This part of the code defines what an event is.
 """
 
 import warnings
-from homevent.twist import track_errors
-from homevent.base import Name
-from twisted.python import failure
+from homevent.base import Name,RaisedError
 
 class TrySomethingElse(RuntimeError):
 	"""Error if a conditional does not match"""
@@ -44,17 +42,6 @@ class EventNoNameError(ValueError):
 		You tried to create an unnamed event. That's stupid.
 		"""
 	pass
-
-class RaisedError(RuntimeError):
-	"""An error that has been explicitly raised by a script"""
-	def __init__(self,*params):
-		self.params = params
-	def __repr__(self):
-		return u"‹%s: %s›" % (self.__class__.__name__, repr(self.params))
-	def __str__(self):
-		return u"%s: %s" % (self.__class__.__name__, " ".join(str(x) for x in self.params))
-	def __unicode__(self):
-		return u"%s: %s" % (self.__class__.__name__, " ".join(unicode(x) for x in self.params))
 
 event_id = 0
 
@@ -173,29 +160,3 @@ class Event(object):
 
 		return self.__class__(ctx, *self.name[drop:])
 
-#Monkey-patch t.p.f.Failure to answer to our report() call
-
-def report(self, verbose=False):
-	if verbose and not self.check(RaisedError):
-		from traceback import format_stack
-		p = "ERROR: "
-		for l in self.getTraceback().rstrip("\n").split("\n"):
-			yield p+l
-			p="     : "
-		if hasattr(self,"cmd"):
-			yield "   at: "+cmd.file+":"+unicode(cmd.line)
-		if hasattr(self,"within"):
-			for w in self.within:
-				p = "   in: "
-				for r in w.report(verbose):
-					yield p+r
-					p = "     : "
-		if track_errors():
-			p = "   by: "
-			for rr in format_stack():
-				for r in rr.rstrip("\n").split("\n"):
-					yield p+r
-					p = "     : "
-	else:
-		yield "ERROR: "+self.getErrorMessage()
-failure.Failure.report = report

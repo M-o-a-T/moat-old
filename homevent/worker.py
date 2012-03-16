@@ -27,10 +27,8 @@ something about it.
 from homevent.context import Context
 from homevent.event import Event,TrySomethingElse,NeverHappens
 from homevent.base import Name,MIN_PRIO,MAX_PRIO
-from homevent.twist import BaseFailure
 from homevent.times import humandelta, now
-
-from twisted.python import failure
+from homevent.twist import fix_exception,reraise
 
 from homevent.geventreactor import waitForGreenlet
 from gevent import spawn
@@ -178,8 +176,9 @@ class WorkSequence(WorkItem):
 		from homevent.logging import log_run,log_halted
 		try:
 			event = self.event
-		except Exception:
-			event = failure.Failure()
+		except Exception as ex:
+			fix_exception(ex)
+			event = ex
 		skipping = False
 		excepting = False
 
@@ -197,34 +196,36 @@ class WorkSequence(WorkItem):
 				if not excepting or isinstance(w,ExcWorker):
 					log_run(self,w,step)
 					r = w.process(event=self.event, queue=self)
-			except HaltSequence:
-				r = failure.Failure()
+			except HaltSequence as ex:
+				fix_exception(ex)
+				r = ex
 				log_halted(self,w,step)
 				skipping = True
 			except TrySomethingElse:
 				pass
-			except Exception:
-				r = failure.Failure()
+			except Exception as ex:
+				fix_exception(ex)
+				r = ex
 			else:
 				if self.handle_conditional and w.prio >= MIN_PRIO:
 					skipping = True
 
-			if isinstance(r,BaseFailure):
+			if isinstance(r,Exception):
 				excepting = True
 				if not hasattr(r,"within"):
 					r.within=[w]
 				r.within.append(self)
 			if res is None:
 				res = r
-			elif isinstance(r,BaseFailure):
+			elif isinstance(r,Exception):
 				from homevent.logging import log_exc
 				log_exc("Unhandled nested exception", res)
 				from homevent.run import process_failure
 				process_failure(res)
 				res = r
 
-		if isinstance(res,BaseFailure):
-			res.raiseException()
+		if isinstance(res,Exception):
+			reraise(res)
 
 	def report(self, verbose=False):
 		if not verbose:

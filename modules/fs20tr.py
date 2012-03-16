@@ -37,7 +37,6 @@ from homevent.twist import callLater,log_wait
 
 from twisted.internet import protocol,defer,reactor
 from twisted.protocols.basic import _PauseableMixin
-from twisted.python import failure
 from twisted.internet.error import ProcessExitedAlready
 
 import os

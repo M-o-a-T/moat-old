@@ -33,7 +33,6 @@ from homevent.base import Name
 
 from twisted.internet import protocol,defer,reactor
 from twisted.protocols.basic import _PauseableMixin
-from twisted.python import failure
 
 import struct
 import os
@@ -500,10 +499,8 @@ class OWFSqueue(OWFSreceiver):
 		elif n_msgs or msg.empty_ok:
 			msg.done()
 		else:
-			try:
-				err = failure.Failure()
-			except failure.NoCurrentExceptionError:
-				err = OWFSUnspecdError()
+			err = OWFSUnspecdError()
+			fix_exception(err)
 			self.retry(msg, err)
 		
 

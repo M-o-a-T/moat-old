@@ -34,10 +34,9 @@ from homevent.event import RaisedError
 from homevent.check import check_condition
 from homevent import logging
 from homevent.run import process_failure
-from homevent.twist import BaseFailure, fix_exception
+from homevent.twist import fix_exception
 
 from twisted.internet import defer
-from twisted.python import failure
 import sys
 
 class TryStatement(MainStatementList):
@@ -113,8 +112,6 @@ Implementation restriction: can't be used at top level. (Wrap with 'block:'.)
 	def does_error(self,ctx):
 		err = ctx.error_
 		ctx = ctx()
-		if isinstance(err,BaseFailure):
-			err = err.value
 		if not isinstance(err,RaisedError):
 			if len(self.arglist) > 1:
 				return None

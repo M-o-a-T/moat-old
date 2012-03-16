@@ -24,8 +24,6 @@ from homevent.worker import WorkSequence,ConditionalWorkSequence,ExcWorker
 from homevent.collect import Collection
 from homevent.twist import fix_exception
 
-from twisted.python import failure
-
 workers = {}
 work_prios = []
 worker_ids = {}

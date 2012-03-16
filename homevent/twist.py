@@ -17,13 +17,16 @@ from __future__ import division
 ##
 
 """\
-	This module holds Twisted support stuff.
+	This module used to hold Twisted support stuff.
+	Nowadays it holds stuff that's used to replace Twisted.
+	… among other grab-bag stuff.
 	"""
 
 from twisted.internet.abstract import FileDescriptor
 from twisted.internet import fdesc,defer,reactor,base
-from twisted.python import log,failure
+from twisted.python import log
 
+from homevent.base import RaisedError
 from homevent.geventreactor import DelayedCall,deferToGreenlet
 
 import gevent
@@ -80,12 +83,41 @@ class StdOutDescriptor(FileDescriptor):
 	
 # Py3 stores an exception's traceback in a __traceback__ attribute.
 # Do that too, instead of relying on Twisted's Failure wrapper.
+
+# Also, attach something that duck-types homevent.event.Event,
+# in that it mimics our .report() function.
+
+def _report(self, verbose=False):
+	if verbose and not isinstance(self,RaisedError):
+		from traceback import format_stack
+		p = "ERROR: "
+		for l in formatTraceback(self).rstrip("\n").split("\n"):
+			yield p+l
+			p="     : "
+		if hasattr(self,"cmd"):
+			yield "   at: "+cmd.file+":"+unicode(cmd.line)
+		if hasattr(self,"within"):
+			for w in self.within:
+				p = "   in: "
+				for r in w.report(verbose):
+					yield p+r
+					p = "     : "
+		if track_errors():
+			p = "   by: "
+			for rr in format_stack():
+				for r in rr.rstrip("\n").split("\n"):
+					yield p+r
+					p = "     : "
+	else:
+		yield "ERROR: "+str(self)
+
 def fix_exception(e, tb=None):
 	"""Add a __traceback__ attribute to an exception if it's not there already"""
 	if not hasattr(e,"__traceback__"):
 		if tb is None:
 			tb = sys.exc_info()[2]
 		e.__traceback__ = tb
+		e.report = _report
 
 def print_exception(e=None,file=sys.stderr):
 	traceback.print_exception(e.__class__, e, e.__traceback__, file=sys.stderr)
@@ -259,30 +291,6 @@ def nfhw(self,data):
 	return fhw(self,data)
 FileDescriptor.write = nfhw
 
-# Simplify failure handling
-BaseFailure = failure.Failure
-class TwistFailure(BaseFailure,BaseException):
-	def __init__(self, exc_value=None, exc_type=None, exc_tb=None, captureVars=False):
-		global tracked_errors
-		try:
-			a,b,c = sys.exc_info()
-		except Exception:
-			a,b,c = sys.exc_info()
-		if exc_type is None: exc_type = a
-		if exc_value is None: exc_value = b
-		if exc_tb is None: exc_tb = c
-
-		if exc_value is None:
-			raise failure.NoCurrentExceptionError
-		if not isinstance(exc_value,BaseException):
-			exc_type = RuntimeError("Bad Exception: "+str(exc_value))
-		BaseFailure.__init__(self,exc_value,exc_type,exc_tb,captureVars)
-
-	def cleanFailure(self):
-		"""Do not clean out the damn backtrace. We need it."""
-		pass
-
-failure.Failure = TwistFailure
 
 if False:
 	gjob=0

@@ -36,7 +36,6 @@ from homevent.collect import Collection,Collected
 
 from time import time
 import os
-from twisted.python import failure
 import datetime as dt
 
 class Timeslots(Collection):

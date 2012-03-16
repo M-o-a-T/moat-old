@@ -33,18 +33,15 @@ import sys
 import os
 import errno
 from twisted.internet import reactor,threads,defer,interfaces
-from twisted.python import failure
 from twisted.protocols.basic import LineOnlyReceiver,FileSender,_PauseableMixin
 
 import gevent
-from gevent.thread import allocate_lock as Lock
 from gevent.select import select
 from geventreactor import waitForDeferred
 
 from homevent.logging import log,TRACE,DEBUG
 from homevent.context import Context
 from homevent.io import Outputter,conns
-from homevent.run import process_failure
 from homevent.event import Event,StopParsing
 from homevent.statement import global_words
 from homevent.twist import deferToLater,setBlocking, fix_exception,print_exception

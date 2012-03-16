@@ -34,7 +34,6 @@ from twisted.cred import credentials
 from twisted.conch import error,avatar,recvline
 from twisted.conch.ssh import keys, factory, common, session
 from twisted.cred import checkers, portal
-from twisted.python import failure
 from zope.interface import implements
 from twisted.conch import interfaces as conchinterfaces
 from twisted.conch.insults import insults
@@ -104,17 +103,17 @@ class PublicKeyCredentialsChecker:
 		try:
 			userKey = AuthKeys[Name(credentials.username)].key
 		except KeyError:
-			return failure.Failure(error.ConchError("No such user"))
+			raise error.ConchError("No such user")
 		else:
 			if not credentials.blob == base64.decodestring(userKey):
-				raise failure.failure(error.ConchError("I don't recognize that key"))
+				raise error.ConchError("I don't recognize that key")
 			if not credentials.signature:
-				return failure.Failure(error.ValidPublicKey( ))
+				return error.ValidPublicKey( )
 			pubKey = keys.getPublicKeyObject(data=credentials.blob)
 			if keys.verifySignature(pubKey, credentials.signature, credentials.sigData):
 				return credentials.username
 			else:
-				return failure.Failure(error.ConchError("Incorrect signature"))
+				return error.ConchError("Incorrect signature")
 
 
 NotYet = object()

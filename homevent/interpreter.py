@@ -32,7 +32,7 @@ for typical usage.
 from homevent.context import Context
 from homevent.event import Event
 from homevent.base import Name
-from homevent.twist import BaseFailure,fix_exception
+from homevent.twist import fix_exception
 
 from twisted.internet import defer
 from homevent.geventreactor import waitForDeferred
@@ -106,10 +106,7 @@ class Processor(object):
 		pass
 	
 	def error(self,parser,err):
-		if isinstance(err,BaseFailure):
-			err.raiseException()
-		else:
-			raise err.__class__,err,sys.exc_info()[2]
+		reraise(err)
 
 class CollectProcessor(Processor):
 	"""\
