@@ -76,6 +76,22 @@ class StdOutDescriptor(FileDescriptor):
 		finally:
 			setBlocking(True,1)
 	
+# Py3 stores an exception's traceback in a __traceback__ attribute.
+# Do that too, instead of relying on Twisted's Failure wrapper.
+def fix_exception(e, tb=None):
+	"""Add a __traceback__ attribute to an exception if it's not there already"""
+	if not hasattr(e,"__traceback__"):
+		if tb is None:
+			tb = sys.exc_info()[2]
+		e.__traceback__ = tb
+
+def reraise(e):
+	"""Re-raise an exception, with its original traceback"""
+	tb = getattr(e,"__traceback__",None)
+	if tb is None:
+		tb = sys.exc_info()[2]
+	raise e.__class__,e,e.__traceback__
+
 
 # count the number of active defer-to-later handlers
 # so that we don't exit when one of them is still running,
@@ -127,7 +143,6 @@ deferToLater = deferToGreenlet
 # these in-order, but it does not actually wait for anything unless the
 # "force" flag is set, which denotes that the given timeout affects
 # something "real" and therefore may not be ignored.
-
 
 def sleepUntil(force,delta):
 	from homevent.times import unixdelta,now
