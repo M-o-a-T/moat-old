@@ -273,7 +273,7 @@ if False:
 		global gjob
 		gjob += 1
 		job = gjob
-		print >>sys.stderr,"SPAWN %d %s %s %s" % (job,func,a,k)
+		print >>sys.stderr,"G SPAWN %d %s %s %s" % (job,func,a,k)
 		g = gspawn(func,*a,**k)
 		_completer(g,job)
 		return g
