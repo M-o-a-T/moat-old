@@ -32,7 +32,7 @@ for typical usage.
 from homevent.context import Context
 from homevent.event import Event
 from homevent.base import Name
-from homevent.twist import fix_exception
+from homevent.twist import fix_exception,reraise
 
 from twisted.internet import defer
 from homevent.geventreactor import waitForDeferred
