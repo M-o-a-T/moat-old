@@ -25,7 +25,7 @@ part of the system.
 """
 
 from homevent.run import register_worker
-from homevent.worker import Worker,ExcWorker
+from homevent.worker import Worker,ExcWorker,report_
 from homevent.event import Event
 from homevent.context import Context
 from homevent.base import Name,SYS_PRIO,MIN_PRIO,MAX_PRIO
@@ -75,6 +75,7 @@ def log_level(cls, level=None):
 	return ret
 
 logger_nr = 0
+
 
 class Logger(Collected):
 	"""\
@@ -129,11 +130,8 @@ class Logger(Collected):
 
 	def log_event(self, event, level):
 		if level >= self.level:
-			if hasattr(event,"report"):
-				for r in event.report(99):
-					self._wlog(level,r)
-			else:
-				self._wlog(level,unicode(event))
+			for r in report_(event,99):
+				self._wlog(level,r)
 			self.flush()
 
 	def log_failure(self, err, level=WARN):
@@ -284,7 +282,7 @@ class log_run(Event):
 					p = " "*len(self.prefix)+": "
 					q = ""
 				p = " "*(len(self.prefix)-2)+"ev: "
-				for r in self.seq.event.report(False):
+				for r in report_(self.seq.event,False):
 					yield p+r
 					p = " "*len(self.prefix)+": "
 

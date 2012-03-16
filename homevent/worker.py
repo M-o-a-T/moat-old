@@ -46,6 +46,36 @@ class HaltSequence(Exception):
 	pass
 	
 
+def report_(err, verbose=False):
+	"""A report wrapper which reports backtraces for exceptions"""
+	if hasattr(err,"report"):
+		for r in err.report():
+			yield r
+	elif not isinstance(err,BaseException):
+		yield unicode(err)
+	elif verbose and not isinstance(err,RaisedError):
+		from traceback import format_stack
+		p = "ERROR: "
+		for l in formatTraceback(err).rstrip("\n").split("\n"):
+			yield p+l
+			p="     : "
+		if hasattr(err,"cmd"):
+			yield "   at: "+cmd.file+":"+unicode(cmd.line)
+		if hasattr(err,"within"):
+			for w in err.within:
+				p = "   in: "
+				for r in w.report(verbose):
+					yield p+r
+					p = "     : "
+		if track_errors():
+			p = "   by: "
+			for rr in format_stack():
+				for r in rr.rstrip("\n").split("\n"):
+					yield p+r
+					p = "     : "
+	else:
+		yield "ERROR: "+unicode(err)
+
 seqnum = 0
 
 class WorkItem(object):
@@ -245,7 +275,7 @@ class WorkSequence(WorkItem):
 			for r in super(WorkSequence,self).report(verbose):
 				yield prefix+r
 			if hasattr(self.event,"report"):
-				for r in self.event.report(False):
+				for r in report_(self.event,False):
 					yield prefix+r
 			else:
 				yield prefix+unicode(self.event)

@@ -81,44 +81,14 @@ class StdOutDescriptor(FileDescriptor):
 		finally:
 			setBlocking(True,1)
 	
-# Py3 stores an exception's traceback in a __traceback__ attribute.
-# Do that too, instead of relying on Twisted's Failure wrapper.
-
-# Also, attach something that duck-types homevent.event.Event,
-# in that it mimics our .report() function.
-
-def _report(self, verbose=False):
-	if verbose and not isinstance(self,RaisedError):
-		from traceback import format_stack
-		p = "ERROR: "
-		for l in formatTraceback(self).rstrip("\n").split("\n"):
-			yield p+l
-			p="     : "
-		if hasattr(self,"cmd"):
-			yield "   at: "+cmd.file+":"+unicode(cmd.line)
-		if hasattr(self,"within"):
-			for w in self.within:
-				p = "   in: "
-				for r in w.report(verbose):
-					yield p+r
-					p = "     : "
-		if track_errors():
-			p = "   by: "
-			for rr in format_stack():
-				for r in rr.rstrip("\n").split("\n"):
-					yield p+r
-					p = "     : "
-	else:
-		yield "ERROR: "+str(self)
 
 def fix_exception(e, tb=None):
-	"""Add a __traceback__ attribute to an exception if it's not there already.
-		Also add a .report() call, duck-typing homevent.event.Event in the logger."""
+	"""Add a __traceback__ attribute to an exception if it's not there already."""
 	if not hasattr(e,"__traceback__"):
 		if tb is None:
 			tb = sys.exc_info()[2]
+	if tb is not None:
 		e.__traceback__ = tb
-	e.report = _report
 
 def print_exception(e=None,file=sys.stderr):
 	print >>file,format_exception(e)
@@ -126,7 +96,7 @@ def print_exception(e=None,file=sys.stderr):
 def format_exception(e=None):
 	tb = getattr(e,"__traceback__",None)
 	if tb is not None:
-		return traceback.format_exception(e.__class__, e, e.__traceback__)
+		return "".join(traceback.format_exception(e.__class__, e, e.__traceback__))
 	else:
 		return unicode(e)
 

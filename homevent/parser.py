@@ -297,7 +297,7 @@ class Parser(object):
 					except defer.AlreadyCalledError: pass
 					else: self.endConnection()
 				except Exception as ex2:
-					fix_exception(ex2)
+					ex2 = fix_exception(ex2)
 					sys.stderr.write("\n*** Here's where we die again^2:\n");
 					print_exception(ex2,file=sys.stderr)
 					raise
