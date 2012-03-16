@@ -87,11 +87,6 @@ def fix_exception(e, tb=None):
 			tb = sys.exc_info()[2]
 		e.__traceback__ = tb
 
-def clean_exception(e):
-	"""Drop the exception's traceback. This avoids memory loops."""
-	if hasattr(e,"__traceback__"):
-		del e.__traceback__
-	
 def print_exception(e=None,file=sys.stderr):
 	traceback.print_exception(e.__class__, e, e.__traceback__, file=sys.stderr)
 
