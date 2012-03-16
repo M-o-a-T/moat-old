@@ -29,7 +29,7 @@ from homevent.worker import Worker,ExcWorker
 from homevent.event import Event
 from homevent.context import Context
 from homevent.base import Name,SYS_PRIO,MIN_PRIO,MAX_PRIO
-from homevent.twist import BaseFailure,fix_exception
+from homevent.twist import BaseFailure,fix_exception,print_exception
 from homevent.collect import Collection,Collected
 
 from gevent import spawn
@@ -37,7 +37,6 @@ from gevent.queue import Queue,Full
 from gevent.select import select
 
 import sys
-from traceback import print_exc
 
 __all__ = ("Logger",
 	"log","log_run","log_created","log_halted","LogNames",
@@ -197,7 +196,7 @@ class LogWorker(ExcWorker):
 			except Exception as e:
 				fix_exception(e)
 				print >>sys.stderr,"LOGGER CRASH 1"
-				print_exc(file=sys.stderr)
+				print_exception(e,file=sys.stderr)
 				l.end_logging()
 				exc.append(sys.exc_info())
 		if exc:
@@ -222,7 +221,7 @@ def log_exc(msg=None, err=None, level=ERROR):
 			except Exception as e:
 				fix_exception(e)
 				print >>sys.stderr,"LOGGER CRASH 2"
-				print_exc(file=sys.stderr)
+				print_exception(e,file=sys.stderr)
 				l.end_logging()
 				log_exc("Logger removed",e)
 		try:
@@ -230,7 +229,7 @@ def log_exc(msg=None, err=None, level=ERROR):
 		except Exception as e:
 			fix_exception(e)
 			print >>sys.stderr,"LOGGER CRASH 3"
-			print_exc(file=sys.stderr)
+			print_exception(e,file=sys.stderr)
 			l.end_logging()
 			log_exc("Logger removed",e)
 
@@ -250,7 +249,7 @@ class LogEndEvent(Event):
 		except Exception as e:
 			fix_exception(e)
 			print >>sys.stderr,"LOGGER CRASH 4"
-			print_exc(file=sys.stderr)
+			print_exception(e,file=sys.stderr)
 			yield  "END: REPORT_ERROR: "+repr(self.name[1:])
 
 class LogDoneWorker(LogWorker):
@@ -353,7 +352,7 @@ def log(level, *a):
 		except Exception as e:
 			fix_exception(e)
 			print >>sys.stderr,"LOGGER CRASH 0"
-			print_exc(file=sys.stderr)
+			print_exception(e,file=sys.stderr)
 			l.delete()
 			exc.append(sys.exc_info())
 	if exc:

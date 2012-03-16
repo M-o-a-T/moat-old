@@ -34,6 +34,7 @@ import sys
 import os
 import fcntl
 import datetime as dt
+import traceback
 
 tracked_errors = ("HOMEVENT_TRACK_ERRORS" in os.environ)
 
@@ -86,11 +87,24 @@ def fix_exception(e, tb=None):
 			tb = sys.exc_info()[2]
 		e.__traceback__ = tb
 
+def clean_exception(e):
+	"""Drop the exception's traceback. This avoids memory loops."""
+	if hasattr(e,"__traceback__"):
+		del e.__traceback__
+	
+def print_exception(e=None,file=sys.stderr):
+	traceback.print_exception(e.__class__, e, e.__traceback__, file=sys.stderr)
+
+def format_exception(e=None,file=sys.stderr):
+	return traceback.format_exception(e.__class__, e, e.__traceback__)
+
 def reraise(e):
 	"""Re-raise an exception, with its original traceback"""
 	tb = getattr(e,"__traceback__",None)
 	if tb is None:
 		tb = sys.exc_info()[2]
+	else:
+		del e.__traceback__
 	raise e.__class__,e,e.__traceback__
 
 

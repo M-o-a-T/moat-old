@@ -29,7 +29,6 @@ from homevent.geventreactor import waitForDeferred
 from twisted.internet import reactor,interfaces,fdesc
 from twisted.internet._posixstdio import StandardIO ## XXX unstable interface!
 from twisted.internet.error import ConnectionDone,ConnectionLost
-from traceback import print_exc
 from tokenize import tok_name
 import os,sys
 

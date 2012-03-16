@@ -47,7 +47,7 @@ from homevent.io import Outputter,conns
 from homevent.run import process_failure
 from homevent.event import Event,StopParsing
 from homevent.statement import global_words
-from homevent.twist import deferToLater,setBlocking, fix_exception
+from homevent.twist import deferToLater,setBlocking, fix_exception,print_exception
 
 class SimpleReceiver(LineOnlyReceiver,object):
 	delimiter = "\n"
@@ -288,19 +288,21 @@ class Parser(object):
 				self.proc.error(self,ex)
 				self.prompt()
 				log("parser",TRACE,"PERR OK")
-			except Exception:
+			except Exception as ex:
+				fix_exception(ex)
 				import sys,traceback
 				sys.stderr.write("*** Died in the error handler\n");
 				try:
-					traceback.print_exc(file=sys.stderr)
+					print_exception(ex,file=sys.stderr)
 
 					try:
 						log("parser",TRACE,"RESULT error",ex)
 					except defer.AlreadyCalledError: pass
 					else: self.endConnection()
-				except Exception:
+				except Exception as ex2:
+					fix_exception(ex2)
 					sys.stderr.write("\n*** Here's where we die again^2:\n");
-					traceback.print_exc(file=sys.stderr)
+					print_exception(ex2,file=sys.stderr)
 					raise
 
 	def _parseStep(self, t,txt,beg,end,line):

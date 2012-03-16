@@ -22,7 +22,7 @@ from homevent.interpreter import Interpreter
 from homevent.parser import parse
 from homevent.context import Context
 from homevent.times import unixtime,now
-from homevent.twist import fix_exception
+from homevent.twist import fix_exception,format_exception,print_exception
 from homevent.statement import Statement,main_words
 from homevent.base import Name
 
@@ -126,6 +126,9 @@ class run_logger(Logger):
 		if hasattr(event,"report"):
 			for r in event.report(99):
 				self._log(None,unicode(r))
+		elif isinstance(event,BaseException):
+			for l in format_exception(event).strip('\n').split('\n'):
+				self._log(None,l)
 		else:
 			self._log(None,unicode(event))
 		if self.dot:
@@ -187,7 +190,7 @@ def run(name,input, interpreter=Interpreter, logger=None):
 			parse(input, interpreter(Context(out=logwrite(logger))),parse_ctx)
 		except Exception as e:
 			fix_exception(e)
-			traceback.print_exc(file=sys.stderr)
+			print_exception(e,file=sys.stderr)
 		finally:
 			h.shut_down()
 			if ht is not None:

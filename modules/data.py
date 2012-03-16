@@ -26,10 +26,8 @@ from homevent.module import Module
 from homevent.run import list_workers
 from homevent.reactor import Events
 from homevent.base import Name
-from homevent.twist import fix_exception
+from homevent.twist import fix_exception,print_exception
 from homevent.collect import get_collect,all_collect,Collection
-
-from traceback import print_exc
 
 def flatten(out,s,p=""):
 	if hasattr(s,"list") and callable(s.list):
@@ -95,7 +93,7 @@ list ‹type› ‹name…›
 		except Exception as e:
 			fix_exception(e)
 			print >>self.ctx.out, "* ERROR *",repr(e)
-			print_exc(file=self.ctx.out)
+			print_exception(e,file=self.ctx.out)
 			
 		finally:
 			print >>self.ctx.out, "."
