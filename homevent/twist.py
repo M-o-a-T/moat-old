@@ -46,25 +46,35 @@ def track_errors(doit = None):
 
 # nonblocking versions of stdin/stdout
 
+def setBlocking(flag,file):
+	"""if @flag is true, the file descriptor will block upon reading."""
+	if not hasattr(file,"fileno"):
+		return
+
+	# make stdin a (non-)blocking file
+	fd = file.fileno()
+	fl = fcntl.fcntl(fd, fcntl.F_GETFL)
+	fcntl.fcntl(fd, fcntl.F_SETFL, (fl & ~os.O_NONBLOCK) if flag else (fl | os.O_NONBLOCK))
+
 class StdInDescriptor(FileDescriptor):
 	def fileno(self):
 		return 0
 	def doRead(self):
 		try:
-			fdesc.setNonBlocking(0)
+			setBlocking(False,0)
 			return fdesc.readFromFD(0, self.dataReceived)
 		finally:
-			fdesc.setBlocking(0)
+			fdesc.setBlocking(True,0)
 
 class StdOutDescriptor(FileDescriptor):
 	def fileno(self):
 		return 1
 	def writeSomeData(self, data):
 		try:
-			fdesc.setNonBlocking(1)
+			setBlocking(False,1)
 			return write(1,data)
 		finally:
-			fdesc.setBlocking(1)
+			setBlocking(True,1)
 	
 
 # count the number of active defer-to-later handlers

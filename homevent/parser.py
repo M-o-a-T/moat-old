@@ -46,17 +46,7 @@ from homevent.io import Outputter,conns
 from homevent.run import process_failure
 from homevent.event import Event,StopParsing
 from homevent.statement import global_words
-from homevent.twist import deferToLater
-
-def set_blocking(flag,file):
-	"""if FLAG is true, the file descriptor will not block upon reading."""
-	if not hasattr(file,"fileno"):
-		return
-
-	# make stdin a (non-)blocking file
-	fd = file.fileno()
-	fl = fcntl.fcntl(fd, fcntl.F_GETFL)
-	fcntl.fcntl(fd, fcntl.F_SETFL, (fl & ~os.O_NONBLOCK) if flag else (fl | os.O_NONBLOCK))
+from homevent.twist import deferToLater,setBlocking
 
 class SimpleReceiver(LineOnlyReceiver,object):
 	delimiter = "\n"
@@ -217,7 +207,7 @@ class Parser(object):
 		
 	def _run(self):
 		try:
-			set_blocking(False,self.input)
+			setBlocking(False,self.input)
 			while True:
 				try:
 					l = self.input.readline()
@@ -236,7 +226,7 @@ class Parser(object):
 		except BaseException as e:
 			return sys.exc_info()
 		finally:
-			set_blocking(True,self.input)
+			setBlocking(True,self.input)
 			gevent.spawn(self.endConnection,kill=False)
 			if not hasattr(self.input,"fileno") or self.input.fileno() > 2:
 				self.input.close()
