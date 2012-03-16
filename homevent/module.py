@@ -26,7 +26,7 @@ from homevent.event import Event
 from homevent.check import Check
 from homevent.base import Name
 from homevent.collect import Collection,Collected
-from homevent.twist import fix_exception
+from homevent.twist import fix_exception,reraise
 
 import sys
 import os
