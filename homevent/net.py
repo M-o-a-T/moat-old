@@ -284,12 +284,13 @@ class NetListener(Collected):
 		"""The server and this object are cross-connected, so this step finishes initialization."""
 		self.server = server
 		self.connector = connector
+		server.start()
 	
 	def connected(self, socket, address):
 		if not self.connector:
 			socket.close()
 			return
-		self.connector(socket,address)
+		self.connector(socket,address,self.name)
 
 	def info(self):
 		return "%s %s:%s" % (self.typ, self.name,self.connector.name)
@@ -377,8 +378,7 @@ send net text… :to ‹name…›
 			name = Name(name.apply(ctx))
 
 		val = u" ".join(unicode(s) for s in event)
-		d = self.storage[name].write(val)
-		return d
+		self.storage[name].write(val)
 
 class NetTo(Statement):
 	name=("to",)

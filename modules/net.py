@@ -30,11 +30,10 @@ from homevent.run import simple_event
 from homevent.context import Context
 
 from twisted.internet import protocol,reactor,error
-from twisted.protocols.basic import LineReceiver,_PauseableMixin
 
 from homevent.net import NetListen,NetConnect,NetSend,NetExists,NetConnected,\
 	DisconnectedError,NetListener,NetActiveConnector,NetPassiveConnector,\
-	NetName,NetTo
+	NetName,NetTo,LineReceiver
 
 import os
 

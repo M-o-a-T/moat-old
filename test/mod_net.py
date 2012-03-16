@@ -39,11 +39,11 @@ on net connect foo:
 	list net
 	list net foo
 	del net foo
-on net connect baz zaz:
+on net connect baz zaz *who:
 	send net "quux":
-		to baz zaz
-	list net baz zaz
-	del net baz zaz
+		to baz zaz $who
+	list net baz zaz $who
+	del net baz zaz $who
 on net disconnect foo:
 	log TRACE dis foo
 on net disconnect baz zaz:
