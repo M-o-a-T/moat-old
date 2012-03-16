@@ -30,7 +30,8 @@ from homevent.tokize import tokizer
 from tokenize import tok_name
 import Queue
 import sys
-import os,fcntl,errno
+import os
+import errno
 from twisted.internet import reactor,threads,defer,interfaces
 from twisted.python import failure
 from twisted.protocols.basic import LineOnlyReceiver,FileSender,_PauseableMixin

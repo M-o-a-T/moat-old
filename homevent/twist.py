@@ -32,6 +32,7 @@ from gevent.event import AsyncResult
 from posix import write
 import sys
 import os
+import fcntl
 import datetime as dt
 
 tracked_errors = ("HOMEVENT_TRACK_ERRORS" in os.environ)
