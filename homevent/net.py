@@ -174,7 +174,7 @@ class NetCommonConnector(Collected):
 
 	def write(self,val):
 		if self.socket:
-			self.socket.write(val)
+			self.socket.send(val)
 		else:
 			raise DisconnectedError(self.name)
 
@@ -368,7 +368,6 @@ send net text… :to ‹name…›
 
 """
 	def run(self,ctx,**k):
-		import pdb;pdb.set_trace()
 		event = self.params(ctx)
 		name = self.dest
 		if name is None:
