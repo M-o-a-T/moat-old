@@ -373,7 +373,7 @@ cmd ‹words…›
 	def run(self,ctx,**k):
 		event = self.par(ctx)
 		if not len(event):
-			raise syntaxerror(u"Usage: cmd ‹whatever…›")
+			raise SyntaxError(u"Usage: cmd ‹whatever…›")
 		self.parent.cmd = event
 AVRconnect.register_statement(AVRcmd)
 
@@ -390,7 +390,7 @@ port ‹device› [‹baud›]
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		if not len(event) or len(event) > 2:
-			raise syntaxerror(u"Usage: port ‹device› [‹baud›]")
+			raise SyntaxError(u"Usage: port ‹device› [‹baud›]")
 		self.parent.port = event[0]
 		if len(event) > 1:
 			self.parent.baud = int(event[1])

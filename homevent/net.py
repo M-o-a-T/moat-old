@@ -30,7 +30,7 @@ from homevent.event import Event
 from homevent.base import Name
 from homevent.run import process_failure
 from homevent.collect import Collection,Collected
-from homevent.twist import fix_exception
+from homevent.twist import fix_exception,reraise
 
 from twisted.internet import protocol,reactor,error
 from twisted.protocols.basic import LineReceiver,_PauseableMixin
@@ -250,7 +250,7 @@ You need to override the long_doc description.
 		self.client(s,name=self.dest, host=self.host,port=self.port)
 
 	def error(self,e):
-		raise e[0],e[1],e[2]
+		reraise(e)
 
 
 ##### passive connections

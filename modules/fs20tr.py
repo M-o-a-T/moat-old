@@ -256,7 +256,7 @@ del fs20 receiver ‹name…›
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		if not len(event):
-			raise syntaxerror(u"usage: del fs20 receiver ‹name…›")
+			raise SyntaxError(u"usage: del fs20 receiver ‹name…›")
 		b = recvs[Name(event)]
 		b.do_stop()
 
@@ -416,7 +416,7 @@ del fs20 sender ‹name…›
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		if not len(event):
-			raise syntaxerror(u"usage: del fs20 sender ‹name…›")
+			raise SyntaxError(u"usage: del fs20 sender ‹name…›")
 		b = xmits[Name(event)]
 		b.do_stop()
 
@@ -435,7 +435,7 @@ cmd ‹command…›
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		if not len(event):
-			raise syntaxerror(u"Usage: cmd ‹whatever…›")
+			raise SyntaxError(u"Usage: cmd ‹whatever…›")
 		self.parent.cmd = Name(event)
 FS20receive.register_statement(FS20cmd)
 FS20transmit.register_statement(FS20cmd)

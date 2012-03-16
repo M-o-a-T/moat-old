@@ -148,11 +148,13 @@ def load_module(*m):
 			mod.load()
 		except BaseException as e:
 			fix_exception(e)
-			a,b,c = sys.exc_info()
 			try:
 				mod.unload()
-			finally:
-				raise a,b,c
+			except Exception:
+				reraise(e)
+			else:
+				reraise(e)
+			# do not use finally: here
 		else:
 			mod.path = p
 	except BaseException:

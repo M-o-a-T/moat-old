@@ -44,7 +44,7 @@ from homevent.context import Context
 from homevent.io import Outputter,conns
 from homevent.event import Event,StopParsing
 from homevent.statement import global_words
-from homevent.twist import deferToLater,setBlocking, fix_exception,print_exception
+from homevent.twist import deferToLater,setBlocking, fix_exception,print_exception,reraise
 
 class SimpleReceiver(LineOnlyReceiver,object):
 	delimiter = "\n"
