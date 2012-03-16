@@ -112,12 +112,13 @@ def _report(self, verbose=False):
 		yield "ERROR: "+str(self)
 
 def fix_exception(e, tb=None):
-	"""Add a __traceback__ attribute to an exception if it's not there already"""
+	"""Add a __traceback__ attribute to an exception if it's not there already.
+		Also add a .report() call, duck-typing homevent.event.Event in the logger."""
 	if not hasattr(e,"__traceback__"):
 		if tb is None:
 			tb = sys.exc_info()[2]
 		e.__traceback__ = tb
-		e.report = _report
+	e.report = _report
 
 def print_exception(e=None,file=sys.stderr):
 	print >>file,format_exception(e)
