@@ -22,6 +22,7 @@ from homevent.interpreter import Interpreter
 from homevent.parser import parse
 from homevent.context import Context
 from homevent.times import unixtime,now
+from homevent.twist import fix_exception
 from homevent.statement import Statement,main_words
 from homevent.base import Name
 
@@ -185,6 +186,7 @@ def run(name,input, interpreter=Interpreter, logger=None):
 		try:
 			parse(input, interpreter(Context(out=logwrite(logger))),parse_ctx)
 		except Exception as e:
+			fix_exception(e)
 			traceback.print_exc(file=sys.stderr)
 		finally:
 			h.shut_down()

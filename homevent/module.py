@@ -26,6 +26,7 @@ from homevent.event import Event
 from homevent.check import Check
 from homevent.base import Name
 from homevent.collect import Collection,Collected
+from homevent.twist import fix_exception
 
 import sys
 import os
@@ -146,6 +147,7 @@ def load_module(*m):
 		try:
 			mod.load()
 		except BaseException as e:
+			fix_exception(e)
 			a,b,c = sys.exc_info()
 			try:
 				mod.unload()

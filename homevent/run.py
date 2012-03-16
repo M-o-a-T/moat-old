@@ -22,6 +22,7 @@ This is the core of the event dispatcher.
 from homevent.base import Name,SYS_PRIO,MIN_PRIO,MAX_PRIO
 from homevent.worker import WorkSequence,ConditionalWorkSequence,ExcWorker
 from homevent.collect import Collection
+from homevent.twist import fix_exception
 
 from twisted.python import failure
 
@@ -132,6 +133,7 @@ def process_failure(e=None):
 	try:
 		collect_failure(e).process(event=e)
 	except Exception as err:
+		fix_exception(err)
 		log_exc(msg="Error in failure handler", err=err, level=ERROR)
 	
 def run_event(event):

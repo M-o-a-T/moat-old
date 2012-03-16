@@ -29,7 +29,7 @@ from homevent.worker import Worker,ExcWorker
 from homevent.event import Event
 from homevent.context import Context
 from homevent.base import Name,SYS_PRIO,MIN_PRIO,MAX_PRIO
-from homevent.twist import BaseFailure
+from homevent.twist import BaseFailure,fix_exception
 from homevent.collect import Collection,Collected
 
 from gevent import spawn
@@ -195,6 +195,7 @@ class LogWorker(ExcWorker):
 			try:
 				l.log_event(event=event,level=level)
 			except Exception as e:
+				fix_exception(e)
 				print >>sys.stderr,"LOGGER CRASH 1"
 				print_exc(file=sys.stderr)
 				l.end_logging()
@@ -219,6 +220,7 @@ def log_exc(msg=None, err=None, level=ERROR):
 			try:
 				l.log(level,msg)
 			except Exception as e:
+				fix_exception(e)
 				print >>sys.stderr,"LOGGER CRASH 2"
 				print_exc(file=sys.stderr)
 				l.end_logging()
@@ -226,6 +228,7 @@ def log_exc(msg=None, err=None, level=ERROR):
 		try:
 			l.log_failure(err, level=level)
 		except Exception as e:
+			fix_exception(e)
 			print >>sys.stderr,"LOGGER CRASH 3"
 			print_exc(file=sys.stderr)
 			l.end_logging()
@@ -245,6 +248,7 @@ class LogEndEvent(Event):
 		try:
 			yield  u"END: "+unicode(Name(self.name[1:]))
 		except Exception as e:
+			fix_exception(e)
 			print >>sys.stderr,"LOGGER CRASH 4"
 			print_exc(file=sys.stderr)
 			yield  "END: REPORT_ERROR: "+repr(self.name[1:])
@@ -347,6 +351,7 @@ def log(level, *a):
 		try:
 			l.log(level, *a)
 		except Exception as e:
+			fix_exception(e)
 			print >>sys.stderr,"LOGGER CRASH 0"
 			print_exc(file=sys.stderr)
 			l.delete()

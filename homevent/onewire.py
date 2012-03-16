@@ -28,7 +28,7 @@ from homevent.context import Context
 from homevent.event import Event
 from homevent.run import process_event,process_failure,simple_event
 from homevent.reconnect import ReconnectingClientFactory
-from homevent.twist import callLater
+from homevent.twist import callLater, fix_exception
 from homevent.base import Name
 
 from twisted.internet import protocol,defer,reactor
@@ -245,6 +245,7 @@ class OWFScall(object):
 		try:
 			conn.sendMsg(typ,data,rlen)
 		except Exception as ex:
+			fix_exception(ex)
 			self.error(ex)
 
 	def dataReceived(self, data):
@@ -467,6 +468,7 @@ class OWFSqueue(OWFSreceiver):
 				log("onewire",DEBUG,"recv again")
 				return
 		except Exception as e:
+			fix_exception(e)
 			log("onewire",DEBUG,"recv err",e)
 			#process_failure()
 			self.is_done(e)

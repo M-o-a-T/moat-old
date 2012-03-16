@@ -24,6 +24,7 @@ from homevent.check import Check,register_condition,unregister_condition
 from homevent.module import Module
 from homevent.statement import Statement, main_words
 from homevent.times import now
+from homevent.twist import fix_exception
 from homevent.base import Name
 from homevent.collect import Collection,Collected
 
@@ -133,6 +134,7 @@ set rrd value ‹name…›
 		try:
 			rrdtool.update(s.upath, "-t",s.udataset, now().strftime("%s")+":"+unicode(event[0]).encode("utf-8"))
 		except Exception as e:
+			fix_exception(e)
 			if "minimum one second step" in str(e):
 				pass
 			else:

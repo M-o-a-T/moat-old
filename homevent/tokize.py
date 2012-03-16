@@ -25,8 +25,11 @@ import string, re, os, sys
 from token import *
 import tokenize as t
 from twisted.internet.defer import maybeDeferred, Deferred
+
 from homevent.logging import log,TRACE
 from homevent.event import StopParsing
+from homevent.twist import fix_exception
+
 from gevent.queue import Channel,Empty
 import gevent
 
@@ -259,6 +262,7 @@ class tokizer(object):
 					pos = pos + 1
 
 		except StopParsing as e:
+			fix_exception(e)
 			self.q = None
 			if self.parent:
 				self.parent.kill(e)

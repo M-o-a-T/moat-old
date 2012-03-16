@@ -30,7 +30,7 @@ from homevent.worker import ExcWorker
 from homevent.times import time_delta, time_until, unixdelta, now, \
 	humandelta
 from homevent.base import Name,SYS_PRIO
-from homevent.twist import log_wait, sleepUntil
+from homevent.twist import log_wait, sleepUntil, fix_exception
 from homevent.context import Context
 from homevent.logging import log,TRACE,DEBUG
 from homevent.collect import Collection,Collected
@@ -256,6 +256,7 @@ class Monitor(Collected):
 			if self.new_value is not None:
 				self.value = self.new_value
 		except Exception as e:
+			fix_exception(e)
 			process_failure(e)
 		finally:
 			log("monitor",TRACE,"Stop run",self.name)
@@ -294,6 +295,7 @@ class Monitor(Collected):
 					pass
 
 				except Exception as e:
+					fix_exception(e)
 					process_failure(e)
 					break
 
@@ -315,6 +317,7 @@ class Monitor(Collected):
 										abs(self.value-avg) > self.alarm:
 									process_event(Event(Context(),"monitor","alarm",avg,*self.name))
 							except Exception as e:
+								fix_exception(e)
 								process_failure()
 							else:
 								self.new_value = avg
@@ -327,6 +330,7 @@ class Monitor(Collected):
 			try:
 				process_event(Event(Context(),"monitor","error",*self.name))
 			except Exception as e:
+				fix_exception(e)
 				process_failure()
 
 		finally:

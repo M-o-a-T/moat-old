@@ -32,7 +32,7 @@ for typical usage.
 from homevent.context import Context
 from homevent.event import Event
 from homevent.base import Name
-from homevent.twist import BaseFailure
+from homevent.twist import BaseFailure,fix_exception
 
 from twisted.internet import defer
 from homevent.geventreactor import waitForDeferred
@@ -214,6 +214,7 @@ class Interpreter(Processor):
 		try:
 			fn.run(self.ctx)
 		except Exception as ex:
+			fix_exception(ex)
 			self.error(self,ex)
 
 	def complex_statement(self,args):

@@ -36,7 +36,7 @@ from homevent.times import time_delta, time_until, unixtime,unixdelta, now, huma
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.base import Name,SYS_PRIO
 from homevent.collect import Collection,Collected
-from homevent.twist import callLater
+from homevent.twist import callLater,fix_exception
 from homevent import logging
 
 import gevent
@@ -257,6 +257,7 @@ wait [NAME…]: for FOO…
 		try:
 			r = w.job.get()
 		except Exception as ex:
+			fix_exception(ex)
 			logging.log_exc(msg=u"Wait %s died:"%(self.name,), err=ex, level=logging.TRACE)
 			raise
 		else:

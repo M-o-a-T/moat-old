@@ -46,7 +46,7 @@ from homevent.io import Outputter,conns
 from homevent.run import process_failure
 from homevent.event import Event,StopParsing
 from homevent.statement import global_words
-from homevent.twist import deferToLater,setBlocking
+from homevent.twist import deferToLater,setBlocking, fix_exception
 
 class SimpleReceiver(LineOnlyReceiver,object):
 	delimiter = "\n"
@@ -212,6 +212,7 @@ class Parser(object):
 				try:
 					l = self.input.readline()
 				except EnvironmentError as e:
+					fix_exception(e)
 					if e.errno != errno.EAGAIN or not hasattr(self.input,"fileno"):
 						raise
 					r,_,_ = select((self.input,),(),())
@@ -278,6 +279,7 @@ class Parser(object):
 			return
 
 		except Exception as ex:
+			fix_exception(ex)
 			if self.p_stack:
 				self.proc = self.p_stack[0]
 

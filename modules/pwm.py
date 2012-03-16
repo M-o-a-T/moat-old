@@ -40,7 +40,7 @@ from homevent.worker import HaltSequence,ExcWorker
 from homevent.times import simple_time_delta, now, humandelta
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.base import Name,SYS_PRIO
-from homevent.twist import callLater
+from homevent.twist import callLater, fix_exception
 from homevent.collect import Collection,Collected
 
 import os
@@ -118,6 +118,7 @@ class CommonPM(Collected):
 			if self.state:
 				process_event(Event(self.ctx,"pcm","set",self.names[0],*self.name))
 		except Exception as ex:
+			fix_exception(ex)
 			process_failure(ex)
 		finally:
 			self.delete_done()
@@ -155,6 +156,7 @@ class CommonPM(Collected):
 			else:
 				self.next = None
 		except Exception as e:
+			fix_exception(e)
 			process_failure(e)
 			simple_event(self.ctx,"pcm","error",*self.name)
 		

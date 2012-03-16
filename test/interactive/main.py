@@ -23,7 +23,7 @@ from homevent.check import register_condition
 from homevent.module import load_module, Load,LoadDir,ModuleExists
 from homevent.reactor import ShutdownHandler,mainloop,shut_down
 from homevent.context import Context
-from homevent.twist import callLater
+from homevent.twist import callLater,fix_exception
 from homevent.geventreactor import waitForDeferred
 
 from twisted.internet import reactor,interfaces,fdesc
@@ -89,6 +89,7 @@ def ready():
 	try:
 		parse(sys.stdin, interpreter=i, ctx=c)
 	except Exception as e:
+		fix_exception(e)
 		reporter(e)
 	shut_down()
 

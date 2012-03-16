@@ -33,6 +33,7 @@ from homevent import logging
 from homevent.logging import log, Logger, \
 	TRACE,DEBUG,INFO,WARN,ERROR,PANIC
 from homevent.collect import Collection,Collected
+from homevent.twist import fix_exception
 
 import syslog
 import socket
@@ -122,6 +123,7 @@ class SysLogger(Logger):
 								  txt,
 				                  "\0" if "HOMEVENT_TEST" not in os.environ else "\n"))
 			except socket.error as err:
+				fix_exception(err)
 				if err.args[0] != errno.EINTR:
 					raise
 			else:

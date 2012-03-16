@@ -34,7 +34,7 @@ from homevent.event import RaisedError
 from homevent.check import check_condition
 from homevent import logging
 from homevent.run import process_failure
-from homevent.twist import BaseFailure
+from homevent.twist import BaseFailure, fix_exception
 
 from twisted.internet import defer
 from twisted.python import failure
@@ -77,6 +77,7 @@ Syntax:
 		try:
 			super(TryStatement,self).run(ctx,**k)
 		except Exception as err:
+			fix_exception(err)
 			if self.catch_do:
 				self.catch_do.run(ctx(error_=err), **k)
 			else:
