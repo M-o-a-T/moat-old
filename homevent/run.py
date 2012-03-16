@@ -118,14 +118,11 @@ def process_event(e, drop_errors=False):
 		if not drop_errors:
 			raise
 
-def process_failure(e=None):
+def process_failure(e):
 	"""\
 		Process a failure event. This is the internal procedure that
 		will mangle your errors.
 		"""
-	if e is None:
-		_,e,t = sys.last_exc()
-		e.traceback = t
 	from homevent.logging import log_event,ERROR,log_exc
 	log_event(event=e,level=ERROR)
 	try:
@@ -137,8 +134,9 @@ def process_failure(e=None):
 def run_event(event):
 	try:
 		process_event(event)
-	except Exception:
-		process_failure()
+	except Exception as e:
+		fix_exception(e)
+		process_failure(e)
 	
 def simple_event(ctx, *args):
 	"""\

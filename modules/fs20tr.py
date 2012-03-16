@@ -33,7 +33,7 @@ from homevent.fs20 import handler,register_handler,unregister_handler, \
 from homevent.base import Name,MIN_PRIO
 from homevent.worker import ExcWorker
 from homevent.reactor import shutdown_event
-from homevent.twist import callLater,log_wait
+from homevent.twist import callLater,log_wait, fix_exception
 
 from twisted.internet import protocol,defer,reactor
 from twisted.protocols.basic import _PauseableMixin
@@ -126,8 +126,9 @@ class FS20recv(protocol.ProcessProtocol, my_handler):
 				msg = self.waiting.pop(0)
 				log("fs20",DEBUG,msg)
 				d = self.dataReceived(msg)
-			except Exception:
-				process_failure()
+			except Exception as e:
+				fix_exception(e)
+				process_failure(e)
 			else:
 				if d:
 					d.addCallback(self.cont)

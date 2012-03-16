@@ -26,7 +26,7 @@ from homevent.run import register_worker,unregister_worker, SYS_PRIO,MAX_PRIO,\
 	process_event, process_failure
 from homevent.statement import Statement
 from homevent.io import dropConnections
-from homevent.twist import deferToLater
+from homevent.twist import deferToLater, fix_exception
 from homevent.collect import Collection,Collected
 
 from twisted.internet import reactor
@@ -112,8 +112,9 @@ def start_up():
 		running = True
 		try:
 			process_event(startup_event)
-		except Exception:
-			process_failure()
+		except Exception as e:
+			fix_exception(e)
+			process_failure(e)
 	
 def _shut_down():
 	"""\
@@ -125,8 +126,9 @@ def _shut_down():
 		running = False
 		try:
 			process_event(shutdown_event)
-		except Exception:
-			process_failure()
+		except Exception as e:
+			fix_exception(e)
+			process_failure(e)
 
 #	if not Events:
 #		_stop_mainloop()

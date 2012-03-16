@@ -25,7 +25,7 @@ from homevent.check import register_condition
 from homevent.context import Context
 from homevent.parser import read_config
 from homevent.run import process_failure
-from homevent.twist import track_errors
+from homevent.twist import track_errors, fix_exception
 from homevent.reactor import ShutdownHandler,mainloop,shut_down,\
 	stop_mainloop
 from homevent.logging import TRACE,DEBUG,INFO,WARN,ERROR,PANIC,\
@@ -91,8 +91,9 @@ def _readcf():
 	try:
 		for f in args:
 			read_config(c,f)
-	except Exception:
-		process_failure()
+	except Exception as e:
+		fix_exception(e)
+		process_failure(e)
 		shut_down()
 
 reading = None

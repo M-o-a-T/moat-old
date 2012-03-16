@@ -33,7 +33,7 @@ from homevent.fs20 import handler,register_handler,unregister_handler, \
 	PREFIX,PREFIX_TIMESTAMP
 from homevent.worker import ExcWorker
 from homevent.reactor import shutdown_event
-from homevent.twist import callLater
+from homevent.twist import callLater, fix_exception
 from homevent.collect import Collection,Collected
 
 from homevent.net import NetListen,NetConnect,NetSend,NetExists,NetConnected,\
@@ -137,8 +137,9 @@ class AVRcommon(handler):
 					self.lbuf = None
 				try:
 					self._dataReceived(msg)
-				except Exception:
-					process_failure()
+				except Exception as e:
+					fix_exception(e)
+					process_failure(e)
 
 		self.dbuf = data
 		self._start_timer()
@@ -150,8 +151,9 @@ class AVRcommon(handler):
 				msg = self.waiting.pop(0)
 				log("fs20",DEBUG,msg)
 				d = self._dataReceived(msg)
-			except Exception:
-				process_failure()
+			except Exception as e:
+				fix_exception(e)
+				process_failure(e)
 			else:
 				if d:
 					d.addCallback(self.cont)

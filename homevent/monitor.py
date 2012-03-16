@@ -318,7 +318,7 @@ class Monitor(Collected):
 									process_event(Event(Context(),"monitor","alarm",avg,*self.name))
 							except Exception as e:
 								fix_exception(e)
-								process_failure()
+								process_failure(e)
 							else:
 								self.new_value = avg
 						return
@@ -331,7 +331,7 @@ class Monitor(Collected):
 				process_event(Event(Context(),"monitor","error",*self.name))
 			except Exception as e:
 				fix_exception(e)
-				process_failure()
+				process_failure(e)
 
 		finally:
 			log("monitor",TRACE,"End run", self.name)

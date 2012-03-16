@@ -30,6 +30,7 @@ from homevent.event import Event
 from homevent.base import Name
 from homevent.run import process_failure
 from homevent.collect import Collection,Collected
+from homevent.twist import fix_exception
 
 from twisted.internet import protocol,reactor,error
 from twisted.protocols.basic import LineReceiver,_PauseableMixin
@@ -96,8 +97,9 @@ class LineReceiver(object):
 		for d in data:
 			try:
 				self.lineReceived(d)
-			except Exception:
-				process_failure()
+			except Exception as e:
+				fix_exception(e)
+				process_failure(e)
 		
 	def write(self,val):
 		super(LineReceiver,self).write(val+self.delimiter)

@@ -469,7 +469,7 @@ class OWFSqueue(OWFSreceiver):
 		except Exception as e:
 			fix_exception(e)
 			log("onewire",DEBUG,"recv err",e)
-			#process_failure()
+			#process_failure(e)
 			self.is_done(e)
 		else:
 			log("onewire",DEBUG,"recv done")

@@ -41,6 +41,7 @@ from homevent.check import Check,register_condition,unregister_condition
 from homevent.base import Name
 from homevent.collect import Collection,Collected
 from homevent.times import now,humandelta
+from homevent.twist import fix_exception
 
 import os,sys
 
@@ -252,8 +253,9 @@ set state X name...
 			s.time = now()
 			try:
 				process_event(Event(self.ctx,"state",old,value,*s.name))
-			except Exception:
-				process_failure()
+			except Exception as e:
+				fix_exception(e)
+				process_failure(e)
 		finally:
 			s.working = False
 
