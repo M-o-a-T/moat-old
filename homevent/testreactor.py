@@ -117,6 +117,10 @@ class TestReactor(GeventReactor):
 		log.msg('Main loop terminated.')
 		self.fireSystemEvent('shutdown')
 
+	def reschedule(self):
+		if self._wait and len(self._callqueue) > 0: # don't look at the time
+			gevent.kill(self.greenlet,Reschedule)
+
 def install():
 	"""Configure the twisted mainloop to be run using geventreactor."""
 	reactor = TestReactor()
