@@ -35,12 +35,6 @@ from gevent import spawn
 
 #import os
 
-class DropException:
-	"""\
-		A sentinel which log_end returns in order to not propagate exceptions beyond a Deferred's lifetime.
-		"""
-	pass
-
 class HaltSequence(Exception):
 	"""Do not execute the following workers."""
 	pass
