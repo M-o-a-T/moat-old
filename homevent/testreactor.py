@@ -58,6 +58,14 @@ class TestReactor(GeventReactor):
 		insort(self._callqueue,c)
 		self.reschedule()
 		return c
+
+	# Copy from geventreactor, but using "real" time
+	def callFromGreenlet(self,func,*args,**kw):
+		c = DelayedCall(self,self.realSeconds(),func,args,kw,seconds=self.realSeconds)
+		insort(self._callqueue,c)
+		self.reschedule()
+		return c
+
 	def mainLoop(self):
 		"""This main loop yields to gevent until the end, handling function calls along the way."""
 		self.greenlet = gevent.getcurrent()
@@ -101,7 +109,6 @@ class TestReactor(GeventReactor):
 					if c.getTime() > now:
 						break
 					del callqueue[0]
-					print >>sys.stderr,"Calling: %s %s %s"%(now,c.getTime(),c)
 					try:
 						c()
 					except gevent.GreenletExit:
