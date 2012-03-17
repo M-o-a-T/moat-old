@@ -29,7 +29,7 @@ from homevent.reactor import shutdown_event
 from homevent.times import time_delta, time_until, unixdelta, now, \
 	humandelta
 from homevent.base import Name
-from homevent.twist import callLater
+from homevent.twist import callLater, fix_exception
 from homevent.context import Context
 from homevent.logging import log,TRACE,DEBUG,ERROR
 from homevent.collect import Collection,Collected
@@ -122,8 +122,9 @@ class Timeslot(Collected):
 		if self.next is None:
 			self.next = now()
 		self.last = self.next
-		d = process_event(Event(self.ctx,"timeslot","begin",*self.name))
-		def post(_):
+
+		try:
+			process_event(Event(self.ctx,"timeslot","begin",*self.name))
 			if self.running == "pre":
 				self.running = "during"
 				self.next += dt.timedelta(0,self.duration)
@@ -132,9 +133,9 @@ class Timeslot(Collected):
 				log(ERROR,"timeslot error pre2",self.running,*self.name)
 			else:
 				self.next = None
-			return _
-		d.addCallback(post)
-		d.addErrback(self.dead)
+		except Exception as e:
+			fix_exception(e)
+			self.dead(e)
 	
 	def do_sync(self):
 		self.down()
@@ -149,17 +150,17 @@ class Timeslot(Collected):
 			return
 
 		self.running = "post"
-		d = process_event(Event(self.ctx,"timeslot","end",*self.name))
-		def post(_):
+		try:
+			process_event(Event(self.ctx,"timeslot","end",*self.name))
 			if self.running == "post":
 				self.running = "next"
 				self.next = time_delta(self.interval, now=self.next)-dt.timedelta(0,self.duration)
 				self.waiter = callLater(False, self.next, self.do_pre)
 			elif self.running not in("off","error"):
 				log(ERROR,"timeslot error post2",self.running,*self.name)
-			return _
-		d.addCallback(post)
-		d.addErrback(self.dead)
+		except Exception as e:
+			fix_exception(e)
+			self.dead(e)
 
 
 	def dead(self,_):
