@@ -54,7 +54,7 @@ class TestReactor(GeventReactor):
 			except ValueError:
 				pass
 		else:
-			c = DelayedCall(self,self.seconds()+args[0],args[1],args[2:],kw,seconds=self.seconds)
+			c = DelayedCall(self,self.realSeconds()+args[0],args[1],args[2:],kw,seconds=self.realSeconds)
 		insort(self._callqueue,c)
 		self.reschedule()
 		return c
@@ -81,8 +81,6 @@ class TestReactor(GeventReactor):
 					c = None
 					self._wake = now+10
 					delay = 10
-				if delay > 10:
-					raise RuntimeError("Real Delay too large: %s"%(delay,))
 				try:
 					self._wait = 1
 					gevent.sleep(max(0,delay))
@@ -103,11 +101,13 @@ class TestReactor(GeventReactor):
 					if c.getTime() > now:
 						break
 					del callqueue[0]
+					print >>sys.stderr,"Calling: %s %s %s"%(now,c.getTime(),c)
 					try:
 						c()
 					except gevent.GreenletExit:
 						raise
 					except:
+						from twisted.python import log
 						log.msg('Unexpected error in main loop.')
 						log.err()
 		except (gevent.GreenletExit,KeyboardInterrupt):
