@@ -32,9 +32,6 @@ from homevent.run import process_failure
 from homevent.collect import Collection,Collected
 from homevent.twist import fix_exception,reraise
 
-from twisted.internet import protocol,reactor,error
-from twisted.protocols.basic import LineReceiver,_PauseableMixin
-
 import os
 import sys
 import socket
@@ -73,7 +70,7 @@ class NetError(EnvironmentError):
 
 
 class LineReceiver(object):
-	"""A receiver for the basic line protocol."""
+	"""A receiver mix-in for the basic line protocol."""
 
 	delimiter = "\n"
 	buffer = ""
@@ -81,7 +78,7 @@ class LineReceiver(object):
 	def lineReceived(self, line):
 		"""Override this.
 		"""
-		self.loseConnection()
+		self.end()
 		raise NotImplementedError("You need to override NetReceiver.lineReceived")
 
 	def dataReceived(self,val):
@@ -147,7 +144,11 @@ class NetCommonConnector(Collected):
 			r = self.socket.recv(4096)
 			if r is None:
 				return
-			self.dataReceived(r)
+			try:
+				self.dataReceived(r)
+			except Exception as e:
+				fix_exception(e)
+				process_failure(e)
 	
 	def dataReceived(self):
 		raise NotImplementedError("You need to override NetCommonConnector.dataReceived()")
