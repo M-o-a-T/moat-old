@@ -135,8 +135,11 @@ class CommonPM(Collected):
 
 	def do_timed_switch(self):
 		self.timer = None
-		d = self.do_switch()
-		d.addErrback(process_failure)
+		try:
+			self.do_switch()
+		except Exception as e:
+			fix_exception(e)
+			process_failure(e)
 
 	def do_switch(self):
 		"""Click"""
