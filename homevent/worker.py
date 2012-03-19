@@ -47,7 +47,7 @@ def report_(err, verbose=False):
 			yield r
 	elif not isinstance(err,BaseException):
 		yield unicode(err)
-	elif verbose and not isinstance(err,RaisedError):
+	elif verbose and not getattr(err,"no_backtrace",False):
 		from traceback import format_stack
 		p = "ERROR: "
 		for l in formatTraceback(err).rstrip("\n").split("\n"):
@@ -166,7 +166,11 @@ class WorkSequence(WorkItem):
 		else:
 			self.ctx = Context()
 
-		self.info = u"Worker %d for ‹%s›" % (self.id,Name(self.event))
+		if isinstance(self.event,Event):
+			en = Name(self.event)
+		else:
+			en = unicode(self.event)
+		self.info = u"Worker %d for ‹%s›" % (self.id,en)
 
 	def __repr__(self):
 		if not hasattr(self,"work"):

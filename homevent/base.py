@@ -44,6 +44,8 @@ class Name(tuple):
 
 class RaisedError(RuntimeError):
 	"""An error that has been explicitly raised by a script"""
+	no_backtrace = True
+
 	def __init__(self,*params):
 		self.params = params
 	def __repr__(self):

@@ -95,7 +95,7 @@ def print_exception(e=None,file=sys.stderr):
 
 def format_exception(e=None):
 	tb = getattr(e,"__traceback__",None)
-	if tb is not None:
+	if tb is not None and not getattr(e,"no_backtrace",False):
 		return "".join(traceback.format_exception(e.__class__, e, e.__traceback__))
 	else:
 		return unicode(e)
