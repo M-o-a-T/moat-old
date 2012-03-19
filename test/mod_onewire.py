@@ -48,6 +48,7 @@ block:
 		wait yawn:
 			for 10
 			debug force
+		shutdown
 	catch:
 		do nothing
 

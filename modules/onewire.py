@@ -27,11 +27,7 @@ from homevent.check import Check,register_condition,unregister_condition
 from homevent.onewire import connect,disconnect, devices
 from homevent.monitor import Monitor,MonitorHandler, MonitorAgain
 
-from twisted.internet import protocol,defer,reactor
-from twisted.protocols.basic import _PauseableMixin
-
 import struct
-
 
 buses = {}
 
@@ -66,7 +62,7 @@ class OWFSdisconnect(Statement):
 	doc = "disconnect from an OWFS server"
 	long_doc="""\
 disconnect onewire NAME
-  - disconnect (asynchronously) from the onewire server named NAME.
+  - disconnect from the onewire server named NAME.
 	The system will emit connection-closed and device-absent events.
 """
 
@@ -75,6 +71,7 @@ disconnect onewire NAME
 		if len(event) != 1:
 			raise SyntaxError("Usage: disconnect onewire NAME")
 		name = event[0]
+		log(TRACE,"Dropping OWFS bus",name)
 		disconnect(buses.pop(name))
 		log(TRACE,"Drop OWFS bus",name)
 
@@ -96,11 +93,8 @@ var onewire NAME dev attr
 		var, dev, attr = event[:]
 		dev = dev.lower()
 		
-		def got(val):
-			setattr(self.parent.ctx,var,val)
-		d = devices[dev].get(attr)
-		d.addCallback(got)
-		return d
+		val = devices[dev].get(attr)
+		setattr(self.parent.ctx,var,val)
 
 class OWFSset(Statement):
 	name=("set","onewire")
@@ -116,8 +110,7 @@ set onewire VALUE dev attr
 		val, dev, attr = event[:]
 		dev = dev.lower()
 		
-		d = devices[dev].set(attr, val)
-		return d
+		devices[dev].set(attr, val)
 
 
 class OWFSdir(Statement):
@@ -148,10 +141,9 @@ dir onewire NAME path...
 			else:
 				dev = buses[event[0]].root
 				path = event[1:]
-			d = dev.dir(path=path, proc=reporter)
+			dev.dir(path=path, proc=reporter)
 
-			def term(_):
-				print >>ctx.out,"."
+			print >>ctx.out,"."
 			d.addCallback(term)
 			return d
 
@@ -415,8 +407,8 @@ wind ‹offset› ‹weight›
 	(N - E - S - W - N).
 	The offset specifies where "real" North is in the above list.
 	The weight value says how "good" the new value is likely to be; this
-	depends somewhat on how turbulent the air is around your wind vane
-	and should be between 0 and 1 (probably closer to zero).
+	depends somewhat on how turbulent the air usually is around your wind
+	vane, and must be between 0 and 1; the defaut is 0.1.
 
 """
 	def run(self,ctx,**k):
