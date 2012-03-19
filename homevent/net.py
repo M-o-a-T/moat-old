@@ -115,7 +115,7 @@ class NetCommonConnector(Collected):
 	#storage2 = net_conns
 	typ = "???common"
 
-	def __init__(self, socket, name, host,port, *a,**k):
+	def __init__(self, socket, name, host,port):
 		self.socket = socket
 		self.host = host
 		self.port = port
@@ -123,6 +123,13 @@ class NetCommonConnector(Collected):
 		assert (host,port) not in self.storage2, "already known host/port tuple"
 		super(NetCommonConnector,self).__init__()
 		self.storage2[(host,port)] = self
+		if self.socket is None:
+			try:
+				self._connect()
+			except:
+				del self.storage2[(host,port)]
+				self.delete_done()
+				raise
 
 		def dead(_):
 			self.job = None
@@ -138,6 +145,32 @@ class NetCommonConnector(Collected):
 		except Exception:
 			self.end()
 			raise
+
+	def _connect(self):
+		e = None
+		for res in socket.getaddrinfo(self.host, self.port, socket.AF_UNSPEC, socket.SOCK_STREAM):
+			af, socktype, proto, canonname, sa = res
+			try:
+				s = socket.socket(af, socktype, proto)
+			except socket.error as err:
+				fix_exception(err)
+				if e is None:
+					e = err
+				s = None
+				continue
+			try:
+				s.connect(sa)
+			except socket.error as err:
+				fix_exception(err)
+				if e is None:
+					e = err
+				s.close()
+				s = None
+				continue
+			break
+		if s is None:
+			reraise(e)
+		self.socket = s
 
 	def _reader(self):
 		while True:
@@ -225,30 +258,7 @@ You need to override the long_doc description.
 		self.start_up()
 
 	def start_up(self):
-		s = None
-		e = None
-		for res in socket.getaddrinfo(self.host, self.port, socket.AF_UNSPEC, socket.SOCK_STREAM):
-			af, socktype, proto, canonname, sa = res
-			try:
-				s = socket.socket(af, socktype, proto)
-			except socket.error:
-				if e is None:
-					e = sys.exc_info()
-				s = None
-				continue
-			try:
-				s.connect(sa)
-			except socket.error:
-				if e is None:
-					e = sys.exc_info()
-				s.close()
-				s = None
-				continue
-			break
-		if s is None:
-			self.error(e)
-			return
-		self.client(s,name=self.dest, host=self.host,port=self.port)
+		self.client(None,name=self.dest, host=self.host,port=self.port)
 
 	def error(self,e):
 		reraise(e)
