@@ -32,8 +32,8 @@ from homevent.base import Name,SYS_PRIO,MIN_PRIO,MAX_PRIO
 from homevent.twist import fix_exception,print_exception,format_exception
 from homevent.collect import Collection,Collected
 
-from gevent import spawn
-from gevent.queue import Queue,Full
+import gevent
+from gevent.queue import JoinableQueue,Full
 from gevent.select import select
 
 import sys
@@ -77,8 +77,11 @@ def log_level(cls, level=None):
 
 logger_nr = 0
 
+class FlushMe(object):
+	"""Marker to flush a logger's file"""
+	pass
 
-class Logger(Collected):
+class BaseLogger(Collected):
 	"""\
 		This class implements one particular way to log things.
 		"""
@@ -93,25 +96,31 @@ class Logger(Collected):
 		if not hasattr(self,"name") or self.name is None:
 			self.name = Name(self.__class__.__name__, "x"+str(logger_nr))
 
-		super(Logger,self).__init__()
-		self.q = Queue(100)
-		self.job = spawn(self._writer)
+		super(BaseLogger,self).__init__()
+		self.q = JoinableQueue(100)
+		self.job = gevent.spawn(self._writer)
 
 	def _writer(self):
 		for r in self.q:
-			if r is None:
-				return
-			self._log(*r)
+			try:
+				if r is None:
+					return
+				elif r is FlushMe:
+					self._flush()
+				else:
+					self._log(*r)
+			finally:
+				self.q.task_done()
 
 	# Collection stuff
 	def list(self):
 		yield ("Name",self.name)
 		yield ("Type",self.__class__.__name__)
 		yield ("Level",LogNames[self.level])
-		yield ("Out",repr(self.out))
+		yield ("Queue",self.q.qsize())
 
 	def info(self):
-		return LogNames[self.level]+" "+repr(self.out)
+		return LogNames[self.level]+": "+self.__class__.__name__
 
 	def delete(self, ctx=None):
 		self.q.put(None)
@@ -124,32 +133,61 @@ class Logger(Collected):
 	def _wlog(self, *a):
 		self.q.put(a, block=False)
 
-	def _log(self, level, data):
-		if hasattr(self.out,'fileno'):
-			select((),(self.out,))
-		print >>self.out,data
+	def _log(self, *a):
+		raise NotImplementedError("You need to override %s._log" % (self.__class__.__name__,))
+
+	def _flush(self):
+		pass
 
 	def log(self, level, *a):
 		if level >= self.level:
 			self._wlog(level,u" ".join(unicode(x) for x in a))
-			self.flush()
+			if "HOMEVENT_TEST" in os.environ:
+				self.flush()
 
 	def log_event(self, event, level):
 		if level >= self.level:
 			for r in report_(event,99):
 				self._wlog(level,r)
-			self.flush()
+			if "HOMEVENT_TEST" in os.environ:
+				self.flush()
 
 	def log_failure(self, err, level=WARN):
 		if level >= self.level:
 			self._wlog(level,format_exception(err))
 	
 	def flush(self):
-		pass
+		self.q.put(FlushMe)
+		self.q.join()
 
 	def end_logging(self):
 		self.flush()
 		self.delete()
+
+class Logger(BaseLogger):
+	"""\
+		This class logs to a file.
+		"""
+	def __init__(self, level, out=sys.stdout):
+		super(Logger,self).__init__(level)
+		self.out = out
+
+	def _log(self, level, data):
+		if hasattr(self.out,'fileno'):
+			select((),(self.out,))
+		print >>self.out,data
+	
+	def _flush(self):
+		self.out.flush()
+
+	def list(self):
+		for r in super(Loger.self).list():
+			yield r
+		yield ("Out",repr(self.out))
+
+	def info(self):
+		return LogNames[self.level]+" "+repr(self.out)
+
 
 class LogWorker(ExcWorker):
 	"""\

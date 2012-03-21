@@ -30,7 +30,7 @@ log
 from homevent.module import Module
 from homevent.statement import Statement, main_words
 from homevent import logging
-from homevent.logging import log, Logger, \
+from homevent.logging import log, BaseLogger, \
 	TRACE,DEBUG,INFO,WARN,ERROR,PANIC
 from homevent.collect import Collection,Collected
 from homevent.twist import fix_exception
@@ -82,7 +82,7 @@ local_levels = {
 }
 
 
-class SysLogger(Logger):
+class SysLogger(BaseLogger):
 	"""\
 		This class implements a logger that writes to syslog.
 		"""

@@ -17,7 +17,7 @@
 ##
 
 import homevent as h
-from homevent.logging import Logger, TRACE,NONE, log, log_level
+from homevent.logging import BaseLogger, TRACE,NONE, log, log_level
 from homevent.interpreter import Interpreter
 from homevent.parser import parse
 from homevent.context import Context
@@ -55,7 +55,7 @@ def ttime():
 r_fli = re.compile(r'(:\s+File ").*/([^/]+/[^/]+)", line \d+, in')
 r_hex = re.compile(r'object at 0x[0-9a-fA-F]+')
 
-class run_logger(Logger):
+class run_logger(BaseLogger):
 	"""\
 		This class checks that the current log matches the stored log.
 		"""
