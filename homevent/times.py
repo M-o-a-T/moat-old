@@ -38,7 +38,7 @@ if "HOMEVENT_TEST" in os.environ:
 	def now(force=False):
 		if force:
 			return dt.datetime.now()
-		r = dt.datetime.utcfromtimestamp(1049519228) # 2003-04-05 06:07:08 UTC
+		r = dt.datetime.utcfromtimestamp(1049522828) # 2003-04-05 06:07:08 UTC
 		return r + dt.timedelta(0, current_slot // SLOT, (current_slot % SLOT) * (1e6 / SLOT) )
 
 	def test_runtime():
