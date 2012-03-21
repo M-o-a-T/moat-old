@@ -99,6 +99,8 @@ class Logger(Collected):
 
 	def _writer(self):
 		for r in self.q:
+			if r is None:
+				return
 			self._log(*r)
 
 	# Collection stuff
@@ -112,7 +114,10 @@ class Logger(Collected):
 		return LogNames[self.level]+" "+repr(self.out)
 
 	def delete(self, ctx=None):
-		self.job.kill()
+		self.q.put(None)
+		self.job.join(timeout=1)
+		if self.job.dead:
+			self.job.kill()
 		self.job = None
 		self.delete_done()
 
