@@ -59,10 +59,10 @@ class NETreceiver(LineReceiver):
 		line = line.strip().split()
 		simple_event(Context(),"net", *(self.factory.name + tuple(line)))
 
-	def down_event(self):
+	def down_event(self, external=False):
 		simple_event(Context(),"net","disconnect",*self.name)
 
-	def up_event(self):
+	def up_event(self, external=False):
 		simple_event(Context(),"net","connect",*self.name)
 
 class NETactive(NETreceiver, NetActiveConnector):

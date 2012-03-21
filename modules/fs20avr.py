@@ -297,13 +297,13 @@ class AVRclient_factory(NetClientFactory):
 	storage = AVRs.storage
 	storage2 = avr_conns
 
-	def down_event(self):
+	def down_event(self, external=False):
 		simple_event(Context(),"fs20","avr","disconnect",*self.name)
 
 	def not_up_event(self):
 		simple_event(Context(),"fs20","avr","error",*self.name)
 
-	def up_event(self):
+	def up_event(self, external=False):
 		simple_event(Context(),"fs20","avr","connect",*self.name)
 
 	def protocol(self):

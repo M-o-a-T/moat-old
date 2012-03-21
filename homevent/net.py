@@ -123,6 +123,7 @@ class NetCommonConnector(Collected):
 		assert (host,port) not in self.storage2, "already known host/port tuple"
 		super(NetCommonConnector,self).__init__()
 		self.storage2[(host,port)] = self
+		external = (self.socket is not None)
 		if self.socket is None:
 			try:
 				self._connect()
@@ -141,7 +142,7 @@ class NetCommonConnector(Collected):
 		self.job.link(dead)
 
 		try:
-			self.up_event()
+			self.up_event(external)
 		except Exception:
 			self.close()
 			raise
@@ -199,8 +200,8 @@ class NetCommonConnector(Collected):
 		self.close(external=False)
 		self.delete_done()
 
-	def up_event(self):
-		self.close()
+	def up_event(self,external=False):
+		self.close(True)
 		raise NotImplementedError("You need to override NetCommonConnector.up_event()")
 
 	def down_event(self,external=True):
@@ -260,7 +261,7 @@ You need to override the long_doc description.
 		self.start_up()
 
 	def start_up(self):
-		self.client(None,name=self.dest, host=self.host,port=self.port)
+		self.client(name=self.dest, host=self.host,port=self.port)
 
 	def error(self,e):
 		reraise(e)
