@@ -34,7 +34,7 @@ block:
 		ssh directory "../keys"
 
 # TODO: run an external test ‽
-listen ssh 50022
+listen ssh 50922
 auth ssh smurf "AAAAB3NzaC1kc3MAAACBAOvddksPhkNQIxJWTvWh6+NYR2yUBSMs2lwC4PSbmUOdjyoU9pwcF1ARJNIUxPrFBfT6bsP1W4RY/FAbS8rNsIwiaTqbqtiE8Dm9ea1ofIRBQFjsECRKjsWxBIOSOpQLhAin0CFmzZBJd4GZYVc6MV1j3uvi8pprqC5DkOMmq5wxAAAAFQD+uUSzVO526t0smxAi2eyDQMhmZQAAAIBhc6+jU7kNxv9dFaZ2QlqzhYiD4h3flWg1x4dMhkLIoZqYryOtSu+Cj2cda4ES94N/cRir3fTEKvjHA9Lpw0Ul4kdLdoebu8Kum6jspTRqTMi9CrAZ5Ub27P4jy/N/ahVUtGWQZAdxeNQEEXo8z6b+oCul5H8aFYxr1rvbtpdK8wAAAIEAx1zIfnMecvXNcxa1tVruWFXU6bN0GC1Z0scYhjaYCgZPOZwlywIDd4ui4t9DyPxh+ZyPjcyDtqjOABFU5qVR0QoyIH7DRBzBi91ovDM2Fu+k2kfng4ewhUbN6If2jgX6DBwqS6HhCmA210+P+G+K9+RarStL/43TgQvog5zDDLM="
 
 list ssh auth
