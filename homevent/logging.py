@@ -37,6 +37,7 @@ from gevent.queue import Queue,Full
 from gevent.select import select
 
 import sys
+import os
 
 __all__ = ("Logger",
 	"log","log_run","log_created","log_halted","LogNames",
@@ -324,7 +325,7 @@ def log(level, *a):
 		"""
 	exc = []
 	if isinstance(level,basestring):
-		lim = levels.get(level,NONE)
+		lim = levels.get(level, TRACE if "HOMEVENT_TEST" in os.environ else NONE)
 		# get the real level from a and add the subsystem name to the front
 		b = level
 		level = a[0]

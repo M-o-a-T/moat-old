@@ -17,7 +17,7 @@
 ##
 
 import homevent as h
-from homevent.logging import Logger, TRACE, log, log_level
+from homevent.logging import Logger, TRACE,NONE, log, log_level
 from homevent.interpreter import Interpreter
 from homevent.parser import parse
 from homevent.context import Context
@@ -41,6 +41,8 @@ exitcode = 0
 log_level("event",TRACE)
 log_level("monitor",TRACE)
 log_level("fs20",TRACE)
+log_level("parser",NONE)
+log_level("token",NONE)
 
 startup=now()
 def ixtime(t=None):
