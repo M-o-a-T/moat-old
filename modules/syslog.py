@@ -84,7 +84,7 @@ local_levels = {
 
 class SysLogger(Logger):
 	"""\
-		This class implements one particular way to log things.
+		This class implements a logger that writes to syslog.
 		"""
 	def __init__(self, name, address="/dev/log", facility="user", level="info"):
 		self.name = name
