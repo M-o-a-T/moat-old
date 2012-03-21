@@ -78,7 +78,7 @@ class LineReceiver(object):
 	def lineReceived(self, line):
 		"""Override this.
 		"""
-		self.end()
+		self.close()
 		raise NotImplementedError("You need to override NetReceiver.lineReceived")
 
 	def dataReceived(self,val):
@@ -115,7 +115,7 @@ class NetCommonConnector(Collected):
 	#storage2 = net_conns
 	typ = "???common"
 
-	def __init__(self, socket, name, host,port):
+	def __init__(self, name, host,port, socket=None):
 		self.socket = socket
 		self.host = host
 		self.port = port
@@ -135,7 +135,7 @@ class NetCommonConnector(Collected):
 			self.job = None
 			if self.socket is not None:
 				self.socket.close()
-				self.down_event()
+				self.down_event(True)
 
 		self.job = gevent.spawn(self._reader)
 		self.job.link(dead)
@@ -143,7 +143,7 @@ class NetCommonConnector(Collected):
 		try:
 			self.up_event()
 		except Exception:
-			self.end()
+			self.close()
 			raise
 
 	def _connect(self):
@@ -174,10 +174,10 @@ class NetCommonConnector(Collected):
 
 	def _reader(self):
 		while True:
-			r = self.socket.recv(4096)
-			if r is None:
-				return
 			try:
+				r = self.socket.recv(4096)
+				if r is None or r == "":
+					return
 				self.dataReceived(r)
 			except Exception as e:
 				fix_exception(e)
@@ -194,16 +194,16 @@ class NetCommonConnector(Collected):
 		yield ("host",self.host)
 		yield ("port",self.port)
 
-	def delete(self,ctx):
+	def delete(self,ctx=None):
 		assert self==self.storage2.pop((self.host,self.port))
-		self.end()
+		self.close(external=False)
 		self.delete_done()
 
 	def up_event(self):
-		self.end()
+		self.close()
 		raise NotImplementedError("You need to override NetCommonConnector.up_event()")
 
-	def down_event(self):
+	def down_event(self,external=True):
 		raise NotImplementedError("You need to override NetCommonConnector.down_event()")
 
 	def write(self,val):
@@ -212,7 +212,7 @@ class NetCommonConnector(Collected):
 		else:
 			raise DisconnectedError(self.name)
 
-	def end(self):
+	def close(self,external=False):
 		r,self.job = self.job,None
 		if r:
 			r.kill()
@@ -220,7 +220,9 @@ class NetCommonConnector(Collected):
 		c,self.socket = self.socket,None
 		if c:
 			c.close()
-			self.down_event()
+			self.down_event(external=external)
+	def closed(self):
+		self.close(external=True)
 
 
 ##### active connections
@@ -276,7 +278,7 @@ class NetPassiveConnector(NetCommonConnector):
 		name_seq += 1
 
 		name = name+("N"+str(name_seq),)
-		super(NetPassiveConnector,self).__init__(socket, name=name, host=address[0],port=address[1])
+		super(NetPassiveConnector,self).__init__(socket=socket, name=name, host=address[0],port=address[1])
 
 
 class NetListener(Collected):

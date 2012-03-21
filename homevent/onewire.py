@@ -25,13 +25,16 @@ from homevent.logging import log,log_exc,DEBUG,TRACE,INFO,WARN,ERROR
 from homevent.statement import Statement, main_words
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.context import Context
+from homevent.collect import Collection
 from homevent.event import Event
 from homevent.run import process_event,process_failure,simple_event
 from homevent.reconnect import ReconnectingClientFactory
 from homevent.twist import callLater, fix_exception
 from homevent.base import Name
-from homevent.msg import MsgReceiver,MsgBase,MsgQueue,\
-	P_STANDARD,P_URGENT,P_BACKGROUND
+from homevent.net import NetActiveConnector
+from homevent.msg import MsgReceiver,MsgBase,MsgQueue,MsgFactory,\
+	PRIO_STANDARD,PRIO_URGENT,PRIO_BACKGROUND,\
+	RECV_AGAIN,MINE
 
 import struct
 import os
@@ -73,6 +76,8 @@ class OWFSUnspecdError(RuntimeError):
 
 class idErr(RuntimeError):
 	def __init__(self,path):
+		if path is None:
+			import pdb;pdb.set_trace()
 		self.path = path
 
 class TimedOut(idErr):
@@ -136,14 +141,15 @@ class OWFSassembler(object):
 	_len = 24
 
 	def __init__(self,persist=False,*a,**k):
+		self.persist = persist
 		super(OWFSassembler,self).__init__(*a,**k)
 		
-	def errReceived(self,err):
-		self.end()
-		raise NotImplementedError("You need to override OWFSassembler.errReceived")
+	def error(self,err):
+		self.close()
+		raise NotImplementedError("You need to override OWFSassembler.error")
 
 	def msgReceived(self,err):
-		self.end()
+		self.close()
 		raise NotImplementedError("You need to override OWFSassembler.msgReceived")
 
 	def dataReceived(self, data):
@@ -159,7 +165,7 @@ class OWFSassembler(object):
 				if offset & 32768: offset = 0
 
 				if version != 0:
-					self.errReceived(RuntimeError("Wrong version: %d"%(version,)))
+					self.error(RuntimeError("Wrong version: %d"%(version,)))
 					return
 				if payload_len == -1 and data_len == 0 and offset == 0:
 
@@ -169,7 +175,7 @@ class OWFSassembler(object):
 #					return
 
 				if payload_len > self.MAX_LENGTH:
-					self.errReceived(RuntimeError("Length exceeded: %d %d %d"%(payload_len,offset,data_len,)))
+					self.error(RuntimeError("Length exceeded: %d %d %d"%(payload_len,offset,data_len,)))
 					return
 				self._offset = offset
 				if payload_len:
@@ -185,7 +191,7 @@ class OWFSassembler(object):
 				self._typ = None
 				self._len = 24
 
-				self.msgReceived((typ,data))
+				self.msgReceived(typ=typ,data=data)
 
 	def sendMsg(self, typ, data, rlen):
 		"""Send an OWFS message to the other end of the connection.
@@ -204,16 +210,16 @@ class OWFSassembler(object):
 			0, len(data), typ, flags, rlen, 0) +data)
 
 
+class OWchans(Collection):
+       name = "owfs connection"
+OWchans = OWchans()
+OWchans.does("del")
+OWchans2 = {}
+
 class OWFSchannel(OWFSassembler, NetActiveConnector):
 	"""A receiver for the protocol used by OWFS."""
-	pass
-
-class OWFSqueue(MsgQueue):
-	def __init__(self,name,host,port,persist=False):
-		self.host = host
-		self.port = port
-		self.persist = persist
-		super(OWFSqueue,self).__init__(name=name, factory=MsgFactory(OWFSchannel,host=host,port=port,persist=persist))
+	storage = OWchans
+	storage2 = OWchans2
 
 
 class OWFSxmit(object):
@@ -223,6 +229,8 @@ class OWFSxmit(object):
 
 	def sendMsg(self,conn, typ,data, rlen=0):
 		try:
+			if not hasattr(conn,"sendMsg"):
+				import pdb;pdb.set_trace()
 			conn.sendMsg(typ,data,rlen)
 		except Exception as ex:
 			fix_exception(ex)
@@ -234,23 +242,21 @@ class OWFScall(OWFSxmit,MsgBase):
 	prio = PRIO_STANDARD
 	retries = 10
 	cached = False
+	d = None
 
-	def __init__(self):
-		self.result = AsyncResult()
-	
 	def __repr__(self):
 		return u"‹"+self.__class__.__name__+u"›"
 
 	def dataReceived(self, data):
 		# child object expect this
 		log("onewire",DEBUG,"done: ",self)
-		if self.d is not None:
-			self.d.set(data)
+		if self.result is not None:
+			self.result.set(data)
 
-	def recv(self, typ, data):
-		if typ < 0:
+	def recv(self, msg):
+		if msg.typ < 0:
 			return NOT_MINE
-		r = self.dataReceived(data)
+		r = self.dataReceived(msg.data)
 		if r is None:
 			r = MINE
 		return r
@@ -261,16 +267,11 @@ class OWFScall(OWFSxmit,MsgBase):
 			return True
 		return False
 
-	def done(self, _=None):
-		"""Processing is finished."""
-		if self.d is not None and not self.d.successful():
-			raise RuntimeError("Did not trigger the result in dataReceived()",_)
-	
-	def errReceived(self,err):
+	def error(self,err):
 		"""An error occurred."""
-		if not self.d.successful:
+		if self.result is not None and not self.result.successful:
 			log("onewire",DEBUG,"done error: ",self,err)
-			self.d.set_exception(err)
+			self.result.set_exception(err)
 		else:
 			process_failure(err)
 
@@ -348,14 +349,17 @@ class NOPmsg(OWFScall):
 		self.sendMsg(conn,OWMsg.nop,"",0)
 
 
-class ATTRgetmsg(OWFStimeout,OWFScall):
+class ATTRgetmsg(OWFScall):
 	def __init__(self,path, prio=PRIO_STANDARD):
+		if path is None:
+			import pdb;pdb.set_trace()
 		self.path = path
 		self.prio = prio
 		super(ATTRgetmsg,self).__init__()
 
 	def send(self,conn):
 		self.sendMsg(conn,OWMsg.read,self._path(self.path)+'\0',8192)
+		return RECV_AGAIN
 	
 	def __repr__(self):
 		return "‹"+self.__class__.__name__+" "+self.path[-2]+" "+self.path[-1]+"›"
@@ -364,8 +368,10 @@ class ATTRgetmsg(OWFStimeout,OWFScall):
 	# .dataReceived() already does what's expected
 	
 
-class ATTRsetmsg(OWFStimeout,OWFScall):
+class ATTRsetmsg(OWFScall):
 	def __init__(self,path,value, prio=PRIO_URGENT):
+		if path is None:
+			import pdb;pdb.set_trace()
 		self.path = path
 		self.value = value
 		super(ATTRsetmsg,self).__init__()
@@ -373,13 +379,14 @@ class ATTRsetmsg(OWFStimeout,OWFScall):
 	def send(self,conn):
 		val = unicode(self.value)
 		self.sendMsg(conn, OWMsg.write,self._path(self.path)+'\0'+val,len(val))
+		return RECV_AGAIN
 
 	def __repr__(self):
 		return u"‹"+self.__class__.__name__+" "+self.path[-2]+" "+self.path[-1]+" "+unicode(self.value)+u"›"
 		
 
 
-class DIRmsg(OWFStimeout,OWFScall):
+class DIRmsg(OWFScall):
 	error_on_timeout = False
 	prio = PRIO_BACKGROUND
 	empty_ok = True
@@ -387,6 +394,8 @@ class DIRmsg(OWFStimeout,OWFScall):
 	dirall = True
 
 	def __init__(self,path,cb):
+		if path is None:
+			import pdb;pdb.set_trace()
 		self.path = path
 		self.cb = cb
 		super(DIRmsg,self).__init__()
@@ -396,24 +405,28 @@ class DIRmsg(OWFStimeout,OWFScall):
 			self.sendMsg(conn, OWMsg.dirall, self._path(self.path)+'\0', 0)
 		else:
 			self.sendMsg(conn, OWMsg.dir, self._path(self.path)+'\0', 0)
+		return RECV_AGAIN
 
 	def dataReceived(self,data):
 		if self.dirall:
+			n=0
 			for entry in data.split(","):
+				n += 1
 				try: entry = entry[entry.rindex('/')+1:]
 				except ValueError: pass
 				self.cb(entry)
+			self.result.set(n)
 		else:
 			if len(data):
 				try: data = data[data.rindex('/')+1:]
 				except ValueError: pass
 				self.cb(data)
-				return True
+				return RECV_AGAIN
+			self.result.set(n)
 	
 	### TODO: retry with "dir" if the server does not understand "dirall"
 	def done(self, _=None):
 		log("onewire",DEBUG,"doneDIR",self)
-		self.d.callback(_)
 		return super(DIRmsg,self).done()
 
 	def __repr__(self):
@@ -424,15 +437,18 @@ class OWbus(Collection):
 OWbus = OWbus()
 OWbus.does("del")
 
+
 class OWFSqueue(MsgQueue):
 	"""An adapter for the owfs server protocol"""
 	storage = OWbus
+	ondemand = True
 
-	def __init__(self, *a,**k):
-		super(OWFSqueue,self).__init__(*a,**k)
-		if not k.get("persist",False):
+	def __init__(self, name, host,port, persist=False, *a,**k):
+		super(OWFSqueue,self).__init__(name=name, factory=MsgFactory(OWFSchannel,name=name,host=host,port=port,persist=persist, **k))
+		if not persist:
 			self.max_send = 1
 		self.nop = None
+		self.root = OWFSroot(self)
 
 	def delete(self):
 		self.stop()
@@ -445,7 +461,7 @@ class OWFSqueue(MsgQueue):
 		def dead(_):
 			self.watcher = None
 			self._clean_watched()
-		self.watcher.join(dead)
+		self.watcher.link(dead)
 
 	def stop(self):
 		if self.watcher:
@@ -577,7 +593,7 @@ class OWFSqueue(MsgQueue):
 #		self.name = name
 #		self._init_queues()
 #		self.persist = persist
-#		self.up_event = False
+##		self.up_event = False
 #		self.root = OWFSroot(self)
 #		self.watcher_id = None
 #		self.nop = None
@@ -708,113 +724,99 @@ class OWFSqueue(MsgQueue):
 #			self._drop()
 #		
 #
-#	def all_devices(self, proc):
-#		seen_mplex = {}
-#		def doit(dev,path=(),key=None):
-#			buses = []
-#			entries = []
-#			def got_entry(name):
-#				if key is None and name.startswith("bus."):
-#					buses.append(name)
-#				elif len(name)>3 and name[2] == ".":
-#					entries.append(name)
-#				else:
-#					log(TRACE,"got unrecognized OWFS name %s" % (name,))
-#
-#			def done(_):
-#				f = defer.succeed(None)
-#				if buses:
-#					for b in buses:
-#						f.addCallback(_call,doit,dev,path=path+(b,),key=None)
-#
-#				p = dev.path
-#				if dev.bus_id:
-#					p += (dev.bus_id,)
-#				p += path
-#				if key:
-#					p += (key,)
-#
-#				for b in entries:
-#					dn = OWFSdevice(id=b,bus=self,path=p)
-#					f.addCallback(_call,proc,dn)
-#					if b.startswith("1F.") and b not in seen_mplex:
-#						seen_mplex[b] = f
-#						f.addCallback(_call,doit,dn,key="main")
-#						f.addCallback(_call,doit,dn,key="aux")
-#				return f
-#
-#			e = dev.dir(key=key,proc=got_entry,path=path)
-#			e.addCallback(done)
-#			return e
-#
-#		return doit(self.root)
-#
-#	def update_all(self):
-#		try:
-#			process_event(Event(Context(),"onewire","scanning",self.name))
-#			self._update_all()
-#		except Exception as e:
-#			fix_exception(e)
-#			process_failure(e)
-#
-#	def _update_all(self):
-#		log(TRACE,"OWFS start bus update")
-#		old_ids = devices.copy()
-#		new_ids = {}
-#		seen_ids = {}
-#		def got_dev(dev):
-#			if dev.id in seen_ids:
-#				return
-#			seen_ids[dev.id] = dev
-#			if dev.id in old_ids:
-#				del old_ids[dev.id]
-#			else:
-#				new_ids[dev.id] = dev
-#		d = self.all_devices(got_dev)
-#
-#		def cleanup(_):
-#			e = defer.succeed(None)
-#			n_old = 0
-#			n_dev = 0
-#			for dev in old_ids.itervalues():
-#				if dev.bus is self:
-#					n_old += 1
-#					## Just because something vanishes from the listing
-#					## doesn't mean it's dead; the bus may be a bit unstable
-#					# dev.go_down()
-#					log(DEBUG,"Bus unstable?",self.name,dev.id)
-#
-#			for dev in devices.itervalues():
-#				if dev.bus is self:
-#					n_dev += 1
-#			
-#			def dropit(_,dev):
-#				del devices[dev.id]
-#				if _.check(OWFSerror):
-#					log(WARN,_.getErrorMessage())
-#					return
-#				return process_failure(_)
-#
-#			for dev in new_ids.itervalues():
-#				if not hasattr(dev,"typ"):
-#					e.addCallback(_call,dev.get,"type")
-#					e.addCallback(dev._setattr,"typ")
-#				e.addCallback(_call,dev.go_up)
-#				e.addErrback(dropit,dev)
-#
-#			def num(_):
-#				simple_event(Context(),"onewire","scanned",self.name,n_old, len(new_ids), n_dev)
-#				return len(old_ids)
-#			e.addCallback(num)
-#			return e
-#			
-#		d.addCallback(cleanup)
-#		def lerr(_):
-#			log(TRACE,"OWFS done bus update (with error)")
-#			return _
-#		d.addErrback(lerr)
-#		return d
-#	
+	def all_devices(self):
+		seen_mplex = {}
+		def doit(dev,path=(),key=None):
+			buses = []
+			entries = []
+			def got_entry(name):
+				if key is None and name.startswith("bus."):
+					buses.append(name)
+				elif len(name)>3 and name[2] == ".":
+					entries.append(name)
+				else:
+					log(TRACE,"got unrecognized OWFS name %s" % (name,))
+
+			dev.dir(key=key,proc=got_entry,path=path)
+
+			if buses:
+				for b in buses:
+					for res in doit(dev,path=path+(b,),key=None):
+						yield res
+				return
+
+			p = dev.path
+			if dev.bus_id:
+				p += (dev.bus_id,)
+			p += path
+			if key:
+				p += (key,)
+
+			for b in entries:
+				dn = OWFSdevice(id=b,bus=self,path=p)
+				yield dn
+				if b.startswith("1F.") and b not in seen_mplex:
+					seen_mplex[b] = f
+					for res in doit(dn,key="main"):
+						yield res
+					for res in doit(dn,key="aux"):
+						yield res
+
+		return doit(self.root)
+
+	def update_all(self):
+		try:
+			process_event(Event(Context(),"onewire","scanning",self.name))
+			self._update_all()
+		except Exception as e:
+			fix_exception(e)
+			process_failure(e)
+
+	def _update_all(self):
+		log(TRACE,"OWFS start bus update")
+		old_ids = devices.copy()
+		new_ids = {}
+		seen_ids = {}
+
+		for dev in self.all_devices():
+			if dev.id in seen_ids:
+				continue
+			seen_ids[dev.id] = dev
+			if dev.id in old_ids:
+				del old_ids[dev.id]
+			else:
+				new_ids[dev.id] = dev
+
+		n_old = 0
+		n_dev = 0
+		for dev in old_ids.itervalues():
+			if dev.bus is self:
+				n_old += 1
+				## Just because something vanishes from the listing
+				## doesn't mean it's dead; the bus may be a bit unstable
+				# dev.go_down()
+				log(DEBUG,"Bus unstable?",self.name,dev.id)
+
+		for dev in devices.itervalues():
+			if dev.bus is self:
+				n_dev += 1
+		
+		for dev in new_ids.itervalues():
+			if not hasattr(dev,"typ"):
+				try:
+					t = dev.get("type")
+					dev._setattr(t,"typ")
+				except OWFSerror as ex:
+					del devices[dev.id]
+					fix_exception(ex)
+					log(WARN,ex)
+				except Exception as ex:
+					del devices[dev.id]
+					fix_exception(ex)
+					process_failure(ex)
+
+		simple_event(Context(),"onewire","scanned",self.name,n_old, len(new_ids), n_dev)
+			
 	def _watcher(self):
 		res = []
 		while True:
@@ -823,19 +825,21 @@ class OWFSqueue(MsgQueue):
 			except Exception as ex:
 				fix_exception(ex)
 				process_failure(ex)
+				resl = len(res)
 				while res:
 					q = res.pop()
 					q.set_exception(ex)
 			else:
+				resl = len(res)
 				while res:
 					q = res.pop()
 					q.set(None)
 
 			if "HOMEVENT_TEST" in os.environ:
-				if _: d = 10
+				if resl: d = 10
 				else: d = 30
 			else:
-				if _: d = 60
+				if resl: d = 60
 				else: d = 300
 
 			while True:
@@ -896,6 +900,8 @@ class OWFSdevice(object):
 		if short_id:
 			self.id = short_id.lower()
 		self.bus = bus
+		if path is None:
+			import pdb;pdb.set_trace()
 		self.path = path
 		self.is_up = None
 		self.ctx = Context()
@@ -931,10 +937,10 @@ class OWFSdevice(object):
 			raise DisconnectedDeviceError(self.id)
 
 		msg = ATTRgetmsg(self.path+(self.bus_id,key))
-		self.bus.queue(msg)
+		msg.queue(self.bus)
 
 		try:
-			res = self.result.get()
+			res = msg.result.get()
 		except Exception as ex:
 			fix_exception(ex)
 			self.go_down(ex)
@@ -956,7 +962,7 @@ class OWFSdevice(object):
 			raise DisconnectedDeviceError(self.id)
 
 		msg = ATTRsetmsg(self.path+(self.bus_id,key),val)
-		self.bus.queue(msg)
+		msg.queue(self.bus)
 		try:
 			return msg.result.get()
 		except Exception as ex:
@@ -975,7 +981,8 @@ class OWFSdevice(object):
 			p += (key,)
 
 		msg = DIRmsg(p,proc)
-		self.bus.queue(msg)
+		msg.queue(self.bus)
+
 		try:
 			return msg.result.get()
 		except Exception as ex:
