@@ -133,10 +133,11 @@ class Collected(object):
 		yield (unicode(self),)
 		yield ("name",self.name)
 
-#	def delete(self, ctx=None):
-#		"""Remove myself from a collection"""
-#		raise NotImplementedError("You need to override 'del' in '%s'" % (self.__class__.__name__,))
-#
+	def delete(self, ctx=None):
+		"""Remove myself from a collection"""
+		#raise NotImplementedError("You need to override 'del' in '%s'" % (self.__class__.__name__,))
+		pass # TODO: combine with delete_done, now that there are no more Deferreds
+
 	def delete_done(self):
 		del self.storage[self.name]
 
