@@ -76,8 +76,7 @@ class OWFSUnspecdError(RuntimeError):
 
 class idErr(RuntimeError):
 	def __init__(self,path):
-		if path is None:
-			import pdb;pdb.set_trace()
+		assert path is not None
 		self.path = path
 
 class TimedOut(idErr):
@@ -229,8 +228,6 @@ class OWFSxmit(object):
 
 	def sendMsg(self,conn, typ,data, rlen=0):
 		try:
-			if not hasattr(conn,"sendMsg"):
-				import pdb;pdb.set_trace()
 			conn.sendMsg(typ,data,rlen)
 		except Exception as ex:
 			fix_exception(ex)
@@ -351,8 +348,7 @@ class NOPmsg(OWFScall):
 
 class ATTRgetmsg(OWFScall):
 	def __init__(self,path, prio=PRIO_STANDARD):
-		if path is None:
-			import pdb;pdb.set_trace()
+		assert path is not None
 		self.path = path
 		self.prio = prio
 		super(ATTRgetmsg,self).__init__()
@@ -370,8 +366,7 @@ class ATTRgetmsg(OWFScall):
 
 class ATTRsetmsg(OWFScall):
 	def __init__(self,path,value, prio=PRIO_URGENT):
-		if path is None:
-			import pdb;pdb.set_trace()
+		assert path is not None
 		self.path = path
 		self.value = value
 		super(ATTRsetmsg,self).__init__()
@@ -394,8 +389,7 @@ class DIRmsg(OWFScall):
 	dirall = True
 
 	def __init__(self,path,cb):
-		if path is None:
-			import pdb;pdb.set_trace()
+		assert path is not None
 		self.path = path
 		self.cb = cb
 		super(DIRmsg,self).__init__()
@@ -900,8 +894,7 @@ class OWFSdevice(object):
 		if short_id:
 			self.id = short_id.lower()
 		self.bus = bus
-		if path is None:
-			import pdb;pdb.set_trace()
+		assert path is not None
 		self.path = path
 		self.is_up = None
 		self.ctx = Context()
