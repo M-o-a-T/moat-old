@@ -278,7 +278,7 @@ class NetPassiveConnector(NetCommonConnector):
 		global name_seq
 		name_seq += 1
 
-		name = name+("N"+str(name_seq),)
+		name = name+(str(name_seq),)
 		super(NetPassiveConnector,self).__init__(socket=socket, name=name, host=address[0],port=address[1])
 
 
