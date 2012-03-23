@@ -23,7 +23,7 @@ from test import run
 
 input = """\
 async:
-	net foop localhost 50334
+	connect net foop localhost 50334
 wait BAD:
 	for 0.2
 	debug force
@@ -53,7 +53,7 @@ wait BEFORE:
 	debug force
 listen net localhost 50345 :name baz zaz
 async:
-	net foo localhost 50333
+	connect net foo localhost 50333
 wait AFTER:
 	for 0.8
 	debug force

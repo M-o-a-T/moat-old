@@ -77,7 +77,7 @@ class NETlistener(NetListener):
 	storage = NetListens.storage
 
 class NETconnect(NetConnect):
-	name = ("net",)
+	name = ("connect","net")
 	client = NETactive
 	doc = "connect to a TCP port"
 	long_doc="""\
