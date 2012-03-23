@@ -229,6 +229,8 @@ class OWFSexistsbus(Check):
 
 
 class OWFSmon(Monitor):
+	queue_len = None # to not use the Watcher queue
+
 	def __init__(self,*a,**k):
 		super(OWFSmon,self).__init__(*a,**k)
 

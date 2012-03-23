@@ -36,7 +36,7 @@ from homevent.logging import log,TRACE,DEBUG
 from homevent.collect import Collection,Collected
 
 from gevent.event import AsyncResult,Event as gEvent
-from gevent.queue import Channel
+from gevent.queue import Channel,Queue
 import gevent
 
 from time import time
@@ -80,6 +80,7 @@ class Monitor(Collected):
 	job = None # greenlet running the monitor loop
 	running = None # Event. OFF while measuring (so that we can wait for that to end; currently unused)
 	passive = None # active or passive monitoring?
+	queue_len = 0 # length of the watch queue; 0:use a blocking channel
 	watcher = None # if passive: channel for the next value
 	params = None # for reporting
 
@@ -108,7 +109,11 @@ class Monitor(Collected):
 	def __init__(self,parent,name):
 		self.passive = (self.__class__ == Monitor)
 		self.ctx = parent.ctx
-		self.watcher = Channel()
+		if self.queue_len is not None:
+			if self.queue_len == 0:
+				self.watcher = Channel()
+			else:
+				self.watcher = Queue(self.queue_len)
 		self.running = gEvent()
 		try:
 			self.parent = parent.parent
