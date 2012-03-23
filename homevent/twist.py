@@ -292,7 +292,7 @@ if False:
 
 gwait = 0
 _log = None
-DEBUG = None
+TRACE = None
 class log_wait(object):
 	"""Usage:
 		>>> with log_wait("foo","bar","baz"):
@@ -307,15 +307,15 @@ class log_wait(object):
 
 	def __enter__(self):
 		global _log
-		global DEBUG
+		global TRACE
 		if _log is None:
-			from homevent.logging import log as xlog, DEBUG as xDEBUG
+			from homevent.logging import log as xlog, TRACE as xTRACE
 			_log = xlog
-			DEBUG = xDEBUG
-		_log(DEBUG,"+WAIT", self.w, *self.a)
+			TRACE = xTRACE
+		_log(TRACE,"+WAIT", self.w, *self.a)
 		return self
 	def __exit__(self, a,b,c):
-		_log(DEBUG,"-WAIT", self.w, *self.a)
+		_log(TRACE,"-WAIT", self.w, *self.a)
 		return False
 
 # avoids a warning from threading module on shutdown
