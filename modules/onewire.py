@@ -36,7 +36,7 @@ class OWFSconnect(Statement):
 	doc = "connect to an OWFS server"
 	long_doc="""\
 connect onewire NAME [[host] port]
-  - connect (asynchronously) to the onewire server at the remote port;
+  - connect (synchronously) to the onewire server at the remote port;
     name that connection NAME. Defaults for host/port are localhost/4304.
 	The system will emit connection-ready and device-present events.
 """

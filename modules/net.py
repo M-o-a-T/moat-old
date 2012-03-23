@@ -82,7 +82,7 @@ class NETconnect(NetConnect):
 	doc = "connect to a TCP port"
 	long_doc="""\
 net NAME [host] port
-  - connect (asynchronously) to the TCP server at the remote port;
+  - connect (synchronously) to the TCP server at the remote port;
 	name that connection NAME. Default for host is localhost.
 	The system will emit a connection-ready event.
 net [host] port :name NAME…
