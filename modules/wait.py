@@ -264,6 +264,7 @@ wait [NAME…]: for FOO…
 			raise
 		else:
 			process_event(Event(self.ctx(loglevel=logging.TRACE),"wait","done",ixtime(now(self.force),self.force), *w.name))
+			ctx.wait = tm = ixtime(now(self.force),self.force)
 
 		
 class WaitFor(Statement):
