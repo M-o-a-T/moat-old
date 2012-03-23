@@ -1,0 +1,32 @@
+if not exists module bool: load bool
+if not exists module ifelse: load ifelse
+if not exists module logging: load logging
+if not exists module block: load block
+if not exists module trigger: load trigger
+if not exists module wait: load wait
+if not exists module on_event: load on_event
+if not exists module wago: load wago
+log DEBUG
+
+wago server test:
+	host localhost 59068
+	ping 1
+	monitor 5
+
+
+wago counter baz:
+	server test
+	port 1 2
+	monitor both
+	limit 60
+
+wago input foo bar:
+	server test
+	port 1 1
+	monitor both
+
+wago output foofoo barbar:
+	server test
+	port 2 3
+
+

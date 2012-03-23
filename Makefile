@@ -23,15 +23,18 @@ FIX:
 all:
 	cp -a _geventreactor/Pinako/geventreactor/__init__.py homevent/geventreactor.py
 	@$(MAKE) -C fs20 --no-print-directory all
+	@$(MAKE) -C wago --no-print-directory all
 	python setup.py build --build-base="$(DESTDIR)"
 install:
 	@$(MAKE) -C fs20 --no-print-directory install ROOT=$(DESTDIR)
+	@$(MAKE) -C wago --no-print-directory install ROOT=$(DESTDIR)
 	python setup.py install --prefix=/usr --root="$(DESTDIR)" --no-compile -O0
 
 clean:
 	python setup.py clean --build-base="$(DESTDIR)"
 	rm -rf build
 	@$(MAKE) -C fs20 --no-print-directory clean
+	@$(MAKE) -C wago --no-print-directory clean
 
 
 test: FIX
@@ -41,6 +44,10 @@ diff: FIX
 
 ow: FIX
 	sh test/interactive/onewire.sh
+w fs20: FIX
+	python test/interactive/main.py test/interactive/wago
+wd wagodebug: FIX
+	pdb test/interactive/main.py test/interactive/wago
 f fs20: FIX
 	python test/interactive/main.py test/interactive/fs20
 fd fs20debug: FIX
