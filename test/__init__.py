@@ -45,10 +45,12 @@ log_level("parser",NONE)
 log_level("token",NONE)
 
 startup=now()
-def ixtime(t=None):
+realStartup=now(True)
+def ixtime(t=None,force=False):
 	if t is None:
-		t = now()
-	return unixtime(t)
+		t = now(force)
+	r = unixtime(t)-unixtime(realStartup if force else startup)
+	return "%.1f" % (r,)
 def ttime():
 	return time()-unixtime(startup)
 
@@ -164,7 +166,6 @@ class logwrite(object):
 			l = self.buf
 			self.buf = ""
 			self.log(None,l)
-		pass
 
 class ctxdump(Statement):
 	name=("dump","context")

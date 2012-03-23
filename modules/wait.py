@@ -58,7 +58,7 @@ if "HOMEVENT_TEST" in os.environ:
 	from test import ixtime,ttime
 	time=ttime
 else:
-	def ixtime(t):
+	def ixtime(t,_=None):
 		return unixtime(t)
 
 class WaitError(RuntimeError):
@@ -206,14 +206,17 @@ class Waiter(Collected):
 			return 0
 		if not self._running:
 			return "??"
-		return self._cmd("remain")
+		res = self._cmd("remain")
+		if "HOMEVENT_TEST" in os.environ:
+			res = "%.1f" % (res,)
+		return res
 
 	def delete(self,ctx):
 		self.job.kill()
 
 	def cancel(self, err=WaitCancelled):
 		"""Cancel a waiter."""
-		process_event(Event(self.ctx(loglevel=logging.TRACE),"wait","cancel",ixtime(self.end),*self.name))
+		process_event(Event(self.ctx(loglevel=logging.TRACE),"wait","cancel",ixtime(self.end,self.force),*self.name))
 		self._cmd("cancel")
 
 	def retime(self, dest):
@@ -252,7 +255,7 @@ wait [NAME…]: for FOO…
 			return Waiters[self.displayname].retime(self.timespec())
 		w = Waiter(self, self.displayname, self.force)
 		w.init(self.timespec())
-		process_event(Event(self.ctx(loglevel=logging.TRACE),"wait","start",ixtime(w.end),*w.name))
+		process_event(Event(self.ctx(loglevel=logging.TRACE),"wait","start",ixtime(w.end,self.force),*w.name))
 		try:
 			r = w.job.get()
 		except Exception as ex:
@@ -260,7 +263,7 @@ wait [NAME…]: for FOO…
 			logging.log_exc(msg=u"Wait %s died:"%(self.name,), err=ex, level=logging.TRACE)
 			raise
 		else:
-			process_event(Event(self.ctx(loglevel=logging.TRACE),"wait","done",unixtime(now(self.force)), *w.name))
+			process_event(Event(self.ctx(loglevel=logging.TRACE),"wait","done",ixtime(now(self.force),self.force), *w.name))
 
 		
 class WaitFor(Statement):
