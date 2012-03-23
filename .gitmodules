@@ -1,3 +1,6 @@
 [submodule "_geventreactor"]
 	path = _geventreactor
 	url = git@git.intern.smurf.noris.de:inportb_playground.git
+[submodule "wago"]
+	path = wago
+	url = git@git.intern.smurf.noris.de:wago.git
