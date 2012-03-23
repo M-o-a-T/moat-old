@@ -155,6 +155,8 @@ class BaseLogger(Collected):
 	def log_failure(self, err, level=WARN):
 		if level >= self.level:
 			self._wlog(level,format_exception(err))
+			if "HOMEVENT_TEST" in os.environ:
+				self.flush()
 	
 	def flush(self):
 		self.q.put(FlushMe)

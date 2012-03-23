@@ -129,9 +129,6 @@ class SysLogger(BaseLogger):
 			else:
 				break
 
-	def flush(self):
-		pass
-
 def gen_addr(a="/dev/log",b=None):
 	"""Return an address from one or two arguments"""
 	if a.startswith("/"):

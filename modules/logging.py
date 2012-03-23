@@ -44,7 +44,7 @@ class OutLogger(Logger):
 		else:
 			print >>self.out,LogNames[level]+"> "+txt
 
-	def flush(self):
+	def _flush(self):
 		if hasattr(self.out,"flush"):
 			self.out.flush()
 
