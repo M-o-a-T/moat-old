@@ -65,6 +65,9 @@ class NETreceiver(LineReceiver):
 	def up_event(self, external=False):
 		simple_event(Context(),"net","connect",*self.name)
 
+	def not_up_event(self, external=False):
+		simple_event(Context(),"net","error",*self.name)
+
 class NETactive(NETreceiver, NetActiveConnector):
 	typ = "net_active"
 	pass
