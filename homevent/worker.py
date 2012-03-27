@@ -28,7 +28,7 @@ from homevent.context import Context
 from homevent.event import Event,TrySomethingElse,NeverHappens
 from homevent.base import Name,MIN_PRIO,MAX_PRIO
 from homevent.times import humandelta, now
-from homevent.twist import fix_exception,reraise
+from homevent.twist import fix_exception,reraise,format_exception,track_errors
 
 from homevent.geventreactor import waitForGreenlet
 from gevent import spawn
@@ -50,7 +50,7 @@ def report_(err, verbose=False):
 	elif verbose and not getattr(err,"no_backtrace",False):
 		from traceback import format_stack
 		p = "ERROR: "
-		for l in formatTraceback(err).rstrip("\n").split("\n"):
+		for l in format_exception(err).rstrip("\n").split("\n"):
 			yield p+l
 			p="     : "
 		if hasattr(err,"cmd"):
