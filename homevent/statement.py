@@ -240,7 +240,7 @@ class ComplexStatement(Statement):
 			if it exists.
 			"""
 		if not isinstance(handler.name,Name):
-			assert isinstance(handler.name,tuple),"Names must be word lists"
+			assert isinstance(handler.name,(basestring,tuple)),"Names must be word lists"
 			handler.name = Name(handler.name)
 
 		if handler.name in self._words:

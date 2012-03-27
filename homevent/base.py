@@ -33,7 +33,7 @@ class Name(tuple):
 		if len(data)==1:
 			data = data[0]
 			if isinstance(data,basestring):
-				data = (data,)
+				data = data.split(" ")
 		return super(Name,cls).__new__(cls,data)
 	def __str__(self):
 		return unicode(self).encode("utf-8")
