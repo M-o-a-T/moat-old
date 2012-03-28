@@ -45,11 +45,11 @@ trigger FOO...
 	sync = False
 
 	def run(self,ctx,**k):
-		if self.recurse:
-			ctx = Context()
 		if self.loglevel is not None:
 			ctx = ctx(loglevel=self.loglevel)
 		event = self.params(ctx)
+		if self.recurse:
+			event.ctx = ctx._trim()
 		if not event:
 			raise SyntaxError("Events need at least one parameter")
 
@@ -111,9 +111,9 @@ sync
 		event = self.params(ctx)
 		lo = hi = None
 		if len(event) == 0:
-			self.parent.recurse = True
+			self.parent.sync = True
 		else:
-			raise SyntaxError(u'Usage: recursive')
+			raise SyntaxError(u'Usage: sync')
 TriggerHandler.register_statement(TriggerSync)
 
 

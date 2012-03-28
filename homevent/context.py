@@ -142,7 +142,23 @@ class Context(object):
 			for r in p._report():
 				yield pre+": "+r
 				pre=" "
-		
+	
+	def _trim(self):
+		"""Transform a hierarchic context into a plain ctx with the same attributes."""
+		res = Context()
+		seen = set()
+
+		def do(store):
+			for k,v in store.iteritems():
+				if v is not VanishedAttribute and k not in seen:
+					setattr(res,k,v)
+				seen.add(v) # prevent overwriting with older values
+				
+		do(self._store)
+		for p in self._parents():
+			do(p._store)
+
+		return res
 		
 
 
