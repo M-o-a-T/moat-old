@@ -379,32 +379,11 @@ NEW: <ConditionalWorkSequence:38 (4)>
 EVENT: wait¦cancel¦20.8¦AFTER¦EVENT¦A
 END: wait¦cancel¦20.8¦AFTER¦EVENT¦A
 END: shutdown
-NEW: <ConditionalWorkSequence:39 (4)>
+Waiter ‹wait› was cancelled
+NEW: <WorkSequence:39 (4)>
    : │  id: 39
    : │  call count: 0
-   : │  EVENT: wait¦done¦20.5¦AFTER¦EVENT¦A
+   : │  Waiter ‹wait› was cancelled
    : └1╴... done.
-EVENT: wait¦done¦20.5¦AFTER¦EVENT¦A
-END: wait¦done¦20.5¦AFTER¦EVENT¦A
-Traceback (most recent call last):
-  File "../modules/block.py", line 60, in _run
-    super(Async,self).run(*a,**k)
-  File "/daten/src/git/homevent/homevent/statement.py", line 311, in run
-    res = proc.run(ctx)
-  File "../modules/timeslot.py", line 253, in run
-    setattr(self.parent.ctx,var,Timeslots[name].running)
-KeyError: Name(u'foo', u'bar')
-NEW: <WorkSequence:40 (4)>
-   : │  id: 40
-   : │  call count: 0
-   : │  Name(u'foo', u'bar')
-   : └1╴... done.
-Traceback (most recent call last):
-  File "../modules/block.py", line 60, in _run
-    super(Async,self).run(*a,**k)
-  File "/daten/src/git/homevent/homevent/statement.py", line 311, in run
-    res = proc.run(ctx)
-  File "../modules/timeslot.py", line 253, in run
-    setattr(self.parent.ctx,var,Timeslots[name].running)
-KeyError: Name(u'foo', u'bar')
-END: KeyError
+Waiter ‹wait› was cancelled
+END: WaitCancelled

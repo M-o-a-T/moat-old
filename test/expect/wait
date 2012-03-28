@@ -105,15 +105,8 @@ END: wait¦done¦×××¦_wait¦7
 1 Yes
 0 Create OnEvtHandler: whatever
 0 NewHandler 20
-NEW: <ConditionalWorkSequence:21 (4)>
+NEW: <ConditionalWorkSequence:21 (5)>
    : │  id: 21
-   : │  call count: 0
-   : │  EVENT: wait¦start¦×××¦_wait¦8
-   : └1╴... done.
-EVENT: wait¦start¦×××¦_wait¦8
-END: wait¦start¦×××¦_wait¦8
-NEW: <ConditionalWorkSequence:22 (5)>
-   : │  id: 22
    : │  call count: 0
    : │  IEVENT: whatever
    : ├1╴on whatever ‹OnEventHandler›
@@ -126,10 +119,17 @@ RUN: on whatever ‹OnEventHandler›
    : prio: 51
    : step: var wait x Foo Baz ‹VarWaitHandler›
    : step: log TRACE We wait $x ‹LogHandler›
- at: <ConditionalWorkSequence:22 (5)> (step 1)
+ at: <ConditionalWorkSequence:21 (5)> (step 1)
  ev: IEVENT: whatever
 0 We wait ‹Waiter Foo¦Baz 51.9›
 END: whatever
+NEW: <ConditionalWorkSequence:22 (4)>
+   : │  id: 22
+   : │  call count: 0
+   : │  EVENT: wait¦start¦×××¦_wait¦8
+   : └1╴... done.
+EVENT: wait¦start¦×××¦_wait¦8
+END: wait¦start¦×××¦_wait¦8
 NEW: <ConditionalWorkSequence:23 (4)>
    : │  id: 23
    : │  call count: 0
@@ -137,7 +137,7 @@ NEW: <ConditionalWorkSequence:23 (4)>
    : └1╴... done.
 EVENT: wait¦done¦×××¦_wait¦8
 END: wait¦done¦×××¦_wait¦8
-1 No3
+1 Yes
 NEW: <ConditionalWorkSequence:24 (4)>
    : │  id: 24
    : │  call count: 0
