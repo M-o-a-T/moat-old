@@ -28,7 +28,6 @@ from homevent.context import Context
 from homevent.collect import Collection
 from homevent.event import Event
 from homevent.run import process_event,process_failure,simple_event
-from homevent.reconnect import ReconnectingClientFactory
 from homevent.twist import callLater, fix_exception
 from homevent.base import Name
 from homevent.net import NetActiveConnector
@@ -54,50 +53,14 @@ PRIO_STEP = 10 # number of iterations before considering the next queue
 
 MAX_TRIES = 5 # retrying a message until failure
 
-def _call(_,p,*a,**k):
-	return p(*a,**k)
-
-class DisconnectedBusError(RuntimeError):
-	no_backtrace = True
-	def __init__(self,dev):
-		self.dev = dev
-	def __str__(self):
-		return "%s: %s" % (self.__class__.__name__,self.dev)
-	
 class DisconnectedDeviceError(RuntimeError):
+	"""A devince has vanished."""
 	no_backtrace = True
 	def __init__(self,dev):
 		self.dev = dev
 	def __str__(self):
 		return "%s: %s" % (self.__class__.__name__,self.dev)
 	
-class OWFSUnspecdError(RuntimeError):
-	pass
-
-class idErr(RuntimeError):
-	def __init__(self,path):
-		assert path is not None
-		self.path = path
-
-class TimedOut(idErr):
-	def __str__(self):
-		return "Timeout: No data at %s" % (self.path,)
-
-class OWFSerror(EnvironmentError):
-	def __init__(self,typ):
-		self.typ = typ
-		log(DEBUG,"got OWFS ERR %d %s" % (self.typ,errno.errorcode[-self.typ]))
-	def __str__(self):
-		if self.typ < 0:
-			try:
-				return "OWFS_ERR: %d: %s" % (self.typ,errno.errorcode[-self.typ])
-			except Exception:
-				pass
-		return "OWFS_ERR %s" % (self.typ,)
-
-	def __repr__(self):
-		return "OWFSerror(%d)" % (self.typ,)
-
 class OWMsg:
 	"""Constants for the owserver api message types."""
 	error    = 0
@@ -223,8 +186,6 @@ class OWFSchannel(OWFSassembler, NetActiveConnector):
 
 class OWFSxmit(object):
 	"""A mixin that sends messages"""
-	def send(self,conn):
-		raise NotImplemetedError("You need to override send().")
 
 	def sendMsg(self,conn, typ,data, rlen=0):
 		try:
@@ -239,6 +200,7 @@ class OWFScall(OWFSxmit,MsgBase):
 	prio = PRIO_STANDARD
 	retries = 10
 	cached = False
+	timeout = 10
 	d = None
 
 	def __repr__(self):
@@ -251,6 +213,7 @@ class OWFScall(OWFSxmit,MsgBase):
 			self.result.set(data)
 
 	def recv(self, msg):
+		super(OWFScall,self).recv(msg)
 		if msg.typ < 0:
 			return NOT_MINE
 		r = self.dataReceived(msg.data)
@@ -259,6 +222,7 @@ class OWFScall(OWFSxmit,MsgBase):
 		return r
 	
 	def retry(self):
+		super(OWFScall,self).retry()
 		if self.retries:
 			self.retries -= 1
 			return True
@@ -284,65 +248,11 @@ class OWFScall(OWFSxmit,MsgBase):
 			return "/uncached/"+"/".join(path)
 
 
-
-#class OWFStimeout(object):
-#	"""A mix-in that provides possibly-"benign" timeouts and NOP handling."""
-#	timeout = 2.5
-#	error_on_timeout = True
-#
-#	def __init__(self,*a,**k):
-#		self.timer = None
-#		super(OWFStimeout,self).__init__(*a,**k)
-#
-#	def has_timeout(self):
-#		self.timer = None
-#		if self.conn and self.conn.conn:
-#			if self.error_on_timeout:
-#				self.conn.conn.is_done(TimedOut(self.path))
-#			else:
-#				self.conn.conn.is_done()
-#
-#	def do_timeout(self):
-#		if self.timer is None:
-#			self.timer = callLater(True,self.timeout,self.has_timeout)
-#
-#	def drop_timeout(self):
-#		if self.timer:
-#			self.timer.cancel()
-#			self.timer = None
-#	
-#	def sendMsg(self,*a,**k):
-#		self.do_timeout()
-#		return super(OWFStimeout,self).sendMsg(*a,**k)
-#
-#	def ping(self):
-#		self.drop_timeout()
-#		self.do_timeout()
-#
-#	def msgReceived(self, typ, *a,**k):
-#		self.drop_timeout()
-##		if typ == OWMsg.nop:
-##			self.do_timeout()
-##			return True
-##		else:
-#		res = super(OWFStimeout,self).msgReceived(typ,*a,**k)
-#		if not res:
-#			self.do_timeout()
-#		return res
-#	
-#	def error(self,*a,**k):
-#		self.drop_timeout()
-#		return super(OWFStimeout,self).error(*a,**k)
-#
-#	def done(self,*a,**k):
-#		self.drop_timeout()
-#		return super(OWFStimeout,self).done(*a,**k)
-	
-
 class NOPmsg(OWFScall):
 	prio = PRIO_BACKGROUND
 
 	def send(self,conn):
+		super(NOPmsg,self).send(conn)
 		self.sendMsg(conn,OWMsg.nop,"",0)
 
 
@@ -354,6 +264,7 @@ class ATTRgetmsg(OWFScall):
 		super(ATTRgetmsg,self).__init__()
 
 	def send(self,conn):
+		super(ATTRgetmsg,self).send(conn)
 		self.sendMsg(conn,OWMsg.read,self._path(self.path)+'\0',8192)
 		return RECV_AGAIN
 	
@@ -372,6 +283,7 @@ class ATTRsetmsg(OWFScall):
 		super(ATTRsetmsg,self).__init__()
 
 	def send(self,conn):
+		super(ATTRsetmsg,self).send(conn)
 		val = unicode(self.value)
 		self.sendMsg(conn, OWMsg.write,self._path(self.path)+'\0'+val,len(val))
 		return RECV_AGAIN
@@ -395,6 +307,7 @@ class DIRmsg(OWFScall):
 		super(DIRmsg,self).__init__()
 	
 	def send(self,conn):
+		super(DIRmsg,self).send(conn)
 		if self.dirall:
 			self.sendMsg(conn, OWMsg.dirall, self._path(self.path)+'\0', 0)
 		else:
@@ -433,7 +346,12 @@ OWbus.does("del")
 
 
 class OWFSqueue(MsgQueue):
-	"""An adapter for the owfs server protocol"""
+	"""\
+		An adapter for the owfs server protocol.
+
+		The only real change is to periodically scan the bus.
+		MsgQueue and the factory handle everything else.
+		"""
 	storage = OWbus
 	ondemand = True
 
@@ -444,9 +362,7 @@ class OWFSqueue(MsgQueue):
 		self.nop = None
 		self.root = OWFSroot(self)
 
-	def delete(self):
-		self.stop()
-		self.delete_done()
+	### Bus scanning support
 
 	def start(self):
 		super(OWFSqueue,self).start()
@@ -471,253 +387,7 @@ class OWFSqueue(MsgQueue):
 			else:
 				q.set_exception(RuntimeError("Stopped"))
 		self.watch_q = None
-	
-	
-#	def send(self,msg):
-#		assert self.msg is None, "OWFS Message already in transit!"
-#		self.msg = msg
-#		log("onewire",DEBUG,"send for",self.msg)
-#		msg.send(self)
-#
-#	def ping(self):
-#		if self.msg:
-#			self.msg.ping()
-#
-#	def connectionFailed(self,reason):
-#		super(OWFSqueue,self).connectionFailed(reason)
-#		self.retry()
-#
-#	def connectionLost(self,reason):
-#		super(OWFSqueue,self).connectionLost(reason)
-#		self.is_done()
-#
-#	def connectionMade(self):
-#		self.factory.haveConnection(self)
-#
-#	def msgReceived(self, typ, data):
-#		log("onewire",DEBUG,"recv for %s: %d: %s"%(self.msg,typ,repr(data)))
-#		self.n_msgs += 1
-#		if not self.msg:
-#			log(ERROR,"Spurious OWFS message",typ,data)
-#			return
-#		try:
-#			if self.msg.msgReceived(typ,data):
-#				log("onewire",DEBUG,"recv again")
-#				return
-#		except Exception as e:
-#			fix_exception(e)
-#			log("onewire",DEBUG,"recv err",e)
-#			#process_failure(e)
-#			self.is_done(e)
-#		else:
-#			log("onewire",DEBUG,"recv done")
-#			self.is_done()
-#	
-#	def errReceived(self,err):
-#		self.is_done(err)
-#		self.loseConnection()
-#
-#	def is_done(self, err=None):
-#		"""Signal that the current transaction has concluded."""
-#		msg = self.msg
-#		n_msgs = self.n_msgs
-#
-#		self.msg = None
-#		self.n_msgs = 0
-#
-#		if msg is None:
-#			log("onewire",DEBUG,"done NO_MSG",err)
-#			return
-#
-#		self.factory.send_done(disconnect=(err is not None or n_msgs == 0))
-#
-#		log("onewire",DEBUG,"done",msg.prio,self.msg,err)
-#		if err is not None:
-#			self.retry(msg,err)
-#		elif n_msgs or msg.empty_ok:
-#			msg.done()
-#		else:
-#			err = OWFSUnspecdError()
-#			fix_exception(err)
-#			self.retry(msg, err)
-#		
-#
-#	def timeout(self, err=None):
-#		self.timer = None
-#		if err is None:
-#			err = RuntimeError("Timed out")
-#		self.is_done(err)
-#
-#	def loseConnection(self):
-#		if self.transport:
-#			self.transport.loseConnection()
-#		self.retry()
-#
-#	def retry(self,msg=None, err=None):
-#		if msg is None:
-#			msg = self.msg
-#			self.msg = None
-#		if not msg:
-#			return
-#		if isinstance(err,OWFSerror) and err.typ == -errno.EINVAL:
-#			msg.error(err)
-#		elif msg.may_retry():
-#			if isinstance(err,OWFSerror) and err.typ == -errno.ENOENT:
-#				callLater(True,5*msg.tries,self.factory.queue,msg)
-#			else:
-#				callLater(True,0.5*msg.tries,self.factory.queue,msg)
-#		elif not msg.d.called: # just ignore that
-#			msg.error(err)
-#
-#
-#
-#class OWFSfactory(object,ReconnectingClientFactory):
-#
-#	protocol = OWFSqueue
-#	factor = 1.4
-#	do_rescan = False
-#
-#	def __init__(self, host="localhost", port=4304, persist = False, name=None, *a,**k):
-#		if name is None:
-#			name = "%s:%s" % (host,port)
-#
-#		self.conn = None
-#		self.host = host
-#		self.port = port
-#		self.name = name
-#		self._init_queues()
-#		self.persist = persist
-##		self.up_event = False
-#		self.root = OWFSroot(self)
-#		self.watcher_id = None
-#		self.nop = None
-#		self.watch_trigger = []
-#
-#	def _init_queues(self):
-#		self.queues = []
-#		self.q_prio = []
-#		for x in range(N_PRIO):
-#			self.queues.append([PRIO_STEP])
-#
-#	def has_queued(self):
-#		for s in self.queues:
-#			if len(s) > 1:
-#				return True
-#		return False
-#
-#	def get_queued(self):
-#		for i in (0,1):
-#			for s in self.queues:
-#				if len(s) > 1:
-#					if s[0]:
-#						s[0] += -1
-#						return s.pop(1)
-#					else:
-#						s[0] = PRIO_STEP
-#		return NOPmsg()
-#
-#	def queue(self,msg):
-#		log("onewire",DEBUG,"queue",msg.prio,msg)
-#		if not self.continueTrying:
-#			if msg.d is not None and not msg.d.called:
-#				msg.d.errback(DisconnectedBusError(self.name))
-#			return defer.fail(DisconnectedBusError(self.name))
-#
-#		self.queues[msg.prio].append(msg)
-#		msg._queue(self)
-#		self.maybe_connect()
-#		return msg.d
-#
-#	def maybe_connect(self):
-#		if not self.conn:
-#			self.tryNow()
-#		elif self.persist and not self.conn.msg:
-#			self.conn.send(self.get_queued())
-#
-#	def send_done(self, disconnect=False):
-#		if self.persist and not disconnect:
-#			self.send_next()
-#		elif self.conn:
-#			self.conn.loseConnection()
-#			self.conn = None
-#	
-#	def send_next(self, force=True):
-#		if force or self.has_queued():
-#			if self.nop:
-#				self.nop.cancel()
-#				self.nop = None
-#			self.conn.send(self.get_queued())
-#
-#		elif not self.nop:
-#			if self.persist:
-#				delay = 10
-#			else:
-#				delay = 300
-#			self.nop = callLater(True,delay,self.nopper)
-#
-#	def nopper(self):
-#		self.nop = None
-#		self.queue(NOPmsg()).addErrback(process_failure)
-#
-#	def finalFailure(self):
-#		if self.up_event:
-#			self.up_event = False
-#			simple_event(Context(),"onewire","disconnect",self.name)
-#
-#	def clientConnectionFailed(self, connector, reason):
-#		self.conn = None
-#		log(WARN,reason)
-#		super(OWFSfactory,self).clientConnectionFailed(connector, reason)
-#		simple_event(Context(),"onewire","broken", self.name)
-#
-#	def clientConnectionLost(self, connector, reason):
-#		self.conn = None
-#		if self.persist:
-#			log(INFO,reason)
-#		else:
-#			log("onewire",TRACE,reason)
-#
-#		if self.has_queued():
-#			connector.connect()
-#		elif self.persist:
-#			super(OWFSfactory,self).clientConnectionFailed(connector, reason)
-#		else:
-#			self.connector = connector
-#
-#
-#	def haveConnection(self,conn):
-#		self.resetDelay()
-#		self.conn = conn
-#
-#		if not self.up_event:
-#			self.up_event = True
-#			simple_event(Context(),"onewire","connect",self.name)
-#
-#		conn.send(self.get_queued())
-#
-#	def _drop(self):
-#		e = DisconnectedBusError(self.name)
-#		q = self.queues
-#		self.queues = []
-#		for s in q:
-#			for r in s[1:]:
-#				r.error(e)
-#
-#		if self.conn:
-#			self.conn.loseConnection()
-#
-#	def drop(self):
-#		"""Kill my connection and forget any devices"""
-#		self.stopTrying()
-#		if self.conn and self.conn.msg:
-#			def d(_):
-#				self._drop()
-#				return _
-#			self.conn.msg.d.addBoth(d)
-#		else:
-#			self._drop()
-#		
-#
+
 	def all_devices(self):
 		seen_mplex = {}
 		def doit(dev,path=(),key=None):
@@ -800,10 +470,6 @@ class OWFSqueue(MsgQueue):
 				try:
 					t = dev.get("type")
 					dev._setattr(t,"typ")
-				except OWFSerror as ex:
-					del devices[dev.id]
-					fix_exception(ex)
-					log(WARN,ex)
 				except Exception as ex:
 					del devices[dev.id]
 					fix_exception(ex)
@@ -853,7 +519,11 @@ class OWFSqueue(MsgQueue):
 
 ow_buses = {}
 
+# factory.
 def connect(host="localhost", port=4304, name=None, persist=False):
+	"""\
+		Set up a queue to a OneWire server.
+		"""
 	assert (host,port) not in ow_buses, "already known host/port tuple"
 	f = OWFSqueue(host=host, port=port, name=name, persist=persist)
 	ow_buses[(host,port)] = f
@@ -865,10 +535,8 @@ def disconnect(f):
 	f.stop()
 
 
+
 devices = {}
-
-_call_id = 0
-
 
 class OWFSdevice(object):
 	"""This represents a bus device with attributes."""

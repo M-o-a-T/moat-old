@@ -21,17 +21,19 @@ This code implements (a subset of) the OWFS server protocol.
 """
 
 from homevent.module import Module
+from homevent.base import Name
 from homevent.logging import log,log_exc,DEBUG,TRACE,INFO,WARN
-from homevent.statement import Statement, main_words
+from homevent.statement import Statement, main_words, AttributedStatement
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.onewire import connect,disconnect, devices
+from homevent.net import NetConnect
 from homevent.monitor import Monitor,MonitorHandler, MonitorAgain
 
 import struct
 
 buses = {}
 
-class OWFSconnect(Statement):
+class OWFSconnect(NetConnect):
 	name = ("connect","onewire")
 	doc = "connect to an OWFS server"
 	long_doc="""\
@@ -41,20 +43,10 @@ connect onewire NAME [[host] port]
 	The system will emit connection-ready and device-present events.
 """
 
-	def run(self,ctx,**k):
-		event = self.params(ctx)
-		if len(event) < 1 or len(event) > 3:
-			raise SyntaxError(u"Usage: connect onewire NAME ‹host?› ‹port›")
-		name = event[0]
-		k={'name': name}
-		if len(event) > 2:
-			k['host'] = event[1]
-		if len(event) > 1:
-			k['port'] = event[-1]
-
-		f = connect(**k)
-		buses[name] = f
-		log(TRACE,"New OWFS bus",name,f)
+	def start_up(self):
+		f = connect(name=self.dest, host=self.host, port=self.port)
+		buses[self.dest] = f
+		log(TRACE,"New OWFS bus",self.dest,f)
 
 
 class OWFSdisconnect(Statement):
@@ -68,9 +60,7 @@ disconnect onewire NAME
 
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		if len(event) != 1:
-			raise SyntaxError("Usage: disconnect onewire NAME")
-		name = event[0]
+		name = Name(event)
 		log(TRACE,"Dropping OWFS bus",name)
 		disconnect(buses.pop(name))
 		log(TRACE,"Drop OWFS bus",name)
@@ -113,7 +103,7 @@ set onewire VALUE dev attr
 		devices[dev].set(attr, val)
 
 
-class OWFSdir(Statement):
+class OWFSdir(AttributedStatement):
 	name=("dir","onewire")
 	doc="List a directory on the onewire bus"
 	long_doc="""\
@@ -122,7 +112,11 @@ dir onewire NAME path...
 	(You probably need to quote the device IDs.)
 	Alternately, you can list a device's attributes by just passing the
 	device ID; the system knows on which bus it is and where.
+	For a multi-word bus name, use a separate :name attribute:
+		dir onewire "/"
+			:name foo bar
 """
+	dest=None
 
 	def run(self,ctx,**k):
 		event = self.params(ctx)
@@ -138,14 +132,33 @@ dir onewire NAME path...
 			if len(event) == 1 and event[0].lower() in devices:
 				dev = devices[event[0].lower()]
 				path = ()
+				assert self.dest is None,"Destination only for bus-specific path"
 			else:
-				dev = buses[event[0]].root
-				path = event[1:]
+				if self.dest is None:
+					dev = buses[Name(event[0])].root
+					path = event[1:]
+				else:
+					dev = buses[self.dest].root
+					path = event
 			dev.dir(path=path, proc=reporter)
 
 			print >>ctx.out,"."
-			d.addCallback(term)
-			return d
+
+class OWFSname(Statement):
+    name=("name",)
+    dest = None
+    doc="specify the name of the 1wire connection"
+
+    long_doc = u"""\
+name ‹name…›
+  - Use this form for 1wire connections with multi-word names.
+"""
+
+    def run(self,ctx,**k):
+        event = self.params(ctx)
+        self.parent.dest = Name(event)
+
+OWFSdir.register_statement(OWFSname)
 
 
 class OWFSlist(Statement):
@@ -164,9 +177,7 @@ list onewire [NAME]
 			for b in buses.itervalues():
 				print >>ctx.out,b.name
 			print >>ctx.out,"."
-		elif len(event) != 1:
-			raise SyntaxError("Usage: list onewire [BUS]")
-		elif event[0].lower() in devices:
+		elif len(event) == 1 and event[0].lower() in devices:
 			dev = devices[event[0].lower()]
 			print >>ctx.out,"ID:",dev.bus_id
 			print >>ctx.out,"SID:",dev.id
@@ -176,7 +187,7 @@ list onewire [NAME]
 			if dev.path: print >>ctx.out,"Path:", "/"+"/".join(dev.path)
 
 		else:
-			b = buses[event[0]]
+			b = buses[Name(event)]
 			print >>ctx.out,"Name:",b.name
 			print >>ctx.out,"Host:",b.host
 			print >>ctx.out,"Port:",b.port
@@ -188,7 +199,7 @@ class OWFSconnected(Check):
 	name=("connected","onewire")
 	doc="Test if a onewire device is accessible"
 	def check(self,*args):
-		assert len(args)==1,"This test requires the device ID"
+		assert len(args),"This test requires the device ID"
 		try:
 			dev = devices[args[0].lower()]
 		except KeyError:
@@ -204,9 +215,9 @@ class OWFSconnectedbus(Check):
 	name=("connected","onewire","bus")
 	doc="Test if the named onewire server connection is running"
 	def check(self,*args):
-		assert len(args)==1,"This test requires the connection name"
+		assert len(args),"This test requires the connection name"
 		try:
-			bus = buses[args[0]]
+			bus = buses[Name(args)]
 		except KeyError:
 			return False
 		else:
@@ -225,7 +236,7 @@ class OWFSexistsbus(Check):
 	doc="Test if the named onewire server connection exists"
 	def check(self,*args):
 		assert len(args)==1,"This test requires the connection name"
-		return args[0] in buses
+		return Name(args) in buses
 
 
 class OWFSmon(Monitor):
@@ -450,11 +461,11 @@ scan onewire NAME
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 
-		if len(event) != 1:
+		if len(event) == 0:
 			raise SyntaxError("Usage: scan onewire BUS")
 		else:
 			try:
-				dev = buses[event[0]]
+				dev = buses[Name(event)]
 			except KeyError:
 				raise RuntimeError("scan onewire: unknown bus ‹%s›" % (event[0],))
 			else:

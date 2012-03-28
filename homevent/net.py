@@ -85,10 +85,12 @@ class LineReceiver(object):
 		buffer = self.buffer + val
 		data = []
 
-		i = buffer.index(delimiter)
-		while i >= 0:
+		while True:
+			i = buffer.find(self.delimiter)
+			if i < 0:
+				break
 			data.append(buffer[:i])
-			buffer = buffer[i+len(delimiter):]
+			buffer = buffer[i+len(self.delimiter):]
 
 		self.buffer = buffer
 		for d in data:
@@ -114,23 +116,35 @@ class NetCommonConnector(Collected):
 	#storage = Nets.storage
 	#storage2 = net_conns
 	typ = "???common"
+	job = None
+	socket = None
 
 	def __init__(self, name, host,port, socket=None):
 		self.socket = socket
 		self.host = host
 		self.port = port
 		self.name = name
-		assert (host,port) not in self.storage2, "already known host/port tuple"
+		storage2 = getattr(self,"storage2",{})
+		assert (host,port) not in storage2, "already known host/port tuple"
 		super(NetCommonConnector,self).__init__()
-		self.storage2[(host,port)] = self
+		storage2[(host,port)] = self
 		external = (self.socket is not None)
 		if self.socket is None:
 			try:
 				self._connect()
-			except:
-				del self.storage2[(host,port)]
+			except Exception as ex:
+				fix_exception(ex)
+				del storage2[(host,port)]
 				self.delete_done()
-				raise
+				try:
+					self.not_up_event()
+				except Exception as ex2:
+					fix_exception(ex2)
+					process_failure(ex2)
+				reraise(ex)
+			self.handshake(False)
+		else:
+			self.handshake(True)
 
 		def dead(_):
 			self.job = None
@@ -143,10 +157,15 @@ class NetCommonConnector(Collected):
 
 		try:
 			self.up_event(external)
-		except Exception:
+		except Exception as ex:
+			fix_exception(ex)
 			self.close()
-			raise
+			reraise(ex)
 
+	def handshake(self, external=False):
+		"""Complete the connection, then call .up_event()"""
+		self.up_event(external)
+		
 	def _connect(self):
 		e = None
 		for res in socket.getaddrinfo(self.host, self.port, socket.AF_UNSPEC, socket.SOCK_STREAM):
@@ -174,7 +193,7 @@ class NetCommonConnector(Collected):
 		self.socket = s
 
 	def _reader(self):
-		while True:
+		while self.socket is not None:
 			try:
 				r = self.socket.recv(4096)
 				if r is None or r == "":
@@ -196,16 +215,23 @@ class NetCommonConnector(Collected):
 		yield ("port",self.port)
 
 	def delete(self,ctx=None):
-		assert self==self.storage2.pop((self.host,self.port))
+		storage2 = getattr(self,"storage2",None)
+		assert storage2 is None or self==storage2.pop((self.host,self.port))
 		self.close(external=False)
 		self.delete_done()
 
 	def up_event(self,external=False):
+		"""Called when a connection has been established"""
 		self.close(True)
 		raise NotImplementedError("You need to override NetCommonConnector.up_event()")
 
 	def down_event(self,external=True):
+		"""Called when an established connection is terminated"""
 		raise NotImplementedError("You need to override NetCommonConnector.down_event()")
+
+	def not_up_event(self,external=True):
+		"""Called when a connection could not be established in the first place"""
+		raise NotImplementedError("You need to override NetCommonConnector.not_up_event()")
 
 	def write(self,val):
 		if self.socket:
@@ -226,6 +252,51 @@ class NetCommonConnector(Collected):
 		self.close(external=True)
 
 
+class NetCommon(AttributedStatement):
+	"""Common base class for NetConnect and NetListen commands"""
+	#name = ("connect","net")
+	#doc = "connect to a TCP port (base class)"
+	dest = None
+	job = None
+	recv = None
+	host = "localhost"
+	port = None
+	long_doc = u"""\
+You need to override the long_doc description.
+"""
+
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if self.dest is None and len(event):
+			self.dest = Name(event[0])
+			event = event[1:]
+		if (self.host is None and self.port is None and len(event) < 2) or \
+		   ((self.host is None or self.port is None) and len(event) == 1) or \
+				len(event) > 2:
+			raise SyntaxError(u"Usage: %s ‹name› ‹host›%s ‹port›%s" % (" ".join(self.name), "" if self.host is None else "?", "" if self.port is None else "?"))
+		if self.port is None:
+			if len(event):
+				self.port = event[-1]
+				event = event[:-1]
+			if len(event):
+				self.host = event[0]
+				event = event[1:]
+		else:
+			if len(event):
+				self.host = event[0]
+				event = event[1:]
+			if len(event):
+				self.port = event[-1]
+				event = event[:-1]
+		self.start_up()
+
+	def start_up(self):
+		raise NotImplementedError("You need to override %s.start_up"%(self.__class__.__name__))
+
+	def error(self,e):
+		reraise(e)
+
+
 ##### active connections
 
 class NetActiveConnector(NetCommonConnector):
@@ -234,37 +305,14 @@ class NetActiveConnector(NetCommonConnector):
 	pass
 
 
-class NetConnect(AttributedStatement):
-	#name = ("net",)
-	doc = "connect to a TCP port (base class)"
-	dest = None
-	job = None
-	recv = None
-	client = NetActiveConnector
-	long_doc = u"""\
-You need to override the long_doc description.
-"""
 
-	def run(self,ctx,**k):
-		event = self.params(ctx)
-		if len(event) < 1+(self.dest is None) or len(event) > 2+(self.dest is None):
-			raise SyntaxError(u"Usage: net ‹name› ‹host›? ‹port›")
-		name = self.dest
-		if name is None:
-			self.dest = Name(event[0])
-			event = event[1:]
-		if len(event) == 1:
-			self.host = "localhost"
-		else:
-			self.host = event[0]
-		self.port = event[-1]
-		self.start_up()
+class NetConnect(NetCommon):
+	#name = ("connect","net")
+	doc = "connect to a TCP port (base class)"
+	client = NetActiveConnector
 
 	def start_up(self):
-		self.client(name=self.dest, host=self.host,port=self.port)
-
-	def error(self,e):
-		reraise(e)
+		return self.client(name=self.dest, host=self.host,port=self.port)
 
 
 ##### passive connections
@@ -319,7 +367,7 @@ class NetListener(Collected):
 		self.delete_done()
 
 
-class NetListen(AttributedStatement):
+class NetListen(NetCommon):
 	#name = ("listen","net")
 	doc = "listen to a TCP socket (base class)"
 
@@ -329,22 +377,8 @@ You need to override the long_doc description.
 	dest = None
 	listener = NetListener
 	connector = NetPassiveConnector
+	default_host = None
 	#server = None # descendant of NetServerFactory
-
-	def run(self,ctx,**k):
-		event = self.params(ctx)
-		if len(event) < 1+(self.dest is None) or len(event) > 2+(self.dest is None):
-			raise SyntaxError(u"Usage: listen net ‹name› ‹host›? ‹port›")
-		name = self.dest
-		if name is None:
-			self.dest = Name(event[0])
-			event = event[1:]
-		if len(event) == 2:
-			self.host = "localhost"
-		else:
-			self.host = event[1]
-		self.port = event[-1]
-		self.start_up()
 
 	def start_up(self):
 		r = self.listener(name=self.dest, host=self.host,port=self.port)
@@ -418,7 +452,7 @@ class NetConnected(Check):
 	def check(self,*args):
 		conn = None
 		if len(args) == 2:
-			conn = self.storage2.get(Name(args),None)
+			conn = getattr(self,"storage2",{}).get(Name(args),None)
 		if conn is None:
 			conn = self.storage.get(Name(args))
 		if conn is None:
@@ -432,7 +466,7 @@ class NetExists(Check):
 	doc="Test if a TCP connection is configured"
 
 	def check(self,*args):
-		if len(args) == 2 and Name(args) in self.storage2:
+		if len(args) == 2 and Name(args) in getattr(self,"storage2",{}):
 			return True
 		return Name(args) in self.storage
 

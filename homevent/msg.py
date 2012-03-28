@@ -27,8 +27,8 @@ from homevent.statement import Statement, main_words, AttributedStatement
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.context import Context
 from homevent.event import Event
-from homevent.base import Name
-from homevent.run import process_failure
+from homevent.base import Name,singleName
+from homevent.run import process_failure,simple_event
 from homevent.collect import Collection,Collected
 from homevent.twist import fix_exception,reraise, callLater
 from homevent.net import DisconnectedError
@@ -48,33 +48,45 @@ PRIO_URGENT = 0
 PRIO_STANDARD = 1
 PRIO_BACKGROUND = 2
 
-class NOT_MINE(object):
+class MSG_ERROR(object):
+	"""Drop the message."""
+	def __init__(self,txt):
+		self.txt = txt
+	def __repr__(self):
+		return "%s(%s)" % (self.__class__.__name__, repr(self.txt))
+	__str__ = __repr__
+class ABORT(singleName):
+	"""Handshake failed; kill the connection"""
+	pass
+class NOT_MINE(singleName):
 	"""Not my message."""
 	pass
-class MINE(object):
+class MINE(singleName):
 	"""My message. Don't keep me in the receiver queue."""
 	pass
-class SEND_AGAIN(object):
+class SEND_AGAIN(singleName):
 	"""My message. I will send more messages."""
 	pass
-class RECV_AGAIN(object):
+class RECV_AGAIN(singleName):
 	"""My message. I will receive more messages."""
 class SEND_LATER(object):
 	"""My message. I will send more messages later."""
-	def __init__(self,delay):
-		self.delay = delay
-	def queue(self,msg,chan):
-		self.msg = msg
-		self.chan = chan
-		self.timer = callLater(False,self._call)
-		self.chan.delayed.append(self.timer)
-	def _call(self):
-		self.timer = None
-		self.chan.enqueue(self.msg)
-	def unqueue(self):
-		del self.chan.delayed[self.timer]
-		self.timer.cancel()
-		self.timer = None
+	# TODO
+	pass
+#	def __init__(self,delay):
+#		self.delay = delay
+#	def queue(self,msg,chan):
+#		self.msg = msg
+#		self.chan = chan
+#		self.timer = callLater(False,self._call)
+#		self.chan.delayed.append(self.timer)
+#	def _call(self):
+#		self.timer = None
+#		self.chan.enqueue(self.msg)
+#	def unqueue(self):
+#		del self.chan.delayed[self.timer]
+#		self.timer.cancel()
+#		self.timer = None
 
 
 class MsgSender(object):
@@ -109,28 +121,72 @@ class MsgReceiver(object):
 	def done(self):
 		pass
 	
+class NoAnswer(RuntimeError):
+	"""The server does not reply."""
+	no_backtrace = True
+	def __init__(self,conn):
+		self.conn = conn
+	def __str__(self):
+		return "%s: %s" % (self.__class__.__name__,self.conn)
+
 class MsgBase(MsgSender,MsgReceiver):
 	"""A message which expects a reply."""
 	timeout = None
 	prio = PRIO_STANDARD
 	blocking = False # True if the message needs a reply before sending more
+
+	timeout = None
+	_timer = None
+	_last_channel = None
+	_send_err = None
+	_recv_err = None
 	
 	def __init__(self):
 		self.result = AsyncResult()
 
 	def send(self,channel):
 		"""write myself to the channel. Return None|SEND_AGAIN|RECV_AGAIN."""
-		raise NotImplementedError("You need to override MsgBase.send")
+		self._set_timeout()
+		self._last_channel = channel
+
+		if self._send_err is None:
+			self._send_err = MSG_ERROR("You need to override %s.send"%self.__class__.__name__)
+		return self._send_err
 	
 	def recv(self,data):
 		"""A message has been received. Return NOT_MINE|MINE|RECV_AGAIN|SEND_AGAIN."""
-		raise NotImplementedError("You need to override MsgBase.recv")
+		self._clear_timeout()
+
+		if self._recv_err is None:
+			self._recv_err = MSG_ERROR("You need to override %s.recv"%self.__class__.__name__)
+		return self._recv_err
 	
+	def retry(self):
+		"""Check whether to retry this message"""
+		self._clear_timeout()
+		return False
+
 	def done(self):
 		"""Processing is finished."""
+		self._clear_timeout()
 		if self.result is not None and not self.result.successful():
 			raise RuntimeError("Did not trigger the result in dataReceived()",_)
 
+	def do_timeout(self):
+		self._last_channel.close()
+		
+	def _set_timeout(self):
+		if self.timeout is not None:
+			self._timer = callLater(True,self.timeout,self._timeout)
+
+	def _clear_timeout(self):
+		if self._timer is not None:
+			self._timer.cancel()
+			self._timer = None
+	
+	def _timeout(self):
+		self._timer = None
+		self.do_timeout()
 		
 class MsgRepeater(object):
 	"""A message mix-in that's repeated periodically; useful for keepalive"""
@@ -194,8 +250,33 @@ class MsgReOpen(object):
 	pass
 
 class MsgFactory(object):
-	"""Build a message forwarder from a channel type (and its init arguments)"""
+	"""\
+		Build a message forwarder from a channel type (and its init arguments).
+
+		This is usually called as:
+
+			>>>	class MYchannel(MYassembler, NetActiveConnector):
+			...		'''A receiver for the protocol used by OWFS.'''
+			...		storage = MYchans
+			>>>
+			>>> class MYqueue(MsgQueue):
+			... 	'''A simple adapter for the Wago protocol.'''
+			... 	storage = WAGOserver
+			... 	ondemand = True
+			... 	max_send = None
+			... 	
+			... 	def __init__(self, name, host,port, *a,**k):
+			... 		super(MYqueue,self).__init__(name=name, factory=MsgFactory(MYchannel,name=name,host=host, port=port, **k)) 
+
+		where MYassembler implements dataReceived(), which ultimately calls msgReceived(),
+		which is a method added via MsgFactory.
+		"""
+
 	def __init__(self,cls,*a,**k):
+		"""\
+			Setup a factory to create a new channel.
+			A channel is created by calling @cls with the rest of the supplied arguments when needed.
+			"""
 		class _MsgForwarder(cls):
 			def __init__(self,q):
 				self._msg_queue = q
@@ -208,12 +289,16 @@ class MsgFactory(object):
 				self._msg_queue.put((msg.prio,msg))
 			def up_event(self,*a,**k):
 				pass
+			def not_up_event(self,external=False,*a,**k):
+				if external:
+					msg = MsgReOpen()
+					self._msg_queue.put((msg.prio,msg))
 			def down_event(self,external=False,*a,**k):
 				if external:
 					msg = MsgReOpen()
 					self._msg_queue.put((msg.prio,msg))
-				
 		self.cls = _MsgForwarder
+
 	def __call__(self,q):
 		return self.cls(q)
 		
@@ -228,15 +313,23 @@ class UnknownMessageType(RuntimeError):
 	pass
 
 class MsgQueue(Collected):
-	"""This class represents a persistent network connection."""
+	"""\
+		This class represents a persistent network connection.
+		Message objects are queued to instances of this class.
+		They and can set up long-term interactions with whatever is at the remote end.
+		Connection (re)establishment is handled (mostly) transparently.
+
+		This is a subclass of @Collected, so you need to supply a 'storage' class attribute.
+		"""
 	#storage = Nets.storage
-	#storage2 = net_conns
 	max_open = None # outstanding messages
 	max_send = None # messages to send until the channel is restarted
 	max_connect = None # connection attempts
 	connect_timer = 3 # delay between attempts
+	max_connect_timer = 300 # max delay between attempts
+
 	channel = None # the current connection
-	job = None # the background job
+	job = None # the queue handler greenlet
 	factory = None # a callable that builds a new channel
 	ondemand = False # only open a connection when we have messages to send?
 
@@ -255,17 +348,21 @@ class MsgQueue(Collected):
 	last_rcvd = None
 	last_rcvd_at = None
 
-	def __init__(self, factory, name, qlen=None):
+	def __init__(self, factory, name, qlen=None, ondemand=None):
 		self.name = name
 		self.factory = factory
 		self.msgs = [] # to send
+		self.delayed = []
 		self.receivers = []
 		for _ in range(N_PRIO):
 			self.msgs.append([])
 		self.q = PriorityQueue(maxsize=qlen)
-		self.channel = self.factory(self.q)
-		self.job = None
-		self.delayed = []
+
+		if ondemand is not None:
+			self.ondemand = ondemand
+		if not self.ondemand:
+			self.channel = self.factory(self.q)
+
 		super(MsgQueue,self).__init__()
 	
 	def __del__(self):
@@ -318,9 +415,9 @@ class MsgQueue(Collected):
 		yield ("received",self.n_rcvd,self.n_rcvd_now)
 		yield ("processed",self.n_processed,self.n_processed_now)
 		yield ("open",self.is_open)
-		if self.last_xmit is not None:
-			yield ("last_sent",self.last_xmit)
-			yield ("last_sent_at",self.last_xmit_at)
+		if self.last_sent is not None:
+			yield ("last_sent",self.last_sent)
+			yield ("last_sent_at",self.last_sent_at)
 		if self.last_rcvd is not None:
 			yield ("last_rcvd",self.last_rcvd)
 			yield ("last_rcvd_at",self.last_rcvd_at)
@@ -328,6 +425,9 @@ class MsgQueue(Collected):
 		yield ("out_queued",self.n_outq)
 		for d in self.delayed:
 			yield ("delayed",str(d))
+		if self.channel:
+			for a,b in self.channel.list():
+				yield ("conn "+a,b)
 
 
 	def _incoming(self,msg):
@@ -345,7 +445,10 @@ class MsgQueue(Collected):
 				log("msg",TRACE,"recv",self.name,str(msg))
 				r = m.recv(msg)
 				log("msg",TRACE,"recv=",r)
-				if r is NOT_MINE:
+				if r is ABORT:
+					self.close(False)
+					break
+				elif r is NOT_MINE:
 					continue
 				elif r is MINE or r is SEND_AGAIN:
 					handled = True
@@ -371,6 +474,8 @@ class MsgQueue(Collected):
 				elif r is SEND_AGAIN:
 					handled = True
 					break
+				elif isinstance(r,MSG_ERROR):
+					raise r
 				else:
 					raise BadResult(m)
 			except Exception as ex:
@@ -381,6 +486,8 @@ class MsgQueue(Collected):
 				fix_exception(ex)
 				process_failure(ex)
 			i += 1
+		if not handled:
+			simple_event(Context(),"msg","unhandled",str(msg),*self.name)
 
 	def _error(self,msg):
 		log("conn",ERROR,self.state,self.__class__.__name__,self.name,str(msg))
@@ -415,6 +522,8 @@ class MsgQueue(Collected):
 				raise
 			gevent.sleep(timeout)
 			timeout *= 1.6
+			if self.max_connect_timer is not None and timeout > self.max_connect_timer:
+				timeout = self.max_connect_timer
 		else:
 			self.n_rcvd += self.n_rcvd_now
 			self.n_rcvd_now = 0
@@ -499,14 +608,20 @@ class MsgQueue(Collected):
 				while len(mq):
 					m = mq.pop(0)
 					r = m.send(self.channel)
-					self.last_xmit = m
-					self.last_xmit_at = now()
+					self.last_sent = m
+					self.last_sent_at = now()
 					if r is RECV_AGAIN:
 						self.receivers.append(m)
 					elif r is SEND_AGAIN:
 						self.msgs[msg.prio].append(msg)
 					elif isinstance(r,SEND_LATER):
 						raise NotImplementedError("Queueing doesn't work yet")
+					elif isinstance(r,MSG_ERROR):
+						try:
+							raise r
+						except Exception as r:
+							fix_exception(r)
+							process_failure(r)
 					else:
 						msg.done()
 
