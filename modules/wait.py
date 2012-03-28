@@ -153,32 +153,35 @@ class Waiter(Collected):
 	def _job(self):
 		self._set_pling()
 		self._running = True
-		while True:
-			cmd = self.q.get()
+		try:
+			while True:
+				cmd = self.q.get()
 
-			q = cmd[0]
-			a = cmd[2] if len(cmd)>2 else None
-			cmd = cmd[1]
-			if cmd == "timeout":
-				assert self._plinger is None
-				q.put(None)
-				self.q = None
-				return True
-			elif cmd == "cancel":
-				if self._plinger:
-					self._plinger.cancel()
-					self._plinger = None
-				q.put(None)
-				self.q = None
-				return False
-			elif cmd == "update":
-				q.put(None)
-				self.end = a
-				self._set_pling()
-			elif cmd == "remain":
-				q.put(unixtime(self.end)-unixtime(now(self.force)))
-			else:
-				q.put(RuntimeError('Unknown command: '+cmd))
+				q = cmd[0]
+				a = cmd[2] if len(cmd)>2 else None
+				cmd = cmd[1]
+				if cmd == "timeout":
+					assert self._plinger is None
+					q.put(None)
+					self.q = None
+					return True
+				elif cmd == "cancel":
+					if self._plinger:
+						self._plinger.cancel()
+						self._plinger = None
+					q.put(None)
+					self.q = None
+					return False
+				elif cmd == "update":
+					q.put(None)
+					self.end = a
+					self._set_pling()
+				elif cmd == "remain":
+					q.put(unixtime(self.end)-unixtime(now(self.force)))
+				else:
+					q.put(RuntimeError('Unknown command: '+cmd))
+		finally:
+			self.delete_done()
 
 
 	def init(self,dest):
@@ -188,7 +191,6 @@ class Waiter(Collected):
 		self.q = Channel()
 		self.end = dest
 		self.job = gevent.spawn(self._job)
-		self.job.link(lambda _: self.delete_done())
 
 		Waiters[self.name] = self
 
@@ -263,8 +265,10 @@ wait [NAME…]: for FOO…
 			logging.log_exc(msg=u"Wait %s died:"%(self.name,), err=ex, level=logging.TRACE)
 			raise
 		else:
-			process_event(Event(self.ctx(loglevel=logging.TRACE),"wait","done",ixtime(now(self.force),self.force), *w.name))
-			ctx.wait = tm = ixtime(now(self.force),self.force)
+			tm = ixtime(now(self.force),self.force)
+			if r: # don't log 'done' if canceled
+				process_event(Event(self.ctx(loglevel=logging.TRACE),"wait","done",tm, *w.name))
+			ctx.wait = tm
 
 		
 class WaitFor(Statement):
