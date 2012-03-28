@@ -3,145 +3,89 @@ NEW: <ConditionalWorkSequence:7 (4)>
    : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
+EVENT: startup
+END: startup
 NEW: <ConditionalWorkSequence:8 (4)>
    : │  id: 8
    : │  call count: 0
-   : │  EVENT: foo1
+   : │  EVENT: wait¦start¦×××¦A
    : └1╴... done.
+EVENT: wait¦start¦×××¦A
+END: wait¦start¦×××¦A
 NEW: <ConditionalWorkSequence:9 (4)>
    : │  id: 9
    : │  call count: 0
-   : │  EVENT: bar1
+   : │  IEVENT: bar1
    : └1╴... done.
+IEVENT: bar1
+END: bar1
 NEW: <ConditionalWorkSequence:10 (4)>
    : │  id: 10
    : │  call count: 0
-   : │  EVENT: wait¦start¦×××¦_wait¦1
+   : │  IEVENT: foo1
    : └1╴... done.
-EVENT: startup
-END: startup
-EVENT: foo1
+IEVENT: foo1
 END: foo1
-EVENT: bar1
-END: bar1
-EVENT: wait¦start¦×××¦_wait¦1
-END: wait¦start¦×××¦_wait¦1
 NEW: <ConditionalWorkSequence:11 (4)>
    : │  id: 11
    : │  call count: 0
-   : │  EVENT: wait¦done¦×××¦_wait¦1
+   : │  EVENT: wait¦done¦×××¦A
    : └1╴... done.
-EVENT: wait¦done¦×××¦_wait¦1
-END: wait¦done¦×××¦_wait¦1
+EVENT: wait¦done¦×××¦A
+END: wait¦done¦×××¦A
 NEW: <ConditionalWorkSequence:12 (4)>
    : │  id: 12
    : │  call count: 0
-   : │  EVENT: foo2
+   : │  EVENT: wait¦start¦×××¦B
    : └1╴... done.
-EVENT: foo2
-END: foo2
+EVENT: wait¦start¦×××¦B
+END: wait¦start¦×××¦B
 NEW: <ConditionalWorkSequence:13 (4)>
    : │  id: 13
    : │  call count: 0
-   : │  EVENT: bar2
+   : │  IEVENT: bar2
    : └1╴... done.
-EVENT: bar2
+IEVENT: bar2
 END: bar2
 NEW: <ConditionalWorkSequence:14 (4)>
    : │  id: 14
    : │  call count: 0
-   : │  EVENT: wait¦start¦×××¦_wait¦2
+   : │  IEVENT: foo2
    : └1╴... done.
-EVENT: wait¦start¦×××¦_wait¦2
-END: wait¦start¦×××¦_wait¦2
+IEVENT: foo2
+END: foo2
 NEW: <ConditionalWorkSequence:15 (4)>
    : │  id: 15
    : │  call count: 0
-   : │  EVENT: wait¦done¦×××¦_wait¦2
+   : │  EVENT: wait¦done¦×××¦B
    : └1╴... done.
-EVENT: wait¦done¦×××¦_wait¦2
-END: wait¦done¦×××¦_wait¦2
+EVENT: wait¦done¦×××¦B
+END: wait¦done¦×××¦B
 NEW: <ConditionalWorkSequence:16 (4)>
    : │  id: 16
    : │  call count: 0
-   : │  EVENT: foo3
+   : │  EVENT: wait¦start¦×××¦C
    : └1╴... done.
+EVENT: wait¦start¦×××¦C
+END: wait¦start¦×××¦C
 NEW: <ConditionalWorkSequence:17 (4)>
    : │  id: 17
    : │  call count: 0
-   : │  EVENT: bar3
+   : │  IEVENT: bar3
    : └1╴... done.
+IEVENT: bar3
+END: bar3
 NEW: <ConditionalWorkSequence:18 (4)>
    : │  id: 18
    : │  call count: 0
-   : │  EVENT: wait¦start¦×××¦_wait¦3
+   : │  IEVENT: foo3
    : └1╴... done.
-EVENT: foo3
+IEVENT: foo3
 END: foo3
-EVENT: bar3
-END: bar3
-EVENT: wait¦start¦×××¦_wait¦3
-END: wait¦start¦×××¦_wait¦3
 NEW: <ConditionalWorkSequence:19 (4)>
    : │  id: 19
    : │  call count: 0
-   : │  EVENT: wait¦done¦×××¦_wait¦3
+   : │  EVENT: wait¦done¦×××¦C
    : └1╴... done.
-EVENT: wait¦done¦×××¦_wait¦3
-END: wait¦done¦×××¦_wait¦3
-NEW: <ConditionalWorkSequence:20 (4)>
-   : │  id: 20
-   : │  call count: 0
-   : │  EVENT: foo4
-   : └1╴... done.
-EVENT: foo4
-END: foo4
-NEW: <ConditionalWorkSequence:21 (4)>
-   : │  id: 21
-   : │  call count: 0
-   : │  EVENT: bar4
-   : └1╴... done.
-EVENT: bar4
-END: bar4
-NEW: <ConditionalWorkSequence:22 (4)>
-   : │  id: 22
-   : │  call count: 0
-   : │  EVENT: wait¦start¦×××¦_wait¦4
-   : └1╴... done.
-EVENT: wait¦start¦×××¦_wait¦4
-END: wait¦start¦×××¦_wait¦4
-NEW: <ConditionalWorkSequence:23 (4)>
-   : │  id: 23
-   : │  call count: 0
-   : │  EVENT: foo5
-   : └1╴... done.
-EVENT: foo5
-END: foo5
-NEW: <ConditionalWorkSequence:24 (4)>
-   : │  id: 24
-   : │  call count: 0
-   : │  EVENT: wait¦done¦×××¦_wait¦4
-   : └1╴... done.
-EVENT: wait¦done¦×××¦_wait¦4
-END: wait¦done¦×××¦_wait¦4
-NEW: <ConditionalWorkSequence:25 (4)>
-   : │  id: 25
-   : │  call count: 0
-   : │  EVENT: bar5
-   : └1╴... done.
-NEW: <ConditionalWorkSequence:26 (4)>
-   : │  id: 26
-   : │  call count: 0
-   : │  EVENT: wait¦start¦×××¦_wait¦5
-   : └1╴... done.
-EVENT: bar5
-END: bar5
-EVENT: wait¦start¦×××¦_wait¦5
-END: wait¦start¦×××¦_wait¦5
-NEW: <ConditionalWorkSequence:27 (4)>
-   : │  id: 27
-   : │  call count: 0
-   : │  EVENT: wait¦done¦×××¦_wait¦5
-   : └1╴... done.
-EVENT: wait¦done¦×××¦_wait¦5
-END: wait¦done¦×××¦_wait¦5
+EVENT: wait¦done¦×××¦C
+END: wait¦done¦×××¦C

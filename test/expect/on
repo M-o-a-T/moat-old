@@ -3,6 +3,8 @@ NEW: <ConditionalWorkSequence:6 (4)>
    : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
+EVENT: startup
+END: startup
 0 Create OnEvtHandler: fuß
 0 NewHandler 7
 0 Create OnEvtHandler: num¦1
@@ -47,134 +49,6 @@ pname: Skipped Two
 args: foo
 prio: 50
 .
-NEW: <ConditionalWorkSequence:16 (5)>
-   : │  id: 16
-   : │  call count: 0
-   : │  EVENT: bar¦foo
-   : ├1╴on bar * ‹OnEventHandler›
-   : │  prio: 51
-   : │  step: block ‹Block›
-   : │      : step: trigger $1 ‹SyncTriggerHandler›
-   : └2╴... done.
-EVENT: startup
-END: startup
-EVENT: bar¦foo
-RUN: on bar * ‹OnEventHandler›
-   : prio: 51
-   : step: block ‹Block›
-   :     : step: trigger $1 ‹SyncTriggerHandler›
- at: <ConditionalWorkSequence:16 (5)> (step 1)
- ev: EVENT: bar¦foo
-NEW: <ConditionalWorkSequence:17 (8)>
-   : │  id: 17
-   : │  call count: 0
-   : │  EVENT: foo
-   : ├1╴on foo ‹OnEventHandler›
-   : │  name: Skipped One
-   : │  prio: 49
-   : │  step: if false ‹IfStatement›
-   : │  step: log ERROR This should not be executed ‹LogHandler›
-   : ├2╴on foo ‹OnEventHandler›
-   : │  name: Skipped Two
-   : │  prio: 50
-   : │  step: if true ‹IfStatement›
-   : │      : step: next handler ‹OnSkip›
-   : │  step: log ERROR This should also not be executed ‹LogHandler›
-   : ├3╴on foo ‹OnEventHandler›
-   : │  name: Last Handler
-   : │  prio: 55
-   : │  step: log DEBUG This is logged once ‹LogHandler›
-   : ├4╴on foo ‹OnEventHandler›
-   : │  name: not executed
-   : │  prio: 60
-   : │  step: log DEBUG This is logged once too ‹LogHandler›
-   : └5╴... done.
-EVENT: foo
-RUN: on foo ‹OnEventHandler›
-   : name: Skipped One
-   : prio: 49
-   : step: if false ‹IfStatement›
-   : step: log ERROR This should not be executed ‹LogHandler›
- at: <ConditionalWorkSequence:17 (8)> (step 1)
- ev: EVENT: foo
-RUN: on foo ‹OnEventHandler›
-   : name: Skipped Two
-   : prio: 50
-   : step: if true ‹IfStatement›
-   :     : step: next handler ‹OnSkip›
-   : step: log ERROR This should also not be executed ‹LogHandler›
- at: <ConditionalWorkSequence:17 (8)> (step 2)
- ev: EVENT: foo
-RUN: on foo ‹OnEventHandler›
-   : name: Last Handler
-   : prio: 55
-   : step: log DEBUG This is logged once ‹LogHandler›
- at: <ConditionalWorkSequence:17 (8)> (step 3)
- ev: EVENT: foo
-1 This is logged once
-END: foo
-END: bar¦foo
-NEW: <ConditionalWorkSequence:18 (5)>
-   : │  id: 18
-   : │  call count: 0
-   : │  EVENT: bar¦foo
-   : ├1╴on bar * ‹OnEventHandler›
-   : │  prio: 51
-   : │  step: block ‹Block›
-   : │      : step: trigger $1 ‹SyncTriggerHandler›
-   : └2╴... done.
-EVENT: bar¦foo
-RUN: on bar * ‹OnEventHandler›
-   : prio: 51
-   : step: block ‹Block›
-   :     : step: trigger $1 ‹SyncTriggerHandler›
- at: <ConditionalWorkSequence:18 (5)> (step 1)
- ev: EVENT: bar¦foo
-NEW: <ConditionalWorkSequence:19 (7)>
-   : │  id: 19
-   : │  call count: 0
-   : │  EVENT: foo
-   : ├1╴on foo ‹OnEventHandler›
-   : │  name: Skipped One
-   : │  prio: 49
-   : │  step: if false ‹IfStatement›
-   : │  step: log ERROR This should not be executed ‹LogHandler›
-   : ├2╴on foo ‹OnEventHandler›
-   : │  name: Skipped Two
-   : │  prio: 50
-   : │  step: if true ‹IfStatement›
-   : │      : step: next handler ‹OnSkip›
-   : │  step: log ERROR This should also not be executed ‹LogHandler›
-   : ├3╴on foo ‹OnEventHandler›
-   : │  name: not executed
-   : │  prio: 60
-   : │  step: log DEBUG This is logged once too ‹LogHandler›
-   : └4╴... done.
-EVENT: foo
-RUN: on foo ‹OnEventHandler›
-   : name: Skipped One
-   : prio: 49
-   : step: if false ‹IfStatement›
-   : step: log ERROR This should not be executed ‹LogHandler›
- at: <ConditionalWorkSequence:19 (7)> (step 1)
- ev: EVENT: foo
-RUN: on foo ‹OnEventHandler›
-   : name: Skipped Two
-   : prio: 50
-   : step: if true ‹IfStatement›
-   :     : step: next handler ‹OnSkip›
-   : step: log ERROR This should also not be executed ‹LogHandler›
- at: <ConditionalWorkSequence:19 (7)> (step 2)
- ev: EVENT: foo
-RUN: on foo ‹OnEventHandler›
-   : name: not executed
-   : prio: 60
-   : step: log DEBUG This is logged once too ‹LogHandler›
- at: <ConditionalWorkSequence:19 (7)> (step 3)
- ev: EVENT: foo
-1 This is logged once too
-END: foo
-END: bar¦foo
 Skipped One :: foo (49)
 Skipped Two :: foo (50)
 Num2Txt :: num¦2 (51)
@@ -183,67 +57,225 @@ _on 15 :: bar¦* (51)
 num2num :: num¦3 (51)
 not executed :: foo (60)
 .
-NEW: <ConditionalWorkSequence:20 (4)>
-   : │  id: 20
+NEW: <ConditionalWorkSequence:16 (5)>
+   : │  id: 16
    : │  call count: 0
-   : │  EVENT: fuß
-   : └1╴... done.
-NEW: <ConditionalWorkSequence:21 (5)>
-   : │  id: 21
-   : │  call count: 0
-   : │  EVENT: num¦1
-   : ├1╴on num 1 ‹OnEventHandler›
-   : │  name: Txt2Num
-   : │  prio: 51
-   : │  step: do nothing ‹DoNothingHandler›
-   : └2╴... done.
-NEW: <ConditionalWorkSequence:22 (5)>
-   : │  id: 22
-   : │  call count: 0
-   : │  EVENT: num¦2
-   : ├1╴on num 2 ‹OnEventHandler›
-   : │  name: Num2Txt
-   : │  prio: 51
-   : │  step: do nothing ‹DoNothingHandler›
-   : └2╴... done.
-NEW: <ConditionalWorkSequence:23 (5)>
-   : │  id: 23
-   : │  call count: 0
-   : │  EVENT: num¦3
+   : │  IEVENT: num¦3
    : ├1╴on num 3 ‹OnEventHandler›
    : │  name: num2num
    : │  prio: 51
    : │  step: do nothing ‹DoNothingHandler›
    : └2╴... done.
-EVENT: fuß
-END: fuß
-EVENT: num¦1
-RUN: on num 1 ‹OnEventHandler›
-   : name: Txt2Num
-   : prio: 51
-   : step: do nothing ‹DoNothingHandler›
- at: <ConditionalWorkSequence:21 (5)> (step 1)
- ev: EVENT: num¦1
-0 NOW: do nothing
-END: num¦1
-EVENT: num¦2
-RUN: on num 2 ‹OnEventHandler›
-   : name: Num2Txt
-   : prio: 51
-   : step: do nothing ‹DoNothingHandler›
- at: <ConditionalWorkSequence:22 (5)> (step 1)
- ev: EVENT: num¦2
-0 NOW: do nothing
-END: num¦2
-EVENT: num¦3
+IEVENT: num¦3
 RUN: on num 3 ‹OnEventHandler›
    : name: num2num
    : prio: 51
    : step: do nothing ‹DoNothingHandler›
- at: <ConditionalWorkSequence:23 (5)> (step 1)
- ev: EVENT: num¦3
+ at: <ConditionalWorkSequence:16 (5)> (step 1)
+ ev: IEVENT: num¦3
 0 NOW: do nothing
 END: num¦3
+NEW: <ConditionalWorkSequence:17 (5)>
+   : │  id: 17
+   : │  call count: 0
+   : │  IEVENT: num¦2
+   : ├1╴on num 2 ‹OnEventHandler›
+   : │  name: Num2Txt
+   : │  prio: 51
+   : │  step: do nothing ‹DoNothingHandler›
+   : └2╴... done.
+IEVENT: num¦2
+RUN: on num 2 ‹OnEventHandler›
+   : name: Num2Txt
+   : prio: 51
+   : step: do nothing ‹DoNothingHandler›
+ at: <ConditionalWorkSequence:17 (5)> (step 1)
+ ev: IEVENT: num¦2
+0 NOW: do nothing
+END: num¦2
+NEW: <ConditionalWorkSequence:18 (5)>
+   : │  id: 18
+   : │  call count: 0
+   : │  IEVENT: num¦1
+   : ├1╴on num 1 ‹OnEventHandler›
+   : │  name: Txt2Num
+   : │  prio: 51
+   : │  step: do nothing ‹DoNothingHandler›
+   : └2╴... done.
+IEVENT: num¦1
+RUN: on num 1 ‹OnEventHandler›
+   : name: Txt2Num
+   : prio: 51
+   : step: do nothing ‹DoNothingHandler›
+ at: <ConditionalWorkSequence:18 (5)> (step 1)
+ ev: IEVENT: num¦1
+0 NOW: do nothing
+END: num¦1
+NEW: <ConditionalWorkSequence:19 (4)>
+   : │  id: 19
+   : │  call count: 0
+   : │  IEVENT: fuß
+   : └1╴... done.
+IEVENT: fuß
+END: fuß
+NEW: <ConditionalWorkSequence:20 (5)>
+   : │  id: 20
+   : │  call count: 0
+   : │  IEVENT: bar¦foo
+   : ├1╴on bar * ‹OnEventHandler›
+   : │  prio: 51
+   : │  step: block ‹Block›
+   : │      : step: trigger $1 ‹TriggerHandler›
+   : └2╴... done.
+IEVENT: bar¦foo
+RUN: on bar * ‹OnEventHandler›
+   : prio: 51
+   : step: block ‹Block›
+   :     : step: trigger $1 ‹TriggerHandler›
+ at: <ConditionalWorkSequence:20 (5)> (step 1)
+ ev: IEVENT: bar¦foo
+END: bar¦foo
+Traceback (most recent call last):
+  File "/daten/src/git/homevent/homevent/run.py", line 136, in run_event
+    process_event(event)
+  File "/daten/src/git/homevent/homevent/run.py", line 116, in process_event
+    collect_event(e).process(event=e)
+  File "/daten/src/git/homevent/homevent/worker.py", line 194, in process
+    self._process()
+  File "/daten/src/git/homevent/homevent/worker.py", line 256, in _process
+    reraise(res)
+  File "/daten/src/git/homevent/homevent/worker.py", line 226, in _process
+    r = w.process(event=self.event, queue=self)
+  File "../modules/on_event.py", line 169, in process
+    return self.parent.process(**k)
+  File "../modules/on_event.py", line 248, in process
+    return super(OnEventHandler,self).run(ctx)
+  File "/daten/src/git/homevent/homevent/statement.py", line 311, in run
+    res = proc.run(ctx)
+  File "/daten/src/git/homevent/homevent/statement.py", line 311, in run
+    res = proc.run(ctx)
+  File "../modules/trigger.py", line 52, in run
+    event = self.params(ctx)
+  File "/daten/src/git/homevent/homevent/statement.py", line 101, in params
+    return self.args.apply(ctx,drop=len(self.name))
+  File "/daten/src/git/homevent/homevent/event.py", line 140, in apply
+    r = getattr(ctx,n[1:])
+  File "/daten/src/git/homevent/homevent/context.py", line 84, in __getattribute__
+    raise AttributeError(self,key)
+AttributeError: (Ctx(Ctx(),Ctx(Ctx(Ctx(Ctx({'out': <test.logwrite obj>}),{'words': ‹global_words: Global 2›}),{'words': ‹OnEventHandler on¦bar¦*›}),{'words': ‹Block block›})), '1')
+NEW: <WorkSequence:21 (4)>
+   : │  id: 21
+   : │  call count: 0
+   : │  (Ctx(Ctx(),Ctx(Ctx(Ctx(Ctx({'out': <test.logwrite obj>}),{'words': ‹global_words: Global 2›}),{'words': ‹OnEventHandler on¦bar¦*›}),{'words': ‹Block block›})), '1')
+   : └1╴... done.
+Traceback (most recent call last):
+  File "/daten/src/git/homevent/homevent/run.py", line 136, in run_event
+    process_event(event)
+  File "/daten/src/git/homevent/homevent/run.py", line 116, in process_event
+    collect_event(e).process(event=e)
+  File "/daten/src/git/homevent/homevent/worker.py", line 194, in process
+    self._process()
+  File "/daten/src/git/homevent/homevent/worker.py", line 256, in _process
+    reraise(res)
+  File "/daten/src/git/homevent/homevent/worker.py", line 226, in _process
+    r = w.process(event=self.event, queue=self)
+  File "../modules/on_event.py", line 169, in process
+    return self.parent.process(**k)
+  File "../modules/on_event.py", line 248, in process
+    return super(OnEventHandler,self).run(ctx)
+  File "/daten/src/git/homevent/homevent/statement.py", line 311, in run
+    res = proc.run(ctx)
+  File "/daten/src/git/homevent/homevent/statement.py", line 311, in run
+    res = proc.run(ctx)
+  File "../modules/trigger.py", line 52, in run
+    event = self.params(ctx)
+  File "/daten/src/git/homevent/homevent/statement.py", line 101, in params
+    return self.args.apply(ctx,drop=len(self.name))
+  File "/daten/src/git/homevent/homevent/event.py", line 140, in apply
+    r = getattr(ctx,n[1:])
+  File "/daten/src/git/homevent/homevent/context.py", line 84, in __getattribute__
+    raise AttributeError(self,key)
+AttributeError: (Ctx(Ctx(),Ctx(Ctx(Ctx(Ctx({'out': <test.logwrite obj>}),{'words': ‹global_words: Global 2›}),{'words': ‹OnEventHandler on¦bar¦*›}),{'words': ‹Block block›})), '1')
+END: AttributeError
+NEW: <ConditionalWorkSequence:22 (5)>
+   : │  id: 22
+   : │  call count: 0
+   : │  IEVENT: bar¦foo
+   : ├1╴on bar * ‹OnEventHandler›
+   : │  prio: 51
+   : │  step: block ‹Block›
+   : │      : step: trigger $1 ‹TriggerHandler›
+   : └2╴... done.
+IEVENT: bar¦foo
+RUN: on bar * ‹OnEventHandler›
+   : prio: 51
+   : step: block ‹Block›
+   :     : step: trigger $1 ‹TriggerHandler›
+ at: <ConditionalWorkSequence:22 (5)> (step 1)
+ ev: IEVENT: bar¦foo
+END: bar¦foo
+Traceback (most recent call last):
+  File "/daten/src/git/homevent/homevent/run.py", line 136, in run_event
+    process_event(event)
+  File "/daten/src/git/homevent/homevent/run.py", line 116, in process_event
+    collect_event(e).process(event=e)
+  File "/daten/src/git/homevent/homevent/worker.py", line 194, in process
+    self._process()
+  File "/daten/src/git/homevent/homevent/worker.py", line 256, in _process
+    reraise(res)
+  File "/daten/src/git/homevent/homevent/worker.py", line 226, in _process
+    r = w.process(event=self.event, queue=self)
+  File "../modules/on_event.py", line 169, in process
+    return self.parent.process(**k)
+  File "../modules/on_event.py", line 248, in process
+    return super(OnEventHandler,self).run(ctx)
+  File "/daten/src/git/homevent/homevent/statement.py", line 311, in run
+    res = proc.run(ctx)
+  File "/daten/src/git/homevent/homevent/statement.py", line 311, in run
+    res = proc.run(ctx)
+  File "../modules/trigger.py", line 52, in run
+    event = self.params(ctx)
+  File "/daten/src/git/homevent/homevent/statement.py", line 101, in params
+    return self.args.apply(ctx,drop=len(self.name))
+  File "/daten/src/git/homevent/homevent/event.py", line 140, in apply
+    r = getattr(ctx,n[1:])
+  File "/daten/src/git/homevent/homevent/context.py", line 84, in __getattribute__
+    raise AttributeError(self,key)
+AttributeError: (Ctx(Ctx(),Ctx(Ctx(Ctx(Ctx({'out': <test.logwrite obj>}),{'words': ‹global_words: Global 2›}),{'words': ‹OnEventHandler on¦bar¦*›}),{'words': ‹Block block›})), '1')
+NEW: <WorkSequence:23 (4)>
+   : │  id: 23
+   : │  call count: 0
+   : │  (Ctx(Ctx(),Ctx(Ctx(Ctx(Ctx({'out': <test.logwrite obj>}),{'words': ‹global_words: Global 2›}),{'words': ‹OnEventHandler on¦bar¦*›}),{'words': ‹Block block›})), '1')
+   : └1╴... done.
+Traceback (most recent call last):
+  File "/daten/src/git/homevent/homevent/run.py", line 136, in run_event
+    process_event(event)
+  File "/daten/src/git/homevent/homevent/run.py", line 116, in process_event
+    collect_event(e).process(event=e)
+  File "/daten/src/git/homevent/homevent/worker.py", line 194, in process
+    self._process()
+  File "/daten/src/git/homevent/homevent/worker.py", line 256, in _process
+    reraise(res)
+  File "/daten/src/git/homevent/homevent/worker.py", line 226, in _process
+    r = w.process(event=self.event, queue=self)
+  File "../modules/on_event.py", line 169, in process
+    return self.parent.process(**k)
+  File "../modules/on_event.py", line 248, in process
+    return super(OnEventHandler,self).run(ctx)
+  File "/daten/src/git/homevent/homevent/statement.py", line 311, in run
+    res = proc.run(ctx)
+  File "/daten/src/git/homevent/homevent/statement.py", line 311, in run
+    res = proc.run(ctx)
+  File "../modules/trigger.py", line 52, in run
+    event = self.params(ctx)
+  File "/daten/src/git/homevent/homevent/statement.py", line 101, in params
+    return self.args.apply(ctx,drop=len(self.name))
+  File "/daten/src/git/homevent/homevent/event.py", line 140, in apply
+    r = getattr(ctx,n[1:])
+  File "/daten/src/git/homevent/homevent/context.py", line 84, in __getattribute__
+    raise AttributeError(self,key)
+AttributeError: (Ctx(Ctx(),Ctx(Ctx(Ctx(Ctx({'out': <test.logwrite obj>}),{'words': ‹global_words: Global 2›}),{'words': ‹OnEventHandler on¦bar¦*›}),{'words': ‹Block block›})), '1')
+END: AttributeError
 NEW: <ConditionalWorkSequence:24 (5)>
    : │  id: 24
    : │  call count: 0

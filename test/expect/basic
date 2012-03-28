@@ -4,16 +4,16 @@ NEW: <ConditionalWorkSequence:8 (4)>
    : │  EVENT: startup
    : └1╴... done.
 .
+EVENT: startup
+.
+END: startup
+.
 NEW: <ConditionalWorkSequence:9 (5)>
    : │  id: 9
    : │  call count: 0
    : │  EVENT: say¦hello
    : ├1╴SayWorker: TellMe
    : └2╴... done.
-.
-EVENT: startup
-.
-END: startup
 .
 EVENT: say¦hello
 .

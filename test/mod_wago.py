@@ -32,27 +32,49 @@ if not exists module on_event: load on_event
 if not exists module wago: load wago
 log DEBUG
 
-wago server test:
-	host localhost 59069
-	ping 1
+async:
+	connect wago localhost 59069:
+		name test
+		#ping 1
 
-wago input foo bar:
-	port 1 1
-
-wago output some where:
-	port 2 1
-
-wago counter baz:
-	port 1 2
-
-
-set wago on some where
+#wago input foo bar:
+#	port 1 1
+#
+#wago output some where:
+#	port 2 1
+#
+#wago counter baz:
+#	port 1 2
+#
+#
+#set wago on some where
+#block:
+#	var wago port some where
+#	log DEBUG portstate $port
+#
+#set wago off some where :for 2
+wait:
+	for 0.5
+	debug force
+	
+list
+list wago conn
+list wago conn test
+list wago server
+list wago server test
 block:
-	var wago port some where
-	log DEBUG portstate $port
-
-set wago off some where :for 2
-wait :for 3
+	if exists wago test:
+		log DEBUG Yes
+	else:
+		log DEBUG No1
+	if connected wago test:
+		log DEBUG Yes
+	else:
+		log DEBUG No2
+	if exists wago test stupid:
+		log DEBUG No3
+	else:
+		log DEBUG Yes
 
 shutdown
 """
@@ -68,5 +90,5 @@ load_module("ifelse")
 load_module("path")
 load_module("data")
 
-run("onewire",input)
+run("wago",input)
 

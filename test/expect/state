@@ -3,6 +3,8 @@ NEW: <ConditionalWorkSequence:7 (4)>
    : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
+EVENT: startup
+END: startup
 0 Yes!
 0 Yes!
 0 Set to ONE
@@ -11,8 +13,6 @@ NEW: <ConditionalWorkSequence:8 (4)>
    : │  call count: 0
    : │  EVENT: state¦-¦one¦foo¦bar
    : └1╴... done.
-EVENT: startup
-END: startup
 EVENT: state¦-¦one¦foo¦bar
 END: state¦-¦one¦foo¦bar
 0 Set to TWO
@@ -70,75 +70,51 @@ RUN: on state * twohalf foo bar ‹OnEventHandler›
  ev: EVENT: state¦three¦twohalf¦foo¦bar
 0 Set to FOUR
 END: state¦three¦twohalf¦foo¦bar
-ERROR: Traceback (most recent call last):
-     :   File "internet/defer.py, in unwindGenerator
-     :     return _inlineCallbacks(None, f(*args, **kwargs), Deferred())
-     :   File "internet/defer.py, in _inlineCallbacks
-     :     result = result.throwExceptionIntoGenerator(g)
-     :   File "python/failure.py, in throwExceptionIntoGenerator
-     :     return g.throw(self.type, self.value, self.tb)
-     :   File "homevent/worker.py, in _process
-     :     r = failure.Failure()
-     : --- <exception caught here> ---
-     :   File "homevent/worker.py, in _process
-     :     r = yield w.process(event=self.event, queue=self)
-     :   File "internet/defer.py, in _inlineCallbacks
-     :     result = g.send(result)
-     :   File "modules/state.py, in run
-     :     raise StateChangeError(s,value)
-     : __builtin__.StateChangeError: Trying to change state to 'fourtoo' while changing from 'three' to 'twohalf'
-   in: on state * twohalf foo bar ‹OnEventHandler›
-     : prio: 51
-     : step: log TRACE Set to FOUR ‹LogHandler›
-     : step: set state fourtoo foo bar ‹SetStateHandler›
-   in: <ConditionalWorkSequence:13 (5)>
-     : │  id: 13
-     : │  call count: 1
-     : │  last call: now
-     : │  last event: <Event:state¦three¦twohalf¦foo¦bar>
-     : │  EVENT: state¦three¦twohalf¦foo¦bar
-     : ╞1╕on state * twohalf foo bar ‹OnEventHandler›
-     : │ │prio: 51
-     : │ │step: log TRACE Set to FOUR ‹LogHandler›
-     : │ ╵step: set state fourtoo foo bar ‹SetStateHandler›
-     : └2╴... done.
+Traceback (most recent call last):
+  File "../modules/state.py", line 255, in run
+    process_event(Event(self.ctx,"state",old,value,*s.name))
+  File "/daten/src/git/homevent/homevent/run.py", line 116, in process_event
+    collect_event(e).process(event=e)
+  File "/daten/src/git/homevent/homevent/worker.py", line 194, in process
+    self._process()
+  File "/daten/src/git/homevent/homevent/worker.py", line 256, in _process
+    reraise(res)
+  File "/daten/src/git/homevent/homevent/worker.py", line 226, in _process
+    r = w.process(event=self.event, queue=self)
+  File "../modules/on_event.py", line 169, in process
+    return self.parent.process(**k)
+  File "../modules/on_event.py", line 248, in process
+    return super(OnEventHandler,self).run(ctx)
+  File "/daten/src/git/homevent/homevent/statement.py", line 311, in run
+    res = proc.run(ctx)
+  File "../modules/state.py", line 248, in run
+    raise StateChangeError(s,value)
+StateChangeError: Trying to change state to 'fourtoo' while changing from 'three' to 'twohalf'
 NEW: <WorkSequence:14 (4)>
    : │  id: 14
    : │  call count: 0
-   : │  ERROR: Trying to change state to 'fourtoo' while changing from 'three' to 'twohalf'
+   : │  Trying to change state to 'fourtoo' while changing from 'three' to 'twohalf'
    : └1╴... done.
-ERROR: Traceback (most recent call last):
-     :   File "internet/defer.py, in unwindGenerator
-     :     return _inlineCallbacks(None, f(*args, **kwargs), Deferred())
-     :   File "internet/defer.py, in _inlineCallbacks
-     :     result = result.throwExceptionIntoGenerator(g)
-     :   File "python/failure.py, in throwExceptionIntoGenerator
-     :     return g.throw(self.type, self.value, self.tb)
-     :   File "homevent/worker.py, in _process
-     :     r = failure.Failure()
-     : --- <exception caught here> ---
-     :   File "homevent/worker.py, in _process
-     :     r = yield w.process(event=self.event, queue=self)
-     :   File "internet/defer.py, in _inlineCallbacks
-     :     result = g.send(result)
-     :   File "modules/state.py, in run
-     :     raise StateChangeError(s,value)
-     : __builtin__.StateChangeError: Trying to change state to 'fourtoo' while changing from 'three' to 'twohalf'
-   in: on state * twohalf foo bar ‹OnEventHandler›
-     : prio: 51
-     : step: log TRACE Set to FOUR ‹LogHandler›
-     : step: set state fourtoo foo bar ‹SetStateHandler›
-   in: <ConditionalWorkSequence:13 (5)>
-     : │  id: 13
-     : │  call count: 1
-     : │  last call: now
-     : │  last event: <Event:state¦three¦twohalf¦foo¦bar>
-     : │  EVENT: state¦three¦twohalf¦foo¦bar
-     : ╞1╕on state * twohalf foo bar ‹OnEventHandler›
-     : │ │prio: 51
-     : │ │step: log TRACE Set to FOUR ‹LogHandler›
-     : │ ╵step: set state fourtoo foo bar ‹SetStateHandler›
-     : └2╴... done.
+Traceback (most recent call last):
+  File "../modules/state.py", line 255, in run
+    process_event(Event(self.ctx,"state",old,value,*s.name))
+  File "/daten/src/git/homevent/homevent/run.py", line 116, in process_event
+    collect_event(e).process(event=e)
+  File "/daten/src/git/homevent/homevent/worker.py", line 194, in process
+    self._process()
+  File "/daten/src/git/homevent/homevent/worker.py", line 256, in _process
+    reraise(res)
+  File "/daten/src/git/homevent/homevent/worker.py", line 226, in _process
+    r = w.process(event=self.event, queue=self)
+  File "../modules/on_event.py", line 169, in process
+    return self.parent.process(**k)
+  File "../modules/on_event.py", line 248, in process
+    return super(OnEventHandler,self).run(ctx)
+  File "/daten/src/git/homevent/homevent/statement.py", line 311, in run
+    res = proc.run(ctx)
+  File "../modules/state.py", line 248, in run
+    raise StateChangeError(s,value)
+StateChangeError: Trying to change state to 'fourtoo' while changing from 'three' to 'twohalf'
 END: StateChangeError
 0 Set to THREE
 NEW: <ConditionalWorkSequence:15 (5)>
@@ -192,34 +168,79 @@ last change: now
 0 Yes!
 0 Create OnEvtHandler: whatever
 0 NewHandler 18
-NEW: <ConditionalWorkSequence:19 (5)>
+NEW: <ConditionalWorkSequence:19 (4)>
    : │  id: 19
-   : │  call count: 0
-   : │  EVENT: whatever
-   : ├1╴on whatever ‹OnEventHandler›
-   : │  prio: 51
-   : │  step: var state x foo bar ‹VarStateHandler›
-   : │  step: log TRACE We got $x ‹LogHandler›
-   : └2╴... done.
-EVENT: whatever
-RUN: on whatever ‹OnEventHandler›
-   : prio: 51
-   : step: var state x foo bar ‹VarStateHandler›
-   : step: log TRACE We got $x ‹LogHandler›
- at: <ConditionalWorkSequence:19 (5)> (step 1)
- ev: EVENT: whatever
-0 We got three
-END: whatever
-NEW: <ConditionalWorkSequence:20 (4)>
-   : │  id: 20
    : │  call count: 0
    : │  EVENT: state¦three¦-¦foo¦bar
    : └1╴... done.
 EVENT: state¦three¦-¦foo¦bar
 END: state¦three¦-¦foo¦bar
 .
-NEW: <ConditionalWorkSequence:21 (6)>
+NEW: <ConditionalWorkSequence:20 (5)>
+   : │  id: 20
+   : │  call count: 0
+   : │  IEVENT: whatever
+   : ├1╴on whatever ‹OnEventHandler›
+   : │  prio: 51
+   : │  step: var state x foo bar ‹VarStateHandler›
+   : │  step: log TRACE We got $x ‹LogHandler›
+   : └2╴... done.
+IEVENT: whatever
+RUN: on whatever ‹OnEventHandler›
+   : prio: 51
+   : step: var state x foo bar ‹VarStateHandler›
+   : step: log TRACE We got $x ‹LogHandler›
+ at: <ConditionalWorkSequence:20 (5)> (step 1)
+ ev: IEVENT: whatever
+END: whatever
+Traceback (most recent call last):
+  File "/daten/src/git/homevent/homevent/run.py", line 136, in run_event
+    process_event(event)
+  File "/daten/src/git/homevent/homevent/run.py", line 116, in process_event
+    collect_event(e).process(event=e)
+  File "/daten/src/git/homevent/homevent/worker.py", line 194, in process
+    self._process()
+  File "/daten/src/git/homevent/homevent/worker.py", line 256, in _process
+    reraise(res)
+  File "/daten/src/git/homevent/homevent/worker.py", line 226, in _process
+    r = w.process(event=self.event, queue=self)
+  File "../modules/on_event.py", line 169, in process
+    return self.parent.process(**k)
+  File "../modules/on_event.py", line 248, in process
+    return super(OnEventHandler,self).run(ctx)
+  File "/daten/src/git/homevent/homevent/statement.py", line 311, in run
+    res = proc.run(ctx)
+  File "../modules/state.py", line 296, in run
+    s = States[name]
+KeyError: Name(u'foo', u'bar')
+NEW: <WorkSequence:21 (4)>
    : │  id: 21
+   : │  call count: 0
+   : │  Name(u'foo', u'bar')
+   : └1╴... done.
+Traceback (most recent call last):
+  File "/daten/src/git/homevent/homevent/run.py", line 136, in run_event
+    process_event(event)
+  File "/daten/src/git/homevent/homevent/run.py", line 116, in process_event
+    collect_event(e).process(event=e)
+  File "/daten/src/git/homevent/homevent/worker.py", line 194, in process
+    self._process()
+  File "/daten/src/git/homevent/homevent/worker.py", line 256, in _process
+    reraise(res)
+  File "/daten/src/git/homevent/homevent/worker.py", line 226, in _process
+    r = w.process(event=self.event, queue=self)
+  File "../modules/on_event.py", line 169, in process
+    return self.parent.process(**k)
+  File "../modules/on_event.py", line 248, in process
+    return super(OnEventHandler,self).run(ctx)
+  File "/daten/src/git/homevent/homevent/statement.py", line 311, in run
+    res = proc.run(ctx)
+  File "../modules/state.py", line 296, in run
+    s = States[name]
+KeyError: Name(u'foo', u'bar')
+END: KeyError
+NEW: <ConditionalWorkSequence:22 (6)>
+   : │  id: 22
    : │  call count: 0
    : │  EVENT: shutdown
    : └1╴... done.

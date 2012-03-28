@@ -3,13 +3,13 @@ NEW: <ConditionalWorkSequence:6 (4)>
    : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
+EVENT: startup
+END: startup
 NEW: <ConditionalWorkSequence:7 (4)>
    : │  id: 7
    : │  call count: 0
    : │  EVENT: module¦load¦ssh
    : └1╴... done.
-EVENT: startup
-END: startup
 EVENT: module¦load¦ssh
 END: module¦load¦ssh
 smurf :: SSH public key

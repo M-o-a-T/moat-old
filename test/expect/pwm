@@ -3,6 +3,8 @@ NEW: <ConditionalWorkSequence:8 (4)>
    : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
+EVENT: startup
+END: startup
 1 Yes
 0 Create OnEvtHandler: pcm¦set¦*X¦foo¦bar
 0 NewHandler 9
@@ -17,8 +19,6 @@ NEW: <ConditionalWorkSequence:10 (4)>
    : │  call count: 0
    : │  EVENT: wait¦start¦0.5¦_wait¦2
    : └1╴... done.
-EVENT: startup
-END: startup
 EVENT: wait¦start¦0.5¦_wait¦2
 END: wait¦start¦0.5¦_wait¦2
 NEW: <ConditionalWorkSequence:11 (4)>
@@ -42,8 +42,29 @@ NEW: <ConditionalWorkSequence:12 (4)>
    : └1╴... done.
 EVENT: wait¦start¦9.0¦_wait¦3
 END: wait¦start¦9.0¦_wait¦3
-NEW: <ConditionalWorkSequence:13 (5)>
+NEW: <ConditionalWorkSequence:13 (4)>
    : │  id: 13
+   : │  call count: 0
+   : │  EVENT: wait¦done¦9.0¦_wait¦3
+   : └1╴... done.
+EVENT: wait¦done¦9.0¦_wait¦3
+END: wait¦done¦9.0¦_wait¦3
+type: PWM
+name: foo bar
+current: 0.1
+next: now
+t_off: 9.0 sec
+t_on: 1.0 sec
+.
+NEW: <ConditionalWorkSequence:14 (4)>
+   : │  id: 14
+   : │  call count: 0
+   : │  EVENT: wait¦start¦24.0¦_wait¦4
+   : └1╴... done.
+EVENT: wait¦start¦24.0¦_wait¦4
+END: wait¦start¦24.0¦_wait¦4
+NEW: <ConditionalWorkSequence:15 (5)>
+   : │  id: 15
    : │  call count: 0
    : │  EVENT: pcm¦set¦on¦foo¦bar
    : ├1╴on pcm set *X foo bar ‹OnEventHandler›
@@ -51,43 +72,21 @@ NEW: <ConditionalWorkSequence:13 (5)>
    : │  step: log DEBUG PCM is now $X ‹LogHandler›
    : │  step: wait ‹WaitHandler›
    : └2╴... done.
-NEW: <ConditionalWorkSequence:14 (4)>
-   : │  id: 14
-   : │  call count: 0
-   : │  EVENT: wait¦done¦9.0¦_wait¦3
-   : └1╴... done.
 EVENT: pcm¦set¦on¦foo¦bar
 RUN: on pcm set *X foo bar ‹OnEventHandler›
    : prio: 51
    : step: log DEBUG PCM is now $X ‹LogHandler›
    : step: wait ‹WaitHandler›
- at: <ConditionalWorkSequence:13 (5)> (step 1)
+ at: <ConditionalWorkSequence:15 (5)> (step 1)
  ev: EVENT: pcm¦set¦on¦foo¦bar
 1 PCM is now on
-NEW: <ConditionalWorkSequence:15 (4)>
-   : │  id: 15
-   : │  call count: 0
-   : │  EVENT: wait¦start¦9.1¦_wait¦1
-   : └1╴... done.
-EVENT: wait¦done¦9.0¦_wait¦3
-END: wait¦done¦9.0¦_wait¦3
-type: PWM
-name: foo bar
-state: on
-current: 0.1
-next: now
-t_off: 9.0 sec
-t_on: 1.0 sec
-.
 NEW: <ConditionalWorkSequence:16 (4)>
    : │  id: 16
    : │  call count: 0
-   : │  EVENT: wait¦start¦24.0¦_wait¦4
+   : │  EVENT: wait¦start¦9.1¦_wait¦1
    : └1╴... done.
 EVENT: wait¦start¦9.1¦_wait¦1
 END: wait¦start¦9.1¦_wait¦1
-EVENT: wait¦start¦24.0¦_wait¦4
-END: wait¦start¦24.0¦_wait¦4
 NEW: <ConditionalWorkSequence:17 (4)>
    : │  id: 17
    : │  call count: 0
@@ -201,10 +200,3 @@ EVENT: wait¦done¦24.0¦_wait¦4
 END: wait¦done¦24.0¦_wait¦4
 foo bar :: 0.100000 1.0 sec / 9.0 sec
 .
-NEW: <ConditionalWorkSequence:28 (7)>
-   : │  id: 28
-   : │  call count: 0
-   : │  EVENT: shutdown
-   : └1╴... done.
-EVENT: shutdown
-END: shutdown

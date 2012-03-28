@@ -3,13 +3,13 @@ NEW: <ConditionalWorkSequence:6 (4)>
    : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
+EVENT: startup
+END: startup
 NEW: <ConditionalWorkSequence:7 (4)>
    : │  id: 7
    : │  call count: 0
    : │  EVENT: module¦load¦bool
    : └1╴... done.
-EVENT: startup
-END: startup
 EVENT: module¦load¦bool
 END: module¦load¦bool
 NEW: <ConditionalWorkSequence:8 (4)>
@@ -103,10 +103,10 @@ last_temperature: 15.0
 NEW: <ConditionalWorkSequence:18 (4)>
    : │  id: 18
    : │  call count: 0
-   : │  EVENT: wait¦start¦0.5¦_wait¦1
+   : │  EVENT: wait¦start¦0.6¦_wait¦1
    : └1╴... done.
-EVENT: wait¦start¦0.5¦_wait¦1
-END: wait¦start¦0.5¦_wait¦1
+EVENT: wait¦start¦0.6¦_wait¦1
+END: wait¦start¦0.6¦_wait¦1
 NEW: <ConditionalWorkSequence:19 (4)>
    : │  id: 19
    : │  call count: 0
@@ -117,10 +117,10 @@ END: fs20¦error¦Dies ist noch eine Test-Fehlermeldung¦bar¦foo
 NEW: <ConditionalWorkSequence:20 (4)>
    : │  id: 20
    : │  call count: 0
-   : │  EVENT: wait¦done¦0.5¦_wait¦1
+   : │  EVENT: wait¦done¦0.6¦_wait¦1
    : └1╴... done.
-EVENT: wait¦done¦0.5¦_wait¦1
-END: wait¦done¦0.5¦_wait¦1
+EVENT: wait¦done¦0.6¦_wait¦1
+END: wait¦done¦0.6¦_wait¦1
 foobar
 .
 name: foobar
@@ -138,10 +138,10 @@ stopped: no
 NEW: <ConditionalWorkSequence:21 (4)>
    : │  id: 21
    : │  call count: 0
-   : │  EVENT: wait¦start¦3.5¦_wait¦2
+   : │  EVENT: wait¦start¦3.6¦_wait¦2
    : └1╴... done.
-EVENT: wait¦start¦3.5¦_wait¦2
-END: wait¦start¦3.5¦_wait¦2
+EVENT: wait¦start¦3.6¦_wait¦2
+END: wait¦start¦3.6¦_wait¦2
 1 FS20 sender output *** RECV f8c8d131143 *** bar¦foo
 1 FS20 sender output *** RECV f8c8d130032 *** bar¦foo
 NEW: <ConditionalWorkSequence:22 (4)>
@@ -152,275 +152,305 @@ NEW: <ConditionalWorkSequence:22 (4)>
 EVENT: fs20¦error¦Dies ist eine Test-Fehlermeldung¦foobar
 END: fs20¦error¦Dies ist eine Test-Fehlermeldung¦foobar
 1 fs20 +2 wait
-1 fs20 Wait until 2.0  -- now: 0.5 :: wait
+1 fs20 Wait until 2.0  -- now: 0.0 :: wait
+0 +WAIT 1 Fake timer wait for 2.0
+0 -WAIT 1 Fake timer wait for 2.0
 1 fs20 +2.1 switch OK
 1 fs20 Wait until 2.1  -- now: 2.0 :: switch OK
+0 +WAIT 2 Fake timer wait for 0.1
+0 -WAIT 2 Fake timer wait for 0.1
 1 fs20 f8c8d131244
 NEW: <ConditionalWorkSequence:23 (4)>
    : │  id: 23
    : │  call count: 0
    : │  EVENT: fs20¦state¦toggle¦-¦baz¦quux
    : └1╴... done.
-1 fs20 +2.2 switch unknown function
-1 fs20 Wait until 2.2  -- now: 2.1 :: switch unknown function
 EVENT: fs20¦state¦toggle¦-¦baz¦quux
 END: fs20¦state¦toggle¦-¦baz¦quux
+1 fs20 +2.2 switch unknown function
+1 fs20 Wait until 2.2  -- now: 2.1 :: switch unknown function
+0 +WAIT 3 Fake timer wait for 0.1
+0 -WAIT 3 Fake timer wait for 0.1
 1 fs20 f8c8d131F51
 NEW: <ConditionalWorkSequence:24 (4)>
    : │  id: 24
    : │  call count: 0
    : │  EVENT: fs20¦unknown¦function¦31413142¦31¦131f
    : └1╴... done.
-1 fs20 +2.3 switch housecode not found
-1 fs20 Wait until 2.3  -- now: 2.2 :: switch housecode not found
 EVENT: fs20¦unknown¦function¦31413142¦31¦131f
 END: fs20¦unknown¦function¦31413142¦31¦131f
+1 fs20 +2.3 switch housecode not found
+1 fs20 Wait until 2.3  -- now: 2.2 :: switch housecode not found
+0 +WAIT 4 Fake timer wait for 0.1
+0 -WAIT 4 Fake timer wait for 0.1
 1 fs20 f8c89131240
 NEW: <ConditionalWorkSequence:25 (4)>
    : │  id: 25
    : │  call count: 0
    : │  EVENT: fs20¦unknown¦31413132¦6¦8c89131240
    : └1╴... done.
-1 fs20 +2.4 switch device not found
-1 fs20 Wait until 2.4  -- now: 2.3 :: switch device not found
 EVENT: fs20¦unknown¦31413132¦6¦8c89131240
 END: fs20¦unknown¦31413132¦6¦8c89131240
+1 fs20 +2.4 switch device not found
+1 fs20 Wait until 2.4  -- now: 2.35 :: switch device not found
+0 +WAIT 5 Fake timer wait for 0.05
+0 -WAIT 5 Fake timer wait for 0.05
 1 fs20 f8c8d141245
 NEW: <ConditionalWorkSequence:26 (4)>
    : │  id: 26
    : │  call count: 0
    : │  EVENT: fs20¦unknown¦device¦31413142¦1221¦1412
    : └1╴... done.
-1 fs20 +2.5 switch bad checksum
-1 fs20 Wait until 2.5  -- now: 2.4 :: switch bad checksum
 EVENT: fs20¦unknown¦device¦31413142¦1221¦1412
 END: fs20¦unknown¦device¦31413142¦1221¦1412
+1 fs20 +2.5 switch bad checksum
+1 fs20 Wait until 2.5  -- now: 2.4 :: switch bad checksum
+0 +WAIT 6 Fake timer wait for 0.1
+0 -WAIT 6 Fake timer wait for 0.1
 1 fs20 f8c8d131245
 NEW: <ConditionalWorkSequence:27 (4)>
    : │  id: 27
    : │  call count: 0
    : │  EVENT: fs20¦unknown¦31413142¦7¦8c8d131245
    : └1╴... done.
-1 fs20 +3.1 env bad checksum 1
-1 fs20 Wait until 3.1  -- now: 2.5 :: env bad checksum 1
 EVENT: fs20¦unknown¦31413142¦7¦8c8d131245
 END: fs20¦unknown¦31413142¦7¦8c8d131245
+1 fs20 +3.1 env bad checksum 1
+1 fs20 Wait until 3.1  -- now: 2.5 :: env bad checksum 1
+0 +WAIT 7 Fake timer wait for 0.6
+0 -WAIT 7 Fake timer wait for 0.6
 1 fs20 e0f01030405
 NEW: <ConditionalWorkSequence:28 (4)>
    : │  id: 28
    : │  call count: 0
    : │  EVENT: fs20¦em¦checksum1¦13¦4¦f13
    : └1╴... done.
-1 fs20 +3.2 env bad checksum 2
-1 fs20 Wait until 3.2  -- now: 3.1 :: env bad checksum 2
 EVENT: fs20¦em¦checksum1¦13¦4¦f13
 END: fs20¦em¦checksum1¦13¦4¦f13
+1 fs20 +3.2 env bad checksum 2
+1 fs20 Wait until 3.2  -- now: 3.1 :: env bad checksum 2
+0 +WAIT 8 Fake timer wait for 0.1
+0 -WAIT 8 Fake timer wait for 0.1
 1 fs20 e0f01030d06
 NEW: <ConditionalWorkSequence:29 (4)>
    : │  id: 29
    : │  call count: 0
    : │  EVENT: fs20¦em¦checksum2¦5¦6¦f13
    : └1╴... done.
-1 fs20 +3.3 env unknown devtype
-1 fs20 Wait until 3.3  -- now: 3.2 :: env unknown devtype
 EVENT: fs20¦em¦checksum2¦5¦6¦f13
 END: fs20¦em¦checksum2¦5¦6¦f13
+1 fs20 +3.3 env unknown devtype
+1 fs20 Wait until 3.3  -- now: 3.2 :: env unknown devtype
+0 +WAIT 9 Fake timer wait for 0.1
+0 -WAIT 9 Fake timer wait for 0.1
 1 fs20 e0f01030d05
 NEW: <ConditionalWorkSequence:30 (4)>
    : │  id: 30
    : │  call count: 0
    : │  EVENT: fs20¦unknown¦em¦15¦13
    : └1╴... done.
-1 fs20 +3.4 env bad length
-1 fs20 Wait until 3.4  -- now: 3.3 :: env bad length
 EVENT: fs20¦unknown¦em¦15¦13
 END: fs20¦unknown¦em¦15¦13
+1 fs20 +3.4 env bad length
+1 fs20 Wait until 3.4  -- now: 3.35 :: env bad length
+0 +WAIT 10 Fake timer wait for 0.05
+0 -WAIT 10 Fake timer wait for 0.05
 1 fs20 e010103030d
 NEW: <ConditionalWorkSequence:31 (4)>
    : │  id: 31
    : │  call count: 0
    : │  EVENT: fs20¦em¦bad_length¦thermo_hygro¦2¦3
    : └1╴... done.
-1 fs20 +3.5 env unknown device
-1 fs20 Wait until 3.5  -- now: 3.4 :: env unknown device
 EVENT: fs20¦em¦bad_length¦thermo_hygro¦2¦3
 END: fs20¦em¦bad_length¦thermo_hygro¦2¦3
+1 fs20 +3.5 env unknown device
+1 fs20 Wait until 3.5  -- now: 3.4 :: env unknown device
+0 +WAIT 11 Fake timer wait for 0.1
+0 -WAIT 11 Fake timer wait for 0.1
+1 fs20 e01020302010605040401
 NEW: <ConditionalWorkSequence:32 (4)>
    : │  id: 32
    : │  call count: 0
-   : │  EVENT: wait¦done¦3.5¦_wait¦2
-   : └1╴... done.
-1 fs20 e01020302010605040401
-NEW: <ConditionalWorkSequence:33 (4)>
-   : │  id: 33
-   : │  call count: 0
    : │  EVENT: fs20¦unknown¦em¦unregistered¦thermo_hygro¦2¦temperature¦12.3¦humidity¦45.6
-   : └1╴... done.
-1 fs20 +3.6 env OK: temphumid inside
-1 fs20 Wait until 3.6  -- now: 3.5 :: env OK: temphumid inside
-EVENT: wait¦done¦3.5¦_wait¦2
-END: wait¦done¦3.5¦_wait¦2
-NEW: <ConditionalWorkSequence:34 (4)>
-   : │  id: 34
-   : │  call count: 0
-   : │  EVENT: wait¦start¦103.5¦_wait¦3
    : └1╴... done.
 EVENT: fs20¦unknown¦em¦unregistered¦thermo_hygro¦2¦temperature¦12.3¦humidity¦45.6
 END: fs20¦unknown¦em¦unregistered¦thermo_hygro¦2¦temperature¦12.3¦humidity¦45.6
-EVENT: wait¦start¦103.5¦_wait¦3
-END: wait¦start¦103.5¦_wait¦3
+1 fs20 +3.6 env OK: temphumid inside
+1 fs20 Wait until 3.6  -- now: 3.5 :: env OK: temphumid inside
+0 +WAIT 12 Fake timer wait for 0.1
+0 -WAIT 12 Fake timer wait for 0.1
 1 fs20 e01010302010605040703
-NEW: <ConditionalWorkSequence:35 (4)>
-   : │  id: 35
+NEW: <ConditionalWorkSequence:33 (4)>
+   : │  id: 33
    : │  call count: 0
    : │  EVENT: fs20¦em¦temperature¦11.1¦inside
    : └1╴... done.
-NEW: <ConditionalWorkSequence:36 (4)>
-   : │  id: 36
+EVENT: fs20¦em¦temperature¦11.1¦inside
+END: fs20¦em¦temperature¦11.1¦inside
+NEW: <ConditionalWorkSequence:34 (4)>
+   : │  id: 34
    : │  call count: 0
    : │  EVENT: fs20¦em¦humidity¦45.6¦inside
    : └1╴... done.
-1 fs20 +3.7 env dup: smackmiddle
-1 fs20 Wait until 3.7  -- now: 3.6 :: env dup: smackmiddle
-EVENT: fs20¦em¦temperature¦11.1¦inside
-END: fs20¦em¦temperature¦11.1¦inside
 EVENT: fs20¦em¦humidity¦45.6¦inside
 END: fs20¦em¦humidity¦45.6¦inside
+1 fs20 +3.7 env dup: smackmiddle
+1 fs20 Wait until 3.7  -- now: 3.6 :: env dup: smackmiddle
+0 +WAIT 13 Fake timer wait for 0.1
+0 -WAIT 13 Fake timer wait for 0.1
 1 fs20 e0103050301040302000B
-NEW: <ConditionalWorkSequence:37 (4)>
-   : │  id: 37
+NEW: <ConditionalWorkSequence:35 (4)>
+   : │  id: 35
    : │  call count: 0
    : │  EVENT: fs20¦conflict¦em¦untimed¦thermo_hygro¦3¦temperature¦13.5¦humidity¦23.4
    : └1╴... done.
-1 fs20 +3.8 env OK: temphumid one
-1 fs20 Wait until 3.8  -- now: 3.7 :: env OK: temphumid one
 EVENT: fs20¦conflict¦em¦untimed¦thermo_hygro¦3¦temperature¦13.5¦humidity¦23.4
 END: fs20¦conflict¦em¦untimed¦thermo_hygro¦3¦temperature¦13.5¦humidity¦23.4
+1 fs20 +3.8 env OK: temphumid one
+1 fs20 Wait until 3.8  -- now: 3.7 :: env OK: temphumid one
+0 +WAIT 14 Fake timer wait for 0.1
+0 -WAIT 14 Fake timer wait for 0.1
 1 fs20 e0103030201040302070F
+NEW: <ConditionalWorkSequence:36 (4)>
+   : │  id: 36
+   : │  call count: 0
+   : │  EVENT: fs20¦em¦temperature¦12.3¦one
+   : └1╴... done.
+EVENT: fs20¦em¦temperature¦12.3¦one
+END: fs20¦em¦temperature¦12.3¦one
+NEW: <ConditionalWorkSequence:37 (4)>
+   : │  id: 37
+   : │  call count: 0
+   : │  EVENT: fs20¦em¦humidity¦23.4¦one
+   : └1╴... done.
+EVENT: fs20¦em¦humidity¦23.4¦one
+END: fs20¦em¦humidity¦23.4¦one
+1 fs20 +3.9 env OK: temphumid one also
+1 fs20 Wait until 3.9  -- now: 3.85 :: env OK: temphumid one also
+0 +WAIT 15 Fake timer wait for 0.05
+0 -WAIT 15 Fake timer wait for 0.05
+1 fs20 m31234123f7
 NEW: <ConditionalWorkSequence:38 (4)>
    : │  id: 38
    : │  call count: 0
    : │  EVENT: fs20¦em¦temperature¦12.3¦one
    : └1╴... done.
+EVENT: fs20¦em¦temperature¦12.3¦one
+END: fs20¦em¦temperature¦12.3¦one
 NEW: <ConditionalWorkSequence:39 (4)>
    : │  id: 39
    : │  call count: 0
    : │  EVENT: fs20¦em¦humidity¦23.4¦one
    : └1╴... done.
-1 fs20 +3.9 env OK: temphumid one also
-1 fs20 Wait until 3.9  -- now: 3.8 :: env OK: temphumid one also
-EVENT: fs20¦em¦temperature¦12.3¦one
-END: fs20¦em¦temperature¦12.3¦one
 EVENT: fs20¦em¦humidity¦23.4¦one
 END: fs20¦em¦humidity¦23.4¦one
-1 fs20 m31234123f7
+1 fs20 +4.0 energy bad_length
+1 fs20 Wait until 4.0  -- now: 3.9 :: energy bad_length
+0 +WAIT 16 Fake timer wait for 0.1
+0 -WAIT 16 Fake timer wait for 0.1
+1 fs20 n03095517DE000017DE
 NEW: <ConditionalWorkSequence:40 (4)>
    : │  id: 40
    : │  call count: 0
-   : │  EVENT: fs20¦em¦temperature¦12.3¦one
+   : │  EVENT: fs20¦en¦bad_length¦counter¦9¦395517de0017de
    : └1╴... done.
+EVENT: fs20¦en¦bad_length¦counter¦9¦395517de0017de
+END: fs20¦en¦bad_length¦counter¦9¦395517de0017de
+1 fs20 +4.1 energy bad_checksum
+1 fs20 Wait until 4.1  -- now: 4.0 :: energy bad_checksum
+0 +WAIT 17 Fake timer wait for 0.1
+0 -WAIT 17 Fake timer wait for 0.1
+1 fs20 n03095517DE000017DE5E
 NEW: <ConditionalWorkSequence:41 (4)>
    : │  id: 41
    : │  call count: 0
-   : │  EVENT: fs20¦em¦humidity¦23.4¦one
+   : │  EVENT: fs20¦en¦checksum¦95¦94¦395517de0017de
    : └1╴... done.
-1 fs20 +4.0 energy bad_length
-1 fs20 Wait until 4.0  -- now: 3.9 :: energy bad_length
-EVENT: fs20¦em¦temperature¦12.3¦one
-END: fs20¦em¦temperature¦12.3¦one
-EVENT: fs20¦em¦humidity¦23.4¦one
-END: fs20¦em¦humidity¦23.4¦one
-1 fs20 n03095517DE000017DE
+EVENT: fs20¦en¦checksum¦95¦94¦395517de0017de
+END: fs20¦en¦checksum¦95¦94¦395517de0017de
+1 fs20 +4.2 energy unknown_type
+1 fs20 Wait until 4.2  -- now: 4.1 :: energy unknown_type
+0 +WAIT 18 Fake timer wait for 0.1
+0 -WAIT 18 Fake timer wait for 0.1
+1 fs20 n02095517DE000017DE5E
 NEW: <ConditionalWorkSequence:42 (4)>
    : │  id: 42
    : │  call count: 0
-   : │  EVENT: fs20¦en¦bad_length¦counter¦9¦395517de0017de
+   : │  EVENT: fs20¦unknown¦en¦2¦295517de0017de
    : └1╴... done.
-1 fs20 +4.1 energy bad_checksum
-1 fs20 Wait until 4.1  -- now: 4.0 :: energy bad_checksum
-EVENT: fs20¦en¦bad_length¦counter¦9¦395517de0017de
-END: fs20¦en¦bad_length¦counter¦9¦395517de0017de
-1 fs20 n03095517DE000017DE5E
+EVENT: fs20¦unknown¦en¦2¦295517de0017de
+END: fs20¦unknown¦en¦2¦295517de0017de
+1 fs20 +4.3 energy unknown_type
+1 fs20 Wait until 4.3  -- now: 4.2 :: energy unknown_type
+0 +WAIT 19 Fake timer wait for 0.1
+0 -WAIT 19 Fake timer wait for 0.1
+1 fs20 n030A5517DE000017DE5C
 NEW: <ConditionalWorkSequence:43 (4)>
    : │  id: 43
    : │  call count: 0
-   : │  EVENT: fs20¦en¦checksum¦95¦94¦395517de0017de
-   : └1╴... done.
-1 fs20 +4.2 energy unknown_type
-1 fs20 Wait until 4.2  -- now: 4.1 :: energy unknown_type
-EVENT: fs20¦en¦checksum¦95¦94¦395517de0017de
-END: fs20¦en¦checksum¦95¦94¦395517de0017de
-1 fs20 n02095517DE000017DE5E
-NEW: <ConditionalWorkSequence:44 (4)>
-   : │  id: 44
-   : │  call count: 0
-   : │  EVENT: fs20¦unknown¦en¦2¦295517de0017de
-   : └1╴... done.
-1 fs20 +4.3 energy unknown_type
-1 fs20 Wait until 4.3  -- now: 4.2 :: energy unknown_type
-EVENT: fs20¦unknown¦en¦2¦295517de0017de
-END: fs20¦unknown¦en¦2¦295517de0017de
-1 fs20 n030A5517DE000017DE5C
-NEW: <ConditionalWorkSequence:45 (4)>
-   : │  id: 45
-   : │  call count: 0
    : │  EVENT: fs20¦unknown¦en¦unregistered¦gas_meter¦10¦counter¦56855
    : └1╴... done.
-1 fs20 +4.4 energy first
-1 fs20 Wait until 4.4  -- now: 4.3 :: energy first
 EVENT: fs20¦unknown¦en¦unregistered¦gas_meter¦10¦counter¦56855
 END: fs20¦unknown¦en¦unregistered¦gas_meter¦10¦counter¦56855
+1 fs20 +4.4 energy first
+1 fs20 Wait until 4.4  -- now: 4.35 :: energy first
+0 +WAIT 20 Fake timer wait for 0.05
+0 -WAIT 20 Fake timer wait for 0.05
 1 fs20 n03095517DE000017DE5F
 1 fs20 +4.5 energy second
 1 fs20 Wait until 4.5  -- now: 4.4 :: energy second
+0 +WAIT 21 Fake timer wait for 0.1
+0 -WAIT 21 Fake timer wait for 0.1
 1 fs20 n03095617DF000017DF5C
-NEW: <ConditionalWorkSequence:46 (4)>
-   : │  id: 46
+NEW: <ConditionalWorkSequence:44 (4)>
+   : │  id: 44
    : │  call count: 0
    : │  EVENT: fs20¦en¦counter¦256¦gas
    : └1╴... done.
-1 fs20 +4.6 energy third
-1 fs20 Wait until 4.6  -- now: 4.5 :: energy third
 EVENT: fs20¦en¦counter¦256¦gas
 END: fs20¦en¦counter¦256¦gas
+1 fs20 +4.6 energy third
+1 fs20 Wait until 4.6  -- now: 4.5 :: energy third
+0 +WAIT 22 Fake timer wait for 0.1
+0 -WAIT 22 Fake timer wait for 0.1
 1 fs20 n03095617DF000017DF5C
-NEW: <ConditionalWorkSequence:47 (4)>
-   : │  id: 47
+NEW: <ConditionalWorkSequence:45 (4)>
+   : │  id: 45
    : │  call count: 0
    : │  EVENT: fs20¦en¦counter¦0¦gas
    : └1╴... done.
 EVENT: fs20¦en¦counter¦0¦gas
 END: fs20¦en¦counter¦0¦gas
+NEW: <ConditionalWorkSequence:46 (4)>
+   : │  id: 46
+   : │  call count: 0
+   : │  EVENT: wait¦done¦3.6¦_wait¦2
+   : └1╴... done.
+EVENT: wait¦done¦3.6¦_wait¦2
+END: wait¦done¦3.6¦_wait¦2
+NEW: <ConditionalWorkSequence:47 (4)>
+   : │  id: 47
+   : │  call count: 0
+   : │  EVENT: wait¦start¦3.7¦_wait¦3
+   : └1╴... done.
+EVENT: wait¦start¦3.7¦_wait¦3
+END: wait¦start¦3.7¦_wait¦3
 NEW: <ConditionalWorkSequence:48 (4)>
    : │  id: 48
    : │  call count: 0
-   : │  EVENT: wait¦done¦103.5¦_wait¦3
+   : │  EVENT: wait¦done¦3.7¦_wait¦3
    : └1╴... done.
-EVENT: wait¦done¦103.5¦_wait¦3
-END: wait¦done¦103.5¦_wait¦3
-NEW: <ConditionalWorkSequence:49 (4)>
-   : │  id: 49
-   : │  call count: 0
-   : │  EVENT: wait¦start¦103.6¦_wait¦4
-   : └1╴... done.
-EVENT: wait¦start¦103.6¦_wait¦4
-END: wait¦start¦103.6¦_wait¦4
-NEW: <ConditionalWorkSequence:50 (4)>
-   : │  id: 50
-   : │  call count: 0
-   : │  EVENT: wait¦done¦103.6¦_wait¦4
-   : └1╴... done.
-EVENT: wait¦done¦103.6¦_wait¦4
-END: wait¦done¦103.6¦_wait¦4
-inside :: thermo_hygro 1: 1 min 40.0 sec
-one :: thermo_hygro 3: 1 min 39.7 sec
+EVENT: wait¦done¦3.7¦_wait¦3
+END: wait¦done¦3.7¦_wait¦3
+inside :: thermo_hygro 1: 1.0 sec
+one :: thermo_hygro 3: 0.7 sec
 two :: thermo_hygro 3: (never)
 .
 name: one
 group: 1
 groupname: thermo_hygro
 code: 3
-last: 1 min 39.7 sec
+last: 0.7 sec
 last_temperature: 12.3
 last_humidity: 23.4
 .
@@ -430,62 +460,62 @@ groupname: thermo_hygro
 code: 3
 last_temperature: 15.0
 .
+NEW: <ConditionalWorkSequence:49 (4)>
+   : │  id: 49
+   : │  call count: 0
+   : │  EVENT: wait¦start¦4.4¦_wait¦6
+   : └1╴... done.
+EVENT: wait¦start¦4.4¦_wait¦6
+END: wait¦start¦4.4¦_wait¦6
+NEW: <ConditionalWorkSequence:50 (4)>
+   : │  id: 50
+   : │  call count: 0
+   : │  EVENT: wait¦start¦3.8¦_wait¦4
+   : └1╴... done.
+EVENT: wait¦start¦3.8¦_wait¦4
+END: wait¦start¦3.8¦_wait¦4
 NEW: <ConditionalWorkSequence:51 (4)>
    : │  id: 51
    : │  call count: 0
-   : │  EVENT: wait¦start¦104.3¦_wait¦7
+   : │  EVENT: wait¦done¦3.8¦_wait¦4
    : └1╴... done.
-EVENT: wait¦start¦104.3¦_wait¦7
-END: wait¦start¦104.3¦_wait¦7
+EVENT: wait¦done¦3.8¦_wait¦4
+END: wait¦done¦3.8¦_wait¦4
 NEW: <ConditionalWorkSequence:52 (4)>
    : │  id: 52
    : │  call count: 0
-   : │  EVENT: wait¦start¦103.8¦_wait¦5
+   : │  EVENT: wait¦start¦3.9¦_wait¦5
    : └1╴... done.
-EVENT: wait¦start¦103.8¦_wait¦5
-END: wait¦start¦103.8¦_wait¦5
+EVENT: wait¦start¦3.9¦_wait¦5
+END: wait¦start¦3.9¦_wait¦5
+1 FS20 ending foobar
+1 FS20 ended None foobar
 NEW: <ConditionalWorkSequence:53 (4)>
    : │  id: 53
    : │  call count: 0
-   : │  EVENT: wait¦done¦103.8¦_wait¦5
+   : │  EVENT: wait¦done¦3.9¦_wait¦5
    : └1╴... done.
-EVENT: wait¦done¦103.8¦_wait¦5
-END: wait¦done¦103.8¦_wait¦5
+EVENT: wait¦done¦3.9¦_wait¦5
+END: wait¦done¦3.9¦_wait¦5
+1 FS20 ending bar¦foo
+1 FS20 ended None bar¦foo
 NEW: <ConditionalWorkSequence:54 (4)>
    : │  id: 54
    : │  call count: 0
-   : │  EVENT: wait¦start¦103.9¦_wait¦6
+   : │  EVENT: wait¦done¦4.4¦_wait¦6
    : └1╴... done.
-EVENT: wait¦start¦103.9¦_wait¦6
-END: wait¦start¦103.9¦_wait¦6
-1 FS20 ending foobar
-1 FS20 ended None foobar
-NEW: <ConditionalWorkSequence:55 (4)>
+EVENT: wait¦done¦4.4¦_wait¦6
+END: wait¦done¦4.4¦_wait¦6
+.
+.
+NEW: <ConditionalWorkSequence:55 (7)>
    : │  id: 55
-   : │  call count: 0
-   : │  EVENT: wait¦done¦103.9¦_wait¦6
-   : └1╴... done.
-EVENT: wait¦done¦103.9¦_wait¦6
-END: wait¦done¦103.9¦_wait¦6
-1 FS20 ending bar¦foo
-1 FS20 ended None bar¦foo
-NEW: <ConditionalWorkSequence:56 (4)>
-   : │  id: 56
-   : │  call count: 0
-   : │  EVENT: wait¦done¦104.3¦_wait¦7
-   : └1╴... done.
-EVENT: wait¦done¦104.3¦_wait¦7
-END: wait¦done¦104.3¦_wait¦7
-.
-.
-NEW: <ConditionalWorkSequence:57 (7)>
-   : │  id: 57
    : │  call count: 0
    : │  EVENT: shutdown
    : ├1╴Shutdown FS20 processes
    : └2╴... done.
 EVENT: shutdown
 RUN: Shutdown FS20 processes
- at: <ConditionalWorkSequence:57 (7)> (step 1)
+ at: <ConditionalWorkSequence:55 (7)> (step 1)
  ev: EVENT: shutdown
 END: shutdown

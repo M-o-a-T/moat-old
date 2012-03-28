@@ -3,13 +3,13 @@ NEW: <ConditionalWorkSequence:6 (4)>
    : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
+EVENT: startup
+END: startup
 NEW: <ConditionalWorkSequence:7 (4)>
    : │  id: 7
    : │  call count: 0
    : │  EVENT: module¦load¦bool
    : └1╴... done.
-EVENT: startup
-END: startup
 EVENT: module¦load¦bool
 END: module¦load¦bool
 NEW: <ConditionalWorkSequence:8 (4)>
@@ -56,27 +56,31 @@ EVENT: module¦load¦errors
 END: module¦load¦errors
 0 Create OnEvtHandler: onewire¦scanned¦A¦*¦*¦*
 0 NewHandler 16
+1 onewire NEW <OWFSqueue:A: New> None None ()
+0 New OWFS bus A <OWFSqueue:A: New>
 NEW: <ConditionalWorkSequence:17 (4)>
    : │  id: 17
    : │  call count: 0
-   : │  EVENT: onewire¦scanning¦A
+   : │  EVENT: wait¦start¦11.1¦yawn
    : └1╴... done.
-0 New OWFS bus A <homevent.onewire.OWFSfactory obj>
+EVENT: wait¦start¦11.1¦yawn
+END: wait¦start¦11.1¦yawn
 NEW: <ConditionalWorkSequence:18 (4)>
    : │  id: 18
    : │  call count: 0
-   : │  EVENT: wait¦start¦10.0¦yawn
+   : │  EVENT: onewire¦scanning¦A
    : └1╴... done.
 EVENT: onewire¦scanning¦A
 END: onewire¦scanning¦A
 0 OWFS start bus update
-EVENT: wait¦start¦10.0¦yawn
-END: wait¦start¦10.0¦yawn
-NEW: <ConditionalWorkSequence:19 (4)>
-   : │  id: 19
-   : │  call count: 0
-   : │  EVENT: onewire¦connect¦A
-   : └1╴... done.
+0 conn connecting OWFSqueue A
+0 conn setting up OWFSqueue A
+0 conn connected OWFSqueue A
+1 onewire SEND 0 1 7 2 0 0 '\x00'
+1 onewire RECV 0 96 0 2 95 32770
+0 conn ReOpen OWFSqueue A
+0 conn incoming OWFSqueue A ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:1›
+0 msg recv A ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:1›
 0 got unrecognized OWFS name uncached
 0 got unrecognized OWFS name settings
 0 got unrecognized OWFS name system
@@ -84,27 +88,34 @@ NEW: <ConditionalWorkSequence:19 (4)>
 0 got unrecognized OWFS name structure
 0 got unrecognized OWFS name simultaneous
 0 got unrecognized OWFS name alarm
-EVENT: onewire¦connect¦A
-END: onewire¦connect¦A
+0 msg recv= <class 'homevent.msg.MINE'>
+1 onewire doneDIR ‹DIRmsg ›
+0 conn connecting OWFSqueue A
+0 conn setting up OWFSqueue A
+0 conn connected OWFSqueue A
+1 onewire SEND 0 7 7 2 0 0 '/bus.0\x00'
+1 onewire RECV 0 73 0 2 72 32770
+0 conn ReOpen OWFSqueue A
+0 conn incoming OWFSqueue A ‹MsgIncoming: data:'/bus.0/interface,/bus.0/10.000010EF0000,/bus.0/simultaneous,/bus.0/alarm' typ:0 prio:1›
+0 msg recv A ‹MsgIncoming: data:'/bus.0/interface,/bus.0/10.000010EF0000,/bus.0/simultaneous,/bus.0/alarm' typ:0 prio:1›
 0 got unrecognized OWFS name interface
 0 got unrecognized OWFS name simultaneous
 0 got unrecognized OWFS name alarm
-NEW: <ConditionalWorkSequence:20 (4)>
-   : │  id: 20
-   : │  call count: 0
-   : │  EVENT: onewire¦new¦DS18S20¦000010ef0000
-   : └1╴... done.
-EVENT: onewire¦new¦DS18S20¦000010ef0000
-END: onewire¦new¦DS18S20¦000010ef0000
-NEW: <ConditionalWorkSequence:21 (4)>
-   : │  id: 21
-   : │  call count: 0
-   : │  EVENT: onewire¦up¦DS18S20¦000010ef0000
-   : └1╴... done.
-EVENT: onewire¦up¦DS18S20¦000010ef0000
-END: onewire¦up¦DS18S20¦000010ef0000
-NEW: <ConditionalWorkSequence:22 (5)>
-   : │  id: 22
+0 msg recv= <class 'homevent.msg.MINE'>
+1 onewire doneDIR ‹DIRmsg bus.0›
+1 onewire NEW <OWFSqueue:A: ReOpen> 000010ef0000 10.000010EF0000 ('bus.0',)
+0 conn connecting OWFSqueue A
+0 conn setting up OWFSqueue A
+0 conn connected OWFSqueue A
+1 onewire SEND 0 37 2 2 8192 0 '/uncached/bus.0/10.000010EF0000/type\x00'
+1 onewire RECV 0 7 7 2 7 0
+0 conn ReOpen OWFSqueue A
+0 conn incoming OWFSqueue A ‹MsgIncoming: data:'DS18S20' typ:7 prio:1›
+0 msg recv A ‹MsgIncoming: data:'DS18S20' typ:7 prio:1›
+1 onewire done:  ‹ATTRgetmsg 10.000010EF0000 type›
+0 msg recv= <class 'homevent.msg.MINE'>
+NEW: <ConditionalWorkSequence:19 (5)>
+   : │  id: 19
    : │  call count: 0
    : │  EVENT: onewire¦scanned¦A¦0¦1¦1
    : ├1╴on onewire scanned A * * * ‹OnEventHandler›
@@ -123,106 +134,37 @@ RUN: on onewire scanned A * * * ‹OnEventHandler›
    : step: var onewire X 000010EF0000 temperature ‹OWFSvar›
    : step: trigger thermo $X ‹TriggerHandler›
    : step: del wait yawn ‹Del›
- at: <ConditionalWorkSequence:22 (5)> (step 1)
+ at: <ConditionalWorkSequence:19 (5)> (step 1)
  ev: EVENT: onewire¦scanned¦A¦0¦1¦1
-NEW: <ConditionalWorkSequence:23 (4)>
-   : │  id: 23
-   : │  call count: 0
-   : │  EVENT: thermo¦1.6
-   : └1╴... done.
-NEW: <ConditionalWorkSequence:24 (4)>
-   : │  id: 24
-   : │  call count: 0
-   : │  EVENT: wait¦cancel¦10.0¦yawn
-   : └1╴... done.
-EVENT: thermo¦1.6
-END: thermo¦1.6
-EVENT: wait¦cancel¦10.0¦yawn
-END: wait¦cancel¦10.0¦yawn
-0 NOW: do nothing
-0 DirStart
+0 conn connecting OWFSqueue A
+0 conn setting up OWFSqueue A
+0 conn connected OWFSqueue A
+1 onewire SEND 0 44 2 2 8192 0 u'/uncached/bus.0/10.000010EF0000/temperature\x00'
+1 onewire RECV 0 12 12 2 12 0
+0 conn ReOpen OWFSqueue A
+0 conn incoming OWFSqueue A ‹MsgIncoming: data:'         1.6' typ:12 prio:1›
+0 msg recv A ‹MsgIncoming: data:'         1.6' typ:12 prio:1›
+1 onewire done:  ‹ATTRgetmsg 10.000010EF0000 temperature›
+0 msg recv= <class 'homevent.msg.MINE'>
 END: onewire¦scanned¦A¦0¦1¦1
-10.000010EF0000
-bus.0
-uncached
-settings
-system
-statistics
-structure
-simultaneous
-alarm
-.
-0 DirDev
-address
-alias
-crc8
-errata
-family
-id
-locator
-power
-r_address
-r_id
-r_locator
-temperature
-temphigh
-templow
-type
-.
-0 yes
-0 DirStop
-NEW: <ConditionalWorkSequence:25 (4)>
-   : │  id: 25
+NEW: <ConditionalWorkSequence:20 (4)>
+   : │  id: 20
    : │  call count: 0
-   : │  EVENT: onewire¦scanning¦A
+   : │  EVENT: wait¦done¦1.1¦yawn
    : └1╴... done.
-EVENT: onewire¦scanning¦A
-END: onewire¦scanning¦A
-0 OWFS start bus update
-0 got unrecognized OWFS name uncached
-0 got unrecognized OWFS name settings
-0 got unrecognized OWFS name system
-0 got unrecognized OWFS name statistics
-0 got unrecognized OWFS name structure
-0 got unrecognized OWFS name simultaneous
-0 got unrecognized OWFS name alarm
-0 got unrecognized OWFS name interface
-0 got unrecognized OWFS name simultaneous
-0 got unrecognized OWFS name alarm
-NEW: <ConditionalWorkSequence:26 (4)>
-   : │  id: 26
+EVENT: wait¦done¦1.1¦yawn
+END: wait¦done¦1.1¦yawn
+0 DirStart
+0 conn connecting OWFSqueue A
+NEW: <ConditionalWorkSequence:21 (4)>
+   : │  id: 21
    : │  call count: 0
-   : │  EVENT: onewire¦scanned¦A¦0¦0¦1
+   : │  IEVENT: thermo¦1.6
    : └1╴... done.
-EVENT: onewire¦scanned¦A¦0¦0¦1
-END: onewire¦scanned¦A¦0¦0¦1
-10.000010EF0000
-bus.0
-uncached
-settings
-system
-statistics
-structure
-simultaneous
-alarm
-.
-0 Drop OWFS bus A
-NEW: <ConditionalWorkSequence:27 (4)>
-   : │  id: 27
-   : │  call count: 0
-   : │  EVENT: wait¦start¦1.0¦END
-   : └1╴... done.
-EVENT: wait¦start¦1.0¦END
-END: wait¦start¦1.0¦END
-NEW: <ConditionalWorkSequence:28 (4)>
-   : │  id: 28
-   : │  call count: 0
-   : │  EVENT: wait¦done¦1.0¦END
-   : └1╴... done.
-EVENT: wait¦done¦1.0¦END
-END: wait¦done¦1.0¦END
-NEW: <ConditionalWorkSequence:29 (7)>
-   : │  id: 29
+IEVENT: thermo¦1.6
+END: thermo¦1.6
+NEW: <ConditionalWorkSequence:22 (7)>
+   : │  id: 22
    : │  call count: 0
    : │  EVENT: shutdown
    : └1╴... done.

@@ -3,9 +3,9 @@ NEW: <ConditionalWorkSequence:6 (4)>
    : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
-0 Yes!
 EVENT: startup
 END: startup
+0 Yes!
 0 Yes!
 0 Yes!
 0 Yes!
@@ -67,26 +67,26 @@ persistent: yes
 0 Yes!
 0 Create OnEvtHandler: whatever
 0 NewHandler 11
+foo bar :: three — now
+.
 NEW: <ConditionalWorkSequence:12 (5)>
    : │  id: 12
    : │  call count: 0
-   : │  EVENT: whatever
+   : │  IEVENT: whatever
    : ├1╴on whatever ‹OnEventHandler›
    : │  prio: 51
    : │  step: var state x foo bar ‹VarStateHandler›
    : │  step: log TRACE We got $x ‹LogHandler›
    : └2╴... done.
-EVENT: whatever
+IEVENT: whatever
 RUN: on whatever ‹OnEventHandler›
    : prio: 51
    : step: var state x foo bar ‹VarStateHandler›
    : step: log TRACE We got $x ‹LogHandler›
  at: <ConditionalWorkSequence:12 (5)> (step 1)
- ev: EVENT: whatever
+ ev: IEVENT: whatever
 0 We got three
 END: whatever
-foo bar :: three — now
-.
 NEW: <ConditionalWorkSequence:13 (5)>
    : │  id: 13
    : │  call count: 0

@@ -3,6 +3,8 @@ NEW: <ConditionalWorkSequence:7 (4)>
    : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
+EVENT: startup
+END: startup
 block :: Block-level statements
 data :: provides a couple of common data access functions
 on_event :: the 'on EVENT:' handler
@@ -33,64 +35,63 @@ worker
 NEW: <ConditionalWorkSequence:9 (4)>
    : │  id: 9
    : │  call count: 0
-   : │  EVENT: wait¦start¦×××¦_wait¦2
+   : │  EVENT: wait¦start¦×××¦vorher
    : └1╴... done.
-EVENT: startup
-END: startup
-EVENT: wait¦start¦×××¦_wait¦2
-END: wait¦start¦×××¦_wait¦2
+EVENT: wait¦start¦×××¦vorher
+END: wait¦start¦×××¦vorher
 NEW: <ConditionalWorkSequence:10 (4)>
    : │  id: 10
    : │  call count: 0
-   : │  EVENT: wait¦done¦×××¦_wait¦2
+   : │  EVENT: wait¦done¦×××¦vorher
    : └1╴... done.
-EVENT: wait¦done¦×××¦_wait¦2
-END: wait¦done¦×××¦_wait¦2
-NEW: <ConditionalWorkSequence:11 (5)>
+EVENT: wait¦done¦×××¦vorher
+END: wait¦done¦×××¦vorher
+NEW: <ConditionalWorkSequence:11 (4)>
    : │  id: 11
    : │  call count: 0
-   : │  EVENT: foo
+   : │  EVENT: wait¦start¦×××¦nachher
+   : └1╴... done.
+EVENT: wait¦start¦×××¦nachher
+END: wait¦start¦×××¦nachher
+NEW: <ConditionalWorkSequence:12 (5)>
+   : │  id: 12
+   : │  call count: 0
+   : │  IEVENT: foo
    : ├1╴on foo ‹OnEventHandler›
    : │  prio: 51
    : │  step: block ‹Block›
    : │      : step: wait foo waiter ‹WaitHandler›
    : └2╴... done.
-NEW: <ConditionalWorkSequence:12 (4)>
-   : │  id: 12
-   : │  call count: 0
-   : │  EVENT: wait¦start¦×××¦_wait¦3
-   : └1╴... done.
-EVENT: foo
+IEVENT: foo
 RUN: on foo ‹OnEventHandler›
    : prio: 51
    : step: block ‹Block›
    :     : step: wait foo waiter ‹WaitHandler›
- at: <ConditionalWorkSequence:11 (5)> (step 1)
- ev: EVENT: foo
+ at: <ConditionalWorkSequence:12 (5)> (step 1)
+ ev: IEVENT: foo
 NEW: <ConditionalWorkSequence:13 (4)>
    : │  id: 13
    : │  call count: 0
    : │  EVENT: wait¦start¦×××¦foo¦waiter
    : └1╴... done.
-EVENT: wait¦start¦×××¦_wait¦3
-END: wait¦start¦×××¦_wait¦3
 EVENT: wait¦start¦×××¦foo¦waiter
 END: wait¦start¦×××¦foo¦waiter
 NEW: <ConditionalWorkSequence:14 (4)>
    : │  id: 14
    : │  call count: 0
-   : │  EVENT: wait¦done¦×××¦_wait¦3
+   : │  EVENT: wait¦done¦×××¦nachher
    : └1╴... done.
-EVENT: wait¦done¦×××¦_wait¦3
-END: wait¦done¦×××¦_wait¦3
-4 :: Worker 11 for ‹foo›
+EVENT: wait¦done¦×××¦nachher
+END: wait¦done¦×××¦nachher
+5 :: Worker 12 for ‹foo›
 .
-: <ConditionalWorkSequence:11 (5)>
-id: 11
+: <ConditionalWorkSequence:12 (5)>
+id: 12
 event: foo
 call count: 1
 last call: now
 last event: foo
+           type: InputEvent
 code: ╞1╕on foo ‹OnEventHandler›
 code: │ │prio: 51
 code: │ │step: block ‹Block›
@@ -100,10 +101,10 @@ code: └2╴... done.
 NEW: <ConditionalWorkSequence:15 (4)>
    : │  id: 15
    : │  call count: 0
-   : │  EVENT: wait¦start¦×××¦_wait¦4
+   : │  EVENT: wait¦start¦×××¦ende
    : └1╴... done.
-EVENT: wait¦start¦×××¦_wait¦4
-END: wait¦start¦×××¦_wait¦4
+EVENT: wait¦start¦×××¦ende
+END: wait¦start¦×××¦ende
 NEW: <ConditionalWorkSequence:16 (4)>
    : │  id: 16
    : │  call count: 0
@@ -115,7 +116,7 @@ END: foo
 NEW: <ConditionalWorkSequence:17 (4)>
    : │  id: 17
    : │  call count: 0
-   : │  EVENT: wait¦done¦×××¦_wait¦4
+   : │  EVENT: wait¦done¦×××¦ende
    : └1╴... done.
-EVENT: wait¦done¦×××¦_wait¦4
-END: wait¦done¦×××¦_wait¦4
+EVENT: wait¦done¦×××¦ende
+END: wait¦done¦×××¦ende

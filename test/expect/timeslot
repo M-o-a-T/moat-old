@@ -3,6 +3,8 @@ NEW: <ConditionalWorkSequence:8 (4)>
    : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
+EVENT: startup
+END: startup
 0 Create OnEvtHandler: timeslot¦begin¦foo¦bar
 0 NewHandler 9
 0 Create OnEvtHandler: timeslot¦end¦foo¦bar
@@ -20,8 +22,6 @@ NEW: <ConditionalWorkSequence:11 (4)>
    : │  call count: 0
    : │  EVENT: wait¦start¦9.5¦A¦before
    : └1╴... done.
-EVENT: startup
-END: startup
 EVENT: wait¦start¦9.5¦A¦before
 END: wait¦start¦9.5¦A¦before
 NEW: <ConditionalWorkSequence:12 (4)>
@@ -108,10 +108,10 @@ END: timeslot¦begin¦foo¦bar
 NEW: <ConditionalWorkSequence:17 (4)>
    : │  id: 17
    : │  call count: 0
-   : │  EVENT: wait¦start¦10.9¦AFTER¦EVENT¦A
+   : │  EVENT: wait¦start¦10.8¦AFTER¦EVENT¦A
    : └1╴... done.
-EVENT: wait¦start¦10.9¦AFTER¦EVENT¦A
-END: wait¦start¦10.9¦AFTER¦EVENT¦A
+EVENT: wait¦start¦10.8¦AFTER¦EVENT¦A
+END: wait¦start¦10.8¦AFTER¦EVENT¦A
 NEW: <ConditionalWorkSequence:18 (4)>
    : │  id: 18
    : │  call count: 0
@@ -139,26 +139,26 @@ END: wait¦start¦12.5¦C¦after
 NEW: <ConditionalWorkSequence:20 (4)>
    : │  id: 20
    : │  call count: 0
-   : │  EVENT: wait¦done¦10.9¦AFTER¦EVENT¦A
+   : │  EVENT: wait¦done¦10.8¦AFTER¦EVENT¦A
    : └1╴... done.
-EVENT: wait¦done¦10.9¦AFTER¦EVENT¦A
-END: wait¦done¦10.9¦AFTER¦EVENT¦A
+EVENT: wait¦done¦10.8¦AFTER¦EVENT¦A
+END: wait¦done¦10.8¦AFTER¦EVENT¦A
 0 got it during
 1 Yes
 NEW: <ConditionalWorkSequence:21 (4)>
    : │  id: 21
    : │  call count: 0
-   : │  EVENT: wait¦start¦11.0¦GOT¦EVENT¦AX
+   : │  EVENT: wait¦start¦10.9¦GOT¦EVENT¦AX
    : └1╴... done.
-EVENT: wait¦start¦11.0¦GOT¦EVENT¦AX
-END: wait¦start¦11.0¦GOT¦EVENT¦AX
+EVENT: wait¦start¦10.9¦GOT¦EVENT¦AX
+END: wait¦start¦10.9¦GOT¦EVENT¦AX
 NEW: <ConditionalWorkSequence:22 (4)>
    : │  id: 22
    : │  call count: 0
-   : │  EVENT: wait¦done¦11.0¦GOT¦EVENT¦AX
+   : │  EVENT: wait¦done¦10.9¦GOT¦EVENT¦AX
    : └1╴... done.
-EVENT: wait¦done¦11.0¦GOT¦EVENT¦AX
-END: wait¦done¦11.0¦GOT¦EVENT¦AX
+EVENT: wait¦done¦10.9¦GOT¦EVENT¦AX
+END: wait¦done¦10.9¦GOT¦EVENT¦AX
 1 Yes
 NEW: <ConditionalWorkSequence:23 (5)>
    : │  id: 23
@@ -261,17 +261,17 @@ END: wait¦done¦12.6¦AFTER¦EVENT¦B
 NEW: <ConditionalWorkSequence:30 (4)>
    : │  id: 30
    : │  call count: 0
-   : │  EVENT: wait¦start¦12.8¦GOT¦EVENT¦AX
+   : │  EVENT: wait¦start¦12.7¦GOT¦EVENT¦AX
    : └1╴... done.
-EVENT: wait¦start¦12.8¦GOT¦EVENT¦AX
-END: wait¦start¦12.8¦GOT¦EVENT¦AX
+EVENT: wait¦start¦12.7¦GOT¦EVENT¦AX
+END: wait¦start¦12.7¦GOT¦EVENT¦AX
 NEW: <ConditionalWorkSequence:31 (4)>
    : │  id: 31
    : │  call count: 0
-   : │  EVENT: wait¦done¦12.8¦GOT¦EVENT¦AX
+   : │  EVENT: wait¦done¦12.7¦GOT¦EVENT¦AX
    : └1╴... done.
-EVENT: wait¦done¦12.8¦GOT¦EVENT¦AX
-END: wait¦done¦12.8¦GOT¦EVENT¦AX
+EVENT: wait¦done¦12.7¦GOT¦EVENT¦AX
+END: wait¦done¦12.7¦GOT¦EVENT¦AX
 1 Yes
 NEW: <ConditionalWorkSequence:32 (5)>
    : │  id: 32
@@ -335,10 +335,10 @@ END: timeslot¦begin¦foo¦bar
 NEW: <ConditionalWorkSequence:35 (4)>
    : │  id: 35
    : │  call count: 0
-   : │  EVENT: wait¦start¦20.9¦AFTER¦EVENT¦A
+   : │  EVENT: wait¦start¦20.8¦AFTER¦EVENT¦A
    : └1╴... done.
-EVENT: wait¦start¦20.9¦AFTER¦EVENT¦A
-END: wait¦start¦20.9¦AFTER¦EVENT¦A
+EVENT: wait¦start¦20.8¦AFTER¦EVENT¦A
+END: wait¦start¦20.8¦AFTER¦EVENT¦A
 NEW: <ConditionalWorkSequence:36 (4)>
    : │  id: 36
    : │  call count: 0
@@ -374,8 +374,37 @@ EVENT: shutdown
 NEW: <ConditionalWorkSequence:38 (4)>
    : │  id: 38
    : │  call count: 0
-   : │  EVENT: wait¦cancel¦20.9¦AFTER¦EVENT¦A
+   : │  EVENT: wait¦cancel¦20.8¦AFTER¦EVENT¦A
    : └1╴... done.
-EVENT: wait¦cancel¦20.9¦AFTER¦EVENT¦A
-END: wait¦cancel¦20.9¦AFTER¦EVENT¦A
+EVENT: wait¦cancel¦20.8¦AFTER¦EVENT¦A
+END: wait¦cancel¦20.8¦AFTER¦EVENT¦A
 END: shutdown
+NEW: <ConditionalWorkSequence:39 (4)>
+   : │  id: 39
+   : │  call count: 0
+   : │  EVENT: wait¦done¦20.5¦AFTER¦EVENT¦A
+   : └1╴... done.
+EVENT: wait¦done¦20.5¦AFTER¦EVENT¦A
+END: wait¦done¦20.5¦AFTER¦EVENT¦A
+Traceback (most recent call last):
+  File "../modules/block.py", line 60, in _run
+    super(Async,self).run(*a,**k)
+  File "/daten/src/git/homevent/homevent/statement.py", line 311, in run
+    res = proc.run(ctx)
+  File "../modules/timeslot.py", line 253, in run
+    setattr(self.parent.ctx,var,Timeslots[name].running)
+KeyError: Name(u'foo', u'bar')
+NEW: <WorkSequence:40 (4)>
+   : │  id: 40
+   : │  call count: 0
+   : │  Name(u'foo', u'bar')
+   : └1╴... done.
+Traceback (most recent call last):
+  File "../modules/block.py", line 60, in _run
+    super(Async,self).run(*a,**k)
+  File "/daten/src/git/homevent/homevent/statement.py", line 311, in run
+    res = proc.run(ctx)
+  File "../modules/timeslot.py", line 253, in run
+    setattr(self.parent.ctx,var,Timeslots[name].running)
+KeyError: Name(u'foo', u'bar')
+END: KeyError

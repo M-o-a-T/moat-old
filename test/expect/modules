@@ -3,14 +3,14 @@ NEW: <ConditionalWorkSequence:6 (4)>
    : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
+EVENT: startup
+END: startup
 1 Loading!
 NEW: <ConditionalWorkSequence:7 (4)>
    : │  id: 7
    : │  call count: 0
    : │  EVENT: module¦load¦example
    : └1╴... done.
-EVENT: startup
-END: startup
 EVENT: module¦load¦example
 END: module¦load¦example
 NEW: <ConditionalWorkSequence:8 (4)>

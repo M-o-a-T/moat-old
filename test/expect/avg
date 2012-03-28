@@ -3,6 +3,8 @@ NEW: <ConditionalWorkSequence:8 (4)>
    : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
+EVENT: startup
+END: startup
 .
 test :: (new)
 .
@@ -14,8 +16,6 @@ NEW: <ConditionalWorkSequence:9 (4)>
    : │  call count: 0
    : │  EVENT: wait¦start¦0.2¦_wait¦1
    : └1╴... done.
-EVENT: startup
-END: startup
 EVENT: wait¦start¦0.2¦_wait¦1
 END: wait¦start¦0.2¦_wait¦1
 NEW: <ConditionalWorkSequence:10 (4)>

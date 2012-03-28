@@ -3,14 +3,14 @@ NEW: <ConditionalWorkSequence:6 (4)>
    : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
-1 Yes
-1 Yes
-1 Yes
-1 Yes
-1 Yes
-1 Yes
 EVENT: startup
 END: startup
+1 Yes
+1 Yes
+1 Yes
+1 Yes
+1 Yes
+1 Yes
 NEW: <ConditionalWorkSequence:7 (5)>
    : │  id: 7
    : │  call count: 0

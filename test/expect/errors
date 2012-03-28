@@ -3,21 +3,21 @@ NEW: <ConditionalWorkSequence:6 (4)>
    : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
+EVENT: startup
+END: startup
 1 Yes A
 1 Yes B
 1 Yes C
 1 Yes D
 0 Triggered:
 0 RaisedError: Foo A
-ERROR: RaisedError: Foo A
+RaisedError: Foo A
 NEW: <WorkSequence:7 (4)>
    : │  id: 7
    : │  call count: 0
-   : │  ERROR: RaisedError: Foo A
+   : │  RaisedError: Foo A
    : └1╴... done.
-EVENT: startup
-END: startup
-ERROR: RaisedError: Foo A
+RaisedError: Foo A
 END: RaisedError
 1 Yes E
 0 Triggered:
@@ -33,13 +33,13 @@ END: RaisedError
 1 Yes J D
 0 Triggered:
 0 RaisedError: Foo E
-ERROR: RaisedError: Foo E
+RaisedError: Foo E
 NEW: <WorkSequence:8 (4)>
    : │  id: 8
    : │  call count: 0
-   : │  ERROR: RaisedError: Foo E
+   : │  RaisedError: Foo E
    : └1╴... done.
-ERROR: RaisedError: Foo E
+RaisedError: Foo E
 END: RaisedError
 1 Yes K
 0 Triggered:
