@@ -23,6 +23,13 @@ SYS_PRIO = -10
 MIN_PRIO = 0
 MAX_PRIO = 100
 
+# This construct represents a type as-is
+class singleNameMeta(type):
+	def __repr__(cls):
+		return cls.__name__
+class singleName(object):
+	__metaclass__ = singleNameMeta
+
 class Name(tuple):
 	"""A class that knows how to print itself the "right" way"""
 	delim = u"¦"
