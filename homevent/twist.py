@@ -110,40 +110,6 @@ def reraise(e):
 		del e.__traceback__
 	raise e.__class__,e,tb
 
-
-# count the number of active defer-to-later handlers
-# so that we don't exit when one of them is still running,
-# because that causes a deadlock.
-#_running = 0
-#_callme = None
-#def call_when_idle(p):
-#	global _callme
-#	assert _callme is None, "Only one idle callback allowed"
-#	_callme = p
-#def _defer(d):
-#	global _running
-#	global _callme
-#	d.callback(None)
-#	_running -= 1
-#	if _callme and not _running:
-#		cm = _callme
-#		_callme = None
-#		cm()
-#
-# also, don't require an isInIOThread() test each time we want to defer something
-# from some thread which may or may not be the main one:
-# use this function instead
-#def deferToLater(p,*a,**k):
-#	global _running
-#	_running += 1
-#	d = defer.Deferred()
-#	d.addCallback(lambda _: p(*a,**k))
-#	if isInIOThread():
-#		reactor.callLater(0,_defer,d)
-#	else:
-#		reactor.callFromThread(_defer,d)
-#	reactor.wakeUp()
-#	return d
 deferToLater = deferToGreenlet
 
 
@@ -320,12 +286,4 @@ class log_wait(object):
 
 # avoids a warning from threading module on shutdown
 sys.modules['dummy_threading'] = None
-#import threading as t
-#def t_delete(self):
-#    try:
-#        with t._active_limbo_lock:
-#            del t._active[t._get_ident()]
-#    except KeyError:
-#        if 'dummy_threading' not in sys.modules and 'greenlet' not in sys.modules:
-#            raise
-#t.Thread.__delete = t_delete
+
