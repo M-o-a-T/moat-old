@@ -74,6 +74,7 @@ class WaitDone(WaitError):
 
 class WaitCancelled(WaitError):
 	"""An error signalling that a wait was killed."""
+	no_backtrace = True
 	text = u"Waiter ‹%s› was cancelled"
 
 class DupWaiterError(WaitError):
@@ -269,6 +270,8 @@ wait [NAME…]: for FOO…
 			if r: # don't log 'done' if canceled
 				process_event(Event(self.ctx(loglevel=logging.TRACE),"wait","done",tm, *w.name))
 			ctx.wait = tm
+			if not r:
+				raise WaitCancelled(self)
 
 		
 class WaitFor(Statement):
