@@ -53,6 +53,7 @@ States = States()
 States.does("del")
 
 class StateChangeError(Exception):
+	no_backtrace = True
 	def __init__(self,s,v):
 		self.state = s
 		self.value = v
