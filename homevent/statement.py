@@ -38,6 +38,7 @@ from homevent.base import Name
 from twisted.internet import defer
 
 from homevent.geventreactor import waitForDeferred
+import gevent
 
 class UnknownWordError(KeyError):
 	def __init__(self,word,where):
@@ -308,6 +309,7 @@ class StatementList(ComplexStatement):
 		if self.procs is None:
 			raise SyntaxError("This can only be used as a complex statement")
 		for proc in self.procs:
+			gevent.sleep(0) # give other tasks a chance
 			res = proc.run(ctx)
 			if isinstance(res,defer.Deferred):
 				waitForDeferred(res)
