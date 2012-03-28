@@ -289,6 +289,7 @@ class BadArgCount(RuntimeError):
 	def __str__(self):
 		return "The number of event arguments does not match"
 
+_sleep = 0
 class StatementList(ComplexStatement):
 	"""\
 		This ComplexStatement encapsulates multiple sub-statements.
@@ -309,10 +310,14 @@ class StatementList(ComplexStatement):
 		if self.procs is None:
 			raise SyntaxError("This can only be used as a complex statement")
 		for proc in self.procs:
-			gevent.sleep(0) # give other tasks a chance
 			res = proc.run(ctx)
 			if isinstance(res,defer.Deferred):
 				waitForDeferred(res)
+			global _sleep
+			_sleep += 1
+			if _sleep > 100:
+				_sleep = 0
+				gevent.sleep(0) # give other tasks a chance
 
 	def start_block(self):
 		self.procs = []
