@@ -58,7 +58,7 @@ Syntax:
 			want=False
 			w = w[1:]
 
-		while check_condition(ctx,*w) != want:
+		while check_condition(ctx,*w) == want:
 			super(WhileStatement,self).run(ctx)
 
 
