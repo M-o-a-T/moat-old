@@ -155,12 +155,6 @@ class NetCommonConnector(Collected):
 		self.job = gevent.spawn(self._reader)
 		self.job.link(dead)
 
-		try:
-			self.up_event(external)
-		except Exception as ex:
-			fix_exception(ex)
-			self.close()
-			reraise(ex)
 
 	def handshake(self, external=False):
 		"""Complete the connection, then call .up_event()"""
