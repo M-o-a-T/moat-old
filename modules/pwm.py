@@ -32,8 +32,7 @@ set pwm $VALUE NAME...
 from homevent.statement import AttributedStatement, Statement, main_words,\
 	global_words, HelpSub
 from homevent.event import Event
-from homevent.run import process_event,register_worker,unregister_worker,\
-	simple_event,process_failure
+from homevent.run import process_event, simple_event,process_failure
 from homevent.reactor import shutdown_event
 from homevent.module import Module
 from homevent.worker import HaltSequence,ExcWorker
@@ -381,30 +380,12 @@ var pwm NAME name...
 		setattr(self.parent.ctx,var,PWMs[name].value)
 
 
-class Shutdown_Worker_PWM(ExcWorker):
-	"""\
-		This worker turns off all PWMs.
-		"""
-	prio = SYS_PRIO+4
-
-	def does_event(self,ev):
-		return (ev is shutdown_event)
-	def process(self, **k):
-		super(Shutdown_Worker_PWM,self).process(**k)
-		for p in PWMs.values():
-			pwm.set_value(0)
-
-	def report(self,*a,**k):
-		return ()
-
-
 class PWMModule(Module):
 	"""\
 		This module contains controllers for PWMs.
 		"""
 
 	info = "controllers for pulse-width modulation"
-	worker = Shutdown_Worker_PWM("PWM killer")
 
 	def load(self):
 		main_words.register_statement(PWMHandler)
@@ -413,7 +394,6 @@ class PWMModule(Module):
 		main_words.register_statement(VarPWMHandler)
 		register_condition(ExistsPWMCheck)
 		register_condition(OnPWMCheck)
-		register_worker(self.worker)
 	
 	def unload(self):
 		main_words.unregister_statement(PWMHandler)
@@ -422,6 +402,5 @@ class PWMModule(Module):
 		main_words.unregister_statement(VarPWMHandler)
 		unregister_condition(ExistsPWMCheck)
 		unregister_condition(OnPWMCheck)
-		unregister_worker(self.worker)
 
 init = PWMModule

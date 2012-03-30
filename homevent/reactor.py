@@ -153,6 +153,35 @@ def _stop_mainloop():
 		stop_loggers()
 
 
+## This should be in homevent.collect, but import ordering problems make that impossible
+
+class Shutdown_Collections(ExcWorker):
+	"""\
+		This worker kills off all open collections.
+		"""
+	prio = SYS_PRIO+2
+
+	def does_event(self,ev):
+		return (ev is shutdown_event)
+	def process(self, event, **k):
+		from homevent.collect import collections
+		super(Shutdown_Collections,self).process(**k)
+		import pdb;pdb.set_trace()
+
+		def byprio(a,b):
+			return cmp(a.prio,b.prio)
+		for w in sorted(collections.itervalues(),cmp=byprio):
+			if not w.can_do("del"):
+				continue
+			for d in w.values():
+				d.delete(event.ctx)
+
+	def report(self,*a,**k):
+		return ()
+
+register_worker(Shutdown_Collections("free all collections"))
+
+
 class ShutdownHandler(Statement):
 	"""A command handler to stop the whole thing."""
 	name=("shutdown",)

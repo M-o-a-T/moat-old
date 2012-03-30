@@ -24,7 +24,7 @@ This code contains the framework for watching a device.
 
 from homevent.statement import AttributedStatement, Statement
 from homevent.event import Event
-from homevent.run import process_event,process_failure,register_worker
+from homevent.run import process_event,process_failure
 from homevent.reactor import shutdown_event
 from homevent.worker import ExcWorker
 from homevent.times import time_delta, time_until, unixdelta, now, \
@@ -757,21 +757,3 @@ stopped
 		self.parent.stopped = True
 MonitorHandler.register_statement(MonitorStopped)
 
-class Shutdown_Worker_Monitor(ExcWorker):
-	"""\
-		This worker kills off all monitors.
-		"""
-	prio = SYS_PRIO+3
-
-	def does_event(self,ev):
-		return (ev is shutdown_event)
-	def process(self, **k):
-		super(Shutdown_Worker_Monitor,self).process(**k)
-		for m in Monitors.values():
-			m.down()
-
-	def report(self,*a,**k):
-		return ()
-
-
-register_worker(Shutdown_Worker_Monitor("Monitor killer"))

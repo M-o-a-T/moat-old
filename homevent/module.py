@@ -44,6 +44,7 @@ class ModuleExistsError(RuntimeError):
 
 class Modules(Collection):
 	name = "module"
+	prio = 99
 Modules = Modules()
 Modules.does("del")
 

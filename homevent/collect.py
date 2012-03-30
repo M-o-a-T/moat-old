@@ -33,6 +33,7 @@ class Collection(dict):
 			class FooThings(Collection):
 				name = "foo bar"
 			FooThings = FooThings()
+			FooThings.does("del")
 
 			class Foo(Collected):
 				storage = FooThings.storage
@@ -40,6 +41,7 @@ class Collection(dict):
 		A subsequent "list foo bar" command enumerates all known Foo objects.
 
 		"""
+	prio = 0 # the order to de-allocate everything on shutdown
 
 	def __repr__(self):
 		try:
@@ -209,3 +211,6 @@ def all_collect(name="list", skip=False):
 			continue
 		if m.can_do(name):
 			yield m
+
+### There's also a helper which cleans out all collections
+### see homevent.reactor.Shutdown_Collections

@@ -46,6 +46,7 @@ __all__ = ("Logger",
 class Loggers(Collection):
 	name = "log"
 Loggers = Loggers()
+Loggers.can_do("del")
 
 def stop_loggers():
 	for l in Loggers.storage.values():
