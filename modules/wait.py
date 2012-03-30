@@ -271,7 +271,7 @@ wait [NAME…]: for FOO…
 				process_event(Event(self.ctx(loglevel=logging.TRACE),"wait","done",tm, *w.name))
 			ctx.wait = tm
 			if not r:
-				raise WaitCancelled(self)
+				raise WaitCancelled(w)
 
 		
 class WaitFor(Statement):
