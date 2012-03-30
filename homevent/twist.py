@@ -90,12 +90,14 @@ def fix_exception(e, tb=None):
 	if tb is not None:
 		e.__traceback__ = tb
 
-def print_exception(e=None,file=sys.stderr):
-	print >>file,format_exception(e)
+def print_exception(e=None,file=sys.stderr,backtrace=None):
+	print >>file,format_exception(e,backtrace=backtrace)
 
-def format_exception(e=None):
+def format_exception(e=None,backtrace=None):
 	tb = getattr(e,"__traceback__",None)
-	if tb is not None and not getattr(e,"no_backtrace",False):
+	if backtrace is None:
+		backtrace = not getattr(e,"no_backtrace",False)
+	if tb is not None and backtrace:
 		return "".join(traceback.format_exception(e.__class__, e, e.__traceback__))
 	else:
 		return unicode(e)
@@ -234,7 +236,9 @@ def nfhw(self,data):
 FileDescriptor.write = nfhw
 
 
-if False:
+if "HOMEVENT_TEST" in os.environ:
+	# Log all threads, wait for them to exit.
+	gthreads = {}
 	gjob=0
 	gspawn = gevent.spawn
 	def _completer(g,job):
@@ -242,19 +246,73 @@ if False:
 			print >>sys.stderr,"G RES %d %s" % (job,v)
 		def pr_err(v):
 			print >>sys.stderr,"G ERR %d %s" % (job,v)
-		g.link_value(pr_ok)
-		g.link_exception(pr_err)
+		def pr_del(v):
+			del gthreads[job]
+#		g.link_value(pr_ok)
+#		g.link_exception(pr_err)
+		g.link(pr_del)
 	def do_spawn(func,*a,**k):
 		global gjob
 		gjob += 1
 		job = gjob
-		print >>sys.stderr,"G SPAWN %d %s %s %s" % (job,func,a,k)
+#		print >>sys.stderr,"G SPAWN %d %s %s %s" % (job,func,a,k)
 		g = gspawn(func,*a,**k)
+		gthreads[job]=(g,func,a,k)
 		_completer(g,job)
 		return g
+
 	import gevent.greenlet as ggr
 	gevent.spawn = do_spawn
 	ggr.Greenlet.spawn = do_spawn
+	Loggers = None
+
+	def nr_threads(ignore_loggers=False):
+		n = len(gthreads)
+		if ignore_loggers:
+			n -= len(Loggers.storage)
+		return n
+		
+	def wait_for_all_threads():
+		global Loggers
+		from logging import Loggers as _Loggers
+		from logging import stop_loggers
+		Loggers = _Loggers
+
+		n=0
+		for r in (True,False):
+			while nr_threads(r):
+				if n==100000:
+					for job,t in gthreads.iteritems():
+						print >>sys.stderr,"G WAIT %d %s %s %s" % ((job,)+t[1:])
+	
+					n=0
+				n += 1
+				try:
+					gevent.sleep(0)
+				except gevent.GreenletExit as ex:
+#					fix_exception(ex)
+#					print_exception(ex)
+					pass
+			if r:
+				stop_loggers()
+		for n in range(100):
+			try:
+				gevent.sleep(0)
+			except gevent.GreenletExit as ex:
+#				fix_exception(ex)
+#				print_exception(ex)
+				pass
+
+else:
+	def wait_for_all_threads():
+		from logging import stop_loggers
+		n = 2*kill_loggers()+10
+		while n:
+			n -= 1
+			try:
+				gevent.sleep(0)
+			except gevent.GreenletExit:
+				pass
 
 gwait = 0
 _log = None

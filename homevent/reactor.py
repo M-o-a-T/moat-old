@@ -26,7 +26,8 @@ from homevent.run import register_worker,unregister_worker, SYS_PRIO,MAX_PRIO,\
 	process_event, process_failure
 from homevent.statement import Statement
 from homevent.io import dropConnections
-from homevent.twist import deferToLater, fix_exception
+from homevent.twist import deferToLater, fix_exception,\
+	wait_for_all_threads
 from homevent.collect import Collection,Collected
 
 from twisted.internet import reactor
@@ -146,6 +147,11 @@ def _stop_mainloop():
 		stopping = True
 		dropConnections()
 		reactor.stop()
+		wait_for_all_threads() # Debugging
+
+		from homevent.logging import stop_loggers
+		stop_loggers()
+
 
 class ShutdownHandler(Statement):
 	"""A command handler to stop the whole thing."""

@@ -47,6 +47,10 @@ class Loggers(Collection):
 	name = "log"
 Loggers = Loggers()
 
+def stop_loggers():
+	for l in Loggers.storage.values():
+		l.delete()
+
 TRACE=0
 DEBUG=1
 INFO=2
