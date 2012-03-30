@@ -44,7 +44,7 @@ from homevent.context import Context
 from homevent.io import Outputter,conns
 from homevent.event import Event,StopParsing
 from homevent.statement import global_words
-from homevent.twist import deferToLater,setBlocking, fix_exception,print_exception
+from homevent.twist import deferToLater,setBlocking, fix_exception,print_exception,reraise
 
 class SimpleReceiver(LineOnlyReceiver,object):
 	delimiter = "\n"
@@ -191,17 +191,18 @@ class Parser(object):
 		self.prompt()
 		self.job = gevent.spawn(self._run)
 		self.p_gen = tokizer(self._do_parse,self.job)
+
 		def nojob(_):
 			self.job = None
-
 		self.job.link(nojob)
 		try:
 			e = self.job.get()
-			if isinstance(e,(tuple,list)) and len(e)==3 and isinstance(e[1],BaseException):
-				e1,e2,e3 = e
-				raise e1,e2,e3
+			if isinstance(e,BaseException):
+				reraise(e)
 		except StopParsing:
 			pass
+
+		self.p_gen.exit()
 		
 	def _run(self):
 		try:
@@ -223,7 +224,8 @@ class Parser(object):
 				self.add_line(l)
 		
 		except BaseException as e:
-			return sys.exc_info()
+			fix_exception(e)
+			return e
 		finally:
 			setBlocking(True,self.input)
 			gevent.spawn(self.endConnection,kill=False)
@@ -281,26 +283,8 @@ class Parser(object):
 			if self.p_stack:
 				self.proc = self.p_stack[0]
 
-			try:
-				self.proc.error(self,ex)
-				self.prompt()
-				log("parser",TRACE,"PERR OK")
-			except Exception as ex:
-				fix_exception(ex)
-				import sys,traceback
-				sys.stderr.write("*** Died in the error handler\n");
-				try:
-					print_exception(ex,file=sys.stderr)
-
-					try:
-						log("parser",TRACE,"RESULT error",ex)
-					except defer.AlreadyCalledError: pass
-					else: self.endConnection()
-				except Exception as ex2:
-					ex2 = fix_exception(ex2)
-					sys.stderr.write("\n*** Here's where we die again^2:\n");
-					print_exception(ex2,file=sys.stderr)
-					raise
+			self.proc.error(self,ex)
+			self.prompt()
 
 	def _parseStep(self, t,txt,beg,end,line):
 		from token import NUMBER,NAME,DEDENT,INDENT,OP,NEWLINE,ENDMARKER, \

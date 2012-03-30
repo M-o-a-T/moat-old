@@ -92,15 +92,20 @@ class tokizer(object):
 		self._output = output
 		self.parent = parent
 		self.q = Channel()
+		self.init()
 		self.job = gevent.spawn(self._job)
 		self.job.link(self._end)
-		self.init()
 	
 	def init(self):
 		self.lnum = self.parenlev = self.continued = 0
 		self.contstr, self.needcont = '', 0
 		self.contline = None
 		self.indents = [0]
+	
+	def exit(self):
+		if self.job:
+			self.feed_end()
+			self.job.kill()
 
 	def output(self,*a):
 		log("token",TRACE,repr(a))
@@ -122,6 +127,7 @@ class tokizer(object):
 			raise RuntimeError("reader died: "+repr(line))
 
 	def _end(self, res):
+		self.job = None
 		if self.q:
 			q,self.q = self.q,None
 			try:
@@ -136,7 +142,12 @@ class tokizer(object):
 				line = self.q.get()
 			else:
 				line = None
-			self._do_line(line)
+
+			try:
+				self._do_line(line)
+			except BaseException as e:
+				fix_exception(e)
+				return e
 
 	def _do_line(self,line):
 		try:
