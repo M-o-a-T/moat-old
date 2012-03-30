@@ -28,13 +28,13 @@ wait: for FOO...
 from homevent.statement import AttributedStatement, Statement, main_words,\
 	global_words
 from homevent.event import Event
-from homevent.run import process_event,register_worker,unregister_worker
+from homevent.run import process_event
 from homevent.reactor import shutdown_event
 from homevent.module import Module
 from homevent.worker import HaltSequence,ExcWorker
 from homevent.times import time_delta, time_until, unixtime,unixdelta, now, humandelta
 from homevent.check import Check,register_condition,unregister_condition
-from homevent.base import Name,SYS_PRIO
+from homevent.base import Name
 from homevent.collect import Collection,Collected
 from homevent.twist import callLater,fix_exception
 from homevent import logging
@@ -86,20 +86,19 @@ class Waiter(Collected):
 	storage = Waiters.storage
 	_plinger = None
 	_running = False
+	q = None
+
 	def __init__(self,parent,name,force):
 		self.ctx = parent.ctx
 		self.start = now()
 		self.force = force
-		self.q = Channel()
 		try:
 			self.parent = parent.parent
 		except AttributeError:
 			pass
 		self.defer = defer.Deferred()
 		self.queue = defer.succeed(None)
-		self.name = Name(name)
-		if self.name in Waiters:
-			raise DupWaiterError(self)
+		super(Waiter,self).__init__(name)
 	
 	def list(self):
 		yield super(Waiter,self)
@@ -154,46 +153,46 @@ class Waiter(Collected):
 	def _job(self):
 		self._set_pling()
 		self._running = True
-		try:
-			while True:
-				cmd = self.q.get()
+		while True:
+			cmd = self.q.get()
 
-				q = cmd[0]
-				a = cmd[2] if len(cmd)>2 else None
-				cmd = cmd[1]
-				if cmd == "timeout":
-					assert self._plinger is None
-					q.put(None)
-					self.q = None
-					return True
-				elif cmd == "cancel":
-					if self._plinger:
-						self._plinger.cancel()
-						self._plinger = None
-					q.put(None)
-					self.q = None
-					return False
-				elif cmd == "update":
-					q.put(None)
-					self.end = a
-					self._set_pling()
-				elif cmd == "remain":
-					q.put(unixtime(self.end)-unixtime(now(self.force)))
-				else:
-					q.put(RuntimeError('Unknown command: '+cmd))
-		finally:
-			self.delete_done()
+			q = cmd[0]
+			a = cmd[2] if len(cmd)>2 else None
+			cmd = cmd[1]
+			if cmd == "timeout":
+				assert self._plinger is None
+				q.put(None)
+				return True
+			elif cmd == "cancel":
+				if self._plinger:
+					self._plinger.cancel()
+					self._plinger = None
+				q.put(None)
+				return False
+			elif cmd == "update":
+				q.put(None)
+				self.end = a
+				self._set_pling()
+			elif cmd == "remain":
+				q.put(unixtime(self.end)-unixtime(now(self.force)))
+			else:
+				q.put(RuntimeError('Unknown command: '+cmd))
 
 
 	def init(self,dest):
-		if self.name in Waiters:
-			raise DupWaiterError(self)
+
+		def done(_):
+			self.job = None
+			self.delete_done()
+			q,self.q = self.q,None
+			if q is not None:
+				while not q.empty():
+					q.get()[0].put(StopIteration())
 
 		self.q = Channel()
 		self.end = dest
 		self.job = gevent.spawn(self._job)
-
-		Waiters[self.name] = self
+		self.job.join(done)
 
 	def _cmd(self,cmd,*a):
 		if self.q is None:
@@ -201,7 +200,10 @@ class Waiter(Collected):
 
 		q = Channel()
 		self.q.put((q,cmd)+tuple(a))
-		return q.get()
+		res = q.get()
+		if isinstance(res,BaseException):
+			raise res
+		return res
 
 	@property
 	def value(self):
@@ -215,7 +217,7 @@ class Waiter(Collected):
 		return res
 
 	def delete(self,ctx):
-		self.job.kill()
+		self._cmd("cancel")
 
 	def cancel(self, err=WaitCancelled):
 		"""Cancel a waiter."""
@@ -426,22 +428,6 @@ if "HOMEVENT_TEST" in os.environ:
 	WaitHandler.register_statement(WaitDebug)
 WaitHandler.register_statement(WaitUpdate)
 
-class Shutdown_Worker_Wait(ExcWorker):
-    """\
-        This worker kills off all waiters.
-        """
-    prio = SYS_PRIO+2
-
-    def does_event(self,ev):
-        return (ev is shutdown_event)
-    def process(self, **k):
-		super(Shutdown_Worker_Wait,self).process(**k)
-		for w in Waiters.values():
-			w.cancel(err=HaltSequence)
-
-    def report(self,*a,**k):
-        return ()
-
 
 class WaitModule(Module):
 	"""\
@@ -449,18 +435,15 @@ class WaitModule(Module):
 		"""
 
 	info = "Delay handling"
-	worker = Shutdown_Worker_Wait("Wait killer")
 
 	def load(self):
 		main_words.register_statement(WaitHandler)
 		main_words.register_statement(VarWaitHandler)
 		register_condition(ExistsWaiterCheck)
-		register_worker(self.worker)
 	
 	def unload(self):
 		main_words.unregister_statement(WaitHandler)
 		main_words.unregister_statement(VarWaitHandler)
 		unregister_condition(ExistsWaiterCheck)
-		unregister_worker(self.worker)
 
 init = WaitModule
