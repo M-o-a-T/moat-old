@@ -341,7 +341,6 @@ class Monitor(Collected):
 		finally:
 			log("monitor",TRACE,"End run", self.name)
 			self.stopped_at = now()
-			self.job = None
 
 
 	def one_value(self, step):
@@ -769,7 +768,7 @@ class Shutdown_Worker_Monitor(ExcWorker):
 	def process(self, **k):
 		super(Shutdown_Worker_Monitor,self).process(**k)
 		for m in Monitors.values():
-			monitor.down()
+			m.down()
 
 	def report(self,*a,**k):
 		return ()
