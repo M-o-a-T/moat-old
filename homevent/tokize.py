@@ -123,8 +123,8 @@ class tokizer(object):
 					q.put(None)
 			else:
 				self.q.put(line)
-		elif line is not None:
-			raise RuntimeError("reader died: "+repr(line))
+		else:
+			raise StopParsing
 
 	def _end(self, res):
 		self.job = None
