@@ -346,7 +346,7 @@ class NetListener(Collected):
 		if not self.connector:
 			socket.close()
 			return
-		self.connector(socket,address,self.name)
+		gevent.spawn(self.connector, socket,address,self.name)
 
 	def info(self):
 		return "%s %s:%s" % (self.typ, self.name,self.connector.name)
@@ -377,6 +377,7 @@ You need to override the long_doc description.
 	def start_up(self):
 		r = self.listener(name=self.dest, host=self.host,port=self.port)
 		s = StreamServer((self.host, self.port), r.connected)
+		s.set_spawn(None)
 		r._init2(s, self.connector)
 
 
