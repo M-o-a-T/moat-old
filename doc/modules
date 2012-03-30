@@ -131,7 +131,7 @@ This is important e.g. for monitoring.
 
 	monitor foo:
 		…
-	on monitor value *FOO foo:
+	on monitor value *FOO foo:  #*
 		var monitor OLDFOO foo
 		if null $OLDFOO:
 			log TRACE first time fooing around
@@ -652,7 +652,7 @@ anything; the actual value is available as "$1" (for the first '*') etc.
 Alternately, you can name the parameters:
 
 	load logging
-	on foo *whatever:
+	on foo *whatever:   #*
 		name FooBar
 		prio 10
 		log TRACE "Yes, we get to foo the" $whatever "now!"
@@ -703,7 +703,7 @@ One important usage of this is an alarm system. If you have activated
 your alarm system, you want something entirely different to happen when,
 say, somebody turns on the light in your office.
 
-	on switch * office *:
+	on switch * office *:   #*
 		prio 10
 		if state on alarm
 		trigger alert intruder
@@ -784,7 +784,9 @@ whatever). Reading external data may be subject to hard errors (the
 external bus is down), soft errors (intermittent false readings),
 and other problems.
 
-This module periodically samples 
+This module periodically samples an analog or counted input. It actually
+gets its data either by actively polling a device; see the specific monitor
+subcommands for details.
 
 load monitor
 load tests
@@ -799,9 +801,9 @@ monitor SUBSYSTEM DEVICE …
 --------------------------
 
 This is the basic command to set up a monitor. How to address an
-external device is up to that subsystem; see the appropriate bus module
-on how to specify the parameters necessary to address the device in
-question.
+external device is up to that subsystem; see the appropriate module's
+documentation on how to specify the parameters necessary to address the
+device in question.
 
 This command has a couple of parameters:
 
@@ -889,6 +891,7 @@ stopped
 This subcommand tells the monitor to not start executing immediately.
 A common reason for this is that the event handlers which use the
 monitor have not been set up yet.
+
 
 delta
 -----
@@ -993,7 +996,7 @@ The passive monitor
 -------------------
 
 If there is no dedicated monitoring for a device, you can set up a
-passive monitor. It will send start/stop events when you should
+passive monitor. It will send start/stop events to signal that you should
 start/stop feeding raw values to it.
 
 monitor passive:
@@ -1016,21 +1019,23 @@ connection.
 Lines are delimited by LF (\n) characters. CR (\r) is stripped on
 receipt, but not sent.
 
-------------------------
-net ‹name› ‹host› ‹port›
-------------------------
+--------------------------------
+connect net ‹name› ‹host› ‹port›
+--------------------------------
 
-Establish a connection. If broken, the link will automatically be
-restored if possible.
+Establish a connection.
 
 	net fhz server.local 7072
 
 If you want to use multi-word connection names, supply the name as an
 additional argument.
 
-    net connect localhost 7:
+    net localhost 7:
         name foo bar
 
+If you want to reconnect automatically, attach an event handler to the
+disconnect events. Same for the error event, if the connection could
+not be established in the first place.
 
 -------------------------------
 listen net ‹name› ‹host› ‹port›
@@ -1039,8 +1044,10 @@ listen net ‹name› ‹host› ‹port›
 Same as above, but wait for the remote side to connect to me instead
 of connecting yourself.
 
-At the moment, only one connection is supported. If another client
-connects, the first connection is dropped.
+Multiple connections are supported. They're numbered sequentially, by
+appending an integer to the name.
+
+	EVENT: net connect baz zaz 1
 
 Currently, there is no authorization. You might want to use the kernel
 firewall to control the port, and/or only export non-sensitive
@@ -2068,6 +2075,168 @@ You can change the level with this statement.
 
 	trigger bad foobar:
 		log ERROR
+
+====
+wago
+====
+
+This module implements a line-oriented protocol to a Wago I/O controller
+running Linux. The protocol is implemented by the code in the "wago"
+submodule. Adaption to other controllers, notably those using the kernel's
+GPIO interface, should be very simple.
+
+----
+wago
+----
+
+Declares a Wago input controller.
+
+	wago localhost 59069:
+		name test
+    	ping 1
+    	monitor 0.1
+
+The destination port defaults (for now) to 59995.
+
+name
+----
+
+The name of this controller. If not set, the host name is used.
+
+
+ping
+----
+
+Periodically send a "ping" command, which checks that the device is still present.
+
+The optional parameter is the ping interval; it defaults to once per minute.
+
+monitor
+-------
+
+Tell the device how often to poll its inputs. This overrides the command line
+the server has been started with; the default is three seconds.
+
+----------
+input wago
+----------
+
+Declare a digital input.
+
+Direct parameters are the server name, the I/O card on the server, and the
+port number on the card.
+
+	input wago test 1 1:
+		name foo bar
+		to on
+
+name
+----
+
+The port name. If not set, the server and port is the name, i.e. "test 1 1"
+in this case.
+
+to
+--
+
+Optional; if this parameter is used, an event will be triggered when the port changes to the indicated state ("on", "off", or "both"). If no parameter is used, "both" is assumed.
+
+-----------
+output wago
+-----------
+
+Declare a digital output.
+
+The "name" subcommand is used as in "wago input".
+
+You can change the output with the "set wago" command, described below.
+
+	output wago test 1 2:
+		name baz out
+		default off
+
+default
+-------
+
+If used, the output will be changed to this state ("on" or "off") after
+starting HomEvenT and initially connecting to a server.
+
+Upon reconnection, HomEvenT's current state will be restored.
+
+
+------------
+monitor wago
+------------
+
+This command declares a counter which watches one of the controller's input
+lines and periodically reports how often it changed in a specific interval.
+
+	monitor wago test 1 1:
+		name foo bar
+		delta
+		delay for 30
+		to off
+
+The time given in the "delay for" parameter will be sent to the device
+to set the reporting interval. Note that there will not be any measurements
+when the port does not change.
+
+See the "monitor" command for further options. The "delta" option, in
+particular, should almost always be used.
+
+The "delay until" parameter cannot be used, as the monitor frequency is
+controlled by setting parameters at the remote system. The code there does
+not depend on an accurate time-of-day clock.
+
+to
+--
+
+Declare which state change will be counted ("on", "off" or "both").
+The default is "on".
+
+----------------
+list wago server
+----------------
+
+This command shows which servers are currently known to the system.
+
+You can append the name of a server to show additional details.
+
+----------
+list input
+----------
+
+This command lists input lines and their currrent state.
+
+You can add the name of a line to view additional details.
+
+-----------
+list output
+-----------
+
+This command lists input lines and their currrent state.
+
+You can add the name of a line to view additional details.
+
+------------------
+var input VAR name
+------------------
+
+Set the variable VAR to the current state of the named input.
+
+-----
+Tests
+-----
+
+exists input NAME
+-----------------
+
+Check if the named input exists.
+
+input NAME
+----------
+
+Check if the named input is set.
 
 ====
 wait

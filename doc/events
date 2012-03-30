@@ -216,6 +216,43 @@ fs20 unknown em unregistered ‹type› ‹id› datum value …
     -- No devices for that type and ID have been registered.
 
 
+wago
+----
+
+wago up NAME
+	-- the server is connected
+
+wago down NAME
+	-- the server has been disconnected
+
+wago message TEXT NAME
+	-- a message from the controller arrived
+
+wago on NAME
+	-- an input changed state to ON
+
+wago off NAME
+	-- an input changed state to OFF
+
+wago set on NAME
+	-- an output changed state to ON
+
+wago set off NAME
+	-- an output changed state to OFF
+
+wago timer on NAME
+	-- a timed output change to ON occurred
+
+wago timer off NAME
+	-- a timed output change to OFF occurred
+
+wago timer error MESSAGE NAME
+	-- the timer was aborted
+	   most likely because the output was changed externally
+
+wago count NUMBER NAME
+	-- a counter message was received
+
 Wait
 ----
 
