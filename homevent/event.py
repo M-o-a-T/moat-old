@@ -61,7 +61,7 @@ class Event(object):
 		self._name_check(name)
 		#print "E_INIT",name,"with",ctx
 		self.name = Name(name)
-		self.ctx = ctx
+		self.ctx = ctx if ctx is not None else Context()
 		if "loglevel" in ctx:
 			self.loglevel = ctx.loglevel
 

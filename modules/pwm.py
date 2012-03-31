@@ -109,7 +109,7 @@ class CommonPM(Collected):
 			return "(new)"
 		return "%f %s / %s" % (self._value,humandelta(self.t_on),humandelta(self.t_off))
 
-	def delete(self,ctx):
+	def delete(self,ctx=None):
 		if self.timer:
 			self.timer.cancel()
 			self.timer = None

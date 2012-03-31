@@ -24,7 +24,7 @@ This code contains the framework for timing regular events.
 
 from homevent.statement import AttributedStatement, Statement
 from homevent.event import Event
-from homevent.run import process_event,process_failure,register_worker
+from homevent.run import process_event,process_failure
 from homevent.reactor import shutdown_event
 from homevent.times import time_delta, time_until, unixdelta, now, \
 	humandelta
@@ -170,7 +170,7 @@ class Timeslot(Collected):
 		simple_event(self.ctx,"timeslot","error",*self.name)
 
 
-	def delete(self,ctx):
+	def delete(self,ctx=None):
 		self.down()
 		self.delete_done()
 		return

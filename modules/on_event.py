@@ -176,7 +176,7 @@ class OnEventWorker(Collected,iWorker):
 			for r in self.parent.report(verbose):
 				yield r
 
-	def delete(self,ctx):
+	def delete(self,ctx=None):
 		self.delete_done()
 
 	def info(self):

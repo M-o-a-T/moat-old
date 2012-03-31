@@ -107,7 +107,7 @@ class Avg(Collected):
 			return "(new)"
 		return "%s %s" % (self._calc(), unixdelta(self.total_tm))
 	
-	def delete(self,ctx):
+	def delete(self,ctx=None):
 		self.delete_done()
 
 

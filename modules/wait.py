@@ -29,22 +29,20 @@ from homevent.statement import AttributedStatement, Statement, main_words,\
 	global_words
 from homevent.event import Event
 from homevent.run import process_event
-from homevent.reactor import shutdown_event
 from homevent.module import Module
-from homevent.worker import HaltSequence,ExcWorker
+from homevent.worker import ExcWorker
 from homevent.times import time_delta, time_until, unixtime,unixdelta, now, humandelta
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.base import Name
 from homevent.collect import Collection,Collected
 from homevent.twist import callLater,fix_exception
-from homevent import logging
+from homevent.logging import log_exc,TRACE
 
 import gevent
-from gevent.queue import Channel,Empty
+from gevent.queue import Channel
 
 from time import time
 import os
-from twisted.internet import reactor,defer
 import datetime as dt
 
 timer_nr = 0
@@ -96,8 +94,6 @@ class Waiter(Collected):
 			self.parent = parent.parent
 		except AttributeError:
 			pass
-		self.defer = defer.Deferred()
-		self.queue = defer.succeed(None)
 		super(Waiter,self).__init__(name)
 	
 	def list(self):
@@ -216,16 +212,16 @@ class Waiter(Collected):
 			res = "%.1f" % (res,)
 		return res
 
-	def delete(self,ctx):
+	def delete(self,ctx=None):
 		self._cmd("cancel")
 
 	def cancel(self, err=WaitCancelled):
 		"""Cancel a waiter."""
-		process_event(Event(self.ctx(loglevel=logging.TRACE),"wait","cancel",ixtime(self.end,self.force),*self.name))
+		process_event(Event(self.ctx(loglevel=TRACE),"wait","cancel",ixtime(self.end,self.force),*self.name))
 		self._cmd("cancel")
 
 	def retime(self, dest):
-		process_event(Event(self.ctx(loglevel=logging.TRACE),"wait","update",dest,*self.name))
+		process_event(Event(self.ctx(loglevel=TRACE),"wait","update",dest,*self.name))
 		self._cmd("retime",dest)
 
 	
@@ -260,17 +256,17 @@ wait [NAME…]: for FOO…
 			return Waiters[self.displayname].retime(self.timespec())
 		w = Waiter(self, self.displayname, self.force)
 		w.init(self.timespec())
-		process_event(Event(self.ctx(loglevel=logging.TRACE),"wait","start",ixtime(w.end,self.force),*w.name))
+		process_event(Event(self.ctx(loglevel=TRACE),"wait","start",ixtime(w.end,self.force),*w.name))
 		try:
 			r = w.job.get()
 		except Exception as ex:
 			fix_exception(ex)
-			logging.log_exc(msg=u"Wait %s died:"%(self.name,), err=ex, level=logging.TRACE)
+			log_exc(msg=u"Wait %s died:"%(self.name,), err=ex, level=TRACE)
 			raise
 		else:
 			tm = ixtime(now(self.force),self.force)
 			if r: # don't log 'done' if canceled
-				process_event(Event(self.ctx(loglevel=logging.TRACE),"wait","done",tm, *w.name))
+				process_event(Event(self.ctx(loglevel=TRACE),"wait","done",tm, *w.name))
 			ctx.wait = tm
 			if not r:
 				raise WaitCancelled(w)

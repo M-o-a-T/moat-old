@@ -26,7 +26,7 @@ from homevent.module import Module
 from homevent.logging import log,DEBUG,TRACE,INFO,WARN,ERROR
 from homevent.statement import AttributedStatement,Statement, main_words
 from homevent.check import Check,register_condition,unregister_condition
-from homevent.run import simple_event,process_failure,register_worker,unregister_worker
+from homevent.run import simple_event,process_failure
 from homevent.context import Context
 from homevent.event import Event,TrySomethingElse
 from homevent.fs20 import handler,register_handler,unregister_handler, \

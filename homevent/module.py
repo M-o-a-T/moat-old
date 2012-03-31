@@ -94,7 +94,7 @@ class Module(Collected):
 	def dup_error(self,name):
 		raise RuntimeError(u"Module ‹%s› already exists" % (name,))
 
-	def delete(self,ctx):
+	def delete(self,ctx=None):
 		process_event(Event(ctx, "module","unload",*self.name))
 		self.unload()
 		self.delete_done()

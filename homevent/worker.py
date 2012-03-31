@@ -26,7 +26,7 @@ something about it.
 
 from homevent.context import Context
 from homevent.event import Event,TrySomethingElse,NeverHappens
-from homevent.base import Name,MIN_PRIO,MAX_PRIO
+from homevent.base import Name,MIN_PRIO,MAX_PRIO,SYS_PRIO
 from homevent.times import humandelta, now
 from homevent.twist import fix_exception,reraise,format_exception,track_errors
 
@@ -407,7 +407,6 @@ class ExcWorker(Worker):
 	def does_failure(self,event):
 		return False
 	pass
-
 
 class DoNothingWorker(Worker):
 	def __init__(self):

@@ -45,7 +45,7 @@ class RRD(Collected):
 		self.udataset = dataset.encode("utf-8")
 		super(RRD,self).__init__(*name)
 		 
-	def delete(self,ctx):
+	def delete(self,ctx=None):
 		self.delete_done()
 	
 	def list(self):

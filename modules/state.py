@@ -72,7 +72,7 @@ class State(Collected):
 	def init(self):
 		pass
 
-	def delete(self,ctx):
+	def delete(self,ctx=None):
 		if self.working:
 			raise StateChangeError(self,u"‹deleted›")
 		self.working = True

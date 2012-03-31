@@ -364,7 +364,7 @@ class Monitor(Collected):
 				
 			self.job.link(tell_ended)
 
-	def delete(self,ctx):
+	def delete(self,ctx=None):
 		self.down()
 		self.delete_done()
 
