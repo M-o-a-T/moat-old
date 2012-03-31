@@ -49,7 +49,7 @@ class group(object):
 			raise RuntimeError("House code %04x already known" % (code,))
 		groups[code] = self
 	
-	def delete(self):
+	def delete(self,ctx=None):
 		del groups[(self.code, self.qsum)]
 
 	def datagramReceived(self, data, handler=None):

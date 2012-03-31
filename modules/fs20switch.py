@@ -118,7 +118,7 @@ class SwitchGroup(Collected,igroup):
 		for d in self.devs.itervalues():
 			yield("device",d.name)
 
-	def delete(self):
+	def delete(self,ctx=None):
 		del codes[self.code]
 		self.delete_done()
 
@@ -232,7 +232,7 @@ class Switch(Collected):
 
 		self.parent.add_switch(self)
 
-	def delete(self):
+	def delete(self,ctx=None):
 		del self.parent.devs[self.code]
 		self.delete_done()
 

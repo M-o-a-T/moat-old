@@ -397,7 +397,7 @@ class MsgQueue(Collected):
 		"""Send any initial messages to the channel"""
 		pass
 
-	def delete(self):
+	def delete(self,ctx=None):
 		self.stop("deleted")
 		for m in self.delayed[:]:
 			m.unqueue()

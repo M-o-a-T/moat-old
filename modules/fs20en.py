@@ -141,7 +141,7 @@ class en(Collected,Timeslotted):
 		if self.slot:
 			for k,v in self.slot.list(): yield ("slot_"+k,v)
 	
-	def delete(self):
+	def delete(self,ctx=None):
 		encodes[self.group][self.code].remove(self)
 		if self._slot:
 			d = defer.maybeDeferred(self.slot.delete)
