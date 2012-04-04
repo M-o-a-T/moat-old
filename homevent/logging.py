@@ -130,7 +130,7 @@ class BaseLogger(Collected):
 	def delete(self, ctx=None):
 		self.q.put(None)
 		self.job.join(timeout=1)
-		if self.job.dead:
+		if not self.job.dead:
 			self.job.kill()
 		self.job = None
 		self.delete_done()
