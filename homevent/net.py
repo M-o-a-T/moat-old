@@ -30,7 +30,7 @@ from homevent.event import Event
 from homevent.base import Name
 from homevent.run import process_failure
 from homevent.collect import Collection,Collected
-from homevent.twist import fix_exception,reraise
+from homevent.twist import fix_exception,reraise,Jobber
 
 import os
 import sys
@@ -111,7 +111,7 @@ class LineReceiver(object):
 #
 #net_conns = {}
 
-class NetCommonConnector(Collected):
+class NetCommonConnector(Collected,Jobber):
 	"""This class represents one remote network connection."""
 	#storage = Nets.storage
 	#storage2 = net_conns
@@ -134,8 +134,12 @@ class NetCommonConnector(Collected):
 				self._connect()
 			except Exception as ex:
 				fix_exception(ex)
-				del storage2[(host,port)]
-				self.delete_done()
+				try:
+					del storage2[(host,port)]
+				except KeyError:
+					pass
+				else:
+					self.delete_done()
 				try:
 					self.not_up_event()
 				except Exception as ex2:
@@ -147,12 +151,10 @@ class NetCommonConnector(Collected):
 			self.handshake(True)
 
 		def dead(_):
-			self.job = None
 			if self.socket is not None:
 				self.socket.close()
 				self.down_event(True)
-
-		self.job = gevent.spawn(self._reader)
+		self.start_job("job",self._reader)
 		self.job.link(dead)
 
 
@@ -234,9 +236,7 @@ class NetCommonConnector(Collected):
 			raise DisconnectedError(self.name)
 
 	def close(self,external=False):
-		r,self.job = self.job,None
-		if r:
-			r.kill()
+		self.stop_job("job")
 
 		c,self.socket = self.socket,None
 		if c:
@@ -346,7 +346,12 @@ class NetListener(Collected):
 		if not self.connector:
 			socket.close()
 			return
-		gevent.spawn(self.connector, socket,address,self.name)
+
+		job = gevent.spawn(self.connector, socket,address,self.name)
+		def died(e):
+			fix_exception(e)
+			process_failure(e)
+		job.link_exception(died)
 
 	def info(self):
 		return "%s %s:%s" % (self.typ, self.name,self.connector.name)

@@ -270,6 +270,8 @@ if "HOMEVENT_TEST" in os.environ:
 		n = len(gthreads)
 		if ignore_loggers:
 			n -= len(Loggers.storage)
+		if n < 0:
+			n = 0
 		return n
 		
 	def wait_for_all_threads():
@@ -279,6 +281,9 @@ if "HOMEVENT_TEST" in os.environ:
 		Loggers = _Loggers
 
 		n=0
+#		for job,t in gthreads.iteritems():
+#			print >>sys.stderr,"G WAIT %d %s %s %s" % ((job,)+t[1:])
+	
 		for r in (True,False):
 			while nr_threads(r):
 				if n==100000:
@@ -342,6 +347,51 @@ class log_wait(object):
 		_log(TRACE,"-WAIT", self.w, *self.a)
 		return False
 
+
+### Safely start gevent threads
+
+class _starting(object):
+	pass
+
+class Jobber(object):
+	def start_job(self,attr, proc,*a,**k):
+		with log_wait("start",attr,str(self)):
+			while True:
+				j = getattr(self,attr,None)
+				if j is None:
+					break
+				elif j is _starting or not j.dead:
+					return
+				else:
+					gevent.sleep(0.1)
+
+		setattr(self,attr,_starting)
+		j = gevent.spawn(proc,*a,**k)
+
+		def err(e):
+			from homevent.run import process_failure
+			fix_exception(e)
+			process_failure(e)
+
+		def dead(e):
+			if getattr(self,attr,None) is j:
+				setattr(self,attr,None)
+
+		j.link_exception(err)
+		j.link(dead)
+		setattr(self,attr,j)
+
+	def stop_job(self,attr):
+		j = getattr(self,attr,None)
+		if j is None:
+			return
+		with log_wait("kill",attr,str(self)):
+			if j is not _starting:
+				j.kill()
+			while getattr(self,attr,None) is j:
+				gevent.sleep(0)
+
+		
 # avoids a warning from threading module on shutdown
 sys.modules['dummy_threading'] = None
 

@@ -25,7 +25,7 @@ from homevent.logging import log
 from homevent.statement import main_words, MainStatementList
 from homevent.run import process_failure
 from homevent.worker import HaltSequence
-from homevent.twist import fix_exception
+from homevent.twist import fix_exception,Jobber
 
 import os
 import gevent
@@ -50,7 +50,7 @@ which cannot be used on top level due to implementation restrictions.
 	pass # super.run() already does everything we want
 
 
-class Async(MainStatementList):
+class Async(MainStatementList,Jobber):
 	"""This runs statements in the background."""
 	name=("async",)
 	doc="run multiple statements asynchronously"
@@ -65,7 +65,7 @@ class Async(MainStatementList):
 			process_failure(err)
 
 	def run(self,*a,**k):
-		self.job = gevent.spawn(self._run,a,k)
+		self.start_job("job", self._run,a,k)
 		# TODO: some sort of global job list
 		# so that they can be stopped when ending the program
 

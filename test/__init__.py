@@ -113,17 +113,23 @@ class run_logger(BaseLogger):
 		else:
 			print >>self.data, sx
 
+	# override using a separate thread
+	def _init(self):
+		pass
+	def _wlog(self,*a):
+		self._log(*a)
+
 	def log(self, level, *a):
-		if level is not None and level < self.level:
-			return
+#		if level is not None and level < self.level:
+#			return
 		sx=" ".join(unicode(x) for x in a)
 		self._log(level,sx)
 		if self.dot:
 			self._log(None,".")
 
 	def log_event(self, event, level=0):
-		if level < self.level:
-			return
+#		if level < self.level:
+#			return
 
 		if "HOMEVENT_TEST" in os.environ and int(os.environ["HOMEVENT_TEST"]) > 1:
 			self._log(None,"@ "+ixtime())

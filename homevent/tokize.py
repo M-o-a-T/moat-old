@@ -28,7 +28,7 @@ from twisted.internet.defer import maybeDeferred, Deferred
 
 from homevent.logging import log,TRACE
 from homevent.event import StopParsing
-from homevent.twist import fix_exception
+from homevent.twist import fix_exception, Jobber
 
 from gevent.queue import Channel,Empty
 import gevent
@@ -87,13 +87,13 @@ tokenprog, pseudoprog, namestart, num = map(
 
 tabsize = 8
 
-class tokizer(object):
+class tokizer(Jobber):
 	def __init__(self, output, parent=None):
 		self._output = output
 		self.parent = parent
 		self.q = Channel()
 		self.init()
-		self.job = gevent.spawn(self._job)
+		self.start_job("job",self._job)
 		self.job.link(self._end)
 	
 	def init(self):
@@ -103,9 +103,7 @@ class tokizer(object):
 		self.indents = [0]
 	
 	def exit(self):
-		if self.job:
-			self.feed_end()
-			self.job.kill()
+		self.stop_job("job")
 
 	def output(self,*a):
 		log("token",TRACE,repr(a))
@@ -127,7 +125,7 @@ class tokizer(object):
 			raise StopParsing
 
 	def _end(self, res):
-		self.job = None
+		self.feed_end()
 		if self.q:
 			q,self.q = self.q,None
 			try:
@@ -142,12 +140,7 @@ class tokizer(object):
 				line = self.q.get()
 			else:
 				line = None
-
-			try:
-				self._do_line(line)
-			except BaseException as e:
-				fix_exception(e)
-				return e
+			self._do_line(line)
 
 	def _do_line(self,line):
 		try:

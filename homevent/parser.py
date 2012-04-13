@@ -44,7 +44,8 @@ from homevent.context import Context
 from homevent.io import Outputter,conns
 from homevent.event import Event,StopParsing
 from homevent.statement import global_words
-from homevent.twist import deferToLater,setBlocking, fix_exception,print_exception,reraise
+from homevent.twist import deferToLater,setBlocking, fix_exception,print_exception,reraise,Jobber
+from homevent.collect import Collection,Collected
 
 class SimpleReceiver(LineOnlyReceiver,object):
 	delimiter = "\n"
@@ -162,16 +163,26 @@ def parser_builder(cls=None,interpreter=None,*a,**k):
 	return gen_builder
 
 
-class Parser(object):
+class Parsers(Collection):
+	name = "parser"
+	prio = -99
+Parsers = Parsers()
+Parsers.does("del")
+_npars = 0
+
+class Parser(Collected,Jobber):
 	"""The input parser object. It is a consumer of lines."""
+	storage = Parsers.storage
 	line = None
 	p_gen = None
 	do_prompt = False
+	last_pos = None
 
 	def __init__(self, input, interpreter, ctx=None):
-		"""Parse an input stream and pass the commands to the processor
-		@proc."""
-		super(Parser,self).__init__()
+		"""Parse an input stream and pass the commands to the processor @proc."""
+		global _npars
+		_npars += 1
+		super(Parser,self).__init__("n"+str(_npars))
 
 		self.ending = False
 
@@ -186,15 +197,24 @@ class Parser(object):
 		self.proc = interpreter
 		self.do_prompt = interpreter.do_prompt
 
+	def list(self):
+		"""Yield a couple of (left,right) tuples, for enumeration."""
+		for x in super(Parser,self).list():
+			yield x
+		yield ("input",str(self.input))
+		if self.last_pos is not None:
+			yield ("line",str(self.last_pos[0]))
+			yield ("pos",str(self.last_pos[1]))
+
+	def info(self):
+		return str(self.input)
+
 	def run(self):
 		self.init_state()
 		self.prompt()
-		self.job = gevent.spawn(self._run)
+		self.start_job("job",self._run)
 		self.p_gen = tokizer(self._do_parse,self.job)
 
-		def nojob(_):
-			self.job = None
-		self.job.link(nojob)
 		try:
 			e = self.job.get()
 			if isinstance(e,BaseException):
@@ -228,7 +248,12 @@ class Parser(object):
 			return e
 		finally:
 			setBlocking(True,self.input)
-			gevent.spawn(self.endConnection,kill=False)
+
+			job = gevent.spawn(self.endConnection,kill=False)
+			def dead(e):
+				fix_exception(e)
+				process_failure(e)
+			job.link_exception(dead)
 			if not hasattr(self.input,"fileno") or self.input.fileno() > 2:
 				self.input.close()
 			self.input = None
@@ -238,9 +263,15 @@ class Parser(object):
 	def endConnection(self, res=None, kill=True):
 		"""Called to stop"""
 		if self.job:
-			self.p_gen.feed(None)
 			if kill:
-				self.job.kill()
+				self.p_gen.exit()
+				self.stop_job("job")
+			else:
+				self.p_gen.feed(None)
+
+	def delete(self,ctx=None):
+		self.endConnection()
+		self.delete_done()
 
 	def add_line(self, data):
 		"""Standard LineReceiver method"""
@@ -268,7 +299,7 @@ class Parser(object):
 	def _do_parse(self, t,txt,beg,end,line):
 		# States: 0 newline, 1 after first word, 2 OK to extend word
 		#         3+4 need newline+indent after sub-level start, 5 extending word
-		log("parser",TRACE,"PARSE",t,repr(txt))
+		#log("parser",TRACE,"PARSE",t,repr(txt))
 
 		try:
 			res = self._parseStep(t,txt,beg,end,line)
@@ -290,6 +321,7 @@ class Parser(object):
 		from token import NUMBER,NAME,DEDENT,INDENT,OP,NEWLINE,ENDMARKER, \
 			STRING
 		from homevent.tokize import COMMENT,NL
+		self.last_pos = beg
 
 		if "logger" in self.ctx:
 			self.ctx.logger("T",self.p_state,t,repr(txt),beg,end,repr(line))

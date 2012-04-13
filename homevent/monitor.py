@@ -24,13 +24,13 @@ This code contains the framework for watching a device.
 
 from homevent.statement import AttributedStatement, Statement
 from homevent.event import Event
-from homevent.run import process_event,process_failure
+from homevent.run import process_event,process_failure,simple_event
 from homevent.reactor import shutdown_event
 from homevent.worker import ExcWorker
 from homevent.times import time_delta, time_until, unixdelta, now, \
 	humandelta
 from homevent.base import Name,SYS_PRIO
-from homevent.twist import log_wait, sleepUntil, fix_exception
+from homevent.twist import log_wait, sleepUntil, fix_exception,Jobber
 from homevent.context import Context
 from homevent.logging import log,TRACE,DEBUG
 from homevent.collect import Collection,Collected
@@ -73,7 +73,7 @@ class DupWatcherError(MonitorError):
 class NoWatcherError(MonitorError):
 	text = u"Not waiting for ‹%s›"
 
-class Monitor(Collected):
+class Monitor(Collected,Jobber):
 	"""This is the thing that watches."""
 	storage = Monitors.storage
 
@@ -330,8 +330,6 @@ class Monitor(Collected):
 					else:
 						log("monitor",TRACE,"More data", self.data, "for", u"‹"+" ".join(unicode(x) for x in self.name)+u"›")
 				
-			self.job = None
-		
 			try:
 				process_event(Event(Context(),"monitor","error",*self.name))
 			except Exception as e:
@@ -355,13 +353,16 @@ class Monitor(Collected):
 			return self.watcher.get(block=True, timeout=None)
 
 	def up(self):
+		while self.job and self.job.dead:
+			gevent.sleep(0.1) # link will clear
+
 		if not self.job:
 			self.value = None
-			self.job = gevent.spawn(self._run_loop)
 			process_event(Event(Context(),"monitor","start",*self.name))
+			self.start_job("job",self._run_loop)
+
 			def tell_ended(_):
-				process_event(Event(Context(),"monitor","stop",*self.name))
-				
+				simple_event(Context(),"monitor","stop",*self.name)
 			self.job.link(tell_ended)
 
 	def delete(self,ctx=None):
@@ -369,9 +370,7 @@ class Monitor(Collected):
 		self.delete_done()
 
 	def down(self):
-		if self.job:
-			self.job.kill()
-			assert self.job is None
+		self.stop_job("job")
 
 monitor_nr = 0
 	

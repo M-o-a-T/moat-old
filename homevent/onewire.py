@@ -28,7 +28,7 @@ from homevent.context import Context
 from homevent.collect import Collection
 from homevent.event import Event
 from homevent.run import process_event,process_failure,simple_event
-from homevent.twist import callLater, fix_exception
+from homevent.twist import callLater, fix_exception, Jobber
 from homevent.base import Name
 from homevent.net import NetActiveConnector
 from homevent.msg import MsgReceiver,MsgBase,MsgQueue,MsgFactory,\
@@ -345,7 +345,7 @@ OWbus = OWbus()
 OWbus.does("del")
 
 
-class OWFSqueue(MsgQueue):
+class OWFSqueue(MsgQueue,Jobber):
 	"""\
 		An adapter for the owfs server protocol.
 
@@ -367,16 +367,14 @@ class OWFSqueue(MsgQueue):
 	def start(self):
 		super(OWFSqueue,self).start()
 		self.watch_q = Queue()
-		self.watcher = gevent.spawn(self._watcher)
+		self.start_job("watcher",self._watcher)
 		def dead(_):
-			self.watcher = None
 			self._clean_watched()
 		self.watcher.link(dead)
 
-	def stop(self):
-		if self.watcher:
-			self.watcher.kill()
-		super(OWFSqueue,self).stop()
+	def stop(self,reason=None):
+		self.stop_job("watcher")
+		super(OWFSqueue,self).stop(reason=reason)
 
 	def _clean_watched(self):
 		while True:

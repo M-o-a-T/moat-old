@@ -28,10 +28,11 @@ from homevent.event import Event
 from homevent.run import process_event, run_event
 from homevent.context import Context
 from homevent import logging
+from homevent.twist import Jobber
 
 import gevent
 
-class TriggerHandler(AttributedStatement):
+class TriggerHandler(AttributedStatement,Jobber):
 	name=("trigger",)
 	doc="send an event"
 	long_doc="""\
@@ -56,7 +57,7 @@ trigger FOO...
 		if self.sync:
 			process_event(event)
 		else:
-			self.job = gevent.spawn(run_event,event)
+			self.start_job("job",run_event,event)
 			# TODO: some sort of global job list
 			# so that they can be stopped when ending the program
 

@@ -144,17 +144,10 @@ class EM(Collected,Timeslotted):
 	def delete(self,ctx=None):
 		EMcodes[self.group][self.code].remove(self)
 		if self._slot:
-			d = defer.maybeDeferred(self.slot.delete)
-		else:
-			d = defer.succeed(None)
-
-		def done(_):
-			self.delete_done()
-			if not EMcodes[self.group][self.code]: # empty array
-				del EMcodes[self.group][self.code]
-			return _
-		d.addBoth(done)
-		return d
+			self._slot.delete()
+		self.delete_done()
+		if not EMcodes[self.group][self.code]: # empty array
+			del EMcodes[self.group][self.code]
 		
 
 def flat(r):

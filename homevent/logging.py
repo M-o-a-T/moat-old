@@ -29,7 +29,7 @@ from homevent.worker import Worker,ExcWorker,report_
 from homevent.event import Event
 from homevent.context import Context
 from homevent.base import Name,SYS_PRIO,MIN_PRIO,MAX_PRIO
-from homevent.twist import fix_exception,print_exception,format_exception
+from homevent.twist import fix_exception,print_exception,format_exception,Jobber
 from homevent.collect import Collection,Collected
 
 import gevent
@@ -86,11 +86,12 @@ class FlushMe(object):
 	"""Marker to flush a logger's file"""
 	pass
 
-class BaseLogger(Collected):
+class BaseLogger(Collected,Jobber):
 	"""\
 		This class implements one particular way to log things.
 		"""
 	storage = Loggers.storage
+	q = None
 	def __init__(self, level, out=sys.stdout):
 		self.level = level
 		self.out = out
@@ -102,8 +103,14 @@ class BaseLogger(Collected):
 			self.name = Name(self.__class__.__name__, "x"+str(logger_nr))
 
 		super(BaseLogger,self).__init__()
+		self._init()
+
+	def _init(self):
+		"""Fork off the writer thread.
+			Override this t do nothing if you don't have one."""
+
 		self.q = JoinableQueue(100)
-		self.job = gevent.spawn(self._writer)
+		self.start_job("job",self._writer)
 
 	def _writer(self):
 		for r in self.q:
@@ -130,9 +137,7 @@ class BaseLogger(Collected):
 	def delete(self, ctx=None):
 		self.q.put(None)
 		self.job.join(timeout=1)
-		if not self.job.dead:
-			self.job.kill()
-		self.job = None
+		self.stop_job("job")
 		self.delete_done()
 
 	def _wlog(self, *a):
@@ -164,8 +169,9 @@ class BaseLogger(Collected):
 				self.flush()
 	
 	def flush(self):
-		self.q.put(FlushMe)
-		self.q.join()
+		if self.q is not None:
+			self.q.put(FlushMe)
+			self.q.join()
 
 	def end_logging(self):
 		self.flush()

@@ -35,7 +35,7 @@ from homevent.times import time_delta, time_until, unixtime,unixdelta, now, huma
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.base import Name
 from homevent.collect import Collection,Collected
-from homevent.twist import callLater,fix_exception
+from homevent.twist import callLater,fix_exception,Jobber
 from homevent.logging import log_exc,TRACE
 
 import gevent
@@ -78,7 +78,7 @@ class WaitCancelled(WaitError):
 class DupWaiterError(WaitError):
 	text = u"A waiter ‹%s› already exists"
 
-class Waiter(Collected):
+class Waiter(Collected,Jobber):
 	"""This is the thing that waits."""
 	force = False
 	storage = Waiters.storage
@@ -178,7 +178,6 @@ class Waiter(Collected):
 	def init(self,dest):
 
 		def done(_):
-			self.job = None
 			self.delete_done()
 			q,self.q = self.q,None
 			if q is not None:
@@ -187,8 +186,8 @@ class Waiter(Collected):
 
 		self.q = Channel()
 		self.end = dest
-		self.job = gevent.spawn(self._job)
-		self.job.join(done)
+		self.start_job("job",self._job)
+		self.job.link(done)
 
 	def _cmd(self,cmd,*a):
 		if self.q is None:

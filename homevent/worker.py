@@ -31,7 +31,6 @@ from homevent.times import humandelta, now
 from homevent.twist import fix_exception,reraise,format_exception,track_errors
 
 from homevent.geventreactor import waitForGreenlet
-from gevent import spawn
 
 #import os
 

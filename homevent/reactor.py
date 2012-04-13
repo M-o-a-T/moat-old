@@ -19,6 +19,7 @@
 This part of the code controls the main loop.
 """
 
+import sys
 from homevent.context import Context
 from homevent.event import Event
 from homevent.worker import Worker,ExcWorker,HaltSequence
@@ -206,6 +207,12 @@ shutdown now  ... but does not wait for active events to terminate.
 def mainloop(main=None):
 	start_up()
 	if main:
-		reactor.callWhenRunning(gevent.spawn,main)
+		def run_main():
+			job = gevent.spawn(main)
+			def dead(e):
+				fix_exception(e)
+				print_exception(e)
+			job.link_exception(dead)
+		reactor.callWhenRunning(run_main)
 	reactor.run()
 

@@ -30,7 +30,7 @@ from homevent.event import Event
 from homevent.base import Name,singleName
 from homevent.run import process_failure,simple_event
 from homevent.collect import Collection,Collected
-from homevent.twist import fix_exception,reraise, callLater
+from homevent.twist import fix_exception,reraise, callLater,Jobber
 from homevent.net import DisconnectedError
 from homevent.times import now
 
@@ -312,7 +312,7 @@ class UnknownMessageType(RuntimeError):
 	"""could not determine what to do with this"""
 	pass
 
-class MsgQueue(Collected):
+class MsgQueue(Collected,Jobber):
 	"""\
 		This class represents a persistent network connection.
 		Message objects are queued to instances of this class.
@@ -366,26 +366,14 @@ class MsgQueue(Collected):
 		super(MsgQueue,self).__init__()
 	
 	def __del__(self):
-		if self.job:
-			self.job.kill()
+		self.stop_job("job")
 
 	def start(self):
 		"""Start running the handler"""
-		if self.job is not None:
-			return
-		self.job = gevent.spawn(self._handler)
-
-		def died(e):
-			fix_exception(e)
-			process_failure(e)
-		self.job.link_exception(died)
-		def ended(_):
-			self.job = None
-		self.job.link(ended)
+		self.start_job("job",self._handler)
 
 	def stop(self,reason="stopped"):
-		if self.job:
-			self.job.kill()
+		self.stop_job("job")
 		self._teardown(reason)
 
 	def enqueue(self,msg):
