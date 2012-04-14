@@ -281,6 +281,8 @@ class MsgFactory(object):
 			def __init__(self,q):
 				self._msg_queue = q
 				super(_MsgForwarder,self).__init__(*a,**k)
+			def __repr__(self):
+				return u"‹%s:%s›" % (cls.__name__,cls.__repr__(self))
 			def msgReceived(self,**k):
 				msg = MsgIncoming(**k)
 				self._msg_queue.put((msg.prio,msg))
@@ -394,7 +396,7 @@ class MsgQueue(Collected,Jobber):
 	def info(self):
 		return unicode(self)
 	def __repr__(self):
-		return "<%s:%s: %s>" % (self.__class__.__name__,self.name,self.state)
+		return u"‹%s:%s %s›" % (self.__class__.__name__,self.name,self.state)
                 
 	def list(self):
 		yield ("state",self.state)

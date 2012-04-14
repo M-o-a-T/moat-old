@@ -134,8 +134,8 @@ class WorkItem(object):
 
 	def __repr__(self):
 		if self.id:
-			return "<Item %d:%s>" % (self.id,self.name)
-		return "<Item:%s>" % (self.name,)
+			return u"‹Item %d:%s›" % (self.id,self.name)
+		return u"‹Item:%s›" % (self.name,)
 
 	def __str__(self):
 		return repr(self)
@@ -173,8 +173,8 @@ class WorkSequence(WorkItem):
 
 	def __repr__(self):
 		if not hasattr(self,"work"):
-			return "<%s:%d (?)>" % (self.__class__.__name__,self.id)
-		return "<%s:%d (%d)>" % (self.__class__.__name__, self.id, len(self.work))
+			return u"‹%s:%d (?)›" % (self.__class__.__name__,self.id)
+		return u"‹%s:%d (%d)›" % (self.__class__.__name__, self.id, len(self.work))
 	
 	def __str__(self):
 		return repr(self)

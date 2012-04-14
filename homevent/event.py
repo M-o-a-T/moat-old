@@ -80,7 +80,7 @@ class Event(object):
 
 	def __str__(self):
 		try:
-			return "<Event:%s>" % (self.name,)
+			return u"‹Event:%s›" % (self.name,)
 		except Exception:
 			return "<Event> REPORT_ERROR: "+repr(self.name)
 

@@ -47,7 +47,7 @@ class InputEvent(Event):
 
 	def __str__(self):
 		try:
-			return "<InputEvent:%s>" % (self.name,)
+			return u"‹InputEvent:%s›" % (self.name,)
 		except Exception:
 			return "<InputEvent> REPORT_ERROR: "+repr(self.name)
 

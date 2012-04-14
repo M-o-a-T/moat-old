@@ -207,7 +207,7 @@ class tokizer(Jobber):
 					if column != self.indents[-1]:
 						raise IndentationError(
 							"unindent does not match any outer indentation level",
-							("<tokenize>", self.lnum, pos, line))
+							(u"‹tokenize›", self.lnum, pos, line))
 
 			else:                                  # continued statement
 				if not line:

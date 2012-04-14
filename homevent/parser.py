@@ -192,7 +192,7 @@ class Parser(Collected,Jobber):
 			self.ctx = ctx
 
 		if "filename" not in self.ctx:
-			self.ctx.filename="<stdin?>"
+			self.ctx.filename=u"‹stdin?›"
 		self.input = input
 		self.proc = interpreter
 		self.do_prompt = interpreter.do_prompt
@@ -456,7 +456,7 @@ def parse(input, interpreter=None, ctx=None, out=None, words=None):
 		"""
 	if ctx is None: ctx=Context
 	if ctx is Context or "filename" not in ctx:
-		ctx = ctx(filename=(input if isinstance(input,basestring) else "<stdin>"))
+		ctx = ctx(filename=(input if isinstance(input,basestring) else u"‹stdin›"))
 	if out is not None:
 		ctx.out = out
 	else:
