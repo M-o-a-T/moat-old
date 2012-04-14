@@ -196,6 +196,8 @@ def get_collect(name, allow_collection=False):
 			try:
 				coll = coll[name[0]]
 			except KeyError:
+				from homevent.logging import DEBUG,log
+				log(DEBUG,"Contents: "+", ".join(str(x) for x in c.keys()))
 				raise CKeyError(name,c)
 			else:
 				name = name[1:]
