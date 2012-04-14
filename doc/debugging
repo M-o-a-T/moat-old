@@ -18,6 +18,16 @@ HomEvenT debugging
 
 … or, “what to do when something goes wrong”.
 
+Notice
+------
+
+If you get strange codec errors which mention "ascii", you forgot to set
+Python's default to UTF-8. See the README file.
+
+If you see weird character sequences like â¹ or â¦ or whatever, you need to
+set your console / window / whatever to UTF-8.
+
+
 Nothing happens
 ===============
 

@@ -16,6 +16,20 @@ some devices can only be controlled by infrared, some are in places
 where nothing except stringing some wire would work.
 
 
+This code uses Unicide, more specifically UTF-8, quite liberally.
+For this reason it's imperative to teach Python that the default character
+set is UTF-8, not ASCII. Thus, you need to add the following code to
+/etc/python2.7/sitecustomize.py:
+
+    import sys
+    try:
+    	sys.setdefaultencoding("utf-8")
+    except AttributeError:
+    	pass
+
+This change is very unlikely to be a problem.
+
+
 The rest of the documentation is in the doc/ subdirectory.
 You'll probably want to start with the tutorial.
 
@@ -41,6 +55,18 @@ That controller is supported by a large and well-maintained server
 written in Perl. The main problem I have with it is that I do not like
 Perl :-/ the other is that it's 100% synchronous code, which does not
 integrate at all well with the 1wire bus.
+
+* Wago
+
+This is a industrial controller made by Wago GmbH, Germany.
+It runs Linux and it has decent pluggable I/O modules for most needs.
+The daemon I wrote to run on that device could probably be adapted quite
+easily to use standard Linux GPIO instead.
+
+I'm intentionally not using MODBUS or some other standard (which these
+controllers also support) since these buses don't afford timed outputs.
+It's imperative that my watering system closes the valves after the
+prescribed time, however, even if the network goes down …
 
 * 1-wire
 
