@@ -37,10 +37,20 @@ class Name(tuple):
 	suffix = ""
 
 	def __new__(cls,*data):
-		if len(data)==1:
-			data = data[0]
-			if isinstance(data,basestring):
-				data = data.split(" ")
+		while isinstance(data,tuple):
+			if isinstance(data,Name):
+				return data
+			if len(data) == 1:
+				data = data[0]
+			else:
+				break
+		n = getattr(data,"name",None)
+		if n is not None:
+			return n
+		if isinstance(data,basestring):
+			data = data.split(" ")
+		elif not isinstance(data,(list,tuple)):
+			data = (data,)
 		return super(Name,cls).__new__(cls,data)
 	def __str__(self):
 		return unicode(self).encode("utf-8")
