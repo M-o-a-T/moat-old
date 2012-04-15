@@ -26,7 +26,7 @@ from homevent.context import Context
 from homevent.parser import parser_builder,parse
 from homevent.statement import main_words,Statement
 from homevent.interpreter import Interpreter
-from homevent.base import Name
+from homevent.base import Name,SName
 from homevent.collect import Collection,Collected
 from homevent.geventreactor import deferToGreenlet
 import homevent.twist_ssh # monkey patches
@@ -214,7 +214,7 @@ on a specific port. (There is no default port.)
 		if sshFactory is None:
 			raise RuntimeError('ssh keys are not ready yet')
 
-		self.parent.displayname = Name(event)
+		self.parent.displayname = SName(event)
 		reactor.listenTCP(int(event[0]), sshFactory)
 
 

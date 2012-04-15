@@ -32,7 +32,7 @@ from homevent.statement import AttributedStatement, Statement, main_words,\
 	global_words
 from homevent.module import Module
 from homevent.check import Check,register_condition,unregister_condition
-from homevent.base import Name
+from homevent.base import Name,SName
 
 import os
 from twisted.internet import defer
@@ -54,7 +54,7 @@ This statement updates the parameters of an existing monitor.
 			raise SyntaxError(u'Usage: update monitor ‹name…›')
 		if not self.params:
 			raise SyntaxError(u'update monitor: You did not specify any changes?')
-		monitor = Monitors[Name(event)]
+		monitor = Monitors[SName(event)]
 		active = monitor.job is not None
 
 		if active:
@@ -82,7 +82,7 @@ start monitor ‹name›
 		event = self.params(ctx)
 		if not len(event):
 			raise SyntaxError(u'Usage: start monitor ‹name…›')
-		m = Monitors[Name(event)]
+		m = Monitors[SName(event)]
 		return m.up()
 
 class MonitorStop(Statement):
@@ -96,7 +96,7 @@ stop monitor ‹name›
 		event = self.params(ctx)
 		if not len(event):
 			raise SyntaxError(u'Usage: stop monitor ‹name…›')
-		m = Monitors[Name(event)]
+		m = Monitors[SName(event)]
 		return m.down()
 
 class MonitorSet(Statement):
@@ -111,7 +111,7 @@ set monitor VALUE NAME
 		event = self.params(ctx)
 		if len(event) < 2:
 			raise SyntaxError(u"Usage: set monitor ‹value› ‹name…›")
-		m = Monitors[Name(event[1:])]
+		m = Monitors[Name(*event[1:])]
 		m.watcher.put(event[0], block=True, timeout=0.1)
 
 class ExistsMonitorCheck(Check):
@@ -120,7 +120,7 @@ class ExistsMonitorCheck(Check):
 	def check(self,*args):
 		if not len(args):
 			raise SyntaxError(u"Usage: if exists monitor ‹name…›")
-		name = Name(args)
+		name = Name(*args)
 		return name in Monitors
 
 class RunningMonitorCheck(Check):
@@ -129,7 +129,7 @@ class RunningMonitorCheck(Check):
 	def check(self,*args):
 		if not len(args):
 			raise SyntaxError(u"Usage: if active monitor ‹name…›")
-		name = Name(args)
+		name = Name(*args)
 		return Monitors[name].job is not None
 
 
@@ -139,7 +139,7 @@ class WaitingMonitorCheck(Check):
 	def check(self,*args):
 		if not len(args):
 			raise SyntaxError(u"Usage: if waiting monitor ‹name…›")
-		name = Name(args)
+		name = Name(*args)
 		m = Monitors[name]
 		return m.job and m.watcher is not None
 
@@ -154,7 +154,7 @@ var monitor NAME name...
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		var = event[0]
-		name = Name(event[1:])
+		name = Name(*event[1:])
 		setattr(self.parent.ctx,var,Monitors[name].value)
 
 
