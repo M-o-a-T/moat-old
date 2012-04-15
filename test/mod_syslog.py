@@ -43,6 +43,7 @@ list log
 wait:
 	for 0.8
 	debug force
+shutdown
 """
 
 h.main_words.register_statement(ShutdownHandler)
