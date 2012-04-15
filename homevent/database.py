@@ -20,6 +20,7 @@ This is the core of database access.
 """
 
 from homevent.base import Name
+from homevent.logging import log,TRACE
 from sqlmix import Db,NoData,ManyData
 
 SafeNames = {
@@ -40,7 +41,13 @@ class DbStore(object):
 				name = "HOMEVENT_TEST"
 			else:
 				name = "HOMEVENT"
-		self.db = Db(name)
+		if "HOMEVENT_TEST" in os.environ:
+			def trace(a,b,c):
+				log(TRACE,a,b,c)
+		else:
+			trace = None
+
+		self.db = Db(name, trace=trace)
 		self.category = " ".join(Name(category)).encode("utf-8")
 		db=self.db()
 		try:

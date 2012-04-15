@@ -6,7 +6,7 @@ Maintainer: Matthias Urlichs <matthias@urlichs.de>
 Build-Depends: debhelper (>= 5), python-all-dev, python-setuptools, python-twisted-core (>= 11.1), python-twisted-conch, libglib2.0-dev (>= 2.14), python-rrdtool, rrdtool,
  owserver | owfs,
  python-dbg,
- python-sqlmix (>= 0.9.26),
+ python-sqlmix (>= 0.9.29),
  portaudio19-dev
 X-Also-Depends: avr-libc, gcc-avr
 Build-Depends-Indep: python-support
