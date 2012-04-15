@@ -157,6 +157,6 @@ class RRDModule(Module):
 		unregister_condition(ExistsRRDCheck)
 		main_words.unregister_statement(RRDHandler)
 		main_words.unregister_statement(RRDset)
-		main_words.unregister_statement(VarRRDtHandler)
+		main_words.unregister_statement(VarRRDHandler)
 	
 init = RRDModule
