@@ -26,7 +26,7 @@ something about it.
 
 from homevent.context import Context
 from homevent.event import Event,TrySomethingElse,NeverHappens
-from homevent.base import Name,MIN_PRIO,MAX_PRIO,SYS_PRIO
+from homevent.base import Name,MIN_PRIO,MAX_PRIO,SYS_PRIO,SName
 from homevent.times import humandelta, now
 from homevent.twist import fix_exception,reraise,format_exception,track_errors
 
@@ -119,9 +119,9 @@ class WorkItem(object):
 		yield (unicode(self),)
 		yield ("id",self.id)
 		if hasattr(self,"event"):
-			yield ("event",Name(self.event))
+			yield ("event",SName(self.event))
 		if self.name:
-			yield ("name",Name(self.name))
+			yield ("name",SName(self.name))
 		yield ("call count",str(self.call_count))
 		if self.last_call:
 			yield ("last call",humandelta(now()-self.last_call))
@@ -166,7 +166,7 @@ class WorkSequence(WorkItem):
 			self.ctx = Context()
 
 		if isinstance(self.event,Event):
-			en = Name(self.event)
+			en = SName(self.event)
 		else:
 			en = unicode(self.event)
 		self.info = u"Worker %d for ‹%s›" % (self.id,en)

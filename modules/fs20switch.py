@@ -26,7 +26,7 @@ from homevent.statement import AttributedStatement,Statement, main_words
 from homevent.run import simple_event
 from homevent.event import Event
 from homevent.context import Context
-from homevent.base import Name
+from homevent.base import Name,SName
 from homevent.collect import Collection,Collected
 from homevent.fs20 import from_hc, from_dev, to_hc, to_dev, WrongDatagram
 from homevent.fs20sw import group
@@ -100,7 +100,7 @@ class SwitchGroup(Collected,igroup):
 	storage = SwitchGroups.storage
 	def __init__(self,code,name):
 		self.code = code
-		self.name = Name(name)
+		self.name = SName(name)
 		self.devs = {}
 		self.last_dgram = None
 
@@ -203,7 +203,7 @@ class Switch(Collected):
 	def __init__(self,code,name, parent=None, handler=None, can_do = None, init = None):
 		self.parent = parent
 		self.code = code
-		self.name = Name(name)
+		self.name = SName(name)
 		self.handler = handler
 		self.does = set(can_do) if can_do is not None else set(("on","off"))
 		self.state = None
@@ -320,7 +320,7 @@ fs20 switch ‹house_code› ‹name…›
 			raise SyntaxError(u"Usage: fs20 switch ‹name…›")
 
 		try:
-			self.hc = SwitchGroups[Name(event)]
+			self.hc = SwitchGroups[SName(event)]
 		except KeyError:
 			self.new_hc = True
 		else:
@@ -334,7 +334,7 @@ fs20 switch ‹house_code› ‹name…›
 		if self.hc is None:
 			if self.code is None:
 				raise SyntaxError(u"A new ‹fs20 switch› needs a ‹code› sub-statement!")
-			self.hc = SwitchGroup(self.code, Name(event))
+			self.hc = SwitchGroup(self.code, SName(event))
 		elif self.code is not None:
 			self.hc.code = self.code ## update
 
@@ -389,7 +389,7 @@ add ‹name…›:
 		event = self.params(ctx)
 		if not len(event):
 			raise SyntaxError(u"Usage: add ‹name…›")
-		name = Name(event)
+		name = SName(event)
 		if self.code is None:
 			raise SyntaxError(u"Usage: “add” needs a “code” sub-statement")
 
@@ -430,7 +430,7 @@ del ‹name…›
 		event = self.params(ctx)
 		if not len(event):
 			raise SyntaxError(u"Usage: del ‹name…›")
-		name = Name(event)
+		name = SName(event)
 		self.parent.del_sw(Switches[name])
 FS20switches.register_statement(FS20delswitch)
 
@@ -448,7 +448,7 @@ send fs20 ‹msg› -|‹aux› ‹name…›
 		event = self.params(ctx)
 		if len(event) < 3:
 			raise SyntaxError(u"Usage: send fs20 ‹msg› -|‹aux› ‹name…›")
-		name = Name(event[2:])
+		name = Name(*event[2:])
 		try:
 			d = Switches[name]
 		except KeyError:

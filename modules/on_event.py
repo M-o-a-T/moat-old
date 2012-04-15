@@ -44,7 +44,7 @@ from homevent.module import Module
 from homevent.logging import log
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.event import TrySomethingElse
-from homevent.base import Name
+from homevent.base import Name,SName
 from homevent.collect import Collection,Collected
 
 from twisted.internet import defer
@@ -255,7 +255,7 @@ Every "*foo" in the event description is mapped to the corresponding
 
 	def start_block(self):
 		super(OnEventHandler,self).start_block()
-		w = Name(self.params(self.ctx))
+		w = Name(*self.params(self.ctx))
 		log(TRACE, "Create OnEvtHandler:", w)
 		self.arglist = w
 
@@ -305,7 +305,7 @@ This statement assigns a name to an event handler.
 		event = self.params(ctx)
 		if not len(event):
 			raise SyntaxError(u'Usage: name "‹text›"')
-		self.parent.displayname = Name(event)
+		self.parent.displayname = SName(event)
 
 
 class OnDoc(Statement):
@@ -344,7 +344,7 @@ if exists on FOO BAR: check if a handler for this event exists
 	def check(self,*args):
 		if not len(args):
 			raise SyntaxError(u"Usage: if exists on ‹name…›")
-		name = Name(args)
+		name = Name(*args)
 		return name in OnHandlers
 
 

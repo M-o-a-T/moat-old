@@ -29,7 +29,7 @@ from homevent.reactor import shutdown_event
 from homevent.worker import ExcWorker
 from homevent.times import time_delta, time_until, unixdelta, now, \
 	humandelta
-from homevent.base import Name,SYS_PRIO
+from homevent.base import Name,SName, SYS_PRIO
 from homevent.twist import log_wait, sleepUntil, fix_exception,Jobber
 from homevent.context import Context
 from homevent.logging import log,TRACE,DEBUG
@@ -418,7 +418,7 @@ name ‹whatever you want›
 		event = self.params(ctx)
 		if not len(event):
 			raise SyntaxError(u'Usage: name ‹name…›')
-		self.parent.displayname = Name(event)
+		self.parent.displayname = SName(event)
 MonitorHandler.register_statement(MonitorName)
 
 

@@ -30,7 +30,7 @@ from homevent.statement import AttributedStatement, Statement, main_words,\
 	global_words
 from homevent.module import Module
 from homevent.check import Check,register_condition,unregister_condition
-from homevent.base import Name
+from homevent.base import Name,SName
 
 import os
 from twisted.internet import defer
@@ -54,7 +54,7 @@ timeslot ‹name…›
 		if not len(event):
 			raise SyntaxError(u'Usage: timeslot ‹name…›')
 
-		m = Timeslot(self, Name(event))
+		m = Timeslot(self, SName(event))
 		if "interval" not in self.values:
 			raise SyntaxError(u'Usage: timeslot ‹name…›: need to specify an interval')
 
@@ -153,7 +153,7 @@ This statement updates the parameters of an existing timeslot.
 			raise SyntaxError(u'Usage: update timeslot ‹name…›')
 		if not self.params:
 			raise SyntaxError(u'update timeslot: You did not specify any changes?')
-		timeslot = Timeslots[Name(event)]
+		timeslot = Timeslots[SName(event)]
 
 		for p,v in self.params.iteritems():
 			setattr(timeslot,p,v)
@@ -176,7 +176,7 @@ start timeslot ‹name›
 		event = self.params(ctx)
 		if not len(event):
 			raise SyntaxError(u'Usage: start timeslot ‹name…›')
-		m = Timeslots[Name(event)]
+		m = Timeslots[SName(event)]
 		return m.up(resync=self.now)
 
 class TimeslotNow(Statement):
@@ -206,7 +206,7 @@ stop timeslot ‹name›
 		event = self.params(ctx)
 		if not len(event):
 			raise SyntaxError(u'Usage: stop timeslot ‹name…›')
-		m = Timeslots[Name(event)]
+		m = Timeslots[SName(event)]
 		return m.down()
 
 
@@ -216,7 +216,7 @@ class ExistsTimeslotCheck(Check):
 	def check(self,*args):
 		if not len(args):
 			raise SyntaxError(u"Usage: if exists timeslot ‹name…›")
-		name = Name(args)
+		name = Name(*args)
 		return name in Timeslots
 
 class RunningTimeslotCheck(Check):
@@ -225,7 +225,7 @@ class RunningTimeslotCheck(Check):
 	def check(self,*args):
 		if not len(args):
 			raise SyntaxError(u"Usage: if running timeslot ‹name…›")
-		name = Name(args)
+		name = Name(*args)
 		return Timeslots[name].running != "off"
 
 
@@ -235,7 +235,7 @@ class DuringTimeslotCheck(Check):
 	def check(self,*args):
 		if not len(args):
 			raise SyntaxError(u"Usage: if in timeslot ‹name…›")
-		name = Name(args)
+		name = Name(*args)
 		return Timeslots[name].running not in ("off","next")
 
 
@@ -249,7 +249,7 @@ var timeslot NAME name...
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		var = event[0]
-		name = Name(event[1:])
+		name = Name(*event[1:])
 		setattr(self.parent.ctx,var,Timeslots[name].running)
 
 

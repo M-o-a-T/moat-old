@@ -38,7 +38,7 @@ from homevent.module import Module
 from homevent.worker import HaltSequence,ExcWorker
 from homevent.times import simple_time_delta, now, humandelta
 from homevent.check import Check,register_condition,unregister_condition
-from homevent.base import Name,SYS_PRIO
+from homevent.base import Name,SName, SYS_PRIO
 from homevent.twist import callLater, fix_exception
 from homevent.collect import Collection,Collected
 
@@ -261,7 +261,7 @@ pwm NAME…: type
 		if self.pwm is None:
 			raise SyntaxError(u'Usage: pwm ‹name…›: requires ‹type›')
 
-		self.pwm(self,Name(event), **self.attrs)
+		self.pwm(self,SName(event), **self.attrs)
 
 PWMtypes = {}
 v = None
@@ -286,7 +286,7 @@ type ‹kind›
 		event = self.params(ctx)
 		if len(event) != 1:
 			raise SyntaxError(u'Usage: type ‹kind›')
-		self.parent.pwm = PWMtypes[Name(event)]
+		self.parent.pwm = PWMtypes[SName(event)]
 PWMHandler.register_statement(PWMtype)
 	
 
@@ -343,7 +343,7 @@ The PWM will not do anything before you do that.
 		if len(event) < 1:
 			raise SyntaxError('Usage: set pwm ‹value› ‹name…›')
 		
-		pwm = PWMs[Name(event[1:])]
+		pwm = PWMs[Name(*event[1:])]
 		pwm.value = float(event[0])
 
 
@@ -353,7 +353,7 @@ class ExistsPWMCheck(Check):
 	def check(self,*args):
 		if not len(args):
 			raise SyntaxError(u"Usage: if exists pwm ‹name…›")
-		name = Name(args)
+		name = Name(*args)
 		return name in PWMs
 
 class OnPWMCheck(Check):
@@ -362,7 +362,7 @@ class OnPWMCheck(Check):
 	def check(self,*args):
 		if not len(args):
 			raise SyntaxError(u"Usage: if pwm ‹name…›")
-		name = Name(args)
+		name = Name(*args)
 		return PWMs[name].state
 
 
@@ -376,7 +376,7 @@ var pwm NAME name...
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		var = event[0]
-		name = Name(event[1:])
+		name = Name(*event[1:])
 		setattr(self.parent.ctx,var,PWMs[name].value)
 
 

@@ -28,7 +28,7 @@ from homevent.statement import AttributedStatement,Statement, main_words
 from homevent.run import simple_event
 #from homevent.event import Event
 #from homevent.context import Context
-from homevent.base import Name
+from homevent.base import Name,SName
 from homevent.fs20 import recv_handler, PREFIX
 from homevent.collect import Collection,Collected
 from homevent.logging import log,TRACE,DEBUG
@@ -265,7 +265,7 @@ Known types:
 			raise SyntaxError(u"‹fs20 en› needs a name")
 		if self.code is None:
 			raise SyntaxError(u"‹fs20 en› needs a 'code' sub-statement")
-		en(Name(event), self.group,self.code,ctx, self.faktor, self.slot, self.delta)
+		en(SName(event), self.group,self.code,ctx, self.faktor, self.slot, self.delta)
 
 class FS20enDelta(Statement):
         name = ("delta",)
@@ -375,7 +375,7 @@ set fs20 en ‹type› ‹value› ‹name…›
 		event = self.params(self.ctx)
 		if len(event) < 3:
 			raise SyntaxError(u"Usage: set fs20 en ‹type› ‹value› ‹name…›")
-		d = ens[Name(event[2:])]
+		d = ens[Name(*event[2:])]
 		if d.last_data is None: d.last_data = {}
 		d.last_data[event[0]] = float(event[1])
 

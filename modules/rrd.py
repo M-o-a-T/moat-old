@@ -71,7 +71,7 @@ class ExistsRRDCheck(Check):
 	doc="Check if the RRD has been created"
 	def check(self,*args):
 		assert len(args), "Need exactly one argument (RRD name)"
-		return Name(args) in RRDs
+		return Name(*args) in RRDs
 
 
 class RRDHandler(Statement):
@@ -90,7 +90,7 @@ rrd path dataset NAME…
 			raise SyntaxError(u'Usage: rrd "/path/to/the.rrd" ‹varname› ‹name…›')
 		fn = event[0]
 		assert os.path.exists(fn), "the RRD file does not exist: ‹%s›" % (fn,)
-		RRD(path=fn, dataset=event[1], name=Name(event[2:]))
+		RRD(path=fn, dataset=event[1], name=Name(*event[2:]))
 
 
 class VarRRDHandler(Statement):
@@ -107,7 +107,7 @@ var rrd variable item NAME
 		event = self.params(ctx)
 		if len(event) < 3:
 			raise SyntaxError(u'Usage: var rrd ‹variable› ‹item› ‹name…›')
-		s = RRDs[Name(event[2:])]
+		s = RRDs[Name(*event[2:])]
 		try:
 			setattr(self.parent.ctx,event[0],rrdtool.info(s.upath)["ds"][s.dataset][event[1]])
 		except KeyError:
@@ -128,7 +128,7 @@ set rrd value ‹name…›
 		event = self.params(ctx)
 		if len(event) < 2:
 			raise SyntaxError(u'Usage: set rrd ‹value› ‹name…›')
-		s = RRDs[Name(event[1:])]
+		s = RRDs[Name(*event[1:])]
 		# Using "N:" may run into a RRD bug
 		# if we're really close to the next minute
 		try:

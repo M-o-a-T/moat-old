@@ -33,7 +33,7 @@ from homevent.statement import Statement, main_words
 from homevent.module import Module
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.times import unixdelta, now, humandelta
-from homevent.base import Name
+from homevent.base import Name,SName
 from homevent.collect import Collection,Collected
 
 from datetime import timedelta
@@ -122,7 +122,7 @@ avg ‹name…›
 
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		Avg(self, Name(event))
+		Avg(self, SName(event))
 
 	
 class AvgSet(Statement):
@@ -137,7 +137,7 @@ set avg VALUE NAME
 		event = self.params(ctx)
 		if len(event) < 2:
 			raise SyntaxError(u"Usage: set avg ‹value› ‹name…›")
-		m = Avgs[Name(event[1:])]
+		m = Avgs[Name(*event[1:])]
 		m.feed(float(event[0]))
 
 class ExistsAvgCheck(Check):
@@ -146,7 +146,7 @@ class ExistsAvgCheck(Check):
 	def check(self,*args):
 		if not len(args):
 			raise SyntaxError(u"Usage: if exists avg ‹name…›")
-		name = Name(args)
+		name = Name(*args)
 		return name in Avgs
 
 class VarAvgHandler(Statement):
@@ -159,7 +159,7 @@ var avg NAME name...
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		var = event[0]
-		name = Name(event[1:])
+		name = Name(*event[1:])
 		setattr(self.parent.ctx,var,Avgs[name]._calc())
 
 

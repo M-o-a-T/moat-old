@@ -33,7 +33,7 @@ from homevent.module import Module
 from homevent.worker import ExcWorker
 from homevent.times import time_delta, time_until, unixtime,unixdelta, now, humandelta
 from homevent.check import Check,register_condition,unregister_condition
-from homevent.base import Name
+from homevent.base import Name,SName
 from homevent.collect import Collection,Collected
 from homevent.twist import callLater,fix_exception,Jobber
 from homevent.logging import log_exc,TRACE
@@ -244,7 +244,7 @@ wait [NAME…]: for FOO…
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		if len(event):
-			self.displayname = Name(event)
+			self.displayname = SName(event)
 
 		if self.timespec is None:
 			raise SyntaxError(u'Usage: wait [name…]: for|until|next ‹timespec›')
@@ -397,7 +397,7 @@ class ExistsWaiterCheck(Check):
 	def check(self,*args):
 		if not len(args):
 			raise SyntaxError(u"Usage: if exists wait ‹name…›")
-		name = Name(args)
+		name = Name(*args)
 		return name in Waiters
 
 class VarWaitHandler(Statement):
@@ -411,7 +411,7 @@ var wait NAME name...
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		var = event[0]
-		name = Name(event[1:])
+		name = Name(*event[1:])
 		setattr(self.parent.ctx,var,Waiters[name])
 
 

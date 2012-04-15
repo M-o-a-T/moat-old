@@ -38,7 +38,7 @@ from homevent.statement import Statement, main_words, AttributedStatement
 from homevent.run import process_event,process_failure
 from homevent.event import Event
 from homevent.check import Check,register_condition,unregister_condition
-from homevent.base import Name
+from homevent.base import Name,SName
 from homevent.collect import Collection,Collected
 from homevent.times import now,humandelta
 from homevent.twist import fix_exception
@@ -237,7 +237,7 @@ set state X name...
 		if len(event) < 2:
 			raise SyntaxError(u"Usage: set state ‹value› ‹name…›")
 		value = event[0]
-		name = Name(event[1:])
+		name = Name(*event[1:])
 		s = States[name]
 		old = s.value
 		if old is None:
@@ -273,7 +273,7 @@ forget state name...
 		event = self.params(ctx)
 		if not len(event):
 			raise SyntaxError(u"Usage: forget state ‹name…›")
-		name = Name(event)
+		name = SName(event)
 
 		global Db
 		if Db is None:
@@ -293,7 +293,7 @@ var state NAME name...
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		var = event[0]
-		name = Name(event[1:])
+		name = Name(*event[1:])
 		s = States[name]
 		setattr(self.parent.ctx,var,s.value if not s.working else s.old_value)
 
@@ -305,7 +305,7 @@ class StateCheck(Check):
 		if len(args) < 2:
 			raise SyntaxError(u"Usage: if state ‹value› ‹name…›")
 		value = args[0]
-		name = Name(args[1:])
+		name = Name(*args[1:])
 		return States[name].value == value
 
 
@@ -315,7 +315,7 @@ class StateLockedCheck(Check):
 	def check(self,*args):
 		if len(args) < 2:
 			raise SyntaxError(u"Usage: if state locked ‹name…›")
-		return States[Name(args)].working
+		return States[Name(*args)].working
 
 
 class LastStateCheck(Check):
@@ -325,7 +325,7 @@ class LastStateCheck(Check):
 		if len(args) < 2:
 			raise SyntaxError(u"Usage: if last state ‹value› ‹name…›")
 		value = args[0]
-		name = Name(args[1:])
+		name = Name(*args[1:])
 
 		s = States[name]
 		if hasattr(s,"old_value"):
@@ -340,7 +340,7 @@ class ExistsStateCheck(Check):
 	def check(self,*args):
 		if len(args) < 1:
 			raise SyntaxError(u"Usage: if exists state ‹name…›")
-		name = Name(args)
+		name = Name(*args)
 		return name in States
 
 
@@ -357,7 +357,7 @@ class SavedStateCheck(Check):
 			from homevent.database import DbStore
 			Db = DbStore(category="state")
 		try:
-			Db.get(Name(args))
+			Db.get(Name(*args))
 		except KeyError:
 			return False
 		else:
@@ -375,6 +375,7 @@ class StateModule(Module):
 		main_words.register_statement(StateHandler)
 		main_words.register_statement(SetStateHandler)
 		main_words.register_statement(VarStateHandler)
+		main_words.register_statement(ForgetStateHandler)
 		register_condition(StateCheck)
 		register_condition(StateLockedCheck)
 		register_condition(LastStateCheck)

@@ -27,7 +27,7 @@ from homevent.statement import Statement, main_words, AttributedStatement
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.context import Context
 from homevent.event import Event
-from homevent.base import Name
+from homevent.base import Name,SName
 from homevent.run import process_failure
 from homevent.collect import Collection,Collected
 from homevent.twist import fix_exception,reraise,Jobber
@@ -398,7 +398,7 @@ name ‹name…›
 
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		self.parent.dest = Name(event)
+		self.parent.dest = SName(event)
 NetConnect.register_statement(NetName)
 NetListen.register_statement(NetName)
 
@@ -423,7 +423,7 @@ send net text… :to ‹name…›
 			name = Name(event[0])
 			event = event[1:]
 		else:
-			name = Name(name.apply(ctx))
+			name = Name(*name.apply(ctx))
 
 		val = u" ".join(unicode(s) for s in event)
 		self.storage[name].write(val)
@@ -452,9 +452,9 @@ class NetConnected(Check):
 	def check(self,*args):
 		conn = None
 		if len(args) == 2:
-			conn = getattr(self,"storage2",{}).get(Name(args),None)
+			conn = getattr(self,"storage2",{}).get(Name(*args),None)
 		if conn is None:
-			conn = self.storage.get(Name(args))
+			conn = self.storage.get(Name(*args))
 		if conn is None:
 			return False
 		return conn.did_up_event
@@ -466,7 +466,7 @@ class NetExists(Check):
 	doc="Test if a TCP connection is configured"
 
 	def check(self,*args):
-		if len(args) == 2 and Name(args) in getattr(self,"storage2",{}):
+		if len(args) == 2 and Name(*args) in getattr(self,"storage2",{}):
 			return True
-		return Name(args) in self.storage
+		return Name(*args) in self.storage
 

@@ -53,7 +53,7 @@ Statements may be multi-word and follow generic Python syntax.
 			n = len(wl)
 			while n >= 0:
 				try:
-					words = wlist(Name(wl[:n]))()
+					words = wlist(Name(*wl[:n]))()
 				except KeyError:
 					pass
 				else:

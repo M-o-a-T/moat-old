@@ -17,7 +17,7 @@
 
 """Class to make storing collections of stuff simpler"""
 
-from homevent.base import Name
+from homevent.base import Name,SName
 
 from weakref import WeakValueDictionary,proxy
 
@@ -52,7 +52,7 @@ class Collection(dict):
 	def __new__(cls):
 		self = dict.__new__(cls)
 
-		name = Name(self.name)
+		name = SName(self.name)
 		if name in collections:
 			return collections[name]
 
@@ -69,10 +69,10 @@ class Collection(dict):
 	
 	def does(self,name):
 		assert name not in self._can_do
-		self._can_do.add(Name(name))
+		self._can_do.add(SName(name))
 
 	def can_do(self,name):
-		name = Name(name)
+		name = SName(name)
 		return name in self._can_do
 
 	def iteritems(self):
@@ -114,7 +114,7 @@ class Collected(object):
 		if self.storage is None:
 			raise RuntimeError("You didn't declare a storage for '%s'" % (self.__class__.__name__,))
 
-		self.name = name = Name(name)
+		self.name = name = SName(name)
 		if name in self.storage:
 			self.dup_error(name)
 
@@ -156,22 +156,22 @@ class CKeyError(KeyError):
 		self.name = name
 		self.coll = coll
 	def __repr__(self):
-		return u"‹%s ‹%s› %s›" % (self.__class__.__name__, Name(self.name),self.coll)
+		return u"‹%s ‹%s› %s›" % (self.__class__.__name__, SName(self.name),self.coll)
 	def __unicode__(self):
-		return u"I could not find an entry for ‹%s› in %s." % (Name(self.name),self.coll)
+		return u"I could not find an entry for ‹%s› in %s." % (SName(self.name),self.coll)
 	def __str__(self):
-		return "I could not find an entry for ‹%s› in %s." % (Name(self.name),self.coll)
+		return "I could not find an entry for ‹%s› in %s." % (SName(self.name),self.coll)
 
 
 class CCollError(KeyError):
 	def __init__(self,name):
 		self.name = name
 	def __repr__(self):
-		return u"‹%s %s›" % (self.__class__.__name__, Name(self.name))
+		return u"‹%s %s›" % (self.__class__.__name__, SName(self.name))
 	def __unicode__(self):
-		return u"‹%s› is a group, not an item." % (Name(self.name),)
+		return u"‹%s› is a group, not an item." % (SName(self.name),)
 	def __str__(self):
-		return "‹%s› is a group, not an item." % (Name(self.name),)
+		return "‹%s› is a group, not an item." % (SName(self.name),)
 
 
 def get_collect(name, allow_collection=False):
@@ -184,7 +184,7 @@ def get_collect(name, allow_collection=False):
 		n = len(name)
 		while n > 0:
 			try:
-				coll = coll[Name(name[:n])]
+				coll = coll[Name(*name[:n])]
 			except KeyError:
 				n = n-1
 			else:

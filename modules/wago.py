@@ -21,7 +21,7 @@ This code implements (a subset of) the WAGO server protocol.
 """
 
 from homevent.module import Module
-from homevent.base import Name,singleName
+from homevent.base import Name,SName, singleName
 from homevent.logging import log,log_exc,DEBUG,TRACE,INFO,WARN
 from homevent.statement import AttributedStatement, Statement, main_words
 from homevent.check import Check,register_condition,unregister_condition
@@ -137,7 +137,7 @@ name ‹name…›
 
 		def run(self,ctx,**k):
 				event = self.params(ctx)
-				self.parent.dest = Name(event)
+				self.parent.dest = SName(event)
 
 
 class WAGOconnected(Check):
@@ -146,7 +146,7 @@ class WAGOconnected(Check):
 	def check(self,*args):
 		assert len(args)==1,"This test requires the connection name"
 		try:
-			bus = WAGOserver[Name(args)]
+			bus = WAGOserver[Name(*args)]
 		except KeyError:
 			return False
 		else:
@@ -157,7 +157,7 @@ class WAGOexists(Check):
 	doc="Test if the named wago server connection exists"
 	def check(self,*args):
 		assert len(args)>0,"This test requires the connection name"
-		return Name(args) in WAGOserver
+		return Name(*args) in WAGOserver
 
 
 class WAGOdisconnect(Statement):

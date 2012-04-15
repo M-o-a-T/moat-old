@@ -37,20 +37,11 @@ class Name(tuple):
 	suffix = ""
 
 	def __new__(cls,*data):
-		while isinstance(data,tuple):
-			if isinstance(data,Name):
-				return data
-			if len(data) == 1:
-				data = data[0]
-			else:
-				break
-		n = getattr(data,"name",None)
-		if n is not None:
-			return n
-		if isinstance(data,basestring):
-			data = data.split(" ")
-		elif not isinstance(data,(list,tuple)):
-			data = (data,)
+		if len(data) == 1 and isinstance(data[0],tuple):
+			data = data[0]
+		if len(data) > 0 and not isinstance(data[0],(basestring,int,float)):
+			raise RuntimeError("Name:"+repr(data))
+			import pdb;pdb.set_trace()
 		return super(Name,cls).__new__(cls,data)
 	def __str__(self):
 		return unicode(self).encode("utf-8")
@@ -58,6 +49,18 @@ class Name(tuple):
 		return self.prefix + self.delim.join((unicode(x) for x in self)) + self.suffix
 	def __repr__(self):
 		return self.__class__.__name__+super(Name,self).__repr__()
+
+def SName(data,attr="name"):
+	"""An alternate Name constructor that accepts a single argument"""
+	if isinstance(data,Name):
+		return data
+	n = getattr(data,attr,None)
+	if isinstance(n,Name):
+		return n
+
+	if isinstance(data,basestring):
+		data = data.split(" ")
+	return Name(*data)
 
 class RaisedError(RuntimeError):
 	"""An error that has been explicitly raised by a script"""

@@ -33,7 +33,7 @@ import sys
 from homevent.context import Context
 from homevent.event import Event,StopParsing
 from homevent.logging import log_event,log, TRACE
-from homevent.base import Name
+from homevent.base import Name,SName
 
 from twisted.internet import defer
 
@@ -54,7 +54,7 @@ class Statement(object):
 	"""\
 		Abstract base class for handling statements.
 		"""
-	name=("unassigned",)
+	name="unassigned"
 	doc="(unassigned short help text!)"
 
 #	long_doc="""\
@@ -64,9 +64,7 @@ class Statement(object):
 	immediate = False # don't enqueue this
 
 	def __init__(self,parent=None, ctx=None):
-		if not isinstance(self.name,Name):
-			assert isinstance(self.name,tuple),"Name is "+repr(self.name)
-			self.name = tuple(self.name)
+		self.name = SName(self.name)
 		self.parent = parent
 		self.ctx = ctx or Context()
 		self.args = None
@@ -85,7 +83,7 @@ class Statement(object):
 	def matches(self,args):
 		"""Check if this statement can process this list of words."""
 		if len(args) < len(self.name): return False
-		return self.name == Name(args[0:len(self.name)])
+		return self.name == Name(*args[0:len(self.name)])
 	
 	def called(self, args):
 		"""\
@@ -170,7 +168,7 @@ class ComplexStatement(Statement):
 		n = len(args)
 		while n > 0:
 			try:
-				fn = self[Name(args[:n])]
+				fn = self[Name(*args[:n])]
 			except KeyError:
 				pass
 			else:
@@ -240,9 +238,7 @@ class ComplexStatement(Statement):
 			up in. handler.end_block() will be called when the block is finished,
 			if it exists.
 			"""
-		if not isinstance(handler.name,Name):
-			assert isinstance(handler.name,(basestring,tuple)),"Names must be word lists"
-			handler.name = Name(handler.name)
+		handler.name = SName(handler.name)
 
 		if handler.name in self._words:
 			raise ValueError("A handler for '%s' is already registered. (%s)" % (handler.name,self._words[handler.name]))

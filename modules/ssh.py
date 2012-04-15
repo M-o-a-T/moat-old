@@ -28,6 +28,7 @@ from homevent.statement import main_words,Statement
 from homevent.interpreter import Interpreter
 from homevent.base import Name
 from homevent.collect import Collection,Collected
+from homevent.geventreactor import deferToGreenlet
 import homevent.twist_ssh # monkey patches
 
 from twisted.cred import credentials
@@ -38,7 +39,6 @@ from zope.interface import implements
 from twisted.conch import interfaces as conchinterfaces
 from twisted.conch.insults import insults
 from twisted.internet import reactor
-from twisted.internet.threads import deferToThread
 
 import base64,os
 from cStringIO import StringIO
@@ -156,7 +156,7 @@ You need to call this exactly once.
 		if sshFactory is not NotYet:
 			raise RuntimeError("You can set the SSH path only once!")
 		sshFactory = None
-		d = deferToThread(self._run,ctx,path)
+		d = deferToGreenlet(self._run,ctx,path)
 		def ex(_):
 			sshFactory = NotYet
 			return _

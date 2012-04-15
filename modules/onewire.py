@@ -21,7 +21,7 @@ This code implements (a subset of) the OWFS server protocol.
 """
 
 from homevent.module import Module
-from homevent.base import Name
+from homevent.base import Name,SName
 from homevent.logging import log,log_exc,DEBUG,TRACE,INFO,WARN
 from homevent.statement import Statement, main_words, AttributedStatement
 from homevent.check import Check,register_condition,unregister_condition
@@ -60,7 +60,7 @@ disconnect onewire NAME
 
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		name = Name(event)
+		name = SName(event)
 		log(TRACE,"Dropping OWFS bus",name)
 		disconnect(buses.pop(name))
 		log(TRACE,"Drop OWFS bus",name)
@@ -156,7 +156,7 @@ name ‹name…›
 
     def run(self,ctx,**k):
         event = self.params(ctx)
-        self.parent.dest = Name(event)
+        self.parent.dest = SName(event)
 
 OWFSdir.register_statement(OWFSname)
 
@@ -187,7 +187,7 @@ list onewire [NAME]
 			if dev.path: print >>ctx.out,"Path:", "/"+"/".join(dev.path)
 
 		else:
-			b = buses[Name(event)]
+			b = buses[SName(event)]
 			print >>ctx.out,"Name:",b.name
 			print >>ctx.out,"Host:",b.host
 			print >>ctx.out,"Port:",b.port
@@ -217,7 +217,7 @@ class OWFSconnectedbus(Check):
 	def check(self,*args):
 		assert len(args),"This test requires the connection name"
 		try:
-			bus = buses[Name(args)]
+			bus = buses[Name(*args)]
 		except KeyError:
 			return False
 		else:
@@ -236,7 +236,7 @@ class OWFSexistsbus(Check):
 	doc="Test if the named onewire server connection exists"
 	def check(self,*args):
 		assert len(args)==1,"This test requires the connection name"
-		return Name(args) in buses
+		return Name(*args) in buses
 
 
 class OWFSmon(Monitor):
@@ -465,7 +465,7 @@ scan onewire NAME
 			raise SyntaxError("Usage: scan onewire BUS")
 		else:
 			try:
-				dev = buses[Name(event)]
+				dev = buses[SName(event)]
 			except KeyError:
 				raise RuntimeError("scan onewire: unknown bus ‹%s›" % (event[0],))
 			else:

@@ -30,7 +30,7 @@ from homevent.context import Context
 from homevent.event import Event,TrySomethingElse
 from homevent.fs20 import handler,register_handler,unregister_handler, \
 	PREFIX,PREFIX_TIMESTAMP
-from homevent.base import Name,MIN_PRIO
+from homevent.base import Name,SName, MIN_PRIO
 from homevent.worker import ExcWorker
 from homevent.reactor import shutdown_event
 from homevent.twist import callLater,log_wait, fix_exception
@@ -200,7 +200,7 @@ class FS20recv(protocol.ProcessProtocol, my_handler):
 
 
 class FS20receive(AttributedStatement):
-	name = ("fs20","receiver")
+	name = "fs20 receiver"
 	doc = "external FS20 receiver"
 	long_doc="""\
 fs20 receiver ‹name…›
@@ -216,14 +216,14 @@ fs20 receiver ‹name…›
 		if self.cmd is None:
 			raise SyntaxError(u"requires a 'cmd' subcommand")
 
-		name = Name(event)
+		name = SName(event)
 		if name in recvs:
 			raise RuntimeError(u"‹%s› is already defined" % (name,))
 		FS20recv(name=name, cmd=self.cmd, ctx=ctx).do_start()
 
 
 class FS20listreceive(Statement):
-	name = ("list","fs20","receiver")
+	name = "list fs20 receiver"
 	doc = "list external FS20 receivers"
 	long_doc="""\
 list fs20 receiver
@@ -237,16 +237,16 @@ list fs20 receiver
 			for b in recvs.itervalues():
 				print >>self.ctx.out,b.name
 		else:
-			b = recvs[Name(event)]
+			b = recvs[SName(event)]
 			print >>self.ctx.out,"name:",b.name
-			print >>self.ctx.out,"command:",Name(b.cmd)
+			print >>self.ctx.out,"command:",Name(*b.cmd)
 			print >>self.ctx.out,"running:","yes" if b.transport else "no"
 			print >>self.ctx.out,"stopped:","yes" if b.stopped else "no"
 		print >>self.ctx.out,"."
 
 
 class FS20delreceive(Statement):
-	name = ("del","fs20","receiver")
+	name = "del fs20 receiver"
 	doc = "kill of an external fs20 receiver"
 	long_doc="""\
 del fs20 receiver ‹name…›
@@ -257,7 +257,7 @@ del fs20 receiver ‹name…›
 		event = self.params(ctx)
 		if not len(event):
 			raise SyntaxError(u"usage: del fs20 receiver ‹name…›")
-		b = recvs[Name(event)]
+		b = recvs[SName(event)]
 		b.do_stop()
 
 
@@ -361,7 +361,7 @@ class FS20xmit(protocol.ProcessProtocol, my_handler):
 		
 
 class FS20transmit(AttributedStatement):
-	name = ("fs20","sender")
+	name = "fs20 sender"
 	doc = "external fs20 sender"
 	long_doc="""\
 fs20 sender ‹name…›
@@ -376,14 +376,14 @@ fs20 sender ‹name…›
 			raise SyntaxError(u"Usage: fs20 sender ‹name…›")
 		if self.cmd is None:
 			raise SyntaxError(u"requires a 'cmd' subcommand")
-		name = Name(event)
+		name = SName(event)
 		if name in xmits:
 			raise RuntimeError(u"‹%s› is already defined" % (name,))
 		FS20xmit(name=name, cmd=self.cmd, ctx=ctx).do_start()
 
 
 class FS20listtransmit(Statement):
-	name = ("list","fs20","sender")
+	name = "list fs20 sender"
 	doc = "list external FS20 senders"
 	long_doc="""\
 list fs20 sender
@@ -397,16 +397,16 @@ list fs20 sender
 			for b in xmits.itervalues():
 				print >>self.ctx.out,b.name
 		else:
-			b = xmits[Name(event)]
+			b = xmits[SName(event)]
 			print >>self.ctx.out,"name:",b.name
-			print >>self.ctx.out,"command:",Name(b.cmd)
+			print >>self.ctx.out,"command:",Name(*b.cmd)
 			print >>self.ctx.out,"running:","yes" if b.transport else "no"
 			print >>self.ctx.out,"stopped:","yes" if b.stopped else "no"
 		print >>self.ctx.out,"."
 
 
 class FS20deltransmit(Statement):
-	name = ("del","fs20","sender")
+	name = "del fs20 sender"
 	doc = "kill of an external fs20 sender"
 	long_doc="""\
 del fs20 sender ‹name…›
@@ -417,13 +417,13 @@ del fs20 sender ‹name…›
 		event = self.params(ctx)
 		if not len(event):
 			raise SyntaxError(u"usage: del fs20 sender ‹name…›")
-		b = xmits[Name(event)]
+		b = xmits[SName(event)]
 		b.do_stop()
 
 
 
 class FS20cmd(Statement):
-	name = ("cmd",)
+	name = "cmd"
 	doc = "set the command to use"
 	long_doc=u"""\
 cmd ‹command…›
@@ -436,7 +436,7 @@ cmd ‹command…›
 		event = self.params(ctx)
 		if not len(event):
 			raise SyntaxError(u"Usage: cmd ‹whatever…›")
-		self.parent.cmd = Name(event)
+		self.parent.cmd = SName(event)
 FS20receive.register_statement(FS20cmd)
 FS20transmit.register_statement(FS20cmd)
 
