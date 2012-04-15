@@ -28,7 +28,7 @@ from homevent.context import Context
 from homevent.collect import Collection
 from homevent.event import Event
 from homevent.run import process_event,process_failure,simple_event
-from homevent.twist import callLater, fix_exception, Jobber
+from homevent.twist import callLater, fix_exception,print_exception, Jobber
 from homevent.base import Name
 from homevent.net import NetActiveConnector
 from homevent.msg import MsgReceiver,MsgBase,MsgQueue,MsgFactory,\
@@ -356,6 +356,7 @@ class OWFSqueue(MsgQueue,Jobber):
 	ondemand = True
 
 	def __init__(self, name, host,port, persist=False, *a,**k):
+		self.ident = (host,port)
 		super(OWFSqueue,self).__init__(name=name, factory=MsgFactory(OWFSchannel,name=name,host=host,port=port,persist=persist, **k))
 		if not persist:
 			self.max_send = 1
@@ -504,14 +505,14 @@ class OWFSqueue(MsgQueue,Jobber):
 				try:
 					q = self.watch_q.get(timeout=(d if not res else 0))
 				except Empty:
-					pass
+					break
 				else:
 					res.append(q)
 
 	def run_watcher(self):
 		res = AsyncResult()
 		self.watch_q.put(res)
-		return res_q.get()
+		return res.get()
 
 
 
@@ -529,7 +530,7 @@ def connect(host="localhost", port=4304, name=None, persist=False):
 	return f
 
 def disconnect(f):
-	assert f==ow_buses.pop((f.host,f.port))
+	assert f==ow_buses.pop(f.ident)
 	f.stop()
 
 
@@ -633,7 +634,7 @@ class OWFSdevice(object):
 		if not self.bus:
 			raise DisconnectedDeviceError(self.id)
 
-		p = self.path + Name(path)
+		p = self.path + Name(*path)
 		if self.bus_id is not None:
 			p += (self.bus_id,)
 		if key is not None:
