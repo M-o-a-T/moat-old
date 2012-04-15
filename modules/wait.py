@@ -147,47 +147,44 @@ class Waiter(Collected,Jobber):
 		self._plinger = callLater(self.force, timeout, self._pling)
 		
 	def _job(self):
-		self._set_pling()
-		self._running = True
-		while True:
-			cmd = self.q.get()
-
-			q = cmd[0]
-			a = cmd[2] if len(cmd)>2 else None
-			cmd = cmd[1]
-			if cmd == "timeout":
-				assert self._plinger is None
-				q.put(None)
-				return True
-			elif cmd == "cancel":
-				if self._plinger:
-					self._plinger.cancel()
-					self._plinger = None
-				q.put(None)
-				return False
-			elif cmd == "update":
-				q.put(None)
-				self.end = a
-				self._set_pling()
-			elif cmd == "remain":
-				q.put(unixtime(self.end)-unixtime(now(self.force)))
-			else:
-				q.put(RuntimeError('Unknown command: '+cmd))
-
-
-	def init(self,dest):
-
-		def done(_):
+		try:
+			self._set_pling()
+			self._running = True
+			while True:
+				cmd = self.q.get()
+	
+				q = cmd[0]
+				a = cmd[2] if len(cmd)>2 else None
+				cmd = cmd[1]
+				if cmd == "timeout":
+					assert self._plinger is None
+					q.put(None)
+					return True
+				elif cmd == "cancel":
+					if self._plinger:
+						self._plinger.cancel()
+						self._plinger = None
+					q.put(None)
+					return False
+				elif cmd == "update":
+					q.put(None)
+					self.end = a
+					self._set_pling()
+				elif cmd == "remain":
+					q.put(unixtime(self.end)-unixtime(now(self.force)))
+				else:
+					q.put(RuntimeError('Unknown command: '+cmd))
+		finally:
 			self.delete_done()
 			q,self.q = self.q,None
 			if q is not None:
 				while not q.empty():
 					q.get()[0].put(StopIteration())
 
+	def init(self,dest):
 		self.q = Channel()
 		self.end = dest
 		self.start_job("job",self._job)
-		self.job.link(done)
 
 	def _cmd(self,cmd,*a):
 		if self.q is None:
@@ -221,7 +218,7 @@ class Waiter(Collected,Jobber):
 
 	def retime(self, dest):
 		process_event(Event(self.ctx(loglevel=TRACE),"wait","update",dest,*self.name))
-		self._cmd("retime",dest)
+		self._cmd("update",dest)
 
 	
 class WaitHandler(AttributedStatement):
@@ -257,7 +254,10 @@ wait [NAME…]: for FOO…
 		w.init(self.timespec())
 		process_event(Event(self.ctx(loglevel=TRACE),"wait","start",ixtime(w.end,self.force),*w.name))
 		try:
-			r = w.job.get()
+			if w.job:
+				r = w.job.get()
+			else:
+				r = True
 		except Exception as ex:
 			fix_exception(ex)
 			log_exc(msg=u"Wait %s died:"%(self.name,), err=ex, level=TRACE)
