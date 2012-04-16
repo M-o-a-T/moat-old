@@ -122,7 +122,9 @@ class SavedState(State):
 		self.value = val
 
 	def delete(self,ctx):
-		Db.delete(self.name)
+		if not getattr(ctx,"shutdown",False):
+			Db.delete(self.name)
+
 		super(SavedState,self).delete(ctx)
 
 	def list(self):
@@ -383,6 +385,10 @@ class StateModule(Module):
 		register_condition(SavedStateCheck)
 	
 	def unload(self):
+		global Db
+		if Db is not None:
+			Db.close()
+			Db = None
 		main_words.unregister_statement(StateHandler)
 		main_words.unregister_statement(SetStateHandler)
 		main_words.unregister_statement(VarStateHandler)

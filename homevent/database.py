@@ -70,6 +70,10 @@ class DbStore(object):
 		
 		self.running = True
 	
+	def close(self):
+		self.db.close()
+		self.db = None
+
 	def get(self, key):
 		key = " ".join(Name(key)).encode("utf-8")
 		with self.db() as db:

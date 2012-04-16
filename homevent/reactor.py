@@ -38,8 +38,8 @@ import gevent
 __all__ = ("start_up","shut_down", "startup_event","shutdown_event",
 	"ShutdownHandler","mainloop", "Events")
 
-startup_event = Event(Context(), "startup")
-shutdown_event = Event(Context(), "shutdown")
+startup_event = Event(Context(startup=True), "startup")
+shutdown_event = Event(Context(shutdown=True), "shutdown")
 
 active_q_id = 0
 running = False
