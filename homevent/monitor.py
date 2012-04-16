@@ -60,10 +60,6 @@ class MonitorError(RuntimeError):
 	def __unicode__(self):
 		return self.text % (" ".join(unicode(x) for x in self.monitor.name),)
 
-class DelayCancelled(MonitorError):
-	"""An error signalling that a delay was killed."""
-	text = u"Waiter ‹%s› was cancelled"
-
 class DupMonitorError(MonitorError):
 	text = u"A monitor ‹%s› already exists"
 
