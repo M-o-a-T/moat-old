@@ -70,6 +70,7 @@ block:
 		log DEBUG No2
 	else:
 		log DEBUG Yes
+list monitor baz zaz
 
 shutdown
 """
