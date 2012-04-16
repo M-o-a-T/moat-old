@@ -35,6 +35,7 @@ from homevent.twist import fix_exception,reraise,Jobber
 import os
 import sys
 import socket
+import errno
 
 import gevent
 from gevent.server import StreamServer
@@ -134,6 +135,8 @@ class NetCommonConnector(Collected,Jobber):
 				self._connect()
 			except Exception as ex:
 				fix_exception(ex)
+				if isinstance(ex,EnvironmentError) and ex.errno == errno.ECONNREFUSED:
+					ex.no_backtrace = True
 				try:
 					del storage2[(host,port)]
 				except KeyError:
