@@ -1,25 +1,31 @@
-NEW: <ConditionalWorkSequence:8 (4)>
-   : │  id: 8
+NEW: ‹ConditionalWorkSequence:7 (4)›
+   : │  id: 7
    : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
 EVENT: startup
 END: startup
+0 +WAIT 1 start job ‹Collected Parser:n1›
+0 -WAIT 1 start job ‹Collected Parser:n1›
+0 +WAIT 2 start job <homevent.tokize.tokizer obj>
+0 -WAIT 2 start job <homevent.tokize.tokizer obj>
 .
 test :: (new)
 .
 name: test
 cur_value: None
 .
-NEW: <ConditionalWorkSequence:9 (4)>
-   : │  id: 9
+0 +WAIT 3 start job ‹Waiter _wait¦1 ??›
+0 -WAIT 3 start job ‹Waiter _wait¦1 ??›
+NEW: ‹ConditionalWorkSequence:8 (4)›
+   : │  id: 8
    : │  call count: 0
    : │  EVENT: wait¦start¦0.2¦_wait¦1
    : └1╴... done.
 EVENT: wait¦start¦0.2¦_wait¦1
 END: wait¦start¦0.2¦_wait¦1
-NEW: <ConditionalWorkSequence:10 (4)>
-   : │  id: 10
+NEW: ‹ConditionalWorkSequence:9 (4)›
+   : │  id: 9
    : │  call count: 0
    : │  EVENT: wait¦done¦0.2¦_wait¦1
    : └1╴... done.
@@ -32,15 +38,17 @@ total_time: now
 last_value: 2.0
 value: 2.0
 .
-NEW: <ConditionalWorkSequence:11 (4)>
-   : │  id: 11
+0 +WAIT 4 start job ‹Waiter _wait¦2 ??›
+0 -WAIT 4 start job ‹Waiter _wait¦2 ??›
+NEW: ‹ConditionalWorkSequence:10 (4)›
+   : │  id: 10
    : │  call count: 0
    : │  EVENT: wait¦start¦1.2¦_wait¦2
    : └1╴... done.
 EVENT: wait¦start¦1.2¦_wait¦2
 END: wait¦start¦1.2¦_wait¦2
-NEW: <ConditionalWorkSequence:12 (4)>
-   : │  id: 12
+NEW: ‹ConditionalWorkSequence:11 (4)›
+   : │  id: 11
    : │  call count: 0
    : │  EVENT: wait¦done¦1.2¦_wait¦2
    : └1╴... done.
@@ -62,15 +70,17 @@ value: 2.0
 .
 1 Yes
 1 Yes
-NEW: <ConditionalWorkSequence:13 (4)>
-   : │  id: 13
+0 +WAIT 5 start job ‹Waiter _wait¦3 ??›
+0 -WAIT 5 start job ‹Waiter _wait¦3 ??›
+NEW: ‹ConditionalWorkSequence:12 (4)›
+   : │  id: 12
    : │  call count: 0
    : │  EVENT: wait¦start¦3.2¦_wait¦3
    : └1╴... done.
 EVENT: wait¦start¦3.2¦_wait¦3
 END: wait¦start¦3.2¦_wait¦3
-NEW: <ConditionalWorkSequence:14 (4)>
-   : │  id: 14
+NEW: ‹ConditionalWorkSequence:13 (4)›
+   : │  id: 13
    : │  call count: 0
    : │  EVENT: wait¦done¦3.2¦_wait¦3
    : └1╴... done.
@@ -79,10 +89,82 @@ END: wait¦done¦3.2¦_wait¦3
 1 Yes
 1 Yes
 .
-NEW: <ConditionalWorkSequence:15 (7)>
-   : │  id: 15
+0 +WAIT 6 kill job <homevent.tokize.tokizer obj>
+0 -WAIT 6 kill job <homevent.tokize.tokizer obj>
+NEW: ‹ConditionalWorkSequence:14 (6)›
+   : │  id: 14
    : │  call count: 0
    : │  EVENT: shutdown
    : └1╴... done.
 EVENT: shutdown
+NEW: ‹ConditionalWorkSequence:15 (4)›
+   : │  id: 15
+   : │  call count: 0
+   : │  EVENT: module¦unload¦avg
+   : └1╴... done.
+EVENT: module¦unload¦avg
+END: module¦unload¦avg
+NEW: ‹ConditionalWorkSequence:16 (4)›
+   : │  id: 16
+   : │  call count: 0
+   : │  EVENT: module¦unload¦data
+   : └1╴... done.
+EVENT: module¦unload¦data
+END: module¦unload¦data
+NEW: ‹ConditionalWorkSequence:17 (4)›
+   : │  id: 17
+   : │  call count: 0
+   : │  EVENT: module¦unload¦tests
+   : └1╴... done.
+EVENT: module¦unload¦tests
+END: module¦unload¦tests
+NEW: ‹ConditionalWorkSequence:18 (4)›
+   : │  id: 18
+   : │  call count: 0
+   : │  EVENT: module¦unload¦block
+   : └1╴... done.
+EVENT: module¦unload¦block
+END: module¦unload¦block
+NEW: ‹ConditionalWorkSequence:19 (4)›
+   : │  id: 19
+   : │  call count: 0
+   : │  EVENT: module¦unload¦logging
+   : └1╴... done.
+EVENT: module¦unload¦logging
+END: module¦unload¦logging
+NEW: ‹ConditionalWorkSequence:20 (4)›
+   : │  id: 20
+   : │  call count: 0
+   : │  EVENT: module¦unload¦wait
+   : └1╴... done.
+EVENT: module¦unload¦wait
+END: module¦unload¦wait
+NEW: ‹ConditionalWorkSequence:21 (4)›
+   : │  id: 21
+   : │  call count: 0
+   : │  EVENT: module¦unload¦on_event
+   : └1╴... done.
+EVENT: module¦unload¦on_event
+END: module¦unload¦on_event
+NEW: ‹ConditionalWorkSequence:22 (4)›
+   : │  id: 22
+   : │  call count: 0
+   : │  EVENT: module¦unload¦bool
+   : └1╴... done.
+EVENT: module¦unload¦bool
+END: module¦unload¦bool
+NEW: ‹ConditionalWorkSequence:23 (4)›
+   : │  id: 23
+   : │  call count: 0
+   : │  EVENT: module¦unload¦trigger
+   : └1╴... done.
+EVENT: module¦unload¦trigger
+END: module¦unload¦trigger
+NEW: ‹ConditionalWorkSequence:24 (4)›
+   : │  id: 24
+   : │  call count: 0
+   : │  EVENT: module¦unload¦ifelse
+   : └1╴... done.
+EVENT: module¦unload¦ifelse
+END: module¦unload¦ifelse
 END: shutdown

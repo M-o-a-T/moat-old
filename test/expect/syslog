@@ -1,18 +1,24 @@
-NEW: <ConditionalWorkSequence:7 (4)>
+NEW: ‹ConditionalWorkSequence:7 (4)›
    : │  id: 7
    : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
 EVENT: startup
 END: startup
-NEW: <ConditionalWorkSequence:8 (4)>
+0 +WAIT 1 start job ‹Collected Parser:n1›
+0 -WAIT 1 start job ‹Collected Parser:n1›
+0 +WAIT 2 start job <homevent.tokize.tokizer obj>
+0 -WAIT 2 start job <homevent.tokize.tokizer obj>
+0 +WAIT 3 start job ‹Waiter _wait¦1 ??›
+0 -WAIT 3 start job ‹Waiter _wait¦1 ??›
+NEW: ‹ConditionalWorkSequence:8 (4)›
    : │  id: 8
    : │  call count: 0
    : │  EVENT: wait¦start¦0.2¦_wait¦1
    : └1╴... done.
 EVENT: wait¦start¦0.2¦_wait¦1
 END: wait¦start¦0.2¦_wait¦1
-NEW: <ConditionalWorkSequence:9 (4)>
+NEW: ‹ConditionalWorkSequence:9 (4)›
    : │  id: 9
    : │  call count: 0
    : │  EVENT: wait¦done¦0.2¦_wait¦1
@@ -21,6 +27,8 @@ EVENT: wait¦done¦0.2¦_wait¦1
 END: wait¦done¦0.2¦_wait¦1
 syslog :: TRACE: run_logger
 .
+0 +WAIT 4 start job ‹Collected SysLogger:local5¦localhost¦55514›
+0 -WAIT 4 start job ‹Collected SysLogger:local5¦localhost¦55514›
 1 Five Debug
 3 Five Warn
 local5 localhost 55514 :: local5 info
@@ -36,5 +44,18 @@ address: (u'localhost', 55514)
 level: 2
 level_name: info
 .
+0 +WAIT 5 kill job ‹Collected SysLogger:local5¦localhost¦55514›
+0 -WAIT 5 kill job ‹Collected SysLogger:local5¦localhost¦55514›
 syslog :: TRACE: run_logger
 .
+0 +WAIT 6 start job ‹Waiter _wait¦2 ??›
+0 -WAIT 6 start job ‹Waiter _wait¦2 ??›
+NEW: ‹ConditionalWorkSequence:10 (4)›
+   : │  id: 10
+   : │  call count: 0
+   : │  EVENT: wait¦start¦1.0¦_wait¦2
+   : └1╴... done.
+EVENT: wait¦start¦1.0¦_wait¦2
+END: wait¦start¦1.0¦_wait¦2
+0 +WAIT 7 kill job <homevent.tokize.tokizer obj>
+0 -WAIT 7 kill job <homevent.tokize.tokizer obj>

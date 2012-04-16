@@ -1,14 +1,18 @@
-NEW: <ConditionalWorkSequence:8 (4)>
-   : │  id: 8
+NEW: ‹ConditionalWorkSequence:7 (4)›
+   : │  id: 7
    : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
 EVENT: startup
 END: startup
+0 +WAIT 1 start job ‹Collected Parser:n1›
+0 -WAIT 1 start job ‹Collected Parser:n1›
+0 +WAIT 2 start job <homevent.tokize.tokizer obj>
+0 -WAIT 2 start job <homevent.tokize.tokizer obj>
 0 Create OnEvtHandler: timeslot¦begin¦foo¦bar
-0 NewHandler 9
+0 NewHandler 8
 0 Create OnEvtHandler: timeslot¦end¦foo¦bar
-0 NewHandler 10
+0 NewHandler 9
 .
 name: foo bar
 run: off
@@ -17,15 +21,17 @@ duration: 2.0
 .
 1 Yes
 1 Yes
-NEW: <ConditionalWorkSequence:11 (4)>
-   : │  id: 11
+0 +WAIT 3 start job ‹Waiter A¦before ??›
+0 -WAIT 3 start job ‹Waiter A¦before ??›
+NEW: ‹ConditionalWorkSequence:10 (4)›
+   : │  id: 10
    : │  call count: 0
    : │  EVENT: wait¦start¦9.5¦A¦before
    : └1╴... done.
 EVENT: wait¦start¦9.5¦A¦before
 END: wait¦start¦9.5¦A¦before
-NEW: <ConditionalWorkSequence:12 (4)>
-   : │  id: 12
+NEW: ‹ConditionalWorkSequence:11 (4)›
+   : │  id: 11
    : │  call count: 0
    : │  EVENT: wait¦done¦9.5¦A¦before
    : └1╴... done.
@@ -39,15 +45,17 @@ next: 0.5 sec
 .
 1 Yes
 1 Yes
-NEW: <ConditionalWorkSequence:13 (4)>
-   : │  id: 13
+0 +WAIT 4 start job ‹Waiter B¦during ??›
+0 -WAIT 4 start job ‹Waiter B¦during ??›
+NEW: ‹ConditionalWorkSequence:12 (4)›
+   : │  id: 12
    : │  call count: 0
    : │  EVENT: wait¦start¦10.5¦B¦during
    : └1╴... done.
 EVENT: wait¦start¦10.5¦B¦during
 END: wait¦start¦10.5¦B¦during
-NEW: <ConditionalWorkSequence:14 (5)>
-   : │  id: 14
+NEW: ‹ConditionalWorkSequence:13 (5)›
+   : │  id: 13
    : │  call count: 0
    : │  EVENT: timeslot¦begin¦foo¦bar
    : ├1╴on timeslot begin foo bar ‹OnEventHandler›
@@ -86,17 +94,19 @@ RUN: on timeslot begin foo bar ‹OnEventHandler›
    :     : step: wait GOT EVENT AX ‹WaitHandler›
    :     : step: if in timeslot foo bar ‹IfStatement›
    :     :     : step: log DEBUG Yes ‹LogHandler›
- at: <ConditionalWorkSequence:14 (5)> (step 1)
+ at: ‹ConditionalWorkSequence:13 (5)› (step 1)
  ev: EVENT: timeslot¦begin¦foo¦bar
-NEW: <ConditionalWorkSequence:15 (4)>
-   : │  id: 15
+0 +WAIT 5 start job ‹Waiter GOT¦EVENT¦A ??›
+0 -WAIT 5 start job ‹Waiter GOT¦EVENT¦A ??›
+NEW: ‹ConditionalWorkSequence:14 (4)›
+   : │  id: 14
    : │  call count: 0
    : │  EVENT: wait¦start¦10.3¦GOT¦EVENT¦A
    : └1╴... done.
 EVENT: wait¦start¦10.3¦GOT¦EVENT¦A
 END: wait¦start¦10.3¦GOT¦EVENT¦A
-NEW: <ConditionalWorkSequence:16 (4)>
-   : │  id: 16
+NEW: ‹ConditionalWorkSequence:15 (4)›
+   : │  id: 15
    : │  call count: 0
    : │  EVENT: wait¦done¦10.3¦GOT¦EVENT¦A
    : └1╴... done.
@@ -104,16 +114,20 @@ EVENT: wait¦done¦10.3¦GOT¦EVENT¦A
 END: wait¦done¦10.3¦GOT¦EVENT¦A
 1 Yes
 1 Yes
+0 +WAIT 6 start job ‹Async async›
+0 -WAIT 6 start job ‹Async async›
 END: timeslot¦begin¦foo¦bar
-NEW: <ConditionalWorkSequence:17 (4)>
-   : │  id: 17
+0 +WAIT 7 start job ‹Waiter AFTER¦EVENT¦A ??›
+0 -WAIT 7 start job ‹Waiter AFTER¦EVENT¦A ??›
+NEW: ‹ConditionalWorkSequence:16 (4)›
+   : │  id: 16
    : │  call count: 0
    : │  EVENT: wait¦start¦10.8¦AFTER¦EVENT¦A
    : └1╴... done.
 EVENT: wait¦start¦10.8¦AFTER¦EVENT¦A
 END: wait¦start¦10.8¦AFTER¦EVENT¦A
-NEW: <ConditionalWorkSequence:18 (4)>
-   : │  id: 18
+NEW: ‹ConditionalWorkSequence:17 (4)›
+   : │  id: 17
    : │  call count: 0
    : │  EVENT: wait¦done¦10.5¦B¦during
    : └1╴... done.
@@ -129,15 +143,17 @@ slot: 0.75
 .
 1 Yes
 1 Yes
-NEW: <ConditionalWorkSequence:19 (4)>
-   : │  id: 19
+0 +WAIT 8 start job ‹Waiter C¦after ??›
+0 -WAIT 8 start job ‹Waiter C¦after ??›
+NEW: ‹ConditionalWorkSequence:18 (4)›
+   : │  id: 18
    : │  call count: 0
    : │  EVENT: wait¦start¦12.5¦C¦after
    : └1╴... done.
 EVENT: wait¦start¦12.5¦C¦after
 END: wait¦start¦12.5¦C¦after
-NEW: <ConditionalWorkSequence:20 (4)>
-   : │  id: 20
+NEW: ‹ConditionalWorkSequence:19 (4)›
+   : │  id: 19
    : │  call count: 0
    : │  EVENT: wait¦done¦10.8¦AFTER¦EVENT¦A
    : └1╴... done.
@@ -145,23 +161,25 @@ EVENT: wait¦done¦10.8¦AFTER¦EVENT¦A
 END: wait¦done¦10.8¦AFTER¦EVENT¦A
 0 got it during
 1 Yes
-NEW: <ConditionalWorkSequence:21 (4)>
-   : │  id: 21
+0 +WAIT 9 start job ‹Waiter GOT¦EVENT¦AX ??›
+0 -WAIT 9 start job ‹Waiter GOT¦EVENT¦AX ??›
+NEW: ‹ConditionalWorkSequence:20 (4)›
+   : │  id: 20
    : │  call count: 0
    : │  EVENT: wait¦start¦10.9¦GOT¦EVENT¦AX
    : └1╴... done.
 EVENT: wait¦start¦10.9¦GOT¦EVENT¦AX
 END: wait¦start¦10.9¦GOT¦EVENT¦AX
-NEW: <ConditionalWorkSequence:22 (4)>
-   : │  id: 22
+NEW: ‹ConditionalWorkSequence:21 (4)›
+   : │  id: 21
    : │  call count: 0
    : │  EVENT: wait¦done¦10.9¦GOT¦EVENT¦AX
    : └1╴... done.
 EVENT: wait¦done¦10.9¦GOT¦EVENT¦AX
 END: wait¦done¦10.9¦GOT¦EVENT¦AX
 1 Yes
-NEW: <ConditionalWorkSequence:23 (5)>
-   : │  id: 23
+NEW: ‹ConditionalWorkSequence:22 (5)›
+   : │  id: 22
    : │  call count: 0
    : │  EVENT: timeslot¦end¦foo¦bar
    : ├1╴on timeslot end foo bar ‹OnEventHandler›
@@ -200,17 +218,19 @@ RUN: on timeslot end foo bar ‹OnEventHandler›
    :     : step: wait GOT EVENT AX ‹WaitHandler›
    :     : step: if in timeslot foo bar ‹IfStatement›
    :     :     : step: log DEBUG No9ax ‹LogHandler›
- at: <ConditionalWorkSequence:23 (5)> (step 1)
+ at: ‹ConditionalWorkSequence:22 (5)› (step 1)
  ev: EVENT: timeslot¦end¦foo¦bar
-NEW: <ConditionalWorkSequence:24 (4)>
-   : │  id: 24
+0 +WAIT 10 start job ‹Waiter GOT¦EVENT¦B ??›
+0 -WAIT 10 start job ‹Waiter GOT¦EVENT¦B ??›
+NEW: ‹ConditionalWorkSequence:23 (4)›
+   : │  id: 23
    : │  call count: 0
    : │  EVENT: wait¦start¦12.1¦GOT¦EVENT¦B
    : └1╴... done.
 EVENT: wait¦start¦12.1¦GOT¦EVENT¦B
 END: wait¦start¦12.1¦GOT¦EVENT¦B
-NEW: <ConditionalWorkSequence:25 (4)>
-   : │  id: 25
+NEW: ‹ConditionalWorkSequence:24 (4)›
+   : │  id: 24
    : │  call count: 0
    : │  EVENT: wait¦done¦12.1¦GOT¦EVENT¦B
    : └1╴... done.
@@ -218,16 +238,20 @@ EVENT: wait¦done¦12.1¦GOT¦EVENT¦B
 END: wait¦done¦12.1¦GOT¦EVENT¦B
 1 Yes
 1 Yes
+0 +WAIT 11 start job ‹Async async›
+0 -WAIT 11 start job ‹Async async›
 END: timeslot¦end¦foo¦bar
-NEW: <ConditionalWorkSequence:26 (4)>
-   : │  id: 26
+0 +WAIT 12 start job ‹Waiter AFTER¦EVENT¦B ??›
+0 -WAIT 12 start job ‹Waiter AFTER¦EVENT¦B ??›
+NEW: ‹ConditionalWorkSequence:25 (4)›
+   : │  id: 25
    : │  call count: 0
    : │  EVENT: wait¦start¦12.6¦AFTER¦EVENT¦B
    : └1╴... done.
 EVENT: wait¦start¦12.6¦AFTER¦EVENT¦B
 END: wait¦start¦12.6¦AFTER¦EVENT¦B
-NEW: <ConditionalWorkSequence:27 (4)>
-   : │  id: 27
+NEW: ‹ConditionalWorkSequence:26 (4)›
+   : │  id: 26
    : │  call count: 0
    : │  EVENT: wait¦done¦12.5¦C¦after
    : └1╴... done.
@@ -242,15 +266,17 @@ next: 7.5 sec
 .
 1 Yes
 1 Yes
-NEW: <ConditionalWorkSequence:28 (4)>
-   : │  id: 28
+0 +WAIT 13 start job ‹Waiter D¦during¦again ??›
+0 -WAIT 13 start job ‹Waiter D¦during¦again ??›
+NEW: ‹ConditionalWorkSequence:27 (4)›
+   : │  id: 27
    : │  call count: 0
    : │  EVENT: wait¦start¦20.5¦D¦during¦again
    : └1╴... done.
 EVENT: wait¦start¦20.5¦D¦during¦again
 END: wait¦start¦20.5¦D¦during¦again
-NEW: <ConditionalWorkSequence:29 (4)>
-   : │  id: 29
+NEW: ‹ConditionalWorkSequence:28 (4)›
+   : │  id: 28
    : │  call count: 0
    : │  EVENT: wait¦done¦12.6¦AFTER¦EVENT¦B
    : └1╴... done.
@@ -258,23 +284,25 @@ EVENT: wait¦done¦12.6¦AFTER¦EVENT¦B
 END: wait¦done¦12.6¦AFTER¦EVENT¦B
 0 got it next
 1 Yes
-NEW: <ConditionalWorkSequence:30 (4)>
-   : │  id: 30
+0 +WAIT 14 start job ‹Waiter GOT¦EVENT¦AX ??›
+0 -WAIT 14 start job ‹Waiter GOT¦EVENT¦AX ??›
+NEW: ‹ConditionalWorkSequence:29 (4)›
+   : │  id: 29
    : │  call count: 0
    : │  EVENT: wait¦start¦12.7¦GOT¦EVENT¦AX
    : └1╴... done.
 EVENT: wait¦start¦12.7¦GOT¦EVENT¦AX
 END: wait¦start¦12.7¦GOT¦EVENT¦AX
-NEW: <ConditionalWorkSequence:31 (4)>
-   : │  id: 31
+NEW: ‹ConditionalWorkSequence:30 (4)›
+   : │  id: 30
    : │  call count: 0
    : │  EVENT: wait¦done¦12.7¦GOT¦EVENT¦AX
    : └1╴... done.
 EVENT: wait¦done¦12.7¦GOT¦EVENT¦AX
 END: wait¦done¦12.7¦GOT¦EVENT¦AX
 1 Yes
-NEW: <ConditionalWorkSequence:32 (5)>
-   : │  id: 32
+NEW: ‹ConditionalWorkSequence:31 (5)›
+   : │  id: 31
    : │  call count: 0
    : │  EVENT: timeslot¦begin¦foo¦bar
    : ├1╴on timeslot begin foo bar ‹OnEventHandler›
@@ -313,17 +341,19 @@ RUN: on timeslot begin foo bar ‹OnEventHandler›
    :     : step: wait GOT EVENT AX ‹WaitHandler›
    :     : step: if in timeslot foo bar ‹IfStatement›
    :     :     : step: log DEBUG Yes ‹LogHandler›
- at: <ConditionalWorkSequence:32 (5)> (step 1)
+ at: ‹ConditionalWorkSequence:31 (5)› (step 1)
  ev: EVENT: timeslot¦begin¦foo¦bar
-NEW: <ConditionalWorkSequence:33 (4)>
-   : │  id: 33
+0 +WAIT 15 start job ‹Waiter GOT¦EVENT¦A ??›
+0 -WAIT 15 start job ‹Waiter GOT¦EVENT¦A ??›
+NEW: ‹ConditionalWorkSequence:32 (4)›
+   : │  id: 32
    : │  call count: 0
    : │  EVENT: wait¦start¦20.3¦GOT¦EVENT¦A
    : └1╴... done.
 EVENT: wait¦start¦20.3¦GOT¦EVENT¦A
 END: wait¦start¦20.3¦GOT¦EVENT¦A
-NEW: <ConditionalWorkSequence:34 (4)>
-   : │  id: 34
+NEW: ‹ConditionalWorkSequence:33 (4)›
+   : │  id: 33
    : │  call count: 0
    : │  EVENT: wait¦done¦20.3¦GOT¦EVENT¦A
    : └1╴... done.
@@ -331,16 +361,20 @@ EVENT: wait¦done¦20.3¦GOT¦EVENT¦A
 END: wait¦done¦20.3¦GOT¦EVENT¦A
 1 Yes
 1 Yes
+0 +WAIT 16 start job ‹Async async›
+0 -WAIT 16 start job ‹Async async›
 END: timeslot¦begin¦foo¦bar
-NEW: <ConditionalWorkSequence:35 (4)>
-   : │  id: 35
+0 +WAIT 17 start job ‹Waiter AFTER¦EVENT¦A ??›
+0 -WAIT 17 start job ‹Waiter AFTER¦EVENT¦A ??›
+NEW: ‹ConditionalWorkSequence:34 (4)›
+   : │  id: 34
    : │  call count: 0
    : │  EVENT: wait¦start¦20.8¦AFTER¦EVENT¦A
    : └1╴... done.
 EVENT: wait¦start¦20.8¦AFTER¦EVENT¦A
 END: wait¦start¦20.8¦AFTER¦EVENT¦A
-NEW: <ConditionalWorkSequence:36 (4)>
-   : │  id: 36
+NEW: ‹ConditionalWorkSequence:35 (4)›
+   : │  id: 35
    : │  call count: 0
    : │  EVENT: wait¦done¦20.5¦D¦during¦again
    : └1╴... done.
@@ -365,25 +399,90 @@ duration: 2.0
 last: 0.5 sec
 .
 1 Yes
-NEW: <ConditionalWorkSequence:37 (7)>
-   : │  id: 37
+0 +WAIT 18 kill job <homevent.tokize.tokizer obj>
+0 -WAIT 18 kill job <homevent.tokize.tokizer obj>
+NEW: ‹ConditionalWorkSequence:36 (6)›
+   : │  id: 36
    : │  call count: 0
    : │  EVENT: shutdown
    : └1╴... done.
 EVENT: shutdown
-NEW: <ConditionalWorkSequence:38 (4)>
+NEW: ‹ConditionalWorkSequence:37 (4)›
+   : │  id: 37
+   : │  call count: 0
+   : │  EVENT: module¦unload¦data
+   : └1╴... done.
+EVENT: module¦unload¦data
+END: module¦unload¦data
+NEW: ‹ConditionalWorkSequence:38 (4)›
    : │  id: 38
    : │  call count: 0
-   : │  EVENT: wait¦cancel¦20.8¦AFTER¦EVENT¦A
+   : │  EVENT: module¦unload¦timeslot
    : └1╴... done.
-EVENT: wait¦cancel¦20.8¦AFTER¦EVENT¦A
-END: wait¦cancel¦20.8¦AFTER¦EVENT¦A
-END: shutdown
-Waiter ‹wait› was cancelled
-NEW: <WorkSequence:39 (4)>
+EVENT: module¦unload¦timeslot
+END: module¦unload¦timeslot
+NEW: ‹ConditionalWorkSequence:39 (4)›
    : │  id: 39
    : │  call count: 0
-   : │  Waiter ‹wait› was cancelled
+   : │  EVENT: module¦unload¦tests
    : └1╴... done.
-Waiter ‹wait› was cancelled
+EVENT: module¦unload¦tests
+END: module¦unload¦tests
+NEW: ‹ConditionalWorkSequence:40 (4)›
+   : │  id: 40
+   : │  call count: 0
+   : │  EVENT: module¦unload¦block
+   : └1╴... done.
+EVENT: module¦unload¦block
+END: module¦unload¦block
+NEW: ‹ConditionalWorkSequence:41 (4)›
+   : │  id: 41
+   : │  call count: 0
+   : │  EVENT: module¦unload¦logging
+   : └1╴... done.
+EVENT: module¦unload¦logging
+END: module¦unload¦logging
+NEW: ‹ConditionalWorkSequence:42 (4)›
+   : │  id: 42
+   : │  call count: 0
+   : │  EVENT: module¦unload¦wait
+   : └1╴... done.
+EVENT: module¦unload¦wait
+END: module¦unload¦wait
+NEW: ‹ConditionalWorkSequence:43 (4)›
+   : │  id: 43
+   : │  call count: 0
+   : │  EVENT: module¦unload¦on_event
+   : └1╴... done.
+EVENT: module¦unload¦on_event
+END: module¦unload¦on_event
+NEW: ‹ConditionalWorkSequence:44 (4)›
+   : │  id: 44
+   : │  call count: 0
+   : │  EVENT: module¦unload¦bool
+   : └1╴... done.
+EVENT: module¦unload¦bool
+END: module¦unload¦bool
+NEW: ‹ConditionalWorkSequence:45 (4)›
+   : │  id: 45
+   : │  call count: 0
+   : │  EVENT: module¦unload¦trigger
+   : └1╴... done.
+EVENT: module¦unload¦trigger
+END: module¦unload¦trigger
+NEW: ‹ConditionalWorkSequence:46 (4)›
+   : │  id: 46
+   : │  call count: 0
+   : │  EVENT: module¦unload¦ifelse
+   : └1╴... done.
+EVENT: module¦unload¦ifelse
+END: module¦unload¦ifelse
+END: shutdown
+Waiter ‹AFTER EVENT A› was cancelled
+NEW: ‹WorkSequence:47 (4)›
+   : │  id: 47
+   : │  call count: 0
+   : │  Waiter ‹AFTER EVENT A› was cancelled
+   : └1╴... done.
+Waiter ‹AFTER EVENT A› was cancelled
 END: WaitCancelled

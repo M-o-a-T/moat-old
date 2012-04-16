@@ -1,32 +1,36 @@
-NEW: <ConditionalWorkSequence:6 (4)>
-   : │  id: 6
+NEW: ‹ConditionalWorkSequence:7 (4)›
+   : │  id: 7
    : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
 EVENT: startup
 END: startup
+0 +WAIT 1 start job ‹Collected Parser:n1›
+0 -WAIT 1 start job ‹Collected Parser:n1›
+0 +WAIT 2 start job <homevent.tokize.tokizer obj>
+0 -WAIT 2 start job <homevent.tokize.tokizer obj>
 Init foo(1) from ‹global_words: Global 3›
-Input foo(1): <InputEvent:>
+Input foo(1): 
 Init foo(2) from ‹global_words: Global 3›
-Input foo(2): <InputEvent:baz>
+Input foo(2): baz
 Init foo¦bar(3) from ‹global_words: Global 3›
-Input foo¦bar(3): <InputEvent:>
+Input foo¦bar(3): 
 Init foo¦bar(4) from ‹global_words: Global 3›
-Input foo¦bar(4): <InputEvent:baz>
+Input foo¦bar(4): baz
 Init foo¦bar(5) from Ctx(Ctx({'out': <test.logwrite obj>}),{'words': ‹global_words: Global 3›})
 InputComplex foo¦bar(5): [u'foo', u'bar', u'baz', u'quux']
 Init what(6) from ‹BarHandler: foo¦bar 2 (5)›
-Input what(6): <InputEvent:ever>
+Input what(6): ever
 Init for(7) from Ctx(Ctx(Ctx({'out': <test.logwrite obj>}),{'words': ‹global_words: Global 3›}),{'words': ‹BarHandler: foo¦bar 2 (5)›})
 InputComplex for(7): [u'for', u'ever', u'and', u'ever']
 Init foiled(8) from ‹ForHandler: for 1 (7)›
-Input foiled(8): <InputEvent:again>
+Input foiled(8): again
 ... moving up
 Init what(9) from ‹BarHandler: foo¦bar 2 (5)›
-Input what(9): <InputEvent:else>
+Input what(9): else
 ... moving up
 Init foo(10) from ‹global_words: Global 3›
-Input foo(10): <InputEvent:again>
+Input foo(10): again
 Global : word list:
 Known words:
 conditions   : List of conditions you can use in 'if' statements.
@@ -64,10 +68,19 @@ Init foo¦bar(16) from None
 Init for(17) from None
 Init foiled(18) from None
 foiled : not clingfilm
-NEW: <ConditionalWorkSequence:7 (5)>
-   : │  id: 7
+0 +WAIT 3 kill job <homevent.tokize.tokizer obj>
+0 -WAIT 3 kill job <homevent.tokize.tokizer obj>
+NEW: ‹ConditionalWorkSequence:8 (6)›
+   : │  id: 8
    : │  call count: 0
    : │  EVENT: shutdown
    : └1╴... done.
 EVENT: shutdown
+NEW: ‹ConditionalWorkSequence:9 (4)›
+   : │  id: 9
+   : │  call count: 0
+   : │  EVENT: module¦unload¦help
+   : └1╴... done.
+EVENT: module¦unload¦help
+END: module¦unload¦help
 END: shutdown

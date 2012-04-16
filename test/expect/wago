@@ -1,79 +1,94 @@
-NEW: <ConditionalWorkSequence:6 (4)>
-   : │  id: 6
+NEW: ‹ConditionalWorkSequence:7 (4)›
+   : │  id: 7
    : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
 EVENT: startup
 END: startup
-NEW: <ConditionalWorkSequence:7 (4)>
-   : │  id: 7
+0 +WAIT 1 start job ‹Collected Parser:n1›
+0 -WAIT 1 start job ‹Collected Parser:n1›
+0 +WAIT 2 start job <homevent.tokize.tokizer obj>
+0 -WAIT 2 start job <homevent.tokize.tokizer obj>
+NEW: ‹ConditionalWorkSequence:8 (4)›
+   : │  id: 8
    : │  call count: 0
    : │  EVENT: module¦load¦bool
    : └1╴... done.
 EVENT: module¦load¦bool
 END: module¦load¦bool
-NEW: <ConditionalWorkSequence:8 (4)>
-   : │  id: 8
+NEW: ‹ConditionalWorkSequence:9 (4)›
+   : │  id: 9
    : │  call count: 0
    : │  EVENT: module¦load¦logging
    : └1╴... done.
 EVENT: module¦load¦logging
 END: module¦load¦logging
-NEW: <ConditionalWorkSequence:9 (4)>
-   : │  id: 9
+NEW: ‹ConditionalWorkSequence:10 (4)›
+   : │  id: 10
    : │  call count: 0
    : │  EVENT: module¦load¦trigger
    : └1╴... done.
 EVENT: module¦load¦trigger
 END: module¦load¦trigger
-NEW: <ConditionalWorkSequence:11 (4)>
+NEW: ‹ConditionalWorkSequence:11 (4)›
    : │  id: 11
    : │  call count: 0
    : │  EVENT: module¦load¦wait
    : └1╴... done.
 EVENT: module¦load¦wait
 END: module¦load¦wait
-NEW: <ConditionalWorkSequence:12 (4)>
+NEW: ‹ConditionalWorkSequence:12 (4)›
    : │  id: 12
    : │  call count: 0
    : │  EVENT: module¦load¦on_event
    : └1╴... done.
 EVENT: module¦load¦on_event
 END: module¦load¦on_event
-NEW: <ConditionalWorkSequence:14 (4)>
-   : │  id: 14
+NEW: ‹ConditionalWorkSequence:13 (4)›
+   : │  id: 13
    : │  call count: 0
    : │  EVENT: module¦load¦wago
    : └1╴... done.
 EVENT: module¦load¦wago
 END: module¦load¦wago
-NEW: <ConditionalWorkSequence:15 (4)>
-   : │  id: 15
+0 +WAIT 3 start job ‹Collected OutLogger:OutLogger¦x2›
+0 -WAIT 3 start job ‹Collected OutLogger:OutLogger¦x2›
+0 +WAIT 4 start job ‹Async async›
+0 -WAIT 4 start job ‹Async async›
+0 +WAIT 5 start job ‹Waiter _wait¦1 ??›
+0 -WAIT 5 start job ‹Waiter _wait¦1 ??›
+NEW: ‹ConditionalWorkSequence:14 (4)›
+   : │  id: 14
    : │  call count: 0
-   : │  EVENT: wait¦start¦1.5¦_wait¦1
+   : │  EVENT: wait¦start¦1.6¦_wait¦1
    : └1╴... done.
-EVENT: wait¦start¦1.5¦_wait¦1
-END: wait¦start¦1.5¦_wait¦1
+EVENT: wait¦start¦1.6¦_wait¦1
+END: wait¦start¦1.6¦_wait¦1
+0 +WAIT 6 start job ‹WAGOchannel:‹Collected _MsgForwarder:test››
+0 -WAIT 6 start job ‹WAGOchannel:‹Collected _MsgForwarder:test››
+0 +WAIT 7 start job ‹WAGOqueue:test New›
+0 -WAIT 7 start job ‹WAGOqueue:test New›
 0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'WAGO ready.' type:MT_INFO prio:1›
-NEW: <ConditionalWorkSequence:16 (4)>
-   : │  id: 16
+NEW: ‹ConditionalWorkSequence:15 (4)›
+   : │  id: 15
    : │  call count: 0
    : │  EVENT: msg¦unhandled¦‹MsgIncoming: msg:'WAGO ready.' type:MT_INFO prio:1›¦test
    : └1╴... done.
 EVENT: msg¦unhandled¦‹MsgIncoming: msg:'WAGO ready.' type:MT_INFO prio:1›¦test
 END: msg¦unhandled¦‹MsgIncoming: msg:'WAGO ready.' type:MT_INFO prio:1›¦test
-NEW: <ConditionalWorkSequence:17 (4)>
-   : │  id: 17
+NEW: ‹ConditionalWorkSequence:16 (4)›
+   : │  id: 16
    : │  call count: 0
-   : │  EVENT: wait¦done¦1.5¦_wait¦1
+   : │  EVENT: wait¦done¦1.6¦_wait¦1
    : └1╴... done.
-EVENT: wait¦done¦1.5¦_wait¦1
-END: wait¦done¦1.5¦_wait¦1
+EVENT: wait¦done¦1.6¦_wait¦1
+END: wait¦done¦1.6¦_wait¦1
 event
 log
 module
 monitor
 on
+parser
 wago conn
 wago server
 wait
@@ -85,7 +100,7 @@ type: wago
 host: localhost
 port: 59069
 .
-test :: <WAGOqueue:test: New>
+test :: ‹WAGOqueue:test New›
 .
 state: New
 since: None
@@ -100,17 +115,93 @@ conn host: localhost
 conn port: 59069
 .
 1 Yes
+0 +WAIT 8 kill job <homevent.tokize.tokizer obj>
 DEBUG> Yes
-1 Yes
-DEBUG> Yes
-1 Yes
-DEBUG> Yes
-NEW: <ConditionalWorkSequence:18 (7)>
-   : │  id: 18
+0 -WAIT 8 kill job <homevent.tokize.tokizer obj>
+NEW: ‹ConditionalWorkSequence:17 (6)›
+   : │  id: 17
    : │  call count: 0
    : │  EVENT: shutdown
    : └1╴... done.
 EVENT: shutdown
+0 +WAIT 9 kill job ‹WAGOqueue:test New›
+0 -WAIT 9 kill job ‹WAGOqueue:test New›
+0 conn deleted WAGOqueue test
+NEW: ‹ConditionalWorkSequence:18 (4)›
+   : │  id: 18
+   : │  call count: 0
+   : │  EVENT: module¦unload¦file
+   : └1╴... done.
+EVENT: module¦unload¦file
+END: module¦unload¦file
+NEW: ‹ConditionalWorkSequence:19 (4)›
+   : │  id: 19
+   : │  call count: 0
+   : │  EVENT: module¦unload¦data
+   : └1╴... done.
+EVENT: module¦unload¦data
+END: module¦unload¦data
+NEW: ‹ConditionalWorkSequence:20 (4)›
+   : │  id: 20
+   : │  call count: 0
+   : │  EVENT: module¦unload¦on_event
+   : └1╴... done.
+EVENT: module¦unload¦on_event
+END: module¦unload¦on_event
+NEW: ‹ConditionalWorkSequence:21 (4)›
+   : │  id: 21
+   : │  call count: 0
+   : │  EVENT: module¦unload¦block
+   : └1╴... done.
+EVENT: module¦unload¦block
+END: module¦unload¦block
+NEW: ‹ConditionalWorkSequence:22 (4)›
+   : │  id: 22
+   : │  call count: 0
+   : │  EVENT: module¦unload¦logging
+   : └1╴... done.
+EVENT: module¦unload¦logging
+END: module¦unload¦logging
+NEW: ‹ConditionalWorkSequence:23 (4)›
+   : │  id: 23
+   : │  call count: 0
+   : │  EVENT: module¦unload¦wait
+   : └1╴... done.
+EVENT: module¦unload¦wait
+END: module¦unload¦wait
+NEW: ‹ConditionalWorkSequence:24 (4)›
+   : │  id: 24
+   : │  call count: 0
+   : │  EVENT: module¦unload¦wago
+   : └1╴... done.
+EVENT: module¦unload¦wago
+END: module¦unload¦wago
+NEW: ‹ConditionalWorkSequence:25 (4)›
+   : │  id: 25
+   : │  call count: 0
+   : │  EVENT: module¦unload¦ifelse
+   : └1╴... done.
+EVENT: module¦unload¦ifelse
+END: module¦unload¦ifelse
+NEW: ‹ConditionalWorkSequence:26 (4)›
+   : │  id: 26
+   : │  call count: 0
+   : │  EVENT: module¦unload¦trigger
+   : └1╴... done.
+EVENT: module¦unload¦trigger
+END: module¦unload¦trigger
+NEW: ‹ConditionalWorkSequence:27 (4)›
+   : │  id: 27
+   : │  call count: 0
+   : │  EVENT: module¦unload¦path
+   : └1╴... done.
+EVENT: module¦unload¦path
+END: module¦unload¦path
+NEW: ‹ConditionalWorkSequence:28 (4)›
+   : │  id: 28
+   : │  call count: 0
+   : │  EVENT: module¦unload¦bool
+   : └1╴... done.
+EVENT: module¦unload¦bool
+END: module¦unload¦bool
 END: shutdown
-0 conn ReOpen WAGOqueue test
-0 conn connecting WAGOqueue test

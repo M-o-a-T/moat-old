@@ -1,71 +1,41 @@
-NEW: <ConditionalWorkSequence:7 (4)>
+NEW: ‹ConditionalWorkSequence:7 (4)›
    : │  id: 7
    : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
 EVENT: startup
 END: startup
-NEW: <ConditionalWorkSequence:8 (4)>
+0 +WAIT 1 start job ‹Collected Parser:n1›
+0 -WAIT 1 start job ‹Collected Parser:n1›
+0 +WAIT 2 start job <homevent.tokize.tokizer obj>
+0 -WAIT 2 start job <homevent.tokize.tokizer obj>
+0 +WAIT 3 start job ‹Async async›
+0 -WAIT 3 start job ‹Async async›
+0 +WAIT 4 start job ‹Waiter BAD ??›
+0 -WAIT 4 start job ‹Waiter BAD ??›
+NEW: ‹ConditionalWorkSequence:8 (4)›
    : │  id: 8
    : │  call count: 0
    : │  EVENT: wait¦start¦0.3¦BAD
    : └1╴... done.
 EVENT: wait¦start¦0.3¦BAD
 END: wait¦start¦0.3¦BAD
-NEW: <ConditionalWorkSequence:9 (4)>
+NEW: ‹ConditionalWorkSequence:9 (4)›
    : │  id: 9
    : │  call count: 0
    : │  EVENT: net¦error¦foop
    : └1╴... done.
 EVENT: net¦error¦foop
 END: net¦error¦foop
-Traceback (most recent call last):
-  File "../modules/block.py", line 60, in _run
-    super(Async,self).run(*a,**k)
-  File "/daten/src/git/homevent/homevent/statement.py", line 311, in run
-    res = proc.run(ctx)
-  File "/daten/src/git/homevent/homevent/net.py", line 291, in run
-    self.start_up()
-  File "/daten/src/git/homevent/homevent/net.py", line 315, in start_up
-    return self.client(name=self.dest, host=self.host,port=self.port)
-  File "/daten/src/git/homevent/homevent/net.py", line 144, in __init__
-    reraise(ex)
-  File "/daten/src/git/homevent/homevent/net.py", line 134, in __init__
-    self._connect()
-  File "/daten/src/git/homevent/homevent/net.py", line 192, in _connect
-    reraise(e)
-  File "/daten/src/git/homevent/homevent/net.py", line 182, in _connect
-    s.connect(sa)
-  File "/usr/lib/pymodules/python2.7/gevent/socket.py", line 333, in connect
-    raise error(err, strerror(err))
-error: [Errno 111] Connection refused
-NEW: <WorkSequence:10 (4)>
+[Errno 111] Connection refused
+NEW: ‹WorkSequence:10 (4)›
    : │  id: 10
    : │  call count: 0
    : │  [Errno 111] Connection refused
    : └1╴... done.
-Traceback (most recent call last):
-  File "../modules/block.py", line 60, in _run
-    super(Async,self).run(*a,**k)
-  File "/daten/src/git/homevent/homevent/statement.py", line 311, in run
-    res = proc.run(ctx)
-  File "/daten/src/git/homevent/homevent/net.py", line 291, in run
-    self.start_up()
-  File "/daten/src/git/homevent/homevent/net.py", line 315, in start_up
-    return self.client(name=self.dest, host=self.host,port=self.port)
-  File "/daten/src/git/homevent/homevent/net.py", line 144, in __init__
-    reraise(ex)
-  File "/daten/src/git/homevent/homevent/net.py", line 134, in __init__
-    self._connect()
-  File "/daten/src/git/homevent/homevent/net.py", line 192, in _connect
-    reraise(e)
-  File "/daten/src/git/homevent/homevent/net.py", line 182, in _connect
-    s.connect(sa)
-  File "/usr/lib/pymodules/python2.7/gevent/socket.py", line 333, in connect
-    raise error(err, strerror(err))
-error: [Errno 111] Connection refused
+[Errno 111] Connection refused
 END: error
-NEW: <ConditionalWorkSequence:11 (4)>
+NEW: ‹ConditionalWorkSequence:11 (4)›
    : │  id: 11
    : │  call count: 0
    : │  EVENT: wait¦done¦0.3¦BAD
@@ -81,28 +51,34 @@ END: wait¦done¦0.3¦BAD
 0 NewHandler 14
 0 Create OnEvtHandler: net¦disconnect¦baz¦zaz
 0 NewHandler 15
-NEW: <ConditionalWorkSequence:16 (4)>
+0 +WAIT 5 start job ‹Waiter BEFORE ??›
+0 -WAIT 5 start job ‹Waiter BEFORE ??›
+NEW: ‹ConditionalWorkSequence:16 (4)›
    : │  id: 16
    : │  call count: 0
    : │  EVENT: wait¦start¦0.5¦BEFORE
    : └1╴... done.
 EVENT: wait¦start¦0.5¦BEFORE
 END: wait¦start¦0.5¦BEFORE
-NEW: <ConditionalWorkSequence:17 (4)>
+NEW: ‹ConditionalWorkSequence:17 (4)›
    : │  id: 17
    : │  call count: 0
    : │  EVENT: wait¦done¦0.5¦BEFORE
    : └1╴... done.
 EVENT: wait¦done¦0.5¦BEFORE
 END: wait¦done¦0.5¦BEFORE
-NEW: <ConditionalWorkSequence:18 (4)>
+0 +WAIT 6 start job ‹Async async›
+0 -WAIT 6 start job ‹Async async›
+0 +WAIT 7 start job ‹Waiter AFTER ??›
+0 -WAIT 7 start job ‹Waiter AFTER ??›
+NEW: ‹ConditionalWorkSequence:18 (4)›
    : │  id: 18
    : │  call count: 0
    : │  EVENT: wait¦start¦1.3¦AFTER
    : └1╴... done.
 EVENT: wait¦start¦1.3¦AFTER
 END: wait¦start¦1.3¦AFTER
-NEW: <ConditionalWorkSequence:19 (5)>
+NEW: ‹ConditionalWorkSequence:19 (5)›
    : │  id: 19
    : │  call count: 0
    : │  EVENT: net¦connect¦foo
@@ -120,7 +96,7 @@ RUN: on net connect foo ‹OnEventHandler›
    : step: list net ‹List›
    : step: list net foo ‹List›
    : step: del net foo ‹Del›
- at: <ConditionalWorkSequence:19 (5)> (step 1)
+ at: ‹ConditionalWorkSequence:19 (5)› (step 1)
  ev: EVENT: net¦connect¦foo
 foo :: net_active localhost:50333
 .
@@ -128,7 +104,7 @@ type: net_active
 host: localhost
 port: 50333
 .
-NEW: <ConditionalWorkSequence:20 (5)>
+NEW: ‹ConditionalWorkSequence:20 (5)›
    : │  id: 20
    : │  call count: 0
    : │  EVENT: net¦disconnect¦foo
@@ -140,80 +116,15 @@ EVENT: net¦disconnect¦foo
 RUN: on net disconnect foo ‹OnEventHandler›
    : prio: 51
    : step: log TRACE dis foo ‹LogHandler›
- at: <ConditionalWorkSequence:20 (5)> (step 1)
+ at: ‹ConditionalWorkSequence:20 (5)› (step 1)
  ev: EVENT: net¦disconnect¦foo
 0 dis foo
 END: net¦disconnect¦foo
 END: net¦connect¦foo
-NEW: <ConditionalWorkSequence:21 (5)>
+0 +WAIT 8 start job ‹Collected NETactive:foo›
+0 -WAIT 8 start job ‹Collected NETactive:foo›
+NEW: ‹ConditionalWorkSequence:21 (5)›
    : │  id: 21
-   : │  call count: 0
-   : │  EVENT: net¦connect¦foo
-   : ├1╴on net connect foo ‹OnEventHandler›
-   : │  prio: 51
-   : │  step: send net foo bar ‹NETsend›
-   : │  step: list net ‹List›
-   : │  step: list net foo ‹List›
-   : │  step: del net foo ‹Del›
-   : └2╴... done.
-EVENT: net¦connect¦foo
-RUN: on net connect foo ‹OnEventHandler›
-   : prio: 51
-   : step: send net foo bar ‹NETsend›
-   : step: list net ‹List›
-   : step: list net foo ‹List›
-   : step: del net foo ‹Del›
- at: <ConditionalWorkSequence:21 (5)> (step 1)
- ev: EVENT: net¦connect¦foo
-END: net¦connect¦foo
-Traceback (most recent call last):
-  File "/daten/src/git/homevent/homevent/run.py", line 136, in run_event
-    process_event(event)
-  File "/daten/src/git/homevent/homevent/run.py", line 116, in process_event
-    collect_event(e).process(event=e)
-  File "/daten/src/git/homevent/homevent/worker.py", line 194, in process
-    self._process()
-  File "/daten/src/git/homevent/homevent/worker.py", line 256, in _process
-    reraise(res)
-  File "/daten/src/git/homevent/homevent/worker.py", line 226, in _process
-    r = w.process(event=self.event, queue=self)
-  File "../modules/on_event.py", line 169, in process
-    return self.parent.process(**k)
-  File "../modules/on_event.py", line 248, in process
-    return super(OnEventHandler,self).run(ctx)
-  File "/daten/src/git/homevent/homevent/statement.py", line 311, in run
-    res = proc.run(ctx)
-  File "/daten/src/git/homevent/homevent/net.py", line 429, in run
-    self.storage[name].write(val)
-KeyError: Name(u'foo',)
-NEW: <WorkSequence:22 (4)>
-   : │  id: 22
-   : │  call count: 0
-   : │  Name(u'foo',)
-   : └1╴... done.
-Traceback (most recent call last):
-  File "/daten/src/git/homevent/homevent/run.py", line 136, in run_event
-    process_event(event)
-  File "/daten/src/git/homevent/homevent/run.py", line 116, in process_event
-    collect_event(e).process(event=e)
-  File "/daten/src/git/homevent/homevent/worker.py", line 194, in process
-    self._process()
-  File "/daten/src/git/homevent/homevent/worker.py", line 256, in _process
-    reraise(res)
-  File "/daten/src/git/homevent/homevent/worker.py", line 226, in _process
-    r = w.process(event=self.event, queue=self)
-  File "../modules/on_event.py", line 169, in process
-    return self.parent.process(**k)
-  File "../modules/on_event.py", line 248, in process
-    return super(OnEventHandler,self).run(ctx)
-  File "/daten/src/git/homevent/homevent/statement.py", line 311, in run
-    res = proc.run(ctx)
-  File "/daten/src/git/homevent/homevent/net.py", line 429, in run
-    self.storage[name].write(val)
-KeyError: Name(u'foo',)
-END: KeyError
-NEW: <ConditionalWorkSequence:23 (5)>
-   : │  id: 23
    : │  call count: 0
    : │  EVENT: net¦connect¦baz¦zaz¦1
    : ├1╴on net connect baz zaz *who ‹OnEventHandler›
@@ -228,87 +139,24 @@ RUN: on net connect baz zaz *who ‹OnEventHandler›
    : step: send net quux ‹NETsend›
    : step: list net baz zaz $who ‹List›
    : step: del net baz zaz $who ‹Del›
- at: <ConditionalWorkSequence:23 (5)> (step 1)
+ at: ‹ConditionalWorkSequence:21 (5)› (step 1)
  ev: EVENT: net¦connect¦baz¦zaz¦1
 type: net_passive
 host: 127.0.0.1
-port: 47646
+port: 48419
 .
-NEW: <ConditionalWorkSequence:24 (4)>
-   : │  id: 24
+NEW: ‹ConditionalWorkSequence:22 (4)›
+   : │  id: 22
    : │  call count: 0
    : │  EVENT: net¦disconnect¦baz¦zaz¦1
    : └1╴... done.
 EVENT: net¦disconnect¦baz¦zaz¦1
 END: net¦disconnect¦baz¦zaz¦1
 END: net¦connect¦baz¦zaz¦1
-NEW: <ConditionalWorkSequence:25 (5)>
-   : │  id: 25
-   : │  call count: 0
-   : │  EVENT: net¦connect¦baz¦zaz¦1
-   : ├1╴on net connect baz zaz *who ‹OnEventHandler›
-   : │  prio: 51
-   : │  step: send net quux ‹NETsend›
-   : │  step: list net baz zaz $who ‹List›
-   : │  step: del net baz zaz $who ‹Del›
-   : └2╴... done.
-EVENT: net¦connect¦baz¦zaz¦1
-RUN: on net connect baz zaz *who ‹OnEventHandler›
-   : prio: 51
-   : step: send net quux ‹NETsend›
-   : step: list net baz zaz $who ‹List›
-   : step: del net baz zaz $who ‹Del›
- at: <ConditionalWorkSequence:25 (5)> (step 1)
- ev: EVENT: net¦connect¦baz¦zaz¦1
-END: net¦connect¦baz¦zaz¦1
-Traceback (most recent call last):
-  File "/daten/src/git/homevent/homevent/run.py", line 136, in run_event
-    process_event(event)
-  File "/daten/src/git/homevent/homevent/run.py", line 116, in process_event
-    collect_event(e).process(event=e)
-  File "/daten/src/git/homevent/homevent/worker.py", line 194, in process
-    self._process()
-  File "/daten/src/git/homevent/homevent/worker.py", line 256, in _process
-    reraise(res)
-  File "/daten/src/git/homevent/homevent/worker.py", line 226, in _process
-    r = w.process(event=self.event, queue=self)
-  File "../modules/on_event.py", line 169, in process
-    return self.parent.process(**k)
-  File "../modules/on_event.py", line 248, in process
-    return super(OnEventHandler,self).run(ctx)
-  File "/daten/src/git/homevent/homevent/statement.py", line 311, in run
-    res = proc.run(ctx)
-  File "/daten/src/git/homevent/homevent/net.py", line 429, in run
-    self.storage[name].write(val)
-KeyError: Name(u'baz', u'zaz', '1')
-NEW: <WorkSequence:26 (4)>
-   : │  id: 26
-   : │  call count: 0
-   : │  Name(u'baz', u'zaz', '1')
-   : └1╴... done.
-Traceback (most recent call last):
-  File "/daten/src/git/homevent/homevent/run.py", line 136, in run_event
-    process_event(event)
-  File "/daten/src/git/homevent/homevent/run.py", line 116, in process_event
-    collect_event(e).process(event=e)
-  File "/daten/src/git/homevent/homevent/worker.py", line 194, in process
-    self._process()
-  File "/daten/src/git/homevent/homevent/worker.py", line 256, in _process
-    reraise(res)
-  File "/daten/src/git/homevent/homevent/worker.py", line 226, in _process
-    r = w.process(event=self.event, queue=self)
-  File "../modules/on_event.py", line 169, in process
-    return self.parent.process(**k)
-  File "../modules/on_event.py", line 248, in process
-    return super(OnEventHandler,self).run(ctx)
-  File "/daten/src/git/homevent/homevent/statement.py", line 311, in run
-    res = proc.run(ctx)
-  File "/daten/src/git/homevent/homevent/net.py", line 429, in run
-    self.storage[name].write(val)
-KeyError: Name(u'baz', u'zaz', '1')
-END: KeyError
-NEW: <ConditionalWorkSequence:27 (4)>
-   : │  id: 27
+0 +WAIT 9 start job ‹Collected NETpassive:baz¦zaz¦1›
+0 -WAIT 9 start job ‹Collected NETpassive:baz¦zaz¦1›
+NEW: ‹ConditionalWorkSequence:23 (4)›
+   : │  id: 23
    : │  call count: 0
    : │  EVENT: wait¦done¦1.3¦AFTER
    : └1╴... done.
@@ -317,31 +165,70 @@ END: wait¦done¦1.3¦AFTER
 0 ending
 .
 1 Yes
-NEW: <ConditionalWorkSequence:28 (4)>
-   : │  id: 28
+0 +WAIT 10 start job ‹Waiter END ??›
+0 -WAIT 10 start job ‹Waiter END ??›
+NEW: ‹ConditionalWorkSequence:24 (4)›
+   : │  id: 24
    : │  call count: 0
    : │  EVENT: wait¦start¦0.2¦END
    : └1╴... done.
 EVENT: wait¦start¦0.2¦END
 END: wait¦start¦0.2¦END
-NEW: <ConditionalWorkSequence:29 (6)>
-   : │  id: 29
+0 +WAIT 11 kill job <homevent.tokize.tokizer obj>
+0 -WAIT 11 kill job <homevent.tokize.tokizer obj>
+NEW: ‹ConditionalWorkSequence:25 (6)›
+   : │  id: 25
    : │  call count: 0
    : │  EVENT: shutdown
    : └1╴... done.
 EVENT: shutdown
-NEW: <ConditionalWorkSequence:30 (4)>
+NEW: ‹ConditionalWorkSequence:26 (4)›
+   : │  id: 26
+   : │  call count: 0
+   : │  EVENT: module¦unload¦net
+   : └1╴... done.
+EVENT: module¦unload¦net
+END: module¦unload¦net
+NEW: ‹ConditionalWorkSequence:27 (4)›
+   : │  id: 27
+   : │  call count: 0
+   : │  EVENT: module¦unload¦data
+   : └1╴... done.
+EVENT: module¦unload¦data
+END: module¦unload¦data
+NEW: ‹ConditionalWorkSequence:28 (4)›
+   : │  id: 28
+   : │  call count: 0
+   : │  EVENT: module¦unload¦on_event
+   : └1╴... done.
+EVENT: module¦unload¦on_event
+END: module¦unload¦on_event
+NEW: ‹ConditionalWorkSequence:29 (4)›
+   : │  id: 29
+   : │  call count: 0
+   : │  EVENT: module¦unload¦block
+   : └1╴... done.
+EVENT: module¦unload¦block
+END: module¦unload¦block
+NEW: ‹ConditionalWorkSequence:30 (4)›
    : │  id: 30
    : │  call count: 0
-   : │  EVENT: wait¦cancel¦0.2¦END
+   : │  EVENT: module¦unload¦logging
    : └1╴... done.
-EVENT: wait¦cancel¦0.2¦END
-END: wait¦cancel¦0.2¦END
-END: shutdown
-NEW: <ConditionalWorkSequence:31 (4)>
+EVENT: module¦unload¦logging
+END: module¦unload¦logging
+NEW: ‹ConditionalWorkSequence:31 (4)›
    : │  id: 31
    : │  call count: 0
-   : │  EVENT: wait¦done¦0.0¦END
+   : │  EVENT: module¦unload¦wait
    : └1╴... done.
-EVENT: wait¦done¦0.0¦END
-END: wait¦done¦0.0¦END
+EVENT: module¦unload¦wait
+END: module¦unload¦wait
+NEW: ‹ConditionalWorkSequence:32 (4)›
+   : │  id: 32
+   : │  call count: 0
+   : │  EVENT: module¦unload¦ifelse
+   : └1╴... done.
+EVENT: module¦unload¦ifelse
+END: module¦unload¦ifelse
+END: shutdown

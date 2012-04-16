@@ -1,19 +1,21 @@
-NEW: <ConditionalWorkSequence:6 (4)>
-   : │  id: 6
+NEW: ‹ConditionalWorkSequence:7 (4)›
+   : │  id: 7
    : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
 EVENT: startup
 END: startup
+0 +WAIT 1 start job ‹Collected Parser:n1›
+0 -WAIT 1 start job ‹Collected Parser:n1›
+0 +WAIT 2 start job <homevent.tokize.tokizer obj>
+0 -WAIT 2 start job <homevent.tokize.tokizer obj>
 0 Create OnEvtHandler: fuß
-0 NewHandler 7
-0 Create OnEvtHandler: num¦1
 0 NewHandler 8
-0 Create OnEvtHandler: num¦2
+0 Create OnEvtHandler: num¦1
 0 NewHandler 9
-0 Create OnEvtHandler: num¦3
+0 Create OnEvtHandler: num¦2
 0 NewHandler 10
-0 Create OnEvtHandler: foo
+0 Create OnEvtHandler: num¦3
 0 NewHandler 11
 0 Create OnEvtHandler: foo
 0 NewHandler 12
@@ -21,21 +23,23 @@ END: startup
 0 NewHandler 13
 0 Create OnEvtHandler: foo
 0 NewHandler 14
-0 Create OnEvtHandler: bar¦*
+0 Create OnEvtHandler: foo
 0 NewHandler 15
+0 Create OnEvtHandler: bar¦*
+0 NewHandler 16
 Skipped One :: foo (49)
 Skipped Two :: foo (50)
 Num2Txt :: num¦2 (51)
 Schau auf deine Füße :: fuß (51)
 Txt2Num :: num¦1 (51)
-_on 15 :: bar¦* (51)
+_on 16 :: bar¦* (51)
 num2num :: num¦3 (51)
 Last Handler :: foo (55)
 not executed :: foo (60)
 .
 : ⇒OnEventWorker:Skipped¦One
 name: Skipped¦One
-id: 11
+id: 12
 prio: 49
 pname: Skipped One
 args: foo
@@ -43,14 +47,14 @@ prio: 49
 .
 : ⇒OnEventWorker:Skipped¦Two
 name: Skipped¦Two
-id: 12
+id: 13
 prio: 50
 pname: Skipped Two
 args: foo
 prio: 50
 .
-NEW: <ConditionalWorkSequence:16 (5)>
-   : │  id: 16
+NEW: ‹ConditionalWorkSequence:17 (5)›
+   : │  id: 17
    : │  call count: 0
    : │  IEVENT: bar¦foo
    : ├1╴on bar * ‹OnEventHandler›
@@ -63,10 +67,10 @@ RUN: on bar * ‹OnEventHandler›
    : prio: 51
    : step: block ‹Block›
    :     : step: trigger $1 ‹TriggerHandler›
- at: <ConditionalWorkSequence:16 (5)> (step 1)
+ at: ‹ConditionalWorkSequence:17 (5)› (step 1)
  ev: IEVENT: bar¦foo
-NEW: <ConditionalWorkSequence:17 (8)>
-   : │  id: 17
+NEW: ‹ConditionalWorkSequence:18 (8)›
+   : │  id: 18
    : │  call count: 0
    : │  IEVENT: foo
    : ├1╴on foo ‹OnEventHandler›
@@ -95,7 +99,7 @@ RUN: on foo ‹OnEventHandler›
    : prio: 49
    : step: if false ‹IfStatement›
    : step: log ERROR This should not be executed ‹LogHandler›
- at: <ConditionalWorkSequence:17 (8)> (step 1)
+ at: ‹ConditionalWorkSequence:18 (8)› (step 1)
  ev: IEVENT: foo
 RUN: on foo ‹OnEventHandler›
    : name: Skipped Two
@@ -103,19 +107,19 @@ RUN: on foo ‹OnEventHandler›
    : step: if true ‹IfStatement›
    :     : step: next handler ‹OnSkip›
    : step: log ERROR This should also not be executed ‹LogHandler›
- at: <ConditionalWorkSequence:17 (8)> (step 2)
+ at: ‹ConditionalWorkSequence:18 (8)› (step 2)
  ev: IEVENT: foo
 RUN: on foo ‹OnEventHandler›
    : name: Last Handler
    : prio: 55
    : step: log DEBUG This is logged once ‹LogHandler›
- at: <ConditionalWorkSequence:17 (8)> (step 3)
+ at: ‹ConditionalWorkSequence:18 (8)› (step 3)
  ev: IEVENT: foo
 1 This is logged once
 END: foo
 END: bar¦foo
-NEW: <ConditionalWorkSequence:18 (5)>
-   : │  id: 18
+NEW: ‹ConditionalWorkSequence:19 (5)›
+   : │  id: 19
    : │  call count: 0
    : │  IEVENT: bar¦foo
    : ├1╴on bar * ‹OnEventHandler›
@@ -128,10 +132,10 @@ RUN: on bar * ‹OnEventHandler›
    : prio: 51
    : step: block ‹Block›
    :     : step: trigger $1 ‹TriggerHandler›
- at: <ConditionalWorkSequence:18 (5)> (step 1)
+ at: ‹ConditionalWorkSequence:19 (5)› (step 1)
  ev: IEVENT: bar¦foo
-NEW: <ConditionalWorkSequence:19 (7)>
-   : │  id: 19
+NEW: ‹ConditionalWorkSequence:20 (7)›
+   : │  id: 20
    : │  call count: 0
    : │  IEVENT: foo
    : ├1╴on foo ‹OnEventHandler›
@@ -156,7 +160,7 @@ RUN: on foo ‹OnEventHandler›
    : prio: 49
    : step: if false ‹IfStatement›
    : step: log ERROR This should not be executed ‹LogHandler›
- at: <ConditionalWorkSequence:19 (7)> (step 1)
+ at: ‹ConditionalWorkSequence:20 (7)› (step 1)
  ev: IEVENT: foo
 RUN: on foo ‹OnEventHandler›
    : name: Skipped Two
@@ -164,13 +168,13 @@ RUN: on foo ‹OnEventHandler›
    : step: if true ‹IfStatement›
    :     : step: next handler ‹OnSkip›
    : step: log ERROR This should also not be executed ‹LogHandler›
- at: <ConditionalWorkSequence:19 (7)> (step 2)
+ at: ‹ConditionalWorkSequence:20 (7)› (step 2)
  ev: IEVENT: foo
 RUN: on foo ‹OnEventHandler›
    : name: not executed
    : prio: 60
    : step: log DEBUG This is logged once too ‹LogHandler›
- at: <ConditionalWorkSequence:19 (7)> (step 3)
+ at: ‹ConditionalWorkSequence:20 (7)› (step 3)
  ev: IEVENT: foo
 1 This is logged once too
 END: foo
@@ -179,12 +183,21 @@ Skipped One :: foo (49)
 Skipped Two :: foo (50)
 Num2Txt :: num¦2 (51)
 Txt2Num :: num¦1 (51)
-_on 15 :: bar¦* (51)
+_on 16 :: bar¦* (51)
 num2num :: num¦3 (51)
 not executed :: foo (60)
 .
-NEW: <ConditionalWorkSequence:20 (5)>
-   : │  id: 20
+0 +WAIT 3 start job ‹TriggerHandler: trigger 2›
+0 -WAIT 3 start job ‹TriggerHandler: trigger 2›
+0 +WAIT 4 start job ‹TriggerHandler: trigger 2›
+0 -WAIT 4 start job ‹TriggerHandler: trigger 2›
+0 +WAIT 5 start job ‹TriggerHandler: trigger 2›
+0 -WAIT 5 start job ‹TriggerHandler: trigger 2›
+0 +WAIT 6 start job ‹TriggerHandler: trigger 2›
+0 -WAIT 6 start job ‹TriggerHandler: trigger 2›
+0 +WAIT 7 kill job <homevent.tokize.tokizer obj>
+NEW: ‹ConditionalWorkSequence:21 (5)›
+   : │  id: 21
    : │  call count: 0
    : │  IEVENT: num¦3
    : ├1╴on num 3 ‹OnEventHandler›
@@ -197,12 +210,12 @@ RUN: on num 3 ‹OnEventHandler›
    : name: num2num
    : prio: 51
    : step: do nothing ‹DoNothingHandler›
- at: <ConditionalWorkSequence:20 (5)> (step 1)
+ at: ‹ConditionalWorkSequence:21 (5)› (step 1)
  ev: IEVENT: num¦3
 0 NOW: do nothing
 END: num¦3
-NEW: <ConditionalWorkSequence:21 (5)>
-   : │  id: 21
+NEW: ‹ConditionalWorkSequence:22 (5)›
+   : │  id: 22
    : │  call count: 0
    : │  IEVENT: num¦2
    : ├1╴on num 2 ‹OnEventHandler›
@@ -215,12 +228,12 @@ RUN: on num 2 ‹OnEventHandler›
    : name: Num2Txt
    : prio: 51
    : step: do nothing ‹DoNothingHandler›
- at: <ConditionalWorkSequence:21 (5)> (step 1)
+ at: ‹ConditionalWorkSequence:22 (5)› (step 1)
  ev: IEVENT: num¦2
 0 NOW: do nothing
 END: num¦2
-NEW: <ConditionalWorkSequence:22 (5)>
-   : │  id: 22
+NEW: ‹ConditionalWorkSequence:23 (5)›
+   : │  id: 23
    : │  call count: 0
    : │  IEVENT: num¦1
    : ├1╴on num 1 ‹OnEventHandler›
@@ -233,21 +246,71 @@ RUN: on num 1 ‹OnEventHandler›
    : name: Txt2Num
    : prio: 51
    : step: do nothing ‹DoNothingHandler›
- at: <ConditionalWorkSequence:22 (5)> (step 1)
+ at: ‹ConditionalWorkSequence:23 (5)› (step 1)
  ev: IEVENT: num¦1
 0 NOW: do nothing
 END: num¦1
-NEW: <ConditionalWorkSequence:23 (4)>
-   : │  id: 23
+NEW: ‹ConditionalWorkSequence:24 (4)›
+   : │  id: 24
    : │  call count: 0
    : │  IEVENT: fuß
    : └1╴... done.
 IEVENT: fuß
 END: fuß
-NEW: <ConditionalWorkSequence:24 (5)>
-   : │  id: 24
+0 -WAIT 7 kill job <homevent.tokize.tokizer obj>
+NEW: ‹ConditionalWorkSequence:25 (6)›
+   : │  id: 25
    : │  call count: 0
    : │  EVENT: shutdown
    : └1╴... done.
 EVENT: shutdown
+NEW: ‹ConditionalWorkSequence:26 (4)›
+   : │  id: 26
+   : │  call count: 0
+   : │  EVENT: module¦unload¦data
+   : └1╴... done.
+EVENT: module¦unload¦data
+END: module¦unload¦data
+NEW: ‹ConditionalWorkSequence:27 (4)›
+   : │  id: 27
+   : │  call count: 0
+   : │  EVENT: module¦unload¦on_event
+   : └1╴... done.
+EVENT: module¦unload¦on_event
+END: module¦unload¦on_event
+NEW: ‹ConditionalWorkSequence:28 (4)›
+   : │  id: 28
+   : │  call count: 0
+   : │  EVENT: module¦unload¦block
+   : └1╴... done.
+EVENT: module¦unload¦block
+END: module¦unload¦block
+NEW: ‹ConditionalWorkSequence:29 (4)›
+   : │  id: 29
+   : │  call count: 0
+   : │  EVENT: module¦unload¦logging
+   : └1╴... done.
+EVENT: module¦unload¦logging
+END: module¦unload¦logging
+NEW: ‹ConditionalWorkSequence:30 (4)›
+   : │  id: 30
+   : │  call count: 0
+   : │  EVENT: module¦unload¦ifelse
+   : └1╴... done.
+EVENT: module¦unload¦ifelse
+END: module¦unload¦ifelse
+NEW: ‹ConditionalWorkSequence:31 (4)›
+   : │  id: 31
+   : │  call count: 0
+   : │  EVENT: module¦unload¦trigger
+   : └1╴... done.
+EVENT: module¦unload¦trigger
+END: module¦unload¦trigger
+NEW: ‹ConditionalWorkSequence:32 (4)›
+   : │  id: 32
+   : │  call count: 0
+   : │  EVENT: module¦unload¦bool
+   : └1╴... done.
+EVENT: module¦unload¦bool
+END: module¦unload¦bool
 END: shutdown

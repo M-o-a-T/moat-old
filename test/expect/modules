@@ -1,30 +1,43 @@
-NEW: <ConditionalWorkSequence:6 (4)>
-   : │  id: 6
+NEW: ‹ConditionalWorkSequence:7 (4)›
+   : │  id: 7
    : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
 EVENT: startup
 END: startup
+0 +WAIT 1 start job ‹Collected Parser:n1›
+0 -WAIT 1 start job ‹Collected Parser:n1›
+0 +WAIT 2 start job <homevent.tokize.tokizer obj>
+0 -WAIT 2 start job <homevent.tokize.tokizer obj>
 1 Loading!
-NEW: <ConditionalWorkSequence:7 (4)>
-   : │  id: 7
+NEW: ‹ConditionalWorkSequence:8 (4)›
+   : │  id: 8
    : │  call count: 0
    : │  EVENT: module¦load¦example
    : └1╴... done.
 EVENT: module¦load¦example
 END: module¦load¦example
-NEW: <ConditionalWorkSequence:8 (4)>
-   : │  id: 8
+NEW: ‹ConditionalWorkSequence:9 (4)›
+   : │  id: 9
    : │  call count: 0
    : │  EVENT: module¦unload¦example
    : └1╴... done.
 EVENT: module¦unload¦example
 END: module¦unload¦example
 1 Unloading!
-NEW: <ConditionalWorkSequence:9 (5)>
-   : │  id: 9
+0 +WAIT 3 kill job <homevent.tokize.tokizer obj>
+0 -WAIT 3 kill job <homevent.tokize.tokizer obj>
+NEW: ‹ConditionalWorkSequence:10 (6)›
+   : │  id: 10
    : │  call count: 0
    : │  EVENT: shutdown
    : └1╴... done.
 EVENT: shutdown
+NEW: ‹ConditionalWorkSequence:11 (4)›
+   : │  id: 11
+   : │  call count: 0
+   : │  EVENT: module¦unload¦data
+   : └1╴... done.
+EVENT: module¦unload¦data
+END: module¦unload¦data
 END: shutdown

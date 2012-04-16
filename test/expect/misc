@@ -1,91 +1,149 @@
-NEW: <ConditionalWorkSequence:7 (4)>
+NEW: ‹ConditionalWorkSequence:7 (4)›
    : │  id: 7
    : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
 EVENT: startup
 END: startup
-NEW: <ConditionalWorkSequence:8 (4)>
+0 +WAIT 1 start job ‹Collected Parser:n1›
+0 -WAIT 1 start job ‹Collected Parser:n1›
+0 +WAIT 2 start job <homevent.tokize.tokizer obj>
+0 -WAIT 2 start job <homevent.tokize.tokizer obj>
+0 +WAIT 3 start job ‹TriggerHandler: trigger 2›
+0 -WAIT 3 start job ‹TriggerHandler: trigger 2›
+0 +WAIT 4 start job ‹TriggerHandler: trigger 2›
+0 -WAIT 4 start job ‹TriggerHandler: trigger 2›
+0 +WAIT 5 start job ‹Waiter A ??›
+0 -WAIT 5 start job ‹Waiter A ??›
+NEW: ‹ConditionalWorkSequence:8 (4)›
    : │  id: 8
    : │  call count: 0
    : │  EVENT: wait¦start¦×××¦A
    : └1╴... done.
 EVENT: wait¦start¦×××¦A
 END: wait¦start¦×××¦A
-NEW: <ConditionalWorkSequence:9 (4)>
+NEW: ‹ConditionalWorkSequence:9 (4)›
    : │  id: 9
    : │  call count: 0
    : │  IEVENT: bar1
    : └1╴... done.
 IEVENT: bar1
 END: bar1
-NEW: <ConditionalWorkSequence:10 (4)>
+NEW: ‹ConditionalWorkSequence:10 (4)›
    : │  id: 10
    : │  call count: 0
    : │  IEVENT: foo1
    : └1╴... done.
 IEVENT: foo1
 END: foo1
-NEW: <ConditionalWorkSequence:11 (4)>
+NEW: ‹ConditionalWorkSequence:11 (4)›
    : │  id: 11
    : │  call count: 0
    : │  EVENT: wait¦done¦×××¦A
    : └1╴... done.
 EVENT: wait¦done¦×××¦A
 END: wait¦done¦×××¦A
-NEW: <ConditionalWorkSequence:12 (4)>
+NEW: ‹ConditionalWorkSequence:12 (4)›
    : │  id: 12
    : │  call count: 0
-   : │  EVENT: wait¦start¦×××¦B
+   : │  IEVENT: foo2
    : └1╴... done.
-EVENT: wait¦start¦×××¦B
-END: wait¦start¦×××¦B
-NEW: <ConditionalWorkSequence:13 (4)>
+IEVENT: foo2
+END: foo2
+NEW: ‹ConditionalWorkSequence:13 (4)›
    : │  id: 13
    : │  call count: 0
    : │  IEVENT: bar2
    : └1╴... done.
 IEVENT: bar2
 END: bar2
-NEW: <ConditionalWorkSequence:14 (4)>
+0 +WAIT 6 start job ‹Waiter B ??›
+0 -WAIT 6 start job ‹Waiter B ??›
+NEW: ‹ConditionalWorkSequence:14 (4)›
    : │  id: 14
    : │  call count: 0
-   : │  IEVENT: foo2
+   : │  EVENT: wait¦start¦×××¦B
    : └1╴... done.
-IEVENT: foo2
-END: foo2
-NEW: <ConditionalWorkSequence:15 (4)>
+EVENT: wait¦start¦×××¦B
+END: wait¦start¦×××¦B
+NEW: ‹ConditionalWorkSequence:15 (4)›
    : │  id: 15
    : │  call count: 0
    : │  EVENT: wait¦done¦×××¦B
    : └1╴... done.
 EVENT: wait¦done¦×××¦B
 END: wait¦done¦×××¦B
-NEW: <ConditionalWorkSequence:16 (4)>
+0 +WAIT 7 start job ‹TriggerHandler: trigger 2›
+0 -WAIT 7 start job ‹TriggerHandler: trigger 2›
+0 +WAIT 8 start job ‹TriggerHandler: trigger 2›
+0 -WAIT 8 start job ‹TriggerHandler: trigger 2›
+0 +WAIT 9 start job ‹Waiter C ??›
+0 -WAIT 9 start job ‹Waiter C ??›
+NEW: ‹ConditionalWorkSequence:16 (4)›
    : │  id: 16
    : │  call count: 0
    : │  EVENT: wait¦start¦×××¦C
    : └1╴... done.
 EVENT: wait¦start¦×××¦C
 END: wait¦start¦×××¦C
-NEW: <ConditionalWorkSequence:17 (4)>
+NEW: ‹ConditionalWorkSequence:17 (4)›
    : │  id: 17
    : │  call count: 0
    : │  IEVENT: bar3
    : └1╴... done.
 IEVENT: bar3
 END: bar3
-NEW: <ConditionalWorkSequence:18 (4)>
+NEW: ‹ConditionalWorkSequence:18 (4)›
    : │  id: 18
    : │  call count: 0
    : │  IEVENT: foo3
    : └1╴... done.
 IEVENT: foo3
 END: foo3
-NEW: <ConditionalWorkSequence:19 (4)>
+NEW: ‹ConditionalWorkSequence:19 (4)›
    : │  id: 19
    : │  call count: 0
    : │  EVENT: wait¦done¦×××¦C
    : └1╴... done.
 EVENT: wait¦done¦×××¦C
 END: wait¦done¦×××¦C
+0 +WAIT 10 start job ‹Collected Parser:n2›
+0 -WAIT 10 start job ‹Collected Parser:n2›
+0 +WAIT 11 start job <homevent.tokize.tokizer obj>
+0 -WAIT 11 start job <homevent.tokize.tokizer obj>
+0 +WAIT 12 kill job <homevent.tokize.tokizer obj>
+NEW: ‹ConditionalWorkSequence:20 (4)›
+   : │  id: 20
+   : │  call count: 0
+   : │  IEVENT: foo4
+   : └1╴... done.
+IEVENT: foo4
+END: foo4
+NEW: ‹ConditionalWorkSequence:21 (4)›
+   : │  id: 21
+   : │  call count: 0
+   : │  IEVENT: bar4
+   : └1╴... done.
+IEVENT: bar4
+END: bar4
+0 +WAIT 13 start job ‹Async async›
+0 -WAIT 13 start job ‹Async async›
+0 +WAIT 14 start job ‹Waiter D ??›
+0 -WAIT 14 start job ‹Waiter D ??›
+NEW: ‹ConditionalWorkSequence:22 (4)›
+   : │  id: 22
+   : │  call count: 0
+   : │  EVENT: wait¦start¦×××¦D
+   : └1╴... done.
+EVENT: wait¦start¦×××¦D
+END: wait¦start¦×××¦D
+0 +WAIT 15 start job ‹TriggerHandler: trigger 2›
+0 -WAIT 15 start job ‹TriggerHandler: trigger 2›
+NEW: ‹ConditionalWorkSequence:23 (4)›
+   : │  id: 23
+   : │  call count: 0
+   : │  IEVENT: foo5
+   : └1╴... done.
+IEVENT: foo5
+END: foo5
+0 -WAIT 12 kill job <homevent.tokize.tokizer obj>

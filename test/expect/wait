@@ -1,25 +1,35 @@
-NEW: <ConditionalWorkSequence:7 (4)>
+NEW: ‹ConditionalWorkSequence:7 (4)›
    : │  id: 7
    : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
 EVENT: startup
 END: startup
-NEW: <ConditionalWorkSequence:8 (4)>
+0 +WAIT 1 start job ‹Collected Parser:n1›
+0 -WAIT 1 start job ‹Collected Parser:n1›
+0 +WAIT 2 start job <homevent.tokize.tokizer obj>
+0 -WAIT 2 start job <homevent.tokize.tokizer obj>
+0 +WAIT 3 start job ‹Async async›
+0 -WAIT 3 start job ‹Async async›
+0 +WAIT 4 start job ‹Waiter X1 ??›
+0 -WAIT 4 start job ‹Waiter X1 ??›
+NEW: ‹ConditionalWorkSequence:8 (4)›
    : │  id: 8
    : │  call count: 0
    : │  EVENT: wait¦start¦×××¦X1
    : └1╴... done.
 EVENT: wait¦start¦×××¦X1
 END: wait¦start¦×××¦X1
-NEW: <ConditionalWorkSequence:9 (4)>
+0 +WAIT 5 start job ‹Waiter Foo¦Bar ??›
+0 -WAIT 5 start job ‹Waiter Foo¦Bar ??›
+NEW: ‹ConditionalWorkSequence:9 (4)›
    : │  id: 9
    : │  call count: 0
    : │  EVENT: wait¦start¦×××¦Foo¦Bar
    : └1╴... done.
 EVENT: wait¦start¦×××¦Foo¦Bar
 END: wait¦start¦×××¦Foo¦Bar
-NEW: <ConditionalWorkSequence:10 (4)>
+NEW: ‹ConditionalWorkSequence:10 (4)›
    : │  id: 10
    : │  call count: 0
    : │  EVENT: wait¦done¦×××¦X1
@@ -38,7 +48,7 @@ remaining: 9.8
 in: async
 in: Global
 .
-NEW: <ConditionalWorkSequence:11 (4)>
+NEW: ‹ConditionalWorkSequence:11 (4)›
    : │  id: 11
    : │  call count: 0
    : │  EVENT: wait¦update¦2003-04-05 06:07:08.300000¦Foo¦Bar
@@ -46,57 +56,85 @@ NEW: <ConditionalWorkSequence:11 (4)>
 EVENT: wait¦update¦2003-04-05 06:07:08.300000¦Foo¦Bar
 END: wait¦update¦2003-04-05 06:07:08.300000¦Foo¦Bar
 1 Yes
-NEW: <ConditionalWorkSequence:12 (4)>
+0 +WAIT 6 start job ‹Waiter X2 ??›
+0 -WAIT 6 start job ‹Waiter X2 ??›
+NEW: ‹ConditionalWorkSequence:12 (4)›
    : │  id: 12
    : │  call count: 0
    : │  EVENT: wait¦start¦×××¦X2
    : └1╴... done.
 EVENT: wait¦start¦×××¦X2
 END: wait¦start¦×××¦X2
-NEW: <ConditionalWorkSequence:13 (4)>
+NEW: ‹ConditionalWorkSequence:13 (4)›
    : │  id: 13
+   : │  call count: 0
+   : │  EVENT: wait¦done¦×××¦Foo¦Bar
+   : └1╴... done.
+EVENT: wait¦done¦×××¦Foo¦Bar
+END: wait¦done¦×××¦Foo¦Bar
+0 +WAIT 7 start job ‹TriggerHandler: trigger 2›
+0 -WAIT 7 start job ‹TriggerHandler: trigger 2›
+NEW: ‹ConditionalWorkSequence:14 (4)›
+   : │  id: 14
+   : │  call count: 0
+   : │  IEVENT: FooBar
+   : └1╴... done.
+IEVENT: FooBar
+END: FooBar
+NEW: ‹ConditionalWorkSequence:15 (4)›
+   : │  id: 15
    : │  call count: 0
    : │  EVENT: wait¦done¦×××¦X2
    : └1╴... done.
 EVENT: wait¦done¦×××¦X2
 END: wait¦done¦×××¦X2
-NEW: <ConditionalWorkSequence:14 (4)>
-   : │  id: 14
+0 +WAIT 8 start job ‹TriggerHandler: trigger 2›
+0 -WAIT 8 start job ‹TriggerHandler: trigger 2›
+0 +WAIT 9 start job ‹Waiter X3 ??›
+0 -WAIT 9 start job ‹Waiter X3 ??›
+NEW: ‹ConditionalWorkSequence:16 (4)›
+   : │  id: 16
    : │  call count: 0
    : │  EVENT: wait¦start¦×××¦X3
    : └1╴... done.
 EVENT: wait¦start¦×××¦X3
 END: wait¦start¦×××¦X3
-NEW: <ConditionalWorkSequence:15 (4)>
-   : │  id: 15
+NEW: ‹ConditionalWorkSequence:17 (4)›
+   : │  id: 17
    : │  call count: 0
    : │  IEVENT: DoNow¦0.4
    : └1╴... done.
 IEVENT: DoNow¦0.4
 END: DoNow¦0.4
-NEW: <ConditionalWorkSequence:16 (4)>
-   : │  id: 16
+NEW: ‹ConditionalWorkSequence:18 (4)›
+   : │  id: 18
    : │  call count: 0
    : │  EVENT: wait¦done¦×××¦X3
    : └1╴... done.
 EVENT: wait¦done¦×××¦X3
 END: wait¦done¦×××¦X3
-NEW: <ConditionalWorkSequence:17 (4)>
-   : │  id: 17
+0 +WAIT 10 start job ‹Async async›
+0 -WAIT 10 start job ‹Async async›
+0 +WAIT 11 start job ‹Waiter _wait¦7 ??›
+0 -WAIT 11 start job ‹Waiter _wait¦7 ??›
+NEW: ‹ConditionalWorkSequence:19 (4)›
+   : │  id: 19
    : │  call count: 0
    : │  EVENT: wait¦start¦×××¦_wait¦7
    : └1╴... done.
 EVENT: wait¦start¦×××¦_wait¦7
 END: wait¦start¦×××¦_wait¦7
-NEW: <ConditionalWorkSequence:18 (4)>
-   : │  id: 18
+0 +WAIT 12 start job ‹Waiter Foo¦Baz ??›
+0 -WAIT 12 start job ‹Waiter Foo¦Baz ??›
+NEW: ‹ConditionalWorkSequence:20 (4)›
+   : │  id: 20
    : │  call count: 0
    : │  EVENT: wait¦start¦×××¦Foo¦Baz
    : └1╴... done.
 EVENT: wait¦start¦×××¦Foo¦Baz
 END: wait¦start¦×××¦Foo¦Baz
-NEW: <ConditionalWorkSequence:19 (4)>
-   : │  id: 19
+NEW: ‹ConditionalWorkSequence:21 (4)›
+   : │  id: 21
    : │  call count: 0
    : │  EVENT: wait¦done¦×××¦_wait¦7
    : └1╴... done.
@@ -104,9 +142,9 @@ EVENT: wait¦done¦×××¦_wait¦7
 END: wait¦done¦×××¦_wait¦7
 1 Yes
 0 Create OnEvtHandler: whatever
-0 NewHandler 20
-NEW: <ConditionalWorkSequence:21 (5)>
-   : │  id: 21
+0 NewHandler 22
+NEW: ‹ConditionalWorkSequence:23 (5)›
+   : │  id: 23
    : │  call count: 0
    : │  IEVENT: whatever
    : ├1╴on whatever ‹OnEventHandler›
@@ -119,50 +157,50 @@ RUN: on whatever ‹OnEventHandler›
    : prio: 51
    : step: var wait x Foo Baz ‹VarWaitHandler›
    : step: log TRACE We wait $x ‹LogHandler›
- at: <ConditionalWorkSequence:21 (5)> (step 1)
+ at: ‹ConditionalWorkSequence:23 (5)› (step 1)
  ev: IEVENT: whatever
 0 We wait ‹Waiter Foo¦Baz 51.9›
 END: whatever
-NEW: <ConditionalWorkSequence:22 (4)>
-   : │  id: 22
+0 +WAIT 13 start job ‹Waiter _wait¦8 ??›
+0 -WAIT 13 start job ‹Waiter _wait¦8 ??›
+NEW: ‹ConditionalWorkSequence:24 (4)›
+   : │  id: 24
    : │  call count: 0
    : │  EVENT: wait¦start¦×××¦_wait¦8
    : └1╴... done.
 EVENT: wait¦start¦×××¦_wait¦8
 END: wait¦start¦×××¦_wait¦8
-NEW: <ConditionalWorkSequence:23 (4)>
-   : │  id: 23
+NEW: ‹ConditionalWorkSequence:25 (4)›
+   : │  id: 25
    : │  call count: 0
    : │  EVENT: wait¦done¦×××¦_wait¦8
    : └1╴... done.
 EVENT: wait¦done¦×××¦_wait¦8
 END: wait¦done¦×××¦_wait¦8
+Waiter ‹Foo Baz› was cancelled
+NEW: ‹WorkSequence:26 (4)›
+   : │  id: 26
+   : │  call count: 0
+   : │  Waiter ‹Foo Baz› was cancelled
+   : └1╴... done.
+Waiter ‹Foo Baz› was cancelled
+END: WaitCancelled
 1 Yes
-NEW: <ConditionalWorkSequence:24 (4)>
-   : │  id: 24
+0 +WAIT 14 start job ‹Waiter _wait¦9 ??›
+0 -WAIT 14 start job ‹Waiter _wait¦9 ??›
+NEW: ‹ConditionalWorkSequence:27 (4)›
+   : │  id: 27
    : │  call count: 0
    : │  EVENT: wait¦start¦×××¦_wait¦9
    : └1╴... done.
 EVENT: wait¦start¦×××¦_wait¦9
 END: wait¦start¦×××¦_wait¦9
-NEW: <ConditionalWorkSequence:25 (4)>
-   : │  id: 25
-   : │  call count: 0
-   : │  EVENT: wait¦done¦×××¦Foo¦Baz
-   : └1╴... done.
-EVENT: wait¦done¦×××¦Foo¦Baz
-END: wait¦done¦×××¦Foo¦Baz
-NEW: <ConditionalWorkSequence:26 (4)>
-   : │  id: 26
-   : │  call count: 0
-   : │  IEVENT: Heya
-   : └1╴... done.
-IEVENT: Heya
-END: Heya
-NEW: <ConditionalWorkSequence:27 (4)>
-   : │  id: 27
+NEW: ‹ConditionalWorkSequence:28 (4)›
+   : │  id: 28
    : │  call count: 0
    : │  EVENT: wait¦done¦×××¦_wait¦9
    : └1╴... done.
 EVENT: wait¦done¦×××¦_wait¦9
 END: wait¦done¦×××¦_wait¦9
+0 +WAIT 15 kill job <homevent.tokize.tokizer obj>
+0 -WAIT 15 kill job <homevent.tokize.tokizer obj>
