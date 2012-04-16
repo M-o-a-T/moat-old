@@ -141,7 +141,7 @@ class WaitingMonitorCheck(Check):
 			raise SyntaxError(u"Usage: if waiting monitor ‹name…›")
 		name = Name(*args)
 		m = Monitors[name]
-		return m.job and m.watcher is not None
+		return m.job and not m.running.is_set()
 
 
 class VarMonitorHandler(Statement):

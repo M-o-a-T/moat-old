@@ -78,7 +78,7 @@ class Monitor(Collected,Jobber):
 	storage = Monitors.storage
 
 	job = None # greenlet running the monitor loop
-	running = None # Event. OFF while measuring (so that we can wait for that to end; currently unused)
+	running = None # Event. OFF while measuring (so that we can wait for that to end; currently used as a flag)
 	passive = None # active or passive monitoring?
 	queue_len = 0 # length of the watch queue; 0:use a blocking channel
 	watcher = None # if passive: channel for the next value
@@ -240,7 +240,13 @@ class Monitor(Collected,Jobber):
 		return None
 
 	def _do_measure(self):
-		def mon_send(_):
+		log("monitor",TRACE,"Start run",self.name)
+		try:
+			self.running.clear()
+			self.started_at = now()
+			self._monitor()
+			if self.passive:
+				process_event(Event(self.ctx, "monitor","checked",*self.name))
 			if self.new_value is not None:
 				if hasattr(self,"delta"):
 					if self.value is not None:
@@ -249,15 +255,6 @@ class Monitor(Collected,Jobber):
 							process_event(Event(Context(),"monitor","value",self.new_value-self.value,*self.name))
 				else:
 					process_event(Event(Context(),"monitor","value",self.new_value,*self.name))
-
-		log("monitor",TRACE,"Start run",self.name)
-		try:
-			self.running.clear()
-			self.started_at = now()
-			self._measure()
-			if self.passive:
-				process_event(Event(self.ctx, "monitor","checked",*self.name))
-			mon_send()
 			if self.new_value is not None:
 				self.value = self.new_value
 		except Exception as e:
@@ -271,7 +268,7 @@ class Monitor(Collected,Jobber):
 	def _run_loop(self):
 		"""Main monitor loop."""
 		while True:
-			self._monitor()
+			self._do_measure()
 			self._schedule()
 
 	def _monitor(self):
