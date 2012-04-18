@@ -71,6 +71,30 @@ block:
 	else:
 		log DEBUG Yes
 list monitor baz zaz
+del monitor baz zaz
+
+
+input monitest fake
+output monitest fake
+set output 1 monitest
+
+# The alternate solution would be a passive monitor
+# that's triggered by setting the variable, but we
+# already test the components of that elsewhere.
+monitor input monitest:
+	delay for 0.2
+	name moni test
+wait :for 0.1
+set output 2 monitest
+wait :for 0.2
+set output 3 monitest
+wait :for 0.2
+set output 4 monitest
+wait :for 0.2
+set output 5 monitest
+list monitor
+list monitor moni test
+del monitor moni test
 
 shutdown
 """

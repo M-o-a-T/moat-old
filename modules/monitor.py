@@ -20,12 +20,12 @@ from __future__ import division
 """\
 This code does basic monitoring.
 
-monitor TYPE args
+monitor name TYPE args
 	- monitors some kind of device
 
 """
 
-from homevent.monitor import Monitors, MonitorDelayFor,MonitorDelayUntil,\
+from homevent.monitor import Monitor,Monitors, MonitorDelayFor,MonitorDelayUntil,\
 	MonitorRequire,MonitorRetry,MonitorAlarm,MonitorHigh,MonitorLow,\
 	MonitorLimit, MonitorScale, MonitorDiff, MonitorHandler, NoWatcherError
 from homevent.statement import AttributedStatement, Statement, main_words,\
@@ -33,11 +33,40 @@ from homevent.statement import AttributedStatement, Statement, main_words,\
 from homevent.module import Module
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.base import Name,SName
+from homevent.in_out import Inputs
 
 import os
 from twisted.internet import defer
 
-	
+class VarMonitor(Monitor):
+	"""Monitor for a variable. Really simple."""
+	def one_value(self,step):
+		return Inputs[self.var].read()
+
+class MonitorMaker(MonitorHandler):
+	name = "monitor input"
+	monitor = VarMonitor
+	doc="watch an input's value"
+	long_doc="""\
+monitor input ‹name…›
+	- creates a monitor for a specific input.
+      Don't delete the input while the monitor is active.
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if len(event) < 1:
+			raise SyntaxError(u"Usage: monitor input ‹name…›")
+		self.name = SName(event)
+		self.values["var"] = self.name
+
+		super(MonitorMaker,self).run(ctx,**k)
+
+	def list(self):
+		"""status iterator"""
+		for r in super(Monitor,self).list():
+			yield r
+		yield ("var",self.var)
+
 class MonitorUpdate(AttributedStatement):
 	name = ("update","monitor")
 	doc = "change the parameters of an existing monitor"
@@ -166,6 +195,7 @@ class MonitorModule(Module):
 	info = "Monitoring"
 
 	def load(self):
+		main_words.register_statement(MonitorMaker)
 		main_words.register_statement(MonitorHandler)
 		main_words.register_statement(MonitorUpdate)
 		main_words.register_statement(MonitorSet)
@@ -177,6 +207,7 @@ class MonitorModule(Module):
 		register_condition(WaitingMonitorCheck)
 	
 	def unload(self):
+		main_words.unregister_statement(MonitorMaker)
 		main_words.unregister_statement(MonitorHandler)
 		main_words.unregister_statement(MonitorUpdate)
 		main_words.unregister_statement(MonitorSet)
