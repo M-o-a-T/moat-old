@@ -775,6 +775,86 @@ don't know whether one exists.
 	if exists on FooBar:
 		del on FooBar
 
+============
+Input/Output
+============
+
+This is, strictly speaking, not a module of its own.
+Instead, other modules may register I/O handlers which can be accessed with
+common commands.
+
+The mod_io test contains code for a "fake" module which simply sets the
+input named X to whatever an output with the same name is set to.
+
+---------------------------
+input ‹name› ‹typ› ‹param…›
+---------------------------
+
+Declare a named input of the given type.
+
+---------------------------
+output ‹name› ‹typ› ‹param…›
+---------------------------
+
+Declare a named output of the given type.
+
+-----------------
+Common Parameters
+-----------------
+
+name
+----
+
+If the input or output should be named with a multi-word name, use this
+attribute.
+
+	output wago whichever 1 2:
+		name light outside
+
+----------------
+del input ‹name›
+----------------
+
+Forgets that this named input exists.
+
+-----------------
+del output ‹name›
+-----------------
+
+Forgets that this named output exists.
+
+---------
+var input
+---------
+
+Sets a variable to whatever the input is when this statement is executed.
+
+Subsequent statements may retrieve the value with '$var'.
+
+	input magic … :name thermometer outside
+	var input temp thermometer outside
+	if less $temp 0:
+		log WARN it is cold out there
+
+
+----------
+set output
+----------
+
+Sets the output to the value given.
+
+	set output on light wherever
+
+-----
+Tests
+-----
+
+exists input ‹name›
+-------------------
+
+Check whether this in put has been declared.
+
+
 =======
 monitor
 =======
@@ -804,6 +884,10 @@ This is the basic command to set up a monitor. How to address an
 external device is up to that subsystem; see the appropriate module's
 documentation on how to specify the parameters necessary to address the
 device in question.
+
+The subsystem is "input" if you want to watch an input variable;
+however, note that the variable is always polled. Subsystems which
+send data on their own will register their own subsystems.
 
 This command has a couple of parameters:
 
