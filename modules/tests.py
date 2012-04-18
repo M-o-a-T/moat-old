@@ -25,7 +25,7 @@ monitor test ...
 
 from homevent.statement import Statement, main_words
 from homevent.event import Event
-from homevent.run import process_event
+from homevent.run import simple_event
 from homevent.monitor import Monitor,MonitorHandler
 from homevent.in_out import register_input,register_output, unregister_input,unregister_output, Input,Output
 from weakref import WeakValueDictionary
@@ -95,7 +95,7 @@ class FakeOutput(Output):
 	typ="fake"
 	def write(self,val):
 		ins[self.name].value = val
-	
+		simple_event(None,"input","fake",val,*self.name)
 
 
 from homevent.module import Module
