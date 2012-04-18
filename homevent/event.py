@@ -21,6 +21,7 @@ This part of the code defines what an event is.
 
 import warnings
 from homevent.base import Name,RaisedError
+from homevent.context import Context
 
 class TrySomethingElse(RuntimeError):
 	"""Error if a conditional does not match"""
@@ -62,7 +63,7 @@ class Event(object):
 		#print "E_INIT",name,"with",ctx
 		self.name = Name(name)
 		self.ctx = ctx if ctx is not None else Context()
-		if "loglevel" in ctx:
+		if "loglevel" in self.ctx:
 			self.loglevel = ctx.loglevel
 
 		global event_id
