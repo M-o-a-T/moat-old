@@ -294,8 +294,7 @@ output ‹type› ‹params…› :name ‹name…›
 
 
 
-@MakeInput.register_statement
-@MakeOutput.register_statement
+@MakeIO.register_statement
 class IOName(Statement):
         name="name"
         dest = None
@@ -310,8 +309,7 @@ name ‹name…›
 		event = self.params(ctx)
 		self.parent.dest = SName(event)
 
-@MakeInput.register_statement
-@MakeOutput.register_statement
+@MakeIO.register_statement
 class IORange(Statement):
 	name="range"
 	doc="specify boundaries for values"
@@ -333,8 +331,7 @@ range ‹from› ‹to›
 			b = float(event[1]) if event[1] != "" else None
 		self.parent.ranges.append((a,b))
 
-@MakeInput.register_statement
-@MakeOutput.register_statement
+@MakeIO.register_statement
 class IOValue(Statement):
 	name="value"
 	doc="specify single allowed values"
