@@ -50,6 +50,25 @@ class Name(tuple):
 	def __repr__(self):
 		return self.__class__.__name__+super(Name,self).__repr__()
 
+	def apply(self, ctx=None, drop=0):
+		"""\
+			Copy a name, applying substitutions.
+			This code dies with an AttributeError if there are no
+			matching substitutes. This is intentional.
+			"""
+		if ctx is None:
+			if drop:
+				return self.__class__(*self[drop:])
+			else:
+				return self
+
+		res = []
+		for n in self[drop:]:
+			if hasattr(n,"startswith") and n.startswith('$'):
+				n = getattr(ctx,n[1:])
+			res.append(n)
+		return self.__class__(*res)
+
 def SName(data,attr="name"):
 	"""An alternate Name constructor that accepts a single argument"""
 	if isinstance(data,Name):

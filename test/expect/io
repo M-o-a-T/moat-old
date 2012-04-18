@@ -1,0 +1,85 @@
+NEW: ‹ConditionalWorkSequence:7 (4)›
+   : │  id: 7
+   : │  call count: 0
+   : │  EVENT: startup
+   : └1╴... done.
+EVENT: startup
+END: startup
+0 +WAIT 1 start job ‹Collected Parser:n1›
+0 -WAIT 1 start job ‹Collected Parser:n1›
+0 +WAIT 2 start job <homevent.tokize.tokizer obj>
+0 -WAIT 2 start job <homevent.tokize.tokizer obj>
+foo bar :: fake foo¦bar:None
+.
+: ‹Collected FakeInput:foo¦bar›
+name: foo¦bar
+type: fake
+.
+foo bar :: fake foo¦bar:None
+.
+: ‹Collected FakeOutput:foo¦bar›
+name: foo¦bar
+type: fake
+.
+1 Yes
+1 Yes
+: ‹Collected FakeInput:foo¦bar›
+name: foo¦bar
+type: fake
+value: GRMPF
+.
+: ‹Collected FakeOutput:foo¦bar›
+name: foo¦bar
+type: fake
+.
+0 +WAIT 3 kill job <homevent.tokize.tokizer obj>
+0 -WAIT 3 kill job <homevent.tokize.tokizer obj>
+NEW: ‹ConditionalWorkSequence:8 (6)›
+   : │  id: 8
+   : │  call count: 0
+   : │  EVENT: shutdown
+   : └1╴... done.
+EVENT: shutdown
+NEW: ‹ConditionalWorkSequence:9 (4)›
+   : │  id: 9
+   : │  call count: 0
+   : │  EVENT: module¦unload¦data
+   : └1╴... done.
+EVENT: module¦unload¦data
+END: module¦unload¦data
+NEW: ‹ConditionalWorkSequence:10 (4)›
+   : │  id: 10
+   : │  call count: 0
+   : │  EVENT: module¦unload¦tests
+   : └1╴... done.
+EVENT: module¦unload¦tests
+END: module¦unload¦tests
+NEW: ‹ConditionalWorkSequence:11 (4)›
+   : │  id: 11
+   : │  call count: 0
+   : │  EVENT: module¦unload¦block
+   : └1╴... done.
+EVENT: module¦unload¦block
+END: module¦unload¦block
+NEW: ‹ConditionalWorkSequence:12 (4)›
+   : │  id: 12
+   : │  call count: 0
+   : │  EVENT: module¦unload¦logging
+   : └1╴... done.
+EVENT: module¦unload¦logging
+END: module¦unload¦logging
+NEW: ‹ConditionalWorkSequence:13 (4)›
+   : │  id: 13
+   : │  call count: 0
+   : │  EVENT: module¦unload¦ifelse
+   : └1╴... done.
+EVENT: module¦unload¦ifelse
+END: module¦unload¦ifelse
+NEW: ‹ConditionalWorkSequence:14 (4)›
+   : │  id: 14
+   : │  call count: 0
+   : │  EVENT: module¦unload¦bool
+   : └1╴... done.
+EVENT: module¦unload¦bool
+END: module¦unload¦bool
+END: shutdown

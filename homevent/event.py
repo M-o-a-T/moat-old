@@ -145,7 +145,7 @@ class Event(object):
 #						print >>sys.stderr,": ",x
 				n = r
 			w.append(n)
-		return self.__class__(ctx, *w)
+		return self.__class__(ctx, *self.name.apply(ctx=ctx,drop=drop))
 
 	def dup(self, ctx=None, drop=0):
 		"""\
