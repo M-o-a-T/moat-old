@@ -64,6 +64,16 @@ Statements may be multi-word and follow generic Python syntax.
 				break
 
 		if wl:
+			# this is for a type registry
+			if len(wl) == 1 and hasattr(words,"registry") and wl[0] in words.registry:
+				words = words.registry[wl[0]]
+				try:
+					doc = ":\n"+words.long_doc.rstrip("\n")
+				except AttributeError:
+					doc = " : "+words.doc
+				print >>self.ctx.out,wl[0]+doc
+				return
+
 			print >>self.ctx.out,"Not a command in %s:" % (words.__class__.__name__,)," ".join(wl)
 
 		try:
@@ -72,6 +82,7 @@ Statements may be multi-word and follow generic Python syntax.
 			doc = " : "+words.doc
 		print >>self.ctx.out," ".join(words.name)+doc
 
+		# this is for common sub-statements
 		try:
 			wl = words.iteritems
 		except AttributeError: # it's empty
@@ -90,6 +101,25 @@ Statements may be multi-word and follow generic Python syntax.
 				for n,d in sorted(wl(),nam):
 					hname = " ".join(n)
 					print >>self.ctx.out,hname+(" "*(maxlen+1-len(hname)))+": "+d.doc
+
+		# this is for a type registry
+		try:
+			wl = words.registry.iteritems
+		except AttributeError:
+			pass
+		else:
+			maxlen=0
+			for n,d in wl():
+				hlen = len(n)
+				if hlen > maxlen: maxlen = hlen
+			if maxlen:
+				print >>self.ctx.out,"Known types:"
+
+				def nam(a,b):
+					return cmp(a[0],b[0])
+				for n,d in sorted(wl(),nam):
+					print >>self.ctx.out,n+(" "*(maxlen+1-len(hname)))+": "+d.doc
+
 
 
 class HelpModule(Module):

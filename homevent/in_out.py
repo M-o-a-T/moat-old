@@ -82,6 +82,8 @@ def unregister_output(outp):
 class CommonIO(Collected):
 	"""This class collects common code for input and output"""
 	typ = "???"
+	doc = "you forgot to document this"
+	long_doc = None
 
 	params = () # creation parameters
 	addons = {} # data from additional commands

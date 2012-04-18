@@ -78,6 +78,7 @@ ins = WeakValueDictionary()
 class FakeInput(Input):
 	typ="fake"
 	value = None
+	doc="An input which is set by the corresponding output"
 	def __init__(self,*a,**k):
 		super(FakeInput,self).__init__(*a,**k)
 		ins[self.name]=self
@@ -93,6 +94,7 @@ class FakeInput(Input):
 	
 class FakeOutput(Output):
 	typ="fake"
+	doc="An output that sets the input with the same name"
 	def write(self,val):
 		ins[self.name].value = val
 		simple_event(None,"input","fake",val,*self.name)
