@@ -27,7 +27,8 @@ from homevent.statement import Statement, main_words
 from homevent.event import Event
 from homevent.run import process_event
 from homevent.monitor import Monitor,MonitorHandler
-
+from homevent.in_out import register_input,register_output, unregister_input,unregister_output, Input,Output
+from weakref import WeakValueDictionary
 from random import Random
 
 class Tester(Monitor):
@@ -73,6 +74,29 @@ monitor test MIN MAX STEP
 		super(TestMonitor,self).run(ctx,**k)
 
 
+ins = WeakValueDictionary()
+class FakeInput(Input):
+	typ="fake"
+	value = None
+	def __init__(self,*a,**k):
+		super(FakeInput,self).__init__(*a,**k)
+		ins[self.name]=self
+
+	def list(self):
+		for r in super(Input,self).list():
+			yield r
+		if self.value is not None:
+			yield ("value",self.value)
+
+	def read(self):
+		return self.value
+	
+class FakeOutput(Output):
+	typ="fake"
+	def write(self,val):
+		ins[self.name].value = val
+	
+
 
 from homevent.module import Module
 
@@ -85,8 +109,12 @@ class TestModule(Module):
 
 	def load(self):
 		main_words.register_statement(TestMonitor)
+		register_input(FakeInput)
+		register_output(FakeOutput)
 	
 	def unload(self):
 		main_words.unregister_statement(TestMonitor)
+		unregister_input(FakeInput)
+		unregister_output(FakeOutput)
 
 init = TestModule

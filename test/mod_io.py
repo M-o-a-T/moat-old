@@ -19,34 +19,8 @@
 import homevent as h
 from homevent.reactor import ShutdownHandler
 from homevent.module import load_module
-from homevent.in_out import register_input,register_output,Input,Output
-from weakref import WeakValueDictionary
 from test import run
 
-ins = WeakValueDictionary()
-@register_input
-class FakeInput(Input):
-	typ="fake"
-	value = None
-	def __init__(self,*a,**k):
-		super(FakeInput,self).__init__(*a,**k)
-		ins[self.name]=self
-
-	def list(self):
-		for r in super(Input,self).list():
-			yield r
-		if self.value is not None:
-			yield ("value",self.value)
-
-	def read(self):
-		return self.value
-	
-@register_output
-class FakeOutput(Output):
-	typ="fake"
-	def write(self,val):
-		ins[self.name].value = val
-	
 input = """\
 #log TRACE
 input fake :name foo bar
@@ -79,12 +53,12 @@ shutdown
 """
 
 h.main_words.register_statement(ShutdownHandler)
-load_module("tests")
 load_module("ifelse")
 load_module("data")
 load_module("block")
 load_module("bool")
 load_module("logging")
+load_module("tests")
 
 run("io",input)
 

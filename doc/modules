@@ -783,8 +783,8 @@ This is, strictly speaking, not a module of its own.
 Instead, other modules may register I/O handlers which can be accessed with
 common commands.
 
-The mod_io test contains code for a "fake" module which simply sets the
-input named X to whatever an output with the same name is set to.
+The "tests" module contains code for "fake" input and output handlers.
+A fake output simply sets the fake input with the same name to whatever it is set to.
 
 ---------------------------
 input ‹name› ‹typ› ‹param…›
