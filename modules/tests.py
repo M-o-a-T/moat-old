@@ -89,13 +89,13 @@ class FakeInput(Input):
 		if self.value is not None:
 			yield ("value",self.value)
 
-	def read(self):
+	def _read(self):
 		return self.value
 	
 class FakeOutput(Output):
 	typ="fake"
 	doc="An output that sets the input with the same name"
-	def write(self,val):
+	def _write(self,val):
 		ins[self.name].value = val
 		simple_event(None,"input","fake",val,*self.name)
 

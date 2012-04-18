@@ -29,6 +29,7 @@ from homevent.base import Name,SName
 from homevent.run import process_failure
 from homevent.collect import Collection,Collected
 from homevent.twist import fix_exception,reraise,Jobber
+from homevent.times import now,unixdelta,humandelta
 
 import os
 import sys
@@ -161,7 +162,8 @@ class Input(CommonIO):
 		res = self.repr(res)
 		self.check(res)
 		self.last_time = now()
-		return self.last_value
+		self.last_value = res
+		return res
 
 	def repr(self, res):
 		"""Represent the input, i.e. translate input values to script data"""
@@ -199,7 +201,7 @@ class Output(CommonIO):
 	def write(self,val):
 		"""Read an input, check range."""
 		wval = self.trans(val)
-		check(val)
+		self.check(val)
 		self._write(wval)
 
 		self.last_value = wval
@@ -245,10 +247,14 @@ class MakeIO(AttributedStatement):
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		if self.dest is None:
+			if len(event) < 2:
+				raise SyntaxError(u'Usage: %s ‹name› ‹typ› ‹params›'%(self.name,))
 			self.dest = Name(event[0])
 			typ = event[1]
 			d = 2
 		else:
+			if len(event) < 1:
+				raise SyntaxError(u'Usage: %s ‹typ› ‹params›'%(self.name,))
 			typ = event[0]
 			d = 1
 
@@ -308,7 +314,6 @@ name ‹name…›
 @MakeOutput.register_statement
 class IORange(Statement):
 	name="range"
-	dest = None
 	doc="specify boundaries for values"
 
 	long_doc = u"""\
@@ -332,7 +337,6 @@ range ‹from› ‹to›
 @MakeOutput.register_statement
 class IOValue(Statement):
 	name="value"
-	dest = None
 	doc="specify single allowed values"
 
 	long_doc = u"""\
@@ -344,7 +348,7 @@ value ‹val›…
 		event = self.params(ctx)
 		if not len(event):
 			 raise SyntaxError(u'Usage: value ‹val›…')
-		self.parent.ranges.extend(event)
+		self.parent.values.extend(event)
 
 
 @main_words.register_statement

@@ -24,7 +24,12 @@ from test import run
 input = """\
 #log TRACE
 input fake :name foo bar
-output fake :name foo bar
+output fake:
+	name foo bar
+	range 1 9
+	range 111 222
+	value TEST GRMPF
+	value one two three
 list input
 list input foo bar
 list output
@@ -36,7 +41,30 @@ block:
 	if equal $bla "TEST":
 		log DEBUG Yes
 	else:
-		log DEBUG No $bla
+		log DEBUG No1 $bla
+
+block:
+	try:
+		set output 0 foo bar
+		log DEBUG No 0
+	catch:
+		log DEBUG yes
+	set output 1 foo bar
+	set output 9 foo bar
+	set output 123 foo bar
+	try:
+		set output 10 foo bar
+		log DEBUG No 10
+	catch:
+		log DEBUG yes
+	set output one foo bar
+	set output two foo bar
+	set output three foo bar
+	try:
+		set output four foo bar
+		log DEBUG No four
+	catch:
+		log DEBUG yes
 
 set output GRMPF foo bar
 block:
@@ -59,6 +87,7 @@ load_module("block")
 load_module("bool")
 load_module("logging")
 load_module("tests")
+load_module("errors")
 
 run("io",input)
 
