@@ -243,6 +243,7 @@ class ComplexStatement(Statement):
 		if handler.name in self._words:
 			raise ValueError("A handler for '%s' is already registered. (%s)" % (handler.name,self._words[handler.name]))
 		self._words[handler.name] = handler
+		return handler
 
 	@classmethod
 	def unregister_statement(self,handler):
