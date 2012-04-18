@@ -59,12 +59,12 @@ outputmakers = {}
 def _register(store,io,what):
 	if io.typ in store:
 		raise ValueError("An %sput handler for '%s' is already registered." % \
-			(what,io.name))
+			(what,io.typ))
 	store[io.typ] = io
 def _unregister(store,io,what):
 	if io.typ not in store:
 		raise ValueError("No %sput handler for '%s' is registered." % \
-			(what,io.name))
+			(what,io.typ))
 	del store[io.typ]
 
 def register_input(inp):
