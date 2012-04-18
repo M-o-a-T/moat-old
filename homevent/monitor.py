@@ -131,7 +131,6 @@ class Monitor(Collected,Jobber):
 		"""status iterator"""
 		for r in super(Monitor,self).list():
 			yield r
-		yield ("name"," ".join(unicode(x) for x in self.name))
 		if self.params:
 			yield ("device"," ".join(unicode(x) for x in self.params))
 		yield ("value",self.value)
