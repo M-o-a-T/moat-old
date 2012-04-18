@@ -10,7 +10,7 @@ END: startup
 0 +WAIT 2 start job <homevent.tokize.tokizer obj>
 0 -WAIT 2 start job <homevent.tokize.tokizer obj>
 0 Yes!
-0 INIT sqlite {'username': 'smurf', 'trace': <function trace at 0x1c1d1b8>, 'database': '/tmp/homevent.smurf.db', 'dbtype': 'sqlite', 'dataport': '3306', 'host': 'sql.intern.smurf.noris.de', 'password': 'geheim'}
+0 INIT sqlite {'username': 'smurf', 'trace': <function trace at 0x×××>, 'database': '/tmp/homevent.smurf.db', 'dbtype': 'sqlite', 'dataport': '3306', 'host': 'sql.intern.smurf.noris.de', 'password': 'geheim'}
 0 DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) None
 0 RollBack  
 0 Yes!
