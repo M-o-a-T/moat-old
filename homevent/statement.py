@@ -107,7 +107,7 @@ class Statement(object):
 		return self.args.dup(ctx,drop=len(self.name))
 
 	def run(self,ctx,**k):
-		raise NotImplementedError("You need to override '%s.run' (called with %s)" % (self.__class__.__name__,repr(event)))
+		raise NotImplementedError("You need to override '%s.run' (called with %s)" % (self.__class__.__name__,repr(k)))
 	
 	def report(self,verbose):
 		yield " ".join(unicode(x) for x in self.args)+u" ‹"+self.__class__.__name__+u"›"
