@@ -21,7 +21,7 @@ This is the core of external input and output.
 """
 
 from homevent.logging import log,log_exc,DEBUG,TRACE,INFO,WARN,ERROR
-from homevent.statement import Statement, main_words, AttributedStatement
+from homevent.statement import Statement, main_words, AttributedStatement,WordAttached
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.context import Context
 from homevent.event import Event
@@ -169,15 +169,6 @@ class Input(CommonIO):
 		"""Represent the input, i.e. translate input values to script data"""
 		return res
 
-	def repr_range(self, res):
-		"""Represent the input when it's from a continuous range"""
-		return self.repr(res)
-
-	def repr_value(self, res):
-		"""Represent the input when it's from a distinct set"""
-		return self.repr(res)
-
-
 class Output(CommonIO):
 	"""This represents a single output."""
 	storage = Outputs
@@ -211,24 +202,6 @@ class Output(CommonIO):
 		"""Translate the output, i.e. script data to input values"""
 		return val
 
-class BoolIO(object):
-	"""A boolean mix-in. Add *before* Input or Output class."""
-	def __init__(self,name):
-		super(BoolIO,self).__init__(name, values=(False,True,"on","off","False","True",0,1,"0","1"))
-
-	def trans(self,res):
-		if str(val).lower() in ("on","true","1"):
-			return True
-		if str(val).lower() in ("off","false","0"):
-			return False
-		raise BadValue(self.name, val)
-
-	def repr_value(self,res):
-		if res:
-			return "on"
-		else:
-			return "off"
-	
 
 class MakeIO(AttributedStatement):
 	"""Common base class for input and output creation statements"""
@@ -236,6 +209,7 @@ class MakeIO(AttributedStatement):
 	values = None
 	addons = None
 
+	registry = None # override in subclass
 	dest = None
 
 	def __init__(self,*a,**k):
@@ -259,6 +233,48 @@ class MakeIO(AttributedStatement):
 			d = 1
 
 		self.registry[typ](self.dest.apply(ctx), event.apply(ctx,drop=d), self.addons,self.ranges,self.values)
+
+
+# the first version was to be directly attached to variables, but that doesn't work
+#class BoolIO(WordAttached):
+class BoolIO(object):
+	"""A boolean mix-in. Add *before* Input or Output class."""
+	bools = ("off","on")
+	def __init__(self,name, params,addons,ranges=(),values=()):
+		if addons and "bools" in addons:
+			self.bools = addons['bools']
+
+		super(BoolIO,self).__init__(name, params,addons, ranges,tuple(values)+(False,True,"on","off","False","True",0,1,"0","1"))
+
+	def trans(self,res):
+		res = str(res).lower()
+		if res in ("on","true","1",self.bools[1]):
+			return True
+		if res in ("off","false","0",self.bools[0]):
+			return False
+		raise BadValue(self.name, res)
+
+	def repr(self,res):
+		return self.bools[bool(res)]
+
+	
+#@BoolIO.register_statement
+@MakeIO.register_statement
+class BoolParams(Statement):
+        name="bool"
+        doc="specify the names for 'on' and 'off'"
+
+        long_doc = u"""\
+bool ‹yes› ‹no›
+  - For boolean I/O, specify which names to use for signals that are turned on, or off.
+    Surprisingly, the defaults are 'on' and 'off'.
+"""
+
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if len(event) != 2:
+			raise SyntaxError(u"Usage: bool ‹yes› ‹no›")
+		self.parent.addons['bools'] = (event[1],event[0])
 
 
 @main_words.register_statement
@@ -393,6 +409,16 @@ class InputExists(IOExists):
 	storage = Inputs.storage
 	name="exists input"
 	doc="Test if a named input exists"
+
+@register_condition
+class InputIsSet(IOExists):
+	storage = Inputs.storage
+	name="input"
+	doc="Test if an input is set to a specific value"
+	def check(self,*args):
+		if len(args) < 2:
+			raise SyntaxError(u"Usage: if input VALUE NAME…")
+		return self.storage[Name(*args[1:])].read() == args[0]
 
 @register_condition
 class OutputExists(IOExists):

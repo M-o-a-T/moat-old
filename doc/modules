@@ -2317,6 +2317,11 @@ exists input NAME
 
 Check if the named input exists.
 
+exists output NAME
+-----------------
+
+Check if the named output exists.
+
 input NAME
 ----------
 
