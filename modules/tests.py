@@ -84,7 +84,7 @@ class FakeInput(Input):
 		ins[self.name]=self
 
 	def list(self):
-		for r in super(Input,self).list():
+		for r in super(FakeInput,self).list():
 			yield r
 		if self.value is not None:
 			yield ("value",self.value)
