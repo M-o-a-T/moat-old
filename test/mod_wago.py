@@ -37,22 +37,46 @@ async:
 		name test
 		#ping 1
 
-#wago input foo bar:
-#	port 1 1
-#
-#wago output some where:
-#	port 2 1
-#
+on foo baba:
+	send wago test Dc
+	send wago test DI
+	send wago test Dr
+
+wait :for 0.1
+# TODO
+
+input wago test 1 1:
+	name foo bar
+	bool why whynot
+
+output wago test 2 1:
+	name foo baz
+	bool hey ho
+
 #wago counter baz:
 #	port 1 2
 #
 #
-#set wago on some where
-#block:
-#	var wago port some where
-#	log DEBUG portstate $port
+set output on foo baz
+block:
+	var input port foo bar
+	log DEBUG portstate $port
+	if input whynot foo bar:
+		log DEBUG Yes
+	else:
+		log DEBUG No3
+	send wago test Ds
+	var input port foo bar
+	log DEBUG portstate $port
+
+	if input why foo bar:
+		log DEBUG Yes
+	else:
+		log DEBUG No4
 #
-#set wago off some where :for 2
+#set wago off foo baz :for 2
+set output hey foo baz
+set output ho foo baz
 wait:
 	for 0.5
 	debug force

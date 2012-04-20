@@ -27,13 +27,18 @@ from homevent.statement import AttributedStatement, Statement, main_words
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.monitor import Monitor,MonitorHandler, MonitorAgain
 from homevent.net import NetConnect,LineReceiver,NetActiveConnector
-from homevent.msg import MsgQueue,MsgFactory
+from homevent.twist import reraise
+from homevent.msg import MsgQueue,MsgFactory,MsgBase, MINE,NOT_MINE, RECV_AGAIN,\
+	MsgReceiver
 from homevent.collect import Collection
+from homevent.in_out import register_input,register_output, unregister_input,unregister_output,\
+	Input,Output,BoolIO
 
+from gevent.event import AsyncResult
 
-class WAGOchannel(Collection):
+class WAGOchannels(Collection):
 	name = "wago conn"
-WAGOchannel = WAGOchannel()
+WAGOchannels = WAGOchannels()
 
 class WAGOserver(Collection):
 	name = "wago server"
@@ -49,6 +54,14 @@ class MT_NAK(singleName): pass # -
 class MT_IND(singleName): pass # !num
 class MT_IND_ACK(singleName): pass # !+num
 class MT_IND_NAK(singleName): pass # !-num
+
+
+class WAGObadResult(RuntimeError):
+	pass
+
+class WAGOerror(RuntimeError):
+	pass
+
 
 class WAGOassembler(LineReceiver):
 	buf = None
@@ -93,9 +106,28 @@ class WAGOassembler(LineReceiver):
 
 class WAGOchannel(WAGOassembler, NetActiveConnector):
 	"""A receiver for the protocol used by the wago adapter."""
-	storage = WAGOchannel
+	storage = WAGOchannels
 	typ = "wago"
 
+	def handshake(self, external=False):
+		pass
+		# we do not do anything, except to read a prompt
+
+
+class WAGOinitMsg(MsgReceiver,LineReceiver):
+	blocking = True
+	def __init__(self,queue):
+		self.queue = queue
+		super(WAGOinitMsg,self).__init__()
+	def retry(self):
+		import pdb;pdb.set_trace()
+	def recv(self,msg):
+		if msg.type is MT_INFO:
+			self.queue.channel.up_event(False)
+			return MINE
+		return MSG_ERROR("Initial message:"+repr(msg))
+	def done(self):
+		self.blocking = False
 
 class WAGOqueue(MsgQueue):
 	"""A simple adapter for the Wago protocol."""
@@ -106,6 +138,8 @@ class WAGOqueue(MsgQueue):
 	def __init__(self, name, host,port, *a,**k):
 		super(WAGOqueue,self).__init__(name=name, factory=MsgFactory(WAGOchannel,name=name,host=host,port=port, **k))
 
+	def setup(self):
+		self.enqueue(WAGOinitMsg(self))
 
 
 class WAGOconnect(NetConnect):
@@ -126,18 +160,17 @@ connect wago NAME [[host] port]
 		
 
 class WAGOName(Statement):
-		name=("name",)
-		dest = None
-		doc="specify the name of a new Wago connection"
+	name=("name",)
+	doc="specify the name of a new Wago connection"
 
-		long_doc = u"""\
+	long_doc = u"""\
 name ‹name…›
 - Use this form for network connections with multi-word names.
 """
 
-		def run(self,ctx,**k):
-				event = self.params(ctx)
-				self.parent.dest = SName(event)
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		self.parent.dest = SName(event)
 
 
 class WAGOconnected(Check):
@@ -180,6 +213,160 @@ disconnect wago NAME
 		log(TRACE,"Drop WAGO connection",name)
 
 
+### simple variables
+
+class WAGOrun(MsgBase):
+	"""Send a simple command to Wago. Base class."""
+
+	def send(self,conn):
+		conn.write(self.msg)
+		return RECV_AGAIN
+
+	def recv(self,msg):
+		if msg.type is MT_ACK:
+			self.result.set(msg.msg)
+			return MINE
+		if msg.type is MT_NAK or msg.type is MT_ERROR:
+			self.result.set(WAGOerror(msg.msg))
+			return MINE
+		return NOT_MINE
+
+	@property
+	def msg(self):
+		raise NotImplementedError("You forgot to override %s.msg"%(self.__class__.__name__,))
+
+
+class WAGOioRun(WAGOrun):
+	"""Send a simple I/O command to Wago."""
+
+	def __init__(self,card,port):
+		super(WAGOioRun,self).__init__()
+		self.card = card
+		self.port = port
+
+
+class WAGOinputRun(WAGOioRun):
+	"""Send a simple command read an input."""
+	@property
+	def msg(self):
+		return "i %d %d" % (self.card,self.port)
+
+
+class WAGOoutputRun(WAGOioRun):
+	"""Send a simple command to write an output."""
+	def __init__(self,card,port,value):
+		self.val = value
+		super(WAGOoutputRun,self).__init__(card,port)
+
+	@property
+	def msg(self):
+		return "%s %d %d" % ("s" if self.val else "c", self.card,self.port)
+
+class WAGOrawRun(WAGOrun):
+	"""Send a simple command to write a command."""
+	def __init__(self,msg):
+		self._msg = msg
+		super(WAGOrawRun,self).__init__()
+	
+	@property
+	def msg(self):
+		return self._msg
+
+class WAGOio(object):
+	"""Base class for Wago input and output variables"""
+	typ="wago"
+	def __init__(self, name, params,addons,ranges,values):
+		if len(params) < 3:
+			raise SyntaxError(u"Usage: %s wago ‹name…› ‹card› ‹port›"%(self.what,))
+		self.server = Name(*params[:-2])
+		self.card = int(params[-2])
+		self.port = int(params[-1])
+		super(WAGOio,self).__init__(name, params,addons,ranges,values)
+
+	def list(self):
+		for r in super(WAGOinput,self).list():
+			yield r
+		yield ("server",self.server)
+		yield ("card",self.card)
+		yield ("port",self.port)
+
+
+class WAGOinput(BoolIO,WAGOio,Input):
+	what="input"
+	doc="An input on a remote WAGO server"
+
+	@property
+	def msg(self):
+		return "i %d %d" % (self.card,self.port)
+
+	def _read(self):
+		msg = WAGOinputRun(self.card,self.port)
+		WAGOserver[self.server].enqueue(msg)
+		res = msg.result.get()
+		if isinstance(res,Exception):
+			reraise(res)
+		if res == "1":
+			return True
+		elif res == "0":
+			return False
+		raise WAGObadResult(res)
+
+
+class WAGOoutput(BoolIO,WAGOio,Output):
+	what="output"
+	doc="An output on a remote WAGO server"
+
+	def _write(self,val):
+		msg = WAGOoutputRun(self.card,self.port,val)
+		WAGOserver[self.server].enqueue(msg)
+		res = msg.result.get()
+		if isinstance(res,Exception):
+			reraise(res)
+		return
+
+
+class WAGOraw(AttributedStatement):
+	name="send wago"
+	dest = None
+	doc="Send a line to a controller"
+
+	long_doc = u"""\
+send wago ‹name› ‹text…›
+  - Send this text (multiple words are space separated) to a controller
+send wago ‹text…› :to ‹name›
+  - Use this form if you need to use a multi-word name
+"""
+
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		name = self.dest
+		if name is None:
+			name = Name(event[0])
+			event = event[1:]
+		else:
+			name = Name(*name.apply(ctx))
+
+		val = u" ".join(unicode(s) for s in event)
+
+		msg = WAGOrawRun(val)
+		WAGOserver[name].enqueue(msg)
+		res = msg.result.get()
+
+
+@WAGOraw.register_statement
+class WAGOto(Statement):
+	name=("to",)
+	dest = None
+	doc="specify the (multi-word) name of the connection"
+
+	long_doc = u"""\
+to ‹name…›
+- Use this form for connections with multi-word names.
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		self.parent.dest = SName(event)
+
 
 class WAGOmon(Monitor):
 	queue_len = 1 # use the watcher queue
@@ -199,17 +386,18 @@ class WAGOmon(Monitor):
 
 
 class WAGOmonitor(MonitorHandler):
-	name=("monitor","wago")
+	name= "monitor wago"
 	monitor = WAGOmon
-	doc="watch a counter on a wago server"
+	doc="watch (or count transitions on) an input on a wago server"
 	long_doc="""\
-monitor wago ‹device› ‹attribute›
-	- creates a monitor for a specific counter on the server.
+monitor wago ‹server…› ‹slot› ‹port›
+	- creates a monitor for a specific input on the server.
 """
+	mode = None
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		if len(event) < 3:
-			raise SyntaxError("Usage: monitor wago ‹server› ‹slot› ‹port›")
+			raise SyntaxError("Usage: monitor wago ‹server…› ‹slot› ‹port›")
 		self.values["slot"] = int(event[-1])
 		self.values["port"] = int(event[-2])
 		self.values["server"] = event[:-2]
@@ -218,6 +406,16 @@ monitor wago ‹device› ‹attribute›
 			self.values["params"] += (u"±"+unicode(self.values["switch"]),)
 
 		super(WAGOmonitor,self).run(ctx,**k)
+
+@WAGOmonitor.register_statement
+class WAGOmonMode(Statement):
+	name = "mode"
+	doc = "Select whether to report or count transitions"
+
+@WAGOmonitor.register_statement
+class WAGOmonLevel(Statement):
+	name = "level"
+	doc = "Select which transitons to monitor"
 
 
 class WAGOmodule(Module):
@@ -231,14 +429,20 @@ class WAGOmodule(Module):
 		main_words.register_statement(WAGOconnect)
 		main_words.register_statement(WAGOmonitor)
 		main_words.register_statement(WAGOdisconnect)
+		main_words.register_statement(WAGOraw)
 		register_condition(WAGOconnected)
 		register_condition(WAGOexists)
+		register_input(WAGOinput)
+		register_output(WAGOoutput)
 	
 	def unload(self):
 		main_words.unregister_statement(WAGOconnect)
 		main_words.unregister_statement(WAGOmonitor)
 		main_words.unregister_statement(WAGOdisconnect)
+		main_words.unregister_statement(WAGOraw)
 		unregister_condition(WAGOconnected)
 		unregister_condition(WAGOexists)
+		unregister_input(WAGOinput)
+		unregister_output(WAGOoutput)
 	
 init = WAGOmodule

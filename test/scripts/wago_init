@@ -16,8 +16,8 @@
 
 PATH=/usr/local/sbin:/usr/sbin/:$PATH
 
-if test -d wago ; then WAGO=wago/wago; else WAGO=../wago/wago; fi
+if test -d wago ; then WAGO=wago; else WAGO=../wago; fi
 
-$WAGO --foreground -p 59069 > /tmp/wagolog_$USER 2>&1 &
+$WAGO/wago --foreground -p 59069 -c $WAGO/wago.sample.csv > /tmp/wagolog_$USER 2>&1 &
 echo $! > /tmp/wagotest_$USER
 sleep 1

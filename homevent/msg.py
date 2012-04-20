@@ -91,6 +91,7 @@ class SEND_LATER(object):
 
 class MsgSender(object):
 	"""A message sender"""
+	prio = PRIO_STANDARD
 	def queue(self,bus):
 		bus.enqueue(self)
 
@@ -103,6 +104,7 @@ class MsgSender(object):
 
 class MsgReceiver(object):
 	"""A receiver, possibly for a broadcast message"""
+	prio = PRIO_STANDARD
 	def recv(self,data):
 		"""A message has been received. Return NOT_MINE|MINE|RECV_AGAIN."""
 		raise NotImplementedError("You need to override MsgReceiver.recv")
@@ -132,7 +134,6 @@ class NoAnswer(RuntimeError):
 class MsgBase(MsgSender,MsgReceiver):
 	"""A message which expects a reply."""
 	timeout = None
-	prio = PRIO_STANDARD
 	blocking = False # True if the message needs a reply before sending more
 
 	timeout = None
@@ -141,7 +142,8 @@ class MsgBase(MsgSender,MsgReceiver):
 	_send_err = None
 	_recv_err = None
 	
-	def __init__(self):
+	def __init__(self,*a,**k):
+		super(MsgBase,self).__init__(*a,**k)
 		self.result = AsyncResult()
 
 	def send(self,channel):
@@ -170,7 +172,7 @@ class MsgBase(MsgSender,MsgReceiver):
 		"""Processing is finished."""
 		self._clear_timeout()
 		if self.result is not None and not self.result.successful():
-			raise RuntimeError("Did not trigger the result in dataReceived()",_)
+			raise RuntimeError("Did not trigger the result in %s.dataReceived()"%(self.__class__.__name__,))
 
 	def do_timeout(self):
 		self._last_channel.close()
@@ -260,8 +262,8 @@ class MsgFactory(object):
 			...		storage = MYchans
 			>>>
 			>>> class MYqueue(MsgQueue):
-			... 	'''A simple adapter for the Wago protocol.'''
-			... 	storage = WAGOserver
+			... 	'''A simple adapter for the MY protocol.'''
+			... 	storage = MYservers
 			... 	ondemand = True
 			... 	max_send = None
 			... 	
@@ -290,6 +292,7 @@ class MsgFactory(object):
 				msg = MsgError(msg)
 				self._msg_queue.put((msg.prio,msg))
 			def up_event(self,*a,**k):
+				
 				pass
 			def not_up_event(self,external=False,*a,**k):
 				if external:
@@ -362,8 +365,7 @@ class MsgQueue(Collected,Jobber):
 
 		if ondemand is not None:
 			self.ondemand = ondemand
-		if not self.ondemand:
-			self.channel = self.factory(self.q)
+		self.start()
 
 		super(MsgQueue,self).__init__()
 	
@@ -418,6 +420,14 @@ class MsgQueue(Collected,Jobber):
 		if self.channel:
 			for a,b in self.channel.list():
 				yield ("conn "+a,b)
+		# now dump send and recv queues
+		i = 0
+		for mq in self.msgs:
+			for m in mq:
+				yield("msg send "+str(i),repr(m))
+			i += 1
+		for m in self.receivers:
+			yield("msg recv",repr(m))
 
 
 	def _incoming(self,msg):
@@ -442,14 +452,14 @@ class MsgQueue(Collected,Jobber):
 					continue
 				elif r is MINE or r is SEND_AGAIN:
 					handled = True
-					if len(self.receivers) < i and self.receivers[i] is m:
+					if len(self.receivers) > i and self.receivers[i] is m:
 						self.receivers.pop(i)
 					else:
 						self.receivers.remove(m)
 
 					if r is SEND_AGAIN:
-						if self.blocking:
-							self.msgs[m.prio].insert(0)
+						if m.blocking:
+							self.msgs[0].insert(0,m)
 						else:
 							self.msgs[m.prio].append(m)
 					else:
@@ -475,6 +485,8 @@ class MsgQueue(Collected,Jobber):
 					self.receivers.remove(m)
 				fix_exception(ex)
 				process_failure(ex)
+
+				self.close(False)
 			i += 1
 		if not handled:
 			simple_event(Context(),"msg","unhandled",str(msg),*self.name)
@@ -522,13 +534,18 @@ class MsgQueue(Collected,Jobber):
 			self.n_processed += self.n_processed_now
 			self.n_processed_now = 0
 
-			for m in self.receivers[:]:
+			recvs = self.receivers
+			self.receivers = []
+			for m in recvs:
 				try:
 					r = m.retry()
-					if r is True:
-						self.enqueue(m)
-					elif r is False:
-						self.receivers.remove(m)
+					if r is SEND_AGAIN:
+						self.msgs[msg.prio].append(msg)
+					elif r is RECV_AGAIN:
+						self.receivers.append(msg)
+						pass
+					elif r is not None:
+						raise RuntimeError("Strange retry(): %s %s" % (repr(msg),repr(r)))
 				except Exception as e:
 					fix_exception(e)
 					process_failure(e)
@@ -565,12 +582,18 @@ class MsgQueue(Collected,Jobber):
 			Processing of incoming and outgoing data is serialized so that
 			there will be no problems with concurrency.
 			"""
+		if not self.ondemand:
+			m = MsgReOpen()
+			self.q.put((m.prio,m), block=False)
 		while True:
 			_,msg = self.q.get()
 			if isinstance(msg,MsgSender):
 				self.msgs[msg.prio].append(msg)
 			elif isinstance(msg,MsgReceiver):
-				self.listeners.append(msg)
+				if msg.blocking:
+					self.receivers.insert(0,msg)
+				else:
+					self.receivers.append(msg)
 			elif isinstance(msg,MsgIncoming):
 				self._incoming(msg)
 			elif isinstance(msg,MsgReOpen):
@@ -584,10 +607,12 @@ class MsgQueue(Collected,Jobber):
 				continue
 			if not self.channel:
 				self._setup()
-			done = False
+
+			done = False # marker for "don't send any more stuff"
 
 			for m in self.receivers:
 				if m.blocking:
+					done = True
 					break
 
 			for mq in self.msgs:
@@ -601,7 +626,10 @@ class MsgQueue(Collected,Jobber):
 					self.last_sent = m
 					self.last_sent_at = now()
 					if r is RECV_AGAIN:
-						self.receivers.append(m)
+						if m.blocking:
+							self.receivers.insert(0,m)
+						else:
+							self.receivers.append(m)
 					elif r is SEND_AGAIN:
 						self.msgs[msg.prio].append(msg)
 					elif isinstance(r,SEND_LATER):
