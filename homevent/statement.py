@@ -118,36 +118,14 @@ class WordLister(type):
 		super(WordLister, cls).__init__(name, bases, dct)
 		cls._words = {}
 
-class ComplexStatement(Statement):
+class WordAttached(Statement):
 	"""\
-		Base class for handling complex statements. This class has a
-		word list which can be used to attach distinct sub-statements.
-
-		A statement may want to be available in both complex and simple
-		versions. The difference is that the complex version will have
-		calls to start_block() and end_block(). Thus, you need to throw
-		an error in .run() if using your statement in simple form does
-		not make sense (e.g. a plain "if foo" without sub-statements).
-
-		If you want sub-statements that are executed at runtime (as
-		opposed to interpreter time), you want to inherit from
-		StatementList instead.
+		Class for attaching word lists to statements.
+		The use case is a multiple-inheritance mix-in to a (complex)
+		statement which can be configured by its own sub-statement.
 		"""
 
 	__metaclass__ = WordLister
-
-	def __init__(self,*a,**k):
-		super(ComplexStatement,self).__init__(*a,**k)
-		self.statements = []
-
-	def __repr__(self):
-		if self._words is None:
-			return u"‹%s: %s›" % (self.__class__.__name__,self.name)
-		else:
-			return u"‹%s: %s %d›" % (self.__class__.__name__,self.name,len(self._words))
-
-	def start_block(self):
-		raise NotImplementedError("You need to override '%s.start_block' (called with %s)" % (self.__class__.__name__,repr(self.args)))
 
 	@classmethod
 	def __getitem__(self,key):
@@ -159,45 +137,6 @@ class ComplexStatement(Statement):
 					pass
 		raise KeyError(self,key)
 
-	def lookup(self,args):
-		"""\
-			Override this if you want to replace the default lookup
-			code for sub-statements.
-			"""
-		
-		n = len(args)
-		while n > 0:
-			try:
-				fn = self[Name(*args[:n])]
-			except KeyError:
-				pass
-			else:
-				# verify
-				if fn.matches(args):
-					return fn
-			n = n-1
-
-		raise UnknownWordError(args,self)
-		
-	def get_processor(self):
-		"""\
-			Returns the translator that should process my substatements.
-			By default, returns a CollectProcessor.
-			"""
-		from homevent.interpreter import CollectProcessor
-		return CollectProcessor(parent=self, ctx=self.ctx(words=self))
-	processor = property(get_processor,doc="which processor works for my content?")
-
-	def store(self,s):
-		self.statements.append(s)
-
-	def end_block(self):
-		"""\
-			Override this if you want a notification that your sub-statement
-			is complete.
-			"""
-		pass
-	
 	@classmethod
 	def _get_wordlist(self):
 		"""Called by Help to get my list of words."""
@@ -251,6 +190,78 @@ class ComplexStatement(Statement):
 			Remove this statement.
 			"""
 		del self._words[handler.name]
+
+
+class ComplexStatement(WordAttached):
+	"""\
+		Base class for handling complex statements. This class has a
+		word list which can be used to attach distinct sub-statements.
+
+		A statement may want to be available in both complex and simple
+		versions. The difference is that the complex version will have
+		calls to start_block(), at least one add(), and end_block() at
+		compile time.
+		Thus, you need to throw an error in .run() if using your statement
+		in simple form does not make sense (e.g. a plain "if foo" without
+		sub-statements).
+
+		If you want sub-statements that are executed at runtime (as
+		opposed to interpreter time), you want to inherit from
+		StatementList instead.
+		"""
+
+	def __init__(self,*a,**k):
+		super(ComplexStatement,self).__init__(*a,**k)
+		self.statements = []
+
+	def __repr__(self):
+		if getattr(self,"_words",None) is None:
+			return u"‹%s: %s›" % (self.__class__.__name__,self.name)
+		else:
+			return u"‹%s: %s %d›" % (self.__class__.__name__,self.name,len(self._words))
+
+	def start_block(self):
+		raise NotImplementedError("You need to override '%s.start_block' (called with %s)" % (self.__class__.__name__,repr(self.args)))
+
+	def lookup(self,args):
+		"""\
+			Override this if you want to replace the default lookup
+			code for sub-statements.
+			"""
+		
+		n = len(args)
+		while n > 0:
+			try:
+				fn = self[Name(*args[:n])]
+			except KeyError:
+				pass
+			else:
+				# verify
+				if fn.matches(args):
+					return fn
+			n = n-1
+
+		raise UnknownWordError(args,self)
+		
+	def get_processor(self):
+		"""\
+			Returns the translator that should process my substatements.
+			By default, returns a CollectProcessor.
+			"""
+		from homevent.interpreter import CollectProcessor
+		return CollectProcessor(parent=self, ctx=self.ctx(words=self))
+	processor = property(get_processor,doc="which processor works for my content?")
+
+	def store(self,s):
+		self.statements.append(s)
+
+	def end_block(self):
+		"""\
+			Override this if you want a notification that your sub-statement
+			is complete.
+			"""
+		pass
+	
 
 class AttributedStatement(ComplexStatement):
 	"""A statement that can be parameterized."""
