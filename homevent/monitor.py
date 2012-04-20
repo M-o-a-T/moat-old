@@ -35,7 +35,7 @@ from homevent.context import Context
 from homevent.logging import log,TRACE,DEBUG
 from homevent.collect import Collection,Collected
 
-from gevent.event import AsyncResult,Event as gEvent
+from gevent.event import Event as gEvent
 from gevent.queue import Channel,Queue
 import gevent
 
