@@ -76,6 +76,10 @@ block:
 #
 #set wago off foo baz :for 2
 set output hey foo baz
+send wago test "D-"
+wait:
+	for 0.1
+	debug force
 set output ho foo baz
 wait:
 	for 0.5

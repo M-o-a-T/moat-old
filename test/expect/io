@@ -92,6 +92,8 @@ END: input¦fake¦GRMPF¦foo¦bar
 : ‹Collected FakeInput:foo¦bar›
 name: foo¦bar
 type: fake
+last read: now
+last value: GRMPF
 value: GRMPF
 .
 : ‹Collected FakeOutput:foo¦bar›

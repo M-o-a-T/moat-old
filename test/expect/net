@@ -143,7 +143,7 @@ RUN: on net connect baz zaz *who ‹OnEventHandler›
  ev: EVENT: net¦connect¦baz¦zaz¦1
 type: net_passive
 host: 127.0.0.1
-port: 48419
+port: 41127
 .
 NEW: ‹ConditionalWorkSequence:22 (4)›
    : │  id: 22
