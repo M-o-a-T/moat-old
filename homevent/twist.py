@@ -369,6 +369,10 @@ class Jobber(object):
 		j = gevent.spawn(proc,*a,**k)
 
 		def err(e):
+			try:
+				e = e.get()
+			except BaseException as e:
+				pass
 			from homevent.run import process_failure
 			fix_exception(e)
 			process_failure(e)

@@ -96,6 +96,8 @@ def collect_failure(e):
 		Create a list of things to be done for it.
 		"""
 	from homevent.logging import log_created
+	from homevent.event import Event
+	assert isinstance(e,(Event,BaseException)),"Cannot be used as an event: "+repr(e)
 
 	work = WorkSequence(e,None)
 	for wp in work_prios:
