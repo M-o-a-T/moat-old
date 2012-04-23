@@ -28,6 +28,10 @@ Documentation
 Code
 ====
 
+* move log_wait to logging and make it a collection
+
+* net FOO => net recv FOO
+
 * implement logging to SQL
 
 * more documentation (docstring and comments) are always helpful …
