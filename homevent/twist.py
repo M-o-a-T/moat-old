@@ -107,7 +107,10 @@ def reraise(e):
 	"""Re-raise an exception, with its original traceback"""
 	tb = getattr(e,"__traceback__",None)
 	if tb is None:
-		tb = sys.exc_info()[2]
+		try:
+			raise e
+		except BaseException as e:
+			tb = sys.exc_info()[2]
 	else:
 		del e.__traceback__
 	raise e.__class__,e,tb
