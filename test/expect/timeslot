@@ -485,4 +485,4 @@ NEW: ‹WorkSequence:47 (4)›
    : │  Waiter ‹AFTER EVENT A› was cancelled
    : └1╴... done.
 Waiter ‹AFTER EVENT A› was cancelled
-END: WaitCancelled
+END: DelayCancelled

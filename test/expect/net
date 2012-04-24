@@ -16,10 +16,10 @@ END: startup
 NEW: ‹ConditionalWorkSequence:8 (4)›
    : │  id: 8
    : │  call count: 0
-   : │  EVENT: wait¦start¦0.3¦BAD
+   : │  EVENT: wait¦start¦0.2¦BAD
    : └1╴... done.
-EVENT: wait¦start¦0.3¦BAD
-END: wait¦start¦0.3¦BAD
+EVENT: wait¦start¦0.2¦BAD
+END: wait¦start¦0.2¦BAD
 NEW: ‹ConditionalWorkSequence:9 (4)›
    : │  id: 9
    : │  call count: 0
@@ -38,10 +38,10 @@ END: error
 NEW: ‹ConditionalWorkSequence:11 (4)›
    : │  id: 11
    : │  call count: 0
-   : │  EVENT: wait¦done¦0.3¦BAD
+   : │  EVENT: wait¦done¦0.2¦BAD
    : └1╴... done.
-EVENT: wait¦done¦0.3¦BAD
-END: wait¦done¦0.3¦BAD
+EVENT: wait¦done¦0.2¦BAD
+END: wait¦done¦0.2¦BAD
 1 Yes
 0 Create OnEvtHandler: net¦connect¦foo
 0 NewHandler 12
@@ -56,17 +56,17 @@ END: wait¦done¦0.3¦BAD
 NEW: ‹ConditionalWorkSequence:16 (4)›
    : │  id: 16
    : │  call count: 0
-   : │  EVENT: wait¦start¦0.5¦BEFORE
+   : │  EVENT: wait¦start¦0.4¦BEFORE
    : └1╴... done.
-EVENT: wait¦start¦0.5¦BEFORE
-END: wait¦start¦0.5¦BEFORE
+EVENT: wait¦start¦0.4¦BEFORE
+END: wait¦start¦0.4¦BEFORE
 NEW: ‹ConditionalWorkSequence:17 (4)›
    : │  id: 17
    : │  call count: 0
-   : │  EVENT: wait¦done¦0.5¦BEFORE
+   : │  EVENT: wait¦done¦0.4¦BEFORE
    : └1╴... done.
-EVENT: wait¦done¦0.5¦BEFORE
-END: wait¦done¦0.5¦BEFORE
+EVENT: wait¦done¦0.4¦BEFORE
+END: wait¦done¦0.4¦BEFORE
 0 +WAIT 6 start job ‹Async async›
 0 -WAIT 6 start job ‹Async async›
 0 +WAIT 7 start job ‹Waiter AFTER ??›
@@ -74,10 +74,10 @@ END: wait¦done¦0.5¦BEFORE
 NEW: ‹ConditionalWorkSequence:18 (4)›
    : │  id: 18
    : │  call count: 0
-   : │  EVENT: wait¦start¦1.3¦AFTER
+   : │  EVENT: wait¦start¦1.2¦AFTER
    : └1╴... done.
-EVENT: wait¦start¦1.3¦AFTER
-END: wait¦start¦1.3¦AFTER
+EVENT: wait¦start¦1.2¦AFTER
+END: wait¦start¦1.2¦AFTER
 NEW: ‹ConditionalWorkSequence:19 (5)›
    : │  id: 19
    : │  call count: 0
@@ -143,7 +143,7 @@ RUN: on net connect baz zaz *who ‹OnEventHandler›
  ev: EVENT: net¦connect¦baz¦zaz¦1
 type: net_passive
 host: 127.0.0.1
-port: 41127
+port: 53714
 .
 NEW: ‹ConditionalWorkSequence:22 (4)›
    : │  id: 22
@@ -158,10 +158,10 @@ END: net¦connect¦baz¦zaz¦1
 NEW: ‹ConditionalWorkSequence:23 (4)›
    : │  id: 23
    : │  call count: 0
-   : │  EVENT: wait¦done¦1.3¦AFTER
+   : │  EVENT: wait¦done¦1.2¦AFTER
    : └1╴... done.
-EVENT: wait¦done¦1.3¦AFTER
-END: wait¦done¦1.3¦AFTER
+EVENT: wait¦done¦1.2¦AFTER
+END: wait¦done¦1.2¦AFTER
 0 ending
 .
 1 Yes

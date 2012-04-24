@@ -358,12 +358,19 @@ END: monitor¦stop¦baz¦zaz
 NEW: ‹ConditionalWorkSequence:33 (4)›
    : │  id: 33
    : │  call count: 0
+   : │  EVENT: output¦set¦None¦1¦monitest
+   : └1╴... done.
+EVENT: output¦set¦None¦1¦monitest
+END: output¦set¦None¦1¦monitest
+NEW: ‹ConditionalWorkSequence:34 (4)›
+   : │  id: 34
+   : │  call count: 0
    : │  EVENT: input¦fake¦1¦monitest
    : └1╴... done.
 EVENT: input¦fake¦1¦monitest
 END: input¦fake¦1¦monitest
-NEW: ‹ConditionalWorkSequence:34 (4)›
-   : │  id: 34
+NEW: ‹ConditionalWorkSequence:35 (4)›
+   : │  id: 35
    : │  call count: 0
    : │  EVENT: monitor¦start¦moni¦test
    : └1╴... done.
@@ -373,8 +380,8 @@ END: monitor¦start¦moni¦test
 0 -WAIT 27 start job ‹VarMonitor moni¦test off›
 0 +WAIT 28 start job ‹Waiter _wait¦7 ??›
 0 -WAIT 28 start job ‹Waiter _wait¦7 ??›
-NEW: ‹ConditionalWorkSequence:35 (4)›
-   : │  id: 35
+NEW: ‹ConditionalWorkSequence:36 (4)›
+   : │  id: 36
    : │  call count: 0
    : │  EVENT: wait¦start¦×××¦_wait¦7
    : └1╴... done.
@@ -384,8 +391,8 @@ END: wait¦start¦×××¦_wait¦7
 0 monitor raw 1 moni test
 0 monitor filter [1] on moni¦test
 0 monitor End run moni¦test
-NEW: ‹ConditionalWorkSequence:36 (4)›
-   : │  id: 36
+NEW: ‹ConditionalWorkSequence:37 (4)›
+   : │  id: 37
    : │  call count: 0
    : │  EVENT: monitor¦value¦1.0¦moni¦test
    : └1╴... done.
@@ -393,15 +400,22 @@ EVENT: monitor¦value¦1.0¦moni¦test
 END: monitor¦value¦1.0¦moni¦test
 0 monitor Stop run moni¦test
 0 +WAIT 29 monitor sleep moni test
-NEW: ‹ConditionalWorkSequence:37 (4)›
-   : │  id: 37
+NEW: ‹ConditionalWorkSequence:38 (4)›
+   : │  id: 38
    : │  call count: 0
    : │  EVENT: wait¦done¦×××¦_wait¦7
    : └1╴... done.
 EVENT: wait¦done¦×××¦_wait¦7
 END: wait¦done¦×××¦_wait¦7
-NEW: ‹ConditionalWorkSequence:38 (4)›
-   : │  id: 38
+NEW: ‹ConditionalWorkSequence:39 (4)›
+   : │  id: 39
+   : │  call count: 0
+   : │  EVENT: output¦set¦1¦2¦monitest
+   : └1╴... done.
+EVENT: output¦set¦1¦2¦monitest
+END: output¦set¦1¦2¦monitest
+NEW: ‹ConditionalWorkSequence:40 (4)›
+   : │  id: 40
    : │  call count: 0
    : │  EVENT: input¦fake¦2¦monitest
    : └1╴... done.
@@ -409,8 +423,8 @@ EVENT: input¦fake¦2¦monitest
 END: input¦fake¦2¦monitest
 0 +WAIT 30 start job ‹Waiter _wait¦8 ??›
 0 -WAIT 30 start job ‹Waiter _wait¦8 ??›
-NEW: ‹ConditionalWorkSequence:39 (4)›
-   : │  id: 39
+NEW: ‹ConditionalWorkSequence:41 (4)›
+   : │  id: 41
    : │  call count: 0
    : │  EVENT: wait¦start¦×××¦_wait¦8
    : └1╴... done.
@@ -423,8 +437,8 @@ END: wait¦start¦×××¦_wait¦8
 0 monitor raw 2 moni test
 0 monitor filter [2] on moni¦test
 0 monitor End run moni¦test
-NEW: ‹ConditionalWorkSequence:40 (4)›
-   : │  id: 40
+NEW: ‹ConditionalWorkSequence:42 (4)›
+   : │  id: 42
    : │  call count: 0
    : │  EVENT: monitor¦value¦2.0¦moni¦test
    : └1╴... done.
@@ -432,15 +446,22 @@ EVENT: monitor¦value¦2.0¦moni¦test
 END: monitor¦value¦2.0¦moni¦test
 0 monitor Stop run moni¦test
 0 +WAIT 32 monitor sleep moni test
-NEW: ‹ConditionalWorkSequence:41 (4)›
-   : │  id: 41
+NEW: ‹ConditionalWorkSequence:43 (4)›
+   : │  id: 43
    : │  call count: 0
    : │  EVENT: wait¦done¦×××¦_wait¦8
    : └1╴... done.
 EVENT: wait¦done¦×××¦_wait¦8
 END: wait¦done¦×××¦_wait¦8
-NEW: ‹ConditionalWorkSequence:42 (4)›
-   : │  id: 42
+NEW: ‹ConditionalWorkSequence:44 (4)›
+   : │  id: 44
+   : │  call count: 0
+   : │  EVENT: output¦set¦2¦3¦monitest
+   : └1╴... done.
+EVENT: output¦set¦2¦3¦monitest
+END: output¦set¦2¦3¦monitest
+NEW: ‹ConditionalWorkSequence:45 (4)›
+   : │  id: 45
    : │  call count: 0
    : │  EVENT: input¦fake¦3¦monitest
    : └1╴... done.
@@ -448,8 +469,8 @@ EVENT: input¦fake¦3¦monitest
 END: input¦fake¦3¦monitest
 0 +WAIT 33 start job ‹Waiter _wait¦9 ??›
 0 -WAIT 33 start job ‹Waiter _wait¦9 ??›
-NEW: ‹ConditionalWorkSequence:43 (4)›
-   : │  id: 43
+NEW: ‹ConditionalWorkSequence:46 (4)›
+   : │  id: 46
    : │  call count: 0
    : │  EVENT: wait¦start¦×××¦_wait¦9
    : └1╴... done.
@@ -457,15 +478,22 @@ EVENT: wait¦start¦×××¦_wait¦9
 END: wait¦start¦×××¦_wait¦9
 0 -WAIT 32 monitor sleep moni test
 0 +WAIT 34 monitor sleep moni test
-NEW: ‹ConditionalWorkSequence:44 (4)›
-   : │  id: 44
+NEW: ‹ConditionalWorkSequence:47 (4)›
+   : │  id: 47
    : │  call count: 0
    : │  EVENT: wait¦done¦×××¦_wait¦9
    : └1╴... done.
 EVENT: wait¦done¦×××¦_wait¦9
 END: wait¦done¦×××¦_wait¦9
-NEW: ‹ConditionalWorkSequence:45 (4)›
-   : │  id: 45
+NEW: ‹ConditionalWorkSequence:48 (4)›
+   : │  id: 48
+   : │  call count: 0
+   : │  EVENT: output¦set¦3¦4¦monitest
+   : └1╴... done.
+EVENT: output¦set¦3¦4¦monitest
+END: output¦set¦3¦4¦monitest
+NEW: ‹ConditionalWorkSequence:49 (4)›
+   : │  id: 49
    : │  call count: 0
    : │  EVENT: input¦fake¦4¦monitest
    : └1╴... done.
@@ -473,8 +501,8 @@ EVENT: input¦fake¦4¦monitest
 END: input¦fake¦4¦monitest
 0 +WAIT 35 start job ‹Waiter _wait¦10 ??›
 0 -WAIT 35 start job ‹Waiter _wait¦10 ??›
-NEW: ‹ConditionalWorkSequence:46 (4)›
-   : │  id: 46
+NEW: ‹ConditionalWorkSequence:50 (4)›
+   : │  id: 50
    : │  call count: 0
    : │  EVENT: wait¦start¦×××¦_wait¦10
    : └1╴... done.
@@ -485,8 +513,8 @@ END: wait¦start¦×××¦_wait¦10
 0 monitor raw 4 moni test
 0 monitor filter [4] on moni¦test
 0 monitor End run moni¦test
-NEW: ‹ConditionalWorkSequence:47 (4)›
-   : │  id: 47
+NEW: ‹ConditionalWorkSequence:51 (4)›
+   : │  id: 51
    : │  call count: 0
    : │  EVENT: monitor¦value¦4.0¦moni¦test
    : └1╴... done.
@@ -496,15 +524,22 @@ END: monitor¦value¦4.0¦moni¦test
 0 +WAIT 36 monitor sleep moni test
 0 -WAIT 36 monitor sleep moni test
 0 +WAIT 37 monitor sleep moni test
-NEW: ‹ConditionalWorkSequence:48 (4)›
-   : │  id: 48
+NEW: ‹ConditionalWorkSequence:52 (4)›
+   : │  id: 52
    : │  call count: 0
    : │  EVENT: wait¦done¦×××¦_wait¦10
    : └1╴... done.
 EVENT: wait¦done¦×××¦_wait¦10
 END: wait¦done¦×××¦_wait¦10
-NEW: ‹ConditionalWorkSequence:49 (4)›
-   : │  id: 49
+NEW: ‹ConditionalWorkSequence:53 (4)›
+   : │  id: 53
+   : │  call count: 0
+   : │  EVENT: output¦set¦4¦5¦monitest
+   : └1╴... done.
+EVENT: output¦set¦4¦5¦monitest
+END: output¦set¦4¦5¦monitest
+NEW: ‹ConditionalWorkSequence:54 (4)›
+   : │  id: 54
    : │  call count: 0
    : │  EVENT: input¦fake¦5¦monitest
    : └1╴... done.
@@ -523,8 +558,8 @@ data: 4
 .
 0 +WAIT 38 kill job ‹VarMonitor moni¦test on 4.0›
 0 -WAIT 37 monitor sleep moni test
-NEW: ‹ConditionalWorkSequence:50 (4)›
-   : │  id: 50
+NEW: ‹ConditionalWorkSequence:55 (4)›
+   : │  id: 55
    : │  call count: 0
    : │  EVENT: monitor¦stop¦moni¦test
    : └1╴... done.

@@ -75,10 +75,10 @@ END: module¦load¦errors
 NEW: ‹ConditionalWorkSequence:16 (4)›
    : │  id: 16
    : │  call count: 0
-   : │  EVENT: wait¦start¦11.2¦yawn
+   : │  EVENT: wait¦start¦11.1¦yawn
    : └1╴... done.
-EVENT: wait¦start¦11.2¦yawn
-END: wait¦start¦11.2¦yawn
+EVENT: wait¦start¦11.1¦yawn
+END: wait¦start¦11.1¦yawn
 NEW: ‹ConditionalWorkSequence:17 (4)›
    : │  id: 17
    : │  call count: 0
@@ -88,12 +88,14 @@ EVENT: onewire¦scanning¦A
 END: onewire¦scanning¦A
 0 OWFS start bus update
 0 conn connecting OWFSqueue A
+0 !got UP_EVENT A
 0 +WAIT 8 start job ‹OWFSchannel:‹Collected _MsgForwarder:A››
 0 -WAIT 8 start job ‹OWFSchannel:‹Collected _MsgForwarder:A››
 0 conn setting up OWFSqueue A
 0 conn connected OWFSqueue A
 1 onewire SEND 0 1 7 2 0 0 '\x00'
 1 onewire RECV 0 96 0 2 95 32770
+0 !got DOWN_EVENT A
 0 conn ReOpen OWFSqueue A
 0 conn incoming OWFSqueue A ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:1›
 0 msg recv A ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:1›
@@ -104,36 +106,40 @@ END: onewire¦scanning¦A
 0 got unrecognized OWFS name structure
 0 got unrecognized OWFS name simultaneous
 0 got unrecognized OWFS name alarm
-0 msg recv= MINE
+0 msg recv= MINE ‹DIRmsg ›
 1 onewire doneDIR ‹DIRmsg ›
 0 conn connecting OWFSqueue A
+0 !got UP_EVENT A
 0 +WAIT 9 start job ‹OWFSchannel:‹Collected _MsgForwarder:A››
 0 -WAIT 9 start job ‹OWFSchannel:‹Collected _MsgForwarder:A››
 0 conn setting up OWFSqueue A
 0 conn connected OWFSqueue A
 1 onewire SEND 0 7 7 2 0 0 '/bus.0\x00'
 1 onewire RECV 0 73 0 2 72 32770
+0 !got DOWN_EVENT A
 0 conn ReOpen OWFSqueue A
 0 conn incoming OWFSqueue A ‹MsgIncoming: data:'/bus.0/interface,/bus.0/10.000010EF0000,/bus.0/simultaneous,/bus.0/alarm' typ:0 prio:1›
 0 msg recv A ‹MsgIncoming: data:'/bus.0/interface,/bus.0/10.000010EF0000,/bus.0/simultaneous,/bus.0/alarm' typ:0 prio:1›
 0 got unrecognized OWFS name interface
 0 got unrecognized OWFS name simultaneous
 0 got unrecognized OWFS name alarm
-0 msg recv= MINE
+0 msg recv= MINE ‹DIRmsg bus.0›
 1 onewire doneDIR ‹DIRmsg bus.0›
 1 onewire NEW ‹OWFSqueue:A ReOpen› 000010ef0000 10.000010EF0000 ('bus.0',)
 0 conn connecting OWFSqueue A
+0 !got UP_EVENT A
 0 +WAIT 10 start job ‹OWFSchannel:‹Collected _MsgForwarder:A››
 0 -WAIT 10 start job ‹OWFSchannel:‹Collected _MsgForwarder:A››
 0 conn setting up OWFSqueue A
 0 conn connected OWFSqueue A
 1 onewire SEND 0 37 2 2 8192 0 '/uncached/bus.0/10.000010EF0000/type\x00'
 1 onewire RECV 0 7 7 2 7 0
+0 !got DOWN_EVENT A
 0 conn ReOpen OWFSqueue A
 0 conn incoming OWFSqueue A ‹MsgIncoming: data:'DS18S20' typ:7 prio:1›
 0 msg recv A ‹MsgIncoming: data:'DS18S20' typ:7 prio:1›
 1 onewire done:  ‹ATTRgetmsg 10.000010EF0000 type›
-0 msg recv= MINE
+0 msg recv= MINE ‹ATTRgetmsg 10.000010EF0000 type›
 NEW: ‹ConditionalWorkSequence:18 (5)›
    : │  id: 18
    : │  call count: 0
@@ -157,17 +163,19 @@ RUN: on onewire scanned A * * * ‹OnEventHandler›
  at: ‹ConditionalWorkSequence:18 (5)› (step 1)
  ev: EVENT: onewire¦scanned¦A¦0¦1¦1
 0 conn connecting OWFSqueue A
+0 !got UP_EVENT A
 0 +WAIT 11 start job ‹OWFSchannel:‹Collected _MsgForwarder:A››
 0 -WAIT 11 start job ‹OWFSchannel:‹Collected _MsgForwarder:A››
 0 conn setting up OWFSqueue A
 0 conn connected OWFSqueue A
 1 onewire SEND 0 44 2 2 8192 0 u'/uncached/bus.0/10.000010EF0000/temperature\x00'
 1 onewire RECV 0 12 12 2 12 0
+0 !got DOWN_EVENT A
 0 conn ReOpen OWFSqueue A
 0 conn incoming OWFSqueue A ‹MsgIncoming: data:'         1.6' typ:12 prio:1›
 0 msg recv A ‹MsgIncoming: data:'         1.6' typ:12 prio:1›
 1 onewire done:  ‹ATTRgetmsg 10.000010EF0000 temperature›
-0 msg recv= MINE
+0 msg recv= MINE ‹ATTRgetmsg 10.000010EF0000 temperature›
 0 +WAIT 12 start job ‹TriggerHandler: trigger 2›
 0 -WAIT 12 start job ‹TriggerHandler: trigger 2›
 END: onewire¦scanned¦A¦0¦1¦1
@@ -181,12 +189,14 @@ NEW: ‹ConditionalWorkSequence:19 (4)›
    : └1╴... done.
 IEVENT: thermo¦1.6
 END: thermo¦1.6
+0 !got UP_EVENT A
 0 +WAIT 13 start job ‹OWFSchannel:‹Collected _MsgForwarder:A››
 0 -WAIT 13 start job ‹OWFSchannel:‹Collected _MsgForwarder:A››
 0 conn setting up OWFSqueue A
 0 conn connected OWFSqueue A
 1 onewire SEND 0 1 7 2 0 0 '\x00'
 1 onewire RECV 0 96 0 2 95 32770
+0 !got DOWN_EVENT A
 0 conn ReOpen OWFSqueue A
 0 conn incoming OWFSqueue A ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:1›
 0 msg recv A ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:1›
@@ -199,17 +209,19 @@ statistics
 structure
 simultaneous
 alarm
-0 msg recv= MINE
+0 msg recv= MINE ‹DIRmsg ›
 1 onewire doneDIR ‹DIRmsg ›
 .
 0 DirDev
 0 conn connecting OWFSqueue A
+0 !got UP_EVENT A
 0 +WAIT 14 start job ‹OWFSchannel:‹Collected _MsgForwarder:A››
 0 -WAIT 14 start job ‹OWFSchannel:‹Collected _MsgForwarder:A››
 0 conn setting up OWFSqueue A
 0 conn connected OWFSqueue A
 1 onewire SEND 0 23 7 2 0 0 '/bus.0/10.000010EF0000\x00'
 1 onewire RECV 0 454 0 2 453 0
+0 !got DOWN_EVENT A
 0 conn ReOpen OWFSqueue A
 0 conn incoming OWFSqueue A ‹MsgIncoming: data:'/bus.0/10.000010EF0000/address,/bus.0/10.000010EF0000/alias,/bus.0/10.000010EF0000/crc8,/bus.0/10.000010EF0000/errata,/bus.0/10.000010EF0000/family,/bus.0/10.000010EF0000/id,/bus.0/10.000010EF0000/locator,/bus.0/10.000010EF0000/power,/bus.0/10.000010EF0000/r_address,/bus.0/10.000010EF0000/r_id,/bus.0/10.000010EF0000/r_locator,/bus.0/10.000010EF0000/temperature,/bus.0/10.000010EF0000/temphigh,/bus.0/10.000010EF0000/templow,/bus.0/10.000010EF0000/type' typ:0 prio:1›
 0 msg recv A ‹MsgIncoming: data:'/bus.0/10.000010EF0000/address,/bus.0/10.000010EF0000/alias,/bus.0/10.000010EF0000/crc8,/bus.0/10.000010EF0000/errata,/bus.0/10.000010EF0000/family,/bus.0/10.000010EF0000/id,/bus.0/10.000010EF0000/locator,/bus.0/10.000010EF0000/power,/bus.0/10.000010EF0000/r_address,/bus.0/10.000010EF0000/r_id,/bus.0/10.000010EF0000/r_locator,/bus.0/10.000010EF0000/temperature,/bus.0/10.000010EF0000/temphigh,/bus.0/10.000010EF0000/templow,/bus.0/10.000010EF0000/type' typ:0 prio:1›
@@ -228,7 +240,7 @@ temperature
 temphigh
 templow
 type
-0 msg recv= MINE
+0 msg recv= MINE ‹DIRmsg bus.0/10.000010EF0000›
 1 onewire doneDIR ‹DIRmsg bus.0/10.000010EF0000›
 .
 0 yes
@@ -242,12 +254,14 @@ EVENT: onewire¦scanning¦A
 END: onewire¦scanning¦A
 0 OWFS start bus update
 0 conn connecting OWFSqueue A
+0 !got UP_EVENT A
 0 +WAIT 15 start job ‹OWFSchannel:‹Collected _MsgForwarder:A››
 0 -WAIT 15 start job ‹OWFSchannel:‹Collected _MsgForwarder:A››
 0 conn setting up OWFSqueue A
 0 conn connected OWFSqueue A
 1 onewire SEND 0 1 7 2 0 0 '\x00'
 1 onewire RECV 0 96 0 2 95 32770
+0 !got DOWN_EVENT A
 0 conn ReOpen OWFSqueue A
 0 conn incoming OWFSqueue A ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:1›
 0 msg recv A ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:1›
@@ -258,22 +272,24 @@ END: onewire¦scanning¦A
 0 got unrecognized OWFS name structure
 0 got unrecognized OWFS name simultaneous
 0 got unrecognized OWFS name alarm
-0 msg recv= MINE
+0 msg recv= MINE ‹DIRmsg ›
 1 onewire doneDIR ‹DIRmsg ›
 0 conn connecting OWFSqueue A
+0 !got UP_EVENT A
 0 +WAIT 16 start job ‹OWFSchannel:‹Collected _MsgForwarder:A››
 0 -WAIT 16 start job ‹OWFSchannel:‹Collected _MsgForwarder:A››
 0 conn setting up OWFSqueue A
 0 conn connected OWFSqueue A
 1 onewire SEND 0 7 7 2 0 0 '/bus.0\x00'
 1 onewire RECV 0 73 0 2 72 32770
+0 !got DOWN_EVENT A
 0 conn ReOpen OWFSqueue A
 0 conn incoming OWFSqueue A ‹MsgIncoming: data:'/bus.0/interface,/bus.0/10.000010EF0000,/bus.0/simultaneous,/bus.0/alarm' typ:0 prio:1›
 0 msg recv A ‹MsgIncoming: data:'/bus.0/interface,/bus.0/10.000010EF0000,/bus.0/simultaneous,/bus.0/alarm' typ:0 prio:1›
 0 got unrecognized OWFS name interface
 0 got unrecognized OWFS name simultaneous
 0 got unrecognized OWFS name alarm
-0 msg recv= MINE
+0 msg recv= MINE ‹DIRmsg bus.0›
 1 onewire doneDIR ‹DIRmsg bus.0›
 NEW: ‹ConditionalWorkSequence:21 (4)›
    : │  id: 21
@@ -297,12 +313,14 @@ NEW: ‹ConditionalWorkSequence:23 (4)›
 EVENT: onewire¦scanned¦A¦0¦0¦1
 END: onewire¦scanned¦A¦0¦0¦1
 0 conn connecting OWFSqueue A
+0 !got UP_EVENT A
 0 +WAIT 17 start job ‹OWFSchannel:‹Collected _MsgForwarder:A››
 0 -WAIT 17 start job ‹OWFSchannel:‹Collected _MsgForwarder:A››
 0 conn setting up OWFSqueue A
 0 conn connected OWFSqueue A
 1 onewire SEND 0 1 7 2 0 0 '\x00'
 1 onewire RECV 0 96 0 2 95 32770
+0 !got DOWN_EVENT A
 0 conn ReOpen OWFSqueue A
 0 conn incoming OWFSqueue A ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:1›
 0 msg recv A ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:1›
@@ -315,7 +333,7 @@ statistics
 structure
 simultaneous
 alarm
-0 msg recv= MINE
+0 msg recv= MINE ‹DIRmsg ›
 1 onewire doneDIR ‹DIRmsg ›
 .
 0 Dropping OWFS bus A
@@ -329,10 +347,10 @@ alarm
 NEW: ‹ConditionalWorkSequence:24 (4)›
    : │  id: 24
    : │  call count: 0
-   : │  EVENT: wait¦start¦2.2¦END
+   : │  EVENT: wait¦start¦2.1¦END
    : └1╴... done.
-EVENT: wait¦start¦2.2¦END
-END: wait¦start¦2.2¦END
+EVENT: wait¦start¦2.1¦END
+END: wait¦start¦2.1¦END
 0 +WAIT 21 kill job <homevent.tokize.tokizer obj>
 0 -WAIT 21 kill job <homevent.tokize.tokizer obj>
 NEW: ‹ConditionalWorkSequence:25 (6)›

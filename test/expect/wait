@@ -184,7 +184,7 @@ NEW: ‹WorkSequence:26 (4)›
    : │  Waiter ‹Foo Baz› was cancelled
    : └1╴... done.
 Waiter ‹Foo Baz› was cancelled
-END: WaitCancelled
+END: DelayCancelled
 1 Yes
 0 +WAIT 14 start job ‹Waiter _wait¦9 ??›
 0 -WAIT 14 start job ‹Waiter _wait¦9 ??›
