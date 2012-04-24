@@ -28,6 +28,8 @@ Documentation
 Code
 ====
 
+* make sure that various attempts at communication back off successfully.
+
 * make sure that errors are reported via process_failure() *once*
 
 * associate statements with files+lines (any StatementList)
