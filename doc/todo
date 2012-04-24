@@ -28,6 +28,12 @@ Documentation
 Code
 ====
 
+* move onewire to i/o framework
+
+* restart wago connections cleanly (query the monitor list!)
+
+* add keepalive messages to wago
+
 * make sure that various attempts at communication back off successfully.
 
 * make sure that errors are reported via process_failure() *once*
