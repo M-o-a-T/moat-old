@@ -104,6 +104,13 @@ Note that a wildcard handler which listens on every conceivable
 connection does not make sense; nevertheless you probably shouldn't
 name your net connection “connect”. ☺
 
+I/O
+---
+
+output set OLD NEW NAME…
+	-- the output changes from OLD to NEW.
+	   An error in the event handler will abort the change.
+
 PWM
 ---
 

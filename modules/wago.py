@@ -28,6 +28,7 @@ from homevent.check import Check,register_condition,unregister_condition
 from homevent.monitor import Monitor,MonitorHandler, MonitorAgain
 from homevent.net import NetConnect,LineReceiver,NetActiveConnector
 from homevent.twist import reraise
+from homevent.times import humandelta,now,unixtime
 from homevent.msg import MsgQueue,MsgFactory,MsgBase, MINE,NOT_MINE, RECV_AGAIN,\
 	MsgReceiver
 from homevent.collect import Collection
@@ -66,25 +67,35 @@ class WAGOerror(RuntimeError):
 class WAGOassembler(LineReceiver):
 	buf = None
 	def lineReceived(self, line):
+		msgid = 0
+		off = 0
+		mt = MT_OTHER
+
 		if self.buf is not None:
 			if line == ".":
 				msg = self.buf
 				self.buf = None
 				self.msgReceived(type=MT_MULTILINE, msg=buf)
+				return
 			else:
 				buf.append(line)
 		elif line == "":
 			self.msgReceived(type=MT_OTHER, msg=line)
 		elif line[0] == "=":
 			self.buf = [line[1:]]
+			return
 		elif line[0] == "?":
 			self.msgReceived(type=MT_ERROR, msg=line[1:].strip())
+			return
 		elif line[0] == "*":
 			self.msgReceived(type=MT_INFO, msg=line[1:].strip())
+			return
 		elif line[0] == "+":
 			self.msgReceived(type=MT_ACK, msg=line[1:].strip())
+			return
 		elif line[0] == "-":
 			self.msgReceived(type=MT_NAK, msg=line[1:].strip())
+			return
 		elif line[0] == "!":
 			if line[1] == "+":
 				mt = MT_IND_ACK
@@ -95,13 +106,13 @@ class WAGOassembler(LineReceiver):
 			else:
 				mt = MT_IND
 				off = 1
-			msgid = 0
-			while off < len(line) and line[off].isdigit():
-				msgid = 10*msgid+int(line[off])
-				off += 1
+		while off < len(line) and line[off].isdigit():
+			msgid = 10*msgid+int(line[off])
+			off += 1
+		if msgid > 0:
 			self.msgReceived(type=mt, msgid=msgid, msg=line[off:].strip())
 		else:
-			self.msgReceived(type=MT_OTHER, msg=line.strip())
+			self.msgReceived(type=mt, msg=line.strip())
 	
 
 class WAGOchannel(WAGOassembler, NetActiveConnector):
@@ -217,6 +228,7 @@ disconnect wago NAME
 
 class WAGOrun(MsgBase):
 	"""Send a simple command to Wago. Base class."""
+	timeout=2
 
 	def send(self,conn):
 		conn.write(self.msg)
@@ -244,6 +256,14 @@ class WAGOioRun(WAGOrun):
 		self.card = card
 		self.port = port
 
+	def __repr__(self):
+		return "<%s %s:%s>" % (self.__class__.__name__,self.card,self.port)
+		
+	def list(self):
+		for r in super(WAGOioRun,self).list():
+			yield r
+		yield ("card",self.card)
+		yield ("port",self.port)
 
 class WAGOinputRun(WAGOioRun):
 	"""Send a simple command read an input."""
@@ -258,9 +278,60 @@ class WAGOoutputRun(WAGOioRun):
 		self.val = value
 		super(WAGOoutputRun,self).__init__(card,port)
 
+	def __repr__(self):
+		res = super(WAGOoutputRun,self).__repr__()
+		return "<%s val=%s>" % (res[1:-1],self.val)
+		
+	def list(self):
+		for r in super(WAGOoutputRun,self).list():
+			yield r
+		yield ("value",self.val)
+
 	@property
 	def msg(self):
 		return "%s %d %d" % ("s" if self.val else "c", self.card,self.port)
+
+class WAGOoutputInRun(WAGOioRun):
+	"""Send a simple command to read an output."""
+	@property
+	def msg(self):
+		return "I %d %d" % (self.card,self.port)
+
+class WAGOtimedOutputRun(WAGOoutputRun):
+	msgid = None
+	def __init__(self,card,port,value,timer):
+		self.timer = timer
+		super(WAGOtimedOutputRun,self).__init__(card,port,value)
+
+	def __repr__(self):
+		res = super(WAGOoutputRun,self).__repr__()
+		return "<%s tm=%s id=%s>" % (res[1:-1],humandelta(self.timer-unixtime(now(True))),self.msgid)
+		
+	def list(self):
+		for r in super(WAGOtimedOutputRun,self).list():
+			yield r
+		yield ("timer",humandelta(self.timer-unixtime(now(True))))
+
+	@property
+	def msg(self):
+		return "%s %d %d %f" % ("s" if self.val else "c", self.card,self.port,self.timer-unixtime(now(True)))
+	
+	def recv(self,msg):
+		if msg.type is MT_IND_ACK and self.msgid is None:
+			self.msgid = msg.msgid
+			return RECV_AGAIN
+		if msg.type is MT_IND and msg.msgid == self.msgid:
+			self.result.set(msg.msg)
+			return RECV_AGAIN
+		if msg.type is MT_IND_NAK and msg.msgid == self.msgid:
+			if not self.result.ready():
+				self.result.set(WAGOerror(msg.msg))
+			return MINE
+		if (msg.type is MT_NAK or msg.type is MT_ERROR) and self.msgid is None:
+			self.result.set(WAGOerror(msg.msg))
+			return MINE
+		return NOT_MINE
+
 
 class WAGOrawRun(WAGOrun):
 	"""Send a simple command to write a command."""
@@ -323,6 +394,27 @@ class WAGOoutput(BoolIO,WAGOio,Output):
 		if isinstance(res,Exception):
 			reraise(res)
 		return
+	
+	def _tmwrite(self,val,timer,nextval=None):
+		assert nextval is None,"setting a different next value is not supported yet"
+		msg = WAGOtimedOutputRun(self.card,self.port,val,timer)
+		WAGOserver[self.server].enqueue(msg)
+		res = msg.result.get()
+		if isinstance(res,Exception):
+			reraise(res)
+		return
+	
+	def _read(self):
+		msg = WAGOoutputInRun(self.card,self.port)
+		WAGOserver[self.server].enqueue(msg)
+		res = msg.result.get()
+		if isinstance(res,Exception):
+			reraise(res)
+		if res == "1":
+			return True
+		elif res == "0":
+			return False
+		raise WAGObadResult(res)
 
 
 class WAGOraw(AttributedStatement):

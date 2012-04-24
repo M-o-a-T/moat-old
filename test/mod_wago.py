@@ -60,23 +60,57 @@ output wago test 2 1:
 set output on foo baz
 block:
 	var input port foo bar
-	log DEBUG portstate $port
+	log DEBUG in_1 $port
 	if input whynot foo bar:
 		log DEBUG Yes
 	else:
 		log DEBUG No3
 	send wago test Ds
 	var input port foo bar
-	log DEBUG portstate $port
+	log DEBUG in_2 $port
 
 	if input why foo bar:
 		log DEBUG Yes
 	else:
 		log DEBUG No4
 #
-#set wago off foo baz :for 2
-set output hey foo baz
-send wago test "D-"
+async:
+	send wago test DS
+	set output off foo baz:
+		for 2
+	log DEBUG released
+	send wago test DS
+block:
+	wait timed set A:
+		for 0.2
+		debug force
+	send wago test DC
+
+	list outtimer
+
+	wait timed set B:
+		for 1
+		debug force
+	#send wago test "D-"
+	var output port foo baz
+	log DEBUG out_1 $port
+
+	if output ho foo baz:
+		log DEBUG Yes
+	else:
+		log DEBUG No5
+	wait timed set C:
+		for 1
+		debug force
+
+	var output port foo baz
+	log DEBUG out_2 $port
+
+	if output hey foo baz:
+		log DEBUG Yes
+	else:
+		log DEBUG No6
+#set output hey foo baz
 wait:
 	for 0.1
 	debug force

@@ -39,7 +39,7 @@ import sys
 import socket
 
 import gevent
-from gevent.queue import PriorityQueue
+from gevent.queue import PriorityQueue,Empty
 from gevent.event import AsyncResult
 
 N_PRIO = 3
@@ -88,10 +88,17 @@ class SEND_LATER(object):
 #		self.timer.cancel()
 #		self.timer = None
 
-
-class MsgSender(object):
-	"""A message sender"""
+class MsgInfo(object):
 	prio = PRIO_STANDARD
+
+	def list(self):
+		yield ("",repr(self))
+		yield ("priority",self.prio)
+	
+
+class MsgSender(MsgInfo):
+	"""A message sender"""
+
 	def queue(self,bus):
 		bus.enqueue(self)
 
@@ -102,9 +109,9 @@ class MsgSender(object):
 	def done(self):
 		pass
 
-class MsgReceiver(object):
+class MsgReceiver(MsgInfo):
 	"""A receiver, possibly for a broadcast message"""
-	prio = PRIO_STANDARD
+
 	def recv(self,data):
 		"""A message has been received. Return NOT_MINE|MINE|RECV_AGAIN."""
 		raise NotImplementedError("You need to override MsgReceiver.recv")
@@ -136,7 +143,6 @@ class MsgBase(MsgSender,MsgReceiver):
 	timeout = None
 	blocking = False # True if the message needs a reply before sending more
 
-	timeout = None
 	_timer = None
 	_last_channel = None
 	_send_err = None
@@ -145,6 +151,20 @@ class MsgBase(MsgSender,MsgReceiver):
 	def __init__(self,*a,**k):
 		super(MsgBase,self).__init__(*a,**k)
 		self.result = AsyncResult()
+
+	def list(self):
+		for r in super(MsgBase,self).list():
+			yield r
+
+		if self.timeout:
+			yield("timeout",self.timeout)
+		if self.result.ready():
+			try:
+				yield("result",self.result.get())
+			except Exception as ex:
+				yield("error",repr(ex))
+		else:
+			yield("status","pending")
 
 	def send(self,channel):
 		"""write myself to the channel. Return None|SEND_AGAIN|RECV_AGAIN."""
@@ -166,7 +186,7 @@ class MsgBase(MsgSender,MsgReceiver):
 	def retry(self):
 		"""Check whether to retry this message"""
 		self._clear_timeout()
-		return False
+		return SEND_AGAIN
 
 	def done(self):
 		"""Processing is finished."""
@@ -202,6 +222,12 @@ class MsgRepeater(object):
 		super(MsgRepeater,self).__init__()
 		self.queue = queue
 
+	def list(self):
+		for r in super(MsgBase,self).list():
+			yield r
+		yield("redo timeout",self.redo_timeout)
+		yield("armed", self.timer is not None)
+
 	def send(self,channel):
 		self.disarm()
 		res = super(MsgBase,self).send(channel)
@@ -223,7 +249,7 @@ class MsgRepeater(object):
 	
 	def retry(self):
 		self.disarm()
-		return True
+		return SEND_AGAIN
 
 class MsgIncoming(object):
 	"""Wrapper to signal an incoming message"""
@@ -246,8 +272,19 @@ class MsgError(object):
 	def __init__(self,error):
 		self.error = error
 
+class MsgClosed(object):
+	"""Signal that the connection is dead"""
+	prio = PRIO_CONNECT
+	pass
+
 class MsgReOpen(object):
-	"""Signal to (close and) re-open the connection"""
+	"""Signal to re-open the connection"""
+	prio = PRIO_CONNECT
+	pass
+
+class MsgOpenMarker(object):
+	"""Signal which noted that the connection is fully open"""
+	# This is used to re-enable ReOpen messages
 	prio = PRIO_CONNECT
 	pass
 
@@ -292,16 +329,17 @@ class MsgFactory(object):
 				msg = MsgError(msg)
 				self._msg_queue.put((msg.prio,msg))
 			def up_event(self,*a,**k):
-				
-				pass
+				log(TRACE,"!got UP_EVENT",*self.name)
+				msg = MsgOpenMarker()
+				self._msg_queue.put((msg.prio,msg))
 			def not_up_event(self,external=False,*a,**k):
-				if external:
-					msg = MsgReOpen()
-					self._msg_queue.put((msg.prio,msg))
+				log(TRACE,"!got NOT_UP_EVENT",*self.name)
+				msg = MsgClosed()
+				self._msg_queue.put((msg.prio,msg))
 			def down_event(self,external=False,*a,**k):
-				if external:
-					msg = MsgReOpen()
-					self._msg_queue.put((msg.prio,msg))
+				log(TRACE,"!got DOWN_EVENT",*self.name)
+				msg = MsgClosed()
+				self._msg_queue.put((msg.prio,msg))
 		self.cls = _MsgForwarder
 
 	def __call__(self,q):
@@ -329,14 +367,17 @@ class MsgQueue(Collected,Jobber):
 	#storage = Nets.storage
 	max_open = None # outstanding messages
 	max_send = None # messages to send until the channel is restarted
-	max_connect = None # connection attempts
-	connect_timer = 3 # delay between attempts
-	max_connect_timer = 300 # max delay between attempts
+	attempts = 0
+	max_attempts = None # connection attempts
+	initial_connect_timeout = 3 # initial delay between attempts, seconds
+	max_connect_timeout = 300 # max delay between attempts
+	connect_timeout = None # current delay between attempts
 
 	channel = None # the current connection
 	job = None # the queue handler greenlet
 	factory = None # a callable that builds a new channel
 	ondemand = False # only open a connection when we have messages to send?
+	q = None # input priority queue
 
 	name = None
 	state = "New"
@@ -359,6 +400,7 @@ class MsgQueue(Collected,Jobber):
 		self.msgs = [] # to send
 		self.delayed = []
 		self.receivers = []
+		self.connect_timeout = self.initial_connect_timeout
 		for _ in range(N_PRIO):
 			self.msgs.append([])
 		self.q = PriorityQueue(maxsize=qlen)
@@ -381,9 +423,9 @@ class MsgQueue(Collected,Jobber):
 		self._teardown(reason)
 
 	def enqueue(self,msg):
+		self.q.put((msg.prio,msg), block=False)
 		if not self.job:
 			self.start()
-		self.q.put((msg.prio,msg), block=False)
 
 	def setup(self):
 		"""Send any initial messages to the channel"""
@@ -401,38 +443,46 @@ class MsgQueue(Collected,Jobber):
 		return u"‹%s:%s %s›" % (self.__class__.__name__,self.name,self.state)
                 
 	def list(self):
+		if self.q is None:
+			yield("queue","dead")
+		else:
+			yield("queue",self.q.qsize())
 		yield ("state",self.state)
-		yield ("since",self.last_change)
-		yield ("sent",self.n_sent,self.n_sent_now)
-		yield ("received",self.n_rcvd,self.n_rcvd_now)
-		yield ("processed",self.n_processed,self.n_processed_now)
-		yield ("open",self.is_open)
+		yield ("state since",self.last_change)
+		yield ("sent",(self.n_sent,self.n_sent_now))
+		yield ("received",(self.n_rcvd,self.n_rcvd_now))
+		yield ("processed",(self.n_processed,self.n_processed_now))
 		if self.last_sent is not None:
 			yield ("last_sent",self.last_sent)
 			yield ("last_sent_at",self.last_sent_at)
 		if self.last_rcvd is not None:
 			yield ("last_rcvd",self.last_rcvd)
 			yield ("last_rcvd_at",self.last_rcvd_at)
-		yield ("in_queued",self.q.qsize())
+		yield("conn attempts",self.attempts)
+		yield("conn timer",self.connect_timeout)
 		yield ("out_queued",self.n_outq)
 		for d in self.delayed:
 			yield ("delayed",str(d))
 		if self.channel:
-			for a,b in self.channel.list():
-				yield ("conn "+a,b)
+			yield ("channel",self.channel)
+
 		# now dump send and recv queues
 		i = 0
 		for mq in self.msgs:
+			j = 0
 			for m in mq:
-				yield("msg send "+str(i),repr(m))
+				j += 1
+				yield("msg send %s %s"%(i,j),m)
 			i += 1
+		i = 0
 		for m in self.receivers:
-			yield("msg recv",repr(m))
+			i += 1
+			yield("msg recv %s"%(i,),m)
 
 
 	def _incoming(self,msg):
 		"""Process an incoming message."""
-		self.n_rcvd += 1
+		self.n_rcvd_now += 1
 		log("conn",TRACE,"incoming", self.__class__.__name__,self.name,msg)
 		self.last_recv = msg
 		self.last_recv_at = now()
@@ -440,11 +490,11 @@ class MsgQueue(Collected,Jobber):
 		# i is an optimization for receiver lists that don't change in mid-action
 		i = 0
 		handled = False
+		log("msg",TRACE,"recv",self.name,str(msg))
 		for m in self.receivers:
 			try:
-				log("msg",TRACE,"recv",self.name,str(msg))
 				r = m.recv(msg)
-				log("msg",TRACE,"recv=",r)
+				log("msg",TRACE,"recv=",r,repr(m))
 				if r is ABORT:
 					self.close(False)
 					break
@@ -465,8 +515,6 @@ class MsgQueue(Collected,Jobber):
 					else:
 						m.done()
 						self.n_processed_now += 1
-						if self.max_send is not None and self.max_send >= self.n_processed_now:
-							self.enqueue(MsgReOpen())
 					break
 				elif r is RECV_AGAIN:
 					handled = True
@@ -501,9 +549,13 @@ class MsgQueue(Collected,Jobber):
 		self.state = state
 		self.last_change = now()
 
+	def _fail(self,reason):
+		self.stop(reason)
+		self.q
+		for m in self.receivers:
+			m.abort()
+
 	def _setup(self):
-		attempts = 0
-		timeout = self.connect_timer
 		try:
 			self._set_state("connecting")
 			self.channel = self.factory(self.q)
@@ -516,16 +568,7 @@ class MsgQueue(Collected,Jobber):
 			log_exc("Setting up",ex)
 
 			self._teardown("retrying")
-			attempts += 1
-			if self.max_connect is not None and attempts > self.max_connect:
-				self._set_state("too many connection attempts")
-				for m in self.receivers:
-					m.abort()
-				raise
-			gevent.sleep(timeout)
-			timeout *= 1.6
-			if self.max_connect_timer is not None and timeout > self.max_connect_timer:
-				timeout = self.max_connect_timer
+			self._up_timeout()
 		else:
 			self.n_rcvd += self.n_rcvd_now
 			self.n_rcvd_now = 0
@@ -536,21 +579,28 @@ class MsgQueue(Collected,Jobber):
 
 			recvs = self.receivers
 			self.receivers = []
-			for m in recvs:
+			for msg in recvs:
 				try:
-					r = m.retry()
+					r = msg.retry()
 					if r is SEND_AGAIN:
 						self.msgs[msg.prio].append(msg)
 					elif r is RECV_AGAIN:
 						self.receivers.append(msg)
-						pass
 					elif r is not None:
 						raise RuntimeError("Strange retry(): %s %s" % (repr(msg),repr(r)))
 				except Exception as e:
 					fix_exception(e)
 					process_failure(e)
-					self.receivers.remove(m)
-					m.error(e)
+					msg.error(e)
+
+	def _up_timeout(self):
+		if self.connect_timeout > 0:
+			self.connect_timeout *= 1.6
+			if self.max_connect_timeout is not None and self.connect_timeout > self.max_connect_timeout:
+				self.connect_timeout = self.max_connect_timeout
+		else:
+			self.connect_timeout = 0.1
+		self.attempts += 1
 
 	def _teardown(self, reason="closed", external=False):
 		if self.channel:
@@ -582,11 +632,21 @@ class MsgQueue(Collected,Jobber):
 			Processing of incoming and outgoing data is serialized so that
 			there will be no problems with concurrency.
 			"""
-		if not self.ondemand:
+		def doReOpen():
 			m = MsgReOpen()
-			self.q.put((m.prio,m), block=False)
+			if self.q is not None:
+				self.q.put((m.prio,m), block=False)
+
+		is_open = (self.state == "connected")
+		self.connect_timeout = self.initial_connect_timeout
+		self.attempts = 0
+
+		if not self.ondemand and not is_open:
+			doReOpen()
+
 		while True:
-			_,msg = self.q.get()
+			prio,msg = self.q.get()
+
 			if isinstance(msg,MsgSender):
 				self.msgs[msg.prio].append(msg)
 			elif isinstance(msg,MsgReceiver):
@@ -596,8 +656,24 @@ class MsgQueue(Collected,Jobber):
 					self.receivers.append(msg)
 			elif isinstance(msg,MsgIncoming):
 				self._incoming(msg)
+			elif isinstance(msg,MsgOpenMarker):
+				is_open = True
+
+				self.connect_timeout = self.initial_connect_timeout
+				self.attempts = 0
+
 			elif isinstance(msg,MsgReOpen):
-				self._teardown("ReOpen",external=False)
+				if self.channel is None:
+					assert not is_open
+					self._setup()
+
+			elif self.channel is None or isinstance(msg,MsgClosed):
+				if is_open:
+					is_open = False
+					self._teardown("ReOpen",external=False)
+					self._up_timeout()
+					callLater(True,self.connect_timeout,doReOpen)
+
 			elif isinstance(msg,MsgError):
 				self._error(msg.error)
 			else:
@@ -607,6 +683,8 @@ class MsgQueue(Collected,Jobber):
 				continue
 			if not self.channel:
 				self._setup()
+			if not is_open:
+				continue
 
 			done = False # marker for "don't send any more stuff"
 
@@ -622,9 +700,15 @@ class MsgQueue(Collected,Jobber):
 					break
 				while len(mq):
 					m = mq.pop(0)
-					r = m.send(self.channel)
-					self.last_sent = m
-					self.last_sent_at = now()
+					try:
+						r = m.send(self.channel)
+					except Exception as ex:
+						fix_exception(ex)
+						r = ex
+					else:
+						self.last_sent = m
+						self.last_sent_at = now()
+						self.n_sent_now += 1
 					if r is RECV_AGAIN:
 						if m.blocking:
 							self.receivers.insert(0,m)
@@ -640,6 +724,8 @@ class MsgQueue(Collected,Jobber):
 						except Exception as r:
 							fix_exception(r)
 							process_failure(r)
+					elif isinstance(r,Exception):
+						reraise(r)
 					else:
 						msg.done()
 

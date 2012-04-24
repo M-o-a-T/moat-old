@@ -33,7 +33,7 @@ from homevent.base import Name
 from homevent.net import NetActiveConnector
 from homevent.msg import MsgReceiver,MsgBase,MsgQueue,MsgFactory,\
 	PRIO_STANDARD,PRIO_URGENT,PRIO_BACKGROUND,\
-	RECV_AGAIN,MINE
+	SEND_AGAIN,RECV_AGAIN,MINE,NOT_MINE
 
 import struct
 import os
@@ -43,11 +43,6 @@ import sys
 import gevent
 from gevent.event import AsyncResult
 from gevent.queue import Queue,Empty
-
-N_PRIO = 3
-PRIO_URGENT = 0
-PRIO_STANDARD = 1
-PRIO_BACKGROUND = 2
 
 PRIO_STEP = 10 # number of iterations before considering the next queue
 
@@ -225,8 +220,8 @@ class OWFScall(OWFSxmit,MsgBase):
 		super(OWFScall,self).retry()
 		if self.retries:
 			self.retries -= 1
-			return True
-		return False
+			return SEND_AGAIN
+		return None
 
 	def error(self,err):
 		"""An error occurred."""

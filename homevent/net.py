@@ -153,12 +153,7 @@ class NetCommonConnector(Collected,Jobber):
 		else:
 			self.handshake(True)
 
-		def dead(_):
-			if self.socket is not None:
-				self.socket.close()
-				self.down_event(True)
 		self.start_job("job",self._reader)
-		self.job.link(dead)
 
 
 	def handshake(self, external=False):
@@ -192,15 +187,29 @@ class NetCommonConnector(Collected,Jobber):
 		self.socket = s
 
 	def _reader(self):
-		while self.socket is not None:
-			try:
-				r = self.socket.recv(4096)
-				if r is None or r == "":
+		try:
+			while self.socket is not None:
+				try:
+					r = self.socket.recv(4096)
+					if r is None or r == "":
+						return
+				except Exception as e:
+					fix_exception(e)
+					process_failure(e)
 					return
-				self.dataReceived(r)
-			except Exception as e:
-				fix_exception(e)
-				process_failure(e)
+				try:
+					self.dataReceived(r)
+				except Exception as e:
+					fix_exception(e)
+					process_failure(e)
+		finally:
+			if self.socket:
+				self.socket.close()
+				self.socket = None
+				self.down_event(True)
+
+
+
 	
 	def dataReceived(self):
 		raise NotImplementedError("You need to override NetCommonConnector.dataReceived()")

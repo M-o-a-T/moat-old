@@ -20,16 +20,16 @@ This is the core of external input and output.
 
 """
 
-from homevent.logging import log,log_exc,DEBUG,TRACE,INFO,WARN,ERROR
 from homevent.statement import Statement, main_words, AttributedStatement,WordAttached
 from homevent.check import Check,register_condition,unregister_condition
-from homevent.context import Context
-from homevent.event import Event
 from homevent.base import Name,SName
-from homevent.run import process_failure
 from homevent.collect import Collection,Collected
-from homevent.twist import fix_exception,reraise,Jobber
-from homevent.times import now,unixdelta,humandelta
+from homevent.twist import fix_exception,reraise,Jobber,callLater
+from homevent.times import humandelta,now,unixtime
+from homevent.run import simple_event
+from homevent.context import Context
+
+from homevent.delay import DelayFor,DelayWhile,DelayUntil,DelayNext
 
 import os
 import sys
@@ -112,6 +112,24 @@ class CommonIO(Collected):
 		for r in self.values:
 			yield ("allowed value",r)
 
+	def repr(self, res):
+		"""Represent the input, i.e. translate input values to script data"""
+		# also needed for output
+		return res
+
+	def _read(self):
+		"""Read an external's value. Override this."""
+		raise NotImplementedError("You need to override %s._read()" % (self.__class__.__name__,))
+
+	def read(self):
+		"""Read an output, check range."""
+		res = self._read()
+		res = self.repr(res)
+		self.check(res)
+		self.last_time = now()
+		self.last_value = res
+		return res
+
 
 	def check(self,res):
 		"""\
@@ -148,31 +166,80 @@ class Input(CommonIO):
 			yield r
 		if self.last_value is not None:
 			delta = now() - self.last_time
-			delta = unixdelta(delta)
 			yield ("last read", humandelta(delta))
 			yield ("last value",self.last_value)
 
-	def _read(self):
-		"""Read an input. Override this."""
-		raise NotImplementedError("You need to override %s._read()" % (self.__class__.__name__,))
 
-	def read(self):
-		"""Read an input, check range."""
-		res = self._read()
-		res = self.repr(res)
-		self.check(res)
-		self.last_time = now()
-		self.last_value = res
-		return res
+class OutTimers(Collection):
+	name = "outtimer"
+OutTimers = OutTimers()
+OutTimers.does("del")
+tseq=0
 
-	def repr(self, res):
-		"""Represent the input, i.e. translate input values to script data"""
-		return res
+class OutTimer(Collected):
+	"""Timer for timed outputs"""
+	storage = OutTimers
+
+	_timer = None
+	def __init__(self,parent,timer,nextval):
+		global tseq
+		tseq += 1
+		self.name = self.parent.name+(str(tseq),)
+		super(OutTimer,self).__init__()
+		self.parent = parent
+		self.timer = timer
+		self.val = nextval
+		self.q = AsyncResult()
+		self._start()
+
+	def info(self):
+		return "%s %s:%s" % (self.typ, self.name, self.last_value)
+
+	def list(self):
+		n = now()
+		for r in super(OutTimer,self).list():
+			yield r
+		yield ("output",self.parent.name)
+		yield ("start", humandelta(n - self.started))
+		yield ("end", humandelta(self.timer - n))
+		yield ("next value",self.val)
+
+	def _start(self):
+		if self._timer:
+			self._timer.cancel()
+		self.started = now()
+		self._timer = callLater(False,self.timer,self._timeout)
+	
+	def _timeout(self):
+		self._timer = None
+		try:
+			self.parent.set(self.val)
+		except Exception as ex:
+			fix_exception(ex)
+			self.q.set(ex)
+		else:
+			self.q.set(None)
+	
+	def cancel(self):
+		self.delete()
+
+	def delete(self):
+		if self._timer is not None:
+			self._timer.cancel()
+			self._timer = None
+		self.q.set(DelayCancelled(self))
+
+		self.delete_done()
+	
+
 
 class Output(CommonIO):
 	"""This represents a single output."""
 	storage = Outputs
 	last_value = None
+	timer = None
+	timing = OutTimer
+	_tmwrite = None
 
 	typ = "???output"
 
@@ -181,7 +248,6 @@ class Output(CommonIO):
 			yield r
 		if self.last_value is not None:
 			delta = now() - self.last_time
-			delta = unixdelta(delta)
 			yield ("last write", humandelta(delta))
 			yield ("last value",self.last_value)
 
@@ -189,14 +255,35 @@ class Output(CommonIO):
 		"""Write an output. Override this."""
 		raise NotImplementedError("You need to override %s._write()" % (self.__class__.__name__,))
 
-	def write(self,val):
+	def write(self,val, timer=None,nextval=None):
 		"""Read an input, check range."""
-		wval = self.trans(val)
 		self.check(val)
-		self._write(wval)
+		if nextval is not None:
+			self.check(nextval)
+			wnextval = self.trans(nextval)
+		else:
+			wnextval = None
+		wval = self.trans(val)
+		if self.timer is not None and (self.last_value != wval or timer is not None):
+			self.timer.cancel()
+			self.timer = None
+
+		if self.last_value != wval:
+			simple_event(Context(),"output","set",self.repr(self.last_value),self.repr(wval),*self.name)
 
 		self.last_value = wval
 		self.last_time = now()
+
+		if timer is None:
+			self._write(wval)
+		elif self._tmwrite is not None:
+			self._tmwrite(wval,unixtime(timer),wnextval)
+		else:
+			self._write(wval)
+			self.timer = OutTimer(self,timer,nextval)
+			res = self.timer.q.get()
+			if isinstance(res,BaseException):
+				reraise(res)
 
 	def trans(self, val):
 		"""Translate the output, i.e. script data to input values"""
@@ -261,10 +348,10 @@ class BoolIO(object):
 #@BoolIO.register_statement
 @MakeIO.register_statement
 class BoolParams(Statement):
-        name="bool"
-        doc="specify the names for 'on' and 'off'"
+	name="bool"
+	doc="specify the names for 'on' and 'off'"
 
-        long_doc = u"""\
+	long_doc = u"""\
 bool ‹yes› ‹no›
   - For boolean I/O, specify which names to use for signals that are turned on, or off.
     Surprisingly, the defaults are 'on' and 'off'.
@@ -312,11 +399,11 @@ output ‹type› ‹params…› :name ‹name…›
 
 @MakeIO.register_statement
 class IOName(Statement):
-        name="name"
-        dest = None
-        doc="specify the name of this port"
+	name="name"
+	dest = None
+	doc="specify the name of this port"
 
-        long_doc = u"""\
+	long_doc = u"""\
 name ‹name…›
   - Use this form for ports with multi-word names.
 """
@@ -364,30 +451,50 @@ value ‹val›…
 		self.parent.values.extend(event)
 
 
-@main_words.register_statement
 class IOvar(Statement):
-        name="var input"
-        doc="assign a variable to get an input value"
-        long_doc=u"""\
+	"""base class for input and output variables"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if len(event) < 2:
+			raise SyntaxError("Usage: %s NAME INPUTNAME..."%(self.name,))
+		var = event[0]
+		dev = self.storage[Name(*event[1:])]
+		setattr(self.parent.ctx,var,dev.read())
+
+@main_words.register_statement
+class InputVar(IOvar):
+	storage = Inputs
+	name="var input"
+	doc="assign a variable to get an input value"
+	long_doc=u"""\
 var input NAME ‹inputname›…
         : Read the named input and store it in the variable ‹NAME›.
           Note: The value will be fetched when this statement is executed,
           not when the value is used.
 """
-	def run(self,ctx,**k):
-		event = self.params(ctx)
-		if len(event) < 2:
-			raise SyntaxError("Usage: var input NAME INPUTNAME...")
-		var = event[0]
-		dev = Inputs[Name(*event[1:])]
-		setattr(self.parent.ctx,var,dev.read())
+
+@main_words.register_statement
+class OutputVar(IOvar):
+	storage = Outputs
+	name="var output"
+	doc="assign a variable to get an output's current value"
+	long_doc=u"""\
+var output NAME ‹outputname›…
+        : Read the named output's current value and store it in the variable ‹NAME›.
+          Whether the actual or the intended value is read depends on the hardware.
+          Note: The value will be fetched when this statement is executed,
+          not when the value is used.
+"""
 
 
 @main_words.register_statement
-class IOset(Statement):
-        name="set output"
-        doc="set an output to some value"
-        long_doc=u"""\
+class IOset(AttributedStatement):
+	timespec = None
+	nextval = None
+	force = True # for timing
+	name="set output"
+	doc="set an output to some value"
+	long_doc=u"""\
 set output VALUE ‹outputname›…
         : The named output is set to ‹VALUE›.
 """
@@ -397,8 +504,15 @@ set output VALUE ‹outputname›…
 			raise SyntaxError("Usage: set output VALUE OUTPUTNAME...")
 		val = event[0]
 		dev = Outputs[Name(*event[1:])]
-		dev.write(val)
-
+		if self.timespec is None:
+			timer = None
+		else:
+			timer = self.timespec()
+		dev.write(val, timer=timer, nextval=self.nextval)
+IOset.register_statement(DelayFor)
+IOset.register_statement(DelayWhile)
+IOset.register_statement(DelayUntil)
+IOset.register_statement(DelayNext)
 
 class IOExists(Check):
 	def check(self,*args):
@@ -411,18 +525,27 @@ class InputExists(IOExists):
 	doc="Test if a named input exists"
 
 @register_condition
-class InputIsSet(IOExists):
-	storage = Inputs.storage
-	name="input"
-	doc="Test if an input is set to a specific value"
-	def check(self,*args):
-		if len(args) < 2:
-			raise SyntaxError(u"Usage: if input VALUE NAME…")
-		return self.storage[Name(*args[1:])].read() == args[0]
-
-@register_condition
 class OutputExists(IOExists):
 	storage = Outputs.storage
 	name="exists output"
 	doc="Test if a named output exists"
+
+
+class IOisSet(Check):
+	def check(self,*args):
+		if len(args) < 2:
+			raise SyntaxError(u"Usage: if %s VALUE NAME…" % (self.name,))
+		return self.storage[Name(*args[1:])].read() == args[0]
+
+@register_condition
+class InputIsSet(IOisSet):
+	storage = Inputs.storage
+	name="input"
+	doc="Test if an input is set to a specific value"
+
+@register_condition
+class OutputIsSet(IOisSet):
+	storage = Outputs.storage
+	name="output"
+	doc="Test if an output is set to a specific value"
 

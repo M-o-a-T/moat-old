@@ -37,6 +37,8 @@ from homevent.base import Name,SName
 from homevent.collect import Collection,Collected
 from homevent.twist import callLater,fix_exception,Jobber
 from homevent.logging import log_exc,TRACE
+from homevent.delay import DelayFor,DelayWhile,DelayUntil,DelayNext,\
+	DelayError,DelayDone,DelayCancelled
 
 import gevent
 from gevent.queue import Channel
@@ -59,23 +61,7 @@ else:
 	def ixtime(t,_=None):
 		return unixtime(t)
 
-class WaitError(RuntimeError):
-	def __init__(self,w):
-		self.waiter = w
-	def __str__(self):
-		return self.text % (" ".join(str(x) for x in self.waiter.name),)
-	def __unicode__(self):
-		return self.text % (" ".join(unicode(x) for x in self.waiter.name),)
-
-class WaitDone(WaitError):
-	text = u"waiter ‹%s› is finished"
-
-class WaitCancelled(WaitError):
-	"""An error signalling that a wait was killed."""
-	no_backtrace = True
-	text = u"Waiter ‹%s› was cancelled"
-
-class DupWaiterError(WaitError):
+class DupWaiterError(DelayError):
 	text = u"A waiter ‹%s› already exists"
 
 class Waiter(Collected,Jobber):
@@ -188,7 +174,7 @@ class Waiter(Collected,Jobber):
 
 	def _cmd(self,cmd,*a):
 		if self.q is None:
-			raise WaitDone(self)
+			raise DelayDone(self)
 
 		q = Channel()
 		self.q.put((q,cmd)+tuple(a))
@@ -211,7 +197,7 @@ class Waiter(Collected,Jobber):
 	def delete(self,ctx=None):
 		self._cmd("cancel")
 
-	def cancel(self, err=WaitCancelled):
+	def cancel(self, err=DelayCancelled):
 		"""Cancel a waiter."""
 		process_event(Event(self.ctx(loglevel=TRACE),"wait","cancel",ixtime(self.end,self.force),*self.name))
 		self._cmd("cancel")
@@ -268,93 +254,9 @@ wait [NAME…]: for FOO…
 				process_event(Event(self.ctx(loglevel=TRACE),"wait","done",tm, *w.name))
 			ctx.wait = tm
 			if not r:
-				raise WaitCancelled(w)
+				raise DelayCancelled(w)
 
 		
-class WaitFor(Statement):
-	name = ("for",)
-	doc = "specify the time to wait"
-	long_doc=u"""\
-for ‹timespec›
-	- specify the absolute time to wait for.
-	  N sec / min / hour / day / month / year
-"""
-	def run(self,ctx,**k):
-		event = self.params(ctx)
-		if not len(event):
-			raise SyntaxError(u'Usage: for ‹timespec…›')
-
-		def delta():
-			return time_delta(event, now=now(self.parent.force))
-		self.parent.timespec = delta
-	
-
-class WaitUntil(Statement):
-	name=("until",)
-	doc="delay until some timespec matches"
-	long_doc=u"""\
-until FOO…
-	- delay processsing until FOO matches the current time.
-	  Return immediately if it matches already.
-	  N sec / min / hour / day / month / year
-	  mo/tu/we/th/fr/sa/su: day of week; N mon…sun: month's Nth monday etc
-	  N wk: ISO week number
-	  negative values go from the end of a period, e.g. month
-"""
-
-	def run(self,ctx,**k):
-		event = self.params(ctx)
-		if not len(event):
-			raise SyntaxError(u'Usage: until ‹timespec…›')
-		def delta():
-			return time_until(event, now=now(self.parent.force))
-		self.parent.timespec = delta
-					
-
-class WaitWhile(Statement):
-	name=("while",)
-	doc="delay while some timespec matches"
-	long_doc=u"""\
-while FOO…
-	- delay processsing while FOO matches the current time
-	  N sec / min / hour / day / month / year
-	  mo/tu/we/th/fr/sa/su: day of week; N mon…sun: month's Nth monday etc
-	  N wk: ISO week number
-	  negative values go from the end of a period, e.g. month
-"""
-
-	def run(self,ctx,**k):
-		event = self.params(ctx)
-		if not len(event):
-			raise SyntaxError(u'Usage: while ‹timespec…›')
-		def delta():
-			return time_until(event, invert=True, now=now(self.parent.force))
-		self.parent.timespec = delta
-					
-
-class WaitNext(Statement):
-	name=("next",)
-	doc="delay until some timespec does not match and then matches again"
-	long_doc=u"""\
-next FOO...
-	- delay processsing until the next time FOO matches
-	  N sec / min / hour / day / month / year
-	  mo/tu/we/th/fr/sa/su: day of week; N mon…sun: month's Nth monday etc
-	  N wk: ISO week number
-	  negative values go from the end of a period, e.g. month
-"""
-
-	def run(self,ctx,**k):
-		event = self.params(ctx)
-		if not len(event):
-			raise SyntaxError(u'Usage: until next ‹timespec…›')
-
-		def delta():
-			s = time_until(event, invert=True, now=now(self.parent.force))
-			return time_until(event, now=s)
-		self.parent.timespec = delta
-					
-
 class WaitDebug(Statement):
 	name = ("debug",)
 	doc = "Debugging / testing support"
@@ -415,10 +317,11 @@ var wait NAME name...
 		setattr(self.parent.ctx,var,Waiters[name])
 
 
-WaitHandler.register_statement(WaitFor)
-WaitHandler.register_statement(WaitUntil)
-WaitHandler.register_statement(WaitWhile)
-WaitHandler.register_statement(WaitNext)
+WaitHandler.register_statement(DelayFor)
+WaitHandler.register_statement(DelayUntil)
+WaitHandler.register_statement(DelayWhile)
+WaitHandler.register_statement(DelayNext)
+
 if "HOMEVENT_TEST" in os.environ:
 	WaitHandler.register_statement(WaitDebug)
 WaitHandler.register_statement(WaitUpdate)

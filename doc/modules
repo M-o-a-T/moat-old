@@ -836,6 +836,15 @@ Subsequent statements may retrieve the value with '$var'.
 	if less $temp 0:
 		log WARN it is cold out there
 
+----------
+var output
+----------
+
+Sets a variable to whatever the output is (if the hardware supports that)
+or is supposed to be (if not), when this statement is executed.
+
+Subsequent statements may retrieve the value with '$var'.
+
 
 ----------
 set output
@@ -852,7 +861,25 @@ Tests
 exists input ‹name›
 -------------------
 
-Check whether this in put has been declared.
+Check whether this input has been declared.
+
+
+exists output ‹name›
+--------------------
+
+Check whether this output has been declared.
+
+
+input ‹value› ‹name›
+--------------------
+
+Check whether this input has the given value.
+
+
+output ‹value› ‹name›
+---------------------
+
+Check whether this output has / is supposed to have the given value.
 
 
 =======
