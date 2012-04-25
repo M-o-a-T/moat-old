@@ -64,16 +64,19 @@ class SiteAdmin(admin.ModelAdmin):
 	]
 
 class FeedAdmin(admin.ModelAdmin):
+	list_display = ('site',)
 	inlines = [
 		ValveInline,
 	]
 
 class ControllerAdmin(admin.ModelAdmin):
+	list_display = ('site','host')
 	inlines = [
 		ValveInline,
 	]
 
 class ValveAdmin(admin.ModelAdmin):
+	list_display = ('name','var','time','level','list_groups','flow','area','min_level','max_level')
 	inlines = [
 		ValveOverrideInline,
 		LevelInline,
@@ -81,37 +84,45 @@ class ValveAdmin(admin.ModelAdmin):
 	]
 
 class LevelAdmin(admin.ModelAdmin):
-	pass
+	list_display = ('valve','time','level','is_open')
+	date_hierarchy = 'time'
 
 class EvaporationAdmin(admin.ModelAdmin):
-	pass
+	list_display = ('time','rate')
+	date_hierarchy = 'time'
 
 class DayAdmin(admin.ModelAdmin):
+	list_display = ('name','list_daytimes')
 	inlines = [
 		DayTimeInline,
 	]
 
 class DayTimeAdmin(admin.ModelAdmin):
+	list_display = ('day',)
 	pass
 
 class GroupAdmin(admin.ModelAdmin):
+	list_display = ('name','site','list_valves','list_days')
 	inlines = [
-		ValveInline,
 		GroupOverrideInline,
 		GroupAdjustInline,
 	]
 
 class GroupOverrideAdmin(admin.ModelAdmin):
-	pass
+	list_display = ('group','start','duration','allowed')
+	date_hierarchy = 'start'
 
 class ValveOverrideAdmin(admin.ModelAdmin):
-	pass
+	list_display = ('valve','start','duration','running')
+	date_hierarchy = 'start'
 
 class GroupAdjustAdmin(admin.ModelAdmin):
-	pass
+	list_display = ('group','start','factor')
+	date_hierarchy = 'start'
 
 class ScheduleAdmin(admin.ModelAdmin):
-	pass
+	list_display = ('valve','start','duration')
+	date_hierarchy = 'start'
 
 admin.site.register(Site, SiteAdmin)
 admin.site.register(Feed, FeedAdmin)

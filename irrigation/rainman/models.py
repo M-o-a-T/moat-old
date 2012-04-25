@@ -53,13 +53,15 @@ class Valve(m.Model):
 	# This describes the area that's watered
 	flow = m.FloatField() # liter/sec when open
 	area = m.FloatField() # wetted area in m²: 1 liter, poured onto 1 m², is 1 mm high
-	max_level = m.FloatField(default=10) # max water level, in mm: stop here
-	min_level = m.FloatField(default=3) # min water level, in mm: start when at/below this
+	max_level = m.FloatField(default=10) # max water level, in mm: stop counting here
+	min_level = m.FloatField(default=3) # min water level, in mm: start when at/above this
 	shade = m.FloatField(default=1) # how much of the standard evaporation rate applies here?
 	#
 	# This describes the current state
 	time = m.DateTimeField(default=timezone.now) # when was the level calculated?
 	level = m.FloatField(default=0) # current water level, in mm
+	def list_groups(self):
+		return u"¦".join((d.name for d in self.groups.all()))
 
 class Level(m.Model):
 	"""historic water levels"""
@@ -83,6 +85,8 @@ class Day(m.Model):
 	def __unicode__(self):
 		return u"‹%s %s›" % (self.__class__.__name__,self.name)
 	name = m.CharField(max_length=30)
+	def list_daytimes(self):
+		return u"¦".join((d.descr for d in self.times.all()))
 
 class DayTime(m.Model):
 	"""One element of a time description which is tested"""
@@ -93,11 +97,15 @@ class DayTime(m.Model):
 
 class Group(m.Model):
 	name = m.CharField(max_length=200)
-	valves = m.ManyToManyField(Valve)
+	valves = m.ManyToManyField(Valve,related_name="groups")
 	site = m.ForeignKey(Site,related_name="groups") # self.valve[*].controller.site is self.site
 	#
 	# when may this group run?
 	days = m.ManyToManyField(Day)
+	def list_days(self):
+		return u"¦".join((d.name for d in self.days.all()))
+	def list_valves(self):
+		return u"¦".join((d.name for d in self.valves.all()))
 
 class GroupOverride(m.Model):
 	"""Modify schedule times"""
@@ -107,7 +115,7 @@ class GroupOverride(m.Model):
 	group = m.ForeignKey(Group,related_name="overrides")
 	allowed = m.BooleanField() # whether to allow these to run(True) or not(False)
 	start = m.DateTimeField()
-	duration = m.IntegerField()
+	duration = m.TimeField()
 	
 class ValveOverride(m.Model):
 	"""Force schedule times"""
@@ -117,7 +125,7 @@ class ValveOverride(m.Model):
 	valve = m.ForeignKey(Valve,related_name="overrides")
 	running = m.BooleanField() # whether to force on(True) or off(False)
 	start = m.DateTimeField()
-	duration = m.IntegerField()
+	duration = m.TimeField()
 	
 class GroupAdjust(m.Model):
 	"""Beginning at this date, this group needs <modifier> more(>1)/less(<1) water.
@@ -135,6 +143,6 @@ class Schedule(m.Model):
 		return u"‹%s @%s %s›" % (self.__class__.__name__,self.start,self.valve)
 	valve = m.ForeignKey(Valve,related_name="schedules")
 	start = m.DateTimeField()
-	duration = m.IntegerField()
+	duration = m.TimeField()
 
 
