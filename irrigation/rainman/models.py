@@ -17,25 +17,34 @@
 from django.db import models as m
 from django.utils import timezone
 
+
 class Site(m.Model):
 	"""One site with stuff to irrigate."""
+	def __unicode__(self):
+		return u"‹%s %s›" % (self.__class__.__name__,self.name)
 	name = m.CharField(max_length=200)
 	rate = m.FloatField(default=2) # how many mm/day evaporate here, currently
 
 class Feed(m.Model):
 	"""A source of water"""
+	def __unicode__(self):
+		return u"‹%s %s›" % (self.__class__.__name__,self.name)
 	name = m.CharField(max_length=200)
 	site = m.ForeignKey(Site,related_name="feeds")
 	flow = m.FloatField(default=10) # l/sec
 
 class Controller(m.Model):
 	"""A thing (Wago or whatever) which controls valves."""
+	def __unicode__(self):
+		return u"‹%s %s›" % (self.__class__.__name__,self.name)
 	name = m.CharField(max_length=200)
 	site = m.ForeignKey(Site,related_name="controllers")
 	max_on = m.IntegerField(default=3) # number of valves that can be on at any one time
 	host = m.CharField(max_length=200) # where to find the controller
 
 class Valve(m.Model):
+	def __unicode__(self):
+		return u"‹%s %s›" % (self.__class__.__name__,self.name)
 	name = m.CharField(max_length=200)
 	feed = m.ForeignKey(Feed,related_name="valves")
 	controller = m.ForeignKey(Controller,related_name="valves")
@@ -54,6 +63,8 @@ class Valve(m.Model):
 
 class Level(m.Model):
 	"""historic water levels"""
+	def __unicode__(self):
+		return u"‹%s @%s %s›" % (self.__class__.__name__,self.time,self.valve)
 	valve = m.ForeignKey(Valve, related_name="levels")
 	time = m.DateTimeField()
 	level = m.FloatField() # then-current water level, in mm
@@ -61,16 +72,22 @@ class Level(m.Model):
 
 class Evaporation(m.Model):
 	"""historic evaporation levels"""
+	def __unicode__(self):
+		return u"‹%s @%s %s›" % (self.__class__.__name__,self.time,self.site)
 	site = m.ForeignKey(Site,related_name="evaporations")
 	time = m.DateTimeField()
 	rate = m.FloatField() # how many mm/day evaporate
 
 class Day(m.Model):
 	"""A generic name for a time description"""
+	def __unicode__(self):
+		return u"‹%s %s›" % (self.__class__.__name__,self.name)
 	name = m.CharField(max_length=30)
 
 class DayTime(m.Model):
 	"""One element of a time description which is tested"""
+	def __unicode__(self):
+		return u"‹%s %s›" % (self.__class__.__name__,self.descr)
 	descr = m.CharField(max_length=200)
 	day = m.ForeignKey(Day,related_name="times")
 
@@ -84,6 +101,8 @@ class Group(m.Model):
 
 class GroupOverride(m.Model):
 	"""Modify schedule times"""
+	def __unicode__(self):
+		return u"‹%s %s›" % (self.__class__.__name__,self.name)
 	name = m.CharField(max_length=200)
 	group = m.ForeignKey(Group,related_name="overrides")
 	allowed = m.BooleanField() # whether to allow these to run(True) or not(False)
@@ -92,6 +111,8 @@ class GroupOverride(m.Model):
 	
 class ValveOverride(m.Model):
 	"""Force schedule times"""
+	def __unicode__(self):
+		return u"‹%s %s›" % (self.__class__.__name__,self.name)
 	name = m.CharField(max_length=200)
 	valve = m.ForeignKey(Valve,related_name="overrides")
 	running = m.BooleanField() # whether to force on(True) or off(False)
@@ -102,12 +123,16 @@ class GroupAdjust(m.Model):
 	"""Beginning at this date, this group needs <modifier> more(>1)/less(<1) water.
 		To turn the whole thing off, set modifier=0.
 		Any entry is valid until superseded by one with later start."""
+	def __unicode__(self):
+		return u"‹%s @%s %s›" % (self.__class__.__name__,self.start,self.group)
 	group = m.ForeignKey(Group,related_name="adjusters")
 	start = m.DateTimeField()
 	factor = m.FloatField()
 
 class Schedule(m.Model):
 	"""The actual plan"""
+	def __unicode__(self):
+		return u"‹%s @%s %s›" % (self.__class__.__name__,self.start,self.valve)
 	valve = m.ForeignKey(Valve,related_name="schedules")
 	start = m.DateTimeField()
 	duration = m.IntegerField()

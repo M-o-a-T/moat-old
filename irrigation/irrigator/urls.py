@@ -3,6 +3,8 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 admin.autodiscover()
 
+from rainman import admin as rain_admin
+
 urlpatterns = patterns('',
     # Examples:
     # url(r'^$', 'regner.views.home', name='home'),
