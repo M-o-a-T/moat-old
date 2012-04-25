@@ -47,6 +47,7 @@ class Valve(m.Model):
 	def __unicode__(self):
 		return u"‹%s %s›" % (self.__class__.__name__,self.name)
 	name = m.CharField(max_length=200)
+	comment = m.CharField(max_length=200)
 	feed = m.ForeignKey(Feed,related_name="valves")
 	controller = m.ForeignKey(Controller,related_name="valves")
 	var = m.CharField(max_length=200, help_text="name of this output, in HomEvenT")

@@ -17,7 +17,7 @@ class ControllerInline(admin.TabularInline):
 class ValveInline(admin.StackedInline):
 	model = Valve
 	extra = 0
-	fields = (('var','flow','area','shade','runoff'), ('time','level','priority','max_level','start_level','stop_level'))
+	fields = (('name','var','comment','feed'),('flow','area','shade','runoff'), ('time','level','priority'),('max_level','start_level','stop_level'))
 
 class HistoryInline(admin.TabularInline):
 	model = History
@@ -86,7 +86,7 @@ class ControllerAdmin(admin.ModelAdmin):
 	]
 
 class ValveAdmin(admin.ModelAdmin):
-	list_display = ('name','controller','var','time','level','priority','list_groups','flow','area','stop_level','start_level','max_level')
+	list_display = ('name','controller','var','comment','time','level','priority','list_groups','flow','area','stop_level','start_level','max_level')
 	inlines = [
 		ValveOverrideInline,
 		LevelInline,
