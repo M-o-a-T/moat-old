@@ -28,6 +28,10 @@ Documentation
 Code
 ====
 
+* add RPC interface
+
+* verify that SSH works
+
 * move onewire to i/o framework
 
 * restart wago connections cleanly (query the monitor list!)
