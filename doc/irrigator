@@ -1,0 +1,110 @@
+=============
+The Irrigator
+=============
+
+or: how do you water your plants intelligently?
+
+-----------
+The problem
+-----------
+
+Let's say you have a large garden and no time or inclination to water all
+of it by hand.
+
+How much water the plants need depends on sunshine, rain, wind, and average
+temperature.
+
+You can't irrigate the lawn during the day – you might ant to
+enjoy the sun. Or mow it. You can't just turn on everything at the same
+time, the water pressure would be down. But maybe you can measure the flow
+rate and thus figure out how much water is actually available.
+
+------------
+The solution
+------------
+
+Let's check out which data we need. It's all in the database, and
+visible in the Django admin.
+
+We need a garden. The database calls it "site". Gardens have different
+access controls.
+
+A garden can have multiple water feeds, each of which has a maximum flow
+rate.
+
+A "controller" is something that opens and closes water valves. The number
+of valves which are opened concurrently may be limited because of the
+current required to keep them open. (Do not use bi-stable valves: what
+happens when the power fails, or the computer crashes, while you're
+irrigating?)
+
+A valve controls a group of sprinklers. They spray or drip a acertain
+amount of water per second onto a specific area. That area has a certain
+water capacity. It might be more or less exposed than the other areas,
+which controls the evaporation rate.
+
+Areas are not modelled in the database. The assumption is that there's a
+1:1 relationship between a valve and the area whose irrigation it controls.
+In other words, the database doesn't model overlapping areas; all the area
+variables are attached to the "valve" record.
+
+What this system keeps track of is not how wet an area s, but how dry it
+is, i.e. how much water it needs. Zero means "any excess water is wasted
+and will run off". If you don't start watering and it doesn't rain, this
+value will increase without limit. In practice there's a real upper bound
+(valve.max_level).
+
+You don't want to start watering when the ground is bone dry, though,
+and you do want to stop sometime before your earth is completely
+water-logged. Thus there are start_level and stop_level variables.
+
+The valve record has separate values for water flow and irrigated area.
+The actual flow might vary, depending on how many valves are open or
+how much water pressure there is. Thus it's a good idea to have a water
+meter with an impulse output.
+
+In order to appoximate how much water an area needs, there are also
+adjustment values for exposure to sun and rainfall.
+
+Water levels are logged (table "level"); the same table accounts for
+whether a valve was open. There are also log tables for environmental data
+(average temperature, wind, and sunshine in one table; accumulated rainfall
+and calculated evaporation in another).
+
+That's not all: before we start to let it rain, we need to know when not
+to. Mid-day is a bad time for turning on the sprinkler, for multiple
+reasons – none of which apply to the drip irrigation under the hedge.
+
+A "day" record, though, doesn't describe a day, but a set of times.
+"Night", for instance, might be any hour when it's supposed to be dark
+and "weekend" is any day when you're able to sleep in – and thus have a
+party in your garden until the wee hours of the morning.
+
+Areas typically are grouped. You're going to have said party on the lawn,
+not in the vegetable beds. So it's OK to water the latter during the party.
+Likewise, you can override the scheduling of a group as well as a single
+valve.
+
+Note: If you override a group "on", then that group can be scheduled during
+the time the override is valid. On the other hand, if you override a single
+valve "on", then it's on no matter what. (Except that you can't turn on
+five valves on a controller that has a four-valve maximum on its power
+supply.)
+
+Lastly, there's a database table for the actual schedule. There you can
+review whatever happened at your leisure. Or at least what was supposed to
+have happened …
+
+-----
+To Do
+-----
+
+Soil moisture sensors can supply the calculated "dryness" level directly.
+
+Cisterns, which tend to run empty, are not implemented yet – I don't have one.
+
+Day times have no notion of sunrise/sunset. Yet. (Prefer to learn these
+times from the sun sensor, please – not by computing from
+lat/long/DST/whatever.)
+
+

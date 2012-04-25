@@ -3,7 +3,7 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 admin.autodiscover()
 
-from rainman.models import Site,Feed,Controller,Valve,Evaporation,Level,Day,DayTime,Group,GroupOverride,ValveOverride,GroupAdjust,Schedule
+from rainman.models import Site,Feed,Controller,Valve,History,Environment,Level,Day,DayTime,Group,GroupOverride,ValveOverride,GroupAdjust,Schedule,RainMeter
 
 # SiteInline
 class FeedInline(admin.TabularInline):
@@ -14,12 +14,17 @@ class ControllerInline(admin.TabularInline):
 	model = Controller
 	extra = 0
 
-class ValveInline(admin.TabularInline):
+class ValveInline(admin.StackedInline):
 	model = Valve
 	extra = 0
+	fields = (('var','flow','area','shade','runoff'), ('time','level','priority','max_level','start_level','stop_level'))
 
-class EvaporationInline(admin.TabularInline):
-	model = Evaporation
+class HistoryInline(admin.TabularInline):
+	model = History
+	extra = 0
+
+class EnvironmentInline(admin.TabularInline):
+	model = Environment
 	extra = 0
 
 class LevelInline(admin.TabularInline):
@@ -54,29 +59,34 @@ class ScheduleInline(admin.TabularInline):
 	model = Schedule
 	extra = 0
 
+class RainMeterInline(admin.TabularInline):
+	model = RainMeter
+	extra = 0
+
 
 class SiteAdmin(admin.ModelAdmin):
+	list_display = ('name','host')
 	inlines = [
 		FeedInline,
 		ControllerInline,
 		GroupInline,
-		EvaporationInline,
+		HistoryInline,
 	]
 
 class FeedAdmin(admin.ModelAdmin):
-	list_display = ('site',)
+	list_display = ('name','site','flow','var')
 	inlines = [
 		ValveInline,
 	]
 
 class ControllerAdmin(admin.ModelAdmin):
-	list_display = ('site','host')
+	list_display = ('name','site')
 	inlines = [
 		ValveInline,
 	]
 
 class ValveAdmin(admin.ModelAdmin):
-	list_display = ('name','var','time','level','list_groups','flow','area','min_level','max_level')
+	list_display = ('name','controller','var','time','level','priority','list_groups','flow','area','stop_level','start_level','max_level')
 	inlines = [
 		ValveOverrideInline,
 		LevelInline,
@@ -84,11 +94,15 @@ class ValveAdmin(admin.ModelAdmin):
 	]
 
 class LevelAdmin(admin.ModelAdmin):
-	list_display = ('valve','time','level','is_open')
+	list_display = ('valve','time','level','flow')
 	date_hierarchy = 'time'
 
-class EvaporationAdmin(admin.ModelAdmin):
-	list_display = ('time','rate')
+class HistoryAdmin(admin.ModelAdmin):
+	list_display = ('time','rate','rain')
+	date_hierarchy = 'time'
+
+class EnvironmentAdmin(admin.ModelAdmin):
+	list_display = ('time','temp','wind','sun')
 	date_hierarchy = 'time'
 
 class DayAdmin(admin.ModelAdmin):
@@ -121,15 +135,19 @@ class GroupAdjustAdmin(admin.ModelAdmin):
 	date_hierarchy = 'start'
 
 class ScheduleAdmin(admin.ModelAdmin):
-	list_display = ('valve','start','duration')
+	list_display = ('valve','start','duration','seen','changed')
 	date_hierarchy = 'start'
+
+class RainMeterAdmin(admin.ModelAdmin):
+	list_display = ('name','var')
 
 admin.site.register(Site, SiteAdmin)
 admin.site.register(Feed, FeedAdmin)
 admin.site.register(Controller, ControllerAdmin)
 admin.site.register(Valve, ValveAdmin)
 admin.site.register(Level, LevelAdmin)
-admin.site.register(Evaporation, EvaporationAdmin)
+admin.site.register(History, HistoryAdmin)
+admin.site.register(Environment, EnvironmentAdmin)
 admin.site.register(Day, DayAdmin)
 admin.site.register(DayTime, DayTimeAdmin)
 admin.site.register(Group, GroupAdmin)
@@ -137,4 +155,5 @@ admin.site.register(GroupOverride, GroupOverrideAdmin)
 admin.site.register(ValveOverride, ValveOverrideAdmin)
 admin.site.register(GroupAdjust, GroupAdjustAdmin)
 admin.site.register(Schedule, ScheduleAdmin)
+admin.site.register(RainMeter, RainMeterAdmin)
 

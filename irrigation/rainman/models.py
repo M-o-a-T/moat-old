@@ -23,7 +23,8 @@ class Site(m.Model):
 	def __unicode__(self):
 		return u"‹%s %s›" % (self.__class__.__name__,self.name)
 	name = m.CharField(max_length=200)
-	rate = m.FloatField(default=2) # how many mm/day evaporate here, currently
+	host = m.CharField(max_length=200, default="localhost", help_text="where to find the HomEvenT server")
+	rate = m.FloatField(default=2, help_text="how many mm/day evaporate here, on average")
 
 class Feed(m.Model):
 	"""A source of water"""
@@ -31,7 +32,8 @@ class Feed(m.Model):
 		return u"‹%s %s›" % (self.__class__.__name__,self.name)
 	name = m.CharField(max_length=200)
 	site = m.ForeignKey(Site,related_name="feeds")
-	flow = m.FloatField(default=10) # l/sec
+	flow = m.FloatField(default=10, help_text="liters per second")
+	var = m.CharField(max_length=200, help_text="flow counter variable", blank=True)
 
 class Controller(m.Model):
 	"""A thing (Wago or whatever) which controls valves."""
@@ -39,8 +41,7 @@ class Controller(m.Model):
 		return u"‹%s %s›" % (self.__class__.__name__,self.name)
 	name = m.CharField(max_length=200)
 	site = m.ForeignKey(Site,related_name="controllers")
-	max_on = m.IntegerField(default=3) # number of valves that can be on at any one time
-	host = m.CharField(max_length=200) # where to find the controller
+	max_on = m.IntegerField(default=3, help_text="number of valves that can be on at any one time")
 
 class Valve(m.Model):
 	def __unicode__(self):
@@ -48,18 +49,21 @@ class Valve(m.Model):
 	name = m.CharField(max_length=200)
 	feed = m.ForeignKey(Feed,related_name="valves")
 	controller = m.ForeignKey(Controller,related_name="valves")
-	var = m.CharField(max_length=200) # HomEvenT's variable name for it
+	var = m.CharField(max_length=200, help_text="name of this output, in HomEvenT")
 	# 
 	# This describes the area that's watered
-	flow = m.FloatField() # liter/sec when open
-	area = m.FloatField() # wetted area in m²: 1 liter, poured onto 1 m², is 1 mm high
-	max_level = m.FloatField(default=10) # max water level, in mm: stop counting here
-	min_level = m.FloatField(default=3) # min water level, in mm: start when at/above this
-	shade = m.FloatField(default=1) # how much of the standard evaporation rate applies here?
+	flow = m.FloatField(help_text="liter/sec when open")
+	area = m.FloatField(help_text=u"area in m²")# 1 liter, poured onto 1 m², is 1 mm high
+	max_level = m.FloatField(default=10, help_text="stop accumulating dryness") # max water level, in mm: stop counting here
+	start_level = m.FloatField(default=8, help_text="start watering above this level") # max water level, in mm: stop counting here
+	stop_level = m.FloatField(default=3, help_text="stop watering below this level") # min water level, in mm: start when at/above this
+	shade = m.FloatField(default=1, help_text="which part of the standard evaporation rate applies here?")
+	runoff = m.FloatField(default=1, help_text="how much incoming rain ends up here?")
 	#
 	# This describes the current state
-	time = m.DateTimeField(default=timezone.now) # when was the level calculated?
-	level = m.FloatField(default=0) # current water level, in mm
+	time = m.DateTimeField(help_text="time when the level was last calculated") # when was the level calculated?
+	level = m.FloatField(default=0, help_text="current water capacity, in mm")
+	priority = m.BooleanField(help_text="the last cycle did not finish")
 	def list_groups(self):
 		return u"¦".join((d.name for d in self.groups.all()))
 
@@ -69,16 +73,29 @@ class Level(m.Model):
 		return u"‹%s @%s %s›" % (self.__class__.__name__,self.time,self.valve)
 	valve = m.ForeignKey(Valve, related_name="levels")
 	time = m.DateTimeField()
-	level = m.FloatField() # then-current water level, in mm
-	is_open = m.BooleanField(default=False) # was the valve open when this started?
+	level = m.FloatField(help_text="then-current water capacity, in mm")
+	flow = m.FloatField(default=0, help_text="actual water flow through the valve")
 
-class Evaporation(m.Model):
-	"""historic evaporation levels"""
+class History(m.Model):
+	"""historic evaporation and rain levels"""
 	def __unicode__(self):
 		return u"‹%s @%s %s›" % (self.__class__.__name__,self.time,self.site)
-	site = m.ForeignKey(Site,related_name="evaporations")
+	site = m.ForeignKey(Site,related_name="history")
 	time = m.DateTimeField()
-	rate = m.FloatField() # how many mm/day evaporate
+	
+	# These values accumulate from this record's "time" until the next
+	rate = m.FloatField(help_text="how much water evaporated (mm)") # calculated value
+	rain = m.FloatField(help_text="how much rain was there (mm)") # measured value
+
+class Environment(m.Model):
+	def __unicode__(self):
+		return u"‹%s @%s %s›" % (self.__class__.__name__,self.time,self.site)
+	site = m.ForeignKey(Site,related_name="environment")
+	time = m.DateTimeField()
+
+	temp = m.FloatField(help_text="average temperature (°C)")
+	wind = m.FloatField(help_text="wind speed (m/s or whatever)")
+	sun = m.FloatField(help_text="how much sunshine was there (0-1)") # measured value
 
 class Day(m.Model):
 	"""A generic name for a time description"""
@@ -144,5 +161,19 @@ class Schedule(m.Model):
 	valve = m.ForeignKey(Valve,related_name="schedules")
 	start = m.DateTimeField()
 	duration = m.TimeField()
+	SEEN_VALUES = (
+		('y',"set"),
+		('n',"not set"),
+		('c',"changed"),
+	)
+	seen = m.BooleanField(default=False,max_length=1,help_text="Sent to the controller?")
+	changed = m.BooleanField(default=False,max_length=1,help_text="Updated by the scheduler?")
+	# The scheduler inserts both to False. The controller sets Seen.
+	# if the scheduler has to change something, it clears Seen and sets Change
 
+class RainMeter(m.Model):
+	"""The rain in Spain stays mainly in the plain."""
+	name = m.CharField(max_length=200)
+	controller = m.ForeignKey(Controller,related_name="rain_meters")
+	var = m.CharField(max_length=200) # HomEvenT's variable name for it
 
