@@ -1,4 +1,4 @@
-# Django settings for regner project.
+# Django settings for the irrigator project.
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -12,11 +12,11 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'regner',                     # Or path to database file if using sqlite3.
-        'USER': 'smurf',                      # Not used with sqlite3.
+        'NAME': 'rainman',                    # Or path to database file if using sqlite3.
+        'USER': 'irrigator',                  # Not used with sqlite3.
         'PASSWORD': '******',                 # Not used with sqlite3.
         'HOST': 'sql.intern.smurf.noris.de',  # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+        'PORT': '',                           # Set to empty string for default. Not used with sqlite3.
     }
 }
 
@@ -100,10 +100,10 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-ROOT_URLCONF = 'regner.urls'
+ROOT_URLCONF = 'irrigator.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
-WSGI_APPLICATION = 'regner.wsgi.application'
+WSGI_APPLICATION = 'irrigator.wsgi.application'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
@@ -119,6 +119,8 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
+	'rainman',
+	'south',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
