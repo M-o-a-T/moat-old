@@ -20,4 +20,10 @@ if test -d wago ; then WAGO=wago; else WAGO=../wago; fi
 
 $WAGO/wago --foreground -p 59069 -c $WAGO/wago.sample.csv > /tmp/wagolog_$USER 2>&1 &
 echo $! > /tmp/wagotest_$USER
+
+while : ; do 
+	nc </dev/null -l localhost 59068 || exit 1
+done &
+echo $! >> /tmp/wagotest_$USER
+
 sleep 1

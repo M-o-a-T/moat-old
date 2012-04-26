@@ -138,6 +138,35 @@ block:
 	else:
 		log DEBUG Yes
 
+log DEBUG now we test a nonexistent port
+block:
+	connect wago localhost 52998:
+		name test nonexist
+		retry 0.2 2
+		#ping 1
+
+wait poll nonexist:
+	for 3
+	debug force
+
+list wago server test nonexist
+del wago server test nonexist
+
+log DEBUG now we test a port that always EOFs
+async:
+	connect wago localhost 59068:
+		name test closing
+		retry 0.12 2
+		#ping 1
+	
+wait poll closing:
+	for 2
+	debug force
+list wago server test closing
+del wago server test closing
+	
+wait poll end:
+	for 2
 shutdown
 """
 

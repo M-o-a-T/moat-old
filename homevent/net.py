@@ -415,6 +415,30 @@ NetConnect.register_statement(NetName)
 NetListen.register_statement(NetName)
 
 
+class NetRetry(Statement):
+	name= "retry"
+	dest = None
+	doc="set how quickly to retry connecting"
+
+	long_doc = u"""\
+retry ‹initial› [‹max›]
+  - specify how quickly to attempt reconnecting.
+    The initial value is multiplied by 1.6 each unsuccessful attempt;
+	the interval is capped by "max", if given.
+"""
+
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if len(event) not in (1,2):
+			raise SyntaxError(u"Usage: %s ‹initial› [‹max›]" % (self.name,))
+		try:
+			self.parent.retry_interval = float(event[0])
+			if len(event) > 1:
+				self.parent.max_retry_interval = float(event[1])
+		except ValueError:
+			raise SyntaxError(u"Usage: %s ‹initial› [‹max›] (float values! was '%s')" % (self.name,event.name))
+
+
 class NetSend(AttributedStatement):
 	#storage = Nets.storage
 	#storage2 = net_conns

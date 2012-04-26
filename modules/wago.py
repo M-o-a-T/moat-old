@@ -26,7 +26,7 @@ from homevent.logging import log,log_exc,DEBUG,TRACE,INFO,WARN
 from homevent.statement import AttributedStatement, Statement, main_words
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.monitor import Monitor,MonitorHandler, MonitorAgain
-from homevent.net import NetConnect,LineReceiver,NetActiveConnector
+from homevent.net import NetConnect,LineReceiver,NetActiveConnector,NetRetry
 from homevent.twist import reraise
 from homevent.run import simple_event
 from homevent.context import Context
@@ -142,7 +142,7 @@ class WAGOinitMsg(MsgReceiver,LineReceiver):
 		self.queue = queue
 		super(WAGOinitMsg,self).__init__()
 	def retry(self):
-		import pdb;pdb.set_trace()
+		pass
 	def recv(self,msg):
 		if msg.type is MT_INFO:
 			self.queue.channel.up_event(False)
@@ -169,6 +169,9 @@ class WAGOconnect(NetConnect):
 	dest = None
 	doc = "connect to a Wago server"
 	port = 59995
+	retry_interval = None
+	max_retry_interval = None
+
 	long_doc="""\
 connect wago NAME [[host] port]
 - connect to the wago server at the remote port;
@@ -178,8 +181,13 @@ connect wago NAME [[host] port]
 
 	def start_up(self):
 		q = WAGOqueue(name=self.dest, host=self.host,port=self.port)
+		if self.retry_interval is not None:
+			q.initial_connect_timeout = self.retry_interval
+		if self.max_retry_interval is not None:
+			q.max_connect_timeout = self.max_retry_interval
 		q.start()
-		
+WAGOconnect.register_statement(NetRetry)
+
 
 class WAGOName(Statement):
 	name=("name",)

@@ -421,6 +421,8 @@ class MsgQueue(Collected,Jobber):
 
 	def start(self):
 		"""Start running the handler"""
+		self.connect_timeout = self.initial_connect_timeout
+		self.attempts = 0
 		self.start_job("job",self._handler)
 
 	def stop(self,reason="stopped"):
@@ -573,7 +575,13 @@ class MsgQueue(Collected,Jobber):
 			log_exc("Setting up",ex)
 
 			self._teardown("retrying")
-			self._up_timeout()
+
+			m = MsgClosed()
+			if self.q is not None:
+				self.q.put((m.prio,m), block=False)
+		except BaseException as ex:
+			import pdb;pdb.set_trace()
+			raise
 		else:
 			self.n_rcvd += self.n_rcvd_now
 			self.n_rcvd_now = 0
@@ -642,11 +650,12 @@ class MsgQueue(Collected,Jobber):
 			if self.q is not None:
 				self.q.put((m.prio,m), block=False)
 
-		is_open = (self.state == "connected")
+		state = "open" if self.state == "connected" else "closed"
+		log("msg",TRACE,"setstate init %s" % (state,))
 		self.connect_timeout = self.initial_connect_timeout
 		self.attempts = 0
 
-		if not self.ondemand and not is_open:
+		if not self.ondemand and state != "open":
 			doReOpen()
 
 		while True:
@@ -662,22 +671,28 @@ class MsgQueue(Collected,Jobber):
 			elif isinstance(msg,MsgIncoming):
 				self._incoming(msg)
 			elif isinstance(msg,MsgOpenMarker):
-				is_open = True
+				log("msg",TRACE,"setstate %s %s" % (state,"connected"))
+				state = "connected"
 
 				self.connect_timeout = self.initial_connect_timeout
 				self.attempts = 0
 
 			elif isinstance(msg,MsgReOpen):
 				if self.channel is None:
-					assert not is_open
-					self._setup()
+					log("msg",TRACE,"setstate %s %s" % (state,"want"))
+					state = "want"
 
-			elif self.channel is None or isinstance(msg,MsgClosed):
-				if is_open:
-					is_open = False
+			elif isinstance(msg,MsgClosed):
+				if self.channel is not None:
+					if state != "waiting" and state != "connecting":
+						log("msg",TRACE,"setstate2 %s %s" % (state,"closed"))
+						state = "closed"
 					self._teardown("ReOpen",external=False)
-					self._up_timeout()
+				if state == "closed" or state == "connecting":
+					log("msg",TRACE,"setstate %s %s: wait %f" % (state,"waiting",self.connect_timeout))
+					state = "waiting"
 					callLater(True,self.connect_timeout,doReOpen)
+					self._up_timeout()
 
 			elif isinstance(msg,MsgError):
 				self._error(msg.error)
@@ -686,9 +701,11 @@ class MsgQueue(Collected,Jobber):
 
 			if self.ondemand and not self.n_outq:
 				continue
-			if not self.channel:
+			if state == "want"  or  state == "closed" and self.ondemand and self.n_outq:
+				log("msg",TRACE,"setstate %s %s" % (state,"connecting"))
+				state = "connecting"
 				self._setup()
-			if not is_open:
+			if self.state != "connected":
 				continue
 
 			done = False # marker for "don't send any more stuff"

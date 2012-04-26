@@ -41,7 +41,6 @@ class Name(tuple):
 			data = data[0]
 		if len(data) > 0 and not isinstance(data[0],(basestring,int,float)):
 			raise RuntimeError("Name:"+repr(data))
-			import pdb;pdb.set_trace()
 		return super(Name,cls).__new__(cls,data)
 	def __str__(self):
 		return unicode(self).encode("utf-8")
