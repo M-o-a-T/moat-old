@@ -23,7 +23,7 @@ trap "rm -f /tmp/nettest_$USER" 0
 
 sleep 1
 (
-sleep 1
+sleep 3
 sed -re "s/^port: [0-9]*/port: ×××/" \
     -i real/net
 )&
