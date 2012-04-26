@@ -178,6 +178,15 @@ class OWFSchannel(OWFSassembler, NetActiveConnector):
 	storage = OWchans
 	storage2 = OWchans2
 
+	def down_event(self, external=False):
+			simple_event(Context(),"onewire","disconnect",*self.name)
+
+	def up_event(self, external=False):
+			simple_event(Context(),"onewire","connect",*self.name)
+
+	def not_up_event(self, external=False):
+			simple_event(Context(),"onewire","error",*self.name)
+
 
 class OWFSxmit(object):
 	"""A mixin that sends messages"""
