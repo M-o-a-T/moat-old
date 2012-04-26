@@ -212,7 +212,7 @@ class NetCommonConnector(Collected,Jobber):
 
 	
 	def dataReceived(self):
-		raise NotImplementedError("You need to override NetCommonConnector.dataReceived()")
+		raise NotImplementedError("You need to override %s.dataReceived()" % (self.__class__.__name__,))
 
 	def info(self):
 		return "%s %s:%s" % (self.typ, self.host,self.port)
@@ -231,15 +231,15 @@ class NetCommonConnector(Collected,Jobber):
 	def up_event(self,external=False):
 		"""Called when a connection has been established"""
 		self.close(True)
-		raise NotImplementedError("You need to override NetCommonConnector.up_event()")
+		raise NotImplementedError("You need to override %s.up_event()" % (self.__class__.__name__,))
 
 	def down_event(self,external=True):
 		"""Called when an established connection is terminated"""
-		raise NotImplementedError("You need to override NetCommonConnector.down_event()")
+		raise NotImplementedError("You need to override %s.down_event()" % (self.__class__.__name__,))
 
 	def not_up_event(self,external=True):
 		"""Called when a connection could not be established in the first place"""
-		raise NotImplementedError("You need to override NetCommonConnector.not_up_event()")
+		raise NotImplementedError("You need to override %s.not_up_event()" % (self.__class__.__name__,))
 
 	def write(self,val):
 		if self.socket:
