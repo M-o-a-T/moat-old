@@ -195,7 +195,8 @@ class MsgBase(MsgSender,MsgReceiver):
 			raise RuntimeError("Did not trigger the result in %s.dataReceived()"%(self.__class__.__name__,))
 
 	def do_timeout(self):
-		self._last_channel.close()
+		if self._last_channel is not None:
+			self._last_channel.close()
 		
 	def _set_timeout(self):
 		if self.timeout is not None:
