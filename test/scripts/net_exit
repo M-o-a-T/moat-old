@@ -22,8 +22,11 @@ echo X | nc localhost 50333 >/dev/null 2>&1 || true
 trap "rm -f /tmp/nettest_$USER" 0 
 
 sleep 1
+(
+sleep 1
 sed -re "s/^port: [0-9]*/port: ×××/" \
     -i real/net
+)&
 
 set -e
 (echo bar;echo quux) | diff -u - /tmp/nettest_$USER
