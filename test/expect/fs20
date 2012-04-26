@@ -460,7 +460,7 @@ name: one
 group: 1
 groupname: thermo_hygro
 code: 3
-last: 0.7 sec
+last: -0.7 sec (2003-04-05 06:07:11.900000)
 last_temperature: 12.3
 last_humidity: 23.4
 .

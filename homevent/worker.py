@@ -110,7 +110,7 @@ class WorkItem(object):
 			yield "id: "+str(self.id)
 		yield "call count: "+str(self.call_count)
 		if self.last_call:
-			yield "last call: "+humandelta(now()-self.last_call)
+			yield "last call: %s (%s)" % (humandelta(now()-self.last_call),self.last_call)
 		if self.last_args:
 			for a,b in self.last_args.iteritems():
 				yield "last %s: %s" % (a,b)
@@ -124,7 +124,7 @@ class WorkItem(object):
 			yield ("name",SName(self.name))
 		yield ("call count",str(self.call_count))
 		if self.last_call:
-			yield ("last call",humandelta(now()-self.last_call))
+			yield ("last call",self.last_call)
 		if self.last_args:
 			for a,b in self.last_args.iteritems():
 				yield ("last",a,b)

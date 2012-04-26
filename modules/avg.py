@@ -97,8 +97,8 @@ class Avg(Collected):
 		yield ("name"," ".join(unicode(x) for x in self.name))
 		yield ("cur_value",self.value)
 		if self.last_tm is not None:
-			yield ("last_time",humandelta(unixdelta(now()-self.last_tm)))
-			yield ("total_time",humandelta(unixdelta(self.total_tm)))
+			yield ("last_time",self.last_tm)
+			yield ("total_time",humandelta(self.total_tm))
 			yield ("last_value",self.avg)
 			yield ("value",self._calc())
 

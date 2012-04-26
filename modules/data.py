@@ -20,6 +20,8 @@ This code implements access to collections.
 
 """
 
+from datetime import datetime
+
 from homevent.logging import log
 from homevent.statement import Statement, main_words
 from homevent.module import Module
@@ -28,6 +30,7 @@ from homevent.reactor import Events
 from homevent.base import Name
 from homevent.twist import fix_exception,print_exception
 from homevent.collect import get_collect,all_collect,Collection
+from homevent.times import humandelta,now
 
 def flatten(out,s,p=""):
 	if hasattr(s,"list") and callable(s.list):
@@ -47,6 +50,8 @@ def flatten(out,s,p=""):
 			flatten(out,tt,p)
 			p = pp
 	else:
+		if isinstance(t,datetime):
+			t = "%s (%s)" % (humandelta(t-now(t.year != 2003)),t)
 		print >>out,p+u": "+unicode(t)
 
 

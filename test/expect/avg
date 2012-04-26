@@ -33,7 +33,7 @@ EVENT: wait¦done¦0.2¦_wait¦1
 END: wait¦done¦0.2¦_wait¦1
 name: test
 cur_value: 2.0
-last_time: now
+last_time: now (2003-04-05 06:07:08.200000)
 total_time: now
 last_value: 2.0
 value: 2.0
@@ -56,14 +56,14 @@ EVENT: wait¦done¦1.2¦_wait¦2
 END: wait¦done¦1.2¦_wait¦2
 name: test
 cur_value: 2.0
-last_time: 1.0 sec
+last_time: -1.0 sec (2003-04-05 06:07:08.200000)
 total_time: now
 last_value: 2.0
 value: 2.0
 .
 name: test
 cur_value: 5.0
-last_time: now
+last_time: now (2003-04-05 06:07:09.200000)
 total_time: 1.0 sec
 last_value: 2.0
 value: 2.0

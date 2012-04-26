@@ -97,9 +97,9 @@ class Timeslot(Collected):
 			yield ("interval"," ".join(str(x) for x in self.interval))
 		yield ("duration",self.duration)
 		if self.last is not None:
-			yield ("last",humandelta(now()-self.last))
+			yield ("last",self.last)
 		if self.next is not None:
-			yield ("next",humandelta(self.next-now()))
+			yield ("next",self.next)
 		if self.slotter is not None:
 			yield ("slot",(unixdelta(self.next-now()))/self.duration)
 

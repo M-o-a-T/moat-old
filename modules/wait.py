@@ -87,7 +87,7 @@ class Waiter(Collected,Jobber):
 		yield("started",self.start)
 		yield("ending",self.end)
 		yield("total", humandelta(self.end-self.start))
-		yield("waited", humandelta(now()-self.start))
+		yield("waited", self.start)
 		yield("remaining", self.value)
 		w = self
 		while True:

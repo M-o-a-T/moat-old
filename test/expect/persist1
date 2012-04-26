@@ -79,7 +79,7 @@ name: foo¦bar
 value: three
 lock: No
 last value: two
-last change: now
+last change: now (2003-04-05 06:07:08)
 persistent: yes
 .
 0 Yes!

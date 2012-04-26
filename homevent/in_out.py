@@ -165,8 +165,7 @@ class Input(CommonIO):
 		for r in super(Input,self).list():
 			yield r
 		if self.last_value is not None:
-			delta = now() - self.last_time
-			yield ("last read", humandelta(delta))
+			yield ("last read", self.last_time)
 			yield ("last value",self.last_value)
 
 
@@ -200,8 +199,8 @@ class OutTimer(Collected):
 		for r in super(OutTimer,self).list():
 			yield r
 		yield ("output",self.parent.name)
-		yield ("start", humandelta(n - self.started))
-		yield ("end", humandelta(self.timer - n))
+		yield ("start", self.started)
+		yield ("end", self.timer)
 		yield ("next value",self.val)
 
 	def _start(self):
@@ -247,8 +246,7 @@ class Output(CommonIO):
 		for r in super(Output,self).list():
 			yield r
 		if self.last_value is not None:
-			delta = now() - self.last_time
-			yield ("last write", humandelta(delta))
+			yield ("last write", self.last_time)
 			yield ("last value",self.last_value)
 
 	def _write(self,val):

@@ -148,7 +148,7 @@ END: input¦fake¦GRMPF¦foo¦bar
 : ‹Collected FakeInput:foo¦bar›
 name: foo¦bar
 type: fake
-last read: now
+last read: now (2003-04-05 06:07:08)
 last value: GRMPF
 value: GRMPF
 .
@@ -162,7 +162,7 @@ allowed value: GRMPF
 allowed value: one
 allowed value: two
 allowed value: three
-last write: now
+last write: now (2003-04-05 06:07:08)
 last value: GRMPF
 .
 0 +WAIT 3 kill job <homevent.tokize.tokizer obj>

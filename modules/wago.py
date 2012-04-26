@@ -321,7 +321,7 @@ class WAGOtimedOutputRun(WAGOoutputRun):
 	def list(self):
 		for r in super(WAGOtimedOutputRun,self).list():
 			yield r
-		yield ("timer",humandelta(self.timer-unixtime(now(True))))
+		yield ("timer",self.timer)
 
 	@property
 	def msg(self):

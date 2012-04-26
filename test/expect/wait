@@ -40,10 +40,10 @@ Foo Bar :: 9.8
 .
 : ‹Waiter Foo¦Bar 9.8›
 name: Foo¦Bar
-started: 2003-04-05 06:07:08
-ending: 2003-04-05 06:07:18
+started: -0.2 sec (2003-04-05 06:07:08)
+ending: 9.8 sec (2003-04-05 06:07:18)
 total: 10.0 sec
-waited: 0.2 sec
+waited: -0.2 sec (2003-04-05 06:07:08)
 remaining: 9.8
 in: async
 in: Global

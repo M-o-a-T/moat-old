@@ -37,7 +37,7 @@ END: wait¦done¦0.5¦_wait¦2
 type: PWM
 name: foo bar
 current: 0.1
-next: 8.5 sec
+next: 8.5 sec (2003-04-05 06:07:17)
 t_off: 9.0 sec
 t_on: 1.0 sec
 .
@@ -60,7 +60,7 @@ END: wait¦done¦9.0¦_wait¦3
 type: PWM
 name: foo bar
 current: 0.1
-next: now
+next: now (2003-04-05 06:07:17)
 t_off: 9.0 sec
 t_on: 1.0 sec
 .

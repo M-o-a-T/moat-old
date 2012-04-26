@@ -133,7 +133,7 @@ class EM(Collected,Timeslotted):
 		yield("groupname",em_procs[self.group].em_name)
 		yield("code",self.code)
 		if self.last:
-			yield ("last",humandelta(now()-self.last))
+			yield ("last",self.last)
 		if self.last_data:
 			for k,v in self.last_data.iteritems(): yield ("last_"+k,v)
 		for k,v in self.faktor.iteritems(): yield ("faktor_"+k,v)

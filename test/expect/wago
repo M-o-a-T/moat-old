@@ -293,7 +293,7 @@ test :: ‹WAGOqueue:test connected›
 .
 queue: 0
 state: connected
-state since: 2003-04-05 06:07:08
+state since: now (2003-04-05 06:07:08.050000)
 sent: (0, 15)
 received: (0, 18)
 processed: (0, 16)
@@ -304,7 +304,7 @@ last_sent : <WAGOoutputRun 2:1 val=False>
           card: 2
           port: 1
           value: False
-last_sent_at: 2003-04-05 06:07:08.100000
+last_sent_at: now (2003-04-05 06:07:08.100000)
 conn attempts: 0
 conn timer: 3
 out_queued: 0

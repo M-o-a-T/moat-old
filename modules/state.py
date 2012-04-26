@@ -92,7 +92,7 @@ class State(Collected):
 		yield ("lock", ("Yes" if self.working else "No"))
 		if hasattr(self,"old_value"):
 			yield ("last value",self.old_value)
-			yield ("last change",humandelta(now()-self.time))
+			yield ("last change",self.time)
 
 	def info(self):
 		if hasattr(self,"old_value"):

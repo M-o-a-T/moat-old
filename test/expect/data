@@ -102,7 +102,7 @@ END: wait¦done¦×××¦nachher
 id: 12
 event: foo
 call count: 1
-last call: now
+last call: now (2003-04-05 06:07:08.100000)
 last event: foo
            type: InputEvent
 code: ╞1╕on foo ‹OnEventHandler›

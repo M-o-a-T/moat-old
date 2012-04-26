@@ -96,9 +96,9 @@ class CommonPM(Collected):
 		if self._value is not None:
 			yield ("current",self._value)
 		if self.last is not None:
-			yield ("last",humandelta(n-self.last))
+			yield ("last",self.last)
 		if self.next is not None:
-			yield ("next",humandelta(self.next-n))
+			yield ("next",self.next)
 		if self.t_off is not None:
 			yield ("t_off",humandelta(self.t_off))
 		if self.t_on is not None:
