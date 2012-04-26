@@ -311,7 +311,7 @@ class MsgFactory(object):
 		which is a method added via MsgFactory.
 		"""
 
-	def __init__(self,cls,*a,**k):
+	def __init__(xself,cls,*a,**k):
 		"""\
 			Setup a factory to create a new channel.
 			A channel is created by calling @cls with the rest of the supplied arguments when needed.
@@ -332,15 +332,19 @@ class MsgFactory(object):
 				log(TRACE,"!got UP_EVENT",*self.name)
 				msg = MsgOpenMarker()
 				self._msg_queue.put((msg.prio,msg))
+				super(xself.cls,self).up_event()
 			def not_up_event(self,external=False,*a,**k):
 				log(TRACE,"!got NOT_UP_EVENT",*self.name)
 				msg = MsgClosed()
 				self._msg_queue.put((msg.prio,msg))
+				super(xself.cls,self).not_up_event()
 			def down_event(self,external=False,*a,**k):
 				log(TRACE,"!got DOWN_EVENT",*self.name)
 				msg = MsgClosed()
 				self._msg_queue.put((msg.prio,msg))
-		self.cls = _MsgForwarder
+				super(xself.cls,self).down_event()
+		xself.cls = _MsgForwarder
+		xself.cls.__name__ = cls.__name__+"_forwarder"
 
 	def __call__(self,q):
 		return self.cls(q)

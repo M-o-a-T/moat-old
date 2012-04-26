@@ -28,6 +28,8 @@ from homevent.check import Check,register_condition,unregister_condition
 from homevent.monitor import Monitor,MonitorHandler, MonitorAgain
 from homevent.net import NetConnect,LineReceiver,NetActiveConnector
 from homevent.twist import reraise
+from homevent.run import simple_event
+from homevent.context import Context
 from homevent.times import humandelta,now,unixtime
 from homevent.msg import MsgQueue,MsgFactory,MsgBase, MINE,NOT_MINE, RECV_AGAIN,\
 	MsgReceiver
@@ -123,6 +125,15 @@ class WAGOchannel(WAGOassembler, NetActiveConnector):
 	def handshake(self, external=False):
 		pass
 		# we do not do anything, except to read a prompt
+
+	def down_event(self, external=False):
+		simple_event(Context(),"wago","disconnect",*self.name)
+
+	def up_event(self, external=False):
+		simple_event(Context(),"wago","connect",*self.name)
+
+	def not_up_event(self, external=False):
+		simple_event(Context(),"wago","error",*self.name)
 
 
 class WAGOinitMsg(MsgReceiver,LineReceiver):
