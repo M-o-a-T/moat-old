@@ -22,12 +22,12 @@ FIX:
 
 all:
 	cp -a _geventreactor/Pinako/geventreactor/__init__.py homevent/geventreactor.py
-	@$(MAKE) -C fs20 --no-print-directory all
-	@$(MAKE) -C wago --no-print-directory all
+	$(MAKE) -C fs20 all
+	$(MAKE) -C wago all
 	python setup.py build --build-base="$(DESTDIR)"
 install:
-	@$(MAKE) -C fs20 --no-print-directory install ROOT=$(DESTDIR)
-	@$(MAKE) -C wago --no-print-directory install ROOT=$(DESTDIR)
+	$(MAKE) -C fs20 install ROOT=$(DESTDIR)
+	$(MAKE) -C wago install ROOT=$(DESTDIR)
 	python setup.py install --prefix=/usr --root="$(DESTDIR)" --no-compile -O0
 
 clean:
