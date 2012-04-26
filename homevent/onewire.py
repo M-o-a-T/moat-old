@@ -48,6 +48,8 @@ PRIO_STEP = 10 # number of iterations before considering the next queue
 
 MAX_TRIES = 5 # retrying a message until failure
 
+PERSIST=True # Default
+
 class DisconnectedDeviceError(RuntimeError):
 	"""A devince has vanished."""
 	no_backtrace = True
@@ -97,7 +99,7 @@ class OWFSassembler(object):
 	_typ = None
 	_len = 24
 
-	def __init__(self,persist=False,*a,**k):
+	def __init__(self,persist=PERSIST,*a,**k):
 		self.persist = persist
 		super(OWFSassembler,self).__init__(*a,**k)
 		
@@ -359,7 +361,7 @@ class OWFSqueue(MsgQueue,Jobber):
 	storage = OWbus
 	ondemand = True
 
-	def __init__(self, name, host,port, persist=False, *a,**k):
+	def __init__(self, name, host,port, persist=PERSIST, *a,**k):
 		self.ident = (host,port)
 		super(OWFSqueue,self).__init__(name=name, factory=MsgFactory(OWFSchannel,name=name,host=host,port=port,persist=persist, **k))
 		if not persist:
@@ -523,7 +525,7 @@ class OWFSqueue(MsgQueue,Jobber):
 ow_buses = {}
 
 # factory.
-def connect(host="localhost", port=4304, name=None, persist=False):
+def connect(host="localhost", port=4304, name=None, persist=PERSIST):
 	"""\
 		Set up a queue to a OneWire server.
 		"""
