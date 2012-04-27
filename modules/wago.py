@@ -33,7 +33,7 @@ from homevent.twist import reraise,callLater
 from homevent.run import simple_event
 from homevent.context import Context
 from homevent.times import humandelta,now,unixtime
-from homevent.msg import MsgQueue,MsgFactory,MsgBase, MINE,NOT_MINE, RECV_AGAIN,\
+from homevent.msg import MsgQueue,MsgFactory,MsgBase, MINE,NOT_MINE, RECV_AGAIN,SEND_AGAIN,\
 	MsgReceiver, MsgClosed
 from homevent.collect import Collection
 from homevent.in_out import register_input,register_output, unregister_input,unregister_output,\
@@ -172,6 +172,77 @@ class WAGOinitMsg(MsgReceiver):
 			self.start_timer = None
 
 
+class WAGOkeepaliveMsg(MsgBase):
+	blocking = False
+	ping_timer = None
+	last_recv = None
+	msgid = None
+
+	def __init__(self,queue, tm,maxtm):
+		self.queue = queue
+		if maxtm is None:
+			maxtm = 2*tm
+		else:
+			maxtm += tm
+
+		self.ping_timeout = tm
+		self.max_ping_timeout = maxtm
+		super(WAGOkeepaliveMsg,self).__init__()
+
+	def send(self,conn):
+		conn.write(self.msg)
+		self.ping_start()
+		return RECV_AGAIN
+
+	@property
+	def msg(self):
+		return "Da"+str(self.ping_timeout)
+
+	def list(self):
+		for r in super(WAGOkeepaliveMsg,self).list():
+			yield r
+		yield "last",self.last_recv
+		yield "id",self.msgid
+
+	def retry(self):
+		return SEND_AGAIN
+
+	def ping_timed_out(self):
+		self.ping_timer = None
+		if self.queue.channel is not None and self.queue.q is not None:
+			m = MsgClosed()
+			self.queue.q.put((m.prio,m), block=False)
+
+	def ping_start(self):
+		if self.ping_timer is not None:
+			self.ping_timer.cancel()
+		self.ping_timer = callLater(True, self.max_ping_timeout, self.ping_timed_out)
+
+	def recv(self,msg):
+		if msg.type is MT_IND_ACK and self.msgid is None:
+			self.msgid = msg.msgid
+			return RECV_AGAIN
+		if msg.type is MT_IND and msg.msgid == self.msgid:
+			self.ping_start()
+			self.last_recv = now(True)
+			return RECV_AGAIN
+		if msg.type is MT_IND_NAK and msg.msgid == self.msgid:
+			if self.ping_timer is not None:
+				self.ping_timer.cancel()
+				self.ping_timer = None
+			simple_event(Context(),"wago","ping","cancel",msg.msg)
+			return MINE
+		if (msg.type is MT_NAK or msg.type is MT_ERROR) and self.msgid is None:
+			simple_event(Context(),"wago","ping","error",msg.msg)
+			return MINE
+		return NOT_MINE
+
+	def done(self):
+		self.blocking = False
+		if self.ping_timer is not None:
+			self.ping_timer.cancel()
+			self.ping_timer = None
+
 
 class WAGOqueue(MsgQueue):
 	"""A simple adapter for the Wago protocol."""
@@ -193,6 +264,8 @@ class WAGOconnect(NetConnect):
 	port = 59995
 	retry_interval = None
 	max_retry_interval = None
+	timeout_interval = None
+	max_timeout_interval = None
 
 	long_doc="""\
 connect wago NAME [[host] port]
@@ -208,21 +281,32 @@ connect wago NAME [[host] port]
 		if self.max_retry_interval is not None:
 			q.max_connect_timeout = self.max_retry_interval
 		q.start()
+		if self.timeout_interval is not None:
+			msg = WAGOkeepaliveMsg(q, self.timeout_interval,self.max_timeout_interval)
+			q.enqueue(msg)
 WAGOconnect.register_statement(NetRetry)
 
 
-class WAGOName(Statement):
-	name=("name",)
-	doc="specify the name of a new Wago connection"
+class WAGOkeepalive(Statement):
+	name= "keepalive"
+	doc="start a keepalive timer"
 
 	long_doc = u"""\
-name ‹name…›
-- Use this form for network connections with multi-word names.
+keepalive ‹timer› ‹timeout›
+- Request a message every ‹timer› seconds; kill the connection if nothing after ‹timeout›. 
 """
 
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		self.parent.dest = SName(event)
+		if len(event) not in (1,2):
+			raise SyntaxError(u"Usage: %s ‹timer› ‹timeout›" % (self.name,))
+		try:
+			self.parent.timeout_interval = float(event[0])
+			if len(event) > 1:
+				self.parent.max_timeout_interval = float(event[1])
+		except ValueError:
+			raise SyntaxError(u"Usage: %s ‹timer› ‹timeout› (#seconds, float)" % (self.name,))
+WAGOconnect.register_statement(WAGOkeepalive)
 
 
 class WAGOconnected(Check):
@@ -352,6 +436,7 @@ class WAGOtimedOutputRun(WAGOoutputRun):
 		for r in super(WAGOtimedOutputRun,self).list():
 			yield r
 		yield ("timer",self.timer)
+		yield ("id",self.msgid)
 
 	@property
 	def msg(self):

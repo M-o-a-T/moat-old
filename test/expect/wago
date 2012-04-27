@@ -90,6 +90,9 @@ EVENT: wago¦connect¦test
 END: wago¦connect¦test
 0 msg recv= MINE <WAGOinitMsg obj>
 0 msg setstate connecting connected
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'monitor created' msgid:1 type:MT_IND_ACK prio:1›
+0 msg recv test ‹MsgIncoming: msg:'monitor created' msgid:1 type:MT_IND_ACK prio:1›
+0 msg recv= RECV_AGAIN <WAGOkeepaliveMsg obj>
 NEW: ‹ConditionalWorkSequence:17 (4)›
    : │  id: 17
    : │  call count: 0
@@ -106,27 +109,33 @@ EVENT: output¦set¦ho¦hey¦foo¦baz
 END: output¦set¦ho¦hey¦foo¦baz
 0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'Set.' type:MT_ACK prio:1›
 0 msg recv test ‹MsgIncoming: msg:'Set.' type:MT_ACK prio:1›
+0 msg recv= NOT_MINE <WAGOkeepaliveMsg obj>
 0 msg recv= MINE <WAGOoutputRun 2:1 val=True>
 0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'0' type:MT_ACK prio:1›
 0 msg recv test ‹MsgIncoming: msg:'0' type:MT_ACK prio:1›
+0 msg recv= NOT_MINE <WAGOkeepaliveMsg obj>
 0 msg recv= MINE <WAGOinputRun 1:1>
 1 in_1 whynot
 DEBUG> in_1 whynot
 0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'0' type:MT_ACK prio:1›
 0 msg recv test ‹MsgIncoming: msg:'0' type:MT_ACK prio:1›
+0 msg recv= NOT_MINE <WAGOkeepaliveMsg obj>
 0 msg recv= MINE <WAGOinputRun 1:1>
 1 Yes
 DEBUG> Yes
 0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'OK' type:MT_ACK prio:1›
 0 msg recv test ‹MsgIncoming: msg:'OK' type:MT_ACK prio:1›
+0 msg recv= NOT_MINE <WAGOkeepaliveMsg obj>
 0 msg recv= MINE <WAGOrawRun obj>
 0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'1' type:MT_ACK prio:1›
 0 msg recv test ‹MsgIncoming: msg:'1' type:MT_ACK prio:1›
+0 msg recv= NOT_MINE <WAGOkeepaliveMsg obj>
 0 msg recv= MINE <WAGOinputRun 1:1>
 1 in_2 why
 DEBUG> in_2 why
 0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'1' type:MT_ACK prio:1›
 0 msg recv test ‹MsgIncoming: msg:'1' type:MT_ACK prio:1›
+0 msg recv= NOT_MINE <WAGOkeepaliveMsg obj>
 0 msg recv= MINE <WAGOinputRun 1:1>
 1 Yes
 DEBUG> Yes
@@ -143,6 +152,7 @@ EVENT: wait¦start¦0.3¦timed¦set¦A
 END: wait¦start¦0.3¦timed¦set¦A
 0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'OK' type:MT_ACK prio:1›
 0 msg recv test ‹MsgIncoming: msg:'OK' type:MT_ACK prio:1›
+0 msg recv= NOT_MINE <WAGOkeepaliveMsg obj>
 0 msg recv= MINE <WAGOrawRun obj>
 NEW: ‹ConditionalWorkSequence:20 (4)›
    : │  id: 20
@@ -151,9 +161,10 @@ NEW: ‹ConditionalWorkSequence:20 (4)›
    : └1╴... done.
 EVENT: output¦set¦hey¦ho¦foo¦baz
 END: output¦set¦hey¦ho¦foo¦baz
-0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'Cleared, monitor started.' msgid:1 type:MT_IND_ACK prio:1›
-0 msg recv test ‹MsgIncoming: msg:'Cleared, monitor started.' msgid:1 type:MT_IND_ACK prio:1›
-0 msg recv= RECV_AGAIN <WAGOtimedOutputRun 2:1 tm=2.0 sec id=1>
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'Cleared, monitor started.' msgid:2 type:MT_IND_ACK prio:1›
+0 msg recv test ‹MsgIncoming: msg:'Cleared, monitor started.' msgid:2 type:MT_IND_ACK prio:1›
+0 msg recv= NOT_MINE <WAGOkeepaliveMsg obj>
+0 msg recv= RECV_AGAIN <WAGOtimedOutputRun 2:1 tm=2.0 sec id=2>
 NEW: ‹ConditionalWorkSequence:21 (4)›
    : │  id: 21
    : │  call count: 0
@@ -163,7 +174,8 @@ EVENT: wait¦done¦0.3¦timed¦set¦A
 END: wait¦done¦0.3¦timed¦set¦A
 0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'OK' type:MT_ACK prio:1›
 0 msg recv test ‹MsgIncoming: msg:'OK' type:MT_ACK prio:1›
-0 msg recv= NOT_MINE <WAGOtimedOutputRun 2:1 tm=1.8 sec id=1>
+0 msg recv= NOT_MINE <WAGOkeepaliveMsg obj>
+0 msg recv= NOT_MINE <WAGOtimedOutputRun 2:1 tm=1.8 sec id=2>
 0 msg recv= MINE <WAGOrawRun obj>
 .
 0 +WAIT 11 start job ‹Waiter timed¦set¦B ??›
@@ -175,6 +187,12 @@ NEW: ‹ConditionalWorkSequence:22 (4)›
    : └1╴... done.
 EVENT: wait¦start¦1.3¦timed¦set¦B
 END: wait¦start¦1.3¦timed¦set¦B
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 1' msgid:1 type:MT_IND prio:1›
+0 msg recv test ‹MsgIncoming: msg:'PING 1' msgid:1 type:MT_IND prio:1›
+0 msg recv= RECV_AGAIN <WAGOkeepaliveMsg obj>
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 2' msgid:1 type:MT_IND prio:1›
+0 msg recv test ‹MsgIncoming: msg:'PING 2' msgid:1 type:MT_IND prio:1›
+0 msg recv= RECV_AGAIN <WAGOkeepaliveMsg obj>
 NEW: ‹ConditionalWorkSequence:23 (4)›
    : │  id: 23
    : │  call count: 0
@@ -184,13 +202,15 @@ EVENT: wait¦done¦1.3¦timed¦set¦B
 END: wait¦done¦1.3¦timed¦set¦B
 0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'0' type:MT_ACK prio:1›
 0 msg recv test ‹MsgIncoming: msg:'0' type:MT_ACK prio:1›
-0 msg recv= NOT_MINE <WAGOtimedOutputRun 2:1 tm=0.8 sec id=1>
+0 msg recv= NOT_MINE <WAGOkeepaliveMsg obj>
+0 msg recv= NOT_MINE <WAGOtimedOutputRun 2:1 tm=0.8 sec id=2>
 0 msg recv= MINE <WAGOoutputInRun 2:1>
 1 out_1 ho
 DEBUG> out_1 ho
 0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'0' type:MT_ACK prio:1›
 0 msg recv test ‹MsgIncoming: msg:'0' type:MT_ACK prio:1›
-0 msg recv= NOT_MINE <WAGOtimedOutputRun 2:1 tm=0.8 sec id=1>
+0 msg recv= NOT_MINE <WAGOkeepaliveMsg obj>
+0 msg recv= NOT_MINE <WAGOtimedOutputRun 2:1 tm=0.8 sec id=2>
 0 msg recv= MINE <WAGOoutputInRun 2:1>
 1 Yes
 DEBUG> Yes
@@ -203,16 +223,25 @@ NEW: ‹ConditionalWorkSequence:24 (4)›
    : └1╴... done.
 EVENT: wait¦start¦2.3¦timed¦set¦C
 END: wait¦start¦2.3¦timed¦set¦C
-0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'TRIGGER' msgid:1 type:MT_IND prio:1›
-0 msg recv test ‹MsgIncoming: msg:'TRIGGER' msgid:1 type:MT_IND prio:1›
-0 msg recv= RECV_AGAIN <WAGOtimedOutputRun 2:1 tm=now id=1>
-0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'Deleted.' msgid:1 type:MT_IND_NAK prio:1›
-0 msg recv test ‹MsgIncoming: msg:'Deleted.' msgid:1 type:MT_IND_NAK prio:1›
-0 msg recv= MINE <WAGOtimedOutputRun 2:1 tm=now id=1>
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 3' msgid:1 type:MT_IND prio:1›
+0 msg recv test ‹MsgIncoming: msg:'PING 3' msgid:1 type:MT_IND prio:1›
+0 msg recv= RECV_AGAIN <WAGOkeepaliveMsg obj>
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 4' msgid:1 type:MT_IND prio:1›
+0 msg recv test ‹MsgIncoming: msg:'PING 4' msgid:1 type:MT_IND prio:1›
+0 msg recv= RECV_AGAIN <WAGOkeepaliveMsg obj>
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'TRIGGER' msgid:2 type:MT_IND prio:1›
+0 msg recv test ‹MsgIncoming: msg:'TRIGGER' msgid:2 type:MT_IND prio:1›
+0 msg recv= NOT_MINE <WAGOkeepaliveMsg obj>
+0 msg recv= RECV_AGAIN <WAGOtimedOutputRun 2:1 tm=now id=2>
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'Deleted.' msgid:2 type:MT_IND_NAK prio:1›
+0 msg recv test ‹MsgIncoming: msg:'Deleted.' msgid:2 type:MT_IND_NAK prio:1›
+0 msg recv= NOT_MINE <WAGOkeepaliveMsg obj>
+0 msg recv= MINE <WAGOtimedOutputRun 2:1 tm=now id=2>
 1 released
 DEBUG> released
 0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'OK' type:MT_ACK prio:1›
 0 msg recv test ‹MsgIncoming: msg:'OK' type:MT_ACK prio:1›
+0 msg recv= NOT_MINE <WAGOkeepaliveMsg obj>
 0 msg recv= MINE <WAGOrawRun obj>
 NEW: ‹ConditionalWorkSequence:25 (4)›
    : │  id: 25
@@ -223,11 +252,13 @@ EVENT: wait¦done¦2.3¦timed¦set¦C
 END: wait¦done¦2.3¦timed¦set¦C
 0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'1' type:MT_ACK prio:1›
 0 msg recv test ‹MsgIncoming: msg:'1' type:MT_ACK prio:1›
+0 msg recv= NOT_MINE <WAGOkeepaliveMsg obj>
 0 msg recv= MINE <WAGOoutputInRun 2:1>
 1 out_2 hey
 DEBUG> out_2 hey
 0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'1' type:MT_ACK prio:1›
 0 msg recv test ‹MsgIncoming: msg:'1' type:MT_ACK prio:1›
+0 msg recv= NOT_MINE <WAGOkeepaliveMsg obj>
 0 msg recv= MINE <WAGOoutputInRun 2:1>
 1 Yes
 DEBUG> Yes
@@ -256,6 +287,7 @@ EVENT: output¦set¦hey¦ho¦foo¦baz
 END: output¦set¦hey¦ho¦foo¦baz
 0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'Cleared.' type:MT_ACK prio:1›
 0 msg recv test ‹MsgIncoming: msg:'Cleared.' type:MT_ACK prio:1›
+0 msg recv= NOT_MINE <WAGOkeepaliveMsg obj>
 0 msg recv= MINE <WAGOoutputRun 2:1 val=False>
 0 +WAIT 14 start job ‹Waiter _wait¦6 ??›
 0 -WAIT 14 start job ‹Waiter _wait¦6 ??›
@@ -266,6 +298,9 @@ NEW: ‹ConditionalWorkSequence:29 (4)›
    : └1╴... done.
 EVENT: wait¦start¦2.9¦_wait¦6
 END: wait¦start¦2.9¦_wait¦6
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 5' msgid:1 type:MT_IND prio:1›
+0 msg recv test ‹MsgIncoming: msg:'PING 5' msgid:1 type:MT_IND prio:1›
+0 msg recv= RECV_AGAIN <WAGOkeepaliveMsg obj>
 NEW: ‹ConditionalWorkSequence:30 (4)›
    : │  id: 30
    : │  call count: 0
@@ -298,8 +333,8 @@ test :: ‹WAGOqueue:test connected›
 queue: 0
 state: connected
 state since: now (2003-04-05 06:07:08.050000)
-sent: (0, 15)
-received: (0, 18)
+sent: (0, 16)
+received: (0, 24)
 processed: (0, 16)
 last_sent : <WAGOoutputRun 2:1 val=False>
           priority: 1
@@ -315,6 +350,11 @@ out_queued: 0
 channel type: wago
         host: localhost
         port: 59069
+msg recv 1 : <WAGOkeepaliveMsg obj>
+           priority: 1
+           status: pending
+           last: -0.4 sec (2012-04-27 10:30:25.011484)
+           id: 1
 .
 1 Yes
 DEBUG> Yes
@@ -333,10 +373,10 @@ DEBUG> now we test a nonexistent port
 NEW: ‹ConditionalWorkSequence:31 (4)›
    : │  id: 31
    : │  call count: 0
-   : │  EVENT: wait¦start¦3.9¦poll¦nonexist
+   : │  EVENT: wait¦start¦4.0¦poll¦nonexist
    : └1╴... done.
-EVENT: wait¦start¦3.9¦poll¦nonexist
-END: wait¦start¦3.9¦poll¦nonexist
+EVENT: wait¦start¦4.0¦poll¦nonexist
+END: wait¦start¦4.0¦poll¦nonexist
 0 msg setstate init closed
 0 msg setstate closed want
 0 msg setstate want connecting
@@ -354,6 +394,9 @@ END: wago¦error¦test¦nonexist
 ERROR> Setting up
 ERROR> [Errno 111] Connection refused
 0 msg setstate connecting waiting: wait 0.200000
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 6' msgid:1 type:MT_IND prio:1›
+0 msg recv test ‹MsgIncoming: msg:'PING 6' msgid:1 type:MT_IND prio:1›
+0 msg recv= RECV_AGAIN <WAGOkeepaliveMsg obj>
 0 msg setstate waiting want
 0 msg setstate want connecting
 0 conn connecting WAGOqueue test¦nonexist
@@ -386,13 +429,16 @@ END: wago¦error¦test¦nonexist
 ERROR> Setting up
 ERROR> [Errno 111] Connection refused
 0 msg setstate connecting waiting: wait 0.500000
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 7' msgid:1 type:MT_IND prio:1›
+0 msg recv test ‹MsgIncoming: msg:'PING 7' msgid:1 type:MT_IND prio:1›
+0 msg recv= RECV_AGAIN <WAGOkeepaliveMsg obj>
 NEW: ‹ConditionalWorkSequence:35 (4)›
    : │  id: 35
    : │  call count: 0
-   : │  EVENT: wait¦done¦3.9¦poll¦nonexist
+   : │  EVENT: wait¦done¦4.0¦poll¦nonexist
    : └1╴... done.
-EVENT: wait¦done¦3.9¦poll¦nonexist
-END: wait¦done¦3.9¦poll¦nonexist
+EVENT: wait¦done¦4.0¦poll¦nonexist
+END: wait¦done¦4.0¦poll¦nonexist
 queue: 0
 state: connecting
 state since: now (2003-04-05 06:07:08.100000)
@@ -414,10 +460,10 @@ DEBUG> now we test a port that always EOFs
 NEW: ‹ConditionalWorkSequence:36 (4)›
    : │  id: 36
    : │  call count: 0
-   : │  EVENT: wait¦start¦4.9¦poll¦closing
+   : │  EVENT: wait¦start¦5.0¦poll¦closing
    : └1╴... done.
-EVENT: wait¦start¦4.9¦poll¦closing
-END: wait¦start¦4.9¦poll¦closing
+EVENT: wait¦start¦5.0¦poll¦closing
+END: wait¦start¦5.0¦poll¦closing
 0 +WAIT 21 start job ‹WAGOqueue:test¦closing New›
 0 -WAIT 21 start job ‹WAGOqueue:test¦closing New›
 0 +WAIT 22 start job ‹WAGOqueue:test¦closing New›
@@ -440,6 +486,9 @@ EVENT: wago¦disconnect¦test¦closing
 END: wago¦disconnect¦test¦closing
 0 conn ReOpen WAGOqueue test¦closing
 0 msg setstate connecting waiting: wait 0.120000
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 8' msgid:1 type:MT_IND prio:1›
+0 msg recv test ‹MsgIncoming: msg:'PING 8' msgid:1 type:MT_IND prio:1›
+0 msg recv= RECV_AGAIN <WAGOkeepaliveMsg obj>
 0 msg setstate waiting want
 0 msg setstate want connecting
 0 conn connecting WAGOqueue test¦closing
@@ -474,6 +523,9 @@ EVENT: wago¦disconnect¦test¦closing
 END: wago¦disconnect¦test¦closing
 0 conn ReOpen WAGOqueue test¦closing
 0 msg setstate connecting waiting: wait 0.307200
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 9' msgid:1 type:MT_IND prio:1›
+0 msg recv test ‹MsgIncoming: msg:'PING 9' msgid:1 type:MT_IND prio:1›
+0 msg recv= RECV_AGAIN <WAGOkeepaliveMsg obj>
 0 msg setstate waiting want
 0 msg setstate want connecting
 0 conn connecting WAGOqueue test¦closing
@@ -494,10 +546,10 @@ END: wago¦disconnect¦test¦closing
 NEW: ‹ConditionalWorkSequence:41 (4)›
    : │  id: 41
    : │  call count: 0
-   : │  EVENT: wait¦done¦4.9¦poll¦closing
+   : │  EVENT: wait¦done¦5.0¦poll¦closing
    : └1╴... done.
-EVENT: wait¦done¦4.9¦poll¦closing
-END: wait¦done¦4.9¦poll¦closing
+EVENT: wait¦done¦5.0¦poll¦closing
+END: wait¦done¦5.0¦poll¦closing
 queue: 0
 state: ReOpen
 state since: now (2003-04-05 06:07:08.100000)
@@ -537,6 +589,9 @@ END: wait¦start¦6.0¦poll¦no_answer
 0 -WAIT 32 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦no_answer››
 0 conn setting up WAGOqueue test¦no_answer
 0 conn connected WAGOqueue test¦no_answer
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 10' msgid:1 type:MT_IND prio:1›
+0 msg recv test ‹MsgIncoming: msg:'PING 10' msgid:1 type:MT_IND prio:1›
+0 msg recv= RECV_AGAIN <WAGOkeepaliveMsg obj>
 0 +WAIT 33 kill job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦no_answer››
 0 !got DOWN_EVENT test no_answer
 NEW: ‹ConditionalWorkSequence:43 (4)›
@@ -568,6 +623,9 @@ END: wago¦disconnect¦test¦no_answer
 0 -WAIT 35 kill job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦no_answer››
 0 conn ReOpen WAGOqueue test¦no_answer
 0 msg setstate connecting waiting: wait 0.192000
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 11' msgid:1 type:MT_IND prio:1›
+0 msg recv test ‹MsgIncoming: msg:'PING 11' msgid:1 type:MT_IND prio:1›
+0 msg recv= RECV_AGAIN <WAGOkeepaliveMsg obj>
 0 msg setstate waiting want
 0 msg setstate want connecting
 0 conn connecting WAGOqueue test¦no_answer

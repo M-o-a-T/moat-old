@@ -35,6 +35,7 @@ log DEBUG
 async:
 	connect wago localhost 59069:
 		name test
+		keepalive 0.5 0.7
 		#ping 1
 
 on foo baba:
