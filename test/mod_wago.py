@@ -142,28 +142,40 @@ log DEBUG now we test a nonexistent port
 block:
 	connect wago localhost 52998:
 		name test nonexist
-		retry 0.2 2
+		retry 0.2 0.5
 		#ping 1
 
 wait poll nonexist:
-	for 3
+	for 1
 	debug force
-
 list wago server test nonexist
 del wago server test nonexist
 
 log DEBUG now we test a port that always EOFs
 async:
-	connect wago localhost 59068:
+	connect wago localhost 59067:
 		name test closing
-		retry 0.12 2
+		retry 0.12 0.5
 		#ping 1
 	
 wait poll closing:
-	for 2
+	for 1
 	debug force
 list wago server test closing
 del wago server test closing
+	
+log DEBUG now we test a port that does not answer
+async:
+	connect wago localhost 59068:
+		name test no_answer
+		retry 0.12 0.5
+		#ping 1
+	
+wait poll no_answer:
+	for 1
+	debug force
+list wago server test no_answer
+del wago server test no_answer
 	
 wait poll end:
 	for 2

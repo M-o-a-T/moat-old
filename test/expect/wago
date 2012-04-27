@@ -70,6 +70,9 @@ END: wait¦start¦0.1¦_wait¦1
 0 -WAIT 6 start job ‹WAGOqueue:test New›
 0 +WAIT 7 start job ‹WAGOqueue:test New›
 0 -WAIT 7 start job ‹WAGOqueue:test New›
+0 msg setstate init closed
+0 msg setstate closed want
+0 msg setstate want connecting
 0 conn connecting WAGOqueue test
 0 +WAIT 8 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test››
 0 -WAIT 8 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test››
@@ -86,6 +89,7 @@ NEW: ‹ConditionalWorkSequence:16 (4)›
 EVENT: wago¦connect¦test
 END: wago¦connect¦test
 0 msg recv= MINE <WAGOinitMsg obj>
+0 msg setstate connecting connected
 NEW: ‹ConditionalWorkSequence:17 (4)›
    : │  id: 17
    : │  call count: 0
@@ -133,10 +137,10 @@ DEBUG> Yes
 NEW: ‹ConditionalWorkSequence:19 (4)›
    : │  id: 19
    : │  call count: 0
-   : │  EVENT: wait¦start¦1.3¦timed¦set¦A
+   : │  EVENT: wait¦start¦0.3¦timed¦set¦A
    : └1╴... done.
-EVENT: wait¦start¦1.3¦timed¦set¦A
-END: wait¦start¦1.3¦timed¦set¦A
+EVENT: wait¦start¦0.3¦timed¦set¦A
+END: wait¦start¦0.3¦timed¦set¦A
 0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'OK' type:MT_ACK prio:1›
 0 msg recv test ‹MsgIncoming: msg:'OK' type:MT_ACK prio:1›
 0 msg recv= MINE <WAGOrawRun obj>
@@ -153,10 +157,10 @@ END: output¦set¦hey¦ho¦foo¦baz
 NEW: ‹ConditionalWorkSequence:21 (4)›
    : │  id: 21
    : │  call count: 0
-   : │  EVENT: wait¦done¦1.3¦timed¦set¦A
+   : │  EVENT: wait¦done¦0.3¦timed¦set¦A
    : └1╴... done.
-EVENT: wait¦done¦1.3¦timed¦set¦A
-END: wait¦done¦1.3¦timed¦set¦A
+EVENT: wait¦done¦0.3¦timed¦set¦A
+END: wait¦done¦0.3¦timed¦set¦A
 0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'OK' type:MT_ACK prio:1›
 0 msg recv test ‹MsgIncoming: msg:'OK' type:MT_ACK prio:1›
 0 msg recv= NOT_MINE <WAGOtimedOutputRun 2:1 tm=1.8 sec id=1>
@@ -167,17 +171,17 @@ END: wait¦done¦1.3¦timed¦set¦A
 NEW: ‹ConditionalWorkSequence:22 (4)›
    : │  id: 22
    : │  call count: 0
-   : │  EVENT: wait¦start¦2.3¦timed¦set¦B
+   : │  EVENT: wait¦start¦1.3¦timed¦set¦B
    : └1╴... done.
-EVENT: wait¦start¦2.3¦timed¦set¦B
-END: wait¦start¦2.3¦timed¦set¦B
+EVENT: wait¦start¦1.3¦timed¦set¦B
+END: wait¦start¦1.3¦timed¦set¦B
 NEW: ‹ConditionalWorkSequence:23 (4)›
    : │  id: 23
    : │  call count: 0
-   : │  EVENT: wait¦done¦2.3¦timed¦set¦B
+   : │  EVENT: wait¦done¦1.3¦timed¦set¦B
    : └1╴... done.
-EVENT: wait¦done¦2.3¦timed¦set¦B
-END: wait¦done¦2.3¦timed¦set¦B
+EVENT: wait¦done¦1.3¦timed¦set¦B
+END: wait¦done¦1.3¦timed¦set¦B
 0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'0' type:MT_ACK prio:1›
 0 msg recv test ‹MsgIncoming: msg:'0' type:MT_ACK prio:1›
 0 msg recv= NOT_MINE <WAGOtimedOutputRun 2:1 tm=0.8 sec id=1>
@@ -195,10 +199,10 @@ DEBUG> Yes
 NEW: ‹ConditionalWorkSequence:24 (4)›
    : │  id: 24
    : │  call count: 0
-   : │  EVENT: wait¦start¦3.3¦timed¦set¦C
+   : │  EVENT: wait¦start¦2.3¦timed¦set¦C
    : └1╴... done.
-EVENT: wait¦start¦3.3¦timed¦set¦C
-END: wait¦start¦3.3¦timed¦set¦C
+EVENT: wait¦start¦2.3¦timed¦set¦C
+END: wait¦start¦2.3¦timed¦set¦C
 0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'TRIGGER' msgid:1 type:MT_IND prio:1›
 0 msg recv test ‹MsgIncoming: msg:'TRIGGER' msgid:1 type:MT_IND prio:1›
 0 msg recv= RECV_AGAIN <WAGOtimedOutputRun 2:1 tm=now id=1>
@@ -213,10 +217,10 @@ DEBUG> released
 NEW: ‹ConditionalWorkSequence:25 (4)›
    : │  id: 25
    : │  call count: 0
-   : │  EVENT: wait¦done¦3.3¦timed¦set¦C
+   : │  EVENT: wait¦done¦2.3¦timed¦set¦C
    : └1╴... done.
-EVENT: wait¦done¦3.3¦timed¦set¦C
-END: wait¦done¦3.3¦timed¦set¦C
+EVENT: wait¦done¦2.3¦timed¦set¦C
+END: wait¦done¦2.3¦timed¦set¦C
 0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'1' type:MT_ACK prio:1›
 0 msg recv test ‹MsgIncoming: msg:'1' type:MT_ACK prio:1›
 0 msg recv= MINE <WAGOoutputInRun 2:1>
@@ -232,17 +236,17 @@ DEBUG> Yes
 NEW: ‹ConditionalWorkSequence:26 (4)›
    : │  id: 26
    : │  call count: 0
-   : │  EVENT: wait¦start¦3.4¦_wait¦5
+   : │  EVENT: wait¦start¦2.4¦_wait¦5
    : └1╴... done.
-EVENT: wait¦start¦3.4¦_wait¦5
-END: wait¦start¦3.4¦_wait¦5
+EVENT: wait¦start¦2.4¦_wait¦5
+END: wait¦start¦2.4¦_wait¦5
 NEW: ‹ConditionalWorkSequence:27 (4)›
    : │  id: 27
    : │  call count: 0
-   : │  EVENT: wait¦done¦3.4¦_wait¦5
+   : │  EVENT: wait¦done¦2.4¦_wait¦5
    : └1╴... done.
-EVENT: wait¦done¦3.4¦_wait¦5
-END: wait¦done¦3.4¦_wait¦5
+EVENT: wait¦done¦2.4¦_wait¦5
+END: wait¦done¦2.4¦_wait¦5
 NEW: ‹ConditionalWorkSequence:28 (4)›
    : │  id: 28
    : │  call count: 0
@@ -258,17 +262,17 @@ END: output¦set¦hey¦ho¦foo¦baz
 NEW: ‹ConditionalWorkSequence:29 (4)›
    : │  id: 29
    : │  call count: 0
-   : │  EVENT: wait¦start¦3.9¦_wait¦6
+   : │  EVENT: wait¦start¦2.9¦_wait¦6
    : └1╴... done.
-EVENT: wait¦start¦3.9¦_wait¦6
-END: wait¦start¦3.9¦_wait¦6
+EVENT: wait¦start¦2.9¦_wait¦6
+END: wait¦start¦2.9¦_wait¦6
 NEW: ‹ConditionalWorkSequence:30 (4)›
    : │  id: 30
    : │  call count: 0
-   : │  EVENT: wait¦done¦3.9¦_wait¦6
+   : │  EVENT: wait¦done¦2.9¦_wait¦6
    : └1╴... done.
-EVENT: wait¦done¦3.9¦_wait¦6
-END: wait¦done¦3.9¦_wait¦6
+EVENT: wait¦done¦2.9¦_wait¦6
+END: wait¦done¦2.9¦_wait¦6
 event
 input
 log
@@ -313,98 +317,397 @@ channel type: wago
         port: 59069
 .
 1 Yes
-0 +WAIT 15 kill job <homevent.tokize.tokizer obj>
 DEBUG> Yes
-0 -WAIT 15 kill job <homevent.tokize.tokizer obj>
-NEW: ‹ConditionalWorkSequence:31 (6)›
+1 Yes
+DEBUG> Yes
+1 Yes
+DEBUG> Yes
+1 now we test a nonexistent port
+DEBUG> now we test a nonexistent port
+0 +WAIT 15 start job ‹WAGOqueue:test¦nonexist New›
+0 -WAIT 15 start job ‹WAGOqueue:test¦nonexist New›
+0 +WAIT 16 start job ‹WAGOqueue:test¦nonexist New›
+0 -WAIT 16 start job ‹WAGOqueue:test¦nonexist New›
+0 +WAIT 17 start job ‹Waiter poll¦nonexist ??›
+0 -WAIT 17 start job ‹Waiter poll¦nonexist ??›
+NEW: ‹ConditionalWorkSequence:31 (4)›
    : │  id: 31
+   : │  call count: 0
+   : │  EVENT: wait¦start¦3.9¦poll¦nonexist
+   : └1╴... done.
+EVENT: wait¦start¦3.9¦poll¦nonexist
+END: wait¦start¦3.9¦poll¦nonexist
+0 msg setstate init closed
+0 msg setstate closed want
+0 msg setstate want connecting
+0 conn connecting WAGOqueue test¦nonexist
+0 !got NOT_UP_EVENT test nonexist
+NEW: ‹ConditionalWorkSequence:32 (4)›
+   : │  id: 32
+   : │  call count: 0
+   : │  EVENT: wago¦error¦test¦nonexist
+   : └1╴... done.
+EVENT: wago¦error¦test¦nonexist
+END: wago¦error¦test¦nonexist
+4 Setting up
+4 [Errno 111] Connection refused
+ERROR> Setting up
+ERROR> [Errno 111] Connection refused
+0 msg setstate connecting waiting: wait 0.200000
+0 msg setstate waiting want
+0 msg setstate want connecting
+0 conn connecting WAGOqueue test¦nonexist
+0 !got NOT_UP_EVENT test nonexist
+NEW: ‹ConditionalWorkSequence:33 (4)›
+   : │  id: 33
+   : │  call count: 0
+   : │  EVENT: wago¦error¦test¦nonexist
+   : └1╴... done.
+EVENT: wago¦error¦test¦nonexist
+END: wago¦error¦test¦nonexist
+4 Setting up
+4 [Errno 111] Connection refused
+ERROR> Setting up
+ERROR> [Errno 111] Connection refused
+0 msg setstate connecting waiting: wait 0.320000
+0 msg setstate waiting want
+0 msg setstate want connecting
+0 conn connecting WAGOqueue test¦nonexist
+0 !got NOT_UP_EVENT test nonexist
+NEW: ‹ConditionalWorkSequence:34 (4)›
+   : │  id: 34
+   : │  call count: 0
+   : │  EVENT: wago¦error¦test¦nonexist
+   : └1╴... done.
+EVENT: wago¦error¦test¦nonexist
+END: wago¦error¦test¦nonexist
+4 Setting up
+4 [Errno 111] Connection refused
+ERROR> Setting up
+ERROR> [Errno 111] Connection refused
+0 msg setstate connecting waiting: wait 0.500000
+NEW: ‹ConditionalWorkSequence:35 (4)›
+   : │  id: 35
+   : │  call count: 0
+   : │  EVENT: wait¦done¦3.9¦poll¦nonexist
+   : └1╴... done.
+EVENT: wait¦done¦3.9¦poll¦nonexist
+END: wait¦done¦3.9¦poll¦nonexist
+queue: 0
+state: connecting
+state since: now (2003-04-05 06:07:08.100000)
+sent: (0, 0)
+received: (0, 0)
+processed: (0, 0)
+conn attempts: 3
+conn timer: 0.5
+out_queued: 0
+.
+0 +WAIT 18 kill job ‹WAGOqueue:test¦nonexist connecting›
+0 -WAIT 18 kill job ‹WAGOqueue:test¦nonexist connecting›
+1 now we test a port that always EOFs
+DEBUG> now we test a port that always EOFs
+0 +WAIT 19 start job ‹Async async›
+0 -WAIT 19 start job ‹Async async›
+0 +WAIT 20 start job ‹Waiter poll¦closing ??›
+0 -WAIT 20 start job ‹Waiter poll¦closing ??›
+NEW: ‹ConditionalWorkSequence:36 (4)›
+   : │  id: 36
+   : │  call count: 0
+   : │  EVENT: wait¦start¦4.9¦poll¦closing
+   : └1╴... done.
+EVENT: wait¦start¦4.9¦poll¦closing
+END: wait¦start¦4.9¦poll¦closing
+0 +WAIT 21 start job ‹WAGOqueue:test¦closing New›
+0 -WAIT 21 start job ‹WAGOqueue:test¦closing New›
+0 +WAIT 22 start job ‹WAGOqueue:test¦closing New›
+0 -WAIT 22 start job ‹WAGOqueue:test¦closing New›
+0 msg setstate init closed
+0 msg setstate closed want
+0 msg setstate want connecting
+0 conn connecting WAGOqueue test¦closing
+0 +WAIT 23 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦closing››
+0 -WAIT 23 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦closing››
+0 conn setting up WAGOqueue test¦closing
+0 conn connected WAGOqueue test¦closing
+0 !got DOWN_EVENT test closing
+NEW: ‹ConditionalWorkSequence:37 (4)›
+   : │  id: 37
+   : │  call count: 0
+   : │  EVENT: wago¦disconnect¦test¦closing
+   : └1╴... done.
+EVENT: wago¦disconnect¦test¦closing
+END: wago¦disconnect¦test¦closing
+0 conn ReOpen WAGOqueue test¦closing
+0 msg setstate connecting waiting: wait 0.120000
+0 msg setstate waiting want
+0 msg setstate want connecting
+0 conn connecting WAGOqueue test¦closing
+0 +WAIT 24 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦closing››
+0 -WAIT 24 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦closing››
+0 conn setting up WAGOqueue test¦closing
+0 conn connected WAGOqueue test¦closing
+0 !got DOWN_EVENT test closing
+NEW: ‹ConditionalWorkSequence:38 (4)›
+   : │  id: 38
+   : │  call count: 0
+   : │  EVENT: wago¦disconnect¦test¦closing
+   : └1╴... done.
+EVENT: wago¦disconnect¦test¦closing
+END: wago¦disconnect¦test¦closing
+0 conn ReOpen WAGOqueue test¦closing
+0 msg setstate connecting waiting: wait 0.192000
+0 msg setstate waiting want
+0 msg setstate want connecting
+0 conn connecting WAGOqueue test¦closing
+0 +WAIT 25 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦closing››
+0 -WAIT 25 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦closing››
+0 conn setting up WAGOqueue test¦closing
+0 conn connected WAGOqueue test¦closing
+0 !got DOWN_EVENT test closing
+NEW: ‹ConditionalWorkSequence:39 (4)›
+   : │  id: 39
+   : │  call count: 0
+   : │  EVENT: wago¦disconnect¦test¦closing
+   : └1╴... done.
+EVENT: wago¦disconnect¦test¦closing
+END: wago¦disconnect¦test¦closing
+0 conn ReOpen WAGOqueue test¦closing
+0 msg setstate connecting waiting: wait 0.307200
+0 msg setstate waiting want
+0 msg setstate want connecting
+0 conn connecting WAGOqueue test¦closing
+0 +WAIT 26 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦closing››
+0 -WAIT 26 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦closing››
+0 conn setting up WAGOqueue test¦closing
+0 conn connected WAGOqueue test¦closing
+0 !got DOWN_EVENT test closing
+NEW: ‹ConditionalWorkSequence:40 (4)›
+   : │  id: 40
+   : │  call count: 0
+   : │  EVENT: wago¦disconnect¦test¦closing
+   : └1╴... done.
+EVENT: wago¦disconnect¦test¦closing
+END: wago¦disconnect¦test¦closing
+0 conn ReOpen WAGOqueue test¦closing
+0 msg setstate connecting waiting: wait 0.491520
+NEW: ‹ConditionalWorkSequence:41 (4)›
+   : │  id: 41
+   : │  call count: 0
+   : │  EVENT: wait¦done¦4.9¦poll¦closing
+   : └1╴... done.
+EVENT: wait¦done¦4.9¦poll¦closing
+END: wait¦done¦4.9¦poll¦closing
+queue: 0
+state: ReOpen
+state since: now (2003-04-05 06:07:08.100000)
+sent: (0, 0)
+received: (0, 0)
+processed: (0, 0)
+conn attempts: 4
+conn timer: 0.5
+out_queued: 0
+msg recv 1 : <WAGOinitMsg obj>
+           priority: 1
+.
+0 +WAIT 27 kill job ‹WAGOqueue:test¦closing ReOpen›
+0 -WAIT 27 kill job ‹WAGOqueue:test¦closing ReOpen›
+1 now we test a port that does not answer
+DEBUG> now we test a port that does not answer
+0 +WAIT 28 start job ‹Async async›
+0 -WAIT 28 start job ‹Async async›
+0 +WAIT 29 start job ‹Waiter poll¦no_answer ??›
+0 -WAIT 29 start job ‹Waiter poll¦no_answer ??›
+NEW: ‹ConditionalWorkSequence:42 (4)›
+   : │  id: 42
+   : │  call count: 0
+   : │  EVENT: wait¦start¦6.0¦poll¦no_answer
+   : └1╴... done.
+EVENT: wait¦start¦6.0¦poll¦no_answer
+END: wait¦start¦6.0¦poll¦no_answer
+0 +WAIT 30 start job ‹WAGOqueue:test¦no_answer New›
+0 -WAIT 30 start job ‹WAGOqueue:test¦no_answer New›
+0 +WAIT 31 start job ‹WAGOqueue:test¦no_answer New›
+0 -WAIT 31 start job ‹WAGOqueue:test¦no_answer New›
+0 msg setstate init closed
+0 msg setstate closed want
+0 msg setstate want connecting
+0 conn connecting WAGOqueue test¦no_answer
+0 +WAIT 32 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦no_answer››
+0 -WAIT 32 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦no_answer››
+0 conn setting up WAGOqueue test¦no_answer
+0 conn connected WAGOqueue test¦no_answer
+0 +WAIT 33 kill job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦no_answer››
+0 !got DOWN_EVENT test no_answer
+NEW: ‹ConditionalWorkSequence:43 (4)›
+   : │  id: 43
+   : │  call count: 0
+   : │  EVENT: wago¦disconnect¦test¦no_answer
+   : └1╴... done.
+EVENT: wago¦disconnect¦test¦no_answer
+END: wago¦disconnect¦test¦no_answer
+0 -WAIT 33 kill job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦no_answer››
+0 conn ReOpen WAGOqueue test¦no_answer
+0 msg setstate connecting waiting: wait 0.120000
+0 msg setstate waiting want
+0 msg setstate want connecting
+0 conn connecting WAGOqueue test¦no_answer
+0 +WAIT 34 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦no_answer››
+0 -WAIT 34 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦no_answer››
+0 conn setting up WAGOqueue test¦no_answer
+0 conn connected WAGOqueue test¦no_answer
+0 +WAIT 35 kill job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦no_answer››
+0 !got DOWN_EVENT test no_answer
+NEW: ‹ConditionalWorkSequence:44 (4)›
+   : │  id: 44
+   : │  call count: 0
+   : │  EVENT: wago¦disconnect¦test¦no_answer
+   : └1╴... done.
+EVENT: wago¦disconnect¦test¦no_answer
+END: wago¦disconnect¦test¦no_answer
+0 -WAIT 35 kill job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦no_answer››
+0 conn ReOpen WAGOqueue test¦no_answer
+0 msg setstate connecting waiting: wait 0.192000
+0 msg setstate waiting want
+0 msg setstate want connecting
+0 conn connecting WAGOqueue test¦no_answer
+0 +WAIT 36 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦no_answer››
+0 -WAIT 36 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦no_answer››
+0 conn setting up WAGOqueue test¦no_answer
+0 conn connected WAGOqueue test¦no_answer
+0 +WAIT 37 kill job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦no_answer››
+0 !got DOWN_EVENT test no_answer
+NEW: ‹ConditionalWorkSequence:45 (4)›
+   : │  id: 45
+   : │  call count: 0
+   : │  EVENT: wago¦disconnect¦test¦no_answer
+   : └1╴... done.
+EVENT: wago¦disconnect¦test¦no_answer
+END: wago¦disconnect¦test¦no_answer
+0 -WAIT 37 kill job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦no_answer››
+0 conn ReOpen WAGOqueue test¦no_answer
+0 msg setstate connecting waiting: wait 0.307200
+NEW: ‹ConditionalWorkSequence:46 (4)›
+   : │  id: 46
+   : │  call count: 0
+   : │  EVENT: wait¦done¦6.0¦poll¦no_answer
+   : └1╴... done.
+EVENT: wait¦done¦6.0¦poll¦no_answer
+END: wait¦done¦6.0¦poll¦no_answer
+queue: 0
+state: ReOpen
+state since: now (2003-04-05 06:07:08.100000)
+sent: (0, 0)
+received: (0, 0)
+processed: (0, 0)
+conn attempts: 3
+conn timer: 0.49152
+out_queued: 0
+msg recv 1 : <WAGOinitMsg obj>
+           priority: 1
+.
+0 +WAIT 38 kill job ‹WAGOqueue:test¦no_answer ReOpen›
+0 -WAIT 38 kill job ‹WAGOqueue:test¦no_answer ReOpen›
+0 +WAIT 39 start job ‹Waiter poll¦end ??›
+0 -WAIT 39 start job ‹Waiter poll¦end ??›
+NEW: ‹ConditionalWorkSequence:47 (4)›
+   : │  id: 47
+   : │  call count: 0
+   : │  EVENT: wait¦start¦2.1¦poll¦end
+   : └1╴... done.
+EVENT: wait¦start¦2.1¦poll¦end
+END: wait¦start¦2.1¦poll¦end
+0 +WAIT 40 kill job <homevent.tokize.tokizer obj>
+0 -WAIT 40 kill job <homevent.tokize.tokizer obj>
+NEW: ‹ConditionalWorkSequence:48 (6)›
+   : │  id: 48
    : │  call count: 0
    : │  EVENT: shutdown
    : └1╴... done.
 EVENT: shutdown
-0 +WAIT 16 kill job ‹WAGOqueue:test connected›
+0 +WAIT 41 kill job ‹WAGOqueue:test connected›
 0 !got DOWN_EVENT test
-NEW: ‹ConditionalWorkSequence:32 (4)›
-   : │  id: 32
+NEW: ‹ConditionalWorkSequence:49 (4)›
+   : │  id: 49
    : │  call count: 0
    : │  EVENT: wago¦disconnect¦test
    : └1╴... done.
 EVENT: wago¦disconnect¦test
 END: wago¦disconnect¦test
-0 -WAIT 16 kill job ‹WAGOqueue:test connected›
+0 -WAIT 41 kill job ‹WAGOqueue:test connected›
 0 conn deleted WAGOqueue test
-NEW: ‹ConditionalWorkSequence:33 (4)›
-   : │  id: 33
+NEW: ‹ConditionalWorkSequence:50 (4)›
+   : │  id: 50
    : │  call count: 0
    : │  EVENT: module¦unload¦file
    : └1╴... done.
 EVENT: module¦unload¦file
 END: module¦unload¦file
-NEW: ‹ConditionalWorkSequence:34 (4)›
-   : │  id: 34
+NEW: ‹ConditionalWorkSequence:51 (4)›
+   : │  id: 51
    : │  call count: 0
    : │  EVENT: module¦unload¦data
    : └1╴... done.
 EVENT: module¦unload¦data
 END: module¦unload¦data
-NEW: ‹ConditionalWorkSequence:35 (4)›
-   : │  id: 35
+NEW: ‹ConditionalWorkSequence:52 (4)›
+   : │  id: 52
    : │  call count: 0
    : │  EVENT: module¦unload¦on_event
    : └1╴... done.
 EVENT: module¦unload¦on_event
 END: module¦unload¦on_event
-NEW: ‹ConditionalWorkSequence:36 (4)›
-   : │  id: 36
+NEW: ‹ConditionalWorkSequence:53 (4)›
+   : │  id: 53
    : │  call count: 0
    : │  EVENT: module¦unload¦block
    : └1╴... done.
 EVENT: module¦unload¦block
 END: module¦unload¦block
-NEW: ‹ConditionalWorkSequence:37 (4)›
-   : │  id: 37
+NEW: ‹ConditionalWorkSequence:54 (4)›
+   : │  id: 54
    : │  call count: 0
    : │  EVENT: module¦unload¦logging
    : └1╴... done.
 EVENT: module¦unload¦logging
 END: module¦unload¦logging
-NEW: ‹ConditionalWorkSequence:38 (4)›
-   : │  id: 38
+NEW: ‹ConditionalWorkSequence:55 (4)›
+   : │  id: 55
    : │  call count: 0
    : │  EVENT: module¦unload¦wait
    : └1╴... done.
 EVENT: module¦unload¦wait
 END: module¦unload¦wait
-NEW: ‹ConditionalWorkSequence:39 (4)›
-   : │  id: 39
+NEW: ‹ConditionalWorkSequence:56 (4)›
+   : │  id: 56
    : │  call count: 0
    : │  EVENT: module¦unload¦wago
    : └1╴... done.
 EVENT: module¦unload¦wago
 END: module¦unload¦wago
-NEW: ‹ConditionalWorkSequence:40 (4)›
-   : │  id: 40
+NEW: ‹ConditionalWorkSequence:57 (4)›
+   : │  id: 57
    : │  call count: 0
    : │  EVENT: module¦unload¦ifelse
    : └1╴... done.
 EVENT: module¦unload¦ifelse
 END: module¦unload¦ifelse
-NEW: ‹ConditionalWorkSequence:41 (4)›
-   : │  id: 41
+NEW: ‹ConditionalWorkSequence:58 (4)›
+   : │  id: 58
    : │  call count: 0
    : │  EVENT: module¦unload¦trigger
    : └1╴... done.
 EVENT: module¦unload¦trigger
 END: module¦unload¦trigger
-NEW: ‹ConditionalWorkSequence:42 (4)›
-   : │  id: 42
+NEW: ‹ConditionalWorkSequence:59 (4)›
+   : │  id: 59
    : │  call count: 0
    : │  EVENT: module¦unload¦path
    : └1╴... done.
 EVENT: module¦unload¦path
 END: module¦unload¦path
-NEW: ‹ConditionalWorkSequence:43 (4)›
-   : │  id: 43
+NEW: ‹ConditionalWorkSequence:60 (4)›
+   : │  id: 60
    : │  call count: 0
    : │  EVENT: module¦unload¦bool
    : └1╴... done.

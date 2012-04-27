@@ -87,6 +87,8 @@ NEW: ‹ConditionalWorkSequence:17 (4)›
 EVENT: onewire¦scanning¦A
 END: onewire¦scanning¦A
 0 OWFS start bus update
+0 msg setstate init closed
+0 msg setstate closed connecting
 0 conn connecting OWFSqueue A
 0 !got UP_EVENT A
 NEW: ‹ConditionalWorkSequence:18 (4)›
@@ -101,6 +103,7 @@ END: onewire¦connect¦A
 0 conn setting up OWFSqueue A
 0 conn connected OWFSqueue A
 1 onewire SEND 0 1 7 6 0 0 '\x00'
+0 msg setstate connecting connected
 1 onewire RECV 0 96 0 6 95 32770
 0 conn incoming OWFSqueue A ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:1›
 0 msg recv A ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:1›

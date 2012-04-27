@@ -17,13 +17,11 @@
 PATH=/usr/local/sbin:/usr/sbin/:$PATH
 
 if test -d wago ; then WAGO=wago; else WAGO=../wago; fi
+if test -d test/scripts ; then TEST=test; else TEST=.; fi
 
 $WAGO/wago --foreground -p 59069 -c $WAGO/wago.sample.csv > /tmp/wagolog_$USER 2>&1 &
 echo $! > /tmp/wagotest_$USER
 
-while : ; do 
-	nc </dev/null -l localhost 59068 || exit 1
-done &
+python $TEST/scripts/wago_job.py &
 echo $! >> /tmp/wagotest_$USER
 
-sleep 1

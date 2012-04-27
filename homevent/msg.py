@@ -95,6 +95,9 @@ class MsgInfo(object):
 		yield ("",repr(self))
 		yield ("priority",self.prio)
 	
+	def error(self,e):
+		process_failure(e)
+	
 
 class MsgSender(MsgInfo):
 	"""A message sender"""
@@ -197,6 +200,7 @@ class MsgBase(MsgSender,MsgReceiver):
 	def do_timeout(self):
 		if self._last_channel is not None:
 			self._last_channel.close()
+			self._last_channel = None
 		
 	def _set_timeout(self):
 		if self.timeout is not None:
@@ -503,7 +507,8 @@ class MsgQueue(Collected,Jobber):
 				r = m.recv(msg)
 				log("msg",TRACE,"recv=",r,repr(m))
 				if r is ABORT:
-					self.close(False)
+					self.channel.close(False)
+					self.channel = None
 					break
 				elif r is NOT_MINE:
 					continue
@@ -513,6 +518,7 @@ class MsgQueue(Collected,Jobber):
 						self.receivers.pop(i)
 					else:
 						self.receivers.remove(m)
+					i -= 1
 
 					if r is SEND_AGAIN:
 						if m.blocking:
@@ -541,7 +547,11 @@ class MsgQueue(Collected,Jobber):
 				fix_exception(ex)
 				process_failure(ex)
 
-				self.close(False)
+				self.channel.close(False)
+				self.channel = None
+				simple_event(Context(),"msg","error",str(msg),*self.name)
+				handled = True
+				break
 			i += 1
 		if not handled:
 			simple_event(Context(),"msg","unhandled",str(msg),*self.name)
@@ -603,7 +613,6 @@ class MsgQueue(Collected,Jobber):
 						raise RuntimeError("Strange retry(): %s %s" % (repr(msg),repr(r)))
 				except Exception as e:
 					fix_exception(e)
-					process_failure(e)
 					msg.error(e)
 
 	def _up_timeout(self):

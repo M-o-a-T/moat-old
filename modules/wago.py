@@ -20,6 +20,8 @@ This code implements (a subset of) the WAGO server protocol.
 
 """
 
+import os
+
 from homevent.module import Module
 from homevent.base import Name,SName, singleName
 from homevent.logging import log,log_exc,DEBUG,TRACE,INFO,WARN
@@ -27,12 +29,12 @@ from homevent.statement import AttributedStatement, Statement, main_words
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.monitor import Monitor,MonitorHandler, MonitorAgain
 from homevent.net import NetConnect,LineReceiver,NetActiveConnector,NetRetry
-from homevent.twist import reraise
+from homevent.twist import reraise,callLater
 from homevent.run import simple_event
 from homevent.context import Context
 from homevent.times import humandelta,now,unixtime
 from homevent.msg import MsgQueue,MsgFactory,MsgBase, MINE,NOT_MINE, RECV_AGAIN,\
-	MsgReceiver
+	MsgReceiver, MsgClosed
 from homevent.collect import Collection
 from homevent.in_out import register_input,register_output, unregister_input,unregister_output,\
 	Input,Output,BoolIO
@@ -136,20 +138,40 @@ class WAGOchannel(WAGOassembler, NetActiveConnector):
 		simple_event(Context(),"wago","error",*self.name)
 
 
-class WAGOinitMsg(MsgReceiver,LineReceiver):
+class WAGOinitMsg(MsgReceiver):
 	blocking = True
+	start_timer = None
 	def __init__(self,queue):
-		self.queue = queue
 		super(WAGOinitMsg,self).__init__()
-	def retry(self):
-		pass
+
+		self.queue = queue
+		self.start_timer = callLater(True, 0.2 if "HOMEVENT_TEST" in os.environ else 2, self.start_timed_out)
+
+	def start_timed_out(self):
+		self.start_timer = None
+		if self.queue.channel is not None and self.queue.q is not None:
+			m = MsgClosed()
+			self.queue.q.put((m.prio,m), block=False)
+
 	def recv(self,msg):
+		if self.blocking is False:
+			return NOT_MINE
+		if self.start_timer is not None:
+			self.start_timer.cancel()
+			self.start_timer = None
 		if msg.type is MT_INFO:
+			self.blocking = False
 			self.queue.channel.up_event(False)
 			return MINE
 		return MSG_ERROR("Initial message:"+repr(msg))
+
 	def done(self):
 		self.blocking = False
+		if self.start_timer is not None:
+			self.start_timer.cancel()
+			self.start_timer = None
+
+
 
 class WAGOqueue(MsgQueue):
 	"""A simple adapter for the Wago protocol."""
