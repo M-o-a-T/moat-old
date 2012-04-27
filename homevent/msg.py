@@ -721,6 +721,7 @@ class MsgQueue(Collected,Jobber):
 
 			for m in self.receivers:
 				if m.blocking:
+					log("msg",TRACE,"blocked by",str(m))
 					done = True
 					break
 
@@ -731,6 +732,7 @@ class MsgQueue(Collected,Jobber):
 					break
 				while len(mq):
 					m = mq.pop(0)
+					log("msg",TRACE,"send",str(m))
 					try:
 						r = m.send(self.channel)
 					except Exception as ex:
@@ -740,6 +742,7 @@ class MsgQueue(Collected,Jobber):
 						self.last_sent = m
 						self.last_sent_at = now()
 						self.n_sent_now += 1
+					log("msg",TRACE,"send result",r)
 					if r is RECV_AGAIN:
 						if m.blocking:
 							self.receivers.insert(0,m)
