@@ -48,13 +48,15 @@ PRIO_URGENT = 0
 PRIO_STANDARD = 1
 PRIO_BACKGROUND = 2
 
-class MSG_ERROR(object):
+seqnum = 0
+
+class MSG_ERROR(Exception):
 	"""Drop the message."""
 	def __init__(self,txt):
 		self.txt = txt
 	def __repr__(self):
-		return "%s(%s)" % (self.__class__.__name__, repr(self.txt))
-	__str__ = __repr__
+		return u"%s('%s')" % (self.__class__.__name__, self.txt.replace("\\","\\\\").replace("'","\\'"))
+
 class ABORT(singleName):
 	"""Handshake failed; kill the connection"""
 	pass
@@ -98,6 +100,8 @@ class MsgInfo(object):
 	def error(self,e):
 		process_failure(e)
 	
+	def __repr__(self):
+		return u"‹%s %x›" % (self.__class__.__name__,id(self))
 
 class MsgSender(MsgInfo):
 	"""A message sender"""
@@ -141,6 +145,18 @@ class NoAnswer(RuntimeError):
 	def __str__(self):
 		return "%s: %s" % (self.__class__.__name__,self.conn)
 
+class PrioMsgQueue(PriorityQueue):
+	"""An order-keeping prio queue"""
+	def put(self,msg,**k):
+		global _seqnum
+		_seqnum += 1
+		return super(PrioMsgQueue,self).put((msg.prio,_seqnum,msg),**k)
+	def get(self,**k):
+		return super(PrioMsgQueue,self).get(**k)[2]
+	def peek(self,**k):
+		return super(PrioMsgQueue,self).peek(**k)[2]
+_seqnum = 0
+		
 class MsgBase(MsgSender,MsgReceiver):
 	"""A message which expects a reply."""
 	timeout = None
@@ -267,7 +283,7 @@ class MsgIncoming(object):
 			else:
 				self.prio = PRIO_STANDARD
 
-	def __str__(self):
+	def __repr__(self):
 		s = " ".join(["%s:%s" % (k,repr(v)) for k,v in self.__dict__.iteritems()])
 		return u"‹%s%s%s›" % (self.__class__.__name__, ": " if s else "", s)
 
@@ -329,24 +345,25 @@ class MsgFactory(object):
 				return u"‹%s:%s›" % (cls.__name__,cls.__repr__(self))
 			def msgReceived(self,**k):
 				msg = MsgIncoming(**k)
-				self._msg_queue.put((msg.prio,msg))
+				log("msg",TRACE,"recv msg",msg)
+				self._msg_queue.put(msg)
 			def error(self,msg):
 				msg = MsgError(msg)
-				self._msg_queue.put((msg.prio,msg))
+				self._msg_queue.put(msg)
 			def up_event(self,*a,**k):
 				log(TRACE,"!got UP_EVENT",*self.name)
 				msg = MsgOpenMarker()
-				self._msg_queue.put((msg.prio,msg))
+				self._msg_queue.put(msg)
 				super(xself.cls,self).up_event()
 			def not_up_event(self,external=False,*a,**k):
 				log(TRACE,"!got NOT_UP_EVENT",*self.name)
 				msg = MsgClosed()
-				self._msg_queue.put((msg.prio,msg))
+				self._msg_queue.put(msg)
 				super(xself.cls,self).not_up_event()
 			def down_event(self,external=False,*a,**k):
 				log(TRACE,"!got DOWN_EVENT",*self.name)
 				msg = MsgClosed()
-				self._msg_queue.put((msg.prio,msg))
+				self._msg_queue.put(msg)
 				super(xself.cls,self).down_event()
 		xself.cls = _MsgForwarder
 		xself.cls.__name__ = cls.__name__+"_forwarder"
@@ -412,7 +429,7 @@ class MsgQueue(Collected,Jobber):
 		self.connect_timeout = self.initial_connect_timeout
 		for _ in range(N_PRIO):
 			self.msgs.append([])
-		self.q = PriorityQueue(maxsize=qlen)
+		self.q = PrioMsgQueue(maxsize=qlen)
 
 		if ondemand is not None:
 			self.ondemand = ondemand
@@ -434,7 +451,7 @@ class MsgQueue(Collected,Jobber):
 		self._teardown(reason)
 
 	def enqueue(self,msg):
-		self.q.put((msg.prio,msg), block=False)
+		self.q.put(msg, block=False)
 		if not self.job:
 			self.start()
 
@@ -454,6 +471,8 @@ class MsgQueue(Collected,Jobber):
 		return u"‹%s:%s %s›" % (self.__class__.__name__,self.name,self.state)
                 
 	def list(self):
+		for r in super(MsgQueue,self).list():
+			yield r
 		if self.q is None:
 			yield("queue","dead")
 		else:
@@ -588,7 +607,7 @@ class MsgQueue(Collected,Jobber):
 
 			m = MsgClosed()
 			if self.q is not None:
-				self.q.put((m.prio,m), block=False)
+				self.q.put(m, block=False)
 		except BaseException as ex:
 			import pdb;pdb.set_trace()
 			raise
@@ -657,9 +676,9 @@ class MsgQueue(Collected,Jobber):
 		def doReOpen():
 			m = MsgReOpen()
 			if self.q is not None:
-				self.q.put((m.prio,m), block=False)
+				self.q.put(m, block=False)
 
-		state = "open" if self.state == "connected" else "closed"
+		state = "open" if self.state == "connected" else "closed" if self.channel is None else "connecting"
 		log("msg",TRACE,"setstate init %s" % (state,))
 		self.connect_timeout = self.initial_connect_timeout
 		self.attempts = 0
@@ -668,7 +687,7 @@ class MsgQueue(Collected,Jobber):
 			doReOpen()
 
 		while True:
-			prio,msg = self.q.get()
+			msg = self.q.get()
 
 			if isinstance(msg,MsgSender):
 				self.msgs[msg.prio].append(msg)
@@ -726,11 +745,14 @@ class MsgQueue(Collected,Jobber):
 					break
 
 			for mq in self.msgs:
-				if done:
-					break
-				if self.max_open >= self.is_open:
-					break
 				while len(mq):
+					if done:
+						break
+					if self.channel is None:
+						break
+					if self.max_open >= self.is_open:
+						break
+
 					m = mq.pop(0)
 					log("msg",TRACE,"send",str(m))
 					try:

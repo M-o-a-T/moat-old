@@ -22,6 +22,6 @@ if test -d test/scripts ; then TEST=test; else TEST=.; fi
 $WAGO/wago --foreground -p 59069 -c $WAGO/wago.sample.csv > /tmp/wagolog_$USER 2>&1 &
 echo $! > /tmp/wagotest_$USER
 
-python $TEST/scripts/wago_job.py &
+python $TEST/scripts/wago_job.py > /tmp/wagolog_$USER 2>&1 &
 echo $! >> /tmp/wagotest_$USER
 

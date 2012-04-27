@@ -21,6 +21,7 @@ This code implements (a subset of) the WAGO server protocol.
 """
 
 import os
+import re
 
 from homevent.module import Module
 from homevent.base import Name,SName, singleName
@@ -29,12 +30,12 @@ from homevent.statement import AttributedStatement, Statement, main_words
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.monitor import Monitor,MonitorHandler, MonitorAgain
 from homevent.net import NetConnect,LineReceiver,NetActiveConnector,NetRetry
-from homevent.twist import reraise,callLater
+from homevent.twist import reraise,callLater,fix_exception
 from homevent.run import simple_event
 from homevent.context import Context
 from homevent.times import humandelta,now,unixtime
 from homevent.msg import MsgQueue,MsgFactory,MsgBase, MINE,NOT_MINE, RECV_AGAIN,SEND_AGAIN,\
-	MsgReceiver, MsgClosed
+	MsgReceiver, MsgClosed, MSG_ERROR
 from homevent.collect import Collection
 from homevent.in_out import register_input,register_output, unregister_input,unregister_output,\
 	Input,Output,BoolIO
@@ -67,22 +68,30 @@ class WAGObadResult(RuntimeError):
 class WAGOerror(RuntimeError):
 	pass
 
+class DroppedMonitor(RuntimeError):
+	"""After reconnecting, a monitor is gone"""
+	def __init__(self,mid):
+		self.mid = mid
+	def __str__(self):
+		return "DroppedMonitor:%d" % (self.mid,)
+	def __repr__(self):
+		return "DroppedMonitor(%d)" % (self.mid,)
 
 class WAGOassembler(LineReceiver):
 	buf = None
 	def lineReceived(self, line):
+		log("wago",TRACE,"recv",repr(line))
 		msgid = 0
 		off = 0
 		mt = MT_OTHER
 
 		if self.buf is not None:
 			if line == ".":
-				msg = self.buf
-				self.buf = None
+				buf,self.buf = self.buf,None
 				self.msgReceived(type=MT_MULTILINE, msg=buf)
-				return
 			else:
-				buf.append(line)
+				self.buf.append(line)
+			return
 		elif line == "":
 			self.msgReceived(type=MT_OTHER, msg=line)
 		elif line[0] == "=":
@@ -151,7 +160,7 @@ class WAGOinitMsg(MsgReceiver):
 		self.start_timer = None
 		if self.queue.channel is not None and self.queue.q is not None:
 			m = MsgClosed()
-			self.queue.q.put((m.prio,m), block=False)
+			self.queue.q.put(m, block=False)
 
 	def recv(self,msg):
 		if self.blocking is False:
@@ -171,6 +180,77 @@ class WAGOinitMsg(MsgReceiver):
 			self.start_timer.cancel()
 			self.start_timer = None
 
+
+_num = re.compile("[0-9]+")
+
+class WAGOmonitorsMsg(MsgBase):
+	blocking = False
+	data = None
+
+	def __init__(self,queue):
+		self.queue = queue
+		self.data = {}
+		super(WAGOmonitorsMsg,self).__init__()
+
+	def send(self,conn):
+		conn.write(self.msg)
+		return RECV_AGAIN
+
+	@property
+	def msg(self):
+		return "m"
+
+	def list(self):
+		for r in super(WAGOmonitorsMsg,self).list():
+			yield r
+		for a,b in self.data.iteritems():
+			yield "found",(a,b)
+
+	def retry(self):
+		super(WAGOmonitorsMsg,self).retry()
+		return None
+
+	def recv(self,msg):
+		if msg.type is MT_MULTILINE:
+			for x in msg.msg:
+				if x == "":
+					continue
+				m = _num.match(x)
+				if m is None:
+					continue
+				mon = int(m.group(0))
+				self.data[mon]=x[m.end():]
+				recvs,self.queue.receivers = self.queue.receivers,[]
+				for r in recvs:
+					mid = getattr(r,"msgid",None)
+					if mid is None or mid in self.data:
+						log("wago",TRACE,"found monitor",r)
+						self.queue.receivers.append(r)
+					else:
+						try:
+							raise DroppedMonitor(mid)
+						except DroppedMonitor as ex:
+							fix_exception(ex)
+							res = r.error(ex)
+							if res is SEND_AGAIN:
+								log("wago",TRACE,"retry monitor",r)
+								self.queue.enqueue(r)
+							else:
+								log("wago",TRACE,"drop monitor",r)
+								assert res is None or res is False, "%s.error returned %s"%(repr(r),repr(res))
+
+			return MINE
+		if msg.type is MT_NAK or msg.type is MT_ERROR:
+			simple_event(Context(),"wago","monitor","error",msg.msg)
+			return MINE
+		return NOT_MINE
+
+	def done(self):
+		for a,b in self.data.iteritems():
+			log("wago",TRACE,"found monitor",a,b)
+		pass
+
+	
 
 class WAGOkeepaliveMsg(MsgBase):
 	blocking = False
@@ -205,13 +285,15 @@ class WAGOkeepaliveMsg(MsgBase):
 		yield "id",self.msgid
 
 	def retry(self):
-		return SEND_AGAIN
+		"""Do not redo this - setup anew."""
+		super(WAGOkeepaliveMsg,self).retry()
+		return None
 
 	def ping_timed_out(self):
 		self.ping_timer = None
 		if self.queue.channel is not None and self.queue.q is not None:
 			m = MsgClosed()
-			self.queue.q.put((m.prio,m), block=False)
+			self.queue.q.put(m, block=False)
 
 	def ping_start(self):
 		if self.ping_timer is not None:
@@ -255,6 +337,7 @@ class WAGOqueue(MsgQueue):
 
 	def setup(self):
 		self.enqueue(WAGOinitMsg(self))
+		self.enqueue(WAGOmonitorsMsg(self))
 
 
 class WAGOconnect(NetConnect):
