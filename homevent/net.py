@@ -371,7 +371,7 @@ class NetListener(Collected):
 	def list(self):
 		yield ("host", self.host)
 		yield ("port", self.port)
-		yield ("connector", self.connector.name)
+		yield ("connector", self.connector.name if self.connector is not None else None)
 
 	def delete(self,ctx):
 		self.server.stop()

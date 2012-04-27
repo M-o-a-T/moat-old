@@ -88,7 +88,8 @@ net
 ---
 
 net connect NAME
-	-- This connection is up.
+	-- This connection is up. Note that reading from this connection
+	   starts after this event has concluded.
 
 net disconnect NAME
 	-- This connection is down.
@@ -96,7 +97,7 @@ net disconnect NAME
 net error NAME
     -- This connection could not be established.
 
-net NAME whatever...
+net recv NAME whatever...
 	-- The text «whatever» has been received.
 	   Arguments are split by whitespace.
 

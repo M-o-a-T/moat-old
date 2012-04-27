@@ -57,7 +57,7 @@ class NETreceiver(LineReceiver):
 
 	def lineReceived(self, line):
 		line = line.strip().split()
-		simple_event(Context(),"net", *(self.factory.name + tuple(line)))
+		simple_event(Context(),"net","recv", *(self.name + tuple(line)))
 
 	def down_event(self, external=False):
 		simple_event(Context(),"net","disconnect",*self.name)
