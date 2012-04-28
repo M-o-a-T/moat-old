@@ -99,6 +99,8 @@ class Environment(m.Model):
 	sun = m.FloatField(help_text="how much sunshine was there (0-1)") # measured value
 
 class EnvironmentEffect(m.Model):
+	def __unicode__(self):
+		return u"‹%s @%s %s¦%s¦%s›" % (self.__class__.__name__,self.site.name,self.temp,self.wind,self.sun)
 	site = m.ForeignKey(Site,related_name="environment_effects")
 	factor = m.FloatField(help_text="Factor to use at this data point")
 
@@ -123,6 +125,8 @@ class DayTime(m.Model):
 	day = m.ForeignKey(Day,related_name="times")
 
 class Group(m.Model):
+	def __unicode__(self):
+		return u"‹%s %s›" % (self.__class__.__name__,self.name)
 	name = m.CharField(max_length=200)
 	valves = m.ManyToManyField(Valve,related_name="groups")
 	site = m.ForeignKey(Site,related_name="groups") # self.valve[*].controller.site is self.site
@@ -183,6 +187,8 @@ class Schedule(m.Model):
 
 class RainMeter(m.Model):
 	"""The rain in Spain stays mainly in the plain."""
+	def __unicode__(self):
+		return u"‹%s @%s %s›" % (self.__class__.__name__,self.controller,self.var)
 	name = m.CharField(max_length=200)
 	controller = m.ForeignKey(Controller,related_name="rain_meters")
 	var = m.CharField(max_length=200) # HomEvenT's variable name for it
