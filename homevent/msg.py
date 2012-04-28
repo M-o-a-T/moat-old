@@ -90,6 +90,7 @@ class SEND_LATER(object):
 #		self.timer.cancel()
 #		self.timer = None
 
+_gid = 0
 class MsgInfo(object):
 	prio = PRIO_STANDARD
 
@@ -101,7 +102,11 @@ class MsgInfo(object):
 		process_failure(e)
 	
 	def __repr__(self):
-		return u"‹%s %x›" % (self.__class__.__name__,id(self))
+		if not hasattr(self,"__id"):
+			global _gid
+			_gid += 1
+			self.__id = _gid
+		return u"‹%s %x›" % (self.__class__.__name__,self.__id)
 
 class MsgSender(MsgInfo):
 	"""A message sender"""
