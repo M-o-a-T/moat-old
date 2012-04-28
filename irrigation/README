@@ -12,3 +12,15 @@ Documentation
 -------------
 
 see doc/irrigator.
+
+Commands
+--------
+
+Note that this Django application manages its schema migration stuff with
+South.
+
+	python ./manage.py schemamigration --auto rainman
+	python ./manage.py migrate rainman
+	# might have to modify if broken
+	git add rainman/migrations/*.py
+

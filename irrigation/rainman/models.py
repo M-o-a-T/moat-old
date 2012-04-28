@@ -91,12 +91,21 @@ class History(m.Model):
 class Environment(m.Model):
 	def __unicode__(self):
 		return u"‹%s @%s %s›" % (self.__class__.__name__,self.time,self.site)
-	site = m.ForeignKey(Site,related_name="environment")
+	site = m.ForeignKey(Site,related_name="environments")
 	time = m.DateTimeField()
 
 	temp = m.FloatField(help_text="average temperature (°C)")
 	wind = m.FloatField(help_text="wind speed (m/s or whatever)")
 	sun = m.FloatField(help_text="how much sunshine was there (0-1)") # measured value
+
+class EnvironmentEffect(m.Model):
+	site = m.ForeignKey(Site,related_name="environment_effects")
+	factor = m.FloatField(help_text="Factor to use at this data point")
+
+	temp = m.FloatField(blank=True,null=True, help_text="average temperature (°C)")
+	wind = m.FloatField(blank=True,null=True, help_text="wind speed (m/s or whatever)")
+	sun = m.FloatField(blank=True,null=True, help_text="how much sunshine was there (0-1)") # measured value
+	
 
 class Day(m.Model):
 	"""A generic name for a time description"""

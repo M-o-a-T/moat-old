@@ -3,7 +3,7 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 admin.autodiscover()
 
-from rainman.models import Site,Feed,Controller,Valve,History,Environment,Level,Day,DayTime,Group,GroupOverride,ValveOverride,GroupAdjust,Schedule,RainMeter
+from rainman.models import Site,Feed,Controller,Valve,History,Environment,EnvironmentEffect,Level,Day,DayTime,Group,GroupOverride,ValveOverride,GroupAdjust,Schedule,RainMeter
 
 # SiteInline
 class FeedInline(admin.TabularInline):
@@ -25,6 +25,10 @@ class HistoryInline(admin.TabularInline):
 
 class EnvironmentInline(admin.TabularInline):
 	model = Environment
+	extra = 0
+
+class EnvironmentEffectInline(admin.TabularInline):
+	model = EnvironmentEffect
 	extra = 0
 
 class LevelInline(admin.TabularInline):
@@ -105,6 +109,9 @@ class EnvironmentAdmin(admin.ModelAdmin):
 	list_display = ('time','temp','wind','sun')
 	date_hierarchy = 'time'
 
+class EnvironmentEffectAdmin(admin.ModelAdmin):
+	list_display = ('factor','temp','wind','sun')
+
 class DayAdmin(admin.ModelAdmin):
 	list_display = ('name','list_daytimes')
 	inlines = [
@@ -148,6 +155,7 @@ admin.site.register(Valve, ValveAdmin)
 admin.site.register(Level, LevelAdmin)
 admin.site.register(History, HistoryAdmin)
 admin.site.register(Environment, EnvironmentAdmin)
+admin.site.register(EnvironmentEffect, EnvironmentEffectAdmin)
 admin.site.register(Day, DayAdmin)
 admin.site.register(DayTime, DayTimeAdmin)
 admin.site.register(Group, GroupAdmin)
