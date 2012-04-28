@@ -20,7 +20,6 @@ from __future__ import division
 	This module holds Twisted support stuff.
 	"""
 
-from homevent.times import slot_update,unixtime,now
 from homevent.geventreactor import DelayedCall,deferToGreenlet,GeventReactor,Reschedule
 
 import gevent
@@ -34,6 +33,7 @@ class FakeDelayedCall(DelayedCall):
 	"""The interesting stuff happens inside the reactor"""
 	pass
 def realGetSeconds(self):
+	from homevent.times import unixtime,now
 	return self.getTime() - unixtime(now(True))
 FakeDelayedCall.getSeconds = DelayedCall.getSeconds
 DelayedCall.getSeconds = realGetSeconds
@@ -42,8 +42,10 @@ class TestReactor(GeventReactor):
 	"""A subclass of geventreactor which supports fake timeouts"""
 	# now = 1049519228 # 2003-04-05 06:07:08 UTC
 	def seconds(self):
+		from homevent.times import unixtime,now
 		return unixtime(now())
 	def realSeconds(self):
+		from homevent.times import unixtime,now
 		return unixtime(now(True))
 		
 	def callLater(self,*args,**kw):
@@ -67,6 +69,7 @@ class TestReactor(GeventReactor):
 		return c
 
 	def mainLoop(self):
+		from homevent.times import slot_update
 		"""This main loop yields to gevent until the end, handling function calls along the way."""
 		self.greenlet = gevent.getcurrent()
 		callqueue = self._callqueue

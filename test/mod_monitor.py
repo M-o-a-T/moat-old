@@ -16,9 +16,9 @@
 ##  for more details.
 ##
 
-import homevent as h
 from homevent.reactor import ShutdownHandler
 from homevent.module import load_module
+from homevent.statement import main_words
 from test import run
 
 input = """\
@@ -99,7 +99,7 @@ del monitor moni test
 shutdown
 """
 
-h.main_words.register_statement(ShutdownHandler)
+main_words.register_statement(ShutdownHandler)
 load_module("trigger")
 load_module("monitor")
 load_module("block")

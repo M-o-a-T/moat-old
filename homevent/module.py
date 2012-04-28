@@ -20,6 +20,7 @@ This code implements module loading and unloading.
 
 """
 
+from homevent import TESTING
 from homevent.run import process_event
 from homevent.statement import Statement
 from homevent.event import Event
@@ -123,7 +124,7 @@ def load_module(*m):
 
 	try:
 		if not md:
-			if "HOMEVENT_TEST" in os.environ:
+			if TESTING:
 				if os.path.isdir("modules"):
 					p = "modules"
 				else:

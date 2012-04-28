@@ -22,6 +22,7 @@ This code contains the framework for watching a device.
 
 """
 
+from homevent import TESTING
 from homevent.statement import AttributedStatement, Statement
 from homevent.event import Event
 from homevent.run import process_event,process_failure,simple_event
@@ -136,7 +137,7 @@ class Monitor(Collected,Jobber):
 		yield ("value",self.value)
 		yield ("up",self.up_name)
 		yield ("time",self.time_name)
-		if not "HOMEVENT_TEST" in os.environ:
+		if not TESTING:
 			if self.started_at:
 				yield ("start",unicode(self.started_at))
 			if self.stopped_at:

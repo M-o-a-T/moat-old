@@ -16,9 +16,9 @@
 ##  for more details.
 ##
 
-import homevent as h
 from homevent.database import DbStore
 from homevent.base import Name
+from homevent.reactor import shut_down,mainloop
 
 s = DbStore(Name("Foo","bar"))
 def main():
@@ -34,7 +34,7 @@ def main():
 	s.set("one",2)
 	getter("one",2)
 
-	h.shut_down()
+	shut_down()
 
-h.mainloop(main)
+mainloop(main)
 

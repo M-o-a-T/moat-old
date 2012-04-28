@@ -23,6 +23,7 @@ This code implements access to collections.
 from datetime import datetime
 import os
 
+from homevent import TESTING
 from homevent.logging import log
 from homevent.statement import Statement, main_words
 from homevent.module import Module
@@ -52,7 +53,7 @@ def flatten(out,s,p=""):
 			p = pp
 	else:
 		if isinstance(t,datetime):
-			if "HOMEVENT_TEST" in os.environ and t.year != 2003:
+			if TESTING and t.year != 2003:
 				t = "%s" % (humandelta(t-now(t.year != 2003)),)
 			else:
 				t = "%s (%s)" % (humandelta(t-now(t.year != 2003)),t)

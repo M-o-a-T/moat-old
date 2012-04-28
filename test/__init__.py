@@ -16,15 +16,15 @@
 ##  for more details.
 ##
 
-import homevent as h
 from homevent.logging import BaseLogger, TRACE,NONE, log, log_level
 from homevent.interpreter import Interpreter
 from homevent.parser import parse
 from homevent.context import Context
 from homevent.times import unixtime,now
-from homevent.twist import fix_exception,format_exception,print_exception
+from homevent.twist import fix_exception,format_exception,print_exception,TESTING
 from homevent.statement import Statement,main_words
 from homevent.base import Name
+from homevent.reactor import shut_down, mainloop
 
 from cStringIO import StringIO
 import sys
@@ -105,7 +105,7 @@ class run_logger(BaseLogger):
 		self.line += 1
 		def rep(m):
 			return m.group(1)+m.group(2)+", in"
-		if "HOMEVENT_TEST" in os.environ:
+		if TESTING:
 			sx = r_fli.sub(rep,sx)
 			sx = r_hex.sub("obj",sx)
 		if level is not None:
@@ -131,7 +131,7 @@ class run_logger(BaseLogger):
 #		if level < self.level:
 #			return
 
-		if "HOMEVENT_TEST" in os.environ and int(os.environ["HOMEVENT_TEST"]) > 1:
+		if TESTING and int(os.environ["HOMEVENT_TEST"]) > 1:
 			self._log(None,"@ "+ixtime())
 		if hasattr(event,"report"):
 			for r in event.report(99):
@@ -201,10 +201,10 @@ def run(name,input, interpreter=Interpreter, logger=None):
 			fix_exception(e)
 			print_exception(e,file=sys.stderr)
 		finally:
-			h.shut_down()
+			shut_down()
 			if ht is not None:
 				ht.try_exit()
 
-	h.mainloop(_main)
+	mainloop(_main)
 
 	sys.exit(exitcode)

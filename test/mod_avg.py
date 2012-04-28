@@ -16,9 +16,10 @@
 ##  for more details.
 ##
 
-import homevent as h
 from homevent.reactor import ShutdownHandler
 from homevent.module import load_module
+from homevent.reactor import shut_down, mainloop
+from homevent.statement import main_words
 from test import run
 
 input = """\
@@ -64,7 +65,7 @@ list avg
 shutdown
 """
 
-h.main_words.register_statement(ShutdownHandler)
+main_words.register_statement(ShutdownHandler)
 load_module("trigger")
 load_module("avg")
 load_module("block")

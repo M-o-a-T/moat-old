@@ -21,6 +21,7 @@ USB sound interface (or whatever).
 
 """
 
+from homevent import TESTING
 from homevent.module import Module
 from homevent.logging import log,DEBUG,TRACE,INFO,WARN
 from homevent.statement import AttributedStatement,Statement, main_words
@@ -106,7 +107,7 @@ class FS20recv(protocol.ProcessProtocol, my_handler):
 			self.timestamp = None
 		elif data[0] == PREFIX_TIMESTAMP:
 			self.timestamp = float(data[1:])
-		elif data[0] == "+" and "HOMEVENT_TEST" in os.environ:
+		elif data[0] == "+" and TESTING:
 			from homevent.times import sleep,test_runtime
 			try:
 				f,c = data[1:].split(" ",1)
@@ -278,7 +279,7 @@ class FS20xmit(protocol.ProcessProtocol, my_handler):
 
 	def connectionMade(self):
 		log(DEBUG,"FS20 started",self.name)
-#		if "HOMEVENT_TEST" not in os.environ:
+#		if not TESTING:
 #			self.transport.closestdout() # we're not reading anything
 		self._start_timer()
 		register_handler(self)

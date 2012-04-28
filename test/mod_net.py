@@ -16,9 +16,10 @@
 ##  for more details.
 ##
 
-import homevent as h
 from homevent.reactor import ShutdownHandler
 from homevent.module import load_module,Load,ModuleExists
+from homevent.statement import main_words
+from homevent.check import register_condition
 from test import run
 
 input = """\
@@ -79,9 +80,9 @@ wait END:
 shutdown
 """
 
-h.main_words.register_statement(ShutdownHandler)
-h.main_words.register_statement(Load)
-h.register_condition(ModuleExists)
+main_words.register_statement(ShutdownHandler)
+main_words.register_statement(Load)
+register_condition(ModuleExists)
 
 load_module("wait")
 load_module("logging")

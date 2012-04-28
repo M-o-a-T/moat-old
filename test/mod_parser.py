@@ -16,9 +16,8 @@
 ##  for more details.
 ##
 
-import homevent as h
 from homevent.interpreter import Interpreter
-from homevent.statement import Statement,ComplexStatement
+from homevent.statement import Statement,ComplexStatement,main_words
 from homevent.reactor import ShutdownHandler
 from homevent.module import load_module
 from homevent.base import Name
@@ -109,9 +108,9 @@ class FoiledHandler(sbr,Statement):
 BarHandler.register_statement(WhatHandler)
 BarHandler.register_statement(ForHandler)
 ForHandler.register_statement(FoiledHandler)
-h.main_words.register_statement(FooHandler)
-h.main_words.register_statement(BarHandler)
-h.main_words.register_statement(ShutdownHandler)
+main_words.register_statement(FooHandler)
+main_words.register_statement(BarHandler)
+main_words.register_statement(ShutdownHandler)
 load_module("help")
 
 class TestInterpreter(Interpreter):

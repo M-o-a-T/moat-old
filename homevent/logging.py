@@ -24,6 +24,7 @@ part of the system.
 
 """
 
+from homevent import TESTING
 from homevent.run import register_worker
 from homevent.worker import Worker,ExcWorker,report_
 from homevent.event import Event
@@ -152,20 +153,20 @@ class BaseLogger(Collected,Jobber):
 	def log(self, level, *a):
 		if level >= self.level:
 			self._wlog(level,u" ".join(unicode(x) for x in a))
-			if "HOMEVENT_TEST" in os.environ:
+			if TESTING:
 				self.flush()
 
 	def log_event(self, event, level):
 		if level >= self.level:
 			for r in report_(event,99):
 				self._wlog(level,r)
-			if "HOMEVENT_TEST" in os.environ:
+			if TESTING:
 				self.flush()
 
 	def log_failure(self, err, level=WARN):
 		if level >= self.level:
 			self._wlog(level,format_exception(err))
-			if "HOMEVENT_TEST" in os.environ:
+			if TESTING:
 				self.flush()
 	
 	def flush(self):
@@ -381,7 +382,7 @@ def log(level, *a):
 		"""
 	exc = []
 	if isinstance(level,basestring):
-		lim = levels.get(level, TRACE if "HOMEVENT_TEST" in os.environ else NONE)
+		lim = levels.get(level, TRACE if TESTING else NONE)
 		# get the real level from a and add the subsystem name to the front
 		b = level
 		level = a[0]

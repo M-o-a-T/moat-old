@@ -25,6 +25,7 @@ wait: for FOO...
 
 """
 
+from homevent import TESTING
 from homevent.statement import AttributedStatement, Statement, main_words,\
 	global_words
 from homevent.event import Event
@@ -54,7 +55,7 @@ class Waiters(Collection):
 Waiters = Waiters()
 Waiters.does("del")
 
-if "HOMEVENT_TEST" in os.environ:
+if TESTING:
 	from test import ixtime,ttime
 	time=ttime
 else:
@@ -190,7 +191,7 @@ class Waiter(Collected,Jobber):
 		if not self._running:
 			return "??"
 		res = self._cmd("remain")
-		if "HOMEVENT_TEST" in os.environ:
+		if TESTING:
 			res = "%.1f" % (res,)
 		return res
 
@@ -322,7 +323,7 @@ WaitHandler.register_statement(DelayUntil)
 WaitHandler.register_statement(DelayWhile)
 WaitHandler.register_statement(DelayNext)
 
-if "HOMEVENT_TEST" in os.environ:
+if TESTING:
 	WaitHandler.register_statement(WaitDebug)
 WaitHandler.register_statement(WaitUpdate)
 

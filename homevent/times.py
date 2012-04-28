@@ -24,15 +24,16 @@ This code does some standard time handling.
 
 import datetime as dt
 from time import time,mktime
-import os
 from calendar import isleap,monthrange
 
 import gevent
 from gevent.queue import Queue
 
+from homevent import TESTING
+
 startup = dt.datetime.now()
 
-if "HOMEVENT_TEST" in os.environ:
+if TESTING:
 	SLOT=20
 	current_slot = 0
 	def now(force=False):

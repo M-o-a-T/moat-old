@@ -39,6 +39,12 @@ import fcntl
 import datetime as dt
 import traceback
 
+# This test is also in homevent/__init__.py, for recursive-import reasons
+if "HOMEVENT_TEST" in os.environ:
+	TESTING = True
+else:
+	TESTING = False
+
 tracked_errors = ("HOMEVENT_TRACK_ERRORS" in os.environ)
 
 def track_errors(doit = None):

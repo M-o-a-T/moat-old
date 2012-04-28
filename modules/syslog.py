@@ -27,6 +27,7 @@ log
 
 """
 
+from homevent import TESTING
 from homevent.module import Module
 from homevent.statement import Statement, main_words
 from homevent import logging
@@ -121,7 +122,7 @@ class SysLogger(BaseLogger):
 				self.socket.send("<%d>HomEvenT: %s%s" % (
 				                  self.facility | local_levels[level],
 								  txt,
-				                  "\0" if "HOMEVENT_TEST" not in os.environ else "\n"))
+				                  "\0" if not TESTING else "\n"))
 			except socket.error as err:
 				fix_exception(err)
 				if err.args[0] != errno.EINTR:

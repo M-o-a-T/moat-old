@@ -16,7 +16,6 @@
 ##  for more details.
 ##
 
-import homevent as h
 from homevent.context import Context
 from modules.onewire import OWFSwindmon
 

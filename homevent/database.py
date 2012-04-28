@@ -19,6 +19,7 @@
 This is the core of database access.
 """
 
+from homevent import TESTING
 from homevent.base import Name
 from homevent.logging import log,TRACE
 from sqlmix import Db,NoData,ManyData
@@ -36,12 +37,11 @@ class DbStore(object):
 
 	def __init__(self,category,name=None):
 		if name is None:
-			import os
-			if "HOMEVENT_TEST" in os.environ:
+			if TESTING:
 				name = "HOMEVENT_TEST"
 			else:
 				name = "HOMEVENT"
-		if "HOMEVENT_TEST" in os.environ:
+		if TESTING:
 			def trace(a,b,c):
 				log(TRACE,a,b,c)
 		else:

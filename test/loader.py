@@ -16,9 +16,9 @@
 ##  for more details.
 ##
 
-import homevent as h
 from homevent.reactor import ShutdownHandler
 from homevent.module import Load,load_module
+from homevent.statement import main_words
 from test import run
 
 input = """\
@@ -28,8 +28,8 @@ del module example
 shutdown
 """
 
-h.main_words.register_statement(ShutdownHandler)
-h.main_words.register_statement(Load)
+main_words.register_statement(ShutdownHandler)
+main_words.register_statement(Load)
 
 load_module("data")
 

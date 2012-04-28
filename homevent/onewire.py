@@ -20,6 +20,7 @@ This code implements (a subset of) the OWFS server protocol.
 
 """
 
+from homevent import TESTING
 from homevent.module import Module
 from homevent.logging import log,log_exc,DEBUG,TRACE,INFO,WARN,ERROR
 from homevent.statement import Statement, main_words
@@ -500,7 +501,7 @@ class OWFSqueue(MsgQueue,Jobber):
 					q = res.pop()
 					q.set(None)
 
-			if "HOMEVENT_TEST" in os.environ:
+			if TESTING:
 				if resl: d = 10
 				else: d = 30
 			else:

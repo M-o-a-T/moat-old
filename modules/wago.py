@@ -23,6 +23,7 @@ This code implements (a subset of) the WAGO server protocol.
 import os
 import re
 
+from homevent import TESTING
 from homevent.module import Module
 from homevent.base import Name,SName, singleName
 from homevent.logging import log,log_exc,DEBUG,TRACE,INFO,WARN
@@ -157,7 +158,7 @@ class WAGOinitMsg(MsgReceiver):
 		super(WAGOinitMsg,self).__init__()
 
 		self.queue = queue
-		self.start_timer = callLater(True, 0.2 if "HOMEVENT_TEST" in os.environ else 2, self.start_timed_out)
+		self.start_timer = callLater(True, 0.2 if TESTING else 2, self.start_timed_out)
 
 	def start_timed_out(self):
 		self.start_timer = None
