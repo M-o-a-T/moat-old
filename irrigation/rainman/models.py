@@ -119,9 +119,9 @@ class EnvironmentEffect(m.Model):
 	def __unicode__(self):
 		return u"‹%s @%s %s¦%s¦%s›" % (self.__class__.__name__,self.site.name,self.temp,self.wind,self.sun)
 	site = m.ForeignKey(Site,related_name="environment_effects")
-	factor = m.FloatField(help_text="Factor to use at this data point")
+	factor = m.FloatField(default=1.0, help_text="Factor to use at this data point")
 
-	temp = m.FloatField(blank=True,null=True, help_text="average temperature (°C)")
+	temp = m.FloatField(blank=True,null=True, default=20, help_text="average temperature (°C)")
 	wind = m.FloatField(blank=True,null=True, help_text="wind speed (m/s or whatever)")
 	sun = m.FloatField(blank=True,null=True, help_text="how much sunshine was there (0-1)") # measured value
 	
@@ -152,6 +152,12 @@ class Group(m.Model):
 	valves = m.ManyToManyField(Valve,related_name="groups")
 	site = m.ForeignKey(Site,related_name="groups") # self.valve[*].controller.site is self.site
 	#
+	# Adjustment factors affecting this group
+	adj_rain = m.FloatField(default=1, help_text="How much does rain affect this group?")
+	adj_sun = m.FloatField(default=1, help_text="How much does sunshine affect this group?")
+	adj_wind = m.FloatField(default=1, help_text="How much does wind affect this group?")
+	adj_temp = m.FloatField(default=1, help_text="How much does temperature affect this group?")
+	# 
 	# when may this group run?
 	days = m.ManyToManyField(Day)
 	def list_days(self):
