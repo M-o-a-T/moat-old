@@ -33,7 +33,7 @@ from homevent.net import NetConnect,LineReceiver,NetActiveConnector,NetRetry
 from homevent.twist import reraise,callLater,fix_exception
 from homevent.run import simple_event
 from homevent.context import Context
-from homevent.times import humandelta,now,unixtime
+from homevent.times import humandelta,now,unixdelta
 from homevent.msg import MsgQueue,MsgFactory,MsgBase, MINE,NOT_MINE, RECV_AGAIN,SEND_AGAIN,\
 	MsgReceiver, MsgClosed, MSG_ERROR,PRIO_URGENT,PRIO_CONNECT
 from homevent.collect import Collection
@@ -518,7 +518,7 @@ class WAGOtimedOutputRun(WAGOoutputRun):
 
 	def __repr__(self):
 		res = super(WAGOoutputRun,self).__repr__()
-		return "<%s tm=%s id=%s>" % (res[1:-1],humandelta(self.timer-unixtime(now(True))),self.msgid)
+		return "<%s tm=%s id=%s>" % (res[1:-1],humandelta(self.timer-now(True)),self.msgid)
 		
 	def list(self):
 		for r in super(WAGOtimedOutputRun,self).list():
@@ -528,9 +528,9 @@ class WAGOtimedOutputRun(WAGOoutputRun):
 
 	@property
 	def msg(self):
-		delta = self.timer-unixtime(now(True))
+		delta = unixdelta(self.timer-now(True))
 		if delta < 0.1: delta = 0.1
-		return "%s %d %d %f" % ("s" if self.val else "c", self.card,self.port,self.timer-unixtime(now(True)))
+		return "%s %d %d %f" % ("s" if self.val else "c", self.card,self.port,delta)
 	
 	def recv(self,msg):
 		if msg.type is MT_IND_ACK and self.msgid is None:

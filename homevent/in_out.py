@@ -275,7 +275,7 @@ class Output(CommonIO):
 		if timer is None:
 			self._write(wval)
 		elif self._tmwrite is not None:
-			self._tmwrite(wval,unixtime(timer),wnextval)
+			self._tmwrite(wval,timer,wnextval)
 		else:
 			self._write(wval)
 			self.timer = OutTimer(self,timer,nextval)
