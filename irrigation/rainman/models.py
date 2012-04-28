@@ -20,14 +20,18 @@ from django.utils import timezone
 
 class Site(m.Model):
 	"""One site with stuff to irrigate."""
+	class Meta:
+		pass
 	def __unicode__(self):
 		return u"‹%s %s›" % (self.__class__.__name__,self.name)
-	name = m.CharField(max_length=200)
+	name = m.CharField(max_length=200, unique=True)
 	host = m.CharField(max_length=200, default="localhost", help_text="where to find the HomEvenT server")
 	rate = m.FloatField(default=2, help_text="how many mm/day evaporate here, on average")
 
 class Feed(m.Model):
 	"""A source of water"""
+	class Meta:
+		unique_together = (("site", "name"),)
 	def __unicode__(self):
 		return u"‹%s %s›" % (self.__class__.__name__,self.name)
 	name = m.CharField(max_length=200)
@@ -37,6 +41,8 @@ class Feed(m.Model):
 
 class Controller(m.Model):
 	"""A thing (Wago or whatever) which controls valves."""
+	class Meta:
+		unique_together = (("site", "name"),)
 	def __unicode__(self):
 		return u"‹%s %s›" % (self.__class__.__name__,self.name)
 	name = m.CharField(max_length=200)
@@ -44,6 +50,8 @@ class Controller(m.Model):
 	max_on = m.IntegerField(default=3, help_text="number of valves that can be on at any one time")
 
 class Valve(m.Model):
+	class Meta:
+		unique_together = (("controller", "name"),)
 	def __unicode__(self):
 		return u"‹%s %s›" % (self.__class__.__name__,self.name)
 	name = m.CharField(max_length=200)
@@ -70,6 +78,8 @@ class Valve(m.Model):
 
 class Level(m.Model):
 	"""historic water levels"""
+	class Meta:
+		unique_together = (("valve", "time"),)
 	def __unicode__(self):
 		return u"‹%s @%s %s›" % (self.__class__.__name__,self.time,self.valve)
 	valve = m.ForeignKey(Valve, related_name="levels")
@@ -79,6 +89,8 @@ class Level(m.Model):
 
 class History(m.Model):
 	"""historic evaporation and rain levels"""
+	class Meta:
+		unique_together = (("site", "time"),)
 	def __unicode__(self):
 		return u"‹%s @%s %s›" % (self.__class__.__name__,self.time,self.site)
 	site = m.ForeignKey(Site,related_name="history")
@@ -89,6 +101,9 @@ class History(m.Model):
 	rain = m.FloatField(help_text="how much rain was there (mm)") # measured value
 
 class Environment(m.Model):
+	"""historic environmental data"""
+	class Meta:
+		unique_together = (("site", "time"),)
 	def __unicode__(self):
 		return u"‹%s @%s %s›" % (self.__class__.__name__,self.time,self.site)
 	site = m.ForeignKey(Site,related_name="environments")
@@ -99,6 +114,8 @@ class Environment(m.Model):
 	sun = m.FloatField(help_text="how much sunshine was there (0-1)") # measured value
 
 class EnvironmentEffect(m.Model):
+	class Meta:
+		unique_together = (("site", "temp","wind","sun"),)
 	def __unicode__(self):
 		return u"‹%s @%s %s¦%s¦%s›" % (self.__class__.__name__,self.site.name,self.temp,self.wind,self.sun)
 	site = m.ForeignKey(Site,related_name="environment_effects")
@@ -113,18 +130,22 @@ class Day(m.Model):
 	"""A generic name for a time description"""
 	def __unicode__(self):
 		return u"‹%s %s›" % (self.__class__.__name__,self.name)
-	name = m.CharField(max_length=30)
+	name = m.CharField(max_length=30, unique=True)
 	def list_daytimes(self):
 		return u"¦".join((d.descr for d in self.times.all()))
 
 class DayTime(m.Model):
 	"""One element of a time description which is tested"""
+	class Meta:
+		unique_together = (("day", "descr"),)
 	def __unicode__(self):
 		return u"‹%s %s›" % (self.__class__.__name__,self.descr)
 	descr = m.CharField(max_length=200)
 	day = m.ForeignKey(Day,related_name="times")
 
 class Group(m.Model):
+	class Meta:
+		unique_together = (("site", "name"),)
 	def __unicode__(self):
 		return u"‹%s %s›" % (self.__class__.__name__,self.name)
 	name = m.CharField(max_length=200)
@@ -140,6 +161,8 @@ class Group(m.Model):
 
 class GroupOverride(m.Model):
 	"""Modify schedule times"""
+	class Meta:
+		unique_together = (("group", "name"),("group","start"))
 	def __unicode__(self):
 		return u"‹%s %s›" % (self.__class__.__name__,self.name)
 	name = m.CharField(max_length=200)
@@ -150,6 +173,8 @@ class GroupOverride(m.Model):
 	
 class ValveOverride(m.Model):
 	"""Force schedule times"""
+	class Meta:
+		unique_together = (("valve", "name"),("valve","start"))
 	def __unicode__(self):
 		return u"‹%s %s›" % (self.__class__.__name__,self.name)
 	name = m.CharField(max_length=200)
@@ -162,6 +187,8 @@ class GroupAdjust(m.Model):
 	"""Beginning at this date, this group needs <modifier> more(>1)/less(<1) water.
 		To turn the whole thing off, set modifier=0.
 		Any entry is valid until superseded by one with later start."""
+	class Meta:
+		unique_together = (("group","start"),)
 	def __unicode__(self):
 		return u"‹%s @%s %s›" % (self.__class__.__name__,self.start,self.group)
 	group = m.ForeignKey(Group,related_name="adjusters")
@@ -170,6 +197,8 @@ class GroupAdjust(m.Model):
 
 class Schedule(m.Model):
 	"""The actual plan"""
+	class Meta:
+		unique_together = (("valve","start"),)
 	def __unicode__(self):
 		return u"‹%s @%s %s›" % (self.__class__.__name__,self.start,self.valve)
 	valve = m.ForeignKey(Valve,related_name="schedules")
@@ -187,9 +216,12 @@ class Schedule(m.Model):
 
 class RainMeter(m.Model):
 	"""The rain in Spain stays mainly in the plain."""
+	class Meta:
+		unique_together = (("site","name"),)
 	def __unicode__(self):
 		return u"‹%s @%s %s›" % (self.__class__.__name__,self.controller,self.var)
 	name = m.CharField(max_length=200)
+	site = m.ForeignKey(Site,related_name="rain_meters")
 	controller = m.ForeignKey(Controller,related_name="rain_meters")
 	var = m.CharField(max_length=200) # HomEvenT's variable name for it
 
