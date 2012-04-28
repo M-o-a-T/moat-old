@@ -292,6 +292,7 @@ if "HOMEVENT_TEST" in os.environ:
 				if n==100000:
 					for job,t in gthreads.iteritems():
 						print >>sys.stderr,"G WAIT %d %s %s %s" % ((job,)+t[1:])
+						t[0].kill()
 	
 					n=0
 				n += 1

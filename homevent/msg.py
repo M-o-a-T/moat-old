@@ -42,11 +42,11 @@ import gevent
 from gevent.queue import PriorityQueue,Empty
 from gevent.event import AsyncResult
 
-N_PRIO = 3
-PRIO_CONNECT = -1
-PRIO_URGENT = 0
-PRIO_STANDARD = 1
-PRIO_BACKGROUND = 2
+PRIO_CONNECT = 0
+PRIO_URGENT = 1
+PRIO_STANDARD = 2
+PRIO_BACKGROUND = 3
+N_PRIO = 4
 
 seqnum = 0
 
@@ -309,7 +309,7 @@ class MsgReOpen(object):
 	pass
 
 class MsgOpenMarker(object):
-	"""Signal which noted that the connection is fully open"""
+	"""Signal which notes that the connection is fully open"""
 	# This is used to re-enable ReOpen messages
 	prio = PRIO_CONNECT
 	pass
@@ -428,12 +428,13 @@ class MsgQueue(Collected,Jobber):
 	def __init__(self, factory, name, qlen=None, ondemand=None):
 		self.name = name
 		self.factory = factory
-		self.msgs = [] # to send
+		self.senders = [] # to send
 		self.delayed = []
 		self.receivers = []
 		self.connect_timeout = self.initial_connect_timeout
 		for _ in range(N_PRIO):
-			self.msgs.append([])
+			self.senders.append([])
+			self.receivers.append([])
 		self.q = PrioMsgQueue(maxsize=qlen)
 
 		if ondemand is not None:
@@ -503,16 +504,19 @@ class MsgQueue(Collected,Jobber):
 
 		# now dump send and recv queues
 		i = 0
-		for mq in self.msgs:
+		for mq in self.senders:
 			j = 0
 			for m in mq:
 				j += 1
 				yield("msg send %s %s"%(i,j),m)
 			i += 1
 		i = 0
-		for m in self.receivers:
+		for mq in self.receivers:
+			j = 0
+			for m in mq:
+				j += 1
+				yield("msg recv %s %s"%(i,j),m)
 			i += 1
-			yield("msg recv %s"%(i,),m)
 
 
 	def _incoming(self,msg):
@@ -523,10 +527,11 @@ class MsgQueue(Collected,Jobber):
 		self.last_recv_at = now()
 
 		# i is an optimization for receiver lists that don't change in mid-action
-		i = 0
 		handled = False
 		log("msg",TRACE,"recv",self.name,str(msg))
-		for m in self.receivers:
+		for mq in self.receivers:
+		  i = 0
+		  for m in mq:
 			try:
 				r = m.recv(msg)
 				log("msg",TRACE,"recv=",r,repr(m))
@@ -538,17 +543,17 @@ class MsgQueue(Collected,Jobber):
 					continue
 				elif r is MINE or r is SEND_AGAIN:
 					handled = True
-					if len(self.receivers) > i and self.receivers[i] is m:
-						self.receivers.pop(i)
+					if len(mq) > i and mq[i] is m:
+						mq.pop(i)
 					else:
-						self.receivers.remove(m)
+						mq.remove(m)
 					i -= 1
 
 					if r is SEND_AGAIN:
 						if m.blocking:
-							self.msgs[0].insert(0,m)
+							self.senders[0].insert(0,m)
 						else:
-							self.msgs[m.prio].append(m)
+							self.senders[m.prio].append(m)
 					else:
 						m.done()
 						self.n_processed_now += 1
@@ -564,10 +569,10 @@ class MsgQueue(Collected,Jobber):
 				else:
 					raise BadResult(m)
 			except Exception as ex:
-				if len(self.receivers) < i and self.receivers[i] is m:
-					self.receivers.pop(i)
+				if len(mq) < i and mq[i] is m:
+					mq.pop(i)
 				elif m in self.receivers:
-					self.receivers.remove(m)
+					mq.remove(m)
 				fix_exception(ex)
 				process_failure(ex)
 
@@ -593,10 +598,30 @@ class MsgQueue(Collected,Jobber):
 	def _fail(self,reason):
 		self.stop(reason)
 		self.q
-		for m in self.receivers:
-			m.abort()
+		for mq in self.receivers:
+			for m in mq:
+				m.abort()
 
 	def _setup(self):
+		sends,self.senders = self.senders,[]
+		recvs,self.receivers = self.receivers,[]
+		for mq in recvs:
+			self.senders.append([])
+			self.receivers.append([])
+		for mq in sends+recvs:
+			for msg in mq:
+				try:
+					r = msg.retry()
+					if r is SEND_AGAIN:
+						self.senders[msg.prio].append(msg)
+					elif r is RECV_AGAIN:
+						self.receivers[msg.prio].append(msg)
+					elif r is not None:
+						raise RuntimeError("Strange retry(): %s %s" % (repr(msg),repr(r)))
+				except Exception as e:
+					fix_exception(e)
+					msg.error(e)
+
 		try:
 			self._set_state("connecting")
 			self.channel = self.factory(self.q)
@@ -624,20 +649,6 @@ class MsgQueue(Collected,Jobber):
 			self.n_processed += self.n_processed_now
 			self.n_processed_now = 0
 
-			recvs = self.receivers
-			self.receivers = []
-			for msg in recvs:
-				try:
-					r = msg.retry()
-					if r is SEND_AGAIN:
-						self.msgs[msg.prio].append(msg)
-					elif r is RECV_AGAIN:
-						self.receivers.append(msg)
-					elif r is not None:
-						raise RuntimeError("Strange retry(): %s %s" % (repr(msg),repr(r)))
-				except Exception as e:
-					fix_exception(e)
-					msg.error(e)
 
 	def _up_timeout(self):
 		if self.connect_timeout > 0:
@@ -659,7 +670,8 @@ class MsgQueue(Collected,Jobber):
 	def is_open(self):
 		"""Count the number of outstanding messages"""
 		res = 0
-		for m in self.receivers:
+		for mq in self.receivers:
+		  for m in mq:
 			if isinstance(m,MsgBase):
 				res += 1
 		return res
@@ -667,7 +679,7 @@ class MsgQueue(Collected,Jobber):
 	@property
 	def n_outq(self):
 		n=0
-		for mq in self.msgs:
+		for mq in self.senders:
 			n += len(mq)
 		return n
 
@@ -695,12 +707,12 @@ class MsgQueue(Collected,Jobber):
 			msg = self.q.get()
 
 			if isinstance(msg,MsgSender):
-				self.msgs[msg.prio].append(msg)
+				self.senders[msg.prio].append(msg)
 			elif isinstance(msg,MsgReceiver):
 				if msg.blocking:
-					self.receivers.insert(0,msg)
+					self.receivers[msg.prio].insert(0,msg)
 				else:
-					self.receivers.append(msg)
+					self.receivers[msg.prio].append(msg)
 			elif isinstance(msg,MsgIncoming):
 				self._incoming(msg)
 			elif isinstance(msg,MsgOpenMarker):
@@ -741,15 +753,19 @@ class MsgQueue(Collected,Jobber):
 			if self.state != "connected":
 				continue
 
+			log("msg",TRACE,"states at run",self.state,state)
 			done = False # marker for "don't send any more stuff"
 
-			for m in self.receivers:
+			for mq in self.receivers:
+			  if done: break
+			  for m in mq:
 				if m.blocking:
 					log("msg",TRACE,"blocked by",str(m))
 					done = True
-					break
+			if done: continue
 
-			for mq in self.msgs:
+			for mq in self.senders:
+				if done: break
 				while len(mq):
 					if done:
 						break
@@ -758,25 +774,28 @@ class MsgQueue(Collected,Jobber):
 					if self.max_open >= self.is_open:
 						break
 
-					m = mq.pop(0)
-					log("msg",TRACE,"send",str(m))
+					msg = mq.pop(0)
+					log("msg",TRACE,"send",str(msg))
 					try:
-						r = m.send(self.channel)
+						r = msg.send(self.channel)
 					except Exception as ex:
 						fix_exception(ex)
 						r = ex
 					else:
-						self.last_sent = m
+						self.last_sent = msg
 						self.last_sent_at = now()
 						self.n_sent_now += 1
 					log("msg",TRACE,"send result",r)
 					if r is RECV_AGAIN:
-						if m.blocking:
-							self.receivers.insert(0,m)
+						if msg.blocking:
+							self.receivers[msg.prio].insert(0,msg)
 						else:
-							self.receivers.append(m)
+							self.receivers[msg.prio].append(msg)
 					elif r is SEND_AGAIN:
-						self.msgs[msg.prio].append(msg)
+						if msg.blocking:
+							self.senders[msg.prio].insert(0,msg)
+						else:
+							self.senders[msg.prio].append(msg)
 					elif isinstance(r,SEND_LATER):
 						raise NotImplementedError("Queueing doesn't work yet")
 					elif isinstance(r,MSG_ERROR):
@@ -790,7 +809,12 @@ class MsgQueue(Collected,Jobber):
 					else:
 						msg.done()
 
-					if m.blocking:
+					if msg.blocking:
 						done = True
 						break
-				
+
+				# while setting up, only process PRIO_CONNECT messages
+				if state != "connected":
+					log(TRACE,"NotConn",self.senders)
+					break
+

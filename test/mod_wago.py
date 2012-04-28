@@ -38,10 +38,11 @@ async:
 		keepalive 0.5 0.7
 		#ping 1
 
-on foo baba:
-	send wago test Dc
-	send wago test DI
-	send wago test Dr
+on wago connect test:
+	async:
+		send wago test Dc
+		send wago test DI
+		send wago test Dr
 
 wait :for 0.1
 # TODO
@@ -92,7 +93,7 @@ block:
 	wait timed set B:
 		for 1
 		debug force
-	#send wago test "D-"
+	send wago test "D-"
 	var output port foo baz
 	log DEBUG out_1 $port
 

@@ -35,7 +35,7 @@ from homevent.run import simple_event
 from homevent.context import Context
 from homevent.times import humandelta,now,unixtime
 from homevent.msg import MsgQueue,MsgFactory,MsgBase, MINE,NOT_MINE, RECV_AGAIN,SEND_AGAIN,\
-	MsgReceiver, MsgClosed, MSG_ERROR
+	MsgReceiver, MsgClosed, MSG_ERROR,PRIO_URGENT,PRIO_CONNECT
 from homevent.collect import Collection
 from homevent.in_out import register_input,register_output, unregister_input,unregister_output,\
 	Input,Output,BoolIO
@@ -150,6 +150,7 @@ class WAGOchannel(WAGOassembler, NetActiveConnector):
 class WAGOinitMsg(MsgReceiver):
 	blocking = True
 	start_timer = None
+	prio = PRIO_CONNECT
 	def __init__(self,queue):
 		super(WAGOinitMsg,self).__init__()
 
@@ -184,7 +185,8 @@ class WAGOinitMsg(MsgReceiver):
 _num = re.compile("[0-9]+")
 
 class WAGOmonitorsMsg(MsgBase):
-	blocking = False
+	blocking = True
+	prio = PRIO_URGENT
 	data = None
 
 	def __init__(self,queue):
@@ -207,6 +209,7 @@ class WAGOmonitorsMsg(MsgBase):
 			yield "found",(a,b)
 
 	def retry(self):
+		log("wago",TRACE,"Queue WAGOmonitorsMsg")
 		super(WAGOmonitorsMsg,self).retry()
 		return None
 
@@ -287,7 +290,8 @@ class WAGOkeepaliveMsg(MsgBase):
 	def retry(self):
 		"""Do not redo this - setup anew."""
 		super(WAGOkeepaliveMsg,self).retry()
-		return None
+		self.msgid = None
+		return SEND_AGAIN
 
 	def ping_timed_out(self):
 		self.ping_timer = None
@@ -507,9 +511,10 @@ class WAGOoutputInRun(WAGOioRun):
 
 class WAGOtimedOutputRun(WAGOoutputRun):
 	msgid = None
-	def __init__(self,card,port,value,timer):
+	def __init__(self,queue,value,timer):
+		self.queue = queue
 		self.timer = timer
-		super(WAGOtimedOutputRun,self).__init__(card,port,value)
+		super(WAGOtimedOutputRun,self).__init__(queue.card,queue.port,value)
 
 	def __repr__(self):
 		res = super(WAGOoutputRun,self).__repr__()
@@ -523,6 +528,8 @@ class WAGOtimedOutputRun(WAGOoutputRun):
 
 	@property
 	def msg(self):
+		delta = self.timer-unixtime(now(True))
+		if delta < 0.1: delta = 0.1
 		return "%s %d %d %f" % ("s" if self.val else "c", self.card,self.port,self.timer-unixtime(now(True)))
 	
 	def recv(self,msg):
@@ -541,6 +548,15 @@ class WAGOtimedOutputRun(WAGOoutputRun):
 			return MINE
 		return NOT_MINE
 
+	def error(self,err):
+		log("wago",DEBUG,"Got error",self,err)
+		simple_event("output","error", self.val, *self.queue.name)
+		super(WAGOtimedOutputRun,self).error(err)
+	
+	def retry(self):
+		if self.msgid is None:
+			return SEND_AGAIN
+		return RECV_AGAIN
 
 class WAGOrawRun(WAGOrun):
 	"""Send a simple command to write a command."""
@@ -606,7 +622,7 @@ class WAGOoutput(BoolIO,WAGOio,Output):
 	
 	def _tmwrite(self,val,timer,nextval=None):
 		assert nextval is None,"setting a different next value is not supported yet"
-		msg = WAGOtimedOutputRun(self.card,self.port,val,timer)
+		msg = WAGOtimedOutputRun(self,val,timer)
 		WAGOserver[self.server].enqueue(msg)
 		res = msg.result.get()
 		if isinstance(res,Exception):

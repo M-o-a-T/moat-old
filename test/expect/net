@@ -74,10 +74,10 @@ END: wait¦done¦0.4¦BEFORE
 NEW: ‹ConditionalWorkSequence:18 (4)›
    : │  id: 18
    : │  call count: 0
-   : │  EVENT: wait¦start¦1.2¦AFTER
+   : │  EVENT: wait¦start¦1.3¦AFTER
    : └1╴... done.
-EVENT: wait¦start¦1.2¦AFTER
-END: wait¦start¦1.2¦AFTER
+EVENT: wait¦start¦1.3¦AFTER
+END: wait¦start¦1.3¦AFTER
 NEW: ‹ConditionalWorkSequence:19 (5)›
    : │  id: 19
    : │  call count: 0
@@ -119,17 +119,17 @@ END: net¦recv¦foo¦A
 NEW: ‹ConditionalWorkSequence:21 (4)›
    : │  id: 21
    : │  call count: 0
-   : │  EVENT: wait¦start¦0.5¦OUT
+   : │  EVENT: wait¦start¦0.6¦OUT
    : └1╴... done.
-EVENT: wait¦start¦0.5¦OUT
-END: wait¦start¦0.5¦OUT
+EVENT: wait¦start¦0.6¦OUT
+END: wait¦start¦0.6¦OUT
 NEW: ‹ConditionalWorkSequence:22 (4)›
    : │  id: 22
    : │  call count: 0
-   : │  EVENT: wait¦done¦0.5¦OUT
+   : │  EVENT: wait¦done¦0.6¦OUT
    : └1╴... done.
-EVENT: wait¦done¦0.5¦OUT
-END: wait¦done¦0.5¦OUT
+EVENT: wait¦done¦0.6¦OUT
+END: wait¦done¦0.6¦OUT
 foo :: net_active localhost:50333
 .
 type: net_active
@@ -220,10 +220,10 @@ END: net¦disconnect¦baz¦zaz¦1
 NEW: ‹ConditionalWorkSequence:29 (4)›
    : │  id: 29
    : │  call count: 0
-   : │  EVENT: wait¦done¦1.2¦AFTER
+   : │  EVENT: wait¦done¦1.3¦AFTER
    : └1╴... done.
-EVENT: wait¦done¦1.2¦AFTER
-END: wait¦done¦1.2¦AFTER
+EVENT: wait¦done¦1.3¦AFTER
+END: wait¦done¦1.3¦AFTER
 0 ending
 .
 1 Yes

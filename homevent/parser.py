@@ -38,6 +38,7 @@ from twisted.protocols.basic import LineOnlyReceiver,FileSender,_PauseableMixin
 import gevent
 from gevent.select import select
 from geventreactor import waitForDeferred
+from gevent.event import AsyncResult
 
 from homevent.logging import log,TRACE,DEBUG
 from homevent.context import Context
@@ -212,8 +213,10 @@ class Parser(Collected,Jobber):
 	def run(self):
 		self.init_state()
 		self.prompt()
-		self.start_job("job",self._run)
+		syn = AsyncResult()
+		self.start_job("job",self._run,syn)
 		self.p_gen = tokizer(self._do_parse,self.job)
+		syn.set(None)
 
 		try:
 			e = self.job.get()
@@ -224,7 +227,8 @@ class Parser(Collected,Jobber):
 
 		self.p_gen.exit()
 		
-	def _run(self):
+	def _run(self,syn):
+		syn.get()
 		try:
 			setBlocking(False,self.input)
 			while True:
