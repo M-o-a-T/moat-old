@@ -19,6 +19,7 @@
 This is the core of the event dispatcher.
 """
 
+import os
 from homevent.base import Name,SYS_PRIO,MIN_PRIO,MAX_PRIO
 from homevent.worker import WorkSequence,ConditionalWorkSequence,ExcWorker
 from homevent.collect import Collection
@@ -127,6 +128,11 @@ def process_failure(e):
 		"""
 	from homevent.logging import log_event,ERROR,log_exc
 	log_event(event=e,level=ERROR)
+	if getattr(e,"_did_event",False):
+		if "HOMEVENT_TEST" in os.environ:
+			raise RuntimeError("you called process_failure twice on "+str(e))
+		return
+	e._did_event = True
 	try:
 		collect_failure(e).process(event=e)
 	except Exception as err:
