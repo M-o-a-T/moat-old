@@ -90,6 +90,8 @@ class WAGOassembler(LineReceiver):
 				buf,self.buf = self.buf,None
 				self.msgReceived(type=MT_MULTILINE, msg=buf)
 			else:
+				if line.startswith("."):
+					line = line[1:]
 				self.buf.append(line)
 			return
 		elif line == "":

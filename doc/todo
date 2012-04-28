@@ -28,8 +28,6 @@ Documentation
 Code
 ====
 
-* multi-line messages: drop leading dot
-
 * add RPC interface
 
 * verify that SSH works
