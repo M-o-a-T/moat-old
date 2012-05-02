@@ -32,8 +32,6 @@ Code
 
 * verify that SSH works
 
-* move onewire to i/o framework
-
 * restart wago connections cleanly (query the monitor list!)
 
 * make sure that various attempts at communication back off successfully.

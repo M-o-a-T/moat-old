@@ -221,8 +221,6 @@ class OWFScall(OWFSxmit,MsgBase):
 
 	def recv(self, msg):
 		super(OWFScall,self).recv(msg)
-		if msg.typ < 0:
-			return NOT_MINE
 		r = self.dataReceived(msg.data)
 		if r is None:
 			r = MINE

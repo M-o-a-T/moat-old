@@ -37,8 +37,15 @@ on onewire scanned A * * *:
 	name scanned
 
 	del on scanned
-	var onewire X "000010EF0000" temperature
+
+	input onewire "000010EF0000" temperature :name temp
+	var input X temp
 	trigger thermo $X
+	list input temp
+
+	output onewire "000010EF0000" temp_high :name temphi
+	set output 99 temphi
+
 	del wait yawn
 
 connect onewire A localhost 54300

@@ -28,6 +28,7 @@ from homevent.check import Check,register_condition,unregister_condition
 from homevent.onewire import connect,disconnect, devices
 from homevent.net import NetConnect
 from homevent.monitor import Monitor,MonitorHandler, MonitorAgain
+from homevent.in_out import register_input,register_output, unregister_input,unregister_output, Input,Output
 
 import struct
 
@@ -38,9 +39,9 @@ class OWFSconnect(NetConnect):
 	doc = "connect to an OWFS server"
 	long_doc="""\
 connect onewire NAME [[host] port]
-  - connect (synchronously) to the onewire server at the remote port;
-    name that connection NAME. Defaults for host/port are localhost/4304.
-	The system will emit connection-ready and device-present events.
+	: connect (synchronously) to the onewire server at the remote port;
+      name that connection NAME. Defaults for host/port are localhost/4304.
+      The system will emit connection-ready and device-present events.
 """
 
 	def start_up(self):
@@ -54,8 +55,8 @@ class OWFSdisconnect(Statement):
 	doc = "disconnect from an OWFS server"
 	long_doc="""\
 disconnect onewire NAME
-  - disconnect from the onewire server named NAME.
-	The system will emit connection-closed and device-absent events.
+	: disconnect from the onewire server named NAME.
+	  The system will emit connection-closed and device-absent events.
 """
 
 	def run(self,ctx,**k):
@@ -66,25 +67,38 @@ disconnect onewire NAME
 		log(TRACE,"Drop OWFS bus",name)
 
 
-class OWFSvar(Statement):
-	name=("var","onewire")
-	doc="assign a variable to get a value off onewire"
-	long_doc=u"""\
-var onewire NAME dev attr
-	: Device ‹dev›'s attribute ‹attr› is read from the bus and stored
-	  in the variable ‹NAME›.
-	  Note: The value will be fetched when this statement is executed,
-	  not when the value is used.
+class OWFSio(object):
+	typ="onewire"
+	def __init__(self, name, params,addons,ranges,values):
+		if len(params) != 2:
+				raise SyntaxError(u"Usage: %s onewire ‹name…› ‹dev› ‹attr›"%(self.what,))
+		self.dev = params[0].lower()
+		self.attr = params[1]
+		super(OWFSio,self).__init__(name, params,addons,ranges,values)
+
+
+class OWFSinput(OWFSio,Input):
+	what="input"
+	doc="An input which reads from 1wire"
+	long_doc="""\
+onewire dev attr
+	: Device ‹dev›'s attribute ‹attr› is read from the bus.
 """
-	def run(self,ctx,**k):
-		event = self.params(ctx)
-		if len(event) != 3:
-			raise SyntaxError("Usage: var onewire NAME DEVICE ATTRIBUTE")
-		var, dev, attr = event[:]
-		dev = dev.lower()
-		
-		val = devices[dev].get(attr)
-		setattr(self.parent.ctx,var,val)
+	def _read(self):
+		val = devices[self.dev].get(self.attr)
+		return val
+
+
+class OWFSoutput(OWFSio,Output):
+	typ="onewire"
+	doc="An output which writes to 1wire"
+	long_doc="""\
+onewire dev attr
+	: Device ‹dev›'s attribute ‹attr› is written to the bus.
+"""
+	def _write(self,val):
+		devices[self.dev].set(self.attr, val)
+
 
 class OWFSset(Statement):
 	name=("set","onewire")
@@ -92,6 +106,7 @@ class OWFSset(Statement):
 	long_doc=u"""\
 set onewire VALUE dev attr
 	: ‹VALUE› is written to device ‹dev›'s attribute ‹attr›.
+	  This is a one-shot version of ‹output X onewire DEV ATTR› plus ‹set output VALUE X›.
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
@@ -145,18 +160,18 @@ dir onewire NAME path...
 			print >>ctx.out,"."
 
 class OWFSname(Statement):
-    name=("name",)
-    dest = None
-    doc="specify the name of the 1wire connection"
+	name=("name",)
+	dest = None
+	doc="specify the name of the 1wire connection"
 
-    long_doc = u"""\
+	long_doc = u"""\
 name ‹name…›
   - Use this form for 1wire connections with multi-word names.
 """
 
-    def run(self,ctx,**k):
-        event = self.params(ctx)
-        self.parent.dest = SName(event)
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		self.parent.dest = SName(event)
 
 OWFSdir.register_statement(OWFSname)
 
@@ -485,9 +500,10 @@ class OWFSmodule(Module):
 		main_words.register_statement(OWFSdir)
 		main_words.register_statement(OWFSlist)
 		main_words.register_statement(OWFSscan)
-		main_words.register_statement(OWFSvar)
 		main_words.register_statement(OWFSset)
 		main_words.register_statement(OWFSmonitor)
+		register_input(OWFSinput)
+		register_output(OWFSoutput)
 		register_condition(OWFSconnected)
 		register_condition(OWFSexists)
 		register_condition(OWFSconnectedbus)
@@ -499,9 +515,10 @@ class OWFSmodule(Module):
 		main_words.unregister_statement(OWFSdir)
 		main_words.unregister_statement(OWFSlist)
 		main_words.unregister_statement(OWFSscan)
-		main_words.unregister_statement(OWFSvar)
 		main_words.unregister_statement(OWFSset)
 		main_words.unregister_statement(OWFSmonitor)
+		unregister_input(OWFSinput)
+		unregister_output(OWFSoutput)
 		unregister_condition(OWFSconnected)
 		unregister_condition(OWFSexists)
 		unregister_condition(OWFSconnectedbus)
