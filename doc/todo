@@ -55,7 +55,7 @@ Code
 * Improve the PWM modulator
   - add minimum times for off and on
     - which either clamp the value, or get skipped when the duty cycle
-      cannot reach the value
+      cannot reach the value, or prolong the off time
   - add override
 
 * implement a multi-step controller (i.e. simple switch thresholds)

@@ -630,12 +630,12 @@ msg recv 2 1 : <WAGOtimedOutputRun 2:1 tm=-2.9 sec id=2>
              card: 2
              port: 1
              value: False
-             timer: 1335598267.01
+             timer: -2.9 sec
              id: 2
 msg recv 2 2 : ‹WAGOkeepaliveMsg 42›
              priority: 2
              status: pending
-             last: -0.1 sec (2012-04-28 09:31:09.777300)
+             last: -0.1 sec
              id: 3
 .
 1 Yes
