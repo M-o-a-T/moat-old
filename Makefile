@@ -62,5 +62,7 @@ r run: FIX
 	python scripts/daemon.py -t DEBUG examples/smurf.he
 tr trace: FIX
 	python scripts/daemon.py -t TRACE examples/smurf.he
+sr ssh:
+	python scripts/daemon.py -t TRACE examples/ssh.he
 
 .PHONY: test i interactive
