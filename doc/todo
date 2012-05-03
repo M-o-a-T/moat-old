@@ -28,8 +28,6 @@ Documentation
 Code
 ====
 
-* add RPC interface
-
 * restart wago connections cleanly (query the monitor list!)
 
 * make sure that various attempts at communication back off successfully.

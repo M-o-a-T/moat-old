@@ -45,6 +45,7 @@ if "HOMEVENT_TEST" in os.environ:
 else:
 	TESTING = False
 
+
 tracked_errors = ("HOMEVENT_TRACK_ERRORS" in os.environ)
 
 def track_errors(doit = None):
@@ -245,7 +246,7 @@ def nfhw(self,data):
 FileDescriptor.write = nfhw
 
 
-if "HOMEVENT_TEST" in os.environ:
+if TESTING and False:
 	# Log all threads, wait for them to exit.
 	gthreads = {}
 	gjob=0
@@ -419,10 +420,6 @@ class Jobber(object):
 #monkey_patch_zmq()
 #del monkey_patch_zmq
 #
-from homevent.gevent_rpyc import patch_all
-patch_all()
-del patch_all
-
 
 # avoids a warning from threading module on shutdown
 sys.modules['dummy_threading'] = None

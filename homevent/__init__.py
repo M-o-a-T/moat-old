@@ -34,6 +34,10 @@ from gevent import monkey
 monkey.patch_all()
 del monkey
 
+from homevent.gevent_rpyc import patch_all
+patch_all()
+del patch_all
+
 from homevent import twist # for side effects
 
 VERSION = "0.3"
