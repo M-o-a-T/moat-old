@@ -14,7 +14,7 @@
 ##  for more details.
 ##
 
-export PYTHONPATH=$(shell pwd):$(shell pwd)/../smurf/python
+export PYTHONPATH=$(shell pwd)
 DESTDIR ?= "/"
 
 FIX:
@@ -22,6 +22,8 @@ FIX:
 
 all:
 	cp -a _geventreactor/Pinako/geventreactor/__init__.py homevent/geventreactor.py
+	#cp -a _zeromq/gevent_zeromq/core.py homevent/zeromq.py
+	cp -a _geventreactor/Pinako/geventrpyc/__init__.py homevent/gevent_rpyc.py
 	$(MAKE) -C fs20 all
 	$(MAKE) -C wago all
 	python setup.py build --build-base="$(DESTDIR)"

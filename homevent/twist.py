@@ -405,7 +405,25 @@ class Jobber(object):
 			while getattr(self,attr,None) is j:
 				gevent.sleep(0)
 
-		
+#import homevent.zeromq as zmq
+#zmq.Context = zmq._Context
+#zmq.Socket = zmq._Socket
+#
+#def monkey_patch_zmq():
+#    """
+#    Monkey patches `zmq.Context` and `zmq.Socket`
+#    """
+#    ozmq = __import__('zmq')
+#    ozmq.Socket = zmq.Socket
+#    ozmq.Context = zmq.Context
+#monkey_patch_zmq()
+#del monkey_patch_zmq
+#
+from homevent.gevent_rpyc import patch_all
+patch_all()
+del patch_all
+
+
 # avoids a warning from threading module on shutdown
 sys.modules['dummy_threading'] = None
 

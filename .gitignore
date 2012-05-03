@@ -31,3 +31,4 @@ fs20/avr/*.bin
 *.map
 debian/*.debhelper.log
 homevent/geventreactor.py
+homevent/gevent_rpyc.py
