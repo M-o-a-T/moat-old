@@ -30,8 +30,6 @@ Code
 
 * add RPC interface
 
-* verify that SSH works
-
 * restart wago connections cleanly (query the monitor list!)
 
 * make sure that various attempts at communication back off successfully.

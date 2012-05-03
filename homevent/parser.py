@@ -37,9 +37,9 @@ from twisted.protocols.basic import LineOnlyReceiver,FileSender,_PauseableMixin
 
 import gevent
 from gevent.select import select
-from geventreactor import waitForDeferred
 from gevent.event import AsyncResult
 
+from homevent.geventreactor import waitForDeferred,deferToGreenlet
 from homevent.logging import log,TRACE,DEBUG
 from homevent.context import Context
 from homevent.io import Outputter,conns
@@ -47,29 +47,6 @@ from homevent.event import Event,StopParsing
 from homevent.statement import global_words
 from homevent.twist import deferToLater,setBlocking, fix_exception,print_exception,reraise,Jobber
 from homevent.collect import Collection,Collected
-
-class SimpleReceiver(LineOnlyReceiver,object):
-	delimiter = "\n"
-
-	def __init__(self, parser):
-		super(SimpleReceiver,self).__init__()
-		self.parser = parser
-
-	def lineReceived(self, data):
-		log("parser",TRACE,"S LINE",repr(data))
-		self.parser.add_line(data)
-	
-	def write(self, data):
-		log("parser",TRACE,"S WRITE",self.transport,repr(data))
-		self.dataReceived(data)
-	
-	def registerProducer(self, producer, streaming):
-		log("parser",TRACE,"S START")
-		self.parser.registerProducer(producer, streaming)
-	
-	def unregisterProducer(self):
-		log("parser",TRACE,"S STOP")
-		self.parser.unregisterProducer()
 
 class ParseReceiver(Outputter):
 	"""This is a mixin to feed a parser"""
@@ -88,7 +65,7 @@ class ParseReceiver(Outputter):
 			i = InteractiveInterpreter(ctx=c)
 			parser = Parser(interpreter=i, input=StdIO, ctx=c)
 		self.parser = parser
-		parser.registerProducer(self)
+		parser.registerProducer(self,False)
 		#parser.startParsing()
 	
 	def readConnectionLost(self):
@@ -115,7 +92,7 @@ class ParseReceiver(Outputter):
 			rl()
 
 	def lineReceived(self, data):
-		self.parser.add_line(data)
+		self.parser.lineReceived(data)
 	
 	def makeConnection(self,transport):
 		assert self.parser is not None, "Need to set the parser"
@@ -126,12 +103,10 @@ class ParseReceiver(Outputter):
 
 	def connectionMade(self):
 		super(ParseReceiver,self).connectionMade()
-		self.parser.startParsing(self)
+		self.parser.run()
 		self.parser.do_prompt = self.parser.proc.do_prompt
-		if self.parser.do_prompt:
-			self.parser.prompt()
 
-def parser_builder(cls=None,interpreter=None,*a,**k):
+def parser_builder(cls=None,protocol=None,interpreter=None,*a,**k):
 	"""\
 		Return something that builds a receiver class when called with
 		no arguments
@@ -158,7 +133,8 @@ def parser_builder(cls=None,interpreter=None,*a,**k):
 		c = ctx()
 		k["ctx"] = c
 		i = interpreter(ctx=c)
-		p = Parser(i, *a,**k)
+		p = TwistedParser(interpreter=i, protocol=protocol, ctx=c)
+
 		m = mixer(p, *x,**y)
 		return m
 	return gen_builder
@@ -178,6 +154,7 @@ class Parser(Collected,Jobber):
 	p_gen = None
 	do_prompt = False
 	last_pos = None
+	job = None
 
 	def __init__(self, input, interpreter, ctx=None):
 		"""Parse an input stream and pass the commands to the processor @proc."""
@@ -210,9 +187,19 @@ class Parser(Collected,Jobber):
 	def info(self):
 		return str(self.input)
 
+	def stop_client(self):
+		"""Helper. See TwistedParser.stop_client()."""
+		pass
+
+	def lineReceived(self, data):
+		return self.add_line(data)
+
 	def run(self):
 		self.init_state()
 		self.prompt()
+		if self.input is None:
+			self.p_gen = tokizer(self._do_parse,self.job,self.stop_client)
+			return
 		syn = AsyncResult()
 		self.start_job("job",self._run,syn)
 		self.p_gen = tokizer(self._do_parse,self.job)
@@ -298,7 +285,7 @@ class Parser(Collected,Jobber):
 			self.ctx.out.write(">> ")
 		else:
 			self.ctx.out.write(".. ")
-		self.ctx.out.flush()
+		getattr(self.ctx.out,"flush",lambda :None)()
 
 	def _do_parse(self, t,txt,beg,end,line):
 		# States: 0 newline, 1 after first word, 2 OK to extend word
@@ -438,6 +425,37 @@ class Parser(Collected,Jobber):
 			self.p_pop_after = False
 
 		raise SyntaxError("Unknown token %s (%s, state %d) in %s:%d" % (repr(txt),tok_name[t] if t in tok_name else t,self.p_state,self.ctx.filename,beg[0]))
+
+
+class TwistedParser(Parser,LineOnlyReceiver,object):
+	delimiter = "\n"
+
+	def __init__(self, protocol, interpreter, ctx=None):
+		self.protocol = protocol
+		super(TwistedParser,self).__init__(input=None,interpreter=interpreter,ctx=ctx)
+
+	def lineReceived(self, data):
+		log("parser",TRACE,"S LINE",repr(data))
+		return deferToGreenlet(self.add_line,data+"\n")
+	
+	def write(self, data):
+		log("parser",TRACE,"S WRITE",self.transport,repr(data))
+		self.dataReceived(data)
+	
+	def registerProducer(self, producer, streaming):
+		log("parser",TRACE,"S START")
+		self.producer = producer
+		self.streaming = streaming
+	
+	def unregisterProducer(self):
+		log("parser",TRACE,"S STOP")
+		self.producer = None
+		self.delete()
+	
+	def stop_client(self):
+		"""Helper when the client types "exit" or whatever."""
+		self.producer.loseConnection()
+		self.delete()
 
 class _drop(object):
 	def __init__(self,g):

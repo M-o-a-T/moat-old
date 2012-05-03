@@ -88,8 +88,9 @@ tokenprog, pseudoprog, namestart, num = map(
 tabsize = 8
 
 class tokizer(Jobber):
-	def __init__(self, output, parent=None):
+	def __init__(self, output, parent=None, endput=None):
 		self._output = output
+		self._endput = endput
 		self.parent = parent
 		self.q = Channel()
 		self.init()
@@ -132,6 +133,8 @@ class tokizer(Jobber):
 				q.get_nowait()
 			except Empty:
 				pass
+		if self._endput:
+			self._endput()
 
 	def _job(self):
 		line = "x"

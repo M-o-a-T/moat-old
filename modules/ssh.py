@@ -155,13 +155,12 @@ You need to call this exactly once.
 			raise RuntimeError("This is not a directory")
 		if sshFactory is not NotYet:
 			raise RuntimeError("You can set the SSH path only once!")
-		sshFactory = None
-		d = deferToGreenlet(self._run,ctx,path)
-		def ex(_):
+		try:
+			sshFactory = None
+			self._run(ctx,path)
+		except BaseException:
 			sshFactory = NotYet
-			return _
-		d.addErrback(ex)
-		return d
+			raise
 
 
 	def _run(self,ctx,path):
