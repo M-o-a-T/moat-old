@@ -23,7 +23,7 @@ from homevent.statement import main_words, global_words, Statement, \
 from homevent.module import Load,LoadDir,ModuleExists,load_module
 from homevent.check import register_condition
 from homevent.context import Context
-from homevent.parser import read_config
+from homevent.parser import parse
 from homevent.run import process_failure
 from homevent.twist import track_errors, fix_exception
 from homevent.reactor import ShutdownHandler,mainloop,shut_down,\
@@ -90,7 +90,7 @@ def _readcf():
 	c = Context()
 	try:
 		for f in args:
-			read_config(c,f)
+			parse(f,ctx=c)
 	except Exception as e:
 		fix_exception(e)
 		process_failure(e)
