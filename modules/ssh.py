@@ -133,6 +133,8 @@ class AuthKey(Collected):
 	def delete(self,ctx=None):
 		self.delete_done()
 	def list(self):
+		for r in super(AuthKey,self).list():
+			yield r
 		yield ("name",self.name)
 		yield ("key",self.key)
 		
