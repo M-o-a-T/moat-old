@@ -53,6 +53,7 @@ def tester():
 	c.root.command("log","DEBUG","This is logged.")
 	c.root.command("var","state","get_me","the","tester")
 	log(DEBUG,"The value is: "+c.root.var("get_me"))
+	c.root.command("wait","some","time",sub=(("for",0.2),))
 
 spawn(tester)
 

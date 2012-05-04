@@ -30,6 +30,7 @@ from homevent.base import Name,SName,flatten
 from homevent.collect import Collection,Collected,get_collect,all_collect
 from homevent.twist import Jobber,fix_exception,reraise
 from homevent.run import process_failure,simple_event
+from homevent.geventreactor import waitForDeferred
 
 from datetime import datetime
 
@@ -55,15 +56,20 @@ class CommandProcessor(ImmediateProcessor):
 		fn = self.lookup(args)
 		fn.parent = self.parent
 		res = fn.run(self.ctx)
-#		if isinstance(res,defer.Deferred):
-#			waitForDeferred(res)
+		res = waitForDeferred(res)
 		return res
 
 	def complex_statement(self,args):
 		fn = self.lookup(args)
+		fn.parent = self.parent
 		fn.start_block()
+		self.fn = fn
+		self.fnp = fn.processor
+		return self.fnp
 
-		return RunMe(self,fn)
+	def run(self):
+		res = self.fn.run(self.ctx)
+		return waitForDeferred(res)
 
 class RPCconn(Service,Collected):
 	storage = RPCconns
@@ -132,9 +138,18 @@ class RPCconn(Service,Collected):
 				yield "* ERROR *",repr(e)
 				process_failure(e)
 				
-	def exposed_command(self,*args):
+	def exposed_command(self,*args,**kwargs):
 		try:
-			return CommandProcessor(parent=self,ctx=self.ctx).simple_statement(args)
+			sub = kwargs.get("sub",())
+			if sub:
+				cmd = CommandProcessor(parent=self,ctx=self.ctx)
+				proc = cmd.complex_statement(args)
+				for s in sub:
+					proc.simple_statement(s)
+				proc.done()
+				cmd.run()
+			else:
+				return CommandProcessor(parent=self,ctx=self.ctx).simple_statement(args)
 		except Exception as e:
 			fix_exception(e)
 			process_failure(e)

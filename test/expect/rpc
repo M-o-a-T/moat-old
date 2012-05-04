@@ -85,95 +85,111 @@ END: UnknownWordError
 1 YES Got an error
 1 This is logged.
 1 The value is: Test123
+0 +WAIT 5 start job ‹Waiter some¦time ??›
+0 -WAIT 5 start job ‹Waiter some¦time ??›
 NEW: ‹ConditionalWorkSequence:11 (4)›
    : │  id: 11
+   : │  call count: 0
+   : │  EVENT: wait¦start¦0.2¦some¦time
+   : └1╴... done.
+EVENT: wait¦start¦0.2¦some¦time
+END: wait¦start¦0.2¦some¦time
+NEW: ‹ConditionalWorkSequence:12 (4)›
+   : │  id: 12
+   : │  call count: 0
+   : │  EVENT: wait¦done¦0.2¦some¦time
+   : └1╴... done.
+EVENT: wait¦done¦0.2¦some¦time
+END: wait¦done¦0.2¦some¦time
+NEW: ‹ConditionalWorkSequence:13 (4)›
+   : │  id: 13
    : │  call count: 0
    : │  EVENT: rpc¦disconnect¦foo¦n1
    : └1╴... done.
 EVENT: rpc¦disconnect¦foo¦n1
 END: rpc¦disconnect¦foo¦n1
-NEW: ‹ConditionalWorkSequence:12 (4)›
-   : │  id: 12
+NEW: ‹ConditionalWorkSequence:14 (4)›
+   : │  id: 14
    : │  call count: 0
    : │  EVENT: wait¦done¦1.0¦server
    : └1╴... done.
 EVENT: wait¦done¦1.0¦server
 END: wait¦done¦1.0¦server
-0 +WAIT 5 start job ‹Waiter foo ??›
-0 -WAIT 5 start job ‹Waiter foo ??›
-NEW: ‹ConditionalWorkSequence:13 (4)›
-   : │  id: 13
+0 +WAIT 6 start job ‹Waiter foo ??›
+0 -WAIT 6 start job ‹Waiter foo ??›
+NEW: ‹ConditionalWorkSequence:15 (4)›
+   : │  id: 15
    : │  call count: 0
    : │  EVENT: wait¦start¦2.0¦foo
    : └1╴... done.
 EVENT: wait¦start¦2.0¦foo
 END: wait¦start¦2.0¦foo
-0 +WAIT 6 kill job <homevent.tokize.tokizer obj>
-0 -WAIT 6 kill job <homevent.tokize.tokizer obj>
-NEW: ‹ConditionalWorkSequence:14 (6)›
-   : │  id: 14
+0 +WAIT 7 kill job <homevent.tokize.tokizer obj>
+0 -WAIT 7 kill job <homevent.tokize.tokizer obj>
+NEW: ‹ConditionalWorkSequence:16 (6)›
+   : │  id: 16
    : │  call count: 0
    : │  EVENT: shutdown
    : └1╴... done.
 EVENT: shutdown
-NEW: ‹ConditionalWorkSequence:15 (4)›
-   : │  id: 15
+NEW: ‹ConditionalWorkSequence:17 (4)›
+   : │  id: 17
    : │  call count: 0
    : │  EVENT: state¦Test123¦-¦the¦tester
    : └1╴... done.
 EVENT: state¦Test123¦-¦the¦tester
 END: state¦Test123¦-¦the¦tester
-NEW: ‹ConditionalWorkSequence:16 (4)›
-   : │  id: 16
+NEW: ‹ConditionalWorkSequence:18 (4)›
+   : │  id: 18
    : │  call count: 0
    : │  EVENT: module¦unload¦net
    : └1╴... done.
 EVENT: module¦unload¦net
 END: module¦unload¦net
-NEW: ‹ConditionalWorkSequence:17 (4)›
-   : │  id: 17
+NEW: ‹ConditionalWorkSequence:19 (4)›
+   : │  id: 19
    : │  call count: 0
    : │  EVENT: module¦unload¦data
    : └1╴... done.
 EVENT: module¦unload¦data
 END: module¦unload¦data
-NEW: ‹ConditionalWorkSequence:18 (4)›
-   : │  id: 18
+NEW: ‹ConditionalWorkSequence:20 (4)›
+   : │  id: 20
    : │  call count: 0
    : │  EVENT: module¦unload¦on_event
    : └1╴... done.
 EVENT: module¦unload¦on_event
 END: module¦unload¦on_event
-NEW: ‹ConditionalWorkSequence:19 (4)›
-   : │  id: 19
+NEW: ‹ConditionalWorkSequence:21 (4)›
+   : │  id: 21
    : │  call count: 0
    : │  EVENT: module¦unload¦block
    : └1╴... done.
 EVENT: module¦unload¦block
 END: module¦unload¦block
-NEW: ‹ConditionalWorkSequence:20 (4)›
-   : │  id: 20
+NEW: ‹ConditionalWorkSequence:22 (4)›
+   : │  id: 22
    : │  call count: 0
    : │  EVENT: module¦unload¦logging
    : └1╴... done.
 EVENT: module¦unload¦logging
 END: module¦unload¦logging
-NEW: ‹ConditionalWorkSequence:21 (4)›
-   : │  id: 21
+NEW: ‹ConditionalWorkSequence:23 (4)›
+   : │  id: 23
    : │  call count: 0
    : │  EVENT: module¦unload¦wait
    : └1╴... done.
 EVENT: module¦unload¦wait
 END: module¦unload¦wait
-NEW: ‹ConditionalWorkSequence:22 (4)›
-   : │  id: 22
+NEW: ‹ConditionalWorkSequence:24 (4)›
+   : │  id: 24
    : │  call count: 0
    : │  EVENT: module¦unload¦state
    : └1╴... done.
 EVENT: module¦unload¦state
 END: module¦unload¦state
-NEW: ‹ConditionalWorkSequence:23 (4)›
-   : │  id: 23
+NEW: ‹ConditionalWorkSequence:25 (4)›
+   : │  id: 25
    : │  call count: 0
    : │  EVENT: module¦unload¦rpc
    : └1╴... done.
