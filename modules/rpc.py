@@ -26,11 +26,18 @@ from homevent.context import Context
 from homevent.parser import parser_builder,parse
 from homevent.statement import main_words,Statement,AttributedStatement
 from homevent.interpreter import Interpreter
-from homevent.base import Name,SName
-from homevent.collect import Collection,Collected
-from homevent.twist import Jobber
+from homevent.base import Name,SName,flatten
+from homevent.collect import Collection,Collected,get_collect,all_collect
+from homevent.twist import Jobber,fix_exception
+from homevent.run import process_failure,simple_event
+
+from datetime import datetime
+
 from rpyc import Service
 from rpyc.utils.server import ThreadedServer
+
+from gevent.queue import Queue
+from gevent import spawn
 
 conn_seq = 0
 
@@ -47,6 +54,7 @@ class RPCconn(Service,Collected):
 		global conn_seq
 		conn_seq += 1
 		self.name = self.dest + ("n"+str(conn_seq),)
+		simple_event(Context(),"rpc","connect",*self.name)
 		Collected.__init__(self)
 
 	def delete(self, ctx=None):
@@ -56,15 +64,56 @@ class RPCconn(Service,Collected):
 		## called from on_disconnect()
 
 	def on_disconnect(self):
+		simple_event(Context(),"rpc","disconnect",*self.name)
 		self.delete_done()
 
-	def exposed_hello(self):
-		return "HeLlO!"
+	def exposed_list(self,*args):
+		c = get_collect(args, allow_collection=True)
+		try:
+			if c is None:
+				for m in all_collect(skip=False):
+					yield m.name
+			elif isinstance(c,Collection):
+				for n,m in c.iteritems():
+					try:
+						m = m.info
+					except AttributeError:
+						m = m.name
+					else:
+						if callable(m):
+							m = m()
+						if isinstance(m,basestring):
+							m = m.split("\n")[0].strip()
 
+					if m is not None:
+						yield (n,m)
+					else:
+						yield n,
+			else:
+				q = Queue(3)
+				job = spawn(flatten,q,(c,))
+				job.link(lambda _:q.put(None))
+
+				while True:
+					res = q.get()
+					if res is None:
+						return
+					p,t = res
+					if isinstance(t,datetime):
+						if TESTING and t.year != 2003:
+							t = "%s" % (humandelta(t-now(t.year != 2003)),)
+						else: 
+							t = "%s (%s)" % (humandelta(t-now(t.year != 2003)),t)
+					yield p,unicode(t)
+
+		except Exception as e:
+				fix_exception(e)
+				yield "* ERROR *",repr(e)
+				process_failure(e)
+				
 	def list(self):
 		for r in super(RPCconn,self).list():
 			yield r
-		import pdb;pdb.set_trace()
 		yield ("local host", self._conn._config["endpoints"][0][0])
 		yield ("local port", self._conn._config["endpoints"][0][1])
 		yield ("remote host", self._conn._config["endpoints"][1][0])
@@ -89,8 +138,12 @@ class RPCserver(Collected,Jobber):
 		self.host=host
 		self.port=port
 		self.server = ThreadedServer(gen_rpcconn(name), hostname=host,port=port,ipv6=True)
-		self.start_job("job",self.server.start)
+		self.server.listener.settimeout(None)
+		self.start_job("job",self._start)
 		super(RPCserver,self).__init__()
+
+	def _start(self):
+		self.server.start()
 
 	def delete(self,ctx=None):
 		self.server.close()
@@ -106,17 +159,17 @@ class RPCserver(Collected,Jobber):
 		
 
 class RPClisten(AttributedStatement):
-	name = "rpc listen"
+	name = "listen rpc"
 	doc = "create an RPC server"
 	dest = None
 	long_doc="""\
-Usage: rpc listen ‹name› [‹host›] ‹port›
+Usage: listen rpc ‹name› [‹host›] ‹port›
 This command binds a RPyC server to the given port.
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		if len(event) > 3 or len(event)+(self.dest is not None) < 2:
-			raise SyntaxError(u'Usage: rpc listen ‹name› [‹host›] ‹port›')
+			raise SyntaxError(u'Usage: listen rpc ‹name› [‹host›] ‹port›')
 		if self.dest is None:
 			dest = Name(event[0])
 			event = event[1:]
