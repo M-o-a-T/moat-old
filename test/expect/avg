@@ -10,10 +10,11 @@ END: startup
 0 +WAIT 2 start job <homevent.tokize.tokizer obj>
 0 -WAIT 2 start job <homevent.tokize.tokizer obj>
 .
-test :: (new)
+test time :: (new)
 .
-name: test
-cur_value: None
+name: test time
+mode: time
+value: None
 .
 0 +WAIT 3 start job ‹Waiter _wait¦1 ??›
 0 -WAIT 3 start job ‹Waiter _wait¦1 ??›
@@ -31,12 +32,14 @@ NEW: ‹ConditionalWorkSequence:9 (4)›
    : └1╴... done.
 EVENT: wait¦done¦0.2¦_wait¦1
 END: wait¦done¦0.2¦_wait¦1
-name: test
-cur_value: 2.0
-last_time: now (2003-04-05 06:07:08.200000)
-total_time: now
-last_value: 2.0
+name: test time
+mode: time
 value: 2.0
+set time: now (2003-04-05 06:07:08.200000)
+prev value: None
+total time: 0:00:00
+total samples: 1
+current average: 2.0
 .
 0 +WAIT 4 start job ‹Waiter _wait¦2 ??›
 0 -WAIT 4 start job ‹Waiter _wait¦2 ??›
@@ -54,114 +57,654 @@ NEW: ‹ConditionalWorkSequence:11 (4)›
    : └1╴... done.
 EVENT: wait¦done¦1.2¦_wait¦2
 END: wait¦done¦1.2¦_wait¦2
-name: test
-cur_value: 2.0
-last_time: -1.0 sec (2003-04-05 06:07:08.200000)
-total_time: now
-last_value: 2.0
+name: test time
+mode: time
 value: 2.0
+set time: -1.0 sec (2003-04-05 06:07:08.200000)
+prev value: None
+total time: 0:00:00
+total samples: 1
+current average: 2.0
 .
-name: test
-cur_value: 5.0
-last_time: now (2003-04-05 06:07:09.200000)
-total_time: 1.0 sec
-last_value: 2.0
-value: 2.0
+name: test time
+mode: time
+value: 5.0
+set time: now (2003-04-05 06:07:09.200000)
+prev value: 2.0
+total time: 0:00:01
+total samples: 2
+current average: 2.0
 .
-1 Yes
-1 Yes
 0 +WAIT 5 start job ‹Waiter _wait¦3 ??›
 0 -WAIT 5 start job ‹Waiter _wait¦3 ??›
 NEW: ‹ConditionalWorkSequence:12 (4)›
    : │  id: 12
    : │  call count: 0
-   : │  EVENT: wait¦start¦3.2¦_wait¦3
+   : │  EVENT: wait¦start¦2.2¦_wait¦3
    : └1╴... done.
-EVENT: wait¦start¦3.2¦_wait¦3
-END: wait¦start¦3.2¦_wait¦3
+EVENT: wait¦start¦2.2¦_wait¦3
+END: wait¦start¦2.2¦_wait¦3
 NEW: ‹ConditionalWorkSequence:13 (4)›
    : │  id: 13
    : │  call count: 0
-   : │  EVENT: wait¦done¦3.2¦_wait¦3
+   : │  EVENT: wait¦done¦2.2¦_wait¦3
    : └1╴... done.
-EVENT: wait¦done¦3.2¦_wait¦3
-END: wait¦done¦3.2¦_wait¦3
+EVENT: wait¦done¦2.2¦_wait¦3
+END: wait¦done¦2.2¦_wait¦3
+name: test time
+mode: time
+value: 5.0
+set time: -1.0 sec (2003-04-05 06:07:09.200000)
+prev value: 2.0
+total time: 0:00:01
+total samples: 2
+current average: 3.5
+.
+name: test time
+mode: time
+value: 0.0
+set time: now (2003-04-05 06:07:10.200000)
+prev value: 5.0
+total time: 0:00:02
+total samples: 3
+current average: 3.5
+.
 1 Yes
+1 Yes
+0 +WAIT 6 start job ‹Waiter _wait¦4 ??›
+0 -WAIT 6 start job ‹Waiter _wait¦4 ??›
+NEW: ‹ConditionalWorkSequence:14 (4)›
+   : │  id: 14
+   : │  call count: 0
+   : │  EVENT: wait¦start¦4.2¦_wait¦4
+   : └1╴... done.
+EVENT: wait¦start¦4.2¦_wait¦4
+END: wait¦start¦4.2¦_wait¦4
+NEW: ‹ConditionalWorkSequence:15 (4)›
+   : │  id: 15
+   : │  call count: 0
+   : │  EVENT: wait¦done¦4.2¦_wait¦4
+   : └1╴... done.
+EVENT: wait¦done¦4.2¦_wait¦4
+END: wait¦done¦4.2¦_wait¦4
+1 Yes
+1 values now 0.0 prev 5.0
+test moving :: (new)
+.
+name: test moving
+mode: moving
+value: None
+samples: 0
+max samples: 3
+.
+0 +WAIT 7 start job ‹Waiter _wait¦5 ??›
+0 -WAIT 7 start job ‹Waiter _wait¦5 ??›
+NEW: ‹ConditionalWorkSequence:16 (4)›
+   : │  id: 16
+   : │  call count: 0
+   : │  EVENT: wait¦start¦4.4¦_wait¦5
+   : └1╴... done.
+EVENT: wait¦start¦4.4¦_wait¦5
+END: wait¦start¦4.4¦_wait¦5
+NEW: ‹ConditionalWorkSequence:17 (4)›
+   : │  id: 17
+   : │  call count: 0
+   : │  EVENT: wait¦done¦4.4¦_wait¦5
+   : └1╴... done.
+EVENT: wait¦done¦4.4¦_wait¦5
+END: wait¦done¦4.4¦_wait¦5
+name: test moving
+mode: moving
+value: 2.0
+set time: now (2003-04-05 06:07:12.400000)
+prev value: None
+total time: None
+total samples: 1
+current average: 2.0
+samples: 1
+max samples: 3
+sample 0: 2.0
+.
+0 +WAIT 8 start job ‹Waiter _wait¦6 ??›
+0 -WAIT 8 start job ‹Waiter _wait¦6 ??›
+NEW: ‹ConditionalWorkSequence:18 (4)›
+   : │  id: 18
+   : │  call count: 0
+   : │  EVENT: wait¦start¦5.4¦_wait¦6
+   : └1╴... done.
+EVENT: wait¦start¦5.4¦_wait¦6
+END: wait¦start¦5.4¦_wait¦6
+NEW: ‹ConditionalWorkSequence:19 (4)›
+   : │  id: 19
+   : │  call count: 0
+   : │  EVENT: wait¦done¦5.4¦_wait¦6
+   : └1╴... done.
+EVENT: wait¦done¦5.4¦_wait¦6
+END: wait¦done¦5.4¦_wait¦6
+name: test moving
+mode: moving
+value: 2.0
+set time: -1.0 sec (2003-04-05 06:07:12.400000)
+prev value: None
+total time: None
+total samples: 1
+current average: 2.0
+samples: 1
+max samples: 3
+sample 0: 2.0
+.
+name: test moving
+mode: moving
+value: 5.0
+set time: now (2003-04-05 06:07:13.400000)
+prev value: 2.0
+total time: None
+total samples: 2
+current average: 3.5
+samples: 2
+max samples: 3
+sample 0: 2.0
+sample 1: 5.0
+.
+0 +WAIT 9 start job ‹Waiter _wait¦7 ??›
+0 -WAIT 9 start job ‹Waiter _wait¦7 ??›
+NEW: ‹ConditionalWorkSequence:20 (4)›
+   : │  id: 20
+   : │  call count: 0
+   : │  EVENT: wait¦start¦7.4¦_wait¦7
+   : └1╴... done.
+EVENT: wait¦start¦7.4¦_wait¦7
+END: wait¦start¦7.4¦_wait¦7
+NEW: ‹ConditionalWorkSequence:21 (4)›
+   : │  id: 21
+   : │  call count: 0
+   : │  EVENT: wait¦done¦7.4¦_wait¦7
+   : └1╴... done.
+EVENT: wait¦done¦7.4¦_wait¦7
+END: wait¦done¦7.4¦_wait¦7
+name: test moving
+mode: moving
+value: 5.0
+set time: -2.0 sec (2003-04-05 06:07:13.400000)
+prev value: 2.0
+total time: None
+total samples: 2
+current average: 3.5
+samples: 2
+max samples: 3
+sample 0: 2.0
+sample 1: 5.0
+.
+name: test moving
+mode: moving
+value: -1.0
+set time: now (2003-04-05 06:07:15.400000)
+prev value: 5.0
+total time: None
+total samples: 3
+current average: 2.0
+samples: 3
+max samples: 3
+sample 0: 2.0
+sample 1: 5.0
+sample 2: -1.0
+.
+0 +WAIT 10 start job ‹Waiter _wait¦8 ??›
+0 -WAIT 10 start job ‹Waiter _wait¦8 ??›
+NEW: ‹ConditionalWorkSequence:22 (4)›
+   : │  id: 22
+   : │  call count: 0
+   : │  EVENT: wait¦start¦11.4¦_wait¦8
+   : └1╴... done.
+EVENT: wait¦start¦11.4¦_wait¦8
+END: wait¦start¦11.4¦_wait¦8
+NEW: ‹ConditionalWorkSequence:23 (4)›
+   : │  id: 23
+   : │  call count: 0
+   : │  EVENT: wait¦done¦11.4¦_wait¦8
+   : └1╴... done.
+EVENT: wait¦done¦11.4¦_wait¦8
+END: wait¦done¦11.4¦_wait¦8
+name: test moving
+mode: moving
+value: -1.0
+set time: -4.0 sec (2003-04-05 06:07:15.400000)
+prev value: 5.0
+total time: None
+total samples: 3
+current average: 2.0
+samples: 3
+max samples: 3
+sample 0: 2.0
+sample 1: 5.0
+sample 2: -1.0
+.
+name: test moving
+mode: moving
+value: 8.0
+set time: now (2003-04-05 06:07:19.400000)
+prev value: -1.0
+total time: None
+total samples: 4
+current average: 4.0
+samples: 3
+max samples: 3
+sample 0: 5.0
+sample 1: -1.0
+sample 2: 8.0
+.
+0 +WAIT 11 start job ‹Waiter _wait¦9 ??›
+0 -WAIT 11 start job ‹Waiter _wait¦9 ??›
+NEW: ‹ConditionalWorkSequence:24 (4)›
+   : │  id: 24
+   : │  call count: 0
+   : │  EVENT: wait¦start¦15.4¦_wait¦9
+   : └1╴... done.
+EVENT: wait¦start¦15.4¦_wait¦9
+END: wait¦start¦15.4¦_wait¦9
+NEW: ‹ConditionalWorkSequence:25 (4)›
+   : │  id: 25
+   : │  call count: 0
+   : │  EVENT: wait¦done¦15.4¦_wait¦9
+   : └1╴... done.
+EVENT: wait¦done¦15.4¦_wait¦9
+END: wait¦done¦15.4¦_wait¦9
+name: test moving
+mode: moving
+value: 8.0
+set time: -4.0 sec (2003-04-05 06:07:19.400000)
+prev value: -1.0
+total time: None
+total samples: 4
+current average: 4.0
+samples: 3
+max samples: 3
+sample 0: 5.0
+sample 1: -1.0
+sample 2: 8.0
+.
+name: test moving
+mode: moving
+value: 14.0
+set time: now (2003-04-05 06:07:23.400000)
+prev value: 8.0
+total time: None
+total samples: 5
+current average: 7.0
+samples: 3
+max samples: 3
+sample 0: -1.0
+sample 1: 8.0
+sample 2: 14.0
+.
+1 Yes
+1 Yes
+0 +WAIT 12 start job ‹Waiter _wait¦10 ??›
+0 -WAIT 12 start job ‹Waiter _wait¦10 ??›
+NEW: ‹ConditionalWorkSequence:26 (4)›
+   : │  id: 26
+   : │  call count: 0
+   : │  EVENT: wait¦start¦17.4¦_wait¦10
+   : └1╴... done.
+EVENT: wait¦start¦17.4¦_wait¦10
+END: wait¦start¦17.4¦_wait¦10
+NEW: ‹ConditionalWorkSequence:27 (4)›
+   : │  id: 27
+   : │  call count: 0
+   : │  EVENT: wait¦done¦17.4¦_wait¦10
+   : └1╴... done.
+EVENT: wait¦done¦17.4¦_wait¦10
+END: wait¦done¦17.4¦_wait¦10
+1 Yes
+1 values now 14.0 prev 8.0
+test decay :: (new)
+.
+name: test decay
+mode: decay
+value: None
+weight: 0.1
+.
+0 +WAIT 13 start job ‹Waiter _wait¦11 ??›
+0 -WAIT 13 start job ‹Waiter _wait¦11 ??›
+NEW: ‹ConditionalWorkSequence:28 (4)›
+   : │  id: 28
+   : │  call count: 0
+   : │  EVENT: wait¦start¦17.6¦_wait¦11
+   : └1╴... done.
+EVENT: wait¦start¦17.6¦_wait¦11
+END: wait¦start¦17.6¦_wait¦11
+NEW: ‹ConditionalWorkSequence:29 (4)›
+   : │  id: 29
+   : │  call count: 0
+   : │  EVENT: wait¦done¦17.6¦_wait¦11
+   : └1╴... done.
+EVENT: wait¦done¦17.6¦_wait¦11
+END: wait¦done¦17.6¦_wait¦11
+name: test decay
+mode: decay
+value: 2.0
+set time: now (2003-04-05 06:07:25.600000)
+prev value: None
+total time: None
+total samples: 1
+current average: 2.0
+weight: 0.1
+.
+0 +WAIT 14 start job ‹Waiter _wait¦12 ??›
+0 -WAIT 14 start job ‹Waiter _wait¦12 ??›
+NEW: ‹ConditionalWorkSequence:30 (4)›
+   : │  id: 30
+   : │  call count: 0
+   : │  EVENT: wait¦start¦18.6¦_wait¦12
+   : └1╴... done.
+EVENT: wait¦start¦18.6¦_wait¦12
+END: wait¦start¦18.6¦_wait¦12
+NEW: ‹ConditionalWorkSequence:31 (4)›
+   : │  id: 31
+   : │  call count: 0
+   : │  EVENT: wait¦done¦18.6¦_wait¦12
+   : └1╴... done.
+EVENT: wait¦done¦18.6¦_wait¦12
+END: wait¦done¦18.6¦_wait¦12
+name: test decay
+mode: decay
+value: 2.0
+set time: -1.0 sec (2003-04-05 06:07:25.600000)
+prev value: None
+total time: None
+total samples: 1
+current average: 2.0
+weight: 0.1
+.
+name: test decay
+mode: decay
+value: 22.0
+set time: now (2003-04-05 06:07:26.600000)
+prev value: 2.0
+total time: None
+total samples: 2
+current average: 4.0
+weight: 0.1
+.
+0 +WAIT 15 start job ‹Waiter _wait¦13 ??›
+0 -WAIT 15 start job ‹Waiter _wait¦13 ??›
+NEW: ‹ConditionalWorkSequence:32 (4)›
+   : │  id: 32
+   : │  call count: 0
+   : │  EVENT: wait¦start¦19.6¦_wait¦13
+   : └1╴... done.
+EVENT: wait¦start¦19.6¦_wait¦13
+END: wait¦start¦19.6¦_wait¦13
+NEW: ‹ConditionalWorkSequence:33 (4)›
+   : │  id: 33
+   : │  call count: 0
+   : │  EVENT: wait¦done¦19.6¦_wait¦13
+   : └1╴... done.
+EVENT: wait¦done¦19.6¦_wait¦13
+END: wait¦done¦19.6¦_wait¦13
+name: test decay
+mode: decay
+value: 22.0
+set time: -1.0 sec (2003-04-05 06:07:26.600000)
+prev value: 2.0
+total time: None
+total samples: 2
+current average: 4.0
+weight: 0.1
+.
+name: test decay
+mode: decay
+value: -1.0
+set time: now (2003-04-05 06:07:27.600000)
+prev value: 22.0
+total time: None
+total samples: 3
+current average: 3.5
+weight: 0.1
+.
+1 Yes
+1 Yes
+0 +WAIT 16 start job ‹Waiter _wait¦14 ??›
+0 -WAIT 16 start job ‹Waiter _wait¦14 ??›
+NEW: ‹ConditionalWorkSequence:34 (4)›
+   : │  id: 34
+   : │  call count: 0
+   : │  EVENT: wait¦start¦21.6¦_wait¦14
+   : └1╴... done.
+EVENT: wait¦start¦21.6¦_wait¦14
+END: wait¦start¦21.6¦_wait¦14
+NEW: ‹ConditionalWorkSequence:35 (4)›
+   : │  id: 35
+   : │  call count: 0
+   : │  EVENT: wait¦done¦21.6¦_wait¦14
+   : └1╴... done.
+EVENT: wait¦done¦21.6¦_wait¦14
+END: wait¦done¦21.6¦_wait¦14
+1 Yes
+1 values now -1.0 prev 22.0
+test decaytime :: (new)
+.
+name: test decaytime
+mode: decaytime
+value: None
+weight/hour: 1.0
+weight/minute: 0.9982029897
+weight/second: 0.1
+.
+0 +WAIT 17 start job ‹Waiter _wait¦15 ??›
+0 -WAIT 17 start job ‹Waiter _wait¦15 ??›
+NEW: ‹ConditionalWorkSequence:36 (4)›
+   : │  id: 36
+   : │  call count: 0
+   : │  EVENT: wait¦start¦21.8¦_wait¦15
+   : └1╴... done.
+EVENT: wait¦start¦21.8¦_wait¦15
+END: wait¦start¦21.8¦_wait¦15
+NEW: ‹ConditionalWorkSequence:37 (4)›
+   : │  id: 37
+   : │  call count: 0
+   : │  EVENT: wait¦done¦21.8¦_wait¦15
+   : └1╴... done.
+EVENT: wait¦done¦21.8¦_wait¦15
+END: wait¦done¦21.8¦_wait¦15
+name: test decaytime
+mode: decaytime
+value: 10.0
+set time: now (2003-04-05 06:07:29.800000)
+prev value: None
+total time: 0:00:00
+total samples: 1
+current average: 10.0
+weight/hour: 1.0
+weight/minute: 0.9982029897
+weight/second: 0.1
+.
+0 +WAIT 18 start job ‹Waiter _wait¦16 ??›
+0 -WAIT 18 start job ‹Waiter _wait¦16 ??›
+NEW: ‹ConditionalWorkSequence:38 (4)›
+   : │  id: 38
+   : │  call count: 0
+   : │  EVENT: wait¦start¦22.8¦_wait¦16
+   : └1╴... done.
+EVENT: wait¦start¦22.8¦_wait¦16
+END: wait¦start¦22.8¦_wait¦16
+NEW: ‹ConditionalWorkSequence:39 (4)›
+   : │  id: 39
+   : │  call count: 0
+   : │  EVENT: wait¦done¦22.8¦_wait¦16
+   : └1╴... done.
+EVENT: wait¦done¦22.8¦_wait¦16
+END: wait¦done¦22.8¦_wait¦16
+name: test decaytime
+mode: decaytime
+value: 10.0
+set time: -1.0 sec (2003-04-05 06:07:29.800000)
+prev value: None
+total time: 0:00:00
+total samples: 1
+current average: 10.0
+weight/hour: 1.0
+weight/minute: 0.9982029897
+weight/second: 0.1
+.
+name: test decaytime
+mode: decaytime
+value: 110.0
+set time: now (2003-04-05 06:07:30.800000)
+prev value: 10.0
+total time: 0:00:00
+total samples: 2
+current average: 10.0
+weight/hour: 1.0
+weight/minute: 0.9982029897
+weight/second: 0.1
+.
+0 +WAIT 19 start job ‹Waiter _wait¦17 ??›
+0 -WAIT 19 start job ‹Waiter _wait¦17 ??›
+NEW: ‹ConditionalWorkSequence:40 (4)›
+   : │  id: 40
+   : │  call count: 0
+   : │  EVENT: wait¦start¦23.8¦_wait¦17
+   : └1╴... done.
+EVENT: wait¦start¦23.8¦_wait¦17
+END: wait¦start¦23.8¦_wait¦17
+NEW: ‹ConditionalWorkSequence:41 (4)›
+   : │  id: 41
+   : │  call count: 0
+   : │  EVENT: wait¦done¦23.8¦_wait¦17
+   : └1╴... done.
+EVENT: wait¦done¦23.8¦_wait¦17
+END: wait¦done¦23.8¦_wait¦17
+name: test decaytime
+mode: decaytime
+value: 110.0
+set time: -1.0 sec (2003-04-05 06:07:30.800000)
+prev value: 10.0
+total time: 0:00:00
+total samples: 2
+current average: 20.0
+weight/hour: 1.0
+weight/minute: 0.9982029897
+weight/second: 0.1
+.
+name: test decaytime
+mode: decaytime
+value: 1.0
+set time: now (2003-04-05 06:07:31.800000)
+prev value: 110.0
+total time: 0:00:00
+total samples: 3
+current average: 20.0
+weight/hour: 1.0
+weight/minute: 0.9982029897
+weight/second: 0.1
+.
+1 Yes
+1 No1 20.0
+0 +WAIT 20 start job ‹Waiter _wait¦18 ??›
+0 -WAIT 20 start job ‹Waiter _wait¦18 ??›
+NEW: ‹ConditionalWorkSequence:42 (4)›
+   : │  id: 42
+   : │  call count: 0
+   : │  EVENT: wait¦start¦25.8¦_wait¦18
+   : └1╴... done.
+EVENT: wait¦start¦25.8¦_wait¦18
+END: wait¦start¦25.8¦_wait¦18
+NEW: ‹ConditionalWorkSequence:43 (4)›
+   : │  id: 43
+   : │  call count: 0
+   : │  EVENT: wait¦done¦25.8¦_wait¦18
+   : └1╴... done.
+EVENT: wait¦done¦25.8¦_wait¦18
+END: wait¦done¦25.8¦_wait¦18
+name: test decaytime
+mode: decaytime
+value: 1.0
+set time: -2.0 sec (2003-04-05 06:07:31.800000)
+prev value: 110.0
+total time: 0:00:00
+total samples: 3
+current average: 16.39
+weight/hour: 1.0
+weight/minute: 0.9982029897
+weight/second: 0.1
+.
+1 values avg 16.39 now 1.0 prev 110.0
 1 Yes
 .
-0 +WAIT 6 kill job <homevent.tokize.tokizer obj>
-0 -WAIT 6 kill job <homevent.tokize.tokizer obj>
-NEW: ‹ConditionalWorkSequence:14 (6)›
-   : │  id: 14
+0 +WAIT 21 kill job <homevent.tokize.tokizer obj>
+0 -WAIT 21 kill job <homevent.tokize.tokizer obj>
+NEW: ‹ConditionalWorkSequence:44 (6)›
+   : │  id: 44
    : │  call count: 0
    : │  EVENT: shutdown
    : └1╴... done.
 EVENT: shutdown
-NEW: ‹ConditionalWorkSequence:15 (4)›
-   : │  id: 15
+NEW: ‹ConditionalWorkSequence:45 (4)›
+   : │  id: 45
    : │  call count: 0
    : │  EVENT: module¦unload¦avg
    : └1╴... done.
 EVENT: module¦unload¦avg
 END: module¦unload¦avg
-NEW: ‹ConditionalWorkSequence:16 (4)›
-   : │  id: 16
+NEW: ‹ConditionalWorkSequence:46 (4)›
+   : │  id: 46
    : │  call count: 0
    : │  EVENT: module¦unload¦data
    : └1╴... done.
 EVENT: module¦unload¦data
 END: module¦unload¦data
-NEW: ‹ConditionalWorkSequence:17 (4)›
-   : │  id: 17
+NEW: ‹ConditionalWorkSequence:47 (4)›
+   : │  id: 47
    : │  call count: 0
    : │  EVENT: module¦unload¦tests
    : └1╴... done.
 EVENT: module¦unload¦tests
 END: module¦unload¦tests
-NEW: ‹ConditionalWorkSequence:18 (4)›
-   : │  id: 18
+NEW: ‹ConditionalWorkSequence:48 (4)›
+   : │  id: 48
    : │  call count: 0
    : │  EVENT: module¦unload¦block
    : └1╴... done.
 EVENT: module¦unload¦block
 END: module¦unload¦block
-NEW: ‹ConditionalWorkSequence:19 (4)›
-   : │  id: 19
+NEW: ‹ConditionalWorkSequence:49 (4)›
+   : │  id: 49
    : │  call count: 0
    : │  EVENT: module¦unload¦logging
    : └1╴... done.
 EVENT: module¦unload¦logging
 END: module¦unload¦logging
-NEW: ‹ConditionalWorkSequence:20 (4)›
-   : │  id: 20
+NEW: ‹ConditionalWorkSequence:50 (4)›
+   : │  id: 50
    : │  call count: 0
    : │  EVENT: module¦unload¦wait
    : └1╴... done.
 EVENT: module¦unload¦wait
 END: module¦unload¦wait
-NEW: ‹ConditionalWorkSequence:21 (4)›
-   : │  id: 21
+NEW: ‹ConditionalWorkSequence:51 (4)›
+   : │  id: 51
    : │  call count: 0
    : │  EVENT: module¦unload¦on_event
    : └1╴... done.
 EVENT: module¦unload¦on_event
 END: module¦unload¦on_event
-NEW: ‹ConditionalWorkSequence:22 (4)›
-   : │  id: 22
+NEW: ‹ConditionalWorkSequence:52 (4)›
+   : │  id: 52
    : │  call count: 0
    : │  EVENT: module¦unload¦bool
    : └1╴... done.
 EVENT: module¦unload¦bool
 END: module¦unload¦bool
-NEW: ‹ConditionalWorkSequence:23 (4)›
-   : │  id: 23
+NEW: ‹ConditionalWorkSequence:53 (4)›
+   : │  id: 53
    : │  call count: 0
    : │  EVENT: module¦unload¦trigger
    : └1╴... done.
 EVENT: module¦unload¦trigger
 END: module¦unload¦trigger
-NEW: ‹ConditionalWorkSequence:24 (4)›
-   : │  id: 24
+NEW: ‹ConditionalWorkSequence:54 (4)›
+   : │  id: 54
    : │  call count: 0
    : │  EVENT: module¦unload¦ifelse
    : └1╴... done.

@@ -57,11 +57,8 @@ Code
 
 * implement a multi-step controller (i.e. simple switch thresholds)
 
-* implement more averaging modes
-  - count "set" commands
-  - floating (i.e. decaying) average
-  - send an event when the average changes by more than X
-    - which needs a timer!
+* Add trigger to averaging
+  - send an event when the average changes by more than X in time Y
 
 * timeslots: store last start time someplace.
 
