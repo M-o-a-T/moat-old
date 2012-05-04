@@ -53,6 +53,7 @@ class CommandProcessor(ImmediateProcessor):
 
 	def simple_statement(self,args):
 		fn = self.lookup(args)
+		fn.parent = self.parent
 		res = fn.run(self.ctx)
 #		if isinstance(res,defer.Deferred):
 #			waitForDeferred(res)
@@ -133,11 +134,15 @@ class RPCconn(Service,Collected):
 				
 	def exposed_command(self,*args):
 		try:
-			return CommandProcessor(ctx=self.ctx).simple_statement(args)
+			return CommandProcessor(parent=self,ctx=self.ctx).simple_statement(args)
 		except Exception as e:
 			fix_exception(e)
 			process_failure(e)
 			reraise(e)
+
+	def exposed_var(self,arg):
+		"""Return the value of a variable"""
+		return getattr(self.ctx,arg)
 
 
 	def list(self):

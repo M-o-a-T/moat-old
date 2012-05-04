@@ -51,11 +51,14 @@ def tester():
 	else:
 		log(DEBUG,"NO Got no error")
 	c.root.command("log","DEBUG","This is logged.")
+	c.root.command("var","state","get_me","the","tester")
+	log(DEBUG,"The value is: "+c.root.var("get_me"))
 
 spawn(tester)
 
 input = """\
 listen rpc foo 56478
+state the tester :value Test123
 wait server:
 	for 1
 	debug force
@@ -75,8 +78,8 @@ load_module("on_event")
 load_module("net")
 load_module("data")
 load_module("block")
-load_module("ifelse")
 load_module("rpc")
+load_module("state")
 
 run("rpc",input)
 
