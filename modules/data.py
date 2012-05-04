@@ -29,36 +29,13 @@ from homevent.statement import Statement, main_words
 from homevent.module import Module
 from homevent.run import list_workers
 from homevent.reactor import Events
-from homevent.base import Name
-from homevent.twist import fix_exception,print_exception
+from homevent.base import Name,flatten
+from homevent.twist import fix_exception,print_exception,log_wait
 from homevent.collect import get_collect,all_collect,Collection
 from homevent.times import humandelta,now
 
-def flatten(out,s,p=""):
-	if hasattr(s,"list") and callable(s.list):
-		for ss in s.list():
-			flatten(out,ss,p)
-		return
-	s = list(s)
-	t = s.pop()
-	if p != "":
-		s.insert(0,p)
-	p = u" ".join((str(ss) for ss in s))
-	if hasattr(t,"list") and callable(t.list):
-		t = t.list()
-	if hasattr(t,"next"):
-		pp = " "*len(p)
-		for tt in t:
-			flatten(out,tt,p)
-			p = pp
-	else:
-		if isinstance(t,datetime):
-			if TESTING and t.year != 2003:
-				t = "%s" % (humandelta(t-now(t.year != 2003)),)
-			else:
-				t = "%s (%s)" % (humandelta(t-now(t.year != 2003)),t)
-		print >>out,p+u": "+unicode(t)
-
+from gevent import spawn
+from gevent.queue import Queue
 
 class List(Statement):
 	name=("list",)
@@ -73,8 +50,23 @@ list ‹type› ‹name…›
 	
 """
 	def run(self,ctx,**k):
+
+		def getter(out,q):
+			while True:
+				res = q.get()
+				if res is None:
+					return
+				p,t = res
+				if isinstance(t,datetime):
+					if TESTING and t.year != 2003:
+						t = "%s" % (humandelta(t-now(t.year != 2003)),)
+					else:
+						t = "%s (%s)" % (humandelta(t-now(t.year != 2003)),t)
+				print >>out,p+u": "+unicode(t)
+
 		event = self.params(ctx)
 		c = get_collect(event, allow_collection=True)
+
 		try:
 			if c is None:
 				for m in all_collect(skip=False):
@@ -98,14 +90,20 @@ list ‹type› ‹name…›
 					else:
 						print >>self.ctx.out,u"%s" % (n,)
 			else:
-				flatten(self.ctx.out,(c,))
+				q = Queue(3)
+				try:
+					job = spawn(getter,self.ctx.out,q)
+					flatten(q,(c,))
+				finally:
+					with log_wait("list "+str(event)):
+						q.put(None)
+						job.join()
 
 		except Exception as e:
 			fix_exception(e)
 			print >>self.ctx.out, "* ERROR *",repr(e)
 			print_exception(e,file=self.ctx.out)
-			
-		finally:
+
 			print >>self.ctx.out, "."
 
 

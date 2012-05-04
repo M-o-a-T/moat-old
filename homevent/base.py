@@ -93,3 +93,24 @@ class RaisedError(RuntimeError):
 	def __unicode__(self):
 		return u"%s: %s" % (self.__class__.__name__, " ".join(unicode(x) for x in self.params))
 
+
+def flatten(out,s,p=""):
+	if hasattr(s,"list") and callable(s.list):
+		for ss in s.list():
+			flatten(out,ss,p)
+		return
+	s = list(s)
+	t = s.pop()
+	if p != "":
+		s.insert(0,p)
+	p = u" ".join((str(ss) for ss in s))
+	if hasattr(t,"list") and callable(t.list):
+		t = t.list()
+	if hasattr(t,"next"):
+		pp = " "*len(p)
+		for tt in t:
+			flatten(out,tt,p)
+			p = pp
+	else:
+		out.put((p,t))
+
