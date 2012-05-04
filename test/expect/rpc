@@ -53,7 +53,7 @@ END: rpc¦connect¦foo¦n1
 1 (u'local host', u'::ffff:127.0.0.1')
 1 (u'local port', u'56478')
 1 (u'remote host', u'::ffff:127.0.0.1')
-1 (u'remote port', u'42908')
+1 (u'remote port', u'×××')
 1 .
 NEW: ‹ConditionalWorkSequence:10 (4)›
    : │  id: 10
