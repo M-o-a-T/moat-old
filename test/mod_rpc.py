@@ -44,6 +44,14 @@ def tester():
 		log(DEBUG, repr(x))
 	log(DEBUG,".")
 
+	try:
+		c.root.command("fuubar","This is not found.")
+	except Exception as e:
+		log(DEBUG,"YES Got an error")
+	else:
+		log(DEBUG,"NO Got no error")
+	c.root.command("log","DEBUG","This is logged.")
+
 spawn(tester)
 
 input = """\

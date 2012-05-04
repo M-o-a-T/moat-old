@@ -24,11 +24,11 @@ from homevent.module import Module
 from homevent.logging import log
 from homevent.context import Context
 from homevent.parser import parser_builder,parse
-from homevent.statement import main_words,Statement,AttributedStatement
-from homevent.interpreter import Interpreter
+from homevent.statement import main_words,Statement,AttributedStatement,global_words
+from homevent.interpreter import Interpreter,ImmediateProcessor
 from homevent.base import Name,SName,flatten
 from homevent.collect import Collection,Collected,get_collect,all_collect
-from homevent.twist import Jobber,fix_exception
+from homevent.twist import Jobber,fix_exception,reraise
 from homevent.run import process_failure,simple_event
 
 from datetime import datetime
@@ -46,6 +46,24 @@ class RPCconns(Collection):
 RPCconns = RPCconns()
 RPCconns.does("del")
 
+class CommandProcessor(ImmediateProcessor):
+	"""\
+		A processor which runs a command.
+		"""
+
+	def simple_statement(self,args):
+		fn = self.lookup(args)
+		res = fn.run(self.ctx)
+#		if isinstance(res,defer.Deferred):
+#			waitForDeferred(res)
+		return res
+
+	def complex_statement(self,args):
+		fn = self.lookup(args)
+		fn.start_block()
+
+		return RunMe(self,fn)
+
 class RPCconn(Service,Collected):
 	storage = RPCconns
 	dest = ("?unnamed",)
@@ -55,6 +73,7 @@ class RPCconn(Service,Collected):
 		conn_seq += 1
 		self.name = self.dest + ("n"+str(conn_seq),)
 		self.ctx = Context()
+		self.ctx.words = global_words(self.ctx)
 		simple_event(self.ctx,"rpc","connect",*self.name)
 		Collected.__init__(self)
 
@@ -112,6 +131,15 @@ class RPCconn(Service,Collected):
 				yield "* ERROR *",repr(e)
 				process_failure(e)
 				
+	def exposed_command(self,*args):
+		try:
+			return CommandProcessor(ctx=self.ctx).simple_statement(args)
+		except Exception as e:
+			fix_exception(e)
+			process_failure(e)
+			reraise(e)
+
+
 	def list(self):
 		for r in super(RPCconn,self).list():
 			yield r
