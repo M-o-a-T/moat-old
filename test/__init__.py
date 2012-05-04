@@ -72,6 +72,7 @@ class run_logger(BaseLogger):
 			print >>sys.stderr,"ERROR, no log file"
 			self.data = sys.stderr
 		self.line=0
+		import pdb;pdb.set_trace()
 		super(run_logger,self).__init__(level)
 
 	def try_init(self):
@@ -115,7 +116,7 @@ class run_logger(BaseLogger):
 
 	# override using a separate thread
 	def _init(self):
-		pass
+		self.ready = True
 	def _wlog(self,*a):
 		self._log(*a)
 

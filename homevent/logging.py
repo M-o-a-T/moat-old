@@ -93,6 +93,7 @@ class BaseLogger(Collected,Jobber):
 		"""
 	storage = Loggers.storage
 	q = None
+	ready = False
 	def __init__(self, level, out=sys.stdout):
 		self.level = level
 		self.out = out
@@ -112,6 +113,7 @@ class BaseLogger(Collected,Jobber):
 
 		self.q = JoinableQueue(100)
 		self.start_job("job",self._writer)
+		self.ready = True
 
 	def _writer(self):
 		for r in self.q:
@@ -195,7 +197,7 @@ class Logger(BaseLogger):
 		self.out.flush()
 
 	def list(self):
-		for r in super(Loger.self).list():
+		for r in super(Logger.self).list():
 			yield r
 		yield ("Out",repr(self.out))
 
@@ -244,6 +246,8 @@ class LogWorker(ExcWorker):
 				return
 
 		for l in Loggers.values():
+			if not l.ready:
+				continue
 			try:
 				l.log_event(event=event,level=level)
 			except Exception as e:
@@ -261,6 +265,8 @@ class LogWorker(ExcWorker):
 
 def log_exc(msg=None, err=None, level=ERROR):
 	for l in Loggers.values():
+		if not l.ready:
+			continue
 		if msg:
 			try:
 				l.log(level,msg)
@@ -391,6 +397,8 @@ def log(level, *a):
 		a = (b,)+a[1:]
 
 	for l in Loggers.values():
+		if not l.ready:
+			continue
 		try:
 			l.log(level, *a)
 		except Exception as e:
