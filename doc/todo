@@ -28,9 +28,10 @@ Documentation
 Code
 ====
 
-* restart wago connections cleanly (query the monitor list!)
+* RPC: support arbitrary commands, i.e. an interpreter
 
-* make sure that various attempts at communication back off successfully.
+* restart wago connections cleanly (query the monitor list!)
+  (actually implemented, but needs a test case)
 
 * associate statements with files+lines (any StatementList)
 
