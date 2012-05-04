@@ -54,7 +54,8 @@ class RPCconn(Service,Collected):
 		global conn_seq
 		conn_seq += 1
 		self.name = self.dest + ("n"+str(conn_seq),)
-		simple_event(Context(),"rpc","connect",*self.name)
+		self.ctx = Context()
+		simple_event(self.ctx,"rpc","connect",*self.name)
 		Collected.__init__(self)
 
 	def delete(self, ctx=None):
@@ -64,7 +65,7 @@ class RPCconn(Service,Collected):
 		## called from on_disconnect()
 
 	def on_disconnect(self):
-		simple_event(Context(),"rpc","disconnect",*self.name)
+		simple_event(self.ctx,"rpc","disconnect",*self.name)
 		self.delete_done()
 
 	def exposed_list(self,*args):
