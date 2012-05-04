@@ -80,7 +80,7 @@ class NETlistener(NetListener):
 	storage = NetListens.storage
 
 class NETconnect(NetConnect):
-	name = ("connect","net")
+	name = "connect net"
 	client = NETactive
 	doc = "connect to a TCP port"
 	long_doc="""\
@@ -99,7 +99,7 @@ net [host] port :name NAME…
 
 
 class NETlisten(NetListen):
-	name = ("listen","net")
+	name = "listen net"
 	listener = NETlistener
 	connector = NETpassive
 	doc = "listen to a TCP socket"
@@ -120,17 +120,17 @@ listen net [address] port :to NAME…
 class NETsend(NetSend):
 	storage = Nets.storage
 	storage2 = net_conns
-	name=("send","net")
+	name="send net"
 
 class NETconnected(NetConnected):
 	storage = Nets.storage
 	storage2 = net_conns
-	name=("connected","net")
+	name="connected net"
 
 class NETexists(NetExists):
 	storage = Nets.storage
 	storage2 = net_conns
-	name = ("exists","net")
+	name = "exists net"
 
 class NETmodule(Module):
 	"""\

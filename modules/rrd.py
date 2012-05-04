@@ -67,7 +67,7 @@ class RRD(Collected):
 
 
 class ExistsRRDCheck(Check):
-	name=("exists","rrd")
+	name="exists rrd"
 	doc="Check if the RRD has been created"
 	def check(self,*args):
 		assert len(args), "Need exactly one argument (RRD name)"
@@ -75,7 +75,7 @@ class ExistsRRDCheck(Check):
 
 
 class RRDHandler(Statement):
-	name=("rrd",)
+	name="rrd"
 	doc="Creates an RRD object"
 	long_doc=u"""\
 rrd path dataset NAME…
@@ -94,7 +94,7 @@ rrd path dataset NAME…
 
 
 class VarRRDHandler(Statement):
-	name=("var","rrd")
+	name="var rrd"
 	doc="assign a variable to some RRD state"
 	long_doc=u"""\
 var rrd variable item NAME
@@ -115,7 +115,7 @@ var rrd variable item NAME
 
 
 class RRDset(Statement):
-	name=("set","rrd")
+	name="set rrd"
 	doc="write a variable to a RRD file"
 	long_doc=u"""\
 set rrd value ‹name…›

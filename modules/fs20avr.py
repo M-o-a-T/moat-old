@@ -319,7 +319,7 @@ class AVRconnect(NetConnect):
 	hostinfo = None
 	baud = None
 
-	name = ("fs20","avr")
+	name = "fs20 avr"
 	doc = "connect to a TCP port"
 	long_doc="""\
 fs20 avr NAME :remote host port
@@ -363,7 +363,7 @@ fs20 avr NAME :remote host port
 
 
 class AVRcmd(AttributedStatement):
-	name = ("cmd",)
+	name = "cmd"
 	doc = "pipe through a command"
 	long_doc = u"""\
 cmd ‹words…›
@@ -379,7 +379,7 @@ AVRconnect.register_statement(AVRcmd)
 
 
 class AVRport(Statement):
-	name = ("port",)
+	name = "port"
 	doc = "set the serial port to use"
 	long_doc=u"""\
 port ‹device› [‹baud›]
@@ -400,7 +400,7 @@ AVRconnect.register_statement(AVRport)
 
 
 class AVRremote(Statement):
-	name = ("remote",)
+	name = "remote"
 	doc = "set the TCP port to use"
 	long_doc=u"""\
 remote ‹host› ‹port›?
@@ -421,17 +421,17 @@ AVRconnect.register_statement(AVRremote)
 class AVRsend(NetSend):
     storage = AVRs.storage
     storage2 = avr_conns
-    name=("send","fs20","avr","raw")
+    name="send fs20 avr raw"
 
 class AVRconnected(NetConnected):
 	storage = AVRs.storage
 	storage2 = avr_conns
-	name=("connected","fs20","avr")
+	name="connected fs20 avr"
 
 class AVRexists(NetExists):
 	storage = AVRs.storage
 	storage2 = avr_conns
-	name = ("exists","fs20","avr")
+	name = "exists fs20 avr"
 
 
 class FS20avr_shutdown(ExcWorker):

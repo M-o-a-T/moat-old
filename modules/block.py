@@ -35,7 +35,7 @@ class Block(MainStatementList):
 	"""\
 		This just groups statements. Necessary e.g. for top-level if:
 	statements"""
-	name=("block",)
+	name="block"
 	doc="group multiple statements"
 	long_doc="""\
 Group multiple statements. This is necessary for some commands (like else:)
@@ -52,7 +52,7 @@ which cannot be used on top level due to implementation restrictions.
 
 class Async(MainStatementList,Jobber):
 	"""This runs statements in the background."""
-	name=("async",)
+	name="async"
 	doc="run multiple statements asynchronously"
 
 	def _run(self,a,k):
@@ -72,7 +72,7 @@ class Async(MainStatementList,Jobber):
 
 class SkipThis(MainStatementList):
 	"""This runs statements exactly never."""
-	name=("skip","this")
+	name="skip this"
 	doc="do not run these statements"
 	long_doc="""\
 skip this:

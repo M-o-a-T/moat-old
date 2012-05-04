@@ -260,7 +260,7 @@ class NetCommonConnector(Collected,Jobber):
 
 class NetCommon(AttributedStatement):
 	"""Common base class for NetConnect and NetListen commands"""
-	#name = ("connect","net")
+	#name = "connect net)
 	#doc = "connect to a TCP port (base class)"
 	dest = None
 	job = None
@@ -313,7 +313,7 @@ class NetActiveConnector(NetCommonConnector):
 
 
 class NetConnect(NetCommon):
-	#name = ("connect","net")
+	#name = "connect net"
 	doc = "connect to a TCP port (base class)"
 	client = NetActiveConnector
 
@@ -379,7 +379,7 @@ class NetListener(Collected):
 
 
 class NetListen(NetCommon):
-	#name = ("listen","net")
+	#name = "listen net"
 	doc = "listen to a TCP socket (base class)"
 
 	long_doc = u"""\
@@ -399,7 +399,7 @@ You need to override the long_doc description.
 
 
 class NetName(Statement):
-	name=("name",)
+	name="name"
 	dest = None
 	doc="specify the name of a new TCP connection"
 
@@ -442,7 +442,7 @@ retry ‹initial› [‹max›]
 class NetSend(AttributedStatement):
 	#storage = Nets.storage
 	#storage2 = net_conns
-	#name=("send","net")
+	#name="send net"
 	dest = None
 	doc="send a line to a TCP connection"
 	long_doc=u"""\
@@ -465,7 +465,7 @@ send net text… :to ‹name…›
 		self.storage[name].write(val)
 
 class NetTo(Statement):
-	name=("to",)
+	name="to"
 	dest = None
 	doc="specify which TCP connection to use"
 
@@ -482,7 +482,7 @@ NetSend.register_statement(NetTo)
 class NetConnected(Check):
 	#storage = Nets.storage
 	#storage2 = net_conns
-	name=("connected","net")
+	name="connected net"
 	doc="Test if a TCP connection is up"
 
 	def check(self,*args):
@@ -498,7 +498,7 @@ class NetConnected(Check):
 class NetExists(Check):
 	#storage = Nets.storage
 	#storage2 = net_conns
-	#name=("exists","net")
+	#name="exists net"
 	doc="Test if a TCP connection is configured"
 
 	def check(self,*args):

@@ -297,7 +297,7 @@ class Switch(Collected):
 
 
 class FS20switches(AttributedStatement):
-	name = ("fs20","switch")
+	name = "fs20 switch"
 	doc = "FS20 controllers"
 	long_doc="""\
 fs20 switch ‹house_code› ‹name…›
@@ -356,7 +356,7 @@ fs20 switch ‹house_code› ‹name…›
 
 
 class FS20code(Statement):
-	name = ("code",)
+	name = "code"
 	doc = "Set the house code for a new switch group"
 	long_doc=u"""\
 fs20 ‹name…›:
@@ -372,7 +372,7 @@ FS20switches.register_statement(FS20code)
 
 
 class FS20addswitch(AttributedStatement):
-	name = ("add",)
+	name = "add"
 	doc = "Add a new named switch"
 	long_doc=u"""\
 add ‹name…›:
@@ -398,7 +398,7 @@ FS20switches.register_statement(FS20addswitch)
 
 
 class FS20swcode(Statement):
-	name = ("code",)
+	name = "code"
 	doc = "Set the device code for a new switch"
 	long_doc=u"""\
 fs20 ‹name…›:
@@ -416,7 +416,7 @@ FS20addswitch.register_statement(FS20swcode)
 
 
 class FS20delswitch(AttributedStatement):
-	name = ("del",)
+	name = "del"
 	doc = "Delete a switch"
 	long_doc=u"""\
 del ‹name…›
@@ -436,7 +436,7 @@ FS20switches.register_statement(FS20delswitch)
 
 
 class FS20send(Statement):
-	name = ("send","fs20")
+	name = "send fs20"
 	doc = "Send a message to a FS20 device"
 	long_doc=u"""\
 send fs20 ‹msg› -|‹aux› ‹name…›

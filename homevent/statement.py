@@ -401,7 +401,7 @@ class MainStatementList(StatementList):
 
 
 class DoNothingHandler(Statement):
-	name = ("do","nothing")
+	name = "do nothing"
 	doc = "do not do anything"
 	long_doc="""\
 This statement does not do anything. It's a placeholder if you want to
@@ -415,7 +415,7 @@ explicitly state that some event does not result in any action.
 
 
 class ExitHandler(Statement):
-	name = ("exit",)
+	name = "exit"
 	doc = "stop processing input"
 	long_doc="""\
 This statement causes the input channel which runs it to terminate.

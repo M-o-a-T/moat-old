@@ -26,7 +26,7 @@ from homevent.statement import Statement, global_words, HelpSub
 from homevent.base import Name
 
 class Help(Statement):
-	name=("help",)
+	name="help"
 	doc="show doc texts"
 	long_doc="""\
 The "help" command shows which words are recognized at each level.

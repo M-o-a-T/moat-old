@@ -209,7 +209,7 @@ class Waiter(Collected,Jobber):
 
 	
 class WaitHandler(AttributedStatement):
-	name=("wait",)
+	name="wait"
 	doc="delay for N seconds"
 	long_doc=u"""\
 wait [NAME…]: for FOO…
@@ -259,7 +259,7 @@ wait [NAME…]: for FOO…
 
 		
 class WaitDebug(Statement):
-	name = ("debug",)
+	name = "debug"
 	doc = "Debugging / testing support"
 	long_doc=u"""\
 debug ‹flags›
@@ -281,7 +281,7 @@ Known flags:
 
 
 class WaitUpdate(Statement):
-	name = ("update",)
+	name = "update"
 	doc = "change the timeout of an existing wait handler"
 	long_doc="""\
 This statement updates the timeout of an existing wait handler.
@@ -295,7 +295,7 @@ This statement updates the timeout of an existing wait handler.
 
 
 class ExistsWaiterCheck(Check):
-	name=("exists","wait")
+	name="exists wait"
 	doc="check if a waiter exists at all"
 	def check(self,*args):
 		if not len(args):
@@ -304,7 +304,7 @@ class ExistsWaiterCheck(Check):
 		return name in Waiters
 
 class VarWaitHandler(Statement):
-	name=("var","wait")
+	name="var wait"
 	doc="assign a variable to report when a waiter will time out"
 	long_doc=u"""\
 var wait NAME name...

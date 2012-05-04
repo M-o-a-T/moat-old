@@ -31,7 +31,7 @@ import os
 
 
 class Include(Statement):
-	name=("include",)
+	name="include"
 	doc="load a configuration file"
 	long_doc = """\
 include 'NAME'

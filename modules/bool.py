@@ -24,28 +24,28 @@ from homevent.check import Check,register_condition,unregister_condition
 from homevent.module import Module
 
 class TrueCheck(Check):
-	name=("true",)
+	name="true"
 	doc="always true."
 	def check(self,*args):
 		assert not args,"Truth doesn't have arguments"
 		return True
 
 class FalseCheck(Check):
-	name=("false",)
+	name="false"
 	doc="always false."
 	def check(self,*args):
 		assert not args,"Falsehood doesn't have arguments"
 		return False
 
 class NoneCheck(Check):
-	name=("null",)
+	name="null"
 	doc="check if the argument has a value."
 	def check(self,*args):
 		assert len(args)==1,u"The ‹null› check requires one argument"
 		return args[0] is None
 
 class EqualCheck(Check):
-	name=("equal",)
+	name="equal"
 	doc="check if the arguments are the same."
 	def check(self,*args):
 		assert len(args)==2,u"The ‹equal› check requires two arguments"
@@ -57,7 +57,7 @@ class EqualCheck(Check):
 			return str(a) == str(b)
 
 class LessCheck(Check):
-	name=("less",)
+	name="less"
 	doc="check if the first argument is smaller."
 	def check(self,*args):
 		assert len(args)==2,u"The ‹less› check requires two arguments"
@@ -69,7 +69,7 @@ class LessCheck(Check):
 			return str(a) < str(b)
 
 class GreaterCheck(Check):
-	name=("greater",)
+	name="greater"
 	doc="check if the first argument is larger."
 	def check(self,*args):
 		assert len(args)==2,u"The ‹greater› check requires two arguments"

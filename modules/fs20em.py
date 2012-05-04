@@ -243,7 +243,7 @@ class em2_handler(em_handler):
 
 
 class FS20em(AttributedStatement):
-	name = ("fs20","em")
+	name = "fs20 em"
 	doc = "declare an FS20 EM monitor"
 	long_doc = u"""\
 fs20 em ‹name…›:
@@ -271,7 +271,7 @@ Known types:
 		EM(SName(event), self.group,self.code,ctx, self.faktor,self.offset, self.slot)
 
 class FS20emScale(Statement):
-	name = ("scale",)
+	name = "scale"
 	doc = "adapt values"
 	long_doc=u"""\
 scale ‹type› ‹factor› ‹offset›
@@ -293,7 +293,7 @@ scale ‹type› ‹factor› ‹offset›
 FS20em.register_statement(FS20emScale)
 
 class FS20emSlot(Statement):
-	name = ("timeslot",)
+	name = "timeslot"
 	doc = "create a time slot"
 	long_doc=u"""\
 timeslot [‹seconds›]
@@ -315,7 +315,7 @@ timeslot [‹seconds›]
 FS20em.register_statement(FS20emSlot)
 
 class FS20emcode(Statement):
-	name = ("code",)
+	name = "code"
 	doc = "declare the code type and number for an EM device"
 	long_doc = u"""\
 code ‹type› ‹id›
@@ -347,7 +347,7 @@ FS20em.register_statement(FS20emcode)
 
 
 class FS20emVal(Statement):
-	name = ("set","fs20","em")
+	name = "set fs20 em"
 	doc = "Set the last-reported value for a device"
 	long_doc = u"""\
 set fs20 em ‹type› ‹value› ‹name…›

@@ -68,7 +68,7 @@ monitor input ‹name…›
 		yield ("var",self.var)
 
 class MonitorUpdate(AttributedStatement):
-	name = ("update","monitor")
+	name = "update monitor"
 	doc = "change the parameters of an existing monitor"
 	long_doc="""\
 This statement updates the parameters of an existing monitor.
@@ -101,7 +101,7 @@ for cmd in (MonitorDelayFor, MonitorDelayUntil, MonitorRequire, \
 
 
 class MonitorStart(Statement):
-	name = ("start","monitor")
+	name = "start monitor"
 	doc = "Start a monitor"
 	long_doc=u"""\
 start monitor ‹name›
@@ -115,7 +115,7 @@ start monitor ‹name›
 		return m.up()
 
 class MonitorStop(Statement):
-	name = ("stop","monitor")
+	name = "stop monitor"
 	doc = "Stop a monitor"
 	long_doc=u"""\
 stop monitor ‹name›
@@ -129,7 +129,7 @@ stop monitor ‹name›
 		return m.down()
 
 class MonitorSet(Statement):
-	name=("set","monitor")
+	name="set monitor"
 	doc="feed a value to a passive monitor"
 	long_doc="""\
 set monitor VALUE NAME
@@ -144,7 +144,7 @@ set monitor VALUE NAME
 		m.watcher.put(event[0], block=True, timeout=0.1)
 
 class ExistsMonitorCheck(Check):
-	name=("exists","monitor")
+	name="exists monitor"
 	doc="check if a monitor exists at all"
 	def check(self,*args):
 		if not len(args):
@@ -153,7 +153,7 @@ class ExistsMonitorCheck(Check):
 		return name in Monitors
 
 class RunningMonitorCheck(Check):
-	name=("running","monitor")
+	name="running monitor"
 	doc="check if a monitor is active"
 	def check(self,*args):
 		if not len(args):
@@ -163,7 +163,7 @@ class RunningMonitorCheck(Check):
 
 
 class WaitingMonitorCheck(Check):
-	name=("waiting","monitor")
+	name="waiting monitor"
 	doc="check if a passive monitor is requesting data"
 	def check(self,*args):
 		if not len(args):
@@ -174,7 +174,7 @@ class WaitingMonitorCheck(Check):
 
 
 class VarMonitorHandler(Statement):
-	name=("var","monitor")
+	name="var monitor"
 	doc="assign a variable to the current value of a monitor"
 	long_doc=u"""\
 var monitor NAME name...

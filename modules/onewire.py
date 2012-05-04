@@ -35,7 +35,7 @@ import struct
 buses = {}
 
 class OWFSconnect(NetConnect):
-	name = ("connect","onewire")
+	name = "connect onewire"
 	doc = "connect to an OWFS server"
 	long_doc="""\
 connect onewire NAME [[host] port]
@@ -51,7 +51,7 @@ connect onewire NAME [[host] port]
 
 
 class OWFSdisconnect(Statement):
-	name = ("disconnect","onewire")
+	name = "disconnect onewire"
 	doc = "disconnect from an OWFS server"
 	long_doc="""\
 disconnect onewire NAME
@@ -101,7 +101,7 @@ onewire dev attr
 
 
 class OWFSset(Statement):
-	name=("set","onewire")
+	name="set onewire"
 	doc="send a value to a onewire device"
 	long_doc=u"""\
 set onewire VALUE dev attr
@@ -119,7 +119,7 @@ set onewire VALUE dev attr
 
 
 class OWFSdir(AttributedStatement):
-	name=("dir","onewire")
+	name="dir onewire"
 	doc="List a directory on the onewire bus"
 	long_doc="""\
 dir onewire NAME path...
@@ -160,7 +160,7 @@ dir onewire NAME path...
 			print >>ctx.out,"."
 
 class OWFSname(Statement):
-	name=("name",)
+	name="name"
 	dest = None
 	doc="specify the name of the 1wire connection"
 
@@ -177,7 +177,7 @@ OWFSdir.register_statement(OWFSname)
 
 
 class OWFSlist(Statement):
-	name=("list","onewire")
+	name="list onewire"
 	doc="List known onewire buses"
 	long_doc="""\
 list onewire [NAME]
@@ -211,7 +211,7 @@ list onewire [NAME]
 
 
 class OWFSconnected(Check):
-	name=("connected","onewire")
+	name="connected onewire"
 	doc="Test if a onewire device is accessible"
 	def check(self,*args):
 		assert len(args),"This test requires the device ID"
@@ -227,7 +227,7 @@ class OWFSconnected(Check):
 
 
 class OWFSconnectedbus(Check):
-	name=("connected","onewire","bus")
+	name="connected onewire bus"
 	doc="Test if the named onewire server connection is running"
 	def check(self,*args):
 		assert len(args),"This test requires the connection name"
@@ -240,14 +240,14 @@ class OWFSconnectedbus(Check):
 
 
 class OWFSexists(Check):
-	name=("exists","onewire")
+	name="exists onewire"
 	doc="Test if the onewire device exists"
 	def check(self,*args):
 		assert len(args)==1,"This test requires the connection name"
 		return args[0].lower() in devices
 
 class OWFSexistsbus(Check):
-	name=("exists","onewire","bus")
+	name="exists onewire bus"
 	doc="Test if the named onewire server connection exists"
 	def check(self,*args):
 		assert len(args)==1,"This test requires the connection name"
@@ -371,7 +371,7 @@ class OWFSwindmon(Monitor):
 
 
 class OWFSmonitor(MonitorHandler):
-	name=("monitor","onewire")
+	name="monitor onewire"
 	monitor = OWFSmon
 	doc="watch a value on the onewire bus"
 	long_doc="""\
@@ -394,7 +394,7 @@ monitor onewire ‹device› ‹attribute›
 
 
 class MonitorSwitch(Statement):
-	name = ("switch",)
+	name = "switch"
 	doc = "switch between resolutions"
 	long_doc=u"""\
 switch ‹port› ‹low› ‹high›
@@ -424,7 +424,7 @@ MonitorHandler.register_statement(MonitorSwitch)
 
 
 class MonitorWind(Statement):
-	name = ("wind",)
+	name = "wind"
 	doc = "declare a wind instrument"
 	long_doc=u"""\
 wind ‹offset› ‹weight›
@@ -465,7 +465,7 @@ MonitorHandler.register_statement(MonitorWind)
 
 
 class OWFSscan(Statement):
-	name=("scan","onewire")
+	name="scan onewire"
 	doc="(Re-)scan a onewire bus"
 	long_doc="""\
 scan onewire NAME

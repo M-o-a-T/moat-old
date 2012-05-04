@@ -167,7 +167,7 @@ def load_module(*m):
 
 
 class Load(Statement):
-	name=("load",)
+	name="load"
 	doc="load a module"
 	long_doc = """\
 load NAME [args]...
@@ -181,7 +181,7 @@ load NAME [args]...
 
 
 class LoadDir(Statement):
-	name=("module","dir")
+	name="module dir"
 	doc="list or change the module directory list"
 	long_doc = """\
 load dir
@@ -224,7 +224,7 @@ load dir - "NAME"
 				raise SyntaxError("Usage: loaddir [ [ - ] name ]")
 
 class ModuleExists(Check):
-	name=("exists","module")
+	name="exists module"
 	doc="check if that module is loaded"
 	def check(self,*args):
 		assert args,"Need a module name (and optional parameters)"

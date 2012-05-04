@@ -33,7 +33,7 @@ from homevent.twist import Jobber
 import gevent
 
 class TriggerHandler(AttributedStatement,Jobber):
-	name=("trigger",)
+	name="trigger"
 	doc="send an event"
 	long_doc="""\
 trigger FOO...
@@ -62,7 +62,7 @@ trigger FOO...
 			# so that they can be stopped when ending the program
 
 class TriggerLog(Statement):
-	name = ("log",)
+	name = "log"
 	doc = "set log level"
 	long_doc=u"""\
 log LEVEL
@@ -85,7 +85,7 @@ log LEVEL
 TriggerHandler.register_statement(TriggerLog)
 
 class TriggerRecurse(Statement):
-	name = ("recursive",)
+	name = "recursive"
 	doc = "mark the execution context as recursive"
 	long_doc=u"""\
 recursive
@@ -102,7 +102,7 @@ recursive
 			raise SyntaxError(u'Usage: recursive')
 
 class TriggerSync(Statement):
-	name = ("sync",)
+	name = "sync"
 	doc = "execute the event synchronously"
 	long_doc=u"""\
 sync

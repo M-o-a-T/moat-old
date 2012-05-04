@@ -240,7 +240,7 @@ class en2_handler(en_handler):
 
 
 class FS20en(AttributedStatement):
-	name = ("fs20","en")
+	name = "fs20 en"
 	doc = "declare an FS20 en monitor"
 	long_doc = u"""\
 fs20 en ‹name…›:
@@ -268,7 +268,7 @@ Known types:
 		en(SName(event), self.group,self.code,ctx, self.faktor, self.slot, self.delta)
 
 class FS20enDelta(Statement):
-        name = ("delta",)
+        name = "delta"
         doc = "report difference"
         long_doc=u"""\
 delta
@@ -290,7 +290,7 @@ FS20en.register_statement(FS20enDelta)
 
 
 class FS20enScale(Statement):
-	name = ("scale",)
+	name = "scale"
 	doc = "adapt values"
 	long_doc=u"""\
 scale ‹type› ‹factor›
@@ -309,7 +309,7 @@ scale ‹type› ‹factor›
 FS20en.register_statement(FS20enScale)
 
 class FS20enSlot(Statement):
-	name = ("timeslot",)
+	name = "timeslot"
 	doc = "create a time slot"
 	long_doc=u"""\
 timeslot [‹seconds›]
@@ -331,7 +331,7 @@ timeslot [‹seconds›]
 FS20en.register_statement(FS20enSlot)
 
 class FS20encode(Statement):
-	name = ("code",)
+	name = "code"
 	doc = "declare the code type and number for an en device"
 	long_doc = u"""\
 code ‹type› ‹id›
@@ -363,7 +363,7 @@ FS20en.register_statement(FS20encode)
 
 
 class FS20enVal(Statement):
-	name = ("set","fs20","en")
+	name = "set fs20 en"
 	doc = "Set the last-reported value for a device"
 	long_doc = u"""\
 set fs20 en ‹type› ‹value› ‹name…›

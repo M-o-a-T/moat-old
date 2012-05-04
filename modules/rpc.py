@@ -184,7 +184,7 @@ This command binds a RPyC server to the given port.
 		RPCserver(dest,host,port)
 
 class RPCname(Statement):
-	name=("name",)
+	name="name"
 	dest = None
 	doc="specify the name of a new TCP connection"
 

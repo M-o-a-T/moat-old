@@ -189,7 +189,7 @@ register_worker(Shutdown_Collections("free all collections"))
 
 class ShutdownHandler(Statement):
 	"""A command handler to stop the whole thing."""
-	name=("shutdown",)
+	name="shutdown"
 	doc="stops executing the program."
 	long_doc="""\
 shutdown      stops executing the program.

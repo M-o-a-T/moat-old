@@ -174,7 +174,7 @@ class logwrite(object):
 			self.log(None,l)
 
 class ctxdump(Statement):
-	name=("dump","context")
+	name="dump context"
 	doc="dump the variable context"
 	def run(self,ctx,**k):
 		event = self.params(ctx)

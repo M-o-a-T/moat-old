@@ -370,7 +370,7 @@ class Monitor(Collected,Jobber):
 monitor_nr = 0
 	
 class MonitorHandler(AttributedStatement):
-	name=("monitor","passive")
+	name="monitor passive"
 	doc="A monitor which waits for values"
 	long_doc="""\
 monitor passive
@@ -403,7 +403,7 @@ monitor passive
 
 	
 class MonitorName(Statement):
-	name = ("name",)
+	name = "name"
 	doc = "name a Monitor handler"
 	long_doc=u"""\
 name ‹whatever you want›
@@ -418,7 +418,7 @@ MonitorHandler.register_statement(MonitorName)
 
 
 class MonitorDelayFor(Statement):
-	name = ("delay","for")
+	name = "delay for"
 	doc = "Interval between measurements"
 	long_doc=u"""\
 delay for ‹time interval›
@@ -439,7 +439,7 @@ MonitorHandler.register_statement(MonitorDelayFor)
 
 
 class MonitorDelayUntil(Statement):
-	name = ("delay","until")
+	name = "delay until"
 	doc = "Time for measurements"
 	long_doc=u"""\
 delay until ‹time interval›
@@ -457,7 +457,7 @@ MonitorHandler.register_statement(MonitorDelayUntil)
 
 
 class MonitorRequire(Statement):
-	name = ("require",)
+	name = "require"
 	doc = "Interval for valid measurements"
 	long_doc=u"""\
 require ‹num› ‹range›
@@ -492,7 +492,7 @@ MonitorHandler.register_statement(MonitorRequire)
 
 
 class MonitorRetry(Statement):
-	name = ("retry",)
+	name = "retry"
 	doc = "Number of valid measurements"
 	long_doc=u"""\
 retry ‹num› ‹delay›
@@ -535,7 +535,7 @@ MonitorHandler.register_statement(MonitorRetry)
 
 
 class MonitorAlarm(Statement):
-	name = ("alarm",)
+	name = "alarm"
 	doc = "Range of permissible change"
 	long_doc=u"""\
 alarm ‹range›
@@ -560,7 +560,7 @@ MonitorHandler.register_statement(MonitorAlarm)
 
 
 class MonitorDiff(Statement):
-	name = ("diff",)
+	name = "diff"
 	doc = "Minimum change for a new event to be triggered"
 	long_doc=u"""\
 diff ‹amount›
@@ -585,7 +585,7 @@ MonitorHandler.register_statement(MonitorDiff)
 
 
 class MonitorHigh(Statement):
-	name = ("high",)
+	name = "high"
 	doc = "Upper alarm threshold"
 	long_doc=u"""\
 high ‹value› [‹ok_value›]
@@ -620,7 +620,7 @@ MonitorHandler.register_statement(MonitorHigh)
 
 
 class MonitorLow(Statement):
-	name = ("low",)
+	name = "low"
 	doc = "Lower alarm threshold"
 	long_doc=u"""\
 low ‹value› [‹ok_value›]
@@ -656,7 +656,7 @@ MonitorHandler.register_statement(MonitorLow)
 
 
 class MonitorLimit(Statement):
-	name = ("limit",)
+	name = "limit"
 	doc = "permissible range"
 	long_doc=u"""\
 limit ‹low› ‹high›
@@ -689,7 +689,7 @@ MonitorHandler.register_statement(MonitorLimit)
 
 
 class MonitorScale(Statement):
-	name = ("scale",)
+	name = "scale"
 	doc = "adapt values"
 	long_doc=u"""\
 scale ‹factor› ‹offset›
@@ -715,7 +715,7 @@ MonitorHandler.register_statement(MonitorScale)
 
 
 class MonitorDelta(Statement):
-	name = ("delta",)
+	name = "delta"
 	doc = "report difference"
 	long_doc=u"""\
 delta
@@ -737,7 +737,7 @@ MonitorHandler.register_statement(MonitorDelta)
 
 
 class MonitorStopped(Statement):
-	name = ("stopped",)
+	name = "stopped"
 	doc = "start disabled"
 	long_doc=u"""\
 stopped

@@ -86,23 +86,23 @@ class sbr(object):
 		log(None,"InputComplex %s(%d): %s" % (self.name,self.sid,self.args))
 
 class FooHandler(sbr,Statement):
-	name=("foo",)
+	name="foo"
 	doc="We foo around."
 
 class BarHandler(sbr,ComplexStatement):
-	name=("foo","bar",)
+	name="foo bar"
 	doc="Have a bar, man!"
 	
 class ForHandler(sbr,ComplexStatement):
-	name=("for",)
+	name="for"
 	doc="for you!"
 	
 class WhatHandler(sbr,ComplexStatement):
-	name=("what",)
+	name="what"
 	doc="What is this?"
 
 class FoiledHandler(sbr,Statement):
-	name=("foiled",)
+	name="foiled"
 	doc="not clingfilm"
 
 BarHandler.register_statement(WhatHandler)

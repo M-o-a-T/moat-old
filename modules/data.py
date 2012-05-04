@@ -38,7 +38,7 @@ from gevent import spawn
 from gevent.queue import Queue
 
 class List(Statement):
-	name=("list",)
+	name="list"
 	doc="list of / show details for various parts of the system"
 	long_doc=u"""\
 list
@@ -95,20 +95,20 @@ list ‹type› ‹name…›
 					job = spawn(getter,self.ctx.out,q)
 					flatten(q,(c,))
 				finally:
-					with log_wait("list "+str(event)):
-						q.put(None)
-						job.join()
+#					with log_wait("list "+str(event)):
+					q.put(None)
+					job.join()
 
 		except Exception as e:
 			fix_exception(e)
 			print >>self.ctx.out, "* ERROR *",repr(e)
 			print_exception(e,file=self.ctx.out)
-
+		finally:
 			print >>self.ctx.out, "."
 
 
 class Del(Statement):
-	name=("del",)
+	name="del"
 	doc="delete a part of the system"
 	long_doc=u"""\
 del ‹type› ‹name…›

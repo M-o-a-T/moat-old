@@ -25,21 +25,21 @@ from homevent.module import Module
 import os
 
 class ExistsPathCheck(Check):
-	name=("exists","path")
+	name="exists path"
 	doc="Check if there's something behind that path"
 	def check(self,*args):
 		assert len(args) == 1,"Need exactly one argument (file name)"
 		return os.path.exists(args[0])
 
 class ExistsFileCheck(Check):
-	name=("exists","file")
+	name="exists file"
 	doc="Check if there's a file at that path"
 	def check(self,*args):
 		assert len(args) == 1,"Need exactly one argument (file name)"
 		return os.path.isfile(args[0])
 
 class ExistsDirCheck(Check):
-	name=("exists","directory")
+	name="exists directory"
 	doc="Check if there's a directory at that path"
 	def check(self,*args):
 		assert len(args) == 1,"Need exactly one argument (directory name)"

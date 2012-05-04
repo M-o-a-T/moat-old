@@ -54,7 +54,7 @@ class OutLogger(Logger):
 
 
 class LogHandler(Statement):
-	name=("log",)
+	name="log"
 	doc="configure reporting"
 	long_doc="""\
 log DEBUG "foo bar baz"
@@ -98,7 +98,7 @@ log
 
 
 class LogLevelHandler(Statement):
-	name=("log","limit")
+	name="log limit"
 	doc="limit logging level"
 	long_doc="""\
 log limit event DEBUG

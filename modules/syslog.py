@@ -142,7 +142,7 @@ def gen_addr(a="/dev/log",b=None):
 	return (a,b)
 
 class SyslogHandler(Statement):
-	name=("syslog",)
+	name="syslog"
 	doc="configure reporting to syslog"
 	long_doc=u"""\
 syslog ‹facility› ‹level› [‹destination›]

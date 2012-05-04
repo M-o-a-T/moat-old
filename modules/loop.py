@@ -33,7 +33,7 @@ from homevent.check import check_condition
 from twisted.internet import defer
 
 class WhileStatement(MainStatementList):
-	name=("while",)
+	name="while"
 	doc="while test: [statements]"
 	long_doc="""\
 The "while" statement executes a block over and over, as long as a
@@ -63,7 +63,7 @@ Syntax:
 
 
 class RepeatStatement(WhileStatement):
-	name=("repeat",)
+	name="repeat"
 	doc="repeat: [statements]"
 	long_doc="""\
 The "repeat" statement executes a block over and over.

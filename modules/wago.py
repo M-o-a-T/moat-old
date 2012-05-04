@@ -348,7 +348,7 @@ class WAGOqueue(MsgQueue):
 
 
 class WAGOconnect(NetConnect):
-	name = ("connect","wago")
+	name = "connect wago"
 	dest = None
 	doc = "connect to a Wago server"
 	port = 59995
@@ -420,7 +420,7 @@ class WAGOexists(Check):
 
 
 class WAGOdisconnect(Statement):
-	name = ("disconnect","wago")
+	name = "disconnect wago"
 	doc = "disconnect from an WAGO server"
 	long_doc="""\
 disconnect wago NAME
@@ -675,7 +675,7 @@ send wago ‹text…› :to ‹name›
 
 @WAGOraw.register_statement
 class WAGOto(Statement):
-	name=("to",)
+	name="to"
 	dest = None
 	doc="specify the (multi-word) name of the connection"
 

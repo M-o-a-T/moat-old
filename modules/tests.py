@@ -54,7 +54,7 @@ class Tester(Monitor):
 		
 
 class TestMonitor(MonitorHandler):
-	name=("monitor","test")
+	name="monitor test"
 	monitor = Tester
 	doc="create a fake sequence"
 	long_doc="""\

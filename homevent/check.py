@@ -47,7 +47,7 @@ class Check(Statement):
 
 
 class Conditions(ComplexStatement):
-	name = ("conditions",)
+	name = "conditions"
 	doc = "List of conditions you can use in 'if' statements."
 	long_doc = """\
 help conditions : list the things you can test for.

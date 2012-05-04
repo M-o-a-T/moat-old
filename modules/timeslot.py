@@ -37,7 +37,7 @@ from twisted.internet import defer
 
 
 class TimeslotHandler(AttributedStatement, Timeslotted):
-	name=("timeslot",)
+	name="timeslot"
 	doc="A timeslot which waits for values"
 	long_doc="""\
 timeslot ‹name…›
@@ -64,7 +64,7 @@ timeslot ‹name…›
 			return m.up()
 	
 class TimeslotInterval(Statement):
-	name = ("every",)
+	name = "every"
 	doc = "Interval between events"
 	long_doc=u"""\
 every ‹time interval›
@@ -81,7 +81,7 @@ TimeslotHandler.register_statement(TimeslotInterval)
 
 
 class TimeslotStopped(Statement):
-	name = ("stopped",)
+	name = "stopped"
 	doc = "start disabled"
 	long_doc=u"""\
 stopped
@@ -97,7 +97,7 @@ TimeslotHandler.register_statement(TimeslotStopped)
 
 	
 class TimeslotDuration(Statement):
-	name = ("for",)
+	name = "for"
 	doc = "slot length"
 	long_doc=u"""\
 for ‹time interval›
@@ -117,7 +117,7 @@ TimeslotHandler.register_statement(TimeslotDuration)
 
 	
 class TimeslotOffset(Statement):
-	name = ("offset",)
+	name = "offset"
 	doc = "Event trigger delay"
 	long_doc=u"""\
 offset ‹0…1›
@@ -138,7 +138,7 @@ TimeslotHandler.register_statement(TimeslotOffset)
 
 	
 class TimeslotUpdate(AttributedStatement):
-	name = ("update","timeslot")
+	name = "update timeslot"
 	doc = "change the parameters of an existing timeslot"
 	long_doc="""\
 This statement updates the parameters of an existing timeslot.
@@ -163,7 +163,7 @@ for cmd in (TimeslotInterval, TimeslotDuration, TimeslotOffset):
 
 
 class TimeslotStart(AttributedStatement):
-	name = ("start","timeslot")
+	name = "start timeslot"
 	doc = "Start a timeslot"
 	long_doc=u"""\
 start timeslot ‹name›
@@ -180,7 +180,7 @@ start timeslot ‹name›
 		return m.up(resync=self.now)
 
 class TimeslotNow(Statement):
-	name = ("Now",)
+	name = "now"
 	doc = "immediately start or resync the slot"
 	long_doc=u"""\
 now
@@ -196,7 +196,7 @@ TimeslotStart.register_statement(TimeslotNow)
 
 	
 class TimeslotStop(Statement):
-	name = ("stop","timeslot")
+	name = "stop timeslot"
 	doc = "Stop a timeslot"
 	long_doc=u"""\
 stop timeslot ‹name›
@@ -211,7 +211,7 @@ stop timeslot ‹name›
 
 
 class ExistsTimeslotCheck(Check):
-	name=("exists","timeslot")
+	name="exists timeslot"
 	doc="check if a timeslot exists at all"
 	def check(self,*args):
 		if not len(args):
@@ -220,7 +220,7 @@ class ExistsTimeslotCheck(Check):
 		return name in Timeslots
 
 class RunningTimeslotCheck(Check):
-	name=("running","timeslot")
+	name="running timeslot"
 	doc="check if a timeslot is active"
 	def check(self,*args):
 		if not len(args):
@@ -230,7 +230,7 @@ class RunningTimeslotCheck(Check):
 
 
 class DuringTimeslotCheck(Check):
-	name=("in","timeslot")
+	name="in timeslot"
 	doc="check if we're within a timeslot"
 	def check(self,*args):
 		if not len(args):
@@ -240,7 +240,7 @@ class DuringTimeslotCheck(Check):
 
 
 class VarTimeslotHandler(Statement):
-	name=("var","timeslot")
+	name="var timeslot"
 	doc="assign a variable to the current state of a timeslot"
 	long_doc=u"""\
 var timeslot NAME name...

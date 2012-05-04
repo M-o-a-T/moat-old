@@ -112,7 +112,7 @@ class Avg(Collected):
 
 
 class AvgHandler(Statement):
-	name=("avg",)
+	name="avg"
 	doc="An average-value accumulator."
 	long_doc=u"""\
 avg ‹name…›
@@ -126,7 +126,7 @@ avg ‹name…›
 
 	
 class AvgSet(Statement):
-	name=("set","avg")
+	name="set avg"
 	doc="feed a value to an averager"
 	long_doc="""\
 set avg VALUE NAME
@@ -141,7 +141,7 @@ set avg VALUE NAME
 		m.feed(float(event[0]))
 
 class ExistsAvgCheck(Check):
-	name=("exists","avg")
+	name="exists avg"
 	doc="check if an averager exists"
 	def check(self,*args):
 		if not len(args):
@@ -150,7 +150,7 @@ class ExistsAvgCheck(Check):
 		return name in Avgs
 
 class VarAvgHandler(Statement):
-	name=("var","avg")
+	name="var avg"
 	doc="assign a variable to the current value of an averager"
 	long_doc=u"""\
 var avg NAME name...

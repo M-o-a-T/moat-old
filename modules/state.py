@@ -133,7 +133,7 @@ class SavedState(State):
 
 	
 class StateHandler(AttributedStatement):
-	name=("state",)
+	name="state"
 	doc="Create a state variable"
 	long_doc="""\
 state name...
@@ -166,7 +166,7 @@ state name...
 			s.working = False
 
 class ValueHandler(Statement):
-	name=("value",)
+	name="value"
 	doc="Set the initial value"
 	long_doc="""\
 value ‹whatever›
@@ -187,7 +187,7 @@ value ‹whatever›
 StateHandler.register_statement(ValueHandler)
 
 class SavedHandler(Statement):
-	name=("saved",)
+	name="saved"
 	doc="Keep the state between runs"
 	long_doc="""\
 saved 
@@ -202,7 +202,7 @@ saved
 StateHandler.register_statement(SavedHandler)
 
 class TriggerHandler(Statement):
-	name=("trigger",)
+	name="trigger"
 	doc="Signal when a state is created"
 	long_doc="""\
 trigger new
@@ -226,7 +226,7 @@ StateHandler.register_statement(TriggerHandler)
 
 
 class SetStateHandler(Statement):
-	name=("set","state")
+	name="set state"
 	doc="set some state to something"
 	long_doc="""\
 set state X name...
@@ -263,7 +263,7 @@ set state X name...
 			s.working = False
 
 class ForgetStateHandler(Statement):
-	name=("forget","state")
+	name="forget state"
 	doc="delete a saved state from the persistent database"
 	long_doc="""\
 forget state name...
@@ -286,7 +286,7 @@ forget state name...
 
 
 class VarStateHandler(Statement):
-	name=("var","state")
+	name="var state"
 	doc="assign a variable to report a state"
 	long_doc=u"""\
 var state NAME name...
@@ -301,7 +301,7 @@ var state NAME name...
 
 
 class StateCheck(Check):
-	name=("state",)
+	name="state"
 	doc="check if a state has a particular value"
 	def check(self,*args):
 		if len(args) < 2:
@@ -312,7 +312,7 @@ class StateCheck(Check):
 
 
 class StateLockedCheck(Check):
-	name=("locked","state")
+	name="locked state"
 	doc="check if a state is being updated"
 	def check(self,*args):
 		if len(args) < 2:
@@ -321,7 +321,7 @@ class StateLockedCheck(Check):
 
 
 class LastStateCheck(Check):
-	name=("last","state")
+	name="last state"
 	doc="check if a state had a particular value before"
 	def check(self,*args):
 		if len(args) < 2:
@@ -337,7 +337,7 @@ class LastStateCheck(Check):
 
 
 class ExistsStateCheck(Check):
-	name=("exists","state")
+	name="exists state"
 	doc="check if a state exists at all"
 	def check(self,*args):
 		if len(args) < 1:
@@ -347,7 +347,7 @@ class ExistsStateCheck(Check):
 
 
 class SavedStateCheck(Check):
-	name=("saved","state")
+	name="saved state"
 	doc="check if a state is stored in the persistent database"
 
 	def check(self,*args):

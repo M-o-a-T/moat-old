@@ -197,7 +197,7 @@ class OnEventWorker(Collected,iWorker):
 
 
 class OnEventHandler(MainStatementList):
-	name=("on",)
+	name="on"
 	doc="on [event...]: [statements]"
 	long_doc="""\
 The OnEvent handler executes a statement (or a statement sequence)
@@ -272,7 +272,7 @@ Every "*foo" in the event description is mapped to the corresponding
 
 
 class OnPrio(Statement):
-	name = ("prio",)
+	name = "prio"
 	doc = "prioritize event handler"
 	immediate = True
 	long_doc="""\
@@ -294,7 +294,7 @@ the order they (attempt to) run in is undefined.
 
 
 class OnName(Statement):
-	name = ("name",)
+	name = "name"
 	doc = "name an event handler"
 	immediate = True
 	long_doc="""\
@@ -309,7 +309,7 @@ This statement assigns a name to an event handler.
 
 
 class OnDoc(Statement):
-	name = ("doc",)
+	name = "doc"
 	doc = "document an event handler"
 	immediate = True
 	long_doc="""\
@@ -324,7 +324,7 @@ This statement assigns a documentation string to an event handler.
 
 
 class OnSkip(Statement):
-	name = ("next","handler")
+	name = "next handler"
 	doc = u"skip ahead to the next on… event handler"
 	long_doc="""\
 This statement causes processing to skip ahead to the next-higher-priority
@@ -336,7 +336,7 @@ Commands in the same handler, after this one, are *not* executed.
 
 
 class OnExistsCheck(Check):
-	name=("exists","on")
+	name="exists on"
 	doc="check if a handler exists"
 	long_doc="""\
 if exists on FOO BAR: check if a handler for this event exists

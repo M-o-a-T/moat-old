@@ -240,7 +240,7 @@ A pulse density modulated signal with constant 'off' time
 
 
 class PWMHandler(AttributedStatement):
-	name=("pwm",)
+	name="pwm"
 	doc="create a pulse-width handler"
 	long_doc=u"""\
 pwm NAME…: type 
@@ -276,7 +276,7 @@ class PWMtype(Statement,HelpSub):
 	helpsub = PWMtypes
 	helpsubname = "type"
 
-	name = ("type",)
+	name = "type"
 	doc = "specify the kind of PWM"
 	long_doc=u"""\
 type ‹kind›
@@ -291,7 +291,7 @@ PWMHandler.register_statement(PWMtype)
 	
 
 class PWMinterval(Statement):
-	name = ("interval",)
+	name = "interval"
 	doc = "specify the timing base for a PWM controller"
 	long_doc=u"""\
 interval ‹timespec›
@@ -307,7 +307,7 @@ PWMHandler.register_statement(PWMinterval)
 	
 
 class PWMUpdate(AttributedStatement):
-	name = ("update","pwm")
+	name = "update pwm"
 	doc = "change the parameters of an existing PWM controller"
 	long_doc="""\
 This statement updates the parameters of a PWM controller.
@@ -332,7 +332,7 @@ PWMUpdate.register_statement(PWMinterval)
 
 
 class PWMSet(Statement):
-	name = ("set","pwm")
+	name = "set pwm"
 	doc = "change the destination value of an existing PWM controller"
 	long_doc="""\
 This statement sets a PWM controller's value.
@@ -348,7 +348,7 @@ The PWM will not do anything before you do that.
 
 
 class ExistsPWMCheck(Check):
-	name=("exists","pwm")
+	name="exists pwm"
 	doc="check if a PWM controller exists at all"
 	def check(self,*args):
 		if not len(args):
@@ -357,7 +357,7 @@ class ExistsPWMCheck(Check):
 		return name in PWMs
 
 class OnPWMCheck(Check):
-	name=("pwm",)
+	name="pwm"
 	doc="check if a PWM is turned on"
 	def check(self,*args):
 		if not len(args):
@@ -367,7 +367,7 @@ class OnPWMCheck(Check):
 
 
 class VarPWMHandler(Statement):
-	name=("var","pwm")
+	name="var pwm"
 	doc="assign a variable to the PWM's value"
 	long_doc=u"""\
 var pwm NAME name...

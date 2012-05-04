@@ -140,7 +140,7 @@ class AuthKey(Collected):
 		
 
 class SSHdir(Statement):
-	name = ("ssh","directory")
+	name = "ssh directory"
 	doc = "set the directory where the SSH module stores its files"
 	long_doc="""\
 Usage: ssh directory "/some/path"
@@ -200,7 +200,7 @@ You need to call this exactly once.
 
 
 class SSHlisten(Statement):
-	name = ("listen","ssh")
+	name = "listen ssh"
 	doc = "listen on a specific port for SSH terminal connections"
 	long_doc="""\
 This statement causes the HomEvenT process to listen for SSH connections
@@ -220,7 +220,7 @@ on a specific port. (There is no default port.)
 
 
 class SSHauth(Statement):
-	name = ("auth","ssh")
+	name = "auth ssh"
 	doc = "authorize a user to connect"
 	long_doc=u"""\
 Usage: auth ssh ‹username› "‹ssh pubkey›"

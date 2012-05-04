@@ -40,7 +40,7 @@ from twisted.internet import defer
 import sys
 
 class TryStatement(MainStatementList):
-	name=("try",)
+	name="try"
 	doc="try: [statements]"
 	long_doc="""\
 The "try" statement executes a block, but continues after an error.
@@ -84,7 +84,7 @@ Syntax:
 
 
 class CatchStatement(TryStatement):
-	name=("catch",)
+	name="catch"
 	doc="catch: [statements]"
 	long_doc="""\
 The "catch" statement executes a block only if a previous "try" block
@@ -162,7 +162,7 @@ Implementation restriction: can't be used at top level. (Wrap with 'block:'.)
 	
 
 class ReportStatement(Statement):
-	name=("log","error")
+	name="log error"
 	doc="log error [Severity]"
 	long_doc="""\
 If running in a "catch" block, this statement logs the current error.
@@ -189,7 +189,7 @@ Syntax:
 
 
 class TriggerStatement(Statement):
-	name=("trigger","error")
+	name="trigger error"
 	doc=u"trigger error NAME…"
 	long_doc=u"""\
 This command causes an error to be reported.
