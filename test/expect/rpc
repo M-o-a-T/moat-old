@@ -1,0 +1,145 @@
+NEW: ‹ConditionalWorkSequence:7 (4)›
+   : │  id: 7
+   : │  call count: 0
+   : │  EVENT: startup
+   : └1╴... done.
+EVENT: startup
+END: startup
+0 +WAIT 1 start job ‹Collected Parser:n1›
+0 -WAIT 1 start job ‹Collected Parser:n1›
+0 +WAIT 2 start job <homevent.tokize.tokizer obj>
+0 -WAIT 2 start job <homevent.tokize.tokizer obj>
+0 +WAIT 3 start job ‹Collected RPCserver:foo›
+0 -WAIT 3 start job ‹Collected RPCserver:foo›
+0 +WAIT 4 start job ‹Waiter server ??›
+0 -WAIT 4 start job ‹Waiter server ??›
+NEW: ‹ConditionalWorkSequence:8 (4)›
+   : │  id: 8
+   : │  call count: 0
+   : │  EVENT: wait¦start¦1.0¦server
+   : └1╴... done.
+EVENT: wait¦start¦1.0¦server
+END: wait¦start¦1.0¦server
+1 CONNECTING
+NEW: ‹ConditionalWorkSequence:9 (4)›
+   : │  id: 9
+   : │  call count: 0
+   : │  EVENT: rpc¦connect¦foo¦n1
+   : └1╴... done.
+EVENT: rpc¦connect¦foo¦n1
+END: rpc¦connect¦foo¦n1
+1 Name('event',)
+1 Name('log',)
+1 Name('module',)
+1 Name('net',)
+1 Name('netserver',)
+1 Name('on',)
+1 Name('parser',)
+1 Name('rpc', 'connection')
+1 Name('rpc', 'server')
+1 Name('wait',)
+1 Name('worker',)
+1 .
+1 (Name(u'foo',),)
+1 .
+1 (u'', u'\u2039Collected RPCserver:foo\u203a')
+1 (u'name', u'foo')
+1 (u'host', u'')
+1 (u'port', u'56478')
+1 (u'server', u'<rpyc.utils.server.ThreadedServer obj>')
+1 .
+1 (u'', u'\u2039Collected namedRPC:foo\xa6n1\u203a')
+1 (u'name', u'foo\xa6n1')
+1 (u'local host', u'::ffff:127.0.0.1')
+1 (u'local port', u'56478')
+1 (u'remote host', u'::ffff:127.0.0.1')
+1 (u'remote port', u'42908')
+1 .
+NEW: ‹ConditionalWorkSequence:10 (4)›
+   : │  id: 10
+   : │  call count: 0
+   : │  EVENT: rpc¦disconnect¦foo¦n1
+   : └1╴... done.
+EVENT: rpc¦disconnect¦foo¦n1
+END: rpc¦disconnect¦foo¦n1
+NEW: ‹ConditionalWorkSequence:11 (4)›
+   : │  id: 11
+   : │  call count: 0
+   : │  EVENT: wait¦done¦1.0¦server
+   : └1╴... done.
+EVENT: wait¦done¦1.0¦server
+END: wait¦done¦1.0¦server
+0 +WAIT 5 start job ‹Waiter foo ??›
+0 -WAIT 5 start job ‹Waiter foo ??›
+NEW: ‹ConditionalWorkSequence:12 (4)›
+   : │  id: 12
+   : │  call count: 0
+   : │  EVENT: wait¦start¦2.0¦foo
+   : └1╴... done.
+EVENT: wait¦start¦2.0¦foo
+END: wait¦start¦2.0¦foo
+0 +WAIT 6 kill job <homevent.tokize.tokizer obj>
+0 -WAIT 6 kill job <homevent.tokize.tokizer obj>
+NEW: ‹ConditionalWorkSequence:13 (6)›
+   : │  id: 13
+   : │  call count: 0
+   : │  EVENT: shutdown
+   : └1╴... done.
+EVENT: shutdown
+NEW: ‹ConditionalWorkSequence:14 (4)›
+   : │  id: 14
+   : │  call count: 0
+   : │  EVENT: module¦unload¦net
+   : └1╴... done.
+EVENT: module¦unload¦net
+END: module¦unload¦net
+NEW: ‹ConditionalWorkSequence:15 (4)›
+   : │  id: 15
+   : │  call count: 0
+   : │  EVENT: module¦unload¦data
+   : └1╴... done.
+EVENT: module¦unload¦data
+END: module¦unload¦data
+NEW: ‹ConditionalWorkSequence:16 (4)›
+   : │  id: 16
+   : │  call count: 0
+   : │  EVENT: module¦unload¦on_event
+   : └1╴... done.
+EVENT: module¦unload¦on_event
+END: module¦unload¦on_event
+NEW: ‹ConditionalWorkSequence:17 (4)›
+   : │  id: 17
+   : │  call count: 0
+   : │  EVENT: module¦unload¦block
+   : └1╴... done.
+EVENT: module¦unload¦block
+END: module¦unload¦block
+NEW: ‹ConditionalWorkSequence:18 (4)›
+   : │  id: 18
+   : │  call count: 0
+   : │  EVENT: module¦unload¦logging
+   : └1╴... done.
+EVENT: module¦unload¦logging
+END: module¦unload¦logging
+NEW: ‹ConditionalWorkSequence:19 (4)›
+   : │  id: 19
+   : │  call count: 0
+   : │  EVENT: module¦unload¦wait
+   : └1╴... done.
+EVENT: module¦unload¦wait
+END: module¦unload¦wait
+NEW: ‹ConditionalWorkSequence:20 (4)›
+   : │  id: 20
+   : │  call count: 0
+   : │  EVENT: module¦unload¦rpc
+   : └1╴... done.
+EVENT: module¦unload¦rpc
+END: module¦unload¦rpc
+NEW: ‹ConditionalWorkSequence:21 (4)›
+   : │  id: 21
+   : │  call count: 0
+   : │  EVENT: module¦unload¦ifelse
+   : └1╴... done.
+EVENT: module¦unload¦ifelse
+END: module¦unload¦ifelse
+END: shutdown

@@ -20,6 +20,7 @@ from homevent.reactor import ShutdownHandler
 from homevent.module import load_module,Load,ModuleExists
 from homevent.statement import main_words
 from homevent.check import register_condition
+from homevent.logging import log,DEBUG
 from test import run
 from gevent import spawn,sleep
 
@@ -28,20 +29,20 @@ import sys
 
 def tester():
 	sleep(0.2)
-	print >>sys.stderr,"CONNECTING"
+	log(DEBUG, "CONNECTING")
 	c = rpyc.connect("localhost",56478)
 	for x in c.root.list():
-		print >>sys.stderr,repr(x)
-	print >>sys.stderr,"."
+		log(DEBUG, repr(x))
+	log(DEBUG,".")
 	for x in c.root.list("rpc","server"):
-		print >>sys.stderr,repr(x)
-	print >>sys.stderr,"."
+		log(DEBUG, repr(x))
+	log(DEBUG,".")
 	for x in c.root.list("rpc","server","foo"):
-		print >>sys.stderr,repr(x)
-	print >>sys.stderr,"."
+		log(DEBUG, repr(x))
+	log(DEBUG,".")
 	for x in c.root.list("rpc","connection","foo","n1"):
-		print >>sys.stderr,repr(x)
-	print >>sys.stderr,"."
+		log(DEBUG, repr(x))
+	log(DEBUG,".")
 
 spawn(tester)
 
