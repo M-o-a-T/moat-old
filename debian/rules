@@ -22,7 +22,7 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 
-	$(MAKE)
+	$(MAKE) all
 
 	touch $@
 
@@ -67,7 +67,7 @@ binary-arch: build install
 #	dh_installemacsen
 #	dh_installpam
 #	dh_installmime
-	dh_pysupport
+	dh_python2
 	dh_installinit
 	dh_installman
 	dh_link

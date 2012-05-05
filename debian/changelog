@@ -1,3 +1,9 @@
+homevent (0.3.2) smurf; urgency=low
+
+  * Fix Debian packaging
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Sat, 05 May 2012 15:52:01 +0200
+
 homevent (0.3.1) smurf; urgency=low
 
   * Loads of changes …

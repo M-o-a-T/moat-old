@@ -1,13 +1,21 @@
 Source: homevent
 Section: python
 Priority: extra
-XS-Python-Version: 2.6
 Maintainer: Matthias Urlichs <matthias@urlichs.de>
-Build-Depends: debhelper (>= 5), python-all-dev, python-setuptools, python-twisted-core (>= 11.1), python-twisted-conch, libglib2.0-dev (>= 2.14), python-rrdtool, rrdtool,
+Build-Depends: debhelper (>= 5),
+ python-setuptools,
+ python-twisted-core (>= 11.1),
+ python-twisted-conch,
+ libglib2.0-dev (>= 2.14),
+ python-rrdtool,
+ rrdtool,
+ python-all-dev (>> 2.6.6-3~), 
  owserver | owfs,
  python-dbg,
  python-sqlmix (>= 0.9.29),
- portaudio19-dev
+ portaudio19-dev,
+ python-gevent,
+ libevent-dev,
 X-Also-Depends: avr-libc, gcc-avr
 Build-Depends-Indep: python-support
 Standards-Version: 3.7.2

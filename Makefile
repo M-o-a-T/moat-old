@@ -17,20 +17,20 @@
 export PYTHONPATH=$(shell pwd)
 DESTDIR ?= "/"
 
-FIX:
-	@if test ! -d homevent/modules; then ln -s ../modules homevent/modules; fi
-
 all:
 	cp -a _geventreactor/Pinako/geventreactor/__init__.py homevent/geventreactor.py
 	#cp -a _zeromq/gevent_zeromq/core.py homevent/zeromq.py
 	cp -a _geventreactor/Pinako/geventrpyc/__init__.py homevent/gevent_rpyc.py
 	$(MAKE) -C fs20 all
 	$(MAKE) -C wago all
-	python setup.py build --build-base="$(DESTDIR)"
+	python setup.py build
 install:
 	$(MAKE) -C fs20 install ROOT=$(DESTDIR)
 	$(MAKE) -C wago install ROOT=$(DESTDIR)
-	python setup.py install --prefix=/usr --root="$(DESTDIR)" --no-compile -O0
+	python setup.py install --root="$(DESTDIR)" --no-compile -O0 --install-layout=deb
+
+FIX:
+	@if test ! -d homevent/modules; then ln -s ../modules homevent/modules; fi
 
 clean:
 	python setup.py clean --build-base="$(DESTDIR)"
@@ -67,11 +67,13 @@ sr ssh:
 
 lab:
 	## private
-	sudo chroot /daten/chroot/i386/wheezy sudo -u smurf make -C $(PWD) lab_
-	dput -u smurf ../homevent_$$(dpkg-parsechangelog | sed -ne 's/^Version:[[:space:]]//p')_i386.changes
+	F="../homevent_$$(dpkg-parsechangelog | sed -ne 's/^Version:[[:space:]]//p')_i386.changes"; \
+	rm -f "$F"; \
+	sudo chroot /daten/chroot/i386/wheezy sudo -u smurf make -C $(PWD) lab_ || test -s "$$F"; \
+	dput -u smurf "$$F"
 	sleep 5
-	ssh -uroot lab apt-get update
-	ssh -uroot lab apt-get install homevent=$$(dpkg-parsechangelog | sed -ne 's/^Version:[[:space:]]//p')
+	ssh -lroot lab apt-get update
+	ssh -lroot lab apt-get install -y homevent=$$(dpkg-parsechangelog | sed -ne 's/^Version:[[:space:]]//p')
 lab_:
 	debuild -b
 
