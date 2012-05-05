@@ -176,6 +176,8 @@ class GroupOverride(m.Model):
 	allowed = m.BooleanField() # whether to allow these to run(True) or not(False)
 	start = m.DateTimeField()
 	duration = m.TimeField()
+	on_level = m.FloatField(blank=True,null=True,default=None,help_text="Level above(off)/below(on) which to activate this rule (factor of max)")
+	off_level = m.FloatField(blank=True,null=True,default=None,help_text="Level above(off)/below(on) which to activate this rule (factor of max)")
 	
 class ValveOverride(m.Model):
 	"""Force schedule times"""
@@ -188,6 +190,8 @@ class ValveOverride(m.Model):
 	running = m.BooleanField() # whether to force on(True) or off(False)
 	start = m.DateTimeField()
 	duration = m.TimeField()
+	on_level = m.FloatField(blank=True,null=True,default=None,help_text="Level above(off)/below(on) which to activate this rule (factor of max)")
+	off_level = m.FloatField(blank=True,null=True,default=None,help_text="Level above(off)/below(on) which to activate this rule (factor of max)")
 	
 class GroupAdjust(m.Model):
 	"""Beginning at this date, this group needs <modifier> more(>1)/less(<1) water.
@@ -229,5 +233,17 @@ class RainMeter(m.Model):
 	name = m.CharField(max_length=200)
 	site = m.ForeignKey(Site,related_name="rain_meters")
 	controller = m.ForeignKey(Controller,related_name="rain_meters")
-	var = m.CharField(max_length=200) # HomEvenT's variable name for it
+	var = m.CharField(max_length=200,help_text="monitor name in HomEvenT") # HomEvenT's variable name for it
+
+
+from django.contrib.auth.models import User as DjangoUser
+class UserForGroup(m.Model):
+	"""Limit Django users to a specific group"""
+	class Meta:
+		pass
+	def __unicode__(self):
+		return u"‹%s @%s %s›" % (self.__class__.__name__,self.controller,self.var)
+	user = m.ForeignKey(DjangoUser)
+	group = m.ForeignKey(Group,related_name="users")
+
 
