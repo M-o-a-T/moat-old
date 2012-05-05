@@ -186,7 +186,7 @@ reader (GIOChannel *source, GIOCondition condition, gpointer data __attribute((u
 		goto out;
 
 	if(tpos<2 || !(tpos & 1)) {
-		fprintf(stderr,"Line length is %d\n",len);
+		fprintf(stderr,"Line length is %z\n",len);
 		goto sout;
 	}
 
