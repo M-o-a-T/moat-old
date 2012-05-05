@@ -1,3 +1,9 @@
+homevent (0.3.1) smurf; urgency=low
+
+  * Loads of changes …
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Sat, 05 May 2012 06:11:07 +0200
+
 homevent (0.3.0) smurf; urgency=low
 
   * Use gevent framework, severely cutting down on Deferred objects.

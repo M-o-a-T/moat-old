@@ -65,4 +65,14 @@ tr trace: FIX
 sr ssh:
 	python scripts/daemon.py -t TRACE examples/ssh.he
 
+lab:
+	## private
+	sudo chroot /daten/chroot/i386/wheezy sudo -u smurf make -C $(PWD) lab_
+	dput -u smurf ../homevent_$$(dpkg-parsechangelog | sed -ne 's/^Version:[[:space:]]//p')_i386.changes
+	sleep 5
+	ssh -uroot lab apt-get update
+	ssh -uroot lab apt-get install homevent=$$(dpkg-parsechangelog | sed -ne 's/^Version:[[:space:]]//p')
+lab_:
+	debuild -b
+
 .PHONY: test i interactive
