@@ -56,10 +56,6 @@ class SSHprotocol(recvline.HistoricRecvLine):
 		self.terminal.write("This is the HomEvenT command line.")
 		self.terminal.nextLine()
 
-	def handle_RETURN(self):
-		self.transport.write("\n");
-		super(SSHprotocol,self).handle_RETURN()
-
 class SSHavatar(avatar.ConchUser):
 	implements(conchinterfaces.ISession)
 	def __init__(self, username):
