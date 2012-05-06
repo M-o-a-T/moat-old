@@ -3,7 +3,7 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 admin.autodiscover()
 
-from rainman.models import Site,Feed,Controller,Valve,History,Environment,EnvironmentEffect,Level,Day,DayTime,Group,GroupOverride,ValveOverride,GroupAdjust,Schedule,RainMeter
+from rainman.models import Site,Feed,Controller,Valve,History,Environment,EnvironmentEffect,Level,Day,DayTime,Group,GroupOverride,ValveOverride,GroupAdjust,Schedule,RainMeter,UserForGroup
 
 # SiteInline
 class FeedInline(admin.TabularInline):
@@ -65,6 +65,10 @@ class ScheduleInline(admin.TabularInline):
 
 class RainMeterInline(admin.TabularInline):
 	model = RainMeter
+	extra = 0
+
+class UserForGroupInline(admin.TabularInline):
+	model = UserForGroup
 	extra = 0
 
 
@@ -149,6 +153,9 @@ class ScheduleAdmin(admin.ModelAdmin):
 class RainMeterAdmin(admin.ModelAdmin):
 	list_display = ('name','var')
 
+class UserForGroupAdmin(admin.ModelAdmin):
+	list_display = ('user','group')
+
 admin.site.register(Site, SiteAdmin)
 admin.site.register(Feed, FeedAdmin)
 admin.site.register(Controller, ControllerAdmin)
@@ -165,4 +172,5 @@ admin.site.register(ValveOverride, ValveOverrideAdmin)
 admin.site.register(GroupAdjust, GroupAdjustAdmin)
 admin.site.register(Schedule, ScheduleAdmin)
 admin.site.register(RainMeter, RainMeterAdmin)
+admin.site.register(UserForGroup, UserForGroupAdmin)
 
