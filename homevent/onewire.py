@@ -426,7 +426,7 @@ class OWFSqueue(MsgQueue,Jobber):
 				dn = OWFSdevice(id=b,bus=self,path=p)
 				yield dn
 				if b.startswith("1F.") and b not in seen_mplex:
-					seen_mplex[b] = f
+					seen_mplex[b] = b
 					for res in doit(dn,key="main"):
 						yield res
 					for res in doit(dn,key="aux"):
