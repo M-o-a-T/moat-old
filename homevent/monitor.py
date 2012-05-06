@@ -79,6 +79,7 @@ class Monitor(Collected,Jobber):
 	job = None # greenlet running the monitor loop
 	running = None # Event. OFF while measuring (so that we can wait for that to end; currently used as a flag)
 	passive = None # active or passive monitoring?
+	send_check_event = None # send a "monitor checked"
 	queue_len = 0 # length of the watch queue; 0:use a blocking channel
 	watcher = None # if passive: channel for the next value
 	params = None # for reporting
@@ -106,7 +107,10 @@ class Monitor(Collected,Jobber):
 	stopped_at = None # last time when measuring ended
 
 	def __init__(self,parent,name):
-		self.passive = (self.__class__ == Monitor)
+		if self.passive is None:
+			self.passive = (self.__class__ is Monitor)
+		if self.send_check_event is None:
+			self.send_check_event = self.passive
 		self.ctx = parent.ctx
 		if self.queue_len is not None:
 			if self.queue_len == 0:
@@ -245,7 +249,7 @@ class Monitor(Collected,Jobber):
 			self.running.clear()
 			self.started_at = now()
 			self._monitor()
-			if self.passive:
+			if self.send_check_event:
 				process_event(Event(self.ctx, "monitor","checked",*self.name))
 			if self.new_value is not None:
 				if hasattr(self,"delta"):
@@ -343,7 +347,7 @@ class Monitor(Collected,Jobber):
 			Get one value from some "set monitor" command.
 			Override this for active monitoring.
 			"""
-		if self.passive and step==1:
+		if self.send_check_event and step==1:
 			process_event(Event(self.ctx, "monitor","checking",*self.name))
 
 		with log_wait("monitor","one_value",*self.name):
