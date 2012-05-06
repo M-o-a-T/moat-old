@@ -374,11 +374,11 @@ class OWFSqueue(MsgQueue,Jobber):
 
 	def __init__(self, name, host,port, persist=PERSIST, *a,**k):
 		self.ident = (host,port)
+		self.root = OWFSroot(self)
 		super(OWFSqueue,self).__init__(name=name, factory=MsgFactory(OWFSchannel,name=name,host=host,port=port,persist=persist, **k))
 		if not persist:
 			self.max_send = 1
 		self.nop = None
-		self.root = OWFSroot(self)
 
 	### Bus scanning support
 
