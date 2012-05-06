@@ -869,8 +869,8 @@ monitor wago ‹server…› ‹slot› ‹port›
 		event = self.params(ctx)
 		if len(event) < 3:
 			raise SyntaxError("Usage: monitor wago ‹server…› ‹slot› ‹port›")
-		self.values["card"] = int(event[-1])
-		self.values["port"] = int(event[-2])
+		self.values["card"] = int(event[-2])
+		self.values["port"] = int(event[-1])
 		self.values["server"] = Name(*event[:-2])
 		self.values["params"] = ("wago",)+tuple(event)
 

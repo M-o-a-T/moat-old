@@ -352,10 +352,10 @@ class log_wait(object):
 			from homevent.logging import log as xlog, TRACE as xTRACE
 			_log = xlog
 			TRACE = xTRACE
-		_log(TRACE,"+WAIT", self.w, *self.a)
+		_log("locking",TRACE,"+WAIT", self.w, *self.a)
 		return self
 	def __exit__(self, a,b,c):
-		_log(TRACE,"-WAIT", self.w, *self.a)
+		_log("locking",TRACE,"-WAIT", self.w, *self.a)
 		return False
 
 

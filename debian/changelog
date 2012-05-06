@@ -1,3 +1,9 @@
+homevent (0.3.13) smurf; urgency=low
+
+  * Wago monitor: param mixup
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Sun, 06 May 2012 22:34:44 +0200
+
 homevent (0.3.12) smurf; urgency=low
 
   * wago and onewire fixes
