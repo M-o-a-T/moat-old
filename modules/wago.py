@@ -707,7 +707,6 @@ class WAGOmonStop(WAGOrun):
 class WAGOmonRun(WAGOioRun):
 	"""Starts a monitor and watches for its messages."""
 	counter = 0
-	prio = PRIO_BACKGROUND
 
 	def __init__(self,monitor):
 		self.monitor = monitor
@@ -748,6 +747,7 @@ class WAGOmonRun(WAGOioRun):
 	def recv(self,msg):
 		if msg.type is MT_IND_ACK and self.msgid is None:
 			self.msgid = msg.msgid
+			self.prio = PRIO_BACKGROUND
 			if not self.result.ready():
 				self.result.set(msg.msg)
 			return RECV_AGAIN
@@ -773,6 +773,7 @@ class WAGOmonRun(WAGOioRun):
 
 	def retry(self):
 		if self.msgid is None:
+			self.prio = PRIO_STANDARD
 			return SEND_AGAIN
 		return RECV_AGAIN
 
