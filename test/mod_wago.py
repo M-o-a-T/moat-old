@@ -30,6 +30,7 @@ if not exists module trigger: load trigger
 if not exists module wait: load wait
 if not exists module on_event: load on_event
 if not exists module wago: load wago
+if not exists module monitor: load monitor
 log DEBUG
 
 async:
@@ -126,11 +127,101 @@ wait:
 	for 0.5
 	debug force
 	
-list
+# now test some monitors
+send wago test "Dc"
+send wago test "d 0.01"
+
+monitor wago test 1 1:
+	name test count up
+	mode count 1
+	level up
+monitor wago test 1 1:
+	name test count down
+	mode count 1
+	level down
+monitor wago test 1 1:
+	name test count both
+	mode count 1
+	level both
+
+monitor wago test 1 1:
+	name test report up
+	mode report
+	level up
+monitor wago test 1 1:
+	name test report down
+	mode report
+	level down
+monitor wago test 1 1:
+	name test report both
+	mode report
+	level both
+
+wait:
+	for 0.1
+	debug force
+send wago test "Ds"
+wait:
+	for 0.1
+	debug force
+send wago test "Dc"
+wait:
+	for 0.1
+	debug force
+send wago test "Ds"
+wait:
+	for 1
+	debug force
+
+list monitor
+list monitor test count up
+list monitor test count down
+list monitor test count both
+list monitor test report up
+list monitor test report down
+list monitor test report both
+block:
+	var monitor MH test count up
+	var monitor ML test count down
+	var monitor MB test count both
+	if not equal $ML 1:
+		log DEBUG No ML $ML
+	else if not equal $MH 2:
+		log DEBUG No MH $MH
+	else if not equal $MB 3:
+		log DEBUG No M3 $M3
+	else:
+		log DEBUG YesM $ML $MH $MB
+
+	var monitor RH test report up
+	var monitor RL test report down
+	var monitor RB test report both
+	if not equal $RL 1:
+		log DEBUG No RL $RL
+	else if not equal $RH 2:
+		log DEBUG No RH $RH
+	else if not equal $RB 3:
+		log DEBUG No R3 $R3
+	else:
+		log DEBUG YesR $RL $RH $RB
+
+del monitor test count up
+del monitor test count down
+del monitor test count both
+del monitor test report up
+del monitor test report down
+del monitor test report both
+
+# give the things time to die
+wait:
+	for 0.1
+	debug force
+
 list wago conn
 list wago conn test
 list wago server
 list wago server test
+
 block:
 	if exists wago server test:
 		log DEBUG Yes
@@ -144,6 +235,7 @@ block:
 		log DEBUG No3
 	else:
 		log DEBUG Yes
+del wago server test
 
 log DEBUG now we test a nonexistent port
 block:

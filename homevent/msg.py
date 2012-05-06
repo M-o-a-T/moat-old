@@ -108,6 +108,10 @@ class MsgInfo(object):
 			self.__id = _gid
 		return u"‹%s %x›" % (self.__class__.__name__,self.__id)
 
+	def abort(self):
+		"""The channel could not send the message."""
+		pass
+
 class MsgSender(MsgInfo):
 	"""A message sender"""
 
@@ -128,10 +132,6 @@ class MsgReceiver(MsgInfo):
 		"""A message has been received. Return NOT_MINE|MINE|RECV_AGAIN."""
 		raise NotImplementedError("You need to override MsgReceiver.recv")
 	
-	def abort(self):
-		"""The channel could not send the message."""
-		pass
-
 	def retry(self):
 		"""\
 			The channel had to be set up again. Return None|SEND_AGAIN|RECV_AGAIN.
@@ -175,6 +175,11 @@ class MsgBase(MsgSender,MsgReceiver):
 	def __init__(self,*a,**k):
 		super(MsgBase,self).__init__(*a,**k)
 		self.result = AsyncResult()
+
+	def abort(self):
+		if not self.result.ready():
+			self.result.set(RuntimeError("aborted"))
+		super(MsgBase,self).abort()
 
 	def list(self):
 		for r in super(MsgBase,self).list():
@@ -587,7 +592,7 @@ class MsgQueue(Collected,Jobber):
 
 	def _error(self,msg):
 		log("conn",ERROR,self.state,self.__class__.__name__,self.name,str(msg))
-		self._teaddown()
+		self._teardown()
 		process_failure(msg)
 		
 	def _set_state(self,state):

@@ -1,3 +1,9 @@
+homevent (0.3.9) smurf; urgency=low
+
+  * Add WAGO monitoring
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Sun, 06 May 2012 20:32:40 +0200
+
 homevent (0.3.8) smurf; urgency=low
 
   * Looks like the 1wire offset should be ignored

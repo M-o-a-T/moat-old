@@ -34,14 +34,15 @@ from homevent.net import NetConnect,LineReceiver,NetActiveConnector,NetRetry
 from homevent.twist import reraise,callLater,fix_exception
 from homevent.run import simple_event
 from homevent.context import Context
-from homevent.times import humandelta,now,unixdelta
+from homevent.times import humandelta,now,unixdelta,simple_time_delta
 from homevent.msg import MsgQueue,MsgFactory,MsgBase, MINE,NOT_MINE, RECV_AGAIN,SEND_AGAIN,\
-	MsgReceiver, MsgClosed, MSG_ERROR,PRIO_URGENT,PRIO_CONNECT
+	MsgReceiver, MsgClosed, MSG_ERROR,PRIO_URGENT,PRIO_CONNECT,PRIO_BACKGROUND
 from homevent.collect import Collection
 from homevent.in_out import register_input,register_output, unregister_input,unregister_output,\
 	Input,Output,BoolIO
 
 from gevent.event import AsyncResult
+from gevent.queue import Full
 
 class WAGOchannels(Collection):
 	name = "wago conn"
@@ -184,10 +185,18 @@ class WAGOinitMsg(MsgReceiver):
 			self.start_timer.cancel()
 			self.start_timer = None
 
+class WAGOmsgBase(MsgBase):
+	"""a small class to hold the common send() code"""
+	def send(self,conn):
+		log("wago",TRACE,"send",repr(self.msg))
+		conn.write(self.msg)
+		return RECV_AGAIN
+
 
 _num = re.compile("[0-9]+")
 
-class WAGOmonitorsMsg(MsgBase):
+class WAGOmonitorsMsg(WAGOmsgBase):
+	"""Query the curent ist of monitors, when reconnecting"""
 	blocking = True
 	prio = PRIO_URGENT
 	data = None
@@ -196,10 +205,6 @@ class WAGOmonitorsMsg(MsgBase):
 		self.queue = queue
 		self.data = {}
 		super(WAGOmonitorsMsg,self).__init__()
-
-	def send(self,conn):
-		conn.write(self.msg)
-		return RECV_AGAIN
 
 	@property
 	def msg(self):
@@ -258,7 +263,8 @@ class WAGOmonitorsMsg(MsgBase):
 
 	
 
-class WAGOkeepaliveMsg(MsgBase):
+class WAGOkeepaliveMsg(WAGOmsgBase):
+	"""Trigger a keepalive ping from the remote end"""
 	blocking = False
 	ping_timer = None
 	last_recv = None
@@ -276,7 +282,7 @@ class WAGOkeepaliveMsg(MsgBase):
 		super(WAGOkeepaliveMsg,self).__init__()
 
 	def send(self,conn):
-		conn.write(self.msg)
+		super(WAGOkeepaliveMsg,self).send(conn)
 		self.ping_start()
 		return RECV_AGAIN
 
@@ -377,26 +383,26 @@ connect wago NAME [[host] port]
 WAGOconnect.register_statement(NetRetry)
 
 
+@WAGOconnect.register_statement
 class WAGOkeepalive(Statement):
 	name= "keepalive"
 	doc="start a keepalive timer"
 
 	long_doc = u"""\
-keepalive ‹timer› ‹timeout›
-- Request a message every ‹timer› seconds; kill the connection if nothing after ‹timeout›. 
+keepalive ‹interval› ‹timeout›
+- Request a message every ‹interval› seconds; kill the connection if nothing happens after ‹timeout›. 
 """
 
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		if len(event) not in (1,2):
-			raise SyntaxError(u"Usage: %s ‹timer› ‹timeout›" % (self.name,))
+			raise SyntaxError(u"Usage: %s ‹interval› ‹timeout›" % (self.name,))
 		try:
 			self.parent.timeout_interval = float(event[0])
 			if len(event) > 1:
 				self.parent.max_timeout_interval = float(event[1])
 		except ValueError:
-			raise SyntaxError(u"Usage: %s ‹timer› ‹timeout› (#seconds, float)" % (self.name,))
-WAGOconnect.register_statement(WAGOkeepalive)
+			raise SyntaxError(u"Usage: %s ‹interval› ‹timeout› (#seconds, float)" % (self.name,))
 
 
 class WAGOconnected(Check):
@@ -432,14 +438,14 @@ disconnect wago NAME
 		log(TRACE,"Drop WAGO connection",name)
 
 
-### simple variables
+### simple commands and whatnot
 
-class WAGOrun(MsgBase):
+class WAGOrun(WAGOmsgBase):
 	"""Send a simple command to Wago. Base class."""
 	timeout=2
 
 	def send(self,conn):
-		conn.write(self.msg)
+		super(WAGOrun,self).send(conn)
 		return RECV_AGAIN
 
 	def recv(self,msg):
@@ -465,7 +471,7 @@ class WAGOioRun(WAGOrun):
 		self.port = port
 
 	def __repr__(self):
-		return "<%s %s:%s>" % (self.__class__.__name__,self.card,self.port)
+		return u"‹%s %s:%s›" % (self.__class__.__name__,self.card,self.port)
 		
 	def list(self):
 		for r in super(WAGOioRun,self).list():
@@ -488,7 +494,7 @@ class WAGOoutputRun(WAGOioRun):
 
 	def __repr__(self):
 		res = super(WAGOoutputRun,self).__repr__()
-		return "<%s val=%s>" % (res[1:-1],self.val)
+		return u"‹%s val=%s›" % (res[1:-1],self.val)
 		
 	def list(self):
 		for r in super(WAGOoutputRun,self).list():
@@ -499,13 +505,16 @@ class WAGOoutputRun(WAGOioRun):
 	def msg(self):
 		return "%s %d %d" % ("s" if self.val else "c", self.card,self.port)
 
+
 class WAGOoutputInRun(WAGOioRun):
 	"""Send a simple command to read an output."""
 	@property
 	def msg(self):
 		return "I %d %d" % (self.card,self.port)
 
+
 class WAGOtimedOutputRun(WAGOoutputRun):
+	"""Send a (monitored) command for set+clear"""
 	msgid = None
 	def __init__(self,queue,value,timer):
 		self.queue = queue
@@ -513,8 +522,8 @@ class WAGOtimedOutputRun(WAGOoutputRun):
 		super(WAGOtimedOutputRun,self).__init__(queue.card,queue.port,value)
 
 	def __repr__(self):
-		res = super(WAGOoutputRun,self).__repr__()
-		return "<%s tm=%s id=%s>" % (res[1:-1],humandelta(self.timer-now(True)),self.msgid)
+		res = super(WAGOtimedOutputRun,self).__repr__()
+		return u"‹%s tm=%s id=%s›" % (res[1:-1],humandelta(self.timer-now(True)),self.msgid)
 		
 	def list(self):
 		for r in super(WAGOtimedOutputRun,self).list():
@@ -681,20 +690,155 @@ to ‹name…›
 		self.parent.dest = SName(event)
 
 
+class WAGOmonStop(WAGOrun):
+	"""Halts a monitor."""
+	def __init__(self,msgid):
+		self.msgid = msgid
+		super(WAGOmonStop,self).__init__()
+
+	def __repr__(self):
+		res = super(WAGOmonStop,self).__repr__()
+		return u"‹%s msgid=%s›" % (res[1:-1],self.msgid)
+
+	@property
+	def msg(self):
+		return "m- %d" % (self.msgid,)
+
+class WAGOmonRun(WAGOioRun):
+	"""Starts a monitor and watches for its messages."""
+	counter = 0
+	prio = PRIO_BACKGROUND
+
+	def __init__(self,monitor):
+		self.monitor = monitor
+		super(WAGOmonRun,self).__init__(monitor.card,monitor.port)
+
+	def __repr__(self):
+		return u"‹%s %s›" % (self.__class__.__name__,repr(self.monitor))
+
+	# Required because the queue manipulates msgid upon restart
+	def _get_msgid(self):
+		return self.monitor.msgid
+	def _set_msgid(self,val):
+		self.monitor.msgid = val
+	msgid = property(_get_msgid,_set_msgid)
+
+	@property
+	def msg(self):
+		def udb():
+			l = self.monitor.level
+			if l == "up": return "+"
+			if l == "down": return "-"
+			if l == "both": return "*"
+			raise RuntimeError("%s: unknown mode %s" % (repr(self),l))
+		if self.monitor.mode == "count":
+			return "m# %d %d %s %f" % (self.monitor.card,self.monitor.port,udb(),self.monitor.timespec)
+		elif self.monitor.mode == "report":
+			return "m+ %d %d %s" % (self.monitor.card,self.monitor.port,udb())
+		else:
+			raise RuntimeError("%s: unknown mode %s" % (self.__class__.__name__,self.monitor.mode))
+	
+	def recv(self,msg):
+		if msg.type is MT_IND_ACK and self.msgid is None:
+			self.msgid = msg.msgid
+			if not self.result.ready():
+				self.result.set(msg.msg)
+			return RECV_AGAIN
+		if msg.type is MT_IND and msg.msgid == self.msgid:
+			try:
+				self.monitor.submit(int(msg.msg))
+			except ValueError:
+				self.counter += 1
+				self.monitor.submit(self.counter)
+			return RECV_AGAIN
+		if msg.type is MT_IND_NAK and msg.msgid == self.msgid:
+			self.msgid = None
+			self.monitor.down()
+			return MINE
+		if (msg.type is MT_NAK or msg.type is MT_ERROR) and self.msgid is None:
+			if not self.result.ready():
+				self.result.set(WAGOerror(msg.msg))
+			else:
+				self.monitor.last_msg = msg
+				self.monitor.down()
+			return MINE
+		return NOT_MINE
+
+	def retry(self):
+		if self.msgid is None:
+			return SEND_AGAIN
+		return RECV_AGAIN
+
+	def error(self,err):
+		log("wago",DEBUG,"Got error",self,err)
+		simple_event("monitor","error", *self.monitor.name)
+		super(WAGOmonitor,self).error(err)
+	
+	def abort(self):
+		self.msgid = None
+		self.monitor.down()
+		super(WAGOmonRun,self).abort()
+
+
 class WAGOmon(Monitor):
-	queue_len = 1 # use the watcher queue
+	mode = "report"
+	timespec = 60
+	level = "up"
+	msgid = None
+	last_msg = None
+
+	# Monitor parameters
+	queue_len = 0 # for direct submission
+	passive = True
+	send_check_event = False
 
 	def __init__(self,*a,**k):
-		pass
-		#m = WAGOinput(slot=self.values["slot"], port=self.port)
-		#servers[self].add_monitor(self)
-		#super(WAGOmon,self).__init__(*a,**k)
+		super(WAGOmon,self).__init__(*a,**k)
+
+	def list(self):
+		for r in super(WAGOmon,self).list():
+			yield r
+		yield("mode",self.mode)
+		if self.mode == "count":
+			yield("timespec",self.timespec)
+		yield("level",self.level)
+		yield("msgid",self.msgid)
+		if self.last_msg is not None:
+			yield("last msg",self.last_msg)
+
+	def up(self):
+		"""submit myself to the server"""
+		assert self.msgid is None, "MsgID is %s in %s"%(self.msgid,repr(self))
+		msg = WAGOmonRun(self)
+		WAGOservers[self.server].enqueue(msg)
+		res = msg.result.get()
+		self.last_msg = res
+		if isinstance(res,Exception):
+			self.msgid = None
+			reraise(res)
+		super(WAGOmon,self).up()
+
+
+	def down(self):
+		"""remove myself to the server"""
+		if self.server not in WAGOservers:
+			self.msgid = None
+		elif self.msgid is not None:
+			msg = WAGOmonStop(msgid=self.msgid)
+			WAGOservers[self.server].enqueue(msg)
+			res = msg.result.get()
+			self.last_msg = res
+			if isinstance(res,Exception):
+				self.msgid = None
+				reraise(res)
+		super(WAGOmon,self).down()
+
 
 	def submit(self,val):
 		try:
-			self.watcher.put(val,timeout=0)
+			self.watcher.put(val,block=False)
 		except Full:
-			simple_event(self.ctx, "monitor","error","overrun",*self.values["params"])
+			simple_event(self.ctx, "monitor","error","overrun",*self.name)
 			pass
 
 
@@ -705,18 +849,17 @@ class WAGOmonitor(MonitorHandler):
 	long_doc="""\
 monitor wago ‹server…› ‹slot› ‹port›
 	- creates a monitor for a specific input on the server.
+	Don't use the generic 'retry' parameter here.
 """
-	mode = None
+
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		if len(event) < 3:
 			raise SyntaxError("Usage: monitor wago ‹server…› ‹slot› ‹port›")
-		self.values["slot"] = int(event[-1])
+		self.values["card"] = int(event[-1])
 		self.values["port"] = int(event[-2])
-		self.values["server"] = event[:-2]
+		self.values["server"] = Name(*event[:-2])
 		self.values["params"] = ("wago",)+tuple(event)
-		if "switch" in self.values and self.values["switch"] is not None:
-			self.values["params"] += (u"±"+unicode(self.values["switch"]),)
 
 		super(WAGOmonitor,self).run(ctx,**k)
 
@@ -724,11 +867,40 @@ monitor wago ‹server…› ‹slot› ‹port›
 class WAGOmonMode(Statement):
 	name = "mode"
 	doc = "Select whether to report or count transitions"
+	long_doc=u"""\
+mode ‹report|count TIME›
+	Set whether to report each transition, or to count them and report after some interval.
+	The default TIME is one minute.
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if not len(event):
+			raise SyntaxError(u'Usage: mode ‹report|count TIME›')
+		elif event[0] == "report":
+			if len(event) > 1:
+				raise SyntaxError(u'Usage: mode ‹report|count TIME›')
+		elif event[0] == "count":
+			if len(event) > 1:
+				self.parent.values["timespec"] = simple_time_delta(event[1:])
+		else:
+			raise SyntaxError(u'Usage: mode ‹report|count TIME›')
+		self.parent.values["mode"] = event[0]
+
 
 @WAGOmonitor.register_statement
 class WAGOmonLevel(Statement):
 	name = "level"
 	doc = "Select which transitons to monitor"
+	long_doc="""\
+level ‹up|down|both›
+	Set which level change to report or count.
+	Default is "up".
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if len(event) != 1 or event[0] not in ("up","down","both"):
+			raise SyntaxError(u'Usage: level ‹up|down|both›')
+		self.parent.values["level"] = event[0]
 
 
 class WAGOmodule(Module):

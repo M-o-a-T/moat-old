@@ -28,6 +28,8 @@ Documentation
 Code
 ====
 
+* wago monitor: mask the 'retry' stanza.
+
 * Network error: add the destination to the error message
 
 * RPC: support arbitrary commands, i.e. an interpreter
