@@ -28,6 +28,8 @@ Documentation
 Code
 ====
 
+* Reload: Use a command, not an interrupt
+
 * wago monitor: mask the 'retry' stanza.
 
 * Network error: add the destination to the error message
