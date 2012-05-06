@@ -100,7 +100,7 @@ class RPCconn(Service,Collected):
 		try:
 			if c is None:
 				for m in all_collect(skip=False):
-					yield m.name
+					yield m.name,
 			elif isinstance(c,Collection):
 				for n,m in c.iteritems():
 					try:
