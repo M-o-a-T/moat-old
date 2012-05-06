@@ -36,7 +36,7 @@ from homevent.run import simple_event
 from homevent.context import Context
 from homevent.times import humandelta,now,unixdelta,simple_time_delta
 from homevent.msg import MsgQueue,MsgFactory,MsgBase, MINE,NOT_MINE, RECV_AGAIN,SEND_AGAIN,\
-	MsgReceiver, MsgClosed, MSG_ERROR,PRIO_URGENT,PRIO_CONNECT,PRIO_BACKGROUND
+	MsgReceiver, MsgClosed, MSG_ERROR,PRIO_URGENT,PRIO_CONNECT,PRIO_BACKGROUND,PRIO_STANDARD
 from homevent.collect import Collection
 from homevent.in_out import register_input,register_output, unregister_input,unregister_output,\
 	Input,Output,BoolIO
@@ -744,10 +744,16 @@ class WAGOmonRun(WAGOioRun):
 		else:
 			raise RuntimeError("%s: unknown mode %s" % (self.__class__.__name__,self.monitor.mode))
 	
+	@property
+	def prio(self):
+		if self.msgid is None:
+			return PRIO_STANDARD
+		else:
+			return PRIO_BACKGROUND
+
 	def recv(self,msg):
 		if msg.type is MT_IND_ACK and self.msgid is None:
 			self.msgid = msg.msgid
-			self.prio = PRIO_BACKGROUND
 			if not self.result.ready():
 				self.result.set(msg.msg)
 			return RECV_AGAIN
@@ -773,7 +779,6 @@ class WAGOmonRun(WAGOioRun):
 
 	def retry(self):
 		if self.msgid is None:
-			self.prio = PRIO_STANDARD
 			return SEND_AGAIN
 		return RECV_AGAIN
 
