@@ -72,7 +72,7 @@ lab:
 	test ! -f "$F"; \
 	sudo chroot /daten/chroot/i386/wheezy sudo -u smurf make -C $(PWD) lab_ || test -s "$$F"; \
 	dput -u smurf "$$F"
-	sleep 5
+	echo -n "Waiting for archive "; while ! -f /daten/debian/pool/main/h/homevent/"$$(basename "$F")" ; do echo -n "."; sleep 1;done;echo ""
 	ssh -lroot lab apt-get update
 	ssh -lroot lab apt-get install -y homevent=$$(dpkg-parsechangelog | sed -ne 's/^Version:[[:space:]]//p')
 lab_:
