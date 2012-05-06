@@ -188,14 +188,12 @@ class WorkSequence(WorkItem):
 			w = wn
 		self.work.append(w)
 
-	def process(self, **k):
-		super(WorkSequence,self).process(**k)
-		self._process()
-
 	handle_conditional = False
 
-	def _process(self):
-		assert self.work,"empty workqueue"
+	def process(self, **k):
+		super(WorkSequence,self).process(**k)
+
+		assert self.work,"empty workqueue in "+repr(self)
 		self.in_step = step = 0
 		self.in_worker = None
 		res = None
@@ -412,8 +410,6 @@ class DoNothingWorker(Worker):
 		super(DoNothingWorker,self).__init__("no-op")
 	def does_event(self,event):
 		return True
-	def process(self, **k):
-		super(DoNothingWorker,self).process(**k)
 
 import warnings
 warnings.filterwarnings('ignore', message="returnValue.*", category=DeprecationWarning, lineno=242)
