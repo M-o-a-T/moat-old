@@ -67,8 +67,9 @@ sr ssh:
 
 lab:
 	## private
+	set -e; \
 	F="../homevent_$$(dpkg-parsechangelog | sed -ne 's/^Version:[[:space:]]//p')_i386.changes"; \
-	rm -f "$F"; \
+	test ! -f "$F"; \
 	sudo chroot /daten/chroot/i386/wheezy sudo -u smurf make -C $(PWD) lab_ || test -s "$$F"; \
 	dput -u smurf "$$F"
 	sleep 5
@@ -76,5 +77,12 @@ lab:
 	ssh -lroot lab apt-get install -y homevent=$$(dpkg-parsechangelog | sed -ne 's/^Version:[[:space:]]//p')
 lab_:
 	debuild -b
+
+schema:
+	python irrigation/manage.py schemamigration --auto rainman
+	python irrigation/manage.py migrate rainman
+	# might have to modify if broken
+	git add irrigation/rainman/migrations/*.py
+
 
 .PHONY: test i interactive
