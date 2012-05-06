@@ -176,6 +176,8 @@ class BaseLogger(Collected,Jobber):
 			self._wlog(level,u" ".join(unicode(x) for x in a))
 			if TESTING:
 				self.flush()
+			else:
+				gevent.sleep(0)
 
 	def log_event(self, event, level):
 		if level >= self.level:
