@@ -175,7 +175,7 @@ class OWFSassembler(object):
 
 
 class OWchans(Collection):
-       name = "owfs connection"
+       name = "onewire connection"
 OWchans = OWchans()
 OWchans.does("del")
 OWchans2 = {}
@@ -185,6 +185,7 @@ class OWFSchannel(OWFSassembler, NetActiveConnector):
 	"""A receiver for the protocol used by OWFS."""
 	storage = OWchans
 	storage2 = OWchans2
+	typ = "onewire"
 
 	def down_event(self, external=False):
 			simple_event(Context(),"onewire","disconnect",*self.name)
@@ -355,7 +356,7 @@ class DIRmsg(OWFScall):
 		return "‹"+self.__class__.__name__+" "+"/".join(self.path)+"›"
 		
 class OWbuses(Collection):
-       name = "owfs bus"
+       name = "onewire bus"
 OWbuses = OWbuses()
 OWbuses.does("del")
 register_condition(OWbuses.exists)
@@ -414,7 +415,7 @@ class OWFSqueue(MsgQueue,Jobber):
 				elif len(name)>3 and name[2] == ".":
 					entries.append(name)
 				else:
-					log(TRACE,"got unrecognized OWFS name %s" % (name,))
+					log("onewire",TRACE,"got unrecognized name %s" % (name,))
 
 			dev.dir(key=key,proc=got_entry,path=path)
 
@@ -452,7 +453,7 @@ class OWFSqueue(MsgQueue,Jobber):
 			process_failure(e)
 
 	def _update_all(self):
-		log(TRACE,"OWFS start bus update")
+		log("onewire",TRACE,"start bus update")
 		old_ids = devices.copy()
 		new_ids = {}
 		seen_ids = {}
@@ -474,7 +475,7 @@ class OWFSqueue(MsgQueue,Jobber):
 				## Just because something vanishes from the listing
 				## doesn't mean it's dead; the bus may be a bit unstable
 				# dev.go_down()
-				log(DEBUG,"Bus unstable?",self.name,dev.id)
+				log("onewire",DEBUG,"Bus unstable?",self.name,dev.id)
 
 		for dev in devices.itervalues():
 			if dev.bus is self:

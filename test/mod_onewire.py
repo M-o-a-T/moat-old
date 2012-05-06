@@ -64,7 +64,7 @@ dir onewire A
 log TRACE DirDev
 dir onewire "000010EF0000"
 block:
-	if exists onewire "000010EF0000":
+	if exists onewire device "000010EF0000":
 		log TRACE yes
 	else:
 		log TRACE no

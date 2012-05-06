@@ -240,18 +240,11 @@ class OWFSconnectedbus(Check):
 
 
 class OWFSexists(Check):
-	name="exists onewire"
+	name="exists onewire device"
 	doc="Test if the onewire device exists"
 	def check(self,*args):
 		assert len(args)==1,"This test requires the connection name"
 		return args[0].lower() in devices
-
-class OWFSexistsbus(Check):
-	name="exists onewire bus"
-	doc="Test if the named onewire server connection exists"
-	def check(self,*args):
-		assert len(args)==1,"This test requires the connection name"
-		return Name(*args) in buses
 
 
 class OWFSmon(Monitor):
@@ -507,7 +500,6 @@ class OWFSmodule(Module):
 		register_condition(OWFSconnected)
 		register_condition(OWFSexists)
 		register_condition(OWFSconnectedbus)
-		register_condition(OWFSexistsbus)
 	
 	def unload(self):
 		main_words.unregister_statement(OWFSconnect)
@@ -522,6 +514,5 @@ class OWFSmodule(Module):
 		unregister_condition(OWFSconnected)
 		unregister_condition(OWFSexists)
 		unregister_condition(OWFSconnectedbus)
-		unregister_condition(OWFSexistsbus)
 	
 init = OWFSmodule

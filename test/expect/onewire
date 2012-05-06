@@ -86,7 +86,7 @@ NEW: ‹ConditionalWorkSequence:17 (4)›
    : └1╴... done.
 EVENT: onewire¦scanning¦A
 END: onewire¦scanning¦A
-0 OWFS start bus update
+0 onewire start bus update
 0 msg setstate init closed
 0 msg setstate closed connecting
 0 conn connecting OWFSqueue A
@@ -114,13 +114,13 @@ END: onewire¦connect¦A
 0 msg recv msg ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:2›
 0 conn incoming OWFSqueue A ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:2›
 0 msg recv A ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:2›
-0 got unrecognized OWFS name uncached
-0 got unrecognized OWFS name settings
-0 got unrecognized OWFS name system
-0 got unrecognized OWFS name statistics
-0 got unrecognized OWFS name structure
-0 got unrecognized OWFS name simultaneous
-0 got unrecognized OWFS name alarm
+0 onewire got unrecognized name uncached
+0 onewire got unrecognized name settings
+0 onewire got unrecognized name system
+0 onewire got unrecognized name statistics
+0 onewire got unrecognized name structure
+0 onewire got unrecognized name simultaneous
+0 onewire got unrecognized name alarm
 0 msg recv= MINE ‹DIRmsg ›
 1 onewire doneDIR ‹DIRmsg ›
 0 msg states at run connected connected
@@ -132,9 +132,9 @@ END: onewire¦connect¦A
 0 msg recv msg ‹MsgIncoming: data:'/bus.0/interface,/bus.0/10.000010EF0000,/bus.0/simultaneous,/bus.0/alarm' typ:0 prio:2›
 0 conn incoming OWFSqueue A ‹MsgIncoming: data:'/bus.0/interface,/bus.0/10.000010EF0000,/bus.0/simultaneous,/bus.0/alarm' typ:0 prio:2›
 0 msg recv A ‹MsgIncoming: data:'/bus.0/interface,/bus.0/10.000010EF0000,/bus.0/simultaneous,/bus.0/alarm' typ:0 prio:2›
-0 got unrecognized OWFS name interface
-0 got unrecognized OWFS name simultaneous
-0 got unrecognized OWFS name alarm
+0 onewire got unrecognized name interface
+0 onewire got unrecognized name simultaneous
+0 onewire got unrecognized name alarm
 0 msg recv= MINE ‹DIRmsg bus.0›
 1 onewire doneDIR ‹DIRmsg bus.0›
 1 onewire NEW ‹OWFSqueue:A connected› 000010ef0000 10.000010EF0000 ('bus.0',)
@@ -283,7 +283,7 @@ NEW: ‹ConditionalWorkSequence:22 (4)›
    : └1╴... done.
 EVENT: onewire¦scanning¦A
 END: onewire¦scanning¦A
-0 OWFS start bus update
+0 onewire start bus update
 0 msg states at run connected connected
 0 msg send ‹DIRmsg ›
 1 onewire SEND 0 1 7 6 0 0 '\x00'
@@ -293,13 +293,13 @@ END: onewire¦scanning¦A
 0 msg recv msg ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:2›
 0 conn incoming OWFSqueue A ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:2›
 0 msg recv A ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:2›
-0 got unrecognized OWFS name uncached
-0 got unrecognized OWFS name settings
-0 got unrecognized OWFS name system
-0 got unrecognized OWFS name statistics
-0 got unrecognized OWFS name structure
-0 got unrecognized OWFS name simultaneous
-0 got unrecognized OWFS name alarm
+0 onewire got unrecognized name uncached
+0 onewire got unrecognized name settings
+0 onewire got unrecognized name system
+0 onewire got unrecognized name statistics
+0 onewire got unrecognized name structure
+0 onewire got unrecognized name simultaneous
+0 onewire got unrecognized name alarm
 0 msg recv= MINE ‹DIRmsg ›
 1 onewire doneDIR ‹DIRmsg ›
 0 msg states at run connected connected
@@ -311,9 +311,9 @@ END: onewire¦scanning¦A
 0 msg recv msg ‹MsgIncoming: data:'/bus.0/interface,/bus.0/10.000010EF0000,/bus.0/simultaneous,/bus.0/alarm' typ:0 prio:2›
 0 conn incoming OWFSqueue A ‹MsgIncoming: data:'/bus.0/interface,/bus.0/10.000010EF0000,/bus.0/simultaneous,/bus.0/alarm' typ:0 prio:2›
 0 msg recv A ‹MsgIncoming: data:'/bus.0/interface,/bus.0/10.000010EF0000,/bus.0/simultaneous,/bus.0/alarm' typ:0 prio:2›
-0 got unrecognized OWFS name interface
-0 got unrecognized OWFS name simultaneous
-0 got unrecognized OWFS name alarm
+0 onewire got unrecognized name interface
+0 onewire got unrecognized name simultaneous
+0 onewire got unrecognized name alarm
 0 msg recv= MINE ‹DIRmsg bus.0›
 1 onewire doneDIR ‹DIRmsg bus.0›
 NEW: ‹ConditionalWorkSequence:23 (4)›
@@ -380,10 +380,10 @@ END: onewire¦disconnect¦A
 NEW: ‹ConditionalWorkSequence:27 (4)›
    : │  id: 27
    : │  call count: 0
-   : │  EVENT: wait¦start¦2.1¦END
+   : │  EVENT: wait¦start¦2.2¦END
    : └1╴... done.
-EVENT: wait¦start¦2.1¦END
-END: wait¦start¦2.1¦END
+EVENT: wait¦start¦2.2¦END
+END: wait¦start¦2.2¦END
 0 +WAIT 14 kill job <homevent.tokize.tokizer obj>
 0 -WAIT 14 kill job <homevent.tokize.tokizer obj>
 NEW: ‹ConditionalWorkSequence:28 (6)›
