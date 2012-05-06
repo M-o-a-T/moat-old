@@ -771,9 +771,8 @@ class WAGOmonRun(WAGOioRun):
 		if (msg.type is MT_NAK or msg.type is MT_ERROR) and self.msgid is None:
 			if not self.result.ready():
 				self.result.set(WAGOerror(msg.msg))
-			else:
-				self.monitor.last_msg = msg
-				self.monitor.down()
+			self.monitor.down()
+			self.monitor.last_msg = msg
 			return MINE
 		return NOT_MINE
 
