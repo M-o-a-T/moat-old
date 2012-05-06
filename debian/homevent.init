@@ -60,7 +60,7 @@ case "$1" in
 	;;
   reload)
 	echo "Reloading $DESC configuration files."
-	start-stop-daemon --stop --signal 1 --quiet --pidfile 
+	start-stop-daemon --stop --signal 1 --quiet --pidfile /var/run/homevent/pid
 	;;
   force-reload)
 	# check whether $DAEMON is running. If so, restart
