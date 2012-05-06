@@ -21,7 +21,6 @@ This code implements a SSH command line for homevent.
 """
 
 from homevent.module import Module
-from homevent.logging import log
 from homevent.context import Context
 from homevent.parser import parser_builder,parse
 from homevent.statement import main_words,Statement,AttributedStatement,global_words
@@ -30,8 +29,10 @@ from homevent.base import Name,SName,flatten
 from homevent.collect import Collection,Collected,get_collect,all_collect
 from homevent.check import register_condition,unregister_condition
 from homevent.twist import Jobber,fix_exception,reraise
-from homevent.run import process_failure,simple_event
+from homevent.run import process_failure,simple_event,register_worker,unregister_worker,MIN_PRIO
 from homevent.geventreactor import waitForDeferred
+from homevent.event import TrySomethingElse
+from homevent.worker import Worker
 
 from datetime import datetime
 
@@ -72,9 +73,73 @@ class CommandProcessor(ImmediateProcessor):
 		res = self.fn.run(self.ctx)
 		return waitForDeferred(res)
 
+
+class EventCallback(Worker):
+	args = None
+	prio = MIN_PRIO+1
+
+	def __init__(self,parent,callback,*args):
+		self.parent = parent
+		self.callback = callback
+		if args:
+			self.args = SName(args)
+			name = SName(parent.name+self.args)
+			# use self.args because that won't do a multi-roundtrip iteration
+		else:
+			name = parent.name
+		super(EventCallback,self).__init__(name)
+	
+	def list(self):
+		for r in super(EventCallback,self).list():
+			yield r
+		yield("callback",repr(self.callback))
+		if self.args:
+			yield("args",self.args)
+
+	def does_event(self,event):
+		if self.args is None:
+			return True
+		ie = iter(event)
+		ia = iter(self.args)
+		while True:
+			try: e = ie.next()
+			except StopIteration: e = StopIteration
+			try: a = ia.next()
+			except StopIteration: a = StopIteration
+			if e is StopIteration and a is StopIteration:
+				return True
+			if e is StopIteration or a is StopIteration:
+				return False
+			if str(a) == '*':
+				pass
+			elif str(a) != str(e):
+				return False
+	
+	def process(self, **k):
+		super(EventCallback,self).process(**k)
+
+		# This is an event monitor. Failures will not be tolerated.
+		try:
+			self.callback(**k)
+		except Exception as ex:
+			fix_exception(ex)
+			process_failure(ex)
+			try:
+				self.cancel()
+			except Exception as ex:
+				fix_exception(ex)
+				process_failure(ex)
+		raise TrySomethingElse
+
+	def cancel(self):
+		self.parent.drop_worker(self)
+	exposed_cancel = cancel
+		
+
 class RPCconn(Service,Collected):
 	storage = RPCconns
 	dest = ("?unnamed",)
+	workers = None
 		
 	def on_connect(self):
 		global conn_seq
@@ -82,6 +147,7 @@ class RPCconn(Service,Collected):
 		self.name = self.dest + ("n"+str(conn_seq),)
 		self.ctx = Context()
 		self.ctx.words = global_words(self.ctx)
+		self.workers = set()
 		simple_event(self.ctx,"rpc","connect",*self.name)
 		Collected.__init__(self)
 
@@ -93,7 +159,15 @@ class RPCconn(Service,Collected):
 
 	def on_disconnect(self):
 		simple_event(self.ctx,"rpc","disconnect",*self.name)
+		if self.workers is not None:
+			for w in self.workers:
+				unregister_worker(w)
+			self.workers = None
 		self.delete_done()
+	
+	def drop_worker(self,worker):
+		unregister_worker(worker)
+		self.workers.remove(worker)
 
 	def exposed_list(self,*args):
 		c = get_collect(args, allow_collection=True)
@@ -160,6 +234,11 @@ class RPCconn(Service,Collected):
 		"""Return the value of a variable"""
 		return getattr(self.ctx,arg)
 
+	def exposed_monitor(self,callback,*args):
+		w = EventCallback(self,callback,*args)
+		self.workers.add(w)
+		register_worker(w)
+		return w
 
 	def list(self):
 		for r in super(RPCconn,self).list():

@@ -31,6 +31,10 @@ def tester():
 	sleep(0.2)
 	log(DEBUG, "CONNECTING")
 	c = rpyc.connect("localhost",56478)
+	def called(**k):
+		for a,b in k.iteritems():
+			log(DEBUG, "CB %s: %s" % (a,b))
+	cb = c.root.monitor(called,*("wait start * some time".split()))
 	for x in c.root.list():
 		log(DEBUG, repr(x))
 	log(DEBUG,".")
@@ -54,6 +58,7 @@ def tester():
 	c.root.command("var","state","get_me","the","tester")
 	log(DEBUG,"The value is: "+c.root.var("get_me"))
 	c.root.command("wait","some","time",sub=(("for",0.2),))
+	cb.cancel()
 
 spawn(tester)
 
