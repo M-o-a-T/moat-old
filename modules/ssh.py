@@ -180,9 +180,12 @@ You need to call this exactly once.
 			# generate a RSA keypair
 			from Crypto.PublicKey import RSA
 			KEY_LENGTH = 1024
-			rsaKey = RSA.generate(KEY_LENGTH, common.entropy.get_bytes)
-			publicKeyString = keys.makePublicKeyString(rsaKey)
-			privateKeyString = keys.makePrivateKeyString(rsaKey)
+			def rander(x):
+				with file("/dev/urandom") as f:
+					return f.read(x)
+			rsaKey = RSA.generate(KEY_LENGTH, randfunc=rander)
+			publicKeyString = keys.Key(rsaKey).public().toString("OPENSSH")
+			privateKeyString = keys.Key(rsaKey).toString("OPENSSH")
 			# save keys for next time
 			file(pub_path, 'w+b').write(publicKeyString)
 			mask = os.umask(077)

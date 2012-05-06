@@ -1,3 +1,9 @@
+homevent (0.3.4) smurf; urgency=low
+
+  * SSH: update key generation to current Twisted
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Sun, 06 May 2012 03:58:05 +0200
+
 homevent (0.3.3) smurf; urgency=low
 
   * Add "exists" checks globally
