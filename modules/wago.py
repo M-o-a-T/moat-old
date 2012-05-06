@@ -723,6 +723,13 @@ class WAGOmonRun(WAGOioRun):
 		self.monitor.msgid = val
 	msgid = property(_get_msgid,_set_msgid)
 
+	def list(self):
+		for r in super(WAGOmonRun,self).list():
+			yield r
+		yield("msgid", self.msgid if self.msgid is not None else "-")
+		if self.counter:
+			yield("counter",self.counter)
+
 	@property
 	def msg(self):
 		def udb():

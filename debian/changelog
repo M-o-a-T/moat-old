@@ -1,3 +1,9 @@
+homevent (0.3.11) smurf; urgency=low
+
+  * Wago: show message ID in monitor commands
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Sun, 06 May 2012 22:16:14 +0200
+
 homevent (0.3.10) smurf; urgency=low
 
   * Add RPC event monitoring
