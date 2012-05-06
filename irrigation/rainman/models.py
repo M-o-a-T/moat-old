@@ -214,11 +214,6 @@ class Schedule(m.Model):
 	valve = m.ForeignKey(Valve,related_name="schedules")
 	start = m.DateTimeField()
 	duration = m.TimeField()
-	SEEN_VALUES = (
-		('y',"set"),
-		('n',"not set"),
-		('c',"changed"),
-	)
 	seen = m.BooleanField(default=False,max_length=1,help_text="Sent to the controller?")
 	changed = m.BooleanField(default=False,max_length=1,help_text="Updated by the scheduler?")
 	# The scheduler inserts both to False. The controller sets Seen.
@@ -242,8 +237,15 @@ class UserForGroup(m.Model):
 	class Meta:
 		pass
 	def __unicode__(self):
-		return u"‹%s @%s %s›" % (self.__class__.__name__,self.controller,self.var)
+		return u"‹%s @%s %s›" % (self.__class__.__name__,self.user.username,self.group.name)
 	user = m.ForeignKey(DjangoUser)
 	group = m.ForeignKey(Group,related_name="users")
+	LEVEL_VALUES = (
+		('0',"None"),
+		('1',"read"),
+		('2',"change schedule"),
+		('3',"admin"),
+	)
+	level = m.IntegerField(choices=LEVEL_VALUES,default=1,help_text=u"Access to …")
 
 
