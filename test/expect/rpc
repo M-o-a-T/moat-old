@@ -28,18 +28,18 @@ NEW: ‹ConditionalWorkSequence:9 (4)›
    : └1╴... done.
 EVENT: rpc¦connect¦foo¦n1
 END: rpc¦connect¦foo¦n1
-1 Name('event',)
-1 Name('log',)
-1 Name('module',)
-1 Name('net',)
-1 Name('netserver',)
-1 Name('on',)
-1 Name('parser',)
-1 Name('rpc', 'connection')
-1 Name('rpc', 'server')
-1 Name('state',)
-1 Name('wait',)
-1 Name('worker',)
+1 (Name('event',),)
+1 (Name('log',),)
+1 (Name('module',),)
+1 (Name('net',),)
+1 (Name('netserver',),)
+1 (Name('on',),)
+1 (Name('parser',),)
+1 (Name('rpc', 'connection'),)
+1 (Name('rpc', 'server'),)
+1 (Name('state',),)
+1 (Name('wait',),)
+1 (Name('worker',),)
 1 .
 1 (Name(u'foo',),)
 1 .
