@@ -337,12 +337,14 @@ class DIRmsg(OWFScall):
 				n += 1
 				try: entry = entry[entry.rindex('/')+1:]
 				except ValueError: pass
+				entry = entry.rstrip("\0")
 				self.cb(entry)
 			self.result.set(n)
 		else:
 			if len(data):
 				try: data = data[data.rindex('/')+1:]
 				except ValueError: pass
+				data = data.rstrip("\0")
 				self.cb(data)
 				return RECV_AGAIN
 			self.result.set(n)
@@ -557,7 +559,9 @@ devices = {}
 class OWFSdevice(object):
 	"""This represents a bus device with attributes."""
 	def __new__(cls,id, bus=None, path=()):
-		short_id = id[id.index(".")+1:].lower()
+		#dot = id.index(".")
+		#short_id = (id[:dot]+id[dot+1:]).lower()
+		short_id = id.lower()
 		try:
 			self = devices[short_id]
 		except KeyError: # new device

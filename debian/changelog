@@ -1,3 +1,11 @@
+homevent (0.3.14) smurf; urgency=low
+
+  * onewire: fix directory lookup (last entry had a spurious NUL)
+  * onewire: fix device lookup (IDs are only unique per devie type)
+    INCOMPATIBLE CHANGE!
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Sun, 06 May 2012 23:09:11 +0200
+
 homevent (0.3.13) smurf; urgency=low
 
   * Wago monitor: param mixup
