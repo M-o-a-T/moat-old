@@ -145,9 +145,9 @@ class Monitor(Collected,Jobber):
 		yield ("time",self.time_name)
 		if not TESTING:
 			if self.started_at:
-				yield ("start",unicode(self.started_at))
+				yield ("start",self.started_at)
 			if self.stopped_at:
-				yield ("stop",unicode(self.stopped_at))
+				yield ("stop",self.stopped_at)
 
 		yield ("steps", "%s / %s / %s" % (self.steps,self.points,self.maxpoints))
 		if self.data:
