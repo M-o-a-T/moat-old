@@ -109,23 +109,37 @@ class BaseLogger(Collected,Jobber):
 
 	def _init(self):
 		"""Fork off the writer thread.
-			Override this t do nothing if you don't have one."""
+		   Override this to do nothing if you don't have one."""
 
 		self.q = JoinableQueue(100)
 		self.start_job("job",self._writer)
-		self.ready = True
+		self.job.link(self.delete)
+		if self.ready is False:
+			self.ready = True
+		else:
+			self.stop_job("job") # concurrency issues?
 
 	def _writer(self):
+		errs = 0
 		for r in self.q:
 			try:
-				if r is None:
-					return
-				elif r is FlushMe:
+				if r is FlushMe:
 					self._flush()
 				else:
 					self._log(*r)
+			except Exception as ex:
+				errs += 1
+				fix_exception(ex)
+				from homevent.run import process_failure,reraise
+				process_failure(ex)
+				if errs > 10:
+					reraise(ex)
+			else:
+				if errs:
+					errs -= 1
 			finally:
 				self.q.task_done()
+		self.q.task_done() # for the StopIter
 
 	# Collection stuff
 	def list(self):
@@ -138,10 +152,15 @@ class BaseLogger(Collected,Jobber):
 		return LogNames[self.level]+": "+self.__class__.__name__
 
 	def delete(self, ctx=None):
-		self.q.put(None)
+		if self.ready:
+			self.ready = None
+			self.delete_done()
+		try:
+			self.q.put(StopIteration,block=False)
+		except Full:
+			pass
 		self.job.join(timeout=1)
 		self.stop_job("job")
-		self.delete_done()
 
 	def _wlog(self, *a):
 		self.q.put(a, block=False)
