@@ -24,7 +24,7 @@ from homevent import TESTING
 from homevent.run import process_event
 from homevent.statement import Statement
 from homevent.event import Event
-from homevent.check import Check
+from homevent.check import Check,register_condition
 from homevent.base import Name
 from homevent.collect import Collection,Collected
 from homevent.twist import fix_exception,reraise
@@ -48,6 +48,7 @@ class Modules(Collection):
 	prio = 99
 Modules = Modules()
 Modules.does("del")
+register_condition(Modules.exists)
 
 class Module(Collected):
 	"""\
@@ -222,11 +223,4 @@ load dir - "NAME"
 					raise RuntimeError(u"‹%s›: not listed" % (w,))
 			else:
 				raise SyntaxError("Usage: loaddir [ [ - ] name ]")
-
-class ModuleExists(Check):
-	name="exists module"
-	doc="check if that module is loaded"
-	def check(self,*args):
-		assert args,"Need a module name (and optional parameters)"
-		return Name(args) in Modules
 

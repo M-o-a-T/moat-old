@@ -20,7 +20,7 @@ from homevent.interpreter import InteractiveInterpreter,Interpreter
 from homevent.parser import parse
 from homevent.statement import main_words, global_words
 from homevent.check import register_condition
-from homevent.module import load_module, Load,LoadDir,ModuleExists
+from homevent.module import load_module, Load,LoadDir
 from homevent.reactor import ShutdownHandler,mainloop,shut_down
 from homevent.context import Context
 from homevent.twist import callLater,fix_exception
@@ -35,7 +35,6 @@ import os,sys
 main_words.register_statement(Load)
 main_words.register_statement(LoadDir)
 main_words.register_statement(ShutdownHandler)
-register_condition(ModuleExists)
 
 load_module("help")
 load_module("data")

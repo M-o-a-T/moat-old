@@ -28,6 +28,7 @@ from homevent.twist import fix_exception,reraise,Jobber,callLater
 from homevent.times import humandelta,now,unixtime
 from homevent.run import simple_event
 from homevent.context import Context
+from homevent.check import register_condition
 
 from homevent.delay import DelayFor,DelayWhile,DelayUntil,DelayNext
 
@@ -40,11 +41,13 @@ class Inputs(Collection):
 	name = "input"
 Inputs = Inputs()
 Inputs.does("del")
+register_condition(Inputs.exists)
 
 class Outputs(Collection):
 	name = "output"
 Outputs = Outputs()
 Outputs.does("del")
+register_condition(Outputs.exists)
 
 class BadValue(RuntimeError):
 	"""The input doesn't match the expected values"""
@@ -173,6 +176,7 @@ class OutTimers(Collection):
 	name = "outtimer"
 OutTimers = OutTimers()
 OutTimers.does("del")
+register_condition(OutTimers.exists)
 tseq=0
 
 class OutTimer(Collected):
@@ -511,22 +515,6 @@ IOset.register_statement(DelayFor)
 IOset.register_statement(DelayWhile)
 IOset.register_statement(DelayUntil)
 IOset.register_statement(DelayNext)
-
-class IOExists(Check):
-	def check(self,*args):
-		return Name(*args) in self.storage
-
-@register_condition
-class InputExists(IOExists):
-	storage = Inputs.storage
-	name="exists input"
-	doc="Test if a named input exists"
-
-@register_condition
-class OutputExists(IOExists):
-	storage = Outputs.storage
-	name="exists output"
-	doc="Test if a named output exists"
 
 
 class IOisSet(Check):

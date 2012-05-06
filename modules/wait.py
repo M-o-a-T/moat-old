@@ -338,11 +338,11 @@ class WaitModule(Module):
 	def load(self):
 		main_words.register_statement(WaitHandler)
 		main_words.register_statement(VarWaitHandler)
-		register_condition(ExistsWaiterCheck)
+		register_condition(Waiters.exists)
 	
 	def unload(self):
 		main_words.unregister_statement(WaitHandler)
 		main_words.unregister_statement(VarWaitHandler)
-		unregister_condition(ExistsWaiterCheck)
+		unregister_condition(Waiters.exists)
 
 init = WaitModule

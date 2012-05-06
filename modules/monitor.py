@@ -143,14 +143,6 @@ set monitor VALUE NAME
 		m = Monitors[Name(*event[1:])]
 		m.watcher.put(event[0], block=True, timeout=0.1)
 
-class ExistsMonitorCheck(Check):
-	name="exists monitor"
-	doc="check if a monitor exists at all"
-	def check(self,*args):
-		if not len(args):
-			raise SyntaxError(u"Usage: if exists monitor ‹name…›")
-		name = Name(*args)
-		return name in Monitors
 
 class RunningMonitorCheck(Check):
 	name="running monitor"
@@ -202,7 +194,6 @@ class MonitorModule(Module):
 		main_words.register_statement(MonitorStart)
 		main_words.register_statement(MonitorStop)
 		main_words.register_statement(VarMonitorHandler)
-		register_condition(ExistsMonitorCheck)
 		register_condition(RunningMonitorCheck)
 		register_condition(WaitingMonitorCheck)
 	
@@ -214,7 +205,6 @@ class MonitorModule(Module):
 		main_words.unregister_statement(MonitorStart)
 		main_words.unregister_statement(MonitorStop)
 		main_words.unregister_statement(VarMonitorHandler)
-		unregister_condition(ExistsMonitorCheck)
 		unregister_condition(RunningMonitorCheck)
 		unregister_condition(WaitingMonitorCheck)
 

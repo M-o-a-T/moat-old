@@ -35,6 +35,7 @@ from homevent.twist import log_wait, sleepUntil, fix_exception,Jobber
 from homevent.context import Context
 from homevent.logging import log,TRACE,DEBUG
 from homevent.collect import Collection,Collected
+from homevent.check import register_condition
 
 from gevent.event import Event as gEvent
 from gevent.queue import Channel,Queue
@@ -48,6 +49,7 @@ class Monitors(Collection):
 	name = "monitor"
 Monitors = Monitors()
 Monitors.does("del")
+register_condition(Monitors.exists)
 
 class MonitorAgain(RuntimeError):
 	"""The monitor is not ready yet; retry please"""

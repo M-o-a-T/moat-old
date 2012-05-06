@@ -18,7 +18,7 @@
 
 from twisted.internet import defer
 from homevent.reactor import ShutdownHandler
-from homevent.module import load_module,Load,ModuleExists
+from homevent.module import load_module,Load
 from homevent.statement import main_words
 from homevent.check import register_condition
 from homevent.fs20 import handler, register_handler
@@ -129,7 +129,6 @@ shutdown
 
 main_words.register_statement(ShutdownHandler)
 main_words.register_statement(Load)
-register_condition(ModuleExists)
 
 load_module("block")
 load_module("file")

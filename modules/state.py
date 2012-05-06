@@ -336,16 +336,6 @@ class LastStateCheck(Check):
 			return value == "-"
 
 
-class ExistsStateCheck(Check):
-	name="exists state"
-	doc="check if a state exists at all"
-	def check(self,*args):
-		if len(args) < 1:
-			raise SyntaxError(u"Usage: if exists state ‹name…›")
-		name = Name(*args)
-		return name in States
-
-
 class SavedStateCheck(Check):
 	name="saved state"
 	doc="check if a state is stored in the persistent database"
@@ -381,7 +371,7 @@ class StateModule(Module):
 		register_condition(StateCheck)
 		register_condition(StateLockedCheck)
 		register_condition(LastStateCheck)
-		register_condition(ExistsStateCheck)
+		register_condition(States.exists)
 		register_condition(SavedStateCheck)
 	
 	def unload(self):
@@ -396,7 +386,7 @@ class StateModule(Module):
 		unregister_condition(StateCheck)
 		unregister_condition(StateLockedCheck)
 		unregister_condition(LastStateCheck)
-		unregister_condition(ExistsStateCheck)
+		unregister_condition(States.exists)
 		unregister_condition(SavedStateCheck)
 	
 init = StateModule

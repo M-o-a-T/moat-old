@@ -210,15 +210,6 @@ stop timeslot ‹name›
 		return m.down()
 
 
-class ExistsTimeslotCheck(Check):
-	name="exists timeslot"
-	doc="check if a timeslot exists at all"
-	def check(self,*args):
-		if not len(args):
-			raise SyntaxError(u"Usage: if exists timeslot ‹name…›")
-		name = Name(*args)
-		return name in Timeslots
-
 class RunningTimeslotCheck(Check):
 	name="running timeslot"
 	doc="check if a timeslot is active"
@@ -266,7 +257,6 @@ class TimeslotModule(Module):
 		main_words.register_statement(TimeslotStart)
 		main_words.register_statement(TimeslotStop)
 		main_words.register_statement(VarTimeslotHandler)
-		register_condition(ExistsTimeslotCheck)
 		register_condition(RunningTimeslotCheck)
 		register_condition(DuringTimeslotCheck)
 	
@@ -276,7 +266,6 @@ class TimeslotModule(Module):
 		main_words.unregister_statement(TimeslotStart)
 		main_words.unregister_statement(TimeslotStop)
 		main_words.unregister_statement(VarTimeslotHandler)
-		unregister_condition(ExistsTimeslotCheck)
 		unregister_condition(RunningTimeslotCheck)
 		unregister_condition(DuringTimeslotCheck)
 

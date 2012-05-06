@@ -31,6 +31,7 @@ from homevent.run import simple_event
 from homevent.base import Name,SName
 from homevent.fs20 import recv_handler, PREFIX
 from homevent.collect import Collection,Collected
+from homevent.check import register_condition,unregister_condition
 from homevent.logging import log,TRACE,DEBUG
 from homevent.times import now,humandelta
 from homevent.timeslot import Timeslots,Timeslotted,Timeslot,collision_filter
@@ -376,11 +377,13 @@ class fs20em(Module):
 		PREFIX[PREFIX_EM2] = em2_handler()
 		main_words.register_statement(FS20em)
 		main_words.register_statement(FS20emVal)
+		register_condition(EMs.exists)
 	
 	def unload(self):
 		del PREFIX[PREFIX_EM]
 		del PREFIX[PREFIX_EM2]
 		main_words.unregister_statement(FS20em)
 		main_words.unregister_statement(FS20emVal)
+		unregister_condition(EMs.exists)
 	
 init = fs20em

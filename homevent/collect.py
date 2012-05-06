@@ -18,6 +18,7 @@
 """Class to make storing collections of stuff simpler"""
 
 from homevent.base import Name,SName
+from homevent.check import Check
 
 from weakref import WeakValueDictionary,proxy
 
@@ -42,6 +43,7 @@ class Collection(dict):
 
 		"""
 	prio = 0 # the order to de-allocate everything on shutdown
+	exists = None
 
 	def __repr__(self):
 		try:
@@ -65,11 +67,26 @@ class Collection(dict):
 		return self
 
 	def __init__(self):
-		pass
+		if self.exists is None:
+			class ExistsCheck(Check):
+				name=Name("exists",*self.name)
+				doc="check if a named %s object exists"%(self.name,)
+				def check(xself,*args):
+					if not len(args):
+						raise SyntaxError(u"Usage: if exists avg ‹name…›")
+					oname = Name(*args)
+					return oname in self
+			self.exists = ExistsCheck
+			self.exists.__name__ = "ExistsCheck_"+"_".join(self.name)
 	
 	def does(self,name):
+		name = SName(name)
 		assert name not in self._can_do
-		self._can_do.add(SName(name))
+		self._can_do.add(name)
+
+	def exists_check(self):
+		return ExistsCheck
+
 
 	def can_do(self,name):
 		name = SName(name)

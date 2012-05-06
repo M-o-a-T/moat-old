@@ -30,7 +30,8 @@ log
 from homevent.module import Module
 from homevent.statement import Statement, main_words
 from homevent import logging
-from homevent.logging import log, Logger, LogNames, log_level
+from homevent.logging import log, Logger, LogNames, log_level, Loggers
+from homevent.check import register_condition,unregister_condition
 
 import sys
 
@@ -131,9 +132,11 @@ class LoggingModule(Module):
 	def load(self):
 		main_words.register_statement(LogHandler)
 		main_words.register_statement(LogLevelHandler)
+		register_condition(Loggers.exists)
 	
 	def unload(self):
 		main_words.unregister_statement(LogHandler)
 		main_words.unregister_statement(LogLevelHandler)
+		unregister_condition(Loggers.exists)
 	
 init = LoggingModule

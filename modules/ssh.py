@@ -28,6 +28,7 @@ from homevent.statement import main_words,Statement
 from homevent.interpreter import Interpreter
 from homevent.base import Name,SName
 from homevent.collect import Collection,Collected
+from homevent.check import register_condition,unregister_condition
 from homevent.geventreactor import deferToGreenlet
 import homevent.twist_ssh # monkey patches
 
@@ -247,11 +248,13 @@ class SSHmodule(Module):
 		main_words.register_statement(SSHlisten)
 		main_words.register_statement(SSHauth)
 		main_words.register_statement(SSHdir)
+		register_condition(AuthKeys.exists)
 	
 	def unload(self):
 		main_words.unregister_statement(SSHlisten)
 		main_words.unregister_statement(SSHauth)
 		main_words.unregister_statement(SSHdir)
+		unregister_condition(AuthKeys.exists)
 	
 init = SSHmodule
 

@@ -35,10 +35,8 @@ from homevent.worker import ExcWorker
 from homevent.reactor import shutdown_event
 from homevent.twist import callLater, fix_exception
 from homevent.collect import Collection,Collected
-
-from homevent.net import NetListen,NetConnect,NetSend,NetExists,NetConnected,\
-	NetReceiver,NetCommonFactory,DisconnectedError,\
-	NetName,NetTo, NetClientFactory,NetServerFactory
+from homevent.net import NetConnect,NetSend,NetConnected,\
+	NetReceiver,NetClientFactory
 
 from twisted.internet import protocol,reactor,error,defer
 from twisted.protocols.basic import _PauseableMixin
@@ -428,11 +426,6 @@ class AVRconnected(NetConnected):
 	storage2 = avr_conns
 	name="connected fs20 avr"
 
-class AVRexists(NetExists):
-	storage = AVRs.storage
-	storage2 = avr_conns
-	name = "exists fs20 avr"
-
 
 class FS20avr_shutdown(ExcWorker):
 	"""\
@@ -466,13 +459,13 @@ class AVRmodule(Module):
 	def load(self):
 		main_words.register_statement(AVRconnect)
 		main_words.register_statement(AVRsend)
-		register_condition(AVRexists)
+		register_condition(AVRs.exists)
 		register_condition(AVRconnected)
 	
 	def unload(self):
 		main_words.unregister_statement(AVRconnect)
 		main_words.unregister_statement(AVRsend)
-		unregister_condition(AVRexists)
+		unregister_condition(AVRs.exists)
 		unregister_condition(AVRconnected)
 	
 init = AVRmodule

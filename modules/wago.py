@@ -47,10 +47,10 @@ class WAGOchannels(Collection):
 	name = "wago conn"
 WAGOchannels = WAGOchannels()
 
-class WAGOserver(Collection):
+class WAGOservers(Collection):
 	name = "wago server"
-WAGOserver = WAGOserver()
-WAGOserver.does("del")
+WAGOservers = WAGOservers()
+WAGOservers.does("del")
 
 class MT_MULTILINE(singleName): pass # =foo bar .
 class MT_OTHER(singleName): pass # anything else
@@ -335,7 +335,7 @@ class WAGOkeepaliveMsg(MsgBase):
 
 class WAGOqueue(MsgQueue):
 	"""A simple adapter for the Wago protocol."""
-	storage = WAGOserver
+	storage = WAGOservers
 	ondemand = False
 	max_send = None
 
@@ -405,18 +405,11 @@ class WAGOconnected(Check):
 	def check(self,*args):
 		assert len(args)==1,"This test requires the connection name"
 		try:
-			bus = WAGOserver[Name(*args)]
+			bus = WAGOservers[Name(*args)]
 		except KeyError:
 			return False
 		else:
 			return bus.channel is not None
-
-class WAGOexists(Check):
-	name="exists wago"
-	doc="Test if the named wago server connection exists"
-	def check(self,*args):
-		assert len(args)>0,"This test requires the connection name"
-		return Name(*args) in WAGOserver
 
 
 class WAGOdisconnect(Statement):
@@ -434,7 +427,7 @@ disconnect wago NAME
 			raise SyntaxError("Usage: disconnect wago NAME")
 		name = event[0]
 		log(TRACE,"Dropping WAGO connection",name)
-		bus = WAGOserver[name]
+		bus = WAGOservers[name]
 		
 		log(TRACE,"Drop WAGO connection",name)
 
@@ -600,7 +593,7 @@ class WAGOinput(BoolIO,WAGOio,Input):
 
 	def _read(self):
 		msg = WAGOinputRun(self.card,self.port)
-		WAGOserver[self.server].enqueue(msg)
+		WAGOservers[self.server].enqueue(msg)
 		res = msg.result.get()
 		if isinstance(res,Exception):
 			reraise(res)
@@ -617,7 +610,7 @@ class WAGOoutput(BoolIO,WAGOio,Output):
 
 	def _write(self,val):
 		msg = WAGOoutputRun(self.card,self.port,val)
-		WAGOserver[self.server].enqueue(msg)
+		WAGOservers[self.server].enqueue(msg)
 		res = msg.result.get()
 		if isinstance(res,Exception):
 			reraise(res)
@@ -626,7 +619,7 @@ class WAGOoutput(BoolIO,WAGOio,Output):
 	def _tmwrite(self,val,timer,nextval=None):
 		assert nextval is None,"setting a different next value is not supported yet"
 		msg = WAGOtimedOutputRun(self,val,timer)
-		WAGOserver[self.server].enqueue(msg)
+		WAGOservers[self.server].enqueue(msg)
 		res = msg.result.get()
 		if isinstance(res,Exception):
 			reraise(res)
@@ -634,7 +627,7 @@ class WAGOoutput(BoolIO,WAGOio,Output):
 	
 	def _read(self):
 		msg = WAGOoutputInRun(self.card,self.port)
-		WAGOserver[self.server].enqueue(msg)
+		WAGOservers[self.server].enqueue(msg)
 		res = msg.result.get()
 		if isinstance(res,Exception):
 			reraise(res)
@@ -669,7 +662,7 @@ send wago ‹text…› :to ‹name›
 		val = u" ".join(unicode(s) for s in event)
 
 		msg = WAGOrawRun(val)
-		WAGOserver[name].enqueue(msg)
+		WAGOservers[name].enqueue(msg)
 		res = msg.result.get()
 
 
@@ -751,7 +744,8 @@ class WAGOmodule(Module):
 		main_words.register_statement(WAGOdisconnect)
 		main_words.register_statement(WAGOraw)
 		register_condition(WAGOconnected)
-		register_condition(WAGOexists)
+		register_condition(WAGOservers.exists)
+		register_condition(WAGOchannels.exists)
 		register_input(WAGOinput)
 		register_output(WAGOoutput)
 	
@@ -761,7 +755,8 @@ class WAGOmodule(Module):
 		main_words.unregister_statement(WAGOdisconnect)
 		main_words.unregister_statement(WAGOraw)
 		unregister_condition(WAGOconnected)
-		unregister_condition(WAGOexists)
+		unregister_condition(WAGOservers.exists)
+		unregister_condition(WAGOchannels.exists)
 		unregister_input(WAGOinput)
 		unregister_output(WAGOoutput)
 	

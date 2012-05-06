@@ -31,6 +31,7 @@ from homevent.times import time_delta, time_until, unixdelta, now, \
 from homevent.base import Name
 from homevent.twist import callLater, fix_exception
 from homevent.context import Context
+from homevent.check import register_condition
 from homevent.logging import log,TRACE,DEBUG,ERROR
 from homevent.collect import Collection,Collected
 
@@ -42,6 +43,7 @@ class Timeslots(Collection):
     name = "timeslot"
 Timeslots = Timeslots()
 Timeslots.does("del")
+register_condition(Timeslots.exists)
 
 class Timeslotted(object):
 	pass

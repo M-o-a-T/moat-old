@@ -29,7 +29,7 @@ from homevent.context import Context
 from homevent.event import Event
 from homevent.base import Name,SName
 from homevent.run import process_failure
-from homevent.collect import Collection,Collected
+from homevent.collect import Collected
 from homevent.twist import fix_exception,reraise,Jobber
 
 import os
@@ -495,14 +495,4 @@ class NetConnected(Check):
 			return False
 		return conn.did_up_event
 
-class NetExists(Check):
-	#storage = Nets.storage
-	#storage2 = net_conns
-	#name="exists net"
-	doc="Test if a TCP connection is configured"
-
-	def check(self,*args):
-		if len(args) == 2 and Name(*args) in getattr(self,"storage2",{}):
-			return True
-		return Name(*args) in self.storage
 

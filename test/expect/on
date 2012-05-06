@@ -212,7 +212,6 @@ RUN: on num 3 ‹OnEventHandler›
    : step: do nothing ‹DoNothingHandler›
  at: ‹ConditionalWorkSequence:21 (5)› (step 1)
  ev: IEVENT: num¦3
-0 NOW: do nothing
 END: num¦3
 NEW: ‹ConditionalWorkSequence:22 (5)›
    : │  id: 22
@@ -230,7 +229,6 @@ RUN: on num 2 ‹OnEventHandler›
    : step: do nothing ‹DoNothingHandler›
  at: ‹ConditionalWorkSequence:22 (5)› (step 1)
  ev: IEVENT: num¦2
-0 NOW: do nothing
 END: num¦2
 NEW: ‹ConditionalWorkSequence:23 (5)›
    : │  id: 23
@@ -248,7 +246,6 @@ RUN: on num 1 ‹OnEventHandler›
    : step: do nothing ‹DoNothingHandler›
  at: ‹ConditionalWorkSequence:23 (5)› (step 1)
  ev: IEVENT: num¦1
-0 NOW: do nothing
 END: num¦1
 NEW: ‹ConditionalWorkSequence:24 (4)›
    : │  id: 24

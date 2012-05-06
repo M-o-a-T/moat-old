@@ -31,7 +31,7 @@ from homevent.context import Context
 
 from twisted.internet import protocol,reactor,error
 
-from homevent.net import NetListen,NetConnect,NetSend,NetExists,NetConnected,\
+from homevent.net import NetListen,NetConnect,NetSend,NetConnected,\
 	DisconnectedError,NetListener,NetActiveConnector,NetPassiveConnector,\
 	NetName,NetTo,LineReceiver
 
@@ -127,11 +127,6 @@ class NETconnected(NetConnected):
 	storage2 = net_conns
 	name="connected net"
 
-class NETexists(NetExists):
-	storage = Nets.storage
-	storage2 = net_conns
-	name = "exists net"
-
 class NETmodule(Module):
 	"""\
 		Basic TCP connection. Incoming lines are translated to events.
@@ -143,14 +138,16 @@ class NETmodule(Module):
 		main_words.register_statement(NETlisten)
 		main_words.register_statement(NETconnect)
 		main_words.register_statement(NETsend)
-		register_condition(NETexists)
+		register_condition(Nets.exists)
+		register_condition(NetListens.exists)
 		register_condition(NETconnected)
 	
 	def unload(self):
 		main_words.unregister_statement(NETlisten)
 		main_words.unregister_statement(NETconnect)
 		main_words.unregister_statement(NETsend)
-		unregister_condition(NETexists)
+		unregister_condition(Nets.exists)
+		unregister_condition(NetListens.exists)
 		unregister_condition(NETconnected)
 	
 init = NETmodule

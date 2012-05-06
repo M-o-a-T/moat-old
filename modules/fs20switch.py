@@ -26,6 +26,7 @@ from homevent.statement import AttributedStatement,Statement, main_words
 from homevent.run import simple_event
 from homevent.event import Event
 from homevent.context import Context
+from homevent.check import register_condition,unregister_condition
 from homevent.base import Name,SName
 from homevent.collect import Collection,Collected
 from homevent.fs20 import from_hc, from_dev, to_hc, to_dev, WrongDatagram
@@ -88,6 +89,7 @@ class CannotDoError(RuntimeError):
 class SwitchGroups(Collection):
 	name = Name("fs20","code")
 SwitchGroups = SwitchGroups()
+SwitchGroups.does("del")
 
 class igroup(group):
 	def __init__(self):
@@ -190,6 +192,7 @@ class SwitchGroup(Collected,igroup):
 class Switches(Collection):
 	name = Name("fs20","switch")
 Switches = Switches()
+Switches.does("del")
 
 class Switch(Collected):
 	"""\
@@ -472,9 +475,13 @@ class fs20switch(Module):
 	def load(self):
 		main_words.register_statement(FS20switches)
 		main_words.register_statement(FS20send)
+		register_condition(SwitchGroups.exists)
+		register_condition(Switches.exists)
 	
 	def unload(self):
 		main_words.unregister_statement(FS20switches)
 		main_words.unregister_statement(FS20send)
+		unregister_condition(SwitchGroups.exists)
+		unregister_condition(Switches.exists)
 	
 init = fs20switch

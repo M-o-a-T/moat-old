@@ -20,7 +20,7 @@ This code implements logging to RRD.
 
 """
 
-from homevent.check import Check,register_condition,unregister_condition
+from homevent.check import register_condition,unregister_condition
 from homevent.module import Module
 from homevent.statement import Statement, main_words
 from homevent.times import now
@@ -64,14 +64,6 @@ class RRD(Collected):
 
 	def info(self):
 		return "%s %s" % (self.path,self.dataset)
-
-
-class ExistsRRDCheck(Check):
-	name="exists rrd"
-	doc="Check if the RRD has been created"
-	def check(self,*args):
-		assert len(args), "Need exactly one argument (RRD name)"
-		return Name(*args) in RRDs
 
 
 class RRDHandler(Statement):
@@ -148,15 +140,15 @@ class RRDModule(Module):
 	info = "Words for RRD access"
 
 	def load(self):
-		register_condition(ExistsRRDCheck)
 		main_words.register_statement(RRDHandler)
 		main_words.register_statement(RRDset)
 		main_words.register_statement(VarRRDHandler)
+		register_condition(RRDs.exists)
 	
 	def unload(self):
-		unregister_condition(ExistsRRDCheck)
 		main_words.unregister_statement(RRDHandler)
 		main_words.unregister_statement(RRDset)
 		main_words.unregister_statement(VarRRDHandler)
+		unregister_condition(RRDs.exists)
 	
 init = RRDModule

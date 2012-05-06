@@ -17,7 +17,7 @@
 ##
 
 from homevent.reactor import ShutdownHandler
-from homevent.module import load_module,Load,ModuleExists
+from homevent.module import load_module,Load
 from homevent.statement import DoNothingHandler,main_words
 from homevent.check import register_condition
 from test import run
@@ -44,7 +44,12 @@ on wago connect test:
 		send wago test DI
 		send wago test Dr
 
-wait :for 0.1
+wait:
+	for 0.1
+	debug force
+if not connected wago test:
+	log WARN not connected
+	shutdown
 # TODO
 
 input wago test 1 1:
@@ -127,7 +132,7 @@ list wago conn test
 list wago server
 list wago server test
 block:
-	if exists wago test:
+	if exists wago server test:
 		log DEBUG Yes
 	else:
 		log DEBUG No1
@@ -135,7 +140,7 @@ block:
 		log DEBUG Yes
 	else:
 		log DEBUG No2
-	if exists wago test stupid:
+	if exists wago server test stupid:
 		log DEBUG No3
 	else:
 		log DEBUG Yes
@@ -187,7 +192,6 @@ shutdown
 main_words.register_statement(DoNothingHandler)
 main_words.register_statement(ShutdownHandler)
 main_words.register_statement(Load)
-register_condition(ModuleExists)
 
 load_module("block")
 load_module("file")

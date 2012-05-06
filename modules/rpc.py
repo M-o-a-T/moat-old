@@ -28,6 +28,7 @@ from homevent.statement import main_words,Statement,AttributedStatement,global_w
 from homevent.interpreter import Interpreter,ImmediateProcessor
 from homevent.base import Name,SName,flatten
 from homevent.collect import Collection,Collected,get_collect,all_collect
+from homevent.check import register_condition,unregister_condition
 from homevent.twist import Jobber,fix_exception,reraise
 from homevent.run import process_failure,simple_event
 from homevent.geventreactor import waitForDeferred
@@ -257,9 +258,13 @@ class RPCmodule(Module):
 
 	def load(self):
 		main_words.register_statement(RPClisten)
+		register_condition(RPCconns.exists)
+		register_condition(RPCservers.exists)
 	
 	def unload(self):
 		main_words.unregister_statement(RPClisten)
+		unregister_condition(RPCconns.exists)
+		unregister_condition(RPCservers.exists)
 	
 init = RPCmodule
 

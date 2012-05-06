@@ -207,6 +207,17 @@ Shows the list of loaded modules, terminated by a single dot.
 
 You can append the name of a loaded module to examine details.
 
+-----
+Tests
+-----
+
+exists …
+--------
+
+Nearly everything that can sensibly be deleted can also be tested for.
+
+	if exists module data:
+		del module data
 
 ======
 errors
@@ -353,11 +364,6 @@ This method is not implemented yet.
 -----
 Tests
 -----
-
-exists fs20 avr ‹name…›
------------------------
-
-Check whether an AVR interface with that name exists.
 
 connected fs20 avr ‹name…›
 --------------------------
@@ -858,18 +864,6 @@ Sets the output to the value given.
 Tests
 -----
 
-exists input ‹name›
--------------------
-
-Check whether this input has been declared.
-
-
-exists output ‹name›
---------------------
-
-Check whether this output has been declared.
-
-
 input ‹value› ‹name›
 --------------------
 
@@ -1312,15 +1306,6 @@ which is more or less the same thing.
 Tests
 -----
 
-
-exists pwm
-----------
-
-Tests if a PWM has been defined.
-
-    if exists pwm foo:
-        del pwm foo
-
 on pwm
 ------
 
@@ -1551,21 +1536,6 @@ system to get flooded with monitor messages.
 Tests
 -----
 
-exists onewire
---------------
-
-Check if a device has ever been found.
-
-	if not exists onewire "10.68D839010800":
-		trigger OhNo
-
-exists onewire bus
-------------------
-
-Check if a connection has been created.
-
-	if not exists onewire bus MAIN: connect onewire MAIN
-
 connected onewire
 -----------------
 
@@ -1673,13 +1643,6 @@ to a name.
 -----
 Tests
 -----
-
-exists rrd NAME
----------------
-
-Check if an RRD has already been created.
-
-	if exists rrd foo bar: del rrd foo bar
 
 
 ===
@@ -1929,14 +1892,6 @@ last state
 
 True if a state had a particular value before it was changed to the
 current one. As above, the previous value for a new state is "-".
-
-exists state
-------------
-
-True if the state has been defined at all.
-
-	if exists state NAME:
-		log DEBUG "Yay!"
 
 saved state
 -----------
@@ -2338,16 +2293,6 @@ Set the variable VAR to the current state of the named input.
 -----
 Tests
 -----
-
-exists input NAME
------------------
-
-Check if the named input exists.
-
-exists output NAME
------------------
-
-Check if the named output exists.
 
 input NAME
 ----------

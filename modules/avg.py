@@ -323,14 +323,6 @@ reset avg NAME
 		m = Avgs[Name(*event[1:])]
 		m.feed(float(event[0]))
 
-class ExistsAvgCheck(Check):
-	name="exists avg"
-	doc="check if an averager exists"
-	def check(self,*args):
-		if not len(args):
-			raise SyntaxError(u"Usage: if exists avg ‹name…›")
-		name = Name(*args)
-		return name in Avgs
 
 class VarAvgHandler(AttributedStatement):
 	name="var avg"
@@ -387,13 +379,13 @@ class AvgModule(Module):
 		main_words.register_statement(AvgSet)
 		main_words.register_statement(AvgReset)
 		main_words.register_statement(VarAvgHandler)
-		register_condition(ExistsAvgCheck)
+		register_condition(Avgs.exists)
 	
 	def unload(self):
 		main_words.unregister_statement(AvgHandler)
 		main_words.unregister_statement(AvgSet)
 		main_words.unregister_statement(AvgReset)
 		main_words.unregister_statement(VarAvgHandler)
-		unregister_condition(ExistsAvgCheck)
+		unregister_condition(Avgs.exists)
 
 init = AvgModule

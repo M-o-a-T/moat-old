@@ -32,7 +32,6 @@ for typical usage.
 import sys
 from homevent.context import Context
 from homevent.event import Event,StopParsing
-from homevent.logging import log_event,log, TRACE
 from homevent.base import Name,SName
 
 from twisted.internet import defer
@@ -411,7 +410,6 @@ explicitly state that some event does not result in any action.
 		event = self.params(ctx)
 		if len(event):
 			raise SyntaxError("Usage: do nothing")
-		log(TRACE,"NOW: do nothing")
 
 
 class ExitHandler(Statement):

@@ -175,6 +175,7 @@ class OWchans(Collection):
 OWchans = OWchans()
 OWchans.does("del")
 OWchans2 = {}
+register_condition(OWchans.exists)
 
 class OWFSchannel(OWFSassembler, NetActiveConnector):
 	"""A receiver for the protocol used by OWFS."""
@@ -344,10 +345,11 @@ class DIRmsg(OWFScall):
 	def __repr__(self):
 		return "‹"+self.__class__.__name__+" "+"/".join(self.path)+"›"
 		
-class OWbus(Collection):
+class OWbuses(Collection):
        name = "owfs bus"
-OWbus = OWbus()
-OWbus.does("del")
+OWbuses = OWbuses()
+OWbuses.does("del")
+register_condition(OWbuses.exists)
 
 
 class OWFSqueue(MsgQueue,Jobber):
@@ -357,7 +359,7 @@ class OWFSqueue(MsgQueue,Jobber):
 		The only real change is to periodically scan the bus.
 		MsgQueue and the factory handle everything else.
 		"""
-	storage = OWbus
+	storage = OWbuses
 	ondemand = True
 
 	def __init__(self, name, host,port, persist=PERSIST, *a,**k):

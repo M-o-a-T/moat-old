@@ -29,7 +29,7 @@ from homevent.context import Context
 from homevent.event import Event
 from homevent.base import Name,singleName
 from homevent.run import process_failure,simple_event
-from homevent.collect import Collection,Collected
+from homevent.collect import Collected
 from homevent.twist import fix_exception,reraise, callLater,Jobber
 from homevent.net import DisconnectedError
 from homevent.times import now

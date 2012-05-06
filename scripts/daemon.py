@@ -20,7 +20,7 @@ import sys; sys.excepthook = None; del sys
 
 from homevent.statement import main_words, global_words, Statement, \
 	DoNothingHandler
-from homevent.module import Load,LoadDir,ModuleExists,load_module
+from homevent.module import Load,LoadDir,load_module
 from homevent.check import register_condition
 from homevent.context import Context
 from homevent.parser import parse
@@ -39,7 +39,6 @@ from twisted.internet import reactor
 
 main_words.register_statement(Load)
 main_words.register_statement(LoadDir)
-register_condition(ModuleExists)
 main_words.register_statement(ShutdownHandler)
 main_words.register_statement(DoNothingHandler)
 load_module("ifelse")

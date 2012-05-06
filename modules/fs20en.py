@@ -31,6 +31,7 @@ from homevent.run import simple_event
 from homevent.base import Name,SName
 from homevent.fs20 import recv_handler, PREFIX
 from homevent.collect import Collection,Collected
+from homevent.check import register_condition,unregister_condition
 from homevent.logging import log,TRACE,DEBUG
 from homevent.times import now,humandelta
 from homevent.timeslot import Timeslots,Timeslotted,Timeslot,collision_filter
@@ -66,15 +67,15 @@ en_procs = [ None,
              en_proc_gas, # gas meter
            ]
 
-class ens(Collection):
+class ENs(Collection):
 	name = Name("fs20","en")
-ens = ens()
-ens.does("del")
+ENs = ENs()
+ENs.does("del")
 
 encodes = {}
 
 class en(Collected,Timeslotted):
-	storage = ens.storage
+	storage = ENs.storage
 	def __init__(self,name,group,code,ctx, faktor={}, slot=None, delta=None):
 		self.ctx = ctx
 		self.group = group
@@ -375,7 +376,7 @@ set fs20 en ‹type› ‹value› ‹name…›
 		event = self.params(self.ctx)
 		if len(event) < 3:
 			raise SyntaxError(u"Usage: set fs20 en ‹type› ‹value› ‹name…›")
-		d = ens[Name(*event[2:])]
+		d = ENs[Name(*event[2:])]
 		if d.last_data is None: d.last_data = {}
 		d.last_data[event[0]] = float(event[1])
 
@@ -391,10 +392,12 @@ class fs20en(Module):
 		PREFIX[PREFIX_ENERGY] = en_handler()
 		main_words.register_statement(FS20en)
 		main_words.register_statement(FS20enVal)
+		register_condition(ENs.exists)
 	
 	def unload(self):
 		del PREFIX[PREFIX_ENERGY]
 		main_words.unregister_statement(FS20en)
 		main_words.unregister_statement(FS20enVal)
+		unregister_condition(ENs.exists)
 	
 init = fs20en

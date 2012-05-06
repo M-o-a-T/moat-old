@@ -347,15 +347,6 @@ The PWM will not do anything before you do that.
 		pwm.value = float(event[0])
 
 
-class ExistsPWMCheck(Check):
-	name="exists pwm"
-	doc="check if a PWM controller exists at all"
-	def check(self,*args):
-		if not len(args):
-			raise SyntaxError(u"Usage: if exists pwm ‹name…›")
-		name = Name(*args)
-		return name in PWMs
-
 class OnPWMCheck(Check):
 	name="pwm"
 	doc="check if a PWM is turned on"
@@ -392,7 +383,7 @@ class PWMModule(Module):
 		main_words.register_statement(PWMUpdate)
 		main_words.register_statement(PWMSet)
 		main_words.register_statement(VarPWMHandler)
-		register_condition(ExistsPWMCheck)
+		register_condition(PWMs.exists)
 		register_condition(OnPWMCheck)
 	
 	def unload(self):
@@ -400,7 +391,7 @@ class PWMModule(Module):
 		main_words.unregister_statement(PWMUpdate)
 		main_words.unregister_statement(PWMSet)
 		main_words.unregister_statement(VarPWMHandler)
-		unregister_condition(ExistsPWMCheck)
+		unregister_condition(PWMs.exists)
 		unregister_condition(OnPWMCheck)
 
 init = PWMModule

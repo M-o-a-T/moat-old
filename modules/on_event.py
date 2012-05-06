@@ -335,19 +335,6 @@ Commands in the same handler, after this one, are *not* executed.
 		raise TrySomethingElse()
 
 
-class OnExistsCheck(Check):
-	name="exists on"
-	doc="check if a handler exists"
-	long_doc="""\
-if exists on FOO BAR: check if a handler for this event exists
-"""
-	def check(self,*args):
-		if not len(args):
-			raise SyntaxError(u"Usage: if exists on ‹name…›")
-		name = Name(*args)
-		return name in OnHandlers
-
-
 class OnEventModule(Module):
 	"""\
 		This module registers the "on EVENT:" handler.
@@ -361,7 +348,7 @@ class OnEventModule(Module):
 		main_words.register_statement(OnSkip)
 		OnEventHandler.register_statement(OnName)
 		OnEventHandler.register_statement(OnDoc)
-		register_condition(OnExistsCheck)
+		register_condition(OnHandlers.exists)
 	
 	def unload(self):
 		main_words.unregister_statement(OnEventHandler)
@@ -369,7 +356,7 @@ class OnEventModule(Module):
 		main_words.unregister_statement(OnSkip)
 		OnEventHandler.unregister_statement(OnName)
 		OnEventHandler.unregister_statement(OnDoc)
-		unregister_condition(OnExistsCheck)
+		unregister_condition(OnHandlers.exists)
 	
 init = OnEventModule
 

@@ -219,7 +219,6 @@ END: thermo¦1.6
 1 onewire done:  ‹ATTRsetmsg 10.000010EF0000 temp_high 99›
 0 msg recv= MINE ‹ATTRsetmsg 10.000010EF0000 temp_high 99›
 END: onewire¦scanned¦A¦0¦1¦1
-0 NOW: do nothing
 0 DirStart
 0 msg states at run connected connected
 0 msg send ‹DIRmsg ›
