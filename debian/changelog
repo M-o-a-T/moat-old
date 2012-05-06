@@ -1,3 +1,9 @@
+homevent (0.3.12) smurf; urgency=low
+
+  * wago and onewire fixes
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Sun, 06 May 2012 22:28:23 +0200
+
 homevent (0.3.11) smurf; urgency=low
 
   * Wago: show message ID in monitor commands
