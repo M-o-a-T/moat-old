@@ -128,7 +128,7 @@ class OWFSassembler(object):
 					self.error(RuntimeError("Wrong version: %d"%(version,)))
 					return
 				if payload_len == -1 and data_len == 0 and offset == 0:
-					log("onewire",DEBUG,"RECV", u"… server busy"
+					log("onewire",DEBUG,"RECV", u"… server busy")
 
 					continue # server busy
 #				if payload_len < 0 or payload_len > 0 and (payload_len < data_len or offset+data_len > payload_len):
@@ -194,27 +194,31 @@ class OWFSchannel(OWFSassembler, NetActiveConnector):
 			simple_event(Context(),"onewire","error",*self.name)
 
 
-class OWFSxmit(object):
-	"""A mixin that sends messages"""
-
-	def sendMsg(self,conn, typ,data, rlen=0):
-		try:
-			conn.sendMsg(typ,data,rlen)
-		except Exception as ex:
-			fix_exception(ex)
-			self.error(ex)
-
-
-class OWFScall(OWFSxmit,MsgBase):
+class OWFScall(MsgBase):
 	"""An object representing one call to OWFS"""
 	prio = PRIO_STANDARD
+	orig_prio = prio
 	retries = 10
 	cached = False
 	timeout = 10
 	d = None
 
+	def __init__(self,prio=None):
+		if prio is not None:
+			self.prio = self.orig_prio = prio
+		super(OWFScall,self).__init__()
+
 	def __repr__(self):
 		return u"‹"+self.__class__.__name__+u"›"
+
+	def sendMsg(self,conn, typ,data, rlen=0):
+		# messages are not tagged, so process received messages in strict order
+		self.prio = PRIO_STANDARD
+		try:
+			conn.sendMsg(typ,data,rlen)
+		except Exception as ex:
+			fix_exception(ex)
+			self.error(ex)
 
 	def dataReceived(self, data):
 		# child object expect this
@@ -233,6 +237,7 @@ class OWFScall(OWFSxmit,MsgBase):
 		super(OWFScall,self).retry()
 		if self.retries:
 			self.retries -= 1
+			self.prio = self.orig_prio
 			return SEND_AGAIN
 		return None
 
@@ -258,6 +263,7 @@ class OWFScall(OWFSxmit,MsgBase):
 
 class NOPmsg(OWFScall):
 	prio = PRIO_BACKGROUND
+	orig_prio = prio
 
 	def send(self,conn):
 		super(NOPmsg,self).send(conn)
@@ -268,8 +274,7 @@ class ATTRgetmsg(OWFScall):
 	def __init__(self,path, prio=PRIO_STANDARD):
 		assert path is not None
 		self.path = path
-		self.prio = prio
-		super(ATTRgetmsg,self).__init__()
+		super(ATTRgetmsg,self).__init__(prio=prio)
 
 	def send(self,conn):
 		super(ATTRgetmsg,self).send(conn)
@@ -288,7 +293,7 @@ class ATTRsetmsg(OWFScall):
 		assert path is not None
 		self.path = path
 		self.value = value
-		super(ATTRsetmsg,self).__init__()
+		super(ATTRsetmsg,self).__init__(prio=prio)
 
 	def send(self,conn):
 		super(ATTRsetmsg,self).send(conn)

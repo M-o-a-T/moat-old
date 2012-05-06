@@ -1,3 +1,9 @@
+homevent (0.3.7) smurf; urgency=low
+
+  * Fix onewire receiver ordering
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Sun, 06 May 2012 11:31:49 +0200
+
 homevent (0.3.6) smurf; urgency=low
 
   * Add receive data logging to onewire

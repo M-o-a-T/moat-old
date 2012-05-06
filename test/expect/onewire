@@ -103,13 +103,14 @@ END: onewire¦connect¦A
 0 conn setting up OWFSqueue A
 0 conn connected OWFSqueue A
 0 msg states at run connected connecting
-0 NotConn [[], [], [], [‹DIRmsg ›]]
+0 NotConn [[], [], [‹DIRmsg ›], []]
 0 msg setstate connecting connected
 0 msg states at run connected connected
 0 msg send ‹DIRmsg ›
 1 onewire SEND 0 1 7 6 0 0 '\x00'
 0 msg send result RECV_AGAIN
-1 onewire RECV 0 96 0 6 95 32770
+1 onewire RECV 0 96 0 6 95 x8002
+1 onewire RECV … 95 '/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm'
 0 msg recv msg ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:2›
 0 conn incoming OWFSqueue A ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:2›
 0 msg recv A ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:2›
@@ -126,7 +127,8 @@ END: onewire¦connect¦A
 0 msg send ‹DIRmsg bus.0›
 1 onewire SEND 0 7 7 6 0 0 '/bus.0\x00'
 0 msg send result RECV_AGAIN
-1 onewire RECV 0 73 0 6 72 32770
+1 onewire RECV 0 73 0 6 72 x8002
+1 onewire RECV … 72 '/bus.0/interface,/bus.0/10.000010EF0000,/bus.0/simultaneous,/bus.0/alarm'
 0 msg recv msg ‹MsgIncoming: data:'/bus.0/interface,/bus.0/10.000010EF0000,/bus.0/simultaneous,/bus.0/alarm' typ:0 prio:2›
 0 conn incoming OWFSqueue A ‹MsgIncoming: data:'/bus.0/interface,/bus.0/10.000010EF0000,/bus.0/simultaneous,/bus.0/alarm' typ:0 prio:2›
 0 msg recv A ‹MsgIncoming: data:'/bus.0/interface,/bus.0/10.000010EF0000,/bus.0/simultaneous,/bus.0/alarm' typ:0 prio:2›
@@ -140,7 +142,8 @@ END: onewire¦connect¦A
 0 msg send ‹ATTRgetmsg 10.000010EF0000 type›
 1 onewire SEND 0 37 2 6 8192 0 '/uncached/bus.0/10.000010EF0000/type\x00'
 0 msg send result RECV_AGAIN
-1 onewire RECV 0 7 7 6 7 0
+1 onewire RECV 0 7 7 6 7 x0
+1 onewire RECV … 7 'DS18S20'
 0 msg recv msg ‹MsgIncoming: data:'DS18S20' typ:7 prio:2›
 0 conn incoming OWFSqueue A ‹MsgIncoming: data:'DS18S20' typ:7 prio:2›
 0 msg recv A ‹MsgIncoming: data:'DS18S20' typ:7 prio:2›
@@ -180,7 +183,8 @@ RUN: on onewire scanned A * * * ‹OnEventHandler›
 0 msg send ‹ATTRgetmsg 10.000010EF0000 temperature›
 1 onewire SEND 0 44 2 6 8192 0 u'/uncached/bus.0/10.000010EF0000/temperature\x00'
 0 msg send result RECV_AGAIN
-1 onewire RECV 0 12 12 6 12 0
+1 onewire RECV 0 12 12 6 12 x0
+1 onewire RECV … 12 '         1.6'
 0 msg recv msg ‹MsgIncoming: data:'         1.6' typ:12 prio:2›
 0 conn incoming OWFSqueue A ‹MsgIncoming: data:'         1.6' typ:12 prio:2›
 0 msg recv A ‹MsgIncoming: data:'         1.6' typ:12 prio:2›
@@ -212,7 +216,8 @@ NEW: ‹ConditionalWorkSequence:21 (4)›
    : └1╴... done.
 IEVENT: thermo¦1.6
 END: thermo¦1.6
-1 onewire RECV 0 0 -1 6 0 0
+1 onewire RECV 0 0 -1 6 0 x0
+1 onewire RECV … 0 ''
 0 msg recv msg ‹MsgIncoming: data:'' typ:-1 prio:2›
 0 conn incoming OWFSqueue A ‹MsgIncoming: data:'' typ:-1 prio:2›
 0 msg recv A ‹MsgIncoming: data:'' typ:-1 prio:2›
@@ -224,7 +229,8 @@ END: onewire¦scanned¦A¦0¦1¦1
 0 msg send ‹DIRmsg ›
 1 onewire SEND 0 1 7 6 0 0 '\x00'
 0 msg send result RECV_AGAIN
-1 onewire RECV 0 96 0 6 95 32770
+1 onewire RECV 0 96 0 6 95 x8002
+1 onewire RECV … 95 '/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm'
 0 msg recv msg ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:2›
 0 conn incoming OWFSqueue A ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:2›
 0 msg recv A ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:2›
@@ -245,7 +251,8 @@ alarm
 0 msg send ‹DIRmsg bus.0/10.000010EF0000›
 1 onewire SEND 0 23 7 6 0 0 '/bus.0/10.000010EF0000\x00'
 0 msg send result RECV_AGAIN
-1 onewire RECV 0 454 0 6 453 0
+1 onewire RECV 0 454 0 6 453 x0
+1 onewire RECV … 453 '/bus.0/10.000010EF0000/address,/bus.0/10.000010EF0000/alias,/bus.0/10.000010EF0000/crc8,/bus.0/10.000010EF0000/errata,/bus.0/10.000010EF0000/family,/bus.0/10.000010EF0000/id,/bus.0/10.000010EF0000/locator,/bus.0/10.000010EF0000/power,/bus.0/10.000010EF0000/r_address,/bus.0/10.000010EF0000/r_id,/bus.0/10.000010EF0000/r_locator,/bus.0/10.000010EF0000/temperature,/bus.0/10.000010EF0000/temphigh,/bus.0/10.000010EF0000/templow,/bus.0/10.000010EF0000/type'
 0 msg recv msg ‹MsgIncoming: data:'/bus.0/10.000010EF0000/address,/bus.0/10.000010EF0000/alias,/bus.0/10.000010EF0000/crc8,/bus.0/10.000010EF0000/errata,/bus.0/10.000010EF0000/family,/bus.0/10.000010EF0000/id,/bus.0/10.000010EF0000/locator,/bus.0/10.000010EF0000/power,/bus.0/10.000010EF0000/r_address,/bus.0/10.000010EF0000/r_id,/bus.0/10.000010EF0000/r_locator,/bus.0/10.000010EF0000/temperature,/bus.0/10.000010EF0000/temphigh,/bus.0/10.000010EF0000/templow,/bus.0/10.000010EF0000/type' typ:0 prio:2›
 0 conn incoming OWFSqueue A ‹MsgIncoming: data:'/bus.0/10.000010EF0000/address,/bus.0/10.000010EF0000/alias,/bus.0/10.000010EF0000/crc8,/bus.0/10.000010EF0000/errata,/bus.0/10.000010EF0000/family,/bus.0/10.000010EF0000/id,/bus.0/10.000010EF0000/locator,/bus.0/10.000010EF0000/power,/bus.0/10.000010EF0000/r_address,/bus.0/10.000010EF0000/r_id,/bus.0/10.000010EF0000/r_locator,/bus.0/10.000010EF0000/temperature,/bus.0/10.000010EF0000/temphigh,/bus.0/10.000010EF0000/templow,/bus.0/10.000010EF0000/type' typ:0 prio:2›
 0 msg recv A ‹MsgIncoming: data:'/bus.0/10.000010EF0000/address,/bus.0/10.000010EF0000/alias,/bus.0/10.000010EF0000/crc8,/bus.0/10.000010EF0000/errata,/bus.0/10.000010EF0000/family,/bus.0/10.000010EF0000/id,/bus.0/10.000010EF0000/locator,/bus.0/10.000010EF0000/power,/bus.0/10.000010EF0000/r_address,/bus.0/10.000010EF0000/r_id,/bus.0/10.000010EF0000/r_locator,/bus.0/10.000010EF0000/temperature,/bus.0/10.000010EF0000/temphigh,/bus.0/10.000010EF0000/templow,/bus.0/10.000010EF0000/type' typ:0 prio:2›
@@ -281,7 +288,8 @@ END: onewire¦scanning¦A
 0 msg send ‹DIRmsg ›
 1 onewire SEND 0 1 7 6 0 0 '\x00'
 0 msg send result RECV_AGAIN
-1 onewire RECV 0 96 0 6 95 32770
+1 onewire RECV 0 96 0 6 95 x8002
+1 onewire RECV … 95 '/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm'
 0 msg recv msg ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:2›
 0 conn incoming OWFSqueue A ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:2›
 0 msg recv A ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:2›
@@ -298,7 +306,8 @@ END: onewire¦scanning¦A
 0 msg send ‹DIRmsg bus.0›
 1 onewire SEND 0 7 7 6 0 0 '/bus.0\x00'
 0 msg send result RECV_AGAIN
-1 onewire RECV 0 73 0 6 72 32770
+1 onewire RECV 0 73 0 6 72 x8002
+1 onewire RECV … 72 '/bus.0/interface,/bus.0/10.000010EF0000,/bus.0/simultaneous,/bus.0/alarm'
 0 msg recv msg ‹MsgIncoming: data:'/bus.0/interface,/bus.0/10.000010EF0000,/bus.0/simultaneous,/bus.0/alarm' typ:0 prio:2›
 0 conn incoming OWFSqueue A ‹MsgIncoming: data:'/bus.0/interface,/bus.0/10.000010EF0000,/bus.0/simultaneous,/bus.0/alarm' typ:0 prio:2›
 0 msg recv A ‹MsgIncoming: data:'/bus.0/interface,/bus.0/10.000010EF0000,/bus.0/simultaneous,/bus.0/alarm' typ:0 prio:2›
@@ -332,7 +341,8 @@ END: onewire¦scanned¦A¦0¦0¦1
 0 msg send ‹DIRmsg ›
 1 onewire SEND 0 1 7 6 0 0 '\x00'
 0 msg send result RECV_AGAIN
-1 onewire RECV 0 96 0 6 95 32770
+1 onewire RECV 0 96 0 6 95 x8002
+1 onewire RECV … 95 '/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm'
 0 msg recv msg ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:2›
 0 conn incoming OWFSqueue A ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:2›
 0 msg recv A ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:2›
