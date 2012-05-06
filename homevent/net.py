@@ -135,7 +135,7 @@ class NetCommonConnector(Collected,Jobber):
 				self._connect()
 			except Exception as ex:
 				fix_exception(ex)
-				if isinstance(ex,EnvironmentError) and ex.errno in (errno.ECONNREFUSED,errno.EHOSTDOWN,errno.EHOSTUNREACH,errno.ENETDOWN,errno.ENETUNREACH):
+				if isinstance(ex,EnvironmentError) and ex.errno in (errno.ECONNREFUSED,errno.EHOSTDOWN,errno.EHOSTUNREACH,errno.ENETDOWN,errno.ENETUNREACH,errno.ETIMEDOUT):
 					ex.no_backtrace = True
 				try:
 					del storage2[(host,port)]
