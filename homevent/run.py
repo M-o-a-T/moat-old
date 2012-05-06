@@ -113,7 +113,7 @@ def process_event(e, drop_errors=False):
 		Process an event. This is the procedure you'll be feeding
 		externally-generated events to.
 		"""
-	from homevent.logging import log_event,DEBUG,TRACE
+	#from homevent.logging import log_event,DEBUG,TRACE
 
 	try:
 		collect_event(e).process(event=e)
