@@ -118,9 +118,9 @@ class OWFSassembler(object):
 		while len(self._data) >= self._len:
 			if self._typ is None:
 				version, payload_len, ret_value, format_flags, data_len, offset = struct.unpack('!6i', self._data[:24])
-				self._data = self._data[24:]
+				self._data = self._data[self._len:]
 
-				log("onewire",DEBUG,"RECV", version, payload_len, ret_value, format_flags, data_len, offset)
+				log("onewire",DEBUG,"RECV", version, payload_len, ret_value, format_flags, data_len, "x%x"%offset)
 				# 0 253 0 2 252 32774
 				if offset & 32768: offset = 0
 
@@ -128,8 +128,9 @@ class OWFSassembler(object):
 					self.error(RuntimeError("Wrong version: %d"%(version,)))
 					return
 				if payload_len == -1 and data_len == 0 and offset == 0:
+					log("onewire",DEBUG,"RECV", u"… server busy"
 
-					return # server busy
+					continue # server busy
 #				if payload_len < 0 or payload_len > 0 and (payload_len < data_len or offset+data_len > payload_len):
 #					self.errReceived(RuntimeError("Wrong length: %d %d %d"%(payload_len,offset,data_len,)))
 #					return
@@ -146,6 +147,7 @@ class OWFSassembler(object):
 				self._typ = ret_value
 			else:
 				data = self._data[self._offset:self._offset+self._data_len]
+				log("onewire",DEBUG,"RECV", u"…",self._data_len,repr(data))
 				self._data = self._data[self._len:]
 				typ = self._typ
 				self._typ = None
