@@ -146,7 +146,9 @@ class OWFSassembler(object):
 				self._len = payload_len
 				self._typ = ret_value
 			else:
-				data = self._data[self._offset:self._offset+self._data_len]
+				# offset seems not to mean what we all think it means
+				#data = self._data[self._offset:self._offset+self._data_len]
+				data = self._data[:self._offset+self._data_len]
 				log("onewire",DEBUG,"RECV", u"…",self._data_len,repr(data))
 				self._data = self._data[self._len:]
 				typ = self._typ

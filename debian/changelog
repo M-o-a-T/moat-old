@@ -1,3 +1,9 @@
+homevent (0.3.8) smurf; urgency=low
+
+  * Looks like the 1wire offset should be ignored
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Sun, 06 May 2012 11:45:39 +0200
+
 homevent (0.3.7) smurf; urgency=low
 
   * Fix onewire receiver ordering
