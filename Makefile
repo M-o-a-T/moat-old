@@ -74,6 +74,7 @@ lab:
 	sudo chroot /daten/chroot/i386/wheezy sudo -u smurf make -C $(PWD) lab_ || test -s "$$F"; \
 	dput -u smurf "$$F"; \
 	echo -n "Waiting for archive "; while test ! -f "/daten/debian/pool/main/h/homevent/$$(basename "$$F")" ; do echo -n "."; sleep 1;done;echo " done."
+	make clean
 	ssh -lroot lab apt-get update
 	ssh -lroot lab apt-get install -y homevent=$$(dpkg-parsechangelog | sed -ne 's/^Version:[[:space:]]//p')
 lab_:
