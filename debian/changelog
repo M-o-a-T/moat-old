@@ -1,3 +1,9 @@
+homevent (0.3.18) smurf; urgency=low
+
+  * Use collections for onewire devices
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Mon, 07 May 2012 09:51:57 +0200
+
 homevent (0.3.17) smurf; urgency=low
 
   * average: decaytime: make the refernece interval configurable

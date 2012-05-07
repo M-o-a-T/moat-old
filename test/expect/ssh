@@ -30,10 +30,10 @@ EVENT: shutdown
 NEW: ‹ConditionalWorkSequence:10 (4)›
    : │  id: 10
    : │  call count: 0
-   : │  EVENT: module¦unload¦ssh
+   : │  EVENT: module¦unload¦path
    : └1╴... done.
-EVENT: module¦unload¦ssh
-END: module¦unload¦ssh
+EVENT: module¦unload¦path
+END: module¦unload¦path
 NEW: ‹ConditionalWorkSequence:11 (4)›
    : │  id: 11
    : │  call count: 0
@@ -44,22 +44,22 @@ END: module¦unload¦ifelse
 NEW: ‹ConditionalWorkSequence:12 (4)›
    : │  id: 12
    : │  call count: 0
-   : │  EVENT: module¦unload¦block
-   : └1╴... done.
-EVENT: module¦unload¦block
-END: module¦unload¦block
-NEW: ‹ConditionalWorkSequence:13 (4)›
-   : │  id: 13
-   : │  call count: 0
-   : │  EVENT: module¦unload¦path
-   : └1╴... done.
-EVENT: module¦unload¦path
-END: module¦unload¦path
-NEW: ‹ConditionalWorkSequence:14 (4)›
-   : │  id: 14
-   : │  call count: 0
    : │  EVENT: module¦unload¦data
    : └1╴... done.
 EVENT: module¦unload¦data
 END: module¦unload¦data
+NEW: ‹ConditionalWorkSequence:13 (4)›
+   : │  id: 13
+   : │  call count: 0
+   : │  EVENT: module¦unload¦ssh
+   : └1╴... done.
+EVENT: module¦unload¦ssh
+END: module¦unload¦ssh
+NEW: ‹ConditionalWorkSequence:14 (4)›
+   : │  id: 14
+   : │  call count: 0
+   : │  EVENT: module¦unload¦block
+   : └1╴... done.
+EVENT: module¦unload¦block
+END: module¦unload¦block
 END: shutdown

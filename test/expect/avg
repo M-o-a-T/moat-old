@@ -35,7 +35,7 @@ END: wait¦done¦0.2¦_wait¦1
 name: test time
 mode: time
 value: 2.0
-set time: now (2003-04-05 06:07:08.200000)
+set time: now (2003-04-05 06:07:08.20)
 prev value: None
 total time: 0:00:00
 total samples: 1
@@ -60,7 +60,7 @@ END: wait¦done¦1.2¦_wait¦2
 name: test time
 mode: time
 value: 2.0
-set time: -1.0 sec (2003-04-05 06:07:08.200000)
+set time: -1.0 sec (2003-04-05 06:07:08.20)
 prev value: None
 total time: 0:00:00
 total samples: 1
@@ -69,7 +69,7 @@ current average: 2.0
 name: test time
 mode: time
 value: 5.0
-set time: now (2003-04-05 06:07:09.200000)
+set time: now (2003-04-05 06:07:09.20)
 prev value: 2.0
 total time: 0:00:01
 total samples: 2
@@ -94,7 +94,7 @@ END: wait¦done¦2.2¦_wait¦3
 name: test time
 mode: time
 value: 5.0
-set time: -1.0 sec (2003-04-05 06:07:09.200000)
+set time: -1.0 sec (2003-04-05 06:07:09.20)
 prev value: 2.0
 total time: 0:00:01
 total samples: 2
@@ -103,7 +103,7 @@ current average: 3.5
 name: test time
 mode: time
 value: 0.0
-set time: now (2003-04-05 06:07:10.200000)
+set time: now (2003-04-05 06:07:10.20)
 prev value: 5.0
 total time: 0:00:02
 total samples: 3
@@ -156,7 +156,7 @@ END: wait¦done¦4.4¦_wait¦5
 name: test moving
 mode: moving
 value: 2.0
-set time: now (2003-04-05 06:07:12.400000)
+set time: now (2003-04-05 06:07:12.40)
 prev value: None
 total time: None
 total samples: 1
@@ -184,7 +184,7 @@ END: wait¦done¦5.4¦_wait¦6
 name: test moving
 mode: moving
 value: 2.0
-set time: -1.0 sec (2003-04-05 06:07:12.400000)
+set time: -1.0 sec (2003-04-05 06:07:12.40)
 prev value: None
 total time: None
 total samples: 1
@@ -196,7 +196,7 @@ sample 0: 2.0
 name: test moving
 mode: moving
 value: 5.0
-set time: now (2003-04-05 06:07:13.400000)
+set time: now (2003-04-05 06:07:13.40)
 prev value: 2.0
 total time: None
 total samples: 2
@@ -225,7 +225,7 @@ END: wait¦done¦7.4¦_wait¦7
 name: test moving
 mode: moving
 value: 5.0
-set time: -2.0 sec (2003-04-05 06:07:13.400000)
+set time: -2.0 sec (2003-04-05 06:07:13.40)
 prev value: 2.0
 total time: None
 total samples: 2
@@ -238,7 +238,7 @@ sample 1: 5.0
 name: test moving
 mode: moving
 value: -1.0
-set time: now (2003-04-05 06:07:15.400000)
+set time: now (2003-04-05 06:07:15.40)
 prev value: 5.0
 total time: None
 total samples: 3
@@ -268,7 +268,7 @@ END: wait¦done¦11.4¦_wait¦8
 name: test moving
 mode: moving
 value: -1.0
-set time: -4.0 sec (2003-04-05 06:07:15.400000)
+set time: -4.0 sec (2003-04-05 06:07:15.40)
 prev value: 5.0
 total time: None
 total samples: 3
@@ -282,7 +282,7 @@ sample 2: -1.0
 name: test moving
 mode: moving
 value: 8.0
-set time: now (2003-04-05 06:07:19.400000)
+set time: now (2003-04-05 06:07:19.40)
 prev value: -1.0
 total time: None
 total samples: 4
@@ -312,7 +312,7 @@ END: wait¦done¦15.4¦_wait¦9
 name: test moving
 mode: moving
 value: 8.0
-set time: -4.0 sec (2003-04-05 06:07:19.400000)
+set time: -4.0 sec (2003-04-05 06:07:19.40)
 prev value: -1.0
 total time: None
 total samples: 4
@@ -326,7 +326,7 @@ sample 2: 8.0
 name: test moving
 mode: moving
 value: 14.0
-set time: now (2003-04-05 06:07:23.400000)
+set time: now (2003-04-05 06:07:23.40)
 prev value: 8.0
 total time: None
 total samples: 5
@@ -383,7 +383,7 @@ END: wait¦done¦17.6¦_wait¦11
 name: test decay
 mode: decay
 value: 2.0
-set time: now (2003-04-05 06:07:25.600000)
+set time: now (2003-04-05 06:07:25.60)
 prev value: None
 total time: None
 total samples: 1
@@ -409,7 +409,7 @@ END: wait¦done¦18.6¦_wait¦12
 name: test decay
 mode: decay
 value: 2.0
-set time: -1.0 sec (2003-04-05 06:07:25.600000)
+set time: -1.0 sec (2003-04-05 06:07:25.60)
 prev value: None
 total time: None
 total samples: 1
@@ -419,7 +419,7 @@ weight: 0.1
 name: test decay
 mode: decay
 value: 22.0
-set time: now (2003-04-05 06:07:26.600000)
+set time: now (2003-04-05 06:07:26.60)
 prev value: 2.0
 total time: None
 total samples: 2
@@ -445,7 +445,7 @@ END: wait¦done¦19.6¦_wait¦13
 name: test decay
 mode: decay
 value: 22.0
-set time: -1.0 sec (2003-04-05 06:07:26.600000)
+set time: -1.0 sec (2003-04-05 06:07:26.60)
 prev value: 2.0
 total time: None
 total samples: 2
@@ -455,7 +455,7 @@ weight: 0.1
 name: test decay
 mode: decay
 value: -1.0
-set time: now (2003-04-05 06:07:27.600000)
+set time: now (2003-04-05 06:07:27.60)
 prev value: 22.0
 total time: None
 total samples: 3
@@ -487,6 +487,8 @@ test decaytime :: (new)
 name: test decaytime
 mode: decaytime
 value: None
+weight: 0.1
+time base: 1.0 sec
 weight/hour: 1.0
 weight/minute: 0.9982029897
 weight/second: 0.1
@@ -510,11 +512,13 @@ END: wait¦done¦21.8¦_wait¦15
 name: test decaytime
 mode: decaytime
 value: 10.0
-set time: now (2003-04-05 06:07:29.800000)
+set time: now (2003-04-05 06:07:29.80)
 prev value: None
 total time: 0:00:00
 total samples: 1
 current average: 10.0
+weight: 0.1
+time base: 1.0 sec
 weight/hour: 1.0
 weight/minute: 0.9982029897
 weight/second: 0.1
@@ -538,11 +542,13 @@ END: wait¦done¦22.8¦_wait¦16
 name: test decaytime
 mode: decaytime
 value: 10.0
-set time: -1.0 sec (2003-04-05 06:07:29.800000)
+set time: -1.0 sec (2003-04-05 06:07:29.80)
 prev value: None
 total time: 0:00:00
 total samples: 1
 current average: 10.0
+weight: 0.1
+time base: 1.0 sec
 weight/hour: 1.0
 weight/minute: 0.9982029897
 weight/second: 0.1
@@ -550,11 +556,13 @@ weight/second: 0.1
 name: test decaytime
 mode: decaytime
 value: 110.0
-set time: now (2003-04-05 06:07:30.800000)
+set time: now (2003-04-05 06:07:30.80)
 prev value: 10.0
 total time: 0:00:00
 total samples: 2
 current average: 10.0
+weight: 0.1
+time base: 1.0 sec
 weight/hour: 1.0
 weight/minute: 0.9982029897
 weight/second: 0.1
@@ -578,11 +586,13 @@ END: wait¦done¦23.8¦_wait¦17
 name: test decaytime
 mode: decaytime
 value: 110.0
-set time: -1.0 sec (2003-04-05 06:07:30.800000)
+set time: -1.0 sec (2003-04-05 06:07:30.80)
 prev value: 10.0
 total time: 0:00:00
 total samples: 2
 current average: 20.0
+weight: 0.1
+time base: 1.0 sec
 weight/hour: 1.0
 weight/minute: 0.9982029897
 weight/second: 0.1
@@ -590,17 +600,19 @@ weight/second: 0.1
 name: test decaytime
 mode: decaytime
 value: 1.0
-set time: now (2003-04-05 06:07:31.800000)
+set time: now (2003-04-05 06:07:31.80)
 prev value: 110.0
 total time: 0:00:00
 total samples: 3
 current average: 20.0
+weight: 0.1
+time base: 1.0 sec
 weight/hour: 1.0
 weight/minute: 0.9982029897
 weight/second: 0.1
 .
 1 Yes
-1 No1 20.0
+1 Yes
 0 locking +WAIT 20 start job ‹Waiter _wait¦18 ??›
 0 locking -WAIT 20 start job ‹Waiter _wait¦18 ??›
 NEW: ‹ConditionalWorkSequence:42 (4)›
@@ -620,11 +632,13 @@ END: wait¦done¦25.8¦_wait¦18
 name: test decaytime
 mode: decaytime
 value: 1.0
-set time: -2.0 sec (2003-04-05 06:07:31.800000)
+set time: -2.0 sec (2003-04-05 06:07:31.80)
 prev value: 110.0
 total time: 0:00:00
 total samples: 3
 current average: 16.39
+weight: 0.1
+time base: 1.0 sec
 weight/hour: 1.0
 weight/minute: 0.9982029897
 weight/second: 0.1
@@ -643,71 +657,71 @@ EVENT: shutdown
 NEW: ‹ConditionalWorkSequence:45 (4)›
    : │  id: 45
    : │  call count: 0
-   : │  EVENT: module¦unload¦avg
-   : └1╴... done.
-EVENT: module¦unload¦avg
-END: module¦unload¦avg
-NEW: ‹ConditionalWorkSequence:46 (4)›
-   : │  id: 46
-   : │  call count: 0
-   : │  EVENT: module¦unload¦data
-   : └1╴... done.
-EVENT: module¦unload¦data
-END: module¦unload¦data
-NEW: ‹ConditionalWorkSequence:47 (4)›
-   : │  id: 47
-   : │  call count: 0
    : │  EVENT: module¦unload¦tests
    : └1╴... done.
 EVENT: module¦unload¦tests
 END: module¦unload¦tests
-NEW: ‹ConditionalWorkSequence:48 (4)›
-   : │  id: 48
-   : │  call count: 0
-   : │  EVENT: module¦unload¦block
-   : └1╴... done.
-EVENT: module¦unload¦block
-END: module¦unload¦block
-NEW: ‹ConditionalWorkSequence:49 (4)›
-   : │  id: 49
+NEW: ‹ConditionalWorkSequence:46 (4)›
+   : │  id: 46
    : │  call count: 0
    : │  EVENT: module¦unload¦logging
    : └1╴... done.
 EVENT: module¦unload¦logging
 END: module¦unload¦logging
-NEW: ‹ConditionalWorkSequence:50 (4)›
-   : │  id: 50
-   : │  call count: 0
-   : │  EVENT: module¦unload¦wait
-   : └1╴... done.
-EVENT: module¦unload¦wait
-END: module¦unload¦wait
-NEW: ‹ConditionalWorkSequence:51 (4)›
-   : │  id: 51
+NEW: ‹ConditionalWorkSequence:47 (4)›
+   : │  id: 47
    : │  call count: 0
    : │  EVENT: module¦unload¦on_event
    : └1╴... done.
 EVENT: module¦unload¦on_event
 END: module¦unload¦on_event
-NEW: ‹ConditionalWorkSequence:52 (4)›
-   : │  id: 52
-   : │  call count: 0
-   : │  EVENT: module¦unload¦bool
-   : └1╴... done.
-EVENT: module¦unload¦bool
-END: module¦unload¦bool
-NEW: ‹ConditionalWorkSequence:53 (4)›
-   : │  id: 53
+NEW: ‹ConditionalWorkSequence:48 (4)›
+   : │  id: 48
    : │  call count: 0
    : │  EVENT: module¦unload¦trigger
    : └1╴... done.
 EVENT: module¦unload¦trigger
 END: module¦unload¦trigger
-NEW: ‹ConditionalWorkSequence:54 (4)›
-   : │  id: 54
+NEW: ‹ConditionalWorkSequence:49 (4)›
+   : │  id: 49
    : │  call count: 0
    : │  EVENT: module¦unload¦ifelse
    : └1╴... done.
 EVENT: module¦unload¦ifelse
 END: module¦unload¦ifelse
+NEW: ‹ConditionalWorkSequence:50 (4)›
+   : │  id: 50
+   : │  call count: 0
+   : │  EVENT: module¦unload¦bool
+   : └1╴... done.
+EVENT: module¦unload¦bool
+END: module¦unload¦bool
+NEW: ‹ConditionalWorkSequence:51 (4)›
+   : │  id: 51
+   : │  call count: 0
+   : │  EVENT: module¦unload¦avg
+   : └1╴... done.
+EVENT: module¦unload¦avg
+END: module¦unload¦avg
+NEW: ‹ConditionalWorkSequence:52 (4)›
+   : │  id: 52
+   : │  call count: 0
+   : │  EVENT: module¦unload¦data
+   : └1╴... done.
+EVENT: module¦unload¦data
+END: module¦unload¦data
+NEW: ‹ConditionalWorkSequence:53 (4)›
+   : │  id: 53
+   : │  call count: 0
+   : │  EVENT: module¦unload¦block
+   : └1╴... done.
+EVENT: module¦unload¦block
+END: module¦unload¦block
+NEW: ‹ConditionalWorkSequence:54 (4)›
+   : │  id: 54
+   : │  call count: 0
+   : │  EVENT: module¦unload¦wait
+   : └1╴... done.
+EVENT: module¦unload¦wait
+END: module¦unload¦wait
 END: shutdown

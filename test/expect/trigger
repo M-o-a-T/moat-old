@@ -55,15 +55,15 @@ EVENT: shutdown
 NEW: ‹ConditionalWorkSequence:14 (4)›
    : │  id: 14
    : │  call count: 0
-   : │  EVENT: module¦unload¦wait
-   : └1╴... done.
-EVENT: module¦unload¦wait
-END: module¦unload¦wait
-NEW: ‹ConditionalWorkSequence:15 (4)›
-   : │  id: 15
-   : │  call count: 0
    : │  EVENT: module¦unload¦trigger
    : └1╴... done.
 EVENT: module¦unload¦trigger
 END: module¦unload¦trigger
+NEW: ‹ConditionalWorkSequence:15 (4)›
+   : │  id: 15
+   : │  call count: 0
+   : │  EVENT: module¦unload¦wait
+   : └1╴... done.
+EVENT: module¦unload¦wait
+END: module¦unload¦wait
 END: shutdown

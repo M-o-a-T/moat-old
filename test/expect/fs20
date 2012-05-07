@@ -460,7 +460,7 @@ name: one
 group: 1
 groupname: thermo_hygro
 code: 3
-last: -0.7 sec (2003-04-05 06:07:11.900000)
+last: -0.7 sec (2003-04-05 06:07:11.90)
 last_temperature: 12.3
 last_humidity: 23.4
 .
@@ -538,101 +538,101 @@ EVENT: shutdown
 NEW: ‹ConditionalWorkSequence:56 (4)›
    : │  id: 56
    : │  call count: 0
-   : │  EVENT: module¦unload¦fs20em
-   : └1╴... done.
-EVENT: module¦unload¦fs20em
-END: module¦unload¦fs20em
-NEW: ‹ConditionalWorkSequence:57 (4)›
-   : │  id: 57
-   : │  call count: 0
-   : │  EVENT: module¦unload¦file
-   : └1╴... done.
-EVENT: module¦unload¦file
-END: module¦unload¦file
-NEW: ‹ConditionalWorkSequence:58 (4)›
-   : │  id: 58
-   : │  call count: 0
-   : │  EVENT: module¦unload¦data
-   : └1╴... done.
-EVENT: module¦unload¦data
-END: module¦unload¦data
-NEW: ‹ConditionalWorkSequence:59 (4)›
-   : │  id: 59
-   : │  call count: 0
    : │  EVENT: module¦unload¦on_event
    : └1╴... done.
 EVENT: module¦unload¦on_event
 END: module¦unload¦on_event
-NEW: ‹ConditionalWorkSequence:60 (4)›
-   : │  id: 60
-   : │  call count: 0
-   : │  EVENT: module¦unload¦fs20switch
-   : └1╴... done.
-EVENT: module¦unload¦fs20switch
-END: module¦unload¦fs20switch
-NEW: ‹ConditionalWorkSequence:61 (4)›
-   : │  id: 61
+NEW: ‹ConditionalWorkSequence:57 (4)›
+   : │  id: 57
    : │  call count: 0
    : │  EVENT: module¦unload¦fs20tr
    : └1╴... done.
 EVENT: module¦unload¦fs20tr
 END: module¦unload¦fs20tr
-NEW: ‹ConditionalWorkSequence:62 (4)›
-   : │  id: 62
-   : │  call count: 0
-   : │  EVENT: module¦unload¦block
-   : └1╴... done.
-EVENT: module¦unload¦block
-END: module¦unload¦block
-NEW: ‹ConditionalWorkSequence:63 (4)›
-   : │  id: 63
+NEW: ‹ConditionalWorkSequence:58 (4)›
+   : │  id: 58
    : │  call count: 0
    : │  EVENT: module¦unload¦logging
    : └1╴... done.
 EVENT: module¦unload¦logging
 END: module¦unload¦logging
-NEW: ‹ConditionalWorkSequence:64 (4)›
-   : │  id: 64
-   : │  call count: 0
-   : │  EVENT: module¦unload¦wait
-   : └1╴... done.
-EVENT: module¦unload¦wait
-END: module¦unload¦wait
-NEW: ‹ConditionalWorkSequence:65 (4)›
-   : │  id: 65
+NEW: ‹ConditionalWorkSequence:59 (4)›
+   : │  id: 59
    : │  call count: 0
    : │  EVENT: module¦unload¦fs20en
    : └1╴... done.
 EVENT: module¦unload¦fs20en
 END: module¦unload¦fs20en
-NEW: ‹ConditionalWorkSequence:66 (4)›
-   : │  id: 66
+NEW: ‹ConditionalWorkSequence:60 (4)›
+   : │  id: 60
    : │  call count: 0
-   : │  EVENT: module¦unload¦bool
+   : │  EVENT: module¦unload¦fs20em
    : └1╴... done.
-EVENT: module¦unload¦bool
-END: module¦unload¦bool
-NEW: ‹ConditionalWorkSequence:67 (4)›
-   : │  id: 67
+EVENT: module¦unload¦fs20em
+END: module¦unload¦fs20em
+NEW: ‹ConditionalWorkSequence:61 (4)›
+   : │  id: 61
    : │  call count: 0
    : │  EVENT: module¦unload¦trigger
    : └1╴... done.
 EVENT: module¦unload¦trigger
 END: module¦unload¦trigger
-NEW: ‹ConditionalWorkSequence:68 (4)›
-   : │  id: 68
-   : │  call count: 0
-   : │  EVENT: module¦unload¦path
-   : └1╴... done.
-EVENT: module¦unload¦path
-END: module¦unload¦path
-NEW: ‹ConditionalWorkSequence:69 (4)›
-   : │  id: 69
+NEW: ‹ConditionalWorkSequence:62 (4)›
+   : │  id: 62
    : │  call count: 0
    : │  EVENT: module¦unload¦ifelse
    : └1╴... done.
 EVENT: module¦unload¦ifelse
 END: module¦unload¦ifelse
+NEW: ‹ConditionalWorkSequence:63 (4)›
+   : │  id: 63
+   : │  call count: 0
+   : │  EVENT: module¦unload¦file
+   : └1╴... done.
+EVENT: module¦unload¦file
+END: module¦unload¦file
+NEW: ‹ConditionalWorkSequence:64 (4)›
+   : │  id: 64
+   : │  call count: 0
+   : │  EVENT: module¦unload¦path
+   : └1╴... done.
+EVENT: module¦unload¦path
+END: module¦unload¦path
+NEW: ‹ConditionalWorkSequence:65 (4)›
+   : │  id: 65
+   : │  call count: 0
+   : │  EVENT: module¦unload¦bool
+   : └1╴... done.
+EVENT: module¦unload¦bool
+END: module¦unload¦bool
+NEW: ‹ConditionalWorkSequence:66 (4)›
+   : │  id: 66
+   : │  call count: 0
+   : │  EVENT: module¦unload¦data
+   : └1╴... done.
+EVENT: module¦unload¦data
+END: module¦unload¦data
+NEW: ‹ConditionalWorkSequence:67 (4)›
+   : │  id: 67
+   : │  call count: 0
+   : │  EVENT: module¦unload¦fs20switch
+   : └1╴... done.
+EVENT: module¦unload¦fs20switch
+END: module¦unload¦fs20switch
+NEW: ‹ConditionalWorkSequence:68 (4)›
+   : │  id: 68
+   : │  call count: 0
+   : │  EVENT: module¦unload¦block
+   : └1╴... done.
+EVENT: module¦unload¦block
+END: module¦unload¦block
+NEW: ‹ConditionalWorkSequence:69 (4)›
+   : │  id: 69
+   : │  call count: 0
+   : │  EVENT: module¦unload¦wait
+   : └1╴... done.
+EVENT: module¦unload¦wait
+END: module¦unload¦wait
 RUN: Shutdown FS20 processes
  at: ‹ConditionalWorkSequence:55 (7)› (step 1)
  ev: EVENT: shutdown

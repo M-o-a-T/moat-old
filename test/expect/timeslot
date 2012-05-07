@@ -410,73 +410,73 @@ EVENT: shutdown
 NEW: ‹ConditionalWorkSequence:37 (4)›
    : │  id: 37
    : │  call count: 0
-   : │  EVENT: module¦unload¦data
-   : └1╴... done.
-EVENT: module¦unload¦data
-END: module¦unload¦data
-NEW: ‹ConditionalWorkSequence:38 (4)›
-   : │  id: 38
-   : │  call count: 0
-   : │  EVENT: module¦unload¦timeslot
-   : └1╴... done.
-EVENT: module¦unload¦timeslot
-END: module¦unload¦timeslot
-NEW: ‹ConditionalWorkSequence:39 (4)›
-   : │  id: 39
-   : │  call count: 0
    : │  EVENT: module¦unload¦tests
    : └1╴... done.
 EVENT: module¦unload¦tests
 END: module¦unload¦tests
-NEW: ‹ConditionalWorkSequence:40 (4)›
-   : │  id: 40
-   : │  call count: 0
-   : │  EVENT: module¦unload¦block
-   : └1╴... done.
-EVENT: module¦unload¦block
-END: module¦unload¦block
-NEW: ‹ConditionalWorkSequence:41 (4)›
-   : │  id: 41
+NEW: ‹ConditionalWorkSequence:38 (4)›
+   : │  id: 38
    : │  call count: 0
    : │  EVENT: module¦unload¦logging
    : └1╴... done.
 EVENT: module¦unload¦logging
 END: module¦unload¦logging
-NEW: ‹ConditionalWorkSequence:42 (4)›
-   : │  id: 42
-   : │  call count: 0
-   : │  EVENT: module¦unload¦wait
-   : └1╴... done.
-EVENT: module¦unload¦wait
-END: module¦unload¦wait
-NEW: ‹ConditionalWorkSequence:43 (4)›
-   : │  id: 43
+NEW: ‹ConditionalWorkSequence:39 (4)›
+   : │  id: 39
    : │  call count: 0
    : │  EVENT: module¦unload¦on_event
    : └1╴... done.
 EVENT: module¦unload¦on_event
 END: module¦unload¦on_event
-NEW: ‹ConditionalWorkSequence:44 (4)›
-   : │  id: 44
-   : │  call count: 0
-   : │  EVENT: module¦unload¦bool
-   : └1╴... done.
-EVENT: module¦unload¦bool
-END: module¦unload¦bool
-NEW: ‹ConditionalWorkSequence:45 (4)›
-   : │  id: 45
+NEW: ‹ConditionalWorkSequence:40 (4)›
+   : │  id: 40
    : │  call count: 0
    : │  EVENT: module¦unload¦trigger
    : └1╴... done.
 EVENT: module¦unload¦trigger
 END: module¦unload¦trigger
-NEW: ‹ConditionalWorkSequence:46 (4)›
-   : │  id: 46
+NEW: ‹ConditionalWorkSequence:41 (4)›
+   : │  id: 41
    : │  call count: 0
    : │  EVENT: module¦unload¦ifelse
    : └1╴... done.
 EVENT: module¦unload¦ifelse
 END: module¦unload¦ifelse
+NEW: ‹ConditionalWorkSequence:42 (4)›
+   : │  id: 42
+   : │  call count: 0
+   : │  EVENT: module¦unload¦timeslot
+   : └1╴... done.
+EVENT: module¦unload¦timeslot
+END: module¦unload¦timeslot
+NEW: ‹ConditionalWorkSequence:43 (4)›
+   : │  id: 43
+   : │  call count: 0
+   : │  EVENT: module¦unload¦bool
+   : └1╴... done.
+EVENT: module¦unload¦bool
+END: module¦unload¦bool
+NEW: ‹ConditionalWorkSequence:44 (4)›
+   : │  id: 44
+   : │  call count: 0
+   : │  EVENT: module¦unload¦data
+   : └1╴... done.
+EVENT: module¦unload¦data
+END: module¦unload¦data
+NEW: ‹ConditionalWorkSequence:45 (4)›
+   : │  id: 45
+   : │  call count: 0
+   : │  EVENT: module¦unload¦block
+   : └1╴... done.
+EVENT: module¦unload¦block
+END: module¦unload¦block
+NEW: ‹ConditionalWorkSequence:46 (4)›
+   : │  id: 46
+   : │  call count: 0
+   : │  EVENT: module¦unload¦wait
+   : └1╴... done.
+EVENT: module¦unload¦wait
+END: module¦unload¦wait
 END: shutdown
 Waiter ‹AFTER EVENT A› was cancelled
 NEW: ‹WorkSequence:47 (4)›

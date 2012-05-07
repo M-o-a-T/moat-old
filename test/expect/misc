@@ -9,10 +9,10 @@ END: startup
 0 locking -WAIT 1 start job ‹Collected Parser:n1›
 0 locking +WAIT 2 start job <homevent.tokize.tokizer obj>
 0 locking -WAIT 2 start job <homevent.tokize.tokizer obj>
-0 locking +WAIT 3 start job ‹TriggerHandler: trigger 2›
-0 locking -WAIT 3 start job ‹TriggerHandler: trigger 2›
-0 locking +WAIT 4 start job ‹TriggerHandler: trigger 2›
-0 locking -WAIT 4 start job ‹TriggerHandler: trigger 2›
+0 locking +WAIT 3 start job ‹TriggerHandler: trigger 3›
+0 locking -WAIT 3 start job ‹TriggerHandler: trigger 3›
+0 locking +WAIT 4 start job ‹TriggerHandler: trigger 3›
+0 locking -WAIT 4 start job ‹TriggerHandler: trigger 3›
 0 locking +WAIT 5 start job ‹Waiter A ??›
 0 locking -WAIT 5 start job ‹Waiter A ??›
 NEW: ‹ConditionalWorkSequence:8 (4)›
@@ -73,10 +73,10 @@ NEW: ‹ConditionalWorkSequence:15 (4)›
    : └1╴... done.
 EVENT: wait¦done¦×××¦B
 END: wait¦done¦×××¦B
-0 locking +WAIT 7 start job ‹TriggerHandler: trigger 2›
-0 locking -WAIT 7 start job ‹TriggerHandler: trigger 2›
-0 locking +WAIT 8 start job ‹TriggerHandler: trigger 2›
-0 locking -WAIT 8 start job ‹TriggerHandler: trigger 2›
+0 locking +WAIT 7 start job ‹TriggerHandler: trigger 3›
+0 locking -WAIT 7 start job ‹TriggerHandler: trigger 3›
+0 locking +WAIT 8 start job ‹TriggerHandler: trigger 3›
+0 locking -WAIT 8 start job ‹TriggerHandler: trigger 3›
 0 locking +WAIT 9 start job ‹Waiter C ??›
 0 locking -WAIT 9 start job ‹Waiter C ??›
 NEW: ‹ConditionalWorkSequence:16 (4)›
@@ -137,8 +137,8 @@ NEW: ‹ConditionalWorkSequence:22 (4)›
    : └1╴... done.
 EVENT: wait¦start¦×××¦D
 END: wait¦start¦×××¦D
-0 locking +WAIT 15 start job ‹TriggerHandler: trigger 2›
-0 locking -WAIT 15 start job ‹TriggerHandler: trigger 2›
+0 locking +WAIT 15 start job ‹TriggerHandler: trigger 3›
+0 locking -WAIT 15 start job ‹TriggerHandler: trigger 3›
 NEW: ‹ConditionalWorkSequence:23 (4)›
    : │  id: 23
    : │  call count: 0

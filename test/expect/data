@@ -53,8 +53,8 @@ NEW: ‹ConditionalWorkSequence:10 (4)›
    : └1╴... done.
 EVENT: wait¦done¦×××¦vorher
 END: wait¦done¦×××¦vorher
-0 locking +WAIT 4 start job ‹TriggerHandler: trigger 2›
-0 locking -WAIT 4 start job ‹TriggerHandler: trigger 2›
+0 locking +WAIT 4 start job ‹TriggerHandler: trigger 3›
+0 locking -WAIT 4 start job ‹TriggerHandler: trigger 3›
 0 locking +WAIT 5 start job ‹Waiter nachher ??›
 0 locking -WAIT 5 start job ‹Waiter nachher ??›
 NEW: ‹ConditionalWorkSequence:11 (4)›
@@ -102,7 +102,7 @@ END: wait¦done¦×××¦nachher
 id: 12
 event: foo
 call count: 1
-last call: now (2003-04-05 06:07:08.100000)
+last call: now (2003-04-05 06:07:08.10)
 last event: foo
            type: InputEvent
 code: ╞1╕on foo ‹OnEventHandler›

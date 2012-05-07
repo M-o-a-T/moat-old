@@ -85,8 +85,8 @@ type: GAUGE
 unknown_sec: 0
 value: ?
 .
-0 locking +WAIT 6 start job ‹TriggerHandler: trigger 2›
-0 locking -WAIT 6 start job ‹TriggerHandler: trigger 2›
+0 locking +WAIT 6 start job ‹TriggerHandler: trigger 3›
+0 locking -WAIT 6 start job ‹TriggerHandler: trigger 3›
 0 locking +WAIT 7 kill job <homevent.tokize.tokizer obj>
 1 Yes
 NEW: ‹ConditionalWorkSequence:14 (4)›

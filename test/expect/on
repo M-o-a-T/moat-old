@@ -187,14 +187,14 @@ _on 16 :: bar¦* (51)
 num2num :: num¦3 (51)
 not executed :: foo (60)
 .
-0 locking +WAIT 3 start job ‹TriggerHandler: trigger 2›
-0 locking -WAIT 3 start job ‹TriggerHandler: trigger 2›
-0 locking +WAIT 4 start job ‹TriggerHandler: trigger 2›
-0 locking -WAIT 4 start job ‹TriggerHandler: trigger 2›
-0 locking +WAIT 5 start job ‹TriggerHandler: trigger 2›
-0 locking -WAIT 5 start job ‹TriggerHandler: trigger 2›
-0 locking +WAIT 6 start job ‹TriggerHandler: trigger 2›
-0 locking -WAIT 6 start job ‹TriggerHandler: trigger 2›
+0 locking +WAIT 3 start job ‹TriggerHandler: trigger 3›
+0 locking -WAIT 3 start job ‹TriggerHandler: trigger 3›
+0 locking +WAIT 4 start job ‹TriggerHandler: trigger 3›
+0 locking -WAIT 4 start job ‹TriggerHandler: trigger 3›
+0 locking +WAIT 5 start job ‹TriggerHandler: trigger 3›
+0 locking -WAIT 5 start job ‹TriggerHandler: trigger 3›
+0 locking +WAIT 6 start job ‹TriggerHandler: trigger 3›
+0 locking -WAIT 6 start job ‹TriggerHandler: trigger 3›
 0 locking +WAIT 7 kill job <homevent.tokize.tokizer obj>
 NEW: ‹ConditionalWorkSequence:21 (5)›
    : │  id: 21
@@ -264,31 +264,31 @@ EVENT: shutdown
 NEW: ‹ConditionalWorkSequence:26 (4)›
    : │  id: 26
    : │  call count: 0
-   : │  EVENT: module¦unload¦data
-   : └1╴... done.
-EVENT: module¦unload¦data
-END: module¦unload¦data
-NEW: ‹ConditionalWorkSequence:27 (4)›
-   : │  id: 27
-   : │  call count: 0
    : │  EVENT: module¦unload¦on_event
    : └1╴... done.
 EVENT: module¦unload¦on_event
 END: module¦unload¦on_event
-NEW: ‹ConditionalWorkSequence:28 (4)›
-   : │  id: 28
-   : │  call count: 0
-   : │  EVENT: module¦unload¦block
-   : └1╴... done.
-EVENT: module¦unload¦block
-END: module¦unload¦block
-NEW: ‹ConditionalWorkSequence:29 (4)›
-   : │  id: 29
+NEW: ‹ConditionalWorkSequence:27 (4)›
+   : │  id: 27
    : │  call count: 0
    : │  EVENT: module¦unload¦logging
    : └1╴... done.
 EVENT: module¦unload¦logging
 END: module¦unload¦logging
+NEW: ‹ConditionalWorkSequence:28 (4)›
+   : │  id: 28
+   : │  call count: 0
+   : │  EVENT: module¦unload¦trigger
+   : └1╴... done.
+EVENT: module¦unload¦trigger
+END: module¦unload¦trigger
+NEW: ‹ConditionalWorkSequence:29 (4)›
+   : │  id: 29
+   : │  call count: 0
+   : │  EVENT: module¦unload¦bool
+   : └1╴... done.
+EVENT: module¦unload¦bool
+END: module¦unload¦bool
 NEW: ‹ConditionalWorkSequence:30 (4)›
    : │  id: 30
    : │  call count: 0
@@ -299,15 +299,15 @@ END: module¦unload¦ifelse
 NEW: ‹ConditionalWorkSequence:31 (4)›
    : │  id: 31
    : │  call count: 0
-   : │  EVENT: module¦unload¦trigger
+   : │  EVENT: module¦unload¦data
    : └1╴... done.
-EVENT: module¦unload¦trigger
-END: module¦unload¦trigger
+EVENT: module¦unload¦data
+END: module¦unload¦data
 NEW: ‹ConditionalWorkSequence:32 (4)›
    : │  id: 32
    : │  call count: 0
-   : │  EVENT: module¦unload¦bool
+   : │  EVENT: module¦unload¦block
    : └1╴... done.
-EVENT: module¦unload¦bool
-END: module¦unload¦bool
+EVENT: module¦unload¦block
+END: module¦unload¦block
 END: shutdown

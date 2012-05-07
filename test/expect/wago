@@ -1553,7 +1553,7 @@ last_sent : ‹WAGOmonStop 7e msgid=9›
           priority: 2
           timeout: 2
           result: Monitor 9 deleted.
-last_sent_at: -1.0 sec (2003-04-05 06:07:18.100000)
+last_sent_at: -1.0 sec (2003-04-05 06:07:18.10)
 conn attempts: 0
 conn timer: 3
 out_queued: 0
@@ -1605,10 +1605,10 @@ DEBUG> now we test a nonexistent port
 NEW: ‹ConditionalWorkSequence:66 (4)›
    : │  id: 66
    : │  call count: 0
-   : │  EVENT: wait¦start¦9.0¦poll¦nonexist
+   : │  EVENT: wait¦start¦9.1¦poll¦nonexist
    : └1╴... done.
-EVENT: wait¦start¦9.0¦poll¦nonexist
-END: wait¦start¦9.0¦poll¦nonexist
+EVENT: wait¦start¦9.1¦poll¦nonexist
+END: wait¦start¦9.1¦poll¦nonexist
 0 msg setstate init closed
 0 msg setstate closed want
 0 msg setstate want connecting
@@ -1661,15 +1661,15 @@ ERROR> [Errno 111] Connection refused
 NEW: ‹ConditionalWorkSequence:70 (4)›
    : │  id: 70
    : │  call count: 0
-   : │  EVENT: wait¦done¦9.0¦poll¦nonexist
+   : │  EVENT: wait¦done¦9.1¦poll¦nonexist
    : └1╴... done.
-EVENT: wait¦done¦9.0¦poll¦nonexist
-END: wait¦done¦9.0¦poll¦nonexist
+EVENT: wait¦done¦9.1¦poll¦nonexist
+END: wait¦done¦9.1¦poll¦nonexist
 : ‹WAGOqueue:test¦nonexist connecting›
 name: test¦nonexist
 queue: 0
 state: connecting
-state since: now (2003-04-05 06:07:19.100000)
+state since: now (2003-04-05 06:07:19.10)
 sent: (0, 0)
 received: (0, 0)
 processed: (0, 0)
@@ -1803,7 +1803,7 @@ END: wait¦done¦10.1¦poll¦closing
 name: test¦closing
 queue: 0
 state: ReOpen
-state since: now (2003-04-05 06:07:19.100000)
+state since: now (2003-04-05 06:07:19.10)
 sent: (0, 0)
 received: (0, 0)
 processed: (0, 0)
@@ -1924,7 +1924,7 @@ END: wait¦done¦11.1¦poll¦no_answer
 name: test¦no_answer
 queue: 0
 state: ReOpen
-state since: now (2003-04-05 06:07:19.100000)
+state since: now (2003-04-05 06:07:19.10)
 sent: (0, 0)
 received: (0, 0)
 processed: (0, 0)
@@ -1959,85 +1959,85 @@ EVENT: shutdown
 NEW: ‹ConditionalWorkSequence:84 (4)›
    : │  id: 84
    : │  call count: 0
-   : │  EVENT: module¦unload¦file
-   : └1╴... done.
-EVENT: module¦unload¦file
-END: module¦unload¦file
-NEW: ‹ConditionalWorkSequence:85 (4)›
-   : │  id: 85
-   : │  call count: 0
-   : │  EVENT: module¦unload¦data
-   : └1╴... done.
-EVENT: module¦unload¦data
-END: module¦unload¦data
-NEW: ‹ConditionalWorkSequence:86 (4)›
-   : │  id: 86
-   : │  call count: 0
    : │  EVENT: module¦unload¦on_event
    : └1╴... done.
 EVENT: module¦unload¦on_event
 END: module¦unload¦on_event
-NEW: ‹ConditionalWorkSequence:87 (4)›
-   : │  id: 87
-   : │  call count: 0
-   : │  EVENT: module¦unload¦block
-   : └1╴... done.
-EVENT: module¦unload¦block
-END: module¦unload¦block
-NEW: ‹ConditionalWorkSequence:88 (4)›
-   : │  id: 88
+NEW: ‹ConditionalWorkSequence:85 (4)›
+   : │  id: 85
    : │  call count: 0
    : │  EVENT: module¦unload¦logging
    : └1╴... done.
 EVENT: module¦unload¦logging
 END: module¦unload¦logging
-NEW: ‹ConditionalWorkSequence:89 (4)›
-   : │  id: 89
-   : │  call count: 0
-   : │  EVENT: module¦unload¦wait
-   : └1╴... done.
-EVENT: module¦unload¦wait
-END: module¦unload¦wait
-NEW: ‹ConditionalWorkSequence:90 (4)›
-   : │  id: 90
-   : │  call count: 0
-   : │  EVENT: module¦unload¦wago
-   : └1╴... done.
-EVENT: module¦unload¦wago
-END: module¦unload¦wago
-NEW: ‹ConditionalWorkSequence:91 (4)›
-   : │  id: 91
+NEW: ‹ConditionalWorkSequence:86 (4)›
+   : │  id: 86
    : │  call count: 0
    : │  EVENT: module¦unload¦monitor
    : └1╴... done.
 EVENT: module¦unload¦monitor
 END: module¦unload¦monitor
-NEW: ‹ConditionalWorkSequence:92 (4)›
-   : │  id: 92
-   : │  call count: 0
-   : │  EVENT: module¦unload¦ifelse
-   : └1╴... done.
-EVENT: module¦unload¦ifelse
-END: module¦unload¦ifelse
-NEW: ‹ConditionalWorkSequence:93 (4)›
-   : │  id: 93
+NEW: ‹ConditionalWorkSequence:87 (4)›
+   : │  id: 87
    : │  call count: 0
    : │  EVENT: module¦unload¦trigger
    : └1╴... done.
 EVENT: module¦unload¦trigger
 END: module¦unload¦trigger
-NEW: ‹ConditionalWorkSequence:94 (4)›
-   : │  id: 94
+NEW: ‹ConditionalWorkSequence:88 (4)›
+   : │  id: 88
    : │  call count: 0
-   : │  EVENT: module¦unload¦path
+   : │  EVENT: module¦unload¦wago
    : └1╴... done.
-EVENT: module¦unload¦path
-END: module¦unload¦path
-NEW: ‹ConditionalWorkSequence:95 (4)›
-   : │  id: 95
+EVENT: module¦unload¦wago
+END: module¦unload¦wago
+NEW: ‹ConditionalWorkSequence:89 (4)›
+   : │  id: 89
+   : │  call count: 0
+   : │  EVENT: module¦unload¦ifelse
+   : └1╴... done.
+EVENT: module¦unload¦ifelse
+END: module¦unload¦ifelse
+NEW: ‹ConditionalWorkSequence:90 (4)›
+   : │  id: 90
    : │  call count: 0
    : │  EVENT: module¦unload¦bool
    : └1╴... done.
 EVENT: module¦unload¦bool
 END: module¦unload¦bool
+NEW: ‹ConditionalWorkSequence:91 (4)›
+   : │  id: 91
+   : │  call count: 0
+   : │  EVENT: module¦unload¦file
+   : └1╴... done.
+EVENT: module¦unload¦file
+END: module¦unload¦file
+NEW: ‹ConditionalWorkSequence:92 (4)›
+   : │  id: 92
+   : │  call count: 0
+   : │  EVENT: module¦unload¦path
+   : └1╴... done.
+EVENT: module¦unload¦path
+END: module¦unload¦path
+NEW: ‹ConditionalWorkSequence:93 (4)›
+   : │  id: 93
+   : │  call count: 0
+   : │  EVENT: module¦unload¦data
+   : └1╴... done.
+EVENT: module¦unload¦data
+END: module¦unload¦data
+NEW: ‹ConditionalWorkSequence:94 (4)›
+   : │  id: 94
+   : │  call count: 0
+   : │  EVENT: module¦unload¦block
+   : └1╴... done.
+EVENT: module¦unload¦block
+END: module¦unload¦block
+NEW: ‹ConditionalWorkSequence:95 (4)›
+   : │  id: 95
+   : │  call count: 0
+   : │  EVENT: module¦unload¦wait
+   : └1╴... done.
+EVENT: module¦unload¦wait
+END: module¦unload¦wait
 END: shutdown

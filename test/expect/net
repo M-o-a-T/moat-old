@@ -126,10 +126,10 @@ END: wait¦start¦0.5¦OUT
 NEW: ‹ConditionalWorkSequence:22 (4)›
    : │  id: 22
    : │  call count: 0
-   : │  EVENT: wait¦done¦0.5¦OUT
+   : │  EVENT: wait¦done¦0.6¦OUT
    : └1╴... done.
-EVENT: wait¦done¦0.5¦OUT
-END: wait¦done¦0.5¦OUT
+EVENT: wait¦done¦0.6¦OUT
+END: wait¦done¦0.6¦OUT
 foo :: net_active localhost:50333
 .
 type: net_active
@@ -181,22 +181,22 @@ RUN: on net connect baz zaz *who ‹OnEventHandler›
 END: net¦connect¦baz¦zaz¦1
 0 locking +WAIT 13 start job ‹Collected NETpassive:baz¦zaz¦1›
 0 locking -WAIT 13 start job ‹Collected NETpassive:baz¦zaz¦1›
-0 locking +WAIT 14 start job ‹Waiter IN ??›
-0 locking -WAIT 14 start job ‹Waiter IN ??›
 NEW: ‹ConditionalWorkSequence:25 (4)›
    : │  id: 25
-   : │  call count: 0
-   : │  EVENT: wait¦start¦0.7¦IN
-   : └1╴... done.
-EVENT: wait¦start¦0.7¦IN
-END: wait¦start¦0.7¦IN
-NEW: ‹ConditionalWorkSequence:26 (4)›
-   : │  id: 26
    : │  call count: 0
    : │  EVENT: net¦recv¦baz¦zaz¦1¦B
    : └1╴... done.
 EVENT: net¦recv¦baz¦zaz¦1¦B
 END: net¦recv¦baz¦zaz¦1¦B
+0 locking +WAIT 14 start job ‹Waiter IN ??›
+0 locking -WAIT 14 start job ‹Waiter IN ??›
+NEW: ‹ConditionalWorkSequence:26 (4)›
+   : │  id: 26
+   : │  call count: 0
+   : │  EVENT: wait¦start¦0.7¦IN
+   : └1╴... done.
+EVENT: wait¦start¦0.7¦IN
+END: wait¦start¦0.7¦IN
 NEW: ‹ConditionalWorkSequence:27 (4)›
    : │  id: 27
    : │  call count: 0
@@ -247,50 +247,50 @@ EVENT: shutdown
 NEW: ‹ConditionalWorkSequence:32 (4)›
    : │  id: 32
    : │  call count: 0
-   : │  EVENT: module¦unload¦net
-   : └1╴... done.
-EVENT: module¦unload¦net
-END: module¦unload¦net
-NEW: ‹ConditionalWorkSequence:33 (4)›
-   : │  id: 33
-   : │  call count: 0
-   : │  EVENT: module¦unload¦data
-   : └1╴... done.
-EVENT: module¦unload¦data
-END: module¦unload¦data
-NEW: ‹ConditionalWorkSequence:34 (4)›
-   : │  id: 34
-   : │  call count: 0
    : │  EVENT: module¦unload¦on_event
    : └1╴... done.
 EVENT: module¦unload¦on_event
 END: module¦unload¦on_event
-NEW: ‹ConditionalWorkSequence:35 (4)›
-   : │  id: 35
-   : │  call count: 0
-   : │  EVENT: module¦unload¦block
-   : └1╴... done.
-EVENT: module¦unload¦block
-END: module¦unload¦block
-NEW: ‹ConditionalWorkSequence:36 (4)›
-   : │  id: 36
+NEW: ‹ConditionalWorkSequence:33 (4)›
+   : │  id: 33
    : │  call count: 0
    : │  EVENT: module¦unload¦logging
    : └1╴... done.
 EVENT: module¦unload¦logging
 END: module¦unload¦logging
-NEW: ‹ConditionalWorkSequence:37 (4)›
-   : │  id: 37
-   : │  call count: 0
-   : │  EVENT: module¦unload¦wait
-   : └1╴... done.
-EVENT: module¦unload¦wait
-END: module¦unload¦wait
-NEW: ‹ConditionalWorkSequence:38 (4)›
-   : │  id: 38
+NEW: ‹ConditionalWorkSequence:34 (4)›
+   : │  id: 34
    : │  call count: 0
    : │  EVENT: module¦unload¦ifelse
    : └1╴... done.
 EVENT: module¦unload¦ifelse
 END: module¦unload¦ifelse
+NEW: ‹ConditionalWorkSequence:35 (4)›
+   : │  id: 35
+   : │  call count: 0
+   : │  EVENT: module¦unload¦net
+   : └1╴... done.
+EVENT: module¦unload¦net
+END: module¦unload¦net
+NEW: ‹ConditionalWorkSequence:36 (4)›
+   : │  id: 36
+   : │  call count: 0
+   : │  EVENT: module¦unload¦data
+   : └1╴... done.
+EVENT: module¦unload¦data
+END: module¦unload¦data
+NEW: ‹ConditionalWorkSequence:37 (4)›
+   : │  id: 37
+   : │  call count: 0
+   : │  EVENT: module¦unload¦block
+   : └1╴... done.
+EVENT: module¦unload¦block
+END: module¦unload¦block
+NEW: ‹ConditionalWorkSequence:38 (4)›
+   : │  id: 38
+   : │  call count: 0
+   : │  EVENT: module¦unload¦wait
+   : └1╴... done.
+EVENT: module¦unload¦wait
+END: module¦unload¦wait
 END: shutdown
