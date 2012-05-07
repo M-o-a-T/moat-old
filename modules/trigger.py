@@ -61,6 +61,7 @@ trigger FOO...
 			# TODO: some sort of global job list
 			# so that they can be stopped when ending the program
 
+@TriggerHandler.register_statement
 class TriggerLog(Statement):
 	name = "log"
 	doc = "set log level"
@@ -82,8 +83,8 @@ log LEVEL
 				self.parent.loglevel = level
 		else:
 			raise SyntaxError(u'Usage: log LEVEL')
-TriggerHandler.register_statement(TriggerLog)
 
+@TriggerHandler.register_statement
 class TriggerRecurse(Statement):
 	name = "recursive"
 	doc = "mark the execution context as recursive"
@@ -101,6 +102,7 @@ recursive
 		else:
 			raise SyntaxError(u'Usage: recursive')
 
+@TriggerHandler.register_statement
 class TriggerSync(Statement):
 	name = "sync"
 	doc = "execute the event synchronously"
@@ -115,7 +117,6 @@ sync
 			self.parent.sync = True
 		else:
 			raise SyntaxError(u'Usage: sync')
-TriggerHandler.register_statement(TriggerSync)
 
 
 
