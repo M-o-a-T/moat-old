@@ -26,7 +26,7 @@ from homevent.logging import log,log_exc,DEBUG,TRACE,INFO,WARN,ERROR
 from homevent.statement import Statement, main_words
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.context import Context
-from homevent.collect import Collection
+from homevent.collect import Collection,Collected
 from homevent.event import Event
 from homevent.run import process_event,process_failure,simple_event
 from homevent.twist import callLater, fix_exception,print_exception, Jobber
@@ -544,10 +544,14 @@ def disconnect(f):
 
 
 
-devices = {}
+class devices(Collection):
+       name = "onewire device"
+devices = devices()
+register_condition(devices.exists)
 
-class OWFSdevice(object):
+class OWFSdevice(Collected):
 	"""This represents a bus device with attributes."""
+	storage = devices.storage
 	def __new__(cls,id, bus=None, path=()):
 		#dot = id.index(".")
 		#short_id = (id[:dot]+id[dot+1:]).lower()
@@ -556,6 +560,8 @@ class OWFSdevice(object):
 			self = devices[short_id]
 		except KeyError: # new device
 			self = super(OWFSdevice,cls).__new__(cls)
+			self.name = Name(short_id)
+			super(OWFSdevice,self).__init__()
 			self._init(bus, short_id,id ,path)
 			devices[short_id] = self
 			self.go_up()
@@ -566,6 +572,9 @@ class OWFSdevice(object):
 				self.path = path
 				self.go_up()
 			return self
+	
+	def __init__(self,*a,**k):
+		pass
 
 	def _init(self, bus, short_id=None, id=None, path=()):
 		log("onewire",DEBUG,"NEW", bus,short_id,id,path)
@@ -577,7 +586,17 @@ class OWFSdevice(object):
 		self.path = path
 		self.is_up = None
 		self.ctx = Context()
-       
+	
+	def list(self):
+		for r in super(OWFSdevice,self).list():
+			yield r
+		if hasattr(self,"typ"):
+			yield ("typ",self.typ)
+		if self.bus is not None:
+			yield ("bus",self.bus.name)
+		if self.path is not None:
+			yield ("path","/"+"/".join(self.path)+"/"+self.id)
+		
 	def _setattr(self,val,key):
 		"""Helper. Needed for new devices to set the device type."""
 		setattr(self,key,val)

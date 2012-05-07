@@ -139,25 +139,20 @@ dir onewire NAME path...
 		def reporter(data):
 			print >>ctx.out,data
 
-		if not len(event):
-			for d in devices.itervalues():
-				print >>ctx.out, (d.typ if hasattr(d,"typ") else "?"), d.id
-			print >>ctx.out,"."
+		if len(event) == 1 and not self.dest and event[0].lower() in devices:
+			dev = devices[event[0].lower()]
+			path = ()
+		elif self.dest is None:
+			if len(event) == 0:
+				raise SyntaxError("Usage: dir onewire device  or  dir onewire bus path…")
+			dev = buses[Name(event[0])].root
+			path = event[1:]
 		else:
-			if len(event) == 1 and event[0].lower() in devices:
-				dev = devices[event[0].lower()]
-				path = ()
-				assert self.dest is None,"Destination only for bus-specific path"
-			else:
-				if self.dest is None:
-					dev = buses[Name(event[0])].root
-					path = event[1:]
-				else:
-					dev = buses[self.dest].root
-					path = event
-			dev.dir(path=path, proc=reporter)
+			dev = buses[self.dest].root
+			path = event
+		dev.dir(path=path, proc=reporter)
 
-			print >>ctx.out,"."
+		print >>ctx.out,"."
 
 class OWFSname(Statement):
 	name="name"
@@ -174,40 +169,6 @@ name ‹name…›
 		self.parent.dest = SName(event)
 
 OWFSdir.register_statement(OWFSname)
-
-
-class OWFSlist(Statement):
-	name="list onewire"
-	doc="List known onewire buses"
-	long_doc="""\
-list onewire [NAME]
-	List the 1wire buses.
-	If you specify the bus name, additional details will be printed.
-"""
-
-	def run(self,ctx,**k):
-		event = self.params(ctx)
-
-		if not len(event):
-			for b in buses.itervalues():
-				print >>ctx.out,b.name
-			print >>ctx.out,"."
-		elif len(event) == 1 and event[0].lower() in devices:
-			dev = devices[event[0].lower()]
-			print >>ctx.out,"ID:",dev.bus_id
-			print >>ctx.out,"SID:",dev.id
-			print >>ctx.out,"Up:", "Yes" \
-				if dev.is_up else "Never" if dev.is_up is None else "No"
-			if dev.bus: print >>ctx.out,"Bus:",dev.bus.name
-			if dev.path: print >>ctx.out,"Path:", "/"+"/".join(dev.path)
-
-		else:
-			b = buses[SName(event)]
-			print >>ctx.out,"Name:",b.name
-			print >>ctx.out,"Host:",b.host
-			print >>ctx.out,"Port:",b.port
-		print >>ctx.out,"."
-
 
 
 class OWFSconnected(Check):
@@ -237,14 +198,6 @@ class OWFSconnectedbus(Check):
 			return False
 		else:
 			return bus.conn is not None
-
-
-class OWFSexists(Check):
-	name="exists onewire device"
-	doc="Test if the onewire device exists"
-	def check(self,*args):
-		assert len(args)==1,"This test requires the connection name"
-		return args[0].lower() in devices
 
 
 class OWFSmon(Monitor):
@@ -491,28 +444,24 @@ class OWFSmodule(Module):
 		main_words.register_statement(OWFSconnect)
 		main_words.register_statement(OWFSdisconnect)
 		main_words.register_statement(OWFSdir)
-		main_words.register_statement(OWFSlist)
 		main_words.register_statement(OWFSscan)
 		main_words.register_statement(OWFSset)
 		main_words.register_statement(OWFSmonitor)
 		register_input(OWFSinput)
 		register_output(OWFSoutput)
 		register_condition(OWFSconnected)
-		register_condition(OWFSexists)
 		register_condition(OWFSconnectedbus)
 	
 	def unload(self):
 		main_words.unregister_statement(OWFSconnect)
 		main_words.unregister_statement(OWFSdisconnect)
 		main_words.unregister_statement(OWFSdir)
-		main_words.unregister_statement(OWFSlist)
 		main_words.unregister_statement(OWFSscan)
 		main_words.unregister_statement(OWFSset)
 		main_words.unregister_statement(OWFSmonitor)
 		unregister_input(OWFSinput)
 		unregister_output(OWFSoutput)
 		unregister_condition(OWFSconnected)
-		unregister_condition(OWFSexists)
 		unregister_condition(OWFSconnectedbus)
 	
 init = OWFSmodule

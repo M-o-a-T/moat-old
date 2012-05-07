@@ -239,8 +239,8 @@ END: onewire¦up¦DS18S20¦10.000010ef0000
 0 msg send ‹ATTRgetmsg 10.000010EF0000 temperature›
 1 onewire SEND 0 44 2 6 8192 0 u'/uncached/bus.0/10.000010EF0000/temperature\x00'
 0 msg send result RECV_AGAIN
-0 locking +WAIT 11 start job ‹TriggerHandler: trigger 2›
-0 locking -WAIT 11 start job ‹TriggerHandler: trigger 2›
+0 locking +WAIT 11 start job ‹TriggerHandler: trigger 3›
+0 locking -WAIT 11 start job ‹TriggerHandler: trigger 3›
 : ‹Collected OWFSinput:temp›
 name: temp
 type: onewire
@@ -383,6 +383,33 @@ NEW: ‹ConditionalWorkSequence:28 (4)›
 EVENT: onewire¦scanned¦A¦0¦0¦1
 END: onewire¦scanned¦A¦0¦0¦1
 0 msg states at run connected connected
+0 msg send ‹DIRmsg bus.0/10.000010EF0000›
+1 onewire SEND 0 23 7 6 0 0 '/bus.0/10.000010EF0000\x00'
+0 msg send result RECV_AGAIN
+1 onewire RECV 0 454 0 6 453 x0
+1 onewire RECV … 453 '/bus.0/10.000010EF0000/address,/bus.0/10.000010EF0000/alias,/bus.0/10.000010EF0000/crc8,/bus.0/10.000010EF0000/errata,/bus.0/10.000010EF0000/family,/bus.0/10.000010EF0000/id,/bus.0/10.000010EF0000/locator,/bus.0/10.000010EF0000/power,/bus.0/10.000010EF0000/r_address,/bus.0/10.000010EF0000/r_id,/bus.0/10.000010EF0000/r_locator,/bus.0/10.000010EF0000/temperature,/bus.0/10.000010EF0000/temphigh,/bus.0/10.000010EF0000/templow,/bus.0/10.000010EF0000/type'
+0 msg recv msg ‹MsgIncoming: data:'/bus.0/10.000010EF0000/address,/bus.0/10.000010EF0000/alias,/bus.0/10.000010EF0000/crc8,/bus.0/10.000010EF0000/errata,/bus.0/10.000010EF0000/family,/bus.0/10.000010EF0000/id,/bus.0/10.000010EF0000/locator,/bus.0/10.000010EF0000/power,/bus.0/10.000010EF0000/r_address,/bus.0/10.000010EF0000/r_id,/bus.0/10.000010EF0000/r_locator,/bus.0/10.000010EF0000/temperature,/bus.0/10.000010EF0000/temphigh,/bus.0/10.000010EF0000/templow,/bus.0/10.000010EF0000/type' typ:0 prio:2›
+0 conn incoming OWFSqueue A ‹MsgIncoming: data:'/bus.0/10.000010EF0000/address,/bus.0/10.000010EF0000/alias,/bus.0/10.000010EF0000/crc8,/bus.0/10.000010EF0000/errata,/bus.0/10.000010EF0000/family,/bus.0/10.000010EF0000/id,/bus.0/10.000010EF0000/locator,/bus.0/10.000010EF0000/power,/bus.0/10.000010EF0000/r_address,/bus.0/10.000010EF0000/r_id,/bus.0/10.000010EF0000/r_locator,/bus.0/10.000010EF0000/temperature,/bus.0/10.000010EF0000/temphigh,/bus.0/10.000010EF0000/templow,/bus.0/10.000010EF0000/type' typ:0 prio:2›
+0 msg recv A ‹MsgIncoming: data:'/bus.0/10.000010EF0000/address,/bus.0/10.000010EF0000/alias,/bus.0/10.000010EF0000/crc8,/bus.0/10.000010EF0000/errata,/bus.0/10.000010EF0000/family,/bus.0/10.000010EF0000/id,/bus.0/10.000010EF0000/locator,/bus.0/10.000010EF0000/power,/bus.0/10.000010EF0000/r_address,/bus.0/10.000010EF0000/r_id,/bus.0/10.000010EF0000/r_locator,/bus.0/10.000010EF0000/temperature,/bus.0/10.000010EF0000/temphigh,/bus.0/10.000010EF0000/templow,/bus.0/10.000010EF0000/type' typ:0 prio:2›
+address
+alias
+crc8
+errata
+family
+id
+locator
+power
+r_address
+r_id
+r_locator
+temperature
+temphigh
+templow
+type
+0 msg recv= MINE ‹DIRmsg bus.0/10.000010EF0000›
+1 onewire doneDIR ‹DIRmsg bus.0/10.000010EF0000›
+.
+0 msg states at run connected connected
 0 msg send ‹DIRmsg ›
 1 onewire SEND 0 1 7 6 0 0 '\x00'
 0 msg send result RECV_AGAIN
@@ -402,6 +429,14 @@ simultaneous
 alarm
 0 msg recv= MINE ‹DIRmsg ›
 1 onewire doneDIR ‹DIRmsg ›
+.
+10.000010ef0000
+.
+: ‹OW:10.000010ef0000 ('bus.0',)›
+name: 10.000010ef0000
+typ: DS18S20
+bus: A
+path: /bus.0/10.000010ef0000
 .
 0 locking +WAIT 12 start job ‹Waiter before¦disconnect ??›
 0 locking -WAIT 12 start job ‹Waiter before¦disconnect ??›
@@ -491,92 +526,92 @@ END: monitor¦stop¦tempi
 NEW: ‹ConditionalWorkSequence:36 (4)›
    : │  id: 36
    : │  call count: 0
-   : │  EVENT: module¦unload¦file
-   : └1╴... done.
-EVENT: module¦unload¦file
-END: module¦unload¦file
-NEW: ‹ConditionalWorkSequence:37 (4)›
-   : │  id: 37
-   : │  call count: 0
-   : │  EVENT: module¦unload¦data
-   : └1╴... done.
-EVENT: module¦unload¦data
-END: module¦unload¦data
-NEW: ‹ConditionalWorkSequence:38 (4)›
-   : │  id: 38
-   : │  call count: 0
    : │  EVENT: module¦unload¦on_event
    : └1╴... done.
 EVENT: module¦unload¦on_event
 END: module¦unload¦on_event
-NEW: ‹ConditionalWorkSequence:39 (4)›
-   : │  id: 39
-   : │  call count: 0
-   : │  EVENT: module¦unload¦onewire
-   : └1╴... done.
-EVENT: module¦unload¦onewire
-END: module¦unload¦onewire
-NEW: ‹ConditionalWorkSequence:40 (4)›
-   : │  id: 40
+NEW: ‹ConditionalWorkSequence:37 (4)›
+   : │  id: 37
    : │  call count: 0
    : │  EVENT: module¦unload¦errors
    : └1╴... done.
 EVENT: module¦unload¦errors
 END: module¦unload¦errors
-NEW: ‹ConditionalWorkSequence:41 (4)›
-   : │  id: 41
-   : │  call count: 0
-   : │  EVENT: module¦unload¦block
-   : └1╴... done.
-EVENT: module¦unload¦block
-END: module¦unload¦block
-NEW: ‹ConditionalWorkSequence:42 (4)›
-   : │  id: 42
+NEW: ‹ConditionalWorkSequence:38 (4)›
+   : │  id: 38
    : │  call count: 0
    : │  EVENT: module¦unload¦logging
    : └1╴... done.
 EVENT: module¦unload¦logging
 END: module¦unload¦logging
-NEW: ‹ConditionalWorkSequence:43 (4)›
-   : │  id: 43
-   : │  call count: 0
-   : │  EVENT: module¦unload¦wait
-   : └1╴... done.
-EVENT: module¦unload¦wait
-END: module¦unload¦wait
-NEW: ‹ConditionalWorkSequence:44 (4)›
-   : │  id: 44
+NEW: ‹ConditionalWorkSequence:39 (4)›
+   : │  id: 39
    : │  call count: 0
    : │  EVENT: module¦unload¦monitor
    : └1╴... done.
 EVENT: module¦unload¦monitor
 END: module¦unload¦monitor
-NEW: ‹ConditionalWorkSequence:45 (4)›
-   : │  id: 45
-   : │  call count: 0
-   : │  EVENT: module¦unload¦ifelse
-   : └1╴... done.
-EVENT: module¦unload¦ifelse
-END: module¦unload¦ifelse
-NEW: ‹ConditionalWorkSequence:46 (4)›
-   : │  id: 46
+NEW: ‹ConditionalWorkSequence:40 (4)›
+   : │  id: 40
    : │  call count: 0
    : │  EVENT: module¦unload¦trigger
    : └1╴... done.
 EVENT: module¦unload¦trigger
 END: module¦unload¦trigger
-NEW: ‹ConditionalWorkSequence:47 (4)›
-   : │  id: 47
+NEW: ‹ConditionalWorkSequence:41 (4)›
+   : │  id: 41
    : │  call count: 0
-   : │  EVENT: module¦unload¦path
+   : │  EVENT: module¦unload¦onewire
    : └1╴... done.
-EVENT: module¦unload¦path
-END: module¦unload¦path
-NEW: ‹ConditionalWorkSequence:48 (4)›
-   : │  id: 48
+EVENT: module¦unload¦onewire
+END: module¦unload¦onewire
+NEW: ‹ConditionalWorkSequence:42 (4)›
+   : │  id: 42
+   : │  call count: 0
+   : │  EVENT: module¦unload¦ifelse
+   : └1╴... done.
+EVENT: module¦unload¦ifelse
+END: module¦unload¦ifelse
+NEW: ‹ConditionalWorkSequence:43 (4)›
+   : │  id: 43
    : │  call count: 0
    : │  EVENT: module¦unload¦bool
    : └1╴... done.
 EVENT: module¦unload¦bool
 END: module¦unload¦bool
+NEW: ‹ConditionalWorkSequence:44 (4)›
+   : │  id: 44
+   : │  call count: 0
+   : │  EVENT: module¦unload¦file
+   : └1╴... done.
+EVENT: module¦unload¦file
+END: module¦unload¦file
+NEW: ‹ConditionalWorkSequence:45 (4)›
+   : │  id: 45
+   : │  call count: 0
+   : │  EVENT: module¦unload¦path
+   : └1╴... done.
+EVENT: module¦unload¦path
+END: module¦unload¦path
+NEW: ‹ConditionalWorkSequence:46 (4)›
+   : │  id: 46
+   : │  call count: 0
+   : │  EVENT: module¦unload¦data
+   : └1╴... done.
+EVENT: module¦unload¦data
+END: module¦unload¦data
+NEW: ‹ConditionalWorkSequence:47 (4)›
+   : │  id: 47
+   : │  call count: 0
+   : │  EVENT: module¦unload¦block
+   : └1╴... done.
+EVENT: module¦unload¦block
+END: module¦unload¦block
+NEW: ‹ConditionalWorkSequence:48 (4)›
+   : │  id: 48
+   : │  call count: 0
+   : │  EVENT: module¦unload¦wait
+   : └1╴... done.
+EVENT: module¦unload¦wait
+END: module¦unload¦wait
 END: shutdown

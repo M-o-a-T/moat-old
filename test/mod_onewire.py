@@ -83,7 +83,10 @@ block:
 log TRACE DirStop
 #set onewire 30 "10.000010ef0000" templow ## not when testing
 scan onewire A
+dir onewire "10.000010ef0000"
 dir onewire A
+list onewire device
+list onewire device "10.000010ef0000"
 wait before disconnect:
 	for 0.3
 	debug force
