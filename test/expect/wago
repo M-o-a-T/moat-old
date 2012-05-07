@@ -298,7 +298,7 @@ EVENT: output¦set¦hey¦ho¦foo¦baz
 END: output¦set¦hey¦ho¦foo¦baz
 0 msg states at run connected connected
 0 msg send ‹WAGOtimedOutputRun 2:1 val=False tm=2.0 sec id=None›
-0 wago send 'c 2 1 1.999191'
+0 wago send 'c 2 1 1.999'
 0 msg send result RECV_AGAIN
 0 wago recv '!+2 Cleared, monitor started.'
 0 msg recv msg ‹MsgIncoming: msg:'Cleared, monitor started.' msgid:2 type:MT_IND_ACK prio:2›
@@ -414,7 +414,7 @@ EVENT: wago¦disconnect¦test
 END: wago¦disconnect¦test
 0 msg setstate2 connected closed
 0 conn ReOpen WAGOqueue test
-0 msg setstate closed waiting: wait 3.000000
+0 msg setstate closed waiting: wait 3.000
 NEW: ‹ConditionalWorkSequence:27 (4)›
    : │  id: 27
    : │  call count: 0
@@ -637,7 +637,7 @@ END: wait¦done¦5.1¦_wait¦6
 0 msg states at run connected connected
 0 msg states at run connected connected
 0 msg send ‹WAGOmonRun ‹WAGOmon test¦count¦up off››
-0 wago send 'm# 1 1 + 1.000000'
+0 wago send 'm# 1 1 + 1.000'
 0 msg send result RECV_AGAIN
 0 wago recv '!+4 monitor created'
 0 msg recv msg ‹MsgIncoming: msg:'monitor created' msgid:4 type:MT_IND_ACK prio:2›
@@ -660,7 +660,7 @@ END: monitor¦start¦test¦count¦up
 0 locking -WAIT 19 start job ‹WAGOmon test¦count¦up off›
 0 msg states at run connected connected
 0 msg send ‹WAGOmonRun ‹WAGOmon test¦count¦down off››
-0 wago send 'm# 1 1 - 1.000000'
+0 wago send 'm# 1 1 - 1.000'
 0 msg send result RECV_AGAIN
 0 monitor Start run test¦count¦up
 0 locking +WAIT 20 monitor one_value test count up
@@ -686,7 +686,7 @@ END: monitor¦start¦test¦count¦down
 0 locking -WAIT 22 start job ‹WAGOmon test¦count¦down off›
 0 msg states at run connected connected
 0 msg send ‹WAGOmonRun ‹WAGOmon test¦count¦both off››
-0 wago send 'm# 1 1 * 1.000000'
+0 wago send 'm# 1 1 * 1.000'
 0 msg send result RECV_AGAIN
 0 monitor Start run test¦count¦down
 0 locking +WAIT 23 monitor one_value test count down
@@ -1183,10 +1183,10 @@ END: monitor¦value¦1.0¦test¦count¦down
 NEW: ‹ConditionalWorkSequence:56 (4)›
    : │  id: 56
    : │  call count: 0
-   : │  EVENT: wait¦done¦6.7¦_wait¦10
+   : │  EVENT: wait¦done¦6.6¦_wait¦10
    : └1╴... done.
-EVENT: wait¦done¦6.7¦_wait¦10
-END: wait¦done¦6.7¦_wait¦10
+EVENT: wait¦done¦6.6¦_wait¦10
+END: wait¦done¦6.6¦_wait¦10
 test count both :: Run ‹1.0 sec›
 test count down :: Wait ‹now›
 test count up :: Run ‹1.0 sec›
@@ -1567,7 +1567,7 @@ msg recv 2 1 : ‹WAGOtimedOutputRun 2:1 val=False tm=-5.8 sec id=2›
              card: 2
              port: 1
              value: False
-             timer: -5.8 sec
+             timer: -5.8 )
              id: 2
 msg recv 2 2 : ‹WAGOkeepaliveMsg 7f›
              priority: 2
@@ -1605,10 +1605,10 @@ DEBUG> now we test a nonexistent port
 NEW: ‹ConditionalWorkSequence:66 (4)›
    : │  id: 66
    : │  call count: 0
-   : │  EVENT: wait¦start¦9.1¦poll¦nonexist
+   : │  EVENT: wait¦start¦9.0¦poll¦nonexist
    : └1╴... done.
-EVENT: wait¦start¦9.1¦poll¦nonexist
-END: wait¦start¦9.1¦poll¦nonexist
+EVENT: wait¦start¦9.0¦poll¦nonexist
+END: wait¦start¦9.0¦poll¦nonexist
 0 msg setstate init closed
 0 msg setstate closed want
 0 msg setstate want connecting
@@ -1625,7 +1625,7 @@ END: wago¦error¦test¦nonexist
 4 [Errno 111] Connection refused
 ERROR> Setting up
 ERROR> [Errno 111] Connection refused
-0 msg setstate connecting waiting: wait 0.200000
+0 msg setstate connecting waiting: wait 0.200
 0 msg setstate waiting want
 0 msg setstate want connecting
 0 conn connecting WAGOqueue test¦nonexist
@@ -1641,7 +1641,7 @@ END: wago¦error¦test¦nonexist
 4 [Errno 111] Connection refused
 ERROR> Setting up
 ERROR> [Errno 111] Connection refused
-0 msg setstate connecting waiting: wait 0.320000
+0 msg setstate connecting waiting: wait 0.320
 0 msg setstate waiting want
 0 msg setstate want connecting
 0 conn connecting WAGOqueue test¦nonexist
@@ -1657,14 +1657,14 @@ END: wago¦error¦test¦nonexist
 4 [Errno 111] Connection refused
 ERROR> Setting up
 ERROR> [Errno 111] Connection refused
-0 msg setstate connecting waiting: wait 0.500000
+0 msg setstate connecting waiting: wait 0.500
 NEW: ‹ConditionalWorkSequence:70 (4)›
    : │  id: 70
    : │  call count: 0
-   : │  EVENT: wait¦done¦9.1¦poll¦nonexist
+   : │  EVENT: wait¦done¦9.0¦poll¦nonexist
    : └1╴... done.
-EVENT: wait¦done¦9.1¦poll¦nonexist
-END: wait¦done¦9.1¦poll¦nonexist
+EVENT: wait¦done¦9.0¦poll¦nonexist
+END: wait¦done¦9.0¦poll¦nonexist
 : ‹WAGOqueue:test¦nonexist connecting›
 name: test¦nonexist
 queue: 0
@@ -1719,7 +1719,7 @@ NEW: ‹ConditionalWorkSequence:72 (4)›
 EVENT: wago¦disconnect¦test¦closing
 END: wago¦disconnect¦test¦closing
 0 conn ReOpen WAGOqueue test¦closing
-0 msg setstate connecting waiting: wait 0.120000
+0 msg setstate connecting waiting: wait 0.120
 0 msg setstate waiting want
 0 msg setstate want connecting
 0 wago Queue WAGOmonitorsMsg
@@ -1743,7 +1743,7 @@ NEW: ‹ConditionalWorkSequence:73 (4)›
 EVENT: wago¦disconnect¦test¦closing
 END: wago¦disconnect¦test¦closing
 0 conn ReOpen WAGOqueue test¦closing
-0 msg setstate connecting waiting: wait 0.192000
+0 msg setstate connecting waiting: wait 0.192
 0 msg setstate waiting want
 0 msg setstate want connecting
 0 wago Queue WAGOmonitorsMsg
@@ -1767,7 +1767,7 @@ NEW: ‹ConditionalWorkSequence:74 (4)›
 EVENT: wago¦disconnect¦test¦closing
 END: wago¦disconnect¦test¦closing
 0 conn ReOpen WAGOqueue test¦closing
-0 msg setstate connecting waiting: wait 0.307200
+0 msg setstate connecting waiting: wait 0.307
 0 msg setstate waiting want
 0 msg setstate want connecting
 0 wago Queue WAGOmonitorsMsg
@@ -1791,7 +1791,7 @@ NEW: ‹ConditionalWorkSequence:75 (4)›
 EVENT: wago¦disconnect¦test¦closing
 END: wago¦disconnect¦test¦closing
 0 conn ReOpen WAGOqueue test¦closing
-0 msg setstate connecting waiting: wait 0.491520
+0 msg setstate connecting waiting: wait 0.492
 NEW: ‹ConditionalWorkSequence:76 (4)›
    : │  id: 76
    : │  call count: 0
@@ -1860,7 +1860,7 @@ EVENT: wago¦disconnect¦test¦no_answer
 END: wago¦disconnect¦test¦no_answer
 0 locking -WAIT 97 kill job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦no_answer››
 0 conn ReOpen WAGOqueue test¦no_answer
-0 msg setstate connecting waiting: wait 0.120000
+0 msg setstate connecting waiting: wait 0.120
 0 msg setstate waiting want
 0 msg setstate want connecting
 0 wago Queue WAGOmonitorsMsg
@@ -1886,7 +1886,7 @@ EVENT: wago¦disconnect¦test¦no_answer
 END: wago¦disconnect¦test¦no_answer
 0 locking -WAIT 99 kill job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦no_answer››
 0 conn ReOpen WAGOqueue test¦no_answer
-0 msg setstate connecting waiting: wait 0.192000
+0 msg setstate connecting waiting: wait 0.192
 0 msg setstate waiting want
 0 msg setstate want connecting
 0 wago Queue WAGOmonitorsMsg
@@ -1912,7 +1912,7 @@ EVENT: wago¦disconnect¦test¦no_answer
 END: wago¦disconnect¦test¦no_answer
 0 locking -WAIT 101 kill job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦no_answer››
 0 conn ReOpen WAGOqueue test¦no_answer
-0 msg setstate connecting waiting: wait 0.307200
+0 msg setstate connecting waiting: wait 0.307
 NEW: ‹ConditionalWorkSequence:81 (4)›
    : │  id: 81
    : │  call count: 0

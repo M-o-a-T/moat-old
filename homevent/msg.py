@@ -739,7 +739,7 @@ class MsgQueue(Collected,Jobber):
 						state = "closed"
 					self._teardown("ReOpen",external=False)
 				if state == "closed" or state == "connecting":
-					log("msg",TRACE,"setstate %s %s: wait %f" % (state,"waiting",self.connect_timeout))
+					log("msg",TRACE,"setstate %s %s: wait %.3f" % (state,"waiting",self.connect_timeout))
 					state = "waiting"
 					callLater(True,self.connect_timeout,doReOpen)
 					self._up_timeout()

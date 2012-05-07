@@ -1,3 +1,9 @@
+homevent (0.3.15) smurf; urgency=low
+
+  * Limit time output to msec
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Mon, 07 May 2012 05:29:27 +0200
+
 homevent (0.3.14) smurf; urgency=low
 
   * onewire: fix directory lookup (last entry had a spurious NUL)

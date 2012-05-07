@@ -181,22 +181,22 @@ RUN: on net connect baz zaz *who ‹OnEventHandler›
 END: net¦connect¦baz¦zaz¦1
 0 locking +WAIT 13 start job ‹Collected NETpassive:baz¦zaz¦1›
 0 locking -WAIT 13 start job ‹Collected NETpassive:baz¦zaz¦1›
-NEW: ‹ConditionalWorkSequence:25 (4)›
-   : │  id: 25
-   : │  call count: 0
-   : │  EVENT: net¦recv¦baz¦zaz¦1¦B
-   : └1╴... done.
-EVENT: net¦recv¦baz¦zaz¦1¦B
-END: net¦recv¦baz¦zaz¦1¦B
 0 locking +WAIT 14 start job ‹Waiter IN ??›
 0 locking -WAIT 14 start job ‹Waiter IN ??›
-NEW: ‹ConditionalWorkSequence:26 (4)›
-   : │  id: 26
+NEW: ‹ConditionalWorkSequence:25 (4)›
+   : │  id: 25
    : │  call count: 0
    : │  EVENT: wait¦start¦0.7¦IN
    : └1╴... done.
 EVENT: wait¦start¦0.7¦IN
 END: wait¦start¦0.7¦IN
+NEW: ‹ConditionalWorkSequence:26 (4)›
+   : │  id: 26
+   : │  call count: 0
+   : │  EVENT: net¦recv¦baz¦zaz¦1¦B
+   : └1╴... done.
+EVENT: net¦recv¦baz¦zaz¦1¦B
+END: net¦recv¦baz¦zaz¦1¦B
 NEW: ‹ConditionalWorkSequence:27 (4)›
    : │  id: 27
    : │  call count: 0

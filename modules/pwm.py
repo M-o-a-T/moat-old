@@ -107,7 +107,7 @@ class CommonPM(Collected):
 	def info(self):
 		if self._value is None or self.t_on is None:
 			return "(new)"
-		return "%f %s / %s" % (self._value,humandelta(self.t_on),humandelta(self.t_off))
+		return "%.3f %s / %s" % (self._value,humandelta(self.t_on),humandelta(self.t_off))
 
 	def delete(self,ctx=None):
 		if self.timer:

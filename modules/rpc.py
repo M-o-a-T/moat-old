@@ -34,7 +34,7 @@ from homevent.geventreactor import waitForDeferred
 from homevent.event import TrySomethingElse
 from homevent.worker import Worker
 
-from datetime import datetime
+from datetime import datetime,date,time,timedelta
 
 from rpyc import Service
 from rpyc.utils.server import ThreadedServer
@@ -202,11 +202,19 @@ class RPCconn(Service,Collected):
 						return
 					p,t = res
 					if isinstance(t,datetime):
-						if TESTING and t.year != 2003:
-							t = "%s" % (humandelta(t-now(t.year != 2003)),)
-						else: 
-							t = "%s (%s)" % (humandelta(t-now(t.year != 2003)),t)
-					yield p,unicode(t)
+						if TESTING:
+							if t.year != 2003:
+								t = "%s" % (humandelta(t-now(t.year != 2003)),)
+							else: 
+								t = "%s (%s)" % (humandelta(t-now(t.year != 2003)),t)
+							ti = t.rfind('.')
+							if ti>0 and len(t)-ti > 4 and len(t)-ti<9: # limit to msec
+								t= t[:ti+4]+")"
+						# otherwise transmit the datetime as-is
+					elif not isinstance(t,(date,time,timedelta)):
+						t = unicode(t)
+
+					yield p,t
 
 		except Exception as e:
 				fix_exception(e)

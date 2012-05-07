@@ -379,6 +379,9 @@ END: onewire¦scanned¦A¦0¦0¦1
 1 onewire RECV 0 96 0 6 95 x8002
 1 onewire RECV … 95 '/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm'
 0 msg recv msg ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:2›
+1 onewire RECV 0 12 12 6 12 x0
+1 onewire RECV … 12 '         1.6'
+0 msg recv msg ‹MsgIncoming: data:'         1.6' typ:12 prio:2›
 0 conn incoming OWFSqueue A ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:2›
 0 msg recv A ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:2›
 10.000010EF0000
@@ -392,6 +395,13 @@ simultaneous
 alarm
 0 msg recv= MINE ‹DIRmsg ›
 1 onewire doneDIR ‹DIRmsg ›
+0 conn incoming OWFSqueue A ‹MsgIncoming: data:'         1.6' typ:12 prio:2›
+0 msg recv A ‹MsgIncoming: data:'         1.6' typ:12 prio:2›
+1 onewire done:  ‹ATTRgetmsg 10.000010EF0000 temperature›
+0 msg recv= MINE ‹ATTRgetmsg 10.000010EF0000 temperature›
+0 monitor raw 1.6 tempi
+0 monitor filter [1.6] on tempi
+0 monitor More data [1.6] for ‹tempi›
 .
 0 locking +WAIT 12 start job ‹Waiter before¦disconnect ??›
 0 locking -WAIT 12 start job ‹Waiter before¦disconnect ??›
@@ -402,16 +412,6 @@ NEW: ‹ConditionalWorkSequence:29 (4)›
    : └1╴... done.
 EVENT: wait¦start¦1.4¦before¦disconnect
 END: wait¦start¦1.4¦before¦disconnect
-1 onewire RECV 0 12 12 6 12 x0
-1 onewire RECV … 12 '         1.6'
-0 msg recv msg ‹MsgIncoming: data:'         1.6' typ:12 prio:2›
-0 conn incoming OWFSqueue A ‹MsgIncoming: data:'         1.6' typ:12 prio:2›
-0 msg recv A ‹MsgIncoming: data:'         1.6' typ:12 prio:2›
-1 onewire done:  ‹ATTRgetmsg 10.000010EF0000 temperature›
-0 msg recv= MINE ‹ATTRgetmsg 10.000010EF0000 temperature›
-0 monitor raw 1.6 tempi
-0 monitor filter [1.6] on tempi
-0 monitor More data [1.6] for ‹tempi›
 0 msg states at run connected connected
 0 msg send ‹ATTRgetmsg 10.000010EF0000 temperature›
 1 onewire SEND 0 44 2 6 8192 0 u'/uncached/bus.0/10.000010EF0000/temperature\x00'
@@ -438,10 +438,10 @@ END: monitor¦value¦1.6¦tempi
 NEW: ‹ConditionalWorkSequence:31 (4)›
    : │  id: 31
    : │  call count: 0
-   : │  EVENT: wait¦done¦2.0¦before¦disconnect
+   : │  EVENT: wait¦done¦1.9¦before¦disconnect
    : └1╴... done.
-EVENT: wait¦done¦2.0¦before¦disconnect
-END: wait¦done¦2.0¦before¦disconnect
+EVENT: wait¦done¦1.9¦before¦disconnect
+END: wait¦done¦1.9¦before¦disconnect
 0 Dropping OWFS bus A
 0 locking +WAIT 14 kill watcher ‹OWFSqueue:A connected›
 0 locking -WAIT 13 monitor sleep tempi
@@ -466,10 +466,10 @@ END: onewire¦disconnect¦A
 NEW: ‹ConditionalWorkSequence:33 (4)›
    : │  id: 33
    : │  call count: 0
-   : │  EVENT: wait¦start¦3.0¦END
+   : │  EVENT: wait¦start¦2.9¦END
    : └1╴... done.
-EVENT: wait¦start¦3.0¦END
-END: wait¦start¦3.0¦END
+EVENT: wait¦start¦2.9¦END
+END: wait¦start¦2.9¦END
 0 locking +WAIT 19 kill job <homevent.tokize.tokizer obj>
 0 locking -WAIT 19 kill job <homevent.tokize.tokizer obj>
 NEW: ‹ConditionalWorkSequence:34 (6)›

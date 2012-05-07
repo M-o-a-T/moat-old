@@ -62,6 +62,14 @@ list ‹type› ‹name…›
 						t = "%s" % (humandelta(t-now(t.year != 2003)),)
 					else:
 						t = "%s (%s)" % (humandelta(t-now(t.year != 2003)),t)
+					if TESTING:
+						lim = 4
+					else:
+						lim = 5
+					ti = t.rfind('.')
+					if ti>0 and len(t)-ti>lim and len(t)-ti<lim+5: # limit to msec
+						t = t[:ti+lim]+")"
+
 				print >>out,p+u": "+unicode(t)
 
 		event = self.params(ctx)

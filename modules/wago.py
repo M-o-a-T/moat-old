@@ -535,7 +535,7 @@ class WAGOtimedOutputRun(WAGOoutputRun):
 	def msg(self):
 		delta = unixdelta(self.timer-now(True))
 		if delta < 0.1: delta = 0.1
-		return "%s %d %d %f" % ("s" if self.val else "c", self.card,self.port,delta)
+		return "%s %d %d %.3f" % ("s" if self.val else "c", self.card,self.port,delta)
 	
 	def recv(self,msg):
 		if msg.type is MT_IND_ACK and self.msgid is None:
@@ -738,7 +738,7 @@ class WAGOmonRun(WAGOioRun):
 			if l == "both": return "*"
 			raise RuntimeError("%s: unknown mode %s" % (repr(self),l))
 		if self.monitor.mode == "count":
-			return "m# %d %d %s %f" % (self.monitor.card,self.monitor.port,udb(),self.monitor.timespec)
+			return "m# %d %d %s %.3f" % (self.monitor.card,self.monitor.port,udb(),self.monitor.timespec)
 		elif self.monitor.mode == "report":
 			return "m+ %d %d %s" % (self.monitor.card,self.monitor.port,udb())
 		else:

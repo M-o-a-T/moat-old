@@ -12,7 +12,7 @@ import os
 from time import time
 from datetime import datetime
 
-from twisted.internet import reactor
+from homevent import geventreactor as reactor
 
 APPNAME="monitor"
 APPVERSION="0.1"
@@ -91,7 +91,10 @@ class MonitorUI(object):
 		def DatePrinter(column, cell, model, iter, col_key):
 			text = model.get_value(iter, 2)
 			text = datetime.utcfromtimestamp(text)
-			text = text.strftime("%Y-%m-%d %H:%M:%S.%f")
+			text = text.strftime("%Y-%m-%d %H:%M:%S.%.3f")
+			ti = text.rfind('.')
+			if ti>0 and len(ti)-ti > 4: # limit to msec
+				text = text[:ti+4]
 			cell.set_property("text", text)
 		add('Event',0)
 		add('#',1)

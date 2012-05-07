@@ -216,7 +216,7 @@ NEW: ‹ConditionalWorkSequence:26 (4)›
    : └1╴... done.
 EVENT: wait¦done¦24.0¦_wait¦4
 END: wait¦done¦24.0¦_wait¦4
-foo bar :: 0.100000 1.0 sec / 9.0 sec
+foo bar :: 0.100 1.0 sec / 9.0 sec
 .
 0 locking +WAIT 10 kill job <homevent.tokize.tokizer obj>
 0 locking -WAIT 10 kill job <homevent.tokize.tokizer obj>
