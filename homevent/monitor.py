@@ -105,6 +105,7 @@ class Monitor(Collected,Jobber):
 	value = None # last correct measurement
 	started_at = None # last time when measuring started or will start
 	stopped_at = None # last time when measuring ended
+	state_change_at = None # last time up/down got called
 
 	def __init__(self,parent,name):
 		if self.passive is None:
@@ -144,10 +145,12 @@ class Monitor(Collected,Jobber):
 		yield ("up",self.up_name)
 		yield ("time",self.time_name)
 		if not TESTING:
-			if self.started_at:
+			if self.started_at is not None:
 				yield ("start",self.started_at)
-			if self.stopped_at:
+			if self.stopped_at is not None:
 				yield ("stop",self.stopped_at)
+			if self.state_change_at is not None:
+				yield ("state change",self.state_change_at)
 
 		yield ("steps", "%s / %s / %s" % (self.steps,self.points,self.maxpoints))
 		if self.data:
@@ -362,6 +365,7 @@ class Monitor(Collected,Jobber):
 			self.value = None
 			process_event(Event(Context(),"monitor","start",*self.name))
 			self.start_job("job",self._run_loop)
+			self.state_change_at = now()
 
 			def tell_ended(_):
 				simple_event(Context(),"monitor","stop",*self.name)
@@ -372,6 +376,7 @@ class Monitor(Collected,Jobber):
 		self.delete_done()
 
 	def down(self):
+		self.state_change_at = now()
 		self.stop_job("job")
 
 monitor_nr = 0
