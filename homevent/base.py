@@ -67,6 +67,32 @@ class Name(tuple):
 				n = getattr(ctx,n[1:])
 			res.append(n)
 		return self.__class__(*res)
+	
+
+	# The following are rich comparison and hashign methods, intended so
+	# that one-element names compare identically to the corresponding strings
+for s in "hash".split(): ## id
+	s="__"+s+"__"
+	def gen_id(s):
+		def f(self):
+			if len(self) == 1:
+				return getattr(unicode(self),s)()
+			return getattr(super(Name,self),s)()
+		f.__name__ = s
+		return f
+	setattr(Name,s,gen_id(s))
+for s in "le lt ge gt eq ne".split(): ## cmp
+	s="__"+s+"__"
+
+	def gen_cmp(s):
+		def f(self,other):
+			if isinstance(other,basestring):
+				return getattr(unicode(self),s)(other)
+			return getattr(super(Name,self),s)(other)
+		f.__name__ = s
+		return f
+	setattr(Name,s,gen_cmp(s))
+
 
 def SName(data,attr="name"):
 	"""An alternate Name constructor that accepts a single argument"""
