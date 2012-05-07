@@ -5,10 +5,10 @@ NEW: ‹ConditionalWorkSequence:7 (4)›
    : └1╴... done.
 EVENT: startup
 END: startup
-0 +WAIT 1 start job ‹Collected Parser:n1›
-0 -WAIT 1 start job ‹Collected Parser:n1›
-0 +WAIT 2 start job <homevent.tokize.tokizer obj>
-0 -WAIT 2 start job <homevent.tokize.tokizer obj>
+0 locking +WAIT 1 start job ‹Collected Parser:n1›
+0 locking -WAIT 1 start job ‹Collected Parser:n1›
+0 locking +WAIT 2 start job <homevent.tokize.tokizer obj>
+0 locking -WAIT 2 start job <homevent.tokize.tokizer obj>
 NEW: ‹ConditionalWorkSequence:8 (4)›
    : │  id: 8
    : │  call count: 0
@@ -16,8 +16,8 @@ NEW: ‹ConditionalWorkSequence:8 (4)›
    : └1╴... done.
 IEVENT: foo
 END: foo
-0 +WAIT 3 start job ‹Waiter _wait¦1 ??›
-0 -WAIT 3 start job ‹Waiter _wait¦1 ??›
+0 locking +WAIT 3 start job ‹Waiter _wait¦1 ??›
+0 locking -WAIT 3 start job ‹Waiter _wait¦1 ??›
 NEW: ‹ConditionalWorkSequence:9 (4)›
    : │  id: 9
    : │  call count: 0
@@ -44,8 +44,8 @@ NEW: ‹ConditionalWorkSequence:12 (4)›
    : │  call count: 0
    : │  IEVENT: baz¦notlogged
    : └1╴... done.
-0 +WAIT 4 kill job <homevent.tokize.tokizer obj>
-0 -WAIT 4 kill job <homevent.tokize.tokizer obj>
+0 locking +WAIT 4 kill job <homevent.tokize.tokizer obj>
+0 locking -WAIT 4 kill job <homevent.tokize.tokizer obj>
 NEW: ‹ConditionalWorkSequence:13 (6)›
    : │  id: 13
    : │  call count: 0

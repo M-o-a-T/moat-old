@@ -5,14 +5,14 @@ NEW: ‹ConditionalWorkSequence:7 (4)›
    : └1╴... done.
 EVENT: startup
 END: startup
-0 +WAIT 1 start job ‹Collected Parser:n1›
-0 -WAIT 1 start job ‹Collected Parser:n1›
-0 +WAIT 2 start job <homevent.tokize.tokizer obj>
-0 -WAIT 2 start job <homevent.tokize.tokizer obj>
-0 +WAIT 3 start job ‹Async async›
-0 -WAIT 3 start job ‹Async async›
-0 +WAIT 4 start job ‹Waiter BAD ??›
-0 -WAIT 4 start job ‹Waiter BAD ??›
+0 locking +WAIT 1 start job ‹Collected Parser:n1›
+0 locking -WAIT 1 start job ‹Collected Parser:n1›
+0 locking +WAIT 2 start job <homevent.tokize.tokizer obj>
+0 locking -WAIT 2 start job <homevent.tokize.tokizer obj>
+0 locking +WAIT 3 start job ‹Async async›
+0 locking -WAIT 3 start job ‹Async async›
+0 locking +WAIT 4 start job ‹Waiter BAD ??›
+0 locking -WAIT 4 start job ‹Waiter BAD ??›
 NEW: ‹ConditionalWorkSequence:8 (4)›
    : │  id: 8
    : │  call count: 0
@@ -51,8 +51,8 @@ END: wait¦done¦0.2¦BAD
 0 NewHandler 14
 0 Create OnEvtHandler: net¦disconnect¦baz¦zaz
 0 NewHandler 15
-0 +WAIT 5 start job ‹Waiter BEFORE ??›
-0 -WAIT 5 start job ‹Waiter BEFORE ??›
+0 locking +WAIT 5 start job ‹Waiter BEFORE ??›
+0 locking -WAIT 5 start job ‹Waiter BEFORE ??›
 NEW: ‹ConditionalWorkSequence:16 (4)›
    : │  id: 16
    : │  call count: 0
@@ -67,10 +67,10 @@ NEW: ‹ConditionalWorkSequence:17 (4)›
    : └1╴... done.
 EVENT: wait¦done¦0.4¦BEFORE
 END: wait¦done¦0.4¦BEFORE
-0 +WAIT 6 start job ‹Async async›
-0 -WAIT 6 start job ‹Async async›
-0 +WAIT 7 start job ‹Waiter AFTER ??›
-0 -WAIT 7 start job ‹Waiter AFTER ??›
+0 locking +WAIT 6 start job ‹Async async›
+0 locking -WAIT 6 start job ‹Async async›
+0 locking +WAIT 7 start job ‹Waiter AFTER ??›
+0 locking -WAIT 7 start job ‹Waiter AFTER ??›
 NEW: ‹ConditionalWorkSequence:18 (4)›
    : │  id: 18
    : │  call count: 0
@@ -102,11 +102,11 @@ RUN: on net connect foo ‹OnEventHandler›
    :     : step: del net foo ‹Del›
  at: ‹ConditionalWorkSequence:19 (5)› (step 1)
  ev: EVENT: net¦connect¦foo
-0 +WAIT 8 start job ‹Async async›
-0 -WAIT 8 start job ‹Async async›
+0 locking +WAIT 8 start job ‹Async async›
+0 locking -WAIT 8 start job ‹Async async›
 END: net¦connect¦foo
-0 +WAIT 9 start job ‹Collected NETactive:foo›
-0 -WAIT 9 start job ‹Collected NETactive:foo›
+0 locking +WAIT 9 start job ‹Collected NETactive:foo›
+0 locking -WAIT 9 start job ‹Collected NETactive:foo›
 NEW: ‹ConditionalWorkSequence:20 (4)›
    : │  id: 20
    : │  call count: 0
@@ -114,15 +114,15 @@ NEW: ‹ConditionalWorkSequence:20 (4)›
    : └1╴... done.
 EVENT: net¦recv¦foo¦A
 END: net¦recv¦foo¦A
-0 +WAIT 10 start job ‹Waiter OUT ??›
-0 -WAIT 10 start job ‹Waiter OUT ??›
+0 locking +WAIT 10 start job ‹Waiter OUT ??›
+0 locking -WAIT 10 start job ‹Waiter OUT ??›
 NEW: ‹ConditionalWorkSequence:21 (4)›
    : │  id: 21
    : │  call count: 0
-   : │  EVENT: wait¦start¦0.6¦OUT
+   : │  EVENT: wait¦start¦0.5¦OUT
    : └1╴... done.
-EVENT: wait¦start¦0.6¦OUT
-END: wait¦start¦0.6¦OUT
+EVENT: wait¦start¦0.5¦OUT
+END: wait¦start¦0.5¦OUT
 NEW: ‹ConditionalWorkSequence:22 (4)›
    : │  id: 22
    : │  call count: 0
@@ -136,7 +136,7 @@ type: net_active
 host: localhost
 port: ×××
 .
-0 +WAIT 11 kill job ‹Collected NETactive:foo›
+0 locking +WAIT 11 kill job ‹Collected NETactive:foo›
 NEW: ‹ConditionalWorkSequence:23 (5)›
    : │  id: 23
    : │  call count: 0
@@ -153,7 +153,7 @@ RUN: on net disconnect foo ‹OnEventHandler›
  ev: EVENT: net¦disconnect¦foo
 0 dis foo
 END: net¦disconnect¦foo
-0 -WAIT 11 kill job ‹Collected NETactive:foo›
+0 locking -WAIT 11 kill job ‹Collected NETactive:foo›
 NEW: ‹ConditionalWorkSequence:24 (5)›
    : │  id: 24
    : │  call count: 0
@@ -176,11 +176,11 @@ RUN: on net connect baz zaz *who ‹OnEventHandler›
    :     : step: del net baz zaz $who ‹Del›
  at: ‹ConditionalWorkSequence:24 (5)› (step 1)
  ev: EVENT: net¦connect¦baz¦zaz¦1
-0 +WAIT 12 start job ‹Async async›
-0 -WAIT 12 start job ‹Async async›
+0 locking +WAIT 12 start job ‹Async async›
+0 locking -WAIT 12 start job ‹Async async›
 END: net¦connect¦baz¦zaz¦1
-0 +WAIT 13 start job ‹Collected NETpassive:baz¦zaz¦1›
-0 -WAIT 13 start job ‹Collected NETpassive:baz¦zaz¦1›
+0 locking +WAIT 13 start job ‹Collected NETpassive:baz¦zaz¦1›
+0 locking -WAIT 13 start job ‹Collected NETpassive:baz¦zaz¦1›
 NEW: ‹ConditionalWorkSequence:25 (4)›
    : │  id: 25
    : │  call count: 0
@@ -188,8 +188,8 @@ NEW: ‹ConditionalWorkSequence:25 (4)›
    : └1╴... done.
 EVENT: net¦recv¦baz¦zaz¦1¦B
 END: net¦recv¦baz¦zaz¦1¦B
-0 +WAIT 14 start job ‹Waiter IN ??›
-0 -WAIT 14 start job ‹Waiter IN ??›
+0 locking +WAIT 14 start job ‹Waiter IN ??›
+0 locking -WAIT 14 start job ‹Waiter IN ??›
 NEW: ‹ConditionalWorkSequence:26 (4)›
    : │  id: 26
    : │  call count: 0
@@ -208,7 +208,7 @@ type: net_passive
 host: 127.0.0.1
 port: ×××
 .
-0 +WAIT 15 kill job ‹Collected NETpassive:baz¦zaz¦1›
+0 locking +WAIT 15 kill job ‹Collected NETpassive:baz¦zaz¦1›
 NEW: ‹ConditionalWorkSequence:28 (4)›
    : │  id: 28
    : │  call count: 0
@@ -216,7 +216,7 @@ NEW: ‹ConditionalWorkSequence:28 (4)›
    : └1╴... done.
 EVENT: net¦disconnect¦baz¦zaz¦1
 END: net¦disconnect¦baz¦zaz¦1
-0 -WAIT 15 kill job ‹Collected NETpassive:baz¦zaz¦1›
+0 locking -WAIT 15 kill job ‹Collected NETpassive:baz¦zaz¦1›
 NEW: ‹ConditionalWorkSequence:29 (4)›
    : │  id: 29
    : │  call count: 0
@@ -227,8 +227,8 @@ END: wait¦done¦1.2¦AFTER
 0 ending
 .
 1 Yes
-0 +WAIT 16 start job ‹Waiter END ??›
-0 -WAIT 16 start job ‹Waiter END ??›
+0 locking +WAIT 16 start job ‹Waiter END ??›
+0 locking -WAIT 16 start job ‹Waiter END ??›
 NEW: ‹ConditionalWorkSequence:30 (4)›
    : │  id: 30
    : │  call count: 0
@@ -236,8 +236,8 @@ NEW: ‹ConditionalWorkSequence:30 (4)›
    : └1╴... done.
 EVENT: wait¦start¦0.2¦END
 END: wait¦start¦0.2¦END
-0 +WAIT 17 kill job <homevent.tokize.tokizer obj>
-0 -WAIT 17 kill job <homevent.tokize.tokizer obj>
+0 locking +WAIT 17 kill job <homevent.tokize.tokizer obj>
+0 locking -WAIT 17 kill job <homevent.tokize.tokizer obj>
 NEW: ‹ConditionalWorkSequence:31 (6)›
    : │  id: 31
    : │  call count: 0

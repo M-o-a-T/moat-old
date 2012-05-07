@@ -5,10 +5,10 @@ NEW: ‹ConditionalWorkSequence:7 (4)›
    : └1╴... done.
 EVENT: startup
 END: startup
-0 +WAIT 1 start job ‹Collected Parser:n1›
-0 -WAIT 1 start job ‹Collected Parser:n1›
-0 +WAIT 2 start job <homevent.tokize.tokizer obj>
-0 -WAIT 2 start job <homevent.tokize.tokizer obj>
+0 locking +WAIT 1 start job ‹Collected Parser:n1›
+0 locking -WAIT 1 start job ‹Collected Parser:n1›
+0 locking +WAIT 2 start job <homevent.tokize.tokizer obj>
+0 locking -WAIT 2 start job <homevent.tokize.tokizer obj>
 0 Create OnEvtHandler: fuß
 0 NewHandler 8
 0 Create OnEvtHandler: num¦1
@@ -187,15 +187,15 @@ _on 16 :: bar¦* (51)
 num2num :: num¦3 (51)
 not executed :: foo (60)
 .
-0 +WAIT 3 start job ‹TriggerHandler: trigger 2›
-0 -WAIT 3 start job ‹TriggerHandler: trigger 2›
-0 +WAIT 4 start job ‹TriggerHandler: trigger 2›
-0 -WAIT 4 start job ‹TriggerHandler: trigger 2›
-0 +WAIT 5 start job ‹TriggerHandler: trigger 2›
-0 -WAIT 5 start job ‹TriggerHandler: trigger 2›
-0 +WAIT 6 start job ‹TriggerHandler: trigger 2›
-0 -WAIT 6 start job ‹TriggerHandler: trigger 2›
-0 +WAIT 7 kill job <homevent.tokize.tokizer obj>
+0 locking +WAIT 3 start job ‹TriggerHandler: trigger 2›
+0 locking -WAIT 3 start job ‹TriggerHandler: trigger 2›
+0 locking +WAIT 4 start job ‹TriggerHandler: trigger 2›
+0 locking -WAIT 4 start job ‹TriggerHandler: trigger 2›
+0 locking +WAIT 5 start job ‹TriggerHandler: trigger 2›
+0 locking -WAIT 5 start job ‹TriggerHandler: trigger 2›
+0 locking +WAIT 6 start job ‹TriggerHandler: trigger 2›
+0 locking -WAIT 6 start job ‹TriggerHandler: trigger 2›
+0 locking +WAIT 7 kill job <homevent.tokize.tokizer obj>
 NEW: ‹ConditionalWorkSequence:21 (5)›
    : │  id: 21
    : │  call count: 0
@@ -254,7 +254,7 @@ NEW: ‹ConditionalWorkSequence:24 (4)›
    : └1╴... done.
 IEVENT: fuß
 END: fuß
-0 -WAIT 7 kill job <homevent.tokize.tokizer obj>
+0 locking -WAIT 7 kill job <homevent.tokize.tokizer obj>
 NEW: ‹ConditionalWorkSequence:25 (6)›
    : │  id: 25
    : │  call count: 0

@@ -5,10 +5,10 @@ NEW: ‹ConditionalWorkSequence:7 (4)›
    : └1╴... done.
 EVENT: startup
 END: startup
-0 +WAIT 1 start job ‹Collected Parser:n1›
-0 -WAIT 1 start job ‹Collected Parser:n1›
-0 +WAIT 2 start job <homevent.tokize.tokizer obj>
-0 -WAIT 2 start job <homevent.tokize.tokizer obj>
+0 locking +WAIT 1 start job ‹Collected Parser:n1›
+0 locking -WAIT 1 start job ‹Collected Parser:n1›
+0 locking +WAIT 2 start job <homevent.tokize.tokizer obj>
+0 locking -WAIT 2 start job <homevent.tokize.tokizer obj>
 .
 test time :: (new)
 .
@@ -16,8 +16,8 @@ name: test time
 mode: time
 value: None
 .
-0 +WAIT 3 start job ‹Waiter _wait¦1 ??›
-0 -WAIT 3 start job ‹Waiter _wait¦1 ??›
+0 locking +WAIT 3 start job ‹Waiter _wait¦1 ??›
+0 locking -WAIT 3 start job ‹Waiter _wait¦1 ??›
 NEW: ‹ConditionalWorkSequence:8 (4)›
    : │  id: 8
    : │  call count: 0
@@ -41,8 +41,8 @@ total time: 0:00:00
 total samples: 1
 current average: 2.0
 .
-0 +WAIT 4 start job ‹Waiter _wait¦2 ??›
-0 -WAIT 4 start job ‹Waiter _wait¦2 ??›
+0 locking +WAIT 4 start job ‹Waiter _wait¦2 ??›
+0 locking -WAIT 4 start job ‹Waiter _wait¦2 ??›
 NEW: ‹ConditionalWorkSequence:10 (4)›
    : │  id: 10
    : │  call count: 0
@@ -75,8 +75,8 @@ total time: 0:00:01
 total samples: 2
 current average: 2.0
 .
-0 +WAIT 5 start job ‹Waiter _wait¦3 ??›
-0 -WAIT 5 start job ‹Waiter _wait¦3 ??›
+0 locking +WAIT 5 start job ‹Waiter _wait¦3 ??›
+0 locking -WAIT 5 start job ‹Waiter _wait¦3 ??›
 NEW: ‹ConditionalWorkSequence:12 (4)›
    : │  id: 12
    : │  call count: 0
@@ -111,8 +111,8 @@ current average: 3.5
 .
 1 Yes
 1 Yes
-0 +WAIT 6 start job ‹Waiter _wait¦4 ??›
-0 -WAIT 6 start job ‹Waiter _wait¦4 ??›
+0 locking +WAIT 6 start job ‹Waiter _wait¦4 ??›
+0 locking -WAIT 6 start job ‹Waiter _wait¦4 ??›
 NEW: ‹ConditionalWorkSequence:14 (4)›
    : │  id: 14
    : │  call count: 0
@@ -137,8 +137,8 @@ value: None
 samples: 0
 max samples: 3
 .
-0 +WAIT 7 start job ‹Waiter _wait¦5 ??›
-0 -WAIT 7 start job ‹Waiter _wait¦5 ??›
+0 locking +WAIT 7 start job ‹Waiter _wait¦5 ??›
+0 locking -WAIT 7 start job ‹Waiter _wait¦5 ??›
 NEW: ‹ConditionalWorkSequence:16 (4)›
    : │  id: 16
    : │  call count: 0
@@ -165,8 +165,8 @@ samples: 1
 max samples: 3
 sample 0: 2.0
 .
-0 +WAIT 8 start job ‹Waiter _wait¦6 ??›
-0 -WAIT 8 start job ‹Waiter _wait¦6 ??›
+0 locking +WAIT 8 start job ‹Waiter _wait¦6 ??›
+0 locking -WAIT 8 start job ‹Waiter _wait¦6 ??›
 NEW: ‹ConditionalWorkSequence:18 (4)›
    : │  id: 18
    : │  call count: 0
@@ -206,8 +206,8 @@ max samples: 3
 sample 0: 2.0
 sample 1: 5.0
 .
-0 +WAIT 9 start job ‹Waiter _wait¦7 ??›
-0 -WAIT 9 start job ‹Waiter _wait¦7 ??›
+0 locking +WAIT 9 start job ‹Waiter _wait¦7 ??›
+0 locking -WAIT 9 start job ‹Waiter _wait¦7 ??›
 NEW: ‹ConditionalWorkSequence:20 (4)›
    : │  id: 20
    : │  call count: 0
@@ -249,8 +249,8 @@ sample 0: 2.0
 sample 1: 5.0
 sample 2: -1.0
 .
-0 +WAIT 10 start job ‹Waiter _wait¦8 ??›
-0 -WAIT 10 start job ‹Waiter _wait¦8 ??›
+0 locking +WAIT 10 start job ‹Waiter _wait¦8 ??›
+0 locking -WAIT 10 start job ‹Waiter _wait¦8 ??›
 NEW: ‹ConditionalWorkSequence:22 (4)›
    : │  id: 22
    : │  call count: 0
@@ -293,8 +293,8 @@ sample 0: 5.0
 sample 1: -1.0
 sample 2: 8.0
 .
-0 +WAIT 11 start job ‹Waiter _wait¦9 ??›
-0 -WAIT 11 start job ‹Waiter _wait¦9 ??›
+0 locking +WAIT 11 start job ‹Waiter _wait¦9 ??›
+0 locking -WAIT 11 start job ‹Waiter _wait¦9 ??›
 NEW: ‹ConditionalWorkSequence:24 (4)›
    : │  id: 24
    : │  call count: 0
@@ -339,8 +339,8 @@ sample 2: 14.0
 .
 1 Yes
 1 Yes
-0 +WAIT 12 start job ‹Waiter _wait¦10 ??›
-0 -WAIT 12 start job ‹Waiter _wait¦10 ??›
+0 locking +WAIT 12 start job ‹Waiter _wait¦10 ??›
+0 locking -WAIT 12 start job ‹Waiter _wait¦10 ??›
 NEW: ‹ConditionalWorkSequence:26 (4)›
    : │  id: 26
    : │  call count: 0
@@ -364,8 +364,8 @@ mode: decay
 value: None
 weight: 0.1
 .
-0 +WAIT 13 start job ‹Waiter _wait¦11 ??›
-0 -WAIT 13 start job ‹Waiter _wait¦11 ??›
+0 locking +WAIT 13 start job ‹Waiter _wait¦11 ??›
+0 locking -WAIT 13 start job ‹Waiter _wait¦11 ??›
 NEW: ‹ConditionalWorkSequence:28 (4)›
    : │  id: 28
    : │  call count: 0
@@ -390,8 +390,8 @@ total samples: 1
 current average: 2.0
 weight: 0.1
 .
-0 +WAIT 14 start job ‹Waiter _wait¦12 ??›
-0 -WAIT 14 start job ‹Waiter _wait¦12 ??›
+0 locking +WAIT 14 start job ‹Waiter _wait¦12 ??›
+0 locking -WAIT 14 start job ‹Waiter _wait¦12 ??›
 NEW: ‹ConditionalWorkSequence:30 (4)›
    : │  id: 30
    : │  call count: 0
@@ -426,8 +426,8 @@ total samples: 2
 current average: 4.0
 weight: 0.1
 .
-0 +WAIT 15 start job ‹Waiter _wait¦13 ??›
-0 -WAIT 15 start job ‹Waiter _wait¦13 ??›
+0 locking +WAIT 15 start job ‹Waiter _wait¦13 ??›
+0 locking -WAIT 15 start job ‹Waiter _wait¦13 ??›
 NEW: ‹ConditionalWorkSequence:32 (4)›
    : │  id: 32
    : │  call count: 0
@@ -464,8 +464,8 @@ weight: 0.1
 .
 1 Yes
 1 Yes
-0 +WAIT 16 start job ‹Waiter _wait¦14 ??›
-0 -WAIT 16 start job ‹Waiter _wait¦14 ??›
+0 locking +WAIT 16 start job ‹Waiter _wait¦14 ??›
+0 locking -WAIT 16 start job ‹Waiter _wait¦14 ??›
 NEW: ‹ConditionalWorkSequence:34 (4)›
    : │  id: 34
    : │  call count: 0
@@ -491,8 +491,8 @@ weight/hour: 1.0
 weight/minute: 0.9982029897
 weight/second: 0.1
 .
-0 +WAIT 17 start job ‹Waiter _wait¦15 ??›
-0 -WAIT 17 start job ‹Waiter _wait¦15 ??›
+0 locking +WAIT 17 start job ‹Waiter _wait¦15 ??›
+0 locking -WAIT 17 start job ‹Waiter _wait¦15 ??›
 NEW: ‹ConditionalWorkSequence:36 (4)›
    : │  id: 36
    : │  call count: 0
@@ -519,8 +519,8 @@ weight/hour: 1.0
 weight/minute: 0.9982029897
 weight/second: 0.1
 .
-0 +WAIT 18 start job ‹Waiter _wait¦16 ??›
-0 -WAIT 18 start job ‹Waiter _wait¦16 ??›
+0 locking +WAIT 18 start job ‹Waiter _wait¦16 ??›
+0 locking -WAIT 18 start job ‹Waiter _wait¦16 ??›
 NEW: ‹ConditionalWorkSequence:38 (4)›
    : │  id: 38
    : │  call count: 0
@@ -559,8 +559,8 @@ weight/hour: 1.0
 weight/minute: 0.9982029897
 weight/second: 0.1
 .
-0 +WAIT 19 start job ‹Waiter _wait¦17 ??›
-0 -WAIT 19 start job ‹Waiter _wait¦17 ??›
+0 locking +WAIT 19 start job ‹Waiter _wait¦17 ??›
+0 locking -WAIT 19 start job ‹Waiter _wait¦17 ??›
 NEW: ‹ConditionalWorkSequence:40 (4)›
    : │  id: 40
    : │  call count: 0
@@ -601,8 +601,8 @@ weight/second: 0.1
 .
 1 Yes
 1 No1 20.0
-0 +WAIT 20 start job ‹Waiter _wait¦18 ??›
-0 -WAIT 20 start job ‹Waiter _wait¦18 ??›
+0 locking +WAIT 20 start job ‹Waiter _wait¦18 ??›
+0 locking -WAIT 20 start job ‹Waiter _wait¦18 ??›
 NEW: ‹ConditionalWorkSequence:42 (4)›
    : │  id: 42
    : │  call count: 0
@@ -632,8 +632,8 @@ weight/second: 0.1
 1 values avg 16.39 now 1.0 prev 110.0
 1 Yes
 .
-0 +WAIT 21 kill job <homevent.tokize.tokizer obj>
-0 -WAIT 21 kill job <homevent.tokize.tokizer obj>
+0 locking +WAIT 21 kill job <homevent.tokize.tokizer obj>
+0 locking -WAIT 21 kill job <homevent.tokize.tokizer obj>
 NEW: ‹ConditionalWorkSequence:44 (6)›
    : │  id: 44
    : │  call count: 0

@@ -5,10 +5,10 @@ NEW: ‹ConditionalWorkSequence:7 (4)›
    : └1╴... done.
 EVENT: startup
 END: startup
-0 +WAIT 1 start job ‹Collected Parser:n1›
-0 -WAIT 1 start job ‹Collected Parser:n1›
-0 +WAIT 2 start job <homevent.tokize.tokizer obj>
-0 -WAIT 2 start job <homevent.tokize.tokizer obj>
+0 locking +WAIT 1 start job ‹Collected Parser:n1›
+0 locking -WAIT 1 start job ‹Collected Parser:n1›
+0 locking +WAIT 2 start job <homevent.tokize.tokizer obj>
+0 locking -WAIT 2 start job <homevent.tokize.tokizer obj>
 NEW: ‹ConditionalWorkSequence:8 (4)›
    : │  id: 8
    : │  call count: 0
@@ -58,29 +58,38 @@ NEW: ‹ConditionalWorkSequence:14 (4)›
    : └1╴... done.
 EVENT: module¦load¦errors
 END: module¦load¦errors
+NEW: ‹ConditionalWorkSequence:15 (4)›
+   : │  id: 15
+   : │  call count: 0
+   : │  EVENT: module¦load¦monitor
+   : └1╴... done.
+EVENT: module¦load¦monitor
+END: module¦load¦monitor
+0 Create OnEvtHandler: onewire¦up¦*¦10.000010ef0000
+0 NewHandler 16
 0 Create OnEvtHandler: onewire¦scanned¦A¦*¦*¦*
-0 NewHandler 15
+0 NewHandler 17
 1 onewire NEW ‹OWFSqueue:None New› None None ()
-0 +WAIT 3 start job ‹OWFSqueue:A New›
-0 -WAIT 3 start job ‹OWFSqueue:A New›
-0 +WAIT 4 start watcher ‹OWFSqueue:A New›
-0 -WAIT 4 start watcher ‹OWFSqueue:A New›
-0 +WAIT 5 start job ‹OWFSqueue:A New›
-0 -WAIT 5 start job ‹OWFSqueue:A New›
-0 +WAIT 6 start watcher ‹OWFSqueue:A New›
-0 -WAIT 6 start watcher ‹OWFSqueue:A New›
+0 locking +WAIT 3 start job ‹OWFSqueue:A New›
+0 locking -WAIT 3 start job ‹OWFSqueue:A New›
+0 locking +WAIT 4 start watcher ‹OWFSqueue:A New›
+0 locking -WAIT 4 start watcher ‹OWFSqueue:A New›
+0 locking +WAIT 5 start job ‹OWFSqueue:A New›
+0 locking -WAIT 5 start job ‹OWFSqueue:A New›
+0 locking +WAIT 6 start watcher ‹OWFSqueue:A New›
+0 locking -WAIT 6 start watcher ‹OWFSqueue:A New›
 0 New OWFS bus A ‹OWFSqueue:A New›
-0 +WAIT 7 start job ‹Waiter yawn ??›
-0 -WAIT 7 start job ‹Waiter yawn ??›
-NEW: ‹ConditionalWorkSequence:16 (4)›
-   : │  id: 16
+0 locking +WAIT 7 start job ‹Waiter yawn ??›
+0 locking -WAIT 7 start job ‹Waiter yawn ??›
+NEW: ‹ConditionalWorkSequence:18 (4)›
+   : │  id: 18
    : │  call count: 0
    : │  EVENT: wait¦start¦11.1¦yawn
    : └1╴... done.
 EVENT: wait¦start¦11.1¦yawn
 END: wait¦start¦11.1¦yawn
-NEW: ‹ConditionalWorkSequence:17 (4)›
-   : │  id: 17
+NEW: ‹ConditionalWorkSequence:19 (4)›
+   : │  id: 19
    : │  call count: 0
    : │  EVENT: onewire¦scanning¦A
    : └1╴... done.
@@ -91,15 +100,15 @@ END: onewire¦scanning¦A
 0 msg setstate closed connecting
 0 conn connecting OWFSqueue A
 0 !got UP_EVENT A
-NEW: ‹ConditionalWorkSequence:18 (4)›
-   : │  id: 18
+NEW: ‹ConditionalWorkSequence:20 (4)›
+   : │  id: 20
    : │  call count: 0
    : │  EVENT: onewire¦connect¦A
    : └1╴... done.
 EVENT: onewire¦connect¦A
 END: onewire¦connect¦A
-0 +WAIT 8 start job ‹OWFSchannel:‹Collected OWFSchannel_forwarder:A››
-0 -WAIT 8 start job ‹OWFSchannel:‹Collected OWFSchannel_forwarder:A››
+0 locking +WAIT 8 start job ‹OWFSchannel:‹Collected OWFSchannel_forwarder:A››
+0 locking -WAIT 8 start job ‹OWFSchannel:‹Collected OWFSchannel_forwarder:A››
 0 conn setting up OWFSqueue A
 0 conn connected OWFSqueue A
 0 msg states at run connected connecting
@@ -137,7 +146,7 @@ END: onewire¦connect¦A
 0 onewire got unrecognized name alarm
 0 msg recv= MINE ‹DIRmsg bus.0›
 1 onewire doneDIR ‹DIRmsg bus.0›
-1 onewire NEW ‹OWFSqueue:A connected› 000010ef0000 10.000010EF0000 ('bus.0',)
+1 onewire NEW ‹OWFSqueue:A connected› 10.000010ef0000 10.000010EF0000 ('bus.0',)
 0 msg states at run connected connected
 0 msg send ‹ATTRgetmsg 10.000010EF0000 type›
 1 onewire SEND 0 37 2 6 8192 0 '/uncached/bus.0/10.000010EF0000/type\x00'
@@ -149,19 +158,19 @@ END: onewire¦connect¦A
 0 msg recv A ‹MsgIncoming: data:'DS18S20' typ:7 prio:2›
 1 onewire done:  ‹ATTRgetmsg 10.000010EF0000 type›
 0 msg recv= MINE ‹ATTRgetmsg 10.000010EF0000 type›
-NEW: ‹ConditionalWorkSequence:19 (5)›
-   : │  id: 19
+NEW: ‹ConditionalWorkSequence:21 (5)›
+   : │  id: 21
    : │  call count: 0
    : │  EVENT: onewire¦scanned¦A¦0¦1¦1
    : ├1╴on onewire scanned A * * * ‹OnEventHandler›
    : │  name: scanned
    : │  prio: 51
    : │  step: del on scanned ‹Del›
-   : │  step: input onewire 000010EF0000 temperature ‹MakeInput›
+   : │  step: input onewire 10.000010ef0000 temperature ‹MakeInput›
    : │  step: var input X temp ‹InputVar›
    : │  step: trigger thermo $X ‹TriggerHandler›
    : │  step: list input temp ‹List›
-   : │  step: output onewire 000010EF0000 temp_high ‹MakeOutput›
+   : │  step: output onewire 10.000010ef0000 temp_high ‹MakeOutput›
    : │  step: set output 99 temphi ‹IOset›
    : │  step: del wait yawn ‹Del›
    : └2╴... done.
@@ -170,14 +179,14 @@ RUN: on onewire scanned A * * * ‹OnEventHandler›
    : name: scanned
    : prio: 51
    : step: del on scanned ‹Del›
-   : step: input onewire 000010EF0000 temperature ‹MakeInput›
+   : step: input onewire 10.000010ef0000 temperature ‹MakeInput›
    : step: var input X temp ‹InputVar›
    : step: trigger thermo $X ‹TriggerHandler›
    : step: list input temp ‹List›
-   : step: output onewire 000010EF0000 temp_high ‹MakeOutput›
+   : step: output onewire 10.000010ef0000 temp_high ‹MakeOutput›
    : step: set output 99 temphi ‹IOset›
    : step: del wait yawn ‹Del›
- at: ‹ConditionalWorkSequence:19 (5)› (step 1)
+ at: ‹ConditionalWorkSequence:21 (5)› (step 1)
  ev: EVENT: onewire¦scanned¦A¦0¦1¦1
 0 msg states at run connected connected
 0 msg send ‹ATTRgetmsg 10.000010EF0000 temperature›
@@ -190,16 +199,16 @@ RUN: on onewire scanned A * * * ‹OnEventHandler›
 0 msg recv A ‹MsgIncoming: data:'         1.6' typ:12 prio:2›
 1 onewire done:  ‹ATTRgetmsg 10.000010EF0000 temperature›
 0 msg recv= MINE ‹ATTRgetmsg 10.000010EF0000 temperature›
-0 +WAIT 9 start job ‹TriggerHandler: trigger 2›
-0 -WAIT 9 start job ‹TriggerHandler: trigger 2›
+0 locking +WAIT 9 start job ‹TriggerHandler: trigger 2›
+0 locking -WAIT 9 start job ‹TriggerHandler: trigger 2›
 : ‹Collected OWFSinput:temp›
 name: temp
 type: onewire
 last read: now (2003-04-05 06:07:08)
 last value: 1.6
 .
-NEW: ‹ConditionalWorkSequence:20 (4)›
-   : │  id: 20
+NEW: ‹ConditionalWorkSequence:22 (4)›
+   : │  id: 22
    : │  call count: 0
    : │  EVENT: output¦set¦None¦99¦temphi
    : └1╴... done.
@@ -209,8 +218,8 @@ END: output¦set¦None¦99¦temphi
 0 msg send ‹ATTRsetmsg 10.000010EF0000 temp_high 99›
 1 onewire SEND 0 44 3 6 2 0 u'/uncached/bus.0/10.000010EF0000/temp_high\x0099'
 0 msg send result RECV_AGAIN
-NEW: ‹ConditionalWorkSequence:21 (4)›
-   : │  id: 21
+NEW: ‹ConditionalWorkSequence:23 (4)›
+   : │  id: 23
    : │  call count: 0
    : │  IEVENT: thermo¦1.6
    : └1╴... done.
@@ -276,8 +285,8 @@ type
 .
 0 yes
 0 DirStop
-NEW: ‹ConditionalWorkSequence:22 (4)›
-   : │  id: 22
+NEW: ‹ConditionalWorkSequence:24 (4)›
+   : │  id: 24
    : │  call count: 0
    : │  EVENT: onewire¦scanning¦A
    : └1╴... done.
@@ -316,22 +325,41 @@ END: onewire¦scanning¦A
 0 onewire got unrecognized name alarm
 0 msg recv= MINE ‹DIRmsg bus.0›
 1 onewire doneDIR ‹DIRmsg bus.0›
-NEW: ‹ConditionalWorkSequence:23 (4)›
-   : │  id: 23
-   : │  call count: 0
-   : │  EVENT: onewire¦new¦DS18S20¦000010ef0000
-   : └1╴... done.
-EVENT: onewire¦new¦DS18S20¦000010ef0000
-END: onewire¦new¦DS18S20¦000010ef0000
-NEW: ‹ConditionalWorkSequence:24 (4)›
-   : │  id: 24
-   : │  call count: 0
-   : │  EVENT: onewire¦up¦DS18S20¦000010ef0000
-   : └1╴... done.
-EVENT: onewire¦up¦DS18S20¦000010ef0000
-END: onewire¦up¦DS18S20¦000010ef0000
 NEW: ‹ConditionalWorkSequence:25 (4)›
    : │  id: 25
+   : │  call count: 0
+   : │  EVENT: onewire¦new¦DS18S20¦10.000010ef0000
+   : └1╴... done.
+EVENT: onewire¦new¦DS18S20¦10.000010ef0000
+END: onewire¦new¦DS18S20¦10.000010ef0000
+NEW: ‹ConditionalWorkSequence:26 (5)›
+   : │  id: 26
+   : │  call count: 0
+   : │  EVENT: onewire¦up¦DS18S20¦10.000010ef0000
+   : ├1╴on onewire up * 10.000010ef0000 ‹OnEventHandler›
+   : │  name: light sensor present
+   : │  prio: 51
+   : │  step: start monitor tempi ‹MonitorStart›
+   : └2╴... done.
+EVENT: onewire¦up¦DS18S20¦10.000010ef0000
+RUN: on onewire up * 10.000010ef0000 ‹OnEventHandler›
+   : name: light sensor present
+   : prio: 51
+   : step: start monitor tempi ‹MonitorStart›
+ at: ‹ConditionalWorkSequence:26 (5)› (step 1)
+ ev: EVENT: onewire¦up¦DS18S20¦10.000010ef0000
+NEW: ‹ConditionalWorkSequence:27 (4)›
+   : │  id: 27
+   : │  call count: 0
+   : │  EVENT: monitor¦start¦tempi
+   : └1╴... done.
+EVENT: monitor¦start¦tempi
+END: monitor¦start¦tempi
+0 locking +WAIT 10 start job ‹OWFSmon tempi off›
+0 locking -WAIT 10 start job ‹OWFSmon tempi off›
+END: onewire¦up¦DS18S20¦10.000010ef0000
+NEW: ‹ConditionalWorkSequence:28 (4)›
+   : │  id: 28
    : │  call count: 0
    : │  EVENT: onewire¦scanned¦A¦0¦0¦1
    : └1╴... done.
@@ -341,9 +369,17 @@ END: onewire¦scanned¦A¦0¦0¦1
 0 msg send ‹DIRmsg ›
 1 onewire SEND 0 1 7 6 0 0 '\x00'
 0 msg send result RECV_AGAIN
+0 monitor Start run tempi
+0 msg states at run connected connected
+0 msg send ‹ATTRgetmsg 10.000010EF0000 temperature›
+1 onewire SEND 0 44 2 6 8192 0 u'/uncached/bus.0/10.000010EF0000/temperature\x00'
+0 msg send result RECV_AGAIN
 1 onewire RECV 0 96 0 6 95 x8002
 1 onewire RECV … 95 '/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm'
 0 msg recv msg ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:2›
+1 onewire RECV 0 12 12 6 12 x0
+1 onewire RECV … 12 '         1.6'
+0 msg recv msg ‹MsgIncoming: data:'         1.6' typ:12 prio:2›
 0 conn incoming OWFSqueue A ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:2›
 0 msg recv A ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:2›
 10.000010EF0000
@@ -357,120 +393,185 @@ simultaneous
 alarm
 0 msg recv= MINE ‹DIRmsg ›
 1 onewire doneDIR ‹DIRmsg ›
+0 conn incoming OWFSqueue A ‹MsgIncoming: data:'         1.6' typ:12 prio:2›
+0 msg recv A ‹MsgIncoming: data:'         1.6' typ:12 prio:2›
+1 onewire done:  ‹ATTRgetmsg 10.000010EF0000 temperature›
+0 msg recv= MINE ‹ATTRgetmsg 10.000010EF0000 temperature›
+0 monitor raw 1.6 tempi
+0 monitor filter [1.6] on tempi
+0 monitor More data [1.6] for ‹tempi›
 .
+0 locking +WAIT 11 start job ‹Waiter before¦disconnect ??›
+0 locking -WAIT 11 start job ‹Waiter before¦disconnect ??›
+NEW: ‹ConditionalWorkSequence:29 (4)›
+   : │  id: 29
+   : │  call count: 0
+   : │  EVENT: wait¦start¦1.4¦before¦disconnect
+   : └1╴... done.
+EVENT: wait¦start¦1.4¦before¦disconnect
+END: wait¦start¦1.4¦before¦disconnect
+0 msg states at run connected connected
+0 msg send ‹ATTRgetmsg 10.000010EF0000 temperature›
+1 onewire SEND 0 44 2 6 8192 0 u'/uncached/bus.0/10.000010EF0000/temperature\x00'
+0 msg send result RECV_AGAIN
+1 onewire RECV 0 12 12 6 12 x0
+1 onewire RECV … 12 '         1.6'
+0 msg recv msg ‹MsgIncoming: data:'         1.6' typ:12 prio:2›
+0 conn incoming OWFSqueue A ‹MsgIncoming: data:'         1.6' typ:12 prio:2›
+0 msg recv A ‹MsgIncoming: data:'         1.6' typ:12 prio:2›
+1 onewire done:  ‹ATTRgetmsg 10.000010EF0000 temperature›
+0 msg recv= MINE ‹ATTRgetmsg 10.000010EF0000 temperature›
+0 monitor raw 1.6 tempi
+0 monitor filter [1.6, 1.6] on tempi
+0 monitor End run tempi
+NEW: ‹ConditionalWorkSequence:30 (4)›
+   : │  id: 30
+   : │  call count: 0
+   : │  EVENT: monitor¦value¦1.6¦tempi
+   : └1╴... done.
+EVENT: monitor¦value¦1.6¦tempi
+END: monitor¦value¦1.6¦tempi
+0 monitor Stop run tempi
+0 locking +WAIT 12 monitor sleep tempi
+NEW: ‹ConditionalWorkSequence:31 (4)›
+   : │  id: 31
+   : │  call count: 0
+   : │  EVENT: wait¦done¦1.9¦before¦disconnect
+   : └1╴... done.
+EVENT: wait¦done¦1.9¦before¦disconnect
+END: wait¦done¦1.9¦before¦disconnect
 0 Dropping OWFS bus A
-0 +WAIT 10 kill watcher ‹OWFSqueue:A connected›
-0 -WAIT 10 kill watcher ‹OWFSqueue:A connected›
-0 +WAIT 11 kill job ‹OWFSqueue:A connected›
-0 -WAIT 11 kill job ‹OWFSqueue:A connected›
-0 +WAIT 12 kill job ‹OWFSchannel:‹Collected OWFSchannel_forwarder:A››
+0 locking +WAIT 13 kill watcher ‹OWFSqueue:A connected›
+0 locking -WAIT 12 monitor sleep tempi
+0 locking +WAIT 14 monitor sleep tempi
+0 locking -WAIT 13 kill watcher ‹OWFSqueue:A connected›
+0 locking +WAIT 15 kill job ‹OWFSqueue:A connected›
+0 locking -WAIT 15 kill job ‹OWFSqueue:A connected›
+0 locking +WAIT 16 kill job ‹OWFSchannel:‹Collected OWFSchannel_forwarder:A››
 0 !got DOWN_EVENT A
-NEW: ‹ConditionalWorkSequence:26 (4)›
-   : │  id: 26
+NEW: ‹ConditionalWorkSequence:32 (4)›
+   : │  id: 32
    : │  call count: 0
    : │  EVENT: onewire¦disconnect¦A
    : └1╴... done.
 EVENT: onewire¦disconnect¦A
 END: onewire¦disconnect¦A
-0 -WAIT 12 kill job ‹OWFSchannel:‹Collected OWFSchannel_forwarder:A››
+0 locking -WAIT 16 kill job ‹OWFSchannel:‹Collected OWFSchannel_forwarder:A››
 0 conn None OWFSqueue A
 0 Drop OWFS bus A
-0 +WAIT 13 start job ‹Waiter END ??›
-0 -WAIT 13 start job ‹Waiter END ??›
-NEW: ‹ConditionalWorkSequence:27 (4)›
-   : │  id: 27
+0 locking +WAIT 17 start job ‹Waiter END ??›
+0 locking -WAIT 17 start job ‹Waiter END ??›
+NEW: ‹ConditionalWorkSequence:33 (4)›
+   : │  id: 33
    : │  call count: 0
-   : │  EVENT: wait¦start¦2.1¦END
+   : │  EVENT: wait¦start¦2.9¦END
    : └1╴... done.
-EVENT: wait¦start¦2.1¦END
-END: wait¦start¦2.1¦END
-0 +WAIT 14 kill job <homevent.tokize.tokizer obj>
-0 -WAIT 14 kill job <homevent.tokize.tokizer obj>
-NEW: ‹ConditionalWorkSequence:28 (6)›
-   : │  id: 28
+EVENT: wait¦start¦2.9¦END
+END: wait¦start¦2.9¦END
+0 locking +WAIT 18 kill job <homevent.tokize.tokizer obj>
+0 locking -WAIT 18 kill job <homevent.tokize.tokizer obj>
+NEW: ‹ConditionalWorkSequence:34 (6)›
+   : │  id: 34
    : │  call count: 0
    : │  EVENT: shutdown
    : └1╴... done.
 EVENT: shutdown
-NEW: ‹ConditionalWorkSequence:29 (4)›
-   : │  id: 29
+0 locking +WAIT 19 kill job ‹OWFSmon tempi on 1.6›
+0 locking -WAIT 14 monitor sleep tempi
+NEW: ‹ConditionalWorkSequence:35 (4)›
+   : │  id: 35
+   : │  call count: 0
+   : │  EVENT: monitor¦stop¦tempi
+   : └1╴... done.
+EVENT: monitor¦stop¦tempi
+END: monitor¦stop¦tempi
+0 locking -WAIT 19 kill job ‹OWFSmon tempi on 1.6›
+NEW: ‹ConditionalWorkSequence:36 (4)›
+   : │  id: 36
    : │  call count: 0
    : │  EVENT: module¦unload¦file
    : └1╴... done.
 EVENT: module¦unload¦file
 END: module¦unload¦file
-NEW: ‹ConditionalWorkSequence:30 (4)›
-   : │  id: 30
+NEW: ‹ConditionalWorkSequence:37 (4)›
+   : │  id: 37
    : │  call count: 0
    : │  EVENT: module¦unload¦data
    : └1╴... done.
 EVENT: module¦unload¦data
 END: module¦unload¦data
-NEW: ‹ConditionalWorkSequence:31 (4)›
-   : │  id: 31
+NEW: ‹ConditionalWorkSequence:38 (4)›
+   : │  id: 38
    : │  call count: 0
    : │  EVENT: module¦unload¦on_event
    : └1╴... done.
 EVENT: module¦unload¦on_event
 END: module¦unload¦on_event
-NEW: ‹ConditionalWorkSequence:32 (4)›
-   : │  id: 32
+NEW: ‹ConditionalWorkSequence:39 (4)›
+   : │  id: 39
    : │  call count: 0
    : │  EVENT: module¦unload¦onewire
    : └1╴... done.
 EVENT: module¦unload¦onewire
 END: module¦unload¦onewire
-NEW: ‹ConditionalWorkSequence:33 (4)›
-   : │  id: 33
+NEW: ‹ConditionalWorkSequence:40 (4)›
+   : │  id: 40
    : │  call count: 0
    : │  EVENT: module¦unload¦errors
    : └1╴... done.
 EVENT: module¦unload¦errors
 END: module¦unload¦errors
-NEW: ‹ConditionalWorkSequence:34 (4)›
-   : │  id: 34
+NEW: ‹ConditionalWorkSequence:41 (4)›
+   : │  id: 41
    : │  call count: 0
    : │  EVENT: module¦unload¦block
    : └1╴... done.
 EVENT: module¦unload¦block
 END: module¦unload¦block
-NEW: ‹ConditionalWorkSequence:35 (4)›
-   : │  id: 35
+NEW: ‹ConditionalWorkSequence:42 (4)›
+   : │  id: 42
    : │  call count: 0
    : │  EVENT: module¦unload¦logging
    : └1╴... done.
 EVENT: module¦unload¦logging
 END: module¦unload¦logging
-NEW: ‹ConditionalWorkSequence:36 (4)›
-   : │  id: 36
+NEW: ‹ConditionalWorkSequence:43 (4)›
+   : │  id: 43
    : │  call count: 0
    : │  EVENT: module¦unload¦wait
    : └1╴... done.
 EVENT: module¦unload¦wait
 END: module¦unload¦wait
-NEW: ‹ConditionalWorkSequence:37 (4)›
-   : │  id: 37
+NEW: ‹ConditionalWorkSequence:44 (4)›
+   : │  id: 44
+   : │  call count: 0
+   : │  EVENT: module¦unload¦monitor
+   : └1╴... done.
+EVENT: module¦unload¦monitor
+END: module¦unload¦monitor
+NEW: ‹ConditionalWorkSequence:45 (4)›
+   : │  id: 45
    : │  call count: 0
    : │  EVENT: module¦unload¦ifelse
    : └1╴... done.
 EVENT: module¦unload¦ifelse
 END: module¦unload¦ifelse
-NEW: ‹ConditionalWorkSequence:38 (4)›
-   : │  id: 38
+NEW: ‹ConditionalWorkSequence:46 (4)›
+   : │  id: 46
    : │  call count: 0
    : │  EVENT: module¦unload¦trigger
    : └1╴... done.
 EVENT: module¦unload¦trigger
 END: module¦unload¦trigger
-NEW: ‹ConditionalWorkSequence:39 (4)›
-   : │  id: 39
+NEW: ‹ConditionalWorkSequence:47 (4)›
+   : │  id: 47
    : │  call count: 0
    : │  EVENT: module¦unload¦path
    : └1╴... done.
 EVENT: module¦unload¦path
 END: module¦unload¦path
-NEW: ‹ConditionalWorkSequence:40 (4)›
-   : │  id: 40
+NEW: ‹ConditionalWorkSequence:48 (4)›
+   : │  id: 48
    : │  call count: 0
    : │  EVENT: module¦unload¦bool
    : └1╴... done.

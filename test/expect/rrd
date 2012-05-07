@@ -5,10 +5,10 @@ NEW: ‹ConditionalWorkSequence:7 (4)›
    : └1╴... done.
 EVENT: startup
 END: startup
-0 +WAIT 1 start job ‹Collected Parser:n1›
-0 -WAIT 1 start job ‹Collected Parser:n1›
-0 +WAIT 2 start job <homevent.tokize.tokizer obj>
-0 -WAIT 2 start job <homevent.tokize.tokizer obj>
+0 locking +WAIT 1 start job ‹Collected Parser:n1›
+0 locking -WAIT 1 start job ‹Collected Parser:n1›
+0 locking +WAIT 2 start job <homevent.tokize.tokizer obj>
+0 locking -WAIT 2 start job <homevent.tokize.tokizer obj>
 1 Yes
 1 Yes
 t tt ttt :: /tmp/rrdtest.rrd test
@@ -25,8 +25,8 @@ type: GAUGE
 unknown_sec: 0
 value: ?
 .
-0 +WAIT 3 start job ‹Waiter _wait¦1 ??›
-0 -WAIT 3 start job ‹Waiter _wait¦1 ??›
+0 locking +WAIT 3 start job ‹Waiter _wait¦1 ??›
+0 locking -WAIT 3 start job ‹Waiter _wait¦1 ??›
 NEW: ‹ConditionalWorkSequence:8 (4)›
    : │  id: 8
    : │  call count: 0
@@ -41,8 +41,8 @@ NEW: ‹ConditionalWorkSequence:9 (4)›
    : └1╴... done.
 EVENT: wait¦done¦×××¦_wait¦1
 END: wait¦done¦×××¦_wait¦1
-0 +WAIT 4 start job ‹Waiter _wait¦2 ??›
-0 -WAIT 4 start job ‹Waiter _wait¦2 ??›
+0 locking +WAIT 4 start job ‹Waiter _wait¦2 ??›
+0 locking -WAIT 4 start job ‹Waiter _wait¦2 ??›
 NEW: ‹ConditionalWorkSequence:10 (4)›
    : │  id: 10
    : │  call count: 0
@@ -57,8 +57,8 @@ NEW: ‹ConditionalWorkSequence:11 (4)›
    : └1╴... done.
 EVENT: wait¦done¦×××¦_wait¦2
 END: wait¦done¦×××¦_wait¦2
-0 +WAIT 5 start job ‹Waiter _wait¦3 ??›
-0 -WAIT 5 start job ‹Waiter _wait¦3 ??›
+0 locking +WAIT 5 start job ‹Waiter _wait¦3 ??›
+0 locking -WAIT 5 start job ‹Waiter _wait¦3 ??›
 NEW: ‹ConditionalWorkSequence:12 (4)›
    : │  id: 12
    : │  call count: 0
@@ -85,9 +85,9 @@ type: GAUGE
 unknown_sec: 0
 value: ?
 .
-0 +WAIT 6 start job ‹TriggerHandler: trigger 2›
-0 -WAIT 6 start job ‹TriggerHandler: trigger 2›
-0 +WAIT 7 kill job <homevent.tokize.tokizer obj>
+0 locking +WAIT 6 start job ‹TriggerHandler: trigger 2›
+0 locking -WAIT 6 start job ‹TriggerHandler: trigger 2›
+0 locking +WAIT 7 kill job <homevent.tokize.tokizer obj>
 1 Yes
 NEW: ‹ConditionalWorkSequence:14 (4)›
    : │  id: 14
@@ -96,4 +96,4 @@ NEW: ‹ConditionalWorkSequence:14 (4)›
    : └1╴... done.
 IEVENT: last¦12
 END: last¦12
-0 -WAIT 7 kill job <homevent.tokize.tokizer obj>
+0 locking -WAIT 7 kill job <homevent.tokize.tokizer obj>

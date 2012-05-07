@@ -5,10 +5,10 @@ NEW: ‹ConditionalWorkSequence:7 (4)›
    : └1╴... done.
 EVENT: startup
 END: startup
-0 +WAIT 1 start job ‹Collected Parser:n1›
-0 -WAIT 1 start job ‹Collected Parser:n1›
-0 +WAIT 2 start job <homevent.tokize.tokizer obj>
-0 -WAIT 2 start job <homevent.tokize.tokizer obj>
+0 locking +WAIT 1 start job ‹Collected Parser:n1›
+0 locking -WAIT 1 start job ‹Collected Parser:n1›
+0 locking +WAIT 2 start job <homevent.tokize.tokizer obj>
+0 locking -WAIT 2 start job <homevent.tokize.tokizer obj>
 0 Create OnEvtHandler: timeslot¦begin¦foo¦bar
 0 NewHandler 8
 0 Create OnEvtHandler: timeslot¦end¦foo¦bar
@@ -21,8 +21,8 @@ duration: 2.0
 .
 1 Yes
 1 Yes
-0 +WAIT 3 start job ‹Waiter A¦before ??›
-0 -WAIT 3 start job ‹Waiter A¦before ??›
+0 locking +WAIT 3 start job ‹Waiter A¦before ??›
+0 locking -WAIT 3 start job ‹Waiter A¦before ??›
 NEW: ‹ConditionalWorkSequence:10 (4)›
    : │  id: 10
    : │  call count: 0
@@ -45,8 +45,8 @@ next: 0.5 sec (2003-04-05 06:07:18)
 .
 1 Yes
 1 Yes
-0 +WAIT 4 start job ‹Waiter B¦during ??›
-0 -WAIT 4 start job ‹Waiter B¦during ??›
+0 locking +WAIT 4 start job ‹Waiter B¦during ??›
+0 locking -WAIT 4 start job ‹Waiter B¦during ??›
 NEW: ‹ConditionalWorkSequence:12 (4)›
    : │  id: 12
    : │  call count: 0
@@ -96,8 +96,8 @@ RUN: on timeslot begin foo bar ‹OnEventHandler›
    :     :     : step: log DEBUG Yes ‹LogHandler›
  at: ‹ConditionalWorkSequence:13 (5)› (step 1)
  ev: EVENT: timeslot¦begin¦foo¦bar
-0 +WAIT 5 start job ‹Waiter GOT¦EVENT¦A ??›
-0 -WAIT 5 start job ‹Waiter GOT¦EVENT¦A ??›
+0 locking +WAIT 5 start job ‹Waiter GOT¦EVENT¦A ??›
+0 locking -WAIT 5 start job ‹Waiter GOT¦EVENT¦A ??›
 NEW: ‹ConditionalWorkSequence:14 (4)›
    : │  id: 14
    : │  call count: 0
@@ -114,11 +114,11 @@ EVENT: wait¦done¦10.3¦GOT¦EVENT¦A
 END: wait¦done¦10.3¦GOT¦EVENT¦A
 1 Yes
 1 Yes
-0 +WAIT 6 start job ‹Async async›
-0 -WAIT 6 start job ‹Async async›
+0 locking +WAIT 6 start job ‹Async async›
+0 locking -WAIT 6 start job ‹Async async›
 END: timeslot¦begin¦foo¦bar
-0 +WAIT 7 start job ‹Waiter AFTER¦EVENT¦A ??›
-0 -WAIT 7 start job ‹Waiter AFTER¦EVENT¦A ??›
+0 locking +WAIT 7 start job ‹Waiter AFTER¦EVENT¦A ??›
+0 locking -WAIT 7 start job ‹Waiter AFTER¦EVENT¦A ??›
 NEW: ‹ConditionalWorkSequence:16 (4)›
    : │  id: 16
    : │  call count: 0
@@ -143,8 +143,8 @@ slot: 0.75
 .
 1 Yes
 1 Yes
-0 +WAIT 8 start job ‹Waiter C¦after ??›
-0 -WAIT 8 start job ‹Waiter C¦after ??›
+0 locking +WAIT 8 start job ‹Waiter C¦after ??›
+0 locking -WAIT 8 start job ‹Waiter C¦after ??›
 NEW: ‹ConditionalWorkSequence:18 (4)›
    : │  id: 18
    : │  call count: 0
@@ -161,8 +161,8 @@ EVENT: wait¦done¦10.8¦AFTER¦EVENT¦A
 END: wait¦done¦10.8¦AFTER¦EVENT¦A
 0 got it during
 1 Yes
-0 +WAIT 9 start job ‹Waiter GOT¦EVENT¦AX ??›
-0 -WAIT 9 start job ‹Waiter GOT¦EVENT¦AX ??›
+0 locking +WAIT 9 start job ‹Waiter GOT¦EVENT¦AX ??›
+0 locking -WAIT 9 start job ‹Waiter GOT¦EVENT¦AX ??›
 NEW: ‹ConditionalWorkSequence:20 (4)›
    : │  id: 20
    : │  call count: 0
@@ -220,8 +220,8 @@ RUN: on timeslot end foo bar ‹OnEventHandler›
    :     :     : step: log DEBUG No9ax ‹LogHandler›
  at: ‹ConditionalWorkSequence:22 (5)› (step 1)
  ev: EVENT: timeslot¦end¦foo¦bar
-0 +WAIT 10 start job ‹Waiter GOT¦EVENT¦B ??›
-0 -WAIT 10 start job ‹Waiter GOT¦EVENT¦B ??›
+0 locking +WAIT 10 start job ‹Waiter GOT¦EVENT¦B ??›
+0 locking -WAIT 10 start job ‹Waiter GOT¦EVENT¦B ??›
 NEW: ‹ConditionalWorkSequence:23 (4)›
    : │  id: 23
    : │  call count: 0
@@ -238,11 +238,11 @@ EVENT: wait¦done¦12.1¦GOT¦EVENT¦B
 END: wait¦done¦12.1¦GOT¦EVENT¦B
 1 Yes
 1 Yes
-0 +WAIT 11 start job ‹Async async›
-0 -WAIT 11 start job ‹Async async›
+0 locking +WAIT 11 start job ‹Async async›
+0 locking -WAIT 11 start job ‹Async async›
 END: timeslot¦end¦foo¦bar
-0 +WAIT 12 start job ‹Waiter AFTER¦EVENT¦B ??›
-0 -WAIT 12 start job ‹Waiter AFTER¦EVENT¦B ??›
+0 locking +WAIT 12 start job ‹Waiter AFTER¦EVENT¦B ??›
+0 locking -WAIT 12 start job ‹Waiter AFTER¦EVENT¦B ??›
 NEW: ‹ConditionalWorkSequence:25 (4)›
    : │  id: 25
    : │  call count: 0
@@ -266,8 +266,8 @@ next: 7.5 sec (2003-04-05 06:07:28)
 .
 1 Yes
 1 Yes
-0 +WAIT 13 start job ‹Waiter D¦during¦again ??›
-0 -WAIT 13 start job ‹Waiter D¦during¦again ??›
+0 locking +WAIT 13 start job ‹Waiter D¦during¦again ??›
+0 locking -WAIT 13 start job ‹Waiter D¦during¦again ??›
 NEW: ‹ConditionalWorkSequence:27 (4)›
    : │  id: 27
    : │  call count: 0
@@ -284,8 +284,8 @@ EVENT: wait¦done¦12.6¦AFTER¦EVENT¦B
 END: wait¦done¦12.6¦AFTER¦EVENT¦B
 0 got it next
 1 Yes
-0 +WAIT 14 start job ‹Waiter GOT¦EVENT¦AX ??›
-0 -WAIT 14 start job ‹Waiter GOT¦EVENT¦AX ??›
+0 locking +WAIT 14 start job ‹Waiter GOT¦EVENT¦AX ??›
+0 locking -WAIT 14 start job ‹Waiter GOT¦EVENT¦AX ??›
 NEW: ‹ConditionalWorkSequence:29 (4)›
    : │  id: 29
    : │  call count: 0
@@ -343,8 +343,8 @@ RUN: on timeslot begin foo bar ‹OnEventHandler›
    :     :     : step: log DEBUG Yes ‹LogHandler›
  at: ‹ConditionalWorkSequence:31 (5)› (step 1)
  ev: EVENT: timeslot¦begin¦foo¦bar
-0 +WAIT 15 start job ‹Waiter GOT¦EVENT¦A ??›
-0 -WAIT 15 start job ‹Waiter GOT¦EVENT¦A ??›
+0 locking +WAIT 15 start job ‹Waiter GOT¦EVENT¦A ??›
+0 locking -WAIT 15 start job ‹Waiter GOT¦EVENT¦A ??›
 NEW: ‹ConditionalWorkSequence:32 (4)›
    : │  id: 32
    : │  call count: 0
@@ -361,11 +361,11 @@ EVENT: wait¦done¦20.3¦GOT¦EVENT¦A
 END: wait¦done¦20.3¦GOT¦EVENT¦A
 1 Yes
 1 Yes
-0 +WAIT 16 start job ‹Async async›
-0 -WAIT 16 start job ‹Async async›
+0 locking +WAIT 16 start job ‹Async async›
+0 locking -WAIT 16 start job ‹Async async›
 END: timeslot¦begin¦foo¦bar
-0 +WAIT 17 start job ‹Waiter AFTER¦EVENT¦A ??›
-0 -WAIT 17 start job ‹Waiter AFTER¦EVENT¦A ??›
+0 locking +WAIT 17 start job ‹Waiter AFTER¦EVENT¦A ??›
+0 locking -WAIT 17 start job ‹Waiter AFTER¦EVENT¦A ??›
 NEW: ‹ConditionalWorkSequence:34 (4)›
    : │  id: 34
    : │  call count: 0
@@ -399,8 +399,8 @@ duration: 2.0
 last: -0.5 sec (2003-04-05 06:07:28)
 .
 1 Yes
-0 +WAIT 18 kill job <homevent.tokize.tokizer obj>
-0 -WAIT 18 kill job <homevent.tokize.tokizer obj>
+0 locking +WAIT 18 kill job <homevent.tokize.tokizer obj>
+0 locking -WAIT 18 kill job <homevent.tokize.tokizer obj>
 NEW: ‹ConditionalWorkSequence:36 (6)›
    : │  id: 36
    : │  call count: 0

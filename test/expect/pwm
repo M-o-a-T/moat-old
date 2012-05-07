@@ -5,10 +5,10 @@ NEW: ‹ConditionalWorkSequence:7 (4)›
    : └1╴... done.
 EVENT: startup
 END: startup
-0 +WAIT 1 start job ‹Collected Parser:n1›
-0 -WAIT 1 start job ‹Collected Parser:n1›
-0 +WAIT 2 start job <homevent.tokize.tokizer obj>
-0 -WAIT 2 start job <homevent.tokize.tokizer obj>
+0 locking +WAIT 1 start job ‹Collected Parser:n1›
+0 locking -WAIT 1 start job ‹Collected Parser:n1›
+0 locking +WAIT 2 start job <homevent.tokize.tokizer obj>
+0 locking -WAIT 2 start job <homevent.tokize.tokizer obj>
 1 Yes
 0 Create OnEvtHandler: pcm¦set¦*X¦foo¦bar
 0 NewHandler 8
@@ -18,8 +18,8 @@ foo bar :: (new)
 type: PWM
 name: foo bar
 .
-0 +WAIT 3 start job ‹Waiter _wait¦2 ??›
-0 -WAIT 3 start job ‹Waiter _wait¦2 ??›
+0 locking +WAIT 3 start job ‹Waiter _wait¦2 ??›
+0 locking -WAIT 3 start job ‹Waiter _wait¦2 ??›
 NEW: ‹ConditionalWorkSequence:9 (4)›
    : │  id: 9
    : │  call count: 0
@@ -41,8 +41,8 @@ next: 8.5 sec (2003-04-05 06:07:17)
 t_off: 9.0 sec
 t_on: 1.0 sec
 .
-0 +WAIT 4 start job ‹Waiter _wait¦3 ??›
-0 -WAIT 4 start job ‹Waiter _wait¦3 ??›
+0 locking +WAIT 4 start job ‹Waiter _wait¦3 ??›
+0 locking -WAIT 4 start job ‹Waiter _wait¦3 ??›
 NEW: ‹ConditionalWorkSequence:11 (4)›
    : │  id: 11
    : │  call count: 0
@@ -64,8 +64,8 @@ next: now (2003-04-05 06:07:17)
 t_off: 9.0 sec
 t_on: 1.0 sec
 .
-0 +WAIT 5 start job ‹Waiter _wait¦4 ??›
-0 -WAIT 5 start job ‹Waiter _wait¦4 ??›
+0 locking +WAIT 5 start job ‹Waiter _wait¦4 ??›
+0 locking -WAIT 5 start job ‹Waiter _wait¦4 ??›
 NEW: ‹ConditionalWorkSequence:13 (4)›
    : │  id: 13
    : │  call count: 0
@@ -90,8 +90,8 @@ RUN: on pcm set *X foo bar ‹OnEventHandler›
  at: ‹ConditionalWorkSequence:14 (5)› (step 1)
  ev: EVENT: pcm¦set¦on¦foo¦bar
 1 PCM is now on
-0 +WAIT 6 start job ‹Waiter _wait¦1 ??›
-0 -WAIT 6 start job ‹Waiter _wait¦1 ??›
+0 locking +WAIT 6 start job ‹Waiter _wait¦1 ??›
+0 locking -WAIT 6 start job ‹Waiter _wait¦1 ??›
 NEW: ‹ConditionalWorkSequence:15 (4)›
    : │  id: 15
    : │  call count: 0
@@ -124,8 +124,8 @@ RUN: on pcm set *X foo bar ‹OnEventHandler›
  at: ‹ConditionalWorkSequence:17 (5)› (step 1)
  ev: EVENT: pcm¦set¦off¦foo¦bar
 1 PCM is now off
-0 +WAIT 7 start job ‹Waiter _wait¦1 ??›
-0 -WAIT 7 start job ‹Waiter _wait¦1 ??›
+0 locking +WAIT 7 start job ‹Waiter _wait¦1 ??›
+0 locking -WAIT 7 start job ‹Waiter _wait¦1 ??›
 NEW: ‹ConditionalWorkSequence:18 (4)›
    : │  id: 18
    : │  call count: 0
@@ -158,8 +158,8 @@ RUN: on pcm set *X foo bar ‹OnEventHandler›
  at: ‹ConditionalWorkSequence:20 (5)› (step 1)
  ev: EVENT: pcm¦set¦on¦foo¦bar
 1 PCM is now on
-0 +WAIT 8 start job ‹Waiter _wait¦1 ??›
-0 -WAIT 8 start job ‹Waiter _wait¦1 ??›
+0 locking +WAIT 8 start job ‹Waiter _wait¦1 ??›
+0 locking -WAIT 8 start job ‹Waiter _wait¦1 ??›
 NEW: ‹ConditionalWorkSequence:21 (4)›
    : │  id: 21
    : │  call count: 0
@@ -192,8 +192,8 @@ RUN: on pcm set *X foo bar ‹OnEventHandler›
  at: ‹ConditionalWorkSequence:23 (5)› (step 1)
  ev: EVENT: pcm¦set¦off¦foo¦bar
 1 PCM is now off
-0 +WAIT 9 start job ‹Waiter _wait¦1 ??›
-0 -WAIT 9 start job ‹Waiter _wait¦1 ??›
+0 locking +WAIT 9 start job ‹Waiter _wait¦1 ??›
+0 locking -WAIT 9 start job ‹Waiter _wait¦1 ??›
 NEW: ‹ConditionalWorkSequence:24 (4)›
    : │  id: 24
    : │  call count: 0
@@ -218,5 +218,5 @@ EVENT: wait¦done¦24.0¦_wait¦4
 END: wait¦done¦24.0¦_wait¦4
 foo bar :: 0.100000 1.0 sec / 9.0 sec
 .
-0 +WAIT 10 kill job <homevent.tokize.tokizer obj>
-0 -WAIT 10 kill job <homevent.tokize.tokizer obj>
+0 locking +WAIT 10 kill job <homevent.tokize.tokizer obj>
+0 locking -WAIT 10 kill job <homevent.tokize.tokizer obj>

@@ -5,10 +5,10 @@ NEW: ‹ConditionalWorkSequence:7 (4)›
    : └1╴... done.
 EVENT: startup
 END: startup
-0 +WAIT 1 start job ‹Collected Parser:n1›
-0 -WAIT 1 start job ‹Collected Parser:n1›
-0 +WAIT 2 start job <homevent.tokize.tokizer obj>
-0 -WAIT 2 start job <homevent.tokize.tokizer obj>
+0 locking +WAIT 1 start job ‹Collected Parser:n1›
+0 locking -WAIT 1 start job ‹Collected Parser:n1›
+0 locking +WAIT 2 start job <homevent.tokize.tokizer obj>
+0 locking -WAIT 2 start job <homevent.tokize.tokizer obj>
 block :: Block-level statements
 data :: provides a couple of common data access functions
 on_event :: the 'on EVENT:' handler
@@ -37,8 +37,8 @@ worker
 .
 0 Create OnEvtHandler: foo
 0 NewHandler 8
-0 +WAIT 3 start job ‹Waiter vorher ??›
-0 -WAIT 3 start job ‹Waiter vorher ??›
+0 locking +WAIT 3 start job ‹Waiter vorher ??›
+0 locking -WAIT 3 start job ‹Waiter vorher ??›
 NEW: ‹ConditionalWorkSequence:9 (4)›
    : │  id: 9
    : │  call count: 0
@@ -53,10 +53,10 @@ NEW: ‹ConditionalWorkSequence:10 (4)›
    : └1╴... done.
 EVENT: wait¦done¦×××¦vorher
 END: wait¦done¦×××¦vorher
-0 +WAIT 4 start job ‹TriggerHandler: trigger 2›
-0 -WAIT 4 start job ‹TriggerHandler: trigger 2›
-0 +WAIT 5 start job ‹Waiter nachher ??›
-0 -WAIT 5 start job ‹Waiter nachher ??›
+0 locking +WAIT 4 start job ‹TriggerHandler: trigger 2›
+0 locking -WAIT 4 start job ‹TriggerHandler: trigger 2›
+0 locking +WAIT 5 start job ‹Waiter nachher ??›
+0 locking -WAIT 5 start job ‹Waiter nachher ??›
 NEW: ‹ConditionalWorkSequence:11 (4)›
    : │  id: 11
    : │  call count: 0
@@ -80,8 +80,8 @@ RUN: on foo ‹OnEventHandler›
    :     : step: wait foo waiter ‹WaitHandler›
  at: ‹ConditionalWorkSequence:12 (5)› (step 1)
  ev: IEVENT: foo
-0 +WAIT 6 start job ‹Waiter foo¦waiter ??›
-0 -WAIT 6 start job ‹Waiter foo¦waiter ??›
+0 locking +WAIT 6 start job ‹Waiter foo¦waiter ??›
+0 locking -WAIT 6 start job ‹Waiter foo¦waiter ??›
 NEW: ‹ConditionalWorkSequence:13 (4)›
    : │  id: 13
    : │  call count: 0
@@ -111,8 +111,8 @@ code: │ │step: block ‹Block›
 code: │ ╵    : step: wait foo waiter ‹WaitHandler›
 code: └2╴... done.
 .
-0 +WAIT 7 start job ‹Waiter ende ??›
-0 -WAIT 7 start job ‹Waiter ende ??›
+0 locking +WAIT 7 start job ‹Waiter ende ??›
+0 locking -WAIT 7 start job ‹Waiter ende ??›
 NEW: ‹ConditionalWorkSequence:15 (4)›
    : │  id: 15
    : │  call count: 0
@@ -135,5 +135,5 @@ NEW: ‹ConditionalWorkSequence:17 (4)›
    : └1╴... done.
 EVENT: wait¦done¦×××¦ende
 END: wait¦done¦×××¦ende
-0 +WAIT 8 kill job <homevent.tokize.tokizer obj>
-0 -WAIT 8 kill job <homevent.tokize.tokizer obj>
+0 locking +WAIT 8 kill job <homevent.tokize.tokizer obj>
+0 locking -WAIT 8 kill job <homevent.tokize.tokizer obj>

@@ -5,10 +5,10 @@ NEW: ‹ConditionalWorkSequence:7 (4)›
    : └1╴... done.
 EVENT: startup
 END: startup
-0 +WAIT 1 start job ‹Collected Parser:n1›
-0 -WAIT 1 start job ‹Collected Parser:n1›
-0 +WAIT 2 start job <homevent.tokize.tokizer obj>
-0 -WAIT 2 start job <homevent.tokize.tokizer obj>
+0 locking +WAIT 1 start job ‹Collected Parser:n1›
+0 locking -WAIT 1 start job ‹Collected Parser:n1›
+0 locking +WAIT 2 start job <homevent.tokize.tokizer obj>
+0 locking -WAIT 2 start job <homevent.tokize.tokizer obj>
 0 Yes!
 0 Yes!
 0 Set to ONE
@@ -106,8 +106,8 @@ RUN: on state * three foo bar ‹OnEventHandler›
 0 Set to FOUR
 1 Yes! (Shit happens.)
 END: state¦twohalf¦three¦foo¦bar
-0 +WAIT 3 start job ‹Waiter _wait¦1 ??›
-0 -WAIT 3 start job ‹Waiter _wait¦1 ??›
+0 locking +WAIT 3 start job ‹Waiter _wait¦1 ??›
+0 locking -WAIT 3 start job ‹Waiter _wait¦1 ??›
 NEW: ‹ConditionalWorkSequence:16 (4)›
    : │  id: 16
    : │  call count: 0
@@ -162,8 +162,8 @@ NEW: ‹ConditionalWorkSequence:20 (4)›
 EVENT: state¦three¦-¦foo¦bar
 END: state¦three¦-¦foo¦bar
 .
-0 +WAIT 4 kill job <homevent.tokize.tokizer obj>
-0 -WAIT 4 kill job <homevent.tokize.tokizer obj>
+0 locking +WAIT 4 kill job <homevent.tokize.tokizer obj>
+0 locking -WAIT 4 kill job <homevent.tokize.tokizer obj>
 NEW: ‹ConditionalWorkSequence:21 (6)›
    : │  id: 21
    : │  call count: 0

@@ -5,14 +5,14 @@ NEW: ‹ConditionalWorkSequence:7 (4)›
    : └1╴... done.
 EVENT: startup
 END: startup
-0 +WAIT 1 start job ‹Collected Parser:n1›
-0 -WAIT 1 start job ‹Collected Parser:n1›
-0 +WAIT 2 start job <homevent.tokize.tokizer obj>
-0 -WAIT 2 start job <homevent.tokize.tokizer obj>
-0 +WAIT 3 start job ‹Collected RPCserver:foo›
-0 -WAIT 3 start job ‹Collected RPCserver:foo›
-0 +WAIT 4 start job ‹Waiter server ??›
-0 -WAIT 4 start job ‹Waiter server ??›
+0 locking +WAIT 1 start job ‹Collected Parser:n1›
+0 locking -WAIT 1 start job ‹Collected Parser:n1›
+0 locking +WAIT 2 start job <homevent.tokize.tokizer obj>
+0 locking -WAIT 2 start job <homevent.tokize.tokizer obj>
+0 locking +WAIT 3 start job ‹Collected RPCserver:foo›
+0 locking -WAIT 3 start job ‹Collected RPCserver:foo›
+0 locking +WAIT 4 start job ‹Waiter server ??›
+0 locking -WAIT 4 start job ‹Waiter server ??›
 NEW: ‹ConditionalWorkSequence:8 (4)›
    : │  id: 8
    : │  call count: 0
@@ -85,8 +85,8 @@ END: UnknownWordError
 1 YES Got an error
 1 This is logged.
 1 The value is: Test123
-0 +WAIT 5 start job ‹Waiter some¦time ??›
-0 -WAIT 5 start job ‹Waiter some¦time ??›
+0 locking +WAIT 5 start job ‹Waiter some¦time ??›
+0 locking -WAIT 5 start job ‹Waiter some¦time ??›
 NEW: ‹ConditionalWorkSequence:12 (5)›
    : │  id: 12
    : │  call count: 0
@@ -121,8 +121,8 @@ NEW: ‹ConditionalWorkSequence:15 (4)›
    : └1╴... done.
 EVENT: wait¦done¦1.0¦server
 END: wait¦done¦1.0¦server
-0 +WAIT 6 start job ‹Waiter foo ??›
-0 -WAIT 6 start job ‹Waiter foo ??›
+0 locking +WAIT 6 start job ‹Waiter foo ??›
+0 locking -WAIT 6 start job ‹Waiter foo ??›
 NEW: ‹ConditionalWorkSequence:16 (4)›
    : │  id: 16
    : │  call count: 0
@@ -130,8 +130,8 @@ NEW: ‹ConditionalWorkSequence:16 (4)›
    : └1╴... done.
 EVENT: wait¦start¦2.0¦foo
 END: wait¦start¦2.0¦foo
-0 +WAIT 7 kill job <homevent.tokize.tokizer obj>
-0 -WAIT 7 kill job <homevent.tokize.tokizer obj>
+0 locking +WAIT 7 kill job <homevent.tokize.tokizer obj>
+0 locking -WAIT 7 kill job <homevent.tokize.tokizer obj>
 NEW: ‹ConditionalWorkSequence:17 (6)›
    : │  id: 17
    : │  call count: 0
