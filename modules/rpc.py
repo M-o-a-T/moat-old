@@ -20,6 +20,7 @@ This code implements a SSH command line for homevent.
 
 """
 
+from homevent import TESTING
 from homevent.module import Module
 from homevent.context import Context
 from homevent.parser import parser_builder,parse

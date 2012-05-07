@@ -1,3 +1,9 @@
+homevent (0.3.19) smurf; urgency=low
+
+  * import problem
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Mon, 07 May 2012 11:21:02 +0200
+
 homevent (0.3.18) smurf; urgency=low
 
   * Use collections for onewire devices
