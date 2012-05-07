@@ -166,7 +166,7 @@ del avg test decay
 
 
 ## this is 0.1/second
-avg test decaytime :mode decaytime 0.9982029897000856
+avg test decaytime :mode decaytime 0.1 1
 list avg
 list avg test decaytime
 wait: for 0.2

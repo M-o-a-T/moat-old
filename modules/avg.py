@@ -159,13 +159,14 @@ class TimeAvg(Avg):
 class DecayTimeAvg(TimeAvg):
 	"""Decaying average, time-based weight"""
 	mode="decaytime"
-	doc="Time-based decay; param: weight of one sampled minute"
-	params = (1,1)
+	doc="Time-based decay; param: weight of one sample, timebase in seconds (default 60)"
+	params = (1,2)
 
-	def __init__(self,parent,name, weight):
+	def __init__(self,parent,name, weight,base=60):
 		super(DecayTimeAvg,self).__init__(parent,name)
-		# Calculations are second-based, but the user parameter is per minute.
-		self.p = 1-(1-float(weight))**(1/60)
+		# Calculations are based on whatever unit is most convenient
+		self.p = float(weight)
+		self.p_base = float(base)
 
 	def weigth(self, mod=False):
 		if self.value_tm is None:
@@ -175,15 +176,16 @@ class DecayTimeAvg(TimeAvg):
 		if nt == 0: ## called right after init'ing
 			return 0
 		else:
-			return 1-(1-self.p)**nt
+			return 1-(1-self.p)**(nt/self.p_base)
 
 	def list(self):
 		for r in super(DecayTimeAvg,self).list():
 			yield r
-		yield ("weight/hour",1-(1-self.p)**3600)
-		yield ("weight/minute",1-(1-self.p)**60)
-		yield ("weight/second",self.p)
-
+		yield ("weight",self.p)
+		yield ("time base",humandelta(self.p_base))
+		yield ("weight/hour",1-(1-self.p)**(3600/self.p_base))
+		yield ("weight/minute",1-(1-self.p)**(60/self.p_base))
+		yield ("weight/second",1-(1-self.p)**(1/self.p_base))
 
 class DecaySamplesAvg(Avg):
 	"""Decaying average, sample-based weight"""

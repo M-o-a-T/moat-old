@@ -1,3 +1,9 @@
+homevent (0.3.17) smurf; urgency=low
+
+  * average: decaytime: make the refernece interval configurable
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Mon, 07 May 2012 08:04:02 +0200
+
 homevent (0.3.16) smurf; urgency=low
 
   * onewire: have the device node fetch its type itself
