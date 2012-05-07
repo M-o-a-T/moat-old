@@ -32,18 +32,30 @@ if not exists module wait: load wait
 if not exists module onewire: load onewire
 if not exists module on_event: load on_event
 if not exists module errors: load errors
+if not exists module monitor: load monitor
 #
+
+monitor onewire "10.000010ef0000" temperature:
+	name tempi
+	require 2 0.1
+	delay for 3
+	stopped
+
+on onewire up * "10.000010ef0000":
+	name light sensor present
+	start monitor tempi
+
 on onewire scanned A * * *:
 	name scanned
 
 	del on scanned
 
-	input onewire "000010EF0000" temperature :name temp
+	input onewire "10.000010ef0000" temperature :name temp
 	var input X temp
 	trigger thermo $X
 	list input temp
 
-	output onewire "000010EF0000" temp_high :name temphi
+	output onewire "10.000010ef0000" temp_high :name temphi
 	set output 99 temphi
 
 	del wait yawn
@@ -62,16 +74,19 @@ block:
 log TRACE DirStart
 dir onewire A
 log TRACE DirDev
-dir onewire "000010EF0000"
+dir onewire "10.000010ef0000"
 block:
-	if exists onewire device "000010EF0000":
+	if exists onewire device "10.000010ef0000":
 		log TRACE yes
 	else:
 		log TRACE no
 log TRACE DirStop
-#set onewire 30 "000010EF0000" templow ## not when testing
+#set onewire 30 "10.000010ef0000" templow ## not when testing
 scan onewire A
 dir onewire A
+wait before disconnect:
+	for 0.3
+	debug force
 disconnect onewire A
 wait END:
 	for 1
