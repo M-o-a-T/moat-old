@@ -208,8 +208,8 @@ class RPCconn(Service,Collected):
 							else: 
 								t = "%s (%s)" % (humandelta(t-now(t.year != 2003)),t)
 							ti = t.rfind('.')
-							if ti>0 and len(t)-ti > 4 and len(t)-ti<9: # limit to msec
-								t= t[:ti+4]+")"
+							if ti>0 and len(t)-ti > 3 and len(t)-ti<9: # limit to msec
+								t= t[:ti+3]+")"
 						# otherwise transmit the datetime as-is
 					elif not isinstance(t,(date,time,timedelta)):
 						t = unicode(t)

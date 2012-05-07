@@ -63,11 +63,11 @@ list ‹type› ‹name…›
 					else:
 						t = "%s (%s)" % (humandelta(t-now(t.year != 2003)),t)
 					if TESTING:
-						lim = 4
+						lim = 3
 					else:
-						lim = 5
+						lim = 4
 					ti = t.rfind('.')
-					if ti>0 and len(t)-ti>lim and len(t)-ti<lim+5: # limit to msec
+					if ti>0 and len(t)-ti>lim and len(t)-ti<lim+6: # limit to msec
 						t = t[:ti+lim]+")"
 
 				print >>out,p+u": "+unicode(t)
