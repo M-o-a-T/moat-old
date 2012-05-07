@@ -11,6 +11,8 @@ END: startup
 0 locking -WAIT 2 start job <homevent.tokize.tokizer obj>
 0 Create OnEvtHandler: monitor¦value¦*VAL¦foo¦bar
 0 NewHandler 8
+0 locking +WAIT 3 monitor up ‹Tester foo¦bar off›
+0 locking -WAIT 3 monitor up ‹Tester foo¦bar off›
 NEW: ‹ConditionalWorkSequence:9 (4)›
    : │  id: 9
    : │  call count: 0
@@ -18,10 +20,10 @@ NEW: ‹ConditionalWorkSequence:9 (4)›
    : └1╴... done.
 EVENT: monitor¦start¦foo¦bar
 END: monitor¦start¦foo¦bar
-0 locking +WAIT 3 start job ‹Tester foo¦bar off›
-0 locking -WAIT 3 start job ‹Tester foo¦bar off›
-0 locking +WAIT 4 start job ‹Waiter _wait¦1 ??›
-0 locking -WAIT 4 start job ‹Waiter _wait¦1 ??›
+0 locking +WAIT 4 start job ‹Tester foo¦bar off›
+0 locking -WAIT 4 start job ‹Tester foo¦bar off›
+0 locking +WAIT 5 start job ‹Waiter _wait¦1 ??›
+0 locking -WAIT 5 start job ‹Waiter _wait¦1 ??›
 NEW: ‹ConditionalWorkSequence:10 (4)›
    : │  id: 10
    : │  call count: 0
@@ -54,10 +56,10 @@ RUN: on monitor value *VAL foo bar ‹OnEventHandler›
 0 First value is 42.0
 END: monitor¦value¦42.0¦foo¦bar
 0 monitor Stop run foo¦bar
-0 locking +WAIT 5 monitor sleep foo bar
-0 locking -WAIT 5 monitor sleep foo bar
 0 locking +WAIT 6 monitor sleep foo bar
 0 locking -WAIT 6 monitor sleep foo bar
+0 locking +WAIT 7 monitor sleep foo bar
+0 locking -WAIT 7 monitor sleep foo bar
 0 monitor Start run foo¦bar
 0 monitor raw 40 foo bar
 0 monitor filter [40] on foo¦bar
@@ -83,10 +85,10 @@ RUN: on monitor value *VAL foo bar ‹OnEventHandler›
 0 Go from 42.0 to 40.0
 END: monitor¦value¦40.0¦foo¦bar
 0 monitor Stop run foo¦bar
-0 locking +WAIT 7 monitor sleep foo bar
-0 locking -WAIT 7 monitor sleep foo bar
 0 locking +WAIT 8 monitor sleep foo bar
 0 locking -WAIT 8 monitor sleep foo bar
+0 locking +WAIT 9 monitor sleep foo bar
+0 locking -WAIT 9 monitor sleep foo bar
 0 monitor Start run foo¦bar
 0 monitor raw 42 foo bar
 0 monitor filter [42] on foo¦bar
@@ -112,7 +114,7 @@ RUN: on monitor value *VAL foo bar ‹OnEventHandler›
 0 Go from 40.0 to 42.0
 END: monitor¦value¦42.0¦foo¦bar
 0 monitor Stop run foo¦bar
-0 locking +WAIT 9 monitor sleep foo bar
+0 locking +WAIT 10 monitor sleep foo bar
 NEW: ‹ConditionalWorkSequence:14 (4)›
    : │  id: 14
    : │  call count: 0
@@ -132,8 +134,8 @@ time: ‹0.3 sec›
 steps: 1 / 1 / None
 data: 42
 .
-0 locking +WAIT 10 start job ‹Waiter _wait¦2 ??›
-0 locking -WAIT 10 start job ‹Waiter _wait¦2 ??›
+0 locking +WAIT 11 start job ‹Waiter _wait¦2 ??›
+0 locking -WAIT 11 start job ‹Waiter _wait¦2 ??›
 NEW: ‹ConditionalWorkSequence:15 (4)›
    : │  id: 15
    : │  call count: 0
@@ -141,9 +143,9 @@ NEW: ‹ConditionalWorkSequence:15 (4)›
    : └1╴... done.
 EVENT: wait¦start¦×××¦_wait¦2
 END: wait¦start¦×××¦_wait¦2
-0 locking -WAIT 9 monitor sleep foo bar
-0 locking +WAIT 11 monitor sleep foo bar
-0 locking -WAIT 11 monitor sleep foo bar
+0 locking -WAIT 10 monitor sleep foo bar
+0 locking +WAIT 12 monitor sleep foo bar
+0 locking -WAIT 12 monitor sleep foo bar
 0 monitor Start run foo¦bar
 0 monitor raw 41 foo bar
 0 monitor filter [41] on foo¦bar
@@ -169,9 +171,9 @@ RUN: on monitor value *VAL foo bar ‹OnEventHandler›
 0 Go from 42.0 to 41.0
 END: monitor¦value¦41.0¦foo¦bar
 0 monitor Stop run foo¦bar
-0 locking +WAIT 12 monitor sleep foo bar
-0 locking -WAIT 12 monitor sleep foo bar
 0 locking +WAIT 13 monitor sleep foo bar
+0 locking -WAIT 13 monitor sleep foo bar
+0 locking +WAIT 14 monitor sleep foo bar
 NEW: ‹ConditionalWorkSequence:17 (4)›
    : │  id: 17
    : │  call count: 0
@@ -179,8 +181,8 @@ NEW: ‹ConditionalWorkSequence:17 (4)›
    : └1╴... done.
 EVENT: wait¦done¦×××¦_wait¦2
 END: wait¦done¦×××¦_wait¦2
-0 locking +WAIT 14 kill job ‹Tester foo¦bar on 41.0›
-0 locking -WAIT 13 monitor sleep foo bar
+0 locking +WAIT 15 kill job ‹Tester foo¦bar on 41.0›
+0 locking -WAIT 14 monitor sleep foo bar
 NEW: ‹ConditionalWorkSequence:18 (4)›
    : │  id: 18
    : │  call count: 0
@@ -188,10 +190,12 @@ NEW: ‹ConditionalWorkSequence:18 (4)›
    : └1╴... done.
 EVENT: monitor¦stop¦foo¦bar
 END: monitor¦stop¦foo¦bar
-0 locking -WAIT 14 kill job ‹Tester foo¦bar on 41.0›
+0 locking -WAIT 15 kill job ‹Tester foo¦bar on 41.0›
 .
 0 Create OnEvtHandler: monitor¦checking¦baz¦zaz
 0 NewHandler 19
+0 locking +WAIT 16 monitor up ‹Monitor baz¦zaz off›
+0 locking -WAIT 16 monitor up ‹Monitor baz¦zaz off›
 NEW: ‹ConditionalWorkSequence:20 (4)›
    : │  id: 20
    : │  call count: 0
@@ -199,8 +203,8 @@ NEW: ‹ConditionalWorkSequence:20 (4)›
    : └1╴... done.
 EVENT: monitor¦start¦baz¦zaz
 END: monitor¦start¦baz¦zaz
-0 locking +WAIT 15 start job ‹Monitor baz¦zaz off›
-0 locking -WAIT 15 start job ‹Monitor baz¦zaz off›
+0 locking +WAIT 17 start job ‹Monitor baz¦zaz off›
+0 locking -WAIT 17 start job ‹Monitor baz¦zaz off›
 : ‹Monitor baz¦zaz run 0›
 name: baz¦zaz
 device: passive
@@ -209,8 +213,8 @@ up: Run
 time: never
 steps: 0 / 2 / None
 .
-0 locking +WAIT 16 start job ‹Waiter _wait¦5 ??›
-0 locking -WAIT 16 start job ‹Waiter _wait¦5 ??›
+0 locking +WAIT 18 start job ‹Waiter _wait¦5 ??›
+0 locking -WAIT 18 start job ‹Waiter _wait¦5 ??›
 NEW: ‹ConditionalWorkSequence:21 (4)›
    : │  id: 21
    : │  call count: 0
@@ -243,17 +247,17 @@ RUN: on monitor checking baz zaz ‹OnEventHandler›
    :     : step: set monitor 14 baz zaz ‹MonitorSet›
  at: ‹ConditionalWorkSequence:22 (5)› (step 1)
  ev: EVENT: monitor¦checking¦baz¦zaz
-0 locking +WAIT 17 start job ‹Async async›
-0 locking -WAIT 17 start job ‹Async async›
+0 locking +WAIT 19 start job ‹Async async›
+0 locking -WAIT 19 start job ‹Async async›
 END: monitor¦checking¦baz¦zaz
-0 locking +WAIT 18 monitor one_value baz zaz
-0 locking -WAIT 18 monitor one_value baz zaz
+0 locking +WAIT 20 monitor one_value baz zaz
+0 locking -WAIT 20 monitor one_value baz zaz
 0 monitor raw 10 baz zaz
 0 monitor filter [10] on baz¦zaz
 0 monitor More data [10] for ‹baz zaz›
-0 locking +WAIT 19 monitor one_value baz zaz
-0 locking +WAIT 20 start job ‹Waiter _wait¦3 ??›
-0 locking -WAIT 20 start job ‹Waiter _wait¦3 ??›
+0 locking +WAIT 21 monitor one_value baz zaz
+0 locking +WAIT 22 start job ‹Waiter _wait¦3 ??›
+0 locking -WAIT 22 start job ‹Waiter _wait¦3 ??›
 NEW: ‹ConditionalWorkSequence:23 (4)›
    : │  id: 23
    : │  call count: 0
@@ -269,8 +273,8 @@ NEW: ‹ConditionalWorkSequence:24 (4)›
 EVENT: wait¦done¦×××¦_wait¦5
 END: wait¦done¦×××¦_wait¦5
 1 Yes
-0 locking +WAIT 21 start job ‹Waiter _wait¦6 ??›
-0 locking -WAIT 21 start job ‹Waiter _wait¦6 ??›
+0 locking +WAIT 23 start job ‹Waiter _wait¦6 ??›
+0 locking -WAIT 23 start job ‹Waiter _wait¦6 ??›
 NEW: ‹ConditionalWorkSequence:25 (4)›
    : │  id: 25
    : │  call count: 0
@@ -285,13 +289,13 @@ NEW: ‹ConditionalWorkSequence:26 (4)›
    : └1╴... done.
 EVENT: wait¦done¦×××¦_wait¦3
 END: wait¦done¦×××¦_wait¦3
-0 locking -WAIT 19 monitor one_value baz zaz
+0 locking -WAIT 21 monitor one_value baz zaz
 0 monitor raw 13 baz zaz
 0 monitor filter [10, 13] on baz¦zaz
 0 monitor More data [10, 13] for ‹baz zaz›
-0 locking +WAIT 22 monitor one_value baz zaz
-0 locking +WAIT 23 start job ‹Waiter _wait¦4 ??›
-0 locking -WAIT 23 start job ‹Waiter _wait¦4 ??›
+0 locking +WAIT 24 monitor one_value baz zaz
+0 locking +WAIT 25 start job ‹Waiter _wait¦4 ??›
+0 locking -WAIT 25 start job ‹Waiter _wait¦4 ??›
 NEW: ‹ConditionalWorkSequence:27 (4)›
    : │  id: 27
    : │  call count: 0
@@ -306,7 +310,7 @@ NEW: ‹ConditionalWorkSequence:28 (4)›
    : └1╴... done.
 EVENT: wait¦done¦×××¦_wait¦4
 END: wait¦done¦×××¦_wait¦4
-0 locking -WAIT 22 monitor one_value baz zaz
+0 locking -WAIT 24 monitor one_value baz zaz
 0 monitor raw 14 baz zaz
 0 monitor filter [10, 13, 14] on baz¦zaz
 0 monitor End run baz¦zaz
@@ -325,9 +329,9 @@ NEW: ‹ConditionalWorkSequence:30 (4)›
 EVENT: monitor¦value¦13.5¦baz¦zaz
 END: monitor¦value¦13.5¦baz¦zaz
 0 monitor Stop run baz¦zaz
-0 locking +WAIT 24 monitor sleep baz zaz
-0 locking -WAIT 24 monitor sleep baz zaz
-0 locking +WAIT 25 monitor sleep baz zaz
+0 locking +WAIT 26 monitor sleep baz zaz
+0 locking -WAIT 26 monitor sleep baz zaz
+0 locking +WAIT 27 monitor sleep baz zaz
 NEW: ‹ConditionalWorkSequence:31 (4)›
    : │  id: 31
    : │  call count: 0
@@ -345,8 +349,8 @@ time: ‹now›
 steps: 3 / 2 / None
 data: 10 13 14
 .
-0 locking +WAIT 26 kill job ‹Monitor baz¦zaz on 13.5›
-0 locking -WAIT 25 monitor sleep baz zaz
+0 locking +WAIT 28 kill job ‹Monitor baz¦zaz on 13.5›
+0 locking -WAIT 27 monitor sleep baz zaz
 NEW: ‹ConditionalWorkSequence:32 (4)›
    : │  id: 32
    : │  call count: 0
@@ -354,7 +358,7 @@ NEW: ‹ConditionalWorkSequence:32 (4)›
    : └1╴... done.
 EVENT: monitor¦stop¦baz¦zaz
 END: monitor¦stop¦baz¦zaz
-0 locking -WAIT 26 kill job ‹Monitor baz¦zaz on 13.5›
+0 locking -WAIT 28 kill job ‹Monitor baz¦zaz on 13.5›
 NEW: ‹ConditionalWorkSequence:33 (4)›
    : │  id: 33
    : │  call count: 0
@@ -369,6 +373,8 @@ NEW: ‹ConditionalWorkSequence:34 (4)›
    : └1╴... done.
 EVENT: input¦fake¦1¦monitest
 END: input¦fake¦1¦monitest
+0 locking +WAIT 29 monitor up ‹VarMonitor moni¦test off›
+0 locking -WAIT 29 monitor up ‹VarMonitor moni¦test off›
 NEW: ‹ConditionalWorkSequence:35 (4)›
    : │  id: 35
    : │  call count: 0
@@ -376,10 +382,10 @@ NEW: ‹ConditionalWorkSequence:35 (4)›
    : └1╴... done.
 EVENT: monitor¦start¦moni¦test
 END: monitor¦start¦moni¦test
-0 locking +WAIT 27 start job ‹VarMonitor moni¦test off›
-0 locking -WAIT 27 start job ‹VarMonitor moni¦test off›
-0 locking +WAIT 28 start job ‹Waiter _wait¦7 ??›
-0 locking -WAIT 28 start job ‹Waiter _wait¦7 ??›
+0 locking +WAIT 30 start job ‹VarMonitor moni¦test off›
+0 locking -WAIT 30 start job ‹VarMonitor moni¦test off›
+0 locking +WAIT 31 start job ‹Waiter _wait¦7 ??›
+0 locking -WAIT 31 start job ‹Waiter _wait¦7 ??›
 NEW: ‹ConditionalWorkSequence:36 (4)›
    : │  id: 36
    : │  call count: 0
@@ -399,7 +405,7 @@ NEW: ‹ConditionalWorkSequence:37 (4)›
 EVENT: monitor¦value¦1.0¦moni¦test
 END: monitor¦value¦1.0¦moni¦test
 0 monitor Stop run moni¦test
-0 locking +WAIT 29 monitor sleep moni test
+0 locking +WAIT 32 monitor sleep moni test
 NEW: ‹ConditionalWorkSequence:38 (4)›
    : │  id: 38
    : │  call count: 0
@@ -421,8 +427,8 @@ NEW: ‹ConditionalWorkSequence:40 (4)›
    : └1╴... done.
 EVENT: input¦fake¦2¦monitest
 END: input¦fake¦2¦monitest
-0 locking +WAIT 30 start job ‹Waiter _wait¦8 ??›
-0 locking -WAIT 30 start job ‹Waiter _wait¦8 ??›
+0 locking +WAIT 33 start job ‹Waiter _wait¦8 ??›
+0 locking -WAIT 33 start job ‹Waiter _wait¦8 ??›
 NEW: ‹ConditionalWorkSequence:41 (4)›
    : │  id: 41
    : │  call count: 0
@@ -430,9 +436,9 @@ NEW: ‹ConditionalWorkSequence:41 (4)›
    : └1╴... done.
 EVENT: wait¦start¦×××¦_wait¦8
 END: wait¦start¦×××¦_wait¦8
-0 locking -WAIT 29 monitor sleep moni test
-0 locking +WAIT 31 monitor sleep moni test
-0 locking -WAIT 31 monitor sleep moni test
+0 locking -WAIT 32 monitor sleep moni test
+0 locking +WAIT 34 monitor sleep moni test
+0 locking -WAIT 34 monitor sleep moni test
 0 monitor Start run moni¦test
 0 monitor raw 2 moni test
 0 monitor filter [2] on moni¦test
@@ -445,7 +451,7 @@ NEW: ‹ConditionalWorkSequence:42 (4)›
 EVENT: monitor¦value¦2.0¦moni¦test
 END: monitor¦value¦2.0¦moni¦test
 0 monitor Stop run moni¦test
-0 locking +WAIT 32 monitor sleep moni test
+0 locking +WAIT 35 monitor sleep moni test
 NEW: ‹ConditionalWorkSequence:43 (4)›
    : │  id: 43
    : │  call count: 0
@@ -467,8 +473,8 @@ NEW: ‹ConditionalWorkSequence:45 (4)›
    : └1╴... done.
 EVENT: input¦fake¦3¦monitest
 END: input¦fake¦3¦monitest
-0 locking +WAIT 33 start job ‹Waiter _wait¦9 ??›
-0 locking -WAIT 33 start job ‹Waiter _wait¦9 ??›
+0 locking +WAIT 36 start job ‹Waiter _wait¦9 ??›
+0 locking -WAIT 36 start job ‹Waiter _wait¦9 ??›
 NEW: ‹ConditionalWorkSequence:46 (4)›
    : │  id: 46
    : │  call count: 0
@@ -476,8 +482,8 @@ NEW: ‹ConditionalWorkSequence:46 (4)›
    : └1╴... done.
 EVENT: wait¦start¦×××¦_wait¦9
 END: wait¦start¦×××¦_wait¦9
-0 locking -WAIT 32 monitor sleep moni test
-0 locking +WAIT 34 monitor sleep moni test
+0 locking -WAIT 35 monitor sleep moni test
+0 locking +WAIT 37 monitor sleep moni test
 NEW: ‹ConditionalWorkSequence:47 (4)›
    : │  id: 47
    : │  call count: 0
@@ -499,8 +505,8 @@ NEW: ‹ConditionalWorkSequence:49 (4)›
    : └1╴... done.
 EVENT: input¦fake¦4¦monitest
 END: input¦fake¦4¦monitest
-0 locking +WAIT 35 start job ‹Waiter _wait¦10 ??›
-0 locking -WAIT 35 start job ‹Waiter _wait¦10 ??›
+0 locking +WAIT 38 start job ‹Waiter _wait¦10 ??›
+0 locking -WAIT 38 start job ‹Waiter _wait¦10 ??›
 NEW: ‹ConditionalWorkSequence:50 (4)›
    : │  id: 50
    : │  call count: 0
@@ -508,7 +514,7 @@ NEW: ‹ConditionalWorkSequence:50 (4)›
    : └1╴... done.
 EVENT: wait¦start¦×××¦_wait¦10
 END: wait¦start¦×××¦_wait¦10
-0 locking -WAIT 34 monitor sleep moni test
+0 locking -WAIT 37 monitor sleep moni test
 0 monitor Start run moni¦test
 0 monitor raw 4 moni test
 0 monitor filter [4] on moni¦test
@@ -521,9 +527,9 @@ NEW: ‹ConditionalWorkSequence:51 (4)›
 EVENT: monitor¦value¦4.0¦moni¦test
 END: monitor¦value¦4.0¦moni¦test
 0 monitor Stop run moni¦test
-0 locking +WAIT 36 monitor sleep moni test
-0 locking -WAIT 36 monitor sleep moni test
-0 locking +WAIT 37 monitor sleep moni test
+0 locking +WAIT 39 monitor sleep moni test
+0 locking -WAIT 39 monitor sleep moni test
+0 locking +WAIT 40 monitor sleep moni test
 NEW: ‹ConditionalWorkSequence:52 (4)›
    : │  id: 52
    : │  call count: 0
@@ -556,8 +562,8 @@ time: ‹now›
 steps: 1 / 1 / None
 data: 4
 .
-0 locking +WAIT 38 kill job ‹VarMonitor moni¦test on 4.0›
-0 locking -WAIT 37 monitor sleep moni test
+0 locking +WAIT 41 kill job ‹VarMonitor moni¦test on 4.0›
+0 locking -WAIT 40 monitor sleep moni test
 NEW: ‹ConditionalWorkSequence:55 (4)›
    : │  id: 55
    : │  call count: 0
@@ -565,6 +571,6 @@ NEW: ‹ConditionalWorkSequence:55 (4)›
    : └1╴... done.
 EVENT: monitor¦stop¦moni¦test
 END: monitor¦stop¦moni¦test
-0 locking -WAIT 38 kill job ‹VarMonitor moni¦test on 4.0›
-0 locking +WAIT 39 kill job <homevent.tokize.tokizer obj>
-0 locking -WAIT 39 kill job <homevent.tokize.tokizer obj>
+0 locking -WAIT 41 kill job ‹VarMonitor moni¦test on 4.0›
+0 locking +WAIT 42 kill job <homevent.tokize.tokizer obj>
+0 locking -WAIT 42 kill job <homevent.tokize.tokizer obj>

@@ -354,8 +354,9 @@ class Monitor(Collected,Jobber):
 			return self.watcher.get(block=True, timeout=None)
 
 	def up(self):
-		while self.job and self.job.dead:
-			gevent.sleep(0.1) # link will clear
+		with log_wait("monitor up "+repr(self)):
+			while self.job and self.job.dead:
+				gevent.sleep(0.1) # link will clear
 
 		if not self.job:
 			self.value = None

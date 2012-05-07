@@ -126,10 +126,10 @@ END: wait¦start¦0.5¦OUT
 NEW: ‹ConditionalWorkSequence:22 (4)›
    : │  id: 22
    : │  call count: 0
-   : │  EVENT: wait¦done¦0.6¦OUT
+   : │  EVENT: wait¦done¦0.5¦OUT
    : └1╴... done.
-EVENT: wait¦done¦0.6¦OUT
-END: wait¦done¦0.6¦OUT
+EVENT: wait¦done¦0.5¦OUT
+END: wait¦done¦0.5¦OUT
 foo :: net_active localhost:50333
 .
 type: net_active
