@@ -437,7 +437,7 @@ class OWFSqueue(MsgQueue,Jobber):
 			for b in entries:
 				dn = OWFSdevice(id=b,bus=self,path=p)
 				yield dn
-				if b.startswith("1F.") and b not in seen_mplex:
+				if b.lower().startswith("1f.") and b not in seen_mplex:
 					seen_mplex[b] = b
 					for res in doit(dn,key="main"):
 						yield res
@@ -483,16 +483,6 @@ class OWFSqueue(MsgQueue,Jobber):
 			if dev.bus is self:
 				n_dev += 1
 		
-		for dev in new_ids.itervalues():
-			if not hasattr(dev,"typ"):
-				try:
-					t = dev.get("type")
-					dev._setattr(t,"typ")
-				except Exception as ex:
-					del devices[dev.id]
-					fix_exception(ex)
-					process_failure(ex)
-
 		simple_event(Context(),"onewire","scanned",self.name,n_old, len(new_ids), n_dev)
 			
 	def _watcher(self):
@@ -568,6 +558,7 @@ class OWFSdevice(object):
 			self = super(OWFSdevice,cls).__new__(cls)
 			self._init(bus, short_id,id ,path)
 			devices[short_id] = self
+			self.go_up()
 			return self
 		else: # old device, found again
 			if bus is not None and hasattr(self,'typ'):
@@ -597,9 +588,28 @@ class OWFSdevice(object):
 		else:
 			return "‹OW:%s %s›" % (self.id,self.path)
 
+	def _get_typ(self):
+		try:
+			t = self.get("type")
+			self._setattr(t,"typ")
+		except Exception as ex:
+			del self.typ
+			del devices[self.id]
+			fix_exception(ex)
+			process_failure(ex)
+		else:
+			self.go_up()
+
 	def go_up(self):
 		if self.is_up:
 			return
+		if not hasattr(self,"typ"):
+			self.typ = None
+			gevent.spawn(self._get_typ)
+			return
+		if self.typ is None:
+			return
+
 		if self.is_up is None:
 			process_event(Event(self.ctx,"onewire","new",self.typ,self.id))
 		self.is_up = True

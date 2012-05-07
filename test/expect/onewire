@@ -147,17 +147,6 @@ END: onewire¦connect¦A
 0 msg recv= MINE ‹DIRmsg bus.0›
 1 onewire doneDIR ‹DIRmsg bus.0›
 1 onewire NEW ‹OWFSqueue:A connected› 10.000010ef0000 10.000010EF0000 ('bus.0',)
-0 msg states at run connected connected
-0 msg send ‹ATTRgetmsg 10.000010EF0000 type›
-1 onewire SEND 0 37 2 6 8192 0 '/uncached/bus.0/10.000010EF0000/type\x00'
-0 msg send result RECV_AGAIN
-1 onewire RECV 0 7 7 6 7 x0
-1 onewire RECV … 7 'DS18S20'
-0 msg recv msg ‹MsgIncoming: data:'DS18S20' typ:7 prio:2›
-0 conn incoming OWFSqueue A ‹MsgIncoming: data:'DS18S20' typ:7 prio:2›
-0 msg recv A ‹MsgIncoming: data:'DS18S20' typ:7 prio:2›
-1 onewire done:  ‹ATTRgetmsg 10.000010EF0000 type›
-0 msg recv= MINE ‹ATTRgetmsg 10.000010EF0000 type›
 NEW: ‹ConditionalWorkSequence:21 (5)›
    : │  id: 21
    : │  call count: 0
@@ -192,23 +181,74 @@ RUN: on onewire scanned A * * * ‹OnEventHandler›
 0 msg send ‹ATTRgetmsg 10.000010EF0000 temperature›
 1 onewire SEND 0 44 2 6 8192 0 u'/uncached/bus.0/10.000010EF0000/temperature\x00'
 0 msg send result RECV_AGAIN
+0 msg states at run connected connected
+0 msg send ‹ATTRgetmsg 10.000010EF0000 type›
+1 onewire SEND 0 37 2 6 8192 0 '/uncached/bus.0/10.000010EF0000/type\x00'
+0 msg send result RECV_AGAIN
 1 onewire RECV 0 12 12 6 12 x0
 1 onewire RECV … 12 '         1.6'
 0 msg recv msg ‹MsgIncoming: data:'         1.6' typ:12 prio:2›
+1 onewire RECV 0 7 7 6 7 x0
+1 onewire RECV … 7 'DS18S20'
+0 msg recv msg ‹MsgIncoming: data:'DS18S20' typ:7 prio:2›
 0 conn incoming OWFSqueue A ‹MsgIncoming: data:'         1.6' typ:12 prio:2›
 0 msg recv A ‹MsgIncoming: data:'         1.6' typ:12 prio:2›
 1 onewire done:  ‹ATTRgetmsg 10.000010EF0000 temperature›
 0 msg recv= MINE ‹ATTRgetmsg 10.000010EF0000 temperature›
-0 locking +WAIT 9 start job ‹TriggerHandler: trigger 2›
-0 locking -WAIT 9 start job ‹TriggerHandler: trigger 2›
+0 conn incoming OWFSqueue A ‹MsgIncoming: data:'DS18S20' typ:7 prio:2›
+0 msg recv A ‹MsgIncoming: data:'DS18S20' typ:7 prio:2›
+1 onewire done:  ‹ATTRgetmsg 10.000010EF0000 type›
+0 msg recv= MINE ‹ATTRgetmsg 10.000010EF0000 type›
+NEW: ‹ConditionalWorkSequence:22 (4)›
+   : │  id: 22
+   : │  call count: 0
+   : │  EVENT: onewire¦new¦DS18S20¦10.000010ef0000
+   : └1╴... done.
+EVENT: onewire¦new¦DS18S20¦10.000010ef0000
+END: onewire¦new¦DS18S20¦10.000010ef0000
+NEW: ‹ConditionalWorkSequence:23 (5)›
+   : │  id: 23
+   : │  call count: 0
+   : │  EVENT: onewire¦up¦DS18S20¦10.000010ef0000
+   : ├1╴on onewire up * 10.000010ef0000 ‹OnEventHandler›
+   : │  name: light sensor present
+   : │  prio: 51
+   : │  step: start monitor tempi ‹MonitorStart›
+   : └2╴... done.
+EVENT: onewire¦up¦DS18S20¦10.000010ef0000
+RUN: on onewire up * 10.000010ef0000 ‹OnEventHandler›
+   : name: light sensor present
+   : prio: 51
+   : step: start monitor tempi ‹MonitorStart›
+ at: ‹ConditionalWorkSequence:23 (5)› (step 1)
+ ev: EVENT: onewire¦up¦DS18S20¦10.000010ef0000
+0 locking +WAIT 9 monitor up ‹OWFSmon tempi off›
+0 locking -WAIT 9 monitor up ‹OWFSmon tempi off›
+NEW: ‹ConditionalWorkSequence:24 (4)›
+   : │  id: 24
+   : │  call count: 0
+   : │  EVENT: monitor¦start¦tempi
+   : └1╴... done.
+EVENT: monitor¦start¦tempi
+END: monitor¦start¦tempi
+0 locking +WAIT 10 start job ‹OWFSmon tempi off›
+0 locking -WAIT 10 start job ‹OWFSmon tempi off›
+END: onewire¦up¦DS18S20¦10.000010ef0000
+0 monitor Start run tempi
+0 msg states at run connected connected
+0 msg send ‹ATTRgetmsg 10.000010EF0000 temperature›
+1 onewire SEND 0 44 2 6 8192 0 u'/uncached/bus.0/10.000010EF0000/temperature\x00'
+0 msg send result RECV_AGAIN
+0 locking +WAIT 11 start job ‹TriggerHandler: trigger 2›
+0 locking -WAIT 11 start job ‹TriggerHandler: trigger 2›
 : ‹Collected OWFSinput:temp›
 name: temp
 type: onewire
 last read: now (2003-04-05 06:07:08)
 last value: 1.6
 .
-NEW: ‹ConditionalWorkSequence:22 (4)›
-   : │  id: 22
+NEW: ‹ConditionalWorkSequence:25 (4)›
+   : │  id: 25
    : │  call count: 0
    : │  EVENT: output¦set¦None¦99¦temphi
    : └1╴... done.
@@ -218,16 +258,23 @@ END: output¦set¦None¦99¦temphi
 0 msg send ‹ATTRsetmsg 10.000010EF0000 temp_high 99›
 1 onewire SEND 0 44 3 6 2 0 u'/uncached/bus.0/10.000010EF0000/temp_high\x0099'
 0 msg send result RECV_AGAIN
-NEW: ‹ConditionalWorkSequence:23 (4)›
-   : │  id: 23
+NEW: ‹ConditionalWorkSequence:26 (4)›
+   : │  id: 26
    : │  call count: 0
    : │  IEVENT: thermo¦1.6
    : └1╴... done.
 IEVENT: thermo¦1.6
 END: thermo¦1.6
+1 onewire RECV 0 12 12 6 12 x0
+1 onewire RECV … 12 '         1.6'
+0 msg recv msg ‹MsgIncoming: data:'         1.6' typ:12 prio:2›
 1 onewire RECV 0 0 -1 6 0 x0
 1 onewire RECV … 0 ''
 0 msg recv msg ‹MsgIncoming: data:'' typ:-1 prio:2›
+0 conn incoming OWFSqueue A ‹MsgIncoming: data:'         1.6' typ:12 prio:2›
+0 msg recv A ‹MsgIncoming: data:'         1.6' typ:12 prio:2›
+1 onewire done:  ‹ATTRgetmsg 10.000010EF0000 temperature›
+0 msg recv= MINE ‹ATTRgetmsg 10.000010EF0000 temperature›
 0 conn incoming OWFSqueue A ‹MsgIncoming: data:'' typ:-1 prio:2›
 0 msg recv A ‹MsgIncoming: data:'' typ:-1 prio:2›
 1 onewire done:  ‹ATTRsetmsg 10.000010EF0000 temp_high 99›
@@ -238,6 +285,9 @@ END: onewire¦scanned¦A¦0¦1¦1
 0 msg send ‹DIRmsg ›
 1 onewire SEND 0 1 7 6 0 0 '\x00'
 0 msg send result RECV_AGAIN
+0 monitor raw 1.6 tempi
+0 monitor filter [1.6] on tempi
+0 monitor More data [1.6] for ‹tempi›
 1 onewire RECV 0 96 0 6 95 x8002
 1 onewire RECV … 95 '/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm'
 0 msg recv msg ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:2›
@@ -285,8 +335,8 @@ type
 .
 0 yes
 0 DirStop
-NEW: ‹ConditionalWorkSequence:24 (4)›
-   : │  id: 24
+NEW: ‹ConditionalWorkSequence:27 (4)›
+   : │  id: 27
    : │  call count: 0
    : │  EVENT: onewire¦scanning¦A
    : └1╴... done.
@@ -325,41 +375,6 @@ END: onewire¦scanning¦A
 0 onewire got unrecognized name alarm
 0 msg recv= MINE ‹DIRmsg bus.0›
 1 onewire doneDIR ‹DIRmsg bus.0›
-NEW: ‹ConditionalWorkSequence:25 (4)›
-   : │  id: 25
-   : │  call count: 0
-   : │  EVENT: onewire¦new¦DS18S20¦10.000010ef0000
-   : └1╴... done.
-EVENT: onewire¦new¦DS18S20¦10.000010ef0000
-END: onewire¦new¦DS18S20¦10.000010ef0000
-NEW: ‹ConditionalWorkSequence:26 (5)›
-   : │  id: 26
-   : │  call count: 0
-   : │  EVENT: onewire¦up¦DS18S20¦10.000010ef0000
-   : ├1╴on onewire up * 10.000010ef0000 ‹OnEventHandler›
-   : │  name: light sensor present
-   : │  prio: 51
-   : │  step: start monitor tempi ‹MonitorStart›
-   : └2╴... done.
-EVENT: onewire¦up¦DS18S20¦10.000010ef0000
-RUN: on onewire up * 10.000010ef0000 ‹OnEventHandler›
-   : name: light sensor present
-   : prio: 51
-   : step: start monitor tempi ‹MonitorStart›
- at: ‹ConditionalWorkSequence:26 (5)› (step 1)
- ev: EVENT: onewire¦up¦DS18S20¦10.000010ef0000
-0 locking +WAIT 10 monitor up ‹OWFSmon tempi off›
-0 locking -WAIT 10 monitor up ‹OWFSmon tempi off›
-NEW: ‹ConditionalWorkSequence:27 (4)›
-   : │  id: 27
-   : │  call count: 0
-   : │  EVENT: monitor¦start¦tempi
-   : └1╴... done.
-EVENT: monitor¦start¦tempi
-END: monitor¦start¦tempi
-0 locking +WAIT 11 start job ‹OWFSmon tempi off›
-0 locking -WAIT 11 start job ‹OWFSmon tempi off›
-END: onewire¦up¦DS18S20¦10.000010ef0000
 NEW: ‹ConditionalWorkSequence:28 (4)›
    : │  id: 28
    : │  call count: 0
@@ -371,17 +386,9 @@ END: onewire¦scanned¦A¦0¦0¦1
 0 msg send ‹DIRmsg ›
 1 onewire SEND 0 1 7 6 0 0 '\x00'
 0 msg send result RECV_AGAIN
-0 monitor Start run tempi
-0 msg states at run connected connected
-0 msg send ‹ATTRgetmsg 10.000010EF0000 temperature›
-1 onewire SEND 0 44 2 6 8192 0 u'/uncached/bus.0/10.000010EF0000/temperature\x00'
-0 msg send result RECV_AGAIN
 1 onewire RECV 0 96 0 6 95 x8002
 1 onewire RECV … 95 '/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm'
 0 msg recv msg ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:2›
-1 onewire RECV 0 12 12 6 12 x0
-1 onewire RECV … 12 '         1.6'
-0 msg recv msg ‹MsgIncoming: data:'         1.6' typ:12 prio:2›
 0 conn incoming OWFSqueue A ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:2›
 0 msg recv A ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:2›
 10.000010EF0000
@@ -395,13 +402,6 @@ simultaneous
 alarm
 0 msg recv= MINE ‹DIRmsg ›
 1 onewire doneDIR ‹DIRmsg ›
-0 conn incoming OWFSqueue A ‹MsgIncoming: data:'         1.6' typ:12 prio:2›
-0 msg recv A ‹MsgIncoming: data:'         1.6' typ:12 prio:2›
-1 onewire done:  ‹ATTRgetmsg 10.000010EF0000 temperature›
-0 msg recv= MINE ‹ATTRgetmsg 10.000010EF0000 temperature›
-0 monitor raw 1.6 tempi
-0 monitor filter [1.6] on tempi
-0 monitor More data [1.6] for ‹tempi›
 .
 0 locking +WAIT 12 start job ‹Waiter before¦disconnect ??›
 0 locking -WAIT 12 start job ‹Waiter before¦disconnect ??›
