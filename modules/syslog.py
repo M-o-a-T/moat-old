@@ -112,7 +112,7 @@ class SysLogger(BaseLogger):
 	def info(self):
 		return "%s %s" % (self.facility_name,self.level_name)
 
-	def _log(self,level,txt):
+	def _slog(self,level,txt):
 		if isinstance(txt,unicode):
 			txt = txt.encode("utf-8")
 

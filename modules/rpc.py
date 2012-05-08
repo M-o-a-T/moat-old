@@ -34,6 +34,7 @@ from homevent.run import process_failure,simple_event,register_worker,unregister
 from homevent.geventreactor import waitForDeferred
 from homevent.event import TrySomethingElse
 from homevent.worker import Worker
+from homevent.logging import BaseLogger,TRACE
 
 from datetime import datetime,date,time,timedelta
 
@@ -136,6 +137,33 @@ class EventCallback(Worker):
 		self.parent.drop_worker(self)
 	exposed_cancel = cancel
 		
+
+class LogCallback(BaseLogger):
+	def __init__(self,parent,callback,kind=None,level=TRACE):
+		self.parent=parent
+		self.kind=kind
+		self.callback=callback
+
+		self.name = parent.name
+		super(LogCallback,self).__init__(level)
+
+	def _log(self, level, *a):
+		if level < self.level:
+			return
+		if TESTING and (a[0].startswith("TEST") or a[-1].endswith("LOGTEST")):
+			return
+		if self.kind is None or a[0] == self.kind:
+			if TESTING:
+				a = a+("LOGTEST",)
+			self.callback(level,*a)
+	
+	def _flush(self):
+		pass
+
+	def cancel(self):
+		self.delete()
+	exposed_cancel=cancel
+
 
 class RPCconn(Service,Collected):
 	storage = RPCconns
@@ -248,6 +276,10 @@ class RPCconn(Service,Collected):
 		self.workers.add(w)
 		register_worker(w)
 		return w
+
+	def exposed_logger(self,callback,*args):
+		l = LogCallback(self,callback,*args)
+		return l
 
 	def list(self):
 		for r in super(RPCconn,self).list():

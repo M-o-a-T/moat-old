@@ -101,7 +101,7 @@ class run_logger(BaseLogger):
 				global exitcode
 				exitcode = 1
 
-	def _log(self,level, sx):
+	def _slog(self,level, sx):
 		self.line += 1
 		def rep(m):
 			return m.group(1)+m.group(2)+", in"

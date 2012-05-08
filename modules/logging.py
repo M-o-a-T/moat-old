@@ -39,11 +39,14 @@ class OutLogger(Logger):
 	"""\
 		This class implements one particular way to log things.
 		"""
-	def _log(self,level,txt):
-		if txt == ".":
-			print >>self.out,txt
+	def _log(self,level,*txt):
+		if len(txt) == 1 and txt[0] == ".":
+			print >>self.out,txt[0]
 		else:
-			print >>self.out,LogNames[level]+"> "+txt
+			super(OutLogger,self)._log(level,*txt)
+
+	def _slog(self,level,txt):
+		print >>self.out,LogNames[level]+">",txt
 
 	def _flush(self):
 		if hasattr(self.out,"flush"):

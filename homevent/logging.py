@@ -30,7 +30,7 @@ from homevent.worker import Worker,ExcWorker,report_
 from homevent.event import Event
 from homevent.context import Context
 from homevent.base import Name,SYS_PRIO,MIN_PRIO,MAX_PRIO
-from homevent.twist import fix_exception,print_exception,format_exception,Jobber
+from homevent.twist import fix_exception,print_exception,format_exception,Jobber,reraise
 from homevent.collect import Collection,Collected
 
 import gevent
@@ -94,9 +94,8 @@ class BaseLogger(Collected,Jobber):
 	storage = Loggers.storage
 	q = None
 	ready = False
-	def __init__(self, level, out=sys.stdout):
+	def __init__(self, level):
 		self.level = level
-		self.out = out
 
 		global logger_nr
 		logger_nr += 1
@@ -130,7 +129,7 @@ class BaseLogger(Collected,Jobber):
 			except Exception as ex:
 				errs += 1
 				fix_exception(ex)
-				from homevent.run import process_failure,reraise
+				from homevent.run import process_failure
 				process_failure(ex)
 				if errs > 10:
 					reraise(ex)
@@ -165,16 +164,20 @@ class BaseLogger(Collected,Jobber):
 	def _wlog(self, *a):
 		self.q.put(a, block=False)
 
-	def _log(self, *a):
-		raise NotImplementedError("You need to override %s._log" % (self.__class__.__name__,))
+	def _log(self, level, *a):
+		a=" ".join(( x if isinstance(x,basestring) else str(x)  for x in a))
+		self._slog(level,a)
+
+	def _slog(self, a):
+		raise NotImplementedError("You need to override %s._log or ._slog" % (self.__class__.__name__,))
 
 	def _flush(self):
 		pass
 
 	def log(self, level, *a):
 		if level >= self.level:
-			self._wlog(level,u" ".join(unicode(x) for x in a))
-			if TESTING:
+			self._wlog(level,*a)
+			if TESTING and not a[0].startswith("TEST"):
 				self.flush()
 			else:
 				gevent.sleep(0)
@@ -209,10 +212,13 @@ class Logger(BaseLogger):
 		super(Logger,self).__init__(level)
 		self.out = out
 
-	def _log(self, level, data):
+	def _log(self, level, *data):
 		if hasattr(self.out,'fileno'):
 			select((),(self.out,))
-		print >>self.out,data
+		super(Logger,self)._log(level,*data)
+
+	def _slog(self,level,data):
+		print >>self.out,LogNames[level]+">",data
 	
 	def _flush(self):
 		self.out.flush()

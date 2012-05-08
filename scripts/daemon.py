@@ -63,9 +63,9 @@ class DoLogger(Logger):
 	"""\
 		This class implements one particular way to log things.
 		"""
-	def _log(self,level,txt):
+	def _slog(self,level,txt):
 		if txt != ".":
-			print >>self.out,LogNames[level]+"> "+txt
+			print >>self.out,LogNames[level]+"> "+" ".join(txt
 
 
 if opts.debuglevel != "NONE":
