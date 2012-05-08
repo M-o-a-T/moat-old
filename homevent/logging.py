@@ -94,6 +94,7 @@ class BaseLogger(Collected,Jobber):
 	storage = Loggers.storage
 	q = None
 	ready = False
+	_in_flush = False
 	def __init__(self, level):
 		self.level = level
 
@@ -177,7 +178,7 @@ class BaseLogger(Collected,Jobber):
 	def log(self, level, *a):
 		if level >= self.level:
 			self._wlog(level,*a)
-			if TESTING and not a[0].startswith("TEST"):
+			if TESTING and not (hasattr(a[0],"startswith") and a[0].startswith("TEST")):
 				self.flush()
 			else:
 				gevent.sleep(0)
@@ -196,9 +197,14 @@ class BaseLogger(Collected,Jobber):
 				self.flush()
 	
 	def flush(self):
+		if self._in_flush: return
 		if self.q is not None:
-			self.q.put(FlushMe)
-			self.q.join()
+			try:
+				self._in_flush = True
+				self.q.put(FlushMe)
+				self.q.join()
+			finally:
+				self._in_flush = False
 
 	def end_logging(self):
 		self.flush()
