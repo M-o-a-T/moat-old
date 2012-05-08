@@ -585,7 +585,7 @@ class WAGOio(object):
 		super(WAGOio,self).__init__(name, params,addons,ranges,values)
 
 	def list(self):
-		for r in super(WAGOinput,self).list():
+		for r in super(WAGOio,self).list():
 			yield r
 		yield ("server",self.server)
 		yield ("card",self.card)

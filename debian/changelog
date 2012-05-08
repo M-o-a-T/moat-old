@@ -1,3 +1,9 @@
+homevent (0.3.21) smurf; urgency=low
+
+  * super() call error
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Tue, 08 May 2012 09:58:20 +0200
+
 homevent (0.3.20) smurf; urgency=low
 
   * Allow RPC to request logging entries
