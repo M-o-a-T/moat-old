@@ -28,6 +28,8 @@ Documentation
 Code
 ====
 
+* Logger: create singleton integers instead of constants.
+
 * Reload: Use a command, not an interrupt
 
 * wago monitor: mask the 'retry' stanza.
