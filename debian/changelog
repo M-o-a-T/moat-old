@@ -1,6 +1,7 @@
 homevent (0.3.21) smurf; urgency=low
 
   * super() call error
+  * add valve.location and controller.location
 
  -- Matthias Urlichs <matthias@urlichs.de>  Tue, 08 May 2012 09:58:20 +0200
 
