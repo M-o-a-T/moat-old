@@ -65,7 +65,7 @@ class DoLogger(Logger):
 		"""
 	def _slog(self,level,txt):
 		if txt != ".":
-			print >>self.out,LogNames[level]+"> "+" ".join(txt
+			print >>self.out,LogNames[level]+"> "+txt
 
 
 if opts.debuglevel != "NONE":
