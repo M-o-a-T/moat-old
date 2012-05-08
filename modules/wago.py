@@ -594,7 +594,7 @@ class WAGOio(object):
 
 class WAGOinput(BoolIO,WAGOio,Input):
 	what="input"
-	doc="An input on a remote WAGO server"
+	doc="An input on a remote WAGO server. parameters: servername card port"
 
 	@property
 	def msg(self):
@@ -615,7 +615,7 @@ class WAGOinput(BoolIO,WAGOio,Input):
 
 class WAGOoutput(BoolIO,WAGOio,Output):
 	what="output"
-	doc="An output on a remote WAGO server"
+	doc="An output on a remote WAGO server. parameters: servername card port"
 
 	def _write(self,val):
 		msg = WAGOoutputRun(self.card,self.port,val)
