@@ -546,7 +546,7 @@ class WAGOtimedOutputRun(WAGOoutputRun):
 			return RECV_AGAIN
 		if msg.type is MT_IND_NAK and msg.msgid == self.msgid:
 			if not self.result.ready():
-				self.result.set(WAGOerror(msg.msg))
+				self.result.set(msg.msg)
 			return MINE
 		if (msg.type is MT_NAK or msg.type is MT_ERROR) and self.msgid is None:
 			self.result.set(WAGOerror(msg.msg))
@@ -556,6 +556,8 @@ class WAGOtimedOutputRun(WAGOoutputRun):
 	def error(self,err):
 		log("wago",DEBUG,"Got error",self,err)
 		simple_event("output","error", self.val, *self.queue.name)
+		if not self.result.ready():
+			self.result.set(err)
 		super(WAGOtimedOutputRun,self).error(err)
 	
 	def retry(self):
