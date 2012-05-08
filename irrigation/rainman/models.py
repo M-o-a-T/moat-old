@@ -47,6 +47,7 @@ class Controller(m.Model):
 		return u"‹%s %s›" % (self.__class__.__name__,self.name)
 	name = m.CharField(max_length=200)
 	site = m.ForeignKey(Site,related_name="controllers")
+	location = m.CharField(max_length=200, help_text="How to identify the controller (host name?)")
 	max_on = m.IntegerField(default=3, help_text="number of valves that can be on at any one time")
 
 class Valve(m.Model):
@@ -58,6 +59,7 @@ class Valve(m.Model):
 	comment = m.CharField(max_length=200)
 	feed = m.ForeignKey(Feed,related_name="valves")
 	controller = m.ForeignKey(Controller,related_name="valves")
+	location = m.CharField(max_length=200,help_text="how to identify the valve on its controller")
 	var = m.CharField(max_length=200, help_text="name of this output, in HomEvenT")
 	# 
 	# This describes the area that's watered

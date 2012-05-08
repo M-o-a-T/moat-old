@@ -17,7 +17,7 @@ class ControllerInline(admin.TabularInline):
 class ValveInline(admin.StackedInline):
 	model = Valve
 	extra = 0
-	fields = (('name','var','comment','feed'),('flow','area','shade','runoff'), ('time','level','priority'),('max_level','start_level','stop_level'))
+	fields = (('name','var','location','feed'),('flow','area','shade','runoff'), ('time','level','priority','comment'),('max_level','start_level','stop_level'))
 
 class HistoryInline(admin.TabularInline):
 	model = History
@@ -88,7 +88,7 @@ class FeedAdmin(admin.ModelAdmin):
 	]
 
 class ControllerAdmin(admin.ModelAdmin):
-	list_display = ('name','site')
+	list_display = ('name','site','location')
 	inlines = [
 		ValveInline,
 	]
