@@ -1,3 +1,10 @@
+homevent (0.3.22) smurf; urgency=low
+
+  * Add command to auto-generate the valve configuration.
+  * Fix log monitoring.
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Tue, 08 May 2012 18:08:22 +0200
+
 homevent (0.3.21) smurf; urgency=low
 
   * super() call error
