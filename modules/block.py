@@ -65,7 +65,11 @@ class Async(MainStatementList,Jobber):
 			process_failure(err)
 
 	def run(self,*a,**k):
-		self.start_job("job", self._run,a,k)
+		#does not work because (a) nobody cleans it and
+		#(b) blocks unrelated or recursive calls
+		#self.start_job("job", self._run,a,k)
+
+		gevent.spawn(self._run,a,k)
 		# TODO: some sort of global job list
 		# so that they can be stopped when ending the program
 
