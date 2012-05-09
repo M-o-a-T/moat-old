@@ -197,6 +197,8 @@ def get_collect(name, allow_collection=False):
 		return None
 	coll = collections
 
+	if allow_collection and name[-1] == "*":
+		return coll[Name(*name[:-1])]
 	while len(name):
 		n = len(name)
 		while n > 0:

@@ -47,6 +47,8 @@ list ‹type›
 	shows a list of items of that type
 list ‹type› ‹name…›
 	shows details for that item
+list ‹type› *
+	shows details for all items of that type
 	
 """
 	def run(self,ctx,**k):
@@ -76,10 +78,25 @@ list ‹type› ‹name…›
 		c = get_collect(event, allow_collection=True)
 
 		try:
+			def out_one(c):
+				q = Queue(3)
+				try:
+					job = spawn(getter,self.ctx.out,q)
+					flatten(q,(c,))
+				finally:
+#					with log_wait("list "+str(event)):
+					q.put(None)
+					job.join()
+
 			if c is None:
 				for m in all_collect(skip=False):
 					print >>self.ctx.out, " ".join(m.name)
 			elif isinstance(c,Collection):
+				if event[-1] == "*":
+					for m in c.iteritems():
+						print >>self.ctx.out,"* %s :: %s" % (n,m)
+						out_one(m)
+					return
 				for n,m in c.iteritems():
 					try:
 						m = m.info
@@ -98,14 +115,7 @@ list ‹type› ‹name…›
 					else:
 						print >>self.ctx.out,u"%s" % (n,)
 			else:
-				q = Queue(3)
-				try:
-					job = spawn(getter,self.ctx.out,q)
-					flatten(q,(c,))
-				finally:
-#					with log_wait("list "+str(event)):
-					q.put(None)
-					job.join()
+				out_one(c)
 
 		except Exception as e:
 			fix_exception(e)

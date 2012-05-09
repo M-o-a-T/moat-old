@@ -39,6 +39,7 @@ from homevent.logging import BaseLogger,TRACE
 from datetime import datetime,date,time,timedelta
 
 from rpyc import Service
+from rpyc.core.protocol import DEFAULT_CONFIG
 from rpyc.utils.server import ThreadedServer
 
 from gevent.queue import Queue
@@ -205,6 +206,10 @@ class RPCconn(Service,Collected):
 				for m in all_collect(skip=False):
 					yield m.name,
 			elif isinstance(c,Collection):
+				if args[-1] == "*":
+					for n,m in c.iteritems():
+						yield n,m
+					return
 				for n,m in c.iteritems():
 					try:
 						m = m.info
@@ -307,7 +312,7 @@ class RPCserver(Collected,Jobber):
 		self.name = name
 		self.host=host
 		self.port=port
-		self.server = ThreadedServer(gen_rpcconn(name), hostname=host,port=port,ipv6=True)
+		self.server = ThreadedServer(gen_rpcconn(name), hostname=host,port=port,ipv6=True, protocol_config = {"safe_attrs":set(("list","__unicode__")).union(DEFAULT_CONFIG["safe_attrs"])})
 		self.server.listener.settimeout(None)
 		self.start_job("job",self._start)
 		super(RPCserver,self).__init__()
