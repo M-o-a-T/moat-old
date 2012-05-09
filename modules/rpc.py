@@ -199,7 +199,8 @@ class RPCconn(Service,Collected):
 		unregister_worker(worker)
 		self.workers.remove(worker)
 
-	def exposed_list(self,*args):
+	def exposed_cmd_list(self,*args):
+		# don't call this 'exposed_list'!
 		c = get_collect(args, allow_collection=True)
 		try:
 			if c is None:
@@ -293,6 +294,7 @@ class RPCconn(Service,Collected):
 		yield ("local port", self._conn._config["endpoints"][0][1])
 		yield ("remote host", self._conn._config["endpoints"][1][0])
 		yield ("remote port", self._conn._config["endpoints"][1][1])
+	exposed_list = list
 
 def gen_rpcconn(name):
 	class namedRPC(RPCconn):

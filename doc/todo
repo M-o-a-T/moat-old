@@ -28,6 +28,8 @@ Documentation
 Code
 ====
 
+* move the initial listing code from modules/data and scripts/list.py to flatten()
+
 * Logger: create singleton integers instead of constants.
 
 * Reload: Use a command, not an interrupt

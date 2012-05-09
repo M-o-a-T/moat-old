@@ -69,21 +69,14 @@ def out_one(p,c):
 
 	
 c = rpyc.connect("::1", 50005, ipv6=True)
-d = []
-maxl = 0
-for x in c.root.list(*sys.argv[1:]):
+for x in c.root.cmd_list(*sys.argv[1:]):
 	if x is None:
 		print "(None?)"
 		continue
 		
-	elif len(x) == 2:
-		if maxl < len(x[0]):
-			maxl = len(x[0])
-	d.append(x)
-for x in d:
 	if len(x) == 2:
 		a,b = x
-		a = str(a)+" "*(maxl-len(a))
+		a = str(a)
 		out_one(a,b)
 #		if hasattr(b,"list"):
 #			for bb in b.list():
