@@ -28,6 +28,8 @@ Documentation
 Code
 ====
 
+* scripts/monitor: add filtering
+
 * move the initial listing code from modules/data and scripts/list.py to flatten()
 
 * Logger: create singleton integers instead of constants.
