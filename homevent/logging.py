@@ -272,6 +272,9 @@ class LogWorker(ExcWorker):
 				return
 		except AttributeError:
 			pass
+		if levels.get("event",TRACE) > level:
+			return
+
 		subsys = k.get("subsys",None)
 		if subsys is not None:
 			lim = levels.get(subsys,NONE)
