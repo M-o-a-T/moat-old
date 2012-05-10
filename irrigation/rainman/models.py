@@ -14,8 +14,13 @@
 ##  for more details.
 ##
 
+from datetime import datetime,time,timedelta
 from django.db import models as m
 from django.utils import timezone
+from django.utils.timezone import utc
+
+def now():
+	return datetime.utcnow().replace(tzinfo=utc)
 
 
 class Site(m.Model):
@@ -98,7 +103,7 @@ class History(m.Model):
 	site = m.ForeignKey(Site,related_name="history")
 	time = m.DateTimeField()
 	
-	# These values accumulate from this record's "time" until the next
+	# These values log the accumulated volumes since the last entry
 	rate = m.FloatField(help_text="how much water evaporated (mm)") # calculated value
 	rain = m.FloatField(help_text="how much rain was there (mm)") # measured value
 
@@ -232,6 +237,18 @@ class RainMeter(m.Model):
 	controller = m.ForeignKey(Controller,related_name="rain_meters")
 	var = m.CharField(max_length=200,help_text="monitor name in HomEvenT") # HomEvenT's variable name for it
 
+class Log(m.Model):
+	"""Scheduler and other events"""
+	class Meta:
+		pass
+	def __unicode__(self):
+		return u"‹%s %s %s›" % (self.__class__.__name__, self.logger, self.valve or self.controller or self.site)
+	logger = m.CharField(max_length=200)
+	timestamp = m.DateTimeField(default=now)
+	site = m.ForeignKey(Site,related_name="logs")
+	controller = m.ForeignKey(Controller,related_name="logs")
+	valve = m.ForeignKey(Valve,related_name="logs")
+	text = m.TextField()
 
 from django.contrib.auth.models import User as DjangoUser
 class UserForGroup(m.Model):
