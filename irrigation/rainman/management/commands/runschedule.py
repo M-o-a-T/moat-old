@@ -210,7 +210,6 @@ class ParamGroup(SchedCommon):
 		self = object.__new__(cls)
 		paramgroups[pargroup.id] = self
 		self.pg = pargroup
-		self.log("Startup")
 		return self
 	def __init__(self,site):
 		pass
@@ -291,7 +290,7 @@ class SchedSite(SchedCommon):
 			for d in getattr(self.s,M.meter_type+"_meters",()).all():
 				ml.add(M(d))
 
-		log(self.s,"Startup")
+		self.log("Startup")
 		return self
 	def __init__(self,site):
 		pass
