@@ -280,12 +280,14 @@ class Output(CommonIO):
 			self._write(wval)
 		elif self._tmwrite is not None:
 			self._tmwrite(wval,timer,wnextval)
+			simple_event(Context(),"output","set",self.repr(wval),self.repr(wnextval),*self.name)
 		else:
 			self._write(wval)
 			self.timer = OutTimer(self,timer,nextval)
 			res = self.timer.q.get()
 			if isinstance(res,BaseException):
 				reraise(res)
+			simple_event(Context(),"output","set",self.repr(wval),self.repr(wnextval),*self.name)
 
 	def trans(self, val):
 		"""Translate the output, i.e. script data to input values"""
