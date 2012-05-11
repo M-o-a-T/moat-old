@@ -311,7 +311,10 @@ class Monitor(Collected,Jobber):
 				else:
 					log("monitor",TRACE,"raw",val,*self.name)
 					if hasattr(self,"factor"):
-						val = val * self.factor + self.offset
+						try:
+							val = val * self.factor + self.offset
+						except TypeError:
+							log("monitor",ERROR,self.name,val,self.factor,self.offset)
 					self.data.append(val)
 
 					avg = self.filter_data()
