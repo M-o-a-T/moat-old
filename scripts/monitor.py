@@ -7,19 +7,21 @@ from rpyc.core.service import VoidService
 from homevent import gevent_rpyc
 gevent_rpyc.patch_all()
 
-host="::1"
-port=50005
-if len(sys.argv) > 1:
-	port = int(sys.argv[-1])
-if len(sys.argv) > 2:
-	host = sys.argv[-2]
+from optparse import OptionParser
+parser = OptionParser(conflict_handler="resolve")
+parser.add_option("-h","--help","-?", action="help",
+	help="print this help text")
+parser.add_option("-s", "--server", dest="host", action="store",
+	default="::1", help="Server to connect to")
+parser.add_option("-p", "--port", dest="port", action="store",
+	type="int",default="50005", help="port to connect to")
 
 class ExitService(VoidService):
 	def on_disconnect(self,*a,**k):
 		sys.exit()
 	
 
-c = rpyc.connect(host, port, ipv6=True, service=ExitService)
+c = rpyc.connect(opts.host, opts.port, ipv6=True, service=ExitService)
 c._channel.stream.sock.settimeout(None)
 d = []
 maxl = 0

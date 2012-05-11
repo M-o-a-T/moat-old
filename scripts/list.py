@@ -34,7 +34,16 @@ from homevent.base import Name,flatten
 
 from gevent import spawn
 from gevent.queue import Queue
+from optparse import OptionParser
+parser = OptionParser(conflict_handler="resolve")
+parser.add_option("-h","--help","-?", action="help",
+	help="print this help text")
+parser.add_option("-s", "--server", dest="host", action="store",
+	default="::1", help="Server to connect to")
+parser.add_option("-p", "--port", dest="port", action="store",
+	type="int",default="50005", help="port to connect to")
 
+(opts, args) = parser.parse_args()
 
 def getter(q):
 	while True:
@@ -68,8 +77,8 @@ def out_one(p,c):
 		job.join()
 
 	
-c = rpyc.connect("::1", 50005, ipv6=True)
-for x in c.root.cmd_list(*sys.argv[1:]):
+c = rpyc.connect(opts.host, opts.port, ipv6=True)
+for x in c.root.cmd_list(*args):
 	if x is None:
 		print "(None?)"
 		continue
