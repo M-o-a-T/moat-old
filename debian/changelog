@@ -1,3 +1,9 @@
+homevent (0.3.24) smurf; urgency=low
+
+  * Fix events for re-setting of timed outputs
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Fri, 11 May 2012 22:09:04 +0200
+
 homevent (0.3.23) smurf; urgency=low
 
   * Fix async: calls
