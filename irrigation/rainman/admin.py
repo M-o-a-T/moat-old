@@ -3,7 +3,7 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 admin.autodiscover()
 
-from rainman.models import Site,Feed,Controller,Valve,ParamGroup,History,EnvironmentEffect,Level,Day,DayTime,Group,GroupOverride,ValveOverride,GroupAdjust,Schedule,RainMeter,TempMeter,WindMeter,SunMeter,UserForGroup
+from rainman.models import Site,Feed,Controller,Valve,ParamGroup,History,EnvironmentEffect,Level,Day,DayTime,Group,GroupOverride,ValveOverride,GroupAdjust,Schedule,RainMeter,TempMeter,WindMeter,SunMeter,UserForGroup,Log
 
 # SiteInline
 class FeedInline(admin.TabularInline):
@@ -87,6 +87,10 @@ class UserForGroupInline(admin.TabularInline):
 	model = UserForGroup
 	extra = 0
 
+class LogInline(admin.TabularInline):
+	model = Log
+	extra = 0
+
 
 class SiteAdmin(admin.ModelAdmin):
 	list_display = ('name','host')
@@ -124,10 +128,12 @@ class ValveAdmin(admin.ModelAdmin):
 class LevelAdmin(admin.ModelAdmin):
 	list_display = ('valve','time','level','flow')
 	date_hierarchy = 'time'
+	ordering = ('-time',)
 
 class HistoryAdmin(admin.ModelAdmin):
 	list_display = ('time','rain','temp','wind','sun')
 	date_hierarchy = 'time'
+	ordering = ('-time',)
 
 class EnvironmentEffectAdmin(admin.ModelAdmin):
 	list_display = ('factor','temp','wind','sun')
@@ -153,10 +159,12 @@ class GroupAdmin(admin.ModelAdmin):
 class GroupOverrideAdmin(admin.ModelAdmin):
 	list_display = ('group','start','duration','allowed')
 	date_hierarchy = 'start'
+	ordering = ('-start',)
 
 class ValveOverrideAdmin(admin.ModelAdmin):
 	list_display = ('valve','start','duration','running')
 	date_hierarchy = 'start'
+	ordering = ('-start',)
 
 class ParamGroupAdmin(admin.ModelAdmin):
 	list_display = ('name','site','factor','list_valves')
@@ -164,10 +172,12 @@ class ParamGroupAdmin(admin.ModelAdmin):
 class GroupAdjustAdmin(admin.ModelAdmin):
 	list_display = ('group','start','factor')
 	date_hierarchy = 'start'
+	ordering = ('-start',)
 
 class ScheduleAdmin(admin.ModelAdmin):
 	list_display = ('valve','start','duration','seen','changed')
 	date_hierarchy = 'start'
+	ordering = ('-start',)
 
 class RainMeterAdmin(admin.ModelAdmin):
 	list_display = ('name','var')
@@ -183,6 +193,11 @@ class SunMeterAdmin(admin.ModelAdmin):
 
 class UserForGroupAdmin(admin.ModelAdmin):
 	list_display = ('user','group')
+
+class LogAdmin(admin.ModelAdmin):
+	list_display = ('site','controller','valve','timestamp','text')
+	date_hierarchy = 'timestamp'
+	ordering = ('-timestamp',)
 
 admin.site.register(Site, SiteAdmin)
 admin.site.register(Feed, FeedAdmin)
@@ -204,4 +219,5 @@ admin.site.register(TempMeter, TempMeterAdmin)
 admin.site.register(WindMeter, WindMeterAdmin)
 admin.site.register(SunMeter, SunMeterAdmin)
 admin.site.register(UserForGroup, UserForGroupAdmin)
+admin.site.register(Log, LogAdmin)
 
