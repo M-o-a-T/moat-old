@@ -80,7 +80,12 @@ class Command(BaseCommand):
 class RestartService(VoidService):
 	def on_disconnect(self,*a,**k):
 		for s in sites.itervalues():
-			s.maybe_restart(self)
+			if s.ci._local_root is self:
+				s.log("disconnected")
+				s.ci = None
+				s.run_main_task()
+				gevent.spawn_later(10,s.maybe_restart)
+
 
 class Meter(object):
 	sum_it = False
@@ -295,15 +300,17 @@ class SchedSite(SchedCommon):
 		self.ci = rpyc.connect(host=self.s.host, port=int(self.s.port), ipv6=True, service=RestartService)
 
 	def maybe_restart(self):
+		self.log("reconnecting")
 		try:
 			self.connect()
 		except Exception:
 			print_exc()
-			gevent.sched_later(100,self.maybe_restart())
+			gevent.spawn_later(100,self.maybe_restart)
 		else:
 			self.reconnect()
 
 	def reconnect(self):
+		self.log("connected")
 		for c in self.controllers:
 			c.reconnect()
 		for mm in self.meters.itervalues():
@@ -319,13 +326,9 @@ class SchedSite(SchedCommon):
 	def no_rain(self):
 		"""Rain has stopped."""
 		# called by timer
-		self.log("Stopped raining")
 		self.rain_timer = None
-		rain = 0
-		for rw in self.rainwatchers:
-			r = rw.get_rain()
-			if rain < r: rain = r
-		run_calc(self,rain=rain)
+		self.log("Stopped raining")
+		self.run_main_task()
 
 	def has_rain(self):
 		"""Some monitor told us that it started raining"""
@@ -348,7 +351,7 @@ class SchedSite(SchedCommon):
 				if sc.start+sc.duration > n:
 					sc.duration=n-sc.start
 					sc.save()
-		self.run_calc()
+		self.run_main_task()
 				
 		self.rain_timer = gevent.spawn_later(300,self.no_rain)
 
@@ -360,14 +363,13 @@ class SchedSite(SchedCommon):
 			return
 		self._run_delay = delay
 		self._run_last = now()
-		self._run = gevent.spawn_later(self._run_delay, self.run_calc, kill=False)
+		self._run = gevent.spawn_later(self._run_delay, self.run_main_task, kill=False)
 		self._running = False
-		self._running_rain = 0
 
-	def run_calc(self, kill=True, rain=0):
+	def run_main_task(self, kill=True):
 		"""Run the calculation loop."""
 		if self._running:
-			self._running_rain += rain
+			self._running += 1
 			return
 		self._running = True
 		try:
@@ -375,16 +377,14 @@ class SchedSite(SchedCommon):
 				self._run.kill()
 			ts = (now()-self._run_last).total_seconds()
 			if ts < 10:
-				self._run = gevent.spawn_later(10-ts, self.run_calc, kill=False, rain=rain)
+				self._run = gevent.spawn_later(10-ts, self.run_main_task, kill=False)
 				return
-			rain += self._running_rain
-			self._running_rain = 0
-			self.calc_history(rain=rain)
-			self._run = gevent.spawn_later(self._run_delay, self.run_calc, kill=False)
+			self.main_task()
 		finally:
-			self._running = False
+			r,self._running = self._running,False
+			self._run = gevent.spawn_later(10 if r > 1 else self._run_delay, self.run_main_task, kill=False)
 
-	def calc_history(self,rain=0,kill=True):
+	def new_history_entry(self,rain=0,kill=True):
 		"""Create a new history entry"""
 		values = {}
 		for t,ml in self.meters.items():
@@ -410,10 +410,10 @@ class SchedSite(SchedCommon):
 		print >>sys.stderr,"Values:",values
 		h = History(site=self.s,time=now(),**values)
 		h.save()
-		return
+		return h
 
 	def main_task(self):
-		self.run_calc()
+		self.new_history_entry()
 
 
 class SchedController(SchedCommon):
@@ -433,6 +433,10 @@ class SchedController(SchedCommon):
 	
 	def log(self,txt):
 		log(self.c,txt)
+	
+	def reconnect(self):
+		for v in self.c.valves.all():
+			SchedValve(v).reconnect()
 
 class SchedValve(SchedCommon):
 	"""Mirrors a valve."""
