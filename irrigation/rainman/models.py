@@ -14,25 +14,33 @@
 ##  for more details.
 ##
 
+from __future__ import division,absolute_import
+
 from datetime import datetime,time,timedelta
 from django.db import models as m
-from django.utils import timezone
-from django.utils.timezone import utc
-
-def now():
-	return datetime.utcnow().replace(tzinfo=utc)
-
+from rainman.utils import now
 
 class Site(m.Model):
-	"""One site with stuff to irrigate."""
+	"""One place with stuff to irrigate."""
 	class Meta:
 		pass
 	def __unicode__(self):
 		return u"‹%s %s›" % (self.__class__.__name__,self.name)
 	name = m.CharField(max_length=200, unique=True)
 	host = m.CharField(max_length=200, default="localhost", help_text="where to find the HomEvenT server")
+	port = m.PositiveIntegerField(default=50005, help_text="Port for RPC")
 	rate = m.FloatField(default=2, help_text="how many mm/day evaporate here, on average")
+	_rain_delay = m.PositiveIntegerField("rain_delay",default=300,help_text="Wait time after the last sensor says 'no more rain'")
+	def _get_rain_delay(self):
+		return timedelta(0,self._rain_delay)
+	def _set_rain_delay(self,val):
+		self._rain_delay = timedelta(0,self._rain_delay)
+	rain_delay = property(_get_rain_delay,_set_rain_delay)
 
+	@property
+	def rate_sec(self):
+		return self.rate/24/60/60
+	
 class Feed(m.Model):
 	"""A source of water"""
 	class Meta:
@@ -40,7 +48,7 @@ class Feed(m.Model):
 	def __unicode__(self):
 		return u"‹%s %s›" % (self.__class__.__name__,self.name)
 	name = m.CharField(max_length=200)
-	site = m.ForeignKey(Site,related_name="feeds")
+	site = m.ForeignKey(Site,related_name="feed_meters")
 	flow = m.FloatField(default=10, help_text="liters per second")
 	var = m.CharField(max_length=200, help_text="flow counter variable", blank=True)
 
@@ -55,15 +63,30 @@ class Controller(m.Model):
 	location = m.CharField(max_length=200, help_text="How to identify the controller (host name?)")
 	max_on = m.IntegerField(default=3, help_text="number of valves that can be on at any one time")
 
+class ParamGroup(m.Model):
+	class Meta:
+		unique_together = (("site", "name"),)
+	def __unicode__(self):
+		return u"‹%s %s›" % (self.__class__.__name__,self.name)
+	name = m.CharField(max_length=200)
+	comment = m.CharField(max_length=200,blank=True)
+	site = m.ForeignKey(Site,related_name="param_groups")
+	factor = m.FloatField(default=1.0, help_text="Base Factor")
+	rain = m.BooleanField(default=True,help_text="affected by rain?")
+	def list_valves(self):
+		return u"¦".join((d.name for d in self.valves.all()))
+
 class Valve(m.Model):
+	"""One controller of water"""
 	class Meta:
 		unique_together = (("controller", "name"),)
 	def __unicode__(self):
 		return u"‹%s %s›" % (self.__class__.__name__,self.name)
 	name = m.CharField(max_length=200)
-	comment = m.CharField(max_length=200)
+	comment = m.CharField(max_length=200,blank=True)
 	feed = m.ForeignKey(Feed,related_name="valves")
 	controller = m.ForeignKey(Controller,related_name="valves")
+	param_group = m.ForeignKey(ParamGroup,related_name="valves")
 	location = m.CharField(max_length=200,help_text="how to identify the valve on its controller")
 	var = m.CharField(max_length=200, help_text="name of this output, in HomEvenT")
 	# 
@@ -92,7 +115,7 @@ class Level(m.Model):
 	valve = m.ForeignKey(Valve, related_name="levels")
 	time = m.DateTimeField()
 	level = m.FloatField(help_text="then-current water capacity, in mm")
-	flow = m.FloatField(default=0, help_text="actual water flow through the valve")
+	flow = m.FloatField(default=0, help_text="m³ since last entry")
 
 class History(m.Model):
 	"""historic evaporation and rain levels"""
@@ -103,35 +126,27 @@ class History(m.Model):
 	site = m.ForeignKey(Site,related_name="history")
 	time = m.DateTimeField()
 	
-	# These values log the accumulated volumes since the last entry
-	rate = m.FloatField(help_text="how much water evaporated (mm)") # calculated value
-	rain = m.FloatField(help_text="how much rain was there (mm)") # measured value
+	# accumulated volume since the last entry
+	rain = m.FloatField(default=0, help_text="how much rain was there (mm)") # measured value
+	feed = m.FloatField(default=0, help_text="how much water was used (measured)") # measured value
 
-class Environment(m.Model):
-	"""historic environmental data"""
-	class Meta:
-		unique_together = (("site", "time"),)
-	def __unicode__(self):
-		return u"‹%s @%s %s›" % (self.__class__.__name__,self.time,self.site)
-	site = m.ForeignKey(Site,related_name="environments")
-	time = m.DateTimeField()
-
-	temp = m.FloatField(help_text="average temperature (°C)")
-	wind = m.FloatField(help_text="wind speed (m/s or whatever)")
-	sun = m.FloatField(help_text="how much sunshine was there (0-1)") # measured value
+	# averages since the last entry
+	temp = m.FloatField(blank=True,null=True, help_text="average temperature (°C)")
+	wind = m.FloatField(blank=True,null=True, help_text="wind speed (m/s or whatever)")
+	sun = m.FloatField(blank=True,null=True, help_text="how much sunshine was there (0-1)") # measured value
 
 class EnvironmentEffect(m.Model):
 	class Meta:
-		unique_together = (("site", "temp","wind","sun"),)
+		pass
 	def __unicode__(self):
 		return u"‹%s @%s %s¦%s¦%s›" % (self.__class__.__name__,self.site.name,self.temp,self.wind,self.sun)
-	site = m.ForeignKey(Site,related_name="environment_effects")
+	param_group = m.ForeignKey(Site,related_name="environment_effects")
 	factor = m.FloatField(default=1.0, help_text="Factor to use at this data point")
 
-	temp = m.FloatField(blank=True,null=True, default=20, help_text="average temperature (°C)")
+	# these are single- or multi-dimensional data points for finding a reasonable factor
+	temp = m.FloatField(blank=True,null=True, help_text="average temperature (°C)")
 	wind = m.FloatField(blank=True,null=True, help_text="wind speed (m/s or whatever)")
 	sun = m.FloatField(blank=True,null=True, help_text="how much sunshine was there (0-1)") # measured value
-	
 
 class Day(m.Model):
 	"""A generic name for a time description"""
@@ -231,11 +246,44 @@ class RainMeter(m.Model):
 	class Meta:
 		unique_together = (("site","name"),)
 	def __unicode__(self):
-		return u"‹%s @%s %s›" % (self.__class__.__name__,self.controller,self.var)
+		return u"‹%s @%s %s›" % (self.__class__.__name__,self.site,self.var)
 	name = m.CharField(max_length=200)
 	site = m.ForeignKey(Site,related_name="rain_meters")
-	controller = m.ForeignKey(Controller,related_name="rain_meters")
 	var = m.CharField(max_length=200,help_text="monitor name in HomEvenT") # HomEvenT's variable name for it
+	weight = m.PositiveSmallIntegerField(default=10,help_text="how important is this value? 0=presence detector")
+
+class TempMeter(m.Model):
+	"""The rain in Spain stays mainly in the plain."""
+	class Meta:
+		unique_together = (("site","name"),)
+	def __unicode__(self):
+		return u"‹%s @%s %s›" % (self.__class__.__name__,self.site,self.var)
+	name = m.CharField(max_length=200)
+	site = m.ForeignKey(Site,related_name="temp_meters")
+	var = m.CharField(max_length=200,help_text="monitor name in HomEvenT") # HomEvenT's variable name for it
+	weight = m.PositiveSmallIntegerField(default=10,help_text="how important is this value?")
+
+class WindMeter(m.Model):
+	"""obvious what this is for ;-)"""
+	class Meta:
+		unique_together = (("site","name"),)
+	def __unicode__(self):
+		return u"‹%s @%s %s›" % (self.__class__.__name__,self.site,self.var)
+	name = m.CharField(max_length=200)
+	site = m.ForeignKey(Site,related_name="wind_meters")
+	var = m.CharField(max_length=200,help_text="monitor name in HomEvenT") # HomEvenT's variable name for it
+	weight = m.PositiveSmallIntegerField(default=10,help_text="how important is this value?")
+
+class SunMeter(m.Model):
+	"""I am the sunshine of your … garden."""
+	class Meta:
+		unique_together = (("site","name"),)
+	def __unicode__(self):
+		return u"‹%s @%s %s›" % (self.__class__.__name__,self.site,self.var)
+	name = m.CharField(max_length=200)
+	site = m.ForeignKey(Site,related_name="sun_meters")
+	var = m.CharField(max_length=200,help_text="monitor name in HomEvenT") # HomEvenT's variable name for it
+	weight = m.PositiveSmallIntegerField(default=10,help_text="how important is this value?")
 
 class Log(m.Model):
 	"""Scheduler and other events"""
@@ -246,8 +294,8 @@ class Log(m.Model):
 	logger = m.CharField(max_length=200)
 	timestamp = m.DateTimeField(default=now)
 	site = m.ForeignKey(Site,related_name="logs")
-	controller = m.ForeignKey(Controller,related_name="logs")
-	valve = m.ForeignKey(Valve,related_name="logs")
+	controller = m.ForeignKey(Controller,related_name="logs", null=True,blank=True)
+	valve = m.ForeignKey(Valve,related_name="logs", null=True,blank=True)
 	text = m.TextField()
 
 from django.contrib.auth.models import User as DjangoUser

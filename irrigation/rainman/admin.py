@@ -3,7 +3,7 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 admin.autodiscover()
 
-from rainman.models import Site,Feed,Controller,Valve,History,Environment,EnvironmentEffect,Level,Day,DayTime,Group,GroupOverride,ValveOverride,GroupAdjust,Schedule,RainMeter,UserForGroup
+from rainman.models import Site,Feed,Controller,Valve,ParamGroup,History,EnvironmentEffect,Level,Day,DayTime,Group,GroupOverride,ValveOverride,GroupAdjust,Schedule,RainMeter,TempMeter,WindMeter,SunMeter,UserForGroup
 
 # SiteInline
 class FeedInline(admin.TabularInline):
@@ -19,12 +19,12 @@ class ValveInline(admin.StackedInline):
 	extra = 0
 	fields = (('name','var','location','feed'),('flow','area','shade','runoff'), ('time','level','priority','comment'),('max_level','start_level','stop_level'))
 
-class HistoryInline(admin.TabularInline):
-	model = History
+class ParamGroupInline(admin.TabularInline):
+	model = ParamGroup
 	extra = 0
 
-class EnvironmentInline(admin.TabularInline):
-	model = Environment
+class HistoryInline(admin.TabularInline):
+	model = History
 	extra = 0
 
 class EnvironmentEffectInline(admin.TabularInline):
@@ -55,6 +55,10 @@ class ValveOverrideInline(admin.TabularInline):
 	model = ValveOverride
 	extra = 0
 
+class ParamGroupInline(admin.TabularInline):
+	model = ParamGroup
+	extra = 0
+
 class GroupAdjustInline(admin.TabularInline):
 	model = GroupAdjust
 	extra = 0
@@ -65,6 +69,18 @@ class ScheduleInline(admin.TabularInline):
 
 class RainMeterInline(admin.TabularInline):
 	model = RainMeter
+	extra = 0
+
+class TempMeterInline(admin.TabularInline):
+	model = TempMeter
+	extra = 0
+
+class WindMeterInline(admin.TabularInline):
+	model = WindMeter
+	extra = 0
+
+class SunMeterInline(admin.TabularInline):
+	model = SunMeter
 	extra = 0
 
 class UserForGroupInline(admin.TabularInline):
@@ -78,7 +94,11 @@ class SiteAdmin(admin.ModelAdmin):
 		FeedInline,
 		ControllerInline,
 		GroupInline,
-		HistoryInline,
+		ParamGroupInline,
+		RainMeterInline,
+		TempMeterInline,
+		WindMeterInline,
+		SunMeterInline,
 	]
 
 class FeedAdmin(admin.ModelAdmin):
@@ -106,11 +126,7 @@ class LevelAdmin(admin.ModelAdmin):
 	date_hierarchy = 'time'
 
 class HistoryAdmin(admin.ModelAdmin):
-	list_display = ('time','rate','rain')
-	date_hierarchy = 'time'
-
-class EnvironmentAdmin(admin.ModelAdmin):
-	list_display = ('time','temp','wind','sun')
+	list_display = ('time','rain','temp','wind','sun')
 	date_hierarchy = 'time'
 
 class EnvironmentEffectAdmin(admin.ModelAdmin):
@@ -142,6 +158,9 @@ class ValveOverrideAdmin(admin.ModelAdmin):
 	list_display = ('valve','start','duration','running')
 	date_hierarchy = 'start'
 
+class ParamGroupAdmin(admin.ModelAdmin):
+	list_display = ('name','site','factor','list_valves')
+
 class GroupAdjustAdmin(admin.ModelAdmin):
 	list_display = ('group','start','factor')
 	date_hierarchy = 'start'
@@ -153,6 +172,15 @@ class ScheduleAdmin(admin.ModelAdmin):
 class RainMeterAdmin(admin.ModelAdmin):
 	list_display = ('name','var')
 
+class TempMeterAdmin(admin.ModelAdmin):
+	list_display = ('name','var')
+
+class WindMeterAdmin(admin.ModelAdmin):
+	list_display = ('name','var')
+
+class SunMeterAdmin(admin.ModelAdmin):
+	list_display = ('name','var')
+
 class UserForGroupAdmin(admin.ModelAdmin):
 	list_display = ('user','group')
 
@@ -160,9 +188,9 @@ admin.site.register(Site, SiteAdmin)
 admin.site.register(Feed, FeedAdmin)
 admin.site.register(Controller, ControllerAdmin)
 admin.site.register(Valve, ValveAdmin)
+admin.site.register(ParamGroup, ParamGroupAdmin)
 admin.site.register(Level, LevelAdmin)
 admin.site.register(History, HistoryAdmin)
-admin.site.register(Environment, EnvironmentAdmin)
 admin.site.register(EnvironmentEffect, EnvironmentEffectAdmin)
 admin.site.register(Day, DayAdmin)
 admin.site.register(DayTime, DayTimeAdmin)
@@ -172,5 +200,8 @@ admin.site.register(ValveOverride, ValveOverrideAdmin)
 admin.site.register(GroupAdjust, GroupAdjustAdmin)
 admin.site.register(Schedule, ScheduleAdmin)
 admin.site.register(RainMeter, RainMeterAdmin)
+admin.site.register(TempMeter, TempMeterAdmin)
+admin.site.register(WindMeter, WindMeterAdmin)
+admin.site.register(SunMeter, SunMeterAdmin)
 admin.site.register(UserForGroup, UserForGroupAdmin)
 
