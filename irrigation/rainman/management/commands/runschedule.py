@@ -79,8 +79,8 @@ class Command(BaseCommand):
 
 class RestartService(VoidService):
 	def on_disconnect(self,*a,**k):
-		for c in controllers.itervalues():
-			c.maybe_restart(self)
+		for s in sites.itervalues():
+			s.maybe_restart(self)
 
 class Meter(object):
 	sum_it = False
@@ -122,6 +122,11 @@ class SumMeter(Meter):
 class RainMeter(SumMeter):
 	meter_type="rain"
 
+	def add_value(self,val):
+		super(RainMeter,self).add_value(val)
+		if val > 0:
+			self.site.has_rain()
+
 class FeedMeter(SumMeter):
 	meter_type="feed"
 	sum_it = True
@@ -156,9 +161,9 @@ class AvgMeter(Meter):
 	def snapshot(self):
 		n = now()
 		if self.ts is not None and self.val is not None:
-			w=(n-self.ts).total_seconds
+			w=(n-self.ts).total_seconds()
 			if w > 300: w = 300 # if the measurer dies
-			self.avg = w*self.val
+			self.avg += w*self.val
 			self.nval += w
 		self.ts = n
 	
@@ -263,6 +268,7 @@ class SchedSite(SchedCommon):
 	"""Mirrors a site"""
 	rain_timer = None
 	rain_counter = 0
+	_run_delay = None
 
 	def __new__(cls,site):
 		if site.id in sites:
@@ -270,7 +276,7 @@ class SchedSite(SchedCommon):
 		self = object.__new__(cls)
 		sites[site.id] = self
 		self.s = site
-		self.ci = rpyc.connect(host=site.host, port=int(site.port), ipv6=True, service=RestartService)
+		self.connect()
 
 		self.controllers = set()
 		self.meters = {}
@@ -285,8 +291,19 @@ class SchedSite(SchedCommon):
 	def __init__(self,site):
 		pass
 
-	def reconnect(self,ci):
-		self.ci = ci
+	def connect(self):
+		self.ci = rpyc.connect(host=self.s.host, port=int(self.s.port), ipv6=True, service=RestartService)
+
+	def maybe_restart(self):
+		try:
+			self.connect()
+		except Exception:
+			print_exc()
+			gevent.sched_later(100,self.maybe_restart())
+		else:
+			self.reconnect()
+
+	def reconnect(self):
 		for c in self.controllers:
 			c.reconnect()
 		for mm in self.meters.itervalues():
@@ -335,13 +352,16 @@ class SchedSite(SchedCommon):
 				
 		self.rain_timer = gevent.spawn_later(300,self.no_rain)
 
-	def run_every(self,delay=None):
+	def run_every(self,delay):
 		"""Initiate running the calculation and scheduling loop every @delay seconds."""
 
+		if self._run_delay is not None:
+			self._run_delay = delay # just update
+			return
 		self._run_delay = delay
 		self._run_last = now()
 		self._run = gevent.spawn_later(self._run_delay, self.run_calc, kill=False)
-		self._running = True
+		self._running = False
 		self._running_rain = 0
 
 	def run_calc(self, kill=True, rain=0):
