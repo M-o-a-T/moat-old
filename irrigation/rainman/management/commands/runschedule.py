@@ -27,6 +27,7 @@ from traceback import format_exc,print_exc
 import sys
 import gevent,rpyc
 from gevent.queue import Queue
+from gevent.coros import Semaphore
 from rpyc.core.service import VoidService
 from optparse import make_option
 
@@ -274,12 +275,12 @@ class SchedSite(SchedCommon):
 	rain_counter = 0
 	_run_delay = None
 
-	def __new__(cls,site):
-		if site.id in sites:
-			return sites[site.id]
+	def __new__(cls,s):
+		if s.id in sites:
+			return sites[s.id]
 		self = object.__new__(cls)
-		sites[site.id] = self
-		self.s = site
+		sites[s.id] = self
+		self.s = s
 		self.connect()
 
 		self.controllers = set()
@@ -292,7 +293,7 @@ class SchedSite(SchedCommon):
 
 		self.log("Startup")
 		return self
-	def __init__(self,site):
+	def __init__(self,s):
 		pass
 
 	def connect(self):
@@ -333,16 +334,21 @@ class SchedSite(SchedCommon):
 		"""Some monitor told us that it started raining"""
 		if self.rain_timer:
 			self.rain_timer.kill()
-		else:
-			self.log("Started raining")
+			self.rain_timer = gevent.spawn_later(300,self.no_rain)
+			return
+		self.log("Started raining")
 		self.rain = True
 
 		n=now()
-		for v in self.c.valves.all():
+		#for v in self.s.valves.all():
+		for v in Valve.objects.filter(controller__site=self.s):
+			valve = SchedValve(v)
+			if valve.locked:
+				continue
 			if v.runoff == 0:
 				continue # not affected by rain
 			try:
-				self.ci.command("set","output","off",*(v.location.split()))
+				self.ci.root.command("set","output","off",*(v.var.split()))
 			except Exception:
 				self.log_error(v)
 			v.schedules.filter(start__gte=n).delete()
@@ -363,37 +369,43 @@ class SchedSite(SchedCommon):
 		self._run_delay = delay
 		self._run_last = now()
 		self._run = gevent.spawn_later(self._run_delay, self.run_main_task, kill=False)
-		self._running = False
+		self._running = Semaphore()
+		self._run_again = False
 
 	def run_main_task(self, kill=True):
 		"""Run the calculation loop."""
-		if self._running:
-			self._running += 1
+		nxt = None
+		if not self._running.acquire(blocking=False):
+			self._run_again = True
 			return
-		self._running = True
 		try:
 			if kill:
 				self._run.kill()
-			ts = (now()-self._run_last).total_seconds()
+			n = now()
+			ts = (n-self._run_last).total_seconds()
 			if ts < 10:
-				self._run = gevent.spawn_later(10-ts, self.run_main_task, kill=False)
+				nxt = 10-ts
 				return
+			self._run_last = n
+
 			self.main_task()
 		finally:
-			r,self._running = self._running,False
-			self._run = gevent.spawn_later(10 if r > 1 else self._run_delay, self.run_main_task, kill=False)
+			r,self._run_again = self._run_again,0
+			if nxt is None:
+				if r:
+					nxt = 10
+				else:
+					nxt = self._run_delay
+			self._run = gevent.spawn_later(nxt, self.run_main_task, kill=False)
+			self._running.release()
 
 	def new_history_entry(self,rain=0,kill=True):
 		"""Create a new history entry"""
 		values = {}
 		for t,ml in self.meters.items():
-			if t == "rain":
-				sum_val = 10*rain
-				sum_f = 10
-			else:
-				sum_val = 0
-				sum_f = 0
 			sum_it = False
+			sum_val = 0
+			sum_f = 0
 			for m in ml:
 				f = m.weight
 				v = m.get_value()
@@ -426,7 +438,6 @@ class SchedController(SchedCommon):
 		self.c = c
 		self.site = SchedSite(self.c.site)
 		self.site.add_controller(self)
-
 	def __init__(self,c):
 		pass
 	
@@ -439,24 +450,30 @@ class SchedController(SchedCommon):
 
 class SchedValve(SchedCommon):
 	"""Mirrors a valve."""
-	def __new__(cls,valve):
-		if valve.id in valves:
-			return valves[valve.id]
+	locked = False # external command, don't change
+	def __new__(cls,v):
+		if v.id in valves:
+			return valves[v.id]
 		self = object.__new__(cls)
-		valves[valve.id] = self
-		self.v = valve
+		valves[v.id] = self
+		self.v = v
 		self.site = SchedSite(self.v.controller.site)
 		self.params = ParamGroup(self.v.param_group)
 		self.reconnect()
 		return self
-	def __init__(self,site):
+	def __init__(self,v):
 		pass
+
 	def reconnect(self):
 		print >>sys.stderr," ".join(("Connect to","output","set","*","*")+tuple(self.v.var.split()))
 		self.mon = self.site.ci.root.monitor(self.callback,"output","set","*","*",*(self.v.var.split()))
 		
 	def callback(self,event=None,**k):
 		"""output set OLD NEW NAME"""
+		on = (event[3] in (1,"1","on"))
+		if self.locked:
+			print >>sys.stderr,self.__class__.__name__,self.v.name,event," LOCKED"
+			return
 		try:
 			print >>sys.stderr,self.__class__.__name__,self.v.name,event
 		except Exception:
