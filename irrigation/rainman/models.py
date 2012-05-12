@@ -20,7 +20,23 @@ from datetime import datetime,time,timedelta
 from django.db import models as m
 from rainman.utils import now
 
-class Site(m.Model):
+class Model(m.Model):
+	class Meta:
+		abstract = True
+
+	def refresh(self):
+		"""Refreshes this instance from db"""
+		from_db = self.__class__.objects.get(pk=self.pk)
+		fields = self.__class__._meta.get_all_field_names()
+		
+		for field in fields:
+			val = getattr(from_db, field)
+			# unfortunately these classes are not accessible externally
+			# so we have to check by name
+			if val.__class__.__name__ not in ("RelatedManager","ManyRelatedManager"):
+				setattr(self, field, val)
+
+class Site(Model):
 	"""One place with stuff to irrigate."""
 	class Meta:
 		pass
@@ -41,7 +57,7 @@ class Site(m.Model):
 	def rate_sec(self):
 		return self.rate/24/60/60
 	
-class Feed(m.Model):
+class Feed(Model):
 	"""A source of water"""
 	class Meta:
 		unique_together = (("site", "name"),)
@@ -52,7 +68,7 @@ class Feed(m.Model):
 	flow = m.FloatField(default=10, help_text="liters per second")
 	var = m.CharField(max_length=200, help_text="flow counter variable", blank=True)
 
-class Controller(m.Model):
+class Controller(Model):
 	"""A thing (Wago or whatever) which controls valves."""
 	class Meta:
 		unique_together = (("site", "name"),)
@@ -63,7 +79,7 @@ class Controller(m.Model):
 	location = m.CharField(max_length=200, help_text="How to identify the controller (host name?)")
 	max_on = m.IntegerField(default=3, help_text="number of valves that can be on at any one time")
 
-class ParamGroup(m.Model):
+class ParamGroup(Model):
 	class Meta:
 		unique_together = (("site", "name"),)
 	def __unicode__(self):
@@ -76,7 +92,7 @@ class ParamGroup(m.Model):
 	def list_valves(self):
 		return u"¦".join((d.name for d in self.valves.all()))
 
-class Valve(m.Model):
+class Valve(Model):
 	"""One controller of water"""
 	class Meta:
 		unique_together = (("controller", "name"),)
@@ -106,7 +122,7 @@ class Valve(m.Model):
 	def list_groups(self):
 		return u"¦".join((d.name for d in self.groups.all()))
 
-class Level(m.Model):
+class Level(Model):
 	"""historic water levels"""
 	class Meta:
 		unique_together = (("valve", "time"),)
@@ -117,7 +133,7 @@ class Level(m.Model):
 	level = m.FloatField(help_text="then-current water capacity, in mm")
 	flow = m.FloatField(default=0, help_text="m³ since last entry")
 
-class History(m.Model):
+class History(Model):
 	"""historic evaporation and rain levels"""
 	class Meta:
 		unique_together = (("site", "time"),)
@@ -135,7 +151,7 @@ class History(m.Model):
 	wind = m.FloatField(blank=True,null=True, help_text="wind speed (m/s or whatever)")
 	sun = m.FloatField(blank=True,null=True, help_text="how much sunshine was there (0-1)") # measured value
 
-class EnvironmentEffect(m.Model):
+class EnvironmentEffect(Model):
 	class Meta:
 		pass
 	def __unicode__(self):
@@ -148,7 +164,7 @@ class EnvironmentEffect(m.Model):
 	wind = m.FloatField(blank=True,null=True, help_text="wind speed (m/s or whatever)")
 	sun = m.FloatField(blank=True,null=True, help_text="how much sunshine was there (0-1)") # measured value
 
-class Day(m.Model):
+class Day(Model):
 	"""A generic name for a time description"""
 	def __unicode__(self):
 		return u"‹%s %s›" % (self.__class__.__name__,self.name)
@@ -156,7 +172,7 @@ class Day(m.Model):
 	def list_daytimes(self):
 		return u"¦".join((d.descr for d in self.times.all()))
 
-class DayTime(m.Model):
+class DayTime(Model):
 	"""One element of a time description which is tested"""
 	class Meta:
 		unique_together = (("day", "descr"),)
@@ -165,7 +181,7 @@ class DayTime(m.Model):
 	descr = m.CharField(max_length=200)
 	day = m.ForeignKey(Day,related_name="times")
 
-class Group(m.Model):
+class Group(Model):
 	class Meta:
 		unique_together = (("site", "name"),)
 	def __unicode__(self):
@@ -187,7 +203,7 @@ class Group(m.Model):
 	def list_valves(self):
 		return u"¦".join((d.name for d in self.valves.all()))
 
-class GroupOverride(m.Model):
+class GroupOverride(Model):
 	"""Modify schedule times"""
 	class Meta:
 		unique_together = (("group", "name"),("group","start"))
@@ -201,7 +217,7 @@ class GroupOverride(m.Model):
 	on_level = m.FloatField(blank=True,null=True,default=None,help_text="Level above(off)/below(on) which to activate this rule (factor of max)")
 	off_level = m.FloatField(blank=True,null=True,default=None,help_text="Level above(off)/below(on) which to activate this rule (factor of max)")
 	
-class ValveOverride(m.Model):
+class ValveOverride(Model):
 	"""Force schedule times"""
 	class Meta:
 		unique_together = (("valve", "name"),("valve","start"))
@@ -215,7 +231,7 @@ class ValveOverride(m.Model):
 	on_level = m.FloatField(blank=True,null=True,default=None,help_text="Level above(off)/below(on) which to activate this rule (factor of max)")
 	off_level = m.FloatField(blank=True,null=True,default=None,help_text="Level above(off)/below(on) which to activate this rule (factor of max)")
 	
-class GroupAdjust(m.Model):
+class GroupAdjust(Model):
 	"""Beginning at this date, this group needs <modifier> more(>1)/less(<1) water.
 		To turn the whole thing off, set modifier=0.
 		Any entry is valid until superseded by one with later start."""
@@ -227,7 +243,7 @@ class GroupAdjust(m.Model):
 	start = m.DateTimeField(db_index=True)
 	factor = m.FloatField()
 
-class Schedule(m.Model):
+class Schedule(Model):
 	"""The actual plan"""
 	class Meta:
 		unique_together = (("valve","start"),)
@@ -241,7 +257,7 @@ class Schedule(m.Model):
 	# The scheduler inserts both to False. The controller sets Seen.
 	# if the scheduler has to change something, it clears Seen and sets Change
 
-class RainMeter(m.Model):
+class RainMeter(Model):
 	"""The rain in Spain stays mainly in the plain."""
 	class Meta:
 		unique_together = (("site","name"),)
@@ -252,7 +268,7 @@ class RainMeter(m.Model):
 	var = m.CharField(max_length=200,help_text="monitor name in HomEvenT") # HomEvenT's variable name for it
 	weight = m.PositiveSmallIntegerField(default=10,help_text="how important is this value? 0=presence detector")
 
-class TempMeter(m.Model):
+class TempMeter(Model):
 	"""The rain in Spain stays mainly in the plain."""
 	class Meta:
 		unique_together = (("site","name"),)
@@ -263,7 +279,7 @@ class TempMeter(m.Model):
 	var = m.CharField(max_length=200,help_text="monitor name in HomEvenT") # HomEvenT's variable name for it
 	weight = m.PositiveSmallIntegerField(default=10,help_text="how important is this value?")
 
-class WindMeter(m.Model):
+class WindMeter(Model):
 	"""obvious what this is for ;-)"""
 	class Meta:
 		unique_together = (("site","name"),)
@@ -274,7 +290,7 @@ class WindMeter(m.Model):
 	var = m.CharField(max_length=200,help_text="monitor name in HomEvenT") # HomEvenT's variable name for it
 	weight = m.PositiveSmallIntegerField(default=10,help_text="how important is this value?")
 
-class SunMeter(m.Model):
+class SunMeter(Model):
 	"""I am the sunshine of your … garden."""
 	class Meta:
 		unique_together = (("site","name"),)
@@ -285,7 +301,7 @@ class SunMeter(m.Model):
 	var = m.CharField(max_length=200,help_text="monitor name in HomEvenT") # HomEvenT's variable name for it
 	weight = m.PositiveSmallIntegerField(default=10,help_text="how important is this value?")
 
-class Log(m.Model):
+class Log(Model):
 	"""Scheduler and other events"""
 	class Meta:
 		#unique_together = (("site","timestamp"),)
@@ -300,7 +316,7 @@ class Log(m.Model):
 	text = m.TextField()
 
 from django.contrib.auth.models import User as DjangoUser
-class UserForGroup(m.Model):
+class UserForGroup(Model):
 	"""Limit Django users to a specific group"""
 	class Meta:
 		pass

@@ -37,6 +37,7 @@ from rainman.utils import now
 from rainman.logging import log,log_error
 from datetime import datetime,time,timedelta
 from django.db.models import F,Q
+from django.db import transaction
 
 class Command(BaseCommand):
 	args = ''
@@ -106,6 +107,9 @@ class Meter(object):
 			self.add_value(val)
 		except Exception:
 			print_exc()
+
+	def refresh(self):
+		self.d.refresh()
 
 	def reconnect(self):
 		if not self.d.var:
@@ -317,6 +321,14 @@ class SchedSite(SchedCommon):
 			for m in mm:
 				m.reconnect()
 
+	def refresh(self):
+		self.s.refresh()
+		for c in self.controllers:
+			c.refresh()
+		for mm in self.meters.itervalues():
+			for m in mm:
+				m.refresh()
+
 	def log(self,txt):
 		log(self.s,txt)
 
@@ -423,7 +435,9 @@ class SchedSite(SchedCommon):
 		h.save()
 		return h
 
+	@transaction.commit_on_success
 	def main_task(self):
+		self.refresh()
 		self.new_history_entry()
 
 
@@ -444,6 +458,11 @@ class SchedController(SchedCommon):
 	def log(self,txt):
 		log(self.c,txt)
 	
+	def refresh(self):
+		self.c.refresh()
+		for v in self.c.valves.all():
+			SchedValve(v).refresh()
+
 	def reconnect(self):
 		for v in self.c.valves.all():
 			SchedValve(v).reconnect()
@@ -463,6 +482,9 @@ class SchedValve(SchedCommon):
 		return self
 	def __init__(self,v):
 		pass
+
+	def refresh(self):
+		self.v.refresh()
 
 	def reconnect(self):
 		print >>sys.stderr," ".join(("Connect to","output","set","*","*")+tuple(self.v.var.split()))
