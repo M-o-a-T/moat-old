@@ -168,6 +168,9 @@ class ValveOverrideAdmin(admin.ModelAdmin):
 
 class ParamGroupAdmin(admin.ModelAdmin):
 	list_display = ('name','site','factor','list_valves')
+	inlines = [
+		ValveInline,
+	]
 
 class GroupAdjustAdmin(admin.ModelAdmin):
 	list_display = ('group','start','factor')
