@@ -100,7 +100,7 @@ class Valve(m.Model):
 	runoff = m.FloatField(default=1, help_text="how much incoming rain ends up here?")
 	#
 	# This describes the current state
-	time = m.DateTimeField(help_text="time when the level was last calculated") # when was the level calculated?
+	time = m.DateTimeField(db_index=True, help_text="time when the level was last calculated") # when was the level calculated?
 	level = m.FloatField(default=0, help_text="current water capacity, in mm")
 	priority = m.BooleanField(help_text="the last cycle did not finish")
 	def list_groups(self):
@@ -113,7 +113,7 @@ class Level(m.Model):
 	def __unicode__(self):
 		return u"‹%s @%s %s›" % (self.__class__.__name__,self.time,self.valve)
 	valve = m.ForeignKey(Valve, related_name="levels")
-	time = m.DateTimeField()
+	time = m.DateTimeField(db_index=True)
 	level = m.FloatField(help_text="then-current water capacity, in mm")
 	flow = m.FloatField(default=0, help_text="m³ since last entry")
 
@@ -124,7 +124,7 @@ class History(m.Model):
 	def __unicode__(self):
 		return u"‹%s @%s %s›" % (self.__class__.__name__,self.time,self.site)
 	site = m.ForeignKey(Site,related_name="history")
-	time = m.DateTimeField()
+	time = m.DateTimeField(db_index=True)
 	
 	# accumulated volume since the last entry
 	rain = m.FloatField(default=0, help_text="how much rain was there (mm)") # measured value
@@ -196,7 +196,7 @@ class GroupOverride(m.Model):
 	name = m.CharField(max_length=200)
 	group = m.ForeignKey(Group,related_name="overrides")
 	allowed = m.BooleanField() # whether to allow these to run(True) or not(False)
-	start = m.DateTimeField()
+	start = m.DateTimeField(db_index=True)
 	duration = m.TimeField()
 	on_level = m.FloatField(blank=True,null=True,default=None,help_text="Level above(off)/below(on) which to activate this rule (factor of max)")
 	off_level = m.FloatField(blank=True,null=True,default=None,help_text="Level above(off)/below(on) which to activate this rule (factor of max)")
@@ -210,7 +210,7 @@ class ValveOverride(m.Model):
 	name = m.CharField(max_length=200)
 	valve = m.ForeignKey(Valve,related_name="overrides")
 	running = m.BooleanField() # whether to force on(True) or off(False)
-	start = m.DateTimeField()
+	start = m.DateTimeField(db_index=True)
 	duration = m.TimeField()
 	on_level = m.FloatField(blank=True,null=True,default=None,help_text="Level above(off)/below(on) which to activate this rule (factor of max)")
 	off_level = m.FloatField(blank=True,null=True,default=None,help_text="Level above(off)/below(on) which to activate this rule (factor of max)")
@@ -224,7 +224,7 @@ class GroupAdjust(m.Model):
 	def __unicode__(self):
 		return u"‹%s @%s %s›" % (self.__class__.__name__,self.start,self.group)
 	group = m.ForeignKey(Group,related_name="adjusters")
-	start = m.DateTimeField()
+	start = m.DateTimeField(db_index=True)
 	factor = m.FloatField()
 
 class Schedule(m.Model):
@@ -234,7 +234,7 @@ class Schedule(m.Model):
 	def __unicode__(self):
 		return u"‹%s @%s %s›" % (self.__class__.__name__,self.start,self.valve)
 	valve = m.ForeignKey(Valve,related_name="schedules")
-	start = m.DateTimeField()
+	start = m.DateTimeField(db_index=True)
 	duration = m.TimeField()
 	seen = m.BooleanField(default=False,max_length=1,help_text="Sent to the controller?")
 	changed = m.BooleanField(default=False,max_length=1,help_text="Updated by the scheduler?")
@@ -288,11 +288,12 @@ class SunMeter(m.Model):
 class Log(m.Model):
 	"""Scheduler and other events"""
 	class Meta:
+		#unique_together = (("site","timestamp"),)
 		pass
 	def __unicode__(self):
 		return u"‹%s %s %s›" % (self.__class__.__name__, self.logger, self.valve or self.controller or self.site)
 	logger = m.CharField(max_length=200)
-	timestamp = m.DateTimeField(default=now)
+	timestamp = m.DateTimeField(default=now,db_index=True)
 	site = m.ForeignKey(Site,related_name="logs")
 	controller = m.ForeignKey(Controller,related_name="logs", null=True,blank=True)
 	valve = m.ForeignKey(Valve,related_name="logs", null=True,blank=True)
