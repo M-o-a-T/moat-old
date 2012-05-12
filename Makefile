@@ -83,7 +83,11 @@ lab_:
 schema:
 	python irrigation/manage.py schemamigration --auto rainman
 	find irrigation/rainman/migrations/ -name \*.py -mtime -0.1 -print0 | xargs -0r \
-	sed -i -e "s/{'default': 'datetime.datetime(.* tzinfo=<UTC>)'}/{}/" -e "s/(default=datetime.datetime(.*tzinfo=<UTC>))/()/"
+	sed -i \
+		-e "s/{'default': 'datetime.datetime(.* tzinfo=<UTC>)'}/{}/" \
+		-e "s/'default': 'datetime.datetime(.* tzinfo=<UTC>)',//"    \
+		-e "s/(default=datetime.datetime(.*tzinfo=<UTC>))/()/"       \
+		-e "s/default=datetime.datetime(.*tzinfo=<UTC>),//"
 	python irrigation/manage.py migrate rainman
 	# might have to modify if broken
 	git add irrigation/rainman/migrations/*.py
