@@ -167,7 +167,7 @@ class EnvironmentEffect(Model):
 		pass
 	def __unicode__(self):
 		return u"‹%s @%s %s¦%s¦%s›" % (self.__class__.__name__,self.site.name,self.temp,self.wind,self.sun)
-	param_group = m.ForeignKey(Site,related_name="environment_effects")
+	param_group = m.ForeignKey(ParamGroup,related_name="environment_effects")
 	factor = m.FloatField(default=1.0, help_text="Factor to use at this data point")
 
 	# these are single- or multi-dimensional data points for finding a reasonable factor
