@@ -44,16 +44,16 @@ def tester():
 		got_something.set(a)
 	cm = c.root.logger(logged,"hello",DEBUG)
 
-	for x in c.root.list():
+	for x in c.root.cmd_list():
 		log("TEST",DEBUG, repr(x))
 	log("TEST",DEBUG,".")
-	for x in c.root.list("rpc","server"):
+	for x in c.root.cmd_list("rpc","server"):
 		log("TEST",DEBUG, repr(x))
 	log("TEST",DEBUG,".")
-	for x in c.root.list("rpc","server","foo"):
+	for x in c.root.cmd_list("rpc","server","foo"):
 		log("TEST",DEBUG, repr(x))
 	log("TEST",DEBUG,".")
-	for x in c.root.list("rpc","connection","foo","n1"):
+	for x in c.root.cmd_list("rpc","connection","foo","n1"):
 		log("TEST",DEBUG, repr(x))
 	log("TEST",DEBUG,".")
 
