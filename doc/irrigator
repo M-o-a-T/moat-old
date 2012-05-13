@@ -26,19 +26,18 @@ The solution
 Let's check out which data we need. It's all in the database, and
 visible in the Django admin.
 
-We need a garden. The database calls it "site". Gardens have different
-access controls.
+We need a garden. The database calls it "site". Multiple users may admin
+various aspects of the system.
 
-A garden can have multiple water feeds, each of which has a maximum flow
+A garden can have multiple water feeds. Each feed has a maximum flow
 rate.
 
 A "controller" is something that opens and closes water valves. The number
 of valves which are opened concurrently may be limited because of the
-current required to keep them open. (Do not use bi-stable valves: what
-happens when the power fails, or the computer crashes, while you're
-irrigating?)
+power required to keep them open. (Do not use bi-stable valves: what
+happens when the power fails while you're irrigating?)
 
-A valve controls a group of sprinklers. They spray or drip a acertain
+A valve controls a group of sprinklers. They spray or drip a certain
 amount of water per second onto a specific area. That area has a certain
 water capacity. It might be more or less exposed than the other areas,
 which controls the evaporation rate.
@@ -48,14 +47,14 @@ Areas are not modelled in the database. The assumption is that there's a
 In other words, the database doesn't model overlapping areas; all the area
 variables are attached to the "valve" record.
 
-What this system keeps track of is not how wet an area s, but how dry it
+What this system keeps track of is not how wet an area is, but how dry it
 is, i.e. how much water it needs. Zero means "any excess water is wasted
 and will run off". If you don't start watering and it doesn't rain, this
 value will increase without limit. In practice there's a real upper bound
-(valve.max_level).
+(valve.max_level) which is enforced once watering starts.
 
-You don't want to start watering when the ground is bone dry, though,
-and you do want to stop sometime before your earth is completely
+You don't want to start watering only when the ground is bone dry, though,
+and you do want to stop sometime before your grounds are completely
 water-logged. Thus there are start_level and stop_level variables.
 
 The valve record has separate values for water flow and irrigated area.
@@ -67,9 +66,12 @@ In order to appoximate how much water an area needs, there are also
 adjustment values for exposure to sun and rainfall.
 
 Water levels are logged (table "level"); the same table accounts for
-whether a valve was open. There are also log tables for environmental data
-(average temperature, wind, and sunshine in one table; accumulated rainfall
-and calculated evaporation in another).
+whether a valve was open. There are also log tables for environmental data.
+The idea is to use the environment variables to calculate how much water is
+required. More sunshine and more heat equals more water required.
+It's not that simple, of course – thus you can add data points ("if it's
+30°C and loads of sunshine and no humidity then use twice as much water
+than usual") and let the system interpolate between them.
 
 That's not all: before we start to let it rain, we need to know when not
 to. Mid-day is a bad time for turning on the sprinkler, for multiple
@@ -77,13 +79,12 @@ reasons – none of which apply to the drip irrigation under the hedge.
 
 A "day" record, though, doesn't describe a day, but a set of times.
 "Night", for instance, might be any hour when it's supposed to be dark
-and "weekend" is any day when you're able to sleep in – and thus have a
-party in your garden until the wee hours of the morning.
+and "weekend" can be any day when you're able to sleep in.
 
-Areas typically are grouped. You're going to have said party on the lawn,
-not in the vegetable beds. So it's OK to water the latter during the party.
-Likewise, you can override the scheduling of a group as well as a single
-valve.
+Areas typically are grouped. You're going to have a party on the lawn, not
+in the vegetable beds. So it's probably OK to water the latter during the
+party. Likewise, you can override the scheduling of a group as well as a
+single valve.
 
 Note: If you override a group "on", then that group can be scheduled during
 the time the override is valid. On the other hand, if you override a single
@@ -95,16 +96,144 @@ Lastly, there's a database table for the actual schedule. There you can
 review whatever happened at your leisure. Or at least what was supposed to
 have happened …
 
+-----------
+The details
+-----------
+
+Metrics
+-------
+
+Oh yes. One important note. This system could care less which units you use
+for temperature or humidity, but water *will* be measured in liters and area
+in square meters. The reason is simple -- fewer errors.
+
+Quickly: How high is one gallon of water if you pour it over an area of one square foot?
+
+With metric data, this is dead simple: One liter is a cube of 0.1m (or
+100mm). If you spread that over an area of 1m (or 1000mm) squared, that'll
+be 10*10 squares, leaving 1/100th of the original cube's height, i.e. 1mm
+of water. So if you want 10cm of wet dirt, you need 5 liters per m²,
+assuming said dirt can hold about its own volume of water.
+
+In imperial units, this is much less fun. A cubic foot holds slightly less
+than 7.5 gallons, so 1/7.5 feet are … 1.6 inches; you want four inches of
+wet ground, so that's … 4/2/1.6 … about 1.25 gallons per square foot.
+
+Sorry, but I've got better things to do than to keep all that straight in
+my head. If you want to convince the web frontend to optionally use
+imperial units, go ahead, but don't wait for me to do that. (The back end?
+Scale the pulse counter's monitor in HomEvenT to emit one tick per liter,
+instead of per gallon.)
+
+End of rant.  ;-)
+
+Setup
+-----
+
+Create a site. Add environment meters and valves. Don't worry about the
+water level numbers yet.
+
+The valve flow data can be auto-generated ("manage.py genconfig") for
+inclusion in HomEvenT; the sensors you'll have to do yourself.
+
+Run the main irrigation control, "manage.py runschedule". It will start to
+record your environment data. If you have an impulse counter, you can now
+tell the system to measure the water flow rate, otherwise you'll have to
+set it manually (turn on one valve, stare at the meter until you have the
+flow rate, turn it off, repeat).
+
+Add a "normal" watering schedule for the next week or so, by forcing the
+valves.
+
+Add environment adjustments. Keep them one-dimensional for now, i.e. only
+fill in one possible value. For instance, if the day's average temperature
+is 20°C, add a baseline parameter for that, add factor 2 for 30°C, factor
+0.7 for 15°C and 0.3 for 10°C. Or something like that. Do the same kind of
+thing for sunlight.
+
+Run this for a week. You now have a baseline. Adjust the factors and
+parameters and re-calculate last week's levels until the water levels look
+sensible and mostly stay within bounds. When everything looks sane, add
+some valves to a group, add allowed-watering times to the group, let the
+system schedule the valves, see what happens.
+
+Scheduling algorithm
+--------------------
+
+Simple and stupid: Whenever a valve's water level (actually, dryness level)
+exceeds the "high" mark, it'll get turned on until the "low" mark is
+reached.
+
+There are a couple of conditions:
+
+  * Its feed's flow capacity cannot be exceeded.
+  * Its controller's max number of active valves cannot be exceeded.
+  * It may not have watering forbidden.
+  * The rest of the conditions are ignored if it has watering forced-on.
+  * It must be in a group that allows watering.
+  * It must not be in a group that forbids watering.
+  * It may not have watering forbidden.
+
+Priority is given to valves, in order,
+
+  * which are forced-on
+  * TODO: whose areas are most in danger of drying
+    (this requires a weather forecast!)
+  * whose time window runs out first
+  * which are already turned on
+  * whose "high" mark has not been reached during the last cycle
+  * which are the dryest (in absolute terms)
+
+
+Events
+======
+
+The irrigation control understands a couple of HomEvenT events, all of
+which you can trigger via SSH or (sometime) with the Web frontend.
+
+check flow
+----------
+
+Run the flow measuring algorithm across all valves in the system whose
+feed has a flow counter. Everything else will shut down during that time.
+
+check flow ‹feed›
+-----------------
+
+Run the flow measuring algorithm across all valves of the given feed.
+
+check maxflow ‹feed›
+--------------------
+
+TODO: Open up as many high-flow valves as possible to figure out the water
+feed's maximum capacity.
+
+check flow ‹valve›
+------------------
+
+Run the flow measuring algorithm across this valve.
+
 -----
 To Do
 -----
 
 Soil moisture sensors can supply the calculated "dryness" level directly.
 
+Add humidity sensors. Or maybe add arbitrary sensor classes.
+
 Cisterns, which tend to run empty, are not implemented yet – I don't have one.
 
 Day times have no notion of sunrise/sunset. Yet. (Prefer to learn these
-times from the sun sensor, please – not by computing from
+times from a sunlight sensor, please – not by computing from
 lat/long/DST/whatever.)
 
+Water on wet ground evaporates faster than water on almost-dry ground.
+
+Add a "purge" mode which sequentially opens all of a feed's valves.
+
+Measure flow capacity by turning on as many most-volume valves as possible.
+
+Add a "turn-off" mode which disables a site or feed completely.
+
+Add a "I did this manually" flag to a schedule.
 
