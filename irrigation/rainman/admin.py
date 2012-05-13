@@ -107,18 +107,21 @@ class SiteAdmin(admin.ModelAdmin):
 
 class FeedAdmin(admin.ModelAdmin):
 	list_display = ('name','site','flow','var')
+	list_filter = ('site',)
 	inlines = [
 		ValveInline,
 	]
 
 class ControllerAdmin(admin.ModelAdmin):
 	list_display = ('name','site','location')
+	list_filter = ('site',)
 	inlines = [
 		ValveInline,
 	]
 
 class ValveAdmin(admin.ModelAdmin):
 	list_display = ('name','controller','var','comment','time','level','priority','list_groups','flow','area','stop_level','start_level','max_level')
+	list_filter = ('feed','param_group','controller')
 	inlines = [
 		ValveOverrideInline,
 		LevelInline,
@@ -127,16 +130,19 @@ class ValveAdmin(admin.ModelAdmin):
 
 class LevelAdmin(admin.ModelAdmin):
 	list_display = ('valve','time','level','flow')
+	list_filter = ('valve',)
 	date_hierarchy = 'time'
 	ordering = ('-time',)
 
 class HistoryAdmin(admin.ModelAdmin):
 	list_display = ('time','rain','temp','wind','sun')
+	list_filter = ('site',)
 	date_hierarchy = 'time'
 	ordering = ('-time',)
 
 class EnvironmentEffectAdmin(admin.ModelAdmin):
 	list_display = ('factor','temp','wind','sun')
+	list_filter = ('param_group',)
 
 class DayAdmin(admin.ModelAdmin):
 	list_display = ('name','list_daytimes')
@@ -145,12 +151,13 @@ class DayAdmin(admin.ModelAdmin):
 	]
 
 class DayTimeAdmin(admin.ModelAdmin):
-	list_display = ('day',)
-	pass
+	list_display = ('day','descr')
+	list_filter = ('day',)
 
 class GroupAdmin(admin.ModelAdmin):
 	list_display = ('name','site','list_valves','list_days')
 	fields = ('name','site',('valves','days'), ('adj_sun','adj_rain','adj_wind','adj_temp'))
+	list_filter = ('site',)
 	inlines = [
 		GroupOverrideInline,
 		GroupAdjustInline,
@@ -158,47 +165,57 @@ class GroupAdmin(admin.ModelAdmin):
 
 class GroupOverrideAdmin(admin.ModelAdmin):
 	list_display = ('group','start','duration','allowed')
+	list_filter = ('group',)
 	date_hierarchy = 'start'
 	ordering = ('-start',)
 
 class ValveOverrideAdmin(admin.ModelAdmin):
 	list_display = ('valve','start','duration','running')
+	list_filter = ('valve',)
 	date_hierarchy = 'start'
 	ordering = ('-start',)
 
 class ParamGroupAdmin(admin.ModelAdmin):
 	list_display = ('name','site','factor','list_valves')
+	list_filter = ('site',)
 	inlines = [
 		ValveInline,
 	]
 
 class GroupAdjustAdmin(admin.ModelAdmin):
 	list_display = ('group','start','factor')
+	list_filter = ('group',)
 	date_hierarchy = 'start'
 	ordering = ('-start',)
 
 class ScheduleAdmin(admin.ModelAdmin):
 	list_display = ('valve','start','duration','seen','changed')
+	list_filter = ('valve',)
 	date_hierarchy = 'start'
 	ordering = ('-start',)
 
 class RainMeterAdmin(admin.ModelAdmin):
 	list_display = ('name','var')
+	list_filter = ('site',)
 
 class TempMeterAdmin(admin.ModelAdmin):
 	list_display = ('name','var')
+	list_filter = ('site',)
 
 class WindMeterAdmin(admin.ModelAdmin):
 	list_display = ('name','var')
+	list_filter = ('site',)
 
 class SunMeterAdmin(admin.ModelAdmin):
 	list_display = ('name','var')
+	list_filter = ('site',)
 
 class UserForGroupAdmin(admin.ModelAdmin):
 	list_display = ('user','group')
 
 class LogAdmin(admin.ModelAdmin):
 	list_display = ('site','controller','valve','timestamp','text')
+	list_filter = ('site','controller','valve')
 	date_hierarchy = 'timestamp'
 	ordering = ('-timestamp',)
 
