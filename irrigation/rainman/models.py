@@ -45,12 +45,17 @@ class Site(Model):
 	name = m.CharField(max_length=200, unique=True)
 	host = m.CharField(max_length=200, default="localhost", help_text="where to find the HomEvenT server")
 	port = m.PositiveIntegerField(default=50005, help_text="Port for RPC")
-	rate = m.FloatField(default=2, help_text="how many mm/day evaporate here, on average")
-	_rain_delay = m.PositiveIntegerField("rain_delay",default=300,help_text="Wait time after the last sensor says 'no more rain'")
+	db_rate = m.FloatField(db_column="rate",default=2, help_text="how many mm/day evaporate here, on average")
+	def _get_rate(self):
+		return self.db_rate*24*3600
+	def _set_rate(self,r):
+		self.db_rate = r/24/3600
+	rate = property(_get_rate,_set_rate)
+	db_rain_delay = m.PositiveIntegerField(db_column="rain_delay",default=300,help_text="Wait time after the last sensor says 'no more rain'")
 	def _get_rain_delay(self):
-		return timedelta(0,self._rain_delay)
+		return timedelta(0,self.db_rain_delay)
 	def _set_rain_delay(self,val):
-		self._rain_delay = timedelta(0,self._rain_delay)
+		self._rain_delay = timedelta(0,self.db_rain_delay)
 	rain_delay = property(_get_rain_delay,_set_rain_delay)
 
 	@property
@@ -67,6 +72,12 @@ class Feed(Model):
 	site = m.ForeignKey(Site,related_name="feed_meters")
 	flow = m.FloatField(default=10, help_text="liters per second")
 	var = m.CharField(max_length=200, help_text="flow counter variable", blank=True)
+	db_max_flow_wait = m.PositiveIntegerField(db_column="max_flow_wait",default=300,help_text="Max time for flow measurement")
+	def _get_max_flow_wait(self):
+		return timedelta(0,self.db_max_flow_wait)
+	def _set_max_flow_wait(self,val):
+		self._max_flow_wait = timedelta(0,self.db_max_flow_wait)
+	max_flow_wait = property(_get_max_flow_wait,_set_max_flow_wait)
 
 class Controller(Model):
 	"""A thing (Wago or whatever) which controls valves."""
@@ -88,7 +99,7 @@ class ParamGroup(Model):
 	comment = m.CharField(max_length=200,blank=True)
 	site = m.ForeignKey(Site,related_name="param_groups")
 	factor = m.FloatField(default=1.0, help_text="Base Factor")
-	rain = m.BooleanField(default=True,help_text="affected by rain?")
+	rain = m.BooleanField(default=True,help_text="stop when it's raining?")
 	def list_valves(self):
 		return u"¦".join((d.name for d in self.valves.all()))
 
@@ -131,7 +142,7 @@ class Level(Model):
 	valve = m.ForeignKey(Valve, related_name="levels")
 	time = m.DateTimeField(db_index=True)
 	level = m.FloatField(help_text="then-current water capacity, in mm")
-	flow = m.FloatField(default=0, help_text="m³ since last entry")
+	flow = m.FloatField(default=0, help_text="liters of inflow since the last entry")
 
 class History(Model):
 	"""historic evaporation and rain levels"""
