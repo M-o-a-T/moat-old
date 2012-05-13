@@ -540,13 +540,18 @@ class WAGOtimedOutputRun(WAGOoutputRun):
 	def recv(self,msg):
 		if msg.type is MT_IND_ACK and self.msgid is None:
 			self.msgid = msg.msgid
+			if not self.result.ready():
+				self.result.set(msg.msg)
 			return RECV_AGAIN
 		if msg.type is MT_IND and msg.msgid == self.msgid:
 			self.result.set(msg.msg)
 			return RECV_AGAIN
 		if msg.type is MT_IND_NAK and msg.msgid == self.msgid:
-			if not self.result.ready():
-				self.result.set(msg.msg)
+			# We already did that, above.
+			#if not self.result.ready():
+			#	self.result.set(msg.msg)
+			if self.timer is not None:
+				self.timer.done()
 			return MINE
 		if (msg.type is MT_NAK or msg.type is MT_ERROR) and self.msgid is None:
 			self.result.set(WAGOerror(msg.msg))

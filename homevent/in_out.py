@@ -26,7 +26,7 @@ from homevent.base import Name,SName
 from homevent.collect import Collection,Collected
 from homevent.twist import fix_exception,reraise,Jobber,callLater
 from homevent.times import humandelta,now,unixtime
-from homevent.run import simple_event
+from homevent.run import simple_event,process_failure
 from homevent.context import Context
 from homevent.check import register_condition
 
@@ -223,6 +223,14 @@ class OutTimer(Collected):
 		else:
 			self.q.set(None)
 	
+	def done(self):
+		"""called externally via _tmwrite() when the external timer ends"""
+		if self._timer:
+			self._timer.cancel()
+			self._timer = None
+		if not self.q.ready():
+			self.q.set(None)
+
 	def cancel(self):
 		self.delete()
 
@@ -257,7 +265,7 @@ class Output(CommonIO):
 		"""Write an output. Override this."""
 		raise NotImplementedError("You need to override %s._write()" % (self.__class__.__name__,))
 
-	def write(self,val, timer=None,nextval=None):
+	def write(self,val, timer=None,nextval=None,async=False):
 		"""Read an input, check range."""
 		self.check(val)
 		if nextval is not None:
@@ -278,16 +286,31 @@ class Output(CommonIO):
 
 		if timer is None:
 			self._write(wval)
-		elif self._tmwrite is not None:
-			self._tmwrite(wval,timer,wnextval)
-			simple_event(Context(),"output","set",self.repr(wval),self.repr(wnextval),*self.name)
 		else:
-			self._write(wval)
-			self.timer = OutTimer(self,timer,nextval)
-			res = self.timer.q.get()
-			if isinstance(res,BaseException):
-				reraise(res)
 			simple_event(Context(),"output","set",self.repr(wval),self.repr(wnextval),*self.name)
+			if self._tmwrite is not None:
+				self._tmwrite(wval,timer,wnextval)
+			else:
+				self._write(wval)
+			self.timer = self.timing(self,timer,nextval)
+			if async:
+				gevent.spawn(self._rewrite_ex,wval,wnextval)
+			else:
+				self._rewrite(wval,wnextval)
+
+	def _rewrite_ex(self,wval,wnextval):
+		try:
+			_rewrite_ex(wval,wnextval)
+		except Exception as ex:
+			fix_exception(ex)
+			process_failure(ex)
+
+	def _rewrite(self,wval,wnextval):
+		res = self.timer.q.get()
+		if isinstance(res,BaseException):
+			reraise(res)
+		simple_event(Context(),"output","set",self.repr(wval),self.repr(wnextval),*self.name)
+
 
 	def trans(self, val):
 		"""Translate the output, i.e. script data to input values"""
@@ -496,6 +519,7 @@ class IOset(AttributedStatement):
 	timespec = None
 	nextval = None
 	force = True # for timing
+	async = False
 	name="set output"
 	doc="set an output to some value"
 	long_doc=u"""\
@@ -512,11 +536,30 @@ set output VALUE ‹outputname›…
 			timer = None
 		else:
 			timer = self.timespec()
-		dev.write(val, timer=timer, nextval=self.nextval)
+		dev.write(val, timer=timer, nextval=self.nextval, async=self.async)
+
 IOset.register_statement(DelayFor)
 IOset.register_statement(DelayWhile)
 IOset.register_statement(DelayUntil)
 IOset.register_statement(DelayNext)
+@IOset.register_statement
+class IOasync(Statement):
+	name = "async"
+	doc = "don't wait for completion"
+	long_doc=u"""\
+async
+	- don't wait for completion.
+	  This only applies to resetting after delay specified with for/until/… sub-statements.
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if len(event):
+			raise SyntaxError(u'Usage: async')
+
+		self.parent.async = True
+
+
+
 
 
 class IOisSet(Check):
