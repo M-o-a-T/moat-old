@@ -33,7 +33,7 @@ from rpyc.core.service import VoidService
 from optparse import make_option
 
 from django.core.management.base import BaseCommand, CommandError
-from rainman.models import Site,Valve,Schedule,Controller,History
+from rainman.models import Site,Valve,Schedule,Controller,History,Level
 from rainman.utils import now
 from rainman.logging import log,log_error
 from datetime import datetime,time,timedelta
@@ -273,9 +273,9 @@ class ParamGroup(SchedCommon):
 				return ef.factor
 			sum_f += ef.factor/d
 			sum_w += 1/d
-		if sum_w:
-			sum_f /= sum_w
-		return sum_f
+		if not sum_w:
+			return None
+		return sum_f / sum_w
 
 
 	def env_factor(self,e):
@@ -290,16 +290,14 @@ class ParamGroup(SchedCommon):
 			(1,None  ,e.wind,None ),
 			(1,None  ,None  ,e.sun),
 			)
-		sum_f = 0
-		sum_w = 0
+		sum_f = 0.01 # if there are no data, return 1
+		sum_w = 0.01
 		for weight,temp,wind,sun in ql:
 			f = self.env_factor_one(temp,wind,sun)
 			if f is not None:
 				sum_f += f*weight
 				sum_w += weight
-		if sum_w:
-			sum_f /= sum_w
-		return sum_f
+		return sum_f / sum_w
 
 class SchedSite(SchedCommon):
 	"""Mirrors a site"""
@@ -422,7 +420,9 @@ class SchedSite(SchedCommon):
 		self._run_last = now()
 		self._running = Semaphore()
 		self._run_result = None
-		self._run = gevent.spawn_later(self._run_delay.total_seconds(), self.run_main_task, kill=False)
+		sd = self._run_delay.total_seconds()/10
+		if sd < 66: sd = 66
+		self._run = gevent.spawn_later(sd, self.run_main_task, kill=False)
 		self._sched = gevent.spawn_later(2, self.run_sched_task)
 
 	def run_main_task(self, kill=True):
@@ -614,7 +614,7 @@ class SchedValve(SchedCommon):
 				pass
 			else:
 				if sched.start+sched.duration > n: # still running
-					self._on(sched.start+sched.duration-n)
+					self._on(sched, sched.start+sched.duration-n)
 					self.sched_ts = sched.start+sched.duration
 					return
 			self.sched_ts = n
@@ -631,7 +631,7 @@ class SchedValve(SchedCommon):
 			self._off()
 			self.sched_job = gevent.spawn_later((sched.start-n).total_seconds(),s.maybe_restart)
 			return
-		self._on(self.duration)
+		self._on(sched)
 
 	def add_flow(self, val):
 		self.flow += val
@@ -706,16 +706,16 @@ class SchedValve(SchedCommon):
 			ts = lv.time
 		sum_f = 0
 		sum_r = 0
-		for h in self.site.history.filter(time__gt=ts).order_by("time"):
+		for h in self.site.s.history.filter(time__gt=ts).order_by("time"):
 			f = self.params.env_factor(h)
-			sum_f += self.site.s._rate*self.params.pg.factor*f*(h.time-ts).totalseconds()
-			sum_r += self.v.runoff*h.rain/self.v.area*(h.time-ts).totalseconds()
+			sum_f += self.site.s.db_rate*self.params.pg.factor*f*(h.time-ts).total_seconds()
+			sum_r += self.v.runoff*h.rain/self.v.area
 			ts=h.time
 
 		self.v.level += sum_f
 		if flow > 0 and self.v.level > self.v.max_level:
 			self.v.level = self.v.max_level
-		self.v.level -= flow/self.v.area
+		self.v.level -= flow/self.v.area+sum_r
 		if self.v.level < 0:
 			self.log("Level %s ?!?"%(self.v.level,))
 			self.v.level = 0
@@ -755,7 +755,7 @@ class FlowCheck(object):
 				raise RuntimeError("already locked: "+repr(valve))
 			valve.locked = True
 			self.locked.add(valve)
-		self.valve._on()
+		self.valve._on(duration=self.valve.feed.d.db_max_flow_wait)
 		print >>sys.stderr,"_start done"
 			
 	def state(self,on):
