@@ -291,7 +291,6 @@ class Output(CommonIO):
 		if timer is None:
 			self._write(wval)
 		else:
-			simple_event(Context(),"output","set",self.repr(wval),self.repr(wnextval),*self.name)
 			self.timer = self.timing(self,timer,nextval)
 			if self._tmwrite is not None:
 				self._tmwrite(wval,self.timer,wnextval)
