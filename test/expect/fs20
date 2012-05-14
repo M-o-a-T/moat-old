@@ -470,10 +470,8 @@ groupname: thermo_hygro
 code: 3
 last_temperature: 15.0
 .
-0 locking +WAIT 28 start job ‹Async async›
-0 locking -WAIT 28 start job ‹Async async›
-0 locking +WAIT 29 start job ‹Waiter _wait¦6 ??›
-0 locking -WAIT 29 start job ‹Waiter _wait¦6 ??›
+0 locking +WAIT 28 start job ‹Waiter _wait¦6 ??›
+0 locking -WAIT 28 start job ‹Waiter _wait¦6 ??›
 NEW: ‹ConditionalWorkSequence:49 (4)›
    : │  id: 49
    : │  call count: 0
@@ -481,8 +479,8 @@ NEW: ‹ConditionalWorkSequence:49 (4)›
    : └1╴... done.
 EVENT: wait¦start¦4.4¦_wait¦6
 END: wait¦start¦4.4¦_wait¦6
-0 locking +WAIT 30 start job ‹Waiter _wait¦4 ??›
-0 locking -WAIT 30 start job ‹Waiter _wait¦4 ??›
+0 locking +WAIT 29 start job ‹Waiter _wait¦4 ??›
+0 locking -WAIT 29 start job ‹Waiter _wait¦4 ??›
 NEW: ‹ConditionalWorkSequence:50 (4)›
    : │  id: 50
    : │  call count: 0
@@ -497,8 +495,8 @@ NEW: ‹ConditionalWorkSequence:51 (4)›
    : └1╴... done.
 EVENT: wait¦done¦3.8¦_wait¦4
 END: wait¦done¦3.8¦_wait¦4
-0 locking +WAIT 31 start job ‹Waiter _wait¦5 ??›
-0 locking -WAIT 31 start job ‹Waiter _wait¦5 ??›
+0 locking +WAIT 30 start job ‹Waiter _wait¦5 ??›
+0 locking -WAIT 30 start job ‹Waiter _wait¦5 ??›
 NEW: ‹ConditionalWorkSequence:52 (4)›
    : │  id: 52
    : │  call count: 0
@@ -526,8 +524,8 @@ EVENT: wait¦done¦4.4¦_wait¦6
 END: wait¦done¦4.4¦_wait¦6
 .
 .
-0 locking +WAIT 32 kill job <homevent.tokize.tokizer obj>
-0 locking -WAIT 32 kill job <homevent.tokize.tokizer obj>
+0 locking +WAIT 31 kill job <homevent.tokize.tokizer obj>
+0 locking -WAIT 31 kill job <homevent.tokize.tokizer obj>
 NEW: ‹ConditionalWorkSequence:55 (7)›
    : │  id: 55
    : │  call count: 0

@@ -125,10 +125,6 @@ NEW: ‹ConditionalWorkSequence:15 (4)›
 EVENT: wait¦start¦1.3¦foo¦b
 END: wait¦start¦1.3¦foo¦b
 0 locking +WAIT 8 kill job <homevent.tokize.tokizer obj>
-0 locking +WAIT 9 kill job ‹Collected LogCallback:foo¦n1›
-0 locking +WAIT 10 kill job ‹Collected LogCallback:foo¦n1›
-0 locking -WAIT 10 kill job ‹Collected LogCallback:foo¦n1›
-0 locking -WAIT 9 kill job ‹Collected LogCallback:foo¦n1›
 0 locking -WAIT 8 kill job <homevent.tokize.tokizer obj>
 NEW: ‹ConditionalWorkSequence:16 (6)›
    : │  id: 16

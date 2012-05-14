@@ -60,12 +60,10 @@ EVENT: module¦load¦monitor
 END: module¦load¦monitor
 0 locking +WAIT 3 start job ‹Collected OutLogger:OutLogger¦x2›
 0 locking -WAIT 3 start job ‹Collected OutLogger:OutLogger¦x2›
-0 locking +WAIT 4 start job ‹Async async›
-0 locking -WAIT 4 start job ‹Async async›
 0 Create OnEvtHandler: wago¦connect¦test
 0 NewHandler 15
-0 locking +WAIT 5 start job ‹Waiter _wait¦1 ??›
-0 locking -WAIT 5 start job ‹Waiter _wait¦1 ??›
+0 locking +WAIT 4 start job ‹Waiter _wait¦1 ??›
+0 locking -WAIT 4 start job ‹Waiter _wait¦1 ??›
 NEW: ‹ConditionalWorkSequence:16 (4)›
    : │  id: 16
    : │  call count: 0
@@ -73,16 +71,16 @@ NEW: ‹ConditionalWorkSequence:16 (4)›
    : └1╴... done.
 EVENT: wait¦start¦0.2¦_wait¦1
 END: wait¦start¦0.2¦_wait¦1
+0 locking +WAIT 5 start job ‹WAGOqueue:test New›
+0 locking -WAIT 5 start job ‹WAGOqueue:test New›
 0 locking +WAIT 6 start job ‹WAGOqueue:test New›
 0 locking -WAIT 6 start job ‹WAGOqueue:test New›
-0 locking +WAIT 7 start job ‹WAGOqueue:test New›
-0 locking -WAIT 7 start job ‹WAGOqueue:test New›
 0 msg setstate init closed
 0 msg setstate closed want
 0 msg setstate want connecting
 0 conn connecting WAGOqueue test
-0 locking +WAIT 8 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test››
-0 locking -WAIT 8 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test››
+0 locking +WAIT 7 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test››
+0 locking -WAIT 7 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test››
 0 conn setting up WAGOqueue test
 0 conn connected WAGOqueue test
 0 msg states at run connected connecting
@@ -118,8 +116,6 @@ RUN: on wago connect test ‹OnEventHandler›
    :     : step: send wago test Dr ‹WAGOraw›
  at: ‹ConditionalWorkSequence:17 (5)› (step 1)
  ev: EVENT: wago¦connect¦test
-0 locking +WAIT 9 start job ‹Async async›
-0 locking -WAIT 9 start job ‹Async async›
 END: wago¦connect¦test
 0 msg recv= MINE ‹WAGOinitMsg 4›
 0 msg states at run connected connecting
@@ -267,10 +263,8 @@ DEBUG> in_2 why
 0 msg states at run connected connected
 1 Yes
 DEBUG> Yes
-0 locking +WAIT 10 start job ‹Async async›
-0 locking -WAIT 10 start job ‹Async async›
-0 locking +WAIT 11 start job ‹Waiter timed¦set¦A ??›
-0 locking -WAIT 11 start job ‹Waiter timed¦set¦A ??›
+0 locking +WAIT 8 start job ‹Waiter timed¦set¦A ??›
+0 locking -WAIT 8 start job ‹Waiter timed¦set¦A ??›
 NEW: ‹ConditionalWorkSequence:20 (4)›
    : │  id: 20
    : │  call count: 0
@@ -296,6 +290,13 @@ NEW: ‹ConditionalWorkSequence:21 (4)›
    : └1╴... done.
 EVENT: output¦set¦hey¦ho¦foo¦baz
 END: output¦set¦hey¦ho¦foo¦baz
+NEW: ‹ConditionalWorkSequence:22 (4)›
+   : │  id: 22
+   : │  call count: 0
+   : │  EVENT: output¦set¦ho¦ho¦foo¦baz
+   : └1╴... done.
+EVENT: output¦set¦ho¦ho¦foo¦baz
+END: output¦set¦ho¦ho¦foo¦baz
 0 msg states at run connected connected
 0 msg send ‹WAGOtimedOutputRun 2:1 val=False tm=2.0 sec id=None›
 0 wago send 'c 2 1 1.999'
@@ -307,8 +308,8 @@ END: output¦set¦hey¦ho¦foo¦baz
 0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 20›
 0 msg recv= RECV_AGAIN ‹WAGOtimedOutputRun 2:1 val=False tm=2.0 sec id=2›
 0 msg states at run connected connected
-NEW: ‹ConditionalWorkSequence:22 (4)›
-   : │  id: 22
+NEW: ‹ConditionalWorkSequence:23 (4)›
+   : │  id: 23
    : │  call count: 0
    : │  EVENT: wait¦done¦0.4¦timed¦set¦A
    : └1╴... done.
@@ -326,11 +327,12 @@ END: wait¦done¦0.4¦timed¦set¦A
 0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=1.8 sec id=2›
 0 msg recv= MINE ‹WAGOrawRun 23›
 0 msg states at run connected connected
+foo baz 1 :: foo¦baz¦1:None
 .
-0 locking +WAIT 12 start job ‹Waiter timed¦set¦B ??›
-0 locking -WAIT 12 start job ‹Waiter timed¦set¦B ??›
-NEW: ‹ConditionalWorkSequence:23 (4)›
-   : │  id: 23
+0 locking +WAIT 9 start job ‹Waiter timed¦set¦B ??›
+0 locking -WAIT 9 start job ‹Waiter timed¦set¦B ??›
+NEW: ‹ConditionalWorkSequence:24 (4)›
+   : │  id: 24
    : │  call count: 0
    : │  EVENT: wait¦start¦1.4¦timed¦set¦B
    : └1╴... done.
@@ -348,25 +350,13 @@ END: wait¦start¦1.4¦timed¦set¦B
 0 msg recv test ‹MsgIncoming: msg:'PING 2' msgid:1 type:MT_IND prio:2›
 0 msg recv= RECV_AGAIN ‹WAGOkeepaliveMsg 25›
 0 msg states at run connected connected
-NEW: ‹ConditionalWorkSequence:24 (4)›
-   : │  id: 24
+NEW: ‹ConditionalWorkSequence:25 (4)›
+   : │  id: 25
    : │  call count: 0
    : │  EVENT: wait¦done¦1.4¦timed¦set¦B
    : └1╴... done.
 EVENT: wait¦done¦1.4¦timed¦set¦B
 END: wait¦done¦1.4¦timed¦set¦B
-0 msg states at run connected connected
-0 msg send ‹WAGOrawRun 26›
-0 wago send u'D-'
-0 msg send result RECV_AGAIN
-0 wago recv '+OK'
-0 msg recv msg ‹MsgIncoming: msg:'OK' type:MT_ACK prio:2›
-0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'OK' type:MT_ACK prio:2›
-0 msg recv test ‹MsgIncoming: msg:'OK' type:MT_ACK prio:2›
-0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 27›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=0.8 sec id=2›
-0 msg recv= MINE ‹WAGOrawRun 28›
-0 msg states at run connected connected
 0 msg states at run connected connected
 0 msg send ‹WAGOoutputInRun 2:1›
 0 wago send 'I 2 1'
@@ -375,7 +365,7 @@ END: wait¦done¦1.4¦timed¦set¦B
 0 msg recv msg ‹MsgIncoming: msg:'0' type:MT_ACK prio:2›
 0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'0' type:MT_ACK prio:2›
 0 msg recv test ‹MsgIncoming: msg:'0' type:MT_ACK prio:2›
-0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 29›
+0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 26›
 0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=0.8 sec id=2›
 0 msg recv= MINE ‹WAGOoutputInRun 2:1›
 0 msg states at run connected connected
@@ -389,186 +379,116 @@ DEBUG> out_1 ho
 0 msg recv msg ‹MsgIncoming: msg:'0' type:MT_ACK prio:2›
 0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'0' type:MT_ACK prio:2›
 0 msg recv test ‹MsgIncoming: msg:'0' type:MT_ACK prio:2›
-0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 2a›
+0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 27›
 0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=0.8 sec id=2›
 0 msg recv= MINE ‹WAGOoutputInRun 2:1›
 0 msg states at run connected connected
 1 Yes
 DEBUG> Yes
-0 locking +WAIT 13 start job ‹Waiter timed¦set¦C ??›
-0 locking -WAIT 13 start job ‹Waiter timed¦set¦C ??›
-NEW: ‹ConditionalWorkSequence:25 (4)›
-   : │  id: 25
+0 locking +WAIT 10 start job ‹Waiter timed¦set¦C ??›
+0 locking -WAIT 10 start job ‹Waiter timed¦set¦C ??›
+NEW: ‹ConditionalWorkSequence:26 (4)›
+   : │  id: 26
    : │  call count: 0
    : │  EVENT: wait¦start¦2.4¦timed¦set¦C
    : └1╴... done.
 EVENT: wait¦start¦2.4¦timed¦set¦C
 END: wait¦start¦2.4¦timed¦set¦C
-0 !got DOWN_EVENT test
-NEW: ‹ConditionalWorkSequence:26 (4)›
-   : │  id: 26
-   : │  call count: 0
-   : │  EVENT: wago¦disconnect¦test
-   : └1╴... done.
-EVENT: wago¦disconnect¦test
-END: wago¦disconnect¦test
-0 msg setstate2 connected closed
-0 conn ReOpen WAGOqueue test
-0 msg setstate closed waiting: wait 3.000
+0 wago recv '!1 PING 3'
+0 msg recv msg ‹MsgIncoming: msg:'PING 3' msgid:1 type:MT_IND prio:2›
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 3' msgid:1 type:MT_IND prio:2›
+0 msg recv test ‹MsgIncoming: msg:'PING 3' msgid:1 type:MT_IND prio:2›
+0 msg recv= RECV_AGAIN ‹WAGOkeepaliveMsg 28›
+0 msg states at run connected connected
+0 wago recv '!1 PING 4'
+0 msg recv msg ‹MsgIncoming: msg:'PING 4' msgid:1 type:MT_IND prio:2›
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 4' msgid:1 type:MT_IND prio:2›
+0 msg recv test ‹MsgIncoming: msg:'PING 4' msgid:1 type:MT_IND prio:2›
+0 msg recv= RECV_AGAIN ‹WAGOkeepaliveMsg 29›
+0 msg states at run connected connected
+0 wago recv '!2 TRIGGER'
+0 msg recv msg ‹MsgIncoming: msg:'TRIGGER' msgid:2 type:MT_IND prio:2›
+0 wago recv '!-2 Deleted.'
+0 msg recv msg ‹MsgIncoming: msg:'Deleted.' msgid:2 type:MT_IND_NAK prio:2›
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'TRIGGER' msgid:2 type:MT_IND prio:2›
+0 msg recv test ‹MsgIncoming: msg:'TRIGGER' msgid:2 type:MT_IND prio:2›
+0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 2a›
+0 msg recv= RECV_AGAIN ‹WAGOtimedOutputRun 2:1 val=False tm=now id=2›
+0 msg states at run connected connected
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'Deleted.' msgid:2 type:MT_IND_NAK prio:2›
+0 msg recv test ‹MsgIncoming: msg:'Deleted.' msgid:2 type:MT_IND_NAK prio:2›
+0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 2b›
+0 msg recv= MINE ‹WAGOtimedOutputRun 2:1 val=False tm=now id=2›
+0 msg states at run connected connected
 NEW: ‹ConditionalWorkSequence:27 (4)›
    : │  id: 27
+   : │  call count: 0
+   : │  EVENT: output¦set¦ho¦ho¦foo¦baz
+   : └1╴... done.
+EVENT: output¦set¦ho¦ho¦foo¦baz
+END: output¦set¦ho¦ho¦foo¦baz
+1 released
+DEBUG> released
+0 msg states at run connected connected
+0 msg send ‹WAGOrawRun 2c›
+0 wago send u'DS'
+0 msg send result RECV_AGAIN
+0 wago recv '+OK'
+0 msg recv msg ‹MsgIncoming: msg:'OK' type:MT_ACK prio:2›
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'OK' type:MT_ACK prio:2›
+0 msg recv test ‹MsgIncoming: msg:'OK' type:MT_ACK prio:2›
+0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 2d›
+0 msg recv= MINE ‹WAGOrawRun 2e›
+0 msg states at run connected connected
+NEW: ‹ConditionalWorkSequence:28 (4)›
+   : │  id: 28
    : │  call count: 0
    : │  EVENT: wait¦done¦2.4¦timed¦set¦C
    : └1╴... done.
 EVENT: wait¦done¦2.4¦timed¦set¦C
 END: wait¦done¦2.4¦timed¦set¦C
-0 msg setstate waiting want
-0 msg setstate want connecting
-0 conn connecting WAGOqueue test
-0 locking +WAIT 14 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test››
-0 locking -WAIT 14 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test››
-0 conn setting up WAGOqueue test
-0 conn connected WAGOqueue test
-0 msg states at run connected connecting
-0 NotConn [[], [], [‹WAGOoutputInRun 2:1›, ‹WAGOkeepaliveMsg 2b›], []]
-0 msg states at run connected connecting
-0 msg blocked by ‹WAGOinitMsg 2c›
-0 msg states at run connected connecting
-0 msg blocked by ‹WAGOinitMsg 2d›
-0 wago recv '* WAGO ready.'
-0 msg recv msg ‹MsgIncoming: msg:'WAGO ready.' type:MT_INFO prio:2›
-0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'WAGO ready.' type:MT_INFO prio:2›
-0 msg recv test ‹MsgIncoming: msg:'WAGO ready.' type:MT_INFO prio:2›
-0 !got UP_EVENT test
-NEW: ‹ConditionalWorkSequence:28 (5)›
-   : │  id: 28
-   : │  call count: 0
-   : │  EVENT: wago¦connect¦test
-   : ├1╴on wago connect test ‹OnEventHandler›
-   : │  prio: 51
-   : │  step: async ‹Async›
-   : │      : step: send wago test Dc ‹WAGOraw›
-   : │      : step: send wago test DI ‹WAGOraw›
-   : │      : step: send wago test Dr ‹WAGOraw›
-   : └2╴... done.
-EVENT: wago¦connect¦test
-RUN: on wago connect test ‹OnEventHandler›
-   : prio: 51
-   : step: async ‹Async›
-   :     : step: send wago test Dc ‹WAGOraw›
-   :     : step: send wago test DI ‹WAGOraw›
-   :     : step: send wago test Dr ‹WAGOraw›
- at: ‹ConditionalWorkSequence:28 (5)› (step 1)
- ev: EVENT: wago¦connect¦test
-0 locking +WAIT 15 start job ‹Async async›
-0 locking -WAIT 15 start job ‹Async async›
-END: wago¦connect¦test
-0 msg recv= MINE ‹WAGOinitMsg 2e›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-2.3 sec id=2›
-0 msg states at run connected connecting
-0 NotConn [[], [‹WAGOmonitorsMsg 2f›], [‹WAGOoutputInRun 2:1›, ‹WAGOkeepaliveMsg 30›], []]
-0 msg setstate connecting connected
-0 msg states at run connected connected
-0 msg send ‹WAGOmonitorsMsg 31›
-0 wago send 'm'
-0 msg send result RECV_AGAIN
-0 msg states at run connected connected
-0 msg blocked by ‹WAGOmonitorsMsg 32›
-0 wago recv '=Monitors:'
-0 wago recv '.'
-0 msg recv msg ‹MsgIncoming: msg:['Monitors:'] type:MT_MULTILINE prio:2›
-0 conn incoming WAGOqueue test ‹MsgIncoming: msg:['Monitors:'] type:MT_MULTILINE prio:2›
-0 msg recv test ‹MsgIncoming: msg:['Monitors:'] type:MT_MULTILINE prio:2›
-0 msg recv= MINE ‹WAGOmonitorsMsg 33›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-2.3 sec id=2›
 0 msg states at run connected connected
 0 msg send ‹WAGOoutputInRun 2:1›
 0 wago send 'I 2 1'
 0 msg send result RECV_AGAIN
-0 msg send ‹WAGOkeepaliveMsg 34›
-0 wago send 'Da0.5'
-0 msg send result RECV_AGAIN
-0 msg send ‹WAGOrawRun 35›
-0 wago send u'Dc'
-0 msg send result RECV_AGAIN
 0 wago recv '+1'
 0 msg recv msg ‹MsgIncoming: msg:'1' type:MT_ACK prio:2›
-0 wago recv '!+3 monitor created'
-0 msg recv msg ‹MsgIncoming: msg:'monitor created' msgid:3 type:MT_IND_ACK prio:2›
-0 wago recv '+OK'
-0 msg recv msg ‹MsgIncoming: msg:'OK' type:MT_ACK prio:2›
 0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'1' type:MT_ACK prio:2›
 0 msg recv test ‹MsgIncoming: msg:'1' type:MT_ACK prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-2.3 sec id=2›
+0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 2f›
 0 msg recv= MINE ‹WAGOoutputInRun 2:1›
 0 msg states at run connected connected
-0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'monitor created' msgid:3 type:MT_IND_ACK prio:2›
-0 msg recv test ‹MsgIncoming: msg:'monitor created' msgid:3 type:MT_IND_ACK prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-2.3 sec id=2›
-0 msg recv= RECV_AGAIN ‹WAGOkeepaliveMsg 36›
-0 msg states at run connected connected
-0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'OK' type:MT_ACK prio:2›
-0 msg recv test ‹MsgIncoming: msg:'OK' type:MT_ACK prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-2.3 sec id=2›
-0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 37›
-0 msg recv= MINE ‹WAGOrawRun 38›
-0 msg states at run connected connected
-0 msg states at run connected connected
-0 msg send ‹WAGOrawRun 39›
-0 wago send u'DI'
-0 msg send result RECV_AGAIN
 1 out_2 hey
 DEBUG> out_2 hey
 0 msg states at run connected connected
 0 msg send ‹WAGOoutputInRun 2:1›
 0 wago send 'I 2 1'
 0 msg send result RECV_AGAIN
-0 wago recv '+OK'
-0 msg recv msg ‹MsgIncoming: msg:'OK' type:MT_ACK prio:2›
 0 wago recv '+1'
 0 msg recv msg ‹MsgIncoming: msg:'1' type:MT_ACK prio:2›
-0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'OK' type:MT_ACK prio:2›
-0 msg recv test ‹MsgIncoming: msg:'OK' type:MT_ACK prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-2.3 sec id=2›
-0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 3a›
-0 msg recv= MINE ‹WAGOrawRun 3b›
-0 msg states at run connected connected
 0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'1' type:MT_ACK prio:2›
 0 msg recv test ‹MsgIncoming: msg:'1' type:MT_ACK prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-2.3 sec id=2›
-0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 3c›
+0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 30›
 0 msg recv= MINE ‹WAGOoutputInRun 2:1›
 0 msg states at run connected connected
 1 Yes
 DEBUG> Yes
-0 locking +WAIT 16 start job ‹Waiter _wait¦5 ??›
-0 locking -WAIT 16 start job ‹Waiter _wait¦5 ??›
+0 locking +WAIT 11 start job ‹Waiter _wait¦5 ??›
+0 locking -WAIT 11 start job ‹Waiter _wait¦5 ??›
 NEW: ‹ConditionalWorkSequence:29 (4)›
    : │  id: 29
    : │  call count: 0
-   : │  EVENT: wait¦start¦4.6¦_wait¦5
+   : │  EVENT: wait¦start¦2.5¦_wait¦5
    : └1╴... done.
-EVENT: wait¦start¦4.6¦_wait¦5
-END: wait¦start¦4.6¦_wait¦5
-0 msg states at run connected connected
-0 msg send ‹WAGOrawRun 3d›
-0 wago send u'Dr'
-0 msg send result RECV_AGAIN
-0 wago recv '+OK'
-0 msg recv msg ‹MsgIncoming: msg:'OK' type:MT_ACK prio:2›
-0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'OK' type:MT_ACK prio:2›
-0 msg recv test ‹MsgIncoming: msg:'OK' type:MT_ACK prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-2.3 sec id=2›
-0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 3e›
-0 msg recv= MINE ‹WAGOrawRun 3f›
-0 msg states at run connected connected
+EVENT: wait¦start¦2.5¦_wait¦5
+END: wait¦start¦2.5¦_wait¦5
 NEW: ‹ConditionalWorkSequence:30 (4)›
    : │  id: 30
    : │  call count: 0
-   : │  EVENT: wait¦done¦4.6¦_wait¦5
+   : │  EVENT: wait¦done¦2.5¦_wait¦5
    : └1╴... done.
-EVENT: wait¦done¦4.6¦_wait¦5
-END: wait¦done¦4.6¦_wait¦5
+EVENT: wait¦done¦2.5¦_wait¦5
+END: wait¦done¦2.5¦_wait¦5
 NEW: ‹ConditionalWorkSequence:31 (4)›
    : │  id: 31
    : │  call count: 0
@@ -584,71 +504,66 @@ END: output¦set¦hey¦ho¦foo¦baz
 0 msg recv msg ‹MsgIncoming: msg:'Cleared.' type:MT_ACK prio:2›
 0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'Cleared.' type:MT_ACK prio:2›
 0 msg recv test ‹MsgIncoming: msg:'Cleared.' type:MT_ACK prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-2.4 sec id=2›
-0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 40›
+0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 31›
 0 msg recv= MINE ‹WAGOoutputRun 2:1 val=False›
 0 msg states at run connected connected
-0 locking +WAIT 17 start job ‹Waiter _wait¦6 ??›
-0 locking -WAIT 17 start job ‹Waiter _wait¦6 ??›
+0 locking +WAIT 12 start job ‹Waiter _wait¦6 ??›
+0 locking -WAIT 12 start job ‹Waiter _wait¦6 ??›
 NEW: ‹ConditionalWorkSequence:32 (4)›
    : │  id: 32
    : │  call count: 0
-   : │  EVENT: wait¦start¦5.1¦_wait¦6
+   : │  EVENT: wait¦start¦3.0¦_wait¦6
    : └1╴... done.
-EVENT: wait¦start¦5.1¦_wait¦6
-END: wait¦start¦5.1¦_wait¦6
-0 wago recv '!3 PING 1'
-0 msg recv msg ‹MsgIncoming: msg:'PING 1' msgid:3 type:MT_IND prio:2›
-0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 1' msgid:3 type:MT_IND prio:2›
-0 msg recv test ‹MsgIncoming: msg:'PING 1' msgid:3 type:MT_IND prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-2.8 sec id=2›
-0 msg recv= RECV_AGAIN ‹WAGOkeepaliveMsg 41›
+EVENT: wait¦start¦3.0¦_wait¦6
+END: wait¦start¦3.0¦_wait¦6
+0 wago recv '!1 PING 5'
+0 msg recv msg ‹MsgIncoming: msg:'PING 5' msgid:1 type:MT_IND prio:2›
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 5' msgid:1 type:MT_IND prio:2›
+0 msg recv test ‹MsgIncoming: msg:'PING 5' msgid:1 type:MT_IND prio:2›
+0 msg recv= RECV_AGAIN ‹WAGOkeepaliveMsg 32›
 0 msg states at run connected connected
 NEW: ‹ConditionalWorkSequence:33 (4)›
    : │  id: 33
    : │  call count: 0
-   : │  EVENT: wait¦done¦5.1¦_wait¦6
+   : │  EVENT: wait¦done¦3.0¦_wait¦6
    : └1╴... done.
-EVENT: wait¦done¦5.1¦_wait¦6
-END: wait¦done¦5.1¦_wait¦6
+EVENT: wait¦done¦3.0¦_wait¦6
+END: wait¦done¦3.0¦_wait¦6
 0 msg states at run connected connected
-0 msg send ‹WAGOrawRun 42›
+0 msg send ‹WAGOrawRun 33›
 0 wago send u'Dc'
 0 msg send result RECV_AGAIN
 0 wago recv '+OK'
 0 msg recv msg ‹MsgIncoming: msg:'OK' type:MT_ACK prio:2›
 0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'OK' type:MT_ACK prio:2›
 0 msg recv test ‹MsgIncoming: msg:'OK' type:MT_ACK prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-2.9 sec id=2›
-0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 43›
-0 msg recv= MINE ‹WAGOrawRun 44›
+0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 34›
+0 msg recv= MINE ‹WAGOrawRun 35›
 0 msg states at run connected connected
 0 msg states at run connected connected
-0 msg send ‹WAGOrawRun 45›
+0 msg send ‹WAGOrawRun 36›
 0 wago send u'd 0.01'
 0 msg send result RECV_AGAIN
 0 wago recv '+Loop timer changed.'
 0 msg recv msg ‹MsgIncoming: msg:'Loop timer changed.' type:MT_ACK prio:2›
 0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'Loop timer changed.' type:MT_ACK prio:2›
 0 msg recv test ‹MsgIncoming: msg:'Loop timer changed.' type:MT_ACK prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-2.9 sec id=2›
-0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 46›
-0 msg recv= MINE ‹WAGOrawRun 47›
+0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 37›
+0 msg recv= MINE ‹WAGOrawRun 38›
 0 msg states at run connected connected
 0 msg states at run connected connected
 0 msg send ‹WAGOmonRun ‹WAGOmon test¦count¦up off››
 0 wago send 'm# 1 1 + 1.000'
 0 msg send result RECV_AGAIN
-0 wago recv '!+4 monitor created'
-0 msg recv msg ‹MsgIncoming: msg:'monitor created' msgid:4 type:MT_IND_ACK prio:2›
-0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'monitor created' msgid:4 type:MT_IND_ACK prio:2›
-0 msg recv test ‹MsgIncoming: msg:'monitor created' msgid:4 type:MT_IND_ACK prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-2.9 sec id=2›
-0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 48›
+0 wago recv '!+3 monitor created'
+0 msg recv msg ‹MsgIncoming: msg:'monitor created' msgid:3 type:MT_IND_ACK prio:2›
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'monitor created' msgid:3 type:MT_IND_ACK prio:2›
+0 msg recv test ‹MsgIncoming: msg:'monitor created' msgid:3 type:MT_IND_ACK prio:2›
+0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 39›
 0 msg recv= RECV_AGAIN ‹WAGOmonRun ‹WAGOmon test¦count¦up off››
 0 msg states at run connected connected
-0 locking +WAIT 18 monitor up ‹WAGOmon test¦count¦up off›
-0 locking -WAIT 18 monitor up ‹WAGOmon test¦count¦up off›
+0 locking +WAIT 13 monitor up ‹WAGOmon test¦count¦up off›
+0 locking -WAIT 13 monitor up ‹WAGOmon test¦count¦up off›
 NEW: ‹ConditionalWorkSequence:34 (4)›
    : │  id: 34
    : │  call count: 0
@@ -656,25 +571,24 @@ NEW: ‹ConditionalWorkSequence:34 (4)›
    : └1╴... done.
 EVENT: monitor¦start¦test¦count¦up
 END: monitor¦start¦test¦count¦up
-0 locking +WAIT 19 start job ‹WAGOmon test¦count¦up off›
-0 locking -WAIT 19 start job ‹WAGOmon test¦count¦up off›
+0 locking +WAIT 14 start job ‹WAGOmon test¦count¦up off›
+0 locking -WAIT 14 start job ‹WAGOmon test¦count¦up off›
 0 msg states at run connected connected
 0 msg send ‹WAGOmonRun ‹WAGOmon test¦count¦down off››
 0 wago send 'm# 1 1 - 1.000'
 0 msg send result RECV_AGAIN
 0 monitor Start run test¦count¦up
-0 locking +WAIT 20 monitor one_value test count up
-0 wago recv '!+5 monitor created'
-0 msg recv msg ‹MsgIncoming: msg:'monitor created' msgid:5 type:MT_IND_ACK prio:2›
-0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'monitor created' msgid:5 type:MT_IND_ACK prio:2›
-0 msg recv test ‹MsgIncoming: msg:'monitor created' msgid:5 type:MT_IND_ACK prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-2.9 sec id=2›
-0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 49›
+0 locking +WAIT 15 monitor one_value test count up
+0 wago recv '!+4 monitor created'
+0 msg recv msg ‹MsgIncoming: msg:'monitor created' msgid:4 type:MT_IND_ACK prio:2›
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'monitor created' msgid:4 type:MT_IND_ACK prio:2›
+0 msg recv test ‹MsgIncoming: msg:'monitor created' msgid:4 type:MT_IND_ACK prio:2›
+0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 3a›
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦up run 1››
 0 msg recv= RECV_AGAIN ‹WAGOmonRun ‹WAGOmon test¦count¦down off››
 0 msg states at run connected connected
-0 locking +WAIT 21 monitor up ‹WAGOmon test¦count¦down off›
-0 locking -WAIT 21 monitor up ‹WAGOmon test¦count¦down off›
+0 locking +WAIT 16 monitor up ‹WAGOmon test¦count¦down off›
+0 locking -WAIT 16 monitor up ‹WAGOmon test¦count¦down off›
 NEW: ‹ConditionalWorkSequence:35 (4)›
    : │  id: 35
    : │  call count: 0
@@ -682,26 +596,25 @@ NEW: ‹ConditionalWorkSequence:35 (4)›
    : └1╴... done.
 EVENT: monitor¦start¦test¦count¦down
 END: monitor¦start¦test¦count¦down
-0 locking +WAIT 22 start job ‹WAGOmon test¦count¦down off›
-0 locking -WAIT 22 start job ‹WAGOmon test¦count¦down off›
+0 locking +WAIT 17 start job ‹WAGOmon test¦count¦down off›
+0 locking -WAIT 17 start job ‹WAGOmon test¦count¦down off›
 0 msg states at run connected connected
 0 msg send ‹WAGOmonRun ‹WAGOmon test¦count¦both off››
 0 wago send 'm# 1 1 * 1.000'
 0 msg send result RECV_AGAIN
 0 monitor Start run test¦count¦down
-0 locking +WAIT 23 monitor one_value test count down
-0 wago recv '!+6 monitor created'
-0 msg recv msg ‹MsgIncoming: msg:'monitor created' msgid:6 type:MT_IND_ACK prio:2›
-0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'monitor created' msgid:6 type:MT_IND_ACK prio:2›
-0 msg recv test ‹MsgIncoming: msg:'monitor created' msgid:6 type:MT_IND_ACK prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-2.9 sec id=2›
-0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 4a›
+0 locking +WAIT 18 monitor one_value test count down
+0 wago recv '!+5 monitor created'
+0 msg recv msg ‹MsgIncoming: msg:'monitor created' msgid:5 type:MT_IND_ACK prio:2›
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'monitor created' msgid:5 type:MT_IND_ACK prio:2›
+0 msg recv test ‹MsgIncoming: msg:'monitor created' msgid:5 type:MT_IND_ACK prio:2›
+0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 3b›
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦up run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦down run 1››
 0 msg recv= RECV_AGAIN ‹WAGOmonRun ‹WAGOmon test¦count¦both off››
 0 msg states at run connected connected
-0 locking +WAIT 24 monitor up ‹WAGOmon test¦count¦both off›
-0 locking -WAIT 24 monitor up ‹WAGOmon test¦count¦both off›
+0 locking +WAIT 19 monitor up ‹WAGOmon test¦count¦both off›
+0 locking -WAIT 19 monitor up ‹WAGOmon test¦count¦both off›
 NEW: ‹ConditionalWorkSequence:36 (4)›
    : │  id: 36
    : │  call count: 0
@@ -709,27 +622,26 @@ NEW: ‹ConditionalWorkSequence:36 (4)›
    : └1╴... done.
 EVENT: monitor¦start¦test¦count¦both
 END: monitor¦start¦test¦count¦both
-0 locking +WAIT 25 start job ‹WAGOmon test¦count¦both off›
-0 locking -WAIT 25 start job ‹WAGOmon test¦count¦both off›
+0 locking +WAIT 20 start job ‹WAGOmon test¦count¦both off›
+0 locking -WAIT 20 start job ‹WAGOmon test¦count¦both off›
 0 msg states at run connected connected
 0 msg send ‹WAGOmonRun ‹WAGOmon test¦report¦up off››
 0 wago send 'm+ 1 1 +'
 0 msg send result RECV_AGAIN
 0 monitor Start run test¦count¦both
-0 locking +WAIT 26 monitor one_value test count both
-0 wago recv '!+7 monitor created'
-0 msg recv msg ‹MsgIncoming: msg:'monitor created' msgid:7 type:MT_IND_ACK prio:2›
-0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'monitor created' msgid:7 type:MT_IND_ACK prio:2›
-0 msg recv test ‹MsgIncoming: msg:'monitor created' msgid:7 type:MT_IND_ACK prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-2.9 sec id=2›
-0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 4b›
+0 locking +WAIT 21 monitor one_value test count both
+0 wago recv '!+6 monitor created'
+0 msg recv msg ‹MsgIncoming: msg:'monitor created' msgid:6 type:MT_IND_ACK prio:2›
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'monitor created' msgid:6 type:MT_IND_ACK prio:2›
+0 msg recv test ‹MsgIncoming: msg:'monitor created' msgid:6 type:MT_IND_ACK prio:2›
+0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 3c›
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦up run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦down run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦both run 1››
 0 msg recv= RECV_AGAIN ‹WAGOmonRun ‹WAGOmon test¦report¦up off››
 0 msg states at run connected connected
-0 locking +WAIT 27 monitor up ‹WAGOmon test¦report¦up off›
-0 locking -WAIT 27 monitor up ‹WAGOmon test¦report¦up off›
+0 locking +WAIT 22 monitor up ‹WAGOmon test¦report¦up off›
+0 locking -WAIT 22 monitor up ‹WAGOmon test¦report¦up off›
 NEW: ‹ConditionalWorkSequence:37 (4)›
    : │  id: 37
    : │  call count: 0
@@ -737,28 +649,27 @@ NEW: ‹ConditionalWorkSequence:37 (4)›
    : └1╴... done.
 EVENT: monitor¦start¦test¦report¦up
 END: monitor¦start¦test¦report¦up
-0 locking +WAIT 28 start job ‹WAGOmon test¦report¦up off›
-0 locking -WAIT 28 start job ‹WAGOmon test¦report¦up off›
+0 locking +WAIT 23 start job ‹WAGOmon test¦report¦up off›
+0 locking -WAIT 23 start job ‹WAGOmon test¦report¦up off›
 0 msg states at run connected connected
 0 msg send ‹WAGOmonRun ‹WAGOmon test¦report¦down off››
 0 wago send 'm+ 1 1 -'
 0 msg send result RECV_AGAIN
 0 monitor Start run test¦report¦up
-0 locking +WAIT 29 monitor one_value test report up
-0 wago recv '!+8 monitor created'
-0 msg recv msg ‹MsgIncoming: msg:'monitor created' msgid:8 type:MT_IND_ACK prio:2›
-0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'monitor created' msgid:8 type:MT_IND_ACK prio:2›
-0 msg recv test ‹MsgIncoming: msg:'monitor created' msgid:8 type:MT_IND_ACK prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-2.9 sec id=2›
-0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 4c›
+0 locking +WAIT 24 monitor one_value test report up
+0 wago recv '!+7 monitor created'
+0 msg recv msg ‹MsgIncoming: msg:'monitor created' msgid:7 type:MT_IND_ACK prio:2›
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'monitor created' msgid:7 type:MT_IND_ACK prio:2›
+0 msg recv test ‹MsgIncoming: msg:'monitor created' msgid:7 type:MT_IND_ACK prio:2›
+0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 3d›
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦up run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦down run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦both run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦up run 1››
 0 msg recv= RECV_AGAIN ‹WAGOmonRun ‹WAGOmon test¦report¦down off››
 0 msg states at run connected connected
-0 locking +WAIT 30 monitor up ‹WAGOmon test¦report¦down off›
-0 locking -WAIT 30 monitor up ‹WAGOmon test¦report¦down off›
+0 locking +WAIT 25 monitor up ‹WAGOmon test¦report¦down off›
+0 locking -WAIT 25 monitor up ‹WAGOmon test¦report¦down off›
 NEW: ‹ConditionalWorkSequence:38 (4)›
    : │  id: 38
    : │  call count: 0
@@ -766,20 +677,19 @@ NEW: ‹ConditionalWorkSequence:38 (4)›
    : └1╴... done.
 EVENT: monitor¦start¦test¦report¦down
 END: monitor¦start¦test¦report¦down
-0 locking +WAIT 31 start job ‹WAGOmon test¦report¦down off›
-0 locking -WAIT 31 start job ‹WAGOmon test¦report¦down off›
+0 locking +WAIT 26 start job ‹WAGOmon test¦report¦down off›
+0 locking -WAIT 26 start job ‹WAGOmon test¦report¦down off›
 0 msg states at run connected connected
 0 msg send ‹WAGOmonRun ‹WAGOmon test¦report¦both off››
 0 wago send 'm+ 1 1 *'
 0 msg send result RECV_AGAIN
 0 monitor Start run test¦report¦down
-0 locking +WAIT 32 monitor one_value test report down
-0 wago recv '!+9 monitor created'
-0 msg recv msg ‹MsgIncoming: msg:'monitor created' msgid:9 type:MT_IND_ACK prio:2›
-0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'monitor created' msgid:9 type:MT_IND_ACK prio:2›
-0 msg recv test ‹MsgIncoming: msg:'monitor created' msgid:9 type:MT_IND_ACK prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-2.9 sec id=2›
-0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 4d›
+0 locking +WAIT 27 monitor one_value test report down
+0 wago recv '!+8 monitor created'
+0 msg recv msg ‹MsgIncoming: msg:'monitor created' msgid:8 type:MT_IND_ACK prio:2›
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'monitor created' msgid:8 type:MT_IND_ACK prio:2›
+0 msg recv test ‹MsgIncoming: msg:'monitor created' msgid:8 type:MT_IND_ACK prio:2›
+0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 3e›
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦up run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦down run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦both run 1››
@@ -787,8 +697,8 @@ END: monitor¦start¦test¦report¦down
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦down run 1››
 0 msg recv= RECV_AGAIN ‹WAGOmonRun ‹WAGOmon test¦report¦both off››
 0 msg states at run connected connected
-0 locking +WAIT 33 monitor up ‹WAGOmon test¦report¦both off›
-0 locking -WAIT 33 monitor up ‹WAGOmon test¦report¦both off›
+0 locking +WAIT 28 monitor up ‹WAGOmon test¦report¦both off›
+0 locking -WAIT 28 monitor up ‹WAGOmon test¦report¦both off›
 NEW: ‹ConditionalWorkSequence:39 (4)›
    : │  id: 39
    : │  call count: 0
@@ -796,67 +706,71 @@ NEW: ‹ConditionalWorkSequence:39 (4)›
    : └1╴... done.
 EVENT: monitor¦start¦test¦report¦both
 END: monitor¦start¦test¦report¦both
-0 locking +WAIT 34 start job ‹WAGOmon test¦report¦both off›
-0 locking -WAIT 34 start job ‹WAGOmon test¦report¦both off›
-0 locking +WAIT 35 start job ‹Waiter _wait¦7 ??›
-0 locking -WAIT 35 start job ‹Waiter _wait¦7 ??›
+0 locking +WAIT 29 start job ‹WAGOmon test¦report¦both off›
+0 locking -WAIT 29 start job ‹WAGOmon test¦report¦both off›
+0 locking +WAIT 30 start job ‹Waiter _wait¦7 ??›
+0 locking -WAIT 30 start job ‹Waiter _wait¦7 ??›
 NEW: ‹ConditionalWorkSequence:40 (4)›
    : │  id: 40
    : │  call count: 0
-   : │  EVENT: wait¦start¦5.2¦_wait¦7
+   : │  EVENT: wait¦start¦3.1¦_wait¦7
    : └1╴... done.
-EVENT: wait¦start¦5.2¦_wait¦7
-END: wait¦start¦5.2¦_wait¦7
+EVENT: wait¦start¦3.1¦_wait¦7
+END: wait¦start¦3.1¦_wait¦7
 0 monitor Start run test¦report¦both
-0 locking +WAIT 36 monitor one_value test report both
+0 locking +WAIT 31 monitor one_value test report both
+0 wago recv '!1 PING 6'
+0 msg recv msg ‹MsgIncoming: msg:'PING 6' msgid:1 type:MT_IND prio:2›
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 6' msgid:1 type:MT_IND prio:2›
+0 msg recv test ‹MsgIncoming: msg:'PING 6' msgid:1 type:MT_IND prio:2›
+0 msg recv= RECV_AGAIN ‹WAGOkeepaliveMsg 3f›
+0 msg states at run connected connected
 NEW: ‹ConditionalWorkSequence:41 (4)›
    : │  id: 41
    : │  call count: 0
-   : │  EVENT: wait¦done¦5.2¦_wait¦7
+   : │  EVENT: wait¦done¦3.1¦_wait¦7
    : └1╴... done.
-EVENT: wait¦done¦5.2¦_wait¦7
-END: wait¦done¦5.2¦_wait¦7
+EVENT: wait¦done¦3.1¦_wait¦7
+END: wait¦done¦3.1¦_wait¦7
 0 msg states at run connected connected
-0 msg send ‹WAGOrawRun 4e›
+0 msg send ‹WAGOrawRun 40›
 0 wago send u'Ds'
 0 msg send result RECV_AGAIN
 0 wago recv '+OK'
 0 msg recv msg ‹MsgIncoming: msg:'OK' type:MT_ACK prio:2›
 0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'OK' type:MT_ACK prio:2›
 0 msg recv test ‹MsgIncoming: msg:'OK' type:MT_ACK prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-3.0 sec id=2›
-0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 4f›
+0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 41›
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦up run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦down run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦both run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦up run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦down run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦both run 1››
-0 msg recv= MINE ‹WAGOrawRun 50›
+0 msg recv= MINE ‹WAGOrawRun 42›
 0 msg states at run connected connected
-0 locking +WAIT 37 start job ‹Waiter _wait¦8 ??›
-0 locking -WAIT 37 start job ‹Waiter _wait¦8 ??›
+0 locking +WAIT 32 start job ‹Waiter _wait¦8 ??›
+0 locking -WAIT 32 start job ‹Waiter _wait¦8 ??›
 NEW: ‹ConditionalWorkSequence:42 (4)›
    : │  id: 42
    : │  call count: 0
-   : │  EVENT: wait¦start¦5.3¦_wait¦8
+   : │  EVENT: wait¦start¦3.2¦_wait¦8
    : └1╴... done.
-EVENT: wait¦start¦5.3¦_wait¦8
-END: wait¦start¦5.3¦_wait¦8
-0 wago recv '!9 H'
-0 msg recv msg ‹MsgIncoming: msg:'H' msgid:9 type:MT_IND prio:2›
-0 wago recv '!7 H'
-0 msg recv msg ‹MsgIncoming: msg:'H' msgid:7 type:MT_IND prio:2›
-0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'H' msgid:9 type:MT_IND prio:2›
-0 msg recv test ‹MsgIncoming: msg:'H' msgid:9 type:MT_IND prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-3.0 sec id=2›
-0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 51›
+EVENT: wait¦start¦3.2¦_wait¦8
+END: wait¦start¦3.2¦_wait¦8
+0 wago recv '!8 H'
+0 msg recv msg ‹MsgIncoming: msg:'H' msgid:8 type:MT_IND prio:2›
+0 wago recv '!6 H'
+0 msg recv msg ‹MsgIncoming: msg:'H' msgid:6 type:MT_IND prio:2›
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'H' msgid:8 type:MT_IND prio:2›
+0 msg recv test ‹MsgIncoming: msg:'H' msgid:8 type:MT_IND prio:2›
+0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 43›
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦up run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦down run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦both run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦up run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦down run 1››
-0 locking -WAIT 36 monitor one_value test report both
+0 locking -WAIT 31 monitor one_value test report both
 0 monitor raw 1 test report both
 0 monitor filter [1] on test¦report¦both
 0 monitor End run test¦report¦both
@@ -868,17 +782,16 @@ NEW: ‹ConditionalWorkSequence:43 (4)›
 EVENT: monitor¦value¦1.0¦test¦report¦both
 END: monitor¦value¦1.0¦test¦report¦both
 0 monitor Stop run test¦report¦both
-0 locking +WAIT 38 monitor sleep test report both
+0 locking +WAIT 33 monitor sleep test report both
 0 msg recv= RECV_AGAIN ‹WAGOmonRun ‹WAGOmon test¦report¦both on 1.0››
 0 msg states at run connected connected
-0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'H' msgid:7 type:MT_IND prio:2›
-0 msg recv test ‹MsgIncoming: msg:'H' msgid:7 type:MT_IND prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-3.0 sec id=2›
-0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 52›
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'H' msgid:6 type:MT_IND prio:2›
+0 msg recv test ‹MsgIncoming: msg:'H' msgid:6 type:MT_IND prio:2›
+0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 44›
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦up run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦down run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦both run 1››
-0 locking -WAIT 29 monitor one_value test report up
+0 locking -WAIT 24 monitor one_value test report up
 0 monitor raw 1 test report up
 0 monitor filter [1] on test¦report¦up
 0 monitor End run test¦report¦up
@@ -890,55 +803,53 @@ NEW: ‹ConditionalWorkSequence:44 (4)›
 EVENT: monitor¦value¦1.0¦test¦report¦up
 END: monitor¦value¦1.0¦test¦report¦up
 0 monitor Stop run test¦report¦up
-0 locking +WAIT 39 monitor sleep test report up
+0 locking +WAIT 34 monitor sleep test report up
 0 msg recv= RECV_AGAIN ‹WAGOmonRun ‹WAGOmon test¦report¦up on 1.0››
 0 msg states at run connected connected
 NEW: ‹ConditionalWorkSequence:45 (4)›
    : │  id: 45
    : │  call count: 0
-   : │  EVENT: wait¦done¦5.4¦_wait¦8
+   : │  EVENT: wait¦done¦3.4¦_wait¦8
    : └1╴... done.
-EVENT: wait¦done¦5.4¦_wait¦8
-END: wait¦done¦5.4¦_wait¦8
+EVENT: wait¦done¦3.4¦_wait¦8
+END: wait¦done¦3.4¦_wait¦8
 0 msg states at run connected connected
-0 msg send ‹WAGOrawRun 53›
+0 msg send ‹WAGOrawRun 45›
 0 wago send u'Dc'
 0 msg send result RECV_AGAIN
-0 locking -WAIT 39 monitor sleep test report up
-0 locking +WAIT 40 monitor sleep test report up
-0 locking -WAIT 38 monitor sleep test report both
-0 locking +WAIT 41 monitor sleep test report both
+0 locking -WAIT 34 monitor sleep test report up
+0 locking +WAIT 35 monitor sleep test report up
+0 locking -WAIT 33 monitor sleep test report both
+0 locking +WAIT 36 monitor sleep test report both
 0 wago recv '+OK'
 0 msg recv msg ‹MsgIncoming: msg:'OK' type:MT_ACK prio:2›
 0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'OK' type:MT_ACK prio:2›
 0 msg recv test ‹MsgIncoming: msg:'OK' type:MT_ACK prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-3.2 sec id=2›
-0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 54›
+0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 46›
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦up run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦down run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦both run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦up on 1.0››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦down run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦both on 1.0››
-0 msg recv= MINE ‹WAGOrawRun 55›
+0 msg recv= MINE ‹WAGOrawRun 47›
 0 msg states at run connected connected
-0 locking +WAIT 42 start job ‹Waiter _wait¦9 ??›
-0 locking -WAIT 42 start job ‹Waiter _wait¦9 ??›
+0 locking +WAIT 37 start job ‹Waiter _wait¦9 ??›
+0 locking -WAIT 37 start job ‹Waiter _wait¦9 ??›
 NEW: ‹ConditionalWorkSequence:46 (4)›
    : │  id: 46
    : │  call count: 0
-   : │  EVENT: wait¦start¦5.5¦_wait¦9
+   : │  EVENT: wait¦start¦3.5¦_wait¦9
    : └1╴... done.
-EVENT: wait¦start¦5.5¦_wait¦9
-END: wait¦start¦5.5¦_wait¦9
-0 wago recv '!9 L'
-0 msg recv msg ‹MsgIncoming: msg:'L' msgid:9 type:MT_IND prio:2›
+EVENT: wait¦start¦3.5¦_wait¦9
+END: wait¦start¦3.5¦_wait¦9
 0 wago recv '!8 L'
 0 msg recv msg ‹MsgIncoming: msg:'L' msgid:8 type:MT_IND prio:2›
-0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'L' msgid:9 type:MT_IND prio:2›
-0 msg recv test ‹MsgIncoming: msg:'L' msgid:9 type:MT_IND prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-3.2 sec id=2›
-0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 56›
+0 wago recv '!7 L'
+0 msg recv msg ‹MsgIncoming: msg:'L' msgid:7 type:MT_IND prio:2›
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'L' msgid:8 type:MT_IND prio:2›
+0 msg recv test ‹MsgIncoming: msg:'L' msgid:8 type:MT_IND prio:2›
+0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 48›
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦up run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦down run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦both run 1››
@@ -953,15 +864,14 @@ EVENT: monitor¦error¦overrun¦test¦report¦both
 END: monitor¦error¦overrun¦test¦report¦both
 0 msg recv= RECV_AGAIN ‹WAGOmonRun ‹WAGOmon test¦report¦both on 1.0››
 0 msg states at run connected connected
-0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'L' msgid:8 type:MT_IND prio:2›
-0 msg recv test ‹MsgIncoming: msg:'L' msgid:8 type:MT_IND prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-3.2 sec id=2›
-0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 57›
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'L' msgid:7 type:MT_IND prio:2›
+0 msg recv test ‹MsgIncoming: msg:'L' msgid:7 type:MT_IND prio:2›
+0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 49›
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦up run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦down run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦both run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦up on 1.0››
-0 locking -WAIT 32 monitor one_value test report down
+0 locking -WAIT 27 monitor one_value test report down
 0 monitor raw 1 test report down
 0 monitor filter [1] on test¦report¦down
 0 monitor End run test¦report¦down
@@ -973,72 +883,69 @@ NEW: ‹ConditionalWorkSequence:48 (4)›
 EVENT: monitor¦value¦1.0¦test¦report¦down
 END: monitor¦value¦1.0¦test¦report¦down
 0 monitor Stop run test¦report¦down
-0 locking +WAIT 43 monitor sleep test report down
+0 locking +WAIT 38 monitor sleep test report down
 0 msg recv= RECV_AGAIN ‹WAGOmonRun ‹WAGOmon test¦report¦down on 1.0››
 0 msg states at run connected connected
-0 locking -WAIT 41 monitor sleep test report both
+0 locking -WAIT 36 monitor sleep test report both
 0 monitor Start run test¦report¦both
-0 locking +WAIT 44 monitor one_value test report both
-0 locking -WAIT 40 monitor sleep test report up
+0 locking +WAIT 39 monitor one_value test report both
+0 locking -WAIT 35 monitor sleep test report up
 0 monitor Start run test¦report¦up
-0 locking +WAIT 45 monitor one_value test report up
-0 wago recv '!3 PING 2'
-0 msg recv msg ‹MsgIncoming: msg:'PING 2' msgid:3 type:MT_IND prio:2›
-0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 2' msgid:3 type:MT_IND prio:2›
-0 msg recv test ‹MsgIncoming: msg:'PING 2' msgid:3 type:MT_IND prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-3.3 sec id=2›
-0 msg recv= RECV_AGAIN ‹WAGOkeepaliveMsg 58›
-0 msg states at run connected connected
+0 locking +WAIT 40 monitor one_value test report up
 NEW: ‹ConditionalWorkSequence:49 (4)›
    : │  id: 49
    : │  call count: 0
-   : │  EVENT: wait¦done¦5.6¦_wait¦9
+   : │  EVENT: wait¦done¦3.6¦_wait¦9
    : └1╴... done.
-EVENT: wait¦done¦5.6¦_wait¦9
-END: wait¦done¦5.6¦_wait¦9
+EVENT: wait¦done¦3.6¦_wait¦9
+END: wait¦done¦3.6¦_wait¦9
 0 msg states at run connected connected
-0 msg send ‹WAGOrawRun 59›
+0 msg send ‹WAGOrawRun 4a›
 0 wago send u'Ds'
 0 msg send result RECV_AGAIN
-0 locking -WAIT 43 monitor sleep test report down
-0 locking +WAIT 46 monitor sleep test report down
+0 locking -WAIT 38 monitor sleep test report down
+0 locking +WAIT 41 monitor sleep test report down
 0 wago recv '+OK'
 0 msg recv msg ‹MsgIncoming: msg:'OK' type:MT_ACK prio:2›
 0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'OK' type:MT_ACK prio:2›
 0 msg recv test ‹MsgIncoming: msg:'OK' type:MT_ACK prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-3.4 sec id=2›
-0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 5a›
+0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 4b›
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦up run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦down run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦both run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦up run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦down on 1.0››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦both run 1››
-0 msg recv= MINE ‹WAGOrawRun 5b›
+0 msg recv= MINE ‹WAGOrawRun 4c›
 0 msg states at run connected connected
-0 locking +WAIT 47 start job ‹Waiter _wait¦10 ??›
-0 locking -WAIT 47 start job ‹Waiter _wait¦10 ??›
+0 locking +WAIT 42 start job ‹Waiter _wait¦10 ??›
+0 locking -WAIT 42 start job ‹Waiter _wait¦10 ??›
 NEW: ‹ConditionalWorkSequence:50 (4)›
    : │  id: 50
    : │  call count: 0
-   : │  EVENT: wait¦start¦6.6¦_wait¦10
+   : │  EVENT: wait¦start¦4.6¦_wait¦10
    : └1╴... done.
-EVENT: wait¦start¦6.6¦_wait¦10
-END: wait¦start¦6.6¦_wait¦10
-0 wago recv '!9 H'
-0 msg recv msg ‹MsgIncoming: msg:'H' msgid:9 type:MT_IND prio:2›
-0 wago recv '!7 H'
-0 msg recv msg ‹MsgIncoming: msg:'H' msgid:7 type:MT_IND prio:2›
-0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'H' msgid:9 type:MT_IND prio:2›
-0 msg recv test ‹MsgIncoming: msg:'H' msgid:9 type:MT_IND prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-3.4 sec id=2›
-0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 5c›
+EVENT: wait¦start¦4.6¦_wait¦10
+END: wait¦start¦4.6¦_wait¦10
+0 wago recv '!1 PING 7'
+0 msg recv msg ‹MsgIncoming: msg:'PING 7' msgid:1 type:MT_IND prio:2›
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 7' msgid:1 type:MT_IND prio:2›
+0 msg recv test ‹MsgIncoming: msg:'PING 7' msgid:1 type:MT_IND prio:2›
+0 msg recv= RECV_AGAIN ‹WAGOkeepaliveMsg 4d›
+0 msg states at run connected connected
+0 wago recv '!8 H'
+0 msg recv msg ‹MsgIncoming: msg:'H' msgid:8 type:MT_IND prio:2›
+0 wago recv '!6 H'
+0 msg recv msg ‹MsgIncoming: msg:'H' msgid:6 type:MT_IND prio:2›
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'H' msgid:8 type:MT_IND prio:2›
+0 msg recv test ‹MsgIncoming: msg:'H' msgid:8 type:MT_IND prio:2›
+0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 4e›
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦up run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦down run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦both run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦up run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦down on 1.0››
-0 locking -WAIT 44 monitor one_value test report both
+0 locking -WAIT 39 monitor one_value test report both
 0 monitor raw 3 test report both
 0 monitor filter [3] on test¦report¦both
 0 monitor End run test¦report¦both
@@ -1050,17 +957,16 @@ NEW: ‹ConditionalWorkSequence:51 (4)›
 EVENT: monitor¦value¦3.0¦test¦report¦both
 END: monitor¦value¦3.0¦test¦report¦both
 0 monitor Stop run test¦report¦both
-0 locking +WAIT 48 monitor sleep test report both
+0 locking +WAIT 43 monitor sleep test report both
 0 msg recv= RECV_AGAIN ‹WAGOmonRun ‹WAGOmon test¦report¦both on 3.0››
 0 msg states at run connected connected
-0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'H' msgid:7 type:MT_IND prio:2›
-0 msg recv test ‹MsgIncoming: msg:'H' msgid:7 type:MT_IND prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-3.4 sec id=2›
-0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 5d›
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'H' msgid:6 type:MT_IND prio:2›
+0 msg recv test ‹MsgIncoming: msg:'H' msgid:6 type:MT_IND prio:2›
+0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 4f›
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦up run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦down run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦both run 1››
-0 locking -WAIT 45 monitor one_value test report up
+0 locking -WAIT 40 monitor one_value test report up
 0 monitor raw 2 test report up
 0 monitor filter [2] on test¦report¦up
 0 monitor End run test¦report¦up
@@ -1072,40 +978,38 @@ NEW: ‹ConditionalWorkSequence:52 (4)›
 EVENT: monitor¦value¦2.0¦test¦report¦up
 END: monitor¦value¦2.0¦test¦report¦up
 0 monitor Stop run test¦report¦up
-0 locking +WAIT 49 monitor sleep test report up
+0 locking +WAIT 44 monitor sleep test report up
 0 msg recv= RECV_AGAIN ‹WAGOmonRun ‹WAGOmon test¦report¦up on 2.0››
 0 msg states at run connected connected
-0 locking -WAIT 46 monitor sleep test report down
+0 locking -WAIT 41 monitor sleep test report down
 0 monitor Start run test¦report¦down
-0 locking +WAIT 50 monitor one_value test report down
-0 locking -WAIT 49 monitor sleep test report up
-0 locking +WAIT 51 monitor sleep test report up
-0 locking -WAIT 48 monitor sleep test report both
-0 locking +WAIT 52 monitor sleep test report both
-0 locking -WAIT 52 monitor sleep test report both
+0 locking +WAIT 45 monitor one_value test report down
+0 locking -WAIT 44 monitor sleep test report up
+0 locking +WAIT 46 monitor sleep test report up
+0 locking -WAIT 43 monitor sleep test report both
+0 locking +WAIT 47 monitor sleep test report both
+0 locking -WAIT 47 monitor sleep test report both
 0 monitor Start run test¦report¦both
-0 locking +WAIT 53 monitor one_value test report both
-0 locking -WAIT 51 monitor sleep test report up
+0 locking +WAIT 48 monitor one_value test report both
+0 locking -WAIT 46 monitor sleep test report up
 0 monitor Start run test¦report¦up
-0 locking +WAIT 54 monitor one_value test report up
-0 wago recv '!3 PING 3'
-0 msg recv msg ‹MsgIncoming: msg:'PING 3' msgid:3 type:MT_IND prio:2›
-0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 3' msgid:3 type:MT_IND prio:2›
-0 msg recv test ‹MsgIncoming: msg:'PING 3' msgid:3 type:MT_IND prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-3.8 sec id=2›
-0 msg recv= RECV_AGAIN ‹WAGOkeepaliveMsg 5e›
+0 locking +WAIT 49 monitor one_value test report up
+0 wago recv '!1 PING 8'
+0 msg recv msg ‹MsgIncoming: msg:'PING 8' msgid:1 type:MT_IND prio:2›
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 8' msgid:1 type:MT_IND prio:2›
+0 msg recv test ‹MsgIncoming: msg:'PING 8' msgid:1 type:MT_IND prio:2›
+0 msg recv= RECV_AGAIN ‹WAGOkeepaliveMsg 50›
 0 msg states at run connected connected
-0 wago recv '!6 3'
-0 msg recv msg ‹MsgIncoming: msg:'3' msgid:6 type:MT_IND prio:2›
-0 wago recv '!4 2'
-0 msg recv msg ‹MsgIncoming: msg:'2' msgid:4 type:MT_IND prio:2›
-0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'3' msgid:6 type:MT_IND prio:2›
-0 msg recv test ‹MsgIncoming: msg:'3' msgid:6 type:MT_IND prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-4.0 sec id=2›
-0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 5f›
+0 wago recv '!5 3'
+0 msg recv msg ‹MsgIncoming: msg:'3' msgid:5 type:MT_IND prio:2›
+0 wago recv '!3 2'
+0 msg recv msg ‹MsgIncoming: msg:'2' msgid:3 type:MT_IND prio:2›
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'3' msgid:5 type:MT_IND prio:2›
+0 msg recv test ‹MsgIncoming: msg:'3' msgid:5 type:MT_IND prio:2›
+0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 51›
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦up run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦down run 1››
-0 locking -WAIT 26 monitor one_value test count both
+0 locking -WAIT 21 monitor one_value test count both
 0 monitor raw 3 test count both
 0 monitor filter [3] on test¦count¦both
 0 monitor End run test¦count¦both
@@ -1117,14 +1021,13 @@ NEW: ‹ConditionalWorkSequence:53 (4)›
 EVENT: monitor¦value¦3.0¦test¦count¦both
 END: monitor¦value¦3.0¦test¦count¦both
 0 monitor Stop run test¦count¦both
-0 locking +WAIT 55 monitor sleep test count both
+0 locking +WAIT 50 monitor sleep test count both
 0 msg recv= RECV_AGAIN ‹WAGOmonRun ‹WAGOmon test¦count¦both on 3.0››
 0 msg states at run connected connected
-0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'2' msgid:4 type:MT_IND prio:2›
-0 msg recv test ‹MsgIncoming: msg:'2' msgid:4 type:MT_IND prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-4.0 sec id=2›
-0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 60›
-0 locking -WAIT 20 monitor one_value test count up
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'2' msgid:3 type:MT_IND prio:2›
+0 msg recv test ‹MsgIncoming: msg:'2' msgid:3 type:MT_IND prio:2›
+0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 52›
+0 locking -WAIT 15 monitor one_value test count up
 0 monitor raw 2 test count up
 0 monitor filter [2] on test¦count¦up
 0 monitor End run test¦count¦up
@@ -1136,21 +1039,26 @@ NEW: ‹ConditionalWorkSequence:54 (4)›
 EVENT: monitor¦value¦2.0¦test¦count¦up
 END: monitor¦value¦2.0¦test¦count¦up
 0 monitor Stop run test¦count¦up
-0 locking +WAIT 56 monitor sleep test count up
+0 locking +WAIT 51 monitor sleep test count up
 0 msg recv= RECV_AGAIN ‹WAGOmonRun ‹WAGOmon test¦count¦up on 2.0››
 0 msg states at run connected connected
-0 locking -WAIT 56 monitor sleep test count up
-0 locking +WAIT 57 monitor sleep test count up
-0 locking -WAIT 55 monitor sleep test count both
-0 locking +WAIT 58 monitor sleep test count both
-0 wago recv '!5 1'
-0 msg recv msg ‹MsgIncoming: msg:'1' msgid:5 type:MT_IND prio:2›
-0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'1' msgid:5 type:MT_IND prio:2›
-0 msg recv test ‹MsgIncoming: msg:'1' msgid:5 type:MT_IND prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-4.2 sec id=2›
-0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 61›
-0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦up on 2.0››
-0 locking -WAIT 23 monitor one_value test count down
+0 locking -WAIT 51 monitor sleep test count up
+0 locking +WAIT 52 monitor sleep test count up
+0 locking -WAIT 50 monitor sleep test count both
+0 locking +WAIT 53 monitor sleep test count both
+0 locking -WAIT 53 monitor sleep test count both
+0 monitor Start run test¦count¦both
+0 locking +WAIT 54 monitor one_value test count both
+0 locking -WAIT 52 monitor sleep test count up
+0 monitor Start run test¦count¦up
+0 locking +WAIT 55 monitor one_value test count up
+0 wago recv '!4 1'
+0 msg recv msg ‹MsgIncoming: msg:'1' msgid:4 type:MT_IND prio:2›
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'1' msgid:4 type:MT_IND prio:2›
+0 msg recv test ‹MsgIncoming: msg:'1' msgid:4 type:MT_IND prio:2›
+0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 53›
+0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦up run 1››
+0 locking -WAIT 18 monitor one_value test count down
 0 monitor raw 1 test count down
 0 monitor filter [1] on test¦count¦down
 0 monitor End run test¦count¦down
@@ -1162,49 +1070,36 @@ NEW: ‹ConditionalWorkSequence:55 (4)›
 EVENT: monitor¦value¦1.0¦test¦count¦down
 END: monitor¦value¦1.0¦test¦count¦down
 0 monitor Stop run test¦count¦down
-0 locking +WAIT 59 monitor sleep test count down
+0 locking +WAIT 56 monitor sleep test count down
 0 msg recv= RECV_AGAIN ‹WAGOmonRun ‹WAGOmon test¦count¦down on 1.0››
 0 msg states at run connected connected
-0 locking -WAIT 58 monitor sleep test count both
-0 monitor Start run test¦count¦both
-0 locking +WAIT 60 monitor one_value test count both
-0 locking -WAIT 57 monitor sleep test count up
-0 monitor Start run test¦count¦up
-0 locking +WAIT 61 monitor one_value test count up
-0 wago recv '!3 PING 4'
-0 msg recv msg ‹MsgIncoming: msg:'PING 4' msgid:3 type:MT_IND prio:2›
-0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 4' msgid:3 type:MT_IND prio:2›
-0 msg recv test ‹MsgIncoming: msg:'PING 4' msgid:3 type:MT_IND prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-4.3 sec id=2›
-0 msg recv= RECV_AGAIN ‹WAGOkeepaliveMsg 62›
-0 msg states at run connected connected
-0 locking -WAIT 59 monitor sleep test count down
-0 locking +WAIT 62 monitor sleep test count down
+0 locking -WAIT 56 monitor sleep test count down
+0 locking +WAIT 57 monitor sleep test count down
 NEW: ‹ConditionalWorkSequence:56 (4)›
    : │  id: 56
    : │  call count: 0
-   : │  EVENT: wait¦done¦6.6¦_wait¦10
+   : │  EVENT: wait¦done¦4.6¦_wait¦10
    : └1╴... done.
-EVENT: wait¦done¦6.6¦_wait¦10
-END: wait¦done¦6.6¦_wait¦10
-test count both :: Run ‹1.0 sec›
+EVENT: wait¦done¦4.6¦_wait¦10
+END: wait¦done¦4.6¦_wait¦10
+test count both :: Run ‹1.1 sec›
 test count down :: Wait ‹now›
-test count up :: Run ‹1.0 sec›
-test report both :: Run ‹2.0 sec›
-test report down :: Run ‹3.0 sec›
-test report up :: Run ‹2.0 sec›
+test count up :: Run ‹1.1 sec›
+test report both :: Run ‹2.1 sec›
+test report down :: Run ‹3.1 sec›
+test report up :: Run ‹2.1 sec›
 .
 : ‹WAGOmon test¦count¦up run 1›
 name: test¦count¦up
 device: wago test 1 1
 value: 2.0
 up: Run
-time: ‹1.0 sec›
+time: ‹1.1 sec›
 steps: 1 / 1 / None
 mode: count
 timespec: 1
 level: up
-msgid: 4
+msgid: 3
 last msg: monitor created
 .
 : ‹WAGOmon test¦count¦down on 1.0›
@@ -1218,7 +1113,7 @@ data: 1
 mode: count
 timespec: 1
 level: down
-msgid: 5
+msgid: 4
 last msg: monitor created
 .
 : ‹WAGOmon test¦count¦both run 1›
@@ -1226,12 +1121,12 @@ name: test¦count¦both
 device: wago test 1 1
 value: 3.0
 up: Run
-time: ‹1.0 sec›
+time: ‹1.1 sec›
 steps: 1 / 1 / None
 mode: count
 timespec: 1
 level: both
-msgid: 6
+msgid: 5
 last msg: monitor created
 .
 : ‹WAGOmon test¦report¦up run 1›
@@ -1239,11 +1134,11 @@ name: test¦report¦up
 device: wago test 1 1
 value: 2.0
 up: Run
-time: ‹2.0 sec›
+time: ‹2.1 sec›
 steps: 1 / 1 / None
 mode: report
 level: up
-msgid: 7
+msgid: 6
 last msg: monitor created
 .
 : ‹WAGOmon test¦report¦down run 1›
@@ -1251,11 +1146,11 @@ name: test¦report¦down
 device: wago test 1 1
 value: 1.0
 up: Run
-time: ‹3.0 sec›
+time: ‹3.1 sec›
 steps: 1 / 1 / None
 mode: report
 level: down
-msgid: 8
+msgid: 7
 last msg: monitor created
 .
 : ‹WAGOmon test¦report¦both run 1›
@@ -1263,11 +1158,11 @@ name: test¦report¦both
 device: wago test 1 1
 value: 3.0
 up: Run
-time: ‹2.0 sec›
+time: ‹2.1 sec›
 steps: 1 / 1 / None
 mode: report
 level: both
-msgid: 9
+msgid: 8
 last msg: monitor created
 .
 1 YesM 1.0 2.0 3.0
@@ -1275,26 +1170,31 @@ DEBUG> YesM 1.0 2.0 3.0
 1 YesR 1.0 2.0 3.0
 DEBUG> YesR 1.0 2.0 3.0
 0 msg states at run connected connected
-0 msg send ‹WAGOmonStop 63 msgid=4›
-0 wago send 'm- 4'
+0 msg send ‹WAGOmonStop 54 msgid=3›
+0 wago send 'm- 3'
 0 msg send result RECV_AGAIN
-0 locking -WAIT 62 monitor sleep test count down
+0 locking -WAIT 57 monitor sleep test count down
 0 monitor Start run test¦count¦down
-0 locking +WAIT 63 monitor one_value test count down
-0 wago recv '!-4 Deleted.'
-0 msg recv msg ‹MsgIncoming: msg:'Deleted.' msgid:4 type:MT_IND_NAK prio:2›
-0 wago recv '+Monitor 4 deleted.'
-0 msg recv msg ‹MsgIncoming: msg:'Monitor 4 deleted.' type:MT_ACK prio:2›
-0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'Deleted.' msgid:4 type:MT_IND_NAK prio:2›
-0 msg recv test ‹MsgIncoming: msg:'Deleted.' msgid:4 type:MT_IND_NAK prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-4.5 sec id=2›
-0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 64›
-0 locking +WAIT 64 kill job ‹WAGOmon test¦count¦up run 1›
-0 locking -WAIT 61 monitor one_value test count up
+0 locking +WAIT 58 monitor one_value test count down
+0 wago recv '!1 PING 9'
+0 msg recv msg ‹MsgIncoming: msg:'PING 9' msgid:1 type:MT_IND prio:2›
+0 wago recv '!-3 Deleted.'
+0 msg recv msg ‹MsgIncoming: msg:'Deleted.' msgid:3 type:MT_IND_NAK prio:2›
+0 wago recv '+Monitor 3 deleted.'
+0 msg recv msg ‹MsgIncoming: msg:'Monitor 3 deleted.' type:MT_ACK prio:2›
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 9' msgid:1 type:MT_IND prio:2›
+0 msg recv test ‹MsgIncoming: msg:'PING 9' msgid:1 type:MT_IND prio:2›
+0 msg recv= RECV_AGAIN ‹WAGOkeepaliveMsg 55›
+0 msg states at run connected connected
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'Deleted.' msgid:3 type:MT_IND_NAK prio:2›
+0 msg recv test ‹MsgIncoming: msg:'Deleted.' msgid:3 type:MT_IND_NAK prio:2›
+0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 56›
+0 locking +WAIT 59 kill job ‹WAGOmon test¦count¦up run 1›
+0 locking -WAIT 55 monitor one_value test count up
 0 monitor End run test¦count¦up
 0 monitor Stop run test¦count¦up
-0 locking +WAIT 65 monitor sleep test count up
-0 locking -WAIT 65 monitor sleep test count up
+0 locking +WAIT 60 monitor sleep test count up
+0 locking -WAIT 60 monitor sleep test count up
 NEW: ‹ConditionalWorkSequence:57 (4)›
    : │  id: 57
    : │  call count: 0
@@ -1302,22 +1202,57 @@ NEW: ‹ConditionalWorkSequence:57 (4)›
    : └1╴... done.
 EVENT: monitor¦stop¦test¦count¦up
 END: monitor¦stop¦test¦count¦up
-0 locking -WAIT 64 kill job ‹WAGOmon test¦count¦up run 1›
+0 locking -WAIT 59 kill job ‹WAGOmon test¦count¦up run 1›
 0 msg recv= MINE ‹WAGOmonRun ‹WAGOmon test¦count¦up off››
 0 msg states at run connected connected
-0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'Monitor 4 deleted.' type:MT_ACK prio:2›
-0 msg recv test ‹MsgIncoming: msg:'Monitor 4 deleted.' type:MT_ACK prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-4.7 sec id=2›
-0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 65›
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'Monitor 3 deleted.' type:MT_ACK prio:2›
+0 msg recv test ‹MsgIncoming: msg:'Monitor 3 deleted.' type:MT_ACK prio:2›
+0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 57›
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦down run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦both run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦up run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦down run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦both run 1››
-0 msg recv= MINE ‹WAGOmonStop 66 msgid=4›
+0 msg recv= MINE ‹WAGOmonStop 58 msgid=3›
 0 msg states at run connected connected
 0 msg states at run connected connected
-0 msg send ‹WAGOmonStop 67 msgid=5›
+0 msg send ‹WAGOmonStop 59 msgid=4›
+0 wago send 'm- 4'
+0 msg send result RECV_AGAIN
+0 wago recv '!-4 Deleted.'
+0 msg recv msg ‹MsgIncoming: msg:'Deleted.' msgid:4 type:MT_IND_NAK prio:2›
+0 wago recv '+Monitor 4 deleted.'
+0 msg recv msg ‹MsgIncoming: msg:'Monitor 4 deleted.' type:MT_ACK prio:2›
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'Deleted.' msgid:4 type:MT_IND_NAK prio:2›
+0 msg recv test ‹MsgIncoming: msg:'Deleted.' msgid:4 type:MT_IND_NAK prio:2›
+0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 5a›
+0 locking +WAIT 61 kill job ‹WAGOmon test¦count¦down run 1›
+0 locking -WAIT 58 monitor one_value test count down
+0 monitor End run test¦count¦down
+0 monitor Stop run test¦count¦down
+0 locking +WAIT 62 monitor sleep test count down
+0 locking -WAIT 62 monitor sleep test count down
+NEW: ‹ConditionalWorkSequence:58 (4)›
+   : │  id: 58
+   : │  call count: 0
+   : │  EVENT: monitor¦stop¦test¦count¦down
+   : └1╴... done.
+EVENT: monitor¦stop¦test¦count¦down
+END: monitor¦stop¦test¦count¦down
+0 locking -WAIT 61 kill job ‹WAGOmon test¦count¦down run 1›
+0 msg recv= MINE ‹WAGOmonRun ‹WAGOmon test¦count¦down off››
+0 msg states at run connected connected
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'Monitor 4 deleted.' type:MT_ACK prio:2›
+0 msg recv test ‹MsgIncoming: msg:'Monitor 4 deleted.' type:MT_ACK prio:2›
+0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 5b›
+0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦both run 1››
+0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦up run 1››
+0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦down run 1››
+0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦both run 1››
+0 msg recv= MINE ‹WAGOmonStop 5c msgid=4›
+0 msg states at run connected connected
+0 msg states at run connected connected
+0 msg send ‹WAGOmonStop 5d msgid=5›
 0 wago send 'm- 5'
 0 msg send result RECV_AGAIN
 0 wago recv '!-5 Deleted.'
@@ -1326,43 +1261,39 @@ END: monitor¦stop¦test¦count¦up
 0 msg recv msg ‹MsgIncoming: msg:'Monitor 5 deleted.' type:MT_ACK prio:2›
 0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'Deleted.' msgid:5 type:MT_IND_NAK prio:2›
 0 msg recv test ‹MsgIncoming: msg:'Deleted.' msgid:5 type:MT_IND_NAK prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-4.7 sec id=2›
-0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 68›
-0 locking +WAIT 66 kill job ‹WAGOmon test¦count¦down run 1›
-0 locking -WAIT 63 monitor one_value test count down
-0 monitor End run test¦count¦down
-0 monitor Stop run test¦count¦down
-0 locking +WAIT 67 monitor sleep test count down
-0 wago recv '!3 PING 5'
-0 msg recv msg ‹MsgIncoming: msg:'PING 5' msgid:3 type:MT_IND prio:2›
-0 locking -WAIT 67 monitor sleep test count down
-NEW: ‹ConditionalWorkSequence:58 (4)›
-   : │  id: 58
+0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 5e›
+0 locking +WAIT 63 kill job ‹WAGOmon test¦count¦both run 1›
+0 locking -WAIT 54 monitor one_value test count both
+0 monitor End run test¦count¦both
+0 monitor Stop run test¦count¦both
+0 locking +WAIT 64 monitor sleep test count both
+0 wago recv '!1 PING 10'
+0 msg recv msg ‹MsgIncoming: msg:'PING 10' msgid:1 type:MT_IND prio:2›
+0 locking -WAIT 64 monitor sleep test count both
+NEW: ‹ConditionalWorkSequence:59 (4)›
+   : │  id: 59
    : │  call count: 0
-   : │  EVENT: monitor¦stop¦test¦count¦down
+   : │  EVENT: monitor¦stop¦test¦count¦both
    : └1╴... done.
-EVENT: monitor¦stop¦test¦count¦down
-END: monitor¦stop¦test¦count¦down
-0 locking -WAIT 66 kill job ‹WAGOmon test¦count¦down run 1›
-0 msg recv= MINE ‹WAGOmonRun ‹WAGOmon test¦count¦down off››
+EVENT: monitor¦stop¦test¦count¦both
+END: monitor¦stop¦test¦count¦both
+0 locking -WAIT 63 kill job ‹WAGOmon test¦count¦both run 1›
+0 msg recv= MINE ‹WAGOmonRun ‹WAGOmon test¦count¦both off››
 0 msg states at run connected connected
 0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'Monitor 5 deleted.' type:MT_ACK prio:2›
 0 msg recv test ‹MsgIncoming: msg:'Monitor 5 deleted.' type:MT_ACK prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-4.9 sec id=2›
-0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 69›
-0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦both run 1››
+0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 5f›
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦up run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦down run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦both run 1››
-0 msg recv= MINE ‹WAGOmonStop 6a msgid=5›
+0 msg recv= MINE ‹WAGOmonStop 60 msgid=5›
 0 msg states at run connected connected
-0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 5' msgid:3 type:MT_IND prio:2›
-0 msg recv test ‹MsgIncoming: msg:'PING 5' msgid:3 type:MT_IND prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-4.9 sec id=2›
-0 msg recv= RECV_AGAIN ‹WAGOkeepaliveMsg 6b›
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 10' msgid:1 type:MT_IND prio:2›
+0 msg recv test ‹MsgIncoming: msg:'PING 10' msgid:1 type:MT_IND prio:2›
+0 msg recv= RECV_AGAIN ‹WAGOkeepaliveMsg 61›
 0 msg states at run connected connected
 0 msg states at run connected connected
-0 msg send ‹WAGOmonStop 6c msgid=6›
+0 msg send ‹WAGOmonStop 62 msgid=6›
 0 wago send 'm- 6'
 0 msg send result RECV_AGAIN
 0 wago recv '!-6 Deleted.'
@@ -1371,35 +1302,32 @@ END: monitor¦stop¦test¦count¦down
 0 msg recv msg ‹MsgIncoming: msg:'Monitor 6 deleted.' type:MT_ACK prio:2›
 0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'Deleted.' msgid:6 type:MT_IND_NAK prio:2›
 0 msg recv test ‹MsgIncoming: msg:'Deleted.' msgid:6 type:MT_IND_NAK prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-4.9 sec id=2›
-0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 6d›
-0 locking +WAIT 68 kill job ‹WAGOmon test¦count¦both run 1›
-0 locking -WAIT 60 monitor one_value test count both
-0 monitor End run test¦count¦both
-0 monitor Stop run test¦count¦both
-0 locking +WAIT 69 monitor sleep test count both
-0 locking -WAIT 69 monitor sleep test count both
-NEW: ‹ConditionalWorkSequence:59 (4)›
-   : │  id: 59
+0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 63›
+0 locking +WAIT 65 kill job ‹WAGOmon test¦report¦up run 1›
+0 locking -WAIT 49 monitor one_value test report up
+0 monitor End run test¦report¦up
+0 monitor Stop run test¦report¦up
+0 locking +WAIT 66 monitor sleep test report up
+0 locking -WAIT 66 monitor sleep test report up
+NEW: ‹ConditionalWorkSequence:60 (4)›
+   : │  id: 60
    : │  call count: 0
-   : │  EVENT: monitor¦stop¦test¦count¦both
+   : │  EVENT: monitor¦stop¦test¦report¦up
    : └1╴... done.
-EVENT: monitor¦stop¦test¦count¦both
-END: monitor¦stop¦test¦count¦both
-0 locking -WAIT 68 kill job ‹WAGOmon test¦count¦both run 1›
-0 msg recv= MINE ‹WAGOmonRun ‹WAGOmon test¦count¦both off››
+EVENT: monitor¦stop¦test¦report¦up
+END: monitor¦stop¦test¦report¦up
+0 locking -WAIT 65 kill job ‹WAGOmon test¦report¦up run 1›
+0 msg recv= MINE ‹WAGOmonRun ‹WAGOmon test¦report¦up off››
 0 msg states at run connected connected
 0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'Monitor 6 deleted.' type:MT_ACK prio:2›
 0 msg recv test ‹MsgIncoming: msg:'Monitor 6 deleted.' type:MT_ACK prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-5.1 sec id=2›
-0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 6e›
-0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦up run 1››
+0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 64›
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦down run 1››
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦both run 1››
-0 msg recv= MINE ‹WAGOmonStop 6f msgid=6›
+0 msg recv= MINE ‹WAGOmonStop 65 msgid=6›
 0 msg states at run connected connected
 0 msg states at run connected connected
-0 msg send ‹WAGOmonStop 70 msgid=7›
+0 msg send ‹WAGOmonStop 66 msgid=7›
 0 wago send 'm- 7'
 0 msg send result RECV_AGAIN
 0 wago recv '!-7 Deleted.'
@@ -1408,41 +1336,37 @@ END: monitor¦stop¦test¦count¦both
 0 msg recv msg ‹MsgIncoming: msg:'Monitor 7 deleted.' type:MT_ACK prio:2›
 0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'Deleted.' msgid:7 type:MT_IND_NAK prio:2›
 0 msg recv test ‹MsgIncoming: msg:'Deleted.' msgid:7 type:MT_IND_NAK prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-5.1 sec id=2›
-0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 71›
-0 locking +WAIT 70 kill job ‹WAGOmon test¦report¦up run 1›
-0 locking -WAIT 54 monitor one_value test report up
-0 monitor End run test¦report¦up
-0 monitor Stop run test¦report¦up
-0 locking +WAIT 71 monitor sleep test report up
-0 wago recv '!3 PING 6'
-0 msg recv msg ‹MsgIncoming: msg:'PING 6' msgid:3 type:MT_IND prio:2›
-0 locking -WAIT 71 monitor sleep test report up
-NEW: ‹ConditionalWorkSequence:60 (4)›
-   : │  id: 60
+0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 67›
+0 locking +WAIT 67 kill job ‹WAGOmon test¦report¦down run 1›
+0 locking -WAIT 45 monitor one_value test report down
+0 monitor End run test¦report¦down
+0 monitor Stop run test¦report¦down
+0 locking +WAIT 68 monitor sleep test report down
+0 wago recv '!1 PING 11'
+0 msg recv msg ‹MsgIncoming: msg:'PING 11' msgid:1 type:MT_IND prio:2›
+0 locking -WAIT 68 monitor sleep test report down
+NEW: ‹ConditionalWorkSequence:61 (4)›
+   : │  id: 61
    : │  call count: 0
-   : │  EVENT: monitor¦stop¦test¦report¦up
+   : │  EVENT: monitor¦stop¦test¦report¦down
    : └1╴... done.
-EVENT: monitor¦stop¦test¦report¦up
-END: monitor¦stop¦test¦report¦up
-0 locking -WAIT 70 kill job ‹WAGOmon test¦report¦up run 1›
-0 msg recv= MINE ‹WAGOmonRun ‹WAGOmon test¦report¦up off››
+EVENT: monitor¦stop¦test¦report¦down
+END: monitor¦stop¦test¦report¦down
+0 locking -WAIT 67 kill job ‹WAGOmon test¦report¦down run 1›
+0 msg recv= MINE ‹WAGOmonRun ‹WAGOmon test¦report¦down off››
 0 msg states at run connected connected
 0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'Monitor 7 deleted.' type:MT_ACK prio:2›
 0 msg recv test ‹MsgIncoming: msg:'Monitor 7 deleted.' type:MT_ACK prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-5.3 sec id=2›
-0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 72›
-0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦down run 1››
+0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 68›
 0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦both run 1››
-0 msg recv= MINE ‹WAGOmonStop 73 msgid=7›
+0 msg recv= MINE ‹WAGOmonStop 69 msgid=7›
 0 msg states at run connected connected
-0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 6' msgid:3 type:MT_IND prio:2›
-0 msg recv test ‹MsgIncoming: msg:'PING 6' msgid:3 type:MT_IND prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-5.3 sec id=2›
-0 msg recv= RECV_AGAIN ‹WAGOkeepaliveMsg 74›
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 11' msgid:1 type:MT_IND prio:2›
+0 msg recv test ‹MsgIncoming: msg:'PING 11' msgid:1 type:MT_IND prio:2›
+0 msg recv= RECV_AGAIN ‹WAGOkeepaliveMsg 6a›
 0 msg states at run connected connected
 0 msg states at run connected connected
-0 msg send ‹WAGOmonStop 75 msgid=8›
+0 msg send ‹WAGOmonStop 6b msgid=8›
 0 wago send 'm- 8'
 0 msg send result RECV_AGAIN
 0 wago recv '!-8 Deleted.'
@@ -1451,49 +1375,13 @@ END: monitor¦stop¦test¦report¦up
 0 msg recv msg ‹MsgIncoming: msg:'Monitor 8 deleted.' type:MT_ACK prio:2›
 0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'Deleted.' msgid:8 type:MT_IND_NAK prio:2›
 0 msg recv test ‹MsgIncoming: msg:'Deleted.' msgid:8 type:MT_IND_NAK prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-5.3 sec id=2›
-0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 76›
-0 locking +WAIT 72 kill job ‹WAGOmon test¦report¦down run 1›
-0 locking -WAIT 50 monitor one_value test report down
-0 monitor End run test¦report¦down
-0 monitor Stop run test¦report¦down
-0 locking +WAIT 73 monitor sleep test report down
-0 locking -WAIT 73 monitor sleep test report down
-NEW: ‹ConditionalWorkSequence:61 (4)›
-   : │  id: 61
-   : │  call count: 0
-   : │  EVENT: monitor¦stop¦test¦report¦down
-   : └1╴... done.
-EVENT: monitor¦stop¦test¦report¦down
-END: monitor¦stop¦test¦report¦down
-0 locking -WAIT 72 kill job ‹WAGOmon test¦report¦down run 1›
-0 msg recv= MINE ‹WAGOmonRun ‹WAGOmon test¦report¦down off››
-0 msg states at run connected connected
-0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'Monitor 8 deleted.' type:MT_ACK prio:2›
-0 msg recv test ‹MsgIncoming: msg:'Monitor 8 deleted.' type:MT_ACK prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-5.5 sec id=2›
-0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 77›
-0 msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦both run 1››
-0 msg recv= MINE ‹WAGOmonStop 78 msgid=8›
-0 msg states at run connected connected
-0 msg states at run connected connected
-0 msg send ‹WAGOmonStop 79 msgid=9›
-0 wago send 'm- 9'
-0 msg send result RECV_AGAIN
-0 wago recv '!-9 Deleted.'
-0 msg recv msg ‹MsgIncoming: msg:'Deleted.' msgid:9 type:MT_IND_NAK prio:2›
-0 wago recv '+Monitor 9 deleted.'
-0 msg recv msg ‹MsgIncoming: msg:'Monitor 9 deleted.' type:MT_ACK prio:2›
-0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'Deleted.' msgid:9 type:MT_IND_NAK prio:2›
-0 msg recv test ‹MsgIncoming: msg:'Deleted.' msgid:9 type:MT_IND_NAK prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-5.5 sec id=2›
-0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 7a›
-0 locking +WAIT 74 kill job ‹WAGOmon test¦report¦both run 1›
-0 locking -WAIT 53 monitor one_value test report both
+0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 6c›
+0 locking +WAIT 69 kill job ‹WAGOmon test¦report¦both run 1›
+0 locking -WAIT 48 monitor one_value test report both
 0 monitor End run test¦report¦both
 0 monitor Stop run test¦report¦both
-0 locking +WAIT 75 monitor sleep test report both
-0 locking -WAIT 75 monitor sleep test report both
+0 locking +WAIT 70 monitor sleep test report both
+0 locking -WAIT 70 monitor sleep test report both
 NEW: ‹ConditionalWorkSequence:62 (4)›
    : │  id: 62
    : │  call count: 0
@@ -1501,38 +1389,30 @@ NEW: ‹ConditionalWorkSequence:62 (4)›
    : └1╴... done.
 EVENT: monitor¦stop¦test¦report¦both
 END: monitor¦stop¦test¦report¦both
-0 locking -WAIT 74 kill job ‹WAGOmon test¦report¦both run 1›
+0 locking -WAIT 69 kill job ‹WAGOmon test¦report¦both run 1›
 0 msg recv= MINE ‹WAGOmonRun ‹WAGOmon test¦report¦both off››
 0 msg states at run connected connected
-0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'Monitor 9 deleted.' type:MT_ACK prio:2›
-0 msg recv test ‹MsgIncoming: msg:'Monitor 9 deleted.' type:MT_ACK prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-5.7 sec id=2›
-0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 7b›
-0 msg recv= MINE ‹WAGOmonStop 7c msgid=9›
+0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'Monitor 8 deleted.' type:MT_ACK prio:2›
+0 msg recv test ‹MsgIncoming: msg:'Monitor 8 deleted.' type:MT_ACK prio:2›
+0 msg recv= NOT_MINE ‹WAGOkeepaliveMsg 6d›
+0 msg recv= MINE ‹WAGOmonStop 6e msgid=8›
 0 msg states at run connected connected
-0 locking +WAIT 76 start job ‹Waiter _wait¦11 ??›
-0 locking -WAIT 76 start job ‹Waiter _wait¦11 ??›
+0 locking +WAIT 71 start job ‹Waiter _wait¦11 ??›
+0 locking -WAIT 71 start job ‹Waiter _wait¦11 ??›
 NEW: ‹ConditionalWorkSequence:63 (4)›
    : │  id: 63
    : │  call count: 0
-   : │  EVENT: wait¦start¦8.0¦_wait¦11
+   : │  EVENT: wait¦start¦6.0¦_wait¦11
    : └1╴... done.
-EVENT: wait¦start¦8.0¦_wait¦11
-END: wait¦start¦8.0¦_wait¦11
-0 wago recv '!3 PING 7'
-0 msg recv msg ‹MsgIncoming: msg:'PING 7' msgid:3 type:MT_IND prio:2›
-0 conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 7' msgid:3 type:MT_IND prio:2›
-0 msg recv test ‹MsgIncoming: msg:'PING 7' msgid:3 type:MT_IND prio:2›
-0 msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=-5.8 sec id=2›
-0 msg recv= RECV_AGAIN ‹WAGOkeepaliveMsg 7d›
-0 msg states at run connected connected
+EVENT: wait¦start¦6.0¦_wait¦11
+END: wait¦start¦6.0¦_wait¦11
 NEW: ‹ConditionalWorkSequence:64 (4)›
    : │  id: 64
    : │  call count: 0
-   : │  EVENT: wait¦done¦8.0¦_wait¦11
+   : │  EVENT: wait¦done¦6.0¦_wait¦11
    : └1╴... done.
-EVENT: wait¦done¦8.0¦_wait¦11
-END: wait¦done¦8.0¦_wait¦11
+EVENT: wait¦done¦6.0¦_wait¦11
+END: wait¦done¦6.0¦_wait¦11
 test :: wago localhost:59069
 .
 type: wago
@@ -1545,35 +1425,26 @@ test :: ‹WAGOqueue:test connected›
 name: test
 queue: 0
 state: connected
-state since: -11.1 sec (2003-04-05 06:07:08)
-sent: (17, 25)
-received: (20, 48)
-processed: (16, 25)
-last_sent : ‹WAGOmonStop 7e msgid=9›
+state since: -14.9 sec (2003-04-05 06:07:08)
+sent: (0, 37)
+received: (0, 66)
+processed: (0, 37)
+last_sent : ‹WAGOmonStop 6f msgid=8›
           priority: 2
           timeout: 2
-          result: Monitor 9 deleted.
-last_sent_at: -1.0 sec (2003-04-05 06:07:18.10)
+          result: Monitor 8 deleted.
+last_sent_at: -1.0 sec (2003-04-05 06:07:21.90)
 conn attempts: 0
 conn timer: 3
 out_queued: 0
 channel type: wago
         host: localhost
         port: 59069
-msg recv 2 1 : ‹WAGOtimedOutputRun 2:1 val=False tm=-5.8 sec id=2›
-             priority: 2
-             timeout: 2
-             status: pending
-             card: 2
-             port: 1
-             value: False
-             timer: -5.8 )
-             id: 2
-msg recv 2 2 : ‹WAGOkeepaliveMsg 7f›
+msg recv 2 1 : ‹WAGOkeepaliveMsg 70›
              priority: 2
              status: pending
-             last: now
-             id: 3
+             last: -0.3 )
+             id: 1
 .
 1 Yes
 DEBUG> Yes
@@ -1581,9 +1452,9 @@ DEBUG> Yes
 DEBUG> Yes
 1 Yes
 DEBUG> Yes
-0 locking +WAIT 77 kill job ‹WAGOqueue:test connected›
-0 locking -WAIT 77 kill job ‹WAGOqueue:test connected›
-0 locking +WAIT 78 kill job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test››
+0 locking +WAIT 72 kill job ‹WAGOqueue:test connected›
+0 locking -WAIT 72 kill job ‹WAGOqueue:test connected›
+0 locking +WAIT 73 kill job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test››
 0 !got DOWN_EVENT test
 NEW: ‹ConditionalWorkSequence:65 (4)›
    : │  id: 65
@@ -1592,23 +1463,23 @@ NEW: ‹ConditionalWorkSequence:65 (4)›
    : └1╴... done.
 EVENT: wago¦disconnect¦test
 END: wago¦disconnect¦test
-0 locking -WAIT 78 kill job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test››
+0 locking -WAIT 73 kill job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test››
 0 conn deleted WAGOqueue test
 1 now we test a nonexistent port
 DEBUG> now we test a nonexistent port
-0 locking +WAIT 79 start job ‹WAGOqueue:test¦nonexist New›
-0 locking -WAIT 79 start job ‹WAGOqueue:test¦nonexist New›
-0 locking +WAIT 80 start job ‹WAGOqueue:test¦nonexist New›
-0 locking -WAIT 80 start job ‹WAGOqueue:test¦nonexist New›
-0 locking +WAIT 81 start job ‹Waiter poll¦nonexist ??›
-0 locking -WAIT 81 start job ‹Waiter poll¦nonexist ??›
+0 locking +WAIT 74 start job ‹WAGOqueue:test¦nonexist New›
+0 locking -WAIT 74 start job ‹WAGOqueue:test¦nonexist New›
+0 locking +WAIT 75 start job ‹WAGOqueue:test¦nonexist New›
+0 locking -WAIT 75 start job ‹WAGOqueue:test¦nonexist New›
+0 locking +WAIT 76 start job ‹Waiter poll¦nonexist ??›
+0 locking -WAIT 76 start job ‹Waiter poll¦nonexist ??›
 NEW: ‹ConditionalWorkSequence:66 (4)›
    : │  id: 66
    : │  call count: 0
-   : │  EVENT: wait¦start¦9.1¦poll¦nonexist
+   : │  EVENT: wait¦start¦7.0¦poll¦nonexist
    : └1╴... done.
-EVENT: wait¦start¦9.1¦poll¦nonexist
-END: wait¦start¦9.1¦poll¦nonexist
+EVENT: wait¦start¦7.0¦poll¦nonexist
+END: wait¦start¦7.0¦poll¦nonexist
 0 msg setstate init closed
 0 msg setstate closed want
 0 msg setstate want connecting
@@ -1661,15 +1532,15 @@ ERROR> [Errno 111] Connection refused
 NEW: ‹ConditionalWorkSequence:70 (4)›
    : │  id: 70
    : │  call count: 0
-   : │  EVENT: wait¦done¦9.1¦poll¦nonexist
+   : │  EVENT: wait¦done¦7.0¦poll¦nonexist
    : └1╴... done.
-EVENT: wait¦done¦9.1¦poll¦nonexist
-END: wait¦done¦9.1¦poll¦nonexist
+EVENT: wait¦done¦7.0¦poll¦nonexist
+END: wait¦done¦7.0¦poll¦nonexist
 : ‹WAGOqueue:test¦nonexist connecting›
 name: test¦nonexist
 queue: 0
 state: connecting
-state since: now (2003-04-05 06:07:19.10)
+state since: now (2003-04-05 06:07:22.90)
 sent: (0, 0)
 received: (0, 0)
 processed: (0, 0)
@@ -1677,39 +1548,37 @@ conn attempts: 3
 conn timer: 0.5
 out_queued: 0
 .
-0 locking +WAIT 82 kill job ‹WAGOqueue:test¦nonexist connecting›
-0 locking -WAIT 82 kill job ‹WAGOqueue:test¦nonexist connecting›
+0 locking +WAIT 77 kill job ‹WAGOqueue:test¦nonexist connecting›
+0 locking -WAIT 77 kill job ‹WAGOqueue:test¦nonexist connecting›
 1 now we test a port that always EOFs
 DEBUG> now we test a port that always EOFs
-0 locking +WAIT 83 start job ‹Async async›
-0 locking -WAIT 83 start job ‹Async async›
-0 locking +WAIT 84 start job ‹Waiter poll¦closing ??›
-0 locking -WAIT 84 start job ‹Waiter poll¦closing ??›
+0 locking +WAIT 78 start job ‹Waiter poll¦closing ??›
+0 locking -WAIT 78 start job ‹Waiter poll¦closing ??›
 NEW: ‹ConditionalWorkSequence:71 (4)›
    : │  id: 71
    : │  call count: 0
-   : │  EVENT: wait¦start¦10.1¦poll¦closing
+   : │  EVENT: wait¦start¦8.0¦poll¦closing
    : └1╴... done.
-EVENT: wait¦start¦10.1¦poll¦closing
-END: wait¦start¦10.1¦poll¦closing
-0 locking +WAIT 85 start job ‹WAGOqueue:test¦closing New›
-0 locking -WAIT 85 start job ‹WAGOqueue:test¦closing New›
-0 locking +WAIT 86 start job ‹WAGOqueue:test¦closing New›
-0 locking -WAIT 86 start job ‹WAGOqueue:test¦closing New›
+EVENT: wait¦start¦8.0¦poll¦closing
+END: wait¦start¦8.0¦poll¦closing
+0 locking +WAIT 79 start job ‹WAGOqueue:test¦closing New›
+0 locking -WAIT 79 start job ‹WAGOqueue:test¦closing New›
+0 locking +WAIT 80 start job ‹WAGOqueue:test¦closing New›
+0 locking -WAIT 80 start job ‹WAGOqueue:test¦closing New›
 0 msg setstate init closed
 0 msg setstate closed want
 0 msg setstate want connecting
 0 conn connecting WAGOqueue test¦closing
-0 locking +WAIT 87 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦closing››
-0 locking -WAIT 87 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦closing››
+0 locking +WAIT 81 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦closing››
+0 locking -WAIT 81 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦closing››
 0 conn setting up WAGOqueue test¦closing
 0 conn connected WAGOqueue test¦closing
 0 msg states at run connected connecting
 0 NotConn [[], [], [], []]
 0 msg states at run connected connecting
-0 msg blocked by ‹WAGOinitMsg 80›
+0 msg blocked by ‹WAGOinitMsg 71›
 0 msg states at run connected connecting
-0 msg blocked by ‹WAGOinitMsg 81›
+0 msg blocked by ‹WAGOinitMsg 72›
 0 !got DOWN_EVENT test closing
 NEW: ‹ConditionalWorkSequence:72 (4)›
    : │  id: 72
@@ -1724,16 +1593,16 @@ END: wago¦disconnect¦test¦closing
 0 msg setstate want connecting
 0 wago Queue WAGOmonitorsMsg
 0 conn connecting WAGOqueue test¦closing
-0 locking +WAIT 88 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦closing››
-0 locking -WAIT 88 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦closing››
+0 locking +WAIT 82 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦closing››
+0 locking -WAIT 82 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦closing››
 0 conn setting up WAGOqueue test¦closing
 0 conn connected WAGOqueue test¦closing
 0 msg states at run connected connecting
 0 NotConn [[], [], [], []]
 0 msg states at run connected connecting
-0 msg blocked by ‹WAGOinitMsg 82›
+0 msg blocked by ‹WAGOinitMsg 73›
 0 msg states at run connected connecting
-0 msg blocked by ‹WAGOinitMsg 83›
+0 msg blocked by ‹WAGOinitMsg 74›
 0 !got DOWN_EVENT test closing
 NEW: ‹ConditionalWorkSequence:73 (4)›
    : │  id: 73
@@ -1748,16 +1617,16 @@ END: wago¦disconnect¦test¦closing
 0 msg setstate want connecting
 0 wago Queue WAGOmonitorsMsg
 0 conn connecting WAGOqueue test¦closing
-0 locking +WAIT 89 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦closing››
-0 locking -WAIT 89 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦closing››
+0 locking +WAIT 83 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦closing››
+0 locking -WAIT 83 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦closing››
 0 conn setting up WAGOqueue test¦closing
 0 conn connected WAGOqueue test¦closing
 0 msg states at run connected connecting
 0 NotConn [[], [], [], []]
 0 msg states at run connected connecting
-0 msg blocked by ‹WAGOinitMsg 84›
+0 msg blocked by ‹WAGOinitMsg 75›
 0 msg states at run connected connecting
-0 msg blocked by ‹WAGOinitMsg 85›
+0 msg blocked by ‹WAGOinitMsg 76›
 0 !got DOWN_EVENT test closing
 NEW: ‹ConditionalWorkSequence:74 (4)›
    : │  id: 74
@@ -1772,16 +1641,16 @@ END: wago¦disconnect¦test¦closing
 0 msg setstate want connecting
 0 wago Queue WAGOmonitorsMsg
 0 conn connecting WAGOqueue test¦closing
-0 locking +WAIT 90 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦closing››
-0 locking -WAIT 90 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦closing››
+0 locking +WAIT 84 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦closing››
+0 locking -WAIT 84 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦closing››
 0 conn setting up WAGOqueue test¦closing
 0 conn connected WAGOqueue test¦closing
 0 msg states at run connected connecting
 0 NotConn [[], [], [], []]
 0 msg states at run connected connecting
-0 msg blocked by ‹WAGOinitMsg 86›
+0 msg blocked by ‹WAGOinitMsg 77›
 0 msg states at run connected connecting
-0 msg blocked by ‹WAGOinitMsg 87›
+0 msg blocked by ‹WAGOinitMsg 78›
 0 !got DOWN_EVENT test closing
 NEW: ‹ConditionalWorkSequence:75 (4)›
    : │  id: 75
@@ -1795,61 +1664,59 @@ END: wago¦disconnect¦test¦closing
 NEW: ‹ConditionalWorkSequence:76 (4)›
    : │  id: 76
    : │  call count: 0
-   : │  EVENT: wait¦done¦10.1¦poll¦closing
+   : │  EVENT: wait¦done¦8.0¦poll¦closing
    : └1╴... done.
-EVENT: wait¦done¦10.1¦poll¦closing
-END: wait¦done¦10.1¦poll¦closing
+EVENT: wait¦done¦8.0¦poll¦closing
+END: wait¦done¦8.0¦poll¦closing
 : ‹WAGOqueue:test¦closing ReOpen›
 name: test¦closing
 queue: 0
 state: ReOpen
-state since: now (2003-04-05 06:07:19.10)
+state since: now (2003-04-05 06:07:22.90)
 sent: (0, 0)
 received: (0, 0)
 processed: (0, 0)
 conn attempts: 4
 conn timer: 0.5
 out_queued: 1
-msg send 1 1 : ‹WAGOmonitorsMsg 88›
+msg send 1 1 : ‹WAGOmonitorsMsg 79›
              priority: 1
              status: pending
-msg recv 0 1 : ‹WAGOinitMsg 89›
+msg recv 0 1 : ‹WAGOinitMsg 7a›
              priority: 0
 .
-0 locking +WAIT 91 kill job ‹WAGOqueue:test¦closing ReOpen›
-0 locking -WAIT 91 kill job ‹WAGOqueue:test¦closing ReOpen›
+0 locking +WAIT 85 kill job ‹WAGOqueue:test¦closing ReOpen›
+0 locking -WAIT 85 kill job ‹WAGOqueue:test¦closing ReOpen›
 1 now we test a port that does not answer
 DEBUG> now we test a port that does not answer
-0 locking +WAIT 92 start job ‹Async async›
-0 locking -WAIT 92 start job ‹Async async›
-0 locking +WAIT 93 start job ‹Waiter poll¦no_answer ??›
-0 locking -WAIT 93 start job ‹Waiter poll¦no_answer ??›
+0 locking +WAIT 86 start job ‹Waiter poll¦no_answer ??›
+0 locking -WAIT 86 start job ‹Waiter poll¦no_answer ??›
 NEW: ‹ConditionalWorkSequence:77 (4)›
    : │  id: 77
    : │  call count: 0
-   : │  EVENT: wait¦start¦11.1¦poll¦no_answer
+   : │  EVENT: wait¦start¦9.0¦poll¦no_answer
    : └1╴... done.
-EVENT: wait¦start¦11.1¦poll¦no_answer
-END: wait¦start¦11.1¦poll¦no_answer
-0 locking +WAIT 94 start job ‹WAGOqueue:test¦no_answer New›
-0 locking -WAIT 94 start job ‹WAGOqueue:test¦no_answer New›
-0 locking +WAIT 95 start job ‹WAGOqueue:test¦no_answer New›
-0 locking -WAIT 95 start job ‹WAGOqueue:test¦no_answer New›
+EVENT: wait¦start¦9.0¦poll¦no_answer
+END: wait¦start¦9.0¦poll¦no_answer
+0 locking +WAIT 87 start job ‹WAGOqueue:test¦no_answer New›
+0 locking -WAIT 87 start job ‹WAGOqueue:test¦no_answer New›
+0 locking +WAIT 88 start job ‹WAGOqueue:test¦no_answer New›
+0 locking -WAIT 88 start job ‹WAGOqueue:test¦no_answer New›
 0 msg setstate init closed
 0 msg setstate closed want
 0 msg setstate want connecting
 0 conn connecting WAGOqueue test¦no_answer
-0 locking +WAIT 96 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦no_answer››
-0 locking -WAIT 96 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦no_answer››
+0 locking +WAIT 89 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦no_answer››
+0 locking -WAIT 89 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦no_answer››
 0 conn setting up WAGOqueue test¦no_answer
 0 conn connected WAGOqueue test¦no_answer
 0 msg states at run connected connecting
 0 NotConn [[], [], [], []]
 0 msg states at run connected connecting
-0 msg blocked by ‹WAGOinitMsg 8a›
+0 msg blocked by ‹WAGOinitMsg 7b›
 0 msg states at run connected connecting
-0 msg blocked by ‹WAGOinitMsg 8b›
-0 locking +WAIT 97 kill job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦no_answer››
+0 msg blocked by ‹WAGOinitMsg 7c›
+0 locking +WAIT 90 kill job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦no_answer››
 0 !got DOWN_EVENT test no_answer
 NEW: ‹ConditionalWorkSequence:78 (4)›
    : │  id: 78
@@ -1858,24 +1725,24 @@ NEW: ‹ConditionalWorkSequence:78 (4)›
    : └1╴... done.
 EVENT: wago¦disconnect¦test¦no_answer
 END: wago¦disconnect¦test¦no_answer
-0 locking -WAIT 97 kill job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦no_answer››
+0 locking -WAIT 90 kill job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦no_answer››
 0 conn ReOpen WAGOqueue test¦no_answer
 0 msg setstate connecting waiting: wait 0.120
 0 msg setstate waiting want
 0 msg setstate want connecting
 0 wago Queue WAGOmonitorsMsg
 0 conn connecting WAGOqueue test¦no_answer
-0 locking +WAIT 98 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦no_answer››
-0 locking -WAIT 98 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦no_answer››
+0 locking +WAIT 91 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦no_answer››
+0 locking -WAIT 91 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦no_answer››
 0 conn setting up WAGOqueue test¦no_answer
 0 conn connected WAGOqueue test¦no_answer
 0 msg states at run connected connecting
 0 NotConn [[], [], [], []]
 0 msg states at run connected connecting
-0 msg blocked by ‹WAGOinitMsg 8c›
+0 msg blocked by ‹WAGOinitMsg 7d›
 0 msg states at run connected connecting
-0 msg blocked by ‹WAGOinitMsg 8d›
-0 locking +WAIT 99 kill job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦no_answer››
+0 msg blocked by ‹WAGOinitMsg 7e›
+0 locking +WAIT 92 kill job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦no_answer››
 0 !got DOWN_EVENT test no_answer
 NEW: ‹ConditionalWorkSequence:79 (4)›
    : │  id: 79
@@ -1884,24 +1751,24 @@ NEW: ‹ConditionalWorkSequence:79 (4)›
    : └1╴... done.
 EVENT: wago¦disconnect¦test¦no_answer
 END: wago¦disconnect¦test¦no_answer
-0 locking -WAIT 99 kill job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦no_answer››
+0 locking -WAIT 92 kill job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦no_answer››
 0 conn ReOpen WAGOqueue test¦no_answer
 0 msg setstate connecting waiting: wait 0.192
 0 msg setstate waiting want
 0 msg setstate want connecting
 0 wago Queue WAGOmonitorsMsg
 0 conn connecting WAGOqueue test¦no_answer
-0 locking +WAIT 100 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦no_answer››
-0 locking -WAIT 100 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦no_answer››
+0 locking +WAIT 93 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦no_answer››
+0 locking -WAIT 93 start job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦no_answer››
 0 conn setting up WAGOqueue test¦no_answer
 0 conn connected WAGOqueue test¦no_answer
 0 msg states at run connected connecting
 0 NotConn [[], [], [], []]
 0 msg states at run connected connecting
-0 msg blocked by ‹WAGOinitMsg 8e›
+0 msg blocked by ‹WAGOinitMsg 7f›
 0 msg states at run connected connecting
-0 msg blocked by ‹WAGOinitMsg 8f›
-0 locking +WAIT 101 kill job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦no_answer››
+0 msg blocked by ‹WAGOinitMsg 80›
+0 locking +WAIT 94 kill job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦no_answer››
 0 !got DOWN_EVENT test no_answer
 NEW: ‹ConditionalWorkSequence:80 (4)›
    : │  id: 80
@@ -1910,46 +1777,46 @@ NEW: ‹ConditionalWorkSequence:80 (4)›
    : └1╴... done.
 EVENT: wago¦disconnect¦test¦no_answer
 END: wago¦disconnect¦test¦no_answer
-0 locking -WAIT 101 kill job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦no_answer››
+0 locking -WAIT 94 kill job ‹WAGOchannel:‹Collected WAGOchannel_forwarder:test¦no_answer››
 0 conn ReOpen WAGOqueue test¦no_answer
 0 msg setstate connecting waiting: wait 0.307
 NEW: ‹ConditionalWorkSequence:81 (4)›
    : │  id: 81
    : │  call count: 0
-   : │  EVENT: wait¦done¦11.1¦poll¦no_answer
+   : │  EVENT: wait¦done¦9.0¦poll¦no_answer
    : └1╴... done.
-EVENT: wait¦done¦11.1¦poll¦no_answer
-END: wait¦done¦11.1¦poll¦no_answer
+EVENT: wait¦done¦9.0¦poll¦no_answer
+END: wait¦done¦9.0¦poll¦no_answer
 : ‹WAGOqueue:test¦no_answer ReOpen›
 name: test¦no_answer
 queue: 0
 state: ReOpen
-state since: now (2003-04-05 06:07:19.10)
+state since: now (2003-04-05 06:07:22.90)
 sent: (0, 0)
 received: (0, 0)
 processed: (0, 0)
 conn attempts: 3
 conn timer: 0.49152
 out_queued: 1
-msg send 1 1 : ‹WAGOmonitorsMsg 90›
+msg send 1 1 : ‹WAGOmonitorsMsg 81›
              priority: 1
              status: pending
-msg recv 0 1 : ‹WAGOinitMsg 91›
+msg recv 0 1 : ‹WAGOinitMsg 82›
              priority: 0
 .
-0 locking +WAIT 102 kill job ‹WAGOqueue:test¦no_answer ReOpen›
-0 locking -WAIT 102 kill job ‹WAGOqueue:test¦no_answer ReOpen›
-0 locking +WAIT 103 start job ‹Waiter poll¦end ??›
-0 locking -WAIT 103 start job ‹Waiter poll¦end ??›
+0 locking +WAIT 95 kill job ‹WAGOqueue:test¦no_answer ReOpen›
+0 locking -WAIT 95 kill job ‹WAGOqueue:test¦no_answer ReOpen›
+0 locking +WAIT 96 start job ‹Waiter poll¦end ??›
+0 locking -WAIT 96 start job ‹Waiter poll¦end ??›
 NEW: ‹ConditionalWorkSequence:82 (4)›
    : │  id: 82
    : │  call count: 0
-   : │  EVENT: wait¦start¦13.1¦poll¦end
+   : │  EVENT: wait¦start¦16.9¦poll¦end
    : └1╴... done.
-EVENT: wait¦start¦13.1¦poll¦end
-END: wait¦start¦13.1¦poll¦end
-0 locking +WAIT 104 kill job <homevent.tokize.tokizer obj>
-0 locking -WAIT 104 kill job <homevent.tokize.tokizer obj>
+EVENT: wait¦start¦16.9¦poll¦end
+END: wait¦start¦16.9¦poll¦end
+0 locking +WAIT 97 kill job <homevent.tokize.tokizer obj>
+0 locking -WAIT 97 kill job <homevent.tokize.tokizer obj>
 NEW: ‹ConditionalWorkSequence:83 (6)›
    : │  id: 83
    : │  call count: 0

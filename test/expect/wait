@@ -9,10 +9,8 @@ END: startup
 0 locking -WAIT 1 start job ‹Collected Parser:n1›
 0 locking +WAIT 2 start job <homevent.tokize.tokizer obj>
 0 locking -WAIT 2 start job <homevent.tokize.tokizer obj>
-0 locking +WAIT 3 start job ‹Async async›
-0 locking -WAIT 3 start job ‹Async async›
-0 locking +WAIT 4 start job ‹Waiter X1 ??›
-0 locking -WAIT 4 start job ‹Waiter X1 ??›
+0 locking +WAIT 3 start job ‹Waiter X1 ??›
+0 locking -WAIT 3 start job ‹Waiter X1 ??›
 NEW: ‹ConditionalWorkSequence:8 (4)›
    : │  id: 8
    : │  call count: 0
@@ -20,8 +18,8 @@ NEW: ‹ConditionalWorkSequence:8 (4)›
    : └1╴... done.
 EVENT: wait¦start¦×××¦X1
 END: wait¦start¦×××¦X1
-0 locking +WAIT 5 start job ‹Waiter Foo¦Bar ??›
-0 locking -WAIT 5 start job ‹Waiter Foo¦Bar ??›
+0 locking +WAIT 4 start job ‹Waiter Foo¦Bar ??›
+0 locking -WAIT 4 start job ‹Waiter Foo¦Bar ??›
 NEW: ‹ConditionalWorkSequence:9 (4)›
    : │  id: 9
    : │  call count: 0
@@ -56,8 +54,8 @@ NEW: ‹ConditionalWorkSequence:11 (4)›
 EVENT: wait¦update¦2003-04-05 06:07:08.300000¦Foo¦Bar
 END: wait¦update¦2003-04-05 06:07:08.300000¦Foo¦Bar
 1 Yes
-0 locking +WAIT 6 start job ‹Waiter X2 ??›
-0 locking -WAIT 6 start job ‹Waiter X2 ??›
+0 locking +WAIT 5 start job ‹Waiter X2 ??›
+0 locking -WAIT 5 start job ‹Waiter X2 ??›
 NEW: ‹ConditionalWorkSequence:12 (4)›
    : │  id: 12
    : │  call count: 0
@@ -72,8 +70,8 @@ NEW: ‹ConditionalWorkSequence:13 (4)›
    : └1╴... done.
 EVENT: wait¦done¦×××¦Foo¦Bar
 END: wait¦done¦×××¦Foo¦Bar
-0 locking +WAIT 7 start job ‹TriggerHandler: trigger 3›
-0 locking -WAIT 7 start job ‹TriggerHandler: trigger 3›
+0 locking +WAIT 6 start job ‹TriggerHandler: trigger 3›
+0 locking -WAIT 6 start job ‹TriggerHandler: trigger 3›
 NEW: ‹ConditionalWorkSequence:14 (4)›
    : │  id: 14
    : │  call count: 0
@@ -88,10 +86,10 @@ NEW: ‹ConditionalWorkSequence:15 (4)›
    : └1╴... done.
 EVENT: wait¦done¦×××¦X2
 END: wait¦done¦×××¦X2
-0 locking +WAIT 8 start job ‹TriggerHandler: trigger 3›
-0 locking -WAIT 8 start job ‹TriggerHandler: trigger 3›
-0 locking +WAIT 9 start job ‹Waiter X3 ??›
-0 locking -WAIT 9 start job ‹Waiter X3 ??›
+0 locking +WAIT 7 start job ‹TriggerHandler: trigger 3›
+0 locking -WAIT 7 start job ‹TriggerHandler: trigger 3›
+0 locking +WAIT 8 start job ‹Waiter X3 ??›
+0 locking -WAIT 8 start job ‹Waiter X3 ??›
 NEW: ‹ConditionalWorkSequence:16 (4)›
    : │  id: 16
    : │  call count: 0
@@ -113,10 +111,8 @@ NEW: ‹ConditionalWorkSequence:18 (4)›
    : └1╴... done.
 EVENT: wait¦done¦×××¦X3
 END: wait¦done¦×××¦X3
-0 locking +WAIT 10 start job ‹Async async›
-0 locking -WAIT 10 start job ‹Async async›
-0 locking +WAIT 11 start job ‹Waiter _wait¦7 ??›
-0 locking -WAIT 11 start job ‹Waiter _wait¦7 ??›
+0 locking +WAIT 9 start job ‹Waiter _wait¦7 ??›
+0 locking -WAIT 9 start job ‹Waiter _wait¦7 ??›
 NEW: ‹ConditionalWorkSequence:19 (4)›
    : │  id: 19
    : │  call count: 0
@@ -124,8 +120,8 @@ NEW: ‹ConditionalWorkSequence:19 (4)›
    : └1╴... done.
 EVENT: wait¦start¦×××¦_wait¦7
 END: wait¦start¦×××¦_wait¦7
-0 locking +WAIT 12 start job ‹Waiter Foo¦Baz ??›
-0 locking -WAIT 12 start job ‹Waiter Foo¦Baz ??›
+0 locking +WAIT 10 start job ‹Waiter Foo¦Baz ??›
+0 locking -WAIT 10 start job ‹Waiter Foo¦Baz ??›
 NEW: ‹ConditionalWorkSequence:20 (4)›
    : │  id: 20
    : │  call count: 0
@@ -161,8 +157,8 @@ RUN: on whatever ‹OnEventHandler›
  ev: IEVENT: whatever
 0 We wait ‹Waiter Foo¦Baz 51.9›
 END: whatever
-0 locking +WAIT 13 start job ‹Waiter _wait¦8 ??›
-0 locking -WAIT 13 start job ‹Waiter _wait¦8 ??›
+0 locking +WAIT 11 start job ‹Waiter _wait¦8 ??›
+0 locking -WAIT 11 start job ‹Waiter _wait¦8 ??›
 NEW: ‹ConditionalWorkSequence:24 (4)›
    : │  id: 24
    : │  call count: 0
@@ -186,8 +182,8 @@ NEW: ‹WorkSequence:26 (4)›
 Waiter ‹Foo Baz› was cancelled
 END: DelayCancelled
 1 Yes
-0 locking +WAIT 14 start job ‹Waiter _wait¦9 ??›
-0 locking -WAIT 14 start job ‹Waiter _wait¦9 ??›
+0 locking +WAIT 12 start job ‹Waiter _wait¦9 ??›
+0 locking -WAIT 12 start job ‹Waiter _wait¦9 ??›
 NEW: ‹ConditionalWorkSequence:27 (4)›
    : │  id: 27
    : │  call count: 0
@@ -202,5 +198,5 @@ NEW: ‹ConditionalWorkSequence:28 (4)›
    : └1╴... done.
 EVENT: wait¦done¦×××¦_wait¦9
 END: wait¦done¦×××¦_wait¦9
-0 locking +WAIT 15 kill job <homevent.tokize.tokizer obj>
-0 locking -WAIT 15 kill job <homevent.tokize.tokizer obj>
+0 locking +WAIT 13 kill job <homevent.tokize.tokizer obj>
+0 locking -WAIT 13 kill job <homevent.tokize.tokizer obj>

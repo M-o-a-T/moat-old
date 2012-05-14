@@ -1,0 +1,270 @@
+NEW: ‹ConditionalWorkSequence:7 (4)›
+   : │  id: 7
+   : │  call count: 0
+   : │  EVENT: startup
+   : └1╴... done.
+EVENT: startup
+END: startup
+0 locking +WAIT 1 start job ‹Collected Parser:n1›
+0 locking -WAIT 1 start job ‹Collected Parser:n1›
+0 locking +WAIT 2 start job <homevent.tokize.tokizer obj>
+0 locking -WAIT 2 start job <homevent.tokize.tokizer obj>
+0 locking +WAIT 3 start job ‹Waiter startup ??›
+0 locking -WAIT 3 start job ‹Waiter startup ??›
+NEW: ‹ConditionalWorkSequence:8 (4)›
+   : │  id: 8
+   : │  call count: 0
+   : │  EVENT: wait¦start¦0.2¦startup
+   : └1╴... done.
+EVENT: wait¦start¦0.2¦startup
+END: wait¦start¦0.2¦startup
+NEW: ‹ConditionalWorkSequence:9 (4)›
+   : │  id: 9
+   : │  call count: 0
+   : │  EVENT: wait¦done¦0.2¦startup
+   : └1╴... done.
+EVENT: wait¦done¦0.2¦startup
+END: wait¦done¦0.2¦startup
+1 Yes
+0 locking +WAIT 4 start job ‹RRDqueue:t¦tt¦ttt New›
+0 locking -WAIT 4 start job ‹RRDqueue:t¦tt¦ttt New›
+0 locking +WAIT 5 start job ‹RRDqueue:t¦tt¦ttt New›
+0 locking -WAIT 5 start job ‹RRDqueue:t¦tt¦ttt New›
+1 Yes
+t tt ttt :: ‹RRDqueue:t¦tt¦ttt New›
+.
+: ‹RRDqueue:t¦tt¦ttt New›
+name: t¦tt¦ttt
+queue: 0
+state: New
+state since: None
+sent: (0, 0)
+received: (0, 0)
+processed: (0, 0)
+conn attempts: 0
+conn timer: 3
+out_queued: 0
+.
+1 Yes
+1 Yes
+a aa aaa
+.
+: ‹Collected RRDfile:a¦aa¦aaa›
+name: a¦aa¦aaa
+server: ‹RRDqueue:t¦tt¦ttt New›
+       name: t¦tt¦ttt
+       queue: 0
+       state: New
+       state since: None
+       sent: (0, 0)
+       received: (0, 0)
+       processed: (0, 0)
+       conn attempts: 0
+       conn timer: 3
+       out_queued: 0
+filename: /tmp/rrdtest.rrd
+.
+0 locking +WAIT 6 start job ‹Waiter _wait¦2 ??›
+0 locking -WAIT 6 start job ‹Waiter _wait¦2 ??›
+NEW: ‹ConditionalWorkSequence:10 (4)›
+   : │  id: 10
+   : │  call count: 0
+   : │  EVENT: wait¦start¦0.3¦_wait¦2
+   : └1╴... done.
+EVENT: wait¦start¦0.3¦_wait¦2
+END: wait¦start¦0.3¦_wait¦2
+0 msg setstate init closed
+0 msg setstate closed want
+0 msg setstate want connecting
+0 conn connecting RRDqueue t¦tt¦ttt
+0 locking +WAIT 7 start job ‹RRDchannel:‹Collected RRDchannel_forwarder:t¦tt¦ttt››
+0 locking -WAIT 7 start job ‹RRDchannel:‹Collected RRDchannel_forwarder:t¦tt¦ttt››
+0 conn setting up RRDqueue t¦tt¦ttt
+0 !got UP_EVENT t tt ttt
+NEW: ‹ConditionalWorkSequence:11 (4)›
+   : │  id: 11
+   : │  call count: 0
+   : │  EVENT: rrd¦connect¦t¦tt¦ttt
+   : └1╴... done.
+EVENT: rrd¦connect¦t¦tt¦ttt
+END: rrd¦connect¦t¦tt¦ttt
+0 conn connected RRDqueue t¦tt¦ttt
+0 msg states at run connected connecting
+0 NotConn [[], [], [], []]
+0 msg setstate connecting connected
+0 msg states at run connected connected
+NEW: ‹ConditionalWorkSequence:12 (4)›
+   : │  id: 12
+   : │  call count: 0
+   : │  EVENT: wait¦done¦0.3¦_wait¦2
+   : └1╴... done.
+EVENT: wait¦done¦0.3¦_wait¦2
+END: wait¦done¦0.3¦_wait¦2
+0 msg states at run connected connected
+0 msg send ‹RRDsendUpdate 1›
+0 rrd send 'update /tmp/rrdtest.rrd 1049515628:10'
+0 msg send result RECV_AGAIN
+0 rrd recv '0 Yes'
+0 msg recv msg ‹MsgIncoming: msg:'Yes' type:MT_ACK prio:2›
+0 conn incoming RRDqueue t¦tt¦ttt ‹MsgIncoming: msg:'Yes' type:MT_ACK prio:2›
+0 msg recv t¦tt¦ttt ‹MsgIncoming: msg:'Yes' type:MT_ACK prio:2›
+0 msg recv= MINE ‹RRDsendUpdate 2›
+0 msg states at run connected connected
+0 locking +WAIT 8 start job ‹Waiter _wait¦3 ??›
+0 locking -WAIT 8 start job ‹Waiter _wait¦3 ??›
+NEW: ‹ConditionalWorkSequence:13 (4)›
+   : │  id: 13
+   : │  call count: 0
+   : │  EVENT: wait¦start¦0.4¦_wait¦3
+   : └1╴... done.
+EVENT: wait¦start¦0.4¦_wait¦3
+END: wait¦start¦0.4¦_wait¦3
+NEW: ‹ConditionalWorkSequence:14 (4)›
+   : │  id: 14
+   : │  call count: 0
+   : │  EVENT: wait¦done¦0.4¦_wait¦3
+   : └1╴... done.
+EVENT: wait¦done¦0.4¦_wait¦3
+END: wait¦done¦0.4¦_wait¦3
+0 msg states at run connected connected
+0 msg send ‹RRDsendUpdate 3›
+0 rrd send 'update /tmp/rrdtest.rrd 1049515628:11'
+0 msg send result RECV_AGAIN
+0 rrd recv '2 Nonsense follows'
+0 rrd recv 'Nonsense'
+0 rrd recv 'More Nonsense'
+0 msg recv msg ‹MsgIncoming: msg:' Nonsense follows' data:['Nonsense', 'More Nonsense'] type:MT_MULTILINE prio:2›
+0 conn incoming RRDqueue t¦tt¦ttt ‹MsgIncoming: msg:' Nonsense follows' data:['Nonsense', 'More Nonsense'] type:MT_MULTILINE prio:2›
+0 msg recv t¦tt¦ttt ‹MsgIncoming: msg:' Nonsense follows' data:['Nonsense', 'More Nonsense'] type:MT_MULTILINE prio:2›
+0 msg recv= MINE ‹RRDsendUpdate 4›
+0 msg states at run connected connected
+0 locking +WAIT 9 start job ‹Waiter _wait¦4 ??›
+0 locking -WAIT 9 start job ‹Waiter _wait¦4 ??›
+NEW: ‹ConditionalWorkSequence:15 (4)›
+   : │  id: 15
+   : │  call count: 0
+   : │  EVENT: wait¦start¦0.6¦_wait¦4
+   : └1╴... done.
+EVENT: wait¦start¦0.6¦_wait¦4
+END: wait¦start¦0.6¦_wait¦4
+NEW: ‹ConditionalWorkSequence:16 (4)›
+   : │  id: 16
+   : │  call count: 0
+   : │  EVENT: wait¦done¦0.6¦_wait¦4
+   : └1╴... done.
+EVENT: wait¦done¦0.6¦_wait¦4
+END: wait¦done¦0.6¦_wait¦4
+0 msg states at run connected connected
+0 msg send ‹RRDsendUpdate 5›
+0 rrd send 'update /tmp/rrdtest.rrd 1049515628:12'
+0 msg send result RECV_AGAIN
+0 rrd recv '-123 No'
+0 msg recv msg ‹MsgIncoming: msg:'No' errno:123 type:MT_ERROR prio:2›
+0 conn incoming RRDqueue t¦tt¦ttt ‹MsgIncoming: msg:'No' errno:123 type:MT_ERROR prio:2›
+0 msg recv t¦tt¦ttt ‹MsgIncoming: msg:'No' errno:123 type:MT_ERROR prio:2›
+0 msg recv= MINE ‹RRDsendUpdate 6›
+0 msg states at run connected connected
+1 Yes error
+: ‹Collected RRDfile:a¦aa¦aaa›
+name: a¦aa¦aaa
+server: ‹RRDqueue:t¦tt¦ttt connected›
+       name: t¦tt¦ttt
+       queue: 0
+       state: connected
+       state since: now (2003-04-05 06:07:08)
+       sent: (0, 3)
+       received: (0, 3)
+       processed: (0, 3)
+       last_sent : ‹RRDsendUpdate 7›
+                 priority: 2
+                 timeout: 10
+                 result: No
+       last_sent_at: now (2003-04-05 06:07:08)
+       conn attempts: 0
+       conn timer: 3
+       out_queued: 0
+       channel type: rrd
+               host: localhost
+               port: 52442
+filename: /tmp/rrdtest.rrd
+.
+1 Yes
+0 locking +WAIT 10 kill job ‹RRDqueue:t¦tt¦ttt connected›
+0 locking -WAIT 10 kill job ‹RRDqueue:t¦tt¦ttt connected›
+0 locking +WAIT 11 kill job ‹RRDchannel:‹Collected RRDchannel_forwarder:t¦tt¦ttt››
+0 !got DOWN_EVENT t tt ttt
+NEW: ‹ConditionalWorkSequence:17 (4)›
+   : │  id: 17
+   : │  call count: 0
+   : │  EVENT: rrd¦disconnect¦t¦tt¦ttt
+   : └1╴... done.
+EVENT: rrd¦disconnect¦t¦tt¦ttt
+END: rrd¦disconnect¦t¦tt¦ttt
+0 locking -WAIT 11 kill job ‹RRDchannel:‹Collected RRDchannel_forwarder:t¦tt¦ttt››
+0 conn deleted RRDqueue t¦tt¦ttt
+1 Yes
+0 locking +WAIT 12 kill job <homevent.tokize.tokizer obj>
+0 locking -WAIT 12 kill job <homevent.tokize.tokizer obj>
+NEW: ‹ConditionalWorkSequence:18 (6)›
+   : │  id: 18
+   : │  call count: 0
+   : │  EVENT: shutdown
+   : └1╴... done.
+EVENT: shutdown
+NEW: ‹ConditionalWorkSequence:19 (4)›
+   : │  id: 19
+   : │  call count: 0
+   : │  EVENT: module¦unload¦errors
+   : └1╴... done.
+EVENT: module¦unload¦errors
+END: module¦unload¦errors
+NEW: ‹ConditionalWorkSequence:20 (4)›
+   : │  id: 20
+   : │  call count: 0
+   : │  EVENT: module¦unload¦logging
+   : └1╴... done.
+EVENT: module¦unload¦logging
+END: module¦unload¦logging
+NEW: ‹ConditionalWorkSequence:21 (4)›
+   : │  id: 21
+   : │  call count: 0
+   : │  EVENT: module¦unload¦trigger
+   : └1╴... done.
+EVENT: module¦unload¦trigger
+END: module¦unload¦trigger
+NEW: ‹ConditionalWorkSequence:22 (4)›
+   : │  id: 22
+   : │  call count: 0
+   : │  EVENT: module¦unload¦ifelse
+   : └1╴... done.
+EVENT: module¦unload¦ifelse
+END: module¦unload¦ifelse
+NEW: ‹ConditionalWorkSequence:23 (4)›
+   : │  id: 23
+   : │  call count: 0
+   : │  EVENT: module¦unload¦wait
+   : └1╴... done.
+EVENT: module¦unload¦wait
+END: module¦unload¦wait
+NEW: ‹ConditionalWorkSequence:24 (4)›
+   : │  id: 24
+   : │  call count: 0
+   : │  EVENT: module¦unload¦data
+   : └1╴... done.
+EVENT: module¦unload¦data
+END: module¦unload¦data
+NEW: ‹ConditionalWorkSequence:25 (4)›
+   : │  id: 25
+   : │  call count: 0
+   : │  EVENT: module¦unload¦block
+   : └1╴... done.
+EVENT: module¦unload¦block
+END: module¦unload¦block
+NEW: ‹ConditionalWorkSequence:26 (4)›
+   : │  id: 26
+   : │  call count: 0
+   : │  EVENT: module¦unload¦rrdc
+   : └1╴... done.
+EVENT: module¦unload¦rrdc
+END: module¦unload¦rrdc
+END: shutdown

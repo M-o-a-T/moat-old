@@ -35,23 +35,7 @@ TRACE> IEVENT: Logged
 IEVENT: Logged
 TRACE> END: Logged
 END: Logged
-TRACE> IEVENT: Not¦Logged
 TRACE> locking +WAIT 4 kill job <homevent.tokize.tokizer obj>
 0 locking +WAIT 4 kill job <homevent.tokize.tokizer obj>
-IEVENT: Not¦Logged
-TRACE> END: Not¦Logged
-END: Not¦Logged
 TRACE> locking -WAIT 4 kill job <homevent.tokize.tokizer obj>
 0 locking -WAIT 4 kill job <homevent.tokize.tokizer obj>
-TRACE> EVENT: shutdown
-EVENT: shutdown
-TRACE> EVENT: module¦unload¦trigger
-EVENT: module¦unload¦trigger
-TRACE> END: module¦unload¦trigger
-END: module¦unload¦trigger
-TRACE> EVENT: module¦unload¦logging
-EVENT: module¦unload¦logging
-TRACE> END: module¦unload¦logging
-END: module¦unload¦logging
-TRACE> END: shutdown
-END: shutdown

@@ -126,10 +126,8 @@ NEW: ‹ConditionalWorkSequence:21 (4)›
    : └1╴... done.
 IEVENT: bar4
 END: bar4
-0 locking +WAIT 13 start job ‹Async async›
-0 locking -WAIT 13 start job ‹Async async›
-0 locking +WAIT 14 start job ‹Waiter D ??›
-0 locking -WAIT 14 start job ‹Waiter D ??›
+0 locking +WAIT 13 start job ‹Waiter D ??›
+0 locking -WAIT 13 start job ‹Waiter D ??›
 NEW: ‹ConditionalWorkSequence:22 (4)›
    : │  id: 22
    : │  call count: 0
@@ -137,8 +135,8 @@ NEW: ‹ConditionalWorkSequence:22 (4)›
    : └1╴... done.
 EVENT: wait¦start¦×××¦D
 END: wait¦start¦×××¦D
-0 locking +WAIT 15 start job ‹TriggerHandler: trigger 3›
-0 locking -WAIT 15 start job ‹TriggerHandler: trigger 3›
+0 locking +WAIT 14 start job ‹TriggerHandler: trigger 3›
+0 locking -WAIT 14 start job ‹TriggerHandler: trigger 3›
 NEW: ‹ConditionalWorkSequence:23 (4)›
    : │  id: 23
    : │  call count: 0

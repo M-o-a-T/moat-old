@@ -19,10 +19,10 @@ name: on_event
 path: ../modules/on_event.py
 info: the 'on EVENT:' handler
 .
-1 :: Logger
-4 :: shutdown first
-3 :: free all collections
 2 :: Logger
+4 :: shutdown first
+1 :: free all collections
+3 :: Logger
 6 :: shutdown handler
 5 :: shutdown last
 .
