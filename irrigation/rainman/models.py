@@ -43,6 +43,7 @@ class Site(Model):
 	def __unicode__(self):
 		return u"‹%s %s›" % (self.__class__.__name__,self.name)
 	name = m.CharField(max_length=200, unique=True)
+	var = m.CharField(max_length=200, unique=True, help_text="name in HomEvenT", blank=True)
 	host = m.CharField(max_length=200, default="localhost", help_text="where to find the HomEvenT server")
 	port = m.PositiveIntegerField(default=50005, help_text="Port for RPC")
 	db_rate = m.FloatField(db_column="rate",default=2, help_text="how many mm/day evaporate here, on average")
@@ -86,6 +87,7 @@ class Controller(Model):
 	def __unicode__(self):
 		return u"‹%s %s›" % (self.__class__.__name__,self.name)
 	name = m.CharField(max_length=200)
+	var = m.CharField(max_length=200,unique=True,help_text="Name in HomEvenT")
 	site = m.ForeignKey(Site,related_name="controllers")
 	location = m.CharField(max_length=200, help_text="How to identify the controller (host name?)")
 	max_on = m.IntegerField(default=3, help_text="number of valves that can be on at any one time")
@@ -96,6 +98,7 @@ class ParamGroup(Model):
 	def __unicode__(self):
 		return u"‹%s %s›" % (self.__class__.__name__,self.name)
 	name = m.CharField(max_length=200)
+	var = m.CharField(max_length=200,unique=True,help_text="Name in HomEvenT")
 	comment = m.CharField(max_length=200,blank=True)
 	site = m.ForeignKey(Site,related_name="param_groups")
 	factor = m.FloatField(default=1.0, help_text="Base Factor")
@@ -115,7 +118,7 @@ class Valve(Model):
 	controller = m.ForeignKey(Controller,related_name="valves")
 	param_group = m.ForeignKey(ParamGroup,related_name="valves")
 	location = m.CharField(max_length=200,help_text="how to identify the valve on its controller")
-	var = m.CharField(max_length=200, help_text="name of this output, in HomEvenT")
+	var = m.CharField(max_length=200, unique=True, help_text="name of this output, in HomEvenT")
 	# 
 	# This describes the area that's watered
 	flow = m.FloatField(help_text="liter/sec when open")
@@ -166,7 +169,7 @@ class EnvironmentEffect(Model):
 	class Meta:
 		pass
 	def __unicode__(self):
-		return u"‹%s @%s %s¦%s¦%s›" % (self.__class__.__name__,self.site.name,self.temp,self.wind,self.sun)
+		return u"‹%s @%s %s¦%s¦%s›" % (self.__class__.__name__,self.param_group.name,self.temp,self.wind,self.sun)
 	param_group = m.ForeignKey(ParamGroup,related_name="environment_effects")
 	factor = m.FloatField(default=1.0, help_text="Factor to use at this data point")
 
@@ -276,7 +279,7 @@ class RainMeter(Model):
 		return u"‹%s @%s %s›" % (self.__class__.__name__,self.site,self.var)
 	name = m.CharField(max_length=200)
 	site = m.ForeignKey(Site,related_name="rain_meters")
-	var = m.CharField(max_length=200,help_text="monitor name in HomEvenT") # HomEvenT's variable name for it
+	var = m.CharField(max_length=200,unique=True, help_text="monitor name in HomEvenT") # HomEvenT's variable name for it
 	weight = m.PositiveSmallIntegerField(default=10,help_text="how important is this value? 0=presence detector")
 
 class TempMeter(Model):
@@ -287,7 +290,7 @@ class TempMeter(Model):
 		return u"‹%s @%s %s›" % (self.__class__.__name__,self.site,self.var)
 	name = m.CharField(max_length=200)
 	site = m.ForeignKey(Site,related_name="temp_meters")
-	var = m.CharField(max_length=200,help_text="monitor name in HomEvenT") # HomEvenT's variable name for it
+	var = m.CharField(max_length=200,unique=True, help_text="monitor name in HomEvenT") # HomEvenT's variable name for it
 	weight = m.PositiveSmallIntegerField(default=10,help_text="how important is this value?")
 
 class WindMeter(Model):
@@ -298,7 +301,7 @@ class WindMeter(Model):
 		return u"‹%s @%s %s›" % (self.__class__.__name__,self.site,self.var)
 	name = m.CharField(max_length=200)
 	site = m.ForeignKey(Site,related_name="wind_meters")
-	var = m.CharField(max_length=200,help_text="monitor name in HomEvenT") # HomEvenT's variable name for it
+	var = m.CharField(max_length=200,unique=True, help_text="monitor name in HomEvenT") # HomEvenT's variable name for it
 	weight = m.PositiveSmallIntegerField(default=10,help_text="how important is this value?")
 
 class SunMeter(Model):
@@ -309,7 +312,7 @@ class SunMeter(Model):
 		return u"‹%s @%s %s›" % (self.__class__.__name__,self.site,self.var)
 	name = m.CharField(max_length=200)
 	site = m.ForeignKey(Site,related_name="sun_meters")
-	var = m.CharField(max_length=200,help_text="monitor name in HomEvenT") # HomEvenT's variable name for it
+	var = m.CharField(max_length=200,unique=True, help_text="monitor name in HomEvenT") # HomEvenT's variable name for it
 	weight = m.PositiveSmallIntegerField(default=10,help_text="how important is this value?")
 
 class Log(Model):
