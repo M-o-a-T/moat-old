@@ -160,7 +160,7 @@ class CommonIO(Collected):
 
 class Input(CommonIO):
 	"""This represents a single input."""
-	storage = Inputs
+	storage = Inputs.storage
 	last_value = None
 
 	typ = "???input"
@@ -182,7 +182,7 @@ tseq=0
 
 class OutTimer(Collected):
 	"""Timer for timed outputs"""
-	storage = OutTimers
+	storage = OutTimers.storage
 	q = None
 	_timer = None
 
@@ -249,7 +249,7 @@ class OutTimer(Collected):
 
 class Output(CommonIO):
 	"""This represents a single output."""
-	storage = Outputs
+	storage = Outputs.storage
 	last_value = None
 	timer = None
 	timing = OutTimer
@@ -397,7 +397,7 @@ bool ‹yes› ‹no›
 @main_words.register_statement
 class MakeInput(MakeIO):
 	name="input"
-	storage = Inputs
+	storage = Inputs.storage
 	registry = inputmakers
 
 	doc="create an input"
@@ -413,7 +413,7 @@ input ‹type› ‹params…› :name ‹name…›
 @main_words.register_statement
 class MakeOutput(MakeIO):
 	name="output"
-	storage = Outputs
+	storage = Outputs.storage
 	registry = outputmakers
 
 	doc="create an output"
@@ -493,7 +493,7 @@ class IOvar(Statement):
 
 @main_words.register_statement
 class InputVar(IOvar):
-	storage = Inputs
+	storage = Inputs.storage
 	name="var input"
 	doc="assign a variable to get an input value"
 	long_doc=u"""\
@@ -505,7 +505,7 @@ var input NAME ‹inputname›…
 
 @main_words.register_statement
 class OutputVar(IOvar):
-	storage = Outputs
+	storage = Outputs.storage
 	name="var output"
 	doc="assign a variable to get an output's current value"
 	long_doc=u"""\

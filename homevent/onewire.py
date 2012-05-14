@@ -183,7 +183,7 @@ register_condition(OWchans.exists)
 
 class OWFSchannel(OWFSassembler, NetActiveConnector):
 	"""A receiver for the protocol used by OWFS."""
-	storage = OWchans
+	storage = OWchans.storage
 	storage2 = OWchans2
 	typ = "onewire"
 
@@ -371,7 +371,7 @@ class OWFSqueue(MsgQueue,Jobber):
 		The only real change is to periodically scan the bus.
 		MsgQueue and the factory handle everything else.
 		"""
-	storage = OWbuses
+	storage = OWbuses.storage
 	ondemand = True
 
 	def __init__(self, name, host,port, persist=PERSIST, *a,**k):
