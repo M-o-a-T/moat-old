@@ -1,3 +1,9 @@
+homevent (0.3.26) smurf; urgency=low
+
+  * Fix spurious state change event for timed outputs
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Mon, 14 May 2012 20:22:53 +0200
+
 homevent (0.3.25) smurf; urgency=low
 
   * Add networked RRD client.
