@@ -17,7 +17,7 @@ class ControllerInline(admin.TabularInline):
 class ValveInline(admin.StackedInline):
 	model = Valve
 	extra = 0
-	fields = (('name','var','location','feed'),('flow','area','shade','runoff'), ('time','level','priority','comment'),('max_level','start_level','stop_level'))
+	fields = (('name','var','location','feed'),('flow','area','shade','runoff'), ('time','level','priority','comment'),('param_group','max_level','start_level','stop_level'))
 
 class ParamGroupInline(admin.TabularInline):
 	model = ParamGroup
