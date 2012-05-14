@@ -1,3 +1,9 @@
+homevent (0.3.25) smurf; urgency=low
+
+  * Add networked RRD client.
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Mon, 14 May 2012 15:47:54 +0200
+
 homevent (0.3.24) smurf; urgency=low
 
   * Fix events for re-setting of timed outputs
