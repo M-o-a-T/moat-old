@@ -28,7 +28,7 @@ from optparse import make_option
 
 
 class Command(BaseCommand):
-	args = '<site> <interval> <valve>…'
+	args = '<valve>…'
 	help = 'Report the schedule for the given valves, or all of them'
 
 	option_list = BaseCommand.option_list + (
@@ -80,7 +80,7 @@ class Command(BaseCommand):
 				iv = 1
 			if options['current']:
 				q &= Q(start__gt=now-timedelta(1)) # this uses the index
-				q &= Q(start__gt=now-F(duration))
+				#q &= Q(start__gt=now-F("db_duration"))
 			else:
 				q &= Q(start__gte=now)
 			q &= Q(start__lt=now+timedelta(iv))
@@ -88,11 +88,11 @@ class Command(BaseCommand):
 		if len(args):
 			for a in args:
 				qq = Q(valve__name=a)
-				self.one_site(q & qq, options)
+				self.one_site(q & qq, options,now)
 		else:
-			self.one_site(q,options)
+			self.one_site(q,options,now)
 
-	def one_site(self,q,options):
+	def one_site(self,q,options,now):
 		"""Print results as a nice minimal table"""
 		r = []
 		if 'site' not in options:
@@ -103,6 +103,8 @@ class Command(BaseCommand):
 		res = [r]
 		lengths = [0] * len(r)
 		for sched in Schedule.objects.filter(q):
+			if options['current'] and sched.start+sched.duration < now:
+				continue
 			r = []
 			if 'site' not in options:
 				r.append(sched.controller.site.name)
