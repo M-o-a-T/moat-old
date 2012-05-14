@@ -72,8 +72,8 @@ class RRDassembler(LineReceiver):
 
 		if self.buf is not None:
 			self.buf.append(line)
-			self.line -= 1
-			if self.line == 0:
+			self.lines -= 1
+			if self.lines == 0:
 				buf,self.buf = self.buf,None
 				self.msgReceived(type=MT_MULTILINE, msg=buf[0],data=buf[1:])
 			return
@@ -87,7 +87,7 @@ class RRDassembler(LineReceiver):
 				off += 1
 			self.msgReceived(type=MT_ERROR, errno=errno, msg=line[off:].strip())
 		elif line[0].isdigit():
-			off=1
+			off=0
 			lines=0
 			while off < len(line) and line[off].isdigit():
 				lines = 10*lines+int(line[off])
@@ -201,6 +201,17 @@ class RRDfile(Collected):
 		self.server = server
 		self.filename = filename
 
+	def list(self):
+		for r in super(RRDfile,self).list():
+			yield r
+		yield "server",self.server
+		yield "filename",self.filename
+
+	def delete(self,ctx=None):
+		import pdb;pdb.set_trace()
+		self.delete_done()
+
+
 class RRDsetfile(AttributedStatement):
 	name="rrd file"
 	dest = None
@@ -226,12 +237,6 @@ rrd file ‹path› ‹name…› :server ‹server›
 
 		RRDfile(RRDservers[server],path,name)
 	
-	def list(self):
-		for r in super(RRDfile,self).list():
-			yield r
-		yield "server",self.server
-		yield "filename",self.filename
-
 @RRDsetfile.register_statement
 class RRDtoserver(Statement):
 	name="server"
@@ -299,6 +304,8 @@ send rrd ‹val…› :to ‹name…›
 
 		msg = RRDsendUpdate(RRDfiles[name],val)
 		res = msg.result.get()
+		if isinstance(res,Exception):
+			reraise(res)
 
 
 @RRDset.register_statement

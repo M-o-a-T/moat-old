@@ -52,12 +52,26 @@ block:
 		log DEBUG No2a
 list rrd file
 list rrd file a aa aaa
-wait: for 1.1
+
+wait:
+	for 0.1
+	debug force
 set rrd 10 a aa aaa
-wait: for 1.1
+wait:
+	for 0.1
+	debug force
 set rrd 11 a aa aaa
-wait: for 1.1
-set rrd 12 a aa aaa
+wait:
+	for 0.1
+	debug force
+
+block:
+	try:
+		set rrd 12 a aa aaa
+		log DEBUG No error
+	catch:
+		log DEBUG Yes error
+	
 list rrd file a aa aaa
 del rrd file a aa aaa
 block:
@@ -82,6 +96,7 @@ load_module("rrdc")
 load_module("logging")
 load_module("block")
 load_module("wait")
+load_module("errors")
 
 run("rrdc",input)
 
