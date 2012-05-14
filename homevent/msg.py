@@ -643,9 +643,9 @@ class MsgQueue(Collected,Jobber):
 			m = MsgClosed()
 			if self.q is not None:
 				self.q.put(m, block=False)
-		except BaseException as ex:
-			import pdb;pdb.set_trace()
-			raise
+#		except BaseException as ex:
+#			import pdb;pdb.set_trace()
+#			raise
 		else:
 			self.n_rcvd += self.n_rcvd_now
 			self.n_rcvd_now = 0
