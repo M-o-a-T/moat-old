@@ -191,12 +191,13 @@ class FeedMeter(SumMeter):
 		if self._flow_check:
 			self._flow_check.add_flow(val)
 
-		self.add_flow(val)
 		sum_f = 0
 		for valve in self.valves:
 			if valve.on:
 				sum_f += valve.v.flow
 		if sum_f:
+			# TODO: calculate flow/sec. If greater than the max flow through
+			# the valves, the excess must be accounted for someplace else.
 			for valve in self.valves:
 				if valve.on:
 					valve.add_flow(val * valve.v.flow / sum_f)
@@ -345,6 +346,7 @@ class SchedSite(SchedCommon):
 	_run_delay = None
 	_sched = None
 	_sched_running = None
+	_delay_on = None
 
 	def __new__(cls,s):
 		if s.id in sites:
@@ -353,6 +355,7 @@ class SchedSite(SchedCommon):
 		sites[s.id] = self
 		self.s = s
 		self.connect()
+		self._delay_on = Semaphore()
 
 		self.controllers = set()
 		self.meters = {}
@@ -367,6 +370,10 @@ class SchedSite(SchedCommon):
 		return self
 	def __init__(self,s):
 		pass
+
+	def delay_on(self):
+		self._delay_on.acquire()
+		gevent.spawn_later(1,self._delay_on.release)
 
 	def check_flow(self,**k):
 		for c in self.controllers:
@@ -636,6 +643,7 @@ class SchedValve(SchedCommon):
 		pass
 
 	def _on(self,sched=None,duration=None):
+		self.site.delay_on()
 		if self.controller.has_max_on():
 			raise TooManyOn(self)
 		if duration is None and sched is not None:
@@ -733,9 +741,9 @@ class SchedValve(SchedCommon):
 		try:
 			print >>sys.stderr,self.__class__.__name__,self.v.name,event
 			if on != self.on:
-				self.new_level_entry(self.flow)
+				flow,self.flow = self.flow,0
+				self.new_level_entry(flow)
 				self.on = on
-				self.flow = flow
 
 		except Exception:
 			print_exc()
@@ -763,6 +771,8 @@ class SchedValve(SchedCommon):
 			sum_r += self.v.runoff*h.rain/self.v.area
 			ts=h.time
 
+		if self.v.time == ts:
+			return
 		self.v.level += sum_f
 		if flow > 0 and self.v.level > self.v.max_level:
 			self.v.level = self.v.max_level
@@ -911,8 +921,6 @@ class MaxFlowCheck(object):
 			self.feed.d.save()
 		else:
 			self.feed.log("Flow check broken: sec %s"%(sec,))
-		if self.valve.on:
-			self.valve._off()
 		self._unlock()
 
 	def dead(self):
