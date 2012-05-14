@@ -122,7 +122,7 @@ class SwitchGroup(Collected,igroup):
 
 	def delete(self,ctx=None):
 		del codes[self.code]
-		self.delete_done()
+		super(SwitchGroup,self).delete()
 
 	def __unicode__(self):
 		return u"FS20_SwitchGroup ‹%s›" % (self.name,)
@@ -237,7 +237,7 @@ class Switch(Collected):
 
 	def delete(self,ctx=None):
 		del self.parent.devs[self.code]
-		self.delete_done()
+		super(Switch,self).delete()
 
 	def __unicode__(self):
 		return u"FS20_Switch ‹%s›" % (self.name,)

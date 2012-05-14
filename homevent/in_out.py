@@ -243,7 +243,7 @@ class OutTimer(Collected):
 			self._timer = None
 		self.q.set(DelayCancelled(self))
 
-		self.delete_done()
+		super(OutTimer,self).delete(ctx)
 	
 
 

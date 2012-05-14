@@ -81,7 +81,7 @@ class State(Collected):
 			if self.value is not None:
 				process_event(Event(ctx,"state",self.value,"-",*self.name))
 		finally:
-			self.delete_done()
+			super(State,self).delete()
 
 	def set_value(self, val):
 		self.value = val
@@ -160,7 +160,7 @@ state name...
 				if val is None: val = "-"
 				process_event(Event(self.ctx,"state",old,self.value,*s.name))
 		except BaseException:
-			s.delete_done()
+			s.delete()
 			raise
 		finally:
 			s.working = False

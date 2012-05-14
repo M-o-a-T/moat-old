@@ -207,10 +207,6 @@ class RRDfile(Collected):
 		yield "server",self.server
 		yield "filename",self.filename
 
-	def delete(self,ctx=None):
-		import pdb;pdb.set_trace()
-		self.delete_done()
-
 
 class RRDsetfile(AttributedStatement):
 	name="rrd file"

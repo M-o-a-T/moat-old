@@ -184,7 +184,7 @@ class RPCconn(Service,Collected):
 	def delete(self, ctx=None):
 		if self._conn is not None:
 			self._conn.close()
-		#self.delete_done()
+		#super(RPCconn,self).delete()
 		## called from on_disconnect()
 
 	def on_disconnect(self):
@@ -193,7 +193,7 @@ class RPCconn(Service,Collected):
 			for w in self.workers:
 				unregister_worker(w)
 			self.workers = None
-		self.delete_done()
+		super(RPCconn,self).delete()
 	
 	def drop_worker(self,worker):
 		unregister_worker(worker)
@@ -325,7 +325,7 @@ class RPCserver(Collected,Jobber):
 	def delete(self,ctx=None):
 		self.server.close()
 		self.server = None
-		self.delete_done()
+		super(RPCserver,self).delete()
 
 	def list(self):
 		for r in super(RPCserver,self).list():

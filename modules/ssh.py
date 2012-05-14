@@ -124,11 +124,11 @@ AuthKeys.does("del")
 class AuthKey(Collected):
 	storage = AuthKeys.storage
 	info = "SSH public key"
+
 	def __init__(self,name,key):
 		self.key = key
 		super(AuthKey,self).__init__(name)
-	def delete(self,ctx=None):
-		self.delete_done()
+
 	def list(self):
 		for r in super(AuthKey,self).list():
 			yield r

@@ -262,7 +262,7 @@ class Parser(Collected,Jobber):
 
 	def delete(self,ctx=None):
 		self.endConnection()
-		self.delete_done()
+		super(Parser,self).delete()
 
 	def add_line(self, data):
 		"""Standard LineReceiver method"""

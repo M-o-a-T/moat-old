@@ -99,7 +99,7 @@ class Module(Collected):
 	def delete(self,ctx=None):
 		process_event(Event(ctx, "module","unload",*self.name))
 		self.unload()
-		self.delete_done()
+		super(Module,self).delete()
 
 	def list(self):
 		yield ("name",self.name)

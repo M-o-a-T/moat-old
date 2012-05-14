@@ -376,7 +376,7 @@ class Monitor(Collected,Jobber):
 
 	def delete(self,ctx=None):
 		self.down()
-		self.delete_done()
+		super(Monitor,self).delete()
 
 	def down(self):
 		self.state_change_at = now()

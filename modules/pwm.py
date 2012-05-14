@@ -120,7 +120,7 @@ class CommonPM(Collected):
 			fix_exception(ex)
 			process_failure(ex)
 		finally:
-			self.delete_done()
+			super(CommonPM,self).delete()
 
 	def __repr__(self):
 		return u"‹%s %s %d›" % (self.__class__.__name__, self.name,self._value)

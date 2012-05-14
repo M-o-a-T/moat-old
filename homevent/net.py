@@ -142,7 +142,7 @@ class NetCommonConnector(Collected,Jobber):
 				except KeyError:
 					pass
 				else:
-					self.delete_done()
+					super(NetCommonConnector,self).delete()
 				try:
 					self.not_up_event()
 				except Exception as ex2:
@@ -226,7 +226,7 @@ class NetCommonConnector(Collected,Jobber):
 		storage2 = getattr(self,"storage2",None)
 		assert storage2 is None or self==storage2.pop((self.host,self.port))
 		self.close(external=False)
-		self.delete_done()
+		super(NetCommonConnector,self).delete()
 
 	def up_event(self,external=False):
 		"""Called when a connection has been established"""
@@ -375,7 +375,7 @@ class NetListener(Collected):
 
 	def delete(self,ctx):
 		self.server.stop()
-		self.delete_done()
+		super(NetListener,self).delete()
 
 
 class NetListen(NetCommon):

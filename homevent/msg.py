@@ -474,7 +474,7 @@ class MsgQueue(Collected,Jobber):
 		self.stop("deleted")
 		for m in self.delayed[:]:
 			m.unqueue()
-		self.delete_done()
+		super(MsgQueue,self).delete()
 
 	def info(self):
 		return unicode(self)

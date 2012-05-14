@@ -162,7 +162,7 @@ class Waiter(Collected,Jobber):
 				else:
 					q.put(RuntimeError('Unknown command: '+cmd))
 		finally:
-			self.delete_done()
+			super(Waiter,self).delete()
 			q,self.q = self.q,None
 			if q is not None:
 				while not q.empty():

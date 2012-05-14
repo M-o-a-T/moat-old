@@ -174,7 +174,7 @@ class Timeslot(Collected):
 
 	def delete(self,ctx=None):
 		self.down()
-		self.delete_done()
+		super(Timeslot,self).delete()
 		return
 
 

@@ -146,7 +146,7 @@ class EM(Collected,Timeslotted):
 		EMcodes[self.group][self.code].remove(self)
 		if self._slot:
 			self._slot.delete()
-		self.delete_done()
+		super(EM,self).delete()
 		if not EMcodes[self.group][self.code]: # empty array
 			del EMcodes[self.group][self.code]
 		

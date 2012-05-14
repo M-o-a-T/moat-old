@@ -154,7 +154,7 @@ class BaseLogger(Collected,Jobber):
 	def delete(self, ctx=None):
 		if self.ready:
 			self.ready = None
-			self.delete_done()
+			super(BaseLogger,self).delete(ctx)
 		try:
 			self.q.put(StopIteration,block=False)
 		except Full:
