@@ -27,7 +27,7 @@ from traceback import format_exc,print_exc
 from operator import attrgetter
 import sys
 import gevent,rpyc
-from gevent.queue import Queue
+from gevent.queue import Queue,Empty
 from gevent.coros import Semaphore
 from gevent.event import AsyncResult
 from rpyc.core.service import VoidService
@@ -40,6 +40,33 @@ from rainman.logging import log,log_error
 from datetime import datetime,time,timedelta
 from django.db.models import F,Q
 from django.db import transaction
+
+
+### database stuff
+@transaction.commit_on_success
+def save_objs(objs):
+	for o in objs:
+		o.save()
+
+_save_q = Queue()
+def _save_job():
+	while True:
+		s = set()
+		o = _save_q.get()
+		s.add(o)
+		try:
+			while True:
+				o = _save_q.get(timeout=1)
+				s.add(o)
+		except Empty:
+			pass
+
+		save_objs(s)
+	
+	
+
+def Save(obj):
+	_save_q.put(obj)
 
 class TooManyOn(RuntimeError):
 	def __init__(self,valve):
@@ -84,6 +111,7 @@ class Command(BaseCommand):
 
 		if not controllers:
 			raise RuntimeError("No matching controllers found.")
+		gevent.spawn(_save_job)
 		while True:
 			gevent.sleep(99999)
 
@@ -398,7 +426,8 @@ class SchedSite(SchedCommon):
 		for mm in self.meters.itervalues():
 			for m in mm:
 				m.connect_monitors()
-		self.ckf = self.ci.root.monitor(self.check_flow,"check","flow","all")
+		self.ckf = self.ci.root.monitor(self.check_flow,"check","flow",*self.s.var.split(" "))
+		self.cks = self.ci.root.monitor(self.run_sched_task,"read","schedule",*self.s.var.split(" "))
 
 	def run_schedule(self):
 		for c in self.controllers:
@@ -450,7 +479,7 @@ class SchedSite(SchedCommon):
 			for sc in v.schedules.filter(start__gte=now()-timedelta(1),seen=True):
 				if sc.start+sc.duration > n:
 					sc.duration=n-sc.start
-					sc.save()
+					Save(sc)
 		self.run_main_task()
 
 	def run_every(self,delay):
@@ -528,14 +557,13 @@ class SchedSite(SchedCommon):
 		
 		print >>sys.stderr,"Values:",values
 		h = History(site=self.s,time=now(),**values)
-		h.save()
+		Save(h)
 		return h
 
 	def sync_history(self):
 		for c in self.controllers:
 			c.sync_history()
 
-	@transaction.commit_on_success
 	def main_task(self):
 		self.refresh()
 		h = self.new_history_entry()
@@ -545,6 +573,7 @@ class SchedSite(SchedCommon):
 		return h
 
 	def run_sched_task(self,delayed=False):
+		print >>sys.stderr,"RunSched"
 		if self._sched_running is not None:
 			return self._sched_running.get()
 		if delayed:
@@ -560,7 +589,6 @@ class SchedSite(SchedCommon):
 			self._sched = gevent.spawn_later(600,self.run_sched_task)
 			r.set(None)
 
-	@transaction.commit_on_success
 	def sched_task(self, kill=True):
 		self.run_schedule()
 
@@ -601,7 +629,7 @@ class SchedController(SchedCommon):
 			return
 		for v in self.c.valves.all():
 			SchedValve(v).connect_monitors()
-		self.ckf = self.site.ci.root.monitor(self.check_flow,"check","flow",*self.c.name.split())
+		self.ckf = self.site.ci.root.monitor(self.check_flow,"check","flow",*self.c.var.split())
 
 	def check_flow(self,**k):
 		for v in self.c.valves.all():
@@ -634,6 +662,8 @@ class SchedValve(SchedCommon):
 		self.site = SchedSite(self.v.controller.site)
 		self.params = ParamGroup(self.v.param_group)
 		self.controller = SchedController(self.v.controller)
+		if self.site.ci:
+			self.site.ci.root.command("set","output","off",*(self.v.var.split()))
 		return self
 	def __init__(self,v):
 		pass
@@ -652,12 +682,15 @@ class SchedValve(SchedCommon):
 			self.site.ci.root.command("set","output","on",*(self.v.var.split()), sub=(("for",duration.total_seconds()),("async",)))
 		if sched is not None:
 			sched.seen = True
-			sched.save()
+			Save(sched)
 
 	def _off(self):
 		self.site.ci.root.command("set","output","off",*(self.v.var.split()))
 
 	def run_schedule(self):
+		if self.sched_job is not None:
+			self.sched_job.kill()
+			self.sched_job = None
 		if self.locked:
 			return
 		n = now()
@@ -684,9 +717,13 @@ class SchedValve(SchedCommon):
 
 		if sched.start > n:
 			self._off()
-			self.sched_job = gevent.spawn_later((sched.start-n).total_seconds(),s.maybe_restart)
+			self.sched_job = gevent.spawn_later((sched.start-n).total_seconds(),self.run_sched_task)
 			return
 		self._on(sched)
+	
+	def run_sched_task(self):
+		self.sched_job = None
+		self.site.run_sched_task()
 
 	def add_flow(self, val):
 		self.flow += val
@@ -774,8 +811,8 @@ class SchedValve(SchedCommon):
 			self.v.level = 0
 		self.v.time = ts
 		lv = Level(valve=self.v,time=ts,level=self.v.level,flow=flow)
-		lv.save()
-		self.v.save()
+		Save(lv)
+		Save(self.v)
 
 	def log(self,txt):
 		log(self.v,txt)
@@ -830,7 +867,7 @@ class FlowCheck(object):
 		if sec > 3:
 			self.res = self.flow/sec
 			self.valve.v.flow = self.res
-			self.valve.v.save()
+			Save(self.valve.v)
 		else:
 			self.valve.log("Flow check broken: sec %s"%(sec,))
 		if self.valve.on:
@@ -904,7 +941,7 @@ class MaxFlowCheck(object):
 		if sec > 3:
 			self.res = self.flow/sec
 			self.feed.d.flow = self.res
-			self.feed.d.save()
+			Save(self.feed.d)
 		else:
 			self.feed.log("Flow check broken: sec %s"%(sec,))
 		self._unlock()

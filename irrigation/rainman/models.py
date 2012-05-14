@@ -227,7 +227,12 @@ class GroupOverride(Model):
 	group = m.ForeignKey(Group,related_name="overrides")
 	allowed = m.BooleanField() # whether to allow these to run(True) or not(False)
 	start = m.DateTimeField(db_index=True)
-	duration = m.TimeField()
+	db_duration = m.PositiveIntegerField(db_column="duration")
+	def _get_duration(self):
+		return timedelta(0,self.db_duration)
+	def _set_duration(self,val):
+		self._duration = timedelta(0,self.db_duration)
+	duration = property(_get_duration,_set_duration)
 	on_level = m.FloatField(blank=True,null=True,default=None,help_text="Level above(off)/below(on) which to activate this rule (factor of max)")
 	off_level = m.FloatField(blank=True,null=True,default=None,help_text="Level above(off)/below(on) which to activate this rule (factor of max)")
 	
@@ -241,7 +246,12 @@ class ValveOverride(Model):
 	valve = m.ForeignKey(Valve,related_name="overrides")
 	running = m.BooleanField() # whether to force on(True) or off(False)
 	start = m.DateTimeField(db_index=True)
-	duration = m.TimeField()
+	db_duration = m.PositiveIntegerField(db_column="duration")
+	def _get_duration(self):
+		return timedelta(0,self.db_duration)
+	def _set_duration(self,val):
+		self._duration = timedelta(0,self.db_duration)
+	duration = property(_get_duration,_set_duration)
 	on_level = m.FloatField(blank=True,null=True,default=None,help_text="Level above(off)/below(on) which to activate this rule (factor of max)")
 	off_level = m.FloatField(blank=True,null=True,default=None,help_text="Level above(off)/below(on) which to activate this rule (factor of max)")
 	
@@ -265,7 +275,13 @@ class Schedule(Model):
 		return u"‹%s @%s %s›" % (self.__class__.__name__,self.start,self.valve)
 	valve = m.ForeignKey(Valve,related_name="schedules")
 	start = m.DateTimeField(db_index=True)
-	duration = m.TimeField()
+	db_duration = m.PositiveIntegerField(db_column="duration")
+	def _get_duration(self):
+		return timedelta(0,self.db_duration)
+	def _set_duration(self,val):
+		self._duration = timedelta(0,self.db_duration)
+	duration = property(_get_duration,_set_duration)
+
 	seen = m.BooleanField(default=False,max_length=1,help_text="Sent to the controller?")
 	changed = m.BooleanField(default=False,max_length=1,help_text="Updated by the scheduler?")
 	# The scheduler inserts both to False. The controller sets Seen.
