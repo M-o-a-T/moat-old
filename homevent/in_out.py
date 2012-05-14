@@ -31,6 +31,7 @@ from homevent.context import Context
 from homevent.check import register_condition
 from homevent.delay import DelayFor,DelayWhile,DelayUntil,DelayNext, DelayCancelled
 
+import gevent
 from gevent.event import AsyncResult
 
 import os

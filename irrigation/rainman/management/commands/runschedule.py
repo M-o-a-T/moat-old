@@ -24,6 +24,7 @@ from homevent import gevent_rpyc
 gevent_rpyc.patch_all()
 
 from traceback import format_exc,print_exc
+from operator import attrgetter
 import sys
 import gevent,rpyc
 from gevent.queue import Queue
@@ -39,6 +40,12 @@ from rainman.logging import log,log_error
 from datetime import datetime,time,timedelta
 from django.db.models import F,Q
 from django.db import transaction
+
+class TooManyOn(RuntimeError):
+	def __init__(self,valve):
+		self.valve = valve
+	def __str__(self):
+		return u"‹%s: %s / %s: too many open valves›" % (self.__class__.__name__,self.valve.v.controller,self.valve.v)
 
 class Command(BaseCommand):
 	args = ''
@@ -146,6 +153,8 @@ class FeedMeter(SumMeter):
 	meter_type="feed"
 	sum_it = True
 	weight = 1
+	_flow_check = None
+
 	def __init__(self,*a,**k):
 		super(FeedMeter,self).__init__(*a,**k)
 		self.valves = set()
@@ -154,8 +163,35 @@ class FeedMeter(SumMeter):
 			valve.feed = self
 			self.valves.add(valve)
 
+	def check_max_flow(self,**k):
+		if self._flow_check:
+			raise RuntimeError("already working")
+		try:
+			cf = MaxFlowCheck(self)
+			# Safety timer
+			timer = gevent.spawn_later(self.d.db_max_flow_wait,cf.dead)
+
+			cf.start()
+			res = cf.q.get()
+			self.log("End flow check: %s"%(res,))
+			timer.kill()
+		except Exception as ex:
+			print_exc()
+			try:
+				log_error(self.d.site)
+				if cf is not None:
+					cf._unlock()
+			except:
+				print_exc()
+				raise
+		
+		
 	def add_value(self,val):
 		super(FeedMeter,self).add_value(val)
+		if self._flow_check:
+			self._flow_check.add_flow(val)
+
+		self.add_flow(val)
 		sum_f = 0
 		for valve in self.valves:
 			if valve.on:
@@ -171,7 +207,10 @@ class FeedMeter(SumMeter):
 
 	def connect_monitors(self):
 		super(FeedMeter,self).connect_monitors()
-		self.chk = self.site.ci.root.monitor(self.check_flow,"check","flow",*(self.d.var.split()))
+		if self.d.var:
+			print >>sys.stderr,"CheckFlow for",self.d.var.split()
+			self.chk = self.site.ci.root.monitor(self.check_flow,"check","flow",*(self.d.var.split()))
+			self.chm = self.site.ci.root.monitor(self.check_max_flow,"check","maxflow",*(self.d.var.split()))
 
 	
 		
@@ -565,6 +604,15 @@ class SchedController(SchedCommon):
 		for v in self.c.valves.all():
 			SchedValve(v).check_flow(**k)
 
+	def has_max_on(self):
+		if not self.c.max_on:
+			return False
+		n=0
+		for v in self.c.valves.all():
+			if SchedValve(v).on:
+				n += 1
+		return n >= self.c.max_on
+
 class SchedValve(SchedCommon):
 	"""Mirrors a valve."""
 	locked = False # external command, don't change
@@ -582,11 +630,14 @@ class SchedValve(SchedCommon):
 		self.v = v
 		self.site = SchedSite(self.v.controller.site)
 		self.params = ParamGroup(self.v.param_group)
+		self.controller = SchedController(self.v.controller)
 		return self
 	def __init__(self,v):
 		pass
 
 	def _on(self,sched=None,duration=None):
+		if self.controller.has_max_on():
+			raise TooManyOn(self)
 		if duration is None and sched is not None:
 			duration = sched.duration
 		if duration is None:
@@ -594,7 +645,7 @@ class SchedValve(SchedCommon):
 			self.site.ci.root.command("set","output","on",*(self.v.var.split()))
 		else:
 			self.log("Run for %s"%(duration,))
-			self.site.ci.root.command("set","output","on",*(self.v.var.split()), sub=(("for",duration.total_seconds()),"async"))
+			self.site.ci.root.command("set","output","on",*(self.v.var.split()), sub=(("for",duration.total_seconds()),("async",)))
 		if sched is not None:
 			sched.seen = True
 			sched.save()
@@ -755,7 +806,7 @@ class FlowCheck(object):
 				raise RuntimeError("already locked: "+repr(valve))
 			valve.locked = True
 			self.locked.add(valve)
-		self.valve._on(duration=self.valve.feed.d.db_max_flow_wait)
+		self.valve._on(duration=self.valve.feed.d.max_flow_wait)
 		print >>sys.stderr,"_start done"
 			
 	def state(self,on):
@@ -800,6 +851,84 @@ class FlowCheck(object):
 		self.valve._flow_check = None
 		if self.valve.on:
 			self.valve._off()
+		for valve in self.locked:
+			valve.locked = False
+		self.q.set(self.res)
+		
+class MaxFlowCheck(object):
+	"""Discover the flow of a feed"""
+	q = None
+	nflow = 0
+	flow = 0
+	start = None
+	res = None
+	def __init__(self,feed):
+		self.feed = feed
+
+	def start(self):
+		print >>sys.stderr,"_start max"
+		"""Start flow checking"""
+		if self.q is not None:
+			raise RuntimeError("already flow checking: "+repr(self.valve))
+		if not self.feed.d.var:
+			raise RuntimeError("No flow meter: "+repr(self.valve))
+		self.q = AsyncResult()
+		self.locked = set()
+		self.on = set()
+		self.feed._flow_check = self
+		for valve in self.feed.valves:
+			if valve.locked:
+				self._unlock()
+				raise RuntimeError("already locked: "+repr(valve))
+			valve.locked = True
+			self.locked.add(valve)
+
+		valves = sorted(self.feed.valves, reverse=True, key=attrgetter('v.flow'))
+		for valve in valves:
+			try:
+				valve._on(duration=self.feed.d.max_flow_wait)
+			except TooManyOn:
+				pass
+			else:
+				self.on.add(valve)
+		print >>sys.stderr,"_start max done"
+			
+	def add_flow(self,val):
+		self.nflow += 1
+		if self.nflow == 2:
+			self.start = now()
+		if self.nflow > 2:
+			self.flow += val
+		if self.nflow == 9:
+			self.stop()
+
+	def stop(self):
+		n=now()
+		sec = (n-self.start).total_seconds()
+		if sec > 3:
+			self.res = self.flow/sec
+			self.feed.d.flow = self.res
+			self.feed.d.save()
+		else:
+			self.feed.log("Flow check broken: sec %s"%(sec,))
+		if self.valve.on:
+			self.valve._off()
+		self._unlock()
+
+	def dead(self):
+		print >>sys.stderr,"_dead"
+		if self.feed._flow_check is not self:
+			return
+		self.feed.log("Flow check aborted")
+		self._unlock()
+		
+	def _unlock(self):
+		print >>sys.stderr,"_unlock"
+		if self.feed._flow_check is not self:
+			return
+		self.feed._flow_check = None
+		for valve in self.on:
+			valve._off()
 		for valve in self.locked:
 			valve.locked = False
 		self.q.set(self.res)
