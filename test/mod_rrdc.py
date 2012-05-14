@@ -23,6 +23,9 @@ from test import run
 
 
 input = """\
+wait startup:
+	for 0.2
+	debug force
 block:
 	if exists rrd server t tt ttt:
 		log DEBUG No1

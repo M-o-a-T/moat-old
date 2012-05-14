@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  Copyright © 2012, Matthias Urlichs <matthias@urlichs.de>
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -16,14 +16,13 @@
 ##
 
 """\
-This code implements (a subset of) the RRD server protocol.
+This code implements (a subset of) the RRD client protocol.
 
 """
 
 import os
 import re
 
-from homevent import TESTING
 from homevent.module import Module
 from homevent.base import Name,SName, singleName
 from homevent.logging import log,log_exc,DEBUG,TRACE,INFO,WARN
@@ -35,11 +34,8 @@ from homevent.twist import reraise,callLater,fix_exception
 from homevent.run import simple_event
 from homevent.context import Context
 from homevent.times import now,unixtime
-from homevent.msg import MsgQueue,MsgFactory,MsgBase, MINE,NOT_MINE, RECV_AGAIN,SEND_AGAIN,\
-	MsgReceiver, MsgClosed, MSG_ERROR,PRIO_URGENT,PRIO_CONNECT,PRIO_BACKGROUND,PRIO_STANDARD
+from homevent.msg import MsgQueue,MsgFactory,MsgBase, MINE,NOT_MINE, RECV_AGAIN,SEND_AGAIN
 from homevent.collect import Collection,Collected
-from homevent.in_out import register_input,register_output, unregister_input,unregister_output,\
-	Input,Output,BoolIO
 
 from gevent.event import AsyncResult
 from gevent.queue import Full
@@ -90,7 +86,7 @@ class RRDassembler(LineReceiver):
 				errno = 10*errno+int(line[off])
 				off += 1
 			self.msgReceived(type=MT_ERROR, errno=errno, msg=line[off:].strip())
-		elif isdigit(line[0]):
+		elif line[0].isdigit():
 			off=1
 			lines=0
 			while off < len(line) and line[off].isdigit():

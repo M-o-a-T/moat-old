@@ -15,16 +15,21 @@ def rrdc_me(socket, address):
 	fileobj = socket.makefile()
 
 	line = fileobj.readline()
-	print >>fileobj,"0 Yes"
+	fileobj.write("0 Yes\n")
+	fileobj.flush()
 
 	line = fileobj.readline()
-	print >>fileobj,"2 Nonsense follows"
-	print >>fileobj,"Nonsense"
-	print >>fileobj,"More Nonsense"
+	fileobj.write("2 Nonsense follows\n")
+	fileobj.write("Nonsense\n")
+	fileobj.write("More Nonsense\n")
+	fileobj.flush()
 
 	while True:
 		line = fileobj.readline()
-		print >>fileobj,"-123 No"
+		if line is None or line == "":
+			break
+		fileobj.write("-123 No\n")
+		fileobj.flush()
 
 
 if __name__ == '__main__':
