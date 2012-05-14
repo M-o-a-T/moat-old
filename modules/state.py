@@ -121,7 +121,7 @@ class SavedState(State):
 			Db.set(self.name,val)
 		self.value = val
 
-	def delete(self,ctx):
+	def delete(self,ctx=None):
 		if not getattr(ctx,"shutdown",False):
 			Db.delete(self.name)
 

@@ -29,8 +29,9 @@ from homevent.times import humandelta,now,unixtime
 from homevent.run import simple_event,process_failure
 from homevent.context import Context
 from homevent.check import register_condition
+from homevent.delay import DelayFor,DelayWhile,DelayUntil,DelayNext, DelayCancelled
 
-from homevent.delay import DelayFor,DelayWhile,DelayUntil,DelayNext
+from gevent.event import AsyncResult
 
 import os
 import sys
@@ -182,21 +183,23 @@ tseq=0
 class OutTimer(Collected):
 	"""Timer for timed outputs"""
 	storage = OutTimers
+	q = None
+	_timer = None
 
 	_timer = None
 	def __init__(self,parent,timer,nextval):
 		global tseq
 		tseq += 1
-		self.name = self.parent.name+(str(tseq),)
+		self.name = parent.name+(str(tseq),)
 		super(OutTimer,self).__init__()
 		self.parent = parent
-		self.timer = timer
+		self.end = timer
 		self.val = nextval
 		self.q = AsyncResult()
 		self._start()
 
 	def info(self):
-		return "%s %s:%s" % (self.typ, self.name, self.last_value)
+		return "%s:%s" % (self.name, self.val)
 
 	def list(self):
 		n = now()
@@ -204,19 +207,19 @@ class OutTimer(Collected):
 			yield r
 		yield ("output",self.parent.name)
 		yield ("start", self.started)
-		yield ("end", self.timer)
+		yield ("end", self.end)
 		yield ("next value",self.val)
 
 	def _start(self):
 		if self._timer:
 			self._timer.cancel()
 		self.started = now()
-		self._timer = callLater(False,self.timer,self._timeout)
+		self._timer = callLater(False,self.end,self._timeout)
 	
 	def _timeout(self):
 		self._timer = None
 		try:
-			self.parent.set(self.val)
+			self.parent.write(self.val)
 		except Exception as ex:
 			fix_exception(ex)
 			self.q.set(ex)
@@ -224,7 +227,7 @@ class OutTimer(Collected):
 			self.q.set(None)
 	
 	def done(self):
-		"""called externally via _tmwrite() when the external timer ends"""
+		"""called externally via _tmwrite() when the external timer writes"""
 		if self._timer:
 			self._timer.cancel()
 			self._timer = None
@@ -234,7 +237,7 @@ class OutTimer(Collected):
 	def cancel(self):
 		self.delete()
 
-	def delete(self):
+	def delete(self, ctx=None):
 		if self._timer is not None:
 			self._timer.cancel()
 			self._timer = None
@@ -274,7 +277,7 @@ class Output(CommonIO):
 		else:
 			wnextval = None
 		wval = self.trans(val)
-		if self.timer is not None and (self.last_value != wval or timer is not None):
+		if self.timer is not None: #  and (self.last_value != wval or timer is not None): ## ?
 			self.timer.cancel()
 			self.timer = None
 
@@ -288,11 +291,11 @@ class Output(CommonIO):
 			self._write(wval)
 		else:
 			simple_event(Context(),"output","set",self.repr(wval),self.repr(wnextval),*self.name)
+			self.timer = self.timing(self,timer,nextval)
 			if self._tmwrite is not None:
-				self._tmwrite(wval,timer,wnextval)
+				self._tmwrite(wval,self.timer,wnextval)
 			else:
 				self._write(wval)
-			self.timer = self.timing(self,timer,nextval)
 			if async:
 				gevent.spawn(self._rewrite_ex,wval,wnextval)
 			else:
@@ -300,7 +303,7 @@ class Output(CommonIO):
 
 	def _rewrite_ex(self,wval,wnextval):
 		try:
-			_rewrite_ex(wval,wnextval)
+			self._rewrite(wval,wnextval)
 		except Exception as ex:
 			fix_exception(ex)
 			process_failure(ex)

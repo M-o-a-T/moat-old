@@ -99,7 +99,7 @@ block:
 	wait timed set B:
 		for 1
 		debug force
-	send wago test "D-"
+	#send wago test "D-"
 	var output port foo baz
 	log DEBUG out_1 $port
 

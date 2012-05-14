@@ -206,6 +206,12 @@ class OWFSmon(Monitor):
 	def __init__(self,*a,**k):
 		super(OWFSmon,self).__init__(*a,**k)
 
+	def list(self):
+		for r in super(OWFSmon,self).list():
+			yield r
+		if self.switch is not None:
+			yield ("switch", self.switch, "on" if self.switched else "off", self.low,self.high)
+
 	def one_value(self, step):
 		dev = devices[self.device]
 		val = dev.get(self.attribute)

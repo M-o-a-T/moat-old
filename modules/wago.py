@@ -523,7 +523,7 @@ class WAGOtimedOutputRun(WAGOoutputRun):
 
 	def __repr__(self):
 		res = super(WAGOtimedOutputRun,self).__repr__()
-		return u"‹%s tm=%s id=%s›" % (res[1:-1],humandelta(self.timer-now(True)),self.msgid)
+		return u"‹%s tm=%s id=%s›" % (res[1:-1],humandelta(self.timer.end-now(True)),self.msgid)
 		
 	def list(self):
 		for r in super(WAGOtimedOutputRun,self).list():
@@ -533,7 +533,7 @@ class WAGOtimedOutputRun(WAGOoutputRun):
 
 	@property
 	def msg(self):
-		delta = unixdelta(self.timer-now(True))
+		delta = unixdelta(self.timer.end-now(True))
 		if delta < 0.1: delta = 0.1
 		return "%s %d %d %.3f" % ("s" if self.val else "c", self.card,self.port,delta)
 	
