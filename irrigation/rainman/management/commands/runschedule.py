@@ -112,7 +112,6 @@ class Meter(object):
 	def monitor_value(self,event=None,**k):
 		"""monitor value NUMBER name…"""
 		try:
-			print >>sys.stderr,self.__class__.__name__,self.d.name,event
 			val = float(event[2])
 			self.add_value(val)
 		except Exception:
@@ -126,7 +125,6 @@ class Meter(object):
 			return
 		if self.site.ci is None:
 			return
-		print >>sys.stderr," ".join(("Connect to","monitor","value","*")+tuple(self.d.var.split()))
 		self.mon = self.site.ci.root.monitor(self.monitor_value,"monitor","value","*",*(self.d.var.split()))
 
 	def log(self,txt):
@@ -209,7 +207,6 @@ class FeedMeter(SumMeter):
 	def connect_monitors(self):
 		super(FeedMeter,self).connect_monitors()
 		if self.d.var:
-			print >>sys.stderr,"CheckFlow for",self.d.var.split()
 			self.chk = self.site.ci.root.monitor(self.check_flow,"check","flow",*(self.d.var.split()))
 			self.chm = self.site.ci.root.monitor(self.check_max_flow,"check","maxflow",*(self.d.var.split()))
 
@@ -473,7 +470,6 @@ class SchedSite(SchedCommon):
 
 	def run_main_task(self, kill=True):
 		"""Run the calculation loop."""
-		print >>sys.stderr,"MainTask"
 		res = None
 		if not self._running.acquire(blocking=False):
 			return self._run_result.get()
@@ -721,7 +717,6 @@ class SchedValve(SchedCommon):
 	def connect_monitors(self):
 		if self.site.ci is None:
 			return
-		print >>sys.stderr," ".join(("Connect to","output","set","*","*")+tuple(self.v.var.split()))
 		self.mon = self.site.ci.root.monitor(self.watch_state,"output","set","*","*",*(self.v.var.split()))
 		self.ckf = self.site.ci.root.monitor(self.check_flow,"check","flow",*self.v.var.split())
 		
@@ -729,17 +724,14 @@ class SchedValve(SchedCommon):
 		"""output set OLD NEW NAME"""
 		on = (str(event[3]).lower() in ("1","true","on"))
 		if self._flow_check is not None:
-			print >>sys.stderr,self.__class__.__name__,self.v.name,event," FLOWCHECK"
 			# TODO
 			self.on = on
 			self._flow_check.state(on)
 			return
 		if self.locked:
-			print >>sys.stderr,self.__class__.__name__,self.v.name,event," LOCKED"
 			self.on = on
 			return
 		try:
-			print >>sys.stderr,self.__class__.__name__,self.v.name,event
 			if on != self.on:
 				flow,self.flow = self.flow,0
 				self.new_level_entry(flow)
@@ -799,7 +791,6 @@ class FlowCheck(object):
 		self.valve = valve
 
 	def start(self):
-		print >>sys.stderr,"_start"
 		"""Start flow checking"""
 		if self.q is not None:
 			raise RuntimeError("already flow checking: "+repr(self.valve))
@@ -817,7 +808,6 @@ class FlowCheck(object):
 			valve.locked = True
 			self.locked.add(valve)
 		self.valve._on(duration=self.valve.feed.d.max_flow_wait)
-		print >>sys.stderr,"_start done"
 			
 	def state(self,on):
 		if on:
@@ -848,14 +838,12 @@ class FlowCheck(object):
 		self._unlock()
 
 	def dead(self):
-		print >>sys.stderr,"_dead"
 		if self.valve._flow_check is not self:
 			return
 		self.valve.log("Flow check aborted")
 		self._unlock()
 		
 	def _unlock(self):
-		print >>sys.stderr,"_unlock"
 		if self.valve._flow_check is not self:
 			return
 		self.valve._flow_check = None
@@ -876,7 +864,6 @@ class MaxFlowCheck(object):
 		self.feed = feed
 
 	def start(self):
-		print >>sys.stderr,"_start max"
 		"""Start flow checking"""
 		if self.q is not None:
 			raise RuntimeError("already flow checking: "+repr(self.valve))
@@ -901,7 +888,6 @@ class MaxFlowCheck(object):
 				pass
 			else:
 				self.on.add(valve)
-		print >>sys.stderr,"_start max done"
 			
 	def add_flow(self,val):
 		self.nflow += 1
@@ -924,14 +910,12 @@ class MaxFlowCheck(object):
 		self._unlock()
 
 	def dead(self):
-		print >>sys.stderr,"_dead"
 		if self.feed._flow_check is not self:
 			return
 		self.feed.log("Flow check aborted")
 		self._unlock()
 		
 	def _unlock(self):
-		print >>sys.stderr,"_unlock"
 		if self.feed._flow_check is not self:
 			return
 		self.feed._flow_check = None
