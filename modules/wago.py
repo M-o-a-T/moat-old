@@ -418,26 +418,6 @@ class WAGOconnected(Check):
 			return bus.channel is not None
 
 
-class WAGOdisconnect(Statement):
-	name = "disconnect wago"
-	doc = "disconnect from an WAGO server"
-	long_doc="""\
-disconnect wago NAME
-  - disconnect from the wago server named NAME.
-	The system will emit connection-closed and device-absent events.
-"""
-
-	def run(self,ctx,**k):
-		event = self.params(ctx)
-		if len(event) != 1:
-			raise SyntaxError("Usage: disconnect wago NAME")
-		name = event[0]
-		log(TRACE,"Dropping WAGO connection",name)
-		bus = WAGOservers[name]
-		
-		log(TRACE,"Drop WAGO connection",name)
-
-
 ### simple commands and whatnot
 
 class WAGOrun(WAGOmsgBase):
@@ -940,7 +920,6 @@ class WAGOmodule(Module):
 	def load(self):
 		main_words.register_statement(WAGOconnect)
 		main_words.register_statement(WAGOmonitor)
-		main_words.register_statement(WAGOdisconnect)
 		main_words.register_statement(WAGOraw)
 		register_condition(WAGOconnected)
 		register_condition(WAGOservers.exists)
@@ -951,7 +930,6 @@ class WAGOmodule(Module):
 	def unload(self):
 		main_words.unregister_statement(WAGOconnect)
 		main_words.unregister_statement(WAGOmonitor)
-		main_words.unregister_statement(WAGOdisconnect)
 		main_words.unregister_statement(WAGOraw)
 		unregister_condition(WAGOconnected)
 		unregister_condition(WAGOservers.exists)
