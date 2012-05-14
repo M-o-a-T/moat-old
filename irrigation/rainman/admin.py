@@ -93,7 +93,7 @@ class LogInline(admin.TabularInline):
 
 
 class SiteAdmin(admin.ModelAdmin):
-	list_display = ('name','host')
+	list_display = ('name','host','var')
 	inlines = [
 		FeedInline,
 		ControllerInline,
@@ -141,7 +141,7 @@ class HistoryAdmin(admin.ModelAdmin):
 	ordering = ('-time',)
 
 class EnvironmentEffectAdmin(admin.ModelAdmin):
-	list_display = ('factor','temp','wind','sun')
+	list_display = ('param_group','factor','temp','wind','sun')
 	list_filter = ('param_group',)
 
 class DayAdmin(admin.ModelAdmin):
