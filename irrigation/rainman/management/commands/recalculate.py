@@ -29,7 +29,7 @@ from optparse import make_option
 
 class Command(BaseCommand):
 	args = '<valve>…'
-	help = 'Report the schedule for the given valves, or all of them'
+	help = 'Fix calculated water levels'
 
 	option_list = BaseCommand.option_list + (
 			make_option('-s','--site',
@@ -105,7 +105,7 @@ class Command(BaseCommand):
 				h=hist.pop()
 				f = params.env_factor(h,options['verbose'])
 				add_f = s.db_rate*params.pg.factor*f*(h.time-ts).total_seconds()
-				add_r = v.runoff*h.rain/v.area
+				add_r = v.runoff*h.rain
 				if options['verbose']:
 					print "Apply",h,f,u"– dry="+str(add_f)," rain="+str(add_r)
 					print "    T:",h.temp,"W:",h.wind,"S:",h.sun

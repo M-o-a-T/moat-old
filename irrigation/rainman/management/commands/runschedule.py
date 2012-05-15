@@ -957,7 +957,7 @@ class SchedValve(SchedCommon):
 			if self.v.verbose>1:
 				self.log("Env factor for %s is %s"%(h,f))
 			sum_f += self.site.s.db_rate*self.params.pg.factor*f*(h.time-ts).total_seconds()
-			sum_r += self.v.runoff*h.rain/self.v.area
+			sum_r += self.v.runoff*h.rain
 			ts=h.time
 
 		if self.v.verbose:
