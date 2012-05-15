@@ -119,6 +119,7 @@ class Valve(Model):
 	param_group = m.ForeignKey(ParamGroup,related_name="valves")
 	location = m.CharField(max_length=200,help_text="how to identify the valve on its controller")
 	var = m.CharField(max_length=200, unique=True, help_text="name of this output, in HomEvenT")
+	verbose = m.PositiveSmallIntegerField(default=0,help_text="Log lots of changes?")
 	# 
 	# This describes the area that's watered
 	flow = m.FloatField(help_text="liter/sec when open")

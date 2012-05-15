@@ -378,7 +378,7 @@ class ParamGroup(SchedCommon):
 		return sum_f / sum_w
 
 
-	def env_factor(self,e):
+	def env_factor(self,e,logger):
 		"""Calculate a weighted factor based on the given environmental parameters"""
 		# These weighing 
 		ql=(
@@ -395,6 +395,8 @@ class ParamGroup(SchedCommon):
 		for weight,tws,temp,wind,sun in ql:
 			f = self.env_factor_one(tws,temp,wind,sun)
 			if f is not None:
+				if logger:
+					logger("Simple factor %s%s%s: %f" % ("T" if tws[0] else "-", "W" if tws[1] else "-", "S" if tws[2] else "-", f))
 				sum_f += f*weight
 				sum_w += weight
 		return sum_f / sum_w
@@ -792,12 +794,19 @@ class SchedValve(SchedCommon):
 			self.log("Run for %s"%(duration,))
 			self.site.send_command("set","output","on",*(self.v.var.split()), sub=(("for",duration.total_seconds()),("async",)))
 		if sched is not None:
+			if self.v.verbose:
+				self.log("Opened for %s"%(sched,))
 			self.sched = sched
 			sched.seen = True
 			Save(sched)
+		else:
+			if self.v.verbose:
+				self.log("Opened for %s"(duration,))
 
 	def _off(self):
 		if self.on:
+			if self.v.verbose:
+				self.log("Closing")
 			print >>sys.stderr,"Close",self.v.var
 		self.site.send_command("set","output","off",*(self.v.var.split()))
 
@@ -942,10 +951,17 @@ class SchedValve(SchedCommon):
 		sum_f = 0
 		sum_r = 0
 		for h in self.site.s.history.filter(time__gt=ts).order_by("time"):
-			f = self.params.env_factor(h)
+			if self.v.verbose>2:
+				self.log("Env factor for %s"%(h,))
+			f = self.params.env_factor(h, logger=self.logger if self.v.verbose>2 else None)
+			if self.v.verbose>1:
+				self.log("Env factor for %s is %s"%(h,f))
 			sum_f += self.site.s.db_rate*self.params.pg.factor*f*(h.time-ts).total_seconds()
 			sum_r += self.v.runoff*h.rain/self.v.area
 			ts=h.time
+
+		if self.v.verbose:
+			self.log("Apply env %f, rain %r"%(sum_f,sum_r))
 
 		if self.v.time == ts:
 			return
