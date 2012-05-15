@@ -33,7 +33,7 @@ from homevent.times import time_delta, time_until, unixdelta, now, \
 from homevent.base import Name,SName, SYS_PRIO
 from homevent.twist import log_wait, sleepUntil, fix_exception,Jobber
 from homevent.context import Context
-from homevent.logging import log,TRACE,DEBUG
+from homevent.logging import log,TRACE,DEBUG,ERROR
 from homevent.collect import Collection,Collected
 from homevent.check import register_condition
 
