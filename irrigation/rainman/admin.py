@@ -5,6 +5,9 @@ admin.autodiscover()
 
 from rainman.models import Site,Feed,Controller,Valve,ParamGroup,History,EnvironmentEffect,Level,Day,DayTime,Group,GroupOverride,ValveOverride,GroupAdjust,Schedule,RainMeter,TempMeter,WindMeter,SunMeter,UserForGroup,Log
 
+from rainman.utils import now
+from datetime import timedelta
+
 # SiteInline
 class FeedInline(admin.TabularInline):
 	model = Feed
@@ -34,6 +37,9 @@ class EnvironmentEffectInline(admin.TabularInline):
 class LevelInline(admin.TabularInline):
 	model = Level
 	extra = 0
+	def queryset(self, request):
+		qs = super(LevelInline, self).queryset(request)
+		return qs.filter(time__gte = now()-timedelta(1,0)).order_by("-time")
 
 class DayInline(admin.TabularInline):
 	model = Day
@@ -50,10 +56,16 @@ class GroupInline(admin.TabularInline):
 class GroupOverrideInline(admin.TabularInline):
 	model = GroupOverride
 	extra = 0
+	def queryset(self, request):
+		qs = super(GroupOverrideInline, self).queryset(request)
+		return qs.filter(start__gte = now()-timedelta(1,0)).order_by("-start")
 
 class ValveOverrideInline(admin.TabularInline):
 	model = ValveOverride
 	extra = 0
+	def queryset(self, request):
+		qs = super(ValveOverrideInline, self).queryset(request)
+		return qs.filter(start__gte = now()-timedelta(1,0)).order_by("-start")
 
 class ParamGroupInline(admin.TabularInline):
 	model = ParamGroup
@@ -66,6 +78,9 @@ class GroupAdjustInline(admin.TabularInline):
 class ScheduleInline(admin.TabularInline):
 	model = Schedule
 	extra = 0
+	def queryset(self, request):
+		qs = super(ScheduleInline, self).queryset(request)
+		return qs.filter(start__gte = now()-timedelta(0.5)).order_by("start")
 
 class RainMeterInline(admin.TabularInline):
 	model = RainMeter
@@ -124,8 +139,8 @@ class ValveAdmin(admin.ModelAdmin):
 	list_filter = ('feed','param_group','controller')
 	inlines = [
 		ValveOverrideInline,
-		LevelInline,
 		ScheduleInline,
+		LevelInline,
 	]
 
 class LevelAdmin(admin.ModelAdmin):
