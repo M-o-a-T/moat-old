@@ -27,6 +27,7 @@ Recommends: pulseaudio (>= 0.9.7), python-twisted-conch, python-rrdtool, owfs,
  python-sqlmix (>= 0.9.26),
  python-gevent (>= 1.0),
  python-rpyc,
+ python-pytz,
 Suggests: socat
 Description: A scripted event-based monitoring and control system
  HomEvenT is a flexible, scripted, network-aware event handler.
