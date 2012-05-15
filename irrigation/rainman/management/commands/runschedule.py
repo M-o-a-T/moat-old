@@ -347,9 +347,9 @@ class ParamGroup(SchedCommon):
 
 		q=Q()
 		qtemp,qwind,qsun = tws
-		q &= Q(temp__isnull=qtemp)
-		q &= Q(wind__isnull=qwind)
-		q &= Q(sun__isnull=qsun)
+		q &= Q(temp__isnull=not qtemp)
+		q &= Q(wind__isnull=not qwind)
+		q &= Q(sun__isnull=not qsun)
 		if qtemp and temp is None: return None
 		if qwind and wind is None: return None
 		if qsun and sun is None: return None
@@ -952,8 +952,8 @@ class SchedValve(SchedCommon):
 		sum_r = 0
 		for h in self.site.s.history.filter(time__gt=ts).order_by("time"):
 			if self.v.verbose>2:
-				self.log("Env factor for %s"%(h,))
-			f = self.params.env_factor(h, logger=self.logger if self.v.verbose>2 else None)
+				self.log("Env factor for %s: T=%s W=%s S=%s"%(h,h.temp,h.wind,h.sun))
+			f = self.params.env_factor(h, logger=self.log if self.v.verbose>2 else None)
 			if self.v.verbose>1:
 				self.log("Env factor for %s is %s"%(h,f))
 			sum_f += self.site.s.db_rate*self.params.pg.factor*f*(h.time-ts).total_seconds()
