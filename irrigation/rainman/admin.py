@@ -135,7 +135,7 @@ class LevelAdmin(admin.ModelAdmin):
 	ordering = ('-time',)
 
 class HistoryAdmin(admin.ModelAdmin):
-	list_display = ('time','rain','temp','wind','sun')
+	list_display = ('time','rain','temp','wind','sun','feed')
 	list_filter = ('site',)
 	date_hierarchy = 'time'
 	ordering = ('-time',)
