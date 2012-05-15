@@ -25,7 +25,7 @@ gevent_rpyc.patch_all()
 
 from traceback import format_exc,print_exc
 from operator import attrgetter
-import sys
+import sys,signal
 import gevent,rpyc
 from gevent.queue import Queue,Empty
 from gevent.coros import Semaphore
@@ -43,7 +43,7 @@ from django.db import transaction
 
 
 ### database stuff
-@transaction.commit_on_success
+### This does not actually work because of transaction-vs.-thread issues
 def save_objs(objs):
 	for o in objs:
 		o.save()
@@ -53,20 +53,32 @@ def _save_job():
 	while True:
 		s = set()
 		o = _save_q.get()
+		print >>sys.stderr,"AddSave1",id(o),o
 		s.add(o)
 		try:
 			while True:
 				o = _save_q.get(timeout=1)
+				if o is None:
+					break
 				s.add(o)
 		except Empty:
 			pass
 
-		save_objs(s)
-	
-	
+		print >>sys.stderr,"Save",s
+		for i in range(3):
+			try:
+				save_objs(s)
+			except Exception:
+				print_exc()
+			else:
+				break
+		print >>sys.stderr,"SaveDone"
+				
 
 def Save(obj):
-	_save_q.put(obj)
+	#_save_q.put(obj)
+	if obj is not None:
+		obj.save()
 
 class TooManyOn(RuntimeError):
 	def __init__(self,valve):
@@ -75,20 +87,10 @@ class TooManyOn(RuntimeError):
 		return u"‹%s: %s / %s: too many open valves›" % (self.__class__.__name__,self.valve.v.controller,self.valve.v)
 
 class Command(BaseCommand):
-	args = ''
+	args = 'site'
 	help = 'Run the current schedule, watch for rain, etc.'
 
 	option_list = BaseCommand.option_list + (
-		make_option('-s','--site',
-			action='store',
-			dest='site',
-			default=None,
-			help='Limit to this Site (all controllers)'),
-		make_option('-c','--controller',
-			action='store',
-			dest='controller',
-			default=None,
-			help='Controller to generate a config file snippet for'),
 		make_option('-t','--timeout',
 			action='store',type='int',
 			dest='timeout',
@@ -97,20 +99,22 @@ class Command(BaseCommand):
 		)
 
 	def handle(self, *args, **options):
-		q = Q()
-		if options['site']:
-			q &= Q(site__name=options['site'])
-		if options['controller']:
-			q &= Q(name=options['controller'])
-		for c in Controller.objects.filter(q):
-			site = SchedSite(c.site)
-			site.run_every(timedelta(0,options['timeout']))
-			site.run_sched_task(True)
+		if len(args) != 1:
+			print "Choose a site:"
+			for s in Site.objects.all():
+				print s.name
+			sys.exit(1)
+		s = Site.objects.get(name=args[0])
+		for c in s.controllers.all():
 			controller = SchedController(c)
 			controller.connect_monitors()
 
+		site = SchedSite(c.site)
+		site.run_every(timedelta(0,options['timeout']))
+		site.run_sched_task(True)
+
 		if not controllers:
-			raise RuntimeError("No matching controllers found.")
+			raise RuntimeError("No controllers for site '%s' found." % (s.name,))
 		gevent.spawn(_save_job)
 		while True:
 			gevent.sleep(99999)
@@ -147,6 +151,12 @@ class Meter(object):
 
 	def refresh(self):
 		self.d.refresh()
+
+	def shutdown(self):
+		pass
+
+	def sync(self):
+		pass
 
 	def connect_monitors(self):
 		if not self.d.var:
@@ -188,6 +198,11 @@ class FeedMeter(SumMeter):
 			valve = SchedValve(v)
 			valve.feed = self
 			self.valves.add(valve)
+
+	def shutdown(self):
+		super(FeedMeter,self).shutdown()
+		if self._flow_check is not None:
+			self._flow_check.dead()
 
 	def check_max_flow(self,**k):
 		if self._flow_check:
@@ -302,36 +317,56 @@ valves = {}
 
 class ParamGroup(SchedCommon):
 	"""Mirrors a parameter group for valves"""
+	env_cache = None
+
 	def __new__(cls,pargroup):
 		if pargroup.id in paramgroups:
 			return paramgroups[pargroup.id]
 		self = object.__new__(cls)
+		self.env_cache = {}
+
 		paramgroups[pargroup.id] = self
 		self.pg = pargroup
+		SchedSite(self.pg.site).paramgroups.add(self)
 		return self
-	def __init__(self,site):
+	def __init__(self,pargroup):
 		pass
 
 	def log(self,txt):
 		log(self.pg.site,"ParamGroup "+self.pg.name+": "+txt)
 
-	def env_factor_one(self, temp,wind,sun):
+	def sync(self):
+		pass
+	def refresh(self):
+		self.env_cache = {}
+	def shutdown(self):
+		pass
+
+	def env_factor_one(self, tws, temp,wind,sun):
 		p=4 # power factor, favoring nearest-neighbor
 
 		q=Q()
-		q &= Q(temp__isnull=(temp is None))
-		q &= Q(wind__isnull=(wind is None))
-		q &= Q(sun__isnull=(sun is None))
+		qtemp,qwind,qsun = tws
+		q &= Q(temp__isnull=qtemp)
+		q &= Q(wind__isnull=qwind)
+		q &= Q(sun__isnull=qsun)
+		if qtemp and temp is None: return None
+		if qwind and wind is None: return None
+		if qsun and sun is None: return None
 
 		sum_f = 0
 		sum_w = 0
-		for ef in self.pg.environment_effects.filter(q):
+		try:
+			ec = self.env_cache[tws]
+		except KeyError:
+			self.env_cache[tws] = ec = list(self.pg.environment_effects.filter(q))
+		for ef in ec:
 			d=0
-			if temp is not None:
+			if temp is not None and ef.temp is not None:
 				d += (temp-ef.temp)**2
-			if wind is not None:
+			if wind is not None and ef.wind is not None:
 				d += (wind-ef.wind)**2
-			if sun is not None:
+			if sun is not None and ef.sun is not None:
 				d += (sun-ef.sun)**2
 			d = d**(p*0.5)
 			if d < 0.001: # close enough
@@ -347,18 +382,18 @@ class ParamGroup(SchedCommon):
 		"""Calculate a weighted factor based on the given environmental parameters"""
 		# These weighing 
 		ql=(
-			(10,e.temp,e.wind,e.sun),
-			(4,None  ,e.wind,e.sun),
-			(4,e.temp,None  ,e.sun),
-			(4,e.temp,e.wind,None ),
-			(1,e.temp,None  ,None ),
-			(1,None  ,e.wind,None ),
-			(1,None  ,None  ,e.sun),
+			(10,(True,True,True),e.temp,e.wind,e.sun),
+			(4,(False,True,True),None  ,e.wind,e.sun),
+			(4,(True,False,True),e.temp,None  ,e.sun),
+			(4,(True,True,False),e.temp,e.wind,None ),
+			(1,(True,False,False),e.temp,None  ,None ),
+			(1,(False,True,False),None  ,e.wind,None ),
+			(1,(False,False,True),None  ,None  ,e.sun),
 			)
 		sum_f = 0.01 # if there are no data, return 1
 		sum_w = 0.01
-		for weight,temp,wind,sun in ql:
-			f = self.env_factor_one(temp,wind,sun)
+		for weight,tws,temp,wind,sun in ql:
+			f = self.env_factor_one(tws,temp,wind,sun)
 			if f is not None:
 				sum_f += f*weight
 				sum_w += weight
@@ -372,6 +407,7 @@ class SchedSite(SchedCommon):
 	_sched = None
 	_sched_running = None
 	_delay_on = None
+	running = False
 
 	def __new__(cls,s):
 		if s.id in sites:
@@ -383,6 +419,7 @@ class SchedSite(SchedCommon):
 		self._delay_on = Semaphore()
 
 		self.controllers = set()
+		self.paramgroups = set()
 		self.meters = {}
 		for M in METERS:
 			ml = set()
@@ -392,9 +429,26 @@ class SchedSite(SchedCommon):
 
 		self.log("Startup")
 		self.connect_monitors(do_controllers=False)
+		signal.signal(signal.SIGINT,self.do_shutdown)
+		signal.signal(signal.SIGTERM,self.do_shutdown)
+		signal.signal(signal.SIGHUP,self.do_syncsched)
+
+		self.running = True
 		return self
 	def __init__(self,s):
 		pass
+
+	def do_shutdown(self,x,y,**k):
+		gevent.spawn_later(0.1,self.shutdown)
+
+	def do_syncsched(self,x,y):
+		gevent.spawn_later(0.1,self.syncsched)
+
+	def syncsched(self):
+		print >>sys.stderr,"Sync+Sched"
+		self.sync()
+		self.refresh()
+		self.run_sched_task()
 
 	def delay_on(self):
 		self._delay_on.acquire()
@@ -428,6 +482,39 @@ class SchedSite(SchedCommon):
 				m.connect_monitors()
 		self.ckf = self.ci.root.monitor(self.check_flow,"check","flow",*self.s.var.split(" "))
 		self.cks = self.ci.root.monitor(self.run_sched_task,"read","schedule",*self.s.var.split(" "))
+		self.ckt = self.ci.root.monitor(self.sync,"sync",*self.s.var.split(" "))
+		self.cku = self.ci.root.monitor(self.do_shutdown,"shutdown",*self.s.var.split(" "))
+
+	def sync(self,**k):
+		print >>sys.stderr,"Sync"
+		for c in self.controllers:
+			c.sync()
+		for pg in self.paramgroups:
+			pg.sync()
+		for mm in self.meters.itervalues():
+			for m in mm:
+				m.sync()
+		self.run_main_task()
+		Save(None)
+		print >>sys.stderr,"Sync end"
+	
+	def shutdown(self,**k):
+		print >>sys.stderr,"Shutdown"
+		signal.signal(signal.SIGINT,signal.SIG_DFL)
+		signal.signal(signal.SIGTERM,signal.SIG_DFL)
+		if self.running:
+			self.running = False
+			self.sync()
+			for pg in self.paramgroups:
+				pg.sync()
+			for c in self.controllers:
+				c.shutdown()
+			for mm in self.meters.itervalues():
+				for m in mm:
+					m.shutdown()
+		Save(None)
+		sys.exit(0)
+
 
 	def run_schedule(self):
 		for c in self.controllers:
@@ -435,6 +522,8 @@ class SchedSite(SchedCommon):
 
 	def refresh(self):
 		self.s.refresh()
+		for pg in self.paramgroups:
+			pg.refresh()
 		for c in self.controllers:
 			c.refresh()
 		for mm in self.meters.itervalues():
@@ -472,7 +561,7 @@ class SchedSite(SchedCommon):
 			if v.runoff == 0:
 				continue # not affected by rain
 			try:
-				self.ci.root.command("set","output","off",*(v.var.split()))
+				self.send_command("set","output","off",*(v.var.split()))
 			except Exception:
 				self.log_error(v)
 			v.schedules.filter(start__gte=n).delete()
@@ -481,6 +570,12 @@ class SchedSite(SchedCommon):
 					sc.duration=n-sc.start
 					Save(sc)
 		self.run_main_task()
+
+	def send_command(self,*a,**k):
+		# TODO: return a sensible error and handle that correctly
+		#if self.ci is None:
+		#	return
+		self.ci.root.command(*a,**k)
 
 	def run_every(self,delay):
 		"""Initiate running the calculation and scheduling loop every @delay seconds."""
@@ -525,14 +620,14 @@ class SchedSite(SchedCommon):
 			self._running.release()
 			r.set(res)
 
-	def current_history_entry(self):
+	def current_history_entry(self,delta=15):
 		# assure that the last history entry is reasonably current
 		try:
 			he = self.s.history.order_by("-time")[0]
 		except IndexError:
 			pass
 		else:
-			if (now()-he.time).total_seconds() < 15:
+			if (now()-he.time).total_seconds() < delta:
 				return he
 		return self.new_history_entry()
 
@@ -565,11 +660,13 @@ class SchedSite(SchedCommon):
 			c.sync_history()
 
 	def main_task(self):
+		print >>sys.stderr,"MainTask"
 		self.refresh()
-		h = self.new_history_entry()
+		h = self.current_history_entry(3)
 		self.sync_history()
 			
 		gevent.spawn_later(2,self.sched_task)
+		print >>sys.stderr,"MainTask end",h
 		return h
 
 	def run_sched_task(self,delayed=False):
@@ -588,6 +685,7 @@ class SchedSite(SchedCommon):
 			r,self._sched_running = self._sched_running,None
 			self._sched = gevent.spawn_later(600,self.run_sched_task)
 			r.set(None)
+		print >>sys.stderr,"RunSched end"
 
 	def sched_task(self, kill=True):
 		self.run_schedule()
@@ -611,6 +709,10 @@ class SchedController(SchedCommon):
 	def log(self,txt):
 		log(self.c,txt)
 	
+	def sync(self):
+		for v in self.c.valves.all():
+			SchedValve(v).sync()
+		
 	def sync_history(self):
 		for v in self.c.valves.all():
 			SchedValve(v).sync_history()
@@ -618,6 +720,10 @@ class SchedController(SchedCommon):
 	def run_schedule(self):
 		for v in self.c.valves.all():
 			SchedValve(v).run_schedule()
+
+	def shutdown(self):
+		for v in self.c.valves.all():
+			SchedValve(v).shutdown()
 
 	def refresh(self):
 		self.c.refresh()
@@ -647,8 +753,10 @@ class SchedController(SchedCommon):
 class SchedValve(SchedCommon):
 	"""Mirrors a valve."""
 	locked = False # external command, don't change
+	sched = None
 	sched_ts = None
 	sched_job = None
+	sched_lock = None
 	on = False
 	flow = 0
 	_flow_check = None
@@ -662,58 +770,90 @@ class SchedValve(SchedCommon):
 		self.site = SchedSite(self.v.controller.site)
 		self.params = ParamGroup(self.v.param_group)
 		self.controller = SchedController(self.v.controller)
+		self.sched_lock = Semaphore()
 		if self.site.ci:
-			self.site.ci.root.command("set","output","off",*(self.v.var.split()))
+			self.site.send_command("set","output","off",*(self.v.var.split()))
 		return self
 	def __init__(self,v):
 		pass
 
 	def _on(self,sched=None,duration=None):
+		print >>sys.stderr,"Open",self.v.var
 		self.site.delay_on()
 		if self.controller.has_max_on():
+			print >>sys.stderr,"… but too many"
 			raise TooManyOn(self)
 		if duration is None and sched is not None:
 			duration = sched.duration
 		if duration is None:
 			self.log("Run (indefinitely)")
-			self.site.ci.root.command("set","output","on",*(self.v.var.split()))
+			self.site.send_command("set","output","on",*(self.v.var.split()))
 		else:
 			self.log("Run for %s"%(duration,))
-			self.site.ci.root.command("set","output","on",*(self.v.var.split()), sub=(("for",duration.total_seconds()),("async",)))
+			self.site.send_command("set","output","on",*(self.v.var.split()), sub=(("for",duration.total_seconds()),("async",)))
 		if sched is not None:
+			self.sched = sched
 			sched.seen = True
 			Save(sched)
 
 	def _off(self):
-		self.site.ci.root.command("set","output","off",*(self.v.var.split()))
+		if self.on:
+			print >>sys.stderr,"Close",self.v.var
+		self.site.send_command("set","output","off",*(self.v.var.split()))
+
+	def shutdown(self):
+		if self._flow_check is not None:
+			self._flow_check.dead()
 
 	def run_schedule(self):
+		if not self.sched_lock.acquire(blocking=False):
+			return
+		try:
+			self._run_schedule()
+		except Exception:
+			self.log(format_exc())
+		finally:
+			self.sched_lock.release()
+
+	def _run_schedule(self):
 		if self.sched_job is not None:
 			self.sched_job.kill()
 			self.sched_job = None
 		if self.locked:
 			return
 		n = now()
+
+		if self.sched is not None:
+			self.sched.refresh()
+			if self.sched.start+self.sched.duration <= n:
+				self._off()
+				self.sched_ts = self.sched.start+self.sched.duration
+				self.sched = None
+			else:
+				self.sched_job = gevent.spawn_later((self.sched.start+self.sched.duration-n).total_seconds(),self.run_sched_task)
+				return
+
 		sched = None
 		if self.sched_ts is None:
 			try:
 				sched = self.v.schedules.filter(start__lt=n).order_by("-start")[0]
 			except IndexError:
-				pass
-			else:
-				if sched.start+sched.duration > n: # still running
-					self._on(sched, sched.start+sched.duration-n)
-					self.sched_ts = sched.start+sched.duration
-					return
-			self.sched_ts = n
-
-		if sched is None:
-			try:
-				sched = self.v.schedules.filter(start__gte=n).order_by("start")[0]
-			except IndexError:
-				self._off()
 				self.sched_ts = n
-				return
+			else:
+				self.sched_ts = sched.start+sched.duration
+				if sched.start+sched.duration > n: # still running
+					try:
+						self._on(sched, sched.start+sched.duration-n)
+					except TooManyOn:
+						self.log("Could not schedule: too many open valves")
+					return
+
+		try:
+			sched = self.v.schedules.filter(start__gte=self.sched_ts).order_by("start")[0]
+		except IndexError:
+			self._off()
+			self.sched_ts = n
+			return
 
 		if sched.start > n:
 			self._off()
@@ -734,13 +874,7 @@ class SchedValve(SchedCommon):
 		cf = None
 		try:
 			cf = FlowCheck(self)
-			# Safety timer
-			timer = gevent.spawn_later(self.feed.d.db_max_flow_wait,cf.dead)
-
-			cf.start()
-			res = cf.q.get()
-			self.log("End flow check: %s"%(res,))
-			timer.kill()
+			cf.run()
 		except Exception as ex:
 			log_error(self.v)
 			if cf is not None:
@@ -777,8 +911,21 @@ class SchedValve(SchedCommon):
 		except Exception:
 			print_exc()
 
+	def sync(self):
+		flow,self.flow = self.flow,0
+		self.new_level_entry(flow)
+
 	def sync_history(self):
 		n=now()
+		try:
+			lv = self.v.levels.order_by("-time")[0]
+		except IndexError:
+			pass
+		else:
+			if self.v.time > lv.time:
+				self.log("Timestamp downdate: %s %s" % (self.v.time,lv.time))
+				self.v.time = lv.time
+				Save(self.v)
 		if (n-self.v.time).total_seconds() > 3500:
 			self.new_level_entry()
 
@@ -802,13 +949,14 @@ class SchedValve(SchedCommon):
 
 		if self.v.time == ts:
 			return
+		if self.v.level < 0:
+			self.v.level = 0
 		self.v.level += sum_f
 		if flow > 0 and self.v.level > self.v.max_level:
 			self.v.level = self.v.max_level
 		self.v.level -= flow/self.v.area+sum_r
 		if self.v.level < 0:
 			self.log("Level %s ?!?"%(self.v.level,))
-			self.v.level = 0
 		self.v.time = ts
 		lv = Level(valve=self.v,time=ts,level=self.v.level,flow=flow)
 		Save(lv)
@@ -824,6 +972,7 @@ class FlowCheck(object):
 	flow = 0
 	start = None
 	res = None
+	timer = None
 	def __init__(self,valve):
 		self.valve = valve
 
@@ -874,13 +1023,20 @@ class FlowCheck(object):
 			self.valve._off()
 		self._unlock()
 
-	def dead(self):
+	def dead(self, kill=True):
+		if self.timer is not None:
+			if kill:
+				self.timer.kill()
+			self.timer = None
 		if self.valve._flow_check is not self:
 			return
 		self.valve.log("Flow check aborted")
 		self._unlock()
 		
 	def _unlock(self):
+		if self.timer is not None:
+			self.timer.kill()
+			self.timer = None
 		if self.valve._flow_check is not self:
 			return
 		self.valve._flow_check = None
@@ -889,6 +1045,15 @@ class FlowCheck(object):
 		for valve in self.locked:
 			valve.locked = False
 		self.q.set(self.res)
+
+	def run(self):
+		# Safety timer
+		self.timer = gevent.spawn_later(self.valve.feed.d.db_max_flow_wait,cf.dead,False)
+
+		self.start()
+		res = self.q.get()
+		self.feed.site.log("End flow check: %s"%(res,))
+
 		
 class MaxFlowCheck(object):
 	"""Discover the flow of a feed"""
@@ -897,6 +1062,7 @@ class MaxFlowCheck(object):
 	flow = 0
 	start = None
 	res = None
+	timer = None
 	def __init__(self,feed):
 		self.feed = feed
 
@@ -946,13 +1112,20 @@ class MaxFlowCheck(object):
 			self.feed.log("Flow check broken: sec %s"%(sec,))
 		self._unlock()
 
-	def dead(self):
+	def dead(self,kill=True):
+		if self.timer is not None:
+			if kill:
+				self.timer.kill()
+			self.timer = None
 		if self.feed._flow_check is not self:
 			return
 		self.feed.log("Flow check aborted")
 		self._unlock()
 		
 	def _unlock(self):
+		if self.timer is not None:
+			self.timer.kill()
+			self.timer = None
 		if self.feed._flow_check is not self:
 			return
 		self.feed._flow_check = None
@@ -962,3 +1135,11 @@ class MaxFlowCheck(object):
 			valve.locked = False
 		self.q.set(self.res)
 		
+	def run(self):
+		# Safety timer
+		self.timer = gevent.spawn_later(self.feed.d.db_max_flow_wait,cf.dead,False)
+
+		self.start()
+		res = self.q.get()
+		self.feed.site.log("End flow check: %s"%(res,))
+
