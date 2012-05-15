@@ -1,3 +1,9 @@
+homevent (0.3.27) smurf; urgency=low
+
+  * Logging import problem in monitor
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Tue, 15 May 2012 15:11:06 +0200
+
 homevent (0.3.26) smurf; urgency=low
 
   * Fix spurious state change event for timed outputs
