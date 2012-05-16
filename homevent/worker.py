@@ -339,6 +339,7 @@ class Worker(WorkItem):
 		This is a generic worker. It accepts an event and does things to it.
 		"""
 	prio = (MIN_PRIO+MAX_PRIO)//2
+	match_count = 0
 	def __init__(self, name):
 		"""\
 			Initialize this worker.
@@ -348,6 +349,11 @@ class Worker(WorkItem):
 			"""
 		super(Worker,self).__init__()
 		self.name = name
+
+	def list(self):
+		for r in super(Worker,self).list():
+			yield r
+		yield ("matched",self.match_count)
 
 	def __repr__(self):
 		if not hasattr(self,"name"):

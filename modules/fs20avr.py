@@ -280,7 +280,7 @@ class AVRcommon(handler):
 
 
 class AVRs(Collection):
-	name = Name("fs20","avr")
+	name = "fs20 avr"
 AVRs = AVRs()
 AVRs.does("del")
 
@@ -327,7 +327,7 @@ fs20 avr NAME :remote host port
 		if len(event) < 1:
 			raise SyntaxError(u"Usage: fs20 avr ‹name…›")
 
-		name = Name(event)
+		name = SName(event)
 		if name in AVRs:
 			raise RuntimeError(u"‹%s› is already defined" % (name,))
 		
@@ -339,7 +339,7 @@ fs20 avr NAME :remote host port
 
 
 		if self.cmd:
-			AVRcmd(name=name, cmd=Name(self.cmd.apply(ctx)), ctx=ctx)
+			AVRcmd(name=name, cmd=Name(*self.cmd.apply(ctx)), ctx=ctx)
 
 		elif self.hostinfo:
 			event = self.hostinfo.apply(ctx)

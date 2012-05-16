@@ -1,3 +1,9 @@
+homevent (0.3.29) smurf; urgency=low
+
+  * fs20avr: Bad name
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Wed, 16 May 2012 11:18:00 +0200
+
 homevent (0.3.28) smurf; urgency=low
 
   * Fix fs20avr module

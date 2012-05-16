@@ -87,6 +87,7 @@ def collect_event(e):
 	for wp in work_prios:
 		for w in workers[wp]:
 			if w.does_event(e):
+				w.match_count += 1
 				work.append(w)
 	log_created(work)
 	return work
