@@ -1,3 +1,4 @@
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
 import rpyc
 import sys
@@ -20,6 +21,9 @@ class ExitService(VoidService):
 	def on_disconnect(self,*a,**k):
 		sys.exit()
 	
+(opts, args) = parser.parse_args()
+if args:
+	raise RuntimeError("don't pass arguments")
 
 c = rpyc.connect(opts.host, opts.port, ipv6=True, service=ExitService)
 c._channel.stream.sock.settimeout(None)

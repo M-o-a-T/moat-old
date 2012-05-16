@@ -21,7 +21,7 @@ microcontroller.
 
 """
 
-from homevent.base import Name,MIN_PRIO
+from homevent.base import SName,Name,MIN_PRIO
 from homevent.module import Module
 from homevent.logging import log,DEBUG,TRACE,INFO,WARN,ERROR
 from homevent.statement import AttributedStatement,Statement, main_words

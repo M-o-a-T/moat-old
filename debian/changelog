@@ -1,3 +1,9 @@
+homevent (0.3.30) smurf; urgency=low
+
+  * Import error *sigh*
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Wed, 16 May 2012 11:31:12 +0200
+
 homevent (0.3.29) smurf; urgency=low
 
   * fs20avr: Bad name
