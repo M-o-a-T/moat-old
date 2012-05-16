@@ -426,7 +426,7 @@ class SchedSite(SchedCommon):
 		for M in METERS:
 			ml = set()
 			self.meters[M.meter_type] = ml
-			for d in getattr(self.s,M.meter_type+"_meters",()).all():
+			for d in getattr(self.s,M.meter_type+"_meters").all():
 				ml.add(M(d))
 
 		self.log("Startup")
