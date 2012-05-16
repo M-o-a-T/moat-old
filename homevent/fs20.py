@@ -94,7 +94,8 @@ class handler(object):
 	This abstract class defines the interface used to send and receive
 	FS20-and-related datagrams. 
 	"""
-	def __init__(self,ctx=Context):
+	def __init__(self,ctx=Context,**k):
+		super(handler,self).__init__(**k)
 		self.last_timestamp = None
 		self.ctx = ctx()
 	

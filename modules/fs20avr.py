@@ -35,8 +35,7 @@ from homevent.worker import ExcWorker
 from homevent.reactor import shutdown_event
 from homevent.twist import callLater, fix_exception
 from homevent.collect import Collection,Collected
-from homevent.net import NetConnect,NetSend,NetConnected,\
-	LineReceiver
+from homevent.net import NetConnect,NetSend,NetConnected,NetActiveConnector
 
 from twisted.internet import protocol,reactor,error,defer
 from twisted.protocols.basic import _PauseableMixin
@@ -51,8 +50,8 @@ class AVRcommon(handler):
 		"""
 
 	stopped = True
-	def __init__(self, name, ctx=Context, timeout=3):
-		super(AVRcommon,self).__init__(ctx=ctx)
+	def __init__(self, name, ctx=Context, timeout=3, **k):
+		super(AVRcommon,self).__init__(ctx=ctx, name=name, **k)
 		self.timeout = timeout
 		self.timer = None
 		self.dbuf = ""
@@ -84,7 +83,7 @@ class AVRcommon(handler):
 		self.do_kill()
 		simple_event(Context(),"fs20","wedged",*self.name)
 
-	def _dataReceived(self,data):
+	def lineReceived(self,data):
 		db = ""
 		e = ""
 		if not data: return # empty line
@@ -134,7 +133,7 @@ class AVRcommon(handler):
 					msg = self.lbuf
 					self.lbuf = None
 				try:
-					self._dataReceived(msg)
+					self.lineReceived(msg)
 				except Exception as e:
 					fix_exception(e)
 					process_failure(e)
@@ -300,18 +299,21 @@ class AVRreceiver(AVRcommon):
 	def up_event(self, external=False):
 		simple_event(Context(),"fs20","avr","connect",*self.name)
 
-	def protocol(self):
-		return AVRreceiver(self.name)
 
 	# Collected stuff
 	def info(self):
 		return "%s:%s" % (self.host,self.port)
-	
+
+class AVRactive(AVRreceiver, NetActiveConnector):
+	typ = "net_active"
+	pass
+
 
 class AVRconnect(NetConnect):
 	cmd = None
 	hostinfo = None
 	baud = None
+	client = AVRactive
 
 	name = "fs20 avr"
 	doc = "connect to a TCP port"
@@ -322,100 +324,71 @@ fs20 avr NAME :remote host port
 	The system will emit a connection-ready event.
 """
 
-	def run(self,ctx,**k):
-		event = self.params(ctx)
-		if len(event) < 1:
-			raise SyntaxError(u"Usage: fs20 avr ‹name…›")
-
-		name = SName(event)
-		if name in AVRs:
-			raise RuntimeError(u"‹%s› is already defined" % (name,))
-		
-		n = (self.cmd is not None) + (self.hostinfo is not None) + (self.baud is not None)
-		if n == 0:
-			raise SyntaxError(u"You need to specify either a serial port, a TCP port, or a command line.")
-		if n > 1:
-			raise SyntaxError(u"You need to specify either a serial port, a TCP port, or a command line, but not more.")
+	def error(self,e):
+		log(WARN, self.dest, e[1])
+		simple_event(self.ctx, "fs20","avr","error",*self.dest)
 
 
-		if self.cmd:
-			AVRcmd(name=name, cmd=Name(*self.cmd.apply(ctx)), ctx=ctx)
-
-		elif self.hostinfo:
-			event = self.hostinfo.apply(ctx)
-			host = event[0]
-			if len(event) > 1:
-				port = int(event[1])
-			else:
-				port = 54083
-			
-			f = AVRclient_factory(host=host, port=port, name=name)
-			f.connector = reactor.connectTCP(host, port, f)
-
-		else:
-			AVRhost(name=name, port=self.port, baud=self.baud, ctx=ctx)
-
-
-class AVRcmd(AttributedStatement):
-	name = "cmd"
-	doc = "pipe through a command"
-	long_doc = u"""\
-cmd ‹words…›
-  - talk to the AVR using this command
-"""
-
-	def run(self,ctx,**k):
-		event = self.par(ctx)
-		if not len(event):
-			raise SyntaxError(u"Usage: cmd ‹whatever…›")
-		self.parent.cmd = event
-AVRconnect.register_statement(AVRcmd)
-
-
-class AVRport(Statement):
-	name = "port"
-	doc = "set the serial port to use"
-	long_doc=u"""\
-port ‹device› [‹baud›]
-  - set the serial port to use. Don't forget quoting.
-    The baud rate defaults to 57600.
-"""
-
-	def run(self,ctx,**k):
-		event = self.params(ctx)
-		if not len(event) or len(event) > 2:
-			raise SyntaxError(u"Usage: port ‹device› [‹baud›]")
-		self.parent.port = event[0]
-		if len(event) > 1:
-			self.parent.baud = int(event[1])
-		else:
-			self.parent.baud = 57600
-AVRconnect.register_statement(AVRport)
-
-
-class AVRremote(Statement):
-	name = "remote"
-	doc = "set the TCP port to use"
-	long_doc=u"""\
-remote ‹host› ‹port›?
-  - set the remote host and port to use.
-    The port defaults to 54083.
-"""
-	def run(self,ctx,**k):
-		import sys
-		print >>sys.stderr,"I",self
-		event = self.par(ctx)
-		print >>sys.stderr,"E",event
-		if not len(event) or len(event) > 2:
-			raise SyntaxError(u"Usage: remote ‹host› [‹port›]")
-		self.parent.hostinfo = event
-AVRconnect.register_statement(AVRremote)
+#class AVRcmd(AttributedStatement):
+#	name = "cmd"
+#	doc = "pipe through a command"
+#	long_doc = u"""\
+#cmd ‹words…›
+#  - talk to the AVR using this command
+#"""
+#
+#	def run(self,ctx,**k):
+#		event = self.par(ctx)
+#		if not len(event):
+#			raise SyntaxError(u"Usage: cmd ‹whatever…›")
+#		self.parent.cmd = event
+#AVRconnect.register_statement(AVRcmd)
+#
+#
+#class AVRport(Statement):
+#	name = "port"
+#	doc = "set the serial port to use"
+#	long_doc=u"""\
+#port ‹device› [‹baud›]
+#  - set the serial port to use. Don't forget quoting.
+#    The baud rate defaults to 57600.
+#"""
+#
+#	def run(self,ctx,**k):
+#		event = self.params(ctx)
+#		if not len(event) or len(event) > 2:
+#			raise SyntaxError(u"Usage: port ‹device› [‹baud›]")
+#		self.parent.port = event[0]
+#		if len(event) > 1:
+#			self.parent.baud = int(event[1])
+#		else:
+#			self.parent.baud = 57600
+#AVRconnect.register_statement(AVRport)
+#
+#
+#class AVRremote(Statement):
+#	name = "remote"
+#	doc = "set the TCP port to use"
+#	long_doc=u"""\
+#remote ‹host› ‹port›?
+#  - set the remote host and port to use.
+#    The port defaults to 54083.
+#"""
+#	def run(self,ctx,**k):
+#		import sys
+#		print >>sys.stderr,"I",self
+#		event = self.par(ctx)
+#		print >>sys.stderr,"E",event
+#		if not len(event) or len(event) > 2:
+#			raise SyntaxError(u"Usage: remote ‹host› [‹port›]")
+#		self.parent.hostinfo = event
+#AVRconnect.register_statement(AVRremote)
 
 
 class AVRsend(NetSend):
-    storage = AVRs.storage
-    storage2 = avr_conns
-    name="send fs20 avr raw"
+	storage = AVRs.storage
+	storage2 = avr_conns
+	name="send fs20 avr raw"
 
 class AVRconnected(NetConnected):
 	storage = AVRs.storage
