@@ -1,3 +1,9 @@
+homevent (0.3.28) smurf; urgency=low
+
+  * Fix fs20avr module
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Wed, 16 May 2012 10:52:59 +0200
+
 homevent (0.3.27) smurf; urgency=low
 
   * Logging import problem in monitor

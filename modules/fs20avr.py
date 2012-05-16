@@ -36,7 +36,7 @@ from homevent.reactor import shutdown_event
 from homevent.twist import callLater, fix_exception
 from homevent.collect import Collection,Collected
 from homevent.net import NetConnect,NetSend,NetConnected,\
-	NetReceiver,NetClientFactory
+	LineReceiver
 
 from twisted.internet import protocol,reactor,error,defer
 from twisted.protocols.basic import _PauseableMixin
@@ -287,11 +287,7 @@ AVRs.does("del")
 avr_conns = {}
 
 
-class AVRreceiver(AVRcommon,NetReceiver):
-	storage = AVRs.storage
-	storage2 = avr_conns
-
-class AVRclient_factory(NetClientFactory):
+class AVRreceiver(AVRcommon):
 	storage = AVRs.storage
 	storage2 = avr_conns
 
