@@ -38,13 +38,13 @@ from homevent.net import NetListen,NetConnect,NetSend,NetConnected,\
 import os
 
 class Nets(Collection):
-	name = "net"
+	name = "net connection"
 Nets = Nets()
 Nets.does("del")
 
 netlisten_conns = {}
 class NetListens(Collection):
-	name = "netserver"
+	name = "net server"
 NetListens = NetListens()
 NetListens.does("del")
 

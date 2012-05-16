@@ -29,7 +29,7 @@ wait BAD:
 	for 0.2
 	debug force
 block:
-	if exists net foop:
+	if exists net connection foop:
 		log DEBUG No1
 		del net foop
 	else:
@@ -69,7 +69,7 @@ wait AFTER:
 log TRACE ending
 list net
 block:
-	if exists net foo:
+	if exists net connection foo:
 		list net foo
 		del net foo
 		log DEBUG No2
