@@ -338,68 +338,13 @@ class ParamGroup(SchedCommon):
 	def sync(self):
 		pass
 	def refresh(self):
+		self.pg.refresh()
 		self.env_cache = {}
 	def shutdown(self):
 		pass
 
-	def env_factor_one(self, tws, temp,wind,sun):
-		p=4 # power factor, favoring nearest-neighbor
-
-		q=Q()
-		qtemp,qwind,qsun = tws
-		q &= Q(temp__isnull=not qtemp)
-		q &= Q(wind__isnull=not qwind)
-		q &= Q(sun__isnull=not qsun)
-		if qtemp and temp is None: return None
-		if qwind and wind is None: return None
-		if qsun and sun is None: return None
-
-		sum_f = 0
-		sum_w = 0
-		try:
-			ec = self.env_cache[tws]
-		except KeyError:
-			self.env_cache[tws] = ec = list(self.pg.environment_effects.filter(q))
-		for ef in ec:
-			d=0
-			if temp is not None and ef.temp is not None:
-				d += (temp-ef.temp)**2
-			if wind is not None and ef.wind is not None:
-				d += (wind-ef.wind)**2
-			if sun is not None and ef.sun is not None:
-				d += (sun-ef.sun)**2
-			d = d**(p*0.5)
-			if d < 0.001: # close enough
-				return ef.factor
-			sum_f += ef.factor/d
-			sum_w += 1/d
-		if not sum_w:
-			return None
-		return sum_f / sum_w
-
-
-	def env_factor(self,e,logger):
-		"""Calculate a weighted factor based on the given environmental parameters"""
-		# These weighing 
-		ql=(
-			(10,(True,True,True),e.temp,e.wind,e.sun),
-			(4,(False,True,True),None  ,e.wind,e.sun),
-			(4,(True,False,True),e.temp,None  ,e.sun),
-			(4,(True,True,False),e.temp,e.wind,None ),
-			(1,(True,False,False),e.temp,None  ,None ),
-			(1,(False,True,False),None  ,e.wind,None ),
-			(1,(False,False,True),None  ,None  ,e.sun),
-			)
-		sum_f = 0.01 # if there are no data, return 1
-		sum_w = 0.01
-		for weight,tws,temp,wind,sun in ql:
-			f = self.env_factor_one(tws,temp,wind,sun)
-			if f is not None:
-				if logger:
-					logger("Simple factor %s%s%s: %f" % ("T" if tws[0] else "-", "W" if tws[1] else "-", "S" if tws[2] else "-", f))
-				sum_f += f*weight
-				sum_w += weight
-		return sum_f / sum_w
+	def env_factor(self,h,logger):
+		return self.pg.env_factor(h,logger)
 
 class SchedSite(SchedCommon):
 	"""Mirrors a site"""

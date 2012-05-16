@@ -34,6 +34,13 @@ class Model(m.Model):
 			# so we have to check by name
 			if val.__class__.__name__ not in ("RelatedManager","ManyRelatedManager"):
 				setattr(self, field, val)
+	def sync(self):
+		pass
+	def refresh(self):
+		pass
+	def shutdown(self):
+		pass
+
 
 from rainman.models.site import Site
 from rainman.models.feed import Feed
