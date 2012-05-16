@@ -32,6 +32,11 @@ maxl = 0
 q = Queue()
 
 def called(**k):
+	try:
+		if k["event"][-1] == "test" and k["event"][-2] == "motion":
+			return
+	except:
+		pass
 	for a,b in k.iteritems():
 		print a,b
 	print ""
