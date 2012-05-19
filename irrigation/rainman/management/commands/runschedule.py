@@ -80,6 +80,8 @@ def Save(obj):
 	if obj is not None:
 		obj.save()
 
+class NotConnected(RuntimeError):
+	pass
 class TooManyOn(RuntimeError):
 	def __init__(self,valve):
 		self.valve = valve
@@ -509,6 +511,8 @@ class SchedSite(SchedCommon):
 				continue # not affected by rain
 			try:
 				self.send_command("set","output","off",*(v.var.split()))
+			except NotConnected:
+				pass
 			except Exception:
 				self.log_error(v)
 			v.schedules.filter(start__gte=n).delete()
@@ -520,8 +524,8 @@ class SchedSite(SchedCommon):
 
 	def send_command(self,*a,**k):
 		# TODO: return a sensible error and handle that correctly
-		#if self.ci is None:
-		#	return
+		if self.ci is None:
+			raise NotConnected
 		self.ci.root.command(*a,**k)
 
 	def run_every(self,delay):
@@ -719,7 +723,10 @@ class SchedValve(SchedCommon):
 		self.controller = SchedController(self.v.controller)
 		self.sched_lock = Semaphore()
 		if self.site.ci:
-			self.site.send_command("set","output","off",*(self.v.var.split()))
+			try:
+				self.site.send_command("set","output","off",*(self.v.var.split()))
+			except NotConnected:
+				pass
 		return self
 	def __init__(self,v):
 		pass
@@ -753,7 +760,10 @@ class SchedValve(SchedCommon):
 			if self.v.verbose:
 				self.log("Closing")
 			print >>sys.stderr,"Close",self.v.var
-		self.site.send_command("set","output","off",*(self.v.var.split()))
+		try:
+			self.site.send_command("set","output","off",*(self.v.var.split()))
+		except NotConnected:
+			pass
 
 	def shutdown(self):
 		if self._flow_check is not None:
@@ -800,6 +810,8 @@ class SchedValve(SchedCommon):
 						self._on(sched, sched.start+sched.duration-n)
 					except TooManyOn:
 						self.log("Could not schedule: too many open valves")
+					except NotConnected:
+						self.log("Could not schedule: connection to HomEvenT failed")
 					return
 
 		try:
@@ -813,7 +825,12 @@ class SchedValve(SchedCommon):
 			self._off()
 			self.sched_job = gevent.spawn_later((sched.start-n).total_seconds(),self.run_sched_task)
 			return
-		self._on(sched)
+		try:
+			self._on(sched)
+		except TooManyOn:
+			self.log("Could not schedule: too many open valves")
+		except NotConnected:
+			self.log("Could not schedule: connection to HomEvenT failed")
 	
 	def run_sched_task(self):
 		self.sched_job = None
@@ -954,7 +971,11 @@ class FlowCheck(object):
 				raise RuntimeError("already locked: "+repr(valve))
 			valve.locked = True
 			self.locked.add(valve)
-		self.valve._on(duration=self.valve.feed.d.max_flow_wait)
+		try:
+			self.valve._on(duration=self.valve.feed.d.max_flow_wait)
+		except NotConnected:
+			self._unlock()
+			raise
 			
 	def state(self,on):
 		if on:
