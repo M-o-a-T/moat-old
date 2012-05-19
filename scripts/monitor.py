@@ -6,6 +6,8 @@ import gevent
 from gevent.queue import Queue
 from rpyc.core.service import VoidService
 from homevent import gevent_rpyc
+import sys,signal
+
 gevent_rpyc.patch_all()
 
 from optparse import OptionParser
@@ -50,6 +52,13 @@ def q_logged(*a):
 	q.put((logged,a,{}))
 cm = c.root.logger(q_logged,None,0)
 
-while True:
+sigged = False
+def do_shutdown(a,b):
+	global sigged
+	sigged = True
+signal.signal(signal.SIGINT,do_shutdown)
+signal.signal(signal.SIGTERM,do_shutdown)
+while not sigged:
 	p,a,k = q.get()
 	p(*a,**k)
+
