@@ -265,7 +265,10 @@ class RRDsendUpdate(RRDmsgBase):
 			self.result.set(msg.msg)
 			return MINE
 		if msg.type is MT_ERROR:
-			self.result.set(RRDerror(msg.msg))
+			if "illegal attempt to update using time" in msg.msg:
+				self.result.set(msg.msg)
+			else:
+				self.result.set(RRDerror(msg.msg))
 			return MINE
 		return NOT_MINE
 
