@@ -517,7 +517,7 @@ class SchedSite(SchedCommon):
 			except Exception:
 				self.log_error(v)
 			v.schedules.filter(start__gte=n).delete()
-			for sc in v.schedules.filter(start__gte=now()-timedelta(1),seen=True):
+			for sc in v.schedules.filter(start__gte=n-timedelta(1),seen=True):
 				if sc.start+sc.duration > n:
 					sc.duration=n-sc.start
 					Save(sc)
@@ -750,7 +750,9 @@ class SchedValve(SchedCommon):
 			if self.v.verbose:
 				self.log("Opened for %s"%(sched,))
 			self.sched = sched
-			sched.seen = True
+			if not sched.seen:
+				sched.start = now()
+				sched.seen = True
 			Save(sched)
 		else:
 			if self.v.verbose:
