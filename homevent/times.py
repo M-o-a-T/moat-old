@@ -197,7 +197,7 @@ def time_delta(args, now=None):
 
 class _store(object): pass
 
-def collect_words(w):
+def collect_words(n,w):
 	p = _store()
 	p.h = None
 	p.m = None # absolute hour/minute/second
@@ -211,7 +211,9 @@ def collect_words(w):
 	p.dow = None # week_of_year, weekday, which weekday?
 	p.nth = None
 
-	p.now = now()
+	if n is None:
+		n = now()
+	p.now = n
 
 	weekdays = {
 		"monday":0, "tuesday":1, "wednesday":2, "thursday":3, "friday":4, "saturday":5,"sunday":6,
@@ -294,7 +296,7 @@ def time_until(args, now=None, invert=False):
 		Find the next time which is in the future and matches the arguments.
 		If "invert" is True, find the next time which does *not*.
 		"""
-	p = collect_words(args)
+	p = collect_words(now,args)
 
 	p.res = p.now
 	
