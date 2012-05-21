@@ -41,9 +41,9 @@ on net connect foo:
 		wait OUT:
 			for 0.1
 			debug force
-		list net
-		list net foo
-		del net foo
+		list net connection
+		list net connection foo
+		del net connection foo
 on net connect baz zaz *who:
 	send net "quux":
 		to baz zaz $who
@@ -51,8 +51,8 @@ on net connect baz zaz *who:
 		wait IN:
 			for 0.1
 			debug force
-		list net baz zaz $who
-		del net baz zaz $who
+		list net connection baz zaz $who
+		del net connection baz zaz $who
 on net disconnect foo:
 	log TRACE dis foo
 on net disconnect baz zaz:
@@ -67,11 +67,11 @@ wait AFTER:
 	for 0.8
 	debug force
 log TRACE ending
-list net
+list net connection
 block:
 	if exists net connection foo:
-		list net foo
-		del net foo
+		list net connection foo
+		del net connection foo
 		log DEBUG No2
 	else:
 		log DEBUG Yes

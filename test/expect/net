@@ -83,9 +83,9 @@ NEW: ‹ConditionalWorkSequence:19 (5)›
    : │  step: send net foo bar ‹NETsend›
    : │  step: async ‹Async›
    : │      : step: wait OUT ‹WaitHandler›
-   : │      : step: list net ‹List›
-   : │      : step: list net foo ‹List›
-   : │      : step: del net foo ‹Del›
+   : │      : step: list net connection ‹List›
+   : │      : step: list net connection foo ‹List›
+   : │      : step: del net connection foo ‹Del›
    : └2╴... done.
 EVENT: net¦connect¦foo
 RUN: on net connect foo ‹OnEventHandler›
@@ -93,9 +93,9 @@ RUN: on net connect foo ‹OnEventHandler›
    : step: send net foo bar ‹NETsend›
    : step: async ‹Async›
    :     : step: wait OUT ‹WaitHandler›
-   :     : step: list net ‹List›
-   :     : step: list net foo ‹List›
-   :     : step: del net foo ‹Del›
+   :     : step: list net connection ‹List›
+   :     : step: list net connection foo ‹List›
+   :     : step: del net connection foo ‹Del›
  at: ‹ConditionalWorkSequence:19 (5)› (step 1)
  ev: EVENT: net¦connect¦foo
 END: net¦connect¦foo
@@ -157,8 +157,8 @@ NEW: ‹ConditionalWorkSequence:24 (5)›
    : │  step: send net quux ‹NETsend›
    : │  step: async ‹Async›
    : │      : step: wait IN ‹WaitHandler›
-   : │      : step: list net baz zaz $who ‹List›
-   : │      : step: del net baz zaz $who ‹Del›
+   : │      : step: list net connection baz zaz $who ‹List›
+   : │      : step: del net connection baz zaz $who ‹Del›
    : └2╴... done.
 EVENT: net¦connect¦baz¦zaz¦1
 RUN: on net connect baz zaz *who ‹OnEventHandler›
@@ -166,8 +166,8 @@ RUN: on net connect baz zaz *who ‹OnEventHandler›
    : step: send net quux ‹NETsend›
    : step: async ‹Async›
    :     : step: wait IN ‹WaitHandler›
-   :     : step: list net baz zaz $who ‹List›
-   :     : step: del net baz zaz $who ‹Del›
+   :     : step: list net connection baz zaz $who ‹List›
+   :     : step: del net connection baz zaz $who ‹Del›
  at: ‹ConditionalWorkSequence:24 (5)› (step 1)
  ev: EVENT: net¦connect¦baz¦zaz¦1
 END: net¦connect¦baz¦zaz¦1
