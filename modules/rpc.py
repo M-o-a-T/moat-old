@@ -41,9 +41,11 @@ from datetime import datetime,date,time,timedelta
 from rpyc import Service
 from rpyc.core.protocol import DEFAULT_CONFIG
 from rpyc.utils.server import ThreadedServer
+from rpyc.utils.helpers import async
 
 from gevent.queue import Queue
-from gevent import spawn
+from gevent.event import AsyncResult
+from gevent import spawn,spawn_later
 
 conn_seq = 0
 
@@ -51,6 +53,43 @@ class RPCconns(Collection):
 	name = Name("rpc","connection")
 RPCconns = RPCconns()
 RPCconns.does("del")
+
+class RequestTimedOut(RuntimeError):
+	pass
+
+class CallBack(object):
+	"""Mix-in to do sane callback handling"""
+	callback=None
+
+	def __init__(self,callback=None):
+		if callback is None:
+			super(CallBack,self).__init__()
+			return
+		self.callback = async(callback)
+
+
+	def run_callback(self,*args,**kwargs):
+		res = AsyncResult()
+		def trigger(res):
+			res.set(RequestTimedOut)
+		timer = spawn_later(10,trigger,res)
+		def done(r):
+			res.set(r)
+		c = self.callback(*args,**kwargs)
+		c.add_callback(done)
+
+		r = res.get()
+		if r is not RequestTimedOut:
+			timer.kill()
+
+		return r
+		
+		
+	def list(self):
+		for r in super(CallBack,self).list():
+			yield r
+		yield("callback",repr(self.callback))
+
 
 class CommandProcessor(ImmediateProcessor):
 	"""\
@@ -77,13 +116,13 @@ class CommandProcessor(ImmediateProcessor):
 		return waitForDeferred(res)
 
 
-class EventCallback(Worker):
+class EventCallback(Worker,CallBack):
 	args = None
 	prio = MIN_PRIO+1
 
 	def __init__(self,parent,callback,*args):
 		self.parent = parent
-		self.callback = callback
+		CallBack.__init__(self,callback)
 		if args:
 			self.args = SName(args)
 			name = SName(parent.name+self.args)
@@ -95,7 +134,6 @@ class EventCallback(Worker):
 	def list(self):
 		for r in super(EventCallback,self).list():
 			yield r
-		yield("callback",repr(self.callback))
 		if self.args:
 			yield("args",self.args)
 
@@ -123,7 +161,7 @@ class EventCallback(Worker):
 
 		# This is an event monitor. Failures will not be tolerated.
 		try:
-			self.callback(**k)
+			self.run_callback(**k)
 		except Exception as ex:
 			fix_exception(ex)
 			process_failure(ex)
@@ -139,11 +177,11 @@ class EventCallback(Worker):
 	exposed_cancel = cancel
 		
 
-class LogCallback(BaseLogger):
+class LogCallback(BaseLogger,CallBack):
 	def __init__(self,parent,callback,kind=None,level=TRACE):
 		self.parent=parent
 		self.kind=kind
-		self.callback=callback
+		CallBack.__init__(self,callback)
 
 		self.name = parent.name
 		super(LogCallback,self).__init__(level)
@@ -156,7 +194,7 @@ class LogCallback(BaseLogger):
 		if self.kind is None or a[0] == self.kind:
 			if TESTING:
 				a = a+("LOGTEST",)
-			self.callback(level,*a)
+			self.run_callback(level,*a)
 	
 	def _flush(self):
 		pass
@@ -278,10 +316,14 @@ class RPCconn(Service,Collected):
 		return getattr(self.ctx,arg)
 
 	def exposed_monitor(self,callback,*args):
-		w = EventCallback(self,callback,*args)
-		self.workers.add(w)
-		register_worker(w)
-		return w
+		try:
+			w = EventCallback(self,callback,*args)
+			self.workers.add(w)
+			register_worker(w)
+			return w
+		except Exception as ex:
+			fix_exception(ex)
+			process_failure(ex)
 
 	def exposed_logger(self,callback,*args):
 		l = LogCallback(self,callback,*args)
