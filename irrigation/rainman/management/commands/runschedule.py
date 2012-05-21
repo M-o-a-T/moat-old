@@ -27,6 +27,7 @@ from traceback import format_exc,print_exc
 from operator import attrgetter
 import sys,signal
 import gevent,rpyc
+from functools import partial
 from gevent.queue import Queue,Empty
 from gevent.coros import Semaphore
 from gevent.event import AsyncResult
@@ -113,7 +114,7 @@ class Command(BaseCommand):
 
 		site = SchedSite(c.site)
 		site.run_every(timedelta(0,options['timeout']))
-		site.run_sched_task(True)
+		site.run_sched_task(True,reason="Command")
 
 		if not controllers:
 			raise RuntimeError("No controllers for site '%s' found." % (s.name,))
@@ -397,7 +398,7 @@ class SchedSite(SchedCommon):
 		print >>sys.stderr,"Sync+Sched"
 		self.sync()
 		self.refresh()
-		self.run_sched_task()
+		self.run_sched_task(reason="Sync+Sched")
 
 	def delay_on(self):
 		self._delay_on.acquire()
@@ -430,7 +431,7 @@ class SchedSite(SchedCommon):
 			for m in mm:
 				m.connect_monitors()
 		self.ckf = self.ci.root.monitor(self.check_flow,"check","flow",*self.s.var.split(" "))
-		self.cks = self.ci.root.monitor(self.run_sched_task,"read","schedule",*self.s.var.split(" "))
+		self.cks = self.ci.root.monitor(partial(self.run_sched_task,reason="read schedule"),"read","schedule",*self.s.var.split(" "))
 		self.ckt = self.ci.root.monitor(self.sync,"sync",*self.s.var.split(" "))
 		self.cku = self.ci.root.monitor(self.do_shutdown,"shutdown",*self.s.var.split(" "))
 
@@ -541,7 +542,7 @@ class SchedSite(SchedCommon):
 		sd = self._run_delay.total_seconds()/10
 		if sd < 66: sd = 66
 		self._run = gevent.spawn_later(sd, self.run_main_task, kill=False)
-		self._sched = gevent.spawn_later(2, self.run_sched_task)
+		self._sched = gevent.spawn_later(2, self.run_sched_task, reason="run_every")
 
 	def run_main_task(self, kill=True):
 		"""Run the calculation loop."""
@@ -620,12 +621,12 @@ class SchedSite(SchedCommon):
 		print >>sys.stderr,"MainTask end",h
 		return h
 
-	def run_sched_task(self,delayed=False):
-		print >>sys.stderr,"RunSched"
+	def run_sched_task(self,delayed=False,reason=None, **k):
+		print >>sys.stderr,"RunSched",reason
 		if self._sched_running is not None:
 			return self._sched_running.get()
 		if delayed:
-			self._sched = gevent.spawn_later(10,self.run_sched_task)
+			self._sched = gevent.spawn_later(10,self.run_sched_task,reason="Timer 10")
 			return
 		self._sched_running = AsyncResult()
 		try:
@@ -634,7 +635,7 @@ class SchedSite(SchedCommon):
 			self.log(format_exc())
 		finally:
 			r,self._sched_running = self._sched_running,None
-			self._sched = gevent.spawn_later(600,self.run_sched_task)
+			self._sched = gevent.spawn_later(600,self.run_sched_task,reason="Timer 600")
 			r.set(None)
 		print >>sys.stderr,"RunSched end"
 
@@ -794,7 +795,7 @@ class SchedValve(SchedCommon):
 				self.sched_ts = self.sched.start+self.sched.duration
 				self.sched = None
 			else:
-				self.sched_job = gevent.spawn_later((self.sched.start+self.sched.duration-n).total_seconds(),self.run_sched_task)
+				self.sched_job = gevent.spawn_later((self.sched.start+self.sched.duration-n).total_seconds(),self.run_sched_task,reason="_run_schedule 1")
 				return
 
 		sched = None
@@ -823,7 +824,7 @@ class SchedValve(SchedCommon):
 
 		if sched.start > n:
 			self._off()
-			self.sched_job = gevent.spawn_later((sched.start-n).total_seconds(),self.run_sched_task)
+			self.sched_job = gevent.spawn_later((sched.start-n).total_seconds(),self.run_sched_task,reason="_run_schedule 2")
 			return
 		try:
 			self._on(sched)
@@ -834,7 +835,7 @@ class SchedValve(SchedCommon):
 	
 	def run_sched_task(self):
 		self.sched_job = None
-		self.site.run_sched_task()
+		self.site.run_sched_task(reason="valve")
 
 	def add_flow(self, val):
 		self.flow += val
