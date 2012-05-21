@@ -23,7 +23,7 @@ from datetime import timedelta
 
 class GroupOverride(Model):
 	"""Modify schedule times"""
-	class Meta:
+	class Meta(Model.Meta):
 		unique_together = (("group", "name"),("group","start"))
 		db_table="rainman_groupoverride"
 	def __unicode__(self):
@@ -36,14 +36,19 @@ class GroupOverride(Model):
 	def _get_duration(self):
 		return timedelta(0,self.db_duration)
 	def _set_duration(self,val):
-		self._duration = timedelta(0,self.db_duration)
+		self.db_duration = val.total_seconds()
 	duration = property(_get_duration,_set_duration)
+	@property
+	def end(self):
+		return self.start+self.duration
+
 	on_level = m.FloatField(blank=True,null=True,default=None,help_text="Level above(off)/below(on) which to activate this rule (factor of max)")
 	off_level = m.FloatField(blank=True,null=True,default=None,help_text="Level above(off)/below(on) which to activate this rule (factor of max)")
 	
+
 class ValveOverride(Model):
 	"""Force schedule times"""
-	class Meta:
+	class Meta(Model.Meta):
 		unique_together = (("valve", "name"),("valve","start"))
 		db_table="rainman_valveoverride"
 	def __unicode__(self):
@@ -56,16 +61,21 @@ class ValveOverride(Model):
 	def _get_duration(self):
 		return timedelta(0,self.db_duration)
 	def _set_duration(self,val):
-		self._duration = timedelta(0,self.db_duration)
+		self.db_duration = val.total_seconds()
 	duration = property(_get_duration,_set_duration)
+	@property
+	def end(self):
+		return self.start+self.duration
+
 	on_level = m.FloatField(blank=True,null=True,default=None,help_text="Level above(off)/below(on) which to activate this rule (factor of max)")
 	off_level = m.FloatField(blank=True,null=True,default=None,help_text="Level above(off)/below(on) which to activate this rule (factor of max)")
 	
+
 class GroupAdjust(Model):
-	"""Beginning at this date, this group needs <modifier> more(>1)/less(<1) water.
+	"""At this date, this group needs <modifier> more(>1)/less(<1) water.
 		To turn the whole thing off, set modifier=0.
-		Any entry is valid until superseded by one with later start."""
-	class Meta:
+		Entries are interpolated linearly."""
+	class Meta(Model.Meta):
 		unique_together = (("group","start"),)
 		db_table="rainman_groupadjust"
 	def __unicode__(self):

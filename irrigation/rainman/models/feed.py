@@ -23,7 +23,7 @@ from datetime import timedelta
 
 class Feed(Meter):
 	"""A source of water"""
-	class Meta:
+	class Meta(Model.Meta):
 		db_table="rainman_feed"
 	site = m.ForeignKey(Site,related_name="feed_meters")
 	flow = m.FloatField(default=10, help_text="liters per second")
@@ -33,4 +33,49 @@ class Feed(Meter):
 	def _set_max_flow_wait(self,val):
 		self._max_flow_wait = timedelta(0,self.db_max_flow_wait)
 	max_flow_wait = property(_get_max_flow_wait,_set_max_flow_wait)
+
+	def _range(self,start,end,plusflow):
+		"""Return a range of times which accept this additional flow"""
+	
+		from rainman.models.schedule import Schedule
+		from heapq import heappush,heappop
+
+		stops=[]
+		flow = self.flow-plusflow
+		if flow < 0:
+			flow = None # single valve mode
+
+		for s in Schedule.objects.filter(valve__feed=self,start__lt=end,start__gte=start-timedelta(1,0)).order_by("start"):
+			if s.start+s.duration <= start:
+				continue
+			while stops and stops[0][0] < s.start:
+				if flow is None:
+					nflow = None
+					cond=( len(stops)==1 )
+				else:
+					nflow = flow+stops[0][1]
+					cond=( flow<0 and nflow>0 )
+				if cond:
+					self.start = stops[0][0]
+				flow = nflow
+				heappop(stops)
+
+			dflow = s.valve.flow
+			heappush(stops,(s.start+s.duration,dflow))
+			if flow is not None:
+				oflow = flow
+				flow -= dflow
+				cond=( flow<0 and oflow>0 )
+			else:
+				cond=( len(stops)==1 )
+			if cond and start < s.start:
+				yield ((start,s.start-start))
+
+		while stops and (flow<0 if flow is not None else True):
+			start=stops[0][0]
+			if flow is not None:
+				flow += stops[0][1]
+			heappop(stops)
+		if end>start:
+			yield ((start,end-start))
 

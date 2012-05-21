@@ -17,11 +17,13 @@
 from __future__ import division,absolute_import
 from rainman.models import Model
 from rainman.models.site import Site
+from rainman.utils import RangeMixin
 from django.db import models as m
+from datetime import timedelta
 
-class Controller(Model):
+class Controller(Model,RangeMixin):
 	"""A thing (Wago or whatever) which controls valves."""
-	class Meta:
+	class Meta(Model.Meta):
 		unique_together = (("site", "name"),)
 		db_table="rainman_controller"
 	def __unicode__(self):
@@ -31,4 +33,31 @@ class Controller(Model):
 	site = m.ForeignKey(Site,related_name="controllers")
 	location = m.CharField(max_length=200, help_text="How to identify the controller (host name?)")
 	max_on = m.IntegerField(default=3, help_text="number of valves that can be on at any one time")
+
+	def _range(self,start,end):
+		from rainman.models.schedule import Schedule
+
+		from heapq import heappush,heappop
+		stops=[]
+		n_open = 0
+
+		for s in Schedule.objects.filter(valve__controller=self,start__lt=end,start__gte=start-timedelta(1,0)).order_by("start"):
+			if s.start+s.duration <= start:
+				continue
+			while stops and stops[0] < s.start:
+				if n_open == self.max_on:
+					self.start = stops[0]
+				n_open -= 1
+				heappop(stops)
+			n_open += 1
+			heappush(stops,s.start+s.duration)
+			if n_open == self.max_on:
+				if (start < s.start):
+					yield ((start,s.start-start))
+
+		while n_open >= self.max_on and len(stops):
+			n_open -= 1
+			start=heappop(stops)
+		if end>start:
+			yield ((start,end-start))
 

@@ -18,11 +18,13 @@ from __future__ import division,absolute_import
 from rainman.models import Model
 from rainman.models.site import Site
 from rainman.models.valve import Valve
-from rainman.models.day import Day
+from rainman.models.day import DayRange
+from rainman.utils import now
 from django.db import models as m
+from datetime import timedelta
 
 class Group(Model):
-	class Meta:
+	class Meta(Model.Meta):
 		unique_together = (("site", "name"),)
 		db_table="rainman_group"
 	def __unicode__(self):
@@ -36,11 +38,62 @@ class Group(Model):
 	adj_sun = m.FloatField(default=1, help_text="How much does sunshine affect this group?")
 	adj_wind = m.FloatField(default=1, help_text="How much does wind affect this group?")
 	adj_temp = m.FloatField(default=1, help_text="How much does temperature affect this group?")
+
+	def get_adj_flow(self,date=None):
+		if date is None:
+			date = now()
+		try:
+			a1 = self.adjusters.filter(start__lte=now).order_by("-start")[0]
+		except IndexError:
+			a1 = None
+		try:
+			a2 = self.adjusters.filter(start__gte=now).order_by("-start")[0]
+		except IndexError:
+			if a1 is None:
+				return 1
+			return a1.factor
+		else:
+			if a1 is None:
+				return a2.factor
+		td = (a2.start-a1.start).total_seconds()
+		if td < 60: # less than one minute? forget it
+			return (a1.factor+a2.factor)/2
+		dd = (date-a1.start).total_seconds()
+		fd = a2.factor - a1.factor
+		return a1.factor + fd * dd / td
+	adj_flow = property(get_adj_flow)
+
 	# 
 	# when may this group run?
-	days = m.ManyToManyField(Day)
+	days = m.ManyToManyField(DayRange)
 	def list_days(self):
 		return u"¦".join((d.name for d in self.days.all()))
 	def list_valves(self):
 		return u"¦".join((d.name for d in self.valves.all()))
+
+	def _not_blocked_range(self,start,end):
+		for x in self.overrides.filter(start__gte=start-timedelta(1,0),start__lt=end,allowed=False).order_by("start"):
+			if x.end <= start:
+				continue
+			if x.start > start:
+				yield (start,x.start-start)
+				start = x.end
+		if end>start:
+			yield (start,end-start)
+
+	def _allowed_range(self,start,end):
+		n=0
+		for x in self.overrides.filter(start__gte=start-timedelta(1,0),start__lt=end,allowed=True).order_by("start"):
+			if x.end <= start:
+				continue
+			if x.start >= start:
+				yield (x.start,x.duration)
+			else:
+				yield (start,x.end-start)
+			start = x.end
+		if n == 0:
+			yield (start,end-start)
+
+				
+
 

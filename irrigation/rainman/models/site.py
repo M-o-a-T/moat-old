@@ -21,7 +21,7 @@ from datetime import timedelta
 
 class Site(Model):
 	"""One place with stuff to irrigate."""
-	class Meta:
+	class Meta(Model.Meta):
 		db_table="rainman_site"
 	def __unicode__(self):
 		return u"‹%s %s›" % (self.__class__.__name__,self.name)

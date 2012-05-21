@@ -20,10 +20,12 @@ from rainman.models.controller import Controller
 from rainman.models.feed import Feed
 from rainman.models.paramgroup import ParamGroup
 from django.db import models as m
+from rainman.utils import now, range_intersection,range_union, RangeMixin
+from datetime import timedelta
 
-class Valve(Model):
+class Valve(Model,RangeMixin):
 	"""One controller of water"""
-	class Meta:
+	class Meta(Model.Meta):
 		unique_together = (("controller", "name"),)
 		db_table="rainman_valve"
 	def __unicode__(self):
@@ -52,4 +54,55 @@ class Valve(Model):
 	priority = m.BooleanField(help_text="the last cycle did not finish")
 	def list_groups(self):
 		return u"¦".join((d.name for d in self.groups.all()))
+
+	def _range(self,start,end, forced=False):
+		if start is None:
+			start = now()
+		r = []
+		r.append(self._not_scheduled(start,end))
+		r.append(self.controller._range(start,end))
+		r.append(self.feed._range(start,end,self.flow))
+		if forced:
+			r.append(self._forced_range(start,end))
+		else:
+			r.append(self._not_blocked_range(start,end))
+			for g in self.groups.all():
+				r.append(g._not_blocked_range(start,end))
+			rr = []
+			for g in self.groups.all():
+				rr.append(g._allowed_range(start,end))
+			r.append(range_union(*rr))
+
+		return range_intersection(*r)
+	
+	def _not_blocked_range(self,start,end):
+		for x in self.overrides.filter(start__gte=start-timedelta(1,0),start__lt=end,running=False).order_by("start"):
+			if x.end <= start:
+				continue
+			if x.start > start:
+				yield (start,x.start-start)
+				start = x.end
+		if end>start:
+			yield (start,end-start)
+				
+	def _not_scheduled(self,start,end):
+		for x in self.schedules.filter(start__gte=start-timedelta(1,0),start__lt=end).order_by("start"):
+			if x.end <= start:
+				continue
+			if x.start > start:
+				yield (start,x.start-start)
+			start = x.end+timedelta(0,60)
+		if end>start:
+			yield (start,end-start)
+				
+	def _forced_range(self,start,end):
+		for x in self.overrides.filter(start__gte=start-timedelta(1,0),start__lt=end,running=True).order_by("start"):
+			if x.end <= start:
+				continue
+			if x.start > start:
+				yield (x.start,x.end)
+				start = x.end
+
+				
+
 

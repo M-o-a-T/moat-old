@@ -24,7 +24,7 @@ from django.db import models as m
 
 class Level(Model):
 	"""historic water levels"""
-	class Meta:
+	class Meta(Model.Meta):
 		unique_together = (("valve", "time"),)
 		db_table="rainman_level"
 	def __unicode__(self):
@@ -36,7 +36,7 @@ class Level(Model):
 
 class History(Model):
 	"""historic evaporation and rain levels"""
-	class Meta:
+	class Meta(Model.Meta):
 		unique_together = (("site", "time"),)
 		db_table="rainman_history"
 	def __unicode__(self):
@@ -55,7 +55,7 @@ class History(Model):
 
 class Log(Model):
 	"""Scheduler and other events"""
-	class Meta:
+	class Meta(Model.Meta):
 		#unique_together = (("site","timestamp"),)
 		db_table="rainman_log"
 		pass

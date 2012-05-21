@@ -25,21 +25,42 @@ from django.utils.timezone import utc,get_current_timezone
 def now():
 	return datetime.utcnow().replace(tzinfo=utc)
 
-class RangeMixin(object):
-	def list_range(self):
-		return u" ¦ ".join(("%s+%s" % (a.astimezone(get_current_timezone()).strftime("%F %T"),str(b)) for a,b in self.range()))
+def str_tz(t):
+	return t.astimezone(get_current_timezone()).strftime("%F %T")
 
-	def range(self,start=None,days=1):
+class RangeMixin(object):
+	def list_range(self,**k):
+		r = iter(self.range(days=99,**k))
+		i=0
+		res=""
+		while True:
+			try:
+				a,b = r.next()
+			except StopIteration:
+				return res
+			if res:
+				res += u" ¦ "
+			res += "%s %s" % (a.astimezone(get_current_timezone()).strftime("%F %T"),str(b))
+			i += 1
+			if i >= 3:
+				res += u" ¦ …"
+				break
+		return res
+
+	def range(self,start=None,days=1,**k):
 		if start is None:
 			start = now()
 		end = start+timedelta(days,0)
-		return self._range(start,end)
+		return self._range(start,end,**k)
 
 # Work with date (or whatever) ranges.
 class NotYet: pass
 class StoredIter(object):
 	def __init__(self,it):
 		self.it = range_coalesce(it)
+		#i = list(self.it)
+		#print "LIST",i
+		#self.it = iter(i)
 		self.saved = NotYet
 
 	@property
@@ -79,7 +100,12 @@ def range_union(*a):
 		Return an iterator which yields a row of start+length tuples
 		which are the union of all the start+length tuples in a.
 		"""
-	return range_coalesce(_range_union([StoredIter(ax) for ax in a]))
+	#print "UNION"
+	res = range_coalesce(_range_union([StoredIter(ax) for ax in a]))
+	#res = list(res)
+	#print "UNION = ",res
+	return res
+
 def _range_union(head):
 	while head:
 		r,ra,rl = None,None,None
@@ -102,6 +128,17 @@ def _range_union(head):
 	
 
 def range_intersection(*a):
+	"""\
+		Return an iterator which yields a row of start+length tuples
+		which are the union of all the start+length tuples in a.
+		"""
+	#print "INTERSECT"
+	res = _range_intersection(*a)
+	#res = list(res)
+	#print "INTERSECT = ",res
+	return res
+
+def _range_intersection(*a):
 	"""\
 		Return an iterator which yields a row of start+length tuples
 		which are the intersection of all the start+length tuples in a.

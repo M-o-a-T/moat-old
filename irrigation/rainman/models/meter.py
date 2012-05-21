@@ -20,7 +20,7 @@ from rainman.models.site import Site
 from django.db import models as m
 
 class Meter(Model):
-	class Meta:
+	class Meta(Model.Meta):
 		abstract = True
 		unique_together = (("site","name"),)
 	def __unicode__(self):

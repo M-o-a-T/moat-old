@@ -22,7 +22,7 @@ from datetime import timedelta
 
 class Schedule(Model):
 	"""The actual plan"""
-	class Meta:
+	class Meta(Model.Meta):
 		unique_together = (("valve","start"),)
 		db_table="rainman_schedule"
 	def __unicode__(self):
@@ -33,8 +33,11 @@ class Schedule(Model):
 	def _get_duration(self):
 		return timedelta(0,self.db_duration)
 	def _set_duration(self,val):
-		self._duration = timedelta(0,self.db_duration)
+		self.db_duration = val.total_seconds()
 	duration = property(_get_duration,_set_duration)
+	@property
+	def end(self):
+		return self.start+self.duration
 
 	seen = m.BooleanField(default=False,max_length=1,help_text="Sent to the controller?")
 	changed = m.BooleanField(default=False,max_length=1,help_text="Updated by the scheduler?")

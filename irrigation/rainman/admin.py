@@ -3,7 +3,7 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 admin.autodiscover()
 
-from rainman.models import Site,Feed,Controller,Valve,ParamGroup,History,EnvironmentEffect,Level,Day,DayTime,Group,GroupOverride,ValveOverride,GroupAdjust,Schedule,RainMeter,TempMeter,WindMeter,SunMeter,UserForGroup,Log
+from rainman.models import Site,Feed,Controller,Valve,ParamGroup,History,EnvironmentEffect,Level,DayRange,Day,DayTime,Group,GroupOverride,ValveOverride,GroupAdjust,Schedule,RainMeter,TempMeter,WindMeter,SunMeter,UserForGroup,Log
 
 from rainman.utils import now
 from datetime import timedelta
@@ -40,6 +40,10 @@ class LevelInline(admin.TabularInline):
 	def queryset(self, request):
 		qs = super(LevelInline, self).queryset(request)
 		return qs.filter(time__gte = now()-timedelta(1,0)).order_by("-time")
+
+class DayRangeInline(admin.TabularInline):
+	model = DayRange
+	extra = 0
 
 class DayInline(admin.TabularInline):
 	model = Day
@@ -128,7 +132,7 @@ class FeedAdmin(admin.ModelAdmin):
 	]
 
 class ControllerAdmin(admin.ModelAdmin):
-	list_display = ('name','site','location')
+	list_display = ('name','site','location','list_range')
 	list_filter = ('site',)
 	inlines = [
 		ValveInline,
@@ -140,7 +144,6 @@ class ValveAdmin(admin.ModelAdmin):
 	inlines = [
 		ValveOverrideInline,
 		ScheduleInline,
-		LevelInline,
 	]
 
 class LevelAdmin(admin.ModelAdmin):
@@ -158,6 +161,9 @@ class HistoryAdmin(admin.ModelAdmin):
 class EnvironmentEffectAdmin(admin.ModelAdmin):
 	list_display = ('param_group','factor','temp','wind','sun')
 	list_filter = ('param_group',)
+
+class DayRangeAdmin(admin.ModelAdmin):
+	list_display = ('name','list_range')
 
 class DayAdmin(admin.ModelAdmin):
 	list_display = ('name','list_daytimes','list_range')
@@ -242,6 +248,7 @@ admin.site.register(ParamGroup, ParamGroupAdmin)
 admin.site.register(Level, LevelAdmin)
 admin.site.register(History, HistoryAdmin)
 admin.site.register(EnvironmentEffect, EnvironmentEffectAdmin)
+admin.site.register(DayRange, DayRangeAdmin)
 admin.site.register(Day, DayAdmin)
 admin.site.register(DayTime, DayTimeAdmin)
 admin.site.register(Group, GroupAdmin)

@@ -21,7 +21,7 @@ from django.db import models as m
 from django.db.models import Q
 
 class ParamGroup(Model):
-	class Meta:
+	class Meta(Model.Meta):
 		unique_together = (("site", "name"),)
 		db_table="rainman_paramgroup"
 	def __unicode__(self):
@@ -103,7 +103,7 @@ class ParamGroup(Model):
 		return sum_f / sum_w
 
 class EnvironmentEffect(Model):
-	class Meta:
+	class Meta(Model.Meta):
 		db_table="rainman_environmenteffect"
 	def __unicode__(self):
 		return u"‹%s @%s %s¦%s¦%s›" % (self.__class__.__name__,self.param_group.name,self.temp,self.wind,self.sun)

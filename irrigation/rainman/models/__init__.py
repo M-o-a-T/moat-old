@@ -22,6 +22,7 @@ from rainman.utils import now
 class Model(m.Model):
 	class Meta:
 		abstract = True
+		app_label = 'rainman'
 
 	def refresh(self):
 		"""Refreshes this instance from db"""
@@ -48,7 +49,7 @@ from rainman.models.controller import Controller
 from rainman.models.paramgroup import ParamGroup,EnvironmentEffect
 from rainman.models.valve import Valve
 from rainman.models.history import Level,History,Log
-from rainman.models.day import Day,DayTime
+from rainman.models.day import Day,DayTime,DayRange
 from rainman.models.group import Group
 from rainman.models.override import GroupOverride,ValveOverride,GroupAdjust
 from rainman.models.schedule import Schedule

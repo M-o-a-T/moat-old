@@ -22,7 +22,7 @@ from django.db import models as m
 from django.contrib.auth.models import User as DjangoUser
 class UserForGroup(Model):
 	"""Limit Django users to a specific group"""
-	class Meta:
+	class Meta(Model.Meta):
 		db_table="rainman_userforgroup"
 	def __unicode__(self):
 		return u"‹%s @%s %s›" % (self.__class__.__name__,self.user.username,self.group.name)

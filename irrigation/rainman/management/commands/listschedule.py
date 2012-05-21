@@ -21,6 +21,7 @@
 
 from django.core.management.base import BaseCommand, CommandError
 from rainman.models import Site,Valve,Schedule,Controller
+from rainman.utils import str_tz
 from datetime import datetime,time,timedelta
 from django.db.models import F,Q
 from django.utils.timezone import utc,get_current_timezone
@@ -99,7 +100,7 @@ class Command(BaseCommand):
 			r.append("Site")
 		if 'controller' not in options:
 			r.append("Controller")
-		r.extend(("Valve","Start","Dauer","?"))
+		r.extend(("Valve","Start","Dauer","Ende","?"))
 		res = [r]
 		lengths = [0] * len(r)
 		for sched in Schedule.objects.filter(q):
@@ -110,7 +111,7 @@ class Command(BaseCommand):
 				r.append(sched.controller.site.name)
 			if 'controller' not in options:
 				r.append(sched.controller.name)
-			r.extend((sched.valve.name, sched.start.astimezone(get_current_timezone()).strftime("%F %T"), str(sched.duration), "*" if sched.seen else "-"))
+			r.extend((sched.valve.name, str_tz(sched.start), str(sched.duration), str_tz(sched.end), "*" if sched.seen else "-"))
 			res.append(r)
 		for a in res:
 			i=0
