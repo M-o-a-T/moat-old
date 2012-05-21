@@ -127,6 +127,7 @@ def isodate(yr,wk,wdy):
 def simple_time_delta(w):
 	s=0
 	m=1
+	w=w[:]
 	while w:
 		if len(w) == 1:
 			pass
@@ -168,7 +169,7 @@ def simple_time_delta(w):
 	return s
 
 def time_delta(args, now=None):
-	w = list(args)
+	w = list(args)[:]
 	step = None
 	if now is None: now = globals()["now"]()
 	if not w:
@@ -239,11 +240,13 @@ def collect_words(n,w):
 		elif w[0] == "-":
 			w.pop(0)
 			f = -1
-		if w[0] in weekdays:
+		lw = w[0].lower()
+		if lw in weekdays:
 			assert p.dow is None, "You already specified the day of week"
 			assert f is None, "A sign makes no sense here"
-			p.dow = weekdays[w.pop(0)]
+			p.dow = weekdays[lw]
 			p.nth = 0
+			w.pop(0)
 			continue
 		val = int(w.pop(0))
 		if f is not None:
