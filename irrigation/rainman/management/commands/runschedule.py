@@ -835,9 +835,9 @@ class SchedValve(SchedCommon):
 		except NotConnected:
 			self.log("Could not schedule: connection to HomEvenT failed")
 	
-	def run_sched_task(self):
+	def run_sched_task(self,reason="valve"):
 		self.sched_job = None
-		self.site.run_sched_task(reason="valve")
+		self.site.run_sched_task(reason=reason)
 
 	def add_flow(self, val):
 		self.flow += val
