@@ -214,6 +214,8 @@ class OWFSmon(Monitor):
 
 	def one_value(self, step):
 		dev = devices[self.device]
+		if self.switch is not None:
+			dev.set(self.switch, self.to_high if self.switched else self.to_low)
 		val = dev.get(self.attribute)
 		if self.switch is not None:
 			if not self.switched:
