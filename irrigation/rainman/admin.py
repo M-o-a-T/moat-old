@@ -166,7 +166,7 @@ class DayAdmin(admin.ModelAdmin):
 	]
 
 class DayTimeAdmin(admin.ModelAdmin):
-	list_display = ('day','descr')
+	list_display = ('day','descr','list_range')
 	list_filter = ('day',)
 
 class GroupAdmin(admin.ModelAdmin):

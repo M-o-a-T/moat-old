@@ -17,8 +17,14 @@
 from __future__ import division,absolute_import
 from rainman.models import Model
 from django.db import models as m
+from rainman.utils import now, range_union, RangeMixin
+from datetime import timedelta
+from homevent.times import time_until
+from django.utils.timezone import get_current_timezone,make_aware,make_naive
 
-class Day(Model):
+import re
+
+class Day(Model,RangeMixin):
 	"""A generic name for a time description"""
 	class Meta:
 		db_table="rainman_day"
@@ -28,8 +34,13 @@ class Day(Model):
 	name = m.CharField(max_length=30, unique=True)
 	def list_daytimes(self):
 		return u"¦".join((d.descr for d in self.times.all()))
+	
+	def _range(self,start,end):
+		return range_union(*(x._range(start,end) for x in self.days.all()))
 
-class DayTime(Model):
+TimeSplit = re.compile('([-+]?\\d+)\\s*(\\w+)(?:\s+|$)')
+
+class DayTime(Model,RangeMixin):
 	"""One element of a time description which is tested"""
 	class Meta:
 		unique_together = (("day", "descr"),)
@@ -39,4 +50,20 @@ class DayTime(Model):
 
 	descr = m.CharField(max_length=200)
 	day = m.ForeignKey(Day,related_name="times")
+
+	def _range(self,start,end):
+		#
+		#txt = self.descr.split()
+		def j(x):
+			for y in x:
+				for z in y:
+					yield z
+		txt=list(j(TimeSplit.findall(self.descr)))
+		start = make_naive(start,get_current_timezone())
+		end = make_naive(end,get_current_timezone())
+		while start < end:
+			a = time_until(txt, invert=False, now=start)
+			b = time_until(txt, invert=True, now=a)
+			yield (make_aware(a,get_current_timezone()), b-a)
+			start=b
 

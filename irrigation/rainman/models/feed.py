@@ -26,6 +26,7 @@ class Feed(Meter):
 	class Meta:
 		db_table="rainman_feed"
 	site = m.ForeignKey(Site,related_name="feed_meters")
+	flow = m.FloatField(default=10, help_text="liters per second")
 	db_max_flow_wait = m.PositiveIntegerField(db_column="max_flow_wait",default=300,help_text="Max time for flow measurement")
 	def _get_max_flow_wait(self):
 		return timedelta(0,self.db_max_flow_wait)

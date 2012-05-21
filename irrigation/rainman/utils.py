@@ -19,11 +19,21 @@
 	This module holds a few random utility functions.
 	"""
 
-from datetime import datetime
-from django.utils.timezone import utc
+from datetime import datetime,timedelta
+from django.utils.timezone import utc,get_current_timezone
 
 def now():
 	return datetime.utcnow().replace(tzinfo=utc)
+
+class RangeMixin(object):
+	def list_range(self):
+		return u" ¦ ".join(("%s+%s" % (a.astimezone(get_current_timezone()).strftime("%F %T"),str(b)) for a,b in self.range()))
+
+	def range(self,start=None,days=1):
+		if start is None:
+			start = now()
+		end = start+timedelta(days,0)
+		return self._range(start,end)
 
 # Work with date (or whatever) ranges.
 class NotYet: pass
@@ -64,7 +74,34 @@ def range_coalesce(it):
 			rl = se-ra
 
 
-def range_merge(*a):
+def range_union(*a):
+	"""\
+		Return an iterator which yields a row of start+length tuples
+		which are the union of all the start+length tuples in a.
+		"""
+	return range_coalesce(_range_union([StoredIter(ax) for ax in a]))
+def _range_union(head):
+	while head:
+		r,ra,rl = None,None,None
+		i=0
+		for ax in head:
+			try:
+				sa,sl = ax.stored
+			except StopIteration:
+				del head[i]
+				continue
+			if ra is None or ra > sa:
+				r,ra,rl,ri = ax,sa,sl,i
+			i += 1
+		if r is not None:
+			yield ra,rl
+			try:
+				r.next
+			except StopIteration:
+				del head[ri]
+	
+
+def range_intersection(*a):
 	"""\
 		Return an iterator which yields a row of start+length tuples
 		which are the intersection of all the start+length tuples in a.
@@ -132,10 +169,11 @@ if __name__ == "__main__":
 	print a
 	print b
 	print c
-	print list(range_merge(a,b,c))
-	print list(range_merge(c,b,a))
-	print list(range_merge(c,a,b))
-	print list(range_merge(a,c,b))
-	print list(range_merge(b,c,a))
-	print list(range_merge(b,a,c))
+	print list(range_intersection(a,b,c))
+	print list(range_intersection(c,b,a))
+	print list(range_intersection(c,a,b))
+	print list(range_intersection(a,c,b))
+	print list(range_intersection(b,c,a))
+	print list(range_intersection(b,a,c))
 	print list(range_invert(50,950,a))
+	print list(range_union(a,b))
