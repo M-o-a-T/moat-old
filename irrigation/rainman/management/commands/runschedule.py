@@ -798,7 +798,7 @@ class SchedValve(SchedCommon):
 				self.sched = None
 			else:
 				self.sched_job = gevent.spawn_later((self.sched.start+self.sched.duration-n).total_seconds(),self.run_sched_task,reason="_run_schedule 1")
-				return
+			return
 
 		sched = None
 		if self.sched_ts is None:
