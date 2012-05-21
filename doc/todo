@@ -28,19 +28,17 @@ Documentation
 Code
 ====
 
+* teach the time range code to accept x-y, y-x, a,b,c-d, and (optionally) e-f/g times.
+
 * scripts/monitor: add filtering
 
-* move the initial listing code from modules/data and scripts/list.py to flatten()
-
 * Logger: create singleton integers instead of constants.
-
-* Reload: Use a command, not an interrupt
 
 * wago monitor: mask the 'retry' stanza.
 
 * Network error: add the destination to the error message
 
-* RPC: support arbitrary commands, i.e. an interpreter
+* RPC: support arbitrary commands, i.e. a "real" interpreter
 
 * restart wago connections cleanly (query the monitor list!)
   (actually implemented, but needs a test case)
