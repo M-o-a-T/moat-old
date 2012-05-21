@@ -160,7 +160,7 @@ class EnvironmentEffectAdmin(admin.ModelAdmin):
 	list_filter = ('param_group',)
 
 class DayAdmin(admin.ModelAdmin):
-	list_display = ('name','list_daytimes')
+	list_display = ('name','list_daytimes','list_range')
 	inlines = [
 		DayTimeInline,
 	]

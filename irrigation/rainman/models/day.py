@@ -32,11 +32,12 @@ class Day(Model,RangeMixin):
 		return u"‹%s %s›" % (self.__class__.__name__,self.name)
 
 	name = m.CharField(max_length=30, unique=True)
+
 	def list_daytimes(self):
 		return u"¦".join((d.descr for d in self.times.all()))
 	
 	def _range(self,start,end):
-		return range_union(*(x._range(start,end) for x in self.days.all()))
+		return range_union(*(x._range(start,end) for x in self.times.all()))
 
 TimeSplit = re.compile('([-+]?\\d+)\\s*(\\w+)(?:\s+|$)')
 
