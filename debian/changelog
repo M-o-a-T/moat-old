@@ -1,3 +1,9 @@
+homevent (0.3.32) smurf; urgency=low
+
+  * minor fixes
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Mon, 21 May 2012 09:32:05 +0200
+
 homevent (0.3.31) smurf; urgency=low
 
   * Fix fs20-avr sending. Receiver untested so far.
