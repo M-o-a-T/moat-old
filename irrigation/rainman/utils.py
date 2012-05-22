@@ -33,19 +33,22 @@ class RangeMixin(object):
 		r = iter(self.range(days=99,**k))
 		i=0
 		res=""
-		while True:
-			try:
-				a,b = r.next()
-			except StopIteration:
-				return res
-			if res:
-				res += u" ¦ "
-			res += "%s %s" % (a.astimezone(get_current_timezone()).strftime("%F %T"),str(b))
-			i += 1
-			if i >= 3:
-				res += u" ¦ …"
-				break
-		return res
+		try:
+			while True:
+				try:
+					a,b = r.next()
+				except StopIteration:
+					return res
+				if res:
+					res += u" ¦ "
+				res += "%s %s" % (a.astimezone(get_current_timezone()).strftime("%F %T"),str(b))
+				i += 1
+				if i >= 3:
+					res += u" ¦ …"
+					break
+			return res
+		except ValueError:
+			return u"‹Error›"
 
 	def range(self,start=None,days=1,**k):
 		if start is None:
