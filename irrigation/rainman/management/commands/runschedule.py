@@ -504,12 +504,10 @@ class SchedSite(SchedCommon):
 
 		n=now()
 		#for v in self.s.valves.all():
-		for v in Valve.objects.filter(controller__site=self.s):
+		for v in Valve.objects.filter(controller__site=self.s, runoff__gt=0):
 			valve = SchedValve(v)
 			if valve.locked:
 				continue
-			if v.runoff == 0:
-				continue # not affected by rain
 			try:
 				self.send_command("set","output","off",*(v.var.split()))
 			except NotConnected:
@@ -517,10 +515,11 @@ class SchedSite(SchedCommon):
 			except Exception:
 				self.log_error(v)
 			v.schedules.filter(start__gte=n).delete()
-			for sc in v.schedules.filter(start__gte=n-timedelta(1),seen=True):
+			for sc in v.schedules.filter(start__gte=n-timedelta(1),start__lt=n,seen=True):
 				if sc.start+sc.duration > n:
 					sc.duration=n-sc.start
 					Save(sc)
+			v.schedules.filter(start__gte=n-timedelta(1),seen=False).delete()
 		self.run_main_task()
 
 	def send_command(self,*a,**k):
@@ -542,7 +541,9 @@ class SchedSite(SchedCommon):
 		sd = self._run_delay.total_seconds()/10
 		if sd < 66: sd = 66
 		self._run = gevent.spawn_later(sd, self.run_main_task, kill=False)
-		self._sched = gevent.spawn_later(2, self.run_sched_task, reason="run_every")
+		if self._sched is not None:
+			self._sched.kill()
+		self._sched = gevent.spawn_later(2, self.run_sched_task, kill=False, reason="run_every")
 
 	def run_main_task(self, kill=True):
 		"""Run the calculation loop."""
@@ -621,13 +622,17 @@ class SchedSite(SchedCommon):
 		print >>sys.stderr,"MainTask end",h
 		return h
 
-	def run_sched_task(self,delayed=False,reason=None, **k):
+	def run_sched_task(self,delayed=False,reason=None,kill=True, **k):
 		print >>sys.stderr,"RunSched",reason
 		if self._sched_running is not None:
 			return self._sched_running.get()
+		if self._sched is not None:
+			if kill:
+				self._sched.kill()
 		if delayed:
-			self._sched = gevent.spawn_later(10,self.run_sched_task,reason="Timer 10")
+			self._sched = gevent.spawn_later(10,self.run_sched_task,kill=False,reason="Timer 10")
 			return
+		self._sched = None
 		self._sched_running = AsyncResult()
 		try:
 			self.sched_task()
@@ -635,7 +640,8 @@ class SchedSite(SchedCommon):
 			self.log(format_exc())
 		finally:
 			r,self._sched_running = self._sched_running,None
-			self._sched = gevent.spawn_later(600,self.run_sched_task,reason="Timer 600")
+			if self._sched is None:
+				self._sched = gevent.spawn_later(600,self.run_sched_task,kill=False,reason="Timer 600")
 			r.set(None)
 		print >>sys.stderr,"RunSched end"
 
@@ -736,7 +742,7 @@ class SchedValve(SchedCommon):
 		print >>sys.stderr,"Open",self.v.var
 		self.site.delay_on()
 		if self.controller.has_max_on():
-			print >>sys.stderr,"… but too many"
+			print >>sys.stderr,"… but too many:", " ".join(str(v) for v in self.c.valves.all() if SchedValve(v).on)
 			raise TooManyOn(self)
 		if duration is None and sched is not None:
 			duration = sched.duration

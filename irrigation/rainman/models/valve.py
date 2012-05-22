@@ -59,24 +59,37 @@ class Valve(Model,RangeMixin):
 		if start is None:
 			start = now()
 		r = []
-		r.append(self._not_scheduled(start,end))
-		r.append(self.controller._range(start,end))
-		r.append(self.feed._range(start,end,self.flow))
+
+
 		if forced:
+			# If this pass considers force-open times, only this matters
 			r.append(self._forced_range(start,end))
 		else:
-			r.append(self._not_blocked_range(start,end))
-			for g in self.groups.all():
-				r.append(g._not_blocked_range(start,end))
-			ry = []
-			rn = []
-			for g in self.groups.all():
-				ry.append(g._allowed_range(start,end))
-			if ry:
-				r.append(range_union(*ry))
+			# Apply groups' times 
 			r.append(self._group_range(start,end))
 			r.append(self._group_xrange(start,end))
 
+			# First step finished.
+			r = [range_intersection(*r)]
+			# Now add any group "allowed" one-shots.
+			for g in self.groups.all():
+				r.append(g._allowed_range(start,end))
+			r = [range_union(*r)]
+
+			# Now add any group "not-allowed" one-shots.
+			for g in self.groups.all():
+				r.append(g._not_blocked_range(start,end))
+
+			# Also apply my own exclusion times
+			r.append(self._not_blocked_range(start,end))
+
+		# Exclude times when this valve is already scheduled
+		r.append(self._not_scheduled(start,end))
+
+		# Only consider times when the controller can open the valve and
+		# there's enough water for it to run
+		r.append(self.controller._range(start,end))
+		r.append(self.feed._range(start,end,self.flow))
 		return range_intersection(*r)
 	
 	def _not_blocked_range(self,start,end):
@@ -119,6 +132,6 @@ class Valve(Model,RangeMixin):
 		for g in self.groups.all():
 			for gd in g.xdays.all():
 				gx.append(gd._range(start,end))
-		return range_invert(range_union(*gx))
+		return range_invert(start,end-start,range_union(*gx))
 				
 

@@ -96,7 +96,12 @@ that's associated with "Weeknights" would fire, surprise, at night on
 weekdays. If you associate a group with more than one date record, its
 valves are scheduled whenever any of the dates matches the current time.
 
-For ease of administration, you can also add exclusion records. These are 
+For ease of administration, you can also add exclusion records. These are
+considered after the above "inclusion" records. So if you have a party on
+every second Friday of the month, you can add that date to the exclusion
+list.
+
+Of course, there's also one-shot events, both for allowing and 
 
 Areas typically are grouped. You're going to have a party on the lawn, not
 in the vegetable beds. So it's probably OK to water the latter during the

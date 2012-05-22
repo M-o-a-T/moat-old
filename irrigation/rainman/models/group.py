@@ -72,17 +72,19 @@ class Group(Model,RangeMixin):
 		return u" ¦ ".join((d.name for d in self.xdays.all()))
 	
 	def list_range(self):
-		if self.days.count()+self.xdays.count() == 0:
+		if self.days.count()+self.xdays.count()+self.overrides.filter(start__gt=now()).count() == 0:
 			return u"‹no dates›"
 		return super(Group,self).list_range()
 
 	def _range(self,start,end):
 		r = []
-		r.append(self._allowed_range(start,end))
-		r.append(self._not_blocked_range(start,end))
 		r.append(self._days_range(start,end))
 		r.append(self._no_xdays_range(start,end))
-		return range_intersection(*r)
+		r = range_intersection(*r)
+		if self.overrides.count():
+			r = range_union(r,self._allowed_range(start,end))
+		r = range_intersection(r,self._not_blocked_range(start,end))
+		return r
 
 	valves = m.ManyToManyField(Valve,related_name="groups")
 	def list_valves(self):
@@ -99,7 +101,6 @@ class Group(Model,RangeMixin):
 			yield (start,end-start)
 
 	def _allowed_range(self,start,end):
-		n=0
 		for x in self.overrides.filter(start__gte=start-timedelta(1,0),start__lt=end,allowed=True).order_by("start"):
 			if x.end <= start:
 				continue
@@ -108,8 +109,6 @@ class Group(Model,RangeMixin):
 			else:
 				yield (start,x.end-start)
 			start = x.end
-		if n == 0:
-			yield (start,end-start)
 
 	def _days_range(self,start,end):
 		return range_union(*(d._range(start,end) for d in self.days.all()))

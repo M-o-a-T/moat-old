@@ -26,8 +26,11 @@ class Feed(Meter):
 	class Meta(Model.Meta):
 		db_table="rainman_feed"
 	site = m.ForeignKey(Site,related_name="feed_meters")
+	var = m.CharField(max_length=200,unique=True,blank=True,null=True, help_text="monitor name in HomEvenT") # HomEvenT's variable name for it
+
 	flow = m.FloatField(default=10, help_text="liters per second")
 	db_max_flow_wait = m.PositiveIntegerField(db_column="max_flow_wait",default=300,help_text="Max time for flow measurement")
+
 	def _get_max_flow_wait(self):
 		return timedelta(0,self.db_max_flow_wait)
 	def _set_max_flow_wait(self,val):
@@ -56,7 +59,7 @@ class Feed(Meter):
 					nflow = flow+stops[0][1]
 					cond=( flow<0 and nflow>0 )
 				if cond:
-					self.start = stops[0][0]
+					start = stops[0][0]
 				flow = nflow
 				heappop(stops)
 

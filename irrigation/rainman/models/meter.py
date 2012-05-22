@@ -27,12 +27,12 @@ class Meter(Model):
 		return u"‹%s @%s %s›" % (self.__class__.__name__,self.site,self.var)
 	name = m.CharField(max_length=200)
 	#site = m.ForeignKey(Site,related_name="meters")
-	var = m.CharField(max_length=200,unique=True, help_text="monitor name in HomEvenT") # HomEvenT's variable name for it
 
 class WMeter(Meter):
 	class Meta(Meter.Meta):
 		abstract = True
 	weight = m.PositiveSmallIntegerField(default=10,help_text="how important is this value? 0=presence detector")
+	var = m.CharField(max_length=200,unique=True, help_text="monitor name in HomEvenT") # HomEvenT's variable name for it
 
 
 class RainMeter(WMeter):

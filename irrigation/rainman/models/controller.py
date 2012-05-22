@@ -17,7 +17,7 @@
 from __future__ import division,absolute_import
 from rainman.models import Model
 from rainman.models.site import Site
-from rainman.utils import RangeMixin
+from rainman.utils import RangeMixin,str_tz
 from django.db import models as m
 from datetime import timedelta
 
@@ -46,11 +46,13 @@ class Controller(Model,RangeMixin):
 				continue
 			while stops and stops[0] < s.start:
 				if n_open == self.max_on:
-					self.start = stops[0]
+					start = stops[0]
+				k=heappop(stops)
+				#print "-",n_open,str_tz(k)
 				n_open -= 1
-				heappop(stops)
 			n_open += 1
 			heappush(stops,s.start+s.duration)
+			#print "+",n_open,str_tz(s.start+s.duration)
 			if n_open == self.max_on:
 				if (start < s.start):
 					yield ((start,s.start-start))
