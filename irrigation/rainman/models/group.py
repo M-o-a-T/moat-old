@@ -64,8 +64,8 @@ class Group(Model):
 	adj_flow = property(get_adj_flow)
 
 	# 
-	# when may this group run?
-	days = m.ManyToManyField(DayRange)
+	# when may this group run? Empty=no restriction
+	days = m.ManyToManyField(DayRange,blank=True)
 	def list_days(self):
 		return u"¦".join((d.name for d in self.days.all()))
 	def list_valves(self):

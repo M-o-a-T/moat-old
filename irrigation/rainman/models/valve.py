@@ -71,7 +71,9 @@ class Valve(Model,RangeMixin):
 			rr = []
 			for g in self.groups.all():
 				rr.append(g._allowed_range(start,end))
-			r.append(range_union(*rr))
+			if rr:
+				r.append(range_union(*rr))
+			r.append(self._group_range(start,end))
 
 		return range_intersection(*r)
 	
@@ -103,6 +105,13 @@ class Valve(Model,RangeMixin):
 				yield (x.start,x.end)
 				start = x.end
 
+	def _group_range(self,start,end):
+		gx = []
+		for g in self.groups.all():
+			for gd in g.days.all():
+				gx.append(gd._range(start,end))
+		return range_union(*gx)
+				
 				
 
 
