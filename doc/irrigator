@@ -49,9 +49,10 @@ variables are attached to the "valve" record.
 
 What this system keeps track of is not how wet an area is, but how dry it
 is, i.e. how much water it needs. Zero means "any excess water is wasted
-and will run off". If you don't start watering and it doesn't rain, this
-value will increase without limit. In practice there's a real upper bound
-(valve.max_level) which is enforced once watering starts.
+and will run off" (not necessarily above-ground).
+If you don't start watering and it doesn't rain, this value will increase
+without limit. In practice there's a real upper bound ("", valve.max_level)
+which is enforced once watering starts.
 
 You don't want to start watering only when the ground is bone dry, though,
 and you do want to stop sometime before your grounds are completely
@@ -80,6 +81,22 @@ reasons – none of which apply to the drip irrigation under the hedge.
 A "day" record, though, doesn't describe a day, but a set of times.
 "Night", for instance, might be any hour when it's supposed to be dark
 and "weekend" can be any day when you're able to sleep in.
+
+For specifying times, you first enter simple statements about time.
+"22 hr", for instance, is 10 p.m. through 10:59 p.m. daily, while
+"Fr" is Friday. So the first step would be an entry like "weekend",
+i.e. "Sa" and "Su". 
+
+In the second step, you can join these. So "Weeknights" would be "Night"
+plus "Week".
+
+The third step is to create a group and associate that with a number of 
+valves, and a number of these date records. So a valve that's in a group
+that's associated with "Weeknights" would fire, surprise, at night on
+weekdays. If you associate a group with more than one date record, its
+valves are scheduled whenever any of the dates matches the current time.
+
+For ease of administration, you can also add exclusion records. These are 
 
 Areas typically are grouped. You're going to have a party on the lawn, not
 in the vegetable beds. So it's probably OK to water the latter during the

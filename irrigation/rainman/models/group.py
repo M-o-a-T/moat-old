@@ -30,7 +30,6 @@ class Group(Model):
 	def __unicode__(self):
 		return u"‹%s %s›" % (self.__class__.__name__,self.name)
 	name = m.CharField(max_length=200)
-	valves = m.ManyToManyField(Valve,related_name="groups")
 	site = m.ForeignKey(Site,related_name="groups") # self.valve[*].controller.site is self.site
 	#
 	# Adjustment factors affecting this group
@@ -65,9 +64,14 @@ class Group(Model):
 
 	# 
 	# when may this group run? Empty=no restriction
-	days = m.ManyToManyField(DayRange,blank=True)
+	days = m.ManyToManyField(DayRange,blank=True,related_name="groups_y")
 	def list_days(self):
 		return u"¦".join((d.name for d in self.days.all()))
+	xdays = m.ManyToManyField(DayRange,blank=True,related_name="groups_n")
+	def list_xdays(self):
+		return u"¦".join((d.name for d in self.xdays.all()))
+
+	valves = m.ManyToManyField(Valve,related_name="groups")
 	def list_valves(self):
 		return u"¦".join((d.name for d in self.valves.all()))
 

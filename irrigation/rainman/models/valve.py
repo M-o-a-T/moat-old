@@ -20,7 +20,7 @@ from rainman.models.controller import Controller
 from rainman.models.feed import Feed
 from rainman.models.paramgroup import ParamGroup
 from django.db import models as m
-from rainman.utils import now, range_intersection,range_union, RangeMixin
+from rainman.utils import now, range_intersection,range_union,range_invert, RangeMixin
 from datetime import timedelta
 
 class Valve(Model,RangeMixin):
@@ -68,12 +68,14 @@ class Valve(Model,RangeMixin):
 			r.append(self._not_blocked_range(start,end))
 			for g in self.groups.all():
 				r.append(g._not_blocked_range(start,end))
-			rr = []
+			ry = []
+			rn = []
 			for g in self.groups.all():
-				rr.append(g._allowed_range(start,end))
-			if rr:
-				r.append(range_union(*rr))
+				ry.append(g._allowed_range(start,end))
+			if ry:
+				r.append(range_union(*ry))
 			r.append(self._group_range(start,end))
+			r.append(self._group_xrange(start,end))
 
 		return range_intersection(*r)
 	
@@ -111,7 +113,12 @@ class Valve(Model,RangeMixin):
 			for gd in g.days.all():
 				gx.append(gd._range(start,end))
 		return range_union(*gx)
-				
-				
 
+	def _group_xrange(self,start,end):
+		gx = []
+		for g in self.groups.all():
+			for gd in g.xdays.all():
+				gx.append(gd._range(start,end))
+		return range_invert(range_union(*gx))
+				
 
