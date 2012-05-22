@@ -176,8 +176,8 @@ class DayTimeAdmin(admin.ModelAdmin):
 	list_filter = ('day',)
 
 class GroupAdmin(admin.ModelAdmin):
-	list_display = ('name','site','list_valves','list_days')
-	fields = ('name','site',('valves','days'), ('adj_sun','adj_rain','adj_wind','adj_temp'))
+	list_display = ('name','site','list_valves','list_range')
+	fields = ('name','site',('valves','days','xdays'), ('adj_sun','adj_rain','adj_wind','adj_temp'))
 	list_filter = ('site',)
 	inlines = [
 		GroupOverrideInline,

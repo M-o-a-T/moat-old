@@ -19,11 +19,11 @@ from rainman.models import Model
 from rainman.models.site import Site
 from rainman.models.valve import Valve
 from rainman.models.day import DayRange
-from rainman.utils import now
+from rainman.utils import now,RangeMixin, range_union,range_intersection,range_invert
 from django.db import models as m
 from datetime import timedelta
 
-class Group(Model):
+class Group(Model,RangeMixin):
 	class Meta(Model.Meta):
 		unique_together = (("site", "name"),)
 		db_table="rainman_group"
@@ -66,14 +66,27 @@ class Group(Model):
 	# when may this group run? Empty=no restriction
 	days = m.ManyToManyField(DayRange,blank=True,related_name="groups_y")
 	def list_days(self):
-		return u"¦".join((d.name for d in self.days.all()))
+		return u" ¦ ".join((d.name for d in self.days.all()))
 	xdays = m.ManyToManyField(DayRange,blank=True,related_name="groups_n")
 	def list_xdays(self):
-		return u"¦".join((d.name for d in self.xdays.all()))
+		return u" ¦ ".join((d.name for d in self.xdays.all()))
+	
+	def list_range(self):
+		if self.days.count()+self.xdays.count() == 0:
+			return u"‹no dates›"
+		return super(Group,self).list_range()
+
+	def _range(self,start,end):
+		r = []
+		r.append(self._allowed_range(start,end))
+		r.append(self._not_blocked_range(start,end))
+		r.append(self._days_range(start,end))
+		r.append(self._no_xdays_range(start,end))
+		return range_intersection(*r)
 
 	valves = m.ManyToManyField(Valve,related_name="groups")
 	def list_valves(self):
-		return u"¦".join((d.name for d in self.valves.all()))
+		return u" ¦ ".join((d.name for d in self.valves.all()))
 
 	def _not_blocked_range(self,start,end):
 		for x in self.overrides.filter(start__gte=start-timedelta(1,0),start__lt=end,allowed=False).order_by("start"):
@@ -97,6 +110,13 @@ class Group(Model):
 			start = x.end
 		if n == 0:
 			yield (start,end-start)
+
+	def _days_range(self,start,end):
+		return range_union(*(d._range(start,end) for d in self.days.all()))
+
+	def _no_xdays_range(self,start,end):
+		return range_invert(start,end-start, range_union(*(d._range(start,end) for d in self.xdays.all())))
+
 
 				
 
