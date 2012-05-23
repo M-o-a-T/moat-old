@@ -61,6 +61,8 @@ MEDIA_URL = ''
 # Example: "/home/media/media.lawrence.com/static/"
 STATIC_ROOT = ''
 
+ADMIN_MEDIA_PREFIX = '/static/admin/'
+
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
 STATIC_URL = '/static/'
@@ -85,6 +87,7 @@ SECRET_KEY = 'nk(hmf9=6^ikpj_xt+q(t^95o*h^q$rv-o*i8!gzq)0o2y&amp;e#k'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
+    'djinja.template.loaders.Loader',
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
 #     'django.template.loaders.eggs.Loader',
@@ -112,12 +115,15 @@ TEMPLATE_DIRS = (
 )
 
 INSTALLED_APPS = (
+	#'djinja.contrib.debug_toolbar',
+	#'debug_toolbar',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     #'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'djinja.contrib.admin',
     'django.contrib.admin',
 	'rainman',
 	'south',
