@@ -1039,11 +1039,11 @@ class FlowCheck(object):
 
 	def run(self):
 		# Safety timer
-		self.timer = gevent.spawn_later(self.valve.feed.d.db_max_flow_wait,cf.dead,False)
+		self.timer = gevent.spawn_later(self.valve.feed.d.db_max_flow_wait, self.dead, kill=False)
 
 		self.start()
 		res = self.q.get()
-		self.feed.site.log("End flow check: %s"%(res,))
+		self.valve.log("End flow check: %s"%(res,))
 
 		
 class MaxFlowCheck(object):

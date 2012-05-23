@@ -41,6 +41,7 @@ class Schedule(Model):
 
 	seen = m.BooleanField(default=False,max_length=1,help_text="Sent to the controller?")
 	changed = m.BooleanField(default=False,max_length=1,help_text="Updated by the scheduler?")
+	forced = m.BooleanField(default=False,max_length=1,help_text="Generated due to a valve force entry?")
 	# The scheduler inserts both to False. The controller sets Seen.
 	# if the scheduler has to change something, it clears Seen and sets Change
 
