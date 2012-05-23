@@ -28,6 +28,9 @@ Documentation
 Code
 ====
 
+* teach runschedule to reload the current list of
+  valves/feeds/meters/controllers/whatever.
+
 * teach the time range code to accept x-y, y-x, a,b,c-d, and (optionally) e-f/g times.
 
 * scripts/monitor: add filtering
