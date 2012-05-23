@@ -711,13 +711,14 @@ class SchedController(SchedCommon):
 		return n >= self.c.max_on
 
 class SchedValve(SchedCommon):
-	"""Mirrors a valve."""
+	"""Mirrors (and monitors) a valve."""
 	locked = False # external command, don't change
 	sched = None
 	sched_ts = None
 	sched_job = None
 	sched_lock = None
 	on = False
+	on_ts = None
 	flow = 0
 	_flow_check = None
 
@@ -887,9 +888,14 @@ class SchedValve(SchedCommon):
 			return
 		try:
 			if on != self.on:
+				n=now()
 				flow,self.flow = self.flow,0
+				# If nothing happened, calculate.
+				if not on and not self.flow and not self.v.feed.var:
+					flow = self.v.flow * (n-self.on_ts).total_seconds()
 				self.new_level_entry(flow)
 				self.on = on
+				self.on_ts = n
 
 		except Exception:
 			print_exc()
