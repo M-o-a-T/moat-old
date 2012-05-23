@@ -99,10 +99,11 @@ class Command(BaseCommand):
 		for s in v.schedules.filter(start__gte=soon-timedelta(1,0)):
 			if s.end < soon:
 				continue
-			if s.start-s > soon and not s.seen and not s.forced:
+			if s.start > soon and not s.seen and not s.forced:
 				s.delete()
 				continue
-			want -= s.duration*1.2 # avoid some strange burst
+			#want -= s.duration*1.2 # avoid some strange burst
+			want -= timedelta(0,s.duration.total_seconds()*1.2) # avoid some strange burst
 
 		if options['verbose']:
 			print "Run",v,"for",want,"Level",v.level,v.start_level,v.stop_level
