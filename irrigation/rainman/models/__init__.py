@@ -37,10 +37,10 @@ class Model(m.Model):
 				setattr(self, field, val)
 	def sync(self):
 		pass
-	def refresh(self):
-		pass
 	def shutdown(self):
 		pass
+	def update(self,**k):
+		self.__class__.objects.filter(id=self.id).update(**k)
 
 
 from rainman.models.site import Site

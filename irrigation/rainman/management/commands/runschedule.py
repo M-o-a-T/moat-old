@@ -45,41 +45,41 @@ from django.db import transaction
 
 ### database stuff
 ### This does not actually work because of transaction-vs.-thread issues
-def save_objs(objs):
-	for o in objs:
-		o.save()
-
-_save_q = Queue()
-def _save_job():
-	while True:
-		s = set()
-		o = _save_q.get()
-		print >>sys.stderr,"AddSave1",id(o),o
-		s.add(o)
-		try:
-			while True:
-				o = _save_q.get(timeout=1)
-				if o is None:
-					break
-				s.add(o)
-		except Empty:
-			pass
-
-		print >>sys.stderr,"Save",s
-		for i in range(3):
-			try:
-				save_objs(s)
-			except Exception:
-				print_exc()
-			else:
-				break
-		print >>sys.stderr,"SaveDone"
-				
-
-def Save(obj):
-	#_save_q.put(obj)
-	if obj is not None:
-		obj.save()
+#def save_objs(objs):
+#	for o in objs:
+#		o.save()
+#
+#_save_q = Queue()
+#def _save_job():
+#	while True:
+#		s = set()
+#		o = _save_q.get()
+#		print >>sys.stderr,"AddSave1",id(o),o
+#		s.add(o)
+#		try:
+#			while True:
+#				o = _save_q.get(timeout=1)
+#				if o is None:
+#					break
+#				s.add(o)
+#		except Empty:
+#			pass
+#
+#		print >>sys.stderr,"Save",s
+#		for i in range(3):
+#			try:
+#				save_objs(s)
+#			except Exception:
+#				print_exc()
+#			else:
+#				break
+#		print >>sys.stderr,"SaveDone"
+#				
+#
+#def Save(obj):
+#	#_save_q.put(obj)
+#	if obj is not None:
+#		obj.save()
 
 class NotConnected(RuntimeError):
 	pass
@@ -118,7 +118,7 @@ class Command(BaseCommand):
 
 		if not controllers:
 			raise RuntimeError("No controllers for site '%s' found." % (s.name,))
-		gevent.spawn(_save_job)
+		#gevent.spawn(_save_job)
 		while True:
 			gevent.sleep(99999)
 
@@ -146,6 +146,7 @@ class Meter(object):
 
 	def monitor_value(self,event=None,**k):
 		"""monitor value NUMBER name…"""
+		self.refresh()
 		try:
 			val = float(event[2])
 			self.add_value(val)
@@ -445,7 +446,7 @@ class SchedSite(SchedCommon):
 			for m in mm:
 				m.sync()
 		self.run_main_task()
-		Save(None)
+		#Save(None)
 		print >>sys.stderr,"Sync end"
 	
 	def shutdown(self,**k):
@@ -462,7 +463,7 @@ class SchedSite(SchedCommon):
 			for mm in self.meters.itervalues():
 				for m in mm:
 					m.shutdown()
-		Save(None)
+		#Save(None)
 		sys.exit(0)
 
 
@@ -517,8 +518,8 @@ class SchedSite(SchedCommon):
 			v.schedules.filter(start__gte=n).delete()
 			for sc in v.schedules.filter(start__gte=n-timedelta(1),start__lt=n,seen=True):
 				if sc.start+sc.duration > n:
-					sc.duration=n-sc.start
-					Save(sc)
+					sc.update(duration=n-sc.start)
+					sc.refresh()
 			v.schedules.filter(start__gte=n-timedelta(1),seen=False).delete()
 		self.run_main_task()
 
@@ -605,7 +606,7 @@ class SchedSite(SchedCommon):
 		
 		print >>sys.stderr,"Values:",values
 		h = History(site=self.s,time=now(),**values)
-		Save(h)
+		h.save()
 		return h
 
 	def sync_history(self):
@@ -646,6 +647,7 @@ class SchedSite(SchedCommon):
 		print >>sys.stderr,"RunSched end"
 
 	def sched_task(self, kill=True):
+		self.refresh()
 		self.run_schedule()
 
 
@@ -758,8 +760,9 @@ class SchedValve(SchedCommon):
 			self.sched = sched
 			if not sched.seen:
 				sched.start = now()
-				sched.seen = True
-			Save(sched)
+				sched.update(seen = True)
+				sched.refresh()
+			#Save(sched)
 		else:
 			if self.v.verbose:
 				self.log("Opened for %s"(duration,))
@@ -904,8 +907,9 @@ class SchedValve(SchedCommon):
 		else:
 			if self.v.time > lv.time:
 				self.log("Timestamp downdate: %s %s" % (self.v.time,lv.time))
-				self.v.time = lv.time
-				Save(self.v)
+				self.v.update(time = lv.time)
+				self.v.refresh()
+				#Save(self.v)
 		if (n-self.v.time).total_seconds() > 3500:
 			self.new_level_entry()
 
@@ -937,17 +941,20 @@ class SchedValve(SchedCommon):
 		if self.v.time == ts:
 			return
 		if self.v.level < 0:
-			self.v.level = 0
-		self.v.level += sum_f
+			level = 0
+		else:
+			level = F('level')
+		level += sum_f
 		if flow > 0 and self.v.level > self.v.max_level:
-			self.v.level = self.v.max_level
-		self.v.level -= flow/self.v.area+sum_r
-		if self.v.level < 0:
-			self.log("Level %s ?!?"%(self.v.level,))
-		self.v.time = ts
+			level = self.v.max_level
+		level -= flow/self.v.area+sum_r
+		#if level < 0:
+		#	self.log("Level %s ?!?"%(self.v.level,))
+		self.v.update(time=ts, level=level)
+		self.v.refresh()
+
 		lv = Level(valve=self.v,time=ts,level=self.v.level,flow=flow)
-		Save(lv)
-		Save(self.v)
+		lv.save()
 
 	def log(self,txt):
 		log(self.v,txt)
@@ -1006,8 +1013,8 @@ class FlowCheck(object):
 		sec = (n-self.start).total_seconds()
 		if sec > 3:
 			self.res = self.flow/sec
-			self.valve.v.flow = self.res
-			Save(self.valve.v)
+			self.valve.v.update(flow = self.res)
+			self.valve.v.refresh()
 		else:
 			self.valve.log("Flow check broken: sec %s"%(sec,))
 		if self.valve.on:
@@ -1097,8 +1104,8 @@ class MaxFlowCheck(object):
 		sec = (n-self.start).total_seconds()
 		if sec > 3:
 			self.res = self.flow/sec
-			self.feed.d.flow = self.res
-			Save(self.feed.d)
+			self.feed.d.update(flow = self.res)
+			self.feed.d.refresh()
 		else:
 			self.feed.log("Flow check broken: sec %s"%(sec,))
 		self._unlock()
