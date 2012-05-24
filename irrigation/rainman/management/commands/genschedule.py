@@ -110,6 +110,8 @@ class Command(BaseCommand):
 			#want -= s.duration*1.2 # avoid some strange burst
 			want -= timedelta(0,s.duration.total_seconds()*1.2) # timedelta cannot be multiplied (Py3 feature)
 
+		if want.total_seconds() < 10:
+			return
 		if options['verbose']:
 			print "Plan",v,"for",want,"Level",v.level,v.start_level,v.stop_level
 		for a,b in v.range(start=soon):
