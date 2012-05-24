@@ -87,7 +87,9 @@ SECRET_KEY = 'nk(hmf9=6^ikpj_xt+q(t^95o*h^q$rv-o*i8!gzq)0o2y&amp;e#k'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
-    'djinja.template.loaders.Loader',
+	'django_jinja.loaders.AppLoader',
+	'django_jinja.loaders.FileSystemLoader',
+
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
 #     'django.template.loaders.eggs.Loader',
@@ -123,10 +125,10 @@ INSTALLED_APPS = (
     #'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'djinja.contrib.admin',
     'django.contrib.admin',
 	'rainman',
 	'south',
+	'django_jinja',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )

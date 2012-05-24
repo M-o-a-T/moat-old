@@ -235,6 +235,17 @@ check flow ‹valve›
 
 Run the flow measuring algorithm across this valve.
 
+------------
+Installation
+------------
+
+You need:
+
+  * Django (Web framework)
+  * Jinja2 (Template system)
+  * django-south (database migration)
+  * django-jinja2 (integration)
+
 -----
 To Do
 -----
