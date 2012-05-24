@@ -113,7 +113,7 @@ class LogInline(admin.TabularInline):
 
 class SiteAdmin(admin.ModelAdmin):
 	list_display = ('name','host','var')
-	inlines_= [
+	inlines = [
 		FeedInline,
 		ControllerInline,
 		GroupInline,
@@ -127,21 +127,21 @@ class SiteAdmin(admin.ModelAdmin):
 class FeedAdmin(admin.ModelAdmin):
 	list_display = ('name','site','flow','var')
 	list_filter = ('site',)
-	inlines_= [
+	inlines = [
 		ValveInline,
 	]
 
 class ControllerAdmin(admin.ModelAdmin):
 	list_display = ('name','site','location','list_range')
 	list_filter = ('site',)
-	inlines_= [
+	inlines = [
 		ValveInline,
 	]
 
 class ValveAdmin(admin.ModelAdmin):
 	list_display = ('name','controller','var','comment','time','level','priority','list_groups','flow','area','stop_level','start_level','max_level')
 	list_filter = ('feed','param_group','controller')
-	inlines_= [
+	inlines = [
 		ValveOverrideInline,
 		ScheduleInline,
 	]
@@ -167,7 +167,7 @@ class DayRangeAdmin(admin.ModelAdmin):
 
 class DayAdmin(admin.ModelAdmin):
 	list_display = ('name','list_daytimes','list_range')
-	inlines_= [
+	inlines = [
 		DayTimeInline,
 	]
 
@@ -177,9 +177,9 @@ class DayTimeAdmin(admin.ModelAdmin):
 
 class GroupAdmin(admin.ModelAdmin):
 	list_display = ('name','site','list_valves','list_range')
-	fields = ('name','site',('valves','days','xdays'), ('adj_sun','adj_rain','adj_wind','adj_temp'))
+	fields = ('name','site',('valves','days','xdays'))
 	list_filter = ('site',)
-	inlines_= [
+	inlines = [
 		GroupOverrideInline,
 		GroupAdjustInline,
 	]
@@ -199,7 +199,7 @@ class ValveOverrideAdmin(admin.ModelAdmin):
 class ParamGroupAdmin(admin.ModelAdmin):
 	list_display = ('name','site','factor','list_valves')
 	list_filter = ('site',)
-	inlines_= [
+	inlines = [
 		EnvironmentEffectInline,
 		#ValveInline,
 	]
