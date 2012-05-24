@@ -4,15 +4,18 @@ from django.contrib import admin
 admin.autodiscover()
 
 from rainman import admin as rain_admin
+from irrigator.views import SiteView,SitesView
 
 urlpatterns = patterns('',
-    # Examples:
-    # url(r'^$', 'regner.views.home', name='home'),
-    # url(r'^regner/', include('regner.foo.urls')),
+    url(r'^$', 'irrigator.views.home', name='home'),
+    url(r'^site/$', SitesView.as_view()),
+    url(r'^site/(?P<pk>\d+)$', SiteView.as_view()),
 
-    # Uncomment the admin/doc line below to enable admin documentation:
+	# Login stuff
+	url(r'^login/$', 'django.contrib.auth.views.login', {'template_name': 'auth/login.html'}),
+	url(r'^login/logout$', 'django.contrib.auth.views.logout', {'template_name': 'auth/logout.html'}),
+    url(r'^login/no_access$', 'irrigator.auth.no_access'),
+
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
-
-    # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
 )

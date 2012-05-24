@@ -16,7 +16,7 @@
 
 from __future__ import division,absolute_import
 from rainman.models import Model
-from rainman.models.group import Group
+from rainman.models.group import Group,Site
 from django.db import models as m
 from django.db.models.signals import post_save
 
@@ -36,6 +36,18 @@ class UserForGroup(Model):
 		('3',"admin"),
 	)
 	level = m.IntegerField(choices=LEVEL_VALUES,default=1,help_text=u"Access to …")
+
+	_sites = None
+	@property
+	def sites(self):
+		"""Return the set of sites which the user may access"""
+		if self._sites is not None:
+			return self._sites
+		res = set()
+		for s in Site.objects.filter(groups__valves__groups__users=self).distinct():
+			res.add(s)
+		self._sites = res
+		return res
 
 
 # definition of UserProfile from above

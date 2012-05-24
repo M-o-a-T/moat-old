@@ -1,0 +1,12 @@
+{% extends "base.jinja" %}
+{% block title %}Sites{% endblock %}
+{% block content %}
+
+<table>
+<th><td>Site name</td></th>
+{% for site in site_list %}
+<tr><td>{{ site.name }}</td></tr>
+{% endfor %}
+</table>
+
+{% endblock %}

@@ -105,9 +105,15 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-AUTH_PROFILE_MODULE = 'rainman.models.auth.UserForGroup'
+AUTH_PROFILE_MODULE = 'rainman.UserForGroup'
+
+LOGIN_URL = '/login/'
 
 ROOT_URLCONF = 'irrigator.urls'
+
+LOGIN_REDIRECT_URL = '/'
+
+JINJA2_AUTOESCAPE = True
 
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'irrigator.wsgi.application'
@@ -116,6 +122,7 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
+	"/daten/src/git/homevent/irrigation/rainman/templates",
 )
 
 INSTALLED_APPS = (
