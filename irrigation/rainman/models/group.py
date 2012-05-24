@@ -33,10 +33,6 @@ class Group(Model,RangeMixin):
 	site = m.ForeignKey(Site,related_name="groups") # self.valve[*].controller.site is self.site
 	#
 	# Adjustment factors affecting this group
-	adj_rain = m.FloatField(default=1, help_text="How much does rain affect this group?")
-	adj_sun = m.FloatField(default=1, help_text="How much does sunshine affect this group?")
-	adj_wind = m.FloatField(default=1, help_text="How much does wind affect this group?")
-	adj_temp = m.FloatField(default=1, help_text="How much does temperature affect this group?")
 
 	def get_adj_flow(self,date=None):
 		if date is None:
