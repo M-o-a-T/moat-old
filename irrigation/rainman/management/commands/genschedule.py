@@ -22,6 +22,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from rainman.models import Site,Valve,Schedule,Controller,History,Level
 from rainman.utils import now,str_tz
+from rainman.logging import log
 from datetime import datetime,time,timedelta
 from django.db.models import F,Q
 from django.utils.timezone import utc,get_current_timezone
@@ -89,8 +90,9 @@ class Command(BaseCommand):
 
 	def one_valve(self,v,options):
 		if v.level < v.start_level:
-			if options['verbose']:
-				print "Nothing to do",v,v.level,v.start_level
+			print "Nothing to do",v,v.level,v.start_level
+			if options['save'] and v.verbose:
+				log(v,"Nothing to do (has %s, need %s)" % (v.level,v.start_level))
 			return
 		level = v.level
 		if level > v.max_level:
@@ -100,25 +102,32 @@ class Command(BaseCommand):
 			if s.end < soon:
 				continue
 			if s.start > soon and not s.seen and not s.forced:
-				s.delete()
-				continue
+				if options['save']:
+					if v.verbose:
+						log(v,"Drop schedule at %s for %s" % (str_tz(s.start),str(s.duration)))
+					s.delete()
+					continue
 			#want -= s.duration*1.2 # avoid some strange burst
-			want -= timedelta(0,s.duration.total_seconds()*1.2) # avoid some strange burst
+			want -= timedelta(0,s.duration.total_seconds()*1.2) # timedelta cannot be multiplied (Py3 feature)
 
 		if options['verbose']:
-			print "Run",v,"for",want,"Level",v.level,v.start_level,v.stop_level
+			print "Plan",v,"for",want,"Level",v.level,v.start_level,v.stop_level
 		for a,b in v.range(start=soon):
 			if b < want:
 				print "Partial",str_tz(a),str(b)
 				if options['save']:
 					sc=Schedule(valve=v,start=a,duration=b)
 					sc.save()
+					if v.verbose:
+						log(v,"Scheduled at %s for %s (level %s; want %s)" % (str_tz(a),str(b),v.level),str(want))
 				want -= b
 			else:
 				print "Total",str_tz(a),str(want)
 				if options['save']:
 					sc=Schedule(valve=v,start=a,duration=want)
 					sc.save()
+					if v.verbose:
+						log(v,"Scheduled at %s for %s (level %s)" % (str_tz(a),str(want),v.level))
 				want = None
 				break
 		if want is not None:
