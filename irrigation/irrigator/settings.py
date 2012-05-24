@@ -83,7 +83,7 @@ STATICFILES_FINDERS = (
 )
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = 'nk(hmf9=6^ikpj_xt+q(t^95o*h^q$rv-o*i8!gzq)0o2y&amp;e#k'
+SECRET_KEY = 'YOU WISH'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -104,6 +104,8 @@ MIDDLEWARE_CLASSES = (
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
+
+AUTH_PROFILE_MODULE = 'rainman.models.auth.UserForGroup'
 
 ROOT_URLCONF = 'irrigator.urls'
 
