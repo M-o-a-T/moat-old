@@ -745,7 +745,10 @@ class SchedValve(SchedCommon):
 		print >>sys.stderr,"Open",self.v.var
 		self.site.delay_on()
 		if self.controller.has_max_on():
-			print >>sys.stderr,"… but too many:", " ".join(str(v) for v in self.c.valves.all() if SchedValve(v).on)
+			print >>sys.stderr,"… but too many:", " ".join(str(v) for v in self.controller.c.valves.all() if SchedValve(v).on)
+			if sched:
+				sched.update(seen = False)
+			self.on = False
 			raise TooManyOn(self)
 		if duration is None and sched is not None:
 			duration = sched.duration
