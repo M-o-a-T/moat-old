@@ -35,6 +35,7 @@ from rpyc.core.service import VoidService
 from optparse import make_option
 
 from django.core.management.base import BaseCommand, CommandError
+from django.core.exceptions import ObjectDoesNotExist
 from rainman.models import Site,Valve,Schedule,Controller,History,Level
 from rainman.utils import now
 from rainman.logging import log,log_error
@@ -803,17 +804,20 @@ class SchedValve(SchedCommon):
 			return
 		n = now()
 
-		if self.sched is not None:
-			self.sched.refresh()
-			if self.sched.start+self.sched.duration <= n:
-				self._off()
-				self.sched_ts = self.sched.start+self.sched.duration
-				self.sched = None
-			else:
-				self.sched_job = gevent.spawn_later((self.sched.start+self.sched.duration-n).total_seconds(),self.run_sched_task,reason="_run_schedule 1")
-			return
-
+		try:
+			if self.sched is not None:
+				self.sched.refresh()
+				if self.sched.start+self.sched.duration <= n:
+					self._off()
+					self.sched_ts = self.sched.start+self.sched.duration
+					self.sched = None
+				else:
+					self.sched_job = gevent.spawn_later((self.sched.start+self.sched.duration-n).total_seconds(),self.run_sched_task,reason="_run_schedule 1")
+				return
+		except ObjectDoesNotExist:
+			pass # somebody deleted it *shrug*
 		sched = None
+
 		if self.sched_ts is None:
 			try:
 				sched = self.v.schedules.filter(start__lt=n).order_by("-start")[0]
