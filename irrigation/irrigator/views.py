@@ -18,7 +18,8 @@ from __future__ import division,absolute_import
 from django.http import HttpResponseRedirect
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import get_object_or_404
-from django.views.generic import ListView,DetailView
+from django.views.generic import ListView,DetailView,CreateView,UpdateView,DeleteView
+from django.forms import ModelForm,FloatField,TimeField,Textarea
 from rainman.models import Site
 
 
@@ -41,17 +42,68 @@ def home(request):
 
 	return HttpResponseRedirect('/site/')
 
+class NonNegativeFloatField(FloatField):
+	def clean(self,val):
+		val = super(NonNegativeFloatField,self).clean(val)
+		if val < 0:
+			raise ValidationError("must not be negative")
+		return val
 
-class SiteLimiter(object):
+class BasicSiteForm(ModelForm):
+    class Meta:
+        model = Site
+#class SiteForm(BasicSiteForm):
+class SiteForm(ModelForm):
+	#class Meta(BasicSiteForm.Meta):
+	class Meta:
+		model = Site
+		exclude = ('db_rate','db_rain_delay')
+		fields = ('name','var','host','rain_delay','rate')
+		widgets = {
+			'name': Textarea(attrs={'cols': 80, 'rows': 20}),
+		}
+	rate = NonNegativeFloatField(help_text=Meta.model._meta.get_field_by_name("db_rate")[0].help_text)
+	rain_delay = TimeField(help_text=Meta.model._meta.get_field_by_name("db_rain_delay")[0].help_text)
+
+	def construct_instance(form, instance, fields=None, exclude=None):
+		instance = super(SiteForm,self).construct_instance(form,instance,fields,exclude)
+		for fn in self.Meta.exclude:
+			if not fn.startswith("db_"): continue
+			fn = fn[3:]
+			setattr(instance,fn, form.cleaned_data[fn])
+	
+
+# Creating a form to add an article.
+form = SiteForm()
+
+# Creating a form to change an existing article.
+#site = Site.objects.get(pk=1)
+#form = SiteForm(instance=site)
+
+
+
+class SiteMixin(object):
 	model = Site
+	context_object_name = "site"
 	def get_queryset(self):
 		gu = self.request.user.get_profile()
-		return super(SiteLimiter,self).get_queryset().filter(id__in=(x.id for x in gu.sites))
+		return super(SiteMixin,self).get_queryset().filter(id__in=(x.id for x in gu.sites))
+	def get_template_names(self):
+		return ["obj/%s%s.jinja" % (self.model._meta.object_name.lower(), self.template_name_suffix)]
 
-class SitesView(SiteLimiter,ListView):
+class SitesView(SiteMixin,ListView):
 	context_object_name = "site_list"
-	template_name = "obj/sites.jinja"
+	pass
 
-class SiteView(SiteLimiter,DetailView):
-	context_object_name = "site"
-	template_name = "obj/site.jinja"
+class SiteView(SiteMixin,DetailView):
+	pass
+
+class SiteNewView(SiteMixin,CreateView):
+	success_url="/site/%(id)s"
+
+class SiteEditView(SiteMixin,UpdateView):
+	success_url="/site/%(id)s"
+
+class SiteDeleteView(SiteMixin,DeleteView):
+	pass
+

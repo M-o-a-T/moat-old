@@ -97,7 +97,7 @@ class Command(BaseCommand):
 		level = v.level
 		if level > v.max_level:
 			level = v.max_level
-		want = v.raw_rain_time(level)
+		want = v.raw_watering_time(level)
 		for s in v.schedules.filter(start__gte=soon-timedelta(1,0)):
 			if s.end < soon:
 				continue

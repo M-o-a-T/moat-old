@@ -139,7 +139,7 @@ class ControllerAdmin(admin.ModelAdmin):
 	]
 
 class ValveAdmin(admin.ModelAdmin):
-	list_display = ('name','controller','var','comment','time','level','priority','list_groups','flow','area','stop_level','start_level','max_level','rain_time')
+	list_display = ('name','controller','var','comment','time','level','priority','list_groups','flow','area','stop_level','start_level','max_level','watering_time')
 	list_filter = ('feed','param_group','controller')
 	inlines = [
 		ValveOverrideInline,

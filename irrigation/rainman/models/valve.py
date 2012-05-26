@@ -55,15 +55,15 @@ class Valve(Model,RangeMixin):
 #		return res
 #	adj_flow = property(get_adj_flow)
 
-	def _rain_time(self,level=None):
+	def _watering_time(self,level=None):
 		if level is None:
 			level = self.start_level
 		return (self.start_level-self.stop_level)*self.area/self.flow
-	def raw_rain_time(self,level=None):
-		res = self._rain_time(level)
+	def raw_watering_time(self,level=None):
+		res = self._watering_time(level)
 		return timedelta(0,int(res))
-	def rain_time(self,level=None,date=None):
-		res = self._rain_time(level)
+	def watering_time(self,level=None,date=None):
+		res = self._watering_time(level)
 #		res *= self.get_adj_flow(date)
 		return timedelta(0,int(res))
 	# This describes the current state
