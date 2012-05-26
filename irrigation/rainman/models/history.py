@@ -33,6 +33,7 @@ class Level(Model):
 	time = m.DateTimeField(db_index=True)
 	level = m.FloatField(help_text="then-current water capacity, in mm")
 	flow = m.FloatField(default=0, help_text="liters of inflow since the last entry")
+	forced = m.BooleanField(default=False,help_text="manually corrected, leave alone when recalculating")
 
 class History(Model):
 	"""historic evaporation and rain levels"""

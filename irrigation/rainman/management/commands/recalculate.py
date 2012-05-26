@@ -21,6 +21,7 @@
 
 from django.core.management.base import BaseCommand, CommandError
 from rainman.models import Site,Valve,Schedule,Controller,History,Level
+from rainman.utils import StoredIter
 from datetime import datetime,time,timedelta
 from django.db.models import F,Q
 from django.utils.timezone import utc,get_current_timezone
@@ -87,22 +88,34 @@ class Command(BaseCommand):
 		params = ParamGroup(v.param_group)
 		now = datetime.utcnow().replace(tzinfo=utc)
 		start=now-timedelta(options['age'])
-		hist = list(History.objects.filter(site=v.controller.site,time__gte=start).order_by("-time"))
+		hist = StoredIter(History.objects.filter(site=v.controller.site,time__gte=start).order_by("time"))
 		level=None
 		ts=None
 		s = v.controller.site
 
 		for lv in Level.objects.filter(valve=v).order_by("time"):
-			if level is None:
+			if level is None or lv.forced:
+				while hist:
+					if hist.stored.time > lv.time:
+						break
+					try:
+						hist.next
+					except StopIteration:
+						hist = None
+						break
 				level=lv.level
 				ts=lv.time
 				continue
 			sum_f=0
 			sum_r=0
 			while hist:
-				if hist[-1].time > lv.time:
+				h=hist.stored
+				if h.time > lv.time:
 					break
-				h=hist.pop()
+				try:
+					hist.next
+				except StopIteration:
+					hist = None
 				f = params.env_factor(h,options['verbose'])
 				add_f = v.shade*s.db_rate*params.pg.factor*f*(h.time-ts).total_seconds()
 				add_r = v.runoff*h.rain

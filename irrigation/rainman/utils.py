@@ -60,7 +60,7 @@ class RangeMixin(object):
 class NotYet: pass
 class StoredIter(object):
 	def __init__(self,it):
-		self.it = range_coalesce(it)
+		self.it = iter(it)
 		#i = list(self.it)
 		#print "LIST",i
 		#self.it = iter(i)
@@ -104,7 +104,7 @@ def range_union(*a):
 		which are the union of all the start+length tuples in a.
 		"""
 	#print "UNION"
-	res = range_coalesce(_range_union([StoredIter(ax) for ax in a]))
+	res = range_coalesce(_range_union([StoredIter(range_coalesce(ax)) for ax in a]))
 	#res = list(res)
 	#print "UNION = ",res
 	return res
@@ -146,7 +146,7 @@ def _range_intersection(*a):
 		Return an iterator which yields a row of start+length tuples
 		which are the intersection of all the start+length tuples in a.
 		"""
-	head = [StoredIter(ax) for ax in a]
+	head = [StoredIter(range_coalesce(ax)) for ax in a]
 
 	ra,rl = head[0].stored
 
