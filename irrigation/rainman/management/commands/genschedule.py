@@ -97,7 +97,7 @@ class Command(BaseCommand):
 		level = v.level
 		if level > v.max_level:
 			level = v.max_level
-		want = timedelta(0,(level-v.stop_level)*v.area/v.flow)
+		want = v.raw_rain_time(level)
 		for s in v.schedules.filter(start__gte=soon-timedelta(1,0)):
 			if s.end < soon:
 				continue

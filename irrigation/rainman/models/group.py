@@ -34,29 +34,29 @@ class Group(Model,RangeMixin):
 	#
 	# Adjustment factors affecting this group
 
-	def get_adj_flow(self,date=None):
-		if date is None:
-			date = now()
-		try:
-			a1 = self.adjusters.filter(start__lte=now).order_by("-start")[0]
-		except IndexError:
-			a1 = None
-		try:
-			a2 = self.adjusters.filter(start__gte=now).order_by("-start")[0]
-		except IndexError:
-			if a1 is None:
-				return 1
-			return a1.factor
-		else:
-			if a1 is None:
-				return a2.factor
-		td = (a2.start-a1.start).total_seconds()
-		if td < 60: # less than one minute? forget it
-			return (a1.factor+a2.factor)/2
-		dd = (date-a1.start).total_seconds()
-		fd = a2.factor - a1.factor
-		return a1.factor + fd * dd / td
-	adj_flow = property(get_adj_flow)
+#	def get_adj_flow(self,date=None):
+#		if date is None:
+#			date = now()
+#		try:
+#			a1 = self.adjusters.filter(start__lte=now).order_by("-start")[0]
+#		except IndexError:
+#			a1 = None
+#		try:
+#			a2 = self.adjusters.filter(start__gte=now).order_by("-start")[0]
+#		except IndexError:
+#			if a1 is None:
+#				return 1
+#			return a1.factor
+#		else:
+#			if a1 is None:
+#				return a2.factor
+#		td = (a2.start-a1.start).total_seconds()
+#		if td < 60: # less than one minute? forget it
+#			return (a1.factor+a2.factor)/2
+#		dd = (date-a1.start).total_seconds()
+#		fd = a2.factor - a1.factor
+#		return a1.factor + fd * dd / td
+#	adj_flow = property(get_adj_flow)
 
 	# 
 	# when may this group run? Empty=no restriction

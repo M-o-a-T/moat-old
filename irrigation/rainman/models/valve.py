@@ -48,6 +48,24 @@ class Valve(Model,RangeMixin):
 	shade = m.FloatField(default=1, help_text="which part of the standard evaporation rate applies here?")
 	runoff = m.FloatField(default=1, help_text="how much incoming rain ends up here?")
 	#
+#	def get_adj_flow(self,date=None):
+#		res = 1
+#		for g in self.groups.all():
+#			res *= g.get_adj_flow(date)
+#		return res
+#	adj_flow = property(get_adj_flow)
+
+	def _rain_time(self,level=None):
+		if level is None:
+			level = self.start_level
+		return (self.start_level-self.stop_level)*self.area/self.flow
+	def raw_rain_time(self,level=None):
+		res = self._rain_time(level)
+		return timedelta(0,int(res))
+	def rain_time(self,level=None,date=None):
+		res = self._rain_time(level)
+#		res *= self.get_adj_flow(date)
+		return timedelta(0,int(res))
 	# This describes the current state
 	time = m.DateTimeField(db_index=True, help_text="time when the level was last calculated") # when was the level calculated?
 	level = m.FloatField(default=0, help_text="current water capacity, in mm")
