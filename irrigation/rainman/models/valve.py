@@ -116,7 +116,7 @@ class Valve(Model,RangeMixin):
 				continue
 			if x.start > start:
 				yield (start,x.start-start)
-				start = x.end
+			start = x.end
 		if end>start:
 			yield (start,end-start)
 				

@@ -19,9 +19,10 @@ from rainman.models import Model
 from rainman.models.site import Site
 from rainman.models.valve import Valve
 from rainman.models.day import DayRange
-from rainman.utils import now,RangeMixin, range_union,range_intersection,range_invert
+from rainman.utils import now,RangeMixin, range_union,range_intersection,range_invert, str_tz
 from django.db import models as m
 from datetime import timedelta
+
 
 class Group(Model,RangeMixin):
 	class Meta(Model.Meta):
@@ -92,7 +93,7 @@ class Group(Model,RangeMixin):
 				continue
 			if x.start > start:
 				yield (start,x.start-start)
-				start = x.end
+			start = x.end
 		if end>start:
 			yield (start,end-start)
 
