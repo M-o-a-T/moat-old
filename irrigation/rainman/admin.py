@@ -185,13 +185,13 @@ class GroupAdmin(admin.ModelAdmin):
 	]
 
 class GroupOverrideAdmin(admin.ModelAdmin):
-	list_display = ('group','start','duration','allowed')
+	list_display = ('group','start','duration','end','allowed')
 	list_filter = ('group',)
 	date_hierarchy = 'start'
 	ordering = ('-start',)
 
 class ValveOverrideAdmin(admin.ModelAdmin):
-	list_display = ('valve','start','duration','running')
+	list_display = ('valve','start','duration','end','running')
 	list_filter = ('valve',)
 	date_hierarchy = 'start'
 	ordering = ('-start',)
@@ -211,7 +211,7 @@ class GroupAdjustAdmin(admin.ModelAdmin):
 	ordering = ('-start',)
 
 class ScheduleAdmin(admin.ModelAdmin):
-	list_display = ('valve','start','duration','seen','changed')
+	list_display = ('valve','start','duration','end','seen','changed')
 	list_filter = ('valve',)
 	date_hierarchy = 'start'
 	ordering = ('-start',)
