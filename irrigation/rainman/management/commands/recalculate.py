@@ -117,6 +117,8 @@ class Command(BaseCommand):
 			if (lv.flow > 0 or sum_r > 0) and level > v.max_level:
 				level = v.max_level
 			level -= sum_r+lv.flow/v.area
+			if sum_r == 0 and lv.flow == 0 and level < 0:
+				level = 0
 
 			if options['verbose']:
 				print "Updated",lv,"from",lv.level,"to",level
