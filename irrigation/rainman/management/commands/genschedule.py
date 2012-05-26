@@ -29,6 +29,7 @@ from django.utils.timezone import utc,get_current_timezone
 from optparse import make_option
 
 soon=now()+timedelta(0,15*60)
+later=now()+timedelta(0,2*60*60)
 
 class Command(BaseCommand):
 	args = '<valve>…'
@@ -101,7 +102,7 @@ class Command(BaseCommand):
 		for s in v.schedules.filter(start__gte=soon-timedelta(1,0)):
 			if s.end < soon:
 				continue
-			if s.start > soon and not s.seen and not s.forced:
+			if s.start > later and not s.seen and not s.forced:
 				if options['save']:
 					if v.verbose:
 						log(v,"Drop schedule at %s for %s" % (str_tz(s.start),str(s.duration)))
