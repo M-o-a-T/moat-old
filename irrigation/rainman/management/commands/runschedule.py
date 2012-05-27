@@ -809,8 +809,6 @@ class SchedValve(SchedCommon):
 				self.sched.refresh()
 				if self.sched.start+self.sched.duration <= n:
 					self._off()
-					self.sched_ts = self.sched.start+self.sched.duration
-					self.sched = None
 				else:
 					self.sched_job = gevent.spawn_later((self.sched.start+self.sched.duration-n).total_seconds(),self.run_sched_task,reason="_run_schedule 1")
 				return
@@ -895,7 +893,13 @@ class SchedValve(SchedCommon):
 			return
 		try:
 			if on != self.on:
+				print >>sys.stderr,"Report %s" % ("ON" if on else "OFF"),self.v.var
 				n=now()
+				if self.sched is not None and self.sched.start+self.sched.duration <= n:
+					self.sched.update(duration=n-self.sched.start)
+					self.sched.refresh()
+					self.sched_ts = self.sched.start+self.sched.duration
+					self.sched = None
 				flow,self.flow = self.flow,0
 				# If nothing happened, calculate.
 				if not on and not self.flow and not self.v.feed.var:
