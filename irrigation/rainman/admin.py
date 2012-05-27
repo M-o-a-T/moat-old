@@ -147,7 +147,7 @@ class ValveAdmin(admin.ModelAdmin):
 	]
 
 class LevelAdmin(admin.ModelAdmin):
-	list_display = ('valve','time','level','flow')
+	list_display = ('valve','time','level','flow','forced')
 	list_filter = ('valve',)
 	date_hierarchy = 'time'
 	ordering = ('-time',)
