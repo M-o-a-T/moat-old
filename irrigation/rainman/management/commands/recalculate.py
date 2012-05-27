@@ -146,8 +146,7 @@ class Command(BaseCommand):
 				if options['verbose']:
 					print "Unchanged",lv,lv.level
 		if abs(v.level-level)>(abs(v.level)+abs(level))/100:
-			if options['verbose']:
-				print "Updated",v,"from",v.level,"to",level
+			print "Updated",v,"from",v.level,"to",level
 			if options['save']:
 				v.update(level=level)
 				v.refresh()
