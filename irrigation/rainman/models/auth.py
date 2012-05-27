@@ -16,38 +16,73 @@
 
 from __future__ import division,absolute_import
 from rainman.models import Model
-from rainman.models.group import Group,Site
+from rainman.models.site import Site
+from rainman.models.valve import Valve
+from rainman.models.feed import Feed
+from rainman.models.controller import Controller
 from django.db import models as m
 from django.db.models.signals import post_save
 
 from django.contrib.auth.models import User as DjangoUser
-class UserForGroup(Model):
-	"""Limit Django users to a specific group"""
-	class Meta(Model.Meta):
-		db_table="rainman_userforgroup"
-	def __unicode__(self):
-		return u"‹%s @%s %s›" % (self.__class__.__name__,self.user.username,self.group.name)
-	user = m.OneToOneField(DjangoUser)
-	group = m.ForeignKey(Group, blank=True,null=True, related_name="users",help_text="A group containing the valves this user may access")
-	LEVEL_VALUES = (
-		('0',"None"),
-		('1',"read"),
-		('2',"change schedule"),
-		('3',"admin"),
-	)
-	level = m.IntegerField(choices=LEVEL_VALUES,default=1,help_text=u"Access to …")
 
-	_sites = None
+LEVEL_VALUES = (
+	(0,"None"),
+	(1,"read"),
+	(2,"change schedule"),
+	(3,"admin"),
+)
+
+class UserForSite(Model):
+	"""Limit Django users to some sites"""
+	class Meta(Model.Meta):
+		db_table="rainman_userforsite"
+	def __unicode__(self):
+		return u"‹%s @%s %s›" % (self.__class__.__name__,self.user.username,u"¦".join(s.name for s in self.sites.all()))
+	user = m.OneToOneField(DjangoUser)
+	sites = m.ManyToManyField(Site, blank=True, related_name="users",help_text="Sites this user may access")
+	valves = m.ManyToManyField(Valve, blank=True, related_name="users",help_text="Valves this user may access")
+	level = m.PositiveSmallIntegerField(choices=LEVEL_VALUES,default=1,help_text=u"Access to …")
+
 	@property
-	def sites(self):
-		"""Return the set of sites which the user may access"""
-		if self._sites is not None:
-			return self._sites
-		res = set()
-		for s in Site.objects.filter(groups__valves__groups__users=self).distinct():
-			res.add(s)
-		self._sites = res
-		return res
+	def feeds(self):
+		return Feed.objects.filter(valves__in=self.valves)
+
+	@property
+	def controllers(self):
+		return Controller.objects.filter(valves__in=self.valves)
+
+	def access_site(self,site):
+		if self.sites.filter(id==site.id).count():
+			return self.level
+		return False
+
+	def access_valve(self,valve):
+		if not self.sites.filter(id=valve.feed.site.id).unique().count():
+			return False
+		if self.level >= 3:
+			return self.level
+		if self.valves.filter(id=valve.id).unique().count():
+			return self.level
+		return False
+
+	def access_feed(self,feed):
+		if not self.sites.filter(id=feed.site.id).unique().count():
+			return False
+		if self.level >= 3:
+			return self.level
+		if self.valves.filter(feed__id=feed.id).unique().count():
+			return self.level
+		return False
+
+	def access_controller(self,controller):
+		if not self.sites.filter(id=controller.site.id).unique().count():
+			return False
+		if self.level >= 3:
+			return self.level
+		if self.valves.filter(controller__id=controller.id).unique().count():
+			return self.level
+		return False
+
 
 
 # definition of UserProfile from above
@@ -55,6 +90,6 @@ class UserForGroup(Model):
 
 def create_user_profile(sender, instance, created, **kwargs):
 	if created:
-		UserForGroup.objects.create(user=instance)
+		UserForSite.objects.create(user=instance)
 
 post_save.connect(create_user_profile, sender=DjangoUser)

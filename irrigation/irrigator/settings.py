@@ -96,6 +96,7 @@ TEMPLATE_LOADERS = (
 )
 
 MIDDLEWARE_CLASSES = (
+    'rainman.utils.GlobalRequestMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -105,7 +106,7 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-AUTH_PROFILE_MODULE = 'rainman.UserForGroup'
+AUTH_PROFILE_MODULE = 'rainman.UserForSite'
 
 LOGIN_URL = '/login/'
 

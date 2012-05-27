@@ -20,7 +20,10 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import get_object_or_404
 from django.views.generic import ListView,DetailView,CreateView,UpdateView,DeleteView
 from django.forms import ModelForm,FloatField,TimeField,Textarea
-from rainman.models import Site
+from django.utils.translation import ugettext_lazy as _
+from rainman.models import Site,UserForSite
+from rainman.utils import get_request
+from datetime import time,timedelta,datetime
 
 
 def home(request):
@@ -29,7 +32,7 @@ def home(request):
 	except (ObjectDoesNotExist,AttributeError):
 		sites = set()
 	else:
-		sites = gu.sites
+		sites = gu.sites.all()
 
 	if not sites:
 		if request.user.is_authenticated():
@@ -49,47 +52,61 @@ class NonNegativeFloatField(FloatField):
 			raise ValidationError("must not be negative")
 		return val
 
-class BasicSiteForm(ModelForm):
-    class Meta:
-        model = Site
-#class SiteForm(BasicSiteForm):
+def Delta(t):
+	if isinstance(t,timedelta):
+		return t
+	return timedelta(0,(t.hour*60+t.minute)*60+t.second,t.microsecond)
+
+class TimeDeltaField(TimeField):
+	default_error_messages = {
+		'invalid': _(u'Enter a valid time interval.')
+	}
+
+	def to_python(self, value):
+		"""
+		Validates that the input can be converted to a time. Returns a Python
+		datetime.timedelta object.
+		"""
+		res = super(TimeDeltaField, self).to_python(value)
+		return Delta(res)
+
+	def strptime(self, value, format):
+		return Delta(datetime.strptime(value, format).time())
+
+class FormMixin(object):
+	def get_template_names(self):
+		return ["obj/%s%s.jinja" % (self.model._meta.object_name.lower(), self.template_name_suffix)]
+
 class SiteForm(ModelForm):
-	#class Meta(BasicSiteForm.Meta):
 	class Meta:
 		model = Site
 		exclude = ('db_rate','db_rain_delay')
 		fields = ('name','var','host','rain_delay','rate')
-		widgets = {
-			'name': Textarea(attrs={'cols': 80, 'rows': 20}),
-		}
+	
+	# 'Excluded' fields
 	rate = NonNegativeFloatField(help_text=Meta.model._meta.get_field_by_name("db_rate")[0].help_text)
-	rain_delay = TimeField(help_text=Meta.model._meta.get_field_by_name("db_rain_delay")[0].help_text)
+	rain_delay = TimeDeltaField(help_text=Meta.model._meta.get_field_by_name("db_rain_delay")[0].help_text)
 
-	def construct_instance(form, instance, fields=None, exclude=None):
-		instance = super(SiteForm,self).construct_instance(form,instance,fields,exclude)
+	def _post_clean(self):
+		# This is a hack
+		super(SiteForm,self)._post_clean()
 		for fn in self.Meta.exclude:
 			if not fn.startswith("db_"): continue
 			fn = fn[3:]
-			setattr(instance,fn, form.cleaned_data[fn])
+			setattr(self.instance,fn, self.cleaned_data[fn])
+	def save(self):
+		r = super(SiteForm,self).save()
+		gu = get_request().user.get_profile()
+		gu.sites.add(r)
+		gu.save()
+		return r
 	
-
-# Creating a form to add an article.
-form = SiteForm()
-
-# Creating a form to change an existing article.
-#site = Site.objects.get(pk=1)
-#form = SiteForm(instance=site)
-
-
-
-class SiteMixin(object):
+class SiteMixin(FormMixin):
 	model = Site
 	context_object_name = "site"
 	def get_queryset(self):
 		gu = self.request.user.get_profile()
-		return super(SiteMixin,self).get_queryset().filter(id__in=(x.id for x in gu.sites))
-	def get_template_names(self):
-		return ["obj/%s%s.jinja" % (self.model._meta.object_name.lower(), self.template_name_suffix)]
+		return super(SiteMixin,self).get_queryset().filter(id__in=gu.sites.all())
 
 class SitesView(SiteMixin,ListView):
 	context_object_name = "site_list"
@@ -99,9 +116,11 @@ class SiteView(SiteMixin,DetailView):
 	pass
 
 class SiteNewView(SiteMixin,CreateView):
+	form_class = SiteForm
 	success_url="/site/%(id)s"
 
 class SiteEditView(SiteMixin,UpdateView):
+	form_class = SiteForm
 	success_url="/site/%(id)s"
 
 class SiteDeleteView(SiteMixin,DeleteView):

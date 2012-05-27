@@ -39,7 +39,7 @@ class Site(Model):
 	def _get_rain_delay(self):
 		return timedelta(0,self.db_rain_delay)
 	def _set_rain_delay(self,val):
-		self._rain_delay = timedelta(0,self.db_rain_delay)
+		self.db_rain_delay = val.total_seconds()
 	rain_delay = property(_get_rain_delay,_set_rain_delay)
 
 	@property

@@ -21,12 +21,24 @@
 
 from datetime import datetime,timedelta
 from django.utils.timezone import utc,get_current_timezone
+#from django.utils.thread_support import currentThread
+from threading import currentThread
 
 def now():
 	return datetime.utcnow().replace(tzinfo=utc)
 
 def str_tz(t):
 	return t.astimezone(get_current_timezone()).strftime("%F %T")
+
+
+_requests = {}
+
+def get_request():
+	return _requests[currentThread()]
+
+class GlobalRequestMiddleware(object):
+	def process_request(self, request):
+		_requests[currentThread()] = request
 
 class RangeMixin(object):
 	def list_range(self,**k):

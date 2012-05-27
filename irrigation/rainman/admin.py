@@ -3,7 +3,7 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 admin.autodiscover()
 
-from rainman.models import Site,Feed,Controller,Valve,ParamGroup,History,EnvironmentEffect,Level,DayRange,Day,DayTime,Group,GroupOverride,ValveOverride,GroupAdjust,Schedule,RainMeter,TempMeter,WindMeter,SunMeter,UserForGroup,Log
+from rainman.models import Site,Feed,Controller,Valve,ParamGroup,History,EnvironmentEffect,Level,DayRange,Day,DayTime,Group,GroupOverride,ValveOverride,GroupAdjust,Schedule,RainMeter,TempMeter,WindMeter,SunMeter,UserForSite,Log
 
 from rainman.utils import now
 from datetime import timedelta
@@ -102,8 +102,8 @@ class SunMeterInline(admin.TabularInline):
 	model = SunMeter
 	extra = 0
 
-class UserForGroupInline(admin.TabularInline):
-	model = UserForGroup
+class UserForSiteInline(admin.TabularInline):
+	model = UserForSite
 	extra = 0
 
 class LogInline(admin.TabularInline):
@@ -232,8 +232,8 @@ class SunMeterAdmin(admin.ModelAdmin):
 	list_display = ('name','var')
 	list_filter = ('site',)
 
-class UserForGroupAdmin(admin.ModelAdmin):
-	list_display = ('user','group')
+class UserForSiteAdmin(admin.ModelAdmin):
+	list_display = ('user','level')
 
 class LogAdmin(admin.ModelAdmin):
 	list_display = ('site','controller','valve','timestamp','text')
@@ -261,6 +261,6 @@ admin.site.register(RainMeter, RainMeterAdmin)
 admin.site.register(TempMeter, TempMeterAdmin)
 admin.site.register(WindMeter, WindMeterAdmin)
 admin.site.register(SunMeter, SunMeterAdmin)
-admin.site.register(UserForGroup, UserForGroupAdmin)
+admin.site.register(UserForSite, UserForSiteAdmin)
 admin.site.register(Log, LogAdmin)
 

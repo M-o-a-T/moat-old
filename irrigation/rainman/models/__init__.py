@@ -54,5 +54,5 @@ from rainman.models.group import Group
 from rainman.models.override import GroupOverride,ValveOverride,GroupAdjust
 from rainman.models.schedule import Schedule
 from rainman.models.meter import RainMeter,TempMeter,WindMeter,SunMeter
-from rainman.models.auth import UserForGroup
+from rainman.models.auth import UserForSite
 
