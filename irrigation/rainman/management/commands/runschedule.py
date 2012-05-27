@@ -764,8 +764,7 @@ class SchedValve(SchedCommon):
 				self.log("Opened for %s"%(sched,))
 			self.sched = sched
 			if not sched.seen:
-				sched.start = now()
-				sched.update(seen = True)
+				sched.update(start=now(), seen = True)
 				sched.refresh()
 			#Save(sched)
 		else:
