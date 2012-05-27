@@ -5,7 +5,7 @@
 <table>
 <th><td>Site name</td></th>
 {% for site in site_list %}
-<tr><td>{{ site.name }}</td></tr>
+<tr><td><a href="/site/{{ site.id }}">{{ site.name }}</a></td></tr>
 {% endfor %}
 </table>
 
