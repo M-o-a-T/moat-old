@@ -93,8 +93,10 @@ class Command(BaseCommand):
 		ts=None
 		s = v.controller.site
 
-		for lv in Level.objects.filter(valve=v).order_by("time"):
+		for lv in Level.objects.filter(valve=v,time__gte=start).order_by("time"):
 			if level is None or lv.forced:
+				if options['verbose']:
+					print "Initial",lv.level
 				while hist:
 					if hist.stored.time > lv.time:
 						break
@@ -133,16 +135,25 @@ class Command(BaseCommand):
 			if sum_r == 0 and lv.flow == 0 and level < 0:
 				level = 0
 
+			if abs(lv.level-level)>(abs(lv.level)+abs(level))/100:
+				if options['verbose']:
+					print "Updated",lv,"from",lv.level,"to",level
+					print "   evaporate="+str(sum_f),"rain="+str(sum_r),"water="+str(lv.flow/v.area)
+				if options['save']:
+					lv.update(level = level)
+					lv.refresh()
+			else:
+				if options['verbose']:
+					print "Unchanged",lv,lv.level
+		if abs(v.level-level)>(abs(v.level)+abs(level))/100:
 			if options['verbose']:
-				print "Updated",lv,"from",lv.level,"to",level
-				print "   evaporate="+str(sum_f),"rain="+str(sum_r),"water="+str(lv.flow/v.area)
+				print "Updated",v,"from",v.level,"to",level
 			if options['save']:
-				lv.level = level
-				lv.save()
-		print "Updated",v,"from",v.level,"to",level
-		if options['save']:
-			v.level=level
-			v.save()
+				v.update(level=level)
+				v.refresh()
+		else:
+			if options['verbose']:
+				print "Unchanged",v,v.level
 
 
 class ParamGroup(object):
