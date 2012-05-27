@@ -37,7 +37,7 @@ class UserForSite(Model):
 	class Meta(Model.Meta):
 		db_table="rainman_userforsite"
 	def __unicode__(self):
-		return u"‹%s @%s %s›" % (self.__class__.__name__,self.user.username,u"¦".join(s.name for s in self.sites.all()))
+		return u"@%s %s" % (self.user.username,u"¦".join(s.name for s in self.sites.all()))
 	user = m.OneToOneField(DjangoUser)
 	sites = m.ManyToManyField(Site, blank=True, related_name="users",help_text="Sites this user may access")
 	valves = m.ManyToManyField(Valve, blank=True, related_name="users",help_text="Valves this user may access")

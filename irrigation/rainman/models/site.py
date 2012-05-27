@@ -24,7 +24,7 @@ class Site(Model):
 	class Meta(Model.Meta):
 		db_table="rainman_site"
 	def __unicode__(self):
-		return u"‹%s %s›" % (self.__class__.__name__,self.name)
+		return self.name
 	name = m.CharField(max_length=200, unique=True)
 	var = m.CharField(max_length=200, unique=True, help_text="name in HomEvenT", blank=True)
 	host = m.CharField(max_length=200, default="localhost", help_text="where to find the HomEvenT server")

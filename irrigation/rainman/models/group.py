@@ -29,7 +29,7 @@ class Group(Model,RangeMixin):
 		unique_together = (("site", "name"),)
 		db_table="rainman_group"
 	def __unicode__(self):
-		return u"‹%s %s›" % (self.__class__.__name__,self.name)
+		return self.name
 	name = m.CharField(max_length=200)
 	site = m.ForeignKey(Site,related_name="groups") # self.valve[*].controller.site is self.site
 	#

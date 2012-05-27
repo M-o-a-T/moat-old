@@ -27,7 +27,7 @@ class GroupOverride(Model):
 		unique_together = (("group", "name"),("group","start"))
 		db_table="rainman_groupoverride"
 	def __unicode__(self):
-		return u"‹%s %s›" % (self.__class__.__name__,self.name)
+		return self.name
 	name = m.CharField(max_length=200)
 	group = m.ForeignKey(Group,related_name="overrides")
 	allowed = m.BooleanField() # whether to allow these to run(True) or not(False)
@@ -52,7 +52,7 @@ class ValveOverride(Model):
 		unique_together = (("valve", "name"),("valve","start"))
 		db_table="rainman_valveoverride"
 	def __unicode__(self):
-		return u"‹%s %s›" % (self.__class__.__name__,self.name)
+		return self.name
 	name = m.CharField(max_length=200)
 	valve = m.ForeignKey(Valve,related_name="overrides")
 	running = m.BooleanField() # whether to force on(True) or off(False)
@@ -79,7 +79,7 @@ class GroupAdjust(Model):
 		unique_together = (("group","start"),)
 		db_table="rainman_groupadjust"
 	def __unicode__(self):
-		return u"‹%s @%s %s›" % (self.__class__.__name__,self.start,self.group)
+		return u"@%s %s" % (self.start,self.group)
 	group = m.ForeignKey(Group,related_name="adjusters")
 	start = m.DateTimeField(db_index=True)
 	factor = m.FloatField()

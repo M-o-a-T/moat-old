@@ -24,6 +24,9 @@ class Model(m.Model):
 		abstract = True
 		app_label = 'rainman'
 
+	def __repr__(self):
+		return u'‹%s %s›' % (self.__class__.__name__,unicode(self))
+
 	def refresh(self):
 		"""Refreshes this instance from db"""
 		from_db = self.__class__.objects.get(pk=self.pk)

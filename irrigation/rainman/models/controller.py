@@ -27,7 +27,7 @@ class Controller(Model,RangeMixin):
 		unique_together = (("site", "name"),)
 		db_table="rainman_controller"
 	def __unicode__(self):
-		return u"‹%s %s›" % (self.__class__.__name__,self.name)
+		return self.name
 	name = m.CharField(max_length=200)
 	var = m.CharField(max_length=200,unique=True,help_text="Name in HomEvenT")
 	site = m.ForeignKey(Site,related_name="controllers")

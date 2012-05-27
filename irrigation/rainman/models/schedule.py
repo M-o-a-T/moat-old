@@ -26,7 +26,7 @@ class Schedule(Model):
 		unique_together = (("valve","start"),)
 		db_table="rainman_schedule"
 	def __unicode__(self):
-		return u"‹%s @%s %s›" % (self.__class__.__name__,self.start,self.valve)
+		return u"@%s %s" % (self.start,self.valve)
 	valve = m.ForeignKey(Valve,related_name="schedules")
 	start = m.DateTimeField(db_index=True)
 	db_duration = m.PositiveIntegerField(db_column="duration")

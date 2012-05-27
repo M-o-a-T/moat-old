@@ -29,7 +29,7 @@ class Day(Model,RangeMixin):
 	class Meta(Model.Meta):
 		db_table="rainman_day"
 	def __unicode__(self):
-		return u"‹%s %s›" % (self.__class__.__name__,self.name)
+		return self.name
 
 	name = m.CharField(max_length=30, unique=True)
 
@@ -48,7 +48,7 @@ class DayTime(Model,RangeMixin):
 		unique_together = (("day", "descr"),)
 		db_table="rainman_daytime"
 	def __unicode__(self):
-		return u"‹%s %s›" % (self.__class__.__name__,self.descr)
+		return self.descr
 
 	descr = m.CharField(max_length=200)
 	day = m.ForeignKey(Day,related_name="times")
@@ -78,7 +78,7 @@ class DayRange(Model,RangeMixin):
 	class Meta(Model.Meta):
 		db_table="rainman_dayrange"
 	def __unicode__(self):
-		return u"‹%s %s›" % (self.__class__.__name__,self.name)
+		return self.name
 
 	name = m.CharField(max_length=30, unique=True)
 	days = m.ManyToManyField(Day,related_name="ranges")

@@ -24,7 +24,7 @@ class Meter(Model):
 		abstract = True
 		unique_together = (("site","name"),)
 	def __unicode__(self):
-		return u"‹%s @%s %s›" % (self.__class__.__name__,self.site,self.var)
+		return self.name
 	name = m.CharField(max_length=200)
 	#site = m.ForeignKey(Site,related_name="meters")
 

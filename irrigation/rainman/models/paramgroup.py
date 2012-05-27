@@ -25,7 +25,7 @@ class ParamGroup(Model):
 		unique_together = (("site", "name"),)
 		db_table="rainman_paramgroup"
 	def __unicode__(self):
-		return u"‹%s %s›" % (self.__class__.__name__,self.name)
+		return self.name
 	name = m.CharField(max_length=200)
 	var = m.CharField(max_length=200,unique=True,help_text="Name in HomEvenT")
 	comment = m.CharField(max_length=200,blank=True)
@@ -106,7 +106,7 @@ class EnvironmentEffect(Model):
 	class Meta(Model.Meta):
 		db_table="rainman_environmenteffect"
 	def __unicode__(self):
-		return u"‹%s @%s %s¦%s¦%s›" % (self.__class__.__name__,self.param_group.name,self.temp,self.wind,self.sun)
+		return u"@%s %s¦%s¦%s" % (self.param_group.name,self.temp,self.wind,self.sun)
 	param_group = m.ForeignKey(ParamGroup,related_name="environment_effects")
 	factor = m.FloatField(default=1.0, help_text="Factor to use at this data point")
 
