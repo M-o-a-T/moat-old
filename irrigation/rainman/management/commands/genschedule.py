@@ -51,6 +51,12 @@ class Command(BaseCommand):
 				dest='feed',
 				default=None,
 				help='Select the water feed to use'),
+			make_option('-a','--age',
+				action='store',
+				type=float,
+				dest='age',
+				default=1,
+				help='Select the group to use'),
 			make_option('-g','--group',
 				action='store',
 				dest='group',
@@ -115,7 +121,7 @@ class Command(BaseCommand):
 			return
 		if options['verbose']:
 			print "Plan",v,"for",want,"Level",v.level,v.start_level,v.stop_level
-		for a,b in v.range(start=soon):
+		for a,b in v.range(start=soon,days=options['age']):
 			if b < want:
 				print "Partial",str_tz(a),str(b)
 				if options['save']:
