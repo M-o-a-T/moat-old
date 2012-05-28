@@ -29,7 +29,7 @@ class Site(Model):
 	var = m.CharField(max_length=200, unique=True, help_text="name in HomEvenT", blank=True)
 	host = m.CharField(max_length=200, default="localhost", help_text="where to find the HomEvenT server")
 	port = m.PositiveIntegerField(default=50005, help_text="Port for RPC")
-	db_rate = m.FloatField(db_column="rate",default=2, help_text="how many mm/day evaporate here, on average")
+	db_rate = m.FloatField(db_column="rate",default=10/24/3600, help_text="how many mm/day evaporate here, on average")
 	def _get_rate(self):
 		return self.db_rate*24*3600
 	def _set_rate(self,r):
