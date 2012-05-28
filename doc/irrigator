@@ -245,6 +245,7 @@ You need:
   * Jinja2 (Template system)
   * django-south (database migration)
   * django-jinja2 (integration)
+  * hamlish-jinja2 (Python-ish HTML syntax)
 
 -----
 To Do
