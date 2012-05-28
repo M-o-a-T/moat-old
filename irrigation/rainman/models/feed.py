@@ -34,7 +34,7 @@ class Feed(Meter):
 	def _get_max_flow_wait(self):
 		return timedelta(0,self.db_max_flow_wait)
 	def _set_max_flow_wait(self,val):
-		self._max_flow_wait = timedelta(0,self.db_max_flow_wait)
+		self.db_max_flow_wait = val.total_seconds()
 	max_flow_wait = property(_get_max_flow_wait,_set_max_flow_wait)
 
 	def _range(self,start,end,plusflow,add=0):
