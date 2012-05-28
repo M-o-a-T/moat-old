@@ -119,7 +119,7 @@ class Command(BaseCommand):
 				except StopIteration:
 					hist = None
 				f = params.env_factor(h,options['verbose'])
-				add_f = v.shade*s.db_rate*params.pg.factor*f*(h.time-ts).total_seconds()
+				add_f = s.db_rate * (params.pg.factor*f)**v.shade * (h.time-ts).total_seconds()
 				add_r = v.runoff*h.rain
 				if options['verbose']:
 					print "Apply",h,f,u"– dry="+str(add_f)," rain="+str(add_r)
