@@ -12,7 +12,14 @@
 <tr><td>rate</td><td>{{site.rate}} mm/day (on an average day)</td></tr>
 <tr><td>rain delay</td><td>{{site.rain_delay}}</td></tr>
 </table>
+<div id="buttons">
+<a href="/site/{{site.id}}/edit">Edit</a> ¦
+<a href="/site/{{site.id}}/delete">Delete</a>
+</div>
 <h2>Controllers</h2>
 {{ c.table(site.controllers.all()) }}
+<div id="buttons_c">
+<a href="/site/{{site.id}}/new/controller">New Controller…</a>
+</p>
 
 {% endblock %}

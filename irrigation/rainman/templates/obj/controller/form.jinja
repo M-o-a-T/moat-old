@@ -6,6 +6,8 @@
 <form action="" method="post">
 {% csrf_token %}
 <table>
+{% if controller is defined %}{% set site=controller.site %}{% else %}{% set site=form.site %}{% endif %}
+<tr><td>Site</td><td><a href="/site/{{ site.id }}">{{ site.name }}</a></td></tr>
 {{ form.as_table()|safe }}
 </table>
 <input type="submit" value="Submit" />

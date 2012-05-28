@@ -33,11 +33,11 @@ class SiteForm(DbModelForm):
 	rate = NonNegativeFloatField(help_text=Meta.model._meta.get_field_by_name("db_rate")[0].help_text)
 	rain_delay = TimeDeltaField(help_text=Meta.model._meta.get_field_by_name("db_rain_delay")[0].help_text)
 
-	def save(self):
-		r = super(SiteForm,self).save()
+	def save(self,commit=True):
+		r = super(SiteForm,self).save(commit)
 		gu = get_request().user.get_profile()
 		gu.sites.add(r)
-		gu.save()
+		gu.save() ## TODO: check if 'commit' is True!
 		return r
 	
 class SiteMixin(FormMixin):
@@ -63,5 +63,5 @@ class SiteEditView(SiteMixin,UpdateView):
 	success_url="/site/%(id)s"
 
 class SiteDeleteView(SiteMixin,DeleteView):
-	pass
+	success_url="/site/"
 

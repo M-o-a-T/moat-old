@@ -1,0 +1,12 @@
+{% extends "base.jinja" %}
+{% block title %}Delete Site {{ site.name }}{% endblock %}
+{% block content %}
+
+<h1>{{ self.title() }}</h1>
+<form action="" method="post">
+{% csrf_token %}
+<p>Do you really want to delete the site {{site.name}}?</p>
+<input type="submit" value="Yes" />
+</form>
+
+{% endblock %}

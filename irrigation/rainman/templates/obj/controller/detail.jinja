@@ -13,5 +13,9 @@
 </table>
 <h2>Valves</h2>
 {{ v.table(controller.valves.all()) }}
+<div id="buttons">
+<a href="/controller/{{controller.id}}/edit">Edit</a> ¦
+<a href="/controller/{{controller.id}}/delete">Delete</a>
+</div>
 
 {% endblock %}

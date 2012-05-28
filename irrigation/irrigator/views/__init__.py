@@ -76,24 +76,25 @@ class FormMixin(object):
 
 class DbModelForm(ModelForm):
 	def __init__(self,instance=None,initial=None,*a,**k):
-		if instance is not None:
-			if initial is None:
-				initial = {}
-			for fn in self.Meta.exclude:
-				if not fn.startswith("db_"): continue
-				fn = fn[3:]
-				if fn not in initial:
-					initial[fn] = getattr(instance,fn)
+		opts = self._meta
+		if instance is None:
+			instance = opts.model()
+		if initial is None:
+			initial = {}
+		for fn in self.Meta.exclude:
+			if not fn.startswith("db_"): continue
+			fn = fn[3:]
+			if fn not in initial:
+				initial[fn] = getattr(instance,fn)
 
 		k['initial'] = initial
 		k['instance'] = instance
 		super(DbModelForm,self).__init__(*a,**k)
 
-	def _post_clean(self):
-		# This is a hack
-		super(DbModelForm,self)._post_clean()
+	def save(self,commit=True):
 		for fn in self.Meta.exclude:
 			if not fn.startswith("db_"): continue
 			fn = fn[3:]
 			setattr(self.instance,fn, self.cleaned_data[fn])
+		return super(DbModelForm,self).save(commit)
 

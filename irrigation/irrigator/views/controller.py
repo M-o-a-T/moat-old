@@ -17,13 +17,19 @@
 from __future__ import division,absolute_import
 from django.views.generic import ListView,DetailView,CreateView,UpdateView,DeleteView
 from django.forms import ModelForm
-from rainman.models import Controller
+from rainman.models import Controller,Site
 from irrigator.views import FormMixin
 
 class ControllerForm(ModelForm):
 	class Meta:
 		model = Controller
-	
+		exclude = ('site',)
+
+	def save(self,commit=True):
+		self.instance.site = self.site
+		return super(ControllerForm,self).save(commit)
+
+
 class ControllerMixin(FormMixin):
 	model = Controller
 	context_object_name = "controller"
@@ -41,11 +47,29 @@ class ControllerView(ControllerMixin,DetailView):
 class ControllerNewView(ControllerMixin,CreateView):
 	form_class = ControllerForm
 	success_url="/controller/%(id)s"
+	def get_form(self, form_class):
+		form = super(ControllerNewView,self).get_form(form_class)
+		form.site=self.site
+		return form
+	def get(self,request,site,**k):
+		self.site = Site.objects.get(id=site)
+		return super(ControllerNewView,self).get(request,**k)
+	def post(self,request,site,**k):
+		self.site = Site.objects.get(id=site)
+		return super(ControllerNewView,self).post(request,**k)
+	def _post_clean(self):
+		super(DbModelForm,self)._post_clean()
+		self.instance.site = self.site
+
 
 class ControllerEditView(ControllerMixin,UpdateView):
 	form_class = ControllerForm
 	success_url="/controller/%(id)s"
 
 class ControllerDeleteView(ControllerMixin,DeleteView):
+	def post(self,*a,**k):
+		controller = self.get_object()
+		self.success_url="/site/%d" % (controller.site.id,)
+		return super(DeleteView,self).post(*a,**k)
 	pass
 
