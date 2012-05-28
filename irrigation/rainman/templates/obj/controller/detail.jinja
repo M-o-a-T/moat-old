@@ -1,21 +1,44 @@
-{% extends "base.jinja" %}
-{% import "obj/valve/macro.jinja" as v %}
+{% haml %}
+-extends "base.jinja"
+-import "obj/valve/macro.jinja" as v
 
-{% block title %}{{ controller.name }}{% endblock %}
-{% block content %}
+-block title
+	=controller.name
 
-<h1>{{controller.name }}</h1>
-<table>
-<tr><td>var</td><td>{{controller.var}}</td></tr>
-<tr><td>Site</td><td><a href="/site/{{ controller.site.id }}">{{controller.site.name}}</a></td></tr>
-<tr><td>Location</td><td>{{controller.location}}</td></tr>
-<tr><td>max-On</td><td>{{controller.max_on}}</td></tr>
-</table>
-<h2>Valves</h2>
-{{ v.table(controller.valves.all()) }}
-<div id="buttons">
-<a href="/controller/{{controller.id}}/edit">Edit</a> ¦
-<a href="/controller/{{controller.id}}/delete">Delete</a>
-</div>
+-block content
+	%h1
+		=controller.name
+	%table
+		%tr
+			%td
+				var
+			%td
+				=controller.var
+		%tr
+			%td
+				Site
+			%td
+				%a href="/site/{{ controller.site.id }}"
+					=controller.site.name
+		%tr
+			%td
+				Location
+			%td
+				=controller.location
+		%tr
+			%td
+				max On
+			%td
+				=controller.max_on
 
-{% endblock %}
+	%h2
+		Valves
+	=v.table(controller.valves.all())
+	%div id="buttons"
+		%a href="/controller/{{controller.id}}/edit"
+			Edit
+		¦
+		%a href="/controller/{{controller.id}}/delete"
+			Delete
+
+{% endhaml %}

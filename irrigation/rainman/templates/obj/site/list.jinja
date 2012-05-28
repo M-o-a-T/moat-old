@@ -1,13 +1,16 @@
-{% extends "base.jinja" %}
-{% import "obj/site/macro.jinja" as s %}
+{% haml %}
 
-{% block title %}Sites{% endblock %}
-{% block content %}
+-extends "base.jinja"
+-import "obj/site/macro.jinja" as s
 
-{{ s.table(site_list) }}
+-block title
+	Sites
 
-<div id="buttons">
-<a href="/site/new">New Site …</a>
-</div>
+-block content
+	=s.table(site_list)
 
-{% endblock %}
+	%div id="buttons"
+		%a href="/site/new"
+			New Site …
+
+{% endhaml %}

@@ -1,25 +1,49 @@
-{% extends "base.jinja" %}
-{% import "obj/controller/macro.jinja" as c %}
+{% haml %}
+-extends "base.jinja"
+-import "obj/controller/macro.jinja" as c
 
-{% block title %}{{ site.name }}{% endblock %}
-{% block content %}
+-block title
+	=site.name
+-block content
 
-<h1>{{site.name }}</h1>
-<table>
-<tr><td>var</td><td>{{site.var}}</td></tr>
-<tr><td>host</td><td>{{site.host}}</td></tr>
-<tr><td>port</td><td>{{site.port}}</td></tr>
-<tr><td>rate</td><td>{{site.rate}} mm/day (on an average day)</td></tr>
-<tr><td>rain delay</td><td>{{site.rain_delay}}</td></tr>
-</table>
-<div id="buttons">
-<a href="/site/{{site.id}}/edit">Edit</a> ¦
-<a href="/site/{{site.id}}/delete">Delete</a>
-</div>
-<h2>Controllers</h2>
-{{ c.table(site.controllers.all()) }}
-<div id="buttons_c">
-<a href="/site/{{site.id}}/new/controller">New Controller…</a>
-</p>
-
-{% endblock %}
+	%h1
+		=site.name
+	%table
+		%tr
+			%td
+				var
+			%td
+				=site.var
+		%tr
+			%td
+				Host
+			%td
+				=site.host
+		%tr
+			%td
+				Port
+			%td
+				=site.port
+		%tr
+			%td
+				Rate
+			%td
+				=site.rate
+				mm/day (on an average day)
+		%tr
+			%td
+				Rain Delay
+			%td
+				=site.rain_delay
+	%div id="buttons"
+		%a href="/site/{{site.id}}/edit
+			Edit
+		%a href="/site/{{site.id}}/delete"
+			Delete
+	%h2
+		Controllers
+	=c.table(site.controllers.all())
+	%div id="buttons_c"
+		%a href="/site/{{site.id}}/new/controller"
+			New Controller…
+{% endhaml %}

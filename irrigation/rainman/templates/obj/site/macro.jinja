@@ -1,9 +1,14 @@
-{% macro table(sites) %}
-<table>
-<th><td>Site name</td></th>
-{% for site in sites %}
-<tr><td><a href="/site/{{ site.id }}">{{ site.name }}</a></td></tr>
-{% endfor %}
-</table>
-{% endmacro %}
+{% haml %}
 
+-macro table(sites)
+	%table
+		%th
+			%td
+				Name
+		-for site in sites
+			%tr
+				%td
+					%a href="/site/{{ site.id }}">
+						=site.name
+
+{% endhaml %}

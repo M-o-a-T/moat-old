@@ -1,8 +1,14 @@
-{% macro table(controllers) %}
-<table>
-<tr><th>Name</th></tr>
-{% for controller in controllers.all() %}
-<tr><td><a href="/controller/{{ controller.id }}">{{ controller.name }}</a></td></tr>
-{% endfor %}
-</table>
-{% endmacro %}
+{% haml %}
+
+-macro table(controllers)
+	%table
+		%th
+			%td
+				Name
+		-for controller in controllers.all()
+			%tr
+				%td
+					%a href="/controller/{{ controller.id }}"
+						=controller.name
+
+{% endhaml %}

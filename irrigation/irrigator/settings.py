@@ -116,6 +116,13 @@ LOGIN_REDIRECT_URL = '/'
 
 JINJA2_AUTOESCAPE = True
 
+DEFAULT_JINJA2_TEMPLATE_EXTENSION = ".jinja"
+
+from hamlish_jinja import Hamlish
+Hamlish._self_closing_jinja_tags.add('csrf_token')
+
+JINJA2_ENVIRONMENT_OPTIONS = { 'extensions':['hamlish_jinja.HamlishTagExtension','jinja2.ext.i18n', 'jinja2.ext.autoescape'], }
+
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'irrigator.wsgi.application'
 

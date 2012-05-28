@@ -49,7 +49,6 @@ class SiteMixin(FormMixin):
 
 class SitesView(SiteMixin,ListView):
 	context_object_name = "site_list"
-	pass
 
 class SiteView(SiteMixin,DetailView):
 	pass

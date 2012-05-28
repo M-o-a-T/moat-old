@@ -1,9 +1,12 @@
-{% extends "base.jinja" %}
-{% import "obj/controller/macro.jinja" as c %}
+{% haml %}
 
-{% block title %}Controllers{% endblock %}
-{% block content %}
+-extends "base.jinja"
+-import "obj/controller/macro.jinja" as c
 
-{{ c.table(controller_list) }}
+-block title
+	Controllers
 
-{% endblock %}
+-block content
+	=c.table(controller_list)
+
+{% endhaml %}
