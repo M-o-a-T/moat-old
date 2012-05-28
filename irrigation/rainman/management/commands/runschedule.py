@@ -901,10 +901,15 @@ class SchedValve(SchedCommon):
 					self.sched_ts = self.sched.start+self.sched.duration
 					self.sched = None
 				flow,self.flow = self.flow,0
+				duration = n-self.on_ts
 				# If nothing happened, calculate.
 				if not on and not self.flow and not self.v.feed.var:
-					flow = self.v.flow * (n-self.on_ts).total_seconds()
+					flow = self.v.flow * duration.total_seconds()
 				self.new_level_entry(flow)
+				if not on:
+					if self.v.level > self.v.stop_level + (self.v.start_level-self.v.stop_level)/5:
+						self.v.update(priority=True)
+					self.log("Done for %s, level is now %s"%(duration,self.v.level))
 				self.on = on
 				self.on_ts = n
 
