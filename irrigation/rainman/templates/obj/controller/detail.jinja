@@ -1,0 +1,17 @@
+{% extends "base.jinja" %}
+{% import "obj/valve/macro.jinja" as v %}
+
+{% block title %}{{ controller.name }}{% endblock %}
+{% block content %}
+
+<h1>{{controller.name }}</h1>
+<table>
+<tr><td>var</td><td>{{controller.var}}</td></tr>
+<tr><td>Site</td><td><a href="/site/{{ controller.site.id }}">{{controller.site.name}}</a></td></tr>
+<tr><td>Location</td><td>{{controller.location}}</td></tr>
+<tr><td>max-On</td><td>{{controller.max_on}}</td></tr>
+</table>
+<h2>Valves</h2>
+{{ v.table(controller.valves.all()) }}
+
+{% endblock %}

@@ -15,16 +15,13 @@
 ##
 
 from __future__ import division,absolute_import
-from django.http import HttpResponseRedirect
-from django.core.exceptions import ObjectDoesNotExist
-from django.shortcuts import get_object_or_404
 from django.views.generic import ListView,DetailView,CreateView,UpdateView,DeleteView
-from django.forms import ModelForm,FloatField,TimeField,Textarea
+from django.forms import ModelForm
 from django.utils.translation import ugettext_lazy as _
-from rainman.models import Site,UserForSite
+from rainman.models import Site
 from rainman.utils import get_request
-from datetime import time,timedelta,datetime
-from irrigator.views import NonNegativeFloatField,Delta,TimeDeltaField,FormMixin
+from datetime import time
+from irrigator.views import NonNegativeFloatField,TimeDeltaField,FormMixin
 
 class SiteForm(ModelForm):
 	class Meta:

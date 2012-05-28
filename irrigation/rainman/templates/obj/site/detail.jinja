@@ -1,4 +1,6 @@
 {% extends "base.jinja" %}
+{% import "obj/controller/macro.jinja" as c %}
+
 {% block title %}{{ site.name }}{% endblock %}
 {% block content %}
 
@@ -11,11 +13,6 @@
 <tr><td>rain delay</td><td>{{site.rain_delay}}</td></tr>
 </table>
 <h2>Controllers</h2>
-<table>
-<tr><th>Name</th></tr>
-{% for controller in site.controllers.all() %}
-<tr><td>{{ controller.name }}</td></tr>
-{% endfor %}
-</table>
+{{ c.table(site.controllers.all()) }}
 
 {% endblock %}

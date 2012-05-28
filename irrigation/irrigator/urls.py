@@ -4,7 +4,8 @@ from django.contrib import admin
 admin.autodiscover()
 
 from rainman import admin as rain_admin
-from irrigator.views import SiteView,SitesView,SiteNewView,SiteEditView,SiteDeleteView
+from irrigator.views.site import SiteView,SitesView,SiteNewView,SiteEditView,SiteDeleteView
+from irrigator.views.controller import ControllerView,ControllersView,ControllerNewView,ControllerEditView,ControllerDeleteView
 
 urlpatterns = patterns('',
     url(r'^$', 'irrigator.views.home', name='home'),
@@ -14,6 +15,12 @@ urlpatterns = patterns('',
     url(r'^site/new$', SiteNewView.as_view()),
     url(r'^site/(?P<pk>\d+)/edit$', SiteEditView.as_view()),
     url(r'^site/(?P<pk>\d+)/delete$', SiteDeleteView.as_view()),
+
+    url(r'^controller/$', ControllersView.as_view()),
+    url(r'^controller/(?P<pk>\d+)$', ControllerView.as_view()),
+    url(r'^controller/new$', ControllerNewView.as_view()),
+    url(r'^controller/(?P<pk>\d+)/edit$', ControllerEditView.as_view()),
+    url(r'^controller/(?P<pk>\d+)/delete$', ControllerDeleteView.as_view()),
 
 	# Login stuff
 	url(r'^login/$', 'django.contrib.auth.views.login', {'template_name': 'auth/login.html'}),

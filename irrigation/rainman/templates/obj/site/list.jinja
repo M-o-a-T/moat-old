@@ -1,12 +1,9 @@
 {% extends "base.jinja" %}
+{% import "obj/site/macro.jinja" as s %}
+
 {% block title %}Sites{% endblock %}
 {% block content %}
 
-<table>
-<th><td>Site name</td></th>
-{% for site in site_list %}
-<tr><td><a href="/site/{{ site.id }}">{{ site.name }}</a></td></tr>
-{% endfor %}
-</table>
+{{ s.table(site_list) }}
 
 {% endblock %}

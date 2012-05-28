@@ -1,0 +1,8 @@
+{% macro table(valves) %}
+<table>
+<tr><th>Name</th></tr>
+{% for valve in valves.all() %}
+<tr><td><a href="/valve/{{ valve.id }}">{{ valve.name }}</a></td></tr>
+{% endfor %}
+</table>
+{% endmacro %}

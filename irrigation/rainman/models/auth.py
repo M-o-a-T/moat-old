@@ -45,11 +45,15 @@ class UserForSite(Model):
 
 	@property
 	def feeds(self):
-		return Feed.objects.filter(valves__in=self.valves)
+		if self.level >= 3:
+			return Feed.objects.filter(site__in=self.sites.all())
+		return Feed.objects.filter(valves__in=self.valves.all())
 
 	@property
 	def controllers(self):
-		return Controller.objects.filter(valves__in=self.valves)
+		if self.level >= 3:
+			return Controller.objects.filter(site__in=self.sites.all())
+		return Controller.objects.filter(valves__in=self.valves.all())
 
 	def access_site(self,site):
 		if self.sites.filter(id==site.id).count():

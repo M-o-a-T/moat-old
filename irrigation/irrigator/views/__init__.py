@@ -17,13 +17,9 @@
 from __future__ import division,absolute_import
 from django.http import HttpResponseRedirect
 from django.core.exceptions import ObjectDoesNotExist
-from django.shortcuts import get_object_or_404
-from django.views.generic import ListView,DetailView,CreateView,UpdateView,DeleteView
-from django.forms import ModelForm,FloatField,TimeField,Textarea
+from django.forms import ModelForm,FloatField,TimeField
 from django.utils.translation import ugettext_lazy as _
-from rainman.models import Site,UserForSite
-from rainman.utils import get_request
-from datetime import time,timedelta,datetime
+from datetime import timedelta,datetime
 
 
 def home(request):
@@ -75,6 +71,6 @@ class TimeDeltaField(TimeField):
 
 class FormMixin(object):
 	def get_template_names(self):
-		return ["obj/%s%s.jinja" % (self.model._meta.object_name.lower(), self.template_name_suffix)]
+		return ["obj/%s/%s.jinja" % (self.model._meta.object_name.lower(), self.template_name_suffix.lstrip("_"))]
 
 
