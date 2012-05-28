@@ -932,6 +932,7 @@ class SchedValve(SchedCommon):
 	def new_level_entry(self,flow=0):
 		self.site.current_history_entry()
 		n=now()
+		self.v.refresh()
 		hts = None
 		try:
 			lv = self.v.levels.order_by("-time")[0]
