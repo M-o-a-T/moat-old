@@ -116,13 +116,13 @@ class Command(BaseCommand):
 					s.delete()
 					continue
 			#want -= s.duration*1.2 # avoid some strange burst
-			want -= timedelta(0,s.duration.total_seconds()*1.2) # timedelta cannot be multiplied (Py3 feature)
+			want -= timedelta(0,s.duration.total_seconds()*1.1) # timedelta cannot be multiplied (Py3 feature)
 
 		if want.total_seconds() < 10:
 			v.update(priority=False)
 			return
 		if options['verbose']:
-			print "Plan",v,"for",want,"Level",v.level,v.start_level,v.stop_level
+			print "Plan",v,"for",want,"Level",v.level,v.start_level,v.stop_level,"P" if v.priority else ""
 		for a,b in v.range(start=soon,days=options['age'], add=30):
 			if b < want:
 				print "Partial",str_tz(a),str(b)
