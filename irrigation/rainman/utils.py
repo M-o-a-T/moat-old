@@ -23,6 +23,7 @@ from datetime import datetime,timedelta
 from django.utils.timezone import utc,get_current_timezone
 #from django.utils.thread_support import currentThread
 from threading import currentThread
+from weakref import WeakValueDictionary
 
 def now():
 	return datetime.utcnow().replace(tzinfo=utc)
@@ -31,7 +32,7 @@ def str_tz(t):
 	return t.astimezone(get_current_timezone()).strftime("%F %T")
 
 
-_requests = {}
+_requests = WeakValueDictionary()
 
 def get_request():
 	return _requests[currentThread()]
