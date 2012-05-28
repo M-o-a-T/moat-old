@@ -21,9 +21,9 @@ from django.utils.translation import ugettext_lazy as _
 from rainman.models import Site
 from rainman.utils import get_request
 from datetime import time
-from irrigator.views import NonNegativeFloatField,TimeDeltaField,FormMixin
+from irrigator.views import NonNegativeFloatField,TimeDeltaField,FormMixin,DbModelForm
 
-class SiteForm(ModelForm):
+class SiteForm(DbModelForm):
 	class Meta:
 		model = Site
 		exclude = ('db_rate','db_rain_delay')
@@ -33,13 +33,6 @@ class SiteForm(ModelForm):
 	rate = NonNegativeFloatField(help_text=Meta.model._meta.get_field_by_name("db_rate")[0].help_text)
 	rain_delay = TimeDeltaField(help_text=Meta.model._meta.get_field_by_name("db_rain_delay")[0].help_text)
 
-	def _post_clean(self):
-		# This is a hack
-		super(SiteForm,self)._post_clean()
-		for fn in self.Meta.exclude:
-			if not fn.startswith("db_"): continue
-			fn = fn[3:]
-			setattr(self.instance,fn, self.cleaned_data[fn])
 	def save(self):
 		r = super(SiteForm,self).save()
 		gu = get_request().user.get_profile()
