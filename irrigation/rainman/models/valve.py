@@ -58,7 +58,7 @@ class Valve(Model,RangeMixin):
 	def _watering_time(self,level=None):
 		if level is None:
 			level = self.start_level
-		return (self.start_level-self.stop_level)*self.area/self.flow
+		return (level-self.stop_level)*self.area/self.flow
 	def raw_watering_time(self,level=None):
 		res = self._watering_time(level)
 		return timedelta(0,int(res))
