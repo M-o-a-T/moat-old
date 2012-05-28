@@ -73,7 +73,7 @@ class Valve(Model,RangeMixin):
 	def list_groups(self):
 		return u"¦".join((d.name for d in self.groups.all()))
 
-	def _range(self,start,end, forced=False):
+	def _range(self,start,end, forced=False, add=0):
 		if start is None:
 			start = now()
 		r = []
@@ -106,8 +106,8 @@ class Valve(Model,RangeMixin):
 
 		# Only consider times when the controller can open the valve and
 		# there's enough water for it to run
-		r.append(self.controller._range(start,end))
-		r.append(self.feed._range(start,end,self.flow))
+		r.append(self.controller._range(start,end,add=add))
+		r.append(self.feed._range(start,end,self.flow,add=add))
 		return range_intersection(*r)
 	
 	def _not_blocked_range(self,start,end):

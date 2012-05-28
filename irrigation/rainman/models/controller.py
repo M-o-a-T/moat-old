@@ -34,9 +34,11 @@ class Controller(Model,RangeMixin):
 	location = m.CharField(max_length=200, help_text="How to identify the controller (host name?)")
 	max_on = m.IntegerField(default=3, help_text="number of valves that can be on at any one time")
 
-	def _range(self,start,end):
-		from rainman.models.schedule import Schedule
+	def _range(self,start,end, add=0):
+		if not isinstance(add,timedelta):
+			add = timedelta(0,add)
 
+		from rainman.models.schedule import Schedule
 		from heapq import heappush,heappop
 		stops=[]
 		n_open = 0
@@ -51,7 +53,7 @@ class Controller(Model,RangeMixin):
 				#print "-",n_open,str_tz(k)
 				n_open -= 1
 			n_open += 1
-			heappush(stops,s.start+s.duration)
+			heappush(stops,s.start+s.duration+add)
 			#print "+",n_open,str_tz(s.start+s.duration)
 			if n_open == self.max_on:
 				if (start < s.start):

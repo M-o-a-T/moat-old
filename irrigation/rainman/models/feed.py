@@ -37,8 +37,10 @@ class Feed(Meter):
 		self._max_flow_wait = timedelta(0,self.db_max_flow_wait)
 	max_flow_wait = property(_get_max_flow_wait,_set_max_flow_wait)
 
-	def _range(self,start,end,plusflow):
+	def _range(self,start,end,plusflow,add=0):
 		"""Return a range of times which accept this additional flow"""
+		if not isinstance(add,timedelta):
+			add = timedelta(0,add)
 	
 		from rainman.models.schedule import Schedule
 		from heapq import heappush,heappop
@@ -64,7 +66,7 @@ class Feed(Meter):
 				heappop(stops)
 
 			dflow = s.valve.flow
-			heappush(stops,(s.start+s.duration,dflow))
+			heappush(stops,(s.start+s.duration+add,dflow))
 			if flow is not None:
 				oflow = flow
 				flow -= dflow

@@ -16,7 +16,7 @@
 ##
 
 """\
-		Recalculate valves.
+		Calculate valve schedules.
 		"""
 
 from django.core.management.base import BaseCommand, CommandError
@@ -28,8 +28,9 @@ from django.db.models import F,Q
 from django.utils.timezone import utc,get_current_timezone
 from optparse import make_option
 
-soon=now()+timedelta(0,15*60)
-later=now()+timedelta(0,2*60*60)
+n=now()
+soon=n+timedelta(0,15*60)
+later=n+timedelta(0,2*60*60)
 
 class Command(BaseCommand):
 	args = '<valve>…'
@@ -96,7 +97,7 @@ class Command(BaseCommand):
 				self.one_valve(v,options)
 
 	def one_valve(self,v,options):
-		if v.level < v.start_level:
+		if (v.level < v.stop_level) if v.priority else (v.level < v.start_level):
 			print "Nothing to do",v,v.level,v.start_level
 			if options['save'] and v.verbose:
 				log(v,"Nothing to do (has %s, need %s)" % (v.level,v.start_level))
@@ -106,7 +107,7 @@ class Command(BaseCommand):
 			level = v.max_level
 		want = v.raw_watering_time(level)
 		for s in v.schedules.filter(start__gte=soon-timedelta(1,0)):
-			if s.end < soon:
+			if s.end < n:
 				continue
 			if s.start > later and not s.seen and not s.forced:
 				if options['save']:
@@ -118,10 +119,11 @@ class Command(BaseCommand):
 			want -= timedelta(0,s.duration.total_seconds()*1.2) # timedelta cannot be multiplied (Py3 feature)
 
 		if want.total_seconds() < 10:
+			v.update(priority=False)
 			return
 		if options['verbose']:
 			print "Plan",v,"for",want,"Level",v.level,v.start_level,v.stop_level
-		for a,b in v.range(start=soon,days=options['age']):
+		for a,b in v.range(start=soon,days=options['age'], add=30):
 			if b < want:
 				print "Partial",str_tz(a),str(b)
 				if options['save']:
