@@ -1,0 +1,9 @@
+{% extends "base.jinja" %}
+{% import "obj/controller/macro.jinja" as c %}
+
+{% block title %}Controllers{% endblock %}
+{% block content %}
+
+{{ c.table(controller_list) }}
+
+{% endblock %}
