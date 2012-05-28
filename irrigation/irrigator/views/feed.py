@@ -17,57 +17,59 @@
 from __future__ import division,absolute_import
 from django.views.generic import ListView,DetailView,CreateView,UpdateView,DeleteView
 from django.forms import ModelForm
-from rainman.models import Controller,Site
-from irrigator.views import FormMixin
+from rainman.models import Feed,Site
+from irrigator.views import TimeDeltaField,FormMixin,DbModelForm
 
-class ControllerForm(ModelForm):
+class FeedForm(DbModelForm):
 	class Meta:
-		model = Controller
-		exclude = ('site',)
+		model = Feed
+		exclude = ('db_max_flow_wait','site')
+		fields = ('name','var','flow','max_flow_wait')
+
+	max_flow_wait = TimeDeltaField(help_text=Meta.model._meta.get_field_by_name("db_max_flow_wait")[0].help_text)
 
 	def save(self,commit=True):
 		if hasattr(self,'site'):
 			self.instance.site = self.site
-		return super(ControllerForm,self).save(commit)
+		return super(FeedForm,self).save(commit)
 
 
-class ControllerMixin(FormMixin):
-	model = Controller
-	context_object_name = "controller"
+class FeedMixin(FormMixin):
+	model = Feed
+	context_object_name = "feed"
 	def get_queryset(self):
 		gu = self.request.user.get_profile()
-		return super(ControllerMixin,self).get_queryset().filter(id__in=gu.controllers)
+		return super(FeedMixin,self).get_queryset().filter(id__in=gu.feeds)
 
-class ControllersView(ControllerMixin,ListView):
-	context_object_name = "controller_list"
+class FeedsView(FeedMixin,ListView):
+	context_object_name = "feed_list"
 	pass
 
-class ControllerView(ControllerMixin,DetailView):
+class FeedView(FeedMixin,DetailView):
 	pass
 
-class ControllerNewView(ControllerMixin,CreateView):
-	form_class = ControllerForm
-	success_url="/controller/%(id)s"
+class FeedNewView(FeedMixin,CreateView):
+	form_class = FeedForm
+	success_url="/feed/%(id)s"
 	def get_form(self, form_class):
-		form = super(ControllerNewView,self).get_form(form_class)
+		form = super(FeedNewView,self).get_form(form_class)
 		form.site=self.site
 		return form
 	def get(self,request,site,**k):
 		self.site = Site.objects.get(id=site)
-		return super(ControllerNewView,self).get(request,**k)
+		return super(FeedNewView,self).get(request,**k)
 	def post(self,request,site,**k):
 		self.site = Site.objects.get(id=site)
-		return super(ControllerNewView,self).post(request,**k)
+		return super(FeedNewView,self).post(request,**k)
 
+class FeedEditView(FeedMixin,UpdateView):
+	form_class = FeedForm
+	success_url="/feed/%(id)s"
 
-class ControllerEditView(ControllerMixin,UpdateView):
-	form_class = ControllerForm
-	success_url="/controller/%(id)s"
-
-class ControllerDeleteView(ControllerMixin,DeleteView):
+class FeedDeleteView(FeedMixin,DeleteView):
 	def post(self,*a,**k):
-		controller = self.get_object()
-		self.success_url="/site/%d" % (controller.site.id,)
+		feed = self.get_object()
+		self.success_url="/site/%d" % (feed.site.id,)
 		return super(DeleteView,self).post(*a,**k)
 	pass
 

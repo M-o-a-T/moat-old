@@ -6,6 +6,7 @@ admin.autodiscover()
 from rainman import admin as rain_admin
 from irrigator.views.site import SiteView,SitesView,SiteNewView,SiteEditView,SiteDeleteView
 from irrigator.views.controller import ControllerView,ControllersView,ControllerNewView,ControllerEditView,ControllerDeleteView
+from irrigator.views.feed import FeedView,FeedsView,FeedNewView,FeedEditView,FeedDeleteView
 
 urlpatterns = patterns('',
     url(r'^$', 'irrigator.views.home', name='home'),
@@ -21,6 +22,12 @@ urlpatterns = patterns('',
     url(r'^controller/(?P<pk>\d+)/edit$', ControllerEditView.as_view()),
     url(r'^controller/(?P<pk>\d+)/delete$', ControllerDeleteView.as_view()),
     url(r'^site/(?P<site>\d+)/new/controller$', ControllerNewView.as_view()),
+
+    url(r'^feed/$', FeedsView.as_view()),
+    url(r'^feed/(?P<pk>\d+)$', FeedView.as_view()),
+    url(r'^feed/(?P<pk>\d+)/edit$', FeedEditView.as_view()),
+    url(r'^feed/(?P<pk>\d+)/delete$', FeedDeleteView.as_view()),
+    url(r'^site/(?P<site>\d+)/new/feed$', FeedNewView.as_view()),
 
 	# Login stuff
 	url(r'^login/$', 'django.contrib.auth.views.login', {'template_name': 'auth/login.html'}),

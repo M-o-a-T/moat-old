@@ -1,0 +1,15 @@
+{% haml %}
+-extends "base.jinja"
+-block title
+	Delete Feed {{ feed.name }}
+
+-block content
+	%h1
+		=self.title()
+	%form action="" method="post"
+		-csrf_token
+		%p
+			Do you really want to delete the feed {{feed.name}}?
+		%input type="submit" value="Yes"
+
+{% endhaml %}

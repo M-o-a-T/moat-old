@@ -1,0 +1,44 @@
+{% haml %}
+-extends "base.jinja"
+-import "obj/valve/macro.jinja" as v
+
+-block title
+	=feed.name
+
+-block content
+	%h1
+		=feed.name
+	%table
+		%tr
+			%td
+				var
+			%td
+				=feed.var
+		%tr
+			%td
+				Site
+			%td
+				%a href="/site/{{ feed.site.id }}"
+					=feed.site.name
+		%tr
+			%td
+				Flow
+			%td
+				=feed.flow
+		%tr
+			%td
+				max flow wait time
+			%td
+				=feed.max_flow_wait
+
+	%h2
+		Valves
+	=v.table(feed.valves.all())
+	%div id="buttons"
+		%a href="/feed/{{feed.id}}/edit"
+			Edit
+		¦
+		%a href="/feed/{{feed.id}}/delete"
+			Delete
+
+{% endhaml %}

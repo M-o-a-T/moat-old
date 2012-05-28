@@ -1,0 +1,12 @@
+{% haml %}
+
+-extends "base.jinja"
+-import "obj/feed/macro.jinja" as f
+
+-block title
+	Feeds
+
+-block content
+	=f.table(feed_list)
+
+{% endhaml %}

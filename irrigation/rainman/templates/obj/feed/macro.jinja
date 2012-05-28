@@ -1,0 +1,14 @@
+{% haml %}
+
+-macro table(feeds)
+	%table
+		%th
+			%td
+				Name
+		-for feed in feeds.all()
+			%tr
+				%td
+					%a href="/feed/{{ feed.id }}"
+						=feed.name
+
+{% endhaml %}

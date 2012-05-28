@@ -1,6 +1,7 @@
 {% haml %}
 -extends "base.jinja"
 -import "obj/controller/macro.jinja" as c
+-import "obj/feed/macro.jinja" as f
 
 -block title
 	=site.name
@@ -40,10 +41,21 @@
 			Edit
 		%a href="/site/{{site.id}}/delete"
 			Delete
+
 	%h2
 		Controllers
 	=c.table(site.controllers.all())
+
 	%div id="buttons_c"
 		%a href="/site/{{site.id}}/new/controller"
 			New Controller…
+
+	%h2
+		Feeds
+	=f.table(site.feed_meters.all())
+
+	%div id="buttons_f"
+		%a href="/site/{{site.id}}/new/feed"
+			New Feed…
+
 {% endhaml %}
