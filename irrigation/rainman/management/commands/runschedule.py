@@ -750,6 +750,7 @@ class SchedValve(SchedCommon):
 			if sched:
 				sched.update(seen = False)
 			self.on = False
+			self.log("NOT running for %s: too many"%(duration,))
 			raise TooManyOn(self)
 		if duration is None and sched is not None:
 			duration = sched.duration
