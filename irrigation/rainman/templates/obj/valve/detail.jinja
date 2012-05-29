@@ -19,6 +19,10 @@
 			%td -> %a href="/feed/{{ valve.feed.id }}"
 				=valve.feed.name
 		%tr
+			%td -> Parameters
+			%td -> %a href="/params/{{ valve.param_group.id }}"
+				=valve.param_group.name
+		%tr
 			%td -> Site
 			%td -> %a href="/site/{{ valve.feed.site.id }}"
 				=valve.feed.site.name
@@ -38,14 +42,10 @@
 			%td -> =valve.verbose
 		%tr
 			%td -> Flow
-			%td
-				=valve.flow
-				=" mm/sec"
+			%td -> ="%.3f mm/sec" % valve.flow
 		%tr
 			%td -> Area
-			%td
-				=valve.area
-				=" m²"
+			%td -> ="%.1f m²" % valve.area
 		%tr
 			%td -> Shade
 			%td -> =valve.shade

@@ -17,7 +17,7 @@
 				=feed.site.name
 		%tr
 			%td -> Flow
-			%td -> =feed.flow
+			%td -> ="%.3f mm/sec" % feed.flow
 		%tr
 			%td -> max flow wait time
 			%td -> =feed.max_flow_wait
