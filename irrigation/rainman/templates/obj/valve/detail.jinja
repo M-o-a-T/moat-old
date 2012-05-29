@@ -1,0 +1,78 @@
+{% haml %}
+-extends "base.jinja"
+
+-block title
+	=valve.name
+
+-block content
+	%h1 -> =valve.name
+	%table
+		%tr
+			%td -> Comment
+			%td -> =valve.comment
+		%tr
+			%td -> Controller
+			%td -> %a href="/controller/{{ valve.controller.id }}"
+				=valve.controller.name
+		%tr
+			%td -> Feed
+			%td -> %a href="/feed/{{ valve.feed.id }}"
+				=valve.feed.name
+		%tr
+			%td -> Site
+			%td -> %a href="/site/{{ valve.feed.site.id }}"
+				=valve.feed.site.name
+		-if valve.feed.site.id != valve.controller.site.id
+			%tr
+				%td -> Site (Controller)
+				%td -> %a href="/site/{{ valve.controller.site.id }}"
+					=valve.controller.site.name
+		%tr
+			%td -> Location
+			%td -> =valve.location
+		%tr
+			%td -> var
+			%td -> =valve.var
+		%tr
+			%td -> Verbosity
+			%td -> =valve.verbose
+		%tr
+			%td -> Flow
+			%td
+				=valve.flow
+				=" mm/sec"
+		%tr
+			%td -> Area
+			%td
+				=valve.area
+				=" m²"
+		%tr
+			%td -> Shade
+			%td -> =valve.shade
+		%tr
+			%td -> Runoff
+			%td -> =valve.runoff
+		%tr
+			%td -> Max_level
+			%td -> =valve.max_level
+		%tr
+			%td -> Start_level
+			%td -> =valve.start_level
+		%tr
+			%td -> Stop_level
+			%td -> =valve.stop_level
+		%tr
+			%td -> Level
+			%td -> =valve.level
+		%tr
+			%td -> Time
+			%td -> =valve.time
+
+	%div id="buttons"
+		%a href="/valve/{{valve.id}}/edit"
+			Edit
+		=" ¦ "
+		%a href="/valve/{{valve.id}}/delete"
+			Delete
+
+{% endhaml %}

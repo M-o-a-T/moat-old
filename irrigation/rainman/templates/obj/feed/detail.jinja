@@ -22,13 +22,15 @@
 			%td -> max flow wait time
 			%td -> =feed.max_flow_wait
 
-	%h2 -> Valves
-	=v.table(feed.valves.all())
 	%div id="buttons"
 		%a href="/feed/{{feed.id}}/edit"
 			Edit
-		¦
+		=" ¦ "
 		%a href="/feed/{{feed.id}}/delete"
 			Delete
+	%h2 -> Valves
+	=v.table(feed.valves.all())
+	%a href="/site/{{feed.site.id}}/new/valve"
+		Add valve
 
 {% endhaml %}

@@ -1,0 +1,12 @@
+{% haml %}
+
+-extends "base.jinja"
+-import "obj/valve/macro.jinja" as v
+
+-block title
+	Valves
+
+-block content
+	=v.table(valve_list)
+
+{% endhaml %}

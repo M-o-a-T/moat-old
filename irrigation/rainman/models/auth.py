@@ -55,6 +55,12 @@ class UserForSite(Model):
 			return Controller.objects.filter(site__in=self.sites.all())
 		return Controller.objects.filter(valves__in=self.valves.all())
 
+	@property
+	def all_valves(self):
+		if self.level >= 3:
+			return Valve.objects.filter(controller__site__in=self.sites.all())
+		return self.valves.all()
+
 	def access_site(self,site):
 		if self.sites.filter(id==site.id).count():
 			return self.level

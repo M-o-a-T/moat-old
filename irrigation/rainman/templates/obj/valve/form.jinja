@@ -1,0 +1,26 @@
+{% haml %}
+
+-extends "base.jinja"
+-block title
+	-if valve is defined
+		=valve.name
+	-else
+		New Valve
+
+-block content
+	%h1 -> =self.title()
+	%form action="" method="post"
+		-csrf_token
+		%table
+			-if valve is defined or valve.controller
+				-set site=valve.controller.site
+			-else
+				-set site=form.site
+			%tr
+				%td -> Site
+				%td -> %a href="/site/{{ site.id }}"
+					=site.name
+			=form.as_table()|safe
+		%input type="submit" value="Save"
+
+{% endhaml %}

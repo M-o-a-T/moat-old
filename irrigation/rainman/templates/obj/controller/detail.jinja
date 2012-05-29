@@ -22,13 +22,15 @@
 			%td -> max On
 			%td -> =controller.max_on
 
-	%h2 -> Valves
-	=v.table(controller.valves.all())
 	%div id="buttons"
 		%a href="/controller/{{controller.id}}/edit"
 			Edit
-		¦
+		=" ¦ "
 		%a href="/controller/{{controller.id}}/delete"
 			Delete
+	%h2 -> Valves
+	=v.table(controller.valves.all())
+	%a href="/site/{{controller.site.id}}/new/valve"
+		Add valve
 
 {% endhaml %}
