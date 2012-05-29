@@ -55,5 +55,15 @@ class HistorysView(HistoryMixin,ListView):
 		return ctx
 
 class HistoryView(HistoryMixin,DetailView):
-	pass
+	def get_context_data(self,**k):
+		ctx = super(HistoryView,self).get_context_data(**k)
+		try:
+			ctx['next_h'] = self.get_queryset().filter(time__gt=ctx['history'].time).order_by('time')[0]
+		except IndexError:
+			ctx['next_h'] = None
+		try:
+			ctx['prev_h'] = self.get_queryset().filter(time__lt=ctx['history'].time).order_by('-time')[0]
+		except IndexError:
+			ctx['prev_h'] = None
+		return ctx
 

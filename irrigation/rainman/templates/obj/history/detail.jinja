@@ -14,7 +14,7 @@
 				=history.site.name
 		%tr
 			%th -> Time
-			%td -> =history.time
+			%td -> =history.time|tz
 		%tr
 			%th -> Rain
 			%td -> ="%.2f" % history.rain
@@ -31,14 +31,14 @@
 			%th -> Sun
 			%td -> ="%.2f" % history.sun if history.sun is not none else "–"
 
-;	%buttons_h
-;		-if next_h
-;			%a href="/history/{{ next_h.id }}"
-;				Next
-;		-if next_h and prev_h
-;			=" ¦ "
-;		-if prev_h
-;			%a href="/history/{{ prev_h.id }}"
-;				Previous
+	%div.buttons_h
+		-if prev_h
+			%a href="/history/{{ prev_h.id }}"
+				Previous
+		-if next_h and prev_h
+			=" ¦ "
+		-if next_h
+			%a href="/history/{{ next_h.id }}"
+				Next
 
 {% endhaml %}
