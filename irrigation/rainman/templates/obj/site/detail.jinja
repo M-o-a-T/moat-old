@@ -36,14 +36,14 @@
 			%a href="/site/{{site.id}}/delete"
 				Delete
 
-	%div.controllers
-		%h2 -> Controllers
-		%div.content
-			=c.table(site.controllers.all())
-
-		%div.buttons#buttons_c
-			%a href="/site/{{site.id}}/new/controller"
-				New Controller…
+;	%div.controllers
+;		%h2 -> Controllers
+;		%div.content
+;			=c.table(site.controllers.all())
+;
+;		%div.buttons#buttons_c
+;			%a href="/site/{{site.id}}/new/controller"
+;				New Controller…
 
 	%div.feeds
 		%h2 -> Feeds
@@ -73,6 +73,8 @@
 				More…
 	%div.more
 		%div.buttons
+			%a href="/site/{{site.id}}/controller"
+				Controllers
 			%a href="/site/{{site.id}}/params"
 				Parameters
 

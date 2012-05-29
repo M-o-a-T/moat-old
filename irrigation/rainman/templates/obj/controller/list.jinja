@@ -7,6 +7,16 @@
 	Controllers
 
 -block content
-	=c.table(controller_list)
+	-if site is defined
+		-set show_site=False
+	-else
+		-set show_site=True
+
+	=c.table(controller_list, show_site=show_site)
+
+	-if not show_site
+		%div.buttons
+			%a href="/site/{{site}}/new/controller"
+				New…
 
 {% endhaml %}

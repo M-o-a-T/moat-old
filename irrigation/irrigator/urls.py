@@ -25,6 +25,7 @@ urlpatterns = patterns('',
     url(r'^controller/(?P<pk>\d+)$', ControllerView.as_view()),
     url(r'^controller/(?P<pk>\d+)/edit$', ControllerEditView.as_view()),
     url(r'^controller/(?P<pk>\d+)/delete$', ControllerDeleteView.as_view()),
+    url(r'^site/(?P<site>\d+)/controller$', ControllersView.as_view()),
     url(r'^site/(?P<site>\d+)/new/controller$', ControllerNewView.as_view()),
 
     url(r'^feed/$', FeedsView.as_view()),
