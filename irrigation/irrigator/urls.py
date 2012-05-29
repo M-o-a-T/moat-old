@@ -9,6 +9,7 @@ from irrigator.views.controller import ControllerView,ControllersView,Controller
 from irrigator.views.feed import FeedView,FeedsView,FeedNewView,FeedEditView,FeedDeleteView
 from irrigator.views.valve import ValveView,ValvesView,ValveNewView,ValveEditView,ValveDeleteView
 from irrigator.views.paramgroup import ParamGroupView,ParamGroupsView,ParamGroupNewView,ParamGroupEditView,ParamGroupDeleteView
+from irrigator.views.level import LevelView,LevelsView,LevelNewView,LevelEditView
 from irrigator.views.enveffect import EnvEffectView,EnvEffectsView,EnvEffectNewView,EnvEffectEditView,EnvEffectDeleteView
 from irrigator.views.history import HistoryView,HistorysView
 
@@ -39,6 +40,12 @@ urlpatterns = patterns('',
     url(r'^valve/(?P<pk>\d+)/edit$', ValveEditView.as_view()),
     url(r'^valve/(?P<pk>\d+)/delete$', ValveDeleteView.as_view()),
     url(r'^site/(?P<site>\d+)/new/valve$', ValveNewView.as_view()),
+
+	url(r'^level/$', LevelsView.as_view()),
+	url(r'^level/(?P<pk>\d+)$', LevelView.as_view()),
+	url(r'^level/(?P<pk>\d+)/edit$', LevelEditView.as_view()),
+	url(r'^valve/(?P<valve>\d+)/level$', LevelsView.as_view()),
+	url(r'^valve/(?P<valve>\d+)/new/level$', LevelNewView.as_view()),
 
 	url(r'^params/$', ParamGroupsView.as_view()),
 	url(r'^params/(?P<pk>\d+)$', ParamGroupView.as_view()),

@@ -1,0 +1,25 @@
+{% haml %}
+
+-extends "base.jinja"
+-import "obj/level/macro.jinja" as lv
+-import "obj/macro.jinja" as m
+
+-block title
+	Levels
+
+-block content
+	-if valve is defined
+		-set show_valve=False
+	-else
+		-set show_valve=True
+
+	=lv.table(level_list, show_valve=show_valve)
+
+	-if not show_valve
+		%div.buttons
+			%a href="/valve/{{valve}}/new/level"
+				New…
+
+	=m.pager(page_obj)
+
+{% endhaml %}

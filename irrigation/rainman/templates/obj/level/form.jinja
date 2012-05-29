@@ -1,0 +1,32 @@
+{% haml %}
+
+-extends "base.jinja"
+-block title
+	-if level is defined
+		=level
+		=" – edit"
+	-else
+		New Level
+
+-block content
+	%h1
+		-if level is defined
+			=level.time|tz
+		-else
+			=self.title()
+	%form action="" method="post"
+		-csrf_token
+		%table
+			-if level is defined
+				-set valve=level.valve
+			-else
+				-set valve=form.valve
+			%tr
+				%th -> Valve
+				%td
+					%a href="/valve/{{ valve.id }}"
+						=valve.name
+			=form.as_table()|safe
+		%input type="submit" value="Save"
+
+{% endhaml %}

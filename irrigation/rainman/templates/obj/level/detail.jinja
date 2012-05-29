@@ -1,0 +1,36 @@
+{% haml %}
+-extends "base.jinja"
+-import "obj/valve/macro.jinja" as v
+
+-block title
+	=level
+
+-block content
+	%h1 -> =level
+	%table
+		%tr
+			%th -> Valve
+			%td -> %a href="/valve/{{ level.valve.id }}"
+				=level.valve.name
+		%tr
+			%th -> Time
+			%td -> =level.time|tz
+		%tr
+			%th -> Level
+			%td -> ="%.2f" % level.level
+		%tr
+			%th -> Flow
+			%td -> ="%.2f" % level.flow
+		%tr
+			%th -> Forced?
+			%td
+				-if level.forced
+					◉
+				-else
+					–
+
+	%div id="buttons"
+		%a href="/level/{{level.id}}/edit"
+			Edit
+
+{% endhaml %}

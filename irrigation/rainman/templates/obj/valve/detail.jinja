@@ -1,5 +1,6 @@
 {% haml %}
 -extends "base.jinja"
+-import "obj/level/macro.jinja" as lv
 
 -block title
 	=valve.name
@@ -74,5 +75,14 @@
 		=" ¦ "
 		%a href="/valve/{{valve.id}}/delete"
 			Delete
+ 
+	%div.levels
+		%h2 -> Levels
+		%div.content
+			=lv.table(valve.levels.order_by("-time")[:5], show_valve=False)
+
+		%div.buttons#buttons_h
+			%a href="/valve/{{valve.id}}/level"
+				More…
 
 {% endhaml %}
