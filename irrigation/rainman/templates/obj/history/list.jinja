@@ -18,7 +18,7 @@
 		%span.step-links
 			-if page_obj.has_next()
 				%a href="?page={{ page_obj.next_page_number() }}"
-					previous
+					earlier
 				=" ¦ "
 
 		%span.current
@@ -28,6 +28,6 @@
 			-if page_obj.has_previous()
 				=" ¦ "
 				%a href="?page={{ page_obj.previous_page_number() }}"
-					next
+					later
 
 {% endhaml %}
