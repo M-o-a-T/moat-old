@@ -20,6 +20,7 @@ from rainman.models.group import Group
 from rainman.models.valve import Valve
 from django.db import models as m
 from datetime import timedelta
+from rainman.utils import str_tz
 
 class GroupOverride(Model):
 	"""Modify schedule times"""
@@ -79,7 +80,7 @@ class GroupAdjust(Model):
 		unique_together = (("group","start"),)
 		db_table="rainman_groupadjust"
 	def __unicode__(self):
-		return u"@%s %s" % (self.start,self.group)
+		return u"@%s %s" % (str_tz(self.start),self.group)
 	group = m.ForeignKey(Group,related_name="adjusters")
 	start = m.DateTimeField(db_index=True)
 	factor = m.FloatField()

@@ -19,6 +19,7 @@ from rainman.models import Model
 from rainman.models.valve import Valve
 from django.db import models as m
 from datetime import timedelta
+from rainman.utils import str_tz
 
 class Schedule(Model):
 	"""The actual plan"""
@@ -26,7 +27,7 @@ class Schedule(Model):
 		unique_together = (("valve","start"),)
 		db_table="rainman_schedule"
 	def __unicode__(self):
-		return u"@%s %s" % (self.start,self.valve)
+		return u"@%s %s" % (str_tz(self.start),self.valve)
 	valve = m.ForeignKey(Valve,related_name="schedules")
 	start = m.DateTimeField(db_index=True)
 	db_duration = m.PositiveIntegerField(db_column="duration")

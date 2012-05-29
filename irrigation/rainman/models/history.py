@@ -19,7 +19,7 @@ from rainman.models import Model
 from rainman.models.site import Site
 from rainman.models.valve import Valve
 from rainman.models.controller import Controller
-from rainman.utils import now
+from rainman.utils import now,str_tz
 from django.db import models as m
 
 class Level(Model):
@@ -28,7 +28,7 @@ class Level(Model):
 		unique_together = (("valve", "time"),)
 		db_table="rainman_level"
 	def __unicode__(self):
-		return u"@%s %s" % (self.time,self.valve)
+		return u"@%s %s" % (str_tz(self.time),self.valve)
 	valve = m.ForeignKey(Valve, related_name="levels")
 	time = m.DateTimeField(db_index=True)
 	level = m.FloatField(help_text="then-current water capacity, in mm")
@@ -41,7 +41,7 @@ class History(Model):
 		unique_together = (("site", "time"),)
 		db_table="rainman_history"
 	def __unicode__(self):
-		return u"@%s %s" % (self.time,self.site)
+		return u"@%s %s" % (str_tz(self.time),self.site)
 	site = m.ForeignKey(Site,related_name="history")
 	time = m.DateTimeField(db_index=True)
 	
