@@ -1,0 +1,21 @@
+{% haml %}
+
+-macro pager(page_obj)
+
+    %div.pagination
+        %span.step-links
+            -if page_obj.has_next()
+                %a href="?page={{ page_obj.next_page_number() }}"
+                    earlier
+                =" ¦ "
+
+        %span.current
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+
+        %span.step-links
+            -if page_obj.has_previous()
+                =" ¦ "
+                %a href="?page={{ page_obj.previous_page_number() }}"
+                    later
+
+{% endhaml %}
