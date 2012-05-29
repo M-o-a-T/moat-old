@@ -1,0 +1,12 @@
+{% haml %}
+
+-extends "base.jinja"
+-import "obj/enveffect/macro.jinja" as ef
+
+-block title
+	Environment Effects
+
+-block content
+	=ef.table(enveffect_list)
+
+{% endhaml %}

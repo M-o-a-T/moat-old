@@ -1,0 +1,35 @@
+{% haml %}
+-extends "base.jinja"
+-import "obj/valve/macro.jinja" as v
+
+-block title
+	=enveffect
+
+-block content
+	%h1 -> =enveffect
+	%table
+		%tr
+			%th -> Parameter Group
+			%td -> %a href="/params/{{ enveffect.param_group.id }}"
+				=enveffect.param_group.name
+		%tr
+			%th -> Factor
+			%td -> ="%.2f" % enveffect.factor
+		%tr
+			%th -> Temperature
+			%td -> ="%.2f" % enveffect.temp if enveffect.temp is not none else "–"
+		%tr
+			%th -> Wind speed
+			%td -> ="%.2f" % enveffect.wind if enveffect.wind is not none else "–"
+		%tr
+			%th -> Sunshine
+			%td -> ="%.2f" % enveffect.sun if enveffect.sun is not none else "–"
+
+	%div id="buttons"
+		%a href="/environ/{{enveffect.id}}/edit"
+			Edit
+		=" ¦ "
+		%a href="/environ/{{enveffect.id}}/delete"
+			Delete
+
+{% endhaml %}

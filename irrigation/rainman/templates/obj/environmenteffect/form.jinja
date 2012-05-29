@@ -1,0 +1,33 @@
+{% haml %}
+
+-extends "base.jinja"
+-block title
+	-if enveffect is defined
+		=enveffect.name
+		=" – edit"
+	-else
+		New Parameter
+
+-block content
+	%h1
+		-if enveffect is defined
+			=str(enveffect)
+		-else
+			=self.title()
+	%form action="" method="post"
+		-csrf_token
+		%table
+			-if enveffect is defined
+				-set param_group=enveffect.param_group
+			-else
+				-set param_group=form.param_group
+			%tr
+				%td
+					Parameter Group
+				%td
+					%a href="/params/{{ param_group.id }}"
+						=param_group.name
+			=form.as_table()|safe
+		%input type="submit" value="Save"
+
+{% endhaml %}

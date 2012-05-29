@@ -9,6 +9,7 @@ from irrigator.views.controller import ControllerView,ControllersView,Controller
 from irrigator.views.feed import FeedView,FeedsView,FeedNewView,FeedEditView,FeedDeleteView
 from irrigator.views.valve import ValveView,ValvesView,ValveNewView,ValveEditView,ValveDeleteView
 from irrigator.views.paramgroup import ParamGroupView,ParamGroupsView,ParamGroupNewView,ParamGroupEditView,ParamGroupDeleteView
+from irrigator.views.enveffect import EnvEffectView,EnvEffectsView,EnvEffectNewView,EnvEffectEditView,EnvEffectDeleteView
 
 urlpatterns = patterns('',
     url(r'^$', 'irrigator.views.home', name='home'),
@@ -42,6 +43,12 @@ urlpatterns = patterns('',
 	url(r'^params/(?P<pk>\d+)/edit$', ParamGroupEditView.as_view()),
 	url(r'^params/(?P<pk>\d+)/delete$', ParamGroupDeleteView.as_view()),
 	url(r'^site/(?P<site>\d+)/new/params$', ParamGroupNewView.as_view()),
+
+	url(r'^environ/$', EnvEffectsView.as_view()),
+	url(r'^environ/(?P<pk>\d+)$', EnvEffectView.as_view()),
+	url(r'^environ/(?P<pk>\d+)/edit$', EnvEffectEditView.as_view()),
+	url(r'^environ/(?P<pk>\d+)/delete$', EnvEffectDeleteView.as_view()),
+	url(r'^params/(?P<param>\d+)/new/environ$', EnvEffectNewView.as_view()),
 
 	# Login stuff
 	url(r'^login/$', 'django.contrib.auth.views.login', {'template_name': 'auth/login.html'}),
