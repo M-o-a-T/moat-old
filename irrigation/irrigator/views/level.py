@@ -29,6 +29,7 @@ class LevelForm(ModelForm):
 	def save(self,commit=True):
 		if self.instance.id is None:
 			self.instance.time = now()
+			self.instance.valve = self.aux_data['valve']
 		self.instance.forced = True
 		return super(LevelForm,self).save(commit)
 

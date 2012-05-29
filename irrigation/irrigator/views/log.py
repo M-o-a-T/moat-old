@@ -26,20 +26,27 @@ class LogForm(ModelForm):
 		exclude = ('site',)
 
 	def save(self,commit=True):
-		if hasattr(self,'site'):
-			self.instance.site = self.site
+		s = self.aux_data['site']
+		if s is not None:
+			self.instance.controller = s
+		c = self.aux_data['controller']
+		if c is not None:
+			self.instance.valve = c
+		v = self.aux_data['valve']
+		if s is not None:
+			self.instance.site = v
 		return super(LogForm,self).save(commit)
 
 class MoreParamMixin(SiteParamMixin):
 	opt_params = {'site':Site, 'controller':Controller, 'valve':Valve}
-	def get_params_hook(self):
-		super(MoreParamMixin,self).get_params_hook()
-		if self.valve is not None:
-			#self.controller = self.valve.controller
-			self.controller = Valve.objects.get(pk=self.valve).controller.id
-		if self.controller is not None:
-			#self.site = self.controller.site
-			self.site = Controller.objects.get(pk=self.controller).site.id
+	def get_params_hook(self,*a,**k):
+		super(MoreParamMixin,self).get_params_hook(*a,**k)
+		v = self.aux_data['valve']
+		if v is not None:
+			self.aux_data['controller'] = v.controller
+		c = self.aux_data['controller']
+		if c is not None:
+			self.aux_data['site'] = c.site
 
 class LogMixin(FormMixin):
 	model = Log

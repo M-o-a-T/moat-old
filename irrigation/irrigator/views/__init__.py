@@ -76,33 +76,46 @@ class FormMixin(object):
 
 class SiteParamMixin(object):
 	opt_params = {'site':Site}
+	def __init__(self,*a,**k):
+		super(SiteParamMixin,self).__init__(*a,**k)
+		self.aux_data = {}
 
-	def get_params_hook(self):
-		pass
-	def get(self, request, **k):
-		for p in self.opt_params.keys():
+	def get_params_hook(self,k):
+		for p,d in self.opt_params.items():
 			if p in k:
-				setattr(self,p,k.pop(p))
+				self.aux_data[p] = d.objects.get(pk=k.pop(p))
 			else:
-				setattr(self,p,None)
-		self.get_params_hook()
+				self.aux_data[p] = None
+
+	def get_form(self, form_class):
+		form = super(SiteParamMixin,self).get_form(form_class)
+		form.aux_data = self.aux_data
+		return form
+
+	def get(self, request, **k):
+		self.get_params_hook(k)
 		return super(SiteParamMixin,self).get(request,**k)
+	def post(self,request,**k):
+		self.get_params_hook(k)
+		return super(SiteParamMixin,self).post(request,**k)
+
 	def get_queryset(self):
 		q = super(SiteParamMixin,self).get_queryset()
 		f = {}
 		for p in self.opt_params.keys():
-			v = getattr(self,p)
+			v = self.aux_data[p]
 			if v is not None:
-				f[p] = getattr(self,p)
+				f[p] = v
 		if f:
 			q = q.filter(**f)
 		return q
+
 	def get_context_data(self,**k):
 		ctx = super(SiteParamMixin,self).get_context_data(**k)
-		for p,d in self.opt_params.items():
-			v = getattr(self,p)
+		for p in self.opt_params.keys():
+			v = self.aux_data[p]
 			if v is not None:
-				ctx[p] = d.objects.get(pk=v)
+				ctx[p] = v
 		return ctx
 
 class DbModelForm(ModelForm):
