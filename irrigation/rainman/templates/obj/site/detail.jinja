@@ -2,6 +2,7 @@
 -extends "base.jinja"
 -import "obj/controller/macro.jinja" as c
 -import "obj/feed/macro.jinja" as f
+-import "obj/paramgroup/macro.jinja" as pg
 
 -block title
 	=site.name
@@ -10,21 +11,21 @@
 	%h1 -> =site.name
 	%table
 		%tr
-			%td -> var
+			%th -> var
 			%td -> =site.var
 		%tr
-			%td -> Host
+			%th -> Host
 			%td -> =site.host
 		%tr
-			%td -> Port
+			%th -> Port
 			%td -> =site.port
 		%tr
-			%td -> Rate
+			%th -> Rate
 			%td
 				=site.rate
 				mm/day (on an average day)
 		%tr
-			%td -> Rain Delay
+			%th -> Rain Delay
 			%td -> =site.rain_delay
 	%div id="buttons"
 		%a href="/site/{{site.id}}/edit"
@@ -48,7 +49,7 @@
 			New Feed…
 
 	%h2 -> Parameters
-	=f.table(site.param_groups.all())
+	=pg.table(site.param_groups.all())
 
 	%div id="buttons_pg"
 		%a href="/site/{{site.id}}/new/params"

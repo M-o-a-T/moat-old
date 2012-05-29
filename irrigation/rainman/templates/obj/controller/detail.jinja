@@ -9,17 +9,17 @@
 	%h1 -> =controller.name
 	%table
 		%tr
-			%td -> var
+			%th -> var
 			%td -> =controller.var
 		%tr
-			%td -> Site
+			%th -> Site
 			%td -> %a href="/site/{{ controller.site.id }}"
 				=controller.site.name
 		%tr
-			%td -> Location
+			%th -> Location
 			%td -> =controller.location
 		%tr
-			%td -> max On
+			%th -> max On
 			%td -> =controller.max_on
 
 	%div id="buttons"

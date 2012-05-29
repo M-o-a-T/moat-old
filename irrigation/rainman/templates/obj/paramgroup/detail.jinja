@@ -1,5 +1,6 @@
 {% haml %}
 -extends "base.jinja"
+-import "obj/environmenteffect/macro.jinja" as ef
 
 -block title
 	=param_group.name
@@ -8,17 +9,17 @@
 	%h1 -> =param_group.name
 	%table
 		%tr
-			%td -> comment
+			%th -> comment
 			%td -> =param_group.comment
 		%tr
-			%td -> Site
+			%th -> Site
 			%td -> %a href="/site/{{ param_group.site.id }}"
 				=param_group.site.name
 		%tr
-			%td -> Factor
+			%th -> Factor
 			%td -> =param_group.factor
 		%tr
-			%td -> Rain Stop
+			%th -> Rain Stop
 			%td -> ="Yes" if param_group.rain else "No"
 
 	%div id="buttons"
@@ -27,5 +28,12 @@
 		=" ¦ "
 		%a href="/params/{{param_group.id}}/delete"
 			Delete
+
+	%h2 Parameters
+	=ef.table(param_group.environment_effects.all(),False)
+	%div id="buttons_ef"
+		%a href="/params/{{param_group.id}}/new/environ"
+			New Parameter…
+
 
 {% endhaml %}

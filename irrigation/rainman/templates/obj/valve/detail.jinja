@@ -8,64 +8,64 @@
 	%h1 -> =valve.name
 	%table
 		%tr
-			%td -> Comment
+			%th -> Comment
 			%td -> =valve.comment
 		%tr
-			%td -> Controller
+			%th -> Controller
 			%td -> %a href="/controller/{{ valve.controller.id }}"
 				=valve.controller.name
 		%tr
-			%td -> Feed
+			%th -> Feed
 			%td -> %a href="/feed/{{ valve.feed.id }}"
 				=valve.feed.name
 		%tr
-			%td -> Parameters
+			%th -> Parameters
 			%td -> %a href="/params/{{ valve.param_group.id }}"
 				=valve.param_group.name
 		%tr
-			%td -> Site
+			%th -> Site
 			%td -> %a href="/site/{{ valve.feed.site.id }}"
 				=valve.feed.site.name
 		-if valve.feed.site.id != valve.controller.site.id
 			%tr
-				%td -> Site (Controller)
+				%th -> Site (Controller)
 				%td -> %a href="/site/{{ valve.controller.site.id }}"
 					=valve.controller.site.name
 		%tr
-			%td -> Location
+			%th -> Location
 			%td -> =valve.location
 		%tr
-			%td -> var
+			%th -> var
 			%td -> =valve.var
 		%tr
-			%td -> Verbosity
+			%th -> Verbosity
 			%td -> =valve.verbose
 		%tr
-			%td -> Flow
+			%th -> Flow
 			%td -> ="%.3f mm/sec" % valve.flow
 		%tr
-			%td -> Area
+			%th -> Area
 			%td -> ="%.1f m²" % valve.area
 		%tr
-			%td -> Shade
+			%th -> Shade
 			%td -> =valve.shade
 		%tr
-			%td -> Runoff
+			%th -> Runoff
 			%td -> =valve.runoff
 		%tr
-			%td -> Max_level
+			%th -> Max_level
 			%td -> =valve.max_level
 		%tr
-			%td -> Start_level
+			%th -> Start_level
 			%td -> =valve.start_level
 		%tr
-			%td -> Stop_level
+			%th -> Stop_level
 			%td -> =valve.stop_level
 		%tr
-			%td -> Level
+			%th -> Level
 			%td -> =valve.level
 		%tr
-			%td -> Time
+			%th -> Time
 			%td -> =valve.time
 
 	%div id="buttons"

@@ -9,17 +9,17 @@
 	%h1 -> =feed.name
 	%table
 		%tr
-			%td -> var
+			%th -> var
 			%td -> =feed.var
 		%tr
-			%td -> Site
+			%th -> Site
 			%td -> %a href="/site/{{ feed.site.id }}"
 				=feed.site.name
 		%tr
-			%td -> Flow
+			%th -> Flow
 			%td -> ="%.3f mm/sec" % feed.flow
 		%tr
-			%td -> max flow wait time
+			%th -> max flow wait time
 			%td -> =feed.max_flow_wait
 
 	%div id="buttons"
