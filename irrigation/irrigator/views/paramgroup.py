@@ -18,7 +18,7 @@ from __future__ import division,absolute_import
 from django.views.generic import ListView,DetailView,CreateView,UpdateView,DeleteView
 from django.forms import ModelForm
 from rainman.models import ParamGroup,Site
-from irrigator.views import FormMixin
+from irrigator.views import FormMixin,SiteParamMixin
 
 class ParamGroupForm(ModelForm):
 	class Meta:
@@ -38,20 +38,8 @@ class ParamGroupMixin(FormMixin):
 		gu = self.request.user.get_profile()
 		return super(ParamGroupMixin,self).get_queryset().filter(id__in=gu.param_groups)
 
-class ParamGroupsView(ParamGroupMixin,ListView):
+class ParamGroupsView(ParamGroupMixin,SiteParamMixin,ListView):
 	context_object_name = "param_group_list"
-	def get(self, request, site=None, **k):
-		self.site = site
-		return super(ParamGroupsView,self).get(request,**k)
-	def get_queryset(self):
-		q = super(ParamGroupsView,self).get_queryset()
-		if self.site is not None:
-			q = q.filter(site=self.site)
-		return q
-	def get_context_data(self,**k):
-		ctx = super(ParamGroupsView,self).get_context_data(**k)
-		ctx['site'] = self.site
-		return ctx
 
 class ParamGroupView(ParamGroupMixin,DetailView):
 	pass

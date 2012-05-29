@@ -18,7 +18,7 @@ from __future__ import division,absolute_import
 from django.views.generic import ListView,DetailView,CreateView,UpdateView,DeleteView
 from django.forms import ModelForm
 from rainman.models import History,Site
-from irrigator.views import FormMixin
+from irrigator.views import FormMixin,SiteParamMixin
 
 class HistoryForm(ModelForm):
 	class Meta:
@@ -36,23 +36,11 @@ class HistoryMixin(FormMixin):
 	context_object_name = "history"
 	def get_queryset(self):
 		gu = self.request.user.get_profile()
-		return super(HistoryMixin,self).get_queryset().filter(site__id__in=gu.sites.all())
+		return super(HistoryMixin,self).get_queryset().filter(site__id__in=gu.sites.all()).order_by("-time")
 
-class HistorysView(HistoryMixin,ListView):
+class HistorysView(HistoryMixin,SiteParamMixin,ListView):
 	context_object_name = "history_list"
 	paginate_by = 50
-	def get(self, request, site=None, **k):
-		self.site = site
-		return super(HistorysView,self).get(request,**k)
-	def get_queryset(self):
-		q = super(HistorysView,self).get_queryset()
-		if self.site is not None:
-			q = q.filter(site=self.site)
-		return q.order_by("-time")
-	def get_context_data(self,**k):
-		ctx = super(HistorysView,self).get_context_data(**k)
-		ctx['site'] = self.site
-		return ctx
 
 class HistoryView(HistoryMixin,DetailView):
 	def get_context_data(self,**k):
