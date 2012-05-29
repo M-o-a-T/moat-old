@@ -21,6 +21,7 @@ from django.forms import ModelForm,FloatField,TimeField
 from django.utils.translation import ugettext_lazy as _
 from datetime import timedelta,datetime
 
+from rainman.models import Site
 
 def home(request):
 	try:
@@ -74,17 +75,31 @@ class FormMixin(object):
 		return ["obj/%s/%s.jinja" % (self.model._meta.object_name.lower(), self.template_name_suffix.lstrip("_"))]
 
 class SiteParamMixin(object):
-	def get(self, request, site=None, **k):
-		self.site = site
+	opt_params = {'site':Site}
+
+	def get(self, request, **k):
+		for p in self.opt_params.keys():
+			if p in k:
+				setattr(self,p,k.pop(p))
+			else:
+				setattr(self,p,None)
 		return super(SiteParamMixin,self).get(request,**k)
 	def get_queryset(self):
 		q = super(SiteParamMixin,self).get_queryset()
-		if self.site is not None:
-			q = q.filter(site=self.site)
+		f = {}
+		for p in self.opt_params.keys():
+			v = getattr(self,p)
+			if v is not None:
+				f[p] = getattr(self,p)
+		if f:
+			q = q.filter(**f)
 		return q
 	def get_context_data(self,**k):
 		ctx = super(SiteParamMixin,self).get_context_data(**k)
-		ctx['site'] = self.site
+		for p,d in self.opt_params.items():
+			v = getattr(self,p)
+			if v is not None:
+				ctx[p] = d.objects.get(pk=v)
 		return ctx
 
 class DbModelForm(ModelForm):
