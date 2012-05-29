@@ -49,4 +49,11 @@
 		%a href="/site/{{site.id}}/new/feed"
 			New Feed…
 
+	%h2 -> Parameters
+	=f.table(site.param_groups.all())
+
+	%div id="buttons_pg"
+		%a href="/site/{{site.id}}/new/params"
+			New Parameters…
+
 {% endhaml %}

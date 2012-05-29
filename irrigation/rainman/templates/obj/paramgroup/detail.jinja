@@ -1,0 +1,31 @@
+{% haml %}
+-extends "base.jinja"
+
+-block title
+	=param_group.name
+
+-block content
+	%h1 -> =param_group.name
+	%table
+		%tr
+			%td -> comment
+			%td -> =param_group.comment
+		%tr
+			%td -> Site
+			%td -> %a href="/site/{{ param_group.site.id }}"
+				=param_group.site.name
+		%tr
+			%td -> Factor
+			%td -> =param_group.factor
+		%tr
+			%td -> Rain Stop
+			%td -> ="Yes" if param_group.rain else "No"
+
+	%div id="buttons"
+		%a href="/params/{{param_group.id}}/edit"
+			Edit
+		=" ¦ "
+		%a href="/params/{{param_group.id}}/delete"
+			Delete
+
+{% endhaml %}

@@ -1,0 +1,33 @@
+{% haml %}
+
+-extends "base.jinja"
+-block title
+	-if param_group is defined
+		=param_group.name
+		=" – edit"
+	-else
+		New Parameters
+
+-block content
+	%h1
+		-if param_group is defined
+			=param_group.name
+		-else
+			=self.title()
+	%form action="" method="post"
+		-csrf_token
+		%table
+			-if param_group is defined
+				-set site=param_group.site
+			-else
+				-set site=form.site
+			%tr
+				%td
+					Site
+				%td
+					%a href="/site/{{ site.id }}"
+						=site.name
+			=form.as_table()|safe
+		%input type="submit" value="Save"
+
+{% endhaml %}

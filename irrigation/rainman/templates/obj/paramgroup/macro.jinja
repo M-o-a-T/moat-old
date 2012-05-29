@@ -1,0 +1,14 @@
+{% haml %}
+
+-macro table(param_groups)
+	%table
+		%th
+			%td
+				Name
+		-for param_group in param_groups.all()
+			%tr
+				%td
+					%a href="/params/{{ param_group.id }}"
+						=param_group.name
+
+{% endhaml %}

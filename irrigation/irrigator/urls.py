@@ -8,6 +8,7 @@ from irrigator.views.site import SiteView,SitesView,SiteNewView,SiteEditView,Sit
 from irrigator.views.controller import ControllerView,ControllersView,ControllerNewView,ControllerEditView,ControllerDeleteView
 from irrigator.views.feed import FeedView,FeedsView,FeedNewView,FeedEditView,FeedDeleteView
 from irrigator.views.valve import ValveView,ValvesView,ValveNewView,ValveEditView,ValveDeleteView
+from irrigator.views.paramgroup import ParamGroupView,ParamGroupsView,ParamGroupNewView,ParamGroupEditView,ParamGroupDeleteView
 
 urlpatterns = patterns('',
     url(r'^$', 'irrigator.views.home', name='home'),
@@ -35,6 +36,12 @@ urlpatterns = patterns('',
     url(r'^valve/(?P<pk>\d+)/edit$', ValveEditView.as_view()),
     url(r'^valve/(?P<pk>\d+)/delete$', ValveDeleteView.as_view()),
     url(r'^site/(?P<site>\d+)/new/valve$', ValveNewView.as_view()),
+
+	url(r'^params/$', ParamGroupsView.as_view()),
+	url(r'^params/(?P<pk>\d+)$', ParamGroupView.as_view()),
+	url(r'^params/(?P<pk>\d+)/edit$', ParamGroupEditView.as_view()),
+	url(r'^params/(?P<pk>\d+)/delete$', ParamGroupDeleteView.as_view()),
+	url(r'^site/(?P<site>\d+)/new/params$', ParamGroupNewView.as_view()),
 
 	# Login stuff
 	url(r'^login/$', 'django.contrib.auth.views.login', {'template_name': 'auth/login.html'}),

@@ -27,7 +27,6 @@ class ParamGroup(Model):
 	def __unicode__(self):
 		return self.name
 	name = m.CharField(max_length=200)
-	var = m.CharField(max_length=200,unique=True,help_text="Name in HomEvenT")
 	comment = m.CharField(max_length=200,blank=True)
 	site = m.ForeignKey(Site,related_name="param_groups")
 	factor = m.FloatField(default=1.0, help_text="Base Factor")

@@ -1,0 +1,12 @@
+{% haml %}
+
+-extends "base.jinja"
+-import "obj/param_group/macro.jinja" as pg
+
+-block title
+	Parameters
+
+-block content
+	=pg.table(param_group_list)
+
+{% endhaml %}
