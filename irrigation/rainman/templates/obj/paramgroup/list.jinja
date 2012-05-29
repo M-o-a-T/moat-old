@@ -14,4 +14,9 @@
 
 	=pg.table(param_group_list, show_site=show_site)
 
+	-if not show_site
+		%div.buttons
+			%a href="/site/{{site}}/new/params"
+				New…
+
 {% endhaml %}
