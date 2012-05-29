@@ -213,6 +213,8 @@ def range_invert(ra,rl,a):
 			sl -= ra-sa
 			ra += sl
 			rl -= sl
+		if ra+rl<=ra:
+			return
 	yield ra,rl
 
 if __name__ == "__main__":
