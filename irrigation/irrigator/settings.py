@@ -120,8 +120,10 @@ DEFAULT_JINJA2_TEMPLATE_EXTENSION = ".jinja"
 
 from hamlish_jinja import Hamlish
 Hamlish._self_closing_jinja_tags.add('csrf_token')
+from rainman.utils import str_tz
 
-JINJA2_ENVIRONMENT_OPTIONS = { 'extensions':['hamlish_jinja.HamlishTagExtension','jinja2.ext.i18n', 'jinja2.ext.autoescape'], }
+JINJA2_ENVIRONMENT_OPTIONS = { 'extensions':['hamlish_jinja.HamlishTagExtension','jinja2.ext.i18n', 'jinja2.ext.autoescape'] }
+JINJA2_FILTERS = { 'tz':str_tz }
 
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'irrigator.wsgi.application'
