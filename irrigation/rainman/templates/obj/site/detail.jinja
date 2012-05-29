@@ -7,51 +7,41 @@
 	=site.name
 -block content
 
-	%h1
-		=site.name
+	%h1 -> =site.name
 	%table
 		%tr
-			%td
-				var
-			%td
-				=site.var
+			%td -> var
+			%td -> =site.var
 		%tr
-			%td
-				Host
-			%td
-				=site.host
+			%td -> Host
+			%td -> =site.host
 		%tr
-			%td
-				Port
-			%td
-				=site.port
+			%td -> Port
+			%td -> =site.port
 		%tr
-			%td
-				Rate
+			%td -> Rate
 			%td
 				=site.rate
 				mm/day (on an average day)
 		%tr
-			%td
+			%td ->
 				Rain Delay
-			%td
+			%td ->
 				=site.rain_delay
 	%div id="buttons"
-		%a href="/site/{{site.id}}/edit
+		%a href="/site/{{site.id}}/edit"
 			Edit
 		%a href="/site/{{site.id}}/delete"
 			Delete
 
-	%h2
-		Controllers
+	%h2 -> Controllers
 	=c.table(site.controllers.all())
 
 	%div id="buttons_c"
 		%a href="/site/{{site.id}}/new/controller"
 			New Controller…
 
-	%h2
-		Feeds
+	%h2 -> Feeds
 	=f.table(site.feed_meters.all())
 
 	%div id="buttons_f"

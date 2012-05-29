@@ -6,33 +6,23 @@
 	=controller.name
 
 -block content
-	%h1
-		=controller.name
+	%h1 -> =controller.name
 	%table
 		%tr
-			%td
-				var
-			%td
-				=controller.var
+			%td -> var
+			%td -> =controller.var
 		%tr
-			%td
-				Site
-			%td
-				%a href="/site/{{ controller.site.id }}"
-					=controller.site.name
+			%td -> Site
+			%td -> %a href="/site/{{ controller.site.id }}"
+				=controller.site.name
 		%tr
-			%td
-				Location
-			%td
-				=controller.location
+			%td -> Location
+			%td -> =controller.location
 		%tr
-			%td
-				max On
-			%td
-				=controller.max_on
+			%td -> max On
+			%td -> =controller.max_on
 
-	%h2
-		Valves
+	%h2 -> Valves
 	=v.table(controller.valves.all())
 	%div id="buttons"
 		%a href="/controller/{{controller.id}}/edit"
