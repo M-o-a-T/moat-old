@@ -42,7 +42,7 @@ class HistorysView(HistoryMixin,SiteParamMixin,ListView):
 	context_object_name = "history_list"
 	paginate_by = 50
 
-class HistoryView(HistoryMixin,DetailView):
+class HistoryView(HistoryMixin,SiteParamMixin,DetailView):
 	def get_context_data(self,**k):
 		ctx = super(HistoryView,self).get_context_data(**k)
 		try:
