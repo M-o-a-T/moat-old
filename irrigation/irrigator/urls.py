@@ -43,6 +43,7 @@ urlpatterns = patterns('',
 	url(r'^params/(?P<pk>\d+)$', ParamGroupView.as_view()),
 	url(r'^params/(?P<pk>\d+)/edit$', ParamGroupEditView.as_view()),
 	url(r'^params/(?P<pk>\d+)/delete$', ParamGroupDeleteView.as_view()),
+	url(r'^site/(?P<site>\d+)/params$', ParamGroupsView.as_view()),
 	url(r'^site/(?P<site>\d+)/new/params$', ParamGroupNewView.as_view()),
 
 	url(r'^environ/$', EnvEffectsView.as_view()),

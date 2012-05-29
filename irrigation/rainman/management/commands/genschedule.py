@@ -130,7 +130,7 @@ class Command(BaseCommand):
 					sc=Schedule(valve=v,start=a,duration=b)
 					sc.save()
 					if v.verbose:
-						log(v,"Scheduled at %s for %s (level %s; want %s)" % (str_tz(a),str(b),v.level),str(want))
+						log(v,"Scheduled at %s for %s (level %s; want %s)" % (str_tz(a),str(b),v.level,str(want)))
 				want -= b
 			else:
 				print "Total",str_tz(a),str(want)

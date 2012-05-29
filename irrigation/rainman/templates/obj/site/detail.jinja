@@ -24,13 +24,12 @@
 					%td -> =site.port
 				%tr
 					%th -> Rate
-					%td
-						=site.rate
-						mm/day (on an average day)
+					%td -> ="%.2f mm/day (on an average day)" % site.rate
 				%tr
 					%th -> Rain Delay
 					%td -> =site.rain_delay
-		%div.buttons
+
+		%div.buttons#buttons
 			%a href="/site/{{site.id}}/edit"
 				Edit
 			=" ¦ "
@@ -55,14 +54,14 @@
 			%a href="/site/{{site.id}}/new/feed"
 				New Feed…
 
-	%div.params
-		%h2 -> Parameters
-		%div.content
-			=pg.table(site.param_groups.all())
-
-		%div.buttons#buttons_pg
-			%a href="/site/{{site.id}}/new/params"
-				New Parameters…
+;	%div.params
+;		%h2 -> Parameters
+;		%div.content
+;			=pg.table(site.param_groups.all())
+;
+;		%div.buttons#buttons_pg
+;			%a href="/site/{{site.id}}/new/params"
+;				New Parameters…
 
 	%div.history
 		%h2 -> History
@@ -72,5 +71,9 @@
 		%div.buttons#buttons_h
 			%a href="/site/{{site.id}}/history"
 				More…
+	%div.more
+		%div.buttons
+			%a href="/site/{{site.id}}/params"
+				Parameters
 
 {% endhaml %}

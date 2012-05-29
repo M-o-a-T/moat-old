@@ -40,7 +40,18 @@ class ParamGroupMixin(FormMixin):
 
 class ParamGroupsView(ParamGroupMixin,ListView):
 	context_object_name = "param_group_list"
-	pass
+	def get(self, request, site=None, **k):
+		self.site = site
+		return super(ParamGroupsView,self).get(request,**k)
+	def get_queryset(self):
+		q = super(ParamGroupsView,self).get_queryset()
+		if self.site is not None:
+			q = q.filter(site=self.site)
+		return q
+	def get_context_data(self,**k):
+		ctx = super(ParamGroupsView,self).get_context_data(**k)
+		ctx['site'] = self.site
+		return ctx
 
 class ParamGroupView(ParamGroupMixin,DetailView):
 	pass

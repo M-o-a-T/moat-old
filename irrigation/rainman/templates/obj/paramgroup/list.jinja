@@ -1,12 +1,17 @@
 {% haml %}
 
 -extends "base.jinja"
--import "obj/param_group/macro.jinja" as pg
+-import "obj/paramgroup/macro.jinja" as pg
 
 -block title
 	Parameters
 
 -block content
-	=pg.table(param_group_list)
+	-if site is defined
+		-set show_site=False
+	-else
+		-set show_site=True
+
+	=pg.table(param_group_list, show_site=show_site)
 
 {% endhaml %}

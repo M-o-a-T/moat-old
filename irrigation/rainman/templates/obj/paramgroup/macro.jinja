@@ -1,12 +1,19 @@
 {% haml %}
 
--macro table(param_groups)
+-macro table(param_groups,show_site=True)
 	%table
 		%tr
+			-if show_site
+				%th
+					Site
 			%th
 				Name
 		-for param_group in param_groups.all()
 			%tr
+				-if show_site
+					%td
+						%a href="/site/{{ param_group.site.id }}"
+							=param_group.site.name
 				%td
 					%a href="/params/{{ param_group.id }}"
 						=param_group.name
