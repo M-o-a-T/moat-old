@@ -77,12 +77,15 @@ class FormMixin(object):
 class SiteParamMixin(object):
 	opt_params = {'site':Site}
 
+	def get_params_hook(self):
+		pass
 	def get(self, request, **k):
 		for p in self.opt_params.keys():
 			if p in k:
 				setattr(self,p,k.pop(p))
 			else:
 				setattr(self,p,None)
+		self.get_params_hook()
 		return super(SiteParamMixin,self).get(request,**k)
 	def get_queryset(self):
 		q = super(SiteParamMixin,self).get_queryset()

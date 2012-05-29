@@ -1,0 +1,56 @@
+{% haml %}
+-extends "base.jinja"
+-import "obj/valve/macro.jinja" as v
+
+-block title
+	=log
+
+-block content
+	%h1 -> =log
+	%table
+		%tr
+			%th -> Time
+			%td -> log.timestamp|tz
+		%tr
+			%th -> Logger
+			%td -> log.logger
+		%tr
+			%th -> Site
+			%td
+				-if log.site is none
+					–
+				-else
+					%a href="/site/{{ log.site.id }}"
+						=log.site.name
+		%tr
+			%th -> Controller
+			%td
+				-if log.controller is none
+					–
+				-else
+					%a href="/controller/{{ log.controller.id }}"
+						=log.controller.name
+		%tr
+			%th -> Valve
+			%td
+				-if log.valve is none
+					–
+				-else
+					%a href="/valve/{{ log.valve.id }}"
+						=log.valve.name
+		%tr
+			%th -> Text
+			%td
+				%pre
+					=log.text
+	%div.buttons_l
+		-if prev_l
+			%a href="/log/{{ prev_l.id }}"
+				Previous
+		-if next_l and prev_l
+			=" ¦ "
+		-if next_l
+			%a href="/log/{{ next_l.id }}"
+				Next
+
+{% endhaml %}

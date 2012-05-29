@@ -12,6 +12,7 @@ from irrigator.views.paramgroup import ParamGroupView,ParamGroupsView,ParamGroup
 from irrigator.views.level import LevelView,LevelsView,LevelNewView,LevelEditView
 from irrigator.views.enveffect import EnvEffectView,EnvEffectsView,EnvEffectNewView,EnvEffectEditView,EnvEffectDeleteView
 from irrigator.views.history import HistoryView,HistorysView
+from irrigator.views.log import LogView,LogsView
 
 urlpatterns = patterns('',
     url(r'^$', 'irrigator.views.home', name='home'),
@@ -63,6 +64,12 @@ urlpatterns = patterns('',
 	url(r'^history/$', HistorysView.as_view()),
 	url(r'^history/(?P<pk>\d+)$', HistoryView.as_view()),
 	url(r'^site/(?P<site>\d+)/history$', HistorysView.as_view()),
+
+	url(r'^log/$', LogsView.as_view()),
+	url(r'^log/(?P<pk>\d+)$', LogView.as_view()),
+	url(r'^site/(?P<site>\d+)/log$', LogsView.as_view()),
+	url(r'^controller/(?P<controller>\d+)/log$', LogsView.as_view()),
+	url(r'^valve/(?P<valve>\d+)/log$', LogsView.as_view()),
 
 	# Login stuff
 	url(r'^login/$', 'django.contrib.auth.views.login', {'template_name': 'auth/login.html'}),

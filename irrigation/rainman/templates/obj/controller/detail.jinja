@@ -6,34 +6,43 @@
 	=controller.name
 
 -block content
-	%h1 -> =controller.name
-	%table
-		%tr
-			%th -> Site
-			%td -> %a href="/site/{{ controller.site.id }}"
-				=controller.site.name
-		%tr
-			%th -> Comment
-			%td -> =controller.comment
-		%tr
-			%th -> var
-			%td -> =controller.var
-		%tr
-			%th -> Location
-			%td -> =controller.location
-		%tr
-			%th -> max On
-			%td -> =controller.max_on
+	%div.main
+		%h1 -> =controller.name
+		%div.content
+			%table
+				%tr
+					%th -> Site
+					%td -> %a href="/site/{{ controller.site.id }}"
+						=controller.site.name
+				%tr
+					%th -> Comment
+					%td -> =controller.comment
+				%tr
+					%th -> var
+					%td -> =controller.var
+				%tr
+					%th -> Location
+					%td -> =controller.location
+				%tr
+					%th -> max On
+					%td -> =controller.max_on
 
-	%div id="buttons"
-		%a href="/controller/{{controller.id}}/edit"
-			Edit
-		=" ¦ "
-		%a href="/controller/{{controller.id}}/delete"
-			Delete
-	%h2 -> Valves
-	=v.table(controller.valves.all())
-	%a href="/site/{{controller.site.id}}/new/valve"
-		Add valve
+		%div.buttons#buttons
+			%a href="/controller/{{controller.id}}/edit"
+				Edit
+			=" ¦ "
+			%a href="/controller/{{controller.id}}/delete"
+				Delete
+	%div.valves
+		%h2 -> Valves
+		%div.content
+			=v.table(controller.valves.all())
+			%a href="/site/{{controller.site.id}}/new/valve"
+				Add valve
+
+	%div.more
+		%div.buttons
+			%a href="/controller/{{controller.id}}/log"
+				Log
 
 {% endhaml %}

@@ -1,0 +1,28 @@
+{% haml %}
+
+-extends "base.jinja"
+-import "obj/log/macro.jinja" as l
+-import "obj/macro.jinja" as m
+
+-block title
+	History
+
+-block content
+	-if site is defined
+		-set show_site=False
+	-else
+		-set show_site=True
+	-if controller is defined
+		-set show_controller=False
+	-else
+		-set show_controller=True
+	-if valve is defined
+		-set show_valve=False
+	-else
+		-set show_valve=True
+
+	=l.table(log_list, show_site=show_site,show_controller=show_controller,show_valve=show_valve)
+
+	=m.pager(page_obj)
+
+{% endhaml %}

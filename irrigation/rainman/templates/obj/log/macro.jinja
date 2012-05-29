@@ -1,0 +1,36 @@
+{% haml %}
+
+-macro table(logs,show_site=True,show_controller=True,show_valve=True)
+	%table
+		%tr
+			-if show_site
+				%th -> Site
+			-if show_controller
+				%th -> Controller
+			-if show_valve
+				%th -> Valve
+			%th -> Time
+			%th -> Logger
+			%th -> Text
+		-for log in logs.all()
+			%tr
+				-if show_site
+					%td
+						%a href="/site/{{ log.site.id }}"
+							=log.site.name
+				-if show_controller
+					%td
+						%a href="/controller/{{ log.controller.id }}"
+							=log.controller.name
+				-if show_valve
+					%td
+						%a href="/valve/{{ log.valve.id }}"
+							=log.valve.name
+				%td 
+					%a href="/log/{{ log.id }}"
+						=log.timestamp|tz
+				%td -> =log.logger
+				%td -> =log.text
+
+
+{% endhaml %}
