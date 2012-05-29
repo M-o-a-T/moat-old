@@ -504,24 +504,19 @@ class SchedSite(SchedCommon):
 		self.log("Started raining")
 		self.rain = True
 
-		n=now()
 		#for v in self.s.valves.all():
-		for v in Valve.objects.filter(controller__site=self.s, runoff__gt=0):
+		vo = Valve.objects.filter(controller__site=self.s, runoff__gt=0)
+		for v in vo.all():
 			valve = SchedValve(v)
 			if valve.locked:
 				continue
 			try:
-				self.send_command("set","output","off",*(v.var.split()))
+				valve._off()
 			except NotConnected:
 				pass
 			except Exception:
 				self.log_error(v)
-			v.schedules.filter(start__gte=n).delete()
-			for sc in v.schedules.filter(start__gte=n-timedelta(1),start__lt=n,seen=True):
-				if sc.start+sc.duration > n:
-					sc.update(duration=n-sc.start)
-					sc.refresh()
-			v.schedules.filter(start__gte=n-timedelta(1),seen=False).delete()
+		Schedule.objects.filter(valve__in=vo, start__gte=now()-timedelta(1),seen=False).delete()
 		self.run_main_task()
 
 	def send_command(self,*a,**k):
@@ -896,13 +891,14 @@ class SchedValve(SchedCommon):
 				print >>sys.stderr,"Report %s" % ("ON" if on else "OFF"),self.v.var
 				n=now()
 				if self.sched is not None and self.sched.start+self.sched.duration <= n:
-					self.sched.update(duration=n-self.sched.start)
+					self.sched.update(db_duration=(n-self.sched.start).total_seconds())
 					self.sched.refresh()
 					self.sched_ts = self.sched.start+self.sched.duration
 					self.sched = None
 				flow,self.flow = self.flow,0
-				duration = n-self.on_ts
 				# If nothing happened, calculate.
+				if not on:
+					duration = n-self.on_ts
 				if not on and not self.flow and not self.v.feed.var:
 					flow = self.v.flow * duration.total_seconds()
 				self.new_level_entry(flow)
