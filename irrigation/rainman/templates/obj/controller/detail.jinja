@@ -9,12 +9,15 @@
 	%h1 -> =controller.name
 	%table
 		%tr
-			%th -> var
-			%td -> =controller.var
-		%tr
 			%th -> Site
 			%td -> %a href="/site/{{ controller.site.id }}"
 				=controller.site.name
+		%tr
+			%th -> Comment
+			%td -> =controller.comment
+		%tr
+			%th -> var
+			%td -> =controller.var
 		%tr
 			%th -> Location
 			%td -> =controller.location

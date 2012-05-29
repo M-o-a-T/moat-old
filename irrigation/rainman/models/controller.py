@@ -30,6 +30,7 @@ class Controller(Model,RangeMixin):
 		return self.name
 	name = m.CharField(max_length=200)
 	var = m.CharField(max_length=200,unique=True,help_text="Name in HomEvenT")
+	comment = m.CharField(max_length=200,blank=True,help_text="Comment")
 	site = m.ForeignKey(Site,related_name="controllers")
 	location = m.CharField(max_length=200, help_text="How to identify the controller (host name?)")
 	max_on = m.IntegerField(default=3, help_text="number of valves that can be on at any one time")
