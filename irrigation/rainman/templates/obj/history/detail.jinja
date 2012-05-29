@@ -1,0 +1,44 @@
+{% haml %}
+-extends "base.jinja"
+-import "obj/valve/macro.jinja" as v
+
+-block title
+	=history
+
+-block content
+	%h1 -> =history
+	%table
+		%tr
+			%th -> Site
+			%td -> %a href="/site/{{ history.site.id }}"
+				=history.site.name
+		%tr
+			%th -> Time
+			%td -> =history.time
+		%tr
+			%th -> Rain
+			%td -> ="%.2f" % history.rain
+		%tr
+			%th -> Feed
+			%td -> ="%.2f" % history.feed
+		%tr
+			%th -> Temp
+			%td -> ="%.2f" % history.temp if history.temp is not none else "–"
+		%tr
+			%th -> Wind
+			%td -> ="%.2f" % history.rain if history.wind is not none else "–"
+		%tr
+			%th -> Sun
+			%td -> ="%.2f" % history.sun if history.sun is not none else "–"
+
+;	%buttons_h
+;		-if next_h
+;			%a href="/history/{{ next_h.id }}"
+;				Next
+;		-if next_h and prev_h
+;			=" ¦ "
+;		-if prev_h
+;			%a href="/history/{{ prev_h.id }}"
+;				Previous
+
+{% endhaml %}

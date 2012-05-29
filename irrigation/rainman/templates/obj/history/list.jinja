@@ -1,0 +1,17 @@
+{% haml %}
+
+-extends "base.jinja"
+-import "obj/history/macro.jinja" as h
+
+-block title
+	History
+
+-block content
+	-if site is defined
+		-set show_site=False
+	-else
+		-set show_site=True
+
+	=h.table(history_list, show_site=show_site)
+
+{% endhaml %}

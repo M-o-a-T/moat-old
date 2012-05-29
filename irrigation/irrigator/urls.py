@@ -10,6 +10,7 @@ from irrigator.views.feed import FeedView,FeedsView,FeedNewView,FeedEditView,Fee
 from irrigator.views.valve import ValveView,ValvesView,ValveNewView,ValveEditView,ValveDeleteView
 from irrigator.views.paramgroup import ParamGroupView,ParamGroupsView,ParamGroupNewView,ParamGroupEditView,ParamGroupDeleteView
 from irrigator.views.enveffect import EnvEffectView,EnvEffectsView,EnvEffectNewView,EnvEffectEditView,EnvEffectDeleteView
+from irrigator.views.history import HistoryView,HistorysView
 
 urlpatterns = patterns('',
     url(r'^$', 'irrigator.views.home', name='home'),
@@ -49,6 +50,10 @@ urlpatterns = patterns('',
 	url(r'^environ/(?P<pk>\d+)/edit$', EnvEffectEditView.as_view()),
 	url(r'^environ/(?P<pk>\d+)/delete$', EnvEffectDeleteView.as_view()),
 	url(r'^params/(?P<param>\d+)/new/environ$', EnvEffectNewView.as_view()),
+
+	url(r'^history/$', HistorysView.as_view()),
+	url(r'^history/(?P<pk>\d+)$', HistoryView.as_view()),
+	url(r'^site/(?P<site>\d+)/history$', HistorysView.as_view()),
 
 	# Login stuff
 	url(r'^login/$', 'django.contrib.auth.views.login', {'template_name': 'auth/login.html'}),

@@ -1,0 +1,30 @@
+{% haml %}
+
+-macro table(historys,show_site=True)
+	%table
+		%tr
+			-if show_site
+				%th -> Site
+			%th -> Time
+			%th -> Rain
+			%th -> Feed
+			%th -> Temp
+			%th -> Wind
+			%th -> Sun
+		-for history in historys.all()
+			%tr
+				-if show_site
+					%td
+						%a href="/site/{{ history.site.id }}"
+							=history.site.name
+				%td 
+					%a href="/history/{{ history.id }}"
+						=history.time|tz
+				%td -> ="%.2f" % history.rain
+				%td -> ="%.2f" % history.feed
+				%td -> ="%.2f" % history.temp if history.temp is not none else "–"
+				%td -> ="%.2f" % history.wind if history.wind is not none else "–"
+				%td -> ="%.2f" % history.sun if history.sun is not none else "–"
+
+
+{% endhaml %}
