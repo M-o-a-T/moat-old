@@ -26,8 +26,8 @@ class EnvGroupForm(ModelForm):
 		exclude = ('site',)
 
 	def save(self,commit=True):
-		if hasattr(self,'site'):
-			self.instance.site = self.site
+		if self.instance.id is None:
+			self.instance.site = self.aux_data['site']
 		return super(EnvGroupForm,self).save(commit)
 
 
@@ -44,20 +44,9 @@ class EnvGroupsView(EnvGroupMixin,SiteParamMixin,ListView):
 class EnvGroupView(EnvGroupMixin,DetailView):
 	pass
 
-class EnvGroupNewView(EnvGroupMixin,CreateView):
+class EnvGroupNewView(EnvGroupMixin,SiteParamMixin,CreateView):
 	form_class = EnvGroupForm
 	success_url="/envgroup/%(id)s"
-	def get_form(self, form_class):
-		form = super(EnvGroupNewView,self).get_form(form_class)
-		form.site=self.site
-		return form
-	def get(self,request,site,**k):
-		self.site = Site.objects.get(id=site)
-		return super(EnvGroupNewView,self).get(request,**k)
-	def post(self,request,site,**k):
-		self.site = Site.objects.get(id=site)
-		return super(EnvGroupNewView,self).post(request,**k)
-
 
 class EnvGroupEditView(EnvGroupMixin,UpdateView):
 	form_class = EnvGroupForm
