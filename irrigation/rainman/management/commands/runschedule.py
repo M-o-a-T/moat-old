@@ -42,6 +42,7 @@ from rainman.logging import log,log_error
 from datetime import datetime,time,timedelta
 from django.db.models import F,Q
 from django.db import transaction
+from homevent.times import humandelta
 
 
 ### database stuff
@@ -835,6 +836,8 @@ class SchedValve(SchedCommon):
 			return
 
 		if sched.start > n:
+			if self.v.verbose:
+				print >>sys.stderr,"SCHED %s: sched %d in %s" % (self.v.name,sched.id,humandelta(sched.start-n))
 			self._off()
 			self.sched_job = gevent.spawn_later((sched.start-n).total_seconds(),self.run_sched_task,reason="_run_schedule 2")
 			return
