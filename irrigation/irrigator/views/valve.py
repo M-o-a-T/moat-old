@@ -17,20 +17,24 @@
 from __future__ import division,absolute_import
 from django.views.generic import ListView,DetailView,CreateView,UpdateView,DeleteView
 from django.forms import ModelForm
-from rainman.models import Valve,Site
+from django.http import Http404
+from rainman.models import Valve,Site, Controller,Feed,EnvGroup
 from rainman.utils import get_request
-from irrigator.views import FormMixin
+from irrigator.views import FormMixin,SiteParamMixin
 
 class ValveForm(ModelForm):
 	class Meta:
 		model = Valve
 		exclude = ('site',)
 
+	def __init__(self,*a,**k):
+		super(ValveForm,self).__init__(*a,**k)
+
 	def limit_choices(self,site):
-		self.site = site
 		gu = get_request().user.get_profile()
 		self.fields['controller'].queryset = gu.controllers.filter(site=site)
 		self.fields['feed'].queryset = gu.feeds.filter(site=site)
+		self.fields['envgroup'].queryset = gu.envgroups.filter(site=site)
 
 
 class ValveMixin(FormMixin):
@@ -40,7 +44,28 @@ class ValveMixin(FormMixin):
 		gu = self.request.user.get_profile()
 		return super(ValveMixin,self).get_queryset().filter(id__in=gu.all_valves)
 
-class ValvesView(ValveMixin,ListView):
+class ValveParamMixin(SiteParamMixin):
+	opt_params = {'controller':Controller, 'feed':Feed, 'site':Site, 'envgroup':EnvGroup}
+
+	def get_params_hook(self,k):
+		super(ValveParamMixin,self).get_params_hook(k)
+		s = self.aux_data['site']
+		c = self.aux_data['controller']
+		f = self.aux_data['feed']
+		if s:
+			if c is not None and s != c.site:
+				raise Http404
+			if f is not None and s != f.site:
+				raise Http404
+		elif c:
+			if f is not None and c.site != f.site:
+				raise Http404
+			self.aux_data['site'] = c.site
+		elif f:
+			self.aux_data['site'] = f.site
+
+
+class ValvesView(ValveMixin,ValveParamMixin,ListView):
 	context_object_name = "valve_list"
 	pass
 
@@ -48,19 +73,15 @@ class ValveView(ValveMixin,DetailView):
 	pass
 
 # set ModelChoiceField.queryset
-class ValveNewView(ValveMixin,CreateView):
+class ValveNewView(ValveMixin,ValveParamMixin,CreateView):
 	form_class = ValveForm
 	success_url="/valve/%(id)s"
 	def get_form(self, form_class):
 		form = super(ValveNewView,self).get_form(form_class)
-		form.limit_choices(self.site)
+		form.limit_choices(self.aux_data['site'])
 		return form
-	def get(self,request,site,**k):
-		self.site = Site.objects.get(id=site)
-		return super(ValveNewView,self).get(request,**k)
-	def post(self,request,site,**k):
-		self.site = Site.objects.get(id=site)
-		return super(ValveNewView,self).post(request,**k)
+	def get_form_kwargs(self):
+		return {'initial':self.aux_data}
 
 
 class ValveEditView(ValveMixin,UpdateView):

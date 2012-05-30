@@ -1,12 +1,30 @@
 {% haml %}
 
--macro table(valves)
+-macro table(valves, show_controller=True,show_feed=True,show_eg=True)
 	%table
 		%tr
-			%th
-				Name
+			-if show_controller
+				%th -> Controller
+			-if show_feed
+				%th -> Feed
+			-if show_eg
+				%th -> Env.Table
+			%th -> Name
 		-for valve in valves
 			%tr
+				-if show_controller
+					%td
+						%a href="/controller/{{ valve.controller.id }}"
+							=valve.controller.name
+				-if show_feed
+					%td
+						%a href="/feed/{{ valve.feed.id }}"
+							=valve.feed.name
+				-if show_eg
+					%td
+						%a href="/envgroup/{{ valve.envgroup.id }}"
+							=valve.envgroup.name
+				
 				%td
 					%a href="/valve/{{ valve.id }}"
 						=valve.name

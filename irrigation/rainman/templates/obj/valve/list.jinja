@@ -7,6 +7,9 @@
 	Valves
 
 -block content
-	=v.table(valve_list)
+	%h1
+		Valves
+
+	=v.table(valve_list,show_controller=False,show_feed=False)
 
 {% endhaml %}
