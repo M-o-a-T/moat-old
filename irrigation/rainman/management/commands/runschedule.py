@@ -950,7 +950,7 @@ class SchedValve(SchedCommon):
 		for h in self.site.s.history.filter(time__gt=ts).order_by("time"):
 			if self.v.verbose>2:
 				self.log("Env factor for %s: T=%s W=%s S=%s"%(h,h.temp,h.wind,h.sun))
-			f = self.env.env_factor(h, logger=self.log if self.v.verbose>2 else None)
+			f = self.env.env_factor(h, logger=self.log if self.v.verbose>2 else None)*self.v.adj
 			if self.v.verbose>1:
 				self.log("Env factor for %s is %s"%(h,f))
 			sum_f += self.site.s.db_rate * (self.env.eg.factor*f)**self.v.shade * (h.time-ts).total_seconds()

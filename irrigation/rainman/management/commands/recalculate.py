@@ -118,7 +118,7 @@ class Command(BaseCommand):
 					hist.next
 				except StopIteration:
 					hist = None
-				f = envgroup.env_factor(h,options['verbose'])
+				f = envgroup.env_factor(h,options['verbose'])*v.adj
 				add_f = s.db_rate * (envgroup.envgroup.factor*f)**v.shade * (h.time-ts).total_seconds()
 				add_r = v.runoff*h.rain
 				if options['verbose']:
