@@ -10,6 +10,9 @@
 			-if show_eg
 				%th -> Env.Table
 			%th -> Name
+			%th -> Level
+			%th -> Start
+			%th -> Stop
 		-for valve in valves
 			%tr
 				-if show_controller
@@ -28,5 +31,11 @@
 				%td
 					%a href="/valve/{{ valve.id }}"
 						=valve.name
+				%td
+					="%.2f" % valve.level
+				%td
+					="%.2f" % valve.start_level
+				%td
+					="%.2f" % valve.stop_level
 
 {% endhaml %}

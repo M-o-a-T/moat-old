@@ -35,5 +35,12 @@
 		%a href="/envgroup/{{envgroup.id}}/new/envitem"
 			New Entry…
 
+	%div.valves
+		%h2 -> Valves
+		%div.content
+			=v.table(envgroup.valves.all(), show_eg=False)
+			%a href="/controller/{{controller.id}}/new/valve"
+				Add valve
+
 
 {% endhaml %}

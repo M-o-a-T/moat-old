@@ -6,31 +6,36 @@
 	=feed.name
 
 -block content
-	%h1 -> =feed.name
-	%table
-		%tr
-			%th -> var
-			%td -> =feed.var
-		%tr
-			%th -> Site
-			%td -> %a href="/site/{{ feed.site.id }}"
-				=feed.site.name
-		%tr
-			%th -> Flow
-			%td -> ="%.3f mm/sec" % feed.flow
-		%tr
-			%th -> max flow wait time
-			%td -> =feed.max_flow_wait
+	%div.main
+		%h1 -> =feed.name
+		%div.content
+			%table
+				%tr
+					%th -> var
+					%td -> =feed.var
+				%tr
+					%th -> Site
+					%td -> %a href="/site/{{ feed.site.id }}"
+						=feed.site.name
+				%tr
+					%th -> Flow
+					%td -> ="%.3f mm/sec" % feed.flow
+				%tr
+					%th -> max flow wait time
+					%td -> =feed.max_flow_wait
 
-	%div id="buttons"
-		%a href="/feed/{{feed.id}}/edit"
-			Edit
-		=" ¦ "
-		%a href="/feed/{{feed.id}}/delete"
-			Delete
-	%h2 -> Valves
-	=v.table(feed.valves.all())
-	%a href="/site/{{feed.site.id}}/new/valve"
-		Add valve
+		%div.buttons#buttons
+			%a href="/feed/{{feed.id}}/edit"
+				Edit
+			=" ¦ "
+			%a href="/feed/{{feed.id}}/delete"
+				Delete
+	
+	%div.valves
+		%h2 -> Valves
+		=v.table(feed.valves.all(), show_feed=False)
+
+		%a href="/feed/{{feed.id}}/new/valve"
+			Add valve
 
 {% endhaml %}

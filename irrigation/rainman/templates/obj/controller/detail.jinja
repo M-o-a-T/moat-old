@@ -36,8 +36,8 @@
 	%div.valves
 		%h2 -> Valves
 		%div.content
-			=v.table(controller.valves.all())
-			%a href="/site/{{controller.site.id}}/new/valve"
+			=v.table(controller.valves.all(), show_controller=False)
+			%a href="/controller/{{controller.id}}/new/valve"
 				Add valve
 
 	%div.more

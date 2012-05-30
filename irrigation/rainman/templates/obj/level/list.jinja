@@ -8,10 +8,13 @@
 	Levels
 
 -block content
-	-if valve is defined
-		-set show_valve=False
-	-else
-		-set show_valve=True
+	%h1
+		-if valve is defined
+			-set show_valve=False
+			Levels for {{ valve.name }}
+		-else
+			-set show_valve=True
+			All Levels
 
 	=lv.table(level_list, show_valve=show_valve)
 

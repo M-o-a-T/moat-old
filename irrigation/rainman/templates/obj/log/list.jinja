@@ -5,21 +5,30 @@
 -import "obj/macro.jinja" as m
 
 -block title
-	History
+	Log
 
 -block content
-	-if site is defined
-		-set show_site=False
-	-else
-		-set show_site=True
-	-if controller is defined
-		-set show_controller=False
-	-else
-		-set show_controller=True
-	-if valve is defined
-		-set show_valve=False
-	-else
-		-set show_valve=True
+	%h1
+		-if valve is defined
+			-set show_valve=False
+			-set show_controller=False
+			-set show_site=True
+			Log for {{ valve.name }}
+		-elif controller is defined
+			-set show_valve=True
+			-set show_controller=False
+			-set show_site=False
+			Log for {{ controller.name }}
+		-elif site is defined
+			-set show_valve=True
+			-set show_controller=True
+			-set show_site=False
+			Log for {{ site.name }}
+		-else
+			-set show_site=True
+			-set show_controller=True
+			-set show_valve=True
+			All Log Entries
 
 	=l.table(log_list, show_site=show_site,show_controller=show_controller,show_valve=show_valve)
 

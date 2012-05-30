@@ -8,10 +8,13 @@
 	History
 
 -block content
-	-if site is defined
-		-set show_site=False
-	-else
-		-set show_site=True
+	%h1
+		-if site is defined
+			-set show_site=False
+			History for {{ site.name }}
+		-else
+			-set show_site=True
+			All History entries
 
 	=h.table(history_list, show_site=show_site)
 
