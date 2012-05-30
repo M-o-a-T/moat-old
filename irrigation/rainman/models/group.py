@@ -87,6 +87,8 @@ class Group(Model,RangeMixin):
 	def list_valves(self):
 		return u" ¦ ".join((d.name for d in self.valves.all()))
 
+	adj = m.FloatField(blank=True,null=True,help_text="Adjustment for these valves")
+
 	def _not_blocked_range(self,start,end):
 		for x in self.overrides.filter(start__gte=start-timedelta(1,0),start__lt=end,allowed=False).order_by("start"):
 			if x.end <= start:

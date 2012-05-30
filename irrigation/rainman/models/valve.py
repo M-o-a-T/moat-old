@@ -73,6 +73,14 @@ class Valve(Model,RangeMixin):
 	def list_groups(self):
 		return u"¦".join((d.name for d in self.groups.all()))
 
+	@property
+	def adj(self):
+		f = 1.0
+		for g in self.groups.all():
+			if g.adj:
+				f *= g.adj
+		return f
+
 	def _range(self,start,end, forced=False, add=0):
 		if start is None:
 			start = now()
