@@ -44,6 +44,7 @@ urlpatterns = patterns('',
 	url(r'^site/(?P<site>\d+)/new/valve$', ValveNewView.as_view()),
 	url(r'^feed/(?P<feed>\d+)/new/valve$', ValveNewView.as_view()),
 	url(r'^controller/(?P<controller>\d+)/new/valve$', ValveNewView.as_view()),
+	url(r'^envgroup/(?P<envgroup>\d+)/new/valve$', ValveNewView.as_view()),
 
 	url(r'^level/$', LevelsView.as_view()),
 	url(r'^level/(?P<pk>\d+)$', LevelView.as_view()),

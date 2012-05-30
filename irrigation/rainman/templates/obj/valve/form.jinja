@@ -19,6 +19,12 @@
 		%table
 			-if valve is defined and valve.controller is not none
 				-set site=valve.controller.site
+			-elif controller is defined
+				-set site=controller.site
+			-elif feed is defined
+				-set site=feed.site
+			-elif envgroup is defined
+				-set site=envgroup.site
 			%tr
 				%th -> Site
 				%td -> %a href="/site/{{ site.id }}"

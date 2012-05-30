@@ -43,5 +43,9 @@ class Site(Model):
 	rain_delay = property(_get_rain_delay,_set_rain_delay)
 
 	@property
+	def valves(self):
+		from rainman.models.valve import Valve
+		return Valve.objects.filter(controller__site=self)
+	@property
 	def rate_sec(self):
 		return self.rate/24/60/60

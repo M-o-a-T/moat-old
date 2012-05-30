@@ -4,6 +4,7 @@
 -import "obj/feed/macro.jinja" as f
 -import "obj/envgroup/macro.jinja" as pg
 -import "obj/history/macro.jinja" as h
+-import "obj/valve/macro.jinja" as v
 
 -block title
 	=site.name
@@ -36,6 +37,15 @@
 			%a href="/site/{{site.id}}/delete"
 				Delete
 
+	%div.valves
+		%h2 -> Valves
+		%div.content
+			=v.table(site.valves.all().order_by('name'), show_site=False,show_controller=False,show_feed=False)
+
+		%div.buttons#buttons_v
+			%a href="/site/{{site.id}}/new/valve"
+				New Valve…
+
 ;	%div.controllers
 ;		%h2 -> Controllers
 ;		%div.content
@@ -45,14 +55,14 @@
 ;			%a href="/site/{{site.id}}/new/controller"
 ;				New Controller…
 
-	%div.feeds
-		%h2 -> Feeds
-		%div.content
-			=f.table(site.feed_meters.all())
-
-		%div.buttons#buttons_f
-			%a href="/site/{{site.id}}/new/feed"
-				New Feed…
+;	%div.feeds
+;		%h2 -> Feeds
+;		%div.content
+;			=f.table(site.feed_meters.all())
+;
+;		%div.buttons#buttons_f
+;			%a href="/site/{{site.id}}/new/feed"
+;				New Feed…
 
 ;	%div.envgroup
 ;		%h2 -> Environment Tables
@@ -76,6 +86,9 @@
 		%div.buttons
 			%a href="/site/{{site.id}}/controller"
 				Controllers
+			=" ¦ "
+			%a href="/site/{{site.id}}/feed"
+				Feeds
 			=" ¦ "
 			%a href="/site/{{site.id}}/envgroup"
 				Environment Tables

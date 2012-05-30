@@ -1,6 +1,7 @@
 {% haml %}
 -extends "base.jinja"
 -import "obj/envitem/macro.jinja" as ef
+-import "obj/valve/macro.jinja" as v
 
 -block title
 	=envgroup.name
@@ -39,7 +40,7 @@
 		%h2 -> Valves
 		%div.content
 			=v.table(envgroup.valves.all(), show_eg=False)
-			%a href="/controller/{{controller.id}}/new/valve"
+			%a href="/envgroup/{{envgroup.id}}/new/valve"
 				Add valve
 
 

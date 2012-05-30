@@ -52,6 +52,7 @@ class ValveParamMixin(SiteParamMixin):
 		s = self.aux_data['site']
 		c = self.aux_data['controller']
 		f = self.aux_data['feed']
+		eg = self.aux_data['envgroup']
 		if s:
 			if c is not None and s != c.site:
 				raise Http404
@@ -63,6 +64,11 @@ class ValveParamMixin(SiteParamMixin):
 			self.aux_data['site'] = c.site
 		elif f:
 			self.aux_data['site'] = f.site
+		if eg:
+			if self.aux_data['site'] is None:
+				self.aux_data['site'] = eg.site
+			elif self.aux_data['site'] != eg.site:
+				raise Http404
 
 
 class ValvesView(ValveMixin,ValveParamMixin,ListView):
@@ -81,7 +87,10 @@ class ValveNewView(ValveMixin,ValveParamMixin,CreateView):
 		form.limit_choices(self.aux_data['site'])
 		return form
 	def get_form_kwargs(self):
-		return {'initial':self.aux_data}
+		args = super(ValveNewView,self).get_form_kwargs()
+		if args.get('instance',None) is None:
+			args['initial'] = self.aux_data
+		return args
 
 
 class ValveEditView(ValveMixin,UpdateView):
@@ -103,7 +112,7 @@ class ValveEditView(ValveMixin,UpdateView):
 class ValveDeleteView(ValveMixin,DeleteView):
 	def post(self,*a,**k):
 		valve = self.get_object()
-		self.success_url="/site/%d" % (valve.site.id,)
+		self.success_url="/site/%d" % (valve.controller.site.id,)
 		return super(DeleteView,self).post(*a,**k)
 	pass
 

@@ -1,8 +1,10 @@
 {% haml %}
 
--macro table(valves, show_controller=True,show_feed=True,show_eg=True)
+-macro table(valves, show_site=False,show_controller=True,show_feed=True,show_eg=True)
 	%table
 		%tr
+			-if show_site
+				%th -> Site
 			-if show_controller
 				%th -> Controller
 			-if show_feed
@@ -15,6 +17,10 @@
 			%th -> Stop
 		-for valve in valves
 			%tr
+				-if show_site
+					%td
+						%a href="/site/{{ valve.controller.site.id }}"
+							=valve.controller.site/name
 				-if show_controller
 					%td
 						%a href="/controller/{{ valve.controller.id }}"
