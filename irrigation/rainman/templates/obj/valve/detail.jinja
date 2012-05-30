@@ -43,7 +43,7 @@
 			%td -> =valve.verbose
 		%tr
 			%th -> Flow
-			%td -> ="%.3f mm/sec" % valve.flow
+			%td -> ="%.3f l/sec" % valve.flow
 		%tr
 			%th -> Area
 			%td -> ="%.1f m²" % valve.area
@@ -68,6 +68,9 @@
 		%tr
 			%th -> Time
 			%td -> =valve.time|tz
+		%tr
+			%th -> Priority?
+			%td -> ="◉" if valve.priority else "–"
 
 	%div id="buttons"
 		%a href="/valve/{{valve.id}}/edit"

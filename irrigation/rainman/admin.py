@@ -139,7 +139,7 @@ class ControllerAdmin(admin.ModelAdmin):
 	]
 
 class ValveAdmin(admin.ModelAdmin):
-	list_display = ('name','controller','var','comment','time','level','priority','list_groups','flow','area','stop_level','start_level','max_level','watering_time')
+	list_display = ('name','controller','var','comment','time','level','priority','list_groups','adj','flow','area','stop_level','start_level','max_level','watering_time')
 	list_filter = ('feed','envgroup','controller')
 	inlines = [
 		ValveOverrideInline,
@@ -177,7 +177,7 @@ class DayTimeAdmin(admin.ModelAdmin):
 
 class GroupAdmin(admin.ModelAdmin):
 	list_display = ('name','site','list_valves','list_range')
-	fields = ('name','site',('valves','days','xdays'))
+	fields = ('name','site',('valves','days','xdays','adj'))
 	list_filter = ('site',)
 	inlines = [
 		GroupOverrideInline,
