@@ -98,9 +98,9 @@ class Command(BaseCommand):
 				if options['verbose']:
 					print "Initial",lv.level
 				while hist:
-					if hist.stored.time > lv.time:
-						break
 					try:
+						if hist.stored.time > lv.time:
+							break
 						hist.next
 					except StopIteration:
 						hist = None
