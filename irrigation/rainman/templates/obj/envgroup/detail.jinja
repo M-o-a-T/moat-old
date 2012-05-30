@@ -1,0 +1,39 @@
+{% haml %}
+-extends "base.jinja"
+-import "obj/envitem/macro.jinja" as ef
+
+-block title
+	=envgroup.name
+
+-block content
+	%h1 -> =envgroup.name
+	%table
+		%tr
+			%th -> comment
+			%td -> =envgroup.comment
+		%tr
+			%th -> Site
+			%td -> %a href="/site/{{ envgroup.site.id }}"
+				=envgroup.site.name
+		%tr
+			%th -> Factor
+			%td -> =envgroup.factor
+		%tr
+			%th -> Rain Stop
+			%td -> ="Yes" if envgroup.rain else "No"
+
+	%div id="buttons"
+		%a href="/envgroup/{{envgroup.id}}/edit"
+			Edit
+		=" ¦ "
+		%a href="/envgroup/{{envgroup.id}}/delete"
+			Delete
+
+	%h2 Contents
+	=ef.table(envgroup.items.all(),False)
+	%div id="buttons_ef"
+		%a href="/envgroup/{{envgroup.id}}/new/envitem"
+			New Entry…
+
+
+{% endhaml %}

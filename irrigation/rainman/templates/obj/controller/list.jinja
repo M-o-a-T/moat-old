@@ -7,10 +7,13 @@
 	Controllers
 
 -block content
-	-if site is defined
-		-set show_site=False
-	-else
-		-set show_site=True
+	%h1
+		-if site is defined
+			-set show_site=False
+			Controllers at {{site.name}}
+		-else
+			-set show_site=True
+			All Controllers
 
 	=c.table(controller_list, show_site=show_site)
 

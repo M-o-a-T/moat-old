@@ -317,39 +317,39 @@ class SchedCommon(object):
 
 sites = {}
 controllers = {}
-paramgroups = {}
+envgroups = {}
 valves = {}
 
-class ParamGroup(SchedCommon):
-	"""Mirrors a parameter group for valves"""
+class EnvGroup(SchedCommon):
+	"""Mirrors an env group for valves"""
 	env_cache = None
 
-	def __new__(cls,pargroup):
-		if pargroup.id in paramgroups:
-			return paramgroups[pargroup.id]
+	def __new__(cls,envgroup):
+		if envgroup.id in envgroups:
+			return envgroups[envgroup.id]
 		self = object.__new__(cls)
 		self.env_cache = {}
 
-		paramgroups[pargroup.id] = self
-		self.pg = pargroup
-		SchedSite(self.pg.site).paramgroups.add(self)
+		envgroups[envgroup.id] = self
+		self.eg = envgroup
+		SchedSite(self.eg.site).envgroups.add(self)
 		return self
-	def __init__(self,pargroup):
+	def __init__(self,envgroup):
 		pass
 
 	def log(self,txt):
-		log(self.pg.site,"ParamGroup "+self.pg.name+": "+txt)
+		log(self.eg.site,"EnvGroup "+self.eg.name+": "+txt)
 
 	def sync(self):
 		pass
 	def refresh(self):
-		self.pg.refresh()
+		self.eg.refresh()
 		self.env_cache = {}
 	def shutdown(self):
 		pass
 
 	def env_factor(self,h,logger):
-		return self.pg.env_factor(h,logger)
+		return self.eg.env_factor(h,logger)
 
 class SchedSite(SchedCommon):
 	"""Mirrors a site"""
@@ -371,7 +371,7 @@ class SchedSite(SchedCommon):
 		self._delay_on = Semaphore()
 
 		self.controllers = set()
-		self.paramgroups = set()
+		self.envgroups = set()
 		self.meters = {}
 		for M in METERS:
 			ml = set()
@@ -441,8 +441,8 @@ class SchedSite(SchedCommon):
 		print >>sys.stderr,"Sync"
 		for c in self.controllers:
 			c.sync()
-		for pg in self.paramgroups:
-			pg.sync()
+		for eg in self.envgroups:
+			eg.sync()
 		for mm in self.meters.itervalues():
 			for m in mm:
 				m.sync()
@@ -457,8 +457,8 @@ class SchedSite(SchedCommon):
 		if self.running:
 			self.running = False
 			self.sync()
-			for pg in self.paramgroups:
-				pg.sync()
+			for eg in self.envgroups:
+				eg.sync()
 			for c in self.controllers:
 				c.shutdown()
 			for mm in self.meters.itervalues():
@@ -474,8 +474,8 @@ class SchedSite(SchedCommon):
 
 	def refresh(self):
 		self.s.refresh()
-		for pg in self.paramgroups:
-			pg.refresh()
+		for eg in self.envgroups:
+			eg.refresh()
 		for c in self.controllers:
 			c.refresh()
 		for mm in self.meters.itervalues():
@@ -725,7 +725,7 @@ class SchedValve(SchedCommon):
 		valves[v.id] = self
 		self.v = v
 		self.site = SchedSite(self.v.controller.site)
-		self.params = ParamGroup(self.v.param_group)
+		self.env = EnvGroup(self.v.envgroup)
 		self.controller = SchedController(self.v.controller)
 		self.sched_lock = Semaphore()
 		if self.site.ci:
@@ -947,10 +947,10 @@ class SchedValve(SchedCommon):
 		for h in self.site.s.history.filter(time__gt=ts).order_by("time"):
 			if self.v.verbose>2:
 				self.log("Env factor for %s: T=%s W=%s S=%s"%(h,h.temp,h.wind,h.sun))
-			f = self.params.env_factor(h, logger=self.log if self.v.verbose>2 else None)
+			f = self.env.env_factor(h, logger=self.log if self.v.verbose>2 else None)
 			if self.v.verbose>1:
 				self.log("Env factor for %s is %s"%(h,f))
-			sum_f += self.site.s.db_rate * (self.params.pg.factor*f)**self.v.shade * (h.time-ts).total_seconds()
+			sum_f += self.site.s.db_rate * (self.env.eg.factor*f)**self.v.shade * (h.time-ts).total_seconds()
 			sum_r += self.v.runoff*h.rain
 			ts=h.time
 

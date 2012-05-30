@@ -1,7 +1,7 @@
 {% haml %}
 -extends "base.jinja"
 -block title
-	Delete Parameter Item ‹{{ enveffect }}›
+	Delete Environment Item ‹{{ envitem }}›
 
 -block content
 	%h1
@@ -9,7 +9,7 @@
 	%form action="" method="post"
 		-csrf_token
 		%p
-			Do you really want to delete the parameter item ‹{{ enveffect }}›?
+			Do you really want to delete the item ‹{{ envitem }}›?
 		%input type="submit" value="Yes"
 
 {% endhaml %}

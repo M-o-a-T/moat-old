@@ -17,49 +17,50 @@
 from __future__ import division,absolute_import
 from django.views.generic import ListView,DetailView,CreateView,UpdateView,DeleteView
 from django.forms import ModelForm
-from rainman.models import Feed,Site
-from irrigator.views import TimeDeltaField,FormMixin,DbModelForm,SiteParamMixin
+from rainman.models import EnvGroup,EnvItem
+from irrigator.views import FormMixin,SiteParamMixin
 
-class FeedForm(DbModelForm):
+class EnvItemForm(ModelForm):
 	class Meta:
-		model = Feed
-		exclude = ('db_max_flow_wait','site')
-		fields = ('name','var','flow','max_flow_wait')
-
-	max_flow_wait = TimeDeltaField(help_text=Meta.model._meta.get_field_by_name("db_max_flow_wait")[0].help_text)
+		model = EnvItem
+		exclude = ('group',)
 
 	def save(self,commit=True):
 		if self.instance.id is None:
-			self.instance.site = self.aux_data['site']
-		return super(FeedForm,self).save(commit)
+			self.instance.group = self.aux_data['group']
+		return super(EnvItemForm,self).save(commit)
 
 
-class FeedMixin(FormMixin):
-	model = Feed
-	context_object_name = "feed"
+class EnvItemMixin(FormMixin):
+	model = EnvItem
+	context_object_name = "envitem"
 	def get_queryset(self):
 		gu = self.request.user.get_profile()
-		return super(FeedMixin,self).get_queryset().filter(id__in=gu.feeds)
+		return super(EnvItemMixin,self).get_queryset().filter(group__site__id__in=gu.sites.all())
 
-class FeedsView(FeedMixin,SiteParamMixin,ListView):
-	context_object_name = "feed_list"
+class EnvParamMixin(SiteParamMixin):
+	opt_params = {'group':EnvGroup}
+
+class EnvItemsView(EnvItemMixin,EnvParamMixin,ListView):
+	context_object_name = "envitem_list"
 	pass
 
-class FeedView(FeedMixin,DetailView):
+class EnvItemView(EnvItemMixin,DetailView):
 	pass
 
-class FeedNewView(FeedMixin,SiteParamMixin,CreateView):
-	form_class = FeedForm
-	success_url="/feed/%(id)s"
+class EnvItemNewView(EnvItemMixin,EnvParamMixin,CreateView):
+	form_class = EnvItemForm
+	success_url="/envitem/%(id)s"
 
-class FeedEditView(FeedMixin,UpdateView):
-	form_class = FeedForm
-	success_url="/feed/%(id)s"
 
-class FeedDeleteView(FeedMixin,DeleteView):
+class EnvItemEditView(EnvItemMixin,EnvParamMixin,UpdateView):
+	form_class = EnvItemForm
+	success_url="/envitem/%(id)s"
+
+class EnvItemDeleteView(EnvItemMixin,DeleteView):
 	def post(self,*a,**k):
-		feed = self.get_object()
-		self.success_url="/site/%d" % (feed.site.id,)
+		envitem = self.get_object()
+		self.success_url="/envgroup/%d" % (envitem.group.id,)
 		return super(DeleteView,self).post(*a,**k)
 	pass
 

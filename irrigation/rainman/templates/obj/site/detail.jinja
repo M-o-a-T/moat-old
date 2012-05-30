@@ -2,7 +2,7 @@
 -extends "base.jinja"
 -import "obj/controller/macro.jinja" as c
 -import "obj/feed/macro.jinja" as f
--import "obj/paramgroup/macro.jinja" as pg
+-import "obj/envgroup/macro.jinja" as pg
 -import "obj/history/macro.jinja" as h
 
 -block title
@@ -54,14 +54,14 @@
 			%a href="/site/{{site.id}}/new/feed"
 				New Feed…
 
-;	%div.params
-;		%h2 -> Parameters
+;	%div.envgroup
+;		%h2 -> Environment Tables
 ;		%div.content
-;			=pg.table(site.param_groups.all())
+;			=pg.table(site.envgroups.all())
 ;
 ;		%div.buttons#buttons_pg
-;			%a href="/site/{{site.id}}/new/params"
-;				New Parameters…
+;			%a href="/site/{{site.id}}/new/envgroup"
+;				New Environment Table…
 
 	%div.history
 		%h2 -> History
@@ -77,8 +77,8 @@
 			%a href="/site/{{site.id}}/controller"
 				Controllers
 			=" ¦ "
-			%a href="/site/{{site.id}}/params"
-				Parameters
+			%a href="/site/{{site.id}}/envgroup"
+				Environment Tables
 			=" ¦ "
 			%a href="/site/{{site.id}}/log"
 				Log

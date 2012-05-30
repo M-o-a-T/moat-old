@@ -18,7 +18,7 @@ from __future__ import division,absolute_import
 from rainman.models import Model
 from rainman.models.controller import Controller
 from rainman.models.feed import Feed
-from rainman.models.paramgroup import ParamGroup
+from rainman.models.env import EnvGroup
 from django.db import models as m
 from rainman.utils import now, range_intersection,range_union,range_invert, RangeMixin
 from datetime import timedelta
@@ -34,7 +34,7 @@ class Valve(Model,RangeMixin):
 	comment = m.CharField(max_length=200,blank=True)
 	feed = m.ForeignKey(Feed,related_name="valves")
 	controller = m.ForeignKey(Controller,related_name="valves")
-	param_group = m.ForeignKey(ParamGroup,related_name="valves")
+	envgroup = m.ForeignKey(EnvGroup,db_column="param_group_id",related_name="valves")
 	location = m.CharField(max_length=200,help_text="how to identify the valve on its controller")
 	var = m.CharField(max_length=200, unique=True, help_text="name of this output, in HomEvenT")
 	verbose = m.PositiveSmallIntegerField(default=0,help_text="Log lots of changes?")

@@ -19,7 +19,7 @@
 	This module holds a few random utility functions.
 	"""
 
-from rainman.models import Log, Site,Controller,Valve,ParamGroup
+from rainman.models import Log, Site,Controller,Valve,EnvGroup
 import sys, os, traceback
 
 _me = None
@@ -31,9 +31,9 @@ def log(dev, text):
 		c = dev
 	elif isinstance(dev,Site):
 		s = dev
-	elif isinstance(dev,ParamGroup):
+	elif isinstance(dev,EnvGroup):
 		s = dev.site
-		text = "ParGroup "+dev.name+": "+text
+		text = "EnvGroup "+dev.name+": "+text
 	else:
 		raise RuntimeError("Cannot log: %s" % (repr(dev),))
 	if v: c = v.controller

@@ -102,8 +102,7 @@ class SiteParamMixin(object):
 	def get_queryset(self):
 		q = super(SiteParamMixin,self).get_queryset()
 		f = {}
-		for p in self.opt_params.keys():
-			v = self.aux_data[p]
+		for p,v in self.aux_data.items():
 			if v is not None:
 				f[p] = v
 		if f:
@@ -112,8 +111,7 @@ class SiteParamMixin(object):
 
 	def get_context_data(self,**k):
 		ctx = super(SiteParamMixin,self).get_context_data(**k)
-		for p in self.opt_params.keys():
-			v = self.aux_data[p]
+		for p,v in self.aux_data.items():
 			if v is not None:
 				ctx[p] = v
 		return ctx

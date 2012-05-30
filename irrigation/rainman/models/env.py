@@ -20,7 +20,10 @@ from rainman.models.site import Site
 from django.db import models as m
 from django.db.models import Q
 
-class ParamGroup(Model):
+# Tables for environmental effects.
+# Note that table names are different for Hysterical Raisins.
+
+class EnvGroup(Model):
 	class Meta(Model.Meta):
 		unique_together = (("site", "name"),)
 		db_table="rainman_paramgroup"
@@ -28,19 +31,19 @@ class ParamGroup(Model):
 		return self.name
 	name = m.CharField(max_length=200)
 	comment = m.CharField(max_length=200,blank=True)
-	site = m.ForeignKey(Site,related_name="param_groups")
+	site = m.ForeignKey(Site,related_name="envgroups")
 	factor = m.FloatField(default=1.0, help_text="Base Factor")
 	rain = m.BooleanField(default=True,help_text="stop when it's raining?")
 
 	def __init__(self,*a,**k):
-		super(ParamGroup,self).__init__(*a,**k)
+		super(EnvGroup,self).__init__(*a,**k)
 		self.env_cache = {}
 
 	def list_valves(self):
 		return u"¦".join((d.name for d in self.valves.all()))
 
 	def refresh(self):
-		super(ParamGroup,self).refresh()
+		super(EnvGroup,self).refresh()
 		self.env_cache = {}
 
 	def env_factor_one(self, tws, h):
@@ -60,7 +63,7 @@ class ParamGroup(Model):
 		try:
 			ec = self.env_cache[tws]
 		except KeyError:
-			self.env_cache[tws] = ec = list(self.environment_effects.filter(q))
+			self.env_cache[tws] = ec = list(self.items.filter(q))
 		for ef in ec:
 			d=0
 			if qtemp:
@@ -101,12 +104,12 @@ class ParamGroup(Model):
 				sum_w += weight
 		return sum_f / sum_w
 
-class EnvironmentEffect(Model):
+class EnvItem(Model):
 	class Meta(Model.Meta):
 		db_table="rainman_environmenteffect"
 	def __unicode__(self):
-		return u"@%s %s¦%s¦%s" % (self.param_group.name,self.temp,self.wind,self.sun)
-	param_group = m.ForeignKey(ParamGroup,related_name="environment_effects")
+		return u"@%s %s¦%s¦%s" % (self.group.name,self.temp,self.wind,self.sun)
+	group = m.ForeignKey(EnvGroup,db_column="param_group_id",related_name="items")
 	factor = m.FloatField(default=1.0, help_text="Factor to use at this data point")
 
 	# these are single- or multi-dimensional data points for finding a reasonable factor

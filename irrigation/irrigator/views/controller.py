@@ -26,8 +26,8 @@ class ControllerForm(ModelForm):
 		exclude = ('site',)
 
 	def save(self,commit=True):
-		if hasattr(self,'site'):
-			self.instance.site = self.site
+		if self.instance.id is None:
+			self.instance.site = self.aux_data['site']
 		return super(ControllerForm,self).save(commit)
 
 
@@ -45,19 +45,9 @@ class ControllersView(ControllerMixin,SiteParamMixin,ListView):
 class ControllerView(ControllerMixin,DetailView):
 	pass
 
-class ControllerNewView(ControllerMixin,CreateView):
+class ControllerNewView(ControllerMixin,SiteParamMixin,CreateView):
 	form_class = ControllerForm
 	success_url="/controller/%(id)s"
-	def get_form(self, form_class):
-		form = super(ControllerNewView,self).get_form(form_class)
-		form.site=self.site
-		return form
-	def get(self,request,site,**k):
-		self.site = Site.objects.get(id=site)
-		return super(ControllerNewView,self).get(request,**k)
-	def post(self,request,site,**k):
-		self.site = Site.objects.get(id=site)
-		return super(ControllerNewView,self).post(request,**k)
 
 
 class ControllerEditView(ControllerMixin,UpdateView):

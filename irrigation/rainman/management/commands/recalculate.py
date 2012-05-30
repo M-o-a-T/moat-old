@@ -85,7 +85,7 @@ class Command(BaseCommand):
 	def one_valve(self,v,options):
 		if options['verbose']:
 			print "Updating",v
-		params = ParamGroup(v.param_group)
+		envgroup = EnvGroup(v.envgroup)
 		now = datetime.utcnow().replace(tzinfo=utc)
 		start=now-timedelta(options['age'])
 		hist = StoredIter(History.objects.filter(site=v.controller.site,time__gte=start).order_by("time"))
@@ -118,8 +118,8 @@ class Command(BaseCommand):
 					hist.next
 				except StopIteration:
 					hist = None
-				f = params.env_factor(h,options['verbose'])
-				add_f = s.db_rate * (params.pg.factor*f)**v.shade * (h.time-ts).total_seconds()
+				f = envgroup.env_factor(h,options['verbose'])
+				add_f = s.db_rate * (envgroup.envgroup.factor*f)**v.shade * (h.time-ts).total_seconds()
 				add_r = v.runoff*h.rain
 				if options['verbose']:
 					print "Apply",h,f,u"– dry="+str(add_f)," rain="+str(add_r)
@@ -155,16 +155,16 @@ class Command(BaseCommand):
 				print "Unchanged",v,v.level
 
 
-class ParamGroup(object):
+class EnvGroup(object):
 	"""For now, a copy from runschedule"""
 	env_cache = None
 
-	def __init__(self,pargroup):
+	def __init__(self,envgroup):
 		self.env_cache = {}
-		self.pg = pargroup
+		self.envgroup = envgroup
 
 	def log(self,txt):
-		log(self.pg.site,"ParamGroup "+self.pg.name+": "+txt)
+		log(self.envgroup.site,"EnvGroup "+self.envgroup.name+": "+txt)
 
 	def sync(self):
 		pass
@@ -179,4 +179,4 @@ class ParamGroup(object):
 				print x
 		else:
 			logger = None
-		return self.pg.env_factor(h,logger)
+		return self.envgroup.env_factor(h,logger)

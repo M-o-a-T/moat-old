@@ -1,0 +1,20 @@
+{% haml %}
+
+-extends "base.jinja"
+-import "obj/envitem/macro.jinja" as ei
+
+-block title
+	Environment Table Content
+
+-block content
+	%h1
+		-if group is defined
+			-set show_eg=False
+			Environment Table entries for {{group.name}}
+		-else
+			-set show_eg=True
+			All Environment Table entries
+
+	=ei.table(envitem_list, show_eg=show_eg)
+
+{% endhaml %}

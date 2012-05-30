@@ -17,56 +17,56 @@
 from __future__ import division,absolute_import
 from django.views.generic import ListView,DetailView,CreateView,UpdateView,DeleteView
 from django.forms import ModelForm
-from rainman.models import ParamGroup,Site
+from rainman.models import EnvGroup,Site
 from irrigator.views import FormMixin,SiteParamMixin
 
-class ParamGroupForm(ModelForm):
+class EnvGroupForm(ModelForm):
 	class Meta:
-		model = ParamGroup
+		model = EnvGroup
 		exclude = ('site',)
 
 	def save(self,commit=True):
 		if hasattr(self,'site'):
 			self.instance.site = self.site
-		return super(ParamGroupForm,self).save(commit)
+		return super(EnvGroupForm,self).save(commit)
 
 
-class ParamGroupMixin(FormMixin):
-	model = ParamGroup
-	context_object_name = "param_group"
+class EnvGroupMixin(FormMixin):
+	model = EnvGroup
+	context_object_name = "envgroup"
 	def get_queryset(self):
 		gu = self.request.user.get_profile()
-		return super(ParamGroupMixin,self).get_queryset().filter(id__in=gu.param_groups)
+		return super(EnvGroupMixin,self).get_queryset().filter(id__in=gu.envgroups)
 
-class ParamGroupsView(ParamGroupMixin,SiteParamMixin,ListView):
-	context_object_name = "param_group_list"
+class EnvGroupsView(EnvGroupMixin,SiteParamMixin,ListView):
+	context_object_name = "envgroup_list"
 
-class ParamGroupView(ParamGroupMixin,DetailView):
+class EnvGroupView(EnvGroupMixin,DetailView):
 	pass
 
-class ParamGroupNewView(ParamGroupMixin,CreateView):
-	form_class = ParamGroupForm
-	success_url="/params/%(id)s"
+class EnvGroupNewView(EnvGroupMixin,CreateView):
+	form_class = EnvGroupForm
+	success_url="/envgroup/%(id)s"
 	def get_form(self, form_class):
-		form = super(ParamGroupNewView,self).get_form(form_class)
+		form = super(EnvGroupNewView,self).get_form(form_class)
 		form.site=self.site
 		return form
 	def get(self,request,site,**k):
 		self.site = Site.objects.get(id=site)
-		return super(ParamGroupNewView,self).get(request,**k)
+		return super(EnvGroupNewView,self).get(request,**k)
 	def post(self,request,site,**k):
 		self.site = Site.objects.get(id=site)
-		return super(ParamGroupNewView,self).post(request,**k)
+		return super(EnvGroupNewView,self).post(request,**k)
 
 
-class ParamGroupEditView(ParamGroupMixin,UpdateView):
-	form_class = ParamGroupForm
-	success_url="/param_group/%(id)s"
+class EnvGroupEditView(EnvGroupMixin,UpdateView):
+	form_class = EnvGroupForm
+	success_url="/envgroup/%(id)s"
 
-class ParamGroupDeleteView(ParamGroupMixin,DeleteView):
+class EnvGroupDeleteView(EnvGroupMixin,DeleteView):
 	def post(self,*a,**k):
-		param_group = self.get_object()
-		self.success_url="/site/%d" % (param_group.site.id,)
+		envgroup = self.get_object()
+		self.success_url="/site/%d" % (envgroup.site.id,)
 		return super(DeleteView,self).post(*a,**k)
 	pass
 

@@ -1,0 +1,35 @@
+{% haml %}
+-extends "base.jinja"
+-import "obj/valve/macro.jinja" as v
+
+-block title
+	=envitem
+
+-block content
+	%h1 -> =envitem
+	%table
+		%tr
+			%th -> Environment Table
+			%td -> %a href="/envgroup/{{ envitem.group.id }}"
+				=envitem.group.name
+		%tr
+			%th -> Factor
+			%td -> ="%.2f" % envitem.factor
+		%tr
+			%th -> Temperature
+			%td -> ="%.2f" % envitem.temp if envitem.temp is not none else "–"
+		%tr
+			%th -> Wind speed
+			%td -> ="%.2f" % envitem.wind if envitem.wind is not none else "–"
+		%tr
+			%th -> Sunshine
+			%td -> ="%.2f" % envitem.sun if envitem.sun is not none else "–"
+
+	%div id="buttons"
+		%a href="/envitem/{{envitem.id}}/edit"
+			Edit
+		=" ¦ "
+		%a href="/envitem/{{envitem.id}}/delete"
+			Delete
+
+{% endhaml %}

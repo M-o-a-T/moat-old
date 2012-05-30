@@ -49,7 +49,7 @@ class Model(m.Model):
 from rainman.models.site import Site
 from rainman.models.feed import Feed
 from rainman.models.controller import Controller
-from rainman.models.paramgroup import ParamGroup,EnvironmentEffect
+from rainman.models.env import EnvGroup,EnvItem
 from rainman.models.valve import Valve
 from rainman.models.history import Level,History,Log
 from rainman.models.day import Day,DayTime,DayRange

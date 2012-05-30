@@ -3,7 +3,7 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 admin.autodiscover()
 
-from rainman.models import Site,Feed,Controller,Valve,ParamGroup,History,EnvironmentEffect,Level,DayRange,Day,DayTime,Group,GroupOverride,ValveOverride,GroupAdjust,Schedule,RainMeter,TempMeter,WindMeter,SunMeter,UserForSite,Log
+from rainman.models import Site,Feed,Controller,Valve,EnvGroup,History,EnvItem,Level,DayRange,Day,DayTime,Group,GroupOverride,ValveOverride,GroupAdjust,Schedule,RainMeter,TempMeter,WindMeter,SunMeter,UserForSite,Log
 
 from rainman.utils import now
 from datetime import timedelta
@@ -20,18 +20,18 @@ class ControllerInline(admin.TabularInline):
 class ValveInline(admin.StackedInline):
 	model = Valve
 	extra = 0
-	fields = (('name','var','location','feed'),('flow','area','shade','runoff'), ('time','level','priority','comment'),('param_group','max_level','start_level','stop_level'))
+	fields = (('name','var','location','feed'),('flow','area','shade','runoff'), ('time','level','priority','comment'),('envgroup','max_level','start_level','stop_level'))
 
-class ParamGroupInline(admin.TabularInline):
-	model = ParamGroup
+class EnvGroupInline(admin.TabularInline):
+	model = EnvGroup
 	extra = 0
 
 class HistoryInline(admin.TabularInline):
 	model = History
 	extra = 0
 
-class EnvironmentEffectInline(admin.TabularInline):
-	model = EnvironmentEffect
+class EnvItemInline(admin.TabularInline):
+	model = EnvItem
 	extra = 0
 
 class LevelInline(admin.TabularInline):
@@ -71,8 +71,8 @@ class ValveOverrideInline(admin.TabularInline):
 		qs = super(ValveOverrideInline, self).queryset(request)
 		return qs.filter(start__gte = now()-timedelta(1,0)).order_by("-start")
 
-class ParamGroupInline(admin.TabularInline):
-	model = ParamGroup
+class EnvGroupInline(admin.TabularInline):
+	model = EnvGroup
 	extra = 0
 
 class GroupAdjustInline(admin.TabularInline):
@@ -117,7 +117,7 @@ class SiteAdmin(admin.ModelAdmin):
 		FeedInline,
 		ControllerInline,
 		GroupInline,
-		ParamGroupInline,
+		EnvGroupInline,
 		RainMeterInline,
 		TempMeterInline,
 		WindMeterInline,
@@ -140,7 +140,7 @@ class ControllerAdmin(admin.ModelAdmin):
 
 class ValveAdmin(admin.ModelAdmin):
 	list_display = ('name','controller','var','comment','time','level','priority','list_groups','flow','area','stop_level','start_level','max_level','watering_time')
-	list_filter = ('feed','param_group','controller')
+	list_filter = ('feed','envgroup','controller')
 	inlines = [
 		ValveOverrideInline,
 		ScheduleInline,
@@ -158,9 +158,9 @@ class HistoryAdmin(admin.ModelAdmin):
 	date_hierarchy = 'time'
 	ordering = ('-time',)
 
-class EnvironmentEffectAdmin(admin.ModelAdmin):
-	list_display = ('param_group','factor','temp','wind','sun')
-	list_filter = ('param_group',)
+class EnvItemAdmin(admin.ModelAdmin):
+	list_display = ('group','factor','temp','wind','sun')
+	list_filter = ('group',)
 
 class DayRangeAdmin(admin.ModelAdmin):
 	list_display = ('name','list_range')
@@ -196,11 +196,11 @@ class ValveOverrideAdmin(admin.ModelAdmin):
 	date_hierarchy = 'start'
 	ordering = ('-start',)
 
-class ParamGroupAdmin(admin.ModelAdmin):
+class EnvGroupAdmin(admin.ModelAdmin):
 	list_display = ('name','site','factor','list_valves')
 	list_filter = ('site',)
 	inlines = [
-		EnvironmentEffectInline,
+		EnvItemInline,
 		#ValveInline,
 	]
 
@@ -245,10 +245,10 @@ admin.site.register(Site, SiteAdmin)
 admin.site.register(Feed, FeedAdmin)
 admin.site.register(Controller, ControllerAdmin)
 admin.site.register(Valve, ValveAdmin)
-admin.site.register(ParamGroup, ParamGroupAdmin)
+admin.site.register(EnvGroup, EnvGroupAdmin)
 admin.site.register(Level, LevelAdmin)
 admin.site.register(History, HistoryAdmin)
-admin.site.register(EnvironmentEffect, EnvironmentEffectAdmin)
+admin.site.register(EnvItem, EnvItemAdmin)
 admin.site.register(DayRange, DayRangeAdmin)
 admin.site.register(Day, DayAdmin)
 admin.site.register(DayTime, DayTimeAdmin)

@@ -7,6 +7,14 @@
 	Feeds
 
 -block content
-	=f.table(feed_list)
+	%h1
+		-if site is defined
+			-set show_site=False
+			Feeds for {{ site.name }}
+		-else
+			-set show_site=True
+			All Feeds
+
+	=f.table(feed_list, show_site=show_site)
 
 {% endhaml %}

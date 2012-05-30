@@ -1,7 +1,7 @@
 {% haml %}
 -extends "base.jinja"
 -block title
-	Delete Parameters {{ param_group.name }}
+	Delete Environment Table {{ envgroup.name }}
 
 -block content
 	%h1
@@ -9,7 +9,7 @@
 	%form action="" method="post"
 		-csrf_token
 		%p
-			Do you really want to delete the parameters {{param_group.name}}?
+			Do you really want to delete the table {{envgroup.name}}?
 		%input type="submit" value="Yes"
 
 {% endhaml %}

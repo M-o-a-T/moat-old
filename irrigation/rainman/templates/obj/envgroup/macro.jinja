@@ -1,0 +1,21 @@
+{% haml %}
+
+-macro table(envgroups,show_site=True)
+	%table
+		%tr
+			-if show_site
+				%th
+					Site
+			%th
+				Name
+		-for envgroup in envgroups.all()
+			%tr
+				-if show_site
+					%td
+						%a href="/site/{{ envgroup.site.id }}"
+							=envgroup.site.name
+				%td
+					%a href="/envgroup/{{ envgroup.id }}"
+						=envgroup.name
+
+{% endhaml %}

@@ -1,12 +1,19 @@
 {% haml %}
 
--macro table(feeds)
+-macro table(feeds, show_site=True)
 	%table
 		%tr
+			-if show_site
+				%th
+					Site
 			%th
 				Name
 		-for feed in feeds.all()
 			%tr
+				-if show_site
+					%td
+						%a href="/site/{{ feed.site.id }}"
+							=feed.site.name
 				%td
 					%a href="/feed/{{ feed.id }}"
 						=feed.name

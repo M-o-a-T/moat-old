@@ -1,0 +1,30 @@
+{% haml %}
+
+-extends "base.jinja"
+-block title
+	-if envitem is defined
+		=envitem
+		=" – edit"
+	-else
+		New Environment item for {{group}}
+
+-block content
+	%h1
+		-if envitem is defined
+			=envitem
+		-else
+			=self.title()
+	%form action="" method="post"
+		-csrf_token
+		%table
+			-if envitem is defined
+				-set group=envitem.group
+			%tr
+				%th -> Environment Table
+				%td
+					%a href="/envgroup/{{ group.id }}"
+						=group.name
+			=form.as_table()|safe
+		%input type="submit" value="Save"
+
+{% endhaml %}

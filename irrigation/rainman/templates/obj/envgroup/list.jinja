@@ -1,0 +1,25 @@
+{% haml %}
+
+-extends "base.jinja"
+-import "obj/envgroup/macro.jinja" as pg
+
+-block title
+	Environment Tables
+
+-block content
+	%h1
+		-if site is defined
+			-set show_site=False
+			Environment Tables for {{ site.name }}
+		-else
+			-set show_site=True
+			All Environment Tables
+
+	=pg.table(envgroup_list, show_site=show_site)
+
+	-if not show_site
+		%div.buttons
+			%a href="/site/{{site.id}}/new/envgroup"
+				New…
+
+{% endhaml %}
