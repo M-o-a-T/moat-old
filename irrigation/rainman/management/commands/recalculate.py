@@ -52,7 +52,7 @@ class Command(BaseCommand):
 				action='store',
 				type=float,
 				dest='age',
-				default=7,
+				default=None,
 				help='Start n days in the past'),
 			make_option('-n','--no-save',
 				action='store_false',
@@ -87,11 +87,35 @@ class Command(BaseCommand):
 			print "Updating",v
 		envgroup = EnvGroup(v.envgroup)
 		now = datetime.utcnow().replace(tzinfo=utc)
-		start=now-timedelta(options['age'])
-		hist = StoredIter(History.objects.filter(site=v.controller.site,time__gte=start).order_by("time"))
+		if options['age'] is None:
+			start=None
+		else:
+			start=now-timedelta(options['age'])
 		level=None
 		ts=None
 		s = v.controller.site
+
+		try:
+			q=Q(valve=v,forced=True)
+			if start is not None:
+				q &= Q(time__gte=start)
+			last_fixed = Level.objects.filter(q).order_by("-time")[0].time
+			if start is None or start < last_fixed:
+				start = last_fixed
+		except IndexError:
+			try:
+				q=Q(valve=v)
+				if start is not None:
+					q &= Q(time__gte=start)
+				lv = Level.objects.filter(q).order_by("time")[0]
+			except IndexError:
+				pass
+			else:
+				lv.forced=True
+				if options['save']:
+					lv.save()
+				start=lv.time
+		hist = StoredIter(History.objects.filter(site=v.controller.site,time__gte=start).order_by("time"))
 
 		for lv in Level.objects.filter(valve=v,time__gte=start).order_by("time"):
 			if level is None or lv.forced:
@@ -119,7 +143,7 @@ class Command(BaseCommand):
 				except StopIteration:
 					hist = None
 				f = envgroup.env_factor(h,options['verbose'])*v.adj
-				add_f = s.db_rate * (envgroup.envgroup.factor*f)**v.shade * (h.time-ts).total_seconds()
+				add_f = s.db_rate * v.do_shade(envgroup.envgroup.factor*f) * (h.time-ts).total_seconds()
 				add_r = v.runoff*h.rain
 				if options['verbose']:
 					print "Apply",h,f,u"– dry="+str(add_f)," rain="+str(add_r)

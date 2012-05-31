@@ -37,7 +37,7 @@ from optparse import make_option
 from django.core.management.base import BaseCommand, CommandError
 from django.core.exceptions import ObjectDoesNotExist
 from rainman.models import Site,Valve,Schedule,Controller,History,Level
-from rainman.utils import now
+from rainman.utils import now,str_tz
 from rainman.logging import log,log_error
 from datetime import datetime,time,timedelta
 from django.db.models import F,Q
@@ -621,15 +621,17 @@ class SchedSite(SchedCommon):
 		return h
 
 	def run_sched_task(self,delayed=False,reason=None,kill=True, **k):
-		print >>sys.stderr,"RunSched",reason
 		if self._sched_running is not None:
+			print >>sys.stderr,"RunSched.running",reason
 			return self._sched_running.get()
 		if self._sched is not None:
 			if kill:
 				self._sched.kill()
 		if delayed:
+			print >>sys.stderr,"RunSched.delay",reason
 			self._sched = gevent.spawn_later(10,self.run_sched_task,kill=False,reason="Timer 10")
 			return
+		print >>sys.stderr,"RunSched",reason
 		self._sched = None
 		self._sched_running = AsyncResult()
 		try:
@@ -784,6 +786,8 @@ class SchedValve(SchedCommon):
 
 	def run_schedule(self):
 		if not self.sched_lock.acquire(blocking=False):
+			if self.v.verbose:
+				print >>sys.stderr,"SCHED LOCKED1 %s" % (self.v.name,)
 			return
 		try:
 			self._run_schedule()
@@ -797,6 +801,8 @@ class SchedValve(SchedCommon):
 			self.sched_job.kill()
 			self.sched_job = None
 		if self.locked:
+			if self.v.verbose:
+				print >>sys.stderr,"SCHED LOCKED2 %s" % (self.v.name,)
 			return
 		n = now()
 
@@ -805,9 +811,12 @@ class SchedValve(SchedCommon):
 				self.sched.refresh()
 				if self.sched.start+self.sched.duration <= n:
 					self._off()
+					self.sched = None
 				else:
 					self.sched_job = gevent.spawn_later((self.sched.start+self.sched.duration-n).total_seconds(),self.run_sched_task,reason="_run_schedule 1")
-				return
+					if self.v.verbose:
+						print >>sys.stderr,"SCHED LATER %s: %s" % (self.v.name,humandelta(self.sched.start+self.sched.duration-n))
+					return
 		except ObjectDoesNotExist:
 			pass # somebody deleted it *shrug*
 		sched = None
@@ -816,10 +825,12 @@ class SchedValve(SchedCommon):
 			try:
 				sched = self.v.schedules.filter(start__lt=n).order_by("-start")[0]
 			except IndexError:
-				self.sched_ts = n
+				self.sched_ts = n-timedelta(1,0)
 			else:
 				self.sched_ts = sched.start+sched.duration
 				if sched.start+sched.duration > n: # still running
+					if self.v.verbose:
+						print >>sys.stderr,"SCHED RUNNING %s: %s" % (self.v.name,humandelta(self.sched.start+self.sched.duration-n))
 					try:
 						self._on(sched, sched.start+sched.duration-n)
 					except TooManyOn:
@@ -831,8 +842,9 @@ class SchedValve(SchedCommon):
 		try:
 			sched = self.v.schedules.filter(start__gte=self.sched_ts).order_by("start")[0]
 		except IndexError:
+			if self.v.verbose:
+				print >>sys.stderr,"SCHED EMPTY %s: %s" % (self.v.name,str_tz(self.sched_ts))
 			self._off()
-			self.sched_ts = n
 			return
 
 		if sched.start > n:
@@ -953,7 +965,7 @@ class SchedValve(SchedCommon):
 			f = self.env.env_factor(h, logger=self.log if self.v.verbose>2 else None)*self.v.adj
 			if self.v.verbose>1:
 				self.log("Env factor for %s is %s"%(h,f))
-			sum_f += self.site.s.db_rate * (self.env.eg.factor*f)**self.v.shade * (h.time-ts).total_seconds()
+			sum_f += self.site.s.db_rate * v.do_shade(self.env.eg.factor*f) * (h.time-ts).total_seconds()
 			sum_r += self.v.runoff*h.rain
 			ts=h.time
 

@@ -27,6 +27,9 @@ from datetime import datetime,time,timedelta
 from django.db.models import F,Q
 from django.utils.timezone import utc,get_current_timezone
 from optparse import make_option
+from time import sleep
+from traceback import print_exc
+import rpyc
 
 n=now()
 soon=n+timedelta(0,15*60)
@@ -57,7 +60,13 @@ class Command(BaseCommand):
 				type=float,
 				dest='age',
 				default=1,
-				help='Select the group to use'),
+				help='How far into the future to generate the schedule'),
+			make_option('-d','--delay',
+				action='store',
+				type=float,
+				dest='delay',
+				default=None,
+				help='How far into the future to start generating the schedule'),
 			make_option('-g','--group',
 				action='store',
 				dest='group',
@@ -68,6 +77,11 @@ class Command(BaseCommand):
 				dest='save',
 				default=True,
 				help="don't save"),
+			make_option('-t','--trigger',
+				action='store_true',
+				dest='trigger',
+				default=False,
+				help="trigger an immediate schedule read"),
 			make_option('-V','--verbose',
 				action='store_true',
 				dest='verbose',
@@ -76,6 +90,16 @@ class Command(BaseCommand):
 			)
 
 	def handle(self, *args, **options):
+		if options['trigger']:
+			for s in Site.objects.all():
+				if not s.var: continue
+				try:
+					c = rpyc.connect(s.host, int(s.port), ipv6=True)
+					c.root.command("trigger","sync",*s.var.split())
+					c.close()
+				except Exception:
+					print_exc()
+			sleep(10)
 		q = Q()
 		if options['site']:
 			q &= Q(controller__site__name=options['site'])
@@ -85,16 +109,38 @@ class Command(BaseCommand):
 			q &= Q(controller__name=options['controller'])
 		if options['feed']:
 			q &= Q(feed__name=options['feed'])
+
+		global soon
+		if options['delay'] is not None:
+			delay=float(options['delay'])
+		elif options['trigger']:
+			delay=1
+		else:
+			delay=10
+		soon=n+timedelta(0,delay*60)
+
+		sites = set()
 		if len(args):
 			for a in args:
 				v = Valve.objects.get(q & Q(name=a))
+				if options['trigger']:
+					sites.add(v.controller.site)
 				self.force_one_valve(v, options)
 				self.one_valve(v, options)
 		else:
 			for v in Valve.objects.filter(q).order_by("level"):
+				if options['trigger']:
+					sites.add(v.controller.site)
 				self.force_one_valve(v,options)
 			for v in Valve.objects.filter(q).order_by("level"):
 				self.one_valve(v,options)
+
+		if options['trigger']:
+			for s in sites:
+				c = rpyc.connect(s.host, int(s.port), ipv6=True)
+				c.root.command("trigger","read","schedule",*s.var.split())
+				c.close()
+
 
 	def one_valve(self,v,options):
 		if (v.level < v.stop_level) if v.priority else (v.level < v.start_level):
@@ -113,6 +159,7 @@ class Command(BaseCommand):
 				if options['save']:
 					if v.verbose:
 						log(v,"Drop schedule at %s for %s" % (str_tz(s.start),str(s.duration)))
+					v.update(priority=True)
 					s.delete()
 					continue
 			#want -= s.duration*1.2 # avoid some strange burst
@@ -129,6 +176,7 @@ class Command(BaseCommand):
 				if options['save']:
 					sc=Schedule(valve=v,start=a,duration=b)
 					sc.save()
+					v.update(priority=True)
 					if v.verbose:
 						log(v,"Scheduled at %s for %s (level %s; want %s)" % (str_tz(a),str(b),v.level,str(want)))
 				want -= b
@@ -137,6 +185,7 @@ class Command(BaseCommand):
 				if options['save']:
 					sc=Schedule(valve=v,start=a,duration=want)
 					sc.save()
+					v.update(priority=False)
 					if v.verbose:
 						log(v,"Scheduled at %s for %s (level %s)" % (str_tz(a),str(want),v.level))
 				want = None

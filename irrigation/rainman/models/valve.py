@@ -46,6 +46,11 @@ class Valve(Model,RangeMixin):
 	start_level = m.FloatField(default=8, help_text="start watering above this level") # max water level, in mm: stop counting here
 	stop_level = m.FloatField(default=3, help_text="stop watering below this level") # min water level, in mm: start when at/above this
 	shade = m.FloatField(default=1, help_text="which part of the standard evaporation rate applies here?")
+	def do_shade(self,x):
+		# linear
+		return (x-1)*self.shade+1
+		# quadratic might be better
+
 	runoff = m.FloatField(default=1, help_text="how much incoming rain ends up here?")
 	#
 #	def get_adj_flow(self,date=None):
