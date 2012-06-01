@@ -42,7 +42,7 @@
 	%div.schedule
 		%h2 -> Schedule
 		%div.content
-			=sc.table(feed.schedules.order_by("-start")[:5], show_site=False,prefix="/feed/%d"%(feed.id,))
+			=sc.table(feed.schedules.order_by("-start")[:5], prefix="/feed/%d"%(feed.id,))
 
 		%div.buttons#buttons_sc
 			%a href="/feed/{{feed.id}}/schedule"

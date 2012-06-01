@@ -20,7 +20,7 @@
 						=level.time|tz
 				%td -> ="%.2f" % level.level
 				%td -> ="%.2f" % level.flow
-				%td -> ="Yes" if level.forced else "No"
+				%td -> ="◉" if level.forced else "–"
 					
 
 {% endhaml %}
