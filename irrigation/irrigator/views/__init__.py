@@ -76,6 +76,7 @@ class FormMixin(object):
 
 class SiteParamMixin(object):
 	opt_params = {'site':Site}
+	opt_names = {}
 	def __init__(self,*a,**k):
 		super(SiteParamMixin,self).__init__(*a,**k)
 		self.aux_data = {}
@@ -103,6 +104,8 @@ class SiteParamMixin(object):
 		q = super(SiteParamMixin,self).get_queryset()
 		f = {}
 		for p,v in self.aux_data.items():
+			if p in self.opt_names:
+				p = self.opt_names[p]
 			if v is not None:
 				f[p] = v
 		if f:

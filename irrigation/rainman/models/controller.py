@@ -66,3 +66,8 @@ class Controller(Model,RangeMixin):
 		if end>start:
 			yield ((start,end-start))
 
+	@property
+	def schedules(self):
+		from rainman.models.schedule import Schedule
+		return Schedule.objects.filter(valve__controller=self)
+

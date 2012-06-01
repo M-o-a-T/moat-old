@@ -251,6 +251,8 @@ You need:
 To Do
 -----
 
+Change inline schedule display to only show in-progress or future entries.
+
 Soil moisture sensors can supply the calculated "dryness" level directly.
 
 Add humidity sensors. Or maybe add arbitrary sensor classes.

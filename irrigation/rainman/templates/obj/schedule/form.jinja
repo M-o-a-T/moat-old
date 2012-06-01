@@ -1,0 +1,23 @@
+{% haml %}
+
+-extends "base.jinja"
+-block title
+	-if schedule is defined
+		=schedule
+		=" – edit"
+	-else
+		New Schedule
+
+-block content
+	%h1
+		-if schedule is defined
+			=schedule
+		-else
+			=self.title()
+	%form action="" method="post"
+		-csrf_token
+		%table
+			=form.as_table()|safe
+		%input type="submit" value="Save"
+
+{% endhaml %}

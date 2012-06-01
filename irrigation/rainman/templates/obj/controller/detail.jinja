@@ -1,6 +1,7 @@
 {% haml %}
 -extends "base.jinja"
 -import "obj/valve/macro.jinja" as v
+-import "obj/schedule/macro.jinja" as sc
 
 -block title
 	=controller.name
@@ -40,9 +41,21 @@
 			%a href="/controller/{{controller.id}}/new/valve"
 				Add valve
 
+	%div.schedule
+		%h2 -> Schedule
+		%div.content
+			=sc.table(controller.schedules.order_by("-start")[:5],prefix="/controller/%d"%(controller.id,))
+
+		%div.buttons#buttons_sc
+			%a href="/controller/{{controller.id}}/schedule"
+				More…
+
 	%div.more
 		%div.buttons
 			%a href="/controller/{{controller.id}}/log"
 				Log
+			=" ¦ "
+			%a href="/controller/{{controller.id}}/history"
+				History
 
 {% endhaml %}

@@ -1,0 +1,66 @@
+{% haml %}
+-extends "base.jinja"
+-import "obj/valve/macro.jinja" as v
+
+-block title
+	=schedule
+
+-block content
+	%div.main
+		%h1 -> =schedule
+		%div.content
+			%table
+				%tr
+					%th -> Valve
+					%td -> %a href="/valve/{{ schedule.valve.id }}"
+						=schedule.valve.name
+				%tr
+					%th -> Controller
+					%td -> %a href="/controller/{{ schedule.valve.controller.id }}"
+						=schedule.valve.controller.name
+				%tr
+					%th -> Feed
+					%td -> %a href="/feed/{{ schedule.valve.feed.id }}"
+						=schedule.valve.feed.name
+				%tr
+					%th -> Site
+					%td -> %a href="/site/{{ schedule.valve.controller.site.id }}"
+						=schedule.valve.controller.site.name
+				%tr
+					%th -> Start
+					%td -> =schedule.start|tz
+				%tr
+					%th -> Duration
+					%td -> =schedule.duration
+				%tr
+					%th -> End
+					%td -> =schedule.end|tz
+				%tr
+					%th -> Running
+					%td -> ="◉" if schedule.seen else "–"
+				%tr
+					%th -> Changed
+					%td -> ="◉" if schedule.changed else "–"
+				%tr
+					%th -> Forced
+					%td -> ="◉" if schedule.forced else "–"
+
+		%div.buttons#buttons
+			%a href="{{prefix}}/schedule/{{schedule.id}}/edit"
+				Edit
+			-if not schedule.seen
+				=" ¦ "
+				%a href="{{prefix}}/schedule/{{schedule.id}}/delete"
+					Delete
+
+		%div.buttons_s
+			-if prev_s
+				%a href="{{prefix}}/schedule/{{ prev_s.id }}"
+					Previous
+			-if next_s and prev_s
+				=" ¦ "
+			-if next_s
+				%a href="{{prefix}}/schedule/{{ next_s.id }}"
+					Next
+
+{% endhaml %}

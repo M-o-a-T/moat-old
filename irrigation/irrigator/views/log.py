@@ -17,28 +17,29 @@
 from __future__ import division,absolute_import
 from django.views.generic import ListView,DetailView,CreateView,UpdateView,DeleteView
 from django.forms import ModelForm
-from rainman.models import Log,Site,Controller,Valve
+from rainman.models import Log,Site,Controller,Valve,EnvGroup
 from irrigator.views import FormMixin,SiteParamMixin
 
-class LogForm(ModelForm):
-	class Meta:
-		model = Log
-		exclude = ('site',)
-
-	def save(self,commit=True):
-		s = self.aux_data['site']
-		if s is not None:
-			self.instance.controller = s
-		c = self.aux_data['controller']
-		if c is not None:
-			self.instance.valve = c
-		v = self.aux_data['valve']
-		if s is not None:
-			self.instance.site = v
-		return super(LogForm,self).save(commit)
+#class LogForm(ModelForm):
+#	class Meta:
+#		model = Log
+#		exclude = ('site',)
+#
+#	def save(self,commit=True):
+#		s = self.aux_data['site']
+#		if s is not None:
+#			self.instance.site = s
+#		c = self.aux_data['controller']
+#		if c is not None:
+#			self.instance.controller = c
+#		v = self.aux_data['valve']
+#		if v is not None:
+#			self.instance.valve = v
+#		return super(LogForm,self).save(commit)
 
 class MoreParamMixin(SiteParamMixin):
-	opt_params = {'site':Site, 'controller':Controller, 'valve':Valve}
+	opt_params = {'site':Site, 'controller':Controller, 'valve':Valve, 'envgroup':EnvGroup}
+	opt_names = { 'envgroup': 'valve__envgroup' }
 	def get_params_hook(self,*a,**k):
 		super(MoreParamMixin,self).get_params_hook(*a,**k)
 		v = self.aux_data['valve']
@@ -47,6 +48,9 @@ class MoreParamMixin(SiteParamMixin):
 		c = self.aux_data['controller']
 		if c is not None:
 			self.aux_data['site'] = c.site
+		eg = self.aux_data['envgroup']
+		if eg is not None:
+			self.aux_data['site'] = eg.site
 
 class LogMixin(FormMixin):
 	model = Log
@@ -54,6 +58,26 @@ class LogMixin(FormMixin):
 	def get_queryset(self):
 		gu = self.request.user.get_profile()
 		return super(LogMixin,self).get_queryset().filter(site__id__in=gu.sites.all()).order_by("-timestamp")
+
+	def get_context_data(self,**k):
+		ctx = super(LogMixin,self).get_context_data(**k)
+		v=self.aux_data['valve']
+		c=self.aux_data['controller']
+		s=self.aux_data['site']
+		eg=self.aux_data['envgroup']
+		if v is not None:
+			prefix = "/valve/%s" % (v.id,)
+		elif eg is not None:
+			prefix = "/envgroup/%s" % (eg.id,)
+		elif c is not None:
+			prefix = "/controller/%s" % (c.id,)
+		elif s is not None:
+			prefix = "/site/%s" % (s.id,)
+		else:
+			prefix = ""
+		ctx['prefix'] = prefix
+		return ctx
+
 
 class LogsView(LogMixin,MoreParamMixin,ListView):
 	context_object_name = "log_list"
@@ -70,5 +94,6 @@ class LogView(LogMixin,MoreParamMixin,DetailView):
 			ctx['prev_l'] = self.get_queryset().filter(timestamp__lt=ctx['log'].timestamp).order_by('-timestamp')[0]
 		except IndexError:
 			ctx['prev_l'] = None
+
 		return ctx
 

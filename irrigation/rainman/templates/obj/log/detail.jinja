@@ -45,12 +45,12 @@
 					=log.text
 	%div.buttons_l
 		-if prev_l
-			%a href="/log/{{ prev_l.id }}"
+			%a href="{{prefix}}/log/{{ prev_l.id }}"
 				Previous
 		-if next_l and prev_l
 			=" ¦ "
 		-if next_l
-			%a href="/log/{{ next_l.id }}"
+			%a href="{{prefix}}/log/{{ next_l.id }}"
 				Next
 
 {% endhaml %}

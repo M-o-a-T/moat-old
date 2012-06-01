@@ -27,14 +27,22 @@ class ValveForm(ModelForm):
 		model = Valve
 		exclude = ('site',)
 
-	def __init__(self,*a,**k):
-		super(ValveForm,self).__init__(*a,**k)
-
-	def limit_choices(self,site):
+	def limit_choices(self,site=None,controller=None,feed=None,envgroup=None):
 		gu = get_request().user.get_profile()
-		self.fields['controller'].queryset = gu.controllers.filter(site=site)
-		self.fields['feed'].queryset = gu.feeds.filter(site=site)
-		self.fields['envgroup'].queryset = gu.envgroups.filter(site=site)
+		if feed is not None:
+			self.fields['feed'].queryset = gu.feeds.filter(id=feed.id)
+		elif site is not None:
+			self.fields['feed'].queryset = gu.feeds.filter(site=site)
+
+		if controller is not None:
+			self.fields['controller'].queryset = gu.controllers.filter(id=controller.id)
+		elif site is not None:
+			self.fields['controller'].queryset = gu.controllers.filter(site=site)
+
+		if envgroup is not None:
+			self.fields['envgroup'].queryset = gu.envgroups.filter(id=envgroup.id)
+		elif site is not None:
+			self.fields['envgroup'].queryset = gu.envgroups.filter(site=site)
 
 
 class ValveMixin(FormMixin):
@@ -84,12 +92,12 @@ class ValveNewView(ValveMixin,ValveParamMixin,CreateView):
 	success_url="/valve/%(id)s"
 	def get_form(self, form_class):
 		form = super(ValveNewView,self).get_form(form_class)
-		form.limit_choices(self.aux_data['site'])
+		form.limit_choices(**self.aux_data)
 		return form
 	def get_form_kwargs(self):
 		args = super(ValveNewView,self).get_form_kwargs()
 		if args.get('instance',None) is None:
-			args['initial'] = self.aux_data
+			args['initial'] = self.aux_data.copy()
 		return args
 
 
@@ -98,7 +106,7 @@ class ValveEditView(ValveMixin,UpdateView):
 	success_url="/valve/%(id)s"
 	def get_form(self, form_class):
 		form = super(ValveEditView,self).get_form(form_class)
-		form.limit_choices(self.site)
+		form.limit_choices(site=self.site)
 		return form
 	def get(self,request,pk,**k):
 		valve = Valve.objects.get(pk=pk)

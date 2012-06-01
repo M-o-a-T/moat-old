@@ -49,3 +49,8 @@ class Site(Model):
 	@property
 	def rate_sec(self):
 		return self.rate/24/60/60
+	
+	@property
+	def schedules(self):
+		from rainman.models.schedule import Schedule
+		return Schedule.objects.filter(valve__controller__site=self)

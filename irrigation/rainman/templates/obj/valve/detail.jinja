@@ -1,6 +1,7 @@
 {% haml %}
 -extends "base.jinja"
 -import "obj/level/macro.jinja" as lv
+-import "obj/schedule/macro.jinja" as sc
 
 -block title
 	=valve.name
@@ -79,6 +80,15 @@
 		%a href="/valve/{{valve.id}}/delete"
 			Delete
  
+	%div.Schedules
+		%h2 -> Schedule
+		%div.content
+			=sc.table(valve.schedules.order_by("-start")[:5], show_valve=False,prefix="/valve/%d"%(valve.id,))
+
+		%div.buttons#buttons_h
+			%a href="/valve/{{valve.id}}/schedule"
+				More…
+
 	%div.levels
 		%h2 -> Levels
 		%div.content

@@ -103,6 +103,12 @@ class EnvGroup(Model):
 				sum_f += f*weight
 				sum_w += weight
 		return sum_f / sum_w
+	
+	@property
+	def schedules(self):
+		from rainman.models.schedule import Schedule
+		return Schedule.objects.filter(valve__envgroup=self)
+
 
 class EnvItem(Model):
 	class Meta(Model.Meta):

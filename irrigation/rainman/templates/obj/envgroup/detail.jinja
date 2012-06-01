@@ -2,6 +2,7 @@
 -extends "base.jinja"
 -import "obj/envitem/macro.jinja" as ef
 -import "obj/valve/macro.jinja" as v
+-import "obj/schedule/macro.jinja" as sc
 
 -block title
 	=envgroup.name
@@ -36,12 +37,26 @@
 		%a href="/envgroup/{{envgroup.id}}/new/envitem"
 			New Entry…
 
+	%div.Schedules
+		%h2 -> Schedule
+		%div.content
+			=sc.table(envgroup.schedules.order_by("-start")[:5], show_valve=False,prefix="/envgroup/%d"%(envgroup.id,))
+
+		%div.buttons#buttons_h
+			%a href="/valve/{{valve.id}}/schedule"
+				More…
+
 	%div.valves
 		%h2 -> Valves
 		%div.content
 			=v.table(envgroup.valves.all(), show_eg=False)
 			%a href="/envgroup/{{envgroup.id}}/new/valve"
 				Add valve
+
+	%div.more
+		%div.buttons
+			%a href="/envgroup/{{envgroup.id}}/log"
+				Log
 
 
 {% endhaml %}

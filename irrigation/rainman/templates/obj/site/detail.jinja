@@ -5,6 +5,7 @@
 -import "obj/envgroup/macro.jinja" as pg
 -import "obj/history/macro.jinja" as h
 -import "obj/valve/macro.jinja" as v
+-import "obj/schedule/macro.jinja" as sc
 
 -block title
 	=site.name
@@ -80,6 +81,15 @@
 
 		%div.buttons#buttons_h
 			%a href="/site/{{site.id}}/history"
+				More…
+
+	%div.schedule
+		%h2 -> Schedule
+		%div.content
+			=sc.table(site.schedules.order_by("-start")[:5])
+
+		%div.buttons#buttons_sc
+			%a href="/site/{{site.id}}/schedule"
 				More…
 	%hr
 	%div.more

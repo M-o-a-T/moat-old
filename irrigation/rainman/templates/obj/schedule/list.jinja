@@ -1,0 +1,37 @@
+{% haml %}
+
+-extends "base.jinja"
+-import "obj/schedule/macro.jinja" as sc
+
+-block title
+	schedules
+
+-block content
+	%h1
+		-if valve is defined
+			-set show_valve=False
+			Schedules of {{valve.name}}
+		-elif envgroup is defined
+			-set show_valve=True
+			Schedules of {{envgroup.name}}
+		-elif controller is defined
+			-set show_valve=True
+			Schedules of {{controller.name}}
+		-elif feed is defined
+			-set show_valve=True
+			Schedules of {{feed.name}}
+		-elif site is defined
+			-set show_valve=True
+			Schedules of {{site.name}}
+		-else
+			-set show_valve=True
+			All schedules
+
+	=sc.table(schedule_list, show_valve=show_valve, prefix=prefix)
+
+	-if not show_valve
+		%div.buttons
+			%a href="/valve/{{valve.id}}/new/schedule"
+				New…
+
+{% endhaml %}
