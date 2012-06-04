@@ -1,0 +1,54 @@
+{% haml %}
+-extends "base.jinja"
+-import "obj/valve/macro.jinja" as v
+-import "obj/schedule/macro.jinja" as sc
+
+-block title
+	=group.name
+
+-block content
+	%div.main
+		%h1 -> =group.name
+		%div.content
+			%table
+				%tr
+					%th -> Site
+					%td -> %a href="/site/{{ group.site.id }}"
+						=group.site.name
+				%tr
+					%th -> Comment
+					%td -> =group.comment
+
+		%div.buttons#buttons
+			%a href="/group/{{group.id}}/edit"
+				Edit
+			=" ¦ "
+			%a href="/group/{{group.id}}/delete"
+				Delete
+
+;	? TODO ?
+;	%div.valves
+;		%h2 -> Valves
+;		%div.content
+;			=v.table(group.valves.all())
+;			%a href="/group/{{group.id}}/new/valve"
+;				Add valve
+;
+;	%div.schedule
+;		%h2 -> Schedule
+;		%div.content
+;			=sc.table(group.schedules.order_by("-start")[:5],prefix="/group/%d"%(group.id,))
+;
+;		%div.buttons#buttons_sc
+;			%a href="/group/{{group.id}}/schedule"
+;				More…
+;
+;	%div.more
+;		%div.buttons
+;			%a href="/group/{{group.id}}/log"
+;				Log
+;			=" ¦ "
+;			%a href="/group/{{group.id}}/history"
+;				History
+
+{% endhaml %}

@@ -1,0 +1,30 @@
+{% haml %}
+
+-extends "base.jinja"
+-block title
+	-if group is defined
+		=group.name
+		=" – edit"
+	-else
+		New group
+
+-block content
+	%h1
+		-if group is defined
+			=group.name
+		-else
+			=self.title()
+	%form action="" method="post"
+		-csrf_token
+		%table
+			-if group is defined
+				-set site=group.site
+			%tr
+				%th -> Site
+				%td
+					%a href="/site/{{ site.id }}"
+						=site.name
+			=form.as_table()|safe
+		%input type="submit" value="Save"
+
+{% endhaml %}

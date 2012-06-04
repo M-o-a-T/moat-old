@@ -14,6 +14,7 @@ from irrigator.views.envitem import EnvItemView,EnvItemsView,EnvItemNewView,EnvI
 from irrigator.views.history import HistoryView,HistorysView
 from irrigator.views.log import LogView,LogsView
 from irrigator.views.schedule import ScheduleView,SchedulesView,ScheduleNewView,ScheduleEditView,ScheduleDeleteView
+from irrigator.views.group import GroupView,GroupsView,GroupNewView,GroupEditView,GroupDeleteView
 
 urlpatterns = patterns('',
 	url(r'^$', 'irrigator.views.home', name='home'),
@@ -30,6 +31,13 @@ urlpatterns = patterns('',
 	url(r'^controller/(?P<pk>\d+)/delete$', ControllerDeleteView.as_view()),
 	url(r'^site/(?P<site>\d+)/controller$', ControllersView.as_view()),
 	url(r'^site/(?P<site>\d+)/new/controller$', ControllerNewView.as_view()),
+
+	url(r'^group/$', GroupsView.as_view()),
+	url(r'^group/(?P<pk>\d+)$', GroupView.as_view()),
+	url(r'^group/(?P<pk>\d+)/edit$', GroupEditView.as_view()),
+	url(r'^group/(?P<pk>\d+)/delete$', GroupDeleteView.as_view()),
+	url(r'^site/(?P<site>\d+)/group$', GroupsView.as_view()),
+	url(r'^site/(?P<site>\d+)/new/group$', GroupNewView.as_view()),
 
 	url(r'^feed/$', FeedsView.as_view()),
 	url(r'^feed/(?P<pk>\d+)$', FeedView.as_view()),

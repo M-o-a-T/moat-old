@@ -20,6 +20,7 @@ from rainman.models.site import Site
 from rainman.models.valve import Valve
 from rainman.models.feed import Feed
 from rainman.models.controller import Controller
+from rainman.models.group import Group
 from rainman.models.env import EnvGroup
 from django.db import models as m
 from django.db.models.signals import post_save
@@ -63,6 +64,12 @@ class UserForSite(Model):
 		return Controller.objects.filter(valves__in=self.valves.all())
 
 	@property
+	def groups(self):
+		if self.level >= 3:
+			return Group.objects.filter(site__in=self.sites.all())
+		return Group.objects.filter(valves__in=self.valves.all())
+
+	@property
 	def all_valves(self):
 		if self.level >= 3:
 			return Valve.objects.filter(controller__site__in=self.sites.all())
@@ -97,6 +104,15 @@ class UserForSite(Model):
 		if self.level >= 3:
 			return self.level
 		if self.valves.filter(controller__id=controller.id).unique().count():
+			return self.level
+		return False
+
+	def access_group(self,group):
+		if not self.sites.filter(id=group.site.id).unique().count():
+			return False
+		if self.level >= 3:
+			return self.level
+		if self.valves.filter(group__id=group.id).unique().count():
 			return self.level
 		return False
 

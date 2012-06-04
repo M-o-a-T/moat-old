@@ -32,6 +32,7 @@ class Group(Model,RangeMixin):
 		return self.name
 	name = m.CharField(max_length=200)
 	site = m.ForeignKey(Site,related_name="groups") # self.valve[*].controller.site is self.site
+	comment = m.CharField(max_length=200,blank=True)
 	#
 	# Adjustment factors affecting this group
 
@@ -115,7 +116,8 @@ class Group(Model,RangeMixin):
 	def _no_xdays_range(self,start,end):
 		return range_invert(start,end-start, range_union(*(d._range(start,end) for d in self.xdays.all())))
 
-
-				
-
+	@property
+	def schedules(self):
+		from rainman.models.schedule import Schedule
+		return Schedule.objects.filter(valve__groups__id = self.id)
 
