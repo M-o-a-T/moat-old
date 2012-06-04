@@ -27,7 +27,7 @@ class SiteForm(DbModelForm):
 	class Meta:
 		model = Site
 		exclude = ('db_rate','db_rain_delay')
-		fields = ('name','var','host','rain_delay','rate')
+		fields = ('name','comment','var','host','rain_delay','rate')
 	
 	# 'Excluded' fields
 	rate = NonNegativeFloatField(help_text=Meta.model._meta.get_field_by_name("db_rate")[0].help_text)
