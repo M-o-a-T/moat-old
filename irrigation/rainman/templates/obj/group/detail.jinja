@@ -18,9 +18,10 @@
 					%th -> Site
 					%td -> %a href="/site/{{ group.site.id }}"
 						=group.site.name
-				%tr
-					%th -> Comment
-					%td -> =group.comment
+				-if group.comment
+					%tr
+						%th -> Comment
+						%td -> =group.comment
 
 		%div.buttons#buttons
 			%a href="/group/{{group.id}}/edit"

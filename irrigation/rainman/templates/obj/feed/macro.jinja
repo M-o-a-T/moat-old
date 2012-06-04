@@ -6,6 +6,7 @@
 			%th -> Name
 			-if show_site
 				%th -> Site
+			%th -> Comment
 		-for feed in feeds.all()
 			%tr
 				%td
@@ -15,5 +16,6 @@
 					%td
 						%a href="/site/{{ feed.site.id }}"
 							=feed.site.name
+				%td -> =feed.comment
 
 {% endhaml %}

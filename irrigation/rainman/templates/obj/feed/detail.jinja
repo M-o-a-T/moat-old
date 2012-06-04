@@ -18,9 +18,10 @@
 					%th -> Site
 					%td -> %a href="/site/{{ feed.site.id }}"
 						=feed.site.name
-				%tr
-					%th -> Comment
-					%td -> =feed.comment
+				-if feed.comment
+					%tr
+						%th -> Comment
+						%td -> =feed.comment
 				%tr
 					%th -> var
 					%td -> =feed.var

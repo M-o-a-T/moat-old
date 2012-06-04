@@ -17,9 +17,10 @@
 			%th -> Site
 			%td -> %a href="/site/{{ envgroup.site.id }}"
 				=envgroup.site.name
-		%tr
-			%th -> Comment
-			%td -> =envgroup.comment
+		-if envgroup.comment
+			%tr
+				%th -> Comment
+				%td -> =envgroup.comment
 		%tr
 			%th -> Factor
 			%td -> =envgroup.factor

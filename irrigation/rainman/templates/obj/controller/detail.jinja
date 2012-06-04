@@ -18,9 +18,10 @@
 					%th -> Site
 					%td -> %a href="/site/{{ controller.site.id }}"
 						=controller.site.name
-				%tr
-					%th -> Comment
-					%td -> =controller.comment
+				-if controller.comment
+					%tr
+						%th -> Comment
+						%td -> =controller.comment
 				%tr
 					%th -> var
 					%td -> =controller.var

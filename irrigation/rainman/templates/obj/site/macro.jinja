@@ -4,10 +4,12 @@
 	%table
 		%tr
 			%th -> Name
+			%th -> Comment
 		-for site in sites
 			%tr
 				%td
 					%a href="/site/{{ site.id }}"
 						=site.name
+				%td -> site.comment
 
 {% endhaml %}

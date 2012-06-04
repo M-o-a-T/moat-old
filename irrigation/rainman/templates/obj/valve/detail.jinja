@@ -9,9 +9,10 @@
 -block content
 	%h1 -> =valve.name
 	%table
-		%tr
-			%th -> Comment
-			%td -> =valve.comment
+		-if valve.comment
+			%tr
+				%th -> Comment
+				%td -> =valve.comment
 		%tr
 			%th -> Controller
 			%td -> %a href="/controller/{{ valve.controller.id }}"

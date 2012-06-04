@@ -18,9 +18,10 @@
 				%tr
 					%th -> Name
 					%td -> =site.name
-				%tr
-					%th -> Comment
-					%td -> =site.comment
+				-if site.comment
+					%tr
+						%th -> Comment
+						%td -> =site.comment
 				%tr
 					%th -> var
 					%td -> =site.var

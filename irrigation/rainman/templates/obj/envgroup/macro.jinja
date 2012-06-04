@@ -6,6 +6,7 @@
 			%th -> Name
 			-if show_site
 				%th -> Site
+			%th -> Comment
 		-for envgroup in envgroups.all()
 			%tr
 				%td
@@ -15,5 +16,6 @@
 					%td
 						%a href="/site/{{ envgroup.site.id }}"
 							=envgroup.site.name
+				%td -> =envgroup.comment
 
 {% endhaml %}
