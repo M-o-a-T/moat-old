@@ -43,7 +43,7 @@
 			=sc.table(envgroup.schedules.order_by("-start")[:5], show_valve=False,prefix="/envgroup/%d"%(envgroup.id,))
 
 		%div.buttons#buttons_h
-			%a href="/valve/{{valve.id}}/schedule"
+			%a href="/envgroup/{{envgroup.id}}/schedule"
 				More…
 
 	%div.valves

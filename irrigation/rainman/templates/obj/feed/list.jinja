@@ -17,4 +17,9 @@
 
 	=f.table(feed_list, show_site=show_site)
 
+	-if not show_site
+		%div.buttons
+			%a href="/site/{{site.id}}/new/feed"
+				New…
+
 {% endhaml %}
