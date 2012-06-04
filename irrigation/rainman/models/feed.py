@@ -27,6 +27,7 @@ class Feed(Meter):
 		db_table="rainman_feed"
 	site = m.ForeignKey(Site,related_name="feed_meters")
 	var = m.CharField(max_length=200,unique=True,blank=True,null=True, help_text="monitor name in HomEvenT") # HomEvenT's variable name for it
+	comment = m.CharField(max_length=200,blank=True)
 
 	flow = m.FloatField(default=10, help_text="liters per second")
 	db_max_flow_wait = m.PositiveIntegerField(db_column="max_flow_wait",default=300,help_text="Max time for flow measurement")
