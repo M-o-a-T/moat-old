@@ -3,6 +3,7 @@
 -macro table(valves, show_site=False,show_controller=True,show_feed=True,show_eg=True)
 	%table
 		%tr
+			%th -> Name
 			-if show_site
 				%th -> Site
 			-if show_controller
@@ -11,12 +12,15 @@
 				%th -> Feed
 			-if show_eg
 				%th -> Env.Table
-			%th -> Name
 			%th -> Level
 			%th -> Start
 			%th -> Stop
+			%th -> Comment
 		-for valve in valves
 			%tr
+				%td
+					%a href="/valve/{{ valve.id }}"
+						=valve.name
 				-if show_site
 					%td
 						%a href="/site/{{ valve.controller.site.id }}"
@@ -34,14 +38,9 @@
 						%a href="/envgroup/{{ valve.envgroup.id }}"
 							=valve.envgroup.name
 				
-				%td
-					%a href="/valve/{{ valve.id }}"
-						=valve.name
-				%td
-					="%.2f" % valve.level
-				%td
-					="%.2f" % valve.start_level
-				%td
-					="%.2f" % valve.stop_level
+				%td -> ="%.2f" % valve.level
+				%td -> ="%.2f" % valve.start_level
+				%td -> ="%.2f" % valve.stop_level
+				%td -> =valve.comment
 
 {% endhaml %}

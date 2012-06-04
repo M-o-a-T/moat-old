@@ -3,17 +3,20 @@
 -macro table(logs,show_site=True,show_controller=True,show_valve=True, prefix="")
 	%table
 		%tr
+			%th -> Time
 			-if show_site
 				%th -> Site
 			-if show_controller
 				%th -> Controller
 			-if show_valve
 				%th -> Valve
-			%th -> Time
 			%th -> Logger
 			%th -> Text
 		-for log in logs.all()
 			%tr
+				%td 
+					%a href="{{prefix}}/log/{{ log.id }}"
+						=log.timestamp|tz
 				-if show_site
 					%td
 						-if log.site is none
@@ -35,9 +38,6 @@
 						-else
 							%a href="/valve/{{ log.valve.id }}"
 								=log.valve.name
-				%td 
-					%a href="{{prefix}}/log/{{ log.id }}"
-						=log.timestamp|tz
 				%td -> =log.logger
 				%td -> =log.text
 

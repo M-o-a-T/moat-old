@@ -11,12 +11,15 @@
 	%h1 -> =envgroup.name
 	%table
 		%tr
-			%th -> comment
-			%td -> =envgroup.comment
+			%th -> Name
+			%td -> =envgroup.name
 		%tr
 			%th -> Site
 			%td -> %a href="/site/{{ envgroup.site.id }}"
 				=envgroup.site.name
+		%tr
+			%th -> Comment
+			%td -> =envgroup.comment
 		%tr
 			%th -> Factor
 			%td -> =envgroup.factor

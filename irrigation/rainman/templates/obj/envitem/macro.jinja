@@ -3,23 +3,23 @@
 -macro table(envitems,show_eg=True)
 	%table
 		%tr
-			-if show_eg
-				%th -> Env Group
 			%th -> Factor
 			%th -> Temp
 			%th -> Wind
 			%th -> Sun
+			-if show_eg
+				%th -> Env Group
 		-for envitem in envitems.all()
 			%tr
-				-if show_eg
-					%td
-						%a href="/envgroup/{{ envitem.group.id }}"
-							=envitem.group.name
 				%td
 					%a href="/envitem/{{ envitem.id }}"
 						="%.2f" % envitem.factor
 				%td -> ="%.2f" % envitem.temp if envitem.temp is not none else "–"
 				%td -> ="%.2f" % envitem.wind if envitem.wind is not none else "–"
 				%td -> ="%.2f" % envitem.sun if envitem.sun is not none else "–"
+				-if show_eg
+					%td
+						%a href="/envgroup/{{ envitem.group.id }}"
+							=envitem.group.name
 
 {% endhaml %}

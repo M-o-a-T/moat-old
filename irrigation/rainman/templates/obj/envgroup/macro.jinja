@@ -3,19 +3,17 @@
 -macro table(envgroups,show_site=True)
 	%table
 		%tr
+			%th -> Name
 			-if show_site
-				%th
-					Site
-			%th
-				Name
+				%th -> Site
 		-for envgroup in envgroups.all()
 			%tr
+				%td
+					%a href="/envgroup/{{ envgroup.id }}"
+						=envgroup.name
 				-if show_site
 					%td
 						%a href="/site/{{ envgroup.site.id }}"
 							=envgroup.site.name
-				%td
-					%a href="/envgroup/{{ envgroup.id }}"
-						=envgroup.name
 
 {% endhaml %}

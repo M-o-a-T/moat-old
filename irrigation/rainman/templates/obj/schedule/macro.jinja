@@ -3,18 +3,14 @@
 -macro table(schedules, show_valve=True, prefix="")
 	%table
 		%tr
-			-if show_valve
-				%th -> Valve
 			%th -> Start
 			%th -> Duration
 			%th -> End
 			%th -> Running
+			-if show_valve
+				%th -> Valve
 		-for schedule in schedules.all()
 			%tr
-				-if show_valve
-					%td
-						%a href="/valve/{{ schedule.valve.id }}"
-							=schedule.valve.name
 				%td
 					%a href="{{prefix}}/schedule/{{ schedule.id }}"
 						=schedule.start|tz
@@ -24,5 +20,9 @@
 					=schedule.end|tz
 				%td
 					="◉" if schedule.seen else "–"
+				-if show_valve
+					%td
+						%a href="/valve/{{ schedule.valve.id }}"
+							=schedule.valve.name
 
 {% endhaml %}

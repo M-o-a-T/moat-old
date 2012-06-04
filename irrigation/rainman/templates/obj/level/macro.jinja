@@ -3,24 +3,24 @@
 -macro table(valves, show_valve=True)
 	%table
 		%tr
-			-if show_valve
-				%th -> Valve
 			%th -> Time
 			%th -> Level
 			%th -> Flow
 			%th -> forced?
+			-if show_valve
+				%th -> Valve
 		-for level in valves.all()
 			%tr
-				-if show_valve
-					%td
-						%a href="/valve/{{ level.valve.id }}"
-							=level.valve.name
 				%td
 					%a href="/level/{{ level.id }}"
 						=level.time|tz
 				%td -> ="%.2f" % level.level
 				%td -> ="%.2f" % level.flow
 				%td -> ="◉" if level.forced else "–"
+				-if show_valve
+					%td
+						%a href="/valve/{{ level.valve.id }}"
+							=level.valve.name
 					
 
 {% endhaml %}

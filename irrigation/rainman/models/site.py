@@ -26,6 +26,7 @@ class Site(Model):
 	def __unicode__(self):
 		return self.name
 	name = m.CharField(max_length=200, unique=True)
+	comment = m.CharField(max_length=200, blank=True)
 	var = m.CharField(max_length=200, unique=True, help_text="name in HomEvenT", blank=True)
 	host = m.CharField(max_length=200, default="localhost", help_text="where to find the HomEvenT server")
 	port = m.PositiveIntegerField(default=50005, help_text="Port for RPC")

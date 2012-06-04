@@ -12,15 +12,18 @@
 		%div.content
 			%table
 				%tr
+					%th -> Name
+					%td -> =feed.name
+				%tr
+					%th -> Site
+					%td -> %a href="/site/{{ feed.site.id }}"
+						=feed.site.name
+				%tr
 					%th -> Comment
 					%td -> =feed.comment
 				%tr
 					%th -> var
 					%td -> =feed.var
-				%tr
-					%th -> Site
-					%td -> %a href="/site/{{ feed.site.id }}"
-						=feed.site.name
 				%tr
 					%th -> Flow
 					%td -> ="%.3f l/sec" % feed.flow

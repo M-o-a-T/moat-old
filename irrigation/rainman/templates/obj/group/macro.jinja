@@ -3,19 +3,19 @@
 -macro table(groups, show_site=True)
 	%table
 		%tr
+			%th -> Name
 			-if show_site
 				%th -> Site
-			%th -> Name
 			%th -> Comment
 		-for group in groups.all()
 			%tr
+				%td
+					%a href="/group/{{ group.id }}"
+						=group.name
 				-if show_site
 					%td
 						%a href="/site/{{ group.site.id }}"
 							=group.site.name
-				%td
-					%a href="/group/{{ group.id }}"
-						=group.name
 				%td
 					=group.comment
 

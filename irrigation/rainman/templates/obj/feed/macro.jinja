@@ -3,19 +3,17 @@
 -macro table(feeds, show_site=True)
 	%table
 		%tr
+			%th -> Name
 			-if show_site
-				%th
-					Site
-			%th
-				Name
+				%th -> Site
 		-for feed in feeds.all()
 			%tr
+				%td
+					%a href="/feed/{{ feed.id }}"
+						=feed.name
 				-if show_site
 					%td
 						%a href="/site/{{ feed.site.id }}"
 							=feed.site.name
-				%td
-					%a href="/feed/{{ feed.id }}"
-						=feed.name
 
 {% endhaml %}

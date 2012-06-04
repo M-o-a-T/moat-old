@@ -3,19 +3,19 @@
 -macro table(controllers, show_site=True)
 	%table
 		%tr
+			%th -> Name
 			-if show_site
 				%th -> Site
-			%th -> Name
 			%th -> Comment
 		-for controller in controllers.all()
 			%tr
+				%td
+					%a href="/controller/{{ controller.id }}"
+						=controller.name
 				-if show_site
 					%td
 						%a href="/site/{{ controller.site.id }}"
 							=controller.site.name
-				%td
-					%a href="/controller/{{ controller.id }}"
-						=controller.name
 				%td
 					=controller.comment
 
