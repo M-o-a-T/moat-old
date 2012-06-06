@@ -914,8 +914,9 @@ class SchedValve(SchedCommon):
 				# If nothing happened, calculate.
 				if not on:
 					duration = n-self.on_ts
-				if not on and not self.flow and not self.v.feed.var:
-					flow = self.v.flow * duration.total_seconds()
+					maxflow = self.v.flow * duration.total_seconds()
+					if (not flow and not self.v.feed.var) or flow > maxflow:
+						flow = maxflow
 				self.new_level_entry(flow)
 				if not on:
 					if self.v.level > self.v.stop_level + (self.v.start_level-self.v.stop_level)/5:
@@ -965,7 +966,7 @@ class SchedValve(SchedCommon):
 			f = self.env.env_factor(h, logger=self.log if self.v.verbose>2 else None)*self.v.adj
 			if self.v.verbose>1:
 				self.log("Env factor for %s is %s"%(h,f))
-			sum_f += self.site.s.db_rate * v.do_shade(self.env.eg.factor*f) * (h.time-ts).total_seconds()
+			sum_f += self.site.s.db_rate * self.v.do_shade(self.env.eg.factor*f) * (h.time-ts).total_seconds()
 			sum_r += self.v.runoff*h.rain
 			ts=h.time
 
