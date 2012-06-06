@@ -84,7 +84,7 @@ class Group(Model,RangeMixin):
 		r = range_intersection(r,self._not_blocked_range(start,end))
 		return r
 
-	valves = m.ManyToManyField(Valve,related_name="groups")
+	valves = m.ManyToManyField(Valve,through=Valve.groups.through)
 	def list_valves(self):
 		return u" ¦ ".join((d.name for d in self.valves.all()))
 

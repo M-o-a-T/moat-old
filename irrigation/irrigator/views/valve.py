@@ -26,7 +26,7 @@ class ValveForm(ModelForm):
 	class Meta:
 		model = Valve
 		exclude = ('site',)
-		fields = ('name','comment','controller','feed','envgroup','location','var','verbose','flow','area','max_level','start_level','stop_level','shade','runoff','time','level','priority') # ,'groups'
+		#fields = ('name','comment','controller','feed','envgroup','location','var','verbose','flow','area','max_level','start_level','stop_level','shade','runoff','time','level','priority','groups')
 		#many_to_many = ('groups,')
 
 	#groups = ModelMultipleChoiceField(queryset=Group.objects.all())
@@ -52,7 +52,7 @@ class ValveForm(ModelForm):
 #			self.fields['groups'].queryset = gu.groups.filter(site=site)
 #		else:
 #			self.fields['groups'].queryset = gu.groups ## should not happen
-
+	
 
 class ValveMixin(FormMixin):
 	model = Valve
@@ -87,6 +87,16 @@ class ValveParamMixin(SiteParamMixin):
 			elif self.aux_data['site'] != eg.site:
 				raise Http404
 
+	def get_form_kwargs(self):
+		args = super(ValveParamMixin,self).get_form_kwargs()
+		obj = args.get('instance',None)
+		if obj is None:
+			args['initial'] = self.aux_data.copy()
+#		else:
+#			args['initial']['groups'] = (x.id for x in obj.groups.all())
+
+		return args
+
 
 class ValvesView(ValveMixin,ValveParamMixin,ListView):
 	context_object_name = "valve_list"
@@ -103,16 +113,9 @@ class ValveNewView(ValveMixin,ValveParamMixin,CreateView):
 		form = super(ValveNewView,self).get_form(form_class)
 		form.limit_choices(**self.aux_data)
 		return form
-	def get_form_kwargs(self):
-		args = super(ValveNewView,self).get_form_kwargs()
-		obj = args.get('instance',None)
-		if obj is None:
-			args['initial'] = self.aux_data.copy()
-
-		return args
 
 
-class ValveEditView(ValveMixin,UpdateView):
+class ValveEditView(ValveMixin,ValveParamMixin,UpdateView):
 	form_class = ValveForm
 	success_url="/valve/%(id)s"
 	def get_form(self, form_class):

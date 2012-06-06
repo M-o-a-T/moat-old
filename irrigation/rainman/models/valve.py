@@ -165,4 +165,7 @@ class Valve(Model,RangeMixin):
 				gx.append(gd._range(start,end))
 		return range_invert(start,end-start,range_union(*gx))
 				
+	groups = m.ManyToManyField('Group',db_table='rainman_group_valves')
+	def list_groups(self):
+		return u" ¦ ".join((d.name for d in self.groups.all()))
 
