@@ -71,6 +71,16 @@
 			%th -> Time
 			%td -> =valve.time|tz
 		%tr
+			%th -> Groups
+			%td
+				-for group in valve.groups.order_by('name')
+					-if not loop.first
+						<br />
+					%a href="/group/{{group.id}}"
+						=group.name
+				-else
+					–
+		%tr
 			%th -> Priority?
 			%td -> ="◉" if valve.priority else "–"
 
