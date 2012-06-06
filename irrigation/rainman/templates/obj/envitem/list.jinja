@@ -8,9 +8,9 @@
 
 -block content
 	%h1
-		-if group is defined
+		-if envgroup is defined
 			-set show_eg=False
-			Environment Table entries for {{group.name}}
+			Environment Table entries for {{envgroup.name}}
 		-else
 			-set show_eg=True
 			All Environment Table entries

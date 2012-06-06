@@ -6,7 +6,7 @@
 		=envitem
 		=" – edit"
 	-else
-		New Environment item for {{group}}
+		New Environment item for {{envgroup}}
 
 -block content
 	%h1
@@ -18,12 +18,12 @@
 		-csrf_token
 		%table
 			-if envitem is defined
-				-set group=envitem.group
+				-set envgroup=envitem.group
 			%tr
 				%th -> Environment Table
 				%td
-					%a href="/envgroup/{{ group.id }}"
-						=group.name
+					%a href="/envgroup/{{ envgroup.id }}"
+						=envgroup.name
 			=form.as_table()|safe
 		%input type="submit" value="Save"
 

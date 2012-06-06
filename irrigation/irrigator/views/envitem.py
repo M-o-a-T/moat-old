@@ -27,7 +27,7 @@ class EnvItemForm(ModelForm):
 
 	def save(self,commit=True):
 		if self.instance.id is None:
-			self.instance.group = self.aux_data['group']
+			self.instance.group = self.aux_data['envgroup']
 		return super(EnvItemForm,self).save(commit)
 
 
@@ -39,7 +39,7 @@ class EnvItemMixin(FormMixin):
 		return super(EnvItemMixin,self).get_queryset().filter(group__site__id__in=gu.sites.all())
 
 class EnvParamMixin(SiteParamMixin):
-	opt_params = {'group':EnvGroup}
+	opt_params = {'envgroup':EnvGroup}
 
 class EnvItemsView(EnvItemMixin,EnvParamMixin,ListView):
 	context_object_name = "envitem_list"
