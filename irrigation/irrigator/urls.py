@@ -121,9 +121,9 @@ urlpatterns = patterns('',
 	url(r'^valve/(?P<valve>\d+)/schedule/(?P<pk>\d+)/delete$', ScheduleDeleteView.as_view()),
 
 	# Login stuff
-	url(r'^login/$', 'django.contrib.auth.views.login', {'template_name': 'auth/login.html'}),
-	url(r'^login/logout$', 'django.contrib.auth.views.logout', {'template_name': 'auth/logout.html'}),
-	url(r'^login/no_access$', 'irrigator.auth.no_access'),
+	url(r'^login/$', 'django.contrib.auth.views.login', {'template_name': 'auth/login.jinja'}),
+	url(r'^login/logout$', 'django.contrib.auth.views.logout', {'template_name': 'auth/logout.jinja'}),
+	url(r'^login/no_access$', 'irrigator.auth.no_access', {'template_name': 'auth/no_access.jinja'}),
 
 	url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 	url(r'^admin/', include(admin.site.urls)),
