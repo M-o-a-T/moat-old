@@ -1,0 +1,39 @@
+{% haml %}
+-extends "base.jinja"
+
+-block title
+	=day.name
+-block content
+
+	%div.main
+		%h1 -> =day.name
+		%div.content
+			%table
+				%tr
+					%th -> Name
+					%td -> =day.name
+				%tr
+					%th -> Parts
+					%td
+						-for part in day.times.all()
+							-if not loop.first
+								=" ¦ "
+							=part.descr
+						-else
+							–
+				%tr
+					%th -> next at
+					%td
+						=day.list_range()
+
+		%div.buttons#buttons
+			%a href="/day/{{day.id}}/new"
+				New part
+			=" ¦ "
+			%a href="/day/{{day.id}}/edit"
+				Edit
+			=" ¦ "
+			%a href="/day/{{day.id}}/delete"
+				Delete
+
+{% endhaml %}

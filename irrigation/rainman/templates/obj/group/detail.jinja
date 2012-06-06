@@ -29,7 +29,7 @@
 							-for day in group.days.order_by('name')
 								-if not loop.first
 									<br />
-								%a href="/day/{{day.id}}"
+								%a href="/dayrange/{{day.id}}"
 									=day.name
 				-if group.xdays.count()
 					%tr
@@ -38,7 +38,7 @@
 							-for day in group.xdays.order_by('name')
 								-if not loop.first
 									<br />
-								%a href="/day/{{day.id}}"
+								%a href="/dayrange/{{day.id}}"
 									=day.name
 				%tr
 					%th -> Valves

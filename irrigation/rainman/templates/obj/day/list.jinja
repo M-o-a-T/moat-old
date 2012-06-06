@@ -1,0 +1,19 @@
+{% haml %}
+
+-extends "base.jinja"
+-import "obj/day/macro.jinja" as dr
+
+-block title
+	Time Parts
+
+-block content
+	%h1
+		Time Parts
+
+	=dr.table(day_list)
+
+	%div id="buttons"
+		%a href="/day/new"
+			New time part …
+
+{% endhaml %}

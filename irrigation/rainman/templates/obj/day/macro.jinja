@@ -1,0 +1,24 @@
+{% haml %}
+
+-macro table(days)
+	%table
+		%tr
+			%th -> Name
+			%th -> Parts
+			%th -> next at
+		-for day in days
+			%tr
+				%td
+					%a href="/day/{{ day.id }}"
+						=day.name
+				%td
+					-for p in day.times.all()
+						-if not loop.first
+							=" ¦ "
+						=p.descr
+					-else
+						–
+				%td
+					=day.list_range()
+
+{% endhaml %}

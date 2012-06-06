@@ -1,20 +1,19 @@
 {% haml %}
 
 -extends "base.jinja"
--import "obj/site/macro.jinja" as s
 -import "obj/dayrange/macro.jinja" as dr
 
 -block title
-	Sites
+	Time Specs
 
 -block content
 	%h1
-		Sites
+		Time Specs
 
-	=s.table(site_list)
+	=dr.table(dayrange_list)
 
 	%div id="buttons"
-		%a href="/site/new"
-			New Site …
+		%a href="/dayrange/new"
+			New time spec …
 
 {% endhaml %}

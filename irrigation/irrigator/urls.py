@@ -15,6 +15,9 @@ from irrigator.views.history import HistoryView,HistorysView
 from irrigator.views.log import LogView,LogsView
 from irrigator.views.schedule import ScheduleView,SchedulesView,ScheduleNewView,ScheduleEditView,ScheduleDeleteView
 from irrigator.views.group import GroupView,GroupsView,GroupNewView,GroupEditView,GroupDeleteView
+from irrigator.views.dayrange import DayRangeView,DayRangesView,DayRangeNewView,DayRangeEditView,DayRangeDeleteView
+from irrigator.views.dayrange import DayRangeView,DayRangesView,DayRangeNewView,DayRangeEditView,DayRangeDeleteView
+from irrigator.views.day import DayView,DaysView,DayNewView,DayEditView,DayDeleteView
 
 urlpatterns = patterns('',
 	url(r'^$', 'irrigator.views.home', name='home'),
@@ -119,6 +122,18 @@ urlpatterns = patterns('',
 	url(r'^valve/(?P<valve>\d+)/schedule/(?P<pk>\d+)$', ScheduleView.as_view()),
 	url(r'^valve/(?P<valve>\d+)/schedule/(?P<pk>\d+)/edit$', ScheduleEditView.as_view()),
 	url(r'^valve/(?P<valve>\d+)/schedule/(?P<pk>\d+)/delete$', ScheduleDeleteView.as_view()),
+
+	url(r'^dayrange/$', DayRangesView.as_view()),
+	url(r'^dayrange/(?P<pk>\d+)$', DayRangeView.as_view()),
+	url(r'^dayrange/new$', DayRangeNewView.as_view()),
+	url(r'^dayrange/(?P<pk>\d+)/edit$', DayRangeEditView.as_view()),
+	url(r'^dayrange/(?P<pk>\d+)/delete$', DayRangeDeleteView.as_view()),
+
+	url(r'^day/$', DaysView.as_view()),
+	url(r'^day/(?P<pk>\d+)$', DayView.as_view()),
+	url(r'^day/new$', DayNewView.as_view()),
+	url(r'^day/(?P<pk>\d+)/edit$', DayEditView.as_view()),
+	url(r'^day/(?P<pk>\d+)/delete$', DayDeleteView.as_view()),
 
 	# Login stuff
 	url(r'^login/$', 'django.contrib.auth.views.login', {'template_name': 'auth/login.jinja'}),

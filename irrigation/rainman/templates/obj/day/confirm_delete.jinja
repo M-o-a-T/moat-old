@@ -1,0 +1,15 @@
+{% haml %}
+-extends "base.jinja"
+-block title
+	Delete time part {{ day.name }}
+
+-block content
+	%h1
+		=self.title()
+	%form action="" method="post"
+		-csrf_token
+		%p
+			Do you really want to delete the time part {{day.name}}?
+		%input type="submit" value="Yes"
+
+{% endhaml %}

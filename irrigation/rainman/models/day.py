@@ -81,6 +81,7 @@ class DayRange(Model,RangeMixin):
 		return self.name
 
 	name = m.CharField(max_length=30, unique=True)
+	comment = m.CharField(max_length=200, blank=True,null=True)
 	days = m.ManyToManyField(Day,related_name="ranges")
 
 	def _range(self,start,end):

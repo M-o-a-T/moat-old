@@ -1,0 +1,44 @@
+{% haml %}
+-extends "base.jinja"
+
+-block title
+	=dayrange.name
+-block content
+
+	%div.main
+		%h1 -> =dayrange.name
+		%div.content
+			%table
+				%tr
+					%th -> Name
+					%td -> =dayrange.name
+				-if dayrange.comment
+					%tr
+						%th -> Comment
+						%td -> =dayrange.comment
+				%tr
+					%th -> Required
+					%td
+						-for day in dayrange.days.all()
+							-if not loop.first
+								<br />
+							%a href="/day/{{day.id}}"
+								=day.name
+						-else
+							–
+				%tr
+					%th -> next at
+					%td
+						=dayrange.list_range()
+
+		%div.buttons#buttons
+			%a href="/dayrange/{{dayrange.id}}/new"
+				New part
+			=" ¦ "
+			%a href="/dayrange/{{dayrange.id}}/edit"
+				Edit
+			=" ¦ "
+			%a href="/dayrange/{{dayrange.id}}/delete"
+				Delete
+
+{% endhaml %}

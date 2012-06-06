@@ -1,0 +1,22 @@
+{% haml %}
+
+-macro table(dayranges)
+	%table
+		%tr
+			%th -> Name
+			%th -> Comment
+			%th -> next at
+		-for dayrange in dayranges
+			%tr
+				%td
+					%a href="/dayrange/{{ dayrange.id }}"
+						=dayrange.name
+				%td
+					-if dayrange.comment
+						=dayrange.comment
+					-else
+						&nbsp;
+				%td
+					=dayrange.list_range()
+
+{% endhaml %}
