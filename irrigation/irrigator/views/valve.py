@@ -16,9 +16,9 @@
 
 from __future__ import division,absolute_import
 from django.views.generic import ListView,DetailView,CreateView,UpdateView,DeleteView
-from django.forms import ModelForm
+from django.forms import ModelForm,ModelMultipleChoiceField
 from django.http import Http404
-from rainman.models import Valve,Site, Controller,Feed,EnvGroup
+from rainman.models import Valve,Site, Controller,Feed,EnvGroup,Group
 from rainman.utils import get_request
 from irrigator.views import FormMixin,SiteParamMixin
 
@@ -26,6 +26,10 @@ class ValveForm(ModelForm):
 	class Meta:
 		model = Valve
 		exclude = ('site',)
+		fields = ('name','comment','controller','feed','envgroup','location','var','verbose','flow','area','max_level','start_level','stop_level','shade','runoff','time','level','priority') # ,'groups'
+		#many_to_many = ('groups,')
+
+	#groups = ModelMultipleChoiceField(queryset=Group.objects.all())
 
 	def limit_choices(self,site=None,controller=None,feed=None,envgroup=None):
 		gu = get_request().user.get_profile()
@@ -43,6 +47,11 @@ class ValveForm(ModelForm):
 			self.fields['envgroup'].queryset = gu.envgroups.filter(id=envgroup.id)
 		elif site is not None:
 			self.fields['envgroup'].queryset = gu.envgroups.filter(site=site)
+
+#		if site is not None:
+#			self.fields['groups'].queryset = gu.groups.filter(site=site)
+#		else:
+#			self.fields['groups'].queryset = gu.groups ## should not happen
 
 
 class ValveMixin(FormMixin):
@@ -96,8 +105,10 @@ class ValveNewView(ValveMixin,ValveParamMixin,CreateView):
 		return form
 	def get_form_kwargs(self):
 		args = super(ValveNewView,self).get_form_kwargs()
-		if args.get('instance',None) is None:
+		obj = args.get('instance',None)
+		if obj is None:
 			args['initial'] = self.aux_data.copy()
+
 		return args
 
 
