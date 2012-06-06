@@ -48,10 +48,10 @@ class ValveForm(ModelForm):
 		elif site is not None:
 			self.fields['envgroup'].queryset = gu.envgroups.filter(site=site)
 
-#		if site is not None:
-#			self.fields['groups'].queryset = gu.groups.filter(site=site)
-#		else:
-#			self.fields['groups'].queryset = gu.groups ## should not happen
+		if site is not None:
+			self.fields['groups'].queryset = gu.groups.filter(site=site)
+		else:
+			self.fields['groups'].queryset = gu.groups ## should not happen
 	
 
 class ValveMixin(FormMixin):
