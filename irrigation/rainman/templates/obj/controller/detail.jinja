@@ -31,6 +31,9 @@
 				%tr
 					%th -> max On
 					%td -> =controller.max_on
+				%tr
+					%th -> off at
+					%td -> =controller.list_range()
 
 		%div.buttons#buttons
 			%a href="/controller/{{controller.id}}/edit"

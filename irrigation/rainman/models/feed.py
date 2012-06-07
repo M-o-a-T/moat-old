@@ -16,12 +16,13 @@
 
 from __future__ import division,absolute_import
 from rainman.models import Model
+from rainman.utils import RangeMixin
 from rainman.models.meter import Meter
 from rainman.models.site import Site
 from django.db import models as m
 from datetime import timedelta
 
-class Feed(Meter):
+class Feed(Meter,RangeMixin):
 	"""A source of water"""
 	class Meta(Model.Meta):
 		db_table="rainman_feed"

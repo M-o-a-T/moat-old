@@ -7,91 +7,96 @@
 	=valve.name
 
 -block content
-	%h1 -> =valve.name
-	%table
-		-if valve.comment
+	%div main
+		%h1 -> =valve.name
+		%table
+			-if valve.comment
+				%tr
+					%th -> Comment
+					%td -> =valve.comment
 			%tr
-				%th -> Comment
-				%td -> =valve.comment
-		%tr
-			%th -> Controller
-			%td -> %a href="/controller/{{ valve.controller.id }}"
-				=valve.controller.name
-		%tr
-			%th -> Feed
-			%td -> %a href="/feed/{{ valve.feed.id }}"
-				=valve.feed.name
-		%tr
-			%th -> Environment Table
-			%td -> %a href="/envgroup/{{ valve.envgroup.id }}"
-				=valve.envgroup.name
-		%tr
-			%th -> Site
-			%td -> %a href="/site/{{ valve.feed.site.id }}"
-				=valve.feed.site.name
-		-if valve.feed.site.id != valve.controller.site.id
+				%th -> Controller
+				%td -> %a href="/controller/{{ valve.controller.id }}"
+					=valve.controller.name
 			%tr
-				%th -> Site (Controller)
-				%td -> %a href="/site/{{ valve.controller.site.id }}"
-					=valve.controller.site.name
-		%tr
-			%th -> Location
-			%td -> =valve.location
-		%tr
-			%th -> var
-			%td -> =valve.var
-		%tr
-			%th -> Verbosity
-			%td -> =valve.verbose
-		%tr
-			%th -> Flow
-			%td -> ="%.3f l/sec" % valve.flow
-		%tr
-			%th -> Area
-			%td -> ="%.1f m²" % valve.area
-		%tr
-			%th -> Shade
-			%td -> =valve.shade
-		%tr
-			%th -> Runoff
-			%td -> =valve.runoff
-		%tr
-			%th -> Max_level
-			%td -> =valve.max_level
-		%tr
-			%th -> Start_level
-			%td -> =valve.start_level
-		%tr
-			%th -> Stop_level
-			%td -> =valve.stop_level
-		%tr
-			%th -> Level
-			%td -> =valve.level
-		%tr
-			%th -> Time
-			%td -> =valve.time|tz
-		%tr
-			%th -> Groups
-			%td
-				-for group in valve.groups.order_by('name')
-					-if not loop.first
-						<br />
-					%a href="/group/{{group.id}}"
-						=group.name
-				-else
-					–
-		%tr
-			%th -> Priority?
-			%td -> ="◉" if valve.priority else "–"
+				%th -> Feed
+				%td -> %a href="/feed/{{ valve.feed.id }}"
+					=valve.feed.name
+			%tr
+				%th -> Environment Table
+				%td -> %a href="/envgroup/{{ valve.envgroup.id }}"
+					=valve.envgroup.name
+			%tr
+				%th -> Site
+				%td -> %a href="/site/{{ valve.feed.site.id }}"
+					=valve.feed.site.name
+			-if valve.feed.site.id != valve.controller.site.id
+				%tr
+					%th -> Site (Controller)
+					%td -> %a href="/site/{{ valve.controller.site.id }}"
+						=valve.controller.site.name
+			%tr
+				%th -> Location
+				%td -> =valve.location
+			%tr
+				%th -> var
+				%td -> =valve.var
+			%tr
+				%th -> Verbosity
+				%td -> =valve.verbose
+			%tr
+				%th -> Flow
+				%td -> ="%.3f l/sec" % valve.flow
+			%tr
+				%th -> Area
+				%td -> ="%.1f m²" % valve.area
+			%tr
+				%th -> Shade
+				%td -> =valve.shade
+			%tr
+				%th -> Runoff
+				%td -> =valve.runoff
+			%tr
+				%th -> Max_level
+				%td -> =valve.max_level
+			%tr
+				%th -> Start_level
+				%td -> =valve.start_level
+			%tr
+				%th -> Stop_level
+				%td -> =valve.stop_level
+			%tr
+				%th -> Level
+				%td -> =valve.level
+			%tr
+				%th -> Time
+				%td -> =valve.time|tz
+			%tr
+				%th -> Groups
+				%td
+					-for group in valve.groups.order_by('name')
+						-if not loop.first
+							<br />
+						%a href="/group/{{group.id}}"
+							=group.name
+					-else
+						–
+			%tr
+				%th -> Priority?
+				%td -> ="◉" if valve.priority else "–"
+			%tr
+				%th -> possible<br />run times
+				%td
+					=valve.list_range()
 
-	%div id="buttons"
-		%a href="/valve/{{valve.id}}/edit"
-			Edit
-		=" ¦ "
-		%a href="/valve/{{valve.id}}/delete"
-			Delete
+		%div.buttons#buttons
+			%a href="/valve/{{valve.id}}/edit"
+				Edit
+			=" ¦ "
+			%a href="/valve/{{valve.id}}/delete"
+				Delete
  
-	%div.Schedules
+	%div.schedules
 		%h2 -> Schedule
 		%div.content
 			=sc.table(valve.schedules.order_by("-start")[:5], show_valve=False,prefix="/valve/%d"%(valve.id,))

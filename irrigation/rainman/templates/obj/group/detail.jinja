@@ -50,6 +50,10 @@
 								=valve.name
 						-else
 							–
+				%tr
+					%th -> possible<br />run times
+					%td
+						=group.list_range()
 
 		%div.buttons#buttons
 			%a href="/group/{{group.id}}/edit"

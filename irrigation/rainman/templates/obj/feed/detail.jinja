@@ -31,6 +31,9 @@
 				%tr
 					%th -> max flow wait time
 					%td -> =feed.max_flow_wait
+				%tr
+					%th -> off at
+					%td -> =feed.list_range(plusflow=9999999)
 
 		%div.buttons#buttons
 			%a href="/feed/{{feed.id}}/edit"
