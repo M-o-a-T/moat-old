@@ -83,7 +83,8 @@ class SiteParamMixin(object):
 
 	def get_params_hook(self,k):
 		for p,d in self.opt_params.items():
-			if p in k:
+			pk = k.get(p,None)
+			if pk is not None:
 				self.aux_data[p] = d.objects.get(pk=k.pop(p))
 			else:
 				self.aux_data[p] = None
