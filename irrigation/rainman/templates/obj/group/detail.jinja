@@ -2,6 +2,7 @@
 -extends "base.jinja"
 -import "obj/valve/macro.jinja" as v
 -import "obj/schedule/macro.jinja" as sc
+-import "obj/groupoverride/macro.jinja" as go
 
 -block title
 	=group.name
@@ -61,6 +62,18 @@
 			=" ¦ "
 			%a href="/group/{{group.id}}/delete"
 				Delete
+
+	%div.groupoverrides
+		%h2 -> Group Times
+		%div.content
+			=go.table(group.overrides.order_by("-start")[:5], show_group=False,prefix="/group/%d/time"%(group.id,))
+
+		%div.buttons#buttons_h
+			%a href="/group/{{group.id}}/time"
+				More…
+			=" ¦ "
+			%a href="/group/{{group.id}}/new/time"
+				New
 
 ;	? TODO ?
 ;	%div.valves

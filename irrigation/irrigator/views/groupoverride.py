@@ -23,16 +23,16 @@ from rainman.utils import get_request
 
 def limit_choices(q,site=None,group=None):
 	if site is not None:
-		q = q.filter(group__site=site)
+		q = q.filter(site=site)
 	if group is not None:
-		q = q.filter(group=group)
+		q = q.filter(id__exact=group.id)
 	return q
 
 class GroupOverrideForm(DbModelForm):
 	class Meta:
 		model = GroupOverride
 		exclude = ('db_duration',)
-		fields = ('group','start','duration','running')
+		fields = ('name','group','start','duration','allowed')
 
 	# 'Excluded' fields
 	duration = TimeDeltaField(help_text=Meta.model._meta.get_field_by_name("db_duration")[0].help_text)
@@ -40,7 +40,7 @@ class GroupOverrideForm(DbModelForm):
 	def limit_choices(self,**k):
 		gu = get_request().user.get_profile()
 
-		self.fields['group'].queryset = limit_choices(gu.all_groups,**k)
+		self.fields['group'].queryset = limit_choices(gu.groups,**k)
 
 class GroupOverrideParamMixin(SiteParamMixin):
 	opt_params = {'site':Site, 'group':Group}
@@ -68,7 +68,7 @@ class GroupOverrideMixin(FormMixin):
 		s=self.aux_data.get('site',None)
 		g=self.aux_data.get('group',None)
 		if g is not None:
-			prefix = "/group/%s/time" % (v.id,)
+			prefix = "/group/%s/time" % (g.id,)
 		elif s is not None:
 			prefix = "/site/%s/gtime" % (s.id,)
 		else:
@@ -85,7 +85,7 @@ class GroupOverrideView(GroupOverrideMixin,GroupOverrideParamMixin,DetailView):
 	def get_context_data(self,**k):
 		ctx = super(GroupOverrideView,self).get_context_data(**k)
 		gu = get_request().user.get_profile()
-		av = limit_choices(gu.all_groups,**self.aux_data)
+		av = limit_choices(gu.groups,**self.aux_data)
 		q = GroupOverride.objects.filter(group__in=av)
 		try:
 			ctx['next_s'] = q.filter(start__gt=ctx['groupoverride'].start).order_by('start')[0]

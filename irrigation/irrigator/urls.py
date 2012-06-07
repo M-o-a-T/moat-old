@@ -19,6 +19,7 @@ from irrigator.views.dayrange import DayRangeView,DayRangesView,DayRangeNewView,
 from irrigator.views.dayrange import DayRangeView,DayRangesView,DayRangeNewView,DayRangeEditView,DayRangeDeleteView
 from irrigator.views.day import DayView,DaysView,DayNewView,DayEditView,DayDeleteView
 from irrigator.views.valveoverride import ValveOverrideView,ValveOverridesView,ValveOverrideNewView,ValveOverrideEditView,ValveOverrideDeleteView
+from irrigator.views.groupoverride import GroupOverrideView,GroupOverridesView,GroupOverrideNewView,GroupOverrideEditView,GroupOverrideDeleteView
 
 urlpatterns = patterns('',
 	url(r'^$', 'irrigator.views.home', name='home'),
@@ -86,6 +87,13 @@ urlpatterns = patterns('',
 	url(r'^(?:valve/(?P<valve>\d+)|envgroup/(?P<envgroup>\d+)|feed/(?P<feed>\d+)|controller/(?P<controller>\d+)|site/(?P<site>\d+)|valve)/time/(?P<pk>\d+)$', ValveOverrideView.as_view()),
 	url(r'^(?:valve/(?P<valve>\d+)|envgroup/(?P<envgroup>\d+)|feed/(?P<feed>\d+)|controller/(?P<controller>\d+)|site/(?P<site>\d+)|valve)/time/(?P<pk>\d+)/edit$', ValveOverrideEditView.as_view()),
 	url(r'^(?:valve/(?P<valve>\d+)|envgroup/(?P<envgroup>\d+)|feed/(?P<feed>\d+)|controller/(?P<controller>\d+)|site/(?P<site>\d+)|valve)/time/(?P<pk>\d+)/delete$', ValveOverrideDeleteView.as_view()),
+
+	# note that it's site/##/gtime, not time, as that's already used for valves
+	url(r'^(?:group/(?P<group>\d+)/|site/(?P<site>\d+)/g|group/)time$', GroupOverridesView.as_view()),
+	url(r'^(?:group/(?P<group>\d+)/|site/(?P<site>\d+)/g|group/)new/time$', GroupOverrideNewView.as_view()),
+	url(r'^(?:group/(?P<group>\d+)/|site/(?P<site>\d+)/g|group/)time/(?P<pk>\d+)$', GroupOverrideView.as_view()),
+	url(r'^(?:group/(?P<group>\d+)/|site/(?P<site>\d+)/g|group/)time/(?P<pk>\d+)/edit$', GroupOverrideEditView.as_view()),
+	url(r'^(?:group/(?P<group>\d+)/|site/(?P<site>\d+)/g|group/)time/(?P<pk>\d+)/delete$', GroupOverrideDeleteView.as_view()),
 
 	url(r'^dayrange/$', DayRangesView.as_view()),
 	url(r'^dayrange/(?P<pk>\d+)$', DayRangeView.as_view()),
