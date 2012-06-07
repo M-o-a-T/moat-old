@@ -38,7 +38,7 @@ class ValveOverrideForm(DbModelForm):
 	class Meta:
 		model = ValveOverride
 		exclude = ('db_duration',)
-		fields = ('valve','start','duration','running')
+		fields = ('name','valve','start','duration','running')
 
 	# 'Excluded' fields
 	duration = TimeDeltaField(help_text=Meta.model._meta.get_field_by_name("db_duration")[0].help_text)

@@ -1,0 +1,28 @@
+{% haml %}
+
+-extends "base.jinja"
+-import "obj/groupoverride/macro.jinja" as go
+
+-block title
+	groupoverrides
+
+-block content
+	%h1
+		-if group is defined
+			-set show_group=False
+			Group Times of {{group.name}}
+		-elif site is defined
+			-set show_group=True
+			Group Times of {{site.name}}
+		-else
+			-set show_group=True
+			All groupoverrides
+
+	=go.table(groupoverride_list, show_group=show_group, prefix=prefix)
+
+	-if group is defined
+		%div.buttons
+			%a href="/group/{{group.id}}/new/time"
+				New…
+
+{% endhaml %}

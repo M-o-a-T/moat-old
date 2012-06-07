@@ -1,0 +1,50 @@
+{% haml %}
+-extends "base.jinja"
+
+-block title
+	=groupoverride
+
+-block content
+	%div.main
+		%h1 -> =groupoverride
+		%div.content
+			%table
+				%tr
+					%th -> Group
+					%td -> %a href="/group/{{ groupoverride.group.id }}"
+						=groupoverride.group.name
+				%tr
+					%th -> Site
+					%td -> %a href="/site/{{ groupoverride.group.site.id }}"
+						=groupoverride.group.site.name
+				%tr
+					%th -> Start
+					%td -> =groupoverride.start|tz
+				%tr
+					%th -> Duration
+					%td -> =groupoverride.duration
+				%tr
+					%th -> End
+					%td -> =groupoverride.end|tz
+				%tr
+					%th -> Allowed
+					%td -> ="◉" if groupoverride.allowed else "○"
+
+		%div.buttons#buttons
+			%a href="{{prefix}}/{{groupoverride.id}}/edit"
+				Edit
+			=" ¦ "
+			%a href="{{prefix}}/{{groupoverride.id}}/delete"
+				Delete
+
+		%div.buttons_s
+			-if prev_s
+				%a href="{{prefix}}/{{ prev_s.id }}"
+					Previous
+			-if next_s and prev_s
+				=" ¦ "
+			-if next_s
+				%a href="{{prefix}}/{{ next_s.id }}"
+					Next
+
+{% endhaml %}

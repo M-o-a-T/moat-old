@@ -1,0 +1,28 @@
+{% haml %}
+
+-macro table(groupoverrides, show_group=True, prefix="")
+	%table
+		%tr
+			%th -> Start
+			%th -> Duration
+			%th -> End
+			%th -> Allowed
+			-if show_group
+				%th -> Group
+		-for groupoverride in groupoverrides.all()
+			%tr
+				%td
+					%a href="{{prefix}}/{{ groupoverride.id }}"
+						=groupoverride.start|tz
+				%td
+					=groupoverride.duration
+				%td
+					=groupoverride.end|tz
+				%td
+					="◉" if groupoverride.allowed else "○"
+				-if show_group
+					%td
+						%a href="/group/{{ groupoverride.group.id }}"
+							=groupoverride.group.name
+
+{% endhaml %}
