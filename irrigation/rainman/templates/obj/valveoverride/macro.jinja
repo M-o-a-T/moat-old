@@ -1,0 +1,28 @@
+{% haml %}
+
+-macro table(valveoverrides, show_valve=True, prefix="")
+	%table
+		%tr
+			%th -> Start
+			%th -> Duration
+			%th -> End
+			%th -> Running
+			-if show_valve
+				%th -> Valve
+		-for valveoverride in valveoverrides.all()
+			%tr
+				%td
+					%a href="{{prefix}}/{{ valveoverride.id }}"
+						=valveoverride.start|tz
+				%td
+					=valveoverride.duration
+				%td
+					=valveoverride.end|tz
+				%td
+					="◉" if valveoverride.running else "○"
+				-if show_valve
+					%td
+						%a href="/valve/{{ valveoverride.valve.id }}"
+							=valveoverride.valve.name
+
+{% endhaml %}

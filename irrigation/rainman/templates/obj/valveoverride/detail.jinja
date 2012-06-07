@@ -1,0 +1,58 @@
+{% haml %}
+-extends "base.jinja"
+
+-block title
+	=valveoverride
+
+-block content
+	%div.main
+		%h1 -> =valveoverride
+		%div.content
+			%table
+				%tr
+					%th -> Valve
+					%td -> %a href="/valve/{{ valveoverride.valve.id }}"
+						=valveoverride.valve.name
+				%tr
+					%th -> Controller
+					%td -> %a href="/controller/{{ valveoverride.valve.controller.id }}"
+						=valveoverride.valve.controller.name
+				%tr
+					%th -> Feed
+					%td -> %a href="/feed/{{ valveoverride.valve.feed.id }}"
+						=valveoverride.valve.feed.name
+				%tr
+					%th -> Site
+					%td -> %a href="/site/{{ valveoverride.valve.controller.site.id }}"
+						=valveoverride.valve.controller.site.name
+				%tr
+					%th -> Start
+					%td -> =valveoverride.start|tz
+				%tr
+					%th -> Duration
+					%td -> =valveoverride.duration
+				%tr
+					%th -> End
+					%td -> =valveoverride.end|tz
+				%tr
+					%th -> Running
+					%td -> ="◉" if valveoverride.running else "○"
+
+		%div.buttons#buttons
+			%a href="{{prefix}}/{{valveoverride.id}}/edit"
+				Edit
+			=" ¦ "
+			%a href="{{prefix}}/{{valveoverride.id}}/delete"
+				Delete
+
+		%div.buttons_s
+			-if prev_s
+				%a href="{{prefix}}/{{ prev_s.id }}"
+					Previous
+			-if next_s and prev_s
+				=" ¦ "
+			-if next_s
+				%a href="{{prefix}}/{{ next_s.id }}"
+					Next
+
+{% endhaml %}

@@ -1,0 +1,23 @@
+{% haml %}
+
+-extends "base.jinja"
+-block title
+	-if valveoverride is defined
+		=valveoverride
+		=" – edit"
+	-else
+		New Valve Time
+
+-block content
+	%h1
+		-if valveoverride is defined
+			=valveoverride
+		-else
+			=self.title()
+	%form action="" method="post"
+		-csrf_token
+		%table
+			=form.as_table()|safe
+		%input type="submit" value="Save"
+
+{% endhaml %}

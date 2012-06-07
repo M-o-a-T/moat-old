@@ -35,6 +35,8 @@ class GroupOverride(Model):
 	start = m.DateTimeField(db_index=True)
 	db_duration = m.PositiveIntegerField(db_column="duration")
 	def _get_duration(self):
+		if self.db_duration is None:
+			return None
 		return timedelta(0,self.db_duration)
 	def _set_duration(self,val):
 		self.db_duration = val.total_seconds()
@@ -60,6 +62,8 @@ class ValveOverride(Model):
 	start = m.DateTimeField(db_index=True)
 	db_duration = m.PositiveIntegerField(db_column="duration")
 	def _get_duration(self):
+		if self.db_duration is None:
+			return None
 		return timedelta(0,self.db_duration)
 	def _set_duration(self,val):
 		self.db_duration = val.total_seconds()

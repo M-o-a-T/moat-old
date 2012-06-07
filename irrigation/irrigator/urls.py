@@ -18,6 +18,7 @@ from irrigator.views.group import GroupView,GroupsView,GroupNewView,GroupEditVie
 from irrigator.views.dayrange import DayRangeView,DayRangesView,DayRangeNewView,DayRangeEditView,DayRangeDeleteView
 from irrigator.views.dayrange import DayRangeView,DayRangesView,DayRangeNewView,DayRangeEditView,DayRangeDeleteView
 from irrigator.views.day import DayView,DaysView,DayNewView,DayEditView,DayDeleteView
+from irrigator.views.valveoverride import ValveOverrideView,ValveOverridesView,ValveOverrideNewView,ValveOverrideEditView,ValveOverrideDeleteView
 
 urlpatterns = patterns('',
 	url(r'^$', 'irrigator.views.home', name='home'),
@@ -79,6 +80,12 @@ urlpatterns = patterns('',
 	url(r'^(?:site/(?P<site>\d+)/|controller/(?P<controller>\d+)/|feed/(?P<feed>\d+)/|envgroup/(?P<envgroup>\d+)/|valve/(?P<valve>\d+)/|)schedule/(?P<pk>\d+)$', ScheduleView.as_view()),
 	url(r'^(?:site/(?P<site>\d+)/|controller/(?P<controller>\d+)/|feed/(?P<feed>\d+)/|envgroup/(?P<envgroup>\d+)/|valve/(?P<valve>\d+)/|)schedule/(?P<pk>\d+)/edit$', ScheduleEditView.as_view()),
 	url(r'^(?:site/(?P<site>\d+)/|controller/(?P<controller>\d+)/|feed/(?P<feed>\d+)/|envgroup/(?P<envgroup>\d+)/|valve/(?P<valve>\d+)/|)schedule/(?P<pk>\d+)/delete$', ScheduleDeleteView.as_view()),
+
+	url(r'^(?:valve/(?P<valve>\d+)|envgroup/(?P<envgroup>\d+)|feed/(?P<feed>\d+)|controller/(?P<controller>\d+)|site/(?P<site>\d+)|valve)/time$', ValveOverridesView.as_view()),
+	url(r'^(?:valve/(?P<valve>\d+)|envgroup/(?P<envgroup>\d+)|feed/(?P<feed>\d+)|controller/(?P<controller>\d+)|site/(?P<site>\d+)|valve)/new/time$', ValveOverrideNewView.as_view()),
+	url(r'^(?:valve/(?P<valve>\d+)|envgroup/(?P<envgroup>\d+)|feed/(?P<feed>\d+)|controller/(?P<controller>\d+)|site/(?P<site>\d+)|valve)/time/(?P<pk>\d+)$', ValveOverrideView.as_view()),
+	url(r'^(?:valve/(?P<valve>\d+)|envgroup/(?P<envgroup>\d+)|feed/(?P<feed>\d+)|controller/(?P<controller>\d+)|site/(?P<site>\d+)|valve)/time/(?P<pk>\d+)/edit$', ValveOverrideEditView.as_view()),
+	url(r'^(?:valve/(?P<valve>\d+)|envgroup/(?P<envgroup>\d+)|feed/(?P<feed>\d+)|controller/(?P<controller>\d+)|site/(?P<site>\d+)|valve)/time/(?P<pk>\d+)/delete$', ValveOverrideDeleteView.as_view()),
 
 	url(r'^dayrange/$', DayRangesView.as_view()),
 	url(r'^dayrange/(?P<pk>\d+)$', DayRangeView.as_view()),

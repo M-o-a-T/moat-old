@@ -2,6 +2,7 @@
 -extends "base.jinja"
 -import "obj/level/macro.jinja" as lv
 -import "obj/schedule/macro.jinja" as sc
+-import "obj/valveoverride/macro.jinja" as vo
 
 -block title
 	=valve.name
@@ -96,6 +97,19 @@
 			%a href="/valve/{{valve.id}}/delete"
 				Delete
  
+	%div.valveoverrides
+		%h2 -> Valve Times
+		%div.content
+			=vo.table(valve.overrides.order_by("-start")[:5], show_valve=False,prefix="/valve/%d/time"%(valve.id,))
+
+		%div.buttons#buttons_h
+			%a href="/valve/{{valve.id}}/time"
+				More…
+			=" ¦ "
+			%a href="/valve/{{valve.id}}/new/time"
+				New
+
+
 	%div.schedules
 		%h2 -> Schedule
 		%div.content

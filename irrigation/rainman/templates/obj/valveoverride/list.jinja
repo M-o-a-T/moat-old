@@ -1,0 +1,37 @@
+{% haml %}
+
+-extends "base.jinja"
+-import "obj/valveoverride/macro.jinja" as vo
+
+-block title
+	valveoverrides
+
+-block content
+	%h1
+		-if valve is defined
+			-set show_valve=False
+			Valve Times of {{valve.name}}
+		-elif envgroup is defined
+			-set show_valve=True
+			Valve Times of {{envgroup.name}}
+		-elif controller is defined
+			-set show_valve=True
+			Valve Times of {{controller.name}}
+		-elif feed is defined
+			-set show_valve=True
+			Valve Times of {{feed.name}}
+		-elif site is defined
+			-set show_valve=True
+			Valve Times of {{site.name}}
+		-else
+			-set show_valve=True
+			All valveoverrides
+
+	=vo.table(valveoverride_list, show_valve=show_valve, prefix=prefix)
+
+	-if valve is defined
+		%div.buttons
+			%a href="/valve/{{valve.id}}/new/time"
+				New…
+
+{% endhaml %}
