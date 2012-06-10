@@ -15,6 +15,7 @@
 			%th -> Level
 			%th -> Start
 			%th -> Stop
+			%th -> scheduled
 			%th -> Comment
 		-for valve in valves
 			%tr
@@ -41,6 +42,11 @@
 				%td -> ="%.2f" % valve.level
 				%td -> ="%.2f" % valve.start_level
 				%td -> ="%.2f" % valve.stop_level
+				%td 
+					-if valve.last_schedule
+						=valve.last_schedule.start|tz
+					-else
+						–
 				%td -> =valve.comment
 
 {% endhaml %}

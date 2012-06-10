@@ -168,4 +168,10 @@ class Valve(Model,RangeMixin):
 	groups = m.ManyToManyField('Group',db_table='rainman_group_valves')
 	def list_groups(self):
 		return u" ¦ ".join((d.name for d in self.groups.all()))
+	@property
+	def last_schedule(self):
+		try:
+			return self.schedules.order_by("-start")[0]
+		except IndexError:
+			return None
 
