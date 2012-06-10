@@ -18,7 +18,7 @@ from __future__ import division,absolute_import
 from django.views.generic import ListView,DetailView,CreateView,UpdateView,DeleteView
 from django.forms import ModelForm
 from rainman.models import Controller,Site
-from irrigator.views import FormMixin,SiteParamMixin
+from irrigator.views import FormMixin,SiteParamMixin,get_profile
 
 class ControllerForm(ModelForm):
 	class Meta:
@@ -35,7 +35,7 @@ class ControllerMixin(FormMixin):
 	model = Controller
 	context_object_name = "controller"
 	def get_queryset(self):
-		gu = self.request.user.get_profile()
+		gu = get_profile(self.request)
 		return super(ControllerMixin,self).get_queryset().filter(id__in=gu.controllers)
 
 class ControllersView(ControllerMixin,SiteParamMixin,ListView):

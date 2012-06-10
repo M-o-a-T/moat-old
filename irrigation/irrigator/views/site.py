@@ -21,7 +21,7 @@ from django.utils.translation import ugettext_lazy as _
 from rainman.models import Site
 from rainman.utils import get_request
 from datetime import time
-from irrigator.views import NonNegativeFloatField,TimeDeltaField,FormMixin,DbModelForm
+from irrigator.views import NonNegativeFloatField,TimeDeltaField,FormMixin,DbModelForm,get_profile
 
 class SiteForm(DbModelForm):
 	class Meta:
@@ -35,7 +35,7 @@ class SiteForm(DbModelForm):
 
 	def save(self,commit=True):
 		r = super(SiteForm,self).save(commit)
-		gu = get_request().user.get_profile()
+		gu = get_profile(get_request())
 		gu.sites.add(r)
 		gu.save() ## TODO: check if 'commit' is True!
 		return r
@@ -44,7 +44,7 @@ class SiteMixin(FormMixin):
 	model = Site
 	context_object_name = "site"
 	def get_queryset(self):
-		gu = self.request.user.get_profile()
+		gu = get_profile(self.request)
 		return super(SiteMixin,self).get_queryset().filter(id__in=gu.sites.all())
 
 class SitesView(SiteMixin,ListView):

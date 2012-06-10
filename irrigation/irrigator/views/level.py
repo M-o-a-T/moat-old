@@ -18,7 +18,7 @@ from __future__ import division,absolute_import
 from django.views.generic import ListView,DetailView,CreateView,UpdateView,DeleteView
 from django.forms import ModelForm
 from rainman.models import Level,Valve
-from irrigator.views import FormMixin,SiteParamMixin
+from irrigator.views import FormMixin,SiteParamMixin,get_profile
 from rainman.utils import now
 
 class LevelForm(ModelForm):
@@ -38,7 +38,7 @@ class LevelMixin(FormMixin):
 	model = Level
 	context_object_name = "level"
 	def get_queryset(self):
-		gu = self.request.user.get_profile()
+		gu = get_profile(self.request)
 		return super(LevelMixin,self).get_queryset().filter(valve__in=gu.all_valves).order_by('-time')
 
 class LevelsView(LevelMixin,SiteParamMixin,ListView):

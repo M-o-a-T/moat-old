@@ -18,7 +18,7 @@ from __future__ import division,absolute_import
 from django.views.generic import ListView,DetailView,CreateView,UpdateView,DeleteView
 from django.forms import ModelForm
 from rainman.models import Feed,Site
-from irrigator.views import TimeDeltaField,FormMixin,DbModelForm,SiteParamMixin
+from irrigator.views import TimeDeltaField,FormMixin,DbModelForm,SiteParamMixin,get_profile
 
 class FeedForm(DbModelForm):
 	class Meta:
@@ -38,7 +38,7 @@ class FeedMixin(FormMixin):
 	model = Feed
 	context_object_name = "feed"
 	def get_queryset(self):
-		gu = self.request.user.get_profile()
+		gu = get_profile(self.request)
 		return super(FeedMixin,self).get_queryset().filter(id__in=gu.feeds)
 
 class FeedsView(FeedMixin,SiteParamMixin,ListView):

@@ -18,7 +18,7 @@ from __future__ import division,absolute_import
 from django.views.generic import ListView,DetailView,CreateView,UpdateView,DeleteView
 from django.forms import ModelForm
 from rainman.models import Log,Site,Controller,Valve,EnvGroup
-from irrigator.views import FormMixin,SiteParamMixin
+from irrigator.views import FormMixin,SiteParamMixin,get_profile
 
 #class LogForm(ModelForm):
 #	class Meta:
@@ -56,7 +56,7 @@ class LogMixin(FormMixin):
 	model = Log
 	context_object_name = "log"
 	def get_queryset(self):
-		gu = self.request.user.get_profile()
+		gu = get_profile(self.request)
 		return super(LogMixin,self).get_queryset().filter(site__id__in=gu.sites.all()).order_by("-timestamp")
 
 	def get_context_data(self,**k):

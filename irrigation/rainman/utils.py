@@ -37,6 +37,23 @@ _requests = WeakValueDictionary()
 def get_request():
 	return _requests[currentThread()]
 
+class Redirect(Exception):
+	def __init__(self, *args, **kwargs):
+		self.args = args
+		self.kwargs = kwargs
+
+class RedirectMiddleware(object):
+	"""
+	You must add this middleware to MIDDLEWARE_CLASSES list,
+	to make work Redirect exception. All arguments passed to
+	Redirect will be passed to django built in redirect function.
+	"""
+	def process_exception(self, request, exception):
+		if not isinstance(exception, Redirect):
+			return
+		from django.shortcuts import redirect
+		return redirect(*exception.args, **exception.kwargs)
+
 class GlobalRequestMiddleware(object):
 	def process_request(self, request):
 		_requests[currentThread()] = request

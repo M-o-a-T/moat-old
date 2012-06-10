@@ -18,7 +18,7 @@ from __future__ import division,absolute_import
 from django.views.generic import ListView,DetailView,CreateView,UpdateView,DeleteView
 from django.forms import ModelForm
 from rainman.models import GroupOverride,Site,Group,Group
-from irrigator.views import DbModelForm,FormMixin,SiteParamMixin,TimeDeltaField
+from irrigator.views import DbModelForm,FormMixin,SiteParamMixin,TimeDeltaField,get_profile
 from rainman.utils import get_request
 
 def limit_choices(q,site=None,group=None):
@@ -38,7 +38,7 @@ class GroupOverrideForm(DbModelForm):
 	duration = TimeDeltaField(help_text=Meta.model._meta.get_field_by_name("db_duration")[0].help_text)
 
 	def limit_choices(self,**k):
-		gu = get_request().user.get_profile()
+		gu = get_profile(get_request())
 
 		self.fields['group'].queryset = limit_choices(gu.groups,**k)
 
@@ -60,7 +60,7 @@ class GroupOverrideMixin(FormMixin):
 	model = GroupOverride
 	context_object_name = "groupoverride"
 	def get_queryset(self):
-		gu = self.request.user.get_profile()
+		gu = get_profile(self.request)
 		return super(GroupOverrideMixin,self).get_queryset().filter(group__site__id__in=gu.sites.all()).order_by("-start")
 
 	def get_context_data(self,**k):

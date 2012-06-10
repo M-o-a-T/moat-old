@@ -20,7 +20,7 @@ from django.forms import ModelForm,ModelMultipleChoiceField
 from django.http import Http404
 from rainman.models import Valve,Site, Controller,Feed,EnvGroup,Group
 from rainman.utils import get_request
-from irrigator.views import FormMixin,SiteParamMixin
+from irrigator.views import FormMixin,SiteParamMixin,get_profile
 
 class ValveForm(ModelForm):
 	class Meta:
@@ -32,7 +32,7 @@ class ValveForm(ModelForm):
 	#groups = ModelMultipleChoiceField(queryset=Group.objects.all())
 
 	def limit_choices(self,site=None,controller=None,feed=None,envgroup=None):
-		gu = get_request().user.get_profile()
+		gu = get_profile(get_request())
 		if feed is not None:
 			self.fields['feed'].queryset = gu.feeds.filter(id=feed.id)
 		elif site is not None:
@@ -58,7 +58,7 @@ class ValveMixin(FormMixin):
 	model = Valve
 	context_object_name = "valve"
 	def get_queryset(self):
-		gu = self.request.user.get_profile()
+		gu = get_profile(self.request)
 		return super(ValveMixin,self).get_queryset().filter(id__in=gu.all_valves)
 
 class ValveParamMixin(SiteParamMixin):

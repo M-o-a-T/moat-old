@@ -18,7 +18,7 @@ from __future__ import division,absolute_import
 from django.views.generic import ListView,DetailView,CreateView,UpdateView,DeleteView
 from django.forms import ModelForm
 from rainman.models import EnvGroup,EnvItem
-from irrigator.views import FormMixin,SiteParamMixin
+from irrigator.views import FormMixin,SiteParamMixin,get_profile
 
 class EnvItemForm(ModelForm):
 	class Meta:
@@ -35,7 +35,7 @@ class EnvItemMixin(FormMixin):
 	model = EnvItem
 	context_object_name = "envitem"
 	def get_queryset(self):
-		gu = self.request.user.get_profile()
+		gu = get_profile(self.request)
 		return super(EnvItemMixin,self).get_queryset().filter(group__site__id__in=gu.sites.all())
 
 class EnvParamMixin(SiteParamMixin):

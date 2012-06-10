@@ -18,7 +18,7 @@ from __future__ import division,absolute_import
 from django.views.generic import ListView,DetailView,CreateView,UpdateView,DeleteView
 from django.forms import ModelForm
 from rainman.models import Group,Site
-from irrigator.views import FormMixin,SiteParamMixin
+from irrigator.views import FormMixin,SiteParamMixin,get_profile
 from rainman.utils import get_request
 
 class GroupForm(ModelForm):
@@ -32,7 +32,7 @@ class GroupForm(ModelForm):
 		return super(GroupForm,self).save(commit)
 
 	def limit_choices(self,site=None,valve=None):
-		gu = get_request().user.get_profile()
+		gu = get_profile(get_request())
 		v = gu.all_valves
 
 		if valve is not None:
@@ -46,7 +46,7 @@ class GroupMixin(FormMixin):
 	model = Group
 	context_object_name = "group"
 	def get_queryset(self):
-		gu = self.request.user.get_profile()
+		gu = get_profile(self.request)
 		return super(GroupMixin,self).get_queryset().filter(id__in=gu.groups)
 
 class GroupsView(GroupMixin,SiteParamMixin,ListView):

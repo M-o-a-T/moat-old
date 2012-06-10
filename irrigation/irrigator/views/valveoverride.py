@@ -18,7 +18,7 @@ from __future__ import division,absolute_import
 from django.views.generic import ListView,DetailView,CreateView,UpdateView,DeleteView
 from django.forms import ModelForm
 from rainman.models import ValveOverride,Site,Controller,Valve,Feed,EnvGroup
-from irrigator.views import DbModelForm,FormMixin,SiteParamMixin,TimeDeltaField
+from irrigator.views import DbModelForm,FormMixin,SiteParamMixin,TimeDeltaField,get_profile
 from rainman.utils import get_request
 
 def limit_choices(q,site=None,controller=None,envgroup=None,valve=None,feed=None):
@@ -44,7 +44,7 @@ class ValveOverrideForm(DbModelForm):
 	duration = TimeDeltaField(help_text=Meta.model._meta.get_field_by_name("db_duration")[0].help_text)
 
 	def limit_choices(self,**k):
-		gu = get_request().user.get_profile()
+		gu = get_profile(get_request())
 
 		self.fields['valve'].queryset = limit_choices(gu.all_valves,**k)
 
@@ -85,7 +85,7 @@ class ValveOverrideMixin(FormMixin):
 	model = ValveOverride
 	context_object_name = "valveoverride"
 	def get_queryset(self):
-		gu = self.request.user.get_profile()
+		gu = get_profile(self.request)
 		return super(ValveOverrideMixin,self).get_queryset().filter(valve__controller__site__id__in=gu.sites.all()).order_by("-start")
 
 	def get_context_data(self,**k):
@@ -118,7 +118,7 @@ class ValveOverridesView(ValveOverrideMixin,ValveOverrideParamMixin,ListView):
 class ValveOverrideView(ValveOverrideMixin,ValveOverrideParamMixin,DetailView):
 	def get_context_data(self,**k):
 		ctx = super(ValveOverrideView,self).get_context_data(**k)
-		gu = get_request().user.get_profile()
+		gu = get_profile(get_request())
 		av = limit_choices(gu.all_valves,**self.aux_data)
 		q = ValveOverride.objects.filter(valve__in=av)
 		try:

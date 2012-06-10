@@ -18,7 +18,7 @@ from __future__ import division,absolute_import
 from django.views.generic import ListView,DetailView,CreateView,UpdateView,DeleteView
 from django.forms import ModelForm
 from rainman.models import History,Site
-from irrigator.views import FormMixin,SiteParamMixin
+from irrigator.views import FormMixin,SiteParamMixin,get_profile
 
 class HistoryForm(ModelForm):
 	class Meta:
@@ -35,7 +35,7 @@ class HistoryMixin(FormMixin):
 	model = History
 	context_object_name = "history"
 	def get_queryset(self):
-		gu = self.request.user.get_profile()
+		gu = get_profile(self.request)
 		return super(HistoryMixin,self).get_queryset().filter(site__id__in=gu.sites.all()).order_by("-time")
 
 class HistorysView(HistoryMixin,SiteParamMixin,ListView):
