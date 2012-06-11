@@ -33,7 +33,10 @@ class Model(m.Model):
 		fields = self.__class__._meta.get_all_field_names()
 		
 		for field in fields:
-			val = getattr(from_db, field)
+			try:
+				val = getattr(from_db, field)
+			except AttributeError:
+				continue
 			# unfortunately these classes are not accessible externally
 			# so we have to check by name
 			if val.__class__.__name__ not in ("RelatedManager","ManyRelatedManager"):
