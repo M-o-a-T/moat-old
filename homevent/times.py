@@ -98,7 +98,7 @@ def humandelta(delta):
 			res = "-"
 			delta = - delta
 		if delta.days > 0:
-			res = "%d dy"%(d.days)
+			res = "%d dy"%(delta.days)
 		delta = delta.seconds + delta.microseconds / 1e6
 	elif delta < 0:
 		delta = - delta
