@@ -148,7 +148,7 @@ class Valve(Model,RangeMixin):
 			if x.end <= start:
 				continue
 			if x.start > start:
-				yield (x.start,x.end)
+				yield (x.start,x.duration)
 				start = x.end
 
 	def _group_range(self,start,end):
