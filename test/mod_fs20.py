@@ -45,6 +45,7 @@ if not exists module fs20tr: load fs20tr
 if not exists module fs20switch: load fs20switch
 if not exists module fs20em: load fs20em
 if not exists module fs20en: load fs20en
+if not exists module fs20tx: load fs20tx
 if not exists module on_event: load on_event
 #
 list fs20 code
@@ -73,11 +74,25 @@ fs20 em one:
 fs20 em two:
 	code thermo_hygro 3
 
+fs20 tx tempix:
+	code thermo 7
+	scale temperature * +2.3
+
+fs20 tx hygrix:
+	code hygro 7
+	scale humidity * -1.0
+
 set fs20 em temperature 12 one
 set fs20 em temperature 15 two
 
 list fs20 em one
 list fs20 em two
+
+list fs20 en
+list fs20 en gas
+
+list fs20 tx tempix
+list fs20 tx hygrix
 
 block:
 	if exists file "fs20_recv":
@@ -110,6 +125,11 @@ wait:
 list fs20 em
 list fs20 em one
 list fs20 em two
+list fs20 en
+list fs20 en gas
+list fs20 tx
+list fs20 tx tempix
+list fs20 tx hygrix
 async:
 	wait:
 		for 0.1

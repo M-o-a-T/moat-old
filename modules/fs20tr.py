@@ -28,6 +28,7 @@ from homevent.statement import AttributedStatement,Statement, main_words
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.run import simple_event,process_failure,register_worker,unregister_worker
 from homevent.context import Context
+from homevent.collect import Collection,Collected
 from homevent.event import Event,TrySomethingElse
 from homevent.fs20 import handler,register_handler,unregister_handler, \
 	PREFIX,PREFIX_TIMESTAMP
@@ -42,8 +43,15 @@ from twisted.internet.error import ProcessExitedAlready
 
 import os
 
-recvs = {}
-xmits = {}
+class recvs(Collection):
+	name = Name("fs20","receiver")
+recvs = recvs()
+recvs.does("del")
+
+class xmits(Collection):
+	name = Name("fs20","sender")
+xmits = xmits()
+xmits.does("del")
 
 class my_handler(handler):
 	def do_kill(self):
@@ -53,10 +61,10 @@ class my_handler(handler):
 			except ProcessExitedAlready:
 				pass
 
-class FS20recv(protocol.ProcessProtocol, my_handler):
+class FS20recv(protocol.ProcessProtocol, Collected, my_handler):
 	stopped = True
+	storage = recvs.storage
 	def __init__(self, name, cmd, ctx=Context, timeout=3):
-		super(FS20recv,self).__init__(ctx=ctx)
 		self.name = name
 		self.cmd = cmd
 		self.timeout = timeout
@@ -65,10 +73,16 @@ class FS20recv(protocol.ProcessProtocol, my_handler):
 		self.ebuf = ""
 		self.timestamp = None
 		self.last_timestamp = None
-		self.last_dgram = None
-		recvs[self.name] = self
+		super(FS20recv,self).__init__() # (ctx=ctx)
 		self.stopped = False
 		self.waiting = None
+
+	def list(self):
+		for r in super(FS20recv,self).list():
+			yield r
+		yield ("command",Name(*self.cmd))
+		yield ("running", "yes" if self.transport else "no")
+		yield ("stopped", "yes" if self.stopped else "no")
 
 	def connectionMade(self):
 		log(DEBUG,"FS20 started",self.name)
@@ -101,7 +115,7 @@ class FS20recv(protocol.ProcessProtocol, my_handler):
 				else:
 					e=d
 			if e:
-				raise ValueError("odd length",data)
+				db += chr(eval("0x"+e+'0'))
 
 			self.datagramReceived(data[0], db, timestamp=self.timestamp)
 			self.timestamp = None
@@ -223,29 +237,6 @@ fs20 receiver ‹name…›
 		FS20recv(name=name, cmd=self.cmd, ctx=ctx).do_start()
 
 
-class FS20listreceive(Statement):
-	name = "list fs20 receiver"
-	doc = "list external FS20 receivers"
-	long_doc="""\
-list fs20 receiver
-  - List known FS20 receivers.
-    With a name as parameter, list details for that device.
-"""
-
-	def run(self,ctx,**k):
-		event = self.params(ctx)
-		if len(event) < 1:
-			for b in recvs.itervalues():
-				print >>self.ctx.out,b.name
-		else:
-			b = recvs[SName(event)]
-			print >>self.ctx.out,"name:",b.name
-			print >>self.ctx.out,"command:",Name(*b.cmd)
-			print >>self.ctx.out,"running:","yes" if b.transport else "no"
-			print >>self.ctx.out,"stopped:","yes" if b.stopped else "no"
-		print >>self.ctx.out,"."
-
-
 class FS20delreceive(Statement):
 	name = "del fs20 receiver"
 	doc = "kill of an external fs20 receiver"
@@ -263,19 +254,26 @@ del fs20 receiver ‹name…›
 
 
 
-class FS20xmit(protocol.ProcessProtocol, my_handler):
+class FS20xmit(protocol.ProcessProtocol,Collected, my_handler):
 	stopped = True
+	storage = xmits.storage
 	def __init__(self, name, cmd, ctx=Context, timeout=3):
-		super(FS20xmit,self).__init__(ctx=ctx)
 		self.name = name
 		self.cmd = cmd
 		self.timeout = timeout
 		self.timer = None
 		self.dbuf = ""
 		self.ebuf = ""
-		xmits[self.name] = self
+		super(FS20xmit,self).__init__() # (ctx=ctx)
 		log(DEBUG,"*** added",self.name,self)
 		self.stopped = False
+
+	def list(self):
+		for r in super(FS20xmit,self).list():
+			yield r
+		yield ("command",Name(*self.cmd))
+		yield ("running", "yes" if self.transport else "no")
+		yield ("stopped", "yes" if self.stopped else "no")
 
 	def connectionMade(self):
 		log(DEBUG,"FS20 started",self.name)
@@ -383,29 +381,6 @@ fs20 sender ‹name…›
 		FS20xmit(name=name, cmd=self.cmd, ctx=ctx).do_start()
 
 
-class FS20listtransmit(Statement):
-	name = "list fs20 sender"
-	doc = "list external FS20 senders"
-	long_doc="""\
-list fs20 sender
-  - List known FS20 senders.
-    With a name as parameter, list details for that device.
-"""
-
-	def run(self,ctx,**k):
-		event = self.params(ctx)
-		if len(event) < 1:
-			for b in xmits.itervalues():
-				print >>self.ctx.out,b.name
-		else:
-			b = xmits[SName(event)]
-			print >>self.ctx.out,"name:",b.name
-			print >>self.ctx.out,"command:",Name(*b.cmd)
-			print >>self.ctx.out,"running:","yes" if b.transport else "no"
-			print >>self.ctx.out,"stopped:","yes" if b.stopped else "no"
-		print >>self.ctx.out,"."
-
-
 class FS20deltransmit(Statement):
 	name = "del fs20 sender"
 	doc = "kill of an external fs20 sender"
@@ -475,19 +450,15 @@ class fs20tr(Module):
 
 	def load(self):
 		main_words.register_statement(FS20receive)
-		main_words.register_statement(FS20listreceive)
 		main_words.register_statement(FS20delreceive)
 		main_words.register_statement(FS20transmit)
-		main_words.register_statement(FS20listtransmit)
 		main_words.register_statement(FS20deltransmit)
 		register_worker(FS20tr_shutdown)
 	
 	def unload(self):
 		main_words.unregister_statement(FS20receive)
-		main_words.unregister_statement(FS20listreceive)
 		main_words.unregister_statement(FS20delreceive)
 		main_words.unregister_statement(FS20transmit)
-		main_words.unregister_statement(FS20listtransmit)
 		main_words.unregister_statement(FS20deltransmit)
 		unregister_worker(FS20tr_shutdown)
 	

@@ -71,6 +71,27 @@ sys.stdout.write("n03095617DF000017DF5C\n")
 sys.stdout.write("+4.6 energy third\n")
 sys.stdout.write("n03095617DF000017DF5C\n")
 
+sys.stdout.write("+5.0 th3temp bad_length\n")
+sys.stdout.write("xB00E73173D\n")
+
+sys.stdout.write("+5.1 th3temp bad_checksum\n")
+sys.stdout.write("xA00E73173C\n")
+
+sys.stdout.write("+5.2 th3temp bad_repeat\n")
+sys.stdout.write("xA00E73137D\n")
+
+sys.stdout.write("+5.3 th3temp wrong_length\n")
+sys.stdout.write("x90E83173D\n")
+
+sys.stdout.write("+5.4 th3temp unknown_code\n")
+sys.stdout.write("xA0E073173D\n")
+
+sys.stdout.write("+5.5 th3temp 23_1deg\n")
+sys.stdout.write("xA00E73173D\n")
+
+sys.stdout.write("+5.6 th3hydro 52_0pct\n")
+sys.stdout.write("xAE0F520525\n")
+
 sys.stdout.flush()
 time.sleep(0.2)
 sys.stderr.write("9\r")

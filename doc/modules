@@ -411,7 +411,7 @@ just before generating the event for a measurement.
 
 You can use a star instead of writing one or zero, respectively, to
 document that you didn't measure the value (as opposed to knowing that
-the value is zero).
+the value is zero or one).
 
     fs20 em inside
         code thermo_hygro 1
@@ -441,6 +441,57 @@ two slots, the device with the closest values will be used.
 
 ----------------
 del fs20 em NAME
+----------------
+
+Forget about this device.
+
+
+======
+fs20tx
+======
+
+This module adds decoding of TX2/TX3 devices. These are 433 MHz temperature
+and humidity sensors.
+
+Appropriate events are emitted every time a TX message is received.
+
+-------------
+fs20 tx NAME…
+-------------
+
+Register a device.
+
+    fs20 tx inside
+        code thermo 1
+
+
+code TYPE ID
+------------
+
+Tells HomEvenT which type of device this is and the ID that's set on it.
+
+You can get the list of known types with "help fs20 tx".
+
+Device IDs range from zero to 127.
+
+
+scale type factor offset
+------------------------
+
+Raw values of TYPE get multiplied by FACTOR, then OFFSET is added,
+just before generating the event for a measurement.
+
+You can use a star instead of writing one or zero, respectively, to
+document that you didn't measure the value (as opposed to knowing that
+the value is zero or one).
+
+    fs20 tx inside
+        code hygro 1
+        scale humidity * 1.2
+
+
+----------------
+del fs20 tx NAME
 ----------------
 
 Forget about this device.
@@ -484,11 +535,11 @@ The device code is four digits long (1 to 4, again).
 		add living room light:
             code 2143
 
-You can use the same command to modify an existing house code.
+You can use the same command to modify a house or device code.
 
 	fs20 switch inside actors:
 		del living room light
-		add living room light
+		add living room light:
             code 2144
 
 Note that the broadcast and/or group control codes, which are defined as
