@@ -196,6 +196,8 @@ RRDfiles.does("del")
 
 class RRDfile(Collected):
 	storage = RRDfiles.storage
+	last_sent = None
+	last_sent_at = None
 	def __init__(self,server,filename,name):
 		super(RRDfile,self).__init__(name)
 		self.server = server
@@ -206,6 +208,10 @@ class RRDfile(Collected):
 			yield r
 		yield "server",self.server
 		yield "filename",self.filename
+		if self.last_sent is not None:
+			yield ("last_sent",self.last_sent)
+			yield ("last_sent_at",self.last_sent_at)
+
 
 
 class RRDsetfile(AttributedStatement):
@@ -301,7 +307,10 @@ send rrd ‹val…› :to ‹name…›
 			val = list(event)
 			name = Name(*name.apply(ctx))
 
-		msg = RRDsendUpdate(RRDfiles[name],val)
+		rrdf = RRDfiles[name]
+		rrdf.last_sent = val
+		rrdf.last_sent_at = now()
+		msg = RRDsendUpdate(rrdf,val)
 		res = msg.result.get()
 		if isinstance(res,Exception):
 			reraise(res)
