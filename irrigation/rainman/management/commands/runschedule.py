@@ -1021,6 +1021,11 @@ class FlowCheck(object):
 				self._unlock()
 				raise RuntimeError("already locked: "+repr(valve))
 			valve.locked = True
+			if valve.on:
+				valve._off()
+				gevent.sleep(1)
+				if valve.on:
+					raise RuntimeError("cannot turn off: "+repr(valve))
 			self.locked.add(valve)
 		try:
 			self.valve._on(duration=self.valve.feed.d.max_flow_wait)
@@ -1109,12 +1114,40 @@ class MaxFlowCheck(object):
 		self.locked = set()
 		self.on = set()
 		self.feed._flow_check = self
+		controllers = set()
 		for valve in self.feed.valves:
 			if valve.locked:
 				self._unlock()
 				raise RuntimeError("already locked: "+repr(valve))
 			valve.locked = True
+			if valve.on:
+				valve._off()
+				gevent.sleep(1)
+				if valve.on:
+					valve.locked = False
+					self._unlock()
+					raise RuntimeError("cannot turn off: "+repr(valve))
+
 			self.locked.add(valve)
+			controllers.add(valve.controller)
+
+		# also turn off all other valves on associated controllers
+		for controller in controllers:
+			for valve in controller.valves:
+				if valve in self.locked:
+					continue
+				if valve.locked:
+					self._unlock()
+					raise RuntimeError("already locked: "+repr(valve))
+				valve.locked = True
+				if valve.on:
+					valve._off()
+					gevent.sleep(1)
+					if valve.on:
+						valve.locked = False
+						self._unlock()
+						raise RuntimeError("cannot turn off: "+repr(valve))
+				self.locked.add(valve)
 
 		valves = sorted(self.feed.valves, reverse=True, key=attrgetter('v.flow'))
 		for valve in valves:
