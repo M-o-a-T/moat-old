@@ -93,16 +93,18 @@ class EnvGroup(Model):
 			(1,(False,True,False)),
 			(1,(False,False,True)),
 			)
-		sum_f = 0.01 # if there are no data, return 1
-		sum_w = 0.01
+		sum_f = 1 # if there are no data, return 1
+		sum_w = 1
+		n = 1
 		for weight,tws in ql:
 			f = self.env_factor_one(tws,h)
 			if f is not None:
 				if logger:
 					logger("Simple factor %s%s%s: %f" % ("T" if tws[0] else "-", "W" if tws[1] else "-", "S" if tws[2] else "-", f))
-				sum_f += f*weight
+				sum_f *= f**weight
 				sum_w += weight
-		return sum_f / sum_w
+				n += 1
+		return sum_f ** (n/sum_w)
 	
 	@property
 	def schedules(self):
