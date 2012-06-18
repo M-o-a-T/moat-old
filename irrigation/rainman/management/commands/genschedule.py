@@ -152,21 +152,29 @@ class Command(BaseCommand):
 		if level > v.max_level:
 			level = v.max_level
 		want = v.raw_watering_time(level)
+		has = timedelta(0,0)
 		for s in v.schedules.filter(start__gte=soon-timedelta(1,0)):
 			if s.end < n:
 				continue
-			if s.start > later and not s.seen and not s.forced:
-				if options['save']:
-					if v.verbose:
-						log(v,"Drop schedule at %s for %s" % (str_tz(s.start),str(s.duration)))
-					v.update(priority=True)
-					s.delete()
-					continue
-			#want -= s.duration*1.2 # avoid some strange burst
-			want -= timedelta(0,s.duration.total_seconds()*1.1) # timedelta cannot be multiplied (Py3 feature)
+#			# This code is disabled because as more 
+#			if s.start > later and not s.seen and not s.forced:
+#				if options['save']:
+#					if v.verbose:
+#						log(v,"Drop schedule at %s for %s" % (str_tz(s.start),str(s.duration)))
+#					v.update(priority=True)
+#					s.delete()
+#					continue
+			has += s.duration
 
-		if want.total_seconds() < 10:
-			v.update(priority=False)
+		if has:
+			if options['save']:
+				v.update(priority=(want.total_seconds() > has.total_seconds()*1.2))
+			log(v,"Already something to do (has %s, need %s, want %s, does %s)" % (v.level,v.start_level,want,has))
+			return
+		elif want.total_seconds() < 10:
+			if options['save']:
+				v.update(priority=False)
+			log(v,"Too little to do (has %s, need %s, want %s)" % (v.level,v.start_level,want))
 			return
 		if options['verbose']:
 			print "Plan",v,"for",want,"Level",v.level,v.start_level,v.stop_level,"P" if v.priority else ""
