@@ -78,6 +78,7 @@ urlpatterns = patterns('',
 	url(r'^(?:site/(?P<site>\d+)/|controller/(?P<controller>\d+)/|valve/(?P<valve>\d+)/|envgroup/(?P<envgroup>\d+)/|)log/(?P<pk>\d+)$', LogView.as_view()),
 
 	url(r'^(?:site/(?P<site>\d+)/|controller/(?P<controller>\d+)/|feed/(?P<feed>\d+)/|envgroup/(?P<envgroup>\d+)/|valve/(?P<valve>\d+)/|)schedule/$', SchedulesView.as_view()),
+	url(r'^(?:site/(?P<site>\d+)/|controller/(?P<controller>\d+)/|feed/(?P<feed>\d+)/|envgroup/(?P<envgroup>\d+)/|valve/(?P<valve>\d+)/|)new/schedule/$', ScheduleNewView.as_view()),
 	url(r'^(?:site/(?P<site>\d+)/|controller/(?P<controller>\d+)/|feed/(?P<feed>\d+)/|envgroup/(?P<envgroup>\d+)/|valve/(?P<valve>\d+)/|)schedule/(?P<pk>\d+)$', ScheduleView.as_view()),
 	url(r'^(?:site/(?P<site>\d+)/|controller/(?P<controller>\d+)/|feed/(?P<feed>\d+)/|envgroup/(?P<envgroup>\d+)/|valve/(?P<valve>\d+)/|)schedule/(?P<pk>\d+)/edit$', ScheduleEditView.as_view()),
 	url(r'^(?:site/(?P<site>\d+)/|controller/(?P<controller>\d+)/|feed/(?P<feed>\d+)/|envgroup/(?P<envgroup>\d+)/|valve/(?P<valve>\d+)/|)schedule/(?P<pk>\d+)/delete$', ScheduleDeleteView.as_view()),
