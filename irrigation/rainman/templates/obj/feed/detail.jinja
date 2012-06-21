@@ -24,10 +24,18 @@
 						%td -> =feed.comment
 				%tr
 					%th -> var
-					%td -> =feed.var
+					%td
+						-if feed.var is none or feed.var == ""
+							–
+						-else
+							=feed.var
 				%tr
 					%th -> Flow
-					%td -> ="%.3f l/sec" % feed.flow
+					%td
+						-if feed.flow is none
+							–
+						-else
+							="%.3f l/sec" % feed.flow
 				%tr
 					%th -> max flow wait time
 					%td -> =feed.max_flow_wait

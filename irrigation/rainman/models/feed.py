@@ -30,7 +30,7 @@ class Feed(Meter,RangeMixin):
 	var = m.CharField(max_length=200,unique=True,blank=True,null=True, help_text="monitor name in HomEvenT") # HomEvenT's variable name for it
 	comment = m.CharField(max_length=200,blank=True)
 
-	flow = m.FloatField(default=10, help_text="liters per second")
+	flow = m.FloatField(default=10, blank=True,null=True,help_text="liters per second")
 	db_max_flow_wait = m.PositiveIntegerField(db_column="max_flow_wait",default=300,help_text="Max time for flow measurement")
 
 	def _get_max_flow_wait(self):
@@ -48,9 +48,12 @@ class Feed(Meter,RangeMixin):
 		from heapq import heappush,heappop
 
 		stops=[]
-		flow = self.flow-plusflow
-		if flow < 0:
-			flow = None # single valve mode
+		if self.flow is None:
+			flow = None
+		else:
+			flow = self.flow-plusflow
+			if flow < 0:
+				flow = None # single valve mode
 
 		for s in Schedule.objects.filter(valve__feed=self,start__lt=end,start__gte=start-timedelta(1,0)).order_by("start"):
 			if s.start+s.duration <= start:
