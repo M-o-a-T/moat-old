@@ -81,11 +81,11 @@ class UserForSite(Model):
 		return False
 
 	def access_valve(self,valve):
-		if not self.sites.filter(id=valve.feed.site.id).unique().count():
+		if not self.sites.filter(id=valve.feed.site.id).distinct().count():
 			return False
 		if self.level >= 3:
 			return self.level
-		if self.valves.filter(id=valve.id).unique().count():
+		if self.valves.filter(id=valve.id).distinct().count():
 			return self.level
 		return False
 

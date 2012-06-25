@@ -113,7 +113,7 @@
 	%div.schedules
 		%h2 -> Schedule
 		%div.content
-			=sc.table(valve.schedules.order_by("-start")[:5], show_valve=False,prefix="/valve/%d"%(valve.id,))
+			=sc.table(valve.schedules.order_by("-start")[:5],user, show_valve=False,prefix="/valve/%d"%(valve.id,))
 
 		%div.buttons#buttons_h
 			%a href="/valve/{{valve.id}}/schedule"

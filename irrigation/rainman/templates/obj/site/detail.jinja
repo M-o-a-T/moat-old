@@ -48,7 +48,7 @@
 	%div.valves
 		%h2 -> Valves
 		%div.content
-			=v.table(site.valves.all().order_by('name'), show_site=False,show_controller=False,show_feed=False)
+			=v.table(site.valves.all().order_by('name'), user, show_site=False,show_controller=False,show_feed=False)
 
 		%div.buttons#buttons_v
 			%a href="/site/{{site.id}}/new/valve"
@@ -93,7 +93,7 @@
 	%div.schedule
 		%h2 -> Schedule
 		%div.content
-			=sc.table(site.schedules.order_by("-start")[:5])
+			=sc.table(site.schedules.order_by("-start")[:5],user)
 
 		%div.buttons#buttons_sc
 			%a href="/site/{{site.id}}/schedule"

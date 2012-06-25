@@ -79,14 +79,14 @@
 ;	%div.valves
 ;		%h2 -> Valves
 ;		%div.content
-;			=v.table(group.valves.all())
+;			=v.table(group.valves.all(), user)
 ;			%a href="/group/{{group.id}}/new/valve"
 ;				Add valve
 ;
 ;	%div.schedule
 ;		%h2 -> Schedule
 ;		%div.content
-;			=sc.table(group.schedules.order_by("-start")[:5],prefix="/group/%d"%(group.id,))
+;			=sc.table(group.schedules.order_by("-start")[:5],user, prefix="/group/%d"%(group.id,))
 ;
 ;		%div.buttons#buttons_sc
 ;			%a href="/group/{{group.id}}/schedule"

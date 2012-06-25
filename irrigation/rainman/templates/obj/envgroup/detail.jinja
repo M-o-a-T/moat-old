@@ -44,7 +44,7 @@
 	%div.Schedules
 		%h2 -> Schedule
 		%div.content
-			=sc.table(envgroup.schedules.order_by("-start")[:5], show_valve=False,prefix="/envgroup/%d"%(envgroup.id,))
+			=sc.table(envgroup.schedules.order_by("-start")[:5],user, show_valve=False,prefix="/envgroup/%d"%(envgroup.id,))
 
 		%div.buttons#buttons_h
 			%a href="/envgroup/{{envgroup.id}}/schedule"
@@ -53,7 +53,7 @@
 	%div.valves
 		%h2 -> Valves
 		%div.content
-			=v.table(envgroup.valves.all(), show_eg=False)
+			=v.table(envgroup.valves.all(), user, show_eg=False)
 			%a href="/envgroup/{{envgroup.id}}/new/valve"
 				Add valve
 

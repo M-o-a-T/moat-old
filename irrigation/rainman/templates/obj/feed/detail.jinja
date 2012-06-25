@@ -52,7 +52,7 @@
 	
 	%div.valves
 		%h2 -> Valves
-		=v.table(feed.valves.all(), show_feed=False)
+		=v.table(feed.valves.all(), user, show_feed=False)
 
 		%a href="/feed/{{feed.id}}/new/valve"
 			Add valve
@@ -60,7 +60,7 @@
 	%div.schedule
 		%h2 -> Schedule
 		%div.content
-			=sc.table(feed.schedules.order_by("-start")[:5], prefix="/feed/%d"%(feed.id,))
+			=sc.table(feed.schedules.order_by("-start")[:5],user, prefix="/feed/%d"%(feed.id,))
 
 		%div.buttons#buttons_sc
 			%a href="/feed/{{feed.id}}/schedule"

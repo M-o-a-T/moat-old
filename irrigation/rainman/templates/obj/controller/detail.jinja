@@ -44,14 +44,14 @@
 	%div.valves
 		%h2 -> Valves
 		%div.content
-			=v.table(controller.valves.all(), show_controller=False)
+			=v.table(controller.valves.all(), user, show_controller=False)
 			%a href="/controller/{{controller.id}}/new/valve"
 				Add valve
 
 	%div.schedule
 		%h2 -> Schedule
 		%div.content
-			=sc.table(controller.schedules.order_by("-start")[:5],prefix="/controller/%d"%(controller.id,))
+			=sc.table(controller.schedules.order_by("-start")[:5],user,prefix="/controller/%d"%(controller.id,))
 
 		%div.buttons#buttons_sc
 			%a href="/controller/{{controller.id}}/schedule"

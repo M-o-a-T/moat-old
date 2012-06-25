@@ -1,6 +1,6 @@
 {% haml %}
 
--macro table(schedules, show_valve=True, prefix="")
+-macro table(schedules, user, show_valve=True, prefix="")
 	%table
 		%tr
 			%th -> Start
@@ -22,7 +22,10 @@
 					="◉" if schedule.seen else "–"
 				-if show_valve
 					%td
-						%a href="/valve/{{ schedule.valve.id }}"
+						-if user.get_profile().access_valve(schedule.valve)
+							%a href="/valve/{{ schedule.valve.id }}"
+								=schedule.valve.name
+						-else
 							=schedule.valve.name
 
 {% endhaml %}
