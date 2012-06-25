@@ -19,5 +19,5 @@ from django.http import HttpResponseRedirect
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render_to_response
 
-def no_access(request):
+def no_access(request,*a,**k):
 	return render_to_response('auth/no_access.jinja')
