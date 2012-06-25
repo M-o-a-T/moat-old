@@ -48,7 +48,7 @@ class Valve(Model,RangeMixin):
 	shade = m.FloatField(default=1, help_text="which part of the standard evaporation rate applies here?")
 	def do_shade(self,x):
 		# linear
-		return (x-1)*self.shade+1
+		return x*self.shade
 		# quadratic might be better
 
 	runoff = m.FloatField(default=1, help_text="how much incoming rain ends up here?")
