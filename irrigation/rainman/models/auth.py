@@ -48,26 +48,26 @@ class UserForSite(Model):
 	@property
 	def feeds(self):
 		if self.level >= 3:
-			return Feed.objects.filter(site__in=self.sites.all())
-		return Feed.objects.filter(valves__in=self.valves.all())
+			return Feed.objects.filter(site__in=self.sites.all()).distinct()
+		return Feed.objects.filter(valves__in=self.valves.all()).distinct()
 
 	@property
 	def envgroups(self):
 		if self.level >= 3:
-			return EnvGroup.objects.filter(site__in=self.sites.all())
-		return EnvGroup.objects.filter(valves__in=self.valves.all())
+			return EnvGroup.objects.filter(site__in=self.sites.all()).distinct()
+		return EnvGroup.objects.filter(valves__in=self.valves.all()).distinct()
 
 	@property
 	def controllers(self):
 		if self.level >= 3:
-			return Controller.objects.filter(site__in=self.sites.all())
-		return Controller.objects.filter(valves__in=self.valves.all())
+			return Controller.objects.filter(site__in=self.sites.all()).distinct()
+		return Controller.objects.filter(valves__in=self.valves.all()).distinct()
 
 	@property
 	def groups(self):
 		if self.level >= 3:
-			return Group.objects.filter(site__in=self.sites.all())
-		return Group.objects.filter(valves__in=self.valves.all())
+			return Group.objects.filter(site__in=self.sites.all()).distinct()
+		return Group.objects.filter(valves__in=self.valves.all()).distinct()
 
 	@property
 	def all_valves(self):
