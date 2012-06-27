@@ -25,11 +25,11 @@ from rainman.utils import str_tz
 class GroupOverride(Model):
 	"""Modify schedule times"""
 	class Meta(Model.Meta):
-		unique_together = (("group", "name"),("group","start"))
+		unique_together = (("group","start"),)
 		db_table="rainman_groupoverride"
 	def __unicode__(self):
 		return self.name
-	name = m.CharField(max_length=200)
+	name = m.CharField(max_length=200,blank=True,null=True)
 	group = m.ForeignKey(Group,related_name="overrides")
 	allowed = m.BooleanField() # whether to allow these to run(True) or not(False)
 	start = m.DateTimeField(db_index=True)
@@ -52,11 +52,11 @@ class GroupOverride(Model):
 class ValveOverride(Model):
 	"""Force schedule times"""
 	class Meta(Model.Meta):
-		unique_together = (("valve", "name"),("valve","start"))
+		unique_together = (("valve","start"),)
 		db_table="rainman_valveoverride"
 	def __unicode__(self):
 		return self.name
-	name = m.CharField(max_length=200)
+	name = m.CharField(max_length=200,blank=True,null=True)
 	valve = m.ForeignKey(Valve,related_name="overrides")
 	running = m.BooleanField() # whether to force on(True) or off(False)
 	start = m.DateTimeField(db_index=True)
