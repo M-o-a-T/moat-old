@@ -181,6 +181,10 @@ class Command(BaseCommand):
 		for a,b in v.range(start=soon,days=options['age'], add=30):
 			if b < want:
 				print "Partial",str_tz(a),str(b)
+				if b.total_seconds() < want.total_seconds()/5:
+					if v.verbose:
+						log(v,"slot too short at %s for %s (level %s; want %s)" % (str_tz(a),str(b),v.level,str(want)))
+					continue
 				if options['save']:
 					sc=Schedule(valve=v,start=a,duration=b)
 					sc.save()
