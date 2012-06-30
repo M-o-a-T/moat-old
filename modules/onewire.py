@@ -269,7 +269,11 @@ class OWFSwindmon(Monitor):
 	def one_value(self, step):
 		dev = devices[self.device]
 		val = dev.get(self.attribute)
-		val = (float(v.strip()) for v in val.split(","))
+		try:
+			val = (float(v.strip()) for v in val.split(","))
+		except ValueError:
+			raise MonitorAgain
+			
 		val = (2 if v > 3.5 else 0 if v < 1 else 1 for v in val)
 		val = tuple(val)
 		if   val == (2,2,1,2): val = 0
