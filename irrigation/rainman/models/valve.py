@@ -46,6 +46,23 @@ class Valve(Model,RangeMixin):
 	start_level = m.FloatField(default=8, help_text="start watering above this level") # max water level, in mm: stop counting here
 	stop_level = m.FloatField(default=3, help_text="stop watering below this level") # min water level, in mm: start when at/above this
 	shade = m.FloatField(default=1, help_text="which part of the standard evaporation rate applies here?")
+
+	db_max_run = m.PositiveIntegerField(blank=True,null=True,help_text="maximum time-on",db_column="max_run")
+	def _get_max_run(self):
+			if self.db_max_run is not None:
+					return timedelta(0,self.db_max_run)
+	def _set_max_run(self,val):
+			self.db_max_run = val.total_seconds()
+	max_run = property(_get_max_run,_set_max_run)
+
+	db_min_delay = m.PositiveIntegerField(blank=True,null=True,help_text="minimum time between runs",db_column="min_delay") 
+	def _get_min_delay(self):
+			if self.db_min_delay is not None:
+					return timedelta(0,self.db_min_delay)
+	def _set_min_delay(self,val):
+			self.db_min_delay = val.total_seconds()
+	min_delay = property(_get_min_delay,_set_min_delay)
+
 	def do_shade(self,x):
 		# linear
 		return x*self.shade
