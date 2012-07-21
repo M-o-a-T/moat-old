@@ -153,7 +153,9 @@ class Command(BaseCommand):
 			level = v.max_level
 		want = v.raw_watering_time(level)
 		has = timedelta(0,0)
-		for s in v.schedules.filter(start__gte=soon-timedelta(1,0)):
+		last_end = None
+		for s in v.schedules.filter(start__gte=soon-timedelta(1,0)).order_by('start'):
+			last_end=s.end
 			if s.end < n:
 				continue
 #			# This code is disabled because as more 
@@ -165,6 +167,8 @@ class Command(BaseCommand):
 #					s.delete()
 #					continue
 			has += s.duration
+		if last_end and v.min_delay:
+			last_end += v.min_delay
 
 		if has:
 			if options['save']:
@@ -179,6 +183,15 @@ class Command(BaseCommand):
 		if options['verbose']:
 			print "Plan",v,"for",want,"Level",v.level,v.start_level,v.stop_level,"P" if v.priority else ""
 		for a,b in v.range(start=soon,days=options['age'], add=30):
+			if last_end and last_end > a:
+				if last_end >= a+b:
+					continue
+				if last_end>a:
+					b-=(last_end-a)
+					a=last_end
+				last_end=None
+			if v.max_run and v.max_run > b:
+				b=v.max_run
 			if b < want:
 				print "Partial",str_tz(a),str(b)
 				if b.total_seconds() < want.total_seconds()/5:
@@ -192,6 +205,7 @@ class Command(BaseCommand):
 					if v.verbose:
 						log(v,"Scheduled at %s for %s (level %s; want %s)" % (str_tz(a),str(b),v.level,str(want)))
 				want -= b
+				break # bail out makes sense, get others scheduled first / do more in the same slot if v.max_run is set
 			else:
 				print "Total",str_tz(a),str(want)
 				if options['save']:
