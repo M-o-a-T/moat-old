@@ -20,14 +20,18 @@ from django.forms import ModelForm,ModelMultipleChoiceField
 from django.http import Http404
 from rainman.models import Valve,Site, Controller,Feed,EnvGroup,Group
 from rainman.utils import get_request
-from irrigator.views import FormMixin,SiteParamMixin,get_profile
+from irrigator.views import FormMixin,SiteParamMixin,get_profile, TimeDeltaField
 
 class ValveForm(ModelForm):
 	class Meta:
 		model = Valve
-		exclude = ('site',)
-		#fields = ('name','comment','controller','feed','envgroup','location','var','verbose','flow','area','max_level','start_level','stop_level','shade','runoff','time','level','priority','groups')
+		exclude = ('site','db_max_run','db_min_delay')
+		fields = ('name','comment','controller','feed','envgroup','location','var','verbose','flow','area','max_level','start_level','stop_level','max_run','min_delay','shade','runoff','time','level','priority','groups')
 		#many_to_many = ('groups,')
+
+	max_run = TimeDeltaField(help_text=Meta.model._meta.get_field_by_name("db_max_run")[0].help_text)
+	min_delay = TimeDeltaField(help_text=Meta.model._meta.get_field_by_name("db_min_delay")[0].help_text)
+
 
 	#groups = ModelMultipleChoiceField(queryset=Group.objects.all())
 
