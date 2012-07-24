@@ -190,7 +190,7 @@ class Command(BaseCommand):
 					b-=(last_end-a)
 					a=last_end
 				last_end=None
-			if v.max_run and v.max_run > b:
+			if v.max_run and b > v.max_run:
 				b=v.max_run
 			if b < want:
 				print "Partial",str_tz(a),str(b)
