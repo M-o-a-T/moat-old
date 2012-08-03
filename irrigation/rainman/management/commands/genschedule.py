@@ -183,6 +183,8 @@ class Command(BaseCommand):
 		if options['verbose']:
 			print "Plan",v,"for",want,"Level",v.level,v.start_level,v.stop_level,"P" if v.priority else ""
 		for a,b in v.range(start=soon,days=options['age'], add=30):
+			if a > soon:
+				break # do it during the next run
 			if last_end and last_end > a:
 				if last_end >= a+b:
 					continue
@@ -190,14 +192,14 @@ class Command(BaseCommand):
 					b-=(last_end-a)
 					a=last_end
 				last_end=None
+			if b.total_seconds() < want.total_seconds()/5:
+				if v.verbose:
+					log(v,"slot too short at %s for %s (level %s; want %s)" % (str_tz(a),str(b),v.level,str(want)))
+				continue
 			if v.max_run and b > v.max_run:
 				b=v.max_run
 			if b < want:
 				print "Partial",str_tz(a),str(b)
-				if b.total_seconds() < want.total_seconds()/5:
-					if v.verbose:
-						log(v,"slot too short at %s for %s (level %s; want %s)" % (str_tz(a),str(b),v.level,str(want)))
-					continue
 				if options['save']:
 					sc=Schedule(valve=v,start=a,duration=b)
 					sc.save()
