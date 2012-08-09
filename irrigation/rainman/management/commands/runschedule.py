@@ -44,6 +44,7 @@ from django.db.models import F,Q
 from django.db import transaction
 from homevent.times import humandelta
 
+METER_TIME=5*60 # meters get deprecated if no value for five minutes 
 
 ### database stuff
 ### This does not actually work because of transaction-vs.-thread issues
@@ -138,6 +139,8 @@ class RestartService(VoidService):
 
 class Meter(object):
 	sum_it = False
+	last_time = None
+
 	def __init__(self,dev):
 		self.d = dev
 		self.site = SchedSite(dev.site)
@@ -149,6 +152,7 @@ class Meter(object):
 	def monitor_value(self,event=None,**k):
 		"""monitor value NUMBER name…"""
 		self.refresh()
+		self.last_time = now()
 		try:
 			val = float(event[2])
 			self.add_value(val)
@@ -286,7 +290,8 @@ class AvgMeter(Meter):
 		n = now()
 		if self.ts is not None and self.val is not None:
 			w=(n-self.ts).total_seconds()
-			if w > 300: w = 300 # if the measurer dies
+			if w > METER_TIME:
+				w = METER_TIME # limit weight if the measurer dies
 			self.avg += w*self.val
 			self.nval += w
 		self.ts = n
@@ -585,6 +590,7 @@ class SchedSite(SchedCommon):
 	def new_history_entry(self,rain=0):
 		"""Create a new history entry"""
 		values = {}
+		n = now()
 		for t,ml in self.meters.items():
 			sum_it = False
 			sum_val = 0
@@ -592,6 +598,14 @@ class SchedSite(SchedCommon):
 			for m in ml:
 				f = m.weight
 				v = m.get_value()
+				if m.last_time is None:
+					f *= 0.01
+				else:
+					s = (n - m.last_time).total_seconds()
+					if s > METER_TIME*100:
+						f *= 0.01
+					elif s > METER_TIME:
+						f *= METER_TIME/s
 				if v is not None:
 					sum_val += f*v
 					sum_f += f
