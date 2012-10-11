@@ -62,6 +62,8 @@ class NonNegativeFloatField(FloatField):
 		return val
 
 def Delta(t):
+	if t is None:
+		return None
 	if isinstance(t,timedelta):
 		return t
 	return timedelta(0,(t.hour*60+t.minute)*60+t.second,t.microsecond)
