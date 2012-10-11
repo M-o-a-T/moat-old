@@ -92,6 +92,9 @@ sys.stdout.write("xA00E73173D\n")
 sys.stdout.write("+5.6 th3hydro 52_0pct\n")
 sys.stdout.write("xAE0F520525\n")
 
+sys.stdout.write("+5.7 ???\n")
+sys.stdout.write("xA0CA791790\n")
+
 sys.stdout.flush()
 time.sleep(0.2)
 sys.stderr.write("9\r")

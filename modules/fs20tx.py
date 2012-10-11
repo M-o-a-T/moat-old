@@ -172,8 +172,10 @@ class tx_handler(recv_handler):
 		for d in data[:-1]:
 			qs += d
 		if qs&0xF != qsum:
+			# fs20¦tx¦checksum¦65¦0¦a0ca791790
+			# obviously wrong
 			simple_event(ctx, "fs20","tx","checksum",qs,qsum,"".join("%x" % x for x in data))
-			return
+			#return
 		data = data[1:-1]
 		try:
 			g = tx_procs[data[0]]
@@ -277,8 +279,8 @@ Known types:
 				except (TypeError,ValueError):
 					raise SyntaxError(u"‹fs20 tx› ‹name…›: ‹code›: ID must be a number")
 				else:
-					if id<0 or id>7:
-						raise SyntaxError(u"‹fs20 tx› ‹name…›: ‹code›: ID between 0 and 7 please")
+					if id<0 or id>127:
+						raise SyntaxError(u"‹fs20 tx› ‹name…›: ‹code›: ID between 0 and 127 please")
 					self.parent.code = id
 				return
 			id += 1
