@@ -43,6 +43,7 @@ from datetime import datetime,time,timedelta
 from django.db.models import F,Q
 from django.db import transaction
 from homevent.times import humandelta
+import random
 
 
 ### database stuff
@@ -232,11 +233,34 @@ class FeedMeter(SumMeter):
 				print_exc()
 				raise
 		
+	def do_flush(self,**k):
+		if self._flow_check:
+			raise RuntimeError("already working")
+		try:
+			cf = Flusher(self)
+			# Safety timer
+			timer = gevent.spawn_later(self.d.db_max_flow_wait,cf.dead)
+
+			cf.start()
+			res = cf.q.get()
+			self.log("End flow check: %s"%(res,))
+			timer.kill()
+		except Exception as ex:
+			print_exc()
+			try:
+				log_error(self.d.site)
+				if cf is not None:
+					cf._unlock()
+			except:
+				print_exc()
+				raise
+		
 		
 	def add_value(self,val):
-		super(FeedMeter,self).add_value(val)
 		if self._flow_check:
-			self._flow_check.add_flow(val)
+			if self._flow_check.add_flow(val):
+				return
+		super(FeedMeter,self).add_value(val)
 
 		sum_f = 0
 		for valve in self.valves:
@@ -258,6 +282,7 @@ class FeedMeter(SumMeter):
 		if self.d.var:
 			self.chk = self.site.ci.root.monitor(self.check_flow,"check","flow",*(self.d.var.split()))
 			self.chm = self.site.ci.root.monitor(self.check_max_flow,"check","maxflow",*(self.d.var.split()))
+			self.flush = self.site.ci.root.monitor(self.do_flush,"flush",*(self.d.var.split()))
 
 	
 		
@@ -757,7 +782,9 @@ class SchedValve(SchedCommon):
 			self.site.send_command("set","output","on",*(self.v.var.split()))
 		else:
 			self.log("Run for %s"%(duration,))
-			self.site.send_command("set","output","on",*(self.v.var.split()), sub=(("for",duration.total_seconds()),("async",)))
+			if not isinstance(duration,(int,long)):
+				duration = duration.total_seconds()
+			self.site.send_command("set","output","on",*(self.v.var.split()), sub=(("for",duration),("async",)))
 		if sched is not None:
 			if self.v.verbose:
 				self.log("Opened for %s"%(sched,))
@@ -768,7 +795,7 @@ class SchedValve(SchedCommon):
 			#Save(sched)
 		else:
 			if self.v.verbose:
-				self.log("Opened for %s"(duration,))
+				self.log("Opened for %s"%(duration,))
 
 	def _off(self):
 		if self.on:
@@ -830,7 +857,7 @@ class SchedValve(SchedCommon):
 				self.sched_ts = sched.start+sched.duration
 				if sched.start+sched.duration > n: # still running
 					if self.v.verbose:
-						print >>sys.stderr,"SCHED RUNNING %s: %s" % (self.v.name,humandelta(self.sched.start+self.sched.duration-n))
+						print >>sys.stderr,"SCHED RUNNING %s: %s" % (self.v.name,humandelta(sched.start+sched.duration-n))
 					try:
 						self._on(sched, sched.start+sched.duration-n)
 					except TooManyOn:
@@ -865,9 +892,10 @@ class SchedValve(SchedCommon):
 		self.site.run_sched_task(reason=reason)
 
 	def add_flow(self, val):
-		self.flow += val
 		if self._flow_check is not None:
-			self._flow_check.add_flow(val)
+			if self._flow_check.add_flow(val):
+				return
+		self.flow += val
 
 	def check_flow(self,**k):
 		cf = None
@@ -1047,6 +1075,7 @@ class FlowCheck(object):
 			self.flow += val
 		if self.nflow == 9:
 			self.stop()
+		return False
 
 	def stop(self):
 		n=now()
@@ -1158,6 +1187,9 @@ class MaxFlowCheck(object):
 			else:
 				self.on.add(valve)
 			
+	def state(self,on):
+		pass
+
 	def add_flow(self,val):
 		self.nflow += 1
 		if self.nflow == 2:
@@ -1166,6 +1198,7 @@ class MaxFlowCheck(object):
 			self.flow += val
 		if self.nflow == 9:
 			self.stop()
+		return False
 
 	def stop(self):
 		n=now()
@@ -1208,4 +1241,99 @@ class MaxFlowCheck(object):
 		self.start()
 		res = self.q.get()
 		self.feed.site.log("End flow check: %s"%(res,))
+
+		
+class Flusher(object):
+	"""Flush all valves"""
+	q = None
+	nflow = 0
+	flow = 0
+	start = None
+	on = None
+	res = None
+	timer = None
+	def __init__(self,feed):
+		self.feed = feed
+
+	def start(self):
+		"""Start flushing"""
+		if self.q is not None:
+			raise RuntimeError("already flushing: "+repr(self.valve))
+		self.q = AsyncResult()
+		self.locked = set()
+		self.on = None
+		self.feed._flow_check = self
+		controllers = set()
+		for valve in self.feed.valves:
+			if valve.locked:
+				self._unlock()
+				raise RuntimeError("already locked: "+repr(valve))
+			valve.locked = True
+			if valve.on:
+				valve._off()
+				gevent.sleep(1)
+				if valve.on:
+					valve.locked = False
+					self._unlock()
+					raise RuntimeError("cannot turn off: "+repr(valve))
+
+			self.locked.add(valve)
+			controllers.add(valve.controller)
+
+		v = list(self.feed.valves)
+		valves = []
+		for i in range(5):
+			random.shuffle(v)
+			for valve in v:
+				try:
+					self.on = valve
+					valve._on(duration=20)
+				except TooManyOn:
+					pass
+				else:
+					gevent.sleep(60)
+			
+	def add_flow(self,val):
+		return True
+
+	def state(self,on):
+		pass
+
+	def stop(self):
+		n=now()
+		sec = (n-self.start).total_seconds()
+		if sec > 3:
+			self.res = sec
+		else:
+			self.feed.log("Flush broken: sec %s"%(sec,))
+		self._unlock()
+
+	def dead(self,kill=True):
+		if self.timer is not None:
+			if kill:
+				self.timer.kill()
+			self.timer = None
+		if self.feed._flow_check is not self:
+			return
+		self.feed.log("Flow check aborted")
+		self._unlock()
+		
+	def _unlock(self):
+		if self.timer is not None:
+			self.timer.kill()
+			self.timer = None
+		if self.feed._flow_check is not self:
+			return
+		self.feed._flow_check = None
+		if self.on is not None:
+			self.on._off()
+		for valve in self.locked:
+			valve.locked = False
+		self.q.set(self.res)
+		
+	def run(self):
+		# Safety timer
+		self.start()
+		res = self.q.get()
+		self.feed.site.log("End flush: %s"%(res,))
 
