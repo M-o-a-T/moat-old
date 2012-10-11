@@ -29,8 +29,8 @@ class ValveForm(ModelForm):
 		fields = ('name','comment','controller','feed','envgroup','location','var','verbose','flow','area','max_level','start_level','stop_level','max_run','min_delay','shade','runoff','time','level','priority','groups')
 		#many_to_many = ('groups,')
 
-	max_run = TimeDeltaField(help_text=Meta.model._meta.get_field_by_name("db_max_run")[0].help_text)
-	min_delay = TimeDeltaField(help_text=Meta.model._meta.get_field_by_name("db_min_delay")[0].help_text)
+	max_run = TimeDeltaField(required=False,help_text=Meta.model._meta.get_field_by_name("db_max_run")[0].help_text)
+	min_delay = TimeDeltaField(required=False,help_text=Meta.model._meta.get_field_by_name("db_min_delay")[0].help_text)
 
 
 	#groups = ModelMultipleChoiceField(queryset=Group.objects.all())
