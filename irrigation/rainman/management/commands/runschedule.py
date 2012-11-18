@@ -46,6 +46,7 @@ from homevent.times import humandelta
 import random
 
 METER_TIME=5*60 # meters get deprecated if no value for five minutes 
+METER_MAXTIME=60*60 # need to report at least hourly, otherwise I don't believe you
 
 ### database stuff
 ### This does not actually work because of transaction-vs.-thread issues
@@ -287,6 +288,8 @@ class FeedMeter(SumMeter):
 			self.chk = self.site.ci.root.monitor(self.check_flow,"check","flow",*(self.d.var.split()))
 			self.chm = self.site.ci.root.monitor(self.check_max_flow,"check","maxflow",*(self.d.var.split()))
 			self.flush = self.site.ci.root.monitor(self.do_flush,"flush",*(self.d.var.split()))
+		else:
+			self.flush = self.site.ci.root.monitor(self.do_flush,"flush",*(self.d.name.split()))
 
 	
 		
@@ -627,7 +630,7 @@ class SchedSite(SchedCommon):
 					f *= 0.01
 				else:
 					s = (n - m.last_time).total_seconds()
-					if s > METER_TIME*100:
+					if s > METER_MAXTIME:
 						f *= 0.01
 					elif s > METER_TIME:
 						f *= METER_TIME/s
