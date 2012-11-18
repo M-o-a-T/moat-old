@@ -42,6 +42,10 @@
 				%tr
 					%th -> off at
 					%td -> =feed.list_range(plusflow=9999999)
+				%tr
+					%th -> Active
+					%td -> ="–" if feed.disabled else "◉"
+
 
 		%div.buttons#buttons
 			%a href="/feed/{{feed.id}}/edit"

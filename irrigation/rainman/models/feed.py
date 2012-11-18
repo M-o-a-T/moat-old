@@ -32,6 +32,7 @@ class Feed(Meter,RangeMixin):
 
 	flow = m.FloatField(default=10, blank=True,null=True,help_text="liters per second")
 	db_max_flow_wait = m.PositiveIntegerField(db_column="max_flow_wait",default=300,help_text="Max time for flow measurement")
+	disabled = m.BooleanField(default=False,max_length=1,help_text="OFF: don't schedule my valves")
 
 	def _get_max_flow_wait(self):
 		return timedelta(0,self.db_max_flow_wait)
