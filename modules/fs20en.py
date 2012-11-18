@@ -125,7 +125,7 @@ class en(Collected,Timeslotted):
 	def info(self):
 		if self.last is not None:
 			return "%s %d: %s" % (en_procs[self.group].en_name, self.code,
-				humandelta(now()-self.last))
+				humandelta(self.last-now()))
 		else:
 			return "%s %d: (never)" % (en_procs[self.group].en_name, self.code)
 

@@ -122,7 +122,7 @@ class TX(Collected):
 	def info(self):
 		if self.last is not None:
 			return "%s %d: %s" % (tx_procs[self.group].tx_name, self.code,
-				humandelta(now()-self.last))
+				humandelta(self.last-now()))
 		else:
 			return "%s %d: (never)" % (tx_procs[self.group].tx_name, self.code)
 

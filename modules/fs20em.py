@@ -124,7 +124,7 @@ class EM(Collected,Timeslotted):
 	def info(self):
 		if self.last is not None:
 			return "%s %d: %s" % (em_procs[self.group].em_name, self.code,
-				humandelta(now()-self.last))
+				humandelta(self.last-now()))
 		else:
 			return "%s %d: (never)" % (em_procs[self.group].em_name, self.code)
 
