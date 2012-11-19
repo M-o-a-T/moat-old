@@ -1308,7 +1308,7 @@ class Flusher(object):
 				except TooManyOn:
 					pass
 				else:
-					gevent.sleep(60)
+					gevent.sleep(100)
 			
 	def add_flow(self,val):
 		return True
