@@ -46,7 +46,7 @@ class group(object):
 		self.qsum = qsum
 		code = (code, qsum)
 		if code in groups:
-			raise RuntimeError("House code %04x already known" % (code,))
+			raise RuntimeError("House code %04x/%02x already known" % code)
 		groups[code] = self
 	
 	def delete(self,ctx=None):
