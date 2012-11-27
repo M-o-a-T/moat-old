@@ -1,3 +1,9 @@
+homevent (0.3.35) smurf; urgency=low
+
+  * minor fs20 fixes
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Wed, 28 Nov 2012 00:58:43 +0100
+
 homevent (0.3.34) smurf; urgency=low
 
   * Support TX2/TX3 sensors (433 MHz).
