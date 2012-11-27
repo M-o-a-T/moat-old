@@ -122,6 +122,7 @@ class SwitchGroup(Collected,igroup):
 
 	def delete(self,ctx=None):
 		del codes[self.code]
+		group.delete(self)
 		super(SwitchGroup,self).delete()
 
 	def __unicode__(self):
