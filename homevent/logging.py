@@ -158,12 +158,17 @@ class BaseLogger(Collected,Jobber):
 		try:
 			self.q.put(StopIteration,block=False)
 		except Full:
+			## panic?
 			pass
 		self.job.join(timeout=1)
 		self.stop_job("job")
 
 	def _wlog(self, *a):
-		self.q.put(a, block=False)
+		try:
+			self.q.put(a, block=False)
+		except Full:
+			## panic?
+			self.delete()
 
 	def _log(self, level, *a):
 		a=" ".join(( x if isinstance(x,basestring) else str(x)  for x in a))
