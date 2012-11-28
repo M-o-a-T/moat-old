@@ -369,7 +369,7 @@ class MsgFactory(object):
 				log(TRACE,"!got NOT_UP_EVENT",*self.name)
 				msg = MsgClosed()
 				self._msg_queue.put(msg)
-				super(xself.cls,self).not_up_event()
+				super(xself.cls,self).not_up_event(external=external)
 			def down_event(self,external=False,*a,**k):
 				log(TRACE,"!got DOWN_EVENT",*self.name)
 				msg = MsgClosed()
@@ -701,7 +701,7 @@ class MsgQueue(Collected,Jobber):
 				self.q.put(m, block=False)
 
 		state = "open" if self.state == "connected" else "closed" if self.channel is None else "connecting"
-		log("msg",TRACE,"setstate init %s" % (state,))
+		log("conn",TRACE,"setstate init %s" % (state,))
 		self.connect_timeout = self.initial_connect_timeout
 		self.attempts = 0
 
@@ -721,7 +721,7 @@ class MsgQueue(Collected,Jobber):
 			elif isinstance(msg,MsgIncoming):
 				self._incoming(msg)
 			elif isinstance(msg,MsgOpenMarker):
-				log("msg",TRACE,"setstate %s %s" % (state,"connected"))
+				log("conn",TRACE,"setstate %s %s" % (state,"connected"))
 				state = "connected"
 
 				self.connect_timeout = self.initial_connect_timeout
@@ -729,17 +729,17 @@ class MsgQueue(Collected,Jobber):
 
 			elif isinstance(msg,MsgReOpen):
 				if self.channel is None:
-					log("msg",TRACE,"setstate %s %s" % (state,"want"))
+					log("conn",TRACE,"setstate %s %s" % (state,"want"))
 					state = "want"
 
 			elif isinstance(msg,MsgClosed):
 				if self.channel is not None:
 					if state != "waiting" and state != "connecting":
-						log("msg",TRACE,"setstate2 %s %s" % (state,"closed"))
+						log("conn",TRACE,"setstate2 %s %s" % (state,"closed"))
 						state = "closed"
 					self._teardown("ReOpen",external=False)
 				if state == "closed" or state == "connecting":
-					log("msg",TRACE,"setstate %s %s: wait %.3f" % (state,"waiting",self.connect_timeout))
+					log("conn",TRACE,"setstate %s %s: wait %.3f" % (state,"waiting",self.connect_timeout))
 					state = "waiting"
 					callLater(True,self.connect_timeout,doReOpen)
 					self._up_timeout()
@@ -752,7 +752,7 @@ class MsgQueue(Collected,Jobber):
 			if self.ondemand and not self.n_outq:
 				continue
 			if state == "want"  or  state == "closed" and self.ondemand and self.n_outq:
-				log("msg",TRACE,"setstate %s %s" % (state,"connecting"))
+				log("conn",TRACE,"setstate %s %s" % (state,"connecting"))
 				state = "connecting"
 				self._setup()
 			if self.state != "connected":

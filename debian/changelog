@@ -1,3 +1,9 @@
+homevent (0.3.36) smurf; urgency=low
+
+  * attempt to fix onewire reconnect loop
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Wed, 28 Nov 2012 14:56:13 +0100
+
 homevent (0.3.35) smurf; urgency=low
 
   * minor fs20 fixes

@@ -51,7 +51,8 @@ class AVRcommon(handler):
 
 	stopped = True
 	def __init__(self, name, ctx=Context, timeout=3, **k):
-		super(AVRcommon,self).__init__(ctx=ctx, name=name, **k)
+		super(AVRcommon,self).__init__(ctx=ctx, **k)
+		self.name = name
 		self.timeout = timeout
 		self.timer = None
 		self.dbuf = ""
@@ -64,8 +65,7 @@ class AVRcommon(handler):
 		self.waiting = None
 
 	def connectionMade(self):
-		log(DEBUG,"AVR started",self.factory.name)
-		self.factory.haveConnection(self)
+		log(DEBUG,"AVR started",self.name)
 		self._start_timer()
 		register_handler(self)
 	
@@ -294,7 +294,7 @@ class AVRreceiver(AVRcommon):
 		self.connectionLost()
 		simple_event(Context(),"fs20","avr","disconnect",*self.name)
 
-	def not_up_event(self):
+	def not_up_event(self, external=False):
 		simple_event(Context(),"fs20","avr","error",*self.name)
 
 	def up_event(self, external=False):
