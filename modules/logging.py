@@ -122,7 +122,7 @@ log limit event DEBUG
 				out = self.ctx.out
 			except AttributeError:
 				out = sys.stderr
-			print >>out, LogNames(log_level(name))
+			print >>out, LogNames[log_level(name)]
 
 
 class LoggingModule(Module):
