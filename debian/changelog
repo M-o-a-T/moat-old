@@ -1,3 +1,9 @@
+homevent (0.3.38) smurf; urgency=low
+
+  * Init timer var
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Thu, 29 Nov 2012 15:36:13 +0100
+
 homevent (0.3.37) smurf; urgency=low
 
   * need to pass conn name

@@ -63,6 +63,7 @@ class AVRcommon(handler):
 		self.last_dgram = None
 		self.stopped = False
 		self.waiting = None
+		self.timer = None
 
 	def connectionMade(self):
 		log(DEBUG,"AVR started",self.name)
