@@ -51,7 +51,7 @@ class AVRcommon(handler):
 
 	stopped = True
 	def __init__(self, name, ctx=Context, timeout=3, **k):
-		super(AVRcommon,self).__init__(ctx=ctx, **k)
+		super(AVRcommon,self).__init__(ctx=ctx, name=name, **k)
 		self.name = name
 		self.timeout = timeout
 		self.timer = None
