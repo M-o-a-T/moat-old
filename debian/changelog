@@ -1,3 +1,9 @@
+homevent (0.3.39) smurf; urgency=low
+
+  * Init order
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Thu, 29 Nov 2012 15:43:26 +0100
+
 homevent (0.3.38) smurf; urgency=low
 
   * Init timer var

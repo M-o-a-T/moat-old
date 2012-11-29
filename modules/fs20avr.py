@@ -51,7 +51,6 @@ class AVRcommon(handler):
 
 	stopped = True
 	def __init__(self, name, ctx=Context, timeout=3, **k):
-		super(AVRcommon,self).__init__(ctx=ctx, name=name, **k)
 		self.name = name
 		self.timeout = timeout
 		self.timer = None
@@ -64,6 +63,7 @@ class AVRcommon(handler):
 		self.stopped = False
 		self.waiting = None
 		self.timer = None
+		super(AVRcommon,self).__init__(ctx=ctx, name=name, **k)
 
 	def connectionMade(self):
 		log(DEBUG,"AVR started",self.name)
