@@ -161,8 +161,7 @@ class AVRcommon(handler):
 
 	def send(self,prefix,data):
 		data = prefix+"".join("%02x" % ord(x)  for x in data)
-		self.transport.write(data+"\n")
-		return defer.succeed(None)
+		self.write(data+"\n")
 
 
 	# standard stuff
