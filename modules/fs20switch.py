@@ -282,13 +282,9 @@ class Switch(Collected):
 		else:
 			d += chr(switch_codes[state])
 		
-		d = self.parent.send(d, handler=self.handler)
-		def done(_):
-			self.state = state
-			self.ext = ext
-			return _
-		d.addCallback(done)
-		return d
+		self.parent.send(d, handler=self.handler)
+		self.state = state
+		self.ext = ext
 
 	def get(self, state, ext=None, handler=None):
 		simple_event(Context(), "fs20","state", \
@@ -462,7 +458,7 @@ send fs20 ‹msg› -|‹aux› ‹name…›
 			ext = None
 		else:
 			ext = int(event[1])
-		return d.set(event[0],ext)
+		d.set(event[0],ext)
 
 
 
