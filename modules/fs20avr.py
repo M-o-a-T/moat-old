@@ -291,7 +291,7 @@ class AVRreceiver(AVRcommon):
 	storage2 = avr_conns
 
 	def down_event(self, external=False):
-		self.connectionLost()
+		self.connectionLost("disconnect")
 		simple_event(Context(),"fs20","avr","disconnect",*self.name)
 
 	def not_up_event(self, external=False):
