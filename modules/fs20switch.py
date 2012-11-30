@@ -29,7 +29,7 @@ from homevent.context import Context
 from homevent.check import register_condition,unregister_condition
 from homevent.base import Name,SName
 from homevent.collect import Collection,Collected
-from homevent.fs20 import from_hc, from_dev, to_hc, to_dev, WrongDatagram
+from homevent.fs20 import from_hc, from_dev, to_hc, to_dev, WrongDatagram, handler_names
 from homevent.fs20sw import group
 
 from twisted.internet import protocol,defer,reactor
@@ -177,18 +177,12 @@ class SwitchGroup(Collected,igroup):
 		else:
 			hdl = dev.get
 		if ext is not None:
-			res = defer.maybeDeferred(hdl,fn,ext,handler=handler)
+			hdl(fn,ext,handler=handler)
 		else:
-			res = defer.maybeDeferred(hdl,fn,handler=handler)
+			hdl(fn,handler=handler)
 
-		def send_cpl(_):
-			data = chr(dc)+chr(fcode|0x80)+data[2:]
-			self.send(data, handler)
-			return _
-		if fcode & 0x40:
-			res.addCallback(send_cpl)
-
-		return res
+		data = chr(dc)+chr(fcode|0x80)+data[2:]
+		self.send(data, handler)
 
 class Switches(Collection):
 	name = Name("fs20","switch")
@@ -227,6 +221,8 @@ class Switch(Collected):
 			yield ("does",d)
 		if self.state is not None:
 			yield ("state",self.state)
+		if self.handler:
+			yield ("via",self.handler.name)
 
 	def add(self):
 		if not self.parent:
@@ -269,7 +265,7 @@ class Switch(Collected):
 		else:
 			return what in self.does
 
-	def set(self, state, ext=None, force=False):
+	def set(self, state, ext=None, force=False, handler=None):
 		if not self._allowed(state):
 			raise CannotDoError(self,state)
 		if not force:
@@ -282,7 +278,7 @@ class Switch(Collected):
 		else:
 			d += chr(switch_codes[state])
 		
-		self.parent.send(d, handler=self.handler)
+		self.parent.send(d, handler=handler or self.handler)
 		self.state = state
 		self.ext = ext
 
@@ -380,11 +376,9 @@ add ‹name…›:
   - Add a new named FS20 switch. By default, it can do "on" and "off".
 """
 	immediate = True
+	code = None
+	handler = None
 
-	def __init__(self,*a,**k):
-		super(FS20addswitch,self).__init__(*a,**k)
-		self.code = None
-		
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		if not len(event):
@@ -393,7 +387,7 @@ add ‹name…›:
 		if self.code is None:
 			raise SyntaxError(u"Usage: “add” needs a “code” sub-statement")
 
-		self.parent.add_sw(Switch(self.code, name))
+		self.parent.add_sw(Switch(self.code, name, handler=self.handler))
 FS20switches.register_statement(FS20addswitch)
 
 
@@ -415,7 +409,7 @@ FS20addswitch.register_statement(FS20swcode)
 
 
 
-class FS20delswitch(AttributedStatement):
+class FS20delswitch(Statement):
 	name = "del"
 	doc = "Delete a switch"
 	long_doc=u"""\
@@ -423,9 +417,6 @@ del ‹name…›
   - Delete a named FS20 switch.
 """
 
-	def __init__(self,*a,**k):
-		super(FS20delswitch,self).__init__(*a,**k)
-		
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		if not len(event):
@@ -435,7 +426,7 @@ del ‹name…›
 FS20switches.register_statement(FS20delswitch)
 
 
-class FS20send(Statement):
+class FS20send(AttributedStatement):
 	name = "send fs20"
 	doc = "Send a message to a FS20 device"
 	long_doc=u"""\
@@ -443,6 +434,7 @@ send fs20 ‹msg› -|‹aux› ‹name…›
   - Send a message to this FS20 device.
     The ‹aux› value, if given, results in an extended message.
 """
+	handler=None
 
 	def run(self,ctx,**k):
 		event = self.params(ctx)
@@ -458,7 +450,28 @@ send fs20 ‹msg› -|‹aux› ‹name…›
 			ext = None
 		else:
 			ext = int(event[1])
-		d.set(event[0],ext)
+		d.set(event[0],ext, handler=self.handler)
+
+
+class FS20via(Statement):
+	name = "via"
+	doc = "Use a specific sender"
+	long_doc=u"""\
+via ‹name…›
+  - Use this sender (presumably closest to intended receiver).
+"""
+
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if not len(event):
+			raise SyntaxError(u"Usage: del ‹name…›")
+		name = SName(event)
+		try:
+			self.parent.handler = handler_names[name]
+		except KeyError:
+			raise SyntaxError(u"Unknown handler: "+str(name))
+FS20send.register_statement(FS20via)
+FS20addswitch.register_statement(FS20via)
 
 
 

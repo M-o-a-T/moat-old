@@ -32,6 +32,7 @@ PREFIX_TIMESTAMP = 't'
 PREFIX = {}
 
 handlers = []
+handler_names = {}
 default_handler = None
 
 class WrongDatagram(TypeError):
@@ -77,12 +78,14 @@ def register_handler(h):
 	if h in handlers:
 		raise RuntimeError("Handler already registered: %s" % (h,))
 	handlers.append(h)
+	handler_names[h.name] = h
 	if default_handler is None:
 		default_handler = h
 
 def unregister_handler(h):
 	global default_handler
 	handlers.remove(h)
+	handler_names.remove(h.name)
 	if default_handler is h:
 		try:
 			default_handler = handlers[0]
