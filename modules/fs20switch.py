@@ -278,7 +278,12 @@ class Switch(Collected):
 		else:
 			d += chr(switch_codes[state])
 		
-		self.parent.send(d, handler=handler or self.handler)
+		if handler is None and self.handler is not None:
+			try:
+				handler = handler_names[self.handler]
+			except KeyError:
+				pass
+		self.parent.send(d, handler=handler)
 		self.state = state
 		self.ext = ext
 
@@ -387,7 +392,11 @@ add ‹name…›:
 		if self.code is None:
 			raise SyntaxError(u"Usage: “add” needs a “code” sub-statement")
 
-		self.parent.add_sw(Switch(self.code, name, handler=self.handler))
+		try:
+			handler = handler_names[self.handler]
+		except KeyError:
+			handler = None
+		self.parent.add_sw(Switch(self.code, name, handler=handler))
 FS20switches.register_statement(FS20addswitch)
 
 
@@ -450,6 +459,11 @@ send fs20 ‹msg› -|‹aux› ‹name…›
 			ext = None
 		else:
 			ext = int(event[1])
+
+		try:
+			handler = handler_names[self.handler]
+		except KeyError:
+			handler = None
 		d.set(event[0],ext, handler=self.handler)
 
 
@@ -465,11 +479,7 @@ via ‹name…›
 		event = self.params(ctx)
 		if not len(event):
 			raise SyntaxError(u"Usage: del ‹name…›")
-		name = SName(event)
-		try:
-			self.parent.handler = handler_names[name]
-		except KeyError:
-			raise SyntaxError(u"Unknown handler: "+str(name))
+		self.parent.handler = SName(event)
 FS20send.register_statement(FS20via)
 FS20addswitch.register_statement(FS20via)
 
