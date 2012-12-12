@@ -1,3 +1,9 @@
+homevent (0.3.47) smurf; urgency=low
+
+  * More handler stuff
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Thu, 13 Dec 2012 00:27:22 +0100
+
 homevent (0.3.46) smurf; urgency=low
 
   * Test whether connected

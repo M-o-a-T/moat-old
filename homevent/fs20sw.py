@@ -57,7 +57,13 @@ class group(object):
 
 	def send(self, data, handler=None):
 		if handler is None:
-			handler = self.handler or fs20.default_handler
+			try:
+				handler = handler_name[self.handler]
+			except KeyError:
+				handler = fs20.default_handler
+
+			if handler is None:
+				raise RuntimeError("No FS20 handler known")
 
 		data = chr(self.code >> 8) + chr(self.code & 0xFF) + data
 		qsum = self.qsum
