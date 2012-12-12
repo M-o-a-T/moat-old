@@ -464,7 +464,7 @@ send fs20 ‹msg› -|‹aux› ‹name…›
 			handler = handler_names[self.handler]
 		except KeyError:
 			handler = None
-		d.set(event[0],ext, handler=self.handler)
+		d.set(event[0],ext, handler=handler)
 
 
 class FS20via(Statement):

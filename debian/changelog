@@ -1,14 +1,8 @@
-homevent (0.3.48) smurf; urgency=low
-
-  * More handler nonsense
-
- -- Matthias Urlichs <matthias@urlichs.de>  Thu, 13 Dec 2012 00:35:20 +0100
-
-homevent (0.3.47) smurf; urgency=low
+homevent (0.3.49) smurf; urgency=low
 
   * More handler stuff
 
- -- Matthias Urlichs <matthias@urlichs.de>  Thu, 13 Dec 2012 00:27:22 +0100
+ -- Matthias Urlichs <matthias@urlichs.de>  Thu, 13 Dec 2012 00:40:06 +0100
 
 homevent (0.3.46) smurf; urgency=low
 
