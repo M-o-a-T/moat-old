@@ -1,3 +1,9 @@
+homevent (0.3.44) smurf; urgency=low
+
+  * Send via: ignore via existence until actual send event
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Wed, 12 Dec 2012 23:56:09 +0100
+
 homevent (0.3.43) smurf; urgency=low
 
   * Don't skip re-sending
