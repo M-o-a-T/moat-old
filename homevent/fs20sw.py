@@ -24,7 +24,7 @@ This module is the basis for processing FS20 datagrams.
 from homevent.event import Event
 from homevent.run import simple_event
 from homevent.context import Context
-from homevent.fs20 import recv_handler,PREFIX, to_hc
+from homevent.fs20 import recv_handler,PREFIX, to_hc, handler_names
 from homevent import fs20 # for default_handler
 
 from time import time
@@ -58,7 +58,7 @@ class group(object):
 	def send(self, data, handler=None):
 		if handler is None:
 			try:
-				handler = handler_name[self.handler]
+				handler = handler_names[self.handler]
 			except KeyError:
 				handler = fs20.default_handler
 
