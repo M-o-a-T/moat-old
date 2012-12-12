@@ -240,7 +240,6 @@ def collect_words(n,w):
 		elif w[0] == "-":
 			w.pop(0)
 			f = -1
-		lw = w[0].lower()
 		if isinstance(w[0],basestring) and w[0].lower() in weekdays:
 			assert p.dow is None, "You already specified the day of week"
 			assert f is None, "A sign makes no sense here"
