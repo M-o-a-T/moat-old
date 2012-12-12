@@ -241,10 +241,10 @@ def collect_words(n,w):
 			w.pop(0)
 			f = -1
 		lw = w[0].lower()
-		if lw in weekdays:
+		if isinstance(w[0],basestring) and w[0].lower() in weekdays:
 			assert p.dow is None, "You already specified the day of week"
 			assert f is None, "A sign makes no sense here"
-			p.dow = weekdays[lw]
+			p.dow = weekdays[w[0].lower()]
 			p.nth = 0
 			w.pop(0)
 			continue
