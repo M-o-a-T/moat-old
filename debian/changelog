@@ -1,3 +1,9 @@
+homevent (0.3.43) smurf; urgency=low
+
+  * Don't skip re-sending
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Wed, 12 Dec 2012 19:39:26 +0100
+
 homevent (0.3.42) smurf; urgency=low
 
   * Implement 'via' parameter for FS20 senders

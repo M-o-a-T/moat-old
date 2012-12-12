@@ -268,9 +268,9 @@ class Switch(Collected):
 	def set(self, state, ext=None, force=False, handler=None):
 		if not self._allowed(state):
 			raise CannotDoError(self,state)
-		if not force:
-			if self.state == state and self.ext == ext:
-				return
+#		if not force:
+#			if self.state == state and self.ext == ext:
+#				return
 		d = chr(self.code)
 		if ext is not None:
 			d += chr(switch_codes[state] | 0x20)
