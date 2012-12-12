@@ -493,6 +493,6 @@ class NetConnected(Check):
 			conn = self.storage.get(Name(*args))
 		if conn is None:
 			return False
-		return conn.did_up_event
+		return conn.job is not None ## TODO: correct?
 
 

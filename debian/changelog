@@ -1,3 +1,9 @@
+homevent (0.3.46) smurf; urgency=low
+
+  * Test whether connected
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Thu, 13 Dec 2012 00:19:22 +0100
+
 homevent (0.3.45) smurf; urgency=low
 
   * Edit error, stupid
