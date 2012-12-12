@@ -84,12 +84,11 @@ class Waiter(Collected,Jobber):
 		super(Waiter,self).__init__(name)
 	
 	def list(self):
-		end=now()+self.value
+		end=now()+dt.timedelta(0,self.value)
 		yield super(Waiter,self)
 		yield("start",self.start)
 		yield("end",end)
 		yield("total", humandelta(end-self.start))
-		yield("remaining", self.value)
 		w = self
 		while True:
 			w = getattr(w,"parent",None)
