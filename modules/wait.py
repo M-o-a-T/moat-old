@@ -126,8 +126,8 @@ class Waiter(Collected,Jobber):
 
 	def _set_pling(self):
 		timeout = unixtime(self.end) - unixtime(now(self.force))
-		if timeout < 0:
-			timeout = 0.01
+		if timeout <= 0.1:
+			timeout = 0.1
 		if self._plinger:
 			self._plinger.cancel()
 		self._plinger = callLater(self.force, timeout, self._pling)
@@ -161,8 +161,8 @@ class Waiter(Collected,Jobber):
 				else:
 					q.put(RuntimeError('Unknown command: '+cmd))
 		finally:
-			super(Waiter,self).delete()
 			q,self.q = self.q,None
+			super(Waiter,self).delete()
 			if q is not None:
 				while not q.empty():
 					q.get()[0].put(StopIteration())
