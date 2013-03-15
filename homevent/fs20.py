@@ -37,7 +37,13 @@ default_handler = None
 
 class WrongDatagram(TypeError):
 	"""The datagram could not be recognized"""
-	pass
+	def __init__(self,data=None):
+		self.data = data
+	def __str__(self):
+		r = "Bad FS20 datagram"
+		if self.data is not None:
+			r += " (%s)" % (repr(self.data),)
+		return r
 
 def to_hc(code, _len=8):
 	"""convert a number to an n(=8)-digit 1234 value"""

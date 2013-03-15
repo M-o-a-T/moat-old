@@ -144,7 +144,7 @@ class SwitchGroup(Collected,igroup):
 		self.devs[switch.code] = switch
 
 	def datagramReceived(self,data, handler=None, timedelta=None):
-		if len(data) < 2: raise WrongDatagram
+		if len(data) < 2: raise WrongDatagram(data)
 
 		if self.last_dgram is not None and timedelta is not None and \
 				self.last_dgram == data and timedelta < 0.15:
@@ -153,10 +153,10 @@ class SwitchGroup(Collected,igroup):
 
 		fcode = ord(data[1])
 		if fcode & 0x20:
-			if len(data) != 3: raise WrongDatagram
+			if len(data) != 3: raise WrongDatagram(data)
 			ext = ord(data[2])
 		else:
-			if len(data) != 2: raise WrongDatagram
+			if len(data) != 2: raise WrongDatagram(data)
 			ext = None
 
 		dc = ord(data[0])
