@@ -167,7 +167,7 @@ class AVRcommon(handler):
 	# standard stuff
 
 	def connectionLost(self,reason):
-		log(DEBUG,"AVR ending",self.factory.name,reason)
+		log(DEBUG,"AVR ending",self.name,reason)
 		unregister_handler(self)
 
 	# process stuff
@@ -182,7 +182,7 @@ class AVRcommon(handler):
 		pass
 
 	def processEnded(self, status_object):
-		log(DEBUG,"AVR ended",status_object.value.exitCode, self.factory.name)
+		log(DEBUG,"AVR ended",status_object.value.exitCode, self.name)
 		if self.stopped:
 			del AVRs[self.name]
 		else:
