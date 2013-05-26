@@ -144,7 +144,7 @@ class Command(BaseCommand):
 
 	def one_valve(self,v,options):
 		if v.feed.disabled:
-			continue
+			return
 		if (v.level < v.stop_level) if v.priority else (v.level < v.start_level):
 			print "Nothing to do",v,v.level,v.start_level
 			if options['save'] and v.verbose:
