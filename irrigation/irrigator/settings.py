@@ -1,4 +1,5 @@
 # Django settings for the irrigator project.
+from django.conf.global_settings import *
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -119,8 +120,6 @@ JINJA2_AUTOESCAPE = True
 
 DEFAULT_JINJA2_TEMPLATE_EXTENSION = ".jinja"
 
-from hamlish_jinja import Hamlish
-Hamlish._self_closing_jinja_tags.add('csrf_token')
 from rainman.utils import str_tz
 
 JINJA2_ENVIRONMENT_OPTIONS = { 'extensions':['hamlish_jinja.HamlishTagExtension','jinja2.ext.i18n', 'jinja2.ext.autoescape'] }
