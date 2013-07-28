@@ -1,3 +1,10 @@
+homevent (0.3.50) smurf; urgency=low
+
+  * Monitoring: flush output after each block
+  * monitor: sum() needs float()ification
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Sun, 28 Jul 2013 19:04:06 +0200
+
 homevent (0.3.49) smurf; urgency=low
 
   * More handler stuff
