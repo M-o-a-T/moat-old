@@ -42,12 +42,15 @@ def called(**k):
 	for a,b in k.iteritems():
 		print a,b
 	print ""
+	sys.stdout.flush()
+
 def q_called(**k):
 	q.put((called,[],k))
 cb = c.root.monitor(q_called)
 
 def logged(level,*a):
 	print u"<%d> %s" % (level,u"¦".join((str(x) for x in a)))
+	sys.stdout.flush()
 def q_logged(*a):
 	q.put((logged,a,{}))
 cm = c.root.logger(q_logged,None,0)
