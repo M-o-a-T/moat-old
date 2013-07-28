@@ -213,7 +213,7 @@ class Monitor(Collected,Jobber):
 
 		if len(self.data) < self.points:
 			return None
-		avg = sum(self.data)/len(self.data)
+		avg = sum(float(x) for x in self.data)/len(self.data)
 		if not self.range:
 			return avg
 
