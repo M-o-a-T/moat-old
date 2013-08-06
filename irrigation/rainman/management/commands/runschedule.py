@@ -1025,7 +1025,7 @@ class SchedValve(SchedCommon):
 		else:
 			level = F('level')
 		level += sum_f
-		if flow > 0 and self.v.level > self.v.max_level:
+		if (flow > 0 or sum_r > 0) and self.v.level > self.v.max_level:
 			level = self.v.max_level
 		level -= flow/self.v.area+sum_r
 		#if level < 0:
