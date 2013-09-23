@@ -545,7 +545,7 @@ class SchedSite(SchedCommon):
 			if valve.locked:
 				continue
 			try:
-				valve._off()
+				valve._off(1)
 			except NotConnected:
 				pass
 			except Exception:
@@ -814,10 +814,10 @@ class SchedValve(SchedCommon):
 			if self.v.verbose:
 				self.log("Opened for %s"%(duration,))
 
-	def _off(self):
+	def _off(self, num):
 		if self.on:
 			if self.v.verbose:
-				self.log("Closing")
+				self.log("Closing "+str(num))
 			print >>sys.stderr,"Close",self.v.var
 		try:
 			self.site.send_command("set","output","off",*(self.v.var.split()))
@@ -854,7 +854,9 @@ class SchedValve(SchedCommon):
 			if self.sched is not None:
 				self.sched.refresh()
 				if self.sched.start+self.sched.duration <= n:
-					self._off()
+					if self.v.verbose:
+						print >>sys.stderr,"Turn off: %s+%s <= %s" % (self.sched.start,self.sched.duration,n)
+					self._off(2)
 					self.sched = None
 				else:
 					self.sched_job = gevent.spawn_later((self.sched.start+self.sched.duration-n).total_seconds(),self.run_sched_task,reason="_run_schedule 1")
@@ -888,13 +890,13 @@ class SchedValve(SchedCommon):
 		except IndexError:
 			if self.v.verbose:
 				print >>sys.stderr,"SCHED EMPTY %s: %s" % (self.v.name,str_tz(self.sched_ts))
-			self._off()
+			self._off(3)
 			return
 
 		if sched.start > n:
 			if self.v.verbose:
 				print >>sys.stderr,"SCHED %s: sched %d in %s" % (self.v.name,sched.id,humandelta(sched.start-n))
-			self._off()
+			self._off(4)
 			self.sched_job = gevent.spawn_later((sched.start-n).total_seconds(),self.run_sched_task,reason="_run_schedule 2")
 			return
 		try:
@@ -1067,7 +1069,7 @@ class FlowCheck(object):
 				raise RuntimeError("already locked: "+repr(valve))
 			valve.locked = True
 			if valve.on:
-				valve._off()
+				valve._off(5)
 				gevent.sleep(1)
 				if valve.on:
 					raise RuntimeError("cannot turn off: "+repr(valve))
@@ -1104,7 +1106,7 @@ class FlowCheck(object):
 		else:
 			self.valve.log("Flow check broken: sec %s"%(sec,))
 		if self.valve.on:
-			self.valve._off()
+			self.valve._off(6)
 		self._unlock()
 
 	def dead(self, kill=True):
@@ -1125,7 +1127,7 @@ class FlowCheck(object):
 			return
 		self.valve._flow_check = None
 		if self.valve.on:
-			self.valve._off()
+			self.valve._off(7)
 		for valve in self.locked:
 			valve.locked = False
 		self.q.set(self.res)
@@ -1167,7 +1169,7 @@ class MaxFlowCheck(object):
 				raise RuntimeError("already locked: "+repr(valve))
 			valve.locked = True
 			if valve.on:
-				valve._off()
+				valve._off(8)
 				gevent.sleep(1)
 				if valve.on:
 					valve.locked = False
@@ -1187,7 +1189,7 @@ class MaxFlowCheck(object):
 					raise RuntimeError("already locked: "+repr(valve))
 				valve.locked = True
 				if valve.on:
-					valve._off()
+					valve._off(9)
 					gevent.sleep(1)
 					if valve.on:
 						valve.locked = False
@@ -1246,7 +1248,7 @@ class MaxFlowCheck(object):
 			return
 		self.feed._flow_check = None
 		for valve in self.on:
-			valve._off()
+			valve._off(10)
 		for valve in self.locked:
 			valve.locked = False
 		self.q.set(self.res)
@@ -1287,7 +1289,7 @@ class Flusher(object):
 				raise RuntimeError("already locked: "+repr(valve))
 			valve.locked = True
 			if valve.on:
-				valve._off()
+				valve._off(11)
 				gevent.sleep(1)
 				if valve.on:
 					valve.locked = False
@@ -1343,7 +1345,7 @@ class Flusher(object):
 			return
 		self.feed._flow_check = None
 		if self.on is not None:
-			self.on._off()
+			self.on._off(12)
 		for valve in self.locked:
 			valve.locked = False
 		self.q.set(self.res)
