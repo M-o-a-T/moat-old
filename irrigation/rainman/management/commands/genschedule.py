@@ -30,6 +30,8 @@ from optparse import make_option
 from time import sleep
 from traceback import print_exc
 import rpyc
+import errno
+import sys
 
 n=now()
 soon=n+timedelta(0,15*60)
@@ -97,8 +99,15 @@ class Command(BaseCommand):
 					c = rpyc.connect(s.host, int(s.port), ipv6=True)
 					c.root.command("trigger","sync",*s.var.split())
 					c.close()
+				except EnvironmentError as e:
+					if e.errno == errno.ECONNREFUSED:
+						print >>sys.stderr,"Connecting to '%s' failed" % (s.host,)
+						continue
+					print_exc()
 				except Exception:
 					print_exc()
+				else:
+					print >>sys.stderr,"Connecting to '%s' succeeded" % (s.host,)
 			sleep(10)
 		q = Q()
 		if options['site']:
