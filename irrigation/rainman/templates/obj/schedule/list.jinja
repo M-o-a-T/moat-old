@@ -2,6 +2,7 @@
 
 -extends "base.jinja"
 -import "obj/schedule/macro.jinja" as sc
+-import "obj/macro.jinja" as m
 
 -block title
 	schedules
@@ -28,6 +29,8 @@
 			All schedules
 
 	=sc.table(schedule_list,user, show_valve=show_valve, prefix=prefix)
+
+	=m.pager(page_obj)
 
 	-if not show_valve
 		%div.buttons
