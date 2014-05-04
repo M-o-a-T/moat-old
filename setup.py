@@ -21,6 +21,7 @@
 
 from sys import version
 import os
+os.environ["HOMEVENT_BUILD"] = "Y"
 from homevent import VERSION
 
 #from distutils.core import setup

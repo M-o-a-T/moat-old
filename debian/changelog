@@ -1,7 +1,12 @@
+homevent (0.3.52) smurf; urgency=low
+
+  * Do not monkeypatch when called from setup.py
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Sun, 04 May 2014 21:53:50 +0200
+
 homevent (0.3.51) smurf; urgency=low
 
   * Add systemd init files
-  * temp hack for debugging
 
  -- Matthias Urlichs <matthias@urlichs.de>  Sun, 04 May 2014 21:39:00 +0200
 

@@ -19,29 +19,31 @@
 This is the core of the event dispatcher.
 """
 
-# This test is also in homevent/twist.py, for recursive-import reasons
-import os
-if "HOMEVENT_TEST" in os.environ:
-	from homevent.testreactor import install
-	TESTING = True
-else:
-	from homevent.geventreactor import install
-	TESTING = False
-install()
-del install
-
-from gevent import monkey
-import pdb;pdb.set_trace()
-monkey.patch_all()
-del monkey
-
-from homevent.gevent_rpyc import patch_all
-patch_all()
-del patch_all
-
-from homevent import twist # for side effects
-
 VERSION = "0.3"
+
+import os
+if os.environ.get("HOMEVENT_BUILD","N") != "Y":
+
+	# This test is also in homevent/twist.py, for recursive-import reasons
+	if "HOMEVENT_TEST" in os.environ:
+		from homevent.testreactor import install
+		TESTING = True
+	else:
+		from homevent.geventreactor import install
+		TESTING = False
+	install()
+	del install
+
+
+	from gevent import monkey
+	monkey.patch_all()
+	del monkey
+
+	from homevent.gevent_rpyc import patch_all
+	patch_all()
+	del patch_all
+
+	from homevent import twist # for side effects
 
 __all__ = ("Context", "Event", "Worker","SeqWorker","WorkSequence",
 	"collect_event","process_event","register_worker", "mainloop",
