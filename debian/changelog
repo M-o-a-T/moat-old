@@ -1,3 +1,10 @@
+homevent (0.3.51) smurf; urgency=low
+
+  * Add systemd init files
+  * temp hack for debugging
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Sun, 04 May 2014 21:39:00 +0200
+
 homevent (0.3.50) smurf; urgency=low
 
   * Monitoring: flush output after each block
