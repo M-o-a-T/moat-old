@@ -1,0 +1,9 @@
+[Unit]
+Description=Home Event monitor
+ConditionPathExists=/etc/homevent/main.he
+
+[Service]
+ExecStart=/usr/bin/homevent /etc/homevent/main.he
+
+[Install]
+WantedBy=multi-user.target
