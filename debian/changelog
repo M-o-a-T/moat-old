@@ -1,3 +1,9 @@
+homevent (0.3.53) smurf; urgency=low
+
+  * Depend on python-tz if python-pytz does not exist.
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Mon, 05 May 2014 10:08:15 +0200
+
 homevent (0.3.52) smurf; urgency=low
 
   * Do not monkeypatch when called from setup.py
