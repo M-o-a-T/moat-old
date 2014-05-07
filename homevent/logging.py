@@ -160,8 +160,9 @@ class BaseLogger(Collected,Jobber):
 		except Full:
 			## panic?
 			pass
-		self.job.join(timeout=1)
-		self.stop_job("job")
+		if self.job is not None:
+			self.job.join(timeout=1)
+			self.stop_job("job")
 
 	def _wlog(self, *a):
 		try:
