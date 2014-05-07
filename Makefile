@@ -17,10 +17,7 @@
 export PYTHONPATH=$(shell pwd)
 DESTDIR ?= "/"
 
-all:
-	cp -a _geventreactor/Pinako/geventreactor/__init__.py homevent/geventreactor.py
-	#cp -a _zeromq/gevent_zeromq/core.py homevent/zeromq.py
-	cp -a _geventreactor/Pinako/geventrpyc/__init__.py homevent/gevent_rpyc.py
+all: homevent/geventreactor.py homevent/gevent_rpyc.py
 	$(MAKE) -C fs20 all
 	$(MAKE) -C wago all
 	python setup.py build
@@ -28,6 +25,12 @@ install:
 	$(MAKE) -C fs20 install ROOT=$(DESTDIR)
 	$(MAKE) -C wago install ROOT=$(DESTDIR)
 	python setup.py install --root="$(DESTDIR)" --no-compile -O0 --install-layout=deb
+
+homevent/geventreactor.py: _geventreactor/Pinako/geventreactor/__init__.py
+	cp -a _geventreactor/Pinako/geventreactor/__init__.py homevent/geventreactor.py
+	#cp -a _zeromq/gevent_zeromq/core.py homevent/zeromq.py
+homevent/gevent_rpyc.py: _geventreactor/Pinako/geventrpyc/__init__.py
+	cp -a _geventreactor/Pinako/geventrpyc/__init__.py homevent/gevent_rpyc.py
 
 FIX:
 	@if test ! -d homevent/modules; then ln -s ../modules homevent/modules; fi

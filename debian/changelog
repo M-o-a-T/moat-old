@@ -1,3 +1,9 @@
+homevent (0.3.55) smurf; urgency=medium
+
+  * Fix gevent reactor to not use kill().
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Wed, 07 May 2014 10:01:43 +0200
+
 homevent (0.3.54) smurf; urgency=medium
 
   * Extend systemd setup
