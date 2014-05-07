@@ -3,7 +3,10 @@ Description=Home Event monitor
 ConditionPathExists=/etc/homevent/main.he
 
 [Service]
-ExecStart=/usr/bin/homevent /etc/homevent/main.he
+ExecStart=/usr/sbin/homevent /etc/homevent/main.he
+WorkingDirectory=/etc/homevent
+User=homevent
+Group=homevent
 
 [Install]
 WantedBy=multi-user.target

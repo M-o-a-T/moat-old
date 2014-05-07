@@ -1,3 +1,9 @@
+homevent (0.3.54) smurf; urgency=medium
+
+  * Extend systemd setup
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Wed, 07 May 2014 09:24:19 +0200
+
 homevent (0.3.53) smurf; urgency=low
 
   * Depend on python-tz if python-pytz does not exist.
