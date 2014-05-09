@@ -310,11 +310,17 @@ class Monitor(Collected,Jobber):
 
 				else:
 					log("monitor",TRACE,"raw",val,*self.name)
+					try:
+						val = float(val)
+					except TypeError:
+						log("monitor",ERROR,self.name,"not a float:",val)
 					if hasattr(self,"factor"):
 						try:
 							val = val * self.factor + self.offset
-						except TypeError:
+						except TypeError as e:
 							log("monitor",ERROR,self.name,val,self.factor,self.offset)
+							process_failure(e)
+							continue
 					self.data.append(val)
 
 					avg = self.filter_data()
