@@ -1,3 +1,9 @@
+homevent (0.3.57) smurf; urgency=medium
+
+  * log broken values
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Thu, 15 May 2014 04:29:19 +0200
+
 homevent (0.3.56) smurf; urgency=medium
 
   * not a float ??
