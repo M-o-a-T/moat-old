@@ -70,6 +70,15 @@ LogNames={
 	PANIC:"PANIC",
 	NONE:"NONE",
 }
+LogLevels={
+	'TRACE':TRACE,
+	'DEBUG':DEBUG,
+	'WARN':WARN,
+	'INFO':INFO,
+	'ERROR':ERROR,
+	'PANIC':PANIC,
+	'NONE':NONE,
+}
 
 levels = {}
 
@@ -160,7 +169,8 @@ class BaseLogger(Collected,Jobber):
 		except Full:
 			## panic?
 			pass
-		self.job.join(timeout=1)
+		if self.job is not None:
+			self.job.join(timeout=1)
 		self.stop_job("job")
 
 	def _wlog(self, *a):
@@ -225,7 +235,7 @@ class Logger(BaseLogger):
 
 	def _log(self, level, *data):
 		if hasattr(self.out,'fileno'):
-			select((),(self.out,))
+			select((),(self.out,),())
 		super(Logger,self)._log(level,*data)
 
 	def _slog(self,level,data):
