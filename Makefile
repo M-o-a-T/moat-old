@@ -18,6 +18,8 @@ export PYTHONPATH=$(shell pwd)
 DESTDIR ?= "/"
 
 all:
+	git submodule init
+	git submodule update
 	cp -a _geventreactor/Pinako/geventreactor/__init__.py homevent/geventreactor.py
 	#cp -a _zeromq/gevent_zeromq/core.py homevent/zeromq.py
 	cp -a _geventreactor/Pinako/geventrpyc/__init__.py homevent/gevent_rpyc.py
@@ -46,6 +48,8 @@ diff: FIX
 
 ow: FIX
 	sh test/interactive/onewire.sh
+a amqp: FIX
+	python test/interactive/main.py test/interactive/amqp
 w fs20: FIX
 	python test/interactive/main.py test/interactive/wago
 wd wagodebug: FIX
