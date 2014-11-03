@@ -91,7 +91,7 @@ def register_handler(h):
 def unregister_handler(h):
 	global default_handler
 	handlers.remove(h)
-	handler_names.remove(h.name)
+	del handler_names[h.name]
 	if default_handler is h:
 		try:
 			default_handler = handlers[0]
