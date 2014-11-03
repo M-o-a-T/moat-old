@@ -171,7 +171,7 @@ class BaseLogger(Collected,Jobber):
 			pass
 		if self.job is not None:
 			self.job.join(timeout=1)
-		self.stop_job("job")
+			self.stop_job("job")
 
 	def _wlog(self, *a):
 		try:

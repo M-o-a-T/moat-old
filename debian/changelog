@@ -1,3 +1,51 @@
+homevent (0.3.58) smurf; urgency=medium
+
+  * Major merge
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Mon, 03 Nov 2014 11:23:49 +0100
+
+homevent (0.3.57) smurf; urgency=medium
+
+  * log broken values
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Thu, 15 May 2014 04:29:19 +0200
+
+homevent (0.3.56) smurf; urgency=medium
+
+  * not a float ??
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Fri, 09 May 2014 02:29:40 +0200
+
+homevent (0.3.55) smurf; urgency=medium
+
+  * Fix gevent reactor to not use kill().
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Wed, 07 May 2014 10:01:43 +0200
+
+homevent (0.3.54) smurf; urgency=medium
+
+  * Extend systemd setup
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Wed, 07 May 2014 09:24:19 +0200
+
+homevent (0.3.53) smurf; urgency=low
+
+  * Depend on python-tz if python-pytz does not exist.
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Mon, 05 May 2014 10:08:15 +0200
+
+homevent (0.3.52) smurf; urgency=low
+
+  * Do not monkeypatch when called from setup.py
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Sun, 04 May 2014 21:53:50 +0200
+
+homevent (0.3.51) smurf; urgency=low
+
+  * Add systemd init files
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Sun, 04 May 2014 21:39:00 +0200
+
 homevent (0.3.50) smurf; urgency=low
 
   * Monitoring: flush output after each block
