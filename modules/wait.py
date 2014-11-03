@@ -47,6 +47,11 @@ from gevent.queue import Channel
 from time import time
 import os
 import datetime as dt
+try:
+	from twisted.internet.error import AlreadyCalled
+except ImportError:
+	class AlreadyCalled(Exception):
+		pass
 
 timer_nr = 0
 
@@ -148,7 +153,10 @@ class Waiter(Collected,Jobber):
 					return True
 				elif cmd == "cancel":
 					if self._plinger:
-						self._plinger.cancel()
+						try:
+							self._plinger.cancel()
+						except AlreadyCalled:
+							pass
 						self._plinger = None
 					q.put(None)
 					return False
