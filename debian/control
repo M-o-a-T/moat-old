@@ -4,8 +4,6 @@ Priority: extra
 Maintainer: Matthias Urlichs <matthias@urlichs.de>
 Build-Depends: debhelper (>= 5),
  python-setuptools,
- python-twisted-core (>= 11.1),
- python-twisted-conch,
  libglib2.0-dev (>= 2.14),
  python-rrdtool,
  rrdtool,
@@ -23,8 +21,8 @@ Standards-Version: 3.7.2
 
 Package: homevent
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, ${python:Depends}, python-twisted-core (>= 11.1)
-Recommends: pulseaudio (>= 0.9.7), python-twisted-conch, python-rrdtool, owfs,
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${python:Depends}
+Recommends: pulseaudio (>= 0.9.7), python-rrdtool, owfs,
  python-sqlmix (>= 0.9.26),
  python-gevent (>= 1.0),
  python-rpyc,
