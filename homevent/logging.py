@@ -70,6 +70,15 @@ LogNames={
 	PANIC:"PANIC",
 	NONE:"NONE",
 }
+LogLevels={
+	'TRACE':TRACE,
+	'DEBUG':DEBUG,
+	'WARN':WARN,
+	'INFO':INFO,
+	'ERROR':ERROR,
+	'PANIC':PANIC,
+	'NONE':NONE,
+}
 
 levels = {}
 
@@ -226,7 +235,7 @@ class Logger(BaseLogger):
 
 	def _log(self, level, *data):
 		if hasattr(self.out,'fileno'):
-			select((),(self.out,))
+			select((),(self.out,),())
 		super(Logger,self)._log(level,*data)
 
 	def _slog(self,level,data):

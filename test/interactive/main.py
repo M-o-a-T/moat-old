@@ -75,8 +75,7 @@ def looper():
 def ready():
 	c=Context()
 	for f in sys.argv[1:]:
-		read_config(c,f)
-		parse(f, interpreter, ctx=c)
+		parse(f, ctx=c)
 	
 	#c.logger=parse_logger
 	if os.isatty(0):

@@ -17,7 +17,10 @@
 export PYTHONPATH=$(shell pwd)
 DESTDIR ?= "/"
 
-all: homevent/geventreactor.py homevent/gevent_rpyc.py
+all: subfiles
+	cp -a _geventreactor/Pinako/geventreactor/__init__.py homevent/geventreactor.py
+	#cp -a _zeromq/gevent_zeromq/core.py homevent/zeromq.py
+	cp -a _geventreactor/Pinako/geventrpyc/__init__.py homevent/gevent_rpyc.py
 	$(MAKE) -C fs20 all
 	$(MAKE) -C wago all
 	python setup.py build
@@ -26,12 +29,19 @@ install:
 	$(MAKE) -C wago install ROOT=$(DESTDIR)
 	python setup.py install --root="$(DESTDIR)" --no-compile -O0 --install-layout=deb
 
+subfiles: homevent/geventreactor.py homevent/gevent_rpyc.py
+
 homevent/geventreactor.py: _geventreactor/Pinako/geventreactor/__init__.py
 	cp -a _geventreactor/Pinako/geventreactor/__init__.py homevent/geventreactor.py
 	#cp -a _zeromq/gevent_zeromq/core.py homevent/zeromq.py
 homevent/gevent_rpyc.py: _geventreactor/Pinako/geventrpyc/__init__.py
 	cp -a _geventreactor/Pinako/geventrpyc/__init__.py homevent/gevent_rpyc.py
 
+_geventreactor/Pinako/geventrpyc/__init__.py: submod
+_geventreactor/Pinako/geventreactor/__init__.py: submod
+submod:
+	git submodule init
+	git submodule update
 FIX:
 	@if test ! -d homevent/modules; then ln -s ../modules homevent/modules; fi
 
@@ -49,6 +59,8 @@ diff: FIX
 
 ow: FIX
 	sh test/interactive/onewire.sh
+a amqp: FIX
+	python test/interactive/main.py test/interactive/amqp
 w fs20: FIX
 	python test/interactive/main.py test/interactive/wago
 wd wagodebug: FIX
@@ -96,4 +108,4 @@ schema:
 	git add irrigation/rainman/migrations/*.py
 
 
-.PHONY: test i interactive
+.PHONY: FIX test i interactive submod

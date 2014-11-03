@@ -228,7 +228,7 @@ class OWFSmon(Monitor):
 					dev.set(self.switch,self.to_low)
 					val = dev.get(self.attribute)
 					self.switched = False
-			if self.switched:
+			if self.switched and val != "":
 				val += self.high - self.low
 		return val
 

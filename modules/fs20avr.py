@@ -136,6 +136,7 @@ class AVRcommon(handler):
 				try:
 					self.lineReceived(msg)
 				except Exception as e:
+					log("fs20",ERROR,msg,e)
 					fix_exception(e)
 					process_failure(e)
 
