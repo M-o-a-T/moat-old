@@ -1,0 +1,14 @@
+[Unit]
+Description=Home Event monitor
+ConditionPathExists=/etc/homevent/%i.he
+After=rabbitmq-server.service
+Requires=rabbitmq-server.service
+
+[Service]
+ExecStart=/usr/sbin/homevent /etc/homevent/%i.he
+WorkingDirectory=/etc/homevent
+User=homevent
+Group=homevent
+
+[Install]
+WantedBy=homevent.target
