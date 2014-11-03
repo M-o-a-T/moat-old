@@ -445,7 +445,11 @@ class SchedSite(SchedCommon):
 			c.check_flow(**k)
 
 	def connect(self):
-		self.ci = rpyc.connect(host=self.s.host, port=int(self.s.port), ipv6=True, service=RestartService)
+		try:
+			self.ci = rpyc.connect(host=self.s.host, port=int(self.s.port), ipv6=False, service=RestartService)
+		except Exception:
+			print >>sys.stderr,"Could not connect:",self.s.host
+			raise
 
 	def maybe_restart(self):
 		self.log("reconnecting")
