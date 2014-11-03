@@ -22,7 +22,6 @@ from __future__ import division
 	… among other grab-bag stuff.
 	"""
 
-from twisted.internet.abstract import FileDescriptor
 from twisted.internet import fdesc,defer,reactor,base
 from twisted.python import log
 
@@ -38,6 +37,20 @@ import os
 import fcntl
 import datetime as dt
 import traceback
+
+## change the default encoding to UTF-8
+## this is a no-op in PY3
+# PY2 defaults to ASCII, which requires adding spurious .encode("utf-8") to
+# absolutely everything you might want to print / write to a file
+import sys
+try:
+	reload(sys)
+except NameError:
+	# py3 doesn't have reload()
+	pass
+else:
+	# py3 also doesn't have sys.setdefaultencoding
+	sys.setdefaultencoding("utf-8")
 
 # This test is also in homevent/__init__.py, for recursive-import reasons
 if "HOMEVENT_TEST" in os.environ:
@@ -67,27 +80,6 @@ def setBlocking(flag,file):
 	fd = file.fileno()
 	fl = fcntl.fcntl(fd, fcntl.F_GETFL)
 	fcntl.fcntl(fd, fcntl.F_SETFL, (fl & ~os.O_NONBLOCK) if flag else (fl | os.O_NONBLOCK))
-
-class StdInDescriptor(FileDescriptor):
-	def fileno(self):
-		return 0
-	def doRead(self):
-		try:
-			setBlocking(False,0)
-			return fdesc.readFromFD(0, self.dataReceived)
-		finally:
-			fdesc.setBlocking(True,0)
-
-class StdOutDescriptor(FileDescriptor):
-	def fileno(self):
-		return 1
-	def writeSomeData(self, data):
-		try:
-			setBlocking(False,1)
-			return write(1,data)
-		finally:
-			setBlocking(True,1)
-	
 
 def fix_exception(e, tb=None):
 	"""Add a __traceback__ attribute to an exception if it's not there already."""
@@ -236,15 +228,6 @@ if False:
 		print >>sys.stderr,"+THR",tid,p,a,k
 		return _cic(_tcall,tid,p,a,k)
 	reactor.callInThread = cic
-
-# Always encode Unicode strings in utf-8
-fhw = FileDescriptor.write
-def nfhw(self,data):
-	if isinstance(data,unicode):
-		data = data.encode("utf-8")
-	return fhw(self,data)
-FileDescriptor.write = nfhw
-
 
 if TESTING and False:
 	# Log all threads, wait for them to exit.
