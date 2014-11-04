@@ -24,7 +24,6 @@ __credits__ = \
 import string, re, os, sys
 from token import *
 import tokenize as t
-from twisted.internet.defer import maybeDeferred, Deferred
 
 from homevent.logging import log,TRACE
 from homevent.event import StopParsing

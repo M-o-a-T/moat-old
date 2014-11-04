@@ -32,9 +32,6 @@ from homevent.collect import Collection,Collected
 from homevent.fs20 import from_hc, from_dev, to_hc, to_dev, WrongDatagram, handler_names
 from homevent.fs20sw import group
 
-from twisted.internet import protocol,defer,reactor
-from twisted.protocols.basic import _PauseableMixin
-
 codes = {}
 devs = {}
 

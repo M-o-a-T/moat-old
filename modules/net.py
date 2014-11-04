@@ -29,8 +29,6 @@ from homevent.collect import Collection,Collected
 from homevent.run import simple_event
 from homevent.context import Context
 
-from twisted.internet import protocol,reactor,error
-
 from homevent.net import NetListen,NetConnect,NetSend,NetConnected,\
 	DisconnectedError,NetListener,NetActiveConnector,NetPassiveConnector,\
 	NetName,NetTo,LineReceiver

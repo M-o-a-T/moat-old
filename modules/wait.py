@@ -36,22 +36,17 @@ from homevent.times import time_delta, time_until, unixtime,unixdelta, now, huma
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.base import Name,SName
 from homevent.collect import Collection,Collected
-from homevent.twist import callLater,fix_exception,Jobber
+from homevent.twist import callLater,fix_exception,Jobber,log_wait
 from homevent.logging import log_exc,TRACE
 from homevent.delay import DelayFor,DelayWhile,DelayUntil,DelayNext,\
 	DelayError,DelayDone,DelayCancelled
 
-import gevent
-from gevent.queue import Channel
+from gevent.queue import Channel,AsyncResult
+from gevent.lock import Semaphore
 
 from time import time
 import os
 import datetime as dt
-try:
-	from twisted.internet.error import AlreadyCalled
-except ImportError:
-	class AlreadyCalled(Exception):
-		pass
 
 timer_nr = 0
 
@@ -82,6 +77,7 @@ class Waiter(Collected,Jobber):
 		self.ctx = parent.ctx
 		self.start = now()
 		self.force = force
+		self._lock = Semaphore()
 		try:
 			self.parent = parent.parent
 		except AttributeError:
@@ -125,7 +121,8 @@ class Waiter(Collected,Jobber):
 	def __repr__(self):
 		return u"‹%s %s %s›" % (self.__class__.__name__, self.name,self.value)
 
-	def _pling(self):
+	def _pling(self,timeout):
+		gevent.sleep(timeout)
 		self._plinger = None
 		self._cmd("timeout")
 
@@ -135,7 +132,7 @@ class Waiter(Collected,Jobber):
 			timeout = 0.1
 		if self._plinger:
 			self._plinger.cancel()
-		self._plinger = callLater(self.force, timeout, self._pling)
+		self.start_job("_plinger",self._pling, timeout)
 		
 	def _job(self):
 		try:
@@ -152,22 +149,14 @@ class Waiter(Collected,Jobber):
 					q.put(None)
 					return True
 				elif cmd == "cancel":
-					if self._plinger:
-						try:
-							self._plinger.cancel()
-						except AlreadyCalled:
-							pass
-						self._plinger = None
-					q.put(None)
-					return False
 				elif cmd == "update":
-					q.put(None)
+					q.set(None)
 					self.end = a
 					self._set_pling()
 				elif cmd == "remain":
-					q.put(unixtime(self.end)-unixtime(now(self.force)))
+					q.set(unixtime(self.end)-unixtime(now(self.force)))
 				else:
-					q.put(RuntimeError('Unknown command: '+cmd))
+					q.set_exception(RuntimeError('Unknown command: '+cmd))
 		finally:
 			q,self.q = self.q,None
 			super(Waiter,self).delete()
@@ -176,7 +165,6 @@ class Waiter(Collected,Jobber):
 					q.get()[0].put(StopIteration())
 
 	def init(self,dest):
-		self.q = Channel()
 		self.end = dest
 		self.start_job("job",self._job)
 
@@ -184,7 +172,7 @@ class Waiter(Collected,Jobber):
 		if self.q is None:
 			raise DelayDone(self)
 
-		q = Channel()
+		q = AsyncResult()
 		self.q.put((q,cmd)+tuple(a))
 		res = q.get()
 		if isinstance(res,BaseException):
@@ -197,18 +185,20 @@ class Waiter(Collected,Jobber):
 			return 0
 		if not self._running:
 			return "??"
-		res = self._cmd("remain")
-		if TESTING:
-			res = "%.1f" % (res,)
+		with log_wait("wait","remain",self.name):
+			with self._lock:
+				res = unixtime(self.end)-unixtime(now(self.force))
 		return res
 
 	def delete(self,ctx=None):
-		self._cmd("cancel")
+		with log_wait("wait","delete",self.name):
+			with self._lock:
+				self.stop_job('_plinger')
 
 	def cancel(self, err=DelayCancelled):
 		"""Cancel a waiter."""
 		process_event(Event(self.ctx(loglevel=TRACE),"wait","cancel",ixtime(self.end,self.force),*self.name))
-		self._cmd("cancel")
+		self.delete()
 
 	def retime(self, dest):
 		process_event(Event(self.ctx(loglevel=TRACE),"wait","update",dest,*self.name))

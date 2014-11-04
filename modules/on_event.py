@@ -47,8 +47,6 @@ from homevent.event import TrySomethingElse
 from homevent.base import Name,SName
 from homevent.collect import Collection,Collected
 
-from twisted.internet import defer
-
 onHandlers = {}
 onHandlers2 = {}
 

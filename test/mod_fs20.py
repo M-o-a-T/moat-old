@@ -16,7 +16,6 @@
 ##  for more details.
 ##
 
-from twisted.internet import defer
 from homevent.reactor import ShutdownHandler
 from homevent.module import load_module,Load
 from homevent.statement import main_words

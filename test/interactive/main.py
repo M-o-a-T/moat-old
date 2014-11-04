@@ -24,11 +24,7 @@ from homevent.module import load_module, Load,LoadDir
 from homevent.reactor import ShutdownHandler,mainloop,shut_down
 from homevent.context import Context
 from homevent.twist import callLater,fix_exception
-from homevent.geventreactor import waitForDeferred
 
-from twisted.internet import reactor,interfaces,fdesc
-from twisted.internet._posixstdio import StandardIO ## XXX unstable interface!
-from twisted.internet.error import ConnectionDone,ConnectionLost
 from tokenize import tok_name
 import os,sys
 
@@ -50,19 +46,6 @@ def parse_logger(t,*x):
 	except KeyError:
 		pass
 	print t+":"+" ".join(str(d) for d in x)
-
-class StdIO(StandardIO):
-	def __init__(self,*a,**k):
-		super(StdIO,self).__init__(*a,**k)
-		fdesc.setBlocking(self._writer.fd)
-	def connectionLost(self,reason):
-		super(StdIO,self).connectionLost(self)
-		if not reason.check(ConnectionDone,ConnectionLost):
-			print "EOF:",reason
-	def write(self,data):
-		sys.stdout.write(data)
-	def flush(self):
-		sys.stdout.flush()
 
 def reporter(err):
 	print "Error:",err

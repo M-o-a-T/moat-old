@@ -36,7 +36,6 @@ from homevent.base import Name,SName
 from homevent.in_out import Inputs
 
 import os
-from twisted.internet import defer
 
 class VarMonitor(Monitor):
 	"""Monitor for a variable. Really simple."""

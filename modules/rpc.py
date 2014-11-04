@@ -23,7 +23,6 @@ This code implements a SSH command line for homevent.
 from homevent import TESTING
 from homevent.module import Module
 from homevent.context import Context
-from homevent.parser import parser_builder,parse
 from homevent.statement import main_words,Statement,AttributedStatement,global_words
 from homevent.interpreter import Interpreter,ImmediateProcessor
 from homevent.base import Name,SName,flatten
@@ -31,7 +30,6 @@ from homevent.collect import Collection,Collected,get_collect,all_collect
 from homevent.check import register_condition,unregister_condition
 from homevent.twist import Jobber,fix_exception,reraise
 from homevent.run import process_failure,simple_event,register_worker,unregister_worker,MIN_PRIO
-from homevent.geventreactor import waitForDeferred
 from homevent.event import TrySomethingElse
 from homevent.worker import Worker
 from homevent.logging import BaseLogger,TRACE
@@ -100,7 +98,6 @@ class CommandProcessor(ImmediateProcessor):
 		fn = self.lookup(args)
 		fn.parent = self.parent
 		res = fn.run(self.ctx)
-		res = waitForDeferred(res)
 		return res
 
 	def complex_statement(self,args):
@@ -113,7 +110,7 @@ class CommandProcessor(ImmediateProcessor):
 
 	def run(self):
 		res = self.fn.run(self.ctx)
-		return waitForDeferred(res)
+		return res
 
 
 class EventCallback(Worker,CallBack):

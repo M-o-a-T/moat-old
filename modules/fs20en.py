@@ -36,9 +36,6 @@ from homevent.logging import log,TRACE,DEBUG
 from homevent.times import now,humandelta
 from homevent.timeslot import Timeslots,Timeslotted,Timeslot,collision_filter
 
-#from twisted.internet import protocol,defer,reactor
-#from twisted.protocols.basic import _PauseableMixin
-
 PREFIX_ENERGY = 'n'
 
 # n030955 17DE000017DE 5F

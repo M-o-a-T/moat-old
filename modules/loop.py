@@ -30,7 +30,6 @@ while false:
 from homevent.statement import MainStatementList, main_words,global_words
 from homevent.module import Module
 from homevent.check import check_condition
-from twisted.internet import defer
 
 class WhileStatement(MainStatementList):
 	name="while"

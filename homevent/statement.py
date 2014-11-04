@@ -34,9 +34,6 @@ from homevent.context import Context
 from homevent.event import Event,StopParsing
 from homevent.base import Name,SName
 
-from twisted.internet import defer
-
-from homevent.geventreactor import waitForDeferred
 import gevent
 
 class UnknownWordError(KeyError):
@@ -317,9 +314,7 @@ class StatementList(ComplexStatement):
 		if self.procs is None:
 			raise SyntaxError("This can only be used as a complex statement")
 		for proc in self.procs:
-			res = proc.run(ctx)
-			if isinstance(res,defer.Deferred):
-				waitForDeferred(res)
+			proc.run(ctx)
 			global _sleep
 			_sleep += 1
 			if _sleep > 100:

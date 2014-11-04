@@ -25,17 +25,14 @@ from homevent.check import register_condition
 from homevent.context import Context
 from homevent.parser import parse
 from homevent.run import process_failure
-from homevent.twist import track_errors, fix_exception
-from homevent.reactor import ShutdownHandler,mainloop,shut_down,\
-	stop_mainloop
+from homevent.twist import fix_exception
+from homevent.reactor import ShutdownHandler,mainloop,shut_down
 from homevent.logging import TRACE,DEBUG,INFO,WARN,ERROR,PANIC,\
 	Logger,LogNames, log_level
 from signal import signal,SIGINT,SIGHUP,SIGQUIT
 import sys
 import os
 import gevent
-
-from twisted.internet import reactor
 
 main_words.register_statement(Load)
 main_words.register_statement(LoadDir)
@@ -49,8 +46,6 @@ parser.add_option("-h","--help","-?", action="help",
 	help="print this help text")
 parser.add_option("-t", "--trace", dest="debuglevel", action="store",
 	help="trace level (TRACE,DEBUG,INFO,WARN,ERROR,PANIC,NONE)", default="PANIC")
-parser.add_option("-s", "--stack", dest="stack", action="store_true",
-	help="HomEvenT errors are logged with Python stack traces")
 parser.add_option("-p", "--pidfile", dest="pidfile", action="store",
 	help="file to write our PID to")
 
@@ -78,8 +73,6 @@ if opts.debuglevel != "NONE":
 		else:
 			raise KeyError("'%s' is not a debug level." % (level,))
 
-track_errors(opts.stack)
-
 if opts.pidfile:
 	pid = open(opts.pidfile,"w")
 	print >>pid, os.getpid()
@@ -106,10 +99,9 @@ def readcf():
 		reading = False
 	reading.link(read_done)
 
-signal(SIGINT, lambda a,b: gevent.spawn(stop_mainloop))
+signal(SIGINT, lambda a,b: gevent.spawn(shut_down))
 signal(SIGQUIT,lambda a,b: gevent.spawn(shut_down))
 signal(SIGHUP, lambda a,b: readcf())
 
-readcf()
-mainloop()
+mainloop(setup=readcf)
 

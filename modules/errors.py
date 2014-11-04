@@ -36,7 +36,6 @@ from homevent import logging
 from homevent.run import process_failure
 from homevent.twist import fix_exception
 
-from twisted.internet import defer
 import sys
 
 class TryStatement(MainStatementList):
@@ -158,7 +157,7 @@ Implementation restriction: can't be used at top level. (Wrap with 'block:'.)
 			elif self.catch_do:
 				return self.catch_do.run(ctx,**k)
 			else:
-				return defer.fail(ctx.error_)
+				raise ctx.error_
 	
 
 class ReportStatement(Statement):

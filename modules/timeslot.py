@@ -33,8 +33,6 @@ from homevent.check import Check,register_condition,unregister_condition
 from homevent.base import Name,SName
 
 import os
-from twisted.internet import defer
-
 
 class TimeslotHandler(AttributedStatement, Timeslotted):
 	name="timeslot"
