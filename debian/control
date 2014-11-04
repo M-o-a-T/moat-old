@@ -21,13 +21,27 @@ Standards-Version: 3.7.2
 
 Package: homevent
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, ${python:Depends}
-Recommends: pulseaudio (>= 0.9.7), python-rrdtool, owfs,
+Depends: ${shlibs:Depends}, ${misc:Depends}, python-homevent
+Recommends: pulseaudio (>= 0.9.7), python-rrdtool, owfs
+Description: A scripted event-based monitoring and control system
+ HomEvenT is a flexible, scripted, network-aware event handler.
+ It can monitor and control quite a few external buses and peripherals,
+ including 1wire and FS20. It can write values to RRD files and allows
+ access to its command interpreter with SSH.
+ .
+ The author uses it as a central hub for home automation.
+ .
+ This package contains auxiliary binaries.
+
+Package: python-homevent
+Architecture: all
+Depends: ${misc:Depends}, ${python:Depends},
  python-sqlmix (>= 0.9.26),
  python-gevent (>= 1.0),
  python-rpyc,
  python-dabroker,
  python-pytz | python-tz,
+Recommends: python-rrdtool, owfs,
 Suggests: socat
 Description: A scripted event-based monitoring and control system
  HomEvenT is a flexible, scripted, network-aware event handler.
