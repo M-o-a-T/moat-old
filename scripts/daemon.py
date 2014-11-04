@@ -16,6 +16,8 @@
 ##  for more details.
 ##
 
+from __future__ import division,absolute_import
+
 import sys; sys.excepthook = None; del sys
 
 from homevent.statement import main_words, global_words, Statement, \

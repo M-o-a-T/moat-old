@@ -17,6 +17,8 @@
 
 """Tokenization help for Python-like HomEvenT programs."""
 
+from __future__ import division,absolute_import
+
 __author__ = 'Matthias Urlichs <matthias@urlichs.de>'
 __credits__ = \
     'GvR, ESR, Tim Peters, Thomas Wouters, Fred Drake, Skip Montanaro, Ka-Ping Yee'

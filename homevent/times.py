@@ -15,12 +15,12 @@
 ##  for more details.
 ##
 
-from __future__ import division
-
 """\
 This code does some standard time handling.
 
 """
+
+from __future__ import division,absolute_import
 
 import datetime as dt
 from time import time,mktime

@@ -25,6 +25,8 @@ for typical usage.
 
 """
 
+from __future__ import division,absolute_import
+
 from homevent.tokize import tokizer
 from tokenize import tok_name
 import Queue
@@ -122,6 +124,8 @@ class Parser(Collected,Jobber):
 		syn.get()
 		try:
 			while True:
+				# allow tasks which kill this one to run
+				gevent.sleep(0)
 				l = self.input.readline()
 				if not l:
 					break

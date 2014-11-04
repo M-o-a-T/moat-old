@@ -20,6 +20,8 @@ This code implements a simple line-oriented protocol via TCP.
 
 """
 
+from __future__ import division,absolute_import
+
 from homevent.module import Module
 from homevent.logging import log,log_exc,DEBUG,TRACE,INFO,WARN,ERROR
 from homevent.statement import Statement, main_words, AttributedStatement

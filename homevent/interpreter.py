@@ -29,6 +29,8 @@ for typical usage.
 
 """
 
+from __future__ import division,absolute_import
+
 from homevent.context import Context
 from homevent.event import Event
 from homevent.base import Name

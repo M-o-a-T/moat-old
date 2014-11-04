@@ -15,8 +15,6 @@
 ##  for more details.
 ##
 
-from __future__ import division
-
 """\
 This code does basic configurable event mangling.
 
@@ -33,6 +31,8 @@ Given the event "switch on livingroom main", this would cause a
 Otherwise a "alarm livingroom" would be triggered.
 
 """
+
+from __future__ import division,absolute_import
 
 from homevent.interpreter import CollectProcessor
 from homevent.statement import Statement,MainStatementList, main_words,\

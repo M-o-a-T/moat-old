@@ -15,12 +15,12 @@
 ##  for more details.
 ##
 
-from __future__ import division
-
 """\
 This code implements a listener for environment monitoring (tx2/tx3).
 
 """
+
+from __future__ import division,absolute_import
 
 from homevent.module import Module
 from homevent.statement import AttributedStatement,Statement, main_words

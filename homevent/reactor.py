@@ -19,6 +19,8 @@
 This part of the code controls the main loop.
 """
 
+from __future__ import division,absolute_import
+
 import sys
 from homevent.context import Context
 from homevent.event import Event
@@ -27,12 +29,11 @@ from homevent.run import register_worker,unregister_worker, SYS_PRIO,MAX_PRIO,\
 	process_event, process_failure
 from homevent.statement import Statement
 from homevent.io import dropConnections
-from homevent.twist import deferToLater, fix_exception,print_exception,\
+from homevent.twist import fix_exception,print_exception,\
 	wait_for_all_threads
 from homevent.collect import Collection,Collected
 
 import gevent
-from gevent.event import Event
 from dabroker.util.thread import Main as _Main
 
 __all__ = ("start_up","shut_down", "startup_event","shutdown_event",
@@ -86,7 +87,7 @@ class Shutdown_Worker_2(ExcWorker):
 			del Events[queue.aq_id]
 			del queue.aq_id
 		if not running and not Events:
-			stop_mainloop()
+			_stop_mainloop()
 	def report(self,*a,**k):
 		return ()
 
@@ -148,6 +149,7 @@ def _stop_mainloop():
 		stop_loggers()
 
 
+
 ## This should be in homevent.collect, but import ordering problems make that impossible
 
 class Shutdown_Collections(ExcWorker):
@@ -193,14 +195,15 @@ shutdown now  ... but does not wait for active events to terminate.
 		event = self.params(ctx)
 		if len(event):
 			if tuple(event) == ("now",):
-				stop_mainloop()
+				_stop_mainloop()
+				shut_down()
 				return
 			raise ValueError(u"'shutdown' does not take arguments (except ‹now›).",event)
 		shut_down()
 
 class MyMain(_Main):
 	def __init__(self, main=None, setup=None):
-		self.main = main
+		self.main_proc = main
 		self.setup_proc = setup
 		self.main_job = None
 		super(MyMain,self).__init__()
@@ -209,9 +212,9 @@ class MyMain(_Main):
 		if self.setup_proc:
 			self.setup_proc()
 	def main(self):
-		if self.main:
-			self.main_job = gevent.spawn(self.main)
-			self.register_stop(self.main_job.kill)
+		if self.main_proc:
+			self.main_job = gevent.spawn(self.main_proc)
+			#self.register_stop(self.main_job.kill)
 		self.shutting_down.wait()
 	def cleanup(self):
 		_stop_mainloop()

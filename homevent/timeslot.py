@@ -15,12 +15,12 @@
 ##  for more details.
 ##
 
-from __future__ import division
-
 """\
 This code contains the framework for timing regular events.
 
 """
+
+from __future__ import division,absolute_import
 
 from homevent.statement import AttributedStatement, Statement
 from homevent.event import Event

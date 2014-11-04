@@ -33,6 +33,8 @@ list state [NAME]
 
 """
 
+from __future__ import division,absolute_import
+
 from homevent.module import Module
 from homevent.statement import Statement, main_words, AttributedStatement
 from homevent.run import process_event,process_failure

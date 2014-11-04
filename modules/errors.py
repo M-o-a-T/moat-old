@@ -27,6 +27,8 @@ catch:
 
 """
 
+from __future__ import division,absolute_import
+
 from homevent.statement import MainStatementList,Statement, \
 	main_words,global_words
 from homevent.module import Module

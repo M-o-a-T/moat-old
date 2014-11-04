@@ -19,6 +19,8 @@
 This is the core of database access.
 """
 
+from __future__ import division,absolute_import
+
 from homevent import TESTING
 from homevent.base import Name
 from homevent.logging import log,TRACE

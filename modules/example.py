@@ -20,6 +20,8 @@ This code represents a sample loadable module for homevent.
 
 """
 
+from __future__ import division,absolute_import
+
 from homevent.module import Module
 from homevent.logging import log,DEBUG
 

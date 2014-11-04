@@ -23,6 +23,8 @@ monitor test ...
 
 """
 
+from __future__ import division,absolute_import
+
 from homevent.statement import Statement, main_words
 from homevent.event import Event
 from homevent.run import simple_event

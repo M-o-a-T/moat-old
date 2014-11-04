@@ -20,6 +20,8 @@ This code implements (a subset of) the OWFS server protocol.
 
 """
 
+from __future__ import division,absolute_import
+
 from homevent import TESTING
 from homevent.module import Module
 from homevent.logging import log,log_exc,DEBUG,TRACE,INFO,WARN,ERROR

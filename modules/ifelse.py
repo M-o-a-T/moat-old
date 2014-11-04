@@ -33,6 +33,8 @@ on what ever:
 This code implements the "if" command.
 """
 
+from __future__ import division,absolute_import
+
 from homevent.statement import MainStatementList, main_words,global_words
 from homevent.module import Module
 from homevent.check import check_condition

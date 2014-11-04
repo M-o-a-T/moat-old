@@ -22,6 +22,8 @@ Your code needs to supply storage and factory class variables.
 Look at module/net.py for a basic example.
 """
 
+from __future__ import division,absolute_import
+
 from homevent.logging import log,log_exc,DEBUG,TRACE,INFO,WARN,ERROR
 from homevent.statement import Statement, main_words, AttributedStatement
 from homevent.check import Check,register_condition,unregister_condition

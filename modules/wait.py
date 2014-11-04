@@ -15,8 +15,6 @@
 ##  for more details.
 ##
 
-from __future__ import division
-
 """\
 This code does basic timeout handling.
 
@@ -24,6 +22,8 @@ wait: for FOO...
 	- waits for FOO seconds
 
 """
+
+from __future__ import division,absolute_import
 
 from homevent import TESTING
 from homevent.statement import AttributedStatement, Statement, main_words,\
@@ -41,8 +41,9 @@ from homevent.logging import log_exc,TRACE
 from homevent.delay import DelayFor,DelayWhile,DelayUntil,DelayNext,\
 	DelayError,DelayDone,DelayCancelled
 
-from gevent.queue import Channel,AsyncResult
+from gevent.event import Event as gEvent
 from gevent.lock import Semaphore
+from gevent import sleep
 
 from time import time
 import os
@@ -122,62 +123,21 @@ class Waiter(Collected,Jobber):
 		return u"‹%s %s %s›" % (self.__class__.__name__, self.name,self.value)
 
 	def _pling(self,timeout):
-		gevent.sleep(timeout)
+		sleep(timeout)
 		self._plinger = None
-		self._cmd("timeout")
+		self.job.set()
 
 	def _set_pling(self):
 		timeout = unixtime(self.end) - unixtime(now(self.force))
 		if timeout <= 0.1:
 			timeout = 0.1
-		if self._plinger:
-			self._plinger.cancel()
+		self.stop_job("_plinger")
 		self.start_job("_plinger",self._pling, timeout)
 		
-	def _job(self):
-		try:
-			self._set_pling()
-			self._running = True
-			while True:
-				cmd = self.q.get()
-	
-				q = cmd[0]
-				a = cmd[2] if len(cmd)>2 else None
-				cmd = cmd[1]
-				if cmd == "timeout":
-					assert self._plinger is None
-					q.put(None)
-					return True
-				elif cmd == "cancel":
-				elif cmd == "update":
-					q.set(None)
-					self.end = a
-					self._set_pling()
-				elif cmd == "remain":
-					q.set(unixtime(self.end)-unixtime(now(self.force)))
-				else:
-					q.set_exception(RuntimeError('Unknown command: '+cmd))
-		finally:
-			q,self.q = self.q,None
-			super(Waiter,self).delete()
-			if q is not None:
-				while not q.empty():
-					q.get()[0].put(StopIteration())
-
 	def init(self,dest):
+		self.job = gEvent()
 		self.end = dest
-		self.start_job("job",self._job)
-
-	def _cmd(self,cmd,*a):
-		if self.q is None:
-			raise DelayDone(self)
-
-		q = AsyncResult()
-		self.q.put((q,cmd)+tuple(a))
-		res = q.get()
-		if isinstance(res,BaseException):
-			raise res
-		return res
+		self._set_pling()
 
 	@property
 	def value(self):
@@ -194,16 +154,21 @@ class Waiter(Collected,Jobber):
 		with log_wait("wait","delete",self.name):
 			with self._lock:
 				self.stop_job('_plinger')
+				super(Waiter,self).delete(ctx=ctx)
 
 	def cancel(self, err=DelayCancelled):
 		"""Cancel a waiter."""
 		process_event(Event(self.ctx(loglevel=TRACE),"wait","cancel",ixtime(self.end,self.force),*self.name))
 		self.delete()
+		self.job.set()
+		self.job = None
 
 	def retime(self, dest):
 		process_event(Event(self.ctx(loglevel=TRACE),"wait","update",dest,*self.name))
-		self._cmd("update",dest)
-
+		with log_wait("wait","delete",self.name):
+			with self._lock:
+				self.end = dest
+				self._set_pling()
 	
 class WaitHandler(AttributedStatement):
 	name="wait"
@@ -239,7 +204,8 @@ wait [NAME…]: for FOO…
 		process_event(Event(self.ctx(loglevel=TRACE),"wait","start",ixtime(w.end,self.force),*w.name))
 		try:
 			if w.job:
-				r = w.job.get()
+				w.job.wait()
+				r = (w.job is not None)
 			else:
 				r = True
 		except Exception as ex:
@@ -253,6 +219,8 @@ wait [NAME…]: for FOO…
 			ctx.wait = tm
 			if not r:
 				raise DelayCancelled(w)
+		finally:
+			w.delete()
 
 		
 class WaitDebug(Statement):

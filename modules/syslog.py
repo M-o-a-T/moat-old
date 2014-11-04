@@ -27,6 +27,8 @@ log
 
 """
 
+from __future__ import division,absolute_import
+
 from homevent import TESTING
 from homevent.module import Module
 from homevent.statement import Statement, main_words

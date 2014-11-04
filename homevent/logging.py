@@ -24,6 +24,8 @@ part of the system.
 
 """
 
+from __future__ import division,absolute_import
+
 from homevent import TESTING
 from homevent.run import register_worker
 from homevent.worker import Worker,ExcWorker,report_
@@ -39,6 +41,9 @@ from gevent.select import select
 
 import sys
 import os
+
+import logging
+logger = logging.getLogger("homevent.logging")
 
 __all__ = ("Logger",
 	"log","log_run","log_created","log_halted","LogNames",
@@ -102,6 +107,7 @@ class BaseLogger(Collected,Jobber):
 		"""
 	storage = Loggers.storage
 	q = None
+	job = None
 	ready = False
 	_in_flush = False
 	def __init__(self, level):
@@ -165,7 +171,8 @@ class BaseLogger(Collected,Jobber):
 			self.ready = None
 			super(BaseLogger,self).delete(ctx)
 		try:
-			self.q.put(StopIteration,block=False)
+			if self.q:
+				self.q.put(StopIteration,block=False)
 		except Full:
 			## panic?
 			pass
@@ -437,6 +444,10 @@ def log(level, *a):
 		argument. Logging for that subsystem can be enabled by
 		log_level(subsys_name, LEVEL).
 		"""
+	try: level = LogNames[level]
+	except KeyError: pass
+	logger.log(getattr(logging,level,logging.DEBUG),"%s"," ".join(str(x) for x in a))
+
 	exc = []
 	if isinstance(level,basestring):
 		lim = levels.get(level, TRACE if TESTING else NONE)

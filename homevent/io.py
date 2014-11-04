@@ -20,6 +20,8 @@ This code does some standard I/O handling.
 
 """
 
+from __future__ import division,absolute_import
+
 from homevent.run import process_failure
 
 conns = []

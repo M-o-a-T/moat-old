@@ -40,7 +40,6 @@ if not exists module logging: load logging
 if not exists module block: load block
 if not exists module trigger: load trigger
 if not exists module wait: load wait
-if not exists module fs20tr: load fs20tr
 if not exists module fs20switch: load fs20switch
 if not exists module fs20em: load fs20em
 if not exists module fs20en: load fs20en

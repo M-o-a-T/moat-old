@@ -20,6 +20,8 @@ This code implements an AMQP connector for HomEvenT.
 
 """
 
+from __future__ import division,absolute_import
+
 from homevent import TESTING
 from homevent.module import Module
 from homevent.context import Context

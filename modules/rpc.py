@@ -20,6 +20,8 @@ This code implements a SSH command line for homevent.
 
 """
 
+from __future__ import division,absolute_import
+
 from homevent import TESTING
 from homevent.module import Module
 from homevent.context import Context

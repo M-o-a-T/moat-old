@@ -22,7 +22,10 @@ from __future__ import division
 	… among other grab-bag stuff.
 	"""
 
-from homevent.base import RaisedError
+from __future__ import division,absolute_import
+
+from homevent.base import RaisedError,SName
+from homevent.collect import Collection
 
 import gevent
 from gevent.event import AsyncResult
@@ -33,6 +36,9 @@ import os
 import fcntl
 import datetime as dt
 import traceback
+
+import logging
+logger = logging.getLogger("homevent.twist")
 
 ## change the default encoding to UTF-8
 ## this is a no-op in PY3
@@ -135,10 +141,10 @@ def sleepUntil(force,delta):
 _real_step = 999
 _sleepers = 0
 
-def callLater(force,delta,p,*a,**k):
+def callLater(force,delta,p,*a,**kw):
 	k=Jobber()
 	k.j = None
-	k.start_job(k,'j',_later,force,delta,p,*a,**k)
+	k.start_job('j', _later,force,delta,p,*a,**kw)
 def _later(force,delta,p,*a,**k):
 	from homevent.times import unixdelta,now
 	global _sleepers,_real_step
@@ -173,8 +179,16 @@ def _later(force,delta,p,*a,**k):
 
 
 class Jobs(Collection):
-	name = "jobs"
+	name = "job"
 Jobs = Jobs()
+
+class Job(object):
+	def __init__(self,g,func,a,k):
+		self.func = func
+		self.g = g
+		self.a = a
+		self.k = k
+		self.name = SName("_"+str(g))
 
 # Log all threads, wait for them to exit.
 gjob=0
@@ -186,16 +200,16 @@ def _completer(g,job):
 		print >>sys.stderr,"G ERR %d %s" % (job,v)
 	def pr_del(v):
 		del Jobs[job]
-#		g.link_value(pr_ok)
-#		g.link_exception(pr_err)
+		g.link_value(pr_ok)
+		g.link_exception(pr_err)
 	g.link(pr_del)
 def do_spawn(func,*a,**k):
 	global gjob
 	gjob += 1
 	job = gjob
-#		print >>sys.stderr,"G SPAWN %d %s %s %s" % (job,func,a,k)
+	print >>sys.stderr,"G SPAWN %d %s %s %s" % (job,func,a,k)
 	g = gspawn(func,*a,**k)
-	Jobs[job]=(g,func,a,k)
+	Jobs[job]=Job(g,func,a,k)
 	_completer(g,job)
 	return g
 
@@ -215,8 +229,8 @@ def nr_threads(ignore_loggers=False):
 	
 def wait_for_all_threads():
 	global Loggers
-	from logging import Loggers as _Loggers
-	from logging import stop_loggers
+	from homevent.logging import Loggers as _Loggers
+	from homevent.logging import stop_loggers
 	Loggers = _Loggers
 
 	n=0
@@ -225,12 +239,11 @@ def wait_for_all_threads():
 
 	for r in (True,False):
 		while nr_threads(r):
-			if n==100000:
-				for job,t in gthreads.iteritems():
-					print >>sys.stderr,"G WAIT %d %s %s %s" % ((job,)+t[1:])
-					t[0].kill()
+			if n==10:
+				for job,t in Jobs.iteritems():
+					print >>sys.stderr,"G WAIT %d %r %r %r" % (job,t.func,t.a,t.k)
 
-				n=0
+				break
 			n += 1
 			try:
 				gevent.sleep(0)
@@ -270,10 +283,10 @@ class log_wait(object):
 			from homevent.logging import log as xlog, TRACE as xTRACE
 			_log = xlog
 			TRACE = xTRACE
-		_log("locking",TRACE,"+WAIT", self.w, *self.a)
+		_log(TRACE,"locking","+WAIT", self.w, *self.a)
 		return self
 	def __exit__(self, a,b,c):
-		_log("locking",TRACE,"-WAIT", self.w, *self.a)
+		_log(TRACE,"locking","-WAIT", self.w, *self.a)
 		return False
 
 ### Safely start gevent threads

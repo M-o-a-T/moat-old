@@ -20,6 +20,8 @@ This code implements logging to RRD.
 
 """
 
+from __future__ import division,absolute_import
+
 from homevent.check import register_condition,unregister_condition
 from homevent.module import Module
 from homevent.statement import Statement, main_words

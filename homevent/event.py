@@ -19,6 +19,8 @@
 This part of the code defines what an event is.
 """
 
+from __future__ import division,absolute_import
+
 import warnings
 from homevent.base import Name,RaisedError
 from homevent.context import Context

@@ -19,34 +19,22 @@
 This is the core of the event dispatcher.
 """
 
-VERSION = "0.3"
+from __future__ import division,absolute_import
 
 import os
-if os.environ.get("HOMEVENT_BUILD","N") != "Y":
+
+VERSION = "0.4"
+
+TESTING = "HOMEVENT_TEST" in os.environ
 
 	# This test is also in homevent/twist.py, for recursive-import reasons
-	if "HOMEVENT_TEST" in os.environ:
-		from homevent.testreactor import install
-		TESTING = True
-	else:
-		from homevent.geventreactor import install
-		TESTING = False
-	install()
-	del install
 
+def patch():
+	"""Call this as early as possible, not from an import, and only once."""
+	from dabroker import patch; patch()
+	from homevent.gevent_rpyc import patch_all; patch_all()
 
-	from gevent import monkey
-	monkey.patch_all()
-	del monkey
+	import logging,sys
+	logging.basicConfig(stream=sys.stderr,level=logging.DEBUG if TESTING else logging.WARN)
 
-	from homevent.gevent_rpyc import patch_all
-	patch_all()
-	del patch_all
-
-	from homevent import twist # for side effects
-
-__all__ = ("Context", "Event", "Worker","SeqWorker","WorkSequence",
-	"collect_event","process_event","register_worker", "mainloop",
-	"main_words","global_words", "register_condition")
-# Do not export "log" by default; it's too generic.
 

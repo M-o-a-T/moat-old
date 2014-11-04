@@ -20,6 +20,8 @@ This code implements access to collections.
 
 """
 
+from __future__ import division,absolute_import
+
 from datetime import datetime
 import os
 

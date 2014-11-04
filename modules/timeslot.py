@@ -15,8 +15,6 @@
 ##  for more details.
 ##
 
-from __future__ import division
-
 """\
 This code does basic timeout handling.
 
@@ -24,6 +22,8 @@ timeslot FOO...
 	- timeslots for FOO seconds
 
 """
+
+from __future__ import division,absolute_import
 
 from homevent.timeslot import Timeslots, Timeslot, Timeslotted
 from homevent.statement import AttributedStatement, Statement, main_words,\

@@ -16,6 +16,7 @@
 ##  for more details.
 ##
 
+from homevent import patch;patch()
 from homevent.interpreter import InteractiveInterpreter,Interpreter
 from homevent.parser import parse
 from homevent.statement import main_words, global_words

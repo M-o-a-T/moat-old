@@ -19,6 +19,8 @@
 This is the core of the event dispatcher.
 """
 
+from __future__ import division,absolute_import
+
 from homevent import TESTING
 from homevent.base import Name,SYS_PRIO,MIN_PRIO,MAX_PRIO
 from homevent.worker import WorkSequence,ConditionalWorkSequence,ExcWorker

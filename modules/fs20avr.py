@@ -21,6 +21,8 @@ microcontroller.
 
 """
 
+from __future__ import division,absolute_import
+
 from homevent.base import SName,Name,MIN_PRIO
 from homevent.module import Module
 from homevent.logging import log,DEBUG,TRACE,INFO,WARN,ERROR

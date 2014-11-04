@@ -20,6 +20,8 @@ This code implements module loading and unloading.
 
 """
 
+from __future__ import division,absolute_import
+
 from homevent import TESTING
 from homevent.run import process_event
 from homevent.statement import Statement

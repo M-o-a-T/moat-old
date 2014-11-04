@@ -2,6 +2,9 @@
 # -*- coding: utf8 -*-
 
 from __future__ import division
+from homevent import patch; homevent.patch()
+from dabroker.util.thread import Main
+
 import gtk
 import gtk.gdk
 import gnome.ui
@@ -12,11 +15,8 @@ import os
 from time import time
 from datetime import datetime
 
-from homevent import geventreactor as reactor
-
 APPNAME="monitor"
 APPVERSION="0.1"
-
 
 class Monitor(object):
 	def __init__(self, widgets):
@@ -158,15 +158,16 @@ class MonitorUI(object):
 	def on_prefs_port_pre(self,*x):
 		print "PE",x
 
+class MonitorMain(Main):
+	def setup(self):
+		self.widgets = MonitorUI()
+		MonitorData = Monitor(widgets)
+		self.widgets.init_done()
+	def main(self):
+		self.shutting_down.get()
 
-import sys
 if __name__ == "__main__":
-	widgets = MonitorUI()
-	MonitorData = Monitor(widgets)
-	widgets.init_done()
-	#glib.timeout_add(60*1000, db_idle)
-
-	#gtk.main()
-	reactor.run()
+	main=MyMain()
+	main.run()
 
 # END #

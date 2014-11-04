@@ -20,6 +20,8 @@ This code implements basic commands to access FS20 switches.
 
 """
 
+from __future__ import division,absolute_import
+
 from homevent.module import Module
 from homevent.logging import log,log_exc,DEBUG,TRACE,INFO,WARN
 from homevent.statement import AttributedStatement,Statement, main_words

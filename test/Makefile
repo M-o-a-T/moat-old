@@ -14,7 +14,7 @@
 ##  for more details.
 ##
 
-export PYTHONPATH=$(shell pwd)/..:$(shell pwd)/../../smurf/python
+export PYTHONPATH=$(shell pwd)/..:$(shell pwd)/../../dabroker:$(shell pwd)/../../smurf/python
 export HOMEVENT_TEST=1
 
 test:

@@ -19,6 +19,8 @@
 	This module holds a few random constants and stuff.
 	"""
 
+from __future__ import division,absolute_import
+
 SYS_PRIO = -10
 MIN_PRIO = 0
 MAX_PRIO = 100

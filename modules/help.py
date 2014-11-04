@@ -20,6 +20,8 @@ This code implements the Help command.
 
 """
 
+from __future__ import division,absolute_import
+
 from homevent.module import Module
 from homevent.logging import log
 from homevent.statement import Statement, global_words, HelpSub
