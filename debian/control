@@ -26,6 +26,7 @@ Recommends: pulseaudio (>= 0.9.7), python-rrdtool, owfs,
  python-sqlmix (>= 0.9.26),
  python-gevent (>= 1.0),
  python-rpyc,
+ python-dabroker,
  python-pytz | python-tz,
 Suggests: socat
 Description: A scripted event-based monitoring and control system
