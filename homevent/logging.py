@@ -322,6 +322,8 @@ class LogWorker(ExcWorker):
 		log_exc(err=err,msg="while logging")
 
 def log_exc(msg=None, err=None, level=ERROR):
+	level = LogNames.get(level,level)
+
 	for l in Loggers.values():
 		if not l.ready:
 			continue
@@ -450,11 +452,8 @@ def log(level, *a):
 		try:
 			lim = levels[level]
 		except KeyError:
-			if isinstance(a[0],(int,long)) and TRACE<=a[0]<=PANIC or a[0] in LogLevels:
-				lim = None
-			else:
-				lim = TRACE if TESTING else INFO
-		if lim is None:
+			lim = TRACE if TESTING else INFO
+		if isinstance(a[0],(int,long)) and TRACE<=a[0]<=PANIC or a[0] in LogLevels:
 			b = level
 			level = a[0]
 			level = LogLevels.get(level,level)

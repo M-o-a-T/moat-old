@@ -34,7 +34,7 @@ from homevent.twist import Jobber,fix_exception,reraise
 from homevent.run import process_failure,simple_event,register_worker,unregister_worker,MIN_PRIO
 from homevent.event import TrySomethingElse
 from homevent.worker import Worker
-from homevent.logging import BaseLogger,TRACE
+from homevent.logging import BaseLogger,TRACE,LogLevels
 
 from datetime import datetime,date,time,timedelta
 
@@ -186,7 +186,7 @@ class LogCallback(BaseLogger,CallBack):
 		super(LogCallback,self).__init__(level)
 
 	def _log(self, level, *a):
-		if level < self.level:
+		if LogLevels.get(level,level) < self.level:
 			return
 		if TESTING and (a[0].startswith("TEST") or a[-1].endswith("LOGTEST")):
 			return
