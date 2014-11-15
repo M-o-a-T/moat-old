@@ -152,10 +152,10 @@ class SwitchGroup(Collected,igroup):
 
 		fcode = ord(data[1])
 		if fcode & 0x20:
-			if len(data) != 3: raise WrongDatagram(data)
+			if len(data) < 3: raise WrongDatagram(data)
 			ext = ord(data[2])
 		else:
-			if len(data) != 2: raise WrongDatagram(data)
+			if len(data) < 2: raise WrongDatagram(data)
 			ext = None
 
 		dc = ord(data[0])
