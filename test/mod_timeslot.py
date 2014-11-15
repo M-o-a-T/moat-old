@@ -39,12 +39,12 @@ on timeslot begin foo bar:
 	async:
 		wait AFTER EVENT A:
 			for 0.5
-		var timeslot X foo bar
-		log TRACE got it $X
-		if equal $X "during":
+		var timeslot XX foo bar
+		log TRACE got it $XX
+		if equal $XX "during":
 			log DEBUG Yes
 		else:
-			log DEBUG No2x $X
+			log DEBUG No2x $XX
 		wait GOT EVENT AX:
 			for 0.1
 		if in timeslot foo bar:
@@ -67,12 +67,12 @@ on timeslot end foo bar:
 	async:
 		wait AFTER EVENT B:
 			for 0.5
-		var timeslot X foo bar
-		log TRACE got it $X
-		if equal $X "next":
+		var timeslot XX foo bar
+		log TRACE got it $XX
+		if equal $XX "next":
 			log DEBUG Yes
 		else:
-			log DEBUG No9x $X
+			log DEBUG No9x $XX
 		wait GOT EVENT AX:
 			for 0.1
 		if in timeslot foo bar:
