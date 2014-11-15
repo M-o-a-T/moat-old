@@ -36,6 +36,8 @@ parser.add_option("-s", "--server", dest="host", action="store",
 	default="::1", help="Server to connect to")
 parser.add_option("-p", "--port", dest="port", action="store",
 	type="int",default="50005", help="port to connect to")
+parser.add_option("-6", "--ipv6", dest="ipv6", action="store_true",
+	default=False, help="Use IPv6")
 
 class ExitService(VoidService):
 	def on_disconnect(self,*a,**k):
@@ -45,7 +47,7 @@ class ExitService(VoidService):
 if args:
 	raise RuntimeError("don't pass arguments")
 
-c = rpyc.connect(opts.host, opts.port, ipv6=True, service=ExitService)
+c = rpyc.connect(opts.host, opts.port, ipv6=opts.ipv6, service=ExitService)
 c._channel.stream.sock.settimeout(None)
 d = []
 maxl = 0
