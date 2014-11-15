@@ -31,10 +31,13 @@ from datetime import datetime
 import os
 
 from homevent.base import Name,flatten
+from homevent.times import humandelta
 
 from gevent import spawn
 from gevent.queue import Queue
 from optparse import OptionParser
+TESTING=os.environ.get("HOMEVENT_TEST",False)
+
 parser = OptionParser(conflict_handler="resolve")
 parser.add_option("-h","--help","-?", action="help",
 	help="print this help text")
@@ -55,9 +58,9 @@ def getter(q):
 		p,t = res
 		if isinstance(t,datetime):
 			if TESTING and t.year != 2003:
-				t = "%s" % (humandelta(t-now(t.year != 2003)),)
+				t = "%s" % (humandelta(t-c.root.now(t.year != 2003)),)
 			else:
-				t = "%s (%s)" % (humandelta(t-now(t.year != 2003)),t)
+				t = "%s (%s)" % (humandelta(t-c.root.now(t.year != 2003)),t)
 			if TESTING:
 				lim = 3
 			else:
