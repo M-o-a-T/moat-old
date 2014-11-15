@@ -42,6 +42,8 @@ parser.add_option("-s", "--server", dest="host", action="store",
 	default="::1", help="Server to connect to")
 parser.add_option("-p", "--port", dest="port", action="store",
 	type="int",default="50005", help="port to connect to")
+parser.add_option("-6", "--ipv6", dest="ipv6", action="store_true",
+	default=False, help="Use IPv6")
 
 (opts, args) = parser.parse_args()
 
@@ -77,7 +79,7 @@ def out_one(p,c):
 		job.join()
 
 	
-c = rpyc.connect(opts.host, opts.port, ipv6=True)
+c = rpyc.connect(opts.host, opts.port, ipv6=opts.ipv6)
 for x in c.root.cmd_list(*args):
 	if x is None:
 		print "(None?)"
