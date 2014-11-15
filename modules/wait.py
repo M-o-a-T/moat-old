@@ -32,18 +32,17 @@ from homevent.event import Event
 from homevent.run import process_event
 from homevent.module import Module
 from homevent.worker import ExcWorker
-from homevent.times import time_delta, time_until, unixtime,unixdelta, now, humandelta
+from homevent.times import time_delta, time_until, unixtime,unixdelta, now, humandelta, sleep
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.base import Name,SName
 from homevent.collect import Collection,Collected
 from homevent.twist import callLater,fix_exception,Jobber,log_wait
-from homevent.logging import log_exc,TRACE
+from homevent.logging import log,log_exc,TRACE
 from homevent.delay import DelayFor,DelayWhile,DelayUntil,DelayNext,\
 	DelayError,DelayDone,DelayCancelled
 
-from gevent.event import Event as gEvent
+from gevent.event import AsyncResult
 from gevent.lock import Semaphore
-from gevent import sleep
 
 from time import time
 import os
@@ -71,8 +70,6 @@ class Waiter(Collected,Jobber):
 	force = False
 	storage = Waiters.storage
 	_plinger = None
-	_running = False
-	q = None
 
 	def __init__(self,parent,name,force):
 		self.ctx = parent.ctx
@@ -84,13 +81,15 @@ class Waiter(Collected,Jobber):
 		except AttributeError:
 			pass
 		super(Waiter,self).__init__(name)
+		log(TRACE,"WaitAdded",self.name)
 	
 	def list(self):
-		end=now()+dt.timedelta(0,self.value)
-		yield super(Waiter,self)
 		yield("start",self.start)
-		yield("end",end)
-		yield("total", humandelta(end-self.start))
+		yield super(Waiter,self)
+		if self._plinger:
+			end=now()+dt.timedelta(0,self.value)
+			yield("end",end)
+			yield("total", humandelta(end-self.start))
 		w = self
 		while True:
 			w = getattr(w,"parent",None)
@@ -123,9 +122,13 @@ class Waiter(Collected,Jobber):
 		return u"‹%s %s %s›" % (self.__class__.__name__, self.name,self.value)
 
 	def _pling(self,timeout):
-		sleep(timeout)
+		log(TRACE,"WaitEnter",self.name,self.force,timeout)
+		sleep(self.force, timeout, self.name)
+		log(TRACE,"WaitDone Del",self.name)
+		assert self._plinger is not None
 		self._plinger = None
-		self.job.set()
+		super(Waiter,self).delete()
+		self.job.set(True)
 
 	def _set_pling(self):
 		timeout = unixtime(self.end) - unixtime(now(self.force))
@@ -135,37 +138,32 @@ class Waiter(Collected,Jobber):
 		self.start_job("_plinger",self._pling, timeout)
 		
 	def init(self,dest):
-		self.job = gEvent()
+		self.job = AsyncResult()
 		self.end = dest
 		self._set_pling()
 
 	@property
 	def value(self):
-		if self.q is None:
-			return 0
-		if not self._running:
-			return "??"
+		if self._plinger is None:
+			return None
 		with log_wait("wait","remain",self.name):
 			with self._lock:
 				res = unixtime(self.end)-unixtime(now(self.force))
 		return res
 
 	def delete(self,ctx=None):
-		with log_wait("wait","delete",self.name):
+		with log_wait("wait","delete2",self.name):
 			with self._lock:
-				self.stop_job('_plinger')
-				super(Waiter,self).delete(ctx=ctx)
-
-	def cancel(self, err=DelayCancelled):
-		"""Cancel a waiter."""
-		process_event(Event(self.ctx(loglevel=TRACE),"wait","cancel",ixtime(self.end,self.force),*self.name))
-		self.delete()
-		self.job.set()
-		self.job = None
+				if self._plinger:
+					self.stop_job('_plinger')
+					assert self._plinger is None
+					log(TRACE,"WaitDel",self.name)
+					super(Waiter,self).delete(ctx=ctx)
+					self.job.set(False)
 
 	def retime(self, dest):
 		process_event(Event(self.ctx(loglevel=TRACE),"wait","update",dest,*self.name))
-		with log_wait("wait","delete",self.name):
+		with log_wait("wait","delete1",self.name):
 			with self._lock:
 				self.end = dest
 				self._set_pling()
@@ -204,18 +202,20 @@ wait [NAME…]: for FOO…
 		process_event(Event(self.ctx(loglevel=TRACE),"wait","start",ixtime(w.end,self.force),*w.name))
 		try:
 			if w.job:
-				w.job.wait()
-				r = (w.job is not None)
+				r = w.job.get()
 			else:
 				r = True
 		except Exception as ex:
+			process_event(Event(self.ctx(loglevel=TRACE),"wait","error",tm, *w.name))
 			fix_exception(ex)
 			log_exc(msg=u"Wait %s died:"%(self.name,), err=ex, level=TRACE)
 			raise
 		else:
 			tm = ixtime(now(self.force),self.force)
-			if r: # don't log 'done' if canceled
+			if r:
 				process_event(Event(self.ctx(loglevel=TRACE),"wait","done",tm, *w.name))
+			else:
+				process_event(Event(self.ctx(loglevel=TRACE),"wait","cancel",tm, *w.name))
 			ctx.wait = tm
 			if not r:
 				raise DelayCancelled(w)

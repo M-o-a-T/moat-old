@@ -138,16 +138,17 @@ def sleepUntil(force,delta):
 	else:
 		gevent.sleep(delta)
 
-_real_step = 999
+_real_sleep = 999
+_real_sleepers = 0
 _sleepers = 0
 
 def callLater(force,delta,p,*a,**kw):
-	k=Jobber()
-	k.j = None
-	k.start_job('j', _later,force,delta,p,*a,**kw)
+	r = gevent.spawn(_later,force,delta,p,*a,**kw)
+	r.cancel = r.kill
+	return r
 def _later(force,delta,p,*a,**k):
 	from homevent.times import unixdelta,now
-	global _sleepers,_real_step
+	global _sleepers,_real_sleep,_real_sleepers
 
 	if isinstance(delta,dt.datetime):
 		delta = delta - now(force)
@@ -161,13 +162,22 @@ def _later(force,delta,p,*a,**k):
 		if "HOMEVENT_TEST" not in os.environ:
 			gevent.sleep(delta)
 		elif force:
-			while _real_sleep < delta:
-				rs = _real_sleep
+			_real_sleepers += 1
+			if _real_sleep > delta:
+				_real_sleep = delta
+			while delta > 0:
+				if _real_sleep < delta:
+					rs = _real_sleep
+				else:
+					rs = 0.1
 				delta -= rs
 				gevent.sleep(rs)
+			_real_sleepers += -1
+			if _real_sleepers == 0:
+				_real_sleep = 999
 		else:
 			while delta > 0:
-				if _real_step < delta:
+				if _real_sleep < delta:
 					gevent.sleep(0.1)
 					delta -= 0.1
 				else:
