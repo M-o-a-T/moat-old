@@ -128,6 +128,7 @@ class Parser(Collected,Jobber):
 				gevent.sleep(0)
 				l = self.input.readline()
 				if not l:
+					self.add_line(".")
 					break
 				self.add_line(l)
 		
