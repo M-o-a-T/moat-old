@@ -22,7 +22,8 @@ Standards-Version: 3.7.2
 Package: homevent
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, python-homevent
-Recommends: pulseaudio (>= 0.9.7), python-rrdtool, owfs
+Recommends: python-rrdtool, owfs,
+  rabbitmq-server,
 Description: A scripted event-based monitoring and control system
  HomEvenT is a flexible, scripted, network-aware event handler.
  It can monitor and control quite a few external buses and peripherals,
@@ -41,6 +42,7 @@ Depends: ${misc:Depends}, ${python:Depends},
  python-rpyc,
  python-dabroker,
  python-pytz | python-tz,
+ python-flask,
 Recommends: python-rrdtool, owfs,
 Suggests: socat
 Description: A scripted event-based monitoring and control system

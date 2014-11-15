@@ -450,10 +450,14 @@ def log(level, *a):
 		try:
 			lim = levels[level]
 		except KeyError:
-			lim = TRACE if TESTING else NONE
-		else:
+			if isinstance(a[0],(int,long)) and TRACE<=a[0]<=PANIC:
+				lim = None
+			else:
+				lim = TRACE if TESTING else INFO
+		if lim is None:
 			b = level
 			level = a[0]
+			level = Lognames.get(level,level)
 			if lim > level:
 				return
 			a = (b,)+a[1:]
