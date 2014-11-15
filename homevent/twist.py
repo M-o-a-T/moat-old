@@ -122,7 +122,7 @@ def reraise(e):
 # something "real" and therefore may not be ignored.
 
 def sleepUntil(force,delta):
-	from homevent.times import unixdelta,now
+	from homevent.times import unixdelta,now,sleep
 
 	if isinstance(delta,dt.datetime):
 		delta = delta - now()
@@ -131,62 +131,15 @@ def sleepUntil(force,delta):
 	if delta < 0: # we're late
 		delta = 0 # but let's hope not too late
 
-	if "HOMEVENT_TEST" in os.environ:
-		ev = AsyncResult()
-		callLater(force,delta, ev.set,None)
-		ev.get(block=True)
-	else:
-		gevent.sleep(delta)
-
-_real_sleep = 999
-_real_sleepers = 0
-_sleepers = 0
+	sleep(force,delta)
 
 def callLater(force,delta,p,*a,**kw):
 	r = gevent.spawn(_later,force,delta,p,*a,**kw)
 	r.cancel = r.kill
 	return r
 def _later(force,delta,p,*a,**k):
-	from homevent.times import unixdelta,now
-	global _sleepers,_real_sleep,_real_sleepers
-
-	if isinstance(delta,dt.datetime):
-		delta = delta - now(force)
-	if isinstance(delta,dt.timedelta):
-		delta = unixdelta(delta)
-	if delta < 0: # we're late
-		delta = 0 # but let's hope not too late
-
-	_sleepers += 1
-	try:
-		if "HOMEVENT_TEST" not in os.environ:
-			gevent.sleep(delta)
-		elif force:
-			_real_sleepers += 1
-			if _real_sleep > delta:
-				_real_sleep = delta
-			while delta > 0:
-				if _real_sleep < delta:
-					rs = _real_sleep
-				else:
-					rs = 0.1
-				delta -= rs
-				gevent.sleep(rs)
-			_real_sleepers += -1
-			if _real_sleepers == 0:
-				_real_sleep = 999
-		else:
-			while delta > 0:
-				if _real_sleep < delta:
-					gevent.sleep(0.1)
-					delta -= 0.1
-				else:
-					gevent.sleep(0.01)
-					delta -= 0.1/_sleepers
-	finally:
-		_sleepers -= 1
-	p(*a,**k)
-
+	sleepUntil(force,delta)
+	return p(*a,**k)
 
 class Jobs(Collection):
 	name = "job"
