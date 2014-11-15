@@ -15,8 +15,6 @@
 ##  for more details.
 ##
 
-from __future__ import division
-
 """\
 This code does basic timeout handling.
 
@@ -25,6 +23,8 @@ wait: for FOO...
 
 """
 
+from __future__ import division,absolute_import
+
 from homevent import TESTING
 from homevent.statement import AttributedStatement, Statement, main_words,\
 	global_words
@@ -32,26 +32,21 @@ from homevent.event import Event
 from homevent.run import process_event
 from homevent.module import Module
 from homevent.worker import ExcWorker
-from homevent.times import time_delta, time_until, unixtime,unixdelta, now, humandelta
+from homevent.times import time_delta, time_until, unixtime,unixdelta, now, humandelta, sleep
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.base import Name,SName
 from homevent.collect import Collection,Collected
-from homevent.twist import callLater,fix_exception,Jobber
-from homevent.logging import log_exc,TRACE
+from homevent.twist import callLater,fix_exception,Jobber,log_wait
+from homevent.logging import log,log_exc,TRACE
 from homevent.delay import DelayFor,DelayWhile,DelayUntil,DelayNext,\
 	DelayError,DelayDone,DelayCancelled
 
-import gevent
-from gevent.queue import Channel
+from gevent.event import AsyncResult
+from gevent.lock import Semaphore
 
 from time import time
 import os
 import datetime as dt
-try:
-	from twisted.internet.error import AlreadyCalled
-except ImportError:
-	class AlreadyCalled(Exception):
-		pass
 
 timer_nr = 0
 
@@ -75,25 +70,26 @@ class Waiter(Collected,Jobber):
 	force = False
 	storage = Waiters.storage
 	_plinger = None
-	_running = False
-	q = None
 
 	def __init__(self,parent,name,force):
 		self.ctx = parent.ctx
 		self.start = now()
 		self.force = force
+		self._lock = Semaphore()
 		try:
 			self.parent = parent.parent
 		except AttributeError:
 			pass
 		super(Waiter,self).__init__(name)
+		#log(TRACE,"WaitAdded",self.name)
 	
 	def list(self):
-		end=now()+dt.timedelta(0,self.value)
-		yield super(Waiter,self)
 		yield("start",self.start)
-		yield("end",end)
-		yield("total", humandelta(end-self.start))
+		yield super(Waiter,self)
+		if self._plinger:
+			end=now()+dt.timedelta(0,self.value)
+			yield("end",end)
+			yield("total", humandelta(end-self.start))
 		w = self
 		while True:
 			w = getattr(w,"parent",None)
@@ -125,95 +121,49 @@ class Waiter(Collected,Jobber):
 	def __repr__(self):
 		return u"‹%s %s %s›" % (self.__class__.__name__, self.name,self.value)
 
-	def _pling(self):
+	def _pling(self,timeout):
+		#log(TRACE,"WaitEnter",self.name,self.force,timeout)
+		sleep(self.force, timeout, self.name)
+		#log(TRACE,"WaitDone Del",self.name)
+		assert self._plinger is not None
 		self._plinger = None
-		self._cmd("timeout")
+		super(Waiter,self).delete()
+		self.job.set(True)
 
 	def _set_pling(self):
 		timeout = unixtime(self.end) - unixtime(now(self.force))
 		if timeout <= 0.1:
 			timeout = 0.1
-		if self._plinger:
-			self._plinger.cancel()
-		self._plinger = callLater(self.force, timeout, self._pling)
+		self.stop_job("_plinger")
+		self.start_job("_plinger",self._pling, timeout)
 		
-	def _job(self):
-		try:
-			self._set_pling()
-			self._running = True
-			while True:
-				cmd = self.q.get()
-	
-				q = cmd[0]
-				a = cmd[2] if len(cmd)>2 else None
-				cmd = cmd[1]
-				if cmd == "timeout":
-					assert self._plinger is None
-					q.put(None)
-					return True
-				elif cmd == "cancel":
-					if self._plinger:
-						try:
-							self._plinger.cancel()
-						except AlreadyCalled:
-							pass
-						self._plinger = None
-					q.put(None)
-					return False
-				elif cmd == "update":
-					q.put(None)
-					self.end = a
-					self._set_pling()
-				elif cmd == "remain":
-					q.put(unixtime(self.end)-unixtime(now(self.force)))
-				else:
-					q.put(RuntimeError('Unknown command: '+cmd))
-		finally:
-			q,self.q = self.q,None
-			super(Waiter,self).delete()
-			if q is not None:
-				while not q.empty():
-					q.get()[0].put(StopIteration())
-
 	def init(self,dest):
-		self.q = Channel()
+		self.job = AsyncResult()
 		self.end = dest
-		self.start_job("job",self._job)
-
-	def _cmd(self,cmd,*a):
-		if self.q is None:
-			raise DelayDone(self)
-
-		q = Channel()
-		self.q.put((q,cmd)+tuple(a))
-		res = q.get()
-		if isinstance(res,BaseException):
-			raise res
-		return res
+		self._set_pling()
 
 	@property
 	def value(self):
-		if self.q is None:
-			return 0
-		if not self._running:
-			return "??"
-		res = self._cmd("remain")
-		if TESTING:
-			res = "%.1f" % (res,)
-		return res
+		if self._plinger is None:
+			return None
+		return unixtime(self.end)-unixtime(now(self.force))
 
 	def delete(self,ctx=None):
-		self._cmd("cancel")
-
-	def cancel(self, err=DelayCancelled):
-		"""Cancel a waiter."""
-		process_event(Event(self.ctx(loglevel=TRACE),"wait","cancel",ixtime(self.end,self.force),*self.name))
-		self._cmd("cancel")
+		with log_wait("wait","delete2",self.name):
+			with self._lock:
+				if self._plinger:
+					self.stop_job('_plinger')
+					assert self._plinger is None
+					#log(TRACE,"WaitDel",self.name)
+					super(Waiter,self).delete(ctx=ctx)
+					self.job.set(False)
 
 	def retime(self, dest):
 		process_event(Event(self.ctx(loglevel=TRACE),"wait","update",dest,*self.name))
-		self._cmd("update",dest)
-
+		with log_wait("wait","delete1",self.name):
+			with self._lock:
+				self.end = dest
+				self._set_pling()
 	
 class WaitHandler(AttributedStatement):
 	name="wait"
@@ -253,16 +203,21 @@ wait [NAME…]: for FOO…
 			else:
 				r = True
 		except Exception as ex:
+			process_event(Event(self.ctx(loglevel=TRACE),"wait","error",tm, *w.name))
 			fix_exception(ex)
 			log_exc(msg=u"Wait %s died:"%(self.name,), err=ex, level=TRACE)
 			raise
 		else:
 			tm = ixtime(now(self.force),self.force)
-			if r: # don't log 'done' if canceled
+			if r:
 				process_event(Event(self.ctx(loglevel=TRACE),"wait","done",tm, *w.name))
+			else:
+				process_event(Event(self.ctx(loglevel=TRACE),"wait","cancel",tm, *w.name))
 			ctx.wait = tm
 			if not r:
 				raise DelayCancelled(w)
+		finally:
+			w.delete()
 
 		
 class WaitDebug(Statement):

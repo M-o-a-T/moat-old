@@ -20,6 +20,8 @@ This code implements a simple line-oriented protocol via TCP.
 
 """
 
+from __future__ import division,absolute_import
+
 from homevent.module import Module
 from homevent.logging import log,log_exc,DEBUG,TRACE,INFO,WARN,ERROR
 from homevent.statement import Statement, main_words, AttributedStatement
@@ -28,8 +30,6 @@ from homevent.base import Name
 from homevent.collect import Collection,Collected
 from homevent.run import simple_event
 from homevent.context import Context
-
-from twisted.internet import protocol,reactor,error
 
 from homevent.net import NetListen,NetConnect,NetSend,NetConnected,\
 	DisconnectedError,NetListener,NetActiveConnector,NetPassiveConnector,\

@@ -15,8 +15,6 @@
 ##  for more details.
 ##
 
-from __future__ import division
-
 """\
 This code does basic configurable event mangling.
 
@@ -34,6 +32,8 @@ Otherwise a "alarm livingroom" would be triggered.
 
 """
 
+from __future__ import division,absolute_import
+
 from homevent.interpreter import CollectProcessor
 from homevent.statement import Statement,MainStatementList, main_words,\
 	global_words
@@ -46,8 +46,6 @@ from homevent.check import Check,register_condition,unregister_condition
 from homevent.event import TrySomethingElse
 from homevent.base import Name,SName
 from homevent.collect import Collection,Collected
-
-from twisted.internet import defer
 
 onHandlers = {}
 onHandlers2 = {}

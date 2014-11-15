@@ -25,120 +25,26 @@ for typical usage.
 
 """
 
-from zope.interface import implements
+from __future__ import division,absolute_import
+
 from homevent.tokize import tokizer
 from tokenize import tok_name
 import Queue
 import sys
 import os
 import errno
-from twisted.internet import reactor,threads,defer,interfaces
-from twisted.protocols.basic import LineOnlyReceiver,FileSender,_PauseableMixin
 
 import gevent
 from gevent.select import select
 from gevent.event import AsyncResult
 
-from homevent.geventreactor import waitForDeferred,deferToGreenlet
 from homevent.logging import log,TRACE,DEBUG
 from homevent.context import Context
 from homevent.io import Outputter,conns
 from homevent.event import Event,StopParsing
 from homevent.statement import global_words
-from homevent.twist import deferToLater,setBlocking, fix_exception,print_exception,reraise,Jobber
+from homevent.twist import fix_exception,print_exception,reraise,Jobber
 from homevent.collect import Collection,Collected
-
-class ParseReceiver(Outputter):
-	"""This is a mixin to feed a parser"""
-	implements(interfaces.IHalfCloseableProtocol)
-	delimiter = '\n'
-
-	def __init__(self, parser=None, *a,**k):
-		super(ParseReceiver,self).__init__(*a,**k)
-		if parser is None:
-			from homevent.interpreter import InteractiveInterpreter
-
-			def reporter(err):
-				print >>sys.stderr,"Error:",err
-			c=Context()
-			#c.logger=parse_logger
-			i = InteractiveInterpreter(ctx=c)
-			parser = Parser(interpreter=i, input=StdIO, ctx=c)
-		self.parser = parser
-		parser.registerProducer(self,False)
-		#parser.startParsing()
-	
-	def readConnectionLost(self):
-		try:
-			rl = super(ParseReceiver,self).readConnectionLost
-		except AttributeError:
-			pass
-		else:
-			rl()
-		if self.parser:
-			self.parser.endConnection()
-			self.parser = None
-		
-	def connectionLost(self,reason):
-		self.readConnectionLost()
-		self.writeConnectionLost()
-
-	def writeConnectionLost(self):
-		try:
-			rl = super(ParseReceiver,self).writeConnectionLost
-		except AttributeError:
-			super(ParseReceiver,self).connectionLost("unknown")
-		else:
-			rl()
-
-	def lineReceived(self, data):
-		self.parser.lineReceived(data)
-	
-	def makeConnection(self,transport):
-		assert self.parser is not None, "Need to set the parser"
-		if "out" not in self.parser.ctx:
-			self.parser.ctx.out = transport
-
-		super(ParseReceiver,self).makeConnection(transport)
-
-	def connectionMade(self):
-		super(ParseReceiver,self).connectionMade()
-		self.parser.run()
-		self.parser.do_prompt = self.parser.proc.do_prompt
-
-def parser_builder(cls=None,protocol=None,interpreter=None,*a,**k):
-	"""\
-		Return something that builds a receiver class when called with
-		no arguments
-		"""
-	if cls is None:
-		cls = LineOnlyReceiver
-		impl = interfaces.IPushProducer
-	else:
-		impl = None
-	try:
-		ctx = k.pop("ctx")
-	except KeyError:
-		ctx = Context
-	if interpreter is None:
-		from homevent.interpreter import InteractiveInterpreter
-		interpreter = InteractiveInterpreter
-
-	class mixer(ParseReceiver,cls):
-		if impl:
-			implements(impl)
-		pass
-
-	def gen_builder(*x,**y):
-		c = ctx()
-		k["ctx"] = c
-		i = interpreter(ctx=c)
-		p = TwistedParser(interpreter=i, protocol=protocol, ctx=c)
-
-		m = mixer(p, *x,**y)
-		return m
-	return gen_builder
-
 
 class Parsers(Collection):
 	name = "parser"
@@ -192,7 +98,7 @@ class Parser(Collected,Jobber):
 		pass
 
 	def lineReceived(self, data):
-		return self.add_line(data)
+		self.add_line(data)
 
 	def run(self):
 		self.init_state()
@@ -217,20 +123,12 @@ class Parser(Collected,Jobber):
 	def _run(self,syn):
 		syn.get()
 		try:
-			setBlocking(False,self.input)
 			while True:
-				try:
-					l = self.input.readline()
-				except EnvironmentError as e:
-					fix_exception(e)
-					if e.errno != errno.EAGAIN or not hasattr(self.input,"fileno"):
-						raise
-					r,_,_ = select((self.input,),(),())
-					if not r:
-						return
-					continue
-	
+				# allow tasks which kill this one to run
+				gevent.sleep(0)
+				l = self.input.readline()
 				if not l:
+					self.add_line(".")
 					break
 				self.add_line(l)
 		
@@ -238,8 +136,6 @@ class Parser(Collected,Jobber):
 			fix_exception(e)
 			return e
 		finally:
-			setBlocking(True,self.input)
-
 			job = gevent.spawn(self.endConnection,kill=False)
 			def dead(e):
 				fix_exception(e)
@@ -293,9 +189,7 @@ class Parser(Collected,Jobber):
 		#log("parser",TRACE,"PARSE",t,repr(txt))
 
 		try:
-			res = self._parseStep(t,txt,beg,end,line)
-			if isinstance(res,defer.Deferred):
-				waitForDeferred(res)
+			self._parseStep(t,txt,beg,end,line)
 
 		except StopIteration:
 			return
@@ -369,7 +263,7 @@ class Parser(Collected,Jobber):
 				log("parser",TRACE,"RUN2")
 				log("parser",TRACE,self.proc.complex_statement,self.p_args)
 				self.p_state = 3
-				_ = waitForDeferred(self.proc.complex_statement(self.p_args))
+				_ = self.proc.complex_statement(self.p_args)
 
 				self.p_stack.append(self.proc)
 				self.proc = _
@@ -384,7 +278,7 @@ class Parser(Collected,Jobber):
 				# statements which terminate the parser ("exit")
 				if not self.p_pop_after:
 					self.p_state=0
-				waitForDeferred(self.proc.simple_statement(self.p_args))
+				self.proc.simple_statement(self.p_args)
 					
 				if self.p_pop_after:
 					self.proc.done()
@@ -426,36 +320,6 @@ class Parser(Collected,Jobber):
 
 		raise SyntaxError("Unknown token %s (%s, state %d) in %s:%d" % (repr(txt),tok_name[t] if t in tok_name else t,self.p_state,self.ctx.filename,beg[0]))
 
-
-class TwistedParser(Parser,LineOnlyReceiver,object):
-	delimiter = "\n"
-
-	def __init__(self, protocol, interpreter, ctx=None):
-		self.protocol = protocol
-		super(TwistedParser,self).__init__(input=None,interpreter=interpreter,ctx=ctx)
-
-	def lineReceived(self, data):
-		log("parser",TRACE,"S LINE",repr(data))
-		return deferToGreenlet(self.add_line,data+"\n")
-	
-	def write(self, data):
-		log("parser",TRACE,"S WRITE",self.transport,repr(data))
-		self.dataReceived(data)
-	
-	def registerProducer(self, producer, streaming):
-		log("parser",TRACE,"S START")
-		self.producer = producer
-		self.streaming = streaming
-	
-	def unregisterProducer(self):
-		log("parser",TRACE,"S STOP")
-		self.producer = None
-		self.delete()
-	
-	def stop_client(self):
-		"""Helper when the client types "exit" or whatever."""
-		self.producer.loseConnection()
-		self.delete()
 
 class _drop(object):
 	def __init__(self,g):

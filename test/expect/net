@@ -1,81 +1,73 @@
-NEW: ‹ConditionalWorkSequence:7 (4)›
-   : │  id: 7
+NEW: ‹ConditionalWorkSequence:5 (2)›
+   : │  id: 5
    : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
 EVENT: startup
 END: startup
-0 locking +WAIT 1 start job ‹Collected Parser:n1›
-0 locking -WAIT 1 start job ‹Collected Parser:n1›
-0 locking +WAIT 2 start job <homevent.tokize.tokizer obj>
-0 locking -WAIT 2 start job <homevent.tokize.tokizer obj>
-0 locking +WAIT 3 start job ‹Waiter BAD ??›
-0 locking -WAIT 3 start job ‹Waiter BAD ??›
-NEW: ‹ConditionalWorkSequence:8 (4)›
-   : │  id: 8
+NEW: ‹ConditionalWorkSequence:6 (2)›
+   : │  id: 6
    : │  call count: 0
    : │  EVENT: wait¦start¦0.2¦BAD
    : └1╴... done.
 EVENT: wait¦start¦0.2¦BAD
 END: wait¦start¦0.2¦BAD
-NEW: ‹ConditionalWorkSequence:9 (4)›
-   : │  id: 9
+NEW: ‹ConditionalWorkSequence:7 (2)›
+   : │  id: 7
    : │  call count: 0
    : │  EVENT: net¦error¦foop
    : └1╴... done.
 EVENT: net¦error¦foop
 END: net¦error¦foop
 [Errno 111] Connection refused
-NEW: ‹WorkSequence:10 (4)›
-   : │  id: 10
+NEW: ‹WorkSequence:8 (2)›
+   : │  id: 8
    : │  call count: 0
    : │  [Errno 111] Connection refused
    : └1╴... done.
 [Errno 111] Connection refused
 END: error
-NEW: ‹ConditionalWorkSequence:11 (4)›
-   : │  id: 11
+2014-11-15 18:45:05.988092 BAD: Forced timer done 
+NEW: ‹ConditionalWorkSequence:9 (2)›
+   : │  id: 9
    : │  call count: 0
    : │  EVENT: wait¦done¦0.2¦BAD
    : └1╴... done.
 EVENT: wait¦done¦0.2¦BAD
 END: wait¦done¦0.2¦BAD
-1 Yes
-0 Create OnEvtHandler: net¦connect¦foo
-0 NewHandler 12
-0 Create OnEvtHandler: net¦connect¦baz¦zaz¦*who
-0 NewHandler 13
-0 Create OnEvtHandler: net¦disconnect¦foo
-0 NewHandler 14
-0 Create OnEvtHandler: net¦disconnect¦baz¦zaz
-0 NewHandler 15
-0 locking +WAIT 4 start job ‹Waiter BEFORE ??›
-0 locking -WAIT 4 start job ‹Waiter BEFORE ??›
-NEW: ‹ConditionalWorkSequence:16 (4)›
-   : │  id: 16
+DEBUG Yes
+TRACE Create OnEvtHandler: net¦connect¦foo
+TRACE NewHandler 10
+TRACE Create OnEvtHandler: net¦connect¦baz¦zaz¦*who
+TRACE NewHandler 11
+TRACE Create OnEvtHandler: net¦disconnect¦foo
+TRACE NewHandler 12
+TRACE Create OnEvtHandler: net¦disconnect¦baz¦zaz
+TRACE NewHandler 13
+NEW: ‹ConditionalWorkSequence:14 (2)›
+   : │  id: 14
    : │  call count: 0
    : │  EVENT: wait¦start¦0.4¦BEFORE
    : └1╴... done.
 EVENT: wait¦start¦0.4¦BEFORE
 END: wait¦start¦0.4¦BEFORE
-NEW: ‹ConditionalWorkSequence:17 (4)›
-   : │  id: 17
+2014-11-15 18:45:06.212691 BEFORE: Forced timer done 
+NEW: ‹ConditionalWorkSequence:15 (2)›
+   : │  id: 15
    : │  call count: 0
    : │  EVENT: wait¦done¦0.4¦BEFORE
    : └1╴... done.
 EVENT: wait¦done¦0.4¦BEFORE
 END: wait¦done¦0.4¦BEFORE
-0 locking +WAIT 5 start job ‹Waiter AFTER ??›
-0 locking -WAIT 5 start job ‹Waiter AFTER ??›
-NEW: ‹ConditionalWorkSequence:18 (4)›
-   : │  id: 18
+NEW: ‹ConditionalWorkSequence:16 (2)›
+   : │  id: 16
    : │  call count: 0
-   : │  EVENT: wait¦start¦1.2¦AFTER
+   : │  EVENT: wait¦start¦1.3¦AFTER
    : └1╴... done.
-EVENT: wait¦start¦1.2¦AFTER
-END: wait¦start¦1.2¦AFTER
-NEW: ‹ConditionalWorkSequence:19 (5)›
-   : │  id: 19
+EVENT: wait¦start¦1.3¦AFTER
+END: wait¦start¦1.3¦AFTER
+NEW: ‹ConditionalWorkSequence:17 (3)›
+   : │  id: 17
    : │  call count: 0
    : │  EVENT: net¦connect¦foo
    : ├1╴on net connect foo ‹OnEventHandler›
@@ -96,43 +88,39 @@ RUN: on net connect foo ‹OnEventHandler›
    :     : step: list net connection ‹List›
    :     : step: list net connection foo ‹List›
    :     : step: del net connection foo ‹Del›
- at: ‹ConditionalWorkSequence:19 (5)› (step 1)
+ at: ‹ConditionalWorkSequence:17 (3)› (step 1)
  ev: EVENT: net¦connect¦foo
 END: net¦connect¦foo
-0 locking +WAIT 6 start job ‹Collected NETactive:foo›
-0 locking -WAIT 6 start job ‹Collected NETactive:foo›
-NEW: ‹ConditionalWorkSequence:20 (4)›
-   : │  id: 20
+NEW: ‹ConditionalWorkSequence:18 (2)›
+   : │  id: 18
+   : │  call count: 0
+   : │  EVENT: wait¦start¦0.6¦OUT
+   : └1╴... done.
+EVENT: wait¦start¦0.6¦OUT
+END: wait¦start¦0.6¦OUT
+NEW: ‹ConditionalWorkSequence:19 (2)›
+   : │  id: 19
    : │  call count: 0
    : │  EVENT: net¦recv¦foo¦A
    : └1╴... done.
 EVENT: net¦recv¦foo¦A
 END: net¦recv¦foo¦A
-0 locking +WAIT 7 start job ‹Waiter OUT ??›
-0 locking -WAIT 7 start job ‹Waiter OUT ??›
-NEW: ‹ConditionalWorkSequence:21 (4)›
-   : │  id: 21
+2014-11-15 18:45:06.374413 OUT: Forced timer done 
+NEW: ‹ConditionalWorkSequence:20 (2)›
+   : │  id: 20
    : │  call count: 0
-   : │  EVENT: wait¦start¦0.5¦OUT
+   : │  EVENT: wait¦done¦0.6¦OUT
    : └1╴... done.
-EVENT: wait¦start¦0.5¦OUT
-END: wait¦start¦0.5¦OUT
-NEW: ‹ConditionalWorkSequence:22 (4)›
-   : │  id: 22
-   : │  call count: 0
-   : │  EVENT: wait¦done¦0.5¦OUT
-   : └1╴... done.
-EVENT: wait¦done¦0.5¦OUT
-END: wait¦done¦0.5¦OUT
+EVENT: wait¦done¦0.6¦OUT
+END: wait¦done¦0.6¦OUT
 foo :: net_active localhost:50333
 .
 type: net_active
 host: localhost
-port: ×××
+port: 50333
 .
-0 locking +WAIT 8 kill job ‹Collected NETactive:foo›
-NEW: ‹ConditionalWorkSequence:23 (5)›
-   : │  id: 23
+NEW: ‹ConditionalWorkSequence:21 (3)›
+   : │  id: 21
    : │  call count: 0
    : │  EVENT: net¦disconnect¦foo
    : ├1╴on net disconnect foo ‹OnEventHandler›
@@ -143,13 +131,12 @@ EVENT: net¦disconnect¦foo
 RUN: on net disconnect foo ‹OnEventHandler›
    : prio: 51
    : step: log TRACE dis foo ‹LogHandler›
- at: ‹ConditionalWorkSequence:23 (5)› (step 1)
+ at: ‹ConditionalWorkSequence:21 (3)› (step 1)
  ev: EVENT: net¦disconnect¦foo
-0 dis foo
+TRACE dis foo
 END: net¦disconnect¦foo
-0 locking -WAIT 8 kill job ‹Collected NETactive:foo›
-NEW: ‹ConditionalWorkSequence:24 (5)›
-   : │  id: 24
+NEW: ‹ConditionalWorkSequence:22 (3)›
+   : │  id: 22
    : │  call count: 0
    : │  EVENT: net¦connect¦baz¦zaz¦1
    : ├1╴on net connect baz zaz *who ‹OnEventHandler›
@@ -168,29 +155,26 @@ RUN: on net connect baz zaz *who ‹OnEventHandler›
    :     : step: wait IN ‹WaitHandler›
    :     : step: list net connection baz zaz $who ‹List›
    :     : step: del net connection baz zaz $who ‹Del›
- at: ‹ConditionalWorkSequence:24 (5)› (step 1)
+ at: ‹ConditionalWorkSequence:22 (3)› (step 1)
  ev: EVENT: net¦connect¦baz¦zaz¦1
 END: net¦connect¦baz¦zaz¦1
-0 locking +WAIT 9 start job ‹Collected NETpassive:baz¦zaz¦1›
-0 locking -WAIT 9 start job ‹Collected NETpassive:baz¦zaz¦1›
-NEW: ‹ConditionalWorkSequence:25 (4)›
-   : │  id: 25
-   : │  call count: 0
-   : │  EVENT: net¦recv¦baz¦zaz¦1¦B
-   : └1╴... done.
-EVENT: net¦recv¦baz¦zaz¦1¦B
-END: net¦recv¦baz¦zaz¦1¦B
-0 locking +WAIT 10 start job ‹Waiter IN ??›
-0 locking -WAIT 10 start job ‹Waiter IN ??›
-NEW: ‹ConditionalWorkSequence:26 (4)›
-   : │  id: 26
+NEW: ‹ConditionalWorkSequence:23 (2)›
+   : │  id: 23
    : │  call count: 0
    : │  EVENT: wait¦start¦0.7¦IN
    : └1╴... done.
 EVENT: wait¦start¦0.7¦IN
 END: wait¦start¦0.7¦IN
-NEW: ‹ConditionalWorkSequence:27 (4)›
-   : │  id: 27
+NEW: ‹ConditionalWorkSequence:24 (2)›
+   : │  id: 24
+   : │  call count: 0
+   : │  EVENT: net¦recv¦baz¦zaz¦1¦B
+   : └1╴... done.
+EVENT: net¦recv¦baz¦zaz¦1¦B
+END: net¦recv¦baz¦zaz¦1¦B
+2014-11-15 18:45:06.510736 IN: Forced timer done 
+NEW: ‹ConditionalWorkSequence:25 (2)›
+   : │  id: 25
    : │  call count: 0
    : │  EVENT: wait¦done¦0.7¦IN
    : └1╴... done.
@@ -198,91 +182,38 @@ EVENT: wait¦done¦0.7¦IN
 END: wait¦done¦0.7¦IN
 type: net_passive
 host: 127.0.0.1
-port: ×××
+port: 52101
 .
-0 locking +WAIT 11 kill job ‹Collected NETpassive:baz¦zaz¦1›
-NEW: ‹ConditionalWorkSequence:28 (4)›
-   : │  id: 28
+NEW: ‹ConditionalWorkSequence:26 (2)›
+   : │  id: 26
    : │  call count: 0
    : │  EVENT: net¦disconnect¦baz¦zaz¦1
    : └1╴... done.
 EVENT: net¦disconnect¦baz¦zaz¦1
 END: net¦disconnect¦baz¦zaz¦1
-0 locking -WAIT 11 kill job ‹Collected NETpassive:baz¦zaz¦1›
-NEW: ‹ConditionalWorkSequence:29 (4)›
+2014-11-15 18:45:07.087779 AFTER: Forced timer done 
+NEW: ‹ConditionalWorkSequence:27 (2)›
+   : │  id: 27
+   : │  call count: 0
+   : │  EVENT: wait¦done¦1.3¦AFTER
+   : └1╴... done.
+EVENT: wait¦done¦1.3¦AFTER
+END: wait¦done¦1.3¦AFTER
+TRACE ending
+.
+DEBUG Yes
+NEW: ‹ConditionalWorkSequence:28 (2)›
+   : │  id: 28
+   : │  call count: 0
+   : │  EVENT: wait¦start¦1.6¦END
+   : └1╴... done.
+EVENT: wait¦start¦1.6¦END
+END: wait¦start¦1.6¦END
+2003-04-05 06:07:09.675018 END: Fake timer done 
+NEW: ‹ConditionalWorkSequence:29 (2)›
    : │  id: 29
    : │  call count: 0
-   : │  EVENT: wait¦done¦1.2¦AFTER
+   : │  EVENT: wait¦done¦1.7¦END
    : └1╴... done.
-EVENT: wait¦done¦1.2¦AFTER
-END: wait¦done¦1.2¦AFTER
-0 ending
-.
-1 Yes
-0 locking +WAIT 12 start job ‹Waiter END ??›
-0 locking -WAIT 12 start job ‹Waiter END ??›
-NEW: ‹ConditionalWorkSequence:30 (4)›
-   : │  id: 30
-   : │  call count: 0
-   : │  EVENT: wait¦start¦0.2¦END
-   : └1╴... done.
-EVENT: wait¦start¦0.2¦END
-END: wait¦start¦0.2¦END
-0 locking +WAIT 13 kill job <homevent.tokize.tokizer obj>
-0 locking -WAIT 13 kill job <homevent.tokize.tokizer obj>
-NEW: ‹ConditionalWorkSequence:31 (6)›
-   : │  id: 31
-   : │  call count: 0
-   : │  EVENT: shutdown
-   : └1╴... done.
-EVENT: shutdown
-NEW: ‹ConditionalWorkSequence:32 (4)›
-   : │  id: 32
-   : │  call count: 0
-   : │  EVENT: module¦unload¦on_event
-   : └1╴... done.
-EVENT: module¦unload¦on_event
-END: module¦unload¦on_event
-NEW: ‹ConditionalWorkSequence:33 (4)›
-   : │  id: 33
-   : │  call count: 0
-   : │  EVENT: module¦unload¦logging
-   : └1╴... done.
-EVENT: module¦unload¦logging
-END: module¦unload¦logging
-NEW: ‹ConditionalWorkSequence:34 (4)›
-   : │  id: 34
-   : │  call count: 0
-   : │  EVENT: module¦unload¦ifelse
-   : └1╴... done.
-EVENT: module¦unload¦ifelse
-END: module¦unload¦ifelse
-NEW: ‹ConditionalWorkSequence:35 (4)›
-   : │  id: 35
-   : │  call count: 0
-   : │  EVENT: module¦unload¦net
-   : └1╴... done.
-EVENT: module¦unload¦net
-END: module¦unload¦net
-NEW: ‹ConditionalWorkSequence:36 (4)›
-   : │  id: 36
-   : │  call count: 0
-   : │  EVENT: module¦unload¦data
-   : └1╴... done.
-EVENT: module¦unload¦data
-END: module¦unload¦data
-NEW: ‹ConditionalWorkSequence:37 (4)›
-   : │  id: 37
-   : │  call count: 0
-   : │  EVENT: module¦unload¦block
-   : └1╴... done.
-EVENT: module¦unload¦block
-END: module¦unload¦block
-NEW: ‹ConditionalWorkSequence:38 (4)›
-   : │  id: 38
-   : │  call count: 0
-   : │  EVENT: module¦unload¦wait
-   : └1╴... done.
-EVENT: module¦unload¦wait
-END: module¦unload¦wait
-END: shutdown
+EVENT: wait¦done¦1.7¦END
+END: wait¦done¦1.7¦END

@@ -25,6 +25,8 @@ monitor name TYPE args
 
 """
 
+from __future__ import division,absolute_import
+
 from homevent.monitor import Monitor,Monitors, MonitorDelayFor,MonitorDelayUntil,\
 	MonitorRequire,MonitorRetry,MonitorAlarm,MonitorHigh,MonitorLow,\
 	MonitorLimit, MonitorScale, MonitorDiff, MonitorHandler, NoWatcherError
@@ -36,7 +38,6 @@ from homevent.base import Name,SName
 from homevent.in_out import Inputs
 
 import os
-from twisted.internet import defer
 
 class VarMonitor(Monitor):
 	"""Monitor for a variable. Really simple."""

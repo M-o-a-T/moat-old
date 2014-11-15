@@ -17,6 +17,8 @@
 
 """Class to make storing collections of stuff simpler"""
 
+from __future__ import division,absolute_import
+
 from homevent.base import Name,SName
 from homevent.check import Check
 
@@ -139,6 +141,7 @@ class Collected(object):
 		self.storage[name] = self
 
 	def dup_error(self,name):
+		import pdb;pdb.set_trace()
 		raise RuntimeError(u"Duplicate entry ‹%s› in ‹%s›" % (name,self.storage.name))
 
 	def __repr__(self):

@@ -29,13 +29,12 @@ for typical usage.
 
 """
 
+from __future__ import division,absolute_import
+
 from homevent.context import Context
 from homevent.event import Event
 from homevent.base import Name
 from homevent.twist import fix_exception,reraise
-
-from twisted.internet import defer
-from homevent.geventreactor import waitForDeferred
 
 import sys
 import traceback
@@ -128,8 +127,6 @@ class CollectProcessor(Processor):
 		fn = self.lookup(args)
 		if fn.immediate:
 			res = fn.run(self.ctx)
-			if isinstance(res,defer.Deferred):
-				waitForDeferred(res)
 			return res
 		self.store(fn)
 
@@ -168,9 +165,7 @@ class RunMe(object):
 		return self.fnp.complex_statement(args)
 	def done(self):
 		self.fnp.done()
-		res = self.fn.run(self.proc.ctx)
-		if isinstance(res,defer.Deferred):
-			waitForDeferred(res)
+		self.fn.run(self.proc.ctx)
 
 class ImmediateProcessor(CollectProcessor):
 	"""\
@@ -183,8 +178,6 @@ class ImmediateProcessor(CollectProcessor):
 	def simple_statement(self,args):
 		fn = self.lookup(args)
 		res = fn.run(self.ctx)
-		if isinstance(res,defer.Deferred):
-			waitForDeferred(res)
 		return res
 
 	def complex_statement(self,args):

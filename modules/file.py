@@ -23,6 +23,8 @@ This code reads a config file.
 
 """
 
+from __future__ import division,absolute_import
+
 from homevent.statement import Statement, main_words
 from homevent.module import Module
 from homevent.check import Check,register_condition,unregister_condition

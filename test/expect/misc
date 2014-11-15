@@ -1,147 +1,152 @@
-NEW: ‹ConditionalWorkSequence:7 (4)›
-   : │  id: 7
+NEW: ‹ConditionalWorkSequence:5 (2)›
+   : │  id: 5
    : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
 EVENT: startup
 END: startup
-0 locking +WAIT 1 start job ‹Collected Parser:n1›
-0 locking -WAIT 1 start job ‹Collected Parser:n1›
-0 locking +WAIT 2 start job <homevent.tokize.tokizer obj>
-0 locking -WAIT 2 start job <homevent.tokize.tokizer obj>
-0 locking +WAIT 3 start job ‹TriggerHandler: trigger 3›
-0 locking -WAIT 3 start job ‹TriggerHandler: trigger 3›
-0 locking +WAIT 4 start job ‹TriggerHandler: trigger 3›
-0 locking -WAIT 4 start job ‹TriggerHandler: trigger 3›
-0 locking +WAIT 5 start job ‹Waiter A ??›
-0 locking -WAIT 5 start job ‹Waiter A ??›
-NEW: ‹ConditionalWorkSequence:8 (4)›
-   : │  id: 8
-   : │  call count: 0
-   : │  EVENT: wait¦start¦×××¦A
-   : └1╴... done.
-EVENT: wait¦start¦×××¦A
-END: wait¦start¦×××¦A
-NEW: ‹ConditionalWorkSequence:9 (4)›
-   : │  id: 9
-   : │  call count: 0
-   : │  IEVENT: bar1
-   : └1╴... done.
-IEVENT: bar1
-END: bar1
-NEW: ‹ConditionalWorkSequence:10 (4)›
-   : │  id: 10
+NEW: ‹ConditionalWorkSequence:6 (2)›
+   : │  id: 6
    : │  call count: 0
    : │  IEVENT: foo1
    : └1╴... done.
 IEVENT: foo1
 END: foo1
-NEW: ‹ConditionalWorkSequence:11 (4)›
-   : │  id: 11
+NEW: ‹ConditionalWorkSequence:7 (2)›
+   : │  id: 7
    : │  call count: 0
-   : │  EVENT: wait¦done¦×××¦A
+   : │  IEVENT: bar1
    : └1╴... done.
-EVENT: wait¦done¦×××¦A
-END: wait¦done¦×××¦A
-NEW: ‹ConditionalWorkSequence:12 (4)›
-   : │  id: 12
+IEVENT: bar1
+END: bar1
+NEW: ‹ConditionalWorkSequence:8 (2)›
+   : │  id: 8
+   : │  call count: 0
+   : │  EVENT: wait¦start¦0.1¦A
+   : └1╴... done.
+EVENT: wait¦start¦0.1¦A
+END: wait¦start¦0.1¦A
+2003-04-05 06:07:08.150000 A: Fake timer done 
+NEW: ‹ConditionalWorkSequence:9 (2)›
+   : │  id: 9
+   : │  call count: 0
+   : │  EVENT: wait¦done¦0.1¦A
+   : └1╴... done.
+EVENT: wait¦done¦0.1¦A
+END: wait¦done¦0.1¦A
+NEW: ‹ConditionalWorkSequence:10 (2)›
+   : │  id: 10
    : │  call count: 0
    : │  IEVENT: foo2
    : └1╴... done.
 IEVENT: foo2
 END: foo2
-NEW: ‹ConditionalWorkSequence:13 (4)›
-   : │  id: 13
+NEW: ‹ConditionalWorkSequence:11 (2)›
+   : │  id: 11
    : │  call count: 0
    : │  IEVENT: bar2
    : └1╴... done.
 IEVENT: bar2
 END: bar2
-0 locking +WAIT 6 start job ‹Waiter B ??›
-0 locking -WAIT 6 start job ‹Waiter B ??›
-NEW: ‹ConditionalWorkSequence:14 (4)›
+NEW: ‹ConditionalWorkSequence:12 (2)›
+   : │  id: 12
+   : │  call count: 0
+   : │  EVENT: wait¦start¦0.2¦B
+   : └1╴... done.
+EVENT: wait¦start¦0.2¦B
+END: wait¦start¦0.2¦B
+2003-04-05 06:07:08.300000 B: Fake timer done 
+NEW: ‹ConditionalWorkSequence:13 (2)›
+   : │  id: 13
+   : │  call count: 0
+   : │  EVENT: wait¦done¦0.3¦B
+   : └1╴... done.
+EVENT: wait¦done¦0.3¦B
+END: wait¦done¦0.3¦B
+NEW: ‹ConditionalWorkSequence:14 (2)›
    : │  id: 14
    : │  call count: 0
-   : │  EVENT: wait¦start¦×××¦B
+   : │  EVENT: wait¦start¦0.4¦C
    : └1╴... done.
-EVENT: wait¦start¦×××¦B
-END: wait¦start¦×××¦B
-NEW: ‹ConditionalWorkSequence:15 (4)›
+EVENT: wait¦start¦0.4¦C
+END: wait¦start¦0.4¦C
+NEW: ‹ConditionalWorkSequence:15 (2)›
    : │  id: 15
-   : │  call count: 0
-   : │  EVENT: wait¦done¦×××¦B
-   : └1╴... done.
-EVENT: wait¦done¦×××¦B
-END: wait¦done¦×××¦B
-0 locking +WAIT 7 start job ‹TriggerHandler: trigger 3›
-0 locking -WAIT 7 start job ‹TriggerHandler: trigger 3›
-0 locking +WAIT 8 start job ‹TriggerHandler: trigger 3›
-0 locking -WAIT 8 start job ‹TriggerHandler: trigger 3›
-0 locking +WAIT 9 start job ‹Waiter C ??›
-0 locking -WAIT 9 start job ‹Waiter C ??›
-NEW: ‹ConditionalWorkSequence:16 (4)›
-   : │  id: 16
-   : │  call count: 0
-   : │  EVENT: wait¦start¦×××¦C
-   : └1╴... done.
-EVENT: wait¦start¦×××¦C
-END: wait¦start¦×××¦C
-NEW: ‹ConditionalWorkSequence:17 (4)›
-   : │  id: 17
-   : │  call count: 0
-   : │  IEVENT: bar3
-   : └1╴... done.
-IEVENT: bar3
-END: bar3
-NEW: ‹ConditionalWorkSequence:18 (4)›
-   : │  id: 18
    : │  call count: 0
    : │  IEVENT: foo3
    : └1╴... done.
 IEVENT: foo3
 END: foo3
-NEW: ‹ConditionalWorkSequence:19 (4)›
-   : │  id: 19
+NEW: ‹ConditionalWorkSequence:16 (2)›
+   : │  id: 16
    : │  call count: 0
-   : │  EVENT: wait¦done¦×××¦C
+   : │  IEVENT: bar3
    : └1╴... done.
-EVENT: wait¦done¦×××¦C
-END: wait¦done¦×××¦C
-0 locking +WAIT 10 start job ‹Collected Parser:n2›
-0 locking -WAIT 10 start job ‹Collected Parser:n2›
-0 locking +WAIT 11 start job <homevent.tokize.tokizer obj>
-0 locking -WAIT 11 start job <homevent.tokize.tokizer obj>
-0 locking +WAIT 12 kill job <homevent.tokize.tokizer obj>
-NEW: ‹ConditionalWorkSequence:20 (4)›
-   : │  id: 20
+IEVENT: bar3
+END: bar3
+2003-04-05 06:07:08.450000 C: Fake timer done 
+NEW: ‹ConditionalWorkSequence:17 (2)›
+   : │  id: 17
+   : │  call count: 0
+   : │  EVENT: wait¦done¦0.5¦C
+   : └1╴... done.
+EVENT: wait¦done¦0.5¦C
+END: wait¦done¦0.5¦C
+NEW: ‹ConditionalWorkSequence:18 (2)›
+   : │  id: 18
    : │  call count: 0
    : │  IEVENT: foo4
    : └1╴... done.
 IEVENT: foo4
 END: foo4
-NEW: ‹ConditionalWorkSequence:21 (4)›
-   : │  id: 21
+NEW: ‹ConditionalWorkSequence:19 (2)›
+   : │  id: 19
    : │  call count: 0
    : │  IEVENT: bar4
    : └1╴... done.
 IEVENT: bar4
 END: bar4
-0 locking +WAIT 13 start job ‹Waiter D ??›
-0 locking -WAIT 13 start job ‹Waiter D ??›
-NEW: ‹ConditionalWorkSequence:22 (4)›
-   : │  id: 22
+NEW: ‹ConditionalWorkSequence:20 (2)›
+   : │  id: 20
    : │  call count: 0
-   : │  EVENT: wait¦start¦×××¦D
+   : │  EVENT: wait¦start¦0.5¦D
    : └1╴... done.
-EVENT: wait¦start¦×××¦D
-END: wait¦start¦×××¦D
-0 locking +WAIT 14 start job ‹TriggerHandler: trigger 3›
-0 locking -WAIT 14 start job ‹TriggerHandler: trigger 3›
-NEW: ‹ConditionalWorkSequence:23 (4)›
-   : │  id: 23
+EVENT: wait¦start¦0.5¦D
+END: wait¦start¦0.5¦D
+NEW: ‹ConditionalWorkSequence:21 (2)›
+   : │  id: 21
    : │  call count: 0
    : │  IEVENT: foo5
    : └1╴... done.
 IEVENT: foo5
 END: foo5
-0 locking -WAIT 12 kill job <homevent.tokize.tokizer obj>
+2003-04-05 06:07:08.550000 D: Fake timer done 
+NEW: ‹ConditionalWorkSequence:22 (2)›
+   : │  id: 22
+   : │  call count: 0
+   : │  EVENT: wait¦done¦0.5¦D
+   : └1╴... done.
+EVENT: wait¦done¦0.5¦D
+END: wait¦done¦0.5¦D
+NEW: ‹ConditionalWorkSequence:23 (2)›
+   : │  id: 23
+   : │  call count: 0
+   : │  IEVENT: bar5
+   : └1╴... done.
+IEVENT: bar5
+END: bar5
+NEW: ‹ConditionalWorkSequence:24 (2)›
+   : │  id: 24
+   : │  call count: 0
+   : │  EVENT: wait¦start¦0.6¦E
+   : └1╴... done.
+EVENT: wait¦start¦0.6¦E
+END: wait¦start¦0.6¦E
+2003-04-05 06:07:08.700000 E: Fake timer done 
+NEW: ‹ConditionalWorkSequence:25 (2)›
+   : │  id: 25
+   : │  call count: 0
+   : │  EVENT: wait¦done¦0.7¦E
+   : └1╴... done.
+EVENT: wait¦done¦0.7¦E
+END: wait¦done¦0.7¦E

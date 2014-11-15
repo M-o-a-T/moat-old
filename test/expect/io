@@ -1,14 +1,10 @@
-NEW: ‹ConditionalWorkSequence:7 (4)›
-   : │  id: 7
+NEW: ‹ConditionalWorkSequence:5 (2)›
+   : │  id: 5
    : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
 EVENT: startup
 END: startup
-0 locking +WAIT 1 start job ‹Collected Parser:n1›
-0 locking -WAIT 1 start job ‹Collected Parser:n1›
-0 locking +WAIT 2 start job <homevent.tokize.tokizer obj>
-0 locking -WAIT 2 start job <homevent.tokize.tokizer obj>
 foo bar :: fake foo¦bar:None
 .
 : ‹Collected FakeInput:foo¦bar›
@@ -28,123 +24,123 @@ allowed value: one
 allowed value: two
 allowed value: three
 .
-NEW: ‹ConditionalWorkSequence:8 (4)›
-   : │  id: 8
+NEW: ‹ConditionalWorkSequence:6 (2)›
+   : │  id: 6
    : │  call count: 0
    : │  EVENT: output¦set¦None¦TEST¦foo¦bar
    : └1╴... done.
 EVENT: output¦set¦None¦TEST¦foo¦bar
 END: output¦set¦None¦TEST¦foo¦bar
-NEW: ‹ConditionalWorkSequence:9 (4)›
-   : │  id: 9
+NEW: ‹ConditionalWorkSequence:7 (2)›
+   : │  id: 7
    : │  call count: 0
    : │  EVENT: input¦fake¦TEST¦foo¦bar
    : └1╴... done.
 EVENT: input¦fake¦TEST¦foo¦bar
 END: input¦fake¦TEST¦foo¦bar
-1 Yes
-1 yes
-NEW: ‹ConditionalWorkSequence:10 (4)›
-   : │  id: 10
+DEBUG Yes
+DEBUG yes
+NEW: ‹ConditionalWorkSequence:8 (2)›
+   : │  id: 8
    : │  call count: 0
    : │  EVENT: output¦set¦TEST¦1¦foo¦bar
    : └1╴... done.
 EVENT: output¦set¦TEST¦1¦foo¦bar
 END: output¦set¦TEST¦1¦foo¦bar
-NEW: ‹ConditionalWorkSequence:11 (4)›
-   : │  id: 11
+NEW: ‹ConditionalWorkSequence:9 (2)›
+   : │  id: 9
    : │  call count: 0
    : │  EVENT: input¦fake¦1¦foo¦bar
    : └1╴... done.
 EVENT: input¦fake¦1¦foo¦bar
 END: input¦fake¦1¦foo¦bar
-NEW: ‹ConditionalWorkSequence:12 (4)›
-   : │  id: 12
+NEW: ‹ConditionalWorkSequence:10 (2)›
+   : │  id: 10
    : │  call count: 0
    : │  EVENT: output¦set¦1¦9¦foo¦bar
    : └1╴... done.
 EVENT: output¦set¦1¦9¦foo¦bar
 END: output¦set¦1¦9¦foo¦bar
-NEW: ‹ConditionalWorkSequence:13 (4)›
-   : │  id: 13
+NEW: ‹ConditionalWorkSequence:11 (2)›
+   : │  id: 11
    : │  call count: 0
    : │  EVENT: input¦fake¦9¦foo¦bar
    : └1╴... done.
 EVENT: input¦fake¦9¦foo¦bar
 END: input¦fake¦9¦foo¦bar
-NEW: ‹ConditionalWorkSequence:14 (4)›
-   : │  id: 14
+NEW: ‹ConditionalWorkSequence:12 (2)›
+   : │  id: 12
    : │  call count: 0
    : │  EVENT: output¦set¦9¦123¦foo¦bar
    : └1╴... done.
 EVENT: output¦set¦9¦123¦foo¦bar
 END: output¦set¦9¦123¦foo¦bar
-NEW: ‹ConditionalWorkSequence:15 (4)›
-   : │  id: 15
+NEW: ‹ConditionalWorkSequence:13 (2)›
+   : │  id: 13
    : │  call count: 0
    : │  EVENT: input¦fake¦123¦foo¦bar
    : └1╴... done.
 EVENT: input¦fake¦123¦foo¦bar
 END: input¦fake¦123¦foo¦bar
-1 yes
-NEW: ‹ConditionalWorkSequence:16 (4)›
-   : │  id: 16
+DEBUG yes
+NEW: ‹ConditionalWorkSequence:14 (2)›
+   : │  id: 14
    : │  call count: 0
    : │  EVENT: output¦set¦123¦one¦foo¦bar
    : └1╴... done.
 EVENT: output¦set¦123¦one¦foo¦bar
 END: output¦set¦123¦one¦foo¦bar
-NEW: ‹ConditionalWorkSequence:17 (4)›
-   : │  id: 17
+NEW: ‹ConditionalWorkSequence:15 (2)›
+   : │  id: 15
    : │  call count: 0
    : │  EVENT: input¦fake¦one¦foo¦bar
    : └1╴... done.
 EVENT: input¦fake¦one¦foo¦bar
 END: input¦fake¦one¦foo¦bar
-NEW: ‹ConditionalWorkSequence:18 (4)›
-   : │  id: 18
+NEW: ‹ConditionalWorkSequence:16 (2)›
+   : │  id: 16
    : │  call count: 0
    : │  EVENT: output¦set¦one¦two¦foo¦bar
    : └1╴... done.
 EVENT: output¦set¦one¦two¦foo¦bar
 END: output¦set¦one¦two¦foo¦bar
-NEW: ‹ConditionalWorkSequence:19 (4)›
-   : │  id: 19
+NEW: ‹ConditionalWorkSequence:17 (2)›
+   : │  id: 17
    : │  call count: 0
    : │  EVENT: input¦fake¦two¦foo¦bar
    : └1╴... done.
 EVENT: input¦fake¦two¦foo¦bar
 END: input¦fake¦two¦foo¦bar
-NEW: ‹ConditionalWorkSequence:20 (4)›
-   : │  id: 20
+NEW: ‹ConditionalWorkSequence:18 (2)›
+   : │  id: 18
    : │  call count: 0
    : │  EVENT: output¦set¦two¦three¦foo¦bar
    : └1╴... done.
 EVENT: output¦set¦two¦three¦foo¦bar
 END: output¦set¦two¦three¦foo¦bar
-NEW: ‹ConditionalWorkSequence:21 (4)›
-   : │  id: 21
+NEW: ‹ConditionalWorkSequence:19 (2)›
+   : │  id: 19
    : │  call count: 0
    : │  EVENT: input¦fake¦three¦foo¦bar
    : └1╴... done.
 EVENT: input¦fake¦three¦foo¦bar
 END: input¦fake¦three¦foo¦bar
-1 yes
-NEW: ‹ConditionalWorkSequence:22 (4)›
-   : │  id: 22
+DEBUG yes
+NEW: ‹ConditionalWorkSequence:20 (2)›
+   : │  id: 20
    : │  call count: 0
    : │  EVENT: output¦set¦three¦GRMPF¦foo¦bar
    : └1╴... done.
 EVENT: output¦set¦three¦GRMPF¦foo¦bar
 END: output¦set¦three¦GRMPF¦foo¦bar
-NEW: ‹ConditionalWorkSequence:23 (4)›
-   : │  id: 23
+NEW: ‹ConditionalWorkSequence:21 (2)›
+   : │  id: 21
    : │  call count: 0
    : │  EVENT: input¦fake¦GRMPF¦foo¦bar
    : └1╴... done.
 EVENT: input¦fake¦GRMPF¦foo¦bar
 END: input¦fake¦GRMPF¦foo¦bar
-1 Yes
+DEBUG Yes
 : ‹Collected FakeInput:foo¦bar›
 name: foo¦bar
 type: fake
@@ -165,61 +161,3 @@ allowed value: three
 last write: now (2003-04-05 06:07:08)
 last value: GRMPF
 .
-0 locking +WAIT 3 kill job <homevent.tokize.tokizer obj>
-0 locking -WAIT 3 kill job <homevent.tokize.tokizer obj>
-NEW: ‹ConditionalWorkSequence:24 (6)›
-   : │  id: 24
-   : │  call count: 0
-   : │  EVENT: shutdown
-   : └1╴... done.
-EVENT: shutdown
-NEW: ‹ConditionalWorkSequence:25 (4)›
-   : │  id: 25
-   : │  call count: 0
-   : │  EVENT: module¦unload¦tests
-   : └1╴... done.
-EVENT: module¦unload¦tests
-END: module¦unload¦tests
-NEW: ‹ConditionalWorkSequence:26 (4)›
-   : │  id: 26
-   : │  call count: 0
-   : │  EVENT: module¦unload¦errors
-   : └1╴... done.
-EVENT: module¦unload¦errors
-END: module¦unload¦errors
-NEW: ‹ConditionalWorkSequence:27 (4)›
-   : │  id: 27
-   : │  call count: 0
-   : │  EVENT: module¦unload¦logging
-   : └1╴... done.
-EVENT: module¦unload¦logging
-END: module¦unload¦logging
-NEW: ‹ConditionalWorkSequence:28 (4)›
-   : │  id: 28
-   : │  call count: 0
-   : │  EVENT: module¦unload¦bool
-   : └1╴... done.
-EVENT: module¦unload¦bool
-END: module¦unload¦bool
-NEW: ‹ConditionalWorkSequence:29 (4)›
-   : │  id: 29
-   : │  call count: 0
-   : │  EVENT: module¦unload¦ifelse
-   : └1╴... done.
-EVENT: module¦unload¦ifelse
-END: module¦unload¦ifelse
-NEW: ‹ConditionalWorkSequence:30 (4)›
-   : │  id: 30
-   : │  call count: 0
-   : │  EVENT: module¦unload¦data
-   : └1╴... done.
-EVENT: module¦unload¦data
-END: module¦unload¦data
-NEW: ‹ConditionalWorkSequence:31 (4)›
-   : │  id: 31
-   : │  call count: 0
-   : │  EVENT: module¦unload¦block
-   : └1╴... done.
-EVENT: module¦unload¦block
-END: module¦unload¦block
-END: shutdown

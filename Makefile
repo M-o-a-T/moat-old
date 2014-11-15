@@ -14,12 +14,10 @@
 ##  for more details.
 ##
 
-export PYTHONPATH=$(shell pwd)
+export PYTHONPATH=$(shell pwd):$(shell pwd)/dabroker
 DESTDIR ?= "/"
 
 all: subfiles
-	cp -a _geventreactor/Pinako/geventreactor/__init__.py homevent/geventreactor.py
-	#cp -a _zeromq/gevent_zeromq/core.py homevent/zeromq.py
 	cp -a _geventreactor/Pinako/geventrpyc/__init__.py homevent/gevent_rpyc.py
 	$(MAKE) -C fs20 all
 	$(MAKE) -C wago all
@@ -29,16 +27,12 @@ install:
 	$(MAKE) -C wago install ROOT=$(DESTDIR)
 	python setup.py install --root="$(DESTDIR)" --no-compile -O0 --install-layout=deb
 
-subfiles: homevent/geventreactor.py homevent/gevent_rpyc.py
+subfiles: homevent/gevent_rpyc.py
 
-homevent/geventreactor.py: _geventreactor/Pinako/geventreactor/__init__.py
-	cp -a _geventreactor/Pinako/geventreactor/__init__.py homevent/geventreactor.py
-	#cp -a _zeromq/gevent_zeromq/core.py homevent/zeromq.py
 homevent/gevent_rpyc.py: _geventreactor/Pinako/geventrpyc/__init__.py
 	cp -a _geventreactor/Pinako/geventrpyc/__init__.py homevent/gevent_rpyc.py
 
 _geventreactor/Pinako/geventrpyc/__init__.py: submod
-_geventreactor/Pinako/geventreactor/__init__.py: submod
 submod:
 	if test ! -e _geventreactor/.git ; then \
 	git submodule init; \

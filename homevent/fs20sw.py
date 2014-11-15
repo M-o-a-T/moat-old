@@ -15,11 +15,11 @@
 ##  for more details.
 ##
 
-from __future__ import division
-
 """\
 This module is the basis for processing FS20 datagrams.
 """
+
+from __future__ import division,absolute_import
 
 from homevent.event import Event
 from homevent.run import simple_event

@@ -15,8 +15,6 @@
 ##  for more details.
 ##
 
-from __future__ import division
-
 """\
 This part of the code defines what a (generic) worker is.
 
@@ -24,13 +22,13 @@ Briefly: a worker is something that recognizes an event and does
 something about it.
 """
 
+from __future__ import division,absolute_import
+
 from homevent.context import Context
 from homevent.event import Event,TrySomethingElse,NeverHappens
 from homevent.base import Name,MIN_PRIO,MAX_PRIO,SYS_PRIO,SName
 from homevent.times import humandelta, now
-from homevent.twist import fix_exception,reraise,format_exception,track_errors
-
-from homevent.geventreactor import waitForGreenlet
+from homevent.twist import fix_exception,reraise,format_exception
 
 #import os
 
@@ -60,12 +58,11 @@ def report_(err, verbose=False):
 				for r in w.report(verbose):
 					yield p+r
 					p = "     : "
-		if track_errors():
-			p = "   by: "
-			for rr in format_stack():
-				for r in rr.rstrip("\n").split("\n"):
-					yield p+r
-					p = "     : "
+		p = "   by: "
+		for rr in format_stack():
+			for r in rr.rstrip("\n").split("\n"):
+				yield p+r
+				p = "     : "
 	else:
 		yield "ERROR: "+unicode(err)
 

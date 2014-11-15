@@ -16,6 +16,7 @@
 ##  for more details.
 ##
 
+from homevent import patch;patch()
 from homevent.interpreter import Interpreter
 from homevent.statement import Statement,ComplexStatement,main_words
 from homevent.reactor import ShutdownHandler

@@ -21,6 +21,8 @@ microcontroller.
 
 """
 
+from __future__ import division,absolute_import
+
 from homevent.base import SName,Name,MIN_PRIO
 from homevent.module import Module
 from homevent.logging import log,DEBUG,TRACE,INFO,WARN,ERROR
@@ -36,11 +38,6 @@ from homevent.reactor import shutdown_event
 from homevent.twist import callLater, fix_exception
 from homevent.collect import Collection,Collected
 from homevent.net import NetConnect,NetSend,NetConnected,NetActiveConnector
-
-from twisted.internet import protocol,reactor,error,defer
-from twisted.protocols.basic import _PauseableMixin
-from twisted.internet.error import ProcessExitedAlready
-from twisted.internet.serialport import SerialPort
 
 import os
 

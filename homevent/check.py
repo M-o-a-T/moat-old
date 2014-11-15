@@ -33,6 +33,8 @@ on what ever:
 This code implements the basic framework for checking conditions.
 """
 
+from __future__ import division,absolute_import
+
 from homevent.statement import Statement,ComplexStatement, global_words
 
 

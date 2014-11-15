@@ -33,7 +33,6 @@ import os
 import traceback
 from time import time
 from subprocess import Popen
-from twisted.internet import reactor
 from tokenize import tok_name
 
 exitcode = 0
@@ -43,6 +42,9 @@ log_level("monitor",TRACE)
 log_level("fs20",TRACE)
 log_level("parser",NONE)
 log_level("token",NONE)
+log_level("msg",TRACE)
+log_level("wago",TRACE)
+log_level("conn",TRACE)
 
 startup=now()
 realStartup=now(True)

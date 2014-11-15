@@ -20,6 +20,8 @@ This code holds common subcommands for specifying delays and related stuff.
 
 """
 
+from __future__ import division,absolute_import
+
 from homevent.statement import Statement
 from homevent.times import time_delta,time_until,now
 

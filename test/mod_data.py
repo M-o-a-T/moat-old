@@ -16,6 +16,7 @@
 ##  for more details.
 ##
 
+from homevent import patch;patch()
 from homevent.reactor import ShutdownHandler
 from homevent.module import load_module
 from homevent.statement import main_words
@@ -35,8 +36,8 @@ on foo:
 wait vorher: for 0.1
 trigger foo
 wait nachher: for 0.1
-list event
-list event 5
+list wait
+list wait foo waiter
 wait ende: for 0.3
 
 shutdown

@@ -15,12 +15,12 @@
 ##  for more details.
 ##
 
-from __future__ import division
-
 """\
 This code contains the framework for timing regular events.
 
 """
+
+from __future__ import division,absolute_import
 
 from homevent.statement import AttributedStatement, Statement
 from homevent.event import Event
@@ -90,7 +90,7 @@ class Timeslot(Collected):
 		super(Timeslot,self).__init__(*name)
 
 	def __repr__(self):
-		return u"‹%s %s %s›" % (self.__class__.__name__, self.running)
+		return u"‹%s %s %s›" % (self.__class__.__name__, self.running, self.parent)
 
 	def list(self):
 		yield ("name"," ".join(unicode(x) for x in self.name))

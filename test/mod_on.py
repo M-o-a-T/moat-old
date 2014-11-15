@@ -16,6 +16,7 @@
 ##  for more details.
 ##
 
+from homevent import patch;patch()
 from homevent.reactor import ShutdownHandler
 from homevent.module import load_module
 from homevent.statement import DoNothingHandler, main_words

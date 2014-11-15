@@ -20,6 +20,8 @@ This code implements basic commands to access FS20 switches.
 
 """
 
+from __future__ import division,absolute_import
+
 from homevent.module import Module
 from homevent.logging import log,log_exc,DEBUG,TRACE,INFO,WARN
 from homevent.statement import AttributedStatement,Statement, main_words
@@ -31,9 +33,6 @@ from homevent.base import Name,SName
 from homevent.collect import Collection,Collected
 from homevent.fs20 import from_hc, from_dev, to_hc, to_dev, WrongDatagram, handler_names
 from homevent.fs20sw import group
-
-from twisted.internet import protocol,defer,reactor
-from twisted.protocols.basic import _PauseableMixin
 
 codes = {}
 devs = {}
@@ -153,10 +152,10 @@ class SwitchGroup(Collected,igroup):
 
 		fcode = ord(data[1])
 		if fcode & 0x20:
-			if len(data) != 3: raise WrongDatagram(data)
+			if len(data) < 3: raise WrongDatagram(data)
 			ext = ord(data[2])
 		else:
-			if len(data) != 2: raise WrongDatagram(data)
+			if len(data) < 2: raise WrongDatagram(data)
 			ext = None
 
 		dc = ord(data[0])

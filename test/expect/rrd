@@ -1,16 +1,13 @@
-NEW: ‹ConditionalWorkSequence:7 (4)›
-   : │  id: 7
+NEW: ‹ConditionalWorkSequence:5 (2)›
+   : │  id: 5
    : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
 EVENT: startup
 END: startup
-0 locking +WAIT 1 start job ‹Collected Parser:n1›
-0 locking -WAIT 1 start job ‹Collected Parser:n1›
-0 locking +WAIT 2 start job <homevent.tokize.tokizer obj>
-0 locking -WAIT 2 start job <homevent.tokize.tokizer obj>
-1 Yes
-1 Yes
+DEBUG STARTING_UP
+DEBUG Yes
+DEBUG Yes
 t tt ttt :: /tmp/rrdtest.rrd test
 .
 name: t¦tt¦ttt
@@ -25,49 +22,46 @@ type: GAUGE
 unknown_sec: 0
 value: ?
 .
-0 locking +WAIT 3 start job ‹Waiter _wait¦1 ??›
-0 locking -WAIT 3 start job ‹Waiter _wait¦1 ??›
-NEW: ‹ConditionalWorkSequence:8 (4)›
-   : │  id: 8
+NEW: ‹ConditionalWorkSequence:6 (2)›
+   : │  id: 6
    : │  call count: 0
    : │  EVENT: wait¦start¦×××¦_wait¦1
    : └1╴... done.
 EVENT: wait¦start¦×××¦_wait¦1
 END: wait¦start¦×××¦_wait¦1
-NEW: ‹ConditionalWorkSequence:9 (4)›
-   : │  id: 9
+2003-04-05 06:07:09.150000 _wait¦1: Fake timer done 
+NEW: ‹ConditionalWorkSequence:7 (2)›
+   : │  id: 7
    : │  call count: 0
    : │  EVENT: wait¦done¦×××¦_wait¦1
    : └1╴... done.
 EVENT: wait¦done¦×××¦_wait¦1
 END: wait¦done¦×××¦_wait¦1
-0 locking +WAIT 4 start job ‹Waiter _wait¦2 ??›
-0 locking -WAIT 4 start job ‹Waiter _wait¦2 ??›
-NEW: ‹ConditionalWorkSequence:10 (4)›
-   : │  id: 10
+NEW: ‹ConditionalWorkSequence:8 (2)›
+   : │  id: 8
    : │  call count: 0
    : │  EVENT: wait¦start¦×××¦_wait¦2
    : └1╴... done.
 EVENT: wait¦start¦×××¦_wait¦2
 END: wait¦start¦×××¦_wait¦2
-NEW: ‹ConditionalWorkSequence:11 (4)›
-   : │  id: 11
+2003-04-05 06:07:10.300000 _wait¦2: Fake timer done 
+NEW: ‹ConditionalWorkSequence:9 (2)›
+   : │  id: 9
    : │  call count: 0
    : │  EVENT: wait¦done¦×××¦_wait¦2
    : └1╴... done.
 EVENT: wait¦done¦×××¦_wait¦2
 END: wait¦done¦×××¦_wait¦2
-0 locking +WAIT 5 start job ‹Waiter _wait¦3 ??›
-0 locking -WAIT 5 start job ‹Waiter _wait¦3 ??›
-NEW: ‹ConditionalWorkSequence:12 (4)›
-   : │  id: 12
+NEW: ‹ConditionalWorkSequence:10 (2)›
+   : │  id: 10
    : │  call count: 0
    : │  EVENT: wait¦start¦×××¦_wait¦3
    : └1╴... done.
 EVENT: wait¦start¦×××¦_wait¦3
 END: wait¦start¦×××¦_wait¦3
-NEW: ‹ConditionalWorkSequence:13 (4)›
-   : │  id: 13
+2003-04-05 06:07:11.450000 _wait¦3: Fake timer done 
+NEW: ‹ConditionalWorkSequence:11 (2)›
+   : │  id: 11
    : │  call count: 0
    : │  EVENT: wait¦done¦×××¦_wait¦3
    : └1╴... done.
@@ -85,15 +79,11 @@ type: GAUGE
 unknown_sec: 0
 value: ?
 .
-0 locking +WAIT 6 start job ‹TriggerHandler: trigger 3›
-0 locking -WAIT 6 start job ‹TriggerHandler: trigger 3›
-0 locking +WAIT 7 kill job <homevent.tokize.tokizer obj>
-1 Yes
-NEW: ‹ConditionalWorkSequence:14 (4)›
-   : │  id: 14
+NEW: ‹ConditionalWorkSequence:12 (2)›
+   : │  id: 12
    : │  call count: 0
    : │  IEVENT: last¦12
    : └1╴... done.
 IEVENT: last¦12
 END: last¦12
-0 locking -WAIT 7 kill job <homevent.tokize.tokizer obj>
+DEBUG Yes

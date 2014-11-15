@@ -16,6 +16,7 @@
 ##  for more details.
 ##
 
+from homevent import patch;patch()
 from homevent.reactor import ShutdownHandler
 from homevent.module import load_module,Load
 from homevent.statement import DoNothingHandler,main_words
@@ -67,20 +68,17 @@ block:
 		wait yawn:
 			for 10
 			debug force
-		shutdown
+		shutdown now
 	catch:
 		do nothing
 
-log TRACE DirStart
 dir onewire A
-log TRACE DirDev
 dir onewire "10.000010ef0000"
 block:
 	if exists onewire device "10.000010ef0000":
 		log TRACE yes
 	else:
 		log TRACE no
-log TRACE DirStop
 #set onewire 30 "10.000010ef0000" templow ## not when testing
 scan onewire A
 dir onewire "10.000010ef0000"

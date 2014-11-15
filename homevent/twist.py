@@ -22,12 +22,10 @@ from __future__ import division
 	… among other grab-bag stuff.
 	"""
 
-from twisted.internet.abstract import FileDescriptor
-from twisted.internet import fdesc,defer,reactor,base
-from twisted.python import log
+from __future__ import division,absolute_import
 
-from homevent.base import RaisedError
-from homevent.geventreactor import DelayedCall,deferToGreenlet
+from homevent.base import RaisedError,SName
+from homevent.collect import Collection
 
 import gevent
 from gevent.event import AsyncResult
@@ -39,21 +37,28 @@ import fcntl
 import datetime as dt
 import traceback
 
+import logging
+logger = logging.getLogger("homevent.twist")
+
+## change the default encoding to UTF-8
+## this is a no-op in PY3
+# PY2 defaults to ASCII, which requires adding spurious .encode("utf-8") to
+# absolutely everything you might want to print / write to a file
+import sys
+try:
+	reload(sys)
+except NameError:
+	# py3 doesn't have reload()
+	pass
+else:
+	# py3 also doesn't have sys.setdefaultencoding
+	sys.setdefaultencoding("utf-8")
+
 # This test is also in homevent/__init__.py, for recursive-import reasons
 if "HOMEVENT_TEST" in os.environ:
 	TESTING = True
 else:
 	TESTING = False
-
-
-tracked_errors = ("HOMEVENT_TRACK_ERRORS" in os.environ)
-
-def track_errors(doit = None):
-	global tracked_errors
-	res = tracked_errors
-	if doit is not None:
-		tracked_errors = doit
-	return res
 
 
 # nonblocking versions of stdin/stdout
@@ -67,27 +72,6 @@ def setBlocking(flag,file):
 	fd = file.fileno()
 	fl = fcntl.fcntl(fd, fcntl.F_GETFL)
 	fcntl.fcntl(fd, fcntl.F_SETFL, (fl & ~os.O_NONBLOCK) if flag else (fl | os.O_NONBLOCK))
-
-class StdInDescriptor(FileDescriptor):
-	def fileno(self):
-		return 0
-	def doRead(self):
-		try:
-			setBlocking(False,0)
-			return fdesc.readFromFD(0, self.dataReceived)
-		finally:
-			fdesc.setBlocking(True,0)
-
-class StdOutDescriptor(FileDescriptor):
-	def fileno(self):
-		return 1
-	def writeSomeData(self, data):
-		try:
-			setBlocking(False,1)
-			return write(1,data)
-		finally:
-			setBlocking(True,1)
-	
 
 def fix_exception(e, tb=None):
 	"""Add a __traceback__ attribute to an exception if it's not there already."""
@@ -122,9 +106,6 @@ def reraise(e):
 		del e.__traceback__
 	raise e.__class__,e,tb
 
-deferToLater = deferToGreenlet
-
-
 # When testing, we log the time an operation takes. Unfortunately, since
 # the logged values are accurate up to 1/10th second, that means that
 # the timestamp values in the logs will jitter merrily when something
@@ -141,7 +122,7 @@ deferToLater = deferToGreenlet
 # something "real" and therefore may not be ignored.
 
 def sleepUntil(force,delta):
-	from homevent.times import unixdelta,now
+	from homevent.times import unixdelta,now,sleep
 
 	if isinstance(delta,dt.datetime):
 		delta = delta - now()
@@ -150,185 +131,98 @@ def sleepUntil(force,delta):
 	if delta < 0: # we're late
 		delta = 0 # but let's hope not too late
 
-	if "HOMEVENT_TEST" in os.environ:
-		ev = AsyncResult()
-		callLater(force,delta, ev.set,None)
-		ev.get(block=True)
-	else:
-		gevent.sleep(delta)
+	sleep(force,delta)
 
+def callLater(force,delta,p,*a,**kw):
+	r = gevent.spawn(_later,force,delta,p,*a,**kw)
+	r.cancel = r.kill
+	return r
+def _later(force,delta,p,*a,**k):
+	sleepUntil(force,delta)
+	return p(*a,**k)
 
-def callLater(force,delta,p,*a,**k):
-	from homevent.times import unixdelta,now
+class Jobs(Collection):
+	name = "job"
+Jobs = Jobs()
 
-	if isinstance(delta,dt.datetime):
-		delta = delta - now(force)
-	if isinstance(delta,dt.timedelta):
-		delta = unixdelta(delta)
-	if delta < 0: # we're late
-		delta = 0 # but let's hope not too late
-	if "HOMEVENT_TEST" in os.environ:
-		if force:
-			cl = DelayedCall
-			delta += reactor.realSeconds()
-		else:
-			from homevent.testreactor import FakeDelayedCall
-			cl = FakeDelayedCall
-			delta += reactor.seconds()
-	else:
-		cl = DelayedCall
-		delta += reactor.seconds()
-	cl = cl(reactor,delta, gevent.spawn,(p,)+a,k,seconds=reactor.seconds)
+class Job(object):
+	def __init__(self,g,func,a,k):
+		self.func = func
+		self.g = g
+		self.a = a
+		self.k = k
+		self.name = SName("_"+str(g))
 
-	return reactor.callLater(cl)
+# Log all threads, wait for them to exit.
+gjob=0
+gspawn = gevent.spawn
+def _completer(g,job):
+	def pr_ok(v):
+		print >>sys.stderr,"G RES %d %s" % (job,v)
+	def pr_err(v):
+		print >>sys.stderr,"G ERR %d %s" % (job,v)
+	def pr_del(v):
+		del Jobs[job]
+		#g.link_value(pr_ok)
+		#g.link_exception(pr_err)
+	g.link(pr_del)
+def do_spawn(func,*a,**k):
+	global gjob
+	gjob += 1
+	job = gjob
+	#print >>sys.stderr,"G SPAWN %d %s %s %s" % (job,func,a,k)
+	g = gspawn(func,*a,**k)
+	Jobs[job]=Job(g,func,a,k)
+	_completer(g,job)
+	return g
 
+import gevent.greenlet as ggr
+gevent.spawn = do_spawn
+ggr.Greenlet.spawn = do_spawn
 
-# Allow a Deferred to be called with another Deferred
-# so that the result of the second is fed to the first
-# (without checking for this case each time)
-def acb(self, result):
-	if isinstance(result, defer.Deferred):
-		result.addBoth(self.callback)
-	else:
-		self._startRunCallbacks(result)
-defer.Deferred.callback = acb
+Loggers = None
 
-
-# falls flat on its face without the test
-def _cse(self, eventType):
-	sysEvtTriggers = self._eventTriggers.get(eventType)
-	if not sysEvtTriggers:
-		return
-	for callList in sysEvtTriggers[1], sysEvtTriggers[2]:
-		for callable, args, kw in callList:
-			try:
-				callable(*args, **kw)
-			except:
-				log.deferr()
-	# now that we've called all callbacks, no need to store
-	# references to them anymore, in fact this can cause problems.
-	del self._eventTriggers[eventType]
-base.ReactorBase._continueSystemEvent = _cse
-
-
-# hack callInThread to log what it's doing
-if False:
-	from threading import Lock
-	_syn = Lock()
-	_cic = reactor.callInThread
-	_thr = {}
-	_thr_id = 0
-	def _tcall(tid,p,a,k):
-		_thr[tid] = (p,a,k)
-		try:
-			return p(*a,**k)
-		finally:
-			_syn.acquire()
-			del _thr[tid]
-			print >>sys.stderr,"-THR",tid," ".join(str(x) for x in _thr.keys())
-			_syn.release()
-	def cic(p,*a,**k):
-		_syn.acquire()
-		global _thr_id
-		_thr_id += 1
-		tid = _thr_id
-		_syn.release()
-		print >>sys.stderr,"+THR",tid,p,a,k
-		return _cic(_tcall,tid,p,a,k)
-	reactor.callInThread = cic
-
-# Always encode Unicode strings in utf-8
-fhw = FileDescriptor.write
-def nfhw(self,data):
-	if isinstance(data,unicode):
-		data = data.encode("utf-8")
-	return fhw(self,data)
-FileDescriptor.write = nfhw
-
-
-if TESTING and False:
-	# Log all threads, wait for them to exit.
-	gthreads = {}
-	gjob=0
-	gspawn = gevent.spawn
-	def _completer(g,job):
-		def pr_ok(v):
-			print >>sys.stderr,"G RES %d %s" % (job,v)
-		def pr_err(v):
-			print >>sys.stderr,"G ERR %d %s" % (job,v)
-		def pr_del(v):
-			del gthreads[job]
-#		g.link_value(pr_ok)
-#		g.link_exception(pr_err)
-		g.link(pr_del)
-	def do_spawn(func,*a,**k):
-		global gjob
-		gjob += 1
-		job = gjob
-#		print >>sys.stderr,"G SPAWN %d %s %s %s" % (job,func,a,k)
-		g = gspawn(func,*a,**k)
-		gthreads[job]=(g,func,a,k)
-		_completer(g,job)
-		return g
-
-	import gevent.greenlet as ggr
-	gevent.spawn = do_spawn
-	ggr.Greenlet.spawn = do_spawn
-	Loggers = None
-
-	def nr_threads(ignore_loggers=False):
-		n = len(gthreads)
-		if ignore_loggers:
-			n -= len(Loggers.storage)
-		if n < 0:
-			n = 0
-		return n
-		
-	def wait_for_all_threads():
-		global Loggers
-		from logging import Loggers as _Loggers
-		from logging import stop_loggers
-		Loggers = _Loggers
-
-		n=0
-#		for job,t in gthreads.iteritems():
-#			print >>sys.stderr,"G WAIT %d %s %s %s" % ((job,)+t[1:])
+def nr_threads(ignore_loggers=False):
+	n = len(Jobs)
+	if ignore_loggers:
+		n -= len(Loggers.storage)
+	if n < 0:
+		n = 0
+	return n
 	
-		for r in (True,False):
-			while nr_threads(r):
-				if n==100000:
-					for job,t in gthreads.iteritems():
-						print >>sys.stderr,"G WAIT %d %s %s %s" % ((job,)+t[1:])
-						t[0].kill()
-	
-					n=0
-				n += 1
-				try:
-					gevent.sleep(0)
-				except gevent.GreenletExit as ex:
-#					fix_exception(ex)
-#					print_exception(ex)
-					pass
-			if r:
-				stop_loggers()
-		for n in range(100):
+def wait_for_all_threads():
+	global Loggers
+	from homevent.logging import Loggers as _Loggers
+	from homevent.logging import stop_loggers
+	Loggers = _Loggers
+
+	n=0
+#	for job,t in gthreads.iteritems():
+#		print >>sys.stderr,"G WAIT %d %s %s %s" % ((job,)+t[1:])
+
+	for r in (True,False):
+		while nr_threads(r):
+			if n==10:
+#				for job,t in Jobs.iteritems():
+#					print >>sys.stderr,"G WAIT %d %r %r %r" % (job,t.func,t.a,t.k)
+
+				break
+			n += 1
 			try:
 				gevent.sleep(0)
 			except gevent.GreenletExit as ex:
 #				fix_exception(ex)
 #				print_exception(ex)
 				pass
-
-else:
-	def wait_for_all_threads():
-		from logging import stop_loggers
-		n = 2*kill_loggers()+10
-		while n:
-			n -= 1
-			try:
-				gevent.sleep(0)
-			except gevent.GreenletExit:
-				pass
+		if r:
+			stop_loggers()
+	for n in range(100):
+		try:
+			gevent.sleep(0)
+		except gevent.GreenletExit as ex:
+#			fix_exception(ex)
+#			print_exception(ex)
+			pass
 
 gwait = 0
 _log = None
@@ -337,7 +231,7 @@ class log_wait(object):
 	"""Usage:
 		>>> with log_wait("foo","bar","baz"):
 		...    do_something_blocking()
-	"""
+		"""
 
 	def __init__(self,*a):
 		global gwait
@@ -352,20 +246,21 @@ class log_wait(object):
 			from homevent.logging import log as xlog, TRACE as xTRACE
 			_log = xlog
 			TRACE = xTRACE
-		_log("locking",TRACE,"+WAIT", self.w, *self.a)
+		#_log(TRACE,"locking","+WAIT", self.w, *self.a)
 		return self
 	def __exit__(self, a,b,c):
-		_log("locking",TRACE,"-WAIT", self.w, *self.a)
+		#_log(TRACE,"locking","-WAIT", self.w, *self.a)
 		return False
 
-
 ### Safely start gevent threads
-
+ 
 class _starting(object):
 	pass
-
+ 
 class Jobber(object):
+	"""A mix-in to run jobs"""
 	def start_job(self,attr, proc,*a,**k):
+
 		with log_wait("start",attr,str(self)):
 			while True:
 				j = getattr(self,attr,None)
@@ -375,10 +270,18 @@ class Jobber(object):
 					return
 				else:
 					gevent.sleep(0.1)
-
+ 
+		def erh(p,*a,**k):
+			try:
+				return p(*a,**k)
+			except Exception as e:
+				a,b,c = sys.exc_info()
+				import traceback
+				traceback.print_exception(a,b,c)
+				raise
 		setattr(self,attr,_starting)
-		j = gevent.spawn(proc,*a,**k)
-
+		j = gevent.spawn(erh,proc,*a,**k)
+ 
 		def err(e):
 			try:
 				e = e.get()
@@ -387,39 +290,27 @@ class Jobber(object):
 			from homevent.run import process_failure
 			fix_exception(e)
 			process_failure(e)
-
+ 
 		def dead(e):
 			if getattr(self,attr,None) is j:
 				setattr(self,attr,None)
-
+ 
 		j.link_exception(err)
 		j.link(dead)
 		setattr(self,attr,j)
-
+ 
 	def stop_job(self,attr):
 		j = getattr(self,attr,None)
 		if j is None:
 			return
 		with log_wait("kill",attr,str(self)):
+			if getattr(self,attr,None) is gevent.getcurrent():
+				setattr(self,attr,None)
+				raise RuntimeError("a thread kills itself")
 			if j is not _starting:
 				j.kill()
 			while getattr(self,attr,None) is j:
 				gevent.sleep(0)
-
-#import homevent.zeromq as zmq
-#zmq.Context = zmq._Context
-#zmq.Socket = zmq._Socket
-#
-#def monkey_patch_zmq():
-#    """
-#    Monkey patches `zmq.Context` and `zmq.Socket`
-#    """
-#    ozmq = __import__('zmq')
-#    ozmq.Socket = zmq.Socket
-#    ozmq.Context = zmq.Context
-#monkey_patch_zmq()
-#del monkey_patch_zmq
-#
 
 # avoids a warning from threading module on shutdown
 sys.modules['dummy_threading'] = None

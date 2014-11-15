@@ -15,12 +15,12 @@
 ##  for more details.
 ##
 
-from __future__ import division
-
 """\
 This code does some standard time handling.
 
 """
+
+from __future__ import division,absolute_import
 
 import datetime as dt
 from time import time,mktime
@@ -32,50 +32,43 @@ from gevent.queue import Queue
 from homevent import TESTING
 
 startup = dt.datetime.now()
+_log=None
+TRACE=None
 
 if TESTING:
 	SLOT=20
 	current_slot = 0
+	real_sleep = 0
 	def now(force=False):
 		if force:
 			return dt.datetime.now()
 		r = dt.datetime.utcfromtimestamp(1049522828) # 2003-04-05 06:07:08 UTC
 		return r + dt.timedelta(0, current_slot // SLOT, (current_slot % SLOT) * (1e6 / SLOT) )
 
-	def test_runtime():
-		return current_slot / SLOT
-
-	def slot_update(tm):
-		"""Update the time slot until the given time is reached"""
-		if isinstance(tm,dt.datetime):
-			td = unixdelta(tm - now())
-		else:
-			td = tm - unixtime(now())
-		if td < 0:
-			return
-
-		# Do not increase by more than one, because another greenlet (one
-		# which requires shrter timeouts) might run in parallel 
-		global current_slot
-		current_slot += 1
-
-	def sleep(force,timeout):
+	def sleep(force,timeout,debugi=""):
+		global current_slot,real_sleep
 		from homevent.twist import log_wait,callLater
-		with log_wait("%s timer wait for %s" % ("Forced" if force else "Fake", timeout)):
+		if force:
+			real_sleep += 1
+		try:
+			with log_wait("%s %s: %s timer wait for %s" % (now(force),debugi,"Forced" if force else "Fake", timeout)):
+				t = now(force)
+				while unixdelta(now(force) - t) < timeout:
+					gevent.sleep(1/SLOT/real_sleep if real_sleep else 0.001)
+					current_slot += 1/real_sleep+0.00001 if real_sleep else 1
+
+			global _log,TRACE
+			if _log is None:
+				from homevent.logging import log as _log, TRACE
+			_log("%s %s: %s timer done" % (now(force),debugi,"Forced" if force else "Fake"))
+			
+		finally:
 			if force:
-				gevent.sleep(timeout)
-				return
-			q = Queue()
-			callLater(False,timeout,q.put,None)
-			q.get()
+				real_sleep += -1
 
 else:
 	def now(force=False):
 		return dt.datetime.now()
-	def test_runtime():
-		raise RuntimeError("We are not testing!")
-	def slot_update(tm):
-		raise RuntimeError("We are not testing!")
 	def sleep(_,timeout):
 		with log_wait("Timer wait for %s" % (timeout,)):
 			gevent.sleep(timeout)

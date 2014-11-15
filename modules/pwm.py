@@ -15,8 +15,6 @@
 ##  for more details.
 ##
 
-from __future__ import division
-
 """\
 This code implements pulse-code modulation.
 
@@ -28,6 +26,8 @@ pwm NAME...:
 set pwm $VALUE NAME...
 
 """
+
+from __future__ import division,absolute_import
 
 from homevent.statement import AttributedStatement, Statement, main_words,\
 	global_words, HelpSub

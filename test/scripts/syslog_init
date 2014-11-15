@@ -14,5 +14,5 @@
 ##  for more details.
 ##
 
-nc -q1 -u -l localhost 55514 > /tmp/nc_$USER &
+nc -4 -q1 -u -l localhost 55514 > /tmp/nc_$USER &
 echo $! >/tmp/nc_$USER.pid

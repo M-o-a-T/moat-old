@@ -1,56 +1,53 @@
-NEW: ‹ConditionalWorkSequence:7 (4)›
-   : │  id: 7
+NEW: ‹ConditionalWorkSequence:5 (2)›
+   : │  id: 5
    : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
 EVENT: startup
 END: startup
-0 locking +WAIT 1 start job ‹Collected Parser:n1›
-0 locking -WAIT 1 start job ‹Collected Parser:n1›
-0 locking +WAIT 2 start job <homevent.tokize.tokizer obj>
-0 locking -WAIT 2 start job <homevent.tokize.tokizer obj>
-0 Yes!
-0 INIT sqlite {'username': 'smurf', 'trace': <function trace at 0x×××>, 'database': '/tmp/homevent.smurf.db', 'dbtype': 'sqlite', 'dataport': '3306', 'host': 'sql.intern.smurf.noris.de', 'password': 'geheim'}
-0 DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) None
-0 RollBack  
-0 Yes!
-0 DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) None
-0 RollBack  
-0 Yes!
-0 DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) None
-0 RollBack  
-0 Yes!
-0 Set to ONE
-0 DoFn ('update HE_State set value=? where category=? and name=?', ("u'one'", 'state', 'foo bar')) 0
-0 DoFn ('insert into HE_State (category,name,value) VALUES(?,?,?)', ('state', 'foo bar', "u'one'")) 1
-0 Commit  
-NEW: ‹ConditionalWorkSequence:8 (4)›
-   : │  id: 8
+TRACE Yes!
+TRACE INIT sqlite {'username': 'smurf', 'trace': <function trace at 0x7f16332f40c8>, 'database': '/tmp/homevent.smurf.db', 'dbtype': 'sqlite', 'dataport': '3306', 'host': 'sql.intern.smurf.noris.de', 'password': 'geheim'}
+TRACE DoFn ('CREATE TABLE HE_State ( category varchar(50), name varchar(200), value BLOB, id INTEGER AUTO_INCREMENT PRIMARY KEY, UNIQUE (category,name))', ()) -1
+TRACE DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) None
+TRACE RollBack  
+TRACE Yes!
+TRACE DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) None
+TRACE RollBack  
+TRACE Yes!
+TRACE DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) None
+TRACE RollBack  
+TRACE Yes!
+TRACE Set to ONE
+TRACE DoFn ('update HE_State set value=? where category=? and name=?', ("u'one'", 'state', 'foo bar')) 0
+TRACE DoFn ('insert into HE_State (category,name,value) VALUES(?,?,?)', ('state', 'foo bar', "u'one'")) 1
+TRACE Commit  
+NEW: ‹ConditionalWorkSequence:6 (2)›
+   : │  id: 6
    : │  call count: 0
    : │  EVENT: state¦-¦one¦foo¦bar
    : └1╴... done.
 EVENT: state¦-¦one¦foo¦bar
 END: state¦-¦one¦foo¦bar
-0 DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) (u"u'one'",)
-0 Commit  
-0 Yes!
-0 Set to TWO
-0 DoFn ('update HE_State set value=? where category=? and name=?', ("u'two'", 'state', 'foo bar')) 1
-0 Commit  
-NEW: ‹ConditionalWorkSequence:9 (4)›
-   : │  id: 9
+TRACE DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) (u"u'one'",)
+TRACE Commit  
+TRACE Yes!
+TRACE Set to TWO
+TRACE DoFn ('update HE_State set value=? where category=? and name=?', ("u'two'", 'state', 'foo bar')) 1
+TRACE Commit  
+NEW: ‹ConditionalWorkSequence:7 (2)›
+   : │  id: 7
    : │  call count: 0
    : │  EVENT: state¦one¦two¦foo¦bar
    : └1╴... done.
 EVENT: state¦one¦two¦foo¦bar
 END: state¦one¦two¦foo¦bar
-0 Create OnEvtHandler: state¦*¦three¦foo¦bar
-0 NewHandler 10
-0 Set to THREE
-0 DoFn ('update HE_State set value=? where category=? and name=?', ("u'three'", 'state', 'foo bar')) 1
-0 Commit  
-NEW: ‹ConditionalWorkSequence:11 (5)›
-   : │  id: 11
+TRACE Create OnEvtHandler: state¦*¦three¦foo¦bar
+TRACE NewHandler 8
+TRACE Set to THREE
+TRACE DoFn ('update HE_State set value=? where category=? and name=?', ("u'three'", 'state', 'foo bar')) 1
+TRACE Commit  
+NEW: ‹ConditionalWorkSequence:9 (3)›
+   : │  id: 9
    : │  call count: 0
    : │  EVENT: state¦two¦three¦foo¦bar
    : ├1╴on state * three foo bar ‹OnEventHandler›
@@ -67,10 +64,10 @@ RUN: on state * three foo bar ‹OnEventHandler›
    : step: try ‹TryStatement›
    :     : step: set state four foo bar ‹SetStateHandler›
    :     : step: log DEBUG No! (No shit happened.) ‹LogHandler›
- at: ‹ConditionalWorkSequence:11 (5)› (step 1)
+ at: ‹ConditionalWorkSequence:9 (3)› (step 1)
  ev: EVENT: state¦two¦three¦foo¦bar
-0 Set to FOUR
-1 Yes! (Shit happens.)
+TRACE Set to FOUR
+DEBUG Yes! (Shit happens.)
 END: state¦two¦three¦foo¦bar
 foo bar :: three — now
 .
@@ -82,13 +79,14 @@ last value: two
 last change: now (2003-04-05 06:07:08)
 persistent: yes
 .
-0 Yes!
-0 Yes!
-0 Yes!
-0 Create OnEvtHandler: whatever
-0 NewHandler 12
-NEW: ‹ConditionalWorkSequence:13 (5)›
-   : │  id: 13
+TRACE Yes!
+TRACE Yes!
+TRACE Yes!
+TRACE Create OnEvtHandler: whatever
+TRACE NewHandler 10
+DEBUG End1
+NEW: ‹ConditionalWorkSequence:11 (3)›
+   : │  id: 11
    : │  call count: 0
    : │  IEVENT: whatever
    : ├1╴on whatever ‹OnEventHandler›
@@ -101,82 +99,11 @@ RUN: on whatever ‹OnEventHandler›
    : prio: 51
    : step: var state x foo bar ‹VarStateHandler›
    : step: log TRACE We got $x ‹LogHandler›
- at: ‹ConditionalWorkSequence:13 (5)› (step 1)
+ at: ‹ConditionalWorkSequence:11 (3)› (step 1)
  ev: IEVENT: whatever
-0 We got three
+TRACE We got three
 END: whatever
+DEBUG End2
 foo bar :: three — now
 .
-0 locking +WAIT 3 kill job <homevent.tokize.tokizer obj>
-NEW: ‹ConditionalWorkSequence:14 (6)›
-   : │  id: 14
-   : │  call count: 0
-   : │  EVENT: shutdown
-   : └1╴... done.
-EVENT: shutdown
-NEW: ‹ConditionalWorkSequence:15 (4)›
-   : │  id: 15
-   : │  call count: 0
-   : │  EVENT: state¦three¦-¦foo¦bar
-   : └1╴... done.
-EVENT: state¦three¦-¦foo¦bar
-END: state¦three¦-¦foo¦bar
-NEW: ‹ConditionalWorkSequence:16 (4)›
-   : │  id: 16
-   : │  call count: 0
-   : │  EVENT: module¦unload¦on_event
-   : └1╴... done.
-EVENT: module¦unload¦on_event
-END: module¦unload¦on_event
-NEW: ‹ConditionalWorkSequence:17 (4)›
-   : │  id: 17
-   : │  call count: 0
-   : │  EVENT: module¦unload¦errors
-   : └1╴... done.
-EVENT: module¦unload¦errors
-END: module¦unload¦errors
-NEW: ‹ConditionalWorkSequence:18 (4)›
-   : │  id: 18
-   : │  call count: 0
-   : │  EVENT: module¦unload¦logging
-   : └1╴... done.
-EVENT: module¦unload¦logging
-END: module¦unload¦logging
-NEW: ‹ConditionalWorkSequence:19 (4)›
-   : │  id: 19
-   : │  call count: 0
-   : │  EVENT: module¦unload¦state
-   : └1╴... done.
-EVENT: module¦unload¦state
-END: module¦unload¦state
-0 RollBack  
-NEW: ‹ConditionalWorkSequence:20 (4)›
-   : │  id: 20
-   : │  call count: 0
-   : │  EVENT: module¦unload¦trigger
-   : └1╴... done.
-EVENT: module¦unload¦trigger
-END: module¦unload¦trigger
-NEW: ‹ConditionalWorkSequence:21 (4)›
-   : │  id: 21
-   : │  call count: 0
-   : │  EVENT: module¦unload¦ifelse
-   : └1╴... done.
-EVENT: module¦unload¦ifelse
-END: module¦unload¦ifelse
-NEW: ‹ConditionalWorkSequence:22 (4)›
-   : │  id: 22
-   : │  call count: 0
-   : │  EVENT: module¦unload¦data
-   : └1╴... done.
-EVENT: module¦unload¦data
-END: module¦unload¦data
-NEW: ‹ConditionalWorkSequence:23 (4)›
-   : │  id: 23
-   : │  call count: 0
-   : │  EVENT: module¦unload¦block
-   : └1╴... done.
-EVENT: module¦unload¦block
-END: module¦unload¦block
-END: shutdown
-0 locking -WAIT 3 kill job <homevent.tokize.tokizer obj>
+DEBUG End3

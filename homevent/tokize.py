@@ -17,6 +17,8 @@
 
 """Tokenization help for Python-like HomEvenT programs."""
 
+from __future__ import division,absolute_import
+
 __author__ = 'Matthias Urlichs <matthias@urlichs.de>'
 __credits__ = \
     'GvR, ESR, Tim Peters, Thomas Wouters, Fred Drake, Skip Montanaro, Ka-Ping Yee'
@@ -24,7 +26,6 @@ __credits__ = \
 import string, re, os, sys
 from token import *
 import tokenize as t
-from twisted.internet.defer import maybeDeferred, Deferred
 
 from homevent.logging import log,TRACE
 from homevent.event import StopParsing

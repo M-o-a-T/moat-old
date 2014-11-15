@@ -27,6 +27,8 @@ log
 
 """
 
+from __future__ import division,absolute_import
+
 from homevent.module import Module
 from homevent.statement import Statement, main_words
 from homevent import logging
@@ -46,7 +48,9 @@ class OutLogger(Logger):
 			super(OutLogger,self)._log(level,*txt)
 
 	def _slog(self,level,txt):
-		print >>self.out,LogNames[level]+">",txt
+		if isinstance(level,(int,long)):
+			raise RuntimeError("want stringified levels")
+		print >>self.out,level+">",txt
 
 	def _flush(self):
 		if hasattr(self.out,"flush"):

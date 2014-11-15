@@ -1,37 +1,33 @@
-NEW: ‹ConditionalWorkSequence:7 (4)›
-   : │  id: 7
+NEW: ‹ConditionalWorkSequence:5 (2)›
+   : │  id: 5
    : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
 EVENT: startup
 END: startup
-0 locking +WAIT 1 start job ‹Collected Parser:n1›
-0 locking -WAIT 1 start job ‹Collected Parser:n1›
-0 locking +WAIT 2 start job <homevent.tokize.tokizer obj>
-0 locking -WAIT 2 start job <homevent.tokize.tokizer obj>
-0 Yes!
-0 Yes!
-0 Set to ONE
-NEW: ‹ConditionalWorkSequence:8 (4)›
-   : │  id: 8
+TRACE Yes!
+TRACE Yes!
+TRACE Set to ONE
+NEW: ‹ConditionalWorkSequence:6 (2)›
+   : │  id: 6
    : │  call count: 0
    : │  EVENT: state¦-¦one¦foo¦bar
    : └1╴... done.
 EVENT: state¦-¦one¦foo¦bar
 END: state¦-¦one¦foo¦bar
-0 Set to TWO
-NEW: ‹ConditionalWorkSequence:9 (4)›
-   : │  id: 9
+TRACE Set to TWO
+NEW: ‹ConditionalWorkSequence:7 (2)›
+   : │  id: 7
    : │  call count: 0
    : │  EVENT: state¦one¦two¦foo¦bar
    : └1╴... done.
 EVENT: state¦one¦two¦foo¦bar
 END: state¦one¦two¦foo¦bar
-0 Create OnEvtHandler: state¦*¦three¦foo¦bar
-0 NewHandler 10
-0 Set to THREE
-NEW: ‹ConditionalWorkSequence:11 (5)›
-   : │  id: 11
+TRACE Create OnEvtHandler: state¦*¦three¦foo¦bar
+TRACE NewHandler 8
+TRACE Set to THREE
+NEW: ‹ConditionalWorkSequence:9 (3)›
+   : │  id: 9
    : │  call count: 0
    : │  EVENT: state¦two¦three¦foo¦bar
    : ├1╴on state * three foo bar ‹OnEventHandler›
@@ -48,16 +44,16 @@ RUN: on state * three foo bar ‹OnEventHandler›
    : step: try ‹TryStatement›
    :     : step: set state four foo bar ‹SetStateHandler›
    :     : step: log DEBUG No! (No shit happened.) ‹LogHandler›
- at: ‹ConditionalWorkSequence:11 (5)› (step 1)
+ at: ‹ConditionalWorkSequence:9 (3)› (step 1)
  ev: EVENT: state¦two¦three¦foo¦bar
-0 Set to FOUR
-1 Yes! (Shit happens.)
+TRACE Set to FOUR
+DEBUG Yes! (Shit happens.)
 END: state¦two¦three¦foo¦bar
-0 Create OnEvtHandler: state¦*¦twohalf¦foo¦bar
-0 NewHandler 12
-0 Set to TWOHALF
-NEW: ‹ConditionalWorkSequence:13 (5)›
-   : │  id: 13
+TRACE Create OnEvtHandler: state¦*¦twohalf¦foo¦bar
+TRACE NewHandler 10
+TRACE Set to TWOHALF
+NEW: ‹ConditionalWorkSequence:11 (3)›
+   : │  id: 11
    : │  call count: 0
    : │  EVENT: state¦three¦twohalf¦foo¦bar
    : ├1╴on state * twohalf foo bar ‹OnEventHandler›
@@ -70,21 +66,21 @@ RUN: on state * twohalf foo bar ‹OnEventHandler›
    : prio: 51
    : step: log TRACE Set to FOUR ‹LogHandler›
    : step: set state fourtoo foo bar ‹SetStateHandler›
- at: ‹ConditionalWorkSequence:13 (5)› (step 1)
+ at: ‹ConditionalWorkSequence:11 (3)› (step 1)
  ev: EVENT: state¦three¦twohalf¦foo¦bar
-0 Set to FOUR
+TRACE Set to FOUR
 END: state¦three¦twohalf¦foo¦bar
 Trying to change state to 'fourtoo' while changing from 'three' to 'twohalf'
-NEW: ‹WorkSequence:14 (4)›
-   : │  id: 14
+NEW: ‹WorkSequence:12 (2)›
+   : │  id: 12
    : │  call count: 0
    : │  Trying to change state to 'fourtoo' while changing from 'three' to 'twohalf'
    : └1╴... done.
 Trying to change state to 'fourtoo' while changing from 'three' to 'twohalf'
 END: StateChangeError
-0 Set to THREE
-NEW: ‹ConditionalWorkSequence:15 (5)›
-   : │  id: 15
+TRACE Set to THREE
+NEW: ‹ConditionalWorkSequence:13 (3)›
+   : │  id: 13
    : │  call count: 0
    : │  EVENT: state¦twohalf¦three¦foo¦bar
    : ├1╴on state * three foo bar ‹OnEventHandler›
@@ -101,43 +97,42 @@ RUN: on state * three foo bar ‹OnEventHandler›
    : step: try ‹TryStatement›
    :     : step: set state four foo bar ‹SetStateHandler›
    :     : step: log DEBUG No! (No shit happened.) ‹LogHandler›
- at: ‹ConditionalWorkSequence:15 (5)› (step 1)
+ at: ‹ConditionalWorkSequence:13 (3)› (step 1)
  ev: EVENT: state¦twohalf¦three¦foo¦bar
-0 Set to FOUR
-1 Yes! (Shit happens.)
+TRACE Set to FOUR
+DEBUG Yes! (Shit happens.)
 END: state¦twohalf¦three¦foo¦bar
-0 locking +WAIT 3 start job ‹Waiter _wait¦1 ??›
-0 locking -WAIT 3 start job ‹Waiter _wait¦1 ??›
-NEW: ‹ConditionalWorkSequence:16 (4)›
-   : │  id: 16
+NEW: ‹ConditionalWorkSequence:14 (2)›
+   : │  id: 14
    : │  call count: 0
    : │  EVENT: wait¦start¦0.1¦_wait¦1
    : └1╴... done.
 EVENT: wait¦start¦0.1¦_wait¦1
 END: wait¦start¦0.1¦_wait¦1
-NEW: ‹ConditionalWorkSequence:17 (4)›
-   : │  id: 17
+2003-04-05 06:07:08.150000 _wait¦1: Fake timer done 
+NEW: ‹ConditionalWorkSequence:15 (2)›
+   : │  id: 15
    : │  call count: 0
    : │  EVENT: wait¦done¦0.1¦_wait¦1
    : └1╴... done.
 EVENT: wait¦done¦0.1¦_wait¦1
 END: wait¦done¦0.1¦_wait¦1
-foo bar :: three — now
+foo bar :: three — 0.1 sec
 .
 : ‹Collected State:foo¦bar›
 name: foo¦bar
 value: three
 lock: No
 last value: twohalf
-last change: now (2003-04-05 06:07:08)
+last change: -0.1 sec (2003-04-05 06:07:08)
 .
-0 Yes!
-0 Yes!
-0 Yes!
-0 Create OnEvtHandler: whatever
-0 NewHandler 18
-NEW: ‹ConditionalWorkSequence:19 (5)›
-   : │  id: 19
+TRACE Yes!
+TRACE Yes!
+TRACE Yes!
+TRACE Create OnEvtHandler: whatever
+TRACE NewHandler 16
+NEW: ‹ConditionalWorkSequence:17 (3)›
+   : │  id: 17
    : │  call count: 0
    : │  IEVENT: whatever
    : ├1╴on whatever ‹OnEventHandler›
@@ -150,87 +145,15 @@ RUN: on whatever ‹OnEventHandler›
    : prio: 51
    : step: var state x foo bar ‹VarStateHandler›
    : step: log TRACE We got $x ‹LogHandler›
- at: ‹ConditionalWorkSequence:19 (5)› (step 1)
+ at: ‹ConditionalWorkSequence:17 (3)› (step 1)
  ev: IEVENT: whatever
-0 We got three
+TRACE We got three
 END: whatever
-NEW: ‹ConditionalWorkSequence:20 (4)›
-   : │  id: 20
+NEW: ‹ConditionalWorkSequence:18 (2)›
+   : │  id: 18
    : │  call count: 0
    : │  EVENT: state¦three¦-¦foo¦bar
    : └1╴... done.
 EVENT: state¦three¦-¦foo¦bar
 END: state¦three¦-¦foo¦bar
 .
-0 locking +WAIT 4 kill job <homevent.tokize.tokizer obj>
-0 locking -WAIT 4 kill job <homevent.tokize.tokizer obj>
-NEW: ‹ConditionalWorkSequence:21 (6)›
-   : │  id: 21
-   : │  call count: 0
-   : │  EVENT: shutdown
-   : └1╴... done.
-EVENT: shutdown
-NEW: ‹ConditionalWorkSequence:22 (4)›
-   : │  id: 22
-   : │  call count: 0
-   : │  EVENT: module¦unload¦on_event
-   : └1╴... done.
-EVENT: module¦unload¦on_event
-END: module¦unload¦on_event
-NEW: ‹ConditionalWorkSequence:23 (4)›
-   : │  id: 23
-   : │  call count: 0
-   : │  EVENT: module¦unload¦errors
-   : └1╴... done.
-EVENT: module¦unload¦errors
-END: module¦unload¦errors
-NEW: ‹ConditionalWorkSequence:24 (4)›
-   : │  id: 24
-   : │  call count: 0
-   : │  EVENT: module¦unload¦logging
-   : └1╴... done.
-EVENT: module¦unload¦logging
-END: module¦unload¦logging
-NEW: ‹ConditionalWorkSequence:25 (4)›
-   : │  id: 25
-   : │  call count: 0
-   : │  EVENT: module¦unload¦state
-   : └1╴... done.
-EVENT: module¦unload¦state
-END: module¦unload¦state
-NEW: ‹ConditionalWorkSequence:26 (4)›
-   : │  id: 26
-   : │  call count: 0
-   : │  EVENT: module¦unload¦trigger
-   : └1╴... done.
-EVENT: module¦unload¦trigger
-END: module¦unload¦trigger
-NEW: ‹ConditionalWorkSequence:27 (4)›
-   : │  id: 27
-   : │  call count: 0
-   : │  EVENT: module¦unload¦ifelse
-   : └1╴... done.
-EVENT: module¦unload¦ifelse
-END: module¦unload¦ifelse
-NEW: ‹ConditionalWorkSequence:28 (4)›
-   : │  id: 28
-   : │  call count: 0
-   : │  EVENT: module¦unload¦data
-   : └1╴... done.
-EVENT: module¦unload¦data
-END: module¦unload¦data
-NEW: ‹ConditionalWorkSequence:29 (4)›
-   : │  id: 29
-   : │  call count: 0
-   : │  EVENT: module¦unload¦block
-   : └1╴... done.
-EVENT: module¦unload¦block
-END: module¦unload¦block
-NEW: ‹ConditionalWorkSequence:30 (4)›
-   : │  id: 30
-   : │  call count: 0
-   : │  EVENT: module¦unload¦wait
-   : └1╴... done.
-EVENT: module¦unload¦wait
-END: module¦unload¦wait
-END: shutdown

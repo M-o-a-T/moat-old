@@ -1,25 +1,20 @@
-NEW: ‹ConditionalWorkSequence:7 (4)›
-   : │  id: 7
+NEW: ‹ConditionalWorkSequence:5 (2)›
+   : │  id: 5
    : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
 EVENT: startup
 END: startup
-0 locking +WAIT 1 start job ‹Collected Parser:n1›
-0 locking -WAIT 1 start job ‹Collected Parser:n1›
-0 locking +WAIT 2 start job <homevent.tokize.tokizer obj>
-0 locking -WAIT 2 start job <homevent.tokize.tokizer obj>
-0 locking +WAIT 3 start job ‹Waiter _wait¦1 ??›
-0 locking -WAIT 3 start job ‹Waiter _wait¦1 ??›
-NEW: ‹ConditionalWorkSequence:8 (4)›
-   : │  id: 8
+NEW: ‹ConditionalWorkSequence:6 (2)›
+   : │  id: 6
    : │  call count: 0
    : │  EVENT: wait¦start¦0.2¦_wait¦1
    : └1╴... done.
 EVENT: wait¦start¦0.2¦_wait¦1
 END: wait¦start¦0.2¦_wait¦1
-NEW: ‹ConditionalWorkSequence:9 (4)›
-   : │  id: 9
+2014-11-15 18:44:52.536502 _wait¦1: Forced timer done 
+NEW: ‹ConditionalWorkSequence:7 (2)›
+   : │  id: 7
    : │  call count: 0
    : │  EVENT: wait¦done¦0.2¦_wait¦1
    : └1╴... done.
@@ -27,10 +22,8 @@ EVENT: wait¦done¦0.2¦_wait¦1
 END: wait¦done¦0.2¦_wait¦1
 syslog :: TRACE: run_logger
 .
-0 locking +WAIT 4 start job ‹Collected SysLogger:local5¦localhost¦55514›
-0 locking -WAIT 4 start job ‹Collected SysLogger:local5¦localhost¦55514›
-1 Five Debug
-3 Five Warn
+DEBUG Five Debug
+WARN Five Warn
 local5 localhost 55514 :: local5 info
 syslog :: TRACE: run_logger
 .
@@ -44,20 +37,20 @@ address: (u'localhost', 55514)
 level: 2
 level_name: info
 .
-0 locking +WAIT 5 kill job ‹Collected SysLogger:local5¦localhost¦55514›
-0 locking +WAIT 6 kill job ‹Collected SysLogger:local5¦localhost¦55514›
-0 locking -WAIT 6 kill job ‹Collected SysLogger:local5¦localhost¦55514›
-0 locking -WAIT 5 kill job ‹Collected SysLogger:local5¦localhost¦55514›
 syslog :: TRACE: run_logger
 .
-0 locking +WAIT 7 start job ‹Waiter _wait¦2 ??›
-0 locking -WAIT 7 start job ‹Waiter _wait¦2 ??›
-NEW: ‹ConditionalWorkSequence:10 (4)›
-   : │  id: 10
+NEW: ‹ConditionalWorkSequence:8 (2)›
+   : │  id: 8
    : │  call count: 0
    : │  EVENT: wait¦start¦1.0¦_wait¦2
    : └1╴... done.
 EVENT: wait¦start¦1.0¦_wait¦2
 END: wait¦start¦1.0¦_wait¦2
-0 locking +WAIT 8 kill job <homevent.tokize.tokizer obj>
-0 locking -WAIT 8 kill job <homevent.tokize.tokizer obj>
+2014-11-15 18:44:53.375540 _wait¦2: Forced timer done 
+NEW: ‹ConditionalWorkSequence:9 (2)›
+   : │  id: 9
+   : │  call count: 0
+   : │  EVENT: wait¦done¦1.1¦_wait¦2
+   : └1╴... done.
+EVENT: wait¦done¦1.1¦_wait¦2
+END: wait¦done¦1.1¦_wait¦2

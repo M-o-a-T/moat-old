@@ -16,6 +16,7 @@
 ##  for more details.
 ##
 
+from homevent import patch;patch()
 from homevent.reactor import ShutdownHandler
 from homevent.module import load_module
 from homevent.statement import main_words
@@ -86,9 +87,13 @@ block:
 on whatever:
 	var state x foo bar
 	log TRACE We got $x
+log DEBUG End1
 trigger whatever :sync
+log DEBUG End2
 list state
+log DEBUG End3
 shutdown
+log DEBUG End4
 """
 
 main_words.register_statement(ShutdownHandler)

@@ -1,97 +1,88 @@
-NEW: ‹ConditionalWorkSequence:7 (4)›
-   : │  id: 7
+NEW: ‹ConditionalWorkSequence:5 (2)›
+   : │  id: 5
    : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
 EVENT: startup
 END: startup
-0 locking +WAIT 1 start job ‹Collected Parser:n1›
-0 locking -WAIT 1 start job ‹Collected Parser:n1›
-0 locking +WAIT 2 start job <homevent.tokize.tokizer obj>
-0 locking -WAIT 2 start job <homevent.tokize.tokizer obj>
-0 locking +WAIT 3 start job ‹Collected RPCserver:foo›
-0 locking -WAIT 3 start job ‹Collected RPCserver:foo›
-0 Create OnEvtHandler: send¦logger
-0 NewHandler 8
-0 locking +WAIT 4 start job ‹Waiter shutdown ??›
-0 locking -WAIT 4 start job ‹Waiter shutdown ??›
-NEW: ‹ConditionalWorkSequence:9 (4)›
-   : │  id: 9
+TRACE Create OnEvtHandler: send¦logger
+TRACE NewHandler 6
+NEW: ‹ConditionalWorkSequence:7 (2)›
+   : │  id: 7
    : │  call count: 0
    : │  EVENT: wait¦start¦5.0¦shutdown
    : └1╴... done.
 EVENT: wait¦start¦5.0¦shutdown
 END: wait¦start¦5.0¦shutdown
-NEW: ‹ConditionalWorkSequence:10 (4)›
-   : │  id: 10
+NEW: ‹ConditionalWorkSequence:8 (2)›
+   : │  id: 8
    : │  call count: 0
    : │  EVENT: rpc¦connect¦foo¦n1
    : └1╴... done.
 EVENT: rpc¦connect¦foo¦n1
 END: rpc¦connect¦foo¦n1
-0 locking +WAIT 5 start job ‹Collected LogCallback:foo¦n1›
-0 locking -WAIT 5 start job ‹Collected LogCallback:foo¦n1›
-1 TEST (Name('event',),)
-1 TEST (Name('log',),)
-1 TEST (Name('module',),)
-1 TEST (Name('net',),)
-1 TEST (Name('netserver',),)
-1 TEST (Name('on',),)
-1 TEST (Name('parser',),)
-1 TEST (Name('rpc', 'connection'),)
-1 TEST (Name('rpc', 'server'),)
-1 TEST (Name('state',),)
-1 TEST (Name('wait',),)
-1 TEST (Name('worker',),)
-1 TEST .
-1 TEST (Name(u'foo',),)
-1 TEST .
-1 TEST (u'', u'\u2039Collected RPCserver:foo\u203a')
-1 TEST (u'name', u'foo')
-1 TEST (u'host', u'')
-1 TEST (u'port', u'56478')
-1 TEST (u'server', u'<homevent.gevent_rpyc.GeventServer obj>')
-1 TEST .
-1 TEST (u'', u'\u2039Collected namedRPC:foo\xa6n1\u203a')
-1 TEST (u'name', u'foo\xa6n1')
-1 TEST (u'local host', u'::ffff:127.0.0.1')
-1 TEST (u'local port', u'56478')
-1 TEST (u'remote host', u'::ffff:127.0.0.1')
-1 TEST (u'remote port', u'×××')
-1 TEST .
+TEST 1 (Name('event',),)
+4 Logging error
+ERROR (<type 'exceptions.KeyError'>, KeyError('TEST',), <traceback obj>)
+TEST 1 (Name('job',),)
+TEST 1 (Name('log',),)
+TEST 1 (Name('module',),)
+TEST 1 (Name('net', 'connection'),)
+TEST 1 (Name('net', 'server'),)
+TEST 1 (Name('on',),)
+TEST 1 (Name('parser',),)
+TEST 1 (Name('rpc', 'connection'),)
+TEST 1 (Name('rpc', 'server'),)
+TEST 1 (Name('state',),)
+TEST 1 (Name('wait',),)
+TEST 1 (Name('worker',),)
+TEST 1 .
+TEST 1 (Name(u'foo',),)
+TEST 1 .
+TEST 1 (u'', u'\u2039Collected RPCserver:foo\u203a')
+TEST 1 (u'name', u'foo')
+TEST 1 (u'host', u'')
+TEST 1 (u'port', u'56478')
+TEST 1 (u'server', u'<homevent.gevent_rpyc.GeventServer obj>')
+TEST 1 .
+TEST 1 (u'', u'\u2039Collected namedRPC:foo\xa6n1\u203a')
+TEST 1 (u'name', u'foo\xa6n1')
+TEST 1 (u'local host', u'::ffff:127.0.0.1')
+TEST 1 (u'local port', u'56478')
+TEST 1 (u'remote host', u'::ffff:127.0.0.1')
+TEST 1 (u'remote port', u'55207')
+TEST 1 .
 Traceback (most recent call last):
-  File "../modules/rpc.py", line ×××, in exposed_command
+  File "../modules/rpc.py", line 307, in exposed_command
     return CommandProcessor(parent=self,ctx=self.ctx).simple_statement(args)
-  File "../modules/rpc.py", line ×××, in simple_statement
+  File "../modules/rpc.py", line 100, in simple_statement
     fn = self.lookup(args)
-  File "/daten/src/git/homevent/homevent/interpreter.py", line ×××, in lookup
+  File "/home/smurf/homevent/homevent/interpreter.py", line 78, in lookup
     fn = me.lookup(event)
-  File "/daten/src/git/homevent/homevent/statement.py", line ×××, in lookup
+  File "/home/smurf/homevent/homevent/statement.py", line 242, in lookup
     raise UnknownWordError(args,self)
 UnknownWordError: Cannot find word <fuubar This is not found.> in <Global>
-NEW: ‹WorkSequence:12 (4)›
-   : │  id: 12
+NEW: ‹WorkSequence:10 (2)›
+   : │  id: 10
    : │  call count: 0
    : │  Cannot find word ‹fuubar This is not found.› in ‹Global›
    : └1╴... done.
 Traceback (most recent call last):
-  File "../modules/rpc.py", line ×××, in exposed_command
+  File "../modules/rpc.py", line 307, in exposed_command
     return CommandProcessor(parent=self,ctx=self.ctx).simple_statement(args)
-  File "../modules/rpc.py", line ×××, in simple_statement
+  File "../modules/rpc.py", line 100, in simple_statement
     fn = self.lookup(args)
-  File "/daten/src/git/homevent/homevent/interpreter.py", line ×××, in lookup
+  File "/home/smurf/homevent/homevent/interpreter.py", line 78, in lookup
     fn = me.lookup(event)
-  File "/daten/src/git/homevent/homevent/statement.py", line ×××, in lookup
+  File "/home/smurf/homevent/homevent/statement.py", line 242, in lookup
     raise UnknownWordError(args,self)
 UnknownWordError: Cannot find word <fuubar This is not found.> in <Global>
 END: UnknownWordError
-1 TEST YES Got an error
-1 This is logged.
-1 TEST The value is: Test123
-0 locking +WAIT 6 start job ‹TriggerHandler: trigger 3›
-0 locking -WAIT 6 start job ‹TriggerHandler: trigger 3›
-NEW: ‹ConditionalWorkSequence:13 (5)›
-   : │  id: 13
+TEST 1 YES Got an error
+DEBUG This is logged.
+TEST 1 The value is: Test123
+NEW: ‹ConditionalWorkSequence:11 (3)›
+   : │  id: 11
    : │  call count: 0
    : │  IEVENT: send¦logger
    : ├1╴on send logger ‹OnEventHandler›
@@ -102,118 +93,30 @@ IEVENT: send¦logger
 RUN: on send logger ‹OnEventHandler›
    : prio: 51
    : step: log DEBUG hello This is a test ‹LogHandler›
- at: ‹ConditionalWorkSequence:13 (5)› (step 1)
+ at: ‹ConditionalWorkSequence:11 (3)› (step 1)
  ev: IEVENT: send¦logger
-1 hello This is a test
-1 TEST The logger says: <1> hello¦This¦is¦a¦test¦LOGTEST
+DEBUG hello This is a test
 END: send¦logger
-Waiter ‹shutdown› was cancelled
-NEW: ‹WorkSequence:14 (4)›
+2014-11-15 18:45:03.879687 shutdown: Forced timer done 
+NEW: ‹ConditionalWorkSequence:12 (2)›
+   : │  id: 12
+   : │  call count: 0
+   : │  EVENT: wait¦done¦5.1¦shutdown
+   : └1╴... done.
+EVENT: wait¦done¦5.1¦shutdown
+END: wait¦done¦5.1¦shutdown
+NEW: ‹ConditionalWorkSequence:13 (2)›
+   : │  id: 13
+   : │  call count: 0
+   : │  EVENT: wait¦start¦6.1¦foo¦b
+   : └1╴... done.
+EVENT: wait¦start¦6.1¦foo¦b
+END: wait¦start¦6.1¦foo¦b
+2014-11-15 18:45:04.889933 foo¦b: Forced timer done 
+NEW: ‹ConditionalWorkSequence:14 (2)›
    : │  id: 14
    : │  call count: 0
-   : │  Waiter ‹shutdown› was cancelled
+   : │  EVENT: wait¦done¦6.1¦foo¦b
    : └1╴... done.
-Waiter ‹shutdown› was cancelled
-END: DelayCancelled
-0 locking +WAIT 7 start job ‹Waiter foo¦b ??›
-0 locking -WAIT 7 start job ‹Waiter foo¦b ??›
-NEW: ‹ConditionalWorkSequence:15 (4)›
-   : │  id: 15
-   : │  call count: 0
-   : │  EVENT: wait¦start¦1.3¦foo¦b
-   : └1╴... done.
-EVENT: wait¦start¦1.3¦foo¦b
-END: wait¦start¦1.3¦foo¦b
-0 locking +WAIT 8 kill job <homevent.tokize.tokizer obj>
-0 locking -WAIT 8 kill job <homevent.tokize.tokizer obj>
-NEW: ‹ConditionalWorkSequence:16 (6)›
-   : │  id: 16
-   : │  call count: 0
-   : │  EVENT: shutdown
-   : └1╴... done.
-EVENT: shutdown
-NEW: ‹ConditionalWorkSequence:17 (4)›
-   : │  id: 17
-   : │  call count: 0
-   : │  EVENT: state¦Test123¦-¦the¦tester
-   : └1╴... done.
-EVENT: state¦Test123¦-¦the¦tester
-END: state¦Test123¦-¦the¦tester
-NEW: ‹ConditionalWorkSequence:18 (4)›
-   : │  id: 18
-   : │  call count: 0
-   : │  EVENT: rpc¦disconnect¦foo¦n1
-   : └1╴... done.
-EVENT: rpc¦disconnect¦foo¦n1
-END: rpc¦disconnect¦foo¦n1
-NEW: ‹ConditionalWorkSequence:19 (4)›
-   : │  id: 19
-   : │  call count: 0
-   : │  EVENT: module¦unload¦on_event
-   : └1╴... done.
-EVENT: module¦unload¦on_event
-END: module¦unload¦on_event
-NEW: ‹ConditionalWorkSequence:20 (4)›
-   : │  id: 20
-   : │  call count: 0
-   : │  EVENT: module¦unload¦errors
-   : └1╴... done.
-EVENT: module¦unload¦errors
-END: module¦unload¦errors
-NEW: ‹ConditionalWorkSequence:21 (4)›
-   : │  id: 21
-   : │  call count: 0
-   : │  EVENT: module¦unload¦logging
-   : └1╴... done.
-EVENT: module¦unload¦logging
-END: module¦unload¦logging
-NEW: ‹ConditionalWorkSequence:22 (4)›
-   : │  id: 22
-   : │  call count: 0
-   : │  EVENT: module¦unload¦state
-   : └1╴... done.
-EVENT: module¦unload¦state
-END: module¦unload¦state
-NEW: ‹ConditionalWorkSequence:23 (4)›
-   : │  id: 23
-   : │  call count: 0
-   : │  EVENT: module¦unload¦rpc
-   : └1╴... done.
-EVENT: module¦unload¦rpc
-END: module¦unload¦rpc
-NEW: ‹ConditionalWorkSequence:24 (4)›
-   : │  id: 24
-   : │  call count: 0
-   : │  EVENT: module¦unload¦trigger
-   : └1╴... done.
-EVENT: module¦unload¦trigger
-END: module¦unload¦trigger
-NEW: ‹ConditionalWorkSequence:25 (4)›
-   : │  id: 25
-   : │  call count: 0
-   : │  EVENT: module¦unload¦net
-   : └1╴... done.
-EVENT: module¦unload¦net
-END: module¦unload¦net
-NEW: ‹ConditionalWorkSequence:26 (4)›
-   : │  id: 26
-   : │  call count: 0
-   : │  EVENT: module¦unload¦data
-   : └1╴... done.
-EVENT: module¦unload¦data
-END: module¦unload¦data
-NEW: ‹ConditionalWorkSequence:27 (4)›
-   : │  id: 27
-   : │  call count: 0
-   : │  EVENT: module¦unload¦block
-   : └1╴... done.
-EVENT: module¦unload¦block
-END: module¦unload¦block
-NEW: ‹ConditionalWorkSequence:28 (4)›
-   : │  id: 28
-   : │  call count: 0
-   : │  EVENT: module¦unload¦wait
-   : └1╴... done.
-EVENT: module¦unload¦wait
-END: module¦unload¦wait
-END: shutdown
+EVENT: wait¦done¦6.1¦foo¦b
+END: wait¦done¦6.1¦foo¦b

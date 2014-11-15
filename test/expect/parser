@@ -1,14 +1,10 @@
-NEW: ‹ConditionalWorkSequence:7 (4)›
-   : │  id: 7
+NEW: ‹ConditionalWorkSequence:5 (2)›
+   : │  id: 5
    : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
 EVENT: startup
 END: startup
-0 locking +WAIT 1 start job ‹Collected Parser:n1›
-0 locking -WAIT 1 start job ‹Collected Parser:n1›
-0 locking +WAIT 2 start job <homevent.tokize.tokizer obj>
-0 locking -WAIT 2 start job <homevent.tokize.tokizer obj>
 Init foo(1) from ‹global_words: Global 3›
 Input foo(1): 
 Init foo(2) from ‹global_words: Global 3›
@@ -68,19 +64,3 @@ Init foo¦bar(16) from None
 Init for(17) from None
 Init foiled(18) from None
 foiled : not clingfilm
-0 locking +WAIT 3 kill job <homevent.tokize.tokizer obj>
-0 locking -WAIT 3 kill job <homevent.tokize.tokizer obj>
-NEW: ‹ConditionalWorkSequence:8 (6)›
-   : │  id: 8
-   : │  call count: 0
-   : │  EVENT: shutdown
-   : └1╴... done.
-EVENT: shutdown
-NEW: ‹ConditionalWorkSequence:9 (4)›
-   : │  id: 9
-   : │  call count: 0
-   : │  EVENT: module¦unload¦help
-   : └1╴... done.
-EVENT: module¦unload¦help
-END: module¦unload¦help
-END: shutdown

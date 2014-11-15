@@ -20,6 +20,8 @@ This module contains statements to do simple statement aggregation.
 
 """
 
+from __future__ import division,absolute_import
+
 from homevent.module import Module
 from homevent.logging import log
 from homevent.statement import main_words, MainStatementList

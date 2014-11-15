@@ -1,69 +1,41 @@
-NEW: ‹ConditionalWorkSequence:7 (4)›
-   : │  id: 7
+NEW: ‹ConditionalWorkSequence:5 (2)›
+   : │  id: 5
    : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
 EVENT: startup
 END: startup
-0 locking +WAIT 1 start job ‹Collected Parser:n1›
-0 locking -WAIT 1 start job ‹Collected Parser:n1›
-0 locking +WAIT 2 start job <homevent.tokize.tokizer obj>
-0 locking -WAIT 2 start job <homevent.tokize.tokizer obj>
-NEW: ‹ConditionalWorkSequence:8 (4)›
-   : │  id: 8
+NEW: ‹ConditionalWorkSequence:6 (2)›
+   : │  id: 6
    : │  call count: 0
    : │  IEVENT: foo
    : └1╴... done.
 IEVENT: foo
 END: foo
-0 locking +WAIT 3 start job ‹Waiter _wait¦1 ??›
-0 locking -WAIT 3 start job ‹Waiter _wait¦1 ??›
-NEW: ‹ConditionalWorkSequence:9 (4)›
-   : │  id: 9
+NEW: ‹ConditionalWorkSequence:7 (2)›
+   : │  id: 7
    : │  call count: 0
    : │  EVENT: wait¦start¦0.5¦_wait¦1
    : └1╴... done.
 EVENT: wait¦start¦0.5¦_wait¦1
 END: wait¦start¦0.5¦_wait¦1
-NEW: ‹ConditionalWorkSequence:10 (4)›
-   : │  id: 10
+2003-04-05 06:07:08.500000 _wait¦1: Fake timer done 
+NEW: ‹ConditionalWorkSequence:8 (2)›
+   : │  id: 8
    : │  call count: 0
    : │  EVENT: wait¦done¦0.5¦_wait¦1
    : └1╴... done.
 EVENT: wait¦done¦0.5¦_wait¦1
 END: wait¦done¦0.5¦_wait¦1
-NEW: ‹ConditionalWorkSequence:11 (4)›
-   : │  id: 11
+NEW: ‹ConditionalWorkSequence:9 (2)›
+   : │  id: 9
    : │  call count: 0
    : │  IEVENT: bar
    : └1╴... done.
 IEVENT: bar
 END: bar
-NEW: ‹ConditionalWorkSequence:12 (4)›
-   : │  id: 12
+NEW: ‹ConditionalWorkSequence:10 (2)›
+   : │  id: 10
    : │  call count: 0
    : │  IEVENT: baz¦notlogged
    : └1╴... done.
-0 locking +WAIT 4 kill job <homevent.tokize.tokizer obj>
-0 locking -WAIT 4 kill job <homevent.tokize.tokizer obj>
-NEW: ‹ConditionalWorkSequence:13 (6)›
-   : │  id: 13
-   : │  call count: 0
-   : │  EVENT: shutdown
-   : └1╴... done.
-EVENT: shutdown
-NEW: ‹ConditionalWorkSequence:14 (4)›
-   : │  id: 14
-   : │  call count: 0
-   : │  EVENT: module¦unload¦trigger
-   : └1╴... done.
-EVENT: module¦unload¦trigger
-END: module¦unload¦trigger
-NEW: ‹ConditionalWorkSequence:15 (4)›
-   : │  id: 15
-   : │  call count: 0
-   : │  EVENT: module¦unload¦wait
-   : └1╴... done.
-EVENT: module¦unload¦wait
-END: module¦unload¦wait
-END: shutdown

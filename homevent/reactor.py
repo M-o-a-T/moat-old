@@ -19,6 +19,8 @@
 This part of the code controls the main loop.
 """
 
+from __future__ import division,absolute_import
+
 import sys
 from homevent.context import Context
 from homevent.event import Event
@@ -27,16 +29,17 @@ from homevent.run import register_worker,unregister_worker, SYS_PRIO,MAX_PRIO,\
 	process_event, process_failure
 from homevent.statement import Statement
 from homevent.io import dropConnections
-from homevent.twist import deferToLater, fix_exception,print_exception,\
+from homevent.twist import fix_exception,print_exception,\
 	wait_for_all_threads
 from homevent.collect import Collection,Collected
 
-from twisted.internet import reactor
-
 import gevent
+from dabroker.util.thread import Main as _Main
 
 __all__ = ("start_up","shut_down", "startup_event","shutdown_event",
 	"ShutdownHandler","mainloop", "Events")
+
+Main = None
 
 startup_event = Event(Context(startup=True), "startup")
 shutdown_event = Event(Context(shutdown=True), "shutdown")
@@ -49,45 +52,6 @@ class Events(Collection):
     name = "event"
 Events = Events()
 
-class Shutdown_Worker_1(ExcWorker):
-	"""\
-		This worker counts event runs and makes sure that all are
-		processed."""
-	prio = SYS_PRIO+1
-
-	def does_event(self,ev):
-		return True
-	def does_failure(self,ev):
-		return True
-	def process(self, queue=None,**k):
-		super(Shutdown_Worker_1,self).process(queue=queue,**k)
-		if queue is not None:
-			global active_q_id
-			active_q_id += 1
-			queue.aq_id = active_q_id
-			Events[queue.aq_id] = queue
-	def report(self,*a,**k):
-		return ()
-
-class Shutdown_Worker_2(ExcWorker):
-	"""\
-		This worker counts event runs and makes sure that all are
-		processed."""
-	prio = MAX_PRIO+3
-	def does_event(self,ev):
-		return True
-	def does_failure(self,ev):
-		return True
-	def process(self, event=None,queue=None,**k):
-		super(Shutdown_Worker_2,self).process(queue=queue,**k)
-		if queue is not None:
-			del Events[queue.aq_id]
-			del queue.aq_id
-		if not running and not Events:
-			stop_mainloop()
-	def report(self,*a,**k):
-		return ()
-
 class Shutdown_Worker(Worker):
 	"""\
 		This worker does the actual shutdown.
@@ -98,15 +62,14 @@ class Shutdown_Worker(Worker):
 	def process(self, **k):
 		super(Shutdown_Worker,self).process(**k)
 		dropConnections()
+		_stop_mainloop()
 	def report(self,*a,**k):
 		yield "shutting down"
 
 def start_up():
 	"""\
-		Code to be called first. The Twisted mainloop is NOT running.
+		Code to be called first. The main loop is NOT running.
 		"""
-	register_worker(Shutdown_Worker_1("shutdown first"))
-	register_worker(Shutdown_Worker_2("shutdown last"))
 	register_worker(Shutdown_Worker("shutdown handler"))
 
 	global running
@@ -120,38 +83,32 @@ def start_up():
 	
 def _shut_down():
 	"""\
-		Code to be called last. The Twisted mainloop is running and will
+		Code to be called last. The main loop is running and will
 		be stopped when all events have progressed.
 		"""
-	global running
-	if running:
-		running = False
-		try:
-			process_event(shutdown_event)
-		except Exception as e:
-			fix_exception(e)
-			process_failure(e)
+	try:
+		process_event(shutdown_event)
+	except Exception as e:
+		fix_exception(e)
+		process_failure(e)
 
 #	if not Events:
 #		_stop_mainloop()
 
 def shut_down():
-	deferToLater(_shut_down)
-
-def stop_mainloop():
-	"""Sanely halt the Twisted mainloop."""
-	deferToLater(_stop_mainloop)
+	Main.stop()
 
 def _stop_mainloop():
 	global stopping
 	if not stopping:
 		stopping = True
 		dropConnections()
-		reactor.stop()
 		wait_for_all_threads() # Debugging
 
 		from homevent.logging import stop_loggers
 		stop_loggers()
+		shut_down()
+
 
 
 ## This should be in homevent.collect, but import ordering problems make that impossible
@@ -199,20 +156,31 @@ shutdown now  ... but does not wait for active events to terminate.
 		event = self.params(ctx)
 		if len(event):
 			if tuple(event) == ("now",):
-				stop_mainloop()
+				_stop_mainloop()
 				return
 			raise ValueError(u"'shutdown' does not take arguments (except ‹now›).",event)
 		shut_down()
 
-def mainloop(main=None):
-	start_up()
-	if main:
-		def run_main():
-			job = gevent.spawn(main)
-			def dead(e):
-				fix_exception(e)
-				print_exception(e)
-			job.link_exception(dead)
-		reactor.callWhenRunning(run_main)
-	reactor.run()
+class MyMain(_Main):
+	def __init__(self, main=None, setup=None):
+		self.main_proc = main
+		self.setup_proc = setup
+		self.main_job = None
+		super(MyMain,self).__init__()
+	def setup(self):
+		start_up()
+		if self.setup_proc:
+			self.setup_proc()
+	def main(self):
+		if self.main_proc:
+			self.main_job = gevent.spawn(self.main_proc)
+			#self.register_stop(self.main_job.kill)
+		self.shutting_down.wait()
+	def cleanup(self):
+		_stop_mainloop()
+
+def mainloop(main=None,setup=None):
+	global Main
+	Main = MyMain(main,setup)
+	Main.run()
 

@@ -20,14 +20,14 @@ This code does some standard I/O handling.
 
 """
 
-from twisted.internet import defer
+from __future__ import division,absolute_import
+
 from homevent.run import process_failure
-from homevent.geventreactor import waitForDeferred
 
 conns = []
 def dropConnections():
 	for c in conns:
-		waitForDeferred(c.loseConnection())
+		c.loseConnection()
 
 class Outputter(object):
 	"""Wraps standard output behavior"""
@@ -61,9 +61,7 @@ class Outputter(object):
 		self._drop_callbacks = {}
 
 		for proc,a,k in cb.itervalues():
-			res = proc(*a,**k)
-			if isinstance(res,defer.Deferred):
-				waitForDeferred(res)
+			proc(*a,**k)
 
 	def connectionLost(self,reason):
 		if self in conns:

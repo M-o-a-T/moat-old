@@ -20,6 +20,8 @@ This code implements (a subset of) the WAGO server protocol.
 
 """
 
+from __future__ import division,absolute_import
+
 import os
 import re
 

@@ -34,15 +34,6 @@ if version < '2.4':
              % sys.version)
 
 
-def modules_check():
-    '''Check if necessary modules is installed.
-    The function is executed by distutils (by the install command).'''
-    try:
-        import twisted
-    except ImportError:
-        sys.exit('Error: the Twisted framework is required.')
-        raise
-
 setup(
     name = name,
     version = VERSION,
@@ -55,7 +46,6 @@ HomEvenT features a roughly-Pythonic scripting language (with simple syntax
 and event handlers instead of function calls), numerous modules for
 additional I/O, logging, and easy integration into existing systems.
 
-It is based on Twisted.
 ''',
     author = 'Matthias Urlichs',
     author_email = 'matthias@urlichs.de',
@@ -64,7 +54,6 @@ It is based on Twisted.
     license = 'GPL',
 
 	zip_safe = False, 
-    modules_check = modules_check,
     packages = ['homevent','homevent.modules'],
 	package_dir={'homevent': 'homevent', 'homevent.modules':'modules'},
     scripts = ['scripts/daemon.py'],

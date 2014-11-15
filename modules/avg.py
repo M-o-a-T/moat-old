@@ -15,8 +15,6 @@
 ##  for more details.
 ##
 
-from __future__ import division
-
 """\
 This code does basic timeout handling.
 
@@ -28,6 +26,8 @@ var avg X NAME...
 	- gets the current value
 
 """
+
+from __future__ import division,absolute_import
 
 from homevent.statement import Statement, main_words, AttributedStatement
 from homevent.module import Module

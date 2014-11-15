@@ -15,12 +15,12 @@
 ##  for more details.
 ##
 
-from __future__ import division
-
 """\
 This code contains the framework for watching a device.
 
 """
+
+from __future__ import division,absolute_import
 
 from homevent import TESTING
 from homevent.statement import AttributedStatement, Statement

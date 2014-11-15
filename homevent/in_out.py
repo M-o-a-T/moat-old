@@ -20,6 +20,8 @@ This is the core of external input and output.
 
 """
 
+from __future__ import division,absolute_import
+
 from homevent.statement import Statement, main_words, AttributedStatement,WordAttached
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.base import Name,SName

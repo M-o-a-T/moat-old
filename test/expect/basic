@@ -1,5 +1,5 @@
-NEW: ‹ConditionalWorkSequence:9 (4)›
-   : │  id: 9
+NEW: ‹ConditionalWorkSequence:7 (2)›
+   : │  id: 7
    : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
@@ -8,8 +8,8 @@ EVENT: startup
 .
 END: startup
 .
-NEW: ‹ConditionalWorkSequence:10 (5)›
-   : │  id: 10
+NEW: ‹ConditionalWorkSequence:8 (3)›
+   : │  id: 8
    : │  call count: 0
    : │  EVENT: say¦hello
    : ├1╴SayWorker: TellMe
@@ -18,19 +18,19 @@ NEW: ‹ConditionalWorkSequence:10 (5)›
 EVENT: say¦hello
 .
 RUN: SayWorker: TellMe
- at: ‹ConditionalWorkSequence:10 (5)› (step 1)
+ at: ‹ConditionalWorkSequence:8 (3)› (step 1)
  ev: EVENT: say¦hello
 .
-0 The 'TellMe' worker is saying: hello
+TRACE The 'TellMe' worker is saying: hello
 .
 END: say¦hello
 .
-NEW: ‹ConditionalWorkSequence:11 (5)›
-   : │  id: 11
+NEW: ‹ConditionalWorkSequence:9 (3)›
+   : │  id: 9
    : │  call count: 0
    : │  EVENT: say more¦greeting
-   : ├1╴‹WorkSequence:12 (2)›
-   : │  │  id: 12
+   : ├1╴‹WorkSequence:10 (2)›
+   : │  │  id: 10
    : │  │  call count: 0
    : │  │  EVENT: say more¦greeting
    : │  │  by SayMoreWorker: say something
@@ -40,37 +40,27 @@ NEW: ‹ConditionalWorkSequence:11 (5)›
 .
 EVENT: say more¦greeting
 .
-RUN: ‹WorkSequence:12 (2)›
-   : │  id: 12
+RUN: ‹WorkSequence:10 (2)›
+   : │  id: 10
    : │  call count: 0
    : │  EVENT: say more¦greeting
    : │  by SayMoreWorker: say something
    : ├1╴SayWorker: TellOne
    : └2╴SayWorker: TellTwo
- at: ‹ConditionalWorkSequence:11 (5)› (step 1)
+ at: ‹ConditionalWorkSequence:9 (3)› (step 1)
  ev: EVENT: say more¦greeting
 .
 RUN: SayWorker: TellOne
- at: ‹WorkSequence:12 (2)› (step 1)
+ at: ‹WorkSequence:10 (2)› (step 1)
  ev: EVENT: say more¦greeting
 .
-0 The 'TellOne' worker is saying: greeting
+TRACE The 'TellOne' worker is saying: greeting
 .
 RUN: SayWorker: TellTwo
- at: ‹WorkSequence:12 (2)› (step 2)
+ at: ‹WorkSequence:10 (2)› (step 2)
  ev: EVENT: say more¦greeting
 .
-0 The 'TellTwo' worker is saying: greeting
+TRACE The 'TellTwo' worker is saying: greeting
 .
 END: say more¦greeting
-.
-NEW: ‹ConditionalWorkSequence:15 (6)›
-   : │  id: 15
-   : │  call count: 0
-   : │  EVENT: shutdown
-   : └1╴... done.
-.
-EVENT: shutdown
-.
-END: shutdown
 .

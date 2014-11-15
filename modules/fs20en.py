@@ -15,12 +15,12 @@
 ##  for more details.
 ##
 
-from __future__ import division
-
 """\
 This code implements a listener for energy monitoring.
 
 """
+
+from __future__ import division,absolute_import
 
 from homevent.module import Module
 from homevent.statement import AttributedStatement,Statement, main_words
@@ -35,9 +35,6 @@ from homevent.check import register_condition,unregister_condition
 from homevent.logging import log,TRACE,DEBUG
 from homevent.times import now,humandelta
 from homevent.timeslot import Timeslots,Timeslotted,Timeslot,collision_filter
-
-#from twisted.internet import protocol,defer,reactor
-#from twisted.protocols.basic import _PauseableMixin
 
 PREFIX_ENERGY = 'n'
 

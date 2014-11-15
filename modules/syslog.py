@@ -27,11 +27,13 @@ log
 
 """
 
+from __future__ import division,absolute_import
+
 from homevent import TESTING
 from homevent.module import Module
 from homevent.statement import Statement, main_words
 from homevent import logging
-from homevent.logging import log, BaseLogger, \
+from homevent.logging import log, BaseLogger, LogLevels, \
 	TRACE,DEBUG,INFO,WARN,ERROR,PANIC
 from homevent.twist import fix_exception
 
@@ -119,7 +121,7 @@ class SysLogger(BaseLogger):
 		while True:
 			try:
 				self.socket.send("<%d>HomEvenT: %s%s" % (
-				                  self.facility | local_levels[level],
+				                  self.facility | local_levels[LogLevels[level]],
 								  txt,
 				                  "\0" if not TESTING else "\n"))
 			except socket.error as err:

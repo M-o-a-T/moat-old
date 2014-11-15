@@ -16,7 +16,7 @@
 ##  for more details.
 ##
 
-from twisted.internet import defer
+from homevent import patch;patch()
 from homevent.reactor import ShutdownHandler
 from homevent.module import load_module,Load
 from homevent.statement import main_words
@@ -41,7 +41,6 @@ if not exists module logging: load logging
 if not exists module block: load block
 if not exists module trigger: load trigger
 if not exists module wait: load wait
-if not exists module fs20tr: load fs20tr
 if not exists module fs20switch: load fs20switch
 if not exists module fs20em: load fs20em
 if not exists module fs20en: load fs20en
@@ -94,25 +93,25 @@ list fs20 en gas
 list fs20 tx tempix
 list fs20 tx hygrix
 
-block:
-	if exists file "fs20_recv":
-		fs20 receiver foobar:
-			cmd "./fs20_recv"
-		fs20 sender bar foo:
-			cmd "./fs20_xmit"
-	else:
-		fs20 receiver foobar:
-			cmd "test/fs20_recv"
-		fs20 sender bar foo:
-			cmd "test/fs20_xmit"
+#block:
+#	if exists file "fs20_recv":
+#		fs20 receiver foobar:
+#			cmd "./fs20_recv"
+#		fs20 sender bar foo:
+#			cmd "./fs20_xmit"
+#	else:
+#		fs20 receiver foobar:
+#			cmd "test/fs20_recv"
+#		fs20 sender bar foo:
+#			cmd "test/fs20_xmit"
 #
 wait:
 	for 0.5
 	debug force
-list fs20 receiver
-list fs20 receiver foobar
-list fs20 sender
-list fs20 sender bar foo
+#list fs20 receiver
+#list fs20 receiver foobar
+#list fs20 sender
+#list fs20 sender bar foo
 send fs20 on - baz quux
 send fs20 off - baz quux
 #
@@ -130,20 +129,20 @@ list fs20 en gas
 list fs20 tx
 list fs20 tx tempix
 list fs20 tx hygrix
-async:
-	wait:
-		for 0.1
-		debug force
-	del fs20 receiver foobar
-	wait:
-		for 0.1
-		debug force
-	del fs20 sender bar foo
+#async:
+#	wait:
+#		for 0.1
+#		debug force
+#	del fs20 receiver foobar
+#	wait:
+#		for 0.1
+#		debug force
+#	del fs20 sender bar foo
 wait:
 	for 0.7
 	debug force
-list fs20 receiver
-list fs20 sender
+#list fs20 receiver
+#list fs20 sender
 shutdown
 """
 

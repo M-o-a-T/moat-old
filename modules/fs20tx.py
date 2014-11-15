@@ -15,19 +15,16 @@
 ##  for more details.
 ##
 
-from __future__ import division
-
 """\
 This code implements a listener for environment monitoring (tx2/tx3).
 
 """
 
+from __future__ import division,absolute_import
+
 from homevent.module import Module
 from homevent.statement import AttributedStatement,Statement, main_words
-#from homevent.check import Check,register_condition,unregister_condition
 from homevent.run import simple_event
-#from homevent.event import Event
-#from homevent.context import Context
 from homevent.base import Name,SName
 from homevent.fs20 import recv_handler, PREFIX
 from homevent.collect import Collection,Collected
@@ -35,9 +32,6 @@ from homevent.check import register_condition,unregister_condition
 from homevent.logging import log,TRACE,DEBUG
 from homevent.times import now,humandelta
 from homevent.timeslot import collision_filter
-
-#from twisted.internet import protocol,defer,reactor
-#from twisted.protocols.basic import _PauseableMixin
 
 PREFIX_TX = 'x'
 

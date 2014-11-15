@@ -1,12 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import rpyc
-import sys
-from types import GeneratorType
-
-
-
 ##
 ##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
 ##
@@ -26,6 +20,12 @@ from types import GeneratorType
 This code implements access to collections.
 
 """
+
+from __future__ import division,absolute_import
+
+import rpyc
+import sys
+from types import GeneratorType
 
 from datetime import datetime
 import os
