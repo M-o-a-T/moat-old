@@ -19,7 +19,7 @@
 from __future__ import division,absolute_import
 
 import sys; sys.excepthook = None; del sys
-
+from homevent import patch;patch()
 from homevent.statement import main_words, global_words, Statement, \
 	DoNothingHandler
 from homevent.module import Load,LoadDir,load_module
