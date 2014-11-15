@@ -30,7 +30,7 @@ from homevent.run import process_failure
 from homevent.twist import fix_exception
 from homevent.reactor import ShutdownHandler,mainloop,shut_down
 from homevent.logging import TRACE,DEBUG,INFO,WARN,ERROR,PANIC,\
-	Logger,LogNames, log_level
+	Logger, log_level
 from signal import signal,SIGINT,SIGHUP,SIGQUIT
 import sys
 import os
@@ -62,7 +62,7 @@ class DoLogger(Logger):
 		"""
 	def _slog(self,level,txt):
 		if txt != ".":
-			print >>self.out,LogNames[level]+"> "+txt
+			print >>self.out,level+"> "+txt
 
 
 if opts.debuglevel != "NONE":
