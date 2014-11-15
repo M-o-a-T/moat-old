@@ -1,1 +1,2 @@
 debian/homevent@.service lib/systemd/system/
+debian/homevent.target lib/systemd/system/
