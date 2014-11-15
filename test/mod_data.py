@@ -35,8 +35,8 @@ on foo:
 wait vorher: for 0.1
 trigger foo
 wait nachher: for 0.1
-list event
-list event 5
+list wait
+list wait foo waiter
 wait ende: for 0.3
 
 shutdown
