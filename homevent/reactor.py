@@ -52,45 +52,6 @@ class Events(Collection):
     name = "event"
 Events = Events()
 
-class Shutdown_Worker_1(ExcWorker):
-	"""\
-		This worker counts event runs and makes sure that all are
-		processed."""
-	prio = SYS_PRIO+1
-
-	def does_event(self,ev):
-		return True
-	def does_failure(self,ev):
-		return True
-	def process(self, queue=None,**k):
-		super(Shutdown_Worker_1,self).process(queue=queue,**k)
-		if queue is not None:
-			global active_q_id
-			active_q_id += 1
-			queue.aq_id = active_q_id
-			Events[queue.aq_id] = queue
-	def report(self,*a,**k):
-		return ()
-
-class Shutdown_Worker_2(ExcWorker):
-	"""\
-		This worker counts event runs and makes sure that all are
-		processed."""
-	prio = MAX_PRIO+3
-	def does_event(self,ev):
-		return True
-	def does_failure(self,ev):
-		return True
-	def process(self, event=None,queue=None,**k):
-		super(Shutdown_Worker_2,self).process(queue=queue,**k)
-		if queue is not None:
-			del Events[queue.aq_id]
-			del queue.aq_id
-		if not running and not Events:
-			_stop_mainloop()
-	def report(self,*a,**k):
-		return ()
-
 class Shutdown_Worker(Worker):
 	"""\
 		This worker does the actual shutdown.
@@ -101,6 +62,7 @@ class Shutdown_Worker(Worker):
 	def process(self, **k):
 		super(Shutdown_Worker,self).process(**k)
 		dropConnections()
+		_stop_mainloop()
 	def report(self,*a,**k):
 		yield "shutting down"
 
@@ -108,8 +70,6 @@ def start_up():
 	"""\
 		Code to be called first. The main loop is NOT running.
 		"""
-	register_worker(Shutdown_Worker_1("shutdown first"))
-	register_worker(Shutdown_Worker_2("shutdown last"))
 	register_worker(Shutdown_Worker("shutdown handler"))
 
 	global running
@@ -147,6 +107,7 @@ def _stop_mainloop():
 
 		from homevent.logging import stop_loggers
 		stop_loggers()
+		shut_down()
 
 
 
@@ -196,7 +157,6 @@ shutdown now  ... but does not wait for active events to terminate.
 		if len(event):
 			if tuple(event) == ("now",):
 				_stop_mainloop()
-				shut_down()
 				return
 			raise ValueError(u"'shutdown' does not take arguments (except ‹now›).",event)
 		shut_down()
