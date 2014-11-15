@@ -73,6 +73,14 @@ fs20 em one:
 fs20 em two:
 	code thermo_hygro 3
 
+fs20 tx tempix:
+	code thermo 7
+	scale temperature * +2.3
+
+fs20 tx hygrix:
+	code hygro 7
+	scale humidity * -1.0
+
 set fs20 em temperature 12 one
 set fs20 em temperature 15 two
 
@@ -82,12 +90,34 @@ list fs20 em two
 list fs20 en
 list fs20 en gas
 
+list fs20 tx tempix
+list fs20 tx hygrix
+
+block:
+	if exists file "fs20_recv":
+		fs20 receiver foobar:
+			cmd "./fs20_recv"
+		fs20 sender bar foo:
+			cmd "./fs20_xmit"
+	else:
+		fs20 receiver foobar:
+			cmd "test/fs20_recv"
+		fs20 sender bar foo:
+			cmd "test/fs20_xmit"
+#
 wait:
 	for 0.5
 	debug force
-#send fs20 on - baz quux
-#send fs20 off - baz quux
+list fs20 receiver
+list fs20 receiver foobar
+list fs20 sender
+list fs20 sender bar foo
+send fs20 on - baz quux
+send fs20 off - baz quux
 #
+wait:
+	for 3
+	debug force
 wait:
 	for 0.1
 	debug force
@@ -96,6 +126,23 @@ list fs20 em one
 list fs20 em two
 list fs20 en
 list fs20 en gas
+list fs20 tx
+list fs20 tx tempix
+list fs20 tx hygrix
+async:
+	wait:
+		for 0.1
+		debug force
+	del fs20 receiver foobar
+	wait:
+		for 0.1
+		debug force
+	del fs20 sender bar foo
+wait:
+	for 0.7
+	debug force
+list fs20 receiver
+list fs20 sender
 shutdown
 """
 
