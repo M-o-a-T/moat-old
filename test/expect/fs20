@@ -5,10 +5,10 @@ NEW: ‹ConditionalWorkSequence:7 (4)›
    : └1╴... done.
 EVENT: startup
 END: startup
-0 locking +WAIT 1 start job ‹Collected Parser:n1›
-0 locking -WAIT 1 start job ‹Collected Parser:n1›
-0 locking +WAIT 2 start job <homevent.tokize.tokizer obj>
-0 locking -WAIT 2 start job <homevent.tokize.tokizer obj>
+TRACE locking +WAIT 1 start job ‹Collected Parser:n1›
+TRACE locking -WAIT 1 start job ‹Collected Parser:n1›
+TRACE locking +WAIT 2 start job <homevent.tokize.tokizer obj>
+TRACE locking -WAIT 2 start job <homevent.tokize.tokizer obj>
 NEW: ‹ConditionalWorkSequence:8 (4)›
    : │  id: 8
    : │  call count: 0
@@ -127,11 +127,11 @@ groupname: hygro
 code: 7
 offset_humidity: -1.0
 .
-1 FS20 started foobar
-1 *** added bar¦foo ‹Collected FS20xmit:bar¦foo›
-1 FS20 started bar¦foo
-0 locking +WAIT 3 start job ‹Waiter _wait¦1 ??›
-0 locking -WAIT 3 start job ‹Waiter _wait¦1 ??›
+DEBUG FS20 started foobar
+DEBUG *** added bar¦foo ‹Collected FS20xmit:bar¦foo›
+DEBUG FS20 started bar¦foo
+TRACE locking +WAIT 3 start job ‹Waiter _wait¦1 ??›
+TRACE locking -WAIT 3 start job ‹Waiter _wait¦1 ??›
 NEW: ‹ConditionalWorkSequence:19 (4)›
    : │  id: 19
    : │  call count: 0
@@ -175,8 +175,8 @@ Traceback (most recent call last):
     for r in super(FS20recv,self).list():
 TypeError: super(type, obj): obj must be an instance or subtype of type
 .
-0 locking +WAIT 4 start job ‹Waiter _wait¦2 ??›
-0 locking -WAIT 4 start job ‹Waiter _wait¦2 ??›
+TRACE locking +WAIT 4 start job ‹Waiter _wait¦2 ??›
+TRACE locking -WAIT 4 start job ‹Waiter _wait¦2 ??›
 NEW: ‹ConditionalWorkSequence:22 (4)›
    : │  id: 22
    : │  call count: 0
@@ -184,8 +184,8 @@ NEW: ‹ConditionalWorkSequence:22 (4)›
    : └1╴... done.
 EVENT: wait¦start¦3.6¦_wait¦2
 END: wait¦start¦3.6¦_wait¦2
-1 FS20 sender output *** RECV f8c8d131143 *** bar¦foo
-1 FS20 sender output *** RECV f8c8d130032 *** bar¦foo
+DEBUG FS20 sender output *** RECV f8c8d131143 *** bar¦foo
+DEBUG FS20 sender output *** RECV f8c8d130032 *** bar¦foo
 NEW: ‹ConditionalWorkSequence:23 (4)›
    : │  id: 23
    : │  call count: 0
@@ -193,15 +193,15 @@ NEW: ‹ConditionalWorkSequence:23 (4)›
    : └1╴... done.
 EVENT: fs20¦error¦Dies ist eine Test-Fehlermeldung¦foobar
 END: fs20¦error¦Dies ist eine Test-Fehlermeldung¦foobar
-1 fs20 +2 wait
-1 fs20 Wait until 2.0  -- now: 0.0 :: wait
-0 locking +WAIT 5 Fake timer wait for 2.0
-0 locking -WAIT 5 Fake timer wait for 2.0
-1 fs20 +2.1 switch OK
-1 fs20 Wait until 2.1  -- now: 2.0 :: switch OK
-0 locking +WAIT 6 Fake timer wait for 0.1
-0 locking -WAIT 6 Fake timer wait for 0.1
-1 fs20 f8c8d131244
+DEBUG fs20 +2 wait
+DEBUG fs20 Wait until 2.0  -- now: 0.0 :: wait
+TRACE locking +WAIT 5 Fake timer wait for 2.0
+TRACE locking -WAIT 5 Fake timer wait for 2.0
+DEBUG fs20 +2.1 switch OK
+DEBUG fs20 Wait until 2.1  -- now: 2.0 :: switch OK
+TRACE locking +WAIT 6 Fake timer wait for 0.1
+TRACE locking -WAIT 6 Fake timer wait for 0.1
+DEBUG fs20 f8c8d131244
 NEW: ‹ConditionalWorkSequence:24 (4)›
    : │  id: 24
    : │  call count: 0
@@ -209,11 +209,11 @@ NEW: ‹ConditionalWorkSequence:24 (4)›
    : └1╴... done.
 EVENT: fs20¦state¦toggle¦-¦baz¦quux
 END: fs20¦state¦toggle¦-¦baz¦quux
-1 fs20 +2.2 switch unknown function
-1 fs20 Wait until 2.2  -- now: 2.1 :: switch unknown function
-0 locking +WAIT 7 Fake timer wait for 0.1
-0 locking -WAIT 7 Fake timer wait for 0.1
-1 fs20 f8c8d131F51
+DEBUG fs20 +2.2 switch unknown function
+DEBUG fs20 Wait until 2.2  -- now: 2.1 :: switch unknown function
+TRACE locking +WAIT 7 Fake timer wait for 0.1
+TRACE locking -WAIT 7 Fake timer wait for 0.1
+DEBUG fs20 f8c8d131F51
 NEW: ‹ConditionalWorkSequence:25 (4)›
    : │  id: 25
    : │  call count: 0
@@ -221,11 +221,11 @@ NEW: ‹ConditionalWorkSequence:25 (4)›
    : └1╴... done.
 EVENT: fs20¦unknown¦function¦31413142¦31¦131f
 END: fs20¦unknown¦function¦31413142¦31¦131f
-1 fs20 +2.3 switch housecode not found
-1 fs20 Wait until 2.3  -- now: 2.2 :: switch housecode not found
-0 locking +WAIT 8 Fake timer wait for 0.1
-0 locking -WAIT 8 Fake timer wait for 0.1
-1 fs20 f8c89131240
+DEBUG fs20 +2.3 switch housecode not found
+DEBUG fs20 Wait until 2.3  -- now: 2.2 :: switch housecode not found
+TRACE locking +WAIT 8 Fake timer wait for 0.1
+TRACE locking -WAIT 8 Fake timer wait for 0.1
+DEBUG fs20 f8c89131240
 NEW: ‹ConditionalWorkSequence:26 (4)›
    : │  id: 26
    : │  call count: 0
@@ -233,11 +233,11 @@ NEW: ‹ConditionalWorkSequence:26 (4)›
    : └1╴... done.
 EVENT: fs20¦unknown¦31413132¦6¦8c89131240
 END: fs20¦unknown¦31413132¦6¦8c89131240
-1 fs20 +2.4 switch device not found
-1 fs20 Wait until 2.4  -- now: 2.35 :: switch device not found
-0 locking +WAIT 9 Fake timer wait for 0.05
-0 locking -WAIT 9 Fake timer wait for 0.05
-1 fs20 f8c8d141245
+DEBUG fs20 +2.4 switch device not found
+DEBUG fs20 Wait until 2.4  -- now: 2.35 :: switch device not found
+TRACE locking +WAIT 9 Fake timer wait for 0.05
+TRACE locking -WAIT 9 Fake timer wait for 0.05
+DEBUG fs20 f8c8d141245
 NEW: ‹ConditionalWorkSequence:27 (4)›
    : │  id: 27
    : │  call count: 0
@@ -245,11 +245,11 @@ NEW: ‹ConditionalWorkSequence:27 (4)›
    : └1╴... done.
 EVENT: fs20¦unknown¦device¦31413142¦1221¦1412
 END: fs20¦unknown¦device¦31413142¦1221¦1412
-1 fs20 +2.5 switch bad checksum
-1 fs20 Wait until 2.5  -- now: 2.4 :: switch bad checksum
-0 locking +WAIT 10 Fake timer wait for 0.1
-0 locking -WAIT 10 Fake timer wait for 0.1
-1 fs20 f8c8d131245
+DEBUG fs20 +2.5 switch bad checksum
+DEBUG fs20 Wait until 2.5  -- now: 2.4 :: switch bad checksum
+TRACE locking +WAIT 10 Fake timer wait for 0.1
+TRACE locking -WAIT 10 Fake timer wait for 0.1
+DEBUG fs20 f8c8d131245
 NEW: ‹ConditionalWorkSequence:28 (4)›
    : │  id: 28
    : │  call count: 0
@@ -257,11 +257,11 @@ NEW: ‹ConditionalWorkSequence:28 (4)›
    : └1╴... done.
 EVENT: fs20¦unknown¦31413142¦7¦8c8d131245
 END: fs20¦unknown¦31413142¦7¦8c8d131245
-1 fs20 +3.1 env bad checksum 1
-1 fs20 Wait until 3.1  -- now: 2.5 :: env bad checksum 1
-0 locking +WAIT 11 Fake timer wait for 0.6
-0 locking -WAIT 11 Fake timer wait for 0.6
-1 fs20 e0f01030405
+DEBUG fs20 +3.1 env bad checksum 1
+DEBUG fs20 Wait until 3.1  -- now: 2.5 :: env bad checksum 1
+TRACE locking +WAIT 11 Fake timer wait for 0.6
+TRACE locking -WAIT 11 Fake timer wait for 0.6
+DEBUG fs20 e0f01030405
 NEW: ‹ConditionalWorkSequence:29 (4)›
    : │  id: 29
    : │  call count: 0
@@ -269,11 +269,11 @@ NEW: ‹ConditionalWorkSequence:29 (4)›
    : └1╴... done.
 EVENT: fs20¦em¦checksum1¦13¦4¦f13
 END: fs20¦em¦checksum1¦13¦4¦f13
-1 fs20 +3.2 env bad checksum 2
-1 fs20 Wait until 3.2  -- now: 3.1 :: env bad checksum 2
-0 locking +WAIT 12 Fake timer wait for 0.1
-0 locking -WAIT 12 Fake timer wait for 0.1
-1 fs20 e0f01030d06
+DEBUG fs20 +3.2 env bad checksum 2
+DEBUG fs20 Wait until 3.2  -- now: 3.1 :: env bad checksum 2
+TRACE locking +WAIT 12 Fake timer wait for 0.1
+TRACE locking -WAIT 12 Fake timer wait for 0.1
+DEBUG fs20 e0f01030d06
 NEW: ‹ConditionalWorkSequence:30 (4)›
    : │  id: 30
    : │  call count: 0
@@ -281,11 +281,11 @@ NEW: ‹ConditionalWorkSequence:30 (4)›
    : └1╴... done.
 EVENT: fs20¦em¦checksum2¦5¦6¦f13
 END: fs20¦em¦checksum2¦5¦6¦f13
-1 fs20 +3.3 env unknown devtype
-1 fs20 Wait until 3.3  -- now: 3.2 :: env unknown devtype
-0 locking +WAIT 13 Fake timer wait for 0.1
-0 locking -WAIT 13 Fake timer wait for 0.1
-1 fs20 e0f01030d05
+DEBUG fs20 +3.3 env unknown devtype
+DEBUG fs20 Wait until 3.3  -- now: 3.2 :: env unknown devtype
+TRACE locking +WAIT 13 Fake timer wait for 0.1
+TRACE locking -WAIT 13 Fake timer wait for 0.1
+DEBUG fs20 e0f01030d05
 NEW: ‹ConditionalWorkSequence:31 (4)›
    : │  id: 31
    : │  call count: 0
@@ -293,11 +293,11 @@ NEW: ‹ConditionalWorkSequence:31 (4)›
    : └1╴... done.
 EVENT: fs20¦unknown¦em¦15¦13
 END: fs20¦unknown¦em¦15¦13
-1 fs20 +3.4 env bad length
-1 fs20 Wait until 3.4  -- now: 3.35 :: env bad length
-0 locking +WAIT 14 Fake timer wait for 0.05
-0 locking -WAIT 14 Fake timer wait for 0.05
-1 fs20 e010103030d
+DEBUG fs20 +3.4 env bad length
+DEBUG fs20 Wait until 3.4  -- now: 3.35 :: env bad length
+TRACE locking +WAIT 14 Fake timer wait for 0.05
+TRACE locking -WAIT 14 Fake timer wait for 0.05
+DEBUG fs20 e010103030d
 NEW: ‹ConditionalWorkSequence:32 (4)›
    : │  id: 32
    : │  call count: 0
@@ -305,11 +305,11 @@ NEW: ‹ConditionalWorkSequence:32 (4)›
    : └1╴... done.
 EVENT: fs20¦em¦bad_length¦thermo_hygro¦2¦3
 END: fs20¦em¦bad_length¦thermo_hygro¦2¦3
-1 fs20 +3.5 env unknown device
-1 fs20 Wait until 3.5  -- now: 3.4 :: env unknown device
-0 locking +WAIT 15 Fake timer wait for 0.1
-0 locking -WAIT 15 Fake timer wait for 0.1
-1 fs20 e01020302010605040401
+DEBUG fs20 +3.5 env unknown device
+DEBUG fs20 Wait until 3.5  -- now: 3.4 :: env unknown device
+TRACE locking +WAIT 15 Fake timer wait for 0.1
+TRACE locking -WAIT 15 Fake timer wait for 0.1
+DEBUG fs20 e01020302010605040401
 NEW: ‹ConditionalWorkSequence:33 (4)›
    : │  id: 33
    : │  call count: 0
@@ -317,11 +317,11 @@ NEW: ‹ConditionalWorkSequence:33 (4)›
    : └1╴... done.
 EVENT: fs20¦unknown¦em¦unregistered¦thermo_hygro¦2¦temperature¦12.3¦humidity¦45.6
 END: fs20¦unknown¦em¦unregistered¦thermo_hygro¦2¦temperature¦12.3¦humidity¦45.6
-1 fs20 +3.6 env OK: temphumid inside
-1 fs20 Wait until 3.6  -- now: 3.5 :: env OK: temphumid inside
-0 locking +WAIT 16 Fake timer wait for 0.1
-0 locking -WAIT 16 Fake timer wait for 0.1
-1 fs20 e01010302010605040703
+DEBUG fs20 +3.6 env OK: temphumid inside
+DEBUG fs20 Wait until 3.6  -- now: 3.5 :: env OK: temphumid inside
+TRACE locking +WAIT 16 Fake timer wait for 0.1
+TRACE locking -WAIT 16 Fake timer wait for 0.1
+DEBUG fs20 e01010302010605040703
 NEW: ‹ConditionalWorkSequence:34 (4)›
    : │  id: 34
    : │  call count: 0
@@ -336,11 +336,11 @@ NEW: ‹ConditionalWorkSequence:35 (4)›
    : └1╴... done.
 EVENT: fs20¦em¦humidity¦45.6¦inside
 END: fs20¦em¦humidity¦45.6¦inside
-1 fs20 +3.7 env dup: smackmiddle
-1 fs20 Wait until 3.7  -- now: 3.6 :: env dup: smackmiddle
-0 locking +WAIT 17 Fake timer wait for 0.1
-0 locking -WAIT 17 Fake timer wait for 0.1
-1 fs20 e0103050301040302000B
+DEBUG fs20 +3.7 env dup: smackmiddle
+DEBUG fs20 Wait until 3.7  -- now: 3.6 :: env dup: smackmiddle
+TRACE locking +WAIT 17 Fake timer wait for 0.1
+TRACE locking -WAIT 17 Fake timer wait for 0.1
+DEBUG fs20 e0103050301040302000B
 NEW: ‹ConditionalWorkSequence:36 (4)›
    : │  id: 36
    : │  call count: 0
@@ -348,11 +348,11 @@ NEW: ‹ConditionalWorkSequence:36 (4)›
    : └1╴... done.
 EVENT: fs20¦conflict¦em¦untimed¦thermo_hygro¦3¦temperature¦13.5¦humidity¦23.4
 END: fs20¦conflict¦em¦untimed¦thermo_hygro¦3¦temperature¦13.5¦humidity¦23.4
-1 fs20 +3.8 env OK: temphumid one
-1 fs20 Wait until 3.8  -- now: 3.7 :: env OK: temphumid one
-0 locking +WAIT 18 Fake timer wait for 0.1
-0 locking -WAIT 18 Fake timer wait for 0.1
-1 fs20 e0103030201040302070F
+DEBUG fs20 +3.8 env OK: temphumid one
+DEBUG fs20 Wait until 3.8  -- now: 3.7 :: env OK: temphumid one
+TRACE locking +WAIT 18 Fake timer wait for 0.1
+TRACE locking -WAIT 18 Fake timer wait for 0.1
+DEBUG fs20 e0103030201040302070F
 NEW: ‹ConditionalWorkSequence:37 (4)›
    : │  id: 37
    : │  call count: 0
@@ -367,11 +367,11 @@ NEW: ‹ConditionalWorkSequence:38 (4)›
    : └1╴... done.
 EVENT: fs20¦em¦humidity¦23.4¦one
 END: fs20¦em¦humidity¦23.4¦one
-1 fs20 +3.9 env OK: temphumid one also
-1 fs20 Wait until 3.9  -- now: 3.85 :: env OK: temphumid one also
-0 locking +WAIT 19 Fake timer wait for 0.05
-0 locking -WAIT 19 Fake timer wait for 0.05
-1 fs20 m31234123f7
+DEBUG fs20 +3.9 env OK: temphumid one also
+DEBUG fs20 Wait until 3.9  -- now: 3.85 :: env OK: temphumid one also
+TRACE locking +WAIT 19 Fake timer wait for 0.05
+TRACE locking -WAIT 19 Fake timer wait for 0.05
+DEBUG fs20 m31234123f7
 NEW: ‹ConditionalWorkSequence:39 (4)›
    : │  id: 39
    : │  call count: 0
@@ -386,11 +386,11 @@ NEW: ‹ConditionalWorkSequence:40 (4)›
    : └1╴... done.
 EVENT: fs20¦em¦humidity¦23.4¦one
 END: fs20¦em¦humidity¦23.4¦one
-1 fs20 +4.0 energy bad_length
-1 fs20 Wait until 4.0  -- now: 3.9 :: energy bad_length
-0 locking +WAIT 20 Fake timer wait for 0.1
-0 locking -WAIT 20 Fake timer wait for 0.1
-1 fs20 n03095517DE000017DE
+DEBUG fs20 +4.0 energy bad_length
+DEBUG fs20 Wait until 4.0  -- now: 3.9 :: energy bad_length
+TRACE locking +WAIT 20 Fake timer wait for 0.1
+TRACE locking -WAIT 20 Fake timer wait for 0.1
+DEBUG fs20 n03095517DE000017DE
 NEW: ‹ConditionalWorkSequence:41 (4)›
    : │  id: 41
    : │  call count: 0
@@ -398,11 +398,11 @@ NEW: ‹ConditionalWorkSequence:41 (4)›
    : └1╴... done.
 EVENT: fs20¦en¦bad_length¦counter¦9¦395517de0017de
 END: fs20¦en¦bad_length¦counter¦9¦395517de0017de
-1 fs20 +4.1 energy bad_checksum
-1 fs20 Wait until 4.1  -- now: 4.0 :: energy bad_checksum
-0 locking +WAIT 21 Fake timer wait for 0.1
-0 locking -WAIT 21 Fake timer wait for 0.1
-1 fs20 n03095517DE000017DE5E
+DEBUG fs20 +4.1 energy bad_checksum
+DEBUG fs20 Wait until 4.1  -- now: 4.0 :: energy bad_checksum
+TRACE locking +WAIT 21 Fake timer wait for 0.1
+TRACE locking -WAIT 21 Fake timer wait for 0.1
+DEBUG fs20 n03095517DE000017DE5E
 NEW: ‹ConditionalWorkSequence:42 (4)›
    : │  id: 42
    : │  call count: 0
@@ -410,11 +410,11 @@ NEW: ‹ConditionalWorkSequence:42 (4)›
    : └1╴... done.
 EVENT: fs20¦en¦checksum¦95¦94¦395517de0017de
 END: fs20¦en¦checksum¦95¦94¦395517de0017de
-1 fs20 +4.2 energy unknown_type
-1 fs20 Wait until 4.2  -- now: 4.1 :: energy unknown_type
-0 locking +WAIT 22 Fake timer wait for 0.1
-0 locking -WAIT 22 Fake timer wait for 0.1
-1 fs20 n02095517DE000017DE5E
+DEBUG fs20 +4.2 energy unknown_type
+DEBUG fs20 Wait until 4.2  -- now: 4.1 :: energy unknown_type
+TRACE locking +WAIT 22 Fake timer wait for 0.1
+TRACE locking -WAIT 22 Fake timer wait for 0.1
+DEBUG fs20 n02095517DE000017DE5E
 NEW: ‹ConditionalWorkSequence:43 (4)›
    : │  id: 43
    : │  call count: 0
@@ -422,11 +422,11 @@ NEW: ‹ConditionalWorkSequence:43 (4)›
    : └1╴... done.
 EVENT: fs20¦unknown¦en¦2¦295517de0017de
 END: fs20¦unknown¦en¦2¦295517de0017de
-1 fs20 +4.3 energy unknown_type
-1 fs20 Wait until 4.3  -- now: 4.2 :: energy unknown_type
-0 locking +WAIT 23 Fake timer wait for 0.1
-0 locking -WAIT 23 Fake timer wait for 0.1
-1 fs20 n030A5517DE000017DE5C
+DEBUG fs20 +4.3 energy unknown_type
+DEBUG fs20 Wait until 4.3  -- now: 4.2 :: energy unknown_type
+TRACE locking +WAIT 23 Fake timer wait for 0.1
+TRACE locking -WAIT 23 Fake timer wait for 0.1
+DEBUG fs20 n030A5517DE000017DE5C
 NEW: ‹ConditionalWorkSequence:44 (4)›
    : │  id: 44
    : │  call count: 0
@@ -434,16 +434,16 @@ NEW: ‹ConditionalWorkSequence:44 (4)›
    : └1╴... done.
 EVENT: fs20¦unknown¦en¦unregistered¦gas_meter¦10¦counter¦56855
 END: fs20¦unknown¦en¦unregistered¦gas_meter¦10¦counter¦56855
-1 fs20 +4.4 energy first
-1 fs20 Wait until 4.4  -- now: 4.35 :: energy first
-0 locking +WAIT 24 Fake timer wait for 0.05
-0 locking -WAIT 24 Fake timer wait for 0.05
-1 fs20 n03095517DE000017DE5F
-1 fs20 +4.5 energy second
-1 fs20 Wait until 4.5  -- now: 4.4 :: energy second
-0 locking +WAIT 25 Fake timer wait for 0.1
-0 locking -WAIT 25 Fake timer wait for 0.1
-1 fs20 n03095617DF000017DF5C
+DEBUG fs20 +4.4 energy first
+DEBUG fs20 Wait until 4.4  -- now: 4.35 :: energy first
+TRACE locking +WAIT 24 Fake timer wait for 0.05
+TRACE locking -WAIT 24 Fake timer wait for 0.05
+DEBUG fs20 n03095517DE000017DE5F
+DEBUG fs20 +4.5 energy second
+DEBUG fs20 Wait until 4.5  -- now: 4.4 :: energy second
+TRACE locking +WAIT 25 Fake timer wait for 0.1
+TRACE locking -WAIT 25 Fake timer wait for 0.1
+DEBUG fs20 n03095617DF000017DF5C
 NEW: ‹ConditionalWorkSequence:45 (4)›
    : │  id: 45
    : │  call count: 0
@@ -451,11 +451,11 @@ NEW: ‹ConditionalWorkSequence:45 (4)›
    : └1╴... done.
 EVENT: fs20¦en¦counter¦256¦gas
 END: fs20¦en¦counter¦256¦gas
-1 fs20 +4.6 energy third
-1 fs20 Wait until 4.6  -- now: 4.5 :: energy third
-0 locking +WAIT 26 Fake timer wait for 0.1
-0 locking -WAIT 26 Fake timer wait for 0.1
-1 fs20 n03095617DF000017DF5C
+DEBUG fs20 +4.6 energy third
+DEBUG fs20 Wait until 4.6  -- now: 4.5 :: energy third
+TRACE locking +WAIT 26 Fake timer wait for 0.1
+TRACE locking -WAIT 26 Fake timer wait for 0.1
+DEBUG fs20 n03095617DF000017DF5C
 NEW: ‹ConditionalWorkSequence:46 (4)›
    : │  id: 46
    : │  call count: 0
@@ -463,11 +463,11 @@ NEW: ‹ConditionalWorkSequence:46 (4)›
    : └1╴... done.
 EVENT: fs20¦en¦counter¦0¦gas
 END: fs20¦en¦counter¦0¦gas
-1 fs20 +5.0 th3temp bad_length
-1 fs20 Wait until 5.0  -- now: 4.6 :: th3temp bad_length
-0 locking +WAIT 27 Fake timer wait for 0.4
-0 locking -WAIT 27 Fake timer wait for 0.4
-1 fs20 xB00E73173D
+DEBUG fs20 +5.0 th3temp bad_length
+DEBUG fs20 Wait until 5.0  -- now: 4.6 :: th3temp bad_length
+TRACE locking +WAIT 27 Fake timer wait for 0.4
+TRACE locking -WAIT 27 Fake timer wait for 0.4
+DEBUG fs20 xB00E73173D
 NEW: ‹ConditionalWorkSequence:47 (4)›
    : │  id: 47
    : │  call count: 0
@@ -475,11 +475,11 @@ NEW: ‹ConditionalWorkSequence:47 (4)›
    : └1╴... done.
 EVENT: fs20¦tx¦bad_length¦9¦b00e73173
 END: fs20¦tx¦bad_length¦9¦b00e73173
-1 fs20 +5.1 th3temp bad_checksum
-1 fs20 Wait until 5.1  -- now: 5.0 :: th3temp bad_checksum
-0 locking +WAIT 28 Fake timer wait for 0.1
-0 locking -WAIT 28 Fake timer wait for 0.1
-1 fs20 xA00E73173C
+DEBUG fs20 +5.1 th3temp bad_checksum
+DEBUG fs20 Wait until 5.1  -- now: 5.0 :: th3temp bad_checksum
+TRACE locking +WAIT 28 Fake timer wait for 0.1
+TRACE locking -WAIT 28 Fake timer wait for 0.1
+DEBUG fs20 xA00E73173C
 NEW: ‹ConditionalWorkSequence:48 (4)›
    : │  id: 48
    : │  call count: 0
@@ -487,11 +487,11 @@ NEW: ‹ConditionalWorkSequence:48 (4)›
    : └1╴... done.
 EVENT: fs20¦tx¦checksum¦45¦12¦a00e73173c
 END: fs20¦tx¦checksum¦45¦12¦a00e73173c
-1 fs20 +5.2 th3temp bad_repeat
-1 fs20 Wait until 5.2  -- now: 5.1 :: th3temp bad_repeat
-0 locking +WAIT 29 Fake timer wait for 0.1
-0 locking -WAIT 29 Fake timer wait for 0.1
-1 fs20 xA00E73137D
+DEBUG fs20 +5.2 th3temp bad_repeat
+DEBUG fs20 Wait until 5.2  -- now: 5.1 :: th3temp bad_repeat
+TRACE locking +WAIT 29 Fake timer wait for 0.1
+TRACE locking -WAIT 29 Fake timer wait for 0.1
+DEBUG fs20 xA00E73137D
 NEW: ‹ConditionalWorkSequence:49 (4)›
    : │  id: 49
    : │  call count: 0
@@ -499,11 +499,11 @@ NEW: ‹ConditionalWorkSequence:49 (4)›
    : └1╴... done.
 EVENT: fs20¦tx¦bad_repeat¦thermo¦7¦e73137
 END: fs20¦tx¦bad_repeat¦thermo¦7¦e73137
-1 fs20 +5.3 th3temp wrong_length
-1 fs20 Wait until 5.3  -- now: 5.2 :: th3temp wrong_length
-0 locking +WAIT 30 Fake timer wait for 0.1
-0 locking -WAIT 30 Fake timer wait for 0.1
-1 fs20 x90E83173D
+DEBUG fs20 +5.3 th3temp wrong_length
+DEBUG fs20 Wait until 5.3  -- now: 5.2 :: th3temp wrong_length
+TRACE locking +WAIT 30 Fake timer wait for 0.1
+TRACE locking -WAIT 30 Fake timer wait for 0.1
+DEBUG fs20 x90E83173D
 NEW: ‹ConditionalWorkSequence:50 (4)›
    : │  id: 50
    : │  call count: 0
@@ -511,11 +511,11 @@ NEW: ‹ConditionalWorkSequence:50 (4)›
    : └1╴... done.
 EVENT: fs20¦tx¦bad_length¦thermo¦6¦83173
 END: fs20¦tx¦bad_length¦thermo¦6¦83173
-1 fs20 +5.4 th3temp unknown_code
-1 fs20 Wait until 5.4  -- now: 5.35 :: th3temp unknown_code
-0 locking +WAIT 31 Fake timer wait for 0.05
-0 locking -WAIT 31 Fake timer wait for 0.05
-1 fs20 xA0E073173D
+DEBUG fs20 +5.4 th3temp unknown_code
+DEBUG fs20 Wait until 5.4  -- now: 5.35 :: th3temp unknown_code
+TRACE locking +WAIT 31 Fake timer wait for 0.05
+TRACE locking -WAIT 31 Fake timer wait for 0.05
+DEBUG fs20 xA0E073173D
 NEW: ‹ConditionalWorkSequence:51 (4)›
    : │  id: 51
    : │  call count: 0
@@ -523,11 +523,11 @@ NEW: ‹ConditionalWorkSequence:51 (4)›
    : └1╴... done.
 EVENT: fs20¦unknown¦tx¦unregistered¦thermo¦112¦temperature¦23.1
 END: fs20¦unknown¦tx¦unregistered¦thermo¦112¦temperature¦23.1
-1 fs20 +5.5 th3temp 23_1deg
-1 fs20 Wait until 5.5  -- now: 5.4 :: th3temp 23_1deg
-0 locking +WAIT 32 Fake timer wait for 0.1
-0 locking -WAIT 32 Fake timer wait for 0.1
-1 fs20 xA00E73173D
+DEBUG fs20 +5.5 th3temp 23_1deg
+DEBUG fs20 Wait until 5.5  -- now: 5.4 :: th3temp 23_1deg
+TRACE locking +WAIT 32 Fake timer wait for 0.1
+TRACE locking -WAIT 32 Fake timer wait for 0.1
+DEBUG fs20 xA00E73173D
 NEW: ‹ConditionalWorkSequence:52 (4)›
    : │  id: 52
    : │  call count: 0
@@ -535,11 +535,11 @@ NEW: ‹ConditionalWorkSequence:52 (4)›
    : └1╴... done.
 EVENT: fs20¦tx¦temperature¦25.4¦tempix
 END: fs20¦tx¦temperature¦25.4¦tempix
-1 fs20 +5.6 th3hydro 52_0pct
-1 fs20 Wait until 5.6  -- now: 5.5 :: th3hydro 52_0pct
-0 locking +WAIT 33 Fake timer wait for 0.1
-0 locking -WAIT 33 Fake timer wait for 0.1
-1 fs20 xAE0F520525
+DEBUG fs20 +5.6 th3hydro 52_0pct
+DEBUG fs20 Wait until 5.6  -- now: 5.5 :: th3hydro 52_0pct
+TRACE locking +WAIT 33 Fake timer wait for 0.1
+TRACE locking -WAIT 33 Fake timer wait for 0.1
+DEBUG fs20 xAE0F520525
 NEW: ‹ConditionalWorkSequence:53 (4)›
    : │  id: 53
    : │  call count: 0
@@ -554,8 +554,8 @@ NEW: ‹ConditionalWorkSequence:54 (4)›
    : └1╴... done.
 EVENT: wait¦done¦3.6¦_wait¦2
 END: wait¦done¦3.6¦_wait¦2
-0 locking +WAIT 34 start job ‹Waiter _wait¦3 ??›
-0 locking -WAIT 34 start job ‹Waiter _wait¦3 ??›
+TRACE locking +WAIT 34 start job ‹Waiter _wait¦3 ??›
+TRACE locking -WAIT 34 start job ‹Waiter _wait¦3 ??›
 NEW: ‹ConditionalWorkSequence:55 (4)›
    : │  id: 55
    : │  call count: 0
@@ -616,8 +616,8 @@ last: now (2003-04-05 06:07:13.60)
 last_humidity: 52.0
 offset_humidity: -1.0
 .
-0 locking +WAIT 35 start job ‹Waiter _wait¦6 ??›
-0 locking -WAIT 35 start job ‹Waiter _wait¦6 ??›
+TRACE locking +WAIT 35 start job ‹Waiter _wait¦6 ??›
+TRACE locking -WAIT 35 start job ‹Waiter _wait¦6 ??›
 NEW: ‹ConditionalWorkSequence:57 (4)›
    : │  id: 57
    : │  call count: 0
@@ -625,8 +625,8 @@ NEW: ‹ConditionalWorkSequence:57 (4)›
    : └1╴... done.
 EVENT: wait¦start¦4.4¦_wait¦6
 END: wait¦start¦4.4¦_wait¦6
-0 locking +WAIT 36 start job ‹Waiter _wait¦4 ??›
-0 locking -WAIT 36 start job ‹Waiter _wait¦4 ??›
+TRACE locking +WAIT 36 start job ‹Waiter _wait¦4 ??›
+TRACE locking -WAIT 36 start job ‹Waiter _wait¦4 ??›
 NEW: ‹ConditionalWorkSequence:58 (4)›
    : │  id: 58
    : │  call count: 0
@@ -641,8 +641,8 @@ NEW: ‹ConditionalWorkSequence:59 (4)›
    : └1╴... done.
 EVENT: wait¦done¦3.8¦_wait¦4
 END: wait¦done¦3.8¦_wait¦4
-0 locking +WAIT 37 start job ‹Waiter _wait¦5 ??›
-0 locking -WAIT 37 start job ‹Waiter _wait¦5 ??›
+TRACE locking +WAIT 37 start job ‹Waiter _wait¦5 ??›
+TRACE locking -WAIT 37 start job ‹Waiter _wait¦5 ??›
 NEW: ‹ConditionalWorkSequence:60 (4)›
    : │  id: 60
    : │  call count: 0
@@ -650,8 +650,8 @@ NEW: ‹ConditionalWorkSequence:60 (4)›
    : └1╴... done.
 EVENT: wait¦start¦3.9¦_wait¦5
 END: wait¦start¦3.9¦_wait¦5
-1 FS20 ending foobar
-1 FS20 ended None foobar
+DEBUG FS20 ending foobar
+DEBUG FS20 ended None foobar
 NEW: ‹ConditionalWorkSequence:61 (4)›
    : │  id: 61
    : │  call count: 0
@@ -659,8 +659,8 @@ NEW: ‹ConditionalWorkSequence:61 (4)›
    : └1╴... done.
 EVENT: wait¦done¦3.9¦_wait¦5
 END: wait¦done¦3.9¦_wait¦5
-1 FS20 ending bar¦foo
-1 FS20 ended None bar¦foo
+DEBUG FS20 ending bar¦foo
+DEBUG FS20 ended None bar¦foo
 NEW: ‹ConditionalWorkSequence:62 (4)›
    : │  id: 62
    : │  call count: 0
@@ -670,8 +670,8 @@ EVENT: wait¦done¦4.4¦_wait¦6
 END: wait¦done¦4.4¦_wait¦6
 .
 .
-0 locking +WAIT 38 kill job <homevent.tokize.tokizer obj>
-0 locking -WAIT 38 kill job <homevent.tokize.tokizer obj>
+TRACE locking +WAIT 38 kill job <homevent.tokize.tokizer obj>
+TRACE locking -WAIT 38 kill job <homevent.tokize.tokizer obj>
 NEW: ‹ConditionalWorkSequence:63 (7)›
    : │  id: 63
    : │  call count: 0

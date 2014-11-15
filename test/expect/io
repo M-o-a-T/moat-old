@@ -5,10 +5,10 @@ NEW: ‹ConditionalWorkSequence:7 (4)›
    : └1╴... done.
 EVENT: startup
 END: startup
-0 locking +WAIT 1 start job ‹Collected Parser:n1›
-0 locking -WAIT 1 start job ‹Collected Parser:n1›
-0 locking +WAIT 2 start job <homevent.tokize.tokizer obj>
-0 locking -WAIT 2 start job <homevent.tokize.tokizer obj>
+TRACE locking +WAIT 1 start job ‹Collected Parser:n1›
+TRACE locking -WAIT 1 start job ‹Collected Parser:n1›
+TRACE locking +WAIT 2 start job <homevent.tokize.tokizer obj>
+TRACE locking -WAIT 2 start job <homevent.tokize.tokizer obj>
 foo bar :: fake foo¦bar:None
 .
 : ‹Collected FakeInput:foo¦bar›
@@ -42,8 +42,8 @@ NEW: ‹ConditionalWorkSequence:9 (4)›
    : └1╴... done.
 EVENT: input¦fake¦TEST¦foo¦bar
 END: input¦fake¦TEST¦foo¦bar
-1 Yes
-1 yes
+DEBUG Yes
+DEBUG yes
 NEW: ‹ConditionalWorkSequence:10 (4)›
    : │  id: 10
    : │  call count: 0
@@ -86,7 +86,7 @@ NEW: ‹ConditionalWorkSequence:15 (4)›
    : └1╴... done.
 EVENT: input¦fake¦123¦foo¦bar
 END: input¦fake¦123¦foo¦bar
-1 yes
+DEBUG yes
 NEW: ‹ConditionalWorkSequence:16 (4)›
    : │  id: 16
    : │  call count: 0
@@ -129,7 +129,7 @@ NEW: ‹ConditionalWorkSequence:21 (4)›
    : └1╴... done.
 EVENT: input¦fake¦three¦foo¦bar
 END: input¦fake¦three¦foo¦bar
-1 yes
+DEBUG yes
 NEW: ‹ConditionalWorkSequence:22 (4)›
    : │  id: 22
    : │  call count: 0
@@ -144,7 +144,7 @@ NEW: ‹ConditionalWorkSequence:23 (4)›
    : └1╴... done.
 EVENT: input¦fake¦GRMPF¦foo¦bar
 END: input¦fake¦GRMPF¦foo¦bar
-1 Yes
+DEBUG Yes
 : ‹Collected FakeInput:foo¦bar›
 name: foo¦bar
 type: fake
@@ -165,8 +165,8 @@ allowed value: three
 last write: now (2003-04-05 06:07:08)
 last value: GRMPF
 .
-0 locking +WAIT 3 kill job <homevent.tokize.tokizer obj>
-0 locking -WAIT 3 kill job <homevent.tokize.tokizer obj>
+TRACE locking +WAIT 3 kill job <homevent.tokize.tokizer obj>
+TRACE locking -WAIT 3 kill job <homevent.tokize.tokizer obj>
 NEW: ‹ConditionalWorkSequence:24 (6)›
    : │  id: 24
    : │  call count: 0

@@ -5,13 +5,13 @@ NEW: ‹ConditionalWorkSequence:7 (4)›
    : └1╴... done.
 EVENT: startup
 END: startup
-0 locking +WAIT 1 start job ‹Collected Parser:n1›
-0 locking -WAIT 1 start job ‹Collected Parser:n1›
-0 locking +WAIT 2 start job <homevent.tokize.tokizer obj>
-0 locking -WAIT 2 start job <homevent.tokize.tokizer obj>
-0 Yes!
-0 Yes!
-0 Set to ONE
+TRACE locking +WAIT 1 start job ‹Collected Parser:n1›
+TRACE locking -WAIT 1 start job ‹Collected Parser:n1›
+TRACE locking +WAIT 2 start job <homevent.tokize.tokizer obj>
+TRACE locking -WAIT 2 start job <homevent.tokize.tokizer obj>
+TRACE Yes!
+TRACE Yes!
+TRACE Set to ONE
 NEW: ‹ConditionalWorkSequence:8 (4)›
    : │  id: 8
    : │  call count: 0
@@ -19,7 +19,7 @@ NEW: ‹ConditionalWorkSequence:8 (4)›
    : └1╴... done.
 EVENT: state¦-¦one¦foo¦bar
 END: state¦-¦one¦foo¦bar
-0 Set to TWO
+TRACE Set to TWO
 NEW: ‹ConditionalWorkSequence:9 (4)›
    : │  id: 9
    : │  call count: 0
@@ -27,9 +27,9 @@ NEW: ‹ConditionalWorkSequence:9 (4)›
    : └1╴... done.
 EVENT: state¦one¦two¦foo¦bar
 END: state¦one¦two¦foo¦bar
-0 Create OnEvtHandler: state¦*¦three¦foo¦bar
-0 NewHandler 10
-0 Set to THREE
+TRACE Create OnEvtHandler: state¦*¦three¦foo¦bar
+TRACE NewHandler 10
+TRACE Set to THREE
 NEW: ‹ConditionalWorkSequence:11 (5)›
    : │  id: 11
    : │  call count: 0
@@ -50,12 +50,12 @@ RUN: on state * three foo bar ‹OnEventHandler›
    :     : step: log DEBUG No! (No shit happened.) ‹LogHandler›
  at: ‹ConditionalWorkSequence:11 (5)› (step 1)
  ev: EVENT: state¦two¦three¦foo¦bar
-0 Set to FOUR
-1 Yes! (Shit happens.)
+TRACE Set to FOUR
+DEBUG Yes! (Shit happens.)
 END: state¦two¦three¦foo¦bar
-0 Create OnEvtHandler: state¦*¦twohalf¦foo¦bar
-0 NewHandler 12
-0 Set to TWOHALF
+TRACE Create OnEvtHandler: state¦*¦twohalf¦foo¦bar
+TRACE NewHandler 12
+TRACE Set to TWOHALF
 NEW: ‹ConditionalWorkSequence:13 (5)›
    : │  id: 13
    : │  call count: 0
@@ -72,7 +72,7 @@ RUN: on state * twohalf foo bar ‹OnEventHandler›
    : step: set state fourtoo foo bar ‹SetStateHandler›
  at: ‹ConditionalWorkSequence:13 (5)› (step 1)
  ev: EVENT: state¦three¦twohalf¦foo¦bar
-0 Set to FOUR
+TRACE Set to FOUR
 END: state¦three¦twohalf¦foo¦bar
 Trying to change state to 'fourtoo' while changing from 'three' to 'twohalf'
 NEW: ‹WorkSequence:14 (4)›
@@ -82,7 +82,7 @@ NEW: ‹WorkSequence:14 (4)›
    : └1╴... done.
 Trying to change state to 'fourtoo' while changing from 'three' to 'twohalf'
 END: StateChangeError
-0 Set to THREE
+TRACE Set to THREE
 NEW: ‹ConditionalWorkSequence:15 (5)›
    : │  id: 15
    : │  call count: 0
@@ -103,11 +103,11 @@ RUN: on state * three foo bar ‹OnEventHandler›
    :     : step: log DEBUG No! (No shit happened.) ‹LogHandler›
  at: ‹ConditionalWorkSequence:15 (5)› (step 1)
  ev: EVENT: state¦twohalf¦three¦foo¦bar
-0 Set to FOUR
-1 Yes! (Shit happens.)
+TRACE Set to FOUR
+DEBUG Yes! (Shit happens.)
 END: state¦twohalf¦three¦foo¦bar
-0 locking +WAIT 3 start job ‹Waiter _wait¦1 ??›
-0 locking -WAIT 3 start job ‹Waiter _wait¦1 ??›
+TRACE locking +WAIT 3 start job ‹Waiter _wait¦1 ??›
+TRACE locking -WAIT 3 start job ‹Waiter _wait¦1 ??›
 NEW: ‹ConditionalWorkSequence:16 (4)›
    : │  id: 16
    : │  call count: 0
@@ -131,11 +131,11 @@ lock: No
 last value: twohalf
 last change: now (2003-04-05 06:07:08)
 .
-0 Yes!
-0 Yes!
-0 Yes!
-0 Create OnEvtHandler: whatever
-0 NewHandler 18
+TRACE Yes!
+TRACE Yes!
+TRACE Yes!
+TRACE Create OnEvtHandler: whatever
+TRACE NewHandler 18
 NEW: ‹ConditionalWorkSequence:19 (5)›
    : │  id: 19
    : │  call count: 0
@@ -152,7 +152,7 @@ RUN: on whatever ‹OnEventHandler›
    : step: log TRACE We got $x ‹LogHandler›
  at: ‹ConditionalWorkSequence:19 (5)› (step 1)
  ev: IEVENT: whatever
-0 We got three
+TRACE We got three
 END: whatever
 NEW: ‹ConditionalWorkSequence:20 (4)›
    : │  id: 20
@@ -162,8 +162,8 @@ NEW: ‹ConditionalWorkSequence:20 (4)›
 EVENT: state¦three¦-¦foo¦bar
 END: state¦three¦-¦foo¦bar
 .
-0 locking +WAIT 4 kill job <homevent.tokize.tokizer obj>
-0 locking -WAIT 4 kill job <homevent.tokize.tokizer obj>
+TRACE locking +WAIT 4 kill job <homevent.tokize.tokizer obj>
+TRACE locking -WAIT 4 kill job <homevent.tokize.tokizer obj>
 NEW: ‹ConditionalWorkSequence:21 (6)›
    : │  id: 21
    : │  call count: 0

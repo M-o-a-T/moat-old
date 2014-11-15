@@ -5,16 +5,16 @@ NEW: ‹ConditionalWorkSequence:7 (4)›
    : └1╴... done.
 EVENT: startup
 END: startup
-0 locking +WAIT 1 start job ‹Collected Parser:n1›
-0 locking -WAIT 1 start job ‹Collected Parser:n1›
-0 locking +WAIT 2 start job <homevent.tokize.tokizer obj>
-0 locking -WAIT 2 start job <homevent.tokize.tokizer obj>
-1 Yes A
-1 Yes B
-1 Yes C
-1 Yes D
-0 Triggered:
-0 RaisedError: Foo A
+TRACE locking +WAIT 1 start job ‹Collected Parser:n1›
+TRACE locking -WAIT 1 start job ‹Collected Parser:n1›
+TRACE locking +WAIT 2 start job <homevent.tokize.tokizer obj>
+TRACE locking -WAIT 2 start job <homevent.tokize.tokizer obj>
+DEBUG Yes A
+DEBUG Yes B
+DEBUG Yes C
+DEBUG Yes D
+TRACE Triggered:
+TRACE RaisedError: Foo A
 RaisedError: Foo A
 NEW: ‹WorkSequence:8 (4)›
    : │  id: 8
@@ -23,20 +23,20 @@ NEW: ‹WorkSequence:8 (4)›
    : └1╴... done.
 RaisedError: Foo A
 END: RaisedError
-1 Yes E
-0 Triggered:
-0 RaisedError: Foo B
-1 Yes F B
-1 Yes G
-0 Triggered:
-0 RaisedError: Foo C
-1 Yes H C
-1 Yes I
-0 Triggered:
-0 RaisedError: Foo D
-1 Yes J D
-0 Triggered:
-0 RaisedError: Foo E
+DEBUG Yes E
+TRACE Triggered:
+TRACE RaisedError: Foo B
+DEBUG Yes F B
+DEBUG Yes G
+TRACE Triggered:
+TRACE RaisedError: Foo C
+DEBUG Yes H C
+DEBUG Yes I
+TRACE Triggered:
+TRACE RaisedError: Foo D
+DEBUG Yes J D
+TRACE Triggered:
+TRACE RaisedError: Foo E
 RaisedError: Foo E
 NEW: ‹WorkSequence:9 (4)›
    : │  id: 9
@@ -45,22 +45,22 @@ NEW: ‹WorkSequence:9 (4)›
    : └1╴... done.
 RaisedError: Foo E
 END: RaisedError
-1 Yes K
-0 Triggered:
-0 RaisedError: Foo F
-1 Yes L F
-0 Triggered:
-0 RaisedError: Foo G
-1 Yes M G
-1 Yes N KEY
-0 Triggered:
-0 RaisedError: Foo Bar
-1 Yes O
-0 Triggered:
-0 RaisedError: Foo Bar
-1 Yes P Foo Bar
-0 locking +WAIT 3 kill job <homevent.tokize.tokizer obj>
-0 locking -WAIT 3 kill job <homevent.tokize.tokizer obj>
+DEBUG Yes K
+TRACE Triggered:
+TRACE RaisedError: Foo F
+DEBUG Yes L F
+TRACE Triggered:
+TRACE RaisedError: Foo G
+DEBUG Yes M G
+DEBUG Yes N KEY
+TRACE Triggered:
+TRACE RaisedError: Foo Bar
+DEBUG Yes O
+TRACE Triggered:
+TRACE RaisedError: Foo Bar
+DEBUG Yes P Foo Bar
+TRACE locking +WAIT 3 kill job <homevent.tokize.tokizer obj>
+TRACE locking -WAIT 3 kill job <homevent.tokize.tokizer obj>
 NEW: ‹ConditionalWorkSequence:10 (6)›
    : │  id: 10
    : │  call count: 0

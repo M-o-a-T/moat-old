@@ -5,25 +5,25 @@ NEW: ‹ConditionalWorkSequence:7 (4)›
    : └1╴... done.
 EVENT: startup
 END: startup
-0 locking +WAIT 1 start job ‹Collected Parser:n1›
-0 locking -WAIT 1 start job ‹Collected Parser:n1›
-0 locking +WAIT 2 start job <homevent.tokize.tokizer obj>
-0 locking -WAIT 2 start job <homevent.tokize.tokizer obj>
-0 Yes!
-0 INIT sqlite {'username': 'smurf', 'trace': <function trace at 0x×××>, 'database': '/tmp/homevent.smurf.db', 'dbtype': 'sqlite', 'dataport': '3306', 'host': 'sql.intern.smurf.noris.de', 'password': 'geheim'}
-0 DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) None
-0 RollBack  
-0 Yes!
-0 DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) None
-0 RollBack  
-0 Yes!
-0 DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) None
-0 RollBack  
-0 Yes!
-0 Set to ONE
-0 DoFn ('update HE_State set value=? where category=? and name=?', ("u'one'", 'state', 'foo bar')) 0
-0 DoFn ('insert into HE_State (category,name,value) VALUES(?,?,?)', ('state', 'foo bar', "u'one'")) 1
-0 Commit  
+TRACE locking +WAIT 1 start job ‹Collected Parser:n1›
+TRACE locking -WAIT 1 start job ‹Collected Parser:n1›
+TRACE locking +WAIT 2 start job <homevent.tokize.tokizer obj>
+TRACE locking -WAIT 2 start job <homevent.tokize.tokizer obj>
+TRACE Yes!
+TRACE INIT sqlite {'username': 'smurf', 'trace': <function trace at 0x×××>, 'database': '/tmp/homevent.smurf.db', 'dbtype': 'sqlite', 'dataport': '3306', 'host': 'sql.intern.smurf.noris.de', 'password': 'geheim'}
+TRACE DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) None
+TRACE RollBack  
+TRACE Yes!
+TRACE DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) None
+TRACE RollBack  
+TRACE Yes!
+TRACE DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) None
+TRACE RollBack  
+TRACE Yes!
+TRACE Set to ONE
+TRACE DoFn ('update HE_State set value=? where category=? and name=?', ("u'one'", 'state', 'foo bar')) 0
+TRACE DoFn ('insert into HE_State (category,name,value) VALUES(?,?,?)', ('state', 'foo bar', "u'one'")) 1
+TRACE Commit  
 NEW: ‹ConditionalWorkSequence:8 (4)›
    : │  id: 8
    : │  call count: 0
@@ -31,12 +31,12 @@ NEW: ‹ConditionalWorkSequence:8 (4)›
    : └1╴... done.
 EVENT: state¦-¦one¦foo¦bar
 END: state¦-¦one¦foo¦bar
-0 DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) (u"u'one'",)
-0 Commit  
-0 Yes!
-0 Set to TWO
-0 DoFn ('update HE_State set value=? where category=? and name=?', ("u'two'", 'state', 'foo bar')) 1
-0 Commit  
+TRACE DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) (u"u'one'",)
+TRACE Commit  
+TRACE Yes!
+TRACE Set to TWO
+TRACE DoFn ('update HE_State set value=? where category=? and name=?', ("u'two'", 'state', 'foo bar')) 1
+TRACE Commit  
 NEW: ‹ConditionalWorkSequence:9 (4)›
    : │  id: 9
    : │  call count: 0
@@ -44,11 +44,11 @@ NEW: ‹ConditionalWorkSequence:9 (4)›
    : └1╴... done.
 EVENT: state¦one¦two¦foo¦bar
 END: state¦one¦two¦foo¦bar
-0 Create OnEvtHandler: state¦*¦three¦foo¦bar
-0 NewHandler 10
-0 Set to THREE
-0 DoFn ('update HE_State set value=? where category=? and name=?', ("u'three'", 'state', 'foo bar')) 1
-0 Commit  
+TRACE Create OnEvtHandler: state¦*¦three¦foo¦bar
+TRACE NewHandler 10
+TRACE Set to THREE
+TRACE DoFn ('update HE_State set value=? where category=? and name=?', ("u'three'", 'state', 'foo bar')) 1
+TRACE Commit  
 NEW: ‹ConditionalWorkSequence:11 (5)›
    : │  id: 11
    : │  call count: 0
@@ -69,8 +69,8 @@ RUN: on state * three foo bar ‹OnEventHandler›
    :     : step: log DEBUG No! (No shit happened.) ‹LogHandler›
  at: ‹ConditionalWorkSequence:11 (5)› (step 1)
  ev: EVENT: state¦two¦three¦foo¦bar
-0 Set to FOUR
-1 Yes! (Shit happens.)
+TRACE Set to FOUR
+DEBUG Yes! (Shit happens.)
 END: state¦two¦three¦foo¦bar
 foo bar :: three — now
 .
@@ -82,11 +82,11 @@ last value: two
 last change: now (2003-04-05 06:07:08)
 persistent: yes
 .
-0 Yes!
-0 Yes!
-0 Yes!
-0 Create OnEvtHandler: whatever
-0 NewHandler 12
+TRACE Yes!
+TRACE Yes!
+TRACE Yes!
+TRACE Create OnEvtHandler: whatever
+TRACE NewHandler 12
 NEW: ‹ConditionalWorkSequence:13 (5)›
    : │  id: 13
    : │  call count: 0
@@ -103,11 +103,11 @@ RUN: on whatever ‹OnEventHandler›
    : step: log TRACE We got $x ‹LogHandler›
  at: ‹ConditionalWorkSequence:13 (5)› (step 1)
  ev: IEVENT: whatever
-0 We got three
+TRACE We got three
 END: whatever
 foo bar :: three — now
 .
-0 locking +WAIT 3 kill job <homevent.tokize.tokizer obj>
+TRACE locking +WAIT 3 kill job <homevent.tokize.tokizer obj>
 NEW: ‹ConditionalWorkSequence:14 (6)›
    : │  id: 14
    : │  call count: 0
@@ -149,7 +149,7 @@ NEW: ‹ConditionalWorkSequence:19 (4)›
    : └1╴... done.
 EVENT: module¦unload¦state
 END: module¦unload¦state
-0 RollBack  
+TRACE RollBack  
 NEW: ‹ConditionalWorkSequence:20 (4)›
    : │  id: 20
    : │  call count: 0
@@ -179,4 +179,4 @@ NEW: ‹ConditionalWorkSequence:23 (4)›
 EVENT: module¦unload¦block
 END: module¦unload¦block
 END: shutdown
-0 locking -WAIT 3 kill job <homevent.tokize.tokizer obj>
+TRACE locking -WAIT 3 kill job <homevent.tokize.tokizer obj>

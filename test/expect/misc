@@ -5,16 +5,16 @@ NEW: ‹ConditionalWorkSequence:7 (4)›
    : └1╴... done.
 EVENT: startup
 END: startup
-0 locking +WAIT 1 start job ‹Collected Parser:n1›
-0 locking -WAIT 1 start job ‹Collected Parser:n1›
-0 locking +WAIT 2 start job <homevent.tokize.tokizer obj>
-0 locking -WAIT 2 start job <homevent.tokize.tokizer obj>
-0 locking +WAIT 3 start job ‹TriggerHandler: trigger 3›
-0 locking -WAIT 3 start job ‹TriggerHandler: trigger 3›
-0 locking +WAIT 4 start job ‹TriggerHandler: trigger 3›
-0 locking -WAIT 4 start job ‹TriggerHandler: trigger 3›
-0 locking +WAIT 5 start job ‹Waiter A ??›
-0 locking -WAIT 5 start job ‹Waiter A ??›
+TRACE locking +WAIT 1 start job ‹Collected Parser:n1›
+TRACE locking -WAIT 1 start job ‹Collected Parser:n1›
+TRACE locking +WAIT 2 start job <homevent.tokize.tokizer obj>
+TRACE locking -WAIT 2 start job <homevent.tokize.tokizer obj>
+TRACE locking +WAIT 3 start job ‹TriggerHandler: trigger 3›
+TRACE locking -WAIT 3 start job ‹TriggerHandler: trigger 3›
+TRACE locking +WAIT 4 start job ‹TriggerHandler: trigger 3›
+TRACE locking -WAIT 4 start job ‹TriggerHandler: trigger 3›
+TRACE locking +WAIT 5 start job ‹Waiter A ??›
+TRACE locking -WAIT 5 start job ‹Waiter A ??›
 NEW: ‹ConditionalWorkSequence:8 (4)›
    : │  id: 8
    : │  call count: 0
@@ -57,8 +57,8 @@ NEW: ‹ConditionalWorkSequence:13 (4)›
    : └1╴... done.
 IEVENT: bar2
 END: bar2
-0 locking +WAIT 6 start job ‹Waiter B ??›
-0 locking -WAIT 6 start job ‹Waiter B ??›
+TRACE locking +WAIT 6 start job ‹Waiter B ??›
+TRACE locking -WAIT 6 start job ‹Waiter B ??›
 NEW: ‹ConditionalWorkSequence:14 (4)›
    : │  id: 14
    : │  call count: 0
@@ -73,12 +73,12 @@ NEW: ‹ConditionalWorkSequence:15 (4)›
    : └1╴... done.
 EVENT: wait¦done¦×××¦B
 END: wait¦done¦×××¦B
-0 locking +WAIT 7 start job ‹TriggerHandler: trigger 3›
-0 locking -WAIT 7 start job ‹TriggerHandler: trigger 3›
-0 locking +WAIT 8 start job ‹TriggerHandler: trigger 3›
-0 locking -WAIT 8 start job ‹TriggerHandler: trigger 3›
-0 locking +WAIT 9 start job ‹Waiter C ??›
-0 locking -WAIT 9 start job ‹Waiter C ??›
+TRACE locking +WAIT 7 start job ‹TriggerHandler: trigger 3›
+TRACE locking -WAIT 7 start job ‹TriggerHandler: trigger 3›
+TRACE locking +WAIT 8 start job ‹TriggerHandler: trigger 3›
+TRACE locking -WAIT 8 start job ‹TriggerHandler: trigger 3›
+TRACE locking +WAIT 9 start job ‹Waiter C ??›
+TRACE locking -WAIT 9 start job ‹Waiter C ??›
 NEW: ‹ConditionalWorkSequence:16 (4)›
    : │  id: 16
    : │  call count: 0
@@ -107,11 +107,11 @@ NEW: ‹ConditionalWorkSequence:19 (4)›
    : └1╴... done.
 EVENT: wait¦done¦×××¦C
 END: wait¦done¦×××¦C
-0 locking +WAIT 10 start job ‹Collected Parser:n2›
-0 locking -WAIT 10 start job ‹Collected Parser:n2›
-0 locking +WAIT 11 start job <homevent.tokize.tokizer obj>
-0 locking -WAIT 11 start job <homevent.tokize.tokizer obj>
-0 locking +WAIT 12 kill job <homevent.tokize.tokizer obj>
+TRACE locking +WAIT 10 start job ‹Collected Parser:n2›
+TRACE locking -WAIT 10 start job ‹Collected Parser:n2›
+TRACE locking +WAIT 11 start job <homevent.tokize.tokizer obj>
+TRACE locking -WAIT 11 start job <homevent.tokize.tokizer obj>
+TRACE locking +WAIT 12 kill job <homevent.tokize.tokizer obj>
 NEW: ‹ConditionalWorkSequence:20 (4)›
    : │  id: 20
    : │  call count: 0
@@ -126,8 +126,8 @@ NEW: ‹ConditionalWorkSequence:21 (4)›
    : └1╴... done.
 IEVENT: bar4
 END: bar4
-0 locking +WAIT 13 start job ‹Waiter D ??›
-0 locking -WAIT 13 start job ‹Waiter D ??›
+TRACE locking +WAIT 13 start job ‹Waiter D ??›
+TRACE locking -WAIT 13 start job ‹Waiter D ??›
 NEW: ‹ConditionalWorkSequence:22 (4)›
    : │  id: 22
    : │  call count: 0
@@ -135,8 +135,8 @@ NEW: ‹ConditionalWorkSequence:22 (4)›
    : └1╴... done.
 EVENT: wait¦start¦×××¦D
 END: wait¦start¦×××¦D
-0 locking +WAIT 14 start job ‹TriggerHandler: trigger 3›
-0 locking -WAIT 14 start job ‹TriggerHandler: trigger 3›
+TRACE locking +WAIT 14 start job ‹TriggerHandler: trigger 3›
+TRACE locking -WAIT 14 start job ‹TriggerHandler: trigger 3›
 NEW: ‹ConditionalWorkSequence:23 (4)›
    : │  id: 23
    : │  call count: 0
@@ -144,4 +144,4 @@ NEW: ‹ConditionalWorkSequence:23 (4)›
    : └1╴... done.
 IEVENT: foo5
 END: foo5
-0 locking -WAIT 12 kill job <homevent.tokize.tokizer obj>
+TRACE locking -WAIT 12 kill job <homevent.tokize.tokizer obj>

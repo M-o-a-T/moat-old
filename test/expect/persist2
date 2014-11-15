@@ -5,24 +5,24 @@ NEW: ‹ConditionalWorkSequence:7 (4)›
    : └1╴... done.
 EVENT: startup
 END: startup
-0 locking +WAIT 1 start job ‹Collected Parser:n1›
-0 locking -WAIT 1 start job ‹Collected Parser:n1›
-0 locking +WAIT 2 start job <homevent.tokize.tokizer obj>
-0 locking -WAIT 2 start job <homevent.tokize.tokizer obj>
-0 Yes!
-0 INIT sqlite {'username': 'smurf', 'trace': <function trace at 0x×××>, 'database': '/tmp/homevent.smurf.db', 'dbtype': 'sqlite', 'dataport': '3306', 'host': 'sql.intern.smurf.noris.de', 'password': 'geheim'}
-0 DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) (u"u'three'",)
-0 Commit  
-0 Yes!
-0 DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) (u"u'three'",)
-0 Commit  
-0 Yes!
-0 DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) (u"u'three'",)
-0 Commit  
-0 Yes!
-0 We still have three
-0 DoFn ('delete from HE_State where category=? and name=?', ('state', 'foo bar')) 1
-0 Commit  
+TRACE locking +WAIT 1 start job ‹Collected Parser:n1›
+TRACE locking -WAIT 1 start job ‹Collected Parser:n1›
+TRACE locking +WAIT 2 start job <homevent.tokize.tokizer obj>
+TRACE locking -WAIT 2 start job <homevent.tokize.tokizer obj>
+TRACE Yes!
+TRACE INIT sqlite {'username': 'smurf', 'trace': <function trace at 0x×××>, 'database': '/tmp/homevent.smurf.db', 'dbtype': 'sqlite', 'dataport': '3306', 'host': 'sql.intern.smurf.noris.de', 'password': 'geheim'}
+TRACE DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) (u"u'three'",)
+TRACE Commit  
+TRACE Yes!
+TRACE DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) (u"u'three'",)
+TRACE Commit  
+TRACE Yes!
+TRACE DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) (u"u'three'",)
+TRACE Commit  
+TRACE Yes!
+TRACE We still have three
+TRACE DoFn ('delete from HE_State where category=? and name=?', ('state', 'foo bar')) 1
+TRACE Commit  
 NEW: ‹ConditionalWorkSequence:8 (4)›
    : │  id: 8
    : │  call count: 0
@@ -31,8 +31,8 @@ NEW: ‹ConditionalWorkSequence:8 (4)›
 EVENT: state¦three¦-¦foo¦bar
 END: state¦three¦-¦foo¦bar
 .
-0 DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) None
-0 RollBack  
-0 Yes!
-0 locking +WAIT 3 kill job <homevent.tokize.tokizer obj>
-0 locking -WAIT 3 kill job <homevent.tokize.tokizer obj>
+TRACE DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) None
+TRACE RollBack  
+TRACE Yes!
+TRACE locking +WAIT 3 kill job <homevent.tokize.tokizer obj>
+TRACE locking -WAIT 3 kill job <homevent.tokize.tokizer obj>

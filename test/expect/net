@@ -5,12 +5,12 @@ NEW: ‹ConditionalWorkSequence:7 (4)›
    : └1╴... done.
 EVENT: startup
 END: startup
-0 locking +WAIT 1 start job ‹Collected Parser:n1›
-0 locking -WAIT 1 start job ‹Collected Parser:n1›
-0 locking +WAIT 2 start job <homevent.tokize.tokizer obj>
-0 locking -WAIT 2 start job <homevent.tokize.tokizer obj>
-0 locking +WAIT 3 start job ‹Waiter BAD ??›
-0 locking -WAIT 3 start job ‹Waiter BAD ??›
+TRACE locking +WAIT 1 start job ‹Collected Parser:n1›
+TRACE locking -WAIT 1 start job ‹Collected Parser:n1›
+TRACE locking +WAIT 2 start job <homevent.tokize.tokizer obj>
+TRACE locking -WAIT 2 start job <homevent.tokize.tokizer obj>
+TRACE locking +WAIT 3 start job ‹Waiter BAD ??›
+TRACE locking -WAIT 3 start job ‹Waiter BAD ??›
 NEW: ‹ConditionalWorkSequence:8 (4)›
    : │  id: 8
    : │  call count: 0
@@ -40,17 +40,17 @@ NEW: ‹ConditionalWorkSequence:11 (4)›
    : └1╴... done.
 EVENT: wait¦done¦0.2¦BAD
 END: wait¦done¦0.2¦BAD
-1 Yes
-0 Create OnEvtHandler: net¦connect¦foo
-0 NewHandler 12
-0 Create OnEvtHandler: net¦connect¦baz¦zaz¦*who
-0 NewHandler 13
-0 Create OnEvtHandler: net¦disconnect¦foo
-0 NewHandler 14
-0 Create OnEvtHandler: net¦disconnect¦baz¦zaz
-0 NewHandler 15
-0 locking +WAIT 4 start job ‹Waiter BEFORE ??›
-0 locking -WAIT 4 start job ‹Waiter BEFORE ??›
+DEBUG Yes
+TRACE Create OnEvtHandler: net¦connect¦foo
+TRACE NewHandler 12
+TRACE Create OnEvtHandler: net¦connect¦baz¦zaz¦*who
+TRACE NewHandler 13
+TRACE Create OnEvtHandler: net¦disconnect¦foo
+TRACE NewHandler 14
+TRACE Create OnEvtHandler: net¦disconnect¦baz¦zaz
+TRACE NewHandler 15
+TRACE locking +WAIT 4 start job ‹Waiter BEFORE ??›
+TRACE locking -WAIT 4 start job ‹Waiter BEFORE ??›
 NEW: ‹ConditionalWorkSequence:16 (4)›
    : │  id: 16
    : │  call count: 0
@@ -65,8 +65,8 @@ NEW: ‹ConditionalWorkSequence:17 (4)›
    : └1╴... done.
 EVENT: wait¦done¦0.4¦BEFORE
 END: wait¦done¦0.4¦BEFORE
-0 locking +WAIT 5 start job ‹Waiter AFTER ??›
-0 locking -WAIT 5 start job ‹Waiter AFTER ??›
+TRACE locking +WAIT 5 start job ‹Waiter AFTER ??›
+TRACE locking -WAIT 5 start job ‹Waiter AFTER ??›
 NEW: ‹ConditionalWorkSequence:18 (4)›
    : │  id: 18
    : │  call count: 0
@@ -99,8 +99,8 @@ RUN: on net connect foo ‹OnEventHandler›
  at: ‹ConditionalWorkSequence:19 (5)› (step 1)
  ev: EVENT: net¦connect¦foo
 END: net¦connect¦foo
-0 locking +WAIT 6 start job ‹Collected NETactive:foo›
-0 locking -WAIT 6 start job ‹Collected NETactive:foo›
+TRACE locking +WAIT 6 start job ‹Collected NETactive:foo›
+TRACE locking -WAIT 6 start job ‹Collected NETactive:foo›
 NEW: ‹ConditionalWorkSequence:20 (4)›
    : │  id: 20
    : │  call count: 0
@@ -108,8 +108,8 @@ NEW: ‹ConditionalWorkSequence:20 (4)›
    : └1╴... done.
 EVENT: net¦recv¦foo¦A
 END: net¦recv¦foo¦A
-0 locking +WAIT 7 start job ‹Waiter OUT ??›
-0 locking -WAIT 7 start job ‹Waiter OUT ??›
+TRACE locking +WAIT 7 start job ‹Waiter OUT ??›
+TRACE locking -WAIT 7 start job ‹Waiter OUT ??›
 NEW: ‹ConditionalWorkSequence:21 (4)›
    : │  id: 21
    : │  call count: 0
@@ -130,7 +130,7 @@ type: net_active
 host: localhost
 port: ×××
 .
-0 locking +WAIT 8 kill job ‹Collected NETactive:foo›
+TRACE locking +WAIT 8 kill job ‹Collected NETactive:foo›
 NEW: ‹ConditionalWorkSequence:23 (5)›
    : │  id: 23
    : │  call count: 0
@@ -145,9 +145,9 @@ RUN: on net disconnect foo ‹OnEventHandler›
    : step: log TRACE dis foo ‹LogHandler›
  at: ‹ConditionalWorkSequence:23 (5)› (step 1)
  ev: EVENT: net¦disconnect¦foo
-0 dis foo
+TRACE dis foo
 END: net¦disconnect¦foo
-0 locking -WAIT 8 kill job ‹Collected NETactive:foo›
+TRACE locking -WAIT 8 kill job ‹Collected NETactive:foo›
 NEW: ‹ConditionalWorkSequence:24 (5)›
    : │  id: 24
    : │  call count: 0
@@ -171,8 +171,8 @@ RUN: on net connect baz zaz *who ‹OnEventHandler›
  at: ‹ConditionalWorkSequence:24 (5)› (step 1)
  ev: EVENT: net¦connect¦baz¦zaz¦1
 END: net¦connect¦baz¦zaz¦1
-0 locking +WAIT 9 start job ‹Collected NETpassive:baz¦zaz¦1›
-0 locking -WAIT 9 start job ‹Collected NETpassive:baz¦zaz¦1›
+TRACE locking +WAIT 9 start job ‹Collected NETpassive:baz¦zaz¦1›
+TRACE locking -WAIT 9 start job ‹Collected NETpassive:baz¦zaz¦1›
 NEW: ‹ConditionalWorkSequence:25 (4)›
    : │  id: 25
    : │  call count: 0
@@ -180,8 +180,8 @@ NEW: ‹ConditionalWorkSequence:25 (4)›
    : └1╴... done.
 EVENT: net¦recv¦baz¦zaz¦1¦B
 END: net¦recv¦baz¦zaz¦1¦B
-0 locking +WAIT 10 start job ‹Waiter IN ??›
-0 locking -WAIT 10 start job ‹Waiter IN ??›
+TRACE locking +WAIT 10 start job ‹Waiter IN ??›
+TRACE locking -WAIT 10 start job ‹Waiter IN ??›
 NEW: ‹ConditionalWorkSequence:26 (4)›
    : │  id: 26
    : │  call count: 0
@@ -200,7 +200,7 @@ type: net_passive
 host: 127.0.0.1
 port: ×××
 .
-0 locking +WAIT 11 kill job ‹Collected NETpassive:baz¦zaz¦1›
+TRACE locking +WAIT 11 kill job ‹Collected NETpassive:baz¦zaz¦1›
 NEW: ‹ConditionalWorkSequence:28 (4)›
    : │  id: 28
    : │  call count: 0
@@ -208,7 +208,7 @@ NEW: ‹ConditionalWorkSequence:28 (4)›
    : └1╴... done.
 EVENT: net¦disconnect¦baz¦zaz¦1
 END: net¦disconnect¦baz¦zaz¦1
-0 locking -WAIT 11 kill job ‹Collected NETpassive:baz¦zaz¦1›
+TRACE locking -WAIT 11 kill job ‹Collected NETpassive:baz¦zaz¦1›
 NEW: ‹ConditionalWorkSequence:29 (4)›
    : │  id: 29
    : │  call count: 0
@@ -216,11 +216,11 @@ NEW: ‹ConditionalWorkSequence:29 (4)›
    : └1╴... done.
 EVENT: wait¦done¦1.2¦AFTER
 END: wait¦done¦1.2¦AFTER
-0 ending
+TRACE ending
 .
-1 Yes
-0 locking +WAIT 12 start job ‹Waiter END ??›
-0 locking -WAIT 12 start job ‹Waiter END ??›
+DEBUG Yes
+TRACE locking +WAIT 12 start job ‹Waiter END ??›
+TRACE locking -WAIT 12 start job ‹Waiter END ??›
 NEW: ‹ConditionalWorkSequence:30 (4)›
    : │  id: 30
    : │  call count: 0
@@ -228,8 +228,8 @@ NEW: ‹ConditionalWorkSequence:30 (4)›
    : └1╴... done.
 EVENT: wait¦start¦0.2¦END
 END: wait¦start¦0.2¦END
-0 locking +WAIT 13 kill job <homevent.tokize.tokizer obj>
-0 locking -WAIT 13 kill job <homevent.tokize.tokizer obj>
+TRACE locking +WAIT 13 kill job <homevent.tokize.tokizer obj>
+TRACE locking -WAIT 13 kill job <homevent.tokize.tokizer obj>
 NEW: ‹ConditionalWorkSequence:31 (6)›
    : │  id: 31
    : │  call count: 0

@@ -5,12 +5,12 @@ NEW: ‹ConditionalWorkSequence:7 (4)›
    : └1╴... done.
 EVENT: startup
 END: startup
-0 locking +WAIT 1 start job ‹Collected Parser:n1›
-0 locking -WAIT 1 start job ‹Collected Parser:n1›
-0 locking +WAIT 2 start job <homevent.tokize.tokizer obj>
-0 locking -WAIT 2 start job <homevent.tokize.tokizer obj>
-0 locking +WAIT 3 start job ‹Waiter startup ??›
-0 locking -WAIT 3 start job ‹Waiter startup ??›
+TRACE locking +WAIT 1 start job ‹Collected Parser:n1›
+TRACE locking -WAIT 1 start job ‹Collected Parser:n1›
+TRACE locking +WAIT 2 start job <homevent.tokize.tokizer obj>
+TRACE locking -WAIT 2 start job <homevent.tokize.tokizer obj>
+TRACE locking +WAIT 3 start job ‹Waiter startup ??›
+TRACE locking -WAIT 3 start job ‹Waiter startup ??›
 NEW: ‹ConditionalWorkSequence:8 (4)›
    : │  id: 8
    : │  call count: 0
@@ -25,12 +25,12 @@ NEW: ‹ConditionalWorkSequence:9 (4)›
    : └1╴... done.
 EVENT: wait¦done¦0.2¦startup
 END: wait¦done¦0.2¦startup
-1 Yes
-0 locking +WAIT 4 start job ‹RRDqueue:t¦tt¦ttt New›
-0 locking -WAIT 4 start job ‹RRDqueue:t¦tt¦ttt New›
-0 locking +WAIT 5 start job ‹RRDqueue:t¦tt¦ttt New›
-0 locking -WAIT 5 start job ‹RRDqueue:t¦tt¦ttt New›
-1 Yes
+DEBUG Yes
+TRACE locking +WAIT 4 start job ‹RRDqueue:t¦tt¦ttt New›
+TRACE locking -WAIT 4 start job ‹RRDqueue:t¦tt¦ttt New›
+TRACE locking +WAIT 5 start job ‹RRDqueue:t¦tt¦ttt New›
+TRACE locking -WAIT 5 start job ‹RRDqueue:t¦tt¦ttt New›
+DEBUG Yes
 t tt ttt :: ‹RRDqueue:t¦tt¦ttt New›
 .
 : ‹RRDqueue:t¦tt¦ttt New›
@@ -45,8 +45,8 @@ conn attempts: 0
 conn timer: 3
 out_queued: 0
 .
-1 Yes
-1 Yes
+DEBUG Yes
+DEBUG Yes
 a aa aaa
 .
 : ‹Collected RRDfile:a¦aa¦aaa›
@@ -64,8 +64,8 @@ server: ‹RRDqueue:t¦tt¦ttt New›
        out_queued: 0
 filename: /tmp/rrdtest.rrd
 .
-0 locking +WAIT 6 start job ‹Waiter _wait¦2 ??›
-0 locking -WAIT 6 start job ‹Waiter _wait¦2 ??›
+TRACE locking +WAIT 6 start job ‹Waiter _wait¦2 ??›
+TRACE locking -WAIT 6 start job ‹Waiter _wait¦2 ??›
 NEW: ‹ConditionalWorkSequence:10 (4)›
    : │  id: 10
    : │  call count: 0
@@ -73,14 +73,14 @@ NEW: ‹ConditionalWorkSequence:10 (4)›
    : └1╴... done.
 EVENT: wait¦start¦0.3¦_wait¦2
 END: wait¦start¦0.3¦_wait¦2
-0 msg setstate init closed
-0 msg setstate closed want
-0 msg setstate want connecting
-0 conn connecting RRDqueue t¦tt¦ttt
-0 locking +WAIT 7 start job ‹RRDchannel:‹Collected RRDchannel_forwarder:t¦tt¦ttt››
-0 locking -WAIT 7 start job ‹RRDchannel:‹Collected RRDchannel_forwarder:t¦tt¦ttt››
-0 conn setting up RRDqueue t¦tt¦ttt
-0 !got UP_EVENT t tt ttt
+TRACE msg setstate init closed
+TRACE msg setstate closed want
+TRACE msg setstate want connecting
+TRACE conn connecting RRDqueue t¦tt¦ttt
+TRACE locking +WAIT 7 start job ‹RRDchannel:‹Collected RRDchannel_forwarder:t¦tt¦ttt››
+TRACE locking -WAIT 7 start job ‹RRDchannel:‹Collected RRDchannel_forwarder:t¦tt¦ttt››
+TRACE conn setting up RRDqueue t¦tt¦ttt
+TRACE !got UP_EVENT t tt ttt
 NEW: ‹ConditionalWorkSequence:11 (4)›
    : │  id: 11
    : │  call count: 0
@@ -88,11 +88,11 @@ NEW: ‹ConditionalWorkSequence:11 (4)›
    : └1╴... done.
 EVENT: rrd¦connect¦t¦tt¦ttt
 END: rrd¦connect¦t¦tt¦ttt
-0 conn connected RRDqueue t¦tt¦ttt
-0 msg states at run connected connecting
-0 NotConn [[], [], [], []]
-0 msg setstate connecting connected
-0 msg states at run connected connected
+TRACE conn connected RRDqueue t¦tt¦ttt
+TRACE msg states at run connected connecting
+TRACE NotConn [[], [], [], []]
+TRACE msg setstate connecting connected
+TRACE msg states at run connected connected
 NEW: ‹ConditionalWorkSequence:12 (4)›
    : │  id: 12
    : │  call count: 0
@@ -100,18 +100,18 @@ NEW: ‹ConditionalWorkSequence:12 (4)›
    : └1╴... done.
 EVENT: wait¦done¦0.3¦_wait¦2
 END: wait¦done¦0.3¦_wait¦2
-0 msg states at run connected connected
-0 msg send ‹RRDsendUpdate 1›
-0 rrd send 'update /tmp/rrdtest.rrd 1049515628:10'
-0 msg send result RECV_AGAIN
-0 rrd recv '0 Yes'
-0 msg recv msg ‹MsgIncoming: msg:'Yes' type:MT_ACK prio:2›
-0 conn incoming RRDqueue t¦tt¦ttt ‹MsgIncoming: msg:'Yes' type:MT_ACK prio:2›
-0 msg recv t¦tt¦ttt ‹MsgIncoming: msg:'Yes' type:MT_ACK prio:2›
-0 msg recv= MINE ‹RRDsendUpdate 2›
-0 msg states at run connected connected
-0 locking +WAIT 8 start job ‹Waiter _wait¦3 ??›
-0 locking -WAIT 8 start job ‹Waiter _wait¦3 ??›
+TRACE msg states at run connected connected
+TRACE msg send ‹RRDsendUpdate 1›
+TRACE rrd send 'update /tmp/rrdtest.rrd 1049515628:10'
+TRACE msg send result RECV_AGAIN
+TRACE rrd recv '0 Yes'
+TRACE msg recv msg ‹MsgIncoming: msg:'Yes' type:MT_ACK prio:2›
+TRACE conn incoming RRDqueue t¦tt¦ttt ‹MsgIncoming: msg:'Yes' type:MT_ACK prio:2›
+TRACE msg recv t¦tt¦ttt ‹MsgIncoming: msg:'Yes' type:MT_ACK prio:2›
+TRACE msg recv= MINE ‹RRDsendUpdate 2›
+TRACE msg states at run connected connected
+TRACE locking +WAIT 8 start job ‹Waiter _wait¦3 ??›
+TRACE locking -WAIT 8 start job ‹Waiter _wait¦3 ??›
 NEW: ‹ConditionalWorkSequence:13 (4)›
    : │  id: 13
    : │  call count: 0
@@ -126,20 +126,20 @@ NEW: ‹ConditionalWorkSequence:14 (4)›
    : └1╴... done.
 EVENT: wait¦done¦0.4¦_wait¦3
 END: wait¦done¦0.4¦_wait¦3
-0 msg states at run connected connected
-0 msg send ‹RRDsendUpdate 3›
-0 rrd send 'update /tmp/rrdtest.rrd 1049515628:11'
-0 msg send result RECV_AGAIN
-0 rrd recv '2 Nonsense follows'
-0 rrd recv 'Nonsense'
-0 rrd recv 'More Nonsense'
-0 msg recv msg ‹MsgIncoming: msg:' Nonsense follows' data:['Nonsense', 'More Nonsense'] type:MT_MULTILINE prio:2›
-0 conn incoming RRDqueue t¦tt¦ttt ‹MsgIncoming: msg:' Nonsense follows' data:['Nonsense', 'More Nonsense'] type:MT_MULTILINE prio:2›
-0 msg recv t¦tt¦ttt ‹MsgIncoming: msg:' Nonsense follows' data:['Nonsense', 'More Nonsense'] type:MT_MULTILINE prio:2›
-0 msg recv= MINE ‹RRDsendUpdate 4›
-0 msg states at run connected connected
-0 locking +WAIT 9 start job ‹Waiter _wait¦4 ??›
-0 locking -WAIT 9 start job ‹Waiter _wait¦4 ??›
+TRACE msg states at run connected connected
+TRACE msg send ‹RRDsendUpdate 3›
+TRACE rrd send 'update /tmp/rrdtest.rrd 1049515628:11'
+TRACE msg send result RECV_AGAIN
+TRACE rrd recv '2 Nonsense follows'
+TRACE rrd recv 'Nonsense'
+TRACE rrd recv 'More Nonsense'
+TRACE msg recv msg ‹MsgIncoming: msg:' Nonsense follows' data:['Nonsense', 'More Nonsense'] type:MT_MULTILINE prio:2›
+TRACE conn incoming RRDqueue t¦tt¦ttt ‹MsgIncoming: msg:' Nonsense follows' data:['Nonsense', 'More Nonsense'] type:MT_MULTILINE prio:2›
+TRACE msg recv t¦tt¦ttt ‹MsgIncoming: msg:' Nonsense follows' data:['Nonsense', 'More Nonsense'] type:MT_MULTILINE prio:2›
+TRACE msg recv= MINE ‹RRDsendUpdate 4›
+TRACE msg states at run connected connected
+TRACE locking +WAIT 9 start job ‹Waiter _wait¦4 ??›
+TRACE locking -WAIT 9 start job ‹Waiter _wait¦4 ??›
 NEW: ‹ConditionalWorkSequence:15 (4)›
    : │  id: 15
    : │  call count: 0
@@ -154,17 +154,17 @@ NEW: ‹ConditionalWorkSequence:16 (4)›
    : └1╴... done.
 EVENT: wait¦done¦0.6¦_wait¦4
 END: wait¦done¦0.6¦_wait¦4
-0 msg states at run connected connected
-0 msg send ‹RRDsendUpdate 5›
-0 rrd send 'update /tmp/rrdtest.rrd 1049515628:12'
-0 msg send result RECV_AGAIN
-0 rrd recv '-123 No'
-0 msg recv msg ‹MsgIncoming: msg:'No' errno:123 type:MT_ERROR prio:2›
-0 conn incoming RRDqueue t¦tt¦ttt ‹MsgIncoming: msg:'No' errno:123 type:MT_ERROR prio:2›
-0 msg recv t¦tt¦ttt ‹MsgIncoming: msg:'No' errno:123 type:MT_ERROR prio:2›
-0 msg recv= MINE ‹RRDsendUpdate 6›
-0 msg states at run connected connected
-1 Yes error
+TRACE msg states at run connected connected
+TRACE msg send ‹RRDsendUpdate 5›
+TRACE rrd send 'update /tmp/rrdtest.rrd 1049515628:12'
+TRACE msg send result RECV_AGAIN
+TRACE rrd recv '-123 No'
+TRACE msg recv msg ‹MsgIncoming: msg:'No' errno:123 type:MT_ERROR prio:2›
+TRACE conn incoming RRDqueue t¦tt¦ttt ‹MsgIncoming: msg:'No' errno:123 type:MT_ERROR prio:2›
+TRACE msg recv t¦tt¦ttt ‹MsgIncoming: msg:'No' errno:123 type:MT_ERROR prio:2›
+TRACE msg recv= MINE ‹RRDsendUpdate 6›
+TRACE msg states at run connected connected
+DEBUG Yes error
 : ‹Collected RRDfile:a¦aa¦aaa›
 name: a¦aa¦aaa
 server: ‹RRDqueue:t¦tt¦ttt connected›
@@ -188,11 +188,11 @@ server: ‹RRDqueue:t¦tt¦ttt connected›
                port: 52442
 filename: /tmp/rrdtest.rrd
 .
-1 Yes
-0 locking +WAIT 10 kill job ‹RRDqueue:t¦tt¦ttt connected›
-0 locking -WAIT 10 kill job ‹RRDqueue:t¦tt¦ttt connected›
-0 locking +WAIT 11 kill job ‹RRDchannel:‹Collected RRDchannel_forwarder:t¦tt¦ttt››
-0 !got DOWN_EVENT t tt ttt
+DEBUG Yes
+TRACE locking +WAIT 10 kill job ‹RRDqueue:t¦tt¦ttt connected›
+TRACE locking -WAIT 10 kill job ‹RRDqueue:t¦tt¦ttt connected›
+TRACE locking +WAIT 11 kill job ‹RRDchannel:‹Collected RRDchannel_forwarder:t¦tt¦ttt››
+TRACE !got DOWN_EVENT t tt ttt
 NEW: ‹ConditionalWorkSequence:17 (4)›
    : │  id: 17
    : │  call count: 0
@@ -200,11 +200,11 @@ NEW: ‹ConditionalWorkSequence:17 (4)›
    : └1╴... done.
 EVENT: rrd¦disconnect¦t¦tt¦ttt
 END: rrd¦disconnect¦t¦tt¦ttt
-0 locking -WAIT 11 kill job ‹RRDchannel:‹Collected RRDchannel_forwarder:t¦tt¦ttt››
-0 conn deleted RRDqueue t¦tt¦ttt
-1 Yes
-0 locking +WAIT 12 kill job <homevent.tokize.tokizer obj>
-0 locking -WAIT 12 kill job <homevent.tokize.tokizer obj>
+TRACE locking -WAIT 11 kill job ‹RRDchannel:‹Collected RRDchannel_forwarder:t¦tt¦ttt››
+TRACE conn deleted RRDqueue t¦tt¦ttt
+DEBUG Yes
+TRACE locking +WAIT 12 kill job <homevent.tokize.tokizer obj>
+TRACE locking -WAIT 12 kill job <homevent.tokize.tokizer obj>
 NEW: ‹ConditionalWorkSequence:18 (6)›
    : │  id: 18
    : │  call count: 0

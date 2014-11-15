@@ -21,7 +21,7 @@ RUN: SayWorker: TellMe
  at: ‹ConditionalWorkSequence:10 (5)› (step 1)
  ev: EVENT: say¦hello
 .
-0 The 'TellMe' worker is saying: hello
+TRACE The 'TellMe' worker is saying: hello
 .
 END: say¦hello
 .
@@ -54,13 +54,13 @@ RUN: SayWorker: TellOne
  at: ‹WorkSequence:12 (2)› (step 1)
  ev: EVENT: say more¦greeting
 .
-0 The 'TellOne' worker is saying: greeting
+TRACE The 'TellOne' worker is saying: greeting
 .
 RUN: SayWorker: TellTwo
  at: ‹WorkSequence:12 (2)› (step 2)
  ev: EVENT: say more¦greeting
 .
-0 The 'TellTwo' worker is saying: greeting
+TRACE The 'TellTwo' worker is saying: greeting
 .
 END: say more¦greeting
 .
