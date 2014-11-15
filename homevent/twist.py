@@ -318,8 +318,16 @@ class Jobber(object):
 				else:
 					gevent.sleep(0.1)
  
+		def erh(p,*a,**k):
+			try:
+				return p(*a,**k)
+			except Exception as e:
+				a,b,c = sys.exc_info()
+				import traceback
+				traceback.print_exception(a,b,c)
+				raise
 		setattr(self,attr,_starting)
-		j = gevent.spawn(proc,*a,**k)
+		j = gevent.spawn(erh,proc,*a,**k)
  
 		def err(e):
 			try:
@@ -343,6 +351,9 @@ class Jobber(object):
 		if j is None:
 			return
 		with log_wait("kill",attr,str(self)):
+			if getattr(self,attr,None) is gevent.getcurrent():
+				setattr(self,attr,None)
+				raise RuntimeError("a thread kills itself")
 			if j is not _starting:
 				j.kill()
 			while getattr(self,attr,None) is j:
