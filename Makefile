@@ -40,8 +40,10 @@ homevent/gevent_rpyc.py: _geventreactor/Pinako/geventrpyc/__init__.py
 _geventreactor/Pinako/geventrpyc/__init__.py: submod
 _geventreactor/Pinako/geventreactor/__init__.py: submod
 submod:
-	git submodule init
-	git submodule update
+	if test ! -e _geventreactor/.git ; then \
+	git submodule init; \
+	git submodule update; \
+	fi
 FIX:
 	@if test ! -d homevent/modules; then ln -s ../modules homevent/modules; fi
 
