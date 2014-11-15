@@ -70,8 +70,7 @@ else:
 	def now(force=False):
 		return dt.datetime.now()
 	def sleep(_,timeout):
-		with log_wait("Timer wait for %s" % (timeout,)):
-			gevent.sleep(timeout)
+		gevent.sleep(timeout)
 
 def unixdelta(delta):
 	return delta.days*24*60*60 + delta.seconds + delta.microseconds/1e6;
