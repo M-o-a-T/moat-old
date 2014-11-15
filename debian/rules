@@ -67,8 +67,9 @@ binary-arch: build install
 #	dh_installpam
 #	dh_installmime
 	dh_python2 -p python-homevent
-	dh_systemd_enable homevent.target
-	dh_systemd_start --restart-after-upgrade
+	install debian/homevent@.service debian/homevent.target debian/homevent/lib/systemd/system/
+	dh_systemd_enable -p homevent homevent.target
+	dh_systemd_start -p homevent --restart-after-upgrade homevent.target
 	dh_installinit
 	dh_installman
 	dh_link
