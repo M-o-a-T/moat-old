@@ -10,10 +10,6 @@ onewire_params
 test/interactive/onewire
 temp
 python-build-stamp-*
-debian/homevent
-debian/*.substvars
-debian/*.debhelper
-debian/files
 build
 dist
 homevent.egg-info
@@ -29,5 +25,4 @@ fs20/avr/*.bin
 *.elf
 *.lst
 *.map
-debian/*.debhelper.log
 homevent/gevent_rpyc.py

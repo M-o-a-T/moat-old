@@ -16,6 +16,7 @@
 
 export PYTHONPATH=$(shell pwd):$(shell pwd)/dabroker
 DESTDIR ?= "/"
+PYDESTDIR ?= ${DESTDIR}
 
 all: subfiles
 	cp -a _geventreactor/Pinako/geventrpyc/__init__.py homevent/gevent_rpyc.py
@@ -25,7 +26,7 @@ all: subfiles
 install:
 	$(MAKE) -C fs20 install ROOT=$(DESTDIR)
 	$(MAKE) -C wago install ROOT=$(DESTDIR)
-	python setup.py install --root="$(DESTDIR)" --no-compile -O0 --install-layout=deb
+	python setup.py install --root="$(PYDESTDIR)" --no-compile -O0 --install-layout=deb
 
 subfiles: homevent/gevent_rpyc.py
 
@@ -42,7 +43,7 @@ FIX:
 	@if test ! -d homevent/modules; then ln -s ../modules homevent/modules; fi
 
 clean:
-	python setup.py clean --build-base="$(DESTDIR)"
+	python setup.py clean --build-base="$(PYDESTDIR)"
 	rm -rf build
 	@$(MAKE) -C fs20 --no-print-directory clean
 	@$(MAKE) -C wago --no-print-directory clean

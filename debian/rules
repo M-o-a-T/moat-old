@@ -40,11 +40,10 @@ install: build
 	dh_clean -k
 	dh_installdirs
 
-	$(MAKE) install DESTDIR="$(shell pwd)/debian/homevent/"
+	$(MAKE) install DESTDIR="$(shell pwd)/debian/homevent/" PYDESTDIR="$(shell pwd)/debian/python-homevent/"
 
-	mkdir -p debian/homevent/usr/sbin
-	mv debian/homevent/usr/bin/daemon.py debian/homevent/usr/sbin/homevent
-	install sitecustomize.py debian/homevent/etc/homevent
+	mkdir -p debian/python-homevent/usr/sbin
+	mv debian/python-homevent/usr/bin/daemon.py debian/python-homevent/usr/sbin/homevent
 	install daemon.he debian/homevent/etc/homevent
 
 
@@ -67,7 +66,7 @@ binary-arch: build install
 #	dh_installemacsen
 #	dh_installpam
 #	dh_installmime
-	dh_python2
+	dh_python2 -p python-homevent
 	dh_systemd_enable homevent.target
 	dh_systemd_start --restart-after-upgrade
 	dh_installinit

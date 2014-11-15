@@ -1,0 +1,7 @@
+/homevent
+/python-homevent
+/*.substvars
+/*.debhelper
+/files
+/*.debhelper.log
+
