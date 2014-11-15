@@ -210,14 +210,14 @@ def _completer(g,job):
 		print >>sys.stderr,"G ERR %d %s" % (job,v)
 	def pr_del(v):
 		del Jobs[job]
-		g.link_value(pr_ok)
-		g.link_exception(pr_err)
+		#g.link_value(pr_ok)
+		#g.link_exception(pr_err)
 	g.link(pr_del)
 def do_spawn(func,*a,**k):
 	global gjob
 	gjob += 1
 	job = gjob
-	print >>sys.stderr,"G SPAWN %d %s %s %s" % (job,func,a,k)
+	#print >>sys.stderr,"G SPAWN %d %s %s %s" % (job,func,a,k)
 	g = gspawn(func,*a,**k)
 	Jobs[job]=Job(g,func,a,k)
 	_completer(g,job)
@@ -250,8 +250,8 @@ def wait_for_all_threads():
 	for r in (True,False):
 		while nr_threads(r):
 			if n==10:
-				for job,t in Jobs.iteritems():
-					print >>sys.stderr,"G WAIT %d %r %r %r" % (job,t.func,t.a,t.k)
+#				for job,t in Jobs.iteritems():
+#					print >>sys.stderr,"G WAIT %d %r %r %r" % (job,t.func,t.a,t.k)
 
 				break
 			n += 1
@@ -293,10 +293,10 @@ class log_wait(object):
 			from homevent.logging import log as xlog, TRACE as xTRACE
 			_log = xlog
 			TRACE = xTRACE
-		_log(TRACE,"locking","+WAIT", self.w, *self.a)
+		#_log(TRACE,"locking","+WAIT", self.w, *self.a)
 		return self
 	def __exit__(self, a,b,c):
-		_log(TRACE,"locking","-WAIT", self.w, *self.a)
+		#_log(TRACE,"locking","-WAIT", self.w, *self.a)
 		return False
 
 ### Safely start gevent threads

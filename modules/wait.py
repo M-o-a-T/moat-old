@@ -122,9 +122,9 @@ class Waiter(Collected,Jobber):
 		return u"‹%s %s %s›" % (self.__class__.__name__, self.name,self.value)
 
 	def _pling(self,timeout):
-		log(TRACE,"WaitEnter",self.name,self.force,timeout)
+		#log(TRACE,"WaitEnter",self.name,self.force,timeout)
 		sleep(self.force, timeout, self.name)
-		log(TRACE,"WaitDone Del",self.name)
+		#log(TRACE,"WaitDone Del",self.name)
 		assert self._plinger is not None
 		self._plinger = None
 		super(Waiter,self).delete()
@@ -154,7 +154,7 @@ class Waiter(Collected,Jobber):
 				if self._plinger:
 					self.stop_job('_plinger')
 					assert self._plinger is None
-					log(TRACE,"WaitDel",self.name)
+					#log(TRACE,"WaitDel",self.name)
 					super(Waiter,self).delete(ctx=ctx)
 					self.job.set(False)
 
