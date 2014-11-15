@@ -69,7 +69,7 @@ if TESTING:
 else:
 	def now(force=False):
 		return dt.datetime.now()
-	def sleep(_,timeout):
+	def sleep(_,timeout,_=None):
 		gevent.sleep(timeout)
 
 def unixdelta(delta):
