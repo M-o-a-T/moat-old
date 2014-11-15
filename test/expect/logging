@@ -1,33 +1,27 @@
-NEW: ‹ConditionalWorkSequence:7 (4)›
-   : │  id: 7
+NEW: ‹ConditionalWorkSequence:5 (2)›
+   : │  id: 5
    : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
 EVENT: startup
 END: startup
-TRACE locking +WAIT 1 start job ‹Collected Parser:n1›
-TRACE locking -WAIT 1 start job ‹Collected Parser:n1›
-TRACE locking +WAIT 2 start job <homevent.tokize.tokizer obj>
-TRACE locking -WAIT 2 start job <homevent.tokize.tokizer obj>
-TRACE locking +WAIT 3 start job ‹Collected OutLogger:OutLogger¦x2›
-TRACE locking -WAIT 3 start job ‹Collected OutLogger:OutLogger¦x2›
 TRACE This is not logged
 DEBUG> This is logged
 DEBUG This is logged
 WARN> This is logged too
-3 This is logged too
-TRACE = TRACE
-DEBUG = DEBUG
+WARN This is logged too
+0 = TRACE
+1 = DEBUG
 2 = INFO
 3 = WARN
 4 = ERROR
 5 = PANIC
 9 = NONE
 .
-3 This is not logged either
-TRACE> NEW: ‹ConditionalWorkSequence:8 (4)›
-NEW: ‹ConditionalWorkSequence:8 (4)›
-   : │  id: 8
+WARN This is not logged either
+TRACE> NEW: ‹ConditionalWorkSequence:6 (2)›
+NEW: ‹ConditionalWorkSequence:6 (2)›
+   : │  id: 6
    : │  call count: 0
    : │  IEVENT: Logged
    : └1╴... done.
@@ -35,7 +29,3 @@ TRACE> IEVENT: Logged
 IEVENT: Logged
 TRACE> END: Logged
 END: Logged
-TRACE> locking +WAIT 4 kill job <homevent.tokize.tokizer obj>
-TRACE locking +WAIT 4 kill job <homevent.tokize.tokizer obj>
-TRACE> locking -WAIT 4 kill job <homevent.tokize.tokizer obj>
-TRACE locking -WAIT 4 kill job <homevent.tokize.tokizer obj>

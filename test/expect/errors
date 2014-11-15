@@ -1,98 +1,57 @@
-NEW: ‹ConditionalWorkSequence:7 (4)›
-   : │  id: 7
+NEW: ‹ConditionalWorkSequence:5 (2)›
+   : │  id: 5
    : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
 EVENT: startup
 END: startup
-TRACE locking +WAIT 1 start job ‹Collected Parser:n1›
-TRACE locking -WAIT 1 start job ‹Collected Parser:n1›
-TRACE locking +WAIT 2 start job <homevent.tokize.tokizer obj>
-TRACE locking -WAIT 2 start job <homevent.tokize.tokizer obj>
 DEBUG Yes A
 DEBUG Yes B
 DEBUG Yes C
 DEBUG Yes D
-TRACE Triggered:
+0 Triggered:
 TRACE RaisedError: Foo A
 RaisedError: Foo A
-NEW: ‹WorkSequence:8 (4)›
-   : │  id: 8
+NEW: ‹WorkSequence:6 (2)›
+   : │  id: 6
    : │  call count: 0
    : │  RaisedError: Foo A
    : └1╴... done.
 RaisedError: Foo A
 END: RaisedError
 DEBUG Yes E
-TRACE Triggered:
+0 Triggered:
 TRACE RaisedError: Foo B
 DEBUG Yes F B
 DEBUG Yes G
-TRACE Triggered:
+0 Triggered:
 TRACE RaisedError: Foo C
 DEBUG Yes H C
 DEBUG Yes I
-TRACE Triggered:
+0 Triggered:
 TRACE RaisedError: Foo D
 DEBUG Yes J D
-TRACE Triggered:
+0 Triggered:
 TRACE RaisedError: Foo E
 RaisedError: Foo E
-NEW: ‹WorkSequence:9 (4)›
-   : │  id: 9
+NEW: ‹WorkSequence:7 (2)›
+   : │  id: 7
    : │  call count: 0
    : │  RaisedError: Foo E
    : └1╴... done.
 RaisedError: Foo E
 END: RaisedError
 DEBUG Yes K
-TRACE Triggered:
+0 Triggered:
 TRACE RaisedError: Foo F
 DEBUG Yes L F
-TRACE Triggered:
+0 Triggered:
 TRACE RaisedError: Foo G
 DEBUG Yes M G
 DEBUG Yes N KEY
-TRACE Triggered:
+0 Triggered:
 TRACE RaisedError: Foo Bar
 DEBUG Yes O
-TRACE Triggered:
+0 Triggered:
 TRACE RaisedError: Foo Bar
 DEBUG Yes P Foo Bar
-TRACE locking +WAIT 3 kill job <homevent.tokize.tokizer obj>
-TRACE locking -WAIT 3 kill job <homevent.tokize.tokizer obj>
-NEW: ‹ConditionalWorkSequence:10 (6)›
-   : │  id: 10
-   : │  call count: 0
-   : │  EVENT: shutdown
-   : └1╴... done.
-EVENT: shutdown
-NEW: ‹ConditionalWorkSequence:11 (4)›
-   : │  id: 11
-   : │  call count: 0
-   : │  EVENT: module¦unload¦bool
-   : └1╴... done.
-EVENT: module¦unload¦bool
-END: module¦unload¦bool
-NEW: ‹ConditionalWorkSequence:12 (4)›
-   : │  id: 12
-   : │  call count: 0
-   : │  EVENT: module¦unload¦errors
-   : └1╴... done.
-EVENT: module¦unload¦errors
-END: module¦unload¦errors
-NEW: ‹ConditionalWorkSequence:13 (4)›
-   : │  id: 13
-   : │  call count: 0
-   : │  EVENT: module¦unload¦logging
-   : └1╴... done.
-EVENT: module¦unload¦logging
-END: module¦unload¦logging
-NEW: ‹ConditionalWorkSequence:14 (4)›
-   : │  id: 14
-   : │  call count: 0
-   : │  EVENT: module¦unload¦block
-   : └1╴... done.
-EVENT: module¦unload¦block
-END: module¦unload¦block
-END: shutdown

@@ -1,117 +1,105 @@
-NEW: ‹ConditionalWorkSequence:7 (4)›
-   : │  id: 7
+NEW: ‹ConditionalWorkSequence:5 (2)›
+   : │  id: 5
    : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
 EVENT: startup
 END: startup
-TRACE locking +WAIT 1 start job ‹Collected Parser:n1›
-TRACE locking -WAIT 1 start job ‹Collected Parser:n1›
-TRACE locking +WAIT 2 start job <homevent.tokize.tokizer obj>
-TRACE locking -WAIT 2 start job <homevent.tokize.tokizer obj>
-TRACE locking +WAIT 3 start job ‹Waiter BEFORE ??›
-TRACE locking -WAIT 3 start job ‹Waiter BEFORE ??›
-NEW: ‹ConditionalWorkSequence:8 (4)›
+NEW: ‹ConditionalWorkSequence:6 (2)›
+   : │  id: 6
+   : │  call count: 0
+   : │  EVENT: wait¦start¦0.2¦BEFORE
+   : └1╴... done.
+EVENT: wait¦start¦0.2¦BEFORE
+END: wait¦start¦0.2¦BEFORE
+NEW: ‹ConditionalWorkSequence:7 (2)›
+   : │  id: 7
+   : │  call count: 0
+   : │  EVENT: wait¦start¦1.9¦Foo¦Bar
+   : └1╴... done.
+EVENT: wait¦start¦1.9¦Foo¦Bar
+END: wait¦start¦1.9¦Foo¦Bar
+2003-04-05 06:07:08.250000 BEFORE: Fake timer done 
+NEW: ‹ConditionalWorkSequence:8 (2)›
    : │  id: 8
    : │  call count: 0
-   : │  EVENT: wait¦start¦×××¦BEFORE
+   : │  EVENT: wait¦done¦0.3¦BEFORE
    : └1╴... done.
-EVENT: wait¦start¦×××¦BEFORE
-END: wait¦start¦×××¦BEFORE
-TRACE locking +WAIT 4 start job ‹Waiter Foo¦Bar ??›
-TRACE locking -WAIT 4 start job ‹Waiter Foo¦Bar ??›
-NEW: ‹ConditionalWorkSequence:9 (4)›
-   : │  id: 9
-   : │  call count: 0
-   : │  EVENT: wait¦start¦×××¦Foo¦Bar
-   : └1╴... done.
-EVENT: wait¦start¦×××¦Foo¦Bar
-END: wait¦start¦×××¦Foo¦Bar
-NEW: ‹ConditionalWorkSequence:10 (4)›
-   : │  id: 10
-   : │  call count: 0
-   : │  EVENT: wait¦done¦×××¦BEFORE
-   : └1╴... done.
-EVENT: wait¦done¦×××¦BEFORE
-END: wait¦done¦×××¦BEFORE
+EVENT: wait¦done¦0.3¦BEFORE
+END: wait¦done¦0.3¦BEFORE
 DEBUG Start
 DEBUG waiting
-TRACE locking +WAIT 5 start job ‹Waiter DURING ??›
-TRACE locking -WAIT 5 start job ‹Waiter DURING ??›
-NEW: ‹ConditionalWorkSequence:11 (4)›
+NEW: ‹ConditionalWorkSequence:9 (2)›
+   : │  id: 9
+   : │  call count: 0
+   : │  EVENT: wait¦start¦1.0¦DURING
+   : └1╴... done.
+EVENT: wait¦start¦1.0¦DURING
+END: wait¦start¦1.0¦DURING
+2003-04-05 06:07:09.100000 DURING: Fake timer done 
+NEW: ‹ConditionalWorkSequence:10 (2)›
+   : │  id: 10
+   : │  call count: 0
+   : │  EVENT: wait¦done¦1.1¦DURING
+   : └1╴... done.
+EVENT: wait¦done¦1.1¦DURING
+END: wait¦done¦1.1¦DURING
+DEBUG testing
+DEBUG waiting
+NEW: ‹ConditionalWorkSequence:11 (2)›
    : │  id: 11
    : │  call count: 0
-   : │  EVENT: wait¦start¦×××¦DURING
+   : │  EVENT: wait¦start¦1.8¦DURING
    : └1╴... done.
-EVENT: wait¦start¦×××¦DURING
-END: wait¦start¦×××¦DURING
-NEW: ‹ConditionalWorkSequence:12 (4)›
+EVENT: wait¦start¦1.8¦DURING
+END: wait¦start¦1.8¦DURING
+2003-04-05 06:07:09.800000 DURING: Fake timer done 
+NEW: ‹ConditionalWorkSequence:12 (2)›
    : │  id: 12
    : │  call count: 0
-   : │  EVENT: wait¦done¦×××¦DURING
+   : │  EVENT: wait¦done¦1.8¦DURING
    : └1╴... done.
-EVENT: wait¦done¦×××¦DURING
-END: wait¦done¦×××¦DURING
+EVENT: wait¦done¦1.8¦DURING
+END: wait¦done¦1.8¦DURING
 DEBUG testing
 DEBUG waiting
-TRACE locking +WAIT 6 start job ‹Waiter DURING ??›
-TRACE locking -WAIT 6 start job ‹Waiter DURING ??›
-NEW: ‹ConditionalWorkSequence:13 (4)›
+NEW: ‹ConditionalWorkSequence:13 (2)›
    : │  id: 13
    : │  call count: 0
-   : │  EVENT: wait¦start¦×××¦DURING
+   : │  EVENT: wait¦start¦2.5¦DURING
    : └1╴... done.
-EVENT: wait¦start¦×××¦DURING
-END: wait¦start¦×××¦DURING
-NEW: ‹ConditionalWorkSequence:14 (4)›
+EVENT: wait¦start¦2.5¦DURING
+END: wait¦start¦2.5¦DURING
+2003-04-05 06:07:09.950000 Foo¦Bar: Fake timer done 
+NEW: ‹ConditionalWorkSequence:14 (2)›
    : │  id: 14
    : │  call count: 0
-   : │  EVENT: wait¦done¦×××¦DURING
+   : │  EVENT: wait¦done¦2.0¦Foo¦Bar
    : └1╴... done.
-EVENT: wait¦done¦×××¦DURING
-END: wait¦done¦×××¦DURING
-DEBUG testing
-DEBUG waiting
-TRACE locking +WAIT 7 start job ‹Waiter DURING ??›
-TRACE locking -WAIT 7 start job ‹Waiter DURING ??›
-NEW: ‹ConditionalWorkSequence:15 (4)›
+EVENT: wait¦done¦2.0¦Foo¦Bar
+END: wait¦done¦2.0¦Foo¦Bar
+2003-04-05 06:07:10.550000 DURING: Fake timer done 
+NEW: ‹ConditionalWorkSequence:15 (2)›
    : │  id: 15
    : │  call count: 0
-   : │  EVENT: wait¦start¦×××¦DURING
+   : │  EVENT: wait¦done¦2.5¦DURING
    : └1╴... done.
-EVENT: wait¦start¦×××¦DURING
-END: wait¦start¦×××¦DURING
-NEW: ‹ConditionalWorkSequence:16 (4)›
-   : │  id: 16
-   : │  call count: 0
-   : │  EVENT: wait¦done¦×××¦Foo¦Bar
-   : └1╴... done.
-EVENT: wait¦done¦×××¦Foo¦Bar
-END: wait¦done¦×××¦Foo¦Bar
-NEW: ‹ConditionalWorkSequence:17 (4)›
-   : │  id: 17
-   : │  call count: 0
-   : │  EVENT: wait¦done¦×××¦DURING
-   : └1╴... done.
-EVENT: wait¦done¦×××¦DURING
-END: wait¦done¦×××¦DURING
+EVENT: wait¦done¦2.5¦DURING
+END: wait¦done¦2.5¦DURING
 DEBUG testing
 DEBUG Done
-TRACE locking +WAIT 8 start job ‹Waiter AFTER ??›
-TRACE locking -WAIT 8 start job ‹Waiter AFTER ??›
-NEW: ‹ConditionalWorkSequence:18 (4)›
-   : │  id: 18
+NEW: ‹ConditionalWorkSequence:16 (2)›
+   : │  id: 16
    : │  call count: 0
-   : │  EVENT: wait¦start¦×××¦AFTER
+   : │  EVENT: wait¦start¦2.6¦AFTER
    : └1╴... done.
-EVENT: wait¦start¦×××¦AFTER
-END: wait¦start¦×××¦AFTER
-NEW: ‹ConditionalWorkSequence:19 (4)›
-   : │  id: 19
+EVENT: wait¦start¦2.6¦AFTER
+END: wait¦start¦2.6¦AFTER
+2003-04-05 06:07:10.700000 AFTER: Fake timer done 
+NEW: ‹ConditionalWorkSequence:17 (2)›
+   : │  id: 17
    : │  call count: 0
-   : │  EVENT: wait¦done¦×××¦AFTER
+   : │  EVENT: wait¦done¦2.7¦AFTER
    : └1╴... done.
-EVENT: wait¦done¦×××¦AFTER
-END: wait¦done¦×××¦AFTER
-TRACE locking +WAIT 9 kill job <homevent.tokize.tokizer obj>
-TRACE locking -WAIT 9 kill job <homevent.tokize.tokizer obj>
+EVENT: wait¦done¦2.7¦AFTER
+END: wait¦done¦2.7¦AFTER

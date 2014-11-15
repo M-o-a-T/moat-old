@@ -1,16 +1,12 @@
-NEW: ‹ConditionalWorkSequence:7 (4)›
-   : │  id: 7
+NEW: ‹ConditionalWorkSequence:5 (2)›
+   : │  id: 5
    : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
 EVENT: startup
 END: startup
-TRACE locking +WAIT 1 start job ‹Collected Parser:n1›
-TRACE locking -WAIT 1 start job ‹Collected Parser:n1›
-TRACE locking +WAIT 2 start job <homevent.tokize.tokizer obj>
-TRACE locking -WAIT 2 start job <homevent.tokize.tokizer obj>
 TRACE Yes!
-TRACE INIT sqlite {'username': 'smurf', 'trace': <function trace at 0x×××>, 'database': '/tmp/homevent.smurf.db', 'dbtype': 'sqlite', 'dataport': '3306', 'host': 'sql.intern.smurf.noris.de', 'password': 'geheim'}
+TRACE INIT sqlite {'username': 'smurf', 'trace': <function trace at 0x7f75df9e5aa0>, 'database': '/tmp/homevent.smurf.db', 'dbtype': 'sqlite', 'dataport': '3306', 'host': 'sql.intern.smurf.noris.de', 'password': 'geheim'}
 TRACE DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) (u"u'three'",)
 TRACE Commit  
 TRACE Yes!
@@ -23,8 +19,8 @@ TRACE Yes!
 TRACE We still have three
 TRACE DoFn ('delete from HE_State where category=? and name=?', ('state', 'foo bar')) 1
 TRACE Commit  
-NEW: ‹ConditionalWorkSequence:8 (4)›
-   : │  id: 8
+NEW: ‹ConditionalWorkSequence:6 (2)›
+   : │  id: 6
    : │  call count: 0
    : │  EVENT: state¦three¦-¦foo¦bar
    : └1╴... done.
@@ -34,5 +30,3 @@ END: state¦three¦-¦foo¦bar
 TRACE DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) None
 TRACE RollBack  
 TRACE Yes!
-TRACE locking +WAIT 3 kill job <homevent.tokize.tokizer obj>
-TRACE locking -WAIT 3 kill job <homevent.tokize.tokizer obj>

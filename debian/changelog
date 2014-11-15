@@ -1,3 +1,9 @@
+homevent (0.4.1) smurf; urgency=medium
+
+  * Annoying errors: errored off, out and/or away
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Sat, 15 Nov 2014 18:49:26 +0100
+
 homevent (0.4.0) smurf; urgency=low
 
   * Split binaries to their own package.

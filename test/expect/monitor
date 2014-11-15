@@ -1,41 +1,85 @@
-NEW: ‹ConditionalWorkSequence:7 (4)›
-   : │  id: 7
+NEW: ‹ConditionalWorkSequence:5 (2)›
+   : │  id: 5
    : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
 EVENT: startup
 END: startup
-TRACE locking +WAIT 1 start job ‹Collected Parser:n1›
-TRACE locking -WAIT 1 start job ‹Collected Parser:n1›
-TRACE locking +WAIT 2 start job <homevent.tokize.tokizer obj>
-TRACE locking -WAIT 2 start job <homevent.tokize.tokizer obj>
 TRACE Create OnEvtHandler: monitor¦value¦*VAL¦foo¦bar
-TRACE NewHandler 8
-TRACE locking +WAIT 3 monitor up ‹Tester foo¦bar off›
-TRACE locking -WAIT 3 monitor up ‹Tester foo¦bar off›
-NEW: ‹ConditionalWorkSequence:9 (4)›
-   : │  id: 9
+TRACE NewHandler 6
+NEW: ‹ConditionalWorkSequence:7 (2)›
+   : │  id: 7
    : │  call count: 0
    : │  EVENT: monitor¦start¦foo¦bar
    : └1╴... done.
 EVENT: monitor¦start¦foo¦bar
 END: monitor¦start¦foo¦bar
-TRACE locking +WAIT 4 start job ‹Tester foo¦bar off›
-TRACE locking -WAIT 4 start job ‹Tester foo¦bar off›
-TRACE locking +WAIT 5 start job ‹Waiter _wait¦1 ??›
-TRACE locking -WAIT 5 start job ‹Waiter _wait¦1 ??›
-NEW: ‹ConditionalWorkSequence:10 (4)›
-   : │  id: 10
+NEW: ‹ConditionalWorkSequence:8 (2)›
+   : │  id: 8
    : │  call count: 0
-   : │  EVENT: wait¦start¦×××¦_wait¦1
+   : │  EVENT: wait¦start¦1.0¦_wait¦1
    : └1╴... done.
-EVENT: wait¦start¦×××¦_wait¦1
-END: wait¦start¦×××¦_wait¦1
+EVENT: wait¦start¦1.0¦_wait¦1
+END: wait¦start¦1.0¦_wait¦1
 TRACE monitor Start run foo¦bar
 TRACE monitor raw 42 foo bar
-TRACE monitor filter [42] on foo¦bar
+TRACE monitor filter [42.0] on foo¦bar
 TRACE monitor End run foo¦bar
-NEW: ‹ConditionalWorkSequence:11 (5)›
+NEW: ‹ConditionalWorkSequence:9 (3)›
+   : │  id: 9
+   : │  call count: 0
+   : │  EVENT: monitor¦value¦42.0¦foo¦bar
+   : ├1╴on monitor value *VAL foo bar ‹OnEventHandler›
+   : │  prio: 51
+   : │  step: var monitor OLDVAL foo bar ‹VarMonitorHandler›
+   : │  step: if null $OLDVAL ‹IfStatement›
+   : │      : step: log TRACE First value is $VAL ‹LogHandler›
+   : └2╴... done.
+EVENT: monitor¦value¦42.0¦foo¦bar
+RUN: on monitor value *VAL foo bar ‹OnEventHandler›
+   : prio: 51
+   : step: var monitor OLDVAL foo bar ‹VarMonitorHandler›
+   : step: if null $OLDVAL ‹IfStatement›
+   :     : step: log TRACE First value is $VAL ‹LogHandler›
+ at: ‹ConditionalWorkSequence:9 (3)› (step 1)
+ ev: EVENT: monitor¦value¦42.0¦foo¦bar
+TRACE First value is 42.0
+END: monitor¦value¦42.0¦foo¦bar
+TRACE monitor Stop run foo¦bar
+2003-04-05 06:07:08.450000 : Fake timer done 
+2003-04-05 06:07:08.450000 : Fake timer done 
+TRACE monitor Start run foo¦bar
+TRACE monitor raw 40 foo bar
+TRACE monitor filter [40.0] on foo¦bar
+TRACE monitor End run foo¦bar
+NEW: ‹ConditionalWorkSequence:10 (3)›
+   : │  id: 10
+   : │  call count: 0
+   : │  EVENT: monitor¦value¦40.0¦foo¦bar
+   : ├1╴on monitor value *VAL foo bar ‹OnEventHandler›
+   : │  prio: 51
+   : │  step: var monitor OLDVAL foo bar ‹VarMonitorHandler›
+   : │  step: if null $OLDVAL ‹IfStatement›
+   : │      : step: log TRACE First value is $VAL ‹LogHandler›
+   : └2╴... done.
+EVENT: monitor¦value¦40.0¦foo¦bar
+RUN: on monitor value *VAL foo bar ‹OnEventHandler›
+   : prio: 51
+   : step: var monitor OLDVAL foo bar ‹VarMonitorHandler›
+   : step: if null $OLDVAL ‹IfStatement›
+   :     : step: log TRACE First value is $VAL ‹LogHandler›
+ at: ‹ConditionalWorkSequence:10 (3)› (step 1)
+ ev: EVENT: monitor¦value¦40.0¦foo¦bar
+TRACE Go from 42.0 to 40.0
+END: monitor¦value¦40.0¦foo¦bar
+TRACE monitor Stop run foo¦bar
+2003-04-05 06:07:08.850000 : Fake timer done 
+2003-04-05 06:07:08.850000 : Fake timer done 
+TRACE monitor Start run foo¦bar
+TRACE monitor raw 42 foo bar
+TRACE monitor filter [42.0] on foo¦bar
+TRACE monitor End run foo¦bar
+NEW: ‹ConditionalWorkSequence:11 (3)›
    : │  id: 11
    : │  call count: 0
    : │  EVENT: monitor¦value¦42.0¦foo¦bar
@@ -51,107 +95,46 @@ RUN: on monitor value *VAL foo bar ‹OnEventHandler›
    : step: var monitor OLDVAL foo bar ‹VarMonitorHandler›
    : step: if null $OLDVAL ‹IfStatement›
    :     : step: log TRACE First value is $VAL ‹LogHandler›
- at: ‹ConditionalWorkSequence:11 (5)› (step 1)
- ev: EVENT: monitor¦value¦42.0¦foo¦bar
-TRACE First value is 42.0
-END: monitor¦value¦42.0¦foo¦bar
-TRACE monitor Stop run foo¦bar
-TRACE locking +WAIT 6 monitor sleep foo bar
-TRACE locking -WAIT 6 monitor sleep foo bar
-TRACE locking +WAIT 7 monitor sleep foo bar
-TRACE locking -WAIT 7 monitor sleep foo bar
-TRACE monitor Start run foo¦bar
-TRACE monitor raw 40 foo bar
-TRACE monitor filter [40] on foo¦bar
-TRACE monitor End run foo¦bar
-NEW: ‹ConditionalWorkSequence:12 (5)›
-   : │  id: 12
-   : │  call count: 0
-   : │  EVENT: monitor¦value¦40.0¦foo¦bar
-   : ├1╴on monitor value *VAL foo bar ‹OnEventHandler›
-   : │  prio: 51
-   : │  step: var monitor OLDVAL foo bar ‹VarMonitorHandler›
-   : │  step: if null $OLDVAL ‹IfStatement›
-   : │      : step: log TRACE First value is $VAL ‹LogHandler›
-   : └2╴... done.
-EVENT: monitor¦value¦40.0¦foo¦bar
-RUN: on monitor value *VAL foo bar ‹OnEventHandler›
-   : prio: 51
-   : step: var monitor OLDVAL foo bar ‹VarMonitorHandler›
-   : step: if null $OLDVAL ‹IfStatement›
-   :     : step: log TRACE First value is $VAL ‹LogHandler›
- at: ‹ConditionalWorkSequence:12 (5)› (step 1)
- ev: EVENT: monitor¦value¦40.0¦foo¦bar
-TRACE Go from 42.0 to 40.0
-END: monitor¦value¦40.0¦foo¦bar
-TRACE monitor Stop run foo¦bar
-TRACE locking +WAIT 8 monitor sleep foo bar
-TRACE locking -WAIT 8 monitor sleep foo bar
-TRACE locking +WAIT 9 monitor sleep foo bar
-TRACE locking -WAIT 9 monitor sleep foo bar
-TRACE monitor Start run foo¦bar
-TRACE monitor raw 42 foo bar
-TRACE monitor filter [42] on foo¦bar
-TRACE monitor End run foo¦bar
-NEW: ‹ConditionalWorkSequence:13 (5)›
-   : │  id: 13
-   : │  call count: 0
-   : │  EVENT: monitor¦value¦42.0¦foo¦bar
-   : ├1╴on monitor value *VAL foo bar ‹OnEventHandler›
-   : │  prio: 51
-   : │  step: var monitor OLDVAL foo bar ‹VarMonitorHandler›
-   : │  step: if null $OLDVAL ‹IfStatement›
-   : │      : step: log TRACE First value is $VAL ‹LogHandler›
-   : └2╴... done.
-EVENT: monitor¦value¦42.0¦foo¦bar
-RUN: on monitor value *VAL foo bar ‹OnEventHandler›
-   : prio: 51
-   : step: var monitor OLDVAL foo bar ‹VarMonitorHandler›
-   : step: if null $OLDVAL ‹IfStatement›
-   :     : step: log TRACE First value is $VAL ‹LogHandler›
- at: ‹ConditionalWorkSequence:13 (5)› (step 1)
+ at: ‹ConditionalWorkSequence:11 (3)› (step 1)
  ev: EVENT: monitor¦value¦42.0¦foo¦bar
 TRACE Go from 40.0 to 42.0
 END: monitor¦value¦42.0¦foo¦bar
 TRACE monitor Stop run foo¦bar
-TRACE locking +WAIT 10 monitor sleep foo bar
-NEW: ‹ConditionalWorkSequence:14 (4)›
-   : │  id: 14
+2003-04-05 06:07:09 _wait¦1: Fake timer done 
+NEW: ‹ConditionalWorkSequence:12 (2)›
+   : │  id: 12
    : │  call count: 0
-   : │  EVENT: wait¦done¦×××¦_wait¦1
+   : │  EVENT: wait¦done¦1.0¦_wait¦1
    : └1╴... done.
-EVENT: wait¦done¦×××¦_wait¦1
-END: wait¦done¦×××¦_wait¦1
+EVENT: wait¦done¦1.0¦_wait¦1
+END: wait¦done¦1.0¦_wait¦1
 DEBUG Yes
-foo bar :: Wait ‹0.3 sec›
+foo bar :: Wait ‹0.2 sec›
 .
 : ‹Tester foo¦bar on 42.0›
 name: foo¦bar
 device: test 0…100
 value: 42.0
 up: Wait
-time: ‹0.3 sec›
+time: ‹0.2 sec›
 steps: 1 / 1 / None
-data: 42
+data: 42.0
 .
-TRACE locking +WAIT 11 start job ‹Waiter _wait¦2 ??›
-TRACE locking -WAIT 11 start job ‹Waiter _wait¦2 ??›
-NEW: ‹ConditionalWorkSequence:15 (4)›
-   : │  id: 15
+NEW: ‹ConditionalWorkSequence:13 (2)›
+   : │  id: 13
    : │  call count: 0
-   : │  EVENT: wait¦start¦×××¦_wait¦2
+   : │  EVENT: wait¦start¦1.8¦_wait¦2
    : └1╴... done.
-EVENT: wait¦start¦×××¦_wait¦2
-END: wait¦start¦×××¦_wait¦2
-TRACE locking -WAIT 10 monitor sleep foo bar
-TRACE locking +WAIT 12 monitor sleep foo bar
-TRACE locking -WAIT 12 monitor sleep foo bar
+EVENT: wait¦start¦1.8¦_wait¦2
+END: wait¦start¦1.8¦_wait¦2
+2003-04-05 06:07:09.250000 : Fake timer done 
+2003-04-05 06:07:09.250000 : Fake timer done 
 TRACE monitor Start run foo¦bar
 TRACE monitor raw 41 foo bar
-TRACE monitor filter [41] on foo¦bar
+TRACE monitor filter [41.0] on foo¦bar
 TRACE monitor End run foo¦bar
-NEW: ‹ConditionalWorkSequence:16 (5)›
-   : │  id: 16
+NEW: ‹ConditionalWorkSequence:14 (3)›
+   : │  id: 14
    : │  call count: 0
    : │  EVENT: monitor¦value¦41.0¦foo¦bar
    : ├1╴on monitor value *VAL foo bar ‹OnEventHandler›
@@ -166,65 +149,66 @@ RUN: on monitor value *VAL foo bar ‹OnEventHandler›
    : step: var monitor OLDVAL foo bar ‹VarMonitorHandler›
    : step: if null $OLDVAL ‹IfStatement›
    :     : step: log TRACE First value is $VAL ‹LogHandler›
- at: ‹ConditionalWorkSequence:16 (5)› (step 1)
+ at: ‹ConditionalWorkSequence:14 (3)› (step 1)
  ev: EVENT: monitor¦value¦41.0¦foo¦bar
 TRACE Go from 42.0 to 41.0
 END: monitor¦value¦41.0¦foo¦bar
 TRACE monitor Stop run foo¦bar
-TRACE locking +WAIT 13 monitor sleep foo bar
-TRACE locking -WAIT 13 monitor sleep foo bar
-TRACE locking +WAIT 14 monitor sleep foo bar
-NEW: ‹ConditionalWorkSequence:17 (4)›
-   : │  id: 17
+2003-04-05 06:07:09.650000 : Fake timer done 
+2003-04-05 06:07:09.650000 : Fake timer done 
+TRACE monitor Start run foo¦bar
+TRACE monitor raw 40 foo bar
+TRACE monitor filter [40.0] on foo¦bar
+TRACE monitor End run foo¦bar
+NEW: ‹ConditionalWorkSequence:15 (3)›
+   : │  id: 15
    : │  call count: 0
-   : │  EVENT: wait¦done¦×××¦_wait¦2
+   : │  EVENT: monitor¦value¦40.0¦foo¦bar
+   : ├1╴on monitor value *VAL foo bar ‹OnEventHandler›
+   : │  prio: 51
+   : │  step: var monitor OLDVAL foo bar ‹VarMonitorHandler›
+   : │  step: if null $OLDVAL ‹IfStatement›
+   : │      : step: log TRACE First value is $VAL ‹LogHandler›
+   : └2╴... done.
+EVENT: monitor¦value¦40.0¦foo¦bar
+RUN: on monitor value *VAL foo bar ‹OnEventHandler›
+   : prio: 51
+   : step: var monitor OLDVAL foo bar ‹VarMonitorHandler›
+   : step: if null $OLDVAL ‹IfStatement›
+   :     : step: log TRACE First value is $VAL ‹LogHandler›
+ at: ‹ConditionalWorkSequence:15 (3)› (step 1)
+ ev: EVENT: monitor¦value¦40.0¦foo¦bar
+TRACE Go from 41.0 to 40.0
+END: monitor¦value¦40.0¦foo¦bar
+TRACE monitor Stop run foo¦bar
+2003-04-05 06:07:09.800000 _wait¦2: Fake timer done 
+NEW: ‹ConditionalWorkSequence:16 (2)›
+   : │  id: 16
+   : │  call count: 0
+   : │  EVENT: wait¦done¦1.8¦_wait¦2
    : └1╴... done.
-EVENT: wait¦done¦×××¦_wait¦2
-END: wait¦done¦×××¦_wait¦2
-TRACE locking +WAIT 15 kill job ‹Tester foo¦bar on 41.0›
-TRACE locking -WAIT 14 monitor sleep foo bar
-NEW: ‹ConditionalWorkSequence:18 (4)›
-   : │  id: 18
+EVENT: wait¦done¦1.8¦_wait¦2
+END: wait¦done¦1.8¦_wait¦2
+NEW: ‹ConditionalWorkSequence:17 (2)›
+   : │  id: 17
    : │  call count: 0
    : │  EVENT: monitor¦stop¦foo¦bar
    : └1╴... done.
 EVENT: monitor¦stop¦foo¦bar
 END: monitor¦stop¦foo¦bar
-TRACE locking -WAIT 15 kill job ‹Tester foo¦bar on 41.0›
 .
 TRACE Create OnEvtHandler: monitor¦checking¦baz¦zaz
-TRACE NewHandler 19
-TRACE locking +WAIT 16 monitor up ‹Monitor baz¦zaz off›
-TRACE locking -WAIT 16 monitor up ‹Monitor baz¦zaz off›
-NEW: ‹ConditionalWorkSequence:20 (4)›
-   : │  id: 20
+TRACE NewHandler 18
+NEW: ‹ConditionalWorkSequence:19 (2)›
+   : │  id: 19
    : │  call count: 0
    : │  EVENT: monitor¦start¦baz¦zaz
    : └1╴... done.
 EVENT: monitor¦start¦baz¦zaz
 END: monitor¦start¦baz¦zaz
-TRACE locking +WAIT 17 start job ‹Monitor baz¦zaz off›
-TRACE locking -WAIT 17 start job ‹Monitor baz¦zaz off›
-: ‹Monitor baz¦zaz run 0›
-name: baz¦zaz
-device: passive
-value: None
-up: Run
-time: never
-steps: 0 / 2 / None
-.
-TRACE locking +WAIT 18 start job ‹Waiter _wait¦5 ??›
-TRACE locking -WAIT 18 start job ‹Waiter _wait¦5 ??›
-NEW: ‹ConditionalWorkSequence:21 (4)›
-   : │  id: 21
-   : │  call count: 0
-   : │  EVENT: wait¦start¦×××¦_wait¦5
-   : └1╴... done.
-EVENT: wait¦start¦×××¦_wait¦5
-END: wait¦start¦×××¦_wait¦5
 TRACE monitor Start run baz¦zaz
-NEW: ‹ConditionalWorkSequence:22 (5)›
-   : │  id: 22
+NEW: ‹ConditionalWorkSequence:20 (3)›
+   : │  id: 20
    : │  call count: 0
    : │  EVENT: monitor¦checking¦baz¦zaz
    : ├1╴on monitor checking baz zaz ‹OnEventHandler›
@@ -245,330 +229,388 @@ RUN: on monitor checking baz zaz ‹OnEventHandler›
    :     : step: set monitor 13 baz zaz ‹MonitorSet›
    :     : step: wait ‹WaitHandler›
    :     : step: set monitor 14 baz zaz ‹MonitorSet›
- at: ‹ConditionalWorkSequence:22 (5)› (step 1)
+ at: ‹ConditionalWorkSequence:20 (3)› (step 1)
  ev: EVENT: monitor¦checking¦baz¦zaz
 END: monitor¦checking¦baz¦zaz
-TRACE locking +WAIT 19 monitor one_value baz zaz
-TRACE locking -WAIT 19 monitor one_value baz zaz
+: ‹Monitor baz¦zaz run 0›
+name: baz¦zaz
+device: passive
+value: None
+up: Run
+time: ‹now›
+steps: 1 / 2 / None
 TRACE monitor raw 10 baz zaz
-TRACE monitor filter [10] on baz¦zaz
-TRACE monitor More data [10] for ‹baz zaz›
-TRACE locking +WAIT 20 monitor one_value baz zaz
-TRACE locking +WAIT 21 start job ‹Waiter _wait¦3 ??›
-TRACE locking -WAIT 21 start job ‹Waiter _wait¦3 ??›
-NEW: ‹ConditionalWorkSequence:23 (4)›
+TRACE monitor filter [10.0] on baz¦zaz
+TRACE monitor More data [10.0] for ‹baz zaz›
+NEW: ‹ConditionalWorkSequence:21 (2)›
+   : │  id: 21
+   : │  call count: 0
+   : │  EVENT: wait¦start¦2.0¦_wait¦3
+   : └1╴... done.
+EVENT: wait¦start¦2.0¦_wait¦3
+END: wait¦start¦2.0¦_wait¦3
+.
+NEW: ‹ConditionalWorkSequence:22 (2)›
+   : │  id: 22
+   : │  call count: 0
+   : │  EVENT: wait¦start¦1.9¦_wait¦5
+   : └1╴... done.
+EVENT: wait¦start¦1.9¦_wait¦5
+END: wait¦start¦1.9¦_wait¦5
+2003-04-05 06:07:10 _wait¦5: Fake timer done 
+NEW: ‹ConditionalWorkSequence:23 (2)›
    : │  id: 23
    : │  call count: 0
-   : │  EVENT: wait¦start¦×××¦_wait¦3
+   : │  EVENT: wait¦done¦2.0¦_wait¦5
    : └1╴... done.
-EVENT: wait¦start¦×××¦_wait¦3
-END: wait¦start¦×××¦_wait¦3
-NEW: ‹ConditionalWorkSequence:24 (4)›
+EVENT: wait¦done¦2.0¦_wait¦5
+END: wait¦done¦2.0¦_wait¦5
+DEBUG Yes
+NEW: ‹ConditionalWorkSequence:24 (2)›
    : │  id: 24
    : │  call count: 0
-   : │  EVENT: wait¦done¦×××¦_wait¦5
+   : │  EVENT: wait¦start¦2.6¦_wait¦6
    : └1╴... done.
-EVENT: wait¦done¦×××¦_wait¦5
-END: wait¦done¦×××¦_wait¦5
-DEBUG Yes
-TRACE locking +WAIT 22 start job ‹Waiter _wait¦6 ??›
-TRACE locking -WAIT 22 start job ‹Waiter _wait¦6 ??›
-NEW: ‹ConditionalWorkSequence:25 (4)›
+EVENT: wait¦start¦2.6¦_wait¦6
+END: wait¦start¦2.6¦_wait¦6
+2003-04-05 06:07:10.050000 _wait¦3: Fake timer done 
+NEW: ‹ConditionalWorkSequence:25 (2)›
    : │  id: 25
    : │  call count: 0
-   : │  EVENT: wait¦start¦×××¦_wait¦6
+   : │  EVENT: wait¦done¦2.1¦_wait¦3
    : └1╴... done.
-EVENT: wait¦start¦×××¦_wait¦6
-END: wait¦start¦×××¦_wait¦6
-NEW: ‹ConditionalWorkSequence:26 (4)›
+EVENT: wait¦done¦2.1¦_wait¦3
+END: wait¦done¦2.1¦_wait¦3
+TRACE monitor raw 13 baz zaz
+TRACE monitor filter [10.0, 13.0] on baz¦zaz
+TRACE monitor More data [10.0, 13.0] for ‹baz zaz›
+NEW: ‹ConditionalWorkSequence:26 (2)›
    : │  id: 26
    : │  call count: 0
-   : │  EVENT: wait¦done¦×××¦_wait¦3
+   : │  EVENT: wait¦start¦2.3¦_wait¦4
    : └1╴... done.
-EVENT: wait¦done¦×××¦_wait¦3
-END: wait¦done¦×××¦_wait¦3
-TRACE locking -WAIT 20 monitor one_value baz zaz
-TRACE monitor raw 13 baz zaz
-TRACE monitor filter [10, 13] on baz¦zaz
-TRACE monitor More data [10, 13] for ‹baz zaz›
-TRACE locking +WAIT 23 monitor one_value baz zaz
-TRACE locking +WAIT 24 start job ‹Waiter _wait¦4 ??›
-TRACE locking -WAIT 24 start job ‹Waiter _wait¦4 ??›
-NEW: ‹ConditionalWorkSequence:27 (4)›
+EVENT: wait¦start¦2.3¦_wait¦4
+END: wait¦start¦2.3¦_wait¦4
+2003-04-05 06:07:10.300000 _wait¦4: Fake timer done 
+NEW: ‹ConditionalWorkSequence:27 (2)›
    : │  id: 27
    : │  call count: 0
-   : │  EVENT: wait¦start¦×××¦_wait¦4
+   : │  EVENT: wait¦done¦2.3¦_wait¦4
    : └1╴... done.
-EVENT: wait¦start¦×××¦_wait¦4
-END: wait¦start¦×××¦_wait¦4
-NEW: ‹ConditionalWorkSequence:28 (4)›
-   : │  id: 28
-   : │  call count: 0
-   : │  EVENT: wait¦done¦×××¦_wait¦4
-   : └1╴... done.
-EVENT: wait¦done¦×××¦_wait¦4
-END: wait¦done¦×××¦_wait¦4
-TRACE locking -WAIT 23 monitor one_value baz zaz
+EVENT: wait¦done¦2.3¦_wait¦4
+END: wait¦done¦2.3¦_wait¦4
 TRACE monitor raw 14 baz zaz
-TRACE monitor filter [10, 13, 14] on baz¦zaz
+TRACE monitor filter [10.0, 13.0, 14.0] on baz¦zaz
 TRACE monitor End run baz¦zaz
-NEW: ‹ConditionalWorkSequence:29 (4)›
-   : │  id: 29
+NEW: ‹ConditionalWorkSequence:28 (2)›
+   : │  id: 28
    : │  call count: 0
    : │  EVENT: monitor¦checked¦baz¦zaz
    : └1╴... done.
 EVENT: monitor¦checked¦baz¦zaz
 END: monitor¦checked¦baz¦zaz
-NEW: ‹ConditionalWorkSequence:30 (4)›
-   : │  id: 30
+NEW: ‹ConditionalWorkSequence:29 (2)›
+   : │  id: 29
    : │  call count: 0
    : │  EVENT: monitor¦value¦13.5¦baz¦zaz
    : └1╴... done.
 EVENT: monitor¦value¦13.5¦baz¦zaz
 END: monitor¦value¦13.5¦baz¦zaz
 TRACE monitor Stop run baz¦zaz
-TRACE locking +WAIT 25 monitor sleep baz zaz
-TRACE locking -WAIT 25 monitor sleep baz zaz
-TRACE locking +WAIT 26 monitor sleep baz zaz
-NEW: ‹ConditionalWorkSequence:31 (4)›
+2003-04-05 06:07:10.600000 : Fake timer done 
+2003-04-05 06:07:10.600000 : Fake timer done 
+TRACE monitor Start run baz¦zaz
+NEW: ‹ConditionalWorkSequence:30 (3)›
+   : │  id: 30
+   : │  call count: 0
+   : │  EVENT: monitor¦checking¦baz¦zaz
+   : ├1╴on monitor checking baz zaz ‹OnEventHandler›
+   : │  prio: 51
+   : │  step: async ‹Async›
+   : │      : step: set monitor 10 baz zaz ‹MonitorSet›
+   : │      : step: wait ‹WaitHandler›
+   : │      : step: set monitor 13 baz zaz ‹MonitorSet›
+   : │      : step: wait ‹WaitHandler›
+   : │      : step: set monitor 14 baz zaz ‹MonitorSet›
+   : └2╴... done.
+EVENT: monitor¦checking¦baz¦zaz
+RUN: on monitor checking baz zaz ‹OnEventHandler›
+   : prio: 51
+   : step: async ‹Async›
+   :     : step: set monitor 10 baz zaz ‹MonitorSet›
+   :     : step: wait ‹WaitHandler›
+   :     : step: set monitor 13 baz zaz ‹MonitorSet›
+   :     : step: wait ‹WaitHandler›
+   :     : step: set monitor 14 baz zaz ‹MonitorSet›
+ at: ‹ConditionalWorkSequence:30 (3)› (step 1)
+ ev: EVENT: monitor¦checking¦baz¦zaz
+END: monitor¦checking¦baz¦zaz
+TRACE monitor raw 10 baz zaz
+TRACE monitor filter [10.0] on baz¦zaz
+TRACE monitor More data [10.0] for ‹baz zaz›
+NEW: ‹ConditionalWorkSequence:31 (2)›
    : │  id: 31
    : │  call count: 0
-   : │  EVENT: wait¦done¦×××¦_wait¦6
+   : │  EVENT: wait¦start¦2.8¦_wait¦3
    : └1╴... done.
-EVENT: wait¦done¦×××¦_wait¦6
-END: wait¦done¦×××¦_wait¦6
-DEBUG Yes
-: ‹Monitor baz¦zaz on 13.5›
+EVENT: wait¦start¦2.8¦_wait¦3
+END: wait¦start¦2.8¦_wait¦3
+2003-04-05 06:07:10.650000 _wait¦6: Fake timer done 
+NEW: ‹ConditionalWorkSequence:32 (2)›
+   : │  id: 32
+   : │  call count: 0
+   : │  EVENT: wait¦done¦2.7¦_wait¦6
+   : └1╴... done.
+EVENT: wait¦done¦2.7¦_wait¦6
+END: wait¦done¦2.7¦_wait¦6
+DEBUG No2
+: ‹Monitor baz¦zaz run 2›
 name: baz¦zaz
 device: passive
 value: 13.5
-up: Wait
+up: Run
 time: ‹now›
-steps: 3 / 2 / None
-data: 10 13 14
+steps: 2 / 2 / None
+data: 10.0
 .
-TRACE locking +WAIT 27 kill job ‹Monitor baz¦zaz on 13.5›
-TRACE locking -WAIT 26 monitor sleep baz zaz
-NEW: ‹ConditionalWorkSequence:32 (4)›
-   : │  id: 32
+TRACE monitor End run baz¦zaz
+TRACE monitor Stop run baz¦zaz
+2003-04-05 06:07:10.850000 _wait¦3: Fake timer done 
+NEW: ‹ConditionalWorkSequence:33 (2)›
+   : │  id: 33
+   : │  call count: 0
+   : │  EVENT: wait¦done¦2.9¦_wait¦3
+   : └1╴... done.
+EVENT: wait¦done¦2.9¦_wait¦3
+END: wait¦done¦2.9¦_wait¦3
+2003-04-05 06:07:11 : Fake timer done 
+NEW: ‹ConditionalWorkSequence:34 (2)›
+   : │  id: 34
    : │  call count: 0
    : │  EVENT: monitor¦stop¦baz¦zaz
    : └1╴... done.
 EVENT: monitor¦stop¦baz¦zaz
 END: monitor¦stop¦baz¦zaz
-TRACE locking -WAIT 27 kill job ‹Monitor baz¦zaz on 13.5›
-NEW: ‹ConditionalWorkSequence:33 (4)›
-   : │  id: 33
+NEW: ‹ConditionalWorkSequence:35 (2)›
+   : │  id: 35
    : │  call count: 0
    : │  EVENT: output¦set¦None¦1¦monitest
    : └1╴... done.
 EVENT: output¦set¦None¦1¦monitest
 END: output¦set¦None¦1¦monitest
-NEW: ‹ConditionalWorkSequence:34 (4)›
-   : │  id: 34
+NEW: ‹ConditionalWorkSequence:36 (2)›
+   : │  id: 36
    : │  call count: 0
    : │  EVENT: input¦fake¦1¦monitest
    : └1╴... done.
 EVENT: input¦fake¦1¦monitest
 END: input¦fake¦1¦monitest
-TRACE locking +WAIT 28 monitor up ‹VarMonitor moni¦test off›
-TRACE locking -WAIT 28 monitor up ‹VarMonitor moni¦test off›
-NEW: ‹ConditionalWorkSequence:35 (4)›
-   : │  id: 35
+NEW: ‹ConditionalWorkSequence:37 (2)›
+   : │  id: 37
    : │  call count: 0
    : │  EVENT: monitor¦start¦moni¦test
    : └1╴... done.
 EVENT: monitor¦start¦moni¦test
 END: monitor¦start¦moni¦test
-TRACE locking +WAIT 29 start job ‹VarMonitor moni¦test off›
-TRACE locking -WAIT 29 start job ‹VarMonitor moni¦test off›
-TRACE locking +WAIT 30 start job ‹Waiter _wait¦7 ??›
-TRACE locking -WAIT 30 start job ‹Waiter _wait¦7 ??›
-NEW: ‹ConditionalWorkSequence:36 (4)›
-   : │  id: 36
+NEW: ‹ConditionalWorkSequence:38 (2)›
+   : │  id: 38
    : │  call count: 0
-   : │  EVENT: wait¦start¦×××¦_wait¦7
+   : │  EVENT: wait¦start¦3.1¦_wait¦7
    : └1╴... done.
-EVENT: wait¦start¦×××¦_wait¦7
-END: wait¦start¦×××¦_wait¦7
+EVENT: wait¦start¦3.1¦_wait¦7
+END: wait¦start¦3.1¦_wait¦7
 TRACE monitor Start run moni¦test
 TRACE monitor raw 1 moni test
-TRACE monitor filter [1] on moni¦test
+TRACE monitor filter [1.0] on moni¦test
 TRACE monitor End run moni¦test
-NEW: ‹ConditionalWorkSequence:37 (4)›
-   : │  id: 37
+NEW: ‹ConditionalWorkSequence:39 (2)›
+   : │  id: 39
    : │  call count: 0
    : │  EVENT: monitor¦value¦1.0¦moni¦test
    : └1╴... done.
 EVENT: monitor¦value¦1.0¦moni¦test
 END: monitor¦value¦1.0¦moni¦test
 TRACE monitor Stop run moni¦test
-TRACE locking +WAIT 31 monitor sleep moni test
-NEW: ‹ConditionalWorkSequence:38 (4)›
-   : │  id: 38
+2003-04-05 06:07:11.200000 _wait¦7: Fake timer done 
+NEW: ‹ConditionalWorkSequence:40 (2)›
+   : │  id: 40
    : │  call count: 0
-   : │  EVENT: wait¦done¦×××¦_wait¦7
+   : │  EVENT: wait¦done¦3.2¦_wait¦7
    : └1╴... done.
-EVENT: wait¦done¦×××¦_wait¦7
-END: wait¦done¦×××¦_wait¦7
-NEW: ‹ConditionalWorkSequence:39 (4)›
-   : │  id: 39
+EVENT: wait¦done¦3.2¦_wait¦7
+END: wait¦done¦3.2¦_wait¦7
+NEW: ‹ConditionalWorkSequence:41 (2)›
+   : │  id: 41
    : │  call count: 0
    : │  EVENT: output¦set¦1¦2¦monitest
    : └1╴... done.
 EVENT: output¦set¦1¦2¦monitest
 END: output¦set¦1¦2¦monitest
-NEW: ‹ConditionalWorkSequence:40 (4)›
-   : │  id: 40
+NEW: ‹ConditionalWorkSequence:42 (2)›
+   : │  id: 42
    : │  call count: 0
    : │  EVENT: input¦fake¦2¦monitest
    : └1╴... done.
 EVENT: input¦fake¦2¦monitest
 END: input¦fake¦2¦monitest
-TRACE locking +WAIT 32 start job ‹Waiter _wait¦8 ??›
-TRACE locking -WAIT 32 start job ‹Waiter _wait¦8 ??›
-NEW: ‹ConditionalWorkSequence:41 (4)›
-   : │  id: 41
+NEW: ‹ConditionalWorkSequence:43 (2)›
+   : │  id: 43
    : │  call count: 0
-   : │  EVENT: wait¦start¦×××¦_wait¦8
+   : │  EVENT: wait¦start¦3.4¦_wait¦8
    : └1╴... done.
-EVENT: wait¦start¦×××¦_wait¦8
-END: wait¦start¦×××¦_wait¦8
-TRACE locking -WAIT 31 monitor sleep moni test
-TRACE locking +WAIT 33 monitor sleep moni test
-TRACE locking -WAIT 33 monitor sleep moni test
+EVENT: wait¦start¦3.4¦_wait¦8
+END: wait¦start¦3.4¦_wait¦8
+2003-04-05 06:07:11.250000 : Fake timer done 
+2003-04-05 06:07:11.250000 : Fake timer done 
 TRACE monitor Start run moni¦test
 TRACE monitor raw 2 moni test
-TRACE monitor filter [2] on moni¦test
+TRACE monitor filter [2.0] on moni¦test
 TRACE monitor End run moni¦test
-NEW: ‹ConditionalWorkSequence:42 (4)›
-   : │  id: 42
+NEW: ‹ConditionalWorkSequence:44 (2)›
+   : │  id: 44
    : │  call count: 0
    : │  EVENT: monitor¦value¦2.0¦moni¦test
    : └1╴... done.
 EVENT: monitor¦value¦2.0¦moni¦test
 END: monitor¦value¦2.0¦moni¦test
 TRACE monitor Stop run moni¦test
-TRACE locking +WAIT 34 monitor sleep moni test
-NEW: ‹ConditionalWorkSequence:43 (4)›
-   : │  id: 43
+2003-04-05 06:07:11.400000 _wait¦8: Fake timer done 
+NEW: ‹ConditionalWorkSequence:45 (2)›
+   : │  id: 45
    : │  call count: 0
-   : │  EVENT: wait¦done¦×××¦_wait¦8
+   : │  EVENT: wait¦done¦3.4¦_wait¦8
    : └1╴... done.
-EVENT: wait¦done¦×××¦_wait¦8
-END: wait¦done¦×××¦_wait¦8
-NEW: ‹ConditionalWorkSequence:44 (4)›
-   : │  id: 44
+EVENT: wait¦done¦3.4¦_wait¦8
+END: wait¦done¦3.4¦_wait¦8
+NEW: ‹ConditionalWorkSequence:46 (2)›
+   : │  id: 46
    : │  call count: 0
    : │  EVENT: output¦set¦2¦3¦monitest
    : └1╴... done.
 EVENT: output¦set¦2¦3¦monitest
 END: output¦set¦2¦3¦monitest
-NEW: ‹ConditionalWorkSequence:45 (4)›
-   : │  id: 45
+NEW: ‹ConditionalWorkSequence:47 (2)›
+   : │  id: 47
    : │  call count: 0
    : │  EVENT: input¦fake¦3¦monitest
    : └1╴... done.
 EVENT: input¦fake¦3¦monitest
 END: input¦fake¦3¦monitest
-TRACE locking +WAIT 35 start job ‹Waiter _wait¦9 ??›
-TRACE locking -WAIT 35 start job ‹Waiter _wait¦9 ??›
-NEW: ‹ConditionalWorkSequence:46 (4)›
-   : │  id: 46
-   : │  call count: 0
-   : │  EVENT: wait¦start¦×××¦_wait¦9
-   : └1╴... done.
-EVENT: wait¦start¦×××¦_wait¦9
-END: wait¦start¦×××¦_wait¦9
-TRACE locking -WAIT 34 monitor sleep moni test
-TRACE locking +WAIT 36 monitor sleep moni test
-NEW: ‹ConditionalWorkSequence:47 (4)›
-   : │  id: 47
-   : │  call count: 0
-   : │  EVENT: wait¦done¦×××¦_wait¦9
-   : └1╴... done.
-EVENT: wait¦done¦×××¦_wait¦9
-END: wait¦done¦×××¦_wait¦9
-NEW: ‹ConditionalWorkSequence:48 (4)›
+NEW: ‹ConditionalWorkSequence:48 (2)›
    : │  id: 48
+   : │  call count: 0
+   : │  EVENT: wait¦start¦3.6¦_wait¦9
+   : └1╴... done.
+EVENT: wait¦start¦3.6¦_wait¦9
+END: wait¦start¦3.6¦_wait¦9
+2003-04-05 06:07:11.450000 : Fake timer done 
+2003-04-05 06:07:11.450000 : Fake timer done 
+TRACE monitor Start run moni¦test
+TRACE monitor raw 3 moni test
+TRACE monitor filter [3.0] on moni¦test
+TRACE monitor End run moni¦test
+NEW: ‹ConditionalWorkSequence:49 (2)›
+   : │  id: 49
+   : │  call count: 0
+   : │  EVENT: monitor¦value¦3.0¦moni¦test
+   : └1╴... done.
+EVENT: monitor¦value¦3.0¦moni¦test
+END: monitor¦value¦3.0¦moni¦test
+TRACE monitor Stop run moni¦test
+2003-04-05 06:07:11.650000 : Fake timer done 
+2003-04-05 06:07:11.650000 : Fake timer done 
+TRACE monitor Start run moni¦test
+TRACE monitor raw 3 moni test
+TRACE monitor filter [3.0] on moni¦test
+TRACE monitor End run moni¦test
+NEW: ‹ConditionalWorkSequence:50 (2)›
+   : │  id: 50
+   : │  call count: 0
+   : │  EVENT: monitor¦value¦3.0¦moni¦test
+   : └1╴... done.
+EVENT: monitor¦value¦3.0¦moni¦test
+END: monitor¦value¦3.0¦moni¦test
+TRACE monitor Stop run moni¦test
+2003-04-05 06:07:11.700000 _wait¦9: Fake timer done 
+NEW: ‹ConditionalWorkSequence:51 (2)›
+   : │  id: 51
+   : │  call count: 0
+   : │  EVENT: wait¦done¦3.7¦_wait¦9
+   : └1╴... done.
+EVENT: wait¦done¦3.7¦_wait¦9
+END: wait¦done¦3.7¦_wait¦9
+NEW: ‹ConditionalWorkSequence:52 (2)›
+   : │  id: 52
    : │  call count: 0
    : │  EVENT: output¦set¦3¦4¦monitest
    : └1╴... done.
 EVENT: output¦set¦3¦4¦monitest
 END: output¦set¦3¦4¦monitest
-NEW: ‹ConditionalWorkSequence:49 (4)›
-   : │  id: 49
+NEW: ‹ConditionalWorkSequence:53 (2)›
+   : │  id: 53
    : │  call count: 0
    : │  EVENT: input¦fake¦4¦monitest
    : └1╴... done.
 EVENT: input¦fake¦4¦monitest
 END: input¦fake¦4¦monitest
-TRACE locking +WAIT 37 start job ‹Waiter _wait¦10 ??›
-TRACE locking -WAIT 37 start job ‹Waiter _wait¦10 ??›
-NEW: ‹ConditionalWorkSequence:50 (4)›
-   : │  id: 50
+NEW: ‹ConditionalWorkSequence:54 (2)›
+   : │  id: 54
    : │  call count: 0
-   : │  EVENT: wait¦start¦×××¦_wait¦10
+   : │  EVENT: wait¦start¦3.9¦_wait¦10
    : └1╴... done.
-EVENT: wait¦start¦×××¦_wait¦10
-END: wait¦start¦×××¦_wait¦10
-TRACE locking -WAIT 36 monitor sleep moni test
+EVENT: wait¦start¦3.9¦_wait¦10
+END: wait¦start¦3.9¦_wait¦10
+2003-04-05 06:07:11.850000 : Fake timer done 
+2003-04-05 06:07:11.850000 : Fake timer done 
 TRACE monitor Start run moni¦test
 TRACE monitor raw 4 moni test
-TRACE monitor filter [4] on moni¦test
+TRACE monitor filter [4.0] on moni¦test
 TRACE monitor End run moni¦test
-NEW: ‹ConditionalWorkSequence:51 (4)›
-   : │  id: 51
+NEW: ‹ConditionalWorkSequence:55 (2)›
+   : │  id: 55
    : │  call count: 0
    : │  EVENT: monitor¦value¦4.0¦moni¦test
    : └1╴... done.
 EVENT: monitor¦value¦4.0¦moni¦test
 END: monitor¦value¦4.0¦moni¦test
 TRACE monitor Stop run moni¦test
-TRACE locking +WAIT 38 monitor sleep moni test
-TRACE locking -WAIT 38 monitor sleep moni test
-TRACE locking +WAIT 39 monitor sleep moni test
-NEW: ‹ConditionalWorkSequence:52 (4)›
-   : │  id: 52
+2003-04-05 06:07:11.900000 _wait¦10: Fake timer done 
+NEW: ‹ConditionalWorkSequence:56 (2)›
+   : │  id: 56
    : │  call count: 0
-   : │  EVENT: wait¦done¦×××¦_wait¦10
+   : │  EVENT: wait¦done¦3.9¦_wait¦10
    : └1╴... done.
-EVENT: wait¦done¦×××¦_wait¦10
-END: wait¦done¦×××¦_wait¦10
-NEW: ‹ConditionalWorkSequence:53 (4)›
-   : │  id: 53
+EVENT: wait¦done¦3.9¦_wait¦10
+END: wait¦done¦3.9¦_wait¦10
+NEW: ‹ConditionalWorkSequence:57 (2)›
+   : │  id: 57
    : │  call count: 0
    : │  EVENT: output¦set¦4¦5¦monitest
    : └1╴... done.
 EVENT: output¦set¦4¦5¦monitest
 END: output¦set¦4¦5¦monitest
-NEW: ‹ConditionalWorkSequence:54 (4)›
-   : │  id: 54
+NEW: ‹ConditionalWorkSequence:58 (2)›
+   : │  id: 58
    : │  call count: 0
    : │  EVENT: input¦fake¦5¦monitest
    : └1╴... done.
 EVENT: input¦fake¦5¦monitest
 END: input¦fake¦5¦monitest
-moni test :: Wait ‹now›
+moni test :: Wait ‹0.1 sec›
 .
 : ‹VarMonitor moni¦test on 4.0›
 name: moni¦test
 device: unknown
 value: 4.0
 up: Wait
-time: ‹now›
+time: ‹0.1 sec›
 steps: 1 / 1 / None
-data: 4
+data: 4.0
 .
-TRACE locking +WAIT 40 kill job ‹VarMonitor moni¦test on 4.0›
-TRACE locking -WAIT 39 monitor sleep moni test
-NEW: ‹ConditionalWorkSequence:55 (4)›
-   : │  id: 55
+NEW: ‹ConditionalWorkSequence:59 (2)›
+   : │  id: 59
    : │  call count: 0
    : │  EVENT: monitor¦stop¦moni¦test
    : └1╴... done.
 EVENT: monitor¦stop¦moni¦test
 END: monitor¦stop¦moni¦test
-TRACE locking -WAIT 40 kill job ‹VarMonitor moni¦test on 4.0›
-TRACE locking +WAIT 41 kill job <homevent.tokize.tokizer obj>
-TRACE locking -WAIT 41 kill job <homevent.tokize.tokizer obj>

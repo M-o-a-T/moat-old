@@ -1,34 +1,29 @@
-NEW: ‹ConditionalWorkSequence:7 (4)›
-   : │  id: 7
+NEW: ‹ConditionalWorkSequence:5 (2)›
+   : │  id: 5
    : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
 EVENT: startup
 END: startup
-TRACE locking +WAIT 1 start job ‹Collected Parser:n1›
-TRACE locking -WAIT 1 start job ‹Collected Parser:n1›
-TRACE locking +WAIT 2 start job <homevent.tokize.tokizer obj>
-TRACE locking -WAIT 2 start job <homevent.tokize.tokizer obj>
 DEBUG Yes
 TRACE Create OnEvtHandler: pcm¦set¦*X¦foo¦bar
-TRACE NewHandler 8
+TRACE NewHandler 6
 DEBUG Yes
 foo bar :: (new)
 .
 type: PWM
 name: foo bar
 .
-TRACE locking +WAIT 3 start job ‹Waiter _wait¦2 ??›
-TRACE locking -WAIT 3 start job ‹Waiter _wait¦2 ??›
-NEW: ‹ConditionalWorkSequence:9 (4)›
-   : │  id: 9
+NEW: ‹ConditionalWorkSequence:7 (2)›
+   : │  id: 7
    : │  call count: 0
    : │  EVENT: wait¦start¦0.5¦_wait¦2
    : └1╴... done.
 EVENT: wait¦start¦0.5¦_wait¦2
 END: wait¦start¦0.5¦_wait¦2
-NEW: ‹ConditionalWorkSequence:10 (4)›
-   : │  id: 10
+2003-04-05 06:07:08.500000 _wait¦2: Fake timer done 
+NEW: ‹ConditionalWorkSequence:8 (2)›
+   : │  id: 8
    : │  call count: 0
    : │  EVENT: wait¦done¦0.5¦_wait¦2
    : └1╴... done.
@@ -41,17 +36,16 @@ next: 8.5 sec (2003-04-05 06:07:17)
 t_off: 9.0 sec
 t_on: 1.0 sec
 .
-TRACE locking +WAIT 4 start job ‹Waiter _wait¦3 ??›
-TRACE locking -WAIT 4 start job ‹Waiter _wait¦3 ??›
-NEW: ‹ConditionalWorkSequence:11 (4)›
-   : │  id: 11
+NEW: ‹ConditionalWorkSequence:9 (2)›
+   : │  id: 9
    : │  call count: 0
    : │  EVENT: wait¦start¦9.0¦_wait¦3
    : └1╴... done.
 EVENT: wait¦start¦9.0¦_wait¦3
 END: wait¦start¦9.0¦_wait¦3
-NEW: ‹ConditionalWorkSequence:12 (4)›
-   : │  id: 12
+2003-04-05 06:07:17 _wait¦3: Fake timer done 
+NEW: ‹ConditionalWorkSequence:10 (2)›
+   : │  id: 10
    : │  call count: 0
    : │  EVENT: wait¦done¦9.0¦_wait¦3
    : └1╴... done.
@@ -64,17 +58,16 @@ next: now (2003-04-05 06:07:17)
 t_off: 9.0 sec
 t_on: 1.0 sec
 .
-TRACE locking +WAIT 5 start job ‹Waiter _wait¦4 ??›
-TRACE locking -WAIT 5 start job ‹Waiter _wait¦4 ??›
-NEW: ‹ConditionalWorkSequence:13 (4)›
-   : │  id: 13
+NEW: ‹ConditionalWorkSequence:11 (2)›
+   : │  id: 11
    : │  call count: 0
    : │  EVENT: wait¦start¦24.0¦_wait¦4
    : └1╴... done.
 EVENT: wait¦start¦24.0¦_wait¦4
 END: wait¦start¦24.0¦_wait¦4
-NEW: ‹ConditionalWorkSequence:14 (5)›
-   : │  id: 14
+2003-04-05 06:07:17.050000 : Fake timer done 
+NEW: ‹ConditionalWorkSequence:12 (3)›
+   : │  id: 12
    : │  call count: 0
    : │  EVENT: pcm¦set¦on¦foo¦bar
    : ├1╴on pcm set *X foo bar ‹OnEventHandler›
@@ -87,28 +80,28 @@ RUN: on pcm set *X foo bar ‹OnEventHandler›
    : prio: 51
    : step: log DEBUG PCM is now $X ‹LogHandler›
    : step: wait ‹WaitHandler›
- at: ‹ConditionalWorkSequence:14 (5)› (step 1)
+ at: ‹ConditionalWorkSequence:12 (3)› (step 1)
  ev: EVENT: pcm¦set¦on¦foo¦bar
 DEBUG PCM is now on
-TRACE locking +WAIT 6 start job ‹Waiter _wait¦1 ??›
-TRACE locking -WAIT 6 start job ‹Waiter _wait¦1 ??›
-NEW: ‹ConditionalWorkSequence:15 (4)›
-   : │  id: 15
+NEW: ‹ConditionalWorkSequence:13 (2)›
+   : │  id: 13
    : │  call count: 0
    : │  EVENT: wait¦start¦9.1¦_wait¦1
    : └1╴... done.
 EVENT: wait¦start¦9.1¦_wait¦1
 END: wait¦start¦9.1¦_wait¦1
-NEW: ‹ConditionalWorkSequence:16 (4)›
-   : │  id: 16
+2003-04-05 06:07:17.300000 _wait¦1: Fake timer done 
+NEW: ‹ConditionalWorkSequence:14 (2)›
+   : │  id: 14
    : │  call count: 0
-   : │  EVENT: wait¦done¦9.1¦_wait¦1
+   : │  EVENT: wait¦done¦9.3¦_wait¦1
    : └1╴... done.
-EVENT: wait¦done¦9.1¦_wait¦1
-END: wait¦done¦9.1¦_wait¦1
+EVENT: wait¦done¦9.3¦_wait¦1
+END: wait¦done¦9.3¦_wait¦1
 END: pcm¦set¦on¦foo¦bar
-NEW: ‹ConditionalWorkSequence:17 (5)›
-   : │  id: 17
+2003-04-05 06:07:18 : Fake timer done 
+NEW: ‹ConditionalWorkSequence:15 (3)›
+   : │  id: 15
    : │  call count: 0
    : │  EVENT: pcm¦set¦off¦foo¦bar
    : ├1╴on pcm set *X foo bar ‹OnEventHandler›
@@ -121,28 +114,28 @@ RUN: on pcm set *X foo bar ‹OnEventHandler›
    : prio: 51
    : step: log DEBUG PCM is now $X ‹LogHandler›
    : step: wait ‹WaitHandler›
- at: ‹ConditionalWorkSequence:17 (5)› (step 1)
+ at: ‹ConditionalWorkSequence:15 (3)› (step 1)
  ev: EVENT: pcm¦set¦off¦foo¦bar
 DEBUG PCM is now off
-TRACE locking +WAIT 7 start job ‹Waiter _wait¦1 ??›
-TRACE locking -WAIT 7 start job ‹Waiter _wait¦1 ??›
-NEW: ‹ConditionalWorkSequence:18 (4)›
-   : │  id: 18
+NEW: ‹ConditionalWorkSequence:16 (2)›
+   : │  id: 16
    : │  call count: 0
    : │  EVENT: wait¦start¦10.1¦_wait¦1
    : └1╴... done.
 EVENT: wait¦start¦10.1¦_wait¦1
 END: wait¦start¦10.1¦_wait¦1
-NEW: ‹ConditionalWorkSequence:19 (4)›
-   : │  id: 19
+2003-04-05 06:07:18.200000 _wait¦1: Fake timer done 
+NEW: ‹ConditionalWorkSequence:17 (2)›
+   : │  id: 17
    : │  call count: 0
-   : │  EVENT: wait¦done¦10.1¦_wait¦1
+   : │  EVENT: wait¦done¦10.2¦_wait¦1
    : └1╴... done.
-EVENT: wait¦done¦10.1¦_wait¦1
-END: wait¦done¦10.1¦_wait¦1
+EVENT: wait¦done¦10.2¦_wait¦1
+END: wait¦done¦10.2¦_wait¦1
 END: pcm¦set¦off¦foo¦bar
-NEW: ‹ConditionalWorkSequence:20 (5)›
-   : │  id: 20
+2003-04-05 06:07:27 : Fake timer done 
+NEW: ‹ConditionalWorkSequence:18 (3)›
+   : │  id: 18
    : │  call count: 0
    : │  EVENT: pcm¦set¦on¦foo¦bar
    : ├1╴on pcm set *X foo bar ‹OnEventHandler›
@@ -155,28 +148,28 @@ RUN: on pcm set *X foo bar ‹OnEventHandler›
    : prio: 51
    : step: log DEBUG PCM is now $X ‹LogHandler›
    : step: wait ‹WaitHandler›
- at: ‹ConditionalWorkSequence:20 (5)› (step 1)
+ at: ‹ConditionalWorkSequence:18 (3)› (step 1)
  ev: EVENT: pcm¦set¦on¦foo¦bar
 DEBUG PCM is now on
-TRACE locking +WAIT 8 start job ‹Waiter _wait¦1 ??›
-TRACE locking -WAIT 8 start job ‹Waiter _wait¦1 ??›
-NEW: ‹ConditionalWorkSequence:21 (4)›
-   : │  id: 21
+NEW: ‹ConditionalWorkSequence:19 (2)›
+   : │  id: 19
    : │  call count: 0
    : │  EVENT: wait¦start¦19.1¦_wait¦1
    : └1╴... done.
 EVENT: wait¦start¦19.1¦_wait¦1
 END: wait¦start¦19.1¦_wait¦1
-NEW: ‹ConditionalWorkSequence:22 (4)›
-   : │  id: 22
+2003-04-05 06:07:27.200000 _wait¦1: Fake timer done 
+NEW: ‹ConditionalWorkSequence:20 (2)›
+   : │  id: 20
    : │  call count: 0
-   : │  EVENT: wait¦done¦19.1¦_wait¦1
+   : │  EVENT: wait¦done¦19.2¦_wait¦1
    : └1╴... done.
-EVENT: wait¦done¦19.1¦_wait¦1
-END: wait¦done¦19.1¦_wait¦1
+EVENT: wait¦done¦19.2¦_wait¦1
+END: wait¦done¦19.2¦_wait¦1
 END: pcm¦set¦on¦foo¦bar
-NEW: ‹ConditionalWorkSequence:23 (5)›
-   : │  id: 23
+2003-04-05 06:07:28 : Fake timer done 
+NEW: ‹ConditionalWorkSequence:21 (3)›
+   : │  id: 21
    : │  call count: 0
    : │  EVENT: pcm¦set¦off¦foo¦bar
    : ├1╴on pcm set *X foo bar ‹OnEventHandler›
@@ -189,34 +182,32 @@ RUN: on pcm set *X foo bar ‹OnEventHandler›
    : prio: 51
    : step: log DEBUG PCM is now $X ‹LogHandler›
    : step: wait ‹WaitHandler›
- at: ‹ConditionalWorkSequence:23 (5)› (step 1)
+ at: ‹ConditionalWorkSequence:21 (3)› (step 1)
  ev: EVENT: pcm¦set¦off¦foo¦bar
 DEBUG PCM is now off
-TRACE locking +WAIT 9 start job ‹Waiter _wait¦1 ??›
-TRACE locking -WAIT 9 start job ‹Waiter _wait¦1 ??›
-NEW: ‹ConditionalWorkSequence:24 (4)›
-   : │  id: 24
+NEW: ‹ConditionalWorkSequence:22 (2)›
+   : │  id: 22
    : │  call count: 0
    : │  EVENT: wait¦start¦20.1¦_wait¦1
    : └1╴... done.
 EVENT: wait¦start¦20.1¦_wait¦1
 END: wait¦start¦20.1¦_wait¦1
-NEW: ‹ConditionalWorkSequence:25 (4)›
-   : │  id: 25
+2003-04-05 06:07:28.200000 _wait¦1: Fake timer done 
+NEW: ‹ConditionalWorkSequence:23 (2)›
+   : │  id: 23
    : │  call count: 0
-   : │  EVENT: wait¦done¦20.1¦_wait¦1
+   : │  EVENT: wait¦done¦20.2¦_wait¦1
    : └1╴... done.
-EVENT: wait¦done¦20.1¦_wait¦1
-END: wait¦done¦20.1¦_wait¦1
+EVENT: wait¦done¦20.2¦_wait¦1
+END: wait¦done¦20.2¦_wait¦1
 END: pcm¦set¦off¦foo¦bar
-NEW: ‹ConditionalWorkSequence:26 (4)›
-   : │  id: 26
+2003-04-05 06:07:32.050000 _wait¦4: Fake timer done 
+NEW: ‹ConditionalWorkSequence:24 (2)›
+   : │  id: 24
    : │  call count: 0
-   : │  EVENT: wait¦done¦24.0¦_wait¦4
+   : │  EVENT: wait¦done¦24.1¦_wait¦4
    : └1╴... done.
-EVENT: wait¦done¦24.0¦_wait¦4
-END: wait¦done¦24.0¦_wait¦4
+EVENT: wait¦done¦24.1¦_wait¦4
+END: wait¦done¦24.1¦_wait¦4
 foo bar :: 0.100 1.0 sec / 9.0 sec
 .
-TRACE locking +WAIT 10 kill job <homevent.tokize.tokizer obj>
-TRACE locking -WAIT 10 kill job <homevent.tokize.tokizer obj>

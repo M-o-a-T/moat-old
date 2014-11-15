@@ -1,18 +1,14 @@
-NEW: ‹ConditionalWorkSequence:7 (4)›
-   : │  id: 7
+NEW: ‹ConditionalWorkSequence:5 (2)›
+   : │  id: 5
    : │  call count: 0
    : │  EVENT: startup
    : └1╴... done.
 EVENT: startup
 END: startup
-TRACE locking +WAIT 1 start job ‹Collected Parser:n1›
-TRACE locking -WAIT 1 start job ‹Collected Parser:n1›
-TRACE locking +WAIT 2 start job <homevent.tokize.tokizer obj>
-TRACE locking -WAIT 2 start job <homevent.tokize.tokizer obj>
 TRACE Create OnEvtHandler: timeslot¦begin¦foo¦bar
-TRACE NewHandler 8
+TRACE NewHandler 6
 TRACE Create OnEvtHandler: timeslot¦end¦foo¦bar
-TRACE NewHandler 9
+TRACE NewHandler 7
 .
 name: foo bar
 run: off
@@ -21,17 +17,16 @@ duration: 2.0
 .
 DEBUG Yes
 DEBUG Yes
-TRACE locking +WAIT 3 start job ‹Waiter A¦before ??›
-TRACE locking -WAIT 3 start job ‹Waiter A¦before ??›
-NEW: ‹ConditionalWorkSequence:10 (4)›
-   : │  id: 10
+NEW: ‹ConditionalWorkSequence:8 (2)›
+   : │  id: 8
    : │  call count: 0
    : │  EVENT: wait¦start¦9.5¦A¦before
    : └1╴... done.
 EVENT: wait¦start¦9.5¦A¦before
 END: wait¦start¦9.5¦A¦before
-NEW: ‹ConditionalWorkSequence:11 (4)›
-   : │  id: 11
+2003-04-05 06:07:17.500000 A¦before: Fake timer done 
+NEW: ‹ConditionalWorkSequence:9 (2)›
+   : │  id: 9
    : │  call count: 0
    : │  EVENT: wait¦done¦9.5¦A¦before
    : └1╴... done.
@@ -45,17 +40,16 @@ next: 0.5 sec (2003-04-05 06:07:18)
 .
 DEBUG Yes
 DEBUG Yes
-TRACE locking +WAIT 4 start job ‹Waiter B¦during ??›
-TRACE locking -WAIT 4 start job ‹Waiter B¦during ??›
-NEW: ‹ConditionalWorkSequence:12 (4)›
-   : │  id: 12
+NEW: ‹ConditionalWorkSequence:10 (2)›
+   : │  id: 10
    : │  call count: 0
    : │  EVENT: wait¦start¦10.5¦B¦during
    : └1╴... done.
 EVENT: wait¦start¦10.5¦B¦during
 END: wait¦start¦10.5¦B¦during
-NEW: ‹ConditionalWorkSequence:13 (5)›
-   : │  id: 13
+2003-04-05 06:07:18.050000 : Fake timer done 
+NEW: ‹ConditionalWorkSequence:11 (3)›
+   : │  id: 11
    : │  call count: 0
    : │  EVENT: timeslot¦begin¦foo¦bar
    : ├1╴on timeslot begin foo bar ‹OnEventHandler›
@@ -68,9 +62,9 @@ NEW: ‹ConditionalWorkSequence:13 (5)›
    : │      : step: log DEBUG Yes ‹LogHandler›
    : │  step: async ‹Async›
    : │      : step: wait AFTER EVENT A ‹WaitHandler›
-   : │      : step: var timeslot X foo bar ‹VarTimeslotHandler›
-   : │      : step: log TRACE got it $X ‹LogHandler›
-   : │      : step: if equal $X during ‹IfStatement›
+   : │      : step: var timeslot XX foo bar ‹VarTimeslotHandler›
+   : │      : step: log TRACE got it $XX ‹LogHandler›
+   : │      : step: if equal $XX during ‹IfStatement›
    : │      :     : step: log DEBUG Yes ‹LogHandler›
    : │      : step: wait GOT EVENT AX ‹WaitHandler›
    : │      : step: if in timeslot foo bar ‹IfStatement›
@@ -87,97 +81,94 @@ RUN: on timeslot begin foo bar ‹OnEventHandler›
    :     : step: log DEBUG Yes ‹LogHandler›
    : step: async ‹Async›
    :     : step: wait AFTER EVENT A ‹WaitHandler›
-   :     : step: var timeslot X foo bar ‹VarTimeslotHandler›
-   :     : step: log TRACE got it $X ‹LogHandler›
-   :     : step: if equal $X during ‹IfStatement›
+   :     : step: var timeslot XX foo bar ‹VarTimeslotHandler›
+   :     : step: log TRACE got it $XX ‹LogHandler›
+   :     : step: if equal $XX during ‹IfStatement›
    :     :     : step: log DEBUG Yes ‹LogHandler›
    :     : step: wait GOT EVENT AX ‹WaitHandler›
    :     : step: if in timeslot foo bar ‹IfStatement›
    :     :     : step: log DEBUG Yes ‹LogHandler›
- at: ‹ConditionalWorkSequence:13 (5)› (step 1)
+ at: ‹ConditionalWorkSequence:11 (3)› (step 1)
  ev: EVENT: timeslot¦begin¦foo¦bar
-TRACE locking +WAIT 5 start job ‹Waiter GOT¦EVENT¦A ??›
-TRACE locking -WAIT 5 start job ‹Waiter GOT¦EVENT¦A ??›
-NEW: ‹ConditionalWorkSequence:14 (4)›
-   : │  id: 14
+NEW: ‹ConditionalWorkSequence:12 (2)›
+   : │  id: 12
    : │  call count: 0
-   : │  EVENT: wait¦start¦10.3¦GOT¦EVENT¦A
+   : │  EVENT: wait¦start¦10.4¦GOT¦EVENT¦A
    : └1╴... done.
-EVENT: wait¦start¦10.3¦GOT¦EVENT¦A
-END: wait¦start¦10.3¦GOT¦EVENT¦A
-NEW: ‹ConditionalWorkSequence:15 (4)›
-   : │  id: 15
+EVENT: wait¦start¦10.4¦GOT¦EVENT¦A
+END: wait¦start¦10.4¦GOT¦EVENT¦A
+2003-04-05 06:07:18.500000 GOT¦EVENT¦A: Fake timer done 
+NEW: ‹ConditionalWorkSequence:13 (2)›
+   : │  id: 13
    : │  call count: 0
-   : │  EVENT: wait¦done¦10.3¦GOT¦EVENT¦A
+   : │  EVENT: wait¦done¦10.5¦GOT¦EVENT¦A
    : └1╴... done.
-EVENT: wait¦done¦10.3¦GOT¦EVENT¦A
-END: wait¦done¦10.3¦GOT¦EVENT¦A
+EVENT: wait¦done¦10.5¦GOT¦EVENT¦A
+END: wait¦done¦10.5¦GOT¦EVENT¦A
 DEBUG Yes
 DEBUG Yes
 END: timeslot¦begin¦foo¦bar
-TRACE locking +WAIT 6 start job ‹Waiter AFTER¦EVENT¦A ??›
-TRACE locking -WAIT 6 start job ‹Waiter AFTER¦EVENT¦A ??›
-NEW: ‹ConditionalWorkSequence:16 (4)›
-   : │  id: 16
+NEW: ‹ConditionalWorkSequence:14 (2)›
+   : │  id: 14
    : │  call count: 0
-   : │  EVENT: wait¦start¦10.8¦AFTER¦EVENT¦A
+   : │  EVENT: wait¦start¦11.0¦AFTER¦EVENT¦A
    : └1╴... done.
-EVENT: wait¦start¦10.8¦AFTER¦EVENT¦A
-END: wait¦start¦10.8¦AFTER¦EVENT¦A
-NEW: ‹ConditionalWorkSequence:17 (4)›
-   : │  id: 17
+EVENT: wait¦start¦11.0¦AFTER¦EVENT¦A
+END: wait¦start¦11.0¦AFTER¦EVENT¦A
+2003-04-05 06:07:18.550000 B¦during: Fake timer done 
+NEW: ‹ConditionalWorkSequence:15 (2)›
+   : │  id: 15
    : │  call count: 0
-   : │  EVENT: wait¦done¦10.5¦B¦during
+   : │  EVENT: wait¦done¦10.6¦B¦during
    : └1╴... done.
-EVENT: wait¦done¦10.5¦B¦during
-END: wait¦done¦10.5¦B¦during
+EVENT: wait¦done¦10.6¦B¦during
+END: wait¦done¦10.6¦B¦during
 name: foo bar
 run: during
 interval: 10
 duration: 2.0
-last: -0.5 sec (2003-04-05 06:07:18)
-next: 1.5 sec (2003-04-05 06:07:20)
-slot: 0.75
+last: -0.7 sec (2003-04-05 06:07:18)
+next: 1.4 sec (2003-04-05 06:07:20)
+slot: 0.675
 .
 DEBUG Yes
 DEBUG Yes
-TRACE locking +WAIT 7 start job ‹Waiter C¦after ??›
-TRACE locking -WAIT 7 start job ‹Waiter C¦after ??›
-NEW: ‹ConditionalWorkSequence:18 (4)›
-   : │  id: 18
+NEW: ‹ConditionalWorkSequence:16 (2)›
+   : │  id: 16
    : │  call count: 0
-   : │  EVENT: wait¦start¦12.5¦C¦after
+   : │  EVENT: wait¦start¦12.6¦C¦after
    : └1╴... done.
-EVENT: wait¦start¦12.5¦C¦after
-END: wait¦start¦12.5¦C¦after
-NEW: ‹ConditionalWorkSequence:19 (4)›
-   : │  id: 19
+EVENT: wait¦start¦12.6¦C¦after
+END: wait¦start¦12.6¦C¦after
+2003-04-05 06:07:19.050000 AFTER¦EVENT¦A: Fake timer done 
+NEW: ‹ConditionalWorkSequence:17 (2)›
+   : │  id: 17
    : │  call count: 0
-   : │  EVENT: wait¦done¦10.8¦AFTER¦EVENT¦A
+   : │  EVENT: wait¦done¦11.1¦AFTER¦EVENT¦A
    : └1╴... done.
-EVENT: wait¦done¦10.8¦AFTER¦EVENT¦A
-END: wait¦done¦10.8¦AFTER¦EVENT¦A
+EVENT: wait¦done¦11.1¦AFTER¦EVENT¦A
+END: wait¦done¦11.1¦AFTER¦EVENT¦A
 TRACE got it during
 DEBUG Yes
-TRACE locking +WAIT 8 start job ‹Waiter GOT¦EVENT¦AX ??›
-TRACE locking -WAIT 8 start job ‹Waiter GOT¦EVENT¦AX ??›
-NEW: ‹ConditionalWorkSequence:20 (4)›
-   : │  id: 20
+NEW: ‹ConditionalWorkSequence:18 (2)›
+   : │  id: 18
    : │  call count: 0
-   : │  EVENT: wait¦start¦10.9¦GOT¦EVENT¦AX
+   : │  EVENT: wait¦start¦11.2¦GOT¦EVENT¦AX
    : └1╴... done.
-EVENT: wait¦start¦10.9¦GOT¦EVENT¦AX
-END: wait¦start¦10.9¦GOT¦EVENT¦AX
-NEW: ‹ConditionalWorkSequence:21 (4)›
-   : │  id: 21
+EVENT: wait¦start¦11.2¦GOT¦EVENT¦AX
+END: wait¦start¦11.2¦GOT¦EVENT¦AX
+2003-04-05 06:07:19.250000 GOT¦EVENT¦AX: Fake timer done 
+NEW: ‹ConditionalWorkSequence:19 (2)›
+   : │  id: 19
    : │  call count: 0
-   : │  EVENT: wait¦done¦10.9¦GOT¦EVENT¦AX
+   : │  EVENT: wait¦done¦11.2¦GOT¦EVENT¦AX
    : └1╴... done.
-EVENT: wait¦done¦10.9¦GOT¦EVENT¦AX
-END: wait¦done¦10.9¦GOT¦EVENT¦AX
+EVENT: wait¦done¦11.2¦GOT¦EVENT¦AX
+END: wait¦done¦11.2¦GOT¦EVENT¦AX
 DEBUG Yes
-NEW: ‹ConditionalWorkSequence:22 (5)›
-   : │  id: 22
+2003-04-05 06:07:20 : Fake timer done 
+NEW: ‹ConditionalWorkSequence:20 (3)›
+   : │  id: 20
    : │  call count: 0
    : │  EVENT: timeslot¦end¦foo¦bar
    : ├1╴on timeslot end foo bar ‹OnEventHandler›
@@ -190,9 +181,9 @@ NEW: ‹ConditionalWorkSequence:22 (5)›
    : │      : step: log DEBUG Yes ‹LogHandler›
    : │  step: async ‹Async›
    : │      : step: wait AFTER EVENT B ‹WaitHandler›
-   : │      : step: var timeslot X foo bar ‹VarTimeslotHandler›
-   : │      : step: log TRACE got it $X ‹LogHandler›
-   : │      : step: if equal $X next ‹IfStatement›
+   : │      : step: var timeslot XX foo bar ‹VarTimeslotHandler›
+   : │      : step: log TRACE got it $XX ‹LogHandler›
+   : │      : step: if equal $XX next ‹IfStatement›
    : │      :     : step: log DEBUG Yes ‹LogHandler›
    : │      : step: wait GOT EVENT AX ‹WaitHandler›
    : │      : step: if in timeslot foo bar ‹IfStatement›
@@ -209,96 +200,93 @@ RUN: on timeslot end foo bar ‹OnEventHandler›
    :     : step: log DEBUG Yes ‹LogHandler›
    : step: async ‹Async›
    :     : step: wait AFTER EVENT B ‹WaitHandler›
-   :     : step: var timeslot X foo bar ‹VarTimeslotHandler›
-   :     : step: log TRACE got it $X ‹LogHandler›
-   :     : step: if equal $X next ‹IfStatement›
+   :     : step: var timeslot XX foo bar ‹VarTimeslotHandler›
+   :     : step: log TRACE got it $XX ‹LogHandler›
+   :     : step: if equal $XX next ‹IfStatement›
    :     :     : step: log DEBUG Yes ‹LogHandler›
    :     : step: wait GOT EVENT AX ‹WaitHandler›
    :     : step: if in timeslot foo bar ‹IfStatement›
    :     :     : step: log DEBUG No9ax ‹LogHandler›
- at: ‹ConditionalWorkSequence:22 (5)› (step 1)
+ at: ‹ConditionalWorkSequence:20 (3)› (step 1)
  ev: EVENT: timeslot¦end¦foo¦bar
-TRACE locking +WAIT 9 start job ‹Waiter GOT¦EVENT¦B ??›
-TRACE locking -WAIT 9 start job ‹Waiter GOT¦EVENT¦B ??›
-NEW: ‹ConditionalWorkSequence:23 (4)›
-   : │  id: 23
+NEW: ‹ConditionalWorkSequence:21 (2)›
+   : │  id: 21
    : │  call count: 0
    : │  EVENT: wait¦start¦12.1¦GOT¦EVENT¦B
    : └1╴... done.
 EVENT: wait¦start¦12.1¦GOT¦EVENT¦B
 END: wait¦start¦12.1¦GOT¦EVENT¦B
-NEW: ‹ConditionalWorkSequence:24 (4)›
-   : │  id: 24
+2003-04-05 06:07:20.250000 GOT¦EVENT¦B: Fake timer done 
+NEW: ‹ConditionalWorkSequence:22 (2)›
+   : │  id: 22
    : │  call count: 0
-   : │  EVENT: wait¦done¦12.1¦GOT¦EVENT¦B
+   : │  EVENT: wait¦done¦12.2¦GOT¦EVENT¦B
    : └1╴... done.
-EVENT: wait¦done¦12.1¦GOT¦EVENT¦B
-END: wait¦done¦12.1¦GOT¦EVENT¦B
+EVENT: wait¦done¦12.2¦GOT¦EVENT¦B
+END: wait¦done¦12.2¦GOT¦EVENT¦B
 DEBUG Yes
 DEBUG Yes
 END: timeslot¦end¦foo¦bar
-TRACE locking +WAIT 10 start job ‹Waiter AFTER¦EVENT¦B ??›
-TRACE locking -WAIT 10 start job ‹Waiter AFTER¦EVENT¦B ??›
-NEW: ‹ConditionalWorkSequence:25 (4)›
+NEW: ‹ConditionalWorkSequence:23 (2)›
+   : │  id: 23
+   : │  call count: 0
+   : │  EVENT: wait¦start¦12.8¦AFTER¦EVENT¦B
+   : └1╴... done.
+EVENT: wait¦start¦12.8¦AFTER¦EVENT¦B
+END: wait¦start¦12.8¦AFTER¦EVENT¦B
+2003-04-05 06:07:20.750000 C¦after: Fake timer done 
+2003-04-05 06:07:20.850000 AFTER¦EVENT¦B: Fake timer done 
+NEW: ‹ConditionalWorkSequence:24 (2)›
+   : │  id: 24
+   : │  call count: 0
+   : │  EVENT: wait¦done¦12.9¦C¦after
+   : └1╴... done.
+EVENT: wait¦done¦12.9¦C¦after
+END: wait¦done¦12.9¦C¦after
+NEW: ‹ConditionalWorkSequence:25 (2)›
    : │  id: 25
    : │  call count: 0
-   : │  EVENT: wait¦start¦12.6¦AFTER¦EVENT¦B
+   : │  EVENT: wait¦done¦12.9¦AFTER¦EVENT¦B
    : └1╴... done.
-EVENT: wait¦start¦12.6¦AFTER¦EVENT¦B
-END: wait¦start¦12.6¦AFTER¦EVENT¦B
-NEW: ‹ConditionalWorkSequence:26 (4)›
+EVENT: wait¦done¦12.9¦AFTER¦EVENT¦B
+END: wait¦done¦12.9¦AFTER¦EVENT¦B
+TRACE got it next
+DEBUG Yes
+NEW: ‹ConditionalWorkSequence:26 (2)›
    : │  id: 26
    : │  call count: 0
-   : │  EVENT: wait¦done¦12.5¦C¦after
+   : │  EVENT: wait¦start¦13.0¦GOT¦EVENT¦AX
    : └1╴... done.
-EVENT: wait¦done¦12.5¦C¦after
-END: wait¦done¦12.5¦C¦after
+EVENT: wait¦start¦13.0¦GOT¦EVENT¦AX
+END: wait¦start¦13.0¦GOT¦EVENT¦AX
 name: foo bar
 run: next
 interval: 10
 duration: 2.0
-last: -2.5 sec (2003-04-05 06:07:18)
-next: 7.5 sec (2003-04-05 06:07:28)
+last: -2.9 sec (2003-04-05 06:07:18)
+next: 7.2 sec (2003-04-05 06:07:28)
 .
 DEBUG Yes
 DEBUG Yes
-TRACE locking +WAIT 11 start job ‹Waiter D¦during¦again ??›
-TRACE locking -WAIT 11 start job ‹Waiter D¦during¦again ??›
-NEW: ‹ConditionalWorkSequence:27 (4)›
+NEW: ‹ConditionalWorkSequence:27 (2)›
    : │  id: 27
    : │  call count: 0
-   : │  EVENT: wait¦start¦20.5¦D¦during¦again
+   : │  EVENT: wait¦start¦20.9¦D¦during¦again
    : └1╴... done.
-EVENT: wait¦start¦20.5¦D¦during¦again
-END: wait¦start¦20.5¦D¦during¦again
-NEW: ‹ConditionalWorkSequence:28 (4)›
+EVENT: wait¦start¦20.9¦D¦during¦again
+END: wait¦start¦20.9¦D¦during¦again
+2003-04-05 06:07:21.100000 GOT¦EVENT¦AX: Fake timer done 
+NEW: ‹ConditionalWorkSequence:28 (2)›
    : │  id: 28
    : │  call count: 0
-   : │  EVENT: wait¦done¦12.6¦AFTER¦EVENT¦B
+   : │  EVENT: wait¦done¦13.1¦GOT¦EVENT¦AX
    : └1╴... done.
-EVENT: wait¦done¦12.6¦AFTER¦EVENT¦B
-END: wait¦done¦12.6¦AFTER¦EVENT¦B
-TRACE got it next
+EVENT: wait¦done¦13.1¦GOT¦EVENT¦AX
+END: wait¦done¦13.1¦GOT¦EVENT¦AX
 DEBUG Yes
-TRACE locking +WAIT 12 start job ‹Waiter GOT¦EVENT¦AX ??›
-TRACE locking -WAIT 12 start job ‹Waiter GOT¦EVENT¦AX ??›
-NEW: ‹ConditionalWorkSequence:29 (4)›
+2003-04-05 06:07:28 : Fake timer done 
+NEW: ‹ConditionalWorkSequence:29 (3)›
    : │  id: 29
-   : │  call count: 0
-   : │  EVENT: wait¦start¦12.7¦GOT¦EVENT¦AX
-   : └1╴... done.
-EVENT: wait¦start¦12.7¦GOT¦EVENT¦AX
-END: wait¦start¦12.7¦GOT¦EVENT¦AX
-NEW: ‹ConditionalWorkSequence:30 (4)›
-   : │  id: 30
-   : │  call count: 0
-   : │  EVENT: wait¦done¦12.7¦GOT¦EVENT¦AX
-   : └1╴... done.
-EVENT: wait¦done¦12.7¦GOT¦EVENT¦AX
-END: wait¦done¦12.7¦GOT¦EVENT¦AX
-DEBUG Yes
-NEW: ‹ConditionalWorkSequence:31 (5)›
-   : │  id: 31
    : │  call count: 0
    : │  EVENT: timeslot¦begin¦foo¦bar
    : ├1╴on timeslot begin foo bar ‹OnEventHandler›
@@ -311,9 +299,9 @@ NEW: ‹ConditionalWorkSequence:31 (5)›
    : │      : step: log DEBUG Yes ‹LogHandler›
    : │  step: async ‹Async›
    : │      : step: wait AFTER EVENT A ‹WaitHandler›
-   : │      : step: var timeslot X foo bar ‹VarTimeslotHandler›
-   : │      : step: log TRACE got it $X ‹LogHandler›
-   : │      : step: if equal $X during ‹IfStatement›
+   : │      : step: var timeslot XX foo bar ‹VarTimeslotHandler›
+   : │      : step: log TRACE got it $XX ‹LogHandler›
+   : │      : step: if equal $XX during ‹IfStatement›
    : │      :     : step: log DEBUG Yes ‹LogHandler›
    : │      : step: wait GOT EVENT AX ‹WaitHandler›
    : │      : step: if in timeslot foo bar ‹IfStatement›
@@ -330,57 +318,72 @@ RUN: on timeslot begin foo bar ‹OnEventHandler›
    :     : step: log DEBUG Yes ‹LogHandler›
    : step: async ‹Async›
    :     : step: wait AFTER EVENT A ‹WaitHandler›
-   :     : step: var timeslot X foo bar ‹VarTimeslotHandler›
-   :     : step: log TRACE got it $X ‹LogHandler›
-   :     : step: if equal $X during ‹IfStatement›
+   :     : step: var timeslot XX foo bar ‹VarTimeslotHandler›
+   :     : step: log TRACE got it $XX ‹LogHandler›
+   :     : step: if equal $XX during ‹IfStatement›
    :     :     : step: log DEBUG Yes ‹LogHandler›
    :     : step: wait GOT EVENT AX ‹WaitHandler›
    :     : step: if in timeslot foo bar ‹IfStatement›
    :     :     : step: log DEBUG Yes ‹LogHandler›
- at: ‹ConditionalWorkSequence:31 (5)› (step 1)
+ at: ‹ConditionalWorkSequence:29 (3)› (step 1)
  ev: EVENT: timeslot¦begin¦foo¦bar
-TRACE locking +WAIT 13 start job ‹Waiter GOT¦EVENT¦A ??›
-TRACE locking -WAIT 13 start job ‹Waiter GOT¦EVENT¦A ??›
-NEW: ‹ConditionalWorkSequence:32 (4)›
-   : │  id: 32
+NEW: ‹ConditionalWorkSequence:30 (2)›
+   : │  id: 30
    : │  call count: 0
    : │  EVENT: wait¦start¦20.3¦GOT¦EVENT¦A
    : └1╴... done.
 EVENT: wait¦start¦20.3¦GOT¦EVENT¦A
 END: wait¦start¦20.3¦GOT¦EVENT¦A
-NEW: ‹ConditionalWorkSequence:33 (4)›
-   : │  id: 33
+2003-04-05 06:07:28.350000 GOT¦EVENT¦A: Fake timer done 
+NEW: ‹ConditionalWorkSequence:31 (2)›
+   : │  id: 31
    : │  call count: 0
-   : │  EVENT: wait¦done¦20.3¦GOT¦EVENT¦A
+   : │  EVENT: wait¦done¦20.4¦GOT¦EVENT¦A
    : └1╴... done.
-EVENT: wait¦done¦20.3¦GOT¦EVENT¦A
-END: wait¦done¦20.3¦GOT¦EVENT¦A
+EVENT: wait¦done¦20.4¦GOT¦EVENT¦A
+END: wait¦done¦20.4¦GOT¦EVENT¦A
 DEBUG Yes
 DEBUG Yes
 END: timeslot¦begin¦foo¦bar
-TRACE locking +WAIT 14 start job ‹Waiter AFTER¦EVENT¦A ??›
-TRACE locking -WAIT 14 start job ‹Waiter AFTER¦EVENT¦A ??›
-NEW: ‹ConditionalWorkSequence:34 (4)›
+NEW: ‹ConditionalWorkSequence:32 (2)›
+   : │  id: 32
+   : │  call count: 0
+   : │  EVENT: wait¦start¦20.9¦AFTER¦EVENT¦A
+   : └1╴... done.
+EVENT: wait¦start¦20.9¦AFTER¦EVENT¦A
+END: wait¦start¦20.9¦AFTER¦EVENT¦A
+2003-04-05 06:07:28.850000 D¦during¦again: Fake timer done 
+2003-04-05 06:07:28.950000 AFTER¦EVENT¦A: Fake timer done 
+NEW: ‹ConditionalWorkSequence:33 (2)›
+   : │  id: 33
+   : │  call count: 0
+   : │  EVENT: wait¦done¦21.0¦D¦during¦again
+   : └1╴... done.
+EVENT: wait¦done¦21.0¦D¦during¦again
+END: wait¦done¦21.0¦D¦during¦again
+NEW: ‹ConditionalWorkSequence:34 (2)›
    : │  id: 34
    : │  call count: 0
-   : │  EVENT: wait¦start¦20.8¦AFTER¦EVENT¦A
+   : │  EVENT: wait¦done¦21.0¦AFTER¦EVENT¦A
    : └1╴... done.
-EVENT: wait¦start¦20.8¦AFTER¦EVENT¦A
-END: wait¦start¦20.8¦AFTER¦EVENT¦A
-NEW: ‹ConditionalWorkSequence:35 (4)›
+EVENT: wait¦done¦21.0¦AFTER¦EVENT¦A
+END: wait¦done¦21.0¦AFTER¦EVENT¦A
+TRACE got it during
+DEBUG Yes
+NEW: ‹ConditionalWorkSequence:35 (2)›
    : │  id: 35
    : │  call count: 0
-   : │  EVENT: wait¦done¦20.5¦D¦during¦again
+   : │  EVENT: wait¦start¦21.0¦GOT¦EVENT¦AX
    : └1╴... done.
-EVENT: wait¦done¦20.5¦D¦during¦again
-END: wait¦done¦20.5¦D¦during¦again
+EVENT: wait¦start¦21.0¦GOT¦EVENT¦AX
+END: wait¦start¦21.0¦GOT¦EVENT¦AX
 name: foo bar
 run: during
 interval: 10
 duration: 2.0
-last: -0.5 sec (2003-04-05 06:07:28)
-next: 1.5 sec (2003-04-05 06:07:30)
-slot: 0.75
+last: -0.9 sec (2003-04-05 06:07:28)
+next: 1.1 sec (2003-04-05 06:07:30)
+slot: 0.525
 .
 DEBUG Yes
 DEBUG Yes
@@ -390,93 +393,6 @@ name: foo bar
 run: off
 interval: 10
 duration: 2.0
-last: -0.5 sec (2003-04-05 06:07:28)
+last: -0.9 sec (2003-04-05 06:07:28)
 .
 DEBUG Yes
-TRACE locking +WAIT 15 kill job <homevent.tokize.tokizer obj>
-TRACE locking -WAIT 15 kill job <homevent.tokize.tokizer obj>
-NEW: ‹ConditionalWorkSequence:36 (6)›
-   : │  id: 36
-   : │  call count: 0
-   : │  EVENT: shutdown
-   : └1╴... done.
-EVENT: shutdown
-NEW: ‹ConditionalWorkSequence:37 (4)›
-   : │  id: 37
-   : │  call count: 0
-   : │  EVENT: module¦unload¦tests
-   : └1╴... done.
-EVENT: module¦unload¦tests
-END: module¦unload¦tests
-NEW: ‹ConditionalWorkSequence:38 (4)›
-   : │  id: 38
-   : │  call count: 0
-   : │  EVENT: module¦unload¦logging
-   : └1╴... done.
-EVENT: module¦unload¦logging
-END: module¦unload¦logging
-NEW: ‹ConditionalWorkSequence:39 (4)›
-   : │  id: 39
-   : │  call count: 0
-   : │  EVENT: module¦unload¦on_event
-   : └1╴... done.
-EVENT: module¦unload¦on_event
-END: module¦unload¦on_event
-NEW: ‹ConditionalWorkSequence:40 (4)›
-   : │  id: 40
-   : │  call count: 0
-   : │  EVENT: module¦unload¦trigger
-   : └1╴... done.
-EVENT: module¦unload¦trigger
-END: module¦unload¦trigger
-NEW: ‹ConditionalWorkSequence:41 (4)›
-   : │  id: 41
-   : │  call count: 0
-   : │  EVENT: module¦unload¦ifelse
-   : └1╴... done.
-EVENT: module¦unload¦ifelse
-END: module¦unload¦ifelse
-NEW: ‹ConditionalWorkSequence:42 (4)›
-   : │  id: 42
-   : │  call count: 0
-   : │  EVENT: module¦unload¦timeslot
-   : └1╴... done.
-EVENT: module¦unload¦timeslot
-END: module¦unload¦timeslot
-NEW: ‹ConditionalWorkSequence:43 (4)›
-   : │  id: 43
-   : │  call count: 0
-   : │  EVENT: module¦unload¦bool
-   : └1╴... done.
-EVENT: module¦unload¦bool
-END: module¦unload¦bool
-NEW: ‹ConditionalWorkSequence:44 (4)›
-   : │  id: 44
-   : │  call count: 0
-   : │  EVENT: module¦unload¦data
-   : └1╴... done.
-EVENT: module¦unload¦data
-END: module¦unload¦data
-NEW: ‹ConditionalWorkSequence:45 (4)›
-   : │  id: 45
-   : │  call count: 0
-   : │  EVENT: module¦unload¦block
-   : └1╴... done.
-EVENT: module¦unload¦block
-END: module¦unload¦block
-NEW: ‹ConditionalWorkSequence:46 (4)›
-   : │  id: 46
-   : │  call count: 0
-   : │  EVENT: module¦unload¦wait
-   : └1╴... done.
-EVENT: module¦unload¦wait
-END: module¦unload¦wait
-END: shutdown
-Waiter ‹AFTER EVENT A› was cancelled
-NEW: ‹WorkSequence:47 (4)›
-   : │  id: 47
-   : │  call count: 0
-   : │  Waiter ‹AFTER EVENT A› was cancelled
-   : └1╴... done.
-Waiter ‹AFTER EVENT A› was cancelled
-END: DelayCancelled
