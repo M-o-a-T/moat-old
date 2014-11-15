@@ -81,7 +81,7 @@ class Waiter(Collected,Jobber):
 		except AttributeError:
 			pass
 		super(Waiter,self).__init__(name)
-		log(TRACE,"WaitAdded",self.name)
+		#log(TRACE,"WaitAdded",self.name)
 	
 	def list(self):
 		yield("start",self.start)
