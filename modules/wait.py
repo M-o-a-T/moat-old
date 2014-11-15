@@ -146,10 +146,7 @@ class Waiter(Collected,Jobber):
 	def value(self):
 		if self._plinger is None:
 			return None
-		with log_wait("wait","remain",self.name):
-			with self._lock:
-				res = unixtime(self.end)-unixtime(now(self.force))
-		return res
+		return unixtime(self.end)-unixtime(now(self.force))
 
 	def delete(self,ctx=None):
 		with log_wait("wait","delete2",self.name):
