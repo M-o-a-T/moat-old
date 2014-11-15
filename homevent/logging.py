@@ -198,7 +198,7 @@ class BaseLogger(Collected,Jobber):
 		pass
 
 	def log(self, level, *a):
-		if level >= self.level:
+		if LogLevels[level] >= self.level:
 			self._wlog(level,*a)
 			if TESTING and not (hasattr(a[0],"startswith") and a[0].startswith("TEST")):
 				self.flush()
@@ -208,13 +208,13 @@ class BaseLogger(Collected,Jobber):
 	def log_event(self, event, level):
 		if level >= self.level:
 			for r in report_(event,99):
-				self._wlog(level,r)
+				self._wlog(LogNames[level],r)
 			if TESTING:
 				self.flush()
 
 	def log_failure(self, err, level=WARN):
 		if level >= self.level:
-			self._wlog(level,format_exception(err))
+			self._wlog(LogNames[level],format_exception(err))
 			if TESTING:
 				self.flush()
 	
@@ -444,20 +444,24 @@ def log(level, *a):
 		argument. Logging for that subsystem can be enabled by
 		log_level(subsys_name, LEVEL).
 		"""
-	try: level = LogNames[level]
-	except KeyError: pass
+	try:
+		level = LogNames[level]
+	except KeyError: 
+		try:
+			lim = levels[level]
+		except KeyError:
+			lim = TRACE if TESTING else NONE
+		else:
+			b = level
+			level = a[0]
+			if lim > level:
+				return
+			a = (b,)+a[1:]
+			level = LogNames[level]
+			
 	logger.log(getattr(logging,level,logging.DEBUG),"%s"," ".join(str(x) for x in a))
 
 	exc = []
-	if isinstance(level,basestring):
-		lim = levels.get(level, TRACE if TESTING else NONE)
-		# get the real level from a and add the subsystem name to the front
-		b = level
-		level = a[0]
-		if lim > level:
-			return
-		a = (b,)+a[1:]
-
 	for l in Loggers.values():
 		if not l.ready:
 			continue
