@@ -249,8 +249,8 @@ class RPCconn(Service,Collected):
 		unregister_worker(worker)
 		self.workers.remove(worker)
 
-	def exposed_now(self):
-		return now()
+	def exposed_now(self, force=None):
+		return now(force)
 
 	def exposed_cmd_list(self,*args):
 		# don't call this 'exposed_list'!
