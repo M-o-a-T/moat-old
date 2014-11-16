@@ -60,7 +60,7 @@ if TESTING:
 			global _log,TRACE
 			if _log is None:
 				from homevent.logging import log as _log, TRACE
-			_log("%s %s: %s timer done" % (now(force),debugi,"Forced" if force else "Fake"))
+			_log(TRACE,"%s %s: %s timer done" % (now(force),debugi,"Forced" if force else "Fake"))
 			
 		finally:
 			if force:
