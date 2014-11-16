@@ -116,7 +116,7 @@ def do_log(c):
 def do_cmd(c,args):
 	if not args:
 		raise SyntaxError("need an actual command, try 'help'")
-	res = c.root.command(sys.stdout,*args)
+	res = c.root.command(*args)
 
 def do_list(c,args):
 	def getter(q):
