@@ -33,7 +33,7 @@ import os
 TESTING=os.environ.get("HOMEVENT_TEST",False)
 gevent_rpyc.patch_all()
 
-modes = "log,evt,list,cmd".split(",")
+modes = "log,list,cmd".split(",")
 from optparse import OptionParser
 parser = OptionParser(conflict_handler="resolve")
 parser.add_option("-h","--help","-?", action="help",
@@ -66,6 +66,8 @@ def main(c,opts,args):
 		do_log(c)
 	elif mode == "list":
 		do_list(c,args)
+	elif mode == "cmd":
+		do_cmd(c,args)
 	else:
 		raise SyntaxError("mode not one of %s" % (",".join(modes),))
 
@@ -104,6 +106,11 @@ def do_log(c):
 	while not sigged:
 		p,a,k = q.get()
 		p(*a,**k)
+
+def do_cmd(c,args):
+	if not args:
+		raise SyntaxError("need an actual command, try 'help'")
+	res = c.root.command(*args)
 
 def do_list(c,args):
 	def getter(q):
