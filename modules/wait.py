@@ -84,8 +84,8 @@ class Waiter(Collected,Jobber):
 		#log(TRACE,"WaitAdded",self.name)
 	
 	def list(self):
-		yield("start",self.start)
 		yield super(Waiter,self)
+		yield("start",self.start)
 		if self._plinger:
 			end=now()+dt.timedelta(0,self.value)
 			yield("end",end)
