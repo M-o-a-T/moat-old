@@ -29,6 +29,8 @@ from homevent.base import Name,flatten
 from homevent.times import humandelta
 import signal
 import os
+import codecs
+sys.stdout = codecs.getwriter('utf8')(sys.stdout)
 
 TESTING=os.environ.get("HOMEVENT_TEST",False)
 gevent_rpyc.patch_all()
