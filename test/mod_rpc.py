@@ -31,6 +31,17 @@ from traceback import print_exc
 
 got_something = event.AsyncResult()
 
+class LogStream(object):
+	buf = ""
+	def exposed_write(self,s):
+		i = s.find("\n")
+		while i >= 0:
+			log("TEST",DEBUG,">>>",self.buf+s[:i])
+			self.buf = ""
+			s = s[i+1:]
+			i = s.find("\n")
+		self.buf += s
+
 def tester():
 	sleep(0.2)
 	c = rpyc.connect("localhost",56478)
@@ -57,6 +68,9 @@ def tester():
 	for x in c.root.cmd_list("rpc","connection","foo","n1"):
 		log("TEST",DEBUG, repr(x))
 	log("TEST",DEBUG,".")
+
+	c.root.stdout(LogStream())
+	c.root.command("help")
 
 	try:
 		c.root.command("fuubar","This is not found.")
@@ -108,6 +122,7 @@ load_module("rpc")
 load_module("state")
 load_module("errors")
 load_module("trigger")
+load_module("help")
 
 run("rpc",input)
 

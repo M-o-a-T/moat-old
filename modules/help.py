@@ -43,7 +43,7 @@ Statements may be multi-word and follow generic Python syntax.
 
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		words = self.parent
+		words = ctx.words
 
 		wl = event[:]
 		while wl:

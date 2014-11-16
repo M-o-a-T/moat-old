@@ -38,6 +38,7 @@ from homevent.logging import BaseLogger,TRACE,LogLevels
 from homevent.times import now
 
 from datetime import datetime,date,time,timedelta
+from weakref import ref
 
 from rpyc import Service
 from rpyc.core.protocol import DEFAULT_CONFIG
@@ -203,17 +204,28 @@ class LogCallback(BaseLogger,CallBack):
 		self.delete()
 	exposed_cancel=cancel
 
+class Reporter(object):
+	def __init__(self,conn):
+		self.conn = ref(conn)
+	def write(self,s):
+		self.conn().stream.write(s)
+class NullReporter(object):
+	def write(self,s):
+		pass
 
 class RPCconn(Service,Collected):
 	storage = RPCconns
 	dest = ("?unnamed",)
 	workers = None
+	doc = "FUBAR"
+	stream = NullReporter()
 		
 	def on_connect(self):
 		global conn_seq
 		conn_seq += 1
 		self.name = self.dest + ("n"+str(conn_seq),)
 		self.ctx = Context()
+		self.ctx.out = Reporter(self)
 		self.ctx.words = global_words(self.ctx)
 		self.workers = set()
 		simple_event(self.ctx,"rpc","connect",*self.name)
@@ -297,6 +309,9 @@ class RPCconn(Service,Collected):
 				yield "* ERROR *",repr(e)
 				process_failure(e)
 				
+	def exposed_stdout(self,stream):
+		self.stream = stream
+
 	def exposed_command(self,*args,**kwargs):
 		try:
 			sub = kwargs.get("sub",())

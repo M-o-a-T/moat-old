@@ -91,7 +91,7 @@ def do_log(c):
 	cb = c.root.monitor(q_called)
 
 	def logged(level,*a):
-		print u"<%d> %s" % (level,u"¦".join((str(x) for x in a)))
+		print u"<%s> %s" % (level,u"¦".join((str(x) for x in a)))
 		sys.stdout.flush()
 	def q_logged(*a):
 		q.put((logged,a,{}))
@@ -110,7 +110,7 @@ def do_log(c):
 def do_cmd(c,args):
 	if not args:
 		raise SyntaxError("need an actual command, try 'help'")
-	res = c.root.command(*args)
+	res = c.root.command(sys.stdout,*args)
 
 def do_list(c,args):
 	def getter(q):
