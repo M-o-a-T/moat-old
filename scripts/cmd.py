@@ -22,11 +22,13 @@ from homevent import patch;patch()
 import rpyc
 import sys
 import gevent
+from gevent import spawn
 from gevent.queue import Queue
 from rpyc.core.service import VoidService
 from homevent import gevent_rpyc
 from homevent.base import Name,flatten
 from homevent.times import humandelta
+from datetime import datetime
 import signal
 import os
 import codecs
@@ -120,6 +122,11 @@ def do_cmd(c,args):
 
 def do_list(c,args):
 	def getter(q):
+		if TESTING:
+			now = c.root.now
+		else:
+			def now(x):
+				return c.root.now()
 		while True:
 			res = q.get()
 			if res is None:
@@ -127,9 +134,9 @@ def do_list(c,args):
 			p,t = res
 			if isinstance(t,datetime):
 				if TESTING and t.year != 2003:
-					t = "%s" % (humandelta(t-c.root.now(t.year != 2003)),)
+					t = "%s" % (humandelta(t-now(t.year != 2003)),)
 				else:
-					t = "%s (%s)" % (humandelta(t-c.root.now(t.year != 2003)),t)
+					t = "%s (%s)" % (humandelta(t-now(t.year != 2003)),t)
 				if TESTING:
 					lim = 3
 				else:
@@ -142,13 +149,15 @@ def do_list(c,args):
 
 	def out_one(p,c):
 		q = Queue(3)
+		job = None
 		try:
 			job = spawn(getter,q)
 			flatten(q,(c,),p)
 		finally:
 #					with log_wait("list "+str(event)):
 			q.put(None)
-			job.join()
+			if job is not None:
+				job.join()
 
 	for x in c.root.cmd_list(*args):
 		if x is None:
