@@ -101,7 +101,7 @@ on send logger:
 	log DEBUG hello This is a test
 try:
 	wait shutdown:
-		for 5
+		for 1
 		debug force
 wait foo b:
 	for 1
