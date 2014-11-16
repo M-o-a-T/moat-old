@@ -51,8 +51,13 @@ class ExitService(VoidService):
 	def on_disconnect(self,*a,**k):
 		sys.exit()
 
+class Printer(object):
+	def exposed_write(self,s):
+		sys.stdout.write(s)
+
 c = rpyc.connect(opts.host, opts.port, ipv6=opts.ipv6)#, service=ExitService)
 #c._channel.stream.sock.settimeout(None)
+c.root.stdout(Printer())
 
 def main(c,opts,args):
 	if not args:
@@ -70,7 +75,6 @@ def main(c,opts,args):
 		do_cmd(c,args)
 	else:
 		raise SyntaxError("mode not one of %s" % (",".join(modes),))
-
 
 def do_log(c):
 	q = Queue()

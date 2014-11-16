@@ -1,3 +1,9 @@
+homevent (0.4.9) smurf; urgency=medium
+
+  * Remote commands work and get output.
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Sun, 16 Nov 2014 07:13:35 +0100
+
 homevent (0.4.8) smurf; urgency=medium
 
   * Yet more bug fixes; "list" across RPC works
