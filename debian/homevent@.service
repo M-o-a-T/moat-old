@@ -5,7 +5,7 @@ After=rabbitmq-server.service
 Requires=rabbitmq-server.service
 
 [Service]
-ExecStart=/usr/sbin/homevent /etc/homevent/%i.he
+ExecStart=/usr/sbin/homeventd /etc/homevent/%i.he
 WorkingDirectory=/etc/homevent
 User=homevent
 Group=homevent

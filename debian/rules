@@ -43,9 +43,8 @@ install: build
 	$(MAKE) install DESTDIR="$(shell pwd)/debian/homevent/" PYDESTDIR="$(shell pwd)/debian/python-homevent/"
 
 	mkdir -p debian/python-homevent/usr/sbin
-	mv debian/python-homevent/usr/bin/daemon.py debian/python-homevent/usr/sbin/homevent
-	mv debian/python-homevent/usr/bin/monitor.py debian/python-homevent/usr/bin/homevent-monitor
-	mv debian/python-homevent/usr/bin/list.py debian/python-homevent/usr/bin/homevent-list
+	mv debian/python-homevent/usr/bin/daemon.py debian/python-homevent/usr/sbin/homeventd
+	mv debian/python-homevent/usr/bin/cmd.py debian/python-homevent/usr/bin/homevent
 	install daemon.he debian/homevent/etc/homevent
 
 
