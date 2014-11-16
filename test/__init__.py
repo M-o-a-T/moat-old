@@ -59,6 +59,10 @@ def ttime():
 r_fli = re.compile(r'(:\s+File ").*/([^/]+/[^/]+)", line \d+, in')
 r_hex = re.compile(r'object at 0x[0-9a-fA-F]+')
 
+class Null(object):
+	def write(self,s):
+		pass
+
 class run_logger(BaseLogger):
 	"""\
 		This class checks that the current log matches the stored log.
@@ -72,7 +76,7 @@ class run_logger(BaseLogger):
 			self.data=open(os.path.join("real",name),"w")
 		except IOError:
 			print >>sys.stderr,"ERROR, no log file"
-			self.data = sys.stderr
+			self.data = Null()
 		self.line=0
 		super(run_logger,self).__init__(level)
 
@@ -147,6 +151,7 @@ class run_logger(BaseLogger):
 			self._log(None,".")
 
 	def write(self,s):
+		pass
 		s = s.rstrip()
 		if s != "":
 			self.log(None,s)
@@ -163,6 +168,7 @@ class logwrite(object):
 		self.log = log
 		self.buf = ""
 	def write(self,data):
+		return
 		self.buf += data
 		if self.buf[-1] == "\n":
 			if len(self.buf) > 1:
