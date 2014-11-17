@@ -96,6 +96,8 @@ class Event(object):
 	def report(self, verbose=False):
 		try:
 			yield u"EVENT: "+unicode(self.name)
+			for k,v in self.ctx:
+				yield u"     : "+k+u"="+unicode(v)
 		except Exception:
 			yield "EVENT: REPORT_ERROR: "+repr(self.name)
 	
@@ -105,6 +107,7 @@ class Event(object):
 			yield ("type",self.__class__.__name__)
 		if self.loglevel is not None:
 			yield ("log level",self.loglevel)
+		yield ("ctx",self.ctx)
 	
 	def __getitem__(self,i):
 		u"""… so that you can write e[0] instead of e.name[0]"""
