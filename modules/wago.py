@@ -845,7 +845,7 @@ class WAGOmon(Monitor):
 
 	def submit(self,val):
 		try:
-			self.watcher.put(val,block=False)
+			self.watcher.put(val,block=True,timeout=0.5)
 		except Full:
 			simple_event(self.ctx, "monitor","error","overrun",*self.name)
 			pass

@@ -142,7 +142,7 @@ set monitor VALUE NAME
 		if len(event) < 2:
 			raise SyntaxError(u"Usage: set monitor ‹value› ‹name…›")
 		m = Monitors[Name(*event[1:])]
-		m.watcher.put(event[0], block=True, timeout=0.1)
+		m.watcher.put(event[0], block=True, timeout=0.5)
 
 
 class RunningMonitorCheck(Check):
