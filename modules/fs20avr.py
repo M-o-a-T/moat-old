@@ -79,7 +79,7 @@ class AVRcommon(handler):
 	def no_data(self):
 		self.timer = None
 		self.do_kill()
-		simple_event(Context(),"fs20","wedged",*self.name)
+		simple_event("fs20","wedged",*self.name)
 
 	def lineReceived(self,data):
 		db = ""
@@ -91,7 +91,7 @@ class AVRcommon(handler):
 					try:
 						db += chr(eval("0x"+e+d))
 					except SyntaxError:
-						simple_event(Context(),"fs20","unknown","hex",data)
+						simple_event("fs20","unknown","hex", data=data)
 						return
 					e=""
 				else:
@@ -108,7 +108,7 @@ class AVRcommon(handler):
 		elif data[0] == "+":
 			log("fs20",DEBUG,"fs20 trace "+data)
 		else:
-			simple_event(Context(),"fs20","unknown","prefix",data[0],data[1:])
+			simple_event("fs20","unknown","prefix", prefix=data[0],data=data[1:])
 
 	def dataReceived(self, data):
 		self._stop_timer()
@@ -246,7 +246,7 @@ class AVRcommon(handler):
 #		data = (self.ebuf+data).split('\n')
 #		self.ebuf = data.pop()
 #		for d in data:
-#			simple_event(Context(),"fs20","error",*d)
+#			simple_event("fs20","error",*d)
 #		self._start_timer()
 #
 #	def _start(self):
@@ -290,14 +290,14 @@ class AVRreceiver(AVRcommon):
 
 	def down_event(self, external=False):
 		self.connectionLost("disconnect")
-		simple_event(Context(),"fs20","avr","disconnect",*self.name)
+		simple_event("fs20","avr","disconnect",*self.name)
 
 	def not_up_event(self, external=False):
-		simple_event(Context(),"fs20","avr","error",*self.name)
+		simple_event("fs20","avr","error",*self.name)
 
 	def up_event(self, external=False):
 		self.connectionMade()
-		simple_event(Context(),"fs20","avr","connect",*self.name)
+		simple_event("fs20","avr","connect",*self.name)
 
 
 	# Collected stuff
@@ -326,7 +326,7 @@ fs20 avr NAME :remote host port
 
 	def error(self,e):
 		log(WARN, self.dest, e[1])
-		simple_event(self.ctx, "fs20","avr","error",*self.dest)
+		simple_event("fs20","avr","error",*self.dest)
 
 
 #class AVRcmd(AttributedStatement):

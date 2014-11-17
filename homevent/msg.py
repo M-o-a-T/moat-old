@@ -585,12 +585,12 @@ class MsgQueue(Collected,Jobber):
 
 				self.channel.close(False)
 				self.channel = None
-				simple_event(Context(),"msg","error",str(msg),*self.name)
+				simple_event("msg","error",*self.name, msg=msg)
 				handled = True
 				break
 			i += 1
 		if not handled:
-			simple_event(Context(),"msg","unhandled",str(msg),*self.name)
+			simple_event("msg","unhandled",*self.name, msg=msg)
 
 	def _error(self,msg):
 		log("conn",ERROR,self.state,self.__class__.__name__,self.name,str(msg))

@@ -42,6 +42,7 @@ from homevent.event import Event
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.base import Name,SName
 from homevent.collect import Collection,Collected
+from homevent.context import Context
 from homevent.times import now,humandelta
 from homevent.twist import fix_exception
 
@@ -82,6 +83,7 @@ class State(Collected):
 		try:
 			if self.value is not None:
 				process_event(Event(ctx,"state",self.value,"-",*self.name))
+				process_event(Event(Context(prev_value=self.value),"state","delete",*self.name))
 		finally:
 			super(State,self).delete()
 
@@ -161,6 +163,7 @@ state name...
 				val = s.value
 				if val is None: val = "-"
 				process_event(Event(self.ctx,"state",old,self.value,*s.name))
+				process_event(Event(Context(value=self.value),"state","new",*s.name))
 		except BaseException:
 			s.delete()
 			raise
@@ -258,6 +261,7 @@ set state X name...
 			s.time = now()
 			try:
 				process_event(Event(self.ctx,"state",old,value,*s.name))
+				process_event(Event(Context(prev_value=old,value=value),"state","change",*s.name))
 			except Exception as e:
 				fix_exception(e)
 				process_failure(e)

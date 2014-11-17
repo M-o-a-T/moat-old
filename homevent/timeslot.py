@@ -169,7 +169,7 @@ class Timeslot(Collected):
 		self.running = "error"
 		process_failure(_)
 		self.down()
-		simple_event(self.ctx,"timeslot","error",*self.name)
+		simple_event("timeslot","error",*self.name)
 
 
 	def delete(self,ctx=None):

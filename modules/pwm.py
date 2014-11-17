@@ -41,6 +41,7 @@ from homevent.check import Check,register_condition,unregister_condition
 from homevent.base import Name,SName, SYS_PRIO
 from homevent.twist import callLater, fix_exception
 from homevent.collect import Collection,Collected
+from homevent.context import Context
 
 import os
 import datetime as dt
@@ -116,6 +117,7 @@ class CommonPM(Collected):
 		try:
 			if self.state:
 				process_event(Event(self.ctx,"pcm","set",self.names[0],*self.name))
+				process_event(Event(Context(value=0),"pcm","change",*self.name))
 		except Exception as ex:
 			fix_exception(ex)
 			process_failure(ex)
@@ -150,6 +152,7 @@ class CommonPM(Collected):
 			tn = self.t_on
 
 		process_event(Event(self.ctx,"pcm","set",self.names[self.state],*self.name))
+		process_event(Event(Context(value=self.state),"pcm","change",*self.name))
 		try:
 			self.last = self.next
 			if tn is not None:
@@ -160,7 +163,7 @@ class CommonPM(Collected):
 		except Exception as e:
 			fix_exception(e)
 			process_failure(e)
-			simple_event(self.ctx,"pcm","error",*self.name)
+			simple_event("pcm","error",*self.name, error=e)
 		
 	def get_value(self):
 		return self._value

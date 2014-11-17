@@ -162,13 +162,13 @@ class SwitchGroup(Collected,igroup):
 		try:
 			dev = self.devs[dc]
 		except KeyError:
-			simple_event(Context(), "fs20","unknown","device", to_hc(self.code), to_dev(dc), "".join("%02x" % ord(x) for x in data))
+			simple_event("fs20","unknown","device", homecode=self.code, device=dc, data=data)
 			return
 
 		try:
 			fn = switch_names[fcode & 0x1F]
 		except KeyError:
-			simple_event(Context(), "fs20","unknown","function", to_hc(self.code), fcode & 0x1F, "".join("%02x" % ord(x) for x in data))
+			simple_event("fs20","unknown","function", homecode=self.code, device=dc, fcode=fcode & 0x1F, data=data)
 			return
 
 		if fcode & 0x80:
@@ -287,9 +287,14 @@ class Switch(Collected):
 		self.ext = ext
 
 	def get(self, state, ext=None, handler=None):
-		simple_event(Context(), "fs20","state", \
+		simple_event("fs20","state", \
 			state, ext if ext is not None else "-",
 			*self.name)
+
+		ctx = Context(value=state)
+		if ext is not None:
+			ctx.ext = ext
+		simple_event(ctx, "input","fs20", *self.name)
 
 
 	def getReply(self, ext=None, handler=None):

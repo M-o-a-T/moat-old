@@ -114,13 +114,13 @@ class RRDchannel(RRDassembler, NetActiveConnector):
 		# we do not do anything, except to read a prompt
 
 	def down_event(self, external=False):
-		simple_event(Context(),"rrd","disconnect",*self.name)
+		simple_event("rrd","disconnect",*self.name)
 
 	def up_event(self, external=False):
-		simple_event(Context(),"rrd","connect",*self.name)
+		simple_event("rrd","connect",*self.name)
 
 	def not_up_event(self, external=False):
-		simple_event(Context(),"rrd","error",*self.name)
+		simple_event("rrd","error",*self.name)
 
 
 class RRDmsgBase(MsgBase):

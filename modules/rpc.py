@@ -228,7 +228,7 @@ class RPCconn(Service,Collected):
 		self.ctx.out = Reporter(self)
 		self.ctx.words = global_words(self.ctx)
 		self.workers = set()
-		simple_event(self.ctx,"rpc","connect",*self.name)
+		simple_event("rpc","connect",*self.name)
 		Collected.__init__(self)
 
 	def delete(self, ctx=None):
@@ -238,7 +238,7 @@ class RPCconn(Service,Collected):
 		## called from on_disconnect()
 
 	def on_disconnect(self):
-		simple_event(self.ctx,"rpc","disconnect",*self.name)
+		simple_event("rpc","disconnect",*self.name)
 		if self.workers is not None:
 			for w in self.workers:
 				unregister_worker(w)

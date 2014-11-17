@@ -118,7 +118,7 @@ class handler(object):
 		try:
 			ext = PREFIX[prefix]
 		except KeyError:
-			simple_event(self.ctx, "fs20","unknown","prefix",prefix,"".join("%02x" % ord(x) for x in data))
+			simple_event("fs20","unknown","prefix",prefix=prefix,data=data)
 		else:
 			return ext.datagramReceived(self.ctx, data, handler, timestamp)
 

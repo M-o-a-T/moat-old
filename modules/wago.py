@@ -144,13 +144,13 @@ class WAGOchannel(WAGOassembler, NetActiveConnector):
 		# we do not do anything, except to read a prompt
 
 	def down_event(self, external=False):
-		simple_event(Context(),"wago","disconnect",*self.name)
+		simple_event("wago","disconnect",*self.name)
 
 	def up_event(self, external=False):
-		simple_event(Context(),"wago","connect",*self.name)
+		simple_event("wago","connect",*self.name)
 
 	def not_up_event(self, external=False):
-		simple_event(Context(),"wago","error",*self.name)
+		simple_event("wago","error",*self.name)
 
 
 class WAGOinitMsg(MsgReceiver):
@@ -254,7 +254,7 @@ class WAGOmonitorsMsg(WAGOmsgBase):
 
 			return MINE
 		if msg.type is MT_NAK or msg.type is MT_ERROR:
-			simple_event(Context(),"wago","monitor","error",msg.msg)
+			simple_event("wago","monitor","error", msg=msg.msg)
 			return MINE
 		return NOT_MINE
 
@@ -327,10 +327,10 @@ class WAGOkeepaliveMsg(WAGOmsgBase):
 			if self.ping_timer is not None:
 				self.ping_timer.cancel()
 				self.ping_timer = None
-			simple_event(Context(),"wago","ping","cancel",msg.msg)
+			simple_event("wago","ping","cancel", msg=msg.msg)
 			return MINE
 		if (msg.type is MT_NAK or msg.type is MT_ERROR) and self.msgid is None:
-			simple_event(Context(),"wago","ping","error",msg.msg)
+			simple_event("wago","ping","error", msg=msg.msg)
 			return MINE
 		return NOT_MINE
 
@@ -542,7 +542,7 @@ class WAGOtimedOutputRun(WAGOoutputRun):
 
 	def error(self,err):
 		log("wago",DEBUG,"Got error",self,err)
-		simple_event("output","error", self.val, *self.queue.name)
+		simple_event("output","error", *self.queue.name, value=self.val, error=err)
 		if not self.result.ready():
 			self.result.set(err)
 		super(WAGOtimedOutputRun,self).error(err)
@@ -847,7 +847,7 @@ class WAGOmon(Monitor):
 		try:
 			self.watcher.put(val,block=True,timeout=0.5)
 		except Full:
-			simple_event(self.ctx, "monitor","error","overrun",*self.name)
+			simple_event("monitor","overrun",*self.name, value=val)
 			pass
 
 

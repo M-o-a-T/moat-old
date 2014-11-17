@@ -45,7 +45,7 @@ PREFIX_EM2 = 'm'
 
 def em_proc_thermo_hygro(ctx, data):
 	if len(data) != 7:
-		simple_event(ctx, "fs20","em","bad_length","thermo_hygro",len(data),"".join("%x"%x for x in data[1:]))
+		simple_event("fs20","em","bad_length","thermo_hygro",len=len(data),data=data)
 		return None
 	temp = data[1]/10 + data[2] + data[3]*10
 	if data[0] & 8: temp = -temp
@@ -105,13 +105,16 @@ class EM(Collected,Timeslotted):
 	slot = property(get_slot)
 
 	def event(self,ctx,data):
+		d={}
 		for m,n in data.iteritems():
 			try: n = n * self.faktor[m]
 			except KeyError: pass
 			try: n = n + self.offset[m]
 			except KeyError: pass
+			d[m]=n
+			simple_event("fs20","em", m,n, *self.name)
 
-			simple_event(ctx, "fs20","em", m,n, *self.name)
+		simple_event("fs20","em", *self.name, **d)
 		self.last = now()
 		self.last_data = data
 
@@ -164,17 +167,17 @@ class em_handler(recv_handler):
 			xs ^= d
 			qs += d
 		if xs != xsum:
-			simple_event(ctx, "fs20","em","checksum1",xs,xsum,"".join("%x" % x for x in data))
+			simple_event("fs20","em","checksum1",checksum=xs,checksum_wanted=xsum,data=data)
 			return
 		if (qs+5)&15 != qsum:
-			simple_event(ctx, "fs20","em","checksum2",(qs+5)&15,qsum,"".join("%x" % x for x in data))
+			simple_event("fs20","em","checksum2",checksum=(qs+5)&15,checksum_wanted=qsum,data=data)
 			return
 		try:
 			g = em_procs[data[0]]
 			if not g:
 				raise IndexError(data[0])
 		except IndexError:
-			simple_event(ctx, "fs20","unknown","em",data[0],"".join("%x"%x for x in data[1:]))
+			simple_event("fs20","unknown","em",type=data[0],data=data[1:])
 		else:
 			r = g(ctx, data[1:])
 			if r is None:
@@ -182,7 +185,7 @@ class em_handler(recv_handler):
 			try:
 				hdl = EMcodes[data[0]][data[1]&7]
 			except KeyError:
-				simple_event(ctx, "fs20","unknown","em","unregistered",g.em_name,data[1]&7,*tuple(flat(r)))
+				simple_event("fs20","unknown","em","unregistered",type=g.em_name,code=data[1]&7,info=r)
 			else:
 				# If there is more than one device on the same
 				# address, this code tries to find the one that's
@@ -200,28 +203,28 @@ class em_handler(recv_handler):
 				if hi:
 					hi = collision_filter(r,hi)
 					if len(hi) > 1:
-						simple_event(ctx, "fs20","conflict","em","sync",g.em_name,data[1]&7, *tuple(flat(r)))
+						simple_event("fs20","conflict","em","sync",type=g.em_name,code=data[1]&7, **r)
 					else:
 						hi[0].slot.do_sync()
 						hi[0].event(ctx,r)
 				elif hr:
 					hr = collision_filter(r,hr)
 					if len(hr) > 1:
-						simple_event(ctx, "fs20","conflict","em","unsync",g.em_name,data[1]&7, *tuple(flat(r)))
+						simple_event("fs20","conflict","em","unsync",type=g.em_name,code=data[1]&7, **r)
 					else:
 						hr[0].slot.up(True)
 						hr[0].event(ctx,r)
 				elif hn:
 					hn = collision_filter(r,hn)
 					if len(hn) > 1:
-						simple_event(ctx, "fs20","conflict","em","untimed",g.em_name,data[1]&7, *tuple(flat(r)))
+						simple_event("fs20","conflict","em","untimed",type=g.em_name,code=data[1]&7, **r)
 					else:
 						# no timeslot here
 						hn[0].event(ctx,r)
 				elif hdl:
-					simple_event(ctx, "fs20","unknown","em","untimed",g.em_name,data[1]&7, *tuple(flat(r)))
+					simple_event("fs20","unknown","em","untimed",type=g.em_name,code=data[1]&7, **r)
 				else:
-					simple_event(ctx, "fs20","unknown","em","unregistered",g.em_name,data[1]&7, *tuple(flat(r)))
+					simple_event("fs20","unknown","em","unregistered",type=g.em_name,code=data[1]&7, **r)
 
 class em2_handler(em_handler):
 	"""Message: m214365"""

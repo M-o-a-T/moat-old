@@ -104,6 +104,7 @@ class en(Collected,Timeslotted):
 	slot = property(get_slot)
 
 	def event(self,ctx,data):
+		d={}
 		for m,n in data.iteritems():
 			try: n = n * self.faktor[m]
 			except KeyError: pass
@@ -113,9 +114,12 @@ class en(Collected,Timeslotted):
 					val = n-self.last_data[m]
 					if val < 0: val = val + 0x10000 # 16-bit rollover
 					if val >= 0 or self.delta == 0:
-						simple_event(ctx, "fs20","en", m,val, *self.name)
+						d[m]=val
+						simple_event("fs20","en", m,val, *self.name)
 			else:
-				simple_event(ctx, "fs20","en", m,n, *self.name)
+				simple_event("fs20","en", m,n, *self.name)
+				d[m]=n
+		simple_event("fs20","en", *self.name, **d)
 		self.last = now()
 		self.last_data = data
 
@@ -158,7 +162,7 @@ def flat(r):
 class en_handler(recv_handler):
 	def dataReceived(self, ctx, data, handler=None, timedelta=None):
 		if len(data) != 10:
-			simple_event(ctx, "fs20","en","bad_length","counter",len(data),"".join("%x"%ord(x) for x in data))
+			simple_event(ctx, "fs20","en","bad_length","counter",len=len(data),data=data)
 			return
 
 		xsum = ord(data[-1])
@@ -167,14 +171,14 @@ class en_handler(recv_handler):
 		for d in data:
 			xs ^= d
 		if xs != xsum:
-			simple_event(ctx, "fs20","en","checksum",xs,xsum,"".join("%x"%x for x in data))
+			simple_event("fs20","en","checksum",checksum=xs,checksum_wanted=xsum,data=data)
 			return
 		try:
 			g = en_procs[data[0]]
 			if not g:
 				raise IndexError(data[0])
 		except IndexError:
-			simple_event(ctx, "fs20","unknown","en",data[0],"".join("%x"%x for x in data))
+			simple_event("fs20","unknown","en",type=data[0],data=data[1:])
 		else:
 			r = g(ctx, data[3:9])
 			if r is None:
@@ -182,7 +186,7 @@ class en_handler(recv_handler):
 			try:
 				hdl = encodes[data[0]][data[1]]
 			except KeyError:
-				simple_event(ctx, "fs20","unknown","en","unregistered",g.en_name,data[1],*tuple(flat(r)))
+				simple_event("fs20","unknown","en","unregistered",type=g.en_name,code=data[1],**r)
 			else:
 				# If there is more than one device on the same
 				# address, this code tries to find the one that's
@@ -200,28 +204,28 @@ class en_handler(recv_handler):
 				if hi:
 					hi = collision_filter(r,hi)
 					if len(hi) > 1:
-						simple_event(ctx, "fs20","conflict","en","sync",g.en_name,data[1], *tuple(flat(r)))
+						simple_event("fs20","conflict","en","sync",type=g.en_name,code=data[1], **r)
 					else:
 						hi[0].slot.do_sync()
 						hi[0].event(ctx,r)
 				elif hr:
 					hr = collision_filter(r,hr)
 					if len(hr) > 1:
-						simple_event(ctx, "fs20","conflict","en","unsync",g.en_name,data[1], *tuple(flat(r)))
+						simple_event("fs20","conflict","en","unsync",type=g.en_name,code=data[1], **r)
 					else:
 						hr[0].slot.up(True)
 						hr[0].event(ctx,r)
 				elif hn:
 					hn = collision_filter(r,hn)
 					if len(hn) > 1:
-						simple_event(ctx, "fs20","conflict","en","untimed",g.en_name,data[1], *tuple(flat(r)))
+						simple_event("fs20","conflict","en","untimed",type=g.en_name,code=data[1], **r)
 					else:
 						# no timeslot here
 						hn[0].event(ctx,r)
 				elif hdl:
-					simple_event(ctx, "fs20","unknown","en","untimed",g.en_name,data[1], *tuple(flat(r)))
+					simple_event("fs20","unknown","en","untimed",type=g.en_name,code=data[1], **r)
 				else:
-					simple_event(ctx, "fs20","unknown","en","unregistered",g.en_name,data[1], *tuple(flat(r)))
+					simple_event("fs20","unknown","en","unregistered",type=g.en_name,code=data[1], **r)
 
 class en2_handler(en_handler):
 	"""Message: m214365"""

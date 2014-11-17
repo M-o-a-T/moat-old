@@ -37,20 +37,20 @@ PREFIX_TX = 'x'
 
 def tx_proc_thermo(ctx, data):
 	if len(data) != 7:
-		simple_event(ctx, "fs20","tx","bad_length","thermo",len(data),"".join("%x"%x for x in data[1:]))
+		simple_event("fs20","tx","bad_length","thermo",len=len(data),data=data)
 		return None
 	if data[2] != data[5] or data[3] != data[6]:
-		simple_event(ctx, "fs20","tx","bad_repeat","thermo",len(data),"".join("%x"%x for x in data[1:]))
+		simple_event("fs20","tx","bad_repeat","thermo",data=data)
 		return None
 	temp = data[2]*10 + data[3] + data[4]/10 -50
 	return {"temperature":temp}
 
 def tx_proc_hygro(ctx, data):
 	if len(data) != 7:
-		simple_event(ctx, "fs20","tx","bad_length","hygro",len(data),"".join("%x"%x for x in data[1:]))
+		simple_event("fs20","tx","bad_length","hygro",len=len(data),data=data)
 		return None
 	if data[2] != data[5] or data[3] != data[6]:
-		simple_event(ctx, "fs20","tx","bad_repeat","hygro",len(data),"".join("%x"%x for x in data[1:]))
+		simple_event("fs20","tx","bad_repeat","hygro",data=data)
 		return None
 	hum = data[2]*10 + data[3] + data[4]/10
 	return {"humidity":hum}
@@ -103,13 +103,16 @@ class TX(Collected):
 		super(TX,self).__init__(*name)
 
 	def event(self,ctx,data):
+		d={}
 		for m,n in data.iteritems():
 			try: n = n * self.faktor[m]
 			except KeyError: pass
 			try: n = n + self.offset[m]
 			except KeyError: pass
 
-			simple_event(ctx, "fs20","tx", m,n, *self.name)
+			simple_event("fs20","tx", m,n, *self.name)
+			d[m]=n
+		simple_event("fs20","tx", *self.name, **d)
 		self.last = now()
 		self.last_data = data
 
@@ -158,7 +161,7 @@ class tx_handler(recv_handler):
 		if data[0]&1:
 			data.pop() # last nibble is missing
 		if data[0] != len(data):
-			simple_event(ctx, "fs20","tx","bad_length",len(data),"".join("%x"%x for x in data))
+			simple_event("fs20","tx","bad_length",len=len(data),data=data)
 			return None
 
 		qsum = data[-1]
@@ -168,7 +171,7 @@ class tx_handler(recv_handler):
 		if qs&0xF != qsum:
 			# fs20¦tx¦checksum¦65¦0¦a0ca791790
 			# obviously wrong
-			simple_event(ctx, "fs20","tx","checksum",qs,qsum,"".join("%x" % x for x in data))
+			simple_event("fs20","tx","checksum",checksum=qs,checksum_wanted=qsum,data=data)
 			#return
 		data = data[1:-1]
 		try:
@@ -176,7 +179,7 @@ class tx_handler(recv_handler):
 			if not g:
 				raise IndexError(data[0])
 		except IndexError:
-			simple_event(ctx, "fs20","unknown","tx",data[0],"".join("%x"%x for x in data[1:]))
+			simple_event("fs20","unknown","tx",code=data[0],data=data[1:])
 		else:
 			r = g(ctx, data[1:])
 			if r is None:
@@ -185,20 +188,20 @@ class tx_handler(recv_handler):
 			try:
 				hdl = TXcodes[data[0]][adr]
 			except KeyError:
-				simple_event(ctx, "fs20","unknown","tx","unregistered",g.tx_name,adr,*tuple(flat(r)))
+				simple_event("fs20","unknown","tx","unregistered",type=g.tx_name,adr=adr,**r)
 			else:
 				# If there is more than one device on the same
 				# address, this code tries to find the one that's
 				# most likely to be the one responsible.
 				hn = collision_filter(r,hdl)
 				if len(hn) > 1:
-					simple_event(ctx, "fs20","conflict","tx","untimed",g.tx_name,adr, *tuple(flat(r)))
+					simple_event("fs20","conflict","tx","untimed",type=g.tx_name,adr=adr, **r)
 				elif hn:
 					hn[0].event(ctx,r)
 				elif hdl:
-					simple_event(ctx, "fs20","unknown","tx","untimed",g.tx_name,adr, *tuple(flat(r)))
+					simple_event("fs20","unknown","tx","untimed",type=g.tx_name,adr=adr, **r)
 				else:
-					simple_event(ctx, "fs20","unknown","tx","unregistered",g.tx_name,adr, *tuple(flat(r)))
+					simple_event("fs20","unknown","tx","unregistered",type=g.tx_name,adr=adr, **r)
 
 
 class FS20tx(AttributedStatement):

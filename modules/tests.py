@@ -98,8 +98,10 @@ class FakeOutput(Output):
 	typ="fake"
 	doc="An output that sets the input with the same name"
 	def _write(self,val):
+		old_val = ins[self.name]
 		ins[self.name].value = val
-		simple_event(None,"input","fake",val,*self.name)
+		simple_event("input","fake",val,*self.name)
+		simple_event("input","change",*self.name, value=val, last_value=old_val)
 
 
 from homevent.module import Module

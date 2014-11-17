@@ -57,16 +57,16 @@ class NETreceiver(LineReceiver):
 
 	def lineReceived(self, line):
 		line = line.strip().split()
-		simple_event(Context(),"net","recv", *(self.name + tuple(line)))
+		simple_event("net","recv", *self.name, data=line)
 
 	def down_event(self, external=False):
-		simple_event(Context(),"net","disconnect",*self.name)
+		simple_event("net","disconnect",*self.name)
 
 	def up_event(self, external=False):
-		simple_event(Context(),"net","connect",*self.name)
+		simple_event("net","connect",*self.name)
 
 	def not_up_event(self, external=False):
-		simple_event(Context(),"net","error",*self.name)
+		simple_event("net","error",*self.name)
 
 class NETactive(NETreceiver, NetActiveConnector):
 	typ = "net_active"
@@ -95,7 +95,7 @@ net [host] port :name NAME…
 
 	def error(self,e):
 		log(WARN, self.dest, e[1])
-		simple_event(self.ctx, "net","error",*self.dest)
+		simple_event("net","error",*self.dest)
 
 
 class NETlisten(NetListen):

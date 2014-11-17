@@ -31,7 +31,7 @@ from homevent.base import Name,SName,flatten
 from homevent.collect import Collection,Collected,get_collect,all_collect
 from homevent.check import register_condition,unregister_condition
 from homevent.twist import Jobber,fix_exception,reraise
-from homevent.run import process_failure,simple_event,register_worker,unregister_worker,MIN_PRIO
+from homevent.run import process_failure,register_worker,unregister_worker,MIN_PRIO
 from homevent.event import TrySomethingElse
 from homevent.worker import Worker
 from homevent.logging import BaseLogger,TRACE,LogNames,LogLevels,DEBUG

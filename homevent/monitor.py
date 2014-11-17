@@ -269,19 +269,11 @@ class Monitor(Collected,Jobber):
 						val = self.new_value-self.value
 						self._ectx.value_delta = val
 						if val >= 0 or self.delta == 0:
-<<<<<<< master
-							process_event(Event(self.ctx,"monitor","value",self.new_value-self.value,*self.name))
-							process_event(Event(self.ctx,"monitor","update",*self.name))
-				else:
-					process_event(Event(self.ctx,"monitor","value",self.new_value,*self.name))
-					process_event(Event(self.ctx,"monitor","update",*self.name))
-=======
 							process_event(Event(self.ectx,"monitor","value",self.new_value-self.value,*self.name))
-							process_event(Event(self.ectx,"monitor","update",*self.name)
+							process_event(Event(self.ectx,"monitor","update",*self.name))
 				else:
 					process_event(Event(self.ectx,"monitor","value",self.new_value,*self.name))
-					process_event(Event(self.ectx,"monitor","update",*self.name)
->>>>>>> local
+					process_event(Event(self.ectx,"monitor","update",*self.name))
 			if self.new_value is not None:
 				self.value = self.new_value
 		except Exception as e:
@@ -392,12 +384,12 @@ class Monitor(Collected,Jobber):
 
 		if not self.job:
 			self.value = None
-			process_event(Event(Context(),"monitor","start",*self.name))
+			simple_event("monitor","start",*self.name)
 			self.start_job("job",self._run_loop)
 			self.state_change_at = now()
 
 			def tell_ended(_):
-				simple_event(Context(),"monitor","stop",*self.name)
+				simple_event("monitor","stop",*self.name)
 			self.job.link(tell_ended)
 
 	def delete(self,ctx=None):

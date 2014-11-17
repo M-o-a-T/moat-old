@@ -48,13 +48,17 @@ monitor error NAME
 	   Monitoring is stopped. Restarting the monitor is OK from within
 	   the handler, but you should add some kind of back-off.
 
-monitor alarm VAL NAME
+monitor overrun NAME
+	-- The monitor's input queue did not process the last value before the
+	   next came in.
+
+monitor step NAME
 	-- The difference between the old and new value of this monitor is
 	   too large.
 	   If this event triggers an error, no "value" event will be
 	   generated.
 
-monitor value VAL NAME
+monitor update NAME
 	-- Monitoring has determined that the new value for NAME is VAL.
 	   While this handler is running, the monitor's "var monitor"
 	   variable will still contain the old value!
@@ -97,9 +101,10 @@ net disconnect NAME
 net error NAME
     -- This connection could not be established.
 
-net recv NAME whatever...
+net recv NAME
 	-- The text «whatever» has been received.
-	   Arguments are split by whitespace.
+	   Arguments are split by whitespace and stored in the event's `data`
+	   field.
 
 Note that a wildcard handler which listens on every conceivable
 connection does not make sense; nevertheless you probably shouldn't
@@ -108,15 +113,30 @@ name your net connection “connect”. ☺
 I/O
 ---
 
+input change NAME…
+	-- an input has changed
+	   The value is sent in the `value` attribute.
+
 output set OLD NEW NAME…
 	-- the output changes from OLD to NEW.
 	   An error in the event handler will abort the change.
+
+output change NAME…
+	-- the output changes. The old and new values are stored in the event's
+	   `prev_value` and `value`, respectively.
+
+output error NAME…
+	-- Changing the output resulted in an error.
 
 PWM
 ---
 
 pwm set on|off NAME…
     -- change the pulse level.
+
+pwm change NAME…
+    -- change the pulse level.
+	   The new state is in the event's `value` parameter.
 
 pwm error NAME…
     -- A "pwm set" event caused an error.
@@ -125,7 +145,7 @@ pwm error NAME…
 State
 -----
 
-state OLD NEW NAME
+state OLD NEW NAME…
 	-- a state changes.
 	   OLD is "-" if the state is newly created.
 	   NEW is "-" if the state is deleted.
@@ -134,34 +154,50 @@ state OLD NEW NAME
 	   state changes on the same NAME are forbidden and will cause an
 	   error.
 
+state new NAME…
+state delete NAME…
+state change NAME…
+	-- a state is created / deleted / changes.
+	   The old and/or new values are stored in the event's prev_value /
+	   value fields, respectively.
+
 FS20
 ----
 
-fs20 state  STATE EXT  NAME
+fs20 state  STATE EXT  NAME…
 	-- A command has been received. "STATE" is the command that's being
 	   sent to the named device. This includes messages like "toggle" or
 	   "dim_updown".
 	   
 	   EXT is the command's extension byte, or "-" of none has been sent.
 	
-fs20 unknown device HOUSECODE DEVCODE data
-	-- A FS20 command with an unknown device code has been received
-	   on the HOUSECODE address.
+input fs20 NAME…
+	-- A command has been received. The command's message (and extension,
+	   if present) are stored in the event's `value` and `ext` attributes.
+
+fs20 unknown prefix
+	-- A FS20 command with an unknown message type prefix has been received.
+
+fs20 unknown device
+	-- A FS20 command with an unknown device code has been received.
 
 fs20 unknown function HOUSECODE FCODE data
-	-- A FS20 command with an unknown function code has been received
-	   on the HOUSECODE address.
+	-- A FS20 command with an unknown function code has been received.
 
-fs20 unknown HOUSECODE QSDIFF data
-	-- A FS20 command with an unknown house code / checksum has been
-	   received on the HOUSECODE address.
+fs20 unknown hex
+	-- A FS20 command with non-hexadecimal input has been received.
+
+fs20 unknown hc
+	-- A FS20 command with an unknown house code / checksum combination has
+	   been received.
 	   
-	   QSDIFF is the difference between the received and calculated
+	   The code is sent as the `hc` attribute.
+	   `checksum` is the difference between the received and calculated
 	   checksums. Switches use 6, heating 12. Commands forwarded by
 	   repeaters are currently *not* handled. (Repeaters increment the
 	   checksum of packets they forward.)
 
-fs20 error TEXT NAME
+fs20 error TEXT NAME…
 	-- Error messages (on stderr) from any external commands are
 	   reported by this event. NAME is the sender or receiver which
 	   generated the message.
@@ -183,44 +219,49 @@ fs20 em
 These are measurement devices. They have their own (quite limited)
 protocol codes.
 
-fs20 unknown em ‹id› data
+fs20 unknown em
     -- this device ID is unknown.
 
-fs20 unknown em ‹type› ‹id› datum value …
+fs20 unknown em unregistered
     -- device ‹type›, ID ‹id›, reports that it measured ‹datum› as ‹value›.
 
     Example:
 
-        fs20¦unknown¦em¦thermo_hygro¦2¦temperature¦20.3
+        fs20¦unknown¦em¦unregistered
+			type=thermo_hygro
+			code=2
+			temperature=20.3
 
-fs20 em kind value name…
+fs20 em name…
     -- the device registered as ‹name…› reported something.
 
     Example:
 
-    fs20 em temperature 19.3 inside livingroom
+    fs20¦em¦inside¦livingroom
+		temperature=19.3
+		humidity=51
 
-fs20 conflict em sync ‹type› ‹id› datum value …
+fs20 conflict em sync
     -- The data packet fits more than one timeslot, but the values are
        too close so HomEvenT cannot reliably associate the data to a
        single device.
 
-fs20 conflict em unsync ‹type› ‹id› datum value …
+fs20 conflict em unsync
     -- The data packet fits no running timeslot. There are multiple
        unsynced timeslots and the values are too close, so HomEvenT
        cannot reliably associate the data to a single device.
 
-fs20 conflict em untimed ‹type› ‹id› datum value …
+fs20 conflict em untimed
     -- The data packet fits no running timeslot. There are multiple
        devices without timeslot and the values are too close, so
        HomEvenT cannot reliably associate the data to a single device.
 
-fs20 unknown em untimed ‹type› ‹id› datum value …
+fs20 unknown em untimed
     -- The data packet fits no running timeslot. There are no
        devices without timeslot, so HomEvenT cannot associate
        the data to any device.
 
-fs20 unknown em unregistered ‹type› ‹id› datum value …
+fs20 unknown em unregistered
     -- No devices for that type and ID have been registered.
 
 
@@ -340,5 +381,4 @@ timeslot end NAME
 timeslot error NAME
     -- One of the other slot events has raised an error.
        The timeslot is stopped.
-
 

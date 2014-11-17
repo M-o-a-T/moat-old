@@ -190,13 +190,13 @@ class OWFSchannel(OWFSassembler, NetActiveConnector):
 	typ = "onewire"
 
 	def down_event(self, external=False):
-			simple_event(Context(),"onewire","disconnect",*self.name)
+			simple_event("onewire","disconnect",*self.name)
 
 	def up_event(self, external=False):
-			simple_event(Context(),"onewire","connect",*self.name)
+			simple_event("onewire","connect",*self.name)
 
 	def not_up_event(self, external=False):
-			simple_event(Context(),"onewire","error",*self.name)
+			simple_event("onewire","error",*self.name)
 
 
 class OWFScall(MsgBase):
@@ -485,7 +485,7 @@ class OWFSqueue(MsgQueue,Jobber):
 			if dev.bus is self:
 				n_dev += 1
 		
-		simple_event(Context(),"onewire","scanned",self.name,n_old, len(new_ids), n_dev)
+		simple_event("onewire","scanned",self.name, old=n_old, new=len(new_ids), num=n_dev)
 			
 	def _watcher(self):
 		res = []

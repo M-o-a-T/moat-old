@@ -89,7 +89,7 @@ class fs20_handler(recv_handler):
 		try:
 			g = groups[(code,qs)]
 		except KeyError:
-			simple_event(ctx, "fs20","unknown",to_hc(code),qs,"".join("%02x" % ord(x) for x in data))
+			simple_event("fs20","unknown","hc", hc=to_hc(code),checksum=qs,data=data)
 			
 		else:
 			return g.datagramReceived(data[2:-1], handler, timedelta=timedelta)

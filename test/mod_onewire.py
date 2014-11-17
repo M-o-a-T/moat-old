@@ -46,7 +46,7 @@ on onewire up * "10.000010ef0000":
 	name light sensor present
 	start monitor tempi
 
-on onewire scanned A * * *:
+on onewire scanned A:
 	name scanned
 
 	del on scanned
