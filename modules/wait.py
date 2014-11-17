@@ -29,7 +29,7 @@ from homevent import TESTING
 from homevent.statement import AttributedStatement, Statement, main_words,\
 	global_words
 from homevent.event import Event
-from homevent.run import process_event
+from homevent.run import simple_event
 from homevent.module import Module
 from homevent.worker import ExcWorker
 from homevent.times import time_delta, time_until, unixtime,unixdelta, now, humandelta, sleep
@@ -159,7 +159,7 @@ class Waiter(Collected,Jobber):
 					self.job.set(False)
 
 	def retime(self, dest):
-		process_event(Event(self.ctx(loglevel=TRACE),"wait","update",dest,*self.name))
+		simple_event("wait","update",*self.name,dest=dest, loglevel=TRACE)
 		with log_wait("wait","delete1",self.name):
 			with self._lock:
 				self.end = dest
@@ -196,23 +196,28 @@ wait [NAME…]: for FOO…
 			return Waiters[self.displayname].retime(self.timespec())
 		w = Waiter(self, self.displayname, self.force)
 		w.init(self.timespec())
-		process_event(Event(self.ctx(loglevel=TRACE),"wait","start",ixtime(w.end,self.force),*w.name))
+		simple_event("wait","start",ixtime(w.end,self.force),*w.name, loglevel=TRACE)
+		simple_event("wait","start",*w.name, end_time=ixtime(w.end,self.force), loglevel=TRACE)
 		try:
 			if w.job:
 				r = w.job.get()
 			else:
 				r = True
 		except Exception as ex:
-			process_event(Event(self.ctx(loglevel=TRACE),"wait","error",tm, *w.name))
+			simple_event("wait","error",tm, *w.name, loglevel=TRACE)
+			simple_event("wait","error", *w.name, time=tm,loglevel=TRACE)
+
 			fix_exception(ex)
 			log_exc(msg=u"Wait %s died:"%(self.name,), err=ex, level=TRACE)
 			raise
 		else:
 			tm = ixtime(now(self.force),self.force)
 			if r:
-				process_event(Event(self.ctx(loglevel=TRACE),"wait","done",tm, *w.name))
+				simple_event("wait","done",tm, *w.name, loglevel=TRACE)
+				simple_event("wait","done", *w.name, loglevel=TRACE)
 			else:
-				process_event(Event(self.ctx(loglevel=TRACE),"wait","cancel",tm, *w.name))
+				simple_event("wait","cancel",tm, *w.name, loglevel=TRACE)
+				simple_event("wait","cancel", *w.name, loglevel=TRACE)
 			ctx.wait = tm
 			if not r:
 				raise DelayCancelled(w)

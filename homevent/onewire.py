@@ -30,7 +30,7 @@ from homevent.check import Check,register_condition,unregister_condition
 from homevent.context import Context
 from homevent.collect import Collection,Collected
 from homevent.event import Event
-from homevent.run import process_event,process_failure,simple_event
+from homevent.run import process_failure,simple_event
 from homevent.twist import callLater, fix_exception,print_exception, Jobber
 from homevent.base import Name
 from homevent.net import NetActiveConnector
@@ -450,7 +450,7 @@ class OWFSqueue(MsgQueue,Jobber):
 
 	def update_all(self):
 		try:
-			process_event(Event(Context(),"onewire","scanning",self.name))
+			simple_event("onewire","scanning",self.name)
 			self._update_all()
 		except Exception as e:
 			fix_exception(e)
@@ -632,9 +632,11 @@ class OWFSdevice(Collected):
 			return
 
 		if self.is_up is None:
-			process_event(Event(self.ctx,"onewire","new",self.typ,self.id))
+			simple_event("onewire","new",self.typ,self.id)
+			simple_event("onewire","new",typ=self.typ,id=self.id)
 		self.is_up = True
-		process_event(Event(self.ctx,"onewire","up",self.typ,self.id))
+		simple_event("onewire","up",self.typ,self.id)
+		simple_event("onewire","up",typ=self.typ,id=self.id)
 
 	def go_down(self, _=None):
 		if not self.is_up:
@@ -642,7 +644,8 @@ class OWFSdevice(Collected):
 		self.is_up = False
 		if _ is not None:
 			process_failure(_)
-		process_event(Event(self.ctx,"onewire","down",self.typ,self.id))
+		simple_event("onewire","down",self.typ,self.id)
+		simple_event("onewire","down",self.typ,self.id)
 
 	def get(self,key):
 		if not self.bus:

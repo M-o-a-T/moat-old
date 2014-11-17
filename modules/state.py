@@ -37,7 +37,7 @@ from __future__ import division,absolute_import
 
 from homevent.module import Module
 from homevent.statement import Statement, main_words, AttributedStatement
-from homevent.run import process_event,process_failure
+from homevent.run import simple_event,process_failure
 from homevent.event import Event
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.base import Name,SName
@@ -82,8 +82,8 @@ class State(Collected):
 		self.time = now()
 		try:
 			if self.value is not None:
-				process_event(Event(ctx,"state",self.value,"-",*self.name))
-				process_event(Event(Context(prev_value=self.value),"state","delete",*self.name))
+				simple_event("state",self.value,"-",*self.name)
+				simple_event("state","delete",*self.name, prev_value=self.value)
 		finally:
 			super(State,self).delete()
 
@@ -162,8 +162,8 @@ state name...
 				old = s.old_value if s.old_value is not None else "-"
 				val = s.value
 				if val is None: val = "-"
-				process_event(Event(self.ctx,"state",old,self.value,*s.name))
-				process_event(Event(Context(value=self.value),"state","new",*s.name))
+				simple_event("state",old,self.value,*s.name)
+				simple_event("state","new",*s.name, value=self.value)
 		except BaseException:
 			s.delete()
 			raise
@@ -260,8 +260,8 @@ set state X name...
 			s.set_value(value if value != "-" else None)
 			s.time = now()
 			try:
-				process_event(Event(self.ctx,"state",old,value,*s.name))
-				process_event(Event(Context(prev_value=old,value=value),"state","change",*s.name))
+				simple_event("state",old,value,*s.name)
+				simple_event("state","change",*s.name, prev_value=old,value=value)
 			except Exception as e:
 				fix_exception(e)
 				process_failure(e)

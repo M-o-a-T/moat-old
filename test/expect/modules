@@ -2,8 +2,10 @@ NEW: ‹ConditionalWorkSequence:5 (2)›
    : │  id: 5
    : │  call count: 0
    : │  EVENT: startup
+   : │       : startup=True
    : └1╴... done.
 EVENT: startup
+     : startup=True
 END: startup
 DEBUG Loading!
 NEW: ‹ConditionalWorkSequence:6 (2)›

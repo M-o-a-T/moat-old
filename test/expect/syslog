@@ -2,24 +2,50 @@ NEW: ‹ConditionalWorkSequence:5 (2)›
    : │  id: 5
    : │  call count: 0
    : │  EVENT: startup
+   : │       : startup=True
    : └1╴... done.
 EVENT: startup
+     : startup=True
 END: startup
 NEW: ‹ConditionalWorkSequence:6 (2)›
    : │  id: 6
    : │  call count: 0
    : │  EVENT: wait¦start¦0.2¦_wait¦1
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦start¦0.2¦_wait¦1
+     : loglevel=0
 END: wait¦start¦0.2¦_wait¦1
-TRACE 2014-11-17 09:08:25.322619 _wait¦1: Forced timer done
 NEW: ‹ConditionalWorkSequence:7 (2)›
    : │  id: 7
    : │  call count: 0
+   : │  EVENT: wait¦start¦_wait¦1
+   : │       : loglevel=0
+   : │       : end_time=0.2
+   : └1╴... done.
+EVENT: wait¦start¦_wait¦1
+     : loglevel=0
+     : end_time=0.2
+END: wait¦start¦_wait¦1
+TRACE 2014-11-17 14:41:44.500128 _wait¦1: Forced timer done
+NEW: ‹ConditionalWorkSequence:8 (2)›
+   : │  id: 8
+   : │  call count: 0
    : │  EVENT: wait¦done¦0.2¦_wait¦1
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦done¦0.2¦_wait¦1
+     : loglevel=0
 END: wait¦done¦0.2¦_wait¦1
+NEW: ‹ConditionalWorkSequence:9 (2)›
+   : │  id: 9
+   : │  call count: 0
+   : │  EVENT: wait¦done¦_wait¦1
+   : │       : loglevel=0
+   : └1╴... done.
+EVENT: wait¦done¦_wait¦1
+     : loglevel=0
+END: wait¦done¦_wait¦1
 syslog :: TRACE: run_logger
 .
 DEBUG Five Debug
@@ -39,18 +65,42 @@ level_name: info
 .
 syslog :: TRACE: run_logger
 .
-NEW: ‹ConditionalWorkSequence:8 (2)›
-   : │  id: 8
+NEW: ‹ConditionalWorkSequence:10 (2)›
+   : │  id: 10
    : │  call count: 0
    : │  EVENT: wait¦start¦1.0¦_wait¦2
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦start¦1.0¦_wait¦2
+     : loglevel=0
 END: wait¦start¦1.0¦_wait¦2
-TRACE 2014-11-17 09:08:26.159574 _wait¦2: Forced timer done
-NEW: ‹ConditionalWorkSequence:9 (2)›
-   : │  id: 9
+NEW: ‹ConditionalWorkSequence:11 (2)›
+   : │  id: 11
    : │  call count: 0
-   : │  EVENT: wait¦done¦1.0¦_wait¦2
+   : │  EVENT: wait¦start¦_wait¦2
+   : │       : loglevel=0
+   : │       : end_time=1.0
    : └1╴... done.
-EVENT: wait¦done¦1.0¦_wait¦2
-END: wait¦done¦1.0¦_wait¦2
+EVENT: wait¦start¦_wait¦2
+     : loglevel=0
+     : end_time=1.0
+END: wait¦start¦_wait¦2
+TRACE 2014-11-17 14:41:45.342494 _wait¦2: Forced timer done
+NEW: ‹ConditionalWorkSequence:12 (2)›
+   : │  id: 12
+   : │  call count: 0
+   : │  EVENT: wait¦done¦1.1¦_wait¦2
+   : │       : loglevel=0
+   : └1╴... done.
+EVENT: wait¦done¦1.1¦_wait¦2
+     : loglevel=0
+END: wait¦done¦1.1¦_wait¦2
+NEW: ‹ConditionalWorkSequence:13 (2)›
+   : │  id: 13
+   : │  call count: 0
+   : │  EVENT: wait¦done¦_wait¦2
+   : │       : loglevel=0
+   : └1╴... done.
+EVENT: wait¦done¦_wait¦2
+     : loglevel=0
+END: wait¦done¦_wait¦2

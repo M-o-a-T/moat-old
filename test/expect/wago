@@ -2,8 +2,10 @@ NEW: ‹ConditionalWorkSequence:5 (2)›
    : │  id: 5
    : │  call count: 0
    : │  EVENT: startup
+   : │       : startup=True
    : └1╴... done.
 EVENT: startup
+     : startup=True
 END: startup
 NEW: ‹ConditionalWorkSequence:6 (2)›
    : │  id: 6
@@ -64,9 +66,22 @@ NEW: ‹ConditionalWorkSequence:14 (2)›
    : │  id: 14
    : │  call count: 0
    : │  EVENT: wait¦start¦0.1¦_wait¦1
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦start¦0.1¦_wait¦1
+     : loglevel=0
 END: wait¦start¦0.1¦_wait¦1
+NEW: ‹ConditionalWorkSequence:15 (2)›
+   : │  id: 15
+   : │  call count: 0
+   : │  EVENT: wait¦start¦_wait¦1
+   : │       : loglevel=0
+   : │       : end_time=0.1
+   : └1╴... done.
+EVENT: wait¦start¦_wait¦1
+     : loglevel=0
+     : end_time=0.1
+END: wait¦start¦_wait¦1
 TRACE conn setting up WAGOqueue test
 TRACE conn connected WAGOqueue test
 TRACE msg states at run connected connecting
@@ -82,8 +97,8 @@ TRACE msg recv msg ‹MsgIncoming: msg:'WAGO ready.' type:MT_INFO prio:2›
 TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'WAGO ready.' type:MT_INFO prio:2›
 TRACE msg recv test ‹MsgIncoming: msg:'WAGO ready.' type:MT_INFO prio:2›
 TRACE !got UP_EVENT test
-NEW: ‹ConditionalWorkSequence:15 (3)›
-   : │  id: 15
+NEW: ‹ConditionalWorkSequence:16 (3)›
+   : │  id: 16
    : │  call count: 0
    : │  EVENT: wago¦connect¦test
    : ├1╴on wago connect test ‹OnEventHandler›
@@ -100,7 +115,7 @@ RUN: on wago connect test ‹OnEventHandler›
    :     : step: send wago test Dc ‹WAGOraw›
    :     : step: send wago test DI ‹WAGOraw›
    :     : step: send wago test Dr ‹WAGOraw›
- at: ‹ConditionalWorkSequence:15 (3)› (step 1)
+ at: ‹ConditionalWorkSequence:16 (3)› (step 1)
  ev: EVENT: wago¦connect¦test
 END: wago¦connect¦test
 TRACE msg recv= MINE ‹WAGOinitMsg 5›
@@ -126,12 +141,12 @@ TRACE msg send result RECV_AGAIN
 TRACE msg send ‹WAGOrawRun f›
 TRACE wago send u'Dc'
 TRACE msg send result RECV_AGAIN
-TRACE wago recv '!+25 monitor created'
-TRACE msg recv msg ‹MsgIncoming: msg:'monitor created' msgid:25 type:MT_IND_ACK prio:2›
+TRACE wago recv '!+113 monitor created'
+TRACE msg recv msg ‹MsgIncoming: msg:'monitor created' msgid:113 type:MT_IND_ACK prio:2›
 TRACE wago recv '+OK'
 TRACE msg recv msg ‹MsgIncoming: msg:'OK' type:MT_ACK prio:2›
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'monitor created' msgid:25 type:MT_IND_ACK prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'monitor created' msgid:25 type:MT_IND_ACK prio:2›
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'monitor created' msgid:113 type:MT_IND_ACK prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'monitor created' msgid:113 type:MT_IND_ACK prio:2›
 TRACE msg recv= RECV_AGAIN ‹WAGOkeepaliveMsg 10›
 TRACE msg states at run connected connected
 TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'OK' type:MT_ACK prio:2›
@@ -161,21 +176,43 @@ TRACE msg recv test ‹MsgIncoming: msg:'OK' type:MT_ACK prio:2›
 TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 17›
 TRACE msg recv= MINE ‹WAGOrawRun 18›
 TRACE msg states at run connected connected
-TRACE 2014-11-17 09:08:38.709479 _wait¦1: Forced timer done
-NEW: ‹ConditionalWorkSequence:16 (2)›
-   : │  id: 16
-   : │  call count: 0
-   : │  EVENT: wait¦done¦0.1¦_wait¦1
-   : └1╴... done.
-EVENT: wait¦done¦0.1¦_wait¦1
-END: wait¦done¦0.1¦_wait¦1
+TRACE 2014-11-17 14:41:57.700228 _wait¦1: Forced timer done
 NEW: ‹ConditionalWorkSequence:17 (2)›
    : │  id: 17
+   : │  call count: 0
+   : │  EVENT: wait¦done¦0.2¦_wait¦1
+   : │       : loglevel=0
+   : └1╴... done.
+EVENT: wait¦done¦0.2¦_wait¦1
+     : loglevel=0
+END: wait¦done¦0.2¦_wait¦1
+NEW: ‹ConditionalWorkSequence:18 (2)›
+   : │  id: 18
+   : │  call count: 0
+   : │  EVENT: wait¦done¦_wait¦1
+   : │       : loglevel=0
+   : └1╴... done.
+EVENT: wait¦done¦_wait¦1
+     : loglevel=0
+END: wait¦done¦_wait¦1
+NEW: ‹ConditionalWorkSequence:19 (2)›
+   : │  id: 19
    : │  call count: 0
    : │  EVENT: output¦set¦ho¦hey¦foo¦baz
    : └1╴... done.
 EVENT: output¦set¦ho¦hey¦foo¦baz
 END: output¦set¦ho¦hey¦foo¦baz
+NEW: ‹ConditionalWorkSequence:20 (2)›
+   : │  id: 20
+   : │  call count: 0
+   : │  EVENT: output¦change¦foo¦baz
+   : │       : value=True
+   : │       : prev_value=None
+   : └1╴... done.
+EVENT: output¦change¦foo¦baz
+     : value=True
+     : prev_value=None
+END: output¦change¦foo¦baz
 TRACE msg states at run connected connected
 TRACE msg send ‹WAGOoutputRun 2:1 val=True›
 TRACE wago send 's 2 1'
@@ -254,13 +291,26 @@ TRACE msg states at run connected connected
 TRACE msg send ‹WAGOrawRun 21›
 TRACE wago send u'DS'
 TRACE msg send result RECV_AGAIN
-NEW: ‹ConditionalWorkSequence:18 (2)›
-   : │  id: 18
+NEW: ‹ConditionalWorkSequence:21 (2)›
+   : │  id: 21
    : │  call count: 0
    : │  EVENT: wait¦start¦0.4¦timed¦set¦A
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦start¦0.4¦timed¦set¦A
+     : loglevel=0
 END: wait¦start¦0.4¦timed¦set¦A
+NEW: ‹ConditionalWorkSequence:22 (2)›
+   : │  id: 22
+   : │  call count: 0
+   : │  EVENT: wait¦start¦timed¦set¦A
+   : │       : loglevel=0
+   : │       : end_time=0.4
+   : └1╴... done.
+EVENT: wait¦start¦timed¦set¦A
+     : loglevel=0
+     : end_time=0.4
+END: wait¦start¦timed¦set¦A
 TRACE wago recv '+OK'
 TRACE msg recv msg ‹MsgIncoming: msg:'OK' type:MT_ACK prio:2›
 TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'OK' type:MT_ACK prio:2›
@@ -268,32 +318,54 @@ TRACE msg recv test ‹MsgIncoming: msg:'OK' type:MT_ACK prio:2›
 TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 22›
 TRACE msg recv= MINE ‹WAGOrawRun 23›
 TRACE msg states at run connected connected
-NEW: ‹ConditionalWorkSequence:19 (2)›
-   : │  id: 19
+NEW: ‹ConditionalWorkSequence:23 (2)›
+   : │  id: 23
    : │  call count: 0
    : │  EVENT: output¦set¦hey¦ho¦foo¦baz
    : └1╴... done.
 EVENT: output¦set¦hey¦ho¦foo¦baz
 END: output¦set¦hey¦ho¦foo¦baz
+NEW: ‹ConditionalWorkSequence:24 (2)›
+   : │  id: 24
+   : │  call count: 0
+   : │  EVENT: output¦change¦foo¦baz
+   : │       : value=False
+   : │       : prev_value=True
+   : └1╴... done.
+EVENT: output¦change¦foo¦baz
+     : value=False
+     : prev_value=True
+END: output¦change¦foo¦baz
 TRACE msg states at run connected connected
 TRACE msg send ‹WAGOtimedOutputRun 2:1 val=False tm=2.0 sec id=None›
 TRACE wago send 'c 2 1 1.999'
 TRACE msg send result RECV_AGAIN
-TRACE wago recv '!+26 Cleared, monitor started.'
-TRACE msg recv msg ‹MsgIncoming: msg:'Cleared, monitor started.' msgid:26 type:MT_IND_ACK prio:2›
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'Cleared, monitor started.' msgid:26 type:MT_IND_ACK prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'Cleared, monitor started.' msgid:26 type:MT_IND_ACK prio:2›
+TRACE wago recv '!+114 Cleared, monitor started.'
+TRACE msg recv msg ‹MsgIncoming: msg:'Cleared, monitor started.' msgid:114 type:MT_IND_ACK prio:2›
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'Cleared, monitor started.' msgid:114 type:MT_IND_ACK prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'Cleared, monitor started.' msgid:114 type:MT_IND_ACK prio:2›
 TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 24›
-TRACE msg recv= RECV_AGAIN ‹WAGOtimedOutputRun 2:1 val=False tm=2.0 sec id=26›
+TRACE msg recv= RECV_AGAIN ‹WAGOtimedOutputRun 2:1 val=False tm=2.0 sec id=114›
 TRACE msg states at run connected connected
-TRACE 2014-11-17 09:08:38.959068 timed¦set¦A: Forced timer done
-NEW: ‹ConditionalWorkSequence:20 (2)›
-   : │  id: 20
+TRACE 2014-11-17 14:41:57.950190 timed¦set¦A: Forced timer done
+NEW: ‹ConditionalWorkSequence:25 (2)›
+   : │  id: 25
    : │  call count: 0
    : │  EVENT: wait¦done¦0.4¦timed¦set¦A
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦done¦0.4¦timed¦set¦A
+     : loglevel=0
 END: wait¦done¦0.4¦timed¦set¦A
+NEW: ‹ConditionalWorkSequence:26 (2)›
+   : │  id: 26
+   : │  call count: 0
+   : │  EVENT: wait¦done¦timed¦set¦A
+   : │       : loglevel=0
+   : └1╴... done.
+EVENT: wait¦done¦timed¦set¦A
+     : loglevel=0
+END: wait¦done¦timed¦set¦A
 TRACE msg states at run connected connected
 TRACE msg send ‹WAGOrawRun 25›
 TRACE wago send u'DC'
@@ -303,38 +375,62 @@ TRACE msg recv msg ‹MsgIncoming: msg:'OK' type:MT_ACK prio:2›
 TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'OK' type:MT_ACK prio:2›
 TRACE msg recv test ‹MsgIncoming: msg:'OK' type:MT_ACK prio:2›
 TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 26›
-TRACE msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=1.8 sec id=26›
+TRACE msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=1.8 sec id=114›
 TRACE msg recv= MINE ‹WAGOrawRun 27›
 TRACE msg states at run connected connected
 foo baz 1 :: foo¦baz¦1:None
 .
-NEW: ‹ConditionalWorkSequence:21 (2)›
-   : │  id: 21
+NEW: ‹ConditionalWorkSequence:27 (2)›
+   : │  id: 27
    : │  call count: 0
    : │  EVENT: wait¦start¦1.4¦timed¦set¦B
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦start¦1.4¦timed¦set¦B
+     : loglevel=0
 END: wait¦start¦1.4¦timed¦set¦B
-TRACE wago recv '!25 PING 1'
-TRACE msg recv msg ‹MsgIncoming: msg:'PING 1' msgid:25 type:MT_IND prio:2›
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 1' msgid:25 type:MT_IND prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'PING 1' msgid:25 type:MT_IND prio:2›
+NEW: ‹ConditionalWorkSequence:28 (2)›
+   : │  id: 28
+   : │  call count: 0
+   : │  EVENT: wait¦start¦timed¦set¦B
+   : │       : loglevel=0
+   : │       : end_time=1.4
+   : └1╴... done.
+EVENT: wait¦start¦timed¦set¦B
+     : loglevel=0
+     : end_time=1.4
+END: wait¦start¦timed¦set¦B
+TRACE wago recv '!113 PING 1'
+TRACE msg recv msg ‹MsgIncoming: msg:'PING 1' msgid:113 type:MT_IND prio:2›
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 1' msgid:113 type:MT_IND prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'PING 1' msgid:113 type:MT_IND prio:2›
 TRACE msg recv= RECV_AGAIN ‹WAGOkeepaliveMsg 29›
 TRACE msg states at run connected connected
-TRACE wago recv '!25 PING 2'
-TRACE msg recv msg ‹MsgIncoming: msg:'PING 2' msgid:25 type:MT_IND prio:2›
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 2' msgid:25 type:MT_IND prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'PING 2' msgid:25 type:MT_IND prio:2›
+TRACE wago recv '!113 PING 2'
+TRACE msg recv msg ‹MsgIncoming: msg:'PING 2' msgid:113 type:MT_IND prio:2›
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 2' msgid:113 type:MT_IND prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'PING 2' msgid:113 type:MT_IND prio:2›
 TRACE msg recv= RECV_AGAIN ‹WAGOkeepaliveMsg 2b›
 TRACE msg states at run connected connected
-TRACE 2014-11-17 09:08:39.968169 timed¦set¦B: Forced timer done
-NEW: ‹ConditionalWorkSequence:22 (2)›
-   : │  id: 22
+TRACE 2014-11-17 14:41:58.958810 timed¦set¦B: Forced timer done
+NEW: ‹ConditionalWorkSequence:29 (2)›
+   : │  id: 29
    : │  call count: 0
    : │  EVENT: wait¦done¦1.4¦timed¦set¦B
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦done¦1.4¦timed¦set¦B
+     : loglevel=0
 END: wait¦done¦1.4¦timed¦set¦B
+NEW: ‹ConditionalWorkSequence:30 (2)›
+   : │  id: 30
+   : │  call count: 0
+   : │  EVENT: wait¦done¦timed¦set¦B
+   : │       : loglevel=0
+   : └1╴... done.
+EVENT: wait¦done¦timed¦set¦B
+     : loglevel=0
+END: wait¦done¦timed¦set¦B
 TRACE msg states at run connected connected
 TRACE msg send ‹WAGOoutputInRun 2:1›
 TRACE wago send 'I 2 1'
@@ -344,7 +440,7 @@ TRACE msg recv msg ‹MsgIncoming: msg:'0' type:MT_ACK prio:2›
 TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'0' type:MT_ACK prio:2›
 TRACE msg recv test ‹MsgIncoming: msg:'0' type:MT_ACK prio:2›
 TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 2c›
-TRACE msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=0.8 sec id=26›
+TRACE msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=0.8 sec id=114›
 TRACE msg recv= MINE ‹WAGOoutputInRun 2:1›
 TRACE msg states at run connected connected
 DEBUG out_1 ho
@@ -358,51 +454,75 @@ TRACE msg recv msg ‹MsgIncoming: msg:'0' type:MT_ACK prio:2›
 TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'0' type:MT_ACK prio:2›
 TRACE msg recv test ‹MsgIncoming: msg:'0' type:MT_ACK prio:2›
 TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 2d›
-TRACE msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=0.8 sec id=26›
+TRACE msg recv= NOT_MINE ‹WAGOtimedOutputRun 2:1 val=False tm=0.8 sec id=114›
 TRACE msg recv= MINE ‹WAGOoutputInRun 2:1›
 TRACE msg states at run connected connected
 DEBUG Yes
 DEBUG> Yes
-NEW: ‹ConditionalWorkSequence:23 (2)›
-   : │  id: 23
+NEW: ‹ConditionalWorkSequence:31 (2)›
+   : │  id: 31
    : │  call count: 0
    : │  EVENT: wait¦start¦2.4¦timed¦set¦C
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦start¦2.4¦timed¦set¦C
+     : loglevel=0
 END: wait¦start¦2.4¦timed¦set¦C
-TRACE wago recv '!25 PING 3'
-TRACE msg recv msg ‹MsgIncoming: msg:'PING 3' msgid:25 type:MT_IND prio:2›
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 3' msgid:25 type:MT_IND prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'PING 3' msgid:25 type:MT_IND prio:2›
+NEW: ‹ConditionalWorkSequence:32 (2)›
+   : │  id: 32
+   : │  call count: 0
+   : │  EVENT: wait¦start¦timed¦set¦C
+   : │       : loglevel=0
+   : │       : end_time=2.4
+   : └1╴... done.
+EVENT: wait¦start¦timed¦set¦C
+     : loglevel=0
+     : end_time=2.4
+END: wait¦start¦timed¦set¦C
+TRACE wago recv '!113 PING 3'
+TRACE msg recv msg ‹MsgIncoming: msg:'PING 3' msgid:113 type:MT_IND prio:2›
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 3' msgid:113 type:MT_IND prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'PING 3' msgid:113 type:MT_IND prio:2›
 TRACE msg recv= RECV_AGAIN ‹WAGOkeepaliveMsg 2f›
 TRACE msg states at run connected connected
-TRACE wago recv '!25 PING 4'
-TRACE msg recv msg ‹MsgIncoming: msg:'PING 4' msgid:25 type:MT_IND prio:2›
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 4' msgid:25 type:MT_IND prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'PING 4' msgid:25 type:MT_IND prio:2›
+TRACE wago recv '!113 PING 4'
+TRACE msg recv msg ‹MsgIncoming: msg:'PING 4' msgid:113 type:MT_IND prio:2›
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 4' msgid:113 type:MT_IND prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'PING 4' msgid:113 type:MT_IND prio:2›
 TRACE msg recv= RECV_AGAIN ‹WAGOkeepaliveMsg 31›
 TRACE msg states at run connected connected
-TRACE wago recv '!26 TRIGGER'
-TRACE msg recv msg ‹MsgIncoming: msg:'TRIGGER' msgid:26 type:MT_IND prio:2›
-TRACE wago recv '!-26 Deleted.'
-TRACE msg recv msg ‹MsgIncoming: msg:'Deleted.' msgid:26 type:MT_IND_NAK prio:2›
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'TRIGGER' msgid:26 type:MT_IND prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'TRIGGER' msgid:26 type:MT_IND prio:2›
+TRACE wago recv '!114 TRIGGER'
+TRACE msg recv msg ‹MsgIncoming: msg:'TRIGGER' msgid:114 type:MT_IND prio:2›
+TRACE wago recv '!-114 Deleted.'
+TRACE msg recv msg ‹MsgIncoming: msg:'Deleted.' msgid:114 type:MT_IND_NAK prio:2›
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'TRIGGER' msgid:114 type:MT_IND prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'TRIGGER' msgid:114 type:MT_IND prio:2›
 TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 32›
-TRACE msg recv= RECV_AGAIN ‹WAGOtimedOutputRun 2:1 val=False tm=now id=26›
+TRACE msg recv= RECV_AGAIN ‹WAGOtimedOutputRun 2:1 val=False tm=now id=114›
 TRACE msg states at run connected connected
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'Deleted.' msgid:26 type:MT_IND_NAK prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'Deleted.' msgid:26 type:MT_IND_NAK prio:2›
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'Deleted.' msgid:114 type:MT_IND_NAK prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'Deleted.' msgid:114 type:MT_IND_NAK prio:2›
 TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 33›
-TRACE msg recv= MINE ‹WAGOtimedOutputRun 2:1 val=False tm=now id=26›
+TRACE msg recv= MINE ‹WAGOtimedOutputRun 2:1 val=False tm=now id=114›
 TRACE msg states at run connected connected
-NEW: ‹ConditionalWorkSequence:24 (2)›
-   : │  id: 24
+NEW: ‹ConditionalWorkSequence:33 (2)›
+   : │  id: 33
    : │  call count: 0
    : │  EVENT: output¦set¦ho¦ho¦foo¦baz
    : └1╴... done.
 EVENT: output¦set¦ho¦ho¦foo¦baz
 END: output¦set¦ho¦ho¦foo¦baz
+NEW: ‹ConditionalWorkSequence:34 (2)›
+   : │  id: 34
+   : │  call count: 0
+   : │  EVENT: output¦change¦foo¦baz
+   : │       : value=None
+   : │       : prev_value=False
+   : └1╴... done.
+EVENT: output¦change¦foo¦baz
+     : value=None
+     : prev_value=False
+END: output¦change¦foo¦baz
 DEBUG released
 DEBUG> released
 TRACE msg states at run connected connected
@@ -416,14 +536,25 @@ TRACE msg recv test ‹MsgIncoming: msg:'OK' type:MT_ACK prio:2›
 TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 35›
 TRACE msg recv= MINE ‹WAGOrawRun 36›
 TRACE msg states at run connected connected
-TRACE 2014-11-17 09:08:40.978362 timed¦set¦C: Forced timer done
-NEW: ‹ConditionalWorkSequence:25 (2)›
-   : │  id: 25
+TRACE 2014-11-17 14:41:59.966786 timed¦set¦C: Forced timer done
+NEW: ‹ConditionalWorkSequence:35 (2)›
+   : │  id: 35
    : │  call count: 0
    : │  EVENT: wait¦done¦2.4¦timed¦set¦C
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦done¦2.4¦timed¦set¦C
+     : loglevel=0
 END: wait¦done¦2.4¦timed¦set¦C
+NEW: ‹ConditionalWorkSequence:36 (2)›
+   : │  id: 36
+   : │  call count: 0
+   : │  EVENT: wait¦done¦timed¦set¦C
+   : │       : loglevel=0
+   : └1╴... done.
+EVENT: wait¦done¦timed¦set¦C
+     : loglevel=0
+END: wait¦done¦timed¦set¦C
 TRACE msg states at run connected connected
 TRACE msg send ‹WAGOoutputInRun 2:1›
 TRACE wago send 'I 2 1'
@@ -450,28 +581,63 @@ TRACE msg recv= MINE ‹WAGOoutputInRun 2:1›
 TRACE msg states at run connected connected
 DEBUG Yes
 DEBUG> Yes
-NEW: ‹ConditionalWorkSequence:26 (2)›
-   : │  id: 26
+NEW: ‹ConditionalWorkSequence:37 (2)›
+   : │  id: 37
    : │  call count: 0
    : │  EVENT: wait¦start¦2.5¦_wait¦5
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦start¦2.5¦_wait¦5
+     : loglevel=0
 END: wait¦start¦2.5¦_wait¦5
-TRACE 2014-11-17 09:08:41.089543 _wait¦5: Forced timer done
-NEW: ‹ConditionalWorkSequence:27 (2)›
-   : │  id: 27
+NEW: ‹ConditionalWorkSequence:38 (2)›
+   : │  id: 38
+   : │  call count: 0
+   : │  EVENT: wait¦start¦_wait¦5
+   : │       : loglevel=0
+   : │       : end_time=2.5
+   : └1╴... done.
+EVENT: wait¦start¦_wait¦5
+     : loglevel=0
+     : end_time=2.5
+END: wait¦start¦_wait¦5
+TRACE 2014-11-17 14:42:00.076578 _wait¦5: Forced timer done
+NEW: ‹ConditionalWorkSequence:39 (2)›
+   : │  id: 39
    : │  call count: 0
    : │  EVENT: wait¦done¦2.5¦_wait¦5
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦done¦2.5¦_wait¦5
+     : loglevel=0
 END: wait¦done¦2.5¦_wait¦5
-NEW: ‹ConditionalWorkSequence:28 (2)›
-   : │  id: 28
+NEW: ‹ConditionalWorkSequence:40 (2)›
+   : │  id: 40
+   : │  call count: 0
+   : │  EVENT: wait¦done¦_wait¦5
+   : │       : loglevel=0
+   : └1╴... done.
+EVENT: wait¦done¦_wait¦5
+     : loglevel=0
+END: wait¦done¦_wait¦5
+NEW: ‹ConditionalWorkSequence:41 (2)›
+   : │  id: 41
    : │  call count: 0
    : │  EVENT: output¦set¦hey¦ho¦foo¦baz
    : └1╴... done.
 EVENT: output¦set¦hey¦ho¦foo¦baz
 END: output¦set¦hey¦ho¦foo¦baz
+NEW: ‹ConditionalWorkSequence:42 (2)›
+   : │  id: 42
+   : │  call count: 0
+   : │  EVENT: output¦change¦foo¦baz
+   : │       : value=False
+   : │       : prev_value=hey
+   : └1╴... done.
+EVENT: output¦change¦foo¦baz
+     : value=False
+     : prev_value=hey
+END: output¦change¦foo¦baz
 TRACE msg states at run connected connected
 TRACE msg send ‹WAGOoutputRun 2:1 val=False›
 TRACE wago send 'c 2 1'
@@ -483,27 +649,51 @@ TRACE msg recv test ‹MsgIncoming: msg:'Cleared.' type:MT_ACK prio:2›
 TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 39›
 TRACE msg recv= MINE ‹WAGOoutputRun 2:1 val=False›
 TRACE msg states at run connected connected
-NEW: ‹ConditionalWorkSequence:29 (2)›
-   : │  id: 29
+NEW: ‹ConditionalWorkSequence:43 (2)›
+   : │  id: 43
    : │  call count: 0
    : │  EVENT: wait¦start¦3.0¦_wait¦6
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦start¦3.0¦_wait¦6
+     : loglevel=0
 END: wait¦start¦3.0¦_wait¦6
-TRACE wago recv '!25 PING 5'
-TRACE msg recv msg ‹MsgIncoming: msg:'PING 5' msgid:25 type:MT_IND prio:2›
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 5' msgid:25 type:MT_IND prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'PING 5' msgid:25 type:MT_IND prio:2›
+NEW: ‹ConditionalWorkSequence:44 (2)›
+   : │  id: 44
+   : │  call count: 0
+   : │  EVENT: wait¦start¦_wait¦6
+   : │       : loglevel=0
+   : │       : end_time=3.0
+   : └1╴... done.
+EVENT: wait¦start¦_wait¦6
+     : loglevel=0
+     : end_time=3.0
+END: wait¦start¦_wait¦6
+TRACE wago recv '!113 PING 5'
+TRACE msg recv msg ‹MsgIncoming: msg:'PING 5' msgid:113 type:MT_IND prio:2›
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 5' msgid:113 type:MT_IND prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'PING 5' msgid:113 type:MT_IND prio:2›
 TRACE msg recv= RECV_AGAIN ‹WAGOkeepaliveMsg 3b›
 TRACE msg states at run connected connected
-TRACE 2014-11-17 09:08:41.608198 _wait¦6: Forced timer done
-NEW: ‹ConditionalWorkSequence:30 (2)›
-   : │  id: 30
+TRACE 2014-11-17 14:42:00.595893 _wait¦6: Forced timer done
+NEW: ‹ConditionalWorkSequence:45 (2)›
+   : │  id: 45
    : │  call count: 0
    : │  EVENT: wait¦done¦3.0¦_wait¦6
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦done¦3.0¦_wait¦6
+     : loglevel=0
 END: wait¦done¦3.0¦_wait¦6
+NEW: ‹ConditionalWorkSequence:46 (2)›
+   : │  id: 46
+   : │  call count: 0
+   : │  EVENT: wait¦done¦_wait¦6
+   : │       : loglevel=0
+   : └1╴... done.
+EVENT: wait¦done¦_wait¦6
+     : loglevel=0
+END: wait¦done¦_wait¦6
 TRACE msg states at run connected connected
 TRACE msg send ‹WAGOrawRun 3c›
 TRACE wago send u'Dc'
@@ -530,15 +720,15 @@ TRACE msg states at run connected connected
 TRACE msg send ‹WAGOmonRun ‹WAGOmon test¦count¦up off››
 TRACE wago send 'm# 1 1 + 1.000'
 TRACE msg send result RECV_AGAIN
-TRACE wago recv '!+27 monitor created'
-TRACE msg recv msg ‹MsgIncoming: msg:'monitor created' msgid:27 type:MT_IND_ACK prio:2›
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'monitor created' msgid:27 type:MT_IND_ACK prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'monitor created' msgid:27 type:MT_IND_ACK prio:2›
+TRACE wago recv '!+115 monitor created'
+TRACE msg recv msg ‹MsgIncoming: msg:'monitor created' msgid:115 type:MT_IND_ACK prio:2›
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'monitor created' msgid:115 type:MT_IND_ACK prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'monitor created' msgid:115 type:MT_IND_ACK prio:2›
 TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 42›
 TRACE msg recv= RECV_AGAIN ‹WAGOmonRun ‹WAGOmon test¦count¦up off››
 TRACE msg states at run connected connected
-NEW: ‹ConditionalWorkSequence:31 (2)›
-   : │  id: 31
+NEW: ‹ConditionalWorkSequence:47 (2)›
+   : │  id: 47
    : │  call count: 0
    : │  EVENT: monitor¦start¦test¦count¦up
    : └1╴... done.
@@ -549,16 +739,16 @@ TRACE msg states at run connected connected
 TRACE msg send ‹WAGOmonRun ‹WAGOmon test¦count¦down off››
 TRACE wago send 'm# 1 1 - 1.000'
 TRACE msg send result RECV_AGAIN
-TRACE wago recv '!+28 monitor created'
-TRACE msg recv msg ‹MsgIncoming: msg:'monitor created' msgid:28 type:MT_IND_ACK prio:2›
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'monitor created' msgid:28 type:MT_IND_ACK prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'monitor created' msgid:28 type:MT_IND_ACK prio:2›
+TRACE wago recv '!+116 monitor created'
+TRACE msg recv msg ‹MsgIncoming: msg:'monitor created' msgid:116 type:MT_IND_ACK prio:2›
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'monitor created' msgid:116 type:MT_IND_ACK prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'monitor created' msgid:116 type:MT_IND_ACK prio:2›
 TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 43›
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦up run 1››
 TRACE msg recv= RECV_AGAIN ‹WAGOmonRun ‹WAGOmon test¦count¦down off››
 TRACE msg states at run connected connected
-NEW: ‹ConditionalWorkSequence:32 (2)›
-   : │  id: 32
+NEW: ‹ConditionalWorkSequence:48 (2)›
+   : │  id: 48
    : │  call count: 0
    : │  EVENT: monitor¦start¦test¦count¦down
    : └1╴... done.
@@ -569,45 +759,45 @@ TRACE msg states at run connected connected
 TRACE msg send ‹WAGOmonRun ‹WAGOmon test¦count¦both off››
 TRACE wago send 'm# 1 1 * 1.000'
 TRACE msg send result RECV_AGAIN
-TRACE wago recv '!+29 monitor created'
-TRACE msg recv msg ‹MsgIncoming: msg:'monitor created' msgid:29 type:MT_IND_ACK prio:2›
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'monitor created' msgid:29 type:MT_IND_ACK prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'monitor created' msgid:29 type:MT_IND_ACK prio:2›
+TRACE wago recv '!+117 monitor created'
+TRACE msg recv msg ‹MsgIncoming: msg:'monitor created' msgid:117 type:MT_IND_ACK prio:2›
+TRACE wago recv '!113 PING 6'
+TRACE msg recv msg ‹MsgIncoming: msg:'PING 6' msgid:113 type:MT_IND prio:2›
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'monitor created' msgid:117 type:MT_IND_ACK prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'monitor created' msgid:117 type:MT_IND_ACK prio:2›
 TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 44›
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦up run 1››
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦down run 1››
 TRACE msg recv= RECV_AGAIN ‹WAGOmonRun ‹WAGOmon test¦count¦both off››
 TRACE msg states at run connected connected
-NEW: ‹ConditionalWorkSequence:33 (2)›
-   : │  id: 33
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 6' msgid:113 type:MT_IND prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'PING 6' msgid:113 type:MT_IND prio:2›
+NEW: ‹ConditionalWorkSequence:49 (2)›
+   : │  id: 49
    : │  call count: 0
    : │  EVENT: monitor¦start¦test¦count¦both
    : └1╴... done.
 EVENT: monitor¦start¦test¦count¦both
 END: monitor¦start¦test¦count¦both
+TRACE msg recv= RECV_AGAIN ‹WAGOkeepaliveMsg 46›
+TRACE msg states at run connected connected
 TRACE monitor Start run test¦count¦both
 TRACE msg states at run connected connected
 TRACE msg send ‹WAGOmonRun ‹WAGOmon test¦report¦up off››
 TRACE wago send 'm+ 1 1 +'
 TRACE msg send result RECV_AGAIN
-TRACE wago recv '!25 PING 6'
-TRACE msg recv msg ‹MsgIncoming: msg:'PING 6' msgid:25 type:MT_IND prio:2›
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 6' msgid:25 type:MT_IND prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'PING 6' msgid:25 type:MT_IND prio:2›
-TRACE msg recv= RECV_AGAIN ‹WAGOkeepaliveMsg 46›
-TRACE msg states at run connected connected
-TRACE wago recv '!+30 monitor created'
-TRACE msg recv msg ‹MsgIncoming: msg:'monitor created' msgid:30 type:MT_IND_ACK prio:2›
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'monitor created' msgid:30 type:MT_IND_ACK prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'monitor created' msgid:30 type:MT_IND_ACK prio:2›
+TRACE wago recv '!+118 monitor created'
+TRACE msg recv msg ‹MsgIncoming: msg:'monitor created' msgid:118 type:MT_IND_ACK prio:2›
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'monitor created' msgid:118 type:MT_IND_ACK prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'monitor created' msgid:118 type:MT_IND_ACK prio:2›
 TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 47›
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦up run 1››
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦down run 1››
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦both run 1››
 TRACE msg recv= RECV_AGAIN ‹WAGOmonRun ‹WAGOmon test¦report¦up off››
 TRACE msg states at run connected connected
-NEW: ‹ConditionalWorkSequence:34 (2)›
-   : │  id: 34
+NEW: ‹ConditionalWorkSequence:50 (2)›
+   : │  id: 50
    : │  call count: 0
    : │  EVENT: monitor¦start¦test¦report¦up
    : └1╴... done.
@@ -618,10 +808,10 @@ TRACE msg states at run connected connected
 TRACE msg send ‹WAGOmonRun ‹WAGOmon test¦report¦down off››
 TRACE wago send 'm+ 1 1 -'
 TRACE msg send result RECV_AGAIN
-TRACE wago recv '!+31 monitor created'
-TRACE msg recv msg ‹MsgIncoming: msg:'monitor created' msgid:31 type:MT_IND_ACK prio:2›
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'monitor created' msgid:31 type:MT_IND_ACK prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'monitor created' msgid:31 type:MT_IND_ACK prio:2›
+TRACE wago recv '!+119 monitor created'
+TRACE msg recv msg ‹MsgIncoming: msg:'monitor created' msgid:119 type:MT_IND_ACK prio:2›
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'monitor created' msgid:119 type:MT_IND_ACK prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'monitor created' msgid:119 type:MT_IND_ACK prio:2›
 TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 48›
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦up run 1››
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦down run 1››
@@ -629,8 +819,8 @@ TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦both run 1››
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦up run 1››
 TRACE msg recv= RECV_AGAIN ‹WAGOmonRun ‹WAGOmon test¦report¦down off››
 TRACE msg states at run connected connected
-NEW: ‹ConditionalWorkSequence:35 (2)›
-   : │  id: 35
+NEW: ‹ConditionalWorkSequence:51 (2)›
+   : │  id: 51
    : │  call count: 0
    : │  EVENT: monitor¦start¦test¦report¦down
    : └1╴... done.
@@ -641,10 +831,10 @@ TRACE msg states at run connected connected
 TRACE msg send ‹WAGOmonRun ‹WAGOmon test¦report¦both off››
 TRACE wago send 'm+ 1 1 *'
 TRACE msg send result RECV_AGAIN
-TRACE wago recv '!+32 monitor created'
-TRACE msg recv msg ‹MsgIncoming: msg:'monitor created' msgid:32 type:MT_IND_ACK prio:2›
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'monitor created' msgid:32 type:MT_IND_ACK prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'monitor created' msgid:32 type:MT_IND_ACK prio:2›
+TRACE wago recv '!+120 monitor created'
+TRACE msg recv msg ‹MsgIncoming: msg:'monitor created' msgid:120 type:MT_IND_ACK prio:2›
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'monitor created' msgid:120 type:MT_IND_ACK prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'monitor created' msgid:120 type:MT_IND_ACK prio:2›
 TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 49›
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦up run 1››
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦down run 1››
@@ -653,29 +843,53 @@ TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦up run 1››
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦down run 1››
 TRACE msg recv= RECV_AGAIN ‹WAGOmonRun ‹WAGOmon test¦report¦both off››
 TRACE msg states at run connected connected
-NEW: ‹ConditionalWorkSequence:36 (2)›
-   : │  id: 36
+NEW: ‹ConditionalWorkSequence:52 (2)›
+   : │  id: 52
    : │  call count: 0
    : │  EVENT: monitor¦start¦test¦report¦both
    : └1╴... done.
 EVENT: monitor¦start¦test¦report¦both
 END: monitor¦start¦test¦report¦both
 TRACE monitor Start run test¦report¦both
-NEW: ‹ConditionalWorkSequence:37 (2)›
-   : │  id: 37
+NEW: ‹ConditionalWorkSequence:53 (2)›
+   : │  id: 53
    : │  call count: 0
    : │  EVENT: wait¦start¦3.2¦_wait¦7
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦start¦3.2¦_wait¦7
+     : loglevel=0
 END: wait¦start¦3.2¦_wait¦7
-TRACE 2014-11-17 09:08:41.789872 _wait¦7: Forced timer done
-NEW: ‹ConditionalWorkSequence:38 (2)›
-   : │  id: 38
+NEW: ‹ConditionalWorkSequence:54 (2)›
+   : │  id: 54
+   : │  call count: 0
+   : │  EVENT: wait¦start¦_wait¦7
+   : │       : loglevel=0
+   : │       : end_time=3.2
+   : └1╴... done.
+EVENT: wait¦start¦_wait¦7
+     : loglevel=0
+     : end_time=3.2
+END: wait¦start¦_wait¦7
+TRACE 2014-11-17 14:42:00.738445 _wait¦7: Forced timer done
+NEW: ‹ConditionalWorkSequence:55 (2)›
+   : │  id: 55
    : │  call count: 0
    : │  EVENT: wait¦done¦3.2¦_wait¦7
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦done¦3.2¦_wait¦7
+     : loglevel=0
 END: wait¦done¦3.2¦_wait¦7
+NEW: ‹ConditionalWorkSequence:56 (2)›
+   : │  id: 56
+   : │  call count: 0
+   : │  EVENT: wait¦done¦_wait¦7
+   : │       : loglevel=0
+   : └1╴... done.
+EVENT: wait¦done¦_wait¦7
+     : loglevel=0
+END: wait¦done¦_wait¦7
 TRACE msg states at run connected connected
 TRACE msg send ‹WAGOrawRun 4a›
 TRACE wago send u'Ds'
@@ -693,19 +907,32 @@ TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦down run 1››
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦both run 1››
 TRACE msg recv= MINE ‹WAGOrawRun 4c›
 TRACE msg states at run connected connected
-NEW: ‹ConditionalWorkSequence:39 (2)›
-   : │  id: 39
+NEW: ‹ConditionalWorkSequence:57 (2)›
+   : │  id: 57
    : │  call count: 0
    : │  EVENT: wait¦start¦3.3¦_wait¦8
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦start¦3.3¦_wait¦8
+     : loglevel=0
 END: wait¦start¦3.3¦_wait¦8
-TRACE wago recv '!32 H'
-TRACE msg recv msg ‹MsgIncoming: msg:'H' msgid:32 type:MT_IND prio:2›
-TRACE wago recv '!30 H'
-TRACE msg recv msg ‹MsgIncoming: msg:'H' msgid:30 type:MT_IND prio:2›
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'H' msgid:32 type:MT_IND prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'H' msgid:32 type:MT_IND prio:2›
+NEW: ‹ConditionalWorkSequence:58 (2)›
+   : │  id: 58
+   : │  call count: 0
+   : │  EVENT: wait¦start¦_wait¦8
+   : │       : loglevel=0
+   : │       : end_time=3.3
+   : └1╴... done.
+EVENT: wait¦start¦_wait¦8
+     : loglevel=0
+     : end_time=3.3
+END: wait¦start¦_wait¦8
+TRACE wago recv '!120 H'
+TRACE msg recv msg ‹MsgIncoming: msg:'H' msgid:120 type:MT_IND prio:2›
+TRACE wago recv '!118 H'
+TRACE msg recv msg ‹MsgIncoming: msg:'H' msgid:118 type:MT_IND prio:2›
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'H' msgid:120 type:MT_IND prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'H' msgid:120 type:MT_IND prio:2›
 TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 4d›
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦up run 1››
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦down run 1››
@@ -714,42 +941,67 @@ TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦up run 1››
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦down run 1››
 TRACE monitor filter [1.0] on test¦report¦both
 TRACE monitor End run test¦report¦both
-NEW: ‹ConditionalWorkSequence:40 (2)›
-   : │  id: 40
+NEW: ‹ConditionalWorkSequence:59 (2)›
+   : │  id: 59
    : │  call count: 0
    : │  EVENT: monitor¦value¦1.0¦test¦report¦both
    : └1╴... done.
 EVENT: monitor¦value¦1.0¦test¦report¦both
 END: monitor¦value¦1.0¦test¦report¦both
+NEW: ‹ConditionalWorkSequence:60 (2)›
+   : │  id: 60
+   : │  call count: 0
+   : │  EVENT: monitor¦update¦test¦report¦both
+   : └1╴... done.
+EVENT: monitor¦update¦test¦report¦both
+END: monitor¦update¦test¦report¦both
 TRACE monitor Stop run test¦report¦both
 TRACE msg recv= RECV_AGAIN ‹WAGOmonRun ‹WAGOmon test¦report¦both on 1.0››
 TRACE msg states at run connected connected
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'H' msgid:30 type:MT_IND prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'H' msgid:30 type:MT_IND prio:2›
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'H' msgid:118 type:MT_IND prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'H' msgid:118 type:MT_IND prio:2›
 TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 4e›
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦up run 1››
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦down run 1››
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦both run 1››
 TRACE monitor filter [1.0] on test¦report¦up
 TRACE monitor End run test¦report¦up
-NEW: ‹ConditionalWorkSequence:41 (2)›
-   : │  id: 41
+NEW: ‹ConditionalWorkSequence:61 (2)›
+   : │  id: 61
    : │  call count: 0
    : │  EVENT: monitor¦value¦1.0¦test¦report¦up
    : └1╴... done.
 EVENT: monitor¦value¦1.0¦test¦report¦up
 END: monitor¦value¦1.0¦test¦report¦up
+NEW: ‹ConditionalWorkSequence:62 (2)›
+   : │  id: 62
+   : │  call count: 0
+   : │  EVENT: monitor¦update¦test¦report¦up
+   : └1╴... done.
+EVENT: monitor¦update¦test¦report¦up
+END: monitor¦update¦test¦report¦up
 TRACE monitor Stop run test¦report¦up
 TRACE msg recv= RECV_AGAIN ‹WAGOmonRun ‹WAGOmon test¦report¦up on 1.0››
 TRACE msg states at run connected connected
-TRACE 2014-11-17 09:08:41.901640 _wait¦8: Forced timer done
-NEW: ‹ConditionalWorkSequence:42 (2)›
-   : │  id: 42
+TRACE 2014-11-17 14:42:00.849188 _wait¦8: Forced timer done
+NEW: ‹ConditionalWorkSequence:63 (2)›
+   : │  id: 63
    : │  call count: 0
    : │  EVENT: wait¦done¦3.3¦_wait¦8
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦done¦3.3¦_wait¦8
+     : loglevel=0
 END: wait¦done¦3.3¦_wait¦8
+NEW: ‹ConditionalWorkSequence:64 (2)›
+   : │  id: 64
+   : │  call count: 0
+   : │  EVENT: wait¦done¦_wait¦8
+   : │       : loglevel=0
+   : └1╴... done.
+EVENT: wait¦done¦_wait¦8
+     : loglevel=0
+END: wait¦done¦_wait¦8
 TRACE msg states at run connected connected
 TRACE msg send ‹WAGOrawRun 4f›
 TRACE wago send u'Dc'
@@ -767,61 +1019,108 @@ TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦down run 1››
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦both on 1.0››
 TRACE msg recv= MINE ‹WAGOrawRun 51›
 TRACE msg states at run connected connected
-NEW: ‹ConditionalWorkSequence:43 (2)›
-   : │  id: 43
+NEW: ‹ConditionalWorkSequence:65 (2)›
+   : │  id: 65
    : │  call count: 0
    : │  EVENT: wait¦start¦3.4¦_wait¦9
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦start¦3.4¦_wait¦9
+     : loglevel=0
 END: wait¦start¦3.4¦_wait¦9
-TRACE wago recv '!32 L'
-TRACE msg recv msg ‹MsgIncoming: msg:'L' msgid:32 type:MT_IND prio:2›
-TRACE wago recv '!31 L'
-TRACE msg recv msg ‹MsgIncoming: msg:'L' msgid:31 type:MT_IND prio:2›
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'L' msgid:32 type:MT_IND prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'L' msgid:32 type:MT_IND prio:2›
+NEW: ‹ConditionalWorkSequence:66 (2)›
+   : │  id: 66
+   : │  call count: 0
+   : │  EVENT: wait¦start¦_wait¦9
+   : │       : loglevel=0
+   : │       : end_time=3.4
+   : └1╴... done.
+EVENT: wait¦start¦_wait¦9
+     : loglevel=0
+     : end_time=3.4
+END: wait¦start¦_wait¦9
+TRACE wago recv '!120 L'
+TRACE msg recv msg ‹MsgIncoming: msg:'L' msgid:120 type:MT_IND prio:2›
+TRACE wago recv '!119 L'
+TRACE msg recv msg ‹MsgIncoming: msg:'L' msgid:119 type:MT_IND prio:2›
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'L' msgid:120 type:MT_IND prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'L' msgid:120 type:MT_IND prio:2›
 TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 52›
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦up run 1››
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦down run 1››
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦both run 1››
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦up on 1.0››
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦down run 1››
-NEW: ‹ConditionalWorkSequence:44 (2)›
-   : │  id: 44
+TRACE 2014-11-17 14:42:00.960330 _wait¦9: Forced timer done
+NEW: ‹ConditionalWorkSequence:67 (2)›
+   : │  id: 67
    : │  call count: 0
-   : │  EVENT: monitor¦error¦overrun¦test¦report¦both
+   : │  EVENT: wait¦done¦3.4¦_wait¦9
+   : │       : loglevel=0
    : └1╴... done.
-EVENT: monitor¦error¦overrun¦test¦report¦both
-END: monitor¦error¦overrun¦test¦report¦both
-TRACE msg recv= RECV_AGAIN ‹WAGOmonRun ‹WAGOmon test¦report¦both on 1.0››
+EVENT: wait¦done¦3.4¦_wait¦9
+     : loglevel=0
+END: wait¦done¦3.4¦_wait¦9
+NEW: ‹ConditionalWorkSequence:68 (2)›
+   : │  id: 68
+   : │  call count: 0
+   : │  EVENT: wait¦done¦_wait¦9
+   : │       : loglevel=0
+   : └1╴... done.
+EVENT: wait¦done¦_wait¦9
+     : loglevel=0
+END: wait¦done¦_wait¦9
+TRACE 2003-04-05 06:07:16.800172 : Fake timer done
+TRACE 2003-04-05 06:07:16.800172 : Fake timer done
+TRACE monitor Start run test¦report¦up
+TRACE 2003-04-05 06:07:16.900173 : Fake timer done
+TRACE 2003-04-05 06:07:16.900173 : Fake timer done
+TRACE monitor Start run test¦report¦both
+TRACE monitor filter [2.0] on test¦report¦both
+TRACE monitor End run test¦report¦both
+NEW: ‹ConditionalWorkSequence:69 (2)›
+   : │  id: 69
+   : │  call count: 0
+   : │  EVENT: monitor¦value¦2.0¦test¦report¦both
+   : └1╴... done.
+EVENT: monitor¦value¦2.0¦test¦report¦both
+END: monitor¦value¦2.0¦test¦report¦both
+NEW: ‹ConditionalWorkSequence:70 (2)›
+   : │  id: 70
+   : │  call count: 0
+   : │  EVENT: monitor¦update¦test¦report¦both
+   : └1╴... done.
+EVENT: monitor¦update¦test¦report¦both
+END: monitor¦update¦test¦report¦both
+TRACE monitor Stop run test¦report¦both
+TRACE msg recv= RECV_AGAIN ‹WAGOmonRun ‹WAGOmon test¦report¦both on 2.0››
 TRACE msg states at run connected connected
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'L' msgid:31 type:MT_IND prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'L' msgid:31 type:MT_IND prio:2›
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'L' msgid:119 type:MT_IND prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'L' msgid:119 type:MT_IND prio:2›
 TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 53›
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦up run 1››
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦down run 1››
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦both run 1››
-TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦up on 1.0››
+TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦up run 1››
 TRACE monitor filter [1.0] on test¦report¦down
 TRACE monitor End run test¦report¦down
-NEW: ‹ConditionalWorkSequence:45 (2)›
-   : │  id: 45
+NEW: ‹ConditionalWorkSequence:71 (2)›
+   : │  id: 71
    : │  call count: 0
    : │  EVENT: monitor¦value¦1.0¦test¦report¦down
    : └1╴... done.
 EVENT: monitor¦value¦1.0¦test¦report¦down
 END: monitor¦value¦1.0¦test¦report¦down
+NEW: ‹ConditionalWorkSequence:72 (2)›
+   : │  id: 72
+   : │  call count: 0
+   : │  EVENT: monitor¦update¦test¦report¦down
+   : └1╴... done.
+EVENT: monitor¦update¦test¦report¦down
+END: monitor¦update¦test¦report¦down
 TRACE monitor Stop run test¦report¦down
 TRACE msg recv= RECV_AGAIN ‹WAGOmonRun ‹WAGOmon test¦report¦down on 1.0››
 TRACE msg states at run connected connected
-TRACE 2014-11-17 09:08:42.013927 _wait¦9: Forced timer done
-NEW: ‹ConditionalWorkSequence:46 (2)›
-   : │  id: 46
-   : │  call count: 0
-   : │  EVENT: wait¦done¦3.5¦_wait¦9
-   : └1╴... done.
-EVENT: wait¦done¦3.5¦_wait¦9
-END: wait¦done¦3.5¦_wait¦9
 TRACE msg states at run connected connected
 TRACE msg send ‹WAGOrawRun 54›
 TRACE wago send u'Ds'
@@ -834,156 +1133,229 @@ TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 55›
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦up run 1››
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦down run 1››
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦both run 1››
-TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦up on 1.0››
+TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦up run 1››
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦down on 1.0››
-TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦both on 1.0››
+TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦both on 2.0››
 TRACE msg recv= MINE ‹WAGOrawRun 56›
 TRACE msg states at run connected connected
-NEW: ‹ConditionalWorkSequence:47 (2)›
-   : │  id: 47
+NEW: ‹ConditionalWorkSequence:73 (2)›
+   : │  id: 73
    : │  call count: 0
    : │  EVENT: wait¦start¦4.5¦_wait¦10
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦start¦4.5¦_wait¦10
+     : loglevel=0
 END: wait¦start¦4.5¦_wait¦10
-TRACE wago recv '!32 H'
-TRACE msg recv msg ‹MsgIncoming: msg:'H' msgid:32 type:MT_IND prio:2›
-TRACE wago recv '!30 H'
-TRACE msg recv msg ‹MsgIncoming: msg:'H' msgid:30 type:MT_IND prio:2›
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'H' msgid:32 type:MT_IND prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'H' msgid:32 type:MT_IND prio:2›
+NEW: ‹ConditionalWorkSequence:74 (2)›
+   : │  id: 74
+   : │  call count: 0
+   : │  EVENT: wait¦start¦_wait¦10
+   : │       : loglevel=0
+   : │       : end_time=4.5
+   : └1╴... done.
+EVENT: wait¦start¦_wait¦10
+     : loglevel=0
+     : end_time=4.5
+END: wait¦start¦_wait¦10
+TRACE wago recv '!120 H'
+TRACE msg recv msg ‹MsgIncoming: msg:'H' msgid:120 type:MT_IND prio:2›
+TRACE wago recv '!118 H'
+TRACE msg recv msg ‹MsgIncoming: msg:'H' msgid:118 type:MT_IND prio:2›
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'H' msgid:120 type:MT_IND prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'H' msgid:120 type:MT_IND prio:2›
 TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 57›
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦up run 1››
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦down run 1››
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦both run 1››
-TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦up on 1.0››
+TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦up run 1››
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦down on 1.0››
-NEW: ‹ConditionalWorkSequence:48 (2)›
-   : │  id: 48
+TRACE wago recv '!113 PING 7'
+TRACE msg recv msg ‹MsgIncoming: msg:'PING 7' msgid:113 type:MT_IND prio:2›
+TRACE 2003-04-05 06:07:17.950193 : Fake timer done
+TRACE 2003-04-05 06:07:17.950193 : Fake timer done
+TRACE monitor Start run test¦report¦down
+TRACE 2003-04-05 06:07:18.025195 : Fake timer done
+TRACE 2003-04-05 06:07:18.025195 : Fake timer done
+TRACE monitor Start run test¦report¦both
+TRACE monitor filter [3.0] on test¦report¦both
+TRACE monitor End run test¦report¦both
+NEW: ‹ConditionalWorkSequence:75 (2)›
+   : │  id: 75
    : │  call count: 0
-   : │  EVENT: monitor¦error¦overrun¦test¦report¦both
+   : │  EVENT: monitor¦value¦3.0¦test¦report¦both
    : └1╴... done.
-EVENT: monitor¦error¦overrun¦test¦report¦both
-END: monitor¦error¦overrun¦test¦report¦both
-TRACE msg recv= RECV_AGAIN ‹WAGOmonRun ‹WAGOmon test¦report¦both on 1.0››
+EVENT: monitor¦value¦3.0¦test¦report¦both
+END: monitor¦value¦3.0¦test¦report¦both
+NEW: ‹ConditionalWorkSequence:76 (2)›
+   : │  id: 76
+   : │  call count: 0
+   : │  EVENT: monitor¦update¦test¦report¦both
+   : └1╴... done.
+EVENT: monitor¦update¦test¦report¦both
+END: monitor¦update¦test¦report¦both
+TRACE monitor Stop run test¦report¦both
+TRACE msg recv= RECV_AGAIN ‹WAGOmonRun ‹WAGOmon test¦report¦both on 3.0››
 TRACE msg states at run connected connected
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'H' msgid:30 type:MT_IND prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'H' msgid:30 type:MT_IND prio:2›
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'H' msgid:118 type:MT_IND prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'H' msgid:118 type:MT_IND prio:2›
 TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 58›
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦up run 1››
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦down run 1››
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦both run 1››
-NEW: ‹ConditionalWorkSequence:49 (2)›
-   : │  id: 49
+TRACE monitor filter [2.0] on test¦report¦up
+TRACE monitor End run test¦report¦up
+NEW: ‹ConditionalWorkSequence:77 (2)›
+   : │  id: 77
    : │  call count: 0
-   : │  EVENT: monitor¦error¦overrun¦test¦report¦up
+   : │  EVENT: monitor¦value¦2.0¦test¦report¦up
    : └1╴... done.
-EVENT: monitor¦error¦overrun¦test¦report¦up
-END: monitor¦error¦overrun¦test¦report¦up
-TRACE msg recv= RECV_AGAIN ‹WAGOmonRun ‹WAGOmon test¦report¦up on 1.0››
+EVENT: monitor¦value¦2.0¦test¦report¦up
+END: monitor¦value¦2.0¦test¦report¦up
+NEW: ‹ConditionalWorkSequence:78 (2)›
+   : │  id: 78
+   : │  call count: 0
+   : │  EVENT: monitor¦update¦test¦report¦up
+   : └1╴... done.
+EVENT: monitor¦update¦test¦report¦up
+END: monitor¦update¦test¦report¦up
+TRACE monitor Stop run test¦report¦up
+TRACE msg recv= RECV_AGAIN ‹WAGOmonRun ‹WAGOmon test¦report¦up on 2.0››
 TRACE msg states at run connected connected
-TRACE 2003-04-05 06:07:16.925175 : Fake timer done
-TRACE 2003-04-05 06:07:16.925175 : Fake timer done
-TRACE monitor Start run test¦report¦both
-TRACE 2003-04-05 06:07:16.950176 : Fake timer done
-TRACE 2003-04-05 06:07:16.950176 : Fake timer done
-TRACE monitor Start run test¦report¦up
-TRACE wago recv '!25 PING 7'
-TRACE msg recv msg ‹MsgIncoming: msg:'PING 7' msgid:25 type:MT_IND prio:2›
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 7' msgid:25 type:MT_IND prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'PING 7' msgid:25 type:MT_IND prio:2›
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 7' msgid:113 type:MT_IND prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'PING 7' msgid:113 type:MT_IND prio:2›
 TRACE msg recv= RECV_AGAIN ‹WAGOkeepaliveMsg 5a›
 TRACE msg states at run connected connected
-TRACE 2003-04-05 06:07:17.300183 : Fake timer done
-TRACE 2003-04-05 06:07:17.300183 : Fake timer done
-TRACE monitor Start run test¦report¦down
-TRACE wago recv '!25 PING 8'
-TRACE msg recv msg ‹MsgIncoming: msg:'PING 8' msgid:25 type:MT_IND prio:2›
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 8' msgid:25 type:MT_IND prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'PING 8' msgid:25 type:MT_IND prio:2›
+TRACE wago recv '!113 PING 8'
+TRACE msg recv msg ‹MsgIncoming: msg:'PING 8' msgid:113 type:MT_IND prio:2›
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 8' msgid:113 type:MT_IND prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'PING 8' msgid:113 type:MT_IND prio:2›
 TRACE msg recv= RECV_AGAIN ‹WAGOkeepaliveMsg 5c›
 TRACE msg states at run connected connected
-TRACE wago recv '!29 3'
-TRACE msg recv msg ‹MsgIncoming: msg:'3' msgid:29 type:MT_IND prio:2›
-TRACE wago recv '!27 2'
-TRACE msg recv msg ‹MsgIncoming: msg:'2' msgid:27 type:MT_IND prio:2›
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'3' msgid:29 type:MT_IND prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'3' msgid:29 type:MT_IND prio:2›
+TRACE 2003-04-05 06:07:19.075216 : Fake timer done
+TRACE 2003-04-05 06:07:19.075216 : Fake timer done
+TRACE monitor Start run test¦report¦both
+TRACE 2003-04-05 06:07:19.100216 : Fake timer done
+TRACE 2003-04-05 06:07:19.100216 : Fake timer done
+TRACE monitor Start run test¦report¦up
+TRACE wago recv '!117 3'
+TRACE msg recv msg ‹MsgIncoming: msg:'3' msgid:117 type:MT_IND prio:2›
+TRACE wago recv '!115 2'
+TRACE msg recv msg ‹MsgIncoming: msg:'2' msgid:115 type:MT_IND prio:2›
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'3' msgid:117 type:MT_IND prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'3' msgid:117 type:MT_IND prio:2›
 TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 5d›
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦up run 1››
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦down run 1››
 TRACE monitor filter [3.0] on test¦count¦both
 TRACE monitor End run test¦count¦both
-NEW: ‹ConditionalWorkSequence:50 (2)›
-   : │  id: 50
+NEW: ‹ConditionalWorkSequence:79 (2)›
+   : │  id: 79
    : │  call count: 0
    : │  EVENT: monitor¦value¦3.0¦test¦count¦both
    : └1╴... done.
 EVENT: monitor¦value¦3.0¦test¦count¦both
 END: monitor¦value¦3.0¦test¦count¦both
+NEW: ‹ConditionalWorkSequence:80 (2)›
+   : │  id: 80
+   : │  call count: 0
+   : │  EVENT: monitor¦update¦test¦count¦both
+   : └1╴... done.
+EVENT: monitor¦update¦test¦count¦both
+END: monitor¦update¦test¦count¦both
 TRACE monitor Stop run test¦count¦both
 TRACE msg recv= RECV_AGAIN ‹WAGOmonRun ‹WAGOmon test¦count¦both on 3.0››
 TRACE msg states at run connected connected
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'2' msgid:27 type:MT_IND prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'2' msgid:27 type:MT_IND prio:2›
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'2' msgid:115 type:MT_IND prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'2' msgid:115 type:MT_IND prio:2›
 TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 5e›
 TRACE monitor filter [2.0] on test¦count¦up
 TRACE monitor End run test¦count¦up
-NEW: ‹ConditionalWorkSequence:51 (2)›
-   : │  id: 51
+NEW: ‹ConditionalWorkSequence:81 (2)›
+   : │  id: 81
    : │  call count: 0
    : │  EVENT: monitor¦value¦2.0¦test¦count¦up
    : └1╴... done.
 EVENT: monitor¦value¦2.0¦test¦count¦up
 END: monitor¦value¦2.0¦test¦count¦up
+NEW: ‹ConditionalWorkSequence:82 (2)›
+   : │  id: 82
+   : │  call count: 0
+   : │  EVENT: monitor¦update¦test¦count¦up
+   : └1╴... done.
+EVENT: monitor¦update¦test¦count¦up
+END: monitor¦update¦test¦count¦up
 TRACE monitor Stop run test¦count¦up
 TRACE msg recv= RECV_AGAIN ‹WAGOmonRun ‹WAGOmon test¦count¦up on 2.0››
 TRACE msg states at run connected connected
-TRACE wago recv '!28 1'
-TRACE msg recv msg ‹MsgIncoming: msg:'1' msgid:28 type:MT_IND prio:2›
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'1' msgid:28 type:MT_IND prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'1' msgid:28 type:MT_IND prio:2›
+TRACE wago recv '!116 1'
+TRACE msg recv msg ‹MsgIncoming: msg:'1' msgid:116 type:MT_IND prio:2›
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'1' msgid:116 type:MT_IND prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'1' msgid:116 type:MT_IND prio:2›
 TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 5f›
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦up on 2.0››
 TRACE monitor filter [1.0] on test¦count¦down
 TRACE monitor End run test¦count¦down
-NEW: ‹ConditionalWorkSequence:52 (2)›
-   : │  id: 52
+NEW: ‹ConditionalWorkSequence:83 (2)›
+   : │  id: 83
    : │  call count: 0
    : │  EVENT: monitor¦value¦1.0¦test¦count¦down
    : └1╴... done.
 EVENT: monitor¦value¦1.0¦test¦count¦down
 END: monitor¦value¦1.0¦test¦count¦down
+NEW: ‹ConditionalWorkSequence:84 (2)›
+   : │  id: 84
+   : │  call count: 0
+   : │  EVENT: monitor¦update¦test¦count¦down
+   : └1╴... done.
+EVENT: monitor¦update¦test¦count¦down
+END: monitor¦update¦test¦count¦down
 TRACE monitor Stop run test¦count¦down
 TRACE msg recv= RECV_AGAIN ‹WAGOmonRun ‹WAGOmon test¦count¦down on 1.0››
 TRACE msg states at run connected connected
-TRACE 2014-11-17 09:08:43.022370 _wait¦10: Forced timer done
-NEW: ‹ConditionalWorkSequence:53 (2)›
-   : │  id: 53
+TRACE 2003-04-05 06:07:20.250239 : Fake timer done
+TRACE 2003-04-05 06:07:20.250239 : Fake timer done
+TRACE monitor Start run test¦count¦up
+TRACE 2003-04-05 06:07:20.350241 : Fake timer done
+TRACE 2003-04-05 06:07:20.350241 : Fake timer done
+TRACE monitor Start run test¦count¦both
+TRACE 2014-11-17 14:42:02.083106 _wait¦10: Forced timer done
+NEW: ‹ConditionalWorkSequence:85 (2)›
+   : │  id: 85
    : │  call count: 0
    : │  EVENT: wait¦done¦4.5¦_wait¦10
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦done¦4.5¦_wait¦10
+     : loglevel=0
 END: wait¦done¦4.5¦_wait¦10
-test count both :: Wait ‹now›
-test count down :: Wait ‹0.5 sec›
-test count up :: Wait ‹now›
-test report both :: Run ‹2.5 sec›
-test report down :: Run ‹2.2 sec›
-test report up :: Run ‹2.5 sec›
+NEW: ‹ConditionalWorkSequence:86 (2)›
+   : │  id: 86
+   : │  call count: 0
+   : │  EVENT: wait¦done¦_wait¦10
+   : │       : loglevel=0
+   : └1╴... done.
+EVENT: wait¦done¦_wait¦10
+     : loglevel=0
+END: wait¦done¦_wait¦10
+test count both :: Run ‹0.3 sec›
+test count down :: Wait ‹now›
+test count up :: Run ‹0.4 sec›
+test report both :: Run ‹1.6 sec›
+test report down :: Run ‹2.7 sec›
+test report up :: Run ‹1.6 sec›
 .
-: ‹WAGOmon test¦count¦up on 2.0›
+: ‹WAGOmon test¦count¦up run 1›
 name: test¦count¦up
 device: wago test 1 1
 value: 2.0
-up: Wait
-time: ‹now›
+up: Run
+time: ‹0.4 sec›
 steps: 1 / 1 / None
-data: 2.0
 mode: count
 timespec: 1
 level: up
-msgid: 27
+msgid: 115
 last msg: monitor created
 .
 : ‹WAGOmon test¦count¦down on 1.0›
@@ -991,39 +1363,38 @@ name: test¦count¦down
 device: wago test 1 1
 value: 1.0
 up: Wait
-time: ‹0.5 sec›
+time: ‹now›
 steps: 1 / 1 / None
 data: 1.0
 mode: count
 timespec: 1
 level: down
-msgid: 28
+msgid: 116
 last msg: monitor created
 .
-: ‹WAGOmon test¦count¦both on 3.0›
+: ‹WAGOmon test¦count¦both run 1›
 name: test¦count¦both
 device: wago test 1 1
 value: 3.0
-up: Wait
-time: ‹now›
+up: Run
+time: ‹0.3 sec›
 steps: 1 / 1 / None
-data: 3.0
 mode: count
 timespec: 1
 level: both
-msgid: 29
+msgid: 117
 last msg: monitor created
 .
 : ‹WAGOmon test¦report¦up run 1›
 name: test¦report¦up
 device: wago test 1 1
-value: 1.0
+value: 2.0
 up: Run
-time: ‹2.5 sec›
+time: ‹1.6 sec›
 steps: 1 / 1 / None
 mode: report
 level: up
-msgid: 30
+msgid: 118
 last msg: monitor created
 .
 : ‹WAGOmon test¦report¦down run 1›
@@ -1031,56 +1402,50 @@ name: test¦report¦down
 device: wago test 1 1
 value: 1.0
 up: Run
-time: ‹2.2 sec›
+time: ‹2.7 sec›
 steps: 1 / 1 / None
 mode: report
 level: down
-msgid: 31
+msgid: 119
 last msg: monitor created
 .
 : ‹WAGOmon test¦report¦both run 1›
 name: test¦report¦both
 device: wago test 1 1
-value: 1.0
+value: 3.0
 up: Run
-time: ‹2.5 sec›
+time: ‹1.6 sec›
 steps: 1 / 1 / None
 mode: report
 level: both
-msgid: 32
+msgid: 120
 last msg: monitor created
 .
 DEBUG YesM 1.0 2.0 3.0
 DEBUG> YesM 1.0 2.0 3.0
-DEBUG No RH 1.0
-DEBUG> No RH 1.0
+DEBUG YesR 1.0 2.0 3.0
+DEBUG> YesR 1.0 2.0 3.0
 TRACE msg states at run connected connected
-TRACE msg send ‹WAGOmonStop 60 msgid=27›
-TRACE wago send 'm- 27'
+TRACE msg send ‹WAGOmonStop 60 msgid=115›
+TRACE wago send 'm- 115'
 TRACE msg send result RECV_AGAIN
-TRACE 2003-04-05 06:07:19.500226 : Fake timer done
-TRACE 2003-04-05 06:07:19.500226 : Fake timer done
-TRACE monitor Start run test¦count¦both
-TRACE 2003-04-05 06:07:19.550227 : Fake timer done
-TRACE 2003-04-05 06:07:19.550227 : Fake timer done
-TRACE monitor Start run test¦count¦up
-TRACE wago recv '!-27 Deleted.'
-TRACE msg recv msg ‹MsgIncoming: msg:'Deleted.' msgid:27 type:MT_IND_NAK prio:2›
-TRACE wago recv '+Monitor 27 deleted.'
-TRACE msg recv msg ‹MsgIncoming: msg:'Monitor 27 deleted.' type:MT_ACK prio:2›
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'Deleted.' msgid:27 type:MT_IND_NAK prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'Deleted.' msgid:27 type:MT_IND_NAK prio:2›
+TRACE 2003-04-05 06:07:20.700247 : Fake timer done
+TRACE 2003-04-05 06:07:20.700247 : Fake timer done
+TRACE monitor Start run test¦count¦down
+TRACE wago recv '!-115 Deleted.'
+TRACE msg recv msg ‹MsgIncoming: msg:'Deleted.' msgid:115 type:MT_IND_NAK prio:2›
+TRACE wago recv '+Monitor 115 deleted.'
+TRACE msg recv msg ‹MsgIncoming: msg:'Monitor 115 deleted.' type:MT_ACK prio:2›
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'Deleted.' msgid:115 type:MT_IND_NAK prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'Deleted.' msgid:115 type:MT_IND_NAK prio:2›
 TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 61›
 TRACE monitor End run test¦count¦up
 TRACE monitor Stop run test¦count¦up
-TRACE wago recv '!25 PING 9'
-TRACE msg recv msg ‹MsgIncoming: msg:'PING 9' msgid:25 type:MT_IND prio:2›
-TRACE 2003-04-05 06:07:20.050232 : Fake timer done
-TRACE 2003-04-05 06:07:20.050232 : Fake timer done
-TRACE monitor Start run test¦count¦down
-TRACE 2003-04-05 06:07:20.700238 : Fake timer done
-NEW: ‹ConditionalWorkSequence:54 (2)›
-   : │  id: 54
+TRACE wago recv '!113 PING 9'
+TRACE msg recv msg ‹MsgIncoming: msg:'PING 9' msgid:113 type:MT_IND prio:2›
+TRACE 2003-04-05 06:07:21.700257 : Fake timer done
+NEW: ‹ConditionalWorkSequence:87 (2)›
+   : │  id: 87
    : │  call count: 0
    : │  EVENT: monitor¦stop¦test¦count¦up
    : └1╴... done.
@@ -1088,38 +1453,44 @@ EVENT: monitor¦stop¦test¦count¦up
 END: monitor¦stop¦test¦count¦up
 TRACE msg recv= MINE ‹WAGOmonRun ‹WAGOmon test¦count¦up off››
 TRACE msg states at run connected connected
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'Monitor 27 deleted.' type:MT_ACK prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'Monitor 27 deleted.' type:MT_ACK prio:2›
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'Monitor 115 deleted.' type:MT_ACK prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'Monitor 115 deleted.' type:MT_ACK prio:2›
 TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 62›
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦down run 1››
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦both run 1››
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦up run 1››
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦down run 1››
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦both run 1››
-TRACE msg recv= MINE ‹WAGOmonStop 63 msgid=27›
+TRACE msg recv= MINE ‹WAGOmonStop 63 msgid=115›
 TRACE msg states at run connected connected
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 9' msgid:25 type:MT_IND prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'PING 9' msgid:25 type:MT_IND prio:2›
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 9' msgid:113 type:MT_IND prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'PING 9' msgid:113 type:MT_IND prio:2›
 TRACE msg recv= RECV_AGAIN ‹WAGOkeepaliveMsg 65›
 TRACE msg states at run connected connected
 TRACE msg states at run connected connected
-TRACE msg send ‹WAGOmonStop 66 msgid=28›
-TRACE wago send 'm- 28'
+TRACE msg send ‹WAGOmonStop 66 msgid=116›
+TRACE wago send 'm- 116'
 TRACE msg send result RECV_AGAIN
-TRACE wago recv '!-28 Deleted.'
-TRACE msg recv msg ‹MsgIncoming: msg:'Deleted.' msgid:28 type:MT_IND_NAK prio:2›
-TRACE wago recv '+Monitor 28 deleted.'
-TRACE msg recv msg ‹MsgIncoming: msg:'Monitor 28 deleted.' type:MT_ACK prio:2›
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'Deleted.' msgid:28 type:MT_IND_NAK prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'Deleted.' msgid:28 type:MT_IND_NAK prio:2›
-TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 67›
+TRACE wago recv '!113 PING 10'
+TRACE msg recv msg ‹MsgIncoming: msg:'PING 10' msgid:113 type:MT_IND prio:2›
+TRACE wago recv '!-116 Deleted.'
+TRACE msg recv msg ‹MsgIncoming: msg:'Deleted.' msgid:116 type:MT_IND_NAK prio:2›
+TRACE wago recv '+Monitor 116 deleted.'
+TRACE msg recv msg ‹MsgIncoming: msg:'Monitor 116 deleted.' type:MT_ACK prio:2›
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 10' msgid:113 type:MT_IND prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'PING 10' msgid:113 type:MT_IND prio:2›
+TRACE msg recv= RECV_AGAIN ‹WAGOkeepaliveMsg 68›
+TRACE msg states at run connected connected
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'Deleted.' msgid:116 type:MT_IND_NAK prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'Deleted.' msgid:116 type:MT_IND_NAK prio:2›
+TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 69›
 TRACE monitor End run test¦count¦down
 TRACE monitor Stop run test¦count¦down
-TRACE wago recv '!25 PING 10'
-TRACE msg recv msg ‹MsgIncoming: msg:'PING 10' msgid:25 type:MT_IND prio:2›
-TRACE 2003-04-05 06:07:21.700248 : Fake timer done
-NEW: ‹ConditionalWorkSequence:55 (2)›
-   : │  id: 55
+TRACE wago recv '!113 PING 11'
+TRACE msg recv msg ‹MsgIncoming: msg:'PING 11' msgid:113 type:MT_IND prio:2›
+TRACE 2003-04-05 06:07:22.700267 : Fake timer done
+NEW: ‹ConditionalWorkSequence:88 (2)›
+   : │  id: 88
    : │  call count: 0
    : │  EVENT: monitor¦stop¦test¦count¦down
    : └1╴... done.
@@ -1127,37 +1498,37 @@ EVENT: monitor¦stop¦test¦count¦down
 END: monitor¦stop¦test¦count¦down
 TRACE msg recv= MINE ‹WAGOmonRun ‹WAGOmon test¦count¦down off››
 TRACE msg states at run connected connected
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'Monitor 28 deleted.' type:MT_ACK prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'Monitor 28 deleted.' type:MT_ACK prio:2›
-TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 68›
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'Monitor 116 deleted.' type:MT_ACK prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'Monitor 116 deleted.' type:MT_ACK prio:2›
+TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 6a›
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦count¦both run 1››
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦up run 1››
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦down run 1››
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦both run 1››
-TRACE msg recv= MINE ‹WAGOmonStop 69 msgid=28›
+TRACE msg recv= MINE ‹WAGOmonStop 6b msgid=116›
 TRACE msg states at run connected connected
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 10' msgid:25 type:MT_IND prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'PING 10' msgid:25 type:MT_IND prio:2›
-TRACE msg recv= RECV_AGAIN ‹WAGOkeepaliveMsg 6b›
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 11' msgid:113 type:MT_IND prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'PING 11' msgid:113 type:MT_IND prio:2›
+TRACE msg recv= RECV_AGAIN ‹WAGOkeepaliveMsg 6d›
 TRACE msg states at run connected connected
 TRACE msg states at run connected connected
-TRACE msg send ‹WAGOmonStop 6c msgid=29›
-TRACE wago send 'm- 29'
+TRACE msg send ‹WAGOmonStop 6e msgid=117›
+TRACE wago send 'm- 117'
 TRACE msg send result RECV_AGAIN
-TRACE wago recv '!-29 Deleted.'
-TRACE msg recv msg ‹MsgIncoming: msg:'Deleted.' msgid:29 type:MT_IND_NAK prio:2›
-TRACE wago recv '+Monitor 29 deleted.'
-TRACE msg recv msg ‹MsgIncoming: msg:'Monitor 29 deleted.' type:MT_ACK prio:2›
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'Deleted.' msgid:29 type:MT_IND_NAK prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'Deleted.' msgid:29 type:MT_IND_NAK prio:2›
-TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 6d›
+TRACE wago recv '!-117 Deleted.'
+TRACE msg recv msg ‹MsgIncoming: msg:'Deleted.' msgid:117 type:MT_IND_NAK prio:2›
+TRACE wago recv '+Monitor 117 deleted.'
+TRACE msg recv msg ‹MsgIncoming: msg:'Monitor 117 deleted.' type:MT_ACK prio:2›
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'Deleted.' msgid:117 type:MT_IND_NAK prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'Deleted.' msgid:117 type:MT_IND_NAK prio:2›
+TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 6f›
 TRACE monitor End run test¦count¦both
 TRACE monitor Stop run test¦count¦both
-TRACE wago recv '!25 PING 11'
-TRACE msg recv msg ‹MsgIncoming: msg:'PING 11' msgid:25 type:MT_IND prio:2›
-TRACE 2003-04-05 06:07:22.700258 : Fake timer done
-NEW: ‹ConditionalWorkSequence:56 (2)›
-   : │  id: 56
+TRACE wago recv '!113 PING 12'
+TRACE msg recv msg ‹MsgIncoming: msg:'PING 12' msgid:113 type:MT_IND prio:2›
+TRACE 2003-04-05 06:07:23.700277 : Fake timer done
+NEW: ‹ConditionalWorkSequence:89 (2)›
+   : │  id: 89
    : │  call count: 0
    : │  EVENT: monitor¦stop¦test¦count¦both
    : └1╴... done.
@@ -1165,36 +1536,36 @@ EVENT: monitor¦stop¦test¦count¦both
 END: monitor¦stop¦test¦count¦both
 TRACE msg recv= MINE ‹WAGOmonRun ‹WAGOmon test¦count¦both off››
 TRACE msg states at run connected connected
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'Monitor 29 deleted.' type:MT_ACK prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'Monitor 29 deleted.' type:MT_ACK prio:2›
-TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 6e›
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'Monitor 117 deleted.' type:MT_ACK prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'Monitor 117 deleted.' type:MT_ACK prio:2›
+TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 70›
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦up run 1››
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦down run 1››
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦both run 1››
-TRACE msg recv= MINE ‹WAGOmonStop 6f msgid=29›
+TRACE msg recv= MINE ‹WAGOmonStop 71 msgid=117›
 TRACE msg states at run connected connected
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 11' msgid:25 type:MT_IND prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'PING 11' msgid:25 type:MT_IND prio:2›
-TRACE msg recv= RECV_AGAIN ‹WAGOkeepaliveMsg 71›
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 12' msgid:113 type:MT_IND prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'PING 12' msgid:113 type:MT_IND prio:2›
+TRACE msg recv= RECV_AGAIN ‹WAGOkeepaliveMsg 73›
 TRACE msg states at run connected connected
 TRACE msg states at run connected connected
-TRACE msg send ‹WAGOmonStop 72 msgid=30›
-TRACE wago send 'm- 30'
+TRACE msg send ‹WAGOmonStop 74 msgid=118›
+TRACE wago send 'm- 118'
 TRACE msg send result RECV_AGAIN
-TRACE wago recv '!-30 Deleted.'
-TRACE msg recv msg ‹MsgIncoming: msg:'Deleted.' msgid:30 type:MT_IND_NAK prio:2›
-TRACE wago recv '+Monitor 30 deleted.'
-TRACE msg recv msg ‹MsgIncoming: msg:'Monitor 30 deleted.' type:MT_ACK prio:2›
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'Deleted.' msgid:30 type:MT_IND_NAK prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'Deleted.' msgid:30 type:MT_IND_NAK prio:2›
-TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 73›
+TRACE wago recv '!-118 Deleted.'
+TRACE msg recv msg ‹MsgIncoming: msg:'Deleted.' msgid:118 type:MT_IND_NAK prio:2›
+TRACE wago recv '+Monitor 118 deleted.'
+TRACE msg recv msg ‹MsgIncoming: msg:'Monitor 118 deleted.' type:MT_ACK prio:2›
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'Deleted.' msgid:118 type:MT_IND_NAK prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'Deleted.' msgid:118 type:MT_IND_NAK prio:2›
+TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 75›
 TRACE monitor End run test¦report¦up
 TRACE monitor Stop run test¦report¦up
-TRACE wago recv '!25 PING 12'
-TRACE msg recv msg ‹MsgIncoming: msg:'PING 12' msgid:25 type:MT_IND prio:2›
-TRACE 2003-04-05 06:07:23.700268 : Fake timer done
-NEW: ‹ConditionalWorkSequence:57 (2)›
-   : │  id: 57
+TRACE wago recv '!113 PING 13'
+TRACE msg recv msg ‹MsgIncoming: msg:'PING 13' msgid:113 type:MT_IND prio:2›
+TRACE 2003-04-05 06:07:24.700287 : Fake timer done
+NEW: ‹ConditionalWorkSequence:90 (2)›
+   : │  id: 90
    : │  call count: 0
    : │  EVENT: monitor¦stop¦test¦report¦up
    : └1╴... done.
@@ -1202,35 +1573,35 @@ EVENT: monitor¦stop¦test¦report¦up
 END: monitor¦stop¦test¦report¦up
 TRACE msg recv= MINE ‹WAGOmonRun ‹WAGOmon test¦report¦up off››
 TRACE msg states at run connected connected
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'Monitor 30 deleted.' type:MT_ACK prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'Monitor 30 deleted.' type:MT_ACK prio:2›
-TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 74›
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'Monitor 118 deleted.' type:MT_ACK prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'Monitor 118 deleted.' type:MT_ACK prio:2›
+TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 76›
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦down run 1››
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦both run 1››
-TRACE msg recv= MINE ‹WAGOmonStop 75 msgid=30›
+TRACE msg recv= MINE ‹WAGOmonStop 77 msgid=118›
 TRACE msg states at run connected connected
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 12' msgid:25 type:MT_IND prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'PING 12' msgid:25 type:MT_IND prio:2›
-TRACE msg recv= RECV_AGAIN ‹WAGOkeepaliveMsg 77›
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 13' msgid:113 type:MT_IND prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'PING 13' msgid:113 type:MT_IND prio:2›
+TRACE msg recv= RECV_AGAIN ‹WAGOkeepaliveMsg 79›
 TRACE msg states at run connected connected
 TRACE msg states at run connected connected
-TRACE msg send ‹WAGOmonStop 78 msgid=31›
-TRACE wago send 'm- 31'
+TRACE msg send ‹WAGOmonStop 7a msgid=119›
+TRACE wago send 'm- 119'
 TRACE msg send result RECV_AGAIN
-TRACE wago recv '!-31 Deleted.'
-TRACE msg recv msg ‹MsgIncoming: msg:'Deleted.' msgid:31 type:MT_IND_NAK prio:2›
-TRACE wago recv '+Monitor 31 deleted.'
-TRACE msg recv msg ‹MsgIncoming: msg:'Monitor 31 deleted.' type:MT_ACK prio:2›
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'Deleted.' msgid:31 type:MT_IND_NAK prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'Deleted.' msgid:31 type:MT_IND_NAK prio:2›
-TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 79›
+TRACE wago recv '!-119 Deleted.'
+TRACE msg recv msg ‹MsgIncoming: msg:'Deleted.' msgid:119 type:MT_IND_NAK prio:2›
+TRACE wago recv '+Monitor 119 deleted.'
+TRACE msg recv msg ‹MsgIncoming: msg:'Monitor 119 deleted.' type:MT_ACK prio:2›
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'Deleted.' msgid:119 type:MT_IND_NAK prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'Deleted.' msgid:119 type:MT_IND_NAK prio:2›
+TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 7b›
 TRACE monitor End run test¦report¦down
 TRACE monitor Stop run test¦report¦down
-TRACE wago recv '!25 PING 13'
-TRACE msg recv msg ‹MsgIncoming: msg:'PING 13' msgid:25 type:MT_IND prio:2›
-TRACE 2003-04-05 06:07:24.700278 : Fake timer done
-NEW: ‹ConditionalWorkSequence:58 (2)›
-   : │  id: 58
+TRACE wago recv '!113 PING 14'
+TRACE msg recv msg ‹MsgIncoming: msg:'PING 14' msgid:113 type:MT_IND prio:2›
+TRACE 2003-04-05 06:07:25.700297 : Fake timer done
+NEW: ‹ConditionalWorkSequence:91 (2)›
+   : │  id: 91
    : │  call count: 0
    : │  EVENT: monitor¦stop¦test¦report¦down
    : └1╴... done.
@@ -1238,34 +1609,34 @@ EVENT: monitor¦stop¦test¦report¦down
 END: monitor¦stop¦test¦report¦down
 TRACE msg recv= MINE ‹WAGOmonRun ‹WAGOmon test¦report¦down off››
 TRACE msg states at run connected connected
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'Monitor 31 deleted.' type:MT_ACK prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'Monitor 31 deleted.' type:MT_ACK prio:2›
-TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 7a›
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'Monitor 119 deleted.' type:MT_ACK prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'Monitor 119 deleted.' type:MT_ACK prio:2›
+TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 7c›
 TRACE msg recv= NOT_MINE ‹WAGOmonRun ‹WAGOmon test¦report¦both run 1››
-TRACE msg recv= MINE ‹WAGOmonStop 7b msgid=31›
+TRACE msg recv= MINE ‹WAGOmonStop 7d msgid=119›
 TRACE msg states at run connected connected
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 13' msgid:25 type:MT_IND prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'PING 13' msgid:25 type:MT_IND prio:2›
-TRACE msg recv= RECV_AGAIN ‹WAGOkeepaliveMsg 7d›
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 14' msgid:113 type:MT_IND prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'PING 14' msgid:113 type:MT_IND prio:2›
+TRACE msg recv= RECV_AGAIN ‹WAGOkeepaliveMsg 7f›
 TRACE msg states at run connected connected
 TRACE msg states at run connected connected
-TRACE msg send ‹WAGOmonStop 7e msgid=32›
-TRACE wago send 'm- 32'
+TRACE msg send ‹WAGOmonStop 80 msgid=120›
+TRACE wago send 'm- 120'
 TRACE msg send result RECV_AGAIN
-TRACE wago recv '!-32 Deleted.'
-TRACE msg recv msg ‹MsgIncoming: msg:'Deleted.' msgid:32 type:MT_IND_NAK prio:2›
-TRACE wago recv '+Monitor 32 deleted.'
-TRACE msg recv msg ‹MsgIncoming: msg:'Monitor 32 deleted.' type:MT_ACK prio:2›
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'Deleted.' msgid:32 type:MT_IND_NAK prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'Deleted.' msgid:32 type:MT_IND_NAK prio:2›
-TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 7f›
+TRACE wago recv '!-120 Deleted.'
+TRACE msg recv msg ‹MsgIncoming: msg:'Deleted.' msgid:120 type:MT_IND_NAK prio:2›
+TRACE wago recv '+Monitor 120 deleted.'
+TRACE msg recv msg ‹MsgIncoming: msg:'Monitor 120 deleted.' type:MT_ACK prio:2›
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'Deleted.' msgid:120 type:MT_IND_NAK prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'Deleted.' msgid:120 type:MT_IND_NAK prio:2›
+TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 81›
 TRACE monitor End run test¦report¦both
 TRACE monitor Stop run test¦report¦both
-TRACE wago recv '!25 PING 14'
-TRACE msg recv msg ‹MsgIncoming: msg:'PING 14' msgid:25 type:MT_IND prio:2›
-TRACE 2003-04-05 06:07:25.700288 : Fake timer done
-NEW: ‹ConditionalWorkSequence:59 (2)›
-   : │  id: 59
+TRACE wago recv '!113 PING 15'
+TRACE msg recv msg ‹MsgIncoming: msg:'PING 15' msgid:113 type:MT_IND prio:2›
+TRACE 2003-04-05 06:07:26.700307 : Fake timer done
+NEW: ‹ConditionalWorkSequence:92 (2)›
+   : │  id: 92
    : │  call count: 0
    : │  EVENT: monitor¦stop¦test¦report¦both
    : └1╴... done.
@@ -1273,36 +1644,54 @@ EVENT: monitor¦stop¦test¦report¦both
 END: monitor¦stop¦test¦report¦both
 TRACE msg recv= MINE ‹WAGOmonRun ‹WAGOmon test¦report¦both off››
 TRACE msg states at run connected connected
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'Monitor 32 deleted.' type:MT_ACK prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'Monitor 32 deleted.' type:MT_ACK prio:2›
-TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 80›
-TRACE msg recv= MINE ‹WAGOmonStop 81 msgid=32›
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'Monitor 120 deleted.' type:MT_ACK prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'Monitor 120 deleted.' type:MT_ACK prio:2›
+TRACE msg recv= NOT_MINE ‹WAGOkeepaliveMsg 82›
+TRACE msg recv= MINE ‹WAGOmonStop 83 msgid=120›
 TRACE msg states at run connected connected
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 14' msgid:25 type:MT_IND prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'PING 14' msgid:25 type:MT_IND prio:2›
-TRACE msg recv= RECV_AGAIN ‹WAGOkeepaliveMsg 83›
-TRACE msg states at run connected connected
-NEW: ‹ConditionalWorkSequence:60 (2)›
-   : │  id: 60
-   : │  call count: 0
-   : │  EVENT: wait¦start¦7.6¦_wait¦11
-   : └1╴... done.
-EVENT: wait¦start¦7.6¦_wait¦11
-END: wait¦start¦7.6¦_wait¦11
-TRACE wago recv '!25 PING 15'
-TRACE msg recv msg ‹MsgIncoming: msg:'PING 15' msgid:25 type:MT_IND prio:2›
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 15' msgid:25 type:MT_IND prio:2›
-TRACE msg recv test ‹MsgIncoming: msg:'PING 15' msgid:25 type:MT_IND prio:2›
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 15' msgid:113 type:MT_IND prio:2›
+TRACE msg recv test ‹MsgIncoming: msg:'PING 15' msgid:113 type:MT_IND prio:2›
 TRACE msg recv= RECV_AGAIN ‹WAGOkeepaliveMsg 85›
 TRACE msg states at run connected connected
-TRACE 2014-11-17 09:08:46.183490 _wait¦11: Forced timer done
-NEW: ‹ConditionalWorkSequence:61 (2)›
-   : │  id: 61
+NEW: ‹ConditionalWorkSequence:93 (2)›
+   : │  id: 93
    : │  call count: 0
-   : │  EVENT: wait¦done¦7.6¦_wait¦11
+   : │  EVENT: wait¦start¦7.7¦_wait¦11
+   : │       : loglevel=0
    : └1╴... done.
-EVENT: wait¦done¦7.6¦_wait¦11
-END: wait¦done¦7.6¦_wait¦11
+EVENT: wait¦start¦7.7¦_wait¦11
+     : loglevel=0
+END: wait¦start¦7.7¦_wait¦11
+NEW: ‹ConditionalWorkSequence:94 (2)›
+   : │  id: 94
+   : │  call count: 0
+   : │  EVENT: wait¦start¦_wait¦11
+   : │       : loglevel=0
+   : │       : end_time=7.7
+   : └1╴... done.
+EVENT: wait¦start¦_wait¦11
+     : loglevel=0
+     : end_time=7.7
+END: wait¦start¦_wait¦11
+TRACE 2014-11-17 14:42:05.278942 _wait¦11: Forced timer done
+NEW: ‹ConditionalWorkSequence:95 (2)›
+   : │  id: 95
+   : │  call count: 0
+   : │  EVENT: wait¦done¦7.7¦_wait¦11
+   : │       : loglevel=0
+   : └1╴... done.
+EVENT: wait¦done¦7.7¦_wait¦11
+     : loglevel=0
+END: wait¦done¦7.7¦_wait¦11
+NEW: ‹ConditionalWorkSequence:96 (2)›
+   : │  id: 96
+   : │  call count: 0
+   : │  EVENT: wait¦done¦_wait¦11
+   : │       : loglevel=0
+   : └1╴... done.
+EVENT: wait¦done¦_wait¦11
+     : loglevel=0
+END: wait¦done¦_wait¦11
 test :: wago localhost:59069
 .
 type: wago
@@ -1315,15 +1704,15 @@ test :: ‹WAGOqueue:test connected›
 name: test
 queue: 0
 state: connected
-state since: -17.9 sec (2003-04-05 06:07:08)
+state since: -18.9 sec (2003-04-05 06:07:08)
 sent: (0, 37)
 received: (0, 70)
 processed: (0, 37)
-last_sent : ‹WAGOmonStop 86 msgid=32›
+last_sent : ‹WAGOmonStop 86 msgid=120›
           priority: 2
           timeout: 2
-          result: Monitor 32 deleted.
-last_sent_at: -1.2 sec (2003-04-05 06:07:24.70)
+          result: Monitor 120 deleted.
+last_sent_at: -1.2 sec (2003-04-05 06:07:25.70)
 conn attempts: 0
 conn timer: 3
 out_queued: 0
@@ -1333,8 +1722,8 @@ channel type: wago
 msg recv 2 1 : ‹WAGOkeepaliveMsg 87›
              priority: 2
              status: pending
-             last: now
-             id: 25
+             last: -0.1 )
+             id: 113
 .
 DEBUG Yes
 DEBUG> Yes
@@ -1343,8 +1732,8 @@ DEBUG> Yes
 DEBUG Yes
 DEBUG> Yes
 TRACE !got DOWN_EVENT test
-NEW: ‹ConditionalWorkSequence:62 (2)›
-   : │  id: 62
+NEW: ‹ConditionalWorkSequence:97 (2)›
+   : │  id: 97
    : │  call count: 0
    : │  EVENT: wago¦disconnect¦test
    : └1╴... done.
@@ -1357,16 +1746,29 @@ TRACE conn setstate init closed
 TRACE conn setstate closed want
 TRACE conn setstate want connecting
 TRACE conn connecting WAGOqueue test¦nonexist
-NEW: ‹ConditionalWorkSequence:63 (2)›
-   : │  id: 63
+NEW: ‹ConditionalWorkSequence:98 (2)›
+   : │  id: 98
    : │  call count: 0
-   : │  EVENT: wait¦start¦8.6¦poll¦nonexist
+   : │  EVENT: wait¦start¦8.8¦poll¦nonexist
+   : │       : loglevel=0
    : └1╴... done.
-EVENT: wait¦start¦8.6¦poll¦nonexist
-END: wait¦start¦8.6¦poll¦nonexist
+EVENT: wait¦start¦8.8¦poll¦nonexist
+     : loglevel=0
+END: wait¦start¦8.8¦poll¦nonexist
+NEW: ‹ConditionalWorkSequence:99 (2)›
+   : │  id: 99
+   : │  call count: 0
+   : │  EVENT: wait¦start¦poll¦nonexist
+   : │       : loglevel=0
+   : │       : end_time=8.8
+   : └1╴... done.
+EVENT: wait¦start¦poll¦nonexist
+     : loglevel=0
+     : end_time=8.8
+END: wait¦start¦poll¦nonexist
 TRACE !got NOT_UP_EVENT test nonexist
-NEW: ‹ConditionalWorkSequence:64 (2)›
-   : │  id: 64
+NEW: ‹ConditionalWorkSequence:100 (2)›
+   : │  id: 100
    : │  call count: 0
    : │  EVENT: wago¦error¦test¦nonexist
    : └1╴... done.
@@ -1377,13 +1779,13 @@ ERROR [Errno 111] Connection refused
 ERROR> Setting up
 ERROR> [Errno 111] Connection refused
 TRACE conn setstate connecting waiting: wait 0.200
-TRACE 2014-11-17 09:08:46.444930 : Forced timer done
+TRACE 2014-11-17 14:42:05.532771 : Forced timer done
 TRACE conn setstate waiting want
 TRACE conn setstate want connecting
 TRACE conn connecting WAGOqueue test¦nonexist
 TRACE !got NOT_UP_EVENT test nonexist
-NEW: ‹ConditionalWorkSequence:65 (2)›
-   : │  id: 65
+NEW: ‹ConditionalWorkSequence:101 (2)›
+   : │  id: 101
    : │  call count: 0
    : │  EVENT: wago¦error¦test¦nonexist
    : └1╴... done.
@@ -1394,13 +1796,13 @@ ERROR [Errno 111] Connection refused
 ERROR> Setting up
 ERROR> [Errno 111] Connection refused
 TRACE conn setstate connecting waiting: wait 0.320
-TRACE 2014-11-17 09:08:46.797910 : Forced timer done
+TRACE 2014-11-17 14:42:05.881907 : Forced timer done
 TRACE conn setstate waiting want
 TRACE conn setstate want connecting
 TRACE conn connecting WAGOqueue test¦nonexist
 TRACE !got NOT_UP_EVENT test nonexist
-NEW: ‹ConditionalWorkSequence:66 (2)›
-   : │  id: 66
+NEW: ‹ConditionalWorkSequence:102 (2)›
+   : │  id: 102
    : │  call count: 0
    : │  EVENT: wago¦error¦test¦nonexist
    : └1╴... done.
@@ -1411,19 +1813,30 @@ ERROR [Errno 111] Connection refused
 ERROR> Setting up
 ERROR> [Errno 111] Connection refused
 TRACE conn setstate connecting waiting: wait 0.500
-TRACE 2014-11-17 09:08:47.220435 poll¦nonexist: Forced timer done
-NEW: ‹ConditionalWorkSequence:67 (2)›
-   : │  id: 67
+TRACE 2014-11-17 14:42:06.314600 poll¦nonexist: Forced timer done
+NEW: ‹ConditionalWorkSequence:103 (2)›
+   : │  id: 103
    : │  call count: 0
-   : │  EVENT: wait¦done¦8.7¦poll¦nonexist
+   : │  EVENT: wait¦done¦8.8¦poll¦nonexist
+   : │       : loglevel=0
    : └1╴... done.
-EVENT: wait¦done¦8.7¦poll¦nonexist
-END: wait¦done¦8.7¦poll¦nonexist
+EVENT: wait¦done¦8.8¦poll¦nonexist
+     : loglevel=0
+END: wait¦done¦8.8¦poll¦nonexist
+NEW: ‹ConditionalWorkSequence:104 (2)›
+   : │  id: 104
+   : │  call count: 0
+   : │  EVENT: wait¦done¦poll¦nonexist
+   : │       : loglevel=0
+   : └1╴... done.
+EVENT: wait¦done¦poll¦nonexist
+     : loglevel=0
+END: wait¦done¦poll¦nonexist
 : ‹WAGOqueue:test¦nonexist connecting›
 name: test¦nonexist
 queue: 0
 state: connecting
-state since: -1.2 sec (2003-04-05 06:07:27.47)
+state since: -1.2 sec (2003-04-05 06:07:28.46)
 sent: (0, 0)
 received: (0, 0)
 processed: (0, 0)
@@ -1437,13 +1850,26 @@ TRACE conn setstate init closed
 TRACE conn setstate closed want
 TRACE conn setstate want connecting
 TRACE conn connecting WAGOqueue test¦closing
-NEW: ‹ConditionalWorkSequence:68 (2)›
-   : │  id: 68
+NEW: ‹ConditionalWorkSequence:105 (2)›
+   : │  id: 105
    : │  call count: 0
-   : │  EVENT: wait¦start¦9.7¦poll¦closing
+   : │  EVENT: wait¦start¦9.8¦poll¦closing
+   : │       : loglevel=0
    : └1╴... done.
-EVENT: wait¦start¦9.7¦poll¦closing
-END: wait¦start¦9.7¦poll¦closing
+EVENT: wait¦start¦9.8¦poll¦closing
+     : loglevel=0
+END: wait¦start¦9.8¦poll¦closing
+NEW: ‹ConditionalWorkSequence:106 (2)›
+   : │  id: 106
+   : │  call count: 0
+   : │  EVENT: wait¦start¦poll¦closing
+   : │       : loglevel=0
+   : │       : end_time=9.8
+   : └1╴... done.
+EVENT: wait¦start¦poll¦closing
+     : loglevel=0
+     : end_time=9.8
+END: wait¦start¦poll¦closing
 TRACE conn setting up WAGOqueue test¦closing
 TRACE conn connected WAGOqueue test¦closing
 TRACE msg states at run connected connecting
@@ -1453,8 +1879,8 @@ TRACE msg blocked by ‹WAGOinitMsg 89›
 TRACE msg states at run connected connecting
 TRACE msg blocked by ‹WAGOinitMsg 8a›
 TRACE !got DOWN_EVENT test closing
-NEW: ‹ConditionalWorkSequence:69 (2)›
-   : │  id: 69
+NEW: ‹ConditionalWorkSequence:107 (2)›
+   : │  id: 107
    : │  call count: 0
    : │  EVENT: wago¦disconnect¦test¦closing
    : └1╴... done.
@@ -1462,9 +1888,9 @@ EVENT: wago¦disconnect¦test¦closing
 END: wago¦disconnect¦test¦closing
 TRACE conn ReOpen WAGOqueue test¦closing
 TRACE conn setstate connecting waiting: wait 0.120
-TRACE 2014-11-17 09:08:47.317937 : Forced timer done
-TRACE 2014-11-17 09:08:47.341240 : Forced timer done
-TRACE 2014-11-17 09:08:47.383288 : Forced timer done
+TRACE 2014-11-17 14:42:06.379599 : Forced timer done
+TRACE 2014-11-17 14:42:06.405776 : Forced timer done
+TRACE 2014-11-17 14:42:06.463418 : Forced timer done
 TRACE conn setstate waiting want
 TRACE conn setstate want connecting
 TRACE wago Queue WAGOmonitorsMsg
@@ -1478,8 +1904,8 @@ TRACE msg blocked by ‹WAGOinitMsg 8c›
 TRACE msg states at run connected connecting
 TRACE msg blocked by ‹WAGOinitMsg 8d›
 TRACE !got DOWN_EVENT test closing
-NEW: ‹ConditionalWorkSequence:70 (2)›
-   : │  id: 70
+NEW: ‹ConditionalWorkSequence:108 (2)›
+   : │  id: 108
    : │  call count: 0
    : │  EVENT: wago¦disconnect¦test¦closing
    : └1╴... done.
@@ -1487,13 +1913,13 @@ EVENT: wago¦disconnect¦test¦closing
 END: wago¦disconnect¦test¦closing
 TRACE conn ReOpen WAGOqueue test¦closing
 TRACE conn setstate connecting waiting: wait 0.192
-TRACE 2014-11-17 09:08:47.451576 : Forced timer done
-TRACE 2014-11-17 09:08:47.616840 : Forced timer done
+TRACE 2014-11-17 14:42:06.541910 : Forced timer done
+TRACE 2014-11-17 14:42:06.692519 : Forced timer done
 TRACE conn setstate waiting want
 TRACE conn setstate want connecting
 TRACE wago Queue WAGOmonitorsMsg
 TRACE conn connecting WAGOqueue test¦closing
-TRACE 2014-11-17 09:08:47.621407 : Forced timer done
+TRACE 2014-11-17 14:42:06.695763 : Forced timer done
 TRACE conn setting up WAGOqueue test¦closing
 TRACE conn connected WAGOqueue test¦closing
 TRACE msg states at run connected connecting
@@ -1503,8 +1929,8 @@ TRACE msg blocked by ‹WAGOinitMsg 8f›
 TRACE msg states at run connected connecting
 TRACE msg blocked by ‹WAGOinitMsg 90›
 TRACE !got DOWN_EVENT test closing
-NEW: ‹ConditionalWorkSequence:71 (2)›
-   : │  id: 71
+NEW: ‹ConditionalWorkSequence:109 (2)›
+   : │  id: 109
    : │  call count: 0
    : │  EVENT: wago¦disconnect¦test¦closing
    : └1╴... done.
@@ -1512,8 +1938,8 @@ EVENT: wago¦disconnect¦test¦closing
 END: wago¦disconnect¦test¦closing
 TRACE conn ReOpen WAGOqueue test¦closing
 TRACE conn setstate connecting waiting: wait 0.307
-TRACE 2014-11-17 09:08:47.834061 : Forced timer done
-TRACE 2014-11-17 09:08:47.945244 : Forced timer done
+TRACE 2014-11-17 14:42:06.928020 : Forced timer done
+TRACE 2014-11-17 14:42:07.038735 : Forced timer done
 TRACE conn setstate waiting want
 TRACE conn setstate want connecting
 TRACE wago Queue WAGOmonitorsMsg
@@ -1527,8 +1953,8 @@ TRACE msg blocked by ‹WAGOinitMsg 92›
 TRACE msg states at run connected connecting
 TRACE msg blocked by ‹WAGOinitMsg 93›
 TRACE !got DOWN_EVENT test closing
-NEW: ‹ConditionalWorkSequence:72 (2)›
-   : │  id: 72
+NEW: ‹ConditionalWorkSequence:110 (2)›
+   : │  id: 110
    : │  call count: 0
    : │  EVENT: wago¦disconnect¦test¦closing
    : └1╴... done.
@@ -1536,20 +1962,31 @@ EVENT: wago¦disconnect¦test¦closing
 END: wago¦disconnect¦test¦closing
 TRACE conn ReOpen WAGOqueue test¦closing
 TRACE conn setstate connecting waiting: wait 0.492
-TRACE 2014-11-17 09:08:48.191055 : Forced timer done
-TRACE 2014-11-17 09:08:48.258835 poll¦closing: Forced timer done
-NEW: ‹ConditionalWorkSequence:73 (2)›
-   : │  id: 73
+TRACE 2014-11-17 14:42:07.252967 : Forced timer done
+TRACE 2014-11-17 14:42:07.346187 poll¦closing: Forced timer done
+NEW: ‹ConditionalWorkSequence:111 (2)›
+   : │  id: 111
    : │  call count: 0
-   : │  EVENT: wait¦done¦9.7¦poll¦closing
+   : │  EVENT: wait¦done¦9.8¦poll¦closing
+   : │       : loglevel=0
    : └1╴... done.
-EVENT: wait¦done¦9.7¦poll¦closing
-END: wait¦done¦9.7¦poll¦closing
+EVENT: wait¦done¦9.8¦poll¦closing
+     : loglevel=0
+END: wait¦done¦9.8¦poll¦closing
+NEW: ‹ConditionalWorkSequence:112 (2)›
+   : │  id: 112
+   : │  call count: 0
+   : │  EVENT: wait¦done¦poll¦closing
+   : │       : loglevel=0
+   : └1╴... done.
+EVENT: wait¦done¦poll¦closing
+     : loglevel=0
+END: wait¦done¦poll¦closing
 : ‹WAGOqueue:test¦closing ReOpen›
 name: test¦closing
 queue: 0
 state: ReOpen
-state since: -0.8 sec (2003-04-05 06:07:30.80)
+state since: -0.8 sec (2003-04-05 06:07:31.72)
 sent: (0, 0)
 received: (0, 0)
 processed: (0, 0)
@@ -1568,13 +2005,26 @@ TRACE conn setstate init closed
 TRACE conn setstate closed want
 TRACE conn setstate want connecting
 TRACE conn connecting WAGOqueue test¦no_answer
-NEW: ‹ConditionalWorkSequence:74 (2)›
-   : │  id: 74
+NEW: ‹ConditionalWorkSequence:113 (2)›
+   : │  id: 113
    : │  call count: 0
-   : │  EVENT: wait¦start¦10.7¦poll¦no_answer
+   : │  EVENT: wait¦start¦10.8¦poll¦no_answer
+   : │       : loglevel=0
    : └1╴... done.
-EVENT: wait¦start¦10.7¦poll¦no_answer
-END: wait¦start¦10.7¦poll¦no_answer
+EVENT: wait¦start¦10.8¦poll¦no_answer
+     : loglevel=0
+END: wait¦start¦10.8¦poll¦no_answer
+NEW: ‹ConditionalWorkSequence:114 (2)›
+   : │  id: 114
+   : │  call count: 0
+   : │  EVENT: wait¦start¦poll¦no_answer
+   : │       : loglevel=0
+   : │       : end_time=10.8
+   : └1╴... done.
+EVENT: wait¦start¦poll¦no_answer
+     : loglevel=0
+     : end_time=10.8
+END: wait¦start¦poll¦no_answer
 TRACE conn setting up WAGOqueue test¦no_answer
 TRACE conn connected WAGOqueue test¦no_answer
 TRACE msg states at run connected connecting
@@ -1583,11 +2033,11 @@ TRACE msg states at run connected connecting
 TRACE msg blocked by ‹WAGOinitMsg 97›
 TRACE msg states at run connected connecting
 TRACE msg blocked by ‹WAGOinitMsg 98›
-TRACE 2014-11-17 09:08:48.478609 : Forced timer done
-TRACE 2014-11-17 09:08:48.518983 : Forced timer done
+TRACE 2014-11-17 14:42:07.548624 : Forced timer done
+TRACE 2014-11-17 14:42:07.590153 : Forced timer done
 TRACE !got DOWN_EVENT test no_answer
-NEW: ‹ConditionalWorkSequence:75 (2)›
-   : │  id: 75
+NEW: ‹ConditionalWorkSequence:115 (2)›
+   : │  id: 115
    : │  call count: 0
    : │  EVENT: wago¦disconnect¦test¦no_answer
    : └1╴... done.
@@ -1595,7 +2045,7 @@ EVENT: wago¦disconnect¦test¦no_answer
 END: wago¦disconnect¦test¦no_answer
 TRACE conn ReOpen WAGOqueue test¦no_answer
 TRACE conn setstate connecting waiting: wait 0.120
-TRACE 2014-11-17 09:08:48.649077 : Forced timer done
+TRACE 2014-11-17 14:42:07.719692 : Forced timer done
 TRACE conn setstate waiting want
 TRACE conn setstate want connecting
 TRACE wago Queue WAGOmonitorsMsg
@@ -1608,10 +2058,10 @@ TRACE msg states at run connected connecting
 TRACE msg blocked by ‹WAGOinitMsg 9a›
 TRACE msg states at run connected connecting
 TRACE msg blocked by ‹WAGOinitMsg 9b›
-TRACE 2014-11-17 09:08:48.887833 : Forced timer done
+TRACE 2014-11-17 14:42:07.943506 : Forced timer done
 TRACE !got DOWN_EVENT test no_answer
-NEW: ‹ConditionalWorkSequence:76 (2)›
-   : │  id: 76
+NEW: ‹ConditionalWorkSequence:116 (2)›
+   : │  id: 116
    : │  call count: 0
    : │  EVENT: wago¦disconnect¦test¦no_answer
    : └1╴... done.
@@ -1619,7 +2069,7 @@ EVENT: wago¦disconnect¦test¦no_answer
 END: wago¦disconnect¦test¦no_answer
 TRACE conn ReOpen WAGOqueue test¦no_answer
 TRACE conn setstate connecting waiting: wait 0.192
-TRACE 2014-11-17 09:08:49.094362 : Forced timer done
+TRACE 2014-11-17 14:42:08.148841 : Forced timer done
 TRACE conn setstate waiting want
 TRACE conn setstate want connecting
 TRACE wago Queue WAGOmonitorsMsg
@@ -1632,56 +2082,90 @@ TRACE msg states at run connected connecting
 TRACE msg blocked by ‹WAGOinitMsg 9d›
 TRACE msg states at run connected connecting
 TRACE msg blocked by ‹WAGOinitMsg 9e›
-TRACE 2014-11-17 09:08:49.295829 poll¦no_answer: Forced timer done
-NEW: ‹ConditionalWorkSequence:77 (2)›
-   : │  id: 77
+TRACE 2014-11-17 14:42:08.368687 : Forced timer done
+TRACE !got DOWN_EVENT test no_answer
+NEW: ‹ConditionalWorkSequence:117 (2)›
+   : │  id: 117
    : │  call count: 0
-   : │  EVENT: wait¦done¦10.7¦poll¦no_answer
+   : │  EVENT: wago¦disconnect¦test¦no_answer
    : └1╴... done.
-EVENT: wait¦done¦10.7¦poll¦no_answer
-END: wait¦done¦10.7¦poll¦no_answer
-: ‹WAGOqueue:test¦no_answer connected›
+EVENT: wago¦disconnect¦test¦no_answer
+END: wago¦disconnect¦test¦no_answer
+TRACE conn ReOpen WAGOqueue test¦no_answer
+TRACE conn setstate connecting waiting: wait 0.307
+TRACE 2014-11-17 14:42:08.380161 poll¦no_answer: Forced timer done
+NEW: ‹ConditionalWorkSequence:118 (2)›
+   : │  id: 118
+   : │  call count: 0
+   : │  EVENT: wait¦done¦10.8¦poll¦no_answer
+   : │       : loglevel=0
+   : └1╴... done.
+EVENT: wait¦done¦10.8¦poll¦no_answer
+     : loglevel=0
+END: wait¦done¦10.8¦poll¦no_answer
+NEW: ‹ConditionalWorkSequence:119 (2)›
+   : │  id: 119
+   : │  call count: 0
+   : │  EVENT: wait¦done¦poll¦no_answer
+   : │       : loglevel=0
+   : └1╴... done.
+EVENT: wait¦done¦poll¦no_answer
+     : loglevel=0
+END: wait¦done¦poll¦no_answer
+: ‹WAGOqueue:test¦no_answer ReOpen›
 name: test¦no_answer
 queue: 0
-state: connected
-state since: -0.4 sec (2003-04-05 06:07:33.30)
+state: ReOpen
+state since: now (2003-04-05 06:07:34.58)
 sent: (0, 0)
 received: (0, 0)
 processed: (0, 0)
-conn attempts: 2
-conn timer: 0.3072
+conn attempts: 3
+conn timer: 0.49152
 out_queued: 1
-channel type: wago
-        host: localhost
-        port: 59068
 msg send 1 1 : ‹WAGOmonitorsMsg 9f›
              priority: 1
              status: pending
 msg recv 0 1 : ‹WAGOinitMsg a0›
              priority: 0
 .
-TRACE !got DOWN_EVENT test no_answer
-NEW: ‹ConditionalWorkSequence:78 (2)›
-   : │  id: 78
+NEW: ‹ConditionalWorkSequence:120 (2)›
+   : │  id: 120
    : │  call count: 0
-   : │  EVENT: wago¦disconnect¦test¦no_answer
+   : │  EVENT: wait¦start¦28.6¦poll¦end
+   : │       : loglevel=0
    : └1╴... done.
-EVENT: wago¦disconnect¦test¦no_answer
-END: wago¦disconnect¦test¦no_answer
-TRACE conn deleted WAGOqueue test¦no_answer
-NEW: ‹ConditionalWorkSequence:79 (2)›
-   : │  id: 79
+EVENT: wait¦start¦28.6¦poll¦end
+     : loglevel=0
+END: wait¦start¦28.6¦poll¦end
+NEW: ‹ConditionalWorkSequence:121 (2)›
+   : │  id: 121
    : │  call count: 0
-   : │  EVENT: wait¦start¦27.7¦poll¦end
+   : │  EVENT: wait¦start¦poll¦end
+   : │       : loglevel=0
+   : │       : end_time=28.6
    : └1╴... done.
-EVENT: wait¦start¦27.7¦poll¦end
-END: wait¦start¦27.7¦poll¦end
-TRACE 2014-11-17 09:08:49.320503 : Forced timer done
-TRACE 2003-04-05 06:07:35.676345 poll¦end: Fake timer done
-NEW: ‹ConditionalWorkSequence:80 (2)›
-   : │  id: 80
+EVENT: wait¦start¦poll¦end
+     : loglevel=0
+     : end_time=28.6
+END: wait¦start¦poll¦end
+TRACE 2014-11-17 14:42:08.700009 : Forced timer done
+TRACE 2003-04-05 06:07:36.612198 poll¦end: Fake timer done
+NEW: ‹ConditionalWorkSequence:122 (2)›
+   : │  id: 122
    : │  call count: 0
-   : │  EVENT: wait¦done¦27.7¦poll¦end
+   : │  EVENT: wait¦done¦28.6¦poll¦end
+   : │       : loglevel=0
    : └1╴... done.
-EVENT: wait¦done¦27.7¦poll¦end
-END: wait¦done¦27.7¦poll¦end
+EVENT: wait¦done¦28.6¦poll¦end
+     : loglevel=0
+END: wait¦done¦28.6¦poll¦end
+NEW: ‹ConditionalWorkSequence:123 (2)›
+   : │  id: 123
+   : │  call count: 0
+   : │  EVENT: wait¦done¦poll¦end
+   : │       : loglevel=0
+   : └1╴... done.
+EVENT: wait¦done¦poll¦end
+     : loglevel=0
+END: wait¦done¦poll¦end

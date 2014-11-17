@@ -2,8 +2,10 @@ NEW: ‹ConditionalWorkSequence:5 (2)›
    : │  id: 5
    : │  call count: 0
    : │  EVENT: startup
+   : │       : startup=True
    : └1╴... done.
 EVENT: startup
+     : startup=True
 END: startup
 .
 test time :: (new)
@@ -16,17 +18,41 @@ NEW: ‹ConditionalWorkSequence:6 (2)›
    : │  id: 6
    : │  call count: 0
    : │  EVENT: wait¦start¦0.2¦_wait¦1
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦start¦0.2¦_wait¦1
+     : loglevel=0
 END: wait¦start¦0.2¦_wait¦1
-TRACE 2003-04-05 06:07:08.250000 _wait¦1: Fake timer done
 NEW: ‹ConditionalWorkSequence:7 (2)›
    : │  id: 7
    : │  call count: 0
+   : │  EVENT: wait¦start¦_wait¦1
+   : │       : loglevel=0
+   : │       : end_time=0.2
+   : └1╴... done.
+EVENT: wait¦start¦_wait¦1
+     : loglevel=0
+     : end_time=0.2
+END: wait¦start¦_wait¦1
+TRACE 2003-04-05 06:07:08.250000 _wait¦1: Fake timer done
+NEW: ‹ConditionalWorkSequence:8 (2)›
+   : │  id: 8
+   : │  call count: 0
    : │  EVENT: wait¦done¦0.2¦_wait¦1
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦done¦0.2¦_wait¦1
+     : loglevel=0
 END: wait¦done¦0.2¦_wait¦1
+NEW: ‹ConditionalWorkSequence:9 (2)›
+   : │  id: 9
+   : │  call count: 0
+   : │  EVENT: wait¦done¦_wait¦1
+   : │       : loglevel=0
+   : └1╴... done.
+EVENT: wait¦done¦_wait¦1
+     : loglevel=0
+END: wait¦done¦_wait¦1
 name: test time
 mode: time
 value: 2.0
@@ -36,21 +62,45 @@ total time: 0:00:00
 total samples: 1
 current average: 2.0
 .
-NEW: ‹ConditionalWorkSequence:8 (2)›
-   : │  id: 8
+NEW: ‹ConditionalWorkSequence:10 (2)›
+   : │  id: 10
    : │  call count: 0
    : │  EVENT: wait¦start¦1.2¦_wait¦2
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦start¦1.2¦_wait¦2
+     : loglevel=0
 END: wait¦start¦1.2¦_wait¦2
+NEW: ‹ConditionalWorkSequence:11 (2)›
+   : │  id: 11
+   : │  call count: 0
+   : │  EVENT: wait¦start¦_wait¦2
+   : │       : loglevel=0
+   : │       : end_time=1.2
+   : └1╴... done.
+EVENT: wait¦start¦_wait¦2
+     : loglevel=0
+     : end_time=1.2
+END: wait¦start¦_wait¦2
 TRACE 2003-04-05 06:07:09.250000 _wait¦2: Fake timer done
-NEW: ‹ConditionalWorkSequence:9 (2)›
-   : │  id: 9
+NEW: ‹ConditionalWorkSequence:12 (2)›
+   : │  id: 12
    : │  call count: 0
    : │  EVENT: wait¦done¦1.2¦_wait¦2
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦done¦1.2¦_wait¦2
+     : loglevel=0
 END: wait¦done¦1.2¦_wait¦2
+NEW: ‹ConditionalWorkSequence:13 (2)›
+   : │  id: 13
+   : │  call count: 0
+   : │  EVENT: wait¦done¦_wait¦2
+   : │       : loglevel=0
+   : └1╴... done.
+EVENT: wait¦done¦_wait¦2
+     : loglevel=0
+END: wait¦done¦_wait¦2
 name: test time
 mode: time
 value: 2.0
@@ -69,21 +119,45 @@ total time: 0:00:01
 total samples: 2
 current average: 2.0
 .
-NEW: ‹ConditionalWorkSequence:10 (2)›
-   : │  id: 10
+NEW: ‹ConditionalWorkSequence:14 (2)›
+   : │  id: 14
    : │  call count: 0
    : │  EVENT: wait¦start¦2.2¦_wait¦3
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦start¦2.2¦_wait¦3
+     : loglevel=0
 END: wait¦start¦2.2¦_wait¦3
+NEW: ‹ConditionalWorkSequence:15 (2)›
+   : │  id: 15
+   : │  call count: 0
+   : │  EVENT: wait¦start¦_wait¦3
+   : │       : loglevel=0
+   : │       : end_time=2.2
+   : └1╴... done.
+EVENT: wait¦start¦_wait¦3
+     : loglevel=0
+     : end_time=2.2
+END: wait¦start¦_wait¦3
 TRACE 2003-04-05 06:07:10.250000 _wait¦3: Fake timer done
-NEW: ‹ConditionalWorkSequence:11 (2)›
-   : │  id: 11
+NEW: ‹ConditionalWorkSequence:16 (2)›
+   : │  id: 16
    : │  call count: 0
    : │  EVENT: wait¦done¦2.2¦_wait¦3
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦done¦2.2¦_wait¦3
+     : loglevel=0
 END: wait¦done¦2.2¦_wait¦3
+NEW: ‹ConditionalWorkSequence:17 (2)›
+   : │  id: 17
+   : │  call count: 0
+   : │  EVENT: wait¦done¦_wait¦3
+   : │       : loglevel=0
+   : └1╴... done.
+EVENT: wait¦done¦_wait¦3
+     : loglevel=0
+END: wait¦done¦_wait¦3
 name: test time
 mode: time
 value: 5.0
@@ -104,21 +178,45 @@ current average: 3.5
 .
 DEBUG Yes
 DEBUG Yes
-NEW: ‹ConditionalWorkSequence:12 (2)›
-   : │  id: 12
+NEW: ‹ConditionalWorkSequence:18 (2)›
+   : │  id: 18
    : │  call count: 0
    : │  EVENT: wait¦start¦4.2¦_wait¦4
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦start¦4.2¦_wait¦4
+     : loglevel=0
 END: wait¦start¦4.2¦_wait¦4
+NEW: ‹ConditionalWorkSequence:19 (2)›
+   : │  id: 19
+   : │  call count: 0
+   : │  EVENT: wait¦start¦_wait¦4
+   : │       : loglevel=0
+   : │       : end_time=4.2
+   : └1╴... done.
+EVENT: wait¦start¦_wait¦4
+     : loglevel=0
+     : end_time=4.2
+END: wait¦start¦_wait¦4
 TRACE 2003-04-05 06:07:12.250000 _wait¦4: Fake timer done
-NEW: ‹ConditionalWorkSequence:13 (2)›
-   : │  id: 13
+NEW: ‹ConditionalWorkSequence:20 (2)›
+   : │  id: 20
    : │  call count: 0
    : │  EVENT: wait¦done¦4.2¦_wait¦4
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦done¦4.2¦_wait¦4
+     : loglevel=0
 END: wait¦done¦4.2¦_wait¦4
+NEW: ‹ConditionalWorkSequence:21 (2)›
+   : │  id: 21
+   : │  call count: 0
+   : │  EVENT: wait¦done¦_wait¦4
+   : │       : loglevel=0
+   : └1╴... done.
+EVENT: wait¦done¦_wait¦4
+     : loglevel=0
+END: wait¦done¦_wait¦4
 DEBUG Yes
 DEBUG values now 0.0 prev 5.0
 test moving :: (new)
@@ -129,21 +227,45 @@ value: None
 samples: 0
 max samples: 3
 .
-NEW: ‹ConditionalWorkSequence:14 (2)›
-   : │  id: 14
+NEW: ‹ConditionalWorkSequence:22 (2)›
+   : │  id: 22
    : │  call count: 0
    : │  EVENT: wait¦start¦4.5¦_wait¦5
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦start¦4.5¦_wait¦5
+     : loglevel=0
 END: wait¦start¦4.5¦_wait¦5
+NEW: ‹ConditionalWorkSequence:23 (2)›
+   : │  id: 23
+   : │  call count: 0
+   : │  EVENT: wait¦start¦_wait¦5
+   : │       : loglevel=0
+   : │       : end_time=4.5
+   : └1╴... done.
+EVENT: wait¦start¦_wait¦5
+     : loglevel=0
+     : end_time=4.5
+END: wait¦start¦_wait¦5
 TRACE 2003-04-05 06:07:12.500000 _wait¦5: Fake timer done
-NEW: ‹ConditionalWorkSequence:15 (2)›
-   : │  id: 15
+NEW: ‹ConditionalWorkSequence:24 (2)›
+   : │  id: 24
    : │  call count: 0
    : │  EVENT: wait¦done¦4.5¦_wait¦5
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦done¦4.5¦_wait¦5
+     : loglevel=0
 END: wait¦done¦4.5¦_wait¦5
+NEW: ‹ConditionalWorkSequence:25 (2)›
+   : │  id: 25
+   : │  call count: 0
+   : │  EVENT: wait¦done¦_wait¦5
+   : │       : loglevel=0
+   : └1╴... done.
+EVENT: wait¦done¦_wait¦5
+     : loglevel=0
+END: wait¦done¦_wait¦5
 name: test moving
 mode: moving
 value: 2.0
@@ -156,21 +278,45 @@ samples: 1
 max samples: 3
 sample 0: 2.0
 .
-NEW: ‹ConditionalWorkSequence:16 (2)›
-   : │  id: 16
+NEW: ‹ConditionalWorkSequence:26 (2)›
+   : │  id: 26
    : │  call count: 0
    : │  EVENT: wait¦start¦5.5¦_wait¦6
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦start¦5.5¦_wait¦6
+     : loglevel=0
 END: wait¦start¦5.5¦_wait¦6
+NEW: ‹ConditionalWorkSequence:27 (2)›
+   : │  id: 27
+   : │  call count: 0
+   : │  EVENT: wait¦start¦_wait¦6
+   : │       : loglevel=0
+   : │       : end_time=5.5
+   : └1╴... done.
+EVENT: wait¦start¦_wait¦6
+     : loglevel=0
+     : end_time=5.5
+END: wait¦start¦_wait¦6
 TRACE 2003-04-05 06:07:13.500000 _wait¦6: Fake timer done
-NEW: ‹ConditionalWorkSequence:17 (2)›
-   : │  id: 17
+NEW: ‹ConditionalWorkSequence:28 (2)›
+   : │  id: 28
    : │  call count: 0
    : │  EVENT: wait¦done¦5.5¦_wait¦6
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦done¦5.5¦_wait¦6
+     : loglevel=0
 END: wait¦done¦5.5¦_wait¦6
+NEW: ‹ConditionalWorkSequence:29 (2)›
+   : │  id: 29
+   : │  call count: 0
+   : │  EVENT: wait¦done¦_wait¦6
+   : │       : loglevel=0
+   : └1╴... done.
+EVENT: wait¦done¦_wait¦6
+     : loglevel=0
+END: wait¦done¦_wait¦6
 name: test moving
 mode: moving
 value: 2.0
@@ -196,21 +342,45 @@ max samples: 3
 sample 0: 2.0
 sample 1: 5.0
 .
-NEW: ‹ConditionalWorkSequence:18 (2)›
-   : │  id: 18
+NEW: ‹ConditionalWorkSequence:30 (2)›
+   : │  id: 30
    : │  call count: 0
    : │  EVENT: wait¦start¦7.5¦_wait¦7
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦start¦7.5¦_wait¦7
+     : loglevel=0
 END: wait¦start¦7.5¦_wait¦7
+NEW: ‹ConditionalWorkSequence:31 (2)›
+   : │  id: 31
+   : │  call count: 0
+   : │  EVENT: wait¦start¦_wait¦7
+   : │       : loglevel=0
+   : │       : end_time=7.5
+   : └1╴... done.
+EVENT: wait¦start¦_wait¦7
+     : loglevel=0
+     : end_time=7.5
+END: wait¦start¦_wait¦7
 TRACE 2003-04-05 06:07:15.500000 _wait¦7: Fake timer done
-NEW: ‹ConditionalWorkSequence:19 (2)›
-   : │  id: 19
+NEW: ‹ConditionalWorkSequence:32 (2)›
+   : │  id: 32
    : │  call count: 0
    : │  EVENT: wait¦done¦7.5¦_wait¦7
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦done¦7.5¦_wait¦7
+     : loglevel=0
 END: wait¦done¦7.5¦_wait¦7
+NEW: ‹ConditionalWorkSequence:33 (2)›
+   : │  id: 33
+   : │  call count: 0
+   : │  EVENT: wait¦done¦_wait¦7
+   : │       : loglevel=0
+   : └1╴... done.
+EVENT: wait¦done¦_wait¦7
+     : loglevel=0
+END: wait¦done¦_wait¦7
 name: test moving
 mode: moving
 value: 5.0
@@ -238,21 +408,45 @@ sample 0: 2.0
 sample 1: 5.0
 sample 2: -1.0
 .
-NEW: ‹ConditionalWorkSequence:20 (2)›
-   : │  id: 20
+NEW: ‹ConditionalWorkSequence:34 (2)›
+   : │  id: 34
    : │  call count: 0
    : │  EVENT: wait¦start¦11.5¦_wait¦8
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦start¦11.5¦_wait¦8
+     : loglevel=0
 END: wait¦start¦11.5¦_wait¦8
+NEW: ‹ConditionalWorkSequence:35 (2)›
+   : │  id: 35
+   : │  call count: 0
+   : │  EVENT: wait¦start¦_wait¦8
+   : │       : loglevel=0
+   : │       : end_time=11.5
+   : └1╴... done.
+EVENT: wait¦start¦_wait¦8
+     : loglevel=0
+     : end_time=11.5
+END: wait¦start¦_wait¦8
 TRACE 2003-04-05 06:07:19.500000 _wait¦8: Fake timer done
-NEW: ‹ConditionalWorkSequence:21 (2)›
-   : │  id: 21
+NEW: ‹ConditionalWorkSequence:36 (2)›
+   : │  id: 36
    : │  call count: 0
    : │  EVENT: wait¦done¦11.5¦_wait¦8
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦done¦11.5¦_wait¦8
+     : loglevel=0
 END: wait¦done¦11.5¦_wait¦8
+NEW: ‹ConditionalWorkSequence:37 (2)›
+   : │  id: 37
+   : │  call count: 0
+   : │  EVENT: wait¦done¦_wait¦8
+   : │       : loglevel=0
+   : └1╴... done.
+EVENT: wait¦done¦_wait¦8
+     : loglevel=0
+END: wait¦done¦_wait¦8
 name: test moving
 mode: moving
 value: -1.0
@@ -281,21 +475,45 @@ sample 0: 5.0
 sample 1: -1.0
 sample 2: 8.0
 .
-NEW: ‹ConditionalWorkSequence:22 (2)›
-   : │  id: 22
+NEW: ‹ConditionalWorkSequence:38 (2)›
+   : │  id: 38
    : │  call count: 0
    : │  EVENT: wait¦start¦15.5¦_wait¦9
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦start¦15.5¦_wait¦9
+     : loglevel=0
 END: wait¦start¦15.5¦_wait¦9
+NEW: ‹ConditionalWorkSequence:39 (2)›
+   : │  id: 39
+   : │  call count: 0
+   : │  EVENT: wait¦start¦_wait¦9
+   : │       : loglevel=0
+   : │       : end_time=15.5
+   : └1╴... done.
+EVENT: wait¦start¦_wait¦9
+     : loglevel=0
+     : end_time=15.5
+END: wait¦start¦_wait¦9
 TRACE 2003-04-05 06:07:23.500000 _wait¦9: Fake timer done
-NEW: ‹ConditionalWorkSequence:23 (2)›
-   : │  id: 23
+NEW: ‹ConditionalWorkSequence:40 (2)›
+   : │  id: 40
    : │  call count: 0
    : │  EVENT: wait¦done¦15.5¦_wait¦9
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦done¦15.5¦_wait¦9
+     : loglevel=0
 END: wait¦done¦15.5¦_wait¦9
+NEW: ‹ConditionalWorkSequence:41 (2)›
+   : │  id: 41
+   : │  call count: 0
+   : │  EVENT: wait¦done¦_wait¦9
+   : │       : loglevel=0
+   : └1╴... done.
+EVENT: wait¦done¦_wait¦9
+     : loglevel=0
+END: wait¦done¦_wait¦9
 name: test moving
 mode: moving
 value: 8.0
@@ -326,21 +544,45 @@ sample 2: 14.0
 .
 DEBUG Yes
 DEBUG Yes
-NEW: ‹ConditionalWorkSequence:24 (2)›
-   : │  id: 24
+NEW: ‹ConditionalWorkSequence:42 (2)›
+   : │  id: 42
    : │  call count: 0
    : │  EVENT: wait¦start¦17.5¦_wait¦10
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦start¦17.5¦_wait¦10
+     : loglevel=0
 END: wait¦start¦17.5¦_wait¦10
+NEW: ‹ConditionalWorkSequence:43 (2)›
+   : │  id: 43
+   : │  call count: 0
+   : │  EVENT: wait¦start¦_wait¦10
+   : │       : loglevel=0
+   : │       : end_time=17.5
+   : └1╴... done.
+EVENT: wait¦start¦_wait¦10
+     : loglevel=0
+     : end_time=17.5
+END: wait¦start¦_wait¦10
 TRACE 2003-04-05 06:07:25.500000 _wait¦10: Fake timer done
-NEW: ‹ConditionalWorkSequence:25 (2)›
-   : │  id: 25
+NEW: ‹ConditionalWorkSequence:44 (2)›
+   : │  id: 44
    : │  call count: 0
    : │  EVENT: wait¦done¦17.5¦_wait¦10
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦done¦17.5¦_wait¦10
+     : loglevel=0
 END: wait¦done¦17.5¦_wait¦10
+NEW: ‹ConditionalWorkSequence:45 (2)›
+   : │  id: 45
+   : │  call count: 0
+   : │  EVENT: wait¦done¦_wait¦10
+   : │       : loglevel=0
+   : └1╴... done.
+EVENT: wait¦done¦_wait¦10
+     : loglevel=0
+END: wait¦done¦_wait¦10
 DEBUG Yes
 DEBUG values now 14.0 prev 8.0
 test decay :: (new)
@@ -350,21 +592,45 @@ mode: decay
 value: None
 weight: 0.1
 .
-NEW: ‹ConditionalWorkSequence:26 (2)›
-   : │  id: 26
+NEW: ‹ConditionalWorkSequence:46 (2)›
+   : │  id: 46
    : │  call count: 0
    : │  EVENT: wait¦start¦17.7¦_wait¦11
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦start¦17.7¦_wait¦11
+     : loglevel=0
 END: wait¦start¦17.7¦_wait¦11
+NEW: ‹ConditionalWorkSequence:47 (2)›
+   : │  id: 47
+   : │  call count: 0
+   : │  EVENT: wait¦start¦_wait¦11
+   : │       : loglevel=0
+   : │       : end_time=17.7
+   : └1╴... done.
+EVENT: wait¦start¦_wait¦11
+     : loglevel=0
+     : end_time=17.7
+END: wait¦start¦_wait¦11
 TRACE 2003-04-05 06:07:25.750000 _wait¦11: Fake timer done
-NEW: ‹ConditionalWorkSequence:27 (2)›
-   : │  id: 27
+NEW: ‹ConditionalWorkSequence:48 (2)›
+   : │  id: 48
    : │  call count: 0
    : │  EVENT: wait¦done¦17.8¦_wait¦11
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦done¦17.8¦_wait¦11
+     : loglevel=0
 END: wait¦done¦17.8¦_wait¦11
+NEW: ‹ConditionalWorkSequence:49 (2)›
+   : │  id: 49
+   : │  call count: 0
+   : │  EVENT: wait¦done¦_wait¦11
+   : │       : loglevel=0
+   : └1╴... done.
+EVENT: wait¦done¦_wait¦11
+     : loglevel=0
+END: wait¦done¦_wait¦11
 name: test decay
 mode: decay
 value: 2.0
@@ -375,21 +641,45 @@ total samples: 1
 current average: 2.0
 weight: 0.1
 .
-NEW: ‹ConditionalWorkSequence:28 (2)›
-   : │  id: 28
+NEW: ‹ConditionalWorkSequence:50 (2)›
+   : │  id: 50
    : │  call count: 0
    : │  EVENT: wait¦start¦18.8¦_wait¦12
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦start¦18.8¦_wait¦12
+     : loglevel=0
 END: wait¦start¦18.8¦_wait¦12
+NEW: ‹ConditionalWorkSequence:51 (2)›
+   : │  id: 51
+   : │  call count: 0
+   : │  EVENT: wait¦start¦_wait¦12
+   : │       : loglevel=0
+   : │       : end_time=18.8
+   : └1╴... done.
+EVENT: wait¦start¦_wait¦12
+     : loglevel=0
+     : end_time=18.8
+END: wait¦start¦_wait¦12
 TRACE 2003-04-05 06:07:26.750000 _wait¦12: Fake timer done
-NEW: ‹ConditionalWorkSequence:29 (2)›
-   : │  id: 29
+NEW: ‹ConditionalWorkSequence:52 (2)›
+   : │  id: 52
    : │  call count: 0
    : │  EVENT: wait¦done¦18.8¦_wait¦12
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦done¦18.8¦_wait¦12
+     : loglevel=0
 END: wait¦done¦18.8¦_wait¦12
+NEW: ‹ConditionalWorkSequence:53 (2)›
+   : │  id: 53
+   : │  call count: 0
+   : │  EVENT: wait¦done¦_wait¦12
+   : │       : loglevel=0
+   : └1╴... done.
+EVENT: wait¦done¦_wait¦12
+     : loglevel=0
+END: wait¦done¦_wait¦12
 name: test decay
 mode: decay
 value: 2.0
@@ -410,21 +700,45 @@ total samples: 2
 current average: 4.0
 weight: 0.1
 .
-NEW: ‹ConditionalWorkSequence:30 (2)›
-   : │  id: 30
+NEW: ‹ConditionalWorkSequence:54 (2)›
+   : │  id: 54
    : │  call count: 0
    : │  EVENT: wait¦start¦19.8¦_wait¦13
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦start¦19.8¦_wait¦13
+     : loglevel=0
 END: wait¦start¦19.8¦_wait¦13
+NEW: ‹ConditionalWorkSequence:55 (2)›
+   : │  id: 55
+   : │  call count: 0
+   : │  EVENT: wait¦start¦_wait¦13
+   : │       : loglevel=0
+   : │       : end_time=19.8
+   : └1╴... done.
+EVENT: wait¦start¦_wait¦13
+     : loglevel=0
+     : end_time=19.8
+END: wait¦start¦_wait¦13
 TRACE 2003-04-05 06:07:27.750000 _wait¦13: Fake timer done
-NEW: ‹ConditionalWorkSequence:31 (2)›
-   : │  id: 31
+NEW: ‹ConditionalWorkSequence:56 (2)›
+   : │  id: 56
    : │  call count: 0
    : │  EVENT: wait¦done¦19.8¦_wait¦13
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦done¦19.8¦_wait¦13
+     : loglevel=0
 END: wait¦done¦19.8¦_wait¦13
+NEW: ‹ConditionalWorkSequence:57 (2)›
+   : │  id: 57
+   : │  call count: 0
+   : │  EVENT: wait¦done¦_wait¦13
+   : │       : loglevel=0
+   : └1╴... done.
+EVENT: wait¦done¦_wait¦13
+     : loglevel=0
+END: wait¦done¦_wait¦13
 name: test decay
 mode: decay
 value: 22.0
@@ -447,21 +761,45 @@ weight: 0.1
 .
 DEBUG Yes
 DEBUG Yes
-NEW: ‹ConditionalWorkSequence:32 (2)›
-   : │  id: 32
+NEW: ‹ConditionalWorkSequence:58 (2)›
+   : │  id: 58
    : │  call count: 0
    : │  EVENT: wait¦start¦21.8¦_wait¦14
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦start¦21.8¦_wait¦14
+     : loglevel=0
 END: wait¦start¦21.8¦_wait¦14
+NEW: ‹ConditionalWorkSequence:59 (2)›
+   : │  id: 59
+   : │  call count: 0
+   : │  EVENT: wait¦start¦_wait¦14
+   : │       : loglevel=0
+   : │       : end_time=21.8
+   : └1╴... done.
+EVENT: wait¦start¦_wait¦14
+     : loglevel=0
+     : end_time=21.8
+END: wait¦start¦_wait¦14
 TRACE 2003-04-05 06:07:29.750000 _wait¦14: Fake timer done
-NEW: ‹ConditionalWorkSequence:33 (2)›
-   : │  id: 33
+NEW: ‹ConditionalWorkSequence:60 (2)›
+   : │  id: 60
    : │  call count: 0
    : │  EVENT: wait¦done¦21.8¦_wait¦14
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦done¦21.8¦_wait¦14
+     : loglevel=0
 END: wait¦done¦21.8¦_wait¦14
+NEW: ‹ConditionalWorkSequence:61 (2)›
+   : │  id: 61
+   : │  call count: 0
+   : │  EVENT: wait¦done¦_wait¦14
+   : │       : loglevel=0
+   : └1╴... done.
+EVENT: wait¦done¦_wait¦14
+     : loglevel=0
+END: wait¦done¦_wait¦14
 DEBUG Yes
 DEBUG values now -1.0 prev 22.0
 test decaytime :: (new)
@@ -475,21 +813,45 @@ weight/hour: 1.0
 weight/minute: 0.9982029897
 weight/second: 0.1
 .
-NEW: ‹ConditionalWorkSequence:34 (2)›
-   : │  id: 34
+NEW: ‹ConditionalWorkSequence:62 (2)›
+   : │  id: 62
    : │  call count: 0
    : │  EVENT: wait¦start¦22.0¦_wait¦15
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦start¦22.0¦_wait¦15
+     : loglevel=0
 END: wait¦start¦22.0¦_wait¦15
+NEW: ‹ConditionalWorkSequence:63 (2)›
+   : │  id: 63
+   : │  call count: 0
+   : │  EVENT: wait¦start¦_wait¦15
+   : │       : loglevel=0
+   : │       : end_time=22.0
+   : └1╴... done.
+EVENT: wait¦start¦_wait¦15
+     : loglevel=0
+     : end_time=22.0
+END: wait¦start¦_wait¦15
 TRACE 2003-04-05 06:07:30 _wait¦15: Fake timer done
-NEW: ‹ConditionalWorkSequence:35 (2)›
-   : │  id: 35
+NEW: ‹ConditionalWorkSequence:64 (2)›
+   : │  id: 64
    : │  call count: 0
    : │  EVENT: wait¦done¦22.0¦_wait¦15
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦done¦22.0¦_wait¦15
+     : loglevel=0
 END: wait¦done¦22.0¦_wait¦15
+NEW: ‹ConditionalWorkSequence:65 (2)›
+   : │  id: 65
+   : │  call count: 0
+   : │  EVENT: wait¦done¦_wait¦15
+   : │       : loglevel=0
+   : └1╴... done.
+EVENT: wait¦done¦_wait¦15
+     : loglevel=0
+END: wait¦done¦_wait¦15
 name: test decaytime
 mode: decaytime
 value: 10.0
@@ -504,21 +866,45 @@ weight/hour: 1.0
 weight/minute: 0.9982029897
 weight/second: 0.1
 .
-NEW: ‹ConditionalWorkSequence:36 (2)›
-   : │  id: 36
+NEW: ‹ConditionalWorkSequence:66 (2)›
+   : │  id: 66
    : │  call count: 0
    : │  EVENT: wait¦start¦23.0¦_wait¦16
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦start¦23.0¦_wait¦16
+     : loglevel=0
 END: wait¦start¦23.0¦_wait¦16
+NEW: ‹ConditionalWorkSequence:67 (2)›
+   : │  id: 67
+   : │  call count: 0
+   : │  EVENT: wait¦start¦_wait¦16
+   : │       : loglevel=0
+   : │       : end_time=23.0
+   : └1╴... done.
+EVENT: wait¦start¦_wait¦16
+     : loglevel=0
+     : end_time=23.0
+END: wait¦start¦_wait¦16
 TRACE 2003-04-05 06:07:31 _wait¦16: Fake timer done
-NEW: ‹ConditionalWorkSequence:37 (2)›
-   : │  id: 37
+NEW: ‹ConditionalWorkSequence:68 (2)›
+   : │  id: 68
    : │  call count: 0
    : │  EVENT: wait¦done¦23.0¦_wait¦16
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦done¦23.0¦_wait¦16
+     : loglevel=0
 END: wait¦done¦23.0¦_wait¦16
+NEW: ‹ConditionalWorkSequence:69 (2)›
+   : │  id: 69
+   : │  call count: 0
+   : │  EVENT: wait¦done¦_wait¦16
+   : │       : loglevel=0
+   : └1╴... done.
+EVENT: wait¦done¦_wait¦16
+     : loglevel=0
+END: wait¦done¦_wait¦16
 name: test decaytime
 mode: decaytime
 value: 10.0
@@ -547,21 +933,45 @@ weight/hour: 1.0
 weight/minute: 0.9982029897
 weight/second: 0.1
 .
-NEW: ‹ConditionalWorkSequence:38 (2)›
-   : │  id: 38
+NEW: ‹ConditionalWorkSequence:70 (2)›
+   : │  id: 70
    : │  call count: 0
    : │  EVENT: wait¦start¦24.0¦_wait¦17
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦start¦24.0¦_wait¦17
+     : loglevel=0
 END: wait¦start¦24.0¦_wait¦17
+NEW: ‹ConditionalWorkSequence:71 (2)›
+   : │  id: 71
+   : │  call count: 0
+   : │  EVENT: wait¦start¦_wait¦17
+   : │       : loglevel=0
+   : │       : end_time=24.0
+   : └1╴... done.
+EVENT: wait¦start¦_wait¦17
+     : loglevel=0
+     : end_time=24.0
+END: wait¦start¦_wait¦17
 TRACE 2003-04-05 06:07:32 _wait¦17: Fake timer done
-NEW: ‹ConditionalWorkSequence:39 (2)›
-   : │  id: 39
+NEW: ‹ConditionalWorkSequence:72 (2)›
+   : │  id: 72
    : │  call count: 0
    : │  EVENT: wait¦done¦24.0¦_wait¦17
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦done¦24.0¦_wait¦17
+     : loglevel=0
 END: wait¦done¦24.0¦_wait¦17
+NEW: ‹ConditionalWorkSequence:73 (2)›
+   : │  id: 73
+   : │  call count: 0
+   : │  EVENT: wait¦done¦_wait¦17
+   : │       : loglevel=0
+   : └1╴... done.
+EVENT: wait¦done¦_wait¦17
+     : loglevel=0
+END: wait¦done¦_wait¦17
 name: test decaytime
 mode: decaytime
 value: 110.0
@@ -592,21 +1002,45 @@ weight/second: 0.1
 .
 DEBUG Yes
 DEBUG Yes
-NEW: ‹ConditionalWorkSequence:40 (2)›
-   : │  id: 40
+NEW: ‹ConditionalWorkSequence:74 (2)›
+   : │  id: 74
    : │  call count: 0
    : │  EVENT: wait¦start¦26.0¦_wait¦18
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦start¦26.0¦_wait¦18
+     : loglevel=0
 END: wait¦start¦26.0¦_wait¦18
+NEW: ‹ConditionalWorkSequence:75 (2)›
+   : │  id: 75
+   : │  call count: 0
+   : │  EVENT: wait¦start¦_wait¦18
+   : │       : loglevel=0
+   : │       : end_time=26.0
+   : └1╴... done.
+EVENT: wait¦start¦_wait¦18
+     : loglevel=0
+     : end_time=26.0
+END: wait¦start¦_wait¦18
 TRACE 2003-04-05 06:07:34 _wait¦18: Fake timer done
-NEW: ‹ConditionalWorkSequence:41 (2)›
-   : │  id: 41
+NEW: ‹ConditionalWorkSequence:76 (2)›
+   : │  id: 76
    : │  call count: 0
    : │  EVENT: wait¦done¦26.0¦_wait¦18
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦done¦26.0¦_wait¦18
+     : loglevel=0
 END: wait¦done¦26.0¦_wait¦18
+NEW: ‹ConditionalWorkSequence:77 (2)›
+   : │  id: 77
+   : │  call count: 0
+   : │  EVENT: wait¦done¦_wait¦18
+   : │       : loglevel=0
+   : └1╴... done.
+EVENT: wait¦done¦_wait¦18
+     : loglevel=0
+END: wait¦done¦_wait¦18
 name: test decaytime
 mode: decaytime
 value: 1.0

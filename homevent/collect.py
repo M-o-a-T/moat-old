@@ -146,6 +146,7 @@ class Collected(object):
 	@property
 	def ectx(self):
 		self.update_ectx()
+		return self._ectx
 	def update_ectx(self):
 		pass
 

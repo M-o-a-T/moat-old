@@ -2,8 +2,10 @@ NEW: ‹ConditionalWorkSequence:5 (2)›
    : │  id: 5
    : │  call count: 0
    : │  EVENT: startup
+   : │       : startup=True
    : └1╴... done.
 EVENT: startup
+     : startup=True
 END: startup
 foo bar :: fake foo¦bar:None
 .
@@ -34,112 +36,288 @@ END: output¦set¦None¦TEST¦foo¦bar
 NEW: ‹ConditionalWorkSequence:7 (2)›
    : │  id: 7
    : │  call count: 0
+   : │  EVENT: output¦change¦foo¦bar
+   : │       : value=TEST
+   : │       : prev_value=None
+   : └1╴... done.
+EVENT: output¦change¦foo¦bar
+     : value=TEST
+     : prev_value=None
+END: output¦change¦foo¦bar
+NEW: ‹ConditionalWorkSequence:8 (2)›
+   : │  id: 8
+   : │  call count: 0
    : │  EVENT: input¦fake¦TEST¦foo¦bar
    : └1╴... done.
 EVENT: input¦fake¦TEST¦foo¦bar
 END: input¦fake¦TEST¦foo¦bar
+NEW: ‹ConditionalWorkSequence:9 (2)›
+   : │  id: 9
+   : │  call count: 0
+   : │  EVENT: input¦change¦foo¦bar
+   : │       : last_value=None
+   : │       : value=TEST
+   : └1╴... done.
+EVENT: input¦change¦foo¦bar
+     : last_value=None
+     : value=TEST
+END: input¦change¦foo¦bar
 DEBUG Yes
 DEBUG yes
-NEW: ‹ConditionalWorkSequence:8 (2)›
-   : │  id: 8
+NEW: ‹ConditionalWorkSequence:10 (2)›
+   : │  id: 10
    : │  call count: 0
    : │  EVENT: output¦set¦TEST¦1¦foo¦bar
    : └1╴... done.
 EVENT: output¦set¦TEST¦1¦foo¦bar
 END: output¦set¦TEST¦1¦foo¦bar
-NEW: ‹ConditionalWorkSequence:9 (2)›
-   : │  id: 9
+NEW: ‹ConditionalWorkSequence:11 (2)›
+   : │  id: 11
+   : │  call count: 0
+   : │  EVENT: output¦change¦foo¦bar
+   : │       : value=1
+   : │       : prev_value=TEST
+   : └1╴... done.
+EVENT: output¦change¦foo¦bar
+     : value=1
+     : prev_value=TEST
+END: output¦change¦foo¦bar
+NEW: ‹ConditionalWorkSequence:12 (2)›
+   : │  id: 12
    : │  call count: 0
    : │  EVENT: input¦fake¦1¦foo¦bar
    : └1╴... done.
 EVENT: input¦fake¦1¦foo¦bar
 END: input¦fake¦1¦foo¦bar
-NEW: ‹ConditionalWorkSequence:10 (2)›
-   : │  id: 10
+NEW: ‹ConditionalWorkSequence:13 (2)›
+   : │  id: 13
+   : │  call count: 0
+   : │  EVENT: input¦change¦foo¦bar
+   : │       : last_value=TEST
+   : │       : value=1
+   : └1╴... done.
+EVENT: input¦change¦foo¦bar
+     : last_value=TEST
+     : value=1
+END: input¦change¦foo¦bar
+NEW: ‹ConditionalWorkSequence:14 (2)›
+   : │  id: 14
    : │  call count: 0
    : │  EVENT: output¦set¦1¦9¦foo¦bar
    : └1╴... done.
 EVENT: output¦set¦1¦9¦foo¦bar
 END: output¦set¦1¦9¦foo¦bar
-NEW: ‹ConditionalWorkSequence:11 (2)›
-   : │  id: 11
+NEW: ‹ConditionalWorkSequence:15 (2)›
+   : │  id: 15
+   : │  call count: 0
+   : │  EVENT: output¦change¦foo¦bar
+   : │       : value=9
+   : │       : prev_value=1
+   : └1╴... done.
+EVENT: output¦change¦foo¦bar
+     : value=9
+     : prev_value=1
+END: output¦change¦foo¦bar
+NEW: ‹ConditionalWorkSequence:16 (2)›
+   : │  id: 16
    : │  call count: 0
    : │  EVENT: input¦fake¦9¦foo¦bar
    : └1╴... done.
 EVENT: input¦fake¦9¦foo¦bar
 END: input¦fake¦9¦foo¦bar
-NEW: ‹ConditionalWorkSequence:12 (2)›
-   : │  id: 12
+NEW: ‹ConditionalWorkSequence:17 (2)›
+   : │  id: 17
+   : │  call count: 0
+   : │  EVENT: input¦change¦foo¦bar
+   : │       : last_value=1
+   : │       : value=9
+   : └1╴... done.
+EVENT: input¦change¦foo¦bar
+     : last_value=1
+     : value=9
+END: input¦change¦foo¦bar
+NEW: ‹ConditionalWorkSequence:18 (2)›
+   : │  id: 18
    : │  call count: 0
    : │  EVENT: output¦set¦9¦123¦foo¦bar
    : └1╴... done.
 EVENT: output¦set¦9¦123¦foo¦bar
 END: output¦set¦9¦123¦foo¦bar
-NEW: ‹ConditionalWorkSequence:13 (2)›
-   : │  id: 13
+NEW: ‹ConditionalWorkSequence:19 (2)›
+   : │  id: 19
+   : │  call count: 0
+   : │  EVENT: output¦change¦foo¦bar
+   : │       : value=123
+   : │       : prev_value=9
+   : └1╴... done.
+EVENT: output¦change¦foo¦bar
+     : value=123
+     : prev_value=9
+END: output¦change¦foo¦bar
+NEW: ‹ConditionalWorkSequence:20 (2)›
+   : │  id: 20
    : │  call count: 0
    : │  EVENT: input¦fake¦123¦foo¦bar
    : └1╴... done.
 EVENT: input¦fake¦123¦foo¦bar
 END: input¦fake¦123¦foo¦bar
+NEW: ‹ConditionalWorkSequence:21 (2)›
+   : │  id: 21
+   : │  call count: 0
+   : │  EVENT: input¦change¦foo¦bar
+   : │       : last_value=9
+   : │       : value=123
+   : └1╴... done.
+EVENT: input¦change¦foo¦bar
+     : last_value=9
+     : value=123
+END: input¦change¦foo¦bar
 DEBUG yes
-NEW: ‹ConditionalWorkSequence:14 (2)›
-   : │  id: 14
+NEW: ‹ConditionalWorkSequence:22 (2)›
+   : │  id: 22
    : │  call count: 0
    : │  EVENT: output¦set¦123¦one¦foo¦bar
    : └1╴... done.
 EVENT: output¦set¦123¦one¦foo¦bar
 END: output¦set¦123¦one¦foo¦bar
-NEW: ‹ConditionalWorkSequence:15 (2)›
-   : │  id: 15
+NEW: ‹ConditionalWorkSequence:23 (2)›
+   : │  id: 23
+   : │  call count: 0
+   : │  EVENT: output¦change¦foo¦bar
+   : │       : value=one
+   : │       : prev_value=123
+   : └1╴... done.
+EVENT: output¦change¦foo¦bar
+     : value=one
+     : prev_value=123
+END: output¦change¦foo¦bar
+NEW: ‹ConditionalWorkSequence:24 (2)›
+   : │  id: 24
    : │  call count: 0
    : │  EVENT: input¦fake¦one¦foo¦bar
    : └1╴... done.
 EVENT: input¦fake¦one¦foo¦bar
 END: input¦fake¦one¦foo¦bar
-NEW: ‹ConditionalWorkSequence:16 (2)›
-   : │  id: 16
+NEW: ‹ConditionalWorkSequence:25 (2)›
+   : │  id: 25
+   : │  call count: 0
+   : │  EVENT: input¦change¦foo¦bar
+   : │       : last_value=123
+   : │       : value=one
+   : └1╴... done.
+EVENT: input¦change¦foo¦bar
+     : last_value=123
+     : value=one
+END: input¦change¦foo¦bar
+NEW: ‹ConditionalWorkSequence:26 (2)›
+   : │  id: 26
    : │  call count: 0
    : │  EVENT: output¦set¦one¦two¦foo¦bar
    : └1╴... done.
 EVENT: output¦set¦one¦two¦foo¦bar
 END: output¦set¦one¦two¦foo¦bar
-NEW: ‹ConditionalWorkSequence:17 (2)›
-   : │  id: 17
+NEW: ‹ConditionalWorkSequence:27 (2)›
+   : │  id: 27
+   : │  call count: 0
+   : │  EVENT: output¦change¦foo¦bar
+   : │       : value=two
+   : │       : prev_value=one
+   : └1╴... done.
+EVENT: output¦change¦foo¦bar
+     : value=two
+     : prev_value=one
+END: output¦change¦foo¦bar
+NEW: ‹ConditionalWorkSequence:28 (2)›
+   : │  id: 28
    : │  call count: 0
    : │  EVENT: input¦fake¦two¦foo¦bar
    : └1╴... done.
 EVENT: input¦fake¦two¦foo¦bar
 END: input¦fake¦two¦foo¦bar
-NEW: ‹ConditionalWorkSequence:18 (2)›
-   : │  id: 18
+NEW: ‹ConditionalWorkSequence:29 (2)›
+   : │  id: 29
+   : │  call count: 0
+   : │  EVENT: input¦change¦foo¦bar
+   : │       : last_value=one
+   : │       : value=two
+   : └1╴... done.
+EVENT: input¦change¦foo¦bar
+     : last_value=one
+     : value=two
+END: input¦change¦foo¦bar
+NEW: ‹ConditionalWorkSequence:30 (2)›
+   : │  id: 30
    : │  call count: 0
    : │  EVENT: output¦set¦two¦three¦foo¦bar
    : └1╴... done.
 EVENT: output¦set¦two¦three¦foo¦bar
 END: output¦set¦two¦three¦foo¦bar
-NEW: ‹ConditionalWorkSequence:19 (2)›
-   : │  id: 19
+NEW: ‹ConditionalWorkSequence:31 (2)›
+   : │  id: 31
+   : │  call count: 0
+   : │  EVENT: output¦change¦foo¦bar
+   : │       : value=three
+   : │       : prev_value=two
+   : └1╴... done.
+EVENT: output¦change¦foo¦bar
+     : value=three
+     : prev_value=two
+END: output¦change¦foo¦bar
+NEW: ‹ConditionalWorkSequence:32 (2)›
+   : │  id: 32
    : │  call count: 0
    : │  EVENT: input¦fake¦three¦foo¦bar
    : └1╴... done.
 EVENT: input¦fake¦three¦foo¦bar
 END: input¦fake¦three¦foo¦bar
+NEW: ‹ConditionalWorkSequence:33 (2)›
+   : │  id: 33
+   : │  call count: 0
+   : │  EVENT: input¦change¦foo¦bar
+   : │       : last_value=two
+   : │       : value=three
+   : └1╴... done.
+EVENT: input¦change¦foo¦bar
+     : last_value=two
+     : value=three
+END: input¦change¦foo¦bar
 DEBUG yes
-NEW: ‹ConditionalWorkSequence:20 (2)›
-   : │  id: 20
+NEW: ‹ConditionalWorkSequence:34 (2)›
+   : │  id: 34
    : │  call count: 0
    : │  EVENT: output¦set¦three¦GRMPF¦foo¦bar
    : └1╴... done.
 EVENT: output¦set¦three¦GRMPF¦foo¦bar
 END: output¦set¦three¦GRMPF¦foo¦bar
-NEW: ‹ConditionalWorkSequence:21 (2)›
-   : │  id: 21
+NEW: ‹ConditionalWorkSequence:35 (2)›
+   : │  id: 35
+   : │  call count: 0
+   : │  EVENT: output¦change¦foo¦bar
+   : │       : value=GRMPF
+   : │       : prev_value=three
+   : └1╴... done.
+EVENT: output¦change¦foo¦bar
+     : value=GRMPF
+     : prev_value=three
+END: output¦change¦foo¦bar
+NEW: ‹ConditionalWorkSequence:36 (2)›
+   : │  id: 36
    : │  call count: 0
    : │  EVENT: input¦fake¦GRMPF¦foo¦bar
    : └1╴... done.
 EVENT: input¦fake¦GRMPF¦foo¦bar
 END: input¦fake¦GRMPF¦foo¦bar
+NEW: ‹ConditionalWorkSequence:37 (2)›
+   : │  id: 37
+   : │  call count: 0
+   : │  EVENT: input¦change¦foo¦bar
+   : │       : last_value=three
+   : │       : value=GRMPF
+   : └1╴... done.
+EVENT: input¦change¦foo¦bar
+     : last_value=three
+     : value=GRMPF
+END: input¦change¦foo¦bar
 DEBUG Yes
 : ‹Collected FakeInput:foo¦bar›
 name: foo¦bar

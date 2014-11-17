@@ -2,9 +2,11 @@ NEW: ‹ConditionalWorkSequence:7 (2)›
    : │  id: 7
    : │  call count: 0
    : │  EVENT: startup
+   : │       : startup=True
    : └1╴... done.
 .
 EVENT: startup
+     : startup=True
 .
 END: startup
 .

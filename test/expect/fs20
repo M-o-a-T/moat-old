@@ -2,8 +2,10 @@ NEW: ‹ConditionalWorkSequence:5 (2)›
    : │  id: 5
    : │  call count: 0
    : │  EVENT: startup
+   : │       : startup=True
    : └1╴... done.
 EVENT: startup
+     : startup=True
 END: startup
 NEW: ‹ConditionalWorkSequence:6 (2)›
    : │  id: 6
@@ -120,25 +122,49 @@ NEW: ‹ConditionalWorkSequence:15 (2)›
    : │  id: 15
    : │  call count: 0
    : │  EVENT: wait¦start¦0.6¦_wait¦1
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦start¦0.6¦_wait¦1
+     : loglevel=0
 END: wait¦start¦0.6¦_wait¦1
-TRACE 2014-11-17 09:08:24.775077 _wait¦1: Forced timer done
 NEW: ‹ConditionalWorkSequence:16 (2)›
    : │  id: 16
    : │  call count: 0
+   : │  EVENT: wait¦start¦_wait¦1
+   : │       : loglevel=0
+   : │       : end_time=0.6
+   : └1╴... done.
+EVENT: wait¦start¦_wait¦1
+     : loglevel=0
+     : end_time=0.6
+END: wait¦start¦_wait¦1
+TRACE 2014-11-17 14:41:43.955434 _wait¦1: Forced timer done
+NEW: ‹ConditionalWorkSequence:17 (2)›
+   : │  id: 17
+   : │  call count: 0
    : │  EVENT: wait¦done¦0.6¦_wait¦1
+   : │       : loglevel=0
    : └1╴... done.
 EVENT: wait¦done¦0.6¦_wait¦1
+     : loglevel=0
 END: wait¦done¦0.6¦_wait¦1
+NEW: ‹ConditionalWorkSequence:18 (2)›
+   : │  id: 18
+   : │  call count: 0
+   : │  EVENT: wait¦done¦_wait¦1
+   : │       : loglevel=0
+   : └1╴... done.
+EVENT: wait¦done¦_wait¦1
+     : loglevel=0
+END: wait¦done¦_wait¦1
 Traceback (most recent call last):
   File "/home/smurf/homevent/homevent/twist.py", line 287, in err
     e = e.get()
   File "/usr/lib/python2.7/dist-packages/gevent/greenlet.py", line 264, in get
     raise self._exception
 RuntimeError: No FS20 handler known
-NEW: ‹WorkSequence:17 (2)›
-   : │  id: 17
+NEW: ‹WorkSequence:19 (2)›
+   : │  id: 19
    : │  call count: 0
    : │  No FS20 handler known
    : └1╴... done.

@@ -32,7 +32,7 @@ from __future__ import division,absolute_import
 from homevent.statement import AttributedStatement, Statement, main_words,\
 	global_words, HelpSub
 from homevent.event import Event
-from homevent.run import process_event, simple_event,process_failure
+from homevent.run import simple_event,process_failure
 from homevent.reactor import shutdown_event
 from homevent.module import Module
 from homevent.worker import HaltSequence,ExcWorker
@@ -116,8 +116,8 @@ class CommonPM(Collected):
 			self.timer = None
 		try:
 			if self.state:
-				process_event(Event(self.ctx,"pcm","set",self.names[0],*self.name))
-				process_event(Event(Context(value=0),"pcm","change",*self.name))
+				simple_event("pcm","set",self.names[0],*self.name)
+				simple_event("pcm","change",*self.name, value=0)
 		except Exception as ex:
 			fix_exception(ex)
 			process_failure(ex)
@@ -151,8 +151,8 @@ class CommonPM(Collected):
 			self.state = 1
 			tn = self.t_on
 
-		process_event(Event(self.ctx,"pcm","set",self.names[self.state],*self.name))
-		process_event(Event(Context(value=self.state),"pcm","change",*self.name))
+		simple_event("pcm","set",self.names[self.state],*self.name)
+		simple_event("pcm","change",*self.name, value=self.state)
 		try:
 			self.last = self.next
 			if tn is not None:

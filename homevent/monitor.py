@@ -25,7 +25,7 @@ from __future__ import division,absolute_import
 from homevent import TESTING
 from homevent.statement import AttributedStatement, Statement
 from homevent.event import Event
-from homevent.run import process_event,process_failure,simple_event
+from homevent.run import process_failure,simple_event
 from homevent.reactor import shutdown_event
 from homevent.worker import ExcWorker
 from homevent.times import time_delta, time_until, unixdelta, now, \
@@ -262,18 +262,18 @@ class Monitor(Collected,Jobber):
 			self.started_at = now()
 			self._monitor()
 			if self.send_check_event:
-				process_event(Event(self.ectx, "monitor","checked",*self.name))
+				simple_event(self.ectx, "monitor","checked",*self.name)
 			if self.new_value is not None:
 				if hasattr(self,"delta"):
 					if self.value is not None:
 						val = self.new_value-self.value
 						self._ectx.value_delta = val
 						if val >= 0 or self.delta == 0:
-							process_event(Event(self.ectx,"monitor","value",self.new_value-self.value,*self.name))
-							process_event(Event(self.ectx,"monitor","update",*self.name))
+							simple_event(self.ectx,"monitor","value",self.new_value-self.value,*self.name)
+							simple_event(self.ectx,"monitor","update",*self.name)
 				else:
-					process_event(Event(self.ectx,"monitor","value",self.new_value,*self.name))
-					process_event(Event(self.ectx,"monitor","update",*self.name))
+					simple_event(self.ectx,"monitor","value",self.new_value,*self.name)
+					simple_event(self.ectx,"monitor","update",*self.name)
 			if self.new_value is not None:
 				self.value = self.new_value
 		except Exception as e:
@@ -344,8 +344,8 @@ class Monitor(Collected,Jobber):
 								if self.value is not None and \
 										self.alarm is not None and \
 										abs(self.value-avg) > self.alarm:
-									process_event(Event(self.ectx,"monitor","alarm",avg,*self.name))
-									process_event(Event(self.ectx,"monitor","jump",*self.name))
+									simple_event(self.ectx,"monitor","alarm",avg,*self.name)
+									simple_event(self.ectx,"monitor","jump",*self.name)
 							except Exception as e:
 								fix_exception(e)
 								process_failure(e)
@@ -356,7 +356,7 @@ class Monitor(Collected,Jobber):
 						log("monitor",TRACE,"More data", self.data, "for", u"‹"+" ".join(unicode(x) for x in self.name)+u"›")
 				
 			try:
-				process_event(Event(self.ectx,"monitor","error",*self.name))
+				simple_event(self.ectx,"monitor","error",*self.name)
 			except Exception as e:
 				fix_exception(e)
 				process_failure(e)
@@ -372,7 +372,7 @@ class Monitor(Collected,Jobber):
 			Override this for active monitoring.
 			"""
 		if self.send_check_event and step==1:
-			process_event(Event(self.ectx, "monitor","checking",*self.name))
+			simple_event(self.ectx, "monitor","checking",*self.name)
 
 		with log_wait("monitor","one_value",*self.name):
 			return self.watcher.get(block=True, timeout=None)

@@ -24,7 +24,7 @@ from __future__ import division,absolute_import
 
 from homevent.statement import AttributedStatement, Statement
 from homevent.event import Event
-from homevent.run import process_event,process_failure
+from homevent.run import simple_event,process_failure
 from homevent.reactor import shutdown_event
 from homevent.times import time_delta, time_until, unixdelta, now, \
 	humandelta
@@ -126,7 +126,7 @@ class Timeslot(Collected):
 		self.last = self.next
 
 		try:
-			process_event(Event(self.ctx,"timeslot","begin",*self.name))
+			simple_event("timeslot","begin",*self.name)
 			if self.running == "pre":
 				self.running = "during"
 				self.next += dt.timedelta(0,self.duration)
@@ -153,7 +153,7 @@ class Timeslot(Collected):
 
 		self.running = "post"
 		try:
-			process_event(Event(self.ctx,"timeslot","end",*self.name))
+			simple_event("timeslot","end",*self.name)
 			if self.running == "post":
 				self.running = "next"
 				self.next = time_delta(self.interval, now=self.next)-dt.timedelta(0,self.duration)

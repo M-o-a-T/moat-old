@@ -23,7 +23,7 @@ This code implements module loading and unloading.
 from __future__ import division,absolute_import
 
 from homevent import TESTING
-from homevent.run import process_event
+from homevent.run import simple_event
 from homevent.statement import Statement
 from homevent.event import Event
 from homevent.check import Check,register_condition
@@ -99,7 +99,7 @@ class Module(Collected):
 		raise RuntimeError(u"Module ‹%s› already exists" % (name,))
 
 	def delete(self,ctx=None):
-		process_event(Event(ctx, "module","unload",*self.name))
+		simple_event("module","unload",*self.name)
 		self.unload()
 		super(Module,self).delete()
 
@@ -180,7 +180,7 @@ load NAME [args]...
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		load_module(*event)
-		process_event(Event(self.ctx, "module","load",*event))
+		simple_event("module","load",*event)
 
 
 class LoadDir(Statement):

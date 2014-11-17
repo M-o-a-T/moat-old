@@ -366,8 +366,20 @@ onewire down TYPE DEVICE
 	   however, trying to communicate with the device will cause an
 	   error.
 
-timeslot
---------
+timing
+------
+
+wait start NAME…
+	-- A wait event has started. `end_time` tells when it'll stop.
+
+wait error NAME…
+	-- There was a problem with the wait task.
+
+wait done NAME…
+	-- The wait period has concluded.
+
+wait cancel NAME…
+	-- The wait period has been terminated prematurely.
 
 timeslot begin NAME
     -- the timeslot has been reached.

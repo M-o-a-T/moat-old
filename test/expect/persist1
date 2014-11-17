@@ -2,11 +2,13 @@ NEW: ‹ConditionalWorkSequence:5 (2)›
    : │  id: 5
    : │  call count: 0
    : │  EVENT: startup
+   : │       : startup=True
    : └1╴... done.
 EVENT: startup
+     : startup=True
 END: startup
 TRACE Yes!
-TRACE INIT sqlite {'username': 'smurf', 'trace': <function trace at 0x7fdde389e0c8>, 'database': '/tmp/homevent.smurf.db', 'dbtype': 'sqlite', 'dataport': '3306', 'host': 'sql.intern.smurf.noris.de', 'password': 'geheim'}
+TRACE INIT sqlite {'username': 'smurf', 'trace': <function trace at 0x7f6da5b922a8>, 'database': '/tmp/homevent.smurf.db', 'dbtype': 'sqlite', 'dataport': '3306', 'host': 'sql.intern.smurf.noris.de', 'password': 'geheim'}
 TRACE DoFn ('CREATE TABLE HE_State ( category varchar(50), name varchar(200), value BLOB, id INTEGER AUTO_INCREMENT PRIMARY KEY, UNIQUE (category,name))', ()) -1
 TRACE DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) None
 TRACE RollBack  
@@ -28,26 +30,48 @@ NEW: ‹ConditionalWorkSequence:6 (2)›
    : └1╴... done.
 EVENT: state¦-¦one¦foo¦bar
 END: state¦-¦one¦foo¦bar
+NEW: ‹ConditionalWorkSequence:7 (2)›
+   : │  id: 7
+   : │  call count: 0
+   : │  EVENT: state¦change¦foo¦bar
+   : │       : value=one
+   : │       : prev_value=-
+   : └1╴... done.
+EVENT: state¦change¦foo¦bar
+     : value=one
+     : prev_value=-
+END: state¦change¦foo¦bar
 TRACE DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) (u"u'one'",)
 TRACE Commit  
 TRACE Yes!
 TRACE Set to TWO
 TRACE DoFn ('update HE_State set value=? where category=? and name=?', ("u'two'", 'state', 'foo bar')) 1
 TRACE Commit  
-NEW: ‹ConditionalWorkSequence:7 (2)›
-   : │  id: 7
+NEW: ‹ConditionalWorkSequence:8 (2)›
+   : │  id: 8
    : │  call count: 0
    : │  EVENT: state¦one¦two¦foo¦bar
    : └1╴... done.
 EVENT: state¦one¦two¦foo¦bar
 END: state¦one¦two¦foo¦bar
+NEW: ‹ConditionalWorkSequence:9 (2)›
+   : │  id: 9
+   : │  call count: 0
+   : │  EVENT: state¦change¦foo¦bar
+   : │       : value=two
+   : │       : prev_value=one
+   : └1╴... done.
+EVENT: state¦change¦foo¦bar
+     : value=two
+     : prev_value=one
+END: state¦change¦foo¦bar
 TRACE Create OnEvtHandler: state¦*¦three¦foo¦bar
-TRACE NewHandler 8
+TRACE NewHandler 10
 TRACE Set to THREE
 TRACE DoFn ('update HE_State set value=? where category=? and name=?', ("u'three'", 'state', 'foo bar')) 1
 TRACE Commit  
-NEW: ‹ConditionalWorkSequence:9 (3)›
-   : │  id: 9
+NEW: ‹ConditionalWorkSequence:11 (3)›
+   : │  id: 11
    : │  call count: 0
    : │  EVENT: state¦two¦three¦foo¦bar
    : ├1╴on state * three foo bar ‹OnEventHandler›
@@ -64,11 +88,22 @@ RUN: on state * three foo bar ‹OnEventHandler›
    : step: try ‹TryStatement›
    :     : step: set state four foo bar ‹SetStateHandler›
    :     : step: log DEBUG No! (No shit happened.) ‹LogHandler›
- at: ‹ConditionalWorkSequence:9 (3)› (step 1)
+ at: ‹ConditionalWorkSequence:11 (3)› (step 1)
  ev: EVENT: state¦two¦three¦foo¦bar
 TRACE Set to FOUR
 DEBUG Yes! (Shit happens.)
 END: state¦two¦three¦foo¦bar
+NEW: ‹ConditionalWorkSequence:12 (2)›
+   : │  id: 12
+   : │  call count: 0
+   : │  EVENT: state¦change¦foo¦bar
+   : │       : value=three
+   : │       : prev_value=two
+   : └1╴... done.
+EVENT: state¦change¦foo¦bar
+     : value=three
+     : prev_value=two
+END: state¦change¦foo¦bar
 foo bar :: three — now
 .
 : ‹Collected SavedState:foo¦bar›
@@ -83,10 +118,10 @@ TRACE Yes!
 TRACE Yes!
 TRACE Yes!
 TRACE Create OnEvtHandler: whatever
-TRACE NewHandler 10
+TRACE NewHandler 13
 DEBUG End1
-NEW: ‹ConditionalWorkSequence:11 (3)›
-   : │  id: 11
+NEW: ‹ConditionalWorkSequence:14 (3)›
+   : │  id: 14
    : │  call count: 0
    : │  IEVENT: whatever
    : ├1╴on whatever ‹OnEventHandler›
@@ -99,7 +134,7 @@ RUN: on whatever ‹OnEventHandler›
    : prio: 51
    : step: var state x foo bar ‹VarStateHandler›
    : step: log TRACE We got $x ‹LogHandler›
- at: ‹ConditionalWorkSequence:11 (3)› (step 1)
+ at: ‹ConditionalWorkSequence:14 (3)› (step 1)
  ev: IEVENT: whatever
 TRACE We got three
 END: whatever
