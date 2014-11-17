@@ -82,6 +82,7 @@ def main(c,opts,args):
 
 def do_log(c):
 	q = Queue()
+	sig = []
 
 	def called(**k):
 		try:
@@ -105,15 +106,14 @@ def do_log(c):
 		q.put((logged,a,{}))
 	cm = c.root.logger(q_logged,None,0)
 
-	sigged = False
 	def do_shutdown(a,b):
-		global sigged
-		sigged = True
+		sig.append(True)
 	signal.signal(signal.SIGINT,do_shutdown)
 	signal.signal(signal.SIGTERM,do_shutdown)
-	while not sigged:
+	while not sig:
 		p,a,k = q.get()
 		p(*a,**k)
+	c.close()
 
 def do_cmd(c,args):
 	if not args:
