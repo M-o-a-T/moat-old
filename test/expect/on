@@ -21,179 +21,160 @@ TRACE Create OnEvtHandler: foo
 TRACE NewHandler 11
 TRACE Create OnEvtHandler: foo
 TRACE NewHandler 12
-TRACE Create OnEvtHandler: foo
-TRACE NewHandler 13
 TRACE Create OnEvtHandler: bar¦*
-TRACE NewHandler 14
-Skipped One :: foo (49)
-Skipped Two :: foo (50)
+TRACE NewHandler 13
+Another Handler :: foo (51)
 Num2Txt :: num¦2 (51)
 Schau auf deine Füße :: fuß (51)
+Skipped One :: foo (51)
+Skipped Two :: foo (51)
 Txt2Num :: num¦1 (51)
-_on 14 :: bar¦* (51)
+_on 13 :: bar¦* (51)
 num2num :: num¦3 (51)
-Last Handler :: foo (55)
-not executed :: foo (60)
 .
 : ⇒OnEventWorker:Skipped¦One
 name: Skipped¦One
 id: 10
-prio: 49
+prio: 51
 pname: Skipped One
 args: foo
-prio: 49
+prio: 51
 .
 : ⇒OnEventWorker:Skipped¦Two
 name: Skipped¦Two
 id: 11
-prio: 50
+prio: 51
 pname: Skipped Two
 args: foo
-prio: 50
+prio: 51
 .
-NEW: ‹ConditionalWorkSequence:15 (3)›
+NEW: ‹ConditionalWorkSequence:14 (3)›
+   : │  id: 14
+   : │  call count: 0
+   : │  IEVENT: bar¦foo
+   : ├1╴on bar * ‹OnEventHandler›
+   : │  prio: 51
+   : │  step: block ‹Block›
+   : │      : step: trigger $1 ‹TriggerHandler›
+   : └2╴... done.
+IEVENT: bar¦foo
+RUN: on bar * ‹OnEventHandler›
+   : prio: 51
+   : step: block ‹Block›
+   :     : step: trigger $1 ‹TriggerHandler›
+ at: ‹ConditionalWorkSequence:14 (3)› (step 1)
+ ev: IEVENT: bar¦foo
+NEW: ‹ConditionalWorkSequence:15 (5)›
    : │  id: 15
    : │  call count: 0
-   : │  IEVENT: bar¦foo
-   : ├1╴on bar * ‹OnEventHandler›
-   : │  prio: 51
-   : │  step: block ‹Block›
-   : │      : step: trigger $1 ‹TriggerHandler›
-   : └2╴... done.
-IEVENT: bar¦foo
-RUN: on bar * ‹OnEventHandler›
-   : prio: 51
-   : step: block ‹Block›
-   :     : step: trigger $1 ‹TriggerHandler›
- at: ‹ConditionalWorkSequence:15 (3)› (step 1)
- ev: IEVENT: bar¦foo
-NEW: ‹ConditionalWorkSequence:16 (6)›
-   : │  id: 16
-   : │  call count: 0
    : │  IEVENT: foo
    : ├1╴on foo ‹OnEventHandler›
    : │  name: Skipped One
-   : │  prio: 49
+   : │  prio: 51
    : │  step: if false ‹IfStatement›
    : │  step: log ERROR This should not be executed ‹LogHandler›
    : ├2╴on foo ‹OnEventHandler›
    : │  name: Skipped Two
-   : │  prio: 50
+   : │  prio: 51
    : │  step: if true ‹IfStatement›
-   : │      : step: next handler ‹OnSkip›
+   : │      : step: exit handler ‹OnSkip2›
    : │  step: log ERROR This should also not be executed ‹LogHandler›
    : ├3╴on foo ‹OnEventHandler›
-   : │  name: Last Handler
-   : │  prio: 55
+   : │  name: Another Handler
+   : │  prio: 51
    : │  step: log DEBUG This is logged once ‹LogHandler›
-   : ├4╴on foo ‹OnEventHandler›
-   : │  name: not executed
-   : │  prio: 60
-   : │  step: log DEBUG This is logged once too ‹LogHandler›
-   : └5╴... done.
-IEVENT: foo
-RUN: on foo ‹OnEventHandler›
-   : name: Skipped One
-   : prio: 49
-   : step: if false ‹IfStatement›
-   : step: log ERROR This should not be executed ‹LogHandler›
- at: ‹ConditionalWorkSequence:16 (6)› (step 1)
- ev: IEVENT: foo
-RUN: on foo ‹OnEventHandler›
-   : name: Skipped Two
-   : prio: 50
-   : step: if true ‹IfStatement›
-   :     : step: next handler ‹OnSkip›
-   : step: log ERROR This should also not be executed ‹LogHandler›
- at: ‹ConditionalWorkSequence:16 (6)› (step 2)
- ev: IEVENT: foo
-RUN: on foo ‹OnEventHandler›
-   : name: Last Handler
-   : prio: 55
-   : step: log DEBUG This is logged once ‹LogHandler›
- at: ‹ConditionalWorkSequence:16 (6)› (step 3)
- ev: IEVENT: foo
-DEBUG This is logged once
-END: foo
-END: bar¦foo
-NEW: ‹ConditionalWorkSequence:17 (3)›
-   : │  id: 17
-   : │  call count: 0
-   : │  IEVENT: bar¦foo
-   : ├1╴on bar * ‹OnEventHandler›
-   : │  prio: 51
-   : │  step: block ‹Block›
-   : │      : step: trigger $1 ‹TriggerHandler›
-   : └2╴... done.
-IEVENT: bar¦foo
-RUN: on bar * ‹OnEventHandler›
-   : prio: 51
-   : step: block ‹Block›
-   :     : step: trigger $1 ‹TriggerHandler›
- at: ‹ConditionalWorkSequence:17 (3)› (step 1)
- ev: IEVENT: bar¦foo
-NEW: ‹ConditionalWorkSequence:18 (5)›
-   : │  id: 18
-   : │  call count: 0
-   : │  IEVENT: foo
-   : ├1╴on foo ‹OnEventHandler›
-   : │  name: Skipped One
-   : │  prio: 49
-   : │  step: if false ‹IfStatement›
-   : │  step: log ERROR This should not be executed ‹LogHandler›
-   : ├2╴on foo ‹OnEventHandler›
-   : │  name: Skipped Two
-   : │  prio: 50
-   : │  step: if true ‹IfStatement›
-   : │      : step: next handler ‹OnSkip›
-   : │  step: log ERROR This should also not be executed ‹LogHandler›
-   : ├3╴on foo ‹OnEventHandler›
-   : │  name: not executed
-   : │  prio: 60
-   : │  step: log DEBUG This is logged once too ‹LogHandler›
    : └4╴... done.
 IEVENT: foo
 RUN: on foo ‹OnEventHandler›
    : name: Skipped One
-   : prio: 49
+   : prio: 51
    : step: if false ‹IfStatement›
    : step: log ERROR This should not be executed ‹LogHandler›
- at: ‹ConditionalWorkSequence:18 (5)› (step 1)
+ at: ‹ConditionalWorkSequence:15 (5)› (step 1)
  ev: IEVENT: foo
 RUN: on foo ‹OnEventHandler›
    : name: Skipped Two
-   : prio: 50
+   : prio: 51
    : step: if true ‹IfStatement›
-   :     : step: next handler ‹OnSkip›
+   :     : step: exit handler ‹OnSkip2›
    : step: log ERROR This should also not be executed ‹LogHandler›
- at: ‹ConditionalWorkSequence:18 (5)› (step 2)
+ at: ‹ConditionalWorkSequence:15 (5)› (step 2)
  ev: IEVENT: foo
 RUN: on foo ‹OnEventHandler›
-   : name: not executed
-   : prio: 60
-   : step: log DEBUG This is logged once too ‹LogHandler›
- at: ‹ConditionalWorkSequence:18 (5)› (step 3)
+   : name: Another Handler
+   : prio: 51
+   : step: log DEBUG This is logged once ‹LogHandler›
+ at: ‹ConditionalWorkSequence:15 (5)› (step 3)
  ev: IEVENT: foo
-DEBUG This is logged once too
+DEBUG This is logged once
 END: foo
 END: bar¦foo
-Skipped One :: foo (49)
-Skipped Two :: foo (50)
+NEW: ‹ConditionalWorkSequence:16 (3)›
+   : │  id: 16
+   : │  call count: 0
+   : │  IEVENT: bar¦foo
+   : ├1╴on bar * ‹OnEventHandler›
+   : │  prio: 51
+   : │  step: block ‹Block›
+   : │      : step: trigger $1 ‹TriggerHandler›
+   : └2╴... done.
+IEVENT: bar¦foo
+RUN: on bar * ‹OnEventHandler›
+   : prio: 51
+   : step: block ‹Block›
+   :     : step: trigger $1 ‹TriggerHandler›
+ at: ‹ConditionalWorkSequence:16 (3)› (step 1)
+ ev: IEVENT: bar¦foo
+NEW: ‹ConditionalWorkSequence:17 (4)›
+   : │  id: 17
+   : │  call count: 0
+   : │  IEVENT: foo
+   : ├1╴on foo ‹OnEventHandler›
+   : │  name: Skipped One
+   : │  prio: 51
+   : │  step: if false ‹IfStatement›
+   : │  step: log ERROR This should not be executed ‹LogHandler›
+   : ├2╴on foo ‹OnEventHandler›
+   : │  name: Skipped Two
+   : │  prio: 51
+   : │  step: if true ‹IfStatement›
+   : │      : step: exit handler ‹OnSkip2›
+   : │  step: log ERROR This should also not be executed ‹LogHandler›
+   : └3╴... done.
+IEVENT: foo
+RUN: on foo ‹OnEventHandler›
+   : name: Skipped One
+   : prio: 51
+   : step: if false ‹IfStatement›
+   : step: log ERROR This should not be executed ‹LogHandler›
+ at: ‹ConditionalWorkSequence:17 (4)› (step 1)
+ ev: IEVENT: foo
+RUN: on foo ‹OnEventHandler›
+   : name: Skipped Two
+   : prio: 51
+   : step: if true ‹IfStatement›
+   :     : step: exit handler ‹OnSkip2›
+   : step: log ERROR This should also not be executed ‹LogHandler›
+ at: ‹ConditionalWorkSequence:17 (4)› (step 2)
+ ev: IEVENT: foo
+END: foo
+END: bar¦foo
 Num2Txt :: num¦2 (51)
+Skipped One :: foo (51)
+Skipped Two :: foo (51)
 Txt2Num :: num¦1 (51)
-_on 14 :: bar¦* (51)
+_on 13 :: bar¦* (51)
 num2num :: num¦3 (51)
-not executed :: foo (60)
 .
-NEW: ‹ConditionalWorkSequence:19 (2)›
-   : │  id: 19
+NEW: ‹ConditionalWorkSequence:18 (2)›
+   : │  id: 18
    : │  call count: 0
    : │  IEVENT: fuß
    : └1╴... done.
 IEVENT: fuß
 END: fuß
-NEW: ‹ConditionalWorkSequence:20 (3)›
-   : │  id: 20
+NEW: ‹ConditionalWorkSequence:19 (3)›
+   : │  id: 19
    : │  call count: 0
    : │  IEVENT: num¦1
    : ├1╴on num 1 ‹OnEventHandler›
@@ -206,11 +187,11 @@ RUN: on num 1 ‹OnEventHandler›
    : name: Txt2Num
    : prio: 51
    : step: do nothing ‹DoNothingHandler›
- at: ‹ConditionalWorkSequence:20 (3)› (step 1)
+ at: ‹ConditionalWorkSequence:19 (3)› (step 1)
  ev: IEVENT: num¦1
 END: num¦1
-NEW: ‹ConditionalWorkSequence:21 (3)›
-   : │  id: 21
+NEW: ‹ConditionalWorkSequence:20 (3)›
+   : │  id: 20
    : │  call count: 0
    : │  IEVENT: num¦2
    : ├1╴on num 2 ‹OnEventHandler›
@@ -223,11 +204,11 @@ RUN: on num 2 ‹OnEventHandler›
    : name: Num2Txt
    : prio: 51
    : step: do nothing ‹DoNothingHandler›
- at: ‹ConditionalWorkSequence:21 (3)› (step 1)
+ at: ‹ConditionalWorkSequence:20 (3)› (step 1)
  ev: IEVENT: num¦2
 END: num¦2
-NEW: ‹ConditionalWorkSequence:22 (3)›
-   : │  id: 22
+NEW: ‹ConditionalWorkSequence:21 (3)›
+   : │  id: 21
    : │  call count: 0
    : │  IEVENT: num¦3
    : ├1╴on num 3 ‹OnEventHandler›
@@ -240,6 +221,6 @@ RUN: on num 3 ‹OnEventHandler›
    : name: num2num
    : prio: 51
    : step: do nothing ‹DoNothingHandler›
- at: ‹ConditionalWorkSequence:22 (3)› (step 1)
+ at: ‹ConditionalWorkSequence:21 (3)› (step 1)
  ev: IEVENT: num¦3
 END: num¦3

@@ -37,26 +37,17 @@ on num 3:
 	name num2num
 	do nothing
 on foo:
-	prio 49
 	name Skipped One
 	if false
 	log ERROR "This should not be executed"
 on foo:
-	prio 50
 	name Skipped Two
 	if true:
-		next handler
+		exit handler
 	log ERROR "This should also not be executed"
 on foo:
-	prio 55
-	name Last Handler
+	name Another Handler
 	log DEBUG "This is logged once"
-	doc "Causes the prio-60 thing to not be executed"
-on foo:
-	prio 60
-	name not executed
-	doc "Is not executed because of the former 'skip next' (until that's gone)"
-	log DEBUG "This is logged once too"
 on bar *:
 	block:
 		trigger $1 :sync
@@ -64,7 +55,7 @@ list on
 list on Skipped One
 list on Skipped Two
 trigger bar foo :sync
-del on Last Handler
+del on Another Handler
 trigger bar foo :sync
 del on fuß
 list on

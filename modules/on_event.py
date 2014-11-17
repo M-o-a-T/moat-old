@@ -330,6 +330,17 @@ Commands in the same handler, after this one, are *not* executed.
 		raise TrySomethingElse()
 
 
+class OnSkip2(Statement):
+	name = "exit handler"
+	doc = u"Leave the current event handler"
+	long_doc="""\
+This statement causes processing of this handler to end.
+(This is useful within nested if… statements.)
+"""
+	def run(self,ctx,**k):
+		raise TrySomethingElse()
+
+
 class OnEventModule(Module):
 	"""\
 		This module registers the "on EVENT:" handler.
@@ -341,6 +352,7 @@ class OnEventModule(Module):
 		main_words.register_statement(OnEventHandler)
 		OnEventHandler.register_statement(OnPrio)
 		main_words.register_statement(OnSkip)
+		main_words.register_statement(OnSkip2)
 		OnEventHandler.register_statement(OnName)
 		OnEventHandler.register_statement(OnDoc)
 		register_condition(OnHandlers.exists)
@@ -349,6 +361,7 @@ class OnEventModule(Module):
 		main_words.unregister_statement(OnEventHandler)
 		OnEventHandler.unregister_statement(OnPrio)
 		main_words.unregister_statement(OnSkip)
+		main_words.unregister_statement(OnSkip2)
 		OnEventHandler.unregister_statement(OnName)
 		OnEventHandler.unregister_statement(OnDoc)
 		unregister_condition(OnHandlers.exists)
