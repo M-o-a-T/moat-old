@@ -19,7 +19,7 @@ NEW: ‹ConditionalWorkSequence:7 (2)›
    : └1╴... done.
 EVENT: wait¦start¦0.5¦_wait¦1
 END: wait¦start¦0.5¦_wait¦1
-2003-04-05 06:07:08.500000 _wait¦1: Fake timer done 
+TRACE 2003-04-05 06:07:08.500000 _wait¦1: Fake timer done
 NEW: ‹ConditionalWorkSequence:8 (2)›
    : │  id: 8
    : │  call count: 0

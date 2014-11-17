@@ -27,7 +27,7 @@ NEW: ‹WorkSequence:8 (2)›
    : └1╴... done.
 [Errno 111] Connection refused
 END: error
-2014-11-15 18:45:05.988092 BAD: Forced timer done 
+TRACE 2014-11-17 09:08:34.877227 BAD: Forced timer done
 NEW: ‹ConditionalWorkSequence:9 (2)›
    : │  id: 9
    : │  call count: 0
@@ -51,7 +51,7 @@ NEW: ‹ConditionalWorkSequence:14 (2)›
    : └1╴... done.
 EVENT: wait¦start¦0.4¦BEFORE
 END: wait¦start¦0.4¦BEFORE
-2014-11-15 18:45:06.212691 BEFORE: Forced timer done 
+TRACE 2014-11-17 09:08:35.100709 BEFORE: Forced timer done
 NEW: ‹ConditionalWorkSequence:15 (2)›
    : │  id: 15
    : │  call count: 0
@@ -105,7 +105,7 @@ NEW: ‹ConditionalWorkSequence:19 (2)›
    : └1╴... done.
 EVENT: net¦recv¦foo¦A
 END: net¦recv¦foo¦A
-2014-11-15 18:45:06.374413 OUT: Forced timer done 
+TRACE 2014-11-17 09:08:35.288542 OUT: Forced timer done
 NEW: ‹ConditionalWorkSequence:20 (2)›
    : │  id: 20
    : │  call count: 0
@@ -161,10 +161,10 @@ END: net¦connect¦baz¦zaz¦1
 NEW: ‹ConditionalWorkSequence:23 (2)›
    : │  id: 23
    : │  call count: 0
-   : │  EVENT: wait¦start¦0.7¦IN
+   : │  EVENT: wait¦start¦0.8¦IN
    : └1╴... done.
-EVENT: wait¦start¦0.7¦IN
-END: wait¦start¦0.7¦IN
+EVENT: wait¦start¦0.8¦IN
+END: wait¦start¦0.8¦IN
 NEW: ‹ConditionalWorkSequence:24 (2)›
    : │  id: 24
    : │  call count: 0
@@ -172,17 +172,17 @@ NEW: ‹ConditionalWorkSequence:24 (2)›
    : └1╴... done.
 EVENT: net¦recv¦baz¦zaz¦1¦B
 END: net¦recv¦baz¦zaz¦1¦B
-2014-11-15 18:45:06.510736 IN: Forced timer done 
+TRACE 2014-11-17 09:08:35.412234 IN: Forced timer done
 NEW: ‹ConditionalWorkSequence:25 (2)›
    : │  id: 25
    : │  call count: 0
-   : │  EVENT: wait¦done¦0.7¦IN
+   : │  EVENT: wait¦done¦0.8¦IN
    : └1╴... done.
-EVENT: wait¦done¦0.7¦IN
-END: wait¦done¦0.7¦IN
+EVENT: wait¦done¦0.8¦IN
+END: wait¦done¦0.8¦IN
 type: net_passive
 host: 127.0.0.1
-port: 52101
+port: 45195
 .
 NEW: ‹ConditionalWorkSequence:26 (2)›
    : │  id: 26
@@ -191,7 +191,7 @@ NEW: ‹ConditionalWorkSequence:26 (2)›
    : └1╴... done.
 EVENT: net¦disconnect¦baz¦zaz¦1
 END: net¦disconnect¦baz¦zaz¦1
-2014-11-15 18:45:07.087779 AFTER: Forced timer done 
+TRACE 2014-11-17 09:08:35.974976 AFTER: Forced timer done
 NEW: ‹ConditionalWorkSequence:27 (2)›
    : │  id: 27
    : │  call count: 0
@@ -209,11 +209,11 @@ NEW: ‹ConditionalWorkSequence:28 (2)›
    : └1╴... done.
 EVENT: wait¦start¦1.6¦END
 END: wait¦start¦1.6¦END
-2003-04-05 06:07:09.675018 END: Fake timer done 
+TRACE 2003-04-05 06:07:09.600017 END: Fake timer done
 NEW: ‹ConditionalWorkSequence:29 (2)›
    : │  id: 29
    : │  call count: 0
-   : │  EVENT: wait¦done¦1.7¦END
+   : │  EVENT: wait¦done¦1.6¦END
    : └1╴... done.
-EVENT: wait¦done¦1.7¦END
-END: wait¦done¦1.7¦END
+EVENT: wait¦done¦1.6¦END
+END: wait¦done¦1.6¦END

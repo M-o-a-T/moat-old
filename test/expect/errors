@@ -9,7 +9,7 @@ DEBUG Yes A
 DEBUG Yes B
 DEBUG Yes C
 DEBUG Yes D
-0 Triggered:
+TRACE Triggered:
 TRACE RaisedError: Foo A
 RaisedError: Foo A
 NEW: ‹WorkSequence:6 (2)›
@@ -20,18 +20,18 @@ NEW: ‹WorkSequence:6 (2)›
 RaisedError: Foo A
 END: RaisedError
 DEBUG Yes E
-0 Triggered:
+TRACE Triggered:
 TRACE RaisedError: Foo B
 DEBUG Yes F B
 DEBUG Yes G
-0 Triggered:
+TRACE Triggered:
 TRACE RaisedError: Foo C
 DEBUG Yes H C
 DEBUG Yes I
-0 Triggered:
+TRACE Triggered:
 TRACE RaisedError: Foo D
 DEBUG Yes J D
-0 Triggered:
+TRACE Triggered:
 TRACE RaisedError: Foo E
 RaisedError: Foo E
 NEW: ‹WorkSequence:7 (2)›
@@ -42,16 +42,16 @@ NEW: ‹WorkSequence:7 (2)›
 RaisedError: Foo E
 END: RaisedError
 DEBUG Yes K
-0 Triggered:
+TRACE Triggered:
 TRACE RaisedError: Foo F
 DEBUG Yes L F
-0 Triggered:
+TRACE Triggered:
 TRACE RaisedError: Foo G
 DEBUG Yes M G
 DEBUG Yes N KEY
-0 Triggered:
+TRACE Triggered:
 TRACE RaisedError: Foo Bar
 DEBUG Yes O
-0 Triggered:
+TRACE Triggered:
 TRACE RaisedError: Foo Bar
 DEBUG Yes P Foo Bar

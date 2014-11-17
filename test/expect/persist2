@@ -6,7 +6,7 @@ NEW: ‹ConditionalWorkSequence:5 (2)›
 EVENT: startup
 END: startup
 TRACE Yes!
-TRACE INIT sqlite {'username': 'smurf', 'trace': <function trace at 0x7f75df9e5aa0>, 'database': '/tmp/homevent.smurf.db', 'dbtype': 'sqlite', 'dataport': '3306', 'host': 'sql.intern.smurf.noris.de', 'password': 'geheim'}
+TRACE INIT sqlite {'username': 'smurf', 'trace': <function trace at 0x7fba424aaaa0>, 'database': '/tmp/homevent.smurf.db', 'dbtype': 'sqlite', 'dataport': '3306', 'host': 'sql.intern.smurf.noris.de', 'password': 'geheim'}
 TRACE DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) (u"u'three'",)
 TRACE Commit  
 TRACE Yes!

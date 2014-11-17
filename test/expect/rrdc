@@ -12,7 +12,7 @@ NEW: ‹ConditionalWorkSequence:6 (2)›
    : └1╴... done.
 EVENT: wait¦start¦0.2¦startup
 END: wait¦start¦0.2¦startup
-2014-11-15 18:45:07.647801 startup: Forced timer done 
+TRACE 2014-11-17 09:08:36.534883 startup: Forced timer done
 NEW: ‹ConditionalWorkSequence:7 (2)›
    : │  id: 7
    : │  call count: 0
@@ -80,7 +80,7 @@ TRACE msg states at run connected connecting
 TRACE NotConn [[], [], [], []]
 TRACE conn setstate connecting connected
 TRACE msg states at run connected connected
-2014-11-15 18:45:07.780653 _wait¦2: Forced timer done 
+TRACE 2014-11-17 09:08:36.672486 _wait¦2: Forced timer done
 NEW: ‹ConditionalWorkSequence:10 (2)›
    : │  id: 10
    : │  call count: 0
@@ -90,9 +90,9 @@ EVENT: wait¦done¦0.4¦_wait¦2
 END: wait¦done¦0.4¦_wait¦2
 TRACE msg states at run connected connected
 TRACE msg send ‹RRDsendUpdate 1›
-rrd 0 send 'update /tmp/rrdtest.rrd 1049515628:10'
+TRACE rrd send 'update /tmp/rrdtest.rrd 1049515628:10'
 TRACE msg send result RECV_AGAIN
-rrd 0 recv '0 Yes'
+TRACE rrd recv '0 Yes'
 TRACE msg recv msg ‹MsgIncoming: msg:'Yes' type:MT_ACK prio:2›
 TRACE conn incoming RRDqueue t¦tt¦ttt ‹MsgIncoming: msg:'Yes' type:MT_ACK prio:2›
 TRACE msg recv t¦tt¦ttt ‹MsgIncoming: msg:'Yes' type:MT_ACK prio:2›
@@ -105,7 +105,7 @@ NEW: ‹ConditionalWorkSequence:11 (2)›
    : └1╴... done.
 EVENT: wait¦start¦0.5¦_wait¦3
 END: wait¦start¦0.5¦_wait¦3
-2014-11-15 18:45:07.886970 _wait¦3: Forced timer done 
+TRACE 2014-11-17 09:08:36.780323 _wait¦3: Forced timer done
 NEW: ‹ConditionalWorkSequence:12 (2)›
    : │  id: 12
    : │  call count: 0
@@ -115,11 +115,11 @@ EVENT: wait¦done¦0.5¦_wait¦3
 END: wait¦done¦0.5¦_wait¦3
 TRACE msg states at run connected connected
 TRACE msg send ‹RRDsendUpdate 3›
-rrd 0 send 'update /tmp/rrdtest.rrd 1049515628:11'
+TRACE rrd send 'update /tmp/rrdtest.rrd 1049515628:11'
 TRACE msg send result RECV_AGAIN
-rrd 0 recv '2 Nonsense follows'
-rrd 0 recv 'Nonsense'
-rrd 0 recv 'More Nonsense'
+TRACE rrd recv '2 Nonsense follows'
+TRACE rrd recv 'Nonsense'
+TRACE rrd recv 'More Nonsense'
 TRACE msg recv msg ‹MsgIncoming: msg:' Nonsense follows' data:['Nonsense', 'More Nonsense'] type:MT_MULTILINE prio:2›
 TRACE conn incoming RRDqueue t¦tt¦ttt ‹MsgIncoming: msg:' Nonsense follows' data:['Nonsense', 'More Nonsense'] type:MT_MULTILINE prio:2›
 TRACE msg recv t¦tt¦ttt ‹MsgIncoming: msg:' Nonsense follows' data:['Nonsense', 'More Nonsense'] type:MT_MULTILINE prio:2›
@@ -132,7 +132,7 @@ NEW: ‹ConditionalWorkSequence:13 (2)›
    : └1╴... done.
 EVENT: wait¦start¦0.6¦_wait¦4
 END: wait¦start¦0.6¦_wait¦4
-2014-11-15 18:45:07.992163 _wait¦4: Forced timer done 
+TRACE 2014-11-17 09:08:36.888291 _wait¦4: Forced timer done
 NEW: ‹ConditionalWorkSequence:14 (2)›
    : │  id: 14
    : │  call count: 0
@@ -142,9 +142,9 @@ EVENT: wait¦done¦0.6¦_wait¦4
 END: wait¦done¦0.6¦_wait¦4
 TRACE msg states at run connected connected
 TRACE msg send ‹RRDsendUpdate 5›
-rrd 0 send 'update /tmp/rrdtest.rrd 1049515628:12'
+TRACE rrd send 'update /tmp/rrdtest.rrd 1049515628:12'
 TRACE msg send result RECV_AGAIN
-rrd 0 recv '-123 No'
+TRACE rrd recv '-123 No'
 TRACE msg recv msg ‹MsgIncoming: msg:'No' errno:123 type:MT_ERROR prio:2›
 TRACE conn incoming RRDqueue t¦tt¦ttt ‹MsgIncoming: msg:'No' errno:123 type:MT_ERROR prio:2›
 TRACE msg recv t¦tt¦ttt ‹MsgIncoming: msg:'No' errno:123 type:MT_ERROR prio:2›

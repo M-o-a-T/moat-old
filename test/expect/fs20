@@ -123,7 +123,7 @@ NEW: ‹ConditionalWorkSequence:15 (2)›
    : └1╴... done.
 EVENT: wait¦start¦0.6¦_wait¦1
 END: wait¦start¦0.6¦_wait¦1
-2014-11-15 18:44:52.005755 _wait¦1: Forced timer done 
+TRACE 2014-11-17 09:08:24.775077 _wait¦1: Forced timer done
 NEW: ‹ConditionalWorkSequence:16 (2)›
    : │  id: 16
    : │  call count: 0

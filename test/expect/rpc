@@ -10,10 +10,10 @@ TRACE NewHandler 6
 NEW: ‹ConditionalWorkSequence:7 (2)›
    : │  id: 7
    : │  call count: 0
-   : │  EVENT: wait¦start¦5.0¦shutdown
+   : │  EVENT: wait¦start¦1.0¦shutdown
    : └1╴... done.
-EVENT: wait¦start¦5.0¦shutdown
-END: wait¦start¦5.0¦shutdown
+EVENT: wait¦start¦1.0¦shutdown
+END: wait¦start¦1.0¦shutdown
 NEW: ‹ConditionalWorkSequence:8 (2)›
    : │  id: 8
    : │  call count: 0
@@ -21,41 +21,71 @@ NEW: ‹ConditionalWorkSequence:8 (2)›
    : └1╴... done.
 EVENT: rpc¦connect¦foo¦n1
 END: rpc¦connect¦foo¦n1
-TEST 1 (Name('event',),)
-4 Logging error
-ERROR (<type 'exceptions.KeyError'>, KeyError('TEST',), <traceback obj>)
-TEST 1 (Name('job',),)
-TEST 1 (Name('log',),)
-TEST 1 (Name('module',),)
-TEST 1 (Name('net', 'connection'),)
-TEST 1 (Name('net', 'server'),)
-TEST 1 (Name('on',),)
-TEST 1 (Name('parser',),)
-TEST 1 (Name('rpc', 'connection'),)
-TEST 1 (Name('rpc', 'server'),)
-TEST 1 (Name('state',),)
-TEST 1 (Name('wait',),)
-TEST 1 (Name('worker',),)
-TEST 1 .
-TEST 1 (Name(u'foo',),)
-TEST 1 .
-TEST 1 (u'', u'\u2039Collected RPCserver:foo\u203a')
-TEST 1 (u'name', u'foo')
-TEST 1 (u'host', u'')
-TEST 1 (u'port', u'56478')
-TEST 1 (u'server', u'<homevent.gevent_rpyc.GeventServer obj>')
-TEST 1 .
-TEST 1 (u'', u'\u2039Collected namedRPC:foo\xa6n1\u203a')
-TEST 1 (u'name', u'foo\xa6n1')
-TEST 1 (u'local host', u'::ffff:127.0.0.1')
-TEST 1 (u'local port', u'56478')
-TEST 1 (u'remote host', u'::ffff:127.0.0.1')
-TEST 1 (u'remote port', u'55207')
-TEST 1 .
+DEBUG TEST (Name('event',),)
+DEBUG TEST (Name('job',),)
+DEBUG TEST (Name('log',),)
+DEBUG TEST (Name('module',),)
+DEBUG TEST (Name('net', 'connection'),)
+DEBUG TEST (Name('net', 'server'),)
+DEBUG TEST (Name('on',),)
+DEBUG TEST (Name('parser',),)
+DEBUG TEST (Name('rpc', 'connection'),)
+DEBUG TEST (Name('rpc', 'server'),)
+DEBUG TEST (Name('state',),)
+DEBUG TEST (Name('wait',),)
+DEBUG TEST (Name('worker',),)
+DEBUG TEST .
+DEBUG TEST (Name(u'foo',),)
+DEBUG TEST .
+DEBUG TEST (u'', u'\u2039Collected RPCserver:foo\u203a')
+DEBUG TEST (u'name', u'foo')
+DEBUG TEST (u'host', u'')
+DEBUG TEST (u'port', u'56478')
+DEBUG TEST (u'server', u'<homevent.gevent_rpyc.GeventServer obj>')
+DEBUG TEST .
+DEBUG TEST (u'', u'\u2039Collected namedRPC:foo\xa6n1\u203a')
+DEBUG TEST (u'name', u'foo\xa6n1')
+DEBUG TEST (u'local host', u'::ffff:127.0.0.1')
+DEBUG TEST (u'local port', u'56478')
+DEBUG TEST (u'remote host', u'::ffff:127.0.0.1')
+DEBUG TEST (u'remote port', u'48301')
+DEBUG TEST .
+DEBUG TEST >>> Global : word list:
+DEBUG TEST >>> Known words:
+DEBUG TEST >>> async         : run multiple statements asynchronously
+DEBUG TEST >>> block         : group multiple statements
+DEBUG TEST >>> catch         : catch: [statements]
+DEBUG TEST >>> conditions    : List of conditions you can use in 'if' statements.
+DEBUG TEST >>> connect net   : connect to a TCP port
+DEBUG TEST >>> del           : delete a part of the system
+DEBUG TEST >>> dump context  : dump the variable context
+DEBUG TEST >>> exit          : stop processing input
+DEBUG TEST >>> forget state  : delete a saved state from the persistent database
+DEBUG TEST >>> help          : show doc texts
+DEBUG TEST >>> list          : list of / show details for various parts of the system
+DEBUG TEST >>> listen net    : listen to a TCP socket
+DEBUG TEST >>> listen rpc    : create an RPC server
+DEBUG TEST >>> load          : load a module
+DEBUG TEST >>> log           : configure reporting
+DEBUG TEST >>> log error     : log error [Severity]
+DEBUG TEST >>> log limit     : limit logging level
+DEBUG TEST >>> next handler  : skip ahead to the next on… event handler
+DEBUG TEST >>> on            : on [event...]: [statements]
+DEBUG TEST >>> send net      : send a line to a TCP connection
+DEBUG TEST >>> set state     : set some state to something
+DEBUG TEST >>> shutdown      : stops executing the program.
+DEBUG TEST >>> skip this     : do not run these statements
+DEBUG TEST >>> state         : Create a state variable
+DEBUG TEST >>> trigger       : send an event
+DEBUG TEST >>> trigger error : trigger error NAME…
+DEBUG TEST >>> try           : try: [statements]
+DEBUG TEST >>> var state     : assign a variable to report a state
+DEBUG TEST >>> var wait      : assign a variable to report when a waiter will time out
+DEBUG TEST >>> wait          : delay for N seconds
 Traceback (most recent call last):
-  File "../modules/rpc.py", line 307, in exposed_command
+  File "../modules/rpc.py", line 326, in exposed_command
     return CommandProcessor(parent=self,ctx=self.ctx).simple_statement(args)
-  File "../modules/rpc.py", line 100, in simple_statement
+  File "../modules/rpc.py", line 102, in simple_statement
     fn = self.lookup(args)
   File "/home/smurf/homevent/homevent/interpreter.py", line 78, in lookup
     fn = me.lookup(event)
@@ -68,9 +98,9 @@ NEW: ‹WorkSequence:10 (2)›
    : │  Cannot find word ‹fuubar This is not found.› in ‹Global›
    : └1╴... done.
 Traceback (most recent call last):
-  File "../modules/rpc.py", line 307, in exposed_command
+  File "../modules/rpc.py", line 326, in exposed_command
     return CommandProcessor(parent=self,ctx=self.ctx).simple_statement(args)
-  File "../modules/rpc.py", line 100, in simple_statement
+  File "../modules/rpc.py", line 102, in simple_statement
     fn = self.lookup(args)
   File "/home/smurf/homevent/homevent/interpreter.py", line 78, in lookup
     fn = me.lookup(event)
@@ -78,9 +108,9 @@ Traceback (most recent call last):
     raise UnknownWordError(args,self)
 UnknownWordError: Cannot find word <fuubar This is not found.> in <Global>
 END: UnknownWordError
-TEST 1 YES Got an error
+DEBUG TEST YES Got an error
 DEBUG This is logged.
-TEST 1 The value is: Test123
+DEBUG TEST The value is: Test123
 NEW: ‹ConditionalWorkSequence:11 (3)›
    : │  id: 11
    : │  call count: 0
@@ -97,26 +127,26 @@ RUN: on send logger ‹OnEventHandler›
  ev: IEVENT: send¦logger
 DEBUG hello This is a test
 END: send¦logger
-2014-11-15 18:45:03.879687 shutdown: Forced timer done 
+TRACE 2014-11-17 09:08:32.667003 shutdown: Forced timer done
 NEW: ‹ConditionalWorkSequence:12 (2)›
    : │  id: 12
    : │  call count: 0
-   : │  EVENT: wait¦done¦5.1¦shutdown
+   : │  EVENT: wait¦done¦1.0¦shutdown
    : └1╴... done.
-EVENT: wait¦done¦5.1¦shutdown
-END: wait¦done¦5.1¦shutdown
+EVENT: wait¦done¦1.0¦shutdown
+END: wait¦done¦1.0¦shutdown
 NEW: ‹ConditionalWorkSequence:13 (2)›
    : │  id: 13
    : │  call count: 0
-   : │  EVENT: wait¦start¦6.1¦foo¦b
+   : │  EVENT: wait¦start¦2.0¦foo¦b
    : └1╴... done.
-EVENT: wait¦start¦6.1¦foo¦b
-END: wait¦start¦6.1¦foo¦b
-2014-11-15 18:45:04.889933 foo¦b: Forced timer done 
+EVENT: wait¦start¦2.0¦foo¦b
+END: wait¦start¦2.0¦foo¦b
+TRACE 2014-11-17 09:08:33.676720 foo¦b: Forced timer done
 NEW: ‹ConditionalWorkSequence:14 (2)›
    : │  id: 14
    : │  call count: 0
-   : │  EVENT: wait¦done¦6.1¦foo¦b
+   : │  EVENT: wait¦done¦2.0¦foo¦b
    : └1╴... done.
-EVENT: wait¦done¦6.1¦foo¦b
-END: wait¦done¦6.1¦foo¦b
+EVENT: wait¦done¦2.0¦foo¦b
+END: wait¦done¦2.0¦foo¦b

@@ -22,7 +22,6 @@ NEW: ‹ConditionalWorkSequence:8 (2)›
 EVENT: wait¦start¦1.0¦_wait¦1
 END: wait¦start¦1.0¦_wait¦1
 TRACE monitor Start run foo¦bar
-TRACE monitor raw 42 foo bar
 TRACE monitor filter [42.0] on foo¦bar
 TRACE monitor End run foo¦bar
 NEW: ‹ConditionalWorkSequence:9 (3)›
@@ -46,10 +45,9 @@ RUN: on monitor value *VAL foo bar ‹OnEventHandler›
 TRACE First value is 42.0
 END: monitor¦value¦42.0¦foo¦bar
 TRACE monitor Stop run foo¦bar
-2003-04-05 06:07:08.450000 : Fake timer done 
-2003-04-05 06:07:08.450000 : Fake timer done 
+TRACE 2003-04-05 06:07:08.450000 : Fake timer done
+TRACE 2003-04-05 06:07:08.450000 : Fake timer done
 TRACE monitor Start run foo¦bar
-TRACE monitor raw 40 foo bar
 TRACE monitor filter [40.0] on foo¦bar
 TRACE monitor End run foo¦bar
 NEW: ‹ConditionalWorkSequence:10 (3)›
@@ -73,10 +71,9 @@ RUN: on monitor value *VAL foo bar ‹OnEventHandler›
 TRACE Go from 42.0 to 40.0
 END: monitor¦value¦40.0¦foo¦bar
 TRACE monitor Stop run foo¦bar
-2003-04-05 06:07:08.850000 : Fake timer done 
-2003-04-05 06:07:08.850000 : Fake timer done 
+TRACE 2003-04-05 06:07:08.850000 : Fake timer done
+TRACE 2003-04-05 06:07:08.850000 : Fake timer done
 TRACE monitor Start run foo¦bar
-TRACE monitor raw 42 foo bar
 TRACE monitor filter [42.0] on foo¦bar
 TRACE monitor End run foo¦bar
 NEW: ‹ConditionalWorkSequence:11 (3)›
@@ -100,7 +97,7 @@ RUN: on monitor value *VAL foo bar ‹OnEventHandler›
 TRACE Go from 40.0 to 42.0
 END: monitor¦value¦42.0¦foo¦bar
 TRACE monitor Stop run foo¦bar
-2003-04-05 06:07:09 _wait¦1: Fake timer done 
+TRACE 2003-04-05 06:07:09 _wait¦1: Fake timer done
 NEW: ‹ConditionalWorkSequence:12 (2)›
    : │  id: 12
    : │  call count: 0
@@ -127,10 +124,9 @@ NEW: ‹ConditionalWorkSequence:13 (2)›
    : └1╴... done.
 EVENT: wait¦start¦1.8¦_wait¦2
 END: wait¦start¦1.8¦_wait¦2
-2003-04-05 06:07:09.250000 : Fake timer done 
-2003-04-05 06:07:09.250000 : Fake timer done 
+TRACE 2003-04-05 06:07:09.250000 : Fake timer done
+TRACE 2003-04-05 06:07:09.250000 : Fake timer done
 TRACE monitor Start run foo¦bar
-TRACE monitor raw 41 foo bar
 TRACE monitor filter [41.0] on foo¦bar
 TRACE monitor End run foo¦bar
 NEW: ‹ConditionalWorkSequence:14 (3)›
@@ -154,10 +150,9 @@ RUN: on monitor value *VAL foo bar ‹OnEventHandler›
 TRACE Go from 42.0 to 41.0
 END: monitor¦value¦41.0¦foo¦bar
 TRACE monitor Stop run foo¦bar
-2003-04-05 06:07:09.650000 : Fake timer done 
-2003-04-05 06:07:09.650000 : Fake timer done 
+TRACE 2003-04-05 06:07:09.650000 : Fake timer done
+TRACE 2003-04-05 06:07:09.650000 : Fake timer done
 TRACE monitor Start run foo¦bar
-TRACE monitor raw 40 foo bar
 TRACE monitor filter [40.0] on foo¦bar
 TRACE monitor End run foo¦bar
 NEW: ‹ConditionalWorkSequence:15 (3)›
@@ -181,7 +176,7 @@ RUN: on monitor value *VAL foo bar ‹OnEventHandler›
 TRACE Go from 41.0 to 40.0
 END: monitor¦value¦40.0¦foo¦bar
 TRACE monitor Stop run foo¦bar
-2003-04-05 06:07:09.800000 _wait¦2: Fake timer done 
+TRACE 2003-04-05 06:07:09.800000 _wait¦2: Fake timer done
 NEW: ‹ConditionalWorkSequence:16 (2)›
    : │  id: 16
    : │  call count: 0
@@ -239,7 +234,6 @@ value: None
 up: Run
 time: ‹now›
 steps: 1 / 2 / None
-TRACE monitor raw 10 baz zaz
 TRACE monitor filter [10.0] on baz¦zaz
 TRACE monitor More data [10.0] for ‹baz zaz›
 NEW: ‹ConditionalWorkSequence:21 (2)›
@@ -257,7 +251,7 @@ NEW: ‹ConditionalWorkSequence:22 (2)›
    : └1╴... done.
 EVENT: wait¦start¦1.9¦_wait¦5
 END: wait¦start¦1.9¦_wait¦5
-2003-04-05 06:07:10 _wait¦5: Fake timer done 
+TRACE 2003-04-05 06:07:10 _wait¦5: Fake timer done
 NEW: ‹ConditionalWorkSequence:23 (2)›
    : │  id: 23
    : │  call count: 0
@@ -273,7 +267,7 @@ NEW: ‹ConditionalWorkSequence:24 (2)›
    : └1╴... done.
 EVENT: wait¦start¦2.6¦_wait¦6
 END: wait¦start¦2.6¦_wait¦6
-2003-04-05 06:07:10.050000 _wait¦3: Fake timer done 
+TRACE 2003-04-05 06:07:10.050000 _wait¦3: Fake timer done
 NEW: ‹ConditionalWorkSequence:25 (2)›
    : │  id: 25
    : │  call count: 0
@@ -281,7 +275,6 @@ NEW: ‹ConditionalWorkSequence:25 (2)›
    : └1╴... done.
 EVENT: wait¦done¦2.1¦_wait¦3
 END: wait¦done¦2.1¦_wait¦3
-TRACE monitor raw 13 baz zaz
 TRACE monitor filter [10.0, 13.0] on baz¦zaz
 TRACE monitor More data [10.0, 13.0] for ‹baz zaz›
 NEW: ‹ConditionalWorkSequence:26 (2)›
@@ -291,7 +284,7 @@ NEW: ‹ConditionalWorkSequence:26 (2)›
    : └1╴... done.
 EVENT: wait¦start¦2.3¦_wait¦4
 END: wait¦start¦2.3¦_wait¦4
-2003-04-05 06:07:10.300000 _wait¦4: Fake timer done 
+TRACE 2003-04-05 06:07:10.300000 _wait¦4: Fake timer done
 NEW: ‹ConditionalWorkSequence:27 (2)›
    : │  id: 27
    : │  call count: 0
@@ -299,7 +292,6 @@ NEW: ‹ConditionalWorkSequence:27 (2)›
    : └1╴... done.
 EVENT: wait¦done¦2.3¦_wait¦4
 END: wait¦done¦2.3¦_wait¦4
-TRACE monitor raw 14 baz zaz
 TRACE monitor filter [10.0, 13.0, 14.0] on baz¦zaz
 TRACE monitor End run baz¦zaz
 NEW: ‹ConditionalWorkSequence:28 (2)›
@@ -317,8 +309,8 @@ NEW: ‹ConditionalWorkSequence:29 (2)›
 EVENT: monitor¦value¦13.5¦baz¦zaz
 END: monitor¦value¦13.5¦baz¦zaz
 TRACE monitor Stop run baz¦zaz
-2003-04-05 06:07:10.600000 : Fake timer done 
-2003-04-05 06:07:10.600000 : Fake timer done 
+TRACE 2003-04-05 06:07:10.600000 : Fake timer done
+TRACE 2003-04-05 06:07:10.600000 : Fake timer done
 TRACE monitor Start run baz¦zaz
 NEW: ‹ConditionalWorkSequence:30 (3)›
    : │  id: 30
@@ -345,7 +337,6 @@ RUN: on monitor checking baz zaz ‹OnEventHandler›
  at: ‹ConditionalWorkSequence:30 (3)› (step 1)
  ev: EVENT: monitor¦checking¦baz¦zaz
 END: monitor¦checking¦baz¦zaz
-TRACE monitor raw 10 baz zaz
 TRACE monitor filter [10.0] on baz¦zaz
 TRACE monitor More data [10.0] for ‹baz zaz›
 NEW: ‹ConditionalWorkSequence:31 (2)›
@@ -355,7 +346,7 @@ NEW: ‹ConditionalWorkSequence:31 (2)›
    : └1╴... done.
 EVENT: wait¦start¦2.8¦_wait¦3
 END: wait¦start¦2.8¦_wait¦3
-2003-04-05 06:07:10.650000 _wait¦6: Fake timer done 
+TRACE 2003-04-05 06:07:10.650000 _wait¦6: Fake timer done
 NEW: ‹ConditionalWorkSequence:32 (2)›
    : │  id: 32
    : │  call count: 0
@@ -375,7 +366,7 @@ data: 10.0
 .
 TRACE monitor End run baz¦zaz
 TRACE monitor Stop run baz¦zaz
-2003-04-05 06:07:10.850000 _wait¦3: Fake timer done 
+TRACE 2003-04-05 06:07:10.850000 _wait¦3: Fake timer done
 NEW: ‹ConditionalWorkSequence:33 (2)›
    : │  id: 33
    : │  call count: 0
@@ -383,7 +374,7 @@ NEW: ‹ConditionalWorkSequence:33 (2)›
    : └1╴... done.
 EVENT: wait¦done¦2.9¦_wait¦3
 END: wait¦done¦2.9¦_wait¦3
-2003-04-05 06:07:11 : Fake timer done 
+TRACE 2003-04-05 06:07:11 : Fake timer done
 NEW: ‹ConditionalWorkSequence:34 (2)›
    : │  id: 34
    : │  call count: 0
@@ -420,7 +411,6 @@ NEW: ‹ConditionalWorkSequence:38 (2)›
 EVENT: wait¦start¦3.1¦_wait¦7
 END: wait¦start¦3.1¦_wait¦7
 TRACE monitor Start run moni¦test
-TRACE monitor raw 1 moni test
 TRACE monitor filter [1.0] on moni¦test
 TRACE monitor End run moni¦test
 NEW: ‹ConditionalWorkSequence:39 (2)›
@@ -431,7 +421,7 @@ NEW: ‹ConditionalWorkSequence:39 (2)›
 EVENT: monitor¦value¦1.0¦moni¦test
 END: monitor¦value¦1.0¦moni¦test
 TRACE monitor Stop run moni¦test
-2003-04-05 06:07:11.200000 _wait¦7: Fake timer done 
+TRACE 2003-04-05 06:07:11.200000 _wait¦7: Fake timer done
 NEW: ‹ConditionalWorkSequence:40 (2)›
    : │  id: 40
    : │  call count: 0
@@ -460,10 +450,9 @@ NEW: ‹ConditionalWorkSequence:43 (2)›
    : └1╴... done.
 EVENT: wait¦start¦3.4¦_wait¦8
 END: wait¦start¦3.4¦_wait¦8
-2003-04-05 06:07:11.250000 : Fake timer done 
-2003-04-05 06:07:11.250000 : Fake timer done 
+TRACE 2003-04-05 06:07:11.250000 : Fake timer done
+TRACE 2003-04-05 06:07:11.250000 : Fake timer done
 TRACE monitor Start run moni¦test
-TRACE monitor raw 2 moni test
 TRACE monitor filter [2.0] on moni¦test
 TRACE monitor End run moni¦test
 NEW: ‹ConditionalWorkSequence:44 (2)›
@@ -474,7 +463,7 @@ NEW: ‹ConditionalWorkSequence:44 (2)›
 EVENT: monitor¦value¦2.0¦moni¦test
 END: monitor¦value¦2.0¦moni¦test
 TRACE monitor Stop run moni¦test
-2003-04-05 06:07:11.400000 _wait¦8: Fake timer done 
+TRACE 2003-04-05 06:07:11.400000 _wait¦8: Fake timer done
 NEW: ‹ConditionalWorkSequence:45 (2)›
    : │  id: 45
    : │  call count: 0
@@ -503,10 +492,9 @@ NEW: ‹ConditionalWorkSequence:48 (2)›
    : └1╴... done.
 EVENT: wait¦start¦3.6¦_wait¦9
 END: wait¦start¦3.6¦_wait¦9
-2003-04-05 06:07:11.450000 : Fake timer done 
-2003-04-05 06:07:11.450000 : Fake timer done 
+TRACE 2003-04-05 06:07:11.450000 : Fake timer done
+TRACE 2003-04-05 06:07:11.450000 : Fake timer done
 TRACE monitor Start run moni¦test
-TRACE monitor raw 3 moni test
 TRACE monitor filter [3.0] on moni¦test
 TRACE monitor End run moni¦test
 NEW: ‹ConditionalWorkSequence:49 (2)›
@@ -517,10 +505,9 @@ NEW: ‹ConditionalWorkSequence:49 (2)›
 EVENT: monitor¦value¦3.0¦moni¦test
 END: monitor¦value¦3.0¦moni¦test
 TRACE monitor Stop run moni¦test
-2003-04-05 06:07:11.650000 : Fake timer done 
-2003-04-05 06:07:11.650000 : Fake timer done 
+TRACE 2003-04-05 06:07:11.650000 : Fake timer done
+TRACE 2003-04-05 06:07:11.650000 : Fake timer done
 TRACE monitor Start run moni¦test
-TRACE monitor raw 3 moni test
 TRACE monitor filter [3.0] on moni¦test
 TRACE monitor End run moni¦test
 NEW: ‹ConditionalWorkSequence:50 (2)›
@@ -531,7 +518,7 @@ NEW: ‹ConditionalWorkSequence:50 (2)›
 EVENT: monitor¦value¦3.0¦moni¦test
 END: monitor¦value¦3.0¦moni¦test
 TRACE monitor Stop run moni¦test
-2003-04-05 06:07:11.700000 _wait¦9: Fake timer done 
+TRACE 2003-04-05 06:07:11.700000 _wait¦9: Fake timer done
 NEW: ‹ConditionalWorkSequence:51 (2)›
    : │  id: 51
    : │  call count: 0
@@ -560,10 +547,9 @@ NEW: ‹ConditionalWorkSequence:54 (2)›
    : └1╴... done.
 EVENT: wait¦start¦3.9¦_wait¦10
 END: wait¦start¦3.9¦_wait¦10
-2003-04-05 06:07:11.850000 : Fake timer done 
-2003-04-05 06:07:11.850000 : Fake timer done 
+TRACE 2003-04-05 06:07:11.850000 : Fake timer done
+TRACE 2003-04-05 06:07:11.850000 : Fake timer done
 TRACE monitor Start run moni¦test
-TRACE monitor raw 4 moni test
 TRACE monitor filter [4.0] on moni¦test
 TRACE monitor End run moni¦test
 NEW: ‹ConditionalWorkSequence:55 (2)›
@@ -574,7 +560,7 @@ NEW: ‹ConditionalWorkSequence:55 (2)›
 EVENT: monitor¦value¦4.0¦moni¦test
 END: monitor¦value¦4.0¦moni¦test
 TRACE monitor Stop run moni¦test
-2003-04-05 06:07:11.900000 _wait¦10: Fake timer done 
+TRACE 2003-04-05 06:07:11.900000 _wait¦10: Fake timer done
 NEW: ‹ConditionalWorkSequence:56 (2)›
    : │  id: 56
    : │  call count: 0

@@ -21,7 +21,7 @@ NEW: ‹ConditionalWorkSequence:7 (2)›
    : └1╴... done.
 EVENT: wait¦start¦0.5¦_wait¦2
 END: wait¦start¦0.5¦_wait¦2
-2003-04-05 06:07:08.500000 _wait¦2: Fake timer done 
+TRACE 2003-04-05 06:07:08.500000 _wait¦2: Fake timer done
 NEW: ‹ConditionalWorkSequence:8 (2)›
    : │  id: 8
    : │  call count: 0
@@ -43,7 +43,7 @@ NEW: ‹ConditionalWorkSequence:9 (2)›
    : └1╴... done.
 EVENT: wait¦start¦9.0¦_wait¦3
 END: wait¦start¦9.0¦_wait¦3
-2003-04-05 06:07:17 _wait¦3: Fake timer done 
+TRACE 2003-04-05 06:07:17 _wait¦3: Fake timer done
 NEW: ‹ConditionalWorkSequence:10 (2)›
    : │  id: 10
    : │  call count: 0
@@ -65,7 +65,7 @@ NEW: ‹ConditionalWorkSequence:11 (2)›
    : └1╴... done.
 EVENT: wait¦start¦24.0¦_wait¦4
 END: wait¦start¦24.0¦_wait¦4
-2003-04-05 06:07:17.050000 : Fake timer done 
+TRACE 2003-04-05 06:07:17.050000 : Fake timer done
 NEW: ‹ConditionalWorkSequence:12 (3)›
    : │  id: 12
    : │  call count: 0
@@ -90,7 +90,7 @@ NEW: ‹ConditionalWorkSequence:13 (2)›
    : └1╴... done.
 EVENT: wait¦start¦9.1¦_wait¦1
 END: wait¦start¦9.1¦_wait¦1
-2003-04-05 06:07:17.300000 _wait¦1: Fake timer done 
+TRACE 2003-04-05 06:07:17.300000 _wait¦1: Fake timer done
 NEW: ‹ConditionalWorkSequence:14 (2)›
    : │  id: 14
    : │  call count: 0
@@ -99,7 +99,7 @@ NEW: ‹ConditionalWorkSequence:14 (2)›
 EVENT: wait¦done¦9.3¦_wait¦1
 END: wait¦done¦9.3¦_wait¦1
 END: pcm¦set¦on¦foo¦bar
-2003-04-05 06:07:18 : Fake timer done 
+TRACE 2003-04-05 06:07:18 : Fake timer done
 NEW: ‹ConditionalWorkSequence:15 (3)›
    : │  id: 15
    : │  call count: 0
@@ -124,7 +124,7 @@ NEW: ‹ConditionalWorkSequence:16 (2)›
    : └1╴... done.
 EVENT: wait¦start¦10.1¦_wait¦1
 END: wait¦start¦10.1¦_wait¦1
-2003-04-05 06:07:18.200000 _wait¦1: Fake timer done 
+TRACE 2003-04-05 06:07:18.200000 _wait¦1: Fake timer done
 NEW: ‹ConditionalWorkSequence:17 (2)›
    : │  id: 17
    : │  call count: 0
@@ -133,7 +133,7 @@ NEW: ‹ConditionalWorkSequence:17 (2)›
 EVENT: wait¦done¦10.2¦_wait¦1
 END: wait¦done¦10.2¦_wait¦1
 END: pcm¦set¦off¦foo¦bar
-2003-04-05 06:07:27 : Fake timer done 
+TRACE 2003-04-05 06:07:27 : Fake timer done
 NEW: ‹ConditionalWorkSequence:18 (3)›
    : │  id: 18
    : │  call count: 0
@@ -158,7 +158,7 @@ NEW: ‹ConditionalWorkSequence:19 (2)›
    : └1╴... done.
 EVENT: wait¦start¦19.1¦_wait¦1
 END: wait¦start¦19.1¦_wait¦1
-2003-04-05 06:07:27.200000 _wait¦1: Fake timer done 
+TRACE 2003-04-05 06:07:27.200000 _wait¦1: Fake timer done
 NEW: ‹ConditionalWorkSequence:20 (2)›
    : │  id: 20
    : │  call count: 0
@@ -167,7 +167,7 @@ NEW: ‹ConditionalWorkSequence:20 (2)›
 EVENT: wait¦done¦19.2¦_wait¦1
 END: wait¦done¦19.2¦_wait¦1
 END: pcm¦set¦on¦foo¦bar
-2003-04-05 06:07:28 : Fake timer done 
+TRACE 2003-04-05 06:07:28 : Fake timer done
 NEW: ‹ConditionalWorkSequence:21 (3)›
    : │  id: 21
    : │  call count: 0
@@ -192,7 +192,7 @@ NEW: ‹ConditionalWorkSequence:22 (2)›
    : └1╴... done.
 EVENT: wait¦start¦20.1¦_wait¦1
 END: wait¦start¦20.1¦_wait¦1
-2003-04-05 06:07:28.200000 _wait¦1: Fake timer done 
+TRACE 2003-04-05 06:07:28.200000 _wait¦1: Fake timer done
 NEW: ‹ConditionalWorkSequence:23 (2)›
    : │  id: 23
    : │  call count: 0
@@ -201,7 +201,7 @@ NEW: ‹ConditionalWorkSequence:23 (2)›
 EVENT: wait¦done¦20.2¦_wait¦1
 END: wait¦done¦20.2¦_wait¦1
 END: pcm¦set¦off¦foo¦bar
-2003-04-05 06:07:32.050000 _wait¦4: Fake timer done 
+TRACE 2003-04-05 06:07:32.050000 _wait¦4: Fake timer done
 NEW: ‹ConditionalWorkSequence:24 (2)›
    : │  id: 24
    : │  call count: 0
