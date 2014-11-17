@@ -124,6 +124,7 @@ class Collected(object):
 		"""
 	storage = None # Collection
 	name = None
+	_ectx = None # event context
 
 	def __init__(self, *name):
 		if not name:
@@ -140,10 +141,12 @@ class Collected(object):
 
 		super(Collected,self).__init__()
 		self.storage[name] = self
+		self._ectx = Context()
 
-		self.ctx = Context()
-
-	def update_ctx(self):
+	@property
+	def ectx(self):
+		self.update_ectx()
+	def update_ectx(self):
 		pass
 
 	def dup_error(self,name):

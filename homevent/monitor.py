@@ -112,7 +112,6 @@ class Monitor(Collected,Jobber):
 			self.passive = (self.__class__ is Monitor)
 		if self.send_check_event is None:
 			self.send_check_event = self.passive
-		self.ctx = parent.ctx
 		if self.queue_len is not None:
 			if self.queue_len == 0:
 				self.watcher = Channel()
@@ -157,14 +156,14 @@ class Monitor(Collected,Jobber):
 			yield ("data"," ".join(unicode(x) for x in self.data))
 
 	def update_ctx(self):
-		self.ctx.value = self.value
-		self.ctx.up = self.up_name
-		self.ctx.time = self.time_name
-		self.ctx.start_at = self.started_at
-		self.ctx.stop_at = self.stopped_at
-		self.ctx.change_at = self.state_change_at
-		self.ctx.steps = (self.steps,self.points,self.maxpoints)
-		self.ctx.data = self.data
+		self._ectx.value = self.value
+		self._ectx.up = self.up_name
+		self._ectx.time = self.time_name
+		self._ectx.start_at = self.started_at
+		self._ectx.stop_at = self.stopped_at
+		self._ectx.change_at = self.state_change_at
+		self._ectx.steps = (self.steps,self.points,self.maxpoints)
+		self._ectx.data = self.data
 
 	def info(self):
 		"""list one-liner"""
@@ -263,19 +262,26 @@ class Monitor(Collected,Jobber):
 			self.started_at = now()
 			self._monitor()
 			if self.send_check_event:
-				process_event(Event(self.ctx, "monitor","checked",*self.name))
+				process_event(Event(self.ectx, "monitor","checked",*self.name))
 			if self.new_value is not None:
-				self.update_ctx()
 				if hasattr(self,"delta"):
 					if self.value is not None:
 						val = self.new_value-self.value
-						self.ctx.delta = val
+						self._ectx.value_delta = val
 						if val >= 0 or self.delta == 0:
+<<<<<<< master
 							process_event(Event(self.ctx,"monitor","value",self.new_value-self.value,*self.name))
 							process_event(Event(self.ctx,"monitor","update",*self.name))
 				else:
 					process_event(Event(self.ctx,"monitor","value",self.new_value,*self.name))
 					process_event(Event(self.ctx,"monitor","update",*self.name))
+=======
+							process_event(Event(self.ectx,"monitor","value",self.new_value-self.value,*self.name))
+							process_event(Event(self.ectx,"monitor","update",*self.name)
+				else:
+					process_event(Event(self.ectx,"monitor","value",self.new_value,*self.name))
+					process_event(Event(self.ectx,"monitor","update",*self.name)
+>>>>>>> local
 			if self.new_value is not None:
 				self.value = self.new_value
 		except Exception as e:
@@ -346,7 +352,8 @@ class Monitor(Collected,Jobber):
 								if self.value is not None and \
 										self.alarm is not None and \
 										abs(self.value-avg) > self.alarm:
-									process_event(Event(Context(),"monitor","alarm",avg,*self.name))
+									process_event(Event(self.ectx,"monitor","alarm",avg,*self.name))
+									process_event(Event(self.ectx,"monitor","jump",*self.name))
 							except Exception as e:
 								fix_exception(e)
 								process_failure(e)
@@ -357,7 +364,7 @@ class Monitor(Collected,Jobber):
 						log("monitor",TRACE,"More data", self.data, "for", u"‹"+" ".join(unicode(x) for x in self.name)+u"›")
 				
 			try:
-				process_event(Event(Context(),"monitor","error",*self.name))
+				process_event(Event(self.ectx,"monitor","error",*self.name))
 			except Exception as e:
 				fix_exception(e)
 				process_failure(e)
@@ -373,7 +380,7 @@ class Monitor(Collected,Jobber):
 			Override this for active monitoring.
 			"""
 		if self.send_check_event and step==1:
-			process_event(Event(self.ctx, "monitor","checking",*self.name))
+			process_event(Event(self.ectx, "monitor","checking",*self.name))
 
 		with log_wait("monitor","one_value",*self.name):
 			return self.watcher.get(block=True, timeout=None)
