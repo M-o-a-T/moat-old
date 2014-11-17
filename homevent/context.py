@@ -145,6 +145,18 @@ class Context(object):
 				yield pre+": "+r
 				pre=" "
 	
+	def __iter__(self):
+		done = set()
+		for a,b in self._store.iteritems():
+			yield a,b
+			done.add(a)
+		for p in self._parent:
+			for a,b in p:
+				if a in done:
+					continue
+				yield a,b
+				done.add(a)
+	
 	def _trim(self):
 		"""Transform a hierarchic context into a plain ctx with the same attributes."""
 		res = Context()

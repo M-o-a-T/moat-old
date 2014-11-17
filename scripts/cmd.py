@@ -92,6 +92,8 @@ def do_log(c):
 			pass
 		for a,b in k.iteritems():
 			print a,b
+		for a,b in k["event"].ctx:
+			print a,b
 		print ""
 		sys.stdout.flush()
 

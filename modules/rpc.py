@@ -374,7 +374,7 @@ class RPCserver(Collected,Jobber):
 		self.name = name
 		self.host=host
 		self.port=port
-		self.server = ThreadedServer(gen_rpcconn(name), hostname=host,port=port,ipv6=True, protocol_config = {"safe_attrs":set(("list","__unicode__","year","month","day","days","date","time","hour","minute","second","seconds","microseconds")).union(DEFAULT_CONFIG["safe_attrs"])})
+		self.server = ThreadedServer(gen_rpcconn(name), hostname=host,port=port,ipv6=True, protocol_config = {"safe_attrs":set(("list","__unicode__","year","month","day","days","date","time","hour","minute","second","seconds","microseconds","ctx","items","iteritems")).union(DEFAULT_CONFIG["safe_attrs"])})
 		self.server.listener.settimeout(None)
 		self.start_job("job",self._start)
 		super(RPCserver,self).__init__()
