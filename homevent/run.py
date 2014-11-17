@@ -25,6 +25,7 @@ from homevent import TESTING
 from homevent.base import Name,SYS_PRIO,MIN_PRIO,MAX_PRIO
 from homevent.worker import WorkSequence,ConditionalWorkSequence,ExcWorker
 from homevent.collect import Collection
+from homevent.context import Context
 from homevent.twist import fix_exception
 
 workers = {}
@@ -149,10 +150,18 @@ def run_event(event):
 		fix_exception(e)
 		process_failure(e)
 	
-def simple_event(ctx, *args):
+def simple_event(*args,**data):
 	"""\
 		A shortcut for triggering a "simple" background event
 		"""
 	from homevent.event import Event
+	if isinstance(args[0],Context):
+		if data:
+			ctx = Context(args[0],**data)
+		else:
+			ctx = args[0]
+		args = args[1:]
+	else:
+		ctx = Context(**data)
 	run_event(Event(ctx, *args))
 
