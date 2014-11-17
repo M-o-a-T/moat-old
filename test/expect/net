@@ -42,7 +42,7 @@ NEW: ‹WorkSequence:9 (2)›
    : └1╴... done.
 [Errno 111] Connection refused
 END: error
-TRACE 2014-11-17 14:41:53.936484 BAD: Forced timer done
+TRACE 2003-04-05 06:07:08.200000 BAD: Forced timer done
 NEW: ‹ConditionalWorkSequence:10 (2)›
    : │  id: 10
    : │  call count: 0
@@ -90,7 +90,7 @@ EVENT: wait¦start¦BEFORE
      : loglevel=0
      : end_time=0.4
 END: wait¦start¦BEFORE
-TRACE 2014-11-17 14:41:54.162034 BEFORE: Forced timer done
+TRACE 2003-04-05 06:07:08.400000 BEFORE: Forced timer done
 NEW: ‹ConditionalWorkSequence:18 (2)›
    : │  id: 18
    : │  call count: 0
@@ -183,7 +183,7 @@ NEW: ‹ConditionalWorkSequence:25 (2)›
 EVENT: net¦recv¦foo
      : data=['A']
 END: net¦recv¦foo
-TRACE 2014-11-17 14:41:54.296340 OUT: Forced timer done
+TRACE 2003-04-05 06:07:08.550000 OUT: Forced timer done
 NEW: ‹ConditionalWorkSequence:26 (2)›
    : │  id: 26
    : │  call count: 0
@@ -206,7 +206,7 @@ foo :: net_active localhost:50333
 .
 type: net_active
 host: localhost
-port: 50333
+port: ×××
 .
 NEW: ‹ConditionalWorkSequence:28 (3)›
    : │  id: 28
@@ -276,7 +276,7 @@ NEW: ‹ConditionalWorkSequence:32 (2)›
 EVENT: net¦recv¦baz¦zaz¦1
      : data=['B']
 END: net¦recv¦baz¦zaz¦1
-TRACE 2014-11-17 14:41:54.432649 IN: Forced timer done
+TRACE 2003-04-05 06:07:08.800000 IN: Forced timer done
 NEW: ‹ConditionalWorkSequence:33 (2)›
    : │  id: 33
    : │  call count: 0
@@ -297,7 +297,7 @@ EVENT: wait¦done¦IN
 END: wait¦done¦IN
 type: net_passive
 host: 127.0.0.1
-port: 48251
+port: ×××
 .
 NEW: ‹ConditionalWorkSequence:35 (2)›
    : │  id: 35
@@ -306,7 +306,7 @@ NEW: ‹ConditionalWorkSequence:35 (2)›
    : └1╴... done.
 EVENT: net¦disconnect¦baz¦zaz¦1
 END: net¦disconnect¦baz¦zaz¦1
-TRACE 2014-11-17 14:41:55.008439 AFTER: Forced timer done
+TRACE 2003-04-05 06:07:09.400000 AFTER: Forced timer done
 NEW: ‹ConditionalWorkSequence:36 (2)›
    : │  id: 36
    : │  call count: 0
@@ -348,16 +348,16 @@ EVENT: wait¦start¦END
      : loglevel=0
      : end_time=1.6
 END: wait¦start¦END
-TRACE 2003-04-05 06:07:09.675018 END: Fake timer done
+TRACE 2003-04-05 06:07:09.650000 END: Fake timer done
 NEW: ‹ConditionalWorkSequence:40 (2)›
    : │  id: 40
    : │  call count: 0
-   : │  EVENT: wait¦done¦1.7¦END
+   : │  EVENT: wait¦done¦1.6¦END
    : │       : loglevel=0
    : └1╴... done.
-EVENT: wait¦done¦1.7¦END
+EVENT: wait¦done¦1.6¦END
      : loglevel=0
-END: wait¦done¦1.7¦END
+END: wait¦done¦1.6¦END
 NEW: ‹ConditionalWorkSequence:41 (2)›
    : │  id: 41
    : │  call count: 0

@@ -27,7 +27,7 @@ EVENT: wait¦start¦startup
      : loglevel=0
      : end_time=0.2
 END: wait¦start¦startup
-TRACE 2014-11-17 14:41:55.564354 startup: Forced timer done
+TRACE 2003-04-05 06:07:08.200000 startup: Forced timer done
 NEW: ‹ConditionalWorkSequence:8 (2)›
    : │  id: 8
    : │  call count: 0
@@ -88,22 +88,22 @@ filename: /tmp/rrdtest.rrd
 NEW: ‹ConditionalWorkSequence:10 (2)›
    : │  id: 10
    : │  call count: 0
-   : │  EVENT: wait¦start¦0.4¦_wait¦2
+   : │  EVENT: wait¦start¦0.3¦_wait¦2
    : │       : loglevel=0
    : └1╴... done.
-EVENT: wait¦start¦0.4¦_wait¦2
+EVENT: wait¦start¦0.3¦_wait¦2
      : loglevel=0
-END: wait¦start¦0.4¦_wait¦2
+END: wait¦start¦0.3¦_wait¦2
 NEW: ‹ConditionalWorkSequence:11 (2)›
    : │  id: 11
    : │  call count: 0
    : │  EVENT: wait¦start¦_wait¦2
    : │       : loglevel=0
-   : │       : end_time=0.4
+   : │       : end_time=0.3
    : └1╴... done.
 EVENT: wait¦start¦_wait¦2
      : loglevel=0
-     : end_time=0.4
+     : end_time=0.3
 END: wait¦start¦_wait¦2
 TRACE conn setting up RRDqueue t¦tt¦ttt
 TRACE !got UP_EVENT t tt ttt
@@ -115,11 +115,9 @@ NEW: ‹ConditionalWorkSequence:12 (2)›
 EVENT: rrd¦connect¦t¦tt¦ttt
 END: rrd¦connect¦t¦tt¦ttt
 TRACE conn connected RRDqueue t¦tt¦ttt
-TRACE msg states at run connected connecting
 TRACE NotConn [[], [], [], []]
 TRACE conn setstate connecting connected
-TRACE msg states at run connected connected
-TRACE 2014-11-17 14:41:55.698063 _wait¦2: Forced timer done
+TRACE 2003-04-05 06:07:08.300000 _wait¦2: Forced timer done
 NEW: ‹ConditionalWorkSequence:13 (2)›
    : │  id: 13
    : │  call count: 0
@@ -138,16 +136,9 @@ NEW: ‹ConditionalWorkSequence:14 (2)›
 EVENT: wait¦done¦_wait¦2
      : loglevel=0
 END: wait¦done¦_wait¦2
-TRACE msg states at run connected connected
-TRACE msg send ‹RRDsendUpdate 1›
 TRACE rrd send 'update /tmp/rrdtest.rrd 1049515628:10'
-TRACE msg send result RECV_AGAIN
 TRACE rrd recv '0 Yes'
-TRACE msg recv msg ‹MsgIncoming: msg:'Yes' type:MT_ACK prio:2›
 TRACE conn incoming RRDqueue t¦tt¦ttt ‹MsgIncoming: msg:'Yes' type:MT_ACK prio:2›
-TRACE msg recv t¦tt¦ttt ‹MsgIncoming: msg:'Yes' type:MT_ACK prio:2›
-TRACE msg recv= MINE ‹RRDsendUpdate 2›
-TRACE msg states at run connected connected
 NEW: ‹ConditionalWorkSequence:15 (2)›
    : │  id: 15
    : │  call count: 0
@@ -168,7 +159,7 @@ EVENT: wait¦start¦_wait¦3
      : loglevel=0
      : end_time=0.5
 END: wait¦start¦_wait¦3
-TRACE 2014-11-17 14:41:55.804972 _wait¦3: Forced timer done
+TRACE 2003-04-05 06:07:08.400000 _wait¦3: Forced timer done
 NEW: ‹ConditionalWorkSequence:17 (2)›
    : │  id: 17
    : │  call count: 0
@@ -187,18 +178,11 @@ NEW: ‹ConditionalWorkSequence:18 (2)›
 EVENT: wait¦done¦_wait¦3
      : loglevel=0
 END: wait¦done¦_wait¦3
-TRACE msg states at run connected connected
-TRACE msg send ‹RRDsendUpdate 3›
 TRACE rrd send 'update /tmp/rrdtest.rrd 1049515628:11'
-TRACE msg send result RECV_AGAIN
 TRACE rrd recv '2 Nonsense follows'
 TRACE rrd recv 'Nonsense'
 TRACE rrd recv 'More Nonsense'
-TRACE msg recv msg ‹MsgIncoming: msg:' Nonsense follows' data:['Nonsense', 'More Nonsense'] type:MT_MULTILINE prio:2›
 TRACE conn incoming RRDqueue t¦tt¦ttt ‹MsgIncoming: msg:' Nonsense follows' data:['Nonsense', 'More Nonsense'] type:MT_MULTILINE prio:2›
-TRACE msg recv t¦tt¦ttt ‹MsgIncoming: msg:' Nonsense follows' data:['Nonsense', 'More Nonsense'] type:MT_MULTILINE prio:2›
-TRACE msg recv= MINE ‹RRDsendUpdate 4›
-TRACE msg states at run connected connected
 NEW: ‹ConditionalWorkSequence:19 (2)›
    : │  id: 19
    : │  call count: 0
@@ -219,7 +203,7 @@ EVENT: wait¦start¦_wait¦4
      : loglevel=0
      : end_time=0.6
 END: wait¦start¦_wait¦4
-TRACE 2014-11-17 14:41:55.911625 _wait¦4: Forced timer done
+TRACE 2003-04-05 06:07:08.500000 _wait¦4: Forced timer done
 NEW: ‹ConditionalWorkSequence:21 (2)›
    : │  id: 21
    : │  call count: 0
@@ -238,16 +222,9 @@ NEW: ‹ConditionalWorkSequence:22 (2)›
 EVENT: wait¦done¦_wait¦4
      : loglevel=0
 END: wait¦done¦_wait¦4
-TRACE msg states at run connected connected
-TRACE msg send ‹RRDsendUpdate 5›
 TRACE rrd send 'update /tmp/rrdtest.rrd 1049515628:12'
-TRACE msg send result RECV_AGAIN
 TRACE rrd recv '-123 No'
-TRACE msg recv msg ‹MsgIncoming: msg:'No' errno:123 type:MT_ERROR prio:2›
 TRACE conn incoming RRDqueue t¦tt¦ttt ‹MsgIncoming: msg:'No' errno:123 type:MT_ERROR prio:2›
-TRACE msg recv t¦tt¦ttt ‹MsgIncoming: msg:'No' errno:123 type:MT_ERROR prio:2›
-TRACE msg recv= MINE ‹RRDsendUpdate 6›
-TRACE msg states at run connected connected
 DEBUG Yes error
 : ‹Collected RRDfile:a¦aa¦aaa›
 name: a¦aa¦aaa

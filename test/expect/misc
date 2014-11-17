@@ -24,12 +24,12 @@ END: bar1
 NEW: ‹ConditionalWorkSequence:8 (2)›
    : │  id: 8
    : │  call count: 0
-   : │  EVENT: wait¦start¦0.1¦A
+   : │  EVENT: wait¦start¦×××¦A
    : │       : loglevel=0
    : └1╴... done.
-EVENT: wait¦start¦0.1¦A
+EVENT: wait¦start¦×××¦A
      : loglevel=0
-END: wait¦start¦0.1¦A
+END: wait¦start¦×××¦A
 NEW: ‹ConditionalWorkSequence:9 (2)›
    : │  id: 9
    : │  call count: 0
@@ -45,12 +45,12 @@ TRACE 2003-04-05 06:07:08.150000 A: Fake timer done
 NEW: ‹ConditionalWorkSequence:10 (2)›
    : │  id: 10
    : │  call count: 0
-   : │  EVENT: wait¦done¦0.1¦A
+   : │  EVENT: wait¦done¦×××¦A
    : │       : loglevel=0
    : └1╴... done.
-EVENT: wait¦done¦0.1¦A
+EVENT: wait¦done¦×××¦A
      : loglevel=0
-END: wait¦done¦0.1¦A
+END: wait¦done¦×××¦A
 NEW: ‹ConditionalWorkSequence:11 (2)›
    : │  id: 11
    : │  call count: 0
@@ -77,12 +77,12 @@ END: bar2
 NEW: ‹ConditionalWorkSequence:14 (2)›
    : │  id: 14
    : │  call count: 0
-   : │  EVENT: wait¦start¦0.2¦B
+   : │  EVENT: wait¦start¦×××¦B
    : │       : loglevel=0
    : └1╴... done.
-EVENT: wait¦start¦0.2¦B
+EVENT: wait¦start¦×××¦B
      : loglevel=0
-END: wait¦start¦0.2¦B
+END: wait¦start¦×××¦B
 NEW: ‹ConditionalWorkSequence:15 (2)›
    : │  id: 15
    : │  call count: 0
@@ -98,12 +98,12 @@ TRACE 2003-04-05 06:07:08.300000 B: Fake timer done
 NEW: ‹ConditionalWorkSequence:16 (2)›
    : │  id: 16
    : │  call count: 0
-   : │  EVENT: wait¦done¦0.3¦B
+   : │  EVENT: wait¦done¦×××¦B
    : │       : loglevel=0
    : └1╴... done.
-EVENT: wait¦done¦0.3¦B
+EVENT: wait¦done¦×××¦B
      : loglevel=0
-END: wait¦done¦0.3¦B
+END: wait¦done¦×××¦B
 NEW: ‹ConditionalWorkSequence:17 (2)›
    : │  id: 17
    : │  call count: 0
@@ -116,12 +116,12 @@ END: wait¦done¦B
 NEW: ‹ConditionalWorkSequence:18 (2)›
    : │  id: 18
    : │  call count: 0
-   : │  EVENT: wait¦start¦0.4¦C
+   : │  EVENT: wait¦start¦×××¦C
    : │       : loglevel=0
    : └1╴... done.
-EVENT: wait¦start¦0.4¦C
+EVENT: wait¦start¦×××¦C
      : loglevel=0
-END: wait¦start¦0.4¦C
+END: wait¦start¦×××¦C
 NEW: ‹ConditionalWorkSequence:19 (2)›
    : │  id: 19
    : │  call count: 0
@@ -151,12 +151,12 @@ TRACE 2003-04-05 06:07:08.450000 C: Fake timer done
 NEW: ‹ConditionalWorkSequence:22 (2)›
    : │  id: 22
    : │  call count: 0
-   : │  EVENT: wait¦done¦0.5¦C
+   : │  EVENT: wait¦done¦×××¦C
    : │       : loglevel=0
    : └1╴... done.
-EVENT: wait¦done¦0.5¦C
+EVENT: wait¦done¦×××¦C
      : loglevel=0
-END: wait¦done¦0.5¦C
+END: wait¦done¦×××¦C
 NEW: ‹ConditionalWorkSequence:23 (2)›
    : │  id: 23
    : │  call count: 0
@@ -183,12 +183,12 @@ END: bar4
 NEW: ‹ConditionalWorkSequence:26 (2)›
    : │  id: 26
    : │  call count: 0
-   : │  EVENT: wait¦start¦0.5¦D
+   : │  EVENT: wait¦start¦×××¦D
    : │       : loglevel=0
    : └1╴... done.
-EVENT: wait¦start¦0.5¦D
+EVENT: wait¦start¦×××¦D
      : loglevel=0
-END: wait¦start¦0.5¦D
+END: wait¦start¦×××¦D
 NEW: ‹ConditionalWorkSequence:27 (2)›
    : │  id: 27
    : │  call count: 0
@@ -211,12 +211,12 @@ TRACE 2003-04-05 06:07:08.550000 D: Fake timer done
 NEW: ‹ConditionalWorkSequence:29 (2)›
    : │  id: 29
    : │  call count: 0
-   : │  EVENT: wait¦done¦0.5¦D
+   : │  EVENT: wait¦done¦×××¦D
    : │       : loglevel=0
    : └1╴... done.
-EVENT: wait¦done¦0.5¦D
+EVENT: wait¦done¦×××¦D
      : loglevel=0
-END: wait¦done¦0.5¦D
+END: wait¦done¦×××¦D
 NEW: ‹ConditionalWorkSequence:30 (2)›
    : │  id: 30
    : │  call count: 0
@@ -236,12 +236,12 @@ END: bar5
 NEW: ‹ConditionalWorkSequence:32 (2)›
    : │  id: 32
    : │  call count: 0
-   : │  EVENT: wait¦start¦0.6¦E
+   : │  EVENT: wait¦start¦×××¦E
    : │       : loglevel=0
    : └1╴... done.
-EVENT: wait¦start¦0.6¦E
+EVENT: wait¦start¦×××¦E
      : loglevel=0
-END: wait¦start¦0.6¦E
+END: wait¦start¦×××¦E
 NEW: ‹ConditionalWorkSequence:33 (2)›
    : │  id: 33
    : │  call count: 0
@@ -257,12 +257,12 @@ TRACE 2003-04-05 06:07:08.700000 E: Fake timer done
 NEW: ‹ConditionalWorkSequence:34 (2)›
    : │  id: 34
    : │  call count: 0
-   : │  EVENT: wait¦done¦0.7¦E
+   : │  EVENT: wait¦done¦×××¦E
    : │       : loglevel=0
    : └1╴... done.
-EVENT: wait¦done¦0.7¦E
+EVENT: wait¦done¦×××¦E
      : loglevel=0
-END: wait¦done¦0.7¦E
+END: wait¦done¦×××¦E
 NEW: ‹ConditionalWorkSequence:35 (2)›
    : │  id: 35
    : │  call count: 0

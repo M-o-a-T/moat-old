@@ -138,7 +138,7 @@ EVENT: wait¦start¦_wait¦1
      : loglevel=0
      : end_time=0.6
 END: wait¦start¦_wait¦1
-TRACE 2014-11-17 14:41:43.955434 _wait¦1: Forced timer done
+TRACE 2003-04-05 06:07:08.500000 _wait¦1: Forced timer done
 NEW: ‹ConditionalWorkSequence:17 (2)›
    : │  id: 17
    : │  call count: 0

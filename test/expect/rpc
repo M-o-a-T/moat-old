@@ -63,7 +63,7 @@ DEBUG TEST (u'name', u'foo\xa6n1')
 DEBUG TEST (u'local host', u'::ffff:127.0.0.1')
 DEBUG TEST (u'local port', u'56478')
 DEBUG TEST (u'remote host', u'::ffff:127.0.0.1')
-DEBUG TEST (u'remote port', u'51357')
+DEBUG TEST (u'remote port', u'×××')
 DEBUG TEST .
 DEBUG TEST >>> Global : word list:
 DEBUG TEST >>> Known words:
@@ -98,13 +98,13 @@ DEBUG TEST >>> var state     : assign a variable to report a state
 DEBUG TEST >>> var wait      : assign a variable to report when a waiter will time out
 DEBUG TEST >>> wait          : delay for N seconds
 Traceback (most recent call last):
-  File "../modules/rpc.py", line 326, in exposed_command
+  File "../modules/rpc.py", line ×××, in exposed_command
     return CommandProcessor(parent=self,ctx=self.ctx).simple_statement(args)
-  File "../modules/rpc.py", line 102, in simple_statement
+  File "../modules/rpc.py", line ×××, in simple_statement
     fn = self.lookup(args)
-  File "/home/smurf/homevent/homevent/interpreter.py", line 78, in lookup
+  File "/home/smurf/homevent/homevent/interpreter.py", line ×××, in lookup
     fn = me.lookup(event)
-  File "/home/smurf/homevent/homevent/statement.py", line 242, in lookup
+  File "/home/smurf/homevent/homevent/statement.py", line ×××, in lookup
     raise UnknownWordError(args,self)
 UnknownWordError: Cannot find word <fuubar This is not found.> in <Global>
 NEW: ‹WorkSequence:11 (2)›
@@ -113,13 +113,13 @@ NEW: ‹WorkSequence:11 (2)›
    : │  Cannot find word ‹fuubar This is not found.› in ‹Global›
    : └1╴... done.
 Traceback (most recent call last):
-  File "../modules/rpc.py", line 326, in exposed_command
+  File "../modules/rpc.py", line ×××, in exposed_command
     return CommandProcessor(parent=self,ctx=self.ctx).simple_statement(args)
-  File "../modules/rpc.py", line 102, in simple_statement
+  File "../modules/rpc.py", line ×××, in simple_statement
     fn = self.lookup(args)
-  File "/home/smurf/homevent/homevent/interpreter.py", line 78, in lookup
+  File "/home/smurf/homevent/homevent/interpreter.py", line ×××, in lookup
     fn = me.lookup(event)
-  File "/home/smurf/homevent/homevent/statement.py", line 242, in lookup
+  File "/home/smurf/homevent/homevent/statement.py", line ×××, in lookup
     raise UnknownWordError(args,self)
 UnknownWordError: Cannot find word <fuubar This is not found.> in <Global>
 END: UnknownWordError
@@ -142,7 +142,7 @@ RUN: on send logger ‹OnEventHandler›
  ev: IEVENT: send¦logger
 DEBUG hello This is a test
 END: send¦logger
-TRACE 2014-11-17 14:41:51.795262 shutdown: Forced timer done
+TRACE 2003-04-05 06:07:09 shutdown: Forced timer done
 NEW: ‹ConditionalWorkSequence:13 (2)›
    : │  id: 13
    : │  call count: 0
@@ -181,16 +181,16 @@ EVENT: wait¦start¦foo¦b
      : loglevel=0
      : end_time=2.0
 END: wait¦start¦foo¦b
-TRACE 2014-11-17 14:41:52.804921 foo¦b: Forced timer done
+TRACE 2003-04-05 06:07:10 foo¦b: Forced timer done
 NEW: ‹ConditionalWorkSequence:17 (2)›
    : │  id: 17
    : │  call count: 0
-   : │  EVENT: wait¦done¦2.0¦foo¦b
+   : │  EVENT: wait¦done¦2.1¦foo¦b
    : │       : loglevel=0
    : └1╴... done.
-EVENT: wait¦done¦2.0¦foo¦b
+EVENT: wait¦done¦2.1¦foo¦b
      : loglevel=0
-END: wait¦done¦2.0¦foo¦b
+END: wait¦done¦2.1¦foo¦b
 NEW: ‹ConditionalWorkSequence:18 (2)›
    : │  id: 18
    : │  call count: 0

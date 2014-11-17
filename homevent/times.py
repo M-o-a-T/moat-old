@@ -43,7 +43,8 @@ if TESTING:
 		if force:
 			return dt.datetime.now()
 		r = dt.datetime.utcfromtimestamp(1049522828) # 2003-04-05 06:07:08 UTC
-		return r + dt.timedelta(0, current_slot // SLOT, (current_slot % SLOT) * (1e6 / SLOT) )
+		S=int(current_slot)
+		return r + dt.timedelta(0, S // SLOT, (S % SLOT) * (1e6 / SLOT) )
 
 	def sleep(force,timeout,debugi=""):
 		global current_slot,real_sleep
@@ -51,7 +52,7 @@ if TESTING:
 		if force:
 			real_sleep += 1
 		try:
-			with log_wait("%s %s: %s timer wait for %s" % (now(force),debugi,"Forced" if force else "Fake", timeout)):
+			with log_wait("%s %s: %s timer wait for %s" % (now(False),debugi,"Forced" if force else "Fake", timeout)):
 				t = now(force)
 				while unixdelta(now(force) - t) < timeout:
 					gevent.sleep(1/SLOT/real_sleep if real_sleep else 0.001)
@@ -60,7 +61,7 @@ if TESTING:
 			global _log,TRACE
 			if _log is None:
 				from homevent.logging import log as _log, TRACE
-			_log(TRACE,"%s %s: %s timer done" % (now(force),debugi,"Forced" if force else "Fake"))
+			_log(TRACE,"%s %s: %s timer done" % (now(False),debugi,"Forced" if force else "Fake"))
 			
 		finally:
 			if force:

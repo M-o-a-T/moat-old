@@ -42,8 +42,8 @@ log_level("monitor",TRACE)
 log_level("fs20",TRACE)
 log_level("parser",NONE)
 log_level("token",NONE)
-log_level("msg",TRACE)
-log_level("wago",TRACE)
+log_level("msg",NONE)
+log_level("wago",NONE)
 log_level("conn",TRACE)
 
 startup=now()
@@ -206,7 +206,10 @@ def run(name,input, interpreter=Interpreter, logger=None):
 			shut_down()
 			if ht is not None:
 				ht.try_exit()
+				ht = None
 
 	mainloop(_main)
+	if ht is not None:
+		ht.try_exit()
 
 	sys.exit(exitcode)

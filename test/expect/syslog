@@ -27,7 +27,7 @@ EVENT: wait¦start¦_wait¦1
      : loglevel=0
      : end_time=0.2
 END: wait¦start¦_wait¦1
-TRACE 2014-11-17 14:41:44.500128 _wait¦1: Forced timer done
+TRACE 2003-04-05 06:07:08.200000 _wait¦1: Forced timer done
 NEW: ‹ConditionalWorkSequence:8 (2)›
    : │  id: 8
    : │  call count: 0
@@ -68,24 +68,24 @@ syslog :: TRACE: run_logger
 NEW: ‹ConditionalWorkSequence:10 (2)›
    : │  id: 10
    : │  call count: 0
-   : │  EVENT: wait¦start¦1.0¦_wait¦2
+   : │  EVENT: wait¦start¦1.1¦_wait¦2
    : │       : loglevel=0
    : └1╴... done.
-EVENT: wait¦start¦1.0¦_wait¦2
+EVENT: wait¦start¦1.1¦_wait¦2
      : loglevel=0
-END: wait¦start¦1.0¦_wait¦2
+END: wait¦start¦1.1¦_wait¦2
 NEW: ‹ConditionalWorkSequence:11 (2)›
    : │  id: 11
    : │  call count: 0
    : │  EVENT: wait¦start¦_wait¦2
    : │       : loglevel=0
-   : │       : end_time=1.0
+   : │       : end_time=1.1
    : └1╴... done.
 EVENT: wait¦start¦_wait¦2
      : loglevel=0
-     : end_time=1.0
+     : end_time=1.1
 END: wait¦start¦_wait¦2
-TRACE 2014-11-17 14:41:45.342494 _wait¦2: Forced timer done
+TRACE 2003-04-05 06:07:09 _wait¦2: Forced timer done
 NEW: ‹ConditionalWorkSequence:12 (2)›
    : │  id: 12
    : │  call count: 0

@@ -110,18 +110,12 @@ EVENT: onewire¦connect¦A
 END: onewire¦connect¦A
 TRACE conn setting up OWFSqueue A
 TRACE conn connected OWFSqueue A
-TRACE msg states at run connected connecting
 TRACE NotConn [[], [], [‹DIRmsg ›], []]
 TRACE conn setstate connecting connected
-TRACE msg states at run connected connected
-TRACE msg send ‹DIRmsg ›
 DEBUG onewire SEND 0 1 7 6 0 0 '\x00'
-TRACE msg send result RECV_AGAIN
 DEBUG onewire RECV 0 96 0 6 95 x8002
 DEBUG onewire RECV … 95 '/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm'
-TRACE msg recv msg ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:2›
 TRACE conn incoming OWFSqueue A ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:2›
-TRACE msg recv A ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:2›
 TRACE onewire got unrecognized name uncached
 TRACE onewire got unrecognized name settings
 TRACE onewire got unrecognized name system
@@ -129,21 +123,14 @@ TRACE onewire got unrecognized name statistics
 TRACE onewire got unrecognized name structure
 TRACE onewire got unrecognized name simultaneous
 TRACE onewire got unrecognized name alarm
-TRACE msg recv= MINE ‹DIRmsg ›
 DEBUG onewire doneDIR ‹DIRmsg ›
-TRACE msg states at run connected connected
-TRACE msg send ‹DIRmsg bus.0›
 DEBUG onewire SEND 0 7 7 6 0 0 '/bus.0\x00'
-TRACE msg send result RECV_AGAIN
 DEBUG onewire RECV 0 73 0 6 72 x8002
 DEBUG onewire RECV … 72 '/bus.0/interface,/bus.0/10.000010EF0000,/bus.0/simultaneous,/bus.0/alarm'
-TRACE msg recv msg ‹MsgIncoming: data:'/bus.0/interface,/bus.0/10.000010EF0000,/bus.0/simultaneous,/bus.0/alarm' typ:0 prio:2›
 TRACE conn incoming OWFSqueue A ‹MsgIncoming: data:'/bus.0/interface,/bus.0/10.000010EF0000,/bus.0/simultaneous,/bus.0/alarm' typ:0 prio:2›
-TRACE msg recv A ‹MsgIncoming: data:'/bus.0/interface,/bus.0/10.000010EF0000,/bus.0/simultaneous,/bus.0/alarm' typ:0 prio:2›
 TRACE onewire got unrecognized name interface
 TRACE onewire got unrecognized name simultaneous
 TRACE onewire got unrecognized name alarm
-TRACE msg recv= MINE ‹DIRmsg bus.0›
 DEBUG onewire doneDIR ‹DIRmsg bus.0›
 DEBUG onewire NEW ‹OWFSqueue:A connected› 10.000010ef0000 10.000010EF0000 ('bus.0',)
 NEW: ‹ConditionalWorkSequence:20 (3)›
@@ -185,28 +172,16 @@ RUN: on onewire scanned A ‹OnEventHandler›
    :      : new=1
    :      : num=1
    :      : old=0
-TRACE msg states at run connected connected
-TRACE msg send ‹ATTRgetmsg 10.000010EF0000 temperature›
 DEBUG onewire SEND 0 44 2 6 8192 0 u'/uncached/bus.0/10.000010EF0000/temperature\x00'
-TRACE msg send result RECV_AGAIN
-TRACE msg states at run connected connected
-TRACE msg send ‹ATTRgetmsg 10.000010EF0000 type›
 DEBUG onewire SEND 0 37 2 6 8192 0 '/uncached/bus.0/10.000010EF0000/type\x00'
-TRACE msg send result RECV_AGAIN
 DEBUG onewire RECV 0 12 12 6 12 x0
 DEBUG onewire RECV … 12 '         1.6'
-TRACE msg recv msg ‹MsgIncoming: data:'         1.6' typ:12 prio:2›
 DEBUG onewire RECV 0 7 7 6 7 x0
 DEBUG onewire RECV … 7 'DS18S20'
-TRACE msg recv msg ‹MsgIncoming: data:'DS18S20' typ:7 prio:2›
 TRACE conn incoming OWFSqueue A ‹MsgIncoming: data:'         1.6' typ:12 prio:2›
-TRACE msg recv A ‹MsgIncoming: data:'         1.6' typ:12 prio:2›
 DEBUG onewire done:  ‹ATTRgetmsg 10.000010EF0000 temperature›
-TRACE msg recv= MINE ‹ATTRgetmsg 10.000010EF0000 temperature›
 TRACE conn incoming OWFSqueue A ‹MsgIncoming: data:'DS18S20' typ:7 prio:2›
-TRACE msg recv A ‹MsgIncoming: data:'DS18S20' typ:7 prio:2›
 DEBUG onewire done:  ‹ATTRgetmsg 10.000010EF0000 type›
-TRACE msg recv= MINE ‹ATTRgetmsg 10.000010EF0000 type›
 NEW: ‹ConditionalWorkSequence:21 (2)›
    : │  id: 21
    : │  call count: 0
@@ -292,28 +267,16 @@ EVENT: output¦change¦temphi
      : value=99
      : prev_value=None
 END: output¦change¦temphi
-TRACE msg states at run connected connected
-TRACE msg send ‹ATTRsetmsg 10.000010EF0000 temp_high 99›
 DEBUG onewire SEND 0 44 3 6 2 0 u'/uncached/bus.0/10.000010EF0000/temp_high\x0099'
-TRACE msg send result RECV_AGAIN
-TRACE msg states at run connected connected
-TRACE msg send ‹ATTRgetmsg 10.000010EF0000 temperature›
 DEBUG onewire SEND 0 44 2 6 8192 0 u'/uncached/bus.0/10.000010EF0000/temperature\x00'
-TRACE msg send result RECV_AGAIN
 DEBUG onewire RECV 0 0 -1 6 0 x0
 DEBUG onewire RECV … 0 ''
-TRACE msg recv msg ‹MsgIncoming: data:'' typ:-1 prio:2›
 DEBUG onewire RECV 0 12 12 6 12 x0
 DEBUG onewire RECV … 12 '         1.6'
-TRACE msg recv msg ‹MsgIncoming: data:'         1.6' typ:12 prio:2›
 TRACE conn incoming OWFSqueue A ‹MsgIncoming: data:'' typ:-1 prio:2›
-TRACE msg recv A ‹MsgIncoming: data:'' typ:-1 prio:2›
 DEBUG onewire done:  ‹ATTRsetmsg 10.000010EF0000 temp_high 99›
-TRACE msg recv= MINE ‹ATTRsetmsg 10.000010EF0000 temp_high 99›
 TRACE conn incoming OWFSqueue A ‹MsgIncoming: data:'         1.6' typ:12 prio:2›
-TRACE msg recv A ‹MsgIncoming: data:'         1.6' typ:12 prio:2›
 DEBUG onewire done:  ‹ATTRgetmsg 10.000010EF0000 temperature›
-TRACE msg recv= MINE ‹ATTRgetmsg 10.000010EF0000 temperature›
 TRACE monitor filter [1.6] on tempi
 TRACE monitor More data [1.6] for ‹tempi›
 END: onewire¦scanned¦A
@@ -335,15 +298,10 @@ NEW: ‹ConditionalWorkSequence:30 (2)›
 EVENT: wait¦cancel¦yawn
      : loglevel=0
 END: wait¦cancel¦yawn
-TRACE msg states at run connected connected
-TRACE msg send ‹DIRmsg ›
 DEBUG onewire SEND 0 1 7 6 0 0 '\x00'
-TRACE msg send result RECV_AGAIN
 DEBUG onewire RECV 0 96 0 6 95 x8002
 DEBUG onewire RECV … 95 '/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm'
-TRACE msg recv msg ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:2›
 TRACE conn incoming OWFSqueue A ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:2›
-TRACE msg recv A ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:2›
 10.000010EF0000
 bus.0
 uncached
@@ -353,18 +311,12 @@ statistics
 structure
 simultaneous
 alarm
-TRACE msg recv= MINE ‹DIRmsg ›
 DEBUG onewire doneDIR ‹DIRmsg ›
 .
-TRACE msg states at run connected connected
-TRACE msg send ‹DIRmsg bus.0/10.000010EF0000›
 DEBUG onewire SEND 0 23 7 6 0 0 '/bus.0/10.000010EF0000\x00'
-TRACE msg send result RECV_AGAIN
 DEBUG onewire RECV 0 488 0 6 487 x0
 DEBUG onewire RECV … 487 '/bus.0/10.000010EF0000/address,/bus.0/10.000010EF0000/alias,/bus.0/10.000010EF0000/crc8,/bus.0/10.000010EF0000/errata,/bus.0/10.000010EF0000/family,/bus.0/10.000010EF0000/id,/bus.0/10.000010EF0000/locator,/bus.0/10.000010EF0000/power,/bus.0/10.000010EF0000/r_address,/bus.0/10.000010EF0000/r_id,/bus.0/10.000010EF0000/r_locator,/bus.0/10.000010EF0000/scratchpad,/bus.0/10.000010EF0000/temperature,/bus.0/10.000010EF0000/temphigh,/bus.0/10.000010EF0000/templow,/bus.0/10.000010EF0000/type'
-TRACE msg recv msg ‹MsgIncoming: data:'/bus.0/10.000010EF0000/address,/bus.0/10.000010EF0000/alias,/bus.0/10.000010EF0000/crc8,/bus.0/10.000010EF0000/errata,/bus.0/10.000010EF0000/family,/bus.0/10.000010EF0000/id,/bus.0/10.000010EF0000/locator,/bus.0/10.000010EF0000/power,/bus.0/10.000010EF0000/r_address,/bus.0/10.000010EF0000/r_id,/bus.0/10.000010EF0000/r_locator,/bus.0/10.000010EF0000/scratchpad,/bus.0/10.000010EF0000/temperature,/bus.0/10.000010EF0000/temphigh,/bus.0/10.000010EF0000/templow,/bus.0/10.000010EF0000/type' typ:0 prio:2›
 TRACE conn incoming OWFSqueue A ‹MsgIncoming: data:'/bus.0/10.000010EF0000/address,/bus.0/10.000010EF0000/alias,/bus.0/10.000010EF0000/crc8,/bus.0/10.000010EF0000/errata,/bus.0/10.000010EF0000/family,/bus.0/10.000010EF0000/id,/bus.0/10.000010EF0000/locator,/bus.0/10.000010EF0000/power,/bus.0/10.000010EF0000/r_address,/bus.0/10.000010EF0000/r_id,/bus.0/10.000010EF0000/r_locator,/bus.0/10.000010EF0000/scratchpad,/bus.0/10.000010EF0000/temperature,/bus.0/10.000010EF0000/temphigh,/bus.0/10.000010EF0000/templow,/bus.0/10.000010EF0000/type' typ:0 prio:2›
-TRACE msg recv A ‹MsgIncoming: data:'/bus.0/10.000010EF0000/address,/bus.0/10.000010EF0000/alias,/bus.0/10.000010EF0000/crc8,/bus.0/10.000010EF0000/errata,/bus.0/10.000010EF0000/family,/bus.0/10.000010EF0000/id,/bus.0/10.000010EF0000/locator,/bus.0/10.000010EF0000/power,/bus.0/10.000010EF0000/r_address,/bus.0/10.000010EF0000/r_id,/bus.0/10.000010EF0000/r_locator,/bus.0/10.000010EF0000/scratchpad,/bus.0/10.000010EF0000/temperature,/bus.0/10.000010EF0000/temphigh,/bus.0/10.000010EF0000/templow,/bus.0/10.000010EF0000/type' typ:0 prio:2›
 address
 alias
 crc8
@@ -381,7 +333,6 @@ temperature
 temphigh
 templow
 type
-TRACE msg recv= MINE ‹DIRmsg bus.0/10.000010EF0000›
 DEBUG onewire doneDIR ‹DIRmsg bus.0/10.000010EF0000›
 .
 TRACE yes
@@ -393,15 +344,10 @@ NEW: ‹ConditionalWorkSequence:31 (2)›
 EVENT: onewire¦scanning¦A
 END: onewire¦scanning¦A
 TRACE onewire start bus update
-TRACE msg states at run connected connected
-TRACE msg send ‹DIRmsg ›
 DEBUG onewire SEND 0 1 7 6 0 0 '\x00'
-TRACE msg send result RECV_AGAIN
 DEBUG onewire RECV 0 96 0 6 95 x8002
 DEBUG onewire RECV … 95 '/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm'
-TRACE msg recv msg ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:2›
 TRACE conn incoming OWFSqueue A ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:2›
-TRACE msg recv A ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:2›
 TRACE onewire got unrecognized name uncached
 TRACE onewire got unrecognized name settings
 TRACE onewire got unrecognized name system
@@ -409,21 +355,14 @@ TRACE onewire got unrecognized name statistics
 TRACE onewire got unrecognized name structure
 TRACE onewire got unrecognized name simultaneous
 TRACE onewire got unrecognized name alarm
-TRACE msg recv= MINE ‹DIRmsg ›
 DEBUG onewire doneDIR ‹DIRmsg ›
-TRACE msg states at run connected connected
-TRACE msg send ‹DIRmsg bus.0›
 DEBUG onewire SEND 0 7 7 6 0 0 '/bus.0\x00'
-TRACE msg send result RECV_AGAIN
 DEBUG onewire RECV 0 73 0 6 72 x8002
 DEBUG onewire RECV … 72 '/bus.0/interface,/bus.0/10.000010EF0000,/bus.0/simultaneous,/bus.0/alarm'
-TRACE msg recv msg ‹MsgIncoming: data:'/bus.0/interface,/bus.0/10.000010EF0000,/bus.0/simultaneous,/bus.0/alarm' typ:0 prio:2›
 TRACE conn incoming OWFSqueue A ‹MsgIncoming: data:'/bus.0/interface,/bus.0/10.000010EF0000,/bus.0/simultaneous,/bus.0/alarm' typ:0 prio:2›
-TRACE msg recv A ‹MsgIncoming: data:'/bus.0/interface,/bus.0/10.000010EF0000,/bus.0/simultaneous,/bus.0/alarm' typ:0 prio:2›
 TRACE onewire got unrecognized name interface
 TRACE onewire got unrecognized name simultaneous
 TRACE onewire got unrecognized name alarm
-TRACE msg recv= MINE ‹DIRmsg bus.0›
 DEBUG onewire doneDIR ‹DIRmsg bus.0›
 NEW: ‹ConditionalWorkSequence:32 (2)›
    : │  id: 32
@@ -438,15 +377,10 @@ EVENT: onewire¦scanned¦A
      : num=1
      : old=0
 END: onewire¦scanned¦A
-TRACE msg states at run connected connected
-TRACE msg send ‹DIRmsg bus.0/10.000010EF0000›
 DEBUG onewire SEND 0 23 7 6 0 0 '/bus.0/10.000010EF0000\x00'
-TRACE msg send result RECV_AGAIN
 DEBUG onewire RECV 0 488 0 6 487 x0
 DEBUG onewire RECV … 487 '/bus.0/10.000010EF0000/address,/bus.0/10.000010EF0000/alias,/bus.0/10.000010EF0000/crc8,/bus.0/10.000010EF0000/errata,/bus.0/10.000010EF0000/family,/bus.0/10.000010EF0000/id,/bus.0/10.000010EF0000/locator,/bus.0/10.000010EF0000/power,/bus.0/10.000010EF0000/r_address,/bus.0/10.000010EF0000/r_id,/bus.0/10.000010EF0000/r_locator,/bus.0/10.000010EF0000/scratchpad,/bus.0/10.000010EF0000/temperature,/bus.0/10.000010EF0000/temphigh,/bus.0/10.000010EF0000/templow,/bus.0/10.000010EF0000/type'
-TRACE msg recv msg ‹MsgIncoming: data:'/bus.0/10.000010EF0000/address,/bus.0/10.000010EF0000/alias,/bus.0/10.000010EF0000/crc8,/bus.0/10.000010EF0000/errata,/bus.0/10.000010EF0000/family,/bus.0/10.000010EF0000/id,/bus.0/10.000010EF0000/locator,/bus.0/10.000010EF0000/power,/bus.0/10.000010EF0000/r_address,/bus.0/10.000010EF0000/r_id,/bus.0/10.000010EF0000/r_locator,/bus.0/10.000010EF0000/scratchpad,/bus.0/10.000010EF0000/temperature,/bus.0/10.000010EF0000/temphigh,/bus.0/10.000010EF0000/templow,/bus.0/10.000010EF0000/type' typ:0 prio:2›
 TRACE conn incoming OWFSqueue A ‹MsgIncoming: data:'/bus.0/10.000010EF0000/address,/bus.0/10.000010EF0000/alias,/bus.0/10.000010EF0000/crc8,/bus.0/10.000010EF0000/errata,/bus.0/10.000010EF0000/family,/bus.0/10.000010EF0000/id,/bus.0/10.000010EF0000/locator,/bus.0/10.000010EF0000/power,/bus.0/10.000010EF0000/r_address,/bus.0/10.000010EF0000/r_id,/bus.0/10.000010EF0000/r_locator,/bus.0/10.000010EF0000/scratchpad,/bus.0/10.000010EF0000/temperature,/bus.0/10.000010EF0000/temphigh,/bus.0/10.000010EF0000/templow,/bus.0/10.000010EF0000/type' typ:0 prio:2›
-TRACE msg recv A ‹MsgIncoming: data:'/bus.0/10.000010EF0000/address,/bus.0/10.000010EF0000/alias,/bus.0/10.000010EF0000/crc8,/bus.0/10.000010EF0000/errata,/bus.0/10.000010EF0000/family,/bus.0/10.000010EF0000/id,/bus.0/10.000010EF0000/locator,/bus.0/10.000010EF0000/power,/bus.0/10.000010EF0000/r_address,/bus.0/10.000010EF0000/r_id,/bus.0/10.000010EF0000/r_locator,/bus.0/10.000010EF0000/scratchpad,/bus.0/10.000010EF0000/temperature,/bus.0/10.000010EF0000/temphigh,/bus.0/10.000010EF0000/templow,/bus.0/10.000010EF0000/type' typ:0 prio:2›
 address
 alias
 crc8
@@ -463,18 +397,12 @@ temperature
 temphigh
 templow
 type
-TRACE msg recv= MINE ‹DIRmsg bus.0/10.000010EF0000›
 DEBUG onewire doneDIR ‹DIRmsg bus.0/10.000010EF0000›
 .
-TRACE msg states at run connected connected
-TRACE msg send ‹DIRmsg ›
 DEBUG onewire SEND 0 1 7 6 0 0 '\x00'
-TRACE msg send result RECV_AGAIN
 DEBUG onewire RECV 0 96 0 6 95 x8002
 DEBUG onewire RECV … 95 '/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm'
-TRACE msg recv msg ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:2›
 TRACE conn incoming OWFSqueue A ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:2›
-TRACE msg recv A ‹MsgIncoming: data:'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' typ:0 prio:2›
 10.000010EF0000
 bus.0
 uncached
@@ -484,7 +412,6 @@ statistics
 structure
 simultaneous
 alarm
-TRACE msg recv= MINE ‹DIRmsg ›
 DEBUG onewire doneDIR ‹DIRmsg ›
 .
 10.000010ef0000
@@ -515,7 +442,7 @@ EVENT: wait¦start¦before¦disconnect
      : loglevel=0
      : end_time=1.4
 END: wait¦start¦before¦disconnect
-TRACE 2014-11-17 14:41:47.833863 before¦disconnect: Forced timer done
+TRACE 2003-04-05 06:07:08.650000 before¦disconnect: Forced timer done
 NEW: ‹ConditionalWorkSequence:35 (2)›
    : │  id: 35
    : │  call count: 0
@@ -565,7 +492,7 @@ EVENT: wait¦start¦END
      : loglevel=0
      : end_time=2.4
 END: wait¦start¦END
-TRACE 2003-04-05 06:07:09.000010 : Fake timer done
+TRACE 2003-04-05 06:07:09 : Fake timer done
 TRACE conn setstate init closed
 TRACE conn setstate closed waiting: wait 3.000
 NEW: ‹ConditionalWorkSequence:40 (2)›
@@ -576,16 +503,16 @@ NEW: ‹ConditionalWorkSequence:40 (2)›
 EVENT: onewire¦scanning¦A
 END: onewire¦scanning¦A
 TRACE onewire start bus update
-TRACE 2014-11-17 14:41:48.855748 END: Forced timer done
+TRACE 2003-04-05 06:07:10.650000 END: Forced timer done
 NEW: ‹ConditionalWorkSequence:41 (2)›
    : │  id: 41
    : │  call count: 0
-   : │  EVENT: wait¦done¦2.4¦END
+   : │  EVENT: wait¦done¦2.5¦END
    : │       : loglevel=0
    : └1╴... done.
-EVENT: wait¦done¦2.4¦END
+EVENT: wait¦done¦2.5¦END
      : loglevel=0
-END: wait¦done¦2.4¦END
+END: wait¦done¦2.5¦END
 NEW: ‹ConditionalWorkSequence:42 (2)›
    : │  id: 42
    : │  call count: 0
