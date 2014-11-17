@@ -42,9 +42,14 @@ monitor onewire "10.000010ef0000" temperature:
 	delay for 3
 	stopped
 
-on onewire up * "10.000010ef0000":
+on onewire up:
 	name light sensor present
-	start monitor tempi
+
+	if equal $id "10.000010ef0000":
+		log TRACE YesC
+		start monitor tempi
+	else:
+		log TRACE NoC $id
 
 on onewire scanned A:
 	name scanned

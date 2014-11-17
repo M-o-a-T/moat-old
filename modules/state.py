@@ -66,6 +66,7 @@ class StateChangeError(Exception):
 
 class State(Collected):
 	storage = States.storage
+	time = None
 
 	def __init__(self, *name):
 		self.value = None
@@ -237,7 +238,6 @@ class SetStateHandler(Statement):
 set state X name...
 	: sets the named state to X
 	: triggers an event if that changed
-	: raises an error if that event tries to change the state again
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
@@ -252,21 +252,12 @@ set state X name...
 		if value == old:
 			return # no change!
 
-		if s.working:
-			raise StateChangeError(s,value)
-		s.working = True
-		try:
-			s.old_value = s.value
-			s.set_value(value if value != "-" else None)
-			s.time = now()
-			try:
-				simple_event("state",old,value,*s.name)
-				simple_event("state","change",*s.name, prev_value=old,value=value)
-			except Exception as e:
-				fix_exception(e)
-				process_failure(e)
-		finally:
-			s.working = False
+		s.old_value = s.value
+		s.set_value(value if value != "-" else None)
+		tm = s.time
+		s.time = now()
+		simple_event("state",old,value,*s.name)
+		simple_event("state","change",*s.name, prev_value=old,value=value,prev_time=tm)
 
 class ForgetStateHandler(Statement):
 	name="forget state"

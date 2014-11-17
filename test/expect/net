@@ -73,33 +73,33 @@ TRACE NewHandler 15
 NEW: ‹ConditionalWorkSequence:16 (2)›
    : │  id: 16
    : │  call count: 0
-   : │  EVENT: wait¦start¦0.4¦BEFORE
+   : │  EVENT: wait¦start¦0.5¦BEFORE
    : │       : loglevel=0
    : └1╴... done.
-EVENT: wait¦start¦0.4¦BEFORE
+EVENT: wait¦start¦0.5¦BEFORE
      : loglevel=0
-END: wait¦start¦0.4¦BEFORE
+END: wait¦start¦0.5¦BEFORE
 NEW: ‹ConditionalWorkSequence:17 (2)›
    : │  id: 17
    : │  call count: 0
    : │  EVENT: wait¦start¦BEFORE
    : │       : loglevel=0
-   : │       : end_time=0.4
+   : │       : end_time=0.5
    : └1╴... done.
 EVENT: wait¦start¦BEFORE
      : loglevel=0
-     : end_time=0.4
+     : end_time=0.5
 END: wait¦start¦BEFORE
 TRACE 2003-04-05 06:07:08.400000 BEFORE: Forced timer done
 NEW: ‹ConditionalWorkSequence:18 (2)›
    : │  id: 18
    : │  call count: 0
-   : │  EVENT: wait¦done¦0.4¦BEFORE
+   : │  EVENT: wait¦done¦0.5¦BEFORE
    : │       : loglevel=0
    : └1╴... done.
-EVENT: wait¦done¦0.4¦BEFORE
+EVENT: wait¦done¦0.5¦BEFORE
      : loglevel=0
-END: wait¦done¦0.4¦BEFORE
+END: wait¦done¦0.5¦BEFORE
 NEW: ‹ConditionalWorkSequence:19 (2)›
    : │  id: 19
    : │  call count: 0

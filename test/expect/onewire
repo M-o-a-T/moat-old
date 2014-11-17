@@ -63,7 +63,7 @@ NEW: ‹ConditionalWorkSequence:13 (2)›
    : └1╴... done.
 EVENT: module¦load¦monitor
 END: module¦load¦monitor
-TRACE Create OnEvtHandler: onewire¦up¦*¦10.000010ef0000
+TRACE Create OnEvtHandler: onewire¦up
 TRACE NewHandler 14
 TRACE Create OnEvtHandler: onewire¦scanned¦A
 TRACE NewHandler 15
@@ -210,40 +210,47 @@ EVENT: onewire¦new
      : typ=DS18S20
      : id=10.000010ef0000
 END: onewire¦new
-NEW: ‹ConditionalWorkSequence:24 (3)›
+NEW: ‹ConditionalWorkSequence:24 (2)›
    : │  id: 24
    : │  call count: 0
    : │  EVENT: onewire¦up¦DS18S20¦10.000010ef0000
-   : ├1╴on onewire up * 10.000010ef0000 ‹OnEventHandler›
+   : └1╴... done.
+EVENT: onewire¦up¦DS18S20¦10.000010ef0000
+END: onewire¦up¦DS18S20¦10.000010ef0000
+NEW: ‹ConditionalWorkSequence:25 (3)›
+   : │  id: 25
+   : │  call count: 0
+   : │  EVENT: onewire¦up
+   : │       : typ=DS18S20
+   : │       : id=10.000010ef0000
+   : ├1╴on onewire up ‹OnEventHandler›
    : │  name: light sensor present
    : │  prio: 51
-   : │  step: start monitor tempi ‹MonitorStart›
+   : │  step: if equal $id 10.000010ef0000 ‹IfStatement›
+   : │      : step: log TRACE YesC ‹LogHandler›
+   : │      : step: start monitor tempi ‹MonitorStart›
    : └2╴... done.
-EVENT: onewire¦up¦DS18S20¦10.000010ef0000
-RUN: on onewire up * 10.000010ef0000 ‹OnEventHandler›
+EVENT: onewire¦up
+     : typ=DS18S20
+     : id=10.000010ef0000
+RUN: on onewire up ‹OnEventHandler›
    : name: light sensor present
    : prio: 51
-   : step: start monitor tempi ‹MonitorStart›
- at: ‹ConditionalWorkSequence:24 (3)› (step 1)
- ev: EVENT: onewire¦up¦DS18S20¦10.000010ef0000
-NEW: ‹ConditionalWorkSequence:25 (2)›
-   : │  id: 25
+   : step: if equal $id 10.000010ef0000 ‹IfStatement›
+   :     : step: log TRACE YesC ‹LogHandler›
+   :     : step: start monitor tempi ‹MonitorStart›
+ at: ‹ConditionalWorkSequence:25 (3)› (step 1)
+ ev: EVENT: onewire¦up
+   :      : typ=DS18S20
+   :      : id=10.000010ef0000
+TRACE YesC
+NEW: ‹ConditionalWorkSequence:26 (2)›
+   : │  id: 26
    : │  call count: 0
    : │  EVENT: monitor¦start¦tempi
    : └1╴... done.
 EVENT: monitor¦start¦tempi
 END: monitor¦start¦tempi
-END: onewire¦up¦DS18S20¦10.000010ef0000
-NEW: ‹ConditionalWorkSequence:26 (2)›
-   : │  id: 26
-   : │  call count: 0
-   : │  EVENT: onewire¦up
-   : │       : typ=DS18S20
-   : │       : id=10.000010ef0000
-   : └1╴... done.
-EVENT: onewire¦up
-     : typ=DS18S20
-     : id=10.000010ef0000
 END: onewire¦up
 last read: now (2003-04-05 06:07:08)
 last value: 1.6
@@ -425,33 +432,33 @@ path: /bus.0/10.000010ef0000
 NEW: ‹ConditionalWorkSequence:33 (2)›
    : │  id: 33
    : │  call count: 0
-   : │  EVENT: wait¦start¦1.4¦before¦disconnect
+   : │  EVENT: wait¦start¦1.5¦before¦disconnect
    : │       : loglevel=0
    : └1╴... done.
-EVENT: wait¦start¦1.4¦before¦disconnect
+EVENT: wait¦start¦1.5¦before¦disconnect
      : loglevel=0
-END: wait¦start¦1.4¦before¦disconnect
+END: wait¦start¦1.5¦before¦disconnect
 NEW: ‹ConditionalWorkSequence:34 (2)›
    : │  id: 34
    : │  call count: 0
    : │  EVENT: wait¦start¦before¦disconnect
    : │       : loglevel=0
-   : │       : end_time=1.4
+   : │       : end_time=1.5
    : └1╴... done.
 EVENT: wait¦start¦before¦disconnect
      : loglevel=0
-     : end_time=1.4
+     : end_time=1.5
 END: wait¦start¦before¦disconnect
 TRACE 2003-04-05 06:07:08.650000 before¦disconnect: Forced timer done
 NEW: ‹ConditionalWorkSequence:35 (2)›
    : │  id: 35
    : │  call count: 0
-   : │  EVENT: wait¦done¦1.4¦before¦disconnect
+   : │  EVENT: wait¦done¦1.5¦before¦disconnect
    : │       : loglevel=0
    : └1╴... done.
-EVENT: wait¦done¦1.4¦before¦disconnect
+EVENT: wait¦done¦1.5¦before¦disconnect
      : loglevel=0
-END: wait¦done¦1.4¦before¦disconnect
+END: wait¦done¦1.5¦before¦disconnect
 NEW: ‹ConditionalWorkSequence:36 (2)›
    : │  id: 36
    : │  call count: 0
@@ -475,22 +482,22 @@ TRACE Drop OWFS bus A
 NEW: ‹ConditionalWorkSequence:38 (2)›
    : │  id: 38
    : │  call count: 0
-   : │  EVENT: wait¦start¦2.4¦END
+   : │  EVENT: wait¦start¦2.5¦END
    : │       : loglevel=0
    : └1╴... done.
-EVENT: wait¦start¦2.4¦END
+EVENT: wait¦start¦2.5¦END
      : loglevel=0
-END: wait¦start¦2.4¦END
+END: wait¦start¦2.5¦END
 NEW: ‹ConditionalWorkSequence:39 (2)›
    : │  id: 39
    : │  call count: 0
    : │  EVENT: wait¦start¦END
    : │       : loglevel=0
-   : │       : end_time=2.4
+   : │       : end_time=2.5
    : └1╴... done.
 EVENT: wait¦start¦END
      : loglevel=0
-     : end_time=2.4
+     : end_time=2.5
 END: wait¦start¦END
 TRACE 2003-04-05 06:07:09 : Fake timer done
 TRACE conn setstate init closed

@@ -91,17 +91,21 @@ monitor checked NAME
 net
 ---
 
-net connect NAME
+The NAMEs here contain a trailing connection identifier when referring to
+an incoming connection, as there may be more than one concurrent
+connection.
+
+net connect NAME…
 	-- This connection is up. Note that reading from this connection
 	   starts after this event has concluded.
 
-net disconnect NAME
+net disconnect NAME…
 	-- This connection is down.
 
-net error NAME
+net error NAME…
     -- This connection could not be established.
 
-net recv NAME
+net recv NAME…
 	-- The text «whatever» has been received.
 	   Arguments are split by whitespace and stored in the event's `data`
 	   field.

@@ -54,13 +54,9 @@ block:
 		log TRACE "No‽ 5"
 log TRACE Set to TWO
 set state two foo bar
-on state * three foo bar:
-	log TRACE Set to FOUR
-	try:
-		set state four foo bar
-		log DEBUG "No! (No shit happened.)"
-	catch StateChangeError:
-		log DEBUG "Yes! (Shit happens.)"
+on state change foo bar:
+	if equal $value three:
+		log TRACE Yes It is THREE
 block:
 	try:
 		log TRACE Set to THREE
@@ -103,6 +99,7 @@ load_module("data")
 load_module("on_event")
 load_module("logging")
 load_module("ifelse")
+load_module("bool")
 load_module("trigger")
 load_module("errors")
 

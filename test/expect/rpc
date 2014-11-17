@@ -185,12 +185,12 @@ TRACE 2003-04-05 06:07:10 foo¦b: Forced timer done
 NEW: ‹ConditionalWorkSequence:17 (2)›
    : │  id: 17
    : │  call count: 0
-   : │  EVENT: wait¦done¦2.1¦foo¦b
+   : │  EVENT: wait¦done¦2.0¦foo¦b
    : │       : loglevel=0
    : └1╴... done.
-EVENT: wait¦done¦2.1¦foo¦b
+EVENT: wait¦done¦2.0¦foo¦b
      : loglevel=0
-END: wait¦done¦2.1¦foo¦b
+END: wait¦done¦2.0¦foo¦b
 NEW: ‹ConditionalWorkSequence:18 (2)›
    : │  id: 18
    : │  call count: 0

@@ -116,8 +116,8 @@ class CommonPM(Collected):
 			self.timer = None
 		try:
 			if self.state:
-				simple_event("pcm","set",self.names[0],*self.name)
-				simple_event("pcm","change",*self.name, value=0)
+				simple_event("pwm","set",self.names[0],*self.name)
+				simple_event("pwm","change",*self.name, value=0)
 		except Exception as ex:
 			fix_exception(ex)
 			process_failure(ex)
@@ -151,8 +151,8 @@ class CommonPM(Collected):
 			self.state = 1
 			tn = self.t_on
 
-		simple_event("pcm","set",self.names[self.state],*self.name)
-		simple_event("pcm","change",*self.name, value=self.state)
+		simple_event("pwm","set",self.names[self.state],*self.name)
+		simple_event("pwm","change",*self.name, value=self.state)
 		try:
 			self.last = self.next
 			if tn is not None:
@@ -163,7 +163,7 @@ class CommonPM(Collected):
 		except Exception as e:
 			fix_exception(e)
 			process_failure(e)
-			simple_event("pcm","error",*self.name, error=e)
+			simple_event("pwm","error",*self.name, error=e)
 		
 	def get_value(self):
 		return self._value

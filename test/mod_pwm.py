@@ -32,8 +32,8 @@ pwm foo bar:
 	type PWM
 	interval 10
 
-on pcm set *X foo bar:
-	log DEBUG PCM is now $X
+on pwm change foo bar:
+	log DEBUG PWM is now $value
 	wait: for 0.1
 
 block:

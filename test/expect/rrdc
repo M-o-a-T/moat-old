@@ -88,22 +88,22 @@ filename: /tmp/rrdtest.rrd
 NEW: ‹ConditionalWorkSequence:10 (2)›
    : │  id: 10
    : │  call count: 0
-   : │  EVENT: wait¦start¦0.3¦_wait¦2
+   : │  EVENT: wait¦start¦0.4¦_wait¦2
    : │       : loglevel=0
    : └1╴... done.
-EVENT: wait¦start¦0.3¦_wait¦2
+EVENT: wait¦start¦0.4¦_wait¦2
      : loglevel=0
-END: wait¦start¦0.3¦_wait¦2
+END: wait¦start¦0.4¦_wait¦2
 NEW: ‹ConditionalWorkSequence:11 (2)›
    : │  id: 11
    : │  call count: 0
    : │  EVENT: wait¦start¦_wait¦2
    : │       : loglevel=0
-   : │       : end_time=0.3
+   : │       : end_time=0.4
    : └1╴... done.
 EVENT: wait¦start¦_wait¦2
      : loglevel=0
-     : end_time=0.3
+     : end_time=0.4
 END: wait¦start¦_wait¦2
 TRACE conn setting up RRDqueue t¦tt¦ttt
 TRACE !got UP_EVENT t tt ttt

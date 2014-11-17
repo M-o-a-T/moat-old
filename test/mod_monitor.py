@@ -24,12 +24,11 @@ from test import run
 
 input = """\
 #log TRACE
-on monitor value *VAL foo bar:
-	var monitor OLDVAL foo bar
-	if null $OLDVAL:
-		log TRACE First value is $VAL
+on monitor update foo bar:
+	if null $last_value:
+		log TRACE First value is $value
 	else:
-		log TRACE Go from $OLDVAL to $VAL
+		log TRACE Go from $last_value to $value
 monitor test 0 100 2:
 	name foo bar
 	delay for 0.4

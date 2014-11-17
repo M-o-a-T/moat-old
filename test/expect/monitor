@@ -7,7 +7,7 @@ NEW: ‹ConditionalWorkSequence:5 (2)›
 EVENT: startup
      : startup=True
 END: startup
-TRACE Create OnEvtHandler: monitor¦value¦*VAL¦foo¦bar
+TRACE Create OnEvtHandler: monitor¦update¦foo¦bar
 TRACE NewHandler 6
 NEW: ‹ConditionalWorkSequence:7 (2)›
    : │  id: 7
@@ -39,32 +39,75 @@ END: wait¦start¦_wait¦1
 TRACE monitor Start run foo¦bar
 TRACE monitor filter [42.0] on foo¦bar
 TRACE monitor End run foo¦bar
-NEW: ‹ConditionalWorkSequence:10 (3)›
+NEW: ‹ConditionalWorkSequence:10 (2)›
    : │  id: 10
    : │  call count: 0
    : │  EVENT: monitor¦value¦42.0¦foo¦bar
-   : ├1╴on monitor value *VAL foo bar ‹OnEventHandler›
-   : │  prio: 51
-   : │  step: var monitor OLDVAL foo bar ‹VarMonitorHandler›
-   : │  step: if null $OLDVAL ‹IfStatement›
-   : │      : step: log TRACE First value is $VAL ‹LogHandler›
-   : └2╴... done.
+   : │       : start_at=2003-04-05 06:07:08
+   : │       : data=[42.0]
+   : │       : up=Run
+   : │       : value=42.0
+   : │       : stop_at=2003-04-05 06:07:08
+   : │       : change_at=2003-04-05 06:07:08
+   : │       : steps=(1, 1, None)
+   : │       : time=‹now›
+   : │       : last_value=None
+   : └1╴... done.
 EVENT: monitor¦value¦42.0¦foo¦bar
-RUN: on monitor value *VAL foo bar ‹OnEventHandler›
-   : prio: 51
-   : step: var monitor OLDVAL foo bar ‹VarMonitorHandler›
-   : step: if null $OLDVAL ‹IfStatement›
-   :     : step: log TRACE First value is $VAL ‹LogHandler›
- at: ‹ConditionalWorkSequence:10 (3)› (step 1)
- ev: EVENT: monitor¦value¦42.0¦foo¦bar
-TRACE First value is 42.0
+     : start_at=2003-04-05 06:07:08
+     : data=[42.0]
+     : up=Run
+     : value=42.0
+     : stop_at=2003-04-05 06:07:08
+     : change_at=2003-04-05 06:07:08
+     : steps=(1, 1, None)
+     : time=‹now›
+     : last_value=None
 END: monitor¦value¦42.0¦foo¦bar
-NEW: ‹ConditionalWorkSequence:11 (2)›
+NEW: ‹ConditionalWorkSequence:11 (3)›
    : │  id: 11
    : │  call count: 0
    : │  EVENT: monitor¦update¦foo¦bar
-   : └1╴... done.
+   : │       : start_at=2003-04-05 06:07:08
+   : │       : data=[42.0]
+   : │       : up=Run
+   : │       : value=42.0
+   : │       : stop_at=2003-04-05 06:07:08
+   : │       : change_at=2003-04-05 06:07:08
+   : │       : steps=(1, 1, None)
+   : │       : time=‹now›
+   : │       : last_value=None
+   : ├1╴on monitor update foo bar ‹OnEventHandler›
+   : │  prio: 51
+   : │  step: if null $last_value ‹IfStatement›
+   : │      : step: log TRACE First value is $value ‹LogHandler›
+   : └2╴... done.
 EVENT: monitor¦update¦foo¦bar
+     : start_at=2003-04-05 06:07:08
+     : data=[42.0]
+     : up=Run
+     : value=42.0
+     : stop_at=2003-04-05 06:07:08
+     : change_at=2003-04-05 06:07:08
+     : steps=(1, 1, None)
+     : time=‹now›
+     : last_value=None
+RUN: on monitor update foo bar ‹OnEventHandler›
+   : prio: 51
+   : step: if null $last_value ‹IfStatement›
+   :     : step: log TRACE First value is $value ‹LogHandler›
+ at: ‹ConditionalWorkSequence:11 (3)› (step 1)
+ ev: EVENT: monitor¦update¦foo¦bar
+   :      : start_at=2003-04-05 06:07:08
+   :      : data=[42.0]
+   :      : up=Run
+   :      : value=42.0
+   :      : stop_at=2003-04-05 06:07:08
+   :      : change_at=2003-04-05 06:07:08
+   :      : steps=(1, 1, None)
+   :      : time=‹now›
+   :      : last_value=None
+TRACE First value is 42.0
 END: monitor¦update¦foo¦bar
 TRACE monitor Stop run foo¦bar
 TRACE 2003-04-05 06:07:08.450000 : Fake timer done
@@ -72,32 +115,75 @@ TRACE 2003-04-05 06:07:08.450000 : Fake timer done
 TRACE monitor Start run foo¦bar
 TRACE monitor filter [40.0] on foo¦bar
 TRACE monitor End run foo¦bar
-NEW: ‹ConditionalWorkSequence:12 (3)›
+NEW: ‹ConditionalWorkSequence:12 (2)›
    : │  id: 12
    : │  call count: 0
    : │  EVENT: monitor¦value¦40.0¦foo¦bar
-   : ├1╴on monitor value *VAL foo bar ‹OnEventHandler›
-   : │  prio: 51
-   : │  step: var monitor OLDVAL foo bar ‹VarMonitorHandler›
-   : │  step: if null $OLDVAL ‹IfStatement›
-   : │      : step: log TRACE First value is $VAL ‹LogHandler›
-   : └2╴... done.
+   : │       : start_at=2003-04-05 06:07:08.450000
+   : │       : data=[40.0]
+   : │       : up=Run
+   : │       : value=40.0
+   : │       : stop_at=2003-04-05 06:07:08.450000
+   : │       : change_at=2003-04-05 06:07:08
+   : │       : steps=(1, 1, None)
+   : │       : time=‹now›
+   : │       : last_value=42.0
+   : └1╴... done.
 EVENT: monitor¦value¦40.0¦foo¦bar
-RUN: on monitor value *VAL foo bar ‹OnEventHandler›
-   : prio: 51
-   : step: var monitor OLDVAL foo bar ‹VarMonitorHandler›
-   : step: if null $OLDVAL ‹IfStatement›
-   :     : step: log TRACE First value is $VAL ‹LogHandler›
- at: ‹ConditionalWorkSequence:12 (3)› (step 1)
- ev: EVENT: monitor¦value¦40.0¦foo¦bar
-TRACE Go from 42.0 to 40.0
+     : start_at=2003-04-05 06:07:08.450000
+     : data=[40.0]
+     : up=Run
+     : value=40.0
+     : stop_at=2003-04-05 06:07:08.450000
+     : change_at=2003-04-05 06:07:08
+     : steps=(1, 1, None)
+     : time=‹now›
+     : last_value=42.0
 END: monitor¦value¦40.0¦foo¦bar
-NEW: ‹ConditionalWorkSequence:13 (2)›
+NEW: ‹ConditionalWorkSequence:13 (3)›
    : │  id: 13
    : │  call count: 0
    : │  EVENT: monitor¦update¦foo¦bar
-   : └1╴... done.
+   : │       : start_at=2003-04-05 06:07:08.450000
+   : │       : data=[40.0]
+   : │       : up=Run
+   : │       : value=40.0
+   : │       : stop_at=2003-04-05 06:07:08.450000
+   : │       : change_at=2003-04-05 06:07:08
+   : │       : steps=(1, 1, None)
+   : │       : time=‹now›
+   : │       : last_value=42.0
+   : ├1╴on monitor update foo bar ‹OnEventHandler›
+   : │  prio: 51
+   : │  step: if null $last_value ‹IfStatement›
+   : │      : step: log TRACE First value is $value ‹LogHandler›
+   : └2╴... done.
 EVENT: monitor¦update¦foo¦bar
+     : start_at=2003-04-05 06:07:08.450000
+     : data=[40.0]
+     : up=Run
+     : value=40.0
+     : stop_at=2003-04-05 06:07:08.450000
+     : change_at=2003-04-05 06:07:08
+     : steps=(1, 1, None)
+     : time=‹now›
+     : last_value=42.0
+RUN: on monitor update foo bar ‹OnEventHandler›
+   : prio: 51
+   : step: if null $last_value ‹IfStatement›
+   :     : step: log TRACE First value is $value ‹LogHandler›
+ at: ‹ConditionalWorkSequence:13 (3)› (step 1)
+ ev: EVENT: monitor¦update¦foo¦bar
+   :      : start_at=2003-04-05 06:07:08.450000
+   :      : data=[40.0]
+   :      : up=Run
+   :      : value=40.0
+   :      : stop_at=2003-04-05 06:07:08.450000
+   :      : change_at=2003-04-05 06:07:08
+   :      : steps=(1, 1, None)
+   :      : time=‹now›
+   :      : last_value=42.0
+TRACE Go from 42.0 to 40.0
 END: monitor¦update¦foo¦bar
 TRACE monitor Stop run foo¦bar
 TRACE 2003-04-05 06:07:08.850000 : Fake timer done
@@ -105,32 +191,75 @@ TRACE 2003-04-05 06:07:08.850000 : Fake timer done
 TRACE monitor Start run foo¦bar
 TRACE monitor filter [42.0] on foo¦bar
 TRACE monitor End run foo¦bar
-NEW: ‹ConditionalWorkSequence:14 (3)›
+NEW: ‹ConditionalWorkSequence:14 (2)›
    : │  id: 14
    : │  call count: 0
    : │  EVENT: monitor¦value¦42.0¦foo¦bar
-   : ├1╴on monitor value *VAL foo bar ‹OnEventHandler›
-   : │  prio: 51
-   : │  step: var monitor OLDVAL foo bar ‹VarMonitorHandler›
-   : │  step: if null $OLDVAL ‹IfStatement›
-   : │      : step: log TRACE First value is $VAL ‹LogHandler›
-   : └2╴... done.
+   : │       : start_at=2003-04-05 06:07:08.850000
+   : │       : data=[42.0]
+   : │       : up=Run
+   : │       : value=42.0
+   : │       : stop_at=2003-04-05 06:07:08.850000
+   : │       : change_at=2003-04-05 06:07:08
+   : │       : steps=(1, 1, None)
+   : │       : time=‹now›
+   : │       : last_value=40.0
+   : └1╴... done.
 EVENT: monitor¦value¦42.0¦foo¦bar
-RUN: on monitor value *VAL foo bar ‹OnEventHandler›
-   : prio: 51
-   : step: var monitor OLDVAL foo bar ‹VarMonitorHandler›
-   : step: if null $OLDVAL ‹IfStatement›
-   :     : step: log TRACE First value is $VAL ‹LogHandler›
- at: ‹ConditionalWorkSequence:14 (3)› (step 1)
- ev: EVENT: monitor¦value¦42.0¦foo¦bar
-TRACE Go from 40.0 to 42.0
+     : start_at=2003-04-05 06:07:08.850000
+     : data=[42.0]
+     : up=Run
+     : value=42.0
+     : stop_at=2003-04-05 06:07:08.850000
+     : change_at=2003-04-05 06:07:08
+     : steps=(1, 1, None)
+     : time=‹now›
+     : last_value=40.0
 END: monitor¦value¦42.0¦foo¦bar
-NEW: ‹ConditionalWorkSequence:15 (2)›
+NEW: ‹ConditionalWorkSequence:15 (3)›
    : │  id: 15
    : │  call count: 0
    : │  EVENT: monitor¦update¦foo¦bar
-   : └1╴... done.
+   : │       : start_at=2003-04-05 06:07:08.850000
+   : │       : data=[42.0]
+   : │       : up=Run
+   : │       : value=42.0
+   : │       : stop_at=2003-04-05 06:07:08.850000
+   : │       : change_at=2003-04-05 06:07:08
+   : │       : steps=(1, 1, None)
+   : │       : time=‹now›
+   : │       : last_value=40.0
+   : ├1╴on monitor update foo bar ‹OnEventHandler›
+   : │  prio: 51
+   : │  step: if null $last_value ‹IfStatement›
+   : │      : step: log TRACE First value is $value ‹LogHandler›
+   : └2╴... done.
 EVENT: monitor¦update¦foo¦bar
+     : start_at=2003-04-05 06:07:08.850000
+     : data=[42.0]
+     : up=Run
+     : value=42.0
+     : stop_at=2003-04-05 06:07:08.850000
+     : change_at=2003-04-05 06:07:08
+     : steps=(1, 1, None)
+     : time=‹now›
+     : last_value=40.0
+RUN: on monitor update foo bar ‹OnEventHandler›
+   : prio: 51
+   : step: if null $last_value ‹IfStatement›
+   :     : step: log TRACE First value is $value ‹LogHandler›
+ at: ‹ConditionalWorkSequence:15 (3)› (step 1)
+ ev: EVENT: monitor¦update¦foo¦bar
+   :      : start_at=2003-04-05 06:07:08.850000
+   :      : data=[42.0]
+   :      : up=Run
+   :      : value=42.0
+   :      : stop_at=2003-04-05 06:07:08.850000
+   :      : change_at=2003-04-05 06:07:08
+   :      : steps=(1, 1, None)
+   :      : time=‹now›
+   :      : last_value=40.0
+TRACE Go from 40.0 to 42.0
 END: monitor¦update¦foo¦bar
 TRACE monitor Stop run foo¦bar
 TRACE 2003-04-05 06:07:09 _wait¦1: Fake timer done
@@ -189,32 +318,75 @@ TRACE 2003-04-05 06:07:09.250000 : Fake timer done
 TRACE monitor Start run foo¦bar
 TRACE monitor filter [41.0] on foo¦bar
 TRACE monitor End run foo¦bar
-NEW: ‹ConditionalWorkSequence:20 (3)›
+NEW: ‹ConditionalWorkSequence:20 (2)›
    : │  id: 20
    : │  call count: 0
    : │  EVENT: monitor¦value¦41.0¦foo¦bar
-   : ├1╴on monitor value *VAL foo bar ‹OnEventHandler›
-   : │  prio: 51
-   : │  step: var monitor OLDVAL foo bar ‹VarMonitorHandler›
-   : │  step: if null $OLDVAL ‹IfStatement›
-   : │      : step: log TRACE First value is $VAL ‹LogHandler›
-   : └2╴... done.
+   : │       : start_at=2003-04-05 06:07:09.250000
+   : │       : data=[41.0]
+   : │       : up=Run
+   : │       : value=41.0
+   : │       : stop_at=2003-04-05 06:07:09.250000
+   : │       : change_at=2003-04-05 06:07:08
+   : │       : steps=(1, 1, None)
+   : │       : time=‹now›
+   : │       : last_value=42.0
+   : └1╴... done.
 EVENT: monitor¦value¦41.0¦foo¦bar
-RUN: on monitor value *VAL foo bar ‹OnEventHandler›
-   : prio: 51
-   : step: var monitor OLDVAL foo bar ‹VarMonitorHandler›
-   : step: if null $OLDVAL ‹IfStatement›
-   :     : step: log TRACE First value is $VAL ‹LogHandler›
- at: ‹ConditionalWorkSequence:20 (3)› (step 1)
- ev: EVENT: monitor¦value¦41.0¦foo¦bar
-TRACE Go from 42.0 to 41.0
+     : start_at=2003-04-05 06:07:09.250000
+     : data=[41.0]
+     : up=Run
+     : value=41.0
+     : stop_at=2003-04-05 06:07:09.250000
+     : change_at=2003-04-05 06:07:08
+     : steps=(1, 1, None)
+     : time=‹now›
+     : last_value=42.0
 END: monitor¦value¦41.0¦foo¦bar
-NEW: ‹ConditionalWorkSequence:21 (2)›
+NEW: ‹ConditionalWorkSequence:21 (3)›
    : │  id: 21
    : │  call count: 0
    : │  EVENT: monitor¦update¦foo¦bar
-   : └1╴... done.
+   : │       : start_at=2003-04-05 06:07:09.250000
+   : │       : data=[41.0]
+   : │       : up=Run
+   : │       : value=41.0
+   : │       : stop_at=2003-04-05 06:07:09.250000
+   : │       : change_at=2003-04-05 06:07:08
+   : │       : steps=(1, 1, None)
+   : │       : time=‹now›
+   : │       : last_value=42.0
+   : ├1╴on monitor update foo bar ‹OnEventHandler›
+   : │  prio: 51
+   : │  step: if null $last_value ‹IfStatement›
+   : │      : step: log TRACE First value is $value ‹LogHandler›
+   : └2╴... done.
 EVENT: monitor¦update¦foo¦bar
+     : start_at=2003-04-05 06:07:09.250000
+     : data=[41.0]
+     : up=Run
+     : value=41.0
+     : stop_at=2003-04-05 06:07:09.250000
+     : change_at=2003-04-05 06:07:08
+     : steps=(1, 1, None)
+     : time=‹now›
+     : last_value=42.0
+RUN: on monitor update foo bar ‹OnEventHandler›
+   : prio: 51
+   : step: if null $last_value ‹IfStatement›
+   :     : step: log TRACE First value is $value ‹LogHandler›
+ at: ‹ConditionalWorkSequence:21 (3)› (step 1)
+ ev: EVENT: monitor¦update¦foo¦bar
+   :      : start_at=2003-04-05 06:07:09.250000
+   :      : data=[41.0]
+   :      : up=Run
+   :      : value=41.0
+   :      : stop_at=2003-04-05 06:07:09.250000
+   :      : change_at=2003-04-05 06:07:08
+   :      : steps=(1, 1, None)
+   :      : time=‹now›
+   :      : last_value=42.0
+TRACE Go from 42.0 to 41.0
 END: monitor¦update¦foo¦bar
 TRACE monitor Stop run foo¦bar
 TRACE 2003-04-05 06:07:09.650000 : Fake timer done
@@ -222,32 +394,75 @@ TRACE 2003-04-05 06:07:09.650000 : Fake timer done
 TRACE monitor Start run foo¦bar
 TRACE monitor filter [40.0] on foo¦bar
 TRACE monitor End run foo¦bar
-NEW: ‹ConditionalWorkSequence:22 (3)›
+NEW: ‹ConditionalWorkSequence:22 (2)›
    : │  id: 22
    : │  call count: 0
    : │  EVENT: monitor¦value¦40.0¦foo¦bar
-   : ├1╴on monitor value *VAL foo bar ‹OnEventHandler›
-   : │  prio: 51
-   : │  step: var monitor OLDVAL foo bar ‹VarMonitorHandler›
-   : │  step: if null $OLDVAL ‹IfStatement›
-   : │      : step: log TRACE First value is $VAL ‹LogHandler›
-   : └2╴... done.
+   : │       : start_at=2003-04-05 06:07:09.650000
+   : │       : data=[40.0]
+   : │       : up=Run
+   : │       : value=40.0
+   : │       : stop_at=2003-04-05 06:07:09.650000
+   : │       : change_at=2003-04-05 06:07:08
+   : │       : steps=(1, 1, None)
+   : │       : time=‹now›
+   : │       : last_value=41.0
+   : └1╴... done.
 EVENT: monitor¦value¦40.0¦foo¦bar
-RUN: on monitor value *VAL foo bar ‹OnEventHandler›
-   : prio: 51
-   : step: var monitor OLDVAL foo bar ‹VarMonitorHandler›
-   : step: if null $OLDVAL ‹IfStatement›
-   :     : step: log TRACE First value is $VAL ‹LogHandler›
- at: ‹ConditionalWorkSequence:22 (3)› (step 1)
- ev: EVENT: monitor¦value¦40.0¦foo¦bar
-TRACE Go from 41.0 to 40.0
+     : start_at=2003-04-05 06:07:09.650000
+     : data=[40.0]
+     : up=Run
+     : value=40.0
+     : stop_at=2003-04-05 06:07:09.650000
+     : change_at=2003-04-05 06:07:08
+     : steps=(1, 1, None)
+     : time=‹now›
+     : last_value=41.0
 END: monitor¦value¦40.0¦foo¦bar
-NEW: ‹ConditionalWorkSequence:23 (2)›
+NEW: ‹ConditionalWorkSequence:23 (3)›
    : │  id: 23
    : │  call count: 0
    : │  EVENT: monitor¦update¦foo¦bar
-   : └1╴... done.
+   : │       : start_at=2003-04-05 06:07:09.650000
+   : │       : data=[40.0]
+   : │       : up=Run
+   : │       : value=40.0
+   : │       : stop_at=2003-04-05 06:07:09.650000
+   : │       : change_at=2003-04-05 06:07:08
+   : │       : steps=(1, 1, None)
+   : │       : time=‹now›
+   : │       : last_value=41.0
+   : ├1╴on monitor update foo bar ‹OnEventHandler›
+   : │  prio: 51
+   : │  step: if null $last_value ‹IfStatement›
+   : │      : step: log TRACE First value is $value ‹LogHandler›
+   : └2╴... done.
 EVENT: monitor¦update¦foo¦bar
+     : start_at=2003-04-05 06:07:09.650000
+     : data=[40.0]
+     : up=Run
+     : value=40.0
+     : stop_at=2003-04-05 06:07:09.650000
+     : change_at=2003-04-05 06:07:08
+     : steps=(1, 1, None)
+     : time=‹now›
+     : last_value=41.0
+RUN: on monitor update foo bar ‹OnEventHandler›
+   : prio: 51
+   : step: if null $last_value ‹IfStatement›
+   :     : step: log TRACE First value is $value ‹LogHandler›
+ at: ‹ConditionalWorkSequence:23 (3)› (step 1)
+ ev: EVENT: monitor¦update¦foo¦bar
+   :      : start_at=2003-04-05 06:07:09.650000
+   :      : data=[40.0]
+   :      : up=Run
+   :      : value=40.0
+   :      : stop_at=2003-04-05 06:07:09.650000
+   :      : change_at=2003-04-05 06:07:08
+   :      : steps=(1, 1, None)
+   :      : time=‹now›
+   :      : last_value=41.0
+TRACE Go from 41.0 to 40.0
 END: monitor¦update¦foo¦bar
 TRACE monitor Stop run foo¦bar
 TRACE 2003-04-05 06:07:09.800000 _wait¦2: Fake timer done
@@ -291,6 +506,15 @@ NEW: ‹ConditionalWorkSequence:29 (3)›
    : │  id: 29
    : │  call count: 0
    : │  EVENT: monitor¦checking¦baz¦zaz
+   : │       : start_at=2003-04-05 06:07:09.800000
+   : │       : data=[]
+   : │       : up=Run
+   : │       : value=None
+   : │       : stop_at=None
+   : │       : change_at=2003-04-05 06:07:09.800000
+   : │       : steps=(1, 2, None)
+   : │       : time=‹now›
+   : │       : last_value=None
    : ├1╴on monitor checking baz zaz ‹OnEventHandler›
    : │  prio: 51
    : │  step: async ‹Async›
@@ -301,6 +525,15 @@ NEW: ‹ConditionalWorkSequence:29 (3)›
    : │      : step: set monitor 14 baz zaz ‹MonitorSet›
    : └2╴... done.
 EVENT: monitor¦checking¦baz¦zaz
+     : start_at=2003-04-05 06:07:09.800000
+     : data=[]
+     : up=Run
+     : value=None
+     : stop_at=None
+     : change_at=2003-04-05 06:07:09.800000
+     : steps=(1, 2, None)
+     : time=‹now›
+     : last_value=None
 RUN: on monitor checking baz zaz ‹OnEventHandler›
    : prio: 51
    : step: async ‹Async›
@@ -311,6 +544,15 @@ RUN: on monitor checking baz zaz ‹OnEventHandler›
    :     : step: set monitor 14 baz zaz ‹MonitorSet›
  at: ‹ConditionalWorkSequence:29 (3)› (step 1)
  ev: EVENT: monitor¦checking¦baz¦zaz
+   :      : start_at=2003-04-05 06:07:09.800000
+   :      : data=[]
+   :      : up=Run
+   :      : value=None
+   :      : stop_at=None
+   :      : change_at=2003-04-05 06:07:09.800000
+   :      : steps=(1, 2, None)
+   :      : time=‹now›
+   :      : last_value=None
 END: monitor¦checking¦baz¦zaz
 : ‹Monitor baz¦zaz run 0›
 name: baz¦zaz
@@ -468,22 +710,76 @@ NEW: ‹ConditionalWorkSequence:44 (2)›
    : │  id: 44
    : │  call count: 0
    : │  EVENT: monitor¦checked¦baz¦zaz
+   : │       : start_at=2003-04-05 06:07:09.800000
+   : │       : data=[10.0, 13.0, 14.0]
+   : │       : up=Run
+   : │       : value=None
+   : │       : stop_at=2003-04-05 06:07:10.300000
+   : │       : change_at=2003-04-05 06:07:09.800000
+   : │       : steps=(3, 2, None)
+   : │       : time=‹0.5 sec›
+   : │       : last_value=None
    : └1╴... done.
 EVENT: monitor¦checked¦baz¦zaz
+     : start_at=2003-04-05 06:07:09.800000
+     : data=[10.0, 13.0, 14.0]
+     : up=Run
+     : value=None
+     : stop_at=2003-04-05 06:07:10.300000
+     : change_at=2003-04-05 06:07:09.800000
+     : steps=(3, 2, None)
+     : time=‹0.5 sec›
+     : last_value=None
 END: monitor¦checked¦baz¦zaz
 NEW: ‹ConditionalWorkSequence:45 (2)›
    : │  id: 45
    : │  call count: 0
    : │  EVENT: monitor¦value¦13.5¦baz¦zaz
+   : │       : start_at=2003-04-05 06:07:09.800000
+   : │       : data=[10.0, 13.0, 14.0]
+   : │       : up=Run
+   : │       : value=13.5
+   : │       : stop_at=2003-04-05 06:07:10.300000
+   : │       : change_at=2003-04-05 06:07:09.800000
+   : │       : steps=(3, 2, None)
+   : │       : time=‹0.5 sec›
+   : │       : last_value=None
    : └1╴... done.
 EVENT: monitor¦value¦13.5¦baz¦zaz
+     : start_at=2003-04-05 06:07:09.800000
+     : data=[10.0, 13.0, 14.0]
+     : up=Run
+     : value=13.5
+     : stop_at=2003-04-05 06:07:10.300000
+     : change_at=2003-04-05 06:07:09.800000
+     : steps=(3, 2, None)
+     : time=‹0.5 sec›
+     : last_value=None
 END: monitor¦value¦13.5¦baz¦zaz
 NEW: ‹ConditionalWorkSequence:46 (2)›
    : │  id: 46
    : │  call count: 0
    : │  EVENT: monitor¦update¦baz¦zaz
+   : │       : start_at=2003-04-05 06:07:09.800000
+   : │       : data=[10.0, 13.0, 14.0]
+   : │       : up=Run
+   : │       : value=13.5
+   : │       : stop_at=2003-04-05 06:07:10.300000
+   : │       : change_at=2003-04-05 06:07:09.800000
+   : │       : steps=(3, 2, None)
+   : │       : time=‹0.5 sec›
+   : │       : last_value=None
    : └1╴... done.
 EVENT: monitor¦update¦baz¦zaz
+     : start_at=2003-04-05 06:07:09.800000
+     : data=[10.0, 13.0, 14.0]
+     : up=Run
+     : value=13.5
+     : stop_at=2003-04-05 06:07:10.300000
+     : change_at=2003-04-05 06:07:09.800000
+     : steps=(3, 2, None)
+     : time=‹0.5 sec›
+     : last_value=None
 END: monitor¦update¦baz¦zaz
 TRACE monitor Stop run baz¦zaz
 TRACE 2003-04-05 06:07:10.600000 : Fake timer done
@@ -493,6 +789,15 @@ NEW: ‹ConditionalWorkSequence:47 (3)›
    : │  id: 47
    : │  call count: 0
    : │  EVENT: monitor¦checking¦baz¦zaz
+   : │       : start_at=2003-04-05 06:07:10.600000
+   : │       : data=[]
+   : │       : up=Run
+   : │       : value=13.5
+   : │       : stop_at=2003-04-05 06:07:10.300000
+   : │       : change_at=2003-04-05 06:07:09.800000
+   : │       : steps=(1, 2, None)
+   : │       : time=‹now›
+   : │       : last_value=None
    : ├1╴on monitor checking baz zaz ‹OnEventHandler›
    : │  prio: 51
    : │  step: async ‹Async›
@@ -503,6 +808,15 @@ NEW: ‹ConditionalWorkSequence:47 (3)›
    : │      : step: set monitor 14 baz zaz ‹MonitorSet›
    : └2╴... done.
 EVENT: monitor¦checking¦baz¦zaz
+     : start_at=2003-04-05 06:07:10.600000
+     : data=[]
+     : up=Run
+     : value=13.5
+     : stop_at=2003-04-05 06:07:10.300000
+     : change_at=2003-04-05 06:07:09.800000
+     : steps=(1, 2, None)
+     : time=‹now›
+     : last_value=None
 RUN: on monitor checking baz zaz ‹OnEventHandler›
    : prio: 51
    : step: async ‹Async›
@@ -513,6 +827,15 @@ RUN: on monitor checking baz zaz ‹OnEventHandler›
    :     : step: set monitor 14 baz zaz ‹MonitorSet›
  at: ‹ConditionalWorkSequence:47 (3)› (step 1)
  ev: EVENT: monitor¦checking¦baz¦zaz
+   :      : start_at=2003-04-05 06:07:10.600000
+   :      : data=[]
+   :      : up=Run
+   :      : value=13.5
+   :      : stop_at=2003-04-05 06:07:10.300000
+   :      : change_at=2003-04-05 06:07:09.800000
+   :      : steps=(1, 2, None)
+   :      : time=‹now›
+   :      : last_value=None
 END: monitor¦checking¦baz¦zaz
 TRACE monitor filter [10.0] on baz¦zaz
 TRACE monitor More data [10.0] for ‹baz zaz›
@@ -664,15 +987,51 @@ NEW: ‹ConditionalWorkSequence:62 (2)›
    : │  id: 62
    : │  call count: 0
    : │  EVENT: monitor¦value¦1.0¦moni¦test
+   : │       : start_at=2003-04-05 06:07:11
+   : │       : data=[1.0]
+   : │       : up=Run
+   : │       : value=1.0
+   : │       : stop_at=2003-04-05 06:07:11
+   : │       : change_at=2003-04-05 06:07:11
+   : │       : steps=(1, 1, None)
+   : │       : time=‹now›
+   : │       : last_value=None
    : └1╴... done.
 EVENT: monitor¦value¦1.0¦moni¦test
+     : start_at=2003-04-05 06:07:11
+     : data=[1.0]
+     : up=Run
+     : value=1.0
+     : stop_at=2003-04-05 06:07:11
+     : change_at=2003-04-05 06:07:11
+     : steps=(1, 1, None)
+     : time=‹now›
+     : last_value=None
 END: monitor¦value¦1.0¦moni¦test
 NEW: ‹ConditionalWorkSequence:63 (2)›
    : │  id: 63
    : │  call count: 0
    : │  EVENT: monitor¦update¦moni¦test
+   : │       : start_at=2003-04-05 06:07:11
+   : │       : data=[1.0]
+   : │       : up=Run
+   : │       : value=1.0
+   : │       : stop_at=2003-04-05 06:07:11
+   : │       : change_at=2003-04-05 06:07:11
+   : │       : steps=(1, 1, None)
+   : │       : time=‹now›
+   : │       : last_value=None
    : └1╴... done.
 EVENT: monitor¦update¦moni¦test
+     : start_at=2003-04-05 06:07:11
+     : data=[1.0]
+     : up=Run
+     : value=1.0
+     : stop_at=2003-04-05 06:07:11
+     : change_at=2003-04-05 06:07:11
+     : steps=(1, 1, None)
+     : time=‹now›
+     : last_value=None
 END: monitor¦update¦moni¦test
 TRACE monitor Stop run moni¦test
 TRACE 2003-04-05 06:07:11.200000 _wait¦7: Fake timer done
@@ -759,15 +1118,51 @@ NEW: ‹ConditionalWorkSequence:72 (2)›
    : │  id: 72
    : │  call count: 0
    : │  EVENT: monitor¦value¦2.0¦moni¦test
+   : │       : start_at=2003-04-05 06:07:11.250000
+   : │       : data=[2.0]
+   : │       : up=Run
+   : │       : value=2.0
+   : │       : stop_at=2003-04-05 06:07:11.250000
+   : │       : change_at=2003-04-05 06:07:11
+   : │       : steps=(1, 1, None)
+   : │       : time=‹now›
+   : │       : last_value=1.0
    : └1╴... done.
 EVENT: monitor¦value¦2.0¦moni¦test
+     : start_at=2003-04-05 06:07:11.250000
+     : data=[2.0]
+     : up=Run
+     : value=2.0
+     : stop_at=2003-04-05 06:07:11.250000
+     : change_at=2003-04-05 06:07:11
+     : steps=(1, 1, None)
+     : time=‹now›
+     : last_value=1.0
 END: monitor¦value¦2.0¦moni¦test
 NEW: ‹ConditionalWorkSequence:73 (2)›
    : │  id: 73
    : │  call count: 0
    : │  EVENT: monitor¦update¦moni¦test
+   : │       : start_at=2003-04-05 06:07:11.250000
+   : │       : data=[2.0]
+   : │       : up=Run
+   : │       : value=2.0
+   : │       : stop_at=2003-04-05 06:07:11.250000
+   : │       : change_at=2003-04-05 06:07:11
+   : │       : steps=(1, 1, None)
+   : │       : time=‹now›
+   : │       : last_value=1.0
    : └1╴... done.
 EVENT: monitor¦update¦moni¦test
+     : start_at=2003-04-05 06:07:11.250000
+     : data=[2.0]
+     : up=Run
+     : value=2.0
+     : stop_at=2003-04-05 06:07:11.250000
+     : change_at=2003-04-05 06:07:11
+     : steps=(1, 1, None)
+     : time=‹now›
+     : last_value=1.0
 END: monitor¦update¦moni¦test
 TRACE monitor Stop run moni¦test
 TRACE 2003-04-05 06:07:11.400000 _wait¦8: Fake timer done
@@ -854,15 +1249,51 @@ NEW: ‹ConditionalWorkSequence:82 (2)›
    : │  id: 82
    : │  call count: 0
    : │  EVENT: monitor¦value¦3.0¦moni¦test
+   : │       : start_at=2003-04-05 06:07:11.450000
+   : │       : data=[3.0]
+   : │       : up=Run
+   : │       : value=3.0
+   : │       : stop_at=2003-04-05 06:07:11.450000
+   : │       : change_at=2003-04-05 06:07:11
+   : │       : steps=(1, 1, None)
+   : │       : time=‹now›
+   : │       : last_value=2.0
    : └1╴... done.
 EVENT: monitor¦value¦3.0¦moni¦test
+     : start_at=2003-04-05 06:07:11.450000
+     : data=[3.0]
+     : up=Run
+     : value=3.0
+     : stop_at=2003-04-05 06:07:11.450000
+     : change_at=2003-04-05 06:07:11
+     : steps=(1, 1, None)
+     : time=‹now›
+     : last_value=2.0
 END: monitor¦value¦3.0¦moni¦test
 NEW: ‹ConditionalWorkSequence:83 (2)›
    : │  id: 83
    : │  call count: 0
    : │  EVENT: monitor¦update¦moni¦test
+   : │       : start_at=2003-04-05 06:07:11.450000
+   : │       : data=[3.0]
+   : │       : up=Run
+   : │       : value=3.0
+   : │       : stop_at=2003-04-05 06:07:11.450000
+   : │       : change_at=2003-04-05 06:07:11
+   : │       : steps=(1, 1, None)
+   : │       : time=‹now›
+   : │       : last_value=2.0
    : └1╴... done.
 EVENT: monitor¦update¦moni¦test
+     : start_at=2003-04-05 06:07:11.450000
+     : data=[3.0]
+     : up=Run
+     : value=3.0
+     : stop_at=2003-04-05 06:07:11.450000
+     : change_at=2003-04-05 06:07:11
+     : steps=(1, 1, None)
+     : time=‹now›
+     : last_value=2.0
 END: monitor¦update¦moni¦test
 TRACE monitor Stop run moni¦test
 TRACE 2003-04-05 06:07:11.650000 : Fake timer done
@@ -874,15 +1305,51 @@ NEW: ‹ConditionalWorkSequence:84 (2)›
    : │  id: 84
    : │  call count: 0
    : │  EVENT: monitor¦value¦3.0¦moni¦test
+   : │       : start_at=2003-04-05 06:07:11.650000
+   : │       : data=[3.0]
+   : │       : up=Run
+   : │       : value=3.0
+   : │       : stop_at=2003-04-05 06:07:11.650000
+   : │       : change_at=2003-04-05 06:07:11
+   : │       : steps=(1, 1, None)
+   : │       : time=‹now›
+   : │       : last_value=3.0
    : └1╴... done.
 EVENT: monitor¦value¦3.0¦moni¦test
+     : start_at=2003-04-05 06:07:11.650000
+     : data=[3.0]
+     : up=Run
+     : value=3.0
+     : stop_at=2003-04-05 06:07:11.650000
+     : change_at=2003-04-05 06:07:11
+     : steps=(1, 1, None)
+     : time=‹now›
+     : last_value=3.0
 END: monitor¦value¦3.0¦moni¦test
 NEW: ‹ConditionalWorkSequence:85 (2)›
    : │  id: 85
    : │  call count: 0
    : │  EVENT: monitor¦update¦moni¦test
+   : │       : start_at=2003-04-05 06:07:11.650000
+   : │       : data=[3.0]
+   : │       : up=Run
+   : │       : value=3.0
+   : │       : stop_at=2003-04-05 06:07:11.650000
+   : │       : change_at=2003-04-05 06:07:11
+   : │       : steps=(1, 1, None)
+   : │       : time=‹now›
+   : │       : last_value=3.0
    : └1╴... done.
 EVENT: monitor¦update¦moni¦test
+     : start_at=2003-04-05 06:07:11.650000
+     : data=[3.0]
+     : up=Run
+     : value=3.0
+     : stop_at=2003-04-05 06:07:11.650000
+     : change_at=2003-04-05 06:07:11
+     : steps=(1, 1, None)
+     : time=‹now›
+     : last_value=3.0
 END: monitor¦update¦moni¦test
 TRACE monitor Stop run moni¦test
 TRACE 2003-04-05 06:07:11.700000 _wait¦9: Fake timer done
@@ -969,15 +1436,51 @@ NEW: ‹ConditionalWorkSequence:94 (2)›
    : │  id: 94
    : │  call count: 0
    : │  EVENT: monitor¦value¦4.0¦moni¦test
+   : │       : start_at=2003-04-05 06:07:11.850000
+   : │       : data=[4.0]
+   : │       : up=Run
+   : │       : value=4.0
+   : │       : stop_at=2003-04-05 06:07:11.850000
+   : │       : change_at=2003-04-05 06:07:11
+   : │       : steps=(1, 1, None)
+   : │       : time=‹now›
+   : │       : last_value=3.0
    : └1╴... done.
 EVENT: monitor¦value¦4.0¦moni¦test
+     : start_at=2003-04-05 06:07:11.850000
+     : data=[4.0]
+     : up=Run
+     : value=4.0
+     : stop_at=2003-04-05 06:07:11.850000
+     : change_at=2003-04-05 06:07:11
+     : steps=(1, 1, None)
+     : time=‹now›
+     : last_value=3.0
 END: monitor¦value¦4.0¦moni¦test
 NEW: ‹ConditionalWorkSequence:95 (2)›
    : │  id: 95
    : │  call count: 0
    : │  EVENT: monitor¦update¦moni¦test
+   : │       : start_at=2003-04-05 06:07:11.850000
+   : │       : data=[4.0]
+   : │       : up=Run
+   : │       : value=4.0
+   : │       : stop_at=2003-04-05 06:07:11.850000
+   : │       : change_at=2003-04-05 06:07:11
+   : │       : steps=(1, 1, None)
+   : │       : time=‹now›
+   : │       : last_value=3.0
    : └1╴... done.
 EVENT: monitor¦update¦moni¦test
+     : start_at=2003-04-05 06:07:11.850000
+     : data=[4.0]
+     : up=Run
+     : value=4.0
+     : stop_at=2003-04-05 06:07:11.850000
+     : change_at=2003-04-05 06:07:11
+     : steps=(1, 1, None)
+     : time=‹now›
+     : last_value=3.0
 END: monitor¦update¦moni¦test
 TRACE monitor Stop run moni¦test
 TRACE 2003-04-05 06:07:11.900000 _wait¦10: Fake timer done

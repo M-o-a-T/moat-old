@@ -40,22 +40,19 @@ log TRACE Set to ONE
 set state one foo bar
 log TRACE Set to TWO
 set state two foo bar
-on state * three foo bar:
-	log TRACE Set to FOUR
-	try:
-		set state four foo bar
-		log DEBUG "No! (No shit happened.)"
-	catch StateChangeError:
-		log DEBUG "Yes! (Shit happens.)"
+on state change foo bar:
+	if equal $value three:
+		log TRACE Yes Set to three
 block:
 	try:
 		log TRACE Set to THREE
 		set state three foo bar
 	catch:
 		log DEBUG "No! Error! Woe!"
-on state * twohalf foo bar:
-	log TRACE Set to FOUR
-	set state fourtoo foo bar
+on state change foo bar:
+	if equal $value twohalf:
+		log TRACE Set to FOUR
+		set state fourtoo foo bar
 block:
 	try:
 		log TRACE Set to TWOHALF
@@ -103,6 +100,7 @@ load_module("data")
 load_module("on_event")
 load_module("logging")
 load_module("ifelse")
+load_module("bool")
 load_module("trigger")
 load_module("errors")
 

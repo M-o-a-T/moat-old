@@ -102,7 +102,9 @@ class Monitor(Collected,Jobber):
 	range = None # allowed range of data within a measurement
 	diff = None # required difference for a "value" event
 
+	last_value = None
 	value = None # last correct measurement
+	new_value = None
 	started_at = None # last time when measuring started or will start
 	stopped_at = None # last time when measuring ended
 	state_change_at = None # last time up/down got called
@@ -155,8 +157,9 @@ class Monitor(Collected,Jobber):
 		if self.data:
 			yield ("data"," ".join(unicode(x) for x in self.data))
 
-	def update_ctx(self):
+	def update_ectx(self):
 		self._ectx.value = self.value
+		self._ectx.last_value = self.last_value
 		self._ectx.up = self.up_name
 		self._ectx.time = self.time_name
 		self._ectx.start_at = self.started_at
@@ -264,18 +267,17 @@ class Monitor(Collected,Jobber):
 			if self.send_check_event:
 				simple_event(self.ectx, "monitor","checked",*self.name)
 			if self.new_value is not None:
+				self.last_value = self.value
+				self.value = self.new_value
 				if hasattr(self,"delta"):
-					if self.value is not None:
-						val = self.new_value-self.value
-						self._ectx.value_delta = val
-						if val >= 0 or self.delta == 0:
-							simple_event(self.ectx,"monitor","value",self.new_value-self.value,*self.name)
-							simple_event(self.ectx,"monitor","update",*self.name)
+					val = self.value-self.last_value
+					self._ectx.value_delta = val
+					if val >= 0 or self.delta == 0:
+						simple_event(self.ectx,"monitor","value",self.value-self.last_value,*self.name)
+						simple_event(self.ectx,"monitor","update",*self.name)
 				else:
 					simple_event(self.ectx,"monitor","value",self.new_value,*self.name)
 					simple_event(self.ectx,"monitor","update",*self.name)
-			if self.new_value is not None:
-				self.value = self.new_value
 		except Exception as e:
 			fix_exception(e)
 			process_failure(e)
