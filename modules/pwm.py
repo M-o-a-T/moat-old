@@ -35,7 +35,7 @@ from homevent.event import Event
 from homevent.run import simple_event,process_failure
 from homevent.reactor import shutdown_event
 from homevent.module import Module
-from homevent.worker import HaltSequence,ExcWorker
+from homevent.worker import ExcWorker
 from homevent.times import simple_time_delta, now, humandelta
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.base import Name,SName, SYS_PRIO

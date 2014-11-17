@@ -39,7 +39,7 @@ from homevent.statement import Statement,MainStatementList, main_words,\
 	global_words
 from homevent.logging import log_event,log, TRACE
 from homevent.run import register_worker,unregister_worker,MIN_PRIO,MAX_PRIO
-from homevent.worker import HaltSequence,Worker
+from homevent.worker import Worker
 from homevent.module import Module
 from homevent.logging import log
 from homevent.check import Check,register_condition,unregister_condition

@@ -32,11 +32,6 @@ from homevent.twist import fix_exception,reraise,format_exception
 
 #import os
 
-class HaltSequence(Exception):
-	"""Do not execute the following workers."""
-	pass
-	
-
 def report_(err, verbose=False):
 	"""A report wrapper which reports backtraces for exceptions"""
 	if hasattr(err,"report"):
@@ -218,11 +213,6 @@ class WorkSequence(WorkItem):
 				if not excepting or isinstance(w,ExcWorker):
 					log_run(self,w,step)
 					r = w.process(event=self.event, queue=self)
-			except HaltSequence as ex:
-				fix_exception(ex)
-				r = ex
-				log_halted(self,w,step)
-				skipping = True
 			except TrySomethingElse:
 				pass
 			except Exception as ex:

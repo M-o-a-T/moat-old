@@ -26,7 +26,6 @@ from homevent.module import Module
 from homevent.logging import log
 from homevent.statement import main_words, MainStatementList
 from homevent.run import process_failure
-from homevent.worker import HaltSequence
 from homevent.twist import fix_exception,Jobber
 
 import os
@@ -60,8 +59,6 @@ class Async(MainStatementList,Jobber):
 	def _run(self,a,k):
 		try:
 			super(Async,self).run(*a,**k)
-		except HaltSequence:
-			pass
 		except Exception as err:
 			fix_exception(err)
 			process_failure(err)
