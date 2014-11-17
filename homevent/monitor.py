@@ -272,10 +272,10 @@ class Monitor(Collected,Jobber):
 						self.ctx.delta = val
 						if val >= 0 or self.delta == 0:
 							process_event(Event(self.ctx,"monitor","value",self.new_value-self.value,*self.name))
-							process_event(Event(self.ctx,"monitor","update",*self.name)
+							process_event(Event(self.ctx,"monitor","update",*self.name))
 				else:
 					process_event(Event(self.ctx,"monitor","value",self.new_value,*self.name))
-					process_event(Event(self.ctx,"monitor","update",*self.name)
+					process_event(Event(self.ctx,"monitor","update",*self.name))
 			if self.new_value is not None:
 				self.value = self.new_value
 		except Exception as e:
