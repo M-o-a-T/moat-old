@@ -21,6 +21,7 @@ from __future__ import division,absolute_import
 
 from homevent.base import Name,SName
 from homevent.check import Check
+from homevent.context import Context
 
 from weakref import WeakValueDictionary,proxy
 
@@ -139,6 +140,11 @@ class Collected(object):
 
 		super(Collected,self).__init__()
 		self.storage[name] = self
+
+		self.ctx = Context()
+
+	def update_ctx(self):
+		pass
 
 	def dup_error(self,name):
 		import pdb;pdb.set_trace()

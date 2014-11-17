@@ -156,6 +156,16 @@ class Monitor(Collected,Jobber):
 		if self.data:
 			yield ("data"," ".join(unicode(x) for x in self.data))
 
+	def update_ctx(self):
+		self.ctx.value = self.value
+		self.ctx.up = self.up_name
+		self.ctx.time = self.time_name
+		self.ctx.start_at = self.started_at
+		self.ctx.stop_at = self.stopped_at
+		self.ctx.change_at = self.state_change_at
+		self.ctx.steps = (self.steps,self.points,self.maxpoints)
+		self.ctx.data = self.data
+
 	def info(self):
 		"""list one-liner"""
 		return "%s %s" % (self.up_name,self.time_name)
@@ -255,13 +265,17 @@ class Monitor(Collected,Jobber):
 			if self.send_check_event:
 				process_event(Event(self.ctx, "monitor","checked",*self.name))
 			if self.new_value is not None:
+				self.update_ctx()
 				if hasattr(self,"delta"):
 					if self.value is not None:
 						val = self.new_value-self.value
+						self.ctx.delta = val
 						if val >= 0 or self.delta == 0:
-							process_event(Event(Context(),"monitor","value",self.new_value-self.value,*self.name))
+							process_event(Event(self.ctx,"monitor","value",self.new_value-self.value,*self.name))
+							process_event(Event(self.ctx,"monitor","update",*self.name)
 				else:
-					process_event(Event(Context(),"monitor","value",self.new_value,*self.name))
+					process_event(Event(self.ctx,"monitor","value",self.new_value,*self.name))
+					process_event(Event(self.ctx,"monitor","update",*self.name)
 			if self.new_value is not None:
 				self.value = self.new_value
 		except Exception as e:
