@@ -309,17 +309,16 @@ class Monitor(Collected,Jobber):
 					break
 
 				else:
-					log("monitor",TRACE,"raw",val,*self.name)
 					try:
 						val = float(val)
 					except (TypeError,ValueError):
 						log("monitor",ERROR,self.name,"not a float:",val)
+						continue
 					if hasattr(self,"factor"):
 						try:
 							val = val * self.factor + self.offset
 						except (TypeError,ValueError) as e:
 							log("monitor",ERROR,self.name,val,self.factor,self.offset)
-							process_failure(e)
 							continue
 					self.data.append(val)
 
