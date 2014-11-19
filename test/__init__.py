@@ -185,8 +185,9 @@ class ctxdump(Statement):
 			print >>sys.stderr,"   :",s
 main_words.register_statement(ctxdump)
 
+ht = None
 def run(name,input, interpreter=Interpreter, logger=None):
-	ht = None
+	global ht
 	if logger is None:
 		ht = run_logger(name,dot=False)
 		logger = ht.log
@@ -195,6 +196,7 @@ def run(name,input, interpreter=Interpreter, logger=None):
 	input = StringIO(input)
 
 	def _main():
+		global ht
 		parse_ctx = Context(filename=name)
 		#parse_ctx.logger=parse_logger
 		try:

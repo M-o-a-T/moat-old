@@ -23,14 +23,12 @@ from __future__ import division,absolute_import
 
 from homevent import TESTING
 from homevent.base import Name,SYS_PRIO,MIN_PRIO,MAX_PRIO
-from homevent.worker import WorkSequence,ConditionalWorkSequence,ExcWorker
+from homevent.worker import ConcurrentWorkSequence,ExcWorker
 from homevent.collect import Collection
 from homevent.context import Context
 from homevent.twist import fix_exception
 
 workers = {}
-work_prios = []
-worker_ids = {}
 
 def register_worker(w):
 	"""\
@@ -38,33 +36,18 @@ def register_worker(w):
 		The only worker with priority zero is the system's (single)
 		event logger.
 		"""
-	global work_prios
-
-	if w.prio not in workers:
-		workers[w.prio] = []
-		work_prios = sorted(workers.keys())
-	elif w.prio < MIN_PRIO or w.prio > MAX_PRIO:
-		raise RuntimeError("More than one system worker (prio:%d) is registered!" % (w.prio,))
-	workers[w.prio].append(w)
-	worker_ids[w.id] = w
+	workers[w.id] = w
 	
 def unregister_worker(w):
 	"""\
 		Deregister a worker.
 		"""
-	global work_prios
-	workers[w.prio].remove(w)
-	del worker_ids[w.id]
-	if not workers[w.prio]: # last worker removed
-		del workers[w.prio]
-		work_prios = sorted(workers.keys())
-
+	del workers[w.id]
 
 def list_workers(name=None):
-	for p in work_prios:
-		for w in workers[p]:
-			if name is None or name == w.name:
-				yield w
+	for w in workers.itervalues():
+		if name is None or name == w.name:
+			yield w
 
 class Workers(Collection):
 	name = "worker"
@@ -76,7 +59,7 @@ class Workers(Collection):
 			if len(k) != 1:
 				raise SyntaxError,"Worker IDs are single numbers"
 			k = k[0]
-		return worker_ids[int(k)]
+		return workers[int(k)]
 Workers = Workers()
 
 def collect_event(e):
@@ -86,12 +69,11 @@ def collect_event(e):
 		"""
 	from homevent.logging import log_created
 
-	work = ConditionalWorkSequence(e,None)
-	for wp in work_prios:
-		for w in workers[wp]:
-			if w.does_event(e):
-				w.match_count += 1
-				work.append(w)
+	work = ConcurrentWorkSequence(e,None)
+	for w in workers.values():
+		if w.does_event(e):
+			w.match_count += 1
+			work.append(w)
 	log_created(work)
 	return work
 
@@ -104,11 +86,10 @@ def collect_failure(e):
 	from homevent.event import Event
 	assert isinstance(e,(Event,BaseException)),"Cannot be used as an event: "+repr(e)
 
-	work = WorkSequence(e,None)
-	for wp in work_prios:
-		for w in workers[wp]:
-			if isinstance(w,ExcWorker) and w.does_failure(e):
-				work.append(w)
+	work = ConcurrentWorkSequence(e,None)
+	for w in workers.values():
+		if isinstance(w,ExcWorker) and w.does_failure(e):
+			work.append(w)
 	log_created(work)
 	return work
 

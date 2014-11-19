@@ -28,7 +28,8 @@ from homevent.context import Context
 from homevent.event import Event,TrySomethingElse,NeverHappens
 from homevent.base import Name,MIN_PRIO,MAX_PRIO,SYS_PRIO,SName
 from homevent.times import humandelta, now
-from homevent.twist import fix_exception,reraise,format_exception
+from homevent.twist import fix_exception,reraise,format_exception,log_wait
+from gevent import spawn
 
 #import os
 
@@ -141,6 +142,9 @@ class WorkSequence(WorkItem):
 
 		'event' and 'worker' are the events which caused this sequence
 		to be generated.
+
+		NB: This class is currently only instantiated via
+		ConcurrentWorkSequence, below.
 		"""
 	in_step = None
 	in_worker = None
@@ -180,8 +184,6 @@ class WorkSequence(WorkItem):
 			w = wn
 		self.work.append(w)
 
-	handle_conditional = False
-
 	def process(self, **k):
 		super(WorkSequence,self).process(**k)
 
@@ -196,14 +198,10 @@ class WorkSequence(WorkItem):
 		except Exception as ex:
 			fix_exception(ex)
 			event = ex
-		skipping = False
 		excepting = False
 
 		for w in self.work:
-			if w.prio >= MIN_PRIO and w.prio <= MAX_PRIO:
-				step += 1
-				if skipping:
-					continue
+			step += 1
 
 			self.in_step = step
 			self.in_worker = w
@@ -218,9 +216,6 @@ class WorkSequence(WorkItem):
 			except Exception as ex:
 				fix_exception(ex)
 				r = ex
-			else:
-				if self.handle_conditional and w.prio >= MIN_PRIO:
-					skipping = True
 
 			if isinstance(r,Exception):
 				excepting = True
@@ -297,29 +292,77 @@ class WorkSequence(WorkItem):
 				yield pl+rp
 
 		for w in self.work:
-			if w.prio < MIN_PRIO or w.prio > MAX_PRIO+1: # Logger
-				continue
 			if pr:
 				for _ in pstep("╞","├","│"): yield _
 				step += 1
 			pr = w
 		for _ in pstep("╘","└"," "): yield _
 
-class ConditionalWorkSequence(WorkSequence):
-	"""\ 
-		A WorkSequence which completes with the first step that does
-		*not* raise a TrySomethingElse error.
-		"""
-	handle_conditional = True
-
-
-
-def ConcurrentWorkSequence(WorkSequence):
+class ConcurrentWorkSequence(WorkSequence):
 	"""\
-		A work sequence which does not wait for the previous step to complete.
+		A work handler which runs all steps in parallel
 		"""
-	# TODO
-	pass
+	def process(self, **k):
+		from homevent.logging import log_run,log_halted,log_exc
+
+		super(WorkSequence,self).process(**k) ## this is intentional
+
+		assert self.work,"empty workqueue in "+repr(self)
+		event = self.event
+		jobs = []
+
+		def run(p,*a,**k):
+			try:
+				p(*a,**k)
+			except TrySomethingElse:
+				pass
+			except Exception as exc:
+				from homevent.logging import log_exc
+				from homevent.run import process_failure
+				fix_exception(exc)
+				log_exc("Unhandled exception", exc,w)
+				process_failure(exc)
+
+		for w in self.work:
+			log_run(self,w,0)
+			j = spawn(run,w.process,event=self.event, queue=self)
+			jobs.append(j)
+
+		for j,w in zip(jobs,self.work):
+			with log_wait("JobStop",w):
+				j.join()
+
+
+	def report(self, verbose=False):
+		if not verbose:
+			yield unicode(self) # +" for "+unicode(self.event)
+			return
+
+		if verbose > 2:
+			v = verbose
+		else:
+			v = 1
+		prefix = "   "
+		if verbose != 98:
+			yield unicode(self)
+			for r in super(WorkSequence,self).report(verbose):
+				yield prefix+r
+			if hasattr(self.event,"report"):
+				for r in report_(self.event,False):
+					yield prefix+r
+			else:
+				yield prefix+unicode(self.event)
+		if self.worker:
+			w="by "
+			for r in self.worker.report(verbose):
+				yield prefix+w+r
+				w="   "
+
+		for w in self.work:
+			p = u"➔ "
+			for r in w.report(v):
+				yield prefix+p+r
+				p = u"  "
 
 class Worker(WorkItem):
 	"""\

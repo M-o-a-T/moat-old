@@ -47,14 +47,14 @@ list monitor
 on monitor checking baz zaz:
 	async:
 		set monitor 10 baz zaz
-		wait: for 0.2
+		wait bazzaz A: for 0.2
 		set monitor 13 baz zaz
-		wait: for 0.2
+		wait bazzaz B: for 0.2
 		set monitor 14 baz zaz
 	
 monitor passive:
 	name baz zaz
-	delay for 0.3
+	delay for 0.9
 	require 2 2
 list monitor baz zaz
 
@@ -64,13 +64,14 @@ block:
 		log DEBUG Yes
 	else:
 		log DEBUG No1
-wait: for 0.6
+wait: for 0.5
 block:
 	if waiting monitor baz zaz:
 		log DEBUG No2
 	else:
 		log DEBUG Yes
 list monitor baz zaz
+log DEBUG XXX delete baz zaz
 del monitor baz zaz
 
 

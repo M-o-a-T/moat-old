@@ -263,10 +263,8 @@ class Logger(BaseLogger):
 class LogWorker(ExcWorker):
 	"""\
 		This class is the one which logs everything. Specifically,
-		it logs the start of every event execution.
+		it logs every event execution.
 		"""
-	prio = SYS_PRIO
-
 	def __init__(self):
 		super(LogWorker,self).__init__("Logger")
 
@@ -361,15 +359,6 @@ class LogEndEvent(Event):
 			print >>sys.stderr,"LOGGER CRASH 4"
 			print_exception(e,file=sys.stderr)
 			yield  "END: REPORT_ERROR: "+repr(self.name[1:])
-
-class LogDoneWorker(LogWorker):
-	prio = MAX_PRIO+1
-
-	def process(self, event=None,**k):
-		super(LogDoneWorker,self).process(event=LogEndEvent(event),**k)
-
-	def report(self,*a,**k):
-		return ("... done.",)
 
 class log_run(Event):
 	"""\
@@ -483,7 +472,4 @@ def log(level, *a):
 log_event = LogWorker()
 register_worker(log_event)
 log_event = log_event.process
-
-
-register_worker(LogDoneWorker())
 

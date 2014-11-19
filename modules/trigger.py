@@ -51,17 +51,11 @@ trigger FOO...
 		if self.loglevel is not None:
 			ctx = ctx(loglevel=self.loglevel)
 		event = self.params(ctx)
-		if self.recurse:
-			event.ctx = ctx._trim()
+		event.ctx = ctx._trim()
 		if not event:
 			raise SyntaxError("Events need at least one parameter")
 
-		if self.sync:
-			process_event(event)
-		else:
-			self.start_job("job",run_event,event)
-			# TODO: some sort of global job list
-			# so that they can be stopped when ending the program
+		process_event(event)
 
 @TriggerHandler.register_statement
 class TriggerLog(Statement):
@@ -95,6 +89,9 @@ recursive
 	Mark the event as one that might cause itself.
 	Without this statement, a long environment chain
 	will be created which ultimately causes a crash.
+
+	This currently is a no-op, environment data are always
+	flattened.
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
@@ -111,6 +108,8 @@ class TriggerSync(Statement):
 	long_doc=u"""\
 sync
 	The event handler is waited for. Errors are propagated to the caller.
+
+	Currently this is a no-op.
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
