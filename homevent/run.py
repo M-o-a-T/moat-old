@@ -67,14 +67,12 @@ def collect_event(e):
 		Run an event through the system.
 		Create a list of things to be done for this event.
 		"""
-	from homevent.logging import log_created
 
 	work = ConcurrentWorkSequence(e,None)
 	for w in workers.values():
 		if w.does_event(e):
 			w.match_count += 1
 			work.append(w)
-	log_created(work)
 	return work
 
 def collect_failure(e):
@@ -82,7 +80,6 @@ def collect_failure(e):
 		Run a failure through the system.
 		Create a list of things to be done for it.
 		"""
-	from homevent.logging import log_created
 	from homevent.event import Event
 	assert isinstance(e,(Event,BaseException)),"Cannot be used as an event: "+repr(e)
 
@@ -90,7 +87,6 @@ def collect_failure(e):
 	for w in workers.values():
 		if isinstance(w,ExcWorker) and w.does_failure(e):
 			work.append(w)
-	log_created(work)
 	return work
 
 def process_event(e, drop_errors=False):

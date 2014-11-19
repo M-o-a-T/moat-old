@@ -46,7 +46,7 @@ import logging
 logger = logging.getLogger("homevent.logging")
 
 __all__ = ("Logger",
-	"log","log_run","log_created","log_halted","LogNames",
+	"log","log_run","log_halted","LogNames",
 	"TRACE","DEBUG","INFO","WARN","ERROR","PANIC","NONE")
 
 class Loggers(Collection):
@@ -404,27 +404,6 @@ class log_run(Event):
 
 class log_halted(Event):
 	prefix="HALT"
-
-class log_created(Event):
-	"""\
-		Log creating an event.
-		"""
-	def __init__(self,seq):
-		super(log_created,self).__init__("NEW",str(seq.id))
-		self.seq = seq
-		lim = levels.get("event",NONE)
-		if lim == NONE or lim > TRACE:
-			return
-		log_event(self, level=TRACE)
-
-	def report(self, verbose=False):
-		if verbose:
-			p = "NEW: "
-			for r in self.seq.report(verbose):
-				yield p+r
-				p = "   : "
-		else:
-			yield "NEW: "+str(self.seq)
 
 def log(level, *a):
 	"""\
