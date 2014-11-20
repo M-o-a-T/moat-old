@@ -1,12 +1,5 @@
-NEW: ‹ConditionalWorkSequence:5 (2)›
-   : │  id: 5
-   : │  call count: 0
-   : │  EVENT: startup
-   : │       : startup=True
-   : └1╴... done.
 EVENT: startup
      : startup=True
-END: startup
 block :: Block-level statements
 data :: provides a couple of common data access functions
 on_event :: the 'on EVENT:' handler
@@ -17,10 +10,9 @@ name: on_event
 path: ../modules/on_event.py
 info: the 'on EVENT:' handler
 .
-2 :: Logger
 1 :: free all collections
-3 :: Logger
-4 :: shutdown handler
+2 :: Logger
+3 :: shutdown handler
 .
 .
 event
@@ -33,123 +25,35 @@ wait
 worker
 .
 TRACE Create OnEvtHandler: foo
-TRACE NewHandler 6
-NEW: ‹ConditionalWorkSequence:7 (2)›
-   : │  id: 7
-   : │  call count: 0
-   : │  EVENT: wait¦start¦×××¦vorher
-   : │       : loglevel=0
-   : └1╴... done.
+TRACE NewHandler 5
 EVENT: wait¦start¦×××¦vorher
      : loglevel=0
-END: wait¦start¦×××¦vorher
-NEW: ‹ConditionalWorkSequence:8 (2)›
-   : │  id: 8
-   : │  call count: 0
-   : │  EVENT: wait¦start¦vorher
-   : │       : loglevel=0
-   : │       : end_time=0.1
-   : └1╴... done.
 EVENT: wait¦start¦vorher
      : loglevel=0
      : end_time=0.1
-END: wait¦start¦vorher
 TRACE 2003-04-05 06:07:08.150000 vorher: Fake timer done
-NEW: ‹ConditionalWorkSequence:9 (2)›
-   : │  id: 9
-   : │  call count: 0
-   : │  EVENT: wait¦done¦×××¦vorher
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦done¦×××¦vorher
      : loglevel=0
-END: wait¦done¦×××¦vorher
-NEW: ‹ConditionalWorkSequence:10 (2)›
-   : │  id: 10
-   : │  call count: 0
-   : │  EVENT: wait¦done¦vorher
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦done¦vorher
      : loglevel=0
-END: wait¦done¦vorher
-NEW: ‹ConditionalWorkSequence:11 (3)›
-   : │  id: 11
-   : │  call count: 0
-   : │  IEVENT: foo
-   : ├1╴on foo ‹OnEventHandler›
-   : │  prio: 51
-   : │  step: block ‹Block›
-   : │      : step: wait foo waiter ‹WaitHandler›
-   : └2╴... done.
 IEVENT: foo
-RUN: on foo ‹OnEventHandler›
-   : prio: 51
-   : step: block ‹Block›
-   :     : step: wait foo waiter ‹WaitHandler›
- at: ‹ConditionalWorkSequence:11 (3)› (step 1)
- ev: IEVENT: foo
-NEW: ‹ConditionalWorkSequence:12 (2)›
-   : │  id: 12
-   : │  call count: 0
-   : │  EVENT: wait¦start¦×××¦foo¦waiter
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦start¦×××¦foo¦waiter
      : loglevel=0
-END: wait¦start¦×××¦foo¦waiter
-NEW: ‹ConditionalWorkSequence:13 (2)›
-   : │  id: 13
-   : │  call count: 0
-   : │  EVENT: wait¦start¦foo¦waiter
-   : │       : loglevel=0
-   : │       : end_time=0.5
-   : └1╴... done.
 EVENT: wait¦start¦foo¦waiter
      : loglevel=0
      : end_time=0.5
-END: wait¦start¦foo¦waiter
-NEW: ‹ConditionalWorkSequence:14 (2)›
-   : │  id: 14
-   : │  call count: 0
-   : │  EVENT: wait¦start¦×××¦nachher
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦start¦×××¦nachher
      : loglevel=0
-END: wait¦start¦×××¦nachher
-NEW: ‹ConditionalWorkSequence:15 (2)›
-   : │  id: 15
-   : │  call count: 0
-   : │  EVENT: wait¦start¦nachher
-   : │       : loglevel=0
-   : │       : end_time=0.2
-   : └1╴... done.
 EVENT: wait¦start¦nachher
      : loglevel=0
      : end_time=0.2
-END: wait¦start¦nachher
 TRACE 2003-04-05 06:07:08.350000 nachher: Fake timer done
-NEW: ‹ConditionalWorkSequence:16 (2)›
-   : │  id: 16
-   : │  call count: 0
-   : │  EVENT: wait¦done¦×××¦nachher
-   : │       : loglevel=0
-   : └1╴... done.
-EVENT: wait¦done¦×××¦nachher
-     : loglevel=0
-END: wait¦done¦×××¦nachher
-NEW: ‹ConditionalWorkSequence:17 (2)›
-   : │  id: 17
-   : │  call count: 0
-   : │  EVENT: wait¦done¦nachher
-   : │       : loglevel=0
-   : └1╴... done.
-EVENT: wait¦done¦nachher
-     : loglevel=0
-END: wait¦done¦nachher
 foo waiter :: 0.100000023842
 .
+EVENT: wait¦done¦×××¦nachher
+     : loglevel=0
+EVENT: wait¦done¦nachher
+     : loglevel=0
 : ‹Waiter foo¦waiter 0.100000023842›
 name: foo¦waiter
 start: -0.2 sec (2003-04-05 06:07:08.15)
@@ -159,62 +63,18 @@ in: block
 in: on¦foo
 in: Global
 .
-NEW: ‹ConditionalWorkSequence:18 (2)›
-   : │  id: 18
-   : │  call count: 0
-   : │  EVENT: wait¦start¦×××¦ende
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦start¦×××¦ende
      : loglevel=0
-END: wait¦start¦×××¦ende
-NEW: ‹ConditionalWorkSequence:19 (2)›
-   : │  id: 19
-   : │  call count: 0
-   : │  EVENT: wait¦start¦ende
-   : │       : loglevel=0
-   : │       : end_time=0.6
-   : └1╴... done.
 EVENT: wait¦start¦ende
      : loglevel=0
      : end_time=0.6
-END: wait¦start¦ende
 TRACE 2003-04-05 06:07:08.500000 foo¦waiter: Fake timer done
-NEW: ‹ConditionalWorkSequence:20 (2)›
-   : │  id: 20
-   : │  call count: 0
-   : │  EVENT: wait¦done¦×××¦foo¦waiter
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦done¦×××¦foo¦waiter
      : loglevel=0
-END: wait¦done¦×××¦foo¦waiter
-NEW: ‹ConditionalWorkSequence:21 (2)›
-   : │  id: 21
-   : │  call count: 0
-   : │  EVENT: wait¦done¦foo¦waiter
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦done¦foo¦waiter
      : loglevel=0
-END: wait¦done¦foo¦waiter
-END: foo
 TRACE 2003-04-05 06:07:08.650000 ende: Fake timer done
-NEW: ‹ConditionalWorkSequence:22 (2)›
-   : │  id: 22
-   : │  call count: 0
-   : │  EVENT: wait¦done¦×××¦ende
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦done¦×××¦ende
      : loglevel=0
-END: wait¦done¦×××¦ende
-NEW: ‹ConditionalWorkSequence:23 (2)›
-   : │  id: 23
-   : │  call count: 0
-   : │  EVENT: wait¦done¦ende
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦done¦ende
      : loglevel=0
-END: wait¦done¦ende

@@ -1,12 +1,5 @@
-NEW: ‹ConditionalWorkSequence:5 (2)›
-   : │  id: 5
-   : │  call count: 0
-   : │  EVENT: startup
-   : │       : startup=True
-   : └1╴... done.
 EVENT: startup
      : startup=True
-END: startup
 TRACE This is not logged
 DEBUG> This is logged
 DEBUG This is logged
@@ -21,13 +14,5 @@ WARN This is logged too
 9 = NONE
 .
 WARN This is not logged either
-TRACE> NEW: ‹ConditionalWorkSequence:6 (2)›
-NEW: ‹ConditionalWorkSequence:6 (2)›
-   : │  id: 6
-   : │  call count: 0
-   : │  IEVENT: Logged
-   : └1╴... done.
 TRACE> IEVENT: Logged
 IEVENT: Logged
-TRACE> END: Logged
-END: Logged

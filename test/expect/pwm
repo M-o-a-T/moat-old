@@ -1,60 +1,24 @@
-NEW: ‹ConditionalWorkSequence:5 (2)›
-   : │  id: 5
-   : │  call count: 0
-   : │  EVENT: startup
-   : │       : startup=True
-   : └1╴... done.
 EVENT: startup
      : startup=True
-END: startup
 DEBUG Yes
 TRACE Create OnEvtHandler: pwm¦change¦foo¦bar
-TRACE NewHandler 6
+TRACE NewHandler 5
 DEBUG Yes
 foo bar :: (new)
 .
 type: PWM
 name: foo bar
 .
-NEW: ‹ConditionalWorkSequence:7 (2)›
-   : │  id: 7
-   : │  call count: 0
-   : │  EVENT: wait¦start¦0.5¦_wait¦2
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦start¦0.5¦_wait¦2
      : loglevel=0
-END: wait¦start¦0.5¦_wait¦2
-NEW: ‹ConditionalWorkSequence:8 (2)›
-   : │  id: 8
-   : │  call count: 0
-   : │  EVENT: wait¦start¦_wait¦2
-   : │       : loglevel=0
-   : │       : end_time=0.5
-   : └1╴... done.
 EVENT: wait¦start¦_wait¦2
      : loglevel=0
      : end_time=0.5
-END: wait¦start¦_wait¦2
 TRACE 2003-04-05 06:07:08.500000 _wait¦2: Fake timer done
-NEW: ‹ConditionalWorkSequence:9 (2)›
-   : │  id: 9
-   : │  call count: 0
-   : │  EVENT: wait¦done¦0.5¦_wait¦2
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦done¦0.5¦_wait¦2
      : loglevel=0
-END: wait¦done¦0.5¦_wait¦2
-NEW: ‹ConditionalWorkSequence:10 (2)›
-   : │  id: 10
-   : │  call count: 0
-   : │  EVENT: wait¦done¦_wait¦2
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦done¦_wait¦2
      : loglevel=0
-END: wait¦done¦_wait¦2
 type: PWM
 name: foo bar
 current: 0.1
@@ -62,45 +26,16 @@ next: 8.5 sec (2003-04-05 06:07:17)
 t_off: 9.0 sec
 t_on: 1.0 sec
 .
-NEW: ‹ConditionalWorkSequence:11 (2)›
-   : │  id: 11
-   : │  call count: 0
-   : │  EVENT: wait¦start¦9.0¦_wait¦3
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦start¦9.0¦_wait¦3
      : loglevel=0
-END: wait¦start¦9.0¦_wait¦3
-NEW: ‹ConditionalWorkSequence:12 (2)›
-   : │  id: 12
-   : │  call count: 0
-   : │  EVENT: wait¦start¦_wait¦3
-   : │       : loglevel=0
-   : │       : end_time=9.0
-   : └1╴... done.
 EVENT: wait¦start¦_wait¦3
      : loglevel=0
      : end_time=9.0
-END: wait¦start¦_wait¦3
 TRACE 2003-04-05 06:07:17 _wait¦3: Fake timer done
-NEW: ‹ConditionalWorkSequence:13 (2)›
-   : │  id: 13
-   : │  call count: 0
-   : │  EVENT: wait¦done¦9.0¦_wait¦3
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦done¦9.0¦_wait¦3
      : loglevel=0
-END: wait¦done¦9.0¦_wait¦3
-NEW: ‹ConditionalWorkSequence:14 (2)›
-   : │  id: 14
-   : │  call count: 0
-   : │  EVENT: wait¦done¦_wait¦3
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦done¦_wait¦3
      : loglevel=0
-END: wait¦done¦_wait¦3
 type: PWM
 name: foo bar
 current: 0.1
@@ -108,316 +43,75 @@ next: now (2003-04-05 06:07:17)
 t_off: 9.0 sec
 t_on: 1.0 sec
 .
-NEW: ‹ConditionalWorkSequence:15 (2)›
-   : │  id: 15
-   : │  call count: 0
-   : │  EVENT: wait¦start¦24.0¦_wait¦4
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦start¦24.0¦_wait¦4
      : loglevel=0
-END: wait¦start¦24.0¦_wait¦4
-NEW: ‹ConditionalWorkSequence:16 (2)›
-   : │  id: 16
-   : │  call count: 0
-   : │  EVENT: wait¦start¦_wait¦4
-   : │       : loglevel=0
-   : │       : end_time=24.0
-   : └1╴... done.
 EVENT: wait¦start¦_wait¦4
      : loglevel=0
      : end_time=24.0
-END: wait¦start¦_wait¦4
 TRACE 2003-04-05 06:07:17.050000 : Fake timer done
-NEW: ‹ConditionalWorkSequence:17 (2)›
-   : │  id: 17
-   : │  call count: 0
-   : │  EVENT: pwm¦set¦on¦foo¦bar
-   : └1╴... done.
 EVENT: pwm¦set¦on¦foo¦bar
-END: pwm¦set¦on¦foo¦bar
-NEW: ‹ConditionalWorkSequence:18 (3)›
-   : │  id: 18
-   : │  call count: 0
-   : │  EVENT: pwm¦change¦foo¦bar
-   : │       : value=1
-   : ├1╴on pwm change foo bar ‹OnEventHandler›
-   : │  prio: 51
-   : │  step: log DEBUG PWM is now $value ‹LogHandler›
-   : │  step: wait ‹WaitHandler›
-   : └2╴... done.
 EVENT: pwm¦change¦foo¦bar
      : value=1
-RUN: on pwm change foo bar ‹OnEventHandler›
-   : prio: 51
-   : step: log DEBUG PWM is now $value ‹LogHandler›
-   : step: wait ‹WaitHandler›
- at: ‹ConditionalWorkSequence:18 (3)› (step 1)
- ev: EVENT: pwm¦change¦foo¦bar
-   :      : value=1
 DEBUG PWM is now 1
-NEW: ‹ConditionalWorkSequence:19 (2)›
-   : │  id: 19
-   : │  call count: 0
-   : │  EVENT: wait¦start¦9.1¦_wait¦1
-   : │       : loglevel=0
-   : └1╴... done.
-EVENT: wait¦start¦9.1¦_wait¦1
+EVENT: wait¦start¦9.2¦_wait¦1
      : loglevel=0
-END: wait¦start¦9.1¦_wait¦1
-NEW: ‹ConditionalWorkSequence:20 (2)›
-   : │  id: 20
-   : │  call count: 0
-   : │  EVENT: wait¦start¦_wait¦1
-   : │       : loglevel=0
-   : │       : end_time=9.1
-   : └1╴... done.
 EVENT: wait¦start¦_wait¦1
      : loglevel=0
-     : end_time=9.1
-END: wait¦start¦_wait¦1
-TRACE 2003-04-05 06:07:17.300000 _wait¦1: Fake timer done
-NEW: ‹ConditionalWorkSequence:21 (2)›
-   : │  id: 21
-   : │  call count: 0
-   : │  EVENT: wait¦done¦9.3¦_wait¦1
-   : │       : loglevel=0
-   : └1╴... done.
-EVENT: wait¦done¦9.3¦_wait¦1
+     : end_time=9.2
+TRACE 2003-04-05 06:07:17.250000 _wait¦1: Fake timer done
+EVENT: wait¦done¦9.2¦_wait¦1
      : loglevel=0
-END: wait¦done¦9.3¦_wait¦1
-NEW: ‹ConditionalWorkSequence:22 (2)›
-   : │  id: 22
-   : │  call count: 0
-   : │  EVENT: wait¦done¦_wait¦1
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦done¦_wait¦1
      : loglevel=0
-END: wait¦done¦_wait¦1
-END: pwm¦change¦foo¦bar
-TRACE 2003-04-05 06:07:18 : Fake timer done
-NEW: ‹ConditionalWorkSequence:23 (2)›
-   : │  id: 23
-   : │  call count: 0
-   : │  EVENT: pwm¦set¦off¦foo¦bar
-   : └1╴... done.
+TRACE 2003-04-05 06:07:18.050000 : Fake timer done
 EVENT: pwm¦set¦off¦foo¦bar
-END: pwm¦set¦off¦foo¦bar
-NEW: ‹ConditionalWorkSequence:24 (3)›
-   : │  id: 24
-   : │  call count: 0
-   : │  EVENT: pwm¦change¦foo¦bar
-   : │       : value=0
-   : ├1╴on pwm change foo bar ‹OnEventHandler›
-   : │  prio: 51
-   : │  step: log DEBUG PWM is now $value ‹LogHandler›
-   : │  step: wait ‹WaitHandler›
-   : └2╴... done.
 EVENT: pwm¦change¦foo¦bar
      : value=0
-RUN: on pwm change foo bar ‹OnEventHandler›
-   : prio: 51
-   : step: log DEBUG PWM is now $value ‹LogHandler›
-   : step: wait ‹WaitHandler›
- at: ‹ConditionalWorkSequence:24 (3)› (step 1)
- ev: EVENT: pwm¦change¦foo¦bar
-   :      : value=0
 DEBUG PWM is now 0
-NEW: ‹ConditionalWorkSequence:25 (2)›
-   : │  id: 25
-   : │  call count: 0
-   : │  EVENT: wait¦start¦10.1¦_wait¦1
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦start¦10.1¦_wait¦1
      : loglevel=0
-END: wait¦start¦10.1¦_wait¦1
-NEW: ‹ConditionalWorkSequence:26 (2)›
-   : │  id: 26
-   : │  call count: 0
-   : │  EVENT: wait¦start¦_wait¦1
-   : │       : loglevel=0
-   : │       : end_time=10.1
-   : └1╴... done.
 EVENT: wait¦start¦_wait¦1
      : loglevel=0
      : end_time=10.1
-END: wait¦start¦_wait¦1
 TRACE 2003-04-05 06:07:18.200000 _wait¦1: Fake timer done
-NEW: ‹ConditionalWorkSequence:27 (2)›
-   : │  id: 27
-   : │  call count: 0
-   : │  EVENT: wait¦done¦10.2¦_wait¦1
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦done¦10.2¦_wait¦1
      : loglevel=0
-END: wait¦done¦10.2¦_wait¦1
-NEW: ‹ConditionalWorkSequence:28 (2)›
-   : │  id: 28
-   : │  call count: 0
-   : │  EVENT: wait¦done¦_wait¦1
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦done¦_wait¦1
      : loglevel=0
-END: wait¦done¦_wait¦1
-END: pwm¦change¦foo¦bar
 TRACE 2003-04-05 06:07:27 : Fake timer done
-NEW: ‹ConditionalWorkSequence:29 (2)›
-   : │  id: 29
-   : │  call count: 0
-   : │  EVENT: pwm¦set¦on¦foo¦bar
-   : └1╴... done.
 EVENT: pwm¦set¦on¦foo¦bar
-END: pwm¦set¦on¦foo¦bar
-NEW: ‹ConditionalWorkSequence:30 (3)›
-   : │  id: 30
-   : │  call count: 0
-   : │  EVENT: pwm¦change¦foo¦bar
-   : │       : value=1
-   : ├1╴on pwm change foo bar ‹OnEventHandler›
-   : │  prio: 51
-   : │  step: log DEBUG PWM is now $value ‹LogHandler›
-   : │  step: wait ‹WaitHandler›
-   : └2╴... done.
 EVENT: pwm¦change¦foo¦bar
      : value=1
-RUN: on pwm change foo bar ‹OnEventHandler›
-   : prio: 51
-   : step: log DEBUG PWM is now $value ‹LogHandler›
-   : step: wait ‹WaitHandler›
- at: ‹ConditionalWorkSequence:30 (3)› (step 1)
- ev: EVENT: pwm¦change¦foo¦bar
-   :      : value=1
 DEBUG PWM is now 1
-NEW: ‹ConditionalWorkSequence:31 (2)›
-   : │  id: 31
-   : │  call count: 0
-   : │  EVENT: wait¦start¦19.1¦_wait¦1
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦start¦19.1¦_wait¦1
      : loglevel=0
-END: wait¦start¦19.1¦_wait¦1
-NEW: ‹ConditionalWorkSequence:32 (2)›
-   : │  id: 32
-   : │  call count: 0
-   : │  EVENT: wait¦start¦_wait¦1
-   : │       : loglevel=0
-   : │       : end_time=19.1
-   : └1╴... done.
 EVENT: wait¦start¦_wait¦1
      : loglevel=0
      : end_time=19.1
-END: wait¦start¦_wait¦1
-TRACE 2003-04-05 06:07:27.200000 _wait¦1: Fake timer done
-NEW: ‹ConditionalWorkSequence:33 (2)›
-   : │  id: 33
-   : │  call count: 0
-   : │  EVENT: wait¦done¦19.2¦_wait¦1
-   : │       : loglevel=0
-   : └1╴... done.
-EVENT: wait¦done¦19.2¦_wait¦1
+TRACE 2003-04-05 06:07:27.150000 _wait¦1: Fake timer done
+EVENT: wait¦done¦19.1¦_wait¦1
      : loglevel=0
-END: wait¦done¦19.2¦_wait¦1
-NEW: ‹ConditionalWorkSequence:34 (2)›
-   : │  id: 34
-   : │  call count: 0
-   : │  EVENT: wait¦done¦_wait¦1
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦done¦_wait¦1
      : loglevel=0
-END: wait¦done¦_wait¦1
-END: pwm¦change¦foo¦bar
-TRACE 2003-04-05 06:07:28 : Fake timer done
-NEW: ‹ConditionalWorkSequence:35 (2)›
-   : │  id: 35
-   : │  call count: 0
-   : │  EVENT: pwm¦set¦off¦foo¦bar
-   : └1╴... done.
+TRACE 2003-04-05 06:07:28.050000 : Fake timer done
 EVENT: pwm¦set¦off¦foo¦bar
-END: pwm¦set¦off¦foo¦bar
-NEW: ‹ConditionalWorkSequence:36 (3)›
-   : │  id: 36
-   : │  call count: 0
-   : │  EVENT: pwm¦change¦foo¦bar
-   : │       : value=0
-   : ├1╴on pwm change foo bar ‹OnEventHandler›
-   : │  prio: 51
-   : │  step: log DEBUG PWM is now $value ‹LogHandler›
-   : │  step: wait ‹WaitHandler›
-   : └2╴... done.
 EVENT: pwm¦change¦foo¦bar
      : value=0
-RUN: on pwm change foo bar ‹OnEventHandler›
-   : prio: 51
-   : step: log DEBUG PWM is now $value ‹LogHandler›
-   : step: wait ‹WaitHandler›
- at: ‹ConditionalWorkSequence:36 (3)› (step 1)
- ev: EVENT: pwm¦change¦foo¦bar
-   :      : value=0
 DEBUG PWM is now 0
-NEW: ‹ConditionalWorkSequence:37 (2)›
-   : │  id: 37
-   : │  call count: 0
-   : │  EVENT: wait¦start¦20.1¦_wait¦1
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦start¦20.1¦_wait¦1
      : loglevel=0
-END: wait¦start¦20.1¦_wait¦1
-NEW: ‹ConditionalWorkSequence:38 (2)›
-   : │  id: 38
-   : │  call count: 0
-   : │  EVENT: wait¦start¦_wait¦1
-   : │       : loglevel=0
-   : │       : end_time=20.1
-   : └1╴... done.
 EVENT: wait¦start¦_wait¦1
      : loglevel=0
      : end_time=20.1
-END: wait¦start¦_wait¦1
 TRACE 2003-04-05 06:07:28.200000 _wait¦1: Fake timer done
-NEW: ‹ConditionalWorkSequence:39 (2)›
-   : │  id: 39
-   : │  call count: 0
-   : │  EVENT: wait¦done¦20.2¦_wait¦1
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦done¦20.2¦_wait¦1
      : loglevel=0
-END: wait¦done¦20.2¦_wait¦1
-NEW: ‹ConditionalWorkSequence:40 (2)›
-   : │  id: 40
-   : │  call count: 0
-   : │  EVENT: wait¦done¦_wait¦1
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦done¦_wait¦1
      : loglevel=0
-END: wait¦done¦_wait¦1
-END: pwm¦change¦foo¦bar
 TRACE 2003-04-05 06:07:32.050000 _wait¦4: Fake timer done
-NEW: ‹ConditionalWorkSequence:41 (2)›
-   : │  id: 41
-   : │  call count: 0
-   : │  EVENT: wait¦done¦24.1¦_wait¦4
-   : │       : loglevel=0
-   : └1╴... done.
-EVENT: wait¦done¦24.1¦_wait¦4
-     : loglevel=0
-END: wait¦done¦24.1¦_wait¦4
-NEW: ‹ConditionalWorkSequence:42 (2)›
-   : │  id: 42
-   : │  call count: 0
-   : │  EVENT: wait¦done¦_wait¦4
-   : │       : loglevel=0
-   : └1╴... done.
-EVENT: wait¦done¦_wait¦4
-     : loglevel=0
-END: wait¦done¦_wait¦4
 foo bar :: 0.100 1.0 sec / 9.0 sec
 .
+EVENT: wait¦done¦24.1¦_wait¦4
+     : loglevel=0
+EVENT: wait¦done¦_wait¦4
+     : loglevel=0

@@ -1,12 +1,5 @@
-NEW: ‹ConditionalWorkSequence:5 (2)›
-   : │  id: 5
-   : │  call count: 0
-   : │  EVENT: startup
-   : │       : startup=True
-   : └1╴... done.
 EVENT: startup
      : startup=True
-END: startup
 Init foo(1) from ‹global_words: Global 3›
 Input foo(1): 
 Init foo(2) from ‹global_words: Global 3›

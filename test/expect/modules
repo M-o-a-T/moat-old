@@ -1,25 +1,6 @@
-NEW: ‹ConditionalWorkSequence:5 (2)›
-   : │  id: 5
-   : │  call count: 0
-   : │  EVENT: startup
-   : │       : startup=True
-   : └1╴... done.
 EVENT: startup
      : startup=True
-END: startup
 DEBUG Loading!
-NEW: ‹ConditionalWorkSequence:6 (2)›
-   : │  id: 6
-   : │  call count: 0
-   : │  EVENT: module¦load¦example
-   : └1╴... done.
 EVENT: module¦load¦example
-END: module¦load¦example
-NEW: ‹ConditionalWorkSequence:7 (2)›
-   : │  id: 7
-   : │  call count: 0
-   : │  EVENT: module¦unload¦example
-   : └1╴... done.
-EVENT: module¦unload¦example
-END: module¦unload¦example
 DEBUG Unloading!
+EVENT: module¦unload¦example

@@ -1,41 +1,13 @@
-NEW: ‹ConditionalWorkSequence:5 (2)›
-   : │  id: 5
-   : │  call count: 0
-   : │  EVENT: startup
-   : │       : startup=True
-   : └1╴... done.
 EVENT: startup
      : startup=True
-END: startup
 TRACE Create OnEvtHandler: send¦logger
-TRACE NewHandler 6
-NEW: ‹ConditionalWorkSequence:7 (2)›
-   : │  id: 7
-   : │  call count: 0
-   : │  EVENT: wait¦start¦1.0¦shutdown
-   : │       : loglevel=0
-   : └1╴... done.
+TRACE NewHandler 5
 EVENT: wait¦start¦1.0¦shutdown
      : loglevel=0
-END: wait¦start¦1.0¦shutdown
-NEW: ‹ConditionalWorkSequence:8 (2)›
-   : │  id: 8
-   : │  call count: 0
-   : │  EVENT: wait¦start¦shutdown
-   : │       : loglevel=0
-   : │       : end_time=1.0
-   : └1╴... done.
 EVENT: wait¦start¦shutdown
      : loglevel=0
      : end_time=1.0
-END: wait¦start¦shutdown
-NEW: ‹ConditionalWorkSequence:9 (2)›
-   : │  id: 9
-   : │  call count: 0
-   : │  EVENT: rpc¦connect¦foo¦n1
-   : └1╴... done.
 EVENT: rpc¦connect¦foo¦n1
-END: rpc¦connect¦foo¦n1
 DEBUG TEST (Name('event',),)
 DEBUG TEST (Name('job',),)
 DEBUG TEST (Name('log',),)
@@ -75,6 +47,7 @@ DEBUG TEST >>> connect net   : connect to a TCP port
 DEBUG TEST >>> del           : delete a part of the system
 DEBUG TEST >>> dump context  : dump the variable context
 DEBUG TEST >>> exit          : stop processing input
+DEBUG TEST >>> exit handler  : Leave the current event handler
 DEBUG TEST >>> forget state  : delete a saved state from the persistent database
 DEBUG TEST >>> help          : show doc texts
 DEBUG TEST >>> list          : list of / show details for various parts of the system
@@ -107,11 +80,6 @@ Traceback (most recent call last):
   File "/home/smurf/homevent/homevent/statement.py", line ×××, in lookup
     raise UnknownWordError(args,self)
 UnknownWordError: Cannot find word <fuubar This is not found.> in <Global>
-NEW: ‹WorkSequence:11 (2)›
-   : │  id: 11
-   : │  call count: 0
-   : │  Cannot find word ‹fuubar This is not found.› in ‹Global›
-   : └1╴... done.
 Traceback (most recent call last):
   File "../modules/rpc.py", line ×××, in exposed_command
     return CommandProcessor(parent=self,ctx=self.ctx).simple_statement(args)
@@ -122,81 +90,23 @@ Traceback (most recent call last):
   File "/home/smurf/homevent/homevent/statement.py", line ×××, in lookup
     raise UnknownWordError(args,self)
 UnknownWordError: Cannot find word <fuubar This is not found.> in <Global>
-END: UnknownWordError
 DEBUG TEST YES Got an error
 DEBUG This is logged.
 DEBUG TEST The value is: Test123
-NEW: ‹ConditionalWorkSequence:12 (3)›
-   : │  id: 12
-   : │  call count: 0
-   : │  IEVENT: send¦logger
-   : ├1╴on send logger ‹OnEventHandler›
-   : │  prio: 51
-   : │  step: log DEBUG hello This is a test ‹LogHandler›
-   : └2╴... done.
 IEVENT: send¦logger
-RUN: on send logger ‹OnEventHandler›
-   : prio: 51
-   : step: log DEBUG hello This is a test ‹LogHandler›
- at: ‹ConditionalWorkSequence:12 (3)› (step 1)
- ev: IEVENT: send¦logger
 DEBUG hello This is a test
-END: send¦logger
 TRACE 2003-04-05 06:07:09 shutdown: Forced timer done
-NEW: ‹ConditionalWorkSequence:13 (2)›
-   : │  id: 13
-   : │  call count: 0
-   : │  EVENT: wait¦done¦1.0¦shutdown
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦done¦1.0¦shutdown
      : loglevel=0
-END: wait¦done¦1.0¦shutdown
-NEW: ‹ConditionalWorkSequence:14 (2)›
-   : │  id: 14
-   : │  call count: 0
-   : │  EVENT: wait¦done¦shutdown
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦done¦shutdown
      : loglevel=0
-END: wait¦done¦shutdown
-NEW: ‹ConditionalWorkSequence:15 (2)›
-   : │  id: 15
-   : │  call count: 0
-   : │  EVENT: wait¦start¦2.0¦foo¦b
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦start¦2.0¦foo¦b
      : loglevel=0
-END: wait¦start¦2.0¦foo¦b
-NEW: ‹ConditionalWorkSequence:16 (2)›
-   : │  id: 16
-   : │  call count: 0
-   : │  EVENT: wait¦start¦foo¦b
-   : │       : loglevel=0
-   : │       : end_time=2.0
-   : └1╴... done.
 EVENT: wait¦start¦foo¦b
      : loglevel=0
      : end_time=2.0
-END: wait¦start¦foo¦b
 TRACE 2003-04-05 06:07:10 foo¦b: Forced timer done
-NEW: ‹ConditionalWorkSequence:17 (2)›
-   : │  id: 17
-   : │  call count: 0
-   : │  EVENT: wait¦done¦2.0¦foo¦b
-   : │       : loglevel=0
-   : └1╴... done.
-EVENT: wait¦done¦2.0¦foo¦b
+EVENT: wait¦done¦2.1¦foo¦b
      : loglevel=0
-END: wait¦done¦2.0¦foo¦b
-NEW: ‹ConditionalWorkSequence:18 (2)›
-   : │  id: 18
-   : │  call count: 0
-   : │  EVENT: wait¦done¦foo¦b
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦done¦foo¦b
      : loglevel=0
-END: wait¦done¦foo¦b

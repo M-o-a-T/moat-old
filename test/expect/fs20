@@ -1,75 +1,14 @@
-NEW: ‹ConditionalWorkSequence:5 (2)›
-   : │  id: 5
-   : │  call count: 0
-   : │  EVENT: startup
-   : │       : startup=True
-   : └1╴... done.
 EVENT: startup
      : startup=True
-END: startup
-NEW: ‹ConditionalWorkSequence:6 (2)›
-   : │  id: 6
-   : │  call count: 0
-   : │  EVENT: module¦load¦bool
-   : └1╴... done.
 EVENT: module¦load¦bool
-END: module¦load¦bool
-NEW: ‹ConditionalWorkSequence:7 (2)›
-   : │  id: 7
-   : │  call count: 0
-   : │  EVENT: module¦load¦logging
-   : └1╴... done.
 EVENT: module¦load¦logging
-END: module¦load¦logging
-NEW: ‹ConditionalWorkSequence:8 (2)›
-   : │  id: 8
-   : │  call count: 0
-   : │  EVENT: module¦load¦trigger
-   : └1╴... done.
 EVENT: module¦load¦trigger
-END: module¦load¦trigger
-NEW: ‹ConditionalWorkSequence:9 (2)›
-   : │  id: 9
-   : │  call count: 0
-   : │  EVENT: module¦load¦wait
-   : └1╴... done.
 EVENT: module¦load¦wait
-END: module¦load¦wait
-NEW: ‹ConditionalWorkSequence:10 (2)›
-   : │  id: 10
-   : │  call count: 0
-   : │  EVENT: module¦load¦fs20switch
-   : └1╴... done.
 EVENT: module¦load¦fs20switch
-END: module¦load¦fs20switch
-NEW: ‹ConditionalWorkSequence:11 (2)›
-   : │  id: 11
-   : │  call count: 0
-   : │  EVENT: module¦load¦fs20em
-   : └1╴... done.
 EVENT: module¦load¦fs20em
-END: module¦load¦fs20em
-NEW: ‹ConditionalWorkSequence:12 (2)›
-   : │  id: 12
-   : │  call count: 0
-   : │  EVENT: module¦load¦fs20en
-   : └1╴... done.
 EVENT: module¦load¦fs20en
-END: module¦load¦fs20en
-NEW: ‹ConditionalWorkSequence:13 (2)›
-   : │  id: 13
-   : │  call count: 0
-   : │  EVENT: module¦load¦fs20tx
-   : └1╴... done.
 EVENT: module¦load¦fs20tx
-END: module¦load¦fs20tx
-NEW: ‹ConditionalWorkSequence:14 (2)›
-   : │  id: 14
-   : │  call count: 0
-   : │  EVENT: module¦load¦on_event
-   : └1╴... done.
 EVENT: module¦load¦on_event
-END: module¦load¦on_event
 .
 .
 foo bar :: 31413142
@@ -118,60 +57,25 @@ groupname: hygro
 code: 7
 offset_humidity: -1.0
 .
-NEW: ‹ConditionalWorkSequence:15 (2)›
-   : │  id: 15
-   : │  call count: 0
-   : │  EVENT: wait¦start¦0.6¦_wait¦1
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦start¦0.6¦_wait¦1
      : loglevel=0
-END: wait¦start¦0.6¦_wait¦1
-NEW: ‹ConditionalWorkSequence:16 (2)›
-   : │  id: 16
-   : │  call count: 0
-   : │  EVENT: wait¦start¦_wait¦1
-   : │       : loglevel=0
-   : │       : end_time=0.6
-   : └1╴... done.
 EVENT: wait¦start¦_wait¦1
      : loglevel=0
      : end_time=0.6
-END: wait¦start¦_wait¦1
 TRACE 2003-04-05 06:07:08.500000 _wait¦1: Forced timer done
-NEW: ‹ConditionalWorkSequence:17 (2)›
-   : │  id: 17
-   : │  call count: 0
-   : │  EVENT: wait¦done¦0.6¦_wait¦1
-   : │       : loglevel=0
-   : └1╴... done.
+Traceback (most recent call last):
+  File "/home/smurf/homevent/homevent/twist.py", line 287, in err
+    e = e.get()
+  File "/usr/lib/python2.7/dist-packages/gevent/greenlet.py", line 264, in get
+    raise self._exception
+RuntimeError: No FS20 handler known
 EVENT: wait¦done¦0.6¦_wait¦1
      : loglevel=0
-END: wait¦done¦0.6¦_wait¦1
-NEW: ‹ConditionalWorkSequence:18 (2)›
-   : │  id: 18
-   : │  call count: 0
-   : │  EVENT: wait¦done¦_wait¦1
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦done¦_wait¦1
      : loglevel=0
-END: wait¦done¦_wait¦1
 Traceback (most recent call last):
   File "/home/smurf/homevent/homevent/twist.py", line 287, in err
     e = e.get()
   File "/usr/lib/python2.7/dist-packages/gevent/greenlet.py", line 264, in get
     raise self._exception
 RuntimeError: No FS20 handler known
-NEW: ‹WorkSequence:19 (2)›
-   : │  id: 19
-   : │  call count: 0
-   : │  No FS20 handler known
-   : └1╴... done.
-Traceback (most recent call last):
-  File "/home/smurf/homevent/homevent/twist.py", line 287, in err
-    e = e.get()
-  File "/usr/lib/python2.7/dist-packages/gevent/greenlet.py", line 264, in get
-    raise self._exception
-RuntimeError: No FS20 handler known
-END: RuntimeError

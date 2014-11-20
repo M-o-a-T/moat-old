@@ -1,12 +1,5 @@
-NEW: ‹ConditionalWorkSequence:5 (2)›
-   : │  id: 5
-   : │  call count: 0
-   : │  EVENT: startup
-   : │       : startup=True
-   : └1╴... done.
 EVENT: startup
      : startup=True
-END: startup
 DEBUG STARTING_UP
 DEBUG Yes
 DEBUG Yes
@@ -24,123 +17,36 @@ type: GAUGE
 unknown_sec: 0
 value: ?
 .
-NEW: ‹ConditionalWorkSequence:6 (2)›
-   : │  id: 6
-   : │  call count: 0
-   : │  EVENT: wait¦start¦×××¦_wait¦1
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦start¦×××¦_wait¦1
      : loglevel=0
-END: wait¦start¦×××¦_wait¦1
-NEW: ‹ConditionalWorkSequence:7 (2)›
-   : │  id: 7
-   : │  call count: 0
-   : │  EVENT: wait¦start¦_wait¦1
-   : │       : loglevel=0
-   : │       : end_time=1.1
-   : └1╴... done.
 EVENT: wait¦start¦_wait¦1
      : loglevel=0
      : end_time=1.1
-END: wait¦start¦_wait¦1
 TRACE 2003-04-05 06:07:09.150000 _wait¦1: Fake timer done
-NEW: ‹ConditionalWorkSequence:8 (2)›
-   : │  id: 8
-   : │  call count: 0
-   : │  EVENT: wait¦done¦×××¦_wait¦1
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦done¦×××¦_wait¦1
      : loglevel=0
-END: wait¦done¦×××¦_wait¦1
-NEW: ‹ConditionalWorkSequence:9 (2)›
-   : │  id: 9
-   : │  call count: 0
-   : │  EVENT: wait¦done¦_wait¦1
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦done¦_wait¦1
      : loglevel=0
-END: wait¦done¦_wait¦1
-NEW: ‹ConditionalWorkSequence:10 (2)›
-   : │  id: 10
-   : │  call count: 0
-   : │  EVENT: wait¦start¦×××¦_wait¦2
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦start¦×××¦_wait¦2
      : loglevel=0
-END: wait¦start¦×××¦_wait¦2
-NEW: ‹ConditionalWorkSequence:11 (2)›
-   : │  id: 11
-   : │  call count: 0
-   : │  EVENT: wait¦start¦_wait¦2
-   : │       : loglevel=0
-   : │       : end_time=2.2
-   : └1╴... done.
 EVENT: wait¦start¦_wait¦2
      : loglevel=0
      : end_time=2.2
-END: wait¦start¦_wait¦2
 TRACE 2003-04-05 06:07:10.300000 _wait¦2: Fake timer done
-NEW: ‹ConditionalWorkSequence:12 (2)›
-   : │  id: 12
-   : │  call count: 0
-   : │  EVENT: wait¦done¦×××¦_wait¦2
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦done¦×××¦_wait¦2
      : loglevel=0
-END: wait¦done¦×××¦_wait¦2
-NEW: ‹ConditionalWorkSequence:13 (2)›
-   : │  id: 13
-   : │  call count: 0
-   : │  EVENT: wait¦done¦_wait¦2
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦done¦_wait¦2
      : loglevel=0
-END: wait¦done¦_wait¦2
-NEW: ‹ConditionalWorkSequence:14 (2)›
-   : │  id: 14
-   : │  call count: 0
-   : │  EVENT: wait¦start¦×××¦_wait¦3
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦start¦×××¦_wait¦3
      : loglevel=0
-END: wait¦start¦×××¦_wait¦3
-NEW: ‹ConditionalWorkSequence:15 (2)›
-   : │  id: 15
-   : │  call count: 0
-   : │  EVENT: wait¦start¦_wait¦3
-   : │       : loglevel=0
-   : │       : end_time=3.4
-   : └1╴... done.
 EVENT: wait¦start¦_wait¦3
      : loglevel=0
      : end_time=3.4
-END: wait¦start¦_wait¦3
 TRACE 2003-04-05 06:07:11.450000 _wait¦3: Fake timer done
-NEW: ‹ConditionalWorkSequence:16 (2)›
-   : │  id: 16
-   : │  call count: 0
-   : │  EVENT: wait¦done¦×××¦_wait¦3
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦done¦×××¦_wait¦3
      : loglevel=0
-END: wait¦done¦×××¦_wait¦3
-NEW: ‹ConditionalWorkSequence:17 (2)›
-   : │  id: 17
-   : │  call count: 0
-   : │  EVENT: wait¦done¦_wait¦3
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦done¦_wait¦3
      : loglevel=0
-END: wait¦done¦_wait¦3
 name: t¦tt¦ttt
 file: /tmp/rrdtest.rrd
 dataset: test
@@ -153,11 +59,5 @@ type: GAUGE
 unknown_sec: 0
 value: ?
 .
-NEW: ‹ConditionalWorkSequence:18 (2)›
-   : │  id: 18
-   : │  call count: 0
-   : │  IEVENT: last¦12
-   : └1╴... done.
 IEVENT: last¦12
-END: last¦12
 DEBUG Yes

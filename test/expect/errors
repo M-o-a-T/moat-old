@@ -1,12 +1,5 @@
-NEW: ‹ConditionalWorkSequence:5 (2)›
-   : │  id: 5
-   : │  call count: 0
-   : │  EVENT: startup
-   : │       : startup=True
-   : └1╴... done.
 EVENT: startup
      : startup=True
-END: startup
 DEBUG Yes A
 DEBUG Yes B
 DEBUG Yes C
@@ -14,13 +7,7 @@ DEBUG Yes D
 TRACE Triggered:
 TRACE RaisedError: Foo A
 RaisedError: Foo A
-NEW: ‹WorkSequence:6 (2)›
-   : │  id: 6
-   : │  call count: 0
-   : │  RaisedError: Foo A
-   : └1╴... done.
 RaisedError: Foo A
-END: RaisedError
 DEBUG Yes E
 TRACE Triggered:
 TRACE RaisedError: Foo B
@@ -36,13 +23,7 @@ DEBUG Yes J D
 TRACE Triggered:
 TRACE RaisedError: Foo E
 RaisedError: Foo E
-NEW: ‹WorkSequence:7 (2)›
-   : │  id: 7
-   : │  call count: 0
-   : │  RaisedError: Foo E
-   : └1╴... done.
 RaisedError: Foo E
-END: RaisedError
 DEBUG Yes K
 TRACE Triggered:
 TRACE RaisedError: Foo F

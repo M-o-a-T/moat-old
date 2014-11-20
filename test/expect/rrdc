@@ -1,51 +1,15 @@
-NEW: ‹ConditionalWorkSequence:5 (2)›
-   : │  id: 5
-   : │  call count: 0
-   : │  EVENT: startup
-   : │       : startup=True
-   : └1╴... done.
 EVENT: startup
      : startup=True
-END: startup
-NEW: ‹ConditionalWorkSequence:6 (2)›
-   : │  id: 6
-   : │  call count: 0
-   : │  EVENT: wait¦start¦0.2¦startup
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦start¦0.2¦startup
      : loglevel=0
-END: wait¦start¦0.2¦startup
-NEW: ‹ConditionalWorkSequence:7 (2)›
-   : │  id: 7
-   : │  call count: 0
-   : │  EVENT: wait¦start¦startup
-   : │       : loglevel=0
-   : │       : end_time=0.2
-   : └1╴... done.
 EVENT: wait¦start¦startup
      : loglevel=0
      : end_time=0.2
-END: wait¦start¦startup
 TRACE 2003-04-05 06:07:08.200000 startup: Forced timer done
-NEW: ‹ConditionalWorkSequence:8 (2)›
-   : │  id: 8
-   : │  call count: 0
-   : │  EVENT: wait¦done¦0.2¦startup
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦done¦0.2¦startup
      : loglevel=0
-END: wait¦done¦0.2¦startup
-NEW: ‹ConditionalWorkSequence:9 (2)›
-   : │  id: 9
-   : │  call count: 0
-   : │  EVENT: wait¦done¦startup
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦done¦startup
      : loglevel=0
-END: wait¦done¦startup
 DEBUG Yes
 TRACE conn setstate init closed
 TRACE conn setstate closed want
@@ -85,143 +49,50 @@ server: ‹RRDqueue:t¦tt¦ttt connecting›
        out_queued: 0
 filename: /tmp/rrdtest.rrd
 .
-NEW: ‹ConditionalWorkSequence:10 (2)›
-   : │  id: 10
-   : │  call count: 0
-   : │  EVENT: wait¦start¦0.4¦_wait¦2
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦start¦0.4¦_wait¦2
      : loglevel=0
-END: wait¦start¦0.4¦_wait¦2
-NEW: ‹ConditionalWorkSequence:11 (2)›
-   : │  id: 11
-   : │  call count: 0
-   : │  EVENT: wait¦start¦_wait¦2
-   : │       : loglevel=0
-   : │       : end_time=0.4
-   : └1╴... done.
 EVENT: wait¦start¦_wait¦2
      : loglevel=0
      : end_time=0.4
-END: wait¦start¦_wait¦2
 TRACE conn setting up RRDqueue t¦tt¦ttt
 TRACE !got UP_EVENT t tt ttt
-NEW: ‹ConditionalWorkSequence:12 (2)›
-   : │  id: 12
-   : │  call count: 0
-   : │  EVENT: rrd¦connect¦t¦tt¦ttt
-   : └1╴... done.
-EVENT: rrd¦connect¦t¦tt¦ttt
-END: rrd¦connect¦t¦tt¦ttt
 TRACE conn connected RRDqueue t¦tt¦ttt
 TRACE NotConn [[], [], [], []]
 TRACE conn setstate connecting connected
+EVENT: rrd¦connect¦t¦tt¦ttt
 TRACE 2003-04-05 06:07:08.300000 _wait¦2: Forced timer done
-NEW: ‹ConditionalWorkSequence:13 (2)›
-   : │  id: 13
-   : │  call count: 0
-   : │  EVENT: wait¦done¦0.4¦_wait¦2
-   : │       : loglevel=0
-   : └1╴... done.
+TRACE rrd send 'update /tmp/rrdtest.rrd 1049515628:10'
 EVENT: wait¦done¦0.4¦_wait¦2
      : loglevel=0
-END: wait¦done¦0.4¦_wait¦2
-NEW: ‹ConditionalWorkSequence:14 (2)›
-   : │  id: 14
-   : │  call count: 0
-   : │  EVENT: wait¦done¦_wait¦2
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦done¦_wait¦2
      : loglevel=0
-END: wait¦done¦_wait¦2
-TRACE rrd send 'update /tmp/rrdtest.rrd 1049515628:10'
 TRACE rrd recv '0 Yes'
 TRACE conn incoming RRDqueue t¦tt¦ttt ‹MsgIncoming: msg:'Yes' type:MT_ACK prio:2›
-NEW: ‹ConditionalWorkSequence:15 (2)›
-   : │  id: 15
-   : │  call count: 0
-   : │  EVENT: wait¦start¦0.5¦_wait¦3
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦start¦0.5¦_wait¦3
      : loglevel=0
-END: wait¦start¦0.5¦_wait¦3
-NEW: ‹ConditionalWorkSequence:16 (2)›
-   : │  id: 16
-   : │  call count: 0
-   : │  EVENT: wait¦start¦_wait¦3
-   : │       : loglevel=0
-   : │       : end_time=0.5
-   : └1╴... done.
 EVENT: wait¦start¦_wait¦3
      : loglevel=0
      : end_time=0.5
-END: wait¦start¦_wait¦3
 TRACE 2003-04-05 06:07:08.400000 _wait¦3: Forced timer done
-NEW: ‹ConditionalWorkSequence:17 (2)›
-   : │  id: 17
-   : │  call count: 0
-   : │  EVENT: wait¦done¦0.5¦_wait¦3
-   : │       : loglevel=0
-   : └1╴... done.
+TRACE rrd send 'update /tmp/rrdtest.rrd 1049515628:11'
 EVENT: wait¦done¦0.5¦_wait¦3
      : loglevel=0
-END: wait¦done¦0.5¦_wait¦3
-NEW: ‹ConditionalWorkSequence:18 (2)›
-   : │  id: 18
-   : │  call count: 0
-   : │  EVENT: wait¦done¦_wait¦3
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦done¦_wait¦3
      : loglevel=0
-END: wait¦done¦_wait¦3
-TRACE rrd send 'update /tmp/rrdtest.rrd 1049515628:11'
 TRACE rrd recv '2 Nonsense follows'
 TRACE rrd recv 'Nonsense'
 TRACE rrd recv 'More Nonsense'
 TRACE conn incoming RRDqueue t¦tt¦ttt ‹MsgIncoming: msg:' Nonsense follows' data:['Nonsense', 'More Nonsense'] type:MT_MULTILINE prio:2›
-NEW: ‹ConditionalWorkSequence:19 (2)›
-   : │  id: 19
-   : │  call count: 0
-   : │  EVENT: wait¦start¦0.6¦_wait¦4
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦start¦0.6¦_wait¦4
      : loglevel=0
-END: wait¦start¦0.6¦_wait¦4
-NEW: ‹ConditionalWorkSequence:20 (2)›
-   : │  id: 20
-   : │  call count: 0
-   : │  EVENT: wait¦start¦_wait¦4
-   : │       : loglevel=0
-   : │       : end_time=0.6
-   : └1╴... done.
 EVENT: wait¦start¦_wait¦4
      : loglevel=0
      : end_time=0.6
-END: wait¦start¦_wait¦4
 TRACE 2003-04-05 06:07:08.500000 _wait¦4: Forced timer done
-NEW: ‹ConditionalWorkSequence:21 (2)›
-   : │  id: 21
-   : │  call count: 0
-   : │  EVENT: wait¦done¦0.6¦_wait¦4
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦done¦0.6¦_wait¦4
      : loglevel=0
-END: wait¦done¦0.6¦_wait¦4
-NEW: ‹ConditionalWorkSequence:22 (2)›
-   : │  id: 22
-   : │  call count: 0
-   : │  EVENT: wait¦done¦_wait¦4
-   : │       : loglevel=0
-   : └1╴... done.
 EVENT: wait¦done¦_wait¦4
      : loglevel=0
-END: wait¦done¦_wait¦4
 TRACE rrd send 'update /tmp/rrdtest.rrd 1049515628:12'
 TRACE rrd recv '-123 No'
 TRACE conn incoming RRDqueue t¦tt¦ttt ‹MsgIncoming: msg:'No' errno:123 type:MT_ERROR prio:2›
@@ -253,12 +124,6 @@ last_sent_at: now (2003-04-05 06:07:08.50)
 .
 DEBUG Yes
 TRACE !got DOWN_EVENT t tt ttt
-NEW: ‹ConditionalWorkSequence:23 (2)›
-   : │  id: 23
-   : │  call count: 0
-   : │  EVENT: rrd¦disconnect¦t¦tt¦ttt
-   : └1╴... done.
-EVENT: rrd¦disconnect¦t¦tt¦ttt
-END: rrd¦disconnect¦t¦tt¦ttt
 TRACE conn deleted RRDqueue t¦tt¦ttt
+EVENT: rrd¦disconnect¦t¦tt¦ttt
 DEBUG Yes

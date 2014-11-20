@@ -1,12 +1,5 @@
-NEW: ‹ConditionalWorkSequence:5 (2)›
-   : │  id: 5
-   : │  call count: 0
-   : │  EVENT: startup
-   : │       : startup=True
-   : └1╴... done.
 EVENT: startup
      : startup=True
-END: startup
 TRACE Yes!
 TRACE INIT sqlite {'username': 'smurf', 'trace': <function trace at 0x×××>, 'database': '/tmp/homevent.smurf.db', 'dbtype': 'sqlite', 'dataport': '3306', 'host': 'sql.intern.smurf.noris.de', 'password': 'geheim'}
 TRACE DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) (u"u'three'",)
@@ -21,22 +14,9 @@ TRACE Yes!
 TRACE We still have three
 TRACE DoFn ('delete from HE_State where category=? and name=?', ('state', 'foo bar')) 1
 TRACE Commit  
-NEW: ‹ConditionalWorkSequence:6 (2)›
-   : │  id: 6
-   : │  call count: 0
-   : │  EVENT: state¦three¦-¦foo¦bar
-   : └1╴... done.
 EVENT: state¦three¦-¦foo¦bar
-END: state¦three¦-¦foo¦bar
-NEW: ‹ConditionalWorkSequence:7 (2)›
-   : │  id: 7
-   : │  call count: 0
-   : │  EVENT: state¦delete¦foo¦bar
-   : │       : prev_value=three
-   : └1╴... done.
 EVENT: state¦delete¦foo¦bar
      : prev_value=three
-END: state¦delete¦foo¦bar
 .
 TRACE DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) None
 TRACE RollBack  
