@@ -92,7 +92,7 @@ EVENT: wait¦done¦×××¦_wait¦1
      : loglevel=0
 EVENT: wait¦done¦_wait¦1
      : loglevel=0
-DEBUG Yes
+TRACE Yes
 foo bar :: Wait ‹0.2 sec›
 .
 : ‹Tester foo¦bar on 42.0›
@@ -209,7 +209,7 @@ EVENT: wait¦done¦×××¦_wait¦5
      : loglevel=0
 EVENT: wait¦done¦_wait¦5
      : loglevel=0
-DEBUG Yes
+TRACE Yes
 EVENT: wait¦start¦×××¦_wait¦6
      : loglevel=0
 EVENT: wait¦start¦_wait¦6
@@ -270,7 +270,7 @@ EVENT: wait¦done¦×××¦_wait¦6
      : loglevel=0
 EVENT: wait¦done¦_wait¦6
      : loglevel=0
-DEBUG Yes
+TRACE Yes
 : ‹Monitor baz¦zaz on 13.5›
 name: baz¦zaz
 device: passive

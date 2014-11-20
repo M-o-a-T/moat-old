@@ -10,8 +10,8 @@ run: off
 interval: 10
 duration: 2.0
 .
-DEBUG Yes
-DEBUG Yes
+TRACE Yes
+TRACE Yes
 EVENT: wait¦start¦9.5¦A¦before
      : loglevel=0
 EVENT: wait¦start¦A¦before
@@ -28,8 +28,8 @@ interval: 10
 duration: 2.0
 next: 0.5 sec (2003-04-05 06:07:18)
 .
-DEBUG Yes
-DEBUG Yes
+TRACE Yes
+TRACE Yes
 EVENT: wait¦start¦10.5¦B¦during
      : loglevel=0
 EVENT: wait¦start¦B¦during
@@ -37,8 +37,8 @@ EVENT: wait¦start¦B¦during
      : end_time=10.5
 TRACE 2003-04-05 06:07:18.050000 : Fake timer done
 EVENT: timeslot¦begin¦foo¦bar
-DEBUG Yes
-DEBUG Yes
+TRACE Yes
+TRACE Yes
 TRACE 2003-04-05 06:07:18.550000 B¦during: Fake timer done
 EVENT: wait¦done¦10.6¦B¦during
      : loglevel=0
@@ -52,8 +52,8 @@ last: -0.6 sec (2003-04-05 06:07:18)
 next: 1.4 sec (2003-04-05 06:07:20)
 slot: 0.7
 .
-DEBUG Yes
-DEBUG Yes
+TRACE Yes
+TRACE Yes
 EVENT: wait¦start¦12.6¦C¦after
      : loglevel=0
 EVENT: wait¦start¦C¦after
@@ -67,8 +67,8 @@ EVENT: wait¦start¦GOT¦EVENT¦B
      : loglevel=0
      : end_time=12.2
 TRACE 2003-04-05 06:07:20.250000 GOT¦EVENT¦B: Fake timer done
-DEBUG Yes
-DEBUG Yes
+TRACE Yes
+TRACE Yes
 EVENT: wait¦done¦12.2¦GOT¦EVENT¦B
      : loglevel=0
 EVENT: wait¦done¦GOT¦EVENT¦B
@@ -85,8 +85,8 @@ duration: 2.0
 last: -2.6 sec (2003-04-05 06:07:18)
 next: 7.3 sec (2003-04-05 06:07:28)
 .
-DEBUG Yes
-DEBUG Yes
+TRACE Yes
+TRACE Yes
 EVENT: wait¦start¦20.6¦D¦during¦again
      : loglevel=0
 EVENT: wait¦start¦D¦during¦again
@@ -94,8 +94,8 @@ EVENT: wait¦start¦D¦during¦again
      : end_time=20.6
 TRACE 2003-04-05 06:07:28 : Fake timer done
 EVENT: timeslot¦begin¦foo¦bar
-DEBUG Yes
-DEBUG Yes
+TRACE Yes
+TRACE Yes
 TRACE 2003-04-05 06:07:28.700000 D¦during¦again: Fake timer done
 EVENT: wait¦done¦20.8¦D¦during¦again
      : loglevel=0
@@ -109,14 +109,14 @@ last: -0.8 sec (2003-04-05 06:07:28)
 next: 1.2 sec (2003-04-05 06:07:30)
 slot: 0.625
 .
-DEBUG Yes
-DEBUG Yes
-DEBUG Yes
-DEBUG Yes
+TRACE Yes
+TRACE Yes
+TRACE Yes
+TRACE Yes
 name: foo bar
 run: off
 interval: 10
 duration: 2.0
 last: -0.8 sec (2003-04-05 06:07:28)
 .
-DEBUG Yes
+TRACE Yes

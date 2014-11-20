@@ -106,7 +106,7 @@ EVENT: wait¦start¦foo¦b
      : loglevel=0
      : end_time=2.0
 TRACE 2003-04-05 06:07:10 foo¦b: Forced timer done
-EVENT: wait¦done¦2.1¦foo¦b
+EVENT: wait¦done¦2.0¦foo¦b
      : loglevel=0
 EVENT: wait¦done¦foo¦b
      : loglevel=0

@@ -28,7 +28,7 @@ in: Global
 EVENT: wait¦update¦Foo¦Bar
      : loglevel=0
      : dest=2003-04-05 06:07:08.400000
-DEBUG Yes
+TRACE Yes
 EVENT: wait¦start¦×××¦X2
      : loglevel=0
 EVENT: wait¦start¦X2
@@ -71,7 +71,7 @@ EVENT: wait¦done¦×××¦_wait¦7
      : loglevel=0
 EVENT: wait¦done¦_wait¦7
      : loglevel=0
-DEBUG Yes
+TRACE Yes
 TRACE Create OnEvtHandler: whatever
 TRACE NewHandler 30
 IEVENT: whatever
@@ -92,7 +92,7 @@ EVENT: wait¦cancel¦×××¦Foo¦Baz
      : loglevel=0
 EVENT: wait¦cancel¦Foo¦Baz
      : loglevel=0
-DEBUG Yes
+TRACE Yes
 EVENT: wait¦start¦×××¦_wait¦9
      : loglevel=0
 EVENT: wait¦start¦_wait¦9

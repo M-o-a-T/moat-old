@@ -82,8 +82,8 @@ total time: 0:00:02
 total samples: 3
 current average: 3.5
 .
-DEBUG Yes
-DEBUG Yes
+TRACE Yes
+TRACE Yes
 EVENT: wait¦start¦4.2¦_wait¦4
      : loglevel=0
 EVENT: wait¦start¦_wait¦4
@@ -94,7 +94,7 @@ EVENT: wait¦done¦4.2¦_wait¦4
      : loglevel=0
 EVENT: wait¦done¦_wait¦4
      : loglevel=0
-DEBUG Yes
+TRACE Yes
 DEBUG values now 0.0 prev 5.0
 test moving :: (new)
 .
@@ -274,8 +274,8 @@ sample 0: -1.0
 sample 1: 8.0
 sample 2: 14.0
 .
-DEBUG Yes
-DEBUG Yes
+TRACE Yes
+TRACE Yes
 EVENT: wait¦start¦17.5¦_wait¦10
      : loglevel=0
 EVENT: wait¦start¦_wait¦10
@@ -286,7 +286,7 @@ EVENT: wait¦done¦17.5¦_wait¦10
      : loglevel=0
 EVENT: wait¦done¦_wait¦10
      : loglevel=0
-DEBUG Yes
+TRACE Yes
 DEBUG values now 14.0 prev 8.0
 test decay :: (new)
 .
@@ -375,8 +375,8 @@ total samples: 3
 current average: 3.5
 weight: 0.1
 .
-DEBUG Yes
-DEBUG Yes
+TRACE Yes
+TRACE Yes
 EVENT: wait¦start¦21.8¦_wait¦14
      : loglevel=0
 EVENT: wait¦start¦_wait¦14
@@ -387,7 +387,7 @@ EVENT: wait¦done¦21.8¦_wait¦14
      : loglevel=0
 EVENT: wait¦done¦_wait¦14
      : loglevel=0
-DEBUG Yes
+TRACE Yes
 DEBUG values now -1.0 prev 22.0
 test decaytime :: (new)
 .
@@ -500,8 +500,8 @@ weight/hour: 1.0
 weight/minute: 0.9982029897
 weight/second: 0.1
 .
-DEBUG Yes
-DEBUG Yes
+TRACE Yes
+TRACE Yes
 EVENT: wait¦start¦26.0¦_wait¦18
      : loglevel=0
 EVENT: wait¦start¦_wait¦18
@@ -527,5 +527,5 @@ weight/minute: 0.9982029897
 weight/second: 0.1
 .
 DEBUG values avg 16.39 now 1.0 prev 110.0
-DEBUG Yes
+TRACE Yes
 .

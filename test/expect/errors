@@ -1,40 +1,40 @@
 EVENT: startup
      : startup=True
-DEBUG Yes A
-DEBUG Yes B
-DEBUG Yes C
-DEBUG Yes D
+TRACE Yes A
+TRACE Yes B
+TRACE Yes C
+TRACE Yes D
 TRACE Triggered:
 TRACE RaisedError: Foo A
 RaisedError: Foo A
 RaisedError: Foo A
-DEBUG Yes E
+TRACE Yes E
 TRACE Triggered:
 TRACE RaisedError: Foo B
-DEBUG Yes F B
-DEBUG Yes G
+TRACE Yes F B
+TRACE Yes G
 TRACE Triggered:
 TRACE RaisedError: Foo C
-DEBUG Yes H C
-DEBUG Yes I
+TRACE Yes H C
+TRACE Yes I
 TRACE Triggered:
 TRACE RaisedError: Foo D
-DEBUG Yes J D
+TRACE Yes J D
 TRACE Triggered:
 TRACE RaisedError: Foo E
 RaisedError: Foo E
 RaisedError: Foo E
-DEBUG Yes K
+TRACE Yes K
 TRACE Triggered:
 TRACE RaisedError: Foo F
-DEBUG Yes L F
+TRACE Yes L F
 TRACE Triggered:
 TRACE RaisedError: Foo G
-DEBUG Yes M G
-DEBUG Yes N KEY
+TRACE Yes M G
+TRACE Yes N KEY
 TRACE Triggered:
 TRACE RaisedError: Foo Bar
-DEBUG Yes O
+TRACE Yes O
 TRACE Triggered:
 TRACE RaisedError: Foo Bar
-DEBUG Yes P Foo Bar
+TRACE Yes P Foo Bar

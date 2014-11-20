@@ -1,9 +1,9 @@
 EVENT: startup
      : startup=True
-DEBUG Yes
+TRACE Yes
 TRACE Create OnEvtHandler: pwm¦change¦foo¦bar
 TRACE NewHandler 5
-DEBUG Yes
+TRACE Yes
 foo bar :: (new)
 .
 type: PWM

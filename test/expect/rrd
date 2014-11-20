@@ -1,8 +1,8 @@
 EVENT: startup
      : startup=True
 DEBUG STARTING_UP
-DEBUG Yes
-DEBUG Yes
+TRACE Yes
+TRACE Yes
 t tt ttt :: /tmp/rrdtest.rrd test
 .
 name: t¦tt¦ttt
@@ -60,4 +60,4 @@ unknown_sec: 0
 value: ?
 .
 IEVENT: last¦12
-DEBUG Yes
+TRACE Yes

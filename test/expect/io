@@ -27,10 +27,10 @@ EVENT: input¦fake¦TEST¦foo¦bar
 EVENT: input¦change¦foo¦bar
      : last_value=None
      : value=TEST
-DEBUG Yes
-DEBUG yes
-DEBUG yes
-DEBUG yes
+TRACE Yes
+TRACE Yes
+TRACE Yes
+TRACE Yes
 EVENT: output¦set¦TEST¦1¦foo¦bar
 EVENT: output¦change¦foo¦bar
      : value=1
@@ -87,7 +87,7 @@ EVENT: input¦fake¦GRMPF¦foo¦bar
 EVENT: input¦change¦foo¦bar
      : last_value=three
      : value=GRMPF
-DEBUG Yes
+TRACE Yes
 : ‹Collected FakeInput:foo¦bar›
 name: foo¦bar
 type: fake

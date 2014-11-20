@@ -59,8 +59,12 @@ EVENT: onewire¦scanned¦A
 DEBUG onewire SEND 0 44 2 6 8192 0 u'/uncached/bus.0/10.000010EF0000/temperature\x00'
 DEBUG onewire RECV 0 7 7 6 7 x0
 DEBUG onewire RECV … 7 'DS18S20'
+DEBUG onewire RECV 0 12 12 6 12 x0
+DEBUG onewire RECV … 12 '         1.6'
 TRACE conn incoming OWFSqueue A ‹MsgIncoming: data:'DS18S20' typ:7 prio:2›
 DEBUG onewire done:  ‹ATTRgetmsg 10.000010EF0000 type›
+TRACE conn incoming OWFSqueue A ‹MsgIncoming: data:'         1.6' typ:12 prio:2›
+DEBUG onewire done:  ‹ATTRgetmsg 10.000010EF0000 temperature›
 EVENT: onewire¦new¦DS18S20¦10.000010ef0000
 EVENT: onewire¦new
      : typ=DS18S20
@@ -70,34 +74,30 @@ EVENT: onewire¦up
      : typ=DS18S20
      : id=10.000010ef0000
 TRACE YesC
-TRACE monitor Start run tempi
-EVENT: monitor¦start¦tempi
-DEBUG onewire SEND 0 44 2 6 8192 0 u'/uncached/bus.0/10.000010EF0000/temperature\x00'
-DEBUG onewire RECV 0 12 12 6 12 x0
-DEBUG onewire RECV … 12 '         1.6'
-DEBUG onewire RECV 0 12 12 6 12 x0
-DEBUG onewire RECV … 12 '         1.6'
-TRACE conn incoming OWFSqueue A ‹MsgIncoming: data:'         1.6' typ:12 prio:2›
-DEBUG onewire done:  ‹ATTRgetmsg 10.000010EF0000 temperature›
-TRACE conn incoming OWFSqueue A ‹MsgIncoming: data:'         1.6' typ:12 prio:2›
-DEBUG onewire done:  ‹ATTRgetmsg 10.000010EF0000 temperature›
 : ‹Collected OWFSinput:temp›
 name: temp
 type: onewire
-TRACE monitor filter [1.6] on tempi
-TRACE monitor More data [1.6] for ‹tempi›
+TRACE monitor Start run tempi
 IEVENT: thermo¦1.6
 last read: now (2003-04-05 06:07:08)
 last value: 1.6
+EVENT: monitor¦start¦tempi
+DEBUG onewire SEND 0 44 2 6 8192 0 u'/uncached/bus.0/10.000010EF0000/temperature\x00'
 .
 DEBUG onewire SEND 0 44 3 6 2 0 u'/uncached/bus.0/10.000010EF0000/temp_high\x0099'
 EVENT: output¦set¦None¦99¦temphi
 EVENT: output¦change¦temphi
      : value=99
      : prev_value=None
+DEBUG onewire RECV 0 12 12 6 12 x0
+DEBUG onewire RECV … 12 '         1.6'
 DEBUG onewire RECV 0 0 -1 6 0 x0
 DEBUG onewire RECV … 0 ''
+TRACE conn incoming OWFSqueue A ‹MsgIncoming: data:'         1.6' typ:12 prio:2›
+DEBUG onewire done:  ‹ATTRgetmsg 10.000010EF0000 temperature›
 TRACE conn incoming OWFSqueue A ‹MsgIncoming: data:'' typ:-1 prio:2›
+TRACE monitor filter [1.6] on tempi
+TRACE monitor More data [1.6] for ‹tempi›
 DEBUG onewire done:  ‹ATTRsetmsg 10.000010EF0000 temp_high 99›
 DEBUG onewire SEND 0 1 7 6 0 0 '\x00'
 EVENT: wait¦cancel¦1.1¦yawn
@@ -140,7 +140,7 @@ templow
 type
 DEBUG onewire doneDIR ‹DIRmsg bus.0/10.000010EF0000›
 .
-TRACE yes
+TRACE Yes
 TRACE onewire start bus update
 DEBUG onewire SEND 0 1 7 6 0 0 '\x00'
 EVENT: onewire¦scanning¦A

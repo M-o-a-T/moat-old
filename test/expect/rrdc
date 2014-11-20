@@ -1,21 +1,21 @@
 EVENT: startup
      : startup=True
-EVENT: wait¦start¦0.2¦startup
+EVENT: wait¦start¦0.3¦startup
      : loglevel=0
 EVENT: wait¦start¦startup
      : loglevel=0
-     : end_time=0.2
+     : end_time=0.3
 TRACE 2003-04-05 06:07:08.200000 startup: Forced timer done
-EVENT: wait¦done¦0.2¦startup
+EVENT: wait¦done¦0.3¦startup
      : loglevel=0
 EVENT: wait¦done¦startup
      : loglevel=0
-DEBUG Yes
+TRACE Yes
 TRACE conn setstate init closed
 TRACE conn setstate closed want
 TRACE conn setstate want connecting
 TRACE conn connecting RRDqueue t¦tt¦ttt
-DEBUG Yes
+TRACE Yes
 t tt ttt :: ‹RRDqueue:t¦tt¦ttt connecting›
 .
 : ‹RRDqueue:t¦tt¦ttt connecting›
@@ -30,8 +30,8 @@ conn attempts: 0
 conn timer: 3
 out_queued: 0
 .
-DEBUG Yes
-DEBUG Yes
+TRACE Yes
+TRACE Yes
 a aa aaa
 .
 : ‹Collected RRDfile:a¦aa¦aaa›
@@ -96,7 +96,7 @@ EVENT: wait¦done¦_wait¦4
 TRACE rrd send 'update /tmp/rrdtest.rrd 1049515628:12'
 TRACE rrd recv '-123 No'
 TRACE conn incoming RRDqueue t¦tt¦ttt ‹MsgIncoming: msg:'No' errno:123 type:MT_ERROR prio:2›
-DEBUG Yes error
+TRACE Yes error
 : ‹Collected RRDfile:a¦aa¦aaa›
 name: a¦aa¦aaa
 server: ‹RRDqueue:t¦tt¦ttt connected›
@@ -122,8 +122,8 @@ filename: /tmp/rrdtest.rrd
 last_sent: (12,)
 last_sent_at: now (2003-04-05 06:07:08.50)
 .
-DEBUG Yes
+TRACE Yes
 TRACE !got DOWN_EVENT t tt ttt
 TRACE conn deleted RRDqueue t¦tt¦ttt
 EVENT: rrd¦disconnect¦t¦tt¦ttt
-DEBUG Yes
+TRACE Yes
