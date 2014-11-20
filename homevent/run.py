@@ -28,6 +28,8 @@ from homevent.collect import Collection
 from homevent.context import Context
 from homevent.twist import fix_exception
 
+from gevent import spawn
+
 workers = {}
 
 def register_worker(w):
@@ -89,18 +91,15 @@ def collect_failure(e):
 			work.append(w)
 	return work
 
-def process_event(e, drop_errors=False):
+def process_event(e):
 	"""\
 		Process an event. This is the procedure you'll be feeding
 		externally-generated events to.
 		"""
 	#from homevent.logging import log_event,DEBUG,TRACE
 
-	try:
-		collect_event(e).process(event=e)
-	except Exception:
-		if not drop_errors:
-			raise
+	worker = collect_event(e)
+	spawn(worker.process, event=e)
 
 def process_failure(e):
 	"""\
