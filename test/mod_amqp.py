@@ -37,7 +37,10 @@ connect amqp localhost:
 on amqp connect test foo:
 	wait for 0.2:
 		debug force
-	trigger hey ho
+
+log amqp DEBUG:
+	name test foo
+	exchange he_exc
 
 # amqp => homevent
 listen amqp test foo:
@@ -82,6 +85,8 @@ list amqp connection
 list amqp connection test foo
 list worker
 list worker 7
+list log
+list log AMQPlogger x2
 wait:
 	for 1
 

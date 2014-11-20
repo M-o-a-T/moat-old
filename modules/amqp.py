@@ -116,6 +116,7 @@ class EventCallback(Worker):
 
 	def cancel(self):
 		unregister_worker(self)
+		self.parent._stop()
 		self.channel.close()
 		
 
@@ -336,10 +337,10 @@ AMQPconn.register_statement(AMQPuser)
 
 class AMQPlogger(BaseLogger):
 	"""An AMQP logger"""
-	def __init__(self,parent,exchange,kind=None,level=TRACE):
-		self.parent=parent
-		self.exchange=exchange
-		self.kind=kind
+	def __init__(self,conn,parent,level=TRACE):
+		self.parent=conn
+		self.exchange=parent.exchange
+		self.prefix=tuple(parent.prefix)
 		self.channel = self.parent.conn.channel()
 		self.channel.exchange_declare(exchange=self.exchange, type='topic', auto_delete=False, passive=False)
 		super(AMQPlogger,self).__init__(level)
@@ -347,23 +348,24 @@ class AMQPlogger(BaseLogger):
 	def _log(self, level, *a):
 		if level < self.level:
 			return
-		if self.kind is None or a[0] == self.kind:
-			msg=json.dumps(dict(level=(level,LogNames[level]),msg=a))
-			msg = amqp.Message(body=msg, content_type='application/json')
-			self.channel.basic_publish(msg=msg, exchange=self.exchange, routing_key='homevent.log.'+str(a[0])+'.'+LogNames[self.level])
+		msg=json.dumps(dict(level=(LogLevels[level],level),msg=a))
+		msg = amqp.Message(body=msg, content_type='application/json')
+		self.channel.basic_publish(msg=msg, exchange=self.exchange, routing_key=".".join(self.prefix+(level,)))
 	
 	def _flush(self):
 		pass
 
-	def delete(self):
+	def delete(self, ctx=None):
+		self.parent._stop()
 		self.channel.close()
 		super(AMQPlogger,self).delete()
 		
 	def list(self):
 		for r in super(AMQPlogger,self).list():
 			yield r
-		yield("parent",self.parent.list())
+		yield "parent",self.parent
 		yield "exchange",self.exchange
+		yield "prefix",self.prefix
 
 
 class AMQPlog(AttributedStatement):
@@ -371,19 +373,19 @@ class AMQPlog(AttributedStatement):
 	doc = "log to an AMQP server"
 	dest = None
 	exchange = "homevent_log"
+	prefix=("homevent","log")
 
 	long_doc="""\
-Usage: log amqp ‹conn› [‹kind› [‹level›]]
+Usage: log amqp ‹conn› ‹level›
 Send logging data to this AMQP exchange.
-Defaults: exchange=homevent_log kind=* level=DEBUG.
+Defaults: exchange=homevent_log level=DEBUG prefix=homevent.log
 """
 	def run(self,ctx,**k):
-		kind=None
 		level=DEBUG
 
 		event = self.params(ctx)
-		if len(event)+(self.dest is not None) > 3 or len(event)+(self.dest is not None) < 1:
-			raise SyntaxError(u'Usage: log amqp ‹conn› [‹kind› [‹level›]]')
+		if len(event)+(self.dest is not None) > 2 or len(event)+(self.dest is not None) < 1:
+			raise SyntaxError(u'Usage: log amqp ‹conn› [‹level›]')
 		if self.dest is None:
 			dest = Name(event[0])
 			event = event[1:]
@@ -391,12 +393,11 @@ Defaults: exchange=homevent_log kind=* level=DEBUG.
 			dest = self.dest
 		dest = AMQPclients[dest]
 		if len(event) > 0:
-			kind = event[0]
-		if len(event) > 1:
-			level = LogLevels[event[1]]
-		AMQPlogger(dest,self.exchange,kind,level)
+			level = LogLevels[event[0]]
+		AMQPlogger(dest,self,level)
 AMQPlog.register_statement(AMQPname)
 AMQPlog.register_statement(AMQPexchange)
+AMQPlog.register_statement(AMQPprefix)
 
 
 class AMQPstart(Statement):
