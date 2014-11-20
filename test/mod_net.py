@@ -38,22 +38,20 @@ block:
 
 on net connect foo:
 	send net foo "bar"
-	async:
-		wait OUT:
-			for 0.1
-			debug force
-		list net connection
-		list net connection foo
-		del net connection foo
+	wait OUT:
+		for 0.1
+		debug force
+	list net connection
+	list net connection foo
+	del net connection foo
 on net connect baz zaz *who:
 	send net "quux":
 		to baz zaz $who
-	async:
-		wait IN:
-			for 0.1
-			debug force
-		list net connection baz zaz $who
-		del net connection baz zaz $who
+	wait IN:
+		for 0.1
+		debug force
+	list net connection baz zaz $who
+	del net connection baz zaz $who
 on net disconnect foo:
 	log TRACE dis foo
 on net disconnect baz zaz:

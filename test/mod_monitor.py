@@ -45,12 +45,11 @@ del monitor foo bar
 list monitor
 
 on monitor checking baz zaz:
-	async:
-		set monitor 10 baz zaz
-		wait bazzaz A: for 0.2
-		set monitor 13 baz zaz
-		wait bazzaz B: for 0.2
-		set monitor 14 baz zaz
+	set monitor 10 baz zaz
+	wait bazzaz A: for 0.2
+	set monitor 13 baz zaz
+	wait bazzaz B: for 0.2
+	set monitor 14 baz zaz
 	
 monitor passive:
 	name baz zaz

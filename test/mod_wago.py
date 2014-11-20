@@ -41,10 +41,9 @@ async:
 		#ping 1
 
 on wago connect test:
-	async:
-		send wago test Dc
-		send wago test DI
-		send wago test Dr
+	send wago test Dc
+	send wago test DI
+	send wago test Dr
 
 wait:
 	for 0.1
