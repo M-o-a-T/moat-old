@@ -324,7 +324,7 @@ class ConcurrentWorkSequence(WorkSequence):
 				process_failure(exc)
 
 		for w in self.work:
-			log_run(self,w,0)
+			#log_run(self,w,0)
 			j = spawn(run,w.process,event=self.event, queue=self)
 			jobs.append(j)
 
