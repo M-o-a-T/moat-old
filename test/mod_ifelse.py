@@ -25,55 +25,55 @@ from test import run
 input = """\
 block:
 	if true:
-		log DEBUG Yes
+		log TRACE Yes
 	else:
-		log DEBUG No1
+		log ERROR No1
 	if true:
-		log DEBUG Yes
+		log TRACE Yes
 	else if true:
-		log DEBUG No2
+		log ERROR No2
 	if true:
-		log DEBUG Yes
+		log TRACE Yes
 	else if true:
-		log DEBUG No3
+		log ERROR No3
 	else:
-		log DEBUG No4
+		log ERROR No4
 	if true:
-		log DEBUG Yes
+		log TRACE Yes
 	else if false:
-		log DEBUG No5
+		log ERROR No5
 	else:
-		log DEBUG No6
+		log ERROR No6
 
 block:
 	if false:
-		log DEBUG No7
+		log ERROR No7
 	else:
-		log DEBUG Yes
+		log TRACE Yes
 	if false:
-		log DEBUG No8
+		log ERROR No8
 	else if true:
-		log DEBUG Yes
+		log TRACE Yes
 	if false:
-		log DEBUG No9
+		log ERROR No9
 	else if false:
-		log DEBUG No10
+		log ERROR No10
 	else:
-		log DEBUG Yes
+		log TRACE Yes
 
 block:
 	if equal 2 2.0:
-		log DEBUG Yes
+		log TRACE Yes
 	else:
-		log DEBUG No11
+		log ERROR No11
 	if equal 1 2:
-		log DEBUG No12
+		log ERROR No12
 	else:
-		log DEBUG Yes
+		log TRACE Yes
 	if equal 0 Foo:
-		log DEBUG No13
+		log ERROR No13
 	else:
-		log DEBUG Yes
+		log TRACE Yes
 shutdown
 """
 

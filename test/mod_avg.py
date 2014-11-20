@@ -45,23 +45,23 @@ set avg 0 test time
 list avg test time
 block:
 	if exists avg test time:
-		log DEBUG Yes
+		log TRACE Yes
 	else:
-		log DEBUG No0
+		log ERROR No0
 block:
 	var avg X test time
 	if equal $X 3.5:
-		log DEBUG Yes
+		log TRACE Yes
 	else:
-		log DEBUG No1 $X
+		log ERROR No1 $X
 
 wait: for 2
 block:
 	var avg X test time
 	if equal $X 1.75:
-		log DEBUG Yes
+		log TRACE Yes
 	else:
-		log DEBUG No2 $X
+		log ERROR No2 $X
 	var avg Y test time :use value
 	var avg Z test time :use prev_value
 	log DEBUG values now $Y prev $Z
@@ -96,23 +96,23 @@ set avg 14 test moving
 list avg test moving
 block:
 	if exists avg test moving:
-		log DEBUG Yes
+		log TRACE Yes
 	else:
-		log DEBUG No0
+		log ERROR No0
 block:
 	var avg X test moving
 	if equal $X 7:
-		log DEBUG Yes
+		log TRACE Yes
 	else:
-		log DEBUG No1 $X
+		log ERROR No1 $X
 
 wait: for 2
 block:
 	var avg X test moving
 	if equal $X 7:
-		log DEBUG Yes
+		log TRACE Yes
 	else:
-		log DEBUG No2 $X
+		log ERROR No2 $X
 	var avg Y test moving :use value
 	var avg Z test moving :use prev_value
 	log DEBUG values now $Y prev $Z
@@ -140,23 +140,23 @@ set avg -1 test decay
 list avg test decay
 block:
 	if exists avg test decay:
-		log DEBUG Yes
+		log TRACE Yes
 	else:
-		log DEBUG No0
+		log ERROR No0
 block:
 	var avg X test decay
 	if equal $X 3.5:
-		log DEBUG Yes
+		log TRACE Yes
 	else:
-		log DEBUG No1 $X
+		log ERROR No1 $X
 
 wait: for 2
 block:
 	var avg X test decay
 	if equal $X 3.5:
-		log DEBUG Yes
+		log TRACE Yes
 	else:
-		log DEBUG No2 $X
+		log ERROR No2 $X
 	var avg Y test decay :use value
 	var avg Z test decay :use prev_value
 	log DEBUG values now $Y prev $Z
@@ -184,15 +184,15 @@ set avg 1 test decaytime
 list avg test decaytime
 block:
 	if exists avg test decaytime:
-		log DEBUG Yes
+		log TRACE Yes
 	else:
-		log DEBUG No0
+		log ERROR No0
 block:
 	var avg X test decaytime
 	if equal $X 20:
-		log DEBUG Yes
+		log TRACE Yes
 	else:
-		log DEBUG No1 $X
+		log ERROR No1 $X
 
 wait: for 2
 list avg test decaytime
@@ -214,9 +214,9 @@ del avg test decaytime
 
 block:
 	if exists avg test:
-		log DEBUG No3
+		log ERROR No3
 	else:
-		log DEBUG Yes
+		log TRACE Yes
 list avg
 shutdown
 """

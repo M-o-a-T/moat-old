@@ -26,15 +26,15 @@ input = """\
 log DEBUG STARTING_UP
 block:
 	if exists rrd t tt ttt:
-		log DEBUG No1
+		log ERROR No1
 	else:
-		log DEBUG Yes
+		log TRACE Yes
 rrd "/tmp/rrdtest.rrd" test t tt ttt
 block:
 	if exists rrd t tt ttt:
-		log DEBUG Yes
+		log TRACE Yes
 	else:
-		log DEBUG No2
+		log ERROR No2
 list rrd
 list rrd t tt ttt
 wait: for 1.1
@@ -50,9 +50,9 @@ block:
 del rrd t tt ttt
 block:
 	if exists rrd t tt ttt:
-		log DEBUG No3
+		log ERROR No3
 	else:
-		log DEBUG Yes
+		log TRACE Yes
 
 """
 

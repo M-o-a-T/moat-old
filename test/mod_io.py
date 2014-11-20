@@ -40,40 +40,40 @@ set output TEST foo bar
 block:
 	var input bla foo bar
 	if equal $bla "TEST":
-		log DEBUG Yes
+		log TRACE Yes
 	else:
-		log DEBUG No1 $bla
+		log ERROR No1 $bla
 
 block:
 	try:
 		set output 0 foo bar
-		log DEBUG No 0
+		log ERROR No 0
 	catch:
-		log DEBUG yes
+		log TRACE Yes
 	set output 1 foo bar
 	set output 9 foo bar
 	set output 123 foo bar
 	try:
 		set output 10 foo bar
-		log DEBUG No 10
+		log ERROR No 10
 	catch:
-		log DEBUG yes
+		log TRACE Yes
 	set output one foo bar
 	set output two foo bar
 	set output three foo bar
 	try:
 		set output four foo bar
-		log DEBUG No four
+		log ERROR No four
 	catch:
-		log DEBUG yes
+		log TRACE Yes
 
 set output GRMPF foo bar
 block:
 	var input bla foo bar
 	if equal $bla "TEST":
-		log DEBUG No $bla
+		log ERROR No $bla
 	else:
-		log DEBUG Yes
+		log TRACE Yes
 
 list input foo bar
 list output foo bar

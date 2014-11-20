@@ -31,10 +31,10 @@ wait BAD:
 	debug force
 block:
 	if exists net connection foop:
-		log DEBUG No1
+		log ERROR No1
 		del net foop
 	else:
-		log DEBUG Yes
+		log TRACE Yes
 
 on net connect foo:
 	send net foo "bar"
@@ -71,9 +71,9 @@ block:
 	if exists net connection foo:
 		list net connection foo
 		del net connection foo
-		log DEBUG No2
+		log ERROR No2
 	else:
-		log DEBUG Yes
+		log TRACE Yes
 wait END:
 	for 0.2
 shutdown

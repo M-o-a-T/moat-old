@@ -27,26 +27,26 @@ input = """\
 on timeslot begin foo bar:
 	var timeslot X foo bar
 	if equal $X "during":
-		log DEBUG Yes
+		log TRACE Yes
 	else:
-		log DEBUG No2 $X
+		log ERROR No2 $X
 	if in timeslot foo bar:
-		log DEBUG Yes
+		log TRACE Yes
 	else:
-		log DEBUG No2a
+		log ERROR No2a
 
 on timeslot end foo bar:
 	wait GOT EVENT B:
 		for 0.1
 	var timeslot X foo bar
 	if equal $X "next":
-		log DEBUG Yes
+		log TRACE Yes
 	else:
-		log DEBUG No9 $X
+		log ERROR No9 $X
 	if in timeslot foo bar:
-		log DEBUG No9a
+		log ERROR No9a
 	else:
-		log DEBUG Yes
+		log TRACE Yes
 
 list timeslot
 timeslot foo bar:
@@ -58,90 +58,90 @@ list timeslot foo bar
 block:
 	if running timeslot foo bar:
 		var timeslot X foo bar
-		log DEBUG NoS $X
+		log ERROR NoS $X
 	else:
-		log DEBUG Yes
+		log TRACE Yes
 
 start timeslot foo bar
 block:
 	if running timeslot foo bar:
-		log DEBUG Yes
+		log TRACE Yes
 	else:
 		var timeslot X foo bar
-		log DEBUG NoR $X
+		log ERROR NoR $X
 
 wait A before: for 9.5
 list timeslot foo bar
 block:
 	var timeslot X foo bar
 	if equal $X "next":
-		log DEBUG Yes
+		log TRACE Yes
 	else:
-		log DEBUG No4 $X
+		log ERROR No4 $X
 	if in timeslot foo bar:
-		log DEBUG No4a
+		log ERROR No4a
 	else:
-		log DEBUG Yes
+		log TRACE Yes
 
 wait B during: for 1
 list timeslot foo bar
 block:
 	var timeslot X foo bar
 	if equal $X "during":
-		log DEBUG Yes
+		log TRACE Yes
 	else:
-		log DEBUG No1 $X
+		log ERROR No1 $X
 	if in timeslot foo bar:
-		log DEBUG Yes
+		log TRACE Yes
 	else:
 		var timeslot X foo bar
-		log DEBUG No1a
+		log ERROR No1a
 
 wait C after: for 2
 list timeslot foo bar
 block:
 	var timeslot X foo bar
 	if equal $X "next":
-		log DEBUG Yes
+		log TRACE Yes
 	else:
-		log DEBUG No4 $X
+		log ERROR No4 $X
 	if in timeslot foo bar:
-		log DEBUG No4a
+		log ERROR No4a
 	else:
-		log DEBUG Yes
+		log TRACE Yes
 
 wait D during again: for 8
 list timeslot foo bar
 block:
 	var timeslot X foo bar
 	if equal $X "during":
-		log DEBUG Yes
+		log TRACE Yes
 	else:
-		log DEBUG No5 $X
+		log ERROR No5 $X
 	if in timeslot foo bar:
-		log DEBUG Yes
+		log TRACE Yes
 	else:
-		log DEBUG No5a
+		log ERROR No5a
 
 stop timeslot foo bar
 block:
 	var timeslot X foo bar
 	if equal $X "off":
-		log DEBUG Yes
+		log TRACE Yes
 	else:
-		log DEBUG No6 $X
+		log ERROR No6 $X
 	if in timeslot foo bar:
-		log DEBUG No6a
+		log ERROR No6a
 	else:
-		log DEBUG Yes
+		log TRACE Yes
 
 list timeslot foo bar
 del timeslot foo bar
 block:
 	if exists timeslot foo bar:
-		log DEBUG No7
+		log ERROR No7
 	else:
-		log DEBUG Yes
+		log TRACE Yes
 
 shutdown
 """

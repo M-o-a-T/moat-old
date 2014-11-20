@@ -25,29 +25,29 @@ from test import run
 input = """\
 block:
 	if exists path "..":
-		log DEBUG Yes
+		log TRACE Yes
 	else:
-		log DEBUG No1
+		log ERROR No1
 	if exists path "...":
-		log DEBUG No2
+		log ERROR No2
 	else:
-		log DEBUG Yes
+		log TRACE Yes
 	if exists directory "..":
-		log DEBUG Yes
+		log TRACE Yes
 	else:
-		log DEBUG No3
+		log ERROR No3
 	if exists directory "README":
-		log DEBUG No4
+		log ERROR No4
 	else:
-		log DEBUG Yes
+		log TRACE Yes
 	if exists file "README":
-		log DEBUG Yes
+		log TRACE Yes
 	else:
-		log DEBUG No5
+		log ERROR No5
 	if exists file "..":
-		log DEBUG No6
+		log ERROR No6
 	else:
-		log DEBUG Yes
+		log TRACE Yes
 shutdown
 """
 

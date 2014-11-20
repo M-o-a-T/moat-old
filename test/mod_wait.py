@@ -34,9 +34,9 @@ wait Foo Bar:
 	update
 block:
 	if exists wait Foo Baz:
-		log DEBUG No2
+		log ERROR No2
 	else:
-		log DEBUG Yes
+		log TRACE Yes
 block:
 	wait X2: for 0.2
 	trigger DoNow $wait
@@ -47,9 +47,9 @@ async:
 wait: for 0.1
 block:
 	if exists wait Foo Baz:
-		log DEBUG Yes
+		log TRACE Yes
 	else:
-		log DEBUG No1
+		log ERROR No1
 on whatever:
 	var wait x Foo Baz
 	log TRACE We wait $x
@@ -58,9 +58,9 @@ wait: for 0.3
 del wait Foo Baz
 block:
 	if exists wait Foo Baz:
-		log DEBUG No3
+		log ERROR No3
 	else:
-		log DEBUG Yes
+		log TRACE Yes
 wait: for 0.2
 # observe no HeYa event
 shutdown

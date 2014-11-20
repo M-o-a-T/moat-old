@@ -25,9 +25,9 @@ from test import run
 input = """\
 block:
 	if exists pwm foo bar:
-		log DEBUG No1
+		log ERROR No1
 	else:
-		log DEBUG Yes
+		log TRACE Yes
 pwm foo bar:
 	type PWM
 	interval 10
@@ -38,9 +38,9 @@ on pwm change foo bar:
 
 block:
 	if exists pwm foo bar:
-		log DEBUG Yes
+		log TRACE Yes
 	else:
-		log DEBUG No2
+		log ERROR No2
 list pwm
 list pwm foo bar
 set pwm 0.1 foo bar

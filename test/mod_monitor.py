@@ -35,9 +35,9 @@ monitor test 0 100 2:
 wait: for 1
 block:
 	if waiting monitor foo bar:
-		log DEBUG No0
+		log ERROR No0
 	else:
-		log DEBUG Yes
+		log TRACE Yes
 list monitor
 list monitor foo bar
 wait: for 0.8
@@ -60,15 +60,15 @@ list monitor baz zaz
 wait: for 0.1
 block:
 	if waiting monitor baz zaz:
-		log DEBUG Yes
+		log TRACE Yes
 	else:
-		log DEBUG No1
+		log ERROR No1
 wait: for 0.5
 block:
 	if waiting monitor baz zaz:
-		log DEBUG No2
+		log ERROR No2
 	else:
-		log DEBUG Yes
+		log TRACE Yes
 list monitor baz zaz
 log DEBUG XXX delete baz zaz
 del monitor baz zaz

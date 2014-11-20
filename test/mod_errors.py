@@ -25,92 +25,92 @@ from test import run
 input = """\
 block:
 	try:
-		log DEBUG Yes A
+		log TRACE Yes A
 
 	try:
-		log DEBUG Yes B
+		log TRACE Yes B
 	catch:
-		log DEBUG No 01
+		log ERROR No 01
 	
 	try:
-		log DEBUG Yes C
+		log TRACE Yes C
 	catch:
-		log DEBUG No 11
+		log ERROR No 11
 	catch:
-		log DEBUG No 12
+		log ERROR No 12
 	
 	try:
-		log DEBUG Yes D
+		log TRACE Yes D
 		trigger error Foo A
-		log DEBUG No 21
+		log ERROR No 21
 
 	try:
-		log DEBUG Yes E
+		log TRACE Yes E
 		trigger error Foo B
-		log DEBUG No 31
+		log ERROR No 31
 	catch:
-		log DEBUG Yes F $2
+		log TRACE Yes F $2
 
 	try:
-		log DEBUG Yes G
+		log TRACE Yes G
 		trigger error Foo C
-		log DEBUG No 41
+		log ERROR No 41
 	catch:
-		log DEBUG Yes H $2
+		log TRACE Yes H $2
 	catch:
-		log DEBUG No 42
+		log ERROR No 42
 
 	try:
-		log DEBUG Yes I
+		log TRACE Yes I
 		trigger error Foo D
-		log DEBUG No 51
+		log ERROR No 51
 	catch:
-		log DEBUG Yes J $2
+		log TRACE Yes J $2
 		trigger error Foo E
-		log DEBUG No 52
+		log ERROR No 52
 
 	try:
-		log DEBUG Yes K
+		log TRACE Yes K
 		trigger error Foo F
-		log DEBUG No 61
+		log ERROR No 61
 	catch:
-		log DEBUG Yes L $2
+		log TRACE Yes L $2
 		trigger error Foo G
-		log DEBUG No 62
+		log ERROR No 62
 	catch:
-		log DEBUG Yes M $2
+		log TRACE Yes M $2
 
 	try:
 		log DEBUG $foobar
-		log DEBUG No 71
+		log ERROR No 71
 	catch AttributeError:
-		log DEBUG Yes N KEY
+		log TRACE Yes N KEY
 	catch:
-		log DEBUG No 72
+		log ERROR No 72
 
 	try:
 		trigger error Foo Bar
-		log DEBUG No 81
+		log ERROR No 81
 	catch Foo:
-		log DEBUG No 82
+		log ERROR No 82
 	catch Foo Bar Baz:
-		log DEBUG No 83
+		log ERROR No 83
 	catch Foo Bar:
-		log DEBUG Yes O
+		log TRACE Yes O
 	catch:
-		log DEBUG No 84
+		log ERROR No 84
 		
 	try:
 		trigger error Foo Bar
-		log DEBUG No 91
+		log ERROR No 91
 	catch *a:
-		log DEBUG No 92
+		log ERROR No 92
 	catch *a *b *c:
-		log DEBUG No 93
+		log ERROR No 93
 	catch *a *b:
-		log DEBUG Yes P $a $b
+		log TRACE Yes P $a $b
 	catch:
-		log DEBUG No 94
+		log ERROR No 94
 		
 shutdown
 """

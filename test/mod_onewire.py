@@ -49,7 +49,7 @@ on onewire up:
 		log TRACE YesC
 		start monitor tempi
 	else:
-		log TRACE NoC $id
+		log ERROR NoC $id
 
 on onewire scanned A:
 	name scanned
@@ -81,9 +81,9 @@ dir onewire A
 dir onewire "10.000010ef0000"
 block:
 	if exists onewire device "10.000010ef0000":
-		log TRACE yes
+		log TRACE Yes
 	else:
-		log TRACE no
+		log ERROR No
 #set onewire 30 "10.000010ef0000" templow ## not when testing
 scan onewire A
 dir onewire "10.000010ef0000"

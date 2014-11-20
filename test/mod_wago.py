@@ -70,17 +70,17 @@ block:
 	var input port foo bar
 	log DEBUG in_1 $port
 	if input whynot foo bar:
-		log DEBUG Yes
+		log TRACE Yes
 	else:
-		log DEBUG No3
+		log ERROR No3
 	send wago test Ds
 	var input port foo bar
 	log DEBUG in_2 $port
 
 	if input why foo bar:
-		log DEBUG Yes
+		log TRACE Yes
 	else:
-		log DEBUG No4
+		log ERROR No4
 #
 async:
 	send wago test DS
@@ -104,9 +104,9 @@ block:
 	log DEBUG out_1 $port
 
 	if output ho foo baz:
-		log DEBUG Yes
+		log TRACE Yes
 	else:
-		log DEBUG No5
+		log ERROR No5
 	wait timed set C:
 		for 1
 		debug force
@@ -115,9 +115,9 @@ block:
 	log DEBUG out_2 $port
 
 	if output hey foo baz:
-		log DEBUG Yes
+		log TRACE Yes
 	else:
-		log DEBUG No6
+		log ERROR No6
 #set output hey foo baz
 wait:
 	for 0.1
@@ -185,25 +185,25 @@ block:
 	var monitor ML test count down
 	var monitor MB test count both
 	if not equal $ML 1:
-		log DEBUG No ML $ML
+		log ERROR No ML $ML
 	else if not equal $MH 2:
-		log DEBUG No MH $MH
+		log ERROR No MH $MH
 	else if not equal $MB 3:
-		log DEBUG No M3 $M3
+		log ERROR No M3 $M3
 	else:
-		log DEBUG YesM $ML $MH $MB
+		log TRACE YesM $ML $MH $MB
 
 	var monitor RH test report up
 	var monitor RL test report down
 	var monitor RB test report both
 	if not equal $RL 1:
-		log DEBUG No RL $RL
+		log ERROR No RL $RL
 	else if not equal $RH 2:
-		log DEBUG No RH $RH
+		log ERROR No RH $RH
 	else if not equal $RB 3:
-		log DEBUG No R3 $R3
+		log ERROR No R3 $R3
 	else:
-		log DEBUG YesR $RL $RH $RB
+		log TRACE YesR $RL $RH $RB
 
 del monitor test count up
 del monitor test count down
@@ -224,17 +224,17 @@ list wago server test
 
 block:
 	if exists wago server test:
-		log DEBUG Yes
+		log TRACE Yes
 	else:
-		log DEBUG No1
+		log ERROR No1
 	if connected wago test:
-		log DEBUG Yes
+		log TRACE Yes
 	else:
-		log DEBUG No2
+		log ERROR No2
 	if exists wago server test stupid:
-		log DEBUG No3
+		log ERROR No3
 	else:
-		log DEBUG Yes
+		log TRACE Yes
 del wago server test
 
 log DEBUG now we test a nonexistent port

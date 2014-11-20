@@ -28,28 +28,28 @@ wait startup:
 	debug force
 block:
 	if exists rrd server t tt ttt:
-		log DEBUG No1
+		log ERROR No1
 	else:
-		log DEBUG Yes
+		log TRACE Yes
 connect rrd localhost 52442 :name t tt ttt
 block:
 	if exists rrd server t tt ttt:
-		log DEBUG Yes
+		log TRACE Yes
 	else:
-		log DEBUG No2
+		log ERROR No2
 list rrd server
 list rrd server t tt ttt
 block:
 	if exists rrd file a aa aaa:
-		log DEBUG No1a
+		log ERROR No1a
 	else:
-		log DEBUG Yes
+		log TRACE Yes
 rrd file "/tmp/rrdtest.rrd" a aa aaa :server t tt ttt
 block:
 	if exists rrd file a aa aaa:
-		log DEBUG Yes
+		log TRACE Yes
 	else:
-		log DEBUG No2a
+		log ERROR No2a
 list rrd file
 list rrd file a aa aaa
 
@@ -68,23 +68,23 @@ wait:
 block:
 	try:
 		set rrd 12 a aa aaa
-		log DEBUG No error
+		log ERROR No error
 	catch:
-		log DEBUG Yes error
+		log TRACE Yes error
 	
 list rrd file a aa aaa
 del rrd file a aa aaa
 block:
 	if exists rrd file a aa aaa:
-		log DEBUG No3
+		log ERROR No3
 	else:
-		log DEBUG Yes
+		log TRACE Yes
 del rrd server t tt ttt
 block:
 	if exists rrd server t tt ttt:
-		log DEBUG No4
+		log ERROR No4
 	else:
-		log DEBUG Yes
+		log TRACE Yes
 shutdown
 """
 
