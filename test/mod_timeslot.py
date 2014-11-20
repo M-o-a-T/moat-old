@@ -25,10 +25,8 @@ from test import run
 input = """\
 #log TRACE
 on timeslot begin foo bar:
-	wait GOT EVENT A:
-		for 0.3
 	var timeslot X foo bar
-	if equal $X "pre":
+	if equal $X "during":
 		log DEBUG Yes
 	else:
 		log DEBUG No2 $X
@@ -36,49 +34,19 @@ on timeslot begin foo bar:
 		log DEBUG Yes
 	else:
 		log DEBUG No2a
-	async:
-		wait AFTER EVENT A:
-			for 0.5
-		var timeslot XX foo bar
-		log TRACE got it $XX
-		if equal $XX "during":
-			log DEBUG Yes
-		else:
-			log DEBUG No2x $XX
-		wait GOT EVENT AX:
-			for 0.1
-		if in timeslot foo bar:
-			log DEBUG Yes
-		else:
-			log DEBUG No2ax
 
 on timeslot end foo bar:
 	wait GOT EVENT B:
 		for 0.1
 	var timeslot X foo bar
-	if equal $X "post":
+	if equal $X "next":
 		log DEBUG Yes
 	else:
 		log DEBUG No9 $X
 	if in timeslot foo bar:
-		log DEBUG Yes
-	else:
 		log DEBUG No9a
-	async:
-		wait AFTER EVENT B:
-			for 0.5
-		var timeslot XX foo bar
-		log TRACE got it $XX
-		if equal $XX "next":
-			log DEBUG Yes
-		else:
-			log DEBUG No9x $XX
-		wait GOT EVENT AX:
-			for 0.1
-		if in timeslot foo bar:
-			log DEBUG No9ax
-		else:
-			log DEBUG Yes
+	else:
+		log DEBUG Yes
 
 list timeslot
 timeslot foo bar:

@@ -73,9 +73,7 @@ class Timeslot(Collected):
 	running = "off" # state
 		# off: not running
 		# next: wait for next event, not in slot
-		# pre: wait for event trigger, in slot
 		# during: event in progress, in slot (obviously)
-		# post: after event, in slot
 		# error: timer is dead / out of sync
 	waiter = None # trigger for next event
 	slotter = None # trigger for time slot
@@ -120,24 +118,14 @@ class Timeslot(Collected):
 			log(ERROR,"timeslot error pre",self.running,*self.name)
 			return
 
-		self.running = "pre"
 		if self.next is None:
 			self.next = now()
 		self.last = self.next
 
-		try:
-			simple_event("timeslot","begin",*self.name)
-			if self.running == "pre":
-				self.running = "during"
-				self.next += dt.timedelta(0,self.duration)
-				self.slotter = callLater(False,self.next, self.do_post)
-			elif self.running not in ("off","error"):
-				log(ERROR,"timeslot error pre2",self.running,*self.name)
-			else:
-				self.next = None
-		except Exception as e:
-			fix_exception(e)
-			self.dead(e)
+		self.running = "during"
+		simple_event("timeslot","begin",*self.name)
+		self.next += dt.timedelta(0,self.duration)
+		self.slotter = callLater(False,self.next, self.do_post)
 	
 	def do_sync(self):
 		self.down()
@@ -151,19 +139,10 @@ class Timeslot(Collected):
 			log(ERROR,"timeslot error post",self.running,*self.name)
 			return
 
-		self.running = "post"
-		try:
-			simple_event("timeslot","end",*self.name)
-			if self.running == "post":
-				self.running = "next"
-				self.next = time_delta(self.interval, now=self.next)-dt.timedelta(0,self.duration)
-				self.waiter = callLater(False, self.next, self.do_pre)
-			elif self.running not in("off","error"):
-				log(ERROR,"timeslot error post2",self.running,*self.name)
-		except Exception as e:
-			fix_exception(e)
-			self.dead(e)
-
+		self.running = "next"
+		simple_event("timeslot","end",*self.name)
+		self.next = time_delta(self.interval, now=self.next)-dt.timedelta(0,self.duration)
+		self.waiter = callLater(False, self.next, self.do_pre)
 
 	def dead(self,_):
 		self.running = "error"
@@ -171,17 +150,15 @@ class Timeslot(Collected):
 		self.down()
 		simple_event("timeslot","error",*self.name)
 
-
 	def delete(self,ctx=None):
 		self.down()
 		super(Timeslot,self).delete()
 		return
 
-
 	def is_up(self):
 		return self.running not in ("off","error")
 	def is_in(self):
-		return self.running in ("pre","during","post")
+		return self.running == "during"
 	def is_out(self):
 		return self.running == "next"
 		
