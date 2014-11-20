@@ -56,6 +56,6 @@ additional I/O, logging, and easy integration into existing systems.
 	zip_safe = False, 
     packages = ['homevent','homevent.modules'],
 	package_dir={'homevent': 'homevent', 'homevent.modules':'modules'},
-    scripts = ['scripts/daemon.py','scripts/cmd.py'],
+    scripts = ['scripts/daemon.py','scripts/cmd.py','scripts/amqpmon.py'],
     #cmdclass={'install_data' : my_install_data},
     )
