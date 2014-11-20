@@ -1,0 +1,62 @@
+EVENT: startup
+     : startup=True
+TRACE Create OnEvtHandler: amqp¦connect¦test¦foo
+EVENT: amqp¦connect¦test¦foo
+TRACE NewHandler 6
+EVENT: amqp¦start¦test¦foo
+TRACE Create OnEvtHandler: amam¦amqte¦hey¦ho
+TRACE NewHandler 9
+TRACE Create OnEvtHandler: wait¦cancel¦foo¦b
+TRACE NewHandler 10
+TRACE Create OnEvtHandler: wait¦done¦foo¦b
+TRACE NewHandler 11
+EVENT: wait¦start¦0.4¦foo¦a
+     : loglevel=0
+EVENT: wait¦start¦foo¦a
+     : loglevel=0
+     : end_time=0.4
+foo lish
+.
+EVENT: wait¦start¦1.2¦foo¦b
+     : loglevel=0
+EVENT: wait¦start¦foo¦b
+     : loglevel=0
+     : end_time=1.2
+: ‹Collected AMQPrecv:foo¦lish›
+name: foo¦lish
+.
+test foo
+.
+: ‹Collected AMQPclient:test¦foo›
+name: test¦foo
+host: localhost
+port: 5672
+vhost: /test
+user: test
+password: ****
+.
+EVENT: wait¦start¦1.0¦_wait¦4
+     : loglevel=0
+EVENT: wait¦start¦_wait¦4
+     : loglevel=0
+     : end_time=1.0
+TRACE 2003-04-05 06:07:08.500000 foo¦a: Forced timer done
+EVENT: wait¦done¦0.4¦foo¦a
+     : loglevel=0
+EVENT: wait¦done¦foo¦a
+     : loglevel=0
+IEVENT: hey¦ho
+EVENT: amam¦amqte¦hey¦ho
+     : event=[u'hey', u'ho']
+Waiter ‹foo b› was cancelled
+Waiter ‹foo b› was cancelled
+EVENT: wait¦cancel¦0.4¦foo¦b
+     : loglevel=0
+EVENT: wait¦cancel¦foo¦b
+     : loglevel=0
+TRACE Yes
+TRACE 2003-04-05 06:07:09 _wait¦4: Fake timer done
+EVENT: wait¦done¦1.0¦_wait¦4
+     : loglevel=0
+EVENT: wait¦done¦_wait¦4
+     : loglevel=0

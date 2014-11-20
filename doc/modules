@@ -2559,4 +2559,93 @@ You can use this statement to test if a waiter is pending.
 
 See the example under "set state", above.
 
+====
+AMQP
+====
+
+-------------------
+connect amqp ‹host›
+-------------------
+
+Establish a connection to an AMQP server.
+
+	connect amqp localhost:
+		name test foo
+		user "/test" test test
+
+name
+----
+
+The name of this AMQP connection. If it's a single word, you can also say
+
+	connect amqp test_foo localhost
+
+user
+----
+
+Virtual host, user name, and password for establishing the connection.
+
+
+------------------
+listen amqp ‹name›
+------------------
+
+Connect to a specific queue. The routing key is split up at the dots and
+used as the event. The message payload is interpreted as a JSON hash and
+attached to the event; if JSON decoding fails, the payload is attached as
+`data` attribute.
+
+	listen amqp test foo:
+		name foo lish
+		exchange he_exc
+		prefix amqp foo
+
+name
+----
+
+The name of this listener.
+
+exchange ‹name›
+--------
+
+The AMQP exchange to bind to. Defaults to `homevent_event`.
+
+prefix ‹word…›
+--------------
+
+These words are prefixed to the routing key of arriving events.
+
+topic
+-----
+
+Topic filter. The default is `#`, i.e. no filtering.
+
+
+------------------
+start amqp ‹name…›
+------------------
+
+Start processing incoming AMQP messages. You need to call this
+once, after executing all of the above AMQP statements.
+
+-----------------
+stop amqp ‹name…›
+-----------------
+
+Stop processing incoming AMQP messages. You need to call this if you want
+to change your SMQP settings for whatever reason. Note that this may cause
+a synchronization problem if a message arrives at exactly the wrong time.
+
+
+--------------------
+list amqp connection
+--------------------
+
+Returns a list of connections, or deails about one connection.
+
+------------------
+list amqp listener
+------------------
+
+Returns a list of listeners, or deails about one listener.
 

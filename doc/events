@@ -398,3 +398,23 @@ timeslot error NAME
     -- One of the other slot events has raised an error.
        The timeslot is stopped.
 
+AMQP
+----
+
+amqp connect NAME…
+	-- the connection to AMQP has been established.
+	   Note that this will not start an AMQP listener; you need to do that
+	   with "start amqp NAME…" after setting up your channels etc.
+
+amqp error NAME…
+	-- the connection to AMQP could not be established.
+
+amqp start NAME…
+	-- the system is now listening to this connection.
+
+amqp stop NAME…
+	-- the system is no longer listening to this connection.
+
+amqp disconnect NAME…
+	-- the connection to AMQP has been terminated.
+
