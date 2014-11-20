@@ -50,10 +50,11 @@ _seq=0
 class EventCallback(Worker):
 	args = None
 
-	def __init__(self,parent,exchange,prefix,*args):
-		self.parent = parent
-		self.exchange=exchange
-		self.prefix = tuple(prefix)
+	def __init__(self,conn,parent,*args):
+		self.parent = conn
+		self.exchange=parent.exchange
+		self.strip=parent.strip
+		self.prefix = tuple(parent.prefix)
 		if args:
 			self.args = SName(args)
 			name = SName(parent.name+self.args)
@@ -63,7 +64,6 @@ class EventCallback(Worker):
 		self.channel.exchange_declare(exchange=self.exchange, type='topic', auto_delete=False, passive=False)
 		super(EventCallback,self).__init__(name)
 		register_worker(self)
-		parent.workers.append(self)
 	
 	def list(self):
 		for r in super(EventCallback,self).list():
@@ -103,7 +103,7 @@ class EventCallback(Worker):
 		try:
 			msg=json.dumps(dict(event=list(event)))
 			msg = amqp.Message(body=msg, content_type='application/json')
-			self.channel.basic_publish(msg=msg, exchange=self.exchange, routing_key=".".join(self.prefix+tuple(event)))
+			self.channel.basic_publish(msg=msg, exchange=self.exchange, routing_key=".".join(self.prefix+tuple(event)[self.strip:]))
 		except Exception as ex:
 			fix_exception(ex)
 			process_failure(ex)
@@ -115,9 +115,10 @@ class EventCallback(Worker):
 		raise TrySomethingElse
 
 	def cancel(self):
-		self.parent.drop_worker(self)
+		unregister_worker(self)
 		self.channel.close()
 		
+
 class AMQPclients(Collection):
 	name = Name("amqp","connection")
 AMQPclients = AMQPclients()
@@ -176,9 +177,6 @@ class AMQPclient(Collected,Jobber):
 		yield ("user",self.username)
 		yield ("password","*"*len(self.password))
 
-	def drop_worker(self,worker):
-		unregister_worker(worker)
-		self.workers.remove(worker)
 
 class AMQPconn(AttributedStatement):
 	name = "connect amqp"
@@ -208,6 +206,7 @@ This command connects to an AMQP server on the given host/port.
 			port = 5672
 		AMQPclient(dest,host,port, self.vhost,self.username,self.password)
 
+
 class AMQPname(Statement):
 	name="name"
 	dest = None
@@ -222,6 +221,7 @@ name ‹name…›
 		event = self.params(ctx)
 		self.parent.dest = SName(event)
 AMQPconn.register_statement(AMQPname)
+
 
 class AMQPexchange(Statement):
 	name="exchange"
@@ -239,6 +239,7 @@ exchange ‹name›
 			raise SyntaxError(u'Usage: exchange ‹name›')
 		self.parent.exchange = event[0]
 
+
 class AMQPprefix(Statement):
 	name="prefix"
 	dest = None
@@ -255,6 +256,7 @@ prefix ‹name…›
 			raise SyntaxError(u'Usage: prefix ‹name…›')
 		self.parent.prefix = event
 
+
 class AMQPtopic(Statement):
 	name="topic"
 	dest = None
@@ -262,10 +264,11 @@ class AMQPtopic(Statement):
 
 	long_doc = u"""\
 topic ‹filter›
-- Only receive messages with this filter
+- Only receive messages with this filter; shorten topic
   Format: a.b.c
   * = any one field
   # = zero or more fields
+  Default: '#'.
 """
 
 	def run(self,ctx,**k):
@@ -273,6 +276,25 @@ topic ‹filter›
 		if len(event) != 1:
 			raise SyntaxError(u'Usage: topic ‹filter›')
 		self.parent.topic = event[0]
+
+
+class AMQPstrip(Statement):
+	name="strip"
+	dest = None
+	doc="remove elements from routing key"
+
+	long_doc = u"""\
+strip ‹num›
+- Remove the first ‹num› elements from the message's routing key.
+  Default: zero.
+"""
+
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if len(event) != 1:
+			raise SyntaxError(u'Usage: strip ‹num›')
+		self.parent.strip = int(event[0])
+
 
 class AMQPqueue(Statement):
 	name="queue"
@@ -282,6 +304,7 @@ class AMQPqueue(Statement):
 	long_doc = u"""\
 queue ‹name›
 - Set the queue to use.
+  Default: homevent_event / homevent_log.
 """
 
 	def run(self,ctx,**k):
@@ -289,6 +312,7 @@ queue ‹name›
 		if len(event) != 1:
 			raise SyntaxError(u'Usage: queue ‹name›')
 		self.parent.queue = SName(event)
+
 
 class AMQPuser(Statement):
 	name="user"
@@ -341,6 +365,7 @@ class AMQPlogger(BaseLogger):
 		yield("parent",self.parent.list())
 		yield "exchange",self.exchange
 
+
 class AMQPlog(AttributedStatement):
 	name = "log amqp"
 	doc = "log to an AMQP server"
@@ -373,6 +398,7 @@ Defaults: exchange=homevent_log kind=* level=DEBUG.
 AMQPlog.register_statement(AMQPname)
 AMQPlog.register_statement(AMQPexchange)
 
+
 class AMQPstart(Statement):
 	name = "start amqp"
 	doc = "start the AMQP listener"
@@ -389,6 +415,7 @@ Call this method after setting up the channels etc.
 			raise SyntaxError(u'Usage: start amqp ‹conn…›')
 		dest = AMQPclients[SName(event)]
 		dest._start()
+
 
 class AMQPstop(Statement):
 	name = "stop amqp"
@@ -410,11 +437,13 @@ at the wrong moment!
 		dest = AMQPclients[SName(event)]
 		dest._stop()
 
+
 class AMQPtell(AttributedStatement):
 	name = "tell amqp"
 	doc = "send internal events to an AMQP server"
 	dest = None
 	prefix = ()
+	strip = 0
 
 	exchange="homevent_event"
 	long_doc="""\
@@ -432,10 +461,11 @@ Default exchange: homevent_event
 		else:
 			dest = self.dest
 		dest = AMQPclients[dest]
-		worker = EventCallback(dest,self.exchange,self.prefix,*event)
+		worker = EventCallback(dest,self,*event)
 AMQPtell.register_statement(AMQPname)
 AMQPtell.register_statement(AMQPexchange)
 AMQPtell.register_statement(AMQPprefix)
+AMQPtell.register_statement(AMQPstrip)
 
 
 class AMQPrecvs(Collection):
@@ -447,17 +477,21 @@ class AMQPrecv(Collected):
 	"""An AMQP channel receiver"""
 	storage = AMQPrecvs
 	job = None
-	def __init__(self, parent,name,conn, exchange,topic=None,prefix=()):
+	last_recv = None
+	def __init__(self, parent,name,conn):
 		super(AMQPrecv,self).__init__(name)
 
-		topic = topic+".#" if topic else "#"
-		self.chan=conn.channel()
-		self.chan.exchange_declare(exchange=exchange, type='topic', auto_delete=False, passive=False)
+		self.chan=conn.conn.channel()
+		self.chan.exchange_declare(exchange=parent.exchange, type='topic', auto_delete=False, passive=False)
 		res = self.chan.queue_declare(exclusive=True)
-		self.chan.queue_bind(exchange=exchange, queue=res.queue, routing_key=topic)
+		self.chan.queue_bind(exchange=parent.exchange, queue=res.queue, routing_key=parent.topic)
 		self.chan.basic_consume(callback=self.on_info_msg, queue=res.queue, no_ack=True)
 
-		self.prefix=tuple(prefix)
+		self.prefix=tuple(parent.prefix)
+		self.strip=parent.strip
+		self.exchange=parent.exchange
+		self.topic=parent.topic
+		self.conn=conn
 
 	def delete(self, ctx=None):
 		self.chan.close()
@@ -468,15 +502,30 @@ class AMQPrecv(Collected):
 			data = json.loads(msg.body)
 		except Exception:
 			data = { "data": msg.body }
-		simple_event(*(self.prefix+tuple(msg.routing_key.split('.'))), **data)
+		self.last_recv = msg.__dict__
+		simple_event(*(self.prefix+tuple(msg.routing_key.split('.')[self.strip:])), **data)
+
+	def list(self):
+		for x in super(AMQPrecv,self).list():
+			yield x
+		yield "connection",self.conn
+		yield "exchange",self.exchange
+		yield "topic",self.topic
+		if self.strip:
+			yield "strip",self.strip
+		yield "prefix",self.prefix
+		if self.last_recv:
+			yield "recv", self.last_recv
+
 
 class AMQPlisten(AttributedStatement):
 	name = "listen amqp"
 	doc = "read internal events from an AMQP server"
 	dest = None
 	exchange = "homevent_trigger"
-	topic = None
+	topic = '#'
 	prefix = ()
+	strip = 0
 
 	long_doc="""\
 Usage: listen amqp ‹conn›
@@ -493,12 +542,13 @@ Default exchange: homevent_trigger
 			global _seq
 			_seq += 1
 			dest = Name("_amqp",_seq)
-		AMQPrecv(self, dest,conn.conn, self.exchange,self.topic,self.prefix)
+		AMQPrecv(self, dest,conn)
 		
 AMQPlisten.register_statement(AMQPname)
 AMQPlisten.register_statement(AMQPexchange)
 AMQPlisten.register_statement(AMQPprefix)
 AMQPlisten.register_statement(AMQPtopic)
+AMQPlisten.register_statement(AMQPstrip)
 
 
 class AMQPmodule(Module):

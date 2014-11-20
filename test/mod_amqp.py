@@ -45,16 +45,18 @@ listen amqp test foo:
 	exchange he_exc
 	prefix amam 
 	topic "amqte.#"
+	strip 1
 
 # homevent => amqp
 tell amqp hey *:
 	name test foo
 	exchange he_exc
 	prefix amqte
+	strip 1
 
 start amqp test foo
 
-on amam amqte hey ho:
+on amam ho:
 	del wait foo b
 
 on wait cancel foo b:
@@ -78,6 +80,8 @@ list amqp listener
 list amqp listener foo lish
 list amqp connection
 list amqp connection test foo
+list worker
+list worker 7
 wait:
 	for 1
 
