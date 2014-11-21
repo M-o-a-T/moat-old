@@ -491,4 +491,89 @@ the timer, but by now you should be able to write that yourself.
 More complex examples
 ---------------------
 
-TODO.
+HomEvenT is supposed to be able to talk to other systems. We now implement
+a connector to OpenHAB.
+
+To do this, install RabbitMQ. Activate its MQTT module:
+
+	rabbitmq-plugins enable rabbitmq_mqtt
+
+Edit /etc/rabbitmq/rabbitmq.config:
+
+	[{rabbit,        [{tcp_listeners,    [5672]}]},
+	 {rabbitmq_mqtt, [
+	                  {allow_anonymous,  false},
+	                  {vhost,            <<"/homevent">>},
+	                  {exchange,         <<"homevent.event">>} ]}
+	].
+
+Add users:
+
+	rabbitmqctl add_vhost /homevent
+	rabbitmqctl add_user openhab WellWhatever
+	rabbitmqctl add_user homevent AlsoWhatever
+	rabbitmqctl set_permissions -p /homevent openhab ".*" ".*" ".*"
+	rabbitmqctl set_permissions -p /homevent homevent ".*" ".*" ".*"
+
+Configure OpenHAB to talk to MQTT:
+
+	mqtt:openhab.url=tcp://localhost:1883
+	mqtt:openhab.clientId=openhab
+	mqtt:openhab.user=openhab
+	mqtt:openhab.pwd=WellWhatever
+
+	mqtt-eventbus:broker=openhab
+	mqtt-eventbus:statePublishTopic=/openhab/out/state/${item}
+	mqtt-eventbus:commandPublishTopic=/openhab/out/command/${item}
+	mqtt-eventbus:stateSubscribeTopic=/openhab/in/state/${item}
+	mqtt-eventbus:commandSubscribeTopic=/openhab/in/command/${item}
+
+Teach HomEvenT to talk to AMQP:
+
+	if not exists module amqp: load amqp
+
+	on amqp connect bus:
+			name amqp connect bus
+
+			log amqp DEBUG:
+					name bus
+					exchange "homevent.log"
+			tell amqp:
+					name bus
+					exchange "homevent.log"
+					# DO NOT listen on this exchange
+
+			listen amqp bus:
+					name bus openhab
+					exchange "homevent.event"
+					topic ".openhab.out.#"
+					prefix hab in
+					strip 3
+
+			tell amqp hab out "**":
+					name bus
+					exchange "homevent.event"
+					prefix "" openhab in
+					strip 2
+			
+			start amqp bus
+
+	connect amqp localhost:
+			name bus
+			user "/homevent" homevent AlsoWhatever
+
+Now add a switch to openhab (to file items/CONFIG.items):
+
+	Switch Light_Outside "Outdoor Light" ()
+
+… and add the same switch to HomEvenT:
+
+	on hab in command Light_Outside:
+		if equal $raw ON:
+				log DEBUG the light shall be turned on
+		else:
+				log DEBUG the light shall be turned back off
+
+	on lights out:
+		trigger hab out command Light_Outside:
+			param raw OFF
