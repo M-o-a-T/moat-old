@@ -103,7 +103,7 @@ class EventCallback(Worker):
 		try:
 			msg=json.dumps(dict(event=list(event)))
 			msg = amqp.Message(body=msg, content_type='application/json')
-			self.channel.basic_publish(msg=msg, exchange=self.exchange, routing_key=".".join(self.prefix+tuple(event)[self.strip:]))
+			self.channel.basic_publish(msg=msg, exchange=self.exchange, routing_key=".".join(str(x) for x in self.prefix+tuple(event)[self.strip:]))
 		except Exception as ex:
 			fix_exception(ex)
 			process_failure(ex)
@@ -350,7 +350,7 @@ class AMQPlogger(BaseLogger):
 			return
 		msg=json.dumps(dict(level=(LogLevels[level],level),msg=a))
 		msg = amqp.Message(body=msg, content_type='application/json')
-		self.channel.basic_publish(msg=msg, exchange=self.exchange, routing_key=".".join(self.prefix+(level,)))
+		self.channel.basic_publish(msg=msg, exchange=self.exchange, routing_key=".".join(str(x) for x in self.prefix+(level,)))
 	
 	def _flush(self):
 		pass

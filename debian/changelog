@@ -1,3 +1,9 @@
+homevent (0.4.13) smurf; urgency=medium
+
+  * bugfix (numeric AMQP prefix)
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Fri, 21 Nov 2014 19:07:22 +0100
+
 homevent (0.4.12) smurf; urgency=medium
 
   * monitor "delta" fix

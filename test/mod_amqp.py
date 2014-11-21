@@ -57,6 +57,10 @@ tell amqp hey *:
 	prefix amqte
 	strip 1
 
+tell amqp:
+	name test foo
+	exchange he_exc
+
 start amqp test foo
 
 on amam ho:

@@ -5,11 +5,11 @@ EVENT: amqp¦connect¦test¦foo
 TRACE NewHandler 6
 EVENT: amqp¦start¦test¦foo
 TRACE Create OnEvtHandler: amam¦ho
-TRACE NewHandler 9
-TRACE Create OnEvtHandler: wait¦cancel¦foo¦b
 TRACE NewHandler 10
-TRACE Create OnEvtHandler: wait¦done¦foo¦b
+TRACE Create OnEvtHandler: wait¦cancel¦foo¦b
 TRACE NewHandler 11
+TRACE Create OnEvtHandler: wait¦done¦foo¦b
+TRACE NewHandler 12
 EVENT: wait¦start¦0.3¦foo¦a
      : loglevel=0
 EVENT: wait¦start¦foo¦a
@@ -51,9 +51,10 @@ password: ****
 3 :: shutdown handler
 6 :: amqp¦connect¦test¦foo (51)
 7 :: tell¦amqp¦hey¦*
-9 :: amam¦ho (51)
-10 :: wait¦cancel¦foo¦b (51)
-11 :: wait¦done¦foo¦b (51)
+8 :: tell¦amqp
+10 :: amam¦ho (51)
+11 :: wait¦cancel¦foo¦b (51)
+12 :: wait¦done¦foo¦b (51)
 .
 : ⇒EventCallback:tell¦amqp¦hey¦*
 id: 7
