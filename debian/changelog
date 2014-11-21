@@ -1,3 +1,9 @@
+homevent (0.4.15) smurf; urgency=medium
+
+  * Attach data to events (trigger :param)
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Fri, 21 Nov 2014 22:58:05 +0100
+
 homevent (0.4.14) smurf; urgency=medium
 
   * JSON error when logging
