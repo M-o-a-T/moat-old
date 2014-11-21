@@ -106,8 +106,8 @@ class EventCallback(Worker):
 				d = dict((x,y) for x,y in event.ctx if isinstance(y,(int,str,unicode,long,bool,float)))
 				try:
 					msg = json.dumps(dict(event=list(event), **d))
-				except TypeError:
-					msg = json.dumps(dict(data=repr(event)))
+				except (TypeError,UnicodeDecodeError):
+					msg = json.dumps(dict(data=repr(event)+"|"+repr(d)))
 			elif isinstance(msg,(int,long,float)):
 				msg = str(msg)
 			elif isinstance(msg,unicode):
