@@ -515,7 +515,7 @@ class AMQPrecv(Collected):
 		try:
 			data = json.loads(msg.body)
 		except Exception:
-			data = { "data": msg.body }
+			data = { "raw": msg.body }
 		self.last_recv = msg.__dict__
 		simple_event(*(self.prefix+tuple(msg.routing_key.split('.')[self.strip:])), **data)
 

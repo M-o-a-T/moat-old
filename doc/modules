@@ -777,32 +777,10 @@ such a feature is needed.
 next handler
 ------------
 
-This command skips ahead to the next event handler which matches the
-event in question.
+This command skips the remaining commands in this event handler.
 
-It has the same effect as an "if false" conditional (see previous
-section), but it's more readable.
-
-Usually, you use that at the end of a handler to state that the next one
-should also run. Conditionals, on the other hand, are usually used to
-selectively cause an event to be skipped, so they're used at the
-beginning of a handler.
-
-Note that the effects of a "next handler" end at the end of an event
-and do not propagate through a "trigger :sync":
-
-	on foo:
-		log TRACE one
-		trigger bar :sync
-		log TRACE two
-	on bar:
-		skip next
-		log TRACE "beware: this is ignored"
-
-will still print
-
-	TRACE> one
-	TRACE> two
+Usually, you use this in a complex loop or nested if statement to
+immediately exit the handler.
 
 -------
 list on
@@ -2143,45 +2121,17 @@ will continue while the event is processed.
 
 	trigger foo bar
 
-sync
-----
+param ‹key› ‹value›
+-------------------
 
-If you set this keyword, then event is run synchronously, i.e. execution
-will stall until it has been processed. For example, if the trigger
-says
+Attach ‹value› to the event as a named parameter.
 
 	on foo bar:
-		switch on lamp
-		wait lamp: for 1h
-		switch off lamp
-
-	trigger foo bar :sync
-	log DEBUG One hour later
-
-the debug statement will wait. Without the sync, it would be printed
-immediately.
-
-recurse
--------
-
-Sometimes, a chain of events may result in a recursive call:
-
-	on foo bar:
-		wait :for 1h
-		trigger foo bar
-
-This works; the problem is that the call's environment (i.e. any variables,
-where to send debugging output to, etc.) are linked in a chain: each call
-refers the previous call's data. This this statement will eat memory.
-
-To prevent that, use the trigger's "recurse" flag:
-
-	on foo bar:
-		wait :for 1h
-		trigger foo bar:
-			recurse
-
-The event will then inherit an empty environment.
+		log DEBUG Hello $name
+	trigger foo bar:
+		param name Joe
+	
+will log "Hello Joe".
 
 
 log
@@ -2563,6 +2513,16 @@ See the example under "set state", above.
 AMQP
 ====
 
+Connect HomEvenT to an external AMQP messaging server like RabbitMQ.
+
+The message payload typically consists of a JSON string with attributes
+that can be sent or received by HomEvenT. Only simple values (strings or
+numbers) are supported.
+
+The AMQP message exchanges need to be "topic" exchanges so that message
+filtering works. This is particularly important if you use the same queue
+for both directions.
+
 -------------------
 connect amqp ‹host›
 -------------------
@@ -2590,15 +2550,16 @@ Virtual host, user name, and password for establishing the connection.
 listen amqp ‹name›
 ------------------
 
-Connect to a specific queue. The routing key is split up at the dots and
-used as the event. The message payload is interpreted as a JSON hash and
+Connect to a specific exchange. The routing key is split up at the dots and
+used as the event name. The message payload is interpreted as a JSON hash and
 attached to the event; if JSON decoding fails, the payload is attached as
-`data` attribute.
+`raw` attribute.
 
 	listen amqp test foo:
 		name foo lish
 		exchange he_exc
 		prefix amqp foo
+		strip 1
 
 name
 ----
@@ -2620,6 +2581,52 @@ topic
 
 Topic filter. The default is `#`, i.e. no filtering.
 
+strip ‹n›
+---------
+
+Removes the first ‹n› elements from the routing key, before prefixing.
+
+-------------------
+tell amqp ‹prefix…›
+-------------------
+
+Connect to a specific queue and forwards all events which match ‹prefix…›
+to it. The event name is concatenated with dots and used as the routing
+key.
+
+The prefix may be empty, in which case all events are forwarded.
+
+Be careful *not* to either listen to the events you send, or to not forward
+the events you get, otherwise there'll be an endless loop.
+
+Data attached to the event (see `trigger`) are sent as a JSON hash in the
+message body. If there is an attribute `raw`, those attribute's content is
+sent as-is, all others are ignored.
+
+name ‹name…›
+------------
+
+The AMQP connection to use to. Mandatory. If the name is only one element
+long, you can use
+
+	tell amqp ‹name› ‹prefix…›
+
+as a short form.
+
+exchange ‹name›
+---------------
+
+The exchange to use. Defaults to "homevent.event".
+
+prefix ‹name…›
+--------------
+
+Prefix to prepend to the event's key.
+
+strip ‹n›
+---------
+
+Remove the first ‹n› words from the event key before forwarding.
 
 ------------------
 start amqp ‹name…›
@@ -2635,6 +2642,23 @@ stop amqp ‹name…›
 Stop processing incoming AMQP messages. You need to call this if you want
 to change your SMQP settings for whatever reason. Note that this may cause
 a synchronization problem if a message arrives at exactly the wrong time.
+
+--------------
+log amqp DEBUG
+--------------
+
+Send all logging data to an AMQP queue. You should not listen to that
+queue.
+
+name ‹name…›
+------------
+
+The name of the connection.
+
+exchange ‹name›
+---------------
+
+The exchange to send to; the default is `homevent.log`.
 
 
 --------------------
