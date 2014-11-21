@@ -314,8 +314,12 @@ class OWFSwindmon(Monitor):
 			## c² = a²+b²-2 a b cos α  ⇒
 			## α = acos( (a²+b²-c²) / 2 a b )
 			from math import pi,cos,acos,sqrt
-			def distance(a,b,alpha): return sqrt(a*a+b*b-2*a*b*cos(alpha))
-			def angle(a,b,c): return acos((a*a+b*b-c*c)/(2*a*b))
+			def distance(a,b,alpha):
+				return sqrt(a*a+b*b-2*a*b*cos(alpha))
+			def angle(a,b,c):
+				if not a or not b:
+					return 0
+				return acos((a*a+b*b-c*c)/(2*a*b))
 
 			# Angle between the old average and the new point
 			# (center of the circle)
