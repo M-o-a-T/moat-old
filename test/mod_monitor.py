@@ -75,26 +75,41 @@ del monitor baz zaz
 
 
 input monitest fake
+input monitest2 fake
 output monitest fake
+output monitest2 fake
 set output 1 monitest
+set output 2 monitest2
 
 # The alternate solution would be a passive monitor
-# that's triggered by setting the variable, but we
-# already test the components of that elsewhere.
+# which gets triggered by the event that's emitted
+# when setting the variable, but we already test all
+# components of that solution elsewhere.
 monitor input monitest:
 	delay for 0.2
 	name moni test
+monitor input monitest2:
+	delay for 0.2
+	name moni test2
+	delta
 wait :for 0.1
 set output 2 monitest
+set output 1 monitest2
 wait :for 0.2
 set output 3 monitest
+set output 2 monitest2
 wait :for 0.2
 set output 4 monitest
+set output 5 monitest2
 wait :for 0.2
 set output 5 monitest
+set output 12 monitest2
 list monitor
 list monitor moni test
+list monitor moni test2
+wait :for 0.2
 del monitor moni test
+del monitor moni test2
 
 shutdown
 """

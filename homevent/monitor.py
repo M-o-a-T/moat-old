@@ -270,11 +270,12 @@ class Monitor(Collected,Jobber):
 				self.last_value = self.value
 				self.value = self.new_value
 				if hasattr(self,"delta"):
-					val = self.value-self.last_value
-					self._ectx.value_delta = val
-					if val >= 0 or self.delta == 0:
-						simple_event(self.ectx,"monitor","value",self.value-self.last_value,*self.name)
-						simple_event(self.ectx,"monitor","update",*self.name)
+					if self.last_value is not None:
+						val = self.value-self.last_value
+						self._ectx.value_delta = val
+						if val >= 0 or self.delta == 0:
+							simple_event(self.ectx,"monitor","value",self.value-self.last_value,*self.name)
+							simple_event(self.ectx,"monitor","update",*self.name)
 				else:
 					simple_event(self.ectx,"monitor","value",self.new_value,*self.name)
 					simple_event(self.ectx,"monitor","update",*self.name)
