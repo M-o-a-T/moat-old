@@ -348,7 +348,10 @@ class AMQPlogger(BaseLogger):
 	def _log(self, level, *a):
 		if level < self.level:
 			return
-		msg=json.dumps(dict(level=(LogLevels[level],level),msg=a))
+		try:
+			msg=json.dumps(dict(level=(LogLevels[level],level),msg=a))
+		except TypeError:
+			msg=json.dumps(dict(level=(LogLevels[level],level),data=repr(a)))
 		msg = amqp.Message(body=msg, content_type='application/json')
 		self.channel.basic_publish(msg=msg, exchange=self.exchange, routing_key=".".join(str(x) for x in self.prefix+(level,)))
 	

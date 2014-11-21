@@ -1,3 +1,9 @@
+homevent (0.4.14) smurf; urgency=medium
+
+  * JSON error when logging
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Fri, 21 Nov 2014 19:45:35 +0100
+
 homevent (0.4.13) smurf; urgency=medium
 
   * bugfix (numeric AMQP prefix)
