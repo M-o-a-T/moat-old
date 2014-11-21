@@ -1,7 +1,10 @@
 EVENT: startup
      : startup=True
 block :: Block-level statements
+bool :: Boolean conditions. There can be only … two.
 data :: provides a couple of common data access functions
+ifelse :: if / else / else if
+logging :: control logging
 on_event :: the 'on EVENT:' handler
 trigger :: Basic event handling
 wait :: Delay handling
@@ -37,17 +40,18 @@ EVENT: wait¦done¦×××¦vorher
 EVENT: wait¦done¦vorher
      : loglevel=0
 IEVENT: foo
-EVENT: wait¦start¦×××¦foo¦waiter
-     : loglevel=0
-EVENT: wait¦start¦foo¦waiter
-     : loglevel=0
-     : end_time=0.5
+TRACE Yes
 EVENT: wait¦start¦×××¦nachher
      : loglevel=0
 EVENT: wait¦start¦nachher
      : loglevel=0
      : end_time=0.2
-TRACE 2003-04-05 06:07:08.350000 nachher: Fake timer done
+EVENT: wait¦start¦×××¦foo¦waiter
+     : loglevel=0
+EVENT: wait¦start¦foo¦waiter
+     : loglevel=0
+     : end_time=0.5
+TRACE 2003-04-05 06:07:08.300000 nachher: Fake timer done
 foo waiter :: 0.100000023842
 .
 EVENT: wait¦done¦×××¦nachher

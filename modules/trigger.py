@@ -46,12 +46,19 @@ trigger FOO...
 	loglevel = None
 	recurse = None
 	sync = False
+	vars = None
+
+	def __init__(self,*a,**k):
+		self.vars = {}
+		super(TriggerHandler,self).__init__(*a,**k)
 
 	def run(self,ctx,**k):
 		if self.loglevel is not None:
 			ctx = ctx(loglevel=self.loglevel)
 		event = self.params(ctx)
 		event.ctx = ctx._trim()
+		for k,v in self.vars.items():
+			setattr(event.ctx,k, v)
 		if not event:
 			raise SyntaxError("Events need at least one parameter")
 
@@ -118,6 +125,23 @@ sync
 			self.parent.sync = True
 		else:
 			raise SyntaxError(u'Usage: sync')
+
+
+@TriggerHandler.register_statement
+class TriggerParam(Statement):
+	name = "param"
+	doc = "set an event parameter"
+	long_doc=u"""\
+param ‹key› ‹val›
+	The value ‹val› is attached to the event as ‹key›.
+
+	The event handler will then be able to refer to ‹val› by ‹$key›.
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if len(event) != 2:
+			raise SyntaxError(u'Usage: param ‹key› ‹val›')
+		self.parent.vars[event[0]] = event[1]
 
 
 
