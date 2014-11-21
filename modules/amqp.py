@@ -101,7 +101,17 @@ class EventCallback(Worker):
 
 		# This is an event monitor. Failures will not be tolerated.
 		try:
-			msg=json.dumps(dict(event=list(event)))
+			msg = getattr(event.ctx,'raw',None)
+			if msg is None:
+				d = dict((x,y) for x,y in event.ctx if isinstance(y,(int,str,unicode,long,bool,float)))
+				try:
+					msg = json.dumps(dict(event=list(event), **d))
+				except TypeError:
+					msg = json.dumps(dict(data=repr(event)))
+			elif isinstance(msg,(int,long,float)):
+				msg = str(msg)
+			elif isinstance(msg,unicode):
+				msg = msg.encode("utf-8")
 			msg = amqp.Message(body=msg, content_type='application/json')
 			self.channel.basic_publish(msg=msg, exchange=self.exchange, routing_key=".".join(str(x) for x in self.prefix+tuple(event)[self.strip:]))
 		except Exception as ex:

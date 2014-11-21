@@ -103,6 +103,7 @@ EVENT: wait¦done¦foo¦a
 IEVENT: hey¦ho
 EVENT: amam¦ho
      : event=[u'hey', u'ho']
+     : wait=0.3
 EVENT: wait¦cancel¦0.3¦foo¦b
      : loglevel=0
 EVENT: wait¦cancel¦foo¦b
