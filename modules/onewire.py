@@ -24,7 +24,7 @@ from __future__ import division,absolute_import
 
 from homevent.module import Module
 from homevent.base import Name,SName
-from homevent.logging import log,log_exc,DEBUG,TRACE,INFO,WARN
+from homevent.logging import log,DEBUG,TRACE,INFO,WARN
 from homevent.statement import Statement, main_words, AttributedStatement
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.onewire import connect,disconnect, devices

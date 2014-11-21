@@ -224,9 +224,9 @@ class WorkSequence(WorkItem):
 				r.within.append(self)
 			if res is None:
 				res = r
-			elif isinstance(r,Exception):
+			elif isinstance(res,Exception):
 				from homevent.logging import log_exc
-				log_exc("Unhandled nested exception", res)
+				log_exc(msg="Unhandled nested exception", err=res)
 				from homevent.run import process_failure
 				process_failure(res)
 				res = r
@@ -320,7 +320,7 @@ class ConcurrentWorkSequence(WorkSequence):
 				from homevent.logging import log_exc
 				from homevent.run import process_failure
 				fix_exception(exc)
-				log_exc("Unhandled exception", exc,w)
+				log_exc(msg="Unhandled exception", err=exc)
 				process_failure(exc)
 
 		for w in self.work:
