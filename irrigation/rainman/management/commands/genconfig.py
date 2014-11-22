@@ -61,12 +61,24 @@ class Command(BaseCommand):
 	def one_valve(self,v,typ):
 		if typ != "wago":
 			raise NotImplementedError("I only know type 'wago'")
+		sname = "_".join(x[0].upper()+x[1:].lower() for x in v.var.split())
 		print """\
 if exists output {name}:
 	del output {name}
 output wago {cloc} {vloc}:
 	name {name}
 	bool on off
-""".format(name=v.var, vloc=v.location, cloc=v.controller.location)
+on hab in command {sname}:
+	if equal $raw ON:
+			set output on {name}
+	else:
+			set output off {name}
+on output change {name}:
+	if equal $value on:
+		trigger hab out command {sname} :param raw ON
+	else:
+		trigger hab out command {sname} :param raw OFF
+
+""".format(name=v.var, vloc=v.location, cloc=v.controller.location,sname=sname)
 
 
