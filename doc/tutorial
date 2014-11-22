@@ -535,6 +535,7 @@ Teach HomEvenT to talk to AMQP:
 	on amqp connect bus:
 			name amqp connect bus
 
+			# do this if you want to spew logging to AMQP
 			log amqp DEBUG:
 					name bus
 					exchange "homevent.log"
@@ -543,6 +544,7 @@ Teach HomEvenT to talk to AMQP:
 					exchange "homevent.log"
 					# DO NOT listen on this exchange
 
+			# receive openhab messages
 			listen amqp bus:
 					name bus openhab
 					exchange "homevent.event"
@@ -550,6 +552,7 @@ Teach HomEvenT to talk to AMQP:
 					prefix hab in
 					strip 3
 
+			# send commands to openhab
 			tell amqp hab out "**":
 					name bus
 					exchange "homevent.event"
@@ -566,7 +569,12 @@ Now add a switch to openhab (to file items/CONFIG.items):
 
 	Switch Light_Outside "Outdoor Light" ()
 
-… and add the same switch to HomEvenT:
+and assign sensible tags to the light states (in file transform/onoff.map):
+
+	1=ON
+	0=OFF
+
+Now handle the switch in HomEvenT:
 
 	on hab in command Light_Outside:
 		if equal $raw ON:
@@ -574,6 +582,9 @@ Now add a switch to openhab (to file items/CONFIG.items):
 		else:
 				log DEBUG the light shall be turned back off
 
+Of course, if the HomEvenT state changes, we need to tell openhab:
+
 	on lights out:
 		trigger hab out command Light_Outside:
 			param raw OFF
+
