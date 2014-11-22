@@ -70,11 +70,11 @@ output wago {cloc} {vloc}:
 	bool on off
 on hab in command {sname}:
 	if equal $raw ON:
-			set output on {name}
+			set output on {name} :for 5 min
 	else:
 			set output off {name}
 on output change {name}:
-	if equal $value on:
+	if equal $value True:
 		trigger hab out command {sname} :param raw ON
 	else:
 		trigger hab out command {sname} :param raw OFF
