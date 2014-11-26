@@ -251,14 +251,14 @@ class OWFSmon(Monitor):
 class OWFSwindmon(Monitor):
 	def __init__(self,*a,**k):
 		super(OWFSwindmon,self).__init__(*a,**k)
-		self.avg = None
-		self.qavg = None
+		self.avg = None # direction (0…1 around some circle)
+		self.qavg = 0 # quality
 		self.nval = 0
 
 	def up(self):
 		super(OWFSwindmon,self).up()
 		self.avg = None
-		self.qavg = None
+		self.qavg = 0
 		self.nval = 0
 
 	def list(self):
@@ -302,35 +302,65 @@ class OWFSwindmon(Monitor):
 	def _process_value(self,val):
 		if self.avg is None:
 			self.avg = val
-			self.qavg = 0.5
-			decay = self.decay
 		else:
 			# Principle of operation:
-			# Imagine the wind vane traveling on the circumference of
-			# a circle (r=1). Calculate a moving average from this
-			# point's locations within the circle. Its distance from
-			# the center is the accurracy of the current value.
+			# Imagine the tip of the wind vane traveling on the
+			# circumference of a circle (r=1). Calculate a moving average
+			# of this point's locations, which per definition is somewhere
+			# within the circle (or on its edge). The point's distance from
+			# the center is a measure of the accurracy of the current
+			# value, and the angle is where the wind is coming from.
 			#
 			## c² = a²+b²-2 a b cos α  ⇒
 			## α = acos( (a²+b²-c²) / 2 a b )
+			#
+			# Thus, we have an old average at angle .avg×2π and distance
+			# .qavg, and a new point at angle (val/16)×2π and distance 1.
+			# The new average is somewhere on the line between these
+			# points. Its position on that line is controlled by .decay:
+			# the larger that value is, the closer the average is to the
+			# new point.
+
 			from math import pi,cos,acos,sqrt
 			def distance(a,b,alpha):
 				return sqrt(a*a+b*b-2*a*b*cos(alpha))
 			def angle(a,b,c):
-				if not a or not b:
+				if a is None or b is None or c is None:
 					return 0
-				return acos((a*a+b*b-c*c)/(2*a*b))
+				v=(a*a+b*b-c*c)/(2*a*b)
+				# Computer math is inexact, so sometimes we get something
+				# that's a weee bit larger than one
+				if v >= 1:
+					return 0
+				elif v <= -1:
+					return pi
+				return acos(v)
 
-			# Angle between the old average and the new point
-			# (center of the circle)
+			# We use the edge from the circle's center to the new point as
+			# our base line.
+			# ① Get the angle between the old average and the new point
+			# (@ center of the circle)
 			al = ((self.avg-val)%16)*pi/8
 
+			# ② distance between the old avg and the new point
 			d = distance(1,self.qavg,al)
-			nal = angle(1,d,self.qavg) # at corner of wind vane
+			# ③ angle (@ new point)
+			nal = angle(1,d,self.qavg)
+			# ④ distance of new avg from new point; decay=0 is "no change"
 			d = (1-self.decay)*d
+
+			# ⑤ third side of center-new point-new average triangle,
+			# inverse of ③
 			self.qavg = distance(1,d,nal)
-			nal = angle(1,self.qavg,d) # between avg and new, at center
+			
+			# ⑥ angle between new avg and new point, inverse of ②
+			# (center of the circle)
+			nal = angle(1,self.qavg,d)
+
+			# ⑦ now orient the result
 			if self.avg < val: nal = -nal
+			# ⑧ and add the base line's "real" angle back
+			# (inverse of ①)
 			self.avg = (val+nal*8/pi)%16
 
 

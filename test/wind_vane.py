@@ -19,18 +19,18 @@
 from homevent.context import Context
 from modules.onewire import OWFSwindmon
 
-res=[(2,0.5),(2.0,0.55),(2.16567,0.58863),(2.44226,0.60851),(2.86361,0.49702),(7.99997,0.99997),(8.05551,0.92410)]
+res=[(2,0),(2.0,0.20),(2.5562,0.35317),(3.15135,0.46385),(4.56156,0.35936),(7.9999,0.9999),(8.11711,0.92410)]
 
 def dump(c):
 	a,q = res.pop(0)
-	assert abs(a-c.avg)<0.001
-	assert abs(q-c.qavg)<0.001
+	assert abs(a-c.avg)<0.001, (a,c.avg)
+	assert abs(q-c.qavg)<0.001, (q,c.qavg)
 
 class par(object):
 	def __init__(self):
 		self.ctx = Context()
 c = OWFSwindmon(par(),"wind")
-c.decay=0.1
+c.decay=0.2
 c._process_value(2)
 dump(c)
 c._process_value(2)
