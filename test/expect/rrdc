@@ -32,7 +32,7 @@ out_queued: 0
 .
 TRACE Yes
 TRACE Yes
-a aa aaa
+a aa aaa :: Never
 .
 : ‹Collected RRDfile:a¦aa¦aaa›
 name: a¦aa¦aaa
