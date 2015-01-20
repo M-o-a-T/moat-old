@@ -58,8 +58,16 @@ parser.add_option("-r", "--routing", dest="routing", action="store",
 	default="cmdline.generic", help="Routing key to send to")
 parser.add_option("-t", "--content-type", dest="content_type", action="store",
 	default="text/plain", help="The message's content type")
+parser.add_option("-s", "--skip", dest="skip", action="append",
+	help="Skip these messages")
 
 (opts, args) = parser.parse_args()
+
+skip=[]
+if opts.skip:
+	for skip1 in opts.skip:
+		for skip2 in skip1.split(','):
+			skip.append(skip2.split('.'))
 
 conn = amqp.connection.Connection(host=opts.host, userid=opts.user, password=opts.pw, login_method='AMQPLAIN', login_response=None, virtual_host=opts.vhost)
 
@@ -85,6 +93,17 @@ def do_log(conn):
 			msg.body = json.loads(msg.body)
 		except Exception:
 			pass
+		deli = msg.delivery_info['routing_key'].split('.')
+		for skip1 in skip:
+			for s,k in zip(deli,skip1):
+				if k == "*":
+					return
+				if s != k:
+					s=()
+					break
+			if len(s) == len(k):
+				return
+
 		pprint(msg.__dict__)
 
 	chan = conn.channel()
