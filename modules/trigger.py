@@ -58,7 +58,11 @@ trigger FOO...
 		event = self.params(ctx)
 		event.ctx = ctx._trim()
 		for k,v in self.vars.items():
-			setattr(event.ctx,k, v)
+			if k[0] == '$':
+				k = ctx[k[1:]]
+			if v[0] == '$':
+				v = ctx[v[1:]]
+			setattr(event.ctx, k,v)
 		if not event:
 			raise SyntaxError("Events need at least one parameter")
 
@@ -138,7 +142,7 @@ param ‹key› ‹val›
 	The event handler will then be able to refer to ‹val› by ‹$key›.
 """
 	def run(self,ctx,**k):
-		event = self.params(ctx)
+		event = self.par(ctx)
 		if len(event) != 2:
 			raise SyntaxError(u'Usage: param ‹key› ‹val›')
 		self.parent.vars[event[0]] = event[1]
