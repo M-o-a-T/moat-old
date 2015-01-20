@@ -51,6 +51,14 @@ on foo:
 on bar *:
 	block:
 		trigger $1 :sync
+on baz:
+	block:
+		log DEBUG got baz $quux
+		if equal $quux "two":
+			log TRACE Yes
+			set state nix dud
+		else:
+			log ERROR no quux $quux
 list on
 list on Skipped One
 list on Skipped Two
@@ -60,6 +68,23 @@ trigger bar foo :sync
 del on fuß
 list on
 trigger fuß
+trigger baz:
+	param quux one
+block:
+	state dud
+	set state two dud
+	var state vav dud
+	log DEBUG vav is $vav
+	trigger baz dud $vav
+	trigger baz:
+		param quux $vav
+wait :for 0.1
+block:
+	var state va dud
+	if equal $va "nix":
+		log TRACE Yes
+	else:
+		log ERROR handler not called
 trigger num "1"
 trigger num 2
 trigger num 3
@@ -75,6 +100,8 @@ load_module("ifelse")
 load_module("bool")
 load_module("data")
 load_module("logging")
+load_module("state")
+load_module("wait")
 
 run("on",input)
 
