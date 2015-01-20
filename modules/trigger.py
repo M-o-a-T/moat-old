@@ -56,15 +56,20 @@ trigger FOO...
 		if self.loglevel is not None:
 			ctx = ctx(loglevel=self.loglevel)
 		event = self.params(ctx)
+		if not event:
+			raise SyntaxError("Events need at least one parameter")
 		event.ctx = ctx._trim()
+
 		for k,v in self.vars.items():
 			if k[0] == '$':
 				k = ctx[k[1:]]
-			if v[0] == '$':
-				v = ctx[v[1:]]
-			setattr(event.ctx, k,v)
-		if not event:
-			raise SyntaxError("Events need at least one parameter")
+			try:
+				if v[0] == '$':
+					v = ctx[v[1:]]
+			except TypeError: # not an int
+				pass
+			if k is not None and v is not None:
+				setattr(event.ctx, k,v)
 
 		process_event(event)
 
