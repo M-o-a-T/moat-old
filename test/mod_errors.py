@@ -83,8 +83,10 @@ block:
 	try:
 		log DEBUG $foobar
 		log ERROR No 71
-	catch AttributeError:
+	catch KeyError:
 		log TRACE Yes N KEY
+	catch AttributeError:
+		log TRACE Yes N ATTR
 	catch:
 		log ERROR No 72
 
