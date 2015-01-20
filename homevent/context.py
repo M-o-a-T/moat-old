@@ -96,6 +96,15 @@ class Context(object):
 			return super(Context,self).__delattr__(key)
 		self._store[key] = VanishedAttribute
 
+	def __getitem__(self,key):
+		return self._store[key]
+		
+	def __setitem__(self,key,val):
+		self._store[key] = val
+		
+	def __delitem__(self,key):
+		self._store[key] = VanishedAttribute
+		
 	def __contains__(self,key):
 		store = self._store
 		if key in store: return store[key] is not VanishedAttribute
