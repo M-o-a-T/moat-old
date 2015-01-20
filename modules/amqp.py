@@ -292,11 +292,11 @@ topic ‹filter›
 class AMQPstrip(Statement):
 	name="strip"
 	dest = None
-	doc="remove elements from routing key"
+	doc="remove elements from the front of the routing key"
 
 	long_doc = u"""\
 strip ‹num›
-- Remove the first ‹num› elements from the message's routing key.
+- Remove the first ‹num› elements from the front of the message's routing key.
   Default: zero.
 """
 
