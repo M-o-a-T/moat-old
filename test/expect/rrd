@@ -17,35 +17,35 @@ type: GAUGE
 unknown_sec: 0
 value: ?
 .
-EVENT: wait¦start¦×××¦_wait¦1
+EVENT: wait¦start¦×××¦_wait¦t1
      : loglevel=0
-EVENT: wait¦start¦_wait¦1
+EVENT: wait¦start¦_wait¦t1
      : loglevel=0
      : end_time=1.1
-TRACE 2003-04-05 06:07:09.150000 _wait¦1: Fake timer done
-EVENT: wait¦done¦×××¦_wait¦1
+TRACE 2003-04-05 06:07:09.150000 _wait¦t1: Fake timer done
+EVENT: wait¦done¦×××¦_wait¦t1
      : loglevel=0
-EVENT: wait¦done¦_wait¦1
+EVENT: wait¦done¦_wait¦t1
      : loglevel=0
-EVENT: wait¦start¦×××¦_wait¦2
+EVENT: wait¦start¦×××¦_wait¦t2
      : loglevel=0
-EVENT: wait¦start¦_wait¦2
+EVENT: wait¦start¦_wait¦t2
      : loglevel=0
      : end_time=2.2
-TRACE 2003-04-05 06:07:10.300000 _wait¦2: Fake timer done
-EVENT: wait¦done¦×××¦_wait¦2
+TRACE 2003-04-05 06:07:10.300000 _wait¦t2: Fake timer done
+EVENT: wait¦done¦×××¦_wait¦t2
      : loglevel=0
-EVENT: wait¦done¦_wait¦2
+EVENT: wait¦done¦_wait¦t2
      : loglevel=0
-EVENT: wait¦start¦×××¦_wait¦3
+EVENT: wait¦start¦×××¦_wait¦t3
      : loglevel=0
-EVENT: wait¦start¦_wait¦3
+EVENT: wait¦start¦_wait¦t3
      : loglevel=0
      : end_time=3.4
-TRACE 2003-04-05 06:07:11.450000 _wait¦3: Fake timer done
-EVENT: wait¦done¦×××¦_wait¦3
+TRACE 2003-04-05 06:07:11.450000 _wait¦t3: Fake timer done
+EVENT: wait¦done¦×××¦_wait¦t3
      : loglevel=0
-EVENT: wait¦done¦_wait¦3
+EVENT: wait¦done¦_wait¦t3
      : loglevel=0
 name: t¦tt¦ttt
 file: /tmp/rrdtest.rrd

@@ -183,7 +183,7 @@ wait [NAME…]: for FOO…
 		global timer_nr
 		timer_nr += 1
 		self.nr = timer_nr
-		self.displayname=("_wait",self.nr)
+		self.displayname=("_wait","t"+str(self.nr))
 
 	def run(self,ctx,**k):
 		event = self.params(ctx)

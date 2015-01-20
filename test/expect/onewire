@@ -238,7 +238,7 @@ TRACE conn setstate closed waiting: wait 3.000
 TRACE onewire start bus update
 EVENT: onewire¦scanning¦A
 TRACE 2003-04-05 06:07:10.600000 END: Forced timer done
-EVENT: wait¦done¦2.5¦END
+EVENT: wait¦done¦2.4¦END
      : loglevel=0
 EVENT: wait¦done¦END
      : loglevel=0

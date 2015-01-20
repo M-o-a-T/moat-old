@@ -7,9 +7,9 @@ TRACE monitor filter [42.0] on foo¦bar
 TRACE monitor End run foo¦bar
 TRACE monitor Stop run foo¦bar
 EVENT: monitor¦start¦foo¦bar
-EVENT: wait¦start¦×××¦_wait¦1
+EVENT: wait¦start¦×××¦_wait¦t1
      : loglevel=0
-EVENT: wait¦start¦_wait¦1
+EVENT: wait¦start¦_wait¦t1
      : loglevel=0
      : end_time=1.0
 EVENT: monitor¦value¦42.0¦foo¦bar
@@ -87,10 +87,10 @@ EVENT: monitor¦update¦foo¦bar
      : time=‹now›
      : last_value=40.0
 TRACE Go from 40.0 to 42.0
-TRACE 2003-04-05 06:07:09 _wait¦1: Fake timer done
-EVENT: wait¦done¦×××¦_wait¦1
+TRACE 2003-04-05 06:07:09 _wait¦t1: Fake timer done
+EVENT: wait¦done¦×××¦_wait¦t1
      : loglevel=0
-EVENT: wait¦done¦_wait¦1
+EVENT: wait¦done¦_wait¦t1
      : loglevel=0
 TRACE Yes
 foo bar :: Wait ‹0.2 sec›
@@ -104,9 +104,9 @@ time: ‹0.2 sec›
 steps: 1 / 1 / None
 data: 42.0
 .
-EVENT: wait¦start¦×××¦_wait¦2
+EVENT: wait¦start¦×××¦_wait¦t2
      : loglevel=0
-EVENT: wait¦start¦_wait¦2
+EVENT: wait¦start¦_wait¦t2
      : loglevel=0
      : end_time=1.8
 TRACE 2003-04-05 06:07:09.250000 : Fake timer done
@@ -163,10 +163,10 @@ EVENT: monitor¦update¦foo¦bar
      : time=‹now›
      : last_value=41.0
 TRACE Go from 41.0 to 40.0
-TRACE 2003-04-05 06:07:09.800000 _wait¦2: Fake timer done
-EVENT: wait¦done¦×××¦_wait¦2
+TRACE 2003-04-05 06:07:09.800000 _wait¦t2: Fake timer done
+EVENT: wait¦done¦×××¦_wait¦t2
      : loglevel=0
-EVENT: wait¦done¦_wait¦2
+EVENT: wait¦done¦_wait¦t2
      : loglevel=0
 .
 EVENT: monitor¦stop¦foo¦bar
@@ -199,20 +199,20 @@ EVENT: wait¦start¦×××¦bazzaz¦A
 EVENT: wait¦start¦bazzaz¦A
      : loglevel=0
      : end_time=2.0
-EVENT: wait¦start¦×××¦_wait¦5
+EVENT: wait¦start¦×××¦_wait¦t5
      : loglevel=0
-EVENT: wait¦start¦_wait¦5
+EVENT: wait¦start¦_wait¦t5
      : loglevel=0
      : end_time=1.9
-TRACE 2003-04-05 06:07:10 _wait¦5: Fake timer done
-EVENT: wait¦done¦×××¦_wait¦5
+TRACE 2003-04-05 06:07:10 _wait¦t5: Fake timer done
+EVENT: wait¦done¦×××¦_wait¦t5
      : loglevel=0
-EVENT: wait¦done¦_wait¦5
+EVENT: wait¦done¦_wait¦t5
      : loglevel=0
 TRACE Yes
-EVENT: wait¦start¦×××¦_wait¦6
+EVENT: wait¦start¦×××¦_wait¦t6
      : loglevel=0
-EVENT: wait¦start¦_wait¦6
+EVENT: wait¦start¦_wait¦t6
      : loglevel=0
      : end_time=2.5
 TRACE 2003-04-05 06:07:10.050000 bazzaz¦A: Fake timer done
@@ -265,10 +265,10 @@ EVENT: monitor¦update¦baz¦zaz
      : steps=(3, 2, None)
      : time=‹0.5 sec›
      : last_value=None
-TRACE 2003-04-05 06:07:10.550000 _wait¦6: Fake timer done
-EVENT: wait¦done¦×××¦_wait¦6
+TRACE 2003-04-05 06:07:10.550000 _wait¦t6: Fake timer done
+EVENT: wait¦done¦×××¦_wait¦t6
      : loglevel=0
-EVENT: wait¦done¦_wait¦6
+EVENT: wait¦done¦_wait¦t6
      : loglevel=0
 TRACE Yes
 : ‹Monitor baz¦zaz on 13.5›
@@ -328,15 +328,15 @@ TRACE monitor filter [2.0] on moni¦test2
 TRACE monitor End run moni¦test2
 TRACE monitor Stop run moni¦test2
 EVENT: monitor¦start¦moni¦test2
-EVENT: wait¦start¦×××¦_wait¦7
+EVENT: wait¦start¦×××¦_wait¦t7
      : loglevel=0
-EVENT: wait¦start¦_wait¦7
+EVENT: wait¦start¦_wait¦t7
      : loglevel=0
      : end_time=2.7
-TRACE 2003-04-05 06:07:10.750000 _wait¦7: Fake timer done
-EVENT: wait¦done¦×××¦_wait¦7
+TRACE 2003-04-05 06:07:10.750000 _wait¦t7: Fake timer done
+EVENT: wait¦done¦×××¦_wait¦t7
      : loglevel=0
-EVENT: wait¦done¦_wait¦7
+EVENT: wait¦done¦_wait¦t7
      : loglevel=0
 EVENT: output¦set¦1¦2¦monitest
 EVENT: output¦change¦monitest
@@ -354,9 +354,9 @@ EVENT: input¦fake¦1¦monitest2
 EVENT: input¦change¦monitest2
      : last_value=2
      : value=1
-EVENT: wait¦start¦×××¦_wait¦8
+EVENT: wait¦start¦×××¦_wait¦t8
      : loglevel=0
-EVENT: wait¦start¦_wait¦8
+EVENT: wait¦start¦_wait¦t8
      : loglevel=0
      : end_time=3.0
 TRACE 2003-04-05 06:07:10.800000 : Fake timer done
@@ -413,10 +413,10 @@ EVENT: monitor¦update¦moni¦test2
      : time=‹now›
      : last_value=2.0
      : value_delta=-1.0
-TRACE 2003-04-05 06:07:11.050000 _wait¦8: Fake timer done
-EVENT: wait¦done¦×××¦_wait¦8
+TRACE 2003-04-05 06:07:11.050000 _wait¦t8: Fake timer done
+EVENT: wait¦done¦×××¦_wait¦t8
      : loglevel=0
-EVENT: wait¦done¦_wait¦8
+EVENT: wait¦done¦_wait¦t8
      : loglevel=0
 EVENT: output¦set¦2¦3¦monitest
 EVENT: output¦change¦monitest
@@ -434,9 +434,9 @@ EVENT: input¦fake¦2¦monitest2
 EVENT: input¦change¦monitest2
      : last_value=1
      : value=2
-EVENT: wait¦start¦×××¦_wait¦9
+EVENT: wait¦start¦×××¦_wait¦t9
      : loglevel=0
-EVENT: wait¦start¦_wait¦9
+EVENT: wait¦start¦_wait¦t9
      : loglevel=0
      : end_time=3.2
 TRACE 2003-04-05 06:07:11.100000 : Fake timer done
@@ -493,10 +493,10 @@ EVENT: monitor¦update¦moni¦test2
      : time=‹now›
      : last_value=1.0
      : value_delta=1.0
-TRACE 2003-04-05 06:07:11.350000 _wait¦9: Fake timer done
-EVENT: wait¦done¦×××¦_wait¦9
+TRACE 2003-04-05 06:07:11.350000 _wait¦t9: Fake timer done
+EVENT: wait¦done¦×××¦_wait¦t9
      : loglevel=0
-EVENT: wait¦done¦_wait¦9
+EVENT: wait¦done¦_wait¦t9
      : loglevel=0
 EVENT: output¦set¦3¦4¦monitest
 EVENT: output¦change¦monitest
@@ -514,9 +514,9 @@ EVENT: input¦fake¦5¦monitest2
 EVENT: input¦change¦monitest2
      : last_value=2
      : value=5
-EVENT: wait¦start¦×××¦_wait¦10
+EVENT: wait¦start¦×××¦_wait¦t10
      : loglevel=0
-EVENT: wait¦start¦_wait¦10
+EVENT: wait¦start¦_wait¦t10
      : loglevel=0
      : end_time=3.5
 TRACE 2003-04-05 06:07:11.400000 : Fake timer done
@@ -573,10 +573,10 @@ EVENT: monitor¦update¦moni¦test2
      : time=‹now›
      : last_value=2.0
      : value_delta=3.0
-TRACE 2003-04-05 06:07:11.650000 _wait¦10: Fake timer done
-EVENT: wait¦done¦×××¦_wait¦10
+TRACE 2003-04-05 06:07:11.650000 _wait¦t10: Fake timer done
+EVENT: wait¦done¦×××¦_wait¦t10
      : loglevel=0
-EVENT: wait¦done¦_wait¦10
+EVENT: wait¦done¦_wait¦t10
      : loglevel=0
 EVENT: output¦set¦4¦5¦monitest
 EVENT: output¦change¦monitest
@@ -615,9 +615,9 @@ time: ‹now›
 steps: 1 / 1 / None
 data: 5.0
 .
-EVENT: wait¦start¦×××¦_wait¦11
+EVENT: wait¦start¦×××¦_wait¦t11
      : loglevel=0
-EVENT: wait¦start¦_wait¦11
+EVENT: wait¦start¦_wait¦t11
      : loglevel=0
      : end_time=3.9
 TRACE 2003-04-05 06:07:11.700000 : Fake timer done
@@ -674,10 +674,10 @@ EVENT: monitor¦update¦moni¦test2
      : time=‹now›
      : last_value=5.0
      : value_delta=7.0
-TRACE 2003-04-05 06:07:11.950000 _wait¦11: Fake timer done
-EVENT: wait¦done¦×××¦_wait¦11
+TRACE 2003-04-05 06:07:11.950000 _wait¦t11: Fake timer done
+EVENT: wait¦done¦×××¦_wait¦t11
      : loglevel=0
-EVENT: wait¦done¦_wait¦11
+EVENT: wait¦done¦_wait¦t11
      : loglevel=0
 EVENT: monitor¦stop¦moni¦test
 EVENT: monitor¦stop¦moni¦test2

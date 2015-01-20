@@ -555,7 +555,7 @@ Default exchange: homevent_trigger
 		if dest is None:
 			global _seq
 			_seq += 1
-			dest = Name("_amqp",_seq)
+			dest = Name("_amqp","a"+str(_seq))
 		AMQPrecv(self, dest,conn)
 		
 AMQPlisten.register_statement(AMQPname)

@@ -90,9 +90,9 @@ parent: ‹Collected AMQPclient:test¦foo›
 exchange: he_exc
 prefix: ('homevent', 'log')
 .
-EVENT: wait¦start¦1.0¦_wait¦4
+EVENT: wait¦start¦1.0¦_wait¦t4
      : loglevel=0
-EVENT: wait¦start¦_wait¦4
+EVENT: wait¦start¦_wait¦t4
      : loglevel=0
      : end_time=1.0
 TRACE 2003-04-05 06:07:08.500000 foo¦a: Forced timer done
@@ -111,9 +111,9 @@ EVENT: wait¦cancel¦foo¦b
 TRACE Yes
 Waiter ‹foo b› was cancelled
 Waiter ‹foo b› was cancelled
-TRACE 2003-04-05 06:07:09 _wait¦4: Fake timer done
-EVENT: wait¦done¦1.0¦_wait¦4
+TRACE 2003-04-05 06:07:09 _wait¦t4: Fake timer done
+EVENT: wait¦done¦1.0¦_wait¦t4
      : loglevel=0
-EVENT: wait¦done¦_wait¦4
+EVENT: wait¦done¦_wait¦t4
      : loglevel=0
 EVENT: amqp¦stop¦test¦foo

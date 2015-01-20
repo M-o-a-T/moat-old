@@ -44,17 +44,17 @@ EVENT: state¦change¦foo¦bar
      : value=three
      : prev_value=fourtoo
 TRACE Yes Set to three
-EVENT: wait¦start¦0.1¦_wait¦1
+EVENT: wait¦start¦0.1¦_wait¦t1
      : loglevel=0
-EVENT: wait¦start¦_wait¦1
+EVENT: wait¦start¦_wait¦t1
      : loglevel=0
      : end_time=0.1
-TRACE 2003-04-05 06:07:08.150000 _wait¦1: Fake timer done
+TRACE 2003-04-05 06:07:08.150000 _wait¦t1: Fake timer done
 foo bar :: three — 0.1 sec
 .
-EVENT: wait¦done¦0.1¦_wait¦1
+EVENT: wait¦done¦0.1¦_wait¦t1
      : loglevel=0
-EVENT: wait¦done¦_wait¦1
+EVENT: wait¦done¦_wait¦t1
      : loglevel=0
 : ‹Collected State:foo¦bar›
 name: foo¦bar

@@ -57,21 +57,21 @@ groupname: hygro
 code: 7
 offset_humidity: -1.0
 .
-EVENT: wait¦start¦0.6¦_wait¦1
+EVENT: wait¦start¦0.6¦_wait¦t1
      : loglevel=0
-EVENT: wait¦start¦_wait¦1
+EVENT: wait¦start¦_wait¦t1
      : loglevel=0
      : end_time=0.6
-TRACE 2003-04-05 06:07:08.500000 _wait¦1: Forced timer done
+TRACE 2003-04-05 06:07:08.500000 _wait¦t1: Forced timer done
 Traceback (most recent call last):
   File "/home/smurf/homevent/homevent/twist.py", line 287, in err
     e = e.get()
   File "/usr/lib/python2.7/dist-packages/gevent/greenlet.py", line 264, in get
     raise self._exception
 RuntimeError: No FS20 handler known
-EVENT: wait¦done¦0.6¦_wait¦1
+EVENT: wait¦done¦0.6¦_wait¦t1
      : loglevel=0
-EVENT: wait¦done¦_wait¦1
+EVENT: wait¦done¦_wait¦t1
      : loglevel=0
 Traceback (most recent call last):
   File "/home/smurf/homevent/homevent/twist.py", line 287, in err

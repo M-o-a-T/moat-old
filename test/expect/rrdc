@@ -1,12 +1,12 @@
 EVENT: startup
      : startup=True
-EVENT: wait¦start¦0.3¦startup
+EVENT: wait¦start¦0.2¦startup
      : loglevel=0
 EVENT: wait¦start¦startup
      : loglevel=0
-     : end_time=0.3
+     : end_time=0.2
 TRACE 2003-04-05 06:07:08.200000 startup: Forced timer done
-EVENT: wait¦done¦0.3¦startup
+EVENT: wait¦done¦0.2¦startup
      : loglevel=0
 EVENT: wait¦done¦startup
      : loglevel=0
@@ -49,9 +49,9 @@ server: ‹RRDqueue:t¦tt¦ttt connecting›
        out_queued: 0
 filename: /tmp/rrdtest.rrd
 .
-EVENT: wait¦start¦0.4¦_wait¦2
+EVENT: wait¦start¦0.4¦_wait¦t2
      : loglevel=0
-EVENT: wait¦start¦_wait¦2
+EVENT: wait¦start¦_wait¦t2
      : loglevel=0
      : end_time=0.4
 TRACE conn setting up RRDqueue t¦tt¦ttt
@@ -60,38 +60,38 @@ TRACE conn connected RRDqueue t¦tt¦ttt
 TRACE NotConn [[], [], [], []]
 TRACE conn setstate connecting connected
 EVENT: rrd¦connect¦t¦tt¦ttt
-TRACE 2003-04-05 06:07:08.300000 _wait¦2: Forced timer done
+TRACE 2003-04-05 06:07:08.300000 _wait¦t2: Forced timer done
 TRACE rrd send 'update /tmp/rrdtest.rrd 1049515628:10'
-EVENT: wait¦done¦0.4¦_wait¦2
+EVENT: wait¦done¦0.4¦_wait¦t2
      : loglevel=0
-EVENT: wait¦done¦_wait¦2
+EVENT: wait¦done¦_wait¦t2
      : loglevel=0
 TRACE rrd recv '0 Yes'
 TRACE conn incoming RRDqueue t¦tt¦ttt ‹MsgIncoming: msg:'Yes' type:MT_ACK prio:2›
-EVENT: wait¦start¦0.5¦_wait¦3
+EVENT: wait¦start¦0.5¦_wait¦t3
      : loglevel=0
-EVENT: wait¦start¦_wait¦3
+EVENT: wait¦start¦_wait¦t3
      : loglevel=0
      : end_time=0.5
-TRACE 2003-04-05 06:07:08.400000 _wait¦3: Forced timer done
+TRACE 2003-04-05 06:07:08.400000 _wait¦t3: Forced timer done
 TRACE rrd send 'update /tmp/rrdtest.rrd 1049515628:11'
-EVENT: wait¦done¦0.5¦_wait¦3
+EVENT: wait¦done¦0.5¦_wait¦t3
      : loglevel=0
-EVENT: wait¦done¦_wait¦3
+EVENT: wait¦done¦_wait¦t3
      : loglevel=0
 TRACE rrd recv '2 Nonsense follows'
 TRACE rrd recv 'Nonsense'
 TRACE rrd recv 'More Nonsense'
 TRACE conn incoming RRDqueue t¦tt¦ttt ‹MsgIncoming: msg:' Nonsense follows' data:['Nonsense', 'More Nonsense'] type:MT_MULTILINE prio:2›
-EVENT: wait¦start¦0.6¦_wait¦4
+EVENT: wait¦start¦0.6¦_wait¦t4
      : loglevel=0
-EVENT: wait¦start¦_wait¦4
+EVENT: wait¦start¦_wait¦t4
      : loglevel=0
      : end_time=0.6
-TRACE 2003-04-05 06:07:08.500000 _wait¦4: Forced timer done
-EVENT: wait¦done¦0.6¦_wait¦4
+TRACE 2003-04-05 06:07:08.500000 _wait¦t4: Forced timer done
+EVENT: wait¦done¦0.6¦_wait¦t4
      : loglevel=0
-EVENT: wait¦done¦_wait¦4
+EVENT: wait¦done¦_wait¦t4
      : loglevel=0
 TRACE rrd send 'update /tmp/rrdtest.rrd 1049515628:12'
 TRACE rrd recv '-123 No'

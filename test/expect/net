@@ -58,8 +58,8 @@ EVENT: wait¦done¦OUT
 .
 EVENT: net¦disconnect¦foo
 TRACE dis foo
-EVENT: net¦connect¦baz¦zaz¦1
-EVENT: net¦recv¦baz¦zaz¦1
+EVENT: net¦connect¦baz¦zaz¦n1
+EVENT: net¦recv¦baz¦zaz¦n1
      : data=['B']
 EVENT: wait¦start¦0.7¦IN
      : loglevel=0
@@ -75,7 +75,7 @@ EVENT: wait¦done¦0.7¦IN
 EVENT: wait¦done¦IN
      : loglevel=0
 .
-EVENT: net¦disconnect¦baz¦zaz¦1
+EVENT: net¦disconnect¦baz¦zaz¦n1
 TRACE 2003-04-05 06:07:09.400000 AFTER: Forced timer done
 TRACE ending
 .
