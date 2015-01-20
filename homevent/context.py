@@ -97,7 +97,21 @@ class Context(object):
 		self._store[key] = VanishedAttribute
 
 	def __getitem__(self,key):
-		return self._store[key]
+		store = self._store
+		if key in store:
+			r = store[key]
+		else:
+			r = VanishedAttribute
+			for p in self._parents():
+				try:
+					r = p._store[key]
+				except KeyError:
+					pass
+				else:
+					break
+		if r is VanishedAttribute:
+			raise KeyError(key)
+		return r
 		
 	def __setitem__(self,key,val):
 		self._store[key] = val
