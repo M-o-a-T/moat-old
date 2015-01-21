@@ -71,7 +71,7 @@ on amam ho:
 on wait cancel foo b:
 	log TRACE Yes
 on wait done foo b:
-	log ERROR No
+	log ERROR No b2
 
 async:
 	wait foo a:
@@ -81,9 +81,9 @@ async:
 
 async:
 	wait foo b:
-		for 1
+		for 0.5
 		debug force
-	log ERROR No
+	log ERROR No b1
 
 list amqp listener
 list amqp listener foo lish
@@ -94,7 +94,8 @@ list worker 7
 list log
 list log AMQPlogger x2
 wait:
-	for 1
+	for 0.6
+	debug force
 
 shutdown
 """
