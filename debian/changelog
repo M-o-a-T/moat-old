@@ -1,3 +1,9 @@
+homevent (0.5.0~1) smurf; urgency=medium
+
+  * AMQP syntax change
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Wed, 21 Jan 2015 09:33:05 +0100
+
 homevent (0.4.19) smurf; urgency=medium
 
   * Add last-sent time to rrdc overview

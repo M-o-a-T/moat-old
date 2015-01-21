@@ -50,16 +50,17 @@ _seq=0
 class EventCallback(Worker):
 	args = None
 
-	def __init__(self,conn,parent,*args):
+	def __init__(self,conn,parent):
 		self.parent = conn
 		self.exchange=parent.exchange
 		self.strip=parent.strip
 		self.prefix = tuple(parent.prefix)
-		if args:
-			self.args = SName(args)
-			name = SName(parent.name+self.args)
-		else:
-			name = parent.name
+		self.filter = parent.filter
+		name = parent.dest
+		if name is None:
+			global _seq
+			_seq += 1
+			name = SName(conn.name+("f"+str(_seq),))
 		self.channel = self.parent.conn.channel()
 		self.channel.exchange_declare(exchange=self.exchange, type='topic', auto_delete=False, passive=False)
 		super(EventCallback,self).__init__(name)
@@ -68,18 +69,18 @@ class EventCallback(Worker):
 	def list(self):
 		for r in super(EventCallback,self).list():
 			yield r
-		if self.args:
-			yield "args",self.args
+		if self.filter:
+			yield "filter",self.filter
 		yield "parent",self.parent.list()
 		yield "exchange",self.exchange
 		if self.prefix:
 			yield "prefix",self.prefix
 
 	def does_event(self,event):
-		if self.args is None:
+		if not self.filter:
 			return True
 		ie = iter(event)
-		ia = iter(self.args)
+		ia = iter(self.filter)
 		while True:
 			try: e = ie.next()
 			except StopIteration: e = StopIteration
@@ -189,49 +190,40 @@ class AMQPclient(Collected,Jobber):
 		yield ("password","*"*len(self.password))
 
 
-class AMQPconn(AttributedStatement):
-	name = "connect amqp"
-	doc = "connect to an AMQP server"
-	dest = None
-
-	vhost="/"
-	username="guest"
-	password="guest"
-	long_doc="""\
-Usage: connect amqp ‹name› ‹host› [‹port›]
-This command connects to an AMQP server on the given host/port.
-"""
-	def run(self,ctx,**k):
-		event = self.params(ctx)
-		if len(event) > 3 or len(event)+(self.dest is not None) < 2:
-			raise SyntaxError(u'Usage: connect amqp ‹name› ‹host› [‹port›]')
-		if self.dest is None:
-			dest = Name(event[0])
-			event = event[1:]
-		else:
-			dest = self.dest
-		host = event[0]
-		if len(event) > 1:
-			port = int(event[1])
-		else:
-			port = 5672
-		AMQPclient(dest,host,port, self.vhost,self.username,self.password)
-
-
 class AMQPname(Statement):
 	name="name"
 	dest = None
-	doc="specify the name of the AMQP connection"
+	doc="the name of this entry"
 
 	long_doc = u"""\
 name ‹name…›
-- Use this form for AMQP connection names with multi-word names.
+- Name this entry (otherwise it'll be auto-generated)
 """
 
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		self.parent.dest = SName(event)
-AMQPconn.register_statement(AMQPname)
+
+class AMQPcname(AMQPname):
+	doc="specify the name of the AMQP connection"
+	long_doc = u"""\
+name ‹name…›
+- Use this form for AMQP connections with multi-word names.
+"""
+
+class AMQPfilter(Statement):
+	name="filter"
+	dest = None
+	doc="specify the prefix of the events to send"
+
+	long_doc = u"""\
+filter ‹name…›
+- Use this form for AMQP connection names with multi-word names.
+"""
+
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		self.parent.filter = SName(event)
 
 
 class AMQPexchange(Statement):
@@ -342,7 +334,37 @@ user ‹vhost› ‹username› ‹password›
 		self.parent.vhost = event[0]
 		self.parent.username = event[1]
 		self.parent.password = event[2]
+
+
+class AMQPconn(AttributedStatement):
+	name = "connect amqp"
+	doc = "connect to an AMQP server"
+	dest = None
+
+	vhost="/"
+	username="guest"
+	password="guest"
+	long_doc="""\
+Usage: connect amqp ‹name› ‹host› [‹port›]
+This command connects to an AMQP server on the given host/port.
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if len(event) > 3 or len(event)+(self.dest is not None) < 2:
+			raise SyntaxError(u'Usage: connect amqp ‹name› ‹host› [‹port›]')
+		if self.dest is None:
+			dest = Name(event[0])
+			event = event[1:]
+		else:
+			dest = self.dest
+		host = event[0]
+		if len(event) > 1:
+			port = int(event[1])
+		else:
+			port = 5672
+		AMQPclient(dest,host,port, self.vhost,self.username,self.password)
 AMQPconn.register_statement(AMQPuser)
+AMQPconn.register_statement(AMQPcname)
 
 
 class AMQPlogger(BaseLogger):
@@ -457,26 +479,23 @@ class AMQPtell(AttributedStatement):
 	doc = "send internal events to an AMQP server"
 	dest = None
 	prefix = ()
+	filter = ()
 	strip = 0
 
 	exchange="homevent_event"
 	long_doc="""\
-Usage: tell amqp ‹conn› ‹arg…›
+Usage: tell amqp ‹conn…›
 Send event data to this AMQP exchange.
 Default exchange: homevent_event
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		if len(event)+(self.dest is not None) < 1:
-			raise SyntaxError(u'Usage: tell amqp ‹conn› ‹arg…?›')
-		if self.dest is None:
-			dest = Name(event[0])
-			event = event[1:]
-		else:
-			dest = self.dest
-		dest = AMQPclients[dest]
-		worker = EventCallback(dest,self,*event)
+		if not len(event):
+			raise SyntaxError(u'Usage: tell amqp ‹conn…›')
+		dest = AMQPclients[SName(event)]
+		worker = EventCallback(dest,self)
 AMQPtell.register_statement(AMQPname)
+AMQPtell.register_statement(AMQPfilter)
 AMQPtell.register_statement(AMQPexchange)
 AMQPtell.register_statement(AMQPprefix)
 AMQPtell.register_statement(AMQPstrip)

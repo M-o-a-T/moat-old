@@ -43,6 +43,7 @@ log amqp DEBUG:
 	exchange he_exc
 
 # amqp => homevent
+# translate amqte.x.y.z to amam.x.y.z
 listen amqp test foo:
 	name foo lish
 	exchange he_exc
@@ -51,14 +52,15 @@ listen amqp test foo:
 	strip 1
 
 # homevent => amqp
-tell amqp hey *:
-	name test foo
+# translate hey.x to amqte.x
+tell amqp test foo:
+	filter hey *
 	exchange he_exc
 	prefix amqte
 	strip 1
 
-tell amqp:
-	name test foo
+# send everything as-is
+tell amqp test foo:
 	exchange he_exc
 
 start amqp test foo

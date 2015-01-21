@@ -50,19 +50,19 @@ password: ****
 2 :: Logger
 3 :: shutdown handler
 6 :: amqp¦connect¦test¦foo (51)
-7 :: tell¦amqp¦hey¦*
-8 :: tell¦amqp
+7 :: test¦foo¦f1
+8 :: test¦foo¦f2
 10 :: amam¦ho (51)
 11 :: wait¦cancel¦foo¦b (51)
 12 :: wait¦done¦foo¦b (51)
 .
-: ⇒EventCallback:tell¦amqp¦hey¦*
+: ⇒EventCallback:test¦foo¦f1
 id: 7
-name: tell¦amqp¦hey¦*
+name: test¦foo¦f1
 call count: 0
-code: EventCallback: tell¦amqp¦hey¦*
+code: EventCallback: test¦foo¦f1
 matched: 0
-args: hey¦*
+filter: hey¦*
 parent: ‹Collected AMQPclient:test¦foo›
        name: test¦foo
        host: localhost
