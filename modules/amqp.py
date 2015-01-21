@@ -37,6 +37,7 @@ from homevent.worker import Worker
 from homevent.logging import BaseLogger,TRACE,LogNames,LogLevels,DEBUG,log
 
 from datetime import datetime,date,time,timedelta
+from time import time as itime
 
 import amqp
 import json
@@ -45,7 +46,9 @@ from gevent.queue import Queue
 from gevent.event import AsyncResult
 from gevent import spawn,spawn_later
 
-_seq=0
+_seq=0  # new element sequence number
+_mseq=0 # new message sequence number
+base_mseq="homevent.%x."%(int(itime()))
 
 class EventCallback(Worker):
 	args = None
@@ -113,7 +116,9 @@ class EventCallback(Worker):
 				msg = str(msg)
 			elif isinstance(msg,unicode):
 				msg = msg.encode("utf-8")
-			msg = amqp.Message(body=msg, content_type='application/json')
+			global _mseq
+			_mseq += 1
+			msg = amqp.Message(body=msg, content_type='application/json', message_id=base_mseq+str(_mseq))
 			self.channel.basic_publish(msg=msg, exchange=self.exchange, routing_key=".".join(str(x) for x in self.prefix+tuple(event)[self.strip:]))
 		except Exception as ex:
 			fix_exception(ex)
@@ -384,7 +389,10 @@ class AMQPlogger(BaseLogger):
 			msg=json.dumps(dict(level=(LogLevels[level],level),msg=a))
 		except TypeError:
 			msg=json.dumps(dict(level=(LogLevels[level],level),data=repr(a)))
-		msg = amqp.Message(body=msg, content_type='application/json')
+
+		global _mseq
+		_mseq += 1
+		msg = amqp.Message(body=msg, content_type='application/json', message_id=base_mseq+str(_mseq))
 		self.channel.basic_publish(msg=msg, exchange=self.exchange, routing_key=".".join(str(x) for x in self.prefix+(level,)))
 	
 	def _flush(self):
@@ -531,9 +539,14 @@ class AMQPrecv(Collected):
 		super(AMQPrecv,self).__delete__(ctx=ctx)
 
 	def on_info_msg(self,msg):
-		try:
-			data = json.loads(msg.body)
-		except Exception:
+		if not TESTING and msg.message_id.startswith(base_mseq):
+			return # dup
+		if msg.content_type == "application/json":
+			try:
+				data = json.loads(msg.body)
+			except Exception:
+				data = { "raw": msg.body }
+		else:
 			data = { "raw": msg.body }
 		self.last_recv = msg.__dict__
 		simple_event(*(self.prefix+tuple(msg.routing_key.split('.')[self.strip:])), **data)
