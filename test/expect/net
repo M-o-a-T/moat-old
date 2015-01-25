@@ -1,7 +1,5 @@
 EVENT: startup
      : startup=True
-EVENT: wait¦start¦0.2¦BAD
-     : loglevel=0
 EVENT: wait¦start¦BAD
      : loglevel=0
      : end_time=0.2
@@ -9,30 +7,22 @@ EVENT: wait¦start¦BAD
 [Errno 111] Connection refused
 EVENT: net¦error¦foop
 TRACE 2003-04-05 06:07:08.200000 BAD: Forced timer done
-EVENT: wait¦done¦0.2¦BAD
-     : loglevel=0
 EVENT: wait¦done¦BAD
      : loglevel=0
 TRACE Yes
 TRACE Create OnEvtHandler: net¦connect¦foo
-TRACE NewHandler 11
+TRACE NewHandler 9
 TRACE Create OnEvtHandler: net¦connect¦baz¦zaz¦*who
-TRACE NewHandler 12
+TRACE NewHandler 10
 TRACE Create OnEvtHandler: net¦disconnect¦foo
-TRACE NewHandler 13
+TRACE NewHandler 11
 TRACE Create OnEvtHandler: net¦disconnect¦baz¦zaz
-TRACE NewHandler 14
-EVENT: wait¦start¦0.4¦BEFORE
-     : loglevel=0
+TRACE NewHandler 12
 EVENT: wait¦start¦BEFORE
      : loglevel=0
      : end_time=0.4
 TRACE 2003-04-05 06:07:08.400000 BEFORE: Forced timer done
-EVENT: wait¦done¦0.4¦BEFORE
-     : loglevel=0
 EVENT: wait¦done¦BEFORE
-     : loglevel=0
-EVENT: wait¦start¦1.3¦AFTER
      : loglevel=0
 EVENT: wait¦start¦AFTER
      : loglevel=0
@@ -40,8 +30,6 @@ EVENT: wait¦start¦AFTER
 EVENT: net¦connect¦foo
 EVENT: net¦recv¦foo
      : data=['A']
-EVENT: wait¦start¦0.6¦OUT
-     : loglevel=0
 EVENT: wait¦start¦OUT
      : loglevel=0
      : end_time=0.6
@@ -51,8 +39,6 @@ foo :: net_active localhost:50333
 type: net_active
 host: localhost
 port: ×××
-EVENT: wait¦done¦0.6¦OUT
-     : loglevel=0
 EVENT: wait¦done¦OUT
      : loglevel=0
 .
@@ -61,8 +47,6 @@ TRACE dis foo
 EVENT: net¦connect¦baz¦zaz¦n1
 EVENT: net¦recv¦baz¦zaz¦n1
      : data=['B']
-EVENT: wait¦start¦0.7¦IN
-     : loglevel=0
 EVENT: wait¦start¦IN
      : loglevel=0
      : end_time=0.7
@@ -70,8 +54,6 @@ TRACE 2003-04-05 06:07:08.800000 IN: Forced timer done
 type: net_passive
 host: 127.0.0.1
 port: ×××
-EVENT: wait¦done¦0.7¦IN
-     : loglevel=0
 EVENT: wait¦done¦IN
      : loglevel=0
 .
@@ -79,18 +61,12 @@ EVENT: net¦disconnect¦baz¦zaz¦n1
 TRACE 2003-04-05 06:07:09.400000 AFTER: Forced timer done
 TRACE ending
 .
-EVENT: wait¦done¦1.3¦AFTER
-     : loglevel=0
 EVENT: wait¦done¦AFTER
      : loglevel=0
 TRACE Yes
-EVENT: wait¦start¦1.6¦END
-     : loglevel=0
 EVENT: wait¦start¦END
      : loglevel=0
      : end_time=1.6
 TRACE 2003-04-05 06:07:09.650000 END: Fake timer done
-EVENT: wait¦done¦1.6¦END
-     : loglevel=0
 EVENT: wait¦done¦END
      : loglevel=0

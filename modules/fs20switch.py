@@ -287,9 +287,7 @@ class Switch(Collected):
 		self.ext = ext
 
 	def get(self, state, ext=None, handler=None):
-		simple_event("fs20","state", \
-			state, ext if ext is not None else "-",
-			*self.name)
+		simple_event("fs20","state", *self.name, state=state, ext=ext)
 
 		ctx = Context(value=state)
 		if ext is not None:

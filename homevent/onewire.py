@@ -190,13 +190,13 @@ class OWFSchannel(OWFSassembler, NetActiveConnector):
 	typ = "onewire"
 
 	def down_event(self, external=False):
-			simple_event("onewire","disconnect",*self.name)
+		simple_event("onewire","disconnect",*self.name)
 
 	def up_event(self, external=False):
-			simple_event("onewire","connect",*self.name)
+		simple_event("onewire","connect",*self.name)
 
 	def not_up_event(self, external=False):
-			simple_event("onewire","error",*self.name)
+		simple_event("onewire","error",*self.name)
 
 
 class OWFScall(MsgBase):
@@ -632,10 +632,8 @@ class OWFSdevice(Collected):
 			return
 
 		if self.is_up is None:
-			simple_event("onewire","new",self.typ,self.id)
 			simple_event("onewire","new",typ=self.typ,id=self.id)
 		self.is_up = True
-		simple_event("onewire","up",self.typ,self.id)
 		simple_event("onewire","up",typ=self.typ,id=self.id)
 
 	def go_down(self, _=None):
@@ -644,8 +642,7 @@ class OWFSdevice(Collected):
 		self.is_up = False
 		if _ is not None:
 			process_failure(_)
-		simple_event("onewire","down",self.typ,self.id)
-		simple_event("onewire","down",self.typ,self.id)
+		simple_event("onewire","down",typ=self.typ,id=self.id)
 
 	def get(self,key):
 		if not self.bus:

@@ -9,14 +9,10 @@ foo bar :: (new)
 type: PWM
 name: foo bar
 .
-EVENT: wait¦start¦0.5¦_wait¦t2
-     : loglevel=0
 EVENT: wait¦start¦_wait¦t2
      : loglevel=0
      : end_time=0.5
 TRACE 2003-04-05 06:07:08.500000 _wait¦t2: Fake timer done
-EVENT: wait¦done¦0.5¦_wait¦t2
-     : loglevel=0
 EVENT: wait¦done¦_wait¦t2
      : loglevel=0
 type: PWM
@@ -26,14 +22,10 @@ next: 8.5 sec (2003-04-05 06:07:17)
 t_off: 9.0 sec
 t_on: 1.0 sec
 .
-EVENT: wait¦start¦9.0¦_wait¦t3
-     : loglevel=0
 EVENT: wait¦start¦_wait¦t3
      : loglevel=0
      : end_time=9.0
 TRACE 2003-04-05 06:07:17 _wait¦t3: Fake timer done
-EVENT: wait¦done¦9.0¦_wait¦t3
-     : loglevel=0
 EVENT: wait¦done¦_wait¦t3
      : loglevel=0
 type: PWM
@@ -43,75 +35,51 @@ next: now (2003-04-05 06:07:17)
 t_off: 9.0 sec
 t_on: 1.0 sec
 .
-EVENT: wait¦start¦24.0¦_wait¦t4
-     : loglevel=0
 EVENT: wait¦start¦_wait¦t4
      : loglevel=0
      : end_time=24.0
 TRACE 2003-04-05 06:07:17.050000 : Fake timer done
-EVENT: pwm¦set¦on¦foo¦bar
 EVENT: pwm¦change¦foo¦bar
      : value=1
 DEBUG PWM is now 1
-EVENT: wait¦start¦9.2¦_wait¦t1
-     : loglevel=0
 EVENT: wait¦start¦_wait¦t1
      : loglevel=0
      : end_time=9.2
 TRACE 2003-04-05 06:07:17.250000 _wait¦t1: Fake timer done
-EVENT: wait¦done¦9.2¦_wait¦t1
-     : loglevel=0
 EVENT: wait¦done¦_wait¦t1
      : loglevel=0
 TRACE 2003-04-05 06:07:18.050000 : Fake timer done
-EVENT: pwm¦set¦off¦foo¦bar
 EVENT: pwm¦change¦foo¦bar
      : value=0
 DEBUG PWM is now 0
-EVENT: wait¦start¦10.1¦_wait¦t1
-     : loglevel=0
 EVENT: wait¦start¦_wait¦t1
      : loglevel=0
      : end_time=10.1
 TRACE 2003-04-05 06:07:18.200000 _wait¦t1: Fake timer done
-EVENT: wait¦done¦10.2¦_wait¦t1
-     : loglevel=0
 EVENT: wait¦done¦_wait¦t1
      : loglevel=0
 TRACE 2003-04-05 06:07:27 : Fake timer done
-EVENT: pwm¦set¦on¦foo¦bar
 EVENT: pwm¦change¦foo¦bar
      : value=1
 DEBUG PWM is now 1
-EVENT: wait¦start¦19.1¦_wait¦t1
-     : loglevel=0
 EVENT: wait¦start¦_wait¦t1
      : loglevel=0
      : end_time=19.1
 TRACE 2003-04-05 06:07:27.150000 _wait¦t1: Fake timer done
-EVENT: wait¦done¦19.1¦_wait¦t1
-     : loglevel=0
 EVENT: wait¦done¦_wait¦t1
      : loglevel=0
 TRACE 2003-04-05 06:07:28.050000 : Fake timer done
-EVENT: pwm¦set¦off¦foo¦bar
 EVENT: pwm¦change¦foo¦bar
      : value=0
 DEBUG PWM is now 0
-EVENT: wait¦start¦20.1¦_wait¦t1
-     : loglevel=0
 EVENT: wait¦start¦_wait¦t1
      : loglevel=0
      : end_time=20.1
 TRACE 2003-04-05 06:07:28.200000 _wait¦t1: Fake timer done
-EVENT: wait¦done¦20.2¦_wait¦t1
-     : loglevel=0
 EVENT: wait¦done¦_wait¦t1
      : loglevel=0
 TRACE 2003-04-05 06:07:32.050000 _wait¦t4: Fake timer done
 foo bar :: 0.100 1.0 sec / 9.0 sec
 .
-EVENT: wait¦done¦24.1¦_wait¦t4
-     : loglevel=0
 EVENT: wait¦done¦_wait¦t4
      : loglevel=0

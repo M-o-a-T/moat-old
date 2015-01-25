@@ -196,7 +196,6 @@ wait [NAME…]: for FOO…
 			return Waiters[self.displayname].retime(self.timespec())
 		w = Waiter(self, self.displayname, self.force)
 		w.init(self.timespec())
-		simple_event("wait","start",ixtime(w.end,self.force),*w.name, loglevel=TRACE)
 		simple_event("wait","start",*w.name, end_time=ixtime(w.end,self.force), loglevel=TRACE)
 		try:
 			if w.job:
@@ -204,7 +203,6 @@ wait [NAME…]: for FOO…
 			else:
 				r = True
 		except Exception as ex:
-			simple_event("wait","error",tm, *w.name, loglevel=TRACE)
 			simple_event("wait","error", *w.name, time=tm,loglevel=TRACE)
 
 			fix_exception(ex)
@@ -213,10 +211,8 @@ wait [NAME…]: for FOO…
 		else:
 			tm = ixtime(now(self.force),self.force)
 			if r:
-				simple_event("wait","done",tm, *w.name, loglevel=TRACE)
 				simple_event("wait","done", *w.name, loglevel=TRACE)
 			else:
-				simple_event("wait","cancel",tm, *w.name, loglevel=TRACE)
 				simple_event("wait","cancel", *w.name, loglevel=TRACE)
 			ctx.wait = tm
 			if not r:

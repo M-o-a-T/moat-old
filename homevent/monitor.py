@@ -274,10 +274,8 @@ class Monitor(Collected,Jobber):
 						val = self.value-self.last_value
 						self._ectx.value_delta = val
 						if val >= 0 or self.delta == 0:
-							simple_event(self.ectx,"monitor","value",self.value-self.last_value,*self.name)
 							simple_event(self.ectx,"monitor","update",*self.name)
 				else:
-					simple_event(self.ectx,"monitor","value",self.new_value,*self.name)
 					simple_event(self.ectx,"monitor","update",*self.name)
 		except Exception as e:
 			fix_exception(e)
@@ -347,8 +345,7 @@ class Monitor(Collected,Jobber):
 								if self.value is not None and \
 										self.alarm is not None and \
 										abs(self.value-avg) > self.alarm:
-									simple_event(self.ectx,"monitor","alarm",avg,*self.name)
-									simple_event(self.ectx,"monitor","jump",*self.name)
+									simple_event(self.ectx,"monitor","jump",*self.name, avg=avg,value=self.value,alarm=self.alarm)
 							except Exception as e:
 								fix_exception(e)
 								process_failure(e)

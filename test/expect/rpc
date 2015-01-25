@@ -2,8 +2,6 @@ EVENT: startup
      : startup=True
 TRACE Create OnEvtHandler: send¦logger
 TRACE NewHandler 5
-EVENT: wait¦start¦1.0¦shutdown
-     : loglevel=0
 EVENT: wait¦start¦shutdown
      : loglevel=0
      : end_time=1.0
@@ -96,17 +94,11 @@ DEBUG TEST The value is: Test123
 IEVENT: send¦logger
 DEBUG hello This is a test
 TRACE 2003-04-05 06:07:09 shutdown: Forced timer done
-EVENT: wait¦done¦1.0¦shutdown
-     : loglevel=0
 EVENT: wait¦done¦shutdown
-     : loglevel=0
-EVENT: wait¦start¦2.0¦foo¦b
      : loglevel=0
 EVENT: wait¦start¦foo¦b
      : loglevel=0
      : end_time=2.0
 TRACE 2003-04-05 06:07:10 foo¦b: Forced timer done
-EVENT: wait¦done¦2.0¦foo¦b
-     : loglevel=0
 EVENT: wait¦done¦foo¦b
      : loglevel=0

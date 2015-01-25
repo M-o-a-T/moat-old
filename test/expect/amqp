@@ -10,18 +10,14 @@ TRACE Create OnEvtHandler: wait¦cancel¦foo¦b
 TRACE NewHandler 11
 TRACE Create OnEvtHandler: wait¦done¦foo¦b
 TRACE NewHandler 12
-EVENT: wait¦start¦0.3¦foo¦a
-     : loglevel=0
 EVENT: wait¦start¦foo¦a
      : loglevel=0
      : end_time=0.3
 foo lish
 .
-EVENT: wait¦start¦1.1¦foo¦b
-     : loglevel=0
 EVENT: wait¦start¦foo¦b
      : loglevel=0
-     : end_time=1.1
+     : end_time=0.6
 : ‹Collected AMQPrecv:foo¦lish›
 name: foo¦lish
 connection: ‹Collected AMQPclient:test¦foo›
@@ -90,30 +86,22 @@ parent: ‹Collected AMQPclient:test¦foo›
 exchange: he_exc
 prefix: ('homevent', 'log')
 .
-EVENT: wait¦start¦1.0¦_wait¦t4
-     : loglevel=0
 EVENT: wait¦start¦_wait¦t4
      : loglevel=0
-     : end_time=1.0
+     : end_time=0.7
 TRACE 2003-04-05 06:07:08.500000 foo¦a: Forced timer done
-EVENT: wait¦done¦0.3¦foo¦a
-     : loglevel=0
 EVENT: wait¦done¦foo¦a
      : loglevel=0
 IEVENT: hey¦ho
 EVENT: amam¦ho
      : event=[u'hey', u'ho']
      : wait=0.3
-EVENT: wait¦cancel¦0.3¦foo¦b
-     : loglevel=0
 EVENT: wait¦cancel¦foo¦b
      : loglevel=0
 TRACE Yes
 Waiter ‹foo b› was cancelled
 Waiter ‹foo b› was cancelled
-TRACE 2003-04-05 06:07:09 _wait¦t4: Fake timer done
-EVENT: wait¦done¦1.0¦_wait¦t4
-     : loglevel=0
+TRACE 2003-04-05 06:07:08.950000 _wait¦t4: Forced timer done
 EVENT: wait¦done¦_wait¦t4
      : loglevel=0
 EVENT: amqp¦stop¦test¦foo

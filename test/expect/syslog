@@ -1,15 +1,11 @@
 EVENT: startup
      : startup=True
-EVENT: wait¦start¦0.2¦_wait¦t1
-     : loglevel=0
 EVENT: wait¦start¦_wait¦t1
      : loglevel=0
      : end_time=0.2
 TRACE 2003-04-05 06:07:08.200000 _wait¦t1: Forced timer done
 syslog :: TRACE: run_logger
 .
-EVENT: wait¦done¦0.2¦_wait¦t1
-     : loglevel=0
 EVENT: wait¦done¦_wait¦t1
      : loglevel=0
 DEBUG Five Debug
@@ -29,13 +25,9 @@ level_name: info
 .
 syslog :: TRACE: run_logger
 .
-EVENT: wait¦start¦1.1¦_wait¦t2
-     : loglevel=0
 EVENT: wait¦start¦_wait¦t2
      : loglevel=0
-     : end_time=1.1
+     : end_time=1.0
 TRACE 2003-04-05 06:07:09 _wait¦t2: Forced timer done
-EVENT: wait¦done¦1.1¦_wait¦t2
-     : loglevel=0
 EVENT: wait¦done¦_wait¦t2
      : loglevel=0

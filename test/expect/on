@@ -62,7 +62,6 @@ IEVENT: baz
 DEBUG got baz one
 ERROR no quux one
 DEBUG vav is two
-EVENT: state¦-¦two¦dud
 EVENT: state¦change¦dud
      : prev_time=2003-04-05 06:07:08
      : value=two
@@ -71,19 +70,14 @@ IEVENT: baz¦dud¦two
 IEVENT: baz
 DEBUG got baz two
 TRACE Yes
-EVENT: wait¦start¦0.1¦_wait¦t1
-     : loglevel=0
 EVENT: wait¦start¦_wait¦t1
      : loglevel=0
      : end_time=0.1
-EVENT: state¦two¦nix¦dud
 EVENT: state¦change¦dud
      : prev_time=2003-04-05 06:07:08
      : value=nix
      : prev_value=two
 TRACE 2003-04-05 06:07:08.150000 _wait¦t1: Fake timer done
-EVENT: wait¦done¦0.1¦_wait¦t1
-     : loglevel=0
 EVENT: wait¦done¦_wait¦t1
      : loglevel=0
 TRACE Yes

@@ -109,9 +109,8 @@ class TX(Collected):
 			except KeyError: pass
 			try: n = n + self.offset[m]
 			except KeyError: pass
-
-			simple_event("fs20","tx", m,n, *self.name)
 			d[m]=n
+
 		simple_event("fs20","tx", *self.name, **d)
 		self.last = now()
 		self.last_data = data

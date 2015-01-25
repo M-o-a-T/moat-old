@@ -1,3 +1,10 @@
+homevent (0.5.0) smurf; urgency=medium
+
+  * Don't send old events any more
+    Also changed onewire presence events
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Sun, 25 Jan 2015 19:09:28 +0100
+
 homevent (0.5.0~1) smurf; urgency=medium
 
   * AMQP syntax change

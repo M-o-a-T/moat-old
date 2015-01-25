@@ -7,21 +7,9 @@ TRACE monitor filter [42.0] on foo¦bar
 TRACE monitor End run foo¦bar
 TRACE monitor Stop run foo¦bar
 EVENT: monitor¦start¦foo¦bar
-EVENT: wait¦start¦×××¦_wait¦t1
-     : loglevel=0
 EVENT: wait¦start¦_wait¦t1
      : loglevel=0
      : end_time=1.0
-EVENT: monitor¦value¦42.0¦foo¦bar
-     : start_at=2003-04-05 06:07:08
-     : data=[42.0]
-     : up=Run
-     : value=42.0
-     : stop_at=2003-04-05 06:07:08
-     : change_at=2003-04-05 06:07:08
-     : steps=(1, 1, None)
-     : time=‹now›
-     : last_value=None
 EVENT: monitor¦update¦foo¦bar
      : start_at=2003-04-05 06:07:08
      : data=[42.0]
@@ -39,16 +27,6 @@ TRACE monitor Start run foo¦bar
 TRACE monitor filter [40.0] on foo¦bar
 TRACE monitor End run foo¦bar
 TRACE monitor Stop run foo¦bar
-EVENT: monitor¦value¦40.0¦foo¦bar
-     : start_at=2003-04-05 06:07:08.450000
-     : data=[40.0]
-     : up=Run
-     : value=40.0
-     : stop_at=2003-04-05 06:07:08.450000
-     : change_at=2003-04-05 06:07:08
-     : steps=(1, 1, None)
-     : time=‹now›
-     : last_value=42.0
 EVENT: monitor¦update¦foo¦bar
      : start_at=2003-04-05 06:07:08.450000
      : data=[40.0]
@@ -66,16 +44,6 @@ TRACE monitor Start run foo¦bar
 TRACE monitor filter [42.0] on foo¦bar
 TRACE monitor End run foo¦bar
 TRACE monitor Stop run foo¦bar
-EVENT: monitor¦value¦42.0¦foo¦bar
-     : start_at=2003-04-05 06:07:08.850000
-     : data=[42.0]
-     : up=Run
-     : value=42.0
-     : stop_at=2003-04-05 06:07:08.850000
-     : change_at=2003-04-05 06:07:08
-     : steps=(1, 1, None)
-     : time=‹now›
-     : last_value=40.0
 EVENT: monitor¦update¦foo¦bar
      : start_at=2003-04-05 06:07:08.850000
      : data=[42.0]
@@ -88,8 +56,6 @@ EVENT: monitor¦update¦foo¦bar
      : last_value=40.0
 TRACE Go from 40.0 to 42.0
 TRACE 2003-04-05 06:07:09 _wait¦t1: Fake timer done
-EVENT: wait¦done¦×××¦_wait¦t1
-     : loglevel=0
 EVENT: wait¦done¦_wait¦t1
      : loglevel=0
 TRACE Yes
@@ -104,8 +70,6 @@ time: ‹0.2 sec›
 steps: 1 / 1 / None
 data: 42.0
 .
-EVENT: wait¦start¦×××¦_wait¦t2
-     : loglevel=0
 EVENT: wait¦start¦_wait¦t2
      : loglevel=0
      : end_time=1.8
@@ -115,16 +79,6 @@ TRACE monitor Start run foo¦bar
 TRACE monitor filter [41.0] on foo¦bar
 TRACE monitor End run foo¦bar
 TRACE monitor Stop run foo¦bar
-EVENT: monitor¦value¦41.0¦foo¦bar
-     : start_at=2003-04-05 06:07:09.250000
-     : data=[41.0]
-     : up=Run
-     : value=41.0
-     : stop_at=2003-04-05 06:07:09.250000
-     : change_at=2003-04-05 06:07:08
-     : steps=(1, 1, None)
-     : time=‹now›
-     : last_value=42.0
 EVENT: monitor¦update¦foo¦bar
      : start_at=2003-04-05 06:07:09.250000
      : data=[41.0]
@@ -142,16 +96,6 @@ TRACE monitor Start run foo¦bar
 TRACE monitor filter [40.0] on foo¦bar
 TRACE monitor End run foo¦bar
 TRACE monitor Stop run foo¦bar
-EVENT: monitor¦value¦40.0¦foo¦bar
-     : start_at=2003-04-05 06:07:09.650000
-     : data=[40.0]
-     : up=Run
-     : value=40.0
-     : stop_at=2003-04-05 06:07:09.650000
-     : change_at=2003-04-05 06:07:08
-     : steps=(1, 1, None)
-     : time=‹now›
-     : last_value=41.0
 EVENT: monitor¦update¦foo¦bar
      : start_at=2003-04-05 06:07:09.650000
      : data=[40.0]
@@ -164,14 +108,12 @@ EVENT: monitor¦update¦foo¦bar
      : last_value=41.0
 TRACE Go from 41.0 to 40.0
 TRACE 2003-04-05 06:07:09.800000 _wait¦t2: Fake timer done
-EVENT: wait¦done¦×××¦_wait¦t2
-     : loglevel=0
 EVENT: wait¦done¦_wait¦t2
      : loglevel=0
 .
 EVENT: monitor¦stop¦foo¦bar
 TRACE Create OnEvtHandler: monitor¦checking¦baz¦zaz
-TRACE NewHandler 26
+TRACE NewHandler 17
 TRACE monitor Start run baz¦zaz
 : ‹Monitor baz¦zaz run 0›
 name: baz¦zaz
@@ -194,35 +136,23 @@ EVENT: monitor¦checking¦baz¦zaz
 .
 TRACE monitor filter [10.0] on baz¦zaz
 TRACE monitor More data [10.0] for ‹baz zaz›
-EVENT: wait¦start¦×××¦bazzaz¦A
-     : loglevel=0
 EVENT: wait¦start¦bazzaz¦A
      : loglevel=0
      : end_time=2.0
-EVENT: wait¦start¦×××¦_wait¦t5
-     : loglevel=0
 EVENT: wait¦start¦_wait¦t5
      : loglevel=0
      : end_time=1.9
 TRACE 2003-04-05 06:07:10 _wait¦t5: Fake timer done
-EVENT: wait¦done¦×××¦_wait¦t5
-     : loglevel=0
 EVENT: wait¦done¦_wait¦t5
      : loglevel=0
 TRACE Yes
-EVENT: wait¦start¦×××¦_wait¦t6
-     : loglevel=0
 EVENT: wait¦start¦_wait¦t6
      : loglevel=0
      : end_time=2.5
 TRACE 2003-04-05 06:07:10.050000 bazzaz¦A: Fake timer done
 TRACE monitor filter [10.0, 13.0] on baz¦zaz
 TRACE monitor More data [10.0, 13.0] for ‹baz zaz›
-EVENT: wait¦done¦×××¦bazzaz¦A
-     : loglevel=0
 EVENT: wait¦done¦bazzaz¦A
-     : loglevel=0
-EVENT: wait¦start¦×××¦bazzaz¦B
      : loglevel=0
 EVENT: wait¦start¦bazzaz¦B
      : loglevel=0
@@ -231,21 +161,9 @@ TRACE 2003-04-05 06:07:10.300000 bazzaz¦B: Fake timer done
 TRACE monitor filter [10.0, 13.0, 14.0] on baz¦zaz
 TRACE monitor End run baz¦zaz
 TRACE monitor Stop run baz¦zaz
-EVENT: wait¦done¦×××¦bazzaz¦B
-     : loglevel=0
 EVENT: wait¦done¦bazzaz¦B
      : loglevel=0
 EVENT: monitor¦checked¦baz¦zaz
-     : start_at=2003-04-05 06:07:09.800000
-     : data=[10.0, 13.0, 14.0]
-     : up=Run
-     : value=13.5
-     : stop_at=2003-04-05 06:07:10.300000
-     : change_at=2003-04-05 06:07:09.800000
-     : steps=(3, 2, None)
-     : time=‹0.5 sec›
-     : last_value=None
-EVENT: monitor¦value¦13.5¦baz¦zaz
      : start_at=2003-04-05 06:07:09.800000
      : data=[10.0, 13.0, 14.0]
      : up=Run
@@ -266,8 +184,6 @@ EVENT: monitor¦update¦baz¦zaz
      : time=‹0.5 sec›
      : last_value=None
 TRACE 2003-04-05 06:07:10.550000 _wait¦t6: Fake timer done
-EVENT: wait¦done¦×××¦_wait¦t6
-     : loglevel=0
 EVENT: wait¦done¦_wait¦t6
      : loglevel=0
 TRACE Yes
@@ -282,37 +198,25 @@ data: 10.0 13.0 14.0
 .
 DEBUG XXX delete baz zaz
 EVENT: monitor¦stop¦baz¦zaz
-EVENT: output¦set¦None¦1¦monitest
 EVENT: output¦change¦monitest
      : value=1
      : prev_value=None
-EVENT: input¦fake¦1¦monitest
 EVENT: input¦change¦monitest
      : last_value=None
      : value=1
-EVENT: output¦set¦None¦2¦monitest2
+     : fake=True
 EVENT: output¦change¦monitest2
      : value=2
      : prev_value=None
-EVENT: input¦fake¦2¦monitest2
 EVENT: input¦change¦monitest2
      : last_value=None
      : value=2
+     : fake=True
 TRACE monitor Start run moni¦test
 TRACE monitor filter [1.0] on moni¦test
 TRACE monitor End run moni¦test
 TRACE monitor Stop run moni¦test
 EVENT: monitor¦start¦moni¦test
-EVENT: monitor¦value¦1.0¦moni¦test
-     : start_at=2003-04-05 06:07:10.600000
-     : data=[1.0]
-     : up=Run
-     : value=1.0
-     : stop_at=2003-04-05 06:07:10.600000
-     : change_at=2003-04-05 06:07:10.600000
-     : steps=(1, 1, None)
-     : time=‹now›
-     : last_value=None
 EVENT: monitor¦update¦moni¦test
      : start_at=2003-04-05 06:07:10.600000
      : data=[1.0]
@@ -328,34 +232,26 @@ TRACE monitor filter [2.0] on moni¦test2
 TRACE monitor End run moni¦test2
 TRACE monitor Stop run moni¦test2
 EVENT: monitor¦start¦moni¦test2
-EVENT: wait¦start¦×××¦_wait¦t7
-     : loglevel=0
 EVENT: wait¦start¦_wait¦t7
      : loglevel=0
      : end_time=2.7
 TRACE 2003-04-05 06:07:10.750000 _wait¦t7: Fake timer done
-EVENT: wait¦done¦×××¦_wait¦t7
-     : loglevel=0
 EVENT: wait¦done¦_wait¦t7
      : loglevel=0
-EVENT: output¦set¦1¦2¦monitest
 EVENT: output¦change¦monitest
      : value=2
      : prev_value=1
-EVENT: input¦fake¦2¦monitest
 EVENT: input¦change¦monitest
      : last_value=1
      : value=2
-EVENT: output¦set¦2¦1¦monitest2
+     : fake=True
 EVENT: output¦change¦monitest2
      : value=1
      : prev_value=2
-EVENT: input¦fake¦1¦monitest2
 EVENT: input¦change¦monitest2
      : last_value=2
      : value=1
-EVENT: wait¦start¦×××¦_wait¦t8
-     : loglevel=0
+     : fake=True
 EVENT: wait¦start¦_wait¦t8
      : loglevel=0
      : end_time=3.0
@@ -371,16 +267,6 @@ TRACE monitor Start run moni¦test2
 TRACE monitor filter [1.0] on moni¦test2
 TRACE monitor End run moni¦test2
 TRACE monitor Stop run moni¦test2
-EVENT: monitor¦value¦2.0¦moni¦test
-     : start_at=2003-04-05 06:07:10.800000
-     : data=[2.0]
-     : up=Run
-     : value=2.0
-     : stop_at=2003-04-05 06:07:10.800000
-     : change_at=2003-04-05 06:07:10.600000
-     : steps=(1, 1, None)
-     : time=‹now›
-     : last_value=1.0
 EVENT: monitor¦update¦moni¦test
      : start_at=2003-04-05 06:07:10.800000
      : data=[2.0]
@@ -391,17 +277,6 @@ EVENT: monitor¦update¦moni¦test
      : steps=(1, 1, None)
      : time=‹now›
      : last_value=1.0
-EVENT: monitor¦value¦-1.0¦moni¦test2
-     : start_at=2003-04-05 06:07:10.850000
-     : data=[1.0]
-     : up=Run
-     : value=1.0
-     : stop_at=2003-04-05 06:07:10.850000
-     : change_at=2003-04-05 06:07:10.600000
-     : steps=(1, 1, None)
-     : time=‹now›
-     : last_value=2.0
-     : value_delta=-1.0
 EVENT: monitor¦update¦moni¦test2
      : start_at=2003-04-05 06:07:10.850000
      : data=[1.0]
@@ -414,28 +289,22 @@ EVENT: monitor¦update¦moni¦test2
      : last_value=2.0
      : value_delta=-1.0
 TRACE 2003-04-05 06:07:11.050000 _wait¦t8: Fake timer done
-EVENT: wait¦done¦×××¦_wait¦t8
-     : loglevel=0
 EVENT: wait¦done¦_wait¦t8
      : loglevel=0
-EVENT: output¦set¦2¦3¦monitest
 EVENT: output¦change¦monitest
      : value=3
      : prev_value=2
-EVENT: input¦fake¦3¦monitest
 EVENT: input¦change¦monitest
      : last_value=2
      : value=3
-EVENT: output¦set¦1¦2¦monitest2
+     : fake=True
 EVENT: output¦change¦monitest2
      : value=2
      : prev_value=1
-EVENT: input¦fake¦2¦monitest2
 EVENT: input¦change¦monitest2
      : last_value=1
      : value=2
-EVENT: wait¦start¦×××¦_wait¦t9
-     : loglevel=0
+     : fake=True
 EVENT: wait¦start¦_wait¦t9
      : loglevel=0
      : end_time=3.2
@@ -451,16 +320,6 @@ TRACE monitor Start run moni¦test2
 TRACE monitor filter [2.0] on moni¦test2
 TRACE monitor End run moni¦test2
 TRACE monitor Stop run moni¦test2
-EVENT: monitor¦value¦3.0¦moni¦test
-     : start_at=2003-04-05 06:07:11.100000
-     : data=[3.0]
-     : up=Run
-     : value=3.0
-     : stop_at=2003-04-05 06:07:11.100000
-     : change_at=2003-04-05 06:07:10.600000
-     : steps=(1, 1, None)
-     : time=‹now›
-     : last_value=2.0
 EVENT: monitor¦update¦moni¦test
      : start_at=2003-04-05 06:07:11.100000
      : data=[3.0]
@@ -471,17 +330,6 @@ EVENT: monitor¦update¦moni¦test
      : steps=(1, 1, None)
      : time=‹now›
      : last_value=2.0
-EVENT: monitor¦value¦1.0¦moni¦test2
-     : start_at=2003-04-05 06:07:11.150000
-     : data=[2.0]
-     : up=Run
-     : value=2.0
-     : stop_at=2003-04-05 06:07:11.150000
-     : change_at=2003-04-05 06:07:10.600000
-     : steps=(1, 1, None)
-     : time=‹now›
-     : last_value=1.0
-     : value_delta=1.0
 EVENT: monitor¦update¦moni¦test2
      : start_at=2003-04-05 06:07:11.150000
      : data=[2.0]
@@ -494,28 +342,22 @@ EVENT: monitor¦update¦moni¦test2
      : last_value=1.0
      : value_delta=1.0
 TRACE 2003-04-05 06:07:11.350000 _wait¦t9: Fake timer done
-EVENT: wait¦done¦×××¦_wait¦t9
-     : loglevel=0
 EVENT: wait¦done¦_wait¦t9
      : loglevel=0
-EVENT: output¦set¦3¦4¦monitest
 EVENT: output¦change¦monitest
      : value=4
      : prev_value=3
-EVENT: input¦fake¦4¦monitest
 EVENT: input¦change¦monitest
      : last_value=3
      : value=4
-EVENT: output¦set¦2¦5¦monitest2
+     : fake=True
 EVENT: output¦change¦monitest2
      : value=5
      : prev_value=2
-EVENT: input¦fake¦5¦monitest2
 EVENT: input¦change¦monitest2
      : last_value=2
      : value=5
-EVENT: wait¦start¦×××¦_wait¦t10
-     : loglevel=0
+     : fake=True
 EVENT: wait¦start¦_wait¦t10
      : loglevel=0
      : end_time=3.5
@@ -531,16 +373,6 @@ TRACE monitor Start run moni¦test2
 TRACE monitor filter [5.0] on moni¦test2
 TRACE monitor End run moni¦test2
 TRACE monitor Stop run moni¦test2
-EVENT: monitor¦value¦4.0¦moni¦test
-     : start_at=2003-04-05 06:07:11.400000
-     : data=[4.0]
-     : up=Run
-     : value=4.0
-     : stop_at=2003-04-05 06:07:11.400000
-     : change_at=2003-04-05 06:07:10.600000
-     : steps=(1, 1, None)
-     : time=‹now›
-     : last_value=3.0
 EVENT: monitor¦update¦moni¦test
      : start_at=2003-04-05 06:07:11.400000
      : data=[4.0]
@@ -551,17 +383,6 @@ EVENT: monitor¦update¦moni¦test
      : steps=(1, 1, None)
      : time=‹now›
      : last_value=3.0
-EVENT: monitor¦value¦3.0¦moni¦test2
-     : start_at=2003-04-05 06:07:11.450000
-     : data=[5.0]
-     : up=Run
-     : value=5.0
-     : stop_at=2003-04-05 06:07:11.450000
-     : change_at=2003-04-05 06:07:10.600000
-     : steps=(1, 1, None)
-     : time=‹now›
-     : last_value=2.0
-     : value_delta=3.0
 EVENT: monitor¦update¦moni¦test2
      : start_at=2003-04-05 06:07:11.450000
      : data=[5.0]
@@ -574,26 +395,22 @@ EVENT: monitor¦update¦moni¦test2
      : last_value=2.0
      : value_delta=3.0
 TRACE 2003-04-05 06:07:11.650000 _wait¦t10: Fake timer done
-EVENT: wait¦done¦×××¦_wait¦t10
-     : loglevel=0
 EVENT: wait¦done¦_wait¦t10
      : loglevel=0
-EVENT: output¦set¦4¦5¦monitest
 EVENT: output¦change¦monitest
      : value=5
      : prev_value=4
-EVENT: input¦fake¦5¦monitest
 EVENT: input¦change¦monitest
      : last_value=4
      : value=5
-EVENT: output¦set¦5¦12¦monitest2
+     : fake=True
 EVENT: output¦change¦monitest2
      : value=12
      : prev_value=5
-EVENT: input¦fake¦12¦monitest2
 EVENT: input¦change¦monitest2
      : last_value=5
      : value=12
+     : fake=True
 moni test :: Wait ‹now›
 moni test2 :: Wait ‹now›
 .
@@ -615,8 +432,6 @@ time: ‹now›
 steps: 1 / 1 / None
 data: 5.0
 .
-EVENT: wait¦start¦×××¦_wait¦t11
-     : loglevel=0
 EVENT: wait¦start¦_wait¦t11
      : loglevel=0
      : end_time=3.9
@@ -632,16 +447,6 @@ TRACE monitor Start run moni¦test2
 TRACE monitor filter [12.0] on moni¦test2
 TRACE monitor End run moni¦test2
 TRACE monitor Stop run moni¦test2
-EVENT: monitor¦value¦5.0¦moni¦test
-     : start_at=2003-04-05 06:07:11.700000
-     : data=[5.0]
-     : up=Run
-     : value=5.0
-     : stop_at=2003-04-05 06:07:11.700000
-     : change_at=2003-04-05 06:07:10.600000
-     : steps=(1, 1, None)
-     : time=‹now›
-     : last_value=4.0
 EVENT: monitor¦update¦moni¦test
      : start_at=2003-04-05 06:07:11.700000
      : data=[5.0]
@@ -652,17 +457,6 @@ EVENT: monitor¦update¦moni¦test
      : steps=(1, 1, None)
      : time=‹now›
      : last_value=4.0
-EVENT: monitor¦value¦7.0¦moni¦test2
-     : start_at=2003-04-05 06:07:11.750000
-     : data=[12.0]
-     : up=Run
-     : value=12.0
-     : stop_at=2003-04-05 06:07:11.750000
-     : change_at=2003-04-05 06:07:10.600000
-     : steps=(1, 1, None)
-     : time=‹now›
-     : last_value=5.0
-     : value_delta=7.0
 EVENT: monitor¦update¦moni¦test2
      : start_at=2003-04-05 06:07:11.750000
      : data=[12.0]
@@ -675,8 +469,6 @@ EVENT: monitor¦update¦moni¦test2
      : last_value=5.0
      : value_delta=7.0
 TRACE 2003-04-05 06:07:11.950000 _wait¦t11: Fake timer done
-EVENT: wait¦done¦×××¦_wait¦t11
-     : loglevel=0
 EVENT: wait¦done¦_wait¦t11
      : loglevel=0
 EVENT: monitor¦stop¦moni¦test

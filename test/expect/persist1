@@ -16,7 +16,6 @@ TRACE Set to ONE
 TRACE DoFn ('update HE_State set value=? where category=? and name=?', ("u'one'", 'state', 'foo bar')) 0
 TRACE DoFn ('insert into HE_State (category,name,value) VALUES(?,?,?)', ('state', 'foo bar', "u'one'")) 1
 TRACE Commit  
-EVENT: state¦-¦one¦foo¦bar
 EVENT: state¦change¦foo¦bar
      : prev_time=2003-04-05 06:07:08
      : value=one
@@ -27,19 +26,17 @@ TRACE Yes!
 TRACE Set to TWO
 TRACE DoFn ('update HE_State set value=? where category=? and name=?', ("u'two'", 'state', 'foo bar')) 1
 TRACE Commit  
-EVENT: state¦one¦two¦foo¦bar
 EVENT: state¦change¦foo¦bar
      : prev_time=2003-04-05 06:07:08
      : value=two
      : prev_value=one
 TRACE Create OnEvtHandler: state¦change¦foo¦bar
-TRACE NewHandler 9
+TRACE NewHandler 7
 TRACE Set to THREE
 TRACE DoFn ('update HE_State set value=? where category=? and name=?', ("u'three'", 'state', 'foo bar')) 1
 TRACE Commit  
 foo bar :: three — now
 .
-EVENT: state¦two¦three¦foo¦bar
 EVENT: state¦change¦foo¦bar
      : prev_time=2003-04-05 06:07:08
      : value=three
@@ -57,7 +54,7 @@ TRACE Yes!
 TRACE Yes!
 TRACE Yes!
 TRACE Create OnEvtHandler: whatever
-TRACE NewHandler 12
+TRACE NewHandler 9
 DEBUG End1
 IEVENT: whatever
 TRACE We got three
