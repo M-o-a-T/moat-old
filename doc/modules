@@ -2550,10 +2550,10 @@ Virtual host, user name, and password for establishing the connection.
 listen amqp ‹name›
 ------------------
 
-Connect to a specific exchange. The routing key is split up at the dots and
-used as the event name. The message payload is interpreted as a JSON hash and
-attached to the event; if JSON decoding fails, the payload is attached as
-`raw` attribute.
+Connect to a specific exchange on the named AMQP connection. The routing
+key is split up at the dots and used as the event name. The message payload
+is interpreted as a JSON hash and attached to the event; if JSON decoding
+fails, the payload is attached as the `raw` attribute.
 
 	listen amqp test foo:
 		name foo lish
@@ -2586,18 +2586,16 @@ strip ‹n›
 
 Removes the first ‹n› elements from the routing key, before prefixing.
 
+If there is no prefix and no stripping, this listener will mark incoming
+events as "process directly", i.e. they will not be processed by a
+transparent "tell amqp …" command.
+
 -------------------
-tell amqp ‹prefix…›
+tell amqp ‹name…›
 -------------------
 
-Connect to a specific queue and forwards all events which match ‹prefix…›
-to it. The event name is concatenated with dots and used as the routing
-key.
-
-The prefix may be empty, in which case all events are forwarded.
-
-Be careful *not* to either listen to the events you send, or to not forward
-the events you get, otherwise there'll be an endless loop.
+Forwards all events which match ‹filter…› to an AMQP exchange.
+The event name is concatenated with dots and used as the routing key.
 
 Data attached to the event (see `trigger`) are sent as a JSON hash in the
 message body. If there is an attribute `raw`, those attribute's content is
@@ -2606,12 +2604,17 @@ sent as-is, all others are ignored.
 name ‹name…›
 ------------
 
-The AMQP connection to use to. Mandatory. If the name is only one element
-long, you can use
+The name of this connection. Used for logging and, of course, to disable it
+if you need to.
 
-	tell amqp ‹name› ‹prefix…›
+filter ‹prefix…›
+----------------
 
-as a short form.
+Only process events with this prefix. You can use '*' to match a single
+wildcard, or '"**"' (which you need to quote; this is a small parser bug) 
+as the last element, to match any number of words.
+
+If you do not use this sub-statement, all events are forwarded.
 
 exchange ‹name›
 ---------------
