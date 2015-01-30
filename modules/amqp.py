@@ -58,6 +58,7 @@ class EventCallback(Worker):
 		self.exchange=parent.exchange
 		self.strip=parent.strip
 		self.prefix = tuple(parent.prefix)
+		self._direct = parent.shunt
 		self.filter = parent.filter
 		name = parent.dest
 		if name is None:
@@ -67,13 +68,16 @@ class EventCallback(Worker):
 		self.channel = self.parent.conn.channel()
 		self.channel.exchange_declare(exchange=self.exchange, type='topic', auto_delete=False, passive=False)
 		super(EventCallback,self).__init__(name)
-		register_worker(self)
+		register_worker(self, self._direct)
 	
 	def list(self):
 		for r in super(EventCallback,self).list():
 			yield r
 		if self.filter:
 			yield "filter",self.filter
+		if self._direct:
+			yield "shunt",True
+
 		yield "parent",self.parent.list()
 		yield "exchange",self.exchange
 		if self.prefix:
@@ -304,6 +308,39 @@ strip ‹num›
 		self.parent.strip = int(event[0])
 
 
+class AMQPshunt(Statement):
+	name="shunt"
+	dest = None
+	doc="Send all events out, do not process locally"
+
+	long_doc = u"""\
+shunt
+- All matching events will be transmitted to this connection.
+
+  They will NOT be processed locally. You NEED an "amqp listen"
+  command which receives them from the exchange that's also marked 'shunt'
+  and which undoes any processing done here, if you want to not break
+  HomEvent.
+"""
+
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if len(event):
+			raise SyntaxError(u'Usage: shunt')
+		self.parent.shunt = True
+
+
+class AMQPrshunt(AMQPshunt):
+	doc="Event tunnel, process locally"
+
+	long_doc = u"""\
+shunt
+- Use this command to mark the listener as a receiver for a 'shunted'
+  "amqp tell" command. You need to make sure to undo any processing
+  which that command does.
+"""
+
+
 class AMQPqueue(Statement):
 	name="queue"
 	dest = None
@@ -489,6 +526,7 @@ class AMQPtell(AttributedStatement):
 	prefix = ()
 	filter = ()
 	strip = 0
+	shunt = False
 
 	exchange="homevent_event"
 	long_doc="""\
@@ -507,6 +545,7 @@ AMQPtell.register_statement(AMQPfilter)
 AMQPtell.register_statement(AMQPexchange)
 AMQPtell.register_statement(AMQPprefix)
 AMQPtell.register_statement(AMQPstrip)
+AMQPtell.register_statement(AMQPshunt)
 
 
 class AMQPrecvs(Collection):
@@ -533,6 +572,7 @@ class AMQPrecv(Collected):
 		self.exchange=parent.exchange
 		self.topic=parent.topic
 		self.conn=conn
+		self._direct = parent.shunt
 
 	def delete(self, ctx=None):
 		self.chan.close()
@@ -549,11 +589,13 @@ class AMQPrecv(Collected):
 		else:
 			data = { "raw": msg.body }
 		self.last_recv = msg.__dict__
-		simple_event(*(self.prefix+tuple(msg.routing_key.split('.')[self.strip:])), **data)
+		simple_event(*(self.prefix+tuple(msg.routing_key.split('.')[self.strip:])), _direct=self._direct, **data)
 
 	def list(self):
 		for x in super(AMQPrecv,self).list():
 			yield x
+		if self._direct:
+			yield "shunt",True
 		yield "connection",self.conn
 		yield "exchange",self.exchange
 		yield "topic",self.topic
@@ -572,6 +614,7 @@ class AMQPlisten(AttributedStatement):
 	topic = '#'
 	prefix = ()
 	strip = 0
+	shunt = False
 
 	long_doc="""\
 Usage: listen amqp ‹conn›
@@ -595,6 +638,7 @@ AMQPlisten.register_statement(AMQPexchange)
 AMQPlisten.register_statement(AMQPprefix)
 AMQPlisten.register_statement(AMQPtopic)
 AMQPlisten.register_statement(AMQPstrip)
+AMQPlisten.register_statement(AMQPrshunt)
 
 
 class AMQPmodule(Module):

@@ -30,21 +30,30 @@ from homevent.twist import fix_exception
 
 from gevent import spawn
 
-workers = {}
+class _NotGiven: pass
 
-def register_worker(w):
+workers = {}
+shunts = {}
+
+def register_worker(w, _direct=False):
 	"""\
-		Register a worker with a given priority.
-		The only worker with priority zero is the system's (single)
-		event logger.
+		Register a worker.
 		"""
-	workers[w.id] = w
+	if _direct:
+		assert w.id not in workers
+		shunts[w.id] = w
+	else:
+		assert w.id not in shunts
+		workers[w.id] = w
 	
 def unregister_worker(w):
 	"""\
 		Deregister a worker.
 		"""
-	del workers[w.id]
+	try:
+		del workers[w.id]
+	except KeyError:
+		del shunts[w.id]
 
 def list_workers(name=None):
 	for w in workers.itervalues():
@@ -63,6 +72,25 @@ class Workers(Collection):
 			k = k[0]
 		return workers[int(k)]
 Workers = Workers()
+
+
+def list_shunts(name=None):
+	for w in shunts.itervalues():
+		if name is None or name == w.name:
+			yield w
+
+class Shunts(Collection):
+	name = "shunt"
+	def iteritems(self):
+		for w in list_shunts():
+			yield w.id,w
+	def __getitem__(self,k):
+		if isinstance(k,Name):
+			if len(k) != 1:
+				raise SyntaxError,"Shunt IDs are single numbers"
+			k = k[0]
+		return shunts[int(k)]
+Shunts = Shunts()
 
 def collect_event(e):
 	"""\
@@ -91,13 +119,16 @@ def collect_failure(e):
 			work.append(w)
 	return work
 
-def process_event(e):
+def process_event(e, _direct=False):
 	"""\
 		Process an event. This is the procedure you'll be feeding
 		externally-generated events to.
 		"""
 	#from homevent.logging import log_event,DEBUG,TRACE
 
+	for w in shunts.values():
+		if w.can_do(e):
+			return w.process(e)
 	worker = collect_event(e)
 	spawn(worker.process, event=e)
 
@@ -119,9 +150,9 @@ def process_failure(e):
 		fix_exception(err)
 		log_exc(msg="Error in failure handler", err=err, level=ERROR)
 	
-def run_event(event):
+def run_event(event, _direct=False):
 	try:
-		process_event(event)
+		process_event(event, _direct=_direct)
 	except Exception as e:
 		fix_exception(e)
 		process_failure(e)
@@ -131,6 +162,8 @@ def simple_event(*args,**data):
 		A shortcut for triggering a "simple" background event
 		"""
 	from homevent.event import Event
+	_direct = data.pop('_direct',False)
+
 	if isinstance(args[0],Context):
 		if data:
 			ctx = Context(args[0],**data)
@@ -139,5 +172,5 @@ def simple_event(*args,**data):
 		args = args[1:]
 	else:
 		ctx = Context(**data)
-	run_event(Event(ctx, *args))
+	run_event(Event(ctx, *args), _direct=_direct)
 

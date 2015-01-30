@@ -24,11 +24,10 @@ import sys
 from homevent.base import Name,flatten
 from homevent.times import humandelta
 from datetime import datetime
-import signal
 import os
 import codecs
-from gevent import spawn,signal
 from signal import SIGINT,SIGTERM
+from gevent import spawn,signal
 from gevent.event import Event
 
 sys.stdout = codecs.getwriter('utf8')(sys.stdout)
