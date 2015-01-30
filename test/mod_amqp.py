@@ -97,6 +97,56 @@ wait:
 	for 0.6
 	debug force
 
+stop amqp test foo
+del amqp listener foo lish
+# canceling the worker doesn't work yet
+
+listen amqp test foo:
+	name foo bus in
+	exchange he_bus
+	shunt
+
+tell amqp test foo:
+	name foo bus out
+	exchange he_bus
+	shunt
+
+# check for actual messages
+listen amqp test foo:
+	name foo bus in monitor
+	exchange he_bus
+	prefix moni
+	topic "some.#"
+	# this will end up on the bus again
+	# the topic filter is required to prevent a loop
+
+start amqp test foo
+
+async:
+	wait foo mon:
+		for 0.5
+		debug force
+	log ERROR no foo mon
+async:
+	wait foo in:
+		for 0.5
+		debug force
+	log ERROR no foo in
+
+on moni some thing:
+	del wait foo mon
+	log TRACE YES mon in
+on some thing:
+	del wait foo in
+	log TRACE YES in
+trigger some thing
+wait:
+	for 0.6
+	debug force
+
+# homevent => amqp
+# translate hey.x to amqte.x
+
 shutdown
 """
 

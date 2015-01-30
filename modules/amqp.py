@@ -60,6 +60,15 @@ class EventCallback(Worker):
 		self.prefix = tuple(parent.prefix)
 		self._direct = parent.shunt
 		self.filter = parent.filter
+
+		if self._direct:
+			try: i = self.filter.index('*')
+			except ValueError: i = 999
+			try: i = min(self.filter.index('*'),i)
+			except ValueError: pass
+			if i < self.strip or self.strip and not self.filter:
+				raise RuntimeError("You can't use 'shunt' if you strip elements you can't restore!")
+
 		name = parent.dest
 		if name is None:
 			global _seq
@@ -576,7 +585,7 @@ class AMQPrecv(Collected):
 
 	def delete(self, ctx=None):
 		self.chan.close()
-		super(AMQPrecv,self).__delete__(ctx=ctx)
+		super(AMQPrecv,self).delete(ctx=ctx)
 
 	def on_info_msg(self,msg):
 		if not TESTING and msg.message_id.startswith(base_mseq):

@@ -27,6 +27,7 @@ from homevent.worker import ConcurrentWorkSequence,ExcWorker
 from homevent.collect import Collection
 from homevent.context import Context
 from homevent.twist import fix_exception
+from homevent.event import TrySomethingElse
 
 from gevent import spawn
 
@@ -126,9 +127,13 @@ def process_event(e, _direct=False):
 		"""
 	#from homevent.logging import log_event,DEBUG,TRACE
 
-	for w in shunts.values():
-		if w.can_do(e):
-			return w.process(e)
+	if not _direct:
+		for w in shunts.values():
+			if w.does_event(e):
+				try:
+					return w.process(e)
+				except TrySomethingElse:
+					return None
 	worker = collect_event(e)
 	spawn(worker.process, event=e)
 
