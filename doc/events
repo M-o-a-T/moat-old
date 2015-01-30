@@ -121,10 +121,6 @@ input change NAME…
 	-- an input has changed
 	   The value is sent in the `value` attribute.
 
-output set OLD NEW NAME…
-	-- the output changes from OLD to NEW.
-	   An error in the event handler will abort the change.
-
 output change NAME…
 	-- the output changes. The old and new values are stored in the event's
 	   `prev_value` and `value`, respectively.
@@ -134,9 +130,6 @@ output error NAME…
 
 PWM
 ---
-
-pwm set on|off NAME…
-    -- change the pulse level.
 
 pwm change NAME…
     -- change the pulse level.
@@ -148,15 +141,6 @@ pwm error NAME…
 
 State
 -----
-
-state OLD NEW NAME…
-	-- a state changes.
-	   OLD is "-" if the state is newly created.
-	   NEW is "-" if the state is deleted.
-
-	   This event is triggered synchronously; while it executes, new
-	   state changes on the same NAME are forbidden and will cause an
-	   error.
 
 state new NAME…
 state delete NAME…
@@ -350,25 +334,31 @@ onewire scanning NAME
 	-- the bus will be scanned after this event has been handled.
 	   An error during event handling will prevent scanning.
 
-onewire scanned NAME del new sum
+onewire scanned NAME
 	-- scanning of this bus has completed.
-	   "del": Number of devices that were dropped
+	   "old": Number of devices that were on the bus previously
 	   "new": Number of newly-discovered devices
-	   "sum": Number of devices now connected to on the bus
+	   "num": Number of devices now connected to, on this bus
 
-onewire new TYPE DEVICE
-	-- The device with the given type has appeared on a 1-wire bus
+onewire new
+	-- A device with the given type has appeared on a 1-wire bus
 	   for the first time. This event is followed by an "up" event for
 	   the same device.
+	   "typ": the device type
+	   "id": its ID
 
-onewire up TYPE DEVICE
+onewire up
 	-- The device with the given type is now available.
+	   "typ": the device type
+	   "id": its ID
 
-onewire down TYPE DEVICE
+onewire down
 	-- The device with the given type is no longer available.
 	   This may be a temporary condition. Until you see an "up" event,
 	   however, trying to communicate with the device will cause an
 	   error.
+	   "typ": the device type
+	   "id": its ID
 
 timing
 ------
