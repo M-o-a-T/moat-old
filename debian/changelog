@@ -1,3 +1,9 @@
+homevent (0.5.1) smurf; urgency=medium
+
+  * Support an external event bus
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Fri, 30 Jan 2015 12:48:07 +0100
+
 homevent (0.5.0) smurf; urgency=medium
 
   * Don't send old events any more
