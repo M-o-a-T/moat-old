@@ -8,11 +8,17 @@ TRACE RollBack
 TRACE Yes!
 TRACE DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) None
 TRACE RollBack  
+TRACE DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) None
+TRACE RollBack  
 TRACE Yes!
 TRACE DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) None
 TRACE RollBack  
 TRACE Yes!
 TRACE Set to ONE
+TRACE DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) None
+TRACE RollBack  
+TRACE DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) None
+TRACE RollBack  
 TRACE DoFn ('update HE_State set value=? where category=? and name=?', ("u'one'", 'state', 'foo bar')) 0
 TRACE DoFn ('insert into HE_State (category,name,value) VALUES(?,?,?)', ('state', 'foo bar', "u'one'")) 1
 TRACE Commit  
@@ -24,6 +30,10 @@ TRACE DoFn ('select value from HE_State where category=? and name=?', ('state', 
 TRACE Commit  
 TRACE Yes!
 TRACE Set to TWO
+TRACE DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) (u"u'one'",)
+TRACE Commit  
+TRACE DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) (u"u'one'",)
+TRACE Commit  
 TRACE DoFn ('update HE_State set value=? where category=? and name=?', ("u'two'", 'state', 'foo bar')) 1
 TRACE Commit  
 EVENT: state¦change¦foo¦bar
@@ -33,7 +43,13 @@ EVENT: state¦change¦foo¦bar
 TRACE Create OnEvtHandler: state¦change¦foo¦bar
 TRACE NewHandler 7
 TRACE Set to THREE
+TRACE DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) (u"u'two'",)
+TRACE Commit  
+TRACE DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) (u"u'two'",)
+TRACE Commit  
 TRACE DoFn ('update HE_State set value=? where category=? and name=?', ("u'three'", 'state', 'foo bar')) 1
+TRACE Commit  
+TRACE DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) (u"u'three'",)
 TRACE Commit  
 foo bar :: three — now
 .
@@ -42,6 +58,8 @@ EVENT: state¦change¦foo¦bar
      : value=three
      : prev_value=two
 TRACE Yes It is THREE
+TRACE DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) (u"u'three'",)
+TRACE Commit  
 : ‹Collected SavedState:foo¦bar›
 name: foo¦bar
 value: three
@@ -50,6 +68,8 @@ last value: two
 last change: now (2003-04-05 06:07:08)
 persistent: yes
 .
+TRACE DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) (u"u'three'",)
+TRACE Commit  
 TRACE Yes!
 TRACE Yes!
 TRACE Yes!
@@ -57,8 +77,12 @@ TRACE Create OnEvtHandler: whatever
 TRACE NewHandler 9
 DEBUG End1
 IEVENT: whatever
+TRACE DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) (u"u'three'",)
+TRACE Commit  
 TRACE We got three
 DEBUG End2
+TRACE DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) (u"u'three'",)
+TRACE Commit  
 foo bar :: three — now
 .
 DEBUG End3

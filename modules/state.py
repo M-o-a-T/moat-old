@@ -69,7 +69,8 @@ class State(Collected):
 	time = None
 
 	def __init__(self, *name):
-		self.value = None
+		if not hasattr(type(self),'value'):
+			self.value = None
 		self.working = False
 		super(State,self).__init__(*name)
 	
@@ -107,29 +108,29 @@ class State(Collected):
 class SavedState(State):
 	def __init__(self, *name):
 		super(SavedState,self).__init__(*name)
-		del self.value
 	
+	@property
+	def value(self):
 		global Db
 		if Db is None:
 			from homevent.database import DbStore
 			Db = DbStore(category="state")
 		try:
-			self.value = Db.get(self.name)
+			return Db.get(self.name)
 		except KeyError:
-			self.value = None
+			return None
 
 	def set_value(self,val):
 		if val is None:
 			Db.delete(self.name)
 		else:
 			Db.set(self.name,val)
-		self.value = val
 
 	def delete(self,ctx=None):
+		super(SavedState,self).delete(ctx)
+
 		if not getattr(ctx,"shutdown",False):
 			Db.delete(self.name)
-
-		super(SavedState,self).delete(ctx)
 
 	def list(self):
 		yield super(SavedState,self)

@@ -7,11 +7,19 @@ TRACE Commit
 TRACE Yes!
 TRACE DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) (u"u'three'",)
 TRACE Commit  
+TRACE DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) (u"u'three'",)
+TRACE Commit  
 TRACE Yes!
 TRACE DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) (u"u'three'",)
 TRACE Commit  
 TRACE Yes!
+TRACE DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) (u"u'three'",)
+TRACE Commit  
 TRACE We still have three
+TRACE DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) (u"u'three'",)
+TRACE Commit  
+TRACE DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) (u"u'three'",)
+TRACE Commit  
 TRACE DoFn ('delete from HE_State where category=? and name=?', ('state', 'foo bar')) 1
 TRACE Commit  
 EVENT: state¦delete¦foo¦bar
