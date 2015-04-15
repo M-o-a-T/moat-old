@@ -84,7 +84,7 @@ class GroupOverridesView(GroupOverrideMixin,GroupOverrideParamMixin,ListView):
 class GroupOverrideView(GroupOverrideMixin,GroupOverrideParamMixin,DetailView):
 	def get_context_data(self,**k):
 		ctx = super(GroupOverrideView,self).get_context_data(**k)
-		gu = get_request().user.get_profile()
+		gu = get_profile(get_request())
 		av = limit_choices(gu.groups,**self.aux_data)
 		q = GroupOverride.objects.filter(group__in=av)
 		try:

@@ -22,11 +22,13 @@ from django.utils.translation import ugettext_lazy as _
 from datetime import timedelta,datetime
 
 from rainman.models import Site
-#from rainman.utils import Redirect
+from rainman.utils import Redirect
+
+from traceback import print_exc
 
 def get_profile(request):
 	try:
-		gu = request.user.get_profile()
+		gu = request.user.profile
 	except (ObjectDoesNotExist,AttributeError):
 		if request.user.is_authenticated():
 			raise Redirect('/login/no_access')
@@ -37,8 +39,9 @@ def get_profile(request):
 
 def home(request):
 	try:
-		gu = request.user.get_profile()
+		gu = request.user.profile
 	except (ObjectDoesNotExist,AttributeError):
+		print_exc()
 		sites = set()
 	else:
 		sites = gu.sites.all()

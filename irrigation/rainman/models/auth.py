@@ -40,7 +40,7 @@ class UserForSite(Model):
 		db_table="rainman_userforsite"
 	def __unicode__(self):
 		return u"@%s %s" % (self.user.username,u"¦".join(s.name for s in self.sites.all()))
-	user = m.OneToOneField(DjangoUser)
+	user = m.OneToOneField(DjangoUser, related_name="profile")
 	sites = m.ManyToManyField(Site, blank=True, related_name="users",help_text="Sites this user may access")
 	valves = m.ManyToManyField(Valve, blank=True, related_name="users",help_text="Valves this user may access")
 	level = m.PositiveSmallIntegerField(choices=LEVEL_VALUES,default=1,help_text=u"Access to …")
