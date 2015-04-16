@@ -31,7 +31,7 @@ class GroupOverride(Model):
 		return self.name
 	name = m.CharField(max_length=200,blank=True,null=True)
 	group = m.ForeignKey(Group,related_name="overrides")
-	allowed = m.BooleanField() # whether to allow these to run(True) or not(False)
+	allowed = m.BooleanField(default=False) # whether to allow these to run(True) or not(False)
 	start = m.DateTimeField(db_index=True)
 	db_duration = m.PositiveIntegerField(db_column="duration")
 	def _get_duration(self):
@@ -58,7 +58,7 @@ class ValveOverride(Model):
 		return self.name
 	name = m.CharField(max_length=200,blank=True,null=True)
 	valve = m.ForeignKey(Valve,related_name="overrides")
-	running = m.BooleanField() # whether to force on(True) or off(False)
+	running = m.BooleanField(default=False) # whether to force on(True) or off(False)
 	start = m.DateTimeField(db_index=True)
 	db_duration = m.PositiveIntegerField(db_column="duration")
 	def _get_duration(self):

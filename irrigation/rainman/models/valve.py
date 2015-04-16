@@ -91,7 +91,7 @@ class Valve(Model,RangeMixin):
 	# This describes the current state
 	time = m.DateTimeField(db_index=True, default=now, help_text="time when the level was last calculated") # when was the level calculated?
 	level = m.FloatField(default=0, help_text="current water capacity, in mm")
-	priority = m.BooleanField(help_text="the last cycle did not finish")
+	priority = m.BooleanField(default=False, help_text="the last cycle did not finish")
 	def list_groups(self):
 		return u"¦".join((d.name for d in self.groups.all()))
 
