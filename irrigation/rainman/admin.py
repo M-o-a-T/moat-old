@@ -37,8 +37,8 @@ class EnvItemInline(admin.TabularInline):
 class LevelInline(admin.TabularInline):
 	model = Level
 	extra = 0
-	def queryset(self, request):
-		qs = super(LevelInline, self).queryset(request)
+	def get_queryset(self, request):
+		qs = super(LevelInline, self).get_queryset(request)
 		return qs.filter(time__gte = now()-timedelta(1,0)).order_by("-time")
 
 class DayRangeInline(admin.TabularInline):
@@ -60,15 +60,15 @@ class GroupInline(admin.TabularInline):
 class GroupOverrideInline(admin.TabularInline):
 	model = GroupOverride
 	extra = 0
-	def queryset(self, request):
-		qs = super(GroupOverrideInline, self).queryset(request)
+	def get_queryset(self, request):
+		qs = super(GroupOverrideInline, self).get_queryset(request)
 		return qs.filter(start__gte = now()-timedelta(1,0)).order_by("-start")
 
 class ValveOverrideInline(admin.TabularInline):
 	model = ValveOverride
 	extra = 0
-	def queryset(self, request):
-		qs = super(ValveOverrideInline, self).queryset(request)
+	def get_queryset(self, request):
+		qs = super(ValveOverrideInline, self).get_queryset(request)
 		return qs.filter(start__gte = now()-timedelta(1,0)).order_by("-start")
 
 class EnvGroupInline(admin.TabularInline):
@@ -82,8 +82,8 @@ class GroupAdjustInline(admin.TabularInline):
 class ScheduleInline(admin.TabularInline):
 	model = Schedule
 	extra = 0
-	def queryset(self, request):
-		qs = super(ScheduleInline, self).queryset(request)
+	def get_queryset(self, request):
+		qs = super(ScheduleInline, self).get_queryset(request)
 		return qs.filter(start__gte = now()-timedelta(0.5)).order_by("start")
 
 class RainMeterInline(admin.TabularInline):
