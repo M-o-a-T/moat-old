@@ -152,12 +152,14 @@ class Meter(object):
 		return self.d.weight
 
 	def monitor_value(self,event=None,**k):
-		"""monitor value NUMBER name…"""
+		"""monitor update name…"""
 		self.refresh()
 		self.last_time = now()
 		try:
-			val = float(event[2])
-			self.add_value(val)
+			try:
+				self.add_value(event.ctx['value_delta'])
+			except KeyError:
+				self.add_value(event.ctx['value'])
 		except Exception:
 			print_exc()
 
@@ -175,7 +177,7 @@ class Meter(object):
 			return
 		if self.site.ci is None:
 			return
-		self.mon = self.site.ci.root.monitor(self.monitor_value,"monitor","value","*",*(self.d.var.split()))
+		self.mon = self.site.ci.root.monitor(self.monitor_value,"monitor","update",*(self.d.var.split()))
 
 	def log(self,txt):
 		self.site.log(("%s %s: "%(self.meter_type,self.d.name))+txt)
@@ -938,12 +940,12 @@ class SchedValve(SchedCommon):
 	def connect_monitors(self):
 		if self.site.ci is None:
 			return
-		self.mon = self.site.ci.root.monitor(self.watch_state,"output","set","*","*",*(self.v.var.split()))
+		self.mon = self.site.ci.root.monitor(self.watch_state,"output","change",*self.v.var.split())
 		self.ckf = self.site.ci.root.monitor(self.check_flow,"check","flow",*self.v.var.split())
 		
 	def watch_state(self,event=None,**k):
-		"""output set OLD NEW NAME"""
-		on = (str(event[3]).lower() in ("1","true","on"))
+		"""output change NAME ::value ON"""
+		on = (str(event.ctx['value']).lower() in ("1","true","on"))
 		if self._flow_check is not None:
 			# TODO
 			self.on = on
