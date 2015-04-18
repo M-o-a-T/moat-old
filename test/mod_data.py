@@ -30,11 +30,17 @@ list event
 list
 
 on foo:
+	if equal $one two:
+		log TRACE Yes
+	else:
+		log ERROR No $one
 	block:
 		wait foo waiter:
 			for 0.3
 wait vorher: for 0.1
-trigger foo
+trigger foo:
+	param one two
+	param three 4
 wait nachher: for 0.1
 list wait
 list wait foo waiter
@@ -46,6 +52,9 @@ shutdown
 main_words.register_statement(ShutdownHandler)
 load_module("trigger")
 load_module("wait")
+load_module("logging")
+load_module("ifelse")
+load_module("bool")
 load_module("block")
 load_module("data")
 load_module("on_event")

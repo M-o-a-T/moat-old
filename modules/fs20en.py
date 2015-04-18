@@ -115,9 +115,7 @@ class en(Collected,Timeslotted):
 					if val < 0: val = val + 0x10000 # 16-bit rollover
 					if val >= 0 or self.delta == 0:
 						d[m]=val
-						simple_event("fs20","en", m,val, *self.name)
 			else:
-				simple_event("fs20","en", m,n, *self.name)
 				d[m]=n
 		simple_event("fs20","en", *self.name, **d)
 		self.last = now()

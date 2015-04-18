@@ -112,7 +112,6 @@ class EM(Collected,Timeslotted):
 			try: n = n + self.offset[m]
 			except KeyError: pass
 			d[m]=n
-			simple_event("fs20","em", m,n, *self.name)
 
 		simple_event("fs20","em", *self.name, **d)
 		self.last = now()

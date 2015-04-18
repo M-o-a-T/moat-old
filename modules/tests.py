@@ -100,8 +100,7 @@ class FakeOutput(Output):
 	def _write(self,val):
 		old_val = ins[self.name].value
 		ins[self.name].value = val
-		simple_event("input","fake",val,*self.name)
-		simple_event("input","change",*self.name, value=val, last_value=old_val)
+		simple_event("input","change",*self.name, value=val, last_value=old_val, fake=True)
 
 
 from homevent.module import Module

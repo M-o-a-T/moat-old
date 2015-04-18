@@ -25,6 +25,7 @@ from homevent.module import load_module, Load,LoadDir
 from homevent.reactor import ShutdownHandler,mainloop,shut_down
 from homevent.context import Context
 from homevent.twist import callLater,fix_exception
+from homevent.logging import log_level,NONE
 
 from tokenize import tok_name
 import os,sys
@@ -32,6 +33,9 @@ import os,sys
 main_words.register_statement(Load)
 main_words.register_statement(LoadDir)
 main_words.register_statement(ShutdownHandler)
+
+log_level("token",NONE)
+log_level("parser",NONE)
 
 load_module("help")
 load_module("data")

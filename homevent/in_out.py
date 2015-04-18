@@ -285,7 +285,6 @@ class Output(CommonIO):
 			self.timer = None
 
 		if self.last_value != wval:
-			simple_event("output","set",self.repr(self.last_value),self.repr(wval),*self.name)
 			simple_event("output","change",*self.name, prev_value=self.last_value, value=wval)
 
 		self.last_value = wval
@@ -315,7 +314,6 @@ class Output(CommonIO):
 		res = self.timer.q.get()
 		if isinstance(res,BaseException):
 			reraise(res)
-		simple_event("output","set",self.repr(wval),self.repr(wnextval),*self.name)
 		simple_event("output","change",*self.name, prev_value=wval,value=wnextval)
 
 

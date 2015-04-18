@@ -51,7 +51,8 @@ class MonitorMaker(MonitorHandler):
 	long_doc="""\
 monitor input ‹name…›
 	- creates a monitor for a specific input.
-      Don't delete the input while the monitor is active.
+
+      Don't delete the input while the monitor is active!
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)

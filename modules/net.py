@@ -23,7 +23,7 @@ This code implements a simple line-oriented protocol via TCP.
 from __future__ import division,absolute_import
 
 from homevent.module import Module
-from homevent.logging import log,log_exc,DEBUG,TRACE,INFO,WARN,ERROR
+from homevent.logging import log,DEBUG,TRACE,INFO,WARN,ERROR
 from homevent.statement import Statement, main_words, AttributedStatement
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.base import Name

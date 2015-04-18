@@ -16,6 +16,8 @@ TRACE Create OnEvtHandler: foo
 TRACE NewHandler 11
 TRACE Create OnEvtHandler: bar¦*
 TRACE NewHandler 12
+TRACE Create OnEvtHandler: baz
+TRACE NewHandler 13
 Another Handler :: foo (51)
 Num2Txt :: num¦2 (51)
 Schau auf deine Füße :: fuß (51)
@@ -23,6 +25,7 @@ Skipped One :: foo (51)
 Skipped Two :: foo (51)
 Txt2Num :: num¦1 (51)
 _on 12 :: bar¦* (51)
+_on 13 :: baz (51)
 num2num :: num¦3 (51)
 .
 : ⇒OnEventWorker:Skipped¦One
@@ -51,9 +54,33 @@ Skipped One :: foo (51)
 Skipped Two :: foo (51)
 Txt2Num :: num¦1 (51)
 _on 12 :: bar¦* (51)
+_on 13 :: baz (51)
 num2num :: num¦3 (51)
 .
 IEVENT: fuß
+IEVENT: baz
+DEBUG got baz one
+ERROR no quux one
+DEBUG vav is two
+EVENT: state¦change¦dud
+     : prev_time=2003-04-05 06:07:08
+     : value=two
+     : prev_value=-
+IEVENT: baz¦dud¦two
+IEVENT: baz
+DEBUG got baz two
+TRACE Yes
+EVENT: wait¦start¦_wait¦t1
+     : loglevel=0
+     : end_time=0.1
+EVENT: state¦change¦dud
+     : prev_time=2003-04-05 06:07:08
+     : value=nix
+     : prev_value=two
+TRACE 2003-04-05 06:07:08.150000 _wait¦t1: Fake timer done
+EVENT: wait¦done¦_wait¦t1
+     : loglevel=0
+TRACE Yes
 IEVENT: num¦1
 IEVENT: num¦2
 IEVENT: num¦3

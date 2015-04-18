@@ -151,7 +151,6 @@ class Collected(object):
 		pass
 
 	def dup_error(self,name):
-		import pdb;pdb.set_trace()
 		raise RuntimeError(u"Duplicate entry ‹%s› in ‹%s›" % (name,self.storage.name))
 
 	def __repr__(self):

@@ -27,7 +27,7 @@ import re
 
 from homevent.module import Module
 from homevent.base import Name,SName, singleName
-from homevent.logging import log,log_exc,DEBUG,TRACE,INFO,WARN
+from homevent.logging import log,DEBUG,TRACE,INFO,WARN
 from homevent.statement import AttributedStatement, Statement, main_words
 from homevent.check import Check,register_condition,unregister_condition
 from homevent.monitor import Monitor,MonitorHandler, MonitorAgain
@@ -35,7 +35,7 @@ from homevent.net import NetConnect,LineReceiver,NetActiveConnector,NetRetry
 from homevent.twist import reraise,callLater,fix_exception
 from homevent.run import simple_event
 from homevent.context import Context
-from homevent.times import now,unixtime
+from homevent.times import now,unixtime,humandelta
 from homevent.msg import MsgQueue,MsgFactory,MsgBase, MINE,NOT_MINE, RECV_AGAIN,SEND_AGAIN
 from homevent.collect import Collection,Collected
 
@@ -214,6 +214,10 @@ class RRDfile(Collected):
 			yield ("last_sent",self.last_sent)
 			yield ("last_sent_at",self.last_sent_at)
 
+	def info(self):
+		if self.last_sent_at is None:
+			return "Never"
+		return humandelta(now()-self.last_sent_at)
 
 
 class RRDsetfile(AttributedStatement):

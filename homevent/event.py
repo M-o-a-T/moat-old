@@ -143,7 +143,7 @@ class Event(object):
 
 		for n in self.name[drop:]:
 			if hasattr(n,"startswith") and n.startswith('$'):
-				r = getattr(ctx,n[1:])
+				r = ctx[n[1:]]
 #				if n == "$X":
 #					import sys
 #					print >>sys.stderr,"c@%x %s %s"%(id(ctx),n,r)

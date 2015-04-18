@@ -42,7 +42,7 @@ Depends: ${misc:Depends}, ${python:Depends},
  python-rpyc,
  python-dabroker,
  python-pytz | python-tz,
- python-flask,
+ python-amqp,
 Recommends: python-rrdtool, owfs,
  python-pysqlite2,
 Suggests: socat

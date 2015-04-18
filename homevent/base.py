@@ -66,7 +66,7 @@ class Name(tuple):
 		res = []
 		for n in self[drop:]:
 			if hasattr(n,"startswith") and n.startswith('$'):
-				n = getattr(ctx,n[1:])
+				n = ctx[n[1:]]
 			res.append(n)
 		return self.__class__(*res)
 	

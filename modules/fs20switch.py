@@ -23,7 +23,7 @@ This code implements basic commands to access FS20 switches.
 from __future__ import division,absolute_import
 
 from homevent.module import Module
-from homevent.logging import log,log_exc,DEBUG,TRACE,INFO,WARN
+from homevent.logging import log,DEBUG,TRACE,INFO,WARN
 from homevent.statement import AttributedStatement,Statement, main_words
 from homevent.run import simple_event
 from homevent.event import Event
@@ -287,9 +287,7 @@ class Switch(Collected):
 		self.ext = ext
 
 	def get(self, state, ext=None, handler=None):
-		simple_event("fs20","state", \
-			state, ext if ext is not None else "-",
-			*self.name)
+		simple_event("fs20","state", *self.name, state=state, ext=ext)
 
 		ctx = Context(value=state)
 		if ext is not None:

@@ -83,7 +83,6 @@ class State(Collected):
 		self.time = now()
 		try:
 			if self.value is not None:
-				simple_event("state",self.value,"-",*self.name)
 				simple_event("state","delete",*self.name, prev_value=self.value)
 		finally:
 			super(State,self).delete()
@@ -163,8 +162,7 @@ state name...
 				old = s.old_value if s.old_value is not None else "-"
 				val = s.value
 				if val is None: val = "-"
-				simple_event("state",old,self.value,*s.name)
-				simple_event("state","new",*s.name, value=self.value)
+				simple_event("state","new",*s.name, value=self.value, prev_value=old)
 		except BaseException:
 			s.delete()
 			raise
@@ -256,7 +254,6 @@ set state X name...
 		s.set_value(value if value != "-" else None)
 		tm = s.time
 		s.time = now()
-		simple_event("state",old,value,*s.name)
 		simple_event("state","change",*s.name, prev_value=old,value=value,prev_time=tm)
 
 class ForgetStateHandler(Statement):

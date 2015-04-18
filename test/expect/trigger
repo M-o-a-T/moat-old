@@ -1,14 +1,10 @@
 EVENT: startup
      : startup=True
 IEVENT: foo
-EVENT: wait¦start¦0.5¦_wait¦1
-     : loglevel=0
-EVENT: wait¦start¦_wait¦1
+EVENT: wait¦start¦_wait¦t1
      : loglevel=0
      : end_time=0.5
-TRACE 2003-04-05 06:07:08.500000 _wait¦1: Fake timer done
-EVENT: wait¦done¦0.5¦_wait¦1
-     : loglevel=0
-EVENT: wait¦done¦_wait¦1
+TRACE 2003-04-05 06:07:08.500000 _wait¦t1: Fake timer done
+EVENT: wait¦done¦_wait¦t1
      : loglevel=0
 IEVENT: bar
