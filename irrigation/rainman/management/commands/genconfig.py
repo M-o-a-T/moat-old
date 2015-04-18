@@ -69,9 +69,12 @@ output wago {cloc} {vloc}:
 	name {name}
 	bool on off
 on hab in command {sname}:
+	var output now {name}
 	if equal $raw ON:
+		if equal $now off:
 			set output on {name} :for 5 min
 	else:
+		if equal $now on:
 			set output off {name}
 on output change {name}:
 	if equal $value True:
