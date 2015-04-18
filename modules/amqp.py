@@ -588,9 +588,9 @@ class AMQPrecv(Collected):
 		super(AMQPrecv,self).delete(ctx=ctx)
 
 	def on_info_msg(self,msg):
-		if not TESTING and msg.message_id.startswith(base_mseq):
+		if not TESTING and getattr(msg,'message_id','').startswith(base_mseq):
 			return # dup
-		if msg.content_type == "application/json":
+		if getattr(msg,'content_type','') == "application/json":
 			try:
 				data = json.loads(msg.body)
 			except Exception:
