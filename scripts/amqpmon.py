@@ -16,10 +16,9 @@
 ##  for more details.
 ##
 
-from __future__ import division,absolute_import
+from __future__ import division,absolute_import,unicode_literals
 
 from homevent import patch;patch()
-import rpyc
 import sys
 from homevent.base import Name,flatten
 from homevent.times import humandelta
@@ -30,7 +29,8 @@ from signal import SIGINT,SIGTERM
 from gevent import spawn,signal
 from gevent.event import Event
 
-sys.stdout = codecs.getwriter('utf8')(sys.stdout)
+if sys.version_info[0] < 3:
+	sys.stdout = codecs.getwriter('utf8')(sys.stdout)
 
 TESTING=os.environ.get("HOMEVENT_TEST",False)
 
