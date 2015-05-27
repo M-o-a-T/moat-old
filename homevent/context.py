@@ -189,7 +189,7 @@ class Context(object):
 			for k,v in store.iteritems():
 				if v is not VanishedAttribute and k not in seen:
 					setattr(res,k,v)
-				seen.add(v) # prevent overwriting with older values
+				seen.add(k) # prevent overwriting with older values
 				
 		do(self._store)
 		for p in self._parents():
