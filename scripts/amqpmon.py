@@ -55,6 +55,8 @@ parser.add_option("-x", "--exchange", dest="exchange", action="store",
 	default="homevent.event", help="Exchange to listen at")
 parser.add_option("-r", "--routing", dest="routing", action="store",
 	default="cmdline.generic", help="Routing key to send to")
+parser.add_option("-b", "--body-only", dest="body", action="store_true",
+	help="only show the message's body")
 parser.add_option("-t", "--content-type", dest="content_type", action="store",
 	default="text/plain", help="The message's content type")
 parser.add_option("-s", "--skip", dest="skip", action="append",
@@ -76,7 +78,7 @@ def main(conn,opts,args):
 	mode = args[0]
 	args = args[1:]
 	if mode == "log":
-		do_log(conn)
+		do_log(conn,opts.body)
 	elif mode == "msg":
 		do_msg(conn,args)
 
@@ -86,7 +88,7 @@ def do_msg(conn,args):
 	msg = amqp.Message(body=arg, content_type=opts.content_type)
 	chan.basic_publish(msg=msg, exchange=opts.exchange, routing_key=opts.routing)
 
-def do_log(conn):
+def do_log(conn,body=False):
 	def on_msg(msg):
 		try:
 			msg.body = json.loads(msg.body.decode("utf-8"))
@@ -103,7 +105,10 @@ def do_log(conn):
 			if len(s) == len(k):
 				return
 
-		pprint(msg.__dict__)
+		if body and hasattr(msg,"body"):
+			pprint(msg.body)
+		else:
+			pprint(msg.__dict__)
 
 	chan = conn.channel()
 	res = chan.exchange_declare(exchange=opts.exchange, type='topic', auto_delete=False, passive=False)
