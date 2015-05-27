@@ -588,7 +588,7 @@ class AMQPrecv(Collected):
 		super(AMQPrecv,self).delete(ctx=ctx)
 
 	def on_info_msg(self,msg):
-		if not TESTING and getattr(msg,'message_id','').startswith(base_mseq):
+		if not self._direct and not TESTING and getattr(msg,'message_id','').startswith(base_mseq):
 			return # dup
 		if getattr(msg,'content_type','') == "application/json":
 			try:
