@@ -89,9 +89,9 @@ def do_msg(conn,args):
 def do_log(conn):
 	def on_msg(msg):
 		try:
-			msg.body = json.loads(msg.body)
-		except Exception:
-			pass
+			msg.body = json.loads(msg.body.decode("utf-8"))
+		except Exception as e:
+			msg.body = "? "+str(e)+":"+str(msg.body)
 		deli = msg.delivery_info['routing_key'].split('.')
 		for skip1 in skip:
 			for s,k in zip(deli,skip1):
