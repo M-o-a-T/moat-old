@@ -1,3 +1,10 @@
+homevent (0.5.2) smurf; urgency=medium
+
+  * current _geventreactor
+  * minor bug fixes
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Wed, 27 May 2015 12:59:35 +0200
+
 homevent (0.5.1) smurf; urgency=medium
 
   * Support an external event bus
