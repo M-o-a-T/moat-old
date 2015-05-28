@@ -16,7 +16,7 @@
 ##
 
 """\
-This code implements primitive "if true" and "if false" checks.
+This code implements file existence checks.
 
 """
 
