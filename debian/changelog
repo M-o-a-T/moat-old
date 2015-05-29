@@ -1,3 +1,9 @@
+homevent (0.6.0) smurf; urgency=medium
+
+  * Execute Python code
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Fri, 29 May 2015 19:59:19 +0200
+
 homevent (0.5.2) smurf; urgency=medium
 
   * current _geventreactor

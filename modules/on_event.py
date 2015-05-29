@@ -34,78 +34,14 @@ Otherwise a "alarm livingroom" would be triggered.
 
 from __future__ import division,absolute_import
 
-from homevent.interpreter import CollectProcessor
-from homevent.statement import Statement,MainStatementList, main_words,\
-	global_words
-from homevent.logging import log_event,log, TRACE
-from homevent.run import register_worker,unregister_worker,MIN_PRIO,MAX_PRIO
-from homevent.worker import Worker
+from homevent.statement import Statement,MainStatementList, main_words
+from homevent.logging import log, TRACE
+from homevent.run import MIN_PRIO,MAX_PRIO
 from homevent.module import Module
-from homevent.logging import log
-from homevent.check import Check,register_condition,unregister_condition
+from homevent.check import register_condition,unregister_condition
 from homevent.event import TrySomethingElse
 from homevent.base import Name,SName
-from homevent.collect import Collection,Collected
-
-onHandlers = {}
-onHandlers2 = {}
-
-class _OnHandlers(Collection):
-	name = "on"
-
-	def iteritems(self):
-		def priosort(a,b):
-			a=self[a]
-			b=self[b]
-			return cmp(a.prio,b.prio) or cmp(a.name,b.name)
-		for i in sorted(self.iterkeys(), cmp=priosort):
-			yield i,self[i]
-
-	def __getitem__(self,key):
-		try:
-			return super(_OnHandlers,self).__getitem__(key)
-		except KeyError:
-			if key in onHandlers:
-				return onHandlers[key]
-			if key in onHandlers2:
-				return onHandlers2[key][0]
-			if hasattr(key,"__len__") and len(key) == 1:
-				if key[0] in onHandlers:
-					return onHandlers[key[0]]
-				if key[0] in onHandlers2:
-					return onHandlers2[key[0]][0]
-			raise
-
-	def __setitem__(self,key,val):
-		assert val.name==key, repr(val.name)+" != "+repr(key)
-		onHandlers[val.id] = val
-		try:
-			onHandlers2[val.parent.arglist].append(val)
-		except KeyError:
-			onHandlers2[val.parent.arglist] = [val]
-		super(_OnHandlers,self).__setitem__(key,val)
-		register_worker(val)
-
-	def __delitem__(self,key):
-		val = self[key]
-		unregister_worker(val)
-		del onHandlers[val.id]
-		onHandlers2[val.parent.arglist].remove(val)
-		if not onHandlers2[val.parent.arglist]:
-			del onHandlers2[val.parent.arglist]
-		super(_OnHandlers,self).__delitem__(val.name)
-
-	def pop(self,key):
-		val = self[key] if key else self.keys()[0]
-		unregister_worker(val)
-		del OnHandlers[val.id]
-		try:
-			del OnHandlers2[val.parent.arglist]
-		except KeyError:
-			pass
-		return val
-OnHandlers = _OnHandlers()
-OnHandlers.does("del")
+from homevent.event_hook import OnHandlers, OnEventBase
 
 class BadArgs(RuntimeError):
 	def __str__(self):
@@ -115,81 +51,10 @@ class BadArgCount(RuntimeError):
 	def __str__(self):
 		return "The number of event arguments does not match"
 
-
-class iWorker(Worker):
-	"""This is a helper class, to pass the event name to Worker.__init__()"""
-	def __init__(self):
-		super(iWorker,self).__init__(self.name)
-
-class OnEventWorker(Collected,iWorker):
-	storage = OnHandlers.storage
-	def __init__(self,parent, name=None, prio=(MIN_PRIO+MAX_PRIO)//2+1):
-		self.prio = prio
-		self.parent = parent
-
-		if name is None:
-			name = Name("_on",self._get_id())
-		super(OnEventWorker,self).__init__(*name)
-
-#		self.name = unicode(self.parent.arglist)
-#		if self.parent.displayname is not None:
-#			self.name += u" ‹"+" ".join(unicode(x) for x in self.parent.displayname)+u"›"
-
-		
-		log(TRACE,"NewHandler",self.id)
-
-	def does_event(self,event):
-		ie = iter(event)
-		ia = iter(self.parent.arglist)
-		ctx = {}
-		pos = 0
-		while True:
-			try: e = ie.next()
-			except StopIteration: e = StopIteration
-			try: a = ia.next()
-			except StopIteration: a = StopIteration
-			if e is StopIteration and a is StopIteration:
-				return True
-			if e is StopIteration or a is StopIteration:
-				return False
-			if hasattr(a,"startswith") and a.startswith('*'):
-				if a == '*':
-					pos += 1
-					a = str(pos)
-				else:
-					a = a[1:]
-				ctx[a] = e
-			elif str(a) != str(e):
-				return False
-
+class OnEventWorker(OnEventBase):
 	def process(self, **k):
 		super(OnEventWorker,self).process(**k)
 		return self.parent.process(**k)
-
-	def report(self, verbose=False):
-		if not verbose:
-			for r in super(OnEventWorker,self).report(verbose):
-				yield r
-		else:
-			for r in self.parent.report(verbose):
-				yield r
-
-	def info(self):
-		return u"%s (%d)" % (unicode(self.parent.arglist),self.prio)
-
-	def list(self):
-		for r in super(OnEventWorker,self).list():
-			yield r
-		yield("id",self.id)
-		yield("prio",self.prio)
-		if self.parent.displayname is not None:
-			yield("pname"," ".join(unicode(x) for x in self.parent.displayname))
-		yield("args",self.parent.arglist)
-		yield("prio",self.prio)
-		if hasattr(self.parent,"displaydoc"):
-			yield("doc",self.parent.displaydoc)
-
-
 
 class OnEventHandler(MainStatementList):
 	name="on"
@@ -213,7 +78,7 @@ Every "*foo" in the event description is mapped to the corresponding
 	def grab_args(self,event,ctx):
 		### This is a pseudo-clone of grab_event()
 		ie = iter(event)
-		ia = iter(self.arglist)
+		ia = iter(self.args)
 		pos = 0
 		while True:
 			try: e = ie.next()
@@ -246,13 +111,13 @@ Every "*foo" in the event description is mapped to the corresponding
 		if self.procs is None:
 			raise SyntaxError(u"‹on ...› can only be used as a complex statement")
 
-		worker = OnEventWorker(self,name=self.displayname,prio=self.prio)
+		OnEventWorker(self, self.args, name=self.displayname,prio=self.prio)
 
 	def start_block(self):
 		super(OnEventHandler,self).start_block()
 		w = Name(*self.params(self.ctx))
 		log(TRACE, "Create OnEvtHandler:", w)
-		self.arglist = w
+		self.args = w
 
 	def _report(self, verbose=False):
 		if self.displayname is not None:
