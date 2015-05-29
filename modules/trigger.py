@@ -66,7 +66,7 @@ trigger FOO...
 			try:
 				if v[0] == '$':
 					v = ctx[v[1:]]
-			except TypeError: # not an int
+			except TypeError: # not a string
 				pass
 			if k is not None and v is not None:
 				setattr(event.ctx, k,v)
