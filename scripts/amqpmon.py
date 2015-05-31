@@ -32,7 +32,7 @@ from gevent.event import Event
 if sys.version_info[0] < 3:
 	sys.stdout = codecs.getwriter('utf8')(sys.stdout)
 
-TESTING=os.environ.get("HOMEVENT_TEST",False)
+TESTING="MOAT_TEST" in os.environ
 
 import amqp
 import json

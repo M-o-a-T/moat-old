@@ -40,6 +40,6 @@ fi
 ) < onewire_params
 
 export PYTHONPATH=$(pwd)
-export HOMEVENT_TEST=1
+export MOAT_TEST=1
 
 python test/interactive/main.py test/interactive/onewire

@@ -55,11 +55,7 @@ else:
 	sys.setdefaultencoding("utf-8")
 
 # This test is also in moat/__init__.py, for recursive-import reasons
-if "HOMEVENT_TEST" in os.environ:
-	TESTING = True
-else:
-	TESTING = False
-
+TESTING = "MOAT_TEST" in os.environ
 
 # nonblocking versions of stdin/stdout
 

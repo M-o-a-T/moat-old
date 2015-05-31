@@ -40,9 +40,9 @@ class DbStore(object):
 	def __init__(self,category,name=None):
 		if name is None:
 			if TESTING:
-				name = "HOMEVENT_TEST"
+				name = "MOAT_TEST"
 			else:
-				name = "HOMEVENT"
+				name = "MOAT"
 		if TESTING:
 			def trace(a,b,c):
 				log(TRACE,a,b,c)

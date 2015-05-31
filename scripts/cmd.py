@@ -34,7 +34,7 @@ import os
 import codecs
 sys.stdout = codecs.getwriter('utf8')(sys.stdout)
 
-TESTING=os.environ.get("HOMEVENT_TEST",False)
+TESTING="MOAT_TEST" in os.environ
 gevent_rpyc.patch_all()
 
 modes = "log,list,cmd".split(",")

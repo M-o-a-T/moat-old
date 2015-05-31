@@ -25,7 +25,7 @@ import os
 
 VERSION = "0.4"
 
-TESTING = "HOMEVENT_TEST" in os.environ
+TESTING = "MOAT_TEST" in os.environ
 
 	# This test is also in moat/twist.py, for recursive-import reasons
 

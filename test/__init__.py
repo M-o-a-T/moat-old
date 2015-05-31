@@ -133,7 +133,7 @@ class run_logger(BaseLogger):
 #		if level < self.level:
 #			return
 
-		if TESTING and int(os.environ["HOMEVENT_TEST"]) > 1:
+		if TESTING and int(os.environ["MOAT_TEST"]) > 1:
 			self._log(None,"@ "+ixtime())
 		if hasattr(event,"report"):
 			for r in event.report(99):

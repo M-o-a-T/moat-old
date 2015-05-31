@@ -15,7 +15,7 @@
 ##
 
 export PYTHONPATH=$(shell pwd)/..:$(shell pwd)/../dabroker:$(shell pwd)/../../smurf/python
-export HOMEVENT_TEST=1
+export MOAT_TEST=1
 
 test:
 	@rm -f /tmp/moat.$$(id -un).db /tmp/moat.db.$$(id -u) 2>/dev/null
