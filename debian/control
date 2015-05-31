@@ -17,6 +17,8 @@ Build-Depends: debhelper (>= 5),
  libevent-dev,
  python-flask,
  python-rpyc,
+ dh-python,
+ dh-systemd,
 X-Also-Depends: avr-libc, gcc-avr
 Build-Depends-Indep: python-support
 Standards-Version: 3.7.2
