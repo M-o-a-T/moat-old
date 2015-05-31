@@ -807,7 +807,15 @@ class SchedValve(SchedCommon):
 			self.log("Run for %s"%(duration,))
 			if not isinstance(duration,(int,long)):
 				duration = duration.total_seconds()
-			self.site.send_command("set","output","on",*(self.v.var.split()), sub=(("for",duration),("async",)))
+			try:
+				self.site.send_command("set","output","on",*(self.v.var.split()), sub=(("for",duration),("async",)))
+			except Exception:
+				# Something broke. Try to turn this thing off.
+				self.log(format_exc()+repr(context))
+				
+				self.site.send_command("set","output","off",*(self.v.var.split()))
+				raise RuntimeError("Could not start (logged)")
+
 		if sched is not None:
 			if self.v.verbose:
 				self.log("Opened for %s"%(sched,))
