@@ -15,6 +15,8 @@ Build-Depends: debhelper (>= 5),
  portaudio19-dev,
  python-gevent,
  libevent-dev,
+ python-flask,
+ python-rpyc,
 X-Also-Depends: avr-libc, gcc-avr
 Build-Depends-Indep: python-support
 Standards-Version: 3.7.2

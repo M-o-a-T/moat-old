@@ -49,7 +49,7 @@ clean:
 	@$(MAKE) -C wago --no-print-directory clean
 
 
-test: FIX
+test: all
 	@$(MAKE) -C test --no-print-directory test
 diff: FIX
 	@$(MAKE) -C test --no-print-directory diff
