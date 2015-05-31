@@ -38,7 +38,7 @@ Description: A scripted event-based monitoring and control system
  .
  The author uses it as a central hub for home automation.
  .
- This package contains auxiliary binaries.
+ This package contains startup scripts, docs, aux binaries, etc.
 
 Package: python-moat
 Architecture: all
@@ -49,6 +49,7 @@ Depends: ${misc:Depends}, ${python:Depends},
  python-dabroker,
  python-pytz | python-tz,
  python-amqp,
+ moat,
 Conflicts: python-homevent
 Replaces: python-homevent
 Recommends: python-rrdtool, owfs,
@@ -61,3 +62,5 @@ Description: A scripted event-based monitoring and control system
  access to its command interpreter with SSH.
  .
  The author uses it as a central hub for home automation.
+ .
+ This package contains the Python2 implementation.
