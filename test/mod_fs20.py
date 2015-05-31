@@ -16,14 +16,14 @@
 ##  for more details.
 ##
 
-from homevent import patch;patch()
-from homevent.reactor import ShutdownHandler
-from homevent.module import load_module,Load
-from homevent.statement import main_words
-from homevent.check import register_condition
-from homevent.fs20 import handler, register_handler
-import homevent.fs20 as fs20
-from homevent.logging import log,DEBUG
+from moat import patch;patch()
+from moat.reactor import ShutdownHandler
+from moat.module import load_module,Load
+from moat.statement import main_words
+from moat.check import register_condition
+from moat.fs20 import handler, register_handler
+import moat.fs20 as fs20
+from moat.logging import log,DEBUG
 from test import run
 
 #class dumper(handler):

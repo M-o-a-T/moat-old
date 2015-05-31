@@ -142,7 +142,7 @@
         <child>
           <widget class="GtkLabel" id="label1">
             <property name="visible">True</property>
-            <property name="label" translatable="yes">&lt;b&gt;HomEvenT Monitor&lt;/b&gt;</property>
+            <property name="label" translatable="yes">&lt;b&gt;MoaT Monitor&lt;/b&gt;</property>
             <property name="use_markup">True</property>
             <property name="ellipsize">end</property>
             <property name="single_line_mode">True</property>
@@ -225,7 +225,7 @@
   </widget>
   <widget class="GtkDialog" id="prefs">
     <property name="border_width">5</property>
-    <property name="title" translatable="yes">HomEvenT Preferences</property>
+    <property name="title" translatable="yes">MoaT Preferences</property>
     <property name="modal">True</property>
     <property name="window_position">center-on-parent</property>
     <property name="type_hint">dialog</property>
@@ -286,7 +286,7 @@
                             <property name="width_request">200</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="tooltip" translatable="yes">The system on which the HomEvenT server is running</property>
+                            <property name="tooltip" translatable="yes">The system on which the MoaT server is running</property>
                             <property name="invisible_char">●</property>
                             <property name="activates_default">True</property>
                             <property name="truncate_multiline">True</property>
@@ -368,7 +368,7 @@
                 <child>
                   <widget class="GtkLabel" id="label2">
                     <property name="visible">True</property>
-                    <property name="label" translatable="yes">HomEvenT Server</property>
+                    <property name="label" translatable="yes">MoaT Server</property>
                     <property name="use_markup">True</property>
                   </widget>
                   <packing>

@@ -22,13 +22,13 @@ This code implements logging to RRD.
 
 from __future__ import division,absolute_import
 
-from homevent.check import register_condition,unregister_condition
-from homevent.module import Module
-from homevent.statement import Statement, main_words
-from homevent.times import now
-from homevent.twist import fix_exception
-from homevent.base import Name
-from homevent.collect import Collection,Collected
+from moat.check import register_condition,unregister_condition
+from moat.module import Module
+from moat.statement import Statement, main_words
+from moat.times import now
+from moat.twist import fix_exception
+from moat.base import Name
+from moat.collect import Collection,Collected
 
 import os
 import rrdtool

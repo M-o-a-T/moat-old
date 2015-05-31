@@ -16,26 +16,26 @@
 ##
 
 """\
-This code implements a SSH command line for homevent.
+This code implements a SSH command line for moat.
 
 """
 
 from __future__ import division,absolute_import
 
-from homevent import TESTING
-from homevent.module import Module
-from homevent.context import Context
-from homevent.statement import main_words,Statement,AttributedStatement,global_words
-from homevent.interpreter import Interpreter,ImmediateProcessor
-from homevent.base import Name,SName,flatten
-from homevent.collect import Collection,Collected,get_collect,all_collect
-from homevent.check import register_condition,unregister_condition
-from homevent.twist import Jobber,fix_exception,reraise
-from homevent.run import process_failure,simple_event,register_worker,unregister_worker,MIN_PRIO
-from homevent.event import TrySomethingElse
-from homevent.worker import Worker
-from homevent.logging import BaseLogger,TRACE,LogLevels
-from homevent.times import now
+from moat import TESTING
+from moat.module import Module
+from moat.context import Context
+from moat.statement import main_words,Statement,AttributedStatement,global_words
+from moat.interpreter import Interpreter,ImmediateProcessor
+from moat.base import Name,SName,flatten
+from moat.collect import Collection,Collected,get_collect,all_collect
+from moat.check import register_condition,unregister_condition
+from moat.twist import Jobber,fix_exception,reraise
+from moat.run import process_failure,simple_event,register_worker,unregister_worker,MIN_PRIO
+from moat.event import TrySomethingElse
+from moat.worker import Worker
+from moat.logging import BaseLogger,TRACE,LogLevels
+from moat.times import now
 
 from datetime import datetime,date,time,timedelta
 from weakref import ref
@@ -438,7 +438,7 @@ RPClisten.register_statement(RPCname)
 
 class RPCmodule(Module):
 	"""\
-		This module implements RPC access to the HomEvenT process.
+		This module implements RPC access to the MoaT process.
 		"""
 
 	info = "RPC access"

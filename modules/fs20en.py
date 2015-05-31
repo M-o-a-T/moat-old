@@ -22,19 +22,19 @@ This code implements a listener for energy monitoring.
 
 from __future__ import division,absolute_import
 
-from homevent.module import Module
-from homevent.statement import AttributedStatement,Statement, main_words
-#from homevent.check import Check,register_condition,unregister_condition
-from homevent.run import simple_event
-#from homevent.event import Event
-#from homevent.context import Context
-from homevent.base import Name,SName
-from homevent.fs20 import recv_handler, PREFIX
-from homevent.collect import Collection,Collected
-from homevent.check import register_condition,unregister_condition
-from homevent.logging import log,TRACE,DEBUG
-from homevent.times import now,humandelta
-from homevent.timeslot import Timeslots,Timeslotted,Timeslot,collision_filter
+from moat.module import Module
+from moat.statement import AttributedStatement,Statement, main_words
+#from moat.check import Check,register_condition,unregister_condition
+from moat.run import simple_event
+#from moat.event import Event
+#from moat.context import Context
+from moat.base import Name,SName
+from moat.fs20 import recv_handler, PREFIX
+from moat.collect import Collection,Collected
+from moat.check import register_condition,unregister_condition
+from moat.logging import log,TRACE,DEBUG
+from moat.times import now,humandelta
+from moat.timeslot import Timeslots,Timeslotted,Timeslot,collision_filter
 
 PREFIX_ENERGY = 'n'
 

@@ -40,13 +40,13 @@ install: build
 	dh_clean -k
 	dh_installdirs
 
-	$(MAKE) install DESTDIR="$(shell pwd)/debian/homevent/" PYDESTDIR="$(shell pwd)/debian/python-homevent/"
+	$(MAKE) install DESTDIR="$(shell pwd)/debian/moat/" PYDESTDIR="$(shell pwd)/debian/python-moat/"
 
-	mkdir -p debian/python-homevent/usr/sbin
-	mv debian/python-homevent/usr/bin/daemon.py debian/python-homevent/usr/sbin/homeventd
-	mv debian/python-homevent/usr/bin/cmd.py debian/python-homevent/usr/bin/homevent
-	mv debian/python-homevent/usr/bin/amqpmon.py debian/python-homevent/usr/bin/homevent-amqp
-	install daemon.he debian/homevent/etc/homevent
+	mkdir -p debian/python-moat/usr/sbin
+	mv debian/python-moat/usr/bin/daemon.py debian/python-moat/usr/sbin/moatd
+	mv debian/python-moat/usr/bin/cmd.py debian/python-moat/usr/bin/moat
+	mv debian/python-moat/usr/bin/amqpmon.py debian/python-moat/usr/bin/moat-amqp
+	install daemon.he debian/moat/etc/moat
 
 
 
@@ -68,10 +68,10 @@ binary-arch: build install
 #	dh_installemacsen
 #	dh_installpam
 #	dh_installmime
-	dh_python2 -p python-homevent
-	install debian/homevent@.service debian/homevent.target debian/homevent/lib/systemd/system/
-	dh_systemd_enable -p homevent homevent.target
-	dh_systemd_start -p homevent --restart-after-upgrade homevent.target
+	dh_python2 -p python-moat
+	install debian/moat@.service debian/moat.target debian/moat/lib/systemd/system/
+	dh_systemd_enable -p moat moat.target
+	dh_systemd_start -p moat --restart-after-upgrade moat.target
 	dh_installinit
 	dh_installman
 	dh_link

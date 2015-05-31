@@ -25,16 +25,16 @@ from __future__ import division,absolute_import
 from datetime import datetime
 import os
 
-from homevent import TESTING
-from homevent.logging import log
-from homevent.statement import Statement, main_words
-from homevent.module import Module
-from homevent.run import list_workers
-from homevent.reactor import Events
-from homevent.base import Name,flatten
-from homevent.twist import fix_exception,print_exception,log_wait
-from homevent.collect import get_collect,all_collect,Collection
-from homevent.times import humandelta,now
+from moat import TESTING
+from moat.logging import log
+from moat.statement import Statement, main_words
+from moat.module import Module
+from moat.run import list_workers
+from moat.reactor import Events
+from moat.base import Name,flatten
+from moat.twist import fix_exception,print_exception,log_wait
+from moat.collect import get_collect,all_collect,Collection
+from moat.times import humandelta,now
 
 from gevent import spawn
 from gevent.queue import Queue

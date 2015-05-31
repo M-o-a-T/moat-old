@@ -22,16 +22,16 @@ This code implements a listener for environment monitoring (tx2/tx3).
 
 from __future__ import division,absolute_import
 
-from homevent.module import Module
-from homevent.statement import AttributedStatement,Statement, main_words
-from homevent.run import simple_event
-from homevent.base import Name,SName
-from homevent.fs20 import recv_handler, PREFIX
-from homevent.collect import Collection,Collected
-from homevent.check import register_condition,unregister_condition
-from homevent.logging import log,TRACE,DEBUG
-from homevent.times import now,humandelta
-from homevent.timeslot import collision_filter
+from moat.module import Module
+from moat.statement import AttributedStatement,Statement, main_words
+from moat.run import simple_event
+from moat.base import Name,SName
+from moat.fs20 import recv_handler, PREFIX
+from moat.collect import Collection,Collected
+from moat.check import register_condition,unregister_condition
+from moat.logging import log,TRACE,DEBUG
+from moat.times import now,humandelta
+from moat.timeslot import collision_filter
 
 PREFIX_TX = 'x'
 

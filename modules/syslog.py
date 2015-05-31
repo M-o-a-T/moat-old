@@ -29,13 +29,13 @@ log
 
 from __future__ import division,absolute_import
 
-from homevent import TESTING
-from homevent.module import Module
-from homevent.statement import Statement, main_words
-from homevent import logging
-from homevent.logging import log, BaseLogger, LogLevels, \
+from moat import TESTING
+from moat.module import Module
+from moat.statement import Statement, main_words
+from moat import logging
+from moat.logging import log, BaseLogger, LogLevels, \
 	TRACE,DEBUG,INFO,WARN,ERROR,PANIC
-from homevent.twist import fix_exception
+from moat.twist import fix_exception
 
 import syslog
 import socket
@@ -120,7 +120,7 @@ class SysLogger(BaseLogger):
 
 		while True:
 			try:
-				self.socket.send("<%d>HomEvenT: %s%s" % (
+				self.socket.send("<%d>MoaT: %s%s" % (
 				                  self.facility | local_levels[LogLevels[level]],
 								  txt,
 				                  "\0" if not TESTING else "\n"))
@@ -149,7 +149,7 @@ class SyslogHandler(Statement):
 syslog ‹facility› ‹level› [‹destination›]
 	- sets up logging to syslog.
       ‹facility› is standard syslog ("user", "local4"…; default to "user").
-      ‹level› is one of HomEvenT's logging levels as reported by "log".
+      ‹level› is one of MoaT's logging levels as reported by "log".
       ‹destination› can be either a Unix socket (needs to start with a /)
                     or a host name, optionally followed by a port number.
                     Default is the local syslog daemon.

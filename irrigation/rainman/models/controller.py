@@ -29,7 +29,7 @@ class Controller(Model,RangeMixin):
 	def __unicode__(self):
 		return self.name
 	name = m.CharField(max_length=200)
-	var = m.CharField(max_length=200,unique=True,help_text="Name in HomEvenT")
+	var = m.CharField(max_length=200,unique=True,help_text="Name in MoaT")
 	comment = m.CharField(max_length=200,blank=True,help_text="Comment")
 	site = m.ForeignKey(Site,related_name="controllers")
 	location = m.CharField(max_length=200, help_text="How to identify the controller (host name?)")

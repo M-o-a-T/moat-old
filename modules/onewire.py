@@ -22,15 +22,15 @@ This code implements (a subset of) the OWFS server protocol.
 
 from __future__ import division,absolute_import
 
-from homevent.module import Module
-from homevent.base import Name,SName
-from homevent.logging import log,DEBUG,TRACE,INFO,WARN
-from homevent.statement import Statement, main_words, AttributedStatement
-from homevent.check import Check,register_condition,unregister_condition
-from homevent.onewire import connect,disconnect, devices
-from homevent.net import NetConnect
-from homevent.monitor import Monitor,MonitorHandler, MonitorAgain
-from homevent.in_out import register_input,register_output, unregister_input,unregister_output, Input,Output
+from moat.module import Module
+from moat.base import Name,SName
+from moat.logging import log,DEBUG,TRACE,INFO,WARN
+from moat.statement import Statement, main_words, AttributedStatement
+from moat.check import Check,register_condition,unregister_condition
+from moat.onewire import connect,disconnect, devices
+from moat.net import NetConnect
+from moat.monitor import Monitor,MonitorHandler, MonitorAgain
+from moat.in_out import register_input,register_output, unregister_input,unregister_output, Input,Output
 
 import struct
 

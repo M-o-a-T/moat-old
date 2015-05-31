@@ -27,7 +27,7 @@ class Feed(Meter,RangeMixin):
 	class Meta(Model.Meta):
 		db_table="rainman_feed"
 	site = m.ForeignKey(Site,related_name="feed_meters")
-	var = m.CharField(max_length=200,unique=True,blank=True,null=True, help_text="monitor name in HomEvenT") # HomEvenT's variable name for it
+	var = m.CharField(max_length=200,unique=True,blank=True,null=True, help_text="monitor name in MoaT") # MoaT's variable name for it
 	comment = m.CharField(max_length=200,blank=True)
 
 	flow = m.FloatField(default=10, blank=True,null=True,help_text="liters per second")

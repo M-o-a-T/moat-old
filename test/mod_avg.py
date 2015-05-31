@@ -16,11 +16,11 @@
 ##  for more details.
 ##
 
-from homevent import patch;patch()
-from homevent.reactor import ShutdownHandler
-from homevent.module import load_module
-from homevent.reactor import shut_down, mainloop
-from homevent.statement import main_words
+from moat import patch;patch()
+from moat.reactor import ShutdownHandler
+from moat.module import load_module
+from moat.reactor import shut_down, mainloop
+from moat.statement import main_words
 from test import run
 
 input = """\

@@ -29,9 +29,9 @@ while false:
 
 from __future__ import division,absolute_import
 
-from homevent.statement import MainStatementList, main_words,global_words
-from homevent.module import Module
-from homevent.check import check_condition
+from moat.statement import MainStatementList, main_words,global_words
+from moat.module import Module
+from moat.check import check_condition
 
 class WhileStatement(MainStatementList):
 	name="while"

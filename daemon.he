@@ -1,5 +1,5 @@
-# HomEvenT default startup file
-#load dir "/etc/homevent/modules"
+# MoaT default startup file
+#load dir "/etc/moat/modules"
 
 if not exists module logging: load logging
 

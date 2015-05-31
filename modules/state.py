@@ -35,16 +35,16 @@ list state [NAME]
 
 from __future__ import division,absolute_import
 
-from homevent.module import Module
-from homevent.statement import Statement, main_words, AttributedStatement
-from homevent.run import simple_event,process_failure
-from homevent.event import Event
-from homevent.check import Check,register_condition,unregister_condition
-from homevent.base import Name,SName
-from homevent.collect import Collection,Collected
-from homevent.context import Context
-from homevent.times import now,humandelta
-from homevent.twist import fix_exception
+from moat.module import Module
+from moat.statement import Statement, main_words, AttributedStatement
+from moat.run import simple_event,process_failure
+from moat.event import Event
+from moat.check import Check,register_condition,unregister_condition
+from moat.base import Name,SName
+from moat.collect import Collection,Collected
+from moat.context import Context
+from moat.times import now,humandelta
+from moat.twist import fix_exception
 
 import os,sys
 
@@ -111,7 +111,7 @@ class SavedState(State):
 	
 		global Db
 		if Db is None:
-			from homevent.database import DbStore
+			from moat.database import DbStore
 			Db = DbStore(category="state")
 		try:
 			self.value = Db.get(self.name)
@@ -195,7 +195,7 @@ class SavedHandler(Statement):
 	doc="Keep the state between runs"
 	long_doc="""\
 saved 
-	: save/restore the state between invocations of HomEvenT
+	: save/restore the state between invocations of MoaT
 """
 
 	def run(self,ctx,**k):
@@ -273,7 +273,7 @@ forget state name...
 
 		global Db
 		if Db is None:
-			from homevent.database import DbStore
+			from moat.database import DbStore
 			Db = DbStore(category="state")
 
 		Db.delete(name)
@@ -340,7 +340,7 @@ class SavedStateCheck(Check):
 
 		global Db
 		if Db is None:
-			from homevent.database import DbStore
+			from moat.database import DbStore
 			Db = DbStore(category="state")
 		try:
 			Db.get(Name(*args))

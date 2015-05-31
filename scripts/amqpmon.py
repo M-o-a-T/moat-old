@@ -18,10 +18,10 @@
 
 from __future__ import division,absolute_import,unicode_literals
 
-from homevent import patch;patch()
+from moat import patch;patch()
 import sys
-from homevent.base import Name,flatten
-from homevent.times import humandelta
+from moat.base import Name,flatten
+from moat.times import humandelta
 from datetime import datetime
 import os
 import codecs
@@ -52,7 +52,7 @@ parser.add_option("-p", "--pass", dest="pw", action="store",
 parser.add_option("-v", "--vhost", dest="vhost", action="store",
 	default="/test", help="Virtual host to connect at")
 parser.add_option("-x", "--exchange", dest="exchange", action="store",
-	default="homevent.event", help="Exchange to listen at")
+	default="moat.event", help="Exchange to listen at")
 parser.add_option("-r", "--routing", dest="routing", action="store",
 	default="cmdline.generic", help="Routing key to send to")
 parser.add_option("-b", "--body-only", dest="body", action="store_true",

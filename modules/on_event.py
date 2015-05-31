@@ -34,14 +34,14 @@ Otherwise a "alarm livingroom" would be triggered.
 
 from __future__ import division,absolute_import
 
-from homevent.statement import Statement,MainStatementList, main_words
-from homevent.logging import log, TRACE
-from homevent.run import MIN_PRIO,MAX_PRIO
-from homevent.module import Module
-from homevent.check import register_condition,unregister_condition
-from homevent.event import TrySomethingElse
-from homevent.base import Name,SName
-from homevent.event_hook import OnHandlers, OnEventBase
+from moat.statement import Statement,MainStatementList, main_words
+from moat.logging import log, TRACE
+from moat.run import MIN_PRIO,MAX_PRIO
+from moat.module import Module
+from moat.check import register_condition,unregister_condition
+from moat.event import TrySomethingElse
+from moat.base import Name,SName
+from moat.event_hook import OnHandlers, OnEventBase
 
 class BadArgs(RuntimeError):
 	def __str__(self):

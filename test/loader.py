@@ -16,9 +16,9 @@
 ##  for more details.
 ##
 
-from homevent.reactor import ShutdownHandler
-from homevent.module import Load,load_module
-from homevent.statement import main_words
+from moat.reactor import ShutdownHandler
+from moat.module import Load,load_module
+from moat.statement import main_words
 from test import run
 
 input = """\

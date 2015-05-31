@@ -1,6 +1,0 @@
-[Unit]
-Description=The target to start all configured HomEvenT instances
-
-[Install]
-WantedBy=multi-user.target
-

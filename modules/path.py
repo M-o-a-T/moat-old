@@ -22,8 +22,8 @@ This code implements file existence checks.
 
 from __future__ import division,absolute_import
 
-from homevent.check import Check,register_condition,unregister_condition
-from homevent.module import Module
+from moat.check import Check,register_condition,unregister_condition
+from moat.module import Module
 import os
 
 class ExistsPathCheck(Check):

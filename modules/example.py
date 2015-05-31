@@ -16,14 +16,14 @@
 ##
 
 """\
-This code represents a sample loadable module for homevent.
+This code represents a sample loadable module for moat.
 
 """
 
 from __future__ import division,absolute_import
 
-from homevent.module import Module
-from homevent.logging import log,DEBUG
+from moat.module import Module
+from moat.logging import log,DEBUG
 
 class ExampleModule(Module):
 	"""\

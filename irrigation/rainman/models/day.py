@@ -19,7 +19,7 @@ from rainman.models import Model
 from django.db import models as m
 from rainman.utils import now, range_union,range_intersection, RangeMixin
 from datetime import timedelta
-from homevent.times import time_until
+from moat.times import time_until
 from django.utils.timezone import get_current_timezone,make_aware,make_naive
 
 import re

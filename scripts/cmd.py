@@ -18,16 +18,16 @@
 
 from __future__ import division,absolute_import,print_function
 
-from homevent import patch;patch()
+from moat import patch;patch()
 import rpyc
 import sys
 import gevent
 from gevent import spawn
 from gevent.queue import Queue
 from rpyc.core.service import VoidService
-from homevent import gevent_rpyc
-from homevent.base import Name,flatten
-from homevent.times import humandelta
+from moat import gevent_rpyc
+from moat.base import Name,flatten
+from moat.times import humandelta
 from datetime import datetime
 import signal
 import os

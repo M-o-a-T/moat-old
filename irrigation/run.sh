@@ -1,5 +1,5 @@
 #!/bin/sh -xe
-cd /daten/src/git/homevent/irrigation/
+cd /daten/src/git/moat/irrigation/
 export DJANGO_SETTINGS_MODULE="settings"
 export PYTHONPATH=$(pwd)/..:$(pwd)
 (

@@ -29,11 +29,11 @@ log
 
 from __future__ import division,absolute_import
 
-from homevent.module import Module
-from homevent.statement import Statement, main_words
-from homevent import logging
-from homevent.logging import log, Logger, LogNames, log_level, Loggers
-from homevent.check import register_condition,unregister_condition
+from moat.module import Module
+from moat.statement import Statement, main_words
+from moat import logging
+from moat.logging import log, Logger, LogNames, log_level, Loggers
+from moat.check import register_condition,unregister_condition
 
 import sys
 

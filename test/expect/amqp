@@ -84,7 +84,7 @@ parent: ‹Collected AMQPclient:test¦foo›
        user: test
        password: ****
 exchange: he_exc
-prefix: ('homevent', 'log')
+prefix: ('moat', 'log')
 .
 EVENT: wait¦start¦_wait¦t4
      : loglevel=0

@@ -25,11 +25,11 @@ monitor test ...
 
 from __future__ import division,absolute_import
 
-from homevent.statement import Statement, main_words
-from homevent.event import Event
-from homevent.run import simple_event
-from homevent.monitor import Monitor,MonitorHandler
-from homevent.in_out import register_input,register_output, unregister_input,unregister_output, Input,Output
+from moat.statement import Statement, main_words
+from moat.event import Event
+from moat.run import simple_event
+from moat.monitor import Monitor,MonitorHandler
+from moat.in_out import register_input,register_output, unregister_input,unregister_output, Input,Output
 from weakref import WeakValueDictionary
 from random import Random
 
@@ -103,7 +103,7 @@ class FakeOutput(Output):
 		simple_event("input","change",*self.name, value=val, last_value=old_val, fake=True)
 
 
-from homevent.module import Module
+from moat.module import Module
 
 class TestModule(Module):
 	"""\

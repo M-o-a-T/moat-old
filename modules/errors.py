@@ -29,14 +29,14 @@ catch:
 
 from __future__ import division,absolute_import
 
-from homevent.statement import MainStatementList,Statement, \
+from moat.statement import MainStatementList,Statement, \
 	main_words,global_words
-from homevent.module import Module
-from homevent.event import RaisedError
-from homevent.check import check_condition
-from homevent import logging
-from homevent.run import process_failure
-from homevent.twist import fix_exception
+from moat.module import Module
+from moat.event import RaisedError
+from moat.check import check_condition
+from moat import logging
+from moat.run import process_failure
+from moat.twist import fix_exception
 
 import sys
 

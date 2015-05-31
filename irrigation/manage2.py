@@ -1,6 +1,6 @@
 #!/usr/bin/python
-from homevent import patch;patch()
-from homevent import twist
+from moat import patch;patch()
+from moat import twist
 import os
 import sys
 

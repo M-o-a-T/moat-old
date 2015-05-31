@@ -16,25 +16,25 @@
 ##
 
 """\
-This code implements an AMQP connector for HomEvenT.
+This code implements an AMQP connector for MoaT.
 
 """
 
 from __future__ import division,absolute_import
 
-from homevent import TESTING
-from homevent.module import Module
-from homevent.context import Context
-from homevent.statement import main_words,Statement,AttributedStatement,global_words
-from homevent.interpreter import Interpreter,ImmediateProcessor
-from homevent.base import Name,SName,flatten
-from homevent.collect import Collection,Collected,get_collect,all_collect
-from homevent.check import register_condition,unregister_condition
-from homevent.twist import Jobber,fix_exception,reraise
-from homevent.run import process_failure,register_worker,unregister_worker,simple_event
-from homevent.event import TrySomethingElse
-from homevent.worker import Worker
-from homevent.logging import BaseLogger,TRACE,LogNames,LogLevels,DEBUG,log
+from moat import TESTING
+from moat.module import Module
+from moat.context import Context
+from moat.statement import main_words,Statement,AttributedStatement,global_words
+from moat.interpreter import Interpreter,ImmediateProcessor
+from moat.base import Name,SName,flatten
+from moat.collect import Collection,Collected,get_collect,all_collect
+from moat.check import register_condition,unregister_condition
+from moat.twist import Jobber,fix_exception,reraise
+from moat.run import process_failure,register_worker,unregister_worker,simple_event
+from moat.event import TrySomethingElse
+from moat.worker import Worker
+from moat.logging import BaseLogger,TRACE,LogNames,LogLevels,DEBUG,log
 
 from datetime import datetime,date,time,timedelta
 from time import time as itime
@@ -48,7 +48,7 @@ from gevent import spawn,spawn_later
 
 _seq=0  # new element sequence number
 _mseq=0 # new message sequence number
-base_mseq="homevent.%x."%(int(itime()))
+base_mseq="moat.%x."%(int(itime()))
 
 class EventCallback(Worker):
 	args = None
@@ -358,7 +358,7 @@ class AMQPqueue(Statement):
 	long_doc = u"""\
 queue ‹name›
 - Set the queue to use.
-  Default: homevent_event / homevent_log.
+  Default: moat_event / moat_log.
 """
 
 	def run(self,ctx,**k):
@@ -461,13 +461,13 @@ class AMQPlog(AttributedStatement):
 	name = "log amqp"
 	doc = "log to an AMQP server"
 	dest = None
-	exchange = "homevent_log"
-	prefix=("homevent","log")
+	exchange = "moat_log"
+	prefix=("moat","log")
 
 	long_doc="""\
 Usage: log amqp ‹conn› ‹level›
 Send logging data to this AMQP exchange.
-Defaults: exchange=homevent_log level=DEBUG prefix=homevent.log
+Defaults: exchange=moat_log level=DEBUG prefix=moat.log
 """
 	def run(self,ctx,**k):
 		level=DEBUG
@@ -537,11 +537,11 @@ class AMQPtell(AttributedStatement):
 	strip = 0
 	shunt = False
 
-	exchange="homevent_event"
+	exchange="moat_event"
 	long_doc="""\
 Usage: tell amqp ‹conn…›
 Send event data to this AMQP exchange.
-Default exchange: homevent_event
+Default exchange: moat_event
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
@@ -619,7 +619,7 @@ class AMQPlisten(AttributedStatement):
 	name = "listen amqp"
 	doc = "read internal events from an AMQP server"
 	dest = None
-	exchange = "homevent_trigger"
+	exchange = "moat_trigger"
 	topic = '#'
 	prefix = ()
 	strip = 0
@@ -628,7 +628,7 @@ class AMQPlisten(AttributedStatement):
 	long_doc="""\
 Usage: listen amqp ‹conn›
 Receive filtered event data from this AMQP exchange.
-Default exchange: homevent_trigger
+Default exchange: moat_trigger
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
@@ -652,7 +652,7 @@ AMQPlisten.register_statement(AMQPrshunt)
 
 class AMQPmodule(Module):
 	"""\
-		This module implements AMQP access to the HomEvenT process.
+		This module implements AMQP access to the MoaT process.
 		"""
 
 	info = "AMQP access"

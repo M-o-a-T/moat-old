@@ -23,21 +23,21 @@ microcontroller.
 
 from __future__ import division,absolute_import
 
-from homevent.base import SName,Name,MIN_PRIO
-from homevent.module import Module
-from homevent.logging import log,DEBUG,TRACE,INFO,WARN,ERROR
-from homevent.statement import AttributedStatement,Statement, main_words
-from homevent.check import Check,register_condition,unregister_condition
-from homevent.run import simple_event,process_failure
-from homevent.context import Context
-from homevent.event import Event,TrySomethingElse
-from homevent.fs20 import handler,register_handler,unregister_handler, \
+from moat.base import SName,Name,MIN_PRIO
+from moat.module import Module
+from moat.logging import log,DEBUG,TRACE,INFO,WARN,ERROR
+from moat.statement import AttributedStatement,Statement, main_words
+from moat.check import Check,register_condition,unregister_condition
+from moat.run import simple_event,process_failure
+from moat.context import Context
+from moat.event import Event,TrySomethingElse
+from moat.fs20 import handler,register_handler,unregister_handler, \
 	PREFIX,PREFIX_TIMESTAMP
-from homevent.worker import ExcWorker
-from homevent.reactor import shutdown_event
-from homevent.twist import callLater, fix_exception
-from homevent.collect import Collection,Collected
-from homevent.net import NetConnect,NetSend,NetConnected,NetActiveConnector
+from moat.worker import ExcWorker
+from moat.reactor import shutdown_event
+from moat.twist import callLater, fix_exception
+from moat.collect import Collection,Collected
+from moat.net import NetConnect,NetSend,NetConnected,NetActiveConnector
 
 import os
 

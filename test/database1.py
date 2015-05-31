@@ -16,9 +16,9 @@
 ##  for more details.
 ##
 
-from homevent.database import DbStore
-from homevent.base import Name
-from homevent.reactor import shut_down,mainloop
+from moat.database import DbStore
+from moat.base import Name
+from moat.reactor import shut_down,mainloop
 
 s = DbStore(Name("Foo","bar"))
 def main():

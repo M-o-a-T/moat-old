@@ -27,7 +27,7 @@ DEBUG TEST (u'', u'\u2039Collected RPCserver:foo\u203a')
 DEBUG TEST (u'name', u'foo')
 DEBUG TEST (u'host', u'')
 DEBUG TEST (u'port', u'56478')
-DEBUG TEST (u'server', u'<homevent.gevent_rpyc.GeventServer obj>')
+DEBUG TEST (u'server', u'<moat.gevent_rpyc.GeventServer obj>')
 DEBUG TEST .
 DEBUG TEST (u'', u'\u2039Collected namedRPC:foo\xa6n1\u203a')
 DEBUG TEST (u'name', u'foo\xa6n1')
@@ -74,9 +74,9 @@ Traceback (most recent call last):
     return CommandProcessor(parent=self,ctx=self.ctx).simple_statement(args)
   File "../modules/rpc.py", line ×××, in simple_statement
     fn = self.lookup(args)
-  File "/home/smurf/homevent/homevent/interpreter.py", line ×××, in lookup
+  File "/home/smurf/moat/moat/interpreter.py", line ×××, in lookup
     fn = me.lookup(event)
-  File "/home/smurf/homevent/homevent/statement.py", line ×××, in lookup
+  File "/home/smurf/moat/moat/statement.py", line ×××, in lookup
     raise UnknownWordError(args,self)
 UnknownWordError: Cannot find word <fuubar This is not found.> in <Global>
 Traceback (most recent call last):
@@ -84,9 +84,9 @@ Traceback (most recent call last):
     return CommandProcessor(parent=self,ctx=self.ctx).simple_statement(args)
   File "../modules/rpc.py", line ×××, in simple_statement
     fn = self.lookup(args)
-  File "/home/smurf/homevent/homevent/interpreter.py", line ×××, in lookup
+  File "/home/smurf/moat/moat/interpreter.py", line ×××, in lookup
     fn = me.lookup(event)
-  File "/home/smurf/homevent/homevent/statement.py", line ×××, in lookup
+  File "/home/smurf/moat/moat/statement.py", line ×××, in lookup
     raise UnknownWordError(args,self)
 UnknownWordError: Cannot find word <fuubar This is not found.> in <Global>
 DEBUG TEST YES Got an error

@@ -29,12 +29,12 @@ var avg X NAME...
 
 from __future__ import division,absolute_import
 
-from homevent.statement import Statement, main_words, AttributedStatement
-from homevent.module import Module
-from homevent.check import Check,register_condition,unregister_condition
-from homevent.times import unixdelta, now, humandelta
-from homevent.base import Name,SName
-from homevent.collect import Collection,Collected
+from moat.statement import Statement, main_words, AttributedStatement
+from moat.module import Module
+from moat.check import Check,register_condition,unregister_condition
+from moat.times import unixdelta, now, humandelta
+from moat.base import Name,SName
+from moat.collect import Collection,Collected
 
 from datetime import timedelta
 

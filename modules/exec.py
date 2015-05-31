@@ -26,16 +26,16 @@ from __future__ import division,absolute_import
 
 import six
 import gevent
-from homevent.statement import Statement, AttributedStatement, main_words
-from homevent.event import Event
-from homevent.run import process_failure
-from homevent.context import Context
-from homevent.base import SName, Name
-from homevent import logging
-from homevent.twist import Jobber,fix_exception
-from homevent.module import Module
-from homevent.logging import log,DEBUG
-from homevent.event_hook import OnEventBase
+from moat.statement import Statement, AttributedStatement, main_words
+from moat.event import Event
+from moat.run import process_failure
+from moat.context import Context
+from moat.base import SName, Name
+from moat import logging
+from moat.twist import Jobber,fix_exception
+from moat.module import Module
+from moat.logging import log,DEBUG
+from moat.event_hook import OnEventBase
 
 from dabroker.util import import_string
 
@@ -125,7 +125,7 @@ param ‹key› ‹val›
 		self.parent.vars[event[0]] = event[1]
 
 
-from homevent.module import Module
+from moat.module import Module
 
 class ExecModule(Module):
 	"""\

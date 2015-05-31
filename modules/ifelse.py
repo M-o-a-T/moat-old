@@ -35,10 +35,10 @@ This code implements the "if" command.
 
 from __future__ import division,absolute_import
 
-from homevent.statement import MainStatementList, main_words,global_words
-from homevent.module import Module
-from homevent.check import check_condition
-from homevent.event import TrySomethingElse
+from moat.statement import MainStatementList, main_words,global_words
+from moat.module import Module
+from moat.check import check_condition
+from moat.event import TrySomethingElse
 
 class IfStatement(MainStatementList):
 	name="if"

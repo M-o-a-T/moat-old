@@ -29,19 +29,19 @@ set pwm $VALUE NAME...
 
 from __future__ import division,absolute_import
 
-from homevent.statement import AttributedStatement, Statement, main_words,\
+from moat.statement import AttributedStatement, Statement, main_words,\
 	global_words, HelpSub
-from homevent.event import Event
-from homevent.run import simple_event,process_failure
-from homevent.reactor import shutdown_event
-from homevent.module import Module
-from homevent.worker import ExcWorker
-from homevent.times import simple_time_delta, now, humandelta
-from homevent.check import Check,register_condition,unregister_condition
-from homevent.base import Name,SName, SYS_PRIO
-from homevent.twist import callLater, fix_exception
-from homevent.collect import Collection,Collected
-from homevent.context import Context
+from moat.event import Event
+from moat.run import simple_event,process_failure
+from moat.reactor import shutdown_event
+from moat.module import Module
+from moat.worker import ExcWorker
+from moat.times import simple_time_delta, now, humandelta
+from moat.check import Check,register_condition,unregister_condition
+from moat.base import Name,SName, SYS_PRIO
+from moat.twist import callLater, fix_exception
+from moat.collect import Collection,Collected
+from moat.context import Context
 
 import os
 import datetime as dt

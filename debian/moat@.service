@@ -1,0 +1,13 @@
+[Unit]
+Description=Home Event monitor
+ConditionPathExists=/etc/moat/%i.he
+After=rabbitmq-server.service
+
+[Service]
+ExecStart=/usr/sbin/moatd /etc/moat/%i.he
+WorkingDirectory=/etc/moat
+User=moat
+Group=moat
+
+[Install]
+WantedBy=moat.target

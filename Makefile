@@ -19,7 +19,7 @@ DESTDIR ?= "/"
 PYDESTDIR ?= ${DESTDIR}
 
 all: subfiles
-	cp -a _geventreactor/Pinako/geventrpyc/__init__.py homevent/gevent_rpyc.py
+	cp -a _geventreactor/Pinako/geventrpyc/__init__.py moat/gevent_rpyc.py
 	$(MAKE) -C fs20 all
 	$(MAKE) -C wago all
 	python setup.py build
@@ -28,10 +28,10 @@ install:
 	$(MAKE) -C wago install ROOT=$(DESTDIR)
 	python setup.py install --root="$(PYDESTDIR)" --no-compile -O0 --install-layout=deb
 
-subfiles: homevent/gevent_rpyc.py
+subfiles: moat/gevent_rpyc.py
 
-homevent/gevent_rpyc.py: _geventreactor/Pinako/geventrpyc/__init__.py
-	cp -a _geventreactor/Pinako/geventrpyc/__init__.py homevent/gevent_rpyc.py
+moat/gevent_rpyc.py: _geventreactor/Pinako/geventrpyc/__init__.py
+	cp -a _geventreactor/Pinako/geventrpyc/__init__.py moat/gevent_rpyc.py
 
 _geventreactor/Pinako/geventrpyc/__init__.py: submod
 submod:
@@ -40,7 +40,7 @@ submod:
 	git submodule update; \
 	fi
 FIX:
-	@if test ! -d homevent/modules; then ln -s ../modules homevent/modules; fi
+	@if test ! -d moat/modules; then ln -s ../modules moat/modules; fi
 
 clean:
 	python setup.py clean --build-base="$(PYDESTDIR)"
@@ -80,15 +80,15 @@ sr ssh:
 lab:
 	## private
 	set -e; \
-	F="../homevent_$$(dpkg-parsechangelog | sed -ne 's/^Version:[[:space:]]//p')_i386.changes"; \
-	echo "$$F" /daten/debian/pool/main/h/homevent/"$$(basename "$$F")"; \
+	F="../moat_$$(dpkg-parsechangelog | sed -ne 's/^Version:[[:space:]]//p')_i386.changes"; \
+	echo "$$F" /daten/debian/pool/main/h/moat/"$$(basename "$$F")"; \
 	test ! -f "$$F"; \
 	sudo chroot /daten/chroot/i386/wheezy sudo -u smurf make -C $(PWD) lab_ || test -s "$$F"; \
 	dput -u smurf "$$F"; \
-	echo -n "Waiting for archive "; while test ! -f "/daten/debian/pool/main/h/homevent/$$(basename "$$F")" ; do echo -n "."; sleep 1;done;echo " done."
+	echo -n "Waiting for archive "; while test ! -f "/daten/debian/pool/main/h/moat/$$(basename "$$F")" ; do echo -n "."; sleep 1;done;echo " done."
 	make clean
 	ssh -lroot lab apt-get update
-	ssh -lroot lab apt-get install -y homevent=$$(dpkg-parsechangelog | sed -ne 's/^Version:[[:space:]]//p')
+	ssh -lroot lab apt-get install -y moat=$$(dpkg-parsechangelog | sed -ne 's/^Version:[[:space:]]//p')
 lab_:
 	debuild -b
 

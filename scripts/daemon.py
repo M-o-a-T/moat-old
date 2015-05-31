@@ -19,17 +19,17 @@
 from __future__ import division,absolute_import
 
 import sys; sys.excepthook = None; del sys
-from homevent import patch;patch()
-from homevent.statement import main_words, global_words, Statement, \
+from moat import patch;patch()
+from moat.statement import main_words, global_words, Statement, \
 	DoNothingHandler
-from homevent.module import Load,LoadDir,load_module
-from homevent.check import register_condition
-from homevent.context import Context
-from homevent.parser import parse
-from homevent.run import process_failure
-from homevent.twist import fix_exception
-from homevent.reactor import ShutdownHandler,mainloop,shut_down
-from homevent.logging import TRACE,DEBUG,INFO,WARN,ERROR,PANIC,\
+from moat.module import Load,LoadDir,load_module
+from moat.check import register_condition
+from moat.context import Context
+from moat.parser import parse
+from moat.run import process_failure
+from moat.twist import fix_exception
+from moat.reactor import ShutdownHandler,mainloop,shut_down
+from moat.logging import TRACE,DEBUG,INFO,WARN,ERROR,PANIC,\
 	Logger, log_level
 from signal import signal,SIGINT,SIGHUP,SIGQUIT
 import sys

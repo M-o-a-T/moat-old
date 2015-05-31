@@ -27,15 +27,15 @@ monitor name TYPE args
 
 from __future__ import division,absolute_import
 
-from homevent.monitor import Monitor,Monitors, MonitorDelayFor,MonitorDelayUntil,\
+from moat.monitor import Monitor,Monitors, MonitorDelayFor,MonitorDelayUntil,\
 	MonitorRequire,MonitorRetry,MonitorAlarm,MonitorHigh,MonitorLow,\
 	MonitorLimit, MonitorScale, MonitorDiff, MonitorHandler, NoWatcherError
-from homevent.statement import AttributedStatement, Statement, main_words,\
+from moat.statement import AttributedStatement, Statement, main_words,\
 	global_words
-from homevent.module import Module
-from homevent.check import Check,register_condition,unregister_condition
-from homevent.base import Name,SName
-from homevent.in_out import Inputs
+from moat.module import Module
+from moat.check import Check,register_condition,unregister_condition
+from moat.base import Name,SName
+from moat.in_out import Inputs
 
 import os
 

@@ -22,8 +22,8 @@ This code implements primitive "if true" and "if false" checks.
 
 from __future__ import division,absolute_import
 
-from homevent.check import Check,register_condition,unregister_condition
-from homevent.module import Module
+from moat.check import Check,register_condition,unregister_condition
+from moat.module import Module
 
 class TrueCheck(Check):
 	name="true"

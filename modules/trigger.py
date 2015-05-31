@@ -25,12 +25,12 @@ trigger FOO...
 
 from __future__ import division,absolute_import
 
-from homevent.statement import Statement, AttributedStatement, main_words
-from homevent.event import Event
-from homevent.run import process_event, run_event
-from homevent.context import Context
-from homevent import logging
-from homevent.twist import Jobber
+from moat.statement import Statement, AttributedStatement, main_words
+from moat.event import Event
+from moat.run import process_event, run_event
+from moat.context import Context
+from moat import logging
+from moat.twist import Jobber
 
 import gevent
 
@@ -154,7 +154,7 @@ param ‹key› ‹val›
 
 
 
-from homevent.module import Module
+from moat.module import Module
 
 class TriggerModule(Module):
 	"""\

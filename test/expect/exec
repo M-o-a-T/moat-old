@@ -24,7 +24,7 @@ test me not :: test¦me¦not (51)
 EVENT: wait¦done¦_wait¦t1
      : loglevel=0
 IEVENT: test¦me
-DEBUG Parallel HomEvenT handler
+DEBUG Parallel MoaT handler
 TRACE PY Event called test¦me
 EVENT: wait¦start¦_wait¦t2
      : loglevel=0

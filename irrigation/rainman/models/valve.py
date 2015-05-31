@@ -36,7 +36,7 @@ class Valve(Model,RangeMixin):
 	controller = m.ForeignKey(Controller,related_name="valves")
 	envgroup = m.ForeignKey(EnvGroup,db_column="param_group_id",related_name="valves")
 	location = m.CharField(max_length=200,help_text="how to identify the valve on its controller")
-	var = m.CharField(max_length=200, unique=True, help_text="name of this output, in HomEvenT")
+	var = m.CharField(max_length=200, unique=True, help_text="name of this output, in MoaT")
 	verbose = m.PositiveSmallIntegerField(default=0,help_text="Log lots of changes?")
 	# 
 	# This describes the area that's watered

@@ -20,7 +20,7 @@
 		"""
 
 from __future__ import division,absolute_import
-from homevent import gevent_rpyc
+from moat import gevent_rpyc
 gevent_rpyc.patch_all()
 
 from traceback import format_exc,print_exc
@@ -42,7 +42,7 @@ from rainman.logging import log,log_error
 from datetime import datetime,time,timedelta
 from django.db.models import F,Q
 from django.db import transaction
-from homevent.times import humandelta
+from moat.times import humandelta
 import random
 
 METER_TIME=5*60 # meters get deprecated if no value for five minutes 
@@ -896,7 +896,7 @@ class SchedValve(SchedCommon):
 					except TooManyOn:
 						self.log("Could not schedule: too many open valves")
 					except NotConnected:
-						self.log("Could not schedule: connection to HomEvenT failed")
+						self.log("Could not schedule: connection to MoaT failed")
 					return
 
 		try:
@@ -918,7 +918,7 @@ class SchedValve(SchedCommon):
 		except TooManyOn:
 			self.log("Could not schedule: too many open valves")
 		except NotConnected:
-			self.log("Could not schedule: connection to HomEvenT failed")
+			self.log("Could not schedule: connection to MoaT failed")
 	
 	def run_sched_task(self,reason="valve"):
 		self.sched_job = None

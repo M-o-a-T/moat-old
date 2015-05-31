@@ -25,19 +25,19 @@ from __future__ import division,absolute_import
 import os
 import re
 
-from homevent.module import Module
-from homevent.base import Name,SName, singleName
-from homevent.logging import log,DEBUG,TRACE,INFO,WARN
-from homevent.statement import AttributedStatement, Statement, main_words
-from homevent.check import Check,register_condition,unregister_condition
-from homevent.monitor import Monitor,MonitorHandler, MonitorAgain
-from homevent.net import NetConnect,LineReceiver,NetActiveConnector,NetRetry
-from homevent.twist import reraise,callLater,fix_exception
-from homevent.run import simple_event
-from homevent.context import Context
-from homevent.times import now,unixtime,humandelta
-from homevent.msg import MsgQueue,MsgFactory,MsgBase, MINE,NOT_MINE, RECV_AGAIN,SEND_AGAIN
-from homevent.collect import Collection,Collected
+from moat.module import Module
+from moat.base import Name,SName, singleName
+from moat.logging import log,DEBUG,TRACE,INFO,WARN
+from moat.statement import AttributedStatement, Statement, main_words
+from moat.check import Check,register_condition,unregister_condition
+from moat.monitor import Monitor,MonitorHandler, MonitorAgain
+from moat.net import NetConnect,LineReceiver,NetActiveConnector,NetRetry
+from moat.twist import reraise,callLater,fix_exception
+from moat.run import simple_event
+from moat.context import Context
+from moat.times import now,unixtime,humandelta
+from moat.msg import MsgQueue,MsgFactory,MsgBase, MINE,NOT_MINE, RECV_AGAIN,SEND_AGAIN
+from moat.collect import Collection,Collected
 
 from gevent.event import AsyncResult
 from gevent.queue import Full

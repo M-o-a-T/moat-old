@@ -16,12 +16,12 @@
 ##  for more details.
 ##
 
-from homevent import patch;patch()
-from homevent.reactor import ShutdownHandler
-from homevent.module import load_module,Load
-from homevent.statement import main_words
-from homevent.check import register_condition
-from homevent.logging import log,DEBUG
+from moat import patch;patch()
+from moat.reactor import ShutdownHandler
+from moat.module import load_module,Load
+from moat.statement import main_words
+from moat.check import register_condition
+from moat.logging import log,DEBUG
 from test import run
 from gevent import spawn,sleep,event
 

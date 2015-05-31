@@ -16,12 +16,12 @@
 ##  for more details.
 ##
 
-from homevent import patch;patch()
-from homevent.reactor import ShutdownHandler
-from homevent.module import load_module,Load
-from homevent.statement import main_words
-from homevent.check import register_condition
-from homevent.logging import log,DEBUG
+from moat import patch;patch()
+from moat.reactor import ShutdownHandler
+from moat.module import load_module,Load
+from moat.statement import main_words
+from moat.check import register_condition
+from moat.logging import log,DEBUG
 from test import run
 from gevent import spawn,sleep,event
 
@@ -42,7 +42,7 @@ log amqp DEBUG:
 	name test foo
 	exchange he_exc
 
-# amqp => homevent
+# amqp => moat
 # translate amqte.x.y.z to amam.x.y.z
 listen amqp test foo:
 	name foo lish
@@ -51,7 +51,7 @@ listen amqp test foo:
 	topic "amqte.#"
 	strip 1
 
-# homevent => amqp
+# moat => amqp
 # translate hey.x to amqte.x
 tell amqp test foo:
 	filter hey *
@@ -144,7 +144,7 @@ wait:
 	for 0.6
 	debug force
 
-# homevent => amqp
+# moat => amqp
 # translate hey.x to amqte.x
 
 shutdown

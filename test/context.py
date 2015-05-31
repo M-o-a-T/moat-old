@@ -16,7 +16,7 @@
 ##  for more details.
 ##
 
-from homevent.context import Context,default_context
+from moat.context import Context,default_context
 
 c = Context()
 assert not c._store

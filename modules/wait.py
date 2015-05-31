@@ -25,20 +25,20 @@ wait: for FOO...
 
 from __future__ import division,absolute_import
 
-from homevent import TESTING
-from homevent.statement import AttributedStatement, Statement, main_words,\
+from moat import TESTING
+from moat.statement import AttributedStatement, Statement, main_words,\
 	global_words
-from homevent.event import Event
-from homevent.run import simple_event
-from homevent.module import Module
-from homevent.worker import ExcWorker
-from homevent.times import time_delta, time_until, unixtime,unixdelta, now, humandelta, sleep
-from homevent.check import Check,register_condition,unregister_condition
-from homevent.base import Name,SName
-from homevent.collect import Collection,Collected
-from homevent.twist import callLater,fix_exception,Jobber,log_wait
-from homevent.logging import log,log_exc,TRACE
-from homevent.delay import DelayFor,DelayWhile,DelayUntil,DelayNext,\
+from moat.event import Event
+from moat.run import simple_event
+from moat.module import Module
+from moat.worker import ExcWorker
+from moat.times import time_delta, time_until, unixtime,unixdelta, now, humandelta, sleep
+from moat.check import Check,register_condition,unregister_condition
+from moat.base import Name,SName
+from moat.collect import Collection,Collected
+from moat.twist import callLater,fix_exception,Jobber,log_wait
+from moat.logging import log,log_exc,TRACE
+from moat.delay import DelayFor,DelayWhile,DelayUntil,DelayNext,\
 	DelayError,DelayDone,DelayCancelled
 
 from gevent.event import AsyncResult

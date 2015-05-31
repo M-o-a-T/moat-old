@@ -1,0 +1,83 @@
+#! /bin/sh
+#
+# Startup script for MoaT.
+# 
+# Based on a skeleton written by Miquel van Smoorenburg <miquels@cistron.nl>
+# and modified for Debian by Ian Murdock <imurdock@gnu.ai.mit.edu>.
+#
+# Version:	@(#)skeleton  1.9  26-Feb-2001  miquels@cistron.nl
+#
+
+PATH=/usr/lib/moat:/sbin:/bin:/usr/sbin:/usr/bin
+DAEMON=/usr/sbin/moat
+NAME=moat
+DESC=moat
+
+DAEMON_OPTS=""
+DAEMON_CFG="/etc/moat/daemon.he"
+LOGLEVEL=user.info
+ERRLEVEL=user.warn
+export PYTHONPATH=/etc/moat
+
+test -x $DAEMON || exit 0
+
+# Include moat defaults if available
+if [ -f /etc/default/moat ] ; then
+	. /etc/default/moat
+fi
+test -f "$DAEMON_CFG" || exit 0
+
+mkdir -p /var/run/moat /var/cache/moat
+chmod 755 /var/run/moat /var/cache/moat
+chown -R moat /var/run/moat /var/cache/moat
+
+set -e
+
+case "$1" in
+  start)
+	echo -n "Starting $DESC: "
+	cd /var/lib/moat
+	( sudo -u moat env PATH=/usr/lib/moat:/bin:/usr/bin $DAEMON --pidfile=/var/run/moat/pid $DAEMON_OPTS $DAEMON_CFG </dev/null | logger -p $LOGLEVEL -t moat ) 2>&1 | logger -p $ERRLEVEL -t moat &
+	echo "$NAME."
+	;;
+  debug)
+	shift
+	cd /var/lib/moat
+	exec sudo -u moat $DAEMON $DAEMON_OPTS $@ $DAEMON_CFG
+	;;
+  stop)
+	echo -n "Stopping $DESC: "
+	pid=$(cat /var/run/moat/pid 2>/dev/null)
+	test -n "$pid" && kill -0 $pid 2>/dev/null || exit 0
+	start-stop-daemon --stop --quiet --pidfile /var/run/moat/pid
+	for f in . . . . . . . . . . ; do
+		if ! kill -0 $pid 2>/dev/null; then break; fi
+		echo -n $f
+		sleep 1
+	done
+	if kill -0 $pid 2>/dev/null; then echo " -- still running?"; exit 1; fi
+	echo " $NAME."
+	;;
+  reload)
+	echo "Reloading $DESC configuration files."
+	start-stop-daemon --stop --signal 1 --quiet --pidfile /var/run/moat/pid
+	;;
+  force-reload)
+	# check whether $DAEMON is running. If so, restart
+	start-stop-daemon --stop --test --quiet --pidfile /var/run/moat/pid \
+	&& $0 restart \
+	|| exit 0
+	;;
+  restart)
+    echo "Restarting $DESC: "
+	$0 stop
+	$0 start
+	;;
+  *)
+	N=/etc/init.d/$NAME
+	echo "Usage: $N {start|stop|restart|reload|force-reload|debug}" >&2
+	exit 1
+	;;
+esac
+
+exit 0

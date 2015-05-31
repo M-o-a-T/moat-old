@@ -22,17 +22,17 @@ This code implements basic commands to access FS20 switches.
 
 from __future__ import division,absolute_import
 
-from homevent.module import Module
-from homevent.logging import log,DEBUG,TRACE,INFO,WARN
-from homevent.statement import AttributedStatement,Statement, main_words
-from homevent.run import simple_event
-from homevent.event import Event
-from homevent.context import Context
-from homevent.check import register_condition,unregister_condition
-from homevent.base import Name,SName
-from homevent.collect import Collection,Collected
-from homevent.fs20 import from_hc, from_dev, to_hc, to_dev, WrongDatagram, handler_names
-from homevent.fs20sw import group
+from moat.module import Module
+from moat.logging import log,DEBUG,TRACE,INFO,WARN
+from moat.statement import AttributedStatement,Statement, main_words
+from moat.run import simple_event
+from moat.event import Event
+from moat.context import Context
+from moat.check import register_condition,unregister_condition
+from moat.base import Name,SName
+from moat.collect import Collection,Collected
+from moat.fs20 import from_hc, from_dev, to_hc, to_dev, WrongDatagram, handler_names
+from moat.fs20sw import group
 
 codes = {}
 devs = {}

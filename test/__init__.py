@@ -16,15 +16,15 @@
 ##  for more details.
 ##
 
-from homevent.logging import BaseLogger, TRACE,NONE, log, log_level
-from homevent.interpreter import Interpreter
-from homevent.parser import parse
-from homevent.context import Context
-from homevent.times import unixtime,now
-from homevent.twist import fix_exception,format_exception,print_exception,TESTING
-from homevent.statement import Statement,main_words
-from homevent.base import Name
-from homevent.reactor import shut_down, mainloop
+from moat.logging import BaseLogger, TRACE,NONE, log, log_level
+from moat.interpreter import Interpreter
+from moat.parser import parse
+from moat.context import Context
+from moat.times import unixtime,now
+from moat.twist import fix_exception,format_exception,print_exception,TESTING
+from moat.statement import Statement,main_words
+from moat.base import Name
+from moat.reactor import shut_down, mainloop
 
 from cStringIO import StringIO
 import sys

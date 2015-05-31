@@ -16,7 +16,7 @@
 ##  for more details.
 ##
 
-from homevent.context import Context
+from moat.context import Context
 from modules.onewire import OWFSwindmon
 
 res=[(2,0),(2.0,0.20),(2.5562,0.35317),(3.15135,0.46385),(4.56156,0.35936),(7.9999,0.9999),(8.11711,0.92410)]

@@ -25,10 +25,10 @@ This code reads a config file.
 
 from __future__ import division,absolute_import
 
-from homevent.statement import Statement, main_words
-from homevent.module import Module
-from homevent.check import Check,register_condition,unregister_condition
-from homevent.parser import parse
+from moat.statement import Statement, main_words
+from moat.module import Module
+from moat.check import Check,register_condition,unregister_condition
+from moat.parser import parse
 import os
 
 

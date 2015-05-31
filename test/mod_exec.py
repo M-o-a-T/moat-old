@@ -16,16 +16,16 @@
 ##  for more details.
 ##
 
-from homevent import patch;patch()
-from homevent.reactor import ShutdownHandler
-from homevent.module import load_module
-from homevent.statement import DoNothingHandler, main_words
+from moat import patch;patch()
+from moat.reactor import ShutdownHandler
+from moat.module import load_module
+from moat.statement import DoNothingHandler, main_words
 
 from test import run
 
 input = u"""\
 on test me:
-	log DEBUG "Parallel HomEvenT handler"
+	log DEBUG "Parallel MoaT handler"
 on run test:
 	exec test.exec.called one $also
 list on

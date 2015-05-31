@@ -18,8 +18,8 @@
 
 # Tests to figure out how long until a time spec fits / does not fit
 
-from homevent import patch;patch()
-from homevent.times import time_until
+from moat import patch;patch()
+from moat.times import time_until
 import datetime
 import sys
 

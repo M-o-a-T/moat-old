@@ -1,4 +1,4 @@
-from homevent.logging import log, TRACE,ERROR
+from moat.logging import log, TRACE,ERROR
 
 def running(event):
     log(TRACE,"PY Event called",event)

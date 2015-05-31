@@ -22,11 +22,11 @@ This module contains statements to do simple statement aggregation.
 
 from __future__ import division,absolute_import
 
-from homevent.module import Module
-from homevent.logging import log
-from homevent.statement import main_words, MainStatementList
-from homevent.run import process_failure
-from homevent.twist import fix_exception,Jobber
+from moat.module import Module
+from moat.logging import log
+from moat.statement import main_words, MainStatementList
+from moat.run import process_failure
+from moat.twist import fix_exception,Jobber
 
 import os
 import gevent

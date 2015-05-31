@@ -16,12 +16,12 @@
 ##  for more details.
 ##
 
-from homevent import patch;patch()
-from homevent.interpreter import Interpreter
-from homevent.statement import Statement,ComplexStatement,main_words
-from homevent.reactor import ShutdownHandler
-from homevent.module import load_module
-from homevent.base import Name
+from moat import patch;patch()
+from moat.interpreter import Interpreter
+from moat.statement import Statement,ComplexStatement,main_words
+from moat.reactor import ShutdownHandler
+from moat.module import load_module
+from moat.base import Name
 
 from test import run, run_logger
  

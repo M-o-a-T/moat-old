@@ -25,12 +25,12 @@ timeslot FOO...
 
 from __future__ import division,absolute_import
 
-from homevent.timeslot import Timeslots, Timeslot, Timeslotted
-from homevent.statement import AttributedStatement, Statement, main_words,\
+from moat.timeslot import Timeslots, Timeslot, Timeslotted
+from moat.statement import AttributedStatement, Statement, main_words,\
 	global_words
-from homevent.module import Module
-from homevent.check import Check,register_condition,unregister_condition
-from homevent.base import Name,SName
+from moat.module import Module
+from moat.check import Check,register_condition,unregister_condition
+from moat.base import Name,SName
 
 import os
 

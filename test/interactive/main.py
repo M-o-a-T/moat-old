@@ -16,16 +16,16 @@
 ##  for more details.
 ##
 
-from homevent import patch;patch()
-from homevent.interpreter import InteractiveInterpreter,Interpreter
-from homevent.parser import parse
-from homevent.statement import main_words, global_words
-from homevent.check import register_condition
-from homevent.module import load_module, Load,LoadDir
-from homevent.reactor import ShutdownHandler,mainloop,shut_down
-from homevent.context import Context
-from homevent.twist import callLater,fix_exception
-from homevent.logging import log_level,NONE
+from moat import patch;patch()
+from moat.interpreter import InteractiveInterpreter,Interpreter
+from moat.parser import parse
+from moat.statement import main_words, global_words
+from moat.check import register_condition
+from moat.module import load_module, Load,LoadDir
+from moat.reactor import ShutdownHandler,mainloop,shut_down
+from moat.context import Context
+from moat.twist import callLater,fix_exception
+from moat.logging import log_level,NONE
 
 from tokenize import tok_name
 import os,sys

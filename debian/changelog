@@ -1,3 +1,9 @@
+moat (0.7.0) smurf; urgency=medium
+
+  * rename to MoaT.
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Sun, 31 May 2015 10:41:19 +0200
+
 homevent (0.6.0) smurf; urgency=medium
 
   * Execute Python code

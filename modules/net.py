@@ -22,16 +22,16 @@ This code implements a simple line-oriented protocol via TCP.
 
 from __future__ import division,absolute_import
 
-from homevent.module import Module
-from homevent.logging import log,DEBUG,TRACE,INFO,WARN,ERROR
-from homevent.statement import Statement, main_words, AttributedStatement
-from homevent.check import Check,register_condition,unregister_condition
-from homevent.base import Name
-from homevent.collect import Collection,Collected
-from homevent.run import simple_event
-from homevent.context import Context
+from moat.module import Module
+from moat.logging import log,DEBUG,TRACE,INFO,WARN,ERROR
+from moat.statement import Statement, main_words, AttributedStatement
+from moat.check import Check,register_condition,unregister_condition
+from moat.base import Name
+from moat.collect import Collection,Collected
+from moat.run import simple_event
+from moat.context import Context
 
-from homevent.net import NetListen,NetConnect,NetSend,NetConnected,\
+from moat.net import NetListen,NetConnect,NetSend,NetConnected,\
 	DisconnectedError,NetListener,NetActiveConnector,NetPassiveConnector,\
 	NetName,NetTo,LineReceiver
 

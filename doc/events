@@ -231,22 +231,22 @@ fs20 em name…
 
 fs20 conflict em sync
     -- The data packet fits more than one timeslot, but the values are
-       too close so HomEvenT cannot reliably associate the data to a
+       too close so MoaT cannot reliably associate the data to a
        single device.
 
 fs20 conflict em unsync
     -- The data packet fits no running timeslot. There are multiple
-       unsynced timeslots and the values are too close, so HomEvenT
+       unsynced timeslots and the values are too close, so MoaT
        cannot reliably associate the data to a single device.
 
 fs20 conflict em untimed
     -- The data packet fits no running timeslot. There are multiple
        devices without timeslot and the values are too close, so
-       HomEvenT cannot reliably associate the data to a single device.
+       MoaT cannot reliably associate the data to a single device.
 
 fs20 unknown em untimed
     -- The data packet fits no running timeslot. There are no
-       devices without timeslot, so HomEvenT cannot associate
+       devices without timeslot, so MoaT cannot associate
        the data to any device.
 
 fs20 unknown em unregistered

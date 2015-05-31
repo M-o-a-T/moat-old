@@ -20,10 +20,10 @@ Basic guideline: Simple.
 Statements
 ----------
 
-The HomEvenT configuration language is built on statements. Each
+The MoaT configuration language is built on statements. Each
 statement does exactly one thing. Statements are formed with words.
 The word (or words) at the beginning select which statement gets to
-run. You use "help" to list the statements HomEvenT knows about.
+run. You use "help" to list the statements MoaT knows about.
 
 Sometimes there's more than one statement that "fits". For instance, 
 the basic "help" command shows:
@@ -99,7 +99,7 @@ interpreter that you're done with the block, but you wish to see what it
 does before entering any more commands.
 
 
-Another use for blocks is that the HomEvenT way to make simple ideas
+Another use for blocks is that the MoaT way to make simple ideas
 somewhat less simple is to convert the original simple idea from a
 simple statement into a block, and attach a complicating command to it.
 
@@ -180,5 +180,5 @@ No "Known words" are reported here, so you're done.
 The End
 -------
 
-You now know all there is to know about the general syntax of HomEvenT
+You now know all there is to know about the general syntax of MoaT
 commands; you should now proceed to doc/tutorial.

@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 from __future__ import division
-from homevent import patch; homevent.patch()
+from moat import patch; moat.patch()
 from dabroker.util.thread import Main
 
 import gtk

@@ -17,13 +17,13 @@
 ##
 
 import sys
-from homevent.logging import TRACE
-from homevent.worker import Worker,SeqWorker,WorkSequence
-from homevent.event import Event
-from homevent.context import Context
-from homevent.logging import log
-from homevent.run import register_worker,process_event
-from homevent.reactor import shut_down,mainloop
+from moat.logging import TRACE
+from moat.worker import Worker,SeqWorker,WorkSequence
+from moat.event import Event
+from moat.context import Context
+from moat.logging import log
+from moat.run import register_worker,process_event
+from moat.reactor import shut_down,mainloop
 
 class SayWorker(Worker):
 	"""A cheap worker which just logs something convenient."""
