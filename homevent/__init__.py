@@ -32,7 +32,10 @@ TESTING = "HOMEVENT_TEST" in os.environ
 def patch():
 	"""Call this as early as possible, not from an import, and only once."""
 	from dabroker import patch; patch()
-	from homevent.gevent_rpyc import patch_all; patch_all()
+	try:
+		from homevent.gevent_rpyc import patch_all; patch_all()
+	except ImportError:
+		pass
 
 	import logging,sys
 	logging.basicConfig(stream=sys.stderr,level=logging.DEBUG if TESTING else logging.WARN)

@@ -151,7 +151,6 @@ class Collected(object):
 		pass
 
 	def dup_error(self,name):
-		import pdb;pdb.set_trace()
 		raise RuntimeError(u"Duplicate entry ‹%s› in ‹%s›" % (name,self.storage.name))
 
 	def __repr__(self):
@@ -164,6 +163,10 @@ class Collected(object):
 		"""Yield a couple of (left,right) tuples, for enumeration."""
 		yield (unicode(self),)
 		yield ("name",self.name)
+		self = super(Collected,self)
+		if hasattr(self,'list'):
+			for r in self.list():
+				yield r
 
 	def delete(self, ctx=None):
 		"""Remove myself from a collection"""

@@ -3,58 +3,48 @@ EVENT: startup
 TRACE Yes!
 TRACE Yes!
 TRACE Set to ONE
-EVENT: state¦-¦one¦foo¦bar
 EVENT: state¦change¦foo¦bar
      : prev_time=2003-04-05 06:07:08
      : value=one
      : prev_value=-
 TRACE Set to TWO
-EVENT: state¦one¦two¦foo¦bar
 EVENT: state¦change¦foo¦bar
      : prev_time=2003-04-05 06:07:08
      : value=two
      : prev_value=one
 TRACE Create OnEvtHandler: state¦change¦foo¦bar
-TRACE NewHandler 9
+TRACE NewHandler 7
 TRACE Set to THREE
 TRACE Create OnEvtHandler: state¦change¦foo¦bar
-EVENT: state¦two¦three¦foo¦bar
 EVENT: state¦change¦foo¦bar
      : prev_time=2003-04-05 06:07:08
      : value=three
      : prev_value=two
 TRACE Yes Set to three
-TRACE NewHandler 12
+TRACE NewHandler 9
 TRACE Set to TWOHALF
-EVENT: state¦three¦twohalf¦foo¦bar
 EVENT: state¦change¦foo¦bar
      : prev_time=2003-04-05 06:07:08
      : value=twohalf
      : prev_value=three
 TRACE Set to FOUR
-EVENT: state¦twohalf¦fourtoo¦foo¦bar
 EVENT: state¦change¦foo¦bar
      : prev_time=2003-04-05 06:07:08
      : value=fourtoo
      : prev_value=twohalf
 TRACE Set to THREE
-EVENT: state¦fourtoo¦three¦foo¦bar
 EVENT: state¦change¦foo¦bar
      : prev_time=2003-04-05 06:07:08
      : value=three
      : prev_value=fourtoo
 TRACE Yes Set to three
-EVENT: wait¦start¦0.1¦_wait¦1
-     : loglevel=0
-EVENT: wait¦start¦_wait¦1
+EVENT: wait¦start¦_wait¦t1
      : loglevel=0
      : end_time=0.1
-TRACE 2003-04-05 06:07:08.150000 _wait¦1: Fake timer done
+TRACE 2003-04-05 06:07:08.150000 _wait¦t1: Fake timer done
 foo bar :: three — 0.1 sec
 .
-EVENT: wait¦done¦0.1¦_wait¦1
-     : loglevel=0
-EVENT: wait¦done¦_wait¦1
+EVENT: wait¦done¦_wait¦t1
      : loglevel=0
 : ‹Collected State:foo¦bar›
 name: foo¦bar
@@ -67,10 +57,9 @@ TRACE Yes!
 TRACE Yes!
 TRACE No‽ 5
 TRACE Create OnEvtHandler: whatever
-TRACE NewHandler 23
+TRACE NewHandler 15
 IEVENT: whatever
 TRACE We got three
-EVENT: state¦three¦-¦foo¦bar
 EVENT: state¦delete¦foo¦bar
      : prev_value=three
 .

@@ -20,7 +20,7 @@
 		"""
 
 from django.core.management.base import BaseCommand, CommandError
-from rainman.models import Site,Valve,Schedule,Controller
+from rainman.models import Site,Valve,Schedule,Controller,Feed
 from datetime import datetime,time,timedelta
 from django.db.models import F,Q
 from django.utils.timezone import utc
@@ -28,8 +28,8 @@ from optparse import make_option
 
 
 class Command(BaseCommand):
-	args = '<site> <interval> <valve>…'
-	help = 'Report the schedule for the given valves, or all of them'
+	args = '<site>'
+	help = 'Generatr configuration values for openHAB'
 
 	option_list = BaseCommand.option_list + (
 			make_option('-s','--site',
@@ -51,37 +51,32 @@ class Command(BaseCommand):
 
 	def handle(self, *args, **options):
 		q = Q()
+		qf = Q()
 		if options['site']:
 			q &= Q(controller__site__name=options['site'])
+			qf &= Q(site__name=options['site'])
 		if options['controller']:
 			q &= Q(controller__name=options['controller'])
+		print """\
+Group Water "Gartenwasser" (Out)
+"""
+		for f in Feed.objects.filter(qf):
+			self.one_feed(f)
 		for v in Valve.objects.filter(q):
 			self.one_valve(v,options["type"])
 
+	def one_feed(self,s):
+		print """\
+Group Water_{sname} "{sname}" (Water)
+""".format(sname=s.name)
+		
 	def one_valve(self,v,typ):
 		if typ != "wago":
 			raise NotImplementedError("I only know type 'wago'")
 		sname = "_".join(x[0].upper()+x[1:].lower() for x in v.var.split())
+		cname = " ".join(x[0].upper()+x[1:].lower() for x in v.var.split())
 		print """\
-if exists output {name}:
-	del output {name}
-output wago {cloc} {vloc}:
-	name {name}
-	bool on off
-on hab in command {sname}:
-	var output now {name}
-	if equal $raw ON:
-		if equal $now off:
-			set output on {name} :for 5 min
-	else:
-		if equal $now on:
-			set output off {name}
-on output change {name}:
-	if equal $value True:
-		trigger hab out command {sname} :param raw ON
-	else:
-		trigger hab out command {sname} :param raw OFF
-
-""".format(name=v.var, vloc=v.location, cloc=v.controller.location,sname=sname)
+Switch {sname} "{cname}" (Water_{site})
+""".format(name=v.var, vloc=v.location, cloc=v.controller.location,sname=sname,site=v.feed.name,cname=v.name)
 
 

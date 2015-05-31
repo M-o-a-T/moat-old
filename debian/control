@@ -15,6 +15,8 @@ Build-Depends: debhelper (>= 5),
  portaudio19-dev,
  python-gevent,
  libevent-dev,
+ python-flask,
+ python-rpyc,
 X-Also-Depends: avr-libc, gcc-avr
 Build-Depends-Indep: python-support
 Standards-Version: 3.7.2
@@ -42,7 +44,7 @@ Depends: ${misc:Depends}, ${python:Depends},
  python-rpyc,
  python-dabroker,
  python-pytz | python-tz,
- python-flask,
+ python-amqp,
 Recommends: python-rrdtool, owfs,
  python-pysqlite2,
 Suggests: socat

@@ -314,7 +314,7 @@ class LogWorker(ExcWorker):
 				exc.append(sys.exc_info())
 		if exc:
 			for e in exc:
-				log_exc("Logging error", err=e)
+				log_exc(msg="Logging error", err=e)
 
 	def process_exc(self,err):
 		log_exc(err=err,msg="while logging")
@@ -333,7 +333,7 @@ def log_exc(msg=None, err=None, level=ERROR):
 				print >>sys.stderr,"LOGGER CRASH 2"
 				print_exception(e,file=sys.stderr)
 				l.end_logging()
-				log_exc("Logger removed",e)
+				log_exc(msg="Logger removed",err=e)
 		try:
 			l.log_failure(err, level=level)
 		except Exception as e:
@@ -341,7 +341,7 @@ def log_exc(msg=None, err=None, level=ERROR):
 			print >>sys.stderr,"LOGGER CRASH 3"
 			print_exception(e,file=sys.stderr)
 			l.end_logging()
-			log_exc("Logger removed",e)
+			log_exc(msg="Logger removed",err=e)
 
 class LogEndEvent(Event):
 	def __init__(self,event):
@@ -446,7 +446,7 @@ def log(level, *a):
 			exc.append(sys.exc_info())
 	if exc:
 		for e in exc:
-			log_exc("Logging error", err=e)
+			log_exc(msg="Logging error", err=e)
 
 log_event = LogWorker()
 register_worker(log_event)

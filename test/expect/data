@@ -1,7 +1,10 @@
 EVENT: startup
      : startup=True
 block :: Block-level statements
+bool :: Boolean conditions. There can be only … two.
 data :: provides a couple of common data access functions
+ifelse :: if / else / else if
+logging :: control logging
 on_event :: the 'on EVENT:' handler
 trigger :: Basic event handling
 wait :: Delay handling
@@ -21,37 +24,29 @@ log
 module
 on
 parser
+shunt
 wait
 worker
 .
 TRACE Create OnEvtHandler: foo
 TRACE NewHandler 5
-EVENT: wait¦start¦×××¦vorher
-     : loglevel=0
 EVENT: wait¦start¦vorher
      : loglevel=0
      : end_time=0.1
 TRACE 2003-04-05 06:07:08.150000 vorher: Fake timer done
-EVENT: wait¦done¦×××¦vorher
-     : loglevel=0
 EVENT: wait¦done¦vorher
      : loglevel=0
 IEVENT: foo
-EVENT: wait¦start¦×××¦foo¦waiter
-     : loglevel=0
-EVENT: wait¦start¦foo¦waiter
-     : loglevel=0
-     : end_time=0.5
-EVENT: wait¦start¦×××¦nachher
-     : loglevel=0
+TRACE Yes
 EVENT: wait¦start¦nachher
      : loglevel=0
      : end_time=0.2
-TRACE 2003-04-05 06:07:08.350000 nachher: Fake timer done
+EVENT: wait¦start¦foo¦waiter
+     : loglevel=0
+     : end_time=0.5
+TRACE 2003-04-05 06:07:08.300000 nachher: Fake timer done
 foo waiter :: 0.100000023842
 .
-EVENT: wait¦done¦×××¦nachher
-     : loglevel=0
 EVENT: wait¦done¦nachher
      : loglevel=0
 : ‹Waiter foo¦waiter 0.100000023842›
@@ -63,18 +58,12 @@ in: block
 in: on¦foo
 in: Global
 .
-EVENT: wait¦start¦×××¦ende
-     : loglevel=0
 EVENT: wait¦start¦ende
      : loglevel=0
      : end_time=0.6
 TRACE 2003-04-05 06:07:08.500000 foo¦waiter: Fake timer done
-EVENT: wait¦done¦×××¦foo¦waiter
-     : loglevel=0
 EVENT: wait¦done¦foo¦waiter
      : loglevel=0
 TRACE 2003-04-05 06:07:08.650000 ende: Fake timer done
-EVENT: wait¦done¦×××¦ende
-     : loglevel=0
 EVENT: wait¦done¦ende
      : loglevel=0

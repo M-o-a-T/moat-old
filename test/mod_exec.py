@@ -24,70 +24,18 @@ from homevent.statement import DoNothingHandler, main_words
 from test import run
 
 input = u"""\
-on fuß:
-	name Schau auf deine Füße
-	do nothing
-on num 1:
-	name Txt2Num
-	do nothing
-on num "2":
-	name Num2Txt
-	do nothing
-on num 3:
-	name num2num
-	do nothing
-on foo:
-	name Skipped One
-	if false
-	log ERROR "This should not be executed"
-on foo:
-	name Skipped Two
-	if true:
-		exit handler
-	log ERROR "This should also not be executed"
-on foo:
-	name Another Handler
-	log DEBUG "This is logged once"
-on bar *:
-	block:
-		trigger $1 :sync
-on baz:
-	block:
-		log DEBUG got baz $quux
-		if equal $quux "two":
-			log TRACE Yes
-			set state nix dud
-		else:
-			log ERROR no quux $quux
+on test me:
+	log DEBUG "Parallel HomEvenT handler"
+on run test:
+	exec test.exec.called one $also
 list on
-list on Skipped One
-list on Skipped Two
-trigger bar foo :sync
-del on Another Handler
-trigger bar foo :sync
-del on fuß
-list on
-trigger fuß
-trigger baz:
-	param quux one
-block:
-	state dud
-	set state two dud
-	var state vav dud
-	log DEBUG vav is $vav
-	trigger baz dud $vav
-	trigger baz:
-		param quux $vav
+trigger run test:
+	param also two
+	sync
 wait :for 0.1
-block:
-	var state va dud
-	if equal $va "nix":
-		log TRACE Yes
-	else:
-		log ERROR handler not called
-trigger num "1"
-trigger num 2
-trigger num 3
+list on
+trigger test me
+wait :for 0.1
 shutdown
 """
 
@@ -96,6 +44,7 @@ main_words.register_statement(ShutdownHandler)
 load_module("block")
 load_module("trigger")
 load_module("on_event")
+load_module("exec")
 load_module("ifelse")
 load_module("bool")
 load_module("data")
@@ -103,5 +52,5 @@ load_module("logging")
 load_module("state")
 load_module("wait")
 
-run("on",input)
+run("exec",input)
 

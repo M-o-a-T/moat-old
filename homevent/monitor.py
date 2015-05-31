@@ -161,7 +161,8 @@ class Monitor(Collected,Jobber):
 		self._ectx.value = self.value
 		self._ectx.last_value = self.last_value
 		self._ectx.up = self.up_name
-		self._ectx.time = self.time_name
+		self._ectx.time_str = self.time_name
+		self._ectx.time = self.time_int
 		self._ectx.start_at = self.started_at
 		self._ectx.stop_at = self.stopped_at
 		self._ectx.change_at = self.state_change_at
@@ -180,6 +181,7 @@ class Monitor(Collected,Jobber):
 			return "Wait"
 		else:
 			return "Off"
+
 	@property
 	def time_name(self):
 		if self.started_at is None:
@@ -196,6 +198,17 @@ class Monitor(Collected,Jobber):
 		return u"‹"+res+"›"
 		# TODO: refactor that into homevent.times
 
+	@property
+	def time_int(self):
+		if self.started_at is None:
+			return None
+		if not self.running.is_set():
+			delta = now() - self.started_at
+		elif self.job:
+			delta = self.started_at - now()
+		else:
+			delta = now() - self.started_at
+		return unixdelta(delta)
 
 	def _schedule(self):
 		"""Sleep until the next time this monitor should run"""
@@ -270,13 +283,12 @@ class Monitor(Collected,Jobber):
 				self.last_value = self.value
 				self.value = self.new_value
 				if hasattr(self,"delta"):
-					val = self.value-self.last_value
-					self._ectx.value_delta = val
-					if val >= 0 or self.delta == 0:
-						simple_event(self.ectx,"monitor","value",self.value-self.last_value,*self.name)
-						simple_event(self.ectx,"monitor","update",*self.name)
+					if self.last_value is not None:
+						val = self.value-self.last_value
+						self._ectx.value_delta = val
+						if val >= 0 or self.delta == 0:
+							simple_event(self.ectx,"monitor","update",*self.name)
 				else:
-					simple_event(self.ectx,"monitor","value",self.new_value,*self.name)
 					simple_event(self.ectx,"monitor","update",*self.name)
 		except Exception as e:
 			fix_exception(e)
@@ -346,8 +358,7 @@ class Monitor(Collected,Jobber):
 								if self.value is not None and \
 										self.alarm is not None and \
 										abs(self.value-avg) > self.alarm:
-									simple_event(self.ectx,"monitor","alarm",avg,*self.name)
-									simple_event(self.ectx,"monitor","jump",*self.name)
+									simple_event(self.ectx,"monitor","jump",*self.name, avg=avg,value=self.value,alarm=self.alarm)
 							except Exception as e:
 								fix_exception(e)
 								process_failure(e)

@@ -1,0 +1,34 @@
+EVENT: startup
+     : startup=True
+TRACE Create OnEvtHandler: test¦me
+TRACE NewHandler 5
+TRACE Create OnEvtHandler: run¦test
+TRACE NewHandler 6
+_on 5 :: test¦me (51)
+_on 6 :: run¦test (51)
+.
+IEVENT: run¦test
+TRACE PY Proc called <Env obj> (u'one', u'two') {}
+TRACE NewHandler 9
+TRACE NewHandler 10
+TRACE PY Proc done
+EVENT: wait¦start¦_wait¦t1
+     : loglevel=0
+     : end_time=0.1
+TRACE 2003-04-05 06:07:08.150000 _wait¦t1: Fake timer done
+_on 5 :: test¦me (51)
+_on 6 :: run¦test (51)
+foo test bar :: test¦me (51)
+test me not :: test¦me¦not (51)
+.
+EVENT: wait¦done¦_wait¦t1
+     : loglevel=0
+IEVENT: test¦me
+DEBUG Parallel HomEvenT handler
+TRACE PY Event called test¦me
+EVENT: wait¦start¦_wait¦t2
+     : loglevel=0
+     : end_time=0.2
+TRACE 2003-04-05 06:07:08.300000 _wait¦t2: Fake timer done
+EVENT: wait¦done¦_wait¦t2
+     : loglevel=0

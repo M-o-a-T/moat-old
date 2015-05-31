@@ -209,7 +209,7 @@ like it needs polishing, though, because if you have 100 lamps …
 
 Fortunately, events can have placeholders. They look like this:
 
-	>> on toggle *lamp:
+	>> on toggle \*lamp:
 		if not exists state $lamp:
 			set state off $lamp
 		if state on $lamp:
@@ -243,7 +243,7 @@ event names (and state names) can only consist of one word.
 	>> on pushed toggle sw1:
 		trigger toggle lamp lamp1
 	.
-	>> on toggle lamp *lamp:
+	>> on toggle lamp \*lamp:
 		if not exists state lamp $lamp:
 			set state off lamp $lamp
 		if state on lamp $lamp:
@@ -266,7 +266,7 @@ versa. That's still tedious and error-prone.
 The solution is that state changes also trigger events, which get
 created by HomEvenT internally. Thus, we can do this instead:
 
-	>> on toggle lamp *lamp:
+	>> on toggle lamp \*lamp:
 		if not exists state lamp $lamp:
 			set state off lamp $lamp
 		if state on lamp $lamp:
@@ -274,14 +274,14 @@ created by HomEvenT internally. Thus, we can do this instead:
 		else:
 			set state on $lamp
 	
-	on state * on lamp *lamp:
-		log DEBUG "turn on lamp" $lamp
-	on state * off lamp *lamp:
-		log DEBUG "turn off lamp" $lamp
+	on state change lamp \*lamp:
+		if equal $state on:
+			log DEBUG "turn on lamp" $lamp
+		else:
+			log DEBUG "turn off lamp" $lamp
 	.
 
-The single star means "I don't care"; it represents the old value of the
-state. Check the “events” documentation for details.
+Check the “events” documentation for details.
 
 Auto-turn-off
 -------------
@@ -289,7 +289,7 @@ Auto-turn-off
 The easy (but wrong) solution is:
 
 	>> load wait
-	>> on toggle lamp *lamp:
+	>> on toggle lamp \*lamp:
 		set state on $lamp
 		wait: for 5 min
 		set state off lamp $lamp
@@ -326,16 +326,16 @@ makes the lamp go out five minutes after *any* button press. Consider:
   and turn the light back on.
 
 * 11min: Oops, it's dark again. You get pissed off about the timer and
-  forward your annoyance to the author of the above code. Said author
-  looks at the code, sees that it's “obviously correct”, deletes HomEvenT
-  and spends a ton of money on a proprietary system. The end.
+  forward your annoyance to the author of the above HomEvenT code.
+  The author looks at the code, sees that it's “obviously correct”, deletes
+  HomEvenT and spends a ton of money on a proprietary system. The end.
 
 
 Anyway, let's continue with solutions that actually work.
 
 First solution: turn the thing off.
 
-	>> on toggle lamp *lamp:
+	>> on toggle lamp \*lamp:
 		if state on lamp $lamp:
 			del wait lamp $lamp
 		else:
@@ -384,7 +384,7 @@ Second solution: Keep the original timeout, i.e. do nothing.
 
 This is absurdly simple.
 
-	>> on toggle lamp *lamp:
+	>> on toggle lamp \*lamp:
 		if not state on lamp $lamp:
 			set state on lamp $lamp
 			wait lamp $lamp:
@@ -401,7 +401,7 @@ different.
 
 Third solution: re-start the timer.
 
-	>> on toggle lamp *lamp:
+	>> on toggle lamp \*lamp:
 		if exists wait lamp $lamp:
 			wait lamp $lamp:
                 for 5 min
@@ -422,7 +422,7 @@ Fourth solution: extend the time. That's easy, we just need to figure
 out when the lamp should originally have been turned off, and base our
 new timeout on that. 
 
-	>> on toggle lamp *lamp:
+	>> on toggle lamp \*lamp:
 		if exists wait lamp $lamp:
 			var wait timeout wait lamp $lamp
 			wait lamp $lamp:
@@ -453,11 +453,11 @@ detection.
 
 Anyway, in principle, this is easy:
 
-	>> on state * on lamp *lamp:
-		prio 80
-		wait 5 min:
-			name lamp $lamp
-		set state off lamp $lamp
+	>> on state change lamp \*lamp:
+		if equal $state on:
+			wait 5 min:
+				name lamp $lamp
+			set state off lamp $lamp
 	. 
 	>> # THE ABOVE EXAMPLE WILL NOT WORK
 
@@ -475,12 +475,12 @@ The solution is an "async:" block, which is just a normal block that
 doesn't force the rest of the world to wait until the statements inside
 (which are still run in sequence!) complete:
 
-	>> on state * on lamp *lamp:
-		prio 80
-		async:
-			wait 5 min:
-				name lamp $lamp
-			set state off lamp $lamp
+	>> on state change lamp \*lamp:
+		if if equal $state on:
+			async:
+				wait 5 min:
+					name lamp $lamp
+				set state off lamp $lamp
 	.
 
 Of course, you still need a “on state * off …” block which cancels
@@ -491,4 +491,168 @@ the timer, but by now you should be able to write that yourself.
 More complex examples
 ---------------------
 
-TODO.
+HomEvenT is supposed to be able to talk to other systems. We now implement
+a connector to OpenHAB.
+
+To do this, install RabbitMQ. Activate its MQTT module:
+
+	rabbitmq-plugins enable rabbitmq_mqtt
+
+Edit /etc/rabbitmq/rabbitmq.config:
+
+	[{rabbit,        [{tcp_listeners,    [5672]}]},
+	 {rabbitmq_mqtt, [
+	                  {allow_anonymous,  false},
+	                  {vhost,            <<"/homevent">>},
+	                  {exchange,         <<"homevent.event">>} ]}
+	].
+
+Add users:
+
+	rabbitmqctl add_vhost /homevent
+	rabbitmqctl add_user openhab WellWhatever
+	rabbitmqctl add_user homevent AlsoWhatever
+	rabbitmqctl set_permissions -p /homevent openhab ".*" ".*" ".*"
+	rabbitmqctl set_permissions -p /homevent homevent ".*" ".*" ".*"
+
+Configure OpenHAB to talk to MQTT:
+
+	mqtt:openhab.url=tcp://localhost:1883
+	mqtt:openhab.clientId=openhab
+	mqtt:openhab.user=openhab
+	mqtt:openhab.pwd=WellWhatever
+
+	mqtt-eventbus:broker=openhab
+	mqtt-eventbus:statePublishTopic=/openhab/out/state/${item}
+	mqtt-eventbus:commandPublishTopic=/openhab/out/command/${item}
+	mqtt-eventbus:stateSubscribeTopic=/openhab/in/state/${item}
+	mqtt-eventbus:commandSubscribeTopic=/openhab/in/command/${item}
+
+Teach HomEvenT to talk to AMQP:
+
+	if not exists module amqp: load amqp
+
+	on amqp connect bus:
+			name amqp connect bus
+
+			# do this if you want to spew logging to AMQP
+			log amqp DEBUG:
+					name bus logging
+					exchange "homevent.log"
+			tell amqp bus:
+					name bus events
+					exchange "homevent.log"
+					# DO NOT listen on this exchange
+
+			# receive openhab messages
+			listen amqp bus:
+					name bus openhab in
+					exchange "homevent.event"
+					topic ".openhab.out.#"
+					prefix hab in
+					strip 3
+
+			# send commands to openhab
+			tell amqp bus:
+					name bus openhab out
+					filter hab out "**":
+					exchange "homevent.event"
+					prefix "" openhab in
+					strip 2
+			
+			start amqp bus
+
+	connect amqp localhost:
+			name bus
+			user "/homevent" homevent AlsoWhatever
+
+Now add a switch to openhab (to file items/CONFIG.items):
+
+	Switch Light_Outside "Outdoor Light" ()
+
+and assign sensible tags to the light states (in file transform/onoff.map):
+
+	1=ON
+	0=OFF
+
+Now handle the switch in HomEvenT:
+
+	on hab in command Light_Outside:
+		if equal $raw ON:
+				log DEBUG the light shall be turned on
+		else:
+				log DEBUG the light shall be turned back off
+
+Of course, if the HomEvenT state changes, we need to tell openhab:
+
+	on lights out:
+		trigger hab out command Light_Outside:
+			param raw OFF
+
+
+Warning: Event loops
+--------------------
+
+You need to be careful about what you do with incoming events. `tell amqp`
+statements are event handlers like any other, so an incoming message is
+retransmitted right back out if it matches. It's very easy to create
+doubly-processed events or even event loops (which quickly saturate the
+bus) that way.
+
+You should turn on rabbitmq's web interface and monitor the event rate
+while you're experimenting with this. You can also use `log amqp` to send
+all of HomEvenT's logging to an AMQP exchange, and monitor or filter them
+at your convenience. The `amqpmon` script that comes with HomEvenT is
+useful for this.
+
+Splitting up HomEvenT
+---------------------
+
+Let's face it: HomEvenT is not bug-free; sometimes communication with one
+subsystem hangs and you need to debug. Ideally without disrupting the rest
+of the system.
+
+Sending events for everything across AMQP seems like the ideal solution for
+this, except that you now need to keep track which events are local and
+which aren't (otherwise an external event would get retransmitted right
+back to the message bus).
+
+For this reason, the AMQP handlers have an additional bypass or `shunt`
+mode, which works like this:
+
+* An event that's matched by a "tell amqp … shunt" handler is not processed
+  by your HomEvenT script. Instead, it's transmitted to the message bus and
+  then forgotten about. If more than one such handler matches the event,
+  only one is used (this is mostly random), so you shouldn't have
+  overlapping handlers. Most people use just one, without a filter,
+  and forward everything.
+
+* An AMQP message that's received by a "listen amqp … shunt" handler
+  is processed locally. It is *not* forwarded to any shunt handler.
+
+So, let's add this to our "on amqp connect bus" example:
+
+		tell amqp bus:
+				name exchange out
+				exchange "homevent.bus"
+				shunt
+
+		# receive openhab messages
+		listen amqp bus:
+				name exchange in
+				exchange "homevent.bus"
+				topic "#"
+				shunt
+
+This will not change anything, except add some latency.
+
+Now, however, you can run another HomEvenT script that connects to the
+"homevent.bus" exchange, and alll events seen by one will be sent to the
+other.
+
+Note that this doesn't apply to anything else, i.e. non-saved states do not
+get shared, you don't affect the other script's wait handlers, etc.
+
+If you split up your code along mostly-sensible lines, however, this should
+not be a problem.
+

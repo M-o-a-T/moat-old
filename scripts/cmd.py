@@ -16,7 +16,7 @@
 ##  for more details.
 ##
 
-from __future__ import division,absolute_import
+from __future__ import division,absolute_import,print_function
 
 from homevent import patch;patch()
 import rpyc
@@ -91,10 +91,10 @@ def do_log(c):
 		except:
 			pass
 		for a,b in k.iteritems():
-			print a,b
+			print(a,b)
 		for a,b in k["event"].ctx:
-			print a,b
-		print ""
+			print(a,b)
+		print("")
 		sys.stdout.flush()
 
 	def q_called(**k):
@@ -102,7 +102,7 @@ def do_log(c):
 	cb = c.root.monitor(q_called)
 
 	def logged(level,*a):
-		print u"<%s> %s" % (level,u"¦".join((str(x) for x in a)))
+		print(u"<%s> %s" % (level,u"¦".join((str(x) for x in a))))
 		sys.stdout.flush()
 	def q_logged(*a):
 		q.put((logged,a,{}))
@@ -147,7 +147,7 @@ def do_list(c,args):
 				if ti>0 and len(t)-ti>lim and len(t)-ti<lim+6: # limit to msec
 					t = t[:ti+lim]+")"
 
-			print p+u": "+unicode(t)
+			print(p+u": "+unicode(t))
 
 	def out_one(p,c):
 		q = Queue(3)
@@ -163,7 +163,7 @@ def do_list(c,args):
 
 	for x in c.root.cmd_list(*args):
 		if x is None:
-			print "(None?)"
+			print("(None?)")
 			continue
 			
 		if len(x) == 2:
@@ -172,14 +172,14 @@ def do_list(c,args):
 			out_one(a,b)
 #		if hasattr(b,"list"):
 #			for bb in b.list():
-#				print a,bb
+#				print(a,bb)
 #			continue
 #		else:
-#			print a,b
+#			print(a,b)
 		else:
 			if len(x) == 1 and isinstance(x[0],Name):
 				x=str(x[0])
-			print x
+			print(x)
 	
 
 if __name__ == "__main__":

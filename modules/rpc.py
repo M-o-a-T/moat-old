@@ -331,7 +331,7 @@ class RPCconn(Service,Collected):
 
 	def exposed_var(self,arg):
 		"""Return the value of a variable"""
-		return getattr(self.ctx,arg)
+		return self.ctx[arg]
 
 	def exposed_monitor(self,callback,*args):
 		try:

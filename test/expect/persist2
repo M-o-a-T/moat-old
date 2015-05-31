@@ -14,7 +14,6 @@ TRACE Yes!
 TRACE We still have three
 TRACE DoFn ('delete from HE_State where category=? and name=?', ('state', 'foo bar')) 1
 TRACE Commit  
-EVENT: state¦three¦-¦foo¦bar
 EVENT: state¦delete¦foo¦bar
      : prev_value=three
 .

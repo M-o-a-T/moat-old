@@ -638,7 +638,7 @@ class MsgQueue(Collected,Jobber):
 				self._set_state("connected")
 		except Exception as ex:
 			fix_exception(ex)
-			log_exc("Setting up",ex)
+			log_exc(msg="Setting up",err=ex)
 
 			self._teardown("retrying")
 

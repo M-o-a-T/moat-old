@@ -96,6 +96,29 @@ class Context(object):
 			return super(Context,self).__delattr__(key)
 		self._store[key] = VanishedAttribute
 
+	def __getitem__(self,key):
+		store = self._store
+		if key in store:
+			r = store[key]
+		else:
+			r = VanishedAttribute
+			for p in self._parents():
+				try:
+					r = p._store[key]
+				except KeyError:
+					pass
+				else:
+					break
+		if r is VanishedAttribute:
+			raise KeyError(key)
+		return r
+		
+	def __setitem__(self,key,val):
+		self._store[key] = val
+		
+	def __delitem__(self,key):
+		self._store[key] = VanishedAttribute
+		
 	def __contains__(self,key):
 		store = self._store
 		if key in store: return store[key] is not VanishedAttribute
@@ -166,7 +189,7 @@ class Context(object):
 			for k,v in store.iteritems():
 				if v is not VanishedAttribute and k not in seen:
 					setattr(res,k,v)
-				seen.add(v) # prevent overwriting with older values
+				seen.add(k) # prevent overwriting with older values
 				
 		do(self._store)
 		for p in self._parents():
