@@ -14,6 +14,7 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+from __future__ import division,absolute_import
 
 """\
 This code does basic state handling (both persistent and not).
@@ -33,7 +34,7 @@ list state [NAME]
 
 """
 
-from __future__ import division,absolute_import
+import six
 
 from moat.module import Module
 from moat.statement import Statement, main_words, AttributedStatement
@@ -102,7 +103,7 @@ class State(Collected):
 		if hasattr(self,"old_value"):
 			return u"%s — %s " % (self.value,humandelta(now()-self.time))
 		else:
-			return unicode(self.value)
+			return six.text_type(self.value)
 
 class SavedState(State):
 	def __init__(self, *name):

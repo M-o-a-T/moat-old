@@ -27,8 +27,9 @@ class GroupOverride(Model):
 	class Meta(Model.Meta):
 		unique_together = (("group","start"),)
 		db_table="rainman_groupoverride"
-	def __unicode__(self):
+	def __str__(self):
 		return self.name
+	__unicode__=__str__
 	name = m.CharField(max_length=200,blank=True,null=True)
 	group = m.ForeignKey(Group,related_name="overrides")
 	allowed = m.BooleanField(default=False) # whether to allow these to run(True) or not(False)
@@ -54,8 +55,9 @@ class ValveOverride(Model):
 	class Meta(Model.Meta):
 		unique_together = (("valve","start"),)
 		db_table="rainman_valveoverride"
-	def __unicode__(self):
+	def __str__(self):
 		return self.name
+	__unicode__=__str__
 	name = m.CharField(max_length=200,blank=True,null=True)
 	valve = m.ForeignKey(Valve,related_name="overrides")
 	running = m.BooleanField(default=False) # whether to force on(True) or off(False)
@@ -83,8 +85,9 @@ class GroupAdjust(Model):
 	class Meta(Model.Meta):
 		unique_together = (("group","start"),)
 		db_table="rainman_groupadjust"
-	def __unicode__(self):
+	def __str__(self):
 		return u"@%s %s" % (str_tz(self.start),self.group)
+	__unicode__=__str__
 	group = m.ForeignKey(Group,related_name="adjusters")
 	start = m.DateTimeField(db_index=True)
 	factor = m.FloatField()

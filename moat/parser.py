@@ -15,6 +15,8 @@
 ##  for more details.
 ##
 
+from __future__ import division,absolute_import
+
 """\
 This code parses input lines.
 
@@ -25,11 +27,10 @@ for typical usage.
 
 """
 
-from __future__ import division,absolute_import
+import six
 
 from moat.tokize import tokizer
 from tokenize import tok_name
-import Queue
 import sys
 import os
 import errno
@@ -141,8 +142,7 @@ class Parser(Collected,Jobber):
 				fix_exception(e)
 				process_failure(e)
 			job.link_exception(dead)
-			if not hasattr(self.input,"fileno") or self.input.fileno() > 2:
-				self.input.close()
+			self.input.close()
 			self.input = None
 		return "Bla"
 	
@@ -162,7 +162,7 @@ class Parser(Collected,Jobber):
 
 	def add_line(self, data):
 		"""Standard LineReceiver method"""
-		if not isinstance(data,unicode):
+		if not isinstance(data,six.string_types):
 			data = data.decode("utf-8")
 		self.p_gen.feed(data)
 
@@ -342,7 +342,7 @@ def parse(input, interpreter=None, ctx=None, out=None, words=None):
 		"""
 	if ctx is None: ctx=Context
 	if ctx is Context or "filename" not in ctx:
-		ctx = ctx(filename=(input if isinstance(input,basestring) else u"‹stdin›"))
+		ctx = ctx(filename=(input if isinstance(input,six.string_types) else u"‹stdin›"))
 	if out is not None:
 		ctx.out = out
 	else:
@@ -357,7 +357,7 @@ def parse(input, interpreter=None, ctx=None, out=None, words=None):
 	if isinstance(interpreter,type):
 		interpreter = interpreter(ctx)
 
-	if isinstance(input,basestring):
+	if isinstance(input,six.string_types):
 		input = open(input,"rU")
 
 	parser = Parser(interpreter=interpreter, input=input, ctx=ctx)

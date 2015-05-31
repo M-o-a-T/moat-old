@@ -23,8 +23,9 @@ class Site(Model):
 	"""One place with stuff to irrigate."""
 	class Meta(Model.Meta):
 		db_table="rainman_site"
-	def __unicode__(self):
+	def __str__(self):
 		return self.name
+	__unicode__=__str__
 	name = m.CharField(max_length=200, unique=True)
 	comment = m.CharField(max_length=200, blank=True)
 	var = m.CharField(max_length=200, unique=True, help_text="name in MoaT", blank=True)

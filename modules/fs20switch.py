@@ -14,13 +14,14 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+from __future__ import division,absolute_import
 
 """\
 This code implements basic commands to access FS20 switches.
 
 """
 
-from __future__ import division,absolute_import
+import six
 
 from moat.module import Module
 from moat.logging import log,DEBUG,TRACE,INFO,WARN
@@ -72,7 +73,7 @@ switch_codes = {
 }
 
 switch_names = {}
-for a,b in switch_codes.iteritems():
+for a,b in switch_codes.items():
 	if b is not None:
 		switch_names[b]=a
 
@@ -81,8 +82,9 @@ class CannotDoError(RuntimeError):
 	def __init__(self,switch,what):
 		self.switch = switch
 		self.what = what
-	def __unicode__(self):
+	def __str__(self):
 		return u"%s cannot do ‹%s›" % (unicode(self.switch), self.what)
+	__unicode__=__str__
 		
 
 class SwitchGroups(Collection):
@@ -116,7 +118,7 @@ class SwitchGroup(Collected,igroup):
 	def list(self):
 		yield("name",self.name)
 		yield("code",to_hc(self.code))
-		for d in self.devs.itervalues():
+		for d in self.devs.values():
 			yield("device",d.name)
 
 	def delete(self,ctx=None):
@@ -124,8 +126,9 @@ class SwitchGroup(Collected,igroup):
 		group.delete(self)
 		super(SwitchGroup,self).delete()
 
-	def __unicode__(self):
+	def __str__(self):
 		return u"FS20_SwitchGroup ‹%s›" % (self.name,)
+	__unicode__=__str__
 
 	def __repr__(self):
 		try:
@@ -138,7 +141,7 @@ class SwitchGroup(Collected,igroup):
 #		if dc % 100 == 44 or dc // 100 == 44:
 #			raise SyntaxError("Devices cannot have group or master codes")
 		if switch.code in self.devs:
-			raise RuntimeError("Device exists (%s in %s)" % (unicode(self.codes[switch.code]), unicode(self)))
+			raise RuntimeError("Device exists (%s in %s)" % (six.text_type(self.codes[switch.code]), six.text_type(self)))
 
 		self.devs[switch.code] = switch
 
@@ -235,8 +238,9 @@ class Switch(Collected):
 		del self.parent.devs[self.code]
 		super(Switch,self).delete()
 
-	def __unicode__(self):
+	def __str__(self):
 		return u"FS20_Switch ‹%s›" % (self.name,)
+	__unicode__=__str__
 
 	def __repr__(self):
 		try:

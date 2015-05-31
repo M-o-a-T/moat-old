@@ -61,8 +61,8 @@ en_proc_gas.interval_mod = -0.5
 en_procs = [ None,
 			 None, # power meter
 			 None, # power monitor
-             en_proc_gas, # gas meter
-           ]
+			 en_proc_gas, # gas meter
+		   ]
 
 class ENs(Collection):
 	name = Name("fs20","en")
@@ -105,7 +105,7 @@ class en(Collected,Timeslotted):
 
 	def event(self,ctx,data):
 		d={}
-		for m,n in data.iteritems():
+		for m,n in data.items():
 			try: n = n * self.faktor[m]
 			except KeyError: pass
 			else: data[m] = n
@@ -136,8 +136,8 @@ class en(Collected,Timeslotted):
 		if self.last:
 			yield ("last",self.last)
 		if self.last_data:
-			for k,v in self.last_data.iteritems(): yield ("last_"+k,v)
-		for k,v in self.faktor.iteritems(): yield ("faktor_"+k,v)
+			for k,v in self.last_data.items(): yield ("last_"+k,v)
+		for k,v in self.faktor.items(): yield ("faktor_"+k,v)
 		if self.slot:
 			for k,v in self.slot.list(): yield ("slot_"+k,v)
 	
@@ -153,7 +153,7 @@ class en(Collected,Timeslotted):
 class SomeNull(Exception): pass
 
 def flat(r):
-	for a,b in r.iteritems():
+	for a,b in r.items():
 		yield a
 		yield b
 
@@ -268,14 +268,14 @@ Known types:
 		en(SName(event), self.group,self.code,ctx, self.faktor, self.slot, self.delta)
 
 class FS20enDelta(Statement):
-        name = "delta"
-        doc = "report difference"
-        long_doc=u"""\
+	name = "delta"
+	doc = "report difference"
+	long_doc=u"""\
 delta
-        Report the difference between the old and new values.
+	Report the difference between the old and new values.
 delta up
-        Same, but assume that the value only increases.
-        Used for counters.
+	Same, but assume that the value only increases.
+	Used for counters.
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)

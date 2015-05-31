@@ -14,13 +14,13 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+from __future__ import division,absolute_import,print_function
 
 """\
 This code implements the Help command.
 
 """
 
-from __future__ import division,absolute_import
 
 from moat.module import Module
 from moat.logging import log
@@ -73,20 +73,20 @@ Statements may be multi-word and follow generic Python syntax.
 					doc = ":\n"+words.long_doc.rstrip("\n")
 				except AttributeError:
 					doc = " : "+words.doc
-				print >>self.ctx.out,wl[0]+doc
+				print(wl[0]+doc, file=self.ctx.out)
 				return
 
-			print >>self.ctx.out,"Not a command in %s:" % (words.__class__.__name__,)," ".join(wl)
+			print("Not a command in %s:" % (words.__class__.__name__,)," ".join(wl), file=self.ctx.out)
 
 		try:
 			doc = ":\n"+words.long_doc.rstrip("\n")
 		except AttributeError:
 			doc = " : "+words.doc
-		print >>self.ctx.out," ".join(words.name)+doc
+		print(" ".join(words.name)+doc, file=self.ctx.out)
 
 		# this is for common sub-statements
 		try:
-			wl = words.iteritems
+			wl = words.items
 		except AttributeError: # it's empty
 			pass
 		else:
@@ -96,17 +96,17 @@ Statements may be multi-word and follow generic Python syntax.
 				if hlen > maxlen: maxlen = hlen
 			if maxlen:
 				n = getattr(words,"helpsubname","word")
-				print >>self.ctx.out,"Known "+n+"s:"
+				print("Known "+n+"s:", file=self.ctx.out)
 
-				def nam(a,b):
-					return cmp(a[0],b[0])
-				for n,d in sorted(wl(),nam):
+				def nam(a):
+					return a[0]
+				for n,d in sorted(wl(),key=nam):
 					hname = " ".join(n)
-					print >>self.ctx.out,hname+(" "*(maxlen+1-len(hname)))+": "+d.doc
+					print(hname+(" "*(maxlen+1-len(hname)))+": "+d.doc, file=self.ctx.out)
 
 		# this is for a type registry
 		try:
-			wl = words.registry.iteritems
+			wl = words.registry.items
 		except AttributeError:
 			pass
 		else:
@@ -115,12 +115,12 @@ Statements may be multi-word and follow generic Python syntax.
 				hlen = len(n)
 				if hlen > maxlen: maxlen = hlen
 			if maxlen:
-				print >>self.ctx.out,"Known types:"
+				print("Known types:", file=self.ctx.out)
 
 				def nam(a,b):
 					return cmp(a[0],b[0])
 				for n,d in sorted(wl(),nam):
-					print >>self.ctx.out,n+(" "*(maxlen+1-len(hname)))+": "+d.doc
+					print(n+(" "*(maxlen+1-len(hname)))+": "+d.doc, file=self.ctx.out)
 
 
 

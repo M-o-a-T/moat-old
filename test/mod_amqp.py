@@ -25,14 +25,13 @@ from moat.logging import log,DEBUG
 from test import run
 from gevent import spawn,sleep,event
 
-import rpyc
 import sys
 from traceback import print_exc
 
 input = """\
 connect amqp localhost:
 	name test foo
-	user "/test" test test
+	user "test" test test
 
 on amqp connect test foo:
 	wait for 0.2:

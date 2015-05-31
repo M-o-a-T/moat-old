@@ -14,12 +14,13 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+from __future__ import division,absolute_import
 
 """\
 	This module holds a few random constants and stuff.
 	"""
 
-from __future__ import division,absolute_import
+import six
 
 SYS_PRIO = -10
 MIN_PRIO = 0
@@ -29,8 +30,12 @@ MAX_PRIO = 100
 class singleNameMeta(type):
 	def __repr__(cls):
 		return cls.__name__
-class singleName(object):
-	__metaclass__ = singleNameMeta
+if six.PY2:
+	class singleName(object):
+		__metaclass__ = singleNameMeta
+else:
+	class singleName(metaclass=singleNameMeta):
+		pass
 
 class Name(tuple):
 	"""A class that knows how to print itself the "right" way"""
@@ -41,13 +46,16 @@ class Name(tuple):
 	def __new__(cls,*data):
 		if len(data) == 1 and isinstance(data[0],tuple):
 			data = data[0]
-		if len(data) > 0 and not isinstance(data[0],(basestring,int,float)):
+		if len(data) > 0 and not isinstance(data[0],(six.string_types,int,float)):
 			raise RuntimeError("Name:"+repr(data))
 		return super(Name,cls).__new__(cls,data)
-	def __str__(self):
-		return unicode(self).encode("utf-8")
 	def __unicode__(self):
-		return self.prefix + self.delim.join((unicode(x) for x in self)) + self.suffix
+		return self.prefix + self.delim.join((six.text_type(x) for x in self)) + self.suffix
+	if six.PY2:
+		def __str__(self):
+			return unicode(self).encode("utf-8")
+	else:
+		__str__=__unicode__
 	def __repr__(self):
 		return self.__class__.__name__+super(Name,self).__repr__()
 
@@ -78,7 +86,7 @@ for s in "hash".split(): ## id
 	def gen_id(s):
 		def f(self):
 			if len(self) == 1:
-				return getattr(unicode(self),s)()
+				return getattr(six.text_type(self),s)()
 			return getattr(super(Name,self),s)()
 		f.__name__ = s
 		return f
@@ -88,8 +96,8 @@ for s in "le lt ge gt eq ne".split(): ## cmp
 
 	def gen_cmp(s):
 		def f(self,other):
-			if isinstance(other,basestring):
-				return getattr(unicode(self),s)(other)
+			if isinstance(other,six.string_types):
+				return getattr(six.text_type(self),s)(other)
 			return getattr(super(Name,self),s)(other)
 		f.__name__ = s
 		return f
@@ -104,7 +112,7 @@ def SName(data,attr="name"):
 	if isinstance(n,Name):
 		return n
 
-	if isinstance(data,basestring):
+	if isinstance(data,six.string_types):
 		data = data.split(" ")
 	return Name(*data)
 
@@ -118,8 +126,9 @@ class RaisedError(RuntimeError):
 		return u"‹%s: %s›" % (self.__class__.__name__, repr(self.params))
 	def __str__(self):
 		return u"%s: %s" % (self.__class__.__name__, " ".join(str(x) for x in self.params))
-	def __unicode__(self):
-		return u"%s: %s" % (self.__class__.__name__, " ".join(unicode(x) for x in self.params))
+	if six.PY2:
+		def __unicode__(self):
+			return u"%s: %s" % (self.__class__.__name__, " ".join(unicode(x) for x in self.params))
 
 
 def flatten(out,s,p=""):
@@ -134,7 +143,7 @@ def flatten(out,s,p=""):
 	p = u" ".join((str(ss) for ss in s))
 	if hasattr(t,"list") and callable(t.list):
 		t = t.list()
-	if hasattr(t,"next"):
+	if hasattr(t,"next" if six.PY2 else "__next__"):
 		pp = " "*len(p)
 		for tt in t:
 			flatten(out,tt,p)

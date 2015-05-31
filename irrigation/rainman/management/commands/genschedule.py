@@ -101,13 +101,13 @@ class Command(BaseCommand):
 					c.close()
 				except EnvironmentError as e:
 					if e.errno == errno.ECONNREFUSED:
-						print >>sys.stderr,"Connecting to '%s' failed" % (s.host,)
+						print("Connecting to '%s' failed" % (s.host,), fiel=sys.stderr)
 						continue
 					print_exc()
 				except Exception:
 					print_exc()
 				else:
-					print >>sys.stderr,"Connecting to '%s' succeeded" % (s.host,)
+					print("Connecting to '%s' succeeded" % (s.host,), file=sys.stderr)
 			sleep(10)
 		q = Q()
 		if options['site']:
@@ -155,7 +155,7 @@ class Command(BaseCommand):
 		if v.feed.disabled:
 			return
 		if (v.level < v.stop_level) if v.priority else (v.level < v.start_level):
-			print "Nothing to do",v,v.level,v.start_level
+			print("Nothing to do",v,v.level,v.start_level)
 			if options['save'] and v.verbose:
 				log(v,"Nothing to do (has %s, need %s)" % (v.level,v.start_level))
 			return
@@ -192,7 +192,7 @@ class Command(BaseCommand):
 			log(v,"Too little to do (has %s, need %s, want %s)" % (v.level,v.start_level,want))
 			return
 		if options['verbose']:
-			print "Plan",v,"for",want,"Level",v.level,v.start_level,v.stop_level,"P" if v.priority else ""
+			print("Plan",v,"for",want,"Level",v.level,v.start_level,v.stop_level,"P" if v.priority else "")
 		for a,b in v.range(start=soon,days=options['age'], add=30):
 			if a > soon:
 				break # do it during the next run
@@ -210,7 +210,7 @@ class Command(BaseCommand):
 			if v.max_run and b > v.max_run:
 				b=v.max_run
 			if b < want:
-				print "Partial",str_tz(a),str(b)
+				print("Partial",str_tz(a),str(b))
 				if options['save']:
 					sc=Schedule(valve=v,start=a,duration=b)
 					sc.save()
@@ -220,7 +220,7 @@ class Command(BaseCommand):
 				want -= b
 				break # bail out makes sense, get others scheduled first / do more in the same slot if v.max_run is set
 			else:
-				print "Total",str_tz(a),str(want)
+				print("Total",str_tz(a),str(want))
 				if options['save']:
 					sc=Schedule(valve=v,start=a,duration=want)
 					sc.save()
@@ -230,12 +230,12 @@ class Command(BaseCommand):
 				want = None
 				break
 		if want is not None:
-			print "Missing",want
+			print("Missing",want)
 
 
 	def force_one_valve(self,v,options):
 		for a,b in v.range(start=soon,forced=True):
-			print "Forced",str_tz(a),str(b)
+			print("Forced",str_tz(a),str(b))
 			if options['save']:
 				sc=Schedule(valve=v,start=a,duration=b,forced=True)
 				sc.save()

@@ -27,7 +27,11 @@ test:
 	done; \
 	for f in $(wildcard *.py) ; do \
 		echo $$f ...; \
-		python $$f; \
+		set +e; \
+		python3 $$f; \
+		E=$$?; \
+		[ $$E = 0 ] || [ $$E = 121 ] || exit $$E; \
+		set -e; \
 	done; \
 	if ! diff -ru expect real >/tmp/diff.$$$$ ; then less /tmp/diff.$$$$; \
 		rm /tmp/diff.$$$$; exit 1; else rm /tmp/diff.$$$$; exit 0; fi

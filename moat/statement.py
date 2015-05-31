@@ -14,6 +14,7 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+from __future__ import division,absolute_import
 
 """\
 This code holds statement stuff.
@@ -29,7 +30,7 @@ for typical usage.
 
 """
 
-from __future__ import division,absolute_import
+import six
 
 import sys
 from moat.context import Context
@@ -44,9 +45,8 @@ class UnknownWordError(KeyError):
 		self.where = where
 
 	def __str__(self):
-		return "Cannot find word <%s> in <%s>" % (" ".join(str(x) for x in self.word), " ".join(self.where.name))
-	def __unicode__(self):
-		return u"Cannot find word ‹%s› in ‹%s›" % (" ".join(unicode(x) for x in self.word), " ".join(self.where.name))
+		return u"Cannot find word ‹%s› in ‹%s›" % (" ".join(six.text_type(x) for x in self.word), " ".join(self.where.name))
+	__unicode__=__str__
 
 class Statement(object):
 	"""\
@@ -108,13 +108,8 @@ class Statement(object):
 		raise NotImplementedError("You need to override '%s.run' (called with %s)" % (self.__class__.__name__,repr(k)))
 	
 	def report(self,verbose):
-		yield " ".join(unicode(x) for x in self.args)+u" ‹"+self.__class__.__name__+u"›"
+		yield " ".join(six.text_type(x) for x in self.args)+u" ‹"+self.__class__.__name__+u"›"
 
-
-class WordLister(type):
-	def __init__(cls, name, bases, dct):
-		super(WordLister, cls).__init__(name, bases, dct)
-		cls._words = {}
 
 class WordAttached(Statement):
 	"""\
@@ -123,7 +118,12 @@ class WordAttached(Statement):
 		statement which can be configured by its own sub-statement.
 		"""
 
-	__metaclass__ = WordLister
+	#__metaclass__ = WordLister
+	def __init__(self,*a,**k):
+		cls = self.__class__
+		if '_words' not in self.__class__.__dict__:
+			self.__class__._words = {}
+		super(WordAttached,self).__init__(*a,**k)
 
 	@classmethod
 	def __getitem__(self,key):
@@ -141,26 +141,26 @@ class WordAttached(Statement):
 		wl = {}
 		for o in self.__mro__:
 			if hasattr(o,"_words"):
-				for k,v in o._words.iteritems():
+				for k,v in o._words.items():
 					if k not in wl:
 						wl[k] = v
 		return wl
 
 	@classmethod
-	def iterkeys(self):
+	def keys(self):
 		k = self._get_wordlist()
 		if k is None: return ()
-		return k.iterkeys()
+		return k.keys()
 	@classmethod
-	def itervalues(self):
+	def values(self):
 		k = self._get_wordlist()
 		if k is None: return ()
-		return k.itervalues()
+		return k.values()
 	@classmethod
-	def iteritems(self):
+	def items(self):
 		k = self._get_wordlist()
 		if k is None: return ()
-		return k.iteritems()
+		return k.items()
 
 	@classmethod
 	def register_statement(self,handler):
@@ -177,6 +177,8 @@ class WordAttached(Statement):
 			"""
 		handler.name = SName(handler.name)
 
+		if '_words' not in self.__dict__:
+			self._words = {}
 		if handler.name in self._words:
 			raise ValueError("A handler for '%s' is already registered. (%s)" % (handler.name,self._words[handler.name]))
 		self._words[handler.name] = handler
@@ -305,10 +307,10 @@ class StatementList(ComplexStatement):
 
 	def __repr__(self):
 		try:
-			return u"‹"+self.__class__.__name__+"("+unicode(self.handler_id)+u")›"
+			return u"‹"+self.__class__.__name__+"("+six.text_type(self.handler_id)+u")›"
 		except AttributeError:
 			try:
-				return u"‹"+self.__class__.__name__+" "+unicode(self.args)+u"›"
+				return u"‹"+self.__class__.__name__+" "+six.text_type(self.args)+u"›"
 			except AttributeError:
 				return u"‹"+self.__class__.__name__+u"(?)›"
 
@@ -443,8 +445,8 @@ class HelpSub(object):
 	def __getitem__(self,k):
 		sname=getattr(self,"helpsubname","name")
 		return HelpSubProxy(self.helpsub.__getitem__(k),sname)
-	def iteritems(self):
+	def items(self):
 		sname=getattr(self,"helpsubname","name")
-		for i,j in self.helpsub.iteritems():
+		for i,j in self.helpsub.items():
 			yield (i,HelpSubProxy(j,sname))
 

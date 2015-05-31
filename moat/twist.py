@@ -16,14 +16,15 @@ from __future__ import division
 ##  for more details.
 ##
 
+from __future__ import division,absolute_import,print_function
+
 """\
 	This module used to hold Twisted support stuff.
 	Nowadays it holds stuff that's used to replace Twisted.
 	… among other grab-bag stuff.
 	"""
 
-from __future__ import division,absolute_import
-
+import six
 from moat.base import RaisedError,SName
 from moat.collect import Collection
 
@@ -43,7 +44,7 @@ logger = logging.getLogger("moat.twist")
 ## change the default encoding to UTF-8
 ## this is a no-op in PY3
 # PY2 defaults to ASCII, which requires adding spurious .encode("utf-8") to
-# absolutely everything you might want to print / write to a file
+# absolutely everything you might want to print(/ write to a file)
 import sys
 try:
 	reload(sys)
@@ -78,7 +79,7 @@ def fix_exception(e, tb=None):
 		e.__traceback__ = tb
 
 def print_exception(e=None,file=sys.stderr,backtrace=None):
-	print >>file,format_exception(e,backtrace=backtrace)
+	print(format_exception(e,backtrace=backtrace), file=file)
 
 def format_exception(e=None,backtrace=None):
 	tb = getattr(e,"__traceback__",None)
@@ -87,20 +88,12 @@ def format_exception(e=None,backtrace=None):
 	if tb is not None and backtrace:
 		return "".join(traceback.format_exception(e.__class__, e, e.__traceback__))
 	else:
-		return unicode(e)
+		return six.text_type(e)
 
 
 def reraise(e):
 	"""Re-raise an exception, with its original traceback"""
-	tb = getattr(e,"__traceback__",None)
-	if tb is None:
-		try:
-			raise e
-		except BaseException as e:
-			tb = sys.exc_info()[2]
-	else:
-		del e.__traceback__
-	raise e.__class__,e,tb
+	raise e
 
 # When testing, we log the time an operation takes. Unfortunately, since
 # the logged values are accurate up to 1/10th second, that means that
@@ -154,9 +147,9 @@ gjob=0
 gspawn = gevent.spawn
 def _completer(g,job):
 	def pr_ok(v):
-		print >>sys.stderr,"G RES %d %s" % (job,v)
+		print("G RES %d %s" % (job,v), file=sys.stderr)
 	def pr_err(v):
-		print >>sys.stderr,"G ERR %d %s" % (job,v)
+		print("G ERR %d %s" % (job,v), file=sys.stderr)
 	def pr_del(v):
 		del Jobs[job]
 		#g.link_value(pr_ok)
@@ -166,7 +159,7 @@ def do_spawn(func,*a,**k):
 	global gjob
 	gjob += 1
 	job = gjob
-	#print >>sys.stderr,"G SPAWN %d %s %s %s" % (job,func,a,k)
+	#print("G SPAWN %d %s %s %s" % (job,func,a,k), file=sys.stderr)
 	g = gspawn(func,*a,**k)
 	Jobs[job]=Job(g,func,a,k)
 	_completer(g,job)
@@ -193,14 +186,14 @@ def wait_for_all_threads():
 	Loggers = _Loggers
 
 	n=0
-#	for job,t in gthreads.iteritems():
-#		print >>sys.stderr,"G WAIT %d %s %s %s" % ((job,)+t[1:])
+#	for job,t in gthreads.items():
+#		print("G WAIT %d %s %s %s" % ((job,)+t[1:]), file=sys.stderr)
 
 	for r in (True,False):
 		while nr_threads(r):
 			if n==10:
-#				for job,t in Jobs.iteritems():
-#					print >>sys.stderr,"G WAIT %d %r %r %r" % (job,t.func,t.a,t.k)
+#				for job,t in Jobs.items():
+#					print("G WAIT %d %r %r %r" % (job,t.func,t.a,t.k), file=sys.stderr)
 
 				break
 			n += 1
@@ -280,12 +273,12 @@ class Jobber(object):
  
 		def err(e):
 			try:
-				e = e.get()
+				err = e.get()
 			except BaseException as e:
-				pass
+				err = e
 			from moat.run import process_failure
-			fix_exception(e)
-			process_failure(e)
+			fix_exception(err)
+			process_failure(err)
  
 		def dead(e):
 			if getattr(self,attr,None) is j:

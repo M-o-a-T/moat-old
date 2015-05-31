@@ -14,6 +14,7 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+from __future__ import division,absolute_import
 
 """\
 This code does basic timeout handling.
@@ -23,7 +24,7 @@ wait: for FOO...
 
 """
 
-from __future__ import division,absolute_import
+import six
 
 from moat import TESTING
 from moat.statement import AttributedStatement, Statement, main_words,\
@@ -96,20 +97,20 @@ class Waiter(Collected,Jobber):
 			if w is None: break
 			n = getattr(w,"displayname",None)
 			if n is not None:
-				if not isinstance(n,basestring):
-					n = " ".join(unicode(x) for x in n)
+				if not isinstance(n,six.string_types):
+					n = " ".join(six.text_type(x) for x in n)
 			else:
 				try:
 					if w.args:
-						n = unicode(w.args)
+						n = six.text_type(w.args)
 				except AttributeError:
 					pass
 				if n is None:
 					try:
-						if isinstance(w.name,basestring):
+						if isinstance(w.name,six.string_types):
 							n = w.name
 						else:
-							n = " ".join(unicode(x) for x in w.name)
+							n = " ".join(six.text_type(x) for x in w.name)
 					except AttributeError:
 						n = w.__class__.__name__
 			if n is not None:

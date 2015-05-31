@@ -16,6 +16,7 @@
 
 from __future__ import division,absolute_import
 
+import six
 from django.db import models as m
 from rainman.utils import now
 
@@ -25,7 +26,7 @@ class Model(m.Model):
 		app_label = 'rainman'
 
 	def __repr__(self):
-		return u'‹%s %s›' % (self.__class__.__name__,unicode(self))
+		return u'‹%s %s›' % (self.__class__.__name__,six.text_type(self))
 
 	def refresh(self):
 		"""Refreshes this instance from db"""

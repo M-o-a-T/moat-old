@@ -14,6 +14,7 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+from __future__ import division,absolute_import
 
 """\
 This code contains several test statements.
@@ -23,7 +24,7 @@ monitor test ...
 
 """
 
-from __future__ import division,absolute_import
+import six
 
 from moat.statement import Statement, main_words
 from moat.event import Event
@@ -69,7 +70,7 @@ monitor test MIN MAX STEP
 			raise SyntaxError("Events need at least one parameter")
 		self.values["_min"] = int(event[0])
 		self.values["_max"] = int(event[1])
-		self.values["params"] = ("test",unicode(event[0])+u"…"+unicode(event[1]))
+		self.values["params"] = ("test",six.text_type(event[0])+u"…"+six.text_type(event[1]))
 		if len(event) > 2:
 			self.values["_step"] = int(event[2])
 

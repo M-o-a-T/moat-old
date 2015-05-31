@@ -15,11 +15,13 @@
 ##  for more details.
 ##
 
+from __future__ import division,absolute_import
+
 """\
 This module is the basis for processing FS20 datagrams.
 """
 
-from __future__ import division,absolute_import
+import six
 
 from moat.event import Event
 from moat.run import simple_event
@@ -49,7 +51,7 @@ def to_hc(code, _len=8):
 	"""convert a number to an n(=8)-digit 1234 value"""
 	sft = 2*(_len-1)
 	res = 0
-	if isinstance(code,basestring):
+	if isinstance(code,six.string_types):
 		code = int(code)
 	while True:
 		res = 10*res + (((code >> sft) & 3) + 1)
@@ -61,7 +63,7 @@ def from_hc(code, _len=8):
 	"""convert a n(=8)-digit 1234 value to a number"""
 	res = 0
 	sft = 0
-	if isinstance(code,basestring):
+	if isinstance(code,six.string_types):
 		code = int(code)
 	assert len(str(code)) == _len, "wrong format: "+str(code)
 	while code:

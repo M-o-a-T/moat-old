@@ -14,6 +14,7 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+from __future__ import division,absolute_import,print_function
 
 """\
 This code parses a config file.
@@ -29,7 +30,7 @@ for typical usage.
 
 """
 
-from __future__ import division,absolute_import
+import six
 
 from moat.context import Context
 from moat.event import Event
@@ -46,20 +47,15 @@ class InputEvent(Event):
 
 	def __str__(self):
 		try:
-			return u"‹InputEvent:%s›" % (self.name,)
-		except Exception:
-			return "<InputEvent> REPORT_ERROR: "+repr(self.name)
-
-	def __unicode__(self):
-		try:
 			#return u"⌁."+unicode(self.name)
 			return unicode(self.name)
 		except Exception:
 			return u"⌁ REPORT_ERROR: "+repr(self.name)
+	__unicode__=__str__
 
 	def report(self, verbose=False):
 		try:
-			yield "IEVENT: "+unicode(self.name)
+			yield "IEVENT: "+six.text_type(self.name)
 		except Exception:
 			yield "IEVENT: REPORT_ERROR: "+repr(self.name)
 
@@ -210,15 +206,15 @@ class Interpreter(Processor):
 	def complex_statement(self,args):
 		try:
 			fn = self.lookup(args)
-		except TypeError,e:
-			print >>self.ctx.out,"For",args,"::"
+		except TypeError as e:
+			print("For",args,"::", file=self.ctx.out)
 			raise
 
 		fn.start_block()
 		return RunMe(self,fn)
 	
 	def done(self):
-		#print >>self.ctx.out,"Exiting"
+		#print("Exiting", file=self.ctx.out)
 		pass
 
 class InteractiveInterpreter(Interpreter):
@@ -229,9 +225,9 @@ class InteractiveInterpreter(Interpreter):
 		from moat.statement import UnknownWordError
 
 		if isinstance(err,(UnknownWordError,SyntaxError)):
-			print >>parser.ctx.out, "ERROR:", err
+			print("ERROR:", err, file=parser.ctx.out)
 		else:
-			print >>parser.ctx.out, "ERROR:"
+			print("ERROR:", file=parser.ctx.out)
 			traceback.print_exception(err.__class__,err,sys.exc_info()[2], file=parser.ctx.out)
 		if hasattr(parser,'init_state'):
 			parser.init_state()

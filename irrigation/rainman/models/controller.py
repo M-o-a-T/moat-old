@@ -26,8 +26,9 @@ class Controller(Model,RangeMixin):
 	class Meta(Model.Meta):
 		unique_together = (("site", "name"),)
 		db_table="rainman_controller"
-	def __unicode__(self):
+	def __str__(self):
 		return self.name
+	__unicode__=__str__
 	name = m.CharField(max_length=200)
 	var = m.CharField(max_length=200,unique=True,help_text="Name in MoaT")
 	comment = m.CharField(max_length=200,blank=True,help_text="Comment")
@@ -51,11 +52,11 @@ class Controller(Model,RangeMixin):
 				if n_open == self.max_on:
 					start = stops[0]
 				k=heappop(stops)
-				#print "-",n_open,str_tz(k)
+				#print("-",n_open,str_tz(k))
 				n_open -= 1
 			n_open += 1
 			heappush(stops,s.start+s.duration+add)
-			#print "+",n_open,str_tz(s.start+s.duration)
+			#print("+",n_open,str_tz(s.start+s.duration))
 			if n_open == self.max_on:
 				if (start < s.start):
 					yield ((start,s.start-start))

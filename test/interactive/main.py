@@ -50,14 +50,14 @@ def parse_logger(t,*x):
 		x[1] = tok_name[x[1]]
 	except KeyError:
 		pass
-	print t+":"+" ".join(str(d) for d in x)
+	print(t+":"+" ".join(str(d) for d in x))
 
 def reporter(err):
-	print "Error:",err
+	print("Error:",err)
 	
 def looper():
 	while True:
-		print "L"
+		print("L")
 		sleep(1)
 
 def ready():
@@ -70,7 +70,7 @@ def ready():
 		i = InteractiveInterpreter
 	else:
 		i = Interpreter
-	print """Ready. Type «help» if you don't know what to do."""
+	print("""Ready. Type «help» if you don't know what to do.""")
 	try:
 		parse(sys.stdin, interpreter=i, ctx=c)
 	except Exception as e:

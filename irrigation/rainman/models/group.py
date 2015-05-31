@@ -28,8 +28,9 @@ class Group(Model,RangeMixin):
 	class Meta(Model.Meta):
 		unique_together = (("site", "name"),)
 		db_table="rainman_group"
-	def __unicode__(self):
+	def __str__(self):
 		return self.name
+	__unicode__=__str__
 	name = m.CharField(max_length=200)
 	site = m.ForeignKey(Site,related_name="groups") # self.valve[*].controller.site is self.site
 	comment = m.CharField(max_length=200,blank=True)

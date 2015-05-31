@@ -62,7 +62,7 @@ class Command(BaseCommand):
 		if typ != "wago":
 			raise NotImplementedError("I only know type 'wago'")
 		sname = "_".join(x[0].upper()+x[1:].lower() for x in v.var.split())
-		print """\
+		print("""\
 if exists output {name}:
 	del output {name}
 output wago {cloc} {vloc}:
@@ -82,6 +82,6 @@ on output change {name}:
 	else:
 		trigger hab out command {sname} :param raw OFF
 
-""".format(name=v.var, vloc=v.location, cloc=v.controller.location,sname=sname)
+""".format(name=v.var, vloc=v.location, cloc=v.controller.location,sname=sname))
 
 

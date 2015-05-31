@@ -11,7 +11,7 @@ import gevent
 from gevent.server import StreamServer
 
 def rrdc_me(socket, address):
-	print ('New connection from %s:%s' % address)
+	print(('New connection from %s:%s' % address))
 	fileobj = socket.makefile()
 
 	line = fileobj.readline()

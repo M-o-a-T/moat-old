@@ -14,6 +14,7 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+from __future__ import division,absolute_import
 
 """\
 	This module holds a Context object.
@@ -22,7 +23,7 @@
 	See test/context.py for usage examples.
 	"""
 
-from __future__ import division,absolute_import
+import six
 
 import sys,inspect
 
@@ -37,9 +38,12 @@ class Context(object):
 			self._parent = []
 		self._store = {}
 		self._store.update(**k)
-		f = inspect.currentframe(1)
-		if f.f_code.co_name == "__call__":
-			f = inspect.currentframe(2)
+		if six.PY2:
+			f = inspect.currentframe(1)
+			if f.f_code.co_name == "__call__":
+				f = inspect.currentframe(2)
+		else:
+			f = inspect.currentframe()
 		self._created = (f.f_code.co_name ,f.f_code.co_filename ,f.f_lineno )
 
 	def __call__(self,ctx=None,**k):
@@ -134,6 +138,7 @@ class Context(object):
 			if bool(p):
 				return True
 		return False
+	__bool__=__nonzero__
 	
 	def __repr__(self):
 		res = ""
@@ -154,14 +159,14 @@ class Context(object):
 		self._dump_tree("")
 	def _dump_tree(self,pre):
 		from moat.logging import log,DEBUG
-		log(DEBUG,"CTX "+pre,unicode(self._store))
+		log(DEBUG,"CTX "+pre,six.text_type(self._store))
 		for p in self._parent:
 			p._dump_tree(pre+"  ")
 	def _report(self):
 		f = self._created
 		yield "@%x %s %s:%d" % (id(self),f[0],f[1],f[2])
-		for a,b in self._store.iteritems():
-			yield "%s: %s" % (unicode(a),repr(b))
+		for a,b in self._store.items():
+			yield "%s: %s" % (six.text_type(a),repr(b))
 		for p in self._parent:
 			pre="p"
 			for r in p._report():
@@ -170,7 +175,7 @@ class Context(object):
 	
 	def __iter__(self):
 		done = set()
-		for a,b in self._store.iteritems():
+		for a,b in self._store.items():
 			yield a,b
 			done.add(a)
 		for p in self._parent:
@@ -186,7 +191,7 @@ class Context(object):
 		seen = set()
 
 		def do(store):
-			for k,v in store.iteritems():
+			for k,v in store.items():
 				if v is not VanishedAttribute and k not in seen:
 					setattr(res,k,v)
 				seen.add(k) # prevent overwriting with older values

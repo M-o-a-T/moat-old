@@ -14,14 +14,14 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+from __future__ import division,absolute_import
 
 """\
 This code holds common subcommands for specifying delays and related stuff.
 
 """
 
-from __future__ import division,absolute_import
-
+import six
 from moat.statement import Statement
 from moat.times import time_delta,time_until,now
 
@@ -29,9 +29,8 @@ class DelayError(RuntimeError):
 	def __init__(self,w):
 		self.waiter = w
 	def __str__(self):
-		return self.text % (" ".join(str(x) for x in self.waiter.name),)
-	def __unicode__(self):
-		return self.text % (" ".join(unicode(x) for x in self.waiter.name),)
+		return self.text % (" ".join(six.text_type(x) for x in self.waiter.name),)
+	__unicode__=__str__
 
 class DelayDone(DelayError):
 	text = u"Delay ‹%s› is finished"

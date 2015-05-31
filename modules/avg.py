@@ -14,6 +14,7 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+from __future__ import division,absolute_import
 
 """\
 This code does basic timeout handling.
@@ -27,7 +28,7 @@ var avg X NAME...
 
 """
 
-from __future__ import division,absolute_import
+import six
 
 from moat.statement import Statement, main_words, AttributedStatement
 from moat.module import Module
@@ -91,7 +92,7 @@ class Avg(Collected):
 		self.avg = self._calc(True)
 		
 	def list(self):
-		yield ("name"," ".join(unicode(x) for x in self.name))
+		yield ("name"," ".join(six.text_type(x) for x in self.name))
 		yield ("mode",self.mode)
 		yield ("value",self.value)
 		if self.value_tm is not None:
@@ -369,12 +370,12 @@ class AvgModule(Module):
 
 	def load(self):
 		mlen=0
-		for v in globals().itervalues():
+		for v in globals().values():
 			m = getattr(v,"mode",None)
 			if m is None: continue
 			modes[m] = v
 			if mlen < len(m): mlen = len(m)
-		for v in modes.itervalues():
+		for v in modes.values():
 			AvgHandler.long_doc += v.mode+" "*(mlen-len(v.mode)+1)+v.doc+"\n"
 
 		main_words.register_statement(AvgHandler)

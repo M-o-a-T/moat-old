@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 ##
 ##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
 ##
@@ -14,6 +13,7 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+from __future__ import division,absolute_import
 
 """\
 This code does basic configurable event mangling.
@@ -31,8 +31,7 @@ Given the event "switch on livingroom main", this would cause a
 Otherwise a "alarm livingroom" would be triggered.
 
 """
-
-from __future__ import division,absolute_import
+import six
 
 from moat.statement import Statement,MainStatementList, main_words
 from moat.logging import log, TRACE
@@ -81,9 +80,9 @@ Every "*foo" in the event description is mapped to the corresponding
 		ia = iter(self.args)
 		pos = 0
 		while True:
-			try: e = ie.next()
+			try: e = six.next(ie)
 			except StopIteration: e = StopIteration
-			try: a = ia.next()
+			try: a = six.next(ia)
 			except StopIteration: a = StopIteration
 			if e is StopIteration and a is StopIteration:
 				return
@@ -121,10 +120,10 @@ Every "*foo" in the event description is mapped to the corresponding
 
 	def _report(self, verbose=False):
 		if self.displayname is not None:
-			if isinstance(self.displayname,basestring):
+			if isinstance(self.displayname,six.string_types):
 				yield "name: "+self.displayname
 			else:
-				yield "name: "+" ".join(unicode(x) for x in self.displayname)
+				yield "name: "+" ".join(six.text_type(x) for x in self.displayname)
 		yield "prio: "+str(self.prio)
 
 		for r in super(OnEventHandler,self)._report(verbose):

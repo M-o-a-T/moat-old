@@ -14,6 +14,7 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+from __future__ import division,absolute_import
 
 """\
 This code implements generic message queueing across a channel.
@@ -22,7 +23,7 @@ Your code needs to supply message converters and "real" connections.
 Look at module/onewire.py for an example.
 """
 
-from __future__ import division,absolute_import
+import six
 
 from moat.logging import log,log_exc,DEBUG,TRACE,INFO,WARN,ERROR
 from moat.statement import Statement, main_words, AttributedStatement
@@ -287,7 +288,7 @@ class MsgRepeater(object):
 class MsgIncoming(object):
 	"""Wrapper to signal an incoming message"""
 	def __init__(self,**k):
-		for a,b in k.iteritems():
+		for a,b in k.items():
 			setattr(self,a,b)
 		if not hasattr(self,"prio"):
 			if hasattr(self,"msg") and hasattr(self.msg,"prio"):
@@ -296,7 +297,7 @@ class MsgIncoming(object):
 				self.prio = PRIO_STANDARD
 
 	def __repr__(self):
-		s = " ".join(["%s:%s" % (k,repr(v)) for k,v in self.__dict__.iteritems()])
+		s = " ".join(["%s:%s" % (k,repr(v)) for k,v in self.__dict__.items()])
 		return u"‹%s%s%s›" % (self.__class__.__name__, ": " if s else "", s)
 
 class MsgError(object):
@@ -403,7 +404,6 @@ class MsgQueue(Collected,Jobber):
 		This is a subclass of @Collected, so you need to supply a 'storage' class attribute.
 		"""
 	#storage = Nets.storage
-	max_open = None # outstanding messages
 	max_send = None # messages to send until the channel is restarted
 	attempts = 0
 	max_attempts = None # connection attempts
@@ -479,10 +479,10 @@ class MsgQueue(Collected,Jobber):
 		super(MsgQueue,self).delete()
 
 	def info(self):
-		return unicode(self)
+		return six.text_type(self)
 	def __repr__(self):
 		return u"‹%s:%s %s›" % (self.__class__.__name__,self.name,self.state)
-                
+
 	def list(self):
 		for r in super(MsgQueue,self).list():
 			yield r
@@ -537,57 +537,57 @@ class MsgQueue(Collected,Jobber):
 		handled = False
 		log("msg",TRACE,"recv",self.name,str(msg))
 		for mq in self.receivers:
-		  i = 0
-		  for m in mq:
-			try:
-				r = m.recv(msg)
-				log("msg",TRACE,"recv=",r,repr(m))
-				if r is ABORT:
+			i = 0
+			for m in mq:
+				try:
+					r = m.recv(msg)
+					log("msg",TRACE,"recv=",r,repr(m))
+					if r is ABORT:
+						self.channel.close(False)
+						self.channel = None
+						break
+					elif r is NOT_MINE:
+						continue
+					elif r is MINE or r is SEND_AGAIN:
+						handled = True
+						if len(mq) > i and mq[i] is m:
+							mq.pop(i)
+						else:
+							mq.remove(m)
+						i -= 1
+
+						if r is SEND_AGAIN:
+							if m.blocking:
+								self.senders[0].insert(0,m)
+							else:
+								self.senders[m.prio].append(m)
+						else:
+							m.done()
+							self.n_processed_now += 1
+						break
+					elif r is RECV_AGAIN:
+						handled = True
+						break
+					elif r is SEND_AGAIN:
+						handled = True
+						break
+					elif isinstance(r,MSG_ERROR):
+						raise r
+					else:
+						raise BadResult(m)
+				except Exception as ex:
+					if len(mq) < i and mq[i] is m:
+						mq.pop(i)
+					elif m in self.receivers:
+						mq.remove(m)
+					fix_exception(ex)
+					process_failure(ex)
+
 					self.channel.close(False)
 					self.channel = None
-					break
-				elif r is NOT_MINE:
-					continue
-				elif r is MINE or r is SEND_AGAIN:
-					handled = True
-					if len(mq) > i and mq[i] is m:
-						mq.pop(i)
-					else:
-						mq.remove(m)
-					i -= 1
-
-					if r is SEND_AGAIN:
-						if m.blocking:
-							self.senders[0].insert(0,m)
-						else:
-							self.senders[m.prio].append(m)
-					else:
-						m.done()
-						self.n_processed_now += 1
-					break
-				elif r is RECV_AGAIN:
+					simple_event("msg","error",*self.name, msg=msg)
 					handled = True
 					break
-				elif r is SEND_AGAIN:
-					handled = True
-					break
-				elif isinstance(r,MSG_ERROR):
-					raise r
-				else:
-					raise BadResult(m)
-			except Exception as ex:
-				if len(mq) < i and mq[i] is m:
-					mq.pop(i)
-				elif m in self.receivers:
-					mq.remove(m)
-				fix_exception(ex)
-				process_failure(ex)
-
-				self.channel.close(False)
-				self.channel = None
-				simple_event("msg","error",*self.name, msg=msg)
-				handled = True
-				break
 			i += 1
 		if not handled:
 			simple_event("msg","unhandled",*self.name, msg=msg)
@@ -678,9 +678,9 @@ class MsgQueue(Collected,Jobber):
 		"""Count the number of outstanding messages"""
 		res = 0
 		for mq in self.receivers:
-		  for m in mq:
-			if isinstance(m,MsgBase):
-				res += 1
+			for m in mq:
+				if isinstance(m,MsgBase):
+					res += 1
 		return res
 
 	@property
@@ -764,11 +764,11 @@ class MsgQueue(Collected,Jobber):
 			done = False # marker for "don't send any more stuff"
 
 			for mq in self.receivers:
-			  if done: break
-			  for m in mq:
-				if m.blocking:
-					log("msg",TRACE,"blocked by",str(m))
-					done = True
+				if done: break
+				for m in mq:
+					if m.blocking:
+						log("msg",TRACE,"blocked by",str(m))
+						done = True
 			if done: continue
 
 			for mq in self.senders:
@@ -777,8 +777,6 @@ class MsgQueue(Collected,Jobber):
 					if done:
 						break
 					if self.channel is None:
-						break
-					if self.max_open >= self.is_open:
 						break
 
 					msg = mq.pop(0)

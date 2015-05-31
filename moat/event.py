@@ -14,12 +14,12 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+from __future__ import division,absolute_import
 
 """\
 This part of the code defines what an event is.
 """
-
-from __future__ import division,absolute_import
+import six
 
 import warnings
 from moat.base import Name,RaisedError
@@ -62,7 +62,7 @@ class Event(object):
 				Event(ctx, "timer","timeout","t123")
 			"""
 		self._name_check(name)
-		#print "E_INIT",name,"with",ctx
+		#print("E_INIT",name,"with",ctx)
 		self.name = Name(name)
 		self.ctx = ctx if ctx is not None else Context()
 		if "loglevel" in self.ctx:
@@ -83,26 +83,21 @@ class Event(object):
 
 	def __str__(self):
 		try:
-			return u"‹Event:%s›" % (self.name,)
-		except Exception:
-			return "<Event> REPORT_ERROR: "+repr(self.name)
-
-	def __unicode__(self):
-		try:
-			return u"↯."+unicode(self.name)
+			return u"↯."+six.text_type(self.name)
 		except Exception:
 			return "↯ REPORT_ERROR: "+repr(self.name)
+	__unicode__=__str__
 
 	def report(self, verbose=False):
 		try:
-			yield u"EVENT: "+unicode(self.name)
+			yield u"EVENT: "+six.text_type(self.name)
 			for k,v in self.ctx:
-				yield u"     : "+k+u"="+unicode(v)
+				yield u"     : "+k+u"="+six.text_type(v)
 		except Exception:
 			yield "EVENT: REPORT_ERROR: "+repr(self.name)
 	
 	def list(self):
-		yield (unicode(self.name),)
+		yield (six.text_type(self.name),)
 		if self.__class__ is not Event:
 			yield ("type",self.__class__.__name__)
 		if self.loglevel is not None:
@@ -146,9 +141,9 @@ class Event(object):
 				r = ctx[n[1:]]
 #				if n == "$X":
 #					import sys
-#					print >>sys.stderr,"c@%x %s %s"%(id(ctx),n,r)
+#					print("c@%x %s %s"%(id(ctx),n,r), file=sys.stderr)
 #					for x in ctx._report():
-#						print >>sys.stderr,": ",x
+#						print(": ",x, file=sys.stderr)
 				n = r
 			w.append(n)
 		return self.__class__(ctx, *self.name.apply(ctx=ctx,drop=drop))

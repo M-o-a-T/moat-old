@@ -104,7 +104,7 @@ class TX(Collected):
 
 	def event(self,ctx,data):
 		d={}
-		for m,n in data.iteritems():
+		for m,n in data.items():
 			try: n = n * self.faktor[m]
 			except KeyError: pass
 			try: n = n + self.offset[m]
@@ -130,9 +130,9 @@ class TX(Collected):
 		if self.last:
 			yield ("last",self.last)
 		if self.last_data:
-			for k,v in self.last_data.iteritems(): yield ("last_"+k,v)
-		for k,v in self.faktor.iteritems(): yield ("faktor_"+k,v)
-		for k,v in self.offset.iteritems(): yield ("offset_"+k,v)
+			for k,v in self.last_data.items(): yield ("last_"+k,v)
+		for k,v in self.faktor.items(): yield ("faktor_"+k,v)
+		for k,v in self.offset.items(): yield ("offset_"+k,v)
 	
 	def delete(self,ctx=None):
 		TXcodes[self.group][self.code].remove(self)
@@ -142,7 +142,7 @@ class TX(Collected):
 		
 
 def flat(r):
-	for a,b in r.iteritems():
+	for a,b in r.items():
 		yield a
 		yield b
 

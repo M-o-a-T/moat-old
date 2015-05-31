@@ -27,8 +27,9 @@ class EnvGroup(Model):
 	class Meta(Model.Meta):
 		unique_together = (("site", "name"),)
 		db_table="rainman_paramgroup"
-	def __unicode__(self):
+	def __str__(self):
 		return self.name
+	__unicode__=__str__
 	name = m.CharField(max_length=200)
 	comment = m.CharField(max_length=200,blank=True)
 	site = m.ForeignKey(Site,related_name="envgroups")
@@ -115,8 +116,9 @@ class EnvGroup(Model):
 class EnvItem(Model):
 	class Meta(Model.Meta):
 		db_table="rainman_environmenteffect"
-	def __unicode__(self):
+	def __str__(self):
 		return u"@%s %s¦%s¦%s" % (self.group.name,self.temp,self.wind,self.sun)
+	__unicode__=__str__
 	group = m.ForeignKey(EnvGroup,db_column="param_group_id",related_name="items")
 	factor = m.FloatField(default=1.0, help_text="Factor to use at this data point")
 

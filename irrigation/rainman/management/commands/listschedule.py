@@ -126,7 +126,7 @@ class Command(BaseCommand):
 			for b in a:
 				r.append(b + " "*(lengths[i]-len(b)))
 				i += 1
-			print " ".join(r)
+			print(" ".join(r))
 			
 
 

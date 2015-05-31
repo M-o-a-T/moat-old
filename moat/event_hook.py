@@ -14,6 +14,7 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+from __future__ import division,absolute_import
 
 """\
 This code does basic configurable event mangling.
@@ -32,7 +33,7 @@ Otherwise a "alarm livingroom" would be triggered.
 
 """
 
-from __future__ import division,absolute_import
+import six
 
 from moat.logging import log, TRACE
 from moat.run import register_worker,unregister_worker,MIN_PRIO,MAX_PRIO
@@ -46,12 +47,12 @@ onHandlers2 = {}
 class _OnHandlers(Collection):
 	name = "on"
 
-	def iteritems(self):
+	def items(self):
 		def priosort(a,b):
 			a=self[a]
 			b=self[b]
 			return cmp(a.prio,b.prio) or cmp(a.name,b.name)
-		for i in sorted(self.iterkeys(), cmp=priosort):
+		for i in sorted(self.keys(), cmp=priosort):
 			yield i,self[i]
 
 	def __getitem__(self,key):
@@ -119,9 +120,9 @@ class OnEventBase(Collected,iWorker):
 			name = Name("_on",self._get_id())
 		super(OnEventBase,self).__init__(*name)
 
-#		self.name = unicode(self.args)
+#		self.name = six.text_type(self.args)
 #		if self.displayname is not None:
-#			self.name += u" ‹"+" ".join(unicode(x) for x in self.displayname)+u"›"
+#			self.name += u" ‹"+" ".join(six.text_type(x) for x in self.displayname)+u"›"
 
 		
 		log(TRACE,"NewHandler",self.id)
@@ -132,9 +133,9 @@ class OnEventBase(Collected,iWorker):
 		ctx = {}
 		pos = 0
 		while True:
-			try: e = ie.next()
+			try: e = six.next(ie)
 			except StopIteration: e = StopIteration
-			try: a = ia.next()
+			try: a = six.next(ia)
 			except StopIteration: a = StopIteration
 			if e is StopIteration and a is StopIteration:
 				return True
@@ -162,7 +163,7 @@ class OnEventBase(Collected,iWorker):
 				yield r
 
 	def info(self):
-		return u"%s (%d)" % (unicode(self.args),self.prio)
+		return u"%s (%d)" % (six.text_type(self.args),self.prio)
 
 	def list(self):
 		for r in super(OnEventBase,self).list():
@@ -170,7 +171,7 @@ class OnEventBase(Collected,iWorker):
 		yield("id",self.id)
 		yield("prio",self.prio)
 		if self.displayname is not None:
-			yield("pname"," ".join(unicode(x) for x in self.displayname))
+			yield("pname"," ".join(six.text_type(x) for x in self.displayname))
 		yield("args",self.args)
 		if hasattr(self.parent,"displaydoc"):
 			yield("doc",self.parent.displaydoc)

@@ -19,6 +19,8 @@
 	This module holds a few random utility functions.
 	"""
 
+import six
+
 from datetime import datetime,timedelta
 from django.utils.timezone import utc,get_current_timezone
 #from django.utils.thread_support import currentThread
@@ -66,7 +68,7 @@ class RangeMixin(object):
 		try:
 			while True:
 				try:
-					a,b = r.next()
+					a,b = six.next(r)
 				except StopIteration:
 					return res
 				if res:
@@ -92,27 +94,27 @@ class StoredIter(object):
 	def __init__(self,it):
 		self.it = iter(it)
 		#i = list(self.it)
-		#print "LIST",i
+		#print("LIST",i)
 		#self.it = iter(i)
 		self.saved = NotYet
 
 	@property
 	def next(self):
-		self.saved = self.it.next()
+		self.saved = six.next(self.it)
 		return self.saved
 	@property
 	def stored(self):
 		if self.saved is NotYet:
-			self.saved = self.it.next()
+			self.saved = six.next(self.it)
 		return self.saved
 		
 def range_coalesce(it):
 	"""Returns an iterator which returns the union of overlapping (start,lengt) pairs."""
 	it = iter(it)
-	ra,rl = it.next()
+	ra,rl = six.next(it)
 	while True:
 		try:
-			sa,sl = it.next()
+			sa,sl = six.next(it)
 		except StopIteration:
 			yield ra,rl
 			return
@@ -133,10 +135,10 @@ def range_union(*a):
 		Return an iterator which yields a row of start+length tuples
 		which are the union of all the start+length tuples in a.
 		"""
-	#print "UNION"
+	#print("UNION")
 	res = range_coalesce(_range_union([StoredIter(range_coalesce(ax)) for ax in a]))
 	#res = list(res)
-	#print "UNION = ",res
+	#print("UNION = ",res)
 	return res
 
 def _range_union(head):
@@ -165,10 +167,10 @@ def range_intersection(*a):
 		Return an iterator which yields a row of start+length tuples
 		which are the union of all the start+length tuples in a.
 		"""
-	#print "INTERSECT"
+	#print("INTERSECT")
 	res = _range_intersection(*a)
 	#res = list(res)
-	#print "INTERSECT = ",res
+	#print("INTERSECT = ",res)
 	return res
 
 def _range_intersection(*a):
@@ -238,14 +240,14 @@ if __name__ == "__main__":
 	a=((1,100),(220,100),(350,100),(500,100))
 	b=((2,50),(60,100),(320,80),(510,110))
 	c=((0,10),(11,2),(70,1000))
-	print a
-	print b
-	print c
-	print list(range_intersection(a,b,c))
-	print list(range_intersection(c,b,a))
-	print list(range_intersection(c,a,b))
-	print list(range_intersection(a,c,b))
-	print list(range_intersection(b,c,a))
-	print list(range_intersection(b,a,c))
-	print list(range_invert(50,950,a))
-	print list(range_union(a,b))
+	print(a)
+	print(b)
+	print(c)
+	print(list(range_intersection(a,b,c)))
+	print(list(range_intersection(c,b,a)))
+	print(list(range_intersection(c,a,b)))
+	print(list(range_intersection(a,c,b)))
+	print(list(range_intersection(b,c,a)))
+	print(list(range_intersection(b,a,c)))
+	print(list(range_invert(50,950,a)))
+	print(list(range_union(a,b)))

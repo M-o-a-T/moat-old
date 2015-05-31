@@ -41,9 +41,9 @@ def chk(iso,a,invert=False):
 	global lnp
 	if lnp is None or lnp != now:
 		lnp = now
-		print "@",now,"::"
+		print("@",now,"::")
 	err += 1
-	print "?",iso,"≠",res,"@",a
+	print("?",iso,"≠",res,"@",a)
 
 now = datetime.datetime(2003,4,5,6,7,8)
 

@@ -14,6 +14,7 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+from __future__ import division,absolute_import
 
 """\
 This code implements the base for TCP clients and servers.
@@ -22,7 +23,7 @@ Your code needs to supply storage and factory class variables.
 Look at module/net.py for a basic example.
 """
 
-from __future__ import division,absolute_import
+import six
 
 from moat.logging import log,DEBUG,TRACE,INFO,WARN,ERROR
 from moat.statement import Statement, main_words, AttributedStatement
@@ -75,8 +76,8 @@ class NetError(EnvironmentError):
 class LineReceiver(object):
 	"""A receiver mix-in for the basic line protocol."""
 
-	delimiter = "\n"
-	buffer = ""
+	delimiter = b"\n"
+	buffer = b''
 
 	def lineReceived(self, line):
 		"""Override this.
@@ -98,13 +99,13 @@ class LineReceiver(object):
 		self.buffer = buffer
 		for d in data:
 			try:
-				self.lineReceived(d)
+				self.lineReceived(d.decode('utf-8'))
 			except Exception as e:
 				fix_exception(e)
 				process_failure(e)
 		
 	def write(self,val):
-		super(LineReceiver,self).write(val+self.delimiter)
+		super(LineReceiver,self).write(val.encode('utf-8')+self.delimiter)
 
 
 #class Nets(Collection):
@@ -193,7 +194,7 @@ class NetCommonConnector(Collected,Jobber):
 			while self.socket is not None:
 				try:
 					r = self.socket.recv(4096)
-					if r is None or r == "":
+					if not r:
 						return
 				except Exception as e:
 					fix_exception(e)
@@ -463,7 +464,7 @@ send net text… :to ‹name…›
 		else:
 			name = Name(*name.apply(ctx))
 
-		val = u" ".join(unicode(s) for s in event)
+		val = u" ".join(six.text_type(s) for s in event)
 		self.storage[name].write(val)
 
 class NetTo(Statement):

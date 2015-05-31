@@ -12,6 +12,7 @@ Build-Depends: debhelper (>= 5),
  python-dbg,
  python-sqlmix (>= 0.9.29),
  python-pysqlite2,
+ python-amqp,
  portaudio19-dev,
  python-gevent,
  libevent-dev,
@@ -19,6 +20,10 @@ Build-Depends: debhelper (>= 5),
  python-rpyc,
  dh-python,
  dh-systemd,
+ python3-amqp,
+ python3-gevent,
+ python3-setuptools,
+ python3-sqlmix,
 X-Also-Depends: avr-libc, gcc-avr
 Build-Depends-Indep: python-support
 Standards-Version: 3.7.2

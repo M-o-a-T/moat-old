@@ -14,33 +14,33 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+from __future__ import division,absolute_import
 
 """\
 This code implements (a subset of) the WAGO server protocol.
 
 """
 
-from __future__ import division,absolute_import
-
+import six
 import os
 import re
 
-from homevent import TESTING
-from homevent.module import Module
-from homevent.base import Name,SName, singleName
-from homevent.logging import log,DEBUG,TRACE,INFO,WARN
-from homevent.statement import AttributedStatement, Statement, main_words
-from homevent.check import Check,register_condition,unregister_condition
-from homevent.monitor import Monitor,MonitorHandler, MonitorAgain
-from homevent.net import NetConnect,LineReceiver,NetActiveConnector,NetRetry
-from homevent.twist import reraise,callLater,fix_exception
-from homevent.run import simple_event
-from homevent.context import Context
-from homevent.times import humandelta,now,unixdelta,simple_time_delta
-from homevent.msg import MsgQueue,MsgFactory,MsgBase, MINE,NOT_MINE, RECV_AGAIN,SEND_AGAIN,\
+from moat import TESTING
+from moat.module import Module
+from moat.base import Name,SName, singleName
+from moat.logging import log,DEBUG,TRACE,INFO,WARN
+from moat.statement import AttributedStatement, Statement, main_words
+from moat.check import Check,register_condition,unregister_condition
+from moat.monitor import Monitor,MonitorHandler, MonitorAgain
+from moat.net import NetConnect,LineReceiver,NetActiveConnector,NetRetry
+from moat.twist import reraise,callLater,fix_exception
+from moat.run import simple_event
+from moat.context import Context
+from moat.times import humandelta,now,unixdelta,simple_time_delta
+from moat.msg import MsgQueue,MsgFactory,MsgBase, MINE,NOT_MINE, RECV_AGAIN,SEND_AGAIN,\
 	MsgReceiver, MsgClosed, MSG_ERROR,PRIO_URGENT,PRIO_CONNECT,PRIO_BACKGROUND,PRIO_STANDARD
-from homevent.collect import Collection
-from homevent.in_out import register_input,register_output, unregister_input,unregister_output,\
+from moat.collect import Collection
+from moat.in_out import register_input,register_output, unregister_input,unregister_output,\
 	Input,Output,BoolIO
 
 from gevent.event import AsyncResult
@@ -215,7 +215,7 @@ class WAGOmonitorsMsg(WAGOmsgBase):
 	def list(self):
 		for r in super(WAGOmonitorsMsg,self).list():
 			yield r
-		for a,b in self.data.iteritems():
+		for a,b in self.data.items():
 			yield "found",(a,b)
 
 	def retry(self):
@@ -259,7 +259,7 @@ class WAGOmonitorsMsg(WAGOmsgBase):
 		return NOT_MINE
 
 	def done(self):
-		for a,b in self.data.iteritems():
+		for a,b in self.data.items():
 			log("wago",TRACE,"found monitor",a,b)
 		pass
 
@@ -665,7 +665,7 @@ send wago ‹text…› :to ‹name›
 		else:
 			name = Name(*name.apply(ctx))
 
-		val = u" ".join(unicode(s) for s in event)
+		val = u" ".join(six.text_type(s) for s in event)
 
 		msg = WAGOrawRun(val)
 		WAGOservers[name].enqueue(msg)

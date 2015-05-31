@@ -106,7 +106,7 @@ class EM(Collected,Timeslotted):
 
 	def event(self,ctx,data):
 		d={}
-		for m,n in data.iteritems():
+		for m,n in data.items():
 			try: n = n * self.faktor[m]
 			except KeyError: pass
 			try: n = n + self.offset[m]
@@ -132,9 +132,9 @@ class EM(Collected,Timeslotted):
 		if self.last:
 			yield ("last",self.last)
 		if self.last_data:
-			for k,v in self.last_data.iteritems(): yield ("last_"+k,v)
-		for k,v in self.faktor.iteritems(): yield ("faktor_"+k,v)
-		for k,v in self.offset.iteritems(): yield ("offset_"+k,v)
+			for k,v in self.last_data.items(): yield ("last_"+k,v)
+		for k,v in self.faktor.items(): yield ("faktor_"+k,v)
+		for k,v in self.offset.items(): yield ("offset_"+k,v)
 		if self.slot:
 			for k,v in self.slot.list(): yield ("slot_"+k,v)
 	
@@ -148,7 +148,7 @@ class EM(Collected,Timeslotted):
 		
 
 def flat(r):
-	for a,b in r.iteritems():
+	for a,b in r.items():
 		yield a
 		yield b
 

@@ -30,7 +30,7 @@ block:
 	try:
 		log TRACE Yes B
 	catch:
-		log ERROR No 01
+		log ERROR No 1
 	
 	try:
 		log TRACE Yes C

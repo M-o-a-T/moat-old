@@ -127,7 +127,7 @@ class Shutdown_Collections(ExcWorker):
 
 		def byprio(a,b):
 			return cmp(a.prio,b.prio)
-		for w in sorted(collections.itervalues(),cmp=byprio):
+		for w in sorted(collections.values(),cmp=byprio):
 			if not w.can_do("del"):
 				continue
 			for d in w.values():

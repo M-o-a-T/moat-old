@@ -16,6 +16,10 @@
 ##  for more details.
 ##
 
+import six
+if six.PY3:
+	import sys; sys.exit(121)
+
 from moat import patch;patch()
 from moat.reactor import ShutdownHandler
 from moat.module import load_module

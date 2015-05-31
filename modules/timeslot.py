@@ -56,7 +56,7 @@ timeslot ‹name…›
 		if "interval" not in self.values:
 			raise SyntaxError(u'Usage: timeslot ‹name…›: need to specify an interval')
 
-		for p,v in self.values.iteritems():
+		for p,v in self.values.items():
 			setattr(m,p,v)
 		if not self.stopped:
 			return m.up()
@@ -153,7 +153,7 @@ This statement updates the parameters of an existing timeslot.
 			raise SyntaxError(u'update timeslot: You did not specify any changes?')
 		timeslot = Timeslots[SName(event)]
 
-		for p,v in self.params.iteritems():
+		for p,v in self.params.items():
 			setattr(timeslot,p,v)
 
 for cmd in (TimeslotInterval, TimeslotDuration, TimeslotOffset):

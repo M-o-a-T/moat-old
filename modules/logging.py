@@ -14,6 +14,7 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+from __future__ import division,absolute_import,print_function
 
 """\
 This code does basic configurable logging.
@@ -27,7 +28,7 @@ log
 
 """
 
-from __future__ import division,absolute_import
+import six
 
 from moat.module import Module
 from moat.statement import Statement, main_words
@@ -43,14 +44,16 @@ class OutLogger(Logger):
 		"""
 	def _log(self,level,*txt):
 		if len(txt) == 1 and txt[0] == ".":
-			print >>self.out,txt[0]
+			print(txt[0], file=self.out)
 		else:
+			if isinstance(level,int):
+				level = LogNames[level]
 			super(OutLogger,self)._log(level,*txt)
 
 	def _slog(self,level,txt):
-		if isinstance(level,(int,long)):
+		if isinstance(level,six.integer_types):
 			raise RuntimeError("want stringified levels")
-		print >>self.out,level+">",txt
+		print(level+">",txt, file=self.out)
 
 	def _flush(self):
 		if hasattr(self.out,"flush"):
@@ -79,9 +82,9 @@ log
 		except AttributeError:
 			out = sys.stderr
 		if not len(event):
-			for s,v in LogNames.iteritems():
-				print >>out,"%d = %s" % (s,v)
-			print >>out,"."
+			for s,v in LogNames.items():
+				print("%d = %s" % (s,v), file=out)
+			print(".", file=out)
 			return None
 		if len(event) > 1:
 			log(getattr(logging,event[0].upper()), *event[1:])
@@ -126,7 +129,7 @@ log limit event DEBUG
 				out = self.ctx.out
 			except AttributeError:
 				out = sys.stderr
-			print >>out, LogNames[log_level(name)]
+			print(LogNames[log_level(name)], file=out)
 
 
 class LoggingModule(Module):

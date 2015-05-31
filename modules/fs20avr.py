@@ -376,9 +376,9 @@ fs20 avr NAME :remote host port
 #"""
 #	def run(self,ctx,**k):
 #		import sys
-#		print >>sys.stderr,"I",self
+#		print("I",self, file=sys.stderr)
 #		event = self.par(ctx)
-#		print >>sys.stderr,"E",event
+#		print("E",event, file=sys.stderr)
 #		if not len(event) or len(event) > 2:
 #			raise SyntaxError(u"Usage: remote ‹host› [‹port›]")
 #		self.parent.hostinfo = event
@@ -406,7 +406,7 @@ class FS20avr_shutdown(ExcWorker):
 		return (ev is shutdown_event)
 	def process(self, **k):
 		super(FS20avr_shutdown,self).process(**k)
-		for proc in AVRs.itervalues():
+		for proc in AVRs.values():
 			proc.do_stop()
 		raise TrySomethingElse
 

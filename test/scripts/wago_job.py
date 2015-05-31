@@ -11,12 +11,12 @@ import gevent
 from gevent.server import StreamServer
 
 def discard(socket, address):
-	print ('New connection from %s:%s' % address)
+	print(('New connection from %s:%s' % address))
 	fileobj = socket.makefile()
 	while True:
 		line = fileobj.readline()
 		if not line: return
-		print ("got %r" % line)
+		print(("got %r" % line))
 
 
 if __name__ == '__main__':

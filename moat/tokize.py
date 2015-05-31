@@ -25,7 +25,7 @@ __credits__ = \
 
 import string, re, os, sys
 from token import *
-import tokenize as t
+from . import tokenize27 as t
 
 from moat.logging import log,TRACE
 from moat.event import StopParsing
@@ -57,7 +57,6 @@ single_quoted = t.single_quoted
 import token
 __all__ = [x for x in dir(token) if x[0] != '_'] + ["COMMENT","NL",
            "generate_tokens"]
-del x
 del token
 
 PlusMinus = r"[+\-]"
@@ -160,7 +159,7 @@ class tokizer(Jobber):
 
 			if self.contstr:                            # continued string
 				if not line:
-					raise TokenError, ("EOF in multi-line string", strstart)
+					raise TokenError ("EOF in multi-line string", strstart)
 				endmatch = endprog.match(line)
 				if endmatch:
 					pos = end = endmatch.end(0)
@@ -215,7 +214,7 @@ class tokizer(Jobber):
 
 			else:                                  # continued statement
 				if not line:
-					raise TokenError, ("EOF in multi-line statement", (self.lnum, 0))
+					raise TokenError ("EOF in multi-line statement", (self.lnum, 0))
 				self.continued = 0
 
 			while pos < max:

@@ -28,8 +28,9 @@ class Day(Model,RangeMixin):
 	"""A union of possible elements"""
 	class Meta(Model.Meta):
 		db_table="rainman_day"
-	def __unicode__(self):
+	def __str__(self):
 		return self.name
+	__unicode__=__str__
 
 	name = m.CharField(max_length=30, unique=True)
 
@@ -47,8 +48,9 @@ class DayTime(Model,RangeMixin):
 	class Meta(Model.Meta):
 		unique_together = (("day", "descr"),)
 		db_table="rainman_daytime"
-	def __unicode__(self):
+	def __str__(self):
 		return self.descr
+	__unicode__=__str__
 
 	descr = m.CharField(max_length=200)
 	day = m.ForeignKey(Day,related_name="times")
@@ -77,8 +79,9 @@ class DayRange(Model,RangeMixin):
 	"""An intersection of possible elements"""
 	class Meta(Model.Meta):
 		db_table="rainman_dayrange"
-	def __unicode__(self):
+	def __str__(self):
 		return self.name
+	__unicode__=__str__
 
 	name = m.CharField(max_length=30, unique=True)
 	comment = m.CharField(max_length=200, blank=True,null=True)

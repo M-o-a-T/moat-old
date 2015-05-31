@@ -14,13 +14,13 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+from __future__ import division,absolute_import,print_function
 
 """\
 This code implements module loading and unloading.
 
 """
 
-from __future__ import division,absolute_import
 
 from moat import TESTING
 from moat.run import simple_event
@@ -200,8 +200,8 @@ load dir - "NAME"
 		event = self.params(ctx)
 		if len(event) == 0:
 			for m in ModuleDirs:
-				print >>self.ctx.out, m
-			print >>self.ctx.out, "."
+				print(m, file=self.ctx.out)
+			print(".", file=self.ctx.out)
 		else:
 			w = event[-1]
 			if len(event) == 1 and w not in ("+","-"):

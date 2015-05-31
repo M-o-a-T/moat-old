@@ -15,12 +15,14 @@
 ##  for more details.
 ##
 
+from __future__ import division,absolute_import
+
 """\
 This code does some standard time handling.
 
 """
 
-from __future__ import division,absolute_import
+import six
 
 import datetime as dt
 from time import time,mktime
@@ -120,7 +122,7 @@ def isodate(yr,wk,wdy):
 def simple_time_delta(w):
 	s=0
 	m=1
-	w=w[:]
+	w=list(w)[:]
 	while w:
 		if len(w) == 1:
 			pass
@@ -233,7 +235,7 @@ def collect_words(n,w):
 		elif w[0] == "-":
 			w.pop(0)
 			f = -1
-		if isinstance(w[0],basestring) and w[0].lower() in weekdays:
+		if isinstance(w[0],six.string_types) and w[0].lower() in weekdays:
 			assert p.dow is None, "You already specified the day of week"
 			assert f is None, "A sign makes no sense here"
 			p.dow = weekdays[w[0].lower()]

@@ -50,7 +50,7 @@ parser.add_option("-u", "--user", dest="user", action="store",
 parser.add_option("-p", "--pass", dest="pw", action="store",
 	default="test", help="Password to connect with")
 parser.add_option("-v", "--vhost", dest="vhost", action="store",
-	default="/test", help="Virtual host to connect at")
+	default="test", help="Virtual host to connect at")
 parser.add_option("-x", "--exchange", dest="exchange", action="store",
 	default="moat.event", help="Exchange to listen at")
 parser.add_option("-r", "--routing", dest="routing", action="store",

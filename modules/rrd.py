@@ -14,13 +14,14 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+from __future__ import division,absolute_import
 
 """\
 This code implements logging to RRD.
 
 """
 
-from __future__ import division,absolute_import
+import six
 
 from moat.check import register_condition,unregister_condition
 from moat.module import Module
@@ -52,7 +53,7 @@ class RRD(Collected):
 		yield ("file",self.path)
 		yield ("dataset",self.dataset)
 		try:
-			for k,v in rrdtool.info(self.upath)["ds"][self.udataset].iteritems():
+			for k,v in rrdtool.info(self.upath)["ds"][self.udataset].items():
 				yield (k,v)
 		except KeyError:
 			s="ds[%s]." % (self.udataset)
@@ -123,7 +124,7 @@ set rrd value ‹name…›
 		# Using "N:" may run into a RRD bug
 		# if we're really close to the next minute
 		try:
-			rrdtool.update(s.upath, "-t",s.udataset, now().strftime("%s")+":"+unicode(event[0]).encode("utf-8"))
+			rrdtool.update(s.upath, "-t",s.udataset, now().strftime("%s")+":"+six.text_type(event[0]).encode("utf-8"))
 		except Exception as e:
 			fix_exception(e)
 			if "minimum one second step" in str(e):

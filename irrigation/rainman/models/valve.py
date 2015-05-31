@@ -28,8 +28,9 @@ class Valve(Model,RangeMixin):
 	class Meta(Model.Meta):
 		unique_together = (("controller", "name"),)
 		db_table="rainman_valve"
-	def __unicode__(self):
+	def __str__(self):
 		return self.name
+	__unicode__=__str__
 	name = m.CharField(max_length=200)
 	comment = m.CharField(max_length=200,blank=True)
 	feed = m.ForeignKey(Feed,related_name="valves")

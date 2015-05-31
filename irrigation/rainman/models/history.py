@@ -27,8 +27,9 @@ class Level(Model):
 	class Meta(Model.Meta):
 		unique_together = (("valve", "time"),)
 		db_table="rainman_level"
-	def __unicode__(self):
+	def __str__(self):
 		return u"@%s %s" % (str_tz(self.time),self.valve)
+	__unicode__=__str__
 	valve = m.ForeignKey(Valve, related_name="levels")
 	time = m.DateTimeField(db_index=True)
 	level = m.FloatField(help_text="then-current water capacity, in mm")
@@ -40,8 +41,9 @@ class History(Model):
 	class Meta(Model.Meta):
 		unique_together = (("site", "time"),)
 		db_table="rainman_history"
-	def __unicode__(self):
+	def __str__(self):
 		return u"@%s %s" % (str_tz(self.time),self.site)
+	__unicode__=__str__
 	site = m.ForeignKey(Site,related_name="history")
 	time = m.DateTimeField(db_index=True)
 	
@@ -60,8 +62,9 @@ class Log(Model):
 		#unique_together = (("site","timestamp"),)
 		db_table="rainman_log"
 		pass
-	def __unicode__(self):
+	def __str__(self):
 		return u"%s %s" % (self.logger, self.valve or self.controller or self.site)
+	__unicode__=__str__
 	logger = m.CharField(max_length=200)
 	timestamp = m.DateTimeField(default=now,db_index=True)
 	site = m.ForeignKey(Site,related_name="logs")

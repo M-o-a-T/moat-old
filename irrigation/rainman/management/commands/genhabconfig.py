@@ -57,26 +57,26 @@ class Command(BaseCommand):
 			qf &= Q(site__name=options['site'])
 		if options['controller']:
 			q &= Q(controller__name=options['controller'])
-		print """\
+		print("""\
 Group Water "Gartenwasser" (Out)
-"""
+""")
 		for f in Feed.objects.filter(qf):
 			self.one_feed(f)
 		for v in Valve.objects.filter(q):
 			self.one_valve(v,options["type"])
 
 	def one_feed(self,s):
-		print """\
+		print("""\
 Group Water_{sname} "{sname}" (Water)
-""".format(sname=s.name)
+""".format(sname=s.name))
 		
 	def one_valve(self,v,typ):
 		if typ != "wago":
 			raise NotImplementedError("I only know type 'wago'")
 		sname = "_".join(x[0].upper()+x[1:].lower() for x in v.var.split())
 		cname = " ".join(x[0].upper()+x[1:].lower() for x in v.var.split())
-		print """\
+		print("""\
 Switch {sname} "{cname}" (Water_{site})
-""".format(name=v.var, vloc=v.location, cloc=v.controller.location,sname=sname,site=v.feed.name,cname=v.name)
+""".format(name=v.var, vloc=v.location, cloc=v.controller.location,sname=sname,site=v.feed.name,cname=v.name))
 
 

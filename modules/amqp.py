@@ -14,13 +14,14 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+from __future__ import division,absolute_import
 
 """\
 This code implements an AMQP connector for MoaT.
 
 """
 
-from __future__ import division,absolute_import
+import six
 
 from moat import TESTING
 from moat.module import Module
@@ -98,9 +99,9 @@ class EventCallback(Worker):
 		ie = iter(event)
 		ia = iter(self.filter)
 		while True:
-			try: e = ie.next()
+			try: e = six.next(ie)
 			except StopIteration: e = StopIteration
-			try: a = ia.next()
+			try: a = six.next(ia)
 			except StopIteration: a = StopIteration
 			if e is StopIteration and a is StopIteration:
 				return True
@@ -120,14 +121,14 @@ class EventCallback(Worker):
 		try:
 			msg = getattr(event.ctx,'raw',None)
 			if msg is None:
-				d = dict((x,y) for x,y in event.ctx if isinstance(y,(int,str,unicode,long,bool,float)))
+				d = dict((x,y) for x,y in event.ctx if isinstance(y,six.string_types+six.integer_types+(bool,float)))
 				try:
 					msg = json.dumps(dict(event=list(event), **d))
 				except (TypeError,UnicodeDecodeError):
 					msg = json.dumps(dict(data=repr(event)+"|"+repr(d)))
-			elif isinstance(msg,(int,long,float)):
+			elif isinstance(msg,six.integer_types+(float,)):
 				msg = str(msg)
-			elif isinstance(msg,unicode):
+			elif isinstance(msg,six.string_types):
 				msg = msg.encode("utf-8")
 			global _mseq
 			_mseq += 1
@@ -429,7 +430,7 @@ class AMQPlogger(BaseLogger):
 		super(AMQPlogger,self).__init__(level)
 
 	def _log(self, level, *a):
-		if level < self.level:
+		if LogLevels[level] < self.level:
 			return
 		try:
 			msg=json.dumps(dict(level=(LogLevels[level],level),msg=a))

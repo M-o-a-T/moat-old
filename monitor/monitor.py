@@ -32,7 +32,7 @@ class MonitorUI(object):
 		self.widgets = gtk.glade.XML(APPNAME+".glade")
 
 		d = MonitorUI.__dict__.copy()
-		for k in d.iterkeys():
+		for k in d.keys():
 			d[k] = getattr(self,k)
 		self.widgets.signal_autoconnect(d)
 		self.events = {}
@@ -85,7 +85,7 @@ class MonitorUI(object):
 			column.pack_start(cell, True)
 # doesn't work for some reason. TODO.
 #			def ClickMe(*a,**k):
-#				print "Clicked",a,k
+#				print("Clicked",a,k)
 #			column.connect("clicked", ClickMe,col)
 
 		def DatePrinter(column, cell, model, iter, col_key):
@@ -144,19 +144,19 @@ class MonitorUI(object):
 		return True
 
 	def on_prefs_ok(self,*x):
-		print "OK",x
+		print("OK",x)
 		self['prefs'].hide()
 	def on_prefs_test(self,*x):
-		print "TEST",x
+		print("TEST",x)
 	def on_prefs_cancel(self,*x):
-		print "CANCEL",x
+		print("CANCEL",x)
 		self['prefs'].hide()
 	def on_prefs_port_ins(self,*x):
-		print "PI",x
+		print("PI",x)
 	def on_prefs_port_insa(self,*x):
-		print "PIa",x
+		print("PIa",x)
 	def on_prefs_port_pre(self,*x):
-		print "PE",x
+		print("PE",x)
 
 class MonitorMain(Main):
 	def setup(self):

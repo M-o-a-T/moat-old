@@ -14,6 +14,7 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+from __future__ import division,absolute_import
 
 """\
 This code does basic configurable logging.
@@ -27,7 +28,7 @@ log
 
 """
 
-from __future__ import division,absolute_import
+import six
 
 from moat import TESTING
 from moat.module import Module
@@ -115,15 +116,12 @@ class SysLogger(BaseLogger):
 		return "%s %s" % (self.facility_name,self.level_name)
 
 	def _slog(self,level,txt):
-		if isinstance(txt,unicode):
-			txt = txt.encode("utf-8")
-
 		while True:
 			try:
-				self.socket.send("<%d>MoaT: %s%s" % (
+				self.socket.send((u"<%d>MoaT: %s%s" % (
 				                  self.facility | local_levels[LogLevels[level]],
 								  txt,
-				                  "\0" if not TESTING else "\n"))
+				                  "\0" if not TESTING else "\n")).encode('utf-8'))
 			except socket.error as err:
 				fix_exception(err)
 				if err.args[0] != errno.EINTR:

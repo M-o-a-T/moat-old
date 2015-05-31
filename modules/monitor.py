@@ -15,7 +15,7 @@
 ##  for more details.
 ##
 
-from __future__ import division
+from __future__ import division,absolute_import
 
 """\
 This code does basic monitoring.
@@ -24,8 +24,6 @@ monitor name TYPE args
 	- monitors some kind of device
 
 """
-
-from __future__ import division,absolute_import
 
 from moat.monitor import Monitor,Monitors, MonitorDelayFor,MonitorDelayUntil,\
 	MonitorRequire,MonitorRetry,MonitorAlarm,MonitorHigh,MonitorLow,\
@@ -90,7 +88,7 @@ This statement updates the parameters of an existing monitor.
 
 		if active:
 			monitor.down()
-		for p,v in self.params.iteritems():
+		for p,v in self.params.items():
 			setattr(monitor,p,v)
 		if active:
 			monitor.up()

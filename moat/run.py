@@ -57,38 +57,38 @@ def unregister_worker(w):
 		del shunts[w.id]
 
 def list_workers(name=None):
-	for w in workers.itervalues():
+	for w in workers.values():
 		if name is None or name == w.name:
 			yield w
 
 class Workers(Collection):
 	name = "worker"
-	def iteritems(self):
+	def items(self):
 		for w in list_workers():
 			yield w.id,w
 	def __getitem__(self,k):
 		if isinstance(k,Name):
 			if len(k) != 1:
-				raise SyntaxError,"Worker IDs are single numbers"
+				raise SyntaxError("Worker IDs are single numbers")
 			k = k[0]
 		return workers[int(k)]
 Workers = Workers()
 
 
 def list_shunts(name=None):
-	for w in shunts.itervalues():
+	for w in shunts.values():
 		if name is None or name == w.name:
 			yield w
 
 class Shunts(Collection):
 	name = "shunt"
-	def iteritems(self):
+	def items(self):
 		for w in list_shunts():
 			yield w.id,w
 	def __getitem__(self,k):
 		if isinstance(k,Name):
 			if len(k) != 1:
-				raise SyntaxError,"Shunt IDs are single numbers"
+				raise SyntaxError("Shunt IDs are single numbers")
 			k = k[0]
 		return shunts[int(k)]
 Shunts = Shunts()

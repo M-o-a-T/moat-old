@@ -18,6 +18,8 @@
 
 from __future__ import division,absolute_import,print_function
 
+import six
+
 from moat import patch;patch()
 import rpyc
 import sys
@@ -41,7 +43,7 @@ modes = "log,list,cmd".split(",")
 from optparse import OptionParser
 parser = OptionParser(conflict_handler="resolve")
 parser.add_option("-h","--help","-?", action="help",
-	help="print this help text")
+	help="print(this help text"))
 parser.add_option("-s", "--server", dest="host", action="store",
 	default="127.0.0.1", help="Server to connect to")
 parser.add_option("-p", "--port", dest="port", action="store",
@@ -90,7 +92,7 @@ def do_log(c):
 				return
 		except:
 			pass
-		for a,b in k.iteritems():
+		for a,b in k.items():
 			print(a,b)
 		for a,b in k["event"].ctx:
 			print(a,b)
@@ -147,7 +149,7 @@ def do_list(c,args):
 				if ti>0 and len(t)-ti>lim and len(t)-ti<lim+6: # limit to msec
 					t = t[:ti+lim]+")"
 
-			print(p+u": "+unicode(t))
+			print(p+u": "+six.text_type(t))
 
 	def out_one(p,c):
 		q = Queue(3)

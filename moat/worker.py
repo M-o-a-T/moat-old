@@ -14,6 +14,7 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+from __future__ import division,absolute_import
 
 """\
 This part of the code defines what a (generic) worker is.
@@ -22,7 +23,7 @@ Briefly: a worker is something that recognizes an event and does
 something about it.
 """
 
-from __future__ import division,absolute_import
+import six
 
 from moat.context import Context
 from moat.event import Event,TrySomethingElse,NeverHappens
@@ -39,7 +40,7 @@ def report_(err, verbose=False):
 		for r in err.report():
 			yield r
 	elif not isinstance(err,BaseException):
-		yield unicode(err)
+		yield six.text_type(err)
 	elif verbose and not getattr(err,"no_backtrace",False):
 		from traceback import format_stack
 		p = "ERROR: "
@@ -47,7 +48,7 @@ def report_(err, verbose=False):
 			yield p+l
 			p="     : "
 		if hasattr(err,"cmd"):
-			yield "   at: "+cmd.file+":"+unicode(cmd.line)
+			yield "   at: "+cmd.file+":"+six.text_type(cmd.line)
 		if hasattr(err,"within"):
 			for w in err.within:
 				p = "   in: "
@@ -60,7 +61,7 @@ def report_(err, verbose=False):
 				yield p+r
 				p = "     : "
 	else:
-		yield "ERROR: "+unicode(err)
+		yield "ERROR: "+six.text_type(err)
 
 seqnum = 0
 
@@ -105,11 +106,11 @@ class WorkItem(object):
 		if self.last_call:
 			yield "last call: %s (%s)" % (humandelta(now()-self.last_call),self.last_call)
 		if self.last_args:
-			for a,b in self.last_args.iteritems():
+			for a,b in self.last_args.items():
 				yield "last %s: %s" % (a,b)
 
 	def list(self):
-		yield (unicode(self),)
+		yield (six.text_type(self),)
 		yield ("id",self.id)
 		if hasattr(self,"event"):
 			yield ("event",SName(self.event))
@@ -119,7 +120,7 @@ class WorkItem(object):
 		if self.last_call:
 			yield ("last call",self.last_call)
 		if self.last_args:
-			for a,b in self.last_args.iteritems():
+			for a,b in self.last_args.items():
 				yield ("last",a,b)
 		for r in self.report(verbose=98):
 			yield ("code",r)
@@ -164,7 +165,7 @@ class WorkSequence(WorkItem):
 		if isinstance(self.event,Event):
 			en = SName(self.event)
 		else:
-			en = unicode(self.event)
+			en = six.text_type(self.event)
 		self.info = u"Worker %d for ‹%s›" % (self.id,en)
 
 	def __repr__(self):
@@ -236,7 +237,7 @@ class WorkSequence(WorkItem):
 
 	def report(self, verbose=False):
 		if not verbose:
-			yield unicode(self) # +" for "+unicode(self.event)
+			yield six.text_type(self) # +" for "+six.text_type(self.event)
 			return
 
 		if verbose > 2:
@@ -244,7 +245,7 @@ class WorkSequence(WorkItem):
 		else:
 			v = 1
 		if verbose != 98:
-			yield unicode(self)
+			yield six.text_type(self)
 			if self.work:
 				prefix = "│  "
 			else:
@@ -255,7 +256,7 @@ class WorkSequence(WorkItem):
 				for r in report_(self.event,False):
 					yield prefix+r
 			else:
-				yield prefix+unicode(self.event)
+				yield prefix+six.text_type(self.event)
 		if self.worker:
 			w="by "
 			for r in self.worker.report(verbose):
@@ -335,7 +336,7 @@ class ConcurrentWorkSequence(WorkSequence):
 
 	def report(self, verbose=False):
 		if not verbose:
-			yield unicode(self) # +" for "+unicode(self.event)
+			yield six.text_type(self) # +" for "+six.text_type(self.event)
 			return
 
 		if verbose > 2:
@@ -344,14 +345,14 @@ class ConcurrentWorkSequence(WorkSequence):
 			v = 1
 		prefix = "   "
 		if verbose != 98:
-			yield unicode(self)
+			yield six.text_type(self)
 			for r in super(WorkSequence,self).report(verbose):
 				yield prefix+r
 			if hasattr(self.event,"report"):
 				for r in report_(self.event,False):
 					yield prefix+r
 			else:
-				yield prefix+unicode(self.event)
+				yield prefix+six.text_type(self.event)
 		if self.worker:
 			w="by "
 			for r in self.worker.report(verbose):
@@ -396,9 +397,8 @@ class Worker(WorkItem):
 				(self.__class__.__name__, repr(self.name))
 
 	def __str__(self):
-		return "=> %s:%s" % (self.__class__.__name__, self.name)
-	def __unicode__(self):
 		return u"⇒%s:%s" % (self.__class__.__name__, self.name)
+	__unicode__=__str__
 
 	def report(self, verbose=False):
 		yield "%s: %s" % \

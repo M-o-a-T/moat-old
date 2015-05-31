@@ -14,6 +14,7 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+from __future__ import division,absolute_import
 
 """\
 This code implements pulse-code modulation.
@@ -27,7 +28,7 @@ set pwm $VALUE NAME...
 
 """
 
-from __future__ import division,absolute_import
+import six
 
 from moat.statement import AttributedStatement, Statement, main_words,\
 	global_words, HelpSub
@@ -58,9 +59,8 @@ class PWMError(RuntimeError):
 	def __init__(self,w):
 		self.PWM = w
 	def __str__(self):
-		return self.text % (" ".join(str(x) for x in self.PWM.name),)
-	def __unicode__(self):
-		return self.text % (" ".join(unicode(x) for x in self.PWM.name),)
+		return self.text % (" ".join(six.text_type(x) for x in self.PWM.name),)
+	__unicode__=__str__
 
 class CommonPM(Collected):
 	"""This is the (generic) thing that modulates."""
@@ -81,7 +81,7 @@ class CommonPM(Collected):
 		self.ctx = parent.ctx
 		self.start = now()
 		self.names = names
-		for a,b in k.iteritems(): self.arg(a,b)
+		for a,b in k.items(): self.arg(a,b)
 		self.validate()
 		super(CommonPM,self).__init__(*name)
 	
@@ -91,7 +91,7 @@ class CommonPM(Collected):
 	def list(self):
 		n=now()
 		yield ("type",self.type)
-		yield ("name"," ".join(unicode(x) for x in self.name))
+		yield ("name"," ".join(six.text_type(x) for x in self.name))
 		if self.state is not None:
 			yield ("state",self.names[self.state])
 		if self._value is not None:
@@ -266,7 +266,7 @@ pwm NAME…: type
 
 PWMtypes = {}
 v = None
-for v in globals().itervalues():
+for v in globals().values():
 	try:
 		if issubclass(v,CommonPM) and v.type is not None:
 			PWMtypes[Name(v.type)] = v
@@ -325,7 +325,7 @@ This statement updates the parameters of a PWM controller.
 			raise SyntaxError('Usage: update pwm ‹name…›: no attributes given')
 		
 		pwm = PWMs[Name[event]]
-		for a,b in self.attrs.iteritems():
+		for a,b in self.attrs.items():
 			pwm.arg(a,b)
 		pwm.validate()
 		pwm.set_value(None)

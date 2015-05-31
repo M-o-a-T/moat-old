@@ -14,10 +14,11 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+from __future__ import division,absolute_import
 
 """Class to make storing collections of stuff simpler"""
 
-from __future__ import division,absolute_import
+import six
 
 from moat.base import Name,SName
 from moat.check import Check
@@ -95,14 +96,12 @@ class Collection(dict):
 		name = SName(name)
 		return name in self._can_do
 
-	def iteritems(self):
-		def name_cmp(a,b):
-			return cmp(self[a].name,self[b].name)
-		for k in sorted(self.iterkeys(),cmp=name_cmp):
+	def items(self):
+		for k in sorted(self.keys(), key=lambda x:self[x].name):
 			yield k,self[k]
 
-	def itervalues(self):
-		return sorted(super(Collection,self).itervalues())
+#	def values(self):
+#		return sorted(super(Collection,self).values())
 
 	# The Collected's storage needs to be a weak reference so that it
 	# will be freed when the module is unloaded.
@@ -161,7 +160,7 @@ class Collected(object):
 
 	def list(self):
 		"""Yield a couple of (left,right) tuples, for enumeration."""
-		yield (unicode(self),)
+		yield (six.text_type(self),)
 		yield ("name",self.name)
 		self = super(Collected,self)
 		if hasattr(self,'list'):
@@ -186,10 +185,9 @@ class CKeyError(KeyError):
 		self.coll = coll
 	def __repr__(self):
 		return u"‹%s ‹%s› %s›" % (self.__class__.__name__, SName(self.name),self.coll)
-	def __unicode__(self):
-		return u"I could not find an entry for ‹%s› in %s." % (SName(self.name),self.coll)
 	def __str__(self):
-		return "I could not find an entry for ‹%s› in %s." % (SName(self.name),self.coll)
+		return u"I could not find an entry for ‹%s› in %s." % (SName(self.name),self.coll)
+	__unicode__=__str__
 
 
 class CCollError(KeyError):
@@ -197,10 +195,9 @@ class CCollError(KeyError):
 		self.name = name
 	def __repr__(self):
 		return u"‹%s %s›" % (self.__class__.__name__, SName(self.name))
-	def __unicode__(self):
-		return u"‹%s› is a group, not an item." % (SName(self.name),)
 	def __str__(self):
-		return "‹%s› is a group, not an item." % (SName(self.name),)
+		return u"‹%s› is a group, not an item." % (SName(self.name),)
+	__unicode__=__str__
 
 
 def get_collect(name, allow_collection=False):
@@ -238,8 +235,7 @@ def get_collect(name, allow_collection=False):
 	return coll
 
 def all_collect(name="list", skip=False):
-	def byname(a,b): return cmp(a.name,b.name)
-	for m in sorted(collections.itervalues(),cmp=byname):
+	for m in sorted(collections.values(), key=lambda x:x.name):
 		if skip and not m:
 			continue
 		if m.can_do(name):

@@ -14,13 +14,14 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+from __future__ import division,absolute_import
 
 """\
 This code contains the framework for watching a device.
 
 """
 
-from __future__ import division,absolute_import
+import six
 
 from moat import TESTING
 from moat.statement import AttributedStatement, Statement
@@ -130,9 +131,9 @@ class Monitor(Collected,Jobber):
 		if not self.job:
 			act = "off"
 		elif not self.running.is_set():
-			act = "run "+unicode(self.steps)
+			act = "run "+six.text_type(self.steps)
 		else:
-			act = "on "+unicode(self.value)
+			act = "on "+six.text_type(self.value)
 			# TODO: add delay until next check
 		return u"‹%s %s %s›" % (self.__class__.__name__, self.name,act)
 
@@ -141,7 +142,7 @@ class Monitor(Collected,Jobber):
 		for r in super(Monitor,self).list():
 			yield r
 		if self.params:
-			yield ("device"," ".join(unicode(x) for x in self.params))
+			yield ("device"," ".join(six.text_type(x) for x in self.params))
 		yield ("value",self.value)
 		yield ("up",self.up_name)
 		yield ("time",self.time_name)
@@ -155,7 +156,7 @@ class Monitor(Collected,Jobber):
 
 		yield ("steps", "%s / %s / %s" % (self.steps,self.points,self.maxpoints))
 		if self.data:
-			yield ("data"," ".join(unicode(x) for x in self.data))
+			yield ("data"," ".join(six.text_type(x) for x in self.data))
 
 	def update_ectx(self):
 		self._ectx.value = self.value
@@ -366,7 +367,7 @@ class Monitor(Collected,Jobber):
 								self.new_value = avg
 						return
 					else:
-						log("monitor",TRACE,"More data", self.data, "for", u"‹"+" ".join(unicode(x) for x in self.name)+u"›")
+						log("monitor",TRACE,"More data", self.data, "for", u"‹"+" ".join(six.text_type(x) for x in self.name)+u"›")
 				
 			try:
 				simple_event(self.ectx,"monitor","error",*self.name)
@@ -440,7 +441,7 @@ monitor passive
 
 	def run(self,ctx,**k):
 		m = self.monitor(self, self.displayname)
-		for p,v in self.values.iteritems():
+		for p,v in self.values.items():
 			setattr(m,p,v)
 		if m.params is None:
 			m.params = ("passive",) if self.passive else ("unknown",)

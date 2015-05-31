@@ -14,13 +14,14 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+from __future__ import division,absolute_import
 
 """\
 This code implements (a subset of) the OWFS server protocol.
 
 """
 
-from __future__ import division,absolute_import
+import six
 
 from moat.module import Module
 from moat.base import Name,SName
@@ -139,7 +140,7 @@ dir onewire NAME path...
 		event = self.params(ctx)
 
 		def reporter(data):
-			print >>ctx.out,data
+			print(data, file=ctx.out)
 
 		if len(event) == 1 and not self.dest and event[0].lower() in devices:
 			dev = devices[event[0].lower()]
@@ -154,7 +155,7 @@ dir onewire NAME path...
 			path = event
 		dev.dir(path=path, proc=reporter)
 
-		print >>ctx.out,"."
+		print(".", file=ctx.out)
 
 class OWFSname(Statement):
 	name="name"
@@ -382,7 +383,7 @@ monitor onewire ‹device› ‹attribute›
 			self.values["switch"] = None
 		self.values["params"] = ("onewire",event[0],event[1])
 		if "switch" in self.values and self.values["switch"] is not None:
-			self.values["params"] += (u"±"+unicode(self.values["switch"]),)
+			self.values["params"] += (u"±"+six.text_type(self.values["switch"]),)
 
 		super(OWFSmonitor,self).run(ctx,**k)
 

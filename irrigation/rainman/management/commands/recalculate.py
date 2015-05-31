@@ -84,7 +84,7 @@ class Command(BaseCommand):
 
 	def one_valve(self,v,options):
 		if options['verbose']:
-			print "Updating",v
+			print("Updating",v)
 		envgroup = EnvGroup(v.envgroup)
 		now = datetime.utcnow().replace(tzinfo=utc)
 		if options['age'] is None:
@@ -120,7 +120,7 @@ class Command(BaseCommand):
 		for lv in Level.objects.filter(valve=v,time__gte=start).order_by("time"):
 			if level is None or lv.forced:
 				if options['verbose']:
-					print "Initial",lv.level
+					print("Initial",lv.level)
 				while hist:
 					try:
 						if hist.stored.time > lv.time:
@@ -146,8 +146,8 @@ class Command(BaseCommand):
 				add_f = s.db_rate * v.do_shade(envgroup.envgroup.factor*f) * (h.time-ts).total_seconds()
 				add_r = v.runoff*h.rain
 				if options['verbose']:
-					print "Apply",h,f,u"– dry="+str(add_f)," rain="+str(add_r)
-					print "    T:",h.temp,"W:",h.wind,"S:",h.sun
+					print("Apply",h,f,u"– dry="+str(add_f)," rain="+str(add_r))
+					print("    T:",h.temp,"W:",h.wind,"S:",h.sun)
 				sum_f += add_f
 				sum_r += add_r
 				ts=h.time
@@ -161,22 +161,22 @@ class Command(BaseCommand):
 
 			if abs(lv.level-level)>(abs(lv.level)+abs(level))/100:
 				if options['verbose']:
-					print "Updated",lv,"from",lv.level,"to",level
-					print "   evaporate="+str(sum_f),"rain="+str(sum_r),"water="+str(lv.flow/v.area)
+					print("Updated",lv,"from",lv.level,"to",level)
+					print("   evaporate="+str(sum_f),"rain="+str(sum_r),"water="+str(lv.flow/v.area))
 				if options['save']:
 					lv.update(level = level)
 					lv.refresh()
 			else:
 				if options['verbose']:
-					print "Unchanged",lv,lv.level
+					print("Unchanged",lv,lv.level)
 		if level is not None and abs(v.level-level)>(abs(v.level)+abs(level))/100:
-			print "Updated",v,"from",v.level,"to",level
+			print("Updated",v,"from",v.level,"to",level)
 			if options['save']:
 				v.update(level=level)
 				v.refresh()
 		else:
 			if options['verbose']:
-				print "Unchanged",v,v.level
+				print("Unchanged",v,v.level)
 
 
 class EnvGroup(object):
@@ -200,7 +200,7 @@ class EnvGroup(object):
 	def env_factor(self,h,logging):
 		if logging:
 			def logger(x):
-				print x
+				print(x)
 		else:
 			logger = None
 		return self.envgroup.env_factor(h,logger)

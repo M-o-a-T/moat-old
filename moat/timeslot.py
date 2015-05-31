@@ -14,13 +14,14 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+from __future__ import division,absolute_import
 
 """\
 This code contains the framework for timing regular events.
 
 """
 
-from __future__ import division,absolute_import
+import six
 
 from moat.statement import AttributedStatement, Statement
 from moat.event import Event
@@ -40,7 +41,7 @@ import os
 import datetime as dt
 
 class Timeslots(Collection):
-    name = "timeslot"
+	name = "timeslot"
 Timeslots = Timeslots()
 Timeslots.does("del")
 register_condition(Timeslots.exists)
@@ -53,15 +54,14 @@ class Timeslotted(object):
 #		pass
 
 class TimeslotError(RuntimeError):
-    def __init__(self,w):
-        self.timeslot = w
-    def __str__(self):
-        return self.text % (" ".join(str(x) for x in self.timeslot.name),)
-    def __unicode__(self):
-        return self.text % (" ".join(unicode(x) for x in self.timeslot.name),)
+	def __init__(self,w):
+		self.timeslot = w
+	def __str__(self):
+		return self.text % (" ".join(unicode(x) for x in self.timeslot.name),)
+	__unicode__=__str__
 
 class AlreadyRunningError(TimeslotError):
-    text = u"A The timer ‹%s› is already active"
+	text = u"A The timer ‹%s› is already active"
 
 
 class Timeslot(Collected):
@@ -91,7 +91,7 @@ class Timeslot(Collected):
 		return u"‹%s %s %s›" % (self.__class__.__name__, self.running, self.parent)
 
 	def list(self):
-		yield ("name"," ".join(unicode(x) for x in self.name))
+		yield ("name"," ".join(six.text_type(x) for x in self.name))
 		yield ("run",self.running)
 		if self.interval is not None:
 			yield ("interval"," ".join(str(x) for x in self.interval))
@@ -209,7 +209,7 @@ def collision_filter(val, hdl):
 		if h.last_data is None:
 			return hdl
 	dm = []
-	for k in val.iterkeys():
+	for k in val.keys():
 		try:
 			for h in hdl:
 				if k not in h.last_data:

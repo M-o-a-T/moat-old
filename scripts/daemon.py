@@ -45,7 +45,7 @@ load_module("ifelse")
 from optparse import OptionParser
 parser = OptionParser(conflict_handler="resolve")
 parser.add_option("-h","--help","-?", action="help",
-	help="print this help text")
+	help="print(this help text"))
 parser.add_option("-t", "--trace", dest="debuglevel", action="store",
 	help="trace level (TRACE,DEBUG,INFO,WARN,ERROR,PANIC,NONE)", default="PANIC")
 parser.add_option("-p", "--pidfile", dest="pidfile", action="store",
@@ -53,7 +53,7 @@ parser.add_option("-p", "--pidfile", dest="pidfile", action="store",
 
 (opts, args) = parser.parse_args()
 if not args:
-	print >>sys.stderr,"You need at least one config file!"
+	print("You need at least one config file!", file=sys.stderr)
 	sys.exit(1)
 
 class DoLogger(Logger):
@@ -62,7 +62,7 @@ class DoLogger(Logger):
 		"""
 	def _slog(self,level,txt):
 		if txt != ".":
-			print >>self.out,level+"> "+txt
+			print(level+"> "+txt, file=self.out)
 
 
 if opts.debuglevel != "NONE":
@@ -77,7 +77,7 @@ if opts.debuglevel != "NONE":
 
 if opts.pidfile:
 	pid = open(opts.pidfile,"w")
-	print >>pid, os.getpid()
+	print(os.getpid(), file=pid)
 	pid.close()
 
 def _readcf():

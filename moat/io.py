@@ -58,7 +58,7 @@ class Outputter(object):
 		cb = self._drop_callbacks
 		self._drop_callbacks = {}
 
-		for proc,a,k in cb.itervalues():
+		for proc,a,k in cb.values():
 			proc(*a,**k)
 
 	def connectionLost(self,reason):

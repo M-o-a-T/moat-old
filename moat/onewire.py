@@ -14,13 +14,14 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+from __future__ import division,absolute_import
 
 """\
 This code implements (a subset of) the OWFS server protocol.
 
 """
 
-from __future__ import division,absolute_import
+import six
 
 from moat import TESTING
 from moat.module import Module
@@ -98,7 +99,7 @@ class OWtempformat:
 class OWFSassembler(object):
 	"""A mix-in object which can do assembly and dissassembly of OWFS messages."""
 	MAX_LENGTH = 99999
-	_data = ""
+	_data = b""
 	_typ = None
 	_len = 24
 
@@ -110,7 +111,7 @@ class OWFSassembler(object):
 		self.close()
 		raise NotImplementedError("You need to override OWFSassembler.error")
 
-	def msgReceived(self,err):
+	def msgReceived(self,*a,**k):
 		self.close()
 		raise NotImplementedError("You need to override OWFSassembler.msgReceived")
 
@@ -272,7 +273,7 @@ class NOPmsg(OWFScall):
 
 	def send(self,conn):
 		super(NOPmsg,self).send(conn)
-		self.sendMsg(conn,OWMsg.nop,"",0)
+		self.sendMsg(conn,OWMsg.nop,b"",0)
 
 
 class ATTRgetmsg(OWFScall):
@@ -283,7 +284,7 @@ class ATTRgetmsg(OWFScall):
 
 	def send(self,conn):
 		super(ATTRgetmsg,self).send(conn)
-		self.sendMsg(conn,OWMsg.read,self._path(self.path)+'\0',8192)
+		self.sendMsg(conn,OWMsg.read,self._path(self.path).encode('utf-8')+b'\0',8192)
 		return RECV_AGAIN
 	
 	def __repr__(self):
@@ -302,12 +303,12 @@ class ATTRsetmsg(OWFScall):
 
 	def send(self,conn):
 		super(ATTRsetmsg,self).send(conn)
-		val = unicode(self.value)
-		self.sendMsg(conn, OWMsg.write,self._path(self.path)+'\0'+val,len(val))
+		val = six.text_type(self.value)
+		self.sendMsg(conn, OWMsg.write,self._path(self.path).encode('utf-8')+b'\0'+val.encode('utf-8'),len(val))
 		return RECV_AGAIN
 
 	def __repr__(self):
-		return u"‹"+self.__class__.__name__+" "+self.path[-2]+" "+self.path[-1]+" "+unicode(self.value)+u"›"
+		return u"‹"+self.__class__.__name__+" "+self.path[-2]+" "+self.path[-1]+" "+six.text_type(self.value)+u"›"
 		
 
 
@@ -327,12 +328,13 @@ class DIRmsg(OWFScall):
 	def send(self,conn):
 		super(DIRmsg,self).send(conn)
 		if self.dirall:
-			self.sendMsg(conn, OWMsg.dirall, self._path(self.path)+'\0', 0)
+			self.sendMsg(conn, OWMsg.dirall, self._path(self.path).encode('utf-8')+b'\0', 0)
 		else:
-			self.sendMsg(conn, OWMsg.dir, self._path(self.path)+'\0', 0)
+			self.sendMsg(conn, OWMsg.dir, self._path(self.path).encode('utf-8')+b'\0', 0)
 		return RECV_AGAIN
 
 	def dataReceived(self,data):
+		data = data.decode('utf-8')
 		if self.dirall:
 			n=0
 			for entry in data.split(","):
@@ -473,7 +475,7 @@ class OWFSqueue(MsgQueue,Jobber):
 
 		n_old = 0
 		n_dev = 0
-		for dev in old_ids.itervalues():
+		for dev in old_ids.values():
 			if dev.bus is self:
 				n_old += 1
 				## Just because something vanishes from the listing
@@ -481,7 +483,7 @@ class OWFSqueue(MsgQueue,Jobber):
 				# dev.go_down()
 				log("onewire",DEBUG,"Bus unstable?",self.name,dev.id)
 
-		for dev in devices.itervalues():
+		for dev in devices.values():
 			if dev.bus is self:
 				n_dev += 1
 		
@@ -657,6 +659,9 @@ class OWFSdevice(Collected):
 			fix_exception(ex)
 			self.go_down(ex)
 			raise
+
+		if isinstance(res,bytes):
+			res = res.decode('utf-8')
 
 		try:
 			res = int(res)

@@ -14,6 +14,7 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+from __future__ import division,absolute_import
 
 """\
 Error handling.
@@ -27,7 +28,7 @@ catch:
 
 """
 
-from __future__ import division,absolute_import
+import six
 
 from moat.statement import MainStatementList,Statement, \
 	main_words,global_words
@@ -116,7 +117,7 @@ Implementation restriction: can't be used at top level. (Wrap with 'block:'.)
 		if not isinstance(err,RaisedError):
 			if len(self.arglist) > 1:
 				return None
-			if self.arglist:
+			if len(self.arglist):
 				if err.__class__.__name__ != self.arglist[0] and not err.__class__.__name__.endswith("."+self.arglist[0]):
 					return None
 			return ctx
@@ -130,9 +131,9 @@ Implementation restriction: can't be used at top level. (Wrap with 'block:'.)
 		ia = iter(self.arglist)
 		pos = 0
 		while True:
-			try: e = ie.next()
+			try: e = six.next(ie)
 			except StopIteration: e = StopIteration
-			try: a = ia.next()
+			try: a = six.next(ia)
 			except StopIteration: a = StopIteration
 			if e is StopIteration and a is StopIteration:
 				return ctx

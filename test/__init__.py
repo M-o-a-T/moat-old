@@ -15,7 +15,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+from __future__ import division,absolute_import,print_function
 
+
+import six
 from moat.logging import BaseLogger, TRACE,NONE, log, log_level
 from moat.interpreter import Interpreter
 from moat.parser import parse
@@ -26,7 +29,10 @@ from moat.statement import Statement,main_words
 from moat.base import Name
 from moat.reactor import shut_down, mainloop
 
-from cStringIO import StringIO
+try:
+	from io import StringIO
+except ImportError:
+	from cStringIO import StringIO
 import sys
 import re
 import os
@@ -71,7 +77,7 @@ class run_logger(BaseLogger):
 		try:
 			self.data=open(os.path.join("real",name),"w")
 		except IOError:
-			print >>sys.stderr,"ERROR, no log file"
+			print("ERROR, no log file", file=sys.stderr)
 			self.data = sys.stderr
 		self.line=0
 		super(run_logger,self).__init__(level)
@@ -84,7 +90,7 @@ class run_logger(BaseLogger):
 			job = Popen(scp)
 			res = job.wait()
 			if res != 0:
-				print >>sys.stderr,"Init Script for %s failed: %d" % (self.filename,res)
+				print("Init Script for %s failed: %d" % (self.filename,res), file=sys.stderr)
 				sys.exit(0)
 			
 	def try_exit(self):
@@ -98,7 +104,7 @@ class run_logger(BaseLogger):
 			job = Popen(scp)
 			res = job.wait()
 			if res != 0:
-				print >>sys.stderr,"Exit Script for %s failed: %d" % (self.filename,res)
+				print("Exit Script for %s failed: %d" % (self.filename,res), file=sys.stderr)
 				sys.stderr.flush()
 				global exitcode
 				exitcode = 1
@@ -111,9 +117,9 @@ class run_logger(BaseLogger):
 			sx = r_fli.sub(rep,sx)
 			sx = r_hex.sub("obj",sx)
 		if level is not None:
-			print >>self.data, level,sx
+			print(level,sx, file=self.data)
 		else:
-			print >>self.data, sx
+			print(sx, file=self.data)
 
 	# override using a separate thread
 	def _init(self):
@@ -124,7 +130,7 @@ class run_logger(BaseLogger):
 	def log(self, level, *a):
 #		if level is not None and level < self.level:
 #			return
-		sx=" ".join(unicode(x) for x in a)
+		sx=" ".join(six.text_type(x) for x in a)
 		self._log(level,sx)
 		if self.dot:
 			self._log(None,".")
@@ -137,12 +143,12 @@ class run_logger(BaseLogger):
 			self._log(None,"@ "+ixtime())
 		if hasattr(event,"report"):
 			for r in event.report(99):
-				self._log(None,unicode(r))
+				self._log(None,six.text_type(r))
 		elif isinstance(event,BaseException):
 			for l in format_exception(event).strip('\n').split('\n'):
 				self._log(None,l)
 		else:
-			self._log(None,unicode(event))
+			self._log(None,six.text_type(event))
 		if self.dot:
 			self._log(None,".")
 
@@ -180,9 +186,9 @@ class ctxdump(Statement):
 	doc="dump the variable context"
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		print >>sys.stderr,"CTX:",Name(event)
+		print("CTX:",Name(event), file=sys.stderr)
 		for s in ctx._report():
-			print >>sys.stderr,"   :",s
+			print("   :",s, file=sys.stderr)
 main_words.register_statement(ctxdump)
 
 ht = None
@@ -191,8 +197,10 @@ def run(name,input, interpreter=Interpreter, logger=None):
 	if logger is None:
 		ht = run_logger(name,dot=False)
 		logger = ht.log
-	if isinstance(input,unicode):
+	if isinstance(input,six.string_types):
 		input = input.encode("utf-8")
+	if isinstance(input,bytes):
+		input = input.decode('utf-8')
 	input = StringIO(input)
 
 	def _main():
