@@ -9,80 +9,22 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-CFLAGS = -Wall -g
+export PYBUILD_NAME=moat
 
-ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
-	CFLAGS += -O0
-else
-	CFLAGS += -O2
-endif
+%:
+	dh $@ --with python2,python3 --buildsystem=pybuild
 
-build: build-stamp
+override_dh_install:
+	dh_install
+	$(MAKE) installsub DESTDIR="$(shell pwd)/debian/moat/" PYDESTDIR="$(shell pwd)/debian/python-moat/"
+	
+	mkdir -p debian/moat/usr/sbin debian/moat/usr/bin
+	mv debian/python-moat/usr/bin/daemon.py debian/moat/usr/sbin/moatd
+	mv debian/python-moat/usr/bin/cmd.py debian/moat/usr/bin/moat
+	mv debian/python-moat/usr/bin/amqpmon.py debian/moat/usr/bin/moat-amqp
+	install daemon.moat debian/moat/etc/moat/daemon.moat
 
-build-stamp:
-	dh_testdir
+override_dh_auto_test:
+	: do nothing, for now
 
-	$(MAKE) all
-
-	touch $@
-
-clean:
-	dh_testdir
-	dh_testroot
-	rm -f build-stamp
-
-	dh_clean
-	$(MAKE) clean
-
-install: build
-	dh_testdir
-	dh_testroot
-	dh_clean -k
-	dh_installdirs
-
-	$(MAKE) install DESTDIR="$(shell pwd)/debian/moat/" PYDESTDIR="$(shell pwd)/debian/python-moat/"
-
-	mkdir -p debian/python-moat/usr/sbin
-	mv debian/python-moat/usr/bin/daemon.py debian/python-moat/usr/sbin/moatd
-	mv debian/python-moat/usr/bin/cmd.py debian/python-moat/usr/bin/moat
-	mv debian/python-moat/usr/bin/amqpmon.py debian/python-moat/usr/bin/moat-amqp
-	install daemon.he debian/moat/etc/moat
-
-
-
-# Build architecture-independent files here.
-binary-indep: build install
-# We have nothing to do by default.
-
-# Build architecture-dependent files here.
-binary-arch: build install
-	dh_testdir
-	dh_testroot
-	dh_installchangelogs
-	dh_installdocs README
-	dh_installexamples
-#	dh_install
-#	dh_installmenu
-#	dh_installdebconf	
-	dh_installlogrotate
-#	dh_installemacsen
-#	dh_installpam
-#	dh_installmime
-	dh_python2 -p python-moat
-	install debian/moat@.service debian/moat.target debian/moat/lib/systemd/system/
-	dh_systemd_enable -p moat moat.target
-	dh_systemd_start -p moat --restart-after-upgrade moat.target
-	dh_installinit
-	dh_installman
-	dh_link
-	dh_strip
-	dh_compress
-	dh_fixperms
-	dh_installdeb
-	dh_shlibdeps
-	dh_gencontrol
-	dh_md5sums
-	dh_builddeb
-
-binary: binary-indep binary-arch
-.PHONY: build clean binary-indep binary-arch binary install
+#.PHONY: build clean binary-indep binary-arch binary install

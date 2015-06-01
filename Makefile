@@ -23,10 +23,11 @@ all: subfiles
 	$(MAKE) -C fs20 all
 	$(MAKE) -C wago all
 	python setup.py build
-install:
+install: installsub
+	python setup.py install --root="$(PYDESTDIR)" --no-compile -O0 --install-layout=deb
+installsub:
 	$(MAKE) -C fs20 install ROOT=$(DESTDIR)
 	$(MAKE) -C wago install ROOT=$(DESTDIR)
-	python setup.py install --root="$(PYDESTDIR)" --no-compile -O0 --install-layout=deb
 
 subfiles: moat/gevent_rpyc.py
 

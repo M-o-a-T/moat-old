@@ -20,6 +20,8 @@ Build-Depends: debhelper (>= 5),
  python-rpyc,
  dh-python,
  dh-systemd,
+ python3-all,
+ python3-all-dev,
  python3-amqp,
  python3-gevent,
  python3-setuptools,
@@ -69,3 +71,24 @@ Description: A scripted event-based monitoring and control system
  The author uses it as a central hub for home automation.
  .
  This package contains the Python2 implementation.
+
+Package: python3-moat
+Architecture: all
+Depends: ${misc:Depends}, ${python:Depends},
+ python3-sqlmix (>= 0.9.26),
+ python3-gevent (>= 1.0),
+ python3-dabroker,
+ python3-pytz | python3-tz,
+ python3-amqp,
+ moat,
+Recommends: python3-rrdtool, owfs
+Description: A scripted event-based monitoring and control system
+ MoaT is a flexible, scripted, network-aware event handler.
+ It can monitor and control quite a few external buses and peripherals,
+ including 1wire and FS20. It can write values to RRD files and allows
+ access to its command interpreter with SSH.
+ .
+ The author uses it as a central hub for home automation.
+ .
+ This package contains the Python3 implementation.
+

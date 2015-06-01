@@ -34,8 +34,10 @@ if six.PY2:
 	class singleName(object):
 		__metaclass__ = singleNameMeta
 else:
-	class singleName(metaclass=singleNameMeta):
-		pass
+	eval("""
+		class singleName(metaclass=singleNameMeta):
+			pass
+		""")
 
 class Name(tuple):
 	"""A class that knows how to print itself the "right" way"""

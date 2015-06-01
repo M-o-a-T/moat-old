@@ -14,7 +14,7 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
-from __future__ import division,absolute_import
+from __future__ import division,absolute_import,print_function
 
 """\
 This code implements (a subset of) the OWFS server protocol.
