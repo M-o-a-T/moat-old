@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-##BP
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,7 +18,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
-from __future__ import division,absolute_import
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This code implements a SSH command line for moat.
@@ -69,7 +76,6 @@ class CallBack(object):
 			return
 		self.callback = async(callback)
 
-
 	def run_callback(self,*args,**kwargs):
 		res = AsyncResult()
 		def trigger(res):
@@ -91,7 +97,6 @@ class CallBack(object):
 		for r in super(CallBack,self).list():
 			yield r
 		yield("callback",repr(self.callback))
-
 
 class CommandProcessor(ImmediateProcessor):
 	"""\
@@ -115,7 +120,6 @@ class CommandProcessor(ImmediateProcessor):
 	def run(self):
 		res = self.fn.run(self.ctx)
 		return res
-
 
 class EventCallback(Worker,CallBack):
 	args = None
@@ -433,8 +437,6 @@ name ‹name…›
 		event = self.params(ctx)
 		self.parent.dest = SName(event)
 RPClisten.register_statement(RPCname)
-
-
 
 class RPCmodule(Module):
 	"""\

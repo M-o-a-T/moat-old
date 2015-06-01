@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-##BP
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,7 +18,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
-from __future__ import division,absolute_import
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This code implements (a subset of) the RRD client protocol.
@@ -54,7 +61,6 @@ class MT_ERROR(singleName): pass # -2 whatever
 class MT_ACK(singleName): pass # 0 Oh well
 class MT_MULTILINE(MT_ACK): pass # 1 Foo Bar
 class MT_OTHER(singleName): pass # ?
-
 
 class RRDbadResult(RuntimeError):
 	pass
@@ -121,14 +127,12 @@ class RRDchannel(RRDassembler, NetActiveConnector):
 	def not_up_event(self, external=False):
 		simple_event("rrd","error",*self.name)
 
-
 class RRDmsgBase(MsgBase):
 	"""a small class to hold the common send() code"""
 	def send(self,conn):
 		log("rrd",TRACE,"send",repr(self.msg))
 		conn.write(self.msg)
 		return RECV_AGAIN
-
 
 class RRDqueue(MsgQueue):
 	"""A simple adapter for the RRD protocol."""
@@ -141,7 +145,6 @@ class RRDqueue(MsgQueue):
 
 	def setup(self):
 		self.channel.up_event(False)
-
 
 class RRDconnect(NetConnect):
 	name = "connect rrd"
@@ -172,7 +175,6 @@ connect rrd NAME [[host] port]
 			q.enqueue(msg)
 RRDconnect.register_statement(NetRetry)
 
-
 class RRDconnected(Check):
 	name="connected rrd"
 	doc="Test if the named rrd server connection is up"
@@ -184,7 +186,6 @@ class RRDconnected(Check):
 			return False
 		else:
 			return bus.channel is not None
-
 
 # This represents a simple RRD file
 
@@ -217,7 +218,6 @@ class RRDfile(Collected):
 		if self.last_sent_at is None:
 			return "Never"
 		return humandelta(now()-self.last_sent_at)
-
 
 class RRDsetfile(AttributedStatement):
 	name="rrd file"
@@ -257,7 +257,6 @@ server ‹name…›
 		event = self.params(ctx)
 		self.parent.dest = SName(event)
 
-
 class RRDsendUpdate(RRDmsgBase):
 	"""Send a simple command to Wago. Base class."""
 	timeout=10
@@ -286,7 +285,6 @@ class RRDsendUpdate(RRDmsgBase):
 	@property
 	def msg(self):
 		return "update %s %d:%s" % (self.file.filename,int(unixtime(now())),":".join((str(x) for x in self.val)))
-
 
 class RRDset(AttributedStatement):
 	name="set rrd"
@@ -320,7 +318,6 @@ send rrd ‹val…› :to ‹name…›
 		if isinstance(res,Exception):
 			reraise(res)
 
-
 @RRDset.register_statement
 class RRDto(Statement):
 	name="to"
@@ -333,7 +330,6 @@ to ‹name…›
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		self.parent.dest = SName(event)
-
 
 class RRDmodule(Module):
 	"""\

@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-##BP
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,7 +18,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
-from __future__ import division,absolute_import
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This code holds statement stuff.
@@ -76,7 +83,6 @@ class Statement(object):
 		except Exception:
 				return u"‹%s ?›" % (self.__class__.__name__,)
 
-
 	@classmethod
 	def matches(self,args):
 		"""Check if this statement can process this list of words."""
@@ -109,7 +115,6 @@ class Statement(object):
 	
 	def report(self,verbose):
 		yield " ".join(six.text_type(x) for x in self.args)+u" ‹"+self.__class__.__name__+u"›"
-
 
 class WordAttached(Statement):
 	"""\
@@ -190,7 +195,6 @@ class WordAttached(Statement):
 			Remove this statement.
 			"""
 		del self._words[handler.name]
-
 
 class ComplexStatement(WordAttached):
 	"""\
@@ -286,7 +290,6 @@ class IgnoreStatement(Statement):
 	def end_block(self): pass
 	def simple_statement(self,args): pass
 
-
 # statement list
 
 class BadArgs(RuntimeError):
@@ -359,7 +362,6 @@ class main_words(ComplexStatement):
 	name = Name("Main")
 	doc = "word list:"
 
-
 class global_words(ComplexStatement):
 	"""Words that only make sense at top level. It pulls in the main word list."""
 	name = Name("Global")
@@ -383,8 +385,6 @@ class global_words(ComplexStatement):
 		except KeyError: pass
 		return main_words.__getitem__(key)
 
-
-
 class MainStatementList(StatementList):
 	"""\
 		A Statement list that inherits (some) words that it understands
@@ -397,7 +397,6 @@ class MainStatementList(StatementList):
 		except (KeyError,NotImplementedError):
 			return self.main.lookup(args)
 
-
 class DoNothingHandler(Statement):
 	name = "do nothing"
 	doc = "do not do anything"
@@ -409,7 +408,6 @@ explicitly state that some event does not result in any action.
 		event = self.params(ctx)
 		if len(event):
 			raise SyntaxError("Usage: do nothing")
-
 
 class ExitHandler(Statement):
 	name = "exit"
@@ -424,7 +422,6 @@ This statement causes the input channel which runs it to terminate.
 		raise StopParsing
 
 global_words.register_statement(ExitHandler)
-
 
 class HelpSubProxy(object):
 	def __init__(self,x,name):

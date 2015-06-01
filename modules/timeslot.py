@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-##BP
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2008-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,7 +18,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
-from __future__ import division,absolute_import
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This code does basic timeout handling.
@@ -75,8 +82,6 @@ every ‹time interval›
 			self.parent.values['interval'] = tuple(event)
 TimeslotHandler.register_statement(TimeslotInterval)
 
-
-
 class TimeslotStopped(Statement):
 	name = "stopped"
 	doc = "start disabled"
@@ -111,7 +116,6 @@ for ‹time interval›
 			self.parent.values['duration'] = tuple(event)
 TimeslotHandler.register_statement(TimeslotDuration)
 
-
 	
 class TimeslotOffset(Statement):
 	name = "offset"
@@ -131,7 +135,6 @@ offset ‹0…1›
 				raise SyntaxError(u'Usage: offset ‹0…1›')
 			self.parent.values['shift'] = f
 TimeslotHandler.register_statement(TimeslotOffset)
-
 
 	
 class TimeslotUpdate(AttributedStatement):
@@ -157,7 +160,6 @@ This statement updates the parameters of an existing timeslot.
 
 for cmd in (TimeslotInterval, TimeslotDuration, TimeslotOffset):
 	TimeslotUpdate.register_statement(cmd)
-
 
 class TimeslotStart(AttributedStatement):
 	name = "start timeslot"
@@ -206,7 +208,6 @@ stop timeslot ‹name›
 		m = Timeslots[SName(event)]
 		return m.down()
 
-
 class RunningTimeslotCheck(Check):
 	name="running timeslot"
 	doc="check if a timeslot is active"
@@ -216,7 +217,6 @@ class RunningTimeslotCheck(Check):
 		name = Name(*args)
 		return Timeslots[name].running != "off"
 
-
 class DuringTimeslotCheck(Check):
 	name="in timeslot"
 	doc="check if we're within a timeslot"
@@ -225,7 +225,6 @@ class DuringTimeslotCheck(Check):
 			raise SyntaxError(u"Usage: if in timeslot ‹name…›")
 		name = Name(*args)
 		return Timeslots[name].running not in ("off","next")
-
 
 class VarTimeslotHandler(Statement):
 	name="var timeslot"
@@ -239,7 +238,6 @@ var timeslot NAME name...
 		var = event[0]
 		name = Name(*event[1:])
 		setattr(self.parent.ctx,var,Timeslots[name].running)
-
 
 class TimeslotModule(Module):
 	"""\

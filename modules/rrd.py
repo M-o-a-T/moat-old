@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-##BP
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,7 +18,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
-from __future__ import division,absolute_import
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This code implements logging to RRD.
@@ -65,7 +72,6 @@ class RRD(Collected):
 	def info(self):
 		return "%s %s" % (self.path,self.dataset)
 
-
 class RRDHandler(Statement):
 	name="rrd"
 	doc="Creates an RRD object"
@@ -83,7 +89,6 @@ rrd path dataset NAME…
 		fn = event[0]
 		assert os.path.exists(fn), "the RRD file does not exist: ‹%s›" % (fn,)
 		RRD(path=fn, dataset=event[1], name=Name(*event[2:]))
-
 
 class VarRRDHandler(Statement):
 	name="var rrd"
@@ -104,7 +109,6 @@ var rrd variable item NAME
 			setattr(self.parent.ctx,event[0],rrdtool.info(s.upath)["ds"][s.dataset][event[1]])
 		except KeyError:
 			setattr(self.parent.ctx,event[0],rrdtool.info(s.upath)["ds[%s].%s" % (s.dataset,event[1])])
-
 
 class RRDset(Statement):
 	name="set rrd"

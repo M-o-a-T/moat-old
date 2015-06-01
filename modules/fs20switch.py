@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-##BP
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,7 +18,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
-from __future__ import division,absolute_import
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This code implements basic commands to access FS20 switches.
@@ -298,10 +305,8 @@ class Switch(Collected):
 			ctx.ext = ext
 		simple_event(ctx, "input","fs20", *self.name)
 
-
 	def getReply(self, ext=None, handler=None):
 		raise NotImplementedError
-
 
 class FS20switches(AttributedStatement):
 	name = "fs20 switch"
@@ -361,7 +366,6 @@ fs20 switch ‹house_code› ‹name…›
 	def add_sw(self,s):
 		self.new_sw.append(s)
 
-
 class FS20code(Statement):
 	name = "code"
 	doc = "Set the house code for a new switch group"
@@ -376,7 +380,6 @@ fs20 ‹name…›:
 			raise SyntaxError(u"Usage: code ‹code›")
 		self.parent.code = from_hc(event[0])
 FS20switches.register_statement(FS20code)
-
 
 class FS20addswitch(AttributedStatement):
 	name = "add"
@@ -405,7 +408,6 @@ add ‹name…›:
 		self.parent.add_sw(Switch(self.code, name, handler=handler))
 FS20switches.register_statement(FS20addswitch)
 
-
 class FS20swcode(Statement):
 	name = "code"
 	doc = "Set the device code for a new switch"
@@ -422,8 +424,6 @@ fs20 ‹name…›:
 		self.parent.code = from_dev(event[0])
 FS20addswitch.register_statement(FS20swcode)
 
-
-
 class FS20delswitch(Statement):
 	name = "del"
 	doc = "Delete a switch"
@@ -439,7 +439,6 @@ del ‹name…›
 		name = SName(event)
 		self.parent.del_sw(Switches[name])
 FS20switches.register_statement(FS20delswitch)
-
 
 class FS20send(AttributedStatement):
 	name = "send fs20"
@@ -472,7 +471,6 @@ send fs20 ‹msg› -|‹aux› ‹name…›
 			handler = None
 		d.set(event[0],ext, handler=handler)
 
-
 class FS20via(Statement):
 	name = "via"
 	doc = "Use a specific sender"
@@ -488,8 +486,6 @@ via ‹name…›
 		self.parent.handler = SName(event)
 FS20send.register_statement(FS20via)
 FS20addswitch.register_statement(FS20via)
-
-
 
 class fs20switch(Module):
 	"""\

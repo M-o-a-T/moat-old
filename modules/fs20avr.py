@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-##BP
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2008-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,7 +18,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
-from __future__ import division,absolute_import
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This code implements a FS20 transceiver based on a AVR ATmega168
@@ -139,7 +146,6 @@ class AVRcommon(handler):
 		self.dbuf = data
 		self._start_timer()
 
-
 	def cont(self, _=None):
 		while self.waiting:
 			try:
@@ -159,7 +165,6 @@ class AVRcommon(handler):
 	def send(self,prefix,data):
 		data = prefix+"".join("%02x" % ord(x)  for x in data)
 		self.write(data+"\n")
-
 
 	# standard stuff
 
@@ -185,7 +190,6 @@ class AVRcommon(handler):
 		else:
 			self.do_restart()
 
-
 	# my stuff
 
 	def do_start(self):
@@ -202,7 +206,6 @@ class AVRcommon(handler):
 		
 	def do_kill(self):
 		raise NotImplementedError("Need to override do_kill()")
-
 
 #class my_handler(handler):
 #	def do_kill(self):
@@ -274,14 +277,12 @@ class AVRcommon(handler):
 #		reactor.spawnProcess(self, self.cmd[0], self.cmd, {})
 #	
 
-
 class AVRs(Collection):
 	name = "fs20 avr"
 AVRs = AVRs()
 AVRs.does("del")
 
 avr_conns = {}
-
 
 class AVRreceiver(AVRcommon):
 	storage = AVRs.storage
@@ -298,7 +299,6 @@ class AVRreceiver(AVRcommon):
 		self.connectionMade()
 		simple_event("fs20","avr","connect",*self.name)
 
-
 	# Collected stuff
 	def info(self):
 		return "%s:%s" % (self.host,self.port)
@@ -306,7 +306,6 @@ class AVRreceiver(AVRcommon):
 class AVRactive(AVRreceiver, NetActiveConnector):
 	typ = "net_active"
 	pass
-
 
 class AVRconnect(NetConnect):
 	cmd = None
@@ -326,7 +325,6 @@ fs20 avr NAME :remote host port
 	def error(self,e):
 		log(WARN, self.dest, e[1])
 		simple_event("fs20","avr","error",*self.dest)
-
 
 #class AVRcmd(AttributedStatement):
 #	name = "cmd"
@@ -383,7 +381,6 @@ fs20 avr NAME :remote host port
 #		self.parent.hostinfo = event
 #AVRconnect.register_statement(AVRremote)
 
-
 class AVRsend(NetSend):
 	storage = AVRs.storage
 	storage2 = avr_conns
@@ -393,7 +390,6 @@ class AVRconnected(NetConnected):
 	storage = AVRs.storage
 	storage2 = avr_conns
 	name="connected fs20 avr"
-
 
 class FS20avr_shutdown(ExcWorker):
 	"""\
@@ -414,8 +410,6 @@ class FS20avr_shutdown(ExcWorker):
 		return
 
 FS20avr_shutdown = FS20avr_shutdown("FS20 process killer")
-
-
 
 class AVRmodule(Module):
 	"""\

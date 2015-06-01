@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-##BP
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,7 +18,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
-from __future__ import division,absolute_import
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This code implements a listener for environment monitoring.
@@ -237,7 +244,6 @@ class em2_handler(em_handler):
 
 		super(em2_handler,self).dataReceived(ctx, xd, handler, timedelta)
 
-
 class FS20em(AttributedStatement):
 	name = "fs20 em"
 	doc = "declare an FS20 EM monitor"
@@ -341,7 +347,6 @@ Known types:
 		raise SyntaxError(u"Usage: ‹fs20 em› ‹name…›: ‹code›: Unknown type")
 FS20em.register_statement(FS20emcode)
 
-
 class FS20emVal(Statement):
 	name = "set fs20 em"
 	doc = "Set the last-reported value for a device"
@@ -358,7 +363,6 @@ set fs20 em ‹type› ‹value› ‹name…›
 		d = EMs[Name(*event[2:])]
 		if d.last_data is None: d.last_data = {}
 		d.last_data[event[0]] = float(event[1])
-
 
 class fs20em(Module):
 	"""\

@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-##BP
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,7 +18,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
-from __future__ import division,absolute_import
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """Class to make storing collections of stuff simpler"""
 
@@ -27,7 +34,6 @@ from moat.context import Context
 from weakref import WeakValueDictionary,proxy
 
 collections = WeakValueDictionary()
-
 
 class Collection(dict):
 	"""\
@@ -90,7 +96,6 @@ class Collection(dict):
 
 	def exists_check(self):
 		return ExistsCheck
-
 
 	def can_do(self,name):
 		name = SName(name)
@@ -178,7 +183,6 @@ class Collected(object):
 			"""
 		return None
 
-
 class CKeyError(KeyError):
 	def __init__(self,name,coll):
 		self.name = name
@@ -189,7 +193,6 @@ class CKeyError(KeyError):
 		return u"I could not find an entry for ‹%s› in %s." % (SName(self.name),self.coll)
 	__unicode__=__str__
 
-
 class CCollError(KeyError):
 	def __init__(self,name):
 		self.name = name
@@ -198,7 +201,6 @@ class CCollError(KeyError):
 	def __str__(self):
 		return u"‹%s› is a group, not an item." % (SName(self.name),)
 	__unicode__=__str__
-
 
 def get_collect(name, allow_collection=False):
 	c = None

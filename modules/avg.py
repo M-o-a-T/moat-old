@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-##BP
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2008-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,7 +18,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
-from __future__ import division,absolute_import
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This code does basic timeout handling.
@@ -43,7 +50,6 @@ class Avgs(Collection):
     name = "avg"
 Avgs = Avgs()
 Avgs.does("del")
-
 
 class Avg(Collected):
 	"""This is the thing that averages over time."""
@@ -213,7 +219,6 @@ class DecaySamplesAvg(Avg):
 			yield r
 		yield ("weight",self.p)
 
-
 class MovingSamplesAvg(Avg):
 	"""Moving average, based on the last N values"""
 	mode="moving"
@@ -256,7 +261,6 @@ class MovingSamplesAvg(Avg):
 		for i in r:
 			yield ("sample "+str(i),self.values[i])
 
-
 modes = {}
 
 class AvgHandler(AttributedStatement):
@@ -274,7 +278,6 @@ Known modes (default: %s):
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		self.avg(self, SName(event), *self.settings)
-
 
 @AvgHandler.register_statement
 class AvgMode(Statement):
@@ -326,7 +329,6 @@ reset avg NAME
 		m = Avgs[Name(*event[1:])]
 		m.feed(float(event[0]))
 
-
 class VarAvgHandler(AttributedStatement):
 	name="var avg"
 	doc="assign a variable to the current value of an averager"
@@ -359,7 +361,6 @@ Available: %s
 		if len(event) != 1 or event[0] not in self.avail:
 			raise SyntaxError(u"‹use› requires a parameter: " + u"¦".join(self.avail))
 		self.parent.src = event[0]
-
 
 class AvgModule(Module):
 	"""\

@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-##BP
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,7 +18,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
-from __future__ import division,absolute_import
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 	This module holds a few random constants and stuff.
@@ -105,7 +112,6 @@ for s in "le lt ge gt eq ne".split(): ## cmp
 		return f
 	setattr(Name,s,gen_cmp(s))
 
-
 def SName(data,attr="name"):
 	"""An alternate Name constructor that accepts a single argument"""
 	if isinstance(data,Name):
@@ -131,7 +137,6 @@ class RaisedError(RuntimeError):
 	if six.PY2:
 		def __unicode__(self):
 			return u"%s: %s" % (self.__class__.__name__, " ".join(unicode(x) for x in self.params))
-
 
 def flatten(out,s,p=""):
 	if hasattr(s,"list") and callable(s.list):

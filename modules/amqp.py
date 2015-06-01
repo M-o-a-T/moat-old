@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-##BP
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,7 +18,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
-from __future__ import division,absolute_import
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This code implements an AMQP connector for MoaT.
@@ -208,7 +215,6 @@ class AMQPclient(Collected,Jobber):
 		yield ("user",self.username)
 		yield ("password","*"*len(self.password))
 
-
 class AMQPname(Statement):
 	name="name"
 	dest = None
@@ -244,7 +250,6 @@ filter ‹name…›
 		event = self.params(ctx)
 		self.parent.filter = SName(event)
 
-
 class AMQPexchange(Statement):
 	name="exchange"
 	dest = None
@@ -261,7 +266,6 @@ exchange ‹name›
 			raise SyntaxError(u'Usage: exchange ‹name›')
 		self.parent.exchange = event[0]
 
-
 class AMQPprefix(Statement):
 	name="prefix"
 	dest = None
@@ -277,7 +281,6 @@ prefix ‹name…›
 		if len(event) < 1:
 			raise SyntaxError(u'Usage: prefix ‹name…›')
 		self.parent.prefix = event
-
 
 class AMQPtopic(Statement):
 	name="topic"
@@ -299,7 +302,6 @@ topic ‹filter›
 			raise SyntaxError(u'Usage: topic ‹filter›')
 		self.parent.topic = event[0]
 
-
 class AMQPstrip(Statement):
 	name="strip"
 	dest = None
@@ -316,7 +318,6 @@ strip ‹num›
 		if len(event) != 1:
 			raise SyntaxError(u'Usage: strip ‹num›')
 		self.parent.strip = int(event[0])
-
 
 class AMQPshunt(Statement):
 	name="shunt"
@@ -339,7 +340,6 @@ shunt
 			raise SyntaxError(u'Usage: shunt')
 		self.parent.shunt = True
 
-
 class AMQPrshunt(AMQPshunt):
 	doc="Event tunnel, process locally"
 
@@ -349,7 +349,6 @@ shunt
   "amqp tell" command. You need to make sure to undo any processing
   which that command does.
 """
-
 
 class AMQPqueue(Statement):
 	name="queue"
@@ -368,7 +367,6 @@ queue ‹name›
 			raise SyntaxError(u'Usage: queue ‹name›')
 		self.parent.queue = SName(event)
 
-
 class AMQPuser(Statement):
 	name="user"
 	dest = None
@@ -386,7 +384,6 @@ user ‹vhost› ‹username› ‹password›
 		self.parent.vhost = event[0]
 		self.parent.username = event[1]
 		self.parent.password = event[2]
-
 
 class AMQPconn(AttributedStatement):
 	name = "connect amqp"
@@ -417,7 +414,6 @@ This command connects to an AMQP server on the given host/port.
 		AMQPclient(dest,host,port, self.vhost,self.username,self.password)
 AMQPconn.register_statement(AMQPuser)
 AMQPconn.register_statement(AMQPcname)
-
 
 class AMQPlogger(BaseLogger):
 	"""An AMQP logger"""
@@ -457,7 +453,6 @@ class AMQPlogger(BaseLogger):
 		yield "exchange",self.exchange
 		yield "prefix",self.prefix
 
-
 class AMQPlog(AttributedStatement):
 	name = "log amqp"
 	doc = "log to an AMQP server"
@@ -489,7 +484,6 @@ AMQPlog.register_statement(AMQPname)
 AMQPlog.register_statement(AMQPexchange)
 AMQPlog.register_statement(AMQPprefix)
 
-
 class AMQPstart(Statement):
 	name = "start amqp"
 	doc = "start the AMQP listener"
@@ -506,7 +500,6 @@ Call this method after setting up the channels etc.
 			raise SyntaxError(u'Usage: start amqp ‹conn…›')
 		dest = AMQPclients[SName(event)]
 		dest._start()
-
 
 class AMQPstop(Statement):
 	name = "stop amqp"
@@ -527,7 +520,6 @@ at the wrong moment!
 			raise SyntaxError(u'Usage: stop amqp ‹conn…›')
 		dest = AMQPclients[SName(event)]
 		dest._stop()
-
 
 class AMQPtell(AttributedStatement):
 	name = "tell amqp"
@@ -556,7 +548,6 @@ AMQPtell.register_statement(AMQPexchange)
 AMQPtell.register_statement(AMQPprefix)
 AMQPtell.register_statement(AMQPstrip)
 AMQPtell.register_statement(AMQPshunt)
-
 
 class AMQPrecvs(Collection):
 	name = Name("amqp","listener")
@@ -615,7 +606,6 @@ class AMQPrecv(Collected):
 		if self.last_recv:
 			yield "recv", self.last_recv
 
-
 class AMQPlisten(AttributedStatement):
 	name = "listen amqp"
 	doc = "read internal events from an AMQP server"
@@ -649,7 +639,6 @@ AMQPlisten.register_statement(AMQPprefix)
 AMQPlisten.register_statement(AMQPtopic)
 AMQPlisten.register_statement(AMQPstrip)
 AMQPlisten.register_statement(AMQPrshunt)
-
 
 class AMQPmodule(Module):
 	"""\

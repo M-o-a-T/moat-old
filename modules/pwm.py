@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-##BP
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2008-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,7 +18,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
-from __future__ import division,absolute_import
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This code implements pulse-code modulation.
@@ -53,7 +60,6 @@ class PWMs(Collection):
 	name = "pwm"
 PWMs = PWMs()
 PWMs.does("del")
-
 
 class PWMError(RuntimeError):
 	def __init__(self,w):
@@ -209,7 +215,6 @@ A standard pulse width-modulated signal with mostly-constant period
 
 		return (self.interval * (1-val), self.interval * val)
 
-
 class StdPDM(StdPWM):
 	doc="constant 'on' time'"
 	long_doc="""\
@@ -237,8 +242,6 @@ A pulse density modulated signal with constant 'off' time
 		if val == 1: return (0,None) # on
 
 		return (self.interval, self.interval * val/(1-val))
-
-
 
 class PWMHandler(AttributedStatement):
 	name="pwm"
@@ -331,7 +334,6 @@ This statement updates the parameters of a PWM controller.
 		pwm.set_value(None)
 PWMUpdate.register_statement(PWMinterval)
 
-
 class PWMSet(Statement):
 	name = "set pwm"
 	doc = "change the destination value of an existing PWM controller"
@@ -347,7 +349,6 @@ The PWM will not do anything before you do that.
 		pwm = PWMs[Name(*event[1:])]
 		pwm.value = float(event[0])
 
-
 class OnPWMCheck(Check):
 	name="pwm"
 	doc="check if a PWM is turned on"
@@ -356,7 +357,6 @@ class OnPWMCheck(Check):
 			raise SyntaxError(u"Usage: if pwm ‹name…›")
 		name = Name(*args)
 		return PWMs[name].state
-
 
 class VarPWMHandler(Statement):
 	name="var pwm"
@@ -370,7 +370,6 @@ var pwm NAME name...
 		var = event[0]
 		name = Name(*event[1:])
 		setattr(self.parent.ctx,var,PWMs[name].value)
-
 
 class PWMModule(Module):
 	"""\

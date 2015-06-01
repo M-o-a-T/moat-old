@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-##BP
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,7 +18,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
-from __future__ import division,absolute_import
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This code contains the framework for watching a device.
@@ -379,7 +386,6 @@ class Monitor(Collected,Jobber):
 			log("monitor",TRACE,"End run", self.name)
 			self.stopped_at = now()
 
-
 	def one_value(self, step):
 		"""\
 			Get one value from some "set monitor" command.
@@ -463,7 +469,6 @@ name ‹whatever you want›
 		self.parent.displayname = SName(event)
 MonitorHandler.register_statement(MonitorName)
 
-
 class MonitorDelayFor(Statement):
 	name = "delay for"
 	doc = "Interval between measurements"
@@ -484,7 +489,6 @@ delay for ‹time interval›
 			self.parent.values['delay_for'] = tuple(event)
 MonitorHandler.register_statement(MonitorDelayFor)
 
-
 class MonitorDelayUntil(Statement):
 	name = "delay until"
 	doc = "Time for measurements"
@@ -501,7 +505,6 @@ delay until ‹time interval›
 		else:
 			self.parent.values['delay_until'] = tuple(event)
 MonitorHandler.register_statement(MonitorDelayUntil)
-
 
 class MonitorRequire(Statement):
 	name = "require"
@@ -536,7 +539,6 @@ require ‹num› ‹range›
 			except (ValueError,TypeError):
 				raise SyntaxError(u'Usage: require: ‹range› needs to be a non-negative number')
 MonitorHandler.register_statement(MonitorRequire)
-
 
 class MonitorRetry(Statement):
 	name = "retry"
@@ -580,7 +582,6 @@ retry ‹num› ‹delay›
 			self.parent.values["delay"] = tuple(event[1:]) # assume a timespec
 MonitorHandler.register_statement(MonitorRetry)
 
-
 class MonitorAlarm(Statement):
 	name = "alarm"
 	doc = "Range of permissible change"
@@ -605,7 +606,6 @@ alarm ‹range›
 				raise SyntaxError(u'Usage: alarm: ‹range› needs to be a positive number')
 MonitorHandler.register_statement(MonitorAlarm)
 
-
 class MonitorDiff(Statement):
 	name = "diff"
 	doc = "Minimum change for a new event to be triggered"
@@ -629,7 +629,6 @@ diff ‹amount›
 			except (ValueError,TypeError):
 				raise SyntaxError(u'Usage: diff: ‹amount› needs to be a non-negative number')
 MonitorHandler.register_statement(MonitorDiff)
-
 
 class MonitorHigh(Statement):
 	name = "high"
@@ -665,7 +664,6 @@ high ‹value› [‹ok_value›]
 			self.parent.values["ok_high"] = None
 MonitorHandler.register_statement(MonitorHigh)
 
-
 class MonitorLow(Statement):
 	name = "low"
 	doc = "Lower alarm threshold"
@@ -700,8 +698,6 @@ low ‹value› [‹ok_value›]
 			self.parent.values["ok_low"] = None
 MonitorHandler.register_statement(MonitorLow)
 
-
-
 class MonitorLimit(Statement):
 	name = "limit"
 	doc = "permissible range"
@@ -734,7 +730,6 @@ limit ‹low› ‹high›
 			raise SyntaxError(u'Usage: limit: ‹low› needs to be greater than ‹high›')
 MonitorHandler.register_statement(MonitorLimit)
 
-
 class MonitorScale(Statement):
 	name = "scale"
 	doc = "adapt values"
@@ -760,7 +755,6 @@ scale ‹factor› ‹offset›
 			self.parent.values["offset"] = float(event[1])
 MonitorHandler.register_statement(MonitorScale)
 
-
 class MonitorDelta(Statement):
 	name = "delta"
 	doc = "report difference"
@@ -781,7 +775,6 @@ delta up
 		else:
 			raise SyntaxError(u'Usage: delta [up]')
 MonitorHandler.register_statement(MonitorDelta)
-
 
 class MonitorStopped(Statement):
 	name = "stopped"

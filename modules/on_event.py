@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
-##BP
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+from __future__ import absolute_import, print_function, division, unicode_literals
+##
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -13,7 +18,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
-from __future__ import division,absolute_import
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This code does basic configurable event mangling.
@@ -129,7 +137,6 @@ Every "*foo" in the event description is mapped to the corresponding
 		for r in super(OnEventHandler,self)._report(verbose):
 			yield r
 
-
 class OnPrio(Statement):
 	name = "prio"
 	doc = "prioritize event handler"
@@ -151,7 +158,6 @@ the order they (attempt to) run in is undefined.
 			raise ValueError("Priority value (%d): needs to be between %d and %d" % (prio,MIN_PRIO,MAX_PRIO))
 		self.parent.prio = prio
 
-
 class OnName(Statement):
 	name = "name"
 	doc = "name an event handler"
@@ -165,7 +171,6 @@ This statement assigns a name to an event handler.
 		if not len(event):
 			raise SyntaxError(u'Usage: name "‹text›"')
 		self.parent.displayname = SName(event)
-
 
 class OnDoc(Statement):
 	name = "doc"
@@ -181,7 +186,6 @@ This statement assigns a documentation string to an event handler.
 			raise SyntaxError(u'Usage: doc "‹text›"')
 		self.parent.displaydoc = event[0]
 
-
 class OnSkip(Statement):
 	name = "next handler"
 	doc = u"skip ahead to the next on… event handler"
@@ -193,7 +197,6 @@ Commands in the same handler, after this one, are *not* executed.
 	def run(self,ctx,**k):
 		raise TrySomethingElse()
 
-
 class OnSkip2(Statement):
 	name = "exit handler"
 	doc = u"Leave the current event handler"
@@ -203,7 +206,6 @@ This statement causes processing of this handler to end.
 """
 	def run(self,ctx,**k):
 		raise TrySomethingElse()
-
 
 class OnEventModule(Module):
 	"""\

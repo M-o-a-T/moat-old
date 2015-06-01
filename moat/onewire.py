@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-##BP
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,7 +18,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
-from __future__ import division,absolute_import
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This code implements (a subset of) the OWFS server protocol.
@@ -94,7 +101,6 @@ class OWtempformat:
 	kelvin = 2
 	rankine = 3
 	_offset = 16
-
 
 class OWFSassembler(object):
 	"""A mix-in object which can do assembly and dissassembly of OWFS messages."""
@@ -176,7 +182,6 @@ class OWFSassembler(object):
 		self.write(struct.pack("!6i", \
 			0, len(data), typ, flags, rlen, 0) +data)
 
-
 class OWchans(Collection):
        name = "onewire connection"
 OWchans = OWchans()
@@ -198,7 +203,6 @@ class OWFSchannel(OWFSassembler, NetActiveConnector):
 
 	def not_up_event(self, external=False):
 		simple_event("onewire","error",*self.name)
-
 
 class OWFScall(MsgBase):
 	"""An object representing one call to OWFS"""
@@ -266,7 +270,6 @@ class OWFScall(MsgBase):
 				return "/uncached"
 			return "/uncached/"+"/".join(path)
 
-
 class NOPmsg(OWFScall):
 	prio = PRIO_BACKGROUND
 	orig_prio = prio
@@ -274,7 +277,6 @@ class NOPmsg(OWFScall):
 	def send(self,conn):
 		super(NOPmsg,self).send(conn)
 		self.sendMsg(conn,OWMsg.nop,b"",0)
-
 
 class ATTRgetmsg(OWFScall):
 	def __init__(self,path, prio=PRIO_STANDARD):
@@ -310,7 +312,6 @@ class ATTRsetmsg(OWFScall):
 	def __repr__(self):
 		return u"‹"+self.__class__.__name__+" "+self.path[-2]+" "+self.path[-1]+" "+six.text_type(self.value)+u"›"
 		
-
 
 class DIRmsg(OWFScall):
 	error_on_timeout = False
@@ -366,7 +367,6 @@ class OWbuses(Collection):
 OWbuses = OWbuses()
 OWbuses.does("del")
 register_condition(OWbuses.exists)
-
 
 class OWFSqueue(MsgQueue,Jobber):
 	"""\
@@ -527,8 +527,6 @@ class OWFSqueue(MsgQueue,Jobber):
 		self.watch_q.put(res)
 		return res.get()
 
-
-
 ow_buses = {}
 
 # factory.
@@ -545,8 +543,6 @@ def connect(host="localhost", port=4304, name=None, persist=PERSIST):
 def disconnect(f):
 	assert f==ow_buses.pop(f.ident)
 	f.stop()
-
-
 
 class devices(Collection):
        name = "onewire device"
@@ -673,7 +669,6 @@ class OWFSdevice(Collected):
 
 		return res
 
-
 	def set(self,key,val):
 		if not self.bus:
 			raise DisconnectedDeviceError(self.id)
@@ -685,7 +680,6 @@ class OWFSdevice(Collected):
 		except Exception as ex:
 			fix_exception(ex)
 			self.go_down(ex)
-
 
 	def dir(self, proc, path=(), key=None):
 		if not self.bus:
@@ -705,7 +699,6 @@ class OWFSdevice(Collected):
 		except Exception as ex:
 			fix_exception(ex)
 			self.go_down(ex)
-
 
 class OWFSroot(OWFSdevice):
 	"""Represents the root device of an owfs tree"""

@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-##BP
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,7 +18,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
-from __future__ import division,absolute_import
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This part of the code defines what a (generic) worker is.
@@ -125,7 +132,6 @@ class WorkItem(object):
 		for r in self.report(verbose=98):
 			yield ("code",r)
 
-
 	def __repr__(self):
 		if self.id:
 			return u"‹Item %d:%s›" % (self.id,self.name)
@@ -133,7 +139,6 @@ class WorkItem(object):
 
 	def __str__(self):
 		return repr(self)
-
 
 class WorkSequence(WorkItem):
 	"""\ 
@@ -333,7 +338,6 @@ class ConcurrentWorkSequence(WorkSequence):
 			with log_wait("JobStop",w):
 				j.join()
 
-
 	def report(self, verbose=False):
 		if not verbose:
 			yield six.text_type(self) # +" for "+six.text_type(self.event)
@@ -429,7 +433,6 @@ class SeqWorker(Worker):
 		Its process() code MUST NOT have any side effects!
 		"""
 	pass
-
 
 class ExcWorker(Worker):
 	"""\

@@ -1,4 +1,3 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, print_function, division, unicode_literals
 ##
@@ -23,57 +22,4 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
 ##  Thus, do not remove the next line, or insert any blank lines above.
 ##BP
-
-from moat import patch;patch()
-from moat.reactor import ShutdownHandler
-from moat.module import load_module
-from moat.statement import main_words
-from test import run
-
-input = """\
-
-block:
-	if exists state foo bar:
-		log TRACE "No‽ 1"
-	else:
-		log TRACE "Yes!"
-	if saved state foo bar:
-		log TRACE "Yes!"
-	else:
-		log TRACE "No‽ 3"
-state foo bar:
-	saved
-block:
-	if exists state foo bar:
-		log TRACE "Yes!"
-	else:
-		log TRACE "No‽ 2"
-	if saved state foo bar:
-		log TRACE "Yes!"
-	else:
-		log TRACE "No‽ 4"
-
-block:
-	var state x foo bar
-	log TRACE We still have $x
-del state foo bar
-list state
-block:
-	if saved state foo bar:
-		log TRACE "No‽ 9"
-	else:
-		log TRACE "Yes!"
-shutdown
-"""
-
-main_words.register_statement(ShutdownHandler)
-load_module("state")
-load_module("block")
-load_module("data")
-load_module("on_event")
-load_module("logging")
-load_module("ifelse")
-load_module("trigger")
-
-run("persist2",input)
 

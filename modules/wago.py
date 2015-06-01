@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-##BP
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,7 +18,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
-from __future__ import division,absolute_import
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This code implements (a subset of) the WAGO server protocol.
@@ -64,7 +71,6 @@ class MT_NAK(singleName): pass # -
 class MT_IND(singleName): pass # !num
 class MT_IND_ACK(singleName): pass # !+num
 class MT_IND_NAK(singleName): pass # !-num
-
 
 class WAGObadResult(RuntimeError):
 	pass
@@ -152,7 +158,6 @@ class WAGOchannel(WAGOassembler, NetActiveConnector):
 	def not_up_event(self, external=False):
 		simple_event("wago","error",*self.name)
 
-
 class WAGOinitMsg(MsgReceiver):
 	blocking = True
 	start_timer = None
@@ -193,7 +198,6 @@ class WAGOmsgBase(MsgBase):
 		log("wago",TRACE,"send",repr(self.msg))
 		conn.write(self.msg)
 		return RECV_AGAIN
-
 
 _num = re.compile("[0-9]+")
 
@@ -340,7 +344,6 @@ class WAGOkeepaliveMsg(WAGOmsgBase):
 			self.ping_timer.cancel()
 			self.ping_timer = None
 
-
 class WAGOqueue(MsgQueue):
 	"""A simple adapter for the Wago protocol."""
 	storage = WAGOservers
@@ -353,7 +356,6 @@ class WAGOqueue(MsgQueue):
 	def setup(self):
 		self.enqueue(WAGOinitMsg(self))
 		self.enqueue(WAGOmonitorsMsg(self))
-
 
 class WAGOconnect(NetConnect):
 	name = "connect wago"
@@ -384,7 +386,6 @@ connect wago NAME [[host] port]
 			q.enqueue(msg)
 WAGOconnect.register_statement(NetRetry)
 
-
 @WAGOconnect.register_statement
 class WAGOkeepalive(Statement):
 	name= "keepalive"
@@ -406,7 +407,6 @@ keepalive ‹interval› ‹timeout›
 		except ValueError:
 			raise SyntaxError(u"Usage: %s ‹interval› ‹timeout› (#seconds, float)" % (self.name,))
 
-
 class WAGOconnected(Check):
 	name="connected wago"
 	doc="Test if the named wago server connection is running"
@@ -418,7 +418,6 @@ class WAGOconnected(Check):
 			return False
 		else:
 			return bus.channel is not None
-
 
 ### simple commands and whatnot
 
@@ -443,7 +442,6 @@ class WAGOrun(WAGOmsgBase):
 	def msg(self):
 		raise NotImplementedError("You forgot to override %s.msg"%(self.__class__.__name__,))
 
-
 class WAGOioRun(WAGOrun):
 	"""Send a simple I/O command to Wago."""
 
@@ -467,7 +465,6 @@ class WAGOinputRun(WAGOioRun):
 	def msg(self):
 		return "i %d %d" % (self.card,self.port)
 
-
 class WAGOoutputRun(WAGOioRun):
 	"""Send a simple command to write an output."""
 	def __init__(self,card,port,value):
@@ -487,13 +484,11 @@ class WAGOoutputRun(WAGOioRun):
 	def msg(self):
 		return "%s %d %d" % ("s" if self.val else "c", self.card,self.port)
 
-
 class WAGOoutputInRun(WAGOioRun):
 	"""Send a simple command to read an output."""
 	@property
 	def msg(self):
 		return "I %d %d" % (self.card,self.port)
-
 
 class WAGOtimedOutputRun(WAGOoutputRun):
 	"""Send a (monitored) command for set+clear"""
@@ -580,7 +575,6 @@ class WAGOio(object):
 		yield ("card",self.card)
 		yield ("port",self.port)
 
-
 class WAGOinput(BoolIO,WAGOio,Input):
 	what="input"
 	doc="An input on a remote WAGO server"
@@ -604,7 +598,6 @@ wago controller card port
 		elif res == "0":
 			return False
 		raise WAGObadResult(res)
-
 
 class WAGOoutput(BoolIO,WAGOio,Output):
 	what="output"
@@ -643,7 +636,6 @@ wago controller card port
 			return False
 		raise WAGObadResult(res)
 
-
 class WAGOraw(AttributedStatement):
 	name="send wago"
 	dest = None
@@ -671,7 +663,6 @@ send wago ‹text…› :to ‹name›
 		WAGOservers[name].enqueue(msg)
 		res = msg.result.get()
 
-
 @WAGOraw.register_statement
 class WAGOto(Statement):
 	name="to"
@@ -685,7 +676,6 @@ to ‹name…›
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		self.parent.dest = SName(event)
-
 
 class WAGOmonStop(WAGOrun):
 	"""Halts a monitor."""
@@ -788,7 +778,6 @@ class WAGOmonRun(WAGOioRun):
 		self.monitor.down()
 		super(WAGOmonRun,self).abort()
 
-
 class WAGOmon(Monitor):
 	mode = "report"
 	timespec = 60
@@ -827,7 +816,6 @@ class WAGOmon(Monitor):
 			reraise(res)
 		super(WAGOmon,self).up()
 
-
 	def down(self):
 		"""remove myself to the server"""
 		if self.server not in WAGOservers:
@@ -842,14 +830,12 @@ class WAGOmon(Monitor):
 				reraise(res)
 		super(WAGOmon,self).down()
 
-
 	def submit(self,val):
 		try:
 			self.watcher.put(val,block=True,timeout=0.5)
 		except Full:
 			simple_event("monitor","overrun",*self.name, value=val)
 			pass
-
 
 class WAGOmonitor(MonitorHandler):
 	name= "monitor wago"
@@ -895,7 +881,6 @@ mode ‹report|count TIME›
 			raise SyntaxError(u'Usage: mode ‹report|count TIME›')
 		self.parent.values["mode"] = event[0]
 
-
 @WAGOmonitor.register_statement
 class WAGOmonLevel(Statement):
 	name = "level"
@@ -910,7 +895,6 @@ level ‹up|down|both›
 		if len(event) != 1 or event[0] not in ("up","down","both"):
 			raise SyntaxError(u'Usage: level ‹up|down|both›')
 		self.parent.values["level"] = event[0]
-
 
 class WAGOmodule(Module):
 	"""\
