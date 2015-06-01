@@ -61,12 +61,12 @@ class PWMs(Collection):
 PWMs = PWMs()
 PWMs.does("del")
 
+@six.python_2_unicode_compatible
 class PWMError(RuntimeError):
 	def __init__(self,w):
 		self.PWM = w
 	def __str__(self):
 		return self.text % (" ".join(six.text_type(x) for x in self.PWM.name),)
-	__unicode__=__str__
 
 class CommonPM(Collected):
 	"""This is the (generic) thing that modulates."""

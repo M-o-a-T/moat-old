@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
-
-##  Copyright © 2012, Matthias Urlichs <matthias@urlichs.de>
+from __future__ import absolute_import, print_function, division, unicode_literals
+##
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -13,8 +18,13 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
-from __future__ import division,absolute_import
+import six
+
 from rainman.models import Model
 from rainman.models.site import Site
 from django.db import models as m
@@ -23,13 +33,13 @@ from django.db.models import Q
 # Tables for environmental effects.
 # Note that table names are different for Hysterical Raisins.
 
+@six.python_2_unicode_compatible
 class EnvGroup(Model):
 	class Meta(Model.Meta):
 		unique_together = (("site", "name"),)
 		db_table="rainman_paramgroup"
 	def __str__(self):
 		return self.name
-	__unicode__=__str__
 	name = m.CharField(max_length=200)
 	comment = m.CharField(max_length=200,blank=True)
 	site = m.ForeignKey(Site,related_name="envgroups")
@@ -82,7 +92,6 @@ class EnvGroup(Model):
 			return None
 		return sum_f / sum_w
 
-
 	def env_factor(self, h, logger=None):
 		"""Calculate a weighted factor for history entry @h, based on the given environmental parameters"""
 		ql=(
@@ -111,7 +120,6 @@ class EnvGroup(Model):
 	def schedules(self):
 		from rainman.models.schedule import Schedule
 		return Schedule.objects.filter(valve__envgroup=self)
-
 
 class EnvItem(Model):
 	class Meta(Model.Meta):

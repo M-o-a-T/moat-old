@@ -50,10 +50,12 @@ from moat.event import TrySomethingElse
 from moat.base import Name,SName
 from moat.event_hook import OnHandlers, OnEventBase
 
+@six.python_2_unicode_compatible
 class BadArgs(RuntimeError):
 	def __str__(self):
 		return "Mismatch: %s does not fit %s" % (repr(self.args[0]),repr(self.args[1]))
 
+@six.python_2_unicode_compatible
 class BadArgCount(RuntimeError):
 	def __str__(self):
 		return "The number of event arguments does not match"

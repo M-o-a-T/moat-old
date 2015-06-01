@@ -50,6 +50,7 @@ import errno
 import gevent
 from gevent.server import StreamServer
 
+@six.python_2_unicode_compatible
 class DisconnectedError(RuntimeError):
 	def __init__(self,dev):
 		self.dev = dev
@@ -60,10 +61,12 @@ class idErr(RuntimeError):
 	def __init__(self,path):
 		self.path = path
 
+@six.python_2_unicode_compatible
 class TimedOut(idErr):
 	def __str__(self):
 		return "Timeout: No data at %s" % (self.path,)
 
+@six.python_2_unicode_compatible
 class NetError(EnvironmentError):
 	def __init__(self,typ):
 		self.typ = typ

@@ -78,6 +78,7 @@ class WAGObadResult(RuntimeError):
 class WAGOerror(RuntimeError):
 	pass
 
+@six.python_2_unicode_compatible
 class DroppedMonitor(RuntimeError):
 	"""After reconnecting, a monitor is gone"""
 	def __init__(self,mid):

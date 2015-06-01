@@ -46,6 +46,7 @@ else:
 			pass
 		""")
 
+@six.python_2_unicode_compatible
 class Name(tuple):
 	"""A class that knows how to print itself the "right" way"""
 	delim = u"¦"
@@ -58,13 +59,8 @@ class Name(tuple):
 		if len(data) > 0 and not isinstance(data[0],(six.string_types,int,float)):
 			raise RuntimeError("Name:"+repr(data))
 		return super(Name,cls).__new__(cls,data)
-	def __unicode__(self):
+	def __str__(self):
 		return self.prefix + self.delim.join((six.text_type(x) for x in self)) + self.suffix
-	if six.PY2:
-		def __str__(self):
-			return unicode(self).encode("utf-8")
-	else:
-		__str__=__unicode__
 	def __repr__(self):
 		return self.__class__.__name__+super(Name,self).__repr__()
 

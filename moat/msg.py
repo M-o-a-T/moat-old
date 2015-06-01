@@ -152,6 +152,7 @@ class MsgReceiver(MsgInfo):
 	def done(self):
 		pass
 	
+@six.python_2_unicode_compatible
 class NoAnswer(RuntimeError):
 	"""The server does not reply."""
 	no_backtrace = True
