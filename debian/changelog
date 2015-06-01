@@ -1,3 +1,11 @@
+moat (0.7.1) smurf; urgency=medium
+
+  * Build py3 versio
+  * reorganized
+  * added boiplerplate text to all files
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Mon, 01 Jun 2015 09:50:49 +0200
+
 moat (0.7.0) smurf; urgency=medium
 
   * rename to MoaT.
