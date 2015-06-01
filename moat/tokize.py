@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+##BP
 ##
 ##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
 ##
@@ -16,8 +16,6 @@
 ##
 
 """Tokenization help for Python-like MoaT programs."""
-
-from __future__ import division,absolute_import
 
 __author__ = 'Matthias Urlichs <matthias@urlichs.de>'
 __credits__ = \

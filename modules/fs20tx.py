@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+##BP
 ##
 ##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
 ##
@@ -14,13 +14,12 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+from __future__ import division,absolute_import
 
 """\
 This code implements a listener for environment monitoring (tx2/tx3).
 
 """
-
-from __future__ import division,absolute_import
 
 from moat.module import Module
 from moat.statement import AttributedStatement,Statement, main_words

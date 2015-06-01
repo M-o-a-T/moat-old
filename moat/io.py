@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+##BP
 ##
 ##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
 ##
@@ -19,8 +19,6 @@
 This code does some standard I/O handling.
 
 """
-
-from __future__ import division,absolute_import
 
 conns = []
 def dropConnections():

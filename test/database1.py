@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
+##BP
 ##
 ##  Copyright © 2008-2012, Matthias Urlichs <matthias@urlichs.de>
 ##

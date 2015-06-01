@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import division
-
+##BP
 ##
 ##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
 ##
@@ -15,7 +14,6 @@ from __future__ import division
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
-
 from __future__ import division,absolute_import,print_function
 
 """\

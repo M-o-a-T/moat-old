@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+##BP
 ##
 ##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
 ##
@@ -14,6 +14,7 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+from __future__ import division,absolute_import
 
 """\
 Around we go
@@ -26,8 +27,6 @@ while false:
 	do-nothing
 
 """
-
-from __future__ import division,absolute_import
 
 from moat.statement import MainStatementList, main_words,global_words
 from moat.module import Module

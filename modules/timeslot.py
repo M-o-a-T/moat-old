@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+##BP
 ##
 ##  Copyright © 2008-2012, Matthias Urlichs <matthias@urlichs.de>
 ##
@@ -14,6 +14,7 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+from __future__ import division,absolute_import
 
 """\
 This code does basic timeout handling.
@@ -22,8 +23,6 @@ timeslot FOO...
 	- timeslots for FOO seconds
 
 """
-
-from __future__ import division,absolute_import
 
 from moat.timeslot import Timeslots, Timeslot, Timeslotted
 from moat.statement import AttributedStatement, Statement, main_words,\

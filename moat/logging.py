@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+##BP
 ##
 ##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
 ##
@@ -14,8 +14,6 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
-
-from __future__ import division,absolute_import,print_function
 
 """\
 This part of the code defines the logging part of the moat system.

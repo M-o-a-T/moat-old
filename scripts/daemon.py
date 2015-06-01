@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
+##BP
 ##
 ##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
 ##
@@ -15,7 +15,6 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
-
 from __future__ import division,absolute_import
 
 import sys; sys.excepthook = None; del sys

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+##BP
 ##
 ##  Copyright © 2007-2015, Matthias Urlichs <matthias@urlichs.de>
 ##
@@ -14,6 +14,7 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+from __future__ import division,absolute_import
 
 """\
 This code runs arbitrary Python code.
@@ -21,8 +22,6 @@ This code runs arbitrary Python code.
 exec some.module.foo bar baz
 	- imports some.module and runs foo(bar,baz).
 """
-
-from __future__ import division,absolute_import
 
 import six
 import gevent

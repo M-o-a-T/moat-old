@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+##BP
 ##
 ##  Copyright © 2012, Matthias Urlichs <matthias@urlichs.de>
 ##
@@ -19,8 +19,6 @@
 This is the core of external input and output.
 
 """
-
-from __future__ import division,absolute_import
 
 from moat.statement import Statement, main_words, AttributedStatement,WordAttached
 from moat.check import Check,register_condition,unregister_condition

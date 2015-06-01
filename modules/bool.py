@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+##BP
 ##
 ##  Copyright © 2007, Matthias Urlichs <matthias@urlichs.de>
 ##
@@ -19,8 +19,6 @@
 This code implements primitive "if true" and "if false" checks.
 
 """
-
-from __future__ import division,absolute_import
 
 from moat.check import Check,register_condition,unregister_condition
 from moat.module import Module

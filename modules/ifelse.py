@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+##BP
 ##
 ##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
 ##
@@ -14,6 +14,7 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+from __future__ import division,absolute_import
 
 """\
 We need code for conditionals.
@@ -32,8 +33,6 @@ on what ever:
 
 This code implements the "if" command.
 """
-
-from __future__ import division,absolute_import
 
 from moat.statement import MainStatementList, main_words,global_words
 from moat.module import Module

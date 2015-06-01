@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+##BP
 ##
 ##  Copyright © 2007, Matthias Urlichs <matthias@urlichs.de>
 ##
@@ -14,13 +14,12 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+from __future__ import division,absolute_import
 
 """\
 This code implements file existence checks.
 
 """
-
-from __future__ import division,absolute_import
 
 from moat.check import Check,register_condition,unregister_condition
 from moat.module import Module

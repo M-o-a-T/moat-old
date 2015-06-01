@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+##BP
 ## 
 ##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
 ##
@@ -18,8 +18,6 @@
 """\
 This is the core of the event dispatcher.
 """
-
-from __future__ import division,absolute_import
 
 import os
 

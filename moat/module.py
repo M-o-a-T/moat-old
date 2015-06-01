@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+##BP
 ##
 ##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
 ##
@@ -20,7 +20,6 @@ from __future__ import division,absolute_import,print_function
 This code implements module loading and unloading.
 
 """
-
 
 from moat import TESTING
 from moat.run import simple_event

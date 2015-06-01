@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+##BP
 ##
 ##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
 ##
@@ -18,8 +18,6 @@
 """\
 This part of the code controls the main loop.
 """
-
-from __future__ import division,absolute_import
 
 import sys
 from moat.context import Context

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+##BP
 ##
 ##  Copyright © 2008-2012, Matthias Urlichs <matthias@urlichs.de>
 ##
@@ -14,14 +14,13 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+from __future__ import division,absolute_import
 
 """\
 This code implements a FS20 transceiver based on a AVR ATmega168
 microcontroller.
 
 """
-
-from __future__ import division,absolute_import
 
 from moat.base import SName,Name,MIN_PRIO
 from moat.module import Module
