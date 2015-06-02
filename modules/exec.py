@@ -41,6 +41,7 @@ from moat import logging
 from moat.twist import Jobber,fix_exception
 from moat.module import Module
 from moat.logging import log,DEBUG
+from moat.interpreter import Interpreter
 from moat.event_hook import OnEventBase
 
 from dabroker.util import import_string
@@ -82,6 +83,12 @@ class Env(object):
 
 	def trigger(self, *a,**k):
 		simple_event(self.ctx, *a,**k)
+
+	def do(self,*a,**k):
+		ctx = self.ctx(**k)
+		if len(a)==1:
+			a = a[0].split(' ')
+		Interpreter(ctx).simple_statement(a)
 
 class ExecHandler(AttributedStatement,Jobber):
 	name="exec"
@@ -135,6 +142,22 @@ param ‹key› ‹val›
 
 from moat.module import Module
 
+class Path(Statement):
+    name="path"
+    doc="set python module path"
+    long_doc = """\
+path 'directory'
+    adds the given directory to the list of paths where
+	Python (not MoaT) modules are searched at.
+    The directory probably needs to be quoted.
+"""
+    def run(self,ctx,**k):
+        event = self.params(ctx)
+        if len(event) != 1:
+            raise SyntaxError("Usage: path 'filename'")
+		import sys
+        sys.path.insert(0,event[0])
+
 class ExecModule(Module):
 	"""\
 		Contains a function to run arbitrary Python code.
@@ -144,8 +167,10 @@ class ExecModule(Module):
 
 	def load(self):
 		main_words.register_statement(ExecHandler)
+		main_words.register_statement(Path)
 	
 	def unload(self):
 		main_words.unregister_statement(ExecHandler)
+		main_words.unregister_statement(Path)
 
 init = ExecModule

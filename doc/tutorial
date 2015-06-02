@@ -461,15 +461,15 @@ Anyway, in principle, this is easy:
 	. 
 	>> # THE ABOVE EXAMPLE WILL NOT WORK
 
-Unfortunately, this solution will crash with a nasty error message
-instead of turning the light off.
+Unfortunately, this solution may or may not crash MoaT with a nasty error
+message instead of turning the light off.
 
-The reason for that disaster is that state-change events are running
+The reason for that disaster is that state-change events might run
 synchronously, i.e. the "set state" command waits for them to complete
-before continuing. They're also forbidden to change the state they're
-reporting about; otherwise you could get cute endless ping-pong effects.
-(Actually, that problem exists regardless … but at least the main cause
-of such chains is broken.)
+before continuing. If they do, they're also forbidden to change the state
+they're reporting about; otherwise you could get cute endless ping-pong
+effects. (Actually, that problem exists regardless … but at least the main
+cause of such chains is prevented.)
 
 The solution is an "async:" block, which is just a normal block that
 doesn't force the rest of the world to wait until the statements inside
@@ -483,9 +483,13 @@ doesn't force the rest of the world to wait until the statements inside
 				set state off lamp $lamp
 	.
 
-Of course, you still need a “on state * off …” block which cancels
+Of course, you still need an “if equal $state off” part which cancels
 the timer, but by now you should be able to write that yourself.
 
+In case you're wondering: Whether state-change events run synchronously
+depends on which MoaT version you're using and whether internal event
+handling is shunted through an external message broker. It's best to assume
+the worst-case behavior.
 
 ---------------------
 More complex examples
@@ -523,10 +527,10 @@ Configure OpenHAB to talk to MQTT:
 	mqtt:openhab.pwd=WellWhatever
 
 	mqtt-eventbus:broker=openhab
-	mqtt-eventbus:statePublishTopic=/openhab/out/state/${item}
-	mqtt-eventbus:commandPublishTopic=/openhab/out/command/${item}
-	mqtt-eventbus:stateSubscribeTopic=/openhab/in/state/${item}
-	mqtt-eventbus:commandSubscribeTopic=/openhab/in/command/${item}
+	mqtt-eventbus:statePublishTopic=openhab/out/state/${item}
+	mqtt-eventbus:commandPublishTopic=openhab/out/command/${item}
+	mqtt-eventbus:stateSubscribeTopic=openhab/in/state/${item}
+	mqtt-eventbus:commandSubscribeTopic=openhab/in/command/${item}
 
 Teach MoaT to talk to AMQP:
 
@@ -542,13 +546,13 @@ Teach MoaT to talk to AMQP:
 			tell amqp bus:
 					name bus events
 					exchange "moat.log"
-					# DO NOT listen on this exchange
+					# DO NOT tell MoaT to listen on this exchange
 
 			# receive openhab messages
 			listen amqp bus:
 					name bus openhab in
 					exchange "moat.event"
-					topic ".openhab.out.#"
+					topic "openhab.out.#"
 					prefix hab in
 					strip 3
 
@@ -557,7 +561,7 @@ Teach MoaT to talk to AMQP:
 					name bus openhab out
 					filter hab out "**":
 					exchange "moat.event"
-					prefix "" openhab in
+					prefix openhab in
 					strip 2
 			
 			start amqp bus
@@ -566,7 +570,7 @@ Teach MoaT to talk to AMQP:
 			name bus
 			user "/moat" moat AlsoWhatever
 
-Now add a switch to openhab (to file items/CONFIG.items):
+Now add a switch to openhab (edit the file items/CONFIG.items):
 
 	Switch Light_Outside "Outdoor Light" ()
 
@@ -601,12 +605,12 @@ bus) that way.
 
 You should turn on rabbitmq's web interface and monitor the event rate
 while you're experimenting with this. You can also use `log amqp` to send
-all of MoaT's logging to an AMQP exchange, and monitor or filter them
-at your convenience. The `amqpmon` script that comes with MoaT is
+all of MoaT's logging to an AMQP exchange, and monitor or filter these
+messages at your convenience. The `amqpmon` script that comes with MoaT is
 useful for this.
 
 Splitting up MoaT
----------------------
+-----------------
 
 Let's face it: MoaT is not bug-free; sometimes communication with one
 subsystem hangs and you need to debug. Ideally without disrupting the rest
@@ -621,14 +625,15 @@ For this reason, the AMQP handlers have an additional bypass or `shunt`
 mode, which works like this:
 
 * An event that's matched by a "tell amqp … shunt" handler is not processed
-  by your MoaT script. Instead, it's transmitted to the message bus and
+  by MoaT, i.e. it is not passed to any event handlers.
+  Instead, it's transmitted to the message bus and
   then forgotten about. If more than one such handler matches the event,
   only one is used (this is mostly random), so you shouldn't have
   overlapping handlers. Most people use just one, without a filter,
-  and forward everything.
+  and forward everything to AMQP.
 
 * An AMQP message that's received by a "listen amqp … shunt" handler
-  is processed locally. It is *not* forwarded to any shunt handler.
+  is processed locally. It is *not* forwarded to any other shunt handler.
 
 So, let's add this to our "on amqp connect bus" example:
 
@@ -651,33 +656,48 @@ Now, however, you can run another MoaT script that connects to the
 other.
 
 Note that this doesn't apply to anything else, i.e. non-saved states do not
-get shared, you don't affect the other script's wait handlers, etc.
+get shared, you cannot directly affect the other script's wait handlers, etc.
 
 If you split up your code along mostly-sensible lines, however, this should
-not be a problem.
+not be a problem. Replicating state across MoaT instances is not simple
+enough to do by MoaT script, but implementing it in MoaT itself is planned.
 
 ---------------
 Do it in Python
 ---------------
 
-MoaT scripts originally ran under Twisted; the code was used to simplify
-programming, compared to the strange Deferred- and Producer/Consumer-style
-code required for non-blocking code with Twisted.
+MoaT scripts originally ran under Twisted; it was used to simplify
+programming, because the strange Deferred- and Producer/Consumer-style code
+required for non-blocking code with Twisted is too complicated for
+non-programmers who just want to turn the lights on and off.
 
 These days, there's asyncio or gevent (and even code to tie the two together).
-So MoaT will ultimately migrate away from using its own script and switch
+Thus, MoaT will ultimately migrate away from using its own script and switch
 to "real" Python.
 
-As a first step, you can call Python from MoaT with the `exec` statement:
+Commands
+########
+
+exec
+----
+
+You can call Python from MoaT with the `exec` statement:
 
 	exec foo.bar one two three:
 		param what ever
 
-which will load module "foo" and call the procedure "bar" as
+which will load module `foo` and call its procedure `bar` like this:
 
 	foo.bar(ENV, "one", "two", "three", what="ever")
 
-Execution is synchronous unless you wrap it in an `async:` block.
+Execution is synchronous, but you can always wrap it in an `async:` block.
+
+path
+----
+
+Tell MoaT where to load Python modules from.
+
+	path '/etc/moat'
 
 Environment
 ###########
@@ -705,4 +725,13 @@ Trigger an event.
 	trigger("run","me","now", some_data="some_value")
 
 Execution of event handlers always is asynchronous.
+
+do
+--
+
+Call back to MoaT.
+
+	env.do("log DEBUG Calling back")
+
+You can set context values (similar to `trigger`).
 
