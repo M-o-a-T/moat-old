@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,13 +18,17 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This code implements (a subset of) the OWFS server protocol.
 
 """
 
-from __future__ import division,absolute_import
+import six
 
 from moat.module import Module
 from moat.base import Name,SName
@@ -51,7 +59,6 @@ connect onewire NAME [[host] port]
 		buses[self.dest] = f
 		log(TRACE,"New OWFS bus",self.dest,f)
 
-
 class OWFSdisconnect(Statement):
 	name = "disconnect onewire"
 	doc = "disconnect from an OWFS server"
@@ -68,7 +75,6 @@ disconnect onewire NAME
 		disconnect(buses.pop(name))
 		log(TRACE,"Drop OWFS bus",name)
 
-
 class OWFSio(object):
 	typ="onewire"
 	def __init__(self, name, params,addons,ranges,values):
@@ -77,7 +83,6 @@ class OWFSio(object):
 		self.dev = params[0].lower()
 		self.attr = params[1]
 		super(OWFSio,self).__init__(name, params,addons,ranges,values)
-
 
 class OWFSinput(OWFSio,Input):
 	what="input"
@@ -90,7 +95,6 @@ onewire dev attr
 		val = devices[self.dev].get(self.attr)
 		return val
 
-
 class OWFSoutput(OWFSio,Output):
 	typ="onewire"
 	doc="An output which writes to 1wire"
@@ -100,7 +104,6 @@ onewire dev attr
 """
 	def _write(self,val):
 		devices[self.dev].set(self.attr, val)
-
 
 class OWFSset(Statement):
 	name="set onewire"
@@ -118,7 +121,6 @@ set onewire VALUE dev attr
 		dev = dev.lower()
 		
 		devices[dev].set(attr, val)
-
 
 class OWFSdir(AttributedStatement):
 	name="dir onewire"
@@ -139,7 +141,7 @@ dir onewire NAME path...
 		event = self.params(ctx)
 
 		def reporter(data):
-			print >>ctx.out,data
+			print(data, file=ctx.out)
 
 		if len(event) == 1 and not self.dest and event[0].lower() in devices:
 			dev = devices[event[0].lower()]
@@ -154,7 +156,7 @@ dir onewire NAME path...
 			path = event
 		dev.dir(path=path, proc=reporter)
 
-		print >>ctx.out,"."
+		print(".", file=ctx.out)
 
 class OWFSname(Statement):
 	name="name"
@@ -172,7 +174,6 @@ name ‹name…›
 
 OWFSdir.register_statement(OWFSname)
 
-
 class OWFSconnected(Check):
 	name="connected onewire"
 	doc="Test if a onewire device is accessible"
@@ -188,7 +189,6 @@ class OWFSconnected(Check):
 			if bus is None: return False
 			return bus.conn is not None
 
-
 class OWFSconnectedbus(Check):
 	name="connected onewire bus"
 	doc="Test if the named onewire server connection is running"
@@ -200,7 +200,6 @@ class OWFSconnectedbus(Check):
 			return False
 		else:
 			return bus.conn is not None
-
 
 class OWFSmon(Monitor):
 	queue_len = None # to not use the Watcher queue
@@ -363,7 +362,6 @@ class OWFSwindmon(Monitor):
 			# (inverse of ①)
 			self.avg = (val+nal*8/pi)%16
 
-
 class OWFSmonitor(MonitorHandler):
 	name="monitor onewire"
 	monitor = OWFSmon
@@ -382,10 +380,9 @@ monitor onewire ‹device› ‹attribute›
 			self.values["switch"] = None
 		self.values["params"] = ("onewire",event[0],event[1])
 		if "switch" in self.values and self.values["switch"] is not None:
-			self.values["params"] += (u"±"+unicode(self.values["switch"]),)
+			self.values["params"] += (u"±"+six.text_type(self.values["switch"]),)
 
 		super(OWFSmonitor,self).run(ctx,**k)
-
 
 class MonitorSwitch(Statement):
 	name = "switch"
@@ -415,7 +412,6 @@ switch ‹port› ‹low› ‹high›
 			val["to_high"] = 1
 		val["switched"] = None
 MonitorHandler.register_statement(MonitorSwitch)
-
 
 class MonitorWind(Statement):
 	name = "wind"
@@ -457,7 +453,6 @@ wind ‹offset› ‹weight›
 			val["decay"] = 0.1
 MonitorHandler.register_statement(MonitorWind)
 
-
 class OWFSscan(Statement):
 	name="scan onewire"
 	doc="(Re-)scan a onewire bus"
@@ -479,7 +474,6 @@ scan onewire NAME
 				raise RuntimeError("scan onewire: unknown bus ‹%s›" % (event[0],))
 			else:
 				return dev.run_watcher()
-
 
 class OWFSmodule(Module):
 	"""\

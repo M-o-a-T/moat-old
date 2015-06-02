@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2008-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,6 +18,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This code implements pulse-code modulation.
@@ -27,7 +35,7 @@ set pwm $VALUE NAME...
 
 """
 
-from __future__ import division,absolute_import
+import six
 
 from moat.statement import AttributedStatement, Statement, main_words,\
 	global_words, HelpSub
@@ -53,14 +61,12 @@ class PWMs(Collection):
 PWMs = PWMs()
 PWMs.does("del")
 
-
+@six.python_2_unicode_compatible
 class PWMError(RuntimeError):
 	def __init__(self,w):
 		self.PWM = w
 	def __str__(self):
-		return self.text % (" ".join(str(x) for x in self.PWM.name),)
-	def __unicode__(self):
-		return self.text % (" ".join(unicode(x) for x in self.PWM.name),)
+		return self.text % (" ".join(six.text_type(x) for x in self.PWM.name),)
 
 class CommonPM(Collected):
 	"""This is the (generic) thing that modulates."""
@@ -81,7 +87,7 @@ class CommonPM(Collected):
 		self.ctx = parent.ctx
 		self.start = now()
 		self.names = names
-		for a,b in k.iteritems(): self.arg(a,b)
+		for a,b in k.items(): self.arg(a,b)
 		self.validate()
 		super(CommonPM,self).__init__(*name)
 	
@@ -91,7 +97,7 @@ class CommonPM(Collected):
 	def list(self):
 		n=now()
 		yield ("type",self.type)
-		yield ("name"," ".join(unicode(x) for x in self.name))
+		yield ("name"," ".join(six.text_type(x) for x in self.name))
 		if self.state is not None:
 			yield ("state",self.names[self.state])
 		if self._value is not None:
@@ -209,7 +215,6 @@ A standard pulse width-modulated signal with mostly-constant period
 
 		return (self.interval * (1-val), self.interval * val)
 
-
 class StdPDM(StdPWM):
 	doc="constant 'on' time'"
 	long_doc="""\
@@ -238,8 +243,6 @@ A pulse density modulated signal with constant 'off' time
 
 		return (self.interval, self.interval * val/(1-val))
 
-
-
 class PWMHandler(AttributedStatement):
 	name="pwm"
 	doc="create a pulse-width handler"
@@ -266,7 +269,7 @@ pwm NAME…: type
 
 PWMtypes = {}
 v = None
-for v in globals().itervalues():
+for v in globals().values():
 	try:
 		if issubclass(v,CommonPM) and v.type is not None:
 			PWMtypes[Name(v.type)] = v
@@ -325,12 +328,11 @@ This statement updates the parameters of a PWM controller.
 			raise SyntaxError('Usage: update pwm ‹name…›: no attributes given')
 		
 		pwm = PWMs[Name[event]]
-		for a,b in self.attrs.iteritems():
+		for a,b in self.attrs.items():
 			pwm.arg(a,b)
 		pwm.validate()
 		pwm.set_value(None)
 PWMUpdate.register_statement(PWMinterval)
-
 
 class PWMSet(Statement):
 	name = "set pwm"
@@ -347,7 +349,6 @@ The PWM will not do anything before you do that.
 		pwm = PWMs[Name(*event[1:])]
 		pwm.value = float(event[0])
 
-
 class OnPWMCheck(Check):
 	name="pwm"
 	doc="check if a PWM is turned on"
@@ -356,7 +357,6 @@ class OnPWMCheck(Check):
 			raise SyntaxError(u"Usage: if pwm ‹name…›")
 		name = Name(*args)
 		return PWMs[name].state
-
 
 class VarPWMHandler(Statement):
 	name="var pwm"
@@ -370,7 +370,6 @@ var pwm NAME name...
 		var = event[0]
 		name = Name(*event[1:])
 		setattr(self.parent.ctx,var,PWMs[name].value)
-
 
 class PWMModule(Module):
 	"""\

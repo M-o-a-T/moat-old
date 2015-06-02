@@ -23,10 +23,11 @@ all: subfiles
 	$(MAKE) -C fs20 all
 	$(MAKE) -C wago all
 	python setup.py build
-install:
+install: installsub
+	python setup.py install --root="$(PYDESTDIR)" --no-compile -O0 --install-layout=deb
+installsub:
 	$(MAKE) -C fs20 install ROOT=$(DESTDIR)
 	$(MAKE) -C wago install ROOT=$(DESTDIR)
-	python setup.py install --root="$(PYDESTDIR)" --no-compile -O0 --install-layout=deb
 
 subfiles: moat/gevent_rpyc.py
 
@@ -67,7 +68,7 @@ f fs20: FIX
 fd fs20debug: FIX
 	pdb test/interactive/main.py test/interactive/fs20
 i interactive: FIX
-	env LIBEV_FLAGS=1 HOMEVENT_TEST=1 python test/interactive/main.py
+	env LIBEV_FLAGS=1 MOAT_TEST=1 python test/interactive/main.py
 id interactivedebug d debug: FIX
 	pdb test/interactive/main.py
 r run: FIX

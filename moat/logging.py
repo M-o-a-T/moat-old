@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,6 +18,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This part of the code defines the logging part of the moat system.
@@ -24,7 +32,7 @@ part of the system.
 
 """
 
-from __future__ import division,absolute_import
+import six
 
 from moat import TESTING
 from moat.run import register_worker
@@ -55,7 +63,7 @@ Loggers = Loggers()
 Loggers.can_do("del")
 
 def stop_loggers():
-	for l in Loggers.storage.values():
+	for l in list(Loggers.storage.values()):
 		l.delete()
 
 TRACE=0
@@ -86,7 +94,6 @@ LogLevels={
 }
 
 levels = {}
-
 
 def log_level(cls, level=None):
 	"""Get/set the logging level for a particular subsystem"""
@@ -188,7 +195,7 @@ class BaseLogger(Collected,Jobber):
 			self.delete()
 
 	def _log(self, level, *a):
-		a=" ".join(( x if isinstance(x,basestring) else str(x)  for x in a))
+		a=" ".join(( x if isinstance(x,six.string_types) else str(x)  for x in a))
 		self._slog(level,a)
 
 	def _slog(self, a):
@@ -214,7 +221,7 @@ class BaseLogger(Collected,Jobber):
 
 	def log_failure(self, err, level=WARN):
 		if level >= self.level:
-			self._wlog(level,format_exception(err))
+			self._wlog(LogNames[level],format_exception(err))
 			if TESTING:
 				self.flush()
 	
@@ -246,7 +253,7 @@ class Logger(BaseLogger):
 		super(Logger,self)._log(level,*data)
 
 	def _slog(self,level,data):
-		print >>self.out,LogNames[level]+">",data
+		print(LogNames[level]+">",data, file=self.out)
 	
 	def _flush(self):
 		self.out.flush()
@@ -258,7 +265,6 @@ class Logger(BaseLogger):
 
 	def info(self):
 		return LogNames[self.level]+" "+repr(self.out)
-
 
 class LogWorker(ExcWorker):
 	"""\
@@ -287,7 +293,7 @@ class LogWorker(ExcWorker):
 			if event is None:
 				loglevel = NONE
 			else:
-				loglevel = event.loglevel
+				loglevel = event.loglevel or TRACE
 			if loglevel == NONE or loglevel > level:
 				return
 		except AttributeError:
@@ -301,14 +307,14 @@ class LogWorker(ExcWorker):
 			if lim == NONE or lim > TRACE:
 				return
 
-		for l in Loggers.values():
+		for l in list(Loggers.values()):
 			if not l.ready:
 				continue
 			try:
 				l.log_event(event=event,level=level)
 			except Exception as e:
 				fix_exception(e)
-				print >>sys.stderr,"LOGGER CRASH 1"
+				print("LOGGER CRASH 1", file=sys.stderr)
 				print_exception(e,file=sys.stderr)
 				l.end_logging()
 				exc.append(sys.exc_info())
@@ -330,15 +336,15 @@ def log_exc(msg=None, err=None, level=ERROR):
 				l.log(level,msg)
 			except Exception as e:
 				fix_exception(e)
-				print >>sys.stderr,"LOGGER CRASH 2"
+				print("LOGGER CRASH 2", file=sys.stderr)
 				print_exception(e,file=sys.stderr)
 				l.end_logging()
 				log_exc(msg="Logger removed",err=e)
 		try:
-			l.log_failure(err, level=level)
+			l.log_failure(err, level=LogLevels[level])
 		except Exception as e:
 			fix_exception(e)
-			print >>sys.stderr,"LOGGER CRASH 3"
+			print("LOGGER CRASH 3", file=sys.stderr)
 			print_exception(e,file=sys.stderr)
 			l.end_logging()
 			log_exc(msg="Logger removed",err=e)
@@ -353,10 +359,10 @@ class LogEndEvent(Event):
 
 	def report(self, verbose=False):
 		try:
-			yield  u"END: "+unicode(Name(self.name[1:]))
+			yield  u"END: "+six.text_type(Name(self.name[1:]))
 		except Exception as e:
 			fix_exception(e)
-			print >>sys.stderr,"LOGGER CRASH 4"
+			print("LOGGER CRASH 4", file=sys.stderr)
 			print_exception(e,file=sys.stderr)
 			yield  "END: REPORT_ERROR: "+repr(self.name[1:])
 
@@ -380,7 +386,7 @@ class log_run(Event):
 		if verbose:
 			p = self.prefix+": "
 			if self.step:
-				q = u" (step "+unicode(self.step)+u")"
+				q = u" (step "+six.text_type(self.step)+u")"
 			else:
 				q = ""
 			if self.worker:
@@ -400,7 +406,7 @@ class log_run(Event):
 					p = " "*len(self.prefix)+": "
 
 		else:
-			yield self.prefix+u": "+unicode(self.worker)
+			yield self.prefix+u": "+six.text_type(self.worker)
 
 class log_halted(Event):
 	prefix="HALT"
@@ -421,7 +427,7 @@ def log(level, *a):
 			lim = levels[level]
 		except KeyError:
 			lim = TRACE if TESTING else INFO
-		if isinstance(a[0],(int,long)) and TRACE<=a[0]<=PANIC or a[0] in LogLevels:
+		if isinstance(a[0],six.integer_types) and TRACE<=a[0]<=PANIC or a[0] in LogLevels:
 			b = level
 			level = a[0]
 			level = LogLevels.get(level,level)
@@ -440,7 +446,7 @@ def log(level, *a):
 			l.log(level, *a)
 		except Exception as e:
 			fix_exception(e)
-			print >>sys.stderr,"LOGGER CRASH 0"
+			print("LOGGER CRASH 0", file=sys.stderr)
 			print_exception(e,file=sys.stderr)
 			l.delete()
 			exc.append(sys.exc_info())

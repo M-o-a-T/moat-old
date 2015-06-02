@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,6 +18,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This code holds statement stuff.
@@ -29,7 +37,7 @@ for typical usage.
 
 """
 
-from __future__ import division,absolute_import
+import six
 
 import sys
 from moat.context import Context
@@ -38,15 +46,14 @@ from moat.base import Name,SName
 
 import gevent
 
+@six.python_2_unicode_compatible
 class UnknownWordError(KeyError):
 	def __init__(self,word,where):
 		self.word = word
 		self.where = where
 
 	def __str__(self):
-		return "Cannot find word <%s> in <%s>" % (" ".join(str(x) for x in self.word), " ".join(self.where.name))
-	def __unicode__(self):
-		return u"Cannot find word ‹%s› in ‹%s›" % (" ".join(unicode(x) for x in self.word), " ".join(self.where.name))
+		return u"Cannot find word ‹%s› in ‹%s›" % (" ".join(six.text_type(x) for x in self.word), " ".join(self.where.name))
 
 class Statement(object):
 	"""\
@@ -75,7 +82,6 @@ class Statement(object):
 				return u"‹%s: %s›" % (self.__class__.__name__,self.name)
 		except Exception:
 				return u"‹%s ?›" % (self.__class__.__name__,)
-
 
 	@classmethod
 	def matches(self,args):
@@ -108,13 +114,7 @@ class Statement(object):
 		raise NotImplementedError("You need to override '%s.run' (called with %s)" % (self.__class__.__name__,repr(k)))
 	
 	def report(self,verbose):
-		yield " ".join(unicode(x) for x in self.args)+u" ‹"+self.__class__.__name__+u"›"
-
-
-class WordLister(type):
-	def __init__(cls, name, bases, dct):
-		super(WordLister, cls).__init__(name, bases, dct)
-		cls._words = {}
+		yield " ".join(six.text_type(x) for x in self.args)+u" ‹"+self.__class__.__name__+u"›"
 
 class WordAttached(Statement):
 	"""\
@@ -123,7 +123,12 @@ class WordAttached(Statement):
 		statement which can be configured by its own sub-statement.
 		"""
 
-	__metaclass__ = WordLister
+	#__metaclass__ = WordLister
+	def __init__(self,*a,**k):
+		cls = self.__class__
+		if '_words' not in self.__class__.__dict__:
+			self.__class__._words = {}
+		super(WordAttached,self).__init__(*a,**k)
 
 	@classmethod
 	def __getitem__(self,key):
@@ -141,26 +146,26 @@ class WordAttached(Statement):
 		wl = {}
 		for o in self.__mro__:
 			if hasattr(o,"_words"):
-				for k,v in o._words.iteritems():
+				for k,v in o._words.items():
 					if k not in wl:
 						wl[k] = v
 		return wl
 
 	@classmethod
-	def iterkeys(self):
+	def keys(self):
 		k = self._get_wordlist()
 		if k is None: return ()
-		return k.iterkeys()
+		return k.keys()
 	@classmethod
-	def itervalues(self):
+	def values(self):
 		k = self._get_wordlist()
 		if k is None: return ()
-		return k.itervalues()
+		return k.values()
 	@classmethod
-	def iteritems(self):
+	def items(self):
 		k = self._get_wordlist()
 		if k is None: return ()
-		return k.iteritems()
+		return k.items()
 
 	@classmethod
 	def register_statement(self,handler):
@@ -177,6 +182,8 @@ class WordAttached(Statement):
 			"""
 		handler.name = SName(handler.name)
 
+		if '_words' not in self.__dict__:
+			self._words = {}
 		if handler.name in self._words:
 			raise ValueError("A handler for '%s' is already registered. (%s)" % (handler.name,self._words[handler.name]))
 		self._words[handler.name] = handler
@@ -188,7 +195,6 @@ class WordAttached(Statement):
 			Remove this statement.
 			"""
 		del self._words[handler.name]
-
 
 class ComplexStatement(WordAttached):
 	"""\
@@ -284,13 +290,14 @@ class IgnoreStatement(Statement):
 	def end_block(self): pass
 	def simple_statement(self,args): pass
 
-
 # statement list
 
+@six.python_2_unicode_compatible
 class BadArgs(RuntimeError):
 	def __str__(self):
 		return "Mismatch: %s does not fit %s" % (repr(self.args[0]),repr(self.args[1]))
 
+@six.python_2_unicode_compatible
 class BadArgCount(RuntimeError):
 	def __str__(self):
 		return "The number of event arguments does not match"
@@ -305,10 +312,10 @@ class StatementList(ComplexStatement):
 
 	def __repr__(self):
 		try:
-			return u"‹"+self.__class__.__name__+"("+unicode(self.handler_id)+u")›"
+			return u"‹"+self.__class__.__name__+"("+six.text_type(self.handler_id)+u")›"
 		except AttributeError:
 			try:
-				return u"‹"+self.__class__.__name__+" "+unicode(self.args)+u"›"
+				return u"‹"+self.__class__.__name__+" "+six.text_type(self.args)+u"›"
 			except AttributeError:
 				return u"‹"+self.__class__.__name__+u"(?)›"
 
@@ -357,7 +364,6 @@ class main_words(ComplexStatement):
 	name = Name("Main")
 	doc = "word list:"
 
-
 class global_words(ComplexStatement):
 	"""Words that only make sense at top level. It pulls in the main word list."""
 	name = Name("Global")
@@ -381,8 +387,6 @@ class global_words(ComplexStatement):
 		except KeyError: pass
 		return main_words.__getitem__(key)
 
-
-
 class MainStatementList(StatementList):
 	"""\
 		A Statement list that inherits (some) words that it understands
@@ -395,7 +399,6 @@ class MainStatementList(StatementList):
 		except (KeyError,NotImplementedError):
 			return self.main.lookup(args)
 
-
 class DoNothingHandler(Statement):
 	name = "do nothing"
 	doc = "do not do anything"
@@ -407,7 +410,6 @@ explicitly state that some event does not result in any action.
 		event = self.params(ctx)
 		if len(event):
 			raise SyntaxError("Usage: do nothing")
-
 
 class ExitHandler(Statement):
 	name = "exit"
@@ -422,7 +424,6 @@ This statement causes the input channel which runs it to terminate.
 		raise StopParsing
 
 global_words.register_statement(ExitHandler)
-
 
 class HelpSubProxy(object):
 	def __init__(self,x,name):
@@ -443,8 +444,8 @@ class HelpSub(object):
 	def __getitem__(self,k):
 		sname=getattr(self,"helpsubname","name")
 		return HelpSubProxy(self.helpsub.__getitem__(k),sname)
-	def iteritems(self):
+	def items(self):
 		sname=getattr(self,"helpsubname","name")
-		for i,j in self.helpsub.iteritems():
+		for i,j in self.helpsub.items():
 			yield (i,HelpSubProxy(j,sname))
 

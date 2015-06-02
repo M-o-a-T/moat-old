@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,6 +18,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This code implements the base for TCP clients and servers.
@@ -22,7 +30,7 @@ Your code needs to supply storage and factory class variables.
 Look at module/net.py for a basic example.
 """
 
-from __future__ import division,absolute_import
+import six
 
 from moat.logging import log,DEBUG,TRACE,INFO,WARN,ERROR
 from moat.statement import Statement, main_words, AttributedStatement
@@ -42,6 +50,7 @@ import errno
 import gevent
 from gevent.server import StreamServer
 
+@six.python_2_unicode_compatible
 class DisconnectedError(RuntimeError):
 	def __init__(self,dev):
 		self.dev = dev
@@ -52,10 +61,12 @@ class idErr(RuntimeError):
 	def __init__(self,path):
 		self.path = path
 
+@six.python_2_unicode_compatible
 class TimedOut(idErr):
 	def __str__(self):
 		return "Timeout: No data at %s" % (self.path,)
 
+@six.python_2_unicode_compatible
 class NetError(EnvironmentError):
 	def __init__(self,typ):
 		self.typ = typ
@@ -71,12 +82,11 @@ class NetError(EnvironmentError):
 	def __repr__(self):
 		return "NetError(%d)" % (self.typ,)
 
-
 class LineReceiver(object):
 	"""A receiver mix-in for the basic line protocol."""
 
-	delimiter = "\n"
-	buffer = ""
+	delimiter = b"\n"
+	buffer = b''
 
 	def lineReceived(self, line):
 		"""Override this.
@@ -98,14 +108,13 @@ class LineReceiver(object):
 		self.buffer = buffer
 		for d in data:
 			try:
-				self.lineReceived(d)
+				self.lineReceived(d.decode('utf-8'))
 			except Exception as e:
 				fix_exception(e)
 				process_failure(e)
 		
 	def write(self,val):
-		super(LineReceiver,self).write(val+self.delimiter)
-
+		super(LineReceiver,self).write(val.encode('utf-8')+self.delimiter)
 
 #class Nets(Collection):
 #	name = "net"
@@ -157,7 +166,6 @@ class NetCommonConnector(Collected,Jobber):
 
 		self.start_job("job",self._reader)
 
-
 	def handshake(self, external=False):
 		"""Complete the connection, then call .up_event()"""
 		self.up_event(external)
@@ -193,7 +201,7 @@ class NetCommonConnector(Collected,Jobber):
 			while self.socket is not None:
 				try:
 					r = self.socket.recv(4096)
-					if r is None or r == "":
+					if not r:
 						return
 				except Exception as e:
 					fix_exception(e)
@@ -209,8 +217,6 @@ class NetCommonConnector(Collected,Jobber):
 				self.socket.close()
 				self.socket = None
 				self.down_event(True)
-
-
 
 	
 	def dataReceived(self):
@@ -259,7 +265,6 @@ class NetCommonConnector(Collected,Jobber):
 	def closed(self):
 		self.close(external=True)
 
-
 class NetCommon(AttributedStatement):
 	"""Common base class for NetConnect and NetListen commands"""
 	#name = "connect net)
@@ -304,15 +309,12 @@ You need to override the long_doc description.
 	def error(self,e):
 		reraise(e)
 
-
 ##### active connections
 
 class NetActiveConnector(NetCommonConnector):
 	"""A connection created by opening a connection via a NetConnect command."""
 	typ = "???active"
 	pass
-
-
 
 class NetConnect(NetCommon):
 	#name = "connect net"
@@ -321,7 +323,6 @@ class NetConnect(NetCommon):
 
 	def start_up(self):
 		return self.client(name=self.dest, host=self.host,port=self.port)
-
 
 ##### passive connections
 
@@ -336,7 +337,6 @@ class NetPassiveConnector(NetCommonConnector):
 
 		name = name+("n"+str(name_seq),)
 		super(NetPassiveConnector,self).__init__(socket=socket, name=name, host=address[0],port=address[1])
-
 
 class NetListener(Collected):
 	"""Something which accepts connections to a specific address/port."""
@@ -379,7 +379,6 @@ class NetListener(Collected):
 		self.server.stop()
 		super(NetListener,self).delete()
 
-
 class NetListen(NetCommon):
 	#name = "listen net"
 	doc = "listen to a TCP socket (base class)"
@@ -399,7 +398,6 @@ You need to override the long_doc description.
 		s.set_spawn(None)
 		r._init2(s, self.connector)
 
-
 class NetName(Statement):
 	name="name"
 	dest = None
@@ -415,7 +413,6 @@ name ‹name…›
 		self.parent.dest = SName(event)
 NetConnect.register_statement(NetName)
 NetListen.register_statement(NetName)
-
 
 class NetRetry(Statement):
 	name= "retry"
@@ -440,7 +437,6 @@ retry ‹initial› [‹max›]
 		except ValueError:
 			raise SyntaxError(u"Usage: %s ‹initial› [‹max›] (float values! was '%s')" % (self.name,event.name))
 
-
 class NetSend(AttributedStatement):
 	#storage = Nets.storage
 	#storage2 = net_conns
@@ -463,7 +459,7 @@ send net text… :to ‹name…›
 		else:
 			name = Name(*name.apply(ctx))
 
-		val = u" ".join(unicode(s) for s in event)
+		val = u" ".join(six.text_type(s) for s in event)
 		self.storage[name].write(val)
 
 class NetTo(Statement):
@@ -480,7 +476,6 @@ to ‹name…›
 		self.parent.dest = self.par(ctx)
 NetSend.register_statement(NetTo)
 
-
 class NetConnected(Check):
 	#storage = Nets.storage
 	#storage2 = net_conns
@@ -496,5 +491,4 @@ class NetConnected(Check):
 		if conn is None:
 			return False
 		return conn.job is not None ## TODO: correct?
-
 

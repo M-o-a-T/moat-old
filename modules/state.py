@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,6 +18,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This code does basic state handling (both persistent and not).
@@ -33,7 +41,7 @@ list state [NAME]
 
 """
 
-from __future__ import division,absolute_import
+import six
 
 from moat.module import Module
 from moat.statement import Statement, main_words, AttributedStatement
@@ -55,6 +63,7 @@ class States(Collection):
 States = States()
 States.does("del")
 
+@six.python_2_unicode_compatible
 class StateChangeError(Exception):
 	no_backtrace = True
 	def __init__(self,s,v):
@@ -102,7 +111,7 @@ class State(Collected):
 		if hasattr(self,"old_value"):
 			return u"%s — %s " % (self.value,humandelta(now()-self.time))
 		else:
-			return unicode(self.value)
+			return six.text_type(self.value)
 
 class SavedState(State):
 	def __init__(self, *name):
@@ -228,7 +237,6 @@ trigger old
 				raise SyntaxError(u"Usage: trigger new")
 StateHandler.register_statement(TriggerHandler)
 
-
 class SetStateHandler(Statement):
 	name="set state"
 	doc="set some state to something"
@@ -278,7 +286,6 @@ forget state name...
 
 		Db.delete(name)
 
-
 class VarStateHandler(Statement):
 	name="var state"
 	doc="assign a variable to report a state"
@@ -293,7 +300,6 @@ var state NAME name...
 		s = States[name]
 		setattr(self.parent.ctx,var,s.value if not s.working else s.old_value)
 
-
 class StateCheck(Check):
 	name="state"
 	doc="check if a state has a particular value"
@@ -304,7 +310,6 @@ class StateCheck(Check):
 		name = Name(*args[1:])
 		return States[name].value == value
 
-
 class StateLockedCheck(Check):
 	name="locked state"
 	doc="check if a state is being updated"
@@ -312,7 +317,6 @@ class StateLockedCheck(Check):
 		if len(args) < 2:
 			raise SyntaxError(u"Usage: if state locked ‹name…›")
 		return States[Name(*args)].working
-
 
 class LastStateCheck(Check):
 	name="last state"
@@ -328,7 +332,6 @@ class LastStateCheck(Check):
 			return s.old_value == value
 		else:
 			return value == "-"
-
 
 class SavedStateCheck(Check):
 	name="saved state"
@@ -348,7 +351,6 @@ class SavedStateCheck(Check):
 			return False
 		else:
 			return True
-
 
 class StateModule(Module):
 	"""\

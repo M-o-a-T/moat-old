@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,6 +18,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 Error handling.
@@ -27,7 +35,7 @@ catch:
 
 """
 
-from __future__ import division,absolute_import
+import six
 
 from moat.statement import MainStatementList,Statement, \
 	main_words,global_words
@@ -83,7 +91,6 @@ Syntax:
 			else:
 				process_failure(err)
 
-
 class CatchStatement(TryStatement):
 	name="catch"
 	doc="catch: [statements]"
@@ -116,7 +123,7 @@ Implementation restriction: can't be used at top level. (Wrap with 'block:'.)
 		if not isinstance(err,RaisedError):
 			if len(self.arglist) > 1:
 				return None
-			if self.arglist:
+			if len(self.arglist):
 				if err.__class__.__name__ != self.arglist[0] and not err.__class__.__name__.endswith("."+self.arglist[0]):
 					return None
 			return ctx
@@ -130,9 +137,9 @@ Implementation restriction: can't be used at top level. (Wrap with 'block:'.)
 		ia = iter(self.arglist)
 		pos = 0
 		while True:
-			try: e = ie.next()
+			try: e = six.next(ie)
 			except StopIteration: e = StopIteration
-			try: a = ia.next()
+			try: a = six.next(ia)
 			except StopIteration: a = StopIteration
 			if e is StopIteration and a is StopIteration:
 				return ctx
@@ -188,7 +195,6 @@ Syntax:
 			raise SyntaxError("Usage: log error [severity]")
 		logging.log_exc(msg="Logged:", err=ctx.error_, level=level)
 
-
 class TriggerStatement(Statement):
 	name="trigger error"
 	doc=u"trigger error NAME…"
@@ -210,7 +216,6 @@ Syntax:
 		err = RaisedError(*event[:])
 		logging.log_exc(msg="Triggered:", err=err, level=logging.TRACE)
 		raise err
-
 
 class ErrorsModule(Module):
 	"""\

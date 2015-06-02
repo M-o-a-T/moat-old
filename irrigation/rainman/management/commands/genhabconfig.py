@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,6 +18,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 		Generate a config file.
@@ -25,7 +33,6 @@ from datetime import datetime,time,timedelta
 from django.db.models import F,Q
 from django.utils.timezone import utc
 from optparse import make_option
-
 
 class Command(BaseCommand):
 	args = '<site>'
@@ -57,26 +64,25 @@ class Command(BaseCommand):
 			qf &= Q(site__name=options['site'])
 		if options['controller']:
 			q &= Q(controller__name=options['controller'])
-		print """\
+		print("""\
 Group Water "Gartenwasser" (Out)
-"""
+""")
 		for f in Feed.objects.filter(qf):
 			self.one_feed(f)
 		for v in Valve.objects.filter(q):
 			self.one_valve(v,options["type"])
 
 	def one_feed(self,s):
-		print """\
+		print("""\
 Group Water_{sname} "{sname}" (Water)
-""".format(sname=s.name)
+""".format(sname=s.name))
 		
 	def one_valve(self,v,typ):
 		if typ != "wago":
 			raise NotImplementedError("I only know type 'wago'")
 		sname = "_".join(x[0].upper()+x[1:].lower() for x in v.var.split())
 		cname = " ".join(x[0].upper()+x[1:].lower() for x in v.var.split())
-		print """\
+		print("""\
 Switch {sname} "{cname}" (Water_{site})
-""".format(name=v.var, vloc=v.location, cloc=v.controller.location,sname=sname,site=v.feed.name,cname=v.name)
-
+""".format(name=v.var, vloc=v.location, cloc=v.controller.location,sname=sname,site=v.feed.name,cname=v.name))
 

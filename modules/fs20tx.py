@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,13 +18,15 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This code implements a listener for environment monitoring (tx2/tx3).
 
 """
-
-from __future__ import division,absolute_import
 
 from moat.module import Module
 from moat.statement import AttributedStatement,Statement, main_words
@@ -54,7 +60,6 @@ def tx_proc_hygro(ctx, data):
 		return None
 	hum = data[2]*10 + data[3] + data[4]/10
 	return {"humidity":hum}
-
 
 tx_proc_thermo.tx_name = "thermo"
 tx_proc_hygro.tx_name = "hygro"
@@ -104,7 +109,7 @@ class TX(Collected):
 
 	def event(self,ctx,data):
 		d={}
-		for m,n in data.iteritems():
+		for m,n in data.items():
 			try: n = n * self.faktor[m]
 			except KeyError: pass
 			try: n = n + self.offset[m]
@@ -130,9 +135,9 @@ class TX(Collected):
 		if self.last:
 			yield ("last",self.last)
 		if self.last_data:
-			for k,v in self.last_data.iteritems(): yield ("last_"+k,v)
-		for k,v in self.faktor.iteritems(): yield ("faktor_"+k,v)
-		for k,v in self.offset.iteritems(): yield ("offset_"+k,v)
+			for k,v in self.last_data.items(): yield ("last_"+k,v)
+		for k,v in self.faktor.items(): yield ("faktor_"+k,v)
+		for k,v in self.offset.items(): yield ("offset_"+k,v)
 	
 	def delete(self,ctx=None):
 		TXcodes[self.group][self.code].remove(self)
@@ -142,7 +147,7 @@ class TX(Collected):
 		
 
 def flat(r):
-	for a,b in r.iteritems():
+	for a,b in r.items():
 		yield a
 		yield b
 
@@ -201,7 +206,6 @@ class tx_handler(recv_handler):
 					simple_event("fs20","unknown","tx","untimed",type=g.tx_name,adr=adr, **r)
 				else:
 					simple_event("fs20","unknown","tx","unregistered",type=g.tx_name,adr=adr, **r)
-
 
 class FS20tx(AttributedStatement):
 	name = "fs20 tx"
@@ -283,7 +287,6 @@ Known types:
 		raise SyntaxError(u"Usage: ‹fs20 tx› ‹name…›: ‹code›: Unknown type")
 FS20tx.register_statement(FS20txcode)
 
-
 class FS20txVal(Statement):
 	name = "set fs20 tx"
 	doc = "Set the last-reported value for a device"
@@ -300,7 +303,6 @@ set fs20 tx ‹type› ‹value› ‹name…›
 		d = TXs[Name(*event[2:])]
 		if d.last_data is None: d.last_data = {}
 		d.last_data[event[0]] = float(event[1])
-
 
 class fs20tx(Module):
 	"""\

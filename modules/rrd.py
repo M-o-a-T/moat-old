@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,13 +18,17 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This code implements logging to RRD.
 
 """
 
-from __future__ import division,absolute_import
+import six
 
 from moat.check import register_condition,unregister_condition
 from moat.module import Module
@@ -52,7 +60,7 @@ class RRD(Collected):
 		yield ("file",self.path)
 		yield ("dataset",self.dataset)
 		try:
-			for k,v in rrdtool.info(self.upath)["ds"][self.udataset].iteritems():
+			for k,v in rrdtool.info(self.upath)["ds"][self.udataset].items():
 				yield (k,v)
 		except KeyError:
 			s="ds[%s]." % (self.udataset)
@@ -63,7 +71,6 @@ class RRD(Collected):
 
 	def info(self):
 		return "%s %s" % (self.path,self.dataset)
-
 
 class RRDHandler(Statement):
 	name="rrd"
@@ -82,7 +89,6 @@ rrd path dataset NAME…
 		fn = event[0]
 		assert os.path.exists(fn), "the RRD file does not exist: ‹%s›" % (fn,)
 		RRD(path=fn, dataset=event[1], name=Name(*event[2:]))
-
 
 class VarRRDHandler(Statement):
 	name="var rrd"
@@ -104,7 +110,6 @@ var rrd variable item NAME
 		except KeyError:
 			setattr(self.parent.ctx,event[0],rrdtool.info(s.upath)["ds[%s].%s" % (s.dataset,event[1])])
 
-
 class RRDset(Statement):
 	name="set rrd"
 	doc="write a variable to a RRD file"
@@ -123,7 +128,7 @@ set rrd value ‹name…›
 		# Using "N:" may run into a RRD bug
 		# if we're really close to the next minute
 		try:
-			rrdtool.update(s.upath, "-t",s.udataset, now().strftime("%s")+":"+unicode(event[0]).encode("utf-8"))
+			rrdtool.update(s.upath, str("-t"),s.udataset, str(now().strftime("%s")+":"+six.text_type(event[0])).encode("utf-8"))
 		except Exception as e:
 			fix_exception(e)
 			if "minimum one second step" in str(e):

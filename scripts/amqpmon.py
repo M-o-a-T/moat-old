@@ -1,8 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -15,8 +19,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
-
-from __future__ import division,absolute_import,unicode_literals
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 from moat import patch;patch()
 import sys
@@ -32,7 +38,7 @@ from gevent.event import Event
 if sys.version_info[0] < 3:
 	sys.stdout = codecs.getwriter('utf8')(sys.stdout)
 
-TESTING=os.environ.get("HOMEVENT_TEST",False)
+TESTING="MOAT_TEST" in os.environ
 
 import amqp
 import json
@@ -50,7 +56,7 @@ parser.add_option("-u", "--user", dest="user", action="store",
 parser.add_option("-p", "--pass", dest="pw", action="store",
 	default="test", help="Password to connect with")
 parser.add_option("-v", "--vhost", dest="vhost", action="store",
-	default="/test", help="Virtual host to connect at")
+	default="test", help="Virtual host to connect at")
 parser.add_option("-x", "--exchange", dest="exchange", action="store",
 	default="moat.event", help="Exchange to listen at")
 parser.add_option("-r", "--routing", dest="routing", action="store",

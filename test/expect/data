@@ -45,17 +45,17 @@ EVENT: wait¦start¦foo¦waiter
      : loglevel=0
      : end_time=0.5
 TRACE 2003-04-05 06:07:08.300000 nachher: Fake timer done
-foo waiter :: 0.100000023842
+foo waiter :: 0.10000002384185791
 .
 EVENT: wait¦done¦nachher
      : loglevel=0
-: ‹Waiter foo¦waiter 0.100000023842›
+: ‹Waiter foo¦waiter 0.10000002384185791›
 name: foo¦waiter
 start: -0.2 sec (2003-04-05 06:07:08.15)
 end: now (2003-04-05 06:07:08.45)
 total: 0.3 sec
-in: block
-in: on¦foo
+in: ⌁ REPORT_ERROR: Name('block',)
+in: foo
 in: Global
 .
 EVENT: wait¦start¦ende

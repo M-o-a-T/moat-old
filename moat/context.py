@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,6 +18,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 	This module holds a Context object.
@@ -22,7 +30,7 @@
 	See test/context.py for usage examples.
 	"""
 
-from __future__ import division,absolute_import
+import six
 
 import sys,inspect
 
@@ -37,9 +45,12 @@ class Context(object):
 			self._parent = []
 		self._store = {}
 		self._store.update(**k)
-		f = inspect.currentframe(1)
-		if f.f_code.co_name == "__call__":
-			f = inspect.currentframe(2)
+		if six.PY2:
+			f = inspect.currentframe(1)
+			if f.f_code.co_name == "__call__":
+				f = inspect.currentframe(2)
+		else:
+			f = inspect.currentframe()
 		self._created = (f.f_code.co_name ,f.f_code.co_filename ,f.f_lineno )
 
 	def __call__(self,ctx=None,**k):
@@ -134,6 +145,7 @@ class Context(object):
 			if bool(p):
 				return True
 		return False
+	__bool__=__nonzero__
 	
 	def __repr__(self):
 		res = ""
@@ -154,23 +166,23 @@ class Context(object):
 		self._dump_tree("")
 	def _dump_tree(self,pre):
 		from moat.logging import log,DEBUG
-		log(DEBUG,"CTX "+pre,unicode(self._store))
+		log(DEBUG,"CTX "+pre,six.text_type(self._store))
 		for p in self._parent:
 			p._dump_tree(pre+"  ")
 	def _report(self):
 		f = self._created
 		yield "@%x %s %s:%d" % (id(self),f[0],f[1],f[2])
-		for a,b in self._store.iteritems():
-			yield "%s: %s" % (unicode(a),repr(b))
+		for a,b in self._store.items():
+			yield "%s: %s" % (six.text_type(a),repr(b))
 		for p in self._parent:
 			pre="p"
 			for r in p._report():
 				yield pre+": "+r
 				pre=" "
-	
+
 	def __iter__(self):
 		done = set()
-		for a,b in self._store.iteritems():
+		for a,b in self._store.items():
 			yield a,b
 			done.add(a)
 		for p in self._parent:
@@ -179,14 +191,14 @@ class Context(object):
 					continue
 				yield a,b
 				done.add(a)
-	
+
 	def _trim(self):
 		"""Transform a hierarchic context into a plain ctx with the same attributes."""
 		res = Context()
 		seen = set()
 
 		def do(store):
-			for k,v in store.iteritems():
+			for k,v in store.items():
 				if v is not VanishedAttribute and k not in seen:
 					setattr(res,k,v)
 				seen.add(k) # prevent overwriting with older values
@@ -196,8 +208,6 @@ class Context(object):
 			do(p._store)
 
 		return res
-		
-
 
 def default_context(ctx,**defaults):
 	"""\

@@ -8,8 +8,8 @@ mode: time
 value: None
 .
 EVENT: wait¦start¦_wait¦t1
-     : loglevel=0
      : end_time=0.2
+     : loglevel=0
 TRACE 2003-04-05 06:07:08.250000 _wait¦t1: Fake timer done
 EVENT: wait¦done¦_wait¦t1
      : loglevel=0
@@ -23,8 +23,8 @@ total samples: 1
 current average: 2.0
 .
 EVENT: wait¦start¦_wait¦t2
-     : loglevel=0
      : end_time=1.2
+     : loglevel=0
 TRACE 2003-04-05 06:07:09.250000 _wait¦t2: Fake timer done
 EVENT: wait¦done¦_wait¦t2
      : loglevel=0
@@ -47,8 +47,8 @@ total samples: 2
 current average: 2.0
 .
 EVENT: wait¦start¦_wait¦t3
-     : loglevel=0
      : end_time=2.2
+     : loglevel=0
 TRACE 2003-04-05 06:07:10.250000 _wait¦t3: Fake timer done
 EVENT: wait¦done¦_wait¦t3
      : loglevel=0
@@ -73,8 +73,8 @@ current average: 3.5
 TRACE Yes
 TRACE Yes
 EVENT: wait¦start¦_wait¦t4
-     : loglevel=0
      : end_time=4.2
+     : loglevel=0
 TRACE 2003-04-05 06:07:12.250000 _wait¦t4: Fake timer done
 EVENT: wait¦done¦_wait¦t4
      : loglevel=0
@@ -89,8 +89,8 @@ samples: 0
 max samples: 3
 .
 EVENT: wait¦start¦_wait¦t5
-     : loglevel=0
      : end_time=4.5
+     : loglevel=0
 TRACE 2003-04-05 06:07:12.500000 _wait¦t5: Fake timer done
 EVENT: wait¦done¦_wait¦t5
      : loglevel=0
@@ -107,8 +107,8 @@ max samples: 3
 sample 0: 2.0
 .
 EVENT: wait¦start¦_wait¦t6
-     : loglevel=0
      : end_time=5.5
+     : loglevel=0
 TRACE 2003-04-05 06:07:13.500000 _wait¦t6: Fake timer done
 EVENT: wait¦done¦_wait¦t6
      : loglevel=0
@@ -138,8 +138,8 @@ sample 0: 2.0
 sample 1: 5.0
 .
 EVENT: wait¦start¦_wait¦t7
-     : loglevel=0
      : end_time=7.5
+     : loglevel=0
 TRACE 2003-04-05 06:07:15.500000 _wait¦t7: Fake timer done
 EVENT: wait¦done¦_wait¦t7
      : loglevel=0
@@ -171,8 +171,8 @@ sample 1: 5.0
 sample 2: -1.0
 .
 EVENT: wait¦start¦_wait¦t8
-     : loglevel=0
      : end_time=11.5
+     : loglevel=0
 TRACE 2003-04-05 06:07:19.500000 _wait¦t8: Fake timer done
 EVENT: wait¦done¦_wait¦t8
      : loglevel=0
@@ -205,8 +205,8 @@ sample 1: -1.0
 sample 2: 8.0
 .
 EVENT: wait¦start¦_wait¦t9
-     : loglevel=0
      : end_time=15.5
+     : loglevel=0
 TRACE 2003-04-05 06:07:23.500000 _wait¦t9: Fake timer done
 EVENT: wait¦done¦_wait¦t9
      : loglevel=0
@@ -241,8 +241,8 @@ sample 2: 14.0
 TRACE Yes
 TRACE Yes
 EVENT: wait¦start¦_wait¦t10
-     : loglevel=0
      : end_time=17.5
+     : loglevel=0
 TRACE 2003-04-05 06:07:25.500000 _wait¦t10: Fake timer done
 EVENT: wait¦done¦_wait¦t10
      : loglevel=0
@@ -256,8 +256,8 @@ value: None
 weight: 0.1
 .
 EVENT: wait¦start¦_wait¦t11
-     : loglevel=0
      : end_time=17.7
+     : loglevel=0
 TRACE 2003-04-05 06:07:25.750000 _wait¦t11: Fake timer done
 EVENT: wait¦done¦_wait¦t11
      : loglevel=0
@@ -272,8 +272,8 @@ current average: 2.0
 weight: 0.1
 .
 EVENT: wait¦start¦_wait¦t12
-     : loglevel=0
      : end_time=18.8
+     : loglevel=0
 TRACE 2003-04-05 06:07:26.750000 _wait¦t12: Fake timer done
 EVENT: wait¦done¦_wait¦t12
      : loglevel=0
@@ -298,8 +298,8 @@ current average: 4.0
 weight: 0.1
 .
 EVENT: wait¦start¦_wait¦t13
-     : loglevel=0
      : end_time=19.8
+     : loglevel=0
 TRACE 2003-04-05 06:07:27.750000 _wait¦t13: Fake timer done
 EVENT: wait¦done¦_wait¦t13
      : loglevel=0
@@ -326,8 +326,8 @@ weight: 0.1
 TRACE Yes
 TRACE Yes
 EVENT: wait¦start¦_wait¦t14
-     : loglevel=0
      : end_time=21.8
+     : loglevel=0
 TRACE 2003-04-05 06:07:29.750000 _wait¦t14: Fake timer done
 EVENT: wait¦done¦_wait¦t14
      : loglevel=0
@@ -341,12 +341,12 @@ value: None
 weight: 0.1
 time base: 1.0 sec
 weight/hour: 1.0
-weight/minute: 0.9982029897
+weight/minute: 0.9982029897000856
 weight/second: 0.1
 .
 EVENT: wait¦start¦_wait¦t15
-     : loglevel=0
      : end_time=22.0
+     : loglevel=0
 TRACE 2003-04-05 06:07:30 _wait¦t15: Fake timer done
 EVENT: wait¦done¦_wait¦t15
      : loglevel=0
@@ -361,12 +361,12 @@ current average: 10.0
 weight: 0.1
 time base: 1.0 sec
 weight/hour: 1.0
-weight/minute: 0.9982029897
+weight/minute: 0.9982029897000856
 weight/second: 0.1
 .
 EVENT: wait¦start¦_wait¦t16
-     : loglevel=0
      : end_time=23.0
+     : loglevel=0
 TRACE 2003-04-05 06:07:31 _wait¦t16: Fake timer done
 EVENT: wait¦done¦_wait¦t16
      : loglevel=0
@@ -381,7 +381,7 @@ current average: 10.0
 weight: 0.1
 time base: 1.0 sec
 weight/hour: 1.0
-weight/minute: 0.9982029897
+weight/minute: 0.9982029897000856
 weight/second: 0.1
 .
 name: test decaytime
@@ -395,12 +395,12 @@ current average: 10.0
 weight: 0.1
 time base: 1.0 sec
 weight/hour: 1.0
-weight/minute: 0.9982029897
+weight/minute: 0.9982029897000856
 weight/second: 0.1
 .
 EVENT: wait¦start¦_wait¦t17
-     : loglevel=0
      : end_time=24.0
+     : loglevel=0
 TRACE 2003-04-05 06:07:32 _wait¦t17: Fake timer done
 EVENT: wait¦done¦_wait¦t17
      : loglevel=0
@@ -415,7 +415,7 @@ current average: 20.0
 weight: 0.1
 time base: 1.0 sec
 weight/hour: 1.0
-weight/minute: 0.9982029897
+weight/minute: 0.9982029897000856
 weight/second: 0.1
 .
 name: test decaytime
@@ -429,14 +429,14 @@ current average: 20.0
 weight: 0.1
 time base: 1.0 sec
 weight/hour: 1.0
-weight/minute: 0.9982029897
+weight/minute: 0.9982029897000856
 weight/second: 0.1
 .
 TRACE Yes
 TRACE Yes
 EVENT: wait¦start¦_wait¦t18
-     : loglevel=0
      : end_time=26.0
+     : loglevel=0
 TRACE 2003-04-05 06:07:34 _wait¦t18: Fake timer done
 EVENT: wait¦done¦_wait¦t18
      : loglevel=0
@@ -451,9 +451,9 @@ current average: 16.39
 weight: 0.1
 time base: 1.0 sec
 weight/hour: 1.0
-weight/minute: 0.9982029897
+weight/minute: 0.9982029897000856
 weight/second: 0.1
 .
-DEBUG values avg 16.39 now 1.0 prev 110.0
+DEBUG values avg 16.390000000000004 now 1.0 prev 110.0
 TRACE Yes
 .

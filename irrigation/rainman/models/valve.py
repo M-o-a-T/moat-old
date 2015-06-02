@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
-
-##  Copyright © 2012, Matthias Urlichs <matthias@urlichs.de>
+from __future__ import absolute_import, print_function, division, unicode_literals
+##
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -13,8 +18,13 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
-from __future__ import division,absolute_import
+import six
+
 from rainman.models import Model
 from rainman.models.controller import Controller
 from rainman.models.feed import Feed
@@ -23,12 +33,13 @@ from django.db import models as m
 from rainman.utils import now, range_intersection,range_union,range_invert, RangeMixin
 from datetime import timedelta
 
+@six.python_2_unicode_compatible
 class Valve(Model,RangeMixin):
 	"""One controller of water"""
 	class Meta(Model.Meta):
 		unique_together = (("controller", "name"),)
 		db_table="rainman_valve"
-	def __unicode__(self):
+	def __str__(self):
 		return self.name
 	name = m.CharField(max_length=200)
 	comment = m.CharField(max_length=200,blank=True)
@@ -107,7 +118,6 @@ class Valve(Model,RangeMixin):
 		if start is None:
 			start = now()
 		r = []
-
 
 		if forced:
 			# If this pass considers force-open times, only this matters

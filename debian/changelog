@@ -1,3 +1,24 @@
+moat (0.7.3) smurf; urgency=medium
+
+  * require six >= 1.9
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Tue, 02 Jun 2015 06:34:41 +0200
+
+moat (0.7.2) smurf; urgency=medium
+
+  * fixed a bunch of test cases
+  * don't build debug nonsense
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Tue, 02 Jun 2015 06:25:15 +0200
+
+moat (0.7.1) smurf; urgency=medium
+
+  * Build py3 versio
+  * reorganized
+  * added boiplerplate text to all files
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Mon, 01 Jun 2015 09:50:49 +0200
+
 moat (0.7.0) smurf; urgency=medium
 
   * rename to MoaT.

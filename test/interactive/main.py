@@ -1,8 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -15,6 +19,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 from moat import patch;patch()
 from moat.interpreter import InteractiveInterpreter,Interpreter
@@ -50,14 +58,14 @@ def parse_logger(t,*x):
 		x[1] = tok_name[x[1]]
 	except KeyError:
 		pass
-	print t+":"+" ".join(str(d) for d in x)
+	print(t+":"+" ".join(str(d) for d in x))
 
 def reporter(err):
-	print "Error:",err
+	print("Error:",err)
 	
 def looper():
 	while True:
-		print "L"
+		print("L")
 		sleep(1)
 
 def ready():
@@ -70,7 +78,7 @@ def ready():
 		i = InteractiveInterpreter
 	else:
 		i = Interpreter
-	print """Ready. Type «help» if you don't know what to do."""
+	print("""Ready. Type «help» if you don't know what to do.""")
 	try:
 		parse(sys.stdin, interpreter=i, ctx=c)
 	except Exception as e:

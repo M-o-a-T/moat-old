@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2008-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,13 +18,17 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This code contains the framework for timing regular events.
 
 """
 
-from __future__ import division,absolute_import
+import six
 
 from moat.statement import AttributedStatement, Statement
 from moat.event import Event
@@ -40,7 +48,7 @@ import os
 import datetime as dt
 
 class Timeslots(Collection):
-    name = "timeslot"
+	name = "timeslot"
 Timeslots = Timeslots()
 Timeslots.does("del")
 register_condition(Timeslots.exists)
@@ -52,17 +60,15 @@ class Timeslotted(object):
 #	def slot_down(self):
 #		pass
 
+@six.python_2_unicode_compatible
 class TimeslotError(RuntimeError):
-    def __init__(self,w):
-        self.timeslot = w
-    def __str__(self):
-        return self.text % (" ".join(str(x) for x in self.timeslot.name),)
-    def __unicode__(self):
-        return self.text % (" ".join(unicode(x) for x in self.timeslot.name),)
+	def __init__(self,w):
+		self.timeslot = w
+	def __str__(self):
+		return self.text % (" ".join(six.text_type(x) for x in self.timeslot.name),)
 
 class AlreadyRunningError(TimeslotError):
-    text = u"A The timer ‹%s› is already active"
-
+	text = u"A The timer ‹%s› is already active"
 
 class Timeslot(Collected):
 	"""This is the thing that watches."""
@@ -91,7 +97,7 @@ class Timeslot(Collected):
 		return u"‹%s %s %s›" % (self.__class__.__name__, self.running, self.parent)
 
 	def list(self):
-		yield ("name"," ".join(unicode(x) for x in self.name))
+		yield ("name"," ".join(six.text_type(x) for x in self.name))
 		yield ("run",self.running)
 		if self.interval is not None:
 			yield ("interval"," ".join(str(x) for x in self.interval))
@@ -193,7 +199,6 @@ class Timeslot(Collected):
 		self.running = "off"
 		self.next = None
 
-
 class SomeNull(Exception): pass
 
 def collision_filter(val, hdl):
@@ -209,7 +214,7 @@ def collision_filter(val, hdl):
 		if h.last_data is None:
 			return hdl
 	dm = []
-	for k in val.iterkeys():
+	for k in val.keys():
 		try:
 			for h in hdl:
 				if k not in h.last_data:

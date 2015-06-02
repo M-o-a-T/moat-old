@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,13 +18,19 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
+
+from __future__ import division,absolute_import
 
 """\
 This code does some standard time handling.
 
 """
 
-from __future__ import division,absolute_import
+import six
 
 import datetime as dt
 from time import time,mktime
@@ -120,7 +130,7 @@ def isodate(yr,wk,wdy):
 def simple_time_delta(w):
 	s=0
 	m=1
-	w=w[:]
+	w=list(w)[:]
 	while w:
 		if len(w) == 1:
 			pass
@@ -188,7 +198,6 @@ def time_delta(args, now=None):
 		now += s - (now-step) % s
 	return now
 
-
 class _store(object): pass
 
 def collect_words(n,w):
@@ -233,7 +242,7 @@ def collect_words(n,w):
 		elif w[0] == "-":
 			w.pop(0)
 			f = -1
-		if isinstance(w[0],basestring) and w[0].lower() in weekdays:
+		if isinstance(w[0],six.string_types) and w[0].lower() in weekdays:
 			assert p.dow is None, "You already specified the day of week"
 			assert f is None, "A sign makes no sense here"
 			p.dow = weekdays[w[0].lower()]
@@ -409,7 +418,6 @@ def time_until(args, now=None, invert=False):
 
 		return p.delta
 
-
 	# Now here's the fun part: figure out how long until the condition is true
 	# first, check absolute values
 	check_year (False)
@@ -472,5 +480,4 @@ def time_until(args, now=None, invert=False):
 	check_sec  (False)
 
 	return p.res
-
 

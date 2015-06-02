@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,13 +18,17 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This code contains the framework for watching a device.
 
 """
 
-from __future__ import division,absolute_import
+import six
 
 from moat import TESTING
 from moat.statement import AttributedStatement, Statement
@@ -55,13 +63,12 @@ class MonitorAgain(RuntimeError):
 	"""The monitor is not ready yet; retry please"""
 	pass
 
+@six.python_2_unicode_compatible
 class MonitorError(RuntimeError):
 	def __init__(self,w):
 		self.monitor = w
 	def __str__(self):
-		return self.text % (" ".join(str(x) for x in self.monitor.name),)
-	def __unicode__(self):
-		return self.text % (" ".join(unicode(x) for x in self.monitor.name),)
+		return self.text % (" ".join(six.text_type(x) for x in self.monitor.name),)
 
 class DupMonitorError(MonitorError):
 	text = u"A monitor ‹%s› already exists"
@@ -130,9 +137,9 @@ class Monitor(Collected,Jobber):
 		if not self.job:
 			act = "off"
 		elif not self.running.is_set():
-			act = "run "+unicode(self.steps)
+			act = "run "+six.text_type(self.steps)
 		else:
-			act = "on "+unicode(self.value)
+			act = "on "+six.text_type(self.value)
 			# TODO: add delay until next check
 		return u"‹%s %s %s›" % (self.__class__.__name__, self.name,act)
 
@@ -141,7 +148,7 @@ class Monitor(Collected,Jobber):
 		for r in super(Monitor,self).list():
 			yield r
 		if self.params:
-			yield ("device"," ".join(unicode(x) for x in self.params))
+			yield ("device"," ".join(six.text_type(x) for x in self.params))
 		yield ("value",self.value)
 		yield ("up",self.up_name)
 		yield ("time",self.time_name)
@@ -155,7 +162,7 @@ class Monitor(Collected,Jobber):
 
 		yield ("steps", "%s / %s / %s" % (self.steps,self.points,self.maxpoints))
 		if self.data:
-			yield ("data"," ".join(unicode(x) for x in self.data))
+			yield ("data"," ".join(six.text_type(x) for x in self.data))
 
 	def update_ectx(self):
 		self._ectx.value = self.value
@@ -366,7 +373,7 @@ class Monitor(Collected,Jobber):
 								self.new_value = avg
 						return
 					else:
-						log("monitor",TRACE,"More data", self.data, "for", u"‹"+" ".join(unicode(x) for x in self.name)+u"›")
+						log("monitor",TRACE,"More data", self.data, "for", u"‹"+" ".join(six.text_type(x) for x in self.name)+u"›")
 				
 			try:
 				simple_event(self.ectx,"monitor","error",*self.name)
@@ -377,7 +384,6 @@ class Monitor(Collected,Jobber):
 		finally:
 			log("monitor",TRACE,"End run", self.name)
 			self.stopped_at = now()
-
 
 	def one_value(self, step):
 		"""\
@@ -440,7 +446,7 @@ monitor passive
 
 	def run(self,ctx,**k):
 		m = self.monitor(self, self.displayname)
-		for p,v in self.values.iteritems():
+		for p,v in self.values.items():
 			setattr(m,p,v)
 		if m.params is None:
 			m.params = ("passive",) if self.passive else ("unknown",)
@@ -462,7 +468,6 @@ name ‹whatever you want›
 		self.parent.displayname = SName(event)
 MonitorHandler.register_statement(MonitorName)
 
-
 class MonitorDelayFor(Statement):
 	name = "delay for"
 	doc = "Interval between measurements"
@@ -483,7 +488,6 @@ delay for ‹time interval›
 			self.parent.values['delay_for'] = tuple(event)
 MonitorHandler.register_statement(MonitorDelayFor)
 
-
 class MonitorDelayUntil(Statement):
 	name = "delay until"
 	doc = "Time for measurements"
@@ -500,7 +504,6 @@ delay until ‹time interval›
 		else:
 			self.parent.values['delay_until'] = tuple(event)
 MonitorHandler.register_statement(MonitorDelayUntil)
-
 
 class MonitorRequire(Statement):
 	name = "require"
@@ -535,7 +538,6 @@ require ‹num› ‹range›
 			except (ValueError,TypeError):
 				raise SyntaxError(u'Usage: require: ‹range› needs to be a non-negative number')
 MonitorHandler.register_statement(MonitorRequire)
-
 
 class MonitorRetry(Statement):
 	name = "retry"
@@ -579,7 +581,6 @@ retry ‹num› ‹delay›
 			self.parent.values["delay"] = tuple(event[1:]) # assume a timespec
 MonitorHandler.register_statement(MonitorRetry)
 
-
 class MonitorAlarm(Statement):
 	name = "alarm"
 	doc = "Range of permissible change"
@@ -604,7 +605,6 @@ alarm ‹range›
 				raise SyntaxError(u'Usage: alarm: ‹range› needs to be a positive number')
 MonitorHandler.register_statement(MonitorAlarm)
 
-
 class MonitorDiff(Statement):
 	name = "diff"
 	doc = "Minimum change for a new event to be triggered"
@@ -628,7 +628,6 @@ diff ‹amount›
 			except (ValueError,TypeError):
 				raise SyntaxError(u'Usage: diff: ‹amount› needs to be a non-negative number')
 MonitorHandler.register_statement(MonitorDiff)
-
 
 class MonitorHigh(Statement):
 	name = "high"
@@ -664,7 +663,6 @@ high ‹value› [‹ok_value›]
 			self.parent.values["ok_high"] = None
 MonitorHandler.register_statement(MonitorHigh)
 
-
 class MonitorLow(Statement):
 	name = "low"
 	doc = "Lower alarm threshold"
@@ -699,8 +697,6 @@ low ‹value› [‹ok_value›]
 			self.parent.values["ok_low"] = None
 MonitorHandler.register_statement(MonitorLow)
 
-
-
 class MonitorLimit(Statement):
 	name = "limit"
 	doc = "permissible range"
@@ -733,7 +729,6 @@ limit ‹low› ‹high›
 			raise SyntaxError(u'Usage: limit: ‹low› needs to be greater than ‹high›')
 MonitorHandler.register_statement(MonitorLimit)
 
-
 class MonitorScale(Statement):
 	name = "scale"
 	doc = "adapt values"
@@ -759,7 +754,6 @@ scale ‹factor› ‹offset›
 			self.parent.values["offset"] = float(event[1])
 MonitorHandler.register_statement(MonitorScale)
 
-
 class MonitorDelta(Statement):
 	name = "delta"
 	doc = "report difference"
@@ -780,7 +774,6 @@ delta up
 		else:
 			raise SyntaxError(u'Usage: delta [up]')
 MonitorHandler.register_statement(MonitorDelta)
-
 
 class MonitorStopped(Statement):
 	name = "stopped"

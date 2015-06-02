@@ -1,8 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -15,8 +19,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
-
-from __future__ import division,absolute_import
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 import sys; sys.excepthook = None; del sys
 from moat import patch;patch()
@@ -45,7 +51,7 @@ load_module("ifelse")
 from optparse import OptionParser
 parser = OptionParser(conflict_handler="resolve")
 parser.add_option("-h","--help","-?", action="help",
-	help="print this help text")
+	help="print(this help text"))
 parser.add_option("-t", "--trace", dest="debuglevel", action="store",
 	help="trace level (TRACE,DEBUG,INFO,WARN,ERROR,PANIC,NONE)", default="PANIC")
 parser.add_option("-p", "--pidfile", dest="pidfile", action="store",
@@ -53,7 +59,7 @@ parser.add_option("-p", "--pidfile", dest="pidfile", action="store",
 
 (opts, args) = parser.parse_args()
 if not args:
-	print >>sys.stderr,"You need at least one config file!"
+	print("You need at least one config file!", file=sys.stderr)
 	sys.exit(1)
 
 class DoLogger(Logger):
@@ -62,8 +68,7 @@ class DoLogger(Logger):
 		"""
 	def _slog(self,level,txt):
 		if txt != ".":
-			print >>self.out,level+"> "+txt
-
+			print(level+"> "+txt, file=self.out)
 
 if opts.debuglevel != "NONE":
 	for level in opts.debuglevel.split(","):
@@ -77,7 +82,7 @@ if opts.debuglevel != "NONE":
 
 if opts.pidfile:
 	pid = open(opts.pidfile,"w")
-	print >>pid, os.getpid()
+	print(os.getpid(), file=pid)
 	pid.close()
 
 def _readcf():

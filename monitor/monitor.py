@@ -1,7 +1,29 @@
 #!/usr/bin/python
-# -*- coding: utf8 -*-
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import, print_function, division, unicode_literals
+##
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
+##
+##  This program is free software: you can redistribute it and/or modify
+##  it under the terms of the GNU General Public License as published by
+##  the Free Software Foundation, either version 3 of the License, or
+##  (at your option) any later version.
+##
+##  This program is distributed in the hope that it will be useful,
+##  but WITHOUT ANY WARRANTY; without even the implied warranty of
+##  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+##  GNU General Public License (included; see the file LICENSE)
+##  for more details.
+##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
-from __future__ import division
 from moat import patch; moat.patch()
 from dabroker.util.thread import Main
 
@@ -32,7 +54,7 @@ class MonitorUI(object):
 		self.widgets = gtk.glade.XML(APPNAME+".glade")
 
 		d = MonitorUI.__dict__.copy()
-		for k in d.iterkeys():
+		for k in d.keys():
 			d[k] = getattr(self,k)
 		self.widgets.signal_autoconnect(d)
 		self.events = {}
@@ -85,7 +107,7 @@ class MonitorUI(object):
 			column.pack_start(cell, True)
 # doesn't work for some reason. TODO.
 #			def ClickMe(*a,**k):
-#				print "Clicked",a,k
+#				print("Clicked",a,k)
 #			column.connect("clicked", ClickMe,col)
 
 		def DatePrinter(column, cell, model, iter, col_key):
@@ -100,7 +122,6 @@ class MonitorUI(object):
 		add('#',1)
 		add('zuletzt',2,DatePrinter)
 
-
 	def add_event(self,name):
 		v = self['events_view']
 
@@ -114,7 +135,6 @@ class MonitorUI(object):
 		else:
 			r, = m.get(i,1)
 			m.set(i, 1,r+1, 2,tm)
-
 
 ###	EVENTS
 	def on_main_destroy(self,window):
@@ -144,19 +164,19 @@ class MonitorUI(object):
 		return True
 
 	def on_prefs_ok(self,*x):
-		print "OK",x
+		print("OK",x)
 		self['prefs'].hide()
 	def on_prefs_test(self,*x):
-		print "TEST",x
+		print("TEST",x)
 	def on_prefs_cancel(self,*x):
-		print "CANCEL",x
+		print("CANCEL",x)
 		self['prefs'].hide()
 	def on_prefs_port_ins(self,*x):
-		print "PI",x
+		print("PI",x)
 	def on_prefs_port_insa(self,*x):
-		print "PIa",x
+		print("PIa",x)
 	def on_prefs_port_pre(self,*x):
-		print "PE",x
+		print("PE",x)
 
 class MonitorMain(Main):
 	def setup(self):

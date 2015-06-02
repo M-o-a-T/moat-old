@@ -104,8 +104,8 @@ need it.
 Environment variables
 =====================
 
-HOMEVENT_TEST
--------------
+MOAT_TEST
+---------
 
 Setting this makes various parts of MoaT more testable:
 

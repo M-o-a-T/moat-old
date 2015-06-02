@@ -59,7 +59,7 @@ TRACE rrd send 'update /tmp/rrdtest.rrd 1049515628:10'
 EVENT: wait¦done¦_wait¦t2
      : loglevel=0
 TRACE rrd recv '0 Yes'
-TRACE conn incoming RRDqueue t¦tt¦ttt ‹MsgIncoming: msg:'Yes' type:MT_ACK prio:2›
+TRACE conn incoming RRDqueue t¦tt¦ttt ‹MsgIncoming: type:MT_ACK msg:'Yes' prio:2›
 EVENT: wait¦start¦_wait¦t3
      : loglevel=0
      : end_time=0.5
@@ -70,7 +70,7 @@ EVENT: wait¦done¦_wait¦t3
 TRACE rrd recv '2 Nonsense follows'
 TRACE rrd recv 'Nonsense'
 TRACE rrd recv 'More Nonsense'
-TRACE conn incoming RRDqueue t¦tt¦ttt ‹MsgIncoming: msg:' Nonsense follows' data:['Nonsense', 'More Nonsense'] type:MT_MULTILINE prio:2›
+TRACE conn incoming RRDqueue t¦tt¦ttt ‹MsgIncoming: type:MT_MULTILINE data:['Nonsense', 'More Nonsense'] msg:' Nonsense follows' prio:2›
 EVENT: wait¦start¦_wait¦t4
      : loglevel=0
      : end_time=0.6
@@ -79,7 +79,7 @@ EVENT: wait¦done¦_wait¦t4
      : loglevel=0
 TRACE rrd send 'update /tmp/rrdtest.rrd 1049515628:12'
 TRACE rrd recv '-123 No'
-TRACE conn incoming RRDqueue t¦tt¦ttt ‹MsgIncoming: msg:'No' errno:123 type:MT_ERROR prio:2›
+TRACE conn incoming RRDqueue t¦tt¦ttt ‹MsgIncoming: type:MT_ERROR msg:'No' prio:2 errno:123›
 TRACE Yes error
 : ‹Collected RRDfile:a¦aa¦aaa›
 name: a¦aa¦aaa

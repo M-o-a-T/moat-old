@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2012-2008, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,6 +18,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This code implements generic message queueing across a channel.
@@ -22,7 +30,7 @@ Your code needs to supply message converters and "real" connections.
 Look at module/onewire.py for an example.
 """
 
-from __future__ import division,absolute_import
+import six
 
 from moat.logging import log,log_exc,DEBUG,TRACE,INFO,WARN,ERROR
 from moat.statement import Statement, main_words, AttributedStatement
@@ -144,6 +152,7 @@ class MsgReceiver(MsgInfo):
 	def done(self):
 		pass
 	
+@six.python_2_unicode_compatible
 class NoAnswer(RuntimeError):
 	"""The server does not reply."""
 	no_backtrace = True
@@ -287,7 +296,7 @@ class MsgRepeater(object):
 class MsgIncoming(object):
 	"""Wrapper to signal an incoming message"""
 	def __init__(self,**k):
-		for a,b in k.iteritems():
+		for a,b in k.items():
 			setattr(self,a,b)
 		if not hasattr(self,"prio"):
 			if hasattr(self,"msg") and hasattr(self.msg,"prio"):
@@ -296,7 +305,7 @@ class MsgIncoming(object):
 				self.prio = PRIO_STANDARD
 
 	def __repr__(self):
-		s = " ".join(["%s:%s" % (k,repr(v)) for k,v in self.__dict__.iteritems()])
+		s = " ".join(["%s:%s" % (k,repr(v)) for k,v in self.__dict__.items()])
 		return u"‹%s%s%s›" % (self.__class__.__name__, ": " if s else "", s)
 
 class MsgError(object):
@@ -378,7 +387,7 @@ class MsgFactory(object):
 				self._msg_queue.put(msg)
 				super(xself.cls,self).down_event()
 		xself.cls = _MsgForwarder
-		xself.cls.__name__ = cls.__name__+"_forwarder"
+		xself.cls.__name__ = str(cls.__name__+"_forwarder")
 
 	def __call__(self,q):
 		return self.cls(q)
@@ -403,7 +412,6 @@ class MsgQueue(Collected,Jobber):
 		This is a subclass of @Collected, so you need to supply a 'storage' class attribute.
 		"""
 	#storage = Nets.storage
-	max_open = None # outstanding messages
 	max_send = None # messages to send until the channel is restarted
 	attempts = 0
 	max_attempts = None # connection attempts
@@ -479,10 +487,10 @@ class MsgQueue(Collected,Jobber):
 		super(MsgQueue,self).delete()
 
 	def info(self):
-		return unicode(self)
+		return six.text_type(self)
 	def __repr__(self):
 		return u"‹%s:%s %s›" % (self.__class__.__name__,self.name,self.state)
-                
+
 	def list(self):
 		for r in super(MsgQueue,self).list():
 			yield r
@@ -525,7 +533,6 @@ class MsgQueue(Collected,Jobber):
 				yield("msg recv %s %s"%(i,j),m)
 			i += 1
 
-
 	def _incoming(self,msg):
 		"""Process an incoming message."""
 		self.n_rcvd_now += 1
@@ -537,57 +544,57 @@ class MsgQueue(Collected,Jobber):
 		handled = False
 		log("msg",TRACE,"recv",self.name,str(msg))
 		for mq in self.receivers:
-		  i = 0
-		  for m in mq:
-			try:
-				r = m.recv(msg)
-				log("msg",TRACE,"recv=",r,repr(m))
-				if r is ABORT:
+			i = 0
+			for m in mq:
+				try:
+					r = m.recv(msg)
+					log("msg",TRACE,"recv=",r,repr(m))
+					if r is ABORT:
+						self.channel.close(False)
+						self.channel = None
+						break
+					elif r is NOT_MINE:
+						continue
+					elif r is MINE or r is SEND_AGAIN:
+						handled = True
+						if len(mq) > i and mq[i] is m:
+							mq.pop(i)
+						else:
+							mq.remove(m)
+						i -= 1
+
+						if r is SEND_AGAIN:
+							if m.blocking:
+								self.senders[0].insert(0,m)
+							else:
+								self.senders[m.prio].append(m)
+						else:
+							m.done()
+							self.n_processed_now += 1
+						break
+					elif r is RECV_AGAIN:
+						handled = True
+						break
+					elif r is SEND_AGAIN:
+						handled = True
+						break
+					elif isinstance(r,MSG_ERROR):
+						raise r
+					else:
+						raise BadResult(m)
+				except Exception as ex:
+					if len(mq) < i and mq[i] is m:
+						mq.pop(i)
+					elif m in self.receivers:
+						mq.remove(m)
+					fix_exception(ex)
+					process_failure(ex)
+
 					self.channel.close(False)
 					self.channel = None
-					break
-				elif r is NOT_MINE:
-					continue
-				elif r is MINE or r is SEND_AGAIN:
-					handled = True
-					if len(mq) > i and mq[i] is m:
-						mq.pop(i)
-					else:
-						mq.remove(m)
-					i -= 1
-
-					if r is SEND_AGAIN:
-						if m.blocking:
-							self.senders[0].insert(0,m)
-						else:
-							self.senders[m.prio].append(m)
-					else:
-						m.done()
-						self.n_processed_now += 1
-					break
-				elif r is RECV_AGAIN:
+					simple_event("msg","error",*self.name, msg=msg)
 					handled = True
 					break
-				elif r is SEND_AGAIN:
-					handled = True
-					break
-				elif isinstance(r,MSG_ERROR):
-					raise r
-				else:
-					raise BadResult(m)
-			except Exception as ex:
-				if len(mq) < i and mq[i] is m:
-					mq.pop(i)
-				elif m in self.receivers:
-					mq.remove(m)
-				fix_exception(ex)
-				process_failure(ex)
-
-				self.channel.close(False)
-				self.channel = None
-				simple_event("msg","error",*self.name, msg=msg)
-				handled = True
-				break
 			i += 1
 		if not handled:
 			simple_event("msg","unhandled",*self.name, msg=msg)
@@ -656,7 +663,6 @@ class MsgQueue(Collected,Jobber):
 			self.n_processed += self.n_processed_now
 			self.n_processed_now = 0
 
-
 	def _up_timeout(self):
 		if self.connect_timeout > 0:
 			self.connect_timeout *= 1.6
@@ -678,9 +684,9 @@ class MsgQueue(Collected,Jobber):
 		"""Count the number of outstanding messages"""
 		res = 0
 		for mq in self.receivers:
-		  for m in mq:
-			if isinstance(m,MsgBase):
-				res += 1
+			for m in mq:
+				if isinstance(m,MsgBase):
+					res += 1
 		return res
 
 	@property
@@ -764,11 +770,11 @@ class MsgQueue(Collected,Jobber):
 			done = False # marker for "don't send any more stuff"
 
 			for mq in self.receivers:
-			  if done: break
-			  for m in mq:
-				if m.blocking:
-					log("msg",TRACE,"blocked by",str(m))
-					done = True
+				if done: break
+				for m in mq:
+					if m.blocking:
+						log("msg",TRACE,"blocked by",str(m))
+						done = True
 			if done: continue
 
 			for mq in self.senders:
@@ -777,8 +783,6 @@ class MsgQueue(Collected,Jobber):
 					if done:
 						break
 					if self.channel is None:
-						break
-					if self.max_open >= self.is_open:
 						break
 
 					msg = mq.pop(0)

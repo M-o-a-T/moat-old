@@ -1,22 +1,22 @@
 EVENT: startup
      : startup=True
 TRACE Yes!
-TRACE INIT sqlite {'username': 'smurf', 'trace': <function trace at 0x×××>, 'database': '/tmp/moat.smurf.db', 'dbtype': 'sqlite', 'dataport': '3306', 'host': 'sql.intern.smurf.noris.de', 'password': 'geheim'}
-TRACE DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) (u"u'three'",)
+TRACE INIT sqlite {'trace': <function DbStore.__init__.<locals>.trace at 0x×××>, 'database': '/tmp/moat.smurf.db', 'host': 'sql.intern.smurf.noris.de', 'password': 'geheim', 'dbtype': 'sqlite', 'username': 'smurf', 'dataport': '3306'}
+TRACE DoFn ('select value from HE_State where category=? and name=?', (b'state', b'foo bar')) ("'three'",)
 TRACE Commit  
 TRACE Yes!
-TRACE DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) (u"u'three'",)
+TRACE DoFn ('select value from HE_State where category=? and name=?', (b'state', b'foo bar')) ("'three'",)
 TRACE Commit  
 TRACE Yes!
-TRACE DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) (u"u'three'",)
+TRACE DoFn ('select value from HE_State where category=? and name=?', (b'state', b'foo bar')) ("'three'",)
 TRACE Commit  
 TRACE Yes!
 TRACE We still have three
-TRACE DoFn ('delete from HE_State where category=? and name=?', ('state', 'foo bar')) 1
+TRACE DoFn ('delete from HE_State where category=? and name=?', (b'state', b'foo bar')) 1
 TRACE Commit  
 EVENT: state¦delete¦foo¦bar
      : prev_value=three
 .
-TRACE DoFn ('select value from HE_State where category=? and name=?', ('state', 'foo bar')) None
+TRACE DoFn ('select value from HE_State where category=? and name=?', (b'state', b'foo bar')) None
 TRACE RollBack  
 TRACE Yes!

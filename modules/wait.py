@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,6 +18,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This code does basic timeout handling.
@@ -23,7 +31,7 @@ wait: for FOO...
 
 """
 
-from __future__ import division,absolute_import
+import six
 
 from moat import TESTING
 from moat.statement import AttributedStatement, Statement, main_words,\
@@ -96,20 +104,20 @@ class Waiter(Collected,Jobber):
 			if w is None: break
 			n = getattr(w,"displayname",None)
 			if n is not None:
-				if not isinstance(n,basestring):
-					n = " ".join(unicode(x) for x in n)
+				if not isinstance(n,six.string_types):
+					n = " ".join(six.text_type(x) for x in n)
 			else:
 				try:
 					if w.args:
-						n = unicode(w.args)
+						n = six.text_type(w.args)
 				except AttributeError:
 					pass
 				if n is None:
 					try:
-						if isinstance(w.name,basestring):
+						if isinstance(w.name,six.string_types):
 							n = w.name
 						else:
-							n = " ".join(unicode(x) for x in w.name)
+							n = " ".join(six.text_type(x) for x in w.name)
 					except AttributeError:
 						n = w.__class__.__name__
 			if n is not None:
@@ -242,7 +250,6 @@ Known flags:
 			else:
 				raise SyntaxError(u'Flag ‹%s› unknown' % (n,))
 
-
 class WaitUpdate(Statement):
 	name = "update"
 	doc = "change the timeout of an existing wait handler"
@@ -255,7 +262,6 @@ This statement updates the timeout of an existing wait handler.
 			raise SyntaxError('Usage: update')
 		assert hasattr(self.parent,"is_update"), "Not within a wait statement?"
 		self.parent.is_update = True
-
 
 class ExistsWaiterCheck(Check):
 	name="exists wait"
@@ -280,7 +286,6 @@ var wait NAME name...
 		name = Name(*event[1:])
 		setattr(self.parent.ctx,var,Waiters[name])
 
-
 WaitHandler.register_statement(DelayFor)
 WaitHandler.register_statement(DelayUntil)
 WaitHandler.register_statement(DelayWhile)
@@ -289,7 +294,6 @@ WaitHandler.register_statement(DelayNext)
 if TESTING:
 	WaitHandler.register_statement(WaitDebug)
 WaitHandler.register_statement(WaitUpdate)
-
 
 class WaitModule(Module):
 	"""\

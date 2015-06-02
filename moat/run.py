@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,12 +18,14 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This is the core of the event dispatcher.
 """
-
-from __future__ import division,absolute_import
 
 from moat import TESTING
 from moat.base import Name,SYS_PRIO,MIN_PRIO,MAX_PRIO
@@ -57,38 +63,37 @@ def unregister_worker(w):
 		del shunts[w.id]
 
 def list_workers(name=None):
-	for w in workers.itervalues():
+	for w in workers.values():
 		if name is None or name == w.name:
 			yield w
 
 class Workers(Collection):
 	name = "worker"
-	def iteritems(self):
+	def items(self):
 		for w in list_workers():
 			yield w.id,w
 	def __getitem__(self,k):
 		if isinstance(k,Name):
 			if len(k) != 1:
-				raise SyntaxError,"Worker IDs are single numbers"
+				raise SyntaxError("Worker IDs are single numbers")
 			k = k[0]
 		return workers[int(k)]
 Workers = Workers()
 
-
 def list_shunts(name=None):
-	for w in shunts.itervalues():
+	for w in shunts.values():
 		if name is None or name == w.name:
 			yield w
 
 class Shunts(Collection):
 	name = "shunt"
-	def iteritems(self):
+	def items(self):
 		for w in list_shunts():
 			yield w.id,w
 	def __getitem__(self,k):
 		if isinstance(k,Name):
 			if len(k) != 1:
-				raise SyntaxError,"Shunt IDs are single numbers"
+				raise SyntaxError("Shunt IDs are single numbers")
 			k = k[0]
 		return shunts[int(k)]
 Shunts = Shunts()

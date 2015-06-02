@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,17 +18,21 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This part of the code defines what an event is.
 """
-
-from __future__ import division,absolute_import
+import six
 
 import warnings
 from moat.base import Name,RaisedError
 from moat.context import Context
 
+@six.python_2_unicode_compatible
 class TrySomethingElse(RuntimeError):
 	"""Error if a conditional does not match"""
 	def __init__(self,*args):
@@ -48,6 +56,7 @@ class EventNoNameError(ValueError):
 
 event_id = 0
 
+@six.python_2_unicode_compatible
 class Event(object):
 	"""\
 		This is an event. It happens and gets analyzed by the system.
@@ -62,7 +71,7 @@ class Event(object):
 				Event(ctx, "timer","timeout","t123")
 			"""
 		self._name_check(name)
-		#print "E_INIT",name,"with",ctx
+		#print("E_INIT",name,"with",ctx)
 		self.name = Name(name)
 		self.ctx = ctx if ctx is not None else Context()
 		if "loglevel" in self.ctx:
@@ -83,26 +92,20 @@ class Event(object):
 
 	def __str__(self):
 		try:
-			return u"‹Event:%s›" % (self.name,)
-		except Exception:
-			return "<Event> REPORT_ERROR: "+repr(self.name)
-
-	def __unicode__(self):
-		try:
-			return u"↯."+unicode(self.name)
+			return u"↯."+six.text_type(self.name)
 		except Exception:
 			return "↯ REPORT_ERROR: "+repr(self.name)
 
 	def report(self, verbose=False):
 		try:
-			yield u"EVENT: "+unicode(self.name)
+			yield u"EVENT: "+six.text_type(self.name)
 			for k,v in self.ctx:
-				yield u"     : "+k+u"="+unicode(v)
+				yield u"     : "+k+u"="+six.text_type(v)
 		except Exception:
 			yield "EVENT: REPORT_ERROR: "+repr(self.name)
 	
 	def list(self):
-		yield (unicode(self.name),)
+		yield (six.text_type(self.name),)
 		if self.__class__ is not Event:
 			yield ("type",self.__class__.__name__)
 		if self.loglevel is not None:
@@ -146,9 +149,9 @@ class Event(object):
 				r = ctx[n[1:]]
 #				if n == "$X":
 #					import sys
-#					print >>sys.stderr,"c@%x %s %s"%(id(ctx),n,r)
+#					print("c@%x %s %s"%(id(ctx),n,r), file=sys.stderr)
 #					for x in ctx._report():
-#						print >>sys.stderr,": ",x
+#						print(": ",x, file=sys.stderr)
 				n = r
 			w.append(n)
 		return self.__class__(ctx, *self.name.apply(ctx=ctx,drop=drop))

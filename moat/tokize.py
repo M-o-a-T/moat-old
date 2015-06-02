@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,10 +18,12 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """Tokenization help for Python-like MoaT programs."""
-
-from __future__ import division,absolute_import
 
 __author__ = 'Matthias Urlichs <matthias@urlichs.de>'
 __credits__ = \
@@ -25,7 +31,7 @@ __credits__ = \
 
 import string, re, os, sys
 from token import *
-import tokenize as t
+from . import tokenize27 as t
 
 from moat.logging import log,TRACE
 from moat.event import StopParsing
@@ -57,7 +63,6 @@ single_quoted = t.single_quoted
 import token
 __all__ = [x for x in dir(token) if x[0] != '_'] + ["COMMENT","NL",
            "generate_tokens"]
-del x
 del token
 
 PlusMinus = r"[+\-]"
@@ -160,7 +165,7 @@ class tokizer(Jobber):
 
 			if self.contstr:                            # continued string
 				if not line:
-					raise TokenError, ("EOF in multi-line string", strstart)
+					raise TokenError ("EOF in multi-line string", strstart)
 				endmatch = endprog.match(line)
 				if endmatch:
 					pos = end = endmatch.end(0)
@@ -215,7 +220,7 @@ class tokizer(Jobber):
 
 			else:                                  # continued statement
 				if not line:
-					raise TokenError, ("EOF in multi-line statement", (self.lnum, 0))
+					raise TokenError ("EOF in multi-line statement", (self.lnum, 0))
 				self.continued = 0
 
 			while pos < max:

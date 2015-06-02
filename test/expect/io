@@ -20,65 +20,65 @@ allowed value: two
 allowed value: three
 .
 EVENT: output¦change¦foo¦bar
-     : value=TEST
      : prev_value=None
+     : value=TEST
 EVENT: input¦change¦foo¦bar
      : last_value=None
-     : value=TEST
      : fake=True
+     : value=TEST
 TRACE Yes
 TRACE Yes
 TRACE Yes
 TRACE Yes
 EVENT: output¦change¦foo¦bar
-     : value=1
      : prev_value=TEST
+     : value=1
 EVENT: input¦change¦foo¦bar
      : last_value=TEST
-     : value=1
      : fake=True
+     : value=1
 EVENT: output¦change¦foo¦bar
-     : value=9
      : prev_value=1
+     : value=9
 EVENT: input¦change¦foo¦bar
      : last_value=1
-     : value=9
      : fake=True
+     : value=9
 EVENT: output¦change¦foo¦bar
-     : value=123
      : prev_value=9
+     : value=123
 EVENT: input¦change¦foo¦bar
      : last_value=9
-     : value=123
      : fake=True
+     : value=123
 EVENT: output¦change¦foo¦bar
-     : value=one
      : prev_value=123
+     : value=one
 EVENT: input¦change¦foo¦bar
      : last_value=123
-     : value=one
      : fake=True
+     : value=one
 EVENT: output¦change¦foo¦bar
-     : value=two
      : prev_value=one
+     : value=two
 EVENT: input¦change¦foo¦bar
      : last_value=one
-     : value=two
      : fake=True
+     : value=two
 EVENT: output¦change¦foo¦bar
-     : value=three
      : prev_value=two
+     : value=three
 EVENT: input¦change¦foo¦bar
      : last_value=two
-     : value=three
      : fake=True
+     : value=three
 EVENT: output¦change¦foo¦bar
-     : value=GRMPF
      : prev_value=three
+     : value=GRMPF
 EVENT: input¦change¦foo¦bar
      : last_value=three
-     : value=GRMPF
      : fake=True
+     : value=GRMPF
 TRACE Yes
 : ‹Collected FakeInput:foo¦bar›
 name: foo¦bar

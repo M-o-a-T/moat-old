@@ -1,8 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -15,8 +19,12 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
-from __future__ import division,absolute_import,print_function
+import six
 
 from moat import patch;patch()
 import rpyc
@@ -34,14 +42,14 @@ import os
 import codecs
 sys.stdout = codecs.getwriter('utf8')(sys.stdout)
 
-TESTING=os.environ.get("HOMEVENT_TEST",False)
+TESTING="MOAT_TEST" in os.environ
 gevent_rpyc.patch_all()
 
 modes = "log,list,cmd".split(",")
 from optparse import OptionParser
 parser = OptionParser(conflict_handler="resolve")
 parser.add_option("-h","--help","-?", action="help",
-	help="print this help text")
+	help="print(this help text"))
 parser.add_option("-s", "--server", dest="host", action="store",
 	default="127.0.0.1", help="Server to connect to")
 parser.add_option("-p", "--port", dest="port", action="store",
@@ -90,7 +98,7 @@ def do_log(c):
 				return
 		except:
 			pass
-		for a,b in k.iteritems():
+		for a,b in k.items():
 			print(a,b)
 		for a,b in k["event"].ctx:
 			print(a,b)
@@ -147,7 +155,7 @@ def do_list(c,args):
 				if ti>0 and len(t)-ti>lim and len(t)-ti<lim+6: # limit to msec
 					t = t[:ti+lim]+")"
 
-			print(p+u": "+unicode(t))
+			print(p+u": "+six.text_type(t))
 
 	def out_one(p,c):
 		q = Queue(3)

@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,6 +18,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This code does basic configurable event mangling.
@@ -31,8 +39,7 @@ Given the event "switch on livingroom main", this would cause a
 Otherwise a "alarm livingroom" would be triggered.
 
 """
-
-from __future__ import division,absolute_import
+import six
 
 from moat.statement import Statement,MainStatementList, main_words
 from moat.logging import log, TRACE
@@ -43,10 +50,12 @@ from moat.event import TrySomethingElse
 from moat.base import Name,SName
 from moat.event_hook import OnHandlers, OnEventBase
 
+@six.python_2_unicode_compatible
 class BadArgs(RuntimeError):
 	def __str__(self):
 		return "Mismatch: %s does not fit %s" % (repr(self.args[0]),repr(self.args[1]))
 
+@six.python_2_unicode_compatible
 class BadArgCount(RuntimeError):
 	def __str__(self):
 		return "The number of event arguments does not match"
@@ -81,9 +90,9 @@ Every "*foo" in the event description is mapped to the corresponding
 		ia = iter(self.args)
 		pos = 0
 		while True:
-			try: e = ie.next()
+			try: e = six.next(ie)
 			except StopIteration: e = StopIteration
-			try: a = ia.next()
+			try: a = six.next(ia)
 			except StopIteration: a = StopIteration
 			if e is StopIteration and a is StopIteration:
 				return
@@ -121,15 +130,14 @@ Every "*foo" in the event description is mapped to the corresponding
 
 	def _report(self, verbose=False):
 		if self.displayname is not None:
-			if isinstance(self.displayname,basestring):
+			if isinstance(self.displayname,six.string_types):
 				yield "name: "+self.displayname
 			else:
-				yield "name: "+" ".join(unicode(x) for x in self.displayname)
+				yield "name: "+" ".join(six.text_type(x) for x in self.displayname)
 		yield "prio: "+str(self.prio)
 
 		for r in super(OnEventHandler,self)._report(verbose):
 			yield r
-
 
 class OnPrio(Statement):
 	name = "prio"
@@ -152,7 +160,6 @@ the order they (attempt to) run in is undefined.
 			raise ValueError("Priority value (%d): needs to be between %d and %d" % (prio,MIN_PRIO,MAX_PRIO))
 		self.parent.prio = prio
 
-
 class OnName(Statement):
 	name = "name"
 	doc = "name an event handler"
@@ -166,7 +173,6 @@ This statement assigns a name to an event handler.
 		if not len(event):
 			raise SyntaxError(u'Usage: name "‹text›"')
 		self.parent.displayname = SName(event)
-
 
 class OnDoc(Statement):
 	name = "doc"
@@ -182,7 +188,6 @@ This statement assigns a documentation string to an event handler.
 			raise SyntaxError(u'Usage: doc "‹text›"')
 		self.parent.displaydoc = event[0]
 
-
 class OnSkip(Statement):
 	name = "next handler"
 	doc = u"skip ahead to the next on… event handler"
@@ -194,7 +199,6 @@ Commands in the same handler, after this one, are *not* executed.
 	def run(self,ctx,**k):
 		raise TrySomethingElse()
 
-
 class OnSkip2(Statement):
 	name = "exit handler"
 	doc = u"Leave the current event handler"
@@ -204,7 +208,6 @@ This statement causes processing of this handler to end.
 """
 	def run(self,ctx,**k):
 		raise TrySomethingElse()
-
 
 class OnEventModule(Module):
 	"""\

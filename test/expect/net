@@ -1,8 +1,8 @@
 EVENT: startup
      : startup=True
 EVENT: wait¦start¦BAD
-     : loglevel=0
      : end_time=0.2
+     : loglevel=0
 [Errno 111] Connection refused
 [Errno 111] Connection refused
 EVENT: net¦error¦foop
@@ -19,20 +19,20 @@ TRACE NewHandler 11
 TRACE Create OnEvtHandler: net¦disconnect¦baz¦zaz
 TRACE NewHandler 12
 EVENT: wait¦start¦BEFORE
+     : end_time=0.5
      : loglevel=0
-     : end_time=0.4
 TRACE 2003-04-05 06:07:08.400000 BEFORE: Forced timer done
 EVENT: wait¦done¦BEFORE
      : loglevel=0
 EVENT: wait¦start¦AFTER
-     : loglevel=0
      : end_time=1.3
+     : loglevel=0
 EVENT: net¦connect¦foo
 EVENT: net¦recv¦foo
      : data=['A']
 EVENT: wait¦start¦OUT
-     : loglevel=0
      : end_time=0.6
+     : loglevel=0
 TRACE 2003-04-05 06:07:08.550000 OUT: Forced timer done
 foo :: net_active localhost:50333
 .
@@ -45,12 +45,12 @@ EVENT: wait¦done¦OUT
 EVENT: net¦disconnect¦foo
 TRACE dis foo
 EVENT: net¦connect¦baz¦zaz¦n1
+EVENT: wait¦start¦IN
+     : end_time=0.7
+     : loglevel=0
 EVENT: net¦recv¦baz¦zaz¦n1
      : data=['B']
-EVENT: wait¦start¦IN
-     : loglevel=0
-     : end_time=0.7
-TRACE 2003-04-05 06:07:08.800000 IN: Forced timer done
+TRACE 2003-04-05 06:07:08.750000 IN: Forced timer done
 type: net_passive
 host: 127.0.0.1
 port: ×××
@@ -65,8 +65,8 @@ EVENT: wait¦done¦AFTER
      : loglevel=0
 TRACE Yes
 EVENT: wait¦start¦END
-     : loglevel=0
      : end_time=1.6
+     : loglevel=0
 TRACE 2003-04-05 06:07:09.650000 END: Fake timer done
 EVENT: wait¦done¦END
      : loglevel=0

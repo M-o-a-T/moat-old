@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,13 +18,17 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This code implements (a subset of) the OWFS server protocol.
 
 """
 
-from __future__ import division,absolute_import
+import six
 
 from moat import TESTING
 from moat.module import Module
@@ -53,6 +61,7 @@ MAX_TRIES = 5 # retrying a message until failure
 
 PERSIST=True # Default
 
+@six.python_2_unicode_compatible
 class DisconnectedDeviceError(RuntimeError):
 	"""A devince has vanished."""
 	no_backtrace = True
@@ -94,11 +103,10 @@ class OWtempformat:
 	rankine = 3
 	_offset = 16
 
-
 class OWFSassembler(object):
 	"""A mix-in object which can do assembly and dissassembly of OWFS messages."""
 	MAX_LENGTH = 99999
-	_data = ""
+	_data = b""
 	_typ = None
 	_len = 24
 
@@ -110,7 +118,7 @@ class OWFSassembler(object):
 		self.close()
 		raise NotImplementedError("You need to override OWFSassembler.error")
 
-	def msgReceived(self,err):
+	def msgReceived(self,*a,**k):
 		self.close()
 		raise NotImplementedError("You need to override OWFSassembler.msgReceived")
 
@@ -175,7 +183,6 @@ class OWFSassembler(object):
 		self.write(struct.pack("!6i", \
 			0, len(data), typ, flags, rlen, 0) +data)
 
-
 class OWchans(Collection):
        name = "onewire connection"
 OWchans = OWchans()
@@ -197,7 +204,6 @@ class OWFSchannel(OWFSassembler, NetActiveConnector):
 
 	def not_up_event(self, external=False):
 		simple_event("onewire","error",*self.name)
-
 
 class OWFScall(MsgBase):
 	"""An object representing one call to OWFS"""
@@ -265,15 +271,13 @@ class OWFScall(MsgBase):
 				return "/uncached"
 			return "/uncached/"+"/".join(path)
 
-
 class NOPmsg(OWFScall):
 	prio = PRIO_BACKGROUND
 	orig_prio = prio
 
 	def send(self,conn):
 		super(NOPmsg,self).send(conn)
-		self.sendMsg(conn,OWMsg.nop,"",0)
-
+		self.sendMsg(conn,OWMsg.nop,b"",0)
 
 class ATTRgetmsg(OWFScall):
 	def __init__(self,path, prio=PRIO_STANDARD):
@@ -283,7 +287,7 @@ class ATTRgetmsg(OWFScall):
 
 	def send(self,conn):
 		super(ATTRgetmsg,self).send(conn)
-		self.sendMsg(conn,OWMsg.read,self._path(self.path)+'\0',8192)
+		self.sendMsg(conn,OWMsg.read,self._path(self.path).encode('utf-8')+b'\0',8192)
 		return RECV_AGAIN
 	
 	def __repr__(self):
@@ -302,14 +306,13 @@ class ATTRsetmsg(OWFScall):
 
 	def send(self,conn):
 		super(ATTRsetmsg,self).send(conn)
-		val = unicode(self.value)
-		self.sendMsg(conn, OWMsg.write,self._path(self.path)+'\0'+val,len(val))
+		val = six.text_type(self.value)
+		self.sendMsg(conn, OWMsg.write,self._path(self.path).encode('utf-8')+b'\0'+val.encode('utf-8'),len(val))
 		return RECV_AGAIN
 
 	def __repr__(self):
-		return u"‹"+self.__class__.__name__+" "+self.path[-2]+" "+self.path[-1]+" "+unicode(self.value)+u"›"
+		return u"‹"+self.__class__.__name__+" "+self.path[-2]+" "+self.path[-1]+" "+six.text_type(self.value)+u"›"
 		
-
 
 class DIRmsg(OWFScall):
 	error_on_timeout = False
@@ -327,12 +330,13 @@ class DIRmsg(OWFScall):
 	def send(self,conn):
 		super(DIRmsg,self).send(conn)
 		if self.dirall:
-			self.sendMsg(conn, OWMsg.dirall, self._path(self.path)+'\0', 0)
+			self.sendMsg(conn, OWMsg.dirall, self._path(self.path).encode('utf-8')+b'\0', 0)
 		else:
-			self.sendMsg(conn, OWMsg.dir, self._path(self.path)+'\0', 0)
+			self.sendMsg(conn, OWMsg.dir, self._path(self.path).encode('utf-8')+b'\0', 0)
 		return RECV_AGAIN
 
 	def dataReceived(self,data):
+		data = data.decode('utf-8')
 		if self.dirall:
 			n=0
 			for entry in data.split(","):
@@ -364,7 +368,6 @@ class OWbuses(Collection):
 OWbuses = OWbuses()
 OWbuses.does("del")
 register_condition(OWbuses.exists)
-
 
 class OWFSqueue(MsgQueue,Jobber):
 	"""\
@@ -473,7 +476,7 @@ class OWFSqueue(MsgQueue,Jobber):
 
 		n_old = 0
 		n_dev = 0
-		for dev in old_ids.itervalues():
+		for dev in old_ids.values():
 			if dev.bus is self:
 				n_old += 1
 				## Just because something vanishes from the listing
@@ -481,7 +484,7 @@ class OWFSqueue(MsgQueue,Jobber):
 				# dev.go_down()
 				log("onewire",DEBUG,"Bus unstable?",self.name,dev.id)
 
-		for dev in devices.itervalues():
+		for dev in devices.values():
 			if dev.bus is self:
 				n_dev += 1
 		
@@ -525,8 +528,6 @@ class OWFSqueue(MsgQueue,Jobber):
 		self.watch_q.put(res)
 		return res.get()
 
-
-
 ow_buses = {}
 
 # factory.
@@ -543,8 +544,6 @@ def connect(host="localhost", port=4304, name=None, persist=PERSIST):
 def disconnect(f):
 	assert f==ow_buses.pop(f.ident)
 	f.stop()
-
-
 
 class devices(Collection):
        name = "onewire device"
@@ -658,6 +657,9 @@ class OWFSdevice(Collected):
 			self.go_down(ex)
 			raise
 
+		if isinstance(res,bytes):
+			res = res.decode('utf-8')
+
 		try:
 			res = int(res)
 		except (ValueError,TypeError):
@@ -667,7 +669,6 @@ class OWFSdevice(Collected):
 				pass
 
 		return res
-
 
 	def set(self,key,val):
 		if not self.bus:
@@ -680,7 +681,6 @@ class OWFSdevice(Collected):
 		except Exception as ex:
 			fix_exception(ex)
 			self.go_down(ex)
-
 
 	def dir(self, proc, path=(), key=None):
 		if not self.bus:
@@ -700,7 +700,6 @@ class OWFSdevice(Collected):
 		except Exception as ex:
 			fix_exception(ex)
 			self.go_down(ex)
-
 
 class OWFSroot(OWFSdevice):
 	"""Represents the root device of an owfs tree"""

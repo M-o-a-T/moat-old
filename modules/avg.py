@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2008-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,6 +18,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This code does basic timeout handling.
@@ -27,7 +35,7 @@ var avg X NAME...
 
 """
 
-from __future__ import division,absolute_import
+import six
 
 from moat.statement import Statement, main_words, AttributedStatement
 from moat.module import Module
@@ -42,7 +50,6 @@ class Avgs(Collection):
     name = "avg"
 Avgs = Avgs()
 Avgs.does("del")
-
 
 class Avg(Collected):
 	"""This is the thing that averages over time."""
@@ -91,7 +98,7 @@ class Avg(Collected):
 		self.avg = self._calc(True)
 		
 	def list(self):
-		yield ("name"," ".join(unicode(x) for x in self.name))
+		yield ("name"," ".join(six.text_type(x) for x in self.name))
 		yield ("mode",self.mode)
 		yield ("value",self.value)
 		if self.value_tm is not None:
@@ -212,7 +219,6 @@ class DecaySamplesAvg(Avg):
 			yield r
 		yield ("weight",self.p)
 
-
 class MovingSamplesAvg(Avg):
 	"""Moving average, based on the last N values"""
 	mode="moving"
@@ -255,7 +261,6 @@ class MovingSamplesAvg(Avg):
 		for i in r:
 			yield ("sample "+str(i),self.values[i])
 
-
 modes = {}
 
 class AvgHandler(AttributedStatement):
@@ -273,7 +278,6 @@ Known modes (default: %s):
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		self.avg(self, SName(event), *self.settings)
-
 
 @AvgHandler.register_statement
 class AvgMode(Statement):
@@ -325,7 +329,6 @@ reset avg NAME
 		m = Avgs[Name(*event[1:])]
 		m.feed(float(event[0]))
 
-
 class VarAvgHandler(AttributedStatement):
 	name="var avg"
 	doc="assign a variable to the current value of an averager"
@@ -359,7 +362,6 @@ Available: %s
 			raise SyntaxError(u"‹use› requires a parameter: " + u"¦".join(self.avail))
 		self.parent.src = event[0]
 
-
 class AvgModule(Module):
 	"""\
 		This module contains a handler for computing average values.
@@ -369,12 +371,12 @@ class AvgModule(Module):
 
 	def load(self):
 		mlen=0
-		for v in globals().itervalues():
+		for v in globals().values():
 			m = getattr(v,"mode",None)
 			if m is None: continue
 			modes[m] = v
 			if mlen < len(m): mlen = len(m)
-		for v in modes.itervalues():
+		for v in modes.values():
 			AvgHandler.long_doc += v.mode+" "*(mlen-len(v.mode)+1)+v.doc+"\n"
 
 		main_words.register_statement(AvgHandler)

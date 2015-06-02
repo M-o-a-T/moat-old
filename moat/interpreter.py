@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,6 +18,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This code parses a config file.
@@ -29,7 +37,7 @@ for typical usage.
 
 """
 
-from __future__ import division,absolute_import
+import six
 
 from moat.context import Context
 from moat.event import Event
@@ -39,18 +47,13 @@ from moat.twist import fix_exception,reraise
 import sys
 import traceback
 
+@six.python_2_unicode_compatible
 class InputEvent(Event):
 	"""An event that's just a line from the interpreter"""
 	def _name_check(self,name):
 		pass
 
 	def __str__(self):
-		try:
-			return u"‹InputEvent:%s›" % (self.name,)
-		except Exception:
-			return "<InputEvent> REPORT_ERROR: "+repr(self.name)
-
-	def __unicode__(self):
 		try:
 			#return u"⌁."+unicode(self.name)
 			return unicode(self.name)
@@ -59,10 +62,9 @@ class InputEvent(Event):
 
 	def report(self, verbose=False):
 		try:
-			yield "IEVENT: "+unicode(self.name)
+			yield "IEVENT: "+six.text_type(self.name)
 		except Exception:
 			yield "IEVENT: REPORT_ERROR: "+repr(self.name)
-
 
 class Processor(object):
 	"""Base class: Process input lines and do something with them."""
@@ -147,7 +149,6 @@ class CollectProcessor(Processor):
 	def store(self,proc):
 		self.parent.add(proc)
 
-
 class RunMe(object):
 	"""\
 		This is a wrapper which runs a block as soon as it is finished.
@@ -210,15 +211,15 @@ class Interpreter(Processor):
 	def complex_statement(self,args):
 		try:
 			fn = self.lookup(args)
-		except TypeError,e:
-			print >>self.ctx.out,"For",args,"::"
+		except TypeError as e:
+			print("For",args,"::", file=self.ctx.out)
 			raise
 
 		fn.start_block()
 		return RunMe(self,fn)
 	
 	def done(self):
-		#print >>self.ctx.out,"Exiting"
+		#print("Exiting", file=self.ctx.out)
 		pass
 
 class InteractiveInterpreter(Interpreter):
@@ -229,9 +230,9 @@ class InteractiveInterpreter(Interpreter):
 		from moat.statement import UnknownWordError
 
 		if isinstance(err,(UnknownWordError,SyntaxError)):
-			print >>parser.ctx.out, "ERROR:", err
+			print("ERROR:", err, file=parser.ctx.out)
 		else:
-			print >>parser.ctx.out, "ERROR:"
+			print("ERROR:", file=parser.ctx.out)
 			traceback.print_exception(err.__class__,err,sys.exc_info()[2], file=parser.ctx.out)
 		if hasattr(parser,'init_state'):
 			parser.init_state()

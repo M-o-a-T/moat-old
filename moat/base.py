@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,12 +18,16 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 	This module holds a few random constants and stuff.
 	"""
 
-from __future__ import division,absolute_import
+import six
 
 SYS_PRIO = -10
 MIN_PRIO = 0
@@ -29,9 +37,10 @@ MAX_PRIO = 100
 class singleNameMeta(type):
 	def __repr__(cls):
 		return cls.__name__
-class singleName(object):
-	__metaclass__ = singleNameMeta
+class singleName(six.with_metaclass(singleNameMeta,object)):
+	pass
 
+@six.python_2_unicode_compatible
 class Name(tuple):
 	"""A class that knows how to print itself the "right" way"""
 	delim = u"¦"
@@ -41,13 +50,11 @@ class Name(tuple):
 	def __new__(cls,*data):
 		if len(data) == 1 and isinstance(data[0],tuple):
 			data = data[0]
-		if len(data) > 0 and not isinstance(data[0],(basestring,int,float)):
+		if len(data) > 0 and not isinstance(data[0],(six.string_types,int,float)):
 			raise RuntimeError("Name:"+repr(data))
 		return super(Name,cls).__new__(cls,data)
 	def __str__(self):
-		return unicode(self).encode("utf-8")
-	def __unicode__(self):
-		return self.prefix + self.delim.join((unicode(x) for x in self)) + self.suffix
+		return self.prefix + self.delim.join((six.text_type(x) for x in self)) + self.suffix
 	def __repr__(self):
 		return self.__class__.__name__+super(Name,self).__repr__()
 
@@ -78,9 +85,9 @@ for s in "hash".split(): ## id
 	def gen_id(s):
 		def f(self):
 			if len(self) == 1:
-				return getattr(unicode(self),s)()
+				return getattr(six.text_type(self),s)()
 			return getattr(super(Name,self),s)()
-		f.__name__ = s
+		f.__name__ = str(s)
 		return f
 	setattr(Name,s,gen_id(s))
 for s in "le lt ge gt eq ne".split(): ## cmp
@@ -88,13 +95,12 @@ for s in "le lt ge gt eq ne".split(): ## cmp
 
 	def gen_cmp(s):
 		def f(self,other):
-			if isinstance(other,basestring):
-				return getattr(unicode(self),s)(other)
+			if isinstance(other,six.string_types):
+				return getattr(six.text_type(self),s)(other)
 			return getattr(super(Name,self),s)(other)
-		f.__name__ = s
+		f.__name__ = str(s)
 		return f
 	setattr(Name,s,gen_cmp(s))
-
 
 def SName(data,attr="name"):
 	"""An alternate Name constructor that accepts a single argument"""
@@ -104,7 +110,7 @@ def SName(data,attr="name"):
 	if isinstance(n,Name):
 		return n
 
-	if isinstance(data,basestring):
+	if isinstance(data,six.string_types):
 		data = data.split(" ")
 	return Name(*data)
 
@@ -118,9 +124,9 @@ class RaisedError(RuntimeError):
 		return u"‹%s: %s›" % (self.__class__.__name__, repr(self.params))
 	def __str__(self):
 		return u"%s: %s" % (self.__class__.__name__, " ".join(str(x) for x in self.params))
-	def __unicode__(self):
-		return u"%s: %s" % (self.__class__.__name__, " ".join(unicode(x) for x in self.params))
-
+	if six.PY2:
+		def __unicode__(self):
+			return u"%s: %s" % (self.__class__.__name__, " ".join(unicode(x) for x in self.params))
 
 def flatten(out,s,p=""):
 	if hasattr(s,"list") and callable(s.list):
@@ -134,7 +140,7 @@ def flatten(out,s,p=""):
 	p = u" ".join((str(ss) for ss in s))
 	if hasattr(t,"list") and callable(t.list):
 		t = t.list()
-	if hasattr(t,"next"):
+	if hasattr(t,"next" if six.PY2 else "__next__"):
 		pp = " "*len(p)
 		for tt in t:
 			flatten(out,tt,p)

@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,10 +18,14 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """Class to make storing collections of stuff simpler"""
 
-from __future__ import division,absolute_import
+import six
 
 from moat.base import Name,SName
 from moat.check import Check
@@ -26,7 +34,6 @@ from moat.context import Context
 from weakref import WeakValueDictionary,proxy
 
 collections = WeakValueDictionary()
-
 
 class Collection(dict):
 	"""\
@@ -80,7 +87,7 @@ class Collection(dict):
 					oname = Name(*args)
 					return oname in self
 			self.exists = ExistsCheck
-			self.exists.__name__ = "ExistsCheck_"+"_".join(self.name)
+			self.exists.__name__ = str("ExistsCheck_"+"_".join(self.name))
 	
 	def does(self,name):
 		name = SName(name)
@@ -90,19 +97,16 @@ class Collection(dict):
 	def exists_check(self):
 		return ExistsCheck
 
-
 	def can_do(self,name):
 		name = SName(name)
 		return name in self._can_do
 
-	def iteritems(self):
-		def name_cmp(a,b):
-			return cmp(self[a].name,self[b].name)
-		for k in sorted(self.iterkeys(),cmp=name_cmp):
+	def items(self):
+		for k in sorted(self.keys(), key=lambda x:self[x].name):
 			yield k,self[k]
 
-	def itervalues(self):
-		return sorted(super(Collection,self).itervalues())
+#	def values(self):
+#		return sorted(super(Collection,self).values())
 
 	# The Collected's storage needs to be a weak reference so that it
 	# will be freed when the module is unloaded.
@@ -161,7 +165,7 @@ class Collected(object):
 
 	def list(self):
 		"""Yield a couple of (left,right) tuples, for enumeration."""
-		yield (unicode(self),)
+		yield (six.text_type(self),)
 		yield ("name",self.name)
 		self = super(Collected,self)
 		if hasattr(self,'list'):
@@ -179,29 +183,24 @@ class Collected(object):
 			"""
 		return None
 
-
+@six.python_2_unicode_compatible
 class CKeyError(KeyError):
 	def __init__(self,name,coll):
 		self.name = name
 		self.coll = coll
 	def __repr__(self):
 		return u"‹%s ‹%s› %s›" % (self.__class__.__name__, SName(self.name),self.coll)
-	def __unicode__(self):
-		return u"I could not find an entry for ‹%s› in %s." % (SName(self.name),self.coll)
 	def __str__(self):
-		return "I could not find an entry for ‹%s› in %s." % (SName(self.name),self.coll)
+		return u"I could not find an entry for ‹%s› in %s." % (SName(self.name),self.coll)
 
-
+@six.python_2_unicode_compatible
 class CCollError(KeyError):
 	def __init__(self,name):
 		self.name = name
 	def __repr__(self):
 		return u"‹%s %s›" % (self.__class__.__name__, SName(self.name))
-	def __unicode__(self):
-		return u"‹%s› is a group, not an item." % (SName(self.name),)
 	def __str__(self):
-		return "‹%s› is a group, not an item." % (SName(self.name),)
-
+		return u"‹%s› is a group, not an item." % (SName(self.name),)
 
 def get_collect(name, allow_collection=False):
 	c = None
@@ -238,8 +237,7 @@ def get_collect(name, allow_collection=False):
 	return coll
 
 def all_collect(name="list", skip=False):
-	def byname(a,b): return cmp(a.name,b.name)
-	for m in sorted(collections.itervalues(),cmp=byname):
+	for m in sorted(collections.values(), key=lambda x:x.name):
 		if skip and not m:
 			continue
 		if m.can_do(name):

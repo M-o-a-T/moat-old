@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,6 +18,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This code parses input lines.
@@ -25,11 +33,10 @@ for typical usage.
 
 """
 
-from __future__ import division,absolute_import
+import six
 
 from moat.tokize import tokizer
 from tokenize import tok_name
-import Queue
 import sys
 import os
 import errno
@@ -141,8 +148,7 @@ class Parser(Collected,Jobber):
 				fix_exception(e)
 				process_failure(e)
 			job.link_exception(dead)
-			if not hasattr(self.input,"fileno") or self.input.fileno() > 2:
-				self.input.close()
+			self.input.close()
 			self.input = None
 		return "Bla"
 	
@@ -162,7 +168,7 @@ class Parser(Collected,Jobber):
 
 	def add_line(self, data):
 		"""Standard LineReceiver method"""
-		if not isinstance(data,unicode):
+		if not isinstance(data,six.string_types):
 			data = data.decode("utf-8")
 		self.p_gen.feed(data)
 
@@ -320,7 +326,6 @@ class Parser(Collected,Jobber):
 
 		raise SyntaxError("Unknown token %s (%s, state %d) in %s:%d" % (repr(txt),tok_name[t] if t in tok_name else t,self.p_state,self.ctx.filename,beg[0]))
 
-
 class _drop(object):
 	def __init__(self,g):
 		self.g = g
@@ -342,7 +347,7 @@ def parse(input, interpreter=None, ctx=None, out=None, words=None):
 		"""
 	if ctx is None: ctx=Context
 	if ctx is Context or "filename" not in ctx:
-		ctx = ctx(filename=(input if isinstance(input,basestring) else u"‹stdin›"))
+		ctx = ctx(filename=(input if isinstance(input,six.string_types) else u"‹stdin›"))
 	if out is not None:
 		ctx.out = out
 	else:
@@ -357,7 +362,7 @@ def parse(input, interpreter=None, ctx=None, out=None, words=None):
 	if isinstance(interpreter,type):
 		interpreter = interpreter(ctx)
 
-	if isinstance(input,basestring):
+	if isinstance(input,six.string_types):
 		input = open(input,"rU")
 
 	parser = Parser(interpreter=interpreter, input=input, ctx=ctx)

@@ -1,8 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -15,6 +19,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 from moat import patch;patch()
 from moat.reactor import ShutdownHandler
@@ -44,35 +52,34 @@ wait: for 0.8
 del monitor foo bar
 list monitor
 
-on monitor checking baz zaz:
-	set monitor 10 baz zaz
-	wait bazzaz A: for 0.2
-	set monitor 13 baz zaz
-	wait bazzaz B: for 0.2
-	set monitor 14 baz zaz
+on monitor checking bazzi zazzi:
+	set monitor 10 bazzi zazzi
+	wait bazzizazzi A: for 0.2
+	set monitor 13 bazzi zazzi
+	wait bazzizazzi B: for 0.2
+	set monitor 14 bazzi zazzi
 	
 monitor passive:
-	name baz zaz
+	name bazzi zazzi
 	delay for 0.9
 	require 2 2
-list monitor baz zaz
+list monitor bazzi zazzi
 
 wait: for 0.1
 block:
-	if waiting monitor baz zaz:
+	if waiting monitor bazzi zazzi:
 		log TRACE Yes
 	else:
 		log ERROR No1
 wait: for 0.5
 block:
-	if waiting monitor baz zaz:
+	if waiting monitor bazzi zazzi:
 		log ERROR No2
 	else:
 		log TRACE Yes
-list monitor baz zaz
-log DEBUG XXX delete baz zaz
-del monitor baz zaz
-
+list monitor bazzi zazzi
+log DEBUG XXX delete bazzi zazzi
+del monitor bazzi zazzi
 
 input monitest fake
 input monitest2 fake

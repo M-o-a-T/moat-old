@@ -2531,7 +2531,7 @@ Establish a connection to an AMQP server.
 
 	connect amqp localhost:
 		name test foo
-		user "/test" test test
+		user test test test
 
 name
 ----

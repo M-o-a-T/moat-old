@@ -26,3 +26,4 @@ fs20/avr/*.bin
 *.lst
 *.map
 moat/gevent_rpyc.py
+/.pybuild/

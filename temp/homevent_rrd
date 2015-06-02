@@ -123,7 +123,7 @@ def read_rrd_params(path):
 			if what != "-":
 				rrd_info[id] = (what,where,attr)
 
-	for r in old_rrd_info.iterkeys():
+	for r in old_rrd_info.keys():
 		del rrd_info[r]
 
 def re_enum_bus():
@@ -140,7 +140,7 @@ def re_enum_bus():
 			RRDSensor2(s)
 		else:
 			RRDSensor(s)
-	for addr,s in old_sensors.iteritems():
+	for addr,s in old_sensors.items():
 		del sensors[addr]
 		s.gone()
 
@@ -149,7 +149,7 @@ read_rrd_params("/etc/moat/1wire.rrd.cf")
 re_enum_bus()
 
 while True:
-	for s in sensors.itervalues():
+	for s in sensors.values():
 		s.poll()
 	time.sleep(10)
 

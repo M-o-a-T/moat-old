@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,13 +18,15 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This is the core of external input and output.
 
 """
-
-from __future__ import division,absolute_import
 
 from moat.statement import Statement, main_words, AttributedStatement,WordAttached
 from moat.check import Check,register_condition,unregister_condition
@@ -53,6 +59,7 @@ Outputs = Outputs()
 Outputs.does("del")
 register_condition(Outputs.exists)
 
+@six.python_2_unicode_compatible
 class BadValue(RuntimeError):
 	"""The input doesn't match the expected values"""
 	def __init__(self, inp,val):
@@ -60,7 +67,6 @@ class BadValue(RuntimeError):
 		self.val = val
 	def __str__(self):
 		return "BadValue: read %s: bad value for %s" % (self.val,self.inp)
-	
 
 inputmakers = {}
 outputmakers = {}
@@ -85,7 +91,6 @@ def register_output(outp):
 	return outp
 def unregister_output(outp):
 	_unregister(outputmakers,outp,"out")
-
 
 class CommonIO(Collected):
 	"""This class collects common code for input and output"""
@@ -137,7 +142,6 @@ class CommonIO(Collected):
 		self.last_value = res
 		return res
 
-
 	def check(self,res):
 		"""\
 			Check whether a value is accepted.
@@ -160,7 +164,6 @@ class CommonIO(Collected):
 				pass
 		raise BadValue(self.name, res)
 
-
 class Input(CommonIO):
 	"""This represents a single input."""
 	storage = Inputs.storage
@@ -174,7 +177,6 @@ class Input(CommonIO):
 		if self.last_value is not None:
 			yield ("last read", self.last_time)
 			yield ("last value",self.last_value)
-
 
 class OutTimers(Collection):
 	name = "outtimer"
@@ -249,7 +251,6 @@ class OutTimer(Collected):
 		super(OutTimer,self).delete(ctx)
 	
 
-
 class Output(CommonIO):
 	"""This represents a single output."""
 	storage = Outputs.storage
@@ -316,11 +317,9 @@ class Output(CommonIO):
 			reraise(res)
 		simple_event("output","change",*self.name, prev_value=wval,value=wnextval)
 
-
 	def trans(self, val):
 		"""Translate the output, i.e. script data to input values"""
 		return val
-
 
 class MakeIO(AttributedStatement):
 	"""Common base class for input and output creation statements"""
@@ -352,7 +351,6 @@ class MakeIO(AttributedStatement):
 			d = 1
 
 		self.registry[typ](self.dest.apply(ctx), event.apply(ctx,drop=d), self.addons,self.ranges,self.values)
-
 
 # the first version was to be directly attached to variables, but that doesn't work
 #class BoolIO(WordAttached):
@@ -395,7 +393,6 @@ bool ‹yes› ‹no›
 			raise SyntaxError(u"Usage: bool ‹yes› ‹no›")
 		self.parent.addons['bools'] = (event[1],event[0])
 
-
 @main_words.register_statement
 class MakeInput(MakeIO):
 	name="input"
@@ -411,7 +408,6 @@ input ‹type› ‹params…› :name ‹name…›
   - same as above, but use a multi-word name.
 """
 
-
 @main_words.register_statement
 class MakeOutput(MakeIO):
 	name="output"
@@ -426,8 +422,6 @@ output ‹name› ‹type› ‹params…›
 output ‹type› ‹params…› :name ‹name…› 
   - same as above, but use a multi-word name.
 """
-
-
 
 @MakeIO.register_statement
 class IOName(Statement):
@@ -482,7 +476,6 @@ value ‹val›…
 			 raise SyntaxError(u'Usage: value ‹val›…')
 		self.parent.values.extend(event)
 
-
 class IOvar(Statement):
 	"""base class for input and output variables"""
 	def run(self,ctx,**k):
@@ -517,7 +510,6 @@ var output NAME ‹outputname›…
           Note: The value will be fetched when this statement is executed,
           not when the value is used.
 """
-
 
 @main_words.register_statement
 class IOset(AttributedStatement):
@@ -562,10 +554,6 @@ async
 			raise SyntaxError(u'Usage: async')
 
 		self.parent.async = True
-
-
-
-
 
 class IOisSet(Check):
 	def check(self,*args):

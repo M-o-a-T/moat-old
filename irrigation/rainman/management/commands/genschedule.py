@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,6 +18,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 		Calculate valve schedules.
@@ -101,13 +109,13 @@ class Command(BaseCommand):
 					c.close()
 				except EnvironmentError as e:
 					if e.errno == errno.ECONNREFUSED:
-						print >>sys.stderr,"Connecting to '%s' failed" % (s.host,)
+						print("Connecting to '%s' failed" % (s.host,), fiel=sys.stderr)
 						continue
 					print_exc()
 				except Exception:
 					print_exc()
 				else:
-					print >>sys.stderr,"Connecting to '%s' succeeded" % (s.host,)
+					print("Connecting to '%s' succeeded" % (s.host,), file=sys.stderr)
 			sleep(10)
 		q = Q()
 		if options['site']:
@@ -150,12 +158,11 @@ class Command(BaseCommand):
 				c.root.command("trigger","read","schedule",*s.var.split())
 				c.close()
 
-
 	def one_valve(self,v,options):
 		if v.feed.disabled:
 			return
 		if (v.level < v.stop_level) if v.priority else (v.level < v.start_level):
-			print "Nothing to do",v,v.level,v.start_level
+			print("Nothing to do",v,v.level,v.start_level)
 			if options['save'] and v.verbose:
 				log(v,"Nothing to do (has %s, need %s)" % (v.level,v.start_level))
 			return
@@ -192,7 +199,7 @@ class Command(BaseCommand):
 			log(v,"Too little to do (has %s, need %s, want %s)" % (v.level,v.start_level,want))
 			return
 		if options['verbose']:
-			print "Plan",v,"for",want,"Level",v.level,v.start_level,v.stop_level,"P" if v.priority else ""
+			print("Plan",v,"for",want,"Level",v.level,v.start_level,v.stop_level,"P" if v.priority else "")
 		for a,b in v.range(start=soon,days=options['age'], add=30):
 			if a > soon:
 				break # do it during the next run
@@ -210,7 +217,7 @@ class Command(BaseCommand):
 			if v.max_run and b > v.max_run:
 				b=v.max_run
 			if b < want:
-				print "Partial",str_tz(a),str(b)
+				print("Partial",str_tz(a),str(b))
 				if options['save']:
 					sc=Schedule(valve=v,start=a,duration=b)
 					sc.save()
@@ -220,7 +227,7 @@ class Command(BaseCommand):
 				want -= b
 				break # bail out makes sense, get others scheduled first / do more in the same slot if v.max_run is set
 			else:
-				print "Total",str_tz(a),str(want)
+				print("Total",str_tz(a),str(want))
 				if options['save']:
 					sc=Schedule(valve=v,start=a,duration=want)
 					sc.save()
@@ -230,14 +237,12 @@ class Command(BaseCommand):
 				want = None
 				break
 		if want is not None:
-			print "Missing",want
-
+			print("Missing",want)
 
 	def force_one_valve(self,v,options):
 		for a,b in v.range(start=soon,forced=True):
-			print "Forced",str_tz(a),str(b)
+			print("Forced",str_tz(a),str(b))
 			if options['save']:
 				sc=Schedule(valve=v,start=a,duration=b,forced=True)
 				sc.save()
-
 

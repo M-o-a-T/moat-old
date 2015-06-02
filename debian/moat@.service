@@ -1,10 +1,10 @@
 [Unit]
 Description=Home Event monitor
-ConditionPathExists=/etc/moat/%i.he
+ConditionPathExists=/etc/moat/%i.moat
 After=rabbitmq-server.service
 
 [Service]
-ExecStart=/usr/sbin/moatd /etc/moat/%i.he
+ExecStart=/usr/sbin/moatd /etc/moat/%i.moat
 WorkingDirectory=/etc/moat
 User=moat
 Group=moat
