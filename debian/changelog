@@ -1,3 +1,10 @@
+moat (0.7.2) smurf; urgency=medium
+
+  * fixed a bunch of test cases
+  * don't build debug nonsense
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Tue, 02 Jun 2015 06:25:15 +0200
+
 moat (0.7.1) smurf; urgency=medium
 
   * Build py3 versio
