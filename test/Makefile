@@ -16,19 +16,21 @@
 
 export PYTHONPATH=$(shell pwd)/..:$(shell pwd)/../dabroker:$(shell pwd)/../../smurf/python
 export MOAT_TEST=1
-
+PYFILES ?= $(wildcard *.py)
+SHFILES ?= $(wildcard *.sh)
+PYTHON ?= python3
 test:
 	@rm -f /tmp/moat.$$(id -un).db /tmp/moat.db.$$(id -u) 2>/dev/null
 	@set -e; \
 	rm -rf real; mkdir real; \
-	for f in $(wildcard *.sh) ; do \
+	for f in ${SHFILES} ; do \
 		echo $$f ...; \
 		sh $$f; \
 	done; \
-	for f in $(wildcard *.py) ; do \
+	for f in ${PYFILES} ; do \
 		echo $$f ...; \
 		set +e; \
-		python3 $$f; \
+		${PYTHON} $$f; \
 		E=$$?; \
 		[ $$E = 0 ] || [ $$E = 121 ] || exit $$E; \
 		set -e; \
