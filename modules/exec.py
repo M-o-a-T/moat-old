@@ -156,7 +156,7 @@ path 'directory'
 		if len(event) != 1:
 			raise SyntaxError("Usage: path 'filename'")
 		import sys
-		sys.path.insert(0,event[0])
+		sys.path.append(event[0])
 
 class ExecModule(Module):
 	"""\
