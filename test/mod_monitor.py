@@ -52,34 +52,34 @@ wait: for 0.8
 del monitor foo bar
 list monitor
 
-on monitor checking baz zaz:
-	set monitor 10 baz zaz
-	wait bazzaz A: for 0.2
-	set monitor 13 baz zaz
-	wait bazzaz B: for 0.2
-	set monitor 14 baz zaz
+on monitor checking bazzi zazzi:
+	set monitor 10 bazzi zazzi
+	wait bazzizazzi A: for 0.2
+	set monitor 13 bazzi zazzi
+	wait bazzizazzi B: for 0.2
+	set monitor 14 bazzi zazzi
 	
 monitor passive:
-	name baz zaz
+	name bazzi zazzi
 	delay for 0.9
 	require 2 2
-list monitor baz zaz
+list monitor bazzi zazzi
 
 wait: for 0.1
 block:
-	if waiting monitor baz zaz:
+	if waiting monitor bazzi zazzi:
 		log TRACE Yes
 	else:
 		log ERROR No1
 wait: for 0.5
 block:
-	if waiting monitor baz zaz:
+	if waiting monitor bazzi zazzi:
 		log ERROR No2
 	else:
 		log TRACE Yes
-list monitor baz zaz
-log DEBUG XXX delete baz zaz
-del monitor baz zaz
+list monitor bazzi zazzi
+log DEBUG XXX delete bazzi zazzi
+del monitor bazzi zazzi
 
 input monitest fake
 input monitest2 fake
