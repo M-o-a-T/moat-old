@@ -60,8 +60,8 @@ additional I/O, logging, and easy integration into existing systems.
     license = 'GPL',
 
 	zip_safe = False, 
-    packages = ['moat','moat.modules'],
+    packages = [str(x) for x in ('moat','moat.modules')],
 	package_dir={'moat': 'moat', 'moat.modules':'modules'},
-    scripts = ['scripts/daemon.py','scripts/cmd.py','scripts/amqpmon.py'],
+    scripts = [str(x) for x in ('scripts/daemon.py','scripts/cmd.py','scripts/amqpmon.py')]
     #cmdclass={'install_data' : my_install_data},
     )
