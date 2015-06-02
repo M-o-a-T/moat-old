@@ -87,7 +87,7 @@ class Collection(dict):
 					oname = Name(*args)
 					return oname in self
 			self.exists = ExistsCheck
-			self.exists.__name__ = "ExistsCheck_"+"_".join(self.name)
+			self.exists.__name__ = str("ExistsCheck_"+"_".join(self.name))
 	
 	def does(self,name):
 		name = SName(name)

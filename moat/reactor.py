@@ -129,9 +129,7 @@ class Shutdown_Collections(ExcWorker):
 		from moat.collect import collections
 		super(Shutdown_Collections,self).process(**k)
 
-		def byprio(a,b):
-			return cmp(a.prio,b.prio)
-		for w in sorted(collections.values(),cmp=byprio):
+		for w in sorted(collections.values(),key=lambda x:x.prio):
 			if not w.can_do("del"):
 				continue
 			for d in w.values():

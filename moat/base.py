@@ -37,14 +37,8 @@ MAX_PRIO = 100
 class singleNameMeta(type):
 	def __repr__(cls):
 		return cls.__name__
-if six.PY2:
-	class singleName(object):
-		__metaclass__ = singleNameMeta
-else:
-	eval("""
-		class singleName(metaclass=singleNameMeta):
-			pass
-		""")
+class singleName(six.with_metaclass(singleNameMeta,object)):
+	pass
 
 class Name(tuple):
 	"""A class that knows how to print itself the "right" way"""
@@ -97,7 +91,7 @@ for s in "hash".split(): ## id
 			if len(self) == 1:
 				return getattr(six.text_type(self),s)()
 			return getattr(super(Name,self),s)()
-		f.__name__ = s
+		f.__name__ = str(s)
 		return f
 	setattr(Name,s,gen_id(s))
 for s in "le lt ge gt eq ne".split(): ## cmp
@@ -108,7 +102,7 @@ for s in "le lt ge gt eq ne".split(): ## cmp
 			if isinstance(other,six.string_types):
 				return getattr(six.text_type(self),s)(other)
 			return getattr(super(Name,self),s)(other)
-		f.__name__ = s
+		f.__name__ = str(s)
 		return f
 	setattr(Name,s,gen_cmp(s))
 

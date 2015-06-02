@@ -55,11 +55,7 @@ class _OnHandlers(Collection):
 	name = "on"
 
 	def items(self):
-		def priosort(a,b):
-			a=self[a]
-			b=self[b]
-			return cmp(a.prio,b.prio) or cmp(a.name,b.name)
-		for i in sorted(self.keys(), cmp=priosort):
+		for i in sorted(self.keys(), key=lambda x:(self[x].prio,self[x].name)):
 			yield i,self[i]
 
 	def __getitem__(self,key):
