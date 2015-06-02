@@ -142,6 +142,22 @@ param ‹key› ‹val›
 
 from moat.module import Module
 
+class Path(Statement):
+    name="path"
+    doc="set python module path"
+    long_doc = """\
+path 'directory'
+    adds the given directory to the list of paths where
+	Python (not MoaT) modules are searched at.
+    The directory probably needs to be quoted.
+"""
+    def run(self,ctx,**k):
+        event = self.params(ctx)
+        if len(event) != 1:
+            raise SyntaxError("Usage: path 'filename'")
+		import sys
+        sys.path.insert(0,event[0])
+
 class ExecModule(Module):
 	"""\
 		Contains a function to run arbitrary Python code.
@@ -151,8 +167,10 @@ class ExecModule(Module):
 
 	def load(self):
 		main_words.register_statement(ExecHandler)
+		main_words.register_statement(Path)
 	
 	def unload(self):
 		main_words.unregister_statement(ExecHandler)
+		main_words.unregister_statement(Path)
 
 init = ExecModule

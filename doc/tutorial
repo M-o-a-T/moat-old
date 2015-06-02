@@ -692,6 +692,13 @@ which will load module `foo` and call its procedure `bar` like this:
 
 Execution is synchronous, but you can always wrap it in an `async:` block.
 
+path
+----
+
+Tell MoaT where to load Python modules from.
+
+	path '/etc/moat'
+
 Environment
 ###########
 
