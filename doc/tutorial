@@ -656,3 +656,43 @@ get shared, you don't affect the other script's wait handlers, etc.
 If you split up your code along mostly-sensible lines, however, this should
 not be a problem.
 
+---------------
+Do it in Python
+---------------
+
+MoaT scripts originally ran under Twisted; the code was used to simplify
+programming, compared to the strange Deferred- and Producer/Consumer-style
+code required for non-blocking code with Twisted.
+
+These days, there's asyncio or gevent (and even code to tie the two together).
+So MoaT will ultimately migrate away from using its own script and switch
+to "real" Python.
+
+As a first step, you can call Python from MoaT with the `exec` statement:
+
+	exec foo.bar one two three:
+		param what ever
+
+which will load module "foo" and call the procedure "bar" as
+
+	foo.bar(ENV, "one", "two", "three", what="ever")
+
+Execution is synchronous unless you wrap it in an `async:` block.
+
+Environment
+###########
+
+The environment passed to Python is rather limited at the moment.
+More is planned.
+
+on
+--
+
+The `on` method is a decorator to add event handling:
+
+	@ENV.on("run","me","now", name="runme handler"):
+	def handler(event):
+		…
+
+which will call the handler whenever that event happens.
+
