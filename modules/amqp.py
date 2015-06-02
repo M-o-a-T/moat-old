@@ -186,12 +186,12 @@ class AMQPclient(Collected,Jobber):
 			#self.start_job("job",self._loop)
 
 	def _loop(self):
-		simple_event("amqp","start",*self.name)
+		simple_event("amqp","start",*self.name, _direct=True)
 		try:
 			while True:
 				self.conn.drain_events()
 		finally:
-			simple_event("amqp","stop",*self.name)
+			simple_event("amqp","stop",*self.name, _direct=True)
 	
 	def _start(self):
 		self.start_job('job',self._loop)
