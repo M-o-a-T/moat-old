@@ -221,7 +221,7 @@ class BaseLogger(Collected,Jobber):
 
 	def log_failure(self, err, level=WARN):
 		if level >= self.level:
-			self._wlog(level,format_exception(err))
+			self._wlog(LogNames[level],format_exception(err))
 			if TESTING:
 				self.flush()
 	
