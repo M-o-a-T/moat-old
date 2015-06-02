@@ -584,7 +584,7 @@ class AMQPrecv(Collected):
 			return # dup
 		if getattr(msg,'content_type','') == "application/json":
 			try:
-				data = json.loads(msg.body)
+				data = json.loads(msg.body.decode("utf-8"))
 			except Exception:
 				data = { "raw": msg.body }
 		else:
