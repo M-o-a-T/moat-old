@@ -36,6 +36,11 @@ on test me:
 	log DEBUG "Parallel MoaT handler"
 on run test:
 	exec test.exec.called one $also
+on test it:
+	if equal $what ever:
+		log DEBUG Y what $what
+	else:
+		log ERROR N what $what
 list on
 trigger run test:
 	param also two

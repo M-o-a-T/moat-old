@@ -1,8 +1,14 @@
-moat (0.7.4) smurf; urgency=medium
+moat (0.7.5) smurf; urgency=medium
 
   * Fix postinst.
 
  -- Matthias Urlichs <matthias@urlichs.de>  Tue, 02 Jun 2015 11:03:48 +0000
+
+moat (0.7.4) smurf; urgency=medium
+
+  * Add ENV.trigger to exec()
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Tue, 02 Jun 2015 08:06:28 +0200
 
 moat (0.7.3) smurf; urgency=medium
 
