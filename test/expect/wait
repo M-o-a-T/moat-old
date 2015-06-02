@@ -7,16 +7,16 @@ EVENT: wait¦start¦Foo¦Bar
      : loglevel=0
      : end_time=10.0
 TRACE 2003-04-05 06:07:08.250000 X1: Fake timer done
-Foo Bar :: 9.70000004768
+Foo Bar :: 9.700000047683716
 .
 EVENT: wait¦done¦X1
      : loglevel=0
-: ‹Waiter Foo¦Bar 9.70000004768›
+: ‹Waiter Foo¦Bar 9.700000047683716›
 name: Foo¦Bar
 start: -0.3 sec (2003-04-05 06:07:08)
 end: 9.7 sec (2003-04-05 06:07:18)
 total: 10.0 sec
-in: async
+in: ⌁ REPORT_ERROR: Name('async',)
 in: Global
 .
 EVENT: wait¦update¦Foo¦Bar
@@ -52,7 +52,7 @@ EVENT: wait¦done¦_wait¦t7
 TRACE Yes
 TRACE Create OnEvtHandler: whatever
 TRACE NewHandler 19
-TRACE We wait ‹Waiter Foo¦Baz 51.8000000715›
+TRACE We wait ‹Waiter Foo¦Baz 51.800000071525574›
 IEVENT: whatever
 EVENT: wait¦start¦_wait¦t8
      : loglevel=0

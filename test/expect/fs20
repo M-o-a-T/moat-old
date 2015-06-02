@@ -23,8 +23,8 @@ name: baz¦quux
 code: 1214
 parent: foo¦bar
 parentcode: 31413142
-does: on
 does: off
+does: on
 .
 name: one
 group: 1
@@ -62,16 +62,84 @@ EVENT: wait¦start¦_wait¦t1
      : end_time=0.6
 TRACE 2003-04-05 06:07:08.500000 _wait¦t1: Forced timer done
 Traceback (most recent call last):
-  File "/home/smurf/moat/moat/twist.py", line 287, in err
-    e = e.get()
-  File "/usr/lib/python2.7/dist-packages/gevent/greenlet.py", line 264, in get
+  File "/d/src/git/moat/moat/twist.py", line 286, in err
+    err = e.get()
+  File "/usr/lib/python3/dist-packages/gevent/greenlet.py", line 264, in get
     raise self._exception
+  File "/usr/lib/python3/dist-packages/gevent/greenlet.py", line 340, in run
+    result = self._run(*self.args, **self.kwargs)
+  File "/d/src/git/moat/moat/twist.py", line 275, in erh
+    return p(*a,**k)
+  File "/d/src/git/moat/moat/tokize.py", line 152, in _job
+    self._do_line(line)
+  File "/d/src/git/moat/moat/tokize.py", line 237, in _do_line
+    self.output(NL if self.parenlev > 0 else NEWLINE, token, spos, epos, line)
+  File "/d/src/git/moat/moat/tokize.py", line 117, in output
+    self._output(*a)
+  File "/d/src/git/moat/moat/parser.py", line 208, in _do_parse
+    self.proc.error(self,ex)
+  File "/d/src/git/moat/moat/interpreter.py", line 110, in error
+    reraise(err)
+  File "/d/src/git/moat/moat/twist.py", line 100, in reraise
+    raise e
+  File "/d/src/git/moat/moat/parser.py", line 198, in _do_parse
+    self._parseStep(t,txt,beg,end,line)
+  File "/d/src/git/moat/moat/parser.py", line 287, in _parseStep
+    self.proc.simple_statement(self.p_args)
+  File "/d/src/git/moat/moat/interpreter.py", line 209, in simple_statement
+    self.error(self,ex)
+  File "/d/src/git/moat/moat/interpreter.py", line 110, in error
+    reraise(err)
+  File "/d/src/git/moat/moat/twist.py", line 100, in reraise
+    raise e
+  File "/d/src/git/moat/moat/interpreter.py", line 206, in simple_statement
+    fn.run(self.ctx)
+  File "../modules/fs20switch.py", line 472, in run
+    d.set(event[0],ext, handler=handler)
+  File "../modules/fs20switch.py", line 296, in set
+    self.parent.send(d, handler=handler)
+  File "/d/src/git/moat/moat/fs20sw.py", line 72, in send
+    raise RuntimeError("No FS20 handler known")
 RuntimeError: No FS20 handler known
 EVENT: wait¦done¦_wait¦t1
      : loglevel=0
 Traceback (most recent call last):
-  File "/home/smurf/moat/moat/twist.py", line 287, in err
-    e = e.get()
-  File "/usr/lib/python2.7/dist-packages/gevent/greenlet.py", line 264, in get
+  File "/d/src/git/moat/moat/twist.py", line 286, in err
+    err = e.get()
+  File "/usr/lib/python3/dist-packages/gevent/greenlet.py", line 264, in get
     raise self._exception
+  File "/usr/lib/python3/dist-packages/gevent/greenlet.py", line 340, in run
+    result = self._run(*self.args, **self.kwargs)
+  File "/d/src/git/moat/moat/twist.py", line 275, in erh
+    return p(*a,**k)
+  File "/d/src/git/moat/moat/tokize.py", line 152, in _job
+    self._do_line(line)
+  File "/d/src/git/moat/moat/tokize.py", line 237, in _do_line
+    self.output(NL if self.parenlev > 0 else NEWLINE, token, spos, epos, line)
+  File "/d/src/git/moat/moat/tokize.py", line 117, in output
+    self._output(*a)
+  File "/d/src/git/moat/moat/parser.py", line 208, in _do_parse
+    self.proc.error(self,ex)
+  File "/d/src/git/moat/moat/interpreter.py", line 110, in error
+    reraise(err)
+  File "/d/src/git/moat/moat/twist.py", line 100, in reraise
+    raise e
+  File "/d/src/git/moat/moat/parser.py", line 198, in _do_parse
+    self._parseStep(t,txt,beg,end,line)
+  File "/d/src/git/moat/moat/parser.py", line 287, in _parseStep
+    self.proc.simple_statement(self.p_args)
+  File "/d/src/git/moat/moat/interpreter.py", line 209, in simple_statement
+    self.error(self,ex)
+  File "/d/src/git/moat/moat/interpreter.py", line 110, in error
+    reraise(err)
+  File "/d/src/git/moat/moat/twist.py", line 100, in reraise
+    raise e
+  File "/d/src/git/moat/moat/interpreter.py", line 206, in simple_statement
+    fn.run(self.ctx)
+  File "../modules/fs20switch.py", line 472, in run
+    d.set(event[0],ext, handler=handler)
+  File "../modules/fs20switch.py", line 296, in set
+    self.parent.send(d, handler=handler)
+  File "/d/src/git/moat/moat/fs20sw.py", line 72, in send
+    raise RuntimeError("No FS20 handler known")
 RuntimeError: No FS20 handler known

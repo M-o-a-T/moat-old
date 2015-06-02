@@ -19,7 +19,7 @@ Level: INFO
 Queue: 0
 facility: 168
 facility_name: local5
-address: (u'localhost', 55514)
+address: ('localhost', 55514)
 level: 2
 level_name: info
 .
