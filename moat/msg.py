@@ -386,7 +386,7 @@ class MsgFactory(object):
 				self._msg_queue.put(msg)
 				super(xself.cls,self).down_event()
 		xself.cls = _MsgForwarder
-		xself.cls.__name__ = cls.__name__+"_forwarder"
+		xself.cls.__name__ = str(cls.__name__+"_forwarder")
 
 	def __call__(self,q):
 		return self.cls(q)

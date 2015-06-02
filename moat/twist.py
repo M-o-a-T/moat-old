@@ -144,7 +144,13 @@ class Job(object):
 		self.g = g
 		self.a = a
 		self.k = k
-		self.name = SName("_"+str(g))
+		try:
+			self.name = SName("_"+str(g))
+		except UnicodeDecodeError:
+			try:
+				self.name = SName("_"+str(g)[:-5])
+			except UnicodeDecodeError:
+				self.name = SName("_"+str(g)[:-10])
 
 # Log all threads, wait for them to exit.
 gjob=0

@@ -128,7 +128,7 @@ set rrd value ‹name…›
 		# Using "N:" may run into a RRD bug
 		# if we're really close to the next minute
 		try:
-			rrdtool.update(s.upath, "-t",s.udataset, now().strftime("%s")+":"+six.text_type(event[0]).encode("utf-8"))
+			rrdtool.update(s.upath, str("-t"),s.udataset, str(now().strftime("%s")+":"+six.text_type(event[0])).encode("utf-8"))
 		except Exception as e:
 			fix_exception(e)
 			if "minimum one second step" in str(e):
