@@ -1,3 +1,9 @@
+moat (0.7.8) smurf; urgency=medium
+
+  * stupid indents
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Tue, 02 Jun 2015 20:35:44 +0200
+
 moat (0.7.7) smurf; urgency=medium
 
   * Add 'path' handler to 'exec' module
