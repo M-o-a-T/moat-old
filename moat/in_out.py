@@ -28,6 +28,8 @@ This is the core of external input and output.
 
 """
 
+import six
+
 from moat.statement import Statement, main_words, AttributedStatement,WordAttached
 from moat.check import Check,register_condition,unregister_condition
 from moat.base import Name,SName
