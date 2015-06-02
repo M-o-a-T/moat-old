@@ -27,8 +27,6 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 This module is the basis for processing FS20 datagrams.
 """
 
-from __future__ import division,absolute_import
-
 from moat.event import Event
 from moat.run import simple_event
 from moat.context import Context
