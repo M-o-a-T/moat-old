@@ -63,13 +63,12 @@ class MonitorAgain(RuntimeError):
 	"""The monitor is not ready yet; retry please"""
 	pass
 
+@six.python_2_unicode_compatible
 class MonitorError(RuntimeError):
 	def __init__(self,w):
 		self.monitor = w
 	def __str__(self):
-		return self.text % (" ".join(str(x) for x in self.monitor.name),)
-	def __unicode__(self):
-		return self.text % (" ".join(unicode(x) for x in self.monitor.name),)
+		return self.text % (" ".join(six.text_type(x) for x in self.monitor.name),)
 
 class DupMonitorError(MonitorError):
 	text = u"A monitor ‹%s› already exists"

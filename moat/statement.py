@@ -46,6 +46,7 @@ from moat.base import Name,SName
 
 import gevent
 
+@six.python_2_unicode_compatible
 class UnknownWordError(KeyError):
 	def __init__(self,word,where):
 		self.word = word
@@ -53,7 +54,6 @@ class UnknownWordError(KeyError):
 
 	def __str__(self):
 		return u"Cannot find word ‹%s› in ‹%s›" % (" ".join(six.text_type(x) for x in self.word), " ".join(self.where.name))
-	__unicode__=__str__
 
 class Statement(object):
 	"""\
@@ -292,10 +292,12 @@ class IgnoreStatement(Statement):
 
 # statement list
 
+@six.python_2_unicode_compatible
 class BadArgs(RuntimeError):
 	def __str__(self):
 		return "Mismatch: %s does not fit %s" % (repr(self.args[0]),repr(self.args[1]))
 
+@six.python_2_unicode_compatible
 class BadArgCount(RuntimeError):
 	def __str__(self):
 		return "The number of event arguments does not match"

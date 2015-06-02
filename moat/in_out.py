@@ -59,6 +59,7 @@ Outputs = Outputs()
 Outputs.does("del")
 register_condition(Outputs.exists)
 
+@six.python_2_unicode_compatible
 class BadValue(RuntimeError):
 	"""The input doesn't match the expected values"""
 	def __init__(self, inp,val):
@@ -66,7 +67,6 @@ class BadValue(RuntimeError):
 		self.val = val
 	def __str__(self):
 		return "BadValue: read %s: bad value for %s" % (self.val,self.inp)
-	
 
 inputmakers = {}
 outputmakers = {}

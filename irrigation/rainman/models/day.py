@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
-
-##  Copyright © 2012, Matthias Urlichs <matthias@urlichs.de>
+from __future__ import absolute_import, print_function, division, unicode_literals
+##
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -13,8 +18,13 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
-from __future__ import division,absolute_import
+import six
+
 from rainman.models import Model
 from django.db import models as m
 from rainman.utils import now, range_union,range_intersection, RangeMixin
@@ -24,13 +34,13 @@ from django.utils.timezone import get_current_timezone,make_aware,make_naive
 
 import re
 
+@six.python_2_unicode_compatible
 class Day(Model,RangeMixin):
 	"""A union of possible elements"""
 	class Meta(Model.Meta):
 		db_table="rainman_day"
 	def __str__(self):
 		return self.name
-	__unicode__=__str__
 
 	name = m.CharField(max_length=30, unique=True)
 
@@ -40,9 +50,9 @@ class Day(Model,RangeMixin):
 	def _range(self,start,end):
 		return range_union(*(x._range(start,end) for x in self.times.all()))
 
-
 TimeSplit = re.compile('([-+]?\\d+)?\\s*(\\w+)(?:\s+|$)')
 
+@six.python_2_unicode_compatible
 class DayTime(Model,RangeMixin):
 	"""One element of a time description which is tested"""
 	class Meta(Model.Meta):
@@ -50,7 +60,6 @@ class DayTime(Model,RangeMixin):
 		db_table="rainman_daytime"
 	def __str__(self):
 		return self.descr
-	__unicode__=__str__
 
 	descr = m.CharField(max_length=200)
 	day = m.ForeignKey(Day,related_name="times")
@@ -75,13 +84,13 @@ class DayTime(Model,RangeMixin):
 			yield (make_aware(a,get_current_timezone()), b-a)
 			start=b
 
+@six.python_2_unicode_compatible
 class DayRange(Model,RangeMixin):
 	"""An intersection of possible elements"""
 	class Meta(Model.Meta):
 		db_table="rainman_dayrange"
 	def __str__(self):
 		return self.name
-	__unicode__=__str__
 
 	name = m.CharField(max_length=30, unique=True)
 	comment = m.CharField(max_length=200, blank=True,null=True)

@@ -72,6 +72,7 @@ def report_(err, verbose=False):
 
 seqnum = 0
 
+@six.python_2_unicode_compatible
 class WorkItem(object):
 	u"""\
 		One particular thing to do.
@@ -140,6 +141,7 @@ class WorkItem(object):
 	def __str__(self):
 		return repr(self)
 
+@six.python_2_unicode_compatible
 class WorkSequence(WorkItem):
 	"""\ 
 		A WorkSequence encapsulates things that are to be done in
@@ -369,6 +371,7 @@ class ConcurrentWorkSequence(WorkSequence):
 				yield prefix+p+r
 				p = u"  "
 
+@six.python_2_unicode_compatible
 class Worker(WorkItem):
 	"""\
 		This is a generic worker. It accepts an event and does things to it.
@@ -402,7 +405,6 @@ class Worker(WorkItem):
 
 	def __str__(self):
 		return u"⇒%s:%s" % (self.__class__.__name__, self.name)
-	__unicode__=__str__
 
 	def report(self, verbose=False):
 		yield "%s: %s" % \

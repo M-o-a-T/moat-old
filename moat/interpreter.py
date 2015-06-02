@@ -47,6 +47,7 @@ from moat.twist import fix_exception,reraise
 import sys
 import traceback
 
+@six.python_2_unicode_compatible
 class InputEvent(Event):
 	"""An event that's just a line from the interpreter"""
 	def _name_check(self,name):
@@ -58,7 +59,6 @@ class InputEvent(Event):
 			return unicode(self.name)
 		except Exception:
 			return u"⌁ REPORT_ERROR: "+repr(self.name)
-	__unicode__=__str__
 
 	def report(self, verbose=False):
 		try:

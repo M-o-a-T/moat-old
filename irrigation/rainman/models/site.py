@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
-
-##  Copyright © 2012, Matthias Urlichs <matthias@urlichs.de>
+from __future__ import absolute_import, print_function, division, unicode_literals
+##
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -13,19 +18,24 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
-from __future__ import division,absolute_import
+import six
+
 from rainman.models import Model
 from django.db import models as m
 from datetime import timedelta
 
+@six.python_2_unicode_compatible
 class Site(Model):
 	"""One place with stuff to irrigate."""
 	class Meta(Model.Meta):
 		db_table="rainman_site"
 	def __str__(self):
 		return self.name
-	__unicode__=__str__
 	name = m.CharField(max_length=200, unique=True)
 	comment = m.CharField(max_length=200, blank=True)
 	var = m.CharField(max_length=200, unique=True, help_text="name in MoaT", blank=True)

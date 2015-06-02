@@ -63,6 +63,7 @@ class States(Collection):
 States = States()
 States.does("del")
 
+@six.python_2_unicode_compatible
 class StateChangeError(Exception):
 	no_backtrace = True
 	def __init__(self,s,v):

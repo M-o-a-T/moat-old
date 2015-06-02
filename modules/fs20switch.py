@@ -84,6 +84,7 @@ for a,b in switch_codes.items():
 	if b is not None:
 		switch_names[b]=a
 
+@six.python_2_unicode_compatible
 class CannotDoError(RuntimeError):
 	"""can't do this thing"""
 	def __init__(self,switch,what):
@@ -91,8 +92,6 @@ class CannotDoError(RuntimeError):
 		self.what = what
 	def __str__(self):
 		return u"%s cannot do ‹%s›" % (unicode(self.switch), self.what)
-	__unicode__=__str__
-		
 
 class SwitchGroups(Collection):
 	name = Name("fs20","code")
@@ -103,6 +102,7 @@ class igroup(group):
 	def __init__(self):
 		super(igroup,self).__init__(self.code,6)
 
+@six.python_2_unicode_compatible
 class SwitchGroup(Collected,igroup):
 	"""\
 	Switches which share a house code.
@@ -135,7 +135,6 @@ class SwitchGroup(Collected,igroup):
 
 	def __str__(self):
 		return u"FS20_SwitchGroup ‹%s›" % (self.name,)
-	__unicode__=__str__
 
 	def __repr__(self):
 		try:
@@ -198,6 +197,7 @@ class Switches(Collection):
 Switches = Switches()
 Switches.does("del")
 
+@six.python_2_unicode_compatible
 class Switch(Collected):
 	"""\
 	This is the internal representation of a single fs20-addressable
@@ -247,7 +247,6 @@ class Switch(Collected):
 
 	def __str__(self):
 		return u"FS20_Switch ‹%s›" % (self.name,)
-	__unicode__=__str__
 
 	def __repr__(self):
 		try:

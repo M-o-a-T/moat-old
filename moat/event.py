@@ -32,6 +32,7 @@ import warnings
 from moat.base import Name,RaisedError
 from moat.context import Context
 
+@six.python_2_unicode_compatible
 class TrySomethingElse(RuntimeError):
 	"""Error if a conditional does not match"""
 	def __init__(self,*args):
@@ -55,6 +56,7 @@ class EventNoNameError(ValueError):
 
 event_id = 0
 
+@six.python_2_unicode_compatible
 class Event(object):
 	"""\
 		This is an event. It happens and gets analyzed by the system.
@@ -93,7 +95,6 @@ class Event(object):
 			return u"↯."+six.text_type(self.name)
 		except Exception:
 			return "↯ REPORT_ERROR: "+repr(self.name)
-	__unicode__=__str__
 
 	def report(self, verbose=False):
 		try:

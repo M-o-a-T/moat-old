@@ -23,8 +23,6 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##  Thus, do not remove the next line, or insert any blank lines above.
 ##BP
 
-from __future__ import division,absolute_import
-
 """\
 This module is the basis for processing FS20 datagrams.
 """
@@ -45,6 +43,7 @@ handlers = []
 handler_names = {}
 default_handler = None
 
+@six.python_2_unicode_compatible
 class WrongDatagram(TypeError):
 	"""The datagram could not be recognized"""
 	def __init__(self,data=None):

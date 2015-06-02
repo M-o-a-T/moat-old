@@ -60,12 +60,12 @@ class Timeslotted(object):
 #	def slot_down(self):
 #		pass
 
+@six.python_2_unicode_compatible
 class TimeslotError(RuntimeError):
 	def __init__(self,w):
 		self.timeslot = w
 	def __str__(self):
-		return self.text % (" ".join(unicode(x) for x in self.timeslot.name),)
-	__unicode__=__str__
+		return self.text % (" ".join(six.text_type(x) for x in self.timeslot.name),)
 
 class AlreadyRunningError(TimeslotError):
 	text = u"A The timer ‹%s› is already active"

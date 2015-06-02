@@ -183,6 +183,7 @@ class Collected(object):
 			"""
 		return None
 
+@six.python_2_unicode_compatible
 class CKeyError(KeyError):
 	def __init__(self,name,coll):
 		self.name = name
@@ -191,8 +192,8 @@ class CKeyError(KeyError):
 		return u"‹%s ‹%s› %s›" % (self.__class__.__name__, SName(self.name),self.coll)
 	def __str__(self):
 		return u"I could not find an entry for ‹%s› in %s." % (SName(self.name),self.coll)
-	__unicode__=__str__
 
+@six.python_2_unicode_compatible
 class CCollError(KeyError):
 	def __init__(self,name):
 		self.name = name
@@ -200,7 +201,6 @@ class CCollError(KeyError):
 		return u"‹%s %s›" % (self.__class__.__name__, SName(self.name))
 	def __str__(self):
 		return u"‹%s› is a group, not an item." % (SName(self.name),)
-	__unicode__=__str__
 
 def get_collect(name, allow_collection=False):
 	c = None

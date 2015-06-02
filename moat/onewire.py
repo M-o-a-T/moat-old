@@ -61,6 +61,7 @@ MAX_TRIES = 5 # retrying a message until failure
 
 PERSIST=True # Default
 
+@six.python_2_unicode_compatible
 class DisconnectedDeviceError(RuntimeError):
 	"""A devince has vanished."""
 	no_backtrace = True
