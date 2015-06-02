@@ -51,7 +51,7 @@ load_module("ifelse")
 from optparse import OptionParser
 parser = OptionParser(conflict_handler="resolve")
 parser.add_option("-h","--help","-?", action="help",
-	help="print(this help text"))
+	help="print this help text")
 parser.add_option("-t", "--trace", dest="debuglevel", action="store",
 	help="trace level (TRACE,DEBUG,INFO,WARN,ERROR,PANIC,NONE)", default="PANIC")
 parser.add_option("-p", "--pidfile", dest="pidfile", action="store",
