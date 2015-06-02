@@ -41,6 +41,7 @@ from moat import logging
 from moat.twist import Jobber,fix_exception
 from moat.module import Module
 from moat.logging import log,DEBUG
+from moat.interpreter import Interpreter
 from moat.event_hook import OnEventBase
 
 from dabroker.util import import_string
@@ -82,6 +83,12 @@ class Env(object):
 
 	def trigger(self, *a,**k):
 		simple_event(self.ctx, *a,**k)
+
+	def do(self,*a,**k):
+		ctx = self.ctx(**k)
+		if len(a)==1:
+			a = a[0].split(' ')
+		Interpreter(ctx).simple_statement(a)
 
 class ExecHandler(AttributedStatement,Jobber):
 	name="exec"

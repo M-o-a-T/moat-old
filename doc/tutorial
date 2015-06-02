@@ -706,3 +706,11 @@ Trigger an event.
 
 Execution of event handlers always is asynchronous.
 
+do
+--
+
+Call back to MoaT.
+
+	env.do("log DEBUG Calling back")
+
+Similar to `trigger`, you can set context values.

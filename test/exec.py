@@ -37,3 +37,4 @@ def called(env,*a,**k):
     env.on("test","me","not", doc="dummy")(not_running)
     env.trigger("test","it", what="ever")
     log(TRACE,"PY Proc done")
+    env.do("log DEBUG 'do' works")
