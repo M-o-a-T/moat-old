@@ -10,6 +10,7 @@ Build-Depends: debhelper (>= 5),
  python-all-dev (>> 2.6.6-3~), 
  owserver | owfs,
  python-sqlmix (>= 0.9.29),
+ python-six (>= 1.9),
  python-pysqlite2,
  python-amqp,
  portaudio19-dev,
@@ -24,6 +25,7 @@ Build-Depends: debhelper (>= 5),
  python3-amqp,
  python3-gevent,
  python3-setuptools,
+ python3-six (>= 1.9),
  python3-sqlmix,
 X-Also-Depends: avr-libc, gcc-avr
 Build-Depends-Indep: python-support
@@ -49,6 +51,7 @@ Description: A scripted event-based monitoring and control system
 Package: python-moat
 Architecture: all
 Depends: ${misc:Depends}, ${python:Depends},
+ python-six (>= 1.9),
  python-sqlmix (>= 0.9.26),
  python-gevent (>= 1.0),
  python-rpyc,
@@ -75,6 +78,7 @@ Package: python3-moat
 Architecture: all
 Depends: ${misc:Depends}, ${python:Depends},
  python3-sqlmix (>= 0.9.26),
+ python3-six (>= 1.9),
  python3-gevent (>= 1.0),
  python3-dabroker,
  python3-pytz | python3-tz,
