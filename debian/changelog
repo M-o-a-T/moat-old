@@ -1,3 +1,9 @@
+moat (0.7.7) smurf; urgency=medium
+
+  * Add 'path' handler to 'exec' module
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Tue, 02 Jun 2015 18:31:40 +0200
+
 moat (0.7.6) smurf; urgency=medium
 
   * add exec: env.do
