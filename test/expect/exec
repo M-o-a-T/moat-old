@@ -4,20 +4,30 @@ TRACE Create OnEvtHandler: test¦me
 TRACE NewHandler 5
 TRACE Create OnEvtHandler: run¦test
 TRACE NewHandler 6
+TRACE Create OnEvtHandler: test¦it
+TRACE NewHandler 7
 _on 5 :: test¦me (51)
 _on 6 :: run¦test (51)
+_on 7 :: test¦it (51)
 .
 IEVENT: run¦test
 TRACE PY Proc called <Env obj> ('one', 'two') {}
-TRACE NewHandler 9
 TRACE NewHandler 10
+TRACE NewHandler 11
 TRACE PY Proc done
 EVENT: wait¦start¦_wait¦t1
      : loglevel=0
      : end_time=0.1
+EVENT: test¦it
+     : what=ever
+     : words=‹global_words: Global 2›
+     : out=<test.logwrite obj>
+     : also=two
+DEBUG Y what ever
 TRACE 2003-04-05 06:07:08.150000 _wait¦t1: Fake timer done
 _on 5 :: test¦me (51)
 _on 6 :: run¦test (51)
+_on 7 :: test¦it (51)
 foo test bar :: test¦me (51)
 test me not :: test¦me¦not (51)
 .

@@ -34,7 +34,7 @@ import six
 import gevent
 from moat.statement import Statement, AttributedStatement, main_words
 from moat.event import Event
-from moat.run import process_failure
+from moat.run import process_failure, simple_event
 from moat.context import Context
 from moat.base import SName, Name
 from moat import logging
@@ -79,6 +79,9 @@ class Env(object):
 			OnEventExec(self.parent, args, name, fn)
 			return fn
 		return dec
+
+	def trigger(self, *a,**k):
+		simple_event(self.ctx, *a,**k)
 
 class ExecHandler(AttributedStatement,Jobber):
 	name="exec"

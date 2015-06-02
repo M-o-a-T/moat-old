@@ -696,3 +696,13 @@ The `on` method is a decorator to add event handling:
 
 which will call the handler whenever that event happens.
 
+trigger
+-------
+
+Trigger an event.
+
+	import datetime
+	trigger("run","me","now", some_data="some_value")
+
+Execution of event handlers always is asynchronous.
+
