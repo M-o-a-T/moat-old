@@ -103,10 +103,10 @@ class run_logger(BaseLogger):
 		scp = os.path.join("scripts",self.filename+"_exit")
 		if not os.path.exists(scp):
 			scp = os.path.join("test",scp)
+		sys.stdout.flush()
+		sys.stderr.flush()
+		self.data.flush()
 		if os.path.exists(scp):
-			sys.stdout.flush()
-			sys.stderr.flush()
-			self.data.flush()
 			job = Popen(scp)
 			res = job.wait()
 			if res != 0:
