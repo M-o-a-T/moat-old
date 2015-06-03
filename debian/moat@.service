@@ -5,6 +5,9 @@ After=rabbitmq-server.service
 
 [Service]
 ExecStart=/usr/sbin/moatd /etc/moat/%i.moat
+Type=simple
+RestartSec=15
+Restart=always
 WorkingDirectory=/etc/moat
 User=moat
 Group=moat
