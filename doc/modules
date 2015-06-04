@@ -2691,3 +2691,86 @@ list amqp listener
 
 Returns a list of listeners, or deails about one listener.
 
+
+====
+exec
+====
+
+Runs arbitrary Python code.
+
+
+----
+exec
+----
+
+Calls Python from MoaT.
+
+        exec foo.bar one two three:
+                param what ever
+
+will load module `foo` and call its procedure `bar` like this:
+
+        foo.bar(ENV, "one", "two", "three", what="ever")
+
+Execution is synchronous.
+
+----
+path
+----
+
+Add a directory where MoaT searches Python modules.
+
+        path '/etc/moat'
+
+-----------
+Environment
+-----------
+
+The environment passed to Python has these attributes:
+
+on
+--
+
+A decorator to add event handling. Unnamed parameters denote the event.
+An optional handler name is passed in 'name' and can be used to delete the
+handler, if necessary.
+
+	@ENV.on("run","me","now", name=["runme","handler"]):
+	def handler(event):
+		…
+
+	def cleanup(env):
+		env.do.del.on("runme handler")
+
+`do` and `on` support auto-splitting, so the above is exactly the same as:
+
+	@ENV.on("run.me.now", name="runme handler"):
+	def handler(event):
+		…
+
+	def cleanup(env):
+		env.do.del.on("runme","handler")
+
+
+trigger
+-------
+
+Trigger an event.
+
+	import datetime
+	trigger("run","me","now", some_data="some_value")
+
+Whether the event is executed synchronously or not is not specified.
+
+do
+--
+
+Call back to MoaT.
+
+        env.do("log DEBUG Calling back")
+        env.do.log("DEBUG Calling back")
+
+You can set context values (similar to `trigger`).
+
+The above commands are equivalent.
+
