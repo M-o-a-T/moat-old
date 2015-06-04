@@ -28,6 +28,10 @@ Documentation
 Code
 ====
 
+* support KNX
+
+* support systemd keepalive
+
 * teach runschedule to reload the current list of
   valves/feeds/meters/controllers/whatever.
 
@@ -40,8 +44,6 @@ Code
 * wago monitor: mask the 'retry' stanza.
 
 * Network error: add the destination to the error message
-
-* RPC: support arbitrary commands, i.e. a "real" interpreter
 
 * restart wago connections cleanly (query the monitor list!)
   (actually implemented, but needs a test case)
@@ -77,23 +79,12 @@ Code
 
 * timeslots: alert after specified number of cycles without re-sync
 
-* state handling: wait for a state to be unlocked instead of blindly
-  assuming that it must be recursive; store in the context whether
-  that's the case
-
-* delayed state changes, e.g. light coming up, to prevent spurious
-  events from car headlights etc.
-
 FS20 / AVR
 ==========
 
 * Document the stuff that exists now
 
 * Create schematics for AVR
-
-* AVR: write an 1wire client
-
-* AVR: write send/receive interlock
 
 * AVR: write high-level code to talk to FHT controllers
 
@@ -104,8 +95,6 @@ FS20 / AVR
 
 * AVR: Reduce the need for three timers, one is sufficient
 
-* Create schematics for audio
-
 * EM:
   - Warn when timeslots start to wander too close together
   - Store last values someplace.
@@ -114,31 +103,19 @@ FS20 / AVR
 
 * Handle repeaters.
 
-* Implement a FHZ1000/FHZ1300 interface.
-
 * Ignore repeated commands.
 
 * Add send options (how often to repeat immediately / after a delay)
 
 * Handle heating control.
 
-  - interface with the controller
+  - talk to the controller
 
   - control the radiators
 
-* Handle weather devices and similar sensors.
-
-* Audio: Implement an option to control loop speed
-
-* Audio: implement native pulseaudio
-
-* Audio: Figure out why portaudio is broken WRT
-  - async input
-  - ALSA
+* Handle more weather devices and similar sensors.
 
 * Suppport weather sensors, window-open sensors, and similar gadgets.
-
-* Split the audio processors off to their own subpackage.
 
 
 Implement a web server
@@ -231,6 +208,7 @@ net
 
   - send to all of them
 
+* multicast
 
 Parser
 ======
@@ -244,8 +222,12 @@ Parser
   - requires to store code more sensibly before executing any of it
 
 
-Syscalls
-========
+Python
+======
 
-* add a way to run external programs ("system")
+* implement more callbacks from Python to MoaT
+
+  - shutdown handler
+
+  - reading variables
 
