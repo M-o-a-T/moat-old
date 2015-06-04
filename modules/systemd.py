@@ -56,10 +56,6 @@ keepalive
 	- sends "WATCHDOG=1" to systemd
 """
 
-	def __init__(self,*a,**k):
-		self.vars = {}
-		super(ExecHandler,self).__init__(*a,**k)
-
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		if event:
@@ -67,7 +63,37 @@ keepalive
 
 		sd.notify("WATCHDOG=1")
 
-class KeepaliveModule(Module):
+class ReadyHandler(Statement):
+	name="send ready"
+	doc="tell systemd we're live"
+	long_doc="""\
+send ready
+	- sends "READY=1" to systemd
+"""
+
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if event:
+			raise SyntaxError("No parameters here")
+
+		sd.notify("READY=1")
+
+class SendStatusHandler(Statement):
+	name="send status"
+	doc="tell systemd what's going on"
+	long_doc="""\
+send status foo bar
+	- sends "STATUS=foo bar" to systemd
+"""
+
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if not event:
+			raise SyntaxError("No parameters make no sense")
+
+		sd.notify("STATUS="+' '.join(event))
+
+class SystemdModule(Module):
 	"""\
 		Talks to systemd
 		"""
@@ -75,9 +101,13 @@ class KeepaliveModule(Module):
 	info = "call out to Python"
 
 	def load(self):
+		main_words.register_statement(SendStatusHandler)
 		main_words.register_statement(KeepaliveHandler)
+		main_words.register_statement(ReadyHandler)
 	
 	def unload(self):
+		main_words.unregister_statement(SendStatusHandler)
 		main_words.unregister_statement(KeepaliveHandler)
+		main_words.unregister_statement(ReadyHandler)
 
-init = ExecModule
+init = SystemdModule

@@ -2795,3 +2795,16 @@ restarted.
 			wait: for 5 sec
 			keepalive
 
+----------
+send ready
+----------
+
+Tell systemd that your startup has completed.
+
+-----------
+send status
+-----------
+
+Tell systemd what's happening, so that "systemd status moat@whatever" displays
+something meaningful.
+
