@@ -11,11 +11,12 @@ _on 6 :: run¦test (51)
 _on 7 :: test¦it (51)
 .
 IEVENT: run¦test
-TRACE PY Proc called <Env obj> ('one', 'two') {}
+TRACE PY Proc called <Env obj> (u'one', u'two') {}
 TRACE NewHandler 10
 TRACE NewHandler 11
-TRACE PY Proc done
 DEBUG 'do' works
+DEBUG 'do.log' works
+TRACE PY Proc done
 EVENT: wait¦start¦_wait¦t1
      : loglevel=0
      : end_time=0.1
@@ -36,7 +37,7 @@ EVENT: wait¦done¦_wait¦t1
      : loglevel=0
 IEVENT: test¦me
 DEBUG Parallel MoaT handler
-TRACE PY Event called ⌁ REPORT_ERROR: Name('test', 'me')
+TRACE PY Event called test¦me
 EVENT: wait¦start¦_wait¦t2
      : loglevel=0
      : end_time=0.2

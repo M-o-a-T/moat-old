@@ -59,11 +59,30 @@ class OnEventExec(OnEventBase):
 			fix_exception(ex)
 			process_failure(ex)
 
+class EnvRunner(object):
+	def __init__(self,ctx, name=()):
+		self.ctx = ctx
+		self.name = name
+
+	def __call__(self,*a,**k):
+		ctx = self.ctx(**k)
+		if len(a)==1:
+			a = a[0].split(' ')
+		Interpreter(ctx).simple_statement(self.name+tuple(a))
+	
+	def __getattr__(self,k):
+		if k.startswith('_'):
+			return super(EnvRunner,self).__getattr__(k)
+		r = EnvRunner(self.ctx, self.name+(k,))
+		setattr(self,k,r)
+		return r
+
 class Env(object):
 	"""A wrapper class for hooking up Python code"""
 	def __init__(self, parent, ctx):
 		self.parent = parent
 		self.ctx = ctx
+		self.do = EnvRunner(ctx)
 	
 	def on(self, *args, **kw):
 		doc=kw.pop('doc',None)
@@ -83,12 +102,6 @@ class Env(object):
 
 	def trigger(self, *a,**k):
 		simple_event(self.ctx, *a,**k)
-
-	def do(self,*a,**k):
-		ctx = self.ctx(**k)
-		if len(a)==1:
-			a = a[0].split(' ')
-		Interpreter(ctx).simple_statement(a)
 
 class ExecHandler(AttributedStatement,Jobber):
 	name="exec"
