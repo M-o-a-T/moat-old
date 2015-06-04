@@ -14,6 +14,7 @@ Build-Depends: debhelper (>= 5),
  python-pysqlite2,
  python-amqp,
  python-pkg-resources,
+ python-pytz | python-tz,
  portaudio19-dev,
  python-gevent,
  libevent-dev,
@@ -29,6 +30,7 @@ Build-Depends: debhelper (>= 5),
  python3-setuptools,
  python3-six (>= 1.9),
  python3-sqlmix,
+ python3-pytz | python3-tz,
 X-Also-Depends: avr-libc, gcc-avr
 Build-Depends-Indep: python-support
 Standards-Version: 3.7.2
