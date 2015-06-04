@@ -2774,3 +2774,24 @@ You can set context values (similar to `trigger`).
 
 The above commands are equivalent.
 
+
+
+=======
+systemd
+=======
+
+This module contains systemd-related functions.
+
+---------
+keepalive
+---------
+
+If you start your daemon with `WatchdogSec=` set to some number, you need
+to call `keepalive` at least that often to prevent your service from being
+restarted.
+
+	async:
+		while true:
+			wait: for 5 sec
+			keepalive
+

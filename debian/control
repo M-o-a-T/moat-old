@@ -30,6 +30,8 @@ Build-Depends: debhelper (>= 5),
  python3-setuptools,
  python3-six (>= 1.9),
  python3-sqlmix,
+ python3-systemd,
+ python3-sqlmix,
  python3-pytz | python3-tz,
 X-Also-Depends: avr-libc, gcc-avr
 Build-Depends-Indep: python-support
@@ -89,6 +91,7 @@ Depends: ${misc:Depends}, ${python:Depends},
  python3-pytz | python3-tz,
  python3-amqp,
  python3-pkg-resources,
+ python3-systemd,
  moat,
 Recommends: python3-rrdtool, owfs
 Description: A scripted event-based monitoring and control system
