@@ -38,7 +38,7 @@ from moat.run import process_failure, simple_event
 from moat.context import Context
 from moat.base import SName, Name
 from moat import logging
-from moat.twist import Jobber,fix_exception
+from moat.twist import fix_exception
 from moat.module import Module
 from moat.logging import log,DEBUG
 from moat.interpreter import Interpreter
@@ -103,7 +103,7 @@ class Env(object):
 	def trigger(self, *a,**k):
 		simple_event(self.ctx, *a,**k)
 
-class ExecHandler(AttributedStatement,Jobber):
+class ExecHandler(AttributedStatement):
 	name="exec"
 	doc="run Python code"
 	long_doc="""\
