@@ -44,6 +44,7 @@ from moat.logging import log,DEBUG
 from moat.interpreter import Interpreter
 from moat.event_hook import OnEventBase
 from moat.collect import collections
+from moat.check import check_condition
 
 from dabroker.util import import_string
 
@@ -96,12 +97,30 @@ class EnvRunner(object):
 		setattr(self,k,r)
 		return r
 
+class EnvTester(object):
+	def __init__(self,ctx, name=()):
+		self.ctx = ctx
+		self.name = name
+
+	def __call__(self,*a):
+		if len(a)==1:
+			a = a[0].split(' ')
+		return check_condition(self.env, self.name+tuple(a))
+	
+	def __getattr__(self,k):
+		if k.startswith('_'):
+			return super(EnvTester,self).__getattr__(k)
+		r = EnvTester(self.ctx, self.name+(k,))
+		setattr(self,k,r)
+		return r
+
 class Env(object):
 	"""A wrapper class for hooking up Python code"""
 	def __init__(self, parent, ctx):
 		self.parent = parent
 		self.ctx = ctx
 		self.do = EnvRunner(ctx)
+		self.test = EnvTester(ctx)
 	
 	def on(self, *args, **kw):
 		doc=kw.pop('doc',None)

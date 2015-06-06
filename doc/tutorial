@@ -751,3 +751,11 @@ This dict allows you to access the MoaT data store, as reported by `list`.
 
 You need to pass multi-part keys as moat.base.Name() objects.
 
+test
+----
+
+This works like `do` but mirrors MoaT's conditional tests.
+
+	if env.test('true'):
+		env.do.log.DEBUG('That works.')
+

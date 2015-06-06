@@ -14,6 +14,7 @@ IEVENT: run¦test
 TRACE PY Proc called <Env obj> (u'one', u'two') {}
 TRACE NewHandler 10
 TRACE NewHandler 11
+DEBUG true
 EVENT: wait¦start¦_wait¦t1
      : loglevel=0
      : end_time=0.1
