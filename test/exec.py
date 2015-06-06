@@ -36,6 +36,8 @@ def called(env,*a,**k):
     env.on("test","me", doc="Test me harder",name="foo test bar")(running)
     env.on("test","me","not", doc="dummy")(not_running)
     env.trigger("test","it", what="ever")
+    env.do.wait("some delay",_for="0.2 min")
+    env.do.wait("more","delay",_for=(0.3,"min"))
     env.do("log DEBUG 'do' works")
     env.do.log('DEBUG', "'do.log' works")
     log(TRACE,"PY Proc done")

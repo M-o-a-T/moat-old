@@ -64,11 +64,29 @@ class EnvRunner(object):
 		self.ctx = ctx
 		self.name = name
 
-	def __call__(self,*a,**k):
-		ctx = self.ctx(**k)
+	def __call__(self,*a,**kw):
+		attrs = []
+		keys = {}
+		for k,v in kw.items():
+			if k.startswith('_'):
+				if isinstance(v,six.integer_types+six.string_types+(float,)):
+					v = (v,)
+				attrs.append((k[1:],)+tuple(v))
+			else:
+				keys[k]=v
+		ctx = self.ctx(**keys)
 		if len(a)==1:
 			a = a[0].split(' ')
-		Interpreter(ctx).simple_statement(self.name+tuple(a))
+		if attrs:
+			r = Interpreter(ctx).complex_statement(self.name+tuple(a))
+
+			for x in attrs:
+				if len(x) == 2:
+					x = (x[0],)+tuple(x[1].split(" "))
+				r.simple_statement(x)
+			r.done()
+		else:
+			Interpreter(ctx).simple_statement(self.name+tuple(a))
 	
 	def __getattr__(self,k):
 		if k.startswith('_'):
