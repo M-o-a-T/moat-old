@@ -64,6 +64,7 @@ load_module("data")
 load_module("logging")
 load_module("state")
 load_module("wait")
+load_module("amqp")
 
 run("exec",input)
 

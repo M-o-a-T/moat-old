@@ -744,3 +744,10 @@ As usual, auto-split is done on one-word arguments, for convenience:
 
 Use an empty list as argument if you want to call a one-word sub-statement.
 
+data
+----
+
+This dict allows you to access the MoaT data store, as reported by `list`.
+
+You need to pass multi-part keys as moat.base.Name() objects.
+

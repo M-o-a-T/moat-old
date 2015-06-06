@@ -43,6 +43,7 @@ from moat.module import Module
 from moat.logging import log,DEBUG
 from moat.interpreter import Interpreter
 from moat.event_hook import OnEventBase
+from moat.collect import collections
 
 from dabroker.util import import_string
 
@@ -120,6 +121,8 @@ class Env(object):
 
 	def trigger(self, *a,**k):
 		simple_event(self.ctx, *a,**k)
+
+	data = collections
 
 class ExecHandler(AttributedStatement):
 	name="exec"
