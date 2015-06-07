@@ -378,14 +378,17 @@ class OWFSqueue(MsgQueue,Jobber):
 		"""
 	storage = OWbuses.storage
 	ondemand = True
+	bus_paths = None
 
-	def __init__(self, name, host,port, persist=PERSIST, *a,**k):
+	def __init__(self, name, host,port, persist=PERSIST, scan=True, *a,**k):
 		self.ident = (host,port)
 		self.root = OWFSroot(self)
+		self.scan = scan
 		super(OWFSqueue,self).__init__(name=name, factory=MsgFactory(OWFSchannel,name=name,host=host,port=port,persist=persist, **k))
 		if not persist:
 			self.max_send = 1
 		self.nop = None
+		self.bus_paths = set()
 
 	### Bus scanning support
 
@@ -411,8 +414,8 @@ class OWFSqueue(MsgQueue,Jobber):
 				q.set_exception(RuntimeError("Stopped"))
 		self.watch_q = None
 
-	def all_devices(self):
-		seen_mplex = {}
+	def all_devices(self, bus_cb=None):
+		seen_mplex = set()
 		def doit(dev,path=(),key=None):
 			buses = []
 			entries = []
@@ -428,6 +431,8 @@ class OWFSqueue(MsgQueue,Jobber):
 
 			if buses:
 				for b in buses:
+					if bus_cb:
+						bus_cb(path+(b,))
 					for res in doit(dev,path=path+(b,),key=None):
 						yield res
 				return
@@ -444,9 +449,13 @@ class OWFSqueue(MsgQueue,Jobber):
 				yield dn
 				b = b.lower()
 				if b.startswith("1f.") and b not in seen_mplex:
-					seen_mplex[b] = 1
+					seen_mplex.add(b)
+					if bus_cb:
+						bus_cb(p+('main',))
 					for res in doit(dn,key="main"):
 						yield res
+					if bus_cb:
+						bus_cb(p+('aux',))
 					for res in doit(dn,key="aux"):
 						yield res
 
@@ -460,13 +469,24 @@ class OWFSqueue(MsgQueue,Jobber):
 			fix_exception(e)
 			process_failure(e)
 
+			# error only; success below
+			simple_event("onewire","scanned",self.name)
+
 	def _update_all(self):
 		log("onewire",TRACE,"start bus update")
 		old_ids = devices.copy()
 		new_ids = {}
 		seen_ids = {}
+		old_bus = self.bus_paths.copy()
+		new_bus = set()
 
-		for dev in self.all_devices():
+		def bus_cb(path):
+			if path in old_bus:
+				old_bus.remove(path)
+			else:
+				new_bus.add(path)
+
+		for dev in self.all_devices(bus_cb):
 			if dev.id in seen_ids:
 				continue
 			seen_ids[dev.id] = dev
@@ -489,36 +509,45 @@ class OWFSqueue(MsgQueue,Jobber):
 			if dev.bus is self:
 				n_dev += 1
 		
+		for dev in old_bus:
+			self.bus_paths.remove(dev)
+			simple_event("onewire","bus","down", bus=self.name,path=dev)
+		for dev in new_bus:
+			self.bus_paths.add(dev)
+			simple_event("onewire","bus","up", bus=self.name,path=dev)
+
+		# success only, error above
 		simple_event("onewire","scanned",self.name, old=n_old, new=len(new_ids), num=n_dev)
 			
 	def _watcher(self):
 		res = []
 		while True:
-			try:
-				self.update_all()
-			except Exception as ex:
-				fix_exception(ex)
-				process_failure(ex)
-				resl = len(res)
-				while res:
-					q = res.pop()
-					q.set_exception(ex)
-			else:
-				resl = len(res)
-				while res:
-					q = res.pop()
-					q.set(None)
+			if self.scan or res:
+				try:
+					self.update_all()
+				except Exception as ex:
+					fix_exception(ex)
+					process_failure(ex)
+					resl = len(res)
+					while res:
+						q = res.pop()
+						q.set_exception(ex)
+				else:
+					resl = len(res)
+					while res:
+						q = res.pop()
+						q.set(None)
 
-			if TESTING:
-				if resl: d = 10
-				else: d = 30
-			else:
-				if resl: d = 60
-				else: d = 300
+				if TESTING:
+					if resl: d = 10
+					else: d = 30
+				else:
+					if resl: d = 60
+					else: d = 300
 
 			while True:
 				try:
-					q = self.watch_q.get(timeout=(d if not res else 0))
+					q = self.watch_q.get(timeout=(None if not self.scan else d if not res else 0))
 				except Empty:
 					break
 				else:
@@ -532,14 +561,15 @@ class OWFSqueue(MsgQueue,Jobber):
 ow_buses = {}
 
 # factory.
-def connect(host="localhost", port=4304, name=None, persist=PERSIST):
+def connect(host="localhost", port=4304, name=None, persist=PERSIST, scan=True):
 	"""\
 		Set up a queue to a OneWire server.
 		"""
 	assert (host,port) not in ow_buses, "already known host/port tuple"
-	f = OWFSqueue(host=host, port=port, name=name, persist=persist)
+	f = OWFSqueue(host=host, port=port, name=name, persist=persist, scan=scan)
 	ow_buses[(host,port)] = f
-	f.start()
+	if scan:
+		f.start()
 	return f
 
 def disconnect(f):
@@ -632,9 +662,11 @@ class OWFSdevice(Collected):
 			return
 
 		if self.is_up is None:
-			simple_event("onewire","new",typ=self.typ,id=self.id)
+			simple_event("onewire","new",typ=self.typ,id=self.id,bus=self.bus.name,path=self.path)
+			simple_event("onewire","device","new",self.id, typ=self.typ,id=self.id,bus=self.bus.name,path=self.path)
 		self.is_up = True
-		simple_event("onewire","up",typ=self.typ,id=self.id)
+		simple_event("onewire","up",typ=self.typ,id=self.id,bus=self.bus.name,path=self.path)
+		simple_event("onewire","device","up",self.id, typ=self.typ,id=self.id,bus=self.bus.name,path=self.path)
 
 	def go_down(self, _=None):
 		if not self.is_up:
@@ -642,7 +674,8 @@ class OWFSdevice(Collected):
 		self.is_up = False
 		if _ is not None:
 			process_failure(_)
-		simple_event("onewire","down",typ=self.typ,id=self.id)
+		simple_event("onewire","down",typ=self.typ,id=self.id,bus=self.bus.name,path=self.path)
+		simple_event("onewire","device","down",self.id, typ=self.typ,id=self.id,bus=self.bus.name,path=self.path)
 
 	def get(self,key):
 		if not self.bus:

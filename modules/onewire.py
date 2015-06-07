@@ -54,8 +54,10 @@ connect onewire NAME [[host] port]
       The system will emit connection-ready and device-present events.
 """
 
+	scan=True
+
 	def start_up(self):
-		f = connect(name=self.dest, host=self.host, port=self.port)
+		f = connect(name=self.dest, host=self.host, port=self.port, scan=self.scan)
 		buses[self.dest] = f
 		log(TRACE,"New OWFS bus",self.dest,f)
 
@@ -474,6 +476,21 @@ scan onewire NAME
 				raise RuntimeError("scan onewire: unknown bus ‹%s›" % (event[0],))
 			else:
 				return dev.run_watcher()
+
+class Passive(Statement):
+        name="passive"
+        dest = None
+        doc="do not periodically scan the bus"
+
+        long_doc = u"""\
+passive
+  - Don't scan the bus periodically.
+"""
+
+        def run(self,ctx,**k):
+                event = self.params(ctx)
+                self.parent.scan = False
+OWFSconnect.register_statement(Passive)
 
 class OWFSmodule(Module):
 	"""\
