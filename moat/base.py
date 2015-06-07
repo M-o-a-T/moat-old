@@ -29,6 +29,8 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 
 import six
 
+from gevent.lock import RLock
+
 SYS_PRIO = -10
 MIN_PRIO = 0
 MAX_PRIO = 100
@@ -128,23 +130,26 @@ class RaisedError(RuntimeError):
 		def __unicode__(self):
 			return u"%s: %s" % (self.__class__.__name__, " ".join(unicode(x) for x in self.params))
 
+flat_lock = RLock()
+
 def flatten(out,s,p=""):
-	if hasattr(s,"list") and callable(s.list):
-		for ss in s.list():
-			flatten(out,ss,p)
-		return
-	s = list(s)
-	t = s.pop()
-	if p != "":
-		s.insert(0,p)
-	p = u" ".join((str(ss) for ss in s))
-	if hasattr(t,"list") and callable(t.list):
-		t = t.list()
-	if hasattr(t,"next" if six.PY2 else "__next__"):
-		pp = " "*len(p)
-		for tt in t:
-			flatten(out,tt,p)
-			p = pp
-	else:
-		out.put((p,t))
+	with flat_lock:
+		if hasattr(s,"list") and callable(s.list):
+			for ss in s.list():
+				flatten(out,ss,p)
+			return
+		s = list(s)
+		t = s.pop()
+		if p != "":
+			s.insert(0,p)
+		p = u" ".join((str(ss) for ss in s))
+		if hasattr(t,"list") and callable(t.list):
+			t = t.list()
+		if hasattr(t,"next" if six.PY2 else "__next__"):
+			pp = " "*len(p)
+			for tt in t:
+				flatten(out,tt,p)
+				p = pp
+		else:
+			out.put((p,t))
 
