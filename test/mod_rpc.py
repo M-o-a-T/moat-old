@@ -25,7 +25,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##BP
 
 import six
-if six.PY3:
+if six.PY2:
 	import sys; sys.exit(121)
 
 from moat import patch;patch()
