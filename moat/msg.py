@@ -454,9 +454,10 @@ class MsgQueue(Collected,Jobber):
 
 		if ondemand is not None:
 			self.ondemand = ondemand
-		self.start()
 
 		super(MsgQueue,self).__init__()
+
+		self.start()
 	
 	def __del__(self):
 		self.stop_job("job")

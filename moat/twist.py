@@ -258,8 +258,25 @@ class _starting(object):
  
 class Jobber(object):
 	"""A mix-in to run jobs"""
+	def __init__(self):
+		super(Jobber,self).__init__()
+		self._job_attrs = set()
+
+	def _job_list(self):
+		for k in self._job_attrs:
+			yield (k,getattr(self,k,'-'))
+
+	def list(self):
+		yield ("task",self._job_list())
+
+		self = super(Jobber,self)
+		if hasattr(self,'list'):
+			for r in self.list():
+				yield r
+
 	def start_job(self,attr, proc,*a,**k):
 
+		self._job_attrs.add(attr)
 		with log_wait("start",attr,str(self)):
 			while True:
 				j = getattr(self,attr,None)

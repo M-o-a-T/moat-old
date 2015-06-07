@@ -95,6 +95,7 @@ tabsize = 8
 
 class tokizer(Jobber):
 	def __init__(self, output, parent=None, endput=None):
+		super(tokizer,self).__init__()
 		self._output = output
 		self._endput = endput
 		self.parent = parent
