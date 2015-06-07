@@ -88,8 +88,7 @@ class EventCallback(Worker):
 		register_worker(self, self._direct)
 	
 	def list(self):
-		for r in super(EventCallback,self).list():
-			yield r
+		yield super(EventCallback,self)
 		if self.filter:
 			yield "filter",self.filter
 		if self._direct:
@@ -207,8 +206,7 @@ class AMQPclient(Collected,Jobber):
 		super(AMQPclient,self).delete()
 
 	def list(self):
-		for r in super(AMQPclient,self).list():
-			yield r
+		yield super(AMQPclient,self)
 		yield ("host",self.host)
 		yield ("port",self.port)
 		yield ("vhost",self.vhost)
@@ -447,8 +445,7 @@ class AMQPlogger(BaseLogger):
 		super(AMQPlogger,self).delete()
 		
 	def list(self):
-		for r in super(AMQPlogger,self).list():
-			yield r
+		yield super(AMQPlogger,self)
 		yield "parent",self.parent
 		yield "exchange",self.exchange
 		yield "prefix",self.prefix
@@ -593,8 +590,7 @@ class AMQPrecv(Collected):
 		simple_event(*(self.prefix+tuple(msg.routing_key.split('.')[self.strip:])), _direct=self._direct, **data)
 
 	def list(self):
-		for x in super(AMQPrecv,self).list():
-			yield x
+		yield super(AMQPrecv,self)
 		if self._direct:
 			yield "shunt",True
 		yield "connection",self.conn

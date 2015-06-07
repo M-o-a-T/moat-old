@@ -105,8 +105,11 @@ class MsgInfo(object):
 	prio = PRIO_STANDARD
 
 	def list(self):
-		yield ("",repr(self))
+		yield (repr(self),)
 		yield ("priority",self.prio)
+
+		s = super(MsgInfo,self)
+		if hasattr(s,'list'): yield s
 	
 	def error(self,e):
 		process_failure(e)
@@ -193,8 +196,8 @@ class MsgBase(MsgSender,MsgReceiver):
 		super(MsgBase,self).abort()
 
 	def list(self):
-		for r in super(MsgBase,self).list():
-			yield r
+		s = super(MsgBase,self)
+		if hasattr(s,'list'): yield s
 
 		if self.timeout:
 			yield("timeout",self.timeout)
@@ -265,8 +268,7 @@ class MsgRepeater(object):
 		self.queue = queue
 
 	def list(self):
-		for r in super(MsgBase,self).list():
-			yield r
+		yield super(MsgBase,self)
 		yield("redo timeout",self.redo_timeout)
 		yield("armed", self.timer is not None)
 
@@ -305,7 +307,7 @@ class MsgIncoming(object):
 				self.prio = PRIO_STANDARD
 
 	def __repr__(self):
-		s = " ".join(["%s:%s" % (k,repr(v)) for k,v in self.__dict__.items()])
+		s = " ".join(["%s:%s" % (k,repr(v)) for k,v in sorted(self.__dict__.items())])
 		return u"‹%s%s%s›" % (self.__class__.__name__, ": " if s else "", s)
 
 class MsgError(object):
@@ -493,8 +495,7 @@ class MsgQueue(Collected,Jobber):
 		return u"‹%s:%s %s›" % (self.__class__.__name__,self.name,self.state)
 
 	def list(self):
-		for r in super(MsgQueue,self).list():
-			yield r
+		yield super(MsgQueue,self)
 		if self.q is None:
 			yield("queue","dead")
 		else:

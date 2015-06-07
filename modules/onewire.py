@@ -210,8 +210,7 @@ class OWFSmon(Monitor):
 		super(OWFSmon,self).__init__(*a,**k)
 
 	def list(self):
-		for r in super(OWFSmon,self).list():
-			yield r
+		yield super(OWFSmon,self)
 		if self.switch is not None:
 			yield ("switch", self.switch, "on" if self.switched else "off", self.low,self.high)
 
@@ -263,8 +262,7 @@ class OWFSwindmon(Monitor):
 		self.nval = 0
 
 	def list(self):
-		for x in super(OWFSwindmon,self).list():
-			yield x
+		yield super(OWFSwindmon,self)
 		yield ("average",self.avg)
 		yield ("turbulence",1-self.qavg)
 		yield ("values",self.nval)

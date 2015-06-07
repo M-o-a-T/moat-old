@@ -267,12 +267,9 @@ class Jobber(object):
 			yield (k,getattr(self,k,'-'))
 
 	def list(self):
+		s = super(Jobber,self)
+		if hasattr(s,'list'): yield s
 		yield ("task",self._job_list())
-
-		self = super(Jobber,self)
-		if hasattr(self,'list'):
-			for r in self.list():
-				yield r
 
 	def start_job(self,attr, proc,*a,**k):
 

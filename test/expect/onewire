@@ -20,8 +20,8 @@ TRACE conn setstate closed connecting
 TRACE conn connecting OWFSqueue A
 EVENT: onewire¦scanning¦A
 EVENT: wait¦start¦yawn
-     : loglevel=0
      : end_time=11.1
+     : loglevel=0
 TRACE !got UP_EVENT A
 TRACE conn setting up OWFSqueue A
 TRACE conn connected OWFSqueue A
@@ -55,8 +55,8 @@ EVENT: onewire¦bus¦up
      : path=('bus.0',)
 EVENT: onewire¦scanned¦A
      : new=1
-     : old=0
      : num=1
+     : old=0
 DEBUG onewire SEND 0 44 2 6 8192 0 b'/uncached/bus.0/10.000010EF0000/temperature\x00'
 DEBUG onewire RECV 0 7 7 6 7 x0
 DEBUG onewire RECV … 7 b'DS18S20'
@@ -67,26 +67,26 @@ DEBUG onewire done:  ‹ATTRgetmsg 10.000010EF0000 type›
 TRACE conn incoming OWFSqueue A ‹MsgIncoming: data:b'         1.6' prio:2 typ:12›
 DEBUG onewire done:  ‹ATTRgetmsg 10.000010EF0000 temperature›
 EVENT: onewire¦new
-     : id=10.000010ef0000
      : bus=A
-     : typ=DS18S20
+     : id=10.000010ef0000
      : path=('bus.0',)
+     : typ=DS18S20
 EVENT: onewire¦device¦new¦10.000010ef0000
-     : id=10.000010ef0000
      : bus=A
-     : typ=DS18S20
+     : id=10.000010ef0000
      : path=('bus.0',)
+     : typ=DS18S20
 EVENT: onewire¦up
-     : id=10.000010ef0000
      : bus=A
-     : typ=DS18S20
+     : id=10.000010ef0000
      : path=('bus.0',)
+     : typ=DS18S20
 TRACE YesC
 EVENT: onewire¦device¦up¦10.000010ef0000
-     : id=10.000010ef0000
      : bus=A
-     : typ=DS18S20
+     : id=10.000010ef0000
      : path=('bus.0',)
+     : typ=DS18S20
 : ‹Collected OWFSinput:temp›
 name: temp
 type: onewire
@@ -99,8 +99,8 @@ DEBUG onewire SEND 0 44 2 6 8192 0 b'/uncached/bus.0/10.000010EF0000/temperature
 .
 DEBUG onewire SEND 0 44 3 6 2 0 b'/uncached/bus.0/10.000010EF0000/temp_high\x0099'
 EVENT: output¦change¦temphi
-     : value=99
      : prev_value=None
+     : value=99
 DEBUG onewire RECV 0 12 12 6 12 x0
 DEBUG onewire RECV … 12 b'         1.6'
 DEBUG onewire RECV 0 0 -1 6 0 x0
@@ -175,8 +175,8 @@ TRACE onewire got unrecognized name alarm
 DEBUG onewire doneDIR ‹DIRmsg bus.0›
 EVENT: onewire¦scanned¦A
      : new=0
-     : old=0
      : num=1
+     : old=0
 DEBUG onewire SEND 0 23 7 6 0 0 b'/bus.0/10.000010EF0000\x00'
 DEBUG onewire RECV 0 488 0 6 487 x0
 DEBUG onewire RECV … 487 b'/bus.0/10.000010EF0000/address,/bus.0/10.000010EF0000/alias,/bus.0/10.000010EF0000/crc8,/bus.0/10.000010EF0000/errata,/bus.0/10.000010EF0000/family,/bus.0/10.000010EF0000/id,/bus.0/10.000010EF0000/locator,/bus.0/10.000010EF0000/power,/bus.0/10.000010EF0000/r_address,/bus.0/10.000010EF0000/r_id,/bus.0/10.000010EF0000/r_locator,/bus.0/10.000010EF0000/scratchpad,/bus.0/10.000010EF0000/temperature,/bus.0/10.000010EF0000/temphigh,/bus.0/10.000010EF0000/templow,/bus.0/10.000010EF0000/type'
@@ -226,31 +226,34 @@ A :: ‹OWFSqueue:A connected›
 .
 : ‹OWFSqueue:A connected›
 name: A
-task watcher: <Greenlet at 0x7f986b454cc0: erh(<bound method OWFSqueue._watcher of ‹OWFSqueue:A N)>
-     job: <Greenlet at 0x7f986b454b90: erh(<bound method OWFSqueue._handler of ‹OWFSqueue:A N)>
+task watcher: <Greenlet at 0x7ff87c3a6c28: erh(<bound method OWFSqueue._watcher of ‹OWFSqueue:A N)>
+     job: <Greenlet at 0x7ff87c3a6af8: erh(<bound method OWFSqueue._handler of ‹OWFSqueue:A N)>
 queue: 0
 state: connected
 state since: now (2003-04-05 06:07:08)
 sent: (0, 12)
 received: (0, 12)
 processed: (0, 12)
-last_sent : ‹DIRmsg ›
-          priority: 2
+last_sent: ‹DIRmsg ›
+last_sent priority: 2
           timeout: 10
           result: 9
 last_sent_at: now (2003-04-05 06:07:08)
 conn attempts: 0
 conn timer: 3
 out_queued: 0
-channel type: onewire
+channel: ‹OWFSchannel:‹Collected OWFSchannel_forwarder:A››
+channel name: A
+channel task job: <Greenlet at 0x7ff87be0bb90: erh(<bound method OWFSchannel_forwarder._reader of ‹OW)>
+        type: onewire
         host: localhost
         port: 54300
      bus: A
      wire: bus.0
 .
 EVENT: wait¦start¦before¦disconnect
-     : loglevel=0
      : end_time=1.4
+     : loglevel=0
 TRACE 2003-04-05 06:07:08.600000 before¦disconnect: Forced timer done
 TRACE Dropping OWFS bus A
 EVENT: wait¦done¦before¦disconnect
@@ -260,8 +263,8 @@ TRACE conn None OWFSqueue A
 TRACE Drop OWFS bus A
 EVENT: onewire¦disconnect¦A
 EVENT: wait¦start¦END
-     : loglevel=0
      : end_time=2.4
+     : loglevel=0
 TRACE 2003-04-05 06:07:09.050000 : Fake timer done
 TRACE conn setstate init closed
 TRACE conn setstate closed waiting: wait 3.000

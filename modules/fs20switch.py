@@ -123,7 +123,7 @@ class SwitchGroup(Collected,igroup):
 		return str(to_hc(self.code))
 
 	def list(self):
-		yield("name",self.name)
+		yield super(SwitchGroup,self)
 		yield("code",to_hc(self.code))
 		for d in self.devs.values():
 			yield("device",d.name)
@@ -221,7 +221,7 @@ class Switch(Collected):
 		return str(self.parent.name)+" "+str(to_dev(self.code))
 
 	def list(self):
-		yield ("name",self.name)
+		yield super(Switch,self)
 		yield ("code",to_dev(self.code))
 		yield ("parent",self.parent.name)
 		yield ("parentcode", to_hc(self.parent.code))

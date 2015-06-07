@@ -167,10 +167,9 @@ class Collected(object):
 		"""Yield a couple of (left,right) tuples, for enumeration."""
 		yield (six.text_type(self),)
 		yield ("name",self.name)
-		self = super(Collected,self)
-		if hasattr(self,'list'):
-			for r in self.list():
-				yield r
+
+		s = super(Collected,self)
+		if hasattr(s,'list'): yield s
 
 	def delete(self, ctx=None):
 		"""Remove myself from a collection"""

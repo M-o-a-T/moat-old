@@ -1,8 +1,7 @@
 EVENT: startup
      : startup=True
 TRACE Yes!
-TRACE INIT sqlite {'trace': <function DbStore.__init__.<locals>.trace at 0x×××>, 'dbtype': 'sqlite', 'password': 'geheim', 'dataport': '3306', 'username': 'smurf', 'host': 'sql.intern.smurf.noris.de', 'database': '/tmp/moat.smurf.db'}
-TRACE DoFn ('CREATE TABLE HE_State ( category varchar(50), name varchar(200), value BLOB, id INTEGER AUTO_INCREMENT PRIMARY KEY, UNIQUE (category,name))', ()) -1
+TRACE INIT sqlite {'host': 'sql.intern.smurf.noris.de', 'username': 'smurf', 'database': '/tmp/homevent.smurf.db', 'dataport': '3306', 'dbtype': 'sqlite', 'password': 'geheim', 'trace': <function DbStore.__init__.<locals>.trace at 0x×××>}
 TRACE DoFn ('select value from HE_State where category=? and name=?', (b'state', b'foo bar')) None
 TRACE RollBack  
 TRACE Yes!
@@ -14,12 +13,12 @@ TRACE RollBack
 TRACE Yes!
 TRACE Set to ONE
 TRACE DoFn ('update HE_State set value=? where category=? and name=?', ("'one'", b'state', b'foo bar')) 0
-TRACE DoFn ('insert into HE_State (category,name,value) VALUES(?,?,?)', (b'state', b'foo bar', "'one'")) 1
+TRACE DoFn ('insert into HE_State (category,name,value) VALUES(?,?,?)', (b'state', b'foo bar', "'one'")) 3
 TRACE Commit  
 EVENT: state¦change¦foo¦bar
-     : value=one
-     : prev_value=-
      : prev_time=2003-04-05 06:07:08
+     : prev_value=-
+     : value=one
 TRACE DoFn ('select value from HE_State where category=? and name=?', (b'state', b'foo bar')) ("'one'",)
 TRACE Commit  
 TRACE Yes!
@@ -27,9 +26,9 @@ TRACE Set to TWO
 TRACE DoFn ('update HE_State set value=? where category=? and name=?', ("'two'", b'state', b'foo bar')) 1
 TRACE Commit  
 EVENT: state¦change¦foo¦bar
-     : value=two
-     : prev_value=one
      : prev_time=2003-04-05 06:07:08
+     : prev_value=one
+     : value=two
 TRACE Create OnEvtHandler: state¦change¦foo¦bar
 TRACE NewHandler 7
 TRACE Set to THREE
@@ -38,9 +37,9 @@ TRACE Commit
 foo bar :: three — now
 .
 EVENT: state¦change¦foo¦bar
-     : value=three
-     : prev_value=two
      : prev_time=2003-04-05 06:07:08
+     : prev_value=two
+     : value=three
 TRACE Yes It is THREE
 : ‹Collected SavedState:foo¦bar›
 name: foo¦bar

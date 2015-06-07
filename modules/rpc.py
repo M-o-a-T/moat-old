@@ -94,8 +94,7 @@ class CallBack(object):
 		
 		
 	def list(self):
-		for r in super(CallBack,self).list():
-			yield r
+		yield super(CallBack,self)
 		yield("callback",repr(self.callback))
 
 class CommandProcessor(ImmediateProcessor):
@@ -137,8 +136,7 @@ class EventCallback(Worker,CallBack):
 		super(EventCallback,self).__init__(name)
 	
 	def list(self):
-		for r in super(EventCallback,self).list():
-			yield r
+		yield super(EventCallback,self)
 		if self.args:
 			yield("args",self.args)
 
@@ -352,8 +350,7 @@ class RPCconn(Service,Collected):
 		return l
 
 	def list(self):
-		for r in super(RPCconn,self).list():
-			yield r
+		yield super(RPCconn,self)
 		yield ("local host", self._conn._config["endpoints"][0][0])
 		yield ("local port", self._conn._config["endpoints"][0][1])
 		yield ("remote host", self._conn._config["endpoints"][1][0])
@@ -392,8 +389,7 @@ class RPCserver(Collected,Jobber):
 		super(RPCserver,self).delete()
 
 	def list(self):
-		for r in super(RPCserver,self).list():
-			yield r
+		yield super(RPCserver,self)
 		yield ("host",self.host)
 		yield ("port",self.port)
 		yield ("server",repr(self.server))

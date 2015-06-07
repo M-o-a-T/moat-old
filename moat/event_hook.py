@@ -169,8 +169,7 @@ class OnEventBase(Collected,iWorker):
 		return u"%s (%d)" % (six.text_type(self.args),self.prio)
 
 	def list(self):
-		for r in super(OnEventBase,self).list():
-			yield r
+		yield super(OnEventBase,self)
 		yield("id",self.id)
 		yield("prio",self.prio)
 		if self.displayname is not None:

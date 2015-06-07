@@ -96,8 +96,8 @@ class CommonPM(Collected):
 
 	def list(self):
 		n=now()
+		yield super(CommonPM,self)
 		yield ("type",self.type)
-		yield ("name"," ".join(six.text_type(x) for x in self.name))
 		if self.state is not None:
 			yield ("state",self.names[self.state])
 		if self._value is not None:

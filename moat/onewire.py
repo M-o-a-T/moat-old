@@ -405,8 +405,7 @@ class OWFSqueue(MsgQueue,Jobber):
 		super(OWFSqueue,self).stop(reason=reason)
 
 	def list(self, short_buspath=False):
-		for r in super(OWFSqueue,self).list():
-			yield r
+		yield super(OWFSqueue,self)
 		for b in self.bus_paths.values():
 			if short_buspath:
 				yield ("wire",b.path)
@@ -591,8 +590,7 @@ class OWFSbuspath(Jobber):
 		return self.path != other
 
 	def list(self, short_dev=False):
-		for r in super(OWFSbuspath,self).list():
-			yield r
+		yield super(OWFSbuspath,self)
 		if short_dev:
 			yield ("bus",self.bus.name)
 		else:
@@ -676,8 +674,7 @@ class OWFSdevice(Collected):
 		self.ctx = Context()
 	
 	def list(self):
-		for r in super(OWFSdevice,self).list():
-			yield r
+		yield super(OWFSdevice,self)
 		if hasattr(self,"typ"):
 			yield ("typ",self.typ)
 		if self.bus is not None:

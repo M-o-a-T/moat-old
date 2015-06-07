@@ -206,8 +206,7 @@ class RRDfile(Collected):
 		self.filename = filename
 
 	def list(self):
-		for r in super(RRDfile,self).list():
-			yield r
+		yield super(RRDfile,self)
 		yield "server",self.server
 		yield "filename",self.filename
 		if self.last_sent is not None:

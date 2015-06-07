@@ -69,8 +69,7 @@ monitor input ‹name…›
 
 	def list(self):
 		"""status iterator"""
-		for r in super(Monitor,self).list():
-			yield r
+		yield super(Monitor,self)
 		yield ("var",self.var)
 
 class MonitorUpdate(AttributedStatement):

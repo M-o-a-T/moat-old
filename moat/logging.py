@@ -165,7 +165,7 @@ class BaseLogger(Collected,Jobber):
 
 	# Collection stuff
 	def list(self):
-		yield ("Name",self.name)
+		yield super(BaseLogger,self)
 		yield ("Type",self.__class__.__name__)
 		yield ("Level",LogNames[self.level])
 		yield ("Queue",self.q.qsize())
@@ -259,8 +259,7 @@ class Logger(BaseLogger):
 		self.out.flush()
 
 	def list(self):
-		for r in super(Logger.self).list():
-			yield r
+		yield super(Logger.self)
 		yield ("Out",repr(self.out))
 
 	def info(self):

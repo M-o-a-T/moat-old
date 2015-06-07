@@ -97,7 +97,7 @@ class Timeslot(Collected):
 		return u"‹%s %s %s›" % (self.__class__.__name__, self.running, self.parent)
 
 	def list(self):
-		yield ("name"," ".join(six.text_type(x) for x in self.name))
+		yield super(Timeslot,self)
 		yield ("run",self.running)
 		if self.interval is not None:
 			yield ("interval"," ".join(str(x) for x in self.interval))

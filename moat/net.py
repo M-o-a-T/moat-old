@@ -226,6 +226,7 @@ class NetCommonConnector(Collected,Jobber):
 		return "%s %s:%s" % (self.typ, self.host,self.port)
 		
 	def list(self):
+		yield super(NetCommonConnector,self)
 		yield ("type",self.typ)
 		yield ("host",self.host)
 		yield ("port",self.port)
@@ -371,6 +372,7 @@ class NetListener(Collected):
 		return "%s %s:%s" % (self.typ, self.name,self.connector.name)
 		
 	def list(self):
+		yield super(NetListener,self)
 		yield ("host", self.host)
 		yield ("port", self.port)
 		yield ("connector", self.connector.name if self.connector is not None else None)

@@ -5,7 +5,8 @@ TRACE NewHandler 5
 TRACE Create OnEvtHandler: timeslot¦end¦foo¦bar
 TRACE NewHandler 6
 .
-name: foo bar
+: ‹Timeslot off ‹TimeslotHandler: timeslot 4››
+name: foo¦bar
 run: off
 interval: 10
 duration: 2.0
@@ -13,12 +14,13 @@ duration: 2.0
 TRACE Yes
 TRACE Yes
 EVENT: wait¦start¦A¦before
-     : loglevel=0
      : end_time=9.5
+     : loglevel=0
 TRACE 2003-04-05 06:07:17.500000 A¦before: Fake timer done
 EVENT: wait¦done¦A¦before
      : loglevel=0
-name: foo bar
+: ‹Timeslot next ‹TimeslotHandler: timeslot 4››
+name: foo¦bar
 run: next
 interval: 10
 duration: 2.0
@@ -27,8 +29,8 @@ next: 0.5 sec (2003-04-05 06:07:18)
 TRACE Yes
 TRACE Yes
 EVENT: wait¦start¦B¦during
-     : loglevel=0
      : end_time=10.5
+     : loglevel=0
 TRACE 2003-04-05 06:07:18.050000 : Fake timer done
 EVENT: timeslot¦begin¦foo¦bar
 TRACE Yes
@@ -36,7 +38,8 @@ TRACE Yes
 TRACE 2003-04-05 06:07:18.550000 B¦during: Fake timer done
 EVENT: wait¦done¦B¦during
      : loglevel=0
-name: foo bar
+: ‹Timeslot during ‹TimeslotHandler: timeslot 4››
+name: foo¦bar
 run: during
 interval: 10
 duration: 2.0
@@ -47,13 +50,13 @@ slot: 0.7
 TRACE Yes
 TRACE Yes
 EVENT: wait¦start¦C¦after
-     : loglevel=0
      : end_time=12.6
+     : loglevel=0
 TRACE 2003-04-05 06:07:20.050000 : Fake timer done
 EVENT: timeslot¦end¦foo¦bar
 EVENT: wait¦start¦GOT¦EVENT¦B
-     : loglevel=0
      : end_time=12.2
+     : loglevel=0
 TRACE 2003-04-05 06:07:20.250000 GOT¦EVENT¦B: Fake timer done
 TRACE Yes
 TRACE Yes
@@ -62,7 +65,8 @@ EVENT: wait¦done¦GOT¦EVENT¦B
 TRACE 2003-04-05 06:07:20.600000 C¦after: Fake timer done
 EVENT: wait¦done¦C¦after
      : loglevel=0
-name: foo bar
+: ‹Timeslot next ‹TimeslotHandler: timeslot 4››
+name: foo¦bar
 run: next
 interval: 10
 duration: 2.0
@@ -72,8 +76,8 @@ next: 7.3 sec (2003-04-05 06:07:28)
 TRACE Yes
 TRACE Yes
 EVENT: wait¦start¦D¦during¦again
-     : loglevel=0
      : end_time=20.6
+     : loglevel=0
 TRACE 2003-04-05 06:07:28 : Fake timer done
 EVENT: timeslot¦begin¦foo¦bar
 TRACE Yes
@@ -81,7 +85,8 @@ TRACE Yes
 TRACE 2003-04-05 06:07:28.700000 D¦during¦again: Fake timer done
 EVENT: wait¦done¦D¦during¦again
      : loglevel=0
-name: foo bar
+: ‹Timeslot during ‹TimeslotHandler: timeslot 4››
+name: foo¦bar
 run: during
 interval: 10
 duration: 2.0
@@ -93,7 +98,8 @@ TRACE Yes
 TRACE Yes
 TRACE Yes
 TRACE Yes
-name: foo bar
+: ‹Timeslot off ‹TimeslotHandler: timeslot 4››
+name: foo¦bar
 run: off
 interval: 10
 duration: 2.0

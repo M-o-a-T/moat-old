@@ -128,7 +128,7 @@ class TX(Collected):
 			return "%s %d: (never)" % (tx_procs[self.group].tx_name, self.code)
 
 	def list(self):
-		yield("name",self.name)
+		yield super(TX,self)
 		yield("group",self.group)
 		yield("groupname",tx_procs[self.group].tx_name)
 		yield("code",self.code)
@@ -138,7 +138,7 @@ class TX(Collected):
 			for k,v in self.last_data.items(): yield ("last_"+k,v)
 		for k,v in self.faktor.items(): yield ("faktor_"+k,v)
 		for k,v in self.offset.items(): yield ("offset_"+k,v)
-	
+
 	def delete(self,ctx=None):
 		TXcodes[self.group][self.code].remove(self)
 		super(TX,self).delete()

@@ -9,6 +9,7 @@ on_event :: the 'on EVENT:' handler
 trigger :: Basic event handling
 wait :: Delay handling
 .
+: ‹Collected OnEventModule:on_event›
 name: on_event
 path: ../modules/on_event.py
 info: the 'on EVENT:' handler
@@ -31,19 +32,19 @@ worker
 TRACE Create OnEvtHandler: foo
 TRACE NewHandler 5
 EVENT: wait¦start¦vorher
-     : loglevel=0
      : end_time=0.1
+     : loglevel=0
 TRACE 2003-04-05 06:07:08.150000 vorher: Fake timer done
 EVENT: wait¦done¦vorher
      : loglevel=0
 IEVENT: foo
 TRACE Yes
 EVENT: wait¦start¦nachher
-     : loglevel=0
      : end_time=0.2
-EVENT: wait¦start¦foo¦waiter
      : loglevel=0
+EVENT: wait¦start¦foo¦waiter
      : end_time=0.5
+     : loglevel=0
 TRACE 2003-04-05 06:07:08.300000 nachher: Fake timer done
 foo waiter :: 0.10000002384185791
 .
@@ -51,6 +52,7 @@ EVENT: wait¦done¦nachher
      : loglevel=0
 : ‹Waiter foo¦waiter 0.10000002384185791›
 name: foo¦waiter
+task _plinger: <Greenlet at 0x7f442d9580e0: erh(<bound method Waiter._pling of ‹Waiter foo¦waiter , 0.30000007152557373)>
 start: -0.2 sec (2003-04-05 06:07:08.15)
 end: now (2003-04-05 06:07:08.45)
 total: 0.3 sec
@@ -59,8 +61,8 @@ in: foo
 in: Global
 .
 EVENT: wait¦start¦ende
-     : loglevel=0
      : end_time=0.6
+     : loglevel=0
 TRACE 2003-04-05 06:07:08.500000 foo¦waiter: Fake timer done
 EVENT: wait¦done¦foo¦waiter
      : loglevel=0

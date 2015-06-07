@@ -133,6 +133,9 @@ class WorkItem(object):
 		for r in self.report(verbose=98):
 			yield ("code",r)
 
+		s = super(WorkItem,self)
+		if hasattr(s,'list'): yield s
+
 	def __repr__(self):
 		if self.id:
 			return u"‹Item %d:%s›" % (self.id,self.name)
@@ -389,8 +392,7 @@ class Worker(WorkItem):
 		self.name = name
 
 	def list(self):
-		for r in super(Worker,self).list():
-			yield r
+		yield super(Worker,self)
 		yield ("matched",self.match_count)
 
 	def __repr__(self):

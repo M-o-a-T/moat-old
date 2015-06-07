@@ -98,7 +98,7 @@ class Avg(Collected):
 		self.avg = self._calc(True)
 		
 	def list(self):
-		yield ("name"," ".join(six.text_type(x) for x in self.name))
+		yield super(Avg,self)
 		yield ("mode",self.mode)
 		yield ("value",self.value)
 		if self.value_tm is not None:
@@ -186,8 +186,7 @@ class DecayTimeAvg(TimeAvg):
 			return 1-(1-self.p)**(nt/self.p_base)
 
 	def list(self):
-		for r in super(DecayTimeAvg,self).list():
-			yield r
+		yield super(DecayTimeAvg,self)
 		yield ("weight",self.p)
 		yield ("time base",humandelta(self.p_base))
 		yield ("weight/hour",1-(1-self.p)**(3600/self.p_base))
@@ -215,8 +214,7 @@ class DecaySamplesAvg(Avg):
 		return r
 
 	def list(self):
-		for r in super(DecaySamplesAvg,self).list():
-			yield r
+		yield super(DecaySamplesAvg,self)
 		yield ("weight",self.p)
 
 class MovingSamplesAvg(Avg):
@@ -250,8 +248,7 @@ class MovingSamplesAvg(Avg):
 		return self.avg
 
 	def list(self):
-		for r in super(MovingSamplesAvg,self).list():
-			yield r
+		yield super(MovingSamplesAvg,self)
 		yield ("samples",len(self.values))
 		yield ("max samples",self.n)
 		if len(self.values) < 7:
