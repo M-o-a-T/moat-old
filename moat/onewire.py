@@ -690,10 +690,16 @@ class OWFSdevice(Collected):
 		setattr(self,key,val)
 
 	def __repr__(self):
-		if not hasattr(self,'path') and not hasattr(self,'id'):
-			return "‹OW root›"
+		if hasattr(self,'path'):
+			if hasattr(self,'id'):
+				return "‹OW:%s %s›" % (self.id,self.path)
+			else:
+				return "‹OW:? %s›" % (self.path,)
 		else:
-			return "‹OW:%s %s›" % (self.id,self.path)
+			if hasattr(self,'id'):
+				return "‹OW:%s root›" % (self.id,)
+			else:
+				return "‹OW root›"
 
 	def _get_typ(self):
 		try:

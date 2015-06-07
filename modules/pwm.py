@@ -130,7 +130,7 @@ class CommonPM(Collected):
 			super(CommonPM,self).delete()
 
 	def __repr__(self):
-		return u"‹%s %s %d›" % (self.__class__.__name__, self.name,self._value)
+		return u"‹%s %s %s›" % (self.__class__.__name__, self.name,self._value)
 
 	def arg(self,key,value):
 		raise SyntaxError(u"PWM ‹%s› doesn't understand ‹%s›" % (self.type, key))
