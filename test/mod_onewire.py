@@ -98,6 +98,8 @@ dir onewire "10.000010ef0000"
 dir onewire A
 list onewire device
 list onewire device "10.000010ef0000"
+list onewire bus
+list onewire bus A
 wait before disconnect:
 	for 0.3
 	debug force

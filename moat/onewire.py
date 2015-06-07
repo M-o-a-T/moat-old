@@ -388,7 +388,7 @@ class OWFSqueue(MsgQueue,Jobber):
 		if not persist:
 			self.max_send = 1
 		self.nop = None
-		self.bus_paths = set()
+		self.bus_paths = {}
 
 	### Bus scanning support
 
@@ -403,6 +403,15 @@ class OWFSqueue(MsgQueue,Jobber):
 	def stop(self,reason=None):
 		self.stop_job("watcher")
 		super(OWFSqueue,self).stop(reason=reason)
+
+	def list(self, short_buspath=False):
+		for r in super(OWFSqueue,self).list():
+			yield r
+		for b in self.bus_paths.values():
+			if short_buspath:
+				yield ("wire",b.path)
+			else:
+				yield ("wire",b.list(short_dev=True))
 
 	def _clean_watched(self):
 		while True:
@@ -477,7 +486,7 @@ class OWFSqueue(MsgQueue,Jobber):
 		old_ids = devices.copy()
 		new_ids = {}
 		seen_ids = {}
-		old_bus = self.bus_paths.copy()
+		old_bus = set(self.bus_paths.keys())
 		new_bus = set()
 
 		def bus_cb(path):
@@ -510,10 +519,11 @@ class OWFSqueue(MsgQueue,Jobber):
 				n_dev += 1
 		
 		for dev in old_bus:
-			self.bus_paths.remove(dev)
+			bp = self.bus_paths.pop(dev)
+			bp.stop()
 			simple_event("onewire","bus","down", bus=self.name,path=dev)
 		for dev in new_bus:
-			self.bus_paths.add(dev)
+			self.bus_paths[dev] = OWFSbuspath(self,dev)
 			simple_event("onewire","bus","up", bus=self.name,path=dev)
 
 		# success only, error above
@@ -557,6 +567,52 @@ class OWFSqueue(MsgQueue,Jobber):
 		res = AsyncResult()
 		self.watch_q.put(res)
 		return res.get()
+
+
+class OWFSbuspath(Jobber):
+	def __init__(self, bus,path):
+		self.bus = bus
+		self.path = Name(path)
+		super(OWFSbuspath,self).__init__()
+
+	def __cmp__(self,other):
+		if isinstance(other,OWFSbuspath):
+			other = other.path
+		return cmp(self.path,other)
+	def __hash__(self):
+		return hash(self.path)
+	def __eq__(self,other):
+		if isinstance(other,OWFSbuspath):
+			other = other.path
+		return self.path == other
+	def __ne__(self,other):
+		if isinstance(other,OWFSbuspath):
+			other = other.path
+		return self.path != other
+
+	def list(self, short_dev=False):
+		for r in super(OWFSbuspath,self).list():
+			yield r
+		if short_dev:
+			yield ("bus",self.bus.name)
+		else:
+			yield ("bus",self.bus.list(short_buspath=True))
+		yield ("wire",self.path)
+		
+	def start(self):
+		super(OWFSbuspath,self).start()
+		self.watch_q = Queue()
+		self.start_job("scanner",self._scanner)
+		def dead(_):
+			self._clean_watched()
+		self.watcher.link(dead)
+
+	def stop(self,reason=None):
+		self.stop_job("scanner")
+		super(OWFSbuspath,self).stop(reason=reason)
+
+
+
 
 ow_buses = {}
 
