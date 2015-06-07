@@ -263,7 +263,7 @@ class Jobber(object):
 		self._job_attrs = set()
 
 	def _job_list(self):
-		for k in self._job_attrs:
+		for k in sorted(self._job_attrs):
 			yield (k,getattr(self,k,'-'))
 
 	def list(self):
