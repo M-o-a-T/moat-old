@@ -35,7 +35,7 @@ from moat.module import Module
 from moat.context import Context
 from moat.statement import main_words,Statement,AttributedStatement,global_words
 from moat.interpreter import Interpreter,ImmediateProcessor
-from moat.base import Name,SName,flatten
+from moat.base import Name,SName
 from moat.collect import Collection,Collected,get_collect,all_collect
 from moat.check import register_condition,unregister_condition
 from moat.twist import Jobber,fix_exception,reraise

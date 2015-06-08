@@ -26,7 +26,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 
 from moat import patch;patch()
 import sys
-from moat.base import Name,flatten
+from moat.base import Name
 from moat.times import humandelta
 from datetime import datetime
 import os
