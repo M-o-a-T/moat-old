@@ -20,7 +20,7 @@ override_dh_install:
 	
 	mkdir -p debian/moat/usr/sbin debian/moat/usr/bin
 	mv debian/python-moat/usr/bin/daemon.py debian/moat/usr/sbin/moatd
-	mv debian/python-moat/usr/bin/cmd.py debian/moat/usr/bin/moat
+	mv debian/python-moat/usr/bin/cmd debian/moat/usr/bin/moat
 	mv debian/python-moat/usr/bin/amqpmon.py debian/moat/usr/bin/moat-amqp
 	install daemon.moat debian/moat/etc/moat/daemon.moat
 
