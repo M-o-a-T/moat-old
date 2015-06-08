@@ -15,7 +15,7 @@ syslog :: TRACE: run_logger
 .
 : ‹Collected SysLogger:local5¦localhost¦55514›
 name: local5¦localhost¦55514
-task job: <Greenlet at 0x×××: erh(<bound method SysLogger._writer of ‹Collected SysL)>
+task job: <Greenlet: erh(<bound method SysLogger._writer of ‹Collected SysL)>
 Type: SysLogger
 Level: INFO
 Queue: 0

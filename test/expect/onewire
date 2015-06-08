@@ -226,8 +226,8 @@ A :: ‹OWFSqueue:A connected›
 .
 : ‹OWFSqueue:A connected›
 name: A
-task watcher: <Greenlet at 0x7ff87c3a6c28: erh(<bound method OWFSqueue._watcher of ‹OWFSqueue:A N)>
-     job: <Greenlet at 0x7ff87c3a6af8: erh(<bound method OWFSqueue._handler of ‹OWFSqueue:A N)>
+task job: <Greenlet: erh(<bound method OWFSqueue._handler of ‹OWFSqueue:A N)>
+     watcher: <Greenlet: erh(<bound method OWFSqueue._watcher of ‹OWFSqueue:A N)>
 queue: 0
 state: connected
 state since: now (2003-04-05 06:07:08)
@@ -244,7 +244,7 @@ conn timer: 3
 out_queued: 0
 channel: ‹OWFSchannel:‹Collected OWFSchannel_forwarder:A››
 channel name: A
-channel task job: <Greenlet at 0x7ff87be0bb90: erh(<bound method OWFSchannel_forwarder._reader of ‹OW)>
+channel task job: <Greenlet: erh(<bound method OWFSchannel_forwarder._reader of ‹OW)>
         type: onewire
         host: localhost
         port: 54300

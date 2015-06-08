@@ -13,7 +13,7 @@ EVENT: wait¦done¦X1
      : loglevel=0
 : ‹Waiter Foo¦Bar 9.700000047683716›
 name: Foo¦Bar
-task _plinger: <Greenlet at 0x7fce6ee9bd58: erh(<bound method Waiter._pling of ‹Waiter Foo¦Bar 10., 10.0)>
+task _plinger: <Greenlet: erh(<bound method Waiter._pling of ‹Waiter Foo¦Bar 10., 10.0)>
 start: -0.3 sec (2003-04-05 06:07:08)
 end: 9.7 sec (2003-04-05 06:07:18)
 total: 10.0 sec

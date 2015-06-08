@@ -16,7 +16,7 @@ t tt ttt :: ‹RRDqueue:t¦tt¦ttt connecting›
 .
 : ‹RRDqueue:t¦tt¦ttt connecting›
 name: t¦tt¦ttt
-task job: <Greenlet at 0x7f2d1f1eae88: erh(<bound method RRDqueue._handler of ‹RRDqueue:t¦tt¦)>
+task job: <Greenlet: erh(<bound method RRDqueue._handler of ‹RRDqueue:t¦tt¦)>
 queue: 0
 state: connecting
 state since: now (2003-04-05 06:07:08.20)
@@ -35,7 +35,7 @@ a aa aaa :: Never
 name: a¦aa¦aaa
 server: ‹RRDqueue:t¦tt¦ttt connecting›
 server name: t¦tt¦ttt
-server task job: <Greenlet at 0x7f2d1f1eae88: erh(<bound method RRDqueue._handler of ‹RRDqueue:t¦tt¦)>
+server task job: <Greenlet: erh(<bound method RRDqueue._handler of ‹RRDqueue:t¦tt¦)>
        queue: 0
        state: connecting
        state since: now (2003-04-05 06:07:08.20)
@@ -87,7 +87,7 @@ TRACE Yes error
 name: a¦aa¦aaa
 server: ‹RRDqueue:t¦tt¦ttt connected›
 server name: t¦tt¦ttt
-server task job: <Greenlet at 0x7f2d1f1eae88: erh(<bound method RRDqueue._handler of ‹RRDqueue:t¦tt¦)>
+server task job: <Greenlet: erh(<bound method RRDqueue._handler of ‹RRDqueue:t¦tt¦)>
        queue: 0
        state: connected
        state since: -0.3 sec (2003-04-05 06:07:08.20)
@@ -104,7 +104,7 @@ server task job: <Greenlet at 0x7f2d1f1eae88: erh(<bound method RRDqueue._handle
        out_queued: 0
        channel: ‹RRDchannel:‹Collected RRDchannel_forwarder:t¦tt¦ttt››
        channel name: t¦tt¦ttt
-       channel task job: <Greenlet at 0x7f2d1f128340: erh(<bound method RRDchannel_forwarder._reader of ‹RRD)>
+       channel task job: <Greenlet: erh(<bound method RRDchannel_forwarder._reader of ‹RRD)>
                type: rrd
                host: localhost
                port: 52442

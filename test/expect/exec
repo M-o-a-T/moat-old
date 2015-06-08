@@ -11,7 +11,7 @@ _on 6 :: run¦test (51)
 _on 7 :: test¦it (51)
 .
 IEVENT: run¦test
-TRACE PY Proc called <Env obj> ('one', 'two') {}
+TRACE PY Proc called <Env object> ('one', 'two') {}
 TRACE NewHandler 10
 TRACE NewHandler 11
 DEBUG true
@@ -20,7 +20,7 @@ EVENT: wait¦start¦_wait¦t1
      : loglevel=0
 EVENT: test¦it
      : also=two
-     : out=<test.logwrite obj>
+     : out=<test.logwrite object>
      : what=ever
      : words=‹global_words: Global 2›
 DEBUG Y what ever
@@ -49,11 +49,11 @@ EVENT: wait¦start¦more¦delay
      : end_time=30.1
      : loglevel=0
 TRACE 2003-04-05 06:07:38.100000 more¦delay: Fake timer done
-DEBUG Handler _on¦5
-DEBUG Handler foo¦test¦bar
-DEBUG Handler _on¦6
 DEBUG Handler test¦me¦not
+DEBUG Handler _on¦6
+DEBUG Handler _on¦5
 DEBUG Handler _on¦7
+DEBUG Handler foo¦test¦bar
 DEBUG 'do' works
 DEBUG 'do.log' works
 TRACE PY Proc done

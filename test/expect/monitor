@@ -66,7 +66,7 @@ foo bar :: Wait ‹0.2 sec›
 .
 : ‹Tester foo¦bar on 51.0›
 name: foo¦bar
-task job: <Greenlet at 0x7f4fbb4fecc0: erh(<bound method Tester._run_loop of ‹Tester foo¦bar )>
+task job: <Greenlet: erh(<bound method Tester._run_loop of ‹Tester foo¦bar )>
 device: test 0…100
 value: 51.0
 up: Wait
@@ -123,7 +123,7 @@ TRACE NewHandler 17
 TRACE monitor Start run bazzi¦zazzi
 : ‹Monitor bazzi¦zazzi run 0›
 name: bazzi¦zazzi
-task job: <Greenlet at 0x7f4fbb425800: erh(<bound method Monitor._run_loop of ‹Monitor bazzi¦)>
+task job: <Greenlet: erh(<bound method Monitor._run_loop of ‹Monitor bazzi¦)>
 EVENT: monitor¦start¦bazzi¦zazzi
 device: passive
 value: None
@@ -199,7 +199,7 @@ EVENT: wait¦done¦_wait¦t6
 TRACE Yes
 : ‹Monitor bazzi¦zazzi on 13.5›
 name: bazzi¦zazzi
-task job: <Greenlet at 0x7f4fbb425800: erh(<bound method Monitor._run_loop of ‹Monitor bazzi¦)>
+task job: <Greenlet: erh(<bound method Monitor._run_loop of ‹Monitor bazzi¦)>
 device: passive
 value: 13.5
 up: Wait
@@ -434,7 +434,7 @@ moni test2 :: Wait ‹now›
 .
 : ‹VarMonitor moni¦test on 4.0›
 name: moni¦test
-task job: <Greenlet at 0x7f4fbb4259c8: erh(<bound method VarMonitor._run_loop of ‹VarMonitor )>
+task job: <Greenlet: erh(<bound method VarMonitor._run_loop of ‹VarMonitor )>
 device: unknown
 value: 4.0
 up: Wait
@@ -444,7 +444,7 @@ data: 4.0
 .
 : ‹VarMonitor moni¦test2 on 5.0›
 name: moni¦test2
-task job: <Greenlet at 0x7f4fbb425340: erh(<bound method VarMonitor._run_loop of ‹VarMonitor )>
+task job: <Greenlet: erh(<bound method VarMonitor._run_loop of ‹VarMonitor )>
 device: unknown
 value: 5.0
 up: Wait

@@ -1,7 +1,7 @@
 EVENT: startup
      : startup=True
 TRACE Yes!
-TRACE INIT sqlite {'host': 'sql.intern.smurf.noris.de', 'username': 'smurf', 'database': '/tmp/homevent.smurf.db', 'dataport': '3306', 'dbtype': 'sqlite', 'password': 'geheim', 'trace': <function DbStore.__init__.<locals>.trace at 0x×××>}
+TRACE INIT sqlite {'host': 'sql.intern.smurf.noris.de', 'password': 'geheim', 'username': 'smurf', 'dbtype': 'sqlite', 'trace': <function DbStore.__init__.<locals>.trace>, 'dataport': '3306', 'database': '/tmp/homevent.smurf.db'}
 TRACE DoFn ('select value from HE_State where category=? and name=?', (b'state', b'foo bar')) None
 TRACE RollBack  
 TRACE Yes!
@@ -13,7 +13,7 @@ TRACE RollBack
 TRACE Yes!
 TRACE Set to ONE
 TRACE DoFn ('update HE_State set value=? where category=? and name=?', ("'one'", b'state', b'foo bar')) 0
-TRACE DoFn ('insert into HE_State (category,name,value) VALUES(?,?,?)', (b'state', b'foo bar', "'one'")) 3
+TRACE DoFn ('insert into HE_State (category,name,value) VALUES(?,?,?)', (b'state', b'foo bar', "'one'")) 1
 TRACE Commit  
 EVENT: state¦change¦foo¦bar
      : prev_time=2003-04-05 06:07:08

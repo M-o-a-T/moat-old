@@ -38,7 +38,7 @@ foo :: net_active localhost:50333
 .
 : ‹Collected NETactive:foo›
 name: foo
-task job: <Greenlet at 0x7fba1b6063d8: erh(<bound method NETactive._reader of ‹Collected NETa)>
+task job: <Greenlet: erh(<bound method NETactive._reader of ‹Collected NETa)>
 EVENT: wait¦done¦OUT
      : loglevel=0
 type: net_active
@@ -56,7 +56,7 @@ EVENT: wait¦start¦IN
 TRACE 2003-04-05 06:07:08.750000 IN: Forced timer done
 : ‹Collected NETpassive:baz¦zaz¦n1›
 name: baz¦zaz¦n1
-task job: <Greenlet at 0x7fba1b606470: erh(<bound method NETpassive._reader of ‹Collected NET)>
+task job: <Greenlet: erh(<bound method NETpassive._reader of ‹Collected NET)>
 EVENT: wait¦done¦IN
      : loglevel=0
 type: net_passive
