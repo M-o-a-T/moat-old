@@ -83,7 +83,7 @@ class Collection(dict):
 				doc="check if a named %s object exists"%(self.name,)
 				def check(xself,*args):
 					if not len(args):
-						raise SyntaxError(u"Usage: if exists avg ‹name…›")
+						raise SyntaxError(u"Usage: if exists %s ‹name…›" %(" ".join(self.name),))
 					oname = Name(*args)
 					return oname in self
 			self.exists = ExistsCheck
