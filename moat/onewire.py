@@ -337,23 +337,23 @@ class DIRmsg(OWFScall):
 
 	def dataReceived(self,data):
 		data = data.decode('utf-8')
-		if self.dirall:
-			n=0
-			for entry in data.split(","):
-				n += 1
-				try: entry = entry[entry.rindex('/')+1:]
-				except ValueError: pass
-				entry = entry.rstrip("\0")
-				self.cb(entry)
-			self.result.set(n)
-		else:
-			if len(data):
+		n=0
+		if len(data):
+			if self.dirall:
+				for entry in data.split(","):
+					n += 1
+					try: entry = entry[entry.rindex('/')+1:]
+					except ValueError: pass
+					entry = entry.rstrip("\0")
+					self.cb(entry)
+			else:
+				n=1
 				try: data = data[data.rindex('/')+1:]
 				except ValueError: pass
 				data = data.rstrip("\0")
 				self.cb(data)
 				return RECV_AGAIN
-			self.result.set(n)
+		self.result.set(n)
 	
 	### TODO: retry with "dir" if the server does not understand "dirall"
 	def done(self, _=None):
@@ -459,11 +459,11 @@ class OWFSqueue(MsgQueue,Jobber):
 				if b.startswith("1f.") and b not in seen_mplex:
 					seen_mplex.add(b)
 					if bus_cb:
-						bus_cb(p+('main',))
+						bus_cb(p+(b,'main',))
 					for res in doit(dn,key="main"):
 						yield res
 					if bus_cb:
-						bus_cb(p+('aux',))
+						bus_cb(p+(b,'aux',))
 					for res in doit(dn,key="aux"):
 						yield res
 
@@ -800,4 +800,7 @@ class OWFSroot(OWFSdevice):
 		self = object.__new__(cls)
 		self._init(bus)
 		return self
+
+	def __repr__(self):
+		return u"‹"+self.__class__.__name__+u" @"+repr(getattr(self,'bus',None))+u"›"
 

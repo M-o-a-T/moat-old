@@ -150,7 +150,7 @@ dir onewire NAME path...
 			path = ()
 		elif self.dest is None:
 			if len(event) == 0:
-				raise SyntaxError("Usage: dir onewire device  or  dir onewire bus path…")
+				raise SyntaxError("Usage: dir onewire device  or  dir onewire [bus] path…")
 			dev = buses[Name(event[0])].root
 			path = event[1:]
 		else:

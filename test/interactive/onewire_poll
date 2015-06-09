@@ -1,0 +1,24 @@
+if not exists module bool: load bool
+if not exists module ifelse: load ifelse
+if not exists module logging: load logging
+if not exists module block: load block
+if not exists module trigger: load trigger
+if not exists module wait: load wait
+if not exists module on_event: load on_event
+if not exists module onewire: load onewire
+if not exists module data: load data
+log TRACE
+
+on onewire bus up:
+	log DEBUG bus $bus
+	log DEBUG path $path
+on onewire connect I X:
+	list onewire bus
+	list onewire connection
+	wait :for 1
+	poll onewire 'bus.0' '1F.0CB204000000' main:
+		name I X
+
+connect onewire "i.raspi.intern.smurf.noris.de" 4304:
+	name I X
+
