@@ -498,7 +498,7 @@ OWFSconnect.register_statement(Passive)
 
 
 class OWFSpolls(Collection):
-	name = Name("owfs","poll")
+	name = Name("onewire","poll")
 OWFSpolls = OWFSpolls()
 OWFSpolls.does("del")
 
@@ -516,8 +516,9 @@ class OWFSpoller(Collected,Jobber):
 		self.seen_new = set()
 		self.old_seen = set()
 		self.time_start = None
-		self.time_end = None
+		self.time_len = None
 		self.start_job("watcher",self._start)
+		self.last_error = None
 
 	def _reporter(self, id):
 		log(DEBUG,"OFFSpoller report",repr(id))
@@ -537,6 +538,7 @@ class OWFSpoller(Collected,Jobber):
 			self.old_seen.remove(id)
 
 	def _start(self):
+		reported = False
 		while True:
 			sleep(self.freq)
 			try:
@@ -548,12 +550,16 @@ class OWFSpoller(Collected,Jobber):
 					simple_event("onewire","alarm","off",id, bus=self.bus.bus.name, path=self.path, id=id)
 					self.seen.remove(id)
 			except Exception as e:
-				fix_exception(e)
-				process_failure(e)
-				self.time_end = now()
+				self.last_error = e
+				if not reported:
+					reported = True
+					fix_exception(e)
+					process_failure(e)
+				self.time_len = now()-self.time_start
 				sleep(self.freq*10)
 			else:
-				self.time_end = now()
+				reported = False
+				self.time_len = now()-self.time_start
 
 	def delete(self,ctx=None):
 		self.stop_job("watcher")
@@ -567,13 +573,15 @@ class OWFSpoller(Collected,Jobber):
 		yield ("interval",humandelta(self.freq))
 		if self.time_start:
 			yield ("last start",humandelta(now()-self.time_start))
-		if self.time_end:
-			yield ("last start",humandelta(now()-self.time_end))
+		if self.time_len:
+			yield ("last duration",humandelta(self.time_len))
 		for id in self.seen:
 			dev = devices.get(id,id)
 			yield ("alarm",dev)
-		for id in self.new_seen:
+		for id in self.seen_new:
 			yield ("alarm new",id)
+		if self.last_error:
+			yield ("last error",self.last_error)
 			
 
 class OWFSpoll(AttributedStatement):

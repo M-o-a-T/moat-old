@@ -18,6 +18,10 @@ on onewire connect I X:
 	wait :for 1
 	poll onewire 'bus.0' '1F.0CB204000000' main:
 		name I X
+	wait :for 2
+	list onewire poll
+	list onewire poll I X 'bus.0' '1F.0CB204000000' main
+
 
 connect onewire "i.raspi.intern.smurf.noris.de" 4304:
 	name I X

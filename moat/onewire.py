@@ -680,7 +680,7 @@ class OWFSdevice(Collected):
 		if self.bus is not None:
 			yield ("bus",self.bus.name)
 		if self.path is not None:
-			yield ("path","/"+"/".join(self.path)+"/"+self.id)
+			yield ("path","/"+"/".join(self.path)+(("/"+self.bus_id) if self.bus_id else "") )
 		
 	def _setattr(self,val,key):
 		"""Helper. Needed for new devices to set the device type."""
