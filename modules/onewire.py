@@ -521,7 +521,7 @@ class OWFSpoller(Collected,Jobber):
 		self.last_error = None
 
 	def _reporter(self, id):
-		log(DEBUG,"OFFSpoller report",repr(id))
+		# log(DEBUG,"OFFSpoller report",repr(id))
 		id = id.lower()
 		if id not in devices:
 			if id not in self.seen_new:
@@ -544,7 +544,7 @@ class OWFSpoller(Collected,Jobber):
 			try:
 				self.time_start = now()
 				self.old_seen = self.seen.copy()
-				log(DEBUG,"SCAN",self.path,"IN",self.bus)
+				# log(DEBUG,"SCAN",self.path,"IN",self.bus)
 				self.bus.dir(path=self.path+('alarm',), proc=self._reporter)
 				for id in self.old_seen:
 					simple_event("onewire","alarm","off",id, bus=self.bus.bus.name, path=self.path, id=id)
