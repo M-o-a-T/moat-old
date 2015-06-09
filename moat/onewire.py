@@ -739,8 +739,15 @@ class OWFSdevice(Collected):
 	def get(self,key):
 		if not self.bus:
 			raise DisconnectedDeviceError(self.id)
+		if not isinstance(key,tuple):
+			key = Name(key)
 
-		msg = ATTRgetmsg(self.path+(self.bus_id,key))
+		p = self.path
+		if self.bus_id is not None:
+			p += (self.bus_id,)
+		p += key
+
+		msg = ATTRgetmsg(p)
 		msg.queue(self.bus)
 
 		try:
@@ -766,8 +773,15 @@ class OWFSdevice(Collected):
 	def set(self,key,val):
 		if not self.bus:
 			raise DisconnectedDeviceError(self.id)
+		if not isinstance(key,tuple):
+			key = Name(key)
 
-		msg = ATTRsetmsg(self.path+(self.bus_id,key),val)
+		p = self.path
+		if self.bus_id is not None:
+			p += (self.bus_id,)
+		p += key
+
+		msg = ATTRsetmsg(p,val)
 		msg.queue(self.bus)
 		try:
 			return msg.result.get()

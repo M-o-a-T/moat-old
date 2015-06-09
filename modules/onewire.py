@@ -178,6 +178,8 @@ name ‹name…›
 
 	def run(self,ctx,**k):
 		event = self.params(ctx)
+		if not len(event):
+			raise SyntaxError("an empty name is a terrible thing")
 		self.parent.dest = SName(event)
 
 OWFSdir.register_statement(OWFSname)
@@ -505,11 +507,12 @@ OWFSpolls.does("del")
 class OWFSpoller(Collected,Jobber):
 	"""A bus poll service"""
 	storage = OWFSpolls
-	def __init__(self,bus,path,freq):
+	def __init__(self,bus,path,freq,simul):
 		self.bus = bus
 		self.path = tuple(path)
 		self.name = bus.bus.name+self.path
 		self.freq = freq
+		self.simul = simul
 		super(OWFSpoller,self).__init__()
 
 		self.seen = set()
@@ -560,6 +563,11 @@ class OWFSpoller(Collected,Jobber):
 			else:
 				reported = False
 				self.time_len = now()-self.time_start
+				for x in self.simul:
+					x[0] += 1
+					if x[0] >= x[1]:
+						x[0] = 0
+						self.bus.set(self.path+('simultaneous',x[2]),x[3])
 
 	def delete(self,ctx=None):
 		self.stop_job("watcher")
@@ -567,6 +575,10 @@ class OWFSpoller(Collected,Jobber):
 		super(OWFSpoller,self).delete()
 
 	def list(self):
+		def _simul(x):
+			yield ("interval",x[1])
+			yield ("current",x[0])
+			yield ("value",x[3])
 		yield super(OWFSpoller,self)
 		yield ("bus",self.bus)
 		yield ("path",self.path)
@@ -582,6 +594,8 @@ class OWFSpoller(Collected,Jobber):
 			yield ("alarm new",id)
 		if self.last_error:
 			yield ("last error",self.last_error)
+		for x in self.simul:
+			yield ("simultaneous",x[2],_simul(x))
 			
 
 class OWFSpoll(AttributedStatement):
@@ -599,6 +613,10 @@ poll onewire NAME path...
 	dest=None
 	timespec=1
 
+	def __init__(self,*a,**k):
+		super(OWFSpoll,self).__init__(*a,**k)
+		self.simul = []
+
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 
@@ -613,11 +631,30 @@ poll onewire NAME path...
 		else:
 			dev = buses[self.dest].root
 			path = event
-		OWFSpoller(dev,path, self.timespec)
+		OWFSpoller(dev,path, self.timespec, self.simul)
+
+class SimulWrite(Statement):
+	name="simultaneous"
+	dest = None
+	doc="periodically send a conversion command"
+
+	long_doc = u"""\
+simultaneous ‹interval› ‹name› [‹value›]
+  - Every ‹interval› poll cycles, write ‹value› to ‹path›/‹name›.
+    Use this to trigger periodic temperature or voltage conversions
+	which in turn may trigger alarms.
+"""
+
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if len(event) < 2 or len(event) > 3:
+			raise SyntaxError("Usage: simultaneous ‹interval› ‹name› [‹value›]")
+		self.parent.simul.append([0,event[0],event[1],
+			(event[2] if len(event) > 2 else "1")])
 
 OWFSpoll.register_statement(OWFSname)
 OWFSpoll.register_statement(DelayFor)
-
+OWFSpoll.register_statement(SimulWrite)
 
 
 class OWFSmodule(Module):
