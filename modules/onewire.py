@@ -39,8 +39,14 @@ from moat.onewire import connect,disconnect, devices
 from moat.net import NetConnect
 from moat.monitor import Monitor,MonitorHandler, MonitorAgain
 from moat.in_out import register_input,register_output, unregister_input,unregister_output, Input,Output
+from moat.times import humandelta,now
+from moat.twist import fix_exception,Jobber
+from moat.run import simple_event, process_failure
+from moat.collect import Collection,Collected
+from moat.delay import DelayFor
 
 import struct
+from gevent import sleep
 
 buses = {}
 
@@ -490,6 +496,122 @@ passive
                 self.parent.scan = False
 OWFSconnect.register_statement(Passive)
 
+
+class OWFSpolls(Collection):
+	name = Name("owfs","poll")
+OWFSpolls = OWFSpolls()
+OWFSpolls.does("del")
+
+class OWFSpoller(Collected,Jobber):
+	"""A bus poll service"""
+	storage = OWFSpolls
+	def __init__(self,bus,path,freq):
+		self.bus = bus
+		self.path = tuple(path)
+		self.name = bus.bus.name+self.path
+		self.freq = freq
+		super(OWFSpoller,self).__init__()
+
+		self.seen = set()
+		self.seen_new = set()
+		self.old_seen = set()
+		self.time_start = None
+		self.time_end = None
+		self.start_job("watcher",self._start)
+
+	def _reporter(self, id):
+		log(DEBUG,"OFFSpoller report",repr(id))
+		id = id.lower()
+		if id not in devices:
+			if id not in self.seen_new:
+				self.seen_new.add(id)
+				simple_event("onewire","alarm","new",id, bus=self.bus.bus.name, path=self.path, id=id)
+			return # not yet known, presumably on next scan
+		if id in self.seen_new:
+			self.seen_new.remove(id)
+
+		if id not in self.seen:
+			self.seen.add(id)
+			simple_event("onewire","alarm","on",id, bus=self.bus.bus.name, path=self.path, id=id)
+		elif id in self.old_seen:
+			self.old_seen.remove(id)
+
+	def _start(self):
+		while True:
+			sleep(self.freq)
+			try:
+				self.time_start = now()
+				self.old_seen = self.seen.copy()
+				log(DEBUG,"SCAN",self.path,"IN",self.bus)
+				self.bus.dir(path=self.path+('alarm',), proc=self._reporter)
+				for id in self.old_seen:
+					simple_event("onewire","alarm","off",id, bus=self.bus.bus.name, path=self.path, id=id)
+					self.seen.remove(id)
+			except Exception as e:
+				fix_exception(e)
+				process_failure(e)
+				self.time_end = now()
+				sleep(self.freq*10)
+			else:
+				self.time_end = now()
+
+	def delete(self,ctx=None):
+		self.stop_job("watcher")
+		self.server = None
+		super(OWFSpoller,self).delete()
+
+	def list(self):
+		yield super(OWFSpoller,self)
+		yield ("bus",self.bus)
+		yield ("path",self.path)
+		yield ("interval",humandelta(self.freq))
+		if self.time_start:
+			yield ("last start",humandelta(now()-self.time_start))
+		if self.time_end:
+			yield ("last start",humandelta(now()-self.time_end))
+		for id in self.seen:
+			dev = devices.get(id,id)
+			yield ("alarm",dev)
+		for id in self.new_seen:
+			yield ("alarm new",id)
+			
+
+class OWFSpoll(AttributedStatement):
+	name="poll onewire"
+	doc="Periodically scan the /alarm directory on a onewire bus"
+	long_doc="""\
+poll onewire NAME path...
+	Periodically poll a 1wire bus with CONDITIONAL SEARCH.
+	For a multi-word connection name, use a separate :name attribute:
+
+		poll onewire "bus.0" "1f.0cb204000000" main:
+			name foo bar
+			for 0.1
+"""
+	dest=None
+	timespec=1
+
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+
+		if len(event) == 2 and not self.dest and event[0].lower() in devices:
+			dev = devices[event[0].lower()]
+			path = dev.path + (event[1],)
+		elif self.dest is None:
+			if len(event) == 0:
+				raise SyntaxError("Usage: poll onewire device aux/main   or  poll onewire [bus] path… [:name bus…]")
+			dev = buses[Name(event[0])].root
+			path = event[1:]
+		else:
+			dev = buses[self.dest].root
+			path = event
+		OWFSpoller(dev,path, self.timespec)
+
+OWFSpoll.register_statement(OWFSname)
+OWFSpoll.register_statement(DelayFor)
+
+
+
 class OWFSmodule(Module):
 	"""\
 		Basic onewire access.
@@ -504,6 +626,7 @@ class OWFSmodule(Module):
 		main_words.register_statement(OWFSscan)
 		main_words.register_statement(OWFSset)
 		main_words.register_statement(OWFSmonitor)
+		main_words.register_statement(OWFSpoll)
 		register_input(OWFSinput)
 		register_output(OWFSoutput)
 		register_condition(OWFSconnected)
@@ -516,6 +639,7 @@ class OWFSmodule(Module):
 		main_words.unregister_statement(OWFSscan)
 		main_words.unregister_statement(OWFSset)
 		main_words.unregister_statement(OWFSmonitor)
+		main_words.unregister_statement(OWFSpoll)
 		unregister_input(OWFSinput)
 		unregister_output(OWFSoutput)
 		unregister_condition(OWFSconnected)

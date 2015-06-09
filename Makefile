@@ -60,8 +60,10 @@ ow: FIX
 	sh test/interactive/onewire.sh
 a amqp: FIX
 	$(PYTHON) test/interactive/main.py test/interactive/amqp
-w fs20: FIX
+w wago: FIX
 	$(PYTHON) test/interactive/main.py test/interactive/wago
+op onewire_poll: FIX
+	$(PYTHON) scripts/daemon.py test/interactive/onewire_poll
 wd wagodebug: FIX
 	pdb test/interactive/main.py test/interactive/wago
 f fs20: FIX

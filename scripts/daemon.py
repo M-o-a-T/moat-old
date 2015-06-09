@@ -24,7 +24,9 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##  Thus, do not remove the next line, or insert any blank lines above.
 ##BP
 
-import sys; sys.excepthook = None; del sys
+import six
+if six.PY2:
+	import sys; sys.excepthook = None; del sys
 from moat import patch;patch()
 from moat.statement import main_words, global_words, Statement, \
 	DoNothingHandler

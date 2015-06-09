@@ -370,6 +370,20 @@ onewire bus down
 	   "bus": the interface this is connected to
 	   "path": the bus path, may be behind a 1wire switch
 
+onewire alarm new ID
+	-- A 1wire device starts showing up in CONDITIONAL SEARCH
+	   which we haven't yeen yet.
+
+onewire alarm on ID
+	-- A 1wire device starts showing up in CONDITIONAL SEARCH.
+	   "bus": the interface this is connected to
+	   "path": the bus path, may be behind a 1wire switch
+
+onewire alarm off ID
+	-- A 1wire device is no longer listed in CONDITIONAL SEARCH.
+	   "bus": the interface this is connected to
+	   "path": the bus path, may be behind a 1wire switch
+
 timing
 ------
 
