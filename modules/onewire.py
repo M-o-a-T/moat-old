@@ -676,6 +676,7 @@ class OWFSmodule(Module):
 		register_output(OWFSoutput)
 		register_condition(OWFSconnected)
 		register_condition(OWFSconnectedbus)
+		register_condition(OWFSpolls.exists)
 	
 	def unload(self):
 		main_words.unregister_statement(OWFSconnect)
@@ -689,5 +690,6 @@ class OWFSmodule(Module):
 		unregister_output(OWFSoutput)
 		unregister_condition(OWFSconnected)
 		unregister_condition(OWFSconnectedbus)
+		unregister_condition(OWFSpolls.exists)
 	
 init = OWFSmodule
