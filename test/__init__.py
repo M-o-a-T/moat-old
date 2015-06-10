@@ -25,12 +25,13 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##BP
 
 import six
+from moat import TESTING
 from moat.logging import BaseLogger, TRACE,NONE, log, log_level
 from moat.interpreter import Interpreter
 from moat.parser import parse
 from moat.context import Context
 from moat.times import unixtime,now
-from moat.twist import fix_exception,format_exception,print_exception,TESTING
+from moat.twist import fix_exception,format_exception,print_exception
 from moat.statement import Statement,main_words
 from moat.base import Name
 from moat.reactor import shut_down, mainloop

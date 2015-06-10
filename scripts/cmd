@@ -27,6 +27,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import six
 
 from moat import patch;patch()
+from moat import TESTING
 import rpyc
 import sys
 import gevent
@@ -42,7 +43,6 @@ import os
 import codecs
 sys.stdout = codecs.getwriter('utf8')(sys.stdout)
 
-TESTING="MOAT_TEST" in os.environ
 gevent_rpyc.patch_all()
 
 modes = "log,list,cmd".split(",")

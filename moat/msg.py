@@ -32,6 +32,7 @@ Look at module/onewire.py for an example.
 
 import six
 
+from moat import TESTING
 from moat.logging import log,log_exc,DEBUG,TRACE,INFO,WARN,ERROR
 from moat.statement import Statement, main_words, AttributedStatement
 from moat.check import Check,register_condition,unregister_condition

@@ -38,8 +38,6 @@ from gevent.event import Event
 if sys.version_info[0] < 3:
 	sys.stdout = codecs.getwriter('utf8')(sys.stdout)
 
-TESTING="MOAT_TEST" in os.environ
-
 import amqp
 import json
 from pprint import pprint
