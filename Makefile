@@ -64,6 +64,8 @@ w wago: FIX
 	$(PYTHON) test/interactive/main.py test/interactive/wago
 op onewire_poll: FIX
 	$(PYTHON) scripts/daemon.py test/interactive/onewire_poll
+of onewire_fake: FIX
+	env MOAT_TEST=1 $(PYTHON) scripts/daemon.py test/interactive/onewire_fake
 wd wagodebug: FIX
 	pdb test/interactive/main.py test/interactive/wago
 f fs20: FIX
