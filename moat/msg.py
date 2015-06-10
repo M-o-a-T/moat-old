@@ -418,7 +418,7 @@ class MsgQueue(Collected,Jobber):
 	max_send = None # messages to send until the channel is restarted
 	attempts = 0
 	initial_connect_timeout = 3 # initial delay between attempts, seconds
-	max_connect_timeout = 300 # max delay between attempts
+	max_connect_timeout = 300 if not TESTING else 5 # max delay between attempts
 	connect_timeout = None # current delay between attempts
 
 	channel = None # the current connection

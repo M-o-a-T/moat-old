@@ -548,10 +548,10 @@ class OWFSqueue(MsgQueue,Jobber):
 						q.set(None)
 
 				if TESTING:
-					if resl: d = 10
+					if resl: d = 5
 					else: d = 30
 				else:
-					if resl: d = 60
+					if resl: d = 10
 					else: d = 300
 
 			while True:
