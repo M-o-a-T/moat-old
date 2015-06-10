@@ -417,7 +417,6 @@ class MsgQueue(Collected,Jobber):
 	#storage = Nets.storage
 	max_send = None # messages to send until the channel is restarted
 	attempts = 0
-	max_attempts = None # connection attempts
 	initial_connect_timeout = 3 # initial delay between attempts, seconds
 	max_connect_timeout = 300 # max delay between attempts
 	connect_timeout = None # current delay between attempts
