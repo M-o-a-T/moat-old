@@ -53,6 +53,15 @@ block:
 	wait X2: for 0.2
 	trigger DoNow $wait
 wait X3: for 0.1
+block:
+	try:
+		wait:
+			for 0.1
+			timeout
+		log ERROR No timeout
+	catch DelayReached:
+		log DEBUG Yes timeout
+
 async:
 	wait Foo Baz: until 8 min
 	trigger Heya
@@ -91,6 +100,7 @@ load_module("wait")
 load_module("block")
 load_module("logging")
 load_module("ifelse")
+load_module("errors")
 load_module("on_event")
 
 run("wait",input)

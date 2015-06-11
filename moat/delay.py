@@ -42,6 +42,11 @@ class DelayError(RuntimeError):
 class DelayDone(DelayError):
 	text = u"Delay ‹%s› is finished"
 
+class DelayReached(DelayError):
+	"""An error signalling that a timeout was reached."""
+	no_backtrace = True
+	text = u"Waiter ‹%s› was not cancelled"
+
 class DelayCancelled(DelayError):
 	"""An error signalling that a wait was killed."""
 	no_backtrace = True

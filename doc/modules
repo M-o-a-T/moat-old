@@ -2459,6 +2459,21 @@ an error, i.e. the commands after the `wait` are not executed.
 Add `soft` to prevent that, i.e. execution continues regardless of whether
 the wait was canceled or ran to completion.
 
+timeout
+-------
+
+Conversely, you might want the waiter to throw an error when the timer
+completes normally. You can use this to kill your program whenever somethig
+doesn't happen:
+
+	on connected foo: del wait foo timer
+	connect foo  # assume this triggers a "connected foo" event
+	if not connected foo: # avoids a race condition
+		wait foo timer:
+			for 42
+			timeout
+	# code here is only run when the connection was established within 42sec
+
 ---------
 list wait
 ---------

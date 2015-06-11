@@ -47,7 +47,7 @@ from moat.collect import Collection,Collected
 from moat.twist import callLater,fix_exception,Jobber,log_wait
 from moat.logging import log,log_exc,TRACE
 from moat.delay import DelayFor,DelayWhile,DelayUntil,DelayNext,\
-	DelayError,DelayDone,DelayCancelled
+	DelayError,DelayDone,DelayCancelled,DelayReached
 
 from gevent.event import AsyncResult
 from gevent.lock import Semaphore
@@ -76,11 +76,11 @@ class DupWaiterError(DelayError):
 class Waiter(Collected,Jobber):
 	"""This is the thing that waits."""
 	force = False
-	soft = False
+	soft = None
 	storage = Waiters.storage
 	_plinger = None
 
-	def __init__(self,parent,name,force,soft):
+	def __init__(self,parent,name,force,soft=None):
 		self.ctx = parent.ctx
 		self.start = now()
 		self.force = force
@@ -101,6 +101,12 @@ class Waiter(Collected,Jobber):
 			yield("end",end)
 			yield("total", humandelta(end-self.start))
 		w = self
+		if self.soft is None:
+			yield("abort","on cancelation")
+		elif self.soft:
+			yield("abort","never")
+		else:
+			yield("abort","on timeout")
 		while True:
 			w = getattr(w,"parent",None)
 			if w is None: break
@@ -187,7 +193,7 @@ wait [NAME…]: for FOO…
 	is_update = False
 	force = False
 	timespec = None
-	soft = False
+	soft = None
 
 	def __init__(self,*a,**k):
 		super(WaitHandler,self).__init__(*a,**k)
@@ -226,8 +232,12 @@ wait [NAME…]: for FOO…
 			else:
 				simple_event("wait","cancel", *w.name, loglevel=TRACE)
 			ctx.wait = tm
-			if not r and not self.soft:
-				raise DelayCancelled(w)
+			if self.soft is None:
+				if not r:
+					raise DelayCancelled(w)
+			elif not self.soft:
+				if r:
+					raise DelayReached(w)
 		finally:
 			w.delete()
 
@@ -270,7 +280,7 @@ class WaitSoft(Statement):
 	name = "soft"
 	doc = "don't abort when this waiter is canceled"
 	long_doc="""\
-Blocks usually are abother when a waiter in them is canceled.
+Blocks usually are aborted when a waiter in them is canceled.
 This statement causes the block to continue instead.
 """
 	def run(self,ctx,**k):
@@ -278,6 +288,19 @@ This statement causes the block to continue instead.
 		if len(event):
 			raise SyntaxError('Usage: soft')
 		self.parent.soft = True
+
+class WaitTimeout(Statement):
+	name = "timeout"
+	doc = "abort when this waiter is not canceled"
+	long_doc="""\
+This statement causes the block to abort when the waiter completes
+normally. It thus works as a timeout.
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if len(event):
+			raise SyntaxError('Usage: soft')
+		self.parent.soft = False
 
 class ExistsWaiterCheck(Check):
 	name="exists wait"
@@ -311,6 +334,7 @@ if TESTING:
 	WaitHandler.register_statement(WaitDebug)
 WaitHandler.register_statement(WaitUpdate)
 WaitHandler.register_statement(WaitSoft)
+WaitHandler.register_statement(WaitTimeout)
 
 class WaitModule(Module):
 	"""\
