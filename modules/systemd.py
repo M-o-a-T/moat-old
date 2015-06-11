@@ -58,7 +58,7 @@ keepalive
 
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		if event:
+		if len(event):
 			raise SyntaxError("No parameters here")
 
 		sd.notify("WATCHDOG=1")
@@ -73,7 +73,7 @@ send ready
 
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		if event:
+		if len(event):
 			raise SyntaxError("No parameters here")
 
 		sd.notify("READY=1")
@@ -88,7 +88,7 @@ send status foo bar
 
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		if not event:
+		if not len(event):
 			raise SyntaxError("No parameters make no sense")
 
 		sd.notify("STATUS="+' '.join(event))
