@@ -1,3 +1,9 @@
+moat (0.7.16) smurf; urgency=medium
+
+  * py3 string/buffer woes
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Fri, 12 Jun 2015 01:08:38 +0200
+
 moat (0.7.15) smurf; urgency=medium
 
   * Add wait :timeout

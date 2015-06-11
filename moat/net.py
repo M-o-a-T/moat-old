@@ -462,7 +462,7 @@ send net text… :to ‹name…›
 			name = Name(*name.apply(ctx))
 
 		val = u" ".join(six.text_type(s) for s in event)
-		self.storage[name].write(val)
+		self.storage[name].write(val.encode('utf-8'))
 
 class NetTo(Statement):
 	name="to"

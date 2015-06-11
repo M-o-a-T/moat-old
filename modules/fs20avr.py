@@ -57,7 +57,7 @@ class AVRcommon(handler):
 		self.name = name
 		self.timeout = timeout
 		self.timer = None
-		self.dbuf = ""
+		self.dbuf = b""
 		self.ebuf = ""
 		self.lbuf = None
 		self.timestamp = None
@@ -121,17 +121,17 @@ class AVRcommon(handler):
 		data = self.dbuf+data
 		while True:
 			xi = len(data)+1
-			try: pi = data.index('\r')
+			try: pi = data.index(b'\r')
 			except ValueError: pi = xi
-			try: ei = data.index('\n')
+			try: ei = data.index(b'\n')
 			except ValueError: ei = xi
 			if pi==xi and ei==xi:
 				break
 			if pi < ei:
-				self.lbuf = data[:pi]
+				self.lbuf = data[:pi].decode('utf-8')
 				data = data[pi+1:]
 			else:
-				msg = data[:ei]
+				msg = data[:ei].decode('utf-8')
 				data = data[ei+1:]
 				if msg == "" and self.lbuf is not None:
 					msg = self.lbuf
