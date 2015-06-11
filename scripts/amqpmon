@@ -26,6 +26,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 
 from moat import patch;patch()
 import sys
+import six
 from moat.base import Name
 from moat.times import humandelta
 from datetime import datetime
@@ -95,7 +96,10 @@ def do_msg(conn,args):
 def do_log(conn,body=False):
 	def on_msg(msg):
 		try:
-			msg.body = json.loads(msg.body.decode("utf-8"))
+			b = msg.body
+			if not isinstance(b,six.text_type):
+				b = b.decode('utf-8')
+			msg.body = json.loads(b)
 		except Exception as e:
 			msg.body = "? "+str(e)+":"+str(msg.body)
 		deli = msg.delivery_info['routing_key'].split('.')
