@@ -327,7 +327,7 @@ class LogWorker(ExcWorker):
 def log_exc(msg=None, err=None, level=ERROR):
 	level = LogNames.get(level,level)
 
-	for l in Loggers.values():
+	for l in list(Loggers.values()):
 		if not l.ready:
 			continue
 		if msg:
@@ -438,7 +438,7 @@ def log(level, *a):
 	logger.log(getattr(logging,level,logging.DEBUG),"%s"," ".join(str(x) for x in a))
 
 	exc = []
-	for l in Loggers.values():
+	for l in list(Loggers.values()):
 		if not l.ready:
 			continue
 		try:
