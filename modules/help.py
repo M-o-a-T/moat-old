@@ -104,9 +104,7 @@ Statements may be multi-word and follow generic Python syntax.
 				n = getattr(words,"helpsubname","word")
 				print("Known "+n+"s:", file=self.ctx.out)
 
-				def nam(a):
-					return a[0]
-				for n,d in sorted(wl(),key=nam):
+				for n,d in sorted(wl()):
 					hname = " ".join(n)
 					print(hname+(" "*(maxlen+1-len(hname)))+": "+d.doc, file=self.ctx.out)
 
@@ -123,10 +121,8 @@ Statements may be multi-word and follow generic Python syntax.
 			if maxlen:
 				print("Known types:", file=self.ctx.out)
 
-				def nam(a,b):
-					return cmp(a[0],b[0])
-				for n,d in sorted(wl(),nam):
-					print(n+(" "*(maxlen+1-len(hname)))+": "+d.doc, file=self.ctx.out)
+				for n,d in sorted(wl()):
+					print(" ".join(n)+(" "*(maxlen+1-len(hname)))+": "+d.doc, file=self.ctx.out)
 
 class HelpModule(Module):
 	"""\
