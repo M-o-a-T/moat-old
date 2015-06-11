@@ -76,13 +76,15 @@ class DupWaiterError(DelayError):
 class Waiter(Collected,Jobber):
 	"""This is the thing that waits."""
 	force = False
+	soft = False
 	storage = Waiters.storage
 	_plinger = None
 
-	def __init__(self,parent,name,force):
+	def __init__(self,parent,name,force,soft):
 		self.ctx = parent.ctx
 		self.start = now()
 		self.force = force
+		self.soft = soft
 		self._lock = Semaphore()
 		try:
 			self.parent = parent.parent
@@ -185,6 +187,7 @@ wait [NAME…]: for FOO…
 	is_update = False
 	force = False
 	timespec = None
+	soft = False
 
 	def __init__(self,*a,**k):
 		super(WaitHandler,self).__init__(*a,**k)
@@ -202,7 +205,7 @@ wait [NAME…]: for FOO…
 			raise SyntaxError(u'Usage: wait [name…]: for|until|next ‹timespec›')
 		if self.is_update:
 			return Waiters[self.displayname].retime(self.timespec())
-		w = Waiter(self, self.displayname, self.force)
+		w = Waiter(self, self.displayname, self.force, self.soft)
 		w.init(self.timespec())
 		simple_event("wait","start",*w.name, end_time=ixtime(w.end,self.force), loglevel=TRACE)
 		try:
@@ -223,7 +226,7 @@ wait [NAME…]: for FOO…
 			else:
 				simple_event("wait","cancel", *w.name, loglevel=TRACE)
 			ctx.wait = tm
-			if not r:
+			if not r and not self.soft:
 				raise DelayCancelled(w)
 		finally:
 			w.delete()
@@ -263,6 +266,19 @@ This statement updates the timeout of an existing wait handler.
 		assert hasattr(self.parent,"is_update"), "Not within a wait statement?"
 		self.parent.is_update = True
 
+class WaitSoft(Statement):
+	name = "soft"
+	doc = "don't abort when this waiter is canceled"
+	long_doc="""\
+Blocks usually are abother when a waiter in them is canceled.
+This statement causes the block to continue instead.
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if len(event):
+			raise SyntaxError('Usage: soft')
+		self.parent.soft = True
+
 class ExistsWaiterCheck(Check):
 	name="exists wait"
 	doc="check if a waiter exists at all"
@@ -294,6 +310,7 @@ WaitHandler.register_statement(DelayNext)
 if TESTING:
 	WaitHandler.register_statement(WaitDebug)
 WaitHandler.register_statement(WaitUpdate)
+WaitHandler.register_statement(WaitSoft)
 
 class WaitModule(Module):
 	"""\

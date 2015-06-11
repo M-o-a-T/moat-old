@@ -40,6 +40,10 @@ list wait Foo Bar
 wait Foo Bar:
 	for 0.1
 	update
+on Heya:
+	log ERROR No Want Heya
+on Heyu:
+	log DEBUG Yes Want Heyu
 block:
 	if exists wait Foo Baz:
 		log ERROR No2
@@ -52,6 +56,11 @@ wait X3: for 0.1
 async:
 	wait Foo Baz: until 8 min
 	trigger Heya
+async:
+	wait Foo Bazi:
+		until 9 min
+		soft
+	trigger Heyu
 wait: for 0.1
 block:
 	if exists wait Foo Baz:
@@ -64,6 +73,7 @@ on whatever:
 trigger whatever :sync
 wait: for 0.3
 del wait Foo Baz
+del wait Foo Bazi
 block:
 	if exists wait Foo Baz:
 		log ERROR No3

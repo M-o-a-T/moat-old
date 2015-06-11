@@ -2450,6 +2450,15 @@ The above could therefore also have been written as:
 
 except that it's ugly. ☺
 
+soft
+----
+
+Normally, canceling a wait (with `wait cancel`) causes the wait to trigger
+an error, i.e. the commands after the `wait` are not executed.
+
+Add `soft` to prevent that, i.e. execution continues regardless of whether
+the wait was canceled or ran to completion.
+
 ---------
 list wait
 ---------
