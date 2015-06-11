@@ -11,12 +11,12 @@ TRACE NewHandler 11
 TRACE Create OnEvtHandler: wait¦done¦foo¦b
 TRACE NewHandler 12
 EVENT: wait¦start¦foo¦a
-     : end_time=0.3
+     : end_time=0.5
      : loglevel=0
 foo lish
 .
 EVENT: wait¦start¦foo¦b
-     : end_time=0.7
+     : end_time=0.8
      : loglevel=0
 : ‹Collected AMQPrecv:foo¦lish›
 name: foo¦lish
@@ -93,18 +93,19 @@ exchange: he_exc
 prefix: ('moat', 'log')
 .
 EVENT: wait¦start¦_wait¦t4
-     : end_time=0.8
+     : end_time=0.9
      : loglevel=0
 TRACE 2003-04-05 06:07:08.500000 foo¦a: Forced timer done
 EVENT: wait¦done¦foo¦a
      : loglevel=0
 IEVENT: hey¦ho
 EVENT: amam¦ho
-     : raw={"wait": "0.4", "event": ["hey", "ho"]}
+     : event=['hey', 'ho']
+     : wait=0.5
+Waiter ‹foo b› was cancelled
 EVENT: wait¦cancel¦foo¦b
      : loglevel=0
 TRACE Yes
-Waiter ‹foo b› was cancelled
 Waiter ‹foo b› was cancelled
 TRACE 2003-04-05 06:07:08.950000 _wait¦t4: Forced timer done
 EVENT: wait¦done¦_wait¦t4
@@ -116,25 +117,33 @@ TRACE NewHandler 25
 TRACE Create OnEvtHandler: some¦thing
 TRACE NewHandler 26
 EVENT: wait¦start¦foo¦mon
-     : raw={"loglevel": 0, "end_time": "1.3", "event": ["wait", "start", "foo", "mon"]}
+     : end_time=1.5
+     : event=['wait', 'start', 'foo', 'mon']
+     : loglevel=0
 EVENT: wait¦start¦foo¦in
-     : raw={"loglevel": 0, "end_time": "1.3", "event": ["wait", "start", "foo", "in"]}
+     : end_time=1.5
+     : event=['wait', 'start', 'foo', 'in']
+     : loglevel=0
 EVENT: some¦thing
-     : raw={"wait": "0.8", "event": ["some", "thing"]}
-EVENT: wait¦start¦_wait¦t7
-     : raw={"loglevel": 0, "end_time": "1.4", "event": ["wait", "start", "_wait", "t7"]}
-TRACE YES in
-Waiter ‹foo in› was cancelled
-Waiter ‹foo in› was cancelled
-EVENT: moni¦some¦thing
      : event=['some', 'thing']
-     : wait=0.8
-EVENT: wait¦cancel¦foo¦in
-     : raw={"loglevel": 0, "event": ["wait", "cancel", "foo", "in"]}
+     : wait=0.9
+EVENT: wait¦start¦_wait¦t7
+     : end_time=1.6
+     : event=['wait', 'start', '_wait', 't7']
+     : loglevel=0
+EVENT: moni¦some¦thing
+     : event=['moni', 'some', 'thing']
+     : wait=0.9
+TRACE YES in
 TRACE YES mon in
+Waiter ‹foo in› was cancelled
 Waiter ‹foo mon› was cancelled
 Waiter ‹foo mon› was cancelled
+Waiter ‹foo in› was cancelled
+EVENT: wait¦cancel¦foo¦in
+     : event=['wait', 'cancel', 'foo', 'in']
+     : loglevel=0
 EVENT: wait¦cancel¦foo¦mon
-     : raw={"loglevel": 0, "event": ["wait", "cancel", "foo", "mon"]}
+     : event=['wait', 'cancel', 'foo', 'mon']
+     : loglevel=0
 TRACE 2003-04-05 06:07:09.600000 _wait¦t7: Forced timer done
-EVENT: amqp¦stop¦test¦foo
