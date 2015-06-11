@@ -44,6 +44,7 @@ from moat.twist import fix_exception,Jobber
 from moat.run import simple_event, process_failure
 from moat.collect import Collection,Collected
 from moat.delay import DelayFor
+from moat.event_hook import OnEventBase
 
 import struct
 from gevent import sleep
@@ -507,7 +508,7 @@ OWFSpolls.does("del")
 class OWFSpoller(Collected,Jobber):
 	"""A bus poll service"""
 	storage = OWFSpolls
-	def __init__(self,bus,path,freq,simul):
+	def __init__(self,bus,path,freq,simul=()):
 		self.bus = bus
 		self.path = tuple(path)
 		self.name = bus.bus.name+self.path
@@ -656,6 +657,38 @@ OWFSpoll.register_statement(OWFSname)
 OWFSpoll.register_statement(DelayFor)
 OWFSpoll.register_statement(SimulWrite)
 
+## setup auto-poll
+ap_interval = 0
+_new_bus_ev = None
+
+class NewBusEvent(OnEventBase):
+	"""triggers when a new bus device shows up"""
+	def __init__(self):
+		super(NewBusEvent,self).__init__(parent=None, args=Name('onewire','bus','up'), name="onewire bus up hook")
+
+	def process(self, event,**k):
+		if ap_interval > 0:
+			OWFSpoller(buses[event.ctx.bus].root, event.ctx.path, ap_interval)
+
+class AutoPoll(Statement):
+	name="autopoll onewire"
+	dest = None
+	doc="auto-setup a poll instance for new buses"
+
+	long_doc = u"""\
+autopoll onewire ‹interval›
+  - Whenever a new 1wire bus shows up, set up a poll instance which runs every ‹interval› seconds.
+    Use zero to disable.
+	Note that this only affects new buses.
+"""
+
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if len(event) != 1:
+			raise SyntaxError("Usage: autopoll onewire ‹interval›")
+		global ap_interval
+		ap_interval = float(event[0])
+
 
 class OWFSmodule(Module):
 	"""\
@@ -665,6 +698,9 @@ class OWFSmodule(Module):
 	info = "Basic one-wire access"
 
 	def load(self):
+		global _new_bus_ev
+		_new_bus_ev = NewBusEvent()
+
 		main_words.register_statement(OWFSconnect)
 		main_words.register_statement(OWFSdisconnect)
 		main_words.register_statement(OWFSdir)
@@ -672,6 +708,7 @@ class OWFSmodule(Module):
 		main_words.register_statement(OWFSset)
 		main_words.register_statement(OWFSmonitor)
 		main_words.register_statement(OWFSpoll)
+		main_words.register_statement(AutoPoll)
 		register_input(OWFSinput)
 		register_output(OWFSoutput)
 		register_condition(OWFSconnected)
@@ -679,6 +716,8 @@ class OWFSmodule(Module):
 		register_condition(OWFSpolls.exists)
 	
 	def unload(self):
+		if _new_bus_ev:
+			_new_bus_ev.delete()
 		main_words.unregister_statement(OWFSconnect)
 		main_words.unregister_statement(OWFSdisconnect)
 		main_words.unregister_statement(OWFSdir)
@@ -686,6 +725,7 @@ class OWFSmodule(Module):
 		main_words.unregister_statement(OWFSset)
 		main_words.unregister_statement(OWFSmonitor)
 		main_words.unregister_statement(OWFSpoll)
+		main_words.unregister_statement(AutoPoll)
 		unregister_input(OWFSinput)
 		unregister_output(OWFSoutput)
 		unregister_condition(OWFSconnected)
