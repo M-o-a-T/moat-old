@@ -158,12 +158,13 @@ class OnEventBase(Collected,iWorker):
 #		raise NotImplementedError("You need to implement 'process()' in %s" % (self.__class__.__name__,))
 
 	def report(self, verbose=False):
-		if not verbose:
-			for r in super(OnEventBase,self).report(verbose):
-				yield r
-		else:
-			for r in self.parent.report(verbose):
-				yield r
+		for r in super(OnEventBase,self).report(verbose):
+			yield r
+		if verbose:
+			rep = getattr(self.parent,'report',None)
+			if rep is not None:
+				for r in rep(verbose):
+					yield r
 
 	def info(self):
 		return u"%s (%d)" % (six.text_type(self.args),self.prio)
