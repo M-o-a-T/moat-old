@@ -321,10 +321,12 @@ class DIRmsg(OWFScall):
 	cached = True
 	dirall = True
 
-	def __init__(self,path,cb):
+	def __init__(self,path,cb, cached=None):
 		assert path is not None
 		self.path = path
 		self.cb = cb
+		if cached is not None:
+			self.cached = cached
 		super(DIRmsg,self).__init__()
 	
 	def send(self,conn):
@@ -785,7 +787,7 @@ class OWFSdevice(Collected):
 			fix_exception(ex)
 			self.go_down(ex)
 
-	def dir(self, proc, path=(), key=None):
+	def dir(self, proc, path=(), key=None, cached=None):
 		if not self.bus:
 			raise DisconnectedDeviceError(self.id)
 
@@ -795,7 +797,7 @@ class OWFSdevice(Collected):
 		if key is not None:
 			p += (key,)
 
-		msg = DIRmsg(p,proc)
+		msg = DIRmsg(p,proc, cached)
 		msg.queue(self.bus)
 
 		try:

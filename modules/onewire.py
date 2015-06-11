@@ -548,7 +548,7 @@ class OWFSpoller(Collected,Jobber):
 				self.time_start = now()
 				self.old_seen = self.seen.copy()
 				# log(DEBUG,"SCAN",self.path,"IN",self.bus)
-				self.bus.dir(path=self.path+('alarm',), proc=self._reporter)
+				self.bus.dir(path=self.path+('alarm',), proc=self._reporter, cached=False)
 				for id in self.old_seen:
 					simple_event("onewire","alarm","off",id, bus=self.bus.bus.name, path=self.path, id=id)
 					self.seen.remove(id)
