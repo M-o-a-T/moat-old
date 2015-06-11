@@ -2808,3 +2808,34 @@ send status
 Tell systemd what's happening, so that "systemd status moat@whatever" displays
 something meaningful.
 
+====
+moat
+====
+
+This module contains abstractions for MoaT devices.
+
+----------------
+list moat device
+----------------
+
+List known MoaT devices by name.
+
+-----------------------
+input moat adc NAME NR
+-----------------------
+
+Create a named (numeric) input for a MoaT A/D converter.
+
+-----------------------
+input moat port NAME NR
+-----------------------
+
+Create a named (Boolean) input for a MoaT port.
+
+------------------------
+output moat port NAME NR
+------------------------
+
+Create a named (Boolean) input for a MoaT port.
+
+

@@ -73,6 +73,8 @@ class BadValue(RuntimeError):
 inputmakers = {}
 outputmakers = {}
 def _register(store,io,what):
+	if isinstance(io.typ,six.string_types):
+		io.typ = SName(io.typ)
 	if io.typ in store:
 		raise ValueError("An %sput handler for '%s' is already registered." % \
 			(what,io.typ))
@@ -341,14 +343,22 @@ class MakeIO(AttributedStatement):
 				raise SyntaxError(u'Usage: %s ‹name› ‹typ› ‹params›'%(self.name,))
 			self.dest = Name(event[0])
 			typ = event[1]
-			d = 2
+			d = 1
 		else:
 			if len(event) < 1:
 				raise SyntaxError(u'Usage: %s ‹typ› ‹params›'%(self.name,))
 			typ = event[0]
-			d = 1
-
-		self.registry[typ](self.dest.apply(ctx), event.apply(ctx,drop=d), self.addons,self.ranges,self.values)
+			d = 0
+		de=len(event)
+		while de > d:
+			try:
+				reg = self.registry[Name(event[d:de])]
+			except KeyError:
+				de -= 1
+			else:
+				reg(self.dest.apply(ctx), event.apply(ctx,drop=de), self.addons,self.ranges,self.values)
+				return
+		raise
 
 # the first version was to be directly attached to variables, but that doesn't work
 #class BoolIO(WordAttached):
