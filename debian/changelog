@@ -1,3 +1,10 @@
+moat (0.7.9) smurf; urgency=medium
+
+  * basic MoaT support (including alarm poll)
+  * various fixes
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Thu, 11 Jun 2015 22:39:36 +0200
+
 moat (0.7.8) smurf; urgency=medium
 
   * stupid indents
