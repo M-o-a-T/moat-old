@@ -262,14 +262,13 @@ class OWFScall(MsgBase):
 
 	def _path(self,path):
 		"""Helper to build an OWFS path from a list"""
-		if self.cached:
-			if not path:
-				return ""
-			return "/"+"/".join(path)
+		if path:
+			path = '/'+'/'.join(str(x) for x in path)
 		else:
-			if not path:
-				return "/uncached"
-			return "/uncached/"+"/".join(path)
+			path = ""
+		if not self.cached:
+			path = '/uncached'+path
+		return path
 
 class NOPmsg(OWFScall):
 	prio = PRIO_BACKGROUND
@@ -311,7 +310,7 @@ class ATTRsetmsg(OWFScall):
 		return RECV_AGAIN
 
 	def __repr__(self):
-		return u"‹"+self.__class__.__name__+" "+self.path[-2]+" "+self.path[-1]+" "+six.text_type(self.value)+u"›"
+		return u"‹%s %s %s %s›" % (self.__class__.__name__,self.path[-2],self.path[-1],self.value)
 		
 
 class DIRmsg(OWFScall):
