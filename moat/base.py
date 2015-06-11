@@ -50,7 +50,7 @@ class Name(tuple):
 	suffix = ""
 
 	def __new__(cls,*data):
-		if len(data) == 1 and isinstance(data[0],tuple):
+		if len(data) == 1 and isinstance(data[0],(tuple,list)):
 			data = data[0]
 		if len(data) > 0 and not isinstance(data[0],(six.string_types,int,float)):
 			raise RuntimeError("Name:"+repr(data))
