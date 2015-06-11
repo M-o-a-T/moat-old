@@ -4,7 +4,8 @@ ConditionPathExists=/etc/moat/%i.moat
 After=rabbitmq-server.service
 
 [Service]
-ExecStart=/usr/sbin/moatd /etc/moat/%i.moat
+EnvironmentFile=-/etc/default/moat
+ExecStart=/usr/sbin/moatd $DAEMON_OPTS /etc/moat/%i.moat
 Type=notify
 TimeoutStartSec=30
 RestartSec=15
