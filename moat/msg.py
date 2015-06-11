@@ -485,6 +485,7 @@ class MsgQueue(Collected,Jobber):
 
 	def delete(self,ctx=None):
 		self.stop("deleted")
+		self.stop_job("job")
 		for m in self.delayed[:]:
 			m.unqueue()
 		super(MsgQueue,self).delete()

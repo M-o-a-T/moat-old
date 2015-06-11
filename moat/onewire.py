@@ -598,7 +598,6 @@ class OWFSbuspath(Jobber):
 		yield ("wire",self.path)
 		
 	def start(self):
-		super(OWFSbuspath,self).start()
 		self.watch_q = Queue()
 		self.start_job("scanner",self._scanner)
 		def dead(_):
@@ -607,9 +606,6 @@ class OWFSbuspath(Jobber):
 
 	def stop(self,reason=None):
 		self.stop_job("scanner")
-		super(OWFSbuspath,self).stop(reason=reason)
-
-
 
 
 ow_buses = {}
