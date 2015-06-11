@@ -583,11 +583,14 @@ class AMQPrecv(Collected):
 			return # dup
 		if getattr(msg,'content_type','') == "application/json":
 			try:
-				data = json.loads(msg.body.decode("utf-8"))
-			except Exception:
-				data = { "raw": msg.body }
+				b = msg.body
+				if not isinstance(b,six.text_type):
+					b = b.decode('utf-8')
+				data = json.loads(b)
+			except Exception as e:
+				data = { "raw": msg.body, "error": e }
 		else:
-			data = { "raw": msg.body }
+			data = { "raw": msg.body, "content_type": getattr(msg,'content_type','') }
 		self.last_recv = msg.__dict__
 		simple_event(*(self.prefix+tuple(msg.routing_key.split('.')[self.strip:])), _direct=self._direct, **data)
 
