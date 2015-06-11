@@ -177,8 +177,10 @@ class AMQPclient(Collected,Jobber):
 		try:
 			self.conn=amqp.connection.Connection(host=self.host,userid=self.username,password=self.password,login_method='AMQPLAIN', login_response=None, virtual_host=self.vhost)
 
-		except Exception as e:
-			simple_event("amqp","error",*name)
+		except Exception as ex:
+			simple_event("amqp","error",*name, error=str(ex))
+			fix_exception(ex)
+			process_failure(ex)
 		else:
 			super(AMQPclient,self).__init__()
 			simple_event("amqp","connect",*name)
