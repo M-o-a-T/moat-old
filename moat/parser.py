@@ -362,7 +362,7 @@ def parse(input, interpreter=None, ctx=None, out=None, words=None):
 		interpreter = interpreter(ctx)
 
 	if isinstance(input,six.string_types):
-		input = open(input,"rU")
+		input = open(input,"rU",encoding='utf-8')
 
 	parser = Parser(interpreter=interpreter, input=input, ctx=ctx)
 	parser.run()
