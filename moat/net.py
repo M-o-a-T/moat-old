@@ -114,7 +114,9 @@ class LineReceiver(object):
 				process_failure(e)
 		
 	def write(self,val):
-		super(LineReceiver,self).write(val.encode('utf-8')+self.delimiter)
+		if isinstance(val,six.text_type):
+			val = val.encode('utf-8')
+		super(LineReceiver,self).write(val+self.delimiter)
 
 #class Nets(Collection):
 #	name = "net"
