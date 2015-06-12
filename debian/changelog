@@ -1,3 +1,9 @@
+moat (0.7.17) smurf; urgency=medium
+
+  * Fix RPC; pyversions of client and server must match
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Fri, 12 Jun 2015 08:41:47 +0200
+
 moat (0.7.16) smurf; urgency=medium
 
   * py3 string/buffer woes
