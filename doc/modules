@@ -219,6 +219,13 @@ Nearly everything that can sensibly be deleted can also be tested for.
 	if exists module data:
 		del module data
 
+
+exists var ‹name›
+-----------------
+
+Check if a variable of that name exists, i.e. `$name` will work instead of
+raising an error.
+
 ======
 errors
 ======

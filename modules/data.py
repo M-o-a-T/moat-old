@@ -43,6 +43,7 @@ from moat.base import Name,flatten
 from moat.twist import fix_exception,print_exception,log_wait
 from moat.collect import get_collect,all_collect,Collection
 from moat.times import humandelta,now
+from moat.check import Check,register_condition,unregister_condition
 
 from gevent import spawn
 from gevent.queue import Queue
@@ -161,6 +162,14 @@ del ‹type› ‹name…›
 			raise SyntaxError(u"You cannot delete those items.")
 		return c.delete(ctx)
 
+class VarCheck(Check):
+	name="exists var"
+	doc="Check if '$var' can be resolved"
+
+	def check(self,*args):
+		assert len(args) == 1,"Need exactly one argument (variable name)"
+		return Name(*args) in self.ctx
+
 class DataModule(Module):
 	"""\
 		This module provides a couple of common data access functions.
@@ -171,9 +180,11 @@ class DataModule(Module):
 	def load(self):
 		main_words.register_statement(List)
 		main_words.register_statement(Del)
+		register_condition(VarCheck)
 	
 	def unload(self):
 		main_words.unregister_statement(List)
 		main_words.unregister_statement(Del)
+		unregister_condition(VarCheck)
 	
 init = DataModule
