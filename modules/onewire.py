@@ -227,7 +227,7 @@ class OWFSmon(Monitor):
 		dev = devices[self.device]
 		if self.switch is not None:
 			dev.set(self.switch, self.to_high if self.switched else self.to_low)
-		val = dev.get(self.attribute)
+		val = float(dev.get(self.attribute))
 		if self.switch is not None:
 			if not self.switched:
 				if val > self.high:
@@ -450,7 +450,7 @@ wind ‹offset› ‹weight›
 		if len(event) > 0:
 			val["direction"] = float(event[0])
 			if val["direction"] < 0 or val["direction"] >= 16:
-				raise ValueError("weight needs to be between 0 and 15.99")
+				raise ValueError("offset needs to be between 0 and 15.99")
 		else:
 			val["direction"] = 0
 
