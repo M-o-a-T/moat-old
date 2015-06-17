@@ -981,7 +981,7 @@ class SchedValve(SchedCommon):
 				if not on:
 					duration = n-self.on_ts
 					maxflow = self.v.flow * duration.total_seconds()
-					if (not flow and not self.v.feed.var) or flow > maxflow:
+					if (not flow or not self.v.feed.var) or flow > 2*maxflow:
 						flow = maxflow
 				self.new_level_entry(flow)
 				if not on:
