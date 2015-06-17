@@ -348,7 +348,7 @@ class SunMeter(AvgMeter):
 	meter_type="sun"
 
 METERS=[]
-for m in globals().values():
+for m in list(globals().values()):
 	if hasattr(m,"meter_type"):
 		METERS.append(m)
 
