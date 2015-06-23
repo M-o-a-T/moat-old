@@ -472,14 +472,14 @@ class OWFSqueue(MsgQueue,Jobber):
 
 	def update_all(self):
 		try:
-			simple_event("onewire","scanning",self.name)
+			simple_event("onewire","scanning",*self.name)
 			self._update_all()
 		except Exception as e:
 			fix_exception(e)
 			process_failure(e)
 
 			# error only; success below
-			simple_event("onewire","scanned",self.name)
+			simple_event("onewire","scanned",*self.name, error=str(e))
 
 	def _update_all(self):
 		log("onewire",TRACE,"start bus update")
@@ -527,7 +527,7 @@ class OWFSqueue(MsgQueue,Jobber):
 			simple_event("onewire","bus","up", bus=self.name,path=dev)
 
 		# success only, error above
-		simple_event("onewire","scanned",self.name, old=n_old, new=len(new_ids), num=n_dev)
+		simple_event("onewire","scanned",*self.name, old=n_old, new=len(new_ids), num=n_dev)
 			
 	def _watcher(self):
 		res = []
