@@ -227,7 +227,10 @@ class OWFSmon(Monitor):
 		dev = devices[self.device]
 		if self.switch is not None:
 			dev.set(self.switch, self.to_high if self.switched else self.to_low)
-		val = float(dev.get(self.attribute))
+		val = dev.get(self.attribute)
+		if val == "":
+			raise MonitorAgain(self.name)
+		val = float(val)
 		if self.switch is not None:
 			if not self.switched:
 				if val > self.high:
