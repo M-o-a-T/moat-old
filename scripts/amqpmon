@@ -116,14 +116,10 @@ class EventNamespace(BaseNamespace, BroadcastMixin):
 
     def on_new_client(self):
         # we only need the message to get the connection up and the ball rolling
-        i = len(self.request.pos)
-        while i:
-            i -= 1
-            xi = self.request.pos[i]
-            msg = self.request.data[xi]
+        for msg in self.request.data.values():
             pkt = dict(type="event",
                        name='new message',
-                       args=(msg.body,),
+                       args=(msg.seq,msg.body,),
                        endpoint='')
 
             self.socket.send_packet(pkt)
@@ -145,7 +141,6 @@ class Application(object):
         # initializations.
         self.request = attrdict(
             data= {},
-            pos= [],
             clients= WeakSet(),
         )
         self.path = path
@@ -153,30 +148,30 @@ class Application(object):
 
     def has_event(self, msg):
         self.i += 1
-        xi = tuple(msg.body['event'])
+        msg.seq = self.i
         try:
-            self.request.data[xi] = msg
+            xi = tuple(msg.body['event'])
+        except TypeError:
+            print("Body: "+repr(msg.body),file=sys.stderr)
+            return
+        try:
+            omsg = self.request.data.get(xi,None)
         except TypeError:
             print("Event: "+repr(xi),file=sys.stderr)
             return
+        self.request.data[xi] = msg
             
-        try:
-            i = self.request.pos.index(xi)
-        except ValueError:
-            i = None
+        if omsg is None:
             pkt = dict(type="event",
                        name='new message',
-                       args=(msg.body,),
+                       args=(msg.seq,msg.body,),
                        endpoint='')
 
         else:
-            self.request.pos.pop(i)
             pkt = dict(type="event",
                        name='replace message',
-                       args=(i,msg.body,),
+                       args=(omsg.seq, msg.seq,msg.body),
                        endpoint='')
-
-        self.request.pos.insert(0,xi)
 
         for c in self.request.clients:
             c.socket.send_packet(pkt)

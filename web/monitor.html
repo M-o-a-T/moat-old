@@ -6,6 +6,8 @@
     <script type="text/javascript" src="static/socket.io.js"></script>
     <script>    
 
+$(function() {
+
 WEB_SOCKET_SWF_LOCATION = "/static/WebSocketMain.swf";
 WEB_SOCKET_DEBUG = true;
 
@@ -33,13 +35,26 @@ socket.on('connect', function () {
 //    }
 //});
 
-socket.on('new message', function(msg) {
-    $('#log').prepend($('<tr>').append($('<td>').append(msg.event.join(' '))));
+function prep(seq,msg) {
+    var r = $('<tr>')
+    var attrs = "";
+    for(var prop in msg) {
+        if(prop != "event" && msg.hasOwnProperty(prop)) {
+            attrs += " "+prop+"="+msg[prop];
+        }
+    }
+    r.append($('<td>').append(seq));
+    r.append($('<td>').append(msg.event.join(' ')));
+    r.append($('<td>').append(attrs));
+    r.attr('id','msg'+seq);
+    return r;
+}
+socket.on('new message', function(seq,msg) {
+    $('#log').append(prep(seq,msg));
 });
 
-socket.on('replace message', function(pos,msg) {
-    $('#log tr').eq(pos).remove();
-    $('#log').prepend($('<tr>').append($('<td>').append(msg.event.join(' '))));
+socket.on('replace message', function(oseq,seq,msg) {
+    $('tr#msg'+oseq).replaceWith(prep(seq,msg));
 });
 
 socket.on('reconnect', function () {
@@ -60,15 +75,26 @@ function message (m) {
     $('#message').text(m);
 }
 
+$('#messages thead th').click(function(){
+    var table = $(this).parents('table').eq(0).children('tbody');
+    var rows = table.find('tr').toArray().sort(comparer($(this).index()));
+    this.asc = !this.asc;
+    if (!this.asc) { rows = rows.reverse() }
+    for (var i = 0; i < rows.length; i++) { table.append(rows[i]) }
+})
+function comparer(index) {
+    return function(a, b) {
+        var valA = getCellValue(a, index), valB = getCellValue(b, index);
+        return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.localeCompare(valB);
+    }
+}
+function getCellValue(row, index){ return $(row).children('td').eq(index).html(); }
+
 // DOM manipulation
 $(function () {
     $('#trigger').submit(function () {
         socket.emit('trigger', $('#event').val());
         clear();
-        var l = $('#log');
-        if (l.length) {
-            l.get(0).scrollTop = 10000000;
-        }
         return false;
     });
 
@@ -76,6 +102,8 @@ $(function () {
         $('#event').val('').focus();
     };
 });
+
+})();
     </script>
   </head>
 <body>
@@ -87,6 +115,13 @@ $(function () {
   <div id="page">
    <div id="ipage">
     <table id="messages">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Event</th>
+          <th>Data</th>
+        </tr>
+      </thead>
       <tbody id="log">
       </tbody>
     </table>
