@@ -78,7 +78,7 @@ Statements may be multi-word and follow generic Python syntax.
 
 		if wl:
 			# this may be for a type registry
-			print("Not a command in %s:" % (words.__name__,)," ".join(wl), file=self.ctx.out)
+			print("Not a command in %s:" % (words.name,)," ".join(wl), file=self.ctx.out)
 
 		try:
 			doc = ":\n"+words.long_doc.rstrip("\n")
