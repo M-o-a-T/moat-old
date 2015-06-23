@@ -34,6 +34,7 @@ name: Skipped¦One
 id: 9
 name: Skipped¦One
 call count: 0
+code: OnEventWorker: Skipped¦One
 code: foo ‹OnEventHandler›
 code: name: Skipped One
 code: prio: 51
@@ -51,6 +52,7 @@ name: Skipped¦Two
 id: 10
 name: Skipped¦Two
 call count: 0
+code: OnEventWorker: Skipped¦Two
 code: foo ‹OnEventHandler›
 code: name: Skipped Two
 code: prio: 51

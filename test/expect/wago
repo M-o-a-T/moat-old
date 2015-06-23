@@ -37,14 +37,14 @@ EVENT: output¦change¦foo¦baz
      : value=True
 TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'Set.' prio:2 type:MT_ACK›
 TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'0' prio:2 type:MT_ACK›
-DEBUG> in_1 whynot
 DEBUG in_1 whynot
+DEBUG> in_1 whynot
 TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'0' prio:2 type:MT_ACK›
 TRACE Yes
 TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'OK' prio:2 type:MT_ACK›
 TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'1' prio:2 type:MT_ACK›
-DEBUG> in_2 why
 DEBUG in_2 why
+DEBUG> in_2 why
 TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'1' prio:2 type:MT_ACK›
 TRACE Yes
 EVENT: wait¦start¦timed¦set¦A
@@ -70,8 +70,8 @@ TRACE 2003-04-05 06:07:11.700000 timed¦set¦B: Forced timer done
 EVENT: wait¦done¦timed¦set¦B
      : loglevel=0
 TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'0' prio:2 type:MT_ACK›
-DEBUG> out_1 ho
 DEBUG out_1 ho
+DEBUG> out_1 ho
 TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'0' prio:2 type:MT_ACK›
 TRACE Yes
 EVENT: wait¦start¦timed¦set¦C
@@ -81,18 +81,18 @@ TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 3' msgid:1 prio:2 t
 TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 4' msgid:1 prio:2 type:MT_IND›
 TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'TRIGGER' msgid:2 prio:2 type:MT_IND›
 TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'Deleted.' msgid:2 prio:2 type:MT_IND_NAK›
+DEBUG released
 DEBUG> released
 EVENT: output¦change¦foo¦baz
      : prev_value=False
      : value=None
-DEBUG released
 TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'OK' prio:2 type:MT_ACK›
 TRACE 2003-04-05 06:07:14.350000 timed¦set¦C: Forced timer done
 EVENT: wait¦done¦timed¦set¦C
      : loglevel=0
 TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'1' prio:2 type:MT_ACK›
-DEBUG> out_2 hey
 DEBUG out_2 hey
+DEBUG> out_2 hey
 TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'1' prio:2 type:MT_ACK›
 TRACE Yes
 EVENT: wait¦start¦_wait¦t5
@@ -123,10 +123,10 @@ EVENT: monitor¦start¦test¦count¦down
 TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'monitor created' msgid:5 prio:2 type:MT_IND_ACK›
 TRACE monitor Start run test¦count¦both
 EVENT: monitor¦start¦test¦count¦both
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 6' msgid:1 prio:2 type:MT_IND›
 TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'monitor created' msgid:6 prio:2 type:MT_IND_ACK›
 TRACE monitor Start run test¦report¦up
 EVENT: monitor¦start¦test¦report¦up
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 6' msgid:1 prio:2 type:MT_IND›
 TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'monitor created' msgid:7 prio:2 type:MT_IND_ACK›
 TRACE monitor Start run test¦report¦down
 EVENT: monitor¦start¦test¦report¦down
@@ -157,8 +157,8 @@ EVENT: monitor¦update¦test¦report¦both
      : last_value=None
      : start_at=2003-04-05 06:07:15.600000
      : steps=(1, 1, None)
-     : stop_at=2003-04-05 06:07:15.800000
-     : time=0.2
+     : stop_at=2003-04-05 06:07:15.850000
+     : time=0.25
      : time_str=‹0.2 sec›
      : up=Run
      : value=1.0
@@ -168,12 +168,12 @@ EVENT: monitor¦update¦test¦report¦up
      : last_value=None
      : start_at=2003-04-05 06:07:15.600000
      : steps=(1, 1, None)
-     : stop_at=2003-04-05 06:07:15.800000
-     : time=0.2
+     : stop_at=2003-04-05 06:07:15.850000
+     : time=0.25
      : time_str=‹0.2 sec›
      : up=Run
      : value=1.0
-TRACE 2003-04-05 06:07:16.150000 _wait¦t8: Forced timer done
+TRACE 2003-04-05 06:07:16.200000 _wait¦t8: Forced timer done
 EVENT: wait¦done¦_wait¦t8
      : loglevel=0
 TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'OK' prio:2 type:MT_ACK›
@@ -184,11 +184,11 @@ TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'L' msgid:8 prio:2 type:M
 TRACE 2003-04-05 06:07:16.600000 _wait¦t9: Forced timer done
 EVENT: wait¦done¦_wait¦t9
      : loglevel=0
-TRACE 2003-04-05 06:07:16.800000 : Fake timer done
-TRACE 2003-04-05 06:07:16.800000 : Fake timer done
+TRACE 2003-04-05 06:07:16.850000 : Fake timer done
+TRACE 2003-04-05 06:07:16.850000 : Fake timer done
 TRACE monitor Start run test¦report¦up
-TRACE 2003-04-05 06:07:16.900000 : Fake timer done
-TRACE 2003-04-05 06:07:16.900000 : Fake timer done
+TRACE 2003-04-05 06:07:16.950000 : Fake timer done
+TRACE 2003-04-05 06:07:16.950000 : Fake timer done
 TRACE monitor Start run test¦report¦both
 TRACE monitor filter [2.0] on test¦report¦both
 TRACE monitor End run test¦report¦both
@@ -201,9 +201,9 @@ EVENT: monitor¦update¦test¦report¦both
      : change_at=2003-04-05 06:07:15.600000
      : data=[2.0]
      : last_value=1.0
-     : start_at=2003-04-05 06:07:16.900000
+     : start_at=2003-04-05 06:07:16.950000
      : steps=(1, 1, None)
-     : stop_at=2003-04-05 06:07:16.900000
+     : stop_at=2003-04-05 06:07:16.950000
      : time=0.0
      : time_str=‹now›
      : up=Run
@@ -214,19 +214,16 @@ EVENT: monitor¦update¦test¦report¦down
      : last_value=None
      : start_at=2003-04-05 06:07:15.600000
      : steps=(1, 1, None)
-     : stop_at=2003-04-05 06:07:16.900000
-     : time=1.3
-     : time_str=‹1.3 sec›
+     : stop_at=2003-04-05 06:07:16.950000
+     : time=1.35
+     : time_str=‹1.4 sec›
      : up=Run
      : value=1.0
 TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'OK' prio:2 type:MT_ACK›
 EVENT: wait¦start¦_wait¦t10
-     : end_time=4.5
+     : end_time=4.6
      : loglevel=0
 TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'H' msgid:8 prio:2 type:MT_IND›
-TRACE 2003-04-05 06:07:17.900000 : Fake timer done
-TRACE 2003-04-05 06:07:17.900000 : Fake timer done
-TRACE monitor Start run test¦report¦down
 TRACE 2003-04-05 06:07:17.950000 : Fake timer done
 TRACE 2003-04-05 06:07:17.950000 : Fake timer done
 TRACE monitor Start run test¦report¦both
@@ -253,13 +250,16 @@ EVENT: monitor¦update¦test¦report¦up
      : change_at=2003-04-05 06:07:15.600000
      : data=[2.0]
      : last_value=1.0
-     : start_at=2003-04-05 06:07:16.800000
+     : start_at=2003-04-05 06:07:16.850000
      : steps=(1, 1, None)
      : stop_at=2003-04-05 06:07:17.950000
-     : time=1.15
+     : time=1.1
      : time_str=‹1.1 sec›
      : up=Run
      : value=2.0
+TRACE 2003-04-05 06:07:17.950000 : Fake timer done
+TRACE 2003-04-05 06:07:17.950000 : Fake timer done
+TRACE monitor Start run test¦report¦down
 TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 8' msgid:1 prio:2 type:MT_IND›
 TRACE 2003-04-05 06:07:18.950000 : Fake timer done
 TRACE 2003-04-05 06:07:18.950000 : Fake timer done
@@ -287,14 +287,14 @@ EVENT: monitor¦update¦test¦count¦both
      : up=Run
      : value=3.0
 EVENT: monitor¦update¦test¦count¦up
-     : change_at=2003-04-05 06:07:15.550000
+     : change_at=2003-04-05 06:07:15.600000
      : data=[2.0]
      : last_value=None
-     : start_at=2003-04-05 06:07:15.550000
+     : start_at=2003-04-05 06:07:15.600000
      : steps=(1, 1, None)
      : stop_at=2003-04-05 06:07:19.250000
-     : time=3.7
-     : time_str=‹3.7 sec›
+     : time=3.65
+     : time_str=‹3.6 sec›
      : up=Run
      : value=2.0
 TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'1' msgid:4 prio:2 type:MT_IND›
@@ -314,15 +314,15 @@ EVENT: monitor¦update¦test¦count¦down
      : value=1.0
 TRACE 2003-04-05 06:07:20.250000 : Fake timer done
 TRACE 2003-04-05 06:07:20.250000 : Fake timer done
-TRACE monitor Start run test¦count¦up
-TRACE 2003-04-05 06:07:20.350000 : Fake timer done
-TRACE 2003-04-05 06:07:20.350000 : Fake timer done
 TRACE monitor Start run test¦count¦both
-TRACE 2003-04-05 06:07:20.500000 _wait¦t10: Forced timer done
-test count both :: Run ‹0.1 sec›
-test count down :: Wait ‹0.1 sec›
-test count up :: Run ‹0.2 sec›
-test report both :: Run ‹1.5 sec›
+TRACE 2003-04-05 06:07:20.250000 : Fake timer done
+TRACE 2003-04-05 06:07:20.250000 : Fake timer done
+TRACE monitor Start run test¦count¦up
+TRACE 2003-04-05 06:07:20.550000 _wait¦t10: Forced timer done
+test count both :: Run ‹0.3 sec›
+test count down :: Wait ‹now›
+test count up :: Run ‹0.3 sec›
+test report both :: Run ‹1.6 sec›
 test report down :: Run ‹2.6 sec›
 test report up :: Run ‹1.6 sec›
 .
@@ -334,7 +334,7 @@ task job: <Greenlet: erh(<bound method WAGOmon._run_loop of ‹WAGOmon test¦c)>
 device: wago test 1 1
 value: 2.0
 up: Run
-time: ‹0.2 sec›
+time: ‹0.3 sec›
 steps: 1 / 1 / None
 mode: count
 timespec: 1.0
@@ -348,7 +348,7 @@ task job: <Greenlet: erh(<bound method WAGOmon._run_loop of ‹WAGOmon test¦c)>
 device: wago test 1 1
 value: 1.0
 up: Wait
-time: ‹0.1 sec›
+time: ‹now›
 steps: 1 / 1 / None
 data: 1.0
 mode: count
@@ -363,7 +363,7 @@ task job: <Greenlet: erh(<bound method WAGOmon._run_loop of ‹WAGOmon test¦c)>
 device: wago test 1 1
 value: 3.0
 up: Run
-time: ‹0.1 sec›
+time: ‹0.3 sec›
 steps: 1 / 1 / None
 mode: count
 timespec: 1.0
@@ -403,7 +403,7 @@ task job: <Greenlet: erh(<bound method WAGOmon._run_loop of ‹WAGOmon test¦r)>
 device: wago test 1 1
 value: 3.0
 up: Run
-time: ‹1.5 sec›
+time: ‹1.6 sec›
 steps: 1 / 1 / None
 mode: report
 level: both
@@ -412,56 +412,56 @@ last msg: monitor created
 .
 TRACE YesM 1.0 2.0 3.0
 TRACE YesR 1.0 2.0 3.0
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 9' msgid:1 prio:2 type:MT_IND›
 TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'Deleted.' msgid:3 prio:2 type:MT_IND_NAK›
 TRACE monitor End run test¦count¦up
 TRACE monitor Stop run test¦count¦up
 TRACE 2003-04-05 06:07:20.700000 : Fake timer done
 TRACE 2003-04-05 06:07:20.700000 : Fake timer done
 TRACE monitor Start run test¦count¦down
-TRACE 2003-04-05 06:07:21.650000 : Fake timer done
+TRACE 2003-04-05 06:07:21.700000 : Fake timer done
 TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'Monitor 3 deleted.' prio:2 type:MT_ACK›
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 9' msgid:1 prio:2 type:MT_IND›
+TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 10' msgid:1 prio:2 type:MT_IND›
 EVENT: monitor¦stop¦test¦count¦up
 TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'Deleted.' msgid:4 prio:2 type:MT_IND_NAK›
 TRACE monitor End run test¦count¦down
 TRACE monitor Stop run test¦count¦down
-TRACE 2003-04-05 06:07:22.650000 : Fake timer done
+TRACE 2003-04-05 06:07:22.700000 : Fake timer done
 TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'Monitor 4 deleted.' prio:2 type:MT_ACK›
-TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 10' msgid:1 prio:2 type:MT_IND›
-EVENT: monitor¦stop¦test¦count¦down
 TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 11' msgid:1 prio:2 type:MT_IND›
+EVENT: monitor¦stop¦test¦count¦down
 TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'Deleted.' msgid:5 prio:2 type:MT_IND_NAK›
 TRACE monitor End run test¦count¦both
 TRACE monitor Stop run test¦count¦both
-TRACE 2003-04-05 06:07:23.650000 : Fake timer done
+TRACE 2003-04-05 06:07:23.700000 : Fake timer done
 TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'Monitor 5 deleted.' prio:2 type:MT_ACK›
 TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 12' msgid:1 prio:2 type:MT_IND›
 EVENT: monitor¦stop¦test¦count¦both
 TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'Deleted.' msgid:6 prio:2 type:MT_IND_NAK›
 TRACE monitor End run test¦report¦up
 TRACE monitor Stop run test¦report¦up
-TRACE 2003-04-05 06:07:24.650000 : Fake timer done
+TRACE 2003-04-05 06:07:24.700000 : Fake timer done
 TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'Monitor 6 deleted.' prio:2 type:MT_ACK›
 TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 13' msgid:1 prio:2 type:MT_IND›
 EVENT: monitor¦stop¦test¦report¦up
 TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'Deleted.' msgid:7 prio:2 type:MT_IND_NAK›
 TRACE monitor End run test¦report¦down
 TRACE monitor Stop run test¦report¦down
-TRACE 2003-04-05 06:07:25.650000 : Fake timer done
+TRACE 2003-04-05 06:07:25.700000 : Fake timer done
 TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'Monitor 7 deleted.' prio:2 type:MT_ACK›
 TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 14' msgid:1 prio:2 type:MT_IND›
 EVENT: monitor¦stop¦test¦report¦down
 TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'Deleted.' msgid:8 prio:2 type:MT_IND_NAK›
 TRACE monitor End run test¦report¦both
 TRACE monitor Stop run test¦report¦both
-TRACE 2003-04-05 06:07:26.650000 : Fake timer done
+TRACE 2003-04-05 06:07:26.700000 : Fake timer done
 TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'Monitor 8 deleted.' prio:2 type:MT_ACK›
 TRACE conn incoming WAGOqueue test ‹MsgIncoming: msg:'PING 15' msgid:1 prio:2 type:MT_IND›
 EVENT: monitor¦stop¦test¦report¦both
 EVENT: wait¦start¦_wait¦t11
-     : end_time=7.7
+     : end_time=7.8
      : loglevel=0
-TRACE 2003-04-05 06:07:26.800000 _wait¦t11: Forced timer done
+TRACE 2003-04-05 06:07:26.900000 _wait¦t11: Forced timer done
 test :: wago localhost:59069
 .
 EVENT: wait¦done¦_wait¦t11
@@ -480,7 +480,7 @@ name: test
 task job: <Greenlet: erh(<bound method WAGOqueue._handler of ‹WAGOqueue:tes)>
 queue: 0
 state: connected
-state since: -18.8 sec (2003-04-05 06:07:08)
+state since: -18.9 sec (2003-04-05 06:07:08)
 sent: (0, 37)
 received: (0, 70)
 processed: (0, 37)
@@ -488,7 +488,7 @@ last_sent: ‹WAGOmonStop 86 msgid=8›
 last_sent priority: 2
           timeout: 2
           result: Monitor 8 deleted.
-last_sent_at: -1.1 sec (2003-04-05 06:07:25.65)
+last_sent_at: -1.2 sec (2003-04-05 06:07:25.70)
 conn attempts: 0
 conn timer: 3
 out_queued: 0
@@ -510,45 +510,45 @@ TRACE Yes
 TRACE !got DOWN_EVENT test
 TRACE conn deleted WAGOqueue test
 EVENT: wago¦disconnect¦test
-DEBUG> now we test a nonexistent port
 DEBUG now we test a nonexistent port
+DEBUG> now we test a nonexistent port
 TRACE conn setstate init closed
 TRACE conn setstate closed want
 TRACE conn setstate want connecting
 TRACE conn connecting WAGOqueue test¦nonexist
 EVENT: wait¦start¦poll¦nonexist
-     : end_time=8.7
+     : end_time=8.8
      : loglevel=0
 TRACE !got NOT_UP_EVENT test nonexist
+ERROR Setting up
+ERROR [Errno 111] Connection refused
 ERROR> Setting up
 EVENT: wago¦error¦test¦nonexist
 ERROR> [Errno 111] Connection refused
-ERROR Setting up
-ERROR [Errno 111] Connection refused
 TRACE conn setstate connecting waiting: wait 0.200
-TRACE 2003-04-05 06:07:27.400000 : Forced timer done
+TRACE 2003-04-05 06:07:27.450000 : Forced timer done
 TRACE conn setstate waiting want
 TRACE conn setstate want connecting
 TRACE conn connecting WAGOqueue test¦nonexist
 TRACE !got NOT_UP_EVENT test nonexist
+ERROR Setting up
+ERROR [Errno 111] Connection refused
 ERROR> Setting up
 EVENT: wago¦error¦test¦nonexist
 ERROR> [Errno 111] Connection refused
-ERROR Setting up
-ERROR [Errno 111] Connection refused
 TRACE conn setstate connecting waiting: wait 0.320
-TRACE 2003-04-05 06:07:28.350000 : Forced timer done
+TRACE 2003-04-05 06:07:28.400000 : Forced timer done
 TRACE conn setstate waiting want
 TRACE conn setstate want connecting
 TRACE conn connecting WAGOqueue test¦nonexist
 TRACE !got NOT_UP_EVENT test nonexist
+ERROR Setting up
+ERROR [Errno 111] Connection refused
 ERROR> Setting up
 EVENT: wago¦error¦test¦nonexist
 ERROR> [Errno 111] Connection refused
-ERROR Setting up
-ERROR [Errno 111] Connection refused
 TRACE conn setstate connecting waiting: wait 0.500
-TRACE 2003-04-05 06:07:29.650000 poll¦nonexist: Forced timer done
+TRACE 2003-04-05 06:07:29.700000 poll¦nonexist: Forced timer done
 : ‹WAGOqueue:test¦nonexist connecting›
 name: test¦nonexist
 task job: <Greenlet: erh(<bound method WAGOqueue._handler of ‹WAGOqueue:tes)>
@@ -556,7 +556,7 @@ EVENT: wait¦done¦poll¦nonexist
      : loglevel=0
 queue: 0
 state: connecting
-state since: -1.3 sec (2003-04-05 06:07:28.35)
+state since: -1.4 sec (2003-04-05 06:07:28.40)
 sent: (0, 0)
 received: (0, 0)
 processed: (0, 0)
@@ -564,8 +564,8 @@ conn attempts: 3
 conn timer: 0.5
 out_queued: 0
 .
-DEBUG> now we test a port that always EOFs
 DEBUG now we test a port that always EOFs
+DEBUG> now we test a port that always EOFs
 TRACE conn setstate init closed
 TRACE conn setstate closed want
 TRACE conn setstate want connecting
@@ -580,8 +580,8 @@ TRACE !got DOWN_EVENT test closing
 TRACE conn ReOpen WAGOqueue test¦closing
 TRACE conn setstate connecting waiting: wait 0.120
 EVENT: wago¦disconnect¦test¦closing
-TRACE 2003-04-05 06:07:29.850000 : Forced timer done
-TRACE 2003-04-05 06:07:29.900000 : Forced timer done
+TRACE 2003-04-05 06:07:29.950000 : Forced timer done
+TRACE 2003-04-05 06:07:29.950000 : Forced timer done
 TRACE 2003-04-05 06:07:30.150000 : Forced timer done
 TRACE conn setstate waiting want
 TRACE conn setstate want connecting
@@ -593,8 +593,8 @@ TRACE !got DOWN_EVENT test closing
 TRACE conn ReOpen WAGOqueue test¦closing
 TRACE conn setstate connecting waiting: wait 0.192
 EVENT: wago¦disconnect¦test¦closing
-TRACE 2003-04-05 06:07:30.400000 : Forced timer done
-TRACE 2003-04-05 06:07:30.800000 : Forced timer done
+TRACE 2003-04-05 06:07:30.450000 : Forced timer done
+TRACE 2003-04-05 06:07:30.850000 : Forced timer done
 TRACE conn setstate waiting want
 TRACE conn setstate want connecting
 TRACE conn connecting WAGOqueue test¦closing
@@ -605,9 +605,9 @@ TRACE !got DOWN_EVENT test closing
 TRACE conn ReOpen WAGOqueue test¦closing
 TRACE conn setstate connecting waiting: wait 0.307
 EVENT: wago¦disconnect¦test¦closing
-TRACE 2003-04-05 06:07:30.800000 : Forced timer done
-TRACE 2003-04-05 06:07:31.400000 : Forced timer done
-TRACE 2003-04-05 06:07:31.650000 : Forced timer done
+TRACE 2003-04-05 06:07:30.850000 : Forced timer done
+TRACE 2003-04-05 06:07:31.450000 : Forced timer done
+TRACE 2003-04-05 06:07:31.700000 : Forced timer done
 TRACE conn setstate waiting want
 TRACE conn setstate want connecting
 TRACE conn connecting WAGOqueue test¦closing
@@ -618,8 +618,8 @@ TRACE !got DOWN_EVENT test closing
 TRACE conn ReOpen WAGOqueue test¦closing
 TRACE conn setstate connecting waiting: wait 0.492
 EVENT: wago¦disconnect¦test¦closing
-TRACE 2003-04-05 06:07:32.200000 : Forced timer done
-TRACE 2003-04-05 06:07:32.500000 poll¦closing: Forced timer done
+TRACE 2003-04-05 06:07:32.250000 : Forced timer done
+TRACE 2003-04-05 06:07:32.550000 poll¦closing: Forced timer done
 : ‹WAGOqueue:test¦closing ReOpen›
 name: test¦closing
 task job: <Greenlet: erh(<bound method WAGOqueue._handler of ‹WAGOqueue:tes)>
@@ -627,7 +627,7 @@ EVENT: wait¦done¦poll¦closing
      : loglevel=0
 queue: 0
 state: ReOpen
-state since: -0.8 sec (2003-04-05 06:07:31.65)
+state since: -0.8 sec (2003-04-05 06:07:31.70)
 sent: (0, 0)
 received: (0, 0)
 processed: (0, 0)
@@ -640,8 +640,8 @@ msg send 1 1 status: pending
 msg recv 0 1: ‹WAGOinitMsg 95›
              priority: 0
 .
-DEBUG> now we test a port that does not answer
 DEBUG now we test a port that does not answer
+DEBUG> now we test a port that does not answer
 TRACE conn setstate init closed
 TRACE conn setstate closed want
 TRACE conn setstate want connecting
@@ -652,37 +652,37 @@ EVENT: wait¦start¦poll¦no_answer
 TRACE conn setting up WAGOqueue test¦no_answer
 TRACE conn connected WAGOqueue test¦no_answer
 TRACE NotConn [[], [], [], []]
-TRACE 2003-04-05 06:07:32.900000 : Forced timer done
-TRACE 2003-04-05 06:07:33.050000 : Forced timer done
+TRACE 2003-04-05 06:07:32.950000 : Forced timer done
+TRACE 2003-04-05 06:07:33.100000 : Forced timer done
 TRACE !got DOWN_EVENT test no_answer
 TRACE conn ReOpen WAGOqueue test¦no_answer
 TRACE conn setstate connecting waiting: wait 0.120
 EVENT: wago¦disconnect¦test¦no_answer
-TRACE 2003-04-05 06:07:33.300000 : Forced timer done
+TRACE 2003-04-05 06:07:33.350000 : Forced timer done
 TRACE conn setstate waiting want
 TRACE conn setstate want connecting
 TRACE conn connecting WAGOqueue test¦no_answer
 TRACE conn setting up WAGOqueue test¦no_answer
 TRACE conn connected WAGOqueue test¦no_answer
 TRACE NotConn [[], [], [], []]
-TRACE 2003-04-05 06:07:33.700000 : Forced timer done
+TRACE 2003-04-05 06:07:33.750000 : Forced timer done
 TRACE !got DOWN_EVENT test no_answer
 TRACE conn ReOpen WAGOqueue test¦no_answer
 TRACE conn setstate connecting waiting: wait 0.192
 EVENT: wago¦disconnect¦test¦no_answer
-TRACE 2003-04-05 06:07:34.100000 : Forced timer done
+TRACE 2003-04-05 06:07:34.150000 : Forced timer done
 TRACE conn setstate waiting want
 TRACE conn setstate want connecting
 TRACE conn connecting WAGOqueue test¦no_answer
 TRACE conn setting up WAGOqueue test¦no_answer
 TRACE conn connected WAGOqueue test¦no_answer
 TRACE NotConn [[], [], [], []]
-TRACE 2003-04-05 06:07:34.500000 : Forced timer done
+TRACE 2003-04-05 06:07:34.550000 : Forced timer done
 TRACE !got DOWN_EVENT test no_answer
 TRACE conn ReOpen WAGOqueue test¦no_answer
 TRACE conn setstate connecting waiting: wait 0.307
 EVENT: wago¦disconnect¦test¦no_answer
-TRACE 2003-04-05 06:07:34.600000 poll¦no_answer: Forced timer done
+TRACE 2003-04-05 06:07:34.700000 poll¦no_answer: Forced timer done
 : ‹WAGOqueue:test¦no_answer ReOpen›
 name: test¦no_answer
 task job: <Greenlet: erh(<bound method WAGOqueue._handler of ‹WAGOqueue:tes)>
@@ -690,7 +690,7 @@ EVENT: wait¦done¦poll¦no_answer
      : loglevel=0
 queue: 0
 state: ReOpen
-state since: now (2003-04-05 06:07:34.50)
+state since: -0.1 sec (2003-04-05 06:07:34.55)
 sent: (0, 0)
 received: (0, 0)
 processed: (0, 0)
@@ -704,9 +704,9 @@ msg recv 0 1: ‹WAGOinitMsg a0›
              priority: 0
 .
 EVENT: wait¦start¦poll¦end
-     : end_time=28.6
+     : end_time=28.7
      : loglevel=0
 TRACE 2003-04-05 06:07:35.250000 : Forced timer done
-TRACE 2003-04-05 06:07:36.600000 poll¦end: Fake timer done
+TRACE 2003-04-05 06:07:36.700000 poll¦end: Fake timer done
 EVENT: wait¦done¦poll¦end
      : loglevel=0

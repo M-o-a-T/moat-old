@@ -67,17 +67,17 @@ code: 7
 offset_humidity: -1.0
 .
 EVENT: wait¦start¦_wait¦t1
-     : end_time=0.6
+     : end_time=0.8
      : loglevel=0
 TRACE 2003-04-05 06:07:08.500000 _wait¦t1: Forced timer done
 Traceback (most recent call last):
-  File "moat/twist.py", line 300, in err
+  File "moat/twist.py", line 298, in err
     err = e.get()
   File "/usr/lib/python3/dist-packages/gevent/greenlet.py", line 264, in get
     raise self._exception
   File "/usr/lib/python3/dist-packages/gevent/greenlet.py", line 340, in run
     result = self._run(*self.args, **self.kwargs)
-  File "moat/twist.py", line 289, in erh
+  File "moat/twist.py", line 287, in erh
     return p(*a,**k)
   File "moat/tokize.py", line 153, in _job
     self._do_line(line)
@@ -89,7 +89,7 @@ Traceback (most recent call last):
     self.proc.error(self,ex)
   File "moat/interpreter.py", line 110, in error
     reraise(err)
-  File "moat/twist.py", line 100, in reraise
+  File "moat/twist.py", line 98, in reraise
     raise e
   File "moat/parser.py", line 197, in _do_parse
     self._parseStep(t,txt,beg,end,line)
@@ -99,7 +99,7 @@ Traceback (most recent call last):
     self.error(self,ex)
   File "moat/interpreter.py", line 110, in error
     reraise(err)
-  File "moat/twist.py", line 100, in reraise
+  File "moat/twist.py", line 98, in reraise
     raise e
   File "moat/interpreter.py", line 206, in simple_statement
     fn.run(self.ctx)
@@ -113,13 +113,13 @@ RuntimeError: No FS20 handler known
 EVENT: wait¦done¦_wait¦t1
      : loglevel=0
 Traceback (most recent call last):
-  File "moat/twist.py", line 300, in err
+  File "moat/twist.py", line 298, in err
     err = e.get()
   File "/usr/lib/python3/dist-packages/gevent/greenlet.py", line 264, in get
     raise self._exception
   File "/usr/lib/python3/dist-packages/gevent/greenlet.py", line 340, in run
     result = self._run(*self.args, **self.kwargs)
-  File "moat/twist.py", line 289, in erh
+  File "moat/twist.py", line 287, in erh
     return p(*a,**k)
   File "moat/tokize.py", line 153, in _job
     self._do_line(line)
@@ -131,7 +131,7 @@ Traceback (most recent call last):
     self.proc.error(self,ex)
   File "moat/interpreter.py", line 110, in error
     reraise(err)
-  File "moat/twist.py", line 100, in reraise
+  File "moat/twist.py", line 98, in reraise
     raise e
   File "moat/parser.py", line 197, in _do_parse
     self._parseStep(t,txt,beg,end,line)
@@ -141,7 +141,7 @@ Traceback (most recent call last):
     self.error(self,ex)
   File "moat/interpreter.py", line 110, in error
     reraise(err)
-  File "moat/twist.py", line 100, in reraise
+  File "moat/twist.py", line 98, in reraise
     raise e
   File "moat/interpreter.py", line 206, in simple_statement
     fn.run(self.ctx)

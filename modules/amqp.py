@@ -108,7 +108,6 @@ class EventCallback(Worker):
 		if not self.filter:
 			return True
 		if self._simple:
-			import pdb;pdb.set_trace()
 			return self.filter == event
 		ie = iter(event)
 		ia = iter(self.filter)

@@ -93,7 +93,7 @@ exchange: he_exc
 prefix: ('moat', 'log')
 .
 EVENT: wait¦start¦_wait¦t4
-     : end_time=0.9
+     : end_time=1.0
      : loglevel=0
 TRACE 2003-04-05 06:07:08.500000 foo¦a: Forced timer done
 EVENT: wait¦done¦foo¦a
@@ -101,7 +101,8 @@ EVENT: wait¦done¦foo¦a
 IEVENT: hey¦ho
 EVENT: amam¦ho
      : event=['hey', 'ho']
-     : wait=0.5
+     : wait=0.6
+     : words=['Global']
 Waiter ‹foo b› was cancelled
 EVENT: wait¦cancel¦foo¦b
      : loglevel=0
@@ -126,23 +127,25 @@ EVENT: wait¦start¦foo¦in
      : loglevel=0
 EVENT: some¦thing
      : event=['some', 'thing']
-     : wait=0.9
+     : wait=1.0
+     : words=['Global']
 EVENT: wait¦start¦_wait¦t7
      : end_time=1.6
      : event=['wait', 'start', '_wait', 't7']
      : loglevel=0
+TRACE YES in
+Waiter ‹foo in› was cancelled
+Waiter ‹foo in› was cancelled
 EVENT: moni¦some¦thing
      : event=['moni', 'some', 'thing']
-     : wait=0.9
-TRACE YES in
-TRACE YES mon in
-Waiter ‹foo in› was cancelled
-Waiter ‹foo mon› was cancelled
-Waiter ‹foo mon› was cancelled
-Waiter ‹foo in› was cancelled
+     : wait=1.0
+     : words=['Global']
 EVENT: wait¦cancel¦foo¦in
      : event=['wait', 'cancel', 'foo', 'in']
      : loglevel=0
+TRACE YES mon in
+Waiter ‹foo mon› was cancelled
+Waiter ‹foo mon› was cancelled
 EVENT: wait¦cancel¦foo¦mon
      : event=['wait', 'cancel', 'foo', 'mon']
      : loglevel=0

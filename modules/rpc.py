@@ -149,7 +149,6 @@ class EventCallback(Worker,CallBack):
 		if self.args is None:
 			return True
 		if self._simple:
-			import pdb;pdb.set_trace()
 			return self.args == event.name
 
 		ie = iter(event)

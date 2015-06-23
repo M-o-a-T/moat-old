@@ -3,7 +3,7 @@ EVENT: startup
 TRACE Create OnEvtHandler: send¦logger
 TRACE NewHandler 5
 EVENT: wait¦start¦shutdown
-     : end_time=1.0
+     : end_time=1.1
      : loglevel=0
 EVENT: rpc¦connect¦foo¦n1
 DEBUG TEST (Name('event',),)
@@ -99,7 +99,7 @@ TRACE 2003-04-05 06:07:09 shutdown: Forced timer done
 EVENT: wait¦done¦shutdown
      : loglevel=0
 EVENT: wait¦start¦foo¦b
-     : end_time=2.0
+     : end_time=2.1
      : loglevel=0
 TRACE 2003-04-05 06:07:10 foo¦b: Forced timer done
 EVENT: wait¦done¦foo¦b

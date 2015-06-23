@@ -16,10 +16,10 @@ TRACE Create OnEvtHandler: net¦connect¦baz¦zaz¦*who
 TRACE NewHandler 10
 TRACE Create OnEvtHandler: net¦disconnect¦foo
 TRACE NewHandler 11
-TRACE Create OnEvtHandler: net¦disconnect¦baz¦zaz
+TRACE Create OnEvtHandler: net¦disconnect¦baz¦zaz¦*who
 TRACE NewHandler 12
 EVENT: wait¦start¦BEFORE
-     : end_time=0.4
+     : end_time=0.5
      : loglevel=0
 TRACE 2003-04-05 06:07:08.400000 BEFORE: Forced timer done
 EVENT: wait¦done¦BEFORE
@@ -64,6 +64,7 @@ host: 127.0.0.1
 port: ×××
 .
 EVENT: net¦disconnect¦baz¦zaz¦n1
+TRACE dis baz zaz n1
 TRACE 2003-04-05 06:07:09.400000 AFTER: Forced timer done
 TRACE ending
 .
