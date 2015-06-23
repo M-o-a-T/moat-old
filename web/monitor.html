@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link href="static/css/style.css" rel="stylesheet">
+    <script type="text/javascript" src="static/jquery.min.js"></script>
+    <script type="text/javascript" src="static/socket.io.js"></script>
+    <script>    
+
+WEB_SOCKET_SWF_LOCATION = "/static/WebSocketMain.swf";
+WEB_SOCKET_DEBUG = true;
+
+// socket.io specific code
+var socket = io.connect();
+
+$(window).bind("beforeunload", function() {
+    socket.disconnect();
+});
+
+socket.on('connect', function () {
+    $('#monitor').addClass('connected');
+    message('Connected.');
+    socket.emit('new client');
+});
+
+//socket.on('announcement', function (msg) {
+//    $('#lines').append($('<p>').append($('<em>').text(msg)));
+//});
+
+//socket.on('nicknames', function (nicknames) {
+//    $('#nicknames').empty().append($('<span>Online: </span>'));
+//    for (var i in nicknames) {
+//        $('#nicknames').append($('<b>').text(nicknames[i]));
+//    }
+//});
+
+socket.on('new message', function(msg) {
+    $('#log').prepend($('<tr>').append($('<td>').append(msg.event.join(' '))));
+});
+
+socket.on('replace message', function(pos,msg) {
+    $('#log tr').eq(pos).remove();
+    $('#log').prepend($('<tr>').append($('<td>').append(msg.event.join(' '))));
+});
+
+socket.on('reconnect', function () {
+    message('Reconnected to the server');
+    $('#log tr').remove();
+    socket.emit('new client');
+});
+
+socket.on('reconnecting', function () {
+    message('Attempting to re-connect to the server');
+});
+
+socket.on('error', function (e) {
+    message(e ? e : 'A unknown error occurred');
+});
+
+function message (m) {
+    $('#message').text(m);
+}
+
+// DOM manipulation
+$(function () {
+    $('#trigger').submit(function () {
+        socket.emit('trigger', $('#event').val());
+        clear();
+        var l = $('#log');
+        if (l.length) {
+            l.get(0).scrollTop = 10000000;
+        }
+        return false;
+    });
+
+    function clear () {
+        $('#event').val('').focus();
+    };
+});
+    </script>
+  </head>
+<body>
+  <div id="header">
+    <div id="message">
+      Connecting to server
+    </div>
+  </div>
+  <div id="page">
+   <div id="ipage">
+    <table id="messages">
+      <tbody id="log">
+      </tbody>
+    </table>
+   </div>
+  </div>
+  <div id="footer">
+    <form id="trigger">
+      <input id="event" />
+      <button>Send</button>
+    </form>
+  </div>
+</body>
+</html>

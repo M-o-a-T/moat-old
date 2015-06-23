@@ -25,6 +25,12 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##BP
 
 from moat import patch;patch()
+
+from socketio import socketio_manage
+from socketio.server import SocketIOServer
+from socketio.namespace import BaseNamespace
+from socketio.mixins import BroadcastMixin
+
 import sys
 import six
 from moat.base import Name
@@ -37,113 +43,248 @@ from gevent import spawn,signal
 from gevent.event import Event
 
 if sys.version_info[0] < 3:
-	sys.stdout = codecs.getwriter('utf8')(sys.stdout)
+    sys.stdout = codecs.getwriter('utf8')(sys.stdout)
 
 import amqp
 import json
 from pprint import pprint
+from functools import partial
+from weakref import WeakSet
+from itertools import count
+from dabroker.util import attrdict
 
 modes = "log,msg".split(",")
 from optparse import OptionParser
 parser = OptionParser(conflict_handler="resolve")
 parser.add_option("-h","--help","-?", action="help",
-	help="print this help text")
+    help="print this help text")
 parser.add_option("-s", "--server", dest="host", action="store",
-	default="127.0.0.1", help="Server to connect to")
+    default="127.0.0.1", help="Server to connect to")
 parser.add_option("-u", "--user", dest="user", action="store",
-	default="test", help="User to connect as")
+    default="test", help="User to connect as")
 parser.add_option("-p", "--pass", dest="pw", action="store",
-	default="test", help="Password to connect with")
+    default="test", help="Password to connect with")
 parser.add_option("-v", "--vhost", dest="vhost", action="store",
-	default="test", help="Virtual host to connect at")
+    default="test", help="Virtual host to connect at")
 parser.add_option("-x", "--exchange", dest="exchange", action="store",
-	default="moat.event", help="Exchange to listen at")
+    default="moat.event", help="Exchange to listen at")
 parser.add_option("-r", "--routing", dest="routing", action="store",
-	default="cmdline.generic", help="Routing key to send to")
+    default="cmdline.generic", help="Routing key to send to")
 parser.add_option("-b", "--body-only", dest="body", action="store_true",
-	help="only show the message's body")
+    help="only show the message's body")
 parser.add_option("-t", "--content-type", dest="content_type", action="store",
-	default="text/plain", help="The message's content type")
+    default="text/plain", help="The message's content type")
 parser.add_option("-s", "--skip", dest="skip", action="append",
-	help="Skip these messages")
+    help="Skip these messages")
+parser.add_option("--webdir", dest="webdir", action="store", default=".",
+    help="Lookup web files here")
 
 (opts, args) = parser.parse_args()
 
 skip=[]
 if opts.skip:
-	for skip1 in opts.skip:
-		for skip2 in skip1.split(','):
-			skip.append(skip2.split('.'))
+    for skip1 in opts.skip:
+        for skip2 in skip1.split(','):
+            skip.append(skip2.split('.'))
 
 conn = amqp.connection.Connection(host=opts.host, userid=opts.user, password=opts.pw, login_method='AMQPLAIN', login_response=None, virtual_host=opts.vhost)
 
 def main(conn,opts,args):
-	if not args:
-		raise SyntaxError("set a mode (%s)" % (", ".join(modes),))
-	mode = args[0]
-	args = args[1:]
-	if mode == "log":
-		do_log(conn,opts.body)
-	elif mode == "msg":
-		do_msg(conn,args)
+    if not args:
+        raise SyntaxError("set a mode (%s)" % (", ".join(modes),))
+    mode = args[0]
+    args = args[1:]
+    if mode == "log":
+        do_log(conn,opts.body)
+    elif mode == "msg":
+        do_msg(conn,args)
+    elif mode == "web":
+        app = Application(path=opts.webdir)
+        spawn(run_app, app, *args)
+        do_log(conn,args, app=app)
+
+
+class EventNamespace(BaseNamespace, BroadcastMixin):
+    _seq = count(1)
+    def __init__(self,env,ns_name,request):
+        super(EventNamespace,self).__init__(env, ns_name, request=request)
+        request.clients.add(self)
+
+    def on_trigger(self, foo):
+        import pdb;pdb.set_trace()
+        pass
+
+    def on_new_client(self):
+        # we only need the message to get the connection up and the ball rolling
+        i = len(self.request.pos)
+        while i:
+            i -= 1
+            xi = self.request.pos[i]
+            msg = self.request.data[xi]
+            pkt = dict(type="event",
+                       name='new message',
+                       args=(msg.body,),
+                       endpoint='')
+
+            self.socket.send_packet(pkt)
+        pass
+
+    def recv_disconnect(self):
+        self.disconnect(silent=True)
+
+    def has_event(self, msg):
+        import pdb;pdb.set_trace()
+        self.broadcast_event('new_event', msg)
+
+    def recv_message(self, message):
+        print("PING!!!", message)
+
+class Application(object):
+    def __init__(self, path="."):
+        # Fake request object to maintain state between Namespace
+        # initializations.
+        self.request = attrdict(
+            data= {},
+            pos= [],
+            clients= WeakSet(),
+        )
+        self.path = path
+        self.i = 0
+
+    def has_event(self, msg):
+        self.i += 1
+        xi = tuple(msg.body['event'])
+        try:
+            self.request.data[xi] = msg
+        except TypeError:
+            print("Event: "+repr(xi),file=sys.stderr)
+            return
+            
+        try:
+            i = self.request.pos.index(xi)
+        except ValueError:
+            i = None
+            pkt = dict(type="event",
+                       name='new message',
+                       args=(msg.body,),
+                       endpoint='')
+
+        else:
+            self.request.pos.pop(i)
+            pkt = dict(type="event",
+                       name='replace message',
+                       args=(i,msg.body,),
+                       endpoint='')
+
+        self.request.pos.insert(0,xi)
+
+        for c in self.request.clients:
+            c.socket.send_packet(pkt)
+        pass
+
+    def __call__(self, environ, start_response):
+        path = environ['PATH_INFO'].strip('/')
+
+        if not path:
+            path = "monitor.html"
+
+        if path.startswith('static/') or path == 'monitor.html':
+            if "/../" in path:
+                return not_found(start_response)
+            try:
+                with open(os.path.join(self.path,path)) as f:
+                    data = f.read()
+            except Exception:
+                return not_found(start_response)
+
+            if path.endswith(".js"):
+                content_type = "text/javascript"
+            elif path.endswith(".css"):
+                content_type = "text/css"
+            elif path.endswith(".swf"):
+                content_type = "application/x-shockwave-flash"
+            elif path.endswith(".html"):
+                content_type = "text/html"
+            else:
+                content_type = "application/binary"
+
+            start_response('200 OK', [('Content-Type', content_type)])
+            return [data.encode('utf-8')]
+
+        if path.startswith("socket.io"):
+            return socketio_manage(environ, {'': EventNamespace}, self.request)
+
+        return not_found(start_response)
+
+def not_found(start_response):
+    start_response('404 Not Found', [])
+    return [b'<h1>Not Found</h1>']
+
+def run_app(app, *args):
+    print('Listening on port 8080 and on port 843 (flash policy server)')
+    SocketIOServer(('0.0.0.0', 8080), app,
+        resource="socket.io", policy_server=True,
+        policy_listener=('0.0.0.0', 10843)).serve_forever()
 
 def do_msg(conn,args):
-	arg = " ".join(args)
-	chan = conn.channel()
-	msg = amqp.Message(body=arg, content_type=opts.content_type)
-	chan.basic_publish(msg=msg, exchange=opts.exchange, routing_key=opts.routing)
+    arg = " ".join(args)
+    chan = conn.channel()
+    msg = amqp.Message(body=arg, content_type=opts.content_type)
+    chan.basic_publish(msg=msg, exchange=opts.exchange, routing_key=opts.routing)
 
-def do_log(conn,body=False):
-	def on_msg(msg):
-		try:
-			b = msg.body
-			if not isinstance(b,six.text_type):
-				b = b.decode('utf-8')
-			msg.body = json.loads(b)
-		except Exception as e:
-			msg.body = "? "+str(e)+":"+str(msg.body)
-		deli = msg.delivery_info['routing_key'].split('.')
-		for skip1 in skip:
-			for s,k in zip(deli,skip1):
-				if k == "*":
-					return
-				if s != k:
-					s=()
-					break
-			if len(s) == len(k):
-				return
+def do_log(conn,body=False, app=None):
+    def on_msg(msg):
+        try:
+            b = msg.body
+            if not isinstance(b,six.text_type):
+                b = b.decode('utf-8')
+            msg.body = json.loads(b)
+        except Exception as e:
+            msg.body = "? "+str(e)+":"+str(msg.body)
+        deli = msg.delivery_info['routing_key'].split('.')
+        for skip1 in skip:
+            for s,k in zip(deli,skip1):
+                if k == "*":
+                    return
+                if s != k:
+                    s=()
+                    break
+            if len(s) == len(k):
+                return
 
-		if body and hasattr(msg,"body"):
-			pprint(msg.body)
-		else:
-			pprint(msg.__dict__)
+        if app:
+            app.has_event(msg)
+        elif body and hasattr(msg,"body"):
+            pprint(msg.body)
+        else:
+            pprint(msg.__dict__)
 
-	chan = conn.channel()
-	res = chan.exchange_declare(exchange=opts.exchange, type='topic', auto_delete=False, passive=False)
-	res = chan.queue_declare(exclusive=True)
-	chan.queue_bind(exchange=opts.exchange, queue=res.queue, routing_key="#")
-	chan.basic_consume(callback=on_msg, queue=res.queue, no_ack=True)
+    chan = conn.channel()
+    res = chan.exchange_declare(exchange=opts.exchange, type='topic', auto_delete=False, passive=False)
+    res = chan.queue_declare(exclusive=True)
+    chan.queue_bind(exchange=opts.exchange, queue=res.queue, routing_key="#")
+    chan.basic_consume(callback=on_msg, queue=res.queue, no_ack=True)
 
-	sig = Event()
-	def run():
-		while not sig.isSet():
-			conn.drain_events()
+    sig = Event()
+    def run():
+        while not sig.isSet():
+            conn.drain_events()
 
-	def do_shutdown():
-		sig.set()
-	signal(SIGINT,do_shutdown)
-	signal(SIGTERM,do_shutdown)
+    def do_shutdown():
+        sig.set()
+    signal(SIGINT,do_shutdown)
+    signal(SIGTERM,do_shutdown)
 
-	j = spawn(run)
-	sig.wait()
-	j.kill()
-	conn.close()
+    j = spawn(run)
+    sig.wait()
+    j.kill()
+    conn.close()
 
 if __name__ == "__main__":
-	try:
-		main(conn,opts,args)
-	except Exception:
-		raise
-	except BaseException:
-		pass
+    try:
+        main(conn,opts,args)
+    except Exception:
+        raise
+    except BaseException:
+        pass
 
