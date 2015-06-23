@@ -103,13 +103,16 @@ class Avg(Collected):
 		yield ("value",self.value)
 		if self.value_tm is not None:
 			yield ("set time",self.value_tm)
+		if self.prev_value:
 			yield ("prev value",self.prev_value)
+		if self.total_tm is not None:
 			yield ("total time",self.total_tm)
+		if self.total_samples:
 			yield ("total samples",self.total_samples)
 			yield ("current average",self._calc())
 
 	def info(self):
-		if self.total_tm is None:
+		if self.total_samples == 0:
 			return "(new)"
 		return "%s %s" % (self._calc(), unixdelta(self.total_tm))
 	
