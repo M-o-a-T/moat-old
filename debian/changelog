@@ -1,3 +1,9 @@
+moat (0.7.22) smurf; urgency=medium
+
+  * forward more data
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Tue, 23 Jun 2015 10:20:57 +0200
+
 moat (0.7.21) smurf; urgency=medium
 
   * onewire: empty result is try-again

@@ -127,7 +127,13 @@ class EventCallback(Worker):
 		try:
 			msg = getattr(event.ctx,'raw',None)
 			if msg is None:
-				d = dict((x,y) for x,y in event.ctx if isinstance(y,six.string_types+six.integer_types+(bool,float)))
+				d = {}
+				for x,y in event.ctx:
+					if x == 'event': continue
+					if isinstance(y,six.string_types+six.integer_types+(bool,float,list,tuple)):
+						d[x]=y
+					elif hasattr(y,'name'):
+						d[x]=y.name
 				try:
 					msg = json.dumps(dict(event=list(event), **d))
 				except (TypeError,UnicodeDecodeError) as e:
