@@ -62,8 +62,8 @@ on net connect baz zaz *who:
 	del net connection baz zaz $who
 on net disconnect foo:
 	log TRACE dis foo
-on net disconnect baz zaz:
-	log TRACE dis baz zaz
+on net disconnect baz zaz *who:
+	log TRACE dis baz zaz $who
 wait BEFORE:
 	for 0.2
 	debug force
@@ -71,7 +71,7 @@ listen net localhost 50345 :name baz zaz
 async:
 	connect net foo localhost 50333
 wait AFTER:
-	for 3.8
+	for 0.8
 	debug force
 log TRACE ending
 list net connection
