@@ -50,6 +50,11 @@ import errno
 import gevent
 from gevent.server import StreamServer
 
+class ThreadedStreamServer(StreamServer):
+	"""A StreamServer which doesn't kill off its sockets afterwards"""
+	def do_close(*args):
+		pass
+
 @six.python_2_unicode_compatible
 class DisconnectedError(RuntimeError):
 	def __init__(self,dev):
@@ -400,7 +405,7 @@ You need to override the long_doc description.
 
 	def start_up(self):
 		r = self.listener(name=self.dest, host=self.host,port=self.port)
-		s = StreamServer((self.host, self.port), r.connected)
+		s = ThreadedStreamServer((self.host, self.port), r.connected)
 		s.set_spawn(None)
 		r._init2(s, self.connector)
 
