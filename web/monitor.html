@@ -35,12 +35,31 @@ socket.on('connect', function () {
 //    }
 //});
 
+function mformat(prop,m) {
+  if(typeof(m) == "number") {
+      if (prop == "time" || m > 1000000000) {
+          m = m.toFixed(1);
+      } else {
+          m = m.toFixed(8).replace(/\.?0*$/,'');
+      }
+  }
+  return m;
+}
+
 function prep(seq,msg) {
     var r = $('<tr>')
     var attrs = "";
+    if (msg.hasOwnProperty("value_delta")) {
+        attrs += " value_delta="+mformat("value_delta",msg.value_delta);
+    }
+    if (msg.hasOwnProperty("value")) {
+        attrs += " value="+mformat("value",msg.value);
+    }
     for(var prop in msg) {
-        if(prop != "event" && msg.hasOwnProperty(prop)) {
-            attrs += " "+prop+"="+msg[prop];
+        if(prop != "event" && prop != "value" && prop != "value_delta" && msg.hasOwnProperty(prop)) {
+            var m = msg[prop];
+            m = mformat(prop,m)
+            attrs += " "+prop+"="+m;
         }
     }
     r.append($('<td>').append(seq));

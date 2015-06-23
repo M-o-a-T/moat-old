@@ -84,7 +84,7 @@ div#page div#ipage {
     direction:ltr;
 }
 div#page {
-    position: absolute; top: 200px; bottom: 30px;
+    position: absolute; top: 1em; bottom: 1.5em;
     box-sizing: border-box;
     -o-box-sizing: border-box;
     -icab-box-sizing: border-box;
@@ -94,9 +94,9 @@ div#page {
     overflow: auto;
     direction:rtl; 
 }
-tbody#log th {
-	padding-left: 0px;
-	padding-right: 0px;
+th {
+	cursor: pointer;
+	text-align: left;
 }
 
 div#footer  { position: absolute; bottom: 0px; width: 100%; font-size: 0.7em; }
