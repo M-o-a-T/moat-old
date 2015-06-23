@@ -1,3 +1,10 @@
+moat (0.7.20) smurf; urgency=medium
+
+  * fix onewire scanning/scanned event
+  * add rudimentary amqpmon web mode
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Tue, 23 Jun 2015 05:03:12 +0200
+
 moat (0.7.19) smurf; urgency=medium
 
   * Don't compare strings and floats
