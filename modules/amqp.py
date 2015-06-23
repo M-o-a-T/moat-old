@@ -60,6 +60,7 @@ base_mseq="moat.%x."%(int(itime()))
 
 class EventCallback(Worker):
 	args = None
+	_simple = True
 
 	def __init__(self,conn,parent):
 		self.parent = conn
@@ -76,6 +77,10 @@ class EventCallback(Worker):
 			except ValueError: pass
 			if i < self.strip or self.strip and not self.filter:
 				raise RuntimeError("You can't use 'shunt' if you strip elements you can't restore!")
+		for k in self.filter:
+			if hasattr(k,'startswith') and k.startswith('*'):
+				self._simple = False
+				break
 
 		name = parent.dest
 		if name is None:
@@ -102,6 +107,9 @@ class EventCallback(Worker):
 	def does_event(self,event):
 		if not self.filter:
 			return True
+		if self._simple:
+			import pdb;pdb.set_trace()
+			return self.filter == event
 		ie = iter(event)
 		ia = iter(self.filter)
 		while True:

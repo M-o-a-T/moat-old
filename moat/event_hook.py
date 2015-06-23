@@ -110,8 +110,9 @@ class iWorker(Worker):
 		super(iWorker,self).__init__(self.name)
 
 class OnEventBase(Collected,iWorker):
-	storage = OnHandlers.storage
 	"""Link an event to executing a MoaT block"""
+	storage = OnHandlers.storage
+	_simple = True
 
 	def __init__(self, parent, args, name=None, prio=(MIN_PRIO+MAX_PRIO)//2+1):
 		self.prio = prio
@@ -122,6 +123,9 @@ class OnEventBase(Collected,iWorker):
 		if name is None:
 			name = Name("_on",self._get_id())
 		super(OnEventBase,self).__init__(*name)
+		for k in self.args:
+			if hasattr(k,'startswith') and k.startswith('*'):
+				self._simple = False
 
 #		self.name = six.text_type(self.args)
 #		if self.displayname is not None:
@@ -131,6 +135,8 @@ class OnEventBase(Collected,iWorker):
 		log(TRACE,"NewHandler",self.id)
 
 	def does_event(self,event):
+		if self._simple:
+			return self.args == event
 		ie = iter(event)
 		ia = iter(self.args)
 		ctx = {}

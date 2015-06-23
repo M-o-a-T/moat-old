@@ -202,6 +202,8 @@ class NetCommonConnector(Collected,Jobber):
 		try:
 			while self.socket is not None:
 				try:
+					if self.socket.closed:
+						return
 					r = self.socket.recv(4096)
 					if not r:
 						return

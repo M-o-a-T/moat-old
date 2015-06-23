@@ -71,7 +71,7 @@ listen net localhost 50345 :name baz zaz
 async:
 	connect net foo localhost 50333
 wait AFTER:
-	for 0.8
+	for 3.8
 	debug force
 log TRACE ending
 list net connection

@@ -123,12 +123,17 @@ class CommandProcessor(ImmediateProcessor):
 class EventCallback(Worker,CallBack):
 	args = None
 	prio = MIN_PRIO+1
+	_simple = True
 
 	def __init__(self,parent,callback,*args):
 		self.parent = parent
 		CallBack.__init__(self,callback)
 		if args:
 			self.args = SName(args)
+			for k in self.args:
+				if hasattr(k,'startswith') and k.startswith('*'):
+					self._simple = False
+					break
 			name = SName(parent.name+self.args)
 			# use self.args because that won't do a multi-roundtrip iteration
 		else:
@@ -143,6 +148,10 @@ class EventCallback(Worker,CallBack):
 	def does_event(self,event):
 		if self.args is None:
 			return True
+		if self._simple:
+			import pdb;pdb.set_trace()
+			return self.args == event.name
+
 		ie = iter(event)
 		ia = iter(self.args)
 		while True:

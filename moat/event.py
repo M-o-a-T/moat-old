@@ -134,6 +134,10 @@ class Event(object):
 		return True
 	def __iter__(self):
 		return self.name.__iter__()
+	def __eq__(self,x):
+		return self.name.__eq__(x)
+	def __ne__(self,x):
+		return self.name.__ne__(x)
 
 	def apply(self, ctx=None, drop=0):
 		"""\

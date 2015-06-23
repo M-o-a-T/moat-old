@@ -15,7 +15,7 @@
 ##
 
 (
-echo A | nc -q1 -l localhost 50333
-echo B | nc -q1 localhost 50345
+echo A | nc -q9991 -l localhost 50333
+echo B | nc -q9991 localhost 50345
 ) > /tmp/nettest_$USER &
 
