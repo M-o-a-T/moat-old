@@ -17,7 +17,7 @@
 export PYTHONPATH=$(shell pwd):$(shell pwd)/dabroker
 DESTDIR ?= "/"
 PYDESTDIR ?= ${DESTDIR}
-PYTHON ?= python
+PYTHON ?= python3
 
 all: subfiles
 	cp -a _geventreactor/Pinako/geventrpyc/__init__.py moat/gevent_rpyc.py
