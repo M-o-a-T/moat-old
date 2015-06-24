@@ -1,3 +1,9 @@
+moat (0.7.24) smurf; urgency=medium
+
+  * fs20avr: encode data for writing
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Wed, 24 Jun 2015 02:57:55 +0200
+
 moat (0.7.23) smurf; urgency=medium
 
   * Fix network listener

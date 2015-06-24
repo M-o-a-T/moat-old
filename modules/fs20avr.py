@@ -164,7 +164,7 @@ class AVRcommon(handler):
 
 	def send(self,prefix,data):
 		data = prefix+"".join("%02x" % ord(x)  for x in data)
-		self.write(data+"\n")
+		self.write((data+"\n").encode('utf-8'))
 
 	# standard stuff
 
