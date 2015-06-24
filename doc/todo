@@ -28,9 +28,18 @@ Documentation
 Code
 ====
 
+* support multicast sockets
+
 * support KNX
 
-* support systemd keepalive
+* teach the onewire temperature monitor to read its values two seconds
+  after writing simultaneous/temoperature, so as not to block the bus
+
+* support distributed state
+
+  * state update FOO: tells server instance to update its state
+    needs to wait for "state change" event
+  * state report: tell all servers to broadcast all states
 
 * teach runschedule to reload the current list of
   valves/feeds/meters/controllers/whatever.
