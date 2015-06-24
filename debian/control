@@ -3,22 +3,12 @@ Section: python
 Priority: extra
 Maintainer: Matthias Urlichs <matthias@urlichs.de>
 Build-Depends: debhelper (>= 5),
- python-setuptools,
  libglib2.0-dev (>= 2.14),
  python-rrdtool,
  rrdtool,
- python-all-dev (>> 2.6.6-3~), 
  owserver | owfs,
- python-sqlmix (>= 0.9.29),
- python-six (>= 1.9),
- python-pysqlite2,
- python-amqp,
- python-pkg-resources,
- python-pytz | python-tz,
  portaudio19-dev,
- python-gevent,
  libevent-dev,
- python-flask,
  python3-rpyc,
  dh-python,
  dh-systemd,
@@ -39,10 +29,10 @@ Standards-Version: 3.7.2
 
 Package: moat
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, python-moat
+Depends: ${shlibs:Depends}, ${misc:Depends}, python3-moat
 Conflicts: homevent
 Replaces: homevent
-Recommends: python-rrdtool, owfs,
+Recommends: python3-rrdtool, owfs,
   rabbitmq-server,
 Description: A scripted event-based monitoring and control system
  MoaT is a flexible, scripted, network-aware event handler.
@@ -53,33 +43,6 @@ Description: A scripted event-based monitoring and control system
  The author uses it as a central hub for home automation.
  .
  This package contains startup scripts, docs, aux binaries, etc.
-
-Package: python-moat
-Architecture: all
-Depends: ${misc:Depends}, ${python:Depends},
- python-six (>= 1.9),
- python-sqlmix (>= 0.9.26),
- python-gevent (>= 1.0),
- python-rpyc,
- python-pkg-resources,
- python-dabroker,
- python-pytz | python-tz,
- python-amqp,
- moat,
-Conflicts: python-homevent
-Replaces: python-homevent
-Recommends: python-rrdtool, owfs,
- python-pysqlite2,
-Suggests: socat
-Description: A scripted event-based monitoring and control system
- MoaT is a flexible, scripted, network-aware event handler.
- It can monitor and control quite a few external buses and peripherals,
- including 1wire and FS20. It can write values to RRD files and allows
- access to its command interpreter with SSH.
- .
- The author uses it as a central hub for home automation.
- .
- This package contains the Python2 implementation.
 
 Package: python3-moat
 Architecture: all
@@ -102,6 +65,4 @@ Description: A scripted event-based monitoring and control system
  access to its command interpreter with SSH.
  .
  The author uses it as a central hub for home automation.
- .
- This package contains the Python3 implementation.
 

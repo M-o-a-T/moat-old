@@ -1,3 +1,9 @@
+moat (0.7.25) smurf; urgency=medium
+
+  * Drop py2 build
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Wed, 24 Jun 2015 03:10:13 +0200
+
 moat (0.7.24) smurf; urgency=medium
 
   * fs20avr: encode data for writing

@@ -12,16 +12,16 @@
 export PYBUILD_NAME=moat
 
 %:
-	dh $@ --with python2,python3 --buildsystem=pybuild
+	dh $@ --with python3 --buildsystem=pybuild
 
 override_dh_install:
 	dh_install
 	$(MAKE) installsub DESTDIR="$(shell pwd)/debian/moat/" PYDESTDIR="$(shell pwd)/debian/python-moat/"
 	
 	mkdir -p debian/moat/usr/sbin debian/moat/usr/bin
-	mv debian/python-moat/usr/bin/daemon debian/moat/usr/sbin/moatd
-	mv debian/python-moat/usr/bin/cmd debian/moat/usr/bin/moat
-	mv debian/python-moat/usr/bin/amqpmon debian/moat/usr/bin/moat-amqp
+	mv debian/python3-moat/usr/bin/daemon debian/moat/usr/sbin/moatd
+	mv debian/python3-moat/usr/bin/cmd debian/moat/usr/bin/moat
+	mv debian/python3-moat/usr/bin/amqpmon debian/moat/usr/bin/moat-amqp
 	install daemon.moat debian/moat/etc/moat/daemon.moat
 
 override_dh_auto_test:
