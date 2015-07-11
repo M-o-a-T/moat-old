@@ -172,7 +172,7 @@ class Context(object):
 	def _report(self):
 		f = self._created
 		yield "@%x %s %s:%d" % (id(self),f[0],f[1],f[2])
-		for a,b in self._store.items():
+		for a,b in sorted(self._store.items()):
 			yield "%s: %s" % (six.text_type(a),repr(b))
 		for p in self._parent:
 			pre="p"

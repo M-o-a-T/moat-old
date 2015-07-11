@@ -11,18 +11,19 @@ TRACE NewHandler 11
 TRACE Create OnEvtHandler: wait¦done¦foo¦b
 TRACE NewHandler 12
 EVENT: wait¦start¦foo¦a
+     : end_time=0.5
      : loglevel=0
-     : end_time=0.3
 foo lish
 .
 EVENT: wait¦start¦foo¦b
+     : end_time=0.8
      : loglevel=0
-     : end_time=0.6
 : ‹Collected AMQPrecv:foo¦lish›
 name: foo¦lish
 connection: ‹Collected AMQPclient:test¦foo›
-           name: test¦foo
-           host: localhost
+connection name: test¦foo
+connection task job: <Greenlet: erh(<bound method AMQPclient._loop of ‹Collected AMQPc)>
+           host: data.intern.smurf.noris.de
            port: 5672
            vhost: test
            user: test
@@ -36,7 +37,8 @@ test foo
 .
 : ‹Collected AMQPclient:test¦foo›
 name: test¦foo
-host: localhost
+task job: <Greenlet: erh(<bound method AMQPclient._loop of ‹Collected AMQPc)>
+host: data.intern.smurf.noris.de
 port: 5672
 vhost: test
 user: test
@@ -60,8 +62,9 @@ code: EventCallback: test¦foo¦f1
 matched: 0
 filter: hey¦*
 parent: ‹Collected AMQPclient:test¦foo›
-       name: test¦foo
-       host: localhost
+parent name: test¦foo
+parent task job: <Greenlet: erh(<bound method AMQPclient._loop of ‹Collected AMQPc)>
+       host: data.intern.smurf.noris.de
        port: 5672
        vhost: test
        user: test
@@ -72,13 +75,16 @@ prefix: ('amqte',)
 AMQPlogger x2 :: DEBUG: AMQPlogger
 amqp :: TRACE: run_logger
 .
-Name: AMQPlogger¦x2
+: ‹Collected AMQPlogger:AMQPlogger¦x2›
+name: AMQPlogger¦x2
+task job: <Greenlet: erh(<bound method AMQPlogger._writer of ‹Collected AMQ)>
 Type: AMQPlogger
 Level: DEBUG
 Queue: 0
 parent: ‹Collected AMQPclient:test¦foo›
-       name: test¦foo
-       host: localhost
+parent name: test¦foo
+parent task job: <Greenlet: erh(<bound method AMQPclient._loop of ‹Collected AMQPc)>
+       host: data.intern.smurf.noris.de
        port: 5672
        vhost: test
        user: test
@@ -87,58 +93,60 @@ exchange: he_exc
 prefix: ('moat', 'log')
 .
 EVENT: wait¦start¦_wait¦t4
+     : end_time=1.0
      : loglevel=0
-     : end_time=0.7
 TRACE 2003-04-05 06:07:08.500000 foo¦a: Forced timer done
 EVENT: wait¦done¦foo¦a
      : loglevel=0
 IEVENT: hey¦ho
 EVENT: amam¦ho
      : event=['hey', 'ho']
-     : wait=0.3
+     : wait=0.6
+     : words=['Global']
+Waiter ‹foo b› was cancelled
 EVENT: wait¦cancel¦foo¦b
      : loglevel=0
 TRACE Yes
-Waiter ‹foo b› was cancelled
 Waiter ‹foo b› was cancelled
 TRACE 2003-04-05 06:07:08.950000 _wait¦t4: Forced timer done
 EVENT: wait¦done¦_wait¦t4
      : loglevel=0
 EVENT: amqp¦stop¦test¦foo
 EVENT: amqp¦start¦test¦foo
-     : event=['amqp', 'start', 'test', 'foo']
 TRACE Create OnEvtHandler: moni¦some¦thing
 TRACE NewHandler 25
 TRACE Create OnEvtHandler: some¦thing
 TRACE NewHandler 26
 EVENT: wait¦start¦foo¦mon
-     : loglevel=0
-     : end_time=1.3
+     : end_time=1.5
      : event=['wait', 'start', 'foo', 'mon']
-EVENT: wait¦start¦foo¦in
      : loglevel=0
-     : end_time=1.3
+EVENT: wait¦start¦foo¦in
+     : end_time=1.5
      : event=['wait', 'start', 'foo', 'in']
+     : loglevel=0
 EVENT: some¦thing
      : event=['some', 'thing']
-     : wait=0.8
+     : wait=1.0
+     : words=['Global']
 EVENT: wait¦start¦_wait¦t7
-     : loglevel=0
-     : end_time=1.4
+     : end_time=1.6
      : event=['wait', 'start', '_wait', 't7']
+     : loglevel=0
+TRACE YES in
+Waiter ‹foo in› was cancelled
+Waiter ‹foo in› was cancelled
 EVENT: moni¦some¦thing
      : event=['moni', 'some', 'thing']
-     : wait=0.8
-TRACE YES in
+     : wait=1.0
+     : words=['Global']
+EVENT: wait¦cancel¦foo¦in
+     : event=['wait', 'cancel', 'foo', 'in']
+     : loglevel=0
 TRACE YES mon in
 Waiter ‹foo mon› was cancelled
 Waiter ‹foo mon› was cancelled
-Waiter ‹foo in› was cancelled
-Waiter ‹foo in› was cancelled
-EVENT: wait¦cancel¦foo¦in
-     : loglevel=0
-     : event=['wait', 'cancel', 'foo', 'in']
 EVENT: wait¦cancel¦foo¦mon
-     : loglevel=0
      : event=['wait', 'cancel', 'foo', 'mon']
+     : loglevel=0
 TRACE 2003-04-05 06:07:09.600000 _wait¦t7: Forced timer done

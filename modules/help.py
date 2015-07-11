@@ -31,7 +31,10 @@ This code implements the Help command.
 from moat.module import Module
 from moat.logging import log
 from moat.statement import Statement, global_words, HelpSub
-from moat.base import Name
+from moat.base import Name,SName
+
+def _ErrKey(x):
+	raise KeyError(x)
 
 class Help(Statement):
 	name="help"
@@ -56,39 +59,35 @@ Statements may be multi-word and follow generic Python syntax.
 			try:
 				wlist = words.__getitem__
 			except AttributeError:
-				break
+				wlist = _ErrKey
 
 			n = len(wl)
 			while n >= 0:
 				try:
-					words = wlist(Name(*wl[:n]))()
+					words = wlist(Name(*wl[:n]))
 				except KeyError:
-					pass
-				else:
-					wl = wl[n:]
-					break
-				n = n-1
+					try:
+						words = words.registry[SName(wl[:n])]
+					except (KeyError, AttributeError):
+						n = n-1
+						continue
+				break
 			if n < 0:
 				break
+			wl = wl[n:]
 
 		if wl:
-			# this is for a type registry
-			if len(wl) == 1 and hasattr(words,"registry") and wl[0] in words.registry:
-				words = words.registry[wl[0]]
-				try:
-					doc = ":\n"+words.long_doc.rstrip("\n")
-				except AttributeError:
-					doc = " : "+words.doc
-				print(wl[0]+doc, file=self.ctx.out)
-				return
-
-			print("Not a command in %s:" % (words.__class__.__name__,)," ".join(wl), file=self.ctx.out)
+			# this may be for a type registry
+			print("Not a command in %s:" % (words.name,)," ".join(wl), file=self.ctx.out)
 
 		try:
 			doc = ":\n"+words.long_doc.rstrip("\n")
 		except AttributeError:
 			doc = " : "+words.doc
-		print(" ".join(words.name)+doc, file=self.ctx.out)
+		if words.name:
+			print(" ".join(words.name)+doc, file=self.ctx.out)
+		else:
+			print(doc, file=self.ctx.out)
 
 		# this is for common sub-statements
 		try:
@@ -104,9 +103,7 @@ Statements may be multi-word and follow generic Python syntax.
 				n = getattr(words,"helpsubname","word")
 				print("Known "+n+"s:", file=self.ctx.out)
 
-				def nam(a):
-					return a[0]
-				for n,d in sorted(wl(),key=nam):
+				for n,d in sorted(wl()):
 					hname = " ".join(n)
 					print(hname+(" "*(maxlen+1-len(hname)))+": "+d.doc, file=self.ctx.out)
 
@@ -123,10 +120,8 @@ Statements may be multi-word and follow generic Python syntax.
 			if maxlen:
 				print("Known types:", file=self.ctx.out)
 
-				def nam(a,b):
-					return cmp(a[0],b[0])
-				for n,d in sorted(wl(),nam):
-					print(n+(" "*(maxlen+1-len(hname)))+": "+d.doc, file=self.ctx.out)
+				for n,d in sorted(wl()):
+					print(" ".join(n)+(" "*(maxlen+1-len(hname)))+": "+d.doc, file=self.ctx.out)
 
 class HelpModule(Module):
 	"""\

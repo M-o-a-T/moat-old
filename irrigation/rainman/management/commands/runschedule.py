@@ -95,6 +95,13 @@ METER_MAXTIME=60*60 # need to report at least hourly, otherwise I don't believe 
 #	if obj is not None:
 #		obj.save()
 
+from django.db import connections
+def connwrap(p,*a,**k):
+	try:
+		return p(*a,**k)
+	finally:
+		connections.close_all()
+
 class NotConnected(RuntimeError):
 	pass
 
@@ -145,7 +152,7 @@ class RestartService(VoidService):
 				s.log("disconnected")
 				s.ci = None
 				s.run_main_task()
-				gevent.spawn_later(10,s.maybe_restart)
+				gevent.spawn_later(10,connwrap,s.maybe_restart)
 
 class Meter(object):
 	sum_it = False
@@ -232,7 +239,7 @@ class FeedMeter(SumMeter):
 		try:
 			cf = MaxFlowCheck(self)
 			# Safety timer
-			timer = gevent.spawn_later(self.d.db_max_flow_wait,cf.dead)
+			timer = gevent.spawn_later(self.d.db_max_flow_wait,connwrap,cf.dead)
 
 			cf.start()
 			res = cf.q.get()
@@ -254,7 +261,7 @@ class FeedMeter(SumMeter):
 		try:
 			cf = Flusher(self)
 			# Safety timer
-			timer = gevent.spawn_later(self.d.db_max_flow_wait,cf.dead)
+			timer = gevent.spawn_later(self.d.db_max_flow_wait,connwrap,cf.dead)
 
 			cf.start()
 			res = cf.q.get()
@@ -434,10 +441,10 @@ class SchedSite(SchedCommon):
 		pass
 
 	def do_shutdown(self,x,y,**k):
-		gevent.spawn_later(0.1,self.shutdown)
+		gevent.spawn_later(0.1,connwrap,self.shutdown)
 
 	def do_syncsched(self,x,y):
-		gevent.spawn_later(0.1,self.syncsched)
+		gevent.spawn_later(0.1,connwrap,self.syncsched)
 
 	def syncsched(self):
 		print("Sync+Sched", file=sys.stderr)
@@ -447,7 +454,7 @@ class SchedSite(SchedCommon):
 
 	def delay_on(self):
 		self._delay_on.acquire()
-		gevent.spawn_later(1,self._delay_on.release)
+		gevent.spawn_later(1,connwrap,self._delay_on.release)
 
 	def check_flow(self,**k):
 		for c in self.controllers:
@@ -466,7 +473,7 @@ class SchedSite(SchedCommon):
 			self.connect()
 		except Exception:
 			print_exc()
-			gevent.spawn_later(100,self.maybe_restart)
+			gevent.spawn_later(100,connwrap,self.maybe_restart)
 		else:
 			self.connect_monitors()
 
@@ -543,7 +550,7 @@ class SchedSite(SchedCommon):
 
 	def has_rain(self):
 		"""Some monitor told us that it started raining"""
-		r,self.rain_timer = self.rain_timer,gevent.spawn_later(self.s.db_rain_delay,self.no_rain)
+		r,self.rain_timer = self.rain_timer,gevent.spawn_later(self.s.db_rain_delay,connwrap,self.no_rain)
 		if r:
 			r.kill()
 			return
@@ -583,10 +590,10 @@ class SchedSite(SchedCommon):
 		self._run_result = None
 		sd = self._run_delay.total_seconds()/10
 		if sd < 66: sd = 66
-		self._run = gevent.spawn_later(sd, self.run_main_task, kill=False)
+		self._run = gevent.spawn_later(sd, connwrap,self.run_main_task, kill=False)
 		if self._sched is not None:
 			self._sched.kill()
-		self._sched = gevent.spawn_later(2, self.run_sched_task, kill=False, reason="run_every")
+		self._sched = gevent.spawn_later(2, connwrap,self.run_sched_task, kill=False, reason="run_every")
 
 	def run_main_task(self, kill=True):
 		"""Run the calculation loop."""
@@ -611,7 +618,7 @@ class SchedSite(SchedCommon):
 			res = self.main_task()
 			return res
 		finally:
-			self._run = gevent.spawn_later((self._run_last+self._run_delay-n).total_seconds(), self.run_main_task, kill=False)
+			self._run = gevent.spawn_later((self._run_last+self._run_delay-n).total_seconds(), connwrap,self.run_main_task, kill=False)
 			r,self._run_result = self._run_result,None
 			self._running.release()
 			r.set(res)
@@ -670,7 +677,7 @@ class SchedSite(SchedCommon):
 		h = self.current_history_entry(3)
 		self.sync_history()
 			
-		gevent.spawn_later(2,self.sched_task)
+		gevent.spawn_later(2,connwrap,self.sched_task)
 		print("MainTask end",h, file=sys.stderr)
 		return h
 
@@ -683,7 +690,7 @@ class SchedSite(SchedCommon):
 				self._sched.kill()
 		if delayed:
 			print("RunSched.delay",reason, file=sys.stderr)
-			self._sched = gevent.spawn_later(10,self.run_sched_task,kill=False,reason="Timer 10")
+			self._sched = gevent.spawn_later(10,connwrap,self.run_sched_task,kill=False,reason="Timer 10")
 			return
 		print("RunSched",reason, file=sys.stderr)
 		self._sched = None
@@ -695,7 +702,7 @@ class SchedSite(SchedCommon):
 		finally:
 			r,self._sched_running = self._sched_running,None
 			if self._sched is None:
-				self._sched = gevent.spawn_later(600,self.run_sched_task,kill=False,reason="Timer 600")
+				self._sched = gevent.spawn_later(600,connwrap,self.run_sched_task,kill=False,reason="Timer 600")
 			r.set(None)
 		print("RunSched end", file=sys.stderr)
 
@@ -878,7 +885,7 @@ class SchedValve(SchedCommon):
 					self._off(2)
 					self.sched = None
 				else:
-					self.sched_job = gevent.spawn_later((self.sched.start+self.sched.duration-n).total_seconds(),self.run_sched_task,reason="_run_schedule 1")
+					self.sched_job = gevent.spawn_later((self.sched.start+self.sched.duration-n).total_seconds(),connwrap,self.run_sched_task,reason="_run_schedule 1")
 					if self.v.verbose:
 						print("SCHED LATER %s: %s" % (self.v.name,humandelta(self.sched.start+self.sched.duration-n)), file=sys.stderr)
 					return
@@ -916,7 +923,7 @@ class SchedValve(SchedCommon):
 			if self.v.verbose:
 				print("SCHED %s: sched %d in %s" % (self.v.name,sched.id,humandelta(sched.start-n)), file=sys.stderr)
 			self._off(4)
-			self.sched_job = gevent.spawn_later((sched.start-n).total_seconds(),self.run_sched_task,reason="_run_schedule 2")
+			self.sched_job = gevent.spawn_later((sched.start-n).total_seconds(),connwrap,self.run_sched_task,reason="_run_schedule 2")
 			return
 		try:
 			self._on(sched)
@@ -1153,7 +1160,7 @@ class FlowCheck(object):
 
 	def run(self):
 		# Safety timer
-		self.timer = gevent.spawn_later(self.valve.feed.d.db_max_flow_wait, self.dead, kill=False)
+		self.timer = gevent.spawn_later(self.valve.feed.d.db_max_flow_wait, connwrap,self.dead, kill=False)
 
 		self.start()
 		res = self.q.get()
@@ -1274,7 +1281,7 @@ class MaxFlowCheck(object):
 		
 	def run(self):
 		# Safety timer
-		self.timer = gevent.spawn_later(self.feed.d.db_max_flow_wait,cf.dead,False)
+		self.timer = gevent.spawn_later(self.feed.d.db_max_flow_wait,connwrap,cf.dead,False)
 
 		self.start()
 		res = self.q.get()

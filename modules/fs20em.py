@@ -131,6 +131,7 @@ class EM(Collected,Timeslotted):
 			return "%s %d: (never)" % (em_procs[self.group].em_name, self.code)
 
 	def list(self):
+		yield super(EM,self)
 		yield("name",self.name)
 		yield("group",self.group)
 		yield("groupname",em_procs[self.group].em_name)

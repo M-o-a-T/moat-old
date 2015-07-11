@@ -38,11 +38,13 @@ from moat.run import process_failure, simple_event
 from moat.context import Context
 from moat.base import SName, Name
 from moat import logging
-from moat.twist import Jobber,fix_exception
+from moat.twist import fix_exception
 from moat.module import Module
 from moat.logging import log,DEBUG
 from moat.interpreter import Interpreter
 from moat.event_hook import OnEventBase
+from moat.collect import collections
+from moat.check import check_condition
 
 from dabroker.util import import_string
 
@@ -59,11 +61,66 @@ class OnEventExec(OnEventBase):
 			fix_exception(ex)
 			process_failure(ex)
 
+class EnvRunner(object):
+	def __init__(self,ctx, name=()):
+		self.ctx = ctx
+		self.name = name
+
+	def __call__(self,*a,**kw):
+		attrs = []
+		keys = {}
+		for k,v in kw.items():
+			if k.startswith('_'):
+				if isinstance(v,six.integer_types+six.string_types+(float,)):
+					v = (v,)
+				attrs.append((k[1:],)+tuple(v))
+			else:
+				keys[k]=v
+		ctx = self.ctx(**keys)
+		if len(a)==1:
+			a = a[0].split(' ')
+		if attrs:
+			r = Interpreter(ctx).complex_statement(self.name+tuple(a))
+
+			for x in attrs:
+				if len(x) == 2:
+					x = (x[0],)+tuple(x[1].split(" "))
+				r.simple_statement(x)
+			r.done()
+		else:
+			Interpreter(ctx).simple_statement(self.name+tuple(a))
+	
+	def __getattr__(self,k):
+		if k.startswith('_'):
+			return super(EnvRunner,self).__getattr__(k)
+		r = EnvRunner(self.ctx, self.name+(k,))
+		setattr(self,k,r)
+		return r
+
+class EnvTester(object):
+	def __init__(self,ctx, name=()):
+		self.ctx = ctx
+		self.name = name
+
+	def __call__(self,*a):
+		if len(a)==1:
+			a = a[0].split(' ')
+		return check_condition(self.env, self.name+tuple(a))
+	
+	def __getattr__(self,k):
+		if k.startswith('_'):
+			return super(EnvTester,self).__getattr__(k)
+		r = EnvTester(self.ctx, self.name+(k,))
+		setattr(self,k,r)
+		return r
+
 class Env(object):
 	"""A wrapper class for hooking up Python code"""
 	def __init__(self, parent, ctx):
 		self.parent = parent
 		self.ctx = ctx
+		self.do = EnvRunner(ctx)
+		self.test = EnvTester(ctx)
 	
 	def on(self, *args, **kw):
 		doc=kw.pop('doc',None)
@@ -84,13 +141,9 @@ class Env(object):
 	def trigger(self, *a,**k):
 		simple_event(self.ctx, *a,**k)
 
-	def do(self,*a,**k):
-		ctx = self.ctx(**k)
-		if len(a)==1:
-			a = a[0].split(' ')
-		Interpreter(ctx).simple_statement(a)
+	data = collections
 
-class ExecHandler(AttributedStatement,Jobber):
+class ExecHandler(AttributedStatement):
 	name="exec"
 	doc="run Python code"
 	long_doc="""\

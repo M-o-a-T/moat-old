@@ -94,8 +94,7 @@ class CallBack(object):
 		
 		
 	def list(self):
-		for r in super(CallBack,self).list():
-			yield r
+		yield super(CallBack,self)
 		yield("callback",repr(self.callback))
 
 class CommandProcessor(ImmediateProcessor):
@@ -124,12 +123,17 @@ class CommandProcessor(ImmediateProcessor):
 class EventCallback(Worker,CallBack):
 	args = None
 	prio = MIN_PRIO+1
+	_simple = True
 
 	def __init__(self,parent,callback,*args):
 		self.parent = parent
 		CallBack.__init__(self,callback)
 		if args:
 			self.args = SName(args)
+			for k in self.args:
+				if hasattr(k,'startswith') and k.startswith('*'):
+					self._simple = False
+					break
 			name = SName(parent.name+self.args)
 			# use self.args because that won't do a multi-roundtrip iteration
 		else:
@@ -137,14 +141,16 @@ class EventCallback(Worker,CallBack):
 		super(EventCallback,self).__init__(name)
 	
 	def list(self):
-		for r in super(EventCallback,self).list():
-			yield r
+		yield super(EventCallback,self)
 		if self.args:
 			yield("args",self.args)
 
 	def does_event(self,event):
 		if self.args is None:
 			return True
+		if self._simple:
+			return self.args == event.name
+
 		ie = iter(event)
 		ia = iter(self.args)
 		while True:
@@ -352,8 +358,7 @@ class RPCconn(Service,Collected):
 		return l
 
 	def list(self):
-		for r in super(RPCconn,self).list():
-			yield r
+		yield super(RPCconn,self)
 		yield ("local host", self._conn._config["endpoints"][0][0])
 		yield ("local port", self._conn._config["endpoints"][0][1])
 		yield ("remote host", self._conn._config["endpoints"][1][0])
@@ -378,10 +383,10 @@ class RPCserver(Collected,Jobber):
 		self.name = name
 		self.host=host
 		self.port=port
+		super(RPCserver,self).__init__()
 		self.server = ThreadedServer(gen_rpcconn(name), hostname=host,port=port,ipv6=True, protocol_config = {"safe_attrs":set(("list","__str__","__unicode__","year","month","day","days","date","time","hour","minute","second","seconds","microseconds","ctx","items")).union(DEFAULT_CONFIG["safe_attrs"])})
 		self.server.listener.settimeout(None)
 		self.start_job("job",self._start)
-		super(RPCserver,self).__init__()
 
 	def _start(self):
 		self.server.start()
@@ -392,8 +397,7 @@ class RPCserver(Collected,Jobber):
 		super(RPCserver,self).delete()
 
 	def list(self):
-		for r in super(RPCserver,self).list():
-			yield r
+		yield super(RPCserver,self)
 		yield ("host",self.host)
 		yield ("port",self.port)
 		yield ("server",repr(self.server))

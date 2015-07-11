@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link href="static/css/style.css" rel="stylesheet">
+    <script type="text/javascript" src="static/jquery.min.js"></script>
+    <script type="text/javascript" src="static/socket.io.js"></script>
+    <script>    
+
+$(function() {
+
+WEB_SOCKET_SWF_LOCATION = "/static/WebSocketMain.swf";
+WEB_SOCKET_DEBUG = true;
+
+// socket.io specific code
+var socket = io.connect();
+
+$(window).bind("beforeunload", function() {
+    socket.disconnect();
+});
+
+socket.on('connect', function () {
+    $('#monitor').addClass('connected');
+    message('Connected.');
+    socket.emit('new client');
+});
+
+//socket.on('announcement', function (msg) {
+//    $('#lines').append($('<p>').append($('<em>').text(msg)));
+//});
+
+//socket.on('nicknames', function (nicknames) {
+//    $('#nicknames').empty().append($('<span>Online: </span>'));
+//    for (var i in nicknames) {
+//        $('#nicknames').append($('<b>').text(nicknames[i]));
+//    }
+//});
+
+function mformat(prop,m) {
+  if(typeof(m) == "number") {
+      if (prop == "time" || m > 1000000000) {
+          m = m.toFixed(1);
+      } else {
+          m = m.toFixed(8).replace(/\.?0*$/,'');
+      }
+  }
+  return m;
+}
+
+function prep(seq,msg) {
+    var r = $('<tr>')
+    var attrs = "";
+    if (msg.hasOwnProperty("value_delta")) {
+        attrs += " value_delta="+mformat("value_delta",msg.value_delta);
+    }
+    if (msg.hasOwnProperty("value")) {
+        attrs += " value="+mformat("value",msg.value);
+    }
+    for(var prop in msg) {
+        if(prop != "event" && prop != "value" && prop != "value_delta" && msg.hasOwnProperty(prop)) {
+            var m = msg[prop];
+            m = mformat(prop,m)
+            attrs += " "+prop+"="+m;
+        }
+    }
+    r.append($('<td>').append(seq));
+    r.append($('<td>').append(msg.event.join(' ')));
+    r.append($('<td>').append(attrs));
+    r.attr('id','msg'+seq);
+    return r;
+}
+socket.on('new message', function(seq,msg) {
+    $('#log').append(prep(seq,msg));
+});
+
+socket.on('replace message', function(oseq,seq,msg) {
+    $('tr#msg'+oseq).replaceWith(prep(seq,msg));
+});
+
+socket.on('reconnect', function () {
+    message('Reconnected to the server');
+    $('#log tr').remove();
+    socket.emit('new client');
+});
+
+socket.on('reconnecting', function () {
+    message('Attempting to re-connect to the server');
+});
+
+socket.on('error', function (e) {
+    message(e ? e : 'A unknown error occurred');
+});
+
+function message (m) {
+    $('#message').text(m);
+}
+
+$('#messages thead th').click(function(){
+    var table = $(this).parents('table').eq(0).children('tbody');
+    var rows = table.find('tr').toArray().sort(comparer($(this).index()));
+    this.asc = !this.asc;
+    if (!this.asc) { rows = rows.reverse() }
+    for (var i = 0; i < rows.length; i++) { table.append(rows[i]) }
+})
+function comparer(index) {
+    return function(a, b) {
+        var valA = getCellValue(a, index), valB = getCellValue(b, index);
+        return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.localeCompare(valB);
+    }
+}
+function getCellValue(row, index){ return $(row).children('td').eq(index).html(); }
+
+// DOM manipulation
+$(function () {
+    $('#trigger').submit(function () {
+        socket.emit('trigger', $('#event').val());
+        clear();
+        return false;
+    });
+
+    function clear () {
+        $('#event').val('').focus();
+    };
+});
+
+})();
+    </script>
+  </head>
+<body>
+  <div id="header">
+    <div id="message">
+      Connecting to server
+    </div>
+  </div>
+  <div id="page">
+   <div id="ipage">
+    <table id="messages">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Event</th>
+          <th>Data</th>
+        </tr>
+      </thead>
+      <tbody id="log">
+      </tbody>
+    </table>
+   </div>
+  </div>
+  <div id="footer">
+    <form id="trigger">
+      <input id="event" />
+      <button>Send</button>
+    </form>
+  </div>
+</body>
+</html>

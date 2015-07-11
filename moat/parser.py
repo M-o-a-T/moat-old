@@ -90,8 +90,7 @@ class Parser(Collected,Jobber):
 
 	def list(self):
 		"""Yield a couple of (left,right) tuples, for enumeration."""
-		for x in super(Parser,self).list():
-			yield x
+		yield super(Parser,self)
 		yield ("input",str(self.input))
 		if self.last_pos is not None:
 			yield ("line",str(self.last_pos[0]))
@@ -363,7 +362,7 @@ def parse(input, interpreter=None, ctx=None, out=None, words=None):
 		interpreter = interpreter(ctx)
 
 	if isinstance(input,six.string_types):
-		input = open(input,"rU")
+		input = open(input,"rU",encoding='utf-8')
 
 	parser = Parser(interpreter=interpreter, input=input, ctx=ctx)
 	parser.run()

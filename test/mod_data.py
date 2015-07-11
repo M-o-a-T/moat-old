@@ -42,6 +42,14 @@ on foo:
 		log TRACE Yes
 	else:
 		log ERROR No $one
+	if exists var one:
+		log TRACE Yes
+	else:
+		log ERROR NoOne
+	if exists var onesie:
+		log ERROR NoOneSie
+	else:
+		log TRACE Yes
 	block:
 		wait foo waiter:
 			for 0.3

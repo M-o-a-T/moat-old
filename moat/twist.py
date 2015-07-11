@@ -30,6 +30,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 	"""
 
 import six
+
 from moat.base import RaisedError,SName
 from moat.collect import Collection
 
@@ -59,9 +60,6 @@ except NameError:
 else:
 	# py3 also doesn't have sys.setdefaultencoding
 	sys.setdefaultencoding("utf-8")
-
-# This test is also in moat/__init__.py, for recursive-import reasons
-TESTING = "MOAT_TEST" in os.environ
 
 # nonblocking versions of stdin/stdout
 
@@ -258,8 +256,22 @@ class _starting(object):
  
 class Jobber(object):
 	"""A mix-in to run jobs"""
+	def __init__(self):
+		super(Jobber,self).__init__()
+		self._job_attrs = set()
+
+	def _job_list(self):
+		for k in sorted(self._job_attrs):
+			yield (k,getattr(self,k,'-'))
+
+	def list(self):
+		s = super(Jobber,self)
+		if hasattr(s,'list'): yield s
+		yield ("task",self._job_list())
+
 	def start_job(self,attr, proc,*a,**k):
 
+		self._job_attrs.add(attr)
 		with log_wait("start",attr,str(self)):
 			while True:
 				j = getattr(self,attr,None)

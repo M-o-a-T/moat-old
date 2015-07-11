@@ -40,6 +40,10 @@ list wait Foo Bar
 wait Foo Bar:
 	for 0.1
 	update
+on Heya:
+	log ERROR No Want Heya
+on Heyu:
+	log DEBUG Yes Want Heyu
 block:
 	if exists wait Foo Baz:
 		log ERROR No2
@@ -49,9 +53,23 @@ block:
 	wait X2: for 0.2
 	trigger DoNow $wait
 wait X3: for 0.1
+block:
+	try:
+		wait:
+			for 0.1
+			timeout
+		log ERROR No timeout
+	catch DelayReached:
+		log DEBUG Yes timeout
+
 async:
 	wait Foo Baz: until 8 min
 	trigger Heya
+async:
+	wait Foo Bazi:
+		until 9 min
+		soft
+	trigger Heyu
 wait: for 0.1
 block:
 	if exists wait Foo Baz:
@@ -64,6 +82,7 @@ on whatever:
 trigger whatever :sync
 wait: for 0.3
 del wait Foo Baz
+del wait Foo Bazi
 block:
 	if exists wait Foo Baz:
 		log ERROR No3
@@ -81,6 +100,7 @@ load_module("wait")
 load_module("block")
 load_module("logging")
 load_module("ifelse")
+load_module("errors")
 load_module("on_event")
 
 run("wait",input)

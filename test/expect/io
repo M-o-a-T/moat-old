@@ -23,8 +23,8 @@ EVENT: output¦change¦foo¦bar
      : prev_value=None
      : value=TEST
 EVENT: input¦change¦foo¦bar
-     : last_value=None
      : fake=True
+     : last_value=None
      : value=TEST
 TRACE Yes
 TRACE Yes
@@ -34,50 +34,50 @@ EVENT: output¦change¦foo¦bar
      : prev_value=TEST
      : value=1
 EVENT: input¦change¦foo¦bar
-     : last_value=TEST
      : fake=True
+     : last_value=TEST
      : value=1
 EVENT: output¦change¦foo¦bar
      : prev_value=1
      : value=9
 EVENT: input¦change¦foo¦bar
-     : last_value=1
      : fake=True
+     : last_value=1
      : value=9
 EVENT: output¦change¦foo¦bar
      : prev_value=9
      : value=123
 EVENT: input¦change¦foo¦bar
-     : last_value=9
      : fake=True
+     : last_value=9
      : value=123
 EVENT: output¦change¦foo¦bar
      : prev_value=123
      : value=one
 EVENT: input¦change¦foo¦bar
-     : last_value=123
      : fake=True
+     : last_value=123
      : value=one
 EVENT: output¦change¦foo¦bar
      : prev_value=one
      : value=two
 EVENT: input¦change¦foo¦bar
-     : last_value=one
      : fake=True
+     : last_value=one
      : value=two
 EVENT: output¦change¦foo¦bar
      : prev_value=two
      : value=three
 EVENT: input¦change¦foo¦bar
-     : last_value=two
      : fake=True
+     : last_value=two
      : value=three
 EVENT: output¦change¦foo¦bar
      : prev_value=three
      : value=GRMPF
 EVENT: input¦change¦foo¦bar
-     : last_value=three
      : fake=True
+     : last_value=three
      : value=GRMPF
 TRACE Yes
 : ‹Collected FakeInput:foo¦bar›

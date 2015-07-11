@@ -13,25 +13,31 @@ EVENT: module¦load¦on_event
 .
 foo bar :: 31413142
 .
+: FS20_SwitchGroup ‹foo¦bar›
 name: foo¦bar
 code: 31413142
 device: baz¦quux
 .
 baz quux :: foo¦bar 1214
 .
+: FS20_Switch ‹baz¦quux›
 name: baz¦quux
 code: 1214
 parent: foo¦bar
 parentcode: 31413142
-does: off
 does: on
+does: off
 .
+: ‹Collected EM:one›
+name: one
 name: one
 group: 1
 groupname: thermo_hygro
 code: 3
 last_temperature: 12.0
 .
+: ‹Collected EM:two›
+name: two
 name: two
 group: 1
 groupname: thermo_hygro
@@ -40,17 +46,20 @@ last_temperature: 15.0
 .
 gas :: gas_meter 9: (never)
 .
+: ‹Collected en:gas›
 name: gas
 group: 3
 groupname: gas_meter
 code: 9
 .
+: ‹Collected TX:tempix›
 name: tempix
 group: 0
 groupname: thermo
 code: 7
 offset_temperature: 2.3
 .
+: ‹Collected TX:hygrix›
 name: hygrix
 group: 14
 groupname: hygro
@@ -58,88 +67,88 @@ code: 7
 offset_humidity: -1.0
 .
 EVENT: wait¦start¦_wait¦t1
+     : end_time=0.8
      : loglevel=0
-     : end_time=0.6
 TRACE 2003-04-05 06:07:08.500000 _wait¦t1: Forced timer done
 Traceback (most recent call last):
-  File "/d/src/git/moat/moat/twist.py", line 286, in err
+  File "moat/twist.py", line 298, in err
     err = e.get()
   File "/usr/lib/python3/dist-packages/gevent/greenlet.py", line 264, in get
     raise self._exception
   File "/usr/lib/python3/dist-packages/gevent/greenlet.py", line 340, in run
     result = self._run(*self.args, **self.kwargs)
-  File "/d/src/git/moat/moat/twist.py", line 275, in erh
+  File "moat/twist.py", line 287, in erh
     return p(*a,**k)
-  File "/d/src/git/moat/moat/tokize.py", line 152, in _job
+  File "moat/tokize.py", line 153, in _job
     self._do_line(line)
-  File "/d/src/git/moat/moat/tokize.py", line 237, in _do_line
+  File "moat/tokize.py", line 238, in _do_line
     self.output(NL if self.parenlev > 0 else NEWLINE, token, spos, epos, line)
-  File "/d/src/git/moat/moat/tokize.py", line 117, in output
+  File "moat/tokize.py", line 118, in output
     self._output(*a)
-  File "/d/src/git/moat/moat/parser.py", line 208, in _do_parse
+  File "moat/parser.py", line 207, in _do_parse
     self.proc.error(self,ex)
-  File "/d/src/git/moat/moat/interpreter.py", line 110, in error
+  File "moat/interpreter.py", line 110, in error
     reraise(err)
-  File "/d/src/git/moat/moat/twist.py", line 100, in reraise
+  File "moat/twist.py", line 98, in reraise
     raise e
-  File "/d/src/git/moat/moat/parser.py", line 198, in _do_parse
+  File "moat/parser.py", line 197, in _do_parse
     self._parseStep(t,txt,beg,end,line)
-  File "/d/src/git/moat/moat/parser.py", line 287, in _parseStep
+  File "moat/parser.py", line 286, in _parseStep
     self.proc.simple_statement(self.p_args)
-  File "/d/src/git/moat/moat/interpreter.py", line 209, in simple_statement
+  File "moat/interpreter.py", line 209, in simple_statement
     self.error(self,ex)
-  File "/d/src/git/moat/moat/interpreter.py", line 110, in error
+  File "moat/interpreter.py", line 110, in error
     reraise(err)
-  File "/d/src/git/moat/moat/twist.py", line 100, in reraise
+  File "moat/twist.py", line 98, in reraise
     raise e
-  File "/d/src/git/moat/moat/interpreter.py", line 206, in simple_statement
+  File "moat/interpreter.py", line 206, in simple_statement
     fn.run(self.ctx)
-  File "../modules/fs20switch.py", line 472, in run
+  File "../modules/fs20switch.py", line 471, in run
     d.set(event[0],ext, handler=handler)
-  File "../modules/fs20switch.py", line 296, in set
+  File "../modules/fs20switch.py", line 295, in set
     self.parent.send(d, handler=handler)
-  File "/d/src/git/moat/moat/fs20sw.py", line 72, in send
+  File "moat/fs20sw.py", line 72, in send
     raise RuntimeError("No FS20 handler known")
 RuntimeError: No FS20 handler known
 EVENT: wait¦done¦_wait¦t1
      : loglevel=0
 Traceback (most recent call last):
-  File "/d/src/git/moat/moat/twist.py", line 286, in err
+  File "moat/twist.py", line 298, in err
     err = e.get()
   File "/usr/lib/python3/dist-packages/gevent/greenlet.py", line 264, in get
     raise self._exception
   File "/usr/lib/python3/dist-packages/gevent/greenlet.py", line 340, in run
     result = self._run(*self.args, **self.kwargs)
-  File "/d/src/git/moat/moat/twist.py", line 275, in erh
+  File "moat/twist.py", line 287, in erh
     return p(*a,**k)
-  File "/d/src/git/moat/moat/tokize.py", line 152, in _job
+  File "moat/tokize.py", line 153, in _job
     self._do_line(line)
-  File "/d/src/git/moat/moat/tokize.py", line 237, in _do_line
+  File "moat/tokize.py", line 238, in _do_line
     self.output(NL if self.parenlev > 0 else NEWLINE, token, spos, epos, line)
-  File "/d/src/git/moat/moat/tokize.py", line 117, in output
+  File "moat/tokize.py", line 118, in output
     self._output(*a)
-  File "/d/src/git/moat/moat/parser.py", line 208, in _do_parse
+  File "moat/parser.py", line 207, in _do_parse
     self.proc.error(self,ex)
-  File "/d/src/git/moat/moat/interpreter.py", line 110, in error
+  File "moat/interpreter.py", line 110, in error
     reraise(err)
-  File "/d/src/git/moat/moat/twist.py", line 100, in reraise
+  File "moat/twist.py", line 98, in reraise
     raise e
-  File "/d/src/git/moat/moat/parser.py", line 198, in _do_parse
+  File "moat/parser.py", line 197, in _do_parse
     self._parseStep(t,txt,beg,end,line)
-  File "/d/src/git/moat/moat/parser.py", line 287, in _parseStep
+  File "moat/parser.py", line 286, in _parseStep
     self.proc.simple_statement(self.p_args)
-  File "/d/src/git/moat/moat/interpreter.py", line 209, in simple_statement
+  File "moat/interpreter.py", line 209, in simple_statement
     self.error(self,ex)
-  File "/d/src/git/moat/moat/interpreter.py", line 110, in error
+  File "moat/interpreter.py", line 110, in error
     reraise(err)
-  File "/d/src/git/moat/moat/twist.py", line 100, in reraise
+  File "moat/twist.py", line 98, in reraise
     raise e
-  File "/d/src/git/moat/moat/interpreter.py", line 206, in simple_statement
+  File "moat/interpreter.py", line 206, in simple_statement
     fn.run(self.ctx)
-  File "../modules/fs20switch.py", line 472, in run
+  File "../modules/fs20switch.py", line 471, in run
     d.set(event[0],ext, handler=handler)
-  File "../modules/fs20switch.py", line 296, in set
+  File "../modules/fs20switch.py", line 295, in set
     self.parent.send(d, handler=handler)
-  File "/d/src/git/moat/moat/fs20sw.py", line 72, in send
+  File "moat/fs20sw.py", line 72, in send
     raise RuntimeError("No FS20 handler known")
 RuntimeError: No FS20 handler known

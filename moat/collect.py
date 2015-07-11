@@ -83,7 +83,7 @@ class Collection(dict):
 				doc="check if a named %s object exists"%(self.name,)
 				def check(xself,*args):
 					if not len(args):
-						raise SyntaxError(u"Usage: if exists avg ‹name…›")
+						raise SyntaxError(u"Usage: if exists %s ‹name…›" %(" ".join(self.name),))
 					oname = Name(*args)
 					return oname in self
 			self.exists = ExistsCheck
@@ -167,10 +167,9 @@ class Collected(object):
 		"""Yield a couple of (left,right) tuples, for enumeration."""
 		yield (six.text_type(self),)
 		yield ("name",self.name)
-		self = super(Collected,self)
-		if hasattr(self,'list'):
-			for r in self.list():
-				yield r
+
+		s = super(Collected,self)
+		if hasattr(s,'list'): yield s
 
 	def delete(self, ctx=None):
 		"""Remove myself from a collection"""

@@ -17,14 +17,15 @@
 export PYTHONPATH=$(shell pwd):$(shell pwd)/dabroker
 DESTDIR ?= "/"
 PYDESTDIR ?= ${DESTDIR}
+PYTHON ?= python3
 
 all: subfiles
 	cp -a _geventreactor/Pinako/geventrpyc/__init__.py moat/gevent_rpyc.py
 	$(MAKE) -C fs20 all
 	$(MAKE) -C wago all
-	python setup.py build
+	$(PYTHON) setup.py build
 install: installsub
-	python setup.py install --root="$(PYDESTDIR)" --no-compile -O0 --install-layout=deb
+	$(PYTHON) setup.py install --root="$(PYDESTDIR)" --no-compile -O0 --install-layout=deb
 installsub:
 	$(MAKE) -C fs20 install ROOT=$(DESTDIR)
 	$(MAKE) -C wago install ROOT=$(DESTDIR)
@@ -44,7 +45,7 @@ FIX:
 	@if test ! -d moat/modules; then ln -s ../modules moat/modules; fi
 
 clean:
-	python setup.py clean --build-base="$(PYDESTDIR)"
+	$(PYTHON) setup.py clean --build-base="$(PYDESTDIR)"
 	rm -rf build
 	@$(MAKE) -C fs20 --no-print-directory clean
 	@$(MAKE) -C wago --no-print-directory clean
@@ -58,25 +59,31 @@ diff: FIX
 ow: FIX
 	sh test/interactive/onewire.sh
 a amqp: FIX
-	python test/interactive/main.py test/interactive/amqp
-w fs20: FIX
-	python test/interactive/main.py test/interactive/wago
+	$(PYTHON) test/interactive/main.py test/interactive/amqp
+w wago: FIX
+	$(PYTHON) test/interactive/main.py test/interactive/wago
+op onewire_poll: FIX
+	$(PYTHON) scripts/daemon.py test/interactive/onewire_poll
+of onewire_fake: FIX
+	env MOAT_TEST=1 $(PYTHON) scripts/daemon.py test/interactive/onewire_fake
+om onewire_moat: FIX
+	env MOAT_TEST=1 $(PYTHON) scripts/daemon.py test/interactive/onewire_moat
 wd wagodebug: FIX
 	pdb test/interactive/main.py test/interactive/wago
 f fs20: FIX
-	python test/interactive/main.py test/interactive/fs20
+	$(PYTHON) test/interactive/main.py test/interactive/fs20
 fd fs20debug: FIX
 	pdb test/interactive/main.py test/interactive/fs20
 i interactive: FIX
-	env LIBEV_FLAGS=1 MOAT_TEST=1 python test/interactive/main.py
+	env LIBEV_FLAGS=1 MOAT_TEST=1 $(PYTHON) test/interactive/main.py
 id interactivedebug d debug: FIX
 	pdb test/interactive/main.py
 r run: FIX
-	python scripts/daemon.py -t DEBUG examples/smurf.he
+	$(PYTHON) scripts/daemon.py -t DEBUG examples/smurf.he
 tr trace: FIX
-	python scripts/daemon.py -t TRACE examples/smurf.he
+	$(PYTHON) scripts/daemon.py -t TRACE examples/smurf.he
 sr ssh:
-	python scripts/daemon.py -t TRACE examples/ssh.he
+	$(PYTHON) scripts/daemon.py -t TRACE examples/ssh.he
 
 lab:
 	## private
@@ -94,14 +101,14 @@ lab_:
 	debuild -b
 
 schema:
-	python irrigation/manage.py schemamigration --auto rainman
+	$(PYTHON) irrigation/manage.py schemamigration --auto rainman
 	find irrigation/rainman/migrations/ -name \*.py -mtime -0.1 -print0 | xargs -0r \
 	sed -i \
 		-e "s/{'default': 'datetime.datetime(.* tzinfo=<UTC>)'}/{}/" \
 		-e "s/'default': 'datetime.datetime(.* tzinfo=<UTC>)',//"    \
 		-e "s/(default=datetime.datetime(.*tzinfo=<UTC>))/()/"       \
 		-e "s/default=datetime.datetime(.*tzinfo=<UTC>),//"
-	python irrigation/manage.py migrate rainman
+	$(PYTHON) irrigation/manage.py migrate rainman
 	# might have to modify if broken
 	git add irrigation/rainman/migrations/*.py
 

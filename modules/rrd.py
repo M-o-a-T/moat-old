@@ -56,7 +56,7 @@ class RRD(Collected):
 		super(RRD,self).__init__(*name)
 		 
 	def list(self):
-		yield ("name",self.name)
+		yield super(RRD,self)
 		yield ("file",self.path)
 		yield ("dataset",self.dataset)
 		try:

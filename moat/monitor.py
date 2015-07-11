@@ -145,8 +145,7 @@ class Monitor(Collected,Jobber):
 
 	def list(self):
 		"""status iterator"""
-		for r in super(Monitor,self).list():
-			yield r
+		yield super(Monitor,self)
 		if self.params:
 			yield ("device"," ".join(six.text_type(x) for x in self.params))
 		yield ("value",self.value)

@@ -35,7 +35,7 @@ from moat.module import Module
 from moat.context import Context
 from moat.statement import main_words,Statement,AttributedStatement,global_words
 from moat.interpreter import Interpreter,ImmediateProcessor
-from moat.base import Name,SName,flatten
+from moat.base import Name,SName
 from moat.collect import Collection,Collected,get_collect,all_collect
 from moat.check import register_condition,unregister_condition
 from moat.twist import Jobber,fix_exception,reraise
@@ -60,6 +60,7 @@ base_mseq="moat.%x."%(int(itime()))
 
 class EventCallback(Worker):
 	args = None
+	_simple = True
 
 	def __init__(self,conn,parent):
 		self.parent = conn
@@ -76,6 +77,10 @@ class EventCallback(Worker):
 			except ValueError: pass
 			if i < self.strip or self.strip and not self.filter:
 				raise RuntimeError("You can't use 'shunt' if you strip elements you can't restore!")
+		for k in self.filter:
+			if hasattr(k,'startswith') and k.startswith('*'):
+				self._simple = False
+				break
 
 		name = parent.dest
 		if name is None:
@@ -88,8 +93,7 @@ class EventCallback(Worker):
 		register_worker(self, self._direct)
 	
 	def list(self):
-		for r in super(EventCallback,self).list():
-			yield r
+		yield super(EventCallback,self)
 		if self.filter:
 			yield "filter",self.filter
 		if self._direct:
@@ -103,6 +107,8 @@ class EventCallback(Worker):
 	def does_event(self,event):
 		if not self.filter:
 			return True
+		if self._simple:
+			return self.filter == event
 		ie = iter(event)
 		ia = iter(self.filter)
 		while True:
@@ -128,7 +134,13 @@ class EventCallback(Worker):
 		try:
 			msg = getattr(event.ctx,'raw',None)
 			if msg is None:
-				d = dict((x,y) for x,y in event.ctx if isinstance(y,six.string_types+six.integer_types+(bool,float)))
+				d = {}
+				for x,y in event.ctx:
+					if x == 'event': continue
+					if isinstance(y,six.string_types+six.integer_types+(bool,float,list,tuple)):
+						d[x]=y
+					elif hasattr(y,'name'):
+						d[x]=y.name
 				try:
 					msg = json.dumps(dict(event=list(event), **d))
 				except (TypeError,UnicodeDecodeError) as e:
@@ -178,8 +190,10 @@ class AMQPclient(Collected,Jobber):
 		try:
 			self.conn=amqp.connection.Connection(host=self.host,userid=self.username,password=self.password,login_method='AMQPLAIN', login_response=None, virtual_host=self.vhost)
 
-		except Exception as e:
-			simple_event("amqp","error",*name)
+		except Exception as ex:
+			simple_event("amqp","error",*name, error=str(ex))
+			fix_exception(ex)
+			process_failure(ex)
 		else:
 			super(AMQPclient,self).__init__()
 			simple_event("amqp","connect",*name)
@@ -207,8 +221,7 @@ class AMQPclient(Collected,Jobber):
 		super(AMQPclient,self).delete()
 
 	def list(self):
-		for r in super(AMQPclient,self).list():
-			yield r
+		yield super(AMQPclient,self)
 		yield ("host",self.host)
 		yield ("port",self.port)
 		yield ("vhost",self.vhost)
@@ -447,8 +460,7 @@ class AMQPlogger(BaseLogger):
 		super(AMQPlogger,self).delete()
 		
 	def list(self):
-		for r in super(AMQPlogger,self).list():
-			yield r
+		yield super(AMQPlogger,self)
 		yield "parent",self.parent
 		yield "exchange",self.exchange
 		yield "prefix",self.prefix
@@ -584,17 +596,19 @@ class AMQPrecv(Collected):
 			return # dup
 		if getattr(msg,'content_type','') == "application/json":
 			try:
-				data = json.loads(msg.body.decode("utf-8"))
-			except Exception:
-				data = { "raw": msg.body }
+				b = msg.body
+				if not isinstance(b,six.text_type):
+					b = b.decode('utf-8')
+				data = json.loads(b)
+			except Exception as e:
+				data = { "raw": msg.body, "error": e }
 		else:
-			data = { "raw": msg.body }
+			data = { "raw": msg.body, "content_type": getattr(msg,'content_type','') }
 		self.last_recv = msg.__dict__
 		simple_event(*(self.prefix+tuple(msg.routing_key.split('.')[self.strip:])), _direct=self._direct, **data)
 
 	def list(self):
-		for x in super(AMQPrecv,self).list():
-			yield x
+		yield super(AMQPrecv,self)
 		if self._direct:
 			yield "shunt",True
 		yield "connection",self.conn

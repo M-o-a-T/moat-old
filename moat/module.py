@@ -110,7 +110,7 @@ class Module(Collected):
 		super(Module,self).delete()
 
 	def list(self):
-		yield ("name",self.name)
+		yield super(Module,self)
 		if self.path is not None:
 			yield ("path",self.path)
 		for l in self.info.split("\n"):

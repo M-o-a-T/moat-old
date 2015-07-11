@@ -20,6 +20,9 @@ case "$1" in
 			systemctl start "moat@${a#homevent@}"
 			sleep 1
 		done
+
+		systemctl enable moat.target
+		systemctl start moat.target
     ;;
 
     abort-upgrade)

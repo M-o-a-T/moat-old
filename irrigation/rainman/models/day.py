@@ -79,7 +79,6 @@ class DayTime(Model,RangeMixin):
 			a = time_until(txt, invert=False, now=start)
 			b = time_until(txt, invert=True, now=a)
 			if b is None:
-				import pdb;pdb.set_trace()
 				b = time_until(txt, invert=True, now=a)
 			yield (make_aware(a,get_current_timezone()), b-a)
 			start=b

@@ -25,12 +25,13 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##BP
 
 import six
+from moat import TESTING
 from moat.logging import BaseLogger, TRACE,NONE, log, log_level
 from moat.interpreter import Interpreter
 from moat.parser import parse
 from moat.context import Context
 from moat.times import unixtime,now
-from moat.twist import fix_exception,format_exception,print_exception,TESTING
+from moat.twist import fix_exception,format_exception,print_exception
 from moat.statement import Statement,main_words
 from moat.base import Name
 from moat.reactor import shut_down, mainloop
@@ -68,8 +69,12 @@ def ixtime(t=None,force=False):
 def ttime():
 	return time()-unixtime(startup)
 
-r_fli = re.compile(r'(:\s+File ").*/([^/]+/[^/]+)", line \d+, in')
-r_hex = re.compile(r'object at 0x[0-9a-fA-F]+')
+r_fli = re.compile(r'File ".*moat/')
+# File "/mnt/d/src/git/moat/moat/parser.py", line
+r_hex = re.compile(r' at 0x[0-9a-fA-F]+')
+def r_rep(m):
+	# return m.group(1)+m.group(2)+", in"
+	return 'File "moat/'
 
 class run_logger(BaseLogger):
 	"""\
@@ -117,11 +122,9 @@ class run_logger(BaseLogger):
 
 	def _slog(self,level, sx):
 		self.line += 1
-		def rep(m):
-			return m.group(1)+m.group(2)+", in"
 		if TESTING:
-			sx = r_fli.sub(rep,sx)
-			sx = r_hex.sub("obj",sx)
+			sx = r_fli.sub(r_rep,sx)
+			sx = r_hex.sub("",sx)
 		if level is not None:
 			print(level,sx, file=self.data)
 		else:
@@ -178,6 +181,8 @@ class logwrite(object):
 		self.buf += data
 		if self.buf[-1] == "\n":
 			if len(self.buf) > 1:
+				self.buf = r_fli.sub(r_rep,self.buf)
+				self.buf = r_hex.sub("",self.buf)
 				for l in self.buf.rstrip("\n").split("\n"):
 					self.log(None,l)
 			self.buf=""

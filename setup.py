@@ -62,6 +62,6 @@ additional I/O, logging, and easy integration into existing systems.
 	zip_safe = False, 
     packages = [str(x) for x in ('moat','moat.modules')],
 	package_dir={'moat': 'moat', 'moat.modules':'modules'},
-    scripts = [str(x) for x in ('scripts/daemon.py','scripts/cmd.py','scripts/amqpmon.py')]
+    scripts = [str(x) for x in ('scripts/daemon','scripts/cmd','scripts/amqpmon')]
     #cmdclass={'install_data' : my_install_data},
     )

@@ -340,25 +340,49 @@ onewire scanned NAME
 	   "new": Number of newly-discovered devices
 	   "num": Number of devices now connected to, on this bus
 
-onewire new
+onewire device new ID
 	-- A device with the given type has appeared on a 1-wire bus
 	   for the first time. This event is followed by an "up" event for
 	   the same device.
 	   "typ": the device type
 	   "id": its ID
 
-onewire up
+onewire device up ID
 	-- The device with the given type is now available.
 	   "typ": the device type
 	   "id": its ID
 
-onewire down
+onewire device down ID
 	-- The device with the given type is no longer available.
 	   This may be a temporary condition. Until you see an "up" event,
 	   however, trying to communicate with the device will cause an
 	   error.
 	   "typ": the device type
 	   "id": its ID
+
+onewire bus up
+	-- A new 1wire bus has shown up.
+	   "bus": the interface this is connected to
+	   "path": the bus path, may be behind a 1wire switch
+
+onewire bus down
+	-- A 1wire bus has vanished.
+	   "bus": the interface this is connected to
+	   "path": the bus path, may be behind a 1wire switch
+
+onewire alarm new ID
+	-- A 1wire device starts showing up in CONDITIONAL SEARCH
+	   which we haven't yeen yet.
+
+onewire alarm on ID
+	-- A 1wire device starts showing up in CONDITIONAL SEARCH.
+	   "bus": the interface this is connected to
+	   "path": the bus path, may be behind a 1wire switch
+
+onewire alarm off ID
+	-- A 1wire device is no longer listed in CONDITIONAL SEARCH.
+	   "bus": the interface this is connected to
+	   "path": the bus path, may be behind a 1wire switch
 
 timing
 ------

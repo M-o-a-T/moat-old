@@ -98,18 +98,21 @@ class Avg(Collected):
 		self.avg = self._calc(True)
 		
 	def list(self):
-		yield ("name"," ".join(six.text_type(x) for x in self.name))
+		yield super(Avg,self)
 		yield ("mode",self.mode)
 		yield ("value",self.value)
 		if self.value_tm is not None:
 			yield ("set time",self.value_tm)
+		if self.prev_value:
 			yield ("prev value",self.prev_value)
+		if self.total_tm is not None:
 			yield ("total time",self.total_tm)
+		if self.total_samples:
 			yield ("total samples",self.total_samples)
 			yield ("current average",self._calc())
 
 	def info(self):
-		if self.total_tm is None:
+		if self.total_samples == 0:
 			return "(new)"
 		return "%s %s" % (self._calc(), unixdelta(self.total_tm))
 	
@@ -186,8 +189,7 @@ class DecayTimeAvg(TimeAvg):
 			return 1-(1-self.p)**(nt/self.p_base)
 
 	def list(self):
-		for r in super(DecayTimeAvg,self).list():
-			yield r
+		yield super(DecayTimeAvg,self)
 		yield ("weight",self.p)
 		yield ("time base",humandelta(self.p_base))
 		yield ("weight/hour",1-(1-self.p)**(3600/self.p_base))
@@ -215,8 +217,7 @@ class DecaySamplesAvg(Avg):
 		return r
 
 	def list(self):
-		for r in super(DecaySamplesAvg,self).list():
-			yield r
+		yield super(DecaySamplesAvg,self)
 		yield ("weight",self.p)
 
 class MovingSamplesAvg(Avg):
@@ -250,8 +251,7 @@ class MovingSamplesAvg(Avg):
 		return self.avg
 
 	def list(self):
-		for r in super(MovingSamplesAvg,self).list():
-			yield r
+		yield super(MovingSamplesAvg,self)
 		yield ("samples",len(self.values))
 		yield ("max samples",self.n)
 		if len(self.values) < 7:
@@ -324,10 +324,10 @@ reset avg NAME
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		if len(event) < 2:
-			raise SyntaxError(u"Usage: set avg ‹value› ‹name…›")
-		m = Avgs[Name(*event[1:])]
-		m.feed(float(event[0]))
+		if len(event) < 1:
+			raise SyntaxError(u"Usage: reset avg ‹name…›")
+		m = Avgs[Name(*event)]
+		m.reset()
 
 class VarAvgHandler(AttributedStatement):
 	name="var avg"
@@ -350,7 +350,7 @@ var avg NAME name...
 @VarAvgHandler.register_statement
 class AvgVarUse(Statement):
 	name="use"
-	doc="change which variable to use"
+	doc="select which attribute to use"
 	avail = "value value_tm prev_value total_samples".split()
 	long_doc=u"""\
 use ‹var› - use some other value than the current average

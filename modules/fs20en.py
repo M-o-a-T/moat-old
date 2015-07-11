@@ -135,7 +135,7 @@ class en(Collected,Timeslotted):
 			return "%s %d: (never)" % (en_procs[self.group].en_name, self.code)
 
 	def list(self):
-		yield("name",self.name)
+		yield super(en,self)
 		yield("group",self.group)
 		yield("groupname",en_procs[self.group].en_name)
 		yield("code",self.code)

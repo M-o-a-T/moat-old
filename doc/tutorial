@@ -732,6 +732,30 @@ do
 Call back to MoaT.
 
 	env.do("log DEBUG Calling back")
+	env.do.log.DEBUG("Calling back")
 
 You can set context values (similar to `trigger`).
+
+If you need to use subordinate statements, prefix the keyword with an underscore.
+As usual, auto-split is done on one-word arguments, for convenience:
+
+	env.do.wait("some delay", _for="3.14 min")
+	env.do.wait("some","delay", _for=(3.14,"min"))
+
+Use an empty list as argument if you want to call a one-word sub-statement.
+
+data
+----
+
+This dict allows you to access the MoaT data store, as reported by `list`.
+
+You need to pass multi-part keys as moat.base.Name() objects.
+
+test
+----
+
+This works like `do` but mirrors MoaT's conditional tests.
+
+	if env.test('true'):
+		env.do.log.DEBUG('That works.')
 

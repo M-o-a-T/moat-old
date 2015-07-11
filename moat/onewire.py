@@ -262,14 +262,13 @@ class OWFScall(MsgBase):
 
 	def _path(self,path):
 		"""Helper to build an OWFS path from a list"""
-		if self.cached:
-			if not path:
-				return ""
-			return "/"+"/".join(path)
+		if path:
+			path = '/'+'/'.join(str(x) for x in path)
 		else:
-			if not path:
-				return "/uncached"
-			return "/uncached/"+"/".join(path)
+			path = ""
+		if not self.cached:
+			path = '/uncached'+path
+		return path
 
 class NOPmsg(OWFScall):
 	prio = PRIO_BACKGROUND
@@ -311,7 +310,7 @@ class ATTRsetmsg(OWFScall):
 		return RECV_AGAIN
 
 	def __repr__(self):
-		return u"‹"+self.__class__.__name__+" "+self.path[-2]+" "+self.path[-1]+" "+six.text_type(self.value)+u"›"
+		return u"‹%s %s %s %s›" % (self.__class__.__name__,self.path[-2],self.path[-1],self.value)
 		
 
 class DIRmsg(OWFScall):
@@ -321,10 +320,12 @@ class DIRmsg(OWFScall):
 	cached = True
 	dirall = True
 
-	def __init__(self,path,cb):
+	def __init__(self,path,cb, cached=None):
 		assert path is not None
 		self.path = path
 		self.cb = cb
+		if cached is not None:
+			self.cached = cached
 		super(DIRmsg,self).__init__()
 	
 	def send(self,conn):
@@ -337,23 +338,23 @@ class DIRmsg(OWFScall):
 
 	def dataReceived(self,data):
 		data = data.decode('utf-8')
-		if self.dirall:
-			n=0
-			for entry in data.split(","):
-				n += 1
-				try: entry = entry[entry.rindex('/')+1:]
-				except ValueError: pass
-				entry = entry.rstrip("\0")
-				self.cb(entry)
-			self.result.set(n)
-		else:
-			if len(data):
+		n=0
+		if len(data):
+			if self.dirall:
+				for entry in data.split(","):
+					n += 1
+					try: entry = entry[entry.rindex('/')+1:]
+					except ValueError: pass
+					entry = entry.rstrip("\0")
+					self.cb(entry)
+			else:
+				n=1
 				try: data = data[data.rindex('/')+1:]
 				except ValueError: pass
 				data = data.rstrip("\0")
 				self.cb(data)
 				return RECV_AGAIN
-			self.result.set(n)
+		self.result.set(n)
 	
 	### TODO: retry with "dir" if the server does not understand "dirall"
 	def done(self, _=None):
@@ -378,14 +379,17 @@ class OWFSqueue(MsgQueue,Jobber):
 		"""
 	storage = OWbuses.storage
 	ondemand = True
+	bus_paths = None
 
-	def __init__(self, name, host,port, persist=PERSIST, *a,**k):
+	def __init__(self, name, host,port, persist=PERSIST, scan=True, *a,**k):
 		self.ident = (host,port)
 		self.root = OWFSroot(self)
+		self.scan = scan
 		super(OWFSqueue,self).__init__(name=name, factory=MsgFactory(OWFSchannel,name=name,host=host,port=port,persist=persist, **k))
 		if not persist:
 			self.max_send = 1
 		self.nop = None
+		self.bus_paths = {}
 
 	### Bus scanning support
 
@@ -401,6 +405,14 @@ class OWFSqueue(MsgQueue,Jobber):
 		self.stop_job("watcher")
 		super(OWFSqueue,self).stop(reason=reason)
 
+	def list(self, short_buspath=False):
+		yield super(OWFSqueue,self)
+		for b in self.bus_paths.values():
+			if short_buspath:
+				yield ("wire",b.path)
+			else:
+				yield ("wire",b.list(short_dev=True))
+
 	def _clean_watched(self):
 		while True:
 			try:
@@ -411,8 +423,8 @@ class OWFSqueue(MsgQueue,Jobber):
 				q.set_exception(RuntimeError("Stopped"))
 		self.watch_q = None
 
-	def all_devices(self):
-		seen_mplex = {}
+	def all_devices(self, bus_cb=None):
+		seen_mplex = set()
 		def doit(dev,path=(),key=None):
 			buses = []
 			entries = []
@@ -428,6 +440,8 @@ class OWFSqueue(MsgQueue,Jobber):
 
 			if buses:
 				for b in buses:
+					if bus_cb:
+						bus_cb(path+(b,))
 					for res in doit(dev,path=path+(b,),key=None):
 						yield res
 				return
@@ -442,10 +456,15 @@ class OWFSqueue(MsgQueue,Jobber):
 			for b in entries:
 				dn = OWFSdevice(id=b,bus=self,path=p)
 				yield dn
-				if b.lower().startswith("1f.") and b not in seen_mplex:
-					seen_mplex[b] = b
+				b = b.lower()
+				if b.startswith("1f.") and b not in seen_mplex:
+					seen_mplex.add(b)
+					if bus_cb:
+						bus_cb(p+(b,'main',))
 					for res in doit(dn,key="main"):
 						yield res
+					if bus_cb:
+						bus_cb(p+(b,'aux',))
 					for res in doit(dn,key="aux"):
 						yield res
 
@@ -453,19 +472,30 @@ class OWFSqueue(MsgQueue,Jobber):
 
 	def update_all(self):
 		try:
-			simple_event("onewire","scanning",self.name)
+			simple_event("onewire","scanning",*self.name)
 			self._update_all()
 		except Exception as e:
 			fix_exception(e)
 			process_failure(e)
+
+			# error only; success below
+			simple_event("onewire","scanned",*self.name, error=str(e))
 
 	def _update_all(self):
 		log("onewire",TRACE,"start bus update")
 		old_ids = devices.copy()
 		new_ids = {}
 		seen_ids = {}
+		old_bus = set(self.bus_paths.keys())
+		new_bus = set()
 
-		for dev in self.all_devices():
+		def bus_cb(path):
+			if path in old_bus:
+				old_bus.remove(path)
+			else:
+				new_bus.add(path)
+
+		for dev in self.all_devices(bus_cb):
 			if dev.id in seen_ids:
 				continue
 			seen_ids[dev.id] = dev
@@ -488,36 +518,46 @@ class OWFSqueue(MsgQueue,Jobber):
 			if dev.bus is self:
 				n_dev += 1
 		
-		simple_event("onewire","scanned",self.name, old=n_old, new=len(new_ids), num=n_dev)
+		for dev in old_bus:
+			bp = self.bus_paths.pop(dev)
+			bp.stop()
+			simple_event("onewire","bus","down", bus=self.name,path=dev)
+		for dev in new_bus:
+			self.bus_paths[dev] = OWFSbuspath(self,dev)
+			simple_event("onewire","bus","up", bus=self.name,path=dev)
+
+		# success only, error above
+		simple_event("onewire","scanned",*self.name, old=n_old, new=len(new_ids), num=n_dev)
 			
 	def _watcher(self):
 		res = []
 		while True:
-			try:
-				self.update_all()
-			except Exception as ex:
-				fix_exception(ex)
-				process_failure(ex)
-				resl = len(res)
-				while res:
-					q = res.pop()
-					q.set_exception(ex)
-			else:
-				resl = len(res)
-				while res:
-					q = res.pop()
-					q.set(None)
+			if self.scan or res:
+				try:
+					self.update_all()
+				except Exception as ex:
+					fix_exception(ex)
+					process_failure(ex)
+					resl = len(res)
+					while res:
+						q = res.pop()
+						q.set_exception(ex)
+				else:
+					resl = len(res)
+					while res:
+						q = res.pop()
+						q.set(None)
 
-			if TESTING:
-				if resl: d = 10
-				else: d = 30
-			else:
-				if resl: d = 60
-				else: d = 300
+				if TESTING:
+					if resl: d = 5
+					else: d = 30
+				else:
+					if resl: d = 10
+					else: d = 300
 
 			while True:
 				try:
-					q = self.watch_q.get(timeout=(d if not res else 0))
+					q = self.watch_q.get(timeout=(None if not self.scan else d if not res else 0))
 				except Empty:
 					break
 				else:
@@ -528,17 +568,59 @@ class OWFSqueue(MsgQueue,Jobber):
 		self.watch_q.put(res)
 		return res.get()
 
+
+class OWFSbuspath(Jobber):
+	def __init__(self, bus,path):
+		self.bus = bus
+		self.path = Name(path)
+		super(OWFSbuspath,self).__init__()
+
+	def __cmp__(self,other):
+		if isinstance(other,OWFSbuspath):
+			other = other.path
+		return cmp(self.path,other)
+	def __hash__(self):
+		return hash(self.path)
+	def __eq__(self,other):
+		if isinstance(other,OWFSbuspath):
+			other = other.path
+		return self.path == other
+	def __ne__(self,other):
+		if isinstance(other,OWFSbuspath):
+			other = other.path
+		return self.path != other
+
+	def list(self, short_dev=False):
+		yield super(OWFSbuspath,self)
+		if short_dev:
+			yield ("bus",self.bus.name)
+		else:
+			yield ("bus",self.bus.list(short_buspath=True))
+		yield ("wire",self.path)
+		
+	def start(self):
+		self.watch_q = Queue()
+		self.start_job("scanner",self._scanner)
+		def dead(_):
+			self._clean_watched()
+		self.watcher.link(dead)
+
+	def stop(self,reason=None):
+		self.stop_job("scanner")
+
+
 ow_buses = {}
 
 # factory.
-def connect(host="localhost", port=4304, name=None, persist=PERSIST):
+def connect(host="localhost", port=4304, name=None, persist=PERSIST, scan=True):
 	"""\
 		Set up a queue to a OneWire server.
 		"""
 	assert (host,port) not in ow_buses, "already known host/port tuple"
-	f = OWFSqueue(host=host, port=port, name=name, persist=persist)
+	f = OWFSqueue(host=host, port=port, name=name, persist=persist, scan=scan)
 	ow_buses[(host,port)] = f
-	f.start()
+	if scan:
+		f.start()
 	return f
 
 def disconnect(f):
@@ -589,24 +671,29 @@ class OWFSdevice(Collected):
 		self.ctx = Context()
 	
 	def list(self):
-		for r in super(OWFSdevice,self).list():
-			yield r
+		yield super(OWFSdevice,self)
 		if hasattr(self,"typ"):
 			yield ("typ",self.typ)
 		if self.bus is not None:
 			yield ("bus",self.bus.name)
 		if self.path is not None:
-			yield ("path","/"+"/".join(self.path)+"/"+self.id)
+			yield ("path","/"+"/".join(self.path)+(("/"+self.bus_id) if self.bus_id else "") )
 		
 	def _setattr(self,val,key):
 		"""Helper. Needed for new devices to set the device type."""
 		setattr(self,key,val)
 
 	def __repr__(self):
-		if not hasattr(self,'path') and not hasattr(self,'id'):
-			return "‹OW root›"
+		if hasattr(self,'path'):
+			if hasattr(self,'id'):
+				return "‹OW:%s %s›" % (self.id,self.path)
+			else:
+				return "‹OW:? %s›" % (self.path,)
 		else:
-			return "‹OW:%s %s›" % (self.id,self.path)
+			if hasattr(self,'id'):
+				return "‹OW:%s root›" % (self.id,)
+			else:
+				return "‹OW root›"
 
 	def _get_typ(self):
 		try:
@@ -631,9 +718,11 @@ class OWFSdevice(Collected):
 			return
 
 		if self.is_up is None:
-			simple_event("onewire","new",typ=self.typ,id=self.id)
+			simple_event("onewire","new",typ=self.typ,id=self.id,bus=self.bus.name,path=self.path)
+			simple_event("onewire","device","new",self.id, typ=self.typ,id=self.id,bus=self.bus.name,path=self.path)
 		self.is_up = True
-		simple_event("onewire","up",typ=self.typ,id=self.id)
+		simple_event("onewire","up",typ=self.typ,id=self.id,bus=self.bus.name,path=self.path)
+		simple_event("onewire","device","up",self.id, typ=self.typ,id=self.id,bus=self.bus.name,path=self.path)
 
 	def go_down(self, _=None):
 		if not self.is_up:
@@ -641,13 +730,21 @@ class OWFSdevice(Collected):
 		self.is_up = False
 		if _ is not None:
 			process_failure(_)
-		simple_event("onewire","down",typ=self.typ,id=self.id)
+		simple_event("onewire","down",typ=self.typ,id=self.id,bus=self.bus.name,path=self.path)
+		simple_event("onewire","device","down",self.id, typ=self.typ,id=self.id,bus=self.bus.name,path=self.path)
 
 	def get(self,key):
 		if not self.bus:
 			raise DisconnectedDeviceError(self.id)
+		if not isinstance(key,tuple):
+			key = Name(key)
 
-		msg = ATTRgetmsg(self.path+(self.bus_id,key))
+		p = self.path
+		if self.bus_id is not None:
+			p += (self.bus_id,)
+		p += key
+
+		msg = ATTRgetmsg(p)
 		msg.queue(self.bus)
 
 		try:
@@ -673,8 +770,15 @@ class OWFSdevice(Collected):
 	def set(self,key,val):
 		if not self.bus:
 			raise DisconnectedDeviceError(self.id)
+		if not isinstance(key,tuple):
+			key = Name(key)
 
-		msg = ATTRsetmsg(self.path+(self.bus_id,key),val)
+		p = self.path
+		if self.bus_id is not None:
+			p += (self.bus_id,)
+		p += key
+
+		msg = ATTRsetmsg(p,val)
 		msg.queue(self.bus)
 		try:
 			return msg.result.get()
@@ -682,7 +786,7 @@ class OWFSdevice(Collected):
 			fix_exception(ex)
 			self.go_down(ex)
 
-	def dir(self, proc, path=(), key=None):
+	def dir(self, proc, path=(), key=None, cached=None):
 		if not self.bus:
 			raise DisconnectedDeviceError(self.id)
 
@@ -692,7 +796,7 @@ class OWFSdevice(Collected):
 		if key is not None:
 			p += (key,)
 
-		msg = DIRmsg(p,proc)
+		msg = DIRmsg(p,proc, cached)
 		msg.queue(self.bus)
 
 		try:
@@ -707,4 +811,7 @@ class OWFSroot(OWFSdevice):
 		self = object.__new__(cls)
 		self._init(bus)
 		return self
+
+	def __repr__(self):
+		return u"‹"+self.__class__.__name__+u" @"+repr(getattr(self,'bus',None))+u"›"
 

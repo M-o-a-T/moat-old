@@ -11,20 +11,22 @@ _on 6 :: run¦test (51)
 _on 7 :: test¦it (51)
 .
 IEVENT: run¦test
-TRACE PY Proc called <Env obj> ('one', 'two') {}
+TRACE PY Proc called <Env object> ('one', 'two') {}
 TRACE NewHandler 10
 TRACE NewHandler 11
-TRACE PY Proc done
-DEBUG 'do' works
+DEBUG true
 EVENT: wait¦start¦_wait¦t1
-     : loglevel=0
      : end_time=0.1
+     : loglevel=0
 EVENT: test¦it
+     : also=two
+     : out=<test.logwrite object>
      : what=ever
      : words=‹global_words: Global 2›
-     : out=<test.logwrite obj>
-     : also=two
 DEBUG Y what ever
+EVENT: wait¦start¦some¦delay
+     : end_time=12.0
+     : loglevel=0
 TRACE 2003-04-05 06:07:08.150000 _wait¦t1: Fake timer done
 _on 5 :: test¦me (51)
 _on 6 :: run¦test (51)
@@ -37,9 +39,26 @@ EVENT: wait¦done¦_wait¦t1
 IEVENT: test¦me
 DEBUG Parallel MoaT handler
 TRACE PY Event called ⌁ REPORT_ERROR: Name('test', 'me')
-EVENT: wait¦start¦_wait¦t2
+EVENT: wait¦start¦_wait¦t3
+     : end_time=60.2
      : loglevel=0
-     : end_time=0.2
-TRACE 2003-04-05 06:07:08.300000 _wait¦t2: Fake timer done
-EVENT: wait¦done¦_wait¦t2
+TRACE 2003-04-05 06:07:20.050000 some¦delay: Fake timer done
+EVENT: wait¦done¦some¦delay
+     : loglevel=0
+EVENT: wait¦start¦more¦delay
+     : end_time=30.1
+     : loglevel=0
+TRACE 2003-04-05 06:07:38.100000 more¦delay: Fake timer done
+DEBUG Handler test¦me¦not
+DEBUG Handler _on¦6
+DEBUG Handler _on¦5
+DEBUG Handler _on¦7
+DEBUG Handler foo¦test¦bar
+DEBUG 'do' works
+DEBUG 'do.log' works
+TRACE PY Proc done
+EVENT: wait¦done¦more¦delay
+     : loglevel=0
+TRACE 2003-04-05 06:08:08.200000 _wait¦t3: Fake timer done
+EVENT: wait¦done¦_wait¦t3
      : loglevel=0

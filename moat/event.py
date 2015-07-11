@@ -99,18 +99,22 @@ class Event(object):
 	def report(self, verbose=False):
 		try:
 			yield u"EVENT: "+six.text_type(self.name)
-			for k,v in self.ctx:
+			for k,v in sorted(self.ctx):
 				yield u"     : "+k+u"="+six.text_type(v)
 		except Exception:
 			yield "EVENT: REPORT_ERROR: "+repr(self.name)
 	
 	def list(self):
 		yield (six.text_type(self.name),)
+
 		if self.__class__ is not Event:
 			yield ("type",self.__class__.__name__)
 		if self.loglevel is not None:
 			yield ("log level",self.loglevel)
 		yield ("ctx",self.ctx)
+
+		s = super(Event,self)
+		if hasattr(s,'list'): yield s
 	
 	def __getitem__(self,i):
 		u"""… so that you can write e[0] instead of e.name[0]"""
@@ -130,6 +134,10 @@ class Event(object):
 		return True
 	def __iter__(self):
 		return self.name.__iter__()
+	def __eq__(self,x):
+		return self.name.__eq__(x)
+	def __ne__(self,x):
+		return self.name.__ne__(x)
 
 	def apply(self, ctx=None, drop=0):
 		"""\

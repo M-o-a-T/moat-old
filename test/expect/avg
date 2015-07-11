@@ -3,7 +3,8 @@ EVENT: startup
 .
 test time :: (new)
 .
-name: test time
+: ‹TimeAvg test¦time None›
+name: test¦time
 mode: time
 value: None
 .
@@ -13,11 +14,11 @@ EVENT: wait¦start¦_wait¦t1
 TRACE 2003-04-05 06:07:08.250000 _wait¦t1: Fake timer done
 EVENT: wait¦done¦_wait¦t1
      : loglevel=0
-name: test time
+: ‹TimeAvg test¦time 2.0›
+name: test¦time
 mode: time
 value: 2.0
 set time: now (2003-04-05 06:07:08.25)
-prev value: None
 total time: 0:00:00
 total samples: 1
 current average: 2.0
@@ -28,16 +29,17 @@ EVENT: wait¦start¦_wait¦t2
 TRACE 2003-04-05 06:07:09.250000 _wait¦t2: Fake timer done
 EVENT: wait¦done¦_wait¦t2
      : loglevel=0
-name: test time
+: ‹TimeAvg test¦time 2.0›
+name: test¦time
 mode: time
 value: 2.0
 set time: -1.0 sec (2003-04-05 06:07:08.25)
-prev value: None
 total time: 0:00:00
 total samples: 1
 current average: 2.0
 .
-name: test time
+: ‹TimeAvg test¦time 2.0›
+name: test¦time
 mode: time
 value: 5.0
 set time: now (2003-04-05 06:07:09.25)
@@ -52,7 +54,8 @@ EVENT: wait¦start¦_wait¦t3
 TRACE 2003-04-05 06:07:10.250000 _wait¦t3: Fake timer done
 EVENT: wait¦done¦_wait¦t3
      : loglevel=0
-name: test time
+: ‹TimeAvg test¦time 2.0›
+name: test¦time
 mode: time
 value: 5.0
 set time: -1.0 sec (2003-04-05 06:07:09.25)
@@ -61,7 +64,8 @@ total time: 0:00:01
 total samples: 2
 current average: 3.5
 .
-name: test time
+: ‹TimeAvg test¦time 3.5›
+name: test¦time
 mode: time
 value: 0.0
 set time: now (2003-04-05 06:07:10.25)
@@ -82,7 +86,8 @@ TRACE Yes
 DEBUG values now 0.0 prev 5.0
 test moving :: (new)
 .
-name: test moving
+: ‹MovingSamplesAvg test¦moving None›
+name: test¦moving
 mode: moving
 value: None
 samples: 0
@@ -94,12 +99,11 @@ EVENT: wait¦start¦_wait¦t5
 TRACE 2003-04-05 06:07:12.500000 _wait¦t5: Fake timer done
 EVENT: wait¦done¦_wait¦t5
      : loglevel=0
-name: test moving
+: ‹MovingSamplesAvg test¦moving 2.0›
+name: test¦moving
 mode: moving
 value: 2.0
 set time: now (2003-04-05 06:07:12.50)
-prev value: None
-total time: None
 total samples: 1
 current average: 2.0
 samples: 1
@@ -112,24 +116,23 @@ EVENT: wait¦start¦_wait¦t6
 TRACE 2003-04-05 06:07:13.500000 _wait¦t6: Fake timer done
 EVENT: wait¦done¦_wait¦t6
      : loglevel=0
-name: test moving
+: ‹MovingSamplesAvg test¦moving 2.0›
+name: test¦moving
 mode: moving
 value: 2.0
 set time: -1.0 sec (2003-04-05 06:07:12.50)
-prev value: None
-total time: None
 total samples: 1
 current average: 2.0
 samples: 1
 max samples: 3
 sample 0: 2.0
 .
-name: test moving
+: ‹MovingSamplesAvg test¦moving 3.5›
+name: test¦moving
 mode: moving
 value: 5.0
 set time: now (2003-04-05 06:07:13.50)
 prev value: 2.0
-total time: None
 total samples: 2
 current average: 3.5
 samples: 2
@@ -143,12 +146,12 @@ EVENT: wait¦start¦_wait¦t7
 TRACE 2003-04-05 06:07:15.500000 _wait¦t7: Fake timer done
 EVENT: wait¦done¦_wait¦t7
      : loglevel=0
-name: test moving
+: ‹MovingSamplesAvg test¦moving 3.5›
+name: test¦moving
 mode: moving
 value: 5.0
 set time: -2.0 sec (2003-04-05 06:07:13.50)
 prev value: 2.0
-total time: None
 total samples: 2
 current average: 3.5
 samples: 2
@@ -156,12 +159,12 @@ max samples: 3
 sample 0: 2.0
 sample 1: 5.0
 .
-name: test moving
+: ‹MovingSamplesAvg test¦moving 2.0›
+name: test¦moving
 mode: moving
 value: -1.0
 set time: now (2003-04-05 06:07:15.50)
 prev value: 5.0
-total time: None
 total samples: 3
 current average: 2.0
 samples: 3
@@ -176,12 +179,12 @@ EVENT: wait¦start¦_wait¦t8
 TRACE 2003-04-05 06:07:19.500000 _wait¦t8: Fake timer done
 EVENT: wait¦done¦_wait¦t8
      : loglevel=0
-name: test moving
+: ‹MovingSamplesAvg test¦moving 2.0›
+name: test¦moving
 mode: moving
 value: -1.0
 set time: -4.0 sec (2003-04-05 06:07:15.50)
 prev value: 5.0
-total time: None
 total samples: 3
 current average: 2.0
 samples: 3
@@ -190,12 +193,12 @@ sample 0: 2.0
 sample 1: 5.0
 sample 2: -1.0
 .
-name: test moving
+: ‹MovingSamplesAvg test¦moving 4.0›
+name: test¦moving
 mode: moving
 value: 8.0
 set time: now (2003-04-05 06:07:19.50)
 prev value: -1.0
-total time: None
 total samples: 4
 current average: 4.0
 samples: 3
@@ -210,12 +213,12 @@ EVENT: wait¦start¦_wait¦t9
 TRACE 2003-04-05 06:07:23.500000 _wait¦t9: Fake timer done
 EVENT: wait¦done¦_wait¦t9
      : loglevel=0
-name: test moving
+: ‹MovingSamplesAvg test¦moving 4.0›
+name: test¦moving
 mode: moving
 value: 8.0
 set time: -4.0 sec (2003-04-05 06:07:19.50)
 prev value: -1.0
-total time: None
 total samples: 4
 current average: 4.0
 samples: 3
@@ -224,12 +227,12 @@ sample 0: 5.0
 sample 1: -1.0
 sample 2: 8.0
 .
-name: test moving
+: ‹MovingSamplesAvg test¦moving 7.0›
+name: test¦moving
 mode: moving
 value: 14.0
 set time: now (2003-04-05 06:07:23.50)
 prev value: 8.0
-total time: None
 total samples: 5
 current average: 7.0
 samples: 3
@@ -250,7 +253,8 @@ TRACE Yes
 DEBUG values now 14.0 prev 8.0
 test decay :: (new)
 .
-name: test decay
+: ‹DecaySamplesAvg test¦decay None›
+name: test¦decay
 mode: decay
 value: None
 weight: 0.1
@@ -261,12 +265,11 @@ EVENT: wait¦start¦_wait¦t11
 TRACE 2003-04-05 06:07:25.750000 _wait¦t11: Fake timer done
 EVENT: wait¦done¦_wait¦t11
      : loglevel=0
-name: test decay
+: ‹DecaySamplesAvg test¦decay 2.0›
+name: test¦decay
 mode: decay
 value: 2.0
 set time: now (2003-04-05 06:07:25.75)
-prev value: None
-total time: None
 total samples: 1
 current average: 2.0
 weight: 0.1
@@ -277,22 +280,21 @@ EVENT: wait¦start¦_wait¦t12
 TRACE 2003-04-05 06:07:26.750000 _wait¦t12: Fake timer done
 EVENT: wait¦done¦_wait¦t12
      : loglevel=0
-name: test decay
+: ‹DecaySamplesAvg test¦decay 2.0›
+name: test¦decay
 mode: decay
 value: 2.0
 set time: -1.0 sec (2003-04-05 06:07:25.75)
-prev value: None
-total time: None
 total samples: 1
 current average: 2.0
 weight: 0.1
 .
-name: test decay
+: ‹DecaySamplesAvg test¦decay 4.0›
+name: test¦decay
 mode: decay
 value: 22.0
 set time: now (2003-04-05 06:07:26.75)
 prev value: 2.0
-total time: None
 total samples: 2
 current average: 4.0
 weight: 0.1
@@ -303,22 +305,22 @@ EVENT: wait¦start¦_wait¦t13
 TRACE 2003-04-05 06:07:27.750000 _wait¦t13: Fake timer done
 EVENT: wait¦done¦_wait¦t13
      : loglevel=0
-name: test decay
+: ‹DecaySamplesAvg test¦decay 4.0›
+name: test¦decay
 mode: decay
 value: 22.0
 set time: -1.0 sec (2003-04-05 06:07:26.75)
 prev value: 2.0
-total time: None
 total samples: 2
 current average: 4.0
 weight: 0.1
 .
-name: test decay
+: ‹DecaySamplesAvg test¦decay 3.5›
+name: test¦decay
 mode: decay
 value: -1.0
 set time: now (2003-04-05 06:07:27.75)
 prev value: 22.0
-total time: None
 total samples: 3
 current average: 3.5
 weight: 0.1
@@ -335,7 +337,8 @@ TRACE Yes
 DEBUG values now -1.0 prev 22.0
 test decaytime :: (new)
 .
-name: test decaytime
+: ‹DecayTimeAvg test¦decaytime None›
+name: test¦decaytime
 mode: decaytime
 value: None
 weight: 0.1
@@ -350,11 +353,11 @@ EVENT: wait¦start¦_wait¦t15
 TRACE 2003-04-05 06:07:30 _wait¦t15: Fake timer done
 EVENT: wait¦done¦_wait¦t15
      : loglevel=0
-name: test decaytime
+: ‹DecayTimeAvg test¦decaytime 10.0›
+name: test¦decaytime
 mode: decaytime
 value: 10.0
 set time: now (2003-04-05 06:07:30)
-prev value: None
 total time: 0:00:00
 total samples: 1
 current average: 10.0
@@ -370,11 +373,11 @@ EVENT: wait¦start¦_wait¦t16
 TRACE 2003-04-05 06:07:31 _wait¦t16: Fake timer done
 EVENT: wait¦done¦_wait¦t16
      : loglevel=0
-name: test decaytime
+: ‹DecayTimeAvg test¦decaytime 10.0›
+name: test¦decaytime
 mode: decaytime
 value: 10.0
 set time: -1.0 sec (2003-04-05 06:07:30)
-prev value: None
 total time: 0:00:00
 total samples: 1
 current average: 10.0
@@ -384,7 +387,8 @@ weight/hour: 1.0
 weight/minute: 0.9982029897000856
 weight/second: 0.1
 .
-name: test decaytime
+: ‹DecayTimeAvg test¦decaytime 10.0›
+name: test¦decaytime
 mode: decaytime
 value: 110.0
 set time: now (2003-04-05 06:07:31)
@@ -404,7 +408,8 @@ EVENT: wait¦start¦_wait¦t17
 TRACE 2003-04-05 06:07:32 _wait¦t17: Fake timer done
 EVENT: wait¦done¦_wait¦t17
      : loglevel=0
-name: test decaytime
+: ‹DecayTimeAvg test¦decaytime 10.0›
+name: test¦decaytime
 mode: decaytime
 value: 110.0
 set time: -1.0 sec (2003-04-05 06:07:31)
@@ -418,7 +423,8 @@ weight/hour: 1.0
 weight/minute: 0.9982029897000856
 weight/second: 0.1
 .
-name: test decaytime
+: ‹DecayTimeAvg test¦decaytime 20.0›
+name: test¦decaytime
 mode: decaytime
 value: 1.0
 set time: now (2003-04-05 06:07:32)
@@ -440,7 +446,8 @@ EVENT: wait¦start¦_wait¦t18
 TRACE 2003-04-05 06:07:34 _wait¦t18: Fake timer done
 EVENT: wait¦done¦_wait¦t18
      : loglevel=0
-name: test decaytime
+: ‹DecayTimeAvg test¦decaytime 20.0›
+name: test¦decaytime
 mode: decaytime
 value: 1.0
 set time: -2.0 sec (2003-04-05 06:07:32)

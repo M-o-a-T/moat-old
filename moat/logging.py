@@ -165,7 +165,7 @@ class BaseLogger(Collected,Jobber):
 
 	# Collection stuff
 	def list(self):
-		yield ("Name",self.name)
+		yield super(BaseLogger,self)
 		yield ("Type",self.__class__.__name__)
 		yield ("Level",LogNames[self.level])
 		yield ("Queue",self.q.qsize())
@@ -259,8 +259,7 @@ class Logger(BaseLogger):
 		self.out.flush()
 
 	def list(self):
-		for r in super(Logger.self).list():
-			yield r
+		yield super(Logger.self)
 		yield ("Out",repr(self.out))
 
 	def info(self):
@@ -328,7 +327,7 @@ class LogWorker(ExcWorker):
 def log_exc(msg=None, err=None, level=ERROR):
 	level = LogNames.get(level,level)
 
-	for l in Loggers.values():
+	for l in list(Loggers.values()):
 		if not l.ready:
 			continue
 		if msg:
@@ -439,7 +438,7 @@ def log(level, *a):
 	logger.log(getattr(logging,level,logging.DEBUG),"%s"," ".join(str(x) for x in a))
 
 	exc = []
-	for l in Loggers.values():
+	for l in list(Loggers.values()):
 		if not l.ready:
 			continue
 		try:

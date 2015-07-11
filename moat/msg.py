@@ -32,6 +32,7 @@ Look at module/onewire.py for an example.
 
 import six
 
+from moat import TESTING
 from moat.logging import log,log_exc,DEBUG,TRACE,INFO,WARN,ERROR
 from moat.statement import Statement, main_words, AttributedStatement
 from moat.check import Check,register_condition,unregister_condition
@@ -105,8 +106,11 @@ class MsgInfo(object):
 	prio = PRIO_STANDARD
 
 	def list(self):
-		yield ("",repr(self))
+		yield (repr(self),)
 		yield ("priority",self.prio)
+
+		s = super(MsgInfo,self)
+		if hasattr(s,'list'): yield s
 	
 	def error(self,e):
 		process_failure(e)
@@ -193,8 +197,8 @@ class MsgBase(MsgSender,MsgReceiver):
 		super(MsgBase,self).abort()
 
 	def list(self):
-		for r in super(MsgBase,self).list():
-			yield r
+		s = super(MsgBase,self)
+		if hasattr(s,'list'): yield s
 
 		if self.timeout:
 			yield("timeout",self.timeout)
@@ -265,8 +269,7 @@ class MsgRepeater(object):
 		self.queue = queue
 
 	def list(self):
-		for r in super(MsgBase,self).list():
-			yield r
+		yield super(MsgBase,self)
 		yield("redo timeout",self.redo_timeout)
 		yield("armed", self.timer is not None)
 
@@ -305,7 +308,7 @@ class MsgIncoming(object):
 				self.prio = PRIO_STANDARD
 
 	def __repr__(self):
-		s = " ".join(["%s:%s" % (k,repr(v)) for k,v in self.__dict__.items()])
+		s = " ".join(["%s:%s" % (k,repr(v)) for k,v in sorted(self.__dict__.items())])
 		return u"‹%s%s%s›" % (self.__class__.__name__, ": " if s else "", s)
 
 class MsgError(object):
@@ -414,9 +417,8 @@ class MsgQueue(Collected,Jobber):
 	#storage = Nets.storage
 	max_send = None # messages to send until the channel is restarted
 	attempts = 0
-	max_attempts = None # connection attempts
 	initial_connect_timeout = 3 # initial delay between attempts, seconds
-	max_connect_timeout = 300 # max delay between attempts
+	max_connect_timeout = 300 if not TESTING else 5 # max delay between attempts
 	connect_timeout = None # current delay between attempts
 
 	channel = None # the current connection
@@ -454,9 +456,10 @@ class MsgQueue(Collected,Jobber):
 
 		if ondemand is not None:
 			self.ondemand = ondemand
-		self.start()
 
 		super(MsgQueue,self).__init__()
+
+		self.start()
 	
 	def __del__(self):
 		self.stop_job("job")
@@ -482,6 +485,7 @@ class MsgQueue(Collected,Jobber):
 
 	def delete(self,ctx=None):
 		self.stop("deleted")
+		self.stop_job("job")
 		for m in self.delayed[:]:
 			m.unqueue()
 		super(MsgQueue,self).delete()
@@ -492,8 +496,7 @@ class MsgQueue(Collected,Jobber):
 		return u"‹%s:%s %s›" % (self.__class__.__name__,self.name,self.state)
 
 	def list(self):
-		for r in super(MsgQueue,self).list():
-			yield r
+		yield super(MsgQueue,self)
 		if self.q is None:
 			yield("queue","dead")
 		else:

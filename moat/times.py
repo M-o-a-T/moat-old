@@ -158,7 +158,7 @@ def simple_time_delta(w):
 			pass
 		else:
 			raise SyntaxError("unknown unit",w[1])
-		s += m * w[0]
+		s += float(m) * float(w[0])
 		w.pop(0)
 		if w:
 			if w[0] == "+":

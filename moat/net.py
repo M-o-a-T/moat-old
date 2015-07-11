@@ -50,6 +50,11 @@ import errno
 import gevent
 from gevent.server import StreamServer
 
+class ThreadedStreamServer(StreamServer):
+	"""A StreamServer which doesn't kill off its sockets afterwards"""
+	def do_close(*args):
+		pass
+
 @six.python_2_unicode_compatible
 class DisconnectedError(RuntimeError):
 	def __init__(self,dev):
@@ -114,7 +119,9 @@ class LineReceiver(object):
 				process_failure(e)
 		
 	def write(self,val):
-		super(LineReceiver,self).write(val.encode('utf-8')+self.delimiter)
+		if isinstance(val,six.text_type):
+			val = val.encode('utf-8')
+		super(LineReceiver,self).write(val+self.delimiter)
 
 #class Nets(Collection):
 #	name = "net"
@@ -200,6 +207,8 @@ class NetCommonConnector(Collected,Jobber):
 		try:
 			while self.socket is not None:
 				try:
+					if self.socket.closed:
+						return
 					r = self.socket.recv(4096)
 					if not r:
 						return
@@ -226,6 +235,7 @@ class NetCommonConnector(Collected,Jobber):
 		return "%s %s:%s" % (self.typ, self.host,self.port)
 		
 	def list(self):
+		yield super(NetCommonConnector,self)
 		yield ("type",self.typ)
 		yield ("host",self.host)
 		yield ("port",self.port)
@@ -371,6 +381,7 @@ class NetListener(Collected):
 		return "%s %s:%s" % (self.typ, self.name,self.connector.name)
 		
 	def list(self):
+		yield super(NetListener,self)
 		yield ("host", self.host)
 		yield ("port", self.port)
 		yield ("connector", self.connector.name if self.connector is not None else None)
@@ -394,7 +405,7 @@ You need to override the long_doc description.
 
 	def start_up(self):
 		r = self.listener(name=self.dest, host=self.host,port=self.port)
-		s = StreamServer((self.host, self.port), r.connected)
+		s = ThreadedStreamServer((self.host, self.port), r.connected)
 		s.set_spawn(None)
 		r._init2(s, self.connector)
 
@@ -460,7 +471,7 @@ send net text… :to ‹name…›
 			name = Name(*name.apply(ctx))
 
 		val = u" ".join(six.text_type(s) for s in event)
-		self.storage[name].write(val)
+		self.storage[name].write(val.encode('utf-8'))
 
 class NetTo(Statement):
 	name="to"

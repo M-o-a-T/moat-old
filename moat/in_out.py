@@ -73,6 +73,8 @@ class BadValue(RuntimeError):
 inputmakers = {}
 outputmakers = {}
 def _register(store,io,what):
+	if isinstance(io.typ,six.string_types):
+		io.typ = SName(io.typ)
 	if io.typ in store:
 		raise ValueError("An %sput handler for '%s' is already registered." % \
 			(what,io.typ))
@@ -118,8 +120,7 @@ class CommonIO(Collected):
 		return "%s %s:%s" % (self.typ, self.name, self.last_value)
 			
 	def list(self):
-		for r in super(CommonIO,self).list():
-			yield r
+		yield super(CommonIO,self)
 		yield ("type",self.typ)
 		for r in self.ranges:
 			yield ("allowed range", u"%s … %s" % (r[0] if r[0] is not None else u"-∞", r[1] if r[1] is not None else u"∞", ))
@@ -174,8 +175,7 @@ class Input(CommonIO):
 	typ = "???input"
 
 	def list(self):
-		for r in super(Input,self).list():
-			yield r
+		yield super(Input,self)
 		if self.last_value is not None:
 			yield ("last read", self.last_time)
 			yield ("last value",self.last_value)
@@ -210,8 +210,7 @@ class OutTimer(Collected):
 
 	def list(self):
 		n = now()
-		for r in super(OutTimer,self).list():
-			yield r
+		yield super(OutTimer,self)
 		yield ("output",self.parent.name)
 		yield ("start", self.started)
 		yield ("end", self.end)
@@ -264,8 +263,7 @@ class Output(CommonIO):
 	typ = "???output"
 
 	def list(self):
-		for r in super(Output,self).list():
-			yield r
+		yield super(Output,self)
 		if self.last_value is not None:
 			yield ("last write", self.last_time)
 			yield ("last value",self.last_value)
@@ -345,14 +343,22 @@ class MakeIO(AttributedStatement):
 				raise SyntaxError(u'Usage: %s ‹name› ‹typ› ‹params›'%(self.name,))
 			self.dest = Name(event[0])
 			typ = event[1]
-			d = 2
+			d = 1
 		else:
 			if len(event) < 1:
 				raise SyntaxError(u'Usage: %s ‹typ› ‹params›'%(self.name,))
 			typ = event[0]
-			d = 1
-
-		self.registry[typ](self.dest.apply(ctx), event.apply(ctx,drop=d), self.addons,self.ranges,self.values)
+			d = 0
+		de=len(event)
+		while de > d:
+			try:
+				reg = self.registry[Name(event[d:de])]
+			except KeyError:
+				de -= 1
+			else:
+				reg(self.dest.apply(ctx), event.apply(ctx,drop=de), self.addons,self.ranges,self.values)
+				return
+		raise
 
 # the first version was to be directly attached to variables, but that doesn't work
 #class BoolIO(WordAttached):

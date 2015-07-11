@@ -48,7 +48,7 @@ trigger run test:
 wait :for 0.1
 list on
 trigger test me
-wait :for 0.1
+wait :for 60
 shutdown
 """
 
@@ -64,6 +64,7 @@ load_module("data")
 load_module("logging")
 load_module("state")
 load_module("wait")
+load_module("amqp")
 
 run("exec",input)
 

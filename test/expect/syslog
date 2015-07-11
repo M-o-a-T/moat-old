@@ -1,8 +1,8 @@
 EVENT: startup
      : startup=True
 EVENT: wait¦start¦_wait¦t1
-     : loglevel=0
      : end_time=0.2
+     : loglevel=0
 TRACE 2003-04-05 06:07:08.200000 _wait¦t1: Forced timer done
 syslog :: TRACE: run_logger
 .
@@ -13,7 +13,9 @@ WARN Five Warn
 local5 localhost 55514 :: local5 info
 syslog :: TRACE: run_logger
 .
-Name: local5¦localhost¦55514
+: ‹Collected SysLogger:local5¦localhost¦55514›
+name: local5¦localhost¦55514
+task job: <Greenlet: erh(<bound method SysLogger._writer of ‹Collected SysL)>
 Type: SysLogger
 Level: INFO
 Queue: 0
@@ -26,8 +28,8 @@ level_name: info
 syslog :: TRACE: run_logger
 .
 EVENT: wait¦start¦_wait¦t2
-     : loglevel=0
      : end_time=1.0
+     : loglevel=0
 TRACE 2003-04-05 06:07:09 _wait¦t2: Forced timer done
 EVENT: wait¦done¦_wait¦t2
      : loglevel=0

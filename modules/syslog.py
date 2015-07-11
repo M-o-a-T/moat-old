@@ -111,7 +111,7 @@ class SysLogger(BaseLogger):
 		super(SysLogger, self).__init__(self.level)
 
 	def list(self):
-		for x in super(SysLogger,self).list(): yield x
+		yield super(SysLogger,self)
 		yield("facility", self.facility)
 		yield("facility_name", self.facility_name)
 		yield("address", self.address)

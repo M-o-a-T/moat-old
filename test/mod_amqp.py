@@ -37,12 +37,18 @@ import sys
 from traceback import print_exc
 
 input = """\
-connect amqp localhost:
+connect amqp "data.intern.smurf.noris.de":
 	name test foo
 	user "test" test test
 
 on amqp connect test foo:
-	wait for 0.2:
+	if exists wait delay amqp:
+		del wait delay amqp
+
+if not exists amqp connection test foo:
+	log DEBUG waiting for connect
+	wait delay amqp:
+		for 100
 		debug force
 
 log amqp DEBUG:
@@ -170,6 +176,7 @@ load_module("block")
 load_module("state")
 load_module("errors")
 load_module("trigger")
+load_module("ifelse")
 load_module("help")
 
 run("amqp",input)

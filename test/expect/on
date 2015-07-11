@@ -34,6 +34,7 @@ name: Skipped¦One
 id: 9
 name: Skipped¦One
 call count: 0
+code: OnEventWorker: Skipped¦One
 code: foo ‹OnEventHandler›
 code: name: Skipped One
 code: prio: 51
@@ -51,6 +52,7 @@ name: Skipped¦Two
 id: 10
 name: Skipped¦Two
 call count: 0
+code: OnEventWorker: Skipped¦Two
 code: foo ‹OnEventHandler›
 code: name: Skipped Two
 code: prio: 51
@@ -82,9 +84,9 @@ DEBUG got baz one
 ERROR no quux one
 DEBUG vav is two
 EVENT: state¦change¦dud
-     : value=two
-     : prev_value=-
      : prev_time=2003-04-05 06:07:08
+     : prev_value=-
+     : value=two
 IEVENT: baz¦dud¦two
 IEVENT: baz
 DEBUG got baz two
@@ -93,9 +95,9 @@ EVENT: wait¦start¦_wait¦t1
      : end_time=0.1
      : loglevel=0
 EVENT: state¦change¦dud
-     : value=nix
-     : prev_value=two
      : prev_time=2003-04-05 06:07:08
+     : prev_value=two
+     : value=nix
 TRACE 2003-04-05 06:07:08.150000 _wait¦t1: Fake timer done
 EVENT: wait¦done¦_wait¦t1
      : loglevel=0

@@ -218,8 +218,7 @@ class WAGOmonitorsMsg(WAGOmsgBase):
 		return "m"
 
 	def list(self):
-		for r in super(WAGOmonitorsMsg,self).list():
-			yield r
+		yield super(WAGOmonitorsMsg,self)
 		for a,b in self.data.items():
 			yield "found",(a,b)
 
@@ -298,8 +297,7 @@ class WAGOkeepaliveMsg(WAGOmsgBase):
 		return "Da"+str(self.ping_timeout)
 
 	def list(self):
-		for r in super(WAGOkeepaliveMsg,self).list():
-			yield r
+		yield super(WAGOkeepaliveMsg,self)
 		yield "last",self.last_recv
 		yield "id",self.msgid
 
@@ -455,8 +453,7 @@ class WAGOioRun(WAGOrun):
 		return u"‹%s %s:%s›" % (self.__class__.__name__,self.card,self.port)
 		
 	def list(self):
-		for r in super(WAGOioRun,self).list():
-			yield r
+		yield super(WAGOioRun,self)
 		yield ("card",self.card)
 		yield ("port",self.port)
 
@@ -477,8 +474,7 @@ class WAGOoutputRun(WAGOioRun):
 		return u"‹%s val=%s›" % (res[1:-1],self.val)
 		
 	def list(self):
-		for r in super(WAGOoutputRun,self).list():
-			yield r
+		yield super(WAGOoutputRun,self)
 		yield ("value",self.val)
 
 	@property
@@ -504,8 +500,7 @@ class WAGOtimedOutputRun(WAGOoutputRun):
 		return u"‹%s tm=%s id=%s›" % (res[1:-1],humandelta(self.timer.end-now(True)),self.msgid)
 		
 	def list(self):
-		for r in super(WAGOtimedOutputRun,self).list():
-			yield r
+		yield super(WAGOtimedOutputRun,self)
 		yield ("timer",self.timer)
 		yield ("id",self.msgid)
 
@@ -570,8 +565,7 @@ class WAGOio(object):
 		super(WAGOio,self).__init__(name, params,addons,ranges,values)
 
 	def list(self):
-		for r in super(WAGOio,self).list():
-			yield r
+		yield super(WAGOio,self)
 		yield ("server",self.server)
 		yield ("card",self.card)
 		yield ("port",self.port)
@@ -711,8 +705,7 @@ class WAGOmonRun(WAGOioRun):
 	msgid = property(_get_msgid,_set_msgid)
 
 	def list(self):
-		for r in super(WAGOmonRun,self).list():
-			yield r
+		yield super(WAGOmonRun,self)
 		yield("msgid", self.msgid if self.msgid is not None else "-")
 		if self.counter:
 			yield("counter",self.counter)
@@ -795,8 +788,7 @@ class WAGOmon(Monitor):
 		super(WAGOmon,self).__init__(*a,**k)
 
 	def list(self):
-		for r in super(WAGOmon,self).list():
-			yield r
+		yield super(WAGOmon,self)
 		yield("mode",self.mode)
 		if self.mode == "count":
 			yield("timespec",self.timespec)
