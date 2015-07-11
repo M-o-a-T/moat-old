@@ -324,10 +324,10 @@ reset avg NAME
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		if len(event) < 2:
-			raise SyntaxError(u"Usage: set avg ‹value› ‹name…›")
-		m = Avgs[Name(*event[1:])]
-		m.feed(float(event[0]))
+		if len(event) < 1:
+			raise SyntaxError(u"Usage: reset avg ‹name…›")
+		m = Avgs[Name(*event)]
+		m.reset()
 
 class VarAvgHandler(AttributedStatement):
 	name="var avg"
@@ -350,7 +350,7 @@ var avg NAME name...
 @VarAvgHandler.register_statement
 class AvgVarUse(Statement):
 	name="use"
-	doc="change which variable to use"
+	doc="select which attribute to use"
 	avail = "value value_tm prev_value total_samples".split()
 	long_doc=u"""\
 use ‹var› - use some other value than the current average
