@@ -703,7 +703,8 @@ class SchedSite(SchedCommon):
 			r,self._sched_running = self._sched_running,None
 			if self._sched is None:
 				self._sched = gevent.spawn_later(600,connwrap,self.run_sched_task,kill=False,reason="Timer 600")
-			r.set(None)
+			if r is not None:
+				r.set(None)
 		print("RunSched end", file=sys.stderr)
 
 	def sched_task(self, kill=True):
@@ -803,15 +804,15 @@ class SchedValve(SchedCommon):
 	def _on(self,sched=None,duration=None):
 		print("Open",self.v.var, file=sys.stderr)
 		self.site.delay_on()
+		if duration is None and sched is not None:
+			duration = sched.duration
 		if self.controller.has_max_on():
 			print("… but too many:", " ".join(str(v) for v in self.controller.c.valves.all() if SchedValve(v).on), file=sys.stderr)
 			if sched:
 				sched.update(seen = False)
 			self.on = False
-			self.log("NOT running for %s: too many"%(duration,))
+			self.log("NOT running %s for %s: too many"%(self.v,duration,))
 			raise TooManyOn(self)
-		if duration is None and sched is not None:
-			duration = sched.duration
 		if duration is None:
 			self.log("Run (indefinitely)")
 			self.site.send_command("set","output","on",*(self.v.var.split()))
