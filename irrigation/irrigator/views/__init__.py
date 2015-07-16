@@ -27,10 +27,11 @@ from django.http import HttpResponseRedirect
 from django.core.exceptions import ObjectDoesNotExist
 from django.forms import ModelForm,FloatField,TimeField
 from django.utils.translation import ugettext_lazy as _
+from django.template.context_processors import csrf
 from datetime import timedelta,datetime
 
 from rainman.models import Site
-from rainman.utils import Redirect
+from rainman.utils import Redirect, get_request
 
 from traceback import print_exc
 
@@ -98,6 +99,11 @@ class TimeDeltaField(TimeField):
 class FormMixin(object):
 	def get_template_names(self):
 		return ["obj/%s/%s.jinja" % (self.model._meta.object_name.lower(), self.template_name_suffix.lstrip("_"))]
+
+	def get_context_data(self,**k):
+		ctx = super(FormMixin,self).get_context_data(**k)
+		ctx.update(csrf(get_request()))
+		return ctx
 
 class SiteParamMixin(object):
 	opt_params = {'site':Site}
