@@ -454,7 +454,7 @@ class SchedSite(SchedCommon):
 
 	def delay_on(self):
 		self._delay_on.acquire()
-		gevent.spawn_later(1,connwrap,self._delay_on.release)
+		gevent.spawn_later(1,self._delay_on.release)
 
 	def check_flow(self,**k):
 		for c in self.controllers:
