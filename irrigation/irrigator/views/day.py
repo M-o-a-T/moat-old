@@ -34,6 +34,7 @@ from irrigator.views import NonNegativeFloatField,TimeDeltaField,FormMixin,DbMod
 class DayForm(ModelForm):
 	class Meta:
 		model = Day
+		fields = "__all__"
 	
 class DayMixin(FormMixin):
 	model = Day
