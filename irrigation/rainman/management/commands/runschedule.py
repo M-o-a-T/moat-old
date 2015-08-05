@@ -807,10 +807,9 @@ class SchedValve(SchedCommon):
 		if duration is None and sched is not None:
 			duration = sched.duration
 		if self.controller.has_max_on():
-			print("… but too many:", " ".join(str(v) for v in self.controller.c.valves.all() if SchedValve(v).on), file=sys.stderr)
+			print("… but too many:", ", ".join(str(v) for v in self.controller.c.valves.all() if SchedValve(v).on), file=sys.stderr)
 			if sched:
 				sched.update(seen = False)
-			self.on = False
 			self.log("NOT running %s for %s: too many"%(self.v,duration,))
 			raise TooManyOn(self)
 		if duration is None:
@@ -942,6 +941,8 @@ class SchedValve(SchedCommon):
 			if self._flow_check.add_flow(val):
 				return
 		self.flow += val
+		if self.v.verbose:
+			print("FLOW %s: %s" % (self.v.name,val), file=sys.stderr)
 
 	def check_flow(self,**k):
 		cf = None
