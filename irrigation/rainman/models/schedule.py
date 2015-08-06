@@ -38,7 +38,7 @@ class Schedule(Model):
 		unique_together = (("valve","start"),)
 		db_table="rainman_schedule"
 	def __str__(self):
-		return u"@%s %s" % (str_tz(self.start),self.valve)
+		return u"@%s +%s %s" % (str_tz(self.start),self.duration,self.valve)
 	valve = m.ForeignKey(Valve,related_name="schedules")
 	start = m.DateTimeField(db_index=True)
 	db_duration = m.PositiveIntegerField(db_column="duration")
