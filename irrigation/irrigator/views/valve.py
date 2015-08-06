@@ -75,8 +75,8 @@ class ValveMixin(FormMixin):
 class ValveParamMixin(SiteParamMixin):
 	opt_params = {'controller':Controller, 'feed':Feed, 'site':Site, 'envgroup':EnvGroup}
 
-	def get_params_hook(self,k):
-		super(ValveParamMixin,self).get_params_hook(k)
+	def get_params_hook(self,*a,**k):
+		super(ValveParamMixin,self).get_params_hook(*a,**k)
 		s = self.aux_data['site']
 		c = self.aux_data['controller']
 		f = self.aux_data['feed']
@@ -119,7 +119,9 @@ class ValveView(ValveMixin,DetailView):
 class ValveNewView(ValveMixin,ValveParamMixin,CreateView):
 	form_class = ValveForm
 	success_url="/valve/%(id)s"
-	def get_form(self, form_class):
+	def get_form(self, form_class=None):
+		if form_class is None:
+			form_class = self.form_class
 		form = super(ValveNewView,self).get_form(form_class)
 		form.limit_choices(**self.aux_data)
 		return form
@@ -127,7 +129,9 @@ class ValveNewView(ValveMixin,ValveParamMixin,CreateView):
 class ValveEditView(ValveMixin,ValveParamMixin,UpdateView):
 	form_class = ValveForm
 	success_url="/valve/%(id)s"
-	def get_form(self, form_class):
+	def get_form(self, form_class=None):
+		if form_class is None:
+			form_class = self.form_class
 		form = super(ValveEditView,self).get_form(form_class)
 		form.limit_choices(site=self.site)
 		return form

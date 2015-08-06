@@ -66,7 +66,9 @@ class GroupView(GroupMixin,DetailView):
 class GroupNewView(GroupMixin,SiteParamMixin,CreateView):
 	form_class = GroupForm
 	success_url="/group/%(id)s"
-	def get_form(self, form_class):
+	def get_form(self, form_class=None):
+		if form_class is None:
+			form_class = self.form_class
 		form = super(GroupNewView,self).get_form(form_class)
 		form.limit_choices(**self.aux_data)
 		return form
@@ -74,7 +76,9 @@ class GroupNewView(GroupMixin,SiteParamMixin,CreateView):
 class GroupEditView(GroupMixin,SiteParamMixin,UpdateView):
 	form_class = GroupForm
 	success_url="/group/%(id)s"
-	def get_form(self, form_class):
+	def get_form(self, form_class=None):
+		if form_class is None:
+			form_class = self.form_class
 		form = super(GroupEditView,self).get_form(form_class)
 		form.limit_choices(**self.aux_data)
 		return form

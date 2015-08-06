@@ -60,8 +60,8 @@ class ScheduleParamMixin(SiteParamMixin):
 	opt_params = {'site':Site, 'controller':Controller, 'valve':Valve, 'feed': Feed, 'envgroup':EnvGroup, 'valve':Valve}
 	opt_names = { 'envgroup': 'valve__envgroup', 'site':'valve__controller__site','controller':'valve__controller','feed':'valve__feed' }
 
-	def get_params_hook(self,k):
-		super(ScheduleParamMixin,self).get_params_hook(k)
+	def get_params_hook(self,*a,**k):
+		super(ScheduleParamMixin,self).get_params_hook(*a,**k)
 		s = self.aux_data['site']
 		c = self.aux_data['controller']
 		f = self.aux_data['feed']
@@ -139,7 +139,9 @@ class ScheduleView(ScheduleMixin,ScheduleParamMixin,DetailView):
 class ScheduleNewView(ScheduleMixin,ScheduleParamMixin,CreateView):
 	form_class = ScheduleForm
 	success_url="/schedule/%(id)s"
-	def get_form(self, form_class):
+	def get_form(self, form_class=None):
+		if form_class is None:
+			form_class = self.form_class
 		form = super(ScheduleNewView,self).get_form(form_class)
 		form.limit_choices(**self.aux_data)
 		return form
@@ -154,7 +156,9 @@ class ScheduleNewView(ScheduleMixin,ScheduleParamMixin,CreateView):
 
 class ScheduleEditView(ScheduleMixin,ScheduleParamMixin,UpdateView):
 	form_class = ScheduleForm
-	def get_form(self, form_class):
+	def get_form(self, form_class=None):
+		if form_class is None:
+			form_class = self.form_class
 		form = super(ScheduleEditView,self).get_form(form_class)
 		form.limit_choices(valve=self.object.valve)
 		return form
