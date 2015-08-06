@@ -1067,6 +1067,10 @@ class SchedValve(SchedCommon):
 		lv = Level(valve=self.v,time=ts,level=self.v.level,flow=flow)
 		lv.save()
 
+		if self.on and lv < self.v.stop_level:
+			self._off()
+
+
 	def log(self,txt):
 		log(self.v,txt)
 	
