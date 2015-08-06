@@ -940,9 +940,9 @@ class SchedValve(SchedCommon):
 		if self._flow_check is not None:
 			if self._flow_check.add_flow(val):
 				return
-		self.flow += val
 		if self.v.verbose:
-			print("FLOW %s: %s" % (self.v.name,val), file=sys.stderr)
+			print("FLOW %s: %s %s" % (self.v.name,self.flow,val), file=sys.stderr)
+		self.flow += val
 
 	def check_flow(self,**k):
 		cf = None
@@ -1046,7 +1046,7 @@ class SchedValve(SchedCommon):
 			ts=h.time
 
 		if self.v.verbose:
-			self.log("Apply env %f, rain %r"%(sum_f,sum_r))
+			self.log("Apply env %f, rain %r,, flow %f = %f" % (sum_f,sum_r,flow,flow/self.v.area))
 
 		if self.v.time == ts:
 			return
