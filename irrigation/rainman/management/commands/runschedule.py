@@ -978,9 +978,9 @@ class SchedValve(SchedCommon):
 			return
 		try:
 			if on != self.on:
-				print("Report %s" % ("ON" if on else "OFF"),self.v.var, file=sys.stderr)
 				n=now()
-				if self.sched is not None and self.sched.start+self.sched.duration <= n:
+				print("Report %s" % ("ON" if on else "OFF"),self.v.var,self.sched, file=sys.stderr)
+				if self.sched is not None and not on:
 					self.sched.update(db_duration=(n-self.sched.start).total_seconds())
 					self.sched.refresh()
 					self.sched_ts = self.sched.start+self.sched.duration
