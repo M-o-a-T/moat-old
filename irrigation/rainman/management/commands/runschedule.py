@@ -1019,8 +1019,9 @@ class SchedValve(SchedCommon):
 				self.v.update(time = lv.time)
 				self.v.refresh()
 				#Save(self.v)
-		if (n-self.v.time).total_seconds() > 3500:
-			self.new_level_entry()
+		if (n-self.v.time).total_seconds() >= 295:
+			flow,self.flow = self.flow,0
+			self.new_level_entry(flow)
 
 	def new_level_entry(self,flow=0):
 		self.site.current_history_entry()
