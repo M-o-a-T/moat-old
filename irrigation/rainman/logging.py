@@ -46,7 +46,7 @@ def log(dev, text):
 		raise RuntimeError("Cannot log: %s" % (repr(dev),))
 	if v: c = v.controller
 	if c: s = c.site
-	print(text, file=sys.stderr)
+	print("%s: %s" % (dev,text), file=sys.stderr)
 
 	global _me
 	if _me is None:
