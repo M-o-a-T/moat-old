@@ -1067,7 +1067,7 @@ class SchedValve(SchedCommon):
 		lv = Level(valve=self.v,time=ts,level=self.v.level,flow=flow)
 		lv.save()
 
-		if self.on and not (self.schedule and self.schedule.forced) and lv < self.v.stop_level:
+		if self.on and not (self.schedule and self.schedule.forced) and level < self.v.stop_level:
 			self._off()
 
 
