@@ -801,8 +801,8 @@ class SchedValve(SchedCommon):
 	def __init__(self,v):
 		pass
 
-	def _on(self,sched=None,duration=None):
-		print("Open",self.v.var, file=sys.stderr)
+	def _on(self,caller,sched=None,duration=None):
+		print("Open",caller,self.v.var, file=sys.stderr)
 		self.site.delay_on()
 		if duration is None and sched is not None:
 			duration = sched.duration
@@ -904,7 +904,7 @@ class SchedValve(SchedCommon):
 					if self.v.verbose:
 						print("SCHED RUNNING %s: %s" % (self.v.name,humandelta(sched.start+sched.duration-n)), file=sys.stderr)
 					try:
-						self._on(sched, sched.start+sched.duration-n)
+						self._on(1,sched, sched.start+sched.duration-n)
 					except TooManyOn:
 						self.log("Could not schedule: too many open valves")
 					except NotConnected:
@@ -926,7 +926,7 @@ class SchedValve(SchedCommon):
 			self.sched_job = gevent.spawn_later((sched.start-n).total_seconds(),connwrap,self.run_sched_task,reason="_run_schedule 2")
 			return
 		try:
-			self._on(sched)
+			self._on(2,sched)
 		except TooManyOn:
 			self.log("Could not schedule: too many open valves")
 		except NotConnected:
@@ -1107,7 +1107,7 @@ class FlowCheck(object):
 					raise RuntimeError("cannot turn off: "+repr(valve))
 			self.locked.add(valve)
 		try:
-			self.valve._on(duration=self.valve.feed.d.max_flow_wait)
+			self.valve._on(3,duration=self.valve.feed.d.max_flow_wait)
 		except NotConnected:
 			self._unlock()
 			raise
@@ -1232,7 +1232,7 @@ class MaxFlowCheck(object):
 		valves = sorted(self.feed.valves, reverse=True, key=attrgetter('v.flow'))
 		for valve in valves:
 			try:
-				valve._on(duration=self.feed.d.max_flow_wait)
+				valve._on(4,duration=self.feed.d.max_flow_wait)
 			except TooManyOn:
 				pass
 			else:
@@ -1338,7 +1338,7 @@ class Flusher(object):
 			for valve in v:
 				try:
 					self.on = valve
-					valve._on(duration=20)
+					valve._on(5,duration=20)
 				except TooManyOn:
 					pass
 				else:

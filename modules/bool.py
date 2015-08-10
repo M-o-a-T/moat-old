@@ -60,8 +60,14 @@ class EqualCheck(Check):
 		a,b = args
 		if a is None: return b is None
 		try:
-			return float(a) == float(b)
+			a = float(a)
+			b = float(b)
+			return abs(a-b) < max(abs(a),abs(b))/1000000
 		except (ValueError,TypeError):
+			if hasattr(a,"decode"): a = a.decode("utf-8")
+			else: a = str(a)
+			if hasattr(b,"decode"): b = b.decode("utf-8")
+			else: b = str(b)
 			return str(a) == str(b)
 
 class LessCheck(Check):

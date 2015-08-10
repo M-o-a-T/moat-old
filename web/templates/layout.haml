@@ -1,0 +1,82 @@
+<!doctype html>
+-from "_help.haml" import show_menu
+%html
+	%head
+		%title
+			-block title
+				=title or "Venoris Zugangsverwaltung"
+		%link rel="icon" href="{{ url_for('static', filename='venoris.ico') }}" type="image/vnd.microsoft.icon"
+		%link rel="shortcut icon" href="{{ url_for('static', filename='venoris.ico') }}" type="image/vnd.microsoft.icon"
+		-block styles
+			%link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}"
+		-block scripts
+			-if web_port
+				%script type="text/javascript"
+					window.web_port = {{ web_port }};
+			-if websocket_token
+				%script type="text/javascript"
+					window.websocket_token = "{{ websocket_token }}";
+			%script. type="text/javascript" src="{{ url_for('static', filename='jquery.js') }}"
+	%body
+		%div#header
+			%div.inside
+				-if in_admin
+					%h1.admin
+						=title or "Zugangsverwaltung"
+				-else
+					%h1
+						=title or "Zugangsverwaltung"
+	
+				-with messages = get_flashed_messages(with_categories=true)
+					-if messages or error
+						%div.flashes
+							-if error
+								%div.error
+									=error
+							-for category, message in messages
+								%div.flash
+									%div class="{{ category }}"
+										=message
+				-if menu
+					%nav
+						%img#logo src="{{ url_for('static', filename='venoris_small.png') }}"
+						=show_menu(menu)
+						
+				-block header
+					&nbsp;
+
+
+		%div#page
+			-block xbody
+				%div.inside
+					-block body
+						Hier sollte eigentlich Inhalt erscheinen …
+
+		%div#footer
+			%div.inside
+				.left
+					Zugang zu diesen Seiten nur für autorisierte Mieter der Venoris GmbH & Co. Vermögensverwaltungs KG
+				-if g.user
+					.right
+						Sie sind angemeldet als
+						=g.user.username
+						–
+						=g.user.person.vorname
+						=g.user.person.name
+	
+
+		%script type="text/javascript"
+			| //%![CDATA[
+			|$("a").attr("draggable",false);
+			|
+			|// set the content height to whatever is left when subtracting header and footer
+			|// necessary because inner scroll only works reliably with absolute positioning
+			|$(window).on('resize',function(){
+			| var hh = $('#header').height();
+			| $('#page').offset({top:hh, left:0});
+			| hh = $('body').height()-hh-$('#footer').height();
+			| $('#page').height(hh);
+			|});
+			|$(window).trigger('resize');
+			| //]]
+

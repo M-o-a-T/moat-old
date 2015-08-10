@@ -1,0 +1,35 @@
+-extends "layout.haml"
+-block scripts
+	=super()
+	%script. type="text/javascript" src="{{ url_for('static', filename='jquery.idletimer.js') }}"
+	%script. type="text/javascript" src="{{ url_for('static', filename='monitor.js') }}"
+-block styles
+	=super()
+	%link. rel="stylesheet" type="text/css" href="{{ url_for('monitor.style') }}"
+
+-block header
+	%div.hflow
+		%h3 -> Notiz:
+		%form#sender method='POST' action='#'
+			%input#data. name='data'
+			%input. type='submit' value='Absenden'
+	%div.hflow
+		%h3 -> Status:
+		%table.single
+			%tr
+				%th -> Datum
+				%td#status_date -> (noch keine Daten)
+			%tr
+				%th -> Subsystem
+				%td#status_subsys -> (noch keine Daten)
+-block xbody
+	%div.inside.monitor
+		%table
+			%tbody#log
+				%tr#info
+					%th
+						Status
+					%td
+						Einen Moment bitte …
+						%br
+						… (haben Sie JavaScript deaktiviert? Bitte einschalten!)

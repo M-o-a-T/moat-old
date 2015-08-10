@@ -1,3 +1,12 @@
+moat (0.7.26) smurf; urgency=medium
+
+  * fix equality tests
+    * float: 1ppm
+    * string: decode buffer
+  * add web stuff
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Tue, 04 Aug 2015 21:46:20 +0200
+
 moat (0.7.25) smurf; urgency=medium
 
   * Drop py2 build
