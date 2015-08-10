@@ -162,7 +162,6 @@ class Command(BaseCommand):
 		if v.feed.disabled:
 			return
 		if (v.level < v.stop_level) if v.priority else (v.level < v.start_level):
-			print("Nothing to do",v,v.level,v.start_level)
 			if options['save'] and v.verbose:
 				log(v,"Nothing to do (has %s, need %s)" % (v.level,v.start_level))
 			return
@@ -191,17 +190,21 @@ class Command(BaseCommand):
 		if has:
 			if options['save']:
 				v.update(priority=(want.total_seconds() > has.total_seconds()*1.2))
-			log(v,"Already something to do (has %s, need %s, want %s, does %s)" % (v.level,v.start_level,want,has))
+			if v.verbose:
+				log(v,"Already something to do (has %s, need %s, want %s, does %s)" % (v.level,v.start_level,want,has))
 			return
 		elif want.total_seconds() < 10:
 			if options['save']:
 				v.update(priority=False)
-			log(v,"Too little to do (has %s, need %s, want %s)" % (v.level,v.start_level,want))
+			if v.verbose:
+				log(v,"Too little to do (has %s, need %s, want %s)" % (v.level,v.start_level,want))
 			return
 		if options['verbose']:
 			print("Plan",v,"for",want,"Level",v.level,v.start_level,v.stop_level,"P" if v.priority else "")
 		for a,b in v.range(start=soon,days=options['age'], add=30):
 			if a > soon:
+				if options['verbose']:
+					print("NotYet",a,soon)
 				break # do it during the next run
 			if last_end and last_end > a:
 				if last_end >= a+b:
@@ -217,7 +220,7 @@ class Command(BaseCommand):
 			if v.max_run and b > v.max_run:
 				b=v.max_run
 			if b < want:
-				print("Partial",str_tz(a),str(b))
+				log(v, "Partial %s %s %s" % (str_tz(a),str(b),str(want)))
 				if options['save']:
 					sc=Schedule(valve=v,start=a,duration=b)
 					sc.save()
@@ -225,9 +228,9 @@ class Command(BaseCommand):
 					if v.verbose:
 						log(v,"Scheduled at %s for %s (level %s; want %s)" % (str_tz(a),str(b),v.level,str(want)))
 				want -= b
-				break # bail out makes sense, get others scheduled first / do more in the same slot if v.max_run is set
+				break # bail out: get others scheduled first / do more in the same slot if v.max_run is set
 			else:
-				print("Total",str_tz(a),str(want))
+				log(v,"Total %s %s" % (str_tz(a),str(want)))
 				if options['save']:
 					sc=Schedule(valve=v,start=a,duration=want)
 					sc.save()
@@ -236,8 +239,9 @@ class Command(BaseCommand):
 						log(v,"Scheduled at %s for %s (level %s)" % (str_tz(a),str(want),v.level))
 				want = None
 				break
-		if want is not None:
-			print("Missing",want)
+		else:
+			if want:
+				log(v, "Missing %s" % (str(want),))
 
 	def force_one_valve(self,v,options):
 		for a,b in v.range(start=soon,forced=True):

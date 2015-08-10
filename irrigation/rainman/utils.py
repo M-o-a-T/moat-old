@@ -114,9 +114,8 @@ class StoredIter(object):
 		if self.saved is NotYet:
 			self.saved = six.next(self.it)
 		return self.saved
-		
 def range_coalesce(it):
-	"""Returns an iterator which returns the union of overlapping (start,lengt) pairs."""
+	"""Returns an iterator which returns the union of overlapping (start,length) pairs."""
 	it = iter(it)
 	ra,rl = six.next(it)
 	while True:
@@ -125,7 +124,7 @@ def range_coalesce(it):
 		except StopIteration:
 			yield ra,rl
 			return
-		assert ra <= sa
+		assert ra <= sa, (ra,rl,sa,sl)
 		re = ra+rl
 		se = sa+sl
 
@@ -151,7 +150,8 @@ def _range_union(head):
 	while head:
 		r,ra,rl = None,None,None
 		i=0
-		for ax in head:
+		while i < len(head):
+			ax = head[i]
 			try:
 				sa,sl = ax.stored
 			except StopIteration:

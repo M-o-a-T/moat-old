@@ -1,11 +1,6 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import, print_function, division, unicode_literals
-##
-##  This file is part of MoaT, the Master of all Things.
-##
-##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
-##  it is licensed under the GPLv3. See the file `README.rst` for details,
-##  including optimistic statements by the author.
+
+##  Copyright © 2012, Matthias Urlichs <matthias@urlichs.de>
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -18,21 +13,17 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
-##  This header is auto-generated and may self-destruct at any time,
-##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
-##  Thus, do not remove the next line, or insert any blank lines above.
-##BP
 
+from __future__ import division,absolute_import
 from django.http import HttpResponseRedirect
 from django.core.exceptions import ObjectDoesNotExist
 from django.forms import ModelForm,FloatField,TimeField
 from django.utils.translation import ugettext_lazy as _
+from django.template.context_processors import csrf
 from datetime import timedelta,datetime
 
 from rainman.models import Site
-from rainman.utils import Redirect
-
-from traceback import print_exc
+#from rainman.utils import Redirect
 
 def get_profile(request):
 	try:
@@ -47,9 +38,8 @@ def get_profile(request):
 
 def home(request):
 	try:
-		gu = request.user.profile
+		gu = request.user.get_profile()
 	except (ObjectDoesNotExist,AttributeError):
-		print_exc()
 		sites = set()
 	else:
 		sites = gu.sites.all()
@@ -106,24 +96,27 @@ class SiteParamMixin(object):
 		super(SiteParamMixin,self).__init__(*a,**k)
 		self.aux_data = {}
 
-	def get_params_hook(self,k):
+	def get_params_hook(self,request,k):
 		for p,d in self.opt_params.items():
 			pk = k.get(p,None)
 			if pk is not None:
 				self.aux_data[p] = d.objects.get(pk=k.pop(p))
 			else:
 				self.aux_data[p] = None
+		self.aux_data.update(csrf(request))
 
-	def get_form(self, form_class):
+	def get_form(self, form_class=None):
+		if form_class is None:
+			form_class = getattr(self,'form_class',None)
 		form = super(SiteParamMixin,self).get_form(form_class)
 		form.aux_data = self.aux_data
 		return form
 
 	def get(self, request, **k):
-		self.get_params_hook(k)
+		self.get_params_hook(request,k)
 		return super(SiteParamMixin,self).get(request,**k)
 	def post(self,request,**k):
-		self.get_params_hook(k)
+		self.get_params_hook(request,k)
 		return super(SiteParamMixin,self).post(request,**k)
 
 	def get_queryset(self):
@@ -134,6 +127,7 @@ class SiteParamMixin(object):
 				p = self.opt_names[p]
 			if v is not None:
 				f[p] = v
+		f.pop('csrf_token',None)
 		if f:
 			q = q.filter(**f)
 		return q

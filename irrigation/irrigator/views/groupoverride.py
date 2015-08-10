@@ -54,8 +54,8 @@ class GroupOverrideParamMixin(SiteParamMixin):
 	opt_params = {'site':Site, 'group':Group}
 	opt_names = { 'site':'group__site' }
 
-	def get_params_hook(self,k):
-		super(GroupOverrideParamMixin,self).get_params_hook(k)
+	def get_params_hook(self,*a,**k):
+		super(GroupOverrideParamMixin,self).get_params_hook(*a,**k)
 		s = self.aux_data['site']
 		g = self.aux_data['group']
 		if s:
@@ -109,7 +109,9 @@ class GroupOverrideNewView(GroupOverrideMixin,GroupOverrideParamMixin,CreateView
 	form_class = GroupOverrideForm
 	success_url="/group/time/%(id)s"
 	#success_url="/group/%(group)s/time/%(id)s"
-	def get_form(self, form_class):
+	def get_form(self, form_class=None):
+		if form_class is None:
+			form_class = self.form_class
 		form = super(GroupOverrideNewView,self).get_form(form_class)
 		form.limit_choices(**self.aux_data)
 		return form
@@ -124,7 +126,9 @@ class GroupOverrideNewView(GroupOverrideMixin,GroupOverrideParamMixin,CreateView
 
 class GroupOverrideEditView(GroupOverrideMixin,GroupOverrideParamMixin,UpdateView):
 	form_class = GroupOverrideForm
-	def get_form(self, form_class):
+	def get_form(self, form_class=None):
+		if form_class is None:
+			form_class = self.form_class
 		form = super(GroupOverrideEditView,self).get_form(form_class)
 		form.limit_choices(group=self.object.group)
 		return form

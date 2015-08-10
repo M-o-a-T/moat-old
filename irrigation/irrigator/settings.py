@@ -171,7 +171,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
 	'rainman',
-	'south',
+	# 'south',
 	'django_jinja',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',

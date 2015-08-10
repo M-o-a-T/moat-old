@@ -355,7 +355,7 @@ class SunMeter(AvgMeter):
 	meter_type="sun"
 
 METERS=[]
-for m in globals().values():
+for m in list(globals().values()):
 	if hasattr(m,"meter_type"):
 		METERS.append(m)
 
@@ -454,7 +454,7 @@ class SchedSite(SchedCommon):
 
 	def delay_on(self):
 		self._delay_on.acquire()
-		gevent.spawn_later(1,connwrap,self._delay_on.release)
+		gevent.spawn_later(1,self._delay_on.release)
 
 	def check_flow(self,**k):
 		for c in self.controllers:
@@ -703,7 +703,8 @@ class SchedSite(SchedCommon):
 			r,self._sched_running = self._sched_running,None
 			if self._sched is None:
 				self._sched = gevent.spawn_later(600,connwrap,self.run_sched_task,kill=False,reason="Timer 600")
-			r.set(None)
+			if r is not None:
+				r.set(None)
 		print("RunSched end", file=sys.stderr)
 
 	def sched_task(self, kill=True):
@@ -803,15 +804,14 @@ class SchedValve(SchedCommon):
 	def _on(self,caller,sched=None,duration=None):
 		print("Open",caller,self.v.var, file=sys.stderr)
 		self.site.delay_on()
-		if self.controller.has_max_on():
-			print("… but too many:", " ".join(str(v) for v in self.controller.c.valves.all() if SchedValve(v).on), file=sys.stderr)
-			if sched:
-				sched.update(seen = False)
-			self.on = False
-			self.log("NOT running for %s: too many"%(duration,))
-			raise TooManyOn(self)
 		if duration is None and sched is not None:
 			duration = sched.duration
+		if self.controller.has_max_on():
+			print("… but too many:", ", ".join(str(v) for v in self.controller.c.valves.all() if SchedValve(v).on), file=sys.stderr)
+			if sched:
+				sched.update(seen = False)
+			self.log("NOT running %s for %s: too many"%(self.v,duration,))
+			raise TooManyOn(self)
 		if duration is None:
 			self.log("Run (indefinitely)")
 			self.site.send_command("set","output","on",*(self.v.var.split()))
@@ -940,6 +940,8 @@ class SchedValve(SchedCommon):
 		if self._flow_check is not None:
 			if self._flow_check.add_flow(val):
 				return
+		if self.v.verbose:
+			print("FLOW %s: %s %s" % (self.v.name,self.flow,val), file=sys.stderr)
 		self.flow += val
 
 	def check_flow(self,**k):
@@ -976,9 +978,9 @@ class SchedValve(SchedCommon):
 			return
 		try:
 			if on != self.on:
-				print("Report %s" % ("ON" if on else "OFF"),self.v.var, file=sys.stderr)
 				n=now()
-				if self.sched is not None and self.sched.start+self.sched.duration <= n:
+				print("Report %s" % ("ON" if on else "OFF"),self.v.var,self.sched, file=sys.stderr)
+				if self.sched is not None and not on:
 					self.sched.update(db_duration=(n-self.sched.start).total_seconds())
 					self.sched.refresh()
 					self.sched_ts = self.sched.start+self.sched.duration
@@ -988,7 +990,7 @@ class SchedValve(SchedCommon):
 				if not on:
 					duration = n-self.on_ts
 					maxflow = self.v.flow * duration.total_seconds()
-					if (not flow and not self.v.feed.var) or flow > maxflow:
+					if (not flow or not self.v.feed.var) or flow > 2*maxflow:
 						flow = maxflow
 				self.new_level_entry(flow)
 				if not on:
@@ -1017,8 +1019,9 @@ class SchedValve(SchedCommon):
 				self.v.update(time = lv.time)
 				self.v.refresh()
 				#Save(self.v)
-		if (n-self.v.time).total_seconds() > 3500:
-			self.new_level_entry()
+		if (n-self.v.time).total_seconds() >= 295:
+			flow,self.flow = self.flow,0
+			self.new_level_entry(flow)
 
 	def new_level_entry(self,flow=0):
 		self.site.current_history_entry()
@@ -1044,7 +1047,7 @@ class SchedValve(SchedCommon):
 			ts=h.time
 
 		if self.v.verbose:
-			self.log("Apply env %f, rain %r"%(sum_f,sum_r))
+			self.log("Apply env %f, rain %r,, flow %f = %f" % (sum_f,sum_r,flow,flow/self.v.area))
 
 		if self.v.time == ts:
 			return
@@ -1063,6 +1066,10 @@ class SchedValve(SchedCommon):
 
 		lv = Level(valve=self.v,time=ts,level=self.v.level,flow=flow)
 		lv.save()
+
+		if self.on and not (self.schedule and self.schedule.forced) and level < self.v.stop_level:
+			self._off()
+
 
 	def log(self,txt):
 		log(self.v,txt)
