@@ -1,55 +1,68 @@
-Source: homevent
+Source: moat
 Section: python
 Priority: extra
 Maintainer: Matthias Urlichs <matthias@urlichs.de>
 Build-Depends: debhelper (>= 5),
- python-setuptools,
  libglib2.0-dev (>= 2.14),
  python-rrdtool,
  rrdtool,
- python-all-dev (>> 2.6.6-3~), 
  owserver | owfs,
- python-dbg,
- python-sqlmix (>= 0.9.29),
- python-pysqlite2,
  portaudio19-dev,
- python-gevent,
  libevent-dev,
+ python3-rpyc,
+ dh-python,
+ dh-systemd,
+ python3-all,
+ python3-all-dev,
+ python3-amqp,
+ python3-gevent,
+ python3-pkg-resources,
+ python3-setuptools,
+ python3-six (>= 1.9),
+ python3-sqlmix,
+ python3-systemd,
+ python3-sqlmix,
+ python3-pytz | python3-tz,
 X-Also-Depends: avr-libc, gcc-avr
 Build-Depends-Indep: python-support
 Standards-Version: 3.7.2
 
-Package: homevent
+Package: moat
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, python-homevent
-Recommends: python-rrdtool, owfs,
+Depends: ${shlibs:Depends}, ${misc:Depends}, python3-moat
+Conflicts: homevent
+Replaces: homevent
+Recommends: python3-rrdtool, owfs,
   rabbitmq-server,
 Description: A scripted event-based monitoring and control system
- HomEvenT is a flexible, scripted, network-aware event handler.
+ MoaT is a flexible, scripted, network-aware event handler.
  It can monitor and control quite a few external buses and peripherals,
  including 1wire and FS20. It can write values to RRD files and allows
  access to its command interpreter with SSH.
  .
  The author uses it as a central hub for home automation.
  .
- This package contains auxiliary binaries.
+ This package contains startup scripts, docs, aux binaries, etc.
 
-Package: python-homevent
+Package: python3-moat
 Architecture: all
 Depends: ${misc:Depends}, ${python:Depends},
- python-sqlmix (>= 0.9.26),
- python-gevent (>= 1.0),
- python-rpyc,
- python-dabroker,
- python-pytz | python-tz,
- python-amqp,
-Recommends: python-rrdtool, owfs,
- python-pysqlite2,
-Suggests: socat
+ python3-sqlmix (>= 0.9.26),
+ python3-six (>= 1.9),
+ python3-gevent (>= 1.0),
+ python3-dabroker,
+ python3-pytz | python3-tz,
+ python3-rpyc,
+ python3-amqp,
+ python3-pkg-resources,
+ python3-systemd,
+ moat,
+Recommends: python3-rrdtool, owfs
 Description: A scripted event-based monitoring and control system
- HomEvenT is a flexible, scripted, network-aware event handler.
+ MoaT is a flexible, scripted, network-aware event handler.
  It can monitor and control quite a few external buses and peripherals,
  including 1wire and FS20. It can write values to RRD files and allows
  access to its command interpreter with SSH.
  .
  The author uses it as a central hub for home automation.
+

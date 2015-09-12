@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,18 +18,23 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This code implements the Help command.
 
 """
 
-from __future__ import division,absolute_import
+from moat.module import Module
+from moat.logging import log
+from moat.statement import Statement, global_words, HelpSub
+from moat.base import Name,SName
 
-from homevent.module import Module
-from homevent.logging import log
-from homevent.statement import Statement, global_words, HelpSub
-from homevent.base import Name
+def _ErrKey(x):
+	raise KeyError(x)
 
 class Help(Statement):
 	name="help"
@@ -50,43 +59,39 @@ Statements may be multi-word and follow generic Python syntax.
 			try:
 				wlist = words.__getitem__
 			except AttributeError:
-				break
+				wlist = _ErrKey
 
 			n = len(wl)
 			while n >= 0:
 				try:
-					words = wlist(Name(*wl[:n]))()
+					words = wlist(Name(*wl[:n]))
 				except KeyError:
-					pass
-				else:
-					wl = wl[n:]
-					break
-				n = n-1
+					try:
+						words = words.registry[SName(wl[:n])]
+					except (KeyError, AttributeError):
+						n = n-1
+						continue
+				break
 			if n < 0:
 				break
+			wl = wl[n:]
 
 		if wl:
-			# this is for a type registry
-			if len(wl) == 1 and hasattr(words,"registry") and wl[0] in words.registry:
-				words = words.registry[wl[0]]
-				try:
-					doc = ":\n"+words.long_doc.rstrip("\n")
-				except AttributeError:
-					doc = " : "+words.doc
-				print >>self.ctx.out,wl[0]+doc
-				return
-
-			print >>self.ctx.out,"Not a command in %s:" % (words.__class__.__name__,)," ".join(wl)
+			# this may be for a type registry
+			print("Not a command in %s:" % (words.name,)," ".join(wl), file=self.ctx.out)
 
 		try:
 			doc = ":\n"+words.long_doc.rstrip("\n")
 		except AttributeError:
 			doc = " : "+words.doc
-		print >>self.ctx.out," ".join(words.name)+doc
+		if words.name:
+			print(" ".join(words.name)+doc, file=self.ctx.out)
+		else:
+			print(doc, file=self.ctx.out)
 
 		# this is for common sub-statements
 		try:
-			wl = words.iteritems
+			wl = words.items
 		except AttributeError: # it's empty
 			pass
 		else:
@@ -96,17 +101,15 @@ Statements may be multi-word and follow generic Python syntax.
 				if hlen > maxlen: maxlen = hlen
 			if maxlen:
 				n = getattr(words,"helpsubname","word")
-				print >>self.ctx.out,"Known "+n+"s:"
+				print("Known "+n+"s:", file=self.ctx.out)
 
-				def nam(a,b):
-					return cmp(a[0],b[0])
-				for n,d in sorted(wl(),nam):
+				for n,d in sorted(wl()):
 					hname = " ".join(n)
-					print >>self.ctx.out,hname+(" "*(maxlen+1-len(hname)))+": "+d.doc
+					print(hname+(" "*(maxlen+1-len(hname)))+": "+d.doc, file=self.ctx.out)
 
 		# this is for a type registry
 		try:
-			wl = words.registry.iteritems
+			wl = words.registry.items
 		except AttributeError:
 			pass
 		else:
@@ -115,14 +118,10 @@ Statements may be multi-word and follow generic Python syntax.
 				hlen = len(n)
 				if hlen > maxlen: maxlen = hlen
 			if maxlen:
-				print >>self.ctx.out,"Known types:"
+				print("Known types:", file=self.ctx.out)
 
-				def nam(a,b):
-					return cmp(a[0],b[0])
-				for n,d in sorted(wl(),nam):
-					print >>self.ctx.out,n+(" "*(maxlen+1-len(hname)))+": "+d.doc
-
-
+				for n,d in sorted(wl()):
+					print(" ".join(n)+(" "*(maxlen+1-len(hname)))+": "+d.doc, file=self.ctx.out)
 
 class HelpModule(Module):
 	"""\

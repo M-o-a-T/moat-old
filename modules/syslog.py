@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,6 +18,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This code does basic configurable logging.
@@ -27,15 +35,15 @@ log
 
 """
 
-from __future__ import division,absolute_import
+import six
 
-from homevent import TESTING
-from homevent.module import Module
-from homevent.statement import Statement, main_words
-from homevent import logging
-from homevent.logging import log, BaseLogger, LogLevels, \
+from moat import TESTING
+from moat.module import Module
+from moat.statement import Statement, main_words
+from moat import logging
+from moat.logging import log, BaseLogger, LogLevels, \
 	TRACE,DEBUG,INFO,WARN,ERROR,PANIC
-from homevent.twist import fix_exception
+from moat.twist import fix_exception
 
 import syslog
 import socket
@@ -83,7 +91,6 @@ local_levels = {
 	PANIC: syslog.LOG_EMERG,
 }
 
-
 class SysLogger(BaseLogger):
 	"""\
 		This class implements a logger that writes to syslog.
@@ -104,7 +111,7 @@ class SysLogger(BaseLogger):
 		super(SysLogger, self).__init__(self.level)
 
 	def list(self):
-		for x in super(SysLogger,self).list(): yield x
+		yield super(SysLogger,self)
 		yield("facility", self.facility)
 		yield("facility_name", self.facility_name)
 		yield("address", self.address)
@@ -115,15 +122,12 @@ class SysLogger(BaseLogger):
 		return "%s %s" % (self.facility_name,self.level_name)
 
 	def _slog(self,level,txt):
-		if isinstance(txt,unicode):
-			txt = txt.encode("utf-8")
-
 		while True:
 			try:
-				self.socket.send("<%d>HomEvenT: %s%s" % (
+				self.socket.send((u"<%d>MoaT: %s%s" % (
 				                  self.facility | local_levels[LogLevels[level]],
 								  txt,
-				                  "\0" if not TESTING else "\n"))
+				                  "\0" if not TESTING else "\n")).encode('utf-8'))
 			except socket.error as err:
 				fix_exception(err)
 				if err.args[0] != errno.EINTR:
@@ -149,7 +153,7 @@ class SyslogHandler(Statement):
 syslog ‹facility› ‹level› [‹destination›]
 	- sets up logging to syslog.
       ‹facility› is standard syslog ("user", "local4"…; default to "user").
-      ‹level› is one of HomEvenT's logging levels as reported by "log".
+      ‹level› is one of MoaT's logging levels as reported by "log".
       ‹destination› can be either a Unix socket (needs to start with a /)
                     or a host name, optionally followed by a port number.
                     Default is the local syslog daemon.
@@ -168,8 +172,6 @@ syslog ‹facility› ‹level› [‹destination›]
 		else:
 			name = (facility,dest)
 		SysLogger(name=name, address=dest, facility=facility, level=event[1])
-
-
 
 class SyslogModule(Module):
 	"""\

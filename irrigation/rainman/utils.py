@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,10 +18,16 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 	This module holds a few random utility functions.
 	"""
+
+import six
 
 from datetime import datetime,timedelta
 from django.utils.timezone import utc,get_current_timezone
@@ -30,7 +40,6 @@ def now():
 
 def str_tz(t):
 	return t.astimezone(get_current_timezone()).strftime("%F %T")
-
 
 _requests = WeakValueDictionary()
 
@@ -66,7 +75,7 @@ class RangeMixin(object):
 		try:
 			while True:
 				try:
-					a,b = r.next()
+					a,b = six.next(r)
 				except StopIteration:
 					return res
 				if res:
@@ -92,31 +101,30 @@ class StoredIter(object):
 	def __init__(self,it):
 		self.it = iter(it)
 		#i = list(self.it)
-		#print "LIST",i
+		#print("LIST",i)
 		#self.it = iter(i)
 		self.saved = NotYet
 
 	@property
 	def next(self):
-		self.saved = self.it.next()
+		self.saved = six.next(self.it)
 		return self.saved
 	@property
 	def stored(self):
 		if self.saved is NotYet:
-			self.saved = self.it.next()
+			self.saved = six.next(self.it)
 		return self.saved
-		
 def range_coalesce(it):
-	"""Returns an iterator which returns the union of overlapping (start,lengt) pairs."""
+	"""Returns an iterator which returns the union of overlapping (start,length) pairs."""
 	it = iter(it)
-	ra,rl = it.next()
+	ra,rl = six.next(it)
 	while True:
 		try:
-			sa,sl = it.next()
+			sa,sl = six.next(it)
 		except StopIteration:
 			yield ra,rl
 			return
-		assert ra <= sa
+		assert ra <= sa, (ra,rl,sa,sl)
 		re = ra+rl
 		se = sa+sl
 
@@ -127,23 +135,23 @@ def range_coalesce(it):
 		if re < se:
 			rl = se-ra
 
-
 def range_union(*a):
 	"""\
 		Return an iterator which yields a row of start+length tuples
 		which are the union of all the start+length tuples in a.
 		"""
-	#print "UNION"
+	#print("UNION")
 	res = range_coalesce(_range_union([StoredIter(range_coalesce(ax)) for ax in a]))
 	#res = list(res)
-	#print "UNION = ",res
+	#print("UNION = ",res)
 	return res
 
 def _range_union(head):
 	while head:
 		r,ra,rl = None,None,None
 		i=0
-		for ax in head:
+		while i < len(head):
+			ax = head[i]
 			try:
 				sa,sl = ax.stored
 			except StopIteration:
@@ -165,10 +173,10 @@ def range_intersection(*a):
 		Return an iterator which yields a row of start+length tuples
 		which are the union of all the start+length tuples in a.
 		"""
-	#print "INTERSECT"
+	#print("INTERSECT")
 	res = _range_intersection(*a)
 	#res = list(res)
-	#print "INTERSECT = ",res
+	#print("INTERSECT = ",res)
 	return res
 
 def _range_intersection(*a):
@@ -238,14 +246,14 @@ if __name__ == "__main__":
 	a=((1,100),(220,100),(350,100),(500,100))
 	b=((2,50),(60,100),(320,80),(510,110))
 	c=((0,10),(11,2),(70,1000))
-	print a
-	print b
-	print c
-	print list(range_intersection(a,b,c))
-	print list(range_intersection(c,b,a))
-	print list(range_intersection(c,a,b))
-	print list(range_intersection(a,c,b))
-	print list(range_intersection(b,c,a))
-	print list(range_intersection(b,a,c))
-	print list(range_invert(50,950,a))
-	print list(range_union(a,b))
+	print(a)
+	print(b)
+	print(c)
+	print(list(range_intersection(a,b,c)))
+	print(list(range_intersection(c,b,a)))
+	print(list(range_intersection(c,a,b)))
+	print(list(range_intersection(a,c,b)))
+	print(list(range_intersection(b,c,a)))
+	print(list(range_intersection(b,a,c)))
+	print(list(range_invert(50,950,a)))
+	print(list(range_union(a,b)))

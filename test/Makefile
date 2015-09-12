@@ -15,19 +15,25 @@
 ##
 
 export PYTHONPATH=$(shell pwd)/..:$(shell pwd)/../dabroker:$(shell pwd)/../../smurf/python
-export HOMEVENT_TEST=1
-
+export MOAT_TEST=1
+PYFILES ?= $(wildcard *.py)
+SHFILES ?= $(wildcard *.sh)
+PYTHON ?= python3
 test:
-	@rm -f /tmp/homevent.$$(id -un).db /tmp/homevent.db.$$(id -u) 2>/dev/null
+	@rm -f /tmp/moat.$$(id -un).db /tmp/moat.db.$$(id -u) 2>/dev/null
 	@set -e; \
 	rm -rf real; mkdir real; \
-	for f in $(wildcard *.sh) ; do \
+	for f in ${SHFILES} ; do \
 		echo $$f ...; \
 		sh $$f; \
 	done; \
-	for f in $(wildcard *.py) ; do \
+	for f in ${PYFILES} ; do \
 		echo $$f ...; \
-		python $$f; \
+		set +e; \
+		${PYTHON} $$f; \
+		E=$$?; \
+		[ $$E = 0 ] || [ $$E = 121 ] || exit $$E; \
+		set -e; \
 	done; \
 	if ! diff -ru expect real >/tmp/diff.$$$$ ; then less /tmp/diff.$$$$; \
 		rm /tmp/diff.$$$$; exit 1; else rm /tmp/diff.$$$$; exit 0; fi

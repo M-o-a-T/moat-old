@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2008-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,6 +18,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This code implements a FS20 transceiver based on a AVR ATmega168
@@ -21,23 +29,21 @@ microcontroller.
 
 """
 
-from __future__ import division,absolute_import
-
-from homevent.base import SName,Name,MIN_PRIO
-from homevent.module import Module
-from homevent.logging import log,DEBUG,TRACE,INFO,WARN,ERROR
-from homevent.statement import AttributedStatement,Statement, main_words
-from homevent.check import Check,register_condition,unregister_condition
-from homevent.run import simple_event,process_failure
-from homevent.context import Context
-from homevent.event import Event,TrySomethingElse
-from homevent.fs20 import handler,register_handler,unregister_handler, \
+from moat.base import SName,Name,MIN_PRIO
+from moat.module import Module
+from moat.logging import log,DEBUG,TRACE,INFO,WARN,ERROR
+from moat.statement import AttributedStatement,Statement, main_words
+from moat.check import Check,register_condition,unregister_condition
+from moat.run import simple_event,process_failure
+from moat.context import Context
+from moat.event import Event,TrySomethingElse
+from moat.fs20 import handler,register_handler,unregister_handler, \
 	PREFIX,PREFIX_TIMESTAMP
-from homevent.worker import ExcWorker
-from homevent.reactor import shutdown_event
-from homevent.twist import callLater, fix_exception
-from homevent.collect import Collection,Collected
-from homevent.net import NetConnect,NetSend,NetConnected,NetActiveConnector
+from moat.worker import ExcWorker
+from moat.reactor import shutdown_event
+from moat.twist import callLater, fix_exception
+from moat.collect import Collection,Collected
+from moat.net import NetConnect,NetSend,NetConnected,NetActiveConnector
 
 import os
 
@@ -51,7 +57,7 @@ class AVRcommon(handler):
 		self.name = name
 		self.timeout = timeout
 		self.timer = None
-		self.dbuf = ""
+		self.dbuf = b""
 		self.ebuf = ""
 		self.lbuf = None
 		self.timestamp = None
@@ -115,17 +121,17 @@ class AVRcommon(handler):
 		data = self.dbuf+data
 		while True:
 			xi = len(data)+1
-			try: pi = data.index('\r')
+			try: pi = data.index(b'\r')
 			except ValueError: pi = xi
-			try: ei = data.index('\n')
+			try: ei = data.index(b'\n')
 			except ValueError: ei = xi
 			if pi==xi and ei==xi:
 				break
 			if pi < ei:
-				self.lbuf = data[:pi]
+				self.lbuf = data[:pi].decode('utf-8')
 				data = data[pi+1:]
 			else:
-				msg = data[:ei]
+				msg = data[:ei].decode('utf-8')
 				data = data[ei+1:]
 				if msg == "" and self.lbuf is not None:
 					msg = self.lbuf
@@ -139,7 +145,6 @@ class AVRcommon(handler):
 
 		self.dbuf = data
 		self._start_timer()
-
 
 	def cont(self, _=None):
 		while self.waiting:
@@ -159,8 +164,7 @@ class AVRcommon(handler):
 
 	def send(self,prefix,data):
 		data = prefix+"".join("%02x" % ord(x)  for x in data)
-		self.write(data+"\n")
-
+		self.write((data+"\n").encode('utf-8'))
 
 	# standard stuff
 
@@ -186,7 +190,6 @@ class AVRcommon(handler):
 		else:
 			self.do_restart()
 
-
 	# my stuff
 
 	def do_start(self):
@@ -203,7 +206,6 @@ class AVRcommon(handler):
 		
 	def do_kill(self):
 		raise NotImplementedError("Need to override do_kill()")
-
 
 #class my_handler(handler):
 #	def do_kill(self):
@@ -275,14 +277,12 @@ class AVRcommon(handler):
 #		reactor.spawnProcess(self, self.cmd[0], self.cmd, {})
 #	
 
-
 class AVRs(Collection):
 	name = "fs20 avr"
 AVRs = AVRs()
 AVRs.does("del")
 
 avr_conns = {}
-
 
 class AVRreceiver(AVRcommon):
 	storage = AVRs.storage
@@ -299,7 +299,6 @@ class AVRreceiver(AVRcommon):
 		self.connectionMade()
 		simple_event("fs20","avr","connect",*self.name)
 
-
 	# Collected stuff
 	def info(self):
 		return "%s:%s" % (self.host,self.port)
@@ -307,7 +306,6 @@ class AVRreceiver(AVRcommon):
 class AVRactive(AVRreceiver, NetActiveConnector):
 	typ = "net_active"
 	pass
-
 
 class AVRconnect(NetConnect):
 	cmd = None
@@ -327,7 +325,6 @@ fs20 avr NAME :remote host port
 	def error(self,e):
 		log(WARN, self.dest, e[1])
 		simple_event("fs20","avr","error",*self.dest)
-
 
 #class AVRcmd(AttributedStatement):
 #	name = "cmd"
@@ -376,14 +373,13 @@ fs20 avr NAME :remote host port
 #"""
 #	def run(self,ctx,**k):
 #		import sys
-#		print >>sys.stderr,"I",self
+#		print("I",self, file=sys.stderr)
 #		event = self.par(ctx)
-#		print >>sys.stderr,"E",event
+#		print("E",event, file=sys.stderr)
 #		if not len(event) or len(event) > 2:
 #			raise SyntaxError(u"Usage: remote ‹host› [‹port›]")
 #		self.parent.hostinfo = event
 #AVRconnect.register_statement(AVRremote)
-
 
 class AVRsend(NetSend):
 	storage = AVRs.storage
@@ -395,7 +391,6 @@ class AVRconnected(NetConnected):
 	storage2 = avr_conns
 	name="connected fs20 avr"
 
-
 class FS20avr_shutdown(ExcWorker):
 	"""\
 		This worker kills off all connections and processes.
@@ -406,7 +401,7 @@ class FS20avr_shutdown(ExcWorker):
 		return (ev is shutdown_event)
 	def process(self, **k):
 		super(FS20avr_shutdown,self).process(**k)
-		for proc in AVRs.itervalues():
+		for proc in AVRs.values():
 			proc.do_stop()
 		raise TrySomethingElse
 
@@ -415,8 +410,6 @@ class FS20avr_shutdown(ExcWorker):
 		return
 
 FS20avr_shutdown = FS20avr_shutdown("FS20 process killer")
-
-
 
 class AVRmodule(Module):
 	"""\

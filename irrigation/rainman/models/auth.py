@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
-
-##  Copyright © 2012, Matthias Urlichs <matthias@urlichs.de>
+from __future__ import absolute_import, print_function, division, unicode_literals
+##
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -13,8 +18,13 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
-from __future__ import division,absolute_import
+import six
+
 from rainman.models import Model
 from rainman.models.site import Site
 from rainman.models.valve import Valve
@@ -34,13 +44,14 @@ LEVEL_VALUES = (
 	(3,"admin"),
 )
 
+@six.python_2_unicode_compatible
 class UserForSite(Model):
 	"""Limit Django users to some sites"""
 	class Meta(Model.Meta):
 		db_table="rainman_userforsite"
-	def __unicode__(self):
+	def __str__(self):
 		return u"@%s %s" % (self.user.username,u"¦".join(s.name for s in self.sites.all()))
-	user = m.OneToOneField(DjangoUser)
+	user = m.OneToOneField(DjangoUser, related_name="profile")
 	sites = m.ManyToManyField(Site, blank=True, related_name="users",help_text="Sites this user may access")
 	valves = m.ManyToManyField(Valve, blank=True, related_name="users",help_text="Valves this user may access")
 	level = m.PositiveSmallIntegerField(choices=LEVEL_VALUES,default=1,help_text=u"Access to …")
@@ -115,8 +126,6 @@ class UserForSite(Model):
 		if self.valves.filter(group__id=group.id).unique().count():
 			return self.level
 		return False
-
-
 
 # definition of UserProfile from above
 # ...

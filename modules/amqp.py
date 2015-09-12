@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,27 +18,31 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
-This code implements an AMQP connector for HomEvenT.
+This code implements an AMQP connector for MoaT.
 
 """
 
-from __future__ import division,absolute_import
+import six
 
-from homevent import TESTING
-from homevent.module import Module
-from homevent.context import Context
-from homevent.statement import main_words,Statement,AttributedStatement,global_words
-from homevent.interpreter import Interpreter,ImmediateProcessor
-from homevent.base import Name,SName,flatten
-from homevent.collect import Collection,Collected,get_collect,all_collect
-from homevent.check import register_condition,unregister_condition
-from homevent.twist import Jobber,fix_exception,reraise
-from homevent.run import process_failure,register_worker,unregister_worker,simple_event
-from homevent.event import TrySomethingElse
-from homevent.worker import Worker
-from homevent.logging import BaseLogger,TRACE,LogNames,LogLevels,DEBUG,log
+from moat import TESTING
+from moat.module import Module
+from moat.context import Context
+from moat.statement import main_words,Statement,AttributedStatement,global_words
+from moat.interpreter import Interpreter,ImmediateProcessor
+from moat.base import Name,SName
+from moat.collect import Collection,Collected,get_collect,all_collect
+from moat.check import register_condition,unregister_condition
+from moat.twist import Jobber,fix_exception,reraise
+from moat.run import process_failure,register_worker,unregister_worker,simple_event
+from moat.event import TrySomethingElse
+from moat.worker import Worker
+from moat.logging import BaseLogger,TRACE,LogNames,LogLevels,DEBUG,log
 
 from datetime import datetime,date,time,timedelta
 from time import time as itime
@@ -48,10 +56,11 @@ from gevent import spawn,spawn_later
 
 _seq=0  # new element sequence number
 _mseq=0 # new message sequence number
-base_mseq="homevent.%x."%(int(itime()))
+base_mseq="moat.%x."%(int(itime()))
 
 class EventCallback(Worker):
 	args = None
+	_simple = True
 
 	def __init__(self,conn,parent):
 		self.parent = conn
@@ -68,6 +77,10 @@ class EventCallback(Worker):
 			except ValueError: pass
 			if i < self.strip or self.strip and not self.filter:
 				raise RuntimeError("You can't use 'shunt' if you strip elements you can't restore!")
+		for k in self.filter:
+			if hasattr(k,'startswith') and k.startswith('*'):
+				self._simple = False
+				break
 
 		name = parent.dest
 		if name is None:
@@ -80,8 +93,7 @@ class EventCallback(Worker):
 		register_worker(self, self._direct)
 	
 	def list(self):
-		for r in super(EventCallback,self).list():
-			yield r
+		yield super(EventCallback,self)
 		if self.filter:
 			yield "filter",self.filter
 		if self._direct:
@@ -95,12 +107,14 @@ class EventCallback(Worker):
 	def does_event(self,event):
 		if not self.filter:
 			return True
+		if self._simple:
+			return self.filter == event
 		ie = iter(event)
 		ia = iter(self.filter)
 		while True:
-			try: e = ie.next()
+			try: e = six.next(ie)
 			except StopIteration: e = StopIteration
-			try: a = ia.next()
+			try: a = six.next(ia)
 			except StopIteration: a = StopIteration
 			if e is StopIteration and a is StopIteration:
 				return True
@@ -120,14 +134,20 @@ class EventCallback(Worker):
 		try:
 			msg = getattr(event.ctx,'raw',None)
 			if msg is None:
-				d = dict((x,y) for x,y in event.ctx if isinstance(y,(int,str,unicode,long,bool,float)))
+				d = {}
+				for x,y in event.ctx:
+					if x == 'event': continue
+					if isinstance(y,six.string_types+six.integer_types+(bool,float,list,tuple)):
+						d[x]=y
+					elif hasattr(y,'name'):
+						d[x]=y.name
 				try:
 					msg = json.dumps(dict(event=list(event), **d))
-				except (TypeError,UnicodeDecodeError):
-					msg = json.dumps(dict(data=repr(event)+"|"+repr(d)))
-			elif isinstance(msg,(int,long,float)):
+				except (TypeError,UnicodeDecodeError) as e:
+					msg = json.dumps(dict(data=repr(event)+"|"+repr(d)+"|"+repr(e)))
+			elif isinstance(msg,six.integer_types+(float,)):
 				msg = str(msg)
-			elif isinstance(msg,unicode):
+			elif isinstance(msg,six.string_types):
 				msg = msg.encode("utf-8")
 			global _mseq
 			_mseq += 1
@@ -170,20 +190,22 @@ class AMQPclient(Collected,Jobber):
 		try:
 			self.conn=amqp.connection.Connection(host=self.host,userid=self.username,password=self.password,login_method='AMQPLAIN', login_response=None, virtual_host=self.vhost)
 
-		except Exception as e:
-			simple_event("amqp","error",*name)
+		except Exception as ex:
+			simple_event("amqp","error",*name, error=str(ex))
+			fix_exception(ex)
+			process_failure(ex)
 		else:
 			super(AMQPclient,self).__init__()
 			simple_event("amqp","connect",*name)
 			#self.start_job("job",self._loop)
 
 	def _loop(self):
-		simple_event("amqp","start",*self.name)
+		simple_event("amqp","start",*self.name, _direct=True)
 		try:
 			while True:
 				self.conn.drain_events()
 		finally:
-			simple_event("amqp","stop",*self.name)
+			simple_event("amqp","stop",*self.name, _direct=True)
 	
 	def _start(self):
 		self.start_job('job',self._loop)
@@ -199,14 +221,12 @@ class AMQPclient(Collected,Jobber):
 		super(AMQPclient,self).delete()
 
 	def list(self):
-		for r in super(AMQPclient,self).list():
-			yield r
+		yield super(AMQPclient,self)
 		yield ("host",self.host)
 		yield ("port",self.port)
 		yield ("vhost",self.vhost)
 		yield ("user",self.username)
 		yield ("password","*"*len(self.password))
-
 
 class AMQPname(Statement):
 	name="name"
@@ -243,7 +263,6 @@ filter ‹name…›
 		event = self.params(ctx)
 		self.parent.filter = SName(event)
 
-
 class AMQPexchange(Statement):
 	name="exchange"
 	dest = None
@@ -260,7 +279,6 @@ exchange ‹name›
 			raise SyntaxError(u'Usage: exchange ‹name›')
 		self.parent.exchange = event[0]
 
-
 class AMQPprefix(Statement):
 	name="prefix"
 	dest = None
@@ -276,7 +294,6 @@ prefix ‹name…›
 		if len(event) < 1:
 			raise SyntaxError(u'Usage: prefix ‹name…›')
 		self.parent.prefix = event
-
 
 class AMQPtopic(Statement):
 	name="topic"
@@ -298,7 +315,6 @@ topic ‹filter›
 			raise SyntaxError(u'Usage: topic ‹filter›')
 		self.parent.topic = event[0]
 
-
 class AMQPstrip(Statement):
 	name="strip"
 	dest = None
@@ -315,7 +331,6 @@ strip ‹num›
 		if len(event) != 1:
 			raise SyntaxError(u'Usage: strip ‹num›')
 		self.parent.strip = int(event[0])
-
 
 class AMQPshunt(Statement):
 	name="shunt"
@@ -338,7 +353,6 @@ shunt
 			raise SyntaxError(u'Usage: shunt')
 		self.parent.shunt = True
 
-
 class AMQPrshunt(AMQPshunt):
 	doc="Event tunnel, process locally"
 
@@ -349,7 +363,6 @@ shunt
   which that command does.
 """
 
-
 class AMQPqueue(Statement):
 	name="queue"
 	dest = None
@@ -358,7 +371,7 @@ class AMQPqueue(Statement):
 	long_doc = u"""\
 queue ‹name›
 - Set the queue to use.
-  Default: homevent_event / homevent_log.
+  Default: moat_event / moat_log.
 """
 
 	def run(self,ctx,**k):
@@ -366,7 +379,6 @@ queue ‹name›
 		if len(event) != 1:
 			raise SyntaxError(u'Usage: queue ‹name›')
 		self.parent.queue = SName(event)
-
 
 class AMQPuser(Statement):
 	name="user"
@@ -385,7 +397,6 @@ user ‹vhost› ‹username› ‹password›
 		self.parent.vhost = event[0]
 		self.parent.username = event[1]
 		self.parent.password = event[2]
-
 
 class AMQPconn(AttributedStatement):
 	name = "connect amqp"
@@ -417,7 +428,6 @@ This command connects to an AMQP server on the given host/port.
 AMQPconn.register_statement(AMQPuser)
 AMQPconn.register_statement(AMQPcname)
 
-
 class AMQPlogger(BaseLogger):
 	"""An AMQP logger"""
 	def __init__(self,conn,parent,level=TRACE):
@@ -429,7 +439,7 @@ class AMQPlogger(BaseLogger):
 		super(AMQPlogger,self).__init__(level)
 
 	def _log(self, level, *a):
-		if level < self.level:
+		if LogLevels[level] < self.level:
 			return
 		try:
 			msg=json.dumps(dict(level=(LogLevels[level],level),msg=a))
@@ -450,24 +460,22 @@ class AMQPlogger(BaseLogger):
 		super(AMQPlogger,self).delete()
 		
 	def list(self):
-		for r in super(AMQPlogger,self).list():
-			yield r
+		yield super(AMQPlogger,self)
 		yield "parent",self.parent
 		yield "exchange",self.exchange
 		yield "prefix",self.prefix
-
 
 class AMQPlog(AttributedStatement):
 	name = "log amqp"
 	doc = "log to an AMQP server"
 	dest = None
-	exchange = "homevent_log"
-	prefix=("homevent","log")
+	exchange = "moat_log"
+	prefix=("moat","log")
 
 	long_doc="""\
 Usage: log amqp ‹conn› ‹level›
 Send logging data to this AMQP exchange.
-Defaults: exchange=homevent_log level=DEBUG prefix=homevent.log
+Defaults: exchange=moat_log level=DEBUG prefix=moat.log
 """
 	def run(self,ctx,**k):
 		level=DEBUG
@@ -488,7 +496,6 @@ AMQPlog.register_statement(AMQPname)
 AMQPlog.register_statement(AMQPexchange)
 AMQPlog.register_statement(AMQPprefix)
 
-
 class AMQPstart(Statement):
 	name = "start amqp"
 	doc = "start the AMQP listener"
@@ -505,7 +512,6 @@ Call this method after setting up the channels etc.
 			raise SyntaxError(u'Usage: start amqp ‹conn…›')
 		dest = AMQPclients[SName(event)]
 		dest._start()
-
 
 class AMQPstop(Statement):
 	name = "stop amqp"
@@ -527,7 +533,6 @@ at the wrong moment!
 		dest = AMQPclients[SName(event)]
 		dest._stop()
 
-
 class AMQPtell(AttributedStatement):
 	name = "tell amqp"
 	doc = "send internal events to an AMQP server"
@@ -537,11 +542,11 @@ class AMQPtell(AttributedStatement):
 	strip = 0
 	shunt = False
 
-	exchange="homevent_event"
+	exchange="moat_event"
 	long_doc="""\
 Usage: tell amqp ‹conn…›
 Send event data to this AMQP exchange.
-Default exchange: homevent_event
+Default exchange: moat_event
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
@@ -555,7 +560,6 @@ AMQPtell.register_statement(AMQPexchange)
 AMQPtell.register_statement(AMQPprefix)
 AMQPtell.register_statement(AMQPstrip)
 AMQPtell.register_statement(AMQPshunt)
-
 
 class AMQPrecvs(Collection):
 	name = Name("amqp","listener")
@@ -588,21 +592,23 @@ class AMQPrecv(Collected):
 		super(AMQPrecv,self).delete(ctx=ctx)
 
 	def on_info_msg(self,msg):
-		if not TESTING and msg.message_id.startswith(base_mseq):
+		if not self._direct and not TESTING and getattr(msg,'message_id','').startswith(base_mseq):
 			return # dup
-		if msg.content_type == "application/json":
+		if getattr(msg,'content_type','') == "application/json":
 			try:
-				data = json.loads(msg.body)
-			except Exception:
-				data = { "raw": msg.body }
+				b = msg.body
+				if not isinstance(b,six.text_type):
+					b = b.decode('utf-8')
+				data = json.loads(b)
+			except Exception as e:
+				data = { "raw": msg.body, "error": e }
 		else:
-			data = { "raw": msg.body }
+			data = { "raw": msg.body, "content_type": getattr(msg,'content_type','') }
 		self.last_recv = msg.__dict__
 		simple_event(*(self.prefix+tuple(msg.routing_key.split('.')[self.strip:])), _direct=self._direct, **data)
 
 	def list(self):
-		for x in super(AMQPrecv,self).list():
-			yield x
+		yield super(AMQPrecv,self)
 		if self._direct:
 			yield "shunt",True
 		yield "connection",self.conn
@@ -614,12 +620,11 @@ class AMQPrecv(Collected):
 		if self.last_recv:
 			yield "recv", self.last_recv
 
-
 class AMQPlisten(AttributedStatement):
 	name = "listen amqp"
 	doc = "read internal events from an AMQP server"
 	dest = None
-	exchange = "homevent_trigger"
+	exchange = "moat_trigger"
 	topic = '#'
 	prefix = ()
 	strip = 0
@@ -628,7 +633,7 @@ class AMQPlisten(AttributedStatement):
 	long_doc="""\
 Usage: listen amqp ‹conn›
 Receive filtered event data from this AMQP exchange.
-Default exchange: homevent_trigger
+Default exchange: moat_trigger
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
@@ -649,10 +654,9 @@ AMQPlisten.register_statement(AMQPtopic)
 AMQPlisten.register_statement(AMQPstrip)
 AMQPlisten.register_statement(AMQPrshunt)
 
-
 class AMQPmodule(Module):
 	"""\
-		This module implements AMQP access to the HomEvenT process.
+		This module implements AMQP access to the MoaT process.
 		"""
 
 	info = "AMQP access"

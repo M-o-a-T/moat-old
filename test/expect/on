@@ -30,19 +30,40 @@ num2num :: num¦3 (51)
 .
 : ⇒OnEventWorker:Skipped¦One
 name: Skipped¦One
+: ⇒OnEventWorker:Skipped¦One
+id: 9
+name: Skipped¦One
+call count: 0
+code: OnEventWorker: Skipped¦One
+code: foo ‹OnEventHandler›
+code: name: Skipped One
+code: prio: 51
+code: step: if false ‹IfStatement›
+code: step: log ERROR This should not be executed ‹LogHandler›
+matched: 0
 id: 9
 prio: 51
 pname: Skipped One
 args: foo
-prio: 51
 .
 : ⇒OnEventWorker:Skipped¦Two
 name: Skipped¦Two
+: ⇒OnEventWorker:Skipped¦Two
+id: 10
+name: Skipped¦Two
+call count: 0
+code: OnEventWorker: Skipped¦Two
+code: foo ‹OnEventHandler›
+code: name: Skipped Two
+code: prio: 51
+code: step: if true ‹IfStatement›
+code:     : step: exit handler ‹OnSkip2›
+code: step: log ERROR This should also not be executed ‹LogHandler›
+matched: 0
 id: 10
 prio: 51
 pname: Skipped Two
 args: foo
-prio: 51
 .
 IEVENT: bar¦foo
 IEVENT: foo
@@ -64,19 +85,19 @@ ERROR no quux one
 DEBUG vav is two
 EVENT: state¦change¦dud
      : prev_time=2003-04-05 06:07:08
-     : value=two
      : prev_value=-
+     : value=two
 IEVENT: baz¦dud¦two
 IEVENT: baz
 DEBUG got baz two
 TRACE Yes
 EVENT: wait¦start¦_wait¦t1
-     : loglevel=0
      : end_time=0.1
+     : loglevel=0
 EVENT: state¦change¦dud
      : prev_time=2003-04-05 06:07:08
-     : value=nix
      : prev_value=two
+     : value=nix
 TRACE 2003-04-05 06:07:08.150000 _wait¦t1: Fake timer done
 EVENT: wait¦done¦_wait¦t1
      : loglevel=0

@@ -1,8 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -15,13 +19,21 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
-from homevent import patch;patch()
-from homevent.reactor import ShutdownHandler
-from homevent.module import load_module,Load
-from homevent.statement import main_words
-from homevent.check import register_condition
-from homevent.logging import log,DEBUG
+import six
+if six.PY2:
+	import sys; sys.exit(121)
+
+from moat import patch;patch()
+from moat.reactor import ShutdownHandler
+from moat.module import load_module,Load
+from moat.statement import main_words
+from moat.check import register_condition
+from moat.logging import log,DEBUG
 from test import run
 from gevent import spawn,sleep,event
 
@@ -47,7 +59,7 @@ def tester():
 	c = rpyc.connect("localhost",56478)
 
 	def called(**k):
-		for a,b in k.iteritems():
+		for a,b in k.items():
 			log("TEST",DEBUG, "CB %s: %s" % (a,b))
 	cb = c.root.monitor(called,*("wait start * some time".split()))
 
@@ -125,7 +137,6 @@ load_module("trigger")
 load_module("help")
 
 run("rpc",input)
-
 
 import sys
 sys.exit(0)

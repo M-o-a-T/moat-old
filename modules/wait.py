@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,6 +18,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This code does basic timeout handling.
@@ -23,23 +31,23 @@ wait: for FOO...
 
 """
 
-from __future__ import division,absolute_import
+import six
 
-from homevent import TESTING
-from homevent.statement import AttributedStatement, Statement, main_words,\
+from moat import TESTING
+from moat.statement import AttributedStatement, Statement, main_words,\
 	global_words
-from homevent.event import Event
-from homevent.run import simple_event
-from homevent.module import Module
-from homevent.worker import ExcWorker
-from homevent.times import time_delta, time_until, unixtime,unixdelta, now, humandelta, sleep
-from homevent.check import Check,register_condition,unregister_condition
-from homevent.base import Name,SName
-from homevent.collect import Collection,Collected
-from homevent.twist import callLater,fix_exception,Jobber,log_wait
-from homevent.logging import log,log_exc,TRACE
-from homevent.delay import DelayFor,DelayWhile,DelayUntil,DelayNext,\
-	DelayError,DelayDone,DelayCancelled
+from moat.event import Event
+from moat.run import simple_event
+from moat.module import Module
+from moat.worker import ExcWorker
+from moat.times import time_delta, time_until, unixtime,unixdelta, now, humandelta, sleep
+from moat.check import Check,register_condition,unregister_condition
+from moat.base import Name,SName
+from moat.collect import Collection,Collected
+from moat.twist import callLater,fix_exception,Jobber,log_wait
+from moat.logging import log,log_exc,TRACE
+from moat.delay import DelayFor,DelayWhile,DelayUntil,DelayNext,\
+	DelayError,DelayDone,DelayCancelled,DelayReached
 
 from gevent.event import AsyncResult
 from gevent.lock import Semaphore
@@ -68,13 +76,15 @@ class DupWaiterError(DelayError):
 class Waiter(Collected,Jobber):
 	"""This is the thing that waits."""
 	force = False
+	soft = None
 	storage = Waiters.storage
 	_plinger = None
 
-	def __init__(self,parent,name,force):
+	def __init__(self,parent,name,force,soft=None):
 		self.ctx = parent.ctx
 		self.start = now()
 		self.force = force
+		self.soft = soft
 		self._lock = Semaphore()
 		try:
 			self.parent = parent.parent
@@ -91,25 +101,31 @@ class Waiter(Collected,Jobber):
 			yield("end",end)
 			yield("total", humandelta(end-self.start))
 		w = self
+		if self.soft is None:
+			yield("abort","on cancelation")
+		elif self.soft:
+			yield("abort","never")
+		else:
+			yield("abort","on timeout")
 		while True:
 			w = getattr(w,"parent",None)
 			if w is None: break
 			n = getattr(w,"displayname",None)
 			if n is not None:
-				if not isinstance(n,basestring):
-					n = " ".join(unicode(x) for x in n)
+				if not isinstance(n,six.string_types):
+					n = " ".join(six.text_type(x) for x in n)
 			else:
 				try:
 					if w.args:
-						n = unicode(w.args)
+						n = six.text_type(w.args)
 				except AttributeError:
 					pass
 				if n is None:
 					try:
-						if isinstance(w.name,basestring):
+						if isinstance(w.name,six.string_types):
 							n = w.name
 						else:
-							n = " ".join(unicode(x) for x in w.name)
+							n = " ".join(six.text_type(x) for x in w.name)
 					except AttributeError:
 						n = w.__class__.__name__
 			if n is not None:
@@ -177,6 +193,7 @@ wait [NAME…]: for FOO…
 	is_update = False
 	force = False
 	timespec = None
+	soft = None
 
 	def __init__(self,*a,**k):
 		super(WaitHandler,self).__init__(*a,**k)
@@ -194,7 +211,7 @@ wait [NAME…]: for FOO…
 			raise SyntaxError(u'Usage: wait [name…]: for|until|next ‹timespec›')
 		if self.is_update:
 			return Waiters[self.displayname].retime(self.timespec())
-		w = Waiter(self, self.displayname, self.force)
+		w = Waiter(self, self.displayname, self.force, self.soft)
 		w.init(self.timespec())
 		simple_event("wait","start",*w.name, end_time=ixtime(w.end,self.force), loglevel=TRACE)
 		try:
@@ -215,8 +232,12 @@ wait [NAME…]: for FOO…
 			else:
 				simple_event("wait","cancel", *w.name, loglevel=TRACE)
 			ctx.wait = tm
-			if not r:
-				raise DelayCancelled(w)
+			if self.soft is None:
+				if not r:
+					raise DelayCancelled(w)
+			elif not self.soft:
+				if r:
+					raise DelayReached(w)
 		finally:
 			w.delete()
 
@@ -242,7 +263,6 @@ Known flags:
 			else:
 				raise SyntaxError(u'Flag ‹%s› unknown' % (n,))
 
-
 class WaitUpdate(Statement):
 	name = "update"
 	doc = "change the timeout of an existing wait handler"
@@ -256,6 +276,31 @@ This statement updates the timeout of an existing wait handler.
 		assert hasattr(self.parent,"is_update"), "Not within a wait statement?"
 		self.parent.is_update = True
 
+class WaitSoft(Statement):
+	name = "soft"
+	doc = "don't abort when this waiter is canceled"
+	long_doc="""\
+Blocks usually are aborted when a waiter in them is canceled.
+This statement causes the block to continue instead.
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if len(event):
+			raise SyntaxError('Usage: soft')
+		self.parent.soft = True
+
+class WaitTimeout(Statement):
+	name = "timeout"
+	doc = "abort when this waiter is not canceled"
+	long_doc="""\
+This statement causes the block to abort when the waiter completes
+normally. It thus works as a timeout.
+"""
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if len(event):
+			raise SyntaxError('Usage: soft')
+		self.parent.soft = False
 
 class ExistsWaiterCheck(Check):
 	name="exists wait"
@@ -280,7 +325,6 @@ var wait NAME name...
 		name = Name(*event[1:])
 		setattr(self.parent.ctx,var,Waiters[name])
 
-
 WaitHandler.register_statement(DelayFor)
 WaitHandler.register_statement(DelayUntil)
 WaitHandler.register_statement(DelayWhile)
@@ -289,7 +333,8 @@ WaitHandler.register_statement(DelayNext)
 if TESTING:
 	WaitHandler.register_statement(WaitDebug)
 WaitHandler.register_statement(WaitUpdate)
-
+WaitHandler.register_statement(WaitSoft)
+WaitHandler.register_statement(WaitTimeout)
 
 class WaitModule(Module):
 	"""\

@@ -1,0 +1,20 @@
+[Unit]
+Description=Home Event monitor
+ConditionPathExists=/etc/moat/%i.moat
+After=rabbitmq-server.service
+
+[Service]
+EnvironmentFile=-/etc/default/moat
+ExecStart=/usr/sbin/moatd $DAEMON_OPTS /etc/moat/%i.moat
+Type=notify
+TimeoutStartSec=30
+RestartSec=15
+Restart=always
+NotifyAccess=main
+WatchdogSec=15
+WorkingDirectory=/etc/moat
+User=moat
+Group=moat
+
+[Install]
+WantedBy=moat.target

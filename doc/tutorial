@@ -13,23 +13,23 @@
     for more details.
 
 =================
-HomEvenT Tutorial
+MoaT Tutorial
 =================
 
 -----
 Intro
 -----
 
-This tutorial teaches you some basic concepts of HomEvenT.
+This tutorial teaches you some basic concepts of MoaT.
 
 It doesn't interface with the real world; instead, it tries to introduce
-you to the way HomEvenT works.
+you to the way MoaT works.
 
 It is not a command reference. See the “modules” documentation for that.
 
 it is not a syntax reference. See the “syntax” documentation for that.
 
-You can play with HomEvenT by typing “make i”, then “help”.
+You can play with MoaT by typing “make i”, then “help”.
 
 Basic command syntax is described in the “syntax” document.
 Read that before continuing.
@@ -38,15 +38,15 @@ Read that before continuing.
 Switches and devices and stuff
 ------------------------------
 
-Don't exist, as far as HomEvenT is concerned.
+Don't exist, as far as MoaT is concerned.
 
-This may be a rather strange statement, given that HomEvenT is all about
+This may be a rather strange statement, given that MoaT is all about
 home control, which is a sophisticated way of turning a device (like a
 lamp) on and off when you press a switch, so, like, duh?
 
 Don't worry, I'll explain.
 
-HomEvenT is not about reading the state of a switch from *somewhere* and
+MoaT is not about reading the state of a switch from *somewhere* and
 somehow, magically, turning off a lamp *somewhere* *else*.
 
 That's incidental.
@@ -54,11 +54,11 @@ That's incidental.
 The main point isn't state, it's change of state. The fact that the switch
 is on is not interesting. Often, you can't even find out.
 
-What's interesting is the fact that the switch state changed. HomEvenT
+What's interesting is the fact that the switch state changed. MoaT
 then reacts to that somehow. One of the reactions may well be "send a
 message to something-or-other that'll turn on a lamp".
 
-How HomEvenT learns about that change and how it can control external
+How MoaT learns about that change and how it can control external
 devices is a question that's answered adequately (I hope) in the “modules”
 documentation. This document is not about specific modules; here,
 I address the generic structure of how to control things in a sane
@@ -68,8 +68,8 @@ manner. Hopefully.
 Events
 ------
 
-HomEvenT is, as the name implies, based on the central concept of an
-event. Something happens, and HomEvenT reacts to it.
+MoaT is, as the name implies, based on the central concept of an
+event. Something happens, and MoaT reacts to it.
 
 Example: Somebody presses the light switch. The light … lights up. ☺
 
@@ -225,7 +225,7 @@ state if you forgot to do that manually (otherwise you'll get a cryptic
 error message instead of a lit lamp).
 
 Note that the quoting changed in the "log DEBUG" statements. The reason
-for that is the HomEvenT is stupid by design, and replaces those $things
+for that is the MoaT is stupid by design, and replaces those $things
 only when they're on their own.
 
 Oops
@@ -264,7 +264,7 @@ must not forget to also change the corresponding state, and vice
 versa. That's still tedious and error-prone.
 
 The solution is that state changes also trigger events, which get
-created by HomEvenT internally. Thus, we can do this instead:
+created by MoaT internally. Thus, we can do this instead:
 
 	>> on toggle lamp \*lamp:
 		if not exists state lamp $lamp:
@@ -326,9 +326,9 @@ makes the lamp go out five minutes after *any* button press. Consider:
   and turn the light back on.
 
 * 11min: Oops, it's dark again. You get pissed off about the timer and
-  forward your annoyance to the author of the above HomEvenT code.
+  forward your annoyance to the author of the above MoaT code.
   The author looks at the code, sees that it's “obviously correct”, deletes
-  HomEvenT and spends a ton of money on a proprietary system. The end.
+  MoaT and spends a ton of money on a proprietary system. The end.
 
 
 Anyway, let's continue with solutions that actually work.
@@ -461,15 +461,15 @@ Anyway, in principle, this is easy:
 	. 
 	>> # THE ABOVE EXAMPLE WILL NOT WORK
 
-Unfortunately, this solution will crash with a nasty error message
-instead of turning the light off.
+Unfortunately, this solution may or may not crash MoaT with a nasty error
+message instead of turning the light off.
 
-The reason for that disaster is that state-change events are running
+The reason for that disaster is that state-change events might run
 synchronously, i.e. the "set state" command waits for them to complete
-before continuing. They're also forbidden to change the state they're
-reporting about; otherwise you could get cute endless ping-pong effects.
-(Actually, that problem exists regardless … but at least the main cause
-of such chains is broken.)
+before continuing. If they do, they're also forbidden to change the state
+they're reporting about; otherwise you could get cute endless ping-pong
+effects. (Actually, that problem exists regardless … but at least the main
+cause of such chains is prevented.)
 
 The solution is an "async:" block, which is just a normal block that
 doesn't force the rest of the world to wait until the statements inside
@@ -483,15 +483,19 @@ doesn't force the rest of the world to wait until the statements inside
 				set state off lamp $lamp
 	.
 
-Of course, you still need a “on state * off …” block which cancels
+Of course, you still need an “if equal $state off” part which cancels
 the timer, but by now you should be able to write that yourself.
 
+In case you're wondering: Whether state-change events run synchronously
+depends on which MoaT version you're using and whether internal event
+handling is shunted through an external message broker. It's best to assume
+the worst-case behavior.
 
 ---------------------
 More complex examples
 ---------------------
 
-HomEvenT is supposed to be able to talk to other systems. We now implement
+MoaT is supposed to be able to talk to other systems. We now implement
 a connector to OpenHAB.
 
 To do this, install RabbitMQ. Activate its MQTT module:
@@ -503,17 +507,17 @@ Edit /etc/rabbitmq/rabbitmq.config:
 	[{rabbit,        [{tcp_listeners,    [5672]}]},
 	 {rabbitmq_mqtt, [
 	                  {allow_anonymous,  false},
-	                  {vhost,            <<"/homevent">>},
-	                  {exchange,         <<"homevent.event">>} ]}
+	                  {vhost,            <<"/moat">>},
+	                  {exchange,         <<"moat.event">>} ]}
 	].
 
 Add users:
 
-	rabbitmqctl add_vhost /homevent
+	rabbitmqctl add_vhost /moat
 	rabbitmqctl add_user openhab WellWhatever
-	rabbitmqctl add_user homevent AlsoWhatever
-	rabbitmqctl set_permissions -p /homevent openhab ".*" ".*" ".*"
-	rabbitmqctl set_permissions -p /homevent homevent ".*" ".*" ".*"
+	rabbitmqctl add_user moat AlsoWhatever
+	rabbitmqctl set_permissions -p /moat openhab ".*" ".*" ".*"
+	rabbitmqctl set_permissions -p /moat moat ".*" ".*" ".*"
 
 Configure OpenHAB to talk to MQTT:
 
@@ -523,12 +527,12 @@ Configure OpenHAB to talk to MQTT:
 	mqtt:openhab.pwd=WellWhatever
 
 	mqtt-eventbus:broker=openhab
-	mqtt-eventbus:statePublishTopic=/openhab/out/state/${item}
-	mqtt-eventbus:commandPublishTopic=/openhab/out/command/${item}
-	mqtt-eventbus:stateSubscribeTopic=/openhab/in/state/${item}
-	mqtt-eventbus:commandSubscribeTopic=/openhab/in/command/${item}
+	mqtt-eventbus:statePublishTopic=openhab/out/state/${item}
+	mqtt-eventbus:commandPublishTopic=openhab/out/command/${item}
+	mqtt-eventbus:stateSubscribeTopic=openhab/in/state/${item}
+	mqtt-eventbus:commandSubscribeTopic=openhab/in/command/${item}
 
-Teach HomEvenT to talk to AMQP:
+Teach MoaT to talk to AMQP:
 
 	if not exists module amqp: load amqp
 
@@ -538,17 +542,17 @@ Teach HomEvenT to talk to AMQP:
 			# do this if you want to spew logging to AMQP
 			log amqp DEBUG:
 					name bus logging
-					exchange "homevent.log"
+					exchange "moat.log"
 			tell amqp bus:
 					name bus events
-					exchange "homevent.log"
-					# DO NOT listen on this exchange
+					exchange "moat.log"
+					# DO NOT tell MoaT to listen on this exchange
 
 			# receive openhab messages
 			listen amqp bus:
 					name bus openhab in
-					exchange "homevent.event"
-					topic ".openhab.out.#"
+					exchange "moat.event"
+					topic "openhab.out.#"
 					prefix hab in
 					strip 3
 
@@ -556,17 +560,17 @@ Teach HomEvenT to talk to AMQP:
 			tell amqp bus:
 					name bus openhab out
 					filter hab out "**":
-					exchange "homevent.event"
-					prefix "" openhab in
+					exchange "moat.event"
+					prefix openhab in
 					strip 2
 			
 			start amqp bus
 
 	connect amqp localhost:
 			name bus
-			user "/homevent" homevent AlsoWhatever
+			user "/moat" moat AlsoWhatever
 
-Now add a switch to openhab (to file items/CONFIG.items):
+Now add a switch to openhab (edit the file items/CONFIG.items):
 
 	Switch Light_Outside "Outdoor Light" ()
 
@@ -575,7 +579,7 @@ and assign sensible tags to the light states (in file transform/onoff.map):
 	1=ON
 	0=OFF
 
-Now handle the switch in HomEvenT:
+Now handle the switch in MoaT:
 
 	on hab in command Light_Outside:
 		if equal $raw ON:
@@ -583,7 +587,7 @@ Now handle the switch in HomEvenT:
 		else:
 				log DEBUG the light shall be turned back off
 
-Of course, if the HomEvenT state changes, we need to tell openhab:
+Of course, if the MoaT state changes, we need to tell openhab:
 
 	on lights out:
 		trigger hab out command Light_Outside:
@@ -601,14 +605,14 @@ bus) that way.
 
 You should turn on rabbitmq's web interface and monitor the event rate
 while you're experimenting with this. You can also use `log amqp` to send
-all of HomEvenT's logging to an AMQP exchange, and monitor or filter them
-at your convenience. The `amqpmon` script that comes with HomEvenT is
+all of MoaT's logging to an AMQP exchange, and monitor or filter these
+messages at your convenience. The `amqpmon` script that comes with MoaT is
 useful for this.
 
-Splitting up HomEvenT
----------------------
+Splitting up MoaT
+-----------------
 
-Let's face it: HomEvenT is not bug-free; sometimes communication with one
+Let's face it: MoaT is not bug-free; sometimes communication with one
 subsystem hangs and you need to debug. Ideally without disrupting the rest
 of the system.
 
@@ -621,38 +625,137 @@ For this reason, the AMQP handlers have an additional bypass or `shunt`
 mode, which works like this:
 
 * An event that's matched by a "tell amqp … shunt" handler is not processed
-  by your HomEvenT script. Instead, it's transmitted to the message bus and
+  by MoaT, i.e. it is not passed to any event handlers.
+  Instead, it's transmitted to the message bus and
   then forgotten about. If more than one such handler matches the event,
   only one is used (this is mostly random), so you shouldn't have
   overlapping handlers. Most people use just one, without a filter,
-  and forward everything.
+  and forward everything to AMQP.
 
 * An AMQP message that's received by a "listen amqp … shunt" handler
-  is processed locally. It is *not* forwarded to any shunt handler.
+  is processed locally. It is *not* forwarded to any other shunt handler.
 
 So, let's add this to our "on amqp connect bus" example:
 
 		tell amqp bus:
 				name exchange out
-				exchange "homevent.bus"
+				exchange "moat.bus"
 				shunt
 
 		# receive openhab messages
 		listen amqp bus:
 				name exchange in
-				exchange "homevent.bus"
+				exchange "moat.bus"
 				topic "#"
 				shunt
 
 This will not change anything, except add some latency.
 
-Now, however, you can run another HomEvenT script that connects to the
-"homevent.bus" exchange, and alll events seen by one will be sent to the
+Now, however, you can run another MoaT script that connects to the
+"moat.bus" exchange, and alll events seen by one will be sent to the
 other.
 
 Note that this doesn't apply to anything else, i.e. non-saved states do not
-get shared, you don't affect the other script's wait handlers, etc.
+get shared, you cannot directly affect the other script's wait handlers, etc.
 
 If you split up your code along mostly-sensible lines, however, this should
-not be a problem.
+not be a problem. Replicating state across MoaT instances is not simple
+enough to do by MoaT script, but implementing it in MoaT itself is planned.
+
+---------------
+Do it in Python
+---------------
+
+MoaT scripts originally ran under Twisted; it was used to simplify
+programming, because the strange Deferred- and Producer/Consumer-style code
+required for non-blocking code with Twisted is too complicated for
+non-programmers who just want to turn the lights on and off.
+
+These days, there's asyncio or gevent (and even code to tie the two together).
+Thus, MoaT will ultimately migrate away from using its own script and switch
+to "real" Python.
+
+Commands
+########
+
+exec
+----
+
+You can call Python from MoaT with the `exec` statement:
+
+	exec foo.bar one two three:
+		param what ever
+
+which will load module `foo` and call its procedure `bar` like this:
+
+	foo.bar(ENV, "one", "two", "three", what="ever")
+
+Execution is synchronous, but you can always wrap it in an `async:` block.
+
+path
+----
+
+Tell MoaT where to load Python modules from.
+
+	path '/etc/moat'
+
+Environment
+###########
+
+The environment passed to Python is rather limited at the moment.
+More is planned.
+
+on
+--
+
+The `on` method is a decorator to add event handling:
+
+	@ENV.on("run","me","now", name="runme handler"):
+	def handler(event):
+		…
+
+which will call the handler whenever that event happens.
+
+trigger
+-------
+
+Trigger an event.
+
+	import datetime
+	trigger("run","me","now", some_data="some_value")
+
+Execution of event handlers always is asynchronous.
+
+do
+--
+
+Call back to MoaT.
+
+	env.do("log DEBUG Calling back")
+	env.do.log.DEBUG("Calling back")
+
+You can set context values (similar to `trigger`).
+
+If you need to use subordinate statements, prefix the keyword with an underscore.
+As usual, auto-split is done on one-word arguments, for convenience:
+
+	env.do.wait("some delay", _for="3.14 min")
+	env.do.wait("some","delay", _for=(3.14,"min"))
+
+Use an empty list as argument if you want to call a one-word sub-statement.
+
+data
+----
+
+This dict allows you to access the MoaT data store, as reported by `list`.
+
+You need to pass multi-part keys as moat.base.Name() objects.
+
+test
+----
+
+This works like `do` but mirrors MoaT's conditional tests.
+
+	if env.test('true'):
+		env.do.log.DEBUG('That works.')
 

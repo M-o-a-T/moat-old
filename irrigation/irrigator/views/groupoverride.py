@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
-
-##  Copyright © 2012, Matthias Urlichs <matthias@urlichs.de>
+from __future__ import absolute_import, print_function, division, unicode_literals
+##
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -13,8 +18,11 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
-from __future__ import division,absolute_import
 from django.views.generic import ListView,DetailView,CreateView,UpdateView,DeleteView
 from django.forms import ModelForm
 from rainman.models import GroupOverride,Site,Group,Group
@@ -46,8 +54,8 @@ class GroupOverrideParamMixin(SiteParamMixin):
 	opt_params = {'site':Site, 'group':Group}
 	opt_names = { 'site':'group__site' }
 
-	def get_params_hook(self,k):
-		super(GroupOverrideParamMixin,self).get_params_hook(k)
+	def get_params_hook(self,*a,**k):
+		super(GroupOverrideParamMixin,self).get_params_hook(*a,**k)
 		s = self.aux_data['site']
 		g = self.aux_data['group']
 		if s:
@@ -76,7 +84,6 @@ class GroupOverrideMixin(FormMixin):
 		ctx['prefix'] = prefix
 		return ctx
 
-
 class GroupOverridesView(GroupOverrideMixin,GroupOverrideParamMixin,ListView):
 	context_object_name = "groupoverride_list"
 	paginate_by = 50
@@ -84,7 +91,7 @@ class GroupOverridesView(GroupOverrideMixin,GroupOverrideParamMixin,ListView):
 class GroupOverrideView(GroupOverrideMixin,GroupOverrideParamMixin,DetailView):
 	def get_context_data(self,**k):
 		ctx = super(GroupOverrideView,self).get_context_data(**k)
-		gu = get_request().user.get_profile()
+		gu = get_profile(get_request())
 		av = limit_choices(gu.groups,**self.aux_data)
 		q = GroupOverride.objects.filter(group__in=av)
 		try:
@@ -102,7 +109,9 @@ class GroupOverrideNewView(GroupOverrideMixin,GroupOverrideParamMixin,CreateView
 	form_class = GroupOverrideForm
 	success_url="/group/time/%(id)s"
 	#success_url="/group/%(group)s/time/%(id)s"
-	def get_form(self, form_class):
+	def get_form(self, form_class=None):
+		if form_class is None:
+			form_class = self.form_class
 		form = super(GroupOverrideNewView,self).get_form(form_class)
 		form.limit_choices(**self.aux_data)
 		return form
@@ -117,7 +126,9 @@ class GroupOverrideNewView(GroupOverrideMixin,GroupOverrideParamMixin,CreateView
 
 class GroupOverrideEditView(GroupOverrideMixin,GroupOverrideParamMixin,UpdateView):
 	form_class = GroupOverrideForm
-	def get_form(self, form_class):
+	def get_form(self, form_class=None):
+		if form_class is None:
+			form_class = self.form_class
 		form = super(GroupOverrideEditView,self).get_form(form_class)
 		form.limit_choices(group=self.object.group)
 		return form

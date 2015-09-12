@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,13 +18,18 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 		Run the current schedule, watch out for rain
 		"""
 
-from __future__ import division,absolute_import
-from homevent import gevent_rpyc
+import six
+
+from moat import gevent_rpyc
 gevent_rpyc.patch_all()
 
 from traceback import format_exc,print_exc
@@ -42,7 +51,7 @@ from rainman.logging import log,log_error
 from datetime import datetime,time,timedelta
 from django.db.models import F,Q
 from django.db import transaction
-from homevent.times import humandelta
+from moat.times import humandelta
 import random
 
 METER_TIME=5*60 # meters get deprecated if no value for five minutes 
@@ -59,7 +68,7 @@ METER_MAXTIME=60*60 # need to report at least hourly, otherwise I don't believe 
 #	while True:
 #		s = set()
 #		o = _save_q.get()
-#		print >>sys.stderr,"AddSave1",id(o),o
+#		print("AddSave1",id(o),o, file=sys.stderr)
 #		s.add(o)
 #		try:
 #			while True:
@@ -70,7 +79,7 @@ METER_MAXTIME=60*60 # need to report at least hourly, otherwise I don't believe 
 #		except Empty:
 #			pass
 #
-#		print >>sys.stderr,"Save",s
+#		print("Save",s, file=sys.stderr)
 #		for i in range(3):
 #			try:
 #				save_objs(s)
@@ -78,7 +87,7 @@ METER_MAXTIME=60*60 # need to report at least hourly, otherwise I don't believe 
 #				print_exc()
 #			else:
 #				break
-#		print >>sys.stderr,"SaveDone"
+#		print("SaveDone", file=sys.stderr)
 #				
 #
 #def Save(obj):
@@ -86,8 +95,17 @@ METER_MAXTIME=60*60 # need to report at least hourly, otherwise I don't believe 
 #	if obj is not None:
 #		obj.save()
 
+from django.db import connections
+def connwrap(p,*a,**k):
+	try:
+		return p(*a,**k)
+	finally:
+		connections.close_all()
+
 class NotConnected(RuntimeError):
 	pass
+
+@six.python_2_unicode_compatible
 class TooManyOn(RuntimeError):
 	def __init__(self,valve):
 		self.valve = valve
@@ -108,9 +126,9 @@ class Command(BaseCommand):
 
 	def handle(self, *args, **options):
 		if len(args) != 1:
-			print "Choose a site:"
+			print("Choose a site:")
 			for s in Site.objects.all():
-				print s.name
+				print(s.name)
 			sys.exit(1)
 		s = Site.objects.get(name=args[0])
 		for c in s.controllers.all():
@@ -127,17 +145,14 @@ class Command(BaseCommand):
 		while True:
 			gevent.sleep(99999)
 
-
-
 class RestartService(VoidService):
 	def on_disconnect(self,*a,**k):
-		for s in sites.itervalues():
+		for s in sites.values():
 			if s.ci._local_root is self:
 				s.log("disconnected")
 				s.ci = None
 				s.run_main_task()
-				gevent.spawn_later(10,s.maybe_restart)
-
+				gevent.spawn_later(10,connwrap,s.maybe_restart)
 
 class Meter(object):
 	sum_it = False
@@ -152,12 +167,14 @@ class Meter(object):
 		return self.d.weight
 
 	def monitor_value(self,event=None,**k):
-		"""monitor value NUMBER name…"""
+		"""monitor update name…"""
 		self.refresh()
 		self.last_time = now()
 		try:
-			val = float(event[2])
-			self.add_value(val)
+			try:
+				self.add_value(event.ctx['value_delta'])
+			except KeyError:
+				self.add_value(event.ctx['value'])
 		except Exception:
 			print_exc()
 
@@ -175,7 +192,7 @@ class Meter(object):
 			return
 		if self.site.ci is None:
 			return
-		self.mon = self.site.ci.root.monitor(self.monitor_value,"monitor","value","*",*(self.d.var.split()))
+		self.mon = self.site.ci.root.monitor(self.monitor_value,"monitor","update",*(self.d.var.split()))
 
 	def log(self,txt):
 		self.site.log(("%s %s: "%(self.meter_type,self.d.name))+txt)
@@ -222,7 +239,7 @@ class FeedMeter(SumMeter):
 		try:
 			cf = MaxFlowCheck(self)
 			# Safety timer
-			timer = gevent.spawn_later(self.d.db_max_flow_wait,cf.dead)
+			timer = gevent.spawn_later(self.d.db_max_flow_wait,connwrap,cf.dead)
 
 			cf.start()
 			res = cf.q.get()
@@ -244,7 +261,7 @@ class FeedMeter(SumMeter):
 		try:
 			cf = Flusher(self)
 			# Safety timer
-			timer = gevent.spawn_later(self.d.db_max_flow_wait,cf.dead)
+			timer = gevent.spawn_later(self.d.db_max_flow_wait,connwrap,cf.dead)
 
 			cf.start()
 			res = cf.q.get()
@@ -338,10 +355,9 @@ class SunMeter(AvgMeter):
 	meter_type="sun"
 
 METERS=[]
-for m in globals().values():
+for m in list(globals().values()):
 	if hasattr(m,"meter_type"):
 		METERS.append(m)
-
 
 class SchedCommon(object):
 	def log(self,txt):
@@ -425,13 +441,13 @@ class SchedSite(SchedCommon):
 		pass
 
 	def do_shutdown(self,x,y,**k):
-		gevent.spawn_later(0.1,self.shutdown)
+		gevent.spawn_later(0.1,connwrap,self.shutdown)
 
 	def do_syncsched(self,x,y):
-		gevent.spawn_later(0.1,self.syncsched)
+		gevent.spawn_later(0.1,connwrap,self.syncsched)
 
 	def syncsched(self):
-		print >>sys.stderr,"Sync+Sched"
+		print("Sync+Sched", file=sys.stderr)
 		self.sync()
 		self.refresh()
 		self.run_sched_task(reason="Sync+Sched")
@@ -448,7 +464,7 @@ class SchedSite(SchedCommon):
 		try:
 			self.ci = rpyc.connect(host=self.s.host, port=int(self.s.port), ipv6=False, service=RestartService)
 		except Exception:
-			print >>sys.stderr,"Could not connect:",self.s.host
+			print("Could not connect:",self.s.host, file=sys.stderr)
 			raise
 
 	def maybe_restart(self):
@@ -457,7 +473,7 @@ class SchedSite(SchedCommon):
 			self.connect()
 		except Exception:
 			print_exc()
-			gevent.spawn_later(100,self.maybe_restart)
+			gevent.spawn_later(100,connwrap,self.maybe_restart)
 		else:
 			self.connect_monitors()
 
@@ -467,7 +483,7 @@ class SchedSite(SchedCommon):
 		if do_controllers:
 			for c in self.controllers:
 				c.connect_monitors()
-		for mm in self.meters.itervalues():
+		for mm in self.meters.values():
 			for m in mm:
 				m.connect_monitors()
 		self.ckf = self.ci.root.monitor(self.check_flow,"check","flow",*self.s.var.split(" "))
@@ -476,20 +492,20 @@ class SchedSite(SchedCommon):
 		self.cku = self.ci.root.monitor(self.do_shutdown,"shutdown",*self.s.var.split(" "))
 
 	def sync(self,**k):
-		print >>sys.stderr,"Sync"
+		print("Sync", file=sys.stderr)
 		for c in self.controllers:
 			c.sync()
 		for eg in self.envgroups:
 			eg.sync()
-		for mm in self.meters.itervalues():
+		for mm in self.meters.values():
 			for m in mm:
 				m.sync()
 		self.run_main_task()
 		#Save(None)
-		print >>sys.stderr,"Sync end"
+		print("Sync end", file=sys.stderr)
 	
 	def shutdown(self,**k):
-		print >>sys.stderr,"Shutdown"
+		print("Shutdown", file=sys.stderr)
 		signal.signal(signal.SIGINT,signal.SIG_DFL)
 		signal.signal(signal.SIGTERM,signal.SIG_DFL)
 		if self.running:
@@ -499,12 +515,11 @@ class SchedSite(SchedCommon):
 				eg.sync()
 			for c in self.controllers:
 				c.shutdown()
-			for mm in self.meters.itervalues():
+			for mm in self.meters.values():
 				for m in mm:
 					m.shutdown()
 		#Save(None)
 		sys.exit(0)
-
 
 	def run_schedule(self):
 		for c in self.controllers:
@@ -516,7 +531,7 @@ class SchedSite(SchedCommon):
 			eg.refresh()
 		for c in self.controllers:
 			c.refresh()
-		for mm in self.meters.itervalues():
+		for mm in self.meters.values():
 			for m in mm:
 				m.refresh()
 
@@ -535,7 +550,7 @@ class SchedSite(SchedCommon):
 
 	def has_rain(self):
 		"""Some monitor told us that it started raining"""
-		r,self.rain_timer = self.rain_timer,gevent.spawn_later(self.s.db_rain_delay,self.no_rain)
+		r,self.rain_timer = self.rain_timer,gevent.spawn_later(self.s.db_rain_delay,connwrap,self.no_rain)
 		if r:
 			r.kill()
 			return
@@ -575,10 +590,10 @@ class SchedSite(SchedCommon):
 		self._run_result = None
 		sd = self._run_delay.total_seconds()/10
 		if sd < 66: sd = 66
-		self._run = gevent.spawn_later(sd, self.run_main_task, kill=False)
+		self._run = gevent.spawn_later(sd, connwrap,self.run_main_task, kill=False)
 		if self._sched is not None:
 			self._sched.kill()
-		self._sched = gevent.spawn_later(2, self.run_sched_task, kill=False, reason="run_every")
+		self._sched = gevent.spawn_later(2, connwrap,self.run_sched_task, kill=False, reason="run_every")
 
 	def run_main_task(self, kill=True):
 		"""Run the calculation loop."""
@@ -603,7 +618,7 @@ class SchedSite(SchedCommon):
 			res = self.main_task()
 			return res
 		finally:
-			self._run = gevent.spawn_later((self._run_last+self._run_delay-n).total_seconds(), self.run_main_task, kill=False)
+			self._run = gevent.spawn_later((self._run_last+self._run_delay-n).total_seconds(), connwrap,self.run_main_task, kill=False)
 			r,self._run_result = self._run_result,None
 			self._running.release()
 			r.set(res)
@@ -647,7 +662,7 @@ class SchedSite(SchedCommon):
 					sum_val /= sum_f
 				values[t] = sum_val
 		
-		print >>sys.stderr,"Values:",values
+		print("Values:",values, file=sys.stderr)
 		h = History(site=self.s,time=now(),**values)
 		h.save()
 		return h
@@ -657,27 +672,27 @@ class SchedSite(SchedCommon):
 			c.sync_history()
 
 	def main_task(self):
-		print >>sys.stderr,"MainTask"
+		print("MainTask", file=sys.stderr)
 		self.refresh()
 		h = self.current_history_entry(3)
 		self.sync_history()
 			
-		gevent.spawn_later(2,self.sched_task)
-		print >>sys.stderr,"MainTask end",h
+		gevent.spawn_later(2,connwrap,self.sched_task)
+		print("MainTask end",h, file=sys.stderr)
 		return h
 
 	def run_sched_task(self,delayed=False,reason=None,kill=True, **k):
 		if self._sched_running is not None:
-			print >>sys.stderr,"RunSched.running",reason
+			print("RunSched.running",reason, file=sys.stderr)
 			return self._sched_running.get()
 		if self._sched is not None:
 			if kill:
 				self._sched.kill()
 		if delayed:
-			print >>sys.stderr,"RunSched.delay",reason
-			self._sched = gevent.spawn_later(10,self.run_sched_task,kill=False,reason="Timer 10")
+			print("RunSched.delay",reason, file=sys.stderr)
+			self._sched = gevent.spawn_later(10,connwrap,self.run_sched_task,kill=False,reason="Timer 10")
 			return
-		print >>sys.stderr,"RunSched",reason
+		print("RunSched",reason, file=sys.stderr)
 		self._sched = None
 		self._sched_running = AsyncResult()
 		try:
@@ -687,14 +702,14 @@ class SchedSite(SchedCommon):
 		finally:
 			r,self._sched_running = self._sched_running,None
 			if self._sched is None:
-				self._sched = gevent.spawn_later(600,self.run_sched_task,kill=False,reason="Timer 600")
-			r.set(None)
-		print >>sys.stderr,"RunSched end"
+				self._sched = gevent.spawn_later(600,connwrap,self.run_sched_task,kill=False,reason="Timer 600")
+			if r is not None:
+				r.set(None)
+		print("RunSched end", file=sys.stderr)
 
 	def sched_task(self, kill=True):
 		self.refresh()
 		self.run_schedule()
-
 
 class SchedController(SchedCommon):
 	"""Mirrors a controller"""
@@ -786,26 +801,33 @@ class SchedValve(SchedCommon):
 	def __init__(self,v):
 		pass
 
-	def _on(self,sched=None,duration=None):
-		print >>sys.stderr,"Open",self.v.var
+	def _on(self,caller,sched=None,duration=None):
+		print("Open",caller,self.v.var, file=sys.stderr)
 		self.site.delay_on()
-		if self.controller.has_max_on():
-			print >>sys.stderr,"… but too many:", " ".join(str(v) for v in self.controller.c.valves.all() if SchedValve(v).on)
-			if sched:
-				sched.update(seen = False)
-			self.on = False
-			self.log("NOT running for %s: too many"%(duration,))
-			raise TooManyOn(self)
 		if duration is None and sched is not None:
 			duration = sched.duration
+		if self.controller.has_max_on():
+			print("… but too many:", ", ".join(str(v) for v in self.controller.c.valves.all() if SchedValve(v).on), file=sys.stderr)
+			if sched:
+				sched.update(seen = False)
+			self.log("NOT running %s for %s: too many"%(self.v,duration,))
+			raise TooManyOn(self)
 		if duration is None:
 			self.log("Run (indefinitely)")
 			self.site.send_command("set","output","on",*(self.v.var.split()))
 		else:
 			self.log("Run for %s"%(duration,))
-			if not isinstance(duration,(int,long)):
+			if not isinstance(duration,six.integer_types):
 				duration = duration.total_seconds()
-			self.site.send_command("set","output","on",*(self.v.var.split()), sub=(("for",duration),("async",)))
+			try:
+				self.site.send_command("set","output","on",*(self.v.var.split()), sub=(("for",duration),("async",)))
+			except Exception:
+				# Something broke. Try to turn this thing off.
+				self.log(format_exc()+repr(context))
+				
+				self.site.send_command("set","output","off",*(self.v.var.split()))
+				raise RuntimeError("Could not start (logged)")
+
 		if sched is not None:
 			if self.v.verbose:
 				self.log("Opened for %s"%(sched,))
@@ -822,7 +844,7 @@ class SchedValve(SchedCommon):
 		if self.on:
 			if self.v.verbose:
 				self.log("Closing "+str(num))
-			print >>sys.stderr,"Close",self.v.var
+			print("Close",self.v.var, file=sys.stderr)
 		try:
 			self.site.send_command("set","output","off",*(self.v.var.split()))
 		except NotConnected:
@@ -835,7 +857,7 @@ class SchedValve(SchedCommon):
 	def run_schedule(self):
 		if not self.sched_lock.acquire(blocking=False):
 			if self.v.verbose:
-				print >>sys.stderr,"SCHED LOCKED1 %s" % (self.v.name,)
+				print("SCHED LOCKED1 %s" % (self.v.name,), file=sys.stderr)
 			return
 		try:
 			self._run_schedule()
@@ -850,7 +872,7 @@ class SchedValve(SchedCommon):
 			self.sched_job = None
 		if self.locked:
 			if self.v.verbose:
-				print >>sys.stderr,"SCHED LOCKED2 %s" % (self.v.name,)
+				print("SCHED LOCKED2 %s" % (self.v.name,), file=sys.stderr)
 			return
 		n = now()
 
@@ -859,13 +881,13 @@ class SchedValve(SchedCommon):
 				self.sched.refresh()
 				if self.sched.start+self.sched.duration <= n:
 					if self.v.verbose:
-						print >>sys.stderr,"Turn off: %s+%s <= %s" % (self.sched.start,self.sched.duration,n)
+						print("Turn off: %s+%s <= %s" % (self.sched.start,self.sched.duration,n), file=sys.stderr)
 					self._off(2)
 					self.sched = None
 				else:
-					self.sched_job = gevent.spawn_later((self.sched.start+self.sched.duration-n).total_seconds(),self.run_sched_task,reason="_run_schedule 1")
+					self.sched_job = gevent.spawn_later((self.sched.start+self.sched.duration-n).total_seconds(),connwrap,self.run_sched_task,reason="_run_schedule 1")
 					if self.v.verbose:
-						print >>sys.stderr,"SCHED LATER %s: %s" % (self.v.name,humandelta(self.sched.start+self.sched.duration-n))
+						print("SCHED LATER %s: %s" % (self.v.name,humandelta(self.sched.start+self.sched.duration-n)), file=sys.stderr)
 					return
 		except ObjectDoesNotExist:
 			pass # somebody deleted it *shrug*
@@ -880,35 +902,35 @@ class SchedValve(SchedCommon):
 				self.sched_ts = sched.start+sched.duration
 				if sched.start+sched.duration > n: # still running
 					if self.v.verbose:
-						print >>sys.stderr,"SCHED RUNNING %s: %s" % (self.v.name,humandelta(sched.start+sched.duration-n))
+						print("SCHED RUNNING %s: %s" % (self.v.name,humandelta(sched.start+sched.duration-n)), file=sys.stderr)
 					try:
-						self._on(sched, sched.start+sched.duration-n)
+						self._on(1,sched, sched.start+sched.duration-n)
 					except TooManyOn:
 						self.log("Could not schedule: too many open valves")
 					except NotConnected:
-						self.log("Could not schedule: connection to HomEvenT failed")
+						self.log("Could not schedule: connection to MoaT failed")
 					return
 
 		try:
 			sched = self.v.schedules.filter(start__gte=self.sched_ts).order_by("start")[0]
 		except IndexError:
 			if self.v.verbose:
-				print >>sys.stderr,"SCHED EMPTY %s: %s" % (self.v.name,str_tz(self.sched_ts))
+				print("SCHED EMPTY %s: %s" % (self.v.name,str_tz(self.sched_ts)), file=sys.stderr)
 			self._off(3)
 			return
 
 		if sched.start > n:
 			if self.v.verbose:
-				print >>sys.stderr,"SCHED %s: sched %d in %s" % (self.v.name,sched.id,humandelta(sched.start-n))
+				print("SCHED %s: sched %d in %s" % (self.v.name,sched.id,humandelta(sched.start-n)), file=sys.stderr)
 			self._off(4)
-			self.sched_job = gevent.spawn_later((sched.start-n).total_seconds(),self.run_sched_task,reason="_run_schedule 2")
+			self.sched_job = gevent.spawn_later((sched.start-n).total_seconds(),connwrap,self.run_sched_task,reason="_run_schedule 2")
 			return
 		try:
-			self._on(sched)
+			self._on(2,sched)
 		except TooManyOn:
 			self.log("Could not schedule: too many open valves")
 		except NotConnected:
-			self.log("Could not schedule: connection to HomEvenT failed")
+			self.log("Could not schedule: connection to MoaT failed")
 	
 	def run_sched_task(self,reason="valve"):
 		self.sched_job = None
@@ -918,6 +940,8 @@ class SchedValve(SchedCommon):
 		if self._flow_check is not None:
 			if self._flow_check.add_flow(val):
 				return
+		if self.v.verbose:
+			print("FLOW %s: %s %s" % (self.v.name,self.flow,val), file=sys.stderr)
 		self.flow += val
 
 	def check_flow(self,**k):
@@ -938,12 +962,12 @@ class SchedValve(SchedCommon):
 	def connect_monitors(self):
 		if self.site.ci is None:
 			return
-		self.mon = self.site.ci.root.monitor(self.watch_state,"output","set","*","*",*(self.v.var.split()))
+		self.mon = self.site.ci.root.monitor(self.watch_state,"output","change",*self.v.var.split())
 		self.ckf = self.site.ci.root.monitor(self.check_flow,"check","flow",*self.v.var.split())
 		
 	def watch_state(self,event=None,**k):
-		"""output set OLD NEW NAME"""
-		on = (str(event[3]).lower() in ("1","true","on"))
+		"""output change NAME ::value ON"""
+		on = (str(event.ctx['value']).lower() in ("1","true","on"))
 		if self._flow_check is not None:
 			# TODO
 			self.on = on
@@ -954,9 +978,9 @@ class SchedValve(SchedCommon):
 			return
 		try:
 			if on != self.on:
-				print >>sys.stderr,"Report %s" % ("ON" if on else "OFF"),self.v.var
 				n=now()
-				if self.sched is not None and self.sched.start+self.sched.duration <= n:
+				print("Report %s" % ("ON" if on else "OFF"),self.v.var,self.sched, file=sys.stderr)
+				if self.sched is not None and not on:
 					self.sched.update(db_duration=(n-self.sched.start).total_seconds())
 					self.sched.refresh()
 					self.sched_ts = self.sched.start+self.sched.duration
@@ -966,7 +990,7 @@ class SchedValve(SchedCommon):
 				if not on:
 					duration = n-self.on_ts
 					maxflow = self.v.flow * duration.total_seconds()
-					if (not flow and not self.v.feed.var) or flow > maxflow:
+					if (not flow or not self.v.feed.var) or flow > 2*maxflow:
 						flow = maxflow
 				self.new_level_entry(flow)
 				if not on:
@@ -995,8 +1019,9 @@ class SchedValve(SchedCommon):
 				self.v.update(time = lv.time)
 				self.v.refresh()
 				#Save(self.v)
-		if (n-self.v.time).total_seconds() > 3500:
-			self.new_level_entry()
+		if (n-self.v.time).total_seconds() >= 295:
+			flow,self.flow = self.flow,0
+			self.new_level_entry(flow)
 
 	def new_level_entry(self,flow=0):
 		self.site.current_history_entry()
@@ -1022,7 +1047,7 @@ class SchedValve(SchedCommon):
 			ts=h.time
 
 		if self.v.verbose:
-			self.log("Apply env %f, rain %r"%(sum_f,sum_r))
+			self.log("Apply env %f, rain %r,, flow %f = %f" % (sum_f,sum_r,flow,flow/self.v.area))
 
 		if self.v.time == ts:
 			return
@@ -1041,6 +1066,10 @@ class SchedValve(SchedCommon):
 
 		lv = Level(valve=self.v,time=ts,level=self.v.level,flow=flow)
 		lv.save()
+
+		if self.on and not (self.schedule and self.schedule.forced) and level < self.v.stop_level:
+			self._off()
+
 
 	def log(self,txt):
 		log(self.v,txt)
@@ -1079,7 +1108,7 @@ class FlowCheck(object):
 					raise RuntimeError("cannot turn off: "+repr(valve))
 			self.locked.add(valve)
 		try:
-			self.valve._on(duration=self.valve.feed.d.max_flow_wait)
+			self.valve._on(3,duration=self.valve.feed.d.max_flow_wait)
 		except NotConnected:
 			self._unlock()
 			raise
@@ -1138,7 +1167,7 @@ class FlowCheck(object):
 
 	def run(self):
 		# Safety timer
-		self.timer = gevent.spawn_later(self.valve.feed.d.db_max_flow_wait, self.dead, kill=False)
+		self.timer = gevent.spawn_later(self.valve.feed.d.db_max_flow_wait, connwrap,self.dead, kill=False)
 
 		self.start()
 		res = self.q.get()
@@ -1204,7 +1233,7 @@ class MaxFlowCheck(object):
 		valves = sorted(self.feed.valves, reverse=True, key=attrgetter('v.flow'))
 		for valve in valves:
 			try:
-				valve._on(duration=self.feed.d.max_flow_wait)
+				valve._on(4,duration=self.feed.d.max_flow_wait)
 			except TooManyOn:
 				pass
 			else:
@@ -1259,7 +1288,7 @@ class MaxFlowCheck(object):
 		
 	def run(self):
 		# Safety timer
-		self.timer = gevent.spawn_later(self.feed.d.db_max_flow_wait,cf.dead,False)
+		self.timer = gevent.spawn_later(self.feed.d.db_max_flow_wait,connwrap,cf.dead,False)
 
 		self.start()
 		res = self.q.get()
@@ -1310,7 +1339,7 @@ class Flusher(object):
 			for valve in v:
 				try:
 					self.on = valve
-					valve._on(duration=20)
+					valve._on(5,duration=20)
 				except TooManyOn:
 					pass
 				else:

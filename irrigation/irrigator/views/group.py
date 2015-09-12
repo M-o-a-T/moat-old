@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
-
-##  Copyright © 2012, Matthias Urlichs <matthias@urlichs.de>
+from __future__ import absolute_import, print_function, division, unicode_literals
+##
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -13,8 +18,11 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
-from __future__ import division,absolute_import
 from django.views.generic import ListView,DetailView,CreateView,UpdateView,DeleteView
 from django.forms import ModelForm
 from rainman.models import Group,Site
@@ -41,7 +49,6 @@ class GroupForm(ModelForm):
 			v = v.filter(controller__site__id=site.id)
 		self.fields['valves'].queryset = v
 
-
 class GroupMixin(FormMixin):
 	model = Group
 	context_object_name = "group"
@@ -59,7 +66,9 @@ class GroupView(GroupMixin,DetailView):
 class GroupNewView(GroupMixin,SiteParamMixin,CreateView):
 	form_class = GroupForm
 	success_url="/group/%(id)s"
-	def get_form(self, form_class):
+	def get_form(self, form_class=None):
+		if form_class is None:
+			form_class = self.form_class
 		form = super(GroupNewView,self).get_form(form_class)
 		form.limit_choices(**self.aux_data)
 		return form
@@ -67,7 +76,9 @@ class GroupNewView(GroupMixin,SiteParamMixin,CreateView):
 class GroupEditView(GroupMixin,SiteParamMixin,UpdateView):
 	form_class = GroupForm
 	success_url="/group/%(id)s"
-	def get_form(self, form_class):
+	def get_form(self, form_class=None):
+		if form_class is None:
+			form_class = self.form_class
 		form = super(GroupEditView,self).get_form(form_class)
 		form.limit_choices(**self.aux_data)
 		return form

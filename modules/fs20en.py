@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,27 +18,29 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This code implements a listener for energy monitoring.
 
 """
 
-from __future__ import division,absolute_import
-
-from homevent.module import Module
-from homevent.statement import AttributedStatement,Statement, main_words
-#from homevent.check import Check,register_condition,unregister_condition
-from homevent.run import simple_event
-#from homevent.event import Event
-#from homevent.context import Context
-from homevent.base import Name,SName
-from homevent.fs20 import recv_handler, PREFIX
-from homevent.collect import Collection,Collected
-from homevent.check import register_condition,unregister_condition
-from homevent.logging import log,TRACE,DEBUG
-from homevent.times import now,humandelta
-from homevent.timeslot import Timeslots,Timeslotted,Timeslot,collision_filter
+from moat.module import Module
+from moat.statement import AttributedStatement,Statement, main_words
+#from moat.check import Check,register_condition,unregister_condition
+from moat.run import simple_event
+#from moat.event import Event
+#from moat.context import Context
+from moat.base import Name,SName
+from moat.fs20 import recv_handler, PREFIX
+from moat.collect import Collection,Collected
+from moat.check import register_condition,unregister_condition
+from moat.logging import log,TRACE,DEBUG
+from moat.times import now,humandelta
+from moat.timeslot import Timeslots,Timeslotted,Timeslot,collision_filter
 
 PREFIX_ENERGY = 'n'
 
@@ -61,8 +67,8 @@ en_proc_gas.interval_mod = -0.5
 en_procs = [ None,
 			 None, # power meter
 			 None, # power monitor
-             en_proc_gas, # gas meter
-           ]
+			 en_proc_gas, # gas meter
+		   ]
 
 class ENs(Collection):
 	name = Name("fs20","en")
@@ -105,7 +111,7 @@ class en(Collected,Timeslotted):
 
 	def event(self,ctx,data):
 		d={}
-		for m,n in data.iteritems():
+		for m,n in data.items():
 			try: n = n * self.faktor[m]
 			except KeyError: pass
 			else: data[m] = n
@@ -129,15 +135,15 @@ class en(Collected,Timeslotted):
 			return "%s %d: (never)" % (en_procs[self.group].en_name, self.code)
 
 	def list(self):
-		yield("name",self.name)
+		yield super(en,self)
 		yield("group",self.group)
 		yield("groupname",en_procs[self.group].en_name)
 		yield("code",self.code)
 		if self.last:
 			yield ("last",self.last)
 		if self.last_data:
-			for k,v in self.last_data.iteritems(): yield ("last_"+k,v)
-		for k,v in self.faktor.iteritems(): yield ("faktor_"+k,v)
+			for k,v in self.last_data.items(): yield ("last_"+k,v)
+		for k,v in self.faktor.items(): yield ("faktor_"+k,v)
 		if self.slot:
 			for k,v in self.slot.list(): yield ("slot_"+k,v)
 	
@@ -153,7 +159,7 @@ class en(Collected,Timeslotted):
 class SomeNull(Exception): pass
 
 def flat(r):
-	for a,b in r.iteritems():
+	for a,b in r.items():
 		yield a
 		yield b
 
@@ -238,7 +244,6 @@ class en2_handler(en_handler):
 
 		super(en2_handler,self).dataReceived(ctx, xd, handler, timedelta)
 
-
 class FS20en(AttributedStatement):
 	name = "fs20 en"
 	doc = "declare an FS20 en monitor"
@@ -268,14 +273,14 @@ Known types:
 		en(SName(event), self.group,self.code,ctx, self.faktor, self.slot, self.delta)
 
 class FS20enDelta(Statement):
-        name = "delta"
-        doc = "report difference"
-        long_doc=u"""\
+	name = "delta"
+	doc = "report difference"
+	long_doc=u"""\
 delta
-        Report the difference between the old and new values.
+	Report the difference between the old and new values.
 delta up
-        Same, but assume that the value only increases.
-        Used for counters.
+	Same, but assume that the value only increases.
+	Used for counters.
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
@@ -287,7 +292,6 @@ delta up
 		else:
 			raise SyntaxError(u'Usage: delta')
 FS20en.register_statement(FS20enDelta)
-
 
 class FS20enScale(Statement):
 	name = "scale"
@@ -361,7 +365,6 @@ Known types:
 		raise SyntaxError(u"Usage: ‹fs20 en› ‹name…›: ‹code›: Unknown type")
 FS20en.register_statement(FS20encode)
 
-
 class FS20enVal(Statement):
 	name = "set fs20 en"
 	doc = "Set the last-reported value for a device"
@@ -378,7 +381,6 @@ set fs20 en ‹type› ‹value› ‹name…›
 		d = ENs[Name(*event[2:])]
 		if d.last_data is None: d.last_data = {}
 		d.last_data[event[0]] = float(event[1])
-
 
 class fs20en(Module):
 	"""\

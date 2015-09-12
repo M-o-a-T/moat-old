@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,25 +18,29 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This code implements basic commands to access FS20 switches.
 
 """
 
-from __future__ import division,absolute_import
+import six
 
-from homevent.module import Module
-from homevent.logging import log,DEBUG,TRACE,INFO,WARN
-from homevent.statement import AttributedStatement,Statement, main_words
-from homevent.run import simple_event
-from homevent.event import Event
-from homevent.context import Context
-from homevent.check import register_condition,unregister_condition
-from homevent.base import Name,SName
-from homevent.collect import Collection,Collected
-from homevent.fs20 import from_hc, from_dev, to_hc, to_dev, WrongDatagram, handler_names
-from homevent.fs20sw import group
+from moat.module import Module
+from moat.logging import log,DEBUG,TRACE,INFO,WARN
+from moat.statement import AttributedStatement,Statement, main_words
+from moat.run import simple_event
+from moat.event import Event
+from moat.context import Context
+from moat.check import register_condition,unregister_condition
+from moat.base import Name,SName
+from moat.collect import Collection,Collected
+from moat.fs20 import from_hc, from_dev, to_hc, to_dev, WrongDatagram, handler_names
+from moat.fs20sw import group
 
 codes = {}
 devs = {}
@@ -72,18 +80,18 @@ switch_codes = {
 }
 
 switch_names = {}
-for a,b in switch_codes.iteritems():
+for a,b in switch_codes.items():
 	if b is not None:
 		switch_names[b]=a
 
+@six.python_2_unicode_compatible
 class CannotDoError(RuntimeError):
 	"""can't do this thing"""
 	def __init__(self,switch,what):
 		self.switch = switch
 		self.what = what
-	def __unicode__(self):
+	def __str__(self):
 		return u"%s cannot do ‹%s›" % (unicode(self.switch), self.what)
-		
 
 class SwitchGroups(Collection):
 	name = Name("fs20","code")
@@ -94,6 +102,7 @@ class igroup(group):
 	def __init__(self):
 		super(igroup,self).__init__(self.code,6)
 
+@six.python_2_unicode_compatible
 class SwitchGroup(Collected,igroup):
 	"""\
 	Switches which share a house code.
@@ -114,9 +123,9 @@ class SwitchGroup(Collected,igroup):
 		return str(to_hc(self.code))
 
 	def list(self):
-		yield("name",self.name)
+		yield super(SwitchGroup,self)
 		yield("code",to_hc(self.code))
-		for d in self.devs.itervalues():
+		for d in self.devs.values():
 			yield("device",d.name)
 
 	def delete(self,ctx=None):
@@ -124,7 +133,7 @@ class SwitchGroup(Collected,igroup):
 		group.delete(self)
 		super(SwitchGroup,self).delete()
 
-	def __unicode__(self):
+	def __str__(self):
 		return u"FS20_SwitchGroup ‹%s›" % (self.name,)
 
 	def __repr__(self):
@@ -138,7 +147,7 @@ class SwitchGroup(Collected,igroup):
 #		if dc % 100 == 44 or dc // 100 == 44:
 #			raise SyntaxError("Devices cannot have group or master codes")
 		if switch.code in self.devs:
-			raise RuntimeError("Device exists (%s in %s)" % (unicode(self.codes[switch.code]), unicode(self)))
+			raise RuntimeError("Device exists (%s in %s)" % (six.text_type(self.codes[switch.code]), six.text_type(self)))
 
 		self.devs[switch.code] = switch
 
@@ -188,6 +197,7 @@ class Switches(Collection):
 Switches = Switches()
 Switches.does("del")
 
+@six.python_2_unicode_compatible
 class Switch(Collected):
 	"""\
 	This is the internal representation of a single fs20-addressable
@@ -211,7 +221,7 @@ class Switch(Collected):
 		return str(self.parent.name)+" "+str(to_dev(self.code))
 
 	def list(self):
-		yield ("name",self.name)
+		yield super(Switch,self)
 		yield ("code",to_dev(self.code))
 		yield ("parent",self.parent.name)
 		yield ("parentcode", to_hc(self.parent.code))
@@ -235,7 +245,7 @@ class Switch(Collected):
 		del self.parent.devs[self.code]
 		super(Switch,self).delete()
 
-	def __unicode__(self):
+	def __str__(self):
 		return u"FS20_Switch ‹%s›" % (self.name,)
 
 	def __repr__(self):
@@ -294,10 +304,8 @@ class Switch(Collected):
 			ctx.ext = ext
 		simple_event(ctx, "input","fs20", *self.name)
 
-
 	def getReply(self, ext=None, handler=None):
 		raise NotImplementedError
-
 
 class FS20switches(AttributedStatement):
 	name = "fs20 switch"
@@ -357,7 +365,6 @@ fs20 switch ‹house_code› ‹name…›
 	def add_sw(self,s):
 		self.new_sw.append(s)
 
-
 class FS20code(Statement):
 	name = "code"
 	doc = "Set the house code for a new switch group"
@@ -372,7 +379,6 @@ fs20 ‹name…›:
 			raise SyntaxError(u"Usage: code ‹code›")
 		self.parent.code = from_hc(event[0])
 FS20switches.register_statement(FS20code)
-
 
 class FS20addswitch(AttributedStatement):
 	name = "add"
@@ -401,7 +407,6 @@ add ‹name…›:
 		self.parent.add_sw(Switch(self.code, name, handler=handler))
 FS20switches.register_statement(FS20addswitch)
 
-
 class FS20swcode(Statement):
 	name = "code"
 	doc = "Set the device code for a new switch"
@@ -418,8 +423,6 @@ fs20 ‹name…›:
 		self.parent.code = from_dev(event[0])
 FS20addswitch.register_statement(FS20swcode)
 
-
-
 class FS20delswitch(Statement):
 	name = "del"
 	doc = "Delete a switch"
@@ -435,7 +438,6 @@ del ‹name…›
 		name = SName(event)
 		self.parent.del_sw(Switches[name])
 FS20switches.register_statement(FS20delswitch)
-
 
 class FS20send(AttributedStatement):
 	name = "send fs20"
@@ -468,7 +470,6 @@ send fs20 ‹msg› -|‹aux› ‹name…›
 			handler = None
 		d.set(event[0],ext, handler=handler)
 
-
 class FS20via(Statement):
 	name = "via"
 	doc = "Use a specific sender"
@@ -484,8 +485,6 @@ via ‹name…›
 		self.parent.handler = SName(event)
 FS20send.register_statement(FS20via)
 FS20addswitch.register_statement(FS20via)
-
-
 
 class fs20switch(Module):
 	"""\

@@ -1,5 +1,6 @@
-/homevent
-/python-homevent
+/moat
+/python-moat
+/python3-moat
 /*.substvars
 /*.debhelper
 /files

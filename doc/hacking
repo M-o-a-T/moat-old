@@ -22,19 +22,19 @@ Logging
 -------
 
 In addition to the 'normal' log levels, there are also a few subsystems
-in HomEvenT whose logging can be turned on separately:
+in MoaT whose logging can be turned on separately:
 
 	scripts/daemon.py --trace=DEBUG,onewire=TRACE
 
 This statement would enable all debugging levels for the onewire
 subsystem; the console output would not actually contain these because
-of the DEBUG, but you could log them separately from within HomEvenT.
+of the DEBUG, but you could log them separately from within MoaT.
 
 The following subsystems are defined:
 
 * onewire
 
-  This logs all transactions betweenHomEvenT and the onewire server(s).
+  This logs all transactions betweenMoaT and the onewire server(s).
 
 * parser
 
@@ -77,7 +77,7 @@ The HomEvent code you write may contain things like …
 patiently sleeping (or, worse, twiddling its thumbs) until ten seconds
 have passed. Instead, there's a Deferred() object that has those three
 command enqueued onto it (that's done by
-homevent.statement.CompoundStatement.run() — and all *that* does is to
+moat.statement.CompoundStatement.run() — and all *that* does is to
 queue all the "run" methods of the sub-statements onto that Deferred
 thing.
 
@@ -121,18 +121,18 @@ I don't even have arithmetic yet, simply because I don't need it yet.
 (But that will change, and some "var eval" and "if eval" will eventually
 happen.)
 
-On that topic: HomEvenT understands multi-word commands by the simple
+On that topic: MoaT understands multi-word commands by the simple
 expedient of selecting for the longest common prefix. That does mean
 that if you have both "load" and "load dir" commands you cannot load a
 module named "dir" because that selects the wrong command. (Duh.)
 In your own hacking, keep the number of conflicts to a minimum.
 
-Also, HomEvenT has no such concept as pattern matching, string
+Also, MoaT has no such concept as pattern matching, string
 concatenation, and whatnot. , other than a simple(-minded) "this list of
 words looks the same as that one, if you disregard anything that startes
 with an asterisk in the second list", which is how event matching works.
 That's also intentional. Instead of convoluted single-string names, use
-simple multi-part names: HomEvenT uses them for its internal objects
+simple multi-part names: MoaT uses them for its internal objects
 *everywhere*. In your own hacking, please do likewise.
 
 Event matching also assigns variable names. Variables are interpolated
@@ -169,18 +169,18 @@ externalwhatever on foo bar").
 
 The reason for the somewhat convoluted syntax of the last command is
 that variable-length stuff goes at the end, and names of things in
-HomEvenT are (supposed to be) always variable-length. In other words,
+MoaT are (supposed to be) always variable-length. In other words,
 your code should use "Name(event[place:])" as the lookup key.
 Again, see the existing code for plenty of examples.
 
-"Name" is defined in the homevent.base module. It's just a tuple which
+"Name" is defined in the moat.base module. It's just a tuple which
 knows how to print itself more nicely.
 
 
 Send patches!
 -------------
 
-Seventh, patches to make HomEvenT do new shiny interesting things (or
+Seventh, patches to make MoaT do new shiny interesting things (or
 even boring everyday things that it can't do yet) are definitely welcome!
 
 
@@ -197,14 +197,14 @@ necessary, a few random delays don't hurt if that saves
 you from writing a custom daemon just to test stuff.
 Just make sure that you *do* verify the intended output …
 
-HomEvenT, right now, has a test system that could do with some
+MoaT, right now, has a test system that could do with some
 improvement. It simply traces everything and then checks that the traces
 match.
 
 While testing, "wait" statements are only used to prevent everything from
 happening at once; they don't really slow down anything unless the
 "debug force" sub-command is given; see e.g. the FS20 testcase. A "debug
-reset" sub-command can be used to update HomEvenT's idea of how much
+reset" sub-command can be used to update MoaT's idea of how much
 time has really elapsed; use this if you have real-time wait commands
 which follow fake ones.
 
@@ -243,7 +243,7 @@ line on top. Strings with UTF-8 characters, including docstrings,
 shall be marked as Unicode.
 
 I'm somewhat annoyed at the fact that Python's standard encoding is still
-ASCII instead of UTF-8. I changed that on my system, and frankly HomEvenT
+ASCII instead of UTF-8. I changed that on my system, and frankly MoaT
 doesn't work otherwise, simply because I have better things to do than
 to sprinkle .encode("utf-8") into every print()'s and write()'s argument
 list – especially when the latter must only be done when talking to the

@@ -1,8 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -15,11 +19,15 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
-from homevent import patch;patch()
-from homevent.reactor import ShutdownHandler
-from homevent.module import load_module
-from homevent.statement import main_words
+from moat import patch;patch()
+from moat.reactor import ShutdownHandler
+from moat.module import load_module
+from moat.statement import main_words
 from test import run
 
 input = """\
@@ -32,6 +40,10 @@ list wait Foo Bar
 wait Foo Bar:
 	for 0.1
 	update
+on Heya:
+	log ERROR No Want Heya
+on Heyu:
+	log DEBUG Yes Want Heyu
 block:
 	if exists wait Foo Baz:
 		log ERROR No2
@@ -41,9 +53,23 @@ block:
 	wait X2: for 0.2
 	trigger DoNow $wait
 wait X3: for 0.1
+block:
+	try:
+		wait:
+			for 0.1
+			timeout
+		log ERROR No timeout
+	catch DelayReached:
+		log DEBUG Yes timeout
+
 async:
 	wait Foo Baz: until 8 min
 	trigger Heya
+async:
+	wait Foo Bazi:
+		until 9 min
+		soft
+	trigger Heyu
 wait: for 0.1
 block:
 	if exists wait Foo Baz:
@@ -56,6 +82,7 @@ on whatever:
 trigger whatever :sync
 wait: for 0.3
 del wait Foo Baz
+del wait Foo Bazi
 block:
 	if exists wait Foo Baz:
 		log ERROR No3
@@ -73,6 +100,7 @@ load_module("wait")
 load_module("block")
 load_module("logging")
 load_module("ifelse")
+load_module("errors")
 load_module("on_event")
 
 run("wait",input)

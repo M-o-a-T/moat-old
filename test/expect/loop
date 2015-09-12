@@ -1,35 +1,35 @@
 EVENT: startup
      : startup=True
 EVENT: wait¦start¦BEFORE
-     : loglevel=0
      : end_time=0.2
-EVENT: wait¦start¦Foo¦Bar
      : loglevel=0
+EVENT: wait¦start¦Foo¦Bar
      : end_time=1.9
+     : loglevel=0
 TRACE 2003-04-05 06:07:08.250000 BEFORE: Fake timer done
 EVENT: wait¦done¦BEFORE
      : loglevel=0
 DEBUG Start
 DEBUG waiting
 EVENT: wait¦start¦DURING
-     : loglevel=0
      : end_time=1.0
+     : loglevel=0
 TRACE 2003-04-05 06:07:09.100000 DURING: Fake timer done
 DEBUG testing
 DEBUG waiting
 EVENT: wait¦done¦DURING
      : loglevel=0
 EVENT: wait¦start¦DURING
-     : loglevel=0
      : end_time=1.8
+     : loglevel=0
 TRACE 2003-04-05 06:07:09.800000 DURING: Fake timer done
 DEBUG testing
 DEBUG waiting
 EVENT: wait¦done¦DURING
      : loglevel=0
 EVENT: wait¦start¦DURING
-     : loglevel=0
      : end_time=2.5
+     : loglevel=0
 TRACE 2003-04-05 06:07:09.950000 Foo¦Bar: Fake timer done
 EVENT: wait¦done¦Foo¦Bar
      : loglevel=0
@@ -39,8 +39,8 @@ DEBUG Done
 EVENT: wait¦done¦DURING
      : loglevel=0
 EVENT: wait¦start¦AFTER
-     : loglevel=0
      : end_time=2.6
+     : loglevel=0
 TRACE 2003-04-05 06:07:10.700000 AFTER: Fake timer done
 EVENT: wait¦done¦AFTER
      : loglevel=0

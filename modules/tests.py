@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,6 +18,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This code contains several test statements.
@@ -23,13 +31,13 @@ monitor test ...
 
 """
 
-from __future__ import division,absolute_import
+import six
 
-from homevent.statement import Statement, main_words
-from homevent.event import Event
-from homevent.run import simple_event
-from homevent.monitor import Monitor,MonitorHandler
-from homevent.in_out import register_input,register_output, unregister_input,unregister_output, Input,Output
+from moat.statement import Statement, main_words
+from moat.event import Event
+from moat.run import simple_event
+from moat.monitor import Monitor,MonitorHandler
+from moat.in_out import register_input,register_output, unregister_input,unregister_output, Input,Output
 from weakref import WeakValueDictionary
 from random import Random
 
@@ -69,12 +77,11 @@ monitor test MIN MAX STEP
 			raise SyntaxError("Events need at least one parameter")
 		self.values["_min"] = int(event[0])
 		self.values["_max"] = int(event[1])
-		self.values["params"] = ("test",unicode(event[0])+u"…"+unicode(event[1]))
+		self.values["params"] = ("test",six.text_type(event[0])+u"…"+six.text_type(event[1]))
 		if len(event) > 2:
 			self.values["_step"] = int(event[2])
 
 		super(TestMonitor,self).run(ctx,**k)
-
 
 ins = WeakValueDictionary()
 class FakeInput(Input):
@@ -86,8 +93,7 @@ class FakeInput(Input):
 		ins[self.name]=self
 
 	def list(self):
-		for r in super(FakeInput,self).list():
-			yield r
+		yield super(FakeInput,self)
 		if self.value is not None:
 			yield ("value",self.value)
 
@@ -102,8 +108,7 @@ class FakeOutput(Output):
 		ins[self.name].value = val
 		simple_event("input","change",*self.name, value=val, last_value=old_val, fake=True)
 
-
-from homevent.module import Module
+from moat.module import Module
 
 class TestModule(Module):
 	"""\

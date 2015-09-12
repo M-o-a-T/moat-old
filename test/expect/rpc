@@ -3,8 +3,8 @@ EVENT: startup
 TRACE Create OnEvtHandler: send¦logger
 TRACE NewHandler 5
 EVENT: wait¦start¦shutdown
+     : end_time=1.1
      : loglevel=0
-     : end_time=1.0
 EVENT: rpc¦connect¦foo¦n1
 DEBUG TEST (Name('event',),)
 DEBUG TEST (Name('job',),)
@@ -21,20 +21,21 @@ DEBUG TEST (Name('state',),)
 DEBUG TEST (Name('wait',),)
 DEBUG TEST (Name('worker',),)
 DEBUG TEST .
-DEBUG TEST (Name(u'foo',),)
+DEBUG TEST (Name('foo',),)
 DEBUG TEST .
-DEBUG TEST (u'', u'\u2039Collected RPCserver:foo\u203a')
-DEBUG TEST (u'name', u'foo')
-DEBUG TEST (u'host', u'')
-DEBUG TEST (u'port', u'56478')
-DEBUG TEST (u'server', u'<homevent.gevent_rpyc.GeventServer obj>')
+DEBUG TEST ('', '‹Collected RPCserver:foo›')
+DEBUG TEST ('name', 'foo')
+DEBUG TEST ('task job', '<Greenlet: erh(<bound method RPCserver._start of ‹Collected RPCse)>')
+DEBUG TEST ('host', '')
+DEBUG TEST ('port', '56478')
+DEBUG TEST ('server', '<moat.gevent_rpyc.GeventServer object>')
 DEBUG TEST .
-DEBUG TEST (u'', u'\u2039Collected namedRPC:foo\xa6n1\u203a')
-DEBUG TEST (u'name', u'foo\xa6n1')
-DEBUG TEST (u'local host', u'::ffff:127.0.0.1')
-DEBUG TEST (u'local port', u'56478')
-DEBUG TEST (u'remote host', u'::ffff:127.0.0.1')
-DEBUG TEST (u'remote port', u'×××')
+DEBUG TEST ('', '‹Collected namedRPC:foo¦n1›')
+DEBUG TEST ('name', 'foo¦n1')
+DEBUG TEST ('local host', '::ffff:127.0.0.1')
+DEBUG TEST ('local port', '56478')
+DEBUG TEST ('remote host', '::ffff:127.0.0.1')
+DEBUG TEST ('remote port', '×××')
 DEBUG TEST .
 DEBUG TEST >>> Global : word list:
 DEBUG TEST >>> Known words:
@@ -74,21 +75,21 @@ Traceback (most recent call last):
     return CommandProcessor(parent=self,ctx=self.ctx).simple_statement(args)
   File "../modules/rpc.py", line ×××, in simple_statement
     fn = self.lookup(args)
-  File "/home/smurf/homevent/homevent/interpreter.py", line ×××, in lookup
+  File "moat/interpreter.py", line ×××, in lookup
     fn = me.lookup(event)
-  File "/home/smurf/homevent/homevent/statement.py", line ×××, in lookup
+  File "moat/statement.py", line ×××, in lookup
     raise UnknownWordError(args,self)
-UnknownWordError: Cannot find word <fuubar This is not found.> in <Global>
+moat.statement.UnknownWordError: Cannot find word ‹fuubar This is not found.› in ‹Global›
 Traceback (most recent call last):
   File "../modules/rpc.py", line ×××, in exposed_command
     return CommandProcessor(parent=self,ctx=self.ctx).simple_statement(args)
   File "../modules/rpc.py", line ×××, in simple_statement
     fn = self.lookup(args)
-  File "/home/smurf/homevent/homevent/interpreter.py", line ×××, in lookup
+  File "moat/interpreter.py", line ×××, in lookup
     fn = me.lookup(event)
-  File "/home/smurf/homevent/homevent/statement.py", line ×××, in lookup
+  File "moat/statement.py", line ×××, in lookup
     raise UnknownWordError(args,self)
-UnknownWordError: Cannot find word <fuubar This is not found.> in <Global>
+moat.statement.UnknownWordError: Cannot find word ‹fuubar This is not found.› in ‹Global›
 DEBUG TEST YES Got an error
 DEBUG This is logged.
 DEBUG TEST The value is: Test123
@@ -98,8 +99,8 @@ TRACE 2003-04-05 06:07:09 shutdown: Forced timer done
 EVENT: wait¦done¦shutdown
      : loglevel=0
 EVENT: wait¦start¦foo¦b
+     : end_time=2.1
      : loglevel=0
-     : end_time=2.0
 TRACE 2003-04-05 06:07:10 foo¦b: Forced timer done
 EVENT: wait¦done¦foo¦b
      : loglevel=0

@@ -1,3 +1,187 @@
+moat (0.7.26) smurf; urgency=medium
+
+  * fix equality tests
+    * float: 1ppm
+    * string: decode buffer
+  * add web stuff
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Tue, 04 Aug 2015 21:46:20 +0200
+
+moat (0.7.25) smurf; urgency=medium
+
+  * Drop py2 build
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Wed, 24 Jun 2015 03:10:13 +0200
+
+moat (0.7.24) smurf; urgency=medium
+
+  * fs20avr: encode data for writing
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Wed, 24 Jun 2015 02:57:55 +0200
+
+moat (0.7.23) smurf; urgency=medium
+
+  * Fix network listener
+  * speed up event matching
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Wed, 24 Jun 2015 01:59:35 +0200
+
+moat (0.7.22) smurf; urgency=medium
+
+  * forward more data
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Tue, 23 Jun 2015 10:20:57 +0200
+
+moat (0.7.21) smurf; urgency=medium
+
+  * onewire: empty result is try-again
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Tue, 23 Jun 2015 09:43:30 +0200
+
+moat (0.7.20) smurf; urgency=medium
+
+  * fix onewire scanning/scanned event
+  * add rudimentary amqpmon web mode
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Tue, 23 Jun 2015 05:03:12 +0200
+
+moat (0.7.19) smurf; urgency=medium
+
+  * Don't compare strings and floats
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Sat, 13 Jun 2015 14:26:46 +0200
+
+moat (0.7.18) smurf; urgency=medium
+
+  * Added "exists var NAME" check.
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Fri, 12 Jun 2015 13:09:59 +0200
+
+moat (0.7.17) smurf; urgency=medium
+
+  * Fix RPC; pyversions of client and server must match
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Fri, 12 Jun 2015 08:41:47 +0200
+
+moat (0.7.16) smurf; urgency=medium
+
+  * py3 string/buffer woes
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Fri, 12 Jun 2015 01:08:38 +0200
+
+moat (0.7.15) smurf; urgency=medium
+
+  * Add wait :timeout
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Fri, 12 Jun 2015 00:54:38 +0200
+
+moat (0.7.14) smurf; urgency=medium
+
+  * Add wait :soft
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Fri, 12 Jun 2015 00:34:34 +0200
+
+moat (0.7.13) smurf; urgency=medium
+
+  * Wrap Loggers.values() with list()
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Fri, 12 Jun 2015 00:14:43 +0200
+
+moat (0.7.12) smurf; urgency=medium
+
+  * AMQP: better handling of RAW 
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Thu, 11 Jun 2015 22:58:57 +0200
+
+moat (0.7.11) smurf; urgency=medium
+
+  * Fix systemd interface
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Thu, 11 Jun 2015 22:52:32 +0200
+
+moat (0.7.10) smurf; urgency=medium
+
+  * finish script rename
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Thu, 11 Jun 2015 22:41:30 +0200
+
+moat (0.7.9) smurf; urgency=medium
+
+  * basic MoaT support (including alarm poll)
+  * various fixes
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Thu, 11 Jun 2015 22:39:36 +0200
+
+moat (0.7.8) smurf; urgency=medium
+
+  * stupid indents
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Tue, 02 Jun 2015 20:35:44 +0200
+
+moat (0.7.7) smurf; urgency=medium
+
+  * Add 'path' handler to 'exec' module
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Tue, 02 Jun 2015 18:31:40 +0200
+
+moat (0.7.6) smurf; urgency=medium
+
+  * add exec: env.do
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Tue, 02 Jun 2015 17:25:09 +0200
+
+moat (0.7.5) smurf; urgency=medium
+
+  * Fix postinst.
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Tue, 02 Jun 2015 11:03:48 +0000
+
+moat (0.7.4) smurf; urgency=medium
+
+  * Add ENV.trigger to exec()
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Tue, 02 Jun 2015 08:06:28 +0200
+
+moat (0.7.3) smurf; urgency=medium
+
+  * require six >= 1.9
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Tue, 02 Jun 2015 06:34:41 +0200
+
+moat (0.7.2) smurf; urgency=medium
+
+  * fixed a bunch of test cases
+  * don't build debug nonsense
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Tue, 02 Jun 2015 06:25:15 +0200
+
+moat (0.7.1) smurf; urgency=medium
+
+  * Build py3 versio
+  * reorganized
+  * added boiplerplate text to all files
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Mon, 01 Jun 2015 09:50:49 +0200
+
+moat (0.7.0) smurf; urgency=medium
+
+  * rename to MoaT.
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Sun, 31 May 2015 10:41:19 +0200
+
+homevent (0.6.0) smurf; urgency=medium
+
+  * Execute Python code
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Fri, 29 May 2015 19:59:19 +0200
+
+homevent (0.5.2) smurf; urgency=medium
+
+  * current _geventreactor
+  * minor bug fixes
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Wed, 27 May 2015 12:59:35 +0200
+
 homevent (0.5.1) smurf; urgency=medium
 
   * Support an external event bus

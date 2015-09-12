@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
-
-##  Copyright © 2012, Matthias Urlichs <matthias@urlichs.de>
+from __future__ import absolute_import, print_function, division, unicode_literals
+##
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -13,8 +18,11 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
-from __future__ import division,absolute_import
 from django.views.generic import ListView,DetailView,CreateView,UpdateView,DeleteView
 from django.forms import ModelForm,ModelMultipleChoiceField
 from django.http import Http404
@@ -31,7 +39,6 @@ class ValveForm(ModelForm):
 
 	max_run = TimeDeltaField(required=False,help_text=Meta.model._meta.get_field_by_name("db_max_run")[0].help_text)
 	min_delay = TimeDeltaField(required=False,help_text=Meta.model._meta.get_field_by_name("db_min_delay")[0].help_text)
-
 
 	#groups = ModelMultipleChoiceField(queryset=Group.objects.all())
 
@@ -68,8 +75,8 @@ class ValveMixin(FormMixin):
 class ValveParamMixin(SiteParamMixin):
 	opt_params = {'controller':Controller, 'feed':Feed, 'site':Site, 'envgroup':EnvGroup}
 
-	def get_params_hook(self,k):
-		super(ValveParamMixin,self).get_params_hook(k)
+	def get_params_hook(self,*a,**k):
+		super(ValveParamMixin,self).get_params_hook(*a,**k)
 		s = self.aux_data['site']
 		c = self.aux_data['controller']
 		f = self.aux_data['feed']
@@ -101,7 +108,6 @@ class ValveParamMixin(SiteParamMixin):
 
 		return args
 
-
 class ValvesView(ValveMixin,ValveParamMixin,ListView):
 	context_object_name = "valve_list"
 	pass
@@ -113,16 +119,19 @@ class ValveView(ValveMixin,DetailView):
 class ValveNewView(ValveMixin,ValveParamMixin,CreateView):
 	form_class = ValveForm
 	success_url="/valve/%(id)s"
-	def get_form(self, form_class):
+	def get_form(self, form_class=None):
+		if form_class is None:
+			form_class = self.form_class
 		form = super(ValveNewView,self).get_form(form_class)
 		form.limit_choices(**self.aux_data)
 		return form
 
-
 class ValveEditView(ValveMixin,ValveParamMixin,UpdateView):
 	form_class = ValveForm
 	success_url="/valve/%(id)s"
-	def get_form(self, form_class):
+	def get_form(self, form_class=None):
+		if form_class is None:
+			form_class = self.form_class
 		form = super(ValveEditView,self).get_form(form_class)
 		form.limit_choices(site=self.site)
 		return form

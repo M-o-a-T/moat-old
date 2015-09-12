@@ -1,31 +1,37 @@
 EVENT: startup
      : startup=True
 EVENT: wait¦start¦X1
-     : loglevel=0
      : end_time=0.2
-EVENT: wait¦start¦Foo¦Bar
      : loglevel=0
+EVENT: wait¦start¦Foo¦Bar
      : end_time=10.0
+     : loglevel=0
 TRACE 2003-04-05 06:07:08.250000 X1: Fake timer done
-Foo Bar :: 9.70000004768
+Foo Bar :: 9.700000047683716
 .
 EVENT: wait¦done¦X1
      : loglevel=0
-: ‹Waiter Foo¦Bar 9.70000004768›
+: ‹Waiter Foo¦Bar 9.700000047683716›
 name: Foo¦Bar
+task _plinger: <Greenlet: erh(<bound method Waiter._pling of ‹Waiter Foo¦Bar 10., 10.0)>
 start: -0.3 sec (2003-04-05 06:07:08)
 end: 9.7 sec (2003-04-05 06:07:18)
 total: 10.0 sec
-in: async
+abort: on cancelation
+in: ⌁ REPORT_ERROR: Name('async',)
 in: Global
 .
 EVENT: wait¦update¦Foo¦Bar
-     : loglevel=0
      : dest=2003-04-05 06:07:08.400000
+     : loglevel=0
+TRACE Create OnEvtHandler: Heya
+TRACE NewHandler 9
+TRACE Create OnEvtHandler: Heyu
+TRACE NewHandler 10
 TRACE Yes
 EVENT: wait¦start¦X2
-     : loglevel=0
      : end_time=0.5
+     : loglevel=0
 TRACE 2003-04-05 06:07:08.450000 Foo¦Bar: Fake timer done
 EVENT: wait¦done¦Foo¦Bar
      : loglevel=0
@@ -35,39 +41,53 @@ EVENT: wait¦done¦X2
      : loglevel=0
 IEVENT: DoNow¦0.5
 EVENT: wait¦start¦X3
-     : loglevel=0
      : end_time=0.6
+     : loglevel=0
 TRACE 2003-04-05 06:07:08.700000 X3: Fake timer done
 EVENT: wait¦done¦X3
      : loglevel=0
-EVENT: wait¦start¦_wait¦t7
-     : loglevel=0
+EVENT: wait¦start¦_wait¦t6
      : end_time=0.8
-EVENT: wait¦start¦Foo¦Baz
      : loglevel=0
-     : end_time=52.7
-TRACE 2003-04-05 06:07:08.850000 _wait¦t7: Fake timer done
-EVENT: wait¦done¦_wait¦t7
+TRACE 2003-04-05 06:07:08.800000 _wait¦t6: Fake timer done
+DEBUG Yes timeout
+EVENT: wait¦done¦_wait¦t6
+     : loglevel=0
+EVENT: wait¦start¦Foo¦Baz
+     : end_time=52.8
+     : loglevel=0
+EVENT: wait¦start¦_wait¦t9
+     : end_time=0.9
+     : loglevel=0
+EVENT: wait¦start¦Foo¦Bazi
+     : end_time=112.8
+     : loglevel=0
+TRACE 2003-04-05 06:07:09.050000 _wait¦t9: Fake timer done
+EVENT: wait¦done¦_wait¦t9
      : loglevel=0
 TRACE Yes
 TRACE Create OnEvtHandler: whatever
-TRACE NewHandler 19
-TRACE We wait ‹Waiter Foo¦Baz 51.8000000715›
+TRACE NewHandler 24
 IEVENT: whatever
-EVENT: wait¦start¦_wait¦t8
+TRACE We wait ‹Waiter Foo¦Baz 51.699999928474426›
+EVENT: wait¦start¦_wait¦t10
+     : end_time=1.4
      : loglevel=0
-     : end_time=1.2
-TRACE 2003-04-05 06:07:09.300000 _wait¦t8: Fake timer done
-EVENT: wait¦done¦_wait¦t8
+TRACE 2003-04-05 06:07:09.400000 _wait¦t10: Fake timer done
+EVENT: wait¦done¦_wait¦t10
      : loglevel=0
 Waiter ‹Foo Baz› was cancelled
 Waiter ‹Foo Baz› was cancelled
 EVENT: wait¦cancel¦Foo¦Baz
      : loglevel=0
-TRACE Yes
-EVENT: wait¦start¦_wait¦t9
+EVENT: wait¦cancel¦Foo¦Bazi
      : loglevel=0
-     : end_time=1.5
-TRACE 2003-04-05 06:07:09.550000 _wait¦t9: Fake timer done
-EVENT: wait¦done¦_wait¦t9
+IEVENT: Heyu
+DEBUG Yes Want Heyu
+TRACE Yes
+EVENT: wait¦start¦_wait¦t11
+     : end_time=1.6
+     : loglevel=0
+TRACE 2003-04-05 06:07:09.650000 _wait¦t11: Fake timer done
+EVENT: wait¦done¦_wait¦t11
      : loglevel=0

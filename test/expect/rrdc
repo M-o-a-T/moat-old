@@ -1,8 +1,8 @@
 EVENT: startup
      : startup=True
 EVENT: wait¦start¦startup
-     : loglevel=0
      : end_time=0.2
+     : loglevel=0
 TRACE 2003-04-05 06:07:08.200000 startup: Forced timer done
 EVENT: wait¦done¦startup
      : loglevel=0
@@ -16,6 +16,7 @@ t tt ttt :: ‹RRDqueue:t¦tt¦ttt connecting›
 .
 : ‹RRDqueue:t¦tt¦ttt connecting›
 name: t¦tt¦ttt
+task job: <Greenlet: erh(<bound method RRDqueue._handler of ‹RRDqueue:t¦tt¦)>
 queue: 0
 state: connecting
 state since: now (2003-04-05 06:07:08.20)
@@ -33,7 +34,8 @@ a aa aaa :: Never
 : ‹Collected RRDfile:a¦aa¦aaa›
 name: a¦aa¦aaa
 server: ‹RRDqueue:t¦tt¦ttt connecting›
-       name: t¦tt¦ttt
+server name: t¦tt¦ttt
+server task job: <Greenlet: erh(<bound method RRDqueue._handler of ‹RRDqueue:t¦tt¦)>
        queue: 0
        state: connecting
        state since: now (2003-04-05 06:07:08.20)
@@ -46,8 +48,8 @@ server: ‹RRDqueue:t¦tt¦ttt connecting›
 filename: /tmp/rrdtest.rrd
 .
 EVENT: wait¦start¦_wait¦t2
-     : loglevel=0
      : end_time=0.4
+     : loglevel=0
 TRACE conn setting up RRDqueue t¦tt¦ttt
 TRACE !got UP_EVENT t tt ttt
 TRACE conn connected RRDqueue t¦tt¦ttt
@@ -59,10 +61,10 @@ TRACE rrd send 'update /tmp/rrdtest.rrd 1049515628:10'
 EVENT: wait¦done¦_wait¦t2
      : loglevel=0
 TRACE rrd recv '0 Yes'
-TRACE conn incoming RRDqueue t¦tt¦ttt ‹MsgIncoming: msg:'Yes' type:MT_ACK prio:2›
+TRACE conn incoming RRDqueue t¦tt¦ttt ‹MsgIncoming: msg:'Yes' prio:2 type:MT_ACK›
 EVENT: wait¦start¦_wait¦t3
-     : loglevel=0
      : end_time=0.5
+     : loglevel=0
 TRACE 2003-04-05 06:07:08.400000 _wait¦t3: Forced timer done
 TRACE rrd send 'update /tmp/rrdtest.rrd 1049515628:11'
 EVENT: wait¦done¦_wait¦t3
@@ -70,36 +72,40 @@ EVENT: wait¦done¦_wait¦t3
 TRACE rrd recv '2 Nonsense follows'
 TRACE rrd recv 'Nonsense'
 TRACE rrd recv 'More Nonsense'
-TRACE conn incoming RRDqueue t¦tt¦ttt ‹MsgIncoming: msg:' Nonsense follows' data:['Nonsense', 'More Nonsense'] type:MT_MULTILINE prio:2›
+TRACE conn incoming RRDqueue t¦tt¦ttt ‹MsgIncoming: data:['Nonsense', 'More Nonsense'] msg:' Nonsense follows' prio:2 type:MT_MULTILINE›
 EVENT: wait¦start¦_wait¦t4
-     : loglevel=0
      : end_time=0.6
+     : loglevel=0
 TRACE 2003-04-05 06:07:08.500000 _wait¦t4: Forced timer done
 EVENT: wait¦done¦_wait¦t4
      : loglevel=0
 TRACE rrd send 'update /tmp/rrdtest.rrd 1049515628:12'
 TRACE rrd recv '-123 No'
-TRACE conn incoming RRDqueue t¦tt¦ttt ‹MsgIncoming: msg:'No' errno:123 type:MT_ERROR prio:2›
+TRACE conn incoming RRDqueue t¦tt¦ttt ‹MsgIncoming: errno:123 msg:'No' prio:2 type:MT_ERROR›
 TRACE Yes error
 : ‹Collected RRDfile:a¦aa¦aaa›
 name: a¦aa¦aaa
 server: ‹RRDqueue:t¦tt¦ttt connected›
-       name: t¦tt¦ttt
+server name: t¦tt¦ttt
+server task job: <Greenlet: erh(<bound method RRDqueue._handler of ‹RRDqueue:t¦tt¦)>
        queue: 0
        state: connected
        state since: -0.3 sec (2003-04-05 06:07:08.20)
        sent: (0, 3)
        received: (0, 3)
        processed: (0, 3)
-       last_sent : ‹RRDsendUpdate 7›
-                 priority: 2
+       last_sent: ‹RRDsendUpdate 7›
+       last_sent priority: 2
                  timeout: 10
                  result: No
        last_sent_at: now (2003-04-05 06:07:08.50)
        conn attempts: 0
        conn timer: 3
        out_queued: 0
-       channel type: rrd
+       channel: ‹RRDchannel:‹Collected RRDchannel_forwarder:t¦tt¦ttt››
+       channel name: t¦tt¦ttt
+       channel task job: <Greenlet: erh(<bound method RRDchannel_forwarder._reader of ‹RRD)>
+               type: rrd
                host: localhost
                port: 52442
 filename: /tmp/rrdtest.rrd

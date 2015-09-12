@@ -1,0 +1,6 @@
+[Unit]
+Description=The target to start all configured MoaT instances
+
+[Install]
+WantedBy=multi-user.target
+

@@ -12,8 +12,8 @@ temp
 python-build-stamp-*
 build
 dist
-homevent.egg-info
-homevent/modules
+moat.egg-info
+moat/modules
 *-stamp
 *.o
 fs20/audio/reader
@@ -25,4 +25,5 @@ fs20/avr/*.bin
 *.elf
 *.lst
 *.map
-homevent/gevent_rpyc.py
+moat/gevent_rpyc.py
+/.pybuild/

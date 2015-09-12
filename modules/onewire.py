@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,25 +18,36 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This code implements (a subset of) the OWFS server protocol.
 
 """
 
-from __future__ import division,absolute_import
+import six
 
-from homevent.module import Module
-from homevent.base import Name,SName
-from homevent.logging import log,DEBUG,TRACE,INFO,WARN
-from homevent.statement import Statement, main_words, AttributedStatement
-from homevent.check import Check,register_condition,unregister_condition
-from homevent.onewire import connect,disconnect, devices
-from homevent.net import NetConnect
-from homevent.monitor import Monitor,MonitorHandler, MonitorAgain
-from homevent.in_out import register_input,register_output, unregister_input,unregister_output, Input,Output
+from moat.module import Module
+from moat.base import Name,SName
+from moat.logging import log,DEBUG,TRACE,INFO,WARN
+from moat.statement import Statement, main_words, AttributedStatement
+from moat.check import Check,register_condition,unregister_condition
+from moat.onewire import connect,disconnect, devices
+from moat.net import NetConnect
+from moat.monitor import Monitor,MonitorHandler, MonitorAgain
+from moat.in_out import register_input,register_output, unregister_input,unregister_output, Input,Output
+from moat.times import humandelta,now
+from moat.twist import fix_exception,Jobber
+from moat.run import simple_event, process_failure
+from moat.collect import Collection,Collected
+from moat.delay import DelayFor
+from moat.event_hook import OnEventBase
 
 import struct
+from gevent import sleep
 
 buses = {}
 
@@ -46,11 +61,12 @@ connect onewire NAME [[host] port]
       The system will emit connection-ready and device-present events.
 """
 
+	scan=True
+
 	def start_up(self):
-		f = connect(name=self.dest, host=self.host, port=self.port)
+		f = connect(name=self.dest, host=self.host, port=self.port, scan=self.scan)
 		buses[self.dest] = f
 		log(TRACE,"New OWFS bus",self.dest,f)
-
 
 class OWFSdisconnect(Statement):
 	name = "disconnect onewire"
@@ -68,7 +84,6 @@ disconnect onewire NAME
 		disconnect(buses.pop(name))
 		log(TRACE,"Drop OWFS bus",name)
 
-
 class OWFSio(object):
 	typ="onewire"
 	def __init__(self, name, params,addons,ranges,values):
@@ -77,7 +92,6 @@ class OWFSio(object):
 		self.dev = params[0].lower()
 		self.attr = params[1]
 		super(OWFSio,self).__init__(name, params,addons,ranges,values)
-
 
 class OWFSinput(OWFSio,Input):
 	what="input"
@@ -90,7 +104,6 @@ onewire dev attr
 		val = devices[self.dev].get(self.attr)
 		return val
 
-
 class OWFSoutput(OWFSio,Output):
 	typ="onewire"
 	doc="An output which writes to 1wire"
@@ -100,7 +113,6 @@ onewire dev attr
 """
 	def _write(self,val):
 		devices[self.dev].set(self.attr, val)
-
 
 class OWFSset(Statement):
 	name="set onewire"
@@ -118,7 +130,6 @@ set onewire VALUE dev attr
 		dev = dev.lower()
 		
 		devices[dev].set(attr, val)
-
 
 class OWFSdir(AttributedStatement):
 	name="dir onewire"
@@ -139,14 +150,14 @@ dir onewire NAME path...
 		event = self.params(ctx)
 
 		def reporter(data):
-			print >>ctx.out,data
+			print(data, file=ctx.out)
 
 		if len(event) == 1 and not self.dest and event[0].lower() in devices:
 			dev = devices[event[0].lower()]
 			path = ()
 		elif self.dest is None:
 			if len(event) == 0:
-				raise SyntaxError("Usage: dir onewire device  or  dir onewire bus path…")
+				raise SyntaxError("Usage: dir onewire device  or  dir onewire [bus] path…")
 			dev = buses[Name(event[0])].root
 			path = event[1:]
 		else:
@@ -154,7 +165,7 @@ dir onewire NAME path...
 			path = event
 		dev.dir(path=path, proc=reporter)
 
-		print >>ctx.out,"."
+		print(".", file=ctx.out)
 
 class OWFSname(Statement):
 	name="name"
@@ -168,10 +179,11 @@ name ‹name…›
 
 	def run(self,ctx,**k):
 		event = self.params(ctx)
+		if not len(event):
+			raise SyntaxError("an empty name is a terrible thing")
 		self.parent.dest = SName(event)
 
 OWFSdir.register_statement(OWFSname)
-
 
 class OWFSconnected(Check):
 	name="connected onewire"
@@ -188,7 +200,6 @@ class OWFSconnected(Check):
 			if bus is None: return False
 			return bus.conn is not None
 
-
 class OWFSconnectedbus(Check):
 	name="connected onewire bus"
 	doc="Test if the named onewire server connection is running"
@@ -201,7 +212,6 @@ class OWFSconnectedbus(Check):
 		else:
 			return bus.conn is not None
 
-
 class OWFSmon(Monitor):
 	queue_len = None # to not use the Watcher queue
 
@@ -209,8 +219,7 @@ class OWFSmon(Monitor):
 		super(OWFSmon,self).__init__(*a,**k)
 
 	def list(self):
-		for r in super(OWFSmon,self).list():
-			yield r
+		yield super(OWFSmon,self)
 		if self.switch is not None:
 			yield ("switch", self.switch, "on" if self.switched else "off", self.low,self.high)
 
@@ -219,6 +228,9 @@ class OWFSmon(Monitor):
 		if self.switch is not None:
 			dev.set(self.switch, self.to_high if self.switched else self.to_low)
 		val = dev.get(self.attribute)
+		if val == "":
+			raise MonitorAgain(self.name)
+		val = float(val)
 		if self.switch is not None:
 			if not self.switched:
 				if val > self.high:
@@ -262,8 +274,7 @@ class OWFSwindmon(Monitor):
 		self.nval = 0
 
 	def list(self):
-		for x in super(OWFSwindmon,self).list():
-			yield x
+		yield super(OWFSwindmon,self)
 		yield ("average",self.avg)
 		yield ("turbulence",1-self.qavg)
 		yield ("values",self.nval)
@@ -363,7 +374,6 @@ class OWFSwindmon(Monitor):
 			# (inverse of ①)
 			self.avg = (val+nal*8/pi)%16
 
-
 class OWFSmonitor(MonitorHandler):
 	name="monitor onewire"
 	monitor = OWFSmon
@@ -382,10 +392,9 @@ monitor onewire ‹device› ‹attribute›
 			self.values["switch"] = None
 		self.values["params"] = ("onewire",event[0],event[1])
 		if "switch" in self.values and self.values["switch"] is not None:
-			self.values["params"] += (u"±"+unicode(self.values["switch"]),)
+			self.values["params"] += (u"±"+six.text_type(self.values["switch"]),)
 
 		super(OWFSmonitor,self).run(ctx,**k)
-
 
 class MonitorSwitch(Statement):
 	name = "switch"
@@ -416,7 +425,6 @@ switch ‹port› ‹low› ‹high›
 		val["switched"] = None
 MonitorHandler.register_statement(MonitorSwitch)
 
-
 class MonitorWind(Statement):
 	name = "wind"
 	doc = "declare a wind instrument"
@@ -445,7 +453,7 @@ wind ‹offset› ‹weight›
 		if len(event) > 0:
 			val["direction"] = float(event[0])
 			if val["direction"] < 0 or val["direction"] >= 16:
-				raise ValueError("weight needs to be between 0 and 15.99")
+				raise ValueError("offset needs to be between 0 and 15.99")
 		else:
 			val["direction"] = 0
 
@@ -456,7 +464,6 @@ wind ‹offset› ‹weight›
 		else:
 			val["decay"] = 0.1
 MonitorHandler.register_statement(MonitorWind)
-
 
 class OWFSscan(Statement):
 	name="scan onewire"
@@ -480,6 +487,211 @@ scan onewire NAME
 			else:
 				return dev.run_watcher()
 
+class Passive(Statement):
+        name="passive"
+        dest = None
+        doc="do not periodically scan the bus"
+
+        long_doc = u"""\
+passive
+  - Don't scan the bus periodically.
+"""
+
+        def run(self,ctx,**k):
+                event = self.params(ctx)
+                self.parent.scan = False
+OWFSconnect.register_statement(Passive)
+
+
+class OWFSpolls(Collection):
+	name = Name("onewire","poll")
+OWFSpolls = OWFSpolls()
+OWFSpolls.does("del")
+
+class OWFSpoller(Collected,Jobber):
+	"""A bus poll service"""
+	storage = OWFSpolls
+	def __init__(self,bus,path,freq,simul=()):
+		self.bus = bus
+		self.path = tuple(path)
+		self.name = bus.bus.name+self.path
+		self.freq = freq
+		self.simul = simul
+		super(OWFSpoller,self).__init__()
+
+		self.seen = set()
+		self.seen_new = set()
+		self.old_seen = set()
+		self.time_start = None
+		self.time_len = None
+		self.start_job("watcher",self._start)
+		self.last_error = None
+
+	def _reporter(self, id):
+		# log(DEBUG,"OFFSpoller report",repr(id))
+		id = id.lower()
+		if id not in devices:
+			if id not in self.seen_new:
+				self.seen_new.add(id)
+				simple_event("onewire","alarm","new",id, bus=self.bus.bus.name, path=self.path, id=id)
+			return # not yet known, presumably on next scan
+		if id in self.seen_new:
+			self.seen_new.remove(id)
+
+		if id not in self.seen:
+			self.seen.add(id)
+			simple_event("onewire","alarm","on",id, bus=self.bus.bus.name, path=self.path, id=id)
+		elif id in self.old_seen:
+			self.old_seen.remove(id)
+
+	def _start(self):
+		reported = False
+		while True:
+			sleep(self.freq)
+			try:
+				self.time_start = now()
+				self.old_seen = self.seen.copy()
+				# log(DEBUG,"SCAN",self.path,"IN",self.bus)
+				self.bus.dir(path=self.path+('alarm',), proc=self._reporter, cached=False)
+				for id in self.old_seen:
+					simple_event("onewire","alarm","off",id, bus=self.bus.bus.name, path=self.path, id=id)
+					self.seen.remove(id)
+			except Exception as e:
+				self.last_error = e
+				if not reported:
+					reported = True
+					fix_exception(e)
+					process_failure(e)
+				self.time_len = now()-self.time_start
+				sleep(self.freq*10)
+			else:
+				reported = False
+				self.time_len = now()-self.time_start
+				for x in self.simul:
+					x[0] += 1
+					if x[0] >= x[1]:
+						x[0] = 0
+						self.bus.set(self.path+('simultaneous',x[2]),x[3])
+
+	def delete(self,ctx=None):
+		self.stop_job("watcher")
+		self.server = None
+		super(OWFSpoller,self).delete()
+
+	def list(self):
+		def _simul(x):
+			yield ("interval",x[1])
+			yield ("current",x[0])
+			yield ("value",x[3])
+		yield super(OWFSpoller,self)
+		yield ("bus",self.bus)
+		yield ("path",self.path)
+		yield ("interval",humandelta(self.freq))
+		if self.time_start:
+			yield ("last start",humandelta(now()-self.time_start))
+		if self.time_len:
+			yield ("last duration",humandelta(self.time_len))
+		for id in self.seen:
+			dev = devices.get(id,id)
+			yield ("alarm",dev)
+		for id in self.seen_new:
+			yield ("alarm new",id)
+		if self.last_error:
+			yield ("last error",self.last_error)
+		for x in self.simul:
+			yield ("simultaneous",x[2],_simul(x))
+			
+
+class OWFSpoll(AttributedStatement):
+	name="poll onewire"
+	doc="Periodically scan the /alarm directory on a onewire bus"
+	long_doc="""\
+poll onewire NAME path...
+	Periodically poll a 1wire bus with CONDITIONAL SEARCH.
+	For a multi-word connection name, use a separate :name attribute:
+
+		poll onewire "bus.0" "1f.0cb204000000" main:
+			name foo bar
+			for 0.1
+"""
+	dest=None
+	timespec=1
+
+	def __init__(self,*a,**k):
+		super(OWFSpoll,self).__init__(*a,**k)
+		self.simul = []
+
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+
+		if len(event) == 2 and not self.dest and event[0].lower() in devices:
+			dev = devices[event[0].lower()]
+			path = dev.path + (event[1],)
+		elif self.dest is None:
+			if len(event) == 0:
+				raise SyntaxError("Usage: poll onewire device aux/main   or  poll onewire [bus] path… [:name bus…]")
+			dev = buses[Name(event[0])].root
+			path = event[1:]
+		else:
+			dev = buses[self.dest].root
+			path = event
+		OWFSpoller(dev,path, self.timespec, self.simul)
+
+class SimulWrite(Statement):
+	name="simultaneous"
+	dest = None
+	doc="periodically send a conversion command"
+
+	long_doc = u"""\
+simultaneous ‹interval› ‹name› [‹value›]
+  - Every ‹interval› poll cycles, write ‹value› to ‹path›/‹name›.
+    Use this to trigger periodic temperature or voltage conversions
+	which in turn may trigger alarms.
+"""
+
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if len(event) < 2 or len(event) > 3:
+			raise SyntaxError("Usage: simultaneous ‹interval› ‹name› [‹value›]")
+		self.parent.simul.append([0,event[0],event[1],
+			(event[2] if len(event) > 2 else "1")])
+
+OWFSpoll.register_statement(OWFSname)
+OWFSpoll.register_statement(DelayFor)
+OWFSpoll.register_statement(SimulWrite)
+
+## setup auto-poll
+ap_interval = 0
+_new_bus_ev = None
+
+class NewBusEvent(OnEventBase):
+	"""triggers when a new bus device shows up"""
+	def __init__(self):
+		super(NewBusEvent,self).__init__(parent=None, args=Name('onewire','bus','up'), name="onewire bus up hook")
+
+	def process(self, event,**k):
+		if ap_interval > 0:
+			OWFSpoller(buses[event.ctx.bus].root, event.ctx.path, ap_interval)
+
+class AutoPoll(Statement):
+	name="autopoll onewire"
+	dest = None
+	doc="auto-setup a poll instance for new buses"
+
+	long_doc = u"""\
+autopoll onewire ‹interval›
+  - Whenever a new 1wire bus shows up, set up a poll instance which runs every ‹interval› seconds.
+    Use zero to disable.
+	Note that this only affects new buses.
+"""
+
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if len(event) != 1:
+			raise SyntaxError("Usage: autopoll onewire ‹interval›")
+		global ap_interval
+		ap_interval = float(event[0])
+
 
 class OWFSmodule(Module):
 	"""\
@@ -489,27 +701,38 @@ class OWFSmodule(Module):
 	info = "Basic one-wire access"
 
 	def load(self):
+		global _new_bus_ev
+		_new_bus_ev = NewBusEvent()
+
 		main_words.register_statement(OWFSconnect)
 		main_words.register_statement(OWFSdisconnect)
 		main_words.register_statement(OWFSdir)
 		main_words.register_statement(OWFSscan)
 		main_words.register_statement(OWFSset)
 		main_words.register_statement(OWFSmonitor)
+		main_words.register_statement(OWFSpoll)
+		main_words.register_statement(AutoPoll)
 		register_input(OWFSinput)
 		register_output(OWFSoutput)
 		register_condition(OWFSconnected)
 		register_condition(OWFSconnectedbus)
+		register_condition(OWFSpolls.exists)
 	
 	def unload(self):
+		if _new_bus_ev:
+			_new_bus_ev.delete()
 		main_words.unregister_statement(OWFSconnect)
 		main_words.unregister_statement(OWFSdisconnect)
 		main_words.unregister_statement(OWFSdir)
 		main_words.unregister_statement(OWFSscan)
 		main_words.unregister_statement(OWFSset)
 		main_words.unregister_statement(OWFSmonitor)
+		main_words.unregister_statement(OWFSpoll)
+		main_words.unregister_statement(AutoPoll)
 		unregister_input(OWFSinput)
 		unregister_output(OWFSoutput)
 		unregister_condition(OWFSconnected)
 		unregister_condition(OWFSconnectedbus)
+		unregister_condition(OWFSpolls.exists)
 	
 init = OWFSmodule

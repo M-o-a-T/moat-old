@@ -1,8 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -15,34 +19,43 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
-from homevent import patch;patch()
-from homevent.reactor import ShutdownHandler
-from homevent.module import load_module,Load
-from homevent.statement import main_words
-from homevent.check import register_condition
-from homevent.logging import log,DEBUG
+from moat import patch;patch()
+from moat.reactor import ShutdownHandler
+from moat.module import load_module,Load
+from moat.statement import main_words
+from moat.check import register_condition
+from moat.logging import log,DEBUG
 from test import run
 from gevent import spawn,sleep,event
 
-import rpyc
 import sys
 from traceback import print_exc
 
 input = """\
-connect amqp localhost:
+connect amqp "data.intern.smurf.noris.de":
 	name test foo
-	user "/test" test test
+	user "test" test test
 
 on amqp connect test foo:
-	wait for 0.2:
+	if exists wait delay amqp:
+		del wait delay amqp
+
+if not exists amqp connection test foo:
+	log DEBUG waiting for connect
+	wait delay amqp:
+		for 100
 		debug force
 
 log amqp DEBUG:
 	name test foo
 	exchange he_exc
 
-# amqp => homevent
+# amqp => moat
 # translate amqte.x.y.z to amam.x.y.z
 listen amqp test foo:
 	name foo lish
@@ -51,7 +64,7 @@ listen amqp test foo:
 	topic "amqte.#"
 	strip 1
 
-# homevent => amqp
+# moat => amqp
 # translate hey.x to amqte.x
 tell amqp test foo:
 	filter hey *
@@ -144,7 +157,7 @@ wait:
 	for 0.6
 	debug force
 
-# homevent => amqp
+# moat => amqp
 # translate hey.x to amqte.x
 
 shutdown
@@ -163,10 +176,10 @@ load_module("block")
 load_module("state")
 load_module("errors")
 load_module("trigger")
+load_module("ifelse")
 load_module("help")
 
 run("amqp",input)
-
 
 import sys
 sys.exit(0)

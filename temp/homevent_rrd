@@ -66,7 +66,7 @@ class RRDSensor(Sensor):
 		if self.attr is not None:
 			v = float(self.value)
 			#print self.what, self.where,v
-			rrdtool.update("/var/lib/homevent/rrd/%s.%s.rrd" % (self.what,self.where), "-t",self.what,"N:"+str(float(v)))
+			rrdtool.update("/var/lib/moat/rrd/%s.%s.rrd" % (self.what,self.where), "-t",self.what,"N:"+str(float(v)))
 
 class RRDSensor2(RRDSensor):
 	def found(self):
@@ -112,7 +112,7 @@ def enum(s):
 # 65AD39010800	temp hinten temperature Fühler Terrasse
 def read_rrd_params(path):
 	old_rrd_info = rrd_info.copy()
-	for l in open("/etc/homevent/1wire.rrd.cf"):
+	for l in open("/etc/moat/1wire.rrd.cf"):
 		try:
 			id,what,where,attr,_ = l.split(None,4)
 		except ValueError:
@@ -123,7 +123,7 @@ def read_rrd_params(path):
 			if what != "-":
 				rrd_info[id] = (what,where,attr)
 
-	for r in old_rrd_info.iterkeys():
+	for r in old_rrd_info.keys():
 		del rrd_info[r]
 
 def re_enum_bus():
@@ -140,16 +140,16 @@ def re_enum_bus():
 			RRDSensor2(s)
 		else:
 			RRDSensor(s)
-	for addr,s in old_sensors.iteritems():
+	for addr,s in old_sensors.items():
 		del sensors[addr]
 		s.gone()
 
 
-read_rrd_params("/etc/homevent/1wire.rrd.cf")
+read_rrd_params("/etc/moat/1wire.rrd.cf")
 re_enum_bus()
 
 while True:
-	for s in sensors.itervalues():
+	for s in sensors.values():
 		s.poll()
 	time.sleep(10)
 

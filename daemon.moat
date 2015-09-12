@@ -1,0 +1,27 @@
+# MoaT default startup file
+#load dir "/etc/moat/modules"
+
+if not exists module logging: load logging
+if not exists module wait: load wait
+if not exists module systemd: load systemd
+if not exists module block: load block
+if not exists module bool: load bool
+if not exists module loop: load loop
+#if not exists module ifelse: load ifelse
+
+## You might want to ping some service you're using
+## or watch a monitor, or ...
+async:
+	while true:
+		keepalive
+		wait keepalive:
+			for 10
+			## adjust as per systemd service file
+
+send status Config file not edited
+log ERROR You need to edit the daemon configuration file
+log ERROR I will die now
+log ERROR Please try again ":-)"
+#send ready
+shutdown
+

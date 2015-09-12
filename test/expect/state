@@ -5,42 +5,42 @@ TRACE Yes!
 TRACE Set to ONE
 EVENT: state¦change¦foo¦bar
      : prev_time=2003-04-05 06:07:08
-     : value=one
      : prev_value=-
+     : value=one
 TRACE Set to TWO
 EVENT: state¦change¦foo¦bar
      : prev_time=2003-04-05 06:07:08
-     : value=two
      : prev_value=one
+     : value=two
 TRACE Create OnEvtHandler: state¦change¦foo¦bar
 TRACE NewHandler 7
 TRACE Set to THREE
 TRACE Create OnEvtHandler: state¦change¦foo¦bar
 EVENT: state¦change¦foo¦bar
      : prev_time=2003-04-05 06:07:08
-     : value=three
      : prev_value=two
+     : value=three
 TRACE Yes Set to three
 TRACE NewHandler 9
 TRACE Set to TWOHALF
 EVENT: state¦change¦foo¦bar
      : prev_time=2003-04-05 06:07:08
-     : value=twohalf
      : prev_value=three
+     : value=twohalf
 TRACE Set to FOUR
 EVENT: state¦change¦foo¦bar
      : prev_time=2003-04-05 06:07:08
-     : value=fourtoo
      : prev_value=twohalf
+     : value=fourtoo
 TRACE Set to THREE
 EVENT: state¦change¦foo¦bar
      : prev_time=2003-04-05 06:07:08
-     : value=three
      : prev_value=fourtoo
+     : value=three
 TRACE Yes Set to three
 EVENT: wait¦start¦_wait¦t1
-     : loglevel=0
      : end_time=0.1
+     : loglevel=0
 TRACE 2003-04-05 06:07:08.150000 _wait¦t1: Fake timer done
 foo bar :: three — 0.1 sec
 .

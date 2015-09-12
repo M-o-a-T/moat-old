@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,6 +18,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This code does basic event mongering.
@@ -23,14 +31,12 @@ trigger FOO...
 
 """
 
-from __future__ import division,absolute_import
-
-from homevent.statement import Statement, AttributedStatement, main_words
-from homevent.event import Event
-from homevent.run import process_event, run_event
-from homevent.context import Context
-from homevent import logging
-from homevent.twist import Jobber
+from moat.statement import Statement, AttributedStatement, main_words
+from moat.event import Event
+from moat.run import process_event, run_event
+from moat.context import Context
+from moat import logging
+from moat.twist import Jobber
 
 import gevent
 
@@ -66,7 +72,7 @@ trigger FOO...
 			try:
 				if v[0] == '$':
 					v = ctx[v[1:]]
-			except TypeError: # not an int
+			except TypeError: # not a string
 				pass
 			if k is not None and v is not None:
 				setattr(event.ctx, k,v)
@@ -135,7 +141,6 @@ sync
 		else:
 			raise SyntaxError(u'Usage: sync')
 
-
 @TriggerHandler.register_statement
 class TriggerParam(Statement):
 	name = "param"
@@ -152,9 +157,7 @@ param ‹key› ‹val›
 			raise SyntaxError(u'Usage: param ‹key› ‹val›')
 		self.parent.vars[event[0]] = event[1]
 
-
-
-from homevent.module import Module
+from moat.module import Module
 
 class TriggerModule(Module):
 	"""\

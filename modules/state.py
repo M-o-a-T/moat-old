@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,6 +18,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This code does basic state handling (both persistent and not).
@@ -33,18 +41,18 @@ list state [NAME]
 
 """
 
-from __future__ import division,absolute_import
+import six
 
-from homevent.module import Module
-from homevent.statement import Statement, main_words, AttributedStatement
-from homevent.run import simple_event,process_failure
-from homevent.event import Event
-from homevent.check import Check,register_condition,unregister_condition
-from homevent.base import Name,SName
-from homevent.collect import Collection,Collected
-from homevent.context import Context
-from homevent.times import now,humandelta
-from homevent.twist import fix_exception
+from moat.module import Module
+from moat.statement import Statement, main_words, AttributedStatement
+from moat.run import simple_event,process_failure
+from moat.event import Event
+from moat.check import Check,register_condition,unregister_condition
+from moat.base import Name,SName
+from moat.collect import Collection,Collected
+from moat.context import Context
+from moat.times import now,humandelta
+from moat.twist import fix_exception
 
 import os,sys
 
@@ -55,6 +63,7 @@ class States(Collection):
 States = States()
 States.does("del")
 
+@six.python_2_unicode_compatible
 class StateChangeError(Exception):
 	no_backtrace = True
 	def __init__(self,s,v):
@@ -103,7 +112,7 @@ class State(Collected):
 		if hasattr(self,"old_value"):
 			return u"%s — %s " % (self.value,humandelta(now()-self.time))
 		else:
-			return unicode(self.value)
+			return six.text_type(self.value)
 
 class SavedState(State):
 	def __init__(self, *name):
@@ -113,7 +122,7 @@ class SavedState(State):
 	def value(self):
 		global Db
 		if Db is None:
-			from homevent.database import DbStore
+			from moat.database import DbStore
 			Db = DbStore(category="state")
 		try:
 			return Db.get(self.name)
@@ -196,7 +205,7 @@ class SavedHandler(Statement):
 	doc="Keep the state between runs"
 	long_doc="""\
 saved 
-	: save/restore the state between invocations of HomEvenT
+	: save/restore the state between invocations of MoaT
 """
 
 	def run(self,ctx,**k):
@@ -228,7 +237,6 @@ trigger old
 			else:
 				raise SyntaxError(u"Usage: trigger new")
 StateHandler.register_statement(TriggerHandler)
-
 
 class SetStateHandler(Statement):
 	name="set state"
@@ -274,11 +282,10 @@ forget state name...
 
 		global Db
 		if Db is None:
-			from homevent.database import DbStore
+			from moat.database import DbStore
 			Db = DbStore(category="state")
 
 		Db.delete(name)
-
 
 class VarStateHandler(Statement):
 	name="var state"
@@ -294,7 +301,6 @@ var state NAME name...
 		s = States[name]
 		setattr(self.parent.ctx,var,s.value if not s.working else s.old_value)
 
-
 class StateCheck(Check):
 	name="state"
 	doc="check if a state has a particular value"
@@ -305,7 +311,6 @@ class StateCheck(Check):
 		name = Name(*args[1:])
 		return States[name].value == value
 
-
 class StateLockedCheck(Check):
 	name="locked state"
 	doc="check if a state is being updated"
@@ -313,7 +318,6 @@ class StateLockedCheck(Check):
 		if len(args) < 2:
 			raise SyntaxError(u"Usage: if state locked ‹name…›")
 		return States[Name(*args)].working
-
 
 class LastStateCheck(Check):
 	name="last state"
@@ -330,7 +334,6 @@ class LastStateCheck(Check):
 		else:
 			return value == "-"
 
-
 class SavedStateCheck(Check):
 	name="saved state"
 	doc="check if a state is stored in the persistent database"
@@ -341,7 +344,7 @@ class SavedStateCheck(Check):
 
 		global Db
 		if Db is None:
-			from homevent.database import DbStore
+			from moat.database import DbStore
 			Db = DbStore(category="state")
 		try:
 			Db.get(Name(*args))
@@ -349,7 +352,6 @@ class SavedStateCheck(Check):
 			return False
 		else:
 			return True
-
 
 class StateModule(Module):
 	"""\

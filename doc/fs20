@@ -17,7 +17,7 @@
 FS20
 ====
 
-This file documents the FS20 (and similar) codes which HomEvenT
+This file documents the FS20 (and similar) codes which MoaT
 implements, and (part of) the code used for doing that.
 
 The FS20 system uses a puled 868.35 MHz carrier. It is very simple: the

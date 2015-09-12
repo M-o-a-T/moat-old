@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,6 +18,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This code does basic configurable logging.
@@ -27,13 +35,13 @@ log
 
 """
 
-from __future__ import division,absolute_import
+import six
 
-from homevent.module import Module
-from homevent.statement import Statement, main_words
-from homevent import logging
-from homevent.logging import log, Logger, LogNames, log_level, Loggers
-from homevent.check import register_condition,unregister_condition
+from moat.module import Module
+from moat.statement import Statement, main_words
+from moat import logging
+from moat.logging import log, Logger, LogNames, log_level, Loggers
+from moat.check import register_condition,unregister_condition
 
 import sys
 
@@ -43,14 +51,16 @@ class OutLogger(Logger):
 		"""
 	def _log(self,level,*txt):
 		if len(txt) == 1 and txt[0] == ".":
-			print >>self.out,txt[0]
+			print(txt[0], file=self.out)
 		else:
+			if isinstance(level,int):
+				level = LogNames[level]
 			super(OutLogger,self)._log(level,*txt)
 
 	def _slog(self,level,txt):
-		if isinstance(level,(int,long)):
+		if isinstance(level,six.integer_types):
 			raise RuntimeError("want stringified levels")
-		print >>self.out,level+">",txt
+		print(level+">",txt, file=self.out)
 
 	def _flush(self):
 		if hasattr(self.out,"flush"):
@@ -59,7 +69,6 @@ class OutLogger(Logger):
 	def end_logging(self):
 		super(OutLogger,self).end_logging()
 		del self.out.logger
-
 
 class LogHandler(Statement):
 	name="log"
@@ -79,9 +88,9 @@ log
 		except AttributeError:
 			out = sys.stderr
 		if not len(event):
-			for s,v in LogNames.iteritems():
-				print >>out,"%d = %s" % (s,v)
-			print >>out,"."
+			for s,v in LogNames.items():
+				print("%d = %s" % (s,v), file=out)
+			print(".", file=out)
 			return None
 		if len(event) > 1:
 			log(getattr(logging,event[0].upper()), *event[1:])
@@ -104,7 +113,6 @@ log
 						logger.delete()
 						raise
 
-
 class LogLevelHandler(Statement):
 	name="log limit"
 	doc="limit logging level"
@@ -126,8 +134,7 @@ log limit event DEBUG
 				out = self.ctx.out
 			except AttributeError:
 				out = sys.stderr
-			print >>out, LogNames[log_level(name)]
-
+			print(LogNames[log_level(name)], file=out)
 
 class LoggingModule(Module):
 	"""\

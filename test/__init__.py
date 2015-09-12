@@ -1,8 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -15,18 +19,27 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
-from homevent.logging import BaseLogger, TRACE,NONE, log, log_level
-from homevent.interpreter import Interpreter
-from homevent.parser import parse
-from homevent.context import Context
-from homevent.times import unixtime,now
-from homevent.twist import fix_exception,format_exception,print_exception,TESTING
-from homevent.statement import Statement,main_words
-from homevent.base import Name
-from homevent.reactor import shut_down, mainloop
+import six
+from moat import TESTING
+from moat.logging import BaseLogger, TRACE,NONE, log, log_level
+from moat.interpreter import Interpreter
+from moat.parser import parse
+from moat.context import Context
+from moat.times import unixtime,now
+from moat.twist import fix_exception,format_exception,print_exception
+from moat.statement import Statement,main_words
+from moat.base import Name
+from moat.reactor import shut_down, mainloop
 
-from cStringIO import StringIO
+try:
+	from io import StringIO
+except ImportError:
+	from cStringIO import StringIO
 import sys
 import re
 import os
@@ -56,8 +69,12 @@ def ixtime(t=None,force=False):
 def ttime():
 	return time()-unixtime(startup)
 
-r_fli = re.compile(r'(:\s+File ").*/([^/]+/[^/]+)", line \d+, in')
-r_hex = re.compile(r'object at 0x[0-9a-fA-F]+')
+r_fli = re.compile(r'File ".*moat/')
+# File "/mnt/d/src/git/moat/moat/parser.py", line
+r_hex = re.compile(r' at 0x[0-9a-fA-F]+')
+def r_rep(m):
+	# return m.group(1)+m.group(2)+", in"
+	return 'File "moat/'
 
 class run_logger(BaseLogger):
 	"""\
@@ -71,7 +88,7 @@ class run_logger(BaseLogger):
 		try:
 			self.data=open(os.path.join("real",name),"w")
 		except IOError:
-			print >>sys.stderr,"ERROR, no log file"
+			print("ERROR, no log file", file=sys.stderr)
 			self.data = sys.stderr
 		self.line=0
 		super(run_logger,self).__init__(level)
@@ -84,36 +101,34 @@ class run_logger(BaseLogger):
 			job = Popen(scp)
 			res = job.wait()
 			if res != 0:
-				print >>sys.stderr,"Init Script for %s failed: %d" % (self.filename,res)
+				print("Init Script for %s failed: %d" % (self.filename,res), file=sys.stderr)
 				sys.exit(0)
 			
 	def try_exit(self):
 		scp = os.path.join("scripts",self.filename+"_exit")
 		if not os.path.exists(scp):
 			scp = os.path.join("test",scp)
+		sys.stdout.flush()
+		sys.stderr.flush()
+		self.data.flush()
 		if os.path.exists(scp):
-			sys.stdout.flush()
-			sys.stderr.flush()
-			self.data.flush()
 			job = Popen(scp)
 			res = job.wait()
 			if res != 0:
-				print >>sys.stderr,"Exit Script for %s failed: %d" % (self.filename,res)
+				print("Exit Script for %s failed: %d" % (self.filename,res), file=sys.stderr)
 				sys.stderr.flush()
 				global exitcode
 				exitcode = 1
 
 	def _slog(self,level, sx):
 		self.line += 1
-		def rep(m):
-			return m.group(1)+m.group(2)+", in"
 		if TESTING:
-			sx = r_fli.sub(rep,sx)
-			sx = r_hex.sub("obj",sx)
+			sx = r_fli.sub(r_rep,sx)
+			sx = r_hex.sub("",sx)
 		if level is not None:
-			print >>self.data, level,sx
+			print(level,sx, file=self.data)
 		else:
-			print >>self.data, sx
+			print(sx, file=self.data)
 
 	# override using a separate thread
 	def _init(self):
@@ -124,7 +139,7 @@ class run_logger(BaseLogger):
 	def log(self, level, *a):
 #		if level is not None and level < self.level:
 #			return
-		sx=" ".join(unicode(x) for x in a)
+		sx=" ".join(six.text_type(x) for x in a)
 		self._log(level,sx)
 		if self.dot:
 			self._log(None,".")
@@ -133,16 +148,16 @@ class run_logger(BaseLogger):
 #		if level < self.level:
 #			return
 
-		if TESTING and int(os.environ["HOMEVENT_TEST"]) > 1:
+		if TESTING and int(os.environ["MOAT_TEST"]) > 1:
 			self._log(None,"@ "+ixtime())
 		if hasattr(event,"report"):
 			for r in event.report(99):
-				self._log(None,unicode(r))
+				self._log(None,six.text_type(r))
 		elif isinstance(event,BaseException):
 			for l in format_exception(event).strip('\n').split('\n'):
 				self._log(None,l)
 		else:
-			self._log(None,unicode(event))
+			self._log(None,six.text_type(event))
 		if self.dot:
 			self._log(None,".")
 
@@ -166,6 +181,8 @@ class logwrite(object):
 		self.buf += data
 		if self.buf[-1] == "\n":
 			if len(self.buf) > 1:
+				self.buf = r_fli.sub(r_rep,self.buf)
+				self.buf = r_hex.sub("",self.buf)
 				for l in self.buf.rstrip("\n").split("\n"):
 					self.log(None,l)
 			self.buf=""
@@ -180,9 +197,9 @@ class ctxdump(Statement):
 	doc="dump the variable context"
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		print >>sys.stderr,"CTX:",Name(event)
+		print("CTX:",Name(event), file=sys.stderr)
 		for s in ctx._report():
-			print >>sys.stderr,"   :",s
+			print("   :",s, file=sys.stderr)
 main_words.register_statement(ctxdump)
 
 ht = None
@@ -191,8 +208,10 @@ def run(name,input, interpreter=Interpreter, logger=None):
 	if logger is None:
 		ht = run_logger(name,dot=False)
 		logger = ht.log
-	if isinstance(input,unicode):
+	if isinstance(input,six.string_types):
 		input = input.encode("utf-8")
+	if isinstance(input,bytes):
+		input = input.decode('utf-8')
 	input = StringIO(input)
 
 	def _main():

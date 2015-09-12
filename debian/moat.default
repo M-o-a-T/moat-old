@@ -1,0 +1,19 @@
+# Defaults for moat initscript
+# sourced by /etc/init.d/moat
+# installed at /etc/default/moat by the maintainer scripts
+#
+# This is a POSIX shell fragment / systemd environment file.
+# The systemd configuration only looks ad $DAEMON_OPTS;
+# the rest is ignored because it's not necessary.
+#
+
+# Additional options that are passed to the Daemon.
+#DAEMON_OPTS="-s"
+#
+# If this file doesn't exist, nothing will happen
+#DAEMON_CFG=/etc/moat/daemon.moat
+#
+#
+# Syslog facility and level for stdout / stderr
+#LOGLEVEL=user.info
+#ERRLEVEL=user.warn

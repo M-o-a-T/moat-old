@@ -1,8 +1,8 @@
 EVENT: startup
      : startup=True
 EVENT: wait¦start¦BAD
-     : loglevel=0
      : end_time=0.2
+     : loglevel=0
 [Errno 111] Connection refused
 [Errno 111] Connection refused
 EVENT: net¦error¦foop
@@ -16,31 +16,34 @@ TRACE Create OnEvtHandler: net¦connect¦baz¦zaz¦*who
 TRACE NewHandler 10
 TRACE Create OnEvtHandler: net¦disconnect¦foo
 TRACE NewHandler 11
-TRACE Create OnEvtHandler: net¦disconnect¦baz¦zaz
+TRACE Create OnEvtHandler: net¦disconnect¦baz¦zaz¦*who
 TRACE NewHandler 12
 EVENT: wait¦start¦BEFORE
+     : end_time=0.5
      : loglevel=0
-     : end_time=0.4
 TRACE 2003-04-05 06:07:08.400000 BEFORE: Forced timer done
 EVENT: wait¦done¦BEFORE
      : loglevel=0
 EVENT: wait¦start¦AFTER
-     : loglevel=0
      : end_time=1.3
+     : loglevel=0
 EVENT: net¦connect¦foo
 EVENT: net¦recv¦foo
      : data=['A']
 EVENT: wait¦start¦OUT
-     : loglevel=0
      : end_time=0.6
+     : loglevel=0
 TRACE 2003-04-05 06:07:08.550000 OUT: Forced timer done
 foo :: net_active localhost:50333
 .
+: ‹Collected NETactive:foo›
+name: foo
+task job: <Greenlet: erh(<bound method NETactive._reader of ‹Collected NETa)>
+EVENT: wait¦done¦OUT
+     : loglevel=0
 type: net_active
 host: localhost
 port: ×××
-EVENT: wait¦done¦OUT
-     : loglevel=0
 .
 EVENT: net¦disconnect¦foo
 TRACE dis foo
@@ -48,16 +51,20 @@ EVENT: net¦connect¦baz¦zaz¦n1
 EVENT: net¦recv¦baz¦zaz¦n1
      : data=['B']
 EVENT: wait¦start¦IN
-     : loglevel=0
      : end_time=0.7
-TRACE 2003-04-05 06:07:08.800000 IN: Forced timer done
+     : loglevel=0
+TRACE 2003-04-05 06:07:08.750000 IN: Forced timer done
+: ‹Collected NETpassive:baz¦zaz¦n1›
+name: baz¦zaz¦n1
+task job: <Greenlet: erh(<bound method NETpassive._reader of ‹Collected NET)>
+EVENT: wait¦done¦IN
+     : loglevel=0
 type: net_passive
 host: 127.0.0.1
 port: ×××
-EVENT: wait¦done¦IN
-     : loglevel=0
 .
 EVENT: net¦disconnect¦baz¦zaz¦n1
+TRACE dis baz zaz n1
 TRACE 2003-04-05 06:07:09.400000 AFTER: Forced timer done
 TRACE ending
 .
@@ -65,8 +72,8 @@ EVENT: wait¦done¦AFTER
      : loglevel=0
 TRACE Yes
 EVENT: wait¦start¦END
-     : loglevel=0
      : end_time=1.6
+     : loglevel=0
 TRACE 2003-04-05 06:07:09.650000 END: Fake timer done
 EVENT: wait¦done¦END
      : loglevel=0

@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,28 +18,31 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
-This code implements a SSH command line for homevent.
+This code implements a SSH command line for moat.
 
 """
+import six
 
-from __future__ import division,absolute_import
-
-from homevent import TESTING
-from homevent.module import Module
-from homevent.context import Context
-from homevent.statement import main_words,Statement,AttributedStatement,global_words
-from homevent.interpreter import Interpreter,ImmediateProcessor
-from homevent.base import Name,SName,flatten
-from homevent.collect import Collection,Collected,get_collect,all_collect
-from homevent.check import register_condition,unregister_condition
-from homevent.twist import Jobber,fix_exception,reraise
-from homevent.run import process_failure,simple_event,register_worker,unregister_worker,MIN_PRIO
-from homevent.event import TrySomethingElse
-from homevent.worker import Worker
-from homevent.logging import BaseLogger,TRACE,LogLevels
-from homevent.times import now
+from moat import TESTING
+from moat.module import Module
+from moat.context import Context
+from moat.statement import main_words,Statement,AttributedStatement,global_words
+from moat.interpreter import Interpreter,ImmediateProcessor
+from moat.base import Name,SName,flatten
+from moat.collect import Collection,Collected,get_collect,all_collect
+from moat.check import register_condition,unregister_condition
+from moat.twist import Jobber,fix_exception,reraise
+from moat.run import process_failure,simple_event,register_worker,unregister_worker,MIN_PRIO
+from moat.event import TrySomethingElse
+from moat.worker import Worker
+from moat.logging import BaseLogger,TRACE,LogLevels
+from moat.times import now
 
 from datetime import datetime,date,time,timedelta
 from weakref import ref
@@ -69,7 +76,6 @@ class CallBack(object):
 			return
 		self.callback = async(callback)
 
-
 	def run_callback(self,*args,**kwargs):
 		res = AsyncResult()
 		def trigger(res):
@@ -88,10 +94,8 @@ class CallBack(object):
 		
 		
 	def list(self):
-		for r in super(CallBack,self).list():
-			yield r
+		yield super(CallBack,self)
 		yield("callback",repr(self.callback))
-
 
 class CommandProcessor(ImmediateProcessor):
 	"""\
@@ -116,16 +120,20 @@ class CommandProcessor(ImmediateProcessor):
 		res = self.fn.run(self.ctx)
 		return res
 
-
 class EventCallback(Worker,CallBack):
 	args = None
 	prio = MIN_PRIO+1
+	_simple = True
 
 	def __init__(self,parent,callback,*args):
 		self.parent = parent
 		CallBack.__init__(self,callback)
 		if args:
 			self.args = SName(args)
+			for k in self.args:
+				if hasattr(k,'startswith') and k.startswith('*'):
+					self._simple = False
+					break
 			name = SName(parent.name+self.args)
 			# use self.args because that won't do a multi-roundtrip iteration
 		else:
@@ -133,20 +141,22 @@ class EventCallback(Worker,CallBack):
 		super(EventCallback,self).__init__(name)
 	
 	def list(self):
-		for r in super(EventCallback,self).list():
-			yield r
+		yield super(EventCallback,self)
 		if self.args:
 			yield("args",self.args)
 
 	def does_event(self,event):
 		if self.args is None:
 			return True
+		if self._simple:
+			return self.args == event.name
+
 		ie = iter(event)
 		ia = iter(self.args)
 		while True:
-			try: e = ie.next()
+			try: e = six.next(ie)
 			except StopIteration: e = StopIteration
-			try: a = ia.next()
+			try: a = six.next(ia)
 			except StopIteration: a = StopIteration
 			if e is StopIteration and a is StopIteration:
 				return True
@@ -261,10 +271,10 @@ class RPCconn(Service,Collected):
 					yield m.name,
 			elif isinstance(c,Collection):
 				if args[-1] == "*":
-					for n,m in c.iteritems():
+					for n,m in c.items():
 						yield n,m
 					return
-				for n,m in c.iteritems():
+				for n,m in c.items():
 					try:
 						m = m.info
 					except AttributeError:
@@ -272,7 +282,7 @@ class RPCconn(Service,Collected):
 					else:
 						if callable(m):
 							m = m()
-						if isinstance(m,basestring):
+						if isinstance(m,six.string_types):
 							m = m.split("\n")[0].strip()
 
 					if m is not None:
@@ -300,7 +310,7 @@ class RPCconn(Service,Collected):
 								t= t[:ti+3]+")"
 						# otherwise transmit the datetime as-is
 					elif not isinstance(t,(date,time,timedelta)):
-						t = unicode(t)
+						t = six.text_type(t)
 
 					yield p,t
 
@@ -348,8 +358,7 @@ class RPCconn(Service,Collected):
 		return l
 
 	def list(self):
-		for r in super(RPCconn,self).list():
-			yield r
+		yield super(RPCconn,self)
 		yield ("local host", self._conn._config["endpoints"][0][0])
 		yield ("local port", self._conn._config["endpoints"][0][1])
 		yield ("remote host", self._conn._config["endpoints"][1][0])
@@ -374,10 +383,10 @@ class RPCserver(Collected,Jobber):
 		self.name = name
 		self.host=host
 		self.port=port
-		self.server = ThreadedServer(gen_rpcconn(name), hostname=host,port=port,ipv6=True, protocol_config = {"safe_attrs":set(("list","__unicode__","year","month","day","days","date","time","hour","minute","second","seconds","microseconds","ctx","items","iteritems")).union(DEFAULT_CONFIG["safe_attrs"])})
+		super(RPCserver,self).__init__()
+		self.server = ThreadedServer(gen_rpcconn(name), hostname=host,port=port,ipv6=True, protocol_config = {"safe_attrs":set(("list","__str__","__unicode__","year","month","day","days","date","time","hour","minute","second","seconds","microseconds","ctx","items")).union(DEFAULT_CONFIG["safe_attrs"])})
 		self.server.listener.settimeout(None)
 		self.start_job("job",self._start)
-		super(RPCserver,self).__init__()
 
 	def _start(self):
 		self.server.start()
@@ -388,8 +397,7 @@ class RPCserver(Collected,Jobber):
 		super(RPCserver,self).delete()
 
 	def list(self):
-		for r in super(RPCserver,self).list():
-			yield r
+		yield super(RPCserver,self)
 		yield ("host",self.host)
 		yield ("port",self.port)
 		yield ("server",repr(self.server))
@@ -434,11 +442,9 @@ name ‹name…›
 		self.parent.dest = SName(event)
 RPClisten.register_statement(RPCname)
 
-
-
 class RPCmodule(Module):
 	"""\
-		This module implements RPC access to the HomEvenT process.
+		This module implements RPC access to the MoaT process.
 		"""
 
 	info = "RPC access"

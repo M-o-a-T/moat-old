@@ -40,8 +40,8 @@ flow_write.o: ../common/flow_write.c flow_internal.h ../common/flow.h
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 install: all
-	install -m 755 reader $(DESTDIR)/usr/lib/homevent/reader
-	install -m 755 writer $(DESTDIR)/usr/lib/homevent/writer
+	install -m 755 reader $(DESTDIR)/usr/lib/moat/reader
+	install -m 755 writer $(DESTDIR)/usr/lib/moat/writer
 
 clean:
 	@rm -f *.o reader

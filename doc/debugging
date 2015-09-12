@@ -13,7 +13,7 @@
     for more details.
 
 ==================
-HomEvenT debugging
+MoaT debugging
 ==================
 
 … or, “what to do when something goes wrong”.
@@ -38,7 +38,7 @@ also cause it to be triggered at some time.
 Every Deferred also needs an error handler at the end. That handler's
 job is to create an error event which will get logged.
 
-In HomEvenT, any pending trigger should be displayed by a "list FOO"
+In MoaT, any pending trigger should be displayed by a "list FOO"
 command. That should clear up most of the mystery.
 
 Strange things happen
@@ -57,7 +57,7 @@ You will get a whole lot of messages, like this:
 
 This output means: For the ‹say¦hello› event, this sequence of things to
 do has been created. This work is based on whatever “on …” triggers you
-have installed with HomEvenT code (or, as in this sample, other
+have installed with MoaT code (or, as in this sample, other
 event-handling code written in Python).
 
 This particular sequence contains one command (and some other cruft
@@ -104,10 +104,10 @@ need it.
 Environment variables
 =====================
 
-HOMEVENT_TEST
--------------
+MOAT_TEST
+---------
 
-Setting this makes various parts of HomEvenT more testable:
+Setting this makes various parts of MoaT more testable:
 
 * it causes OneWire bus scans to run more often
 
@@ -122,7 +122,7 @@ among all the other cruft is worse than the proverbial needle in a
 haystack. (And remember that in earlier times, needles were made of
 bones, so you couldn't even use a magnet to find them. Oh, and
 supermagnets hadn't been invented either. But I digress.) Thus you can
-selectively turn on logging of various bits and pieces of HomEvenT.
+selectively turn on logging of various bits and pieces of MoaT.
 
 All of this is controlled with the daemon.py script's "-t" switch.
 

@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2008-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,6 +18,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This code does basic timeout handling.
@@ -27,14 +35,14 @@ var avg X NAME...
 
 """
 
-from __future__ import division,absolute_import
+import six
 
-from homevent.statement import Statement, main_words, AttributedStatement
-from homevent.module import Module
-from homevent.check import Check,register_condition,unregister_condition
-from homevent.times import unixdelta, now, humandelta
-from homevent.base import Name,SName
-from homevent.collect import Collection,Collected
+from moat.statement import Statement, main_words, AttributedStatement
+from moat.module import Module
+from moat.check import Check,register_condition,unregister_condition
+from moat.times import unixdelta, now, humandelta
+from moat.base import Name,SName
+from moat.collect import Collection,Collected
 
 from datetime import timedelta
 
@@ -42,7 +50,6 @@ class Avgs(Collection):
     name = "avg"
 Avgs = Avgs()
 Avgs.does("del")
-
 
 class Avg(Collected):
 	"""This is the thing that averages over time."""
@@ -91,18 +98,21 @@ class Avg(Collected):
 		self.avg = self._calc(True)
 		
 	def list(self):
-		yield ("name"," ".join(unicode(x) for x in self.name))
+		yield super(Avg,self)
 		yield ("mode",self.mode)
 		yield ("value",self.value)
 		if self.value_tm is not None:
 			yield ("set time",self.value_tm)
+		if self.prev_value:
 			yield ("prev value",self.prev_value)
+		if self.total_tm is not None:
 			yield ("total time",self.total_tm)
+		if self.total_samples:
 			yield ("total samples",self.total_samples)
 			yield ("current average",self._calc())
 
 	def info(self):
-		if self.total_tm is None:
+		if self.total_samples == 0:
 			return "(new)"
 		return "%s %s" % (self._calc(), unixdelta(self.total_tm))
 	
@@ -179,8 +189,7 @@ class DecayTimeAvg(TimeAvg):
 			return 1-(1-self.p)**(nt/self.p_base)
 
 	def list(self):
-		for r in super(DecayTimeAvg,self).list():
-			yield r
+		yield super(DecayTimeAvg,self)
 		yield ("weight",self.p)
 		yield ("time base",humandelta(self.p_base))
 		yield ("weight/hour",1-(1-self.p)**(3600/self.p_base))
@@ -208,10 +217,8 @@ class DecaySamplesAvg(Avg):
 		return r
 
 	def list(self):
-		for r in super(DecaySamplesAvg,self).list():
-			yield r
+		yield super(DecaySamplesAvg,self)
 		yield ("weight",self.p)
-
 
 class MovingSamplesAvg(Avg):
 	"""Moving average, based on the last N values"""
@@ -244,8 +251,7 @@ class MovingSamplesAvg(Avg):
 		return self.avg
 
 	def list(self):
-		for r in super(MovingSamplesAvg,self).list():
-			yield r
+		yield super(MovingSamplesAvg,self)
 		yield ("samples",len(self.values))
 		yield ("max samples",self.n)
 		if len(self.values) < 7:
@@ -254,7 +260,6 @@ class MovingSamplesAvg(Avg):
 			r = range(3)+range(len(self.values)-3,len(self.values))
 		for i in r:
 			yield ("sample "+str(i),self.values[i])
-
 
 modes = {}
 
@@ -273,7 +278,6 @@ Known modes (default: %s):
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		self.avg(self, SName(event), *self.settings)
-
 
 @AvgHandler.register_statement
 class AvgMode(Statement):
@@ -320,11 +324,10 @@ reset avg NAME
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		if len(event) < 2:
-			raise SyntaxError(u"Usage: set avg ‹value› ‹name…›")
-		m = Avgs[Name(*event[1:])]
-		m.feed(float(event[0]))
-
+		if len(event) < 1:
+			raise SyntaxError(u"Usage: reset avg ‹name…›")
+		m = Avgs[Name(*event)]
+		m.reset()
 
 class VarAvgHandler(AttributedStatement):
 	name="var avg"
@@ -347,7 +350,7 @@ var avg NAME name...
 @VarAvgHandler.register_statement
 class AvgVarUse(Statement):
 	name="use"
-	doc="change which variable to use"
+	doc="select which attribute to use"
 	avail = "value value_tm prev_value total_samples".split()
 	long_doc=u"""\
 use ‹var› - use some other value than the current average
@@ -359,7 +362,6 @@ Available: %s
 			raise SyntaxError(u"‹use› requires a parameter: " + u"¦".join(self.avail))
 		self.parent.src = event[0]
 
-
 class AvgModule(Module):
 	"""\
 		This module contains a handler for computing average values.
@@ -369,12 +371,12 @@ class AvgModule(Module):
 
 	def load(self):
 		mlen=0
-		for v in globals().itervalues():
+		for v in globals().values():
 			m = getattr(v,"mode",None)
 			if m is None: continue
 			modes[m] = v
 			if mlen < len(m): mlen = len(m)
-		for v in modes.itervalues():
+		for v in modes.values():
 			AvgHandler.long_doc += v.mode+" "*(mlen-len(v.mode)+1)+v.doc+"\n"
 
 		main_words.register_statement(AvgHandler)

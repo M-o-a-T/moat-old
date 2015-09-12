@@ -2,28 +2,27 @@
 or in fact any other file or output of this package, you forgot to
 switch your system to UTF-8.)
 
-«HomEvenT» is the old name for «MoaT», the «Manager of all Things».
-The rename (and the third rewrite) is ongoing.
-
-For more information, see the project's temporary homepage at
-http://matthias.urlichs.de/moat/home .
-
-
-«HomEvenT» is a contraction of "home event", plus funky capitalization.
+«MoaT» is the «Manager of all Things». It began its life as «HomEvenT»,
+which is a contraction of "home event", plus funky capitalization.
 Its principal author is Matthias Urlichs <matthias@urlichs.de>.
+However, the thing is not just for managing events at home, so it was time
+for a name change. Plus, frankly, plodding through lots of incompatible
+home automation solutions does feel like wading through molasses … or a
+boggy moat. Hence the new name.
 
 
-I wrote HomEvenT because while playing around with some home automation
+I wrote MoaT because while playing around with some home automation
 stuff, I found that none of the free systems out there fit my needs
 particularly well, plus they are not talking to each other.
 
-In my home, I really need a heterogenous infrastructure: some switches
-need to be wireless, in others existing wired switches need to survive;
+In my home, I have a heterogenous infrastructure: some switches
+need to be wireless, some existing wired switches need to survive;
 some devices can only be controlled by infrared, some are in places
-where nothing except stringing some wire would work.
+where nothing except stringing some wire would work, all the new stuff
+is connected with KNX/EIB.
 
 
-This code uses Unicide, more specifically UTF-8, quite liberally.
+This code uses Unicode, more specifically UTF-8, quite liberally.
 For this reason it's imperative to teach Python that the default character
 set is UTF-8, not ASCII. Thus, you need to add the following code to
 /etc/python2.7/sitecustomize.py:
@@ -34,7 +33,8 @@ set is UTF-8, not ASCII. Thus, you need to add the following code to
     except AttributeError:
     	pass
 
-This change is very unlikely to be a problem.
+This change is very unlikely to be a problem. It's also no longer necessary
+with Python 3, which MoaT is migrating to (but it's not quite there yet).
 
 
 The rest of the documentation is in the doc/ subdirectory.
@@ -44,31 +44,28 @@ Interactive tests and experiments are easy:
 just type “make i”, then “help”.
 
 
-The components I'm concerned with are:
+The components I'm mostly concerned with are:
 
-* FS20
+* KNX
 
-This is a German wireless system operating in the 868-MHz range. It's
-not at all secure and generally doesn't use two-way handshakes. Wall
-switches cost €15, a heating controller is €40, so it's not too bad.
+A mostly-European 2-wire bus system (like 1wire, one of these is ground;
+unlike 1wire, the rest state is 30V and you don't need a separate power
+supply. Also unlike 1wire, components are mostly quite intelligent, made by
+a lot of manufacturers, and quite expensive unless you know what to look
+for).
 
-There's a FS20 controller for USB, whcih I'm currently using. Alternately,
-you can buy a sender and a receiver, and connect them to your computer
-directly. Somehow. I plan to use an USB sound interface for that, because
-I want to control the heating system directly, and the commercial
-controller doesn't let you do that.
+There's a free daemon for KNX which interfaces the bus to IP multicast.
 
-That controller is supported by a large and well-maintained server
-written in Perl. The main problem I have with it is that I do not like
-Perl :-/ the other is that it's 100% synchronous code, which does not
-integrate at all well with the 1wire bus.
+There's also no way to program (or rather, configure) these devices without
+shelling out $$$ for a proprietary configuration thing which only runs on
+Windows.
 
 * Wago
 
 This is a industrial controller made by Wago GmbH, Germany.
 It runs Linux and it has decent pluggable I/O modules for most needs.
 The daemon I wrote to run on that device could probably be adapted quite
-easily to use standard Linux GPIO instead.
+easily to use standard Linux GPIO (to run on a Raspberry Pi) instead.
 
 I'm intentionally not using MODBUS or some other standard (which these
 controllers also support) since these buses don't afford timed outputs.
@@ -103,6 +100,12 @@ Linux support for 1-wire comes either as an incomplete kernel module,
 or a user-space daemon (<http://owfs.sourceforge.net>) with support for
 networking and multiple scripting languages. I'm using the latter.
 
+* AMQP
+
+RabbitMQ is a nice message broker. MoaT broadcasts all its events through
+the broker so that other systems can pick them up and multiple instances
+can talk to each other.
+
 * LIRC
 
 I use infrared to control the window blinds. Good motors cost around
@@ -118,6 +121,17 @@ are not controlled centrally, see above for the cheap light sensor.
 Other systems and projects
 --------------------------
 
+* openHAB
+
+Large. Those people know what they're doing. Unfortunately they're doing it
+it Java. That language may have some advantages, but I'll happily let
+others waste their time writing yet another adapter class.
+
+I use it for visualization, but plan to replace the back-end with a MoaT
+instance.
+
+It can talk MQTT, so interfacing to it is simple.
+
 * plutohome
 
 Really large. Not my kettle of fish: writing my own system is bound to
@@ -131,7 +145,10 @@ Looks interesting, but frankly I hate Perl. Writing a home automation
 
 * fhem
 
-Focuses on FS20. Might be OK as a front-end. Again, too much Perl.
+Started its life talking to FS20; these days, talks to about anything.
+Works quie well as a front-end. Again, too much Perl. Also, blocking code.
+
+It can talk MQTT, so interfacing to it is simple.
 
 * xap
 

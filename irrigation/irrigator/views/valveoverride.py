@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
-
-##  Copyright © 2012, Matthias Urlichs <matthias@urlichs.de>
+from __future__ import absolute_import, print_function, division, unicode_literals
+##
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -13,8 +18,11 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
-from __future__ import division,absolute_import
 from django.views.generic import ListView,DetailView,CreateView,UpdateView,DeleteView
 from django.forms import ModelForm
 from rainman.models import ValveOverride,Site,Controller,Valve,Feed,EnvGroup
@@ -52,8 +60,8 @@ class ValveOverrideParamMixin(SiteParamMixin):
 	opt_params = {'site':Site, 'controller':Controller, 'valve':Valve, 'feed': Feed, 'envgroup':EnvGroup, 'valve':Valve}
 	opt_names = { 'envgroup': 'valve__envgroup', 'site':'valve__controller__site','controller':'valve__controller','feed':'valve__feed' }
 
-	def get_params_hook(self,k):
-		super(ValveOverrideParamMixin,self).get_params_hook(k)
+	def get_params_hook(self,*a,**k):
+		super(ValveOverrideParamMixin,self).get_params_hook(*a,**k)
 		s = self.aux_data['site']
 		c = self.aux_data['controller']
 		f = self.aux_data['feed']
@@ -110,7 +118,6 @@ class ValveOverrideMixin(FormMixin):
 		ctx['prefix'] = prefix
 		return ctx
 
-
 class ValveOverridesView(ValveOverrideMixin,ValveOverrideParamMixin,ListView):
 	context_object_name = "valveoverride_list"
 	paginate_by = 50
@@ -136,7 +143,9 @@ class ValveOverrideNewView(ValveOverrideMixin,ValveOverrideParamMixin,CreateView
 	form_class = ValveOverrideForm
 	success_url="/valve/time/%(id)s"
 	#success_url="/valve/%(valve)s/time/%(id)s"
-	def get_form(self, form_class):
+	def get_form(self, form_class=None):
+		if form_class is None:
+			form_class = self.form_class
 		form = super(ValveOverrideNewView,self).get_form(form_class)
 		form.limit_choices(**self.aux_data)
 		return form
@@ -151,7 +160,9 @@ class ValveOverrideNewView(ValveOverrideMixin,ValveOverrideParamMixin,CreateView
 
 class ValveOverrideEditView(ValveOverrideMixin,ValveOverrideParamMixin,UpdateView):
 	form_class = ValveOverrideForm
-	def get_form(self, form_class):
+	def get_form(self, form_class=None):
+		if form_class is None:
+			form_class = self.form_class
 		form = super(ValveOverrideEditView,self).get_form(form_class)
 		form.limit_choices(valve=self.object.valve)
 		return form

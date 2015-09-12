@@ -144,7 +144,7 @@ wet ground, so that's … 4/2/1.6 … about 1.25 gallons per square foot.
 Sorry, but I've got better things to do than to keep all that straight in
 my head. If you want to convince the web frontend to optionally use
 imperial units, go ahead, but don't wait for me to do that. (The back end?
-Scale the pulse counter's monitor in HomEvenT to emit one tick per liter,
+Scale the pulse counter's monitor in MoaT to emit one tick per liter,
 instead of per gallon.)
 
 End of rant.  ;-)
@@ -156,7 +156,7 @@ Create a site. Add environment meters and valves. Don't worry about the
 water level numbers yet.
 
 The valve flow data can be auto-generated ("manage.py genconfig") for
-inclusion in HomEvenT; the sensors you'll have to do yourself.
+inclusion in MoaT; the sensors you'll have to do yourself.
 
 Run the main irrigation control, "manage.py runschedule". It will start to
 record your environment data. If you have an impulse counter, you can now
@@ -210,7 +210,7 @@ Priority is given to valves, in order,
 Events
 ======
 
-The irrigation control understands a couple of HomEvenT events, all of
+The irrigation control understands a couple of MoaT events, all of
 which you can trigger via SSH or (sometime) with the Web frontend.
 
 check flow

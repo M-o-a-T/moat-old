@@ -19,6 +19,7 @@ from django.http import HttpResponseRedirect
 from django.core.exceptions import ObjectDoesNotExist
 from django.forms import ModelForm,FloatField,TimeField
 from django.utils.translation import ugettext_lazy as _
+from django.template.context_processors import csrf
 from datetime import timedelta,datetime
 
 from rainman.models import Site
@@ -26,7 +27,7 @@ from rainman.models import Site
 
 def get_profile(request):
 	try:
-		gu = request.user.get_profile()
+		gu = request.user.profile
 	except (ObjectDoesNotExist,AttributeError):
 		if request.user.is_authenticated():
 			raise Redirect('/login/no_access')
@@ -95,24 +96,27 @@ class SiteParamMixin(object):
 		super(SiteParamMixin,self).__init__(*a,**k)
 		self.aux_data = {}
 
-	def get_params_hook(self,k):
+	def get_params_hook(self,request,k):
 		for p,d in self.opt_params.items():
 			pk = k.get(p,None)
 			if pk is not None:
 				self.aux_data[p] = d.objects.get(pk=k.pop(p))
 			else:
 				self.aux_data[p] = None
+		self.aux_data.update(csrf(request))
 
-	def get_form(self, form_class):
+	def get_form(self, form_class=None):
+		if form_class is None:
+			form_class = getattr(self,'form_class',None)
 		form = super(SiteParamMixin,self).get_form(form_class)
 		form.aux_data = self.aux_data
 		return form
 
 	def get(self, request, **k):
-		self.get_params_hook(k)
+		self.get_params_hook(request,k)
 		return super(SiteParamMixin,self).get(request,**k)
 	def post(self,request,**k):
-		self.get_params_hook(k)
+		self.get_params_hook(request,k)
 		return super(SiteParamMixin,self).post(request,**k)
 
 	def get_queryset(self):
@@ -123,6 +127,7 @@ class SiteParamMixin(object):
 				p = self.opt_names[p]
 			if v is not None:
 				f[p] = v
+		f.pop('csrf_token',None)
 		if f:
 			q = q.filter(**f)
 		return q

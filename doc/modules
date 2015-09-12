@@ -182,7 +182,7 @@ additional details about that particular item.
     .
     >> list module net
     name: net
-    path: homevent.modules.net.py
+    path: moat.modules.net.py
     info: Basic line-based TCP access
     .
     >> 
@@ -218,6 +218,13 @@ Nearly everything that can sensibly be deleted can also be tested for.
 
 	if exists module data:
 		del module data
+
+
+exists var ‹name›
+-----------------
+
+Check if a variable of that name exists, i.e. `$name` will work instead of
+raising an error.
 
 ======
 errors
@@ -396,7 +403,7 @@ Register a device.
 code TYPE ID
 ------------
 
-Tells HomEvenT which type of device this is and the ID that's set on it.
+Tells MoaT which type of device this is and the ID that's set on it.
 
 You can get the list of known types with "help fs20 em".
 
@@ -432,10 +439,10 @@ necessary.
 
 Note that you need to declare one timeslot-equipped FS20-EM device,
 insert the batteries, and wait for correct measurement events to show up
-before you declare the timeslot for any other device. Otherwise HomEvenT
+before you declare the timeslot for any other device. Otherwise MoaT
 will have no way to determine which device is which.
 
-In addition to using a timeslot, HomEvenT tries to separate devices by
+In addition to using a timeslot, MoaT tries to separate devices by
 considering the previous measurement: if a data packet can be placed in
 two slots, the device with the closest values will be used.
 
@@ -468,7 +475,7 @@ Register a device.
 code TYPE ID
 ------------
 
-Tells HomEvenT which type of device this is and the ID that's set on it.
+Tells MoaT which type of device this is and the ID that's set on it.
 
 You can get the list of known types with "help fs20 tx".
 
@@ -503,7 +510,7 @@ fs20switch
 
 Use this module to register FS20 devices.
 
-HomEvenT uses this registration only for naming, but doesn't
+MoaT uses this registration only for naming, but doesn't
 distinguish between senders and receivers, since it treats incoming
 signals as mere events — you need to specify any more convoluted logic
 in your own code.
@@ -544,8 +551,8 @@ You can use the same command to modify a house or device code.
 
 Note that the broadcast and/or group control codes, which are defined as
 having "44" in the last and/or first two digits of the device code,
-are not handled by HomEvenT in any special way. This is intentional:
-your HomEvenT code needs to know (and document) _anyway_ which signal
+are not handled by MoaT in any special way. This is intentional:
+your MoaT code needs to know (and document) _anyway_ which signal
 affects which device.
 
 
@@ -909,7 +916,7 @@ Check whether this output has / is supposed to have the given value.
 monitor
 =======
 
-You may want HomEvenT to watch external variables (temperature, wind,
+You may want MoaT to watch external variables (temperature, wind,
 whatever). Reading external data may be subject to hard errors (the
 external bus is down), soft errors (intermittent false readings),
 and other problems.
@@ -1357,7 +1364,7 @@ bus). It can run on cheap wiring (one pair, preferably twisted) and does
 not require a separate power supply; usually, though, 1wire buses run
 over Cat5 cable and do have powered wires.
 
-HomEvenT does not access the 1wire bus directly. Instead, it talks to
+MoaT does not access the 1wire bus directly. Instead, it talks to
 one or more “owserver” processes which may run on separate hosts. Check
 the “owfs” project at ‹http://owfs.sourceforge.net› for details.
 
@@ -1370,10 +1377,10 @@ to set the Fahrenheit flag if you *really* want to change that.
 
 One can attach and remove devices to and from a 1wire bus while the bus
 is running. Also, electrical problems like interference may cause bus
-operation to be sporadic. HomEvenT therefore retries some bus
+operation to be sporadic. MoaT therefore retries some bus
 operations, but of course it can't fix everything.
 
-HomEvenT's 1wire bus scanner tries to prioritize bus accesses in order
+MoaT's 1wire bus scanner tries to prioritize bus accesses in order
 to not block other tasks too long. However, 1wire definitely is not a
 real-time bus; you can have *either* a complicated bus topology or
 devices which do A/D conversion, *or* a bus with switches or other
@@ -1393,7 +1400,7 @@ Establish a named server connection.
 
 The above three statements are equivalent.
 
-HomEvenT will scan the bus every five minutes (or every minute if there
+MoaT will scan the bus every five minutes (or every minute if there
 was an error) and provide events for newly connected or removed devices.
 
 ------------------
@@ -1459,7 +1466,7 @@ Show which buses are connected to the system.
 With the bus name as additional argument, shows details about that bus.
 
 Alternately, you can use a device ID as an additional argument;
-HomEvenT will print details about that device. That information will
+MoaT will print details about that device. That information will
 allow you to use standard owfs commands on the device without searching
 the bus for it, which can get tricky if you want to find out where it
 just got disconnected from. :-/
@@ -1589,7 +1596,7 @@ This module provides basic access to RRD databases.
 RRD is an acronym for "round-robin database". They're ideal for storing
 data for which you want to generate both short-term and long-term
 graphs. Basically, a number of data sources get consolidated into one or
-more archives. The HomEvenT support of rrdtool is concerned *only*
+more archives. The MoaT support of rrdtool is concerned *only*
 with supplying data to rrd.
 
 You create these databases with 'rrdtool'.
@@ -1641,7 +1648,7 @@ source are printed. Names and values are the same as reported by the
 "rrdtool info" command, for the data source in question.
 
 Right now there is no way to query for other RRD information; it's out
-of scope for HomEvenT.
+of scope for MoaT.
 
 
 -------
@@ -1678,7 +1685,7 @@ Tests
 ssh
 ===
 
-This module provides secure shell access to HomEvenT.
+This module provides secure shell access to MoaT.
 
 You need to load it this way:
 
@@ -1696,14 +1703,14 @@ ssh needs a persistent host key, which is stored in the directory in
 question. You should use "async:" because the first time you do this,
 creating the host key may take some time. The directory in question
 will then contain a private host key. You need to protect that file so
-that nobody can impersonate your HomEvenT server.
+that nobody can impersonate your MoaT server.
 
 After that, "ssh -l NAME -p 50022 localhost" will connect you to a
-HomEvenT command line. Basic line editing and (non-persistent) history
+MoaT command line. Basic line editing and (non-persistent) history
 is provided.
 
 The SSH connection does not accept passwords for authorization:
-passwords need to be stored someplace secure, and HomEvenT does not
+passwords need to be stored someplace secure, and MoaT does not
 aspire to be able to do that. Instead, you need to create a public key
 (assuming that you don't already have one):
 
@@ -1722,7 +1729,7 @@ the server can do everything.
 
 The command "exit" will terminate your ssh connection.
 
-Using a HomEvenT command on the ssh command line is not yet supported.
+Using a MoaT command on the ssh command line is not yet supported.
 
 -------------------
 auth ssh USER "KEY"
@@ -1752,7 +1759,7 @@ listen ssh PORT
 Accept SSH connections on this port. The standard SSH port is 22, but
 usually your normal system SSH occupies that port. Besides, port numbers
 below 1024 can only be allocated by root. You do not want to run
-HomEvenT with root privileges!
+MoaT with root privileges!
 
 =====
 state
@@ -1999,7 +2006,7 @@ Examples:
 
 * turn on my receiver every 116 seconds and listen for a status message
 
-HomEvenT controls this with time slots.
+MoaT controls this with time slots.
 
 ----------------
 timeslot ‹name…›
@@ -2226,9 +2233,9 @@ default
 -------
 
 If used, the output will be changed to this state ("on" or "off") after
-starting HomEvenT and initially connecting to a server.
+starting MoaT and initially connecting to a server.
 
-Upon reconnection, HomEvenT's current state will be restored.
+Upon reconnection, MoaT's current state will be restored.
 
 
 ------------
@@ -2450,6 +2457,30 @@ The above could therefore also have been written as:
 
 except that it's ugly. ☺
 
+soft
+----
+
+Normally, canceling a wait (with `wait cancel`) causes the wait to trigger
+an error, i.e. the commands after the `wait` are not executed.
+
+Add `soft` to prevent that, i.e. execution continues regardless of whether
+the wait was canceled or ran to completion.
+
+timeout
+-------
+
+Conversely, you might want the waiter to throw an error when the timer
+completes normally. You can use this to kill your program whenever somethig
+doesn't happen:
+
+	on connected foo: del wait foo timer
+	connect foo  # assume this triggers a "connected foo" event
+	if not connected foo: # avoids a race condition
+		wait foo timer:
+			for 42
+			timeout
+	# code here is only run when the connection was established within 42sec
+
 ---------
 list wait
 ---------
@@ -2513,10 +2544,10 @@ See the example under "set state", above.
 AMQP
 ====
 
-Connect HomEvenT to an external AMQP messaging server like RabbitMQ.
+Connect MoaT to an external AMQP messaging server like RabbitMQ.
 
 The message payload typically consists of a JSON string with attributes
-that can be sent or received by HomEvenT. Only simple values (strings or
+that can be sent or received by MoaT. Only simple values (strings or
 numbers) are supported.
 
 The AMQP message exchanges need to be "topic" exchanges so that message
@@ -2531,7 +2562,7 @@ Establish a connection to an AMQP server.
 
 	connect amqp localhost:
 		name test foo
-		user "/test" test test
+		user test test test
 
 name
 ----
@@ -2569,7 +2600,7 @@ The name of this listener.
 exchange ‹name›
 --------
 
-The AMQP exchange to bind to. Defaults to `homevent_event`.
+The AMQP exchange to bind to. Defaults to `moat_event`.
 
 prefix ‹word…›
 --------------
@@ -2626,7 +2657,7 @@ If you do not use this sub-statement, all events are forwarded.
 exchange ‹name›
 ---------------
 
-The exchange to use. Defaults to "homevent.event".
+The exchange to use. Defaults to "moat.event".
 
 prefix ‹name…›
 --------------
@@ -2641,7 +2672,7 @@ Remove the first ‹n› words from the event key before forwarding.
 shunt
 -----
 
-Events matching this statement will *not* be processed by HomEvenT.
+Events matching this statement will *not* be processed by MoaT.
 Instead, you are required to provide a matching `listen amqp` statement.
 That statement also needs a `shunt` sub-statement, and it needs to
 reconstruct the event (remove any prefix).
@@ -2676,7 +2707,7 @@ The name of the connection.
 exchange ‹name›
 ---------------
 
-The exchange to send to; the default is `homevent.log`.
+The exchange to send to; the default is `moat.log`.
 
 
 --------------------
@@ -2690,4 +2721,152 @@ list amqp listener
 ------------------
 
 Returns a list of listeners, or deails about one listener.
+
+
+====
+exec
+====
+
+Runs arbitrary Python code.
+
+
+----
+exec
+----
+
+Calls Python from MoaT.
+
+        exec foo.bar one two three:
+                param what ever
+
+will load module `foo` and call its procedure `bar` like this:
+
+        foo.bar(ENV, "one", "two", "three", what="ever")
+
+Execution is synchronous.
+
+----
+path
+----
+
+Add a directory where MoaT searches Python modules.
+
+        path '/etc/moat'
+
+-----------
+Environment
+-----------
+
+The environment passed to Python has these attributes:
+
+on
+--
+
+A decorator to add event handling. Unnamed parameters denote the event.
+An optional handler name is passed in 'name' and can be used to delete the
+handler, if necessary.
+
+	@ENV.on("run","me","now", name=["runme","handler"]):
+	def handler(event):
+		…
+
+	def cleanup(env):
+		env.do.del.on("runme handler")
+
+`do` and `on` support auto-splitting, so the above is exactly the same as:
+
+	@ENV.on("run.me.now", name="runme handler"):
+	def handler(event):
+		…
+
+	def cleanup(env):
+		env.do.del.on("runme","handler")
+
+
+trigger
+-------
+
+Trigger an event.
+
+	import datetime
+	trigger("run","me","now", some_data="some_value")
+
+Whether the event is executed synchronously or not is not specified.
+
+do
+--
+
+Call back to MoaT.
+
+        env.do("log DEBUG Calling back")
+        env.do.log("DEBUG Calling back")
+
+You can set context values (similar to `trigger`).
+
+The above commands are equivalent.
+
+
+
+=======
+systemd
+=======
+
+This module contains systemd-related functions.
+
+---------
+keepalive
+---------
+
+If you start your daemon with `WatchdogSec=` set to some number, you need
+to call `keepalive` at least that often to prevent your service from being
+restarted.
+
+	async:
+		while true:
+			wait: for 5 sec
+			keepalive
+
+----------
+send ready
+----------
+
+Tell systemd that your startup has completed.
+
+-----------
+send status
+-----------
+
+Tell systemd what's happening, so that "systemd status moat@whatever" displays
+something meaningful.
+
+====
+moat
+====
+
+This module contains abstractions for MoaT devices.
+
+----------------
+list moat device
+----------------
+
+List known MoaT devices by name.
+
+-----------------------
+input moat adc NAME NR
+-----------------------
+
+Create a named (numeric) input for a MoaT A/D converter.
+
+-----------------------
+input moat port NAME NR
+-----------------------
+
+Create a named (Boolean) input for a MoaT port.
+
+------------------------
+output moat port NAME NR
+------------------------
+
+Create a named (Boolean) input for a MoaT port.
+
 

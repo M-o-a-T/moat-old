@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,8 +18,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
-
-from __future__ import division
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 This code does basic monitoring.
@@ -25,17 +31,15 @@ monitor name TYPE args
 
 """
 
-from __future__ import division,absolute_import
-
-from homevent.monitor import Monitor,Monitors, MonitorDelayFor,MonitorDelayUntil,\
+from moat.monitor import Monitor,Monitors, MonitorDelayFor,MonitorDelayUntil,\
 	MonitorRequire,MonitorRetry,MonitorAlarm,MonitorHigh,MonitorLow,\
 	MonitorLimit, MonitorScale, MonitorDiff, MonitorHandler, NoWatcherError
-from homevent.statement import AttributedStatement, Statement, main_words,\
+from moat.statement import AttributedStatement, Statement, main_words,\
 	global_words
-from homevent.module import Module
-from homevent.check import Check,register_condition,unregister_condition
-from homevent.base import Name,SName
-from homevent.in_out import Inputs
+from moat.module import Module
+from moat.check import Check,register_condition,unregister_condition
+from moat.base import Name,SName
+from moat.in_out import Inputs
 
 import os
 
@@ -65,8 +69,7 @@ monitor input ‹name…›
 
 	def list(self):
 		"""status iterator"""
-		for r in super(Monitor,self).list():
-			yield r
+		yield super(Monitor,self)
 		yield ("var",self.var)
 
 class MonitorUpdate(AttributedStatement):
@@ -90,7 +93,7 @@ This statement updates the parameters of an existing monitor.
 
 		if active:
 			monitor.down()
-		for p,v in self.params.iteritems():
+		for p,v in self.params.items():
 			setattr(monitor,p,v)
 		if active:
 			monitor.up()
@@ -100,7 +103,6 @@ for cmd in (MonitorDelayFor, MonitorDelayUntil, MonitorRequire, \
 		MonitorRetry, MonitorAlarm, MonitorLimit, MonitorScale, \
 		MonitorHigh, MonitorLow, MonitorDiff):
 	MonitorUpdate.register_statement(cmd)
-
 
 class MonitorStart(Statement):
 	name = "start monitor"
@@ -145,7 +147,6 @@ set monitor VALUE NAME
 		m = Monitors[Name(*event[1:])]
 		m.watcher.put(event[0], block=True, timeout=0.5)
 
-
 class RunningMonitorCheck(Check):
 	name="running monitor"
 	doc="check if a monitor is active"
@@ -154,7 +155,6 @@ class RunningMonitorCheck(Check):
 			raise SyntaxError(u"Usage: if active monitor ‹name…›")
 		name = Name(*args)
 		return Monitors[name].job is not None
-
 
 class WaitingMonitorCheck(Check):
 	name="waiting monitor"
@@ -165,7 +165,6 @@ class WaitingMonitorCheck(Check):
 		name = Name(*args)
 		m = Monitors[name]
 		return m.job and not m.running.is_set()
-
 
 class VarMonitorHandler(Statement):
 	name="var monitor"
@@ -179,7 +178,6 @@ var monitor NAME name...
 		var = event[0]
 		name = Name(*event[1:])
 		setattr(self.parent.ctx,var,Monitors[name].value)
-
 
 class MonitorModule(Module):
 	"""\

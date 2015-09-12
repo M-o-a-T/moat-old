@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-##  Copyright © 2012, Matthias Urlichs <matthias@urlichs.de>
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
 ##
 ##  This program is free software: you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
@@ -14,6 +18,10 @@
 ##  GNU General Public License (included; see the file LICENSE)
 ##  for more details.
 ##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
 """\
 		Recalculate valves.
@@ -26,7 +34,6 @@ from datetime import datetime,time,timedelta
 from django.db.models import F,Q
 from django.utils.timezone import utc,get_current_timezone
 from optparse import make_option
-
 
 class Command(BaseCommand):
 	args = '<valve>…'
@@ -84,7 +91,7 @@ class Command(BaseCommand):
 
 	def one_valve(self,v,options):
 		if options['verbose']:
-			print "Updating",v
+			print("Updating",v)
 		envgroup = EnvGroup(v.envgroup)
 		now = datetime.utcnow().replace(tzinfo=utc)
 		if options['age'] is None:
@@ -120,7 +127,7 @@ class Command(BaseCommand):
 		for lv in Level.objects.filter(valve=v,time__gte=start).order_by("time"):
 			if level is None or lv.forced:
 				if options['verbose']:
-					print "Initial",lv.level
+					print("Initial",lv.level)
 				while hist:
 					try:
 						if hist.stored.time > lv.time:
@@ -146,8 +153,8 @@ class Command(BaseCommand):
 				add_f = s.db_rate * v.do_shade(envgroup.envgroup.factor*f) * (h.time-ts).total_seconds()
 				add_r = v.runoff*h.rain
 				if options['verbose']:
-					print "Apply",h,f,u"– dry="+str(add_f)," rain="+str(add_r)
-					print "    T:",h.temp,"W:",h.wind,"S:",h.sun
+					print("Apply",h,f,u"– dry="+str(add_f)," rain="+str(add_r))
+					print("    T:",h.temp,"W:",h.wind,"S:",h.sun)
 				sum_f += add_f
 				sum_r += add_r
 				ts=h.time
@@ -161,23 +168,22 @@ class Command(BaseCommand):
 
 			if abs(lv.level-level)>(abs(lv.level)+abs(level))/100:
 				if options['verbose']:
-					print "Updated",lv,"from",lv.level,"to",level
-					print "   evaporate="+str(sum_f),"rain="+str(sum_r),"water="+str(lv.flow/v.area)
+					print("Updated",lv,"from",lv.level,"to",level)
+					print("   evaporate="+str(sum_f),"rain="+str(sum_r),"water="+str(lv.flow/v.area))
 				if options['save']:
 					lv.update(level = level)
 					lv.refresh()
 			else:
 				if options['verbose']:
-					print "Unchanged",lv,lv.level
+					print("Unchanged",lv,lv.level)
 		if level is not None and abs(v.level-level)>(abs(v.level)+abs(level))/100:
-			print "Updated",v,"from",v.level,"to",level
+			print("Updated",v,"from",v.level,"to",level)
 			if options['save']:
 				v.update(level=level)
 				v.refresh()
 		else:
 			if options['verbose']:
-				print "Unchanged",v,v.level
-
+				print("Unchanged",v,v.level)
 
 class EnvGroup(object):
 	"""For now, a copy from runschedule"""
@@ -200,7 +206,7 @@ class EnvGroup(object):
 	def env_factor(self,h,logging):
 		if logging:
 			def logger(x):
-				print x
+				print(x)
 		else:
 			logger = None
 		return self.envgroup.env_factor(h,logger)
