@@ -290,14 +290,17 @@ class AVRreceiver(AVRcommon):
 
 	def down_event(self, external=False):
 		self.connectionLost("disconnect")
-		simple_event("fs20","avr","disconnect",*self.name)
+		simple_event("fs20","avr","disconnect",*self.name, deprecated=True)
+		simple_event("fs20","avr","state",*self.name, state="down")
 
-	def not_up_event(self, external=False):
-		simple_event("fs20","avr","error",*self.name)
+	def not_up_event(self, external=False, error=None):
+		simple_event("fs20","avr","error",*self.name, deprecated=True)
+		simple_event("fs20","avr","state",*self.name, state="error", error=error)
 
 	def up_event(self, external=False):
 		self.connectionMade()
-		simple_event("fs20","avr","connect",*self.name)
+		simple_event("fs20","avr","connect",*self.name, deprecated=True)
+		simple_event("fs20","avr","state",*self.name, state="up")
 
 	# Collected stuff
 	def info(self):

@@ -533,14 +533,14 @@ class OWFSpoller(Collected,Jobber):
 		if id not in devices:
 			if id not in self.seen_new:
 				self.seen_new.add(id)
-				simple_event("onewire","alarm","new",id, bus=self.bus.bus.name, path=self.path, id=id)
+				simple_event("onewire","alarm","new", bus=self.bus.bus.name, path=self.path, id=id)
 			return # not yet known, presumably on next scan
 		if id in self.seen_new:
 			self.seen_new.remove(id)
 
 		if id not in self.seen:
 			self.seen.add(id)
-			simple_event("onewire","alarm","on",id, bus=self.bus.bus.name, path=self.path, id=id)
+			simple_event("onewire","alarm","state",id, bus=self.bus.bus.name, path=self.path, id=id, state="on")
 		elif id in self.old_seen:
 			self.old_seen.remove(id)
 
@@ -554,7 +554,7 @@ class OWFSpoller(Collected,Jobber):
 				# log(DEBUG,"SCAN",self.path,"IN",self.bus)
 				self.bus.dir(path=self.path+('alarm',), proc=self._reporter, cached=False)
 				for id in self.old_seen:
-					simple_event("onewire","alarm","off",id, bus=self.bus.bus.name, path=self.path, id=id)
+					simple_event("onewire","alarm","state",id, bus=self.bus.bus.name, path=self.path, id=id, state="off")
 					self.seen.remove(id)
 			except Exception as e:
 				self.last_error = e

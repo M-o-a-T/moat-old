@@ -1,3 +1,14 @@
+moat (0.7.27) smurf; urgency=medium
+
+  * Clean up events
+    * Check current system state by examining persistent events
+    * add timestamps to events
+    * mark old events as deprecated
+  * use dabroker's JSON codec
+  * report connection errors
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Mon, 14 Sep 2015 09:56:13 +0200
+
 moat (0.7.26) smurf; urgency=medium
 
   * fix equality tests

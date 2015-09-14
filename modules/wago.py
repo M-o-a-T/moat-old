@@ -151,13 +151,16 @@ class WAGOchannel(WAGOassembler, NetActiveConnector):
 		# we do not do anything, except to read a prompt
 
 	def down_event(self, external=False):
-		simple_event("wago","disconnect",*self.name)
+		simple_event("wago","disconnect",*self.name, deprecated=True)
+		simple_event("wago","state",*self.name, state="down")
 
 	def up_event(self, external=False):
-		simple_event("wago","connect",*self.name)
+		simple_event("wago","connect",*self.name, deprecated=True)
+		simple_event("wago","state",*self.name, state="up")
 
-	def not_up_event(self, external=False):
-		simple_event("wago","error",*self.name)
+	def not_up_event(self, external=False, error=None):
+		simple_event("wago","error",*self.name, deprecated=True)
+		simple_event("wago","state",*self.name, state="error", error=error)
 
 class WAGOinitMsg(MsgReceiver):
 	blocking = True
@@ -203,7 +206,7 @@ class WAGOmsgBase(MsgBase):
 _num = re.compile("[0-9]+")
 
 class WAGOmonitorsMsg(WAGOmsgBase):
-	"""Query the curent ist of monitors, when reconnecting"""
+	"""Query the current ist of monitors, when reconnecting"""
 	blocking = True
 	prio = PRIO_URGENT
 	data = None

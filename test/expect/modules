@@ -2,5 +2,11 @@ EVENT: startup
      : startup=True
 DEBUG Loading!
 EVENT: module¦load¦example
+     : deprecated=True
+EVENT: module¦state¦example
+     : state=load
 DEBUG Unloading!
 EVENT: module¦unload¦example
+     : deprecated=True
+EVENT: module¦state¦example
+     : state=unload

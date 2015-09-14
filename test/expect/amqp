@@ -2,22 +2,36 @@ EVENT: startup
      : startup=True
 TRACE Create OnEvtHandler: amqp¦connect¦test¦foo
 EVENT: amqp¦connect¦test¦foo
-TRACE NewHandler 6
+     : deprecated=True
+EVENT: amqp¦state¦test¦foo
+     : state=connect
+TRACE NewHandler 7
 EVENT: amqp¦start¦test¦foo
+     : deprecated=True
+EVENT: amqp¦state¦test¦foo
+     : state=up
 TRACE Create OnEvtHandler: amam¦ho
-TRACE NewHandler 10
-TRACE Create OnEvtHandler: wait¦cancel¦foo¦b
-TRACE NewHandler 11
-TRACE Create OnEvtHandler: wait¦done¦foo¦b
 TRACE NewHandler 12
+TRACE Create OnEvtHandler: wait¦state¦foo¦b
+TRACE NewHandler 13
 EVENT: wait¦start¦foo¦a
-     : end_time=0.5
+     : deprecated=True
+     : end_time=0.4
      : loglevel=0
+EVENT: wait¦state¦foo¦a
+     : end_time=0.4
+     : loglevel=0
+     : state=start
 foo lish
 .
 EVENT: wait¦start¦foo¦b
+     : deprecated=True
      : end_time=0.8
      : loglevel=0
+EVENT: wait¦state¦foo¦b
+     : end_time=0.8
+     : loglevel=0
+     : state=start
 : ‹Collected AMQPrecv:foo¦lish›
 name: foo¦lish
 connection: ‹Collected AMQPclient:test¦foo›
@@ -47,15 +61,14 @@ password: ****
 1 :: free all collections
 2 :: Logger
 3 :: shutdown handler
-6 :: amqp¦connect¦test¦foo (51)
-7 :: test¦foo¦f1
-8 :: test¦foo¦f2
-10 :: amam¦ho (51)
-11 :: wait¦cancel¦foo¦b (51)
-12 :: wait¦done¦foo¦b (51)
+7 :: amqp¦connect¦test¦foo (51)
+8 :: test¦foo¦f1
+9 :: test¦foo¦f2
+12 :: amam¦ho (51)
+13 :: wait¦state¦foo¦b (51)
 .
 : ⇒EventCallback:test¦foo¦f1
-id: 7
+id: 8
 name: test¦foo¦f1
 call count: 0
 code: EventCallback: test¦foo¦f1
@@ -93,60 +106,133 @@ exchange: he_exc
 prefix: ('moat', 'log')
 .
 EVENT: wait¦start¦_wait¦t4
-     : end_time=1.0
+     : deprecated=True
+     : end_time=0.9
      : loglevel=0
+EVENT: wait¦state¦_wait¦t4
+     : end_time=0.9
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:08.500000 foo¦a: Forced timer done
 EVENT: wait¦done¦foo¦a
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦foo¦a
+     : end_time=0.4
+     : loglevel=0
+     : state=done
 IEVENT: hey¦ho
 EVENT: amam¦ho
      : event=['hey', 'ho']
-     : wait=0.6
+     : timestamp=2003-04-05 06:07:08+02:00
+     : wait=0.5
      : words=['Global']
-Waiter ‹foo b› was cancelled
 EVENT: wait¦cancel¦foo¦b
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦foo¦b
+     : end_time=0.8
+     : loglevel=0
+     : state=cancel
 TRACE Yes
+Waiter ‹foo b› was cancelled
 Waiter ‹foo b› was cancelled
 TRACE 2003-04-05 06:07:08.950000 _wait¦t4: Forced timer done
 EVENT: wait¦done¦_wait¦t4
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦_wait¦t4
+     : end_time=0.9
+     : loglevel=0
+     : state=done
 EVENT: amqp¦stop¦test¦foo
+     : deprecated=True
+EVENT: amqp¦state¦test¦foo
+     : state=down
 EVENT: amqp¦start¦test¦foo
+     : deprecated=True
+EVENT: amqp¦state¦test¦foo
+     : state=up
 TRACE Create OnEvtHandler: moni¦some¦thing
-TRACE NewHandler 25
+TRACE NewHandler 34
 TRACE Create OnEvtHandler: some¦thing
-TRACE NewHandler 26
+TRACE NewHandler 35
 EVENT: wait¦start¦foo¦mon
+     : deprecated=True
      : end_time=1.5
      : event=['wait', 'start', 'foo', 'mon']
      : loglevel=0
+     : timestamp=2003-04-05 06:07:08+02:00
+EVENT: wait¦state¦foo¦mon
+     : end_time=1.5
+     : event=['wait', 'state', 'foo', 'mon']
+     : loglevel=0
+     : state=start
+     : timestamp=2003-04-05 06:07:08+02:00
 EVENT: wait¦start¦foo¦in
+     : deprecated=True
      : end_time=1.5
      : event=['wait', 'start', 'foo', 'in']
      : loglevel=0
+     : timestamp=2003-04-05 06:07:08+02:00
+EVENT: wait¦state¦foo¦in
+     : end_time=1.5
+     : event=['wait', 'state', 'foo', 'in']
+     : loglevel=0
+     : state=start
+     : timestamp=2003-04-05 06:07:08+02:00
 EVENT: some¦thing
      : event=['some', 'thing']
-     : wait=1.0
+     : timestamp=2003-04-05 06:07:08+02:00
+     : wait=0.9
      : words=['Global']
 EVENT: wait¦start¦_wait¦t7
+     : deprecated=True
      : end_time=1.6
      : event=['wait', 'start', '_wait', 't7']
      : loglevel=0
-TRACE YES in
-Waiter ‹foo in› was cancelled
-Waiter ‹foo in› was cancelled
+     : timestamp=2003-04-05 06:07:08+02:00
+EVENT: wait¦state¦_wait¦t7
+     : end_time=1.6
+     : event=['wait', 'state', '_wait', 't7']
+     : loglevel=0
+     : state=start
+     : timestamp=2003-04-05 06:07:08+02:00
 EVENT: moni¦some¦thing
      : event=['moni', 'some', 'thing']
-     : wait=1.0
+     : timestamp=2003-04-05 06:07:08+02:00
+     : wait=0.9
      : words=['Global']
-EVENT: wait¦cancel¦foo¦in
-     : event=['wait', 'cancel', 'foo', 'in']
-     : loglevel=0
+TRACE YES in
 TRACE YES mon in
 Waiter ‹foo mon› was cancelled
 Waiter ‹foo mon› was cancelled
+Waiter ‹foo in› was cancelled
+Waiter ‹foo in› was cancelled
+EVENT: wait¦cancel¦foo¦in
+     : deprecated=True
+     : event=['wait', 'cancel', 'foo', 'in']
+     : loglevel=0
+     : timestamp=2003-04-05 06:07:08+02:00
+EVENT: wait¦state¦foo¦in
+     : end_time=1.5
+     : event=['wait', 'state', 'foo', 'in']
+     : loglevel=0
+     : state=cancel
+     : timestamp=2003-04-05 06:07:08+02:00
 EVENT: wait¦cancel¦foo¦mon
+     : deprecated=True
      : event=['wait', 'cancel', 'foo', 'mon']
      : loglevel=0
+     : timestamp=2003-04-05 06:07:08+02:00
+EVENT: wait¦state¦foo¦mon
+     : end_time=1.5
+     : event=['wait', 'state', 'foo', 'mon']
+     : loglevel=0
+     : state=cancel
+     : timestamp=2003-04-05 06:07:08+02:00
 TRACE 2003-04-05 06:07:09.600000 _wait¦t7: Forced timer done
+EVENT: amqp¦stop¦test¦foo
+     : deprecated=True
+EVENT: amqp¦state¦test¦foo
+     : state=down

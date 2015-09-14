@@ -129,7 +129,8 @@ class Timeslot(Collected):
 		self.last = self.next
 
 		self.running = "during"
-		simple_event("timeslot","begin",*self.name)
+		simple_event("timeslot","begin",*self.name, deprecated=True)
+		simple_event("timeslot","state",*self.name, state="begin")
 		self.next += dt.timedelta(0,self.duration)
 		self.slotter = callLater(False,self.next, self.do_post)
 	
@@ -146,7 +147,8 @@ class Timeslot(Collected):
 			return
 
 		self.running = "next"
-		simple_event("timeslot","end",*self.name)
+		simple_event("timeslot","end",*self.name, deprecated=True)
+		simple_event("timeslot","state",*self.name, state="end")
 		self.next = time_delta(self.interval, now=self.next)-dt.timedelta(0,self.duration)
 		self.waiter = callLater(False, self.next, self.do_pre)
 
@@ -154,7 +156,8 @@ class Timeslot(Collected):
 		self.running = "error"
 		process_failure(_)
 		self.down()
-		simple_event("timeslot","error",*self.name)
+		simple_event("timeslot","error",*self.name, deprecated=True)
+		simple_event("timeslot","state",*self.name, state="error", error=_)
 
 	def delete(self,ctx=None):
 		self.down()

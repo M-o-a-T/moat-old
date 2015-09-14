@@ -43,16 +43,19 @@ from moat.run import process_failure,register_worker,unregister_worker,simple_ev
 from moat.event import TrySomethingElse
 from moat.worker import Worker
 from moat.logging import BaseLogger,TRACE,LogNames,LogLevels,DEBUG,log
+from moat.times import now
 
 from datetime import datetime,date,time,timedelta
 from time import time as itime
 
 import amqp
-import json
 
 from gevent.queue import Queue
 from gevent.event import AsyncResult
 from gevent import spawn,spawn_later
+
+from dabroker.base.codec.json import Codec
+json = Codec(None, lists=True)
 
 _seq=0  # new element sequence number
 _mseq=0 # new message sequence number
@@ -141,10 +144,12 @@ class EventCallback(Worker):
 						d[x]=y
 					elif hasattr(y,'name'):
 						d[x]=y.name
+				if 'timestamp' not in d:
+					d['timestamp'] = now()
 				try:
-					msg = json.dumps(dict(event=list(event), **d))
+					msg = json.encode(dict(event=list(event), **d))
 				except (TypeError,UnicodeDecodeError) as e:
-					msg = json.dumps(dict(data=repr(event)+"|"+repr(d)+"|"+repr(e)))
+					msg = json.encode(dict(data=repr(event)+"|"+repr(d)+"|"+repr(e)))
 			elif isinstance(msg,six.integer_types+(float,)):
 				msg = str(msg)
 			elif isinstance(msg,six.string_types):
@@ -191,21 +196,25 @@ class AMQPclient(Collected,Jobber):
 			self.conn=amqp.connection.Connection(host=self.host,userid=self.username,password=self.password,login_method='AMQPLAIN', login_response=None, virtual_host=self.vhost)
 
 		except Exception as ex:
-			simple_event("amqp","error",*name, error=str(ex))
+			simple_event("amqp","error",*name, error=str(ex), deprecated=True)
+			simple_event("amqp","state",*name, error=str(ex), state="error")
 			fix_exception(ex)
 			process_failure(ex)
 		else:
 			super(AMQPclient,self).__init__()
-			simple_event("amqp","connect",*name)
+			simple_event("amqp","connect",*name, deprecated=True)
+			simple_event("amqp","state",*name, state="connect")
 			#self.start_job("job",self._loop)
 
 	def _loop(self):
-		simple_event("amqp","start",*self.name, _direct=True)
+		simple_event("amqp","start",*self.name, _direct=True, deprecated=True)
+		simple_event("amqp","state",*self.name, _direct=True, state="up")
 		try:
 			while True:
 				self.conn.drain_events()
 		finally:
-			simple_event("amqp","stop",*self.name, _direct=True)
+			simple_event("amqp","stop",*self.name, _direct=True, deprecated=True)
+			simple_event("amqp","state",*self.name, _direct=True, state="down")
 	
 	def _start(self):
 		self.start_job('job',self._loop)
@@ -217,7 +226,8 @@ class AMQPclient(Collected,Jobber):
 		self.conn.close()
 		self.conn = None
 		self.stop_job("job")
-		simple_event("amqp","disconnect",*self.name)
+		simple_event("amqp","disconnect",*self.name, deprecated=True)
+		simple_event("amqp","state",*self.name, state="disconnect")
 		super(AMQPclient,self).delete()
 
 	def list(self):
@@ -442,9 +452,9 @@ class AMQPlogger(BaseLogger):
 		if LogLevels[level] < self.level:
 			return
 		try:
-			msg=json.dumps(dict(level=(LogLevels[level],level),msg=a))
+			msg = json.encode(dict(level=(LogLevels[level],level),msg=a))
 		except TypeError:
-			msg=json.dumps(dict(level=(LogLevels[level],level),data=repr(a)))
+			msg = json.encode(dict(level=(LogLevels[level],level),data=repr(a)))
 
 		global _mseq
 		_mseq += 1
@@ -599,12 +609,15 @@ class AMQPrecv(Collected):
 				b = msg.body
 				if not isinstance(b,six.text_type):
 					b = b.decode('utf-8')
-				data = json.loads(b)
+				data = json.decode(b)
+				data = json.decode2(data)
 			except Exception as e:
 				data = { "raw": msg.body, "error": e }
 		else:
 			data = { "raw": msg.body, "content_type": getattr(msg,'content_type','') }
 		self.last_recv = msg.__dict__
+		if 'timestamp' not in data:
+			data['timestamp'] = now()
 		simple_event(*(self.prefix+tuple(msg.routing_key.split('.')[self.strip:])), _direct=self._direct, **data)
 
 	def list(self):

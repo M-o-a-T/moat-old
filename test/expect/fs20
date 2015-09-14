@@ -1,14 +1,41 @@
 EVENT: startup
      : startup=True
 EVENT: module¦load¦bool
+     : deprecated=True
+EVENT: module¦state¦bool
+     : state=load
 EVENT: module¦load¦logging
+     : deprecated=True
+EVENT: module¦state¦logging
+     : state=load
 EVENT: module¦load¦trigger
+     : deprecated=True
+EVENT: module¦state¦trigger
+     : state=load
 EVENT: module¦load¦wait
+     : deprecated=True
+EVENT: module¦state¦wait
+     : state=load
 EVENT: module¦load¦fs20switch
+     : deprecated=True
+EVENT: module¦state¦fs20switch
+     : state=load
 EVENT: module¦load¦fs20em
+     : deprecated=True
+EVENT: module¦state¦fs20em
+     : state=load
 EVENT: module¦load¦fs20en
+     : deprecated=True
+EVENT: module¦state¦fs20en
+     : state=load
 EVENT: module¦load¦fs20tx
+     : deprecated=True
+EVENT: module¦state¦fs20tx
+     : state=load
 EVENT: module¦load¦on_event
+     : deprecated=True
+EVENT: module¦state¦on_event
+     : state=load
 .
 .
 foo bar :: 31413142
@@ -67,8 +94,13 @@ code: 7
 offset_humidity: -1.0
 .
 EVENT: wait¦start¦_wait¦t1
-     : end_time=0.8
+     : deprecated=True
+     : end_time=0.6
      : loglevel=0
+EVENT: wait¦state¦_wait¦t1
+     : end_time=0.6
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:08.500000 _wait¦t1: Forced timer done
 Traceback (most recent call last):
   File "moat/twist.py", line 298, in err
@@ -111,7 +143,12 @@ Traceback (most recent call last):
     raise RuntimeError("No FS20 handler known")
 RuntimeError: No FS20 handler known
 EVENT: wait¦done¦_wait¦t1
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦_wait¦t1
+     : end_time=0.6
+     : loglevel=0
+     : state=done
 Traceback (most recent call last):
   File "moat/twist.py", line 298, in err
     err = e.get()

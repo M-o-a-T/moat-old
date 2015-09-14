@@ -11,11 +11,21 @@ name: foo¦bar
 type: PWM
 .
 EVENT: wait¦start¦_wait¦t2
+     : deprecated=True
      : end_time=0.5
      : loglevel=0
+EVENT: wait¦state¦_wait¦t2
+     : end_time=0.5
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:08.500000 _wait¦t2: Fake timer done
 EVENT: wait¦done¦_wait¦t2
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦_wait¦t2
+     : end_time=0.5
+     : loglevel=0
+     : state=done
 : ‹StdPWM foo¦bar 0.1›
 name: foo¦bar
 type: PWM
@@ -25,11 +35,21 @@ t_off: 9.0 sec
 t_on: 1.0 sec
 .
 EVENT: wait¦start¦_wait¦t3
+     : deprecated=True
      : end_time=9.0
      : loglevel=0
+EVENT: wait¦state¦_wait¦t3
+     : end_time=9.0
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:17 _wait¦t3: Fake timer done
 EVENT: wait¦done¦_wait¦t3
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦_wait¦t3
+     : end_time=9.0
+     : loglevel=0
+     : state=done
 : ‹StdPWM foo¦bar 0.1›
 name: foo¦bar
 type: PWM
@@ -39,50 +59,100 @@ t_off: 9.0 sec
 t_on: 1.0 sec
 .
 EVENT: wait¦start¦_wait¦t4
+     : deprecated=True
      : end_time=24.0
      : loglevel=0
+EVENT: wait¦state¦_wait¦t4
+     : end_time=24.0
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:17.050000 : Fake timer done
 EVENT: pwm¦change¦foo¦bar
      : value=1
 DEBUG PWM is now 1
 EVENT: wait¦start¦_wait¦t1
+     : deprecated=True
      : end_time=9.2
      : loglevel=0
+EVENT: wait¦state¦_wait¦t1
+     : end_time=9.2
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:17.250000 _wait¦t1: Fake timer done
 EVENT: wait¦done¦_wait¦t1
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦_wait¦t1
+     : end_time=9.2
+     : loglevel=0
+     : state=done
 TRACE 2003-04-05 06:07:18.050000 : Fake timer done
 EVENT: pwm¦change¦foo¦bar
      : value=0
 DEBUG PWM is now 0
 EVENT: wait¦start¦_wait¦t1
+     : deprecated=True
      : end_time=10.1
      : loglevel=0
+EVENT: wait¦state¦_wait¦t1
+     : end_time=10.1
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:18.200000 _wait¦t1: Fake timer done
 EVENT: wait¦done¦_wait¦t1
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦_wait¦t1
+     : end_time=10.1
+     : loglevel=0
+     : state=done
 TRACE 2003-04-05 06:07:27 : Fake timer done
 EVENT: pwm¦change¦foo¦bar
      : value=1
 DEBUG PWM is now 1
 EVENT: wait¦start¦_wait¦t1
+     : deprecated=True
      : end_time=19.1
      : loglevel=0
+EVENT: wait¦state¦_wait¦t1
+     : end_time=19.1
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:27.150000 _wait¦t1: Fake timer done
 EVENT: wait¦done¦_wait¦t1
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦_wait¦t1
+     : end_time=19.1
+     : loglevel=0
+     : state=done
 TRACE 2003-04-05 06:07:28.050000 : Fake timer done
 EVENT: pwm¦change¦foo¦bar
      : value=0
 DEBUG PWM is now 0
 EVENT: wait¦start¦_wait¦t1
+     : deprecated=True
      : end_time=20.1
      : loglevel=0
+EVENT: wait¦state¦_wait¦t1
+     : end_time=20.1
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:28.200000 _wait¦t1: Fake timer done
 EVENT: wait¦done¦_wait¦t1
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦_wait¦t1
+     : end_time=20.1
+     : loglevel=0
+     : state=done
 TRACE 2003-04-05 06:07:32.050000 _wait¦t4: Fake timer done
 foo bar :: 0.100 1.0 sec / 9.0 sec
 .
 EVENT: wait¦done¦_wait¦t4
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦_wait¦t4
+     : end_time=24.0
+     : loglevel=0
+     : state=done

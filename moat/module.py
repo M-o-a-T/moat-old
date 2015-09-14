@@ -105,7 +105,8 @@ class Module(Collected):
 		raise RuntimeError(u"Module ‹%s› already exists" % (name,))
 
 	def delete(self,ctx=None):
-		simple_event("module","unload",*self.name)
+		simple_event("module","unload",*self.name, deprecated=True)
+		simple_event("module","state",*self.name, state="unload")
 		self.unload()
 		super(Module,self).delete()
 
@@ -184,8 +185,13 @@ load NAME [args]...
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
-		load_module(*event)
-		simple_event("module","load",*event)
+		try:
+			load_module(*event)
+		except Exception as ex:
+			simple_event("module","state",*event, state="error", error=ex)
+		else:
+			simple_event("module","load",*event, deprecated=True)
+			simple_event("module","state",*event, state="load")
 
 class LoadDir(Statement):
 	name="module dir"

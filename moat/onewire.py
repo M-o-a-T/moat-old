@@ -197,13 +197,16 @@ class OWFSchannel(OWFSassembler, NetActiveConnector):
 	typ = "onewire"
 
 	def down_event(self, external=False):
-		simple_event("onewire","disconnect",*self.name)
+		simple_event("onewire","disconnect",*self.name, deprecated=True)
+		simple_event("onewire","link","state",*self.name, state="down")
 
 	def up_event(self, external=False):
-		simple_event("onewire","connect",*self.name)
+		simple_event("onewire","connect",*self.name, deprecated=True)
+		simple_event("onewire","link","state",*self.name, state="up")
 
-	def not_up_event(self, external=False):
-		simple_event("onewire","error",*self.name)
+	def not_up_event(self, external=False, error=None):
+		simple_event("onewire","error",*self.name, error=error, deprecated=True)
+		simple_event("onewire","link","state",*self.name, state="error",error=error)
 
 class OWFScall(MsgBase):
 	"""An object representing one call to OWFS"""
@@ -472,14 +475,15 @@ class OWFSqueue(MsgQueue,Jobber):
 
 	def update_all(self):
 		try:
-			simple_event("onewire","scanning",*self.name)
+			simple_event("onewire","scanning",*self.name, deprecated=True)
+			simple_event("onewire","scan",*self.name, run="running")
 			self._update_all()
 		except Exception as e:
 			fix_exception(e)
 			process_failure(e)
 
 			# error only; success below
-			simple_event("onewire","scanned",*self.name, error=str(e))
+			simple_event("onewire","scan",*self.name, run="error", error=str(e))
 
 	def _update_all(self):
 		log("onewire",TRACE,"start bus update")
@@ -522,12 +526,15 @@ class OWFSqueue(MsgQueue,Jobber):
 			bp = self.bus_paths.pop(dev)
 			bp.stop()
 			simple_event("onewire","bus","down", bus=self.name,path=dev)
+			simple_event("onewire","bus","state",self.name,"/".join(dev), bus=self.name,path=dev, state="down")
 		for dev in new_bus:
 			self.bus_paths[dev] = OWFSbuspath(self,dev)
 			simple_event("onewire","bus","up", bus=self.name,path=dev)
+			simple_event("onewire","bus","state",self.name,"/".join(dev), bus=self.name,path=dev, state="up")
 
 		# success only, error above
-		simple_event("onewire","scanned",*self.name, old=n_old, new=len(new_ids), num=n_dev)
+		simple_event("onewire","scanned",*self.name, old=n_old, new=len(new_ids), num=n_dev, deprecated=True)
+		simple_event("onewire","scan",*self.name, run="done", old=n_old, new=len(new_ids), num=n_dev)
 			
 	def _watcher(self):
 		res = []
@@ -718,11 +725,11 @@ class OWFSdevice(Collected):
 			return
 
 		if self.is_up is None:
-			simple_event("onewire","new",typ=self.typ,id=self.id,bus=self.bus.name,path=self.path)
-			simple_event("onewire","device","new",self.id, typ=self.typ,id=self.id,bus=self.bus.name,path=self.path)
+			simple_event("onewire","new",typ=self.typ,id=self.id,bus=self.bus.name,path=self.path, deprecated=True)
+			simple_event("onewire","device","new", typ=self.typ,id=self.id,bus=self.bus.name,path=self.path)
 		self.is_up = True
-		simple_event("onewire","up",typ=self.typ,id=self.id,bus=self.bus.name,path=self.path)
-		simple_event("onewire","device","up",self.id, typ=self.typ,id=self.id,bus=self.bus.name,path=self.path)
+		simple_event("onewire","up",typ=self.typ,id=self.id,bus=self.bus.name,path=self.path, deprecated=True)
+		simple_event("onewire","device","state",self.id, typ=self.typ,id=self.id,bus=self.bus.name,path=self.path, state="up")
 
 	def go_down(self, _=None):
 		if not self.is_up:
@@ -730,8 +737,8 @@ class OWFSdevice(Collected):
 		self.is_up = False
 		if _ is not None:
 			process_failure(_)
-		simple_event("onewire","down",typ=self.typ,id=self.id,bus=self.bus.name,path=self.path)
-		simple_event("onewire","device","down",self.id, typ=self.typ,id=self.id,bus=self.bus.name,path=self.path)
+		simple_event("onewire","down",typ=self.typ,id=self.id,bus=self.bus.name,path=self.path, deprecated=True)
+		simple_event("onewire","device","state",self.id, typ=self.typ,id=self.id,bus=self.bus.name,path=self.path, state="down")
 
 	def get(self,key):
 		if not self.bus:

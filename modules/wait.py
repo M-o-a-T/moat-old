@@ -175,7 +175,8 @@ class Waiter(Collected,Jobber):
 					self.job.set(False)
 
 	def retime(self, dest):
-		simple_event("wait","update",*self.name,dest=dest, loglevel=TRACE)
+		simple_event("wait","update",*self.name,dest=dest, loglevel=TRACE, deprecated=True)
+		simple_event("wait","state",*self.name, end_time=dest, loglevel=TRACE, state="update")
 		with log_wait("wait","delete1",self.name):
 			with self._lock:
 				self.end = dest
@@ -213,14 +214,16 @@ wait [NAME…]: for FOO…
 			return Waiters[self.displayname].retime(self.timespec())
 		w = Waiter(self, self.displayname, self.force, self.soft)
 		w.init(self.timespec())
-		simple_event("wait","start",*w.name, end_time=ixtime(w.end,self.force), loglevel=TRACE)
+		simple_event("wait","start",*w.name, end_time=ixtime(w.end,self.force), loglevel=TRACE, deprecated=True)
+		simple_event("wait","state",*w.name, end_time=ixtime(w.end,self.force), loglevel=TRACE, state="start")
 		try:
 			if w.job:
 				r = w.job.get()
 			else:
 				r = True
 		except Exception as ex:
-			simple_event("wait","error", *w.name, time=tm,loglevel=TRACE)
+			simple_event("wait","error",*w.name, end_time=ixtime(w.end,self.force), loglevel=TRACE, deprecated=True)
+			simple_event("wait","state",*w.name, end_time=ixtime(w.end,self.force), loglevel=TRACE, state="error", error=ex)
 
 			fix_exception(ex)
 			log_exc(msg=u"Wait %s died:"%(self.name,), err=ex, level=TRACE)
@@ -228,9 +231,11 @@ wait [NAME…]: for FOO…
 		else:
 			tm = ixtime(now(self.force),self.force)
 			if r:
-				simple_event("wait","done", *w.name, loglevel=TRACE)
+				simple_event("wait","done", *w.name, loglevel=TRACE, deprecated=True)
+				simple_event("wait","state",*w.name, loglevel=TRACE, end_time=ixtime(w.end,self.force), state="done")
 			else:
-				simple_event("wait","cancel", *w.name, loglevel=TRACE)
+				simple_event("wait","cancel", *w.name, loglevel=TRACE, deprecated=True)
+				simple_event("wait","state",*w.name, loglevel=TRACE, end_time=ixtime(w.end,self.force), state="cancel")
 			ctx.wait = tm
 			if self.soft is None:
 				if not r:

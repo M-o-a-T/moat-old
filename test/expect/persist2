@@ -1,7 +1,7 @@
 EVENT: startup
      : startup=True
 TRACE Yes!
-TRACE INIT sqlite {'host': 'sql.intern.smurf.noris.de', 'dataport': '3306', 'password': 'geheim', 'database': '/tmp/moat.smurf.db', 'username': 'smurf', 'trace': <function DbStore.__init__.<locals>.trace>, 'dbtype': 'sqlite'}
+TRACE INIT sqlite {'host': 'sql.intern.smurf.noris.de', 'database': '/tmp/moat.smurf.db', 'username': 'smurf', 'password': 'geheim', 'dbtype': 'sqlite', 'trace': <function DbStore.__init__.<locals>.trace>, 'dataport': '3306'}
 TRACE DoFn ('select value from HE_State where category=? and name=?', (b'state', b'foo bar')) ("'three'",)
 TRACE Commit  
 TRACE Yes!

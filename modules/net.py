@@ -65,13 +65,16 @@ class NETreceiver(LineReceiver):
 		simple_event("net","recv", *self.name, data=line)
 
 	def down_event(self, external=False):
-		simple_event("net","disconnect",*self.name)
+		simple_event("net","disconnect",*self.name, deprecated=True)
+		simple_event("net","state",*self.name, state="down")
 
 	def up_event(self, external=False):
-		simple_event("net","connect",*self.name)
+		simple_event("net","connect",*self.name, deprecated=True)
+		simple_event("net","state",*self.name, state="up")
 
-	def not_up_event(self, external=False):
-		simple_event("net","error",*self.name)
+	def not_up_event(self, external=False, error=None):
+		simple_event("net","error",*self.name, deprecated=True)
+		simple_event("net","state",*self.name, state="error", error=error)
 
 class NETactive(NETreceiver, NetActiveConnector):
 	typ = "net_active"

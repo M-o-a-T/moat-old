@@ -1,7 +1,7 @@
 EVENT: startup
      : startup=True
 TRACE Yes!
-TRACE INIT sqlite {'trace': <function DbStore.__init__.<locals>.trace>, 'dbtype': 'sqlite', 'password': 'geheim', 'host': 'sql.intern.smurf.noris.de', 'dataport': '3306', 'database': '/tmp/moat.smurf.db', 'username': 'smurf'}
+TRACE INIT sqlite {'trace': <function DbStore.__init__.<locals>.trace>, 'username': 'smurf', 'database': '/tmp/moat.smurf.db', 'host': 'sql.intern.smurf.noris.de', 'dbtype': 'sqlite', 'dataport': '3306', 'password': 'geheim'}
 TRACE DoFn ('CREATE TABLE HE_State ( category varchar(50), name varchar(200), value BLOB, id INTEGER AUTO_INCREMENT PRIMARY KEY, UNIQUE (category,name))', ()) -1
 TRACE DoFn ('select value from HE_State where category=? and name=?', (b'state', b'foo bar')) None
 TRACE RollBack  

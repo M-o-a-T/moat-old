@@ -31,6 +31,7 @@ import six
 import warnings
 from moat.base import Name,RaisedError
 from moat.context import Context
+from moat.times import now
 
 @six.python_2_unicode_compatible
 class TrySomethingElse(RuntimeError):
@@ -62,6 +63,7 @@ class Event(object):
 		This is an event. It happens and gets analyzed by the system.
 		"""
 	loglevel = None
+	timestamp = None
 	def __init__(self, ctx, *name):
 		"""\
 			Events have a context and at least one name. For example:
@@ -76,6 +78,7 @@ class Event(object):
 		self.ctx = ctx if ctx is not None else Context()
 		if "loglevel" in self.ctx:
 			self.loglevel = ctx.loglevel
+		self.timestamp = now()
 
 		global event_id
 		event_id += 1
@@ -109,6 +112,8 @@ class Event(object):
 
 		if self.__class__ is not Event:
 			yield ("type",self.__class__.__name__)
+		if self.timestamp is not None:
+			yield ("timestamp",self.loglevel)
 		if self.loglevel is not None:
 			yield ("log level",self.loglevel)
 		yield ("ctx",self.ctx)

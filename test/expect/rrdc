@@ -1,11 +1,21 @@
 EVENT: startup
      : startup=True
 EVENT: wait¦start¦startup
+     : deprecated=True
      : end_time=0.2
      : loglevel=0
+EVENT: wait¦state¦startup
+     : end_time=0.2
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:08.200000 startup: Forced timer done
 EVENT: wait¦done¦startup
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦startup
+     : end_time=0.2
+     : loglevel=0
+     : state=done
 TRACE Yes
 TRACE conn setstate init closed
 TRACE conn setstate closed want
@@ -48,37 +58,70 @@ server task job: <Greenlet: erh(<bound method RRDqueue._handler of ‹RRDqueue:t
 filename: /tmp/rrdtest.rrd
 .
 EVENT: wait¦start¦_wait¦t2
+     : deprecated=True
      : end_time=0.4
      : loglevel=0
+EVENT: wait¦state¦_wait¦t2
+     : end_time=0.4
+     : loglevel=0
+     : state=start
 TRACE conn setting up RRDqueue t¦tt¦ttt
 TRACE !got UP_EVENT t tt ttt
 TRACE conn connected RRDqueue t¦tt¦ttt
 TRACE NotConn [[], [], [], []]
 TRACE conn setstate connecting connected
 EVENT: rrd¦connect¦t¦tt¦ttt
+     : deprecated=True
+EVENT: rrd¦state¦t¦tt¦ttt
+     : state=up
 TRACE 2003-04-05 06:07:08.300000 _wait¦t2: Forced timer done
 TRACE rrd send 'update /tmp/rrdtest.rrd 1049515628:10'
 EVENT: wait¦done¦_wait¦t2
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦_wait¦t2
+     : end_time=0.4
+     : loglevel=0
+     : state=done
 TRACE rrd recv '0 Yes'
 TRACE conn incoming RRDqueue t¦tt¦ttt ‹MsgIncoming: msg:'Yes' prio:2 type:MT_ACK›
 EVENT: wait¦start¦_wait¦t3
+     : deprecated=True
      : end_time=0.5
      : loglevel=0
+EVENT: wait¦state¦_wait¦t3
+     : end_time=0.5
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:08.400000 _wait¦t3: Forced timer done
 TRACE rrd send 'update /tmp/rrdtest.rrd 1049515628:11'
 EVENT: wait¦done¦_wait¦t3
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦_wait¦t3
+     : end_time=0.5
+     : loglevel=0
+     : state=done
 TRACE rrd recv '2 Nonsense follows'
 TRACE rrd recv 'Nonsense'
 TRACE rrd recv 'More Nonsense'
 TRACE conn incoming RRDqueue t¦tt¦ttt ‹MsgIncoming: data:['Nonsense', 'More Nonsense'] msg:' Nonsense follows' prio:2 type:MT_MULTILINE›
 EVENT: wait¦start¦_wait¦t4
+     : deprecated=True
      : end_time=0.6
      : loglevel=0
+EVENT: wait¦state¦_wait¦t4
+     : end_time=0.6
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:08.500000 _wait¦t4: Forced timer done
 EVENT: wait¦done¦_wait¦t4
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦_wait¦t4
+     : end_time=0.6
+     : loglevel=0
+     : state=done
 TRACE rrd send 'update /tmp/rrdtest.rrd 1049515628:12'
 TRACE rrd recv '-123 No'
 TRACE conn incoming RRDqueue t¦tt¦ttt ‹MsgIncoming: errno:123 msg:'No' prio:2 type:MT_ERROR›
@@ -116,4 +159,7 @@ TRACE Yes
 TRACE !got DOWN_EVENT t tt ttt
 TRACE conn deleted RRDqueue t¦tt¦ttt
 EVENT: rrd¦disconnect¦t¦tt¦ttt
+     : deprecated=True
+EVENT: rrd¦state¦t¦tt¦ttt
+     : state=down
 TRACE Yes

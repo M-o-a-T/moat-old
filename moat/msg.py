@@ -383,7 +383,7 @@ class MsgFactory(object):
 				log(TRACE,"!got NOT_UP_EVENT",*self.name)
 				msg = MsgClosed()
 				self._msg_queue.put(msg)
-				super(xself.cls,self).not_up_event(external=external)
+				super(xself.cls,self).not_up_event(external=external, **k)
 			def down_event(self,external=False,*a,**k):
 				log(TRACE,"!got DOWN_EVENT",*self.name)
 				msg = MsgClosed()
