@@ -38,6 +38,7 @@ class VanishedAttribute: pass
 
 class Context(object):
 	"""A stackable context type of thing."""
+	_hide = set("filename words out".split())
 	def __init__(self,parent=None,**k):
 		if parent is not None:
 			self._parent = [parent]
@@ -199,6 +200,8 @@ class Context(object):
 
 		def do(store):
 			for k,v in store.items():
+				if k in self._hide:
+					continue
 				if v is not VanishedAttribute and k not in seen:
 					setattr(res,k,v)
 				seen.add(k) # prevent overwriting with older values
