@@ -304,7 +304,7 @@ normally. It thus works as a timeout.
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		if len(event):
-			raise SyntaxError('Usage: soft')
+			raise SyntaxError('Usage: timeout')
 		self.parent.soft = False
 
 class ExistsWaiterCheck(Check):
