@@ -52,8 +52,8 @@ name: baz¦quux
 code: 1214
 parent: foo¦bar
 parentcode: 31413142
-does: on
 does: off
+does: on
 .
 : ‹Collected EM:one›
 name: one

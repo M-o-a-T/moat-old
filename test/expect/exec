@@ -79,11 +79,11 @@ EVENT: wait¦state¦more¦delay
      : loglevel=0
      : state=start
 TRACE 2003-04-05 06:07:38.100000 more¦delay: Fake timer done
+DEBUG Handler _on¦6
+DEBUG Handler test¦me¦not
+DEBUG Handler _on¦5
 DEBUG Handler _on¦7
 DEBUG Handler foo¦test¦bar
-DEBUG Handler test¦me¦not
-DEBUG Handler _on¦6
-DEBUG Handler _on¦5
 DEBUG 'do' works
 DEBUG 'do.log' works
 TRACE PY Proc done

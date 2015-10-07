@@ -50,10 +50,10 @@ EVENT: wait¦state¦BEFORE
      : state=done
 EVENT: wait¦start¦AFTER
      : deprecated=True
-     : end_time=1.3
+     : end_time=1.2
      : loglevel=0
 EVENT: wait¦state¦AFTER
-     : end_time=1.3
+     : end_time=1.2
      : loglevel=0
      : state=start
 EVENT: net¦connect¦foo
@@ -64,10 +64,10 @@ EVENT: net¦recv¦foo
      : data=['A']
 EVENT: wait¦start¦OUT
      : deprecated=True
-     : end_time=0.6
+     : end_time=0.5
      : loglevel=0
 EVENT: wait¦state¦OUT
-     : end_time=0.6
+     : end_time=0.5
      : loglevel=0
      : state=start
 TRACE 2003-04-05 06:07:08.550000 OUT: Forced timer done
@@ -80,7 +80,7 @@ EVENT: wait¦done¦OUT
      : deprecated=True
      : loglevel=0
 EVENT: wait¦state¦OUT
-     : end_time=0.6
+     : end_time=0.5
      : loglevel=0
      : state=done
 type: net_active
@@ -133,7 +133,7 @@ EVENT: wait¦done¦AFTER
      : deprecated=True
      : loglevel=0
 EVENT: wait¦state¦AFTER
-     : end_time=1.3
+     : end_time=1.2
      : loglevel=0
      : state=done
 TRACE Yes
