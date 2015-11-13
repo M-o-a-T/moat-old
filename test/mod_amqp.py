@@ -33,11 +33,12 @@ from moat.logging import log,DEBUG
 from test import run
 from gevent import spawn,sleep,event
 
-import sys
+import sys,os
 from traceback import print_exc
 
+host=os.environ.get('AMQP_HOST',"localhost")
 input = """\
-connect amqp "data.intern.smurf.noris.de":
+connect amqp "{}":
 	name test foo
 	user "test" test test
 
@@ -162,7 +163,7 @@ wait:
 # translate hey.x to amqte.x
 
 shutdown
-"""
+""".format(host)
 
 main_words.register_statement(ShutdownHandler)
 main_words.register_statement(Load)
