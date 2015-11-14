@@ -31,17 +31,18 @@ import os
 from etctree.util import from_yaml
 import yaml
 from moat.cmd import commands as moat_commands
+from dabroker.unit import DEFAULT_CONFIG
 
 DEFAULT_CFG="/etc/moat.cfg"
 
 def r_update(a,b):
 	for k,v in b.items():
-		if k not in a:
+		if not hasattr(v,'items'):
 			a[k] = v
-		elif hasattr(v,'items'):
-			r_update(a[k],v)
 		else:
-			a[k] = v
+			if k not in a:
+				a[k] = {}
+			r_update(a[k],v)
 
 class Moat(Command):
 	usage = "[MoaT options] %command"
@@ -62,9 +63,12 @@ You can load more than one config file.
 	verbose = None
 
 	def addOptions(self):
+		self.parser.add_option('--no-default-config',
+			action="store_true", dest="no_default",
+			help="do not apply the hard-coded default configuration")
 		self.parser.add_option('-c', '--config',
 			action="append", dest="files",
-			help=".doap file(s) to act on (glob wildcards allowed)")
+			help="config file(s) to read (wildcards are OK)")
 		self.parser.add_option('-v', '--verbose',
 			action="count", dest="verbose", default=1,
 			help="increase verbosity")
@@ -79,29 +83,18 @@ You can load more than one config file.
 		if opts.files:
 			for f in opts.files:
 				paths.extend(glob.glob(f))
-			self.debug('%d doap paths' % len(paths))
 
-		if not paths:
-			# nothing specified, try and find the default
-			paths.extend(glob.glob('*.cfg'))
-			if len(paths) > 1:
-				print("Multiple config files found. Select one.", file=sys.stderr)
-				return 3
 		if not paths:
 			if os.path.exists(DEFAULT_CFG):
 				paths.append(DEFAULT_CFG)
-			else:
-				print("No config files found. Specify one with '--config'.", file=sys.stderr)
-				return 3
 
 		self.cfg = {}
+		if not opts.no_default:
+			r_update(self.cfg.setdefault('config',{}), DEFAULT_CONFIG)
 		for p in paths:
 			with open(p) as f:
 				cfg = yaml.safe_load(f)
 				r_update(self.cfg, cfg)
-		if not cfg:
-			print("Empty configuration. Specify a valid config file with '--config'.", file=sys.stderr)
-			return 3
 
 def main(args):
 	c = Moat()
