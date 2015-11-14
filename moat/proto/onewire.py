@@ -142,4 +142,23 @@ class OnewireDir(OnewireInteraction):
 			files.append(entry)
 		return files
 
+class OnewireRead(OnewireInteraction):
+	@asyncio.coroutine
+	def interact(self,*path):
+		self.send(OWMsg.get, self.path(path), 8192)
+		type,msg = yield from self.recv()
+		assert type > 0
+		return msg.decode('utf-8')
+
+
+class OnewireWrite(OnewireInteraction):
+	@asyncio.coroutine
+	def interact(self,*path, data=None):
+		assert data is not None
+		if not isinstance(data,bytes):
+			data = str(data).encode('utf-8')
+		self.send(OWMsg.get, self.path(path)+str(data).encode('utf-8'), len(data))
+		type,msg = yield from self.recv()
+		assert type == len(data)
+
 
