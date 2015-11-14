@@ -36,12 +36,23 @@ class ConfigCommand(Command):
 	summary = "View  configuration data"""
 	description = """\
 Show the current config data.
+
+With arguments, show only these.
 """
 
 	def do(self,args):
-		if args:
-			raise CommandError("Superfluous arguments")
 		from yaml import safe_dump
-		safe_dump(self.root.cfg, stream=sys.stdout)
+		if args:
+			done = False
+			for n,a in enumerate(args):
+				if n:
+					print("---")
+				c = self.root.cfg
+				for aa in a.split('.'):
+					c = c[aa]
+				safe_dump(c, stream=sys.stdout)
+
+		else:
+			safe_dump(self.root.cfg, stream=sys.stdout)
 
 
