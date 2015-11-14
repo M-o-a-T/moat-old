@@ -27,9 +27,28 @@ import asyncio
 import pytest
 import subprocess
 from functools import wraps
+from socket import socket
+import time
 
 import logging
 logger = logging.getLogger(__name__)
+
+@asyncio.coroutine
+def is_open(port):
+	s = socket()
+	n = 0
+	while n < 30:
+		try:
+			s.connect(("127.0.0.1", port))
+		except Exception:
+			n += 1
+			time.sleep(0.1)
+		else:
+			s.close()
+			break
+	else: # pragma: no cover
+		s.close()
+		raise RuntimeError("Port did not open")
 
 class ProcessHelper(asyncio.SubprocessProtocol):
 	def __init__(self, proc, *args, loop=None, **kw):
@@ -65,6 +84,11 @@ class ProcessHelper(asyncio.SubprocessProtocol):
 		self.transport.terminate()
 		return self.wait()
 	stop._is_coroutine = True
+
+	def kill(self):
+		self.transport.kill()
+		return self.wait()
+	kill._is_coroutine = True
 
 	@asyncio.coroutine
 	def wait(self):
