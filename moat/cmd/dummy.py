@@ -30,3 +30,19 @@ from moat.script import Command as _Command
 
 class Command(_Command):
 	name = "dummy"
+	summary = "A command that does not do anything"
+	description = """\
+This command does not do anything. It is used for testing.
+"""
+
+	foo = (
+		"I told you that this does not do anything.",
+		"Please listen to me next time.",
+		"Stop adding verbosity!",
+		"The error is intentional.",
+	)
+	def do(self,args):
+		n = 0
+		while n < self.root.verbose:
+			print(self.foo[n])
+			n += 1

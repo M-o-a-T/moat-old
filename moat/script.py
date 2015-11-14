@@ -399,7 +399,8 @@ class Command(object):
 			file = self.stderr
 		self.parser.print_usage(file=file)
 
-	def getRootCommand(self):
+	@property
+	def root(self):
 		"""
 		Return the top-level command, which is typically the program.
 		"""
