@@ -153,13 +153,13 @@ class Command(object):
 	usage = None
 	summary = "… you forgot to set the 'summary' attribute."
 	description = "… you forgot to set the 'description' attribute."
-	parentCommand = None
+	parent = None
 	subCommands = None
 	subCommandClasses = None
 	aliasedSubCommands = None
 	parser = None
 
-	def __init__(self, parentCommand=None, stdout=None,
+	def __init__(self, parent=None, stdout=None,
 		stderr=None, width=None):
 		"""
 		Create a new command instance, with the given parent.
@@ -170,7 +170,7 @@ class Command(object):
 			self.name = self.__class__.__name__.lower()
 		self._stdout = stdout
 		self._stderr = stderr
-		self.parentCommand = parentCommand
+		self.parent = parent
 
 		# create subcommands if we have them
 		self.subCommands = {}
@@ -226,17 +226,17 @@ class Command(object):
 				usages.reverse()
 
 		# FIXME: abstract this into getUsage that takes an optional
-		# parentCommand on where to stop recursing up
+		# parent on where to stop recursing up
 		# useful for implementing subshells
 
 		# walk the tree up for our usage
-		c = self.parentCommand
+		c = self.parent
 		while c:
 			usage = c.usage or c.name
 			if usage.find(" %command") > -1:
 				usage = usage.split(" %command")[0]
 			usages.append(usage)
-			c = c.parentCommand
+			c = c.parent
 		usages.reverse()
 		usage = " ".join(usages)
 
@@ -406,8 +406,8 @@ class Command(object):
 		Return the top-level command, which is typically the program.
 		"""
 		c = self
-		while c.parentCommand:
-			c = c.parentCommand
+		while c.parent:
+			c = c.parent
 		return c
 
 	def warning(self, format, *args):
@@ -434,7 +434,7 @@ class Command(object):
 		c = self
 		while c:
 			names.append(c.name)
-			c = c.parentCommand
+			c = c.parent
 		names.reverse()
 		return " ".join(names)
 
@@ -445,11 +445,11 @@ class Command(object):
 			return ret
 
 		# if I am the root command, default
-		if not self.parentCommand:
+		if not self.parent:
 			return getattr(sys, what)
 
 		# otherwise delegate to my parent
-		return getattr(self.parentCommand, what)
+		return getattr(self.parent, what)
 
 	def _getStdOut(self):
 		return self._getStd('stdout')

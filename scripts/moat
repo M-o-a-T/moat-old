@@ -90,9 +90,9 @@ You can load more than one config file.
 		if not paths:
 			if os.path.exists(DEFAULT_CFG):
 				paths.append(DEFAULT_CFG)
-		if not paths:
-			print("No config files found. Specify one with '--config'.", file=sys.stderr)
-			return 3
+			else:
+				print("No config files found. Specify one with '--config'.", file=sys.stderr)
+				return 3
 
 		self.cfg = {}
 		for p in paths:
