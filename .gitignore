@@ -28,3 +28,4 @@ fs20/avr/*.bin
 moat/gevent_rpyc.py
 /.pybuild/
 /.coverage
+/test.log

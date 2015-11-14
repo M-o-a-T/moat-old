@@ -31,6 +31,7 @@ from socket import socket
 import time
 
 import logging
+logging.basicConfig(filename='test.log', level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 @asyncio.coroutine
