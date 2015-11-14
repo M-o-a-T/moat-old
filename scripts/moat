@@ -1,0 +1,121 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import, print_function, division, unicode_literals
+##
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
+##
+##  This program is free software: you can redistribute it and/or modify
+##  it under the terms of the GNU General Public License as published by
+##  the Free Software Foundation, either version 3 of the License, or
+##  (at your option) any later version.
+##
+##  This program is distributed in the hope that it will be useful,
+##  but WITHOUT ANY WARRANTY; without even the implied warranty of
+##  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+##  GNU General Public License (included; see the file LICENSE)
+##  for more details.
+##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
+
+from moat.script import Command, CommandExited
+import glob
+import sys
+import os
+from etctree.util import from_yaml
+import yaml
+from moat.cmd import commands as moat_commands
+
+DEFAULT_CFG="/etc/moat.cfg"
+
+def r_update(a,b):
+	for k,v in b.items():
+		if k not in a:
+			a[k] = v
+		elif hasattr(v,'items'):
+			r_update(a[k],v)
+		else:
+			a[k] = v
+
+class Moat(Command):
+	usage = "[MoaT options] %command"
+	summary = "MoaT utility"
+	description = """
+This is the main MoaT command line processor.
+
+If the config file is not specified with --config, the current directory will be
+searched for *.cfg files.  If there is only one, that will be used;
+otherwise you will be asked to specify. If there is none, /etc/moat.cfg
+will be used. If that doesn't exist either, this command fails.
+
+You can load more than one config file.
+"""
+	subCommandClasses = list(moat_commands())
+
+	cfg = None
+	verbose = None
+
+	def addOptions(self):
+		self.parser.add_option('-c', '--config',
+			action="append", dest="files",
+			help=".doap file(s) to act on (glob wildcards allowed)")
+		self.parser.add_option('-v', '--verbose',
+			action="count", dest="verbose", default=1,
+			help="increase verbosity")
+		self.parser.add_option('-q', '--quiet',
+			action="store_const", dest="verbose", const=0,
+			help="turn off verbosity")
+
+	def handleOptions(self, opts):
+		self.verbose = opts.verbose
+
+		paths = []
+		if opts.files:
+			for f in opts.files:
+				paths.extend(glob.glob(f))
+			self.debug('%d doap paths' % len(paths))
+
+		if not paths:
+			# nothing specified, try and find the default
+			paths.extend(glob.glob('*.cfg'))
+			if len(paths) > 1:
+				print("Multiple config files found. Select one.", file=sys.stderr)
+				return 3
+		if not paths:
+			if os.path.exists(DEFAULT_CFG):
+				paths.append(DEFAULT_CFG)
+		if not paths:
+			print("No config files found. Specify one with '--config'.", file=sys.stderr)
+			return 3
+
+		self.cfg = {}
+		for p in paths:
+			with open(p) as f:
+				cfg = yaml.safe_load(f)
+				r_update(self.cfg, cfg)
+		if not cfg:
+			print("Empty configuration. Specify a valid config file with '--config'.", file=sys.stderr)
+			return 3
+
+def main(args):
+	c = Moat()
+	try:
+		ret = c.parse(args)
+	except CommandExited as e:
+		if e.status or c.verbose:
+			print(e.output, file=sys.stderr)
+		return e.status
+
+	if ret is None:
+		return 0
+	return ret
+
+if __name__ == '__main__':
+	sys.exit(main(sys.argv[1:]))
+
