@@ -26,14 +26,16 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import asyncio
 import pytest
 import subprocess
+from functools import wraps
 
 import logging
 logger = logging.getLogger(__name__)
 
 class ProcessHelper(asyncio.SubprocessProtocol):
-	def __init__(self, proc, *args, loop=None):
+	def __init__(self, proc, *args, loop=None, **kw):
 		self.proc = proc
 		self.args = args
+		self.kw = kw
 		self.fd = [b'',b'',b'']
 		self._loop = loop if loop is not None else asyncio.get_event_loop()
 
@@ -41,12 +43,22 @@ class ProcessHelper(asyncio.SubprocessProtocol):
 		self.fd[fd] += data
 	
 	def process_exited(self):
-		self.done.set_result(True)
+		if not self.done.done():
+			self.done.set_result(self.transport.get_returncode())
+
+	def connection_lost(self,exc):
+		if self.done.done():
+			return
+		else: # pragma: no cover
+			if exc is None:
+				self.done.set_result(True)
+			else:
+				self.done.set_exception(exc)
 
 	@asyncio.coroutine
 	def start(self):
 		self.done = asyncio.Future(loop=self._loop)
-		self.transport,_ = yield from self._loop.subprocess_exec(lambda: self, self.proc,*(str(x) for x in self.args))
+		self.transport,_ = yield from self._loop.subprocess_exec(lambda: self, self.proc,*(str(x) for x in self.args), **self.kw)
 		logger.debug("Started: %s",self.proc)
 
 	def stop(self):
@@ -57,3 +69,4 @@ class ProcessHelper(asyncio.SubprocessProtocol):
 	@asyncio.coroutine
 	def wait(self):
 		yield from self.done
+		return self.done.result()
