@@ -38,3 +38,20 @@ def test_base(event_loop):
 	t2 = time()
 	assert t2-t1 > 0.9
 	assert t2-t1 < 1.2
+
+@pytest.mark.asyncio
+def test_base_fd(event_loop):
+	p = ProcessHelper("echo","Foo!", loop=event_loop)
+	yield from p.start()
+	yield from p.wait()
+	assert p.fd[1] == b"Foo!\n"
+
+@pytest.mark.asyncio
+def test_base_kill(event_loop):
+	p = ProcessHelper("sleep",1, loop=event_loop)
+	t1 = time()
+	yield from p.start()
+	yield from asyncio.sleep(0.1, loop=event_loop)
+	yield from p.stop()
+	t2 = time()
+	assert t2-t1 < 0.3

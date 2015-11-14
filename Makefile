@@ -53,7 +53,7 @@ clean:
 
 test: all
 	@rm -f test.log
-	py.test-3 --cov-report term-missing --cov-config .coveragerc --cov=moat.proto tests
+	py.test-3 --cov-report term-missing --cov-config .coveragerc --cov=tests tests
 
 otest: all
 	@$(MAKE) -C test --no-print-directory otest
