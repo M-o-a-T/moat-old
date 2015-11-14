@@ -170,14 +170,14 @@ class Command(object):
 			self.name = self.__class__.__name__.lower()
 		self._stdout = stdout
 		self._stderr = stderr
+		self._width = width
 		self.parent = parent
 
 		# create subcommands if we have them
 		self.subCommands = {}
 		self.aliasedSubCommands = {}
 		if self.subCommandClasses:
-			for C in self.subCommandClasses:
-				c = C(self, stdout=stdout, stderr=stderr, width=width)
+			for c in self.subCommandClasses:
 				self.subCommands[c.name] = c
 				if c.aliases:
 					for alias in c.aliases:
@@ -361,14 +361,12 @@ class Command(object):
 				"Use --help to get a list of commands.\n")
 			return 1
 
-		# FIXME: check users and enable this
-		# assert type(command) is unicode
-		if command in self.subCommands.keys():
-			return self.subCommands[command].parse(args[1:])
-
-		if self.aliasedSubCommands:
-			if command in self.aliasedSubCommands.keys():
-				return self.aliasedSubCommands[command].parse(args[1:])
+		C = self.subCommands.get(command,None)
+		if C is None:
+			C = self.aliasedSubCommands.get(command,None)
+		if C is not None:
+			c = C(self, stdout=self._stdout, stderr=self._stderr, width=self._width)
+			return c.parse(args[1:])
 
 		self.stderr.write("Unknown command '%s'.\n" % command.encode('utf-8'))
 		self.parser.print_usage(file=self.stderr)
