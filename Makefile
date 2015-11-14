@@ -52,7 +52,11 @@ clean:
 
 
 test: all
-	@$(MAKE) -C test --no-print-directory test
+	@rm -f test.log
+	py.test-3 --cov-report term-missing --cov-config .coveragerc --cov=moat.proto tests
+
+otest: all
+	@$(MAKE) -C test --no-print-directory otest
 diff: FIX
 	@$(MAKE) -C test --no-print-directory diff
 
