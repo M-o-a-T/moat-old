@@ -146,8 +146,10 @@ class OnewireRead(OnewireInteraction):
 	@asyncio.coroutine
 	def interact(self,*path):
 		self.send(OWMsg.get, self.path(path), 8192)
-		type,msg = yield from self.recv()
-		assert type > 0
+		res,msg = yield from self.recv()
+		if res < 0:
+			raise OnewireError(path,res)
+		## TODO res vs. len(msg)?
 		return msg.decode('utf-8')
 
 
@@ -158,7 +160,8 @@ class OnewireWrite(OnewireInteraction):
 		if not isinstance(data,bytes):
 			data = str(data).encode('utf-8')
 		self.send(OWMsg.get, self.path(path)+str(data).encode('utf-8'), len(data))
-		type,msg = yield from self.recv()
-		assert type == len(data)
+		res,msg = yield from self.recv()
+		if res != len(data):
+			raise OnewireError(path,res)
 
 
