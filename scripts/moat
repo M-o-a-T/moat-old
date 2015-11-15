@@ -32,6 +32,8 @@ from etctree.util import from_yaml
 import yaml
 from moat.cmd import commands as moat_commands
 from dabroker.unit import DEFAULT_CONFIG
+from etctree import client
+import asyncio
 
 DEFAULT_CFG="/etc/moat.cfg"
 
@@ -69,6 +71,9 @@ You can load more than one config file.
 		self.parser.add_option('-c', '--config',
 			action="append", dest="files",
 			help="config file(s) to read (wildcards are OK)")
+		self.parser.add_option('-o', '--opt',
+			action="append", dest="opts",
+			help="option to override (use 'path.to.opt.name=value')")
 		self.parser.add_option('-v', '--verbose',
 			action="count", dest="verbose", default=1,
 			help="increase verbosity")
@@ -76,8 +81,13 @@ You can load more than one config file.
 			action="store_const", dest="verbose", const=0,
 			help="turn off verbosity")
 
+	def sync(self,cmd):
+		cmd = asyncio.async(cmd, loop=self.loop)
+		return self.loop.run_until_complete(cmd)
+		
 	def handleOptions(self, opts):
 		self.verbose = opts.verbose
+		self.loop = asyncio.get_event_loop()
 
 		paths = []
 		if opts.files:
@@ -95,6 +105,24 @@ You can load more than one config file.
 			with open(p) as f:
 				cfg = yaml.safe_load(f)
 				r_update(self.cfg, cfg)
+		if opts.opts:
+			for o in opts.opts:
+				k,v = o.split('=',1)
+				oc = None
+				c = self.cfg
+				for kk in k.split('.'):
+					oc = c
+					ok = kk
+					c = c.setdefault(kk,{})
+				oc[ok] = v
+
+
+		self.etcd = self.sync(self._get_etcd())
+
+	def _get_etcd(self):
+		return client(self.cfg)
+	_get_etcd._is_coroutine = True
+
 
 def main(args):
 	c = Moat()

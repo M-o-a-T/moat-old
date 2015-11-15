@@ -28,12 +28,13 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import os
 import sys
 from moat.script import Command, CommandError
+from etctree.util import from_etcd
 
-__all__ = ['ConfigCommand']
+__all__ = ['ShowCommand']
 
 class ConfigCommand(Command):
 	name = "config"
-	summary = "View  configuration data"""
+	summary = "View configuration data"""
 	description = """\
 Show the current config data.
 
@@ -55,4 +56,42 @@ With arguments, show only these.
 		else:
 			safe_dump(self.root.cfg, stream=sys.stdout)
 
+class EtcdCommand(Command):
+	name = "etcd"
+	summary = "View etcd data"""
+	description = """\
+Show the current etcd contents.
+
+With arguments, show only these subtrees.
+"""
+
+	def addOptions(self):
+		self.parser.add_option('-d','--dump',
+            action="store_true", dest="dump",
+            help="show internal details")
+
+	def handleOptions(self,opts):
+		self.dump = opts.dump
+
+	def do(self,args):
+		from yaml import safe_dump
+		if args:
+			done = False
+			for n,a in enumerate(args):
+				if n:
+					print("---")
+				a = a.replace('.','/')
+				safe_dump(self.root.sync(from_etcd(self.root.etcd,'/'+a, dump=self.dump)), stream=sys.stdout)
+
+		else:
+			safe_dump(self.root.sync(from_etcd(self.root.etcd, '/', dump=self.dump)), stream=sys.stdout)
+
+class ShowCommand(Command):
+	name = "show"
+	summary = "Show various data"""
+	description = """\
+Show some data.
+"""
+
+	subCommandClasses = [EtcdCommand,ConfigCommand]
 
