@@ -1,0 +1,12 @@
+config:
+  testing: true
+  etcd:
+    host: localhost
+    port: 2379
+    root: /moat
+  amqp:
+    server:
+      host: localhost
+      login: guest
+      password: guest
+      virtualhost: /moat
