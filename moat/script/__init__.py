@@ -550,7 +550,7 @@ def commandToCmdClass(command):
 				line = line.decode('utf-8')
 				# the do_ method is passed a single argument consisting of
 				# the remainder of the line
-				args = line.split(' ')
+				args = line.split()
 				command.debug('Asking %r to parse %r' % (c, args))
 				return c.parse(args)
 			return do_
