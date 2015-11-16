@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, print_function, division, unicode_literals
 ##
@@ -24,24 +23,32 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##  Thus, do not remove the next line, or insert any blank lines above.
 ##BP
 
-import sys
+import asyncio
+import pytest
+from time import time
+import io
 from moat.script.main import Moat
-from moat.script import CommandExited
 
+from . import ProcessHelper
 
-def main(args):
-	c = Moat()
-	try:
-		ret = c.parse(args)
-	except CommandExited as e:
-		if e.status or c.verbose:
-			print(e.output, file=sys.stderr)
-		return e.status
+class MoatTest(Moat):
+	def __init__(self,*a,**k):
+		super().__init__(*a,**k)
+		self._stdout = io.StringIO()
+		self._width = 9999
 
-	if ret is None:
-		return 0
-	return ret
+	def parse(self,cmd):
+		if isinstance(cmd,str):
+			cmd = cmd.split(' ')
+		return super().parse(cmd)
 
-if __name__ == '__main__':
-	sys.exit(main(sys.argv[1:]))
+	def in_stdout(self,s):
+		return s in self._stdout.getvalue()
+	def in_stderr(self,s):
+		return s in self._stderr.getvalue()
+
+def test_cmd(event_loop):
+	m = Moat()
+	m.parse("test")
+
 

@@ -91,9 +91,9 @@ Check etcd access, and basic data layout.
 					if self.parent.fix:
 						yield from err.set(stat,0)
 
-		with self.state("test.error","warn","Running tests")
-		try:
 		yield from s._wait()
+
+		yield from self.state("test","warn","Running tests")
 		errs = yield from etcd.read("/errors")
 		import pdb;pdb.set_trace()
 		pass

@@ -11,6 +11,8 @@ Command class.
 
 import optparse
 import sys
+import logging
+import asyncio
 
 class CommandHelpFormatter(optparse.IndentedHelpFormatter):
 	"""
@@ -159,8 +161,7 @@ class Command(object):
 	aliasedSubCommands = None
 	parser = None
 
-	def __init__(self, parent=None, stdout=None,
-		stderr=None, width=None):
+	def __init__(self, parent=None, stdout=None, stderr=None, width=None):
 		"""
 		Create a new command instance, with the given parent.
 		Allows for redirecting stdout and stderr if needed.
@@ -168,10 +169,18 @@ class Command(object):
 		"""
 		if not self.name:
 			self.name = self.__class__.__name__.lower()
+
+		if parent is not None:
+			self.fullname = parent.fullname+'.'+self.name
+		else:
+			self.fullname = self.name
+
 		self._stdout = stdout
 		self._stderr = stderr
 		self._width = width
 		self.parent = parent
+
+		self.log = logging.getLogger(self.name)
 
 		# create subcommands if we have them
 		self.subCommands = {}
@@ -365,7 +374,7 @@ class Command(object):
 		if C is None:
 			C = self.aliasedSubCommands.get(command,None)
 		if C is not None:
-			c = C(self, stdout=self._stdout, stderr=self._stderr, width=self._width)
+			c = C(self)
 			return c.parse(args[1:])
 
 		self.stderr.write("Unknown command '%s'.\n" % command.encode('utf-8'))
@@ -428,15 +437,6 @@ class Command(object):
 		"""
 		pass
 
-	def getFullName(self):
-		names = []
-		c = self
-		while c:
-			names.append(c.name)
-			c = c.parent
-		names.reverse()
-		return " ".join(names)
-
 	def _getStd(self, what):
 
 		ret = getattr(self, '_' + what, None)
@@ -450,15 +450,17 @@ class Command(object):
 		# otherwise delegate to my parent
 		return getattr(self.parent, what)
 
-	def _getStdOut(self):
+	@property
+	def stdout(self):
 		return self._getStd('stdout')
 
-	def _getStdErr(self):
+	@property
+	def stderr(self):
 		return self._getStd('stderr')
 
-	stdout = property(_getStdOut)
-	stderr = property(_getStdErr)
-
+	@property
+	def width(self):
+		return self._getStd('width')
 
 class CommandExited(Exception):
 
@@ -575,4 +577,5 @@ def commandToCmdClass(command):
 def commandToCmd(command):
 	# for compatibility reasons
 	return commandToCmdClass(command)()
+
 
