@@ -48,7 +48,7 @@ class MoatTest(Moat):
 		return s in self._stderr.getvalue()
 
 def test_cmd(event_loop):
-	m = Moat()
+	m = MoatTest()
 	m.parse("test")
 
 
