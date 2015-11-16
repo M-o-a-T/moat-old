@@ -123,14 +123,17 @@ You can load more than one config file.
 
 		self.app = self.cfg['config'].get('app',None)
 		if self.app is None:
-			# Rather than enumerate IP addresses, this is the quick&only-somewhat-dirty way
-			s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-			s.connect(('8.8.8.8', 53)) # connecting to a UDP address doesn't send packets
-			addr = s.getsockname()[0]
-			s.close()
-			addr = socket.getfqdn(addr).split('.')
-			if len(addr) < 3:
-				raise CommandError("You need to fix your FQDN ('%s'), or use the '-a' option." % ".".join(addr))
+			addr = os.environ.get('MOAT_FQDN',None)
+			if addr is None:
+				# Rather than enumerate IP addresses, this is the quick&only-somewhat-dirty way
+				s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+				s.connect(('8.8.8.8', 53)) # connecting to a UDP address doesn't send packets
+				addr = s.getsockname()[0]
+				s.close()
+				addr = socket.getfqdn(addr)
+			addr = addr.split('.')
+			if len(addr) < 2:
+				raise CommandError( "You need to fix your FQDN ('%s'), set MOAT_FQDN, or use the '-a' option." % ".".join(addr))
 			addr.reverse()
 			self.cfg['config']['app'] = self.app = ".".join(addr)
 		if self.verbose > 2:

@@ -53,6 +53,7 @@ clean:
 
 test: all
 	@rm -f test.log
+	env MOAT_FQDN=test.moat.invalid \
 	py.test-3 --cov-report term-missing --cov-config .coveragerc --cov=tests tests
 
 otest: all
