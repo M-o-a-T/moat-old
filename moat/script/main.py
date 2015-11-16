@@ -133,6 +133,21 @@ You can load more than one config file.
 				raise CommandError("You need to fix your FQDN ('%s'), or use the '-a' option." % ".".join(addr))
 			addr.reverse()
 			self.cfg['config']['app'] = self.app = ".".join(addr)
+
+#		if 'specific' in kw and appname is not None:
+#			s = kw['specific']
+#			while True:
+#				try:
+#					tree = s[appname]['config']
+#				except KeyError:
+#					pass
+#				else:
+#					r_default(kw['config'],tree)
+#				try:
+#					appname = appname[appname.index('.'):]
+#				except ValueError:
+#					break
+
 		if self.verbose > 2:
 			print("App name:",self.app)
 
