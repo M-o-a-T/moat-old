@@ -1,9 +1,9 @@
 [submodule "_geventreactor"]
 	path = _geventreactor
-	url = git@git.extern.smurf.noris.de:inportb_playground.git
+	url = git@git.smurf.noris.de:inportb_playground.git
 [submodule "wago"]
 	path = wago
-	url = git@git.extern.smurf.noris.de:wago.git
+	url = git@git.smurf.noris.de:wago.git
 [submodule "dabroker"]
 	path = dabroker
 	url = git@github.com:smurfix/DaBroker.git
