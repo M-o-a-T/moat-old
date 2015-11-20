@@ -14,7 +14,7 @@
 ##  for more details.
 ##
 
-export PYTHONPATH=$(shell pwd):$(shell pwd)/dabroker
+export PYTHONPATH=$(shell pwd)
 DESTDIR ?= "/"
 PYDESTDIR ?= ${DESTDIR}
 PYTHON ?= python3
@@ -53,7 +53,13 @@ clean:
 
 test: all
 	@rm -f test.log
-	py.test-3 --cov-report term-missing --cov-config .coveragerc --cov=tests tests
+	py.test-3 --cov-report term-missing \
+		--assert=plain tests \
+		--cov=tests \
+		--cov=moat.cmd \
+		--cov=moat.proto \
+		--cov=moat.script \
+		--cov-config .coveragerc
 
 otest: all
 	@$(MAKE) -C test --no-print-directory otest
