@@ -69,32 +69,31 @@ Check etcd access, and basic data layout.
 				raise CommandError("config.etcd: missing '%s' entry" % k)
 		self.root.sync(self._do())
 	
-	@asyncio.coroutine
-	def _do(self):
-		etcd = yield from self.root._get_etcd()
+	async def _do(self):
+		etcd = await self.root._get_etcd()
 		log = logging.getLogger("etcd")
 		stats = set(("ok","warn","error","fail"))
-		s = yield from etcd.tree("/status")
+		s = await etcd.tree("/status")
 		if "run" not in s:
 			log.error("missing 'run' entry")
 			if self.parent.fix:
-				yield from s.set("run",dict())
+				await s.set("run",dict())
 		if "errors" not in s:
 			log.error("missing 'errors' entry")
 			if self.parent.fix:
-				yield from s.set("errors",dict((s,0) for s in stats))
+				await s.set("errors",dict((s,0) for s in stats))
 		else:
 			err = s['errors']
 			for stat in stats:
 				if stat not in err:
 					log.error("missing 'errors.%s' entry" % stat)
 					if self.parent.fix:
-						yield from err.set(stat,0)
+						await err.set(stat,0)
 
-		yield from s._wait()
+		await s._wait()
 
-		yield from self.state("test","warn","Running tests")
-		errs = yield from etcd.read("/errors")
+		await self.state("test","warn","Running tests")
+		errs = await etcd.read("/errors")
 		import pdb;pdb.set_trace()
 		pass
 

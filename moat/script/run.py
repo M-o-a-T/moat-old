@@ -27,29 +27,27 @@ from . import Command
 import asyncio
 
 class StdCommand(Command):
-	@asyncio.coroutine
-	def run(self, cmd):
+	async def run(self, cmd):
 		r = self.root
 		ttl = float(self.root.cfg['config']['run']['ttl'])
 		refresh = float(self.root.cfg['config']['run']['refresh'])
-		run_state = yield from r.etcd.tree("/status/run/%s/%s", r.app,self.fullname, immediate=True)
+		run_state = await r.etcd.tree("/status/run/%s/%s", r.app,self.fullname, immediate=True)
 
-		@asyncio.coroutine
-		def updater():
-			yield from run_state.set("started",time())
+		async def updater():
+			await run_state.set("started",time())
 			try:
 				while True:
-					yield from run_state.set("running",time(),ttl=ttl)
-					yield from run_state._wait()
-					yield from asyncio.sleep(ttl/refresh, loop=r.loop)
+					await run_state.set("running",time(),ttl=ttl)
+					await run_state._wait()
+					await asyncio.sleep(ttl/refresh, loop=r.loop)
 			finally:
-				yield from run_state.delete("running")
-				yield from run_state._wait()
+				await run_state.delete("running")
+				await run_state._wait()
 				
 
 		run_task = asyncio.async(self._updater(), loop=r.loop)
 		main_task = asyncio.async(cmd, loop=r.loop)
-		yield from asyncio.wait((main_task,run_task), loop=r.loop, return_when=asyncio.FIRST_COMPLETED)
+		await asyncio.wait((main_task,run_task), loop=r.loop, return_when=asyncio.FIRST_COMPLETED)
 		if run_task.done():
 			if not main_task.done():
 				main_task.cancel()
@@ -57,16 +55,16 @@ class StdCommand(Command):
 			assert main_task.done()
 			run_task.cancel()
 		if main_task.cancelled():
-			yield from run_state.set("state","fail")
-			yield from run_state.set("message",str(run_task.exception()))
+			await run_state.set("state","fail")
+			await run_state.set("message",str(run_task.exception()))
 		else:
 			try:
 				res = main_task.result()
-				yield from run_state.set("state","ok")
-				yield from run_state.set("message",str(res))
+				await run_state.set("state","ok")
+				await run_state.set("message",str(res))
 			except Exception as exc:
-				yield from run_state.set("state","error")
-				yield from run_state.set("message",str(exc))
+				await run_state.set("state","error")
+				await run_state.set("message",str(exc))
 				raise
-		yield from run_state.set("stopped",time())
+		await run_state.set("stopped",time())
 

@@ -34,8 +34,7 @@ import logging
 logging.basicConfig(filename='test.log', level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-@asyncio.coroutine
-def is_open(port):
+async def is_open(port):
 	s = socket()
 	n = 0
 	while n < 30:
@@ -75,10 +74,9 @@ class ProcessHelper(asyncio.SubprocessProtocol):
 			else:
 				self.done.set_exception(exc)
 
-	@asyncio.coroutine
-	def start(self):
+	async def start(self):
 		self.done = asyncio.Future(loop=self._loop)
-		self.transport,_ = yield from self._loop.subprocess_exec(lambda: self, self.proc,*(str(x) for x in self.args), **self.kw)
+		self.transport,_ = await self._loop.subprocess_exec(lambda: self, self.proc,*(str(x) for x in self.args), **self.kw)
 		logger.debug("Started: %s",self.proc)
 
 	def stop(self):
@@ -91,7 +89,6 @@ class ProcessHelper(asyncio.SubprocessProtocol):
 		return self.wait()
 	kill._is_coroutine = True
 
-	@asyncio.coroutine
-	def wait(self):
-		yield from self.done
+	async def wait(self):
+		await self.done
 		return self.done.result()

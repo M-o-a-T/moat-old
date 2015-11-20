@@ -151,22 +151,20 @@ You can load more than one config file.
 		if self.verbose > 2:
 			print("App name:",self.app)
 
-	@asyncio.coroutine
-	def setup(self):
+	async def setup(self):
 		"""Once running in async mode, get our basic config loaded"""
 		if self.etcd is None:
-			self.etcd = yield from self._get_etcd()
+			self.etcd = await self._get_etcd()
 		if self.amqp is None:
-			self.amqp = yield from self._get_amqp()
+			self.amqp = await self._get_amqp()
 
 	def _get_etcd(self):
 		return client(self.cfg)
 	_get_etcd._is_coroutine = True
 
-	@asyncio.coroutine
-	def _get_amqp(self):
-		res = yield from make_unit(self.cfg)
-		t = yield from res.tree("/config", static=True)
+	async def _get_amqp(self):
+		res = await make_unit(self.cfg)
+		t = await res.tree("/config", static=True)
 		cfg = {'config':{}}
 		r_update(cfg['config'],t)
 		r_update(cfg,self.cfg)

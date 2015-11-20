@@ -129,11 +129,10 @@ class OnewireInteraction(ProtocolInteraction):
 		return p.encode('utf-8')+b'\0'
 
 class OnewireDir(OnewireInteraction):
-	@asyncio.coroutine
-	def interact(self,*path):
+	async def interact(self,*path):
 		files = []
 		self.send(OWMsg.dirall, self.path(path), 0)
-		type,msg = yield from self.recv()
+		type,msg = await self.recv()
 		assert type == 0
 		for entry in msg.decode('utf-8').split(","):
 			try: entry = entry[entry.rindex('/')+1:]
@@ -143,10 +142,9 @@ class OnewireDir(OnewireInteraction):
 		return files
 
 class OnewireRead(OnewireInteraction):
-	@asyncio.coroutine
-	def interact(self,*path):
+	async def interact(self,*path):
 		self.send(OWMsg.get, self.path(path), 8192)
-		res,msg = yield from self.recv()
+		res,msg = await self.recv()
 		if res < 0:
 			raise OnewireError(path,res)
 		## TODO res vs. len(msg)?
@@ -154,13 +152,12 @@ class OnewireRead(OnewireInteraction):
 
 
 class OnewireWrite(OnewireInteraction):
-	@asyncio.coroutine
-	def interact(self,*path, data=None):
+	async def interact(self,*path, data=None):
 		assert data is not None
 		if not isinstance(data,bytes):
 			data = str(data).encode('utf-8')
 		self.send(OWMsg.get, self.path(path)+str(data).encode('utf-8'), len(data))
-		res,msg = yield from self.recv()
+		res,msg = await self.recv()
 		if res != len(data):
 			raise OnewireError(path,res)
 
