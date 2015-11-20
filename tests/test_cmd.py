@@ -27,6 +27,7 @@ import asyncio
 import pytest
 from time import time
 import io
+import sys
 from moat.script.main import Moat
 
 from . import ProcessHelper
@@ -40,7 +41,11 @@ class MoatTest(Moat):
 	def parse(self,cmd):
 		if isinstance(cmd,str):
 			cmd = cmd.split(' ')
-		return super().parse(cmd)
+		s_out,sys.stdout = sys.stdout,self._stdout
+		try:
+			return super().parse(cmd)
+		finally:
+			sys.stdout = s_out
 
 	def in_stdout(self,s):
 		return s in self._stdout.getvalue()
@@ -50,5 +55,24 @@ class MoatTest(Moat):
 def test_cmd(event_loop):
 	m = MoatTest()
 	m.parse("test")
+
+def test_dummy(event_loop):
+	from moat.cmd.dummy import Command as C
+
+	m = MoatTest()
+	m.parse("-q dummy")
+	assert m._stdout.getvalue() == ""
+
+	m = MoatTest()
+	m.parse("dummy")
+	assert m.in_stdout(C.foo[0])
+	assert not m.in_stdout(C.foo[1])
+	assert not m.in_stdout(C.foo[2])
+
+	m = MoatTest()
+	m.parse("-v dummy")
+	assert m.in_stdout(C.foo[0])
+	assert m.in_stdout(C.foo[1])
+	assert not m.in_stdout(C.foo[2])
 
 
