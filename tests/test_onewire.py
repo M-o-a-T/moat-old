@@ -44,25 +44,25 @@ def owserver(loop,unused_tcp_port):
 	loop.run_until_complete(p.kill())
 
 @pytest.mark.run_loop
-async def test_onewire_dir(loop):
-	#c = ProtocolClient(OnewireProtocol, "127.0.0.1",owserver, loop=loop)
-	#owd = OnewireDir(conn=c)
-	#owr = OnewireRead(conn=c)
-	#oww = OnewireWrite(conn=c)
+async def test_onewire_dir(loop,owserver):
+	c = ProtocolClient(OnewireProtocol, "127.0.0.1",owserver, loop=loop)
+	owd = OnewireDir(conn=c, loop=loop)
+	owr = OnewireRead(conn=c, loop=loop)
+	oww = OnewireWrite(conn=c, loop=loop)
 	f = asyncio.Future(loop=loop)
 	f.set_result(None)
 	await f
-#	res = await owd.run()
-#	assert "bus.0" in res
-#	assert "simultaneous" in res
-#	for p in res:
-#		if p.startswith("bus."):
-#			res2 = await owd.run(p)
-#			for q in res2:
-#				if q.startswith("10."):
-#					r = await c.run(owd,p,q)
-#					logger.debug(r)
-#					r = await owr.run(p,q,"temperature")
-#					assert float(r) == 1.6 # which hopefully will stay stable
-#					await oww.run(p,q,"temphigh", data="99")
-#
+	res = await owd.run()
+	assert "bus.0" in res
+	assert "simultaneous" in res
+	for p in res:
+		if p.startswith("bus."):
+			res2 = await owd.run(p)
+			for q in res2:
+				if q.startswith("10."):
+					r = await c.run(owd,p,q)
+					logger.debug(r)
+					r = await owr.run(p,q,"temperature")
+					assert float(r) == 1.6 # which hopefully will stay stable
+					await oww.run(p,q,"temphigh", data="99")
+

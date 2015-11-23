@@ -59,8 +59,8 @@ class OWtempformat:
 
 class OnewireProtocol(Protocol):
 	MAX_LENGTH=10*1024
-	def __init__(self):
-		super().__init__()
+	def __init__(self, loop=None):
+		super().__init__(loop=loop)
 		self.data = b""
 		self.len = 24
 		self.typ = None
