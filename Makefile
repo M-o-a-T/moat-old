@@ -14,7 +14,7 @@
 ##  for more details.
 ##
 
-export PYTHONPATH=$(shell pwd)
+export PYTHONPATH?=$(shell pwd)
 DESTDIR ?= "/"
 PYDESTDIR ?= ${DESTDIR}
 PYTHON ?= python3
