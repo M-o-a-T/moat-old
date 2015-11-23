@@ -47,15 +47,16 @@ With arguments, show only these.
 	def do(self,args):
 		from yaml import safe_dump
 		if args:
-			done = False
-			for n,a in enumerate(args):
-				if n:
-					print("---", file=self.stdout)
-				c = self.root.cfg
-				for aa in a.split('.'):
-					c = c[aa]
-				safe_dump(c, stream=self.stdout)
-
+			try:
+				for n,a in enumerate(args):
+					if n:
+						print("---", file=self.stdout)
+					c = self.root.cfg
+					for aa in a.split('.'):
+						c = c[aa]
+					safe_dump(c, stream=self.stdout)
+			except KeyError:
+				raise CommandError("Key %s does not exist"%(repr(a),))
 		else:
 			safe_dump(self.root.cfg, stream=self.stdout)
 
@@ -85,7 +86,6 @@ With arguments, show only these subtrees.
 		retval = 0
 		etc = self.root.sync(self.root._get_etcd())
 		if args:
-			done = False
 			for n,a in enumerate(args):
 				if n:
 					print("---", file=self.stdout)

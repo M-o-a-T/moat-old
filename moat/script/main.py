@@ -115,7 +115,7 @@ You can load more than one config file.
 			for f in opts.files:
 				paths.extend(glob.glob(f))
 
-		if not paths:
+		if not paths: # pragma: no cover ## not while testing!
 			if os.path.exists(DEFAULT_CFG):
 				paths.append(DEFAULT_CFG)
 
@@ -146,7 +146,7 @@ You can load more than one config file.
 			addr = s.getsockname()[0]
 			s.close()
 			addr = socket.getfqdn(addr).split('.')
-			if len(addr) < 3:
+			if len(addr) < 3: # pragma: no cover
 				raise CommandError("You need to fix your FQDN ('%s'), or use the '-a' option." % ".".join(addr))
 			addr.reverse()
 			self.cfg['config']['app'] = self.app = ".".join(addr)

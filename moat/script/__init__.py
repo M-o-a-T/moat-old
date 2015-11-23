@@ -39,7 +39,7 @@ class CommandHelpFormatter(optparse.IndentedHelpFormatter):
 
 	### override parent method
 
-	def format_description(self, description, width=None):
+	def format_description(self, description):
 		# textwrap doesn't allow for a way to preserve double newlines
 		# to separate paragraphs, so we do it here.
 		paragraphs = description.split('\n\n')
@@ -161,7 +161,7 @@ class Command(object):
 	aliasedSubCommands = None
 	parser = None
 
-	def __init__(self, parent=None, stdout=None, stderr=None, width=None):
+	def __init__(self, parent=None, stdout=None, stderr=None):
 		"""
 		Create a new command instance, with the given parent.
 		Allows for redirecting stdout and stderr if needed.
@@ -177,7 +177,6 @@ class Command(object):
 
 		self._stdout = stdout
 		self._stderr = stderr
-		self._width = width
 		self.parent = parent
 
 		self.log = logging.getLogger(self.name)
@@ -193,10 +192,10 @@ class Command(object):
 						self.aliasedSubCommands[alias] = c
 
 		# create our formatter and add subcommands if we have them
-		formatter = CommandHelpFormatter(width=width)
+		formatter = CommandHelpFormatter()
 		formatter.setClass(self.__class__)
 		if self.subCommands:
-			if not self.description:
+			if not self.description: # pragma: no cover
 				if self.summary:
 					self.description = self.summary
 				else:
@@ -268,7 +267,7 @@ class Command(object):
 		"""
 		pass
 
-	def do(self, args):
+	def do(self, args): # pragma: no cover
 		"""
 		Override me to implement the functionality of the command.
 
@@ -291,9 +290,9 @@ class Command(object):
 		"""
 		# note: no arguments should be passed as an empty list, not a list
 		# with an empty str as ''.split(' ') returns
-		self.debug('calling %r.parse_args(%r)' % (self, argv))
+		self.log.debug('calling %r.parse_args(%r)' % (self, argv))
 		self.options, args = self.parser.parse_args(argv)
-		self.debug('called %r.parse_args' % self)
+		self.log.debug('called %r.parse_args' % self)
 
 		# if we were asked to print help or usage, we are done
 		if self.parser.usage_printed or self.parser.help_printed:
@@ -301,55 +300,32 @@ class Command(object):
 
 		# FIXME: make handleOptions not take options, since we store it
 		# in self.options now
-		self.debug('calling %r.handleOptions(%r)' % (self, self.options))
+		self.log.debug('calling %r.handleOptions(%r)' % (self, self.options))
 		ret = self.handleOptions(self.options)
-		self.debug('called %r.handleOptions, returned %r' % (self, ret))
+		self.log.debug('called %r.handleOptions, returned %r' % (self, ret))
 
 		if ret:
 			return ret
-
-		# handle pleas for help
-		if args and args[0] == 'help':
-			self.debug('Asked for help, args %r' % args)
-
-			# give help on current command if only 'help' is passed
-			if len(args) == 1:
-				self.outputHelp()
-				return 0
-
-			# complain if we were asked for help on a subcommand, but we don't
-			# have any
-			if not self.subCommands:
-				self.stderr.write('No subcommands defined.\n')
-				self.parser.print_usage(file=self.stderr)
-				self.stderr.write(
-					"Use --help to get more information about this command.\n")
-				return 1
-
-			# rewrite the args the other way around;
-			# help doap becomes doap help so it gets deferred to the doap
-			# command
-			args = [args[1], args[0]]
 
 		# if we don't have args or don't have subcommands,
 		# defer to our do() method
 		# allows implementing a do() for commands that also have subcommands
 		if not args or not self.subCommands:
-			self.debug('no args or no subcommands, calling %r.do(%r)' % (
+			self.log.debug('no args or no subcommands, calling %r.do(%r)' % (
 				self, args))
 			try:
 				ret = self.do(args)
-				self.debug('done ok, returned %r', ret)
-			except CommandOk as e:
-				self.debug('done with exception, raised %r', e)
-				ret = e.status
-				self.stdout.write(e.output + '\n')
+				self.log.debug('done ok, returned %r', ret)
+#			except CommandOk as e:
+#				self.log.debug('done with exception, raised %r', e)
+#				ret = e.status
+#				self.stdout.write(e.output + '\n')
 			except CommandExited as e:
-				self.debug('done with exception, raised %r', e)
+				self.log.debug('done with exception, raised %r', e)
 				ret = e.status
 				self.stderr.write(e.output + '\n')
 			except NotImplementedError:
-				self.debug('done with NotImplementedError')
+				self.log.debug('done with NotImplementedError')
 				self.parser.print_usage(file=self.stderr)
 				self.stderr.write(
 					"Use --help to get a list of commands.\n")
@@ -378,7 +354,7 @@ class Command(object):
 			c = C(self)
 			return c.parse(args[1:])
 
-		self.stderr.write("Unknown command '%s'.\n" % command.encode('utf-8'))
+		self.log.error("Unknown command '%s'.\n", command)
 		self.parser.print_usage(file=self.stderr)
 		return 1
 
@@ -388,23 +364,13 @@ class Command(object):
 		"""
 		pass
 
-	def outputHelp(self, file=None):
-		"""
-		Output help information.
-		"""
-		__pychecker__ = 'no-shadowbuiltin'
-		self.debug('outputHelp')
-		if not file:
-			file = self.stderr
-		self.parser.print_help(file=file)
-
 	def outputUsage(self, file=None):
 		"""
 		Output usage information.
 		Used when the options or arguments were missing or wrong.
 		"""
 		__pychecker__ = 'no-shadowbuiltin'
-		self.debug('outputUsage')
+		self.log.debug('outputUsage')
 		if not file:
 			file = self.stderr
 		self.parser.print_usage(file=file)
@@ -418,25 +384,6 @@ class Command(object):
 		while c.parent:
 			c = c.parent
 		return c
-
-	def warning(self, format, *args):
-		"""
-		Override me to handle warning output from this class.
-		"""
-		pass
-
-	def info(self, format, *args):
-		"""
-		Override me to handle info output from this class.
-		"""
-		pass
-
-
-	def debug(self, format, *args):
-		"""
-		Override me to handle debug output from this class.
-		"""
-		pass
 
 	def _getStd(self, what):
 
@@ -459,10 +406,6 @@ class Command(object):
 	def stderr(self):
 		return self._getStd('stderr')
 
-	@property
-	def width(self):
-		return self._getStd('width')
-
 class CommandExited(Exception):
 
 	def __init__(self, status, output):
@@ -471,10 +414,10 @@ class CommandExited(Exception):
 		self.output = output
 
 
-class CommandOk(CommandExited):
-
-	def __init__(self, output):
-		CommandExited.__init__(self, 0, output)
+#class CommandOk(CommandExited):
+#
+#	def __init__(self, output):
+#		CommandExited.__init__(self, 0, output)
 
 
 class CommandError(CommandExited):

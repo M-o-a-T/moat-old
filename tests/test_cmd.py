@@ -38,14 +38,14 @@ class StoreHandler(logging.Handler):
 		super().__init__()
 		self.cmd = cmd
 	def emit(self, record):
-		self.cmd.log.append(record)
+		self.cmd.debug_log.append(record)
 
 class MoatTest(Moat):
 	def __init__(self,*a,**k):
 		super().__init__(*a,**k)
 		self._stdout = io.StringIO()
 		self._width = 9999
-		self.log = []
+		self.debug_log = []
 		h = StoreHandler(self)
 		logging.getLogger().addHandler(h)
 
@@ -71,6 +71,16 @@ def test_dummy(loop):
 	from moat.cmd.dummy import Command as C
 
 	m = MoatTest(loop=loop)
+	r = m.parse("dummy foo")
+	assert r == 1
+	assert m.stdout_data == ""
+
+	m = MoatTest(loop=loop)
+	r = m.parse("dummy nope")
+	assert r == 1
+	assert m.stdout_data == ""
+
+	m = MoatTest(loop=loop)
 	r = m.parse("-q dummy")
 	assert r == 0
 	assert m.stdout_data == ""
@@ -91,9 +101,29 @@ def test_dummy(loop):
 
 def test_show(loop):
 	m = MoatTest(loop=loop)
+	r = m.parse("-c test.cfg show --help")
+	assert not r
+	assert m.stdout_data.startswith("Usage: [MoaT options] show [command]\n")
+	assert m.in_stdout("--help")
+
+	m = MoatTest(loop=loop)
+	r = m.parse("-c test.cfg show foobarbaz")
+	assert r == 1
+	assert m.debug_log[-1].getMessage() == "Unknown command 'foobarbaz'.\n"
+
+	m = MoatTest(loop=loop)
 	r = m.parse("-c test.cfg show config")
 	assert r == 0
 	assert m.in_stdout("\n    codec: _json\n")
+
+	m = MoatTest(loop=loop)
+	r = m.parse("-c test.cfg -o config.bla.fasel=123 show config config.bla.fasel")
+	assert r == 0
+	m.assert_stdout("'123'\n")
+
+	m = MoatTest(loop=loop)
+	r = m.parse("-c test.cfg show config config.bla.fasel")
+	assert r == 3
 
 def test_set(loop):
 	m = MoatTest(loop=loop)
@@ -102,7 +132,7 @@ def test_set(loop):
 	m = MoatTest(loop=loop)
 	r = m.parse("-c test.cfg show etcd one")
 	assert r > 0
-	assert m.log[-1].getMessage() == 'key not present: one'
+	assert m.debug_log[-2].getMessage() == 'key not present: one'
 
 	m = MoatTest(loop=loop)
 	r = m.parse("-c test.cfg set etcd one.two=three")
@@ -111,7 +141,7 @@ def test_set(loop):
 	m = MoatTest(loop=loop)
 	r = m.parse("-c test.cfg set etcd one.two=threeandahalf")
 	assert r > 0
-	assert m.log[-1].getMessage() == 'Entry exists: one.two'
+	assert m.debug_log[-2].getMessage() == 'Entry exists: one.two'
 
 	m = MoatTest(loop=loop)
 	r = m.parse("-c test.cfg show etcd one")
@@ -142,7 +172,7 @@ def test_set(loop):
 	m = MoatTest(loop=loop)
 	r = m.parse("-c test.cfg set etcd -m %d one.two=four" % (i-1,))
 	assert r > 0
-	assert m.log[-1].getMessage() == 'Bad modstamp: one.two'
+	assert m.debug_log[-2].getMessage() == 'Bad modstamp: one.two'
 
 	m = MoatTest(loop=loop)
 	r = m.parse("-c test.cfg set etcd -m %d one.two=four" % (i,))
@@ -156,7 +186,7 @@ def test_set(loop):
 	m = MoatTest(loop=loop)
 	r = m.parse("-c test.cfg set etcd -p three -d one.two")
 	assert r > 0
-	assert m.log[-1].getMessage() == 'Bad modstamp: one.two'
+	assert m.debug_log[-2].getMessage() == 'Bad modstamp: one.two'
 
 	m = MoatTest(loop=loop)
 	r = m.parse("-c test.cfg set etcd -p four -d one.two")

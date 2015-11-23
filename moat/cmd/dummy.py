@@ -30,6 +30,7 @@ from moat.script import Command as _Command
 
 class Command(_Command):
 	name = "dummy"
+	aliases = ['dumy','dummmy']
 	summary = "A command that does not do anything"
 	description = """\
 This command does not do anything. It is used for testing.
@@ -43,6 +44,11 @@ This command does not do anything. It is used for testing.
 	)
 	def do(self,args):
 		n = 0
+		if args:
+			if args[0] == "nope":
+				raise NotImplementedError("nope")
+			self.outputUsage()
+			return 1
 		while n < self.root.verbose:
 			print(self.foo[n], file=self.stdout)
 			n += 1

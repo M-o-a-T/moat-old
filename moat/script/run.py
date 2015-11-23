@@ -60,7 +60,7 @@ class StdCommand(Command):
 
 		try:
 			if 'running' in run_state:
-				raise etcd.EtcdAlreadyExist
+				raise etcd.EtcdAlreadyExist # pragma: no cover ## timing dependant
 			cseq = await run_state.set("running",time(),ttl=ttl)
 		except etcd.EtcdAlreadyExist:
 			raise RuntimeError("Run marker already exists")
