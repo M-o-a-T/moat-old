@@ -31,12 +31,22 @@ import os
 from etctree.util import from_yaml
 import yaml
 from moat.cmd import commands as moat_commands
-from dabroker.unit import make_unit, DEFAULT_CONFIG
+from dabroker.unit import make_unit, DEFAULT_CONFIG as DABROKER_DEFAULT_CONFIG
 from etctree import client
 import asyncio
 import socket
 
+import logging
+logger = logging.getLogger(__name__)
+
 DEFAULT_CFG="/etc/moat.cfg"
+
+DEFAULT_CONFIG = dict(
+	run=dict(
+		ttl=30,
+		refresh=2,
+	)
+)
 
 def r_update(a,b):
 	for k,v in b.items():
@@ -64,7 +74,12 @@ You can load more than one config file.
 
 	cfg = None
 	verbose = None
-	_etcd = None
+	etcd = None
+	amqp = None
+
+	def __init__(self,*a,loop=None,**kw):
+		super().__init__(*a,**kw)
+		self.loop = loop if loop is not None else asyncio.get_event_loop()
 
 	def addOptions(self):
 		self.parser.add_option('--no-default-config',
@@ -87,12 +102,13 @@ You can load more than one config file.
 			help="application name. Default is the reversed FQDN.")
 
 	def sync(self,cmd):
-		cmd = asyncio.async(cmd, loop=self.loop)
+		cmd = asyncio.ensure_future(cmd, loop=self.loop)
 		return self.loop.run_until_complete(cmd)
 		
 	def handleOptions(self, opts):
 		self.verbose = opts.verbose
-		self.loop = asyncio.get_event_loop()
+
+		logging.basicConfig(stream=sys.stderr,level=(logging.CRITICAL,logging.WARNING,logging.INFO,logging.DEBUG)[min(self.verbose,3)])
 
 		paths = []
 		if opts.files:
@@ -103,9 +119,10 @@ You can load more than one config file.
 			if os.path.exists(DEFAULT_CFG):
 				paths.append(DEFAULT_CFG)
 
-		self.cfg = {}
+		self.cfg = {'config':{}}
 		if not opts.no_default:
-			r_update(self.cfg.setdefault('config',{}), DEFAULT_CONFIG)
+			r_update(self.cfg['config'], DEFAULT_CONFIG)
+			r_update(self.cfg['config'], DABROKER_DEFAULT_CONFIG)
 		for p in paths:
 			with open(p) as f:
 				cfg = yaml.safe_load(f)
@@ -158,15 +175,16 @@ You can load more than one config file.
 		if self.amqp is None:
 			self.amqp = await self._get_amqp()
 
-	def _get_etcd(self):
-		return client(self.cfg)
-	_get_etcd._is_coroutine = True
-
-	async def _get_amqp(self):
-		res = await make_unit(self.cfg)
+	async def _get_etcd(self):
+		res = await client(self.cfg, loop=self.loop)
 		t = await res.tree("/config", static=True)
 		cfg = {'config':{}}
 		r_update(cfg['config'],t)
 		r_update(cfg,self.cfg)
+		self.cfg = cfg
+		return res
+
+	async def _get_amqp(self):
+		res = await make_unit(self.app, self.cfg['config'], loop=self.loop)
 		return res
 

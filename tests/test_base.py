@@ -29,9 +29,9 @@ from time import time
 
 from . import ProcessHelper
 
-@pytest.mark.asyncio
-async def test_base(event_loop):
-	p = ProcessHelper("sleep",1, loop=event_loop)
+@pytest.mark.run_loop
+async def test_base(loop):
+	p = ProcessHelper("sleep",1, loop=loop)
 	t1 = time()
 	await p.start()
 	await p.wait()
@@ -39,19 +39,19 @@ async def test_base(event_loop):
 	assert t2-t1 > 0.9
 	assert t2-t1 < 1.2
 
-@pytest.mark.asyncio
-async def test_base_fd(event_loop):
-	p = ProcessHelper("echo","Foo!", loop=event_loop)
+@pytest.mark.run_loop
+async def test_base_fd(loop):
+	p = ProcessHelper("echo","Foo!", loop=loop)
 	await p.start()
 	await p.wait()
 	assert p.fd[1] == b"Foo!\n"
 
-@pytest.mark.asyncio
-async def test_base_kill(event_loop):
-	p = ProcessHelper("sleep",1, loop=event_loop)
+@pytest.mark.run_loop
+async def test_base_kill(loop):
+	p = ProcessHelper("sleep",1, loop=loop)
 	t1 = time()
 	await p.start()
-	await asyncio.sleep(0.1, loop=event_loop)
+	await asyncio.sleep(0.1, loop=loop)
 	await p.stop()
 	t2 = time()
 	assert t2-t1 < 0.3

@@ -39,67 +39,44 @@ logging.captureWarnings(True)
 import warnings
 warnings.filterwarnings("ignore")
 
-async def is_open(port):
-	s = socket()
-	n = 0
-	while n < 30:
-		try:
-			s.connect(("127.0.0.1", port))
-		except Exception:
-			n += 1
-			time.sleep(0.1)
-		else:
-			s.close()
-			break
-	else: # pragma: no cover
-		s.close()
-		raise RuntimeError("Port did not open")
+@pytest.yield_fixture
+def loop(request):
+	loop = asyncio.new_event_loop()
+	asyncio.set_event_loop(None)
 
-class ProcessHelper(asyncio.SubprocessProtocol):
-	def __init__(self, proc, *args, loop=None, **kw):
-		self.proc = proc
-		self.args = args
-		self.kw = kw
-		self.fd = [b'',b'',b'']
-		if loop is None:
-			loop = asyncio.get_event_loop()
-		else:
-			asyncio.set_event_loop(loop)
-			# required for waiting on a process
-		self._loop = loop
+	yield loop
 
-	def pipe_data_received(self,fd,data):
-		self.fd[fd] += data
-	
-	def process_exited(self):
-		if not self.done.done():
-			self.done.set_result(self.transport.get_returncode())
+	loop.stop()
+	loop.run_forever()
+	loop.close()
+	gc.collect()
+	asyncio.set_event_loop(None)
 
-	def connection_lost(self,exc):
-		if self.done.done():
-			return
-		else: # pragma: no cover
-			if exc is None:
-				self.done.set_result(True)
-			else:
-				self.done.set_exception(exc)
+@pytest.mark.tryfirst
+def pytest_pycollect_makeitem(collector, name, obj):
+    if collector.funcnamefilter(name):
+        if not callable(obj):
+            return
+        item = pytest.Function(name, parent=collector)
+        if 'run_loop' in item.keywords:
+            return list(collector._genfunctions(name, obj))
 
-	async def start(self):
-		self.done = asyncio.Future(loop=self._loop)
-		self.transport,_ = await self._loop.subprocess_exec(lambda: self, self.proc,*(str(x) for x in self.args), **self.kw)
-		logger.debug("Started: %s",self.proc)
+@pytest.mark.tryfirst
+def pytest_pyfunc_call(pyfuncitem):
+    """
+    Run asyncio marked test functions in an event loop instead of a normal
+    function call.
+    """
+    if 'run_loop' in pyfuncitem.keywords:
+        funcargs = pyfuncitem.funcargs
+        loop = funcargs['loop']
+        testargs = {arg: funcargs[arg]
+                    for arg in pyfuncitem._fixtureinfo.argnames}
+        loop.run_until_complete(pyfuncitem.obj(**testargs))
+        return True
 
-	def stop(self):
-		self.transport.terminate()
-		return self.wait()
-	stop._is_coroutine = True
-
-	def kill(self):
-		self.transport.kill()
-		return self.wait()
-	kill._is_coroutine = True
-
-	async def wait(self):
-		await self.done
-		return self.done.result()
+def pytest_runtest_setup(item):
+    if 'run_loop' in item.keywords and 'loop' not in item.fixturenames:
+        # inject an event loop fixture for all async tests
+        item.fixturenames.append('loop')
 

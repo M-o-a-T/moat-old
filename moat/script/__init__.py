@@ -304,6 +304,7 @@ class Command(object):
 		self.debug('calling %r.handleOptions(%r)' % (self, self.options))
 		ret = self.handleOptions(self.options)
 		self.debug('called %r.handleOptions, returned %r' % (self, ret))
+
 		if ret:
 			return ret
 

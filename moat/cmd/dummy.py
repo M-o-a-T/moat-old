@@ -44,5 +44,6 @@ This command does not do anything. It is used for testing.
 	def do(self,args):
 		n = 0
 		while n < self.root.verbose:
-			print(self.foo[n])
+			print(self.foo[n], file=self.stdout)
 			n += 1
+		return self.root.verbose # test exit values

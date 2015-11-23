@@ -28,10 +28,12 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import os
 import sys
 from moat.script import Command, CommandError
+from moat.script.run import StdCommand
 from etctree.util import from_etcd
 import aioetcd as etcd
 import asyncio
 import logging
+from time import time
 
 __all__ = ['TestCommand']
 
@@ -50,7 +52,7 @@ Check basic config layout.
 		except KeyError:
 			raise CommandError("config: missing 'config' entry")
 
-class EtcdCommand(Command):
+class EtcdCommand(StdCommand):
 	name = "etcd"
 	summary = "Verify etcd data"""
 	description = """\
@@ -69,19 +71,33 @@ Check etcd access, and basic data layout.
 				raise CommandError("config.etcd: missing '%s' entry" % k)
 		self.root.sync(self._do())
 	
+	async def _do2(self, info):
+		assert info == "Running tests"
+		await asyncio.sleep(0.2,loop=self.root.loop)
+		run_state = await self.run_state()
+
+		t = time()
+		assert run_state['started'] > t-int(os.environ.get('MOAT_IS_SLOW',1)), (run_state['started'],t)
+		pass
+
 	async def _do(self):
-		etcd = await self.root._get_etcd()
+		retval = 0
+		etc = await self.root._get_etcd()
 		log = logging.getLogger("etcd")
 		stats = set(("ok","warn","error","fail"))
-		s = await etcd.tree("/status")
+		s = await etc.tree("/status")
 		if "run" not in s:
 			log.error("missing 'run' entry")
 			if self.parent.fix:
 				await s.set("run",dict())
+			else:
+				retval += 1
 		if "errors" not in s:
 			log.error("missing 'errors' entry")
 			if self.parent.fix:
 				await s.set("errors",dict((s,0) for s in stats))
+			else:
+				retval += 1
 		else:
 			err = s['errors']
 			for stat in stats:
@@ -89,13 +105,24 @@ Check etcd access, and basic data layout.
 					log.error("missing 'errors.%s' entry" % stat)
 					if self.parent.fix:
 						await err.set(stat,0)
+					else:
+						retval += 1
 
 		await s._wait()
+		retval = await self.run(self._do2,"Running tests")
+		run_state = await self.run_state()
+		if 'running' in run_state:
+			raise RuntimeError("Procedure end did not take")
 
-		await self.state("test","warn","Running tests")
-		errs = await etcd.read("/errors")
-		import pdb;pdb.set_trace()
-		pass
+		try:
+			errs = await etc.read("/errors")
+		except etcd.EtcdKeyNotFound:
+			if self.parent.fix:
+				raise RuntimeError("Creating /errors did not take. Duh?")
+		else:
+			import pdb;pdb.set_trace()
+			pass
+		return retval
 
 
 
@@ -150,7 +177,7 @@ Set some data.
 				if self.root.verbose > 1:
 					import traceback
 					traceback.print_exc(file=sys.stderr)
-					return
+					return 9
 				raise CommandError("%s failed: %s" % (c.name,repr(exc)))
 		if self.root.verbose:
 			print("All tests done.")

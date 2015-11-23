@@ -26,9 +26,12 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 """List of known Tasks"""
 
 import os
-import sys
 from moat.script import Command, CommandError
 from etctree.util import from_etcd
+import aioetcd as etcd
+
+import logging
+logger = logging.getLogger(__name__)
 
 __all__ = ['ShowCommand']
 
@@ -47,14 +50,14 @@ With arguments, show only these.
 			done = False
 			for n,a in enumerate(args):
 				if n:
-					print("---")
+					print("---", file=self.stdout)
 				c = self.root.cfg
 				for aa in a.split('.'):
 					c = c[aa]
-				safe_dump(c, stream=sys.stdout)
+				safe_dump(c, stream=self.stdout)
 
 		else:
-			safe_dump(self.root.cfg, stream=sys.stdout)
+			safe_dump(self.root.cfg, stream=self.stdout)
 
 class EtcdCommand(Command):
 	name = "etcd"
@@ -69,22 +72,41 @@ With arguments, show only these subtrees.
 		self.parser.add_option('-d','--dump',
             action="store_true", dest="dump",
             help="show internal details")
+		self.parser.add_option('-m','--modstamp',
+            action="store_true", dest="mod",
+            help="return the entry's modification number")
 
 	def handleOptions(self,opts):
 		self.dump = opts.dump
+		self.mod = opts.mod
 
 	def do(self,args):
 		from yaml import safe_dump
+		retval = 0
+		etc = self.root.sync(self.root._get_etcd())
 		if args:
 			done = False
 			for n,a in enumerate(args):
 				if n:
-					print("---")
+					print("---", file=self.stdout)
 				a = a.replace('.','/')
-				safe_dump(self.root.sync(from_etcd(self.root.etcd,'/'+a, dump=self.dump)), stream=sys.stdout)
+				try:
+					if self.mod:
+						res = self.root.sync(etc.get('/'+a))
+						print(res.modifiedIndex, file=self.stdout)
+					else:
+						safe_dump(self.root.sync(from_etcd(etc,'/'+a, dump=self.dump)), stream=self.stdout)
+				except etcd.EtcdKeyNotFound:
+					logger.error("key not present: %s",a)
+					retval = 1
 
 		else:
-			safe_dump(self.root.sync(from_etcd(self.root.etcd, '/', dump=self.dump)), stream=sys.stdout)
+			if self.mod:
+				res = self.root.sync(etc.get('/'))
+				print(res.modifiedIndex, file=self.stdout)
+			else:
+				safe_dump(self.root.sync(from_etcd(etc, '/', dump=self.dump)), stream=self.stdout)
+		return retval
 
 class ShowCommand(Command):
 	name = "show"

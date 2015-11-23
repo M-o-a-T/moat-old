@@ -29,11 +29,14 @@ import os
 from dabroker.util import import_string
 from ..script import Command
 
+import logging
+logger = logging.getLogger(__name__)
+
 def commands():
 	for m in __path__:
 		for p in os.listdir(m):
 			if p[0] == '.':
-				continue
+				continue # pragma: no cover
 			if p[0] == '_':
 				continue
 			if p.endswith('.py') or '.' not in p:
@@ -42,7 +45,8 @@ def commands():
 				try:
 					m = import_string(__name__+'.'+p)
 				except ImportError:
-					pass
+					logger.exception("Trying to import "+__name__+'.'+p) # pragma: no cover
+					# not going to ship a broken file for testing this
 				else:
 					try:
 						syms = (getattr(m,s,None) for s in m.__all__)

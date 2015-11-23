@@ -25,38 +25,66 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 
 from . import Command
 import asyncio
+from time import time
 
 class StdCommand(Command):
-	async def run(self, cmd):
+	
+	_run_state = None
+	async def run_state(self):
+		if self._run_state is None:
+			from etctree.node import mtFloat
+			from etctree.etcd import EtcTypes
+			types = EtcTypes()
+			types.register('started', cls=mtFloat)
+			types.register('stopped', cls=mtFloat)
+			types.register('running', cls=mtFloat)
+			self._run_state = await self.root.etcd.tree("/status/run/%s/%s"%(self.root.app,self.fullname), immediate=True, types=types)
+		return self._run_state
+
+	async def run(self, cmd, *a, _ttl=None,_refresh=None, **k):
+		"""\
+			This is MoaT's standard task runner.
+			It takes care of noting the task's state in etcd and will kill
+			the task if there's a conflict.
+			"""
 		r = self.root
-		ttl = float(self.root.cfg['config']['run']['ttl'])
-		refresh = float(self.root.cfg['config']['run']['refresh'])
-		run_state = await r.etcd.tree("/status/run/%s/%s", r.app,self.fullname, immediate=True)
+		await r.setup()
+		ttl = _ttl if _ttl is not None else int(self.root.cfg['config']['run']['ttl'])
+		refresh = _refresh if _refresh is not None else float(self.root.cfg['config']['run']['refresh'])
+		run_state = await self.run_state()
+
+		if 'running' in run_state:
+			raise RuntimeError("Run marker already exists")
+		cseq = await run_state.set("running",time(),ttl=ttl)
+		await run_state.set("started",time())
+		await run_state._wait()
 
 		async def updater():
-			await run_state.set("started",time())
-			try:
-				while True:
-					await run_state.set("running",time(),ttl=ttl)
-					await run_state._wait()
-					await asyncio.sleep(ttl/refresh, loop=r.loop)
-			finally:
-				await run_state.delete("running")
-				await run_state._wait()
+			while True:
+				if 'running' not in run_state or run_state._get('running')._cseq != cseq:
+					raise RuntimeError("Run marker has been deleted")
+				await run_state.set("running",time(),ttl=ttl)
+				await asyncio.sleep(ttl/(refresh+0.1), loop=r.loop)
 				
-
-		run_task = asyncio.async(self._updater(), loop=r.loop)
-		main_task = asyncio.async(cmd, loop=r.loop)
-		await asyncio.wait((main_task,run_task), loop=r.loop, return_when=asyncio.FIRST_COMPLETED)
+		run_task = asyncio.ensure_future(updater(), loop=r.loop)
+		main_task = asyncio.ensure_future(cmd(*a,**k), loop=r.loop)
+		d,p = await asyncio.wait((main_task,run_task), loop=r.loop, return_when=asyncio.FIRST_COMPLETED)
 		if run_task.done():
 			if not main_task.done():
 				main_task.cancel()
+				try: await main_task
+				except Exception: pass
 		else:
 			assert main_task.done()
 			run_task.cancel()
+			try: await run_task
+			except Exception: pass
+
 		if main_task.cancelled():
 			await run_state.set("state","fail")
 			await run_state.set("message",str(run_task.exception()))
+			run_task.result()
+			assert False,"the previous line should have raised an error"
 		else:
 			try:
 				res = main_task.result()
@@ -65,6 +93,12 @@ class StdCommand(Command):
 			except Exception as exc:
 				await run_state.set("state","error")
 				await run_state.set("message",str(exc))
+				try: await run_state.delete("running")
+				except Exception: pass
+				await run_state._wait()
 				raise
 		await run_state.set("stopped",time())
+		try: await run_state.delete("running")
+		except Exception: pass
+		await run_state._wait()
 
