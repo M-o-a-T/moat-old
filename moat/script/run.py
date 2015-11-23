@@ -26,6 +26,10 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 from . import Command
 import asyncio
 from time import time
+import etcd
+
+import logging
+logger = logging.getLogger(__name__)
 
 class StdCommand(Command):
 	
@@ -47,58 +51,68 @@ class StdCommand(Command):
 			It takes care of noting the task's state in etcd and will kill
 			the task if there's a conflict.
 			"""
+		logger.debug("Starting %s/%s",self.root.app,self.fullname)
 		r = self.root
 		await r.setup()
 		ttl = _ttl if _ttl is not None else int(self.root.cfg['config']['run']['ttl'])
 		refresh = _refresh if _refresh is not None else float(self.root.cfg['config']['run']['refresh'])
 		run_state = await self.run_state()
 
-		if 'running' in run_state:
+		try:
+			if 'running' in run_state:
+				raise etcd.EtcdAlreadyExist
+			cseq = await run_state.set("running",time(),ttl=ttl)
+		except etcd.EtcdAlreadyExist:
 			raise RuntimeError("Run marker already exists")
-		cseq = await run_state.set("running",time(),ttl=ttl)
 		await run_state.set("started",time())
 		await run_state._wait()
 
 		async def updater():
 			while True:
+				logger.debug("Run marker check %s/%s",self.root.app,self.fullname)
 				if 'running' not in run_state or run_state._get('running')._cseq != cseq:
+					logger.warn("Run marker deleted %s/%s",self.root.app,self.fullname)
 					raise RuntimeError("Run marker has been deleted")
 				await run_state.set("running",time(),ttl=ttl)
+				logger.debug("Run marker refreshed %s/%s",self.root.app,self.fullname)
 				await asyncio.sleep(ttl/(refresh+0.1), loop=r.loop)
 				
 		run_task = asyncio.ensure_future(updater(), loop=r.loop)
 		main_task = asyncio.ensure_future(cmd(*a,**k), loop=r.loop)
-		d,p = await asyncio.wait((main_task,run_task), loop=r.loop, return_when=asyncio.FIRST_COMPLETED)
-		if run_task.done():
-			if not main_task.done():
-				main_task.cancel()
-				try: await main_task
+		try:
+			d,p = await asyncio.wait((main_task,run_task), loop=r.loop, return_when=asyncio.FIRST_COMPLETED)
+			logger.debug("Ended %s/%s :: %s :: %s",self.root.app,self.fullname, repr(d),repr(p))
+			if run_task.done():
+				if not main_task.done():
+					main_task.cancel()
+					try: await main_task
+					except Exception: pass
+			else:
+				assert main_task.done()
+				run_task.cancel()
+				try: await run_task
 				except Exception: pass
-		else:
-			assert main_task.done()
-			run_task.cancel()
-			try: await run_task
-			except Exception: pass
 
-		if main_task.cancelled():
-			await run_state.set("state","fail")
-			await run_state.set("message",str(run_task.exception()))
-			run_task.result()
-			assert False,"the previous line should have raised an error"
-		else:
-			try:
-				res = main_task.result()
-				await run_state.set("state","ok")
-				await run_state.set("message",str(res))
-			except Exception as exc:
-				await run_state.set("state","error")
-				await run_state.set("message",str(exc))
-				try: await run_state.delete("running")
-				except Exception: pass
-				await run_state._wait()
-				raise
-		await run_state.set("stopped",time())
-		try: await run_state.delete("running")
-		except Exception: pass
-		await run_state._wait()
+			if main_task.cancelled():
+				await run_state.set("state","fail")
+				await run_state.set("message",str(run_task.exception()))
+				run_task.result()
+				assert False,"the previous line should have raised an error" # pragma: no cover
+			else:
+				try:
+					res = main_task.result()
+				except Exception as exc:
+					await run_state.set("state","error")
+					await run_state.set("message",str(exc))
+					raise
+				else:
+					await run_state.set("state","ok")
+					await run_state.set("message",str(res))
+			try: await run_state.delete("running")
+			except Exception: pass # pragma: no cover
+		finally:
+			await run_state.set("stopped",time())
+			try: await run_state.delete("running")
+			except Exception: pass # pragma: no cover
+			await run_state._wait()
 

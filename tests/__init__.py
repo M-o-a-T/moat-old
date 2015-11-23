@@ -73,7 +73,7 @@ class ProcessHelper(asyncio.SubprocessProtocol):
 	
 	def process_exited(self):
 		if not self.done.done():
-			self.done.set_result(self.transport.get_returncode())
+			self.done.set_result(self.get_returncode())
 
 	def connection_lost(self,exc):
 		if self.done.done():

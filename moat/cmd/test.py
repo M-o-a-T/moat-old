@@ -32,8 +32,10 @@ from moat.script.run import StdCommand
 from etctree.util import from_etcd
 import aioetcd as etcd
 import asyncio
-import logging
 from time import time
+
+import logging
+logger = logging.getLogger(__name__)
 
 __all__ = ['TestCommand']
 
@@ -72,13 +74,38 @@ Check etcd access, and basic data layout.
 		self.root.sync(self._do())
 	
 	async def _do2(self, info):
+		logger.debug("start: _do2")
 		assert info == "Running tests"
 		await asyncio.sleep(0.2,loop=self.root.loop)
 		run_state = await self.run_state()
 
 		t = time()
 		assert run_state['started'] > t-int(os.environ.get('MOAT_IS_SLOW',1)), (run_state['started'],t)
-		pass
+
+	async def _do3(self):
+		logger.debug("start: _do3")
+		await asyncio.sleep(0.2,loop=self.root.loop)
+		run_state = await self.run_state()
+		raise RuntimeError("Dying")
+
+	async def _do4(self):
+		logger.debug("start: _do4")
+		run_state = await self.run_state()
+		async def _do4_():
+			await asyncio.sleep(0.2,loop=self.root.loop)
+			logger.debug("kill: _do4")
+			await self.root.etcd.delete("/status/run/%s/%s/running"%(self.root.app,self.fullname))
+		f = asyncio.ensure_future(_do4_(),loop=self.root.loop)
+		try:
+			logger.debug("sleep: _do4")
+			await asyncio.sleep(2.0,loop=self.root.loop)
+			raise RuntimeError("Did not get killed")
+		finally:
+			logger.debug("stop: _do4 %s",f)
+			if not f.done():
+				f.cancel()
+			try: await f
+			except Exception: pass
 
 	async def _do(self):
 		retval = 0
@@ -109,10 +136,47 @@ Check etcd access, and basic data layout.
 						retval += 1
 
 		await s._wait()
-		retval = await self.run(self._do2,"Running tests")
+		try:
+			retval = await self.run(self._do3)
+		except RuntimeError:
+			pass
+		else:
+			raise RuntimeError("Error did not propagate")
+		run_state = await self.run_state()
+		if 'running' in run_state:
+			raise RuntimeError("Procedure end 2 did not take")
+		await s._wait()
+		assert run_state['stopped'] > run_state['started']
+		assert run_state['state'] == "error"
+
+		try:
+			retval = await self.run(self._do4)
+		except RuntimeError:
+			pass
+		else:
+			raise RuntimeError("CancelledError did not propagate")
+		run_state = await self.run_state()
+		if 'running' in run_state:
+			raise RuntimeError("Procedure end 2 did not take")
+		await s._wait()
+		assert run_state['stopped'] > run_state['started']
+		assert run_state['state'] == "fail"
+
+		f = asyncio.ensure_future(self.run(self._do2,"Running tests"), loop=self.root.loop)
+		await asyncio.sleep(0.1,loop=self.root.loop)
+		try:
+			await self.run(self._do2,"Running tests", loop=self.root.loop)
+		except RuntimeError as exc:
+			assert exc.args[0] == "Run marker already exists"
+		else:
+			assert false,"Dup run didn't"
+		retval = await f
 		run_state = await self.run_state()
 		if 'running' in run_state:
 			raise RuntimeError("Procedure end did not take")
+		await s._wait()
+		assert run_state['stopped'] > run_state['started']
+		assert run_state['state'] == "ok"
 
 		try:
 			errs = await etc.read("/errors")
