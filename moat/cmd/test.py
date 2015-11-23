@@ -32,7 +32,7 @@ from moat.script.run import StdCommand
 from etctree.util import from_etcd
 import aioetcd as etcd
 import asyncio
-from time import time
+import time
 
 import logging
 logger = logging.getLogger(__name__)
@@ -79,7 +79,7 @@ Check etcd access, and basic data layout.
 		await asyncio.sleep(0.2,loop=self.root.loop)
 		run_state = await self.run_state()
 
-		t = time()
+		t = time.time()
 		assert run_state['started'] > t-int(os.environ.get('MOAT_IS_SLOW',1)), (run_state['started'],t)
 
 	async def _do3(self):
@@ -183,8 +183,8 @@ Check etcd access, and basic data layout.
 		except etcd.EtcdKeyNotFound:
 			if self.parent.fix:
 				raise RuntimeError("Creating /errors did not take. Duh?")
+			# otherwise it's not there and there's nothing to do
 		else:
-			import pdb;pdb.set_trace()
 			pass
 		return retval
 
@@ -192,7 +192,7 @@ Check etcd access, and basic data layout.
 
 class AmqpCommand(Command):
 	name = "amqp"
-	summary = "Verify amqp data"""
+	summary = "Verify amqp data"
 	description = """\
 Check amqp access, and basic queue layout.
 
@@ -204,6 +204,25 @@ exchanges and queues.
 	def do(self,args):
 		pass
 
+class KillCommand(Command):
+	name = "Kill"
+	description = """\
+Kill off all data.
+
+Only when testing!
+"""
+
+	def do(self,args):
+		if not self.root.cfg['config'].get('testing',False) or \
+		   len(args) != 2 or " ".join(args) != "me hardeR":
+			raise CommandError("You're insane.")
+		etc = self.root.sync(self.root._get_etcd())
+		self.log.fatal("Erasing your etcd data in three seconds.")
+		time.sleep(3)
+		self.root.sync(etc.delete("/",recursive=True))
+		self.log.warn("All gone.")
+		return
+
 class TestCommand(Command):
 	name = "test"
 	summary = "Run various tests"""
@@ -213,6 +232,7 @@ Set some data.
 
 	# process in order
 	subCommandClasses = [
+		KillCommand,
 		ConfigCommand,
 		EtcdCommand,
 		AmqpCommand,
@@ -230,6 +250,9 @@ Set some data.
 	def do(self,args):
 		if self.root.cfg['config'].get('testing',False):
 			print("NOTE: this is a test configuration.", file=sys.stderr)
+		else:
+			print("WARNING: this is NOT a test.", file=sys.stderr)
+			time.sleep(3)
 
 		for c in self.subCommandClasses:
 			if self.root.verbose > 1:
@@ -237,7 +260,7 @@ Set some data.
 			c = c(parent=self)
 			try:
 				c.do(args)
-			except Exception as exc:
+			except Exception as exc: # pragma: no cover
 				if self.root.verbose > 1:
 					import traceback
 					traceback.print_exc(file=sys.stderr)

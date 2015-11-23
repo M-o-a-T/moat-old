@@ -30,6 +30,7 @@ from moat.script import Command as _Command
 
 class Command(_Command):
 	name = "dummy"
+	usage = "[no options] %command"
 	aliases = ['dumy','dummmy']
 	summary = "A command that does not do anything"
 	description = """\

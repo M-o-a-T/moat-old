@@ -62,13 +62,35 @@ class MoatTest(Moat):
 	def assert_stdout(self,s):
 		assert s == self.stdout_data
 
-def test_cmd(loop):
+def test_test(loop):
+	m = MoatTest(loop=loop)
+	r = m.parse("-vvvc test.cfg test Kill me hardeR")
+	assert r == 0
+
+	m = MoatTest(loop=loop)
+	r = m.parse("-vvvc test.cfg test")
+	assert r > 0
+
+	m = MoatTest(loop=loop)
+	r = m.parse("-vvvc test.cfg test -f")
+	assert r == 0
+
 	m = MoatTest(loop=loop)
 	r = m.parse("-vvvc test.cfg test")
 	assert r == 0
 
 def test_dummy(loop):
 	from moat.cmd.dummy import Command as C
+
+	m = MoatTest(loop=loop)
+	r = m.parse("")
+	assert r == 1
+
+	m = MoatTest(loop=loop)
+	r = m.parse("dummy --help")
+	assert not r
+	assert m.in_stdout("\nAliases:")
+	assert m.in_stdout("dummmy")
 
 	m = MoatTest(loop=loop)
 	r = m.parse("dummy foo")

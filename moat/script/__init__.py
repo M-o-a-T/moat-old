@@ -66,7 +66,7 @@ class CommandHelpFormatter(optparse.IndentedHelpFormatter):
 		if self._commands:
 			commandDesc = []
 			commandDesc.append("Commands:")
-			keys = sorted(self._commands.keys())
+			keys = sorted(k for k,v in self._commands.items() if v is not None)
 			length = 0
 			for key in keys:
 				if len(key) > length:
@@ -124,7 +124,7 @@ class CommandOptionParser(optparse.OptionParser):
 
 	def exit(self, status=0, msg=None):
 		if msg:
-			sys.stderr.write(msg)
+			sys.stderr.write(msg) # pragma: no cover ## called by the parser
 
 		return status
 
@@ -153,7 +153,7 @@ class Command(object):
 	name = None
 	aliases = None
 	usage = None
-	summary = "… you forgot to set the 'summary' attribute."
+	summary = None # hidden command # "… you forgot to set the 'summary' attribute."
 	description = "… you forgot to set the 'description' attribute."
 	parent = None
 	subCommands = None
@@ -204,8 +204,8 @@ class Command(object):
 						"for help formatting" % repr(self))
 
 			for name, command in self.subCommands.items():
-				formatter.addCommand(name, command.summary or
-					command.description)
+				if command.summary:
+					formatter.addCommand(name, command.summary)
 
 		if self.aliases:
 			for alias in self.aliases:
@@ -228,7 +228,7 @@ class Command(object):
 			if self.subCommands:
 				usage = usage.split("%command")[0] + '[command]'
 				usages = [usage, ]
-			else:
+			else: 
 				# %command used in a leaf command
 				usages = usage.split("%command")
 				usages.reverse()
@@ -303,7 +303,7 @@ class Command(object):
 		self.log.debug('called %r.handleOptions, returned %r' % (self, ret))
 
 		if ret:
-			return ret
+			return ret # pragma: no cover ## if necessary, we raise
 
 		# if we don't have args or don't have subcommands,
 		# defer to our do() method
@@ -336,14 +336,8 @@ class Command(object):
 
 			return ret
 
-		# if we do have subcommands, defer to them
-		try:
-			command = args[0]
-		except IndexError:
-			self.parser.print_usage(file=self.stderr)
-			self.stderr.write(
-				"Use --help to get a list of commands.\n")
-			return 1
+		# as we have a subcommand, defer to it
+		command = args[0]
 
 		C = self.subCommands.get(command,None)
 		if C is None:
@@ -424,100 +418,100 @@ class CommandError(CommandExited):
 		CommandExited.__init__(self, 3, output)
 
 
-def commandToCmdClass(command):
-	"""
-	@type  command: L{Command}
-
-	Take a Command instance and create a L{cmd.Cmd} class from it that
-	implements a command line interpreter, using the commands under the given
-	Command instance as its subcommands.
-
-	Example use in a command:
-
-	>>> def do(self, args):
-	...	 cmd = command.commandToCmdClass(self)()
-	...	 cmd.prompt = 'prompt> '
-	...	 while not cmd.exited:
-	...		 cmd.cmdloop()
-
-	@rtype: L{cmd.Cmd}
-	"""
-	import cmd
-
-	# internal class to subclass cmd.Cmd with a Ctrl-D handler
-
-	class _CommandWrappingCmd(cmd.Cmd):
-		prompt = '(command) '
-		exited = False
-		command = None # the original Command subclass
-
-		def __repr__(self):
-			return "<_CommandWrappingCmd for Command %r>" % self.command
-
-		def do_EOF(self, args):
-			self.stdout.write('\n')
-			self.exited = True
-			sys.exit(0)
-
-		def do_exit(self, args):
-			self.exited = True
-			sys.exit(0)
-
-		def help_EOF(self):
-			print('Exit.')
-
-		def help_exit(self):
-			print('Exit.')
-
-	# populate the Cmd interpreter from our command class
-	cmdClass = _CommandWrappingCmd
-	cmdClass.command = command
-
-	for name, subCommand in command.subCommands.items() \
-		+ command.aliasedSubCommands.items():
-		if name == 'shell':
-			continue
-		command.debug('Adding shell command %s for %r' % (name, subCommand))
-
-		# add do command
-		methodName = 'do_' + name
-
-		def generateDo(c):
-
-			def do_(s, line):
-				# line is coming from a terminal; usually it is a utf-8 encoded
-				# string.
-				# Instead of making every Command subclass implement do with
-				# unicode decoding, we do it here.
-				line = line.decode('utf-8')
-				# the do_ method is passed a single argument consisting of
-				# the remainder of the line
-				args = line.split(' ')
-				command.debug('Asking %r to parse %r' % (c, args))
-				return c.parse(args)
-			return do_
-
-		method = generateDo(subCommand)
-		setattr(cmdClass, methodName, method)
-
-
-		# add help command
-		methodName = 'help_' + name
-
-		def generateHelp(c):
-
-			def help_(s):
-				command.parser.print_help(file=s.stdout)
-			return help_
-
-		method = generateHelp(subCommand)
-		setattr(cmdClass, methodName, method)
-
-	return cmdClass
-
-
-def commandToCmd(command):
-	# for compatibility reasons
-	return commandToCmdClass(command)()
-
-
+#def commandToCmdClass(command):
+#	"""
+#	@type  command: L{Command}
+#
+#	Take a Command instance and create a L{cmd.Cmd} class from it that
+#	implements a command line interpreter, using the commands under the given
+#	Command instance as its subcommands.
+#
+#	Example use in a command:
+#
+#	>>> def do(self, args):
+#	...	 cmd = command.commandToCmdClass(self)()
+#	...	 cmd.prompt = 'prompt> '
+#	...	 while not cmd.exited:
+#	...		 cmd.cmdloop()
+#
+#	@rtype: L{cmd.Cmd}
+#	"""
+#	import cmd
+#
+#	# internal class to subclass cmd.Cmd with a Ctrl-D handler
+#
+#	class _CommandWrappingCmd(cmd.Cmd):
+#		prompt = '(command) '
+#		exited = False
+#		command = None # the original Command subclass
+#
+#		def __repr__(self):
+#			return "<_CommandWrappingCmd for Command %r>" % self.command
+#
+#		def do_EOF(self, args):
+#			self.stdout.write('\n')
+#			self.exited = True
+#			sys.exit(0)
+#
+#		def do_exit(self, args):
+#			self.exited = True
+#			sys.exit(0)
+#
+#		def help_EOF(self):
+#			print('Exit.')
+#
+#		def help_exit(self):
+#			print('Exit.')
+#
+#	# populate the Cmd interpreter from our command class
+#	cmdClass = _CommandWrappingCmd
+#	cmdClass.command = command
+#
+#	for name, subCommand in command.subCommands.items() \
+#		+ command.aliasedSubCommands.items():
+#		if name == 'shell':
+#			continue
+#		command.debug('Adding shell command %s for %r' % (name, subCommand))
+#
+#		# add do command
+#		methodName = 'do_' + name
+#
+#		def generateDo(c):
+#
+#			def do_(s, line):
+#				# line is coming from a terminal; usually it is a utf-8 encoded
+#				# string.
+#				# Instead of making every Command subclass implement do with
+#				# unicode decoding, we do it here.
+#				line = line.decode('utf-8')
+#				# the do_ method is passed a single argument consisting of
+#				# the remainder of the line
+#				args = line.split(' ')
+#				command.debug('Asking %r to parse %r' % (c, args))
+#				return c.parse(args)
+#			return do_
+#
+#		method = generateDo(subCommand)
+#		setattr(cmdClass, methodName, method)
+#
+#
+#		# add help command
+#		methodName = 'help_' + name
+#
+#		def generateHelp(c):
+#
+#			def help_(s):
+#				command.parser.print_help(file=s.stdout)
+#			return help_
+#
+#		method = generateHelp(subCommand)
+#		setattr(cmdClass, methodName, method)
+#
+#	return cmdClass
+#
+#
+#def commandToCmd(command):
+#	# for compatibility reasons
+#	return commandToCmdClass(command)()
+#
+#
