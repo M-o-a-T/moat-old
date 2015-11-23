@@ -105,7 +105,8 @@ You can load more than one config file.
 		cmd = asyncio.ensure_future(cmd, loop=self.loop)
 		return self.loop.run_until_complete(cmd)
 		
-	def handleOptions(self, opts):
+	def handleOptions(self):
+		opts = self.options
 		self.verbose = opts.verbose
 
 		logging.basicConfig(stream=sys.stderr,level=(logging.CRITICAL,logging.WARNING,logging.INFO,logging.DEBUG)[min(self.verbose,3)])

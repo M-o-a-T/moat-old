@@ -224,8 +224,8 @@ Set some data.
             action="store_true", dest="fix",
             help="try to fix problems")
 
-	def handleOptions(self,opts):
-		self.fix = opts.fix
+	def handleOptions(self):
+		self.fix = self.options.fix
 	
 	def do(self,args):
 		if self.root.cfg['config'].get('testing',False):

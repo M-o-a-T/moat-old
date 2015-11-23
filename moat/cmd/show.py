@@ -77,9 +77,9 @@ With arguments, show only these subtrees.
             action="store_true", dest="mod",
             help="return the entry's modification number")
 
-	def handleOptions(self,opts):
-		self.dump = opts.dump
-		self.mod = opts.mod
+	def handleOptions(self):
+		self.dump = self.options.dump
+		self.mod = self.options.mod
 
 	def do(self,args):
 		from yaml import safe_dump

@@ -298,10 +298,8 @@ class Command(object):
 		if self.parser.usage_printed or self.parser.help_printed:
 			return None
 
-		# FIXME: make handleOptions not take options, since we store it
-		# in self.options now
 		self.log.debug('calling %r.handleOptions(%r)' % (self, self.options))
-		ret = self.handleOptions(self.options)
+		ret = self.handleOptions()
 		self.log.debug('called %r.handleOptions, returned %r' % (self, ret))
 
 		if ret:
@@ -358,7 +356,7 @@ class Command(object):
 		self.parser.print_usage(file=self.stderr)
 		return 1
 
-	def handleOptions(self, options):
+	def handleOptions(self):
 		"""
 		Handle the parsed options.
 		"""

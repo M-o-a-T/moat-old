@@ -59,9 +59,11 @@ If you want to modify an entry, the '-m' or '-p' option is mandatory.
             action="store", dest="previous",
             help="Previous value of current entry.")
 
-	def handleOptions(self,opts):
+	def handleOptions(self):
+		opts = self.options
 		if (opts.delete or opts.modified or opts.previous) and opts.append:
 			raise CommandError("Conflicting arguments")
+		opts = self.options
 		self.delete = opts.delete
 		self.modified = opts.modified
 		self.previous = opts.previous
