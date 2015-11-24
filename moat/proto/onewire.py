@@ -77,13 +77,13 @@ class OnewireProtocol(Protocol):
 				if offset & 32768: offset = 0
 
 				if version != 0:
-					raise RuntimeError("Wrong version: %d" % version)
-				if payload_len == -1 and data_len == 0 and offset == 0:
+					raise RuntimeError("Wrong version: %d" % version) # pragma: no cover
+				if payload_len == -1 and data_len == 0 and offset == 0: # pragma: no cover
 					logger.debug("RECV … server busy")
 					continue # server busy
 
 				if payload_len > self.MAX_LENGTH:
-					raise RuntimeError("Length exceeded: %d %d %d"%(payload_len,offset,data_len))
+					raise RuntimeError("Length exceeded: %d %d %d"%(payload_len,offset,data_len)) # pragma: no cover
 
 				self.offset = offset
 				if payload_len:
@@ -136,7 +136,7 @@ class OnewireDir(OnewireInteraction):
 		assert type == 0
 		for entry in msg.decode('utf-8').split(","):
 			try: entry = entry[entry.rindex('/')+1:]
-			except ValueError: pass
+			except ValueError: pass # pragma: no cover
 			entry = entry.rstrip("\0")
 			files.append(entry)
 		return files
@@ -146,7 +146,7 @@ class OnewireRead(OnewireInteraction):
 		self.send(OWMsg.get, self.path(path), 8192)
 		res,msg = await self.recv()
 		if res < 0:
-			raise OnewireError(path,res)
+			raise OnewireError(path,res) # pragma: no cover
 		## TODO res vs. len(msg)?
 		return msg.decode('utf-8')
 
@@ -159,6 +159,6 @@ class OnewireWrite(OnewireInteraction):
 		self.send(OWMsg.get, self.path(path)+str(data).encode('utf-8'), len(data))
 		res,msg = await self.recv()
 		if res != len(data):
-			raise OnewireError(path,res)
+			raise OnewireError(path,res) # pragma: no cover
 
 
