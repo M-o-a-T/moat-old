@@ -23,15 +23,30 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##  Thus, do not remove the next line, or insert any blank lines above.
 ##BP
 
-"""List of known Tasks"""
+"""Utilities for scripting"""
 
-import os
-from dabroker.util import import_string
-from ..script import Command
-from ..script.util import objects
+from importlib import import_module
+import pkgutil
 
 import logging
 logger = logging.getLogger(__name__)
 
-def commands():
-	return objects(__name__, Command)
+def objects(module, cls):
+	if isinstance(module,str):
+		import sys
+		module = sys.modules[module]
+	for a,b,c in pkgutil.walk_packages(module.__path__, module.__name__+'.'):
+		try:
+			m = import_module(b)
+		except ImportError:
+			logger.exception("Trying to import "+__name__+'.'+p) # pragma: no cover
+			# not going to ship a broken file for testing this
+		else:
+			try:
+				syms = (getattr(m,s,None) for s in m.__all__)
+			except AttributeError:
+				syms = m.__dict__.values()
+			for c in syms:
+				if isinstance(c,type) and c is not cls and issubclass(c,cls):
+					yield c
+			
