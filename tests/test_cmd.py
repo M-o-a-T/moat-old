@@ -64,6 +64,18 @@ class MoatTest(Moat):
 
 def test_test(loop):
 	m = MoatTest(loop=loop)
+	r = m.parse("-vvvc tests/empty.cfg test config")
+	assert r == 0 # internal defaults
+
+	m = MoatTest(loop=loop)
+	r = m.parse("-vvvc tests/empty.cfg test etcd")
+	assert r > 0
+
+	m = MoatTest(loop=loop)
+	r = m.parse("-vvvc test.cfg test Kill me hardeL")
+	assert r == 3
+
+	m = MoatTest(loop=loop)
 	r = m.parse("-vvvc test.cfg test Kill me hardeR")
 	assert r == 0
 

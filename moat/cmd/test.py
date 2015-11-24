@@ -23,7 +23,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##  Thus, do not remove the next line, or insert any blank lines above.
 ##BP
 
-"""List of known Tasks"""
+"""Run tests, which incidentally also sets up the system if you use '-f'."""
 
 import os
 import sys
@@ -51,7 +51,7 @@ Check basic config layout.
 		c = self.root.cfg
 		try:
 			c = c['config']
-		except KeyError:
+		except KeyError: # pragma: no cover
 			raise CommandError("config: missing 'config' entry")
 
 class EtcdCommand(StdCommand):
@@ -70,9 +70,9 @@ Check etcd access, and basic data layout.
 			raise CommandError("config: missing 'etcd' section")
 		for k in ('host','port','root'):
 			if k not in c:
-				raise CommandError("config.etcd: missing '%s' entry" % k)
-		self.root.sync(self._do())
-	
+				raise CommandError("config.etcd: missing '%s' entry" % k) # pragma: no cover
+		return self.root.sync(self._do())
+
 	async def _do2(self, info):
 		logger.debug("start: _do2")
 		assert info == "Running tests"
@@ -99,13 +99,13 @@ Check etcd access, and basic data layout.
 		try:
 			logger.debug("sleep: _do4")
 			await asyncio.sleep(2.0,loop=self.root.loop)
-			raise RuntimeError("Did not get killed")
+			raise RuntimeError("Did not get killed") # pragma: no cover
 		finally:
 			logger.debug("stop: _do4 %s",f)
 			if not f.done():
-				f.cancel()
+				f.cancel() # pragma: no cover
 			try: await f
-			except Exception: pass
+			except Exception: pass # pragma: no cover
 
 	async def _do(self):
 		retval = 0
@@ -116,7 +116,7 @@ Check etcd access, and basic data layout.
 		if "run" not in s:
 			log.error("missing 'run' entry")
 			if self.parent.fix:
-				await s.set("run",dict())
+				await s.set("run",dict()) # pragma: no cover
 			else:
 				retval += 1
 		if "errors" not in s:
@@ -125,7 +125,7 @@ Check etcd access, and basic data layout.
 				await s.set("errors",dict((s,0) for s in stats))
 			else:
 				retval += 1
-		else:
+		if "errors" in s:
 			err = s['errors']
 			for stat in stats:
 				if stat not in err:
@@ -137,27 +137,27 @@ Check etcd access, and basic data layout.
 
 		await s._wait()
 		try:
-			retval = await self.run(self._do3)
+			await self.run(self._do3)
 		except RuntimeError:
 			pass
 		else:
-			raise RuntimeError("Error did not propagate")
+			raise RuntimeError("Error did not propagate") # pragma: no cover
 		run_state = await self.run_state()
 		if 'running' in run_state:
-			raise RuntimeError("Procedure end 2 did not take")
+			raise RuntimeError("Procedure end 2 did not take") # pragma: no cover
 		await s._wait()
 		assert run_state['stopped'] > run_state['started']
 		assert run_state['state'] == "error"
 
 		try:
-			retval = await self.run(self._do4)
+			await self.run(self._do4)
 		except RuntimeError:
 			pass
 		else:
-			raise RuntimeError("CancelledError did not propagate")
+			raise RuntimeError("CancelledError did not propagate") # pragma: no cover
 		run_state = await self.run_state()
 		if 'running' in run_state:
-			raise RuntimeError("Procedure end 2 did not take")
+			raise RuntimeError("Procedure end 2 did not take") # pragma: no cover
 		await s._wait()
 		assert run_state['stopped'] > run_state['started']
 		assert run_state['state'] == "fail"
@@ -169,26 +169,25 @@ Check etcd access, and basic data layout.
 		except RuntimeError as exc:
 			assert exc.args[0] == "Run marker already exists"
 		else:
-			assert false,"Dup run didn't"
-		retval = await f
+			assert false,"Dup run didn't" # pragma: no cover
+		await f
 		run_state = await self.run_state()
 		if 'running' in run_state:
-			raise RuntimeError("Procedure end did not take")
+			raise RuntimeError("Procedure end did not take") # pragma: no cover
 		await s._wait()
 		assert run_state['stopped'] > run_state['started']
 		assert run_state['state'] == "ok"
 
 		try:
-			errs = await etc.read("/errors")
+			errs = await etc.read("/status/errors")
 		except etcd.EtcdKeyNotFound:
 			if self.parent.fix:
-				raise RuntimeError("Creating /errors did not take. Duh?")
+				raise RuntimeError("Creating /errors did not take. Duh?") # pragma: no cover ## hopefully
 			# otherwise it's not there and there's nothing to do
 		else:
 			pass
+
 		return retval
-
-
 
 class AmqpCommand(Command):
 	name = "amqp"
@@ -246,20 +245,23 @@ Set some data.
 
 	def handleOptions(self):
 		self.fix = self.options.fix
-	
+
 	def do(self,args):
 		if self.root.cfg['config'].get('testing',False):
 			print("NOTE: this is a test configuration.", file=sys.stderr)
-		else:
+		else: # pragma: no cover ## not doing the real thing here
 			print("WARNING: this is NOT a test.", file=sys.stderr)
 			time.sleep(3)
 
+		res = 0
 		for c in self.subCommandClasses:
+			if c.summary is None:
+				continue
 			if self.root.verbose > 1:
 				print("Checking:",c.name)
 			c = c(parent=self)
 			try:
-				c.do(args)
+				res |= (c.do(args) or 0)
 			except Exception as exc: # pragma: no cover
 				if self.root.verbose > 1:
 					import traceback
@@ -268,4 +270,5 @@ Set some data.
 				raise CommandError("%s failed: %s" % (c.name,repr(exc)))
 		if self.root.verbose:
 			print("All tests done.")
-		
+		return res
+
