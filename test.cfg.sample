@@ -3,7 +3,7 @@ config:
   etcd:
     host: localhost
     port: 2379
-    root: /moat
+    root: /test/moat
   amqp:
     server:
       host: localhost
