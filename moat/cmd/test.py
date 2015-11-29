@@ -27,12 +27,17 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 
 import os
 import sys
-from moat.script import Command, CommandError
-from moat.script.run import StdCommand
 from etctree.util import from_etcd
+from etctree.etcd import EtcTypes
+from dabroker.util import import_string
 import aioetcd as etcd
 import asyncio
 import time
+import types
+
+from ..script import Command, CommandError
+from ..script.task import Task,runner,_run_state, JobMarkGoneError,JobIsRunningError
+from ..task import tasks,task_var_types
 
 import logging
 logger = logging.getLogger(__name__)
@@ -54,7 +59,7 @@ Check basic config layout.
 		except KeyError: # pragma: no cover
 			raise CommandError("config: missing 'config' entry")
 
-class EtcdCommand(StdCommand):
+class EtcdCommand(Command):
 	name = "etcd"
 	summary = "Verify etcd data"""
 	description = """\
@@ -62,39 +67,18 @@ Check etcd access, and basic data layout.
 
 """
 
-	def do(self,args):
-		c = self.root.cfg['config']
-		try:
-			c = c['etcd']
-		except KeyError:
-			raise CommandError("config: missing 'etcd' section")
-		for k in ('host','port','root'):
-			if k not in c:
-				raise CommandError("config.etcd: missing '%s' entry" % k) # pragma: no cover
-		return self.root.sync(self._do())
-
-	async def _do2(self, info):
-		logger.debug("start: _do2")
-		assert info == "Running tests"
-		await asyncio.sleep(0.2,loop=self.root.loop)
-		run_state = await self.run_state()
-
-		t = time.time()
-		assert run_state['started'] > t-int(os.environ.get('MOAT_IS_SLOW',1)), (run_state['started'],t)
-
 	async def _do3(self):
 		logger.debug("start: _do3")
 		await asyncio.sleep(0.2,loop=self.root.loop)
-		run_state = await self.run_state()
 		raise RuntimeError("Dying")
 
 	async def _do4(self):
 		logger.debug("start: _do4")
-		run_state = await self.run_state()
 		async def _do4_():
 			await asyncio.sleep(0.2,loop=self.root.loop)
 			logger.debug("kill: _do4")
-			await self.root.etcd.delete("/status/run/%s/%s/running"%(self.root.app,self.fullname))
+			await self.root.etcd.delete("/status/run/test/do_4/:task/running")
+			pass
 		f = asyncio.ensure_future(_do4_(),loop=self.root.loop)
 		try:
 			logger.debug("sleep: _do4")
@@ -107,7 +91,24 @@ Check etcd access, and basic data layout.
 			try: await f
 			except Exception: pass # pragma: no cover
 
-	async def _do(self):
+	async def do_async(self,args):
+		c = self.root.cfg['config']
+		try:
+			c = c['etcd']
+		except KeyError:
+			raise CommandError("config: missing 'etcd' section")
+		for k in ('host','port','root'):
+			if k not in c:
+				raise CommandError("config.etcd: missing '%s' entry" % k) # pragma: no cover
+
+		class Task_do2(Task):
+			async def task(self):
+				logger.debug("start: _do2")
+				await asyncio.sleep(0.3,loop=self.loop)
+
+				t = time.time()
+				assert self.run_state['started'] > t-int(os.environ.get('MOAT_IS_SLOW',1)), (self.run_state['started'],t)
+
 		retval = 0
 		etc = await self.root._get_etcd()
 		log = logging.getLogger("etcd")
@@ -135,48 +136,54 @@ Check etcd access, and basic data layout.
 					else:
 						retval += 1
 
-		await s._wait()
+		await s.wait()
+		if not self.root.cfg['config'].get('testing',False):
+			return
+
 		try:
-			await self.run(self._do3)
+			await runner(self._do3,self,"test/do_3")
 		except RuntimeError:
 			pass
 		else:
 			raise RuntimeError("Error did not propagate") # pragma: no cover
-		run_state = await self.run_state()
+		run_state = await _run_state(etc,"test/do_3")
 		if 'running' in run_state:
 			raise RuntimeError("Procedure end 2 did not take") # pragma: no cover
-		await s._wait()
-		assert run_state['stopped'] > run_state['started']
-		assert run_state['state'] == "error"
+		await s.wait()
+		assert run_state['stopped'] > run_state['started'], (run_state['stopped'], run_state['started'])
+		assert run_state['state'] == "error", run_state['state']
+		await run_state.close()
 
 		try:
-			await self.run(self._do4)
-		except RuntimeError:
+			await runner(self._do4,self,"test/do_4")
+		except JobMarkGoneError:
 			pass
 		else:
-			raise RuntimeError("CancelledError did not propagate") # pragma: no cover
-		run_state = await self.run_state()
-		if 'running' in run_state:
-			raise RuntimeError("Procedure end 2 did not take") # pragma: no cover
-		await s._wait()
-		assert run_state['stopped'] > run_state['started']
-		assert run_state['state'] == "fail"
+			raise RuntimeError("Cancellation ('running' marker gone) did not propagate") # pragma: no cover
+		run_state = await _run_state(etc,"test/do_4")
+		assert 'running' not in run_state
+		await s.wait()
+		assert run_state['stopped'] > run_state['started'], (run_state['stopped'], run_state['started'])
+		assert run_state['state'] == "fail", run_state['state']
+		await run_state.close()
 
-		f = asyncio.ensure_future(self.run(self._do2,"Running tests"), loop=self.root.loop)
+		dt2 = Task_do2(self,"test/do_2",{})
+		dt2a = Task_do2(self,"test/do_2",{})
 		await asyncio.sleep(0.1,loop=self.root.loop)
+		dt2.run_state = run_state = await _run_state(etc,"test/do_2")
 		try:
-			await self.run(self._do2,"Running tests", loop=self.root.loop)
-		except RuntimeError as exc:
-			assert exc.args[0] == "Run marker already exists"
+			await dt2a
+		except JobIsRunningError as exc:
+			assert exc.args[0] == "test/do_2", exc
 		else:
 			assert false,"Dup run didn't" # pragma: no cover
-		await f
-		run_state = await self.run_state()
+		await dt2
 		if 'running' in run_state:
 			raise RuntimeError("Procedure end did not take") # pragma: no cover
-		await s._wait()
-		assert run_state['stopped'] > run_state['started']
-		assert run_state['state'] == "ok"
+		await s.wait()
+		assert run_state['stopped'] > run_state['started'], (run_state['stopped'], run_state['started'])
+		assert run_state['state'] == "ok", run_state['state']
+		await run_state.close()
 
 		try:
 			errs = await etc.read("/status/errors")

@@ -28,6 +28,12 @@ from collections.abc import Mapping,MutableMapping
 class _NOT_HERE: pass
 class _NOT_THERE: pass
 
+def r_dict(m):
+	if isinstance(m,Mapping):
+		return dict((k,r_dict(v)) for k,v in m.items())
+	else:
+		return m
+
 class OverlayDict(MutableMapping):
 	def __init__(self,a,b):
 		self.a = a
@@ -68,7 +74,7 @@ class OverlayDict(MutableMapping):
 			if v is not _NOT_HERE:
 				yield k
 		for k in self.b:
-			if self.a.get(k,None) is not _NOT_HERE:
+			if k not in self.a:
 				yield k
 
 	def __len__(self):

@@ -59,6 +59,8 @@ test: all
 		--cov=moat.cmd \
 		--cov=moat.proto \
 		--cov=moat.script \
+		--cov=moat.task \
+		--cov=moat.util \
 		--cov-config .coveragerc
 
 otest: all

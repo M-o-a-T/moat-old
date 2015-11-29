@@ -23,31 +23,38 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##  Thus, do not remove the next line, or insert any blank lines above.
 ##BP
 
-"""Utilities for scripting"""
+from ..script.task import Task
+from etctree.node import mtFloat
 
-from importlib import import_module
-import pkgutil
+class Sleeper(Task):
+	"""This task just waits for a configured amount of time before exiting.
+		You can use it in a 'moat run -K' command to limit runtimes."""
+	name="test:sleep"
+	summary="A simple delay"
 
-import logging
-logger = logging.getLogger(__name__)
+	@classmethod
+	def types(cls,tree):
+		super().types(tree)
+		tree.register(cls=mtFloat)
+		
+	async def task(self):
+		await asyncio.sleep(self.cfg.value, loop=self.loop)
+	
+class Error(Task):
+	name="test:error"
+	description="""This task always errors out."""
+	summary="A simple RuntimeError"
 
-def objects(module, cls):
-	if isinstance(module,str):
-		import sys
-		module = sys.modules[module]
-	for a,b,c in pkgutil.walk_packages(module.__path__, module.__name__+'.'):
-		try:
-			m = import_module(b)
-		except ImportError:
-			logger.exception("Trying to import "+__name__+'.'+b) # pragma: no cover
-			# not going to ship a broken file for testing this
-		else:
-			try:
-				syms = m.__all__
-			except AttributeError:
-				syms = dir(m)
-			for c in syms:
-				c = getattr(m,c,None)
-				if isinstance(c,type) and c is not cls and issubclass(c,cls):
-					yield c
-			
+	async def task(self):
+		raise RuntimeError("I don't wanna dance")
+
+class SleepError(Sleeper):
+	name="test:sleep+error"
+	description="""This task waits for a configured amount of time before raising an error."""
+	summary="""A delay, terminated by an error"""
+
+	async def task(self):
+		await asyncio.sleep(self.cfg.value, loop=self.loop)
+		raise RuntimeError("Don't wanna dance no mo-ooore")
+
+	

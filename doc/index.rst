@@ -123,6 +123,22 @@ The MoaT data is completely contained in a sub-tree, by default ``/moat``.
       how often to refresh the TTL. This is expressed as a fraction of the
       ``ttl`` value.
 
+    * restart
+
+      Default value for the time until restarting a job when it ends
+      normally. If zero, no restart.
+
+    * retry
+    
+      Initial value for the time until restarting a job when it fails, i.e.
+      raises an exception. If zero, the task will not be retried.
+
+      If a job fails again, the value is increased by a factor of 1.1.
+
+    * max_retry
+
+      This is the upper limit for the retry interval.
+
   * testing
 
     A flag to indicate that we're testing.
@@ -163,4 +179,79 @@ The MoaT data is completely contained in a sub-tree, by default ``/moat``.
 
       The error message it has died with, if applicable.
 
+* task
+
+  * whatever …
+
+    This hierarchy describes the tasks which MoaT knows about. The actual
+    structure is up to you. "moat run foo" will run all jobs in the
+    /task/HOSTNAME/foo/… hierarchy.
+
+    * :task
+
+      This directory describes an actual task to run.
+
+      * task
+
+        The name of this task's entry at /meta/task/NAME.
+
+      * name
+
+        Some human-readable name for this task.
+
+        Not used as an index or similar.
+
+      * summary
+
+        Human-readable description of what this particular job does.
+
+      * data
+    
+        Task-specific configuration, passed to the task. TODO; probably JSON.
+
+      * ttl, refresh, …
+
+        You can override the values from /config/run here.
+
+      * :ref (TODO)
+
+        Get any value not described here from /task/REF/:task.
+
+    * :ref (TODO)
+
+      Attach the sub-tree under /task/REF here. Sub-trees are joined, but
+      :task directories are not, thus you can selectively disable a task.
+
+* meta
+
+  This section describes data about the MoaT installation itself.
+
+  * task
+
+    This section describes possible tasks, for the benefit of external
+    configuration editors. It is optional.
+
+    * NAME
+      
+      The task name is supposed to be unique.
+
+      * language
+
+        The programming language the code is written in.
+        Probably "python", for now.
+        
+      * code
+
+        Python: Full name of the Task object to run. Typically
+        ``moat.task.MODULE.CLASS``, though you can use any callable that
+        returns a ``moat.script.task.Task`` object.
+
+      * summary
+
+        This is a generic description what the task's code does.
+
+      * data
+
+        Describes the code's configuration. TODO. Probably JSON, e.g.
+        a json-schema structure.
 

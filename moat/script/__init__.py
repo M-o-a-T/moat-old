@@ -1,9 +1,34 @@
-# -*- Mode: Python; test-case-name: test_command -*-
-# vi:si:et:sw=4:sts=4:ts=4
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import, print_function, division, unicode_literals
+##
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
+##
+##  This program is free software: you can redistribute it and/or modify
+##  it under the terms of the GNU General Public License as published by
+##  the Free Software Foundation, either version 3 of the License, or
+##  (at your option) any later version.
+##
+##  This program is distributed in the hope that it will be useful,
+##  but WITHOUT ANY WARRANTY; without even the implied warranty of
+##  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+##  GNU General Public License (included; see the file LICENSE)
+##  for more details.
+##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
 
-# This file is released under the standard PSF license.
-# Downloaded from: https://thomas.apestaart.org/moap/trac/browser/trunk/moap/extern/command/command.py?order=name
-# on 2015-11-14
+# This is a heavily modified copy (no shadowing of stderr, no interactive
+# use, no instantiation of subcommands before they're actually used, use a
+# logger instance instead of command-local debug etc. methods) of
+# https://thomas.apestaart.org/moap/trac/browser/trunk/moap/extern/command/command.py?order=name
+# Downloaded on 2015-11-14
+# This file is released under the standard PSF license, superseding the above boilerplate.
 
 """
 Command class.
@@ -161,10 +186,10 @@ class Command(object):
 	aliasedSubCommands = None
 	parser = None
 
-	def __init__(self, parent=None, stdout=None, stderr=None):
+	def __init__(self, parent=None, stdout=None):
 		"""
 		Create a new command instance, with the given parent.
-		Allows for redirecting stdout and stderr if needed.
+		Allows for redirecting stdout if needed.
 		This redirection will be passed on to child commands.
 		"""
 		if not self.name:
@@ -176,7 +201,6 @@ class Command(object):
 			self.fullname = self.name
 
 		self._stdout = stdout
-		self._stderr = stderr
 		self.parent = parent
 
 		self.log = logging.getLogger(self.name)
@@ -269,14 +293,25 @@ class Command(object):
 
 	def do(self, args): # pragma: no cover
 		"""
-		Override me to implement the functionality of the command.
+		Override me to implement the functionality of the command synchronously.
 
+		@param    args: list of remaining non-option arguments
+		@type     args: list of unicode
+		@rtype:   int
+		@returns: an exit code, or None if no actual action was taken.
+		"""
+		return self.root.sync(self.do_async(args))
+
+	async def do_async(self, args): # pragma: no cover
+		"""
+		Override me to implement the functionality of the command asynchronously.
+
+		@param    args: list of remaining non-option arguments
+		@type     args: list of unicode
 		@rtype:   int
 		@returns: an exit code, or None if no actual action was taken.
 		"""
 		raise NotImplementedError('Implement %s.do()' % self.__class__)
-		# by default, return 1 and hopefully show help
-		return 1
 
 	def parse(self, argv):
 		"""
@@ -321,12 +356,11 @@ class Command(object):
 			except CommandExited as e:
 				self.log.debug('done with exception, raised %r', e)
 				ret = e.status
-				self.stderr.write(e.output + '\n')
+				sys.stderr.write(e.output + '\n')
 			except NotImplementedError:
 				self.log.debug('done with NotImplementedError')
-				self.parser.print_usage(file=self.stderr)
-				self.stderr.write(
-					"Use --help to get a list of commands.\n")
+				self.parser.print_usage(file=sys.stderr)
+				sys.stderr.write("Use --help to get a list of commands.\n")
 				return 1
 
 
@@ -347,7 +381,7 @@ class Command(object):
 			return c.parse(args[1:])
 
 		self.log.error("Unknown command '%s'.\n", command)
-		self.parser.print_usage(file=self.stderr)
+		self.parser.print_usage(file=sys.stderr)
 		return 1
 
 	def handleOptions(self):
@@ -364,7 +398,7 @@ class Command(object):
 		__pychecker__ = 'no-shadowbuiltin'
 		self.log.debug('outputUsage')
 		if not file:
-			file = self.stderr
+			file = sys.stderr
 		self.parser.print_usage(file=file)
 
 	@property
@@ -394,10 +428,6 @@ class Command(object):
 	def stdout(self):
 		return self._getStd('stdout')
 
-	@property
-	def stderr(self):
-		return self._getStd('stderr')
-
 class CommandExited(Exception):
 
 	def __init__(self, status, output):
@@ -405,7 +435,7 @@ class CommandExited(Exception):
 		self.status = status
 		self.output = output
 
-
+## unused
 #class CommandOk(CommandExited):
 #
 #	def __init__(self, output):
@@ -417,101 +447,3 @@ class CommandError(CommandExited):
 	def __init__(self, output):
 		CommandExited.__init__(self, 3, output)
 
-
-#def commandToCmdClass(command):
-#	"""
-#	@type  command: L{Command}
-#
-#	Take a Command instance and create a L{cmd.Cmd} class from it that
-#	implements a command line interpreter, using the commands under the given
-#	Command instance as its subcommands.
-#
-#	Example use in a command:
-#
-#	>>> def do(self, args):
-#	...	 cmd = command.commandToCmdClass(self)()
-#	...	 cmd.prompt = 'prompt> '
-#	...	 while not cmd.exited:
-#	...		 cmd.cmdloop()
-#
-#	@rtype: L{cmd.Cmd}
-#	"""
-#	import cmd
-#
-#	# internal class to subclass cmd.Cmd with a Ctrl-D handler
-#
-#	class _CommandWrappingCmd(cmd.Cmd):
-#		prompt = '(command) '
-#		exited = False
-#		command = None # the original Command subclass
-#
-#		def __repr__(self):
-#			return "<_CommandWrappingCmd for Command %r>" % self.command
-#
-#		def do_EOF(self, args):
-#			self.stdout.write('\n')
-#			self.exited = True
-#			sys.exit(0)
-#
-#		def do_exit(self, args):
-#			self.exited = True
-#			sys.exit(0)
-#
-#		def help_EOF(self):
-#			print('Exit.')
-#
-#		def help_exit(self):
-#			print('Exit.')
-#
-#	# populate the Cmd interpreter from our command class
-#	cmdClass = _CommandWrappingCmd
-#	cmdClass.command = command
-#
-#	for name, subCommand in command.subCommands.items() \
-#		+ command.aliasedSubCommands.items():
-#		if name == 'shell':
-#			continue
-#		command.debug('Adding shell command %s for %r' % (name, subCommand))
-#
-#		# add do command
-#		methodName = 'do_' + name
-#
-#		def generateDo(c):
-#
-#			def do_(s, line):
-#				# line is coming from a terminal; usually it is a utf-8 encoded
-#				# string.
-#				# Instead of making every Command subclass implement do with
-#				# unicode decoding, we do it here.
-#				line = line.decode('utf-8')
-#				# the do_ method is passed a single argument consisting of
-#				# the remainder of the line
-#				args = line.split(' ')
-#				command.debug('Asking %r to parse %r' % (c, args))
-#				return c.parse(args)
-#			return do_
-#
-#		method = generateDo(subCommand)
-#		setattr(cmdClass, methodName, method)
-#
-#
-#		# add help command
-#		methodName = 'help_' + name
-#
-#		def generateHelp(c):
-#
-#			def help_(s):
-#				command.parser.print_help(file=s.stdout)
-#			return help_
-#
-#		method = generateHelp(subCommand)
-#		setattr(cmdClass, methodName, method)
-#
-#	return cmdClass
-#
-#
-#def commandToCmd(command):
-#	# for compatibility reasons
-#	return commandToCmdClass(command)()
-#
-#

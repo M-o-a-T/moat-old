@@ -32,9 +32,9 @@ from etctree.util import from_yaml
 import yaml
 from moat.cmd import commands as moat_commands
 from dabroker.unit import make_unit, DEFAULT_CONFIG as DABROKER_DEFAULT_CONFIG
-from etctree import client
 import asyncio
 import socket
+from moat.util import OverlayDict
 
 import logging
 logger = logging.getLogger(__name__)
@@ -42,9 +42,13 @@ logger = logging.getLogger(__name__)
 DEFAULT_CFG="/etc/moat.cfg"
 
 DEFAULT_CONFIG = dict(
+	testing=False,
 	run=dict(
 		ttl=30,
 		refresh=2,
+		retry=1,
+		max_retry=600,
+		restart=2,
 	)
 )
 
@@ -109,7 +113,7 @@ You can load more than one config file.
 		opts = self.options
 		self.verbose = opts.verbose
 
-		logging.basicConfig(stream=sys.stderr,level=(logging.CRITICAL,logging.WARNING,logging.INFO,logging.DEBUG)[min(self.verbose,3)])
+		logging.basicConfig(stream=sys.stderr,level=(logging.ERROR,logging.WARNING,logging.INFO,logging.INFO,logging.DEBUG)[min(self.verbose,4)])
 
 		paths = []
 		if opts.files:
@@ -169,23 +173,33 @@ You can load more than one config file.
 		if self.verbose > 2:
 			print("App name:",self.app)
 
-	async def setup(self):
+	async def setup(self, dest=None):
 		"""Once running in async mode, get our basic config loaded"""
 		if self.etcd is None:
-			self.etcd = await self._get_etcd()
+			await self._get_etcd()
 		if self.amqp is None:
-			self.amqp = await self._get_amqp()
+			await self._get_amqp()
+		if dest not in (None,self):
+			dest.etcd = self.etcd
+			dest.amqp = self.amqp
 
 	async def _get_etcd(self):
-		res = await client(self.cfg, loop=self.loop)
-		t = await res.tree("/config", static=True)
-		cfg = {'config':{}}
-		r_update(cfg['config'],t)
-		r_update(cfg,self.cfg)
-		self.cfg = cfg
-		return res
+		if self.etcd is not None:
+			return self.etcd
+		from etctree import client
+		from etctree.etcd import EtcTypes
+		from ..task import task_var_types
+		types = EtcTypes()
+		task_var_types(types.step('run'))
+
+		self.etcd = etc = await client(self.cfg, loop=self.loop)
+		self.etc_cfg = await etc.tree("/config", types=types)
+		self.cfg = OverlayDict(self.cfg,{'config': self.etc_cfg})
+		return etc
 
 	async def _get_amqp(self):
-		res = await make_unit(self.app, self.cfg['config'], loop=self.loop)
+		if self.amqp is not None:
+			return self.amqp
+		self.amqp = res = await make_unit(self.app, self.cfg['config'], loop=self.loop)
 		return res
 

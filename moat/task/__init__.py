@@ -23,31 +23,24 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##  Thus, do not remove the next line, or insert any blank lines above.
 ##BP
 
-"""Utilities for scripting"""
+"""List of known Tasks"""
 
-from importlib import import_module
-import pkgutil
+import os
+from dabroker.util import import_string
+from ..script.util import objects
 
 import logging
 logger = logging.getLogger(__name__)
 
-def objects(module, cls):
-	if isinstance(module,str):
-		import sys
-		module = sys.modules[module]
-	for a,b,c in pkgutil.walk_packages(module.__path__, module.__name__+'.'):
-		try:
-			m = import_module(b)
-		except ImportError:
-			logger.exception("Trying to import "+__name__+'.'+b) # pragma: no cover
-			# not going to ship a broken file for testing this
-		else:
-			try:
-				syms = m.__all__
-			except AttributeError:
-				syms = dir(m)
-			for c in syms:
-				c = getattr(m,c,None)
-				if isinstance(c,type) and c is not cls and issubclass(c,cls):
-					yield c
-			
+def tasks():
+	from ..script.task import Task
+	return objects(__name__, Task)
+
+_VARS = {'ttl','refresh','restart','retry','max-retry'}
+	
+def task_var_types(types):
+	from etctree.etcd import EtcTypes
+	from etctree.node import mtFloat
+	for t in _VARS:
+		types.register(t)(mtFloat)
+	
