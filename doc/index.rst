@@ -193,7 +193,7 @@ The MoaT data is completely contained in a sub-tree, by default ``/moat``.
 
       * task
 
-        The name of this task's entry at /meta/task/NAME.
+        The name of this task's definition, stored at /meta/task/NAME/:taskdef.
 
       * name
 
@@ -231,27 +231,42 @@ The MoaT data is completely contained in a sub-tree, by default ``/moat``.
     This section describes possible tasks, for the benefit of external
     configuration editors. It is optional.
 
-    * NAME
+    * whatever …
+
+      This hierarchy describes the task definitions which MoaT knows about.
+      The actual structure is up to you. "moat task list foo" will display
+      all definitions in the /task/HOSTNAME/foo/… hierarchy.
       
-      The task name is supposed to be unique.
+      * :taskdef
 
-      * language
+        * name
 
-        The programming language the code is written in.
-        Probably "python", for now.
-        
-      * code
+          Human-readable name for this task.
 
-        Python: Full name of the Task object to run. Typically
-        ``moat.task.MODULE.CLASS``, though you can use any callable that
-        returns a ``moat.script.task.Task`` object.
+          Please keep it unique.
 
-      * summary
+        * language
 
-        This is a generic description what the task's code does.
+          The programming language the code is written in.
+          Probably "python", for now.
+          
+        * code
 
-      * data
+          Python: Full name of the Task object to run. Typically
+          ``moat.task.MODULE.CLASS``, though you can use any callable that
+          returns a ``moat.script.task.Task`` object.
 
-        Describes the code's configuration. TODO. Probably JSON, e.g.
-        a json-schema structure.
+        * summary
+
+          This is a one-line description of the code.
+
+        * description
+
+          This is a multi-line description of the code. Please include
+          information about the data fields which the user may set.
+          
+        * data
+
+          Describes the code's configuration. TODO. Probably JSON, i.e.
+          a json-schema structure.
 

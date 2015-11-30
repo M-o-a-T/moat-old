@@ -32,12 +32,17 @@ from ..script.util import objects
 import logging
 logger = logging.getLogger(__name__)
 
+TASK_DIR = '/task'
+TASKDEF_DIR = '/meta/task'
+TASK = ':task'
+TASKDEF = ':taskdef'
+
+_VARS = {'ttl','refresh','restart','retry','max-retry'}
+
 def tasks():
 	from ..script.task import Task
 	return objects(__name__, Task)
 
-_VARS = {'ttl','refresh','restart','retry','max-retry'}
-	
 def task_var_types(types):
 	from etctree.etcd import EtcTypes
 	from etctree.node import mtFloat

@@ -52,12 +52,13 @@ Check basic config layout.
 
 """
 
-	def do(self,args):
+	async def do_async(self,args):
 		c = self.root.cfg
 		try:
 			c = c['config']
 		except KeyError: # pragma: no cover
 			raise CommandError("config: missing 'config' entry")
+
 
 class EtcdCommand(Command):
 	name = "etcd"
@@ -107,11 +108,28 @@ Check etcd access, and basic data layout.
 				await asyncio.sleep(0.3,loop=self.loop)
 
 				t = time.time()
-				assert self.run_state['started'] > t-int(os.environ.get('MOAT_IS_SLOW',1)), (self.run_state['started'],t)
+				run_state = await _run_state(etc,"test/do_2")
+				assert run_state['started'] > t-int(os.environ.get('MOAT_IS_SLOW',1)), (run_state['started'],t)
 
 		retval = 0
 		etc = await self.root._get_etcd()
 		log = logging.getLogger("etcd")
+
+		try:
+			s = None
+			s = await etc.tree('/config')
+			await s.subdir('run', create=False)
+		except KeyError:
+			if self.parent.fix:
+				await s.subdir('run',create=True)
+				logger.info("/config/run created.")
+			else:
+				if self.root.verbose:
+					logger.warning("/config/run missing.")
+		finally:
+			if s is not None:
+				await s.close()
+
 		stats = set(("ok","warn","error","fail"))
 		s = await etc.tree("/status")
 		if "run" not in s:

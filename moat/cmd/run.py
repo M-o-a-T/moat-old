@@ -26,8 +26,10 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 """List of known Tasks"""
 
 import os
-from moat.script import Command, CommandError
+from ..script import Command, CommandError
+from ..task import TASK_DIR,TASK
 from etctree.util import from_etcd
+from etctree.node import mtDir
 import aioetcd as etcd
 import logging
 logger = logging.getLogger(__name__)
@@ -59,7 +61,7 @@ by default, start every task that's defined for this host.
 
 	def addOptions(self):
 		self.parser.add_option('-t','--this',
-            action="count", dest="this",
+            action="count", dest="this", default=0,
             help="Run this job only (add -t for sub-paths)")
 		self.parser.add_option('-l','--list',
             action="store_true", dest="list",
@@ -77,52 +79,43 @@ by default, start every task that's defined for this host.
             action="store_true", dest="killfail",
             help="Exit when a job fails; no restart or whatever")
 
-	def do(self,args):
-		retval = 0
-		self.root.sync(self._do, args)
-	
-	async def _do(self,args):
+	async def do_async(self,args):
 		opts = self.options
 		if opts.is_global and not args and not opts.list:
 			raise CommandError("You can't run the whole world.")
 
 		etc = await self.root._get_etcd()
 		if args:
-			if not self.opts.is_global:
-				args = [cmd.app+'/'+t for t in args]
-			args = ['/task/'+t for t in args]
-		elif self.opts.is_global:
-			args = ['/task/'+cmd.app]
+			if not opts.is_global:
+				args = [self.root.app+'/'+t for t in args]
+			args = [TASK_DIR+'/'+t for t in args]
+		elif opts.is_global:
+			args = [TASK_DIR+'/'+self.root.app]
 		else:
-			args = ['/task']
+			args = [TASK_DIR]
 		
-		tasks = []
+		paths = []
 		for t in args:
-			tasks.append(await t.tree())
+			paths.append(await etc.tree(t))
 		depth = opts.this
-		if depth > 1:
-			while depth > 1:
-				depth -= 1
-				n_a = []
-				for t in tasks:
-					for k,v in t:
-						if k.startswith(':'):
-							continue
-						n_a.append(v)
-					tasks = n_a
-			tasks = [t[':job'] for t in tasks if ':job' in t]
-		else:
-			n_a = []
-			while tasks:
-				t = tasks.pop()
-				if ':job' in t:
-					n_a.append(t[':job'])
-				for k,v in t:
-					if not k.startswith(':'):
-						tasks.append(v)
+		tasks = []
+		while paths and depth != 1:
+			depth -= 1
+			n_p = []
+			for t in paths:
+				for k,v in t.items():
+					if k == TASK:
+						if depth < 2:
+							tasks.append(v)
+					elif k.startswith(':'):
+						continue
+					elif isinstance(v,mtDir):
+						n_p.append(v)
+				paths = n_p
 		if opts.list:
-			for t in sorted(tasks, key=lambda _:_.path):
-				print(t.path,t['code'],t.get('summary',''), sep='\t')
+			for task in sorted(tasks, key=lambda _:_.path):
+				path = task.path[len(TASK_DIR)+1:-(len(TASK)+1)]
+				print(path,task.get('name','-'),task.get('descr','-'), sep='\t')
 			return
 
 		jobs = {}
@@ -131,7 +124,8 @@ by default, start every task that's defined for this host.
 				j = import_string(t['code'])
 				j = j(self,t.path,t['data'], runner_data=t)
 			except Exception as exc:
-				logger.exception("Could not set up %s (%s)",t.path,t['code'])
+				path = t.path[len(TASK_DIR)+1:-(len(TASK)+1)]
+				logger.exception("Could not set up %s (%s)",t.path,t.get('name',path))
 				if opts.killfail:
 					return 2
 			else:

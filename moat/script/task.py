@@ -228,7 +228,7 @@ async def runner(proc,cmd,fullname, _ttl=None,_refresh=None):
 			raise etcd.EtcdAlreadyExist # pragma: no cover ## timing dependant
 		cseq = await run_state.set("running",time(),ttl=ttl)
 	except etcd.EtcdAlreadyExist:
-		logger.warn("Job is running: %s",fullname)
+		logger.warn("Job is already running: %s",fullname)
 		raise JobIsRunningError(fullname)
 	await run_state.set("started",time())
 	await run_state.wait()
@@ -355,7 +355,7 @@ class TaskMaster(object):
 
 		types = EtcTypes()
 		task_var_types(types)
-		self.task = self.etc.tree('/meta/task/'+self.cmd_name, types=types)
+		self.task = self.etc.tree('/meta/task/'+self.cmd_name+'/:taskdef', types=types)
 		if self.task['language'] != 'python':
 			raise RuntimeError("This is not a Python job. Aborting.")
 

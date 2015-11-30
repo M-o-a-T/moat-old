@@ -35,3 +35,4 @@ logger = logging.getLogger(__name__)
 
 def commands():
 	return objects(__name__, Command)
+
