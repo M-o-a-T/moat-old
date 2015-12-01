@@ -23,6 +23,8 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##  Thus, do not remove the next line, or insert any blank lines above.
 ##BP
 
+import asyncio
+
 from ..script.task import Task
 from etctree.node import mtFloat
 
