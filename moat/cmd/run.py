@@ -27,6 +27,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 
 import asyncio
 import os
+import signal
 
 from ..script import Command, CommandError
 from ..script.task import TaskMaster
@@ -34,7 +35,9 @@ from ..task import TASK_DIR,TASK
 from etctree.util import from_etcd
 from etctree.node import mtDir
 from functools import partial
+from itertools import chain
 import aioetcd as etcd
+import traceback
 
 import logging
 logger = logging.getLogger(__name__)
@@ -71,7 +74,13 @@ by default, start every task that's defined for this host.
             action="store_true", dest="killfail",
             help="Exit when a job fails; no restart or whatever")
 
+	def _tilt(self):
+		self.root.loop.remove_signal_handler(signal.SIGINT)
+		self.root.loop.remove_signal_handler(signal.SIGTERM)
+		self.tilt.set_result(None)
+
 	async def do_async(self,args):
+		self.tilt = asyncio.Future(loop=self.root.loop)
 		opts = self.options
 		if opts.is_global and not args and not opts.list:
 			raise CommandError("You can't run the whole world.")
@@ -110,13 +119,12 @@ by default, start every task that's defined for this host.
 				print(path,task.get('name','-'),task.get('descr','-'), sep='\t')
 			return
 
-		def _report(path, state, value=None):
+		def _report(path, state, *value):
 			if self.root.verbose:
-				if value is None:
-					value = ()
-				else:
-					value = (value,)
 				print(path,state, *value, sep='\t', file=self.stdout)
+				if state == "error" and value and self.root.verbose > 1:
+					err = value[0]
+					traceback.print_exception(err.__class__,err,err.__traceback__)
 
 		js = {}
 		for task in tasks:
@@ -143,10 +151,15 @@ by default, start every task that's defined for this host.
 			else:
 				jobs[j.name] = j
 		del js
+
+		self.root.loop.add_signal_handler(signal.SIGINT,self._tilt)
+		self.root.loop.add_signal_handler(signal.SIGTERM,self._tilt)
 		try:
-			while jobs:
-				done,pending = await asyncio.wait(jobs.values(), loop=self.root.loop, return_when=asyncio.FIRST_COMPLETED)
+			while jobs and not self.tilt.done():
+				done,pending = await asyncio.wait(chain((self.tilt,),jobs.values()), loop=self.root.loop, return_when=asyncio.FIRST_COMPLETED)
 				for j in done:
+					if j is self.tilt:
+						break
 					del jobs[j.name]
 					try:
 						r = j.result()

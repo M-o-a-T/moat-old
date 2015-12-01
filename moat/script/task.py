@@ -287,7 +287,7 @@ async def runner(proc,cmd,fullname, _ttl=None,_refresh=None):
 			logger.debug("Ended %s :: %s :: %s",fullname, repr(d),repr(p))
 		except asyncio.CancelledError:
 			# Cancelling an asyncio.wait() doesn't propagate
-			logger.debug("Cancelling %s :: %s :: %s",fullname, repr(d),repr(p))
+			logger.debug("Cancelling %s",fullname)
 			try:
 				main_task.cancel()
 				await main_task
