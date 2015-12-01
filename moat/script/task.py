@@ -14,6 +14,7 @@ from etctree.node import mtFloat,mtBase
 import etcd
 import inspect
 from time import time
+from traceback import format_exception
 import weakref
 
 from ..task import _VARS,  task_var_types, TASK_DIR,TASKDEF_DIR,TASK,TASKDEF
@@ -306,14 +307,15 @@ async def runner(proc,cmd,fullname, _ttl=None,_refresh=None):
 				# We'll get the error later.
 		else:
 			assert main_task.done()
-			run_task.cancel()
+			try: run_task.cancel()
+			except Exception: pass
 			try: await run_task
 			except Exception: pass
-			# At this point we don't care why the update died.
+			# At this point we don't care why the run_task thread died.
 
 		if main_task.cancelled():
 			# Killed because of a timeout / refresh problem. Major fail.
-			await run_state.set("state","fail")
+			await run_state.set("state","warn")
 			await run_state.set("message", "Aborted by timeout" if (killer is None) else str(run_task.exception()))
 			run_task.result()
 			assert False,"the previous line should have raised an error" # pragma: no cover
@@ -323,8 +325,11 @@ async def runner(proc,cmd,fullname, _ttl=None,_refresh=None):
 				res = main_task.result()
 			except Exception as exc:
 				# … or not.
+				exc.__context__ = None # the cancelled run_task is not interesting
 				await run_state.set("state","error")
 				await run_state.set("message",str(exc))
+				await run_state.set("debug","".join(format_exception(exc.__class__,exc,exc.__traceback__)))
+				await run_state.set("debug_time",str(time()))
 				raise
 			else:
 				await run_state.set("state","ok")
