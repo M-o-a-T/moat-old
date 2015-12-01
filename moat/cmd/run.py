@@ -148,11 +148,6 @@ by default, start every task that's defined for this host.
 				done,pending = await asyncio.wait(jobs.values(), loop=self.root.loop, return_when=asyncio.FIRST_COMPLETED)
 				for j in done:
 					del jobs[j.name]
-					if j.__class__ is Restarter:
-						t = j.t
-						j = j.j(self,t.path,t['data'], runner_data=t)
-						jobs[j.name] = j
-						continue
 					try:
 						r = j.result()
 					except Exception as exc:
@@ -162,9 +157,6 @@ by default, start every task that's defined for this host.
 					else:
 						if self.root.verbose > 1:
 							print(j.name,r, sep='\t', file=self.stdout)
-					t = j.runner_data
-					j = Restarter(j.name,j.__class__,t, 99)
-					jobs[j.name] = j
 
 		finally:
 			for j in jobs.values():

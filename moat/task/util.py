@@ -24,6 +24,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##BP
 
 import asyncio
+from time import time
 
 from ..script.task import Task
 from etctree.node import mtFloat
@@ -33,12 +34,39 @@ class Sleeper(Task):
 		You can use it in a 'moat run -K' command to limit runtimes."""
 	summary="""A simple delay"""
 	name="sleep"
+	d = None
+	f = None
 
 	@classmethod
 	def types(cls,tree):
 		super().types(tree)
 		tree.register(cls=mtFloat)
 		
+	def _timeout(self):
+		if self.f is not None:
+			self.f.set_result(None)
+		if self.d is not None:
+			self.d.cancel()
+
 	async def task(self):
-		await asyncio.sleep(float(self.config['delay']), loop=self.loop)
+		t = time()
+		while t+float(self.config['delay']) > time():
+			self.t_updated = False
+			self.f = asyncio.Future(loop=self.loop)
+			self.d = self.loop.call_later(float(self.config['delay']), self._timeout)
+			try:
+				await self.f
+			except asyncio.CancelledError:
+				if self.t_updated:
+					continue
+				raise
+			finally:
+				self.f = None
+
+	def cfg_changed(self):
+		self.t_updated = True
+		if self.d is not None:
+			self.d.cancel()
+		if self.f is not None:
+			self.f.set_result(None)
 
