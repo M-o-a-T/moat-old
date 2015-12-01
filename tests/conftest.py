@@ -32,12 +32,7 @@ import time
 import gc
 
 import logging
-logging.basicConfig(filename='test.log', level=logging.DEBUG)
 logger = logging.getLogger(__name__)
-logging.captureWarnings(True)
-
-import warnings
-warnings.filterwarnings("ignore")
 
 @pytest.yield_fixture
 def loop(request):

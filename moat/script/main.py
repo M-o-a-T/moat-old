@@ -43,13 +43,13 @@ DEFAULT_CFG="/etc/moat.cfg"
 
 DEFAULT_CONFIG = dict(
 	testing=False,
-	run=dict(
-		ttl=30,
-		refresh=2,
-		retry=1,
-		max_retry=600,
-		restart=2,
-	)
+	run={
+		'ttl':30,
+		'refresh':2,
+		'retry':1,
+		'max-retry':600,
+		'restart':2,
+	}
 )
 
 def r_update(a,b):
@@ -95,6 +95,9 @@ You can load more than one config file.
 		self.parser.add_option('-o', '--opt',
 			action="append", dest="opts",
 			help="option to override (use 'path.to.opt.name=value')")
+		self.parser.add_option('-L', '--log-to',
+			action="store", dest="logto",
+			help="write the log to this file")
 		self.parser.add_option('-v', '--verbose',
 			action="count", dest="verbose", default=1,
 			help="increase verbosity")
@@ -113,7 +116,22 @@ You can load more than one config file.
 		opts = self.options
 		self.verbose = opts.verbose
 
-		logging.basicConfig(stream=sys.stderr,level=(logging.ERROR,logging.WARNING,logging.INFO,logging.INFO,logging.DEBUG)[min(self.verbose,4)])
+		if opts.logto:
+			logfile = open(opts.logto,"w")
+		else:
+			logfile = sys.stderr
+		logging.basicConfig(stream=logfile,level=(logging.ERROR,logging.WARNING,logging.INFO,logging.INFO,logging.DEBUG)[min(self.verbose,4)])
+		if opts.logto:
+			# also report errors to stderr
+			h = logging.StreamHandler(sys.stderr)
+			style = '%'
+			fs = logging._STYLES[style][1]
+			fmt = logging.Formatter(fs, None, style)
+			if h.formatter is None:
+				h.setFormatter(fmt)
+				logging.root.addHandler(h)
+			level = (logging.ERROR,logging.ERROR,logging.WARNING)[min(self.verbose,2)]
+			h.setLevel(level)
 
 		paths = []
 		if opts.files:

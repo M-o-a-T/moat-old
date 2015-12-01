@@ -23,6 +23,8 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##  Thus, do not remove the next line, or insert any blank lines above.
 ##BP
 
+import asyncio
+
 from ..script.task import Task
 from etctree.node import mtFloat
 
@@ -38,5 +40,5 @@ class Sleeper(Task):
 		tree.register(cls=mtFloat)
 		
 	async def task(self):
-		await asyncio.sleep(self.cfg.value, loop=self.loop)
+		await asyncio.sleep(float(self.config['delay']), loop=self.loop)
 

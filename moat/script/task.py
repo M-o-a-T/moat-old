@@ -16,7 +16,7 @@ import inspect
 from time import time
 import weakref
 
-from ..task import _VARS, task_var_types
+from ..task import _VARS,  task_var_types, TASK_DIR,TASKDEF_DIR,TASK,TASKDEF
 
 import logging
 logger = logging.getLogger(__name__)
@@ -57,7 +57,7 @@ class Task(asyncio.Task):
 						task_one		// your choice
 							:task
 								summary: This is an example task
-								code: NAME
+								taskdef: NAME
 								data: # TODO: according to the schema
 									foo: bar
 									baz: quux
@@ -70,11 +70,12 @@ class Task(asyncio.Task):
 
 				meta
 					task
-						NAME
-							code: moat.task.whatever.YourTask
-							language: python
-							summary: SUMMARY
-							data: description (json-schema), TODO
+						NAME	// also some hierarchy, set by code
+							:taskdef
+								code: moat.task.whatever.YourTask
+								language: python
+								summary: SUMMARY
+								data: description (json-schema), TODO
 
 		`moat run task_one` will find your task, read the parameters into a
 		dict, and call the task object's "task" procedure.
@@ -156,14 +157,14 @@ class Task(asyncio.Task):
 		await r.setup(self)
 		
 		try:
-			r = await runner(self.task,self._cmd(),self.name)
+			res = await self.task()
 		finally:
 			# Clean up
 			del self.amqp
 			del self.etcd
-		return r
+		return res
 
-	async def cfg_changed(self):
+	def cfg_changed(self):
 		"""\
 			Override this to notify your task about changed configuration values.
 			"""
@@ -171,7 +172,7 @@ class Task(asyncio.Task):
 
 	async def task(self):
 		"""Override this to actually run the task"""
-		raise NotImplementedError("You need to write the code that des the work!")
+		raise NotImplementedError("You need to write the code that does the work!")
 
 async def _run_state(etcd,fullname):
 	"""Get a tree for the job's state. Separate function because testing"""
@@ -181,7 +182,7 @@ async def _run_state(etcd,fullname):
 	types.register('started', cls=mtFloat)
 	types.register('stopped', cls=mtFloat)
 	types.register('running', cls=mtFloat)
-	run_state = await etcd.tree('/status/run/'+fullname+'/:task', types=types)
+	run_state = await etcd.tree('/status/run/'+fullname+'/'+TASK, types=types)
 	return run_state
 
 async def runner(proc,cmd,fullname, _ttl=None,_refresh=None):
@@ -225,13 +226,18 @@ async def runner(proc,cmd,fullname, _ttl=None,_refresh=None):
 
 	try:
 		if 'running' in run_state:
-			raise etcd.EtcdAlreadyExist # pragma: no cover ## timing dependant
+			raise etcd.EtcdAlreadyExist(message=fullname+'/running', payload=run_state['running']) # pragma: no cover ## timing dependant
+		ttl = int(ttl)
+		if ttl < 1:
+			raise ValueError("TTL must be positive",ttl)
 		cseq = await run_state.set("running",time(),ttl=ttl)
 	except etcd.EtcdAlreadyExist:
+		import pdb;pdb.set_trace()
 		logger.warn("Job is already running: %s",fullname)
 		raise JobIsRunningError(fullname)
-	await run_state.set("started",time())
-	await run_state.wait()
+	mod = await run_state.set("started",time())
+	await run_state.wait(mod)
+	keep_running = False # if it's been superseded, do not delete
 
 	def aborter():
 		"""If the updater doesn't work (e.g. if etcd isn't reachable)
@@ -273,24 +279,26 @@ async def runner(proc,cmd,fullname, _ttl=None,_refresh=None):
 	main_task = asyncio.ensure_future(proc(), loop=r.loop)
 	try:
 		try:
-			d,p = await asyncio.wait((main_task,run_task), loop=r.loop, return_when=asyncio.FIRST_COMPLETED)
-		finally:
-			if killer is not None:
-				killer.cancel()
-		logger.debug("Ended %s :: %s :: %s",fullname, repr(d),repr(p))
-	except asyncio.CancelledError:
-		# Cancelling an asyncio.wait() doesn't propagate
-		logger.debug("Cancelling %s :: %s :: %s",fullname, repr(d),repr(p))
-		try:
-			main_task.cancel()
-			await main_task
-		except Exception:
-			pass
-	# At this point at least one of the two jobs has definitely exited
-	# and the "killer" timer is either cancelled or has triggered.
-	try:
+			try:
+				d,p = await asyncio.wait((main_task,run_task), loop=r.loop, return_when=asyncio.FIRST_COMPLETED)
+			finally:
+				if killer is not None:
+					killer.cancel()
+			logger.debug("Ended %s :: %s :: %s",fullname, repr(d),repr(p))
+		except asyncio.CancelledError:
+			# Cancelling an asyncio.wait() doesn't propagate
+			logger.debug("Cancelling %s :: %s :: %s",fullname, repr(d),repr(p))
+			try:
+				main_task.cancel()
+				await main_task
+			except Exception:
+				pass
+		# At this point at least one of the two jobs has definitely exited
+		# and the "killer" timer is either cancelled or has triggered.
 		if run_task.done():
 			# The TTL could not be refreshed: kill the job.
+			if not run_task.cancelled() and isinstance(run_task.exception(), JobMarkGoneError):
+				keep_running = True
 			if not main_task.done():
 				main_task.cancel()
 				try: await main_task
@@ -324,128 +332,160 @@ async def runner(proc,cmd,fullname, _ttl=None,_refresh=None):
 	finally:
 		# Now clean up everything
 		await run_state.set("stopped",time())
-		try: await run_state.delete("running")
-		except Exception: pass # pragma: no cover
+		if not keep_running:
+			try:
+				await run_state.delete("running")
+			except Exception as exc:
+				logger.exception("Could not delete 'running' entry")
 		await run_state.wait()
 		await run_state.close()
+
 		logger.debug("Ended %s",fullname)
 
 
-class TaskMaster(object):
+class TaskMaster(asyncio.Future):
 	"""An object which controls running and restarting a task from etcd."""
 	current_retry = 1
+	path = None
 	job = None
 	timer = None
 	exc = None
 
-	def __init__(self, cmd, name, path):
-		self.name = name
-		self.loop = cmd.loop
+	def __init__(self, cmd, path, callback=None):
+		"""\
+			Set up the static part of our task.
+			@cmd: the command this is running because of.
+			@path: the job's path under /task
+			@callback(status,value): called with ("started",None), ("ok",result) or ("error",exc)
+			 whenever the job state changes
+			"""
+		self.loop = cmd.root.loop
 		self.cmd = cmd
 		self.path = path
-		self.vars = []
+		self.name = path # for now
+		self.vars = {} # standard task control vars
+		self.callback = callback
 
 		for k in _VARS:
 			setattr(self,k,-1)
+
+		super().__init__(loop=self.loop)
 		
 	async def init(self):
 		"""Async part of initialization"""
-		self.etc = await self.root._get_etcd()
-		self.cmd_name = await self.etc.get('/task/'+self.path+'/task')
+		# In order to read the task data, we need the data definition,
+		# which is attached to the taskdef. Thus, first read the poiner to
+		# that "manually".
+		self.etc = await self.cmd.root._get_etcd()
+		self.taskdef_name = (await self.etc.get(TASK_DIR+'/'+self.path+'/'+TASK+'/taskdef')).value
 
 		types = EtcTypes()
 		task_var_types(types)
-		self.task = self.etc.tree('/meta/task/'+self.cmd_name+'/:taskdef', types=types)
-		if self.task['language'] != 'python':
+		self.taskdef = await self.etc.tree(TASKDEF_DIR+'/'+self.taskdef_name+'/'+TASKDEF, types=types)
+		if self.taskdef['language'] != 'python':
+			# Duh.
 			raise RuntimeError("This is not a Python job. Aborting.")
 
-		self.cls = import_string(self.cmd['code'])
+		self.cls = import_string(self.taskdef['code'])
 
 		types = EtcTypes()
 		task_var_types(types)
 		self.cls.types(types.step('data'))
 
-		self.cfg = self.etc.tree('/task/'+self.path, types=types)
-		self.gcfg = self.cmd.root.etc_cfg
-		self._m1 = self.cfg.add_monitor(self.setup_vars)
-		self._m2 = self.task.add_monitor(self.setup_vars)
+		# Now we can read the task data and follow changes to it.
+		self.task = await self.etc.tree(TASK_DIR+'/'+self.path+'/'+TASK, types=types)
+		self.gcfg = self.cmd.root.etc_cfg['run']
+		self.rcfg = self.cmd.root.cfg['config']['run']
+		self._m1 = self.task.add_monitor(self.setup_vars)
+		self._m2 = self.taskdef.add_monitor(self.setup_vars)
 		self._m3 = self.gcfg.add_monitor(self.setup_vars)
 		self.setup_vars()
 		
 		self._start()
 	
 	def task_var(self,k):
-		for cfg in (self.cfg, self.task, self.gcfg):
+		for cfg in (self.taskdef, self.task, self.gcfg, self.rcfg):
 			if k in cfg:
 				return cfg[k]
 		raise KeyError(k)
 
-	def setup_vars(_=None):
+	def setup_vars(self, _=None):
+		"""Copy task variables from etcd to local vars"""
 		# First, check the basics
-		changed = set()
-		if self.cmd != self.cfg.get('code',''):
-			# bail out, for now
-			self._die("Command changed")
-			return
+#		changed = set()
+		if self.taskdef_name != self.task.get('taskdef',''):
+			# bail out
+			raise RuntimeError("Command changed/deleted: %s / %s" % (self.taskdef_name,self.task.get('taskdef','')))
+		self.name = self.task['name']
 		for k in _VARS:
 			v = self.task_var(k)
-			if self.vars[k] != v:
-				changed.add(k)
+#			if self.vars[k] != v:
+#				changed.add(k)
 			self.vars[k] = v
+#		if changed:
+
 
 	def _get_ttl(self):
 		return self.vars['ttl'], self.vars['refresh']
 
-	@property
-	def future(self):
-		"""Returns the future to wait for, i.e. either the job ends or a
-		retry needs to be attempted."""
-		
-		if self.job is not None:
-			return self.job
-		if self.timer is not None:
-			return self.timer_future
-		raise RuntimeError("Neither job mor timer is running")
-
 	def _start(self):
-		j = self.cls(self.cmd, name, config={}, runner_data=None)
-		self.job = asyncio.ensure_future(runner(j.run, self.cmd, self.path, config=self.cfg._get('data',{}), _ttl=self._get_ttl), loop=self.cmd.loop)
+		j = lambda: self.cls(self.cmd, self.name, config=self.task._get('data',{}))
+		self.job = asyncio.ensure_future(runner(j, self.cmd, self.name, _ttl=self._get_ttl))
+		self.job.add_done_callback(self._job_done)
+		if self.callback is not None:
+			self.callback("start",None)
 
 	async def cancel(self):
+		try:
+			super().cancel()
+		except Exception:
+			return
 		if self.job is not None:
-			self.job.cancel()
 			try: 
+				self.job.cancel()
 				await self.job
 			except Exception:
 				pass
 		if self.timer is not None:
-			self.timer.cancel()
-			self.timer_future.cancel()
-
-	def step(self):
-		if self.job is None: # timer running/ended
-			assert self.timer is not None
-			if not self.timer_future.done():
-				return
-			self.timer = None
-			self.timer_future = None
-			self._start()
-		else: # job running/ended
-			assert self.timer is None
-			if not self.job.done():
-				return
 			try:
-				self.job.result()
-			except Exception as exc:
-				if self.exc is None:
-					self.current_retry = self.retry
-				else:
-					self.current_retry += self.retry/2
-				self.exc = exc
+				self.timer.cancel()
+			except Exception:
+				pass
+
+	def _timer_done(self):
+		assert self.job is None
+		assert self.timer is not None
+		self.timer = None
+		self._start()
+
+	def _job_done(self, f):
+		assert f is self.job # job ended
+		assert self.timer is None
+		try:
+			res = self.job.result()
+		except Exception as exc:
+			# TODO: limit the number of retries,
+			# this code only does 0 (retry=0) or 1 (max-retry=0) or inf (neither).
+			if self.callback is not None:
+				self.callback("error",exc)
+			if self.exc is None:
+				self.current_retry = self.vars['retry']
 			else:
-				self.current_retry = self.restart
-				self.exc = None
+				self.current_retry = min(self.current_retry + self.vars['retry']/2, self.vars['max-retry'])
+			self.exc = exc
 			if not self.current_retry:
+				self.set_exception(exc)
 				return
-			self.timer_future = asyncio.Future(loop=self.cmd.loop)
+		else:
+			if self.callback is not None:
+				self.callback("ok",res)
+			self.exc = None
+			self.current_retry = self.vars['restart']
+			if not self.current_retry:
+				self.set_result(res)
+				return
+		finally:
+			self.job = None
+
+		self.timer = self.loop.call_later(self.current_retry,self._timer_done)
 

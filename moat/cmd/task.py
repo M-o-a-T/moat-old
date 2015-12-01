@@ -189,45 +189,41 @@ This command deletes (some of) that data.
 			help="not forcing won't do anything")
 
 	async def do_async(self,args):
-		t = await self.setup(meta=True)
+		td = await self.setup(meta=True)
 		if not args:
 			if not cmd.root.cfg['testing']:
 				raise CommandError("You can't delete everything.")
-			args = t
+			args = td.tagged(TASKDEF)
 		for k in args:
-			if k not in t:
-				raise CommandError("%s: does not exist"%k)
+			taskdef = await td.subdir(k,name=TASKDEF, create=False)
 			if self.root.verbose:
 				print("%s: deleted"%k, file=self.stdout)
-			await t.delete(k)
+			while True:
+				p = t._parent
+				await t.delete()
+				if p is None: break
+				p = p()
+				if p is None or p is t: break
+				t = p
 
 
-class DefParamCommand(Command,DefSetup):
+class _ParamCommand(Command,DefSetup):
 	name = "param"
-	summary = "Parameterize task definitions"
-	description = """\
-Task definitions are stored in etcd at /meta/task/**/:taskdef.
-
-This command shows/changes/deletes parameters for that data.
-
-Usage: … param NAME VALUE  -- set
-       … param             -- list all
-       … param NAME        -- show one
-       … param -d NAME     -- delete
-"""
+	# _def = None ## need to override
 
 	def addOptions(self):
 		self.parser.add_option('-d','--delete',
 			action="store_true", dest="delete",
 			help="delete specific parameters")
-		self.parser.add_option('-g','--global',
-			action="store_true", dest="is_global",
-			help="show global parameters")
+		if self._def:
+			self.parser.add_option('-g','--global',
+				action="store_true", dest="is_global",
+				help="show global parameters")
 
 	async def do_async(self,args):
 		from moat.task import _VARS
-		t = await self.setup(meta=True)
-		if self.options.is_global:
+		t = await self.setup(meta=self._def)
+		if self._def and self.options.is_global:
 			if self.options.delete:
 				raise CommandError("You cannot delete global parameters.")
 			taskdef = self.root.etc_cfg['run']
@@ -242,7 +238,7 @@ Usage: … param NAME VALUE  -- set
 		else:
 			name = args.pop(0)
 			try:
-				taskdef = await t.subdir(name+'/'+TASKDEF)
+				taskdef = await t.subdir(name, name=self.TAG)
 			except KeyError:
 				raise CommandError("Task definition '%s' is unknown." % name)
 
@@ -269,11 +265,46 @@ Usage: … param NAME VALUE  -- set
 					raise CommandError("'%s' is not a valid parameter.")
 				v = args.pop(0)
 				if self.root.verbose:
-					if k in taskdef:
-						print("%s=%s (was %s)" % (k,v,taskdef[k]), file=self.stdout)
-					else:
+					if k not in taskdef:
 						print("%s=%s (new)" % (k,v), file=self.stdout)
+					elif str(taskdef[k]) == v:
+						print("%s=%s (unchanged)" % (k,v), file=self.stdout)
+					else:
+						print("%s=%s (was %s)" % (k,v,taskdef[k]), file=self.stdout)
 				await taskdef.set(k, v)
+
+class DefParamCommand(_ParamCommand):
+	_def = True
+	DIR=TASKDEF_DIR
+	TAG=TASKDEF
+	summary = "Parameterize task definitions"
+	description = """\
+Task definitions are stored in etcd at /meta/task/**/:taskdef.
+
+This command shows/changes/deletes parameters for that data.
+
+Usage: … param NAME VALUE  -- set
+       … param             -- list all
+       … param NAME        -- show one
+       … param -d NAME     -- delete
+"""
+
+class ParamCommand(_ParamCommand):
+	_def = False
+	DIR=TASK_DIR
+	TAG=TASK
+	summary = "Parameterize tasks"
+	description = """\
+Tasks are stored in etcd at /task/**/:task.
+
+This command shows/changes/deletes parameters for that data.
+
+Usage: … param NAME VALUE  -- set
+       … param             -- list all
+       … param NAME        -- show one
+       … param -d NAME     -- delete
+"""
+
 
 class DefCommand(Command):
 	subCommandClasses = [
@@ -377,7 +408,7 @@ class _AddUpdate:
 		except KeyError:
 			raise CommandError("Task '%s' not found. (Use its path, not the name?)" % taskpath)
 		if not self._update:
-			await task.set('task', taskdefpath, sync=False)
+			await task.set('taskdef', taskdefpath, sync=False)
 			if not name:
 				name = taskpath
 		if name:
@@ -461,7 +492,15 @@ This command deletes one of these entries.
 				raise CommandError("%s: does not exist"%k)
 			if self.root.verbose:
 				print("%s: deleted"%k, file=self.stdout)
-			await task.delete()
+			import pdb;pdb.set_trace()
+			while True:
+				p = task._parent
+				await task.delete()
+				if p is None: break
+				p = p()
+				if p is None: break
+				if p is task: break
+				task = p
 
 
 class TaskCommand(Command):
@@ -475,6 +514,7 @@ Commands to set up and admin the task list known to MoaT.
 		DefCommand,
 		AddCommand,
 		UpdateCommand,
+		ParamCommand,
 		ListCommand,
 		DeleteCommand,
 	]

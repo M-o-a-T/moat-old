@@ -25,29 +25,21 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 
 """List of known Tasks"""
 
+import asyncio
 import os
+
 from ..script import Command, CommandError
+from ..script.task import TaskMaster
 from ..task import TASK_DIR,TASK
 from etctree.util import from_etcd
 from etctree.node import mtDir
+from functools import partial
 import aioetcd as etcd
+
 import logging
 logger = logging.getLogger(__name__)
 
 __all__ = ['RunCommand']
-
-class JobMaster(object):
-	def __init__(self_,name,j,t, delay):
-		self_.name = name
-		self_.j = j
-		self_.t = t
-		super().__init__(loop=self.loop)
-		self_.delay = self.loop.call_later(delay, self_.set_result,None)
-
-	def cancel(self):
-		if not self.done:
-			self.delay.cancel()
-			self.set_result(None)
 
 class RunCommand(Command):
 	name = "run"
@@ -90,9 +82,9 @@ by default, start every task that's defined for this host.
 				args = [self.root.app+'/'+t for t in args]
 			args = [TASK_DIR+'/'+t for t in args]
 		elif opts.is_global:
-			args = [TASK_DIR+'/'+self.root.app]
-		else:
 			args = [TASK_DIR]
+		else:
+			args = [TASK_DIR+'/'+self.root.app]
 		
 		paths = []
 		for t in args:
@@ -118,22 +110,42 @@ by default, start every task that's defined for this host.
 				print(path,task.get('name','-'),task.get('descr','-'), sep='\t')
 			return
 
-		jobs = {}
-		for t in tasks:
+		def _report(path, state, value=None):
+			if self.root.verbose:
+				if value is None:
+					value = ()
+				else:
+					value = (value,)
+				print(path,state, *value, sep='\t', file=self.stdout)
+
+		js = {}
+		for task in tasks:
+			path = task.path[len(TASK_DIR)+1:-(len(TASK)+1)]
 			try:
-				j = import_string(t['code'])
-				j = j(self,t.path,t['data'], runner_data=t)
+			    j = TaskMaster(self, path, callback=partial(_report, path))
 			except Exception as exc:
-				path = t.path[len(TASK_DIR)+1:-(len(TASK)+1)]
 				logger.exception("Could not set up %s (%s)",t.path,t.get('name',path))
 				if opts.killfail:
 					return 2
 			else:
+				js[j.path] = (t,j)
+		jobs = {}
+		for name,tj in js.items():
+			t,j = tj
+			try:
+				await j.init()
+			except Exception as exc:
+				logger.exception("Could not init %s (%s)",t.path,t.get('name',path))
+				if opts.killfail:
+					for j in jobs.values():
+						j.cancel()
+					return 2
+			else:
 				jobs[j.name] = j
-
+		del js
 		try:
 			while jobs:
-				done,pending = await asyncio.wait(jobs.values(), loop=self.loop, return_when=FIRST_COMPLETED)
+				done,pending = await asyncio.wait(jobs.values(), loop=self.root.loop, return_when=asyncio.FIRST_COMPLETED)
 				for j in done:
 					del jobs[j.name]
 					if j.__class__ is Restarter:
@@ -157,7 +169,7 @@ by default, start every task that's defined for this host.
 		finally:
 			for j in jobs.values():
 				try:
-					j.cancel()
+					await j.cancel()
 				except Exception:
 					pass
 				try:
