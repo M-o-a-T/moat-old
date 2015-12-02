@@ -198,12 +198,17 @@ This command deletes (some of) that data.
 			taskdef = await td.subdir(k,name=TASKDEF, create=False)
 			if self.root.verbose:
 				print("%s: deleted"%k, file=self.stdout)
+			rec=None
 			while True:
 				p = t._parent
-				await t.delete()
 				if p is None: break
 				p = p()
 				if p is None or p is t: break
+				try:
+					await t.delete(recursive=rec)
+				except etcd.EtcdDirNotEmpty:
+					break
+				rec=False
 				t = p
 
 
@@ -492,14 +497,18 @@ This command deletes one of these entries.
 				raise CommandError("%s: does not exist"%k)
 			if self.root.verbose:
 				print("%s: deleted"%k, file=self.stdout)
-			import pdb;pdb.set_trace()
+			rec=None
 			while True:
 				p = task._parent
-				await task.delete()
 				if p is None: break
 				p = p()
 				if p is None: break
 				if p is task: break
+				try:
+					await task.delete(recursive=rec)
+				except etcd.EtcdDirNotEmpty:
+					break
+				rec=False
 				task = p
 
 

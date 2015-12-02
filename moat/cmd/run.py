@@ -30,7 +30,7 @@ import os
 import signal
 
 from ..script import Command, CommandError
-from ..script.task import TaskMaster
+from ..script.task import TaskMaster, JobIsRunningError
 from ..task import TASK_DIR,TASK
 from etctree.util import from_etcd
 from etctree.node import mtDir
@@ -79,7 +79,13 @@ by default, start every task that's defined for this host.
 		self.root.loop.remove_signal_handler(signal.SIGTERM)
 		self.tilt.set_result(None)
 
+	async def process_task(self, path):
+		if path in self.seen:
+			return
+		self.seen.add(path)
+
 	async def do_async(self,args):
+		self.seen = set()
 		self.tilt = asyncio.Future(loop=self.root.loop)
 		opts = self.options
 		if opts.is_global and not args and not opts.list:
@@ -94,85 +100,57 @@ by default, start every task that's defined for this host.
 			args = [TASK_DIR]
 		else:
 			args = [TASK_DIR+'/'+self.root.app]
-		
-		paths = []
-		for t in args:
-			paths.append(await etc.tree(t))
-		depth = opts.this
-		tasks = []
-		while paths and depth != 1:
-			depth -= 1
-			n_p = []
-			for t in paths:
-				for k,v in t.items():
-					if k == TASK:
-						if depth < 2:
-							tasks.append(v)
-					elif k.startswith(':'):
-						continue
-					elif isinstance(v,mtDir):
-						n_p.append(v)
-				paths = n_p
+		self.args = args
+		self.paths = []
+		self._monitors = []
+		self.tasks = []
+		self.jobs = {}
+		self.rescan = asyncio.Future(loop=self.root.loop)
+		for t in self.args:
+			tree = await etc.tree(t)
+			self.paths.append(tree)
+			self._monitors.append(tree.add_monitor(self._rescan))
+		await self._scan()
 		if opts.list:
-			for task in sorted(tasks, key=lambda _:_.path):
+			for task in sorted(self.tasks, key=lambda _:_.path):
 				path = task.path[len(TASK_DIR)+1:-(len(TASK)+1)]
 				print(path,task.get('name','-'),task.get('descr','-'), sep='\t')
 			return
 
-		def _report(path, state, *value):
-			if self.root.verbose:
-				print(path,state, *value, sep='\t', file=self.stdout)
-				if state == "error" and value and self.root.verbose > 1:
-					err = value[0]
-					traceback.print_exception(err.__class__,err,err.__traceback__)
-
-		js = {}
-		for task in tasks:
-			path = task.path[len(TASK_DIR)+1:-(len(TASK)+1)]
-			try:
-			    j = TaskMaster(self, path, callback=partial(_report, path))
-			except Exception as exc:
-				logger.exception("Could not set up %s (%s)",t.path,t.get('name',path))
-				if opts.killfail:
-					return 2
-			else:
-				js[j.path] = (t,j)
-		jobs = {}
-		for name,tj in js.items():
-			t,j = tj
-			try:
-				await j.init()
-			except Exception as exc:
-				logger.exception("Could not init %s (%s)",t.path,t.get('name',path))
-				if opts.killfail:
-					for j in jobs.values():
-						j.cancel()
-					return 2
-			else:
-				jobs[j.name] = j
-		del js
-
 		self.root.loop.add_signal_handler(signal.SIGINT,self._tilt)
 		self.root.loop.add_signal_handler(signal.SIGTERM,self._tilt)
+		await self._start()
+		await self._loop()
+
+	async def _loop(self):
 		try:
-			while jobs and not self.tilt.done():
-				done,pending = await asyncio.wait(chain((self.tilt,),jobs.values()), loop=self.root.loop, return_when=asyncio.FIRST_COMPLETED)
+			while self.jobs:
+				done,pending = await asyncio.wait(chain((self.tilt,self.rescan),self.jobs.values()), loop=self.root.loop, return_when=asyncio.FIRST_COMPLETED)
 				for j in done:
-					if j is self.tilt:
-						break
-					del jobs[j.name]
+					if j in (self.tilt,self.rescan):
+						continue
+					del self.jobs[j.name]
 					try:
 						r = j.result()
+					except asyncio.CancelledError:
+						if self.root.verbose:
+							print(j.name,'*CANCELLED*', sep='\t', file=self.stdout)
 					except Exception as exc:
-						log_exception("Running %s",j.name)
+						logger.log_exception("Running %s",j.name)
 						if opts.killfail:
 							break
 					else:
 						if self.root.verbose > 1:
 							print(j.name,r, sep='\t', file=self.stdout)
+				if self.tilt.done():
+					break
+				if self.rescan.done():
+					self.rescan = asyncio.Future(loop=self.root.loop)
+					await self._scan()
+					await self._start()
 
 		finally:
-			for j in jobs.values():
+			for j in self.jobs.values():
 				try:
 					await j.cancel()
 				except Exception:
@@ -185,6 +163,83 @@ by default, start every task that's defined for this host.
 				except Exception:
 					log_exception("Cancelling %s",j.name)
 
-		return len(jobs)
+		
+	def _rescan(self,_=None):
+		if not self.rescan.done():
+			self.rescan.set_result(None)
+
+	async def _scan(self):
+		depth = self.options.this
+		p = self.paths
+		while p and depth != 1:
+			depth -= 1
+			n_p = []
+			for t in p:
+				for k,v in t.items():
+					if k == TASK:
+						if depth < 2:
+							self.tasks.append(v)
+					elif k.startswith(':'):
+						continue
+					elif isinstance(v,mtDir):
+						n_p.append(v)
+			p = n_p
+
+	async def _start(self):
+		def _report(path, state, *value):
+			if self.root.verbose:
+				if state == "error" and value:
+					err = value[0]
+					if isinstance(err,JobIsRunningError):
+						errs = "already running"
+						err = None
+					elif isinstance(err,JobMarkGoneError):
+						errs = "task lock broken ?!?"
+						err = None
+					else:
+						errs = repr(err)
+					print(path,state, errs, sep='\t', file=self.stdout)
+					if self.root.verbose > 1 and err is not None:
+						traceback.print_exception(err.__class__,err,err.__traceback__)
+				else:
+					print(path,state, *value, sep='\t', file=self.stdout)
+
+		js = {}
+		old = set(self.jobs)
+		while self.tasks:
+			t = self.tasks.pop()
+			path = t.path[len(TASK_DIR)+1:-(len(TASK)+1)]
+			if path in old:
+				old.remove(path)
+				continue
+
+			try:
+			    j = TaskMaster(self, path, callback=partial(_report, path))
+			except Exception as exc:
+				logger.exception("Could not set up %s (%s)",t.path,t.get('name',path))
+				if opts.killfail:
+					return 2
+			else:
+				js[j.path] = (t,j)
+
+		for name,tj in js.items():
+			t,j = tj
+			try:
+				await j.init()
+			except JobIsRunningError:
+				continue
+			except Exception as exc:
+				logger.exception("Could not init %s (%s)",t.path,t.get('name',path))
+				if opts.killfail:
+					for j in self.jobs.values():
+						j.cancel()
+					return 2
+			else:
+				self.jobs[j.name] = j
+
+		for path in old:
+			await self.jobs[path].cancel()
+
+		return len(self.jobs)
 
 

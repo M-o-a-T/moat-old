@@ -232,10 +232,9 @@ async def runner(proc,cmd,fullname, _ttl=None,_refresh=None):
 		if ttl < 1:
 			raise ValueError("TTL must be positive",ttl)
 		cseq = await run_state.set("running",time(),ttl=ttl)
-	except etcd.EtcdAlreadyExist:
-		import pdb;pdb.set_trace()
+	except etcd.EtcdAlreadyExist as exc:
 		logger.warn("Job is already running: %s",fullname)
-		raise JobIsRunningError(fullname)
+		raise JobIsRunningError(fullname) from exc
 	mod = await run_state.set("started",time())
 	await run_state.wait(mod)
 	keep_running = False # if it's been superseded, do not delete
@@ -268,8 +267,8 @@ async def runner(proc,cmd,fullname, _ttl=None,_refresh=None):
 				raise JobMarkGoneError(fullname)
 			try:
 				await run_state.set("running",time(),ttl=ttl)
-			except (etcd.EtcdKeyNotFound,etcd.EtcdCompareFailed):
-				raise JobMarkGoneError(fullname)
+			except (etcd.EtcdKeyNotFound,etcd.EtcdCompareFailed) as exc:
+				raise JobMarkGoneError(fullname) from exc
 			killer.cancel()
 			killer = r.loop.call_later(ttl,lambda: main_task.cancel())
 			logger.debug("Run marker refreshed %s",fullname)
@@ -337,7 +336,7 @@ async def runner(proc,cmd,fullname, _ttl=None,_refresh=None):
 	finally:
 		# Now clean up everything
 		await run_state.set("stopped",time())
-		if not keep_running:
+		if not keep_running and 'running' in run_state:
 			try:
 				await run_state.delete("running")
 			except Exception as exc:
@@ -438,7 +437,7 @@ class TaskMaster(asyncio.Future):
 		self.job = asyncio.ensure_future(runner(j, self.cmd, self.name, _ttl=self._get_ttl))
 		self.job.add_done_callback(self._job_done)
 		if self.callback is not None:
-			self.callback("start",None)
+			self.callback("start")
 
 	async def cancel(self):
 		try:
@@ -468,6 +467,10 @@ class TaskMaster(asyncio.Future):
 		assert self.timer is None
 		try:
 			res = self.job.result()
+		except asyncio.CancelledError as exc:
+			if not self.done():
+				self.set_exception(exc)
+			return
 		except Exception as exc:
 			# TODO: limit the number of retries,
 			# this code only does 0 (retry=0) or 1 (max-retry=0) or inf (neither).
@@ -483,7 +486,11 @@ class TaskMaster(asyncio.Future):
 				return
 		else:
 			if self.callback is not None:
-				self.callback("ok",res)
+				if res is None:
+					pres = ()
+				else:
+					pres = (res,)
+				self.callback("ok",*pres)
 			self.exc = None
 			self.current_retry = self.vars['restart']
 			if not self.current_retry:
