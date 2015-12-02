@@ -28,6 +28,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import asyncio
 import os
 import signal
+import sys
 
 from ..script import Command, CommandError
 from ..script.task import TaskMaster, JobIsRunningError
@@ -111,6 +112,10 @@ by default, start every task that's defined for this host.
 			self.paths.append(tree)
 			self._monitors.append(tree.add_monitor(self._rescan))
 		await self._scan()
+		if not self.tasks:
+			if self.root.verbose:
+				print("No tasks found. Exiting.", file=sys.stderr)
+			return
 		if opts.list:
 			for task in sorted(self.tasks, key=lambda _:_.path):
 				path = task.path[len(TASK_DIR)+1:-(len(TASK)+1)]
