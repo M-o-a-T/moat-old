@@ -36,6 +36,8 @@ TASK_DIR = '/task'
 TASKDEF_DIR = '/meta/task'
 TASK = ':task'
 TASKDEF = ':taskdef'
+TASKSTATE_DIR = '/status/run'
+TASKSTATE = ':task'
 
 _VARS = {'ttl','refresh','restart','retry','max-retry'}
 

@@ -36,8 +36,8 @@ import time
 import types
 
 from ..script import Command, CommandError
-from ..script.task import Task,runner,_run_state, JobMarkGoneError,JobIsRunningError
-from ..task import tasks,task_var_types
+from ..script.task import Task,_run_state, JobMarkGoneError,JobIsRunningError
+from ..task import tasks,task_var_types, TASKSTATE_DIR,TASKSTATE
 
 import logging
 logger = logging.getLogger(__name__)
@@ -68,29 +68,39 @@ Check etcd access, and basic data layout.
 
 """
 
-	async def _do3(self):
-		logger.debug("start: _do3")
-		await asyncio.sleep(0.2,loop=self.root.loop)
-		raise RuntimeError("Dying")
+	class Task_do2(Task):
+		async def task(self):
+			logger.debug("start: _do2")
+			await asyncio.sleep(0.3,loop=self.loop)
 
-	async def _do4(self):
-		logger.debug("start: _do4")
-		async def _do4_():
-			await asyncio.sleep(0.2,loop=self.root.loop)
-			logger.debug("kill: _do4")
-			await self.root.etcd.delete("/status/run/test/do_4/:task/running")
-			pass
-		f = asyncio.ensure_future(_do4_(),loop=self.root.loop)
-		try:
-			logger.debug("sleep: _do4")
-			await asyncio.sleep(2.0,loop=self.root.loop)
-			raise RuntimeError("Did not get killed") # pragma: no cover
-		finally:
-			logger.debug("stop: _do4 %s",f)
-			if not f.done():
-				f.cancel() # pragma: no cover
-			try: await f
-			except Exception: pass # pragma: no cover
+			t = time.time()
+			run_state = await _run_state(self.etcd,"test/do_2")
+			assert run_state['started'] > t-int(os.environ.get('MOAT_IS_SLOW',1)), (run_state['started'],t)
+
+	class Task_do3(Task):
+		async def task(self):
+			logger.debug("start: _do3")
+			await asyncio.sleep(0.2,loop=self.loop)
+			raise RuntimeError("Dying")
+
+	class Task_do4(Task):
+		async def task(self):
+			logger.debug("start: _do4")
+			async def _do4_():
+				await asyncio.sleep(0.2,loop=self.loop)
+				logger.debug("kill: _do4")
+				await self.etcd.delete('/'.join((TASKSTATE_DIR,'test/do_4',TASKSTATE,'running')))
+			f = asyncio.ensure_future(_do4_(),loop=self.loop)
+			try:
+				logger.debug("sleep: _do4")
+				await asyncio.sleep(2.0,loop=self.loop)
+				raise RuntimeError("Did not get killed") # pragma: no cover
+			finally:
+				logger.debug("stop: _do4 %s",f)
+				if not f.done():
+					f.cancel() # pragma: no cover
+				try: await f
+				except Exception: pass # pragma: no cover
 
 	async def do_async(self,args):
 		c = self.root.cfg['config']
@@ -101,15 +111,6 @@ Check etcd access, and basic data layout.
 		for k in ('host','port','root'):
 			if k not in c:
 				raise CommandError("config.etcd: missing '%s' entry" % k) # pragma: no cover
-
-		class Task_do2(Task):
-			async def task(self):
-				logger.debug("start: _do2")
-				await asyncio.sleep(0.3,loop=self.loop)
-
-				t = time.time()
-				run_state = await _run_state(etc,"test/do_2")
-				assert run_state['started'] > t-int(os.environ.get('MOAT_IS_SLOW',1)), (run_state['started'],t)
 
 		retval = 0
 		etc = await self.root._get_etcd()
@@ -159,8 +160,9 @@ Check etcd access, and basic data layout.
 			return
 
 		try:
-			await runner(self._do3,self,"test/do_3")
-		except RuntimeError:
+			t = self.Task_do3(self,"test/do_3")
+			await t
+		except RuntimeError as exc:
 			pass
 		else:
 			raise RuntimeError("Error did not propagate") # pragma: no cover
@@ -173,7 +175,8 @@ Check etcd access, and basic data layout.
 		await run_state.close()
 
 		try:
-			await runner(self._do4,self,"test/do_4")
+			t = self.Task_do4(self,"test/do_4")
+			await t
 		except JobMarkGoneError:
 			pass
 		else:
@@ -185,8 +188,9 @@ Check etcd access, and basic data layout.
 		assert run_state['state'] == "fail", run_state['state']
 		await run_state.close()
 
-		dt2 = Task_do2(self,"test/do_2",{})
-		dt2a = Task_do2(self,"test/do_2",{})
+		dt2 = self.Task_do2(self,"test/do_2",{})
+		await asyncio.sleep(0.1,loop=self.root.loop)
+		dt2a = self.Task_do2(self,"test/do_2",{})
 		await asyncio.sleep(0.1,loop=self.root.loop)
 		dt2.run_state = run_state = await _run_state(etc,"test/do_2")
 		try:

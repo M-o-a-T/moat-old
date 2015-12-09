@@ -70,18 +70,18 @@ def test_task(loop):
 	m = MoatTest(loop=loop)
 	r = m.parse("-vvvc test.cfg task def list")
 	assert r == 0, r
-	assert m.in_stdout('test:sleep\t'), m.stdout_data
-	assert m.in_stdout('test:error\t'), m.stdout_data
+	assert m.in_stdout('test/sleep\t'), m.stdout_data
+	assert m.in_stdout('test/error\t'), m.stdout_data
 	
 	m = MoatTest(loop=loop)
-	r = m.parse("-vvvc test.cfg task def delete test:sleep")
+	r = m.parse("-vvvc test.cfg task def delete test/sleep")
 	assert r == 0, r
 
 	m = MoatTest(loop=loop)
 	r = m.parse("-vvvc test.cfg task def list")
 	assert r == 0, r
-	assert not m.in_stdout('test:sleep\t'), m.stdout_data
-	assert m.in_stdout('test:error\t'), m.stdout_data
+	assert not m.in_stdout('test/sleep\t'), m.stdout_data
+	assert m.in_stdout('test/error\t'), m.stdout_data
 	
 	m = MoatTest(loop=loop)
 	r = m.parse("-vvvc test.cfg task def init moat.task.test")
@@ -90,37 +90,37 @@ def test_task(loop):
 	m = MoatTest(loop=loop)
 	r = m.parse("-vvvc test.cfg task def list")
 	assert r == 0, r
-	assert m.in_stdout('test:sleep\t'), m.stdout_data
+	assert m.in_stdout('test/sleep\t'), m.stdout_data
 	
 	m = MoatTest(loop=loop)
-	r = m.parse("-vvvc test.cfg task def param test:sleep ttl 11.1")
+	r = m.parse("-vvvc test.cfg task def param test/sleep ttl 11")
 	assert r == 0, r
-	assert m.stdout_data == "ttl=11.1 (new)\n", m.stdout_data
+	assert m.stdout_data == "ttl=11 (new)\n", m.stdout_data
 
 	m = MoatTest(loop=loop)
-	r = m.parse("-vvvc test.cfg task def param test:sleep ttl")
+	r = m.parse("-vvvc test.cfg task def param test/sleep ttl")
 	assert r == 0, r
-	assert m.stdout_data == "11.1\n", m.stdout_data
+	assert m.stdout_data == "11\n", m.stdout_data
 	
 	m = MoatTest(loop=loop)
-	r = m.parse("-vvvc test.cfg task def param test:sleep ttl 10")
+	r = m.parse("-vvvc test.cfg task def param test/sleep ttl 10")
 	assert r == 0, r
-	assert m.stdout_data == "ttl=10 (was 11.1)\n", m.stdout_data
+	assert m.stdout_data == "ttl=10 (was 11)\n", m.stdout_data
 	
 	m = MoatTest(loop=loop)
-	r = m.parse("-vvvc test.cfg task def param test:sleep ttl")
+	r = m.parse("-vvvc test.cfg task def param test/sleep ttl")
 	assert r == 0, r
-	assert m.stdout_data == "10.0\n", m.stdout_data
+	assert m.stdout_data == "10\n", m.stdout_data
 	
 	m = MoatTest(loop=loop)
-	r = m.parse("-vvvc test.cfg task def param test:sleep")
+	r = m.parse("-vvvc test.cfg task def param test/sleep")
 	assert r == 0, r
-	assert m.stdout_data == "ttl\t10.0\n", m.stdout_data
+	assert m.stdout_data == "ttl\t10\n", m.stdout_data
 	
 	m = MoatTest(loop=loop)
 	r = m.parse("-vvvc test.cfg task def param")
 	assert r == 0, r
-	assert m.stdout_data == "test:sleep\tttl\t10.0\n", m.stdout_data
+	assert m.stdout_data == "test/sleep\tttl\t10\n", m.stdout_data
 	
 	
 def test_test(loop):

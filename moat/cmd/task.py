@@ -195,7 +195,7 @@ This command deletes (some of) that data.
 				raise CommandError("You can't delete everything.")
 			args = td.tagged(TASKDEF)
 		for k in args:
-			taskdef = await td.subdir(k,name=TASKDEF, create=False)
+			t = await td.subdir(k,name=TASKDEF, create=False)
 			if self.root.verbose:
 				print("%s: deleted"%k, file=self.stdout)
 			rec=None
@@ -231,19 +231,21 @@ class _ParamCommand(Command,DefSetup):
 		if self._def and self.options.is_global:
 			if self.options.delete:
 				raise CommandError("You cannot delete global parameters.")
-			taskdef = self.root.etc_cfg['run']
+			data = self.root.etc_cfg['run']
 		elif not args:
 			if self.options.delete:
 				raise CommandError("You cannot delete all parameters.")
-			for name,taskdef in t.items():
+
+			for task in t.tagged(self.TAG):
+				path = task.path[len(self.DIR)+1:-(len(self.TAG)+1)]
 				for k in _VARS:
-					if k in taskdef:
-						print(name,k,taskdef[k], sep='\t',file=self.stdout)
+					if k in task:
+						print(path,k,task[k], sep='\t',file=self.stdout)
 			return
 		else:
 			name = args.pop(0)
 			try:
-				taskdef = await t.subdir(name, name=self.TAG)
+				data = await t.subdir(name, name=self.TAG)
 			except KeyError:
 				raise CommandError("Task definition '%s' is unknown." % name)
 
@@ -251,16 +253,16 @@ class _ParamCommand(Command,DefSetup):
 			if not args:
 				args = _VARS
 			for k in args:
-				if k in taskdef:
+				if k in data:
 					if self.root.verbose:
-						print("%s=%s (deleted)" % (k,taskdef[k]), file=self.stdout)
-					await taskdef.delete(k)
+						print("%s=%s (deleted)" % (k,data[k]), file=self.stdout)
+					await data.delete(k)
 		elif len(args) == 1:
-			print(taskdef[args[0]], file=self.stdout)
+			print(data[args[0]], file=self.stdout)
 		elif not len(args):
 			for k in _VARS:
-				if k in taskdef:
-					print(k,taskdef[k], sep='\t',file=self.stdout)
+				if k in data:
+					print(k,data[k], sep='\t',file=self.stdout)
 		elif len(args)%2:
 			raise CommandError("I do not know what to do with an odd number of arguments.")
 		else:
@@ -270,13 +272,13 @@ class _ParamCommand(Command,DefSetup):
 					raise CommandError("'%s' is not a valid parameter.")
 				v = args.pop(0)
 				if self.root.verbose:
-					if k not in taskdef:
+					if k not in data:
 						print("%s=%s (new)" % (k,v), file=self.stdout)
-					elif str(taskdef[k]) == v:
+					elif str(data[k]) == v:
 						print("%s=%s (unchanged)" % (k,v), file=self.stdout)
 					else:
-						print("%s=%s (was %s)" % (k,v,taskdef[k]), file=self.stdout)
-				await taskdef.set(k, v)
+						print("%s=%s (was %s)" % (k,v,data[k]), file=self.stdout)
+				await data.set(k, v)
 
 class DefParamCommand(_ParamCommand):
 	_def = True

@@ -17,7 +17,7 @@ from time import time
 from traceback import format_exception
 import weakref
 
-from ..task import _VARS,  task_var_types, TASK_DIR,TASKDEF_DIR,TASK,TASKDEF
+from ..task import _VARS,  task_var_types, TASK_DIR,TASKDEF_DIR,TASK,TASKDEF, TASKSTATE_DIR,TASKSTATE
 
 import logging
 logger = logging.getLogger(__name__)
@@ -69,18 +69,20 @@ class Task(asyncio.Task):
 
 	_global_loop=False
 
-	def __init__(self, cmd, name, config={}, runner_data=None):
+	def __init__(self, cmd, name, config={}):
 		"""\
 			@cmd: the command object from `moat run`.
 			@name: the etcd tree to use (without /task and :task prefix/suffix)
-			@config: some configuration data, possibly an etctree object
-			@runner_data: pass-thru attribute for the task runner
+			@config: some configuration data or this task, possibly an etctree object
 			"""
-		self._cmd = weakref.ref(cmd)
+		assert ':' not in self.name
+		assert name[0] != '/'
+		assert name[-1] != '/'
+
+		self.cmd = cmd
 		self.config = config
 		self._ttl = config.get('ttl',None)
 		self._refresh = config.get('refresh',None)
-		self.run_data = runner_data
 		self.name = name
 		self.loop = cmd.root.loop
 		super().__init__(coro_wrapper(self.run), loop=self.loop)
@@ -107,27 +109,171 @@ class Task(asyncio.Task):
 			d['data'] = cls.schema
 		return cls.name, dir
 
-	async def run(self):
+	async def run(self, _ttl=None,_refresh=None):
 		"""\
-			Run a task with configuration from etcd.
+			This is MoaT's standard task runner.
+			It takes care of noting the task's state in etcd.
+			The task will be killed if there's a conflict.
+
+			@_ttl: time-to-live for the process lock.
+			@_refresh: how often the lock is refreshed within the TTL.
+			Thus, ttl=10 and refresh=4 would refresh the lock every 2.5
+			seconds. The minimum is 1. A safety margin of 0.1 is added
+			internally.
+
+			If _ttl is a callable, it must return a (ttl,refresh) tuple.
+			_refresh is ignored in that case.
 			"""
-		r = self._cmd().root
-		self.loop = r.loop
-		# Add the notifier. It's attached to our config data, so ignore the
-		# copy that's passed in by etctree's monitoring.
+		logger.debug("Starting %s: %s",self.name, self.__class__.__name__)
+		r = self.cmd.root
+		await r.setup(self)
+		def get_ttl():
+			if callable(_ttl):
+				ttl,refresh = _ttl()
+			else:
+				ttl = _ttl if _ttl is not None else int(r.cfg['config']['run']['ttl'])
+				refresh = _refresh if _refresh is not None else float(r.cfg['config']['run']['refresh'])
+				if refresh < 1:
+					refresh = 1
+			assert refresh>=1, refresh
+			refresh = (ttl/(refresh+0.1))
+			return ttl,refresh
+
+		run_state = await _run_state(r.etcd,self.name)
+		ttl,refresh = get_ttl()
+
+		try:
+			if 'running' in run_state:
+				raise etcd.EtcdAlreadyExist(message=self.name+'/'+TASK+'/running', payload=run_state['running']) # pragma: no cover ## timing dependant
+			ttl = int(ttl)
+			if ttl < 1:
+				raise ValueError("TTL must be positive",ttl)
+			cseq = await run_state.set("running",time(),ttl=ttl)
+		except etcd.EtcdAlreadyExist as exc:
+			logger.warn("Job is already running: %s",self.name)
+			raise JobIsRunningError(self.name) from exc
+		mod = await run_state.set("started",time())
+		await run_state.wait(mod)
+		keep_running = False # if it's been superseded, do not delete
+
 		if isinstance(self.config,mtBase):
 			_note = self.config.add_monitor(lambda _: self.cfg_changed())
 
-		# this sets my .etcd and .amqp attributes, in case the task needs them
-		await r.setup(self)
-		
+		def aborter():
+			"""If the updater doesn't work (e.g. if etcd isn't reachable)
+			this will terminate the task."""
+			logger.error("Aborted %s", self.name)
+			nonlocal killer
+			try:
+				main_task.cancel()
+			except Exception:
+				pass
+			killer = None
+		killer = r.loop.call_later(ttl, aborter)
+
+		async def updater(refresh):
+			# Periodically refresh the "running" entry.
+
+			# The initial sleep is paired with the initial TTL; otherwise, if
+			# somebody changed the TTL from 1 to 100 just as we're starting up,
+			# the refresh value would be far too long, the old 
+			nonlocal killer
+			await asyncio.sleep(refresh, loop=r.loop)
+			while True:
+				ttl,refresh = get_ttl()
+				logger.debug("Run marker check %s",self.name)
+				if 'running' not in run_state or run_state._get('running')._cseq != cseq:
+					logger.warn("Run marker deleted %s",self.name)
+					raise JobMarkGoneError(self.name)
+				try:
+					await run_state.set("running",time(),ttl=ttl)
+				except (etcd.EtcdKeyNotFound,etcd.EtcdCompareFailed) as exc:
+					raise JobMarkGoneError(self.name) from exc
+				killer.cancel()
+				killer = r.loop.call_later(ttl,lambda: main_task.cancel())
+				logger.debug("Run marker refreshed %s",self.name)
+				await asyncio.sleep(refresh, loop=r.loop)
+				
+		# Now start the updater and the main task.
+		import gc; logger.debug("Ref %s",gc.get_referrers(self))
+		run_task = asyncio.ensure_future(updater(refresh), loop=r.loop)
+		main_task = asyncio.ensure_future(self.task(), loop=r.loop)
+		res = None
 		try:
-			res = await self.task()
+			try:
+				try:
+					d,p = await asyncio.wait((main_task,run_task), loop=r.loop, return_when=asyncio.FIRST_COMPLETED)
+				finally:
+					if killer is not None:
+						killer.cancel()
+				logger.debug("Ended %s :: %s :: %s",self.name, repr(d),repr(p))
+			except asyncio.CancelledError:
+				# Cancelling an asyncio.wait() doesn't propagate
+				logger.debug("Cancelling %s",self.name)
+				try:
+					main_task.cancel()
+					await main_task
+				except Exception:
+					pass
+			# At this point at least one of the two jobs has definitely exited
+			# and the "killer" timer is either cancelled or has triggered.
+			if run_task.done():
+				# The TTL could not be refreshed: kill the job.
+				if not run_task.cancelled() and isinstance(run_task.exception(), JobMarkGoneError):
+					keep_running = True
+				if not main_task.done():
+					main_task.cancel()
+					try: await main_task
+					except Exception: pass
+					# We'll get the error later.
+			else:
+				assert main_task.done()
+				try: run_task.cancel()
+				except Exception: pass
+				try: await run_task
+				except Exception: pass
+				# At this point we don't care why the run_task thread died.
+
+			assert main_task.done()
+			assert run_task.done()
+
+			if main_task.cancelled():
+				# Killed because of a timeout / refresh problem. Major fail.
+				await run_state.set("state","fail")
+				await run_state.set("message", "Aborted by timeout" if (killer is None) else str(run_task.exception()))
+				run_task.result()
+				assert False,"the previous line should have raised an error" # pragma: no cover
+			else:
+				# Not killed, so it either returned a result …
+				try:
+					res = main_task.result()
+				except Exception as exc:
+					# … or not.
+					exc.__context__ = None # the cancelled run_task is not interesting
+					await run_state.set("state","error")
+					await run_state.set("message",str(exc))
+					await run_state.set("debug","".join(format_exception(exc.__class__,exc,exc.__traceback__)))
+					await run_state.set("debug_time",str(time()))
+					raise
+				else:
+					await run_state.set("state","ok")
+					await run_state.set("message",str(res))
+					return res
 		finally:
-			# Clean up
+
+			# Now clean up everything
+			await run_state.set("stopped",time())
+			if not keep_running and 'running' in run_state:
+				try:
+					await run_state.delete("running")
+				except Exception as exc:
+					logger.exception("Could not delete 'running' entry")
+			await run_state.wait()
+			await run_state.close()
 			del self.amqp
 			del self.etcd
-		return res
+
+			logger.debug("Ended %s: %s",self.name, res)
 
 	def cfg_changed(self):
 		"""\
@@ -141,7 +287,7 @@ class Task(asyncio.Task):
 			"""
 		raise NotImplementedError("You need to write the code that does the work!")
 
-async def _run_state(etcd,fullname):
+async def _run_state(etcd,path):
 	"""Get a tree for the job's state. This is a separate function for testing"""
 	from etctree.node import mtFloat
 	from etctree.etcd import EtcTypes
@@ -149,169 +295,8 @@ async def _run_state(etcd,fullname):
 	types.register('started', cls=mtFloat)
 	types.register('stopped', cls=mtFloat)
 	types.register('running', cls=mtFloat)
-	run_state = await etcd.tree('/status/run/'+fullname+'/'+TASK, types=types)
+	run_state = await etcd.tree('/'.join((TASKSTATE_DIR,path,TASKSTATE)), types=types)
 	return run_state
-
-async def runner(proc,cmd,fullname, _ttl=None,_refresh=None):
-	"""\
-		This is MoaT's standard task runner.
-		It takes care of noting the task's state in etcd.
-		The task will be killed if there's a conflict.
-
-		@proc: the code to run.
-		@cmd: the command interpreter responsible for this.
-		@fullname: Path to the command's state in etcd.
-
-		@_ttl: time-to-live for the process lock.
-		@_refresh: how often the lock is refreshed within the TTL.
-		Thus, ttl=10 and refresh=4 would refresh the lock every 2.5
-		seconds. The minimum is 1. A safety margin of 0.1 is added
-		internally.
-
-		If _ttl is a callable, it must return a (ttl,refresh) tuple.
-		_refresh is ignored in that case.
-		"""
-	assert ':' not in fullname
-	assert fullname[0] != '/'
-	assert fullname[-1] != '/'
-	logger.debug("Starting %s: %s",fullname,proc)
-	r = cmd.root
-	await r.setup()
-	def get_ttl():
-		if callable(_ttl):
-			ttl,refresh = _ttl()
-		else:
-			ttl = _ttl if _ttl is not None else int(r.cfg['config']['run']['ttl'])
-			refresh = _refresh if _refresh is not None else float(r.cfg['config']['run']['refresh'])
-			if refresh < 1:
-				refresh = 1
-		refresh = (ttl/(refresh+0.1))
-		return ttl,refresh
-
-	run_state = await _run_state(r.etcd,fullname)
-	ttl,refresh = get_ttl()
-
-	try:
-		if 'running' in run_state:
-			raise etcd.EtcdAlreadyExist(message=fullname+'/running', payload=run_state['running']) # pragma: no cover ## timing dependant
-		ttl = int(ttl)
-		if ttl < 1:
-			raise ValueError("TTL must be positive",ttl)
-		cseq = await run_state.set("running",time(),ttl=ttl)
-	except etcd.EtcdAlreadyExist as exc:
-		logger.warn("Job is already running: %s",fullname)
-		raise JobIsRunningError(fullname) from exc
-	mod = await run_state.set("started",time())
-	await run_state.wait(mod)
-	keep_running = False # if it's been superseded, do not delete
-
-	def aborter():
-		"""If the updater doesn't work (e.g. if etcd isn't reachable)
-		this will terminate the task."""
-		logger.error("Aborted %s", fullname)
-		nonlocal killer
-		try:
-			main_task.cancel()
-		except Exception:
-			pass
-		killer = None
-	killer = r.loop.call_later(ttl, aborter)
-
-	async def updater(refresh):
-		# Periodically refresh the "running" entry.
-
-		# The initial sleep is paired with the initial TTL; otherwise, if
-		# somebody changed the TTL from 1 to 100 just as we're starting up,
-		# the refresh value would be far too long, the old 
-		nonlocal killer
-		await asyncio.sleep(refresh, loop=r.loop)
-		while True:
-			ttl,refresh = get_ttl()
-			logger.debug("Run marker check %s",fullname)
-			if 'running' not in run_state or run_state._get('running')._cseq != cseq:
-				logger.warn("Run marker deleted %s",fullname)
-				raise JobMarkGoneError(fullname)
-			try:
-				await run_state.set("running",time(),ttl=ttl)
-			except (etcd.EtcdKeyNotFound,etcd.EtcdCompareFailed) as exc:
-				raise JobMarkGoneError(fullname) from exc
-			killer.cancel()
-			killer = r.loop.call_later(ttl,lambda: main_task.cancel())
-			logger.debug("Run marker refreshed %s",fullname)
-			await asyncio.sleep(refresh, loop=r.loop)
-			
-	# Now start the updater and the main task.
-	run_task = asyncio.ensure_future(updater(refresh), loop=r.loop)
-	main_task = asyncio.ensure_future(proc(), loop=r.loop)
-	try:
-		try:
-			try:
-				d,p = await asyncio.wait((main_task,run_task), loop=r.loop, return_when=asyncio.FIRST_COMPLETED)
-			finally:
-				if killer is not None:
-					killer.cancel()
-			logger.debug("Ended %s :: %s :: %s",fullname, repr(d),repr(p))
-		except asyncio.CancelledError:
-			# Cancelling an asyncio.wait() doesn't propagate
-			logger.debug("Cancelling %s",fullname)
-			try:
-				main_task.cancel()
-				await main_task
-			except Exception:
-				pass
-		# At this point at least one of the two jobs has definitely exited
-		# and the "killer" timer is either cancelled or has triggered.
-		if run_task.done():
-			# The TTL could not be refreshed: kill the job.
-			if not run_task.cancelled() and isinstance(run_task.exception(), JobMarkGoneError):
-				keep_running = True
-			if not main_task.done():
-				main_task.cancel()
-				try: await main_task
-				except Exception: pass
-				# We'll get the error later.
-		else:
-			assert main_task.done()
-			try: run_task.cancel()
-			except Exception: pass
-			try: await run_task
-			except Exception: pass
-			# At this point we don't care why the run_task thread died.
-
-		if main_task.cancelled():
-			# Killed because of a timeout / refresh problem. Major fail.
-			await run_state.set("state","warn")
-			await run_state.set("message", "Aborted by timeout" if (killer is None) else str(run_task.exception()))
-			run_task.result()
-			assert False,"the previous line should have raised an error" # pragma: no cover
-		else:
-			# Not killed, so it either returned a result …
-			try:
-				res = main_task.result()
-			except Exception as exc:
-				# … or not.
-				exc.__context__ = None # the cancelled run_task is not interesting
-				await run_state.set("state","error")
-				await run_state.set("message",str(exc))
-				await run_state.set("debug","".join(format_exception(exc.__class__,exc,exc.__traceback__)))
-				await run_state.set("debug_time",str(time()))
-				raise
-			else:
-				await run_state.set("state","ok")
-				await run_state.set("message",str(res))
-	finally:
-		# Now clean up everything
-		await run_state.set("stopped",time())
-		if not keep_running and 'running' in run_state:
-			try:
-				await run_state.delete("running")
-			except Exception as exc:
-				logger.exception("Could not delete 'running' entry")
-		await run_state.wait()
-		await run_state.close()
-
-		logger.debug("Ended %s",fullname)
-
 
 class TaskMaster(asyncio.Future):
 	"""An object which controls running and restarting a task from etcd."""
@@ -399,8 +384,8 @@ class TaskMaster(asyncio.Future):
 		return self.vars['ttl'], self.vars['refresh']
 
 	def _start(self):
-		j = lambda: self.cls(self.cmd, self.name, config=self.task._get('data',{}))
-		self.job = asyncio.ensure_future(runner(j, self.cmd, self.name, _ttl=self._get_ttl))
+		j = self.cls(self.cmd, self.name, config=self.task._get('data',{}))
+		self.job = asyncio.ensure_future(j.run(self.cmd, self.name, _ttl=self._get_ttl))
 		self.job.add_done_callback(self._job_done)
 		if self.callback is not None:
 			self.callback("start")

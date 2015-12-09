@@ -29,7 +29,6 @@ import subprocess
 from functools import wraps
 from socket import socket
 import time
-import gc
 
 import logging
 logging.basicConfig(filename='test.log', level=logging.DEBUG)

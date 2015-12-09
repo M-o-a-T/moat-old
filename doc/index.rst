@@ -153,7 +153,7 @@ The MoaT data is completely contained in a sub-tree, by default ``/moat``.
   * run
 
     Running programs note their presence here. Each task's entry is under
-    "/status/run/APPNAME/TASKNAME", with these items:
+    "/status/run/TASKPATH/:task", with these items:
 
     * started
 
@@ -162,7 +162,7 @@ The MoaT data is completely contained in a sub-tree, by default ``/moat``.
     * running
       
       Unix timestamp. This entry shall be equipped with a TTL and updated often enough so that it won't time out.
-      If a task subsequently finds that its entry has in fact timed out, it must abort.
+      If a task discovers that its entry has in fact timed out, it must abort immediately.
 
     * state
 
@@ -177,7 +177,7 @@ The MoaT data is completely contained in a sub-tree, by default ``/moat``.
 
     * message
 
-      The error message it has died with, if applicable.
+      The error message the task has died with, if applicable.
 
 * task
 
