@@ -40,7 +40,7 @@ class Sleeper(Task):
 	@classmethod
 	def types(cls,tree):
 		super().types(tree)
-		tree.register(cls=mtFloat)
+		tree.register("delay",cls=mtFloat)
 		
 	def _timeout(self):
 		if self.f is not None:
@@ -50,10 +50,13 @@ class Sleeper(Task):
 
 	async def task(self):
 		t = time()
-		while t+float(self.config['delay']) > time():
+		if 'delay' not in self.config:
+			await self.config.set('delay',10)
+
+		while t+self.config['delay'] > time():
 			self.t_updated = False
 			self.f = asyncio.Future(loop=self.loop)
-			self.d = self.loop.call_later(float(self.config['delay']), self._timeout)
+			self.d = self.loop.call_later(self.config['delay'], self._timeout)
 			try:
 				await self.f
 			except asyncio.CancelledError:

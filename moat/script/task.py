@@ -35,6 +35,10 @@ class JobMarkGoneError(RuntimeError):
 
 @asyncio.coroutine
 def coro_wrapper(proc):
+	"""\
+		This code is responsible for turning whatever callable you pass in
+		into a "yield from"-style coroutine.
+		"""
 	did_call = False
 	if inspect.iscoroutinefunction(proc):
 		proc = proc()
@@ -49,50 +53,14 @@ def coro_wrapper(proc):
 
 class Task(asyncio.Task):
 	"""\
-		I am a task to be executed within MoaT.
-
-		The way this works is to declare an etctree entry:
-			…
-				task
-					invalid.domain.host // or some other random hierarchy
-						task_one		// your choice
-							:task
-								summary: This is an example task
-								taskdef: NAME
-								data: # TODO: according to the schema
-									foo: bar
-									baz: quux
-								restart: 99
-								ttl: 12
-								refresh: 2
-								restart: 10
-								retry: 10
-								max-retry: 999
-
-				meta
-					task
-						NAME	// also some hierarchy, set by code
-							:taskdef
-								code: moat.task.whatever.YourTask
-								language: python
-								summary: SUMMARY
-								data: description (json-schema), TODO
-
-		`moat run task_one` will find your task, read the parameters into a
-		dict, and call the task object's "task" procedure.
+		I am the base class for a task to be executed within MoaT.
 
 		`self.loop` contains the asyncio loop to use.
 		Set `_global_loop` to True if you need to fork a process. (TODO)
 
-		The defaults for the following values are at /config/run/:
-
-		`ttl` and `refresh` control how long the running state in etcd
-		lasts before it is cleaned up; `refresh` says how often it is
-		renewed within that timeframe.
-		
-		"restart" says how long to wait after a successful run, "retry" and
-		"max-retry" apply to those that are not. The retry time will be
-		multiplied by 1.2345 each time the job fails.
+		The `ttl` and `refresh` config values control how long the running
+		state in etcd lasts before it is cleaned up; `refresh` says how
+		often it is renewed within that timeframe.
 		"""
 	name = "do_not_run.py"
 	summary = """This is a prototype. Do not use."""
@@ -104,7 +72,7 @@ class Task(asyncio.Task):
 	def __init__(self, cmd, name, config={}, runner_data=None):
 		"""\
 			@cmd: the command object from `moat run`.
-			@name: the etcd tree to use, typically /task/DOMAIN/TASKNAME
+			@name: the etcd tree to use (without /task and :task prefix/suffix)
 			@config: some configuration data, possibly an etctree object
 			@runner_data: pass-thru attribute for the task runner
 			"""
@@ -117,15 +85,11 @@ class Task(asyncio.Task):
 		self.loop = cmd.root.loop
 		super().__init__(coro_wrapper(self.run), loop=self.loop)
 
-	def update_ttl(self, ttl,refresh):
-		self._ttl = ttl
-		self._refresh = refresh
-
 	@classmethod
 	def types(cls,types):
 		"""\
 			`types` is an etctree.EtcTypes instance.
-			Add your subtree data types here. The default is Unicode.
+			Add your data types here. The default is Unicode.
 
 			This is a class method.
 			"""
@@ -154,7 +118,7 @@ class Task(asyncio.Task):
 		if isinstance(self.config,mtBase):
 			_note = self.config.add_monitor(lambda _: self.cfg_changed())
 
-		# this sets .etcd and .amqp attributes
+		# this sets my .etcd and .amqp attributes, in case the task needs them
 		await r.setup(self)
 		
 		try:
@@ -172,11 +136,13 @@ class Task(asyncio.Task):
 		pass
 
 	async def task(self):
-		"""Override this to actually run the task"""
+		"""\
+			Override this to actually do the task's job.
+			"""
 		raise NotImplementedError("You need to write the code that does the work!")
 
 async def _run_state(etcd,fullname):
-	"""Get a tree for the job's state. Separate function because testing"""
+	"""Get a tree for the job's state. This is a separate function for testing"""
 	from etctree.node import mtFloat
 	from etctree.etcd import EtcTypes
 	types = EtcTypes()
