@@ -71,31 +71,27 @@ class ProcessHelper(asyncio.SubprocessProtocol):
 	def pipe_data_received(self,fd,data):
 		self.fd[fd] += data
 	
-	def process_exited(self):
-		if not self.done.done():
-			self.done.set_result(self.get_returncode())
-
 	def connection_lost(self,exc):
 		if self.done.done():
 			return
 		else: # pragma: no cover
 			if exc is None:
-				self.done.set_result(True)
+				self.done.set_result(self._transport.get_returncode())
 			else:
 				self.done.set_exception(exc)
 
 	async def start(self):
 		self.done = asyncio.Future(loop=self._loop)
-		self.transport,_ = await self._loop.subprocess_exec(lambda: self, self.proc,*(str(x) for x in self.args), **self.kw)
+		self._transport,_ = await self._loop.subprocess_exec(lambda: self, self.proc,*(str(x) for x in self.args), **self.kw)
 		logger.debug("Started: %s",self.proc)
 
 	def stop(self):
-		self.transport.terminate()
+		self._transport.terminate()
 		return self.wait()
 	stop._is_coroutine = True
 
 	def kill(self):
-		self.transport.kill()
+		self._transport.kill()
 		return self.wait()
 	kill._is_coroutine = True
 

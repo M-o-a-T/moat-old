@@ -40,6 +40,18 @@ async def test_base(loop):
 	assert t2-t1 < 1.2
 
 @pytest.mark.run_loop
+async def test_tf(loop):
+	p = ProcessHelper("true", loop=loop)
+	await p.start()
+	r = await p.wait()
+	assert r == 0, r
+
+	p = ProcessHelper("false", loop=loop)
+	await p.start()
+	r = await p.wait()
+	assert r == 1, r
+
+@pytest.mark.run_loop
 async def test_base_fd(loop):
 	p = ProcessHelper("echo","Foo!", loop=loop)
 	await p.start()
