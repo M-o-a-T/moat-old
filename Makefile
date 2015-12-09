@@ -63,6 +63,10 @@ test: all
 		--cov=moat.util \
 		--cov-config .coveragerc
 
+t: all
+	@rm -f test.log
+	py.test-3 -x --assert=plain tests
+
 otest: all
 	@$(MAKE) -C test --no-print-directory otest
 diff: FIX
