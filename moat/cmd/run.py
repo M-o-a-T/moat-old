@@ -31,8 +31,8 @@ import signal
 import sys
 
 from ..script import Command, CommandError
-from ..script.task import TaskMaster, JobIsRunningError
-from ..task import TASK_DIR,TASK
+from ..script.task import TaskMaster, JobIsRunningError, JobMarkGoneError
+from ..task import TASK_DIR,TASK, TASKSTATE_DIR,TASKSTATE
 from etctree.util import from_etcd
 from etctree.node import mtDir
 from functools import partial
@@ -125,9 +125,10 @@ by default, start every task that's defined for this host.
 		self.root.loop.add_signal_handler(signal.SIGINT,self._tilt)
 		self.root.loop.add_signal_handler(signal.SIGTERM,self._tilt)
 		await self._start()
-		await self._loop()
+		return (await self._loop())
 
 	async def _loop(self):
+		errs = 0
 		try:
 			while self.jobs:
 				done,pending = await asyncio.wait(chain((self.tilt,self.rescan),self.jobs.values()), loop=self.root.loop, return_when=asyncio.FIRST_COMPLETED)
@@ -138,11 +139,14 @@ by default, start every task that's defined for this host.
 					try:
 						r = j.result()
 					except asyncio.CancelledError:
+						errs += 10
+							errs += 10
 						if self.root.verbose:
 							print(j.name,'*CANCELLED*', sep='\t', file=self.stdout)
 					except Exception as exc:
-						logger.log_exception("Running %s",j.name)
-						if opts.killfail:
+						errs += 1
+						logger.exception("Running %s",j.name)
+						if self.options.killfail:
 							break
 					else:
 						if self.root.verbose > 1:
@@ -167,6 +171,7 @@ by default, start every task that's defined for this host.
 						print(j.name,'*CANCELLED*', sep='\t', file=self.stdout)
 				except Exception:
 					log_exception("Cancelling %s",j.name)
+		return errs
 
 		
 	def _rescan(self,_=None):
@@ -234,8 +239,10 @@ by default, start every task that's defined for this host.
 			except JobIsRunningError:
 				continue
 			except Exception as exc:
+				# Let's assume that this is fatal.
+				await self.root.etcd.set('/'.join((TASKSTATE_DIR,j.path,TASKSTATE,"debug")), "".join(traceback.format_exception(exc.__class__,exc,exc.__traceback__)))
 				logger.exception("Could not init %s (%s)",t.path,t.get('name',path))
-				if opts.killfail:
+				if self.options.killfail:
 					for j in self.jobs.values():
 						j.cancel()
 					return 2

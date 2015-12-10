@@ -270,3 +270,59 @@ The MoaT data is completely contained in a sub-tree, by default ``/moat``.
           Describes the code's configuration. TODO. Probably JSON, i.e.
           a json-schema structure.
 
+* bus
+
+  * onewire
+
+    * device
+
+      * ID
+
+        * path
+
+          servername:/bus/path
+
+    * server
+
+      * name
+
+        * host
+
+          Host name of this server
+
+        * port
+
+          TCP Port to connect to.
+
+        * info
+
+          Some sort of human-readable text
+
+        * bus
+
+          The collection of buses this server knows.
+
+          * <unique>
+
+            * path
+            
+              The bus path, like bus.0 or bus.1/1F.12345678/main
+            
+            * broken
+
+              Counter for an unreachable bus. If too high, mark its
+              devices as inaccessible.
+            
+            * devices
+
+              * <dev_id>
+
+                Counter for a vanished device. If too high, mark the device
+                as inaccessible.
+
+        * scanning
+
+          A lock for periodic bus scanning, to make sure two scanners
+          don't step on each other's toes.
+
+

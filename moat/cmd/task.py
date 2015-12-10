@@ -269,7 +269,7 @@ class _ParamCommand(Command,DefSetup):
 			while args:
 				k = args.pop(0)
 				if k not in _VARS:
-					raise CommandError("'%s' is not a valid parameter.")
+					raise CommandError("'%s' is not a valid parameter."%k)
 				v = args.pop(0)
 				if self.root.verbose:
 					if k not in data:
@@ -399,7 +399,7 @@ class _AddUpdate:
 					data[k] = v
 			if not self._update:
 				args[p] # raises IndexError if nothing is left
-			descr = "".join(args[p:])
+			descr = " ".join(args[p:])
 		except IndexError:
 			raise CommandError("Missing command parameters")
 		t = await self.setup(meta=False)

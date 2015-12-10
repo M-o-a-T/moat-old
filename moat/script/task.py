@@ -69,11 +69,24 @@ class Task(asyncio.Task):
 
 	_global_loop=False
 
-	def __init__(self, cmd, name, config={}):
+	def __init__(self, cmd, name, config={}, _ttl=None,_refresh=None):
 		"""\
+			This is MoaT's standard task runner.
+			It takes care of noting the task's state in etcd.
+			The task will be killed if there's a conflict.
+
 			@cmd: the command object from `moat run`.
 			@name: the etcd tree to use (without /task and :task prefix/suffix)
 			@config: some configuration data or this task, possibly an etctree object
+
+			@_ttl: time-to-live for the process lock.
+			@_refresh: how often the lock is refreshed within the TTL.
+			Thus, ttl=10 and refresh=4 would refresh the lock every 2.5
+			seconds. The minimum is 1. A safety margin of 0.1 is added
+			internally.
+
+			If _ttl is a callable, it must return a (ttl,refresh) tuple.
+			_refresh is ignored in that case.
 			"""
 		assert ':' not in self.name
 		assert name[0] != '/'
@@ -81,8 +94,8 @@ class Task(asyncio.Task):
 
 		self.cmd = cmd
 		self.config = config
-		self._ttl = config.get('ttl',None)
-		self._refresh = config.get('refresh',None)
+		self._ttl = config.get('ttl',None) if _ttl is None else _ttl
+		self._refresh = config.get('refresh',None) if _refresh is None else _refresh
 		self.name = name
 		self.loop = cmd.root.loop
 		super().__init__(coro_wrapper(self.run), loop=self.loop)
@@ -109,30 +122,17 @@ class Task(asyncio.Task):
 			d['data'] = cls.schema
 		return cls.name, dir
 
-	async def run(self, _ttl=None,_refresh=None):
-		"""\
-			This is MoaT's standard task runner.
-			It takes care of noting the task's state in etcd.
-			The task will be killed if there's a conflict.
-
-			@_ttl: time-to-live for the process lock.
-			@_refresh: how often the lock is refreshed within the TTL.
-			Thus, ttl=10 and refresh=4 would refresh the lock every 2.5
-			seconds. The minimum is 1. A safety margin of 0.1 is added
-			internally.
-
-			If _ttl is a callable, it must return a (ttl,refresh) tuple.
-			_refresh is ignored in that case.
-			"""
+	async def run(self):
+		"""Main code for task control"""
 		logger.debug("Starting %s: %s",self.name, self.__class__.__name__)
 		r = self.cmd.root
 		await r.setup(self)
 		def get_ttl():
-			if callable(_ttl):
-				ttl,refresh = _ttl()
+			if callable(self._ttl):
+				ttl,refresh = self._ttl()
 			else:
-				ttl = _ttl if _ttl is not None else int(r.cfg['config']['run']['ttl'])
-				refresh = _refresh if _refresh is not None else float(r.cfg['config']['run']['refresh'])
+				ttl = self._ttl if self._ttl is not None else int(r.cfg['config']['run']['ttl'])
+				refresh = self._refresh if self._refresh is not None else float(r.cfg['config']['run']['refresh'])
 				if refresh < 1:
 					refresh = 1
 			assert refresh>=1, refresh
@@ -384,8 +384,7 @@ class TaskMaster(asyncio.Future):
 		return self.vars['ttl'], self.vars['refresh']
 
 	def _start(self):
-		j = self.cls(self.cmd, self.name, config=self.task._get('data',{}))
-		self.job = asyncio.ensure_future(j.run(self.cmd, self.name, _ttl=self._get_ttl))
+		self.job = self.cls(self.cmd, self.name, config=self.task._get('data',{}), _ttl=self._get_ttl)
 		self.job.add_done_callback(self._job_done)
 		if self.callback is not None:
 			self.callback("start")
@@ -426,7 +425,10 @@ class TaskMaster(asyncio.Future):
 			# TODO: limit the number of retries,
 			# this code only does 0 (retry=0) or 1 (max-retry=0) or inf (neither).
 			if self.callback is not None:
-				self.callback("error",exc)
+				try:
+					self.callback("error",exc)
+				except Exception as e:
+					logger.exception("during callback %s",self.callback)
 			if self.exc is None:
 				self.current_retry = self.vars['retry']
 			else:

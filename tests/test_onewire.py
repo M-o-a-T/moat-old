@@ -27,12 +27,36 @@ import asyncio
 import pytest
 from time import time
 from dabroker.proto import ProtocolClient
-from moat.proto.onewire import OnewireProtocol, OnewireDir,OnewireRead,OnewireWrite
+from moat.proto.onewire import OnewireServer
+import mock
 
-from . import ProcessHelper, is_open
+from . import ProcessHelper, is_open, MoatTest
 
 import logging
 logger = logging.getLogger(__name__)
+
+class FakeBus:
+	def __init__(self,h,p, loop=None):
+		assert h == "foobar.invalid"
+		assert p == 4304
+		self.loop=loop
+
+	async def dir(self,*p):
+		if p == ('uncached',):
+			return ("bus.42","foobar")
+		if p == ('uncached','bus.42'):
+			return ('alarm','simultaneous','1f.123123123123','10.001001001001')
+		if p == ('uncached','bus.42','1f.123123123123','main'):
+			return ('alarm','simultaneous','F0.004200420042')
+		if p == ('uncached','bus.42','1f.123123123123','aux'):
+			return ('alarm','simultaneous')
+		raise NotImplementedError("I don't know what '%s' is" % repr(p))
+
+	async def read(self,*p):
+		raise NotImplementedError("I don't know what to read at '%s'" % repr(p))
+
+	async def read(self,*p, data=None):
+		raise NotImplementedError("I don't know how to write '%s' to '%s'" % (data,repr(p)))
 
 @pytest.yield_fixture
 def owserver(loop,unused_tcp_port):
@@ -44,25 +68,36 @@ def owserver(loop,unused_tcp_port):
 	loop.run_until_complete(p.kill())
 
 @pytest.mark.run_loop
-async def test_onewire_dir(loop,owserver):
-	c = ProtocolClient(OnewireProtocol, "127.0.0.1",owserver, loop=loop)
-	owd = OnewireDir(conn=c, loop=loop)
-	owr = OnewireRead(conn=c, loop=loop)
-	oww = OnewireWrite(conn=c, loop=loop)
-	f = asyncio.Future(loop=loop)
-	f.set_result(None)
-	await f
-	res = await owd.run()
+async def test_onewire_real(loop,owserver):
+	ow = OnewireServer("127.0.0.1",owserver, loop=loop)
+	res = await ow.dir('uncached')
 	assert "bus.0" in res
 	assert "simultaneous" in res
 	for p in res:
 		if p.startswith("bus."):
-			res2 = await owd.run(p)
+			res2 = await ow.dir(p)
 			for q in res2:
 				if q.startswith("10."):
-					r = await c.run(owd,p,q)
+					r = await ow.dir('uncached',p,q)
 					logger.debug(r)
-					r = await owr.run(p,q,"temperature")
+					r = await ow.read(p,q,"temperature")
 					assert float(r) == 1.6 # which hopefully will stay stable
-					await oww.run(p,q,"temphigh", data="99")
+					await ow.write(p,q,"temphigh", data="99")
+	await ow.close()
+
+def test_onewire_fake(loop):
+	with mock.patch("moat.task.onewire.OnewireServer", new=FakeBus) as mo:
+		m = MoatTest(loop=loop)
+		r = m.parse("-vvvc test.cfg task def init moat.task.onewire")
+		assert r == 0, r
+		m.parse("-vvvc test.cfg bus 1wire server delete faker")
+		r = m.parse("-vvvc test.cfg bus 1wire server add faker foobar.invalid - A nice fake 1wire bus")
+		assert r == 0, r
+		r = m.parse("-vvvc test.cfg task add fake/onewire onewire/scan server=faker delay=0 Scan the fake bus")
+		assert r == 0, r
+		r = m.parse("-vvvc test.cfg task param fake/onewire restart 0 retry 0")
+		assert r == 0, r
+
+		r = m.parse("-vvvc test.cfg run -g fake/onewire")
+		assert r == 0, r
 

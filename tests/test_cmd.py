@@ -28,39 +28,9 @@ import pytest
 from time import time
 import io
 import sys
-from moat.script.main import Moat
 import logging
 
-from . import ProcessHelper
-
-class StoreHandler(logging.Handler):
-	def __init__(self,cmd):
-		super().__init__()
-		self.cmd = cmd
-	def emit(self, record):
-		self.cmd.debug_log.append(record)
-
-class MoatTest(Moat):
-	def __init__(self,*a,**k):
-		super().__init__(*a,**k)
-		self._stdout = io.StringIO()
-		self._width = 9999
-		self.debug_log = []
-		h = StoreHandler(self)
-		logging.getLogger().addHandler(h)
-
-	def parse(self,cmd):
-		if isinstance(cmd,str):
-			cmd = cmd.split(' ')
-		return super().parse(cmd)
-
-	@property
-	def stdout_data(self):
-		return self._stdout.getvalue()
-	def in_stdout(self,s):
-		return s in self.stdout_data
-	def assert_stdout(self,s):
-		assert s == self.stdout_data
+from . import ProcessHelper, MoatTest
 
 def test_task(loop):
 	m = MoatTest(loop=loop)

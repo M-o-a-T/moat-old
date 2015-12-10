@@ -19,7 +19,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import asyncio
 import struct
 from time import time
-from dabroker.proto import Protocol, ProtocolInteraction
+from dabroker.proto import Protocol, ProtocolInteraction, ProtocolClient
 
 import logging
 logger = logging.getLogger(__name__)
@@ -156,9 +156,30 @@ class OnewireWrite(OnewireInteraction):
 		assert data is not None
 		if not isinstance(data,bytes):
 			data = str(data).encode('utf-8')
-		self.send(OWMsg.get, self.path(path)+str(data).encode('utf-8'), len(data))
+		self.send(OWMsg.get, self.path(path)+data, len(data))
 		res,msg = await self.recv()
 		if res != len(data):
 			raise OnewireError(path,res) # pragma: no cover
 
+class OnewireServer:
+	def __init__(self,host,port, loop=None):
+		if loop is None:
+			loop = asyncio.get_event_loop()
+		self._loop = loop
+		self.conn = ProtocolClient(OnewireProtocol, host,port, loop=loop)
+	
+	async def close(self):
+		await self.conn.close()
+	
+	async def dir(self,*path):
+		ow = OnewireDir(conn=self.conn, loop=self._loop)
+		return (await ow.run(*path))
+
+	async def read(self,*path):
+		ow = OnewireRead(conn=self.conn, loop=self._loop)
+		return (await ow.run(*path))
+
+	async def write(self,*path, data=None):
+		ow = OnewireWrite(conn=self.conn, loop=self._loop)
+		return (await ow.run(*path, data=data))
 

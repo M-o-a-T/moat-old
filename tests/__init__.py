@@ -29,6 +29,8 @@ import subprocess
 from functools import wraps
 from socket import socket
 import time
+from moat.script.main import Moat
+import io
 
 import logging
 logging.basicConfig(filename='test.log', level=logging.DEBUG)
@@ -97,4 +99,33 @@ class ProcessHelper(asyncio.SubprocessProtocol):
 	async def wait(self):
 		await self.done
 		return self.done.result()
+
+class StoreHandler(logging.Handler):
+	def __init__(self,cmd):
+		super().__init__()
+		self.cmd = cmd
+	def emit(self, record):
+		self.cmd.debug_log.append(record)
+
+class MoatTest(Moat):
+	def __init__(self,*a,**k):
+		super().__init__(*a,**k)
+		self._stdout = io.StringIO()
+		self._width = 9999
+		self.debug_log = []
+		h = StoreHandler(self)
+		logging.getLogger().addHandler(h)
+
+	def parse(self,cmd):
+		if isinstance(cmd,str):
+			cmd = cmd.split(' ')
+		return super().parse(cmd)
+
+	@property
+	def stdout_data(self):
+		return self._stdout.getvalue()
+	def in_stdout(self,s):
+		return s in self.stdout_data
+	def assert_stdout(self,s):
+		assert s == self.stdout_data
 
