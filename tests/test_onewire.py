@@ -40,6 +40,33 @@ logger = logging.getLogger(__name__)
 class FakeBus:
 	def __init__(self, loop):
 		self.loop = loop
+		d=dict
+		self.temp = {}
+		self.moat = {}
+		self.bus_main = {
+			"alarm":{},
+			"simultaneous":{},
+			"F0.004200420042": self.moat,
+			}
+		self.bus = {
+			"alarm":{},
+			"simultaneous":{},
+			"1f.123123123123":{
+				"main":self.bus_main,
+				"aux":{
+					"alarm":{},
+					"simultaneous":{},
+					},
+				},
+			"10.001001001001":self.temp,
+			}
+		self.data = {
+			"uncached": {
+				"bus.42": self.bus,
+				},
+				"foobar":"whatever",
+			}
+
 	def __call__(self, h,p, loop=None):
 		assert h == "foobar.invalid"
 		assert p == 4304
@@ -47,21 +74,23 @@ class FakeBus:
 		return self
 
 	async def dir(self,*p):
-		if p == ('uncached',):
-			return ("bus.42","foobar")
-		if p == ('uncached','bus.42'):
-			return ('alarm','simultaneous','1f.123123123123','10.001001001001')
-		if p == ('uncached','bus.42','1f.123123123123','main'):
-			return ('alarm','simultaneous','F0.004200420042')
-		if p == ('uncached','bus.42','1f.123123123123','aux'):
-			return ('alarm','simultaneous')
-		raise NotImplementedError("I don't know what '%s' is" % repr(p)) # pragma: no cover
+		d = self.data
+		for s in p:
+			d = d[s]
+		return d.keys()
 
 	async def read(self,*p):
-		raise NotImplementedError("I don't know what to read at '%s'" % repr(p)) # pragma: no cover
+		d = self.data
+		for s in p:
+			d = d[s]
+		assert not isinstance(d,dict)
+		return d
 
-	async def read(self,*p, data=None):
-		raise NotImplementedError("I don't know how to write '%s' to '%s'" % (data,repr(p))) # pragma: no cover
+	async def write(self,*p, data=None):
+		d = self.data
+		for s in p[:-1]:
+			d = d[s]
+		d[p[-1]] = data
 
 class FakeSleep:
 	# A fake implementation of a timer.
@@ -72,6 +101,7 @@ class FakeSleep:
 	f = None
 	g = None
 	proc = None
+	mod = None
 
 	def __init__(self,loop):
 		self.loop = loop
@@ -82,19 +112,30 @@ class FakeSleep:
 		assert self.loop is loop
 		if self.f is not None:
 			self.f.set_result(False)
+		if self.mod is not None:
+			m,self.mod = self.mod,None
+			await m()
 		self.proc = proc
 		return self
 	def cancel(self):
 		# called by the task when it wishes to cancel its timeout
-		self.proc = None
+		self.proc = None # pragma: no cover
 		
-	async def step(self, task, die):
+	async def step(self, task, mod=False):
+		"""\
+			Trigger the fake timeout. @task is the task the timeout is
+			running in so that we don't deadlock if it dies prematurely.
+			@mod is a flag to signal StopWatching (if True), or a callback
+			that's executed at the beginning of the next iteration.
+			"""
 		if self.proc is None:
 			self.f = asyncio.Future(loop=self.loop)
 			await asyncio.wait((task,self.f), loop=self.loop,return_when=asyncio.FIRST_COMPLETED)
 		if task.done() or self.proc is None:
-			return
-		self.proc(StopWatching() if die else None)
+			return # pragma: no cover
+		if not isinstance(mod,bool):
+			self.mod = mod
+		self.proc(StopWatching() if mod is True else None)
 		self.proc = None
 
 @pytest.yield_fixture
@@ -126,8 +167,16 @@ async def test_onewire_real(loop,owserver):
 
 @pytest.mark.run_loop
 async def test_onewire_fake(loop):
+	from etctree import client
+	from . import cfg
+	t = await client(cfg, loop=loop)
+	tr = await t.tree("/bus/onewire")
+
 	with mock.patch("moat.task.onewire.OnewireServer", new=FakeBus(loop)) as fb:
 		with mock.patch("moat.task.onewire.Timer", new=FakeSleep(loop)) as fs:
+			mp = mock.patch("moat.task.onewire.DEV_COUNT", new=1)
+			mp.__enter__()
+
 			m = MoatTest(loop=loop)
 			r = await m.parse("-vvvc test.cfg task def init moat.task.onewire")
 			assert r == 0, r
@@ -143,7 +192,23 @@ async def test_onewire_fake(loop):
 			assert r == 0, r
 
 			f = m.parse("-vvvc test.cfg run -g fake/onewire")
-			await fs.step(f,False)
+
+			async def mod_a():
+				assert tr['device']['10']['001001001001']
+				assert tr['server']['faker']['bus']['bus.42']['devices']['10']['001001001001'] == '0'
+
+				del fb.bus['10.001001001001']
+			await fs.step(f,mod_a)
+			async def mod_b():
+				assert tr['server']['faker']['bus']['bus.42']['devices']['10']['001001001001'] == '1'
+			await fs.step(f,mod_b)
+			await fs.step(f)
+			async def mod_c():
+				with pytest.raises(KeyError):
+					tr['server']['faker']['bus']['bus.42']['devices']['10']['001001001001']
+				with pytest.raises(KeyError):
+					tr['device']['10']['001001001001']['path']
+			await fs.step(f,mod_c)
 			await fs.step(f,True)
 			r = await f
 			assert r == 0, r

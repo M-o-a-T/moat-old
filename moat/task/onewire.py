@@ -44,9 +44,9 @@ dev_re = re.compile(r'([0-9a-f]{2})\.([0-9a-f]{12})$', re.I)
 async def Timer(loop,dly,proc):
 	return loop.call_later(self.cfg['delay'], self._trigger)
 
-BUS_TTL=15 # presumed max time required to scan a bus
-BUS_COUNT=5 # times to scan a bus before it's declared dead
-DEV_COUNT=5 # times to scan a bus before a device on it is declared dead
+BUS_TTL=30 # presumed max time required to scan a bus
+BUS_COUNT=5 # times to not find a whole bus before it's declared dead
+DEV_COUNT=5 # times to not find a single device on a bus before it is declared dead
 
 class BusScan(Task):
 	"""This task periodically scans all buses of a 1wire server."""
@@ -114,15 +114,15 @@ class BusScan(Task):
 
 		for f1,f2 in old:
 			v = st[f1][f2]
-			if v > DEV_COUNT:
+			if v >= DEV_COUNT:
 				try:
 					dev = self.devices[f1][f2]
 				except KeyError:
 					pass
 				else:
-					self.drop_device(dev)
+					await self.drop_device(dev)
 			else:
-				await st.set(f,v+1)
+				await st[f1].set(f2,v+1)
 
 		try:
 			v = self.tree['bus'][b]['broken']
@@ -132,28 +132,31 @@ class BusScan(Task):
 			await self.tree['bus'][b].set('broken',0)
 
 	async def drop_device(self,dev, delete=True):
-		"""When a device vanishes, remove it from the bus it had been at"""
-		p = dev['path']
+		"""When a device vanishes, remove it from the bus it has been at"""
+		try:
+			p = dev['path']
+		except KeyError:
+			return
 		try:
 			s,b = p.split(' ',1)
 		except ValueError:
 			pass
 		else:
 			if s == self.srv_name:
-				dt = self.tree['bus'][b]
+				dt = self.tree['bus'][b]['devices']
 				drop = False
 			else:
-				dt = await self.etcd.tree('/bus/onewire/server/'+s+'/bus/'+b)
+				dt = await self.etcd.tree('/bus/onewire/server/'+s+'/bus/'+b+'/devices')
 				drop = True
 			try:
 				await dt[dev.parent.name].delete(dev.name)
-			except KeyError:
-				pass
+			except KeyError as exc:
+				logger.exception("Bus node gone? %s.%s on %s %s",f1,f2,s,b)
 			finally:
 				if drop:
 					await dt.close()
 		if delete:
-			await self.devices[dev.parent.name].delete(dev.name)
+			await dev.delete('path')
 
 	async def drop_bus(self,bus):
 		for f1,v in bus.items():
@@ -175,7 +178,7 @@ class BusScan(Task):
 		types.register('port', cls=mtInteger)
 		types.register('scanning', cls=mtFloat)
 		types.register('bus','*','broken', cls=mtInteger)
-		types.register('bus','*','devices','*', cls=mtInteger)
+		types.register('bus','*','devices','*','*', cls=mtInteger)
 		self.devices = await self.etcd.tree("/bus/onewire/device")
 
 		while True:
@@ -240,7 +243,7 @@ class BusScan(Task):
 			self._delay.set_result("cfg_changed")
 			self._delay_timer.cancel()
 
-	def _unlock(self,_):
+	def _unlock(self,_): # pragma: no cover
 		if self._delay is not None and not self._delay.done():
 			self._delay.set_result("unlocked")
 			self._delay_timer.cancel()

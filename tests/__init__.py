@@ -31,6 +31,8 @@ from socket import socket
 import time
 from moat.script.main import Moat
 import io
+import os
+from yaml import safe_load
 
 import logging
 logging.basicConfig(filename='test.log', level=logging.DEBUG)
@@ -126,4 +128,22 @@ class MoatTest(Moat):
 		return s in self.stdout_data
 	def assert_stdout(self,s):
 		assert s == self.stdout_data
+
+def load_cfg(cfg):
+    global cfgpath
+    if os.path.exists(cfg):
+        pass
+    elif os.path.exists(os.path.join("tests",cfg)):
+        cfg = os.path.join("tests",cfg)
+    elif os.path.exists(os.path.join(os.pardir,cfg)):
+        cfg = os.path.join(os.pardir,cfg)
+    else:
+        raise RuntimeError("Config file '%s' not found" % (cfg,))
+
+    cfgpath = cfg
+    with open(cfg) as f:
+        cfg = safe_load(f)
+    return cfg
+
+cfg = load_cfg(os.environ.get('MOAT_TEST_CFG',"test.cfg"))
 
