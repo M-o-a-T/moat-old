@@ -32,12 +32,17 @@ from moat.proto.onewire import OnewireServer
 from ..script.task import Task
 from etctree.node import mtFloat,mtInteger
 from etctree.etcd import EtcTypes
+from aioetcd import StopWatching
 
 import logging
 logger = logging.getLogger(__name__)
 
 import re
-dev = re.compile(r'([0-9a-f]{2})\.([0-9a-f]{12})$', re.I)
+dev_re = re.compile(r'([0-9a-f]{2})\.([0-9a-f]{12})$', re.I)
+
+# This is here for overriding by tests.
+async def Timer(loop,dly,proc):
+	return loop.call_later(self.cfg['delay'], self._trigger)
 
 BUS_TTL=15 # presumed max time required to scan a bus
 BUS_COUNT=5 # times to scan a bus before it's declared dead
@@ -58,24 +63,25 @@ class BusScan(Task):
 		
 	async def _scan_one(self, *bus):
 		"""Scan a single bus"""
-		b = "%s:%s" % (self.srv_name, "/".join(bus))
+		b = " ".join(bus)
+		bb = self.srv_name+" "+b
 		old = set()
 		try:
-			k = self.busmap.pop(b)
+			k = self.buses.remove(b)
 		except KeyError:
 			# The bus is new
-			k,m = await self.tree['bus'].set(None,{'path':b,'broken':0,'devices':{}})
+			m = await self.tree['bus'].set(b,{'broken':0,'devices':{}})
 			await self.tree.wait(m)
-			st = self.tree['bus'][k]['devices']
+			st = self.tree['bus'][b]['devices']
 		else:
 			# The bus is known. Remember which devices we think are on it
-			st = self.tree['bus'][k]['devices']
+			st = self.tree['bus'][b]['devices']
 			for d,v in st.items():
 				for e in v.keys():
 					old.add((d,e))
 
 		for f in await self.srv.dir('uncached',*bus):
-			m = dev.match(f)
+			m = dev_re.match(f)
 			if m is None:
 				continue
 			f1 = m.group(1).lower()
@@ -90,52 +96,75 @@ class BusScan(Task):
 				mod = await self.devices.set(f1,{})
 				await self.devices.wait(mod)
 			if f2 not in self.devices[f1]:
-				m = await self.devices[f1].set(f2,{'path':b})
+				m = await self.devices[f1].set(f2,{'path':bb})
 				await self.devices.wait(m)
 			fd = self.devices[f1][f2]
 			op = fd.get('path','')
-			if op != b:
-				if ':' in op:
-					self.drop_device(f,delete=False)
-				await self.devices['f'].set('path',b)
+			if op != bb:
+				if ' ' in op:
+					self.drop_device(fd,delete=False)
+				await fd.set('path',bb)
+
+			if f1 not in st:
+				mod = await st.set(f1,{})
+				await self.tree.wait(mod)
+			if f2 not in st[f1]:
+				m = await st[f1].set(f2,0)
+				await self.tree.wait(m)
 
 		for f1,f2 in old:
 			v = st[f1][f2]
 			if v > DEV_COUNT:
-				self.drop_device(v)
+				try:
+					dev = self.devices[f1][f2]
+				except KeyError:
+					pass
+				else:
+					self.drop_device(dev)
 			else:
 				await st.set(f,v+1)
 
 		try:
-			v = self.tree['bus'][k]['broken']
+			v = self.tree['bus'][b]['broken']
 		except KeyError:
 			v = 99
 		if v > 0:
-			await self.tree['bus'][k].set('broken',0)
+			await self.tree['bus'][b].set('broken',0)
 
 	async def drop_device(self,dev, delete=True):
 		"""When a device vanishes, remove it from the bus it had been at"""
 		p = dev['path']
 		try:
-			s,b = p.split(':',1)
+			s,b = p.split(' ',1)
 		except ValueError:
 			pass
 		else:
-			dt = self.etcd.tree('/bus/onewire/server/'+s+'/bus')
+			if s == self.srv_name:
+				dt = self.tree['bus'][b]
+				drop = False
+			else:
+				dt = await self.etcd.tree('/bus/onewire/server/'+s+'/bus/'+b)
+				drop = True
 			try:
-				for v in dt.values():
-					if v['path'] == b:
-						d = v['devices']
-						if dev.parent.name not in d:
-							break
-						await d[dev.parent.name].delete(dev.name)
-						break
+				await dt[dev.parent.name].delete(dev.name)
+			except KeyError:
+				pass
 			finally:
-				await dt.close()
+				if drop:
+					await dt.close()
 		if delete:
 			await self.devices[dev.parent.name].delete(dev.name)
 
 	async def drop_bus(self,bus):
+		for f1,v in bus.items():
+			for f2 in bus.keys():
+				try:
+					dev = self.devices[f1][f2]
+				except KeyError:
+					pass
+				else:
+					await self.drop_device(dev, delete=False)
+			await self.tree['bus'].delete(bus.name)
 		pass
 
 	async def task(self):
@@ -152,7 +181,7 @@ class BusScan(Task):
 		while True:
 			if self.config['delay']:
 				self._delay = asyncio.Future(loop=self.loop)
-				self._delay_timer = asyncio.call_later(self.cfg['delay'], self._trigger, loop=self.loop)
+				self._delay_timer = await Timer(self.loop,self.config['delay'], self._trigger)
 
 			# Access "our" server
 			server = self.config['server']
@@ -171,17 +200,17 @@ class BusScan(Task):
 			m = await self.tree.set('scanning',value=time(),ttl=BUS_TTL)
 			await self.tree.wait(m)
 			try:
-				self.busmap = {}
+				self.buses = set()
 				if 'bus' in self.tree:
-					for k,v in self.tree['bus'].items():
-						self.busmap[v.path] = k
+					for k in self.tree['bus'].keys():
+						self.buses.add(k)
 				else:
 					mod = await self.tree.set('bus',{})
 					await self.tree.wait(mod)
 				for bus in await self.srv.dir('uncached'):
 					if bus.startswith('bus.'):
 						await self._scan_one(bus)
-				for bus in self.busmap.keys():
+				for bus in self.buses:
 					v = self.tree['bus'][bus]['broken']
 					if v < BUS_COUNT:
 						await self.tree['bus'][bus].set('broken',v+1)
@@ -191,14 +220,20 @@ class BusScan(Task):
 			finally:
 				await self.tree.delete('scanning')
 
-			dly = self.config['delay']
-			if dly < 0.1:
+			if self._delay is None:
 				break
-			await asyncio.sleep(dly, loop=self.loop)
+			try:
+				await self._delay
+			except StopWatching:
+				break
 	
-	def _trigger(self):
+	def _trigger(self,exc=None):
 		if self._delay is not None and not self._delay.done():
-			self._delay.set_result("timeout")
+			if exc is None:
+				self._delay.set_result("timeout")
+			else:
+				# This is for the benefit of testing
+				self._delay.set_exception(exc)
 
 	def cfg_changed(self):
 		if self._delay is not None and not self._delay.done():

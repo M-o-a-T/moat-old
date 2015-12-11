@@ -30,6 +30,7 @@ from dabroker.proto import ProtocolClient
 from moat.proto.onewire import OnewireServer
 import mock
 import etcd
+from aioetcd import StopWatching
 
 from . import ProcessHelper, is_open, MoatTest
 
@@ -37,10 +38,13 @@ import logging
 logger = logging.getLogger(__name__)
 
 class FakeBus:
-	def __init__(self,h,p, loop=None):
+	def __init__(self, loop):
+		self.loop = loop
+	def __call__(self, h,p, loop=None):
 		assert h == "foobar.invalid"
 		assert p == 4304
-		self.loop=loop
+		assert self.loop is loop
+		return self
 
 	async def dir(self,*p):
 		if p == ('uncached',):
@@ -58,6 +62,40 @@ class FakeBus:
 
 	async def read(self,*p, data=None):
 		raise NotImplementedError("I don't know how to write '%s' to '%s'" % (data,repr(p))) # pragma: no cover
+
+class FakeSleep:
+	# A fake implementation of a timer.
+	# The task calls __call__ to set up its timeout and return a future.
+	# The test calls step().
+	# When both arrive, the future is triggered.
+	# repeat.
+	f = None
+	g = None
+	proc = None
+
+	def __init__(self,loop):
+		self.loop = loop
+
+	async def __call__(self,loop,dly,proc):
+		# called by the task when it wishes to create a timeout
+		assert self.proc is None
+		assert self.loop is loop
+		if self.f is not None:
+			self.f.set_result(False)
+		self.proc = proc
+		return self
+	def cancel(self):
+		# called by the task when it wishes to cancel its timeout
+		self.proc = None
+		
+	async def step(self, task, die):
+		if self.proc is None:
+			self.f = asyncio.Future(loop=self.loop)
+			await asyncio.wait((task,self.f), loop=self.loop,return_when=asyncio.FIRST_COMPLETED)
+		if task.done() or self.proc is None:
+			return
+		self.proc(StopWatching() if die else None)
+		self.proc = None
 
 @pytest.yield_fixture
 def owserver(loop,unused_tcp_port):
@@ -88,21 +126,25 @@ async def test_onewire_real(loop,owserver):
 
 @pytest.mark.run_loop
 async def test_onewire_fake(loop):
-	with mock.patch("moat.task.onewire.OnewireServer", new=FakeBus) as mo:
-		m = MoatTest(loop=loop)
-		r = await m.parse("-vvvc test.cfg task def init moat.task.onewire")
-		assert r == 0, r
-		try:
-			await m.parse("-vvvc test.cfg bus 1wire server delete faker")
-		except etcd.EtcdKeyNotFound:
-			pass
-		r = await m.parse("-vvvc test.cfg bus 1wire server add faker foobar.invalid - A nice fake 1wire bus")
-		assert r == 0, r
-		r = await m.parse("-vvvc test.cfg task add fake/onewire onewire/scan server=faker delay=0 Scan the fake bus")
-		assert r == 0, r
-		r = await m.parse("-vvvc test.cfg task param fake/onewire restart 0 retry 0")
-		assert r == 0, r
+	with mock.patch("moat.task.onewire.OnewireServer", new=FakeBus(loop)) as fb:
+		with mock.patch("moat.task.onewire.Timer", new=FakeSleep(loop)) as fs:
+			m = MoatTest(loop=loop)
+			r = await m.parse("-vvvc test.cfg task def init moat.task.onewire")
+			assert r == 0, r
+			try:
+				await m.parse("-vvvc test.cfg bus 1wire server delete faker")
+			except etcd.EtcdKeyNotFound:
+				pass
+			r = await m.parse("-vvvc test.cfg bus 1wire server add faker foobar.invalid - A nice fake 1wire bus")
+			assert r == 0, r
+			r = await m.parse("-vvvc test.cfg task add fake/onewire onewire/scan server=faker delay=999 Scan the fake bus")
+			assert r == 0, r
+			r = await m.parse("-vvvc test.cfg task param fake/onewire restart 0 retry 0")
+			assert r == 0, r
 
-		r = await m.parse("-vvvc test.cfg run -g fake/onewire")
-		assert r == 0, r
+			f = m.parse("-vvvc test.cfg run -g fake/onewire")
+			await fs.step(f,False)
+			await fs.step(f,True)
+			r = await f
+			assert r == 0, r
 
