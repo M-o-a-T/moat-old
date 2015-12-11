@@ -164,10 +164,10 @@ class Task(asyncio.Task):
 			this will terminate the task."""
 			logger.error("Aborted %s", self.name)
 			nonlocal killer
-			try:
-				main_task.cancel()
-			except Exception:
-				pass
+			try: main_task.cancel()
+			except Exception: pass
+			try: run_task.cancel()
+			except Exception: pass
 			killer = None
 		killer = r.loop.call_later(ttl, aborter)
 
@@ -189,6 +189,8 @@ class Task(asyncio.Task):
 					await run_state.set("running",time(),ttl=ttl)
 				except (etcd.EtcdKeyNotFound,etcd.EtcdCompareFailed) as exc:
 					raise JobMarkGoneError(self.name) from exc
+				if killer is None:
+					break
 				killer.cancel()
 				killer = r.loop.call_later(ttl,lambda: main_task.cancel())
 				logger.debug("Run marker refreshed %s",self.name)
