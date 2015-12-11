@@ -51,13 +51,13 @@ class FakeBus:
 			return ('alarm','simultaneous','F0.004200420042')
 		if p == ('uncached','bus.42','1f.123123123123','aux'):
 			return ('alarm','simultaneous')
-		raise NotImplementedError("I don't know what '%s' is" % repr(p))
+		raise NotImplementedError("I don't know what '%s' is" % repr(p)) # pragma: no cover
 
 	async def read(self,*p):
-		raise NotImplementedError("I don't know what to read at '%s'" % repr(p))
+		raise NotImplementedError("I don't know what to read at '%s'" % repr(p)) # pragma: no cover
 
 	async def read(self,*p, data=None):
-		raise NotImplementedError("I don't know how to write '%s' to '%s'" % (data,repr(p)))
+		raise NotImplementedError("I don't know how to write '%s' to '%s'" % (data,repr(p))) # pragma: no cover
 
 @pytest.yield_fixture
 def owserver(loop,unused_tcp_port):
@@ -86,22 +86,23 @@ async def test_onewire_real(loop,owserver):
 					await ow.write(p,q,"temphigh", data="99")
 	await ow.close()
 
-def test_onewire_fake(loop):
+@pytest.mark.run_loop
+async def test_onewire_fake(loop):
 	with mock.patch("moat.task.onewire.OnewireServer", new=FakeBus) as mo:
 		m = MoatTest(loop=loop)
-		r = m.parse("-vvvc test.cfg task def init moat.task.onewire")
+		r = await m.parse("-vvvc test.cfg task def init moat.task.onewire")
 		assert r == 0, r
 		try:
-			m.parse("-vvvc test.cfg bus 1wire server delete faker")
+			await m.parse("-vvvc test.cfg bus 1wire server delete faker")
 		except etcd.EtcdKeyNotFound:
 			pass
-		r = m.parse("-vvvc test.cfg bus 1wire server add faker foobar.invalid - A nice fake 1wire bus")
+		r = await m.parse("-vvvc test.cfg bus 1wire server add faker foobar.invalid - A nice fake 1wire bus")
 		assert r == 0, r
-		r = m.parse("-vvvc test.cfg task add fake/onewire onewire/scan server=faker delay=0 Scan the fake bus")
+		r = await m.parse("-vvvc test.cfg task add fake/onewire onewire/scan server=faker delay=0 Scan the fake bus")
 		assert r == 0, r
-		r = m.parse("-vvvc test.cfg task param fake/onewire restart 0 retry 0")
+		r = await m.parse("-vvvc test.cfg task param fake/onewire restart 0 retry 0")
 		assert r == 0, r
 
-		r = m.parse("-vvvc test.cfg run -g fake/onewire")
+		r = await m.parse("-vvvc test.cfg run -g fake/onewire")
 		assert r == 0, r
 

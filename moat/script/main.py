@@ -73,6 +73,10 @@ otherwise you will be asked to specify. If there is none, /etc/moat.cfg
 will be used. If that doesn't exist either, this command fails.
 
 You can load more than one config file.
+
+NOTE: If you pass in an event loop when initializing, the command handler
+assumes that it's running in a separate thread and will delegate async
+stuff back to the loop.
 """
 	subCommandClasses = list(moat_commands())
 
@@ -80,10 +84,13 @@ You can load more than one config file.
 	verbose = None
 	etcd = None
 	amqp = None
+	loop = None
+	_coro = False
 
 	def __init__(self,*a,loop=None,**kw):
 		super().__init__(*a,**kw)
 		self.loop = loop if loop is not None else asyncio.get_event_loop()
+		self._coro = (loop is not None)
 
 	def addOptions(self):
 		self.parser.add_option('--no-default-config',
@@ -109,8 +116,12 @@ You can load more than one config file.
 			help="application name. Default is the reversed FQDN.")
 
 	def sync(self,cmd):
-		cmd = asyncio.ensure_future(cmd, loop=self.loop)
-		return self.loop.run_until_complete(cmd)
+		"""Run a coroutine synchronously."""
+		if self._coro:
+			future = asyncio.run_coroutine_threadsafe(cmd, self.loop)
+			return future.result()
+		else:
+			return self.loop.run_until_complete(cmd)
 		
 	def handleOptions(self):
 		opts = self.options

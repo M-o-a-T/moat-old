@@ -51,7 +51,7 @@ def loop(request):
 def pytest_pycollect_makeitem(collector, name, obj):
     if collector.funcnamefilter(name):
         if not callable(obj):
-            return
+            return # pragma: no cover
         item = pytest.Function(name, parent=collector)
         if 'run_loop' in item.keywords:
             return list(collector._genfunctions(name, obj))
@@ -70,8 +70,8 @@ def pytest_pyfunc_call(pyfuncitem):
         loop.run_until_complete(pyfuncitem.obj(**testargs))
         return True
 
-def pytest_runtest_setup(item):
-    if 'run_loop' in item.keywords and 'loop' not in item.fixturenames:
-        # inject an event loop fixture for all async tests
-        item.fixturenames.append('loop')
+#def pytest_runtest_setup(item):
+#    if 'run_loop' in item.keywords and 'loop' not in item.fixturenames:
+#        # inject an event loop fixture for all async tests
+#        item.fixturenames.append('loop')
 

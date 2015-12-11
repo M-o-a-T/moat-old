@@ -62,11 +62,9 @@ class ProcessHelper(asyncio.SubprocessProtocol):
 		self.args = args
 		self.kw = kw
 		self.fd = [b'',b'',b'']
-		if loop is None:
-			loop = asyncio.get_event_loop()
-		else:
-			asyncio.set_event_loop(loop)
-			# required for waiting on a process
+		assert loop is not None
+		asyncio.set_event_loop(loop)
+		# required for waiting on a process
 		self._loop = loop
 
 	def pipe_data_received(self,fd,data):
@@ -74,12 +72,12 @@ class ProcessHelper(asyncio.SubprocessProtocol):
 	
 	def connection_lost(self,exc):
 		if self.done.done():
-			return
-		else: # pragma: no cover
+			return # pragma: no cover
+		else:
 			if exc is None:
 				self.done.set_result(self._transport.get_returncode())
 			else:
-				self.done.set_exception(exc)
+				self.done.set_exception(exc) # pragma: no cover
 
 	async def start(self):
 		self.done = asyncio.Future(loop=self._loop)
@@ -119,7 +117,7 @@ class MoatTest(Moat):
 	def parse(self,cmd):
 		if isinstance(cmd,str):
 			cmd = cmd.split(' ')
-		return super().parse(cmd)
+		return self.loop.run_in_executor(None, super().parse,cmd)
 
 	@property
 	def stdout_data(self):
