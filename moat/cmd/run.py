@@ -140,7 +140,6 @@ by default, start every task that's defined for this host.
 						r = j.result()
 					except asyncio.CancelledError:
 						errs += 10
-							errs += 10
 						if self.root.verbose:
 							print(j.name,'*CANCELLED*', sep='\t', file=self.stdout)
 					except Exception as exc:

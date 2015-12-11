@@ -29,6 +29,7 @@ from time import time
 from dabroker.proto import ProtocolClient
 from moat.proto.onewire import OnewireServer
 import mock
+import etcd
 
 from . import ProcessHelper, is_open, MoatTest
 
@@ -90,7 +91,10 @@ def test_onewire_fake(loop):
 		m = MoatTest(loop=loop)
 		r = m.parse("-vvvc test.cfg task def init moat.task.onewire")
 		assert r == 0, r
-		m.parse("-vvvc test.cfg bus 1wire server delete faker")
+		try:
+			m.parse("-vvvc test.cfg bus 1wire server delete faker")
+		except etcd.EtcdKeyNotFound:
+			pass
 		r = m.parse("-vvvc test.cfg bus 1wire server add faker foobar.invalid - A nice fake 1wire bus")
 		assert r == 0, r
 		r = m.parse("-vvvc test.cfg task add fake/onewire onewire/scan server=faker delay=0 Scan the fake bus")
