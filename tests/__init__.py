@@ -133,11 +133,11 @@ def load_cfg(cfg):
     global cfgpath
     if os.path.exists(cfg):
         pass
-    elif os.path.exists(os.path.join("tests",cfg)):
+    elif os.path.exists(os.path.join("tests",cfg)): # pragma: no cover
         cfg = os.path.join("tests",cfg)
-    elif os.path.exists(os.path.join(os.pardir,cfg)):
+    elif os.path.exists(os.path.join(os.pardir,cfg)): # pragma: no cover
         cfg = os.path.join(os.pardir,cfg)
-    else:
+    else: # pragma: no cover
         raise RuntimeError("Config file '%s' not found" % (cfg,))
 
     cfgpath = cfg

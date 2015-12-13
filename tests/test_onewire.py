@@ -186,7 +186,9 @@ async def test_onewire_fake(loop):
 				pass
 			r = await m.parse("-vvvc test.cfg bus 1wire server add faker foobar.invalid - A nice fake 1wire bus")
 			assert r == 0, r
-			r = await m.parse("-vvvc test.cfg task add fake/onewire onewire/scan server=faker delay=999 Scan the fake bus")
+			r = await m.parse("-vvvc test.cfg task add fake/onewire/scan onewire/scan server=faker delay=999 Scan the fake bus")
+			assert r == 0, r
+			r = await m.parse("-vvvc test.cfg task add fake/onewire/write onewire/write server=faker delay=999 Write to the fake bus")
 			assert r == 0, r
 			r = await m.parse("-vvvc test.cfg task param fake/onewire restart 0 retry 0")
 			assert r == 0, r

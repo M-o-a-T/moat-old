@@ -30,7 +30,7 @@ from dabroker.proto import ProtocolClient
 from moat.proto.onewire import OnewireServer
 
 from ..script.task import Task
-from etctree.node import mtFloat,mtInteger
+from etctree.node import mtFloat,mtInteger,mtValue,mtDir
 from etctree.etcd import EtcTypes
 from aioetcd import StopWatching
 
@@ -247,4 +247,72 @@ class BusScan(Task):
 		if self._delay is not None and not self._delay.done():
 			self._delay.set_result("unlocked")
 			self._delay_timer.cancel()
+
+class writerInterface(mtDir):
+	# An interface for bus writing
+	task = None
+	amqp_reg = None
+	def __init__(self, *a,**k)):
+		if self.task is None:
+			raise NotImplementedError("You need to subclass %s and add a 'task' var"%self.__class__.__name__)
+		super().__init__(*a,**k)
+	def has_update(self):
+		super().has_update()
+		self.task.add_todo(self)
+
+class BusWriter(Task):
+	"""This task reads from AMQP."""
+	name="onewire/write"
+	summary="Process output-changing commands from AMQP"
+	buses = {}
+	todo = ()
+
+	def __init__(self,*a,**k):
+		super().__init__(*a,**k)
+		self._init_todo()
+	def _init_todo(self):
+		t,self.todo = self.todo,set()
+		self.todo_wait = asyncio.Future(loop=self.loop)
+		return t
+
+	@classmethod
+	def types(cls,tree):
+		super().types(tree)
+		tree.register("bus",cls=mtValue)
+		
+	def add_todo(self, dev):
+		self.todo.add(dev)
+
+	async def _xmit(self,dev, **data):
+		busname,path = dev['path'].split(' ',1)
+		try:
+			tree,conn = self.buses[bus]
+		except KeyError:
+			types=EtcTypes()
+			types.register('port', cls=mtInteger)
+			tree = await self.etcd.tree("/bus/onewire/server/"+busname, types=types)
+			conn = OnewireServer(self.tree['host'],self.tree.get('port',None), loop=self.loop)
+			self.buses[bus] = tree,conn
+		for k,v in data.items():
+			await conn.write(*(path.split(" ")+(k,)), v)
+
+	async def task(self):
+		class myWriterInterface(writerInterface):
+			task = self
+
+		types = EtcTypes()
+		types.register("bus","onewire","device","*","*","output", cls=myWriterInterface)
+		self.devices = await self.etcd.tree("/bus/onewire/device", types=types)
+
+		while True:
+			await self.todo_wait
+			todo = self._init_todo()
+			for dev in todo:
+				try:
+					outs = dev['output'].items()
+				except KeyError:
+					continue
+				else:
+					for name,out in outs:
+						if n in 
 
