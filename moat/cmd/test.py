@@ -29,7 +29,6 @@ import os
 import sys
 from etcd_tree.util import from_etcd
 from etcd_tree.etcd import EtcTypes
-from dabroker.util import import_string
 import aioetcd as etcd
 import asyncio
 import time

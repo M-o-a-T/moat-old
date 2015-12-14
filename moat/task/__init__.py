@@ -26,7 +26,6 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 """List of known Tasks"""
 
 import os
-from dabroker.util import import_string
 from ..script.util import objects
 
 import logging
