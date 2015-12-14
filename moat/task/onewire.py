@@ -260,10 +260,10 @@ class writerInterface(mtDir):
 		super().has_update()
 		self.task.add_todo(self)
 
-class BusWriter(Task):
+class BusInterface(Task):
 	"""This task reads from AMQP."""
-	name="onewire/write"
-	summary="Process output-changing commands from AMQP"
+	name="onewire/handler"
+	summary="Connect 1wire handler objects to everything"
 	buses = {}
 	todo = ()
 
@@ -311,6 +311,7 @@ class BusWriter(Task):
 				try:
 					outs = dev['output'].items()
 				except KeyError:
+					# no outputs: ignore
 					continue
 				else:
 					for name,out in outs:
