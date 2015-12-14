@@ -27,7 +27,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 
 import os
 from moat.script import Command, CommandError
-from etctree.util import from_etcd
+from etcd_tree.util import from_etcd
 import aioetcd as etcd
 
 import logging

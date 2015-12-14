@@ -27,8 +27,8 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 
 import os
 import sys
-from etctree.util import from_etcd
-from etctree.etcd import EtcTypes
+from etcd_tree.util import from_etcd
+from etcd_tree.etcd import EtcTypes
 from dabroker.util import import_string
 import aioetcd as etcd
 import asyncio

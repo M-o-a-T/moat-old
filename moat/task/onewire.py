@@ -30,8 +30,8 @@ from dabroker.proto import ProtocolClient
 from moat.proto.onewire import OnewireServer
 
 from ..script.task import Task
-from etctree.node import mtFloat,mtInteger,mtValue,mtDir
-from etctree.etcd import EtcTypes
+from etcd_tree.node import mtFloat,mtInteger,mtValue,mtDir
+from etcd_tree.etcd import EtcTypes
 from aioetcd import StopWatching
 
 import logging
@@ -252,7 +252,7 @@ class writerInterface(mtDir):
 	# An interface for bus writing
 	task = None
 	amqp_reg = None
-	def __init__(self, *a,**k)):
+	def __init__(self, *a,**k):
 		if self.task is None:
 			raise NotImplementedError("You need to subclass %s and add a 'task' var"%self.__class__.__name__)
 		super().__init__(*a,**k)
@@ -314,5 +314,5 @@ class BusWriter(Task):
 					continue
 				else:
 					for name,out in outs:
-						if n in 
+						pass ## TODO
 

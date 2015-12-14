@@ -167,7 +167,7 @@ async def test_onewire_real(loop,owserver):
 
 @pytest.mark.run_loop
 async def test_onewire_fake(loop):
-	from etctree import client
+	from etcd_tree import client
 	from . import cfg
 	t = await client(cfg, loop=loop)
 	tr = await t.tree("/bus/onewire")
@@ -188,9 +188,9 @@ async def test_onewire_fake(loop):
 			assert r == 0, r
 			r = await m.parse("-vvvc test.cfg task add fake/onewire/scan onewire/scan server=faker delay=999 Scan the fake bus")
 			assert r == 0, r
-			r = await m.parse("-vvvc test.cfg task add fake/onewire/write onewire/write server=faker delay=999 Write to the fake bus")
-			assert r == 0, r
-			r = await m.parse("-vvvc test.cfg task param fake/onewire restart 0 retry 0")
+			#r = await m.parse("-vvvc test.cfg task add fake/onewire/write onewire/write server=faker delay=999 Write to the fake bus")
+			#assert r == 0, r
+			r = await m.parse("-vvvc test.cfg task param fake/onewire/scan restart 0 retry 0")
 			assert r == 0, r
 
 			f = m.parse("-vvvc test.cfg run -g fake/onewire")

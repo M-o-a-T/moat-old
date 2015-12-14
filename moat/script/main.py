@@ -28,7 +28,7 @@ from moat.script import Command, CommandExited, CommandError
 import glob
 import sys
 import os
-from etctree.util import from_yaml
+from etcd_tree.util import from_yaml
 import yaml
 from moat.cmd import commands as moat_commands
 from dabroker.unit import make_unit, DEFAULT_CONFIG as DABROKER_DEFAULT_CONFIG
@@ -215,8 +215,8 @@ stuff back to the loop.
 	async def _get_etcd(self):
 		if self.etcd is not None:
 			return self.etcd
-		from etctree import client
-		from etctree.etcd import EtcTypes
+		from etcd_tree import client
+		from etcd_tree.etcd import EtcTypes
 		from ..task import task_var_types
 		types = EtcTypes()
 		task_var_types(types.step('run'))

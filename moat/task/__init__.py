@@ -46,8 +46,8 @@ def tasks():
 	return objects(__name__, Task)
 
 def task_var_types(types):
-	from etctree.etcd import EtcTypes
-	from etctree.node import mtFloat,mtInteger
+	from etcd_tree.etcd import EtcTypes
+	from etcd_tree.node import mtFloat,mtInteger
 	for t in _VARS:
 		if t == "ttl":
 			types.register(t)(mtInteger)

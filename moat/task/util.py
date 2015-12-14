@@ -27,7 +27,7 @@ import asyncio
 from time import time
 
 from ..script.task import Task
-from etctree.node import mtFloat
+from etcd_tree.node import mtFloat
 
 class Sleeper(Task):
 	"""This task just waits for a configured amount of time before exiting.

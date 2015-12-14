@@ -31,8 +31,8 @@ from moat.script import Command, CommandError
 from moat.script.task import Task
 from moat.task import tasks
 from moat.util import r_dict
-from etctree.util import from_etcd
-from etctree.etcd import EtcTypes
+from etcd_tree.util import from_etcd
+from etcd_tree.etcd import EtcTypes
 from dabroker.util import import_string
 from ..task import task_var_types, TASK_DIR,TASKDEF_DIR,TASK,TASKDEF
 from yaml import safe_dump

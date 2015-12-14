@@ -9,8 +9,8 @@ Class for managing tasks.
 
 import asyncio
 from dabroker.util import import_string
-from etctree.etcd import EtcTypes
-from etctree.node import mtFloat,mtBase
+from etcd_tree.etcd import EtcTypes
+from etcd_tree.node import mtFloat,mtBase
 import etcd
 import inspect
 from time import time
@@ -77,7 +77,7 @@ class Task(asyncio.Task):
 
 			@cmd: the command object from `moat run`.
 			@name: the etcd tree to use (without /task and :task prefix/suffix)
-			@config: some configuration data or this task, possibly an etctree object
+			@config: some configuration data or this task, possibly an etcd_tree object
 
 			@_ttl: time-to-live for the process lock.
 			@_refresh: how often the lock is refreshed within the TTL.
@@ -103,7 +103,7 @@ class Task(asyncio.Task):
 	@classmethod
 	def types(cls,types):
 		"""\
-			`types` is an etctree.EtcTypes instance.
+			`types` is an etcd_tree.EtcTypes instance.
 			Add your data types here. The default is Unicode.
 
 			This is a class method.
@@ -291,8 +291,8 @@ class Task(asyncio.Task):
 
 async def _run_state(etcd,path):
 	"""Get a tree for the job's state. This is a separate function for testing"""
-	from etctree.node import mtFloat
-	from etctree.etcd import EtcTypes
+	from etcd_tree.node import mtFloat
+	from etcd_tree.etcd import EtcTypes
 	types = EtcTypes()
 	types.register('started', cls=mtFloat)
 	types.register('stopped', cls=mtFloat)

@@ -33,8 +33,8 @@ import sys
 from ..script import Command, CommandError
 from ..script.task import TaskMaster, JobIsRunningError, JobMarkGoneError
 from ..task import TASK_DIR,TASK, TASKSTATE_DIR,TASKSTATE
-from etctree.util import from_etcd
-from etctree.node import mtDir
+from etcd_tree.util import from_etcd
+from etcd_tree.node import mtDir
 from functools import partial
 from itertools import chain
 import aioetcd as etcd
