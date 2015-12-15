@@ -171,6 +171,7 @@ async def test_onewire_fake(loop):
 	from . import cfg
 	t = await client(cfg, loop=loop)
 	tr = await t.tree("/bus/onewire")
+	td = await t.tree("/device/onewire")
 
 	with mock.patch("moat.task.onewire.OnewireServer", new=FakeBus(loop)) as fb:
 		with mock.patch("moat.task.onewire.Timer", new=FakeSleep(loop)) as fs:
@@ -196,7 +197,7 @@ async def test_onewire_fake(loop):
 			f = m.parse("-vvvc test.cfg run -g fake/onewire")
 
 			async def mod_a():
-				assert tr['device']['10']['001001001001']
+				assert td['10']['001001001001'][':dev']
 				assert tr['server']['faker']['bus']['bus.42']['devices']['10']['001001001001'] == '0'
 
 				del fb.bus['10.001001001001']
@@ -209,7 +210,7 @@ async def test_onewire_fake(loop):
 				with pytest.raises(KeyError):
 					tr['server']['faker']['bus']['bus.42']['devices']['10']['001001001001']
 				with pytest.raises(KeyError):
-					tr['device']['10']['001001001001']['path']
+					td['10']['001001001001'][':dev']['path']
 			await fs.step(f,mod_c)
 			await fs.step(f,True)
 			r = await f

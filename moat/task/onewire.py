@@ -96,9 +96,9 @@ class BusScan(Task):
 				mod = await self.devices.set(f1,{})
 				await self.devices.wait(mod)
 			if f2 not in self.devices[f1]:
-				m = await self.devices[f1].set(f2,{'path':bb})
+				m = await self.devices[f1].set(f2,{':dev':{'path':bb}})
 				await self.devices.wait(m)
-			fd = self.devices[f1][f2]
+			fd = self.devices[f1][f2][':dev']
 			op = fd.get('path','')
 			if op != bb:
 				if ' ' in op:
@@ -116,7 +116,7 @@ class BusScan(Task):
 			v = st[f1][f2]
 			if v >= DEV_COUNT:
 				try:
-					dev = self.devices[f1][f2]
+					dev = self.devices[f1][f2][':dev']
 				except KeyError:
 					pass
 				else:
@@ -149,9 +149,15 @@ class BusScan(Task):
 				dt = await self.etcd.tree('/bus/onewire/server/'+s+'/bus/'+b+'/devices')
 				drop = True
 			try:
-				await dt[dev.parent.name].delete(dev.name)
-			except KeyError as exc:
-				logger.exception("Bus node gone? %s.%s on %s %s",f1,f2,s,b)
+				f1 = dev.parent.parent.name
+				f2 = dev.parent.name
+			except AttributeError:
+				pass # parent==None: node gone, don't bother
+			else:
+				try:
+					await dt[f1].delete(f2)
+				except KeyError as exc:
+					logger.exception("Bus node gone? %s.%s on %s %s",f1,f2,s,b)
 			finally:
 				if drop:
 					await dt.close()
@@ -162,7 +168,7 @@ class BusScan(Task):
 		for f1,v in bus.items():
 			for f2 in bus.keys():
 				try:
-					dev = self.devices[f1][f2]
+					dev = self.devices[f1][f2][':dev']
 				except KeyError:
 					pass
 				else:
@@ -179,7 +185,7 @@ class BusScan(Task):
 		types.register('scanning', cls=mtFloat)
 		types.register('bus','*','broken', cls=mtInteger)
 		types.register('bus','*','devices','*','*', cls=mtInteger)
-		self.devices = await self.etcd.tree("/bus/onewire/device")
+		self.devices = await self.etcd.tree("/device/onewire")
 
 		while True:
 			if self.config['delay']:
@@ -301,8 +307,8 @@ class BusInterface(Task):
 			task = self
 
 		types = EtcTypes()
-		types.register("bus","onewire","device","*","*","output", cls=myWriterInterface)
-		self.devices = await self.etcd.tree("/bus/onewire/device", types=types)
+		types.register("*","*",":dev","output", cls=myWriterInterface)
+		self.devices = await self.etcd.tree("/device/onewire", types=types)
 
 		while True:
 			await self.todo_wait
