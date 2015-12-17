@@ -34,7 +34,7 @@ The following subsystems are defined:
 
 * onewire
 
-  This logs all transactions betweenMoaT and the onewire server(s).
+  This logs all transactions between MoaT and the onewire server(s).
 
 * parser
 
