@@ -86,6 +86,9 @@ etcd
 
 The MoaT data is completely contained in a sub-tree, by default ``/moat``.
 
+Main tree
+.........
+
 * config
 
   Configuration.
@@ -270,59 +273,144 @@ The MoaT data is completely contained in a sub-tree, by default ``/moat``.
           Describes the code's configuration. TODO. Probably JSON, i.e.
           a json-schema structure.
 
+* device
+
+  * <dev_type>
+
+    * <dev_id>
+
+      * :dev
+
+        Standard device node. See below.
+
+        * path
+
+          servername bus path…
+
+          If this attribute is not present, the device currently cannot
+          be found on any bus.
+
 * bus
 
   * onewire
 
-    * device
+    * name
 
-      * ID
+      * host
 
-        * path
+        Host name of this server
 
-          servername:/bus/path
+      * port
 
-    * server
+        TCP Port to connect to.
 
-      * name
+      * info
 
-        * host
+        Some sort of human-readable text
 
-          Host name of this server
+      * bus
 
-        * port
+        The collection of buses this server knows.
 
-          TCP Port to connect to.
+        * <unique>
 
-        * info
+          * path
+          
+            The bus path, like bus.0 or bus.1/1F.12345678/main
+          
+          * broken
 
-          Some sort of human-readable text
+            Counter for an unreachable bus. If too high, mark its
+            devices as inaccessible.
+          
+          * devices
 
-        * bus
-
-          The collection of buses this server knows.
-
-          * <unique>
-
-            * path
-            
-              The bus path, like bus.0 or bus.1/1F.12345678/main
-            
-            * broken
-
-              Counter for an unreachable bus. If too high, mark its
-              devices as inaccessible.
-            
-            * devices
+            * <dev_type>
 
               * <dev_id>
 
                 Counter for a vanished device. If too high, mark the device
                 as inaccessible.
 
-        * scanning
+      * scanning
 
-          A lock for periodic bus scanning, to make sure two scanners
-          don't step on each other's toes.
+        A lock for periodic bus scanning, to make sure two scanners
+        don't step on each other's toes.
 
+
+Device
+.....
+
+Devices are located under /device/TYPE/…/:dev with some common attributes.
+
+* name
+
+  Some human-readable name for whatever it is.
+ 
+* attr
+
+  Possible attributes.
+ 
+* input
+
+  An ``input`` subtree. See below.
+
+* output
+
+  An ``output`` subtree. See below.
+
+Input
+.....
+
+Physical inputs are described by this generic structure.
+
+Inputs are either polled, or they signal their change independently.
+If polling is desired, set the ``poll`` attribute. If more than one input
+uses an ``alert`` endpoint, they may be combined in a single message.
+
+* input
+
+  * name
+
+    Some hardware specific interface name
+    the device may have more than one input
+
+    * type
+
+      whichever data type this emits
+
+    * alert
+
+      AMQP: destination for signalling change
+
+      If this attribute is not present, the input is ignored.
+
+    * poll
+
+      if present, an interval (seconds) telling how often the
+      input's value should be read
+
+Output
+......
+
+Physical outputs are described by this generic structure.
+
+Outputs are accessed by sending an RPC request to the RPC address, with the
+data-to-send in the ``data.‹name›`` element. If a device has more than one
+output, all of them may be triggered in the same request.
+
+* output
+
+  * name
+
+    Some hardware specific interface name
+    the device may have more than one output
+
+    * type
+               
+      whichever data type this understands
+
+    * rpc
+
+      AMQP: code to switch the device
 
