@@ -162,24 +162,39 @@ class OnewireWrite(OnewireInteraction):
 			raise OnewireError(path,res) # pragma: no cover
 
 class OnewireServer:
-	def __init__(self,host,port, loop=None):
+	"""Convenient abstraction for 1wire actions"""
+	path=()
+
+	def __init__(self,host=None,port=None, conn=None,path=(), loop=None):
 		if loop is None:
 			loop = asyncio.get_event_loop()
 		self._loop = loop
-		self.conn = ProtocolClient(OnewireProtocol, host,port, loop=loop)
+		if conn:
+			assert loop is None
+			assert host is None and port is None
+		else:
+			assert host is not None
+			conn = ProtocolClient(OnewireProtocol, host,port, loop=loop)
+		self.conn = conn
 	
+	def at(self,*path):
+		"""A convenient abstraction to talk to a bus or device"""
+		return type(self)(conn=self.conn,path=path)
+
 	async def close(self):
+		if self.path: # this is a sub-device, so ignore
+			return
 		await self.conn.close()
 	
 	async def dir(self,*path):
 		ow = OnewireDir(conn=self.conn, loop=self._loop)
-		return (await ow.run(*path))
+		return (await ow.run(*(self.path+path)))
 
 	async def read(self,*path):
 		ow = OnewireRead(conn=self.conn, loop=self._loop)
-		return (await ow.run(*path))
+		return (await ow.run(*(self.path+path)))
 
 	async def write(self,*path, data=None):
 		ow = OnewireWrite(conn=self.conn, loop=self._loop)
-		return (await ow.run(*path, data=data))
+		return (await ow.run(*(self.path+path), data=data))
 
