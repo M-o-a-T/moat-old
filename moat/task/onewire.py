@@ -146,7 +146,7 @@ class BusScan(Task):
 				dt = self.tree['bus'][b]['devices']
 				drop = False
 			else:
-				dt = await self.etcd.tree('/bus/onewire/server/'+s+'/bus/'+b+'/devices')
+				dt = await self.etcd.tree('/bus/onewire/'+s+'/bus/'+b+'/devices')
 				drop = True
 			try:
 				f1 = dev.parent.parent.name
@@ -198,7 +198,7 @@ class BusScan(Task):
 				if self.srv is not None:
 					await self.srv.close()
 				self.srv_name = server
-				self.tree = await self.etcd.tree("/bus/onewire/server/"+server, types=types)
+				self.tree = await self.etcd.tree("/bus/onewire/"+server, types=types)
 				self.srv = OnewireServer(self.tree['host'],self.tree.get('port',None), loop=self.loop)
 
 			if 'scanning' in self.tree:
@@ -296,7 +296,7 @@ class BusInterface(Task):
 		except KeyError:
 			types=EtcTypes()
 			types.register('port', cls=mtInteger)
-			tree = await self.etcd.tree("/bus/onewire/server/"+busname, types=types)
+			tree = await self.etcd.tree("/bus/onewire/"+busname, types=types)
 			conn = OnewireServer(self.tree['host'],self.tree.get('port',None), loop=self.loop)
 			self.buses[bus] = tree,conn
 		for k,v in data.items():

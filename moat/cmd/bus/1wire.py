@@ -93,7 +93,7 @@ Arguments:
 		types = EtcTypes()
 		types.register('port',mtInteger)
 		try:
-			t = await self.root.etcd.tree('/bus/onewire/server/'+name, types=types, create=not self.update)
+			t = await self.root.etcd.tree('/bus/onewire/'+name, types=types, create=not self.update)
 		except etcd.EtcdAlreadyExist:
 			raise CommandError("Host '%s' exists. Use '-u' or choose a different name." % name)
 		except etcd.EtcdKeyNotFound:
@@ -121,16 +121,16 @@ else a short list is printed.
 			dirs = args
 		else:
 			dirs = []
-			res = await etc.get('/bus/onewire/server')
+			res = await etc.get('/bus/onewire')
 			for r in res.children:
 				dirs.append(r.key.rsplit('/',1)[1])
 		for d in dirs:
 			if self.root.verbose > 1:
-				st = await etc.tree('/bus/onewire/server/'+d, static=True)
+				st = await etc.tree('/bus/onewire/'+d, static=True)
 				safe_dump({d: r_dict(dict(st))}, stream=self.stdout)
 			elif self.root.verbose:
-				h = await etc.get('/bus/onewire/server/'+d+'/host')
-				p = await etc.get('/bus/onewire/server/'+d+'/port')
+				h = await etc.get('/bus/onewire/'+d+'/host')
+				p = await etc.get('/bus/onewire/'+d+'/port')
 				print(d,h.value,p.value, sep='\t', file=self.stdout)
 			else:
 				print(d, file=self.stdout)
@@ -154,11 +154,11 @@ Make MoaT forget about a 1wire server.
 			if not cmd.root.cfg['testing']:
 				raise CommandError("You can't delete everything.")
 			args = []
-			res = etc.get('/bus/onewire/server')
+			res = etc.get('/bus/onewire')
 			for r in res.children:
 				args.append(r.name.rsplit('/',1)[1])
 		for k in args:
-			await etc.delete('/bus/onewire/server/'+k, recursive=True)
+			await etc.delete('/bus/onewire/'+k, recursive=True)
 			if self.root.verbose > 1:
 				print("%s: deleted"%k, file=self.stdout)
 
