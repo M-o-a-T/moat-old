@@ -27,12 +27,16 @@ import asyncio
 import pytest
 from time import time
 from dabroker.proto import ProtocolClient
-from moat.proto.onewire import OnewireServer
+from ..proto.onewire import OnewireServer
+from ..dev.onewire import OnewireDevice
 
 from ..script.task import Task
 from etcd_tree.node import mtFloat,mtInteger,mtValue,mtDir
 from etcd_tree.etcd import EtcTypes
 from aioetcd import StopWatching
+from time import time
+from weakref import WeakValueDictionary
+from contextlib import suppress
 
 import logging
 logger = logging.getLogger(__name__)
@@ -42,12 +46,175 @@ dev_re = re.compile(r'([0-9a-f]{2})\.([0-9a-f]{12})$', re.I)
 
 # This is here for overriding by tests.
 async def Timer(loop,dly,proc):
-	return loop.call_later(self.cfg['delay'], self._trigger)
+	return loop.call_later(self.cfg['delay'], proc)
 
 BUS_TTL=30 # presumed max time required to scan a bus
 BUS_COUNT=5 # times to not find a whole bus before it's declared dead
 DEV_COUNT=5 # times to not find a single device on a bus before it is declared dead
 
+async def scanner(self, name):
+	proc = getattr(self,'_scan_'+name)
+	while True:
+		warned = await proc()
+
+class ScanTask(Task):
+	"""\
+		Common class for 1wire bus scanners.
+
+		Subclasses override the `typ` class variable with some name, and
+		the `task_()` method with the periodic activity they want to
+		perform. Whenever a device's `scan_for(typ)` returns a number, a
+		ScanTask instance with that type will be created for the bus the
+		device is on, which will run the task at least that often (in
+		seconds).
+
+		
+		"""
+	typ = None
+	_trigger = None
+
+	def __init__(self,parent):
+		self.parent = parent
+		self.env = parent.env
+		self.bus = parent.srv
+		super().__init__(parent.env.cmd,('onewire','scan',self.typ,self.env.srv_name)+self.bus.path)
+
+	async def task(self):
+		"""run task_() periodically."""
+		ts = time()
+		long_warned = 0
+		while True:
+			if self._trigger is None or self._trigger.done():
+				self._trigger = asyncio.Future(loop=self.loop)
+			warned = await self.task_()
+			t = self.parent.timers[self.typ]
+			if t is None:
+				return
+			# subtract the time spent during the task
+			if warned and t < 10:
+				t = 10
+			ts += t
+			nts = time()
+			delay = ts - nts
+			if delay < 0:
+				if not long_warned:
+					long_warned = int(100/t)+1
+					# thus we get at most one warning every two minutes, more or less
+					logger.warning("Task %s took %s seconds, should run every %s",self.name,t-delay,t)
+					# TODO: write that warning to etcd instead
+				ts = nts
+				continue
+			elif long_warned:
+				long_warned -= 1
+			with suppress(asyncio.TimeoutError):
+				await asyncio.wait_for(self._trigger,delay, loop=self.loop)
+
+	def trigger(self):
+		"""Call to cause an immediate re-scan"""
+		if self._trigger is not None and not self._trigger.done():
+			self._trigger.set_result(None)
+
+	async def task_(self):
+		"""Override this to actually implement the periodic activity."""
+		raise RuntimeError("You need to override '%s.task_'" % (self.__class__.__name__,))
+
+class ScanAlarm(ScanTask):
+	typ = "alarm"
+
+	async def task_(self):
+		warned = False
+		for dev in await self.bus.dir('alarm'):
+			m = dev_re.match(dev)
+			if m:
+				try:
+					d = self.env.devices[m.group(1).lower()][m.group(2).lower()][':dev']
+					await d.has_alarm()
+				except KeyError:
+					warned = True
+					logger.warn("Scanning %s: device '%s' not found", self.name,dev)
+				except NoAlarmHandler as exc:
+					warned = True
+					logger.warn("Scanning %s: device '%s' does not have an alarm handler", self.name,dev)
+				except Exception as e:
+					warned = True
+					logger.exception("Scanning %s: device '%s' triggered an error", self.name,dev)
+			else:
+				warned = True
+				logger.warn("Scanning %s: no match for '%s'", self.name,dev)
+
+			return warned
+		
+class ScanTemperature(ScanTask):
+	typ = "temperature"
+
+	async def task_(self):
+		warned = False
+		if not len(self.parent['devices']['10']):
+			return True
+
+		await self.bus.write("simultaneous/temperature","1")
+		await asyncio.sleep(1.5,loop=self.loop)
+		for dev,b in list(self.parent['devices']['10'].items()):
+			# 
+			if b > 0:
+				continue
+			try:
+				dev = self.env.devices['10'][dev]
+				t = float(await dev.srv.read("temperature"))
+			except Exception as exc:
+				warned = True
+				logger.exception("Reading %s: device '%s' triggered an error", self.name,dev)
+			else:
+				await dev.reading("temperature",t)
+
+		return warned
+		
+tasks = {}
+for t in tuple(globals().values()):
+	if isinstance(t,type) and issubclass(t,ScanTask) and t.typ is not None:
+		tasks[t.typ] = t
+
+class mtBus(mtDir):
+	tasks = None
+
+	def __init__(self,*a,**k):
+		super().__init__(*a,**k)
+		self.tasks = WeakValueDictionary()
+		self.timers = {}
+		self.srv = self.env.srv.at('uncached').at(*(self.name.split(' ')))
+
+	@property
+	def devices(self):
+		d = self.env.devices
+		for f1,v in self['devices'].items():
+			for f2,b in v.items():
+				print("FIND",self.srv.path,f1,f2,b)
+				if b > 0:
+					continue
+				dev = d[f1][f2][':dev']
+				yield dev
+
+	def has_update(self):
+		print("UPD",id(self),self,self.srv.path)
+		super().has_update()
+		if self._seq is None:
+			t,self.tasks = self.tasks,{}
+			for v in t.values():
+				t.cancel()
+		else:
+			for name,task in tasks.items():
+				t = None
+				for dev in self.devices:
+					f = dev.scan_for(name)
+					if f is None:
+						pass
+					elif t is None or t > f:
+						t = f
+
+				self.timers[name] = t
+				if t is not None and name not in self.tasks:
+					self.tasks[name] = self.env.add_task(task(self))
+		
 class BusScan(Task):
 	"""This task periodically scans all buses of a 1wire server."""
 	name="onewire/scan"
@@ -65,20 +232,22 @@ class BusScan(Task):
 		"""Scan a single bus"""
 		b = " ".join(bus)
 		bb = self.srv_name+" "+b
-		old = set()
+
+		old_devices = set()
 		try:
-			k = self.buses.remove(b)
+			k = self.old_buses.remove(b)
 		except KeyError:
 			# The bus is new
-			m = await self.tree['bus'].set(b,{'broken':0,'devices':{}})
-			await self.tree.wait(m)
-			st = self.tree['bus'][b]['devices']
+			logger.info("New 1wire bus: %s",bb)
+
+			await self.tree['bus'].set(b,{'broken':0,'devices':{}})
+			dev_counter = self.tree['bus'][b]['devices']
 		else:
 			# The bus is known. Remember which devices we think are on it
-			st = self.tree['bus'][b]['devices']
-			for d,v in st.items():
+			dev_counter = self.tree['bus'][b]['devices']
+			for d,v in dev_counter.items():
 				for e in v.keys():
-					old.add((d,e))
+					old_devices.add((d,e))
 
 		for f in await self.srv.dir('uncached',*bus):
 			m = dev_re.match(f)
@@ -86,18 +255,16 @@ class BusScan(Task):
 				continue
 			f1 = m.group(1).lower()
 			f2 = m.group(2).lower()
-			if (f1,f2) in old:
-				old.remove((f1,f2))
+			if (f1,f2) in old_devices:
+				old_devices.remove((f1,f2))
 			if f1 == '1f':
 				await self._scan_one(*(bus+(f,'main')))
 				await self._scan_one(*(bus+(f,'aux')))
 
 			if f1 not in self.devices:
-				mod = await self.devices.set(f1,{})
-				await self.devices.wait(mod)
+				await self.devices.set(f1,{})
 			if f2 not in self.devices[f1]:
-				m = await self.devices[f1].set(f2,{':dev':{'path':bb}})
-				await self.devices.wait(m)
+				await self.devices[f1].set(f2,{':dev':{'path':bb}})
 			fd = self.devices[f1][f2][':dev']
 			op = fd.get('path','')
 			if op != bb:
@@ -105,16 +272,21 @@ class BusScan(Task):
 					self.drop_device(fd,delete=False)
 				await fd.set('path',bb)
 
-			if f1 not in st:
-				mod = await st.set(f1,{})
-				await self.tree.wait(mod)
-			if f2 not in st[f1]:
-				m = await st[f1].set(f2,0)
-				await self.tree.wait(m)
+			if f1 not in dev_counter:
+				await dev_counter.set(f1,{})
+			if f2 not in dev_counter[f1]:
+				await dev_counter[f1].set(f2,0)
 
-		for f1,f2 in old:
-			v = st[f1][f2]
+		# Now mark devices which we didn't see as down.
+		# Protect against intermittent failures.
+		for f1,f2 in old_devices:
+			try:
+				v = dev_counter[f1][f2]
+			except KeyError: # pragma: no cover
+				# possible race condition
+				continue
 			if v >= DEV_COUNT:
+				# kill it.
 				try:
 					dev = self.devices[f1][f2][':dev']
 				except KeyError:
@@ -122,8 +294,10 @@ class BusScan(Task):
 				else:
 					await self.drop_device(dev)
 			else:
-				await st[f1].set(f2,v+1)
+				# wait a bit
+				await dev_counter[f1].set(f2,v+1)
 
+		# Mark this bus as "scanning OK".
 		try:
 			v = self.tree['bus'][b]['broken']
 		except KeyError:
@@ -146,7 +320,7 @@ class BusScan(Task):
 				dt = self.tree['bus'][b]['devices']
 				drop = False
 			else:
-				dt = await self.etcd.tree('/bus/onewire/'+s+'/bus/'+b+'/devices')
+				dt = await self.etcd.tree('/bus/onewire/'+s+'/bus/'+b+'/devices',env=self)
 				drop = True
 			try:
 				f1 = dev.parent.parent.name
@@ -165,6 +339,7 @@ class BusScan(Task):
 			await dev.delete('path')
 
 	async def drop_bus(self,bus):
+		logger.warning("Bus '%s %s' has vanished", self.srv_name,bus.name)
 		for f1,v in bus.items():
 			for f2 in bus.keys():
 				try:
@@ -174,23 +349,69 @@ class BusScan(Task):
 				else:
 					await self.drop_device(dev, delete=False)
 			await self.tree['bus'].delete(bus.name)
-		pass
+
+	def add_task(self, t):
+		t = asyncio.ensure_future(t, loop=self.loop)
+		self.new_tasks.add(t)
+		if not self._trigger.done():
+			self._trigger.set_result(None)
+		return t
 
 	async def task(self):
 		self.srv = None
 		self.tree = None
 		self.srv_name = None
 		types=EtcTypes()
+		types.register('*','*',':dev', cls=OnewireDevice)
+
+		self.devices = await self.etcd.tree("/device/onewire",env=self,types=types)
+		self._trigger = None
+
+		main_task = asyncio.ensure_future(self.task_busscan(), loop=self.loop)
+		self.tasks = {main_task}
+		self.new_tasks = set()
+		try:
+			while not main_task.done():
+				if self._trigger is None or self._trigger.done():
+					self._trigger = asyncio.Future(loop=self.loop)
+					self.tasks.add(self._trigger)
+				d,p = await asyncio.wait(self.tasks, loop=self.loop, return_when=asyncio.FIRST_COMPLETED)
+				if self.new_tasks:
+					p |= self.new_tasks
+					self.new_tasks = set()
+				for t in d:
+					try:
+						t.result()
+					except asyncio.CancelledError as exc:
+						logger.info("Cancelled: %s". t)
+				self.tasks = p
+
+		except BaseException as exc:
+			logger.exception("interrupted?")
+			p = self.tasks
+			raise
+		finally:
+			print("F",p)
+			for t in p:
+				if not t.done():
+					t.cancel()
+			asyncio.wait(p, loop=self.loop, return_when=asyncio.ALL_COMPLETED)
+		for t in d:
+			t.result()
+			# this will re-raise whatever exception triggered the first wait
+
+	async def task_busscan(self):
+		types=EtcTypes()
 		types.register('port', cls=mtInteger)
 		types.register('scanning', cls=mtFloat)
+		types.register('bus','*', cls=mtBus)
 		types.register('bus','*','broken', cls=mtInteger)
 		types.register('bus','*','devices','*','*', cls=mtInteger)
-		self.devices = await self.etcd.tree("/device/onewire")
 
 		while True:
 			if self.config['delay']:
 				self._delay = asyncio.Future(loop=self.loop)
-				self._delay_timer = await Timer(self.loop,self.config['delay'], self._trigger)
+				self._delay_timer = await Timer(self.loop,self.config['delay'], self)
 
 			# Access "our" server
 			server = self.config['server']
@@ -198,7 +419,7 @@ class BusScan(Task):
 				if self.srv is not None:
 					await self.srv.close()
 				self.srv_name = server
-				self.tree = await self.etcd.tree("/bus/onewire/"+server, types=types)
+				self.tree = await self.etcd.tree("/bus/onewire/"+server, types=types,env=self)
 				self.srv = OnewireServer(self.tree['host'],self.tree.get('port',None), loop=self.loop)
 
 			if 'scanning' in self.tree:
@@ -206,37 +427,45 @@ class BusScan(Task):
 				logger.info("Server '%s' locked.",self.srv_name)
 				tree._get('scanning').add_monitor(self._unlock)
 				continue
-			m = await self.tree.set('scanning',value=time(),ttl=BUS_TTL)
-			await self.tree.wait(m)
+			await self.tree.set('scanning',value=time(),ttl=BUS_TTL)
 			try:
-				self.buses = set()
+				self.old_buses = set()
 				if 'bus' in self.tree:
 					for k in self.tree['bus'].keys():
-						self.buses.add(k)
+						self.old_buses.add(k)
 				else:
-					mod = await self.tree.set('bus',{})
-					await self.tree.wait(mod)
+					await self.tree.set('bus',{})
 				for bus in await self.srv.dir('uncached'):
 					if bus.startswith('bus.'):
 						await self._scan_one(bus)
-				for bus in self.buses:
-					v = self.tree['bus'][bus]['broken']
+
+				# Delete buses which haven't been seen for some time
+				# (to protect against intermittent failures)
+				for bus in self.old_buses:
+					bus = self.tree['bus'][bus]
+					v = bus['broken']
 					if v < BUS_COUNT:
-						await self.tree['bus'][bus].set('broken',v+1)
+						logger.info("Bus '%s' not seen",bus)
+						await bus.set('broken',v+1)
 					else:
 						await self.drop_bus(bus)
 
 			finally:
-				await self.tree.delete('scanning')
+				if not self.tree.stopped.done():
+					await self.tree.delete('scanning')
 
 			if self._delay is None:
 				break
 			try:
 				await self._delay
+				self._delay.result()
 			except StopWatching:
 				break
+			if self.tree.stopped.done():
+				return self.tree.stopped.result()
 	
-	def _trigger(self,exc=None):
+	def _timeout(self,exc=None):
+		"""Called from timer"""
 		if self._delay is not None and not self._delay.done():
 			if exc is None:
 				self._delay.set_result("timeout")
@@ -244,82 +473,26 @@ class BusScan(Task):
 				# This is for the benefit of testing
 				self._delay.set_exception(exc)
 
+	def trigger(self):
+		"""Tell all tasks to run now. Used mainly for testing."""
+		if self._delay is not None and not self._delay.done():
+			self._delay.set_result("cfg_changed")
+			self._delay_timer.cancel()
+		for t in self.tasks:
+			if hasattr(t,'trigger'):
+				t.trigger()
+
 	def cfg_changed(self):
+		"""Called from task machinery when my configuration changes"""
 		if self._delay is not None and not self._delay.done():
 			self._delay.set_result("cfg_changed")
 			self._delay_timer.cancel()
 
-	def _unlock(self,_): # pragma: no cover
+	def _unlock(self,node): # pragma: no cover
+		"""Called when the 'other' scanner exits"""
+		if node._seq is not None:
+			return
 		if self._delay is not None and not self._delay.done():
 			self._delay.set_result("unlocked")
 			self._delay_timer.cancel()
-
-class writerInterface(mtDir):
-	# An interface for bus writing
-	task = None
-	amqp_reg = None
-	def __init__(self, *a,**k):
-		if self.task is None:
-			raise NotImplementedError("You need to subclass %s and add a 'task' var"%self.__class__.__name__)
-		super().__init__(*a,**k)
-	def has_update(self):
-		super().has_update()
-		self.task.add_todo(self)
-
-class BusInterface(Task):
-	"""This task reads from AMQP."""
-	name="onewire/handler"
-	summary="Connect 1wire handler objects to everything"
-	buses = {}
-	todo = ()
-
-	def __init__(self,*a,**k):
-		super().__init__(*a,**k)
-		self._init_todo()
-	def _init_todo(self):
-		t,self.todo = self.todo,set()
-		self.todo_wait = asyncio.Future(loop=self.loop)
-		return t
-
-	@classmethod
-	def types(cls,tree):
-		super().types(tree)
-		tree.register("bus",cls=mtValue)
-		
-	def add_todo(self, dev):
-		self.todo.add(dev)
-
-	async def _xmit(self,dev, **data):
-		busname,path = dev['path'].split(' ',1)
-		try:
-			tree,conn = self.buses[bus]
-		except KeyError:
-			types=EtcTypes()
-			types.register('port', cls=mtInteger)
-			tree = await self.etcd.tree("/bus/onewire/"+busname, types=types)
-			conn = OnewireServer(self.tree['host'],self.tree.get('port',None), loop=self.loop)
-			self.buses[bus] = tree,conn
-		for k,v in data.items():
-			await conn.write(*(path.split(" ")+(k,)), v)
-
-	async def task(self):
-		class myWriterInterface(writerInterface):
-			task = self
-
-		types = EtcTypes()
-		types.register("*","*",":dev","output", cls=myWriterInterface)
-		self.devices = await self.etcd.tree("/device/onewire", types=types)
-
-		while True:
-			await self.todo_wait
-			todo = self._init_todo()
-			for dev in todo:
-				try:
-					outs = dev['output'].items()
-				except KeyError:
-					# no outputs: ignore
-					continue
-				else:
-					for name,out in outs:
-						pass ## TODO
 

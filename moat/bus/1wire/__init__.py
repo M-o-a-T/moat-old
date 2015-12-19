@@ -23,37 +23,15 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##  Thus, do not remove the next line, or insert any blank lines above.
 ##BP
 
-"""Utilities for scripting"""
+"""List of known 1wire devices"""
 
-from importlib import import_module
-import pkgutil
+import os
+from ...script.util import objects
 
 import logging
 logger = logging.getLogger(__name__)
 
-def objects(module, cls, immediate=False):
-	"""\
-		List all objects of a given class in a directory.
+def devices():
+	from ..script.task import Task
+	return objects(__name__, Task)
 
-		If @immediate is set, only direct subclasses are returned.
-		"""
-	if isinstance(module,str):
-		import sys
-		module = sys.modules[module]
-	for a,b,c in pkgutil.walk_packages(module.__path__, module.__name__+'.'):
-		try:
-			m = import_module(b)
-		except ImportError:
-			logger.exception("Trying to import "+__name__+'.'+b) # pragma: no cover
-			# not going to ship a broken file for testing this
-		else:
-			try:
-				syms = m.__all__
-			except AttributeError:
-				syms = dir(m)
-			for c in syms:
-				c = getattr(m,c,None)
-				if isinstance(c,type) and \
-						((c.__base__ is cls) if immediate else (c is not cls and issubclass(c,cls))):
-					yield c
-			

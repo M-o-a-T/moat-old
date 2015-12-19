@@ -38,8 +38,12 @@ import logging
 logger = logging.getLogger(__name__)
 
 class FakeBus:
-	def __init__(self, loop):
+	path = ()
+	def __init__(self, loop, data=None):
 		self.loop = loop
+		if data is not None:
+			self.data = data
+			return
 		d=dict
 		self.temp = {}
 		self.moat = {}
@@ -92,6 +96,14 @@ class FakeBus:
 			d = d[s]
 		d[p[-1]] = data
 
+	def at(self,*p):
+		d = self.data
+		for s in p:
+			d = d[s]
+		f = FakeBus(self.loop, data=d)
+		f.path = p
+		return f
+		
 class FakeSleep:
 	# A fake implementation of a timer.
 	# The task calls __call__ to set up its timeout and return a future.
@@ -135,8 +147,12 @@ class FakeSleep:
 			return # pragma: no cover
 		if not isinstance(mod,bool):
 			self.mod = mod
-		self.proc(StopWatching() if mod is True else None)
-		self.proc = None
+		p,self.proc = self.proc,None
+		self.f = None
+		if mod is True:
+			p._timeout(StopWatching())
+		else:
+			p.trigger()
 
 @pytest.yield_fixture
 def owserver(loop,unused_tcp_port):
@@ -196,22 +212,40 @@ async def test_onewire_fake(loop):
 
 			f = m.parse("-vvvc test.cfg run -g fake/onewire")
 
+			await asyncio.sleep(5.5,loop=loop)
 			async def mod_a():
+				await td.wait()
+				await tr.wait()
 				assert td['10']['001001001001'][':dev']
-				assert tr['server']['faker']['bus']['bus.42']['devices']['10']['001001001001'] == '0'
+				assert tr['faker']['bus']['bus.42']['devices']['10']['001001001001'] == '0'
 
 				del fb.bus['10.001001001001']
+			if f.done():
+				f.result()
+				assert False,"dead"
 			await fs.step(f,mod_a)
 			async def mod_b():
-				assert tr['server']['faker']['bus']['bus.42']['devices']['10']['001001001001'] == '1'
+				assert tr['faker']['bus']['bus.42']['devices']['10']['001001001001'] == '1'
+			if f.done():
+				f.result()
+				assert False,"dead"
 			await fs.step(f,mod_b)
+			if f.done():
+				f.result()
+				assert False,"dead"
 			await fs.step(f)
+			if f.done():
+				f.result()
+				assert False,"dead"
 			async def mod_c():
 				with pytest.raises(KeyError):
-					tr['server']['faker']['bus']['bus.42']['devices']['10']['001001001001']
+					tr['faker']['bus']['bus.42']['devices']['10']['001001001001']
 				with pytest.raises(KeyError):
 					td['10']['001001001001'][':dev']['path']
 			await fs.step(f,mod_c)
+			if f.done():
+				f.result()
+				assert False,"dead"
 			await fs.step(f,True)
 			r = await f
 			assert r == 0, r

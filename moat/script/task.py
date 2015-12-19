@@ -88,9 +88,13 @@ class Task(asyncio.Task):
 			If _ttl is a callable, it must return a (ttl,refresh) tuple.
 			_refresh is ignored in that case.
 			"""
-		assert ':' not in self.name
-		assert name[0] != '/'
-		assert name[-1] != '/'
+		if isinstance(name,(list,tuple)):
+			assert len(name)
+			name = '/'.join(name)
+		else:
+			assert ':' not in self.name
+			assert name[0] != '/'
+			assert name[-1] != '/'
 
 		self.cmd = cmd
 		self.config = config
@@ -318,6 +322,8 @@ class TaskMaster(asyncio.Future):
 			"""
 		self.loop = cmd.root.loop
 		self.cmd = cmd
+		if not isinstance(path,str):
+			path = '/'.join(path)
 		self.path = path
 		self.name = path # for now
 		self.vars = {} # standard task control vars
@@ -360,6 +366,11 @@ class TaskMaster(asyncio.Future):
 		
 		self._start()
 	
+	def trigger(self):
+		"""Calls the task's trigger() function, causing immediate processing.
+			Used for testing."""
+		self.job.trigger()
+
 	def task_var(self,k):
 		for cfg in (self.taskdef, self.task, self.gcfg, self.rcfg):
 			if k in cfg:
