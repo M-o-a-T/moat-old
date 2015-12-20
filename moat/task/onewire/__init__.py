@@ -389,7 +389,7 @@ class BusScan(Task):
 					try:
 						t.result()
 					except asyncio.CancelledError as exc:
-						logger.info("Cancelled: %s". t)
+						logger.info("Cancelled: %s", t)
 				self.tasks = p
 
 		except BaseException as exc:
