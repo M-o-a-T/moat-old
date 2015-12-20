@@ -160,6 +160,10 @@ class ScanTemperature(ScanTask):
 			try:
 				dev = self.env.devices['10'][dev][':dev']
 				t = float(await dev.srv.read("temperature"))
+			except KeyError:
+				# This may happen during testing when a device gets "moved".
+				# Don't increase the delay in this case.
+				logger.info("Reading %s: device '%s' not found", self.name,dev)
 			except Exception as exc:
 				warned = True
 				logger.exception("Reading %s: device '%s' triggered an error", self.name,dev)

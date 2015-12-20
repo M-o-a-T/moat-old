@@ -303,11 +303,12 @@ async def test_onewire_fake(loop):
 				assert int(fb.bus_aux['simultaneous']['temperature']) == 0
 			await fs.step(f,mod_s)
 			await fs.step(f)
-			await asyncio.sleep(2.5,loop=loop)
+			await asyncio.sleep(4.5,loop=loop)
 			await fs.step(f)
 			async def mod_a3():
 				await td.wait()
-				assert float(td['10']['001001001001'][':dev']['input']['temperature']['value']) == 42.25
+				assert float(td['10']['001001001001'][':dev']['input']['temperature']['value']) == 42.25, \
+					td['10']['001001001001'][':dev']['input']['temperature']['value']
 			await fs.step(f,mod_a3)
 
 			# More to come. For now, shut down.
