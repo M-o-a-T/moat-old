@@ -23,7 +23,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##  Thus, do not remove the next line, or insert any blank lines above.
 ##BP
 
-"""List of known Tasks"""
+"""Run known Tasks"""
 
 import asyncio
 import os
@@ -32,9 +32,13 @@ import sys
 
 from ..script import Command, CommandError
 from ..script.task import TaskMaster, JobIsRunningError, JobMarkGoneError
-from ..task import TASK_DIR,TASK, TASKSTATE_DIR,TASKSTATE
+from ..task import TASK_DIR,TASK, TASKSTATE_DIR,TASKSTATE, task_state_types
+from moat.util import r_dict
+from yaml import safe_dump
+from datetime import datetime
 from etcd_tree.util import from_etcd
-from etcd_tree.node import mtDir
+from etcd_tree.etcd import EtcTypes
+from etcd_tree.node import mtDir,mtFloat
 from functools import partial
 from itertools import chain
 import aioetcd as etcd
@@ -59,9 +63,6 @@ by default, start every task that's defined for this host.
 		self.parser.add_option('-t','--this',
             action="count", dest="this", default=0,
             help="Run this job only (add -t for sub-paths)")
-		self.parser.add_option('-l','--list',
-            action="store_true", dest="list",
-            help="List jobs' state instead of running them")
 		self.parser.add_option('-x','--noref',
             action="store_true", dest="noref",
             help="Do not follow :ref entries")
@@ -89,7 +90,7 @@ by default, start every task that's defined for this host.
 		self.seen = set()
 		self.tilt = asyncio.Future(loop=self.root.loop)
 		opts = self.options
-		if opts.is_global and not args and not opts.list:
+		if opts.is_global and not args:
 			raise CommandError("You can't run the whole world.")
 
 		etc = await self.root._get_etcd()
@@ -115,11 +116,6 @@ by default, start every task that's defined for this host.
 		if not self.tasks:
 			if self.root.verbose:
 				print("No tasks found. Exiting.", file=sys.stderr)
-			return
-		if opts.list:
-			for task in sorted(self.tasks, key=lambda _:_.path):
-				path = task.path[len(TASK_DIR)+1:-(len(TASK)+1)]
-				print(path,task.get('name','-'),task.get('descr','-'), sep='\t')
 			return
 
 		self.root.loop.add_signal_handler(signal.SIGINT,self._tilt)

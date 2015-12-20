@@ -233,7 +233,7 @@ async def test_onewire_fake(loop):
 			assert r == 0, r
 			r = await m.parse("-vvvc test.cfg task add fake/onewire/scan onewire/scan server=faker delay=999 update_delay=0.2 Scan the fake bus")
 			assert r == 0, r
-			r = await m.parse("-vvvc test.cfg task param fake/onewire/scan restart 0 retry 0")
+			r = await m.parse("-vvvc test.cfg task param fake/onewire/scan restart=0 retry=0")
 			assert r == 0, r
 
 			# Start the bus scanner

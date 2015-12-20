@@ -34,12 +34,14 @@ from moat.util import r_dict
 from etcd_tree.util import from_etcd
 from etcd_tree.etcd import EtcTypes
 from dabroker.util import import_string
-from ..task import task_var_types, TASK_DIR,TASKDEF_DIR,TASK,TASKDEF
+from ..task import task_var_types,task_state_types,\
+	TASK_DIR,TASKDEF_DIR,TASK,TASKDEF,TASKSTATE_DIR,TASKSTATE
 from yaml import safe_dump
 import aioetcd as etcd
 import asyncio
 import time
 import types as py_types
+from datetime import datetime
 
 import logging
 logger = logging.getLogger(__name__)
@@ -72,8 +74,8 @@ on the command line, they are added, otherwise everything under
 
 	def addOptions(self):
 		self.parser.add_option('-f','--force',
-            action="store_true", dest="force",
-            help="update existing values")
+			action="store_true", dest="force",
+			help="update existing values")
 
 	def handleOptions(self):
 		self.force = self.options.force
@@ -215,6 +217,15 @@ This command deletes (some of) that data.
 class _ParamCommand(Command,DefSetup):
 	name = "param"
 	# _def = None ## need to override
+	description = """\
+
+This command shows/changes/deletes parameters for that data.
+
+Usage: … param NAME VALUE  -- set
+       … param             -- list all
+       … param NAME        -- show one
+       … param -d NAME     -- delete
+"""
 
 	def addOptions(self):
 		self.parser.add_option('-d','--delete',
@@ -257,28 +268,32 @@ class _ParamCommand(Command,DefSetup):
 					if self.root.verbose:
 						print("%s=%s (deleted)" % (k,data[k]), file=self.stdout)
 					await data.delete(k)
-		elif len(args) == 1:
+		elif len(args) == 1 and '=' not in args[0]:
 			print(data[args[0]], file=self.stdout)
 		elif not len(args):
 			for k in _VARS:
 				if k in data:
 					print(k,data[k], sep='\t',file=self.stdout)
-		elif len(args)%2:
-			raise CommandError("I do not know what to do with an odd number of arguments.")
 		else:
 			while args:
 				k = args.pop(0)
-				if k not in _VARS:
-					raise CommandError("'%s' is not a valid parameter."%k)
-				v = args.pop(0)
-				if self.root.verbose:
-					if k not in data:
-						print("%s=%s (new)" % (k,v), file=self.stdout)
-					elif str(data[k]) == v:
-						print("%s=%s (unchanged)" % (k,v), file=self.stdout)
-					else:
-						print("%s=%s (was %s)" % (k,v,data[k]), file=self.stdout)
-				await data.set(k, v)
+				try:
+					k,v = k.split('=',1)
+				except ValueError:
+					if k not in _VARS:
+						raise CommandError("'%s' is not a valid parameter."%k)
+					print(k,data.get(k,'-'), sep='\t',file=self.stdout)
+				else:
+					if k not in _VARS:
+						raise CommandError("'%s' is not a valid parameter."%k)
+					if self.root.verbose:
+						if k not in data:
+							print("%s=%s (new)" % (k,v), file=self.stdout)
+						elif str(data[k]) == v:
+							print("%s=%s (unchanged)" % (k,v), file=self.stdout)
+						else:
+							print("%s=%s (was %s)" % (k,v,data[k]), file=self.stdout)
+					await data.set(k, v)
 
 class DefParamCommand(_ParamCommand):
 	_def = True
@@ -287,14 +302,7 @@ class DefParamCommand(_ParamCommand):
 	summary = "Parameterize task definitions"
 	description = """\
 Task definitions are stored in etcd at /meta/task/**/:taskdef.
-
-This command shows/changes/deletes parameters for that data.
-
-Usage: … param NAME VALUE  -- set
-       … param             -- list all
-       … param NAME        -- show one
-       … param -d NAME     -- delete
-"""
+""" + _ParamCommand.description
 
 class ParamCommand(_ParamCommand):
 	_def = False
@@ -303,15 +311,7 @@ class ParamCommand(_ParamCommand):
 	summary = "Parameterize tasks"
 	description = """\
 Tasks are stored in etcd at /task/**/:task.
-
-This command shows/changes/deletes parameters for that data.
-
-Usage: … param NAME VALUE  -- set
-       … param             -- list all
-       … param NAME        -- show one
-       … param -d NAME     -- delete
-"""
-
+""" + _ParamCommand.description
 
 class DefCommand(Command):
 	subCommandClasses = [
@@ -514,6 +514,61 @@ This command deletes one of these entries.
 				task = p
 
 
+class StateCommand(Command):
+	name = "state"
+	summary = "Show task status"
+	description = """\
+The status of running tasks is stored in etcd at /status/run/task/**/:task.
+
+This command shows that information.
+"""
+
+	async def do_async(self,args):
+		await self.root.setup()
+		etc = self.root.etcd
+		types = EtcTypes()
+		task_state_types(types.step('**').step(TASKSTATE))
+		t = await etc.tree(TASKSTATE_DIR,types=types,static=True)
+
+		if args:
+			dirs = []
+			for a in args:
+				try:
+					dirs.append(await t.subdir(a, create=False))
+				except KeyError:
+					print("'%s' does not exist" % (a,), file=sys.stderr)
+		else:
+			dirs = [t]
+		for tt in dirs:
+			for task in tt.tagged(TASKSTATE):
+				path = task.path[1:-(len(TASKSTATE)+1)]
+
+				if self.root.verbose > 1:
+					safe_dump({path:r_dict(dict(task))}, stream=self.stdout)
+				else:
+					date = task.get('debug_time','-')
+					if 'running' in task:
+						if 'started' in task:
+							date = task['started']
+							state = 'run'
+						else:
+							date = task['running']
+							state = 'run?'
+					elif 'started' in task and ('stopped' not in task or task['started']>task['stopped']):
+						date = task['started']
+						state = 'crash'
+					elif 'stopped' in task:
+						date = task['stopped']
+						state = task['state']
+					elif 'state' in task:
+						state = task['state']
+					else:
+						state = task.get('state','?')
+					if not isinstance(date,str):
+						date = datetime.fromtimestamp(date).strftime('%Y-%m-%d %H:%M:%S')
+					print(path,state,date,task.get('message','-'), sep='\t', file=self.stdout)
+
+
 class TaskCommand(Command):
 	name = "task"
 	summary = "Configure and define tasks"
@@ -528,6 +583,7 @@ Commands to set up and admin the task list known to MoaT.
 		ParamCommand,
 		ListCommand,
 		DeleteCommand,
+		StateCommand,
 	]
 	fix = False
 

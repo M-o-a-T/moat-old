@@ -67,21 +67,7 @@ class CommandHelpFormatter(optparse.IndentedHelpFormatter):
 	def format_description(self, description):
 		# textwrap doesn't allow for a way to preserve double newlines
 		# to separate paragraphs, so we do it here.
-		paragraphs = description.split('\n\n')
-		rets = []
-
-		for paragraph in paragraphs:
-			# newlines starting with a space/dash are treated as a table, ie as
-			# is
-			lines = paragraph.split('\n -')
-			formatted = []
-			for line in lines:
-				formatted.append(
-					optparse.IndentedHelpFormatter.format_description(
-						self, line))
-			rets.append(" -".join(formatted))
-
-		ret = "\n".join(rets)
+		ret = description
 
 		# add aliases
 		if self._aliases:

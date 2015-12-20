@@ -37,10 +37,10 @@ class Sleeper(Task):
 	@classmethod
 	def types(cls,tree):
 		super().types(tree)
-		tree.register(cls=mtFloat)
+		tree.register('delay', cls=mtFloat)
 		
 	async def task(self):
-		await asyncio.sleep(self.cfg.value, loop=self.loop)
+		await asyncio.sleep(self.config['delay'], loop=self.loop)
 	
 class Error(Task):
 	name="test/error"
@@ -56,7 +56,7 @@ class SleepError(Sleeper):
 	summary="""A delay, terminated by an error"""
 
 	async def task(self):
-		await asyncio.sleep(self.cfg.value, loop=self.loop)
+		await asyncio.sleep(self.config['delay'], loop=self.loop)
 		raise RuntimeError("Don't wanna dance no mo-ooore")
 
 	
