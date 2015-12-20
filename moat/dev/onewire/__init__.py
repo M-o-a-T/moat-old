@@ -72,14 +72,16 @@ class OnewireDevice(Device): #(, metaclass=SelectDevice):
 		cls = device_types.get(parent.parent.name.upper(), cls)
 		return super(OnewireDevice,cls).__new__(cls)
 
-#	def __init__(self,*a,**k):
-#		super().__init__(*a,**k)
-#		import pdb;pdb.set_trace()
-#		self.dev = self.env.srv.at(self.parent.parent.name,self.parent.name)
-
 	def has_update(self):
 		super().has_update()
 		if not self._inited:
+			path = self.get('path','')
+			if path:
+				srv,path = path.split(' ',1)
+				assert self.env.srv_name == srv
+				self.srv = self.env.srv.at('uncached').at(*path.split(' ')).at(self.parent.parent.name+'.'+self.parent.name)
+			else:
+				self.srv = None
 			d = {'input':{},'output':{}}
 			for k,v in self.inputs.items():
 				d['input'][k] = {'type':v}

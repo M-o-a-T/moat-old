@@ -201,7 +201,6 @@ class Task(asyncio.Task):
 				await asyncio.sleep(refresh, loop=r.loop)
 				
 		# Now start the updater and the main task.
-		import gc; logger.debug("Ref %s",gc.get_referrers(self))
 		run_task = asyncio.ensure_future(updater(refresh), loop=r.loop)
 		main_task = asyncio.ensure_future(self.task(), loop=r.loop)
 		res = None

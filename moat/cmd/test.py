@@ -174,7 +174,7 @@ Check etcd access, and basic data layout.
 		await run_state.close()
 
 		try:
-			t = self.Task_do4(self,"test/do_4")
+			t = self.Task_do4(self,"test/do_4",_ttl=3,_refresh=10)
 			await t
 		except JobMarkGoneError:
 			pass

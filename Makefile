@@ -57,6 +57,7 @@ test: all
 		--assert=plain tests \
 		--cov=tests \
 		--cov=moat.cmd \
+		--cov=moat.dev \
 		--cov=moat.proto \
 		--cov=moat.script \
 		--cov=moat.task \

@@ -155,11 +155,10 @@ class ScanTemperature(ScanTask):
 		await self.bus.write("simultaneous","temperature", data="1")
 		await asyncio.sleep(1.5,loop=self.loop)
 		for dev,b in list(self.parent['devices']['10'].items()):
-			# 
 			if b > 0:
 				continue
 			try:
-				dev = self.env.devices['10'][dev]
+				dev = self.env.devices['10'][dev][':dev']
 				t = float(await dev.srv.read("temperature"))
 			except Exception as exc:
 				warned = True

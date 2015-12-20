@@ -37,32 +37,53 @@ from . import ProcessHelper, is_open, MoatTest
 import logging
 logger = logging.getLogger(__name__)
 
-class FakeBus:
+class FakeSubBus:
 	path = ()
+	def __init__(self, parent,path):
+		self.parent = parent
+		self.path = path
+
+	def __repr__(self):
+		return "<S%s %s>" % (repr(self.parent), '/'.join(self.path),)
+
+	async def dir(self,*p):
+		return (await self.parent.dir(*(self.path+p)))
+
+	async def read(self,*p):
+		return (await self.parent.read(*(self.path+p)))
+
+	async def write(self,*p, data=None):
+		return (await self.parent.write(*(self.path+p), data=data))
+
+	def at(self,*p):
+		return FakeSubBus(parent=self,path=p)
+		
+class FakeBus(FakeSubBus):
 	def __init__(self, loop, data=None):
 		self.loop = loop
 		if data is not None:
 			self.data = data
 			return
 		d=dict
-		self.temp = {}
+		self.temp = {"temperature":12.5}
 		self.moat = {}
 		self.bus_main = {
 			"alarm":{},
 			"simultaneous":{},
-			"F0.004200420042": self.moat,
+			"f0.004200420042": self.moat,
+			}
+		self.bus_aux = {
+			"alarm":{},
+			"simultaneous":{},
+			"10.001001001001":self.temp,
 			}
 		self.bus = {
 			"alarm":{},
 			"simultaneous":{},
 			"1f.123123123123":{
 				"main":self.bus_main,
-				"aux":{
-					"alarm":{},
-					"simultaneous":{},
-					},
+				"aux":self.bus_aux,
 				},
-			"10.001001001001":self.temp,
 			}
 		self.data = {
 			"uncached": {
@@ -70,6 +91,9 @@ class FakeBus:
 				},
 				"foobar":"whatever",
 			}
+
+	def __repr__(self):
+		return "<FakeBus>"
 
 	def __call__(self, h,p, loop=None):
 		assert h == "foobar.invalid"
@@ -80,30 +104,25 @@ class FakeBus:
 	async def dir(self,*p):
 		d = self.data
 		for s in p:
-			d = d[s]
+			d = d[s.lower()]
+		logger.debug("BUSDIR %s %s",p,list(d.keys()))
 		return d.keys()
 
 	async def read(self,*p):
 		d = self.data
 		for s in p:
-			d = d[s]
+			d = d[s.lower()]
 		assert not isinstance(d,dict)
+		logger.debug("BUSREAD %s %s",p,d)
 		return d
 
 	async def write(self,*p, data=None):
+		logger.debug("BUSWRITE %s %s",p,data)
 		d = self.data
 		for s in p[:-1]:
-			d = d[s]
-		d[p[-1]] = data
+			d = d[s.lower()]
+		d[p[-1].lower()] = data
 
-	def at(self,*p):
-		d = self.data
-		for s in p:
-			d = d[s]
-		f = FakeBus(self.loop, data=d)
-		f.path = p
-		return f
-		
 class FakeSleep:
 	# A fake implementation of a timer.
 	# The task calls __call__ to set up its timeout and return a future.
@@ -156,7 +175,8 @@ class FakeSleep:
 			await task
 		else:
 			logger.debug("Run: step %s",mod)
-			p.trigger()
+			if not task.done():
+				p.trigger()
 			if task.done():
 				task.result()
 				assert False,"dead"
@@ -201,6 +221,7 @@ async def test_onewire_fake(loop):
 			mp = mock.patch("moat.task.onewire.DEV_COUNT", new=1)
 			mp.__enter__()
 
+			# Set up the whole thing
 			m = MoatTest(loop=loop)
 			r = await m.parse("-vvvc test.cfg task def init moat.task.onewire")
 			assert r == 0, r
@@ -215,32 +236,81 @@ async def test_onewire_fake(loop):
 			r = await m.parse("-vvvc test.cfg task param fake/onewire/scan restart 0 retry 0")
 			assert r == 0, r
 
+			# Start the bus scanner
 			f = m.parse("-vvvc test.cfg run -g fake/onewire")
+
+			# give it some time to settle
 			await fs.step(f)
-			await asyncio.sleep(1.5,loop=loop)
+			await asyncio.sleep(2.5,loop=loop)
 			await fs.step(f)
+
+			# temperature device found, bus scan active
 			async def mod_a():
 				await td.wait()
 				await tr.wait()
 				assert td['10']['001001001001'][':dev']
-				assert tr['faker']['bus']['bus.42']['devices']['10']['001001001001'] == '0'
+				assert tr['faker']['bus']['bus.42 1f.123123123123 aux']['devices']['10']['001001001001'] == '0'
 
-				assert int(fb.bus['simultaneous']['temperature']) == 1
+				assert int(fb.bus_aux['simultaneous']['temperature']) == 1
 			await fs.step(f,mod_a)
+			await asyncio.sleep(2.0,loop=loop)
+			await fs.step(f)
 
+			# we should have a value by now
+			async def mod_a2():
+				await td.wait()
+				assert float(td['10']['001001001001'][':dev']['input']['temperature']['value']) == 12.5
+			await fs.step(f,mod_a2)
+
+			# now unplug the sensor
 			async def mod_x():
-				del fb.bus['10.001001001001']
+				del fb.bus_aux['10.001001001001']
 			await fs.step(f,mod_x)
+
+			# watch it vanish
 			async def mod_b():
-				assert tr['faker']['bus']['bus.42']['devices']['10']['001001001001'] == '1'
+				assert tr['faker']['bus']['bus.42 1f.123123123123 aux']['devices']['10']['001001001001'] == '1'
 			await fs.step(f,mod_b)
 			await fs.step(f)
 			async def mod_c():
 				with pytest.raises(KeyError):
-					tr['faker']['bus']['bus.42']['devices']['10']['001001001001']
+					tr['faker']['bus']['bus.42 1f.123123123123 aux']['devices']['10']['001001001001']
 				with pytest.raises(KeyError):
 					td['10']['001001001001'][':dev']['path']
+
+				# also, nobody scanned the main bus yet
+				with pytest.raises(KeyError):
+					fb.bus['simultaneous']['temperature']
+
+				# it's gone, so heat it up and plug it into the main bus
+				fb.temp['temperature'] = 42.25
+				fb.bus['10.001001001001'] = fb.temp
+				# and prepare to check that the scanner doesn't any more
+				fb.bus_aux['simultaneous']['temperature'] = 0
 			await fs.step(f,mod_c)
+			await fs.step(f)
+			await asyncio.sleep(2.5,loop=loop)
+			await fs.step(f)
+
+			# we're scanning the main bus now
+			async def mod_s():
+				await td.wait()
+				await tr.wait()
+				assert td['10']['001001001001'][':dev']['path']
+				assert tr['faker']['bus']['bus.42']['devices']['10']['001001001001'] == '0'
+
+				assert int(fb.bus['simultaneous']['temperature']) == 1
+				assert int(fb.bus_aux['simultaneous']['temperature']) == 0
+			await fs.step(f,mod_s)
+			await fs.step(f)
+			await asyncio.sleep(2.5,loop=loop)
+			await fs.step(f)
+			async def mod_a3():
+				await td.wait()
+				assert float(td['10']['001001001001'][':dev']['input']['temperature']['value']) == 42.25
+			await fs.step(f,mod_a3)
+
+			# More to come. For now, shut down.
 			await fs.step(f,True)
 			r = await f
 			assert r == 0, r
