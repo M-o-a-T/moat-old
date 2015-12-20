@@ -24,6 +24,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##BP
 
 import asyncio
+from contextlib import suppress
 
 from . import ScanTask,dev_re
 
@@ -39,7 +40,9 @@ class ScanTemperature(ScanTask):
 			return True
 
 		await self.bus.write("simultaneous","temperature", data="1")
-		await asyncio.sleep(1.5,loop=self.loop)
+
+		with suppress(asyncio.TimeoutError):
+			await asyncio.wait_for(self._trigger,timeout=1.5,loop=self.loop)
 		for dev,b in list(self.parent['devices']['10'].items()):
 			if b > 0:
 				continue
