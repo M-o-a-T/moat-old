@@ -56,6 +56,7 @@ class OnewireDevice(Device): #(, metaclass=SelectDevice):
 	inputs = {}
 	outputs = {}
 	_inited = False
+	_cached_path = None
 
 	def __new__(cls,*a,parent=None,**k):
 		"""Find the class for this device."""
@@ -74,14 +75,7 @@ class OnewireDevice(Device): #(, metaclass=SelectDevice):
 
 	def has_update(self):
 		super().has_update()
-		if not self._inited:
-			path = self.get('path','')
-			if path:
-				srv,path = path.split(' ',1)
-				assert self.env.srv_name == srv
-				self.srv = self.env.srv.at('uncached').at(*path.split(' ')).at(self.parent.parent.name+'.'+self.parent.name)
-			else:
-				self.srv = None
+		if self._cached_path is None:
 			d = {'input':{},'output':{}}
 			for k,v in self.inputs.items():
 				d['input'][k] = {'type':v}
@@ -89,7 +83,16 @@ class OnewireDevice(Device): #(, metaclass=SelectDevice):
 				d['output'][k] = {'type':v}
 			for k,v in d.items():
 				self[k] = v
-			self._inited = True
+
+		srvpath = self.get('path','')
+		if self._cached_path is None or srvpath != self._cached_path:
+			if srvpath != '':
+				srv,path = srvpath.split(' ',1)
+				assert self.env.srv_name == srv
+				self.srv = self.env.srv.at('uncached').at(*path.split(' ')).at(self.parent.parent.name+'.'+self.parent.name)
+			else:
+				self.srv = None
+			self._cached_path = srvpath
 
 	@classmethod
 	def types(cls, types):
