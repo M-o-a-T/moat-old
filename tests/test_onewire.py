@@ -241,7 +241,7 @@ async def test_onewire_fake(loop):
 
 			# give it some time to settle
 			await fs.step(f)
-			await asyncio.sleep(2.5,loop=loop)
+			await asyncio.sleep(3.5,loop=loop)
 			await fs.step(f)
 
 			# temperature device found, bus scan active
