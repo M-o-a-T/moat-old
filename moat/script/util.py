@@ -31,16 +31,19 @@ import pkgutil
 import logging
 logger = logging.getLogger(__name__)
 
-def objects(module, cls, immediate=False):
+def objects(module, cls, immediate=False,direct=False):
 	"""\
 		List all objects of a given class in a directory.
 
 		If @immediate is set, only direct subclasses are returned.
+		If @direct is set, modules in subdirectories are ignored.
 		"""
 	if isinstance(module,str):
 		import sys
 		module = sys.modules[module]
 	for a,b,c in pkgutil.walk_packages(module.__path__, module.__name__+'.'):
+		if direct and a.path != module.__path__[0]:
+			continue
 		try:
 			m = import_module(b)
 		except ImportError:
