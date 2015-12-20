@@ -120,6 +120,7 @@ class FakeSleep:
 
 	async def __call__(self,loop,dly,proc):
 		# called by the task when it wishes to create a timeout
+		logger.debug("Enter: %s",proc)
 		assert self.proc is None
 		assert self.loop is loop
 		if self.f is not None:
@@ -141,18 +142,24 @@ class FakeSleep:
 			that's executed at the beginning of the next iteration.
 			"""
 		if self.proc is None:
+			logger.debug("Wait: step %s",mod)
 			self.f = asyncio.Future(loop=self.loop)
 			await asyncio.wait((task,self.f), loop=self.loop,return_when=asyncio.FIRST_COMPLETED)
-		if task.done() or self.proc is None:
-			return # pragma: no cover
+		logger.debug("Enter: step %s",mod)
 		if not isinstance(mod,bool):
 			self.mod = mod
 		p,self.proc = self.proc,None
 		self.f = None
 		if mod is True:
+			logger.debug("Kill: step %s",mod)
 			p._timeout(StopWatching())
+			await task
 		else:
+			logger.debug("Run: step %s",mod)
 			p.trigger()
+			if task.done():
+				task.result()
+				assert False,"dead"
 
 @pytest.yield_fixture
 def owserver(loop,unused_tcp_port):
@@ -203,49 +210,37 @@ async def test_onewire_fake(loop):
 				pass
 			r = await m.parse("-vvvc test.cfg bus 1wire server add faker foobar.invalid - A nice fake 1wire bus")
 			assert r == 0, r
-			r = await m.parse("-vvvc test.cfg task add fake/onewire/scan onewire/scan server=faker delay=999 Scan the fake bus")
+			r = await m.parse("-vvvc test.cfg task add fake/onewire/scan onewire/scan server=faker delay=999 update_delay=0.2 Scan the fake bus")
 			assert r == 0, r
-			#r = await m.parse("-vvvc test.cfg task add fake/onewire/interface onewire/interface server=faker delay=999 Talk to the fake bus")
-			#assert r == 0, r
 			r = await m.parse("-vvvc test.cfg task param fake/onewire/scan restart 0 retry 0")
 			assert r == 0, r
 
 			f = m.parse("-vvvc test.cfg run -g fake/onewire")
-
-			await asyncio.sleep(5.5,loop=loop)
+			await fs.step(f)
+			await asyncio.sleep(1.5,loop=loop)
+			await fs.step(f)
 			async def mod_a():
 				await td.wait()
 				await tr.wait()
 				assert td['10']['001001001001'][':dev']
 				assert tr['faker']['bus']['bus.42']['devices']['10']['001001001001'] == '0'
 
-				del fb.bus['10.001001001001']
-			if f.done():
-				f.result()
-				assert False,"dead"
+				assert int(fb.bus['simultaneous']['temperature']) == 1
 			await fs.step(f,mod_a)
+
+			async def mod_x():
+				del fb.bus['10.001001001001']
+			await fs.step(f,mod_x)
 			async def mod_b():
 				assert tr['faker']['bus']['bus.42']['devices']['10']['001001001001'] == '1'
-			if f.done():
-				f.result()
-				assert False,"dead"
 			await fs.step(f,mod_b)
-			if f.done():
-				f.result()
-				assert False,"dead"
 			await fs.step(f)
-			if f.done():
-				f.result()
-				assert False,"dead"
 			async def mod_c():
 				with pytest.raises(KeyError):
 					tr['faker']['bus']['bus.42']['devices']['10']['001001001001']
 				with pytest.raises(KeyError):
 					td['10']['001001001001'][':dev']['path']
 			await fs.step(f,mod_c)
-			if f.done():
-				f.result()
-				assert False,"dead"
 			await fs.step(f,True)
 			r = await f
 			assert r == 0, r

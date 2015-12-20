@@ -151,7 +151,7 @@ class Task(asyncio.Task):
 				raise etcd.EtcdAlreadyExist(message=self.name+'/'+TASK+'/running', payload=run_state['running']) # pragma: no cover ## timing dependant
 			ttl = int(ttl)
 			if ttl < 1:
-				raise ValueError("TTL must be positive",ttl)
+				raise ValueError("TTL must be at least 1",ttl)
 			cseq = await run_state.set("running",time(),ttl=ttl)
 		except etcd.EtcdAlreadyExist as exc:
 			logger.warn("Job is already running: %s",self.name)

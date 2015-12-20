@@ -25,11 +25,19 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 
 import logging
 logger = logging.getLogger(__name__)
+from etcd_tree.node import mtFloat,mtInteger,mtString
+from time import time
 
-from .base import Device
+from ..base import Device
 
 class NoAlarmHandler(RuntimeError):
 	pass
+
+value_types = {
+	'float': mtFloat,
+	'int': mtInteger,
+}
+device_types = {} # filled later
 
 #class SelectDevice(type(Device)):
 #	def __new__(cls,name,bases,nmspc):
@@ -50,10 +58,18 @@ class OnewireDevice(Device): #(, metaclass=SelectDevice):
 	_inited = False
 
 	def __new__(cls,*a,parent=None,**k):
-		try:
-			cls = globals()['Onewire_'+parent.parent.name.upper()]
-		except KeyError:
-			pass
+		"""Find the class for this device."""
+		if not device_types:
+			from moat.script.util import objects
+			for typ in objects(__name__,OnewireDevice):
+				fam = typ.family
+				if isinstance(fam,str):
+					device_types[fam] = typ
+				else:
+					for f in fam:
+						device_types[f] = typ
+
+		cls = device_types.get(parent.parent.name.upper(), cls)
 		return super(OnewireDevice,cls).__new__(cls)
 
 #	def __init__(self,*a,**k):
@@ -64,18 +80,30 @@ class OnewireDevice(Device): #(, metaclass=SelectDevice):
 	def has_update(self):
 		super().has_update()
 		if not self._inited:
-			d = {'inputs':{},'outputs':{}}
+			d = {'input':{},'output':{}}
 			for k,v in self.inputs.items():
-				d['inputs'][k] = {'type':v}
+				d['input'][k] = {'type':v}
 			for k,v in self.outputs.items():
-				d['outputs'][k] = {'type':v}
+				d['output'][k] = {'type':v}
 			for k,v in d.items():
 				self[k] = v
 			self._inited = True
 
 	@classmethod
 	def types(cls, types):
-		"""Override to get your subtypes registered with etcd_tree"""
+		"""\
+			Register value types with etcd_tree.
+			Override to add your own categories; add to your
+			inputs{}/outputs{} for atomic values"""
+
+		types.register('input','*','timestamp', cls=mtFloat)
+		types.register('output','*','timestamp', cls=mtFloat)
+		for k,v in self.inputs.items():
+			v = value_types.get(v,mtValue)
+			types.register('input',k,'value', cls=v)
+		for k,v in self.outputs.items():
+			v = value_types.get(v,mtValue)
+			types.register('output',k,'value', cls=v)
 		pass
 
 	async def has_alarm(self):
@@ -84,38 +112,12 @@ class OnewireDevice(Device): #(, metaclass=SelectDevice):
 	def scan_for(self, what):
 		return None
 	
-	async def reading(self,what,value):
-		await self['inputs'][what].set('value',value)
-
-class Onewire_F0(OnewireDevice):
-	description = "MoaT device"
-
-	def scan_for(self,what):
-		if what == "alarm":
-			return 0.1
-		return super().scan_for(what)
-
-	async def has_alarm(self):
-		reasons = await self.dev.read("alarm/sources")
-		if not reasons:
+	async def reading(self,what,value, timestamp=None):
+		if timestamp is None:
+			timestamp = time()
+		elif self['input'][what].get('timestamp',0) > timestamp:
+			# a value from the past gets ignored
 			return
-		for r in reasons.split(','):
-			logger.warn("MoaT alarm on %s: no idea how to read '%s'",self.path,r)
-		
-class Onewire_10(OnewireDevice):
-	description = "temperature sensor"
-	inputs = {"temperature":'float'}
+		await self['input'][what].set('value',value)
+		await self['input'][what].set('timestamp',timestamp)
 
-	async def has_alarm(self):
-		# Duh.
-		t = float(strip(await self.dev.read("temperature")))
-		await self.dev.write("templow",int(t-0.5))
-		await self.dev.write("temphigh",int(t+1.5))
-		await self.reading("temperature",t)
-
-	def scan_for(self, what):
-		if what == "temperature":
-			try:
-				return float(self['attr']['scan_freq'])
-			except KeyError:
-				return 60

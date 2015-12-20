@@ -46,7 +46,7 @@ dev_re = re.compile(r'([0-9a-f]{2})\.([0-9a-f]{12})$', re.I)
 
 # This is here for overriding by tests.
 async def Timer(loop,dly,proc):
-	return loop.call_later(self.cfg['delay'], proc)
+	return loop.call_later(dly, proc._timeout)
 
 BUS_TTL=30 # presumed max time required to scan a bus
 BUS_COUNT=5 # times to not find a whole bus before it's declared dead
@@ -152,7 +152,7 @@ class ScanTemperature(ScanTask):
 		if not len(self.parent['devices']['10']):
 			return True
 
-		await self.bus.write("simultaneous/temperature","1")
+		await self.bus.write("simultaneous","temperature", data="1")
 		await asyncio.sleep(1.5,loop=self.loop)
 		for dev,b in list(self.parent['devices']['10'].items()):
 			# 
@@ -188,16 +188,15 @@ class mtBus(mtDir):
 		d = self.env.devices
 		for f1,v in self['devices'].items():
 			for f2,b in v.items():
-				print("FIND",self.srv.path,f1,f2,b)
 				if b > 0:
 					continue
 				dev = d[f1][f2][':dev']
 				yield dev
 
 	def has_update(self):
-		print("UPD",id(self),self,self.srv.path)
 		super().has_update()
 		if self._seq is None:
+			print("UPD DOWN",self,self.srv.path,list(self.tasks.keys()))
 			t,self.tasks = self.tasks,{}
 			for v in t.values():
 				t.cancel()
@@ -213,6 +212,7 @@ class mtBus(mtDir):
 
 				self.timers[name] = t
 				if t is not None and name not in self.tasks:
+					print("UPD UP",self,self.srv.path,name)
 					self.tasks[name] = self.env.add_task(task(self))
 		
 class BusScan(Task):
@@ -226,6 +226,7 @@ class BusScan(Task):
 	def types(cls,tree):
 		super().types(tree)
 		tree.register("delay",cls=mtFloat)
+		tree.register("update_delay",cls=mtFloat)
 		tree.register("ttl",cls=mtInteger)
 		
 	async def _scan_one(self, *bus):
@@ -364,7 +365,8 @@ class BusScan(Task):
 		types=EtcTypes()
 		types.register('*','*',':dev', cls=OnewireDevice)
 
-		self.devices = await self.etcd.tree("/device/onewire",env=self,types=types)
+		update_delay = self.config.get('update_delay',None)
+		self.devices = await self.etcd.tree("/device/onewire",env=self,types=types, update_delay=update_delay)
 		self._trigger = None
 
 		main_task = asyncio.ensure_future(self.task_busscan(), loop=self.loop)
@@ -419,7 +421,8 @@ class BusScan(Task):
 				if self.srv is not None:
 					await self.srv.close()
 				self.srv_name = server
-				self.tree = await self.etcd.tree("/bus/onewire/"+server, types=types,env=self)
+				update_delay = self.config.get('update_delay',None)
+				self.tree = await self.etcd.tree("/bus/onewire/"+server, types=types,env=self,update_delay=update_delay)
 				self.srv = OnewireServer(self.tree['host'],self.tree.get('port',None), loop=self.loop)
 
 			if 'scanning' in self.tree:
