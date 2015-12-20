@@ -37,7 +37,7 @@ class ScanTemperature(ScanTask):
 	async def task_(self):
 		warned = False
 		if not len(self.parent['devices']['10']):
-			return True
+			return True # pragma: no cover
 
 		await self.bus.write("simultaneous","temperature", data="1")
 
@@ -45,14 +45,10 @@ class ScanTemperature(ScanTask):
 			await asyncio.wait_for(self._trigger,timeout=1.5,loop=self.loop)
 		for dev,b in list(self.parent['devices']['10'].items()):
 			if b > 0:
-				continue
+				continue # pragma: no cover # timing dependant
 			try:
 				dev = self.env.devices['10'][dev][':dev']
 				t = float(await dev.srv.read("temperature"))
-			except KeyError:
-				# This may happen during testing when a device gets "moved".
-				# Don't increase the delay in this case.
-				logger.info("Reading %s: device '%s' not found", self.name,dev)
 			except Exception as exc:
 				warned = True
 				logger.exception("Reading %s: device '%s' triggered an error", self.name,dev)
