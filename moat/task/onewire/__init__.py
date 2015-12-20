@@ -58,6 +58,8 @@ async def scanner(self, name):
 	while True:
 		warned = await proc()
 
+tasks = {} # filled later
+
 class ScanTask(Task):
 	"""\
 		Common class for 1wire bus scanners.
@@ -119,65 +121,6 @@ class ScanTask(Task):
 		"""Override this to actually implement the periodic activity."""
 		raise RuntimeError("You need to override '%s.task_'" % (self.__class__.__name__,))
 
-class ScanAlarm(ScanTask):
-	typ = "alarm"
-
-	async def task_(self):
-		warned = False
-		for dev in await self.bus.dir('alarm'):
-			m = dev_re.match(dev)
-			if m:
-				try:
-					d = self.env.devices[m.group(1).lower()][m.group(2).lower()][':dev']
-					await d.has_alarm()
-				except KeyError:
-					warned = True
-					logger.warn("Scanning %s: device '%s' not found", self.name,dev)
-				except NoAlarmHandler as exc:
-					warned = True
-					logger.warn("Scanning %s: device '%s' does not have an alarm handler", self.name,dev)
-				except Exception as e:
-					warned = True
-					logger.exception("Scanning %s: device '%s' triggered an error", self.name,dev)
-			else:
-				warned = True
-				logger.warn("Scanning %s: no match for '%s'", self.name,dev)
-
-			return warned
-		
-class ScanTemperature(ScanTask):
-	typ = "temperature"
-
-	async def task_(self):
-		warned = False
-		if not len(self.parent['devices']['10']):
-			return True
-
-		await self.bus.write("simultaneous","temperature", data="1")
-		await asyncio.sleep(1.5,loop=self.loop)
-		for dev,b in list(self.parent['devices']['10'].items()):
-			if b > 0:
-				continue
-			try:
-				dev = self.env.devices['10'][dev][':dev']
-				t = float(await dev.srv.read("temperature"))
-			except KeyError:
-				# This may happen during testing when a device gets "moved".
-				# Don't increase the delay in this case.
-				logger.info("Reading %s: device '%s' not found", self.name,dev)
-			except Exception as exc:
-				warned = True
-				logger.exception("Reading %s: device '%s' triggered an error", self.name,dev)
-			else:
-				await dev.reading("temperature",t)
-
-		return warned
-		
-tasks = {}
-for t in tuple(globals().values()):
-	if isinstance(t,type) and issubclass(t,ScanTask) and t.typ is not None:
-		tasks[t.typ] = t
-
 class mtBus(mtDir):
 	tasks = None
 
@@ -205,6 +148,9 @@ class mtBus(mtDir):
 			for v in t.values():
 				t.cancel()
 		else:
+			if not tasks:
+				for t in objects(__name__,ScanTask):
+					tasks[t.typ] = t
 			for name,task in tasks.items():
 				t = None
 				for dev in self.devices:
