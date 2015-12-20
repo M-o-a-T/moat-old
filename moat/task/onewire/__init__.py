@@ -26,11 +26,12 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import asyncio
 import pytest
 from time import time
-from dabroker.proto import ProtocolClient
-from ..proto.onewire import OnewireServer
-from ..dev.onewire import OnewireDevice
 
-from ..script.task import Task
+from moat.proto.onewire import OnewireServer
+from moat.dev.onewire import OnewireDevice
+from moat.script.task import Task
+from moat.script.util import objects
+
 from etcd_tree.node import mtFloat,mtInteger,mtValue,mtDir
 from etcd_tree.etcd import EtcTypes
 from aioetcd import StopWatching
