@@ -34,12 +34,3 @@ logger = logging.getLogger(__name__)
 def devices():
 	from .base import Device
 	return objects(__name__, Device, immediate=True)
-
-def device_types(types):
-	from .base import Device
-	t.register("*",":dev",cls=Device)
-
-	for o in devices():
-		t = types.step(o.prefix).step('**').step(':dev')
-		t.register(cls=o)
-		o.types(t)

@@ -30,6 +30,7 @@ from etcd_tree.node import mtFloat,mtInteger,mtString
 from . import OnewireDevice
 
 class Onewire_Moat(OnewireDevice):
+	name = "moat"
 	description = "MoaT device"
 	family = "F0"
 

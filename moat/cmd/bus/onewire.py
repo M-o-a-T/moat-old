@@ -31,6 +31,7 @@ from moat.script import Command, CommandError
 from moat.script.task import Task
 from moat.task import tasks
 from moat.util import r_dict
+from moat.dev.onewire import device_types, OnewireDevice
 from etcd_tree.util import from_etcd
 from etcd_tree.etcd import EtcTypes
 from etcd_tree.node import mtInteger
@@ -174,6 +175,217 @@ class ServerCommand(Command):
 Commands to set up and admin connections to 1wire servers (OWFS).
 """
 
+class DeviceLocateCommand(Command):
+	name = "locate"
+	summary = "Set the location of a 1wire device"
+	description = """\
+Get/Set a device's location.
+Usage: … locate ID [text …]
+"""
+	async def do_async(self,args):
+		await self.root.setup(self)
+		etc = self.root.etcd
+		path = '/device/onewire'
+		if not args or not '.' in args[0]:
+			raise CommandError("You need to specify an ID.")
+		arg = args.pop(0)
+		typ,dev = arg.split('.',1)
+		types = EtcTypes()
+		OnewireDevice.types(types)
+		try:
+			t = await etc.tree('/'.join((path,typ.lower(),dev.lower(),':dev')), types=types,create=False)
+		except KeyError:
+			raise CommandError("Device '%s' not found." % (arg,))
+		if args:
+			await t.set('location',' '.join(args))
+			if self.root.verbose > 1:
+				print("Location set.", file=self.stdout)
+		elif 'location' in t:
+			print(t['location'], file=self.stdout)
+		elif self.root.verbose:
+			print("Location not yet set.", file=sys.stderr)
+			return 1
+
+class DeviceListCommand(Command):
+	name = "list"
+	summary = "List 1wire devices"
+	description = """\
+List 1wire devices (OWFS) found by MoaT.
+
+No arguments: show device classes and counts.
+Device class: show those devices.
+Device ID: detailed information about the device.
+"""
+
+	async def do_async(self,args):
+		await self.root.setup(self)
+		etc = self.root.etcd
+		path = '/device/onewire'
+		if not args:
+			res = await etc.get(path)
+			for r in res.children:
+				typ = r.key[r.key.rindex('/')+1:]
+				try:
+					dt = device_types()[typ.upper()]
+				except KeyError:
+					dt = '?'+typ
+				else:
+					dt = dt.name
+				rr = await etc.get(path+'/'+typ)
+				num = len(list(rr.children))
+				print(typ,num,dt, sep='\t',file=self.stdout)
+		else:
+			types=EtcTypes()
+
+			for arg in args:
+				if len(arg) == 2:
+					try:
+						res = await etc.get(path+'/'+arg.lower())
+					except KeyError:
+						print("Type '%s' not found." % (arg,), file=sys.stderr)
+					else:
+						try:
+							dt = device_types()[arg.upper()]
+							tname = dt.name
+						except KeyError:
+							dt = OnewireDevice
+							tname = '?'+arg
+						types = EtcTypes()
+						dt.types(types)
+						for r in res.children:
+							dev = r.key[r.key.rindex('/')+1:].upper()
+							t = await etc.tree('/'.join((path,arg.lower(),dev.lower(),':dev')), types=types,static=True,create=False)
+							print(arg+'.'+dev,t.get('path','?').replace(' ',':',1).replace(' ','/'),t.get('location','-'), sep='\t',file=self.stdout)
+
+						
+				elif '.' in arg:
+					typ,dev = arg.split('.',1)
+					try:
+						dt = device_types()[typ.upper()]
+						tname = dt.name
+					except KeyError:
+						dt = OnewireDevice
+						tname = '?'+typ
+					types = EtcTypes()
+					dt.types(types)
+					try:
+						t = await etc.tree('/'.join((path,typ.lower(),dev.lower(),':dev')), types=types,static=True,create=False)
+					except KeyError:
+						print("Device '%s' not found." % (arg,), file=sys.stderr)
+					else:
+						if self.root.verbose > 1:
+							safe_dump({arg: r_dict(t)}, stream=self.stdout)
+						else:
+							print(arg,tname,t.get('path','?').replace(' ',':',1).replace(' ','/'),t.get('location','-'), sep='\t',file=self.stdout)
+				else:
+					raise CommandError("'%s' unknown. Please specify either a device class or a device ID."%(arg,))
+
+class DeviceCommand(Command):
+	subCommandClasses = [
+		DeviceListCommand,
+		DeviceLocateCommand,
+	]
+	name = "dev"
+	summary = "OWFS device specific subcommands"
+	description = """\
+Commands to show 1wire bus members
+"""
+
+class ServerListCommand(Command):
+	name = "list"
+	summary = "List 1wire servers"
+	description = """\
+List 1wire servers (OWFS) known to MoaT.
+If you name a server, details are shown in YAML format,
+else a short list is printed.
+"""
+
+	async def do_async(self,args):
+		await self.root.setup(self)
+		etc = self.root.etcd
+		if args:
+			dirs = args
+		else:
+			dirs = []
+			res = await etc.get('/bus/onewire')
+			for r in res.children:
+				dirs.append(r.key.rsplit('/',1)[1])
+		for d in dirs:
+			if self.root.verbose > 1:
+				st = await etc.tree('/bus/onewire/'+d, static=True)
+				safe_dump({d: r_dict(dict(st))}, stream=self.stdout)
+			elif self.root.verbose:
+				h = await etc.get('/bus/onewire/'+d+'/host')
+				p = await etc.get('/bus/onewire/'+d+'/port')
+				print(d,h.value,p.value, sep='\t', file=self.stdout)
+			else:
+				print(d, file=self.stdout)
+
+class BusListCommand(Command):
+	name = "list"
+	summary = "List 1wire buses"
+	description = """\
+List 1wire buses (OWFS) known to MoaT.
+If you name a server and bus, details are shown in YAML format,
+else a short list is printed.
+"""
+
+	async def do_async(self,args):
+		await self.root.setup(self)
+		etc = self.root.etcd
+		if not args:
+			t = await etc.tree('/bus/onewire', static=True)
+			for srv,v in t.items():
+				v = v['bus']
+				for b in v.keys():
+					print(srv,b.replace(' ','/'), sep='\t',file=self.stdout)
+			return
+		srv = args.pop(0)
+		if not args:
+			t = await etc.tree('/bus/onewire/'+srv+'/bus', static=True)
+			if int(t.get('broken',0)):
+				print(bus,"*inaccessible*", sep='\t',file=self.stdout)
+			for bus,dc in t.items():
+				dc = dc.get('devices',{})
+				items = []
+				for typ,v in dc.items():
+					try:
+						dt = device_types()[typ.upper()]
+						tname = dt.name
+					except KeyError:
+						dt = OnewireDevice
+						tname = '?'+typ
+					items.append("%s:%d"%(tname,len(v)))
+				print(bus.replace(' ','/'),*items, sep='\t',file=self.stdout)
+			return
+		bus = args.pop()
+		if args:
+			raise CommandError("Usage: … list [server [bus]]")
+		bus = bus.replace('/',' ')
+		try:
+			t = await etc.tree('/bus/onewire/'+srv+'/bus/'+bus+'/devices', static=True,create=False)
+		except (etcd.EtcdKeyNotFound,KeyError):
+			raise CommandError("Bus %s:%s does not exist." % (srv,bus))
+		for typ,v in t.items():
+			try:
+				dt = device_types()[typ.upper()]
+				tname = dt.name
+			except KeyError:
+				dt = OnewireDevice
+				tname = '?'+typ
+			for dev in v.keys():
+				print(typ+'.'+dev, tname)
+
+class BusCommand(Command):
+	subCommandClasses = [
+		BusListCommand,
+	]
+	name = "bus"
+	summary = "OWFS bus specific subcommands"
+	description = """\
+Commands to show 1wire buses
+"""
+
 
 class OneWireCommand(Command):
 	name = "1wire"
@@ -184,5 +396,7 @@ Commands to set up and admin the task list known to MoaT.
 
 	subCommandClasses = [
 		ServerCommand,
+		DeviceCommand,
+		BusCommand,
 	]
 

@@ -30,7 +30,8 @@ from etcd_tree.node import mtFloat,mtInteger,mtString
 from . import OnewireDevice
 
 class Onewire_1821(OnewireDevice):
-	description = "basic inegrated temperature sensor"
+	name = "thermometer"
+	description = "basic integrated temperature sensor"
 	inputs = {"temperature":'float'}
 	family = "10"
 

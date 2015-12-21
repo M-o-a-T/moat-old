@@ -37,18 +37,19 @@ value_types = {
 	'float': mtFloat,
 	'int': mtInteger,
 }
-device_types = {} # filled later
+_device_types = {} # filled later
 
-#class SelectDevice(type(Device)):
-#	def __new__(cls,name,bases,nmspc):
-#		"""Grab the class for the actual device here"""
-#		import pdb;pdb.set_trace()
-#		p=nmspc['parent'].parent
-#		try:
-#			cls = globals()['Onewire_'+p.name]
-#		except KeyError:
-#			pass
-#		return super(SelectDevice,cls).__new__(cls,name,bases,nmspc)
+def device_types():
+	if not _device_types:
+		from moat.script.util import objects
+		for typ in objects(__name__,OnewireDevice):
+			fam = typ.family
+			if isinstance(fam,str):
+				_device_types[fam] = typ
+			else:
+				for f in fam:
+					_device_types[f] = typ
+	return _device_types
 
 class OnewireDevice(Device): #(, metaclass=SelectDevice):
 	prefix = "onewire"
@@ -60,17 +61,7 @@ class OnewireDevice(Device): #(, metaclass=SelectDevice):
 
 	def __new__(cls,*a,parent=None,**k):
 		"""Find the class for this device."""
-		if not device_types:
-			from moat.script.util import objects
-			for typ in objects(__name__,OnewireDevice):
-				fam = typ.family
-				if isinstance(fam,str):
-					device_types[fam] = typ
-				else:
-					for f in fam:
-						device_types[f] = typ
-
-		cls = device_types.get(parent.parent.name.upper(), cls)
+		cls = device_types().get(parent.parent.name.upper(), cls)
 		return super(OnewireDevice,cls).__new__(cls)
 
 	def has_update(self):
@@ -103,13 +94,12 @@ class OnewireDevice(Device): #(, metaclass=SelectDevice):
 
 		types.register('input','*','timestamp', cls=mtFloat)
 		types.register('output','*','timestamp', cls=mtFloat)
-		for k,v in self.inputs.items():
+		for k,v in cls.inputs.items():
 			v = value_types.get(v,mtValue)
 			types.register('input',k,'value', cls=v)
-		for k,v in self.outputs.items():
+		for k,v in cls.outputs.items():
 			v = value_types.get(v,mtValue)
 			types.register('output',k,'value', cls=v)
-		pass
 
 	async def has_alarm(self):
 		raise NoAlarmHandler(self)
