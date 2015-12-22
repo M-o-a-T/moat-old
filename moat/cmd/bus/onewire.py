@@ -92,15 +92,15 @@ Arguments:
 				raise CommandError("The port must be positive and <65535")
 
 		types = EtcTypes()
-		types.register('port',mtInteger)
+		types.register('server','port',mtInteger)
 		try:
 			t = await self.root.etcd.tree('/bus/onewire/'+name, types=types, create=not self.update)
 		except etcd.EtcdAlreadyExist:
 			raise CommandError("Host '%s' exists. Use '-u' or choose a different name." % name)
 		except etcd.EtcdKeyNotFound:
 			raise CommandError("Host '%s' does not exist. Drop '-u' or choose an existing name." % name)
-		await t.set('host',host)
-		await t.set('port',port)
+		await t.set('server',{'host':host,'port':port})
+
 		if len(args) > 3:
 			await t.set('info',' '.join(args[3:]))
 		if self.root.verbose > 1:
@@ -130,8 +130,8 @@ else a short list is printed.
 				st = await etc.tree('/bus/onewire/'+d, static=True)
 				safe_dump({d: r_dict(dict(st))}, stream=self.stdout)
 			elif self.root.verbose:
-				h = await etc.get('/bus/onewire/'+d+'/host')
-				p = await etc.get('/bus/onewire/'+d+'/port')
+				h = await etc.get('/bus/onewire/'+d+'/server/host')
+				p = await etc.get('/bus/onewire/'+d+'/server/port')
 				print(d,h.value,p.value, sep='\t', file=self.stdout)
 			else:
 				print(d, file=self.stdout)
@@ -315,8 +315,8 @@ else a short list is printed.
 				st = await etc.tree('/bus/onewire/'+d, static=True)
 				safe_dump({d: r_dict(dict(st))}, stream=self.stdout)
 			elif self.root.verbose:
-				h = await etc.get('/bus/onewire/'+d+'/host')
-				p = await etc.get('/bus/onewire/'+d+'/port')
+				h = await etc.get('/bus/onewire/'+d+'/server/host')
+				p = await etc.get('/bus/onewire/'+d+'/server/port')
 				print(d,h.value,p.value, sep='\t', file=self.stdout)
 			else:
 				print(d, file=self.stdout)

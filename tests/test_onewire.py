@@ -89,7 +89,8 @@ class FakeBus(FakeSubBus):
 			"uncached": {
 				"bus.42": self.bus,
 				},
-				"foobar":"whatever",
+			"foobar":"whatever",
+			"bus.42": self.bus,
 			}
 
 	def __repr__(self):
@@ -259,7 +260,8 @@ async def test_onewire_fake(loop):
 			# we should have a value by now
 			async def mod_a2():
 				await td.wait()
-				assert float(td['10']['001001001001'][':dev']['input']['temperature']['value']) == 12.5
+				assert float(td['10']['001001001001'][':dev']['input']['temperature']['value']) == 12.5, \
+					td['10']['001001001001'][':dev']['input']['temperature']['value']
 			await fs.step(f,mod_a2)
 
 			# now unplug the sensor

@@ -79,7 +79,8 @@ class ScanTask(Task):
 	def __init__(self,parent):
 		self.parent = parent
 		self.env = parent.env
-		self.bus = parent.srv
+		self.bus = parent.bus
+		self.bus_cached = parent.bus_cached
 		super().__init__(parent.env.cmd,('onewire','scan',self.typ,self.env.srv_name)+self.bus.path)
 
 	async def task(self):
@@ -128,7 +129,8 @@ class mtBus(mtDir):
 		super().__init__(*a,**k)
 		self.tasks = WeakValueDictionary()
 		self.timers = {}
-		self.srv = self.env.srv.at('uncached').at(*(self.name.split(' ')))
+		self.bus = self.env.srv.at('uncached').at(*(self.name.split(' ')))
+		self.bus_cached = self.env.srv.at(*(self.name.split(' ')))
 
 	@property
 	def devices(self):
@@ -143,7 +145,7 @@ class mtBus(mtDir):
 	def has_update(self):
 		super().has_update()
 		if self._seq is None:
-			print("UPD DOWN",self,self.srv.path,list(self.tasks.keys()))
+			logger.debug("Stopping tasks %s %s %s",self,self.bus_cached.path,list(self.tasks.keys()))
 			t,self.tasks = self.tasks,{}
 			for v in t.values():
 				t.cancel()
@@ -162,7 +164,7 @@ class mtBus(mtDir):
 
 				self.timers[name] = t
 				if t is not None and name not in self.tasks:
-					print("UPD UP",self,self.srv.path,name)
+					logger.debug("Starting task %s %s %s",self,self.bus_cached.path,name)
 					self.tasks[name] = self.env.add_task(task(self))
 		
 class BusScan(Task):
@@ -312,18 +314,33 @@ class BusScan(Task):
 		self.srv = None
 		self.tree = None
 		self.srv_name = None
-		types=EtcTypes()
-		types.register('*','*',':dev', cls=OnewireDevice)
+		self.new_cfg = asyncio.Future(loop=self.loop)
 
+		types=EtcTypes()
+		types.register('server','port', cls=mtInteger)
+		types.register('scanning', cls=mtFloat)
+		types.register('bus','*', cls=mtBus)
+		types.register('bus','*','broken', cls=mtInteger)
+		types.register('bus','*','devices','*','*', cls=mtInteger)
+		
+		server = self.config['server']
+		self.srv_name = server
 		update_delay = self.config.get('update_delay',None)
-		self.devices = await self.etcd.tree("/device/onewire",env=self,types=types, update_delay=update_delay)
+		self.tree = await self.etcd.tree("/bus/onewire/"+server, types=types,env=self,update_delay=update_delay)
+		srv = self.tree['server']
+		srv.add_monitor(self.cfg_changed)
+		self.srv = OnewireServer(srv['host'],srv.get('port',None), loop=self.loop)
+
+		devtypes=EtcTypes()
+		devtypes.register('*','*',':dev', cls=OnewireDevice)
+		self.devices = await self.etcd.tree("/device/onewire",env=self,types=devtypes, update_delay=update_delay)
 		self._trigger = None
 
 		main_task = asyncio.ensure_future(self.task_busscan(), loop=self.loop)
 		self.tasks = {main_task}
 		self.new_tasks = set()
 		try:
-			while not main_task.done():
+			while not main_task.done() and not self.new_cfg.done():
 				if self._trigger is None or self._trigger.done():
 					self._trigger = asyncio.Future(loop=self.loop)
 					self.tasks.add(self._trigger)
@@ -350,30 +367,19 @@ class BusScan(Task):
 			asyncio.wait(p, loop=self.loop, return_when=asyncio.ALL_COMPLETED)
 		for t in d:
 			t.result()
-			# this will re-raise whatever exception triggered the first wait
+			# this will re-raise whatever exception triggered the first wait, if any
 
 	async def task_busscan(self):
-		types=EtcTypes()
-		types.register('port', cls=mtInteger)
-		types.register('scanning', cls=mtFloat)
-		types.register('bus','*', cls=mtBus)
-		types.register('bus','*','broken', cls=mtInteger)
-		types.register('bus','*','devices','*','*', cls=mtInteger)
+		"""\
+			This is the main sub-task. It's responsible for finding all buses,
+			scanning them for devices, and for firing off any other task
+			which these may require.
+			"""
 
 		while True:
 			if self.config['delay']:
 				self._delay = asyncio.Future(loop=self.loop)
 				self._delay_timer = await Timer(self.loop,self.config['delay'], self)
-
-			# Access "our" server
-			server = self.config['server']
-			if self.srv_name is None or self.srv_name != server:
-				if self.srv is not None:
-					await self.srv.close()
-				self.srv_name = server
-				update_delay = self.config.get('update_delay',None)
-				self.tree = await self.etcd.tree("/bus/onewire/"+server, types=types,env=self,update_delay=update_delay)
-				self.srv = OnewireServer(self.tree['host'],self.tree.get('port',None), loop=self.loop)
 
 			if 'scanning' in self.tree:
 				# somebody else is processing this bus. Grumble.
@@ -435,11 +441,20 @@ class BusScan(Task):
 			if hasattr(t,'trigger'):
 				t.trigger()
 
-	def cfg_changed(self):
-		"""Called from task machinery when my configuration changes"""
-		if self._delay is not None and not self._delay.done():
-			self._delay.set_result("cfg_changed")
-			self._delay_timer.cancel()
+	def cfg_changed(self, d=None):
+		"""\
+			Called from task machinery when my basic configuration changes.
+			Rather than trying to fix it all up, this stops (and thus
+			restarts) the whole thing.
+			"""
+		if d is None:
+			d = self.config
+		if not d.notify_seq:
+			# Initial call. Not an update. Ignore.
+			return
+		logger.warn("Config changed %s %s", self,d)
+		if not self.new_cfg.done():
+			self.new_cfg.set_result(None)
 
 	def _unlock(self,node): # pragma: no cover
 		"""Called when the 'other' scanner exits"""

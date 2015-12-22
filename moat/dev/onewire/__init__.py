@@ -80,9 +80,11 @@ class OnewireDevice(Device): #(, metaclass=SelectDevice):
 			if srvpath != '':
 				srv,path = srvpath.split(' ',1)
 				assert self.env.srv_name == srv
-				self.srv = self.env.srv.at('uncached').at(*path.split(' ')).at(self.parent.parent.name+'.'+self.parent.name)
+				self.bus = self.env.srv.at('uncached').at(*path.split(' ')).at(self.parent.parent.name+'.'+self.parent.name)
+				self.bus_cached = self.env.srv.at(*path.split(' ')).at(self.parent.parent.name+'.'+self.parent.name)
 			else:
-				self.srv = None
+				self.bus = None
+				self.bus_cached = None
 			self._cached_path = srvpath
 
 	@classmethod
