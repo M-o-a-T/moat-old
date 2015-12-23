@@ -175,37 +175,6 @@ class ServerCommand(Command):
 Commands to set up and admin connections to 1wire servers (OWFS).
 """
 
-class DeviceLocateCommand(Command):
-	name = "locate"
-	summary = "Set the location of a 1wire device"
-	description = """\
-Get/Set a device's location.
-Usage: … locate ID [text …]
-"""
-	async def do_async(self,args):
-		await self.root.setup(self)
-		etc = self.root.etcd
-		path = '/device/onewire'
-		if not args or not '.' in args[0]:
-			raise CommandError("You need to specify an ID.")
-		arg = args.pop(0)
-		typ,dev = arg.split('.',1)
-		types = EtcTypes()
-		OnewireDevice.types(types)
-		try:
-			t = await etc.tree('/'.join((path,typ.lower(),dev.lower(),':dev')), types=types,create=False)
-		except KeyError:
-			raise CommandError("Device '%s' not found." % (arg,))
-		if args:
-			await t.set('location',' '.join(args))
-			if self.root.verbose > 1:
-				print("Location set.", file=self.stdout)
-		elif 'location' in t:
-			print(t['location'], file=self.stdout)
-		elif self.root.verbose:
-			print("Location not yet set.", file=sys.stderr)
-			return 1
-
 class DeviceListCommand(Command):
 	name = "list"
 	summary = "List 1wire devices"
@@ -226,7 +195,7 @@ Device ID: detailed information about the device.
 			for r in res.children:
 				typ = r.key[r.key.rindex('/')+1:]
 				try:
-					dt = device_types()[typ.upper()]
+					dt = device_types()[typ]
 				except KeyError:
 					dt = '?'+typ
 				else:
@@ -240,12 +209,12 @@ Device ID: detailed information about the device.
 			for arg in args:
 				if len(arg) == 2:
 					try:
-						res = await etc.get(path+'/'+arg.lower())
+						res = await etc.get(path+'/'+arg)
 					except KeyError:
 						print("Type '%s' not found." % (arg,), file=sys.stderr)
 					else:
 						try:
-							dt = device_types()[arg.upper()]
+							dt = device_types()[arg]
 							tname = dt.name
 						except KeyError:
 							dt = OnewireDevice
@@ -253,15 +222,15 @@ Device ID: detailed information about the device.
 						types = EtcTypes()
 						dt.types(types)
 						for r in res.children:
-							dev = r.key[r.key.rindex('/')+1:].upper()
-							t = await etc.tree('/'.join((path,arg.lower(),dev.lower(),':dev')), types=types,static=True,create=False)
+							dev = r.key[r.key.rindex('/')+1:]
+							t = await etc.tree('/'.join((path,arg,dev,':dev')), types=types,static=True,create=False)
 							print(arg+'.'+dev,t.get('path','?').replace(' ',':',1).replace(' ','/'),t.get('location','-'), sep='\t',file=self.stdout)
 
 						
 				elif '.' in arg:
 					typ,dev = arg.split('.',1)
 					try:
-						dt = device_types()[typ.upper()]
+						dt = device_types()[typ]
 						tname = dt.name
 					except KeyError:
 						dt = OnewireDevice
@@ -269,7 +238,7 @@ Device ID: detailed information about the device.
 					types = EtcTypes()
 					dt.types(types)
 					try:
-						t = await etc.tree('/'.join((path,typ.lower(),dev.lower(),':dev')), types=types,static=True,create=False)
+						t = await etc.tree('/'.join((path,typ,dev,':dev')), types=types,static=True,create=False)
 					except KeyError:
 						print("Device '%s' not found." % (arg,), file=sys.stderr)
 					else:
@@ -283,7 +252,6 @@ Device ID: detailed information about the device.
 class DeviceCommand(Command):
 	subCommandClasses = [
 		DeviceListCommand,
-		DeviceLocateCommand,
 	]
 	name = "dev"
 	summary = "OWFS device specific subcommands"
@@ -350,7 +318,7 @@ else a short list is printed.
 				items = []
 				for typ,v in dc.items():
 					try:
-						dt = device_types()[typ.upper()]
+						dt = device_types()[typ]
 						tname = dt.name
 					except KeyError:
 						dt = OnewireDevice
@@ -368,7 +336,7 @@ else a short list is printed.
 			raise CommandError("Bus %s:%s does not exist." % (srv,bus))
 		for typ,v in t.items():
 			try:
-				dt = device_types()[typ.upper()]
+				dt = device_types()[typ]
 				tname = dt.name
 			except KeyError:
 				dt = OnewireDevice

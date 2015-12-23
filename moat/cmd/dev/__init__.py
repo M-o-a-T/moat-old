@@ -23,35 +23,25 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##  Thus, do not remove the next line, or insert any blank lines above.
 ##BP
 
-"""List of known devices"""
+"""List of known Tasks"""
 
 import os
-from ..script.util import objects
+from ...script import Command
+from ...script.util import objects
 
 import logging
 logger = logging.getLogger(__name__)
 
-def devices():
-	from .base import Device
-	# we want all objects with a distinctive prefix
-	return objects(__name__, Device, filter=lambda x:x.__dict__.get('prefix',None) is not None)
+def commands():
+	return objects(__name__, Command)
 
-def dev_types(types):
-	"""Register device types and their sub-entries"""
-	for dev in devices():
-		t = types.step(dev.prefix)
-		for d in dev.dev_paths():
-			cls = d[-1]
-			ts = t
-			for ds in d[:-1]:
-				ts = ts.step(ds)
-			ts = ts.step(':dev')
-			ts.register(cls=cls)
-			cls.types(ts)
-	from .base import DeadDevice
-	ts = types.step('**')
-	ts = ts.step(':dev')
-	ts.register(cls=DeadDevice)
-	DeadDevice.types(ts)
+class Moat(Command):
 
+	name = "dev"
+	summary = "device-specific commands"
+	description = """
+This command class includes device-specific subcommands.
+"""
+
+	subCommandClasses = list(commands())
 

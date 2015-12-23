@@ -32,7 +32,7 @@ from . import OnewireDevice
 class Onewire_Moat(OnewireDevice):
 	name = "moat"
 	description = "MoaT device"
-	family = "F0"
+	family = "f0"
 
 	def scan_for(self,what):
 		if what == "alarm":

@@ -332,8 +332,8 @@ class BusScan(Task):
 		self.srv = OnewireServer(srv['host'],srv.get('port',None), loop=self.loop)
 
 		devtypes=EtcTypes()
-		devtypes.register('*','*',':dev', cls=OnewireDevice)
-		self.devices = await self.etcd.tree("/device/onewire",env=self,types=devtypes, update_delay=update_delay)
+		OnewireDevice.dev_types(devtypes)
+		self.devices = await self.etcd.tree('/device/'+OnewireDevice.prefix,env=self,types=devtypes, update_delay=update_delay)
 		self._trigger = None
 
 		main_task = asyncio.ensure_future(self.task_busscan(), loop=self.loop)

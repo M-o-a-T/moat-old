@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 from etcd_tree.node import mtFloat,mtInteger,mtString
 from time import time
 
-from ..base import Device
+from ..base import HardwareDevice
 
 class NoAlarmHandler(RuntimeError):
 	pass
@@ -51,29 +51,15 @@ def device_types():
 					_device_types[f] = typ
 	return _device_types
 
-class OnewireDevice(Device): #(, metaclass=SelectDevice):
+class OnewireDevice(HardwareDevice): #(, metaclass=SelectDevice):
 	prefix = "onewire"
+	name = "generic"
 	description = "Something hanging off 1wire"
-	inputs = {}
-	outputs = {}
 	_inited = False
 	_cached_path = None
 
-	def __new__(cls,*a,parent=None,**k):
-		"""Find the class for this device."""
-		cls = device_types().get(parent.parent.name.upper(), cls)
-		return super(OnewireDevice,cls).__new__(cls)
-
 	def has_update(self):
 		super().has_update()
-		if self._cached_path is None:
-			d = {'input':{},'output':{}}
-			for k,v in self.inputs.items():
-				d['input'][k] = {'type':v}
-			for k,v in self.outputs.items():
-				d['output'][k] = {'type':v}
-			for k,v in d.items():
-				self[k] = v
 
 		srvpath = self.get('path','')
 		if self._cached_path is None or srvpath != self._cached_path:
@@ -87,34 +73,15 @@ class OnewireDevice(Device): #(, metaclass=SelectDevice):
 				self.bus_cached = None
 			self._cached_path = srvpath
 
-	@classmethod
-	def types(cls, types):
-		"""\
-			Register value types with etcd_tree.
-			Override to add your own categories; add to your
-			inputs{}/outputs{} for atomic values"""
+	@staticmethod
+	def dev_paths():
+		for k,cls in device_types().items():
+			yield k,'*',cls
+		yield '*','*',OnewireDevice
 
-		types.register('input','*','timestamp', cls=mtFloat)
-		types.register('output','*','timestamp', cls=mtFloat)
-		for k,v in cls.inputs.items():
-			v = value_types.get(v,mtValue)
-			types.register('input',k,'value', cls=v)
-		for k,v in cls.outputs.items():
-			v = value_types.get(v,mtValue)
-			types.register('output',k,'value', cls=v)
-
-	async def has_alarm(self):
-		raise NoAlarmHandler(self)
-	
 	def scan_for(self, what):
 		return None
 	
-	async def reading(self,what,value, timestamp=None):
-		if timestamp is None:
-			timestamp = time()
-		elif self['input'][what].get('timestamp',0) > timestamp:
-			# a value from the past gets ignored
-			return
-		await self['input'][what].set('value',value)
-		await self['input'][what].set('timestamp',timestamp)
-
+	async def has_alarm(self):
+		raise NoAlarmHandler(self)
+	

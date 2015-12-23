@@ -31,7 +31,7 @@ import pkgutil
 import logging
 logger = logging.getLogger(__name__)
 
-def objects(module, cls, immediate=False,direct=False):
+def objects(module, cls, immediate=False,direct=False,filter=lambda x:True):
 	"""\
 		List all objects of a given class in a directory.
 
@@ -58,5 +58,6 @@ def objects(module, cls, immediate=False,direct=False):
 				c = getattr(m,c,None)
 				if isinstance(c,type) and \
 						((c.__base__ is cls) if immediate else (c is not cls and issubclass(c,cls))):
-					yield c
+					if filter(c):
+						yield c
 			
