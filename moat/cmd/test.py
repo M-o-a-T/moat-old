@@ -114,18 +114,18 @@ Check etcd access, and basic data layout.
 		retval = 0
 		etc = await self.root._get_etcd()
 		log = logging.getLogger("etcd")
+		show = log.info if self.parent.fix else log.warning
 
 		try:
 			s = None
 			s = await etc.tree('/config')
 			await s.subdir('run', create=False)
 		except KeyError:
+			show("/config/run created.")
 			if self.parent.fix:
 				await s.subdir('run',create=True)
-				logger.info("/config/run created.")
 			else:
-				if self.root.verbose:
-					logger.warning("/config/run missing.")
+				retval += 1
 		finally:
 			if s is not None:
 				await s.close()
@@ -133,22 +133,22 @@ Check etcd access, and basic data layout.
 		stats = set(("ok","warn","error","fail"))
 		s = await etc.tree("/status")
 		if "run" not in s:
-			log.error("missing 'run' entry")
+			show("missing 'run' entry")
 			if self.parent.fix:
 				await s.set("run",dict()) # pragma: no cover
 			else:
 				retval += 1
 		if "errors" not in s:
-			log.error("missing 'errors' entry")
+			show("missing 'errors' entry")
 			if self.parent.fix:
-				await s.set("errors",dict((s,0) for s in stats))
+				await s.set("errors",dict((stat,0) for stat in stats))
 			else:
 				retval += 1
-		if "errors" in s:
+		else:
 			err = s['errors']
 			for stat in stats:
 				if stat not in err:
-					log.error("missing 'errors.%s' entry" % stat)
+					show("missing 'errors.%s' entry" % stat)
 					if self.parent.fix:
 						await err.set(stat,0)
 					else:
@@ -158,6 +158,7 @@ Check etcd access, and basic data layout.
 		if not self.root.cfg['config'].get('testing',False):
 			return
 
+		# The next part is test environment only
 		try:
 			t = self.Task_do3(self,"test/do_3")
 			await t
@@ -217,6 +218,34 @@ Check etcd access, and basic data layout.
 
 		return retval
 
+class TypesCommand(Command):
+	name = "types"
+	summary = "Add knows data types to etcd"
+	description = """\
+		In etcd, /meta/types contains a list of known data types.
+
+		This command fills that list.
+		"""
+
+	async def do_async(self,args):
+		etc = await self.root._get_etcd()
+		from moat.types import types,TYPEDEF_DIR,TYPEDEF
+		for t in types():
+			if self.root.verbose:
+				try:
+					d = await etc.tree('/'.join((TYPEDEF_DIR,t.name,TYPEDEF)), create=False)
+				except etcd.EtcdKeyNotFound:
+					logger.info("Creating %s",t.name)
+					d = await etc.tree('/'.join((TYPEDEF_DIR,t.name,TYPEDEF)), create=True)
+				else:
+					logger.debug("Found %s",t.name)
+			else:
+				d = await etc.tree('/'.join((TYPEDEF_DIR,t.name,TYPEDEF)))
+			for k,v in t.vars.items():
+				if k not in d:
+					await d.set(k,v)
+			await d.close()
+
 class AmqpCommand(Command):
 	name = "amqp"
 	summary = "Verify amqp data"
@@ -236,7 +265,7 @@ class KillCommand(Command):
 	description = """\
 Kill off all data.
 
-Only when testing!
+This command only works when testing.
 """
 
 	def do(self,args):
@@ -262,6 +291,7 @@ Set some data.
 		KillCommand,
 		ConfigCommand,
 		EtcdCommand,
+		TypesCommand,
 		AmqpCommand,
 	]
 	fix = False
