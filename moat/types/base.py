@@ -23,7 +23,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##  Thus, do not remove the next line, or insert any blank lines above.
 ##BP
 
-from etcd_tree.node import mtString,mtInteger,mtFloat, mtTypedDir
+from etcd_tree.node import EtcString,EtcInteger,EtcFloat, EtcDir
 from etcd_tree.etcd import EtcTypes
 from . import type_names, TYPEDEF_DIR,TYPEDEF
 import logging
@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 class _NOTGIVEN:
 	pass
 
-class TypeDir(mtTypedDir):
+class TypeDir(EtcDir):
 	def __init__(self,*a,**k):
 		super().__init__(*a,**k)
 		self._type = type_names()[self.path()[len(TYPEDEF_DIR)+1:-len(TYPEDEF)-1)]]
@@ -102,7 +102,7 @@ class StringType(Type):
 
 class BoolType(Type):
 	name = "bool"
-	etcd_class = mtString
+	etcd_class = EtcString
 	vars = {'true':'on', 'false':'off'}
 
 	@property
@@ -153,25 +153,25 @@ class _NumType(Type):
 
 class IntType(_NumType):
 	name = "int"
-	etcd_class = mtInteger
+	etcd_class = EtcInteger
 	vars = {'min':0, 'max':100}
 	_cls = int
 
 	@classmethod
 	def types(cls,types):
-		types.register('min',cls=mtFloat)
-		types.register('max',cls=mtFloat)
+		types.register('min',cls=EtcFloat)
+		types.register('max',cls=EtcFloat)
 
 class FloatType(_NumType):
 	name = "float"
-	etcd_class = mtFloat
+	etcd_class = EtcFloat
 	_cls = int
 
 	@classmethod
 	def types(cls,types):
 	vars = {'min':0, 'max':1}
-		types.register('min',cls=mtFloat)
-		types.register('max',cls=mtFloat)
+		types.register('min',cls=EtcFloat)
+		types.register('max',cls=EtcFloat)
 
 class FloatTemperatureType(FloatType):
 	name = "float/temperature"

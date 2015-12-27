@@ -26,13 +26,13 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import logging
 logger = logging.getLogger(__name__)
 
-from etcd_tree.node import mtDir,mtFloat
+from etcd_tree.node import EtcDir,EtcFloat
 
 __all__ = ('Device','HardwareDevice')
 
 _SOURCES = ('input','output')
 
-class Var(mtDir):
+class Var(EtcDir):
 	type = None
 
 	def __init__(self,*a,**k):
@@ -45,7 +45,7 @@ class Var(mtDir):
 		if self.type is None or self.type.name != self['type']:
 			t = self.env.types.subdir(self['type'])
 
-class Device(mtDir):
+class Device(EtcDir):
 	prefix = "dummy"
 	description = "Something that does nothing."
 
@@ -99,9 +99,9 @@ class HardwareDevice(Device):
 			input{}/output{} for atomic values"""
 
 		for d in _SOURCES:
-			types.register(d,'*','timestamp', cls=mtFloat)
+			types.register(d,'*','timestamp', cls=EtcFloat)
 			for k,v in getattr(cls,d,{}).items():
-				v = value_types.get(v,mtValue)
+				v = value_types.get(v,EtcValue)
 				types.register(d,k,'value', cls=v)
 
 	async def reading(self,what,value, timestamp=None):

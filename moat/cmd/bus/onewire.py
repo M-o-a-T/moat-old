@@ -34,7 +34,7 @@ from moat.util import r_dict
 from moat.dev.onewire import device_types, OnewireDevice
 from etcd_tree.util import from_etcd
 from etcd_tree.etcd import EtcTypes
-from etcd_tree.node import mtInteger
+from etcd_tree.node import EtcInteger
 from yaml import safe_dump
 import aioetcd as etcd
 import asyncio
@@ -92,7 +92,7 @@ Arguments:
 				raise CommandError("The port must be positive and <65535")
 
 		types = EtcTypes()
-		types.register('server','port',mtInteger)
+		types.register('server','port',EtcInteger)
 		try:
 			t = await self.root.etcd.tree('/bus/onewire/'+name, types=types, create=not self.update)
 		except etcd.EtcdAlreadyExist:

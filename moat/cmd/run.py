@@ -38,7 +38,7 @@ from yaml import safe_dump
 from datetime import datetime
 from etcd_tree.util import from_etcd
 from etcd_tree.etcd import EtcTypes
-from etcd_tree.node import mtDir,mtFloat
+from etcd_tree.node import EtcDir,EtcFloat
 from functools import partial
 from itertools import chain
 import aioetcd as etcd
@@ -186,7 +186,7 @@ by default, start every task that's defined for this host.
 							self.tasks.append(v)
 					elif k.startswith(':'):
 						continue
-					elif isinstance(v,mtDir):
+					elif isinstance(v,EtcDir):
 						n_p.append(v)
 			p = n_p
 

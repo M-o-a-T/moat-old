@@ -26,7 +26,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import asyncio
 
 from ..script.task import Task
-from etcd_tree.node import mtFloat
+from etcd_tree.node import EtcFloat
 
 class Sleeper(Task):
 	"""This task just waits for a configured amount of time before exiting.
@@ -37,7 +37,7 @@ class Sleeper(Task):
 	@classmethod
 	def types(cls,tree):
 		super().types(tree)
-		tree.register('delay', cls=mtFloat)
+		tree.register('delay', cls=EtcFloat)
 		
 	async def task(self):
 		await asyncio.sleep(self.config['delay'], loop=self.loop)

@@ -10,7 +10,7 @@ Class for managing tasks.
 import asyncio
 from dabroker.util import import_string
 from etcd_tree.etcd import EtcTypes
-from etcd_tree.node import mtFloat,mtBase
+from etcd_tree.node import EtcFloat,EtcBase
 import etcd
 import inspect
 from time import time
@@ -160,7 +160,7 @@ class Task(asyncio.Task):
 		await run_state.wait(mod)
 		keep_running = False # if it's been superseded, do not delete
 
-		if isinstance(self.config,mtBase):
+		if isinstance(self.config,EtcBase):
 			_note = self.config.add_monitor(lambda _: self.cfg_changed())
 
 		def aborter():
@@ -294,12 +294,12 @@ class Task(asyncio.Task):
 
 async def _run_state(etcd,path):
 	"""Get a tree for the job's state. This is a separate function for testing"""
-	from etcd_tree.node import mtFloat
+	from etcd_tree.node import EtcFloat
 	from etcd_tree.etcd import EtcTypes
 	types = EtcTypes()
-	types.register('started', cls=mtFloat)
-	types.register('stopped', cls=mtFloat)
-	types.register('running', cls=mtFloat)
+	types.register('started', cls=EtcFloat)
+	types.register('stopped', cls=EtcFloat)
+	types.register('running', cls=EtcFloat)
 	run_state = await etcd.tree('/'.join((TASKSTATE_DIR,path,TASKSTATE)), types=types)
 	return run_state
 

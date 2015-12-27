@@ -46,18 +46,18 @@ def tasks():
 
 def task_var_types(types):
 	from etcd_tree.etcd import EtcTypes
-	from etcd_tree.node import mtFloat,mtInteger
+	from etcd_tree.node import EtcFloat,EtcInteger
 	for t in _VARS:
 		if t == "ttl":
-			types.register(t)(mtInteger)
+			types.register(t)(EtcInteger)
 		else:
-			types.register(t)(mtFloat)
+			types.register(t)(EtcFloat)
 	
 def task_state_types(types):
 	from etcd_tree.etcd import EtcTypes
-	from etcd_tree.node import mtFloat
-	types.register('started')(mtFloat)
-	types.register('stopped')(mtFloat)
-	types.register('running')(mtFloat)
-	types.register('debug_time')(mtFloat)
+	from etcd_tree.node import EtcFloat
+	types.register('started')(EtcFloat)
+	types.register('stopped')(EtcFloat)
+	types.register('running')(EtcFloat)
+	types.register('debug_time')(EtcFloat)
 	

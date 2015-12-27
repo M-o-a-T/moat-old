@@ -32,7 +32,7 @@ from moat.dev.onewire import OnewireDevice
 from moat.script.task import Task
 from moat.script.util import objects
 
-from etcd_tree.node import mtFloat,mtInteger,mtValue,mtDir
+from etcd_tree.node import EtcFloat,EtcInteger,EtcValue,EtcDir
 from etcd_tree.etcd import EtcTypes
 from aioetcd import StopWatching
 from time import time
@@ -122,7 +122,7 @@ class ScanTask(Task):
 		"""Override this to actually implement the periodic activity."""
 		raise RuntimeError("You need to override '%s.task_'" % (self.__class__.__name__,))
 
-class mtBus(mtDir):
+class EtcOnewireBus(EtcDir):
 	tasks = None
 
 	def __init__(self,*a,**k):
@@ -177,9 +177,9 @@ class BusScan(Task):
 	@classmethod
 	def types(cls,tree):
 		super().types(tree)
-		tree.register("delay",cls=mtFloat)
-		tree.register("update_delay",cls=mtFloat)
-		tree.register("ttl",cls=mtInteger)
+		tree.register("delay",cls=EtcFloat)
+		tree.register("update_delay",cls=EtcFloat)
+		tree.register("ttl",cls=EtcInteger)
 		
 	async def _scan_one(self, *bus):
 		"""Scan a single bus"""
@@ -317,11 +317,11 @@ class BusScan(Task):
 		self.new_cfg = asyncio.Future(loop=self.loop)
 
 		types=EtcTypes()
-		types.register('server','port', cls=mtInteger)
-		types.register('scanning', cls=mtFloat)
-		types.register('bus','*', cls=mtBus)
-		types.register('bus','*','broken', cls=mtInteger)
-		types.register('bus','*','devices','*','*', cls=mtInteger)
+		types.register('server','port', cls=EtcInteger)
+		types.register('scanning', cls=EtcFloat)
+		types.register('bus','*', cls=EtcOnewireBus)
+		types.register('bus','*','broken', cls=EtcInteger)
+		types.register('bus','*','devices','*','*', cls=EtcInteger)
 		
 		server = self.config['server']
 		self.srv_name = server
