@@ -23,34 +23,61 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##  Thus, do not remove the next line, or insert any blank lines above.
 ##BP
 
-from etcd_tree.node import mtString,mtInteger,mtFloat
+from etcd_tree.node import mtString,mtInteger,mtFloat, mtTypedDir
+from etcd_tree.etcd import EtcTypes
+from . import type_names, TYPEDEF_DIR,TYPEDEF
 import logging
 logger = logging.getLogger(__name__)
 
 class _NOTGIVEN:
 	pass
 
+class TypeDir(mtTypedDir):
+	def __init__(self,*a,**k):
+		super().__init__(*a,**k)
+		self._type = type_names()[self.path()[len(TYPEDEF_DIR)+1:-len(TYPEDEF)-1)]]
+		self._types = EtcTypes()
+		self._type.types(self._types)
+
+	def subtype(self,*path,dir=None,pre=None):
+		cls = self._types.lookup(*path,dir=dir)
+		if cls is not None:
+			return cls
+		return super().subtype(*path, dir=dir,pre=pre)
+
+
 class Type:
 	"""\
 		This is the base class for typing. The attribute `value` holds
 		whatever the best representation for Python is (e.g. bool: True/False).
-		`bus_value` is the preferred representation for AMQP, `etc_value`
+		`bus_value` is the preferred representation for AMQP, `etcd_value`
 		the one for storing in etcd.
 
-		In setup, @meta is this type's etcd entry.
+		In setup, @meta1 is this type's etcd entry, @meta2 the value's.
 		"""
 	name = None
 	value = _NOTGIVEN
 	vars = {}
 
-	def __init__(self,meta,value=_NOTGIVEN,wire=False):
-		self.meta = meta
+	@classmethod
+	def types(cls,types):
+		pass
+
+	def __init__(self,meta1,meta2,value=_NOTGIVEN):
+		self.meta1 = meta1
+		self.meta2 = meta2
 
 		if value is not _NOTGIVEN:
-			if wire:
-				self.bus_value = value
-			else:
-				self.int_value = value
+			self.etcd_value = value
+
+	def __getitem__(self,key):
+		try:
+			return self.meta2[key]
+		except KeyError:
+			try:
+				return self.meta1[key]
+			except KeyError:
+				return type(self).vars[key]
 
 	@property
 	def bus_value(self):
@@ -60,30 +87,93 @@ class Type:
 		self.value = bus_value
 
 	@property
-	def etc_value(self):
+	def etcd_value(self):
 		return self.value
-	@etc_value.setter
-	def etc_value(self,etc_value):
-		self.value = etc_value
-	
+	@etcd_value.setter
+	def etcd_value(self,etcd_value):
+		self.value = etcd_value
+
+	def check_var(self,var,value):
+		"""Check whether a variable can be set to that value"""
+		raise CommandError("I don't know about '%s', much less setting it to '%s'" % (var,value))
+
+class StringType(Type):
+	name = 'str'
 
 class BoolType(Type):
 	name = "bool"
-	etc_class = mtString
+	etcd_class = mtString
 	vars = {'true':'on', 'false':'off'}
 
+	@property
+	def bus_value(self):
+		return self['true'] if self.value else self['false']
+	@bus_value.setter
+	def bus_value(self,bus_value):
+		if bus_value.lower() == self['true'].lower():
+			self.value = True
+		elif bus_value.lower() == self['false'].lower():
+			self.value = False
+		else:
+			self.value = bool(int(bus_value))
 
-class IntType(Type):
+class _NumType(Type):
+	def check_var(self, var,value):
+		if var not in self.vars:
+			return super().check_var(var,value)
+		try:
+			val = self._cls(value)
+		except ValueError:
+			raise CommandError("need an integer for '%s', not '%s'.", % (var,value))
+		if var == 'min':
+			if var > self['max']:
+				raise CommandError("min %s needs to be smaller than max %s" % (val,self['max'])
+		elif var == 'max':
+			if var < self['min']:
+				raise CommandError("max %s needs to be larger than min %s" % (val,self['min'])
+	
+	@property
+	def etcd_value(self):
+		return str(self.value)
+	@etcd_value.setter
+	def etcd_value(self,etcd_value):
+		self.value = self._cls(etcd_value)
+
+	@property
+	def etcd_value(self):
+		return str(self.value)
+	@etcd_value.setter
+	def etcd_value(self,etcd_value):
+		val = self._cls(etcd_value)
+		if val < self['min']:
+			val = self['min']
+		elif val > self['max']:
+			val = self['max']
+		self.value = self._cls(etcd_value)
+
+class IntType(_NumType):
 	name = "int"
-	etc_class = mtInteger
+	etcd_class = mtInteger
 	vars = {'min':0, 'max':100}
+	_cls = int
 
-class FloatType(Type):
+	@classmethod
+	def types(cls,types):
+		types.register('min',cls=mtFloat)
+		types.register('max',cls=mtFloat)
+
+class FloatType(_NumType):
 	name = "float"
-	etc_class = mtFloat
-	vars = {'min':0, 'max':1}
+	etcd_class = mtFloat
+	_cls = int
 
-class FloatTempType(FloatType):
+	@classmethod
+	def types(cls,types):
+	vars = {'min':0, 'max':1}
+		types.register('min',cls=mtFloat)
+		types.register('max',cls=mtFloat)
+
+class FloatTemperatureType(FloatType):
 	name = "float/temperature"
 	vars = {'min':-50, 'max':120}
 

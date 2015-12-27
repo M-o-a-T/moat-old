@@ -34,7 +34,26 @@ logger = logging.getLogger(__name__)
 TYPEDEF_DIR = '/meta/type'
 TYPEDEF = ':type'
 
+class _type_names(dict):
+	def __getitem__(self,k):
+		try:
+			return super().__getitem__(k)
+		except KeyError:
+			if '/' not in k:
+				raise
+			return self.__getitem__(k[:k.rindex('/')])
+_type_names = _type_names()
+
 def types():
 	from .base import Type
 	return objects(__name__, Type)
 
+def type_names():
+	if not _type_names:
+		for t in types():
+			_type_names[d.name] = t
+	return _type_names
+
+def type_types(types):
+	from .base import TypeDir
+	types.register('**',':type', cls=TypeDir)

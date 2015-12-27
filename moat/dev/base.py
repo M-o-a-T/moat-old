@@ -32,6 +32,19 @@ __all__ = ('Device','HardwareDevice')
 
 _SOURCES = ('input','output')
 
+class Var(mtDir):
+	type = None
+
+	def __init__(self,*a,**k):
+		super().__init__(*a,**k)
+
+	def has_update(self):
+		if 'type' not in self:
+			self.type = None
+			return
+		if self.type is None or self.type.name != self['type']:
+			t = self.env.types.subdir(self['type'])
+
 class Device(mtDir):
 	prefix = "dummy"
 	description = "Something that does nothing."
@@ -45,7 +58,8 @@ class Device(mtDir):
 	@classmethod
 	def types(cls, types):
 		"""Override to get your subtypes registered with etcd_tree"""
-		pass
+		for s in _SOURCES:
+			types.register(s,'*', cls=Var)
 
 	@staticmethod
 	def dev_paths(cls, types):
