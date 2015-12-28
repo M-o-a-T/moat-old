@@ -29,8 +29,8 @@ from time import time
 from dabroker.proto import ProtocolClient
 from moat.proto.onewire import OnewireServer
 import mock
-import etcd
-from aioetcd import StopWatching
+import aio_etcd as etcd
+from contextlib import suppress
 
 from . import ProcessHelper, is_open, MoatTest
 
@@ -172,7 +172,7 @@ class FakeSleep:
 		self.f = None
 		if mod is True:
 			logger.debug("Kill: step %s",mod)
-			p._timeout(StopWatching())
+			p._timeout(etcd.StopWatching())
 			await task
 		else:
 			logger.debug("Run: step %s",mod)
@@ -216,6 +216,9 @@ async def test_onewire_fake(loop):
 	t = await client(cfg, loop=loop)
 	tr = await t.tree("/bus/onewire")
 	td = await t.tree("/device/onewire")
+
+	with suppress(etcd.EtcdKeyNotFound):
+		await t.delete('/task/fake/onewire/scan/:task', recursive=True)
 
 	with mock.patch("moat.task.onewire.OnewireServer", new=FakeBus(loop)) as fb:
 		with mock.patch("moat.task.onewire.Timer", new=FakeSleep(loop)) as fs:

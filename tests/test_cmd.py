@@ -29,6 +29,8 @@ from time import time
 import io
 import sys
 import logging
+from contextlib import suppress
+import aio_etcd as etcd
 
 from . import ProcessHelper, MoatTest
 
@@ -105,6 +107,12 @@ async def test_taskdef(loop):
 	
 @pytest.mark.run_loop
 async def test_task(loop):
+	from etcd_tree import client
+	from . import cfg
+	t = await client(cfg, loop=loop)
+	with suppress(etcd.EtcdKeyNotFound):
+		await t.delete('/task/fake/cmd/sleep/:task', recursive=True)
+
 	m = MoatTest(loop=loop)
 	r = await m.parse("-vvvc test.cfg test -f")
 	assert r == 0, r
@@ -130,7 +138,8 @@ async def test_task(loop):
 
 	t=time()
 	r = m.parse("-vvvc test.cfg run -kg fake/cmd/sleep")
-	await asyncio.sleep(0.2,loop=loop)
+	await asyncio.sleep(0.3,loop=loop)
+	assert not r.done(),repr(r)
 	rx = await m2.parse("-c test.cfg task state fake")
 	assert m2.in_stdout('fake/cmd/sleep\trun\t'), m2.stdout_data
 	assert rx == 0, rx
