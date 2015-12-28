@@ -28,7 +28,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import os
 from moat.script import Command, CommandError
 from etcd_tree.util import from_etcd
-import aioetcd as etcd
+import aio_etcd as etcd
 
 import logging
 logger = logging.getLogger(__name__)

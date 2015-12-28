@@ -29,7 +29,7 @@ import os
 import sys
 from etcd_tree.util import from_etcd
 from etcd_tree.etcd import EtcTypes
-import aioetcd as etcd
+import aio_etcd as etcd
 import asyncio
 import time
 import types

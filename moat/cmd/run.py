@@ -41,7 +41,7 @@ from etcd_tree.etcd import EtcTypes
 from etcd_tree.node import EtcDir,EtcFloat
 from functools import partial
 from itertools import chain
-import aioetcd as etcd
+import aio_etcd as etcd
 import traceback
 
 import logging

@@ -37,7 +37,7 @@ from etcd_tree.util import from_etcd
 from etcd_tree.etcd import EtcTypes
 from etcd_tree.node import EtcInteger
 from yaml import safe_dump
-import aioetcd as etcd
+import aio_etcd as etcd
 import asyncio
 import time
 import types as py_types

@@ -37,7 +37,7 @@ from dabroker.util import import_string
 from ..task import task_var_types,task_state_types,\
 	TASK_DIR,TASKDEF_DIR,TASK,TASKDEF,TASKSTATE_DIR,TASKSTATE
 from yaml import safe_dump
-import aioetcd as etcd
+import aio_etcd as etcd
 import asyncio
 import time
 import types as py_types
