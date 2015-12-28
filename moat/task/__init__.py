@@ -32,10 +32,15 @@ import logging
 logger = logging.getLogger(__name__)
 
 TASK_DIR = '/task'
-TASKDEF_DIR = '/meta/task'
+TASK_LEN = 1
 TASK = ':task'
+
+TASKDEF_DIR = '/meta/task'
+TASKDEF_LEN = 2
 TASKDEF = ':taskdef'
+
 TASKSTATE_DIR = '/status/run'
+TASKSTATE_LEN = 2
 TASKSTATE = ':task'
 
 _VARS = {'ttl','refresh','restart','retry','max-retry'}

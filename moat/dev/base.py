@@ -87,7 +87,7 @@ class HardwareDevice(Device):
 			d = {}
 			for k in _SOURCES:
 				d[k] = dd = {}
-				for k,v in getattr(self.k).items():
+				for k,v in getattr(self,k,{}).items():
 					dd[v] = {'type':v}
 			self.update(d)
 

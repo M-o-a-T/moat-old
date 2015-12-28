@@ -25,7 +25,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 
 from etcd_tree.node import EtcString,EtcInteger,EtcFloat, EtcDir
 from etcd_tree.etcd import EtcTypes
-from . import type_names, TYPEDEF_DIR,TYPEDEF
+from . import type_names, TYPEDEF_LEN
 import logging
 logger = logging.getLogger(__name__)
 
@@ -35,16 +35,8 @@ class _NOTGIVEN:
 class TypeDir(EtcDir):
 	def __init__(self,*a,**k):
 		super().__init__(*a,**k)
-		self._type = type_names()[self.path()[len(TYPEDEF_DIR)+1:-len(TYPEDEF)-1)]]
-		self._types = EtcTypes()
-		self._type.types(self._types)
-
-	def subtype(self,*path,dir=None,pre=None):
-		cls = self._types.lookup(*path,dir=dir)
-		if cls is not None:
-			return cls
-		return super().subtype(*path, dir=dir,pre=pre)
-
+		self._type = type_names()['/'.join(self.path[TYPEDEF_LEN:-1])]
+		self._type.types(self)
 
 class Type:
 	"""\
@@ -124,13 +116,13 @@ class _NumType(Type):
 		try:
 			val = self._cls(value)
 		except ValueError:
-			raise CommandError("need an integer for '%s', not '%s'.", % (var,value))
+			raise CommandError("need an integer for '%s', not '%s'." % (var,value))
 		if var == 'min':
 			if var > self['max']:
-				raise CommandError("min %s needs to be smaller than max %s" % (val,self['max'])
+				raise CommandError("min %s needs to be smaller than max %s" % (val,self['max']))
 		elif var == 'max':
 			if var < self['min']:
-				raise CommandError("max %s needs to be larger than min %s" % (val,self['min'])
+				raise CommandError("max %s needs to be larger than min %s" % (val,self['min']))
 	
 	@property
 	def etcd_value(self):
@@ -166,10 +158,10 @@ class FloatType(_NumType):
 	name = "float"
 	etcd_class = EtcFloat
 	_cls = int
+	vars = {'min':0, 'max':1}
 
 	@classmethod
 	def types(cls,types):
-	vars = {'min':0, 'max':1}
 		types.register('min',cls=EtcFloat)
 		types.register('max',cls=EtcFloat)
 

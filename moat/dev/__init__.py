@@ -31,6 +31,10 @@ from ..script.util import objects
 import logging
 logger = logging.getLogger(__name__)
 
+DEV_DIR='/devices/'
+DEV_LEN=1
+DEV=':dev'
+
 def devices():
 	from .base import Device
 	# we want all objects with a distinctive prefix
@@ -42,16 +46,9 @@ def dev_types(types):
 		t = types.step(dev.prefix)
 		for d in dev.dev_paths():
 			cls = d[-1]
-			ts = t
-			for ds in d[:-1]:
-				ts = ts.step(ds)
-			ts = ts.step(':dev')
-			ts.register(cls=cls)
-			cls.types(ts)
+			t.register(d[:-1]+(DEV,), cls=cls)
+
 	from .base import DeadDevice
-	ts = types.step('**')
-	ts = ts.step(':dev')
-	ts.register(cls=DeadDevice)
-	DeadDevice.types(ts)
+	types.register('**',DEV, cls=DeadDevice)
 
 

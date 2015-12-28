@@ -29,12 +29,12 @@ from time import time
 
 from moat.proto.onewire import OnewireServer
 from moat.dev.onewire import OnewireDevice
+from moat.dev import DEV_DIR,DEV_LEN,DEV
 from moat.script.task import Task
 from moat.script.util import objects
 
-from etcd_tree.node import EtcFloat,EtcInteger,EtcValue,EtcDir
-from etcd_tree.etcd import EtcTypes
-from aioetcd import StopWatching
+from etcd_tree import EtcTypes, EtcFloat,EtcInteger,EtcValue,EtcDir
+from aio_etcd import StopWatching
 from time import time
 from weakref import WeakValueDictionary
 from contextlib import suppress
@@ -140,6 +140,8 @@ class EtcOnewireBus(EtcDir):
 				if b > 0:
 					continue
 				dev = d[f1][f2][':dev']
+				if not isinstance(dev,OnewireDevice):
+					import pdb;pdb.set_trace()
 				yield dev
 
 	def has_update(self):
@@ -167,6 +169,9 @@ class EtcOnewireBus(EtcDir):
 					logger.debug("Starting task %s %s %s",self,self.bus_cached.path,name)
 					self.tasks[name] = self.env.add_task(task(self))
 		
+EtcOnewireBus.register('broken', cls=EtcInteger)
+EtcOnewireBus.register('devices','*','*', cls=EtcInteger)
+
 class BusScan(Task):
 	"""This task periodically scans all buses of a 1wire server."""
 	name="onewire/scan"
@@ -320,8 +325,6 @@ class BusScan(Task):
 		types.register('server','port', cls=EtcInteger)
 		types.register('scanning', cls=EtcFloat)
 		types.register('bus','*', cls=EtcOnewireBus)
-		types.register('bus','*','broken', cls=EtcInteger)
-		types.register('bus','*','devices','*','*', cls=EtcInteger)
 		
 		server = self.config['server']
 		self.srv_name = server
@@ -332,8 +335,8 @@ class BusScan(Task):
 		self.srv = OnewireServer(srv['host'],srv.get('port',None), loop=self.loop)
 
 		devtypes=EtcTypes()
-		OnewireDevice.dev_types(devtypes)
-		self.devices = await self.etcd.tree('/device/'+OnewireDevice.prefix,env=self,types=devtypes, update_delay=update_delay)
+		devtypes.register('*','*',DEV,cls=OnewireDevice)
+		self.devices = await self.etcd.tree(DEV_DIR+'/'+OnewireDevice.prefix,env=self,types=devtypes, update_delay=update_delay)
 		self._trigger = None
 
 		main_task = asyncio.ensure_future(self.task_busscan(), loop=self.loop)

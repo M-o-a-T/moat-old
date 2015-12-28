@@ -32,6 +32,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 TYPEDEF_DIR = '/meta/type'
+TYPEDEF_LEN = 2
 TYPEDEF = ':type'
 
 class _type_names(dict):
@@ -46,7 +47,7 @@ _type_names = _type_names()
 
 def types():
 	from .base import Type
-	return objects(__name__, Type)
+	return objects(__name__, Type, filter=lambda x:x.name is not None)
 
 def type_names():
 	if not _type_names:

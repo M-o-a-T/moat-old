@@ -32,7 +32,7 @@ import sys
 
 from ..script import Command, CommandError
 from ..script.task import TaskMaster, JobIsRunningError, JobMarkGoneError
-from ..task import TASK_DIR,TASK, TASKSTATE_DIR,TASKSTATE, task_state_types
+from ..task import TASK_DIR,TASK_LEN,TASK, TASKSTATE_DIR,TASKSTATE, task_state_types
 from moat.util import r_dict
 from yaml import safe_dump
 from datetime import datetime
@@ -203,17 +203,17 @@ by default, start every task that's defined for this host.
 						err = None
 					else:
 						errs = repr(err)
-					print(path,state, errs, sep='\t', file=self.stdout)
+					print('/'.join(path),state, errs, sep='\t', file=self.stdout)
 					if self.root.verbose > 1 and err is not None:
 						traceback.print_exception(err.__class__,err,err.__traceback__)
 				else:
-					print(path,state, *value, sep='\t', file=self.stdout)
+					print('/'.join(path),state, *value, sep='\t', file=self.stdout)
 
 		js = {}
 		old = set(self.jobs)
 		while self.tasks:
 			t = self.tasks.pop()
-			path = t.path[len(TASK_DIR)+1:-(len(TASK)+1)]
+			path = t.path[TASK_LEN:-1]
 			if path in old:
 				old.remove(path)
 				continue
@@ -221,7 +221,7 @@ by default, start every task that's defined for this host.
 			try:
 			    j = TaskMaster(self, path, callback=partial(_report, path))
 			except Exception as exc:
-				logger.exception("Could not set up %s (%s)",t.path,t.get('name',path))
+				logger.exception("Could not set up %s (%s)",'/'.join(t.path),t.get('name',path))
 				if opts.killfail:
 					return 2
 			else:
@@ -235,8 +235,8 @@ by default, start every task that's defined for this host.
 				continue
 			except Exception as exc:
 				# Let's assume that this is fatal.
-				await self.root.etcd.set('/'.join((TASKSTATE_DIR,j.path,TASKSTATE,"debug")), "".join(traceback.format_exception(exc.__class__,exc,exc.__traceback__)))
-				logger.exception("Could not init %s (%s)",t.path,t.get('name',path))
+				await self.root.etcd.set((TASKSTATE_DIR,j.path,TASKSTATE,"debug"), "".join(traceback.format_exception(exc.__class__,exc,exc.__traceback__)))
+				logger.exception("Could not init %s (%s)",'/'.join(t.path),t.get('name',path))
 				if self.options.killfail:
 					for j in self.jobs.values():
 						j.cancel()

@@ -35,7 +35,7 @@ from etcd_tree.util import from_etcd
 from etcd_tree.etcd import EtcTypes
 from dabroker.util import import_string
 from ..task import task_var_types,task_state_types,\
-	TASK_DIR,TASKDEF_DIR,TASK,TASKDEF,TASKSTATE_DIR,TASKSTATE
+	TASK,TASK_DIR,TASK_LEN, TASKDEF,TASKDEF_DIR,TASKDEF_LEN, TASKSTATE,TASKSTATE_DIR,TASKSTATE_LEN
 from yaml import safe_dump
 import aio_etcd as etcd
 import asyncio
@@ -115,7 +115,7 @@ on the command line, they are added, otherwise everything under
 			)
 			if hasattr(obj,'schema'):
 				d['data'] = obj.schema
-			tt = await t.subdir(obj.name,name=TASKDEF, create=True)
+			tt = await t.subdir(obj.name,name=TASKDEF)
 			if 'language' in tt: ## mandatory
 				if self.force:
 					changed = False
@@ -170,11 +170,11 @@ details are shown in YAML format, else a short list of names is shown.
 			verbose = self.options.all
 		for tt in dirs:
 			for task in tt.tagged(TASKDEF):
-				path = task.path[len(TASKDEF_DIR)+1:-(len(TASKDEF)+1)]
+				path = task.path[TASKDEF_LEN:-1]
 				if verbose:
 					safe_dump({path: r_dict(dict(task))}, stream=self.stdout)
 				else:
-					print(path,task['summary'], sep='\t',file=self.stdout)
+					print('/'.join(path),task['summary'], sep='\t',file=self.stdout)
 
 class DefDeleteCommand(Command,DefSetup):
 	name = "delete"
@@ -248,10 +248,10 @@ Usage: … param NAME VALUE  -- set
 				raise CommandError("You cannot delete all parameters.")
 
 			for task in t.tagged(self.TAG):
-				path = task.path[len(self.DIR)+1:-(len(self.TAG)+1)]
+				path = task.path[self.LEN:-1]
 				for k in _VARS:
 					if k in task:
-						print(path,k,task[k], sep='\t',file=self.stdout)
+						print('/'.join(path),k,task[k], sep='\t',file=self.stdout)
 			return
 		else:
 			name = args.pop(0)
@@ -298,6 +298,7 @@ Usage: … param NAME VALUE  -- set
 class DefParamCommand(_ParamCommand):
 	_def = True
 	DIR=TASKDEF_DIR
+	LEN=TASKDEF_LEN
 	TAG=TASKDEF
 	summary = "Parameterize task definitions"
 	description = """\
@@ -307,6 +308,7 @@ Task definitions are stored in etcd at /meta/task/**/:taskdef.
 class ParamCommand(_ParamCommand):
 	_def = False
 	DIR=TASK_DIR
+	LEN=TASK_LEN
 	TAG=TASK
 	summary = "Parameterize tasks"
 	description = """\
@@ -355,7 +357,7 @@ details are shown in YAML format, else a short list of tasks is shown.
 			verbose = self.options.all
 		for tt in dirs:
 			for task in tt.tagged(TASK):
-				path = task.path[len(TASK_DIR)+1:-(len(TASK)+1)]
+				path = task.path[TASK_LEN:-1]
 				if verbose:
 					safe_dump({path:r_dict(dict(task))}, stream=self.stdout)
 				else:
@@ -458,7 +460,7 @@ class UpdateCommand(_AddUpdate,Command,DefSetup):
 	name = "change"
 	summary = "change a task"
 	description = """\
-Create a new task.
+Update a task.
 
 Arguments:
 
@@ -541,19 +543,18 @@ This command shows that information.
 			dirs = [t]
 		for tt in dirs:
 			for task in tt.tagged(TASKSTATE):
-				path = task.path[1:-(len(TASKSTATE)+1)]
+				path = task.path[TASKSTATE_LEN:-1]
 
 				if self.root.verbose > 1:
-					safe_dump({path:r_dict(dict(task))}, stream=self.stdout)
+					safe_dump({'/'.join(path):r_dict(dict(task))}, stream=self.stdout)
 				else:
 					date = task.get('debug_time','-')
 					if 'running' in task:
 						if 'started' in task:
 							date = task['started']
-							state = 'run'
 						else:
 							date = task['running']
-							state = 'run?'
+						state = 'run'
 					elif 'started' in task and ('stopped' not in task or task['started']>task['stopped']):
 						date = task['started']
 						state = 'crash'
@@ -566,7 +567,7 @@ This command shows that information.
 						state = task.get('state','?')
 					if not isinstance(date,str):
 						date = datetime.fromtimestamp(date).strftime('%Y-%m-%d %H:%M:%S')
-					print(path,state,date,task.get('message','-'), sep='\t', file=self.stdout)
+					print('/'.join(path),state,date,task.get('message','-'), sep='\t', file=self.stdout)
 
 
 class TaskCommand(Command):
