@@ -35,7 +35,7 @@ from etcd_tree.util import from_etcd
 from etcd_tree.etcd import EtcTypes
 from dabroker.util import import_string
 from ..task import task_var_types,task_state_types,\
-	TASK,TASK_DIR,TASK_LEN, TASKDEF,TASKDEF_DIR,TASKDEF_LEN, TASKSTATE,TASKSTATE_DIR,TASKSTATE_LEN
+	TASK,TASK_DIR, TASKDEF,TASKDEF_DIR, TASKSTATE,TASKSTATE_DIR
 from yaml import safe_dump
 import aio_etcd as etcd
 import asyncio
@@ -80,7 +80,7 @@ on the command line, they are added, otherwise everything under
 	def handleOptions(self):
 		self.force = self.options.force
 
-	async def do_async(self,args):
+	async def do(self,args):
 		t = await self.setup(meta=True)
 		if args:
 			objs = []
@@ -156,7 +156,7 @@ details are shown in YAML format, else a short list of names is shown.
 			action="store_true", dest="all",
 			help="show details for all entries")
 
-	async def do_async(self,args):
+	async def do(self,args):
 		t = await self.setup(meta=True)
 		if args:
 			if self.options.all:
@@ -170,7 +170,7 @@ details are shown in YAML format, else a short list of names is shown.
 			verbose = self.options.all
 		for tt in dirs:
 			for task in tt.tagged(TASKDEF):
-				path = task.path[TASKDEF_LEN:-1]
+				path = task.path[len(TASKDEF_DIR):-1]
 				if verbose:
 					safe_dump({path: r_dict(dict(task))}, stream=self.stdout)
 				else:
@@ -190,7 +190,7 @@ This command deletes (some of) that data.
 			action="store_true", dest="force",
 			help="not forcing won't do anything")
 
-	async def do_async(self,args):
+	async def do(self,args):
 		td = await self.setup(meta=True)
 		if not args:
 			if not cmd.root.cfg['testing']:
@@ -236,7 +236,7 @@ Usage: … param NAME VALUE  -- set
 				action="store_true", dest="is_global",
 				help="show global parameters")
 
-	async def do_async(self,args):
+	async def do(self,args):
 		from moat.task import _VARS
 		t = await self.setup(meta=self._def)
 		if self._def and self.options.is_global:
@@ -248,7 +248,7 @@ Usage: … param NAME VALUE  -- set
 				raise CommandError("You cannot delete all parameters.")
 
 			for task in t.tagged(self.TAG):
-				path = task.path[self.LEN:-1]
+				path = task.path[len(self.DIR):-1]
 				for k in _VARS:
 					if k in task:
 						print('/'.join(path),k,task[k], sep='\t',file=self.stdout)
@@ -298,7 +298,6 @@ Usage: … param NAME VALUE  -- set
 class DefParamCommand(_ParamCommand):
 	_def = True
 	DIR=TASKDEF_DIR
-	LEN=TASKDEF_LEN
 	TAG=TASKDEF
 	summary = "Parameterize task definitions"
 	description = """\
@@ -308,7 +307,6 @@ Task definitions are stored in etcd at /meta/task/**/:taskdef.
 class ParamCommand(_ParamCommand):
 	_def = False
 	DIR=TASK_DIR
-	LEN=TASK_LEN
 	TAG=TASK
 	summary = "Parameterize tasks"
 	description = """\
@@ -343,7 +341,7 @@ details are shown in YAML format, else a short list of tasks is shown.
 			action="store_true", dest="all",
 			help="show details for all entries")
 
-	async def do_async(self,args):
+	async def do(self,args):
 		t = await self.setup(meta=False)
 		if args:
 			if self.options.all:
@@ -357,7 +355,7 @@ details are shown in YAML format, else a short list of tasks is shown.
 			verbose = self.options.all
 		for tt in dirs:
 			for task in tt.tagged(TASK):
-				path = task.path[TASK_LEN:-1]
+				path = task.path[len(TASK_DIR):-1]
 				if verbose:
 					safe_dump({path:r_dict(dict(task))}, stream=self.stdout)
 				else:
@@ -368,7 +366,7 @@ details are shown in YAML format, else a short list of tasks is shown.
 
 class _AddUpdate:
 	"""Mix-in to add or update a task (too much)"""
-	async def do_async(self,args):
+	async def do(self,args):
 		try:
 			data = {}
 			taskdefpath=""
@@ -488,7 +486,7 @@ This command deletes one of these entries.
 			action="store_true", dest="force",
 			help="not forcing won't do anything")
 
-	async def do_async(self,args):
+	async def do(self,args):
 		t = await self.setup(meta=False)
 		if not args:
 			if not cmd.root.cfg['testing']:
@@ -525,7 +523,7 @@ The status of running tasks is stored in etcd at /status/run/task/**/:task.
 This command shows that information.
 """
 
-	async def do_async(self,args):
+	async def do(self,args):
 		await self.root.setup()
 		etc = self.root.etcd
 		types = EtcTypes()
@@ -543,7 +541,7 @@ This command shows that information.
 			dirs = [t]
 		for tt in dirs:
 			for task in tt.tagged(TASKSTATE):
-				path = task.path[TASKSTATE_LEN:-1]
+				path = task.path[len(TASKSTATE_DIR):-1]
 
 				if self.root.verbose > 1:
 					safe_dump({'/'.join(path):r_dict(dict(task))}, stream=self.stdout)
@@ -588,7 +586,7 @@ Commands to set up and admin the task list known to MoaT.
 	]
 	fix = False
 
-	def do(self,args):
+	async def do(self,args):
 		if self.root.cfg['config'].get('testing',False):
 			print("NOTE: this is a test configuration.", file=sys.stderr)
 		else: # pragma: no cover ## not doing the real thing here

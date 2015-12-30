@@ -51,7 +51,7 @@ Check basic config layout.
 
 """
 
-	async def do_async(self,args):
+	async def do(self,args):
 		c = self.root.cfg
 		try:
 			c = c['config']
@@ -73,7 +73,7 @@ Check etcd access, and basic data layout.
 			await asyncio.sleep(0.3,loop=self.loop)
 
 			t = time.time()
-			run_state = await _run_state(self.etcd,"test/do_2")
+			run_state = await _run_state(self.etcd,('test','do_2'))
 			assert run_state['started'] > t-int(os.environ.get('MOAT_IS_SLOW',1)), (run_state['started'],t)
 
 	class Task_do3(Task):
@@ -88,7 +88,7 @@ Check etcd access, and basic data layout.
 			async def _do4_():
 				await asyncio.sleep(0.2,loop=self.loop)
 				logger.debug("kill: _do4")
-				await self.etcd.delete('/'.join((TASKSTATE_DIR,'test/do_4',TASKSTATE,'running')))
+				await self.etcd.delete(TASKSTATE_DIR+('test','do_4',TASKSTATE,'running'))
 			f = asyncio.ensure_future(_do4_(),loop=self.loop)
 			try:
 				logger.debug("sleep: _do4")
@@ -97,11 +97,12 @@ Check etcd access, and basic data layout.
 			finally:
 				logger.debug("stop: _do4 %s",f)
 				if not f.done():
+					logger.info('CANCEL 4 %s',f)
 					f.cancel() # pragma: no cover
 				try: await f
 				except Exception: pass # pragma: no cover
 
-	async def do_async(self,args):
+	async def do(self,args):
 		c = self.root.cfg['config']
 		try:
 			c = c['etcd']
@@ -166,7 +167,7 @@ Check etcd access, and basic data layout.
 			pass
 		else:
 			raise RuntimeError("Error did not propagate") # pragma: no cover
-		run_state = await _run_state(etc,"test/do_3")
+		run_state = await _run_state(etc,('test','do_3'))
 		if 'running' in run_state:
 			raise RuntimeError("Procedure end 2 did not take") # pragma: no cover
 		await s.wait()
@@ -181,7 +182,7 @@ Check etcd access, and basic data layout.
 			pass
 		else:
 			raise RuntimeError("Cancellation ('running' marker gone) did not propagate") # pragma: no cover
-		run_state = await _run_state(etc,"test/do_4")
+		run_state = await _run_state(etc,('test','do_4'))
 		assert 'running' not in run_state
 		await s.wait()
 		assert run_state['stopped'] > run_state['started'], (run_state['stopped'], run_state['started'])
@@ -192,7 +193,7 @@ Check etcd access, and basic data layout.
 		await asyncio.sleep(0.1,loop=self.root.loop)
 		dt2a = self.Task_do2(self,"test/do_2",{})
 		await asyncio.sleep(0.1,loop=self.root.loop)
-		dt2.run_state = run_state = await _run_state(etc,"test/do_2")
+		dt2.run_state = run_state = await _run_state(etc,('test','do_2'))
 		try:
 			await dt2a
 		except JobIsRunningError as exc:
@@ -227,20 +228,21 @@ class TypesCommand(Command):
 		This command fills that list.
 		"""
 
-	async def do_async(self,args):
+	async def do(self,args):
 		etc = await self.root._get_etcd()
 		from moat.types import types,TYPEDEF_DIR,TYPEDEF
 		for t in types():
+			path = tuple(t.name.split('/'))
 			if self.root.verbose:
 				try:
-					d = await etc.tree('/'.join((TYPEDEF_DIR,t.name,TYPEDEF)), create=False)
+					d = await etc.tree(TYPEDEF_DIR+path+(TYPEDEF,), create=False)
 				except etcd.EtcdKeyNotFound:
 					logger.info("Creating %s",t.name)
-					d = await etc.tree('/'.join((TYPEDEF_DIR,t.name,TYPEDEF)), create=True)
+					d = await etc.tree(TYPEDEF_DIR+path+(TYPEDEF,), create=True)
 				else:
 					logger.debug("Found %s",t.name)
 			else:
-				d = await etc.tree('/'.join((TYPEDEF_DIR,t.name,TYPEDEF)))
+				d = await etc.tree(TYPEDEF_DIR+path+(TYPEDEF,))
 			for k,v in t.vars.items():
 				if k not in d:
 					await d.set(k,v)
@@ -257,7 +259,7 @@ exchanges and queues.
 
 """
 
-	def do(self,args):
+	async def do(self,args):
 		pass
 
 class KillCommand(Command):
@@ -268,14 +270,14 @@ Kill off all data.
 This command only works when testing.
 """
 
-	def do(self,args):
+	async def do(self,args):
 		if not self.root.cfg['config'].get('testing',False) or \
 		   len(args) != 2 or " ".join(args) != "me hardeR":
 			raise CommandError("You're insane.")
-		etc = self.root.sync(self.root._get_etcd())
+		etc = await self.root._get_etcd()
 		self.log.fatal("Erasing your etcd data in three seconds.")
 		time.sleep(3)
-		self.root.sync(etc.delete("/",recursive=True))
+		await etc.delete("/",recursive=True)
 		self.log.warn("All gone.")
 		return
 
@@ -304,7 +306,7 @@ Set some data.
 	def handleOptions(self):
 		self.fix = self.options.fix
 
-	def do(self,args):
+	async def do(self,args):
 		if self.root.cfg['config'].get('testing',False):
 			print("NOTE: this is a test configuration.", file=sys.stderr)
 		else: # pragma: no cover ## not doing the real thing here
@@ -319,7 +321,7 @@ Set some data.
 				print("Checking:",c.name)
 			c = c(parent=self)
 			try:
-				res |= (c.do(args) or 0)
+				res |= (await c.do(args) or 0)
 			except Exception as exc: # pragma: no cover
 				if self.root.verbose > 1:
 					import traceback

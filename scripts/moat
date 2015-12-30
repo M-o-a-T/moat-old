@@ -27,12 +27,12 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import sys
 from moat.script.main import Moat
 from moat.script import CommandExited
+import asyncio
 
-
-def main(args):
+async def main(args):
 	c = Moat()
 	try:
-		ret = c.parse(args)
+		ret = await c.parse(args)
 	except CommandExited as e:
 		if e.status or c.verbose:
 			print(e.output, file=sys.stderr)
@@ -44,7 +44,7 @@ def main(args):
 
 if __name__ == '__main__':
 	try:
-		sys.exit(main(sys.argv[1:]))
+		sys.exit(asyncio.run_until_complete(main(sys.argv[1:])))
 	except KeyboardInterrupt:
 		print("Interrupted. Aborted.", file=sys.stderr)
 		sys.exit(8)

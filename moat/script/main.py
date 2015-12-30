@@ -115,14 +115,6 @@ stuff back to the loop.
 			action="store", dest="app",
 			help="application name. Default is the reversed FQDN.")
 
-	def sync(self,cmd):
-		"""Run a coroutine synchronously."""
-		if self._coro:
-			future = asyncio.run_coroutine_threadsafe(cmd, self.loop)
-			return future.result()
-		else:
-			return self.loop.run_until_complete(cmd)
-		
 	def handleOptions(self):
 		opts = self.options
 		self.verbose = opts.verbose

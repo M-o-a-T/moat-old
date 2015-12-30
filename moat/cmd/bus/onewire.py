@@ -70,7 +70,7 @@ Arguments:
 	def handleOptions(self):
 		self.update = self.options.update
 
-	async def do_async(self,args):
+	async def do(self,args):
 		await self.root.setup(self)
 		if len(args) < 2:
 			raise CommandError("Usage: … add ‹name› ‹host› [‹port›]")
@@ -115,7 +115,7 @@ If you name a server, details are shown in YAML format,
 else a short list is printed.
 """
 
-	async def do_async(self,args):
+	async def do(self,args):
 		await self.root.setup(self)
 		etc = self.root.etcd
 		if args:
@@ -148,7 +148,7 @@ Make MoaT forget about a 1wire server.
 			action="store_true", dest="force",
 			help="not forcing won't do anything")
 
-	async def do_async(self,args):
+	async def do(self,args):
 		await self.root.setup(self)
 		etc = self.root.etcd
 		if not args:
@@ -186,10 +186,10 @@ Device class: show those devices.
 Device ID: detailed information about the device.
 """
 
-	async def do_async(self,args):
+	async def do(self,args):
 		await self.root.setup(self)
 		etc = self.root.etcd
-		path = '/device/onewire'
+		path = (DEV_DIR,OnewireDevice.prefix)
 		if not args:
 			res = await etc.get(path)
 			for r in res.children:
@@ -268,7 +268,7 @@ If you name a server, details are shown in YAML format,
 else a short list is printed.
 """
 
-	async def do_async(self,args):
+	async def do(self,args):
 		await self.root.setup(self)
 		etc = self.root.etcd
 		if args:
@@ -298,7 +298,7 @@ If you name a server and bus, details are shown in YAML format,
 else a short list is printed.
 """
 
-	async def do_async(self,args):
+	async def do(self,args):
 		await self.root.setup(self)
 		etc = self.root.etcd
 		if not args:

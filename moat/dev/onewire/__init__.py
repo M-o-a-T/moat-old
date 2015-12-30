@@ -28,6 +28,7 @@ logger = logging.getLogger(__name__)
 from etcd_tree.node import EtcFloat,EtcInteger,EtcString
 from time import time
 
+from .. import DEV
 from ..base import HardwareDevice
 
 class NoAlarmHandler(RuntimeError):
@@ -74,10 +75,10 @@ class OnewireDevice(HardwareDevice): #(, metaclass=SelectDevice):
 			self._cached_path = srvpath
 
 	@staticmethod
-	def dev_paths():
+	def dev_paths(types):
 		for k,cls in device_types().items():
-			yield k,'*',cls
-		yield '*','*',OnewireDevice
+			types.register(k,'*',DEV, cls=cls)
+		types.register('*','*',DEV, cls=OnewireDevice)
 
 	def scan_for(self, what):
 		return None

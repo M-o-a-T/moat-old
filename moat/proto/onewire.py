@@ -166,15 +166,13 @@ class OnewireServer:
 	path=()
 
 	def __init__(self,host=None,port=None, conn=None,path=(), loop=None):
-		if loop is None:
-			loop = asyncio.get_event_loop()
-		self._loop = loop
+		self._loop = asyncio.get_event_loop() if loop is None else loop
 		if conn:
 			assert loop is None
 			assert host is None and port is None
 		else:
 			assert host is not None
-			conn = ProtocolClient(OnewireProtocol, host,port, loop=loop)
+			conn = ProtocolClient(OnewireProtocol, host,port, loop=self._loop)
 		self.conn = conn
 	
 	def at(self,*path):

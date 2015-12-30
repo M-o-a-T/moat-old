@@ -25,7 +25,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 
 from etcd_tree.node import EtcString,EtcInteger,EtcFloat, EtcDir
 from etcd_tree.etcd import EtcTypes
-from . import type_names, TYPEDEF_LEN
+from . import type_names, TYPEDEF_DIR
 import logging
 logger = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ class _NOTGIVEN:
 class TypeDir(EtcDir):
 	def __init__(self,*a,**k):
 		super().__init__(*a,**k)
-		self._type = type_names()['/'.join(self.path[TYPEDEF_LEN:-1])]
+		self._type = type_names()['/'.join(self.path[len(TYPEDEF_DIR):-1])]
 		self._type.types(self)
 
 class Type:

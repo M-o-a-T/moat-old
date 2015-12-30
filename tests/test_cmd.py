@@ -137,8 +137,8 @@ async def test_task(loop):
 	assert rx == 0, rx
 
 	t=time()
-	r = m.parse("-vvvc test.cfg run -kg fake/cmd/sleep")
-	await asyncio.sleep(0.3,loop=loop)
+	r = asyncio.ensure_future(m.parse("-vvvc test.cfg run -kg fake/cmd/sleep"), loop=loop)
+	await asyncio.sleep(0.5,loop=loop)
 	assert not r.done(),repr(r)
 	rx = await m2.parse("-c test.cfg task state fake")
 	assert m2.in_stdout('fake/cmd/sleep\trun\t'), m2.stdout_data

@@ -65,7 +65,7 @@ Device ID: detailed information about the device.
 			action="store_true", dest="recursive",
 			help="recurse into subdirectories")
 
-	async def do_async(self,args):
+	async def do(self,args):
 		await self.root.setup(self)
 		etc = self.root.etcd
 		types = None
@@ -139,7 +139,7 @@ class _DeviceAttrCommand(Command):
 	_attr = None
 	_nl = False
 
-	async def do_async(self,args):
+	async def do(self,args):
 		await self.root.setup(self)
 		etc = self.root.etcd
 		path = '/device'

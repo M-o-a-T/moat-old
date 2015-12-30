@@ -43,7 +43,7 @@ This command does not do anything. It is used for testing.
 		"Stop adding verbosity!",
 		"The error is intentional.",
 	)
-	def do(self,args):
+	async def do(self,args):
 		n = 0
 		if args:
 			if args[0] == "nope":

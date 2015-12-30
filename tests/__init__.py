@@ -116,10 +116,10 @@ class MoatTest(Moat):
 		h = StoreHandler(self)
 		logging.getLogger().addHandler(h)
 
-	def parse(self,cmd):
+	async def parse(self,cmd):
 		if isinstance(cmd,str):
 			cmd = cmd.split(' ')
-		return self.loop.run_in_executor(None, super().parse,cmd)
+		return (await super().parse(cmd))
 
 	@property
 	def stdout_data(self):

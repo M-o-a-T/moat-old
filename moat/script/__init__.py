@@ -38,6 +38,7 @@ import optparse
 import sys
 import logging
 import asyncio
+from types import CoroutineType
 
 class CommandHelpFormatter(optparse.IndentedHelpFormatter):
 	"""
@@ -277,18 +278,7 @@ class Command(object):
 		"""
 		pass
 
-	def do(self, args): # pragma: no cover
-		"""
-		Override me to implement the functionality of the command synchronously.
-
-		@param    args: list of remaining non-option arguments
-		@type     args: list of unicode
-		@rtype:   int
-		@returns: an exit code, or None if no actual action was taken.
-		"""
-		return self.root.sync(self.do_async(args))
-
-	async def do_async(self, args): # pragma: no cover
+	async def do(self, args): # pragma: no cover
 		"""
 		Override me to implement the functionality of the command asynchronously.
 
@@ -299,7 +289,7 @@ class Command(object):
 		"""
 		raise NotImplementedError('Implement %s.do()' % self.__class__)
 
-	def parse(self, argv):
+	async def parse(self, argv):
 		"""
 		Parse the given arguments and act on them.
 
@@ -333,7 +323,7 @@ class Command(object):
 			self.log.debug('no args or no subcommands, calling %r.do(%r)' % (
 				self, args))
 			try:
-				ret = self.do(args)
+				ret = await self.do(args)
 				self.log.debug('done ok, returned %r', ret)
 #			except CommandOk as e:
 #				self.log.debug('done with exception, raised %r', e)
@@ -364,7 +354,7 @@ class Command(object):
 			C = self.aliasedSubCommands.get(command,None)
 		if C is not None:
 			c = C(self)
-			return c.parse(args[1:])
+			return (await c.parse(args[1:]))
 
 		self.log.error("Unknown command '%s'.\n", command)
 		self.parser.print_usage(file=sys.stderr)

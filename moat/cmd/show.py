@@ -44,7 +44,7 @@ Show the current config data.
 With arguments, show only these.
 """
 
-	def do(self,args):
+	async def do(self,args):
 		from yaml import safe_dump
 		if args:
 			try:
@@ -81,10 +81,10 @@ With arguments, show only these subtrees.
 		self.dump = self.options.dump
 		self.mod = self.options.mod
 
-	def do(self,args):
+	async def do(self,args):
 		from yaml import safe_dump
 		retval = 0
-		etc = self.root.sync(self.root._get_etcd())
+		etc = await self.root._get_etcd()
 		if args:
 			for n,a in enumerate(args):
 				if n:
@@ -92,20 +92,20 @@ With arguments, show only these subtrees.
 				a = a.replace('.','/')
 				try:
 					if self.mod:
-						res = self.root.sync(etc.get('/'+a))
+						res = await etc.get('/'+a)
 						print(res.modifiedIndex, file=self.stdout)
 					else:
-						safe_dump(self.root.sync(from_etcd(etc,'/'+a, dump=self.dump)), stream=self.stdout)
+						safe_dump(await from_etcd(etc,'/'+a, dump=self.dump), stream=self.stdout)
 				except etcd.EtcdKeyNotFound:
 					logger.error("key not present: %s",a)
 					retval = 1
 
 		else:
 			if self.mod:
-				res = self.root.sync(etc.get('/'))
+				res = await etc.get('/')
 				print(res.modifiedIndex, file=self.stdout)
 			else:
-				safe_dump(self.root.sync(from_etcd(etc, '/', dump=self.dump)), stream=self.stdout)
+				safe_dump(await from_etcd(etc, '/', dump=self.dump), stream=self.stdout)
 		return retval
 
 class ShowCommand(Command):

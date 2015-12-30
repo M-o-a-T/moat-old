@@ -31,16 +31,13 @@ from ..script.util import objects
 import logging
 logger = logging.getLogger(__name__)
 
-TASK_DIR = '/task'
-TASK_LEN = 1
+TASK_DIR = ('task',)
 TASK = ':task'
 
-TASKDEF_DIR = '/meta/task'
-TASKDEF_LEN = 2
+TASKDEF_DIR = ('meta','task')
 TASKDEF = ':taskdef'
 
-TASKSTATE_DIR = '/status/run'
-TASKSTATE_LEN = 2
+TASKSTATE_DIR = ('status','run')
 TASKSTATE = ':task'
 
 _VARS = {'ttl','refresh','restart','retry','max-retry'}

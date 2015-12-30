@@ -29,7 +29,7 @@ from time import time
 
 from moat.proto.onewire import OnewireServer
 from moat.dev.onewire import OnewireDevice
-from moat.dev import DEV_DIR,DEV_LEN,DEV
+from moat.dev import DEV_DIR,DEV
 from moat.script.task import Task
 from moat.script.util import objects
 
@@ -84,7 +84,12 @@ class ScanTask(Task):
 		super().__init__(parent.env.cmd,('onewire','scan',self.typ,self.env.srv_name)+self.bus.path)
 
 	async def task(self):
-		"""run task_() periodically."""
+		"""\
+			run task_() periodically.
+			
+			Do not override this; override .task_ instead.
+			"""
+		logger.info("R 1")
 		ts = time()
 		long_warned = 0
 		while True:
@@ -93,6 +98,7 @@ class ScanTask(Task):
 			warned = await self.task_()
 			t = self.parent.timers[self.typ]
 			if t is None:
+				logger.info("R 9")
 				return
 			# subtract the time spent during the task
 			if warned and t < 10:
@@ -112,6 +118,7 @@ class ScanTask(Task):
 				long_warned -= 1
 			with suppress(asyncio.TimeoutError):
 				await asyncio.wait_for(self._trigger,delay, loop=self.loop)
+		logger.info("R 8")
 
 	def trigger(self):
 		"""Call to cause an immediate re-scan"""
@@ -124,6 +131,7 @@ class ScanTask(Task):
 
 class EtcOnewireBus(EtcDir):
 	tasks = None
+	_set_up = False
 
 	def __init__(self,*a,**k):
 		super().__init__(*a,**k)
@@ -148,26 +156,32 @@ class EtcOnewireBus(EtcDir):
 		super().has_update()
 		if self._seq is None:
 			logger.debug("Stopping tasks %s %s %s",self,self.bus_cached.path,list(self.tasks.keys()))
-			t,self.tasks = self.tasks,{}
-			for v in t.values():
-				t.cancel()
-		else:
-			if not tasks:
-				for t in objects(__name__,ScanTask):
-					tasks[t.typ] = t
-			for name,task in tasks.items():
-				t = None
-				for dev in self.devices:
-					f = dev.scan_for(name)
-					if f is None:
-						pass
-					elif t is None or t > f:
-						t = f
+			if self.tasks:
+				t,self.tasks = self.tasks,WeakValueDictionary()
+				for v in t.values():
+					logger.info('CANCEL 16 %s',t)
+					t.cancel()
+		elif self._set_up:
+			self.setup_tasks()
 
-				self.timers[name] = t
-				if t is not None and name not in self.tasks:
-					logger.debug("Starting task %s %s %s",self,self.bus_cached.path,name)
-					self.tasks[name] = self.env.add_task(task(self))
+	def setup_tasks(self):
+		if not tasks:
+			for t in objects(__name__,ScanTask):
+				tasks[t.typ] = t
+		for name,task in tasks.items():
+			t = None
+			for dev in self.devices:
+				f = dev.scan_for(name)
+				if f is None:
+					pass
+				elif t is None or t > f:
+					t = f
+
+			self.timers[name] = t
+			if t is not None and name not in self.tasks:
+				logger.debug("Starting task %s %s %s",self,self.bus_cached.path,name)
+				self.tasks[name] = self.env.add_task(task(self))
+		self._set_up = True
 		
 EtcOnewireBus.register('broken', cls=EtcInteger)
 EtcOnewireBus.register('devices','*','*', cls=EtcInteger)
@@ -224,6 +238,7 @@ class BusScan(Task):
 			if f2 not in self.devices[f1]:
 				await self.devices[f1].set(f2,{':dev':{'path':bb}})
 			fd = self.devices[f1][f2][':dev']
+			await fd.setup()
 			op = fd.get('path','')
 			if op != bb:
 				if ' ' in op:
@@ -256,12 +271,14 @@ class BusScan(Task):
 				await dev_counter[f1].set(f2,v+1)
 
 		# Mark this bus as "scanning OK".
+		bus = self.tree['bus'][b]
+		bus.setup_tasks()
 		try:
-			v = self.tree['bus'][b]['broken']
+			v = bus['broken']
 		except KeyError:
 			v = 99
 		if v > 0:
-			await self.tree['bus'][b].set('broken',0)
+			await bus.set('broken',0)
 
 	async def drop_device(self,dev, delete=True):
 		"""When a device vanishes, remove it from the bus it has been at"""
@@ -316,6 +333,7 @@ class BusScan(Task):
 		return t
 
 	async def task(self):
+		logger.debug("OWT 1")
 		self.srv = None
 		self.tree = None
 		self.srv_name = None
@@ -329,14 +347,25 @@ class BusScan(Task):
 		server = self.config['server']
 		self.srv_name = server
 		update_delay = self.config.get('update_delay',None)
-		self.tree = await self.etcd.tree("/bus/onewire/"+server, types=types,env=self,update_delay=update_delay)
-		srv = self.tree['server']
-		srv.add_monitor(self.cfg_changed)
+
+		# Reading the tree requires accessing self.srv.
+		# Initializing self.srv requires reading the …/server directory.
+		# Thus, first we get that, initialize self.srv with the data …
+		tree,srv = await self.etcd.tree("/bus/onewire/"+server,sub=('server',), types=types,env=self,static=True)
 		self.srv = OnewireServer(srv['host'],srv.get('port',None), loop=self.loop)
 
+		# and then throw it away in favor of the real thing.
+		self.tree = await self.etcd.tree("/bus/onewire/"+server, types=types,env=self,update_delay=update_delay)
+		nsrv = self.tree['server']
+		if srv != nsrv:
+			import pdb;pdb.set_trace()
+			new_cfg.set_result("duh")
+		nsrv.add_monitor(self.cfg_changed)
+		del tree
+
 		devtypes=EtcTypes()
-		devtypes.register('*','*',DEV,cls=OnewireDevice)
-		self.devices = await self.etcd.tree(DEV_DIR+'/'+OnewireDevice.prefix,env=self,types=devtypes, update_delay=update_delay)
+		OnewireDevice.dev_paths(devtypes)
+		self.devices = await self.etcd.tree(DEV_DIR+(OnewireDevice.prefix,),env=self,types=devtypes, update_delay=update_delay)
 		self._trigger = None
 
 		main_task = asyncio.ensure_future(self.task_busscan(), loop=self.loop)
@@ -363,14 +392,17 @@ class BusScan(Task):
 			p = self.tasks
 			raise
 		finally:
-			print("F",p)
+			logger.debug("OWT 8 %s",p)
 			for t in p:
 				if not t.done():
+					logger.info('CANCEL 17 %s',t)
 					t.cancel()
 			asyncio.wait(p, loop=self.loop, return_when=asyncio.ALL_COMPLETED)
+		logger.debug("OWT 9")
 		for t in d:
 			t.result()
 			# this will re-raise whatever exception triggered the first wait, if any
+		logger.debug("OWT X")
 
 	async def task_busscan(self):
 		"""\
@@ -439,6 +471,7 @@ class BusScan(Task):
 		"""Tell all tasks to run now. Used mainly for testing."""
 		if self._delay is not None and not self._delay.done():
 			self._delay.set_result("cfg_changed")
+			logger.info('CANCEL 17 %s',self._delay_timer)
 			self._delay_timer.cancel()
 		for t in self.tasks:
 			if hasattr(t,'trigger'):
@@ -465,5 +498,6 @@ class BusScan(Task):
 			return
 		if self._delay is not None and not self._delay.done():
 			self._delay.set_result("unlocked")
+			logger.info('CANCEL 17 %s',self._delay_timer)
 			self._delay_timer.cancel()
 

@@ -32,7 +32,7 @@ import sys
 
 from ..script import Command, CommandError
 from ..script.task import TaskMaster, JobIsRunningError, JobMarkGoneError
-from ..task import TASK_DIR,TASK_LEN,TASK, TASKSTATE_DIR,TASKSTATE, task_state_types
+from ..task import TASK_DIR,TASK, TASKSTATE_DIR,TASKSTATE, task_state_types
 from moat.util import r_dict
 from yaml import safe_dump
 from datetime import datetime
@@ -86,7 +86,7 @@ by default, start every task that's defined for this host.
 			return
 		self.seen.add(path)
 
-	async def do_async(self,args):
+	async def do(self,args):
 		self.seen = set()
 		self.tilt = asyncio.Future(loop=self.root.loop)
 		opts = self.options
@@ -97,11 +97,11 @@ by default, start every task that's defined for this host.
 		if args:
 			if not opts.is_global:
 				args = [self.root.app+'/'+t for t in args]
-			args = [TASK_DIR+'/'+t for t in args]
+			args = [TASK_DIR+tuple(t.split('/')) for t in args]
 		elif opts.is_global:
 			args = [TASK_DIR]
 		else:
-			args = [TASK_DIR+'/'+self.root.app]
+			args = [TASK_DIR+(self.root.app,)]
 		self.args = args
 		self.paths = []
 		self._monitors = []
@@ -126,37 +126,46 @@ by default, start every task that's defined for this host.
 	async def _loop(self):
 		errs = 0
 		try:
+			logger.debug("Task Jobs %s",dict(self.jobs))
 			while self.jobs:
 				done,pending = await asyncio.wait(chain((self.tilt,self.rescan),self.jobs.values()), loop=self.root.loop, return_when=asyncio.FIRST_COMPLETED)
+				logger.debug("Task DP %s %s",done,pending)
 				for j in done:
 					if j in (self.tilt,self.rescan):
 						continue
-					del self.jobs[j.name]
+					del self.jobs[j.path]
 					try:
 						r = j.result()
 					except asyncio.CancelledError:
 						errs += 10
+						logger.info('CANCELLED %s', j.name)
 						if self.root.verbose:
 							print(j.name,'*CANCELLED*', sep='\t', file=self.stdout)
 					except Exception as exc:
 						errs += 1
-						logger.exception("Running %s",j.name)
+						logger.exception("Running %s", j.name)
+						if self.root.verbose:
+							print(j.name,'*ERROR*', exc, sep='\t', file=self.stdout)
 						if self.options.killfail:
 							break
 					else:
+						logger.info('EXIT %s %s', j.name,r)
 						if self.root.verbose > 1:
 							print(j.name,r, sep='\t', file=self.stdout)
 				if self.tilt.done():
 					break
 				if self.rescan.done():
+					logger.debug("rescanning")
 					self.rescan = asyncio.Future(loop=self.root.loop)
 					await self._scan()
 					await self._start()
 
 		finally:
+			logger.debug("NoMoreJobs")
 			for j in self.jobs.values():
 				try:
-					await j.cancel()
+					logger.info('CANCEL 1 %s',j)
+					j.cancel()
 				except Exception:
 					pass
 				try:
@@ -165,7 +174,7 @@ by default, start every task that's defined for this host.
 					if self.root.verbose:
 						print(j.name,'*CANCELLED*', sep='\t', file=self.stdout)
 				except Exception:
-					log_exception("Cancelling %s",j.name)
+					logger.exception("Cancelling %s",j.name)
 		return errs
 
 		
@@ -191,6 +200,7 @@ by default, start every task that's defined for this host.
 			p = n_p
 
 	async def _start(self):
+		logger.debug("START")
 		def _report(path, state, *value):
 			if self.root.verbose:
 				if state == "error" and value:
@@ -211,18 +221,21 @@ by default, start every task that's defined for this host.
 
 		js = {}
 		old = set(self.jobs)
+		logger.debug("OLD %s",old)
 		while self.tasks:
 			t = self.tasks.pop()
-			path = t.path[TASK_LEN:-1]
+			path = t.path[len(TASK_DIR):-1]
+			logger.debug("CHECK %s",path)
 			if path in old:
 				old.remove(path)
 				continue
 
+			logger.debug("Launch TM %s",path)
 			try:
 			    j = TaskMaster(self, path, callback=partial(_report, path))
 			except Exception as exc:
 				logger.exception("Could not set up %s (%s)",'/'.join(t.path),t.get('name',path))
-				if opts.killfail:
+				if self.options.killfail:
 					return 2
 			else:
 				js[j.path] = (t,j)
@@ -230,22 +243,31 @@ by default, start every task that's defined for this host.
 		for name,tj in js.items():
 			t,j = tj
 			try:
+				logger.debug("Init TM %s",j.path)
 				await j.init()
 			except JobIsRunningError:
 				continue
 			except Exception as exc:
 				# Let's assume that this is fatal.
-				await self.root.etcd.set((TASKSTATE_DIR,j.path,TASKSTATE,"debug"), "".join(traceback.format_exception(exc.__class__,exc,exc.__traceback__)))
 				logger.exception("Could not init %s (%s)",'/'.join(t.path),t.get('name',path))
+				await self.root.etcd.set(TASKSTATE_DIR+j.path+(TASKSTATE,"debug"), "".join(traceback.format_exception(exc.__class__,exc,exc.__traceback__)))
 				if self.options.killfail:
 					for j in self.jobs.values():
+						logger.info('CANCEL 2 %s',j)
 						j.cancel()
 					return 2
 			else:
-				self.jobs[j.name] = j
+				logger.debug("AddJob TM %s",j.name)
+				self.jobs[j.path] = j
 
 		for path in old:
-			await self.jobs[path].cancel()
+			j = self.jobs[path]
+			logger.info('CANCEL 3 %s',j)
+			j.cancel()
+			try:
+				await j
+			except asyncio.CancelledError:
+				pass
 
 		return len(self.jobs)
 

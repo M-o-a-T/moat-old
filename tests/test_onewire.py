@@ -106,7 +106,7 @@ class FakeBus(FakeSubBus):
 		d = self.data
 		for s in p:
 			d = d[s.lower()]
-		logger.debug("BUSDIR %s %s",p,list(d.keys()))
+		logger.debug("BUS.DIR %s %s",p,list(d.keys()))
 		return d.keys()
 
 	async def read(self,*p):
@@ -114,11 +114,11 @@ class FakeBus(FakeSubBus):
 		for s in p:
 			d = d[s.lower()]
 		assert not isinstance(d,dict)
-		logger.debug("BUSREAD %s %s",p,d)
+		logger.debug("BUS.READ %s %s",p,d)
 		return d
 
 	async def write(self,*p, data=None):
-		logger.debug("BUSWRITE %s %s",p,data)
+		logger.debug("BUS.WRITE %s %s",p,data)
 		d = self.data
 		for s in p[:-1]:
 			d = d[s.lower()]
@@ -242,10 +242,15 @@ async def test_onewire_fake(loop):
 
 			# Start the bus scanner
 			f = m.parse("-vvvc test.cfg run -g fake/onewire")
+			f = asyncio.ensure_future(f,loop=loop)
 
 			# give it some time to settle
 			await fs.step(f)
 			await asyncio.sleep(3.5,loop=loop)
+			await fs.step(f)
+			await fs.step(f)
+			await fs.step(f)
+			await fs.step(f)
 			await fs.step(f)
 
 			# temperature device found, bus scan active

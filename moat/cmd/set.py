@@ -68,11 +68,11 @@ If you want to modify an entry, the '-m' or '-p' option is mandatory.
 		self.previous = opts.previous
 		self.append = opts.append
 
-	def do(self,args):
+	async def do(self,args):
 		from yaml import safe_dump
 		if not args:
 			raise CommandError("Not specifying values to %s makes no sense." % ("delete" if self.delete else "add/update"))
-		etc = self.root.sync(self.root._get_etcd())
+		etc = await self.root._get_etcd()
 		retval = 0
 		if self.delete:
 			for a in args:
@@ -83,7 +83,7 @@ If you want to modify an entry, the '-m' or '-p' option is mandatory.
 				if self.previous:
 					kw['prevValue'] = self.previous
 				try:
-					self.root.sync(etc.delete('/'+pa, recursive=True,**kw))
+					await etc.delete('/'+pa, recursive=True,**kw)
 				except etcd.EtcdCompareFailed:
 					logger.fatal("Bad modstamp: "+a)
 					retval = 1
@@ -103,7 +103,7 @@ If you want to modify an entry, the '-m' or '-p' option is mandatory.
 						kw['value']=v
 					if self.append:
 						kw['append']=True
-					r = self.root.sync(etc.set('/'+pa, **kw))
+					r = await etc.set('/'+pa, **kw)
 					if self.append:
 						print(r.key.rsplit('/',1)[1], file=self.stdout)
 				except etcd.EtcdCompareFailed:

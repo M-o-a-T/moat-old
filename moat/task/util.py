@@ -46,6 +46,7 @@ class Sleeper(Task):
 		if self.f is not None:
 			self.f.set_result(None)
 		if self.d is not None:
+			logger.info('CANCEL 20 %s',self.d)
 			self.d.cancel()
 
 	async def task(self):
@@ -69,6 +70,7 @@ class Sleeper(Task):
 	def cfg_changed(self):
 		self.t_updated = True
 		if self.d is not None:
+			logger.info('CANCEL 21 %s',self.d)
 			self.d.cancel()
 		if self.f is not None:
 			self.f.set_result(None)

@@ -31,9 +31,8 @@ from ..script.util import objects
 import logging
 logger = logging.getLogger(__name__)
 
-DEV_DIR='/devices/'
-DEV_LEN=1
-DEV=':dev'
+DEV_DIR = ('device',)
+DEV = ':dev'
 
 def devices():
 	from .base import Device
@@ -44,9 +43,7 @@ def dev_types(types):
 	"""Register device types and their sub-entries"""
 	for dev in devices():
 		t = types.step(dev.prefix)
-		for d in dev.dev_paths():
-			cls = d[-1]
-			t.register(d[:-1]+(DEV,), cls=cls)
+		dev.dev_paths(t)
 
 	from .base import DeadDevice
 	types.register('**',DEV, cls=DeadDevice)

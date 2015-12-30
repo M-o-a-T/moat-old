@@ -31,8 +31,7 @@ from ..script.util import objects
 import logging
 logger = logging.getLogger(__name__)
 
-TYPEDEF_DIR = '/meta/type'
-TYPEDEF_LEN = 2
+TYPEDEF_DIR = ('meta','type')
 TYPEDEF = ':type'
 
 class _type_names(dict):

@@ -23,10 +23,11 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##  Thus, do not remove the next line, or insert any blank lines above.
 ##BP
 
+from etcd_tree.node import EtcDir,EtcFloat
+from time import time
+
 import logging
 logger = logging.getLogger(__name__)
-
-from etcd_tree.node import EtcDir,EtcFloat
 
 __all__ = ('Device','HardwareDevice')
 
@@ -43,7 +44,7 @@ class Var(EtcDir):
 			self.type = None
 			return
 		if self.type is None or self.type.name != self['type']:
-			t = self.env.types.subdir(self['type'])
+			self.type = self.env.types.subdir(self['type'])
 
 class Device(EtcDir):
 	prefix = "dummy"
@@ -54,6 +55,9 @@ class Device(EtcDir):
 			if not hasattr(self,attr):
 				setattr(self,attr,{})
 		super().__init__(*a,**k)
+
+	async def setup(self):
+		pass
 
 	@classmethod
 	def types(cls, types):
@@ -100,9 +104,31 @@ class HardwareDevice(Device):
 
 		for d in _SOURCES:
 			types.register(d,'*','timestamp', cls=EtcFloat)
+			types.register(d,'*','created', cls=EtcFloat)
 			for k,v in getattr(cls,d,{}).items():
 				v = value_types.get(v,EtcValue)
 				types.register(d,k,'value', cls=v)
+
+	async def setup(self):
+		"""\
+			Create this device's data in etcd.
+
+			This code must be idempotent and nondestructive.
+
+			The default implementation creates variables for all types
+			mentioned in self.input and .output.
+			"""
+		await super().setup()
+		for d in _SOURCES:
+			missing = {}
+			src = self.get(d,{})
+			for k,v in getattr(self,d,{}).items():
+				if 'type' in src.get(k,{}):
+					continue
+				missing[k] = {'type':v,'created':time()}
+			if missing:
+				await self.set(d,missing)
+				# Note that this does not delete anything not mentioned
 
 	async def reading(self,what,value, timestamp=None):
 		"""We have an input value"""

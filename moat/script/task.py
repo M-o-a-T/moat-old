@@ -90,17 +90,21 @@ class Task(asyncio.Task):
 			"""
 		if isinstance(name,(list,tuple)):
 			assert len(name)
+			path = name
 			name = '/'.join(name)
 		else:
-			assert ':' not in self.name
-			assert name[0] != '/'
-			assert name[-1] != '/'
+			path = tuple(name.split('/'))
+		assert ':' not in self.name
+		assert name[0] != '/'
+		assert name[-1] != '/'
+		assert '//' not in name
 
 		self.cmd = cmd
 		self.config = config
 		self._ttl = config.get('ttl',None) if _ttl is None else _ttl
 		self._refresh = config.get('refresh',None) if _refresh is None else _refresh
 		self.name = name
+		self.path = path
 		self.loop = cmd.root.loop
 		super().__init__(coro_wrapper(self.run), loop=self.loop)
 
@@ -143,12 +147,12 @@ class Task(asyncio.Task):
 			refresh = (ttl/(refresh+0.1))
 			return ttl,refresh
 
-		run_state = await _run_state(r.etcd,self.name)
+		run_state = await _run_state(r.etcd,self.path)
 		ttl,refresh = get_ttl()
 
 		try:
 			if 'running' in run_state:
-				raise etcd.EtcdAlreadyExist(message=self.name+'/'+TASK+'/running', payload=run_state['running']) # pragma: no cover ## timing dependant
+				raise etcd.EtcdAlreadyExist(message=self.name, payload=run_state['running']) # pragma: no cover ## timing dependant
 			ttl = int(ttl)
 			if ttl < 1:
 				raise ValueError("TTL must be at least 1",ttl)
@@ -168,9 +172,13 @@ class Task(asyncio.Task):
 			this will terminate the task."""
 			logger.error("Aborted %s", self.name)
 			nonlocal killer
-			try: main_task.cancel()
+			try:
+				logger.info('CANCEL 5 %s',main_task)
+				main_task.cancel()
 			except Exception: pass
-			try: run_task.cancel()
+			try:
+				logger.info('CANCEL 6 %s',run_task)
+				run_task.cancel()
 			except Exception: pass
 			killer = None
 		killer = r.loop.call_later(ttl, aborter)
@@ -195,8 +203,12 @@ class Task(asyncio.Task):
 					raise JobMarkGoneError(self.name) from exc
 				if killer is None:
 					break
+				logger.info('CANCEL 7 %s',killer)
 				killer.cancel()
-				killer = r.loop.call_later(ttl,lambda: main_task.cancel())
+				def mtc():
+					logger.info('CANCEL 8 %s',killer)
+					main_task.cancel()
+				killer = r.loop.call_later(ttl,mtc)
 				logger.debug("Run marker refreshed %s",self.name)
 				await asyncio.sleep(refresh, loop=r.loop)
 				
@@ -210,12 +222,14 @@ class Task(asyncio.Task):
 					d,p = await asyncio.wait((main_task,run_task), loop=r.loop, return_when=asyncio.FIRST_COMPLETED)
 				finally:
 					if killer is not None:
+						logger.info('CANCEL 9 %s',killer)
 						killer.cancel()
 				logger.debug("Ended %s :: %s :: %s",self.name, repr(d),repr(p))
 			except asyncio.CancelledError:
 				# Cancelling an asyncio.wait() doesn't propagate
 				logger.debug("Cancelling %s",self.name)
 				try:
+					logger.info('CANCEL 10 %s',main_task)
 					main_task.cancel()
 					await main_task
 				except Exception:
@@ -227,13 +241,16 @@ class Task(asyncio.Task):
 				if not run_task.cancelled() and isinstance(run_task.exception(), JobMarkGoneError):
 					keep_running = True
 				if not main_task.done():
+					logger.info('CANCEL 11 %s',main_task)
 					main_task.cancel()
 					try: await main_task
 					except Exception: pass
 					# We'll get the error later.
 			else:
 				assert main_task.done()
-				try: run_task.cancel()
+				try:
+					logger.info('CANCEL 12 %s',run_task)
+					run_task.cancel()
 				except Exception: pass
 				try: await run_task
 				except Exception: pass
@@ -300,7 +317,7 @@ async def _run_state(etcd,path):
 	types.register('started', cls=EtcFloat)
 	types.register('stopped', cls=EtcFloat)
 	types.register('running', cls=EtcFloat)
-	run_state = await etcd.tree('/'.join((TASKSTATE_DIR,path,TASKSTATE)), types=types)
+	run_state = await etcd.tree(TASKSTATE_DIR+path+(TASKSTATE,), types=types)
 	return run_state
 
 class TaskMaster(asyncio.Future):
@@ -321,10 +338,9 @@ class TaskMaster(asyncio.Future):
 			"""
 		self.loop = cmd.root.loop
 		self.cmd = cmd
-		if not isinstance(path,str):
-			path = '/'.join(path)
+		assert isinstance(path,tuple)
 		self.path = path
-		self.name = path # for now
+		self.name = '/'.join(path) # for now
 		self.vars = {} # standard task control vars
 		self.callback = callback
 
@@ -339,11 +355,12 @@ class TaskMaster(asyncio.Future):
 		# which is attached to the taskdef. Thus, first read the poiner to
 		# that "manually".
 		self.etc = await self.cmd.root._get_etcd()
-		self.taskdef_name = (await self.etc.get(TASK_DIR+'/'+self.path+'/'+TASK+'/taskdef')).value
+		self.taskdef_name = (await self.etc.get(TASK_DIR+self.path+(TASK,'taskdef'))).value
 
 		types = EtcTypes()
 		task_var_types(types)
-		self.taskdef = await self.etc.tree(TASKDEF_DIR+'/'+self.taskdef_name+'/'+TASKDEF, types=types)
+		path = tuple(self.taskdef_name.split('/'))
+		self.taskdef = await self.etc.tree(TASKDEF_DIR+path+(TASKDEF,), types=types)
 		if self.taskdef['language'] != 'python':
 			# Duh.
 			raise RuntimeError("This is not a Python job. Aborting.")
@@ -355,7 +372,7 @@ class TaskMaster(asyncio.Future):
 		self.cls.types(types.step('data'))
 
 		# Now we can read the task data and follow changes to it.
-		self.task = await self.etc.tree(TASK_DIR+'/'+self.path+'/'+TASK, types=types)
+		self.task = await self.etc.tree(TASK_DIR+self.path+(TASK,), types=types)
 		self.gcfg = self.cmd.root.etc_cfg['run']
 		self.rcfg = self.cmd.root.cfg['config']['run']
 		self._m1 = self.task.add_monitor(self.setup_vars)
@@ -402,18 +419,21 @@ class TaskMaster(asyncio.Future):
 			self.callback("start")
 
 	async def cancel(self):
+		logger.info('CANCEL 13 %s',self)
 		try:
 			super().cancel()
 		except Exception:
 			return
 		if self.job is not None:
 			try: 
+				logger.info('CANCEL 14 %s',self.job)
 				self.job.cancel()
 				await self.job
 			except Exception:
 				pass
 		if self.timer is not None:
 			try:
+				logger.info('CANCEL 15 %s',self.timer)
 				self.timer.cancel()
 			except Exception:
 				pass
