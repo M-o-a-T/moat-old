@@ -37,14 +37,19 @@ async def main(args):
 		if e.status or c.verbose:
 			print(e.output, file=sys.stderr)
 		return e.status
+	except asyncio.CancelledError:
+		print("Cancelled due to error.", file=sys.stderr)
+	finally:
+		await c.finish()
 
 	if ret is None:
 		return 0
 	return ret
 
 if __name__ == '__main__':
+	loop = asyncio.get_event_loop()
 	try:
-		sys.exit(asyncio.run_until_complete(main(sys.argv[1:])))
+		sys.exit(loop.run_until_complete(main(sys.argv[1:])))
 	except KeyboardInterrupt:
 		print("Interrupted. Aborted.", file=sys.stderr)
 		sys.exit(8)

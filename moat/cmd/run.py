@@ -29,19 +29,14 @@ import asyncio
 import os
 import signal
 import sys
+from contextlib import suppress
 
 from ..script import Command, CommandError
 from ..script.task import TaskMaster, JobIsRunningError, JobMarkGoneError
-from ..task import TASK_DIR,TASK, TASKSTATE_DIR,TASKSTATE, task_state_types
-from moat.util import r_dict
-from yaml import safe_dump
-from datetime import datetime
-from etcd_tree.util import from_etcd
-from etcd_tree.etcd import EtcTypes
-from etcd_tree.node import EtcDir,EtcFloat
+from ..task import TASK_DIR,TASK, TASKSTATE_DIR,TASKSTATE
+from etcd_tree.node import EtcDir
 from functools import partial
 from itertools import chain
-import aio_etcd as etcd
 import traceback
 
 import logging
@@ -94,6 +89,7 @@ by default, start every task that's defined for this host.
 			raise CommandError("You can't run the whole world.")
 
 		etc = await self.root._get_etcd()
+		tree = await self.root._get_tree()
 		if args:
 			if not opts.is_global:
 				args = [self.root.app+'/'+t for t in args]
@@ -109,7 +105,7 @@ by default, start every task that's defined for this host.
 		self.jobs = {}
 		self.rescan = asyncio.Future(loop=self.root.loop)
 		for t in self.args:
-			tree = await etc.tree(t)
+			tree = await tree.subdir(t, create=False)
 			self.paths.append(tree)
 			self._monitors.append(tree.add_monitor(self._rescan))
 		await self._scan()
@@ -153,6 +149,7 @@ by default, start every task that's defined for this host.
 						if self.root.verbose > 1:
 							print(j.name,r, sep='\t', file=self.stdout)
 				if self.tilt.done():
+					self.tilt.result() # re-raises any exception
 					break
 				if self.rescan.done():
 					logger.debug("rescanning")
@@ -190,6 +187,7 @@ by default, start every task that's defined for this host.
 			n_p = []
 			for t in p:
 				for k,v in t.items():
+					v = await v
 					if k == TASK:
 						if depth < 2:
 							self.tasks.append(v)
@@ -235,8 +233,12 @@ by default, start every task that's defined for this host.
 			    j = TaskMaster(self, path, callback=partial(_report, path))
 			except Exception as exc:
 				logger.exception("Could not set up %s (%s)",'/'.join(t.path),t.get('name',path))
+				f = asyncio.Future(loop=self.root.loop)
+				f.set_exception(exc)
+				f.name = f.path = path
+				self.jobs[path] = f
 				if self.options.killfail:
-					return 2
+					return
 			else:
 				js[j.path] = (t,j)
 
@@ -249,13 +251,14 @@ by default, start every task that's defined for this host.
 				continue
 			except Exception as exc:
 				# Let's assume that this is fatal.
-				logger.exception("Could not init %s (%s)",'/'.join(t.path),t.get('name',path))
 				await self.root.etcd.set(TASKSTATE_DIR+j.path+(TASKSTATE,"debug"), "".join(traceback.format_exception(exc.__class__,exc,exc.__traceback__)))
+				f = asyncio.Future(loop=self.root.loop)
+				f.set_exception(exc)
+				f.name = f.path = j.path
+				self.jobs[j.path] = f
+
 				if self.options.killfail:
-					for j in self.jobs.values():
-						logger.info('CANCEL 2 %s',j)
-						j.cancel()
-					return 2
+					return
 			else:
 				logger.debug("AddJob TM %s",j.name)
 				self.jobs[j.path] = j
@@ -264,11 +267,7 @@ by default, start every task that's defined for this host.
 			j = self.jobs[path]
 			logger.info('CANCEL 3 %s',j)
 			j.cancel()
-			try:
+			with suppress(asyncio.CancelledError):
 				await j
-			except asyncio.CancelledError:
-				pass
-
-		return len(self.jobs)
 
 

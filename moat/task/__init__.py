@@ -31,22 +31,33 @@ from ..script.util import objects
 import logging
 logger = logging.getLogger(__name__)
 
+# Possible tasks: what shall run where
+# written by "moat task add …"
 TASK_DIR = ('task',)
 TASK = ':task'
 
+# Task descriptions: what kind of tasks exist?
+# written by "moat task def init"
 TASKDEF_DIR = ('meta','task')
 TASKDEF = ':taskdef'
 
+# Task state: which tasks are currently running?
+# written by "moat task run", obviously
 TASKSTATE_DIR = ('status','run')
 TASKSTATE = ':task'
 
 _VARS = {'ttl','refresh','restart','retry','max-retry'}
 
-def tasks():
+def task_types():
+	"""Enumerate the task types known to Moat's code."""
 	from ..script.task import Task
 	return objects(__name__, Task)
 
-def task_var_types(types):
+def setup_task_vars(types):
+	"""Tasks have several global config variables. Their types are set here.
+		This is called with the class/typepath to register:
+		TASK_DIR/**/TASK or TASKSEF_DIR/**/TASKDEF
+		"""
 	from etcd_tree.etcd import EtcTypes
 	from etcd_tree.node import EtcFloat,EtcInteger
 	for t in _VARS:
@@ -54,12 +65,23 @@ def task_var_types(types):
 			types.register(t)(EtcInteger)
 		else:
 			types.register(t)(EtcFloat)
-	
-def task_state_types(types):
+
+def setup_taskstate_vars(types):
+	"""Task state has some typed values. Their types are set here.
+		This is called with the class/typepath to register:
+		TASKSTATE_DIR/**/TASKSTATE"""
 	from etcd_tree.etcd import EtcTypes
 	from etcd_tree.node import EtcFloat
 	types.register('started')(EtcFloat)
 	types.register('stopped')(EtcFloat)
 	types.register('running')(EtcFloat)
 	types.register('debug_time')(EtcFloat)
-	
+
+def setup_task_types(types):
+	"""Registration for task-related types.
+		This is called with global type."""
+	from .base import Task,TaskDef,TaskState
+	types.step(TASK_DIR).step(('**',TASK)).register(cls=Task)
+	types.step(TASKDEF_DIR).step(('**',TASKDEF)).register(cls=TaskDef)
+	types.step(TASKSTATE_DIR).step(('**',TASKSTATE)).register(cls=TaskState)
+

@@ -287,7 +287,15 @@ class Command(object):
 		@rtype:   int
 		@returns: an exit code, or None if no actual action was taken.
 		"""
-		raise NotImplementedError('Implement %s.do()' % self.__class__)
+		raise CommandError("Not implemented. Use '--help' to show sub-commands.")
+
+	async def finish(self):
+		"""
+		Override me to clean up after myself.
+
+		This usually involves freeing async resources.
+		"""
+		pass
 
 	async def parse(self, argv):
 		"""
@@ -330,11 +338,9 @@ class Command(object):
 #				ret = e.status
 #				self.stdout.write(e.output + '\n')
 			except CommandExited as e:
-				self.log.debug('done with exception, raised %r', e)
 				ret = e.status
 				sys.stderr.write(e.output + '\n')
 			except NotImplementedError:
-				self.log.debug('done with NotImplementedError')
 				self.parser.print_usage(file=sys.stderr)
 				sys.stderr.write("Use --help to get a list of commands.\n")
 				return 1
@@ -354,7 +360,11 @@ class Command(object):
 			C = self.aliasedSubCommands.get(command,None)
 		if C is not None:
 			c = C(self)
-			return (await c.parse(args[1:]))
+			try:
+				return (await c.parse(args[1:]))
+			except Exception:
+				await c.finish()
+				raise
 
 		self.log.error("Unknown command '%s'.\n", command)
 		self.parser.print_usage(file=sys.stderr)

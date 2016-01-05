@@ -147,7 +147,7 @@ class EtcOnewireBus(EtcDir):
 			for f2,b in v.items():
 				if b > 0:
 					continue
-				dev = d[f1][f2][':dev']
+				dev = d[f1][f2][DEV]
 				if not isinstance(dev,OnewireDevice):
 					import pdb;pdb.set_trace()
 				yield dev
@@ -236,8 +236,8 @@ class BusScan(Task):
 			if f1 not in self.devices:
 				await self.devices.set(f1,{})
 			if f2 not in self.devices[f1]:
-				await self.devices[f1].set(f2,{':dev':{'path':bb}})
-			fd = self.devices[f1][f2][':dev']
+				await self.devices[f1].set(f2,{DEV:{'path':bb}})
+			fd = self.devices[f1][f2][DEV]
 			await fd.setup()
 			op = fd.get('path','')
 			if op != bb:
@@ -261,7 +261,7 @@ class BusScan(Task):
 			if v >= DEV_COUNT:
 				# kill it.
 				try:
-					dev = self.devices[f1][f2][':dev']
+					dev = self.devices[f1][f2][DEV]
 				except KeyError:
 					pass
 				else:
@@ -314,11 +314,12 @@ class BusScan(Task):
 			await dev.delete('path')
 
 	async def drop_bus(self,bus):
+		"""Somebody unplugged a whole bus"""
 		logger.warning("Bus '%s %s' has vanished", self.srv_name,bus.name)
 		for f1,v in bus.items():
 			for f2 in bus.keys():
 				try:
-					dev = self.devices[f1][f2][':dev']
+					dev = self.devices[f1][f2][DEV]
 				except KeyError:
 					pass
 				else:
@@ -364,7 +365,8 @@ class BusScan(Task):
 		del tree
 
 		devtypes=EtcTypes()
-		OnewireDevice.dev_paths(devtypes)
+		for t in OnewireDevice.dev_paths():
+			devtypes.step(t[:-1]).register(DEV,cls=t[-1])
 		self.devices = await self.etcd.tree(DEV_DIR+(OnewireDevice.prefix,),env=self,types=devtypes, update_delay=update_delay)
 		self._trigger = None
 

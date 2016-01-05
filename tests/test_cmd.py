@@ -129,14 +129,41 @@ async def test_task(loop):
 	
 	m = MoatTest(loop=loop)
 	m2 = MoatTest(loop=loop)
-	r = await m.parse("-vvvc test.cfg task add fake/cmd/sleep test/sleep delay=3 Go to bed")
+	r = await m.parse("-vvvc test.cfg task add fake/cmd/sleep test/sleep delay=2 Go to bed")
 	assert r == 0, r
 	r = await m.parse("-vvvc test.cfg task param fake/cmd/sleep restart=0 retry=0")
 	assert r == 0, r
 	rx = await m2.parse("-c test.cfg task state fake")
 	assert rx == 0, rx
 
-	t=time()
+	r = await m.parse("-c test.cfg task list fake/cmd")
+	assert m.in_stdout('fake/cmd/sleep\t'), m.stdout_data
+	assert r == 0, r
+	m = MoatTest(loop=loop)
+	r = await m.parse("-vc test.cfg task list fake/cmd")
+	assert m.stdout_data.startswith('fake/cmd/sleep:'), m.stdout_data
+	assert r == 0, r
+	m = MoatTest(loop=loop)
+	r = await m.parse("-c test.cfg task list fake/cmd/sleep")
+	assert m.stdout_data.startswith('fake/cmd/sleep\t'), m.stdout_data
+	assert r == 0, r
+	m = MoatTest(loop=loop)
+	r = await m.parse("-vc test.cfg task list fake/cmd/sleep")
+	assert m.stdout_data.startswith('fake/cmd/sleep:'), m.stdout_data
+	assert r == 0, r
+
+	t = time()
+	m = MoatTest(loop=loop)
+	r = await m.parse("-vvvc test.cfg run -kg fake/cmd/sleep")
+	t2 = time()
+	assert r == 0, r
+	assert t2-t < 5 and t2-t > 2, (t,t2)
+
+	m = MoatTest(loop=loop)
+	r = await m.parse("-vvvc test.cfg task change fake/cmd/sleep delay=5")
+	assert r == 0, r
+
+	t = time()
 	r = asyncio.ensure_future(m.parse("-vvvc test.cfg run -kg fake/cmd/sleep"), loop=loop)
 	await asyncio.sleep(0.5,loop=loop)
 	assert not r.done(),repr(r)
@@ -150,7 +177,7 @@ async def test_task(loop):
 
 	r = await r
 	t2 = time()
-	assert t2-t < 4.5 and t2-t > 0.9, (t,t2)
+	assert t2-t < 8 and t2-t > 5, (t,t2)
 	assert r == 0, r
 
 @pytest.mark.run_loop
@@ -285,9 +312,13 @@ async def test_set(loop):
 	assert m.debug_log[-2].getMessage() == 'Entry exists: one.two'
 
 	m = MoatTest(loop=loop)
+	r = await m.parse("-c test.cfg set etcd -u one.two=threeandahalf")
+	assert r == 0, r
+
+	m = MoatTest(loop=loop)
 	r = await m.parse("-c test.cfg show etcd one")
 	assert r == 0, r
-	assert m.in_stdout("{two: three}"), m.stdout_data
+	assert m.in_stdout("{two: threeandahalf}"), m.stdout_data
 
 	m = MoatTest(loop=loop)
 	r = await m.parse("-c test.cfg set etcd -a one=whatever")
@@ -302,7 +333,7 @@ async def test_set(loop):
 	m = MoatTest(loop=loop)
 	r = await m.parse("-c test.cfg show etcd one.two")
 	assert r == 0, r
-	m.assert_stdout("three\n...\n")
+	m.assert_stdout("threeandahalf\n...\n")
 
 	m = MoatTest(loop=loop)
 	r = await m.parse("-c test.cfg show etcd -m one.two")
@@ -325,7 +356,7 @@ async def test_set(loop):
 	m.assert_stdout("four\n...\n")
 
 	m = MoatTest(loop=loop)
-	r = await m.parse("-c test.cfg set etcd -p three -d one.two")
+	r = await m.parse("-c test.cfg set etcd -p threeandahalf -d one.two")
 	assert r > 0, r
 	assert m.debug_log[-2].getMessage() == 'Bad modstamp: one.two'
 

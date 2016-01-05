@@ -42,13 +42,13 @@ class Type:
 	"""\
 		This is the base class for typing. The attribute `value` holds
 		whatever the best representation for Python is (e.g. bool: True/False).
-		`bus_value` is the preferred representation for AMQP, `etcd_value`
+		`amqp_value` is the preferred representation for AMQP, `etcd_value`
 		the one for storing in etcd.
 
 		In setup, @meta1 is this type's etcd entry, @meta2 the value's.
 		"""
 	name = None
-	value = _NOTGIVEN
+	_value = _NOTGIVEN
 	vars = {}
 
 	@classmethod
@@ -56,6 +56,7 @@ class Type:
 		pass
 
 	def __init__(self,meta1,meta2,value=_NOTGIVEN):
+		self.name = '/'.join(self.meta1.path)
 		self.meta1 = meta1
 		self.meta2 = meta2
 
@@ -72,21 +73,38 @@ class Type:
 				return type(self).vars[key]
 
 	@property
-	def bus_value(self):
+	def amqp_value(self):
+		"The value as seen by AMQP"
 		return self.value
-	@bus_value.setter
-	def bus_value(self,bus_value):
-		self.value = bus_value
+	@amqp_value.setter
+	def amqp_value(self,value):
+		self.value = value
 
 	@property
 	def etcd_value(self):
+		"The value as seen by etcd"
 		return self.value
 	@etcd_value.setter
-	def etcd_value(self,etcd_value):
-		self.value = etcd_value
+	def etcd_value(self,value):
+		self.value = value
+
+	@property
+	def value(self):
+		if self._value is _NOTGIVEN:
+			raise RuntimeError("You did not set %s" % (self,))
+		return self._value
+	@value.setter
+	def value(self, value):
+		value = self.check_var("",value)
+		self._value = value
 
 	def check_var(self,var,value):
-		"""Check whether a variable can be set to that value"""
+		"""
+			Check whether a variable can be set to that value.
+			An empty name denotes the value itself.
+
+			Returns a 'settable' version of the value (converted to float, constrained, whatever).
+			"""
 		raise CommandError("I don't know about '%s', much less setting it to '%s'" % (var,value))
 
 class StringType(Type):
@@ -98,16 +116,37 @@ class BoolType(Type):
 	vars = {'true':'on', 'false':'off'}
 
 	@property
-	def bus_value(self):
-		return self['true'] if self.value else self['false']
-	@bus_value.setter
-	def bus_value(self,bus_value):
-		if bus_value.lower() == self['true'].lower():
+	def value(self):
+		return self._value
+	@value.setter
+	def value(self,value):
+		if not isinstance(value,bool):
+			raise RuntimeError("%s: need a bool for a bool" % (self.name,))
+		self._value = value
+
+	@property
+	def etcd_value(self):
+		return true if self.value else false
+	@etcd_value.setter
+	def etcd_value(self,value):
+		if value == 'true':
 			self.value = True
-		elif bus_value.lower() == self['false'].lower():
+		elif value == 'false':
 			self.value = False
 		else:
-			self.value = bool(int(bus_value))
+			raise BadValueError("%s: Dunno what to do with '%s'" % (self.name,value))
+
+	@property
+	def amqp_value(self):
+		return self['true'] if self.value else self['false']
+	@amqp_value.setter
+	def amqp_value(self,amqp_value):
+		if amqp_value.lower() == self['true'].lower():
+			self.value = True
+		elif amqp_value.lower() == self['false'].lower():
+			self.value = False
+		else:
+			self.value = bool(int(amqp_value))
 
 class _NumType(Type):
 	def check_var(self, var,value):
@@ -116,13 +155,15 @@ class _NumType(Type):
 		try:
 			val = self._cls(value)
 		except ValueError:
-			raise CommandError("need an integer for '%s', not '%s'." % (var,value))
-		if var == 'min':
-			if var > self['max']:
-				raise CommandError("min %s needs to be smaller than max %s" % (val,self['max']))
-		elif var == 'max':
-			if var < self['min']:
-				raise CommandError("max %s needs to be larger than min %s" % (val,self['min']))
+			raise CommandError("%s: need an integer for '%s', not '%s'." % (self.name,var,value))
+		if var != 'max':
+			if val > self['max']:
+				raise CommandError("%s: min %s needs to be smaller than max %s" % (self.name,val,self['max']))
+		if var != 'min':
+			if val < self['min']:
+				raise CommandError("%s: max %s needs to be larger than min %s" % (self.name,val,self['min']))
+		# TODO: adapt value to constraints
+		return val
 	
 	@property
 	def etcd_value(self):
@@ -132,16 +173,29 @@ class _NumType(Type):
 		self.value = self._cls(etcd_value)
 
 	@property
-	def etcd_value(self):
-		return str(self.value)
-	@etcd_value.setter
-	def etcd_value(self,etcd_value):
-		val = self._cls(etcd_value)
+	def value(self):
+		"""\
+			Constrain the value to min/max.
+			This is not stupid: the boundaries may have changed.
+			"""
+		val = self._value
 		if val < self['min']:
+			logger.warn("%s: Value %s below min %s",self.name,val,self['min'])
 			val = self['min']
 		elif val > self['max']:
+			logger.warn("%s: Value %s above max %s",self.name,val,self['min'])
 			val = self['max']
-		self.value = self._cls(etcd_value)
+		return val
+	@etcd_value.setter
+	def value(self,etcd_value):
+		val = self._cls(value)
+		if val < self['min']:
+			logger.warn("%s: Value %s below min %s",self.name,val,self['min'])
+			val = self['min']
+		elif val > self['max']:
+			logger.warn("%s: Value %s above max %s",self.name,val,self['min'])
+			val = self['max']
+		self._value = val
 
 class IntType(_NumType):
 	name = "int"
@@ -149,10 +203,10 @@ class IntType(_NumType):
 	vars = {'min':0, 'max':100}
 	_cls = int
 
-	@classmethod
 	def types(cls,types):
-		types.register('min',cls=EtcFloat)
-		types.register('max',cls=EtcFloat)
+		types.register('value',cls=EtcInteger)
+		types.register('min',cls=EtcInteger)
+		types.register('max',cls=EtcInteger)
 
 class FloatType(_NumType):
 	name = "float"
@@ -160,8 +214,8 @@ class FloatType(_NumType):
 	_cls = int
 	vars = {'min':0, 'max':1}
 
-	@classmethod
 	def types(cls,types):
+		types.register('value',cls=EtcFloat)
 		types.register('min',cls=EtcFloat)
 		types.register('max',cls=EtcFloat)
 

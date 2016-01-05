@@ -27,7 +27,6 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 
 import os
 from moat.script import Command, CommandError
-from etcd_tree.util import from_etcd
 import aio_etcd as etcd
 import logging
 logger = logging.getLogger(__name__)
@@ -52,6 +51,9 @@ If you want to modify an entry, the '-m' or '-p' option is mandatory.
 		self.parser.add_option('-d','--delete',
             action="store_true", dest="delete",
             help="delete entries instead of updating them")
+		self.parser.add_option('-u','--update',
+            action="store_true", dest="update",
+            help="update an entry. Implied when old value or modstamp is given")
 		self.parser.add_option('-m','--modified',
             action="store", dest="modified",
             help="Modification stamp of current entry.")
@@ -67,6 +69,7 @@ If you want to modify an entry, the '-m' or '-p' option is mandatory.
 		self.modified = opts.modified
 		self.previous = opts.previous
 		self.append = opts.append
+		self.create = not opts.update
 
 	async def do(self,args):
 		from yaml import safe_dump
@@ -75,6 +78,8 @@ If you want to modify an entry, the '-m' or '-p' option is mandatory.
 		etc = await self.root._get_etcd()
 		retval = 0
 		if self.delete:
+			if not self.create:
+				raise CommandError("You can't update and delete at the same time.")
 			for a in args:
 				pa = a.replace('.','/')
 				kw = {}
@@ -93,17 +98,21 @@ If you want to modify an entry, the '-m' or '-p' option is mandatory.
 			for a in args:
 				a,v = a.split('=',1)
 				pa = a.replace('.','/')
+				create=self.create
 				try:
 					kw={}
 					if self.modified:
 						kw['index']=self.modified
+						create=False
 					if self.previous:
 						kw['prev']=self.previous
+						create=False
 					if v:
 						kw['value']=v
 					if self.append:
 						kw['append']=True
-					r = await etc.set('/'+pa, **kw)
+						create=True
+					r = await etc.set('/'+pa, create=create, **kw)
 					if self.append:
 						print(r.key.rsplit('/',1)[1], file=self.stdout)
 				except etcd.EtcdCompareFailed:

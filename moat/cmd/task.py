@@ -29,13 +29,11 @@ import os
 import sys
 from moat.script import Command, CommandError
 from moat.script.task import Task
-from moat.task import tasks
+from moat.task import task_types
 from moat.util import r_dict
-from etcd_tree.util import from_etcd
 from etcd_tree.etcd import EtcTypes
 from dabroker.util import import_string
-from ..task import task_var_types,task_state_types,\
-	TASK,TASK_DIR, TASKDEF,TASKDEF_DIR, TASKSTATE,TASKSTATE_DIR
+from ..task import TASK,TASK_DIR, TASKDEF,TASKDEF_DIR, TASKSTATE,TASKSTATE_DIR
 from yaml import safe_dump
 import aio_etcd as etcd
 import asyncio
@@ -52,13 +50,12 @@ class DefSetup:
 	async def setup(self, meta=False):
 		await self.root.setup()
 		etc = self.root.etcd
+		tree = await self.root._get_tree()
 		types = EtcTypes()
 		if meta:
-			task_var_types(types.step('**').step(TASKDEF))
-			t = await etc.tree(TASKDEF_DIR,types=types)
+			t = await tree.subdir(TASKDEF_DIR)
 		else:
-			task_var_types(types.step('**').step(TASK))
-			t = await etc.tree(TASK_DIR,types=types)
+			t = await tree.subdir(TASK_DIR)
 		return t
 
 class DefInitCommand(Command,DefSetup):
@@ -104,7 +101,7 @@ on the command line, they are added, otherwise everything under
 						raise CommandError("%s is not a task"%a)
 					objs.append(m)
 		else:
-			objs = tasks()
+			objs = task_types()
 
 		for obj in objs:
 			d = dict(
@@ -115,7 +112,7 @@ on the command line, they are added, otherwise everything under
 			)
 			if hasattr(obj,'schema'):
 				d['data'] = obj.schema
-			tt = await t.subdir(obj.name,name=TASKDEF)
+			tt = await t.subdir(obj.name,name=TASKDEF, create=None)
 			if 'language' in tt: ## mandatory
 				if self.force:
 					changed = False
@@ -163,18 +160,18 @@ details are shown in YAML format, else a short list of names is shown.
 				raise CommandError("Arguments and '-a' are mutually exclusive")
 			dirs = []
 			for a in args:
-				dirs.append(await t.subdir(a))
+				dirs.append(await t.subdir(a, create=False))
 			verbose = True
 		else:
 			dirs = [t]
 			verbose = self.options.all
 		for tt in dirs:
-			for task in tt.tagged(TASKDEF):
+			async for task in tt.tagged(TASKDEF):
 				path = task.path[len(TASKDEF_DIR):-1]
 				if verbose:
 					safe_dump({path: r_dict(dict(task))}, stream=self.stdout)
 				else:
-					print('/'.join(path),task['summary'], sep='\t',file=self.stdout)
+					print('/'.join(path),task.get('summary','??'), sep='\t',file=self.stdout)
 
 class DefDeleteCommand(Command,DefSetup):
 	name = "delete"
@@ -247,7 +244,7 @@ Usage: … param NAME VALUE  -- set
 			if self.options.delete:
 				raise CommandError("You cannot delete all parameters.")
 
-			for task in t.tagged(self.TAG):
+			async for task in t.tagged(self.TAG):
 				path = task.path[len(self.DIR):-1]
 				for k in _VARS:
 					if k in task:
@@ -256,7 +253,7 @@ Usage: … param NAME VALUE  -- set
 		else:
 			name = args.pop(0)
 			try:
-				data = await t.subdir(name, name=self.TAG)
+				data = await t.subdir(name, name=self.TAG, create=False)
 			except KeyError:
 				raise CommandError("Task definition '%s' is unknown." % name)
 
@@ -336,30 +333,25 @@ This command shows that data. If you mention a task's path,
 details are shown in YAML format, else a short list of tasks is shown.
 """
 
-	def addOptions(self):
-		self.parser.add_option('-a','--all',
-			action="store_true", dest="all",
-			help="show details for all entries")
-
 	async def do(self,args):
 		t = await self.setup(meta=False)
 		if args:
-			if self.options.all:
-				raise CommandError("Arguments and '-a' are mutually exclusive")
 			dirs = []
 			for a in args:
-				dirs.append(await t.subdir(a))
-			verbose = True
+				try:
+					dirs.append(await t.subdir(a, create=False))
+				except KeyError:
+					raise CommandError("'%s' does not exist"%(a,))
 		else:
 			dirs = [t]
-			verbose = self.options.all
 		for tt in dirs:
-			for task in tt.tagged(TASK):
+			async for task in tt.tagged(TASK):
 				path = task.path[len(TASK_DIR):-1]
-				if verbose:
-					safe_dump({path:r_dict(dict(task))}, stream=self.stdout)
+				if self.root.verbose > 1:
+					safe_dump({'/'.join(path):r_dict(dict(task))}, stream=self.stdout)
 				else:
 					name = task['name']
+					path = '/'.join(path)
 					if name == path:
 						name = "-"
 					print(path,name,task['descr'], sep='\t',file=self.stdout)
@@ -423,7 +415,7 @@ class _AddUpdate:
 		if descr:
 			await task.set('descr', descr, sync=False)
 		if data:
-			d = await task.subdir('data', create=True)
+			d = await task.subdir('data', create=None)
 			for k,v in data.items():
 				if v == "":
 					try:
@@ -526,9 +518,9 @@ This command shows that information.
 	async def do(self,args):
 		await self.root.setup()
 		etc = self.root.etcd
+		tree = await self.root._get_tree()
 		types = EtcTypes()
-		task_state_types(types.step('**').step(TASKSTATE))
-		t = await etc.tree(TASKSTATE_DIR,types=types,static=True)
+		t = await tree.subdir(TASKSTATE_DIR)
 
 		if args:
 			dirs = []
@@ -540,7 +532,7 @@ This command shows that information.
 		else:
 			dirs = [t]
 		for tt in dirs:
-			for task in tt.tagged(TASKSTATE):
+			async for task in tt.tagged(TASKSTATE):
 				path = task.path[len(TASKSTATE_DIR):-1]
 
 				if self.root.verbose > 1:
@@ -585,30 +577,4 @@ Commands to set up and admin the task list known to MoaT.
 		StateCommand,
 	]
 	fix = False
-
-	async def do(self,args):
-		if self.root.cfg['config'].get('testing',False):
-			print("NOTE: this is a test configuration.", file=sys.stderr)
-		else: # pragma: no cover ## not doing the real thing here
-			print("WARNING: this is NOT a test.", file=sys.stderr)
-			time.sleep(3)
-
-		res = 0
-		for c in self.subCommandClasses:
-			if c.summary is None:
-				continue
-			if self.root.verbose > 1:
-				print("Checking:",c.name)
-			c = c(parent=self)
-			try:
-				res |= (c.do(args) or 0)
-			except Exception as exc: # pragma: no cover
-				if self.root.verbose > 1:
-					import traceback
-					traceback.print_exc(file=sys.stderr)
-					return 9
-				raise CommandError("%s failed: %s" % (c.name,repr(exc)))
-		if self.root.verbose:
-			print("All tests done.")
-		return res
 

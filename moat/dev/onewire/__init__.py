@@ -29,7 +29,7 @@ from etcd_tree.node import EtcFloat,EtcInteger,EtcString
 from time import time
 
 from .. import DEV
-from ..base import HardwareDevice
+from ..base import Device
 
 class NoAlarmHandler(RuntimeError):
 	pass
@@ -52,7 +52,7 @@ def device_types():
 					_device_types[f] = typ
 	return _device_types
 
-class OnewireDevice(HardwareDevice): #(, metaclass=SelectDevice):
+class OnewireDevice(Device): #(, metaclass=SelectDevice):
 	prefix = "onewire"
 	name = "generic"
 	description = "Something hanging off 1wire"
@@ -74,11 +74,11 @@ class OnewireDevice(HardwareDevice): #(, metaclass=SelectDevice):
 				self.bus_cached = None
 			self._cached_path = srvpath
 
-	@staticmethod
-	def dev_paths(types):
+	@classmethod
+	def dev_paths(cls):
 		for k,cls in device_types().items():
-			types.register(k,'*',DEV, cls=cls)
-		types.register('*','*',DEV, cls=OnewireDevice)
+			yield (k,'*',cls)
+		yield ('*','*',OnewireDevice)
 
 	def scan_for(self, what):
 		return None

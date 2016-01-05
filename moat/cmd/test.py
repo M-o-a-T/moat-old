@@ -27,8 +27,6 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 
 import os
 import sys
-from etcd_tree.util import from_etcd
-from etcd_tree.etcd import EtcTypes
 import aio_etcd as etcd
 import asyncio
 import time
@@ -36,7 +34,7 @@ import types
 
 from ..script import Command, CommandError
 from ..script.task import Task,_run_state, JobMarkGoneError,JobIsRunningError
-from ..task import tasks,task_var_types, TASKSTATE_DIR,TASKSTATE
+from ..task import TASKSTATE_DIR,TASKSTATE
 
 import logging
 logger = logging.getLogger(__name__)

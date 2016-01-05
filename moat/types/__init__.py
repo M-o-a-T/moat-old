@@ -23,37 +23,58 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##  Thus, do not remove the next line, or insert any blank lines above.
 ##BP
 
-"""List of known Types"""
+"""\
+This package implements the high-level Type object in MoaT.
+
+Types translate between some sensible internal value and various external
+representations. For instance, interally a switch is on or off (True or
+False) while on 1wire the bit is 1 or 0, on an MQTT bus it's "on" or "off"
+(or "ON and "OFF"), in etcd it's 'true' or 'false', etc.
+
+The internal value shall be the one that makes the most sense to the
+computer. For instance, intensity of a dimmable light is between zero and
+one. It's the GUI's responsibility to map "float/percentage" to something
+nicer.
+
+"""
 
 import os
 from ..script.util import objects
+from etcd_tree import EtcTypes
 
 import logging
 logger = logging.getLogger(__name__)
 
+# Type definitions declare data types and bounds for the rest of MoaT.
 TYPEDEF_DIR = ('meta','type')
 TYPEDEF = ':type'
 
 class _type_names(dict):
 	def __getitem__(self,k):
-		try:
-			return super().__getitem__(k)
-		except KeyError:
-			if '/' not in k:
-				raise
-			return self.__getitem__(k[:k.rindex('/')])
+		while True:
+			try:
+				return super().__getitem__(k)
+			except KeyError:
+				if '/' not in k:
+					from .base import Type
+					return Type
+			k = k[:k.rindex('/')]
 _type_names = _type_names()
 
 def types():
+	"""Generator for all types known to MoaT. This accesses the code."""
 	from .base import Type
 	return objects(__name__, Type, filter=lambda x:x.name is not None)
 
 def type_names():
+	"""Creates a dict which maps type names to its moat.types.*.Type object."""
 	if not _type_names:
 		for t in types():
 			_type_names[d.name] = t
 	return _type_names
 
-def type_types(types):
+def setup_meta_types(types):
+	"""Teach an EtcTypes object about MoaT types"""
 	from .base import TypeDir
-	types.register('**',':type', cls=TypeDir)
+	types.step(TYPEDEF_DIR).register('**',TYPEDEF, cls=TypeDir)
+

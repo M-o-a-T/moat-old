@@ -84,8 +84,10 @@ stuff back to the loop.
 	verbose = None
 	etcd = None
 	amqp = None
+	tree = None
 	loop = None
 	_coro = False
+	_types = None
 
 	def __init__(self,*a,loop=None,**kw):
 		super().__init__(*a,**kw)
@@ -114,6 +116,24 @@ stuff back to the loop.
 		self.parser.add_option('-a', '--app',
 			action="store", dest="app",
 			help="application name. Default is the reversed FQDN.")
+
+	async def finish(self):
+		await super().finish()
+		if self.amqp is not None:
+			try:
+				await self.amqp.stop()
+			except Exception as exc:
+				logger.exception("Closing AMQP")
+		if self.tree is not None:
+			try:
+				await self.tree.close()
+			except Exception as exc:
+				logger.exception("Closing etcd tree")
+		if self.etcd is not None:
+			try:
+				self.etcd.close()
+			except Exception as exc:
+				logger.exception("Closing etcd connection")
 
 	def handleOptions(self):
 		opts = self.options
@@ -194,7 +214,7 @@ stuff back to the loop.
 		if self.verbose > 2:
 			print("App name:",self.app)
 
-	async def setup(self, dest=None):
+	async def setup(self, dest=None, want=()):
 		"""Once running in async mode, get our basic config loaded"""
 		if self.etcd is None:
 			await self._get_etcd()
@@ -204,17 +224,32 @@ stuff back to the loop.
 			dest.etcd = self.etcd
 			dest.amqp = self.amqp
 
+	async def _get_tree(self):
+		if self.tree is not None:
+			return self.tree
+		etc = await self._get_etcd()
+
+		types = self._types
+		from moat.types import setup_meta_types
+		from moat.task import setup_task_types
+		from moat.dev import setup_dev_types
+		setup_meta_types(types)
+		setup_task_types(types)
+		setup_dev_types(types)
+		self.tree = await etc.tree('/', types=types, immediate=None)
+		return self.tree
+
 	async def _get_etcd(self):
 		if self.etcd is not None:
 			return self.etcd
 		from etcd_tree import client
 		from etcd_tree.etcd import EtcTypes
-		from ..task import task_var_types
-		types = EtcTypes()
-		task_var_types(types.step('run'))
+		from ..task import setup_task_vars
+		self._types = types = EtcTypes()
+		setup_task_vars(types.step(('config','run')))
 
 		self.etcd = etc = await client(self.cfg, loop=self.loop)
-		self.etc_cfg = await etc.tree("/config", types=types)
+		self.etc_cfg = await etc.tree("/config", types=types.step('config'))
 		self.cfg = OverlayDict(self.cfg,{'config': self.etc_cfg})
 		return etc
 

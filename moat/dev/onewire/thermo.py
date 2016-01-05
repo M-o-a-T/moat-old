@@ -32,7 +32,7 @@ from . import OnewireDevice
 class Onewire_1821(OnewireDevice):
 	name = "thermometer"
 	description = "basic integrated temperature sensor"
-	input = {"temperature":'float'}
+	input = {"temperature":'float/temperature'}
 	family = "10"
 
 	async def has_alarm(self):

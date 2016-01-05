@@ -23,30 +23,41 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##  Thus, do not remove the next line, or insert any blank lines above.
 ##BP
 
-from etcd_tree.node import EtcDir,EtcFloat
+from etcd_tree import EtcDir,EtcFloat, ReloadRecursive
 from time import time
 
 import logging
 logger = logging.getLogger(__name__)
 
-__all__ = ('Device','HardwareDevice')
+__all__ = ('Device',)
 
 _SOURCES = ('input','output')
 
 class Var(EtcDir):
-	type = None
+	_type = None
 
 	def __init__(self,*a,**k):
 		super().__init__(*a,**k)
 
 	def has_update(self):
 		if 'type' not in self:
-			self.type = None
+			self._type = None
 			return
-		if self.type is None or self.type.name != self['type']:
-			self.type = self.env.types.subdir(self['type'])
+		if self._type is None or self._type.name != self['type']:
+			self._type = self.env.types.subdir(self['type'],name=TYPE)
 
-class Device(EtcDir):
+class BaseDevice(EtcDir):
+	"""\
+		This is the parent class for all MoaT can talk to.
+
+		A Device corresponds to a distinct addressable external entity
+		which may have several inputs and/or outputs, or possibly some more
+		complex state.
+
+		The device state is always reflected in etcd. Devices do not
+		monitor changes in etcd -- use AMQP for that.
+		"""
+
 	prefix = "dummy"
 	description = "Something that does nothing."
 
@@ -65,34 +76,59 @@ class Device(EtcDir):
 		for s in _SOURCES:
 			types.register(s,'*', cls=Var)
 
-	@staticmethod
-	def dev_paths(cls, types):
-		"""Override to register your device type. Returns a list/iter of
+	@classmethod
+	def dev_paths(cls):
+		"""Override to register your device type. Generates
 		tuples of prefixes; the device class (instead of ':dev') must be
 		the last element."""
-		yield '**',cls
+		return ()
 
-class DeadDevice(Device):
+class DeadDevice(BaseDevice):
 	"""\
-		This device has a wrong prefix, the code for it has been removed,
-		or it's just plain wrong.
+		This device has a broken prefix, the code to use it has been removed,
+		or something else is Just Plain Wrong.
 		"""
 	name = 'dead'
 	description = "Code not found"
 
-class HardwareDevice(Device):
+	@classmethod
+	def dev_paths(cls):
+		"""Override to register your device type. Generates
+		tuples of prefixes; the device class (instead of ':dev') must be
+		the last element."""
+		yield '**',cls
+
+class Device(BaseDevice):
+	"""\
+		This is the superclass for devices that actually work
+		(or are supposed to work). Use this instead of BaseDevice
+		unless you have a very good reason not to.
+		"""
 	prefix = None
 	description = "Override me"
 
+	@classmethod
+	async def this_class(cls, pre,recursive):
+		if not recursive:
+			raise ReloadRecursive
+		return (await super().this_class(pre=pre,recursive=recursive))
+
 	def has_update(self):
+		"""\
+			On first call: create variable entries if they don't exist yet.
+
+			This is not asynchronous. If you need to talk to the device, TODO.
+			"""
 		super().has_update()
 		if not self.notify_seq:
 			# first time only
 			d = {}
-			for k in _SOURCES:
-				d[k] = dd = {}
-				for k,v in getattr(self,k,{}).items():
-					dd[v] = {'type':v}
+			for s in _SOURCES:
+				d[s] = dd = {}
+				src = self._get(s,{})
+				for k,v in getattr(self,s,{}).items():
+					if k not in src:
+						dd[v] = {'type':v}
 			self.update(d)
 
 	@classmethod

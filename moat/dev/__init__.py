@@ -35,17 +35,18 @@ DEV_DIR = ('device',)
 DEV = ':dev'
 
 def devices():
-	from .base import Device
+	from .base import BaseDevice
 	# we want all objects with a distinctive prefix
-	return objects(__name__, Device, filter=lambda x:x.__dict__.get('prefix',None) is not None)
+	return objects(__name__, BaseDevice, filter=lambda x:x.__dict__.get('prefix',None) is not None)
 
-def dev_types(types):
-	"""Register device types and their sub-entries"""
+def setup_dev_types(types):
+	"""Register types for all devices."""
+	types = types.step(DEV_DIR)
 	for dev in devices():
 		t = types.step(dev.prefix)
-		dev.dev_paths(t)
+		for p in dev.dev_paths():
+			t.step(p[:-1]).register(DEV, cls=p[-1])
 
 	from .base import DeadDevice
 	types.register('**',DEV, cls=DeadDevice)
-
 

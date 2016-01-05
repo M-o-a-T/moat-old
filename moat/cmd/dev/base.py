@@ -28,14 +28,10 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import os
 import sys
 from moat.script import Command, CommandError
-from moat.script.task import Task
-from moat.task import tasks
 from moat.util import r_dict
-from moat.dev import dev_types
+from moat.dev import setup_dev_types, DEV_DIR,DEV
 from moat.dev.base import Device
-from etcd_tree.util import from_etcd
-from etcd_tree.etcd import EtcTypes
-from etcd_tree.node import EtcInteger
+from etcd_tree import EtcTypes,EtcInteger
 from yaml import safe_dump
 import aio_etcd as etcd
 import asyncio
@@ -68,71 +64,49 @@ Device ID: detailed information about the device.
 	async def do(self,args):
 		await self.root.setup(self)
 		etc = self.root.etcd
+		tree = await self.root._get_tree()
+		tree = await tree.subdir(DEV_DIR)
 		types = None
-		path = '/device'
 		if not args:
-			args = ('',)
+			args = ((),)
 
 		if self.options.recursive:
-			types = EtcTypes()
-			dev_types(types)
 			for arg in args:
 				s = [x for x in arg.split('/') if x != '']
-				t = await etc.tree(path,sub=s,types=types,static=True)
-				for dev in t.tagged(':dev'):
-					self.do_entry(dev,dev.path[1:-5])
+				t = await tree.subdir(arg, recursive=False)
+				async for dev in t.tagged(':dev'):
+					self.do_entry(dev,dev.path[len(DEV_DIR):1])
 			return
 
 		for arg in args:
 			try:
-				if arg == '':
-					argp = ()
-					arg = path
-				else:
-					argp = arg.split('/')
-					arg = path+'/'+arg
-				res = await etc.get(arg)
+				res = await tree.subdir(arg, create=False)
 			except (etcd.EtcdKeyNotFound, KeyError):
 				print("'%s' not found." % (arg,), file=sys.stderr)
 			else:
 				dev = False
 				looped = False
-				while len(list(res.children)) == 1:
-					r = list(res.children)[0]
-					d = r.key[r.key.rindex('/')+1:]
-					if d == ':dev':
+				while len(res) == 1:
+					d = list(res.keys())[0]
+					if d == DEV:
 						break
 					looped = True
-					arg += ('/' if arg else '')+d
-					argp.append(d)
-					res = await etc.get(arg)
-				for r in res.children:
-					d = r.key[r.key.rindex('/')+1:]
-					if d == ':dev':
+					res = await res[d]
+				for d,rr in res.items():
+					rr = await rr
+					if d == DEV:
 						dev = True
 						continue
-					rr = await etc.get(arg+'/'+d)
-					n = 0
-					for r in rr.children:
-						n += 1
-					print(arg+('/' if arg else '')+d,n, sep='\t',file=self.stdout)
+					print('/'.join(rr.path[len(DEV_DIR):]), len(rr.keys()), sep='\t',file=self.stdout)
 				if dev:	
-					if types is None:
-						types = EtcTypes()
-						dev_types(types)
-					argp.append(':dev')
-					cls = types.lookup(argp, dir=True)
-					t = EtcTypes()
-					t.register(':dev',cls=cls)
-					cls.types(t.step(':dev'))
-					t = await etc.tree(arg,sub=':dev', types=t,static=True,create=False)
-					self.do_entry(t[':dev'],arg[8:], not looped)
+					self.do_entry(res[DEV], not looped)
 
-	def do_entry(self,dev,pre='', do_verbose=False):
+	def do_entry(self,dev, do_verbose=False):
+		path = '/'.join(dev.path[len(DEV_DIR):-1])
 		if do_verbose or self.root.verbose > 2:
-			safe_dump({pre: r_dict(dev)}, stream=self.stdout)
+			safe_dump({path: r_dict(dev)}, stream=self.stdout)
 		else:
-			print(pre, dev.__class__.name, dev.get('location','-'), sep='\t',file=self.stdout)
+			print(path, dev.__class__.name, dev.get('location','-'), sep='\t',file=self.stdout)
 
 
 class _DeviceAttrCommand(Command):
@@ -142,9 +116,41 @@ class _DeviceAttrCommand(Command):
 	async def do(self,args):
 		await self.root.setup(self)
 		etc = self.root.etcd
+		if not args:
+			raise CommandError("You need to specify a device.")
+		arg = args.pop(0)
+		types = EtcTypes()
+		Device.types(types)
+		try:
+			t = await etc.tree((DEV_DIR,arg,(DEV,)), types=types,create=False)
+		except KeyError:
+			raise CommandError("Device '%s' not found." % (arg,))
+		if args:
+			args = ' '.join(args)
+			if args == '-':
+				if self._nl:
+					args = sys.stdin.read().rstrip('\n')
+				else:
+					args = sys.stdin.readline().rstrip('\n')
+			await t.set(self._attr,args)
+			if self.root.verbose > 1:
+				print("Location set.", file=self.stdout)
+		elif self._attr in t:
+			print(t[self._attr], file=self.stdout)
+		elif self.root.verbose:
+			print(self._attr.ucfirst()+" not yet set.", file=sys.stderr)
+			return 1
+
+class DeviceSignalCommand(Command):
+	name = "signal"
+	summary = 'set the AMQP signal name for an input or output'
+
+	async def do(self,args):
+		await self.root.setup(self)
+		etc = self.root.etcd
 		path = '/device'
 		if not args:
-			raise CommandError("You need to specify an ID.")
+			raise CommandError("You need to specify a device.")
 		arg = args.pop(0)
 		types = EtcTypes()
 		Device.types(types)

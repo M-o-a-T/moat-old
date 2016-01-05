@@ -17,7 +17,7 @@ from time import time
 from traceback import format_exception
 import weakref
 
-from ..task import _VARS,  task_var_types, TASK_DIR,TASKDEF_DIR,TASK,TASKDEF, TASKSTATE_DIR,TASKSTATE
+from ..task import _VARS, setup_task_vars, TASK_DIR,TASKDEF_DIR,TASK,TASKDEF, TASKSTATE_DIR,TASKSTATE
 
 import logging
 logger = logging.getLogger(__name__)
@@ -355,12 +355,11 @@ class TaskMaster(asyncio.Future):
 		# which is attached to the taskdef. Thus, first read the poiner to
 		# that "manually".
 		self.etc = await self.cmd.root._get_etcd()
+		tree = await self.cmd.root._get_tree()
 		self.taskdef_name = (await self.etc.get(TASK_DIR+self.path+(TASK,'taskdef'))).value
+		td_path = tuple(x for x in self.taskdef_name.split('/') if x != "")
 
-		types = EtcTypes()
-		task_var_types(types)
-		path = tuple(self.taskdef_name.split('/'))
-		self.taskdef = await self.etc.tree(TASKDEF_DIR+path+(TASKDEF,), types=types)
+		self.taskdef = await tree.subdir(TASKDEF_DIR+td_path+(TASKDEF,), create=False)
 		if self.taskdef['language'] != 'python':
 			# Duh.
 			raise RuntimeError("This is not a Python job. Aborting.")
@@ -368,7 +367,7 @@ class TaskMaster(asyncio.Future):
 		self.cls = import_string(self.taskdef['code'])
 
 		types = EtcTypes()
-		task_var_types(types)
+		setup_task_vars(types)
 		self.cls.types(types.step('data'))
 
 		# Now we can read the task data and follow changes to it.
