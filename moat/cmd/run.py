@@ -122,8 +122,8 @@ by default, start every task that's defined for this host.
 	async def _loop(self):
 		errs = 0
 		try:
-			logger.debug("Task Jobs %s",dict(self.jobs))
 			while self.jobs:
+				logger.debug("Task Jobs %s",dict(self.jobs))
 				done,pending = await asyncio.wait(chain((self.tilt,self.rescan),self.jobs.values()), loop=self.root.loop, return_when=asyncio.FIRST_COMPLETED)
 				logger.debug("Task DP %s %s",done,pending)
 				for j in done:
@@ -162,7 +162,7 @@ by default, start every task that's defined for this host.
 			for j in self.jobs.values():
 				try:
 					logger.info('CANCEL 1 %s',j)
-					j.cancel()
+					await j.cancel_job()
 				except Exception:
 					pass
 				try:
@@ -170,8 +170,11 @@ by default, start every task that's defined for this host.
 				except asyncio.CancelledError:
 					if self.root.verbose:
 						print(j.name,'*CANCELLED*', sep='\t', file=self.stdout)
+					logger.debug("canceled %s",j.name)
 				except Exception:
 					logger.exception("Cancelling %s",j.name)
+				else:
+					logger.debug("ended %s",j.name)
 		return errs
 
 		

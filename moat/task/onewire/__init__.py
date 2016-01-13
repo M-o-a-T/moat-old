@@ -89,7 +89,6 @@ class ScanTask(Task):
 			
 			Do not override this; override .task_ instead.
 			"""
-		logger.info("R 1")
 		ts = time()
 		long_warned = 0
 		while True:
@@ -98,7 +97,6 @@ class ScanTask(Task):
 			warned = await self.task_()
 			t = self.parent.timers[self.typ]
 			if t is None:
-				logger.info("R 9")
 				return
 			# subtract the time spent during the task
 			if warned and t < 10:
@@ -118,7 +116,6 @@ class ScanTask(Task):
 				long_warned -= 1
 			with suppress(asyncio.TimeoutError):
 				await asyncio.wait_for(self._trigger,delay, loop=self.loop)
-		logger.info("R 8")
 
 	def trigger(self):
 		"""Call to cause an immediate re-scan"""
@@ -149,7 +146,9 @@ class EtcOnewireBus(EtcDir):
 					continue
 				dev = d[f1][f2][DEV]
 				if not isinstance(dev,OnewireDevice):
-					import pdb;pdb.set_trace()
+					# This should not happen. Otherwise we'd need to
+					# convert .setup_tasks() into a task.
+					raise RuntimeError("XXX: bus lookup incomplete")
 				yield dev
 
 	def has_update(self):
@@ -235,9 +234,10 @@ class BusScan(Task):
 
 			if f1 not in self.devices:
 				await self.devices.set(f1,{})
-			if f2 not in self.devices[f1]:
+			d = await self.devices[f1]
+			if f2 not in d:
 				await self.devices[f1].set(f2,{DEV:{'path':bb}})
-			fd = self.devices[f1][f2][DEV]
+			fd = await d[f2][DEV]
 			await fd.setup()
 			op = fd.get('path','')
 			if op != bb:
@@ -334,7 +334,6 @@ class BusScan(Task):
 		return t
 
 	async def task(self):
-		logger.debug("OWT 1")
 		self.srv = None
 		self.tree = None
 		self.srv_name = None
@@ -367,7 +366,10 @@ class BusScan(Task):
 		devtypes=EtcTypes()
 		for t in OnewireDevice.dev_paths():
 			devtypes.step(t[:-1]).register(DEV,cls=t[-1])
-		self.devices = await self.etcd.tree(DEV_DIR+(OnewireDevice.prefix,),env=self,types=devtypes, update_delay=update_delay)
+		tree = await self.cmd.root._get_tree()
+		self.devices = await tree.subdir(DEV_DIR+(OnewireDevice.prefix,))
+		self.devices.env = self
+		self.devices._types = devtypes
 		self._trigger = None
 
 		main_task = asyncio.ensure_future(self.task_busscan(), loop=self.loop)
@@ -394,12 +396,12 @@ class BusScan(Task):
 			p = self.tasks
 			raise
 		finally:
-			logger.debug("OWT 8 %s",p)
 			for t in p:
 				if not t.done():
 					logger.info('CANCEL 17 %s',t)
 					t.cancel()
-			asyncio.wait(p, loop=self.loop, return_when=asyncio.ALL_COMPLETED)
+			await asyncio.wait(p, loop=self.loop, return_when=asyncio.ALL_COMPLETED)
+			logger.debug("OWT 9x")
 		logger.debug("OWT 9")
 		for t in d:
 			t.result()
@@ -408,22 +410,29 @@ class BusScan(Task):
 
 	async def task_busscan(self):
 		"""\
-			This is the main sub-task. It's responsible for finding all buses,
-			scanning them for devices, and for firing off any other task
-			which these may require.
+			This is the main bus scanning sub-task. It's responsible for
+			finding all (sub) buses, scanning them for devices, and for firing
+			off any other task which these may require.
+
+			TODO: trigger a bus scan manually instead of / in addition to periodically
 			"""
 
 		while True:
+			#logger.debug("SCAN ALL")
 			if self.config['delay']:
+				#logger.debug("SCAN ALL A %s",self.config['delay'])
 				self._delay = asyncio.Future(loop=self.loop)
 				self._delay_timer = await Timer(self.loop,self.config['delay'], self)
 
+			#logger.debug("SCAN ALL B")
 			if 'scanning' in self.tree:
 				# somebody else is processing this bus. Grumble.
 				logger.info("Server '%s' locked.",self.srv_name)
 				tree._get('scanning').add_monitor(self._unlock)
 				continue
+			#logger.debug("SCAN ALL C")
 			await self.tree.set('scanning',value=time(),ttl=BUS_TTL)
+			#logger.debug("SCAN ALL D")
 			try:
 				self.old_buses = set()
 				if 'bus' in self.tree:
@@ -435,6 +444,7 @@ class BusScan(Task):
 					if bus.startswith('bus.'):
 						await self._scan_one(bus)
 
+				#logger.debug("SCAN ALL E %s",self.old_buses)
 				# Delete buses which haven't been seen for some time
 				# (to protect against intermittent failures)
 				for bus in self.old_buses:
@@ -445,20 +455,32 @@ class BusScan(Task):
 						await bus.set('broken',v+1)
 					else:
 						await self.drop_bus(bus)
+				#logger.debug("SCAN ALL F")
 
 			finally:
 				if not self.tree.stopped.done():
+					#logger.debug("SCAN ALL G")
 					await self.tree.delete('scanning')
+				#logger.debug("SCAN ALL H")
 
 			if self._delay is None:
+				#logger.debug("SCAN EX")
 				break
+			#logger.debug("SCAN WAIT")
 			try:
 				await self._delay
 				self._delay.result()
+				#logger.debug("SCAN HAS %s", self._delay.result())
 			except StopWatching:
+				#logger.debug("SCAN STOP")
 				break
+			except Exception as e:
+				#logger.exception("SCAN OUCH")
+				raise
 			if self.tree.stopped.done():
+				#logger.debug("SCAN DONE")
 				return self.tree.stopped.result()
+			#logger.debug("SCAN REDO")
 	
 	def _timeout(self,exc=None):
 		"""Called from timer"""
@@ -471,8 +493,9 @@ class BusScan(Task):
 
 	def trigger(self):
 		"""Tell all tasks to run now. Used mainly for testing."""
+		#logger.debug("SCAN TRIGGER")
 		if self._delay is not None and not self._delay.done():
-			self._delay.set_result("cfg_changed")
+			self._delay.set_result("trigger")
 			logger.info('CANCEL 17 %s',self._delay_timer)
 			self._delay_timer.cancel()
 		for t in self.tasks:

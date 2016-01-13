@@ -30,6 +30,7 @@ import sys
 from moat.script import Command, CommandError
 from moat.script.task import Task
 from moat.util import r_dict
+from moat.dev import DEV_DIR,DEV
 from moat.dev.onewire import device_types, OnewireDevice
 from etcd_tree.etcd import EtcTypes
 from etcd_tree.node import EtcInteger
@@ -187,7 +188,7 @@ Device ID: detailed information about the device.
 	async def do(self,args):
 		await self.root.setup(self)
 		etc = self.root.etcd
-		path = (DEV_DIR,OnewireDevice.prefix)
+		path = DEV_DIR+(OnewireDevice.prefix,)
 		if not args:
 			res = await etc.get(path)
 			for r in res.children:
@@ -221,7 +222,7 @@ Device ID: detailed information about the device.
 						dt.types(types)
 						for r in res.children:
 							dev = r.key[r.key.rindex('/')+1:]
-							t = await etc.tree('/'.join((path,arg,dev,':dev')), types=types,static=True,create=False)
+							t = await etc.tree('/'.join((path,arg,dev,DEV)), types=types,static=True,create=False)
 							print(arg+'.'+dev,t.get('path','?').replace(' ',':',1).replace(' ','/'),t.get('location','-'), sep='\t',file=self.stdout)
 
 						
@@ -236,7 +237,7 @@ Device ID: detailed information about the device.
 					types = EtcTypes()
 					dt.types(types)
 					try:
-						t = await etc.tree('/'.join((path,typ,dev,':dev')), types=types,static=True,create=False)
+						t = await etc.tree('/'.join((path,typ,dev,DEV)), types=types,static=True,create=False)
 					except KeyError:
 						print("Device '%s' not found." % (arg,), file=sys.stderr)
 					else:

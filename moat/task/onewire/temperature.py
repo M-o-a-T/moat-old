@@ -26,6 +26,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import asyncio
 from contextlib import suppress
 
+from moat.dev import DEV
 from . import ScanTask,dev_re
 
 import logging
@@ -46,13 +47,14 @@ class ScanTemperature(ScanTask):
 		for dev,b in list(self.parent['devices']['10'].items()):
 			if b > 0:
 				continue # pragma: no cover # timing dependant
+			d = None
 			try:
-				dev = self.env.devices['10'][dev][':dev']
-				t = float(await dev.bus_cached.read("temperature"))
+				d = await self.env.devices['10'][dev][DEV]
+				t = float(await self.parent.bus_cached.read("10."+dev, "temperature"))
 			except Exception as exc:
 				warned = True
-				logger.exception("Reading %s: device '%s' triggered an error", self.name,dev)
+				logger.exception("Reading %s: device '%s' triggered an error", dev,d)
 			else:
-				await dev.reading("temperature",t)
+				await d.reading("temperature",t)
 
 		return warned

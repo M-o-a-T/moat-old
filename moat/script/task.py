@@ -417,10 +417,10 @@ class TaskMaster(asyncio.Future):
 		if self.callback is not None:
 			self.callback("start")
 
-	async def cancel(self):
+	async def cancel_job(self):
 		logger.info('CANCEL 13 %s',self)
 		try:
-			super().cancel()
+			self.cancel()
 		except Exception:
 			return
 		if self.job is not None:

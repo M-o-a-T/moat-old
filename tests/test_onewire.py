@@ -140,15 +140,17 @@ class FakeSleep:
 
 	async def __call__(self,loop,dly,proc):
 		# called by the task when it wishes to create a timeout
-		logger.debug("Enter: %s",proc)
+		logger.debug("Enter: main %s",proc)
 		assert self.proc is None
 		assert self.loop is loop
 		if self.f is not None:
 			self.f.set_result(False)
 		if self.mod is not None:
 			m,self.mod = self.mod,None
+			logger.debug("Wait: main %s",m)
 			await m()
 		self.proc = proc
+		logger.debug("Exit: main %s",proc)
 		return self
 	def cancel(self):
 		# called by the task when it wishes to cancel its timeout
@@ -176,7 +178,7 @@ class FakeSleep:
 			await task
 		else:
 			logger.debug("Run: step %s",mod)
-			if not task.done():
+			if p and not task.done():
 				p.trigger()
 			if task.done():
 				task.result()
@@ -248,10 +250,6 @@ async def test_onewire_fake(loop):
 			await fs.step(f)
 			await asyncio.sleep(3.5,loop=loop)
 			await fs.step(f)
-			await fs.step(f)
-			await fs.step(f)
-			await fs.step(f)
-			await fs.step(f)
 
 			# temperature device found, bus scan active
 			async def mod_a():
@@ -259,10 +257,11 @@ async def test_onewire_fake(loop):
 				await tr.wait()
 				assert td['10']['001001001001'][':dev']
 				assert tr['faker']['bus']['bus.42 1f.123123123123 aux']['devices']['10']['001001001001'] == '0'
-
 				assert int(fb.bus_aux['simultaneous']['temperature']) == 1
 			await fs.step(f,mod_a)
-			await asyncio.sleep(2.0,loop=loop)
+			await asyncio.sleep(3.0,loop=loop)
+			await fs.step(f)
+			await fs.step(f)
 			await fs.step(f)
 
 			# we should have a value by now

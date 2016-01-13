@@ -25,6 +25,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 
 import asyncio
 
+from moat.dev import DEV
 from . import ScanTask,dev_re
 
 import logging
@@ -39,7 +40,7 @@ class ScanAlarm(ScanTask):
 			m = dev_re.match(dev)
 			if m:
 				try:
-					d = self.env.devices[m.group(1).lower()][m.group(2).lower()][':dev']
+					d = await self.env.devices[m.group(1).lower()][m.group(2).lower()][DEV]
 					await d.has_alarm()
 				except KeyError:
 					warned = True
