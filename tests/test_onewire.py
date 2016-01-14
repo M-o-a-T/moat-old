@@ -246,9 +246,9 @@ async def test_onewire_fake(loop):
 			f = m.parse("-vvvc test.cfg run -g fake/onewire")
 			f = asyncio.ensure_future(f,loop=loop)
 
-			# give it some time to settle
+			# give it some time to settle (lots of new entries)
 			await fs.step(f)
-			await asyncio.sleep(3.5,loop=loop)
+			await asyncio.sleep(1.5,loop=loop)
 			await fs.step(f)
 
 			# temperature device found, bus scan active
@@ -259,8 +259,7 @@ async def test_onewire_fake(loop):
 				assert tr['faker']['bus']['bus.42 1f.123123123123 aux']['devices']['10']['001001001001'] == '0'
 				assert int(fb.bus_aux['simultaneous']['temperature']) == 1
 			await fs.step(f,mod_a)
-			await asyncio.sleep(3.0,loop=loop)
-			await fs.step(f)
+			await asyncio.sleep(0.5,loop=loop)
 			await fs.step(f)
 			await fs.step(f)
 
