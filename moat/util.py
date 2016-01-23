@@ -24,6 +24,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##BP
 
 from collections.abc import Mapping,MutableMapping
+import asyncio
 
 class _NOT_HERE: pass
 class _NOT_THERE: pass
@@ -94,4 +95,25 @@ class OverlayDict(MutableMapping):
 		if v is not _NOT_THERE:
 			return True
 		return k in self.b
+
+def do_async(task, *a, _loop=None, _err_cb=None, **k):
+	"""\
+		Helper to run a task asynchronously and log errors.
+
+		@_loop: the event loop to use
+		@_err_cb: called with the error if there is one.
+		If not set, the error is logged instead.
+		"""
+	try:
+		f = asyncio.ensure_future(task(*a,**k))
+	except Exception as exc:
+		f = asyncio.Future(loop=_loop)
+		f.set_exception(exc)
+	def reporter(f):
+		exc = f.exception()
+		if err_cb is None:
+			logger.exception("Error in %s %s %s", task,a,k, exc=exc)
+		else:
+			err_cb(exc)
+	f.add_done_callback(reporter)
 
