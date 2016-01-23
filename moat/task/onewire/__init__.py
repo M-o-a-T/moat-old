@@ -144,7 +144,10 @@ class EtcOnewireBus(EtcDir):
 			for f2,b in v.items():
 				if b > 0:
 					continue
-				dev = d[f1][f2][DEV]
+				try:
+					dev = d[f1][f2][DEV]
+				except KeyError:
+					continue
 				if not isinstance(dev,OnewireDevice):
 					# This should not happen. Otherwise we'd need to
 					# convert .setup_tasks() into a task.
