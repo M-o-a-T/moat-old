@@ -138,6 +138,10 @@ Main tree
 
   This section describes data about the MoaT installation itself.
 
+  * type
+
+    Data types. See section `types` for details.
+
   * task
 
     This section describes possible tasks, for the benefit of external
@@ -285,10 +289,14 @@ configurable, auto-discovery should add it as an input.
 
   Inputs are either polled, or they signal their change independently.
   If polling is required, set the ``poll`` attribute.
+  If an RPC endpoint exists, the device is read directly.
 
   * <name>
 
-    Some hardware specific interface name
+    Some hardware specific interface name.
+
+    In addition to the attributes described here, any attribute of the type
+    may be overridden here.
 
     * name
      
@@ -296,7 +304,7 @@ configurable, auto-discovery should add it as an input.
 
     * type
 
-      whichever data type this input has
+      The data type this input has. See `types`, below.
 
     * value
 
@@ -336,11 +344,14 @@ configurable, auto-discovery should add it as an input.
 
   Physical outputs are described by this generic structure.
 
-  Outputs are only changed by sending an RPC request.
+  Outputs may be changed by sending an RPC request.
 
   * <name>
 
-    Some hardware specific interface name
+    Some hardware specific interface name.
+
+    In addition to the attributes described here, any attribute of the type
+    may be overridden here.
 
     * name
      
@@ -348,7 +359,7 @@ configurable, auto-discovery should add it as an input.
 
     * type
                
-      whichever data type this output understands
+      The data type this output has. See `types`, below.
 
     * value
 
@@ -374,4 +385,190 @@ configurable, auto-discovery should add it as an input.
     * attr
 
       Generic attributes, used by visualizing code or similar
+
+Types
+......
+
+Types are located at ``/meta/types``. They're tagged with ``:type``.
+
+Types can be subclassed for restrictions, modifications, or display
+requirements. Thus, ``/meta/types/float/temperature/:type`` is a
+specialization of ``/meta/types/float/:type``. (You could add more levels,
+e.g. an indoor temperature for controlling room temperature must be within
+3…30 °C.)
+
+The base type contains a JSON schema for the possible values.
+
+* <name> …
+
+  The type (hierarchy).
+
+  * :schema
+
+    Base types only: the type's JSON schema.
+
+  * :type
+
+    The actual type description.
+
+    Top-level entries have a "structure" element which describes the
+    data (JSON schema) for the benefit of editors etc. That element
+    is set when importing, and is basically immutable. All other
+    possible entries are described there.
+
+    The unit conversion code looks for all entries in the next level(s)
+    up, thus you should never set a particular value more than once.
+    All elements are optional and have sensible default values where
+    applicable.
+
+    The following items describe types, not actual entries. Thus,
+    the details for the type "bool/on_off" are stored at
+    "/moat/meta/type/bool/on_off/:type"; any attribute not detailed
+    there will be read from "/moat/meta/type/bool/:type". The entry
+    "bool", below, describes the structure of these data.
+
+    Floating point numbers' "display/gamma" entry requires a
+    specialized user interface element. Everything else is
+    straightforward and can (should!) be implemented using a
+    JSON schema interpreter.
+
+    Conflicts between the JSON schema data and the descriptions below
+    are a bug.
+
+    * bool
+
+      A bit. Something that can be either "on" or "off".
+
+      * true
+
+        Display value for "on" or "true" state. The default is "true".
+
+      * false
+
+        Display value for "off" or "false" state. The default is "false".
+
+    * float
+
+      Some non-integer number. Temperature, power consumption, percentages, …
+
+      There are standard subtypes like "float/fraction" (between 0 and
+      1 inclusive) or "float/temperature" (between -273.15 and a 
+      million or whatever, though usually limited to -20 to 100).
+
+      The value stored in etcd / used in AMQP messages / whatever is
+      the one that's most useful to a *computer*. For instance, the
+      volume setting of your stereo goes from zero "silent" to 1 "all
+      the way up".
+
+      * min
+
+        The minimum value. Default: None.
+
+        This is the "computer" value. Use the display section, below,
+        to convert to something human-readable.
+
+      * max
+
+        The maximum value. Default: None. See "min".
+
+      * display
+
+        This section describes how to convert between "computer" values
+        and "human-readable" ones.
+
+        Formula: human_value = (computer_value^gamma)*factor+offset
+
+        For a straight percentage: factor=100 unit=' %' step=1
+        For dimmable LED lights: add gamma=1.5
+        For Fahrenheit: factor=1.8 offset=32
+
+        For your stereo's volume: factor=10 (you might want to use some
+        gamma; also don't forget to set "max" 📢 to something like 0.5,
+        i.e. to be compatible with your hearing and/or the neighbors).
+
+        * gamma
+
+          Gamma is useful for modifying a value between 0 and 1 that
+          e.g. the difference between 0.1 and 0.2 has the same
+          perceived magnitude as that between 0.8 and 0.9. 
+
+          Obviously the default is 1. If the change at the low end is
+          too granular when you change the value in your UI, decrease
+          gamma; if the problem is on the high end, increase it.
+
+          You can visualize gamma as shifting the midpoint of the
+          value's range up or down. Thus, if you want to show a slider for
+          the gamma value in your front end:
+
+          gamma = 1/(1-ui_value)-1
+
+          ui_value = gamma/(gamma+1)
+          
+          which makes an UI value between 0 and 1 (neutral: 0.5)
+          corresponds to a gamma between 0 and +∞ (neutral: 1).
+          You probably want to restrict the UI to values between
+          0.1 and 0.9.
+          
+          Never set gamma to zero.
+
+          Negative gamma values invert the value. Do not use them if
+          the value can be zero. The only negative gamma which is
+          useful in the real world is -1: you can use it to convert
+          e.g. l/km (displayed with factor 100, as the customary
+          real-world unit is l/100km) to miles per gallon (gamma -1,
+          factor 2.352 (liters per gallon divided by kilometers per mile)).
+
+        * factor
+
+          Multiply with this value. For instance, "float/percent" would
+          use a factor of 100 here. Your stereo's volume might go up to
+          10.
+          
+          This value must not be zero, for obvious reasons.
+
+        * offset
+
+          Add this value. For instance, to display temperatures in °F,
+          the offset would be 32 (with a factor of 1.8).
+
+        * unit
+
+          The value's unit, as displayed for human consumption.
+          "°C" or "kWh" or "%" or whatever makes sense.
+      
+        * step
+
+          Some natural increment (for a human) to use, in "human" units.
+          The default is 1.
+
+    * int
+
+      Some "naturally-integer" type, like the number of eggs in a basket
+      or the number of devices that are switched on.
+
+      Don't use integers just because your device's setting only takes
+      integers. You might want to use a different device some day, or
+      it might make sense to apply a gamma.
+
+      * min
+
+        Obvious. ;-)
+
+      * max
+
+        Also obvious.
+
+    * str
+
+      Some text.
+
+      * encoding
+
+        This is the encoding which the device wants. The data itself is
+        always stored to etcd in UTF-8.
+
+      * maxlen
+
+        The max number of bytes (not characters) which the device
+        understands.
 

@@ -70,7 +70,7 @@ def type_names():
 	"""Creates a dict which maps type names to its moat.types.*.Type object."""
 	if not _type_names:
 		for t in types():
-			_type_names[d.name] = t
+			_type_names[t.name] = t
 	return _type_names
 
 def setup_meta_types(types):

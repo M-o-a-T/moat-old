@@ -230,13 +230,14 @@ stuff back to the loop.
 		etc = await self._get_etcd()
 
 		types = self._types
-		from moat.types import setup_meta_types
+		from moat.types import setup_meta_types,TYPEDEF_DIR
 		from moat.task import setup_task_types
 		from moat.dev import setup_dev_types
 		setup_meta_types(types)
 		setup_task_types(types)
 		setup_dev_types(types)
 		self.tree = await etc.tree('/', types=types, immediate=None)
+		self.types = await self.tree.subdir(TYPEDEF_DIR,recursive=True)
 		return self.tree
 
 	async def _get_etcd(self):

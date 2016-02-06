@@ -72,7 +72,80 @@ If you want to modify an entry, the '-m' or '-p' option is mandatory.
 		self.create = not opts.update
 
 	async def do(self,args):
-		from yaml import safe_dump
+		if not args:
+			raise CommandError("Not specifying values to %s makes no sense." % ("delete" if self.delete else "add/update"))
+		etc = await self.root._get_etcd()
+		retval = 0
+		if self.delete:
+			if not self.create:
+				raise CommandError("You can't update and delete at the same time.")
+			for a in args:
+				pa = a.replace('.','/')
+				kw = {}
+				if self.modified:
+					kw['prevIndex'] = self.modified
+				if self.previous:
+					kw['prevValue'] = self.previous
+				try:
+					await etc.delete('/'+pa, recursive=True,**kw)
+				except etcd.EtcdCompareFailed:
+					logger.fatal("Bad modstamp: "+a)
+					retval = 1
+				except etcd.EtcdKeyNotFound:
+					logger.info("Key already deleted: "+a)
+		else:
+			for a in args:
+				a,v = a.split('=',1)
+				pa = a.replace('.','/')
+				create=self.create
+				try:
+					kw={}
+					if self.modified:
+						kw['index']=self.modified
+						create=False
+					if self.previous:
+						kw['prev']=self.previous
+						create=False
+					if v:
+						kw['value']=v
+					if self.append:
+						kw['append']=True
+						create=True
+					r = await etc.set('/'+pa, create=create, **kw)
+					if self.append:
+						print(r.key.rsplit('/',1)[1], file=self.stdout)
+				except etcd.EtcdCompareFailed:
+					logger.error("Bad modstamp: "+a)
+					retval = 1
+				except etcd.EtcdAlreadyExist:
+					logger.error("Entry exists: "+a)
+					retval = 1
+		return retval
+
+class DevCommand(Command):
+	name = "dev"
+	summary = "Update device data"""
+	description = """\
+Add/Update/Delete device attributes.
+
+Usage: path/to/device input/name entry=value  -- modify an entry
+       path/to/device input/name -d entry     -- delete this entry
+
+Of course you can use "output" instead of "input", if the device has any.
+See "moat show dev --help" for displaying values.
+
+"""
+
+	def addOptions(self):
+		self.parser.add_option('-d','--delete',
+            action="store_true", dest="delete",
+            help="delete entries instead of adding/updating them")
+
+	def handleOptions(self):
+		opts = self.options
+		self.delete = opts.delete
+
+	async def do(self,args):
 		if not args:
 			raise CommandError("Not specifying values to %s makes no sense." % ("delete" if self.delete else "add/update"))
 		etc = await self.root._get_etcd()
@@ -130,5 +203,5 @@ class SetCommand(Command):
 Set some data.
 """
 
-	subCommandClasses = [EtcdCommand]
+	subCommandClasses = [EtcdCommand, DevCommand]
 

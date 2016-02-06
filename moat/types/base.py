@@ -33,6 +33,7 @@ class _NOTGIVEN:
 	pass
 
 class TypeDir(EtcDir):
+	"""A class linking a type to its etcd entry"""
 	def __init__(self,*a,**k):
 		super().__init__(*a,**k)
 		self._type = type_names()['/'.join(self.path[len(TYPEDEF_DIR):-1])]
@@ -40,12 +41,12 @@ class TypeDir(EtcDir):
 
 class Type:
 	"""\
-		This is the base class for typing. The attribute `value` holds
-		whatever the best representation for Python is (e.g. bool: True/False).
+		This is the (abstract) base class for typing; it holds one typed value.
+
+		The attribute `value` contains whatever the best representation for
+		Python is (e.g. bool: True/False).
 		`amqp_value` is the preferred representation for AMQP, `etcd_value`
 		the one for storing in etcd.
-
-		In setup, @meta1 is this type's etcd entry, @meta2 the value's.
 		"""
 	name = None
 	_value = _NOTGIVEN
@@ -56,7 +57,8 @@ class Type:
 		pass
 
 	def __init__(self,meta1,meta2,value=_NOTGIVEN):
-		self.name = '/'.join(self.meta1.path)
+		"""@meta1 is the type's etcd entry, @meta2 the value's."""
+		self.name = '/'.join(meta1.path)
 		self.meta1 = meta1
 		self.meta2 = meta2
 
@@ -78,7 +80,10 @@ class Type:
 		return self.value
 	@amqp_value.setter
 	def amqp_value(self,value):
-		self.value = value
+		self.value = self.from_amqp(value)
+
+	def from_amqp(self,value):
+		return value
 
 	@property
 	def etcd_value(self):
@@ -140,13 +145,16 @@ class BoolType(Type):
 	def amqp_value(self):
 		return self['true'] if self.value else self['false']
 	@amqp_value.setter
-	def amqp_value(self,amqp_value):
+	def amqp_value(self, value):
+		self.value = self.from_amqp(value)
+
+	def from_amqp(self,amqp_value):
 		if amqp_value.lower() == self['true'].lower():
-			self.value = True
+			return True
 		elif amqp_value.lower() == self['false'].lower():
-			self.value = False
+			return False
 		else:
-			self.value = bool(int(amqp_value))
+			return bool(int(amqp_value))
 
 class _NumType(Type):
 	def check_var(self, var,value):
@@ -179,15 +187,16 @@ class _NumType(Type):
 			This is not stupid: the boundaries may have changed.
 			"""
 		val = self._value
-		if val < self['min']:
-			logger.warn("%s: Value %s below min %s",self.name,val,self['min'])
-			val = self['min']
-		elif val > self['max']:
-			logger.warn("%s: Value %s above max %s",self.name,val,self['min'])
-			val = self['max']
+		if val is not _NOTGIVEN:
+			if val < self['min']:
+				logger.warn("%s: Value %s below min %s",self.name,val,self['min'])
+				val = self['min']
+			elif val > self['max']:
+				logger.warn("%s: Value %s above max %s",self.name,val,self['min'])
+				val = self['max']
 		return val
-	@etcd_value.setter
-	def value(self,etcd_value):
+	@value.setter
+	def value(self,value):
 		val = self._cls(value)
 		if val < self['min']:
 			logger.warn("%s: Value %s below min %s",self.name,val,self['min'])
@@ -197,12 +206,16 @@ class _NumType(Type):
 			val = self['max']
 		self._value = val
 
+	def from_amqp(self, value):
+		return self.check_var('',value)
+
 class IntType(_NumType):
 	name = "int"
 	etcd_class = EtcInteger
 	vars = {'min':0, 'max':100}
 	_cls = int
 
+	@classmethod
 	def types(cls,types):
 		types.register('value',cls=EtcInteger)
 		types.register('min',cls=EtcInteger)
@@ -211,9 +224,10 @@ class IntType(_NumType):
 class FloatType(_NumType):
 	name = "float"
 	etcd_class = EtcFloat
-	_cls = int
+	_cls = float
 	vars = {'min':0, 'max':1}
 
+	@classmethod
 	def types(cls,types):
 		types.register('value',cls=EtcFloat)
 		types.register('min',cls=EtcFloat)

@@ -34,10 +34,6 @@ from ..base import Device
 class NoAlarmHandler(RuntimeError):
 	pass
 
-value_types = {
-	'float': EtcFloat,
-	'int': EtcInteger,
-}
 _device_types = {} # filled later
 
 def device_types():
