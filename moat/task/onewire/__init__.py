@@ -157,13 +157,13 @@ class EtcOnewireBus(EtcDir):
 	def has_update(self):
 		super().has_update()
 		if self._seq is None:
-			logger.debug("Stopping tasks %s %s %s",self,self.bus_cached.path,list(self.tasks.keys()))
+			logger.debug("Stopping tasks %s %s %s",self,self.bus.path,list(self.tasks.keys()))
 			if self.tasks:
 				t,self.tasks = self.tasks,WeakValueDictionary()
 				for v in t.values():
 					logger.info('CANCEL 16 %s',t)
 					t.cancel()
-		elif self._set_up:
+		else:
 			self.setup_tasks()
 
 	def setup_tasks(self):
@@ -180,9 +180,18 @@ class EtcOnewireBus(EtcDir):
 					t = f
 
 			self.timers[name] = t
-			if t is not None and name not in self.tasks:
-				logger.debug("Starting task %s %s %s",self,self.bus_cached.path,name)
-				self.tasks[name] = self.env.add_task(task(self))
+			if t is not None:
+				if name not in self.tasks:
+					logger.debug("Starting task %s %s %s",self,self.bus.path,name)
+					self.tasks[name] = self.env.add_task(task(self))
+			else:
+				if name in self.tasks:
+					t = self.tasks.pop(name)
+					try:
+						t.cancel()
+					except Exception as ex:
+						logger.exception("Ending task %s for bus %s", name,self.bus.path)
+
 		self._set_up = True
 		
 EtcOnewireBus.register('broken', cls=EtcInteger)
@@ -361,8 +370,7 @@ class BusScan(Task):
 		self.tree = await self.etcd.tree("/bus/onewire/"+server, types=types,env=self,update_delay=update_delay)
 		nsrv = self.tree['server']
 		if srv != nsrv:
-			import pdb;pdb.set_trace()
-			new_cfg.set_result("duh")
+			new_cfg.set_result("new_server")
 		nsrv.add_monitor(self.cfg_changed)
 		del tree
 
