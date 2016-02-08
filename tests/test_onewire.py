@@ -126,10 +126,25 @@ class FakeBus(FakeSubBus):
 
 class FakeSleep:
 	# A fake implementation of a timer.
-	# The task calls __call__ to set up its timeout and return a future.
-	# The test calls step().
-	# When both arrive, the future is triggered.
-	# repeat.
+	# Usage:
+	# async def Timer(loop,dly,proc):
+	#    return loop.call_later(dly, proc._timeout)
+	# class proc:
+	#	async def loop(self):
+	#       while True:
+	#			self.f = asyncio.Future(loop=self._loop)
+	#			self.t = Timer(self._loop,100,self)
+	#			…
+	#			await self.f
+	#	def _timeout(self):
+	#		self.f.set_result("timeout")
+	#	def trigger(self):
+	#		self.f.set_result("trigger")
+	# …
+	# with mock.patch("moat.whatever.Timer", new=FakeSleep(loop)) as fs:
+	#	…
+	#	await fs.step(f)
+
 	f = None
 	g = None
 	proc = None
@@ -140,17 +155,18 @@ class FakeSleep:
 
 	async def __call__(self,loop,dly,proc):
 		# called by the task when it wishes to create a timeout
-		logger.debug("Enter: main %s",proc)
+		logger.debug("main: Enter %s",proc)
 		assert self.proc is None
 		assert self.loop is loop
-		if self.f is not None:
-			self.f.set_result(False)
+		self.proc = proc
 		if self.mod is not None:
 			m,self.mod = self.mod,None
-			logger.debug("Wait: main %s",m)
+			logger.debug("main: Wait %s",m)
 			await m()
-		self.proc = proc
-		logger.debug("Exit: main %s",proc)
+		if self.f is not None:
+			logger.debug("main: Sig")
+			self.f.set_result(False)
+		logger.debug("main: Exit %s",proc)
 		return self
 	def cancel(self):
 		# called by the task when it wishes to cancel its timeout
@@ -164,22 +180,24 @@ class FakeSleep:
 			that's executed at the beginning of the next iteration.
 			"""
 		if self.proc is None:
-			logger.debug("Wait: step %s",mod)
+			logger.debug("step: Wait %s",mod)
 			self.f = asyncio.Future(loop=self.loop)
 			await asyncio.wait((task,self.f), loop=self.loop,return_when=asyncio.FIRST_COMPLETED)
-		logger.debug("Enter: step %s",mod)
+		logger.debug("step: Enter %s %s",self.proc,mod)
 		if not isinstance(mod,bool):
 			self.mod = mod
 		p,self.proc = self.proc,None
 		self.f = None
 		if mod is True:
-			logger.debug("Kill: step %s",mod)
+			logger.debug("step: Kill %s",mod)
 			p._timeout(etcd.StopWatching())
 			await task
 		else:
-			logger.debug("Run: step %s",mod)
-			if p and not task.done():
-				p.trigger()
+			logger.debug("step: Run %s",mod)
+			if not task.done():
+				logger.debug("step: trigger")
+				if p is not None:
+					p.trigger()
 			if task.done():
 				task.result()
 				assert False,"dead"
