@@ -421,11 +421,14 @@ class BusScan(Task):
 			"""
 
 		while True:
-			#logger.debug("SCAN ALL")
 			if self.config['delay']:
-				#logger.debug("SCAN ALL A %s",self.config['delay'])
+				#logger.debug("SCAN ALL %s",self.config['delay'])
 				self._delay = asyncio.Future(loop=self.loop)
 				self._delay_timer = await Timer(self.loop,self.config['delay'], self)
+				#logger.debug("SCAN ALL DONE")
+			else:
+				#logger.debug("SCAN ALL -")
+				pass
 
 			#logger.debug("SCAN ALL B")
 			if 'scanning' in self.tree:
@@ -496,11 +499,14 @@ class BusScan(Task):
 
 	def trigger(self):
 		"""Tell all tasks to run now. Used mainly for testing."""
-		#logger.debug("SCAN TRIGGER")
 		if self._delay is not None and not self._delay.done():
+			#logger.debug("SCAN TRIGGER")
 			self._delay.set_result("trigger")
 			logger.info('CANCEL 17 %s',self._delay_timer)
 			self._delay_timer.cancel()
+		else:
+			#logger.debug("SCAN TRIGGER NO")
+			pass
 		for t in self.tasks:
 			if hasattr(t,'trigger'):
 				t.trigger()

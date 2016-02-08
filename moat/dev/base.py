@@ -48,7 +48,7 @@ class RpcName(EtcString):
 	"""Update the parent's rpc name"""
 	def has_update(self):
 		p = self.parent
-		if p is None or not getattr(p.env,'running',False):
+		if p is None:
 			return
 		do_async(p._reg_rpc, self.value if self._seq else None)
 
@@ -56,7 +56,7 @@ class AlertName(EtcString):
 	"""Update the parent's alert name"""
 	def has_update(self):
 		p = self.parent
-		if p is None or not getattr(p.env,'running',False):
+		if p is None:
 			return
 		p._alert_name = (self.value if self._seq else None)
 
@@ -125,9 +125,9 @@ class TypedDir(EtcDir):
 			self._value = self._type._type(self._type,self)
 		if self._value.value == value:
 			await self.set('timestamp',timestamp)
-			return
-		self._value.value = value
-		await self._write_etcd(timestamp)
+		else:
+			self._value.value = value
+			await self._write_etcd(timestamp)
 		await self._write_amqp(timestamp)
 
 	async def reading(self,value, timestamp=None):
@@ -145,7 +145,7 @@ class TypedDir(EtcDir):
 	async def _write_amqp(self,timestamp):
 		if not self._alert_name:
 			return
-		amqp = self.env.cmd.amqp
+		amqp = self.env.cmd.root.amqp
 		await amqp.alert(self._alert_name, _data=self._value.amqp_value)
 		
 class TypedInputDir(TypedDir):

@@ -27,6 +27,7 @@ import asyncio
 import pytest
 from time import time
 from dabroker.proto import ProtocolClient
+from dabroker.unit import Unit,CC_DATA
 from moat.proto.onewire import OnewireServer
 import mock
 import aio_etcd as etcd
@@ -233,15 +234,23 @@ async def test_onewire_real(loop,owserver):
 async def test_onewire_fake(loop):
 	from etcd_tree import client
 	from . import cfg
+	amqt = -1
 	t = await client(cfg, loop=loop)
 	tr = await t.tree("/bus/onewire")
 	td = await t.tree("/device/onewire")
+	u = Unit("test.moat.onewire.client", cfg['config'], loop=loop)
+	@u.register_alert("test.fake.temperature", call_conv=CC_DATA)
+	def get_temp(val):
+		nonlocal amqt
+		amqt = val
+	await u.start()
 
 	with suppress(etcd.EtcdKeyNotFound):
 		await t.delete('/task/fake/onewire/scan/:task', recursive=True)
 
-	with mock.patch("moat.task.onewire.OnewireServer", new=FakeBus(loop)) as fb:
-		with mock.patch("moat.task.onewire.Timer", new=FakeSleep(loop)) as fs:
+	try:
+		with mock.patch("moat.task.onewire.OnewireServer", new=FakeBus(loop)) as fb, \
+			mock.patch("moat.task.onewire.Timer", new=FakeSleep(loop)) as fs:
 			mp = mock.patch("moat.task.onewire.DEV_COUNT", new=1)
 			mp.__enter__()
 
@@ -274,6 +283,7 @@ async def test_onewire_fake(loop):
 				await td.wait()
 				await tr.wait()
 				assert td['10']['001001001001'][':dev']
+				await td['10']['001001001001'][':dev']['input']['temperature'].set('alert','test.fake.temperature')
 				assert tr['faker']['bus']['bus.42 1f.123123123123 aux']['devices']['10']['001001001001'] == '0'
 				assert int(fb.bus_aux['simultaneous']['temperature']) == 1
 			await fs.step(f,mod_a)
@@ -287,6 +297,7 @@ async def test_onewire_fake(loop):
 				assert float(td['10']['001001001001'][':dev']['input']['temperature']['value']) == 12.5, \
 					td['10']['001001001001'][':dev']['input']['temperature']['value']
 			await fs.step(f,mod_a2)
+			assert amqt == 12.5, amqt
 
 			# now unplug the sensor
 			async def mod_x():
@@ -336,9 +347,12 @@ async def test_onewire_fake(loop):
 				assert float(td['10']['001001001001'][':dev']['input']['temperature']['value']) == 42.25, \
 					td['10']['001001001001'][':dev']['input']['temperature']['value']
 			await fs.step(f,mod_a3)
+			assert amqt == 42.25, amqt
 
 			# More to come. For now, shut down.
 			await fs.step(f,True)
 			r = await f
 			assert r == 0, r
+	finally:
+		await u.stop()
 
