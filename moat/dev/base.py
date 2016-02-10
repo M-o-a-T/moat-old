@@ -26,7 +26,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 from etcd_tree import EtcString,EtcDir,EtcFloat,EtcInteger,EtcValue, ReloadRecursive
 from time import time
 from moat.util import do_async
-from moat.types import TYPEDEF, type_names
+from moat.types import TYPEDEF_DIR,TYPEDEF, type_names
 from dabroker.unit.rpc import CC_DATA
 
 import logging
@@ -82,7 +82,14 @@ class TypedDir(EtcDir):
 	def _set_type(self, typename):
 		if self._type is not None and self._type._type.name == typename:
 			return
-		self._type = self.env.cmd.root.types.lookup(typename,name=TYPEDEF)
+		if self.env is not None:
+			self._type = self.env.cmd.root.types.lookup(typename,name=TYPEDEF)
+		else:
+			try:
+				self._type = self.root.lookup(TYPEDEF_DIR).lookup(typename,name=TYPEDEF)
+			except KeyError:
+				import pdb;pdb.set_trace()
+				self._type = self.root.lookup(TYPEDEF_DIR).lookup(typename,name=TYPEDEF)
 
 		if 'value' in self:
 			if self._value is None:
