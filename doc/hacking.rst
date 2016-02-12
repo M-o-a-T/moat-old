@@ -13,6 +13,13 @@ Testing!
 Write a couple of testcases which exercise your code. It's not difficult
 and *will* save time and frustration. Trust me on this.
 
+Manual debugging is somewhat difficult because MoaT protects itself by
+a number of timeouts. dissecting a broken data structure doesn't get any
+easier if you're forced to run the main loop every five seconds. Thus,
+you can set the environment variable ``MOAT_DEBUG_TIMEOUT`` to the number
+of seconds you need for a debugging session. This causes all destructive
+timeouts to last at least that long.
+
 Etcd is authoritative
 ---------------------
 

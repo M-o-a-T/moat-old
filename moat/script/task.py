@@ -22,6 +22,9 @@ from ..task import _VARS, setup_task_vars, TASK_DIR,TASKDEF_DIR,TASK,TASKDEF, TA
 import logging
 logger = logging.getLogger(__name__)
 
+import os
+min_timeout = float(os.environ.get('MOAT_DEBUG_TIMEOUT',0))
+
 class _NOTGIVEN:
 	pass
 
@@ -144,6 +147,7 @@ class Task(asyncio.Task):
 				if refresh < 1:
 					refresh = 1
 			assert refresh>=1, refresh
+			ttl = max(ttl,min_timeout)
 			refresh = (ttl/(refresh+0.1))
 			return ttl,refresh
 
@@ -181,7 +185,7 @@ class Task(asyncio.Task):
 				run_task.cancel()
 			except Exception: pass
 			killer = None
-		killer = r.loop.call_later(ttl, aborter)
+		killer = r.loop.call_later(max(ttl,min_timeout), aborter)
 
 		async def updater(refresh):
 			# Periodically refresh the "running" entry.
@@ -208,7 +212,7 @@ class Task(asyncio.Task):
 				def mtc():
 					logger.info('CANCEL 8 %s',killer)
 					main_task.cancel()
-				killer = r.loop.call_later(ttl,mtc)
+				killer = r.loop.call_later(max(ttl,min_timeout),mtc)
 				logger.debug("Run marker refreshed %s",self.name)
 				await asyncio.sleep(refresh, loop=r.loop)
 				
