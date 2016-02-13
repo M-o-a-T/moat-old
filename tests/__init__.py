@@ -35,9 +35,7 @@ import os
 from yaml import safe_load
 
 import logging
-logging.basicConfig(filename='test.log', level=logging.DEBUG)
 logger = logging.getLogger(__name__)
-logging.captureWarnings(True)
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -130,20 +128,26 @@ class MoatTest(Moat):
 		assert s == self.stdout_data
 
 def load_cfg(cfg):
-    global cfgpath
-    if os.path.exists(cfg):
-        pass
-    elif os.path.exists(os.path.join("tests",cfg)): # pragma: no cover
-        cfg = os.path.join("tests",cfg)
-    elif os.path.exists(os.path.join(os.pardir,cfg)): # pragma: no cover
-        cfg = os.path.join(os.pardir,cfg)
-    else: # pragma: no cover
-        raise RuntimeError("Config file '%s' not found" % (cfg,))
+	global cfgpath
+	if os.path.exists(cfg):
+		pass
+	elif os.path.exists(os.path.join("tests",cfg)): # pragma: no cover
+		cfg = os.path.join("tests",cfg)
+	elif os.path.exists(os.path.join(os.pardir,cfg)): # pragma: no cover
+		cfg = os.path.join(os.pardir,cfg)
+	else: # pragma: no cover
+		raise RuntimeError("Config file '%s' not found" % (cfg,))
 
-    cfgpath = cfg
-    with open(cfg) as f:
-        cfg = safe_load(f)
-    return cfg
+	cfgpath = cfg
+	with open(cfg) as f:
+		cfg = safe_load(f)
+
+	from logging.config import dictConfig
+	dictConfig(cfg['config']['logging'])
+	logging.captureWarnings(True)
+	logger.debug("Test %s","starting up")
+	return cfg
+
 
 cfg = load_cfg(os.environ.get('MOAT_TEST_CFG',"test.cfg"))
 

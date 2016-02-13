@@ -143,7 +143,6 @@ stuff back to the loop.
 			logfile = open(opts.logto,"w")
 		else:
 			logfile = sys.stderr
-		logging.basicConfig(stream=logfile,level=(logging.ERROR,logging.WARNING,logging.INFO,logging.INFO,logging.DEBUG)[min(self.verbose,4)])
 		if opts.logto:
 			# also report errors to stderr
 			h = logging.StreamHandler(sys.stderr)
@@ -183,6 +182,20 @@ stuff back to the loop.
 					ok = kk
 					c = c.setdefault(kk,{})
 				oc[ok] = v
+		#logging.basicConfig(stream=logfile,level=(logging.ERROR,logging.WARNING,logging.INFO,logging.INFO,logging.DEBUG)[min(self.verbose,4)])
+		lcfg = self.cfg['config']['logging']
+		if opts.logto:
+			lcfg['logging']['root']['handlers'] = ['logfile']
+			lh = lcfg['handlers'].get('logfile',
+				{'level':'logging.DEBUG',
+				 'formatter':'std',
+				})
+			lh['class'] = 'logging.FileHandler'
+			lh['filename'] = opts.logto
+
+		from logging.config import dictConfig
+		dictConfig(self.cfg['config']['logging'])
+		logging.captureWarnings(True)
 
 		self.app = self.cfg['config'].get('app',None)
 		if self.app is None:
