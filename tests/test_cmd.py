@@ -272,7 +272,8 @@ async def test_show(loop):
 	m = MoatTest(loop=loop)
 	r = await m.parse("-c test.cfg show foobarbaz")
 	assert r == 1, r
-	assert m.debug_log[-1].getMessage() == "Unknown command 'foobarbaz'.\n"
+	assert m.debug_log[-1].getMessage() == "Unknown command 'foobarbaz'.\n" or \
+	       m.debug_log[-2].getMessage() == "Unknown command 'foobarbaz'.\n"
 
 	m = MoatTest(loop=loop)
 	r = await m.parse("-c test.cfg show config")
@@ -300,7 +301,8 @@ async def test_set(loop):
 	m = MoatTest(loop=loop)
 	r = await m.parse("-c test.cfg show etcd one")
 	assert r > 0, r
-	assert m.debug_log[-2].getMessage() == 'key not present: one'
+	assert m.debug_log[-2].getMessage() == 'key not present: one' or \
+	       m.debug_log[-3].getMessage() == 'key not present: one'
 
 	m = MoatTest(loop=loop)
 	r = await m.parse("-c test.cfg set etcd one.two=three")
@@ -309,7 +311,8 @@ async def test_set(loop):
 	m = MoatTest(loop=loop)
 	r = await m.parse("-c test.cfg set etcd one.two=threeandahalf")
 	assert r > 0, r
-	assert m.debug_log[-2].getMessage() == 'Entry exists: one.two'
+	assert m.debug_log[-2].getMessage() == 'Entry exists: one.two' or \
+	       m.debug_log[-3].getMessage() == 'Entry exists: one.two'
 
 	m = MoatTest(loop=loop)
 	r = await m.parse("-c test.cfg set etcd -u one.two=threeandahalf")
@@ -344,7 +347,8 @@ async def test_set(loop):
 	m = MoatTest(loop=loop)
 	r = await m.parse("-c test.cfg set etcd -m %d one.two=four" % (i-1,))
 	assert r > 0, r
-	assert m.debug_log[-2].getMessage() == 'Bad modstamp: one.two'
+	assert m.debug_log[-2].getMessage() == 'Bad modstamp: one.two' or \
+	       m.debug_log[-3].getMessage() == 'Bad modstamp: one.two'
 
 	m = MoatTest(loop=loop)
 	r = await m.parse("-c test.cfg set etcd -m %d one.two=four" % (i,))
@@ -358,7 +362,8 @@ async def test_set(loop):
 	m = MoatTest(loop=loop)
 	r = await m.parse("-c test.cfg set etcd -p threeandahalf -d one.two")
 	assert r > 0, r
-	assert m.debug_log[-2].getMessage() == 'Bad modstamp: one.two'
+	assert m.debug_log[-2].getMessage() == 'Bad modstamp: one.two' or \
+	       m.debug_log[-3].getMessage() == 'Bad modstamp: one.two'
 
 	m = MoatTest(loop=loop)
 	r = await m.parse("-c test.cfg set etcd -p four -d one.two")

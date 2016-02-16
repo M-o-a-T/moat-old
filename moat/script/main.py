@@ -24,7 +24,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##  Thus, do not remove the next line, or insert any blank lines above.
 ##BP
 
-from moat.script import Command, CommandExited, CommandError
+from moat.script import Command, CommandError
 import glob
 import sys
 import os
@@ -183,7 +183,7 @@ stuff back to the loop.
 					c = c.setdefault(kk,{})
 				oc[ok] = v
 		#logging.basicConfig(stream=logfile,level=(logging.ERROR,logging.WARNING,logging.INFO,logging.INFO,logging.DEBUG)[min(self.verbose,4)])
-		lcfg = self.cfg['config']['logging']
+		lcfg = self.cfg['config'].get('logging',{'version':1})
 		if opts.logto:
 			lcfg['logging']['root']['handlers'] = ['logfile']
 			lh = lcfg['handlers'].get('logfile',
@@ -194,7 +194,8 @@ stuff back to the loop.
 			lh['filename'] = opts.logto
 
 		from logging.config import dictConfig
-		dictConfig(self.cfg['config']['logging'])
+		lcfg['disable_existing_loggers'] = False
+		dictConfig(lcfg)
 		logging.captureWarnings(True)
 
 		self.app = self.cfg['config'].get('app',None)
@@ -204,11 +205,12 @@ stuff back to the loop.
 			s.connect(('8.8.8.8', 53)) # connecting to a UDP address doesn't send packets
 			addr = s.getsockname()[0]
 			s.close()
-			addr = socket.getfqdn(addr).split('.')
+			self.app = socket.getfqdn(addr)
+			addr = self.app.split('.')
 			if len(addr) < 3: # pragma: no cover
 				raise CommandError("You need to fix your FQDN ('%s'), or use the '-a' option." % ".".join(addr))
 			addr.reverse()
-			self.cfg['config']['app'] = self.app = ".".join(addr)
+			self.cfg['config']['app'] = ".".join(addr)
 
 #		if 'specific' in kw and appname is not None:
 #			s = kw['specific']
@@ -224,8 +226,7 @@ stuff back to the loop.
 #				except ValueError:
 #					break
 
-		if self.verbose > 2:
-			print("App name:",self.app)
+		logger.debug("Startup on %s: %s", self.app, self.options.__dict__)
 
 	async def setup(self, dest=None, want=()):
 		"""Once running in async mode, get our basic config loaded"""

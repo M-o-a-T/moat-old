@@ -36,9 +36,11 @@ Command class.
 
 import optparse
 import sys
-import logging
 import asyncio
 from types import CoroutineType
+
+import logging
+logger = logging.getLogger(__name__)
 
 class CommandHelpFormatter(optparse.IndentedHelpFormatter):
 	"""
@@ -172,6 +174,7 @@ class Command(object):
 	subCommandClasses = None
 	aliasedSubCommands = None
 	parser = None
+	logged = False
 
 	def __init__(self, parent=None, stdout=None):
 		"""
@@ -309,32 +312,29 @@ class Command(object):
 		"""
 		# note: no arguments should be passed as an empty list, not a list
 		# with an empty str as ''.split(' ') returns
-		self.log.debug('calling %r.parse_args(%r)' % (self, argv))
 		self.options, args = self.parser.parse_args(argv)
-		self.log.debug('called %r.parse_args' % self)
 
 		# if we were asked to print help or usage, we are done
 		if self.parser.usage_printed or self.parser.help_printed:
 			return None
 
-		self.log.debug('calling %r.handleOptions(%r)' % (self, self.options))
 		ret = self.handleOptions()
-		self.log.debug('called %r.handleOptions, returned %r' % (self, ret))
 
 		if ret:
 			return ret # pragma: no cover ## if necessary, we raise
+
+		self.parse_hook()
 
 		# if we don't have args or don't have subcommands,
 		# defer to our do() method
 		# allows implementing a do() for commands that also have subcommands
 		if not args or not self.subCommands:
-			self.log.debug('no args or no subcommands, calling %r.do(%r)' % (
-				self, args))
+			self.log.debug('no args or no subcommands, calling %r.do(%r)', self, args)
 			try:
 				ret = await self.do(args)
 				self.log.debug('done ok, returned %r', ret)
 #			except CommandOk as e:
-#				self.log.debug('done with exception, raised %r', e)
+#				self.log.exception('done with exception, raised %r', e)
 #				ret = e.status
 #				self.stdout.write(e.output + '\n')
 			except CommandExited as e:
@@ -361,14 +361,32 @@ class Command(object):
 		if C is not None:
 			c = C(self)
 			try:
-				return (await c.parse(args[1:]))
-			except Exception:
-				await c.finish()
+				r = await c.parse(args[1:])
+				if not self.root.logged:
+					if r:
+						logger.info("Error:%s:%s",r, " ".join(args))
+					else:
+						logger.debug("Done:%s", " ".join(args))
+					self.root.logged = True
+				return r
+			except CommandExited as e:
 				raise
+			except Exception:
+				if not self.root.logged:
+					logger.exception("Error:%s", " ".join(args))
+					self.root.logged = True
+				raise
+			finally:
+				await c.finish()
 
 		self.log.error("Unknown command '%s'.\n", command)
 		self.parser.print_usage(file=sys.stderr)
 		return 1
+
+	def parse_hook(self):
+		"""
+		"""
+		pass
 
 	def handleOptions(self):
 		"""

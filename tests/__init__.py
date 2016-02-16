@@ -110,6 +110,8 @@ class MoatTest(Moat):
 		super().__init__(*a,**k)
 		self._stdout = io.StringIO()
 		self._width = 9999
+
+	def parse_hook(self):
 		self.debug_log = []
 		h = StoreHandler(self)
 		logging.getLogger().addHandler(h)
@@ -143,6 +145,7 @@ def load_cfg(cfg):
 		cfg = safe_load(f)
 
 	from logging.config import dictConfig
+	cfg['config']['logging']['disable_existing_loggers'] = False
 	dictConfig(cfg['config']['logging'])
 	logging.captureWarnings(True)
 	logger.debug("Test %s","starting up")
