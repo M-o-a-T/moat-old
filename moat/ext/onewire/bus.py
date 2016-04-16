@@ -28,10 +28,11 @@ logger = logging.getLogger(__name__)
 from etcd_tree.node import EtcFloat,EtcInteger,EtcString
 from time import time
 
-from .. import BUS
-from ..base import BaseBus
+from moat.bus.base import BaseBus
+from moat.types.etcd import MoatBusBase
 
 class OnewireBusBase(MoatBusBase):
+	pass
 	
 class OnewireBus(BaseBus): #(, metaclass=SelectDevice):
 	prefix = "onewire"

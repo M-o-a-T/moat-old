@@ -29,7 +29,7 @@ import os
 import sys
 from moat.script import Command, CommandError
 from moat.util import r_dict
-from moat.dev import setup_dev_types, DEV_DIR,DEV
+from moat.dev import DEV_DIR,DEV
 from moat.dev.base import Device
 from etcd_tree import EtcTypes,EtcInteger
 from yaml import safe_dump
@@ -46,9 +46,9 @@ __all__ = ['DeviceListCommand','DeviceLocateCommand','DeviceDescribeCommand']
 
 class DeviceListCommand(Command):
 	name = "list"
-	summary = "List 1wire devices"
+	summary = "List devices"
 	description = """\
-List 1wire devices (OWFS) found by MoaT.
+List devices found by MoaT.
 
 No arguments: show device classes and counts.
 Device class: show those devices.
@@ -74,8 +74,8 @@ Device ID: detailed information about the device.
 			for arg in args:
 				s = [x for x in arg.split('/') if x != '']
 				t = await tree.subdir(arg, recursive=False)
-				async for dev in t.tagged(':dev'):
-					self.do_entry(dev,dev.path[len(DEV_DIR):1])
+				async for dev in t.tagged(DEV):
+					self.do_entry(dev)
 			return
 
 		for arg in args:
@@ -155,7 +155,7 @@ class DeviceSignalCommand(Command):
 		types = EtcTypes()
 		Device.types(types)
 		try:
-			t = await etc.tree('/'.join((path,arg,':dev')), types=types,create=False)
+			t = await etc.tree('/'.join((path,arg,DEV)), types=types,create=False)
 		except KeyError:
 			raise CommandError("Device '%s' not found." % (arg,))
 		if args:

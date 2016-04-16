@@ -23,37 +23,23 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##  Thus, do not remove the next line, or insert any blank lines above.
 ##BP
 
-"""List of known Tasks"""
+import asyncio
 
-import os
-from ..script.util import objects
-from etcd_tree import EtcDir,EtcFloat
+from moat.dev import DEV
+from . import ScanTask,dev_re
 
 import logging
 logger = logging.getLogger(__name__)
 
-# Possible tasks: what shall run where
-# written by "moat task add …"
-TASK_DIR = ('task',)
-TASK = ':task'
+class ScanPoll(ScanTask):
+	typ = "poll"
 
-# Task descriptions: what kind of tasks exist?
-# written by "moat task def init"
-TASKDEF_DIR = ('meta','task')
-TASKDEF = ':taskdef'
-
-# Task state: which tasks are currently running?
-# written by "moat task run", obviously
-TASKSTATE_DIR = ('status','run')
-TASKSTATE = ':task'
-
-_VARS = {'ttl','refresh','restart','retry','max-retry'}
-
-def task_types(prefix=__name__):
-	"""Enumerate the task types known to Moat's code."""
-	from ..script.task import Task
-	return objects(prefix, Task)
-
-class TaskDir(EtcDir):
-	pass
+	async def task_(self):
+		for fam,d in self.parent['devices'].items():
+			for devid,b in d.items():
+				try:
+					dev = await self.env.devices[fam][devid][DEV]
+					await dev.poll()
+				except Exception:
+					logger.exception("Poll error %s.%s", fam,devid)
 

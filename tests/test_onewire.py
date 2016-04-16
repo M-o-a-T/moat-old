@@ -59,6 +59,24 @@ class FakeSubBus:
 	def at(self,*p):
 		return FakeSubBus(parent=self,path=p)
 		
+class Fake_2405:
+	val = False
+	def __getitem__(self,k):
+		if k != 'sensed':
+			raise KeyError(k)
+		return self.val
+
+	def __setitem__(self,k,v):
+		if k != 'pio':
+			raise KeyError(k)
+		import pdb;pdb.set_trace()
+		if v == '1':
+			self.val = False
+		elif v == '0':
+			self.val = True
+		else:
+			raise ValueError(v)
+
 class FakeBus(FakeSubBus):
 	def __init__(self, loop, data=None):
 		self.loop = loop
@@ -85,6 +103,7 @@ class FakeBus(FakeSubBus):
 				"main":self.bus_main,
 				"aux":self.bus_aux,
 				},
+			"05.010101010101":Fake_2405(),
 			}
 		self.data = {
 			"uncached": {
@@ -166,7 +185,7 @@ class Trigger:
 
 	async def __call__(self,loop=None):
 		# called by the task when it wishes to create a timeout
-		logger.debug("main: Enter %s")
+		logger.debug("main: Enter")
 		assert loop is None or self.loop is loop
 		if self.trigger.done():
 			self.trigger = asyncio.Future(loop=self.loop)
@@ -308,6 +327,7 @@ async def test_onewire_fake(loop):
 				await tr.wait()
 				assert td['10']['001001001001'][':dev']
 				await td['10']['001001001001'][':dev']['input']['temperature'].set('alert','test.fake.temperature')
+				await td['05']['010101010101'][':dev']['output']['pin'].set('rpc','test.fake.pin')
 				assert tr['faker']['bus']['bus.42 1f.123123123123 aux']['devices']['10']['001001001001'] == '0'
 				assert int(fb.bus_aux['simultaneous']['temperature']) == 1
 			await fs.step(f,mod_a)
@@ -322,9 +342,12 @@ async def test_onewire_fake(loop):
 				await td.wait()
 				assert float(td['10']['001001001001'][':dev']['input']['temperature']['value']) == 12.5, \
 					td['10']['001001001001'][':dev']['input']['temperature']['value']
+				assert td['05']['010101010101'][':dev']['input']['pin']['value'] == '0', \
+					 td['05']['010101010101'][':dev']['input']['pin']['value']
 			await fs.step(f,mod_a2)
 			logger.debug("TC E")
 			assert amqt == 12.5, amqt
+			await u.rpc('test.fake.pin',1)
 
 			# now unplug the sensor
 			async def mod_x():
@@ -333,8 +356,9 @@ async def test_onewire_fake(loop):
 			logger.debug("TC F")
 
 			m2 = MoatTest(loop=loop)
-			r = await m.parse("-vvvc test.cfg run -g fake/onewire/scan")
+			r = await m2.parse("-vvvc test.cfg run -g fake/onewire/scan")
 			assert r == 0, r
+			del m2
 
 			logger.debug("TC G")
 			# watch it vanish
@@ -345,12 +369,15 @@ async def test_onewire_fake(loop):
 
 			for x in range(3):
 				m2 = MoatTest(loop=loop)
-				r = await m.parse("-vvvc test.cfg run -g fake/onewire/scan")
+				r = await m2.parse("-vvvc test.cfg run -g fake/onewire/scan")
 				assert r == 0, r
+				del m2
 			await asyncio.sleep(1.5,loop=loop)
 			await fs.step(f)
 			logger.debug("TC I")
 			async def mod_c():
+				assert td['05']['010101010101'][':dev']['input']['pin']['value'] == '1', \
+					 td['05']['010101010101'][':dev']['input']['pin']['value']
 				with pytest.raises(KeyError):
 					tr['faker']['bus']['bus.42 1f.123123123123 aux']['devices']['10']['001001001001']
 				with pytest.raises(KeyError):

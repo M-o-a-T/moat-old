@@ -45,10 +45,10 @@ class ScanAlarm(ScanTask):
 				except KeyError:
 					warned = True
 					logger.warn("Scanning %s: device '%s' not found", self.name,dev)
-				except NoAlarmHandler as exc:
+				except NoAlarmHandler:
 					warned = True
 					logger.warn("Scanning %s: device '%s' does not have an alarm handler", self.name,dev)
-				except Exception as e:
+				except Exception:
 					warned = True
 					logger.exception("Scanning %s: device '%s' triggered an error", self.name,dev)
 			else:

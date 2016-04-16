@@ -26,6 +26,9 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 from collections.abc import Mapping,MutableMapping
 import asyncio
 
+import logging
+logger = logging.getLogger(__name__)
+
 class _NOT_HERE: pass
 class _NOT_THERE: pass
 
@@ -105,15 +108,15 @@ def do_async(task, *a, _loop=None, _err_cb=None, **k):
 		If not set, the error is logged instead.
 		"""
 	try:
-		f = asyncio.ensure_future(task(*a,**k))
+		f = asyncio.ensure_future(task(*a,**k), loop=_loop)
 	except Exception as exc:
 		f = asyncio.Future(loop=_loop)
 		f.set_exception(exc)
 	def reporter(f):
 		exc = f.exception()
-		if err_cb is None:
-			logger.exception("Error in %s %s %s", task,a,k, exc=exc)
+		if _err_cb is None:
+			logger.exception("Error in %s %s %s", task,a,k, exc_info=exc)
 		else:
-			err_cb(exc)
+			_err_cb(exc)
 	f.add_done_callback(reporter)
 

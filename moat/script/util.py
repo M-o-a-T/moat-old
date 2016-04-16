@@ -23,7 +23,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##  Thus, do not remove the next line, or insert any blank lines above.
 ##BP
 
-"""Utilities for scripting"""
+"""Helper code for scripting"""
 
 from importlib import import_module
 import pkgutil
@@ -39,15 +39,15 @@ def objects(module, cls, immediate=False,direct=False,filter=lambda x:True):
 		If @direct is set, modules in subdirectories are ignored.
 		"""
 	if isinstance(module,str):
-		import sys
-		module = sys.modules[module]
+		from dabroker.util import import_string
+		module = import_string(module)
 	for a,b,c in pkgutil.walk_packages(module.__path__, module.__name__+'.'):
 		if direct and a.path != module.__path__[0]:
 			continue
 		try:
 			m = import_module(b)
-		except ImportError:
-			logger.exception("Trying to import "+__name__+'.'+b) # pragma: no cover
+		except ImportError as ex:
+			raise ImportError(b) from ex # pragma: no cover
 			# not going to ship a broken file for testing this
 		else:
 			try:

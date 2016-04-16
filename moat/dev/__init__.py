@@ -39,14 +39,3 @@ def devices():
 	# we want all objects with a distinctive prefix
 	return objects(__name__, BaseDevice, filter=lambda x:x.__dict__.get('prefix',None) is not None)
 
-def setup_dev_types(types):
-	"""Register types for all devices."""
-	types = types.step(DEV_DIR)
-	for dev in devices():
-		t = types.step(dev.prefix)
-		for p in dev.dev_paths():
-			t.step(p[:-1]).register(DEV, cls=p[-1])
-
-	from .base import DeadDevice
-	types.register('**',DEV, cls=DeadDevice)
-

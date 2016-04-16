@@ -33,12 +33,8 @@ class Sleeper(Task):
 		You can use it in a 'moat run -K' command to limit runtimes."""
 	name="test/sleep"
 	summary="A simple delay"
+	schema = {'delay':'float'}
 
-	@classmethod
-	def types(cls,tree):
-		super().types(tree)
-		tree.register('delay', cls=EtcFloat)
-		
 	async def task(self):
 		await asyncio.sleep(self.config['delay'], loop=self.loop)
 	

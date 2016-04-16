@@ -142,16 +142,69 @@ Main tree
 
     Data types. See section `types` for details.
 
+  * module
+
+    Loadable modules.
+
+    * ‹name›
+
+      The module name, like ``knx`` or ``onewire``.
+
+      A module is always coded in a single language.
+
+      * language
+
+        "python" (for now).
+
+      * descr
+
+        Some one-line description of the module.
+
+      * doc
+
+        Some multi-line description of the module.
+
+      * code
+
+        The actual module, e.g. ``moat.ext.onewire.Module``.
+
+      * ‹subsys›
+
+        Name of the code entity, e.g. ``moat.ext.onewire.dev.OnewireDevice``.
+
+        Known subsystems:
+
+        * device
+
+          The node for the /device/‹subsys› tree.
+
+        * bus
+
+          The node for the /bus/‹subsys› tree.
+
+        * cmd_ext
+
+          The "moat ext ‹subsys›" subcommand.
+
+        * cmd_dev
+
+          The "moat dev ‹subsys›" subcommand.
+
+        * cmd_bus
+
+          The "moat bus ‹subsys›" subcommand.
+
   * task
 
     This section describes possible tasks, for the benefit of external
-    configuration editors. It is optional.
+    configuration editors.
 
     * whatever …
 
       This hierarchy describes the task definitions which MoaT knows about.
-      The actual structure is up to you. "moat task list foo" will display
-      all definitions in the /task/HOSTNAME/foo/… hierarchy.
+      The actual structure is not prescribed, though Best Practice is that
+      built-in commands start with "moat". External modules should use
+      their module name as a prefix as to avoid conflicts.
 
       * :taskdef
 
@@ -183,8 +236,11 @@ Main tree
 
         * data
 
-          Describes the code's configuration. TODO. Probably JSON, i.e.
-          a json-schema structure.
+          Describes the code's configuration variables.
+
+          * name …
+
+            Name of the type (/meta/type/name…) of this item.
 
 * device
 

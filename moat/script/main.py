@@ -30,11 +30,13 @@ import sys
 import os
 from etcd_tree.util import from_yaml
 import yaml
-from moat.cmd import commands as moat_commands
-from dabroker.unit import make_unit, DEFAULT_CONFIG as DABROKER_DEFAULT_CONFIG
 import asyncio
 import socket
+
+from moat.cmd import commands as moat_commands
 from moat.util import OverlayDict
+from moat.types import TYPEDEF_DIR
+from dabroker.unit import make_unit, DEFAULT_CONFIG as DABROKER_DEFAULT_CONFIG
 
 import logging
 logger = logging.getLogger(__name__)
@@ -228,8 +230,12 @@ stuff back to the loop.
 
 		logger.debug("Startup on %s: %s", self.app, self.options.__dict__)
 
-	async def setup(self, dest=None, want=()):
-		"""Once running in async mode, get our basic config loaded"""
+	async def setup(self, dest=None):
+		"""
+			Attach to etcd and amqp, get etcd tree.
+
+			Also, set etcd+amqp+tree attributes of `dest` parameter, if given.
+			"""
 		if self.etcd is None:
 			await self._get_etcd()
 		if self.amqp is None:
@@ -237,31 +243,34 @@ stuff back to the loop.
 		if dest not in (None,self):
 			dest.etcd = self.etcd
 			dest.amqp = self.amqp
+			dest.tree = self.tree
 
 	async def _get_tree(self):
+		"""\
+			Returns the "main" etcd tree (lazily loaded).
+
+			Also, populates .types with etcd's TYPEDEF_DIR.
+			"""
 		if self.tree is not None:
 			return self.tree
 		etc = await self._get_etcd()
 
-		types = self._types
-		from moat.types import setup_meta_types,TYPEDEF_DIR
-		from moat.task import setup_task_types
-		from moat.dev import setup_dev_types
-		setup_meta_types(types)
-		setup_task_types(types)
-		setup_dev_types(types)
-		self.tree = await etc.tree('/', types=types, immediate=None)
+		from moat.types.etcd import MoatRoot
+		self.tree = await etc.tree('/', root_cls=MoatRoot, immediate=None)
 		self.types = await self.tree.subdir(TYPEDEF_DIR,recursive=True)
 		return self.tree
 
 	async def _get_etcd(self):
+		"""\
+			Connect to etcd.
+
+			Also, underlays the current configuration with whatever is in etcd.
+			"""
 		if self.etcd is not None:
 			return self.etcd
 		from etcd_tree import client
 		from etcd_tree.etcd import EtcTypes
-		from ..task import setup_task_vars
 		self._types = types = EtcTypes()
-		setup_task_vars(types.step(('config','run')))
 
 		self.etcd = etc = await client(self.cfg, loop=self.loop)
 		self.etc_cfg = await etc.tree("/config", types=types.step('config'))
@@ -273,4 +282,11 @@ stuff back to the loop.
 			return self.amqp
 		self.amqp = res = await make_unit(self.app, self.cfg['config'], loop=self.loop)
 		return res
+
+	def load(self, subsys,name):
+		"""
+			Return the class for etcd's /SUBSYS/NAME, assuming that SUBSYS
+			is 'bus' or 'device'.
+			"""
+		return self.tree.lookup('meta','module', name,subsys).code
 

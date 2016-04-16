@@ -8,7 +8,6 @@ Class for managing tasks.
 """
 
 import asyncio
-from dabroker.util import import_string
 from etcd_tree.etcd import EtcTypes
 from etcd_tree.node import EtcFloat,EtcBase
 import etcd
@@ -17,7 +16,7 @@ from time import time
 from traceback import format_exception
 import weakref
 
-from ..task import _VARS, setup_task_vars, TASK_DIR,TASKDEF_DIR,TASK,TASKDEF, TASKSTATE_DIR,TASKSTATE
+from ..task import _VARS, TASK_DIR,TASKDEF_DIR,TASK,TASKDEF, TASKSTATE_DIR,TASKSTATE
 
 import logging
 logger = logging.getLogger(__name__)
@@ -67,7 +66,7 @@ class Task(asyncio.Task):
 		"""
 	name = "do_not_run.py"
 	summary = """This is a prototype. Do not use."""
-	schema = None
+	schema = {}
 	description = None
 
 	_global_loop=False
@@ -112,18 +111,13 @@ class Task(asyncio.Task):
 		super().__init__(coro_wrapper(self.run), loop=self.loop)
 
 	@classmethod
-	def types(cls,types):
-		"""\
-			`types` is an etcd_tree.EtcTypes instance.
-			Add your data types here. The default is Unicode.
-
-			This is a class method.
-			"""
-		pass
-	
-	@classmethod
 	def task_info(cls,tree):
-		"""Feed my data into etcd."""
+		"""\
+			Retrieve the data about this task that should be stored in etcd.
+			Returns (classname,dict).
+
+			To override: call super(), then add to dict.
+			"""
 		dir = dict(
 			language='python',
 			code=cls.__module__+'.'+cls.__name__,
@@ -134,7 +128,7 @@ class Task(asyncio.Task):
 		return cls.name, dir
 
 	async def run(self):
-		"""Main code for task control"""
+		"""Main code for task control. Don't override."""
 		logger.debug("Starting %s: %s",self.name, self.__class__.__name__)
 		r = self.cmd.root
 		await r.setup(self)
@@ -151,7 +145,7 @@ class Task(asyncio.Task):
 			refresh = (ttl/(refresh+0.1))
 			return ttl,refresh
 
-		run_state = await _run_state(r.etcd,self.path)
+		run_state = await _run_state(r.tree,self.path)
 		ttl,refresh = get_ttl()
 
 		try:
@@ -295,9 +289,6 @@ class Task(asyncio.Task):
 				except Exception as exc:
 					logger.exception("Could not delete 'running' entry")
 			await run_state.wait()
-			await run_state.close()
-			del self.amqp
-			del self.etcd
 
 			logger.debug("Ended %s: %s",self.name, res)
 
@@ -313,19 +304,21 @@ class Task(asyncio.Task):
 			"""
 		raise NotImplementedError("You need to write the code that does the work!")
 
-async def _run_state(etcd,path):
-	"""Get a tree for the job's state. This is a separate function for testing"""
-	from etcd_tree.node import EtcFloat
-	from etcd_tree.etcd import EtcTypes
-	types = EtcTypes()
-	types.register('started', cls=EtcFloat)
-	types.register('stopped', cls=EtcFloat)
-	types.register('running', cls=EtcFloat)
-	run_state = await etcd.tree(TASKSTATE_DIR+path+(TASKSTATE,), types=types)
+async def _run_state(tree,path):
+	"""\
+		Get a tree for the job's state.
+
+		Tests use this to manipulate the state behind the testee's back.
+		"""
+	run_state = await tree.subdir(TASKSTATE_DIR+path+(TASKSTATE,))
 	return run_state
 
+
 class TaskMaster(asyncio.Future):
-	"""An object which controls running and restarting a task from etcd."""
+	"""\
+		An object which controls running and restarting a task,
+		as specified in etcd.
+		"""
 	current_retry = 1
 	path = None
 	job = None
@@ -334,13 +327,16 @@ class TaskMaster(asyncio.Future):
 
 	def __init__(self, cmd, path, callback=None):
 		"""\
-			Set up the static part of our task.
+			Set up the non-async part of our task.
 			@cmd: the command this is running because of.
 			@path: the job's path under /task
 			@callback(status,value): called with ("started",None), ("ok",result) or ("error",exc)
 			 whenever the job state changes
+
+			You need to call "await tm.init()" before using this.
 			"""
 		self.loop = cmd.root.loop
+		self.tree = cmd.root.tree
 		self.cmd = cmd
 		assert isinstance(path,tuple)
 		self.path = path
@@ -355,31 +351,13 @@ class TaskMaster(asyncio.Future):
 		
 	async def init(self):
 		"""Async part of initialization"""
-		# In order to read the task data, we need the data definition,
-		# which is attached to the taskdef. Thus, first read the poiner to
-		# that "manually".
-		self.etc = await self.cmd.root._get_etcd()
-		tree = await self.cmd.root._get_tree()
-		self.taskdef_name = (await self.etc.get(TASK_DIR+self.path+(TASK,'taskdef'))).value
-		td_path = tuple(x for x in self.taskdef_name.split('/') if x != "")
+		self.task = await self.tree.subdir(TASK_DIR+self.path+(TASK,))
+		self.taskdef_name = self.task.taskdef_name
 
-		self.taskdef = await tree.subdir(TASKDEF_DIR+td_path+(TASKDEF,), create=False)
-		if self.taskdef['language'] != 'python':
-			# Duh.
-			raise RuntimeError("This is not a Python job. Aborting.")
-
-		self.cls = import_string(self.taskdef['code'])
-
-		types = EtcTypes()
-		setup_task_vars(types)
-		self.cls.types(types.step('data'))
-
-		# Now we can read the task data and follow changes to it.
-		self.task = await self.etc.tree(TASK_DIR+self.path+(TASK,), types=types)
 		self.gcfg = self.cmd.root.etc_cfg['run']
 		self.rcfg = self.cmd.root.cfg['config']['run']
 		self._m1 = self.task.add_monitor(self.setup_vars)
-		self._m2 = self.taskdef.add_monitor(self.setup_vars)
+		self._m2 = self.task.taskdef.add_monitor(self.setup_vars)
 		self._m3 = self.gcfg.add_monitor(self.setup_vars)
 		self.setup_vars()
 		
@@ -391,7 +369,7 @@ class TaskMaster(asyncio.Future):
 		self.job.trigger()
 
 	def task_var(self,k):
-		for cfg in (self.taskdef, self.task, self.gcfg, self.rcfg):
+		for cfg in (self.task.taskdef, self.task, self.gcfg, self.rcfg):
 			if k in cfg:
 				return cfg[k]
 		raise KeyError(k)
@@ -400,7 +378,7 @@ class TaskMaster(asyncio.Future):
 		"""Copy task variables from etcd to local vars"""
 		# First, check the basics
 #		changed = set()
-		if self.taskdef_name != self.task.get('taskdef',''):
+		if self.taskdef_name != self.task.taskdef_name:
 			# bail out
 			raise RuntimeError("Command changed/deleted: %s / %s" % (self.taskdef_name,self.task.get('taskdef','')))
 		self.name = self.task['name']
@@ -416,7 +394,7 @@ class TaskMaster(asyncio.Future):
 		return self.vars['ttl'], self.vars['refresh']
 
 	def _start(self):
-		self.job = self.cls(self.cmd, self.name, config=self.task._get('data',{}), _ttl=self._get_ttl)
+		self.job = self.task.cls(self.cmd, self.name, config=self.task._get('data',{}), _ttl=self._get_ttl)
 		self.job.add_done_callback(self._job_done)
 		if self.callback is not None:
 			self.callback("start")

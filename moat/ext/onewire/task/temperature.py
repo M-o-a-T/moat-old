@@ -37,7 +37,7 @@ class ScanTemperature(ScanTask):
 
 	async def task_(self):
 		warned = False
-		if not len(self.parent['devices']['10']):
+		if not len(self.parent['devices'].get('10',())):
 			return True # pragma: no cover
 
 		await self.bus_cached.write("simultaneous","temperature", data="1")

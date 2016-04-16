@@ -43,5 +43,6 @@ class Moat(Command):
 This command class includes bus/technology-specific subcommands.
 """
 
-	subCommandClasses = list(commands())
+	def subCommandClasses(self):
+		pass
 

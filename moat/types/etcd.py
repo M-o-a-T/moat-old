@@ -27,16 +27,19 @@ from etcd_tree import EtcRoot, EtcDir, EtcString, ReloadRecursive
 from weakref import WeakValueDictionary
 from dabroker.util import import_string
 
+import logging
+logger = logging.getLogger(__name__)
+
 # This file contains all "singleton" etcd directories, i.e. those with
 # fixed names at the root of the tree
 
 class recEtcDir(EtcDir):
 	"""an EtcDir which always loads its content up front"""
 	@classmethod
-	async def this_class(cls, pre,recursive):
+	async def this_obj(cls, recursive, **kw):
 		if not recursive:
 			raise ReloadRecursive
-		return (await super().this_class(pre=pre,recursive=recursive))
+		return (await super().this_obj(recursive=recursive, **kw))
 
 class MoatDeviceBase(EtcDir):
 	"""\
@@ -52,16 +55,23 @@ class MoatBusBase(EtcDir):
 
 class MoatLoader(EtcString):
 	"""Directory for /meta/module/‹subsys›/‹name›"""
+	_code = None
+
 	@property
 	def code(self):
+		if self._code is not None:
+			return self._code
 		if self.parent['language'] != 'python':
 			raise RuntimeError("Wrong language for %s: %s" % ('/'.join(self.path), self.parent['language']))
-		return import_string(self.value)
+		self._code = import_string(self.value)
+		return self._code
 
 class MoatLoaderDir(recEtcDir):
 	"""Directory for /meta/module/‹subsys›"""
 	pass
 MoatLoaderDir.register('language', cls=EtcString)
+MoatLoaderDir.register('description', cls=EtcString)
+MoatLoaderDir.register('summary', cls=EtcString)
 MoatLoaderDir.register('*', cls=MoatLoader)
 
 class MoatLoaded(EtcDir):
@@ -70,7 +80,6 @@ class MoatLoaded(EtcDir):
 		Will lookup the class to use by way of /meta/modules."""
 	@classmethod
 	async def _new(cls,pre,parent,**kw):
-		import pdb;pdb.set_trace()
 		m = parent.root.lookup('meta','module',pre.key[-1],parent.name).code
 		res = await m._new(pre=pre,parent=parent,**kw)
 		return res
@@ -85,6 +94,50 @@ class MoatMetaModule(EtcDir):
 	async def init(self):
 		self.register('*', cls=MoatLoaderDir)
 		await super().init()
+	
+	async def names_for(self, name):
+		"""\
+			Return all object names with a certain key.
+
+			This is useful for enumerating module names that implement a
+			feature, but without loading the code yet.
+			"""
+		res = []
+		for v in self.values():
+			v = await v
+			if name in v:
+				res.append(name)
+		return res
+
+	async def add_module(self, obj, force=False):
+		d = dict(
+			language='python',
+			descr=obj.summary,
+			doc=getattr(obj,'doc',obj.__doc__),
+			code=obj.__module__+'.'+obj.__name__,
+		)
+		for k,v in obj.entries():
+			d[k] = v
+		if hasattr(obj,'schema'):
+			d['data'] = obj.schema
+		tt = await self.subdir(obj.prefix, create=None)
+		if tt.get('language','') == 'python':
+			if force: 
+				for k,v in d.items():
+					if k not in tt:
+						logger.debug("%s: Add %s: %s", obj.prefix,k,v)
+					elif tt[k] != v:
+						logger.debug("%s: Update %s: %s => %s", obj.prefix,k,tt[k],v)
+					else:
+						continue
+					await tt.set(k,v)
+				logger.info("%s: updated", obj.prefix)
+			else:
+				logger.debug("%s: exists, skipped", obj.prefix)
+		else:
+			logger.info("%s: new", obj.prefix)
+			await tt.update(d)
+
 MoatMetaModule.register('*', cls=MoatLoaderDir)
 
 class MoatMetaType(EtcDir):
@@ -94,6 +147,8 @@ class MoatMetaType(EtcDir):
 		from .base import TypeDir
 		self.register('**',TYPEDEF, cls=TypeDir)
 		await super().init()
+		for v in self.values():
+			await v.load(recursive=True)
 
 class MoatMetaTask(EtcDir):
 	"""Singleton for /meta/task"""
@@ -102,14 +157,45 @@ class MoatMetaTask(EtcDir):
 		from moat.task.base import TaskDef
 		self.register('**',TASKDEF, cls=TaskDef)
 		await super().init()
+	
+	async def add_task(self, task, force=False):
+		d = dict(
+			language='python',
+			code=task.__module__+'.'+task.__name__,
+			descr=task.summary,
+			doc=task.doc or task.__doc__,
+		)
+		if hasattr(task,'schema'):
+			d['data'] = task.schema
+		tt = await self.subdir(task.name,name=TASKDEF, create=None)
+		if 'language' in tt: ## mandatory
+			if force:
+				for k,v in d.items():
+					if k not in tt:
+						logger.debug("%s: Add %s: %s", task.name,k,v)
+					elif tt[k] != v:
+						logger.debug("%s: Update %s: %s => %s", task.name,k,tt[k],v)
+					else:
+						continue
+					await tt.set(k,v)
+				logger.info("%s: updated", task.name)
+			else:
+				logger.debug("%s: exists, skipped", task.name)
+		else:
+			logger.info("%s: new", task.name)
+			await tt.update(d)
 
 class MoatMeta(EtcDir):
 	"""Singleton for /meta"""
 	async def init(self):
 		self.register('type', cls=MoatMetaType)
 		self.register('task', cls=MoatMetaTask)
+		self.register('module', cls=MoatMetaModule)
 		await super().init()
-		await self['type']
+		try:
+			await self['type']
+		except KeyError:
+			pass # not yet present
 
 class MoatConfig(recEtcDir):
 	"""Singleton for /config"""
@@ -152,7 +238,10 @@ class MoatRoot(EtcRoot):
 		await super().init()
 		# preload these sub-trees
 		await self['config']
-		await self['meta']
+		try:
+			await self['meta']
+		except KeyError: # does not exist yet
+			pass
 
 	def managed(self,dev):
 		### XXX ???

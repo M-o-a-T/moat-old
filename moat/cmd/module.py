@@ -31,10 +31,11 @@ from moat.script import Command, CommandError
 from moat.script.task import Task
 from moat.task import task_types
 from moat.util import r_dict
-from etcd_tree.etcd import EtcTypes
+from moat.types import MODULE_DIR
+from moat.types.module import BaseModule, modules
 from dabroker.util import import_string
-from ..task import TASK,TASK_DIR, TASKDEF,TASKDEF_DIR, TASKSTATE,TASKSTATE_DIR
 from yaml import safe_dump
+from etcd_tree import EtcValue
 import aio_etcd as etcd
 import asyncio
 import time
@@ -47,26 +48,20 @@ logger = logging.getLogger(__name__)
 __all__ = ['ModuleCommand']
 
 class ModuleSetup:
-	async def setup(self, meta=False):
+	async def setup(self):
 		await self.root.setup()
-		etc = self.root.etcd
 		tree = await self.root._get_tree()
-		types = EtcTypes()
-		if meta:
-			t = await tree.subdir(TASKDEF_DIR)
-		else:
-			t = await tree.subdir(TASK_DIR)
-		return t
+		return (await tree.subdir(MODULE_DIR))
 
 class ModuleInitCommand(Command,ModuleSetup):
 	name = "init"
 	summary = "Set up task definitions"
 	description = """\
-Task definitions are stored in etcd at /meta/task/**/:taskdef.
+Module declarations are stored in etcd at /meta/module/NAME/FUNCTION.
 
 This command sets up that data. If you mention module or class names
 on the command line, they are added, otherwise everything under
-'moat.task.*' is used.
+'moat.ext.*' is used.
 """
 
 	def addOptions(self):
@@ -78,7 +73,7 @@ on the command line, they are added, otherwise everything under
 		self.force = self.options.force
 
 	async def do(self,args):
-		t = await self.setup(meta=True)
+		t = await self.setup()
 		if args:
 			objs = []
 			for a in args:
@@ -91,93 +86,63 @@ on the command line, they are added, otherwise everything under
 					n = 0
 					for c in syms:
 						c = getattr(m,c,None)
-						if isinstance(c,type) and c is not Task and issubclass(c,Task):
+						if isinstance(c,type) and issubclass(c,BaseModule) and c.prefix is not None:
 							objs.append(c)
 							n += 1
 					if self.root.verbose > (1 if n else 0):
 						print("%s: %s command%s found." % (a,n if n else "no", "" if n==1 else "s"), file=self.stdout)
 				else:
-					if not isinstance(m,Task):
+					if not isinstance(m,BaseModule):
 						raise CommandError("%s is not a task"%a)
 					objs.append(m)
 		else:
-			objs = task_types()
+			objs = modules()
 
 		for obj in objs:
-			d = dict(
-				language='python',
-				code=obj.__module__+'.'+obj.__name__,
-				summary=obj.summary or "? no summary given",
-				description=getattr(obj,'description',obj.__doc__)
-			)
-			if hasattr(obj,'schema'):
-				d['data'] = obj.schema
-			tt = await t.subdir(obj.name,name=TASKDEF, create=None)
-			if 'language' in tt: ## mandatory
-				if self.force:
-					changed = False
-					for k,v in d.items():
-						if k not in tt:
-							if self.root.verbose > 1:
-								print("%s: Add %s: %s" % (obj.name,k,v), file=self.stdout)
-						elif tt[k] != v:
-							if self.root.verbose > 1:
-								print("%s: Update %s: %s => %s" % (obj.name,k,tt[k],v), file=self.stdout)
-						else:
-							continue
-						await tt.set(k,v)
-						changed = True
-					if self.root.verbose:
-						print("%s: updated" % obj.name, file=self.stdout)
-				elif self.root.verbose > 1:
-					print("%s: exists, skipped" % obj.name, file=self.stdout)
-				continue
-			else:
-				if self.root.verbose:
-					print("%s: new" % obj.name, file=self.stdout)
-				await tt.update(d)
+			await t.add_module(obj, force=self.force)
 		await t.wait()
 
 class ModuleListCommand(Command,ModuleSetup):
 	name = "list"
-	summary = "List task definitions"
+	summary = "List module definitions"
 	description = """\
-Task definitions are stored in etcd at /meta/task/**/:taskdef.
+Module definitions are stored in etcd at /meta/module/NAME/FUNCTION.
 
-This command shows that data. If you mention a definition's name,
-details are shown in YAML format, else a short list of names is shown.
+This command shows that data.
 """
 
-	def addOptions(self):
-		self.parser.add_option('-a','--all',
-			action="store_true", dest="all",
-			help="show details for all entries")
-
 	async def do(self,args):
-		t = await self.setup(meta=True)
+		t = await self.setup()
 		if args:
-			if self.options.all:
-				raise CommandError("Arguments and '-a' are mutually exclusive")
 			dirs = []
 			for a in args:
-				dirs.append(await t.subdir(a, create=False))
-			verbose = True
+				tt = t
+				try:
+					for k in a.split('/'):
+						if k:
+							tt = tt._get(k)
+					dirs.append(tt)
+				except KeyError:
+					print("Module '%s' not known"%(a,), file=sys.stderr)
 		else:
-			dirs = [t]
-			verbose = self.options.all
+			dirs = (t,)
+
+		async def _pr(tt):
+			if isinstance(tt,EtcValue):
+				print('/'.join(tt.path[len(MODULE_DIR):]),tt.value)
+			else:
+				for v in tt._values():
+					v = await v
+					await _pr(v)
+
 		for tt in dirs:
-			async for task in tt.tagged(TASKDEF):
-				path = task.path[len(TASKDEF_DIR):-1]
-				if verbose:
-					safe_dump({path: r_dict(dict(task))}, stream=self.stdout)
-				else:
-					print('/'.join(path),task.get('summary','??'), sep='\t',file=self.stdout)
+			await _pr(tt)
 
 class ModuleDeleteCommand(Command,ModuleSetup):
 	name = "delete"
-	summary = "Delete task definitions"
+	summary = "Delete module definitions"
 	description = """\
-Task definitions are stored in etcd at /meta/task/**/:taskdef.
+Module definitions are stored in etcd at /meta/module/NAME/FUNCTION.
 
 This command deletes (some of) that data.
 """
@@ -188,15 +153,26 @@ This command deletes (some of) that data.
 			help="not forcing won't do anything")
 
 	async def do(self,args):
-		td = await self.setup(meta=True)
-		if not args:
+		td = await self.setup()
+		if args:
+			dirs = []
+			for a in args:
+				tt = t
+				try:
+					for k in a.split('/'):
+						if k:
+							tt = tt._get(k)
+					dirs.append(tt)
+				except KeyError:
+					print("Module '%s' not known"%(a,), file=sys.stderr)
+		else:
 			if not cmd.root.cfg['testing']:
 				raise CommandError("You can't delete everything.")
-			args = td.tagged(TASKDEF)
-		for k in args:
-			t = await td.subdir(k,name=TASKDEF, create=False)
-			if self.root.verbose:
-				print("%s: deleted"%k, file=self.stdout)
+			dirs = (t)
+
+		for k in dirs:
+			t = k
+			k = k.path
 			rec=None
 			while True:
 				p = t._parent
@@ -209,355 +185,8 @@ This command deletes (some of) that data.
 					break
 				rec=False
 				t = p
-
-
-class _ParamCommand(Command,ModuleSetup):
-	name = "param"
-	# _def = None ## need to override
-	description = """\
-
-This command shows/changes/deletes parameters for that data.
-
-Usage: … param NAME VALUE  -- set
-       … param             -- list all
-       … param NAME        -- show one
-       … param -d NAME     -- delete
-"""
-
-	def addOptions(self):
-		self.parser.add_option('-d','--delete',
-			action="store_true", dest="delete",
-			help="delete specific parameters")
-		if self._def:
-			self.parser.add_option('-g','--global',
-				action="store_true", dest="is_global",
-				help="show global parameters")
-
-	async def do(self,args):
-		from moat.task import _VARS
-		t = await self.setup(meta=self._def)
-		if self._def and self.options.is_global:
-			if self.options.delete:
-				raise CommandError("You cannot delete global parameters.")
-			data = self.root.etc_cfg['run']
-		elif not args:
-			if self.options.delete:
-				raise CommandError("You cannot delete all parameters.")
-
-			async for task in t.tagged(self.TAG):
-				path = task.path[len(self.DIR):-1]
-				for k in _VARS:
-					if k in task:
-						print('/'.join(path),k,task[k], sep='\t',file=self.stdout)
-			return
-		else:
-			name = args.pop(0)
-			try:
-				data = await t.subdir(name, name=self.TAG, create=False)
-			except KeyError:
-				raise CommandError("Task definition '%s' is unknown." % name)
-
-		if self.options.delete:
-			if not args:
-				args = _VARS
-			for k in args:
-				if k in data:
-					if self.root.verbose:
-						print("%s=%s (deleted)" % (k,data[k]), file=self.stdout)
-					await data.delete(k)
-		elif len(args) == 1 and '=' not in args[0]:
-			print(data[args[0]], file=self.stdout)
-		elif not len(args):
-			for k in _VARS:
-				if k in data:
-					print(k,data[k], sep='\t',file=self.stdout)
-		else:
-			while args:
-				k = args.pop(0)
-				try:
-					k,v = k.split('=',1)
-				except ValueError:
-					if k not in _VARS:
-						raise CommandError("'%s' is not a valid parameter."%k)
-					print(k,data.get(k,'-'), sep='\t',file=self.stdout)
-				else:
-					if k not in _VARS:
-						raise CommandError("'%s' is not a valid parameter."%k)
-					if self.root.verbose:
-						if k not in data:
-							print("%s=%s (new)" % (k,v), file=self.stdout)
-						elif str(data[k]) == v:
-							print("%s=%s (unchanged)" % (k,v), file=self.stdout)
-						else:
-							print("%s=%s (was %s)" % (k,v,data[k]), file=self.stdout)
-					await data.set(k, v)
-
-class ModuleParamCommand(_ParamCommand):
-	_def = True
-	DIR=TASKDEF_DIR
-	TAG=TASKDEF
-	summary = "Parameterize task definitions"
-	description = """\
-Task definitions are stored in etcd at /meta/task/**/:taskdef.
-""" + _ParamCommand.description
-
-class ParamCommand(_ParamCommand):
-	_def = False
-	DIR=TASK_DIR
-	TAG=TASK
-	summary = "Parameterize tasks"
-	description = """\
-Tasks are stored in etcd at /task/**/:task.
-""" + _ParamCommand.description
-
-class ModuleCommand(Command):
-	subCommandClasses = [
-		ModuleInitCommand,
-		ModuleListCommand,
-		ModuleDeleteCommand,
-	]
-	name = "def"
-	summary = "Moduleine tasks"
-	description = """\
-Commands to set up and admin the task definitions known to MoaT.
-"""
-
-class ListCommand(Command,ModuleSetup):
-	name = "list"
-	summary = "List tasks"
-	description = """\
-Tasks are stored in etcd at /task/**/:task.
-
-This command shows that data. If you mention a task's path,
-details are shown in YAML format, else a short list of tasks is shown.
-"""
-
-	async def do(self,args):
-		t = await self.setup(meta=False)
-		if args:
-			dirs = []
-			for a in args:
-				try:
-					dirs.append(await t.subdir(a, create=False))
-				except KeyError:
-					raise CommandError("'%s' does not exist"%(a,))
-		else:
-			dirs = [t]
-		for tt in dirs:
-			async for task in tt.tagged(TASK):
-				path = task.path[len(TASK_DIR):-1]
-				if self.root.verbose > 1:
-					safe_dump({'/'.join(path):r_dict(dict(task))}, stream=self.stdout)
-				else:
-					name = task['name']
-					path = '/'.join(path)
-					if name == path:
-						name = "-"
-					print(path,name,task['descr'], sep='\t',file=self.stdout)
-
-class _AddUpdate:
-	"""Mix-in to add or update a task (too much)"""
-	async def do(self,args):
-		try:
-			data = {}
-			taskdefpath=""
-			name=""
-			p=0
-
-			taskpath = args[p].rstrip('/').lstrip('/')
-			if taskpath == "":
-				raise CommandError("Empty task path?")
-			if taskpath.endswith(TASK):
-				raise CommandError("Don't add the tag")
-			p+=1
-
-			if not self._update:
-				taskdefpath = args[p].rstrip('/').lstrip('/')
-				if taskdefpath == "":
-					raise CommandError("Empty task definition path?")
-				if taskdefpath.endswith(TASKDEF):
-					raise CommandError("Don't add the tag")
-				p+=1
-			while p < len(args):
-				try:
-					k,v = args[p].split('=')
-				except ValueError:
-					break
-				p += 1
-				if k == "name":
-					name = v
-				else:
-					data[k] = v
-			if not self._update:
-				args[p] # raises IndexError if nothing is left
-			descr = " ".join(args[p:])
-		except IndexError:
-			raise CommandError("Missing command parameters")
-		t = await self.setup(meta=False)
-		if not self._update:
-			try:
-				td = await self.setup(meta=True)
-				taskdef = await td.subdir(taskdefpath,name=TASKDEF, create=False)
-			except KeyError:
-				raise CommandError("Taskdef '%s' not found" % taskdefpath)
-
-		try:
-			task = await t.subdir(taskpath,name=TASK, create=not self._update)
-		except KeyError:
-			raise CommandError("Task '%s' not found. (Use its path, not the name?)" % taskpath)
-		if not self._update:
-			await task.set('taskdef', taskdefpath, sync=False)
-			if not name:
-				name = taskpath
-		if name:
-			await task.set('name', name, sync=False)
-		if descr:
-			await task.set('descr', descr, sync=False)
-		if data:
-			d = await task.subdir('data', create=None)
-			for k,v in data.items():
-				if v == "":
-					try:
-						await d.delete(k, sync=False)
-					except KeyError:
-						pass
-				else:
-					await d.set(k,v, sync=False)
-			
-
-class AddCommand(_AddUpdate,Command,ModuleSetup):
-	name = "add"
-	summary = "add a task"
-	description = """\
-Create a new task.
-
-Arguments:
-
-* the new task's path (must not exist)
-
-* the task definition's path (must exist)
-
-* data=value parameters (job-specific, optional)
-
-* a descriptive name (not optional)
-
-"""
-	_update = False
-
-
-class UpdateCommand(_AddUpdate,Command,ModuleSetup):
-	name = "change"
-	summary = "change a task"
-	description = """\
-Update a task.
-
-Arguments:
-
-* the task's path (required)
-
-* data=value entries (deletes the key if value is empty)
-
-* a descriptive name (optional, to update)
-
-"""
-	_update = True
-
-
-class DeleteCommand(Command,ModuleSetup):
-	name = "delete"
-	summary = "Delete a task"
-	description = """\
-Tasks are stored in etcd at /task/**/:task.
-
-This command deletes one of these entries.
-"""
-
-	def addOptions(self):
-		self.parser.add_option('-f','--force',
-			action="store_true", dest="force",
-			help="not forcing won't do anything")
-
-	async def do(self,args):
-		t = await self.setup(meta=False)
-		if not args:
-			if not cmd.root.cfg['testing']:
-				raise CommandError("You can't delete everything.")
-			args = t
-		for k in args:
-			try:
-				task = await t.subdir(k,name=TASK, create=False)
-			except KeyError:
-				raise CommandError("%s: does not exist"%k)
 			if self.root.verbose:
-				print("%s: deleted"%k, file=self.stdout)
-			rec=None
-			while True:
-				p = task._parent
-				if p is None: break
-				p = p()
-				if p is None: break
-				if p is task: break
-				try:
-					await task.delete(recursive=rec)
-				except etcd.EtcdDirNotEmpty:
-					break
-				rec=False
-				task = p
-
-
-class StateCommand(Command):
-	name = "state"
-	summary = "Show task status"
-	description = """\
-The status of running tasks is stored in etcd at /status/run/task/**/:task.
-
-This command shows that information.
-"""
-
-	async def do(self,args):
-		await self.root.setup()
-		etc = self.root.etcd
-		tree = await self.root._get_tree()
-		types = EtcTypes()
-		t = await tree.subdir(TASKSTATE_DIR)
-
-		if args:
-			dirs = []
-			for a in args:
-				try:
-					dirs.append(await t.subdir(a, create=False))
-				except KeyError:
-					print("'%s' does not exist" % (a,), file=sys.stderr)
-		else:
-			dirs = [t]
-		for tt in dirs:
-			async for task in tt.tagged(TASKSTATE):
-				path = task.path[len(TASKSTATE_DIR):-1]
-
-				if self.root.verbose > 1:
-					safe_dump({'/'.join(path):r_dict(dict(task))}, stream=self.stdout)
-				else:
-					date = task.get('debug_time','-')
-					if 'running' in task:
-						if 'started' in task:
-							date = task['started']
-						else:
-							date = task['running']
-						state = 'run'
-					elif 'started' in task and ('stopped' not in task or task['started']>task['stopped']):
-						date = task['started']
-						state = 'crash'
-					elif 'stopped' in task:
-						date = task['stopped']
-						state = task['state']
-					elif 'state' in task:
-						state = task['state']
-					else:
-						state = task.get('state','?')
-					if not isinstance(date,str):
-						date = datetime.fromtimestamp(date).strftime('%Y-%m-%d %H:%M:%S')
-					print('/'.join(path),state,date,task.get('message','-'), sep='\t', file=self.stdout)
-
+				print("%s: deleted"%'/'.join(k), file=self.stdout)
 
 class ModuleCommand(Command):
 	name = "mod"

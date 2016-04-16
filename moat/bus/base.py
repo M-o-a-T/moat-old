@@ -30,8 +30,9 @@ from weakref import ref
 
 from moat.util import do_async
 from moat.types import TYPEDEF_DIR,TYPEDEF
+from moat.dev import devices, DEV
+
 from dabroker.unit.rpc import CC_DATA
-from . import devices, DEV
 
 import logging
 logger = logging.getLogger(__name__)

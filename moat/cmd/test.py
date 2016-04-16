@@ -71,7 +71,7 @@ Check etcd access, and basic data layout.
 			await asyncio.sleep(0.3,loop=self.loop)
 
 			t = time.time()
-			run_state = await _run_state(self.etcd,('test','do_2'))
+			run_state = await _run_state(self.tree,('test','do_2'))
 			assert run_state['started'] > t-int(os.environ.get('MOAT_IS_SLOW',1)), (run_state['started'],t)
 
 	class Task_do3(Task):
@@ -112,6 +112,7 @@ Check etcd access, and basic data layout.
 
 		retval = 0
 		etc = await self.root._get_etcd()
+		tree = await self.root._get_tree()
 		log = logging.getLogger("etcd")
 		show = log.info if self.parent.fix else log.warning
 
@@ -165,13 +166,12 @@ Check etcd access, and basic data layout.
 			pass
 		else:
 			raise RuntimeError("Error did not propagate") # pragma: no cover
-		run_state = await _run_state(etc,('test','do_3'))
+		run_state = await _run_state(tree,('test','do_3'))
 		if 'running' in run_state:
 			raise RuntimeError("Procedure end 2 did not take") # pragma: no cover
 		await s.wait()
 		assert run_state['stopped'] > run_state['started'], (run_state['stopped'], run_state['started'])
 		assert run_state['state'] == "error", run_state['state']
-		await run_state.close()
 
 		try:
 			t = self.Task_do4(self,"test/do_4",_ttl=3,_refresh=10)
@@ -180,18 +180,17 @@ Check etcd access, and basic data layout.
 			pass
 		else:
 			raise RuntimeError("Cancellation ('running' marker gone) did not propagate") # pragma: no cover
-		run_state = await _run_state(etc,('test','do_4'))
+		run_state = await _run_state(tree,('test','do_4'))
 		assert 'running' not in run_state
 		await s.wait()
 		assert run_state['stopped'] > run_state['started'], (run_state['stopped'], run_state['started'])
 		assert run_state['state'] == "fail", run_state['state']
-		await run_state.close()
 
 		dt2 = self.Task_do2(self,"test/do_2",{})
 		await asyncio.sleep(0.1,loop=self.root.loop)
 		dt2a = self.Task_do2(self,"test/do_2",{})
 		await asyncio.sleep(0.1,loop=self.root.loop)
-		dt2.run_state = run_state = await _run_state(etc,('test','do_2'))
+		dt2.run_state = run_state = await _run_state(tree,('test','do_2'))
 		try:
 			await dt2a
 		except JobIsRunningError as exc:
@@ -204,7 +203,6 @@ Check etcd access, and basic data layout.
 		await s.wait()
 		assert run_state['stopped'] > run_state['started'], (run_state['stopped'], run_state['started'])
 		assert run_state['state'] == "ok", run_state['state']
-		await run_state.close()
 
 		try:
 			errs = await etc.read("/status/errors")

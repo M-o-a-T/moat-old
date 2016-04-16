@@ -29,6 +29,9 @@ from . import type_names, TYPEDEF_DIR
 import logging
 logger = logging.getLogger(__name__)
 
+TRUE = {'true','True','1','on','On','ON',1,True}
+FALSE = {'false','False','0','off','Off','OFF',0,False}
+
 class _NOTGIVEN:
 	pass
 
@@ -38,6 +41,8 @@ class TypeDir(EtcDir):
 		super().__init__(*a,**k)
 		self._type = type_names()['/'.join(self.path[len(TYPEDEF_DIR):-1])]
 		self._type.types(self)
+TypeDir.register('timestamp',cls=EtcFloat)
+TypeDir.register('created',cls=EtcFloat)
 
 class Type:
 	"""\
@@ -114,6 +119,7 @@ class Type:
 
 class StringType(Type):
 	name = 'str'
+	etcd_class = EtcString
 
 class BoolType(Type):
 	name = "bool"
@@ -131,12 +137,12 @@ class BoolType(Type):
 
 	@property
 	def etcd_value(self):
-		return true if self.value else false
+		return '1' if self.value else '0'
 	@etcd_value.setter
 	def etcd_value(self,value):
-		if value == 'true':
+		if value in TRUE:
 			self.value = True
-		elif value == 'false':
+		elif value in FALSE:
 			self.value = False
 		else:
 			raise BadValueError("%s: Dunno what to do with '%s'" % (self.name,value))
@@ -149,12 +155,20 @@ class BoolType(Type):
 		self.value = self.from_amqp(value)
 
 	def from_amqp(self,amqp_value):
-		if amqp_value.lower() == self['true'].lower():
+		if amqp_value in TRUE:
+			return True
+		elif amqp_value in FALSE:
+			return False
+		elif amqp_value == self['true']:
+			return True
+		elif amqp_value == self['false']:
+			return False
+		elif amqp_value.lower() == self['true'].lower():
 			return True
 		elif amqp_value.lower() == self['false'].lower():
 			return False
 		else:
-			return bool(int(amqp_value))
+			raise ValueError(amqp_value)
 
 class _NumType(Type):
 	def check_var(self, var,value):

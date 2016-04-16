@@ -27,11 +27,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 
 import os
 import sys
-from moat.script import Command, CommandError
-from moat.script.task import Task
-from moat.util import r_dict
-from moat.dev import DEV_DIR,DEV
-from moat.dev.onewire import device_types, OnewireDevice
+
 from etcd_tree.etcd import EtcTypes
 from etcd_tree.node import EtcInteger
 from yaml import safe_dump
@@ -40,6 +36,13 @@ import asyncio
 import time
 import types as py_types
 import etcd
+
+from moat.script import Command, CommandError
+from moat.script.task import Task
+from moat.util import r_dict
+from moat.dev import DEV_DIR,DEV
+
+from ..dev import device_types, OnewireDevice
 
 import logging
 logger = logging.getLogger(__name__)
@@ -90,10 +93,8 @@ Arguments:
 			if port<1 or port>65534:
 				raise CommandError("The port must be positive and <65535")
 
-		types = EtcTypes()
-		types.register('server','port',EtcInteger)
 		try:
-			t = await self.root.etcd.tree('/bus/onewire/'+name, types=types, create=not self.update)
+			t = await self.root.tree.subdir('bus','onewire',name, create=not self.update)
 		except etcd.EtcdAlreadyExist:
 			raise CommandError("Host '%s' exists. Use '-u' or choose a different name." % name)
 		except etcd.EtcdKeyNotFound:
@@ -116,7 +117,7 @@ else a short list is printed.
 
 	async def do(self,args):
 		await self.root.setup(self)
-		etc = self.root.etcd
+		tree = self.root.tree
 		if args:
 			dirs = args
 		else:
@@ -126,12 +127,11 @@ else a short list is printed.
 				dirs.append(r.key.rsplit('/',1)[1])
 		for d in dirs:
 			if self.root.verbose > 1:
-				st = await etc.tree('/bus/onewire/'+d, static=True)
+				st = await tree.subdir('bus','onewire',d, create=False)
 				safe_dump({d: r_dict(dict(st))}, stream=self.stdout)
 			elif self.root.verbose:
-				h = await etc.get('/bus/onewire/'+d+'/server/host')
-				p = await etc.get('/bus/onewire/'+d+'/server/port')
-				print(d,h.value,p.value, sep='\t', file=self.stdout)
+				hp = await tree.subdir('bus','onewire',d,'server', recursive=True,create=False)
+				print(d,hp['host'],hp['port'], sep='\t', file=self.stdout)
 			else:
 				print(d, file=self.stdout)
 
@@ -187,10 +187,10 @@ Device ID: detailed information about the device.
 
 	async def do(self,args):
 		await self.root.setup(self)
-		etc = self.root.etcd
+		tree = self.root.tree
 		path = DEV_DIR+(OnewireDevice.prefix,)
 		if not args:
-			res = await etc.get(path)
+			res = await tree.lookup(path)
 			for r in res.children:
 				typ = r.key[r.key.rindex('/')+1:]
 				try:
@@ -199,7 +199,7 @@ Device ID: detailed information about the device.
 					dt = '?'+typ
 				else:
 					dt = dt.name
-				rr = await etc.get(path+'/'+typ)
+				rr = await tree.subdir(path,name=typ)
 				num = len(list(rr.children))
 				print(typ,num,dt, sep='\t',file=self.stdout)
 		else:
@@ -269,7 +269,7 @@ else a short list is printed.
 
 	async def do(self,args):
 		await self.root.setup(self)
-		etc = self.root.etcd
+		tree = self.root.tree
 		if args:
 			dirs = args
 		else:
@@ -279,12 +279,11 @@ else a short list is printed.
 				dirs.append(r.key.rsplit('/',1)[1])
 		for d in dirs:
 			if self.root.verbose > 1:
-				st = await etc.tree('/bus/onewire/'+d, static=True)
+				st = await tree.subdir('bus','onewire',d, recursive=True)
 				safe_dump({d: r_dict(dict(st))}, stream=self.stdout)
 			elif self.root.verbose:
-				h = await etc.get('/bus/onewire/'+d+'/server/host')
-				p = await etc.get('/bus/onewire/'+d+'/server/port')
-				print(d,h.value,p.value, sep='\t', file=self.stdout)
+				hp = await tree.subdir('bus','onewire',d,'server', recursive=True,create=False)
+				print(d,hp['host'],hp['port'], sep='\t', file=self.stdout)
 			else:
 				print(d, file=self.stdout)
 
@@ -301,7 +300,7 @@ else a short list is printed.
 		await self.root.setup(self)
 		etc = self.root.etcd
 		if not args:
-			t = await etc.tree('/bus/onewire', static=True)
+			t = await tree.lookup('bus','onewire')
 			for srv,v in t.items():
 				v = v['bus']
 				for b in v.keys():
@@ -309,10 +308,10 @@ else a short list is printed.
 			return
 		srv = args.pop(0)
 		if not args:
-			t = await etc.tree('/bus/onewire/'+srv+'/bus', static=True)
-			if int(t.get('broken',0)):
-				print(bus,"*inaccessible*", sep='\t',file=self.stdout)
+			t = await tree.subdir('bus','onewire',srv,'bus', create=False,recursive=True)
 			for bus,dc in t.items():
+				if dc.get('broken',0):
+					print(bus,"*inaccessible*", sep='\t',file=self.stdout)
 				dc = dc.get('devices',{})
 				items = []
 				for typ,v in dc.items():
@@ -330,7 +329,7 @@ else a short list is printed.
 			raise CommandError("Usage: … list [server [bus]]")
 		bus = bus.replace('/',' ')
 		try:
-			t = await etc.tree('/bus/onewire/'+srv+'/bus/'+bus+'/devices', static=True,create=False)
+			t = await tree.subdir('bus','onewire',srv, 'bus',bus,'devices', create=False,recursive=True)
 		except (etcd.EtcdKeyNotFound,KeyError):
 			raise CommandError("Bus %s:%s does not exist." % (srv,bus))
 		for typ,v in t.items():

@@ -24,15 +24,55 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##BP
 
 from etcd_tree import EtcString,EtcDir,EtcFloat,EtcInteger,EtcValue, ReloadRecursive
+import aio_etcd as etcd
 from time import time
+from weakref import ref
+
 from moat.util import do_async
-from moat.types import TYPEDEF_DIR,TYPEDEF, type_names
+from moat.types import TYPEDEF_DIR,TYPEDEF
 from dabroker.unit.rpc import CC_DATA
+from . import devices, DEV
 
 import logging
 logger = logging.getLogger(__name__)
 
 __all__ = ('Device',)
+
+class DevManager:
+	"""\
+		"""
+	def __init__(self,controller):
+		self._controller = ref(controller)
+
+	@property
+	def controller(self):
+		return self._controller()
+
+	def add_device(self,dev):
+		"""Called by the controller to tell a device that it's managed by
+		this controller"""
+		dev.manager = self
+
+	def drop_device(self,dev):
+		"""Called by the device to tell the controller to forget about the device"""
+		c = self.controller
+		if c is not None:
+			c.drop_device(dev)
+
+def setup_dev_types(types):
+	"""Register types for all devices."""
+	for dev in devices():
+		t = types.step(dev.prefix)
+		for p in dev.dev_paths():
+			t.step(p[:-1]).register(DEV, cls=p[-1])
+	types.register('**',DEV, cls=DeadDevice)
+
+class MoatDevices(EtcDir):
+	"""singleton for etcd /device"""
+	async def init(self):
+		setup_dev_types(self)
+
+		await super().init()
 
 class Typename(EtcString):
 	def has_update(self):
@@ -50,7 +90,7 @@ class RpcName(EtcString):
 		p = self.parent
 		if p is None:
 			return
-		do_async(p._reg_rpc, self.value if self._seq else None)
+		do_async(p._reg_rpc, self.value if self._seq is not None else None, _loop=self._loop)
 
 class AlertName(EtcString):
 	"""Update the parent's alert name"""
@@ -71,6 +111,7 @@ class TypedDir(EtcDir):
 	_rpc = None
 	_rpc_name = ''
 	_alert_name = ''
+	_device = None
 
 	@property
 	def value(self):
@@ -79,22 +120,27 @@ class TypedDir(EtcDir):
 	def value(self,val):
 		self._value.value = val
 
+	@property
+	def device(self):
+		"""Returns 'my' device."""
+		if self._device is not None:
+			return self._device()
+		p = self.parent
+		while p:
+			if isinstance(p,BaseDevice):
+				self._device = ref(p)
+				return p
+		return None
+
 	def _set_type(self, typename):
 		if self._type is not None and self._type._type.name == typename:
 			return
-		if self.env is not None:
-			self._type = self.env.cmd.root.types.lookup(typename,name=TYPEDEF)
-		else:
-			try:
-				self._type = self.root.lookup(TYPEDEF_DIR).lookup(typename,name=TYPEDEF)
-			except KeyError:
-				import pdb;pdb.set_trace()
-				self._type = self.root.lookup(TYPEDEF_DIR).lookup(typename,name=TYPEDEF)
+		self._type = self.root.lookup(TYPEDEF_DIR).lookup(typename,name=TYPEDEF)
+
+		if self._value is None:
+			self._value = self._type._type(self._type,self)
 
 		if 'value' in self:
-			if self._value is None:
-				self._value = self._type._type(self._type,self)
-
 			self._value.etcd_value = self['value']
 
 	def has_update(self):
@@ -108,13 +154,16 @@ class TypedDir(EtcDir):
 		self.has_update()
 
 	async def _reg_rpc(self,name):
-		amqp = self.env.cmd.amqp
+		if self.env is None:
+			return
+		amqp = self.env.cmd.root.amqp
 		if name is not None and self._rpc_name == name:
 			return
 		if self._rpc is not None:
 			await amqp.unregister_rpc_async(self._rpc)
 			self._rpc = None
 		if name is not None:
+			logger.info("REG @%s %s %s %s %s",id(amqp),self,id(self),self.root,id(self.root))
 			self._rpc = await amqp.register_rpc_async(name,self._do_rpc, call_conv=CC_DATA)
 		self._rpc_name = name
 
@@ -130,12 +179,26 @@ class TypedDir(EtcDir):
 			return
 		if self._value is None:
 			self._value = self._type._type(self._type,self)
-		if self._value.value == value:
-			await self.set('timestamp',timestamp)
-		else:
-			self._value.value = value
-			await self._write_etcd(timestamp)
-		await self._write_amqp(timestamp)
+
+		while True:
+			if self.get('timestamp',0) > timestamp:
+				logger.info("Skipping update: %s %s %s",self,self['timestamp'],timestamp)
+				return
+			try:
+				if self._value.value == value:
+					await self.set('timestamp',timestamp)
+				else:
+					self._value.value = value
+					await self._write_etcd(timestamp)
+				await self._write_amqp(timestamp)
+			except etcd.EtcdCompareFailed as exc:
+				logger.info("Retrying update: %s %s",self,str(exc))
+				await self.wait(exc.payload['index'])
+			except Exception as exc:
+				logger.exception("Ouch")
+				raise
+			else:
+				break
 
 	async def reading(self,value, timestamp=None):
 		"""A value has been read."""
@@ -154,10 +217,10 @@ class TypedDir(EtcDir):
 			return
 		amqp = self.env.cmd.root.amqp
 		await amqp.alert(self._alert_name, _data=self._value.amqp_value)
-		
+
 class TypedInputDir(TypedDir):
 	async def _do_rpc(self,data):
-		val = await self.parent.read(self.name,val)
+		val = await self.parent.parent.read(self.name,val)
 		await self.reading(val)
 		return self._value.amqp_value
 
@@ -166,10 +229,9 @@ class TypedOutputDir(TypedDir):
 		val = self._value.from_amqp(data)
 		if self._value.value == val:
 			return False # already set
-		await self.parent.write(self.name,val)
+		await self.parent.parent.write(self.name,val)
 		await self.writing(val)
 		return True # OK
-
 
 TypedDir.register('type',cls=Typename)
 TypedDir.register('rpc',cls=RpcName)
@@ -189,10 +251,10 @@ class TypesReg(type(EtcDir)):
 	def __init__(cls, name, bases, nmspc):
 		super().__init__(name, bases, nmspc)
 		cls.types(cls)
-	
+
 class BaseDevice(EtcDir, metaclass=TypesReg):
 	"""\
-		This is the parent class for all MoaT can talk to.
+		This is the parent class for all things MoaT can talk to.
 
 		A Device corresponds to a distinct addressable external entity
 		which may have several inputs and/or outputs, or possibly some more
@@ -204,6 +266,7 @@ class BaseDevice(EtcDir, metaclass=TypesReg):
 
 	prefix = "dummy"
 	description = "Something that does nothing."
+	_mgr = None
 
 	def __init__(self, *a,**k):
 		for attr in _SOURCES:
@@ -214,11 +277,67 @@ class BaseDevice(EtcDir, metaclass=TypesReg):
 	async def setup(self):
 		pass
 
+	# The idea behind "manager" is that it's an object that is only strongly
+	# referenced by the command which manages this here device. Thus the
+	# manager will vanish (and the device will be notified about that) as
+	# soon as the command terminates.
+	#
+	# The manager object must have a .drop_device() method which tells it
+	# that a device is no longer under its control.
+	#
+	# .manager, when read, actually returns the controlling object directly.
+	# 
+	@property
+	def manager(self):
+		m = self._mgr
+		if m is not None:
+			m = m()
+		if m is not None:
+			return m.controller
+		return None
+	@manager.setter
+	def manager(self,mgr):
+		m = self._mgr
+		if m is not None:
+			m = m()
+		if m is not None and m is not mgr:
+			logger.warning("Device %s switches managers (%s to %s)", self,m,mgr)
+			m.drop_device(self)
+		elif mgr is None:
+			self._mgr = None
+			self.manager_gone()
+		else:
+			assert hasattr(mgr,'drop_device'), mgr # duck typed
+			self._mgr = ref(mgr,self._manager_gone)
+			self.manager_present(mgr)
+	@manager.deleter
+	def manager(self):
+		if self._mgr is not None:
+			self._mgr = None
+			self.manager_gone()
+
+	def manager_present(self,mgr):
+		"""\
+			Override me to do something when the object starts to be managed.
+			The default is to call has_update().
+			"""
+		self.has_update()
+	def _manager_gone(self,_):
+		if self._mgr is not None:
+			self._mgr = None
+			self.manager_gone()
+	def manager_gone(self):
+		"""\
+			Override me to do something when the object is no longer managed.
+			The default is to call has_update().
+			"""
+		self.has_update()
+
 	@classmethod
 	def types(cls, types):
 		"""Override to get your subtypes registered with etcd_tree"""
-		for s in _SOURCES:
-			types.register(s,'*', cls=TypedDir)
+		for s,t in _SOURCES.items():
+			types.register(s,'*', cls=t)
 
 	@classmethod
 	def dev_paths(cls):
@@ -235,8 +354,12 @@ class BaseDevice(EtcDir, metaclass=TypesReg):
 		"""Write to the device. This code does NOT update etcd."""
 		raise NotImplementedError("I don't know how to write '%s' to '%s' of %s" % (value,what,repr(self)))
 
-for attr in _SOURCES:
-	BaseDevice.register(attr, cls=TypedDir)
+	async def poll(self):
+		"""Poll this device. The default does nothing."""
+		pass
+
+#for attr in _SOURCES:
+#	BaseDevice.register(attr, cls=TypedDir)
 
 value_types = {
 	'float': EtcFloat,
@@ -270,11 +393,20 @@ class Device(BaseDevice):
 	prefix = None
 	description = "Override me"
 
+	# Device management
+	_mgr = None
+	def __init__(self,*a,**k):
+		super().__init__(*a,**k)
+		self._mgr = DevManager(self)
+	def _manage_device(self, dev):
+		self._mgr.add_device(dev)
+		pass
+
 	@classmethod
-	async def this_class(cls, pre,recursive):
+	async def this_obj(cls, recursive, **kw):
 		if not recursive:
 			raise ReloadRecursive
-		return (await super().this_class(pre=pre,recursive=recursive))
+		return (await super().this_obj(recursive=recursive, **kw))
 
 	@classmethod
 	def types(cls, types):
@@ -284,8 +416,6 @@ class Device(BaseDevice):
 			input{}/output{} for atomic values"""
 
 		for d in _SOURCES:
-			types.register(d,'*','timestamp', cls=EtcFloat)
-			types.register(d,'*','created', cls=EtcFloat)
 			for k,v in getattr(cls,d,{}).items():
 				v = value_types.get(v,EtcValue)
 				types.register(d,k,'value', cls=v)

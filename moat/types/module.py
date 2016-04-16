@@ -23,28 +23,18 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##  Thus, do not remove the next line, or insert any blank lines above.
 ##BP
 
-"""List of known devices"""
+"""\
+Module Interface
 
-import os
-from ..script.util import objects
+This code implements basic modularization.
 
-import logging
-logger = logging.getLogger(__name__)
-
-from etcd_tree import EtcString,EtcDir,EtcFloat,EtcInteger,EtcValue, ReloadRecursive
-import aio_etcd as etcd
-from time import time
-from weakref import ref
-
-from moat.util import do_async
-from moat.types import TYPEDEF_DIR,TYPEDEF
-from dabroker.unit.rpc import CC_DATA
-from . import devices, DEV
+Actually loading the code is performed in moat.types.etcd
+"""
 
 import logging
 logger = logging.getLogger(__name__)
 
-class BaseModule(recEtcDir):
+class BaseModule(object):
 	"""\
 		This is the parent class for MoaT modules.
 
@@ -53,10 +43,26 @@ class BaseModule(recEtcDir):
 
 		"""
 
-	#prefix = None
-	description = "Base class for modules"
+	prefix = None
+	summary = "Base class for modules"
+	doc = None # use the docstr if empty
+	
+	@classmethod
+	def entries(cls):
+		"""Enumerate subsys,codepath pairs"""
+		if False: yield None
 
-def modules():
-	# we want all objects with a distinctive prefix
-	return objects(__name__, BaseModule, filter=lambda x:x.__dict__.get('prefix',None) is not None)
+	@classmethod
+	def task_types(cls,root):
+		"""Enumerate taskdef classes"""
+		if False: yield None
+		#from moat.task import task_types as ty
+		#return ty('moat.ext.onewire.task')
+
+
+def modules(base="moat.ext"):
+	from moat.script.util import objects
+
+	# This filter ignores derived classes which do not set a prefix
+	return objects(base, BaseModule, filter=lambda x:x.__dict__.get('prefix',None) is not None)
 

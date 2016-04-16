@@ -23,3 +23,26 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##  Thus, do not remove the next line, or insert any blank lines above.
 ##BP
 
+from moat.types.module import BaseModule
+
+class OnewireModule(BaseModule):
+	"""\
+		This module facilitates access to 1wire buses+devices via OWserver.
+		"""
+
+	prefix = "onewire"
+	description = "1wire bus"
+	
+	@classmethod
+	def entries(cls):
+		yield from super().entries()
+		yield "cmd_bus","moat.ext.onewire.cmd.bus.OneWireCommand"
+		yield "bus","moat.ext.onewire.cmd.bus.OneBusBase"
+		yield "device","moat.ext.onewire.dev.OnewireDeviceBase"
+
+	@classmethod
+	def task_types(cls):
+		"""Enumerate taskdef classes"""
+		from moat.task import task_types as ty
+		return ty('moat.ext.onewire.task')
+

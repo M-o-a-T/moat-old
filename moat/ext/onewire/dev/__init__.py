@@ -28,8 +28,9 @@ logger = logging.getLogger(__name__)
 from etcd_tree.node import EtcFloat,EtcInteger,EtcString
 from time import time
 
-from .. import DEV
-from ..base import Device
+from moat.dev import DEV
+from moat.dev.base import Device
+from moat.types.etcd import MoatDeviceBase
 
 class NoAlarmHandler(RuntimeError):
 	pass
@@ -48,6 +49,17 @@ def device_types():
 					_device_types[f] = typ
 	return _device_types
 
+class OnewireDeviceBase(MoatDeviceBase):
+	def subtype(self,*path,**kw):
+		if len(path) != 3 or path[-1] != DEV:
+			return super().subtype(self,*path,**kw)
+		try:
+			return device_types()[path[0]]
+		except KeyError:
+			class OWdevice(OnewireDevice):
+				name = '?'+path[0]
+			return OWdevice
+
 class OnewireDevice(Device): #(, metaclass=SelectDevice):
 	prefix = "onewire"
 	name = "generic"
@@ -55,16 +67,24 @@ class OnewireDevice(Device): #(, metaclass=SelectDevice):
 	_inited = False
 	_cached_path = None
 
+	async def init(self):
+		await super().init()
+		if type(self) == OnewireDevice:
+			self.name = '?'+self.parent.parent.name
+
 	def has_update(self):
 		super().has_update()
+		env = self.env.onewire_run
+		if env is None:
+			return
 
 		srvpath = self.get('path','')
 		if self._cached_path is None or srvpath != self._cached_path:
 			if srvpath != '':
 				srv,path = srvpath.split(' ',1)
-				assert self.env.srv_name == srv
-				self.bus = self.env.srv.at('uncached').at(*path.split(' ')).at(self.parent.parent.name+'.'+self.parent.name)
-				self.bus_cached = self.env.srv.at(*path.split(' ')).at(self.parent.parent.name+'.'+self.parent.name)
+				assert env.srv_name == srv
+				self.bus = env.srv.at('uncached').at(*path.split(' ')).at(self.parent.parent.name+'.'+self.parent.name)
+				self.bus_cached = env.srv.at(*path.split(' ')).at(self.parent.parent.name+'.'+self.parent.name)
 			else:
 				self.bus = None
 				self.bus_cached = None
@@ -77,6 +97,13 @@ class OnewireDevice(Device): #(, metaclass=SelectDevice):
 		yield ('*','*',OnewireDevice)
 
 	def scan_for(self, what):
+		"""\
+			Task selection.
+
+			'what' is a task name, from moat/task/onewire/*.
+			If this returns a number N, the task will execute
+			at least every N seconds, on the bus the device is on.
+			"""
 		return None
 	
 	async def has_alarm(self):

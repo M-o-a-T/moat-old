@@ -45,6 +45,8 @@ from etcd_tree import EtcTypes
 import logging
 logger = logging.getLogger(__name__)
 
+MODULE_DIR = ('meta','module')
+
 # Type definitions declare data types and bounds for the rest of MoaT.
 TYPEDEF_DIR = ('meta','type')
 TYPEDEF = ':type'

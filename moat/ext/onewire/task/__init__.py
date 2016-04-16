@@ -24,20 +24,19 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##BP
 
 import asyncio
-import pytest
 from time import time
+from weakref import WeakValueDictionary
 
-from moat.proto.onewire import OnewireServer
-from moat.dev.onewire import OnewireDevice
+from etcd_tree import EtcTypes, EtcFloat,EtcInteger,EtcValue,EtcDir
+from aio_etcd import StopWatching
+
+from contextlib import suppress
 from moat.dev import DEV_DIR,DEV
 from moat.script.task import Task
 from moat.script.util import objects
 
-from etcd_tree import EtcTypes, EtcFloat,EtcInteger,EtcValue,EtcDir
-from aio_etcd import StopWatching
-from time import time
-from weakref import WeakValueDictionary
-from contextlib import suppress
+from ..proto import OnewireServer
+from ..dev import OnewireDevice
 
 import logging
 logger = logging.getLogger(__name__)
@@ -155,12 +154,17 @@ class EtcOnewireBus(EtcDir):
 		super().__init__(*a,**k)
 		self.tasks = WeakValueDictionary()
 		self.timers = {}
-		self.bus = self.env.srv.at('uncached').at(*(self.name.split(' ')))
-		self.bus_cached = self.env.srv.at(*(self.name.split(' ')))
+		env = self.env.onewire_common
+		if srv:
+			self.bus = env.srv.at('uncached').at(*(self.name.split(' ')))
+			self.bus_cached = env.srv.at(*(self.name.split(' ')))
 
 	@property
 	def devices(self):
-		d = self.env.devices
+		d = self.env.onewire_common
+		if d is None:
+			return
+		d = d.devices
 		for f1,v in self['devices'].items():
 			for f2,b in v.items():
 				if b > 0:
@@ -188,6 +192,8 @@ class EtcOnewireBus(EtcDir):
 			self.setup_tasks()
 
 	def setup_tasks(self):
+		if not self.env.onewire_run:
+			return
 		if not tasks:
 			for t in objects(__name__,ScanTask):
 				tasks[t.typ] = t
@@ -204,7 +210,7 @@ class EtcOnewireBus(EtcDir):
 			if t is not None:
 				if name not in self.tasks:
 					logger.debug("Starting task %s %s %s",self,self.bus.path,name)
-					self.tasks[name] = self.env.add_task(task(self))
+					self.tasks[name] = self.env.onewire_run.add_task(task(self))
 			else:
 				if name in self.tasks:
 					t = self.tasks.pop(name)
@@ -266,11 +272,13 @@ class BusRun(_BusTask):
 		# Reading the tree requires accessing self.srv.
 		# Initializing self.srv requires reading the …/server directory.
 		# Thus, first we get that, initialize self.srv with the data …
-		tree,srv = await self.etcd.tree("/bus/onewire/"+server,sub=('server',), types=types,env=self,static=True)
+		tree,srv = await self.etcd.tree("/bus/onewire/"+server,sub=('server',), types=types,static=True)
 		self.srv = OnewireServer(srv['host'],srv.get('port',None), loop=self.loop)
 
 		# and then throw it away in favor of the real thing.
-		self.tree = await self.etcd.tree("/bus/onewire/"+server, types=types,env=self,update_delay=update_delay)
+		self.tree = await self.etcd.tree("/bus/onewire/"+server, types=types,update_delay=update_delay)
+		self.tree.onewire_common = self
+		self.tree.onewire_run = self
 		nsrv = self.tree['server']
 		if srv != nsrv:
 			new_cfg.set_result("new_server")
@@ -280,7 +288,7 @@ class BusRun(_BusTask):
 		devtypes=EtcTypes()
 		for t in OnewireDevice.dev_paths():
 			devtypes.step(t[:-1]).register(DEV,cls=t[-1])
-		self.devices = await self.etcd.tree(DEV_DIR+(OnewireDevice.prefix,), types=devtypes,env=self,update_delay=update_delay)
+		self.devices = await self.etcd.tree(DEV_DIR+(OnewireDevice.prefix,), types=devtypes,update_delay=update_delay)
 		self._trigger = await trigger_hook(self.loop)
 
 		self.tasks = {self.tree.stopped, self.devices.stopped, self.new_cfg,self.new_task_trigger,self._trigger}
@@ -316,8 +324,8 @@ class BusRun(_BusTask):
 					except asyncio.CancelledError as exc:
 						logger.info("Cancelled: %s", t)
 
-		except BaseException as exc:
-			logger.exception("interrupted?")
+		except Exception as exc:
+			logger.exception("Something broke")
 			raise
 		finally:
 			if self.tasks:
@@ -329,6 +337,7 @@ class BusRun(_BusTask):
 						except Exception:
 							logger.exception("Cancelling %s",t)
 				await asyncio.wait(self.tasks, loop=self.loop, return_when=asyncio.ALL_COMPLETED)
+			pass
 		for t in d:
 			if t is not self._trigger:
 				t.result()

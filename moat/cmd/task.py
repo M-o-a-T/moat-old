@@ -28,10 +28,10 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import os
 import sys
 from moat.script import Command, CommandError
+from moat.types.module import BaseModule
 from moat.script.task import Task
 from moat.task import task_types
 from moat.util import r_dict
-from etcd_tree.etcd import EtcTypes
 from dabroker.util import import_string
 from ..task import TASK,TASK_DIR, TASKDEF,TASKDEF_DIR, TASKSTATE,TASKSTATE_DIR
 from yaml import safe_dump
@@ -51,7 +51,6 @@ class DefSetup:
 		await self.root.setup()
 		etc = self.root.etcd
 		tree = await self.root._get_tree()
-		types = EtcTypes()
 		if meta:
 			t = await tree.subdir(TASKDEF_DIR)
 		else:
@@ -104,38 +103,11 @@ on the command line, they are added, otherwise everything under
 			objs = task_types()
 
 		for obj in objs:
-			d = dict(
-				language='python',
-				code=obj.__module__+'.'+obj.__name__,
-				summary=obj.summary or "? no summary given",
-				description=getattr(obj,'description',obj.__doc__)
-			)
-			if hasattr(obj,'schema'):
-				d['data'] = obj.schema
-			tt = await t.subdir(obj.name,name=TASKDEF, create=None)
-			if 'language' in tt: ## mandatory
-				if self.force:
-					changed = False
-					for k,v in d.items():
-						if k not in tt:
-							if self.root.verbose > 1:
-								print("%s: Add %s: %s" % (obj.name,k,v), file=self.stdout)
-						elif tt[k] != v:
-							if self.root.verbose > 1:
-								print("%s: Update %s: %s => %s" % (obj.name,k,tt[k],v), file=self.stdout)
-						else:
-							continue
-						await tt.set(k,v)
-						changed = True
-					if self.root.verbose:
-						print("%s: updated" % obj.name, file=self.stdout)
-				elif self.root.verbose > 1:
-					print("%s: exists, skipped" % obj.name, file=self.stdout)
-				continue
+			if isinstance(obj,type) and issubclass(obj,BaseModule):
+				for task in obj.task_types():
+					await t.add_task(task, force=self.force)
 			else:
-				if self.root.verbose:
-					print("%s: new" % obj.name, file=self.stdout)
-				await tt.update(d)
+				await t.add_task(obj, force=self.force)
 		await t.wait()
 
 class DefListCommand(Command,DefSetup):
@@ -519,7 +491,6 @@ This command shows that information.
 		await self.root.setup()
 		etc = self.root.etcd
 		tree = await self.root._get_tree()
-		types = EtcTypes()
 		t = await tree.subdir(TASKSTATE_DIR)
 
 		if args:
