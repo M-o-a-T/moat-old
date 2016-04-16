@@ -36,7 +36,7 @@ Main tree
       normally. If zero, no restart.
 
     * retry
-    
+
       Initial value for the time until restarting a job when it fails, i.e.
       raises an exception. If zero, the task will not be retried.
 
@@ -60,14 +60,14 @@ Main tree
   * run
 
     Running programs note their presence here.
-    
+
     * whatever …
-    
+
       This hierarchy is used for run-time process state, i.e. whether it
       runs at all, when it started, or the error message it exited with.
 
       Processes have unique names.
-      
+
       * :task
 
         This directory describes one possibly-running process.
@@ -77,7 +77,7 @@ Main tree
           Unix timestamp.
 
         * running
-      
+
           Unix timestamp. This entry shall be equipped with a TTL and updated often enough so that it won't time out.
           If a task discovers that its entry has in fact timed out, it must abort immediately.
 
@@ -127,7 +127,7 @@ Main tree
         Human-readable description of what this particular job does.
 
       * data
-    
+
         Task-specific configuration, passed to the task. TODO; probably JSON.
 
       * ttl, refresh, …
@@ -152,7 +152,7 @@ Main tree
       This hierarchy describes the task definitions which MoaT knows about.
       The actual structure is up to you. "moat task list foo" will display
       all definitions in the /task/HOSTNAME/foo/… hierarchy.
-      
+
       * :taskdef
 
         * name
@@ -165,7 +165,7 @@ Main tree
 
           The programming language the code is written in.
           Probably "python", for now.
-          
+
         * code
 
           Python: Full name of the Task object to run. Typically
@@ -180,7 +180,7 @@ Main tree
 
           This is a multi-line description of the code. Please include
           information about the data fields which the user may set.
-          
+
         * data
 
           Describes the code's configuration. TODO. Probably JSON, i.e.
@@ -239,14 +239,14 @@ Main tree
         The collection of buses this server knows.
 
         * path
-          
-          The bus path on the server, like "bus.0" or "bus.1 1F.12345678 main". 
-          
+
+          The bus path on the server, like "bus.0" or "bus.1 1F.12345678 main".
+
           * broken
 
             Counter for an unreachable bus. If too high, mark its
             devices as inaccessible.
-          
+
           * devices
 
             * <dev_type>
@@ -273,11 +273,11 @@ configurable, auto-discovery should add it as an input.
 * name
 
   Some human-readable name for whatever it is.
- 
+
 * attr
 
   Possible generic attributes, not interpreted by the MoaT core.
- 
+
 * path
 
   Some bus-specific attribute (physical / hardware address) that tells MoaT
@@ -299,7 +299,7 @@ configurable, auto-discovery should add it as an input.
     may be overridden here.
 
     * name
-     
+
       Some human-readable name
 
     * type
@@ -325,7 +325,7 @@ configurable, auto-discovery should add it as an input.
       AMQP: address to read the device
 
       This request triggers an immediate read of the device in question.
-      
+
       If that is not possible or too disruptive, this endpoint should not
       exist.
 
@@ -354,11 +354,11 @@ configurable, auto-discovery should add it as an input.
     may be overridden here.
 
     * name
-     
+
       Some human-readable name
 
     * type
-               
+
       The data type this output has. See `types`, below.
 
     * value
@@ -452,7 +452,7 @@ The base type contains a JSON schema for the possible values.
       Some non-integer number. Temperature, power consumption, percentages, …
 
       There are standard subtypes like "float/fraction" (between 0 and
-      1 inclusive) or "float/temperature" (between -273.15 and a 
+      1 inclusive) or "float/temperature" (between -273.15 and a
       million or whatever, though usually limited to -20 to 100).
 
       The value stored in etcd / used in AMQP messages / whatever is
@@ -490,7 +490,7 @@ The base type contains a JSON schema for the possible values.
 
           Gamma is useful for modifying a value between 0 and 1 that
           e.g. the difference between 0.1 and 0.2 has the same
-          perceived magnitude as that between 0.8 and 0.9. 
+          perceived magnitude as that between 0.8 and 0.9.
 
           Obviously the default is 1. If the change at the low end is
           too granular when you change the value in your UI, decrease
@@ -503,12 +503,12 @@ The base type contains a JSON schema for the possible values.
           gamma = 1/(1-ui_value)-1
 
           ui_value = gamma/(gamma+1)
-          
+
           which makes an UI value between 0 and 1 (neutral: 0.5)
           corresponds to a gamma between 0 and +∞ (neutral: 1).
           You probably want to restrict the UI to values between
           0.1 and 0.9.
-          
+
           Never set gamma to zero.
 
           Negative gamma values invert the value. Do not use them if
@@ -523,7 +523,7 @@ The base type contains a JSON schema for the possible values.
           Multiply with this value. For instance, "float/percent" would
           use a factor of 100 here. Your stereo's volume might go up to
           10.
-          
+
           This value must not be zero, for obvious reasons.
 
         * offset
@@ -535,7 +535,7 @@ The base type contains a JSON schema for the possible values.
 
           The value's unit, as displayed for human consumption.
           "°C" or "kWh" or "%" or whatever makes sense.
-      
+
         * step
 
           Some natural increment (for a human) to use, in "human" units.
