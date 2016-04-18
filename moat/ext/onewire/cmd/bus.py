@@ -37,7 +37,7 @@ import time
 import types as py_types
 import etcd
 
-from moat.script import Command, CommandError
+from moat.script import Command, SubCommand, CommandError
 from moat.script.task import Task
 from moat.util import r_dict
 from moat.dev import DEV_DIR,DEV
@@ -353,7 +353,7 @@ Commands to show 1wire buses
 """
 
 
-class OneWireCommand(Command):
+class OneWireCommand(SubCommand):
 	name = "1wire"
 	summary = "Configure and define tasks"
 	description = """\

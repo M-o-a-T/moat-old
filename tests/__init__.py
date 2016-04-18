@@ -111,14 +111,14 @@ class MoatTest(Moat):
 		self._stdout = io.StringIO()
 		self._width = 9999
 
-	def parse_hook(self):
+	def _parse_hook(self):
 		self.debug_log = []
 		h = StoreHandler(self)
 		logging.getLogger().addHandler(h)
 
 	async def parse(self,cmd):
 		if isinstance(cmd,str):
-			cmd = cmd.split(' ')
+			cmd = [x for x in cmd.split(' ') if x != '']
 		return (await super().parse(cmd))
 
 	@property

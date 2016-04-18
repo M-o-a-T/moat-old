@@ -32,9 +32,9 @@ import asyncio
 import time
 import types
 
-from ..script import Command, CommandError
-from ..script.task import Task,_run_state, JobMarkGoneError,JobIsRunningError
-from ..task import TASKSTATE_DIR,TASKSTATE
+from moat.script import Command, SubCommand, CommandError
+from moat.script.task import Task,_run_state, JobMarkGoneError,JobIsRunningError
+from moat.task import TASKSTATE_DIR,TASKSTATE
 
 import logging
 logger = logging.getLogger(__name__)
@@ -277,7 +277,7 @@ This command only works when testing.
 		self.log.warn("All gone.")
 		return
 
-class TestCommand(Command):
+class TestCommand(SubCommand):
 	name = "test"
 	summary = "Run various tests"""
 	description = """\
@@ -309,6 +309,9 @@ Set some data.
 			print("WARNING: this is NOT a test.", file=sys.stderr)
 			time.sleep(3)
 
+		if args:
+			return (await super().do(args))
+
 		res = 0
 		for c in self.subCommandClasses:
 			if c.summary is None:
@@ -317,14 +320,18 @@ Set some data.
 				print("Checking:",c.name)
 			c = c(parent=self)
 			try:
-				res |= (await c.do(args) or 0)
+				res = (await c.do(args) or 0)
 			except Exception as exc: # pragma: no cover
 				if self.root.verbose > 1:
 					import traceback
 					traceback.print_exc(file=sys.stderr)
 					return 9
 				raise CommandError("%s failed: %s" % (c.name,repr(exc)))
+			else:
+				if res:
+					print("Error. Stopped test run.", file=sys.stderr)
+					return res
 		if self.root.verbose:
-			print("All tests done.")
+			print("All tests done.", file=self.stdout)
 		return res
 

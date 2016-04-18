@@ -28,7 +28,7 @@ import pytest
 from time import time
 from dabroker.proto import ProtocolClient
 from dabroker.unit import Unit,CC_DATA
-from moat.proto.onewire import OnewireServer
+from moat.ext.onewire.proto import OnewireServer
 import mock
 import aio_etcd as etcd
 from contextlib import suppress
@@ -279,14 +279,14 @@ async def test_onewire_fake(loop):
 		await t.delete('/task/fake/onewire/run/:task', recursive=True)
 
 	try:
-		with mock.patch("moat.task.onewire.OnewireServer", new=FakeBus(loop)) as fb, \
-			mock.patch("moat.task.onewire.trigger_hook", new=Trigger(loop)) as fs:
-			mp = mock.patch("moat.task.onewire.DEV_COUNT", new=1)
+		with mock.patch("moat.ext.onewire.task.OnewireServer", new=FakeBus(loop)) as fb, \
+			mock.patch("moat.ext.onewire.task.trigger_hook", new=Trigger(loop)) as fs:
+			mp = mock.patch("moat.ext.onewire.task.DEV_COUNT", new=1)
 			mp.__enter__()
 
 			# Set up the whole thing
 			m = MoatTest(loop=loop)
-			r = await m.parse("-vvvc test.cfg task def init moat.task.onewire")
+			r = await m.parse("-vvvc test.cfg mod init moat.ext.onewire")
 			assert r == 0, r
 			try:
 				await m.parse("-vvvc test.cfg bus 1wire server delete faker")

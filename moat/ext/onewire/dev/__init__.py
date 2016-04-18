@@ -100,7 +100,7 @@ class OnewireDevice(Device): #(, metaclass=SelectDevice):
 		"""\
 			Task selection.
 
-			'what' is a task name, from moat/task/onewire/*.
+			'what' is a task name, from moat/ext/onewire/task/*.
 			If this returns a number N, the task will execute
 			at least every N seconds, on the bus the device is on.
 			"""

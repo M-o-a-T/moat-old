@@ -52,16 +52,6 @@ class CommandHelpFormatter(optparse.IndentedHelpFormatter):
 	_aliases = None
 	_klass = None
 
-	def addCommand(self, name, description):
-		if self._commands is None:
-			self._commands = {}
-		self._commands[name] = description
-
-	def addAlias(self, alias):
-		if self._aliases is None:
-			self._aliases = []
-		self._aliases.append(alias)
-
 	def setClass(self, klass):
 		self._klass = klass
 
@@ -72,22 +62,17 @@ class CommandHelpFormatter(optparse.IndentedHelpFormatter):
 		# to separate paragraphs, so we do it here.
 		ret = description
 
-		# add aliases
-		if self._aliases:
-			ret += "\nAliases: " + ", ".join(self._aliases) + "\n"
-
 		# add subcommands
-		if self._commands:
+		if self._klass._commands:
 			commandDesc = []
 			commandDesc.append("Commands:")
-			keys = sorted(k for k,v in self._commands.items() if v is not None)
 			length = 0
-			for key in keys:
-				if len(key) > length:
-					length = len(key)
-			for name in keys:
-				formatString = "  %-" + "%d" % length + "s  %s"
-				commandDesc.append(formatString % (name, self._commands[name]))
+			for name,desc in self._klass._commands:
+				if len(name) > length:
+					length = len(name)
+			for name,desc in sorted(self._klass._commands):
+				formatString = "  %-" + str(length) + "s  %s"
+				commandDesc.append(formatString % (name, desc))
 			ret += "\n" + "\n".join(commandDesc) + "\n"
 
 #		# add class info
@@ -195,75 +180,12 @@ class Command(object):
 
 		self.log = logging.getLogger(self.name)
 
-		# create subcommands if we have them
-		self.subCommands = {}
-		self.aliasedSubCommands = {}
-		if self.subCommandClasses:
-			for c in self.subCommandClasses:
-				self.subCommands[c.name] = c
-				if c.aliases:
-					for alias in c.aliases:
-						self.aliasedSubCommands[alias] = c
-
-		# create our formatter and add subcommands if we have them
-		formatter = CommandHelpFormatter()
-		formatter.setClass(self.__class__)
-		if self.subCommands:
-			if not self.description: # pragma: no cover
-				if self.summary:
-					self.description = self.summary
-				else:
-					raise AttributeError(
-						"%s needs a summary or description " \
-						"for help formatting" % repr(self))
-
-			for name, command in self.subCommands.items():
-				if command.summary:
-					formatter.addCommand(name, command.summary)
-
-		if self.aliases:
-			for alias in self.aliases:
-				formatter.addAlias(alias)
-
-		# expand %command for the bottom usage
-		usage = self.usage or ''
-		if not usage:
-			# if no usage, but subcommands, then default to showing that
-			if self.subCommands:
-				usage = "%command"
-
-		# the main program name shouldn't get prepended, because %prog
-		# already expands to the name
-		if not usage.startswith('%prog'):
-			usage = self.name + ' ' + usage
-
-		usages = [usage, ]
-		if usage.find("%command") > -1:
-			if self.subCommands:
-				usage = usage.split("%command")[0] + '[command]'
-				usages = [usage, ]
-			else: 
-				# %command used in a leaf command
-				usages = usage.split("%command")
-				usages.reverse()
-
-		# FIXME: abstract this into getUsage that takes an optional
-		# parent on where to stop recursing up
-		# useful for implementing subshells
-
-		# walk the tree up for our usage
-		c = self.parent
-		while c:
-			usage = c.usage or c.name
-			if usage.find(" %command") > -1:
-				usage = usage.split(" %command")[0]
-			usages.append(usage)
-			c = c.parent
-		usages.reverse()
-		usage = " ".join(usages)
-
 		# create our parser
 		description = self.description or self.summary
+		usage = self.usage or ''
+		formatter = CommandHelpFormatter()
+		formatter.setClass(self.__class__)
+
 		if description:
 			description = description.strip()
 		self.parser = CommandOptionParser(
@@ -310,6 +232,9 @@ class Command(object):
 		@rtype:   int
 		@returns: an exit code, or None if no actual action was taken.
 		"""
+		# cache, in case the ars parser needs to emit help
+		self._commands = await self.list_commands()
+
 		# note: no arguments should be passed as an empty list, not a list
 		# with an empty str as ''.split(' ') returns
 		self.options, args = self.parser.parse_args(argv)
@@ -323,69 +248,37 @@ class Command(object):
 		if ret:
 			return ret # pragma: no cover ## if necessary, we raise
 
-		self.parse_hook()
+		self._parse_hook()
 
 		# if we don't have args or don't have subcommands,
 		# defer to our do() method
 		# allows implementing a do() for commands that also have subcommands
-		if not args or not self.subCommands:
-			self.log.debug('no args or no subcommands, calling %r.do(%r)', self, args)
-			try:
-				ret = await self.do(args)
-				self.log.debug('done ok, returned %r', ret)
+
+		self.log.debug('calling %r.do(%r)', self, args)
+		try:
+			ret = await self.do(args)
+			self.log.debug('done ok, returned %r', ret)
 #			except CommandOk as e:
 #				self.log.exception('done with exception, raised %r', e)
 #				ret = e.status
 #				self.stdout.write(e.output + '\n')
-			except CommandExited as e:
-				ret = e.status
-				sys.stderr.write(e.output + '\n')
-			except NotImplementedError:
-				self.parser.print_usage(file=sys.stderr)
-				sys.stderr.write("Use --help to get a list of commands.\n")
-				return 1
+		except CommandExited as e:
+			ret = e.status
+			sys.stderr.write(e.output + '\n')
+		except NotImplementedError:
+			self.parser.print_usage(file=sys.stderr)
+			sys.stderr.write("Use --help to get a list of commands.\n")
+			return 1
 
 
-			# if everything's fine, we return 0
-			if not ret:
-				ret = 0
+		# if everything's fine, we return 0
+		if not ret:
+			ret = 0
 
-			return ret
+		return ret
 
-		# as we have a subcommand, defer to it
-		command = args[0]
-
-		C = self.subCommands.get(command,None)
-		if C is None:
-			C = self.aliasedSubCommands.get(command,None)
-		if C is not None:
-			c = C(self)
-			try:
-				r = await c.parse(args[1:])
-				if not self.root.logged:
-					if r:
-						logger.info("Error:%s:%s",r, " ".join(args))
-					else:
-						logger.debug("Done:%s", " ".join(args))
-					self.root.logged = True
-				return r
-			except CommandExited as e:
-				raise
-			except Exception:
-				if not self.root.logged:
-					logger.exception("Error:%s", " ".join(args))
-					self.root.logged = True
-				raise
-			finally:
-				await c.finish()
-
-		self.log.error("Unknown command '%s'.\n", command)
-		self.parser.print_usage(file=sys.stderr)
-		return 1
-
-	def parse_hook(self):
-		"""
-		"""
+	def _parse_hook(self):
+		"""Overridden in test"""
 		pass
 
 	def handleOptions(self):
@@ -432,6 +325,10 @@ class Command(object):
 	def stdout(self):
 		return self._getStd('stdout')
 
+	async def list_commands(self):
+		"""dummy"""
+		return ()
+
 class CommandExited(Exception):
 
 	def __init__(self, status, output):
@@ -450,4 +347,83 @@ class CommandError(CommandExited):
 
 	def __init__(self, output):
 		CommandExited.__init__(self, 3, output)
+
+class SubCommand(Command):
+	"""
+	I am a class that dispatches to a nested command.
+	"""
+
+	async def do(self, args):
+		"""
+		Dispatch to sub-command.
+		"""
+		
+		c = await self.resolve_command(args[0])
+		c = c(parent=self)
+
+		try:
+			r = await c.parse(args[1:])
+			if not self.root.logged:
+				if r:
+					logger.info("Error:%s:%s",r, " ".join(args))
+				else:
+					logger.debug("Done:%s", " ".join(args))
+				self.root.logged = True
+			return r
+		except CommandExited as e:
+			raise
+		except Exception:
+			if not self.root.logged:
+				logger.exception("Error:%s", " ".join(args))
+				self.root.logged = True
+			raise
+		finally:
+			await c.finish()
+
+		self.log.error("Unknown command '%s'.\n", command)
+		self.parser.print_usage(file=sys.stderr)
+		return 1
+
+	async def resolve_command(self, name):
+		"""Return the command object corresponding to this name"""
+		raise NotImplementedError("You need to override %s.resolve_command" % type(self))
+
+	async def list_commands(self):
+		"""Return a list of command,descr tuples"""
+		raise NotImplementedError("You need to override %s.list_commands" % type(self))
+
+class ModuleCommand(SubCommand):
+	kind = None # module: cmd_KIND
+
+	async def resolve_command(self, name):
+		t = await self.root.lookup(MODULE_DIR)[name]['cmd_'+self.kind]
+		return t.code
+
+	async def list_commands(self):
+		t = await self.root.lookup(*MODULE_DIR)
+		t = await t.names_for('cmd_'+self.kind)
+		res = []
+		for cmd in t:
+			res.append(v.key, v['descr'])
+
+		return res
+
+class SubCommand(SubCommand):
+	subCommandClasses = None
+
+	def __init__(self, *a,**k):
+		super().__init__(*a,**k)
+
+		self.subCommands = {}
+		for c in self.subCommandClasses:
+			self.subCommands[c.name] = c
+
+	async def resolve_command(self, name):
+		return self.subCommands[name]
+
+	async def list_commands(self):
+		res = []
+		for name,cmd in sorted(self.subCommands.items()):
+			res.append((name,cmd.summary))
+		return res
 

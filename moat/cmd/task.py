@@ -27,7 +27,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 
 import os
 import sys
-from moat.script import Command, CommandError
+from moat.script import Command, SubCommand, CommandError
 from moat.types.module import BaseModule
 from moat.script.task import Task
 from moat.task import task_types
@@ -282,7 +282,7 @@ class ParamCommand(_ParamCommand):
 Tasks are stored in etcd at /task/**/:task.
 """ + _ParamCommand.description
 
-class DefCommand(Command):
+class DefCommand(SubCommand):
 	subCommandClasses = [
 		DefInitCommand,
 		DefListCommand,
@@ -531,7 +531,7 @@ This command shows that information.
 					print('/'.join(path),state,date,task.get('message','-'), sep='\t', file=self.stdout)
 
 
-class TaskCommand(Command):
+class TaskCommand(SubCommand):
 	name = "task"
 	summary = "Configure and define tasks"
 	description = """\

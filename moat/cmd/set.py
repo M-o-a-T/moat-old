@@ -26,7 +26,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 """List of known Tasks"""
 
 import os
-from moat.script import Command, CommandError
+from moat.script import Command, SubCommand, CommandError
 import aio_etcd as etcd
 import logging
 logger = logging.getLogger(__name__)
@@ -196,7 +196,7 @@ See "moat show dev --help" for displaying values.
 					retval = 1
 		return retval
 
-class SetCommand(Command):
+class SetCommand(SubCommand):
 	name = "set"
 	summary = "Update data"""
 	description = """\

@@ -24,7 +24,6 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##  Thus, do not remove the next line, or insert any blank lines above.
 ##BP
 
-from moat.script import Command, CommandError
 import glob
 import sys
 import os
@@ -33,10 +32,12 @@ import yaml
 import asyncio
 import socket
 
+from dabroker.unit import make_unit, DEFAULT_CONFIG as DABROKER_DEFAULT_CONFIG
+
+from moat.script import SubCommand, CommandError
 from moat.cmd import commands as moat_commands
 from moat.util import OverlayDict
 from moat.types import TYPEDEF_DIR
-from dabroker.unit import make_unit, DEFAULT_CONFIG as DABROKER_DEFAULT_CONFIG
 
 import logging
 logger = logging.getLogger(__name__)
@@ -63,7 +64,7 @@ def r_update(a,b):
 				a[k] = {}
 			r_update(a[k],v)
 
-class Moat(Command):
+class Moat(SubCommand):
 	usage = "[MoaT options] %command"
 	summary = "MoaT utility"
 	description = """

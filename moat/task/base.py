@@ -124,8 +124,13 @@ class TaskDef(recEtcDir):
 		self._update_cls()
 
 	def _update_cls(self):
-		if 'language' in self and self['language'] == 'python':
-			self.cls = import_string(self['code'])
+		if self.get('language','') == 'python':
+			try:
+				self.cls = import_string(self['code'])
+			except (ImportError,AttributeError):
+				logger.error("%s: Unable to import %s", '/'.join(self.path[:-1]),self['code'])
+				self.cls = None
+
 		else:
 			self.cls = None
 	

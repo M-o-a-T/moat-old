@@ -26,22 +26,19 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 """List of known Tasks"""
 
 import os
-from ...script import Command
+from ...script import ModuleCommand
 from ...script.util import objects
 
 import logging
 logger = logging.getLogger(__name__)
 
-def commands():
-	return objects(__name__, Command)
-
-class Moat(Command):
-
+class DeviceCommand(ModuleCommand):
 	name = "dev"
+	kind = "dev"
+
 	summary = "device-specific commands"
 	description = """
 This command class includes device-specific subcommands.
 """
-
-	subCommandClasses = list(commands())
+	pass
 

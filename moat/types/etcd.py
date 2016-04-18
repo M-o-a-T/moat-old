@@ -106,14 +106,14 @@ class MoatMetaModule(EtcDir):
 		for v in self.values():
 			v = await v
 			if name in v:
-				res.append(name)
+				res.append(v)
 		return res
 
 	async def add_module(self, obj, force=False):
 		d = dict(
 			language='python',
 			descr=obj.summary,
-			doc=getattr(obj,'doc',obj.__doc__),
+			doc=(getattr(obj,'doc',None) or obj.__doc__),
 			code=obj.__module__+'.'+obj.__name__,
 		)
 		for k,v in obj.entries():
@@ -121,8 +121,14 @@ class MoatMetaModule(EtcDir):
 		if hasattr(obj,'schema'):
 			d['data'] = obj.schema
 		tt = await self.subdir(obj.prefix, create=None)
-		if tt.get('language','') == 'python':
+		r = None
+		lang = tt.get('language',None)
+		if lang is None:
+			logger.info("%s: new", obj.prefix)
+			await tt.update(d, _sync=False)
+		elif lang == 'python':
 			if force: 
+				changed = False
 				for k,v in d.items():
 					if k not in tt:
 						logger.debug("%s: Add %s: %s", obj.prefix,k,v)
@@ -130,13 +136,22 @@ class MoatMetaModule(EtcDir):
 						logger.debug("%s: Update %s: %s => %s", obj.prefix,k,tt[k],v)
 					else:
 						continue
-					await tt.set(k,v)
-				logger.info("%s: updated", obj.prefix)
+					r = await tt.set(k,v, sync=False)
+					changed = True
+				for k in tt.keys():
+					if k not in d:
+						r = await tt.delete(k, sync=False)
+						logger.debug("%s: Delete %s", obj.prefix,k)
+						changed = True
+				if changed:
+					logger.info("%s: updated", obj.prefix)
+				else:
+					logger.debug("%s: not changed", obj.prefix)
 			else:
 				logger.debug("%s: exists, skipped", obj.prefix)
 		else:
-			logger.info("%s: new", obj.prefix)
-			await tt.update(d)
+			raise RuntimeError("%s: exists, language=%s" % (obj.prefix,lang))
+		await tt.wait(r)
 
 MoatMetaModule.register('*', cls=MoatLoaderDir)
 
@@ -155,10 +170,14 @@ class MoatMetaTask(EtcDir):
 	async def init(self):
 		from moat.task import TASKDEF
 		from moat.task.base import TaskDef
+
 		self.register('**',TASKDEF, cls=TaskDef)
 		await super().init()
 	
 	async def add_task(self, task, force=False):
+		from moat.task import TASKDEF
+
+		assert task.name is not None
 		d = dict(
 			language='python',
 			code=task.__module__+'.'+task.__name__,
@@ -168,8 +187,13 @@ class MoatMetaTask(EtcDir):
 		if hasattr(task,'schema'):
 			d['data'] = task.schema
 		tt = await self.subdir(task.name,name=TASKDEF, create=None)
-		if 'language' in tt: ## mandatory
+		lang = tt.get('language',None)
+		if lang is None:
+			logger.info("%s: new", task.name)
+			await tt.update(d)
+		elif lang == 'python':
 			if force:
+				changed = False
 				for k,v in d.items():
 					if k not in tt:
 						logger.debug("%s: Add %s: %s", task.name,k,v)
@@ -178,12 +202,22 @@ class MoatMetaTask(EtcDir):
 					else:
 						continue
 					await tt.set(k,v)
-				logger.info("%s: updated", task.name)
+					changed = True
+				for k in tt.keys():
+					if k not in d:
+						logger.debug("%s: Delete %s", task.name,k)
+						r = await tt.delete(k, sync=False)
+						changed = True
+
+				if changed:
+					logger.info("%s: updated", task.name)
+				else:
+					logger.debug("%s: not changed", task.name)
 			else:
 				logger.debug("%s: exists, skipped", task.name)
 		else:
-			logger.info("%s: new", task.name)
-			await tt.update(d)
+			raise RuntimeError("%s: exists, language=%s" % (task.name,lang))
+
 
 class MoatMeta(EtcDir):
 	"""Singleton for /meta"""

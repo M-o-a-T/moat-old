@@ -26,23 +26,18 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 """List of known Tasks"""
 
 import os
-from ...script import Command
+from ...script import ModuleCommand
 from ...script.util import objects
 
 import logging
 logger = logging.getLogger(__name__)
 
-def commands():
-	return objects(__name__, Command)
-
-class Moat(Command):
-
+class BusCommand(ModuleCommand):
 	name = "bus"
+	kind = "bus"
+
 	summary = "bus-specific commands"
 	description = """
 This command class includes bus/technology-specific subcommands.
 """
-
-	def subCommandClasses(self):
-		pass
-
+	pass

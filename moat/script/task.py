@@ -64,10 +64,10 @@ class Task(asyncio.Task):
 		state in etcd lasts before it is cleaned up; `refresh` says how
 		often it is renewed within that timeframe.
 		"""
-	name = "do_not_run.py"
+	name = None
 	summary = """This is a prototype. Do not use."""
 	schema = {}
-	description = None
+	doc = None
 
 	_global_loop=False
 
@@ -90,13 +90,14 @@ class Task(asyncio.Task):
 			If _ttl is a callable, it must return a (ttl,refresh) tuple.
 			_refresh is ignored in that case.
 			"""
+		self.loop = cmd.root.loop
+		super().__init__(coro_wrapper(self.run), loop=self.loop)
 		if isinstance(name,(list,tuple)):
 			assert len(name)
 			path = name
 			name = '/'.join(name)
 		else:
 			path = tuple(name.split('/'))
-		assert ':' not in self.name
 		assert name[0] != '/'
 		assert name[-1] != '/'
 		assert '//' not in name
@@ -107,8 +108,6 @@ class Task(asyncio.Task):
 		self._refresh = config.get('refresh',None) if _refresh is None else _refresh
 		self.name = name
 		self.path = path
-		self.loop = cmd.root.loop
-		super().__init__(coro_wrapper(self.run), loop=self.loop)
 
 	@classmethod
 	def task_info(cls,tree):

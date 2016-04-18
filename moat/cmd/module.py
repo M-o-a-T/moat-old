@@ -27,9 +27,9 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 
 import os
 import sys
-from moat.script import Command, CommandError
+from moat.script import Command, SubCommand, CommandError
 from moat.script.task import Task
-from moat.task import task_types
+from moat.task import task_types, TASKDEF_DIR
 from moat.util import r_dict
 from moat.types import MODULE_DIR
 from moat.types.module import BaseModule, modules
@@ -98,8 +98,11 @@ on the command line, they are added, otherwise everything under
 		else:
 			objs = modules()
 
+		tasks = await t.root.subdir(TASKDEF_DIR)
 		for obj in objs:
 			await t.add_module(obj, force=self.force)
+			for ta in obj.task_types():
+				await tasks.add_task(ta, force=self.force)
 		await t.wait()
 
 class ModuleListCommand(Command,ModuleSetup):
@@ -153,7 +156,7 @@ This command deletes (some of) that data.
 			help="not forcing won't do anything")
 
 	async def do(self,args):
-		td = await self.setup()
+		t = await self.setup()
 		if args:
 			dirs = []
 			for a in args:
@@ -171,8 +174,8 @@ This command deletes (some of) that data.
 			dirs = (t)
 
 		for k in dirs:
-			t = k
-			k = k.path
+			t = await k
+			k = t.path
 			rec=None
 			while True:
 				p = t._parent
@@ -183,12 +186,19 @@ This command deletes (some of) that data.
 					await t.delete(recursive=rec)
 				except etcd.EtcdDirNotEmpty:
 					break
+				if isinstance(t,MoatLoaderDir):
+					try:
+						t2 = t.root.lookup(*TASKDEF_DIR,self.name)
+					except KeyError:
+						pass
+					else:
+						await t2.delete(recursive=True)
 				rec=False
 				t = p
 			if self.root.verbose:
 				print("%s: deleted"%'/'.join(k), file=self.stdout)
 
-class ModuleCommand(Command):
+class ModuleCommand(SubCommand):
 	name = "mod"
 	summary = "Configure modules"
 	description = """\

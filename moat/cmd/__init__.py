@@ -33,5 +33,5 @@ import logging
 logger = logging.getLogger(__name__)
 
 def commands():
-	return objects(__name__, Command, direct=True)
+	return objects(__name__, Command, direct=True, filter=lambda x: x.name is not None)
 

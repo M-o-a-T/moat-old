@@ -26,7 +26,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 """List of known Tasks"""
 
 import os
-from moat.script import Command, CommandError
+from moat.script import Command, SubCommand, CommandError
 from etcd_tree.util import from_etcd
 import aio_etcd as etcd
 
@@ -205,7 +205,7 @@ Of course you can use "output" instead of "input", if the device has any.
 
 
 
-class ShowCommand(Command):
+class ShowCommand(SubCommand):
 	name = "show"
 	summary = "Show various data"""
 	description = """\

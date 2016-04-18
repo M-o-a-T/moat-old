@@ -31,7 +31,7 @@ class OnewireModule(BaseModule):
 		"""
 
 	prefix = "onewire"
-	description = "1wire bus"
+	summary = "1wire bus"
 	
 	@classmethod
 	def entries(cls):
