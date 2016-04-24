@@ -142,22 +142,6 @@ stuff back to the loop.
 		opts = self.options
 		self.verbose = opts.verbose
 
-		if opts.logto:
-			logfile = open(opts.logto,"w")
-		else:
-			logfile = sys.stderr
-		if opts.logto:
-			# also report errors to stderr
-			h = logging.StreamHandler(sys.stderr)
-			style = '%'
-			fs = logging._STYLES[style][1]
-			fmt = logging.Formatter(fs, None, style)
-			if h.formatter is None:
-				h.setFormatter(fmt)
-				logging.root.addHandler(h)
-			level = (logging.ERROR,logging.ERROR,logging.WARNING)[min(self.verbose,2)]
-			h.setLevel(level)
-
 		paths = []
 		if opts.files:
 			for f in opts.files:
@@ -186,15 +170,27 @@ stuff back to the loop.
 					c = c.setdefault(kk,{})
 				oc[ok] = v
 		#logging.basicConfig(stream=logfile,level=(logging.ERROR,logging.WARNING,logging.INFO,logging.INFO,logging.DEBUG)[min(self.verbose,4)])
-		lcfg = self.cfg['config'].get('logging',{'version':1})
+		lcfg = self.cfg['config'].setdefault('logging',{'version':1})
+		hd = lcfg.setdefault('root',{}).setdefault('handlers',[])
 		if opts.logto:
-			lcfg['logging']['root']['handlers'] = ['logfile']
-			lh = lcfg['handlers'].get('logfile',
+			if 'logfile' not in hd:
+				hd.append('logfile')
+			lh = lcfg['handlers'].setdefault('logfile',
 				{'level':'logging.DEBUG',
 				 'formatter':'std',
 				})
 			lh['class'] = 'logging.FileHandler'
 			lh['filename'] = opts.logto
+		fmt = lcfg.setdefault('formatters',{})
+		fmt.setdefault('std', {'format': '%(levelname)s:%(name)s:%(message)s'})
+		fmt.setdefault('stderr', {'format': '%(message)s'})
+
+		if 'stderr' not in hd:
+			hd.append('stderr')
+		lh = lcfg['handlers'].setdefault('stderr', { 'formatter':'stderr' })
+		lh['class'] = 'logging.StreamHandler'
+		lh['stream'] = sys.stderr
+		lh['level'] = ('ERROR','ERROR','WARNING')[min(self.verbose,2)]
 
 		from logging.config import dictConfig
 		lcfg['disable_existing_loggers'] = False

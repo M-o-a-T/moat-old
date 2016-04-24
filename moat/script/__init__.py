@@ -39,6 +39,8 @@ import sys
 import asyncio
 from types import CoroutineType
 
+from moat.types import MODULE_DIR
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -393,15 +395,17 @@ class ModuleCommand(SubCommand):
 	kind = None # module: cmd_KIND
 
 	async def resolve_command(self, name):
-		t = await self.root.lookup(MODULE_DIR)[name]['cmd_'+self.kind]
+		tree = await self.root._get_tree()
+		t = await tree.lookup(MODULE_DIR)[name]['cmd_'+self.kind]
 		return t.code
 
 	async def list_commands(self):
-		t = await self.root.lookup(*MODULE_DIR)
+		tree = await self.root._get_tree()
+		t = await tree.lookup(*MODULE_DIR)
 		t = await t.names_for('cmd_'+self.kind)
 		res = []
 		for cmd in t:
-			res.append(v.key, v['descr'])
+			res.append((cmd.name, cmd['descr']))
 
 		return res
 
