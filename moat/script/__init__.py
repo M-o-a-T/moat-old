@@ -48,36 +48,29 @@ class CommandHelpFormatter(optparse.IndentedHelpFormatter):
 	after it if there are any, formatted like the options.
 	"""
 
-	_commands = None
-	_aliases = None
-	_klass = None
-
-	def setClass(self, klass):
-		self._klass = klass
+	def __init__(self,parent):
+		super().__init__()
+		self._parent = parent
 
 	### override parent method
 
 	def format_description(self, description):
 		# textwrap doesn't allow for a way to preserve double newlines
 		# to separate paragraphs, so we do it here.
-		ret = description
+		ret = description.strip()+'\n'
 
 		# add subcommands
-		if self._klass._commands:
+		if self._parent._commands:
 			commandDesc = []
 			commandDesc.append("Commands:")
 			length = 0
-			for name,desc in self._klass._commands:
+			for name,desc in self._parent._commands:
 				if len(name) > length:
 					length = len(name)
-			for name,desc in sorted(self._klass._commands):
+			for name,desc in sorted(self._parent._commands):
 				formatString = "  %-" + str(length) + "s  %s"
 				commandDesc.append(formatString % (name, desc))
 			ret += "\n" + "\n".join(commandDesc) + "\n"
-
-#		# add class info
-#		ret += "\nImplemented by: %s.%s\n" % (
-#			self._klass.__module__, self._klass.__name__)
 
 		return ret
 
@@ -183,8 +176,7 @@ class Command(object):
 		# create our parser
 		description = self.description or self.summary
 		usage = self.usage or ''
-		formatter = CommandHelpFormatter()
-		formatter.setClass(self.__class__)
+		formatter = CommandHelpFormatter(self)
 
 		if description:
 			description = description.strip()
@@ -264,10 +256,10 @@ class Command(object):
 #				self.stdout.write(e.output + '\n')
 		except CommandExited as e:
 			ret = e.status
-			sys.stderr.write(e.output + '\n')
+			logger.error(e.output)
 		except NotImplementedError:
 			self.parser.print_usage(file=sys.stderr)
-			sys.stderr.write("Use --help to get a list of commands.\n")
+			print("Use --help to get a list of commands.", file=sys.stderr)
 			return 1
 
 
@@ -358,10 +350,18 @@ class SubCommand(Command):
 		Dispatch to sub-command.
 		"""
 		
-		c = await self.resolve_command(args[0])
-		c = c(parent=self)
+		if not args:
+			self.parser.print_help(file=sys.stderr)
+			return 8
 
+		c = None
 		try:
+			try:
+				c = await self.resolve_command(args[0])
+			except KeyError as e:
+				raise CommandError("Unknown command: '%s'" % args[0]) from e
+			c = c(parent=self)
+
 			r = await c.parse(args[1:])
 			if not self.root.logged:
 				if r:
@@ -378,11 +378,8 @@ class SubCommand(Command):
 				self.root.logged = True
 			raise
 		finally:
-			await c.finish()
-
-		self.log.error("Unknown command '%s'.\n", command)
-		self.parser.print_usage(file=sys.stderr)
-		return 1
+			if c is not None:
+				await c.finish()
 
 	async def resolve_command(self, name):
 		"""Return the command object corresponding to this name"""

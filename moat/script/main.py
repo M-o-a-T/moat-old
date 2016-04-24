@@ -65,7 +65,7 @@ def r_update(a,b):
 			r_update(a[k],v)
 
 class Moat(SubCommand):
-	usage = "[MoaT options] %command"
+	usage = "[MoaT options] command [args …]"
 	summary = "MoaT utility"
 	description = """
 This is the main MoaT command line processor.

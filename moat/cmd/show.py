@@ -39,6 +39,8 @@ class ConfigCommand(Command):
 	name = "config"
 	summary = "View configuration data"""
 	description = """\
+Usage: moat show config [args …]
+
 Show the current config data.
 
 With arguments, show only these.
@@ -64,6 +66,8 @@ class EtcdCommand(Command):
 	name = "etcd"
 	summary = "View etcd data"""
 	description = """\
+Usage: moat show etcd [args …]
+
 Show the current etcd contents.
 
 With arguments, show only these subtrees.
@@ -112,6 +116,8 @@ class DevCommand(Command):
 	name = "dev"
 	summary = "Update device data"""
 	description = """\
+Usage: moat show dev [args …]
+
 Add/Update/Delete device attributes.
 
 Usage: -l path/to                             -- list all devices here
@@ -209,8 +215,10 @@ class ShowCommand(SubCommand):
 	name = "show"
 	summary = "Show various data"""
 	description = """\
+Usage: moat [global options …] show ‹command› [args …]
+
 Show some data.
-"""
+""" # first line checked in tests/test_cmd
 
 	subCommandClasses = [EtcdCommand,ConfigCommand,DevCommand]
 

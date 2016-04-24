@@ -158,7 +158,10 @@ by default, start every task that's defined for this host.
 					await self._start()
 
 		finally:
-			logger.debug("NoMoreJobs")
+			try:
+				logger.debug("NoMoreJobs")
+			except NameError: # may occur when shutting down
+				pass
 			for j in self.jobs.values():
 				try:
 					logger.info('CANCEL 1 %s',j)
