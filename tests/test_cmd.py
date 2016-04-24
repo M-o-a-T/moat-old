@@ -157,7 +157,7 @@ async def test_task(loop):
 	r = await m.parse("-vvvc test.cfg run -kg fake/cmd/sleep")
 	t2 = time()
 	assert r == 0, r
-	assert t2-t < 5 and t2-t > 2, (t,t2)
+	assert t2-t < 10 and t2-t > 2, (t,t2)
 
 	m = MoatTest(loop=loop)
 	r = await m.parse("-vvvc test.cfg task change fake/cmd/sleep delay=5")
