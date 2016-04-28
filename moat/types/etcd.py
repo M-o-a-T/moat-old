@@ -23,7 +23,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##  Thus, do not remove the next line, or insert any blank lines above.
 ##BP
 
-from etcd_tree import EtcRoot, EtcDir, EtcString, ReloadRecursive
+from etcd_tree import EtcRoot, EtcDir, EtcString, EtcXValue, ReloadRecursive
 from weakref import WeakValueDictionary
 from dabroker.util import import_string
 
@@ -53,7 +53,7 @@ class MoatBusBase(EtcDir):
 		"""
 	pass
 
-class MoatLoader(EtcString):
+class MoatLoader(EtcXValue):
 	"""Directory for /meta/module/‹subsys›/‹name›"""
 	_code = None
 
