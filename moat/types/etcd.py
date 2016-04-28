@@ -138,6 +138,7 @@ class MoatMetaModule(EtcDir):
 						continue
 					r = await tt.set(k,v, sync=False)
 					changed = True
+				await tt.wait(r) # otherwise tt.keys() may change during execution
 				for k in tt.keys():
 					if k not in d:
 						r = await tt.delete(k, sync=False)
