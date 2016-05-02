@@ -15,6 +15,7 @@ import inspect
 from time import time
 from traceback import format_exception
 import weakref
+from bdb import BdbQuit
 
 from moat.task import _VARS, TASK_DIR,TASKDEF_DIR,TASK,TASKDEF, TASKSTATE_DIR,TASKSTATE
 from moat.util import do_async
@@ -491,7 +492,7 @@ class TaskMaster(asyncio.Future):
 			else:
 				self.current_retry = min(self.current_retry + self.vars['retry']/2, self.vars['max-retry'])
 			self.exc = exc
-			if not self.current_retry:
+			if not self.current_retry or isinstance(exc,BdbQuit):
 				self.set_exception(exc)
 				return
 		else:
