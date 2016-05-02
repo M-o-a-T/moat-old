@@ -39,7 +39,6 @@ nicer.
 """
 
 import os
-from ..script.util import objects
 from etcd_tree import EtcTypes
 
 import logging
@@ -66,6 +65,7 @@ _type_names = _type_names()
 def types():
 	"""Generator for all types known to MoaT. This accesses the code."""
 	from .base import Type
+	from moat.script.util import objects
 	return objects(__name__, Type, filter=lambda x:x.name is not None)
 
 def type_names():

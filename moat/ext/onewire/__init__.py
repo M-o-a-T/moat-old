@@ -36,8 +36,9 @@ class OnewireModule(BaseModule):
 	@classmethod
 	def entries(cls):
 		yield from super().entries()
-		yield "cmd_bus","moat.ext.onewire.cmd.bus.OneWireCommand"
-		yield "bus","moat.ext.onewire.cmd.bus.OneBusBase"
+		yield "cmd_conn","moat.ext.onewire.cmd.conn.ServerCommand"
+		yield "cmd_dev","moat.ext.onewire.cmd.dev.DeviceCommand"
+		yield "bus","moat.ext.onewire.bus.OnewireBusBase"
 		yield "device","moat.ext.onewire.dev.OnewireDeviceBase"
 
 	@classmethod

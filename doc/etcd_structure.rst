@@ -112,7 +112,7 @@ Main tree
 
       This directory describes an actual task to run.
 
-      * task
+      * taskdef
 
         The name of this task's definition, stored at /meta/task/TASK/:taskdef.
 
@@ -120,7 +120,12 @@ Main tree
 
         Some human-readable name for this task.
 
-        Not used as an index.
+        Not to be used as an index.
+
+      * parent
+
+        The path of the node which triggered auto-creating this task.
+        If this node vanishes, the task shall be terminated (or not started).
 
       * summary
 

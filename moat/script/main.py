@@ -52,6 +52,7 @@ DEFAULT_CONFIG = dict(
 		'retry':1,
 		'max-retry':600,
 		'restart':2,
+		'one-shot':False,
 	}
 )
 
@@ -76,10 +77,6 @@ otherwise you will be asked to specify. If there is none, /etc/moat.cfg
 will be used. If that doesn't exist either, this command fails.
 
 You can load more than one config file.
-
-NOTE: If you pass in an event loop when initializing, the command handler
-assumes that it's running in a separate thread and will delegate async
-stuff back to the loop.
 """
 	subCommandClasses = list(moat_commands())
 
@@ -185,8 +182,12 @@ stuff back to the loop.
 		fmt.setdefault('std', {'format': '%(levelname)s:%(name)s:%(message)s'})
 		fmt.setdefault('stderr', {'format': '%(message)s'})
 
-		if 'stderr' not in hd:
-			hd.append('stderr')
+		if opts.verbose:
+			if 'stderr' not in hd:
+				hd.append('stderr')
+		else:
+			if 'stderr' in hd:
+				hd.remove('stderr')
 		lh = lcfg['handlers'].setdefault('stderr', { 'formatter':'stderr' })
 		lh['class'] = 'logging.StreamHandler'
 		lh['stream'] = sys.stderr

@@ -121,6 +121,30 @@ class StringType(Type):
 	name = 'str'
 	etcd_class = EtcString
 
+class PathType(StringType):
+	name = 'str/path'
+
+	@property
+	def etcd_value(self):
+		assert self.value
+		return '/'.join(self.value)
+	@etcd_value.setter
+	def etcd_value(self,value):
+		self.value = value.split('/')
+		assert '' not in self.value
+
+class HostType(StringType):
+	name = 'str/hostname'
+
+class ObjType(StringType):
+	name = 'str/obj'
+	@property
+	def value(self):
+		return import_string(self._value)
+	@value.setter
+	def value(self,value):
+		self._value = value.__module__+'.'+value.__name__
+
 class BoolType(Type):
 	name = "bool"
 	etcd_class = EtcString
@@ -226,7 +250,7 @@ class _NumType(Type):
 class IntType(_NumType):
 	name = "int"
 	etcd_class = EtcInteger
-	vars = {'min':0, 'max':100}
+	#vars = {'min':0, 'max':100}
 	_cls = int
 
 	@classmethod
@@ -235,17 +259,32 @@ class IntType(_NumType):
 		types.register('min',cls=EtcInteger)
 		types.register('max',cls=EtcInteger)
 
+class IntPortType(IntType):
+	name = "int/port"
+	vars = {'min':1, 'max':65534}
+
+class IntPercentType(IntType):
+	name = "int/percent"
+	vars = {'min':0, 'max':100}
+
 class FloatType(_NumType):
 	name = "float"
 	etcd_class = EtcFloat
 	_cls = float
-	vars = {'min':0, 'max':1}
 
 	@classmethod
 	def types(cls,types):
 		types.register('value',cls=EtcFloat)
 		types.register('min',cls=EtcFloat)
 		types.register('max',cls=EtcFloat)
+
+class FloatTimeType(FloatType):
+	name = "float/time"
+	vars = {'min':0.01}
+
+class FloatPercentType(FloatType):
+	name = "float/percent"
+	vars = {'min':0, 'max':1}
 
 class FloatTemperatureType(FloatType):
 	name = "float/temperature"

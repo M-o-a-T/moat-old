@@ -47,7 +47,7 @@ from ..dev import device_types, OnewireDevice
 import logging
 logger = logging.getLogger(__name__)
 
-__all__ = ['OneWireCommand']
+__all__ = ['ServerCommand']
 
 class ServerAddCommand(Command):
 	name = "add"
@@ -158,113 +158,23 @@ Make MoaT forget about a 1wire server.
 			for r in res.children:
 				args.append(r.name.rsplit('/',1)[1])
 		for k in args:
-			await etc.delete('/bus/onewire/'+k, recursive=True)
-			if self.root.verbose > 1:
-				print("%s: deleted"%k, file=self.stdout)
-
-class ServerCommand(Command):
-	subCommandClasses = [
-		ServerAddCommand,
-		ServerListCommand,
-		ServerDeleteCommand,
-	]
-	name = "server"
-	summary = "OWFS server specific subcommands"
-	description = """\
-Commands to set up and admin connections to 1wire servers (OWFS).
-"""
-
-class DeviceListCommand(Command):
-	name = "list"
-	summary = "List 1wire devices"
-	description = """\
-List 1wire devices (OWFS) found by MoaT.
-
-No arguments: show device classes and counts.
-Device class: show those devices.
-Device ID: detailed information about the device.
-"""
-
-	async def do(self,args):
-		await self.root.setup(self)
-		tree = self.root.tree
-		path = DEV_DIR+(OnewireDevice.prefix,)
-		if not args:
-			res = await tree.lookup(path)
-			for r in res.children:
-				typ = r.key[r.key.rindex('/')+1:]
-				try:
-					dt = device_types()[typ]
-				except KeyError:
-					dt = '?'+typ
-				else:
-					dt = dt.name
-				rr = await tree.subdir(path,name=typ)
-				num = len(list(rr.children))
-				print(typ,num,dt, sep='\t',file=self.stdout)
-		else:
-			types=EtcTypes()
-
-			for arg in args:
-				if len(arg) == 2:
-					try:
-						res = await etc.get(path+'/'+arg)
-					except KeyError:
-						print("Type '%s' not found." % (arg,), file=sys.stderr)
-					else:
-						try:
-							dt = device_types()[arg]
-							tname = dt.name
-						except KeyError:
-							dt = OnewireDevice
-							tname = '?'+arg
-						types = EtcTypes()
-						dt.types(types)
-						for r in res.children:
-							dev = r.key[r.key.rindex('/')+1:]
-							t = await etc.tree('/'.join((path,arg,dev,DEV)), types=types,static=True,create=False)
-							print(arg+'.'+dev,t.get('path','?').replace(' ',':',1).replace(' ','/'),t.get('location','-'), sep='\t',file=self.stdout)
-
-						
-				elif '.' in arg:
-					typ,dev = arg.split('.',1)
-					try:
-						dt = device_types()[typ]
-						tname = dt.name
-					except KeyError:
-						dt = OnewireDevice
-						tname = '?'+typ
-					types = EtcTypes()
-					dt.types(types)
-					try:
-						t = await etc.tree('/'.join((path,typ,dev,DEV)), types=types,static=True,create=False)
-					except KeyError:
-						print("Device '%s' not found." % (arg,), file=sys.stderr)
-					else:
-						if self.root.verbose > 1:
-							safe_dump({arg: r_dict(t)}, stream=self.stdout)
-						else:
-							print(arg,tname,t.get('path','?').replace(' ',':',1).replace(' ','/'),t.get('location','-'), sep='\t',file=self.stdout)
-				else:
-					raise CommandError("'%s' unknown. Please specify either a device class or a device ID."%(arg,))
-
-class DeviceCommand(Command):
-	subCommandClasses = [
-		DeviceListCommand,
-	]
-	name = "dev"
-	summary = "OWFS device specific subcommands"
-	description = """\
-Commands to show 1wire bus members
-"""
+			try:
+				await etc.delete('/bus/onewire/'+k, recursive=True)
+			except etcd.EtcdKeyNotFound:
+				if self.root.verbose:
+					print("%s: not known"%k, file=sys.stderr)
+			else:
+				if self.root.verbose > 1:
+					print("%s: deleted"%k, file=self.stdout)
 
 class ServerListCommand(Command):
 	name = "list"
 	summary = "List 1wire servers"
 	description = """\
 List 1wire servers (OWFS) known to MoaT.
-If you name a server, details are shown in YAML format,
-else a short list is printed.
+
+If very verbose, details are shown in YAML format,
+otherwise a (short if quiet) list is printed.
 """
 
 	async def do(self,args):
@@ -273,10 +183,10 @@ else a short list is printed.
 		if args:
 			dirs = args
 		else:
-			dirs = []
-			res = await etc.get('/bus/onewire')
-			for r in res.children:
-				dirs.append(r.key.rsplit('/',1)[1])
+			res = await tree.lookup('bus','onewire')
+			dirs = res.keys()
+			if self.root.verbose and not dirs:
+				print("No servers known.", file=sys.stderr)
 		for d in dirs:
 			if self.root.verbose > 1:
 				st = await tree.subdir('bus','onewire',d, recursive=True)
@@ -287,8 +197,8 @@ else a short list is printed.
 			else:
 				print(d, file=self.stdout)
 
-class BusListCommand(Command):
-	name = "list"
+class ServerBusCommand(Command):
+	name = "bus"
 	summary = "List 1wire buses"
 	description = """\
 List 1wire buses (OWFS) known to MoaT.
@@ -298,35 +208,51 @@ else a short list is printed.
 
 	async def do(self,args):
 		await self.root.setup(self)
-		etc = self.root.etcd
+		tree = self.root.tree
+		seen = False
 		if not args:
 			t = await tree.lookup('bus','onewire')
 			for srv,v in t.items():
-				v = v['bus']
-				for b in v.keys():
-					print(srv,b.replace(' ','/'), sep='\t',file=self.stdout)
+				try:
+					v = await v['bus']
+				except (etcd.EtcdKeyNotFound,KeyError):
+					pass
+				else:
+					for b in v.keys():
+						seen = True
+						print(srv,b.replace(' ','/'), sep='\t',file=self.stdout)
+			if self.root.verbose and not seen:
+				print("No buses known.", file=sys.stderr)
 			return
 		srv = args.pop(0)
 		if not args:
-			t = await tree.subdir('bus','onewire',srv,'bus', create=False,recursive=True)
-			for bus,dc in t.items():
-				if dc.get('broken',0):
-					print(bus,"*inaccessible*", sep='\t',file=self.stdout)
-				dc = dc.get('devices',{})
-				items = []
-				for typ,v in dc.items():
-					try:
-						dt = device_types()[typ]
-						tname = dt.name
-					except KeyError:
-						dt = OnewireDevice
-						tname = '?'+typ
-					items.append("%s:%d"%(tname,len(v)))
-				print(bus.replace(' ','/'),*items, sep='\t',file=self.stdout)
+			try:
+				t = await tree.subdir('bus','onewire',srv,'bus', create=False,recursive=True)
+			except (etcd.EtcdKeyNotFound,KeyError):
+				pass
+			else:
+				for bus,dc in t.items():
+					if dc.get('broken',0):
+						print(bus,"*inaccessible*", sep='\t',file=self.stdout)
+						seen = True
+					dc = dc.get('devices',{})
+					items = []
+					for typ,v in dc.items():
+						try:
+							dt = device_types()[typ]
+							tname = dt.name
+						except KeyError:
+							dt = OnewireDevice
+							tname = '?'+typ
+						items.append("%s:%d"%(tname,len(v)))
+					print(bus.replace(' ','/'),*items, sep='\t',file=self.stdout)
+					seen = True
+			if self.root.verbose and not seen:
+				print("No buses known.", file=sys.stderr)
 			return
-		bus = args.pop()
+		bus = args.pop(0)
 		if args:
-			raise CommandError("Usage: … list [server [bus]]")
+			raise CommandError("Usage: conn onewire bus [server [bus]]")
 		bus = bus.replace('/',' ')
 		try:
 			t = await tree.subdir('bus','onewire',srv, 'bus',bus,'devices', create=False,recursive=True)
@@ -341,28 +267,20 @@ else a short list is printed.
 				tname = '?'+typ
 			for dev in v.keys():
 				print(typ+'.'+dev, tname)
+				seen = True
+		if self.root.verbose and not seen:
+			print("No devices known.", file=sys.stderr)
 
-class BusCommand(Command):
+class ServerCommand(SubCommand):
 	subCommandClasses = [
-		BusListCommand,
+		ServerAddCommand,
+		ServerListCommand,
+		ServerDeleteCommand,
+		ServerBusCommand,
 	]
-	name = "bus"
-	summary = "OWFS bus specific subcommands"
+	name = "server"
+	summary = "OWFS server specific subcommands"
 	description = """\
-Commands to show 1wire buses
+Commands to set up and admin connections to 1wire servers (OWFS).
 """
-
-
-class OneWireCommand(SubCommand):
-	name = "1wire"
-	summary = "Configure and define tasks"
-	description = """\
-Commands to set up and admin the task list known to MoaT.
-"""
-
-	subCommandClasses = [
-		ServerCommand,
-		DeviceCommand,
-		BusCommand,
-	]
 

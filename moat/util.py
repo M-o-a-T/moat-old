@@ -38,6 +38,16 @@ def r_dict(m):
 	else:
 		return m
 
+def r_show(m,prefix=''):
+	if isinstance(m,Mapping):
+		if m:
+			for k,v in m.items():
+				yield from r_show(v,prefix+('/' if prefix else '')+k)
+		else:
+			yield prefix,'{}'
+	else:
+		yield prefix,m
+
 class OverlayDict(MutableMapping):
 	def __init__(self,a,b):
 		self.a = a

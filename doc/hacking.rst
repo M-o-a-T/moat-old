@@ -121,3 +121,77 @@ conserve as much as possible) without going through every single output.
 XXX TODO: MoaT defines a couple of special, bus-specific alerts for these
 situations. Please handle them.
 
+Tasks
+=====
+
+Tasks are central to MoaT. Tasks are used to talk to external devices,
+monitor AMQP and etcd, and execute schedules.
+
+etcd structure
+--------------
+
+Tasks are described at three places within the etcd hierarchy.
+
+* the task definition at ``/meta/task/…/:taskdef`` names the type of task,
+  the programming language it's written in, the type of any data associated
+  with tasks of this type, and the code to be executed. (In Python, that's
+  a ``Task`` class.)
+
+* the task declaration at ``/task/…/:task`` contains a pointer to the task
+  definition (the ``taskdef`` entry) and actual values for the task's data.
+
+* the status directory at ``/status/run/…/:task`` (same sub-path as the
+  task declaration) describes whether the task is actually running, when it
+  was started, and why it died last.
+
+Data creation
+-------------
+
+Task definitions are created when MoaT is started or when modules are
+added, by simply scanning for subclasses of ``moat.script.Task``.
+There's no reason for multiple taskdef entries for a given
+
+The task declarations necessary for the system to run are auto-created as
+needed. An etcd directory which requires tasks has a ``task_monitor``
+attribute with an async iterator which reports task requirements. The
+parent object should create a monitoring task (task definition
+``moat/task/monitor``) that translates these into actual task entries. A
+task to do that for the root object is created when running ``moat test``.
+
+A task's status directory is auto-created when the task is first started.
+The ``running`` entry in that directory is updated every couple of seconds
+and gets auto-deleted when the task (or the machine it runs on) dies.
+
+Declaring tasks
+---------------
+
+As described above, new task definitions should only be auto-created based
+on data within etcd. You should never scan a bus or check a remote website
+from within a task scanner.
+
+Instead, the bus scanner / site scraper should be a separate task which
+reports its data to etcd, where a directory scanner task notices your
+devices and creates the tasks required to manage them.
+
+Rationale
+---------
+
+* redundancy. Tasks may run on multiple machines; MoaT ensures that they
+  won't step on each other's toes. MoaT will restart a task somewhere else
+  if the original system should die.
+
+* efficiency. The tasks which directly control something must, in most
+  cases, run on the device to which that something is attached. Since
+  embedded systems frequently have low memory or network bandwidth, doing
+  any other work on them does not make sense.
+
+* discoverability. One guiding principle of MoaT is that the entire state
+  of the whole system shall be visible and (if possible) changeable by
+  accessing etcd.
+
+* reliability. Some connections are intermittent or unreliable; scanning
+  some bus systems takes time and/or slows the bus down unacceptably.
+  By moving all "scan the bus" operations to distinct tasks that only run
+  intermittently or at installation time, MoaT isolates the rest of the
+  system from having to deal with devices that randomly come and go.
+

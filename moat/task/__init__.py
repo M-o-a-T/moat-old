@@ -36,6 +36,7 @@ logger = logging.getLogger(__name__)
 # written by "moat task add …"
 TASK_DIR = ('task',)
 TASK = ':task'
+TASKSCAN_DIR = TASK_DIR+('moat','scan')
 
 # Task descriptions: what kind of tasks exist?
 # written by "moat task def init"
@@ -47,7 +48,7 @@ TASKDEF = ':taskdef'
 TASKSTATE_DIR = ('status','run')
 TASKSTATE = ':task'
 
-_VARS = {'ttl','refresh','restart','retry','max-retry'}
+_VARS = {'ttl','refresh','restart','retry','max-retry','one-shot'}
 
 def task_types(prefix=__name__):
 	"""Enumerate the task types known to Moat's code."""

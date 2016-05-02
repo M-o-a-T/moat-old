@@ -28,15 +28,30 @@ logger = logging.getLogger(__name__)
 from etcd_tree.node import EtcFloat,EtcInteger,EtcString
 from time import time
 
-from moat.bus.base import BaseBus
-from moat.types.etcd import MoatBusBase
+from moat.bus.base import Bus
+from moat.types.etcd import MoatBusBase, Subdirs
 
-class OnewireBusBase(MoatBusBase):
-	pass
-	
-class OnewireBus(BaseBus): #(, metaclass=SelectDevice):
+class OnewireBus(Bus):
+	"""Directory for /bus/onewire/NAME"""
 	prefix = "onewire"
 	description = "A controller for 1wire"
-	
+	@property
+	def task_monitor(self):
+		yield "add",("onewire","run"), ('onewire',self.name,'run'), {}
+		yield "add",("onewire","scan"), ('onewire',self.name,'scan'), {}
+
 OnewireBus.register("server","host", cls=EtcString)
 OnewireBus.register("server","port", cls=EtcInteger)
+OnewireBus.register('scanning', cls=EtcFloat)
+OnewireBus.register('bus','*','broken', cls=EtcInteger)
+OnewireBus.register('bus','*','devices','*','*', cls=EtcInteger)
+
+class OnewireBusBase(MoatBusBase):
+	"""Directory for /bus/onewire"""
+	@property
+	def task_monitor(self):
+		return Subdirs(self)
+	def task_for_subdir(self,d):
+		return "scan",
+
+OnewireBusBase.register('*',cls=OnewireBus)

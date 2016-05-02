@@ -288,11 +288,8 @@ async def test_onewire_fake(loop):
 			m = MoatTest(loop=loop)
 			r = await m.parse("-vvvc test.cfg mod init moat.ext.onewire")
 			assert r == 0, r
-			try:
-				await m.parse("-vvvc test.cfg bus 1wire server delete faker")
-			except etcd.EtcdKeyNotFound:
-				pass
-			r = await m.parse("-vvvc test.cfg bus 1wire server add faker foobar.invalid - A nice fake 1wire bus")
+			await m.parse("-vvvc test.cfg conn onewire delete faker")
+			r = await m.parse("-vvvc test.cfg conn onewire add faker foobar.invalid - A nice fake 1wire bus")
 			assert r == 0, r
 			r = await m.parse("-vvvc test.cfg task add fake/onewire/run onewire/run server=faker delay=999 update_delay=0.2 Run the fake bus")
 			assert r == 0, r

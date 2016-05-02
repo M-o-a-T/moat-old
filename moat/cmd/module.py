@@ -29,18 +29,15 @@ import os
 import sys
 from moat.script import Command, SubCommand, CommandError
 from moat.script.task import Task
-from moat.task import task_types, TASKDEF_DIR
-from moat.util import r_dict
+from moat.task import TASKDEF_DIR
 from moat.types import MODULE_DIR
 from moat.types.module import BaseModule, modules
 from dabroker.util import import_string
 from yaml import safe_dump
-from etcd_tree import EtcValue
+from etcd_tree import EtcXValue
 import aio_etcd as etcd
 import asyncio
-import time
 import types as py_types
-from datetime import datetime
 
 import logging
 logger = logging.getLogger(__name__)
@@ -131,14 +128,18 @@ This command shows that data.
 			dirs = (t,)
 
 		async def _pr(tt):
-			if isinstance(tt,EtcValue):
-				print('/'.join(tt.path[len(MODULE_DIR):]),tt.value)
+			if isinstance(tt,EtcXValue):
+				print('/'.join(tt.path[len(MODULE_DIR):]),tt.value, sep='\t')
+			elif 'descr' in tt and not args:
+				d = tt['descr']
+				print(tt.name,d, sep='\t')
 			else:
 				for v in tt._values():
 					v = await v
 					await _pr(v)
 
 		for tt in dirs:
+			tt = await tt
 			await _pr(tt)
 
 class ModuleDeleteCommand(Command,ModuleSetup):

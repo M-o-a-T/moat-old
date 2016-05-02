@@ -50,26 +50,21 @@ class RunCommand(Command):
 	description = """\
 Run MoaT tasks.
 
-by default, start every task that's defined for this host.
-
 """
 
 	def addOptions(self):
 		self.parser.add_option('-t','--this',
             action="count", dest="this", default=0,
-            help="Run this job only (add -t for sub-paths)")
-		self.parser.add_option('-x','--noref',
-            action="store_true", dest="noref",
-            help="Do not follow :ref entries")
+            help="Run the given job only (-tt for jobs one level below, etc.)")
 		self.parser.add_option('-g','--global',
             action="store_true", dest="is_global",
             help="Do not prepend the appname to the paths")
-		self.parser.add_option('-s','--standalone',
-            action="store_true", dest="standalone",
-            help="Do not update jobs when the etcd list changes")
-		self.parser.add_option('-k','--kill-fail',
-            action="store_true", dest="killfail",
-            help="Exit when a job fails; no restart or whatever")
+		self.parser.add_option('-o','--one-shot',
+            action="count", dest="oneshot", default=0,
+            help="Do not restart. Twice: Do not retry.")
+		self.parser.add_option('-q','--quit',
+            action="store_true", dest="quit",
+            help="Do not watch etcd.")
 
 	def _tilt(self):
 		self.root.loop.remove_signal_handler(signal.SIGINT)
@@ -105,9 +100,13 @@ by default, start every task that's defined for this host.
 		self.jobs = {}
 		self.rescan = asyncio.Future(loop=self.root.loop)
 		for t in self.args:
-			tree = await tree.subdir(t, create=False)
-			self.paths.append(tree)
-			self._monitors.append(tree.add_monitor(self._rescan))
+			try:
+				tree = await tree.subdir(t, create=False)
+			except KeyError as err:
+				print("Unknown: "+'/'.join(err.args[0]), file=sys.stderr)
+			else:
+				self.paths.append(tree)
+				self._monitors.append(tree.add_monitor(self._rescan))
 		await self._scan()
 		if not self.tasks:
 			if self.root.verbose:
@@ -142,7 +141,7 @@ by default, start every task that's defined for this host.
 						logger.exception("Running %s", j.name)
 						if self.root.verbose:
 							print(j.name,'*ERROR*', exc, sep='\t', file=self.stdout)
-						if self.options.killfail:
+						if self.options.oneshot:
 							break
 					else:
 						logger.info('EXIT %s %s', j.name,r)
@@ -183,12 +182,15 @@ by default, start every task that's defined for this host.
 		
 	def _rescan(self,_=None):
 		if not self.rescan.done():
+			logger.debug("rescanning")
 			self.rescan.set_result(None)
+		else:
+			logger.debug("NOT rescanning")
 
 	async def _scan(self):
 		depth = self.options.this
 		p = self.paths
-		while p and depth != 1:
+		while p:
 			depth -= 1
 			n_p = []
 			for t in p:
@@ -202,6 +204,8 @@ by default, start every task that's defined for this host.
 					elif isinstance(v,EtcDir):
 						n_p.append(v)
 			p = n_p
+			if not depth:
+				break
 
 	async def _start(self):
 		logger.debug("START")
@@ -218,8 +222,6 @@ by default, start every task that's defined for this host.
 					else:
 						errs = repr(err)
 					print('/'.join(path),state, errs, sep='\t', file=self.stdout)
-					if self.root.verbose > 1 and err is not None:
-						traceback.print_exception(err.__class__,err,err.__traceback__)
 				else:
 					print('/'.join(path),state, *value, sep='\t', file=self.stdout)
 
@@ -235,15 +237,22 @@ by default, start every task that's defined for this host.
 				continue
 
 			logger.debug("Launch TM %s",path)
+			args = {}
+			if self.options.oneshot:
+				args['restart'] = 0
+				if self.options.oneshot > 1:
+					args['retry'] = 0
+			if self.options.quit:
+				args['one_shot'] = True
 			try:
-			    j = TaskMaster(self, path, callback=partial(_report, path))
+			    j = TaskMaster(self, path, callback=partial(_report, path), **args)
 			except Exception as exc:
 				logger.exception("Could not set up %s (%s)",'/'.join(t.path),t.get('name',path))
 				f = asyncio.Future(loop=self.root.loop)
 				f.set_exception(exc)
 				f.name = f.path = path
 				self.jobs[path] = f
-				if self.options.killfail:
+				if self.options.oneshot:
 					return
 			else:
 				js[j.path] = (t,j)
@@ -263,7 +272,7 @@ by default, start every task that's defined for this host.
 				f.name = f.path = j.path
 				self.jobs[j.path] = f
 
-				if self.options.killfail:
+				if self.options.oneshot:
 					return
 			else:
 				logger.debug("AddJob TM %s",j.name)

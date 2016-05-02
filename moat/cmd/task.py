@@ -25,21 +25,23 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 
 """Commands to setup and modify tasks"""
 
+import asyncio
 import os
 import sys
-from moat.script import Command, SubCommand, CommandError
-from moat.types.module import BaseModule
-from moat.script.task import Task
-from moat.task import task_types
-from moat.util import r_dict
-from dabroker.util import import_string
-from ..task import TASK,TASK_DIR, TASKDEF,TASKDEF_DIR, TASKSTATE,TASKSTATE_DIR
-from yaml import safe_dump
-import aio_etcd as etcd
-import asyncio
 import time
 import types as py_types
+from contextlib import suppress
 from datetime import datetime
+from yaml import safe_dump
+
+from dabroker.util import import_string
+from moat.script import Command, SubCommand, CommandError
+from moat.script.task import Task
+from moat.task import TASK,TASK_DIR, TASKDEF,TASKDEF_DIR, TASKSTATE,TASKSTATE_DIR, TASKSCAN_DIR, task_types
+from moat.types.module import BaseModule
+from moat.util import r_dict,r_show
+
+import aio_etcd as etcd
 
 import logging
 logger = logging.getLogger(__name__)
@@ -66,6 +68,8 @@ Task definitions are stored in etcd at /meta/task/**/:taskdef.
 This command sets up that data. If you mention module or class names
 on the command line, they are added, otherwise everything under
 'moat.task.*' is used.
+
+This also installs the root "task scanner" task.
 """
 
 	def addOptions(self):
@@ -77,6 +81,7 @@ on the command line, they are added, otherwise everything under
 		self.force = self.options.force
 
 	async def do(self,args):
+		tree = await self.root._get_tree()
 		t = await self.setup(meta=True)
 		if args:
 			objs = []
@@ -109,6 +114,10 @@ on the command line, they are added, otherwise everything under
 			else:
 				await t.add_task(obj, force=self.force)
 		await t.wait()
+
+		r = await tree.subdir(*TASKSCAN_DIR)
+		from moat.task.collect import Collector
+		await r.add_task(path=(),taskdef=Collector.taskdef, force=self.force)
 
 class DefListCommand(Command,DefSetup):
 	name = "list"
@@ -295,15 +304,75 @@ class DefCommand(SubCommand):
 Commands to set up and admin the task definitions known to MoaT.
 """
 
+class EnumCommand(Command):
+	name = "enum"
+	summary = "list jobs for etcd node"
+	description = """\
+		Show which job(s) should run for a given etcd node
+		"""
+
+	def addOptions(self):
+		self.parser.add_option('-w','--watch',
+			action="store_true", dest="watch",
+			help="also monitor the node for changes")
+	
+	async def do(self,args):
+		tree = await self.root._get_tree()
+
+		if not len(args):
+			args = ("",)
+		else:
+			if len(args) > 1 and self.options.watch:
+				raise CommandError("You can only watch one node. Sorry.")
+		for a in args:
+			a = (x for x in a.split('/') if x != '')
+			try:
+				d = await tree.lookup(a)
+			except KeyError:
+				print("Node '%s' not found" % (a,), file=sys.stderr)
+				continue
+			try:
+				coll = d.task_monitor
+			except AttributeError:
+				print("Node '%s' does not have tasks" % (d,), file=sys.stderr)
+				continue
+			def show(r):
+				if r[0] == 'add':
+					print("Task:"+'/'.join(r[1]), 'at', '/'.join(r[2]),*r[3:], file=self.stdout)
+				elif r[0] == 'drop':
+					print("Delete", '/'.join(r[1]), *r[2:], file=self.stdout)
+				elif r[0] == 'scan':
+					print("Subtask", '/'.join(r[1]), *r[2:], file=self.stdout)
+				elif r[0] == 'watch':
+					print('---', file=self.stdout)
+					if not self.options.watch:
+						raise StopIteration
+				else:
+					raise RuntimeError("Unknown response: "+repr(r))
+			if hasattr(coll,'__aiter__'):
+				async for r in coll:
+					try:
+						show(r)
+					except StopIteration:
+						break
+			else:
+				for r in coll:
+					show(r)
+
 class ListCommand(Command,DefSetup):
 	name = "list"
 	summary = "List tasks"
 	description = """\
 Tasks are stored in etcd at /task/**/:task.
 
-This command shows that data. If you mention a task's path,
-details are shown in YAML format, else a short list of tasks is shown.
+This command shows that data. Depending on verbosity, output is
+a one-line summary, human-readable detailed state, or details as YAML.
 """
+
+	def addOptions(self):
+		self.parser.add_option('-t','--this',
+			action="count", dest="this", default=0,
+			help="Show the given job only (-tt for jobs one level below, etc.)")
 
 	async def do(self,args):
 		t = await self.setup(meta=False)
@@ -317,19 +386,30 @@ details are shown in YAML format, else a short list of tasks is shown.
 		else:
 			dirs = [t]
 		for tt in dirs:
-			async for task in tt.tagged(TASK):
+			async for task in tt.tagged(TASK, depth=self.options.this):
 				path = task.path[len(TASK_DIR):-1]
-				if self.root.verbose > 1:
+				if self.root.verbose == 2:
+					print('*','/'.join(path), sep='\t',file=self.stdout)
+					for k,v in r_show(task,''):
+						print(k,v, sep='\t',file=self.stdout)
+
+				elif self.root.verbose > 1:
 					safe_dump({'/'.join(path):r_dict(dict(task))}, stream=self.stdout)
 				else:
-					name = task['name']
 					path = '/'.join(path)
+					name = task.get('name','-')
 					if name == path:
 						name = "-"
-					print(path,name,task['descr'], sep='\t',file=self.stdout)
+					print(path,name,task.get('descr','-'), sep='\t',file=self.stdout)
 
 class _AddUpdate:
 	"""Mix-in to add or update a task (too much)"""
+
+	def addOptions(self):
+		self.parser.add_option('-p','--parent',
+			action="store", dest="parent",
+			help="the node which this task depends on")
+
 	async def do(self,args):
 		try:
 			data = {}
@@ -382,6 +462,14 @@ class _AddUpdate:
 			await task.set('taskdef', taskdefpath, sync=False)
 			if not name:
 				name = taskpath
+		p = self.options.parent
+		if p is not None:
+			if p == '-':
+				with suppress(KeyError):
+					await task.delete('parent', sync=False)
+			else:
+				await task.set('parent', p, sync=False)
+
 		if name:
 			await task.set('name', name, sync=False)
 		if descr:
@@ -487,6 +575,11 @@ The status of running tasks is stored in etcd at /status/run/task/**/:task.
 This command shows that information.
 """
 
+	def addOptions(self):
+		self.parser.add_option('-t','--this',
+			action="count", dest="this", default=0,
+			help="Report on the given job only (-tt for jobs one level below, etc.)")
+
 	async def do(self,args):
 		await self.root.setup()
 		etc = self.root.etcd
@@ -503,10 +596,20 @@ This command shows that information.
 		else:
 			dirs = [t]
 		for tt in dirs:
-			async for task in tt.tagged(TASKSTATE):
+			async for task in tt.tagged(TASKSTATE, depth=self.options.this):
 				path = task.path[len(TASKSTATE_DIR):-1]
 
-				if self.root.verbose > 1:
+				if self.root.verbose == 2:
+					print('*','/'.join(path), sep='\t', file=self.stdout)
+					for k,v in task.items():
+						if isinstance(v,(float,int)) and 1000000000 < v < 10000000000:
+							v = datetime.fromtimestamp(v).strftime('%Y-%m-%d %H:%M:%S')
+						elif isinstance(v,str):
+							v = v.strip()
+						else:
+							v = str(v)
+						print(k,('\n\t' if '\n' in v else '')+v.replace('\n','\n\t'), sep='\t',file=self.stdout)
+				elif self.root.verbose > 1:
 					safe_dump({'/'.join(path):r_dict(dict(task))}, stream=self.stdout)
 				else:
 					date = task.get('debug_time','-')
@@ -540,6 +643,7 @@ Commands to set up and admin the task list known to MoaT.
 
 	subCommandClasses = [
 		DefCommand,
+		EnumCommand,
 		AddCommand,
 		UpdateCommand,
 		ParamCommand,

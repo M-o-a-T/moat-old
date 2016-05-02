@@ -225,6 +225,7 @@ EtcOnewireBus.register('broken', cls=EtcInteger)
 EtcOnewireBus.register('devices','*','*', cls=EtcInteger)
 
 class _BusTask(Task):
+	schema = {'server':'str', 'delay':'float/time','update_delay':'float/time','ttl':'int'}
 	@classmethod
 	def types(cls,tree):
 		super().types(tree)
@@ -235,12 +236,12 @@ class _BusTask(Task):
 class BusRun(_BusTask):
 	"""\
 		This task runs all required tasks for a 1wire server's buses,
-		as determined by the devices that are ono the bus
+		as determined by the devices that are on the bus
 		as determined by etcd.
 
 		Bus scanning is *not* performed here.
 		"""
-	name="onewire/run"
+	taskdef="onewire/run"
 	summary="Run the buses of a 1wire server"
 	_delay = None
 	_delay_timer = None
@@ -261,10 +262,6 @@ class BusRun(_BusTask):
 		self.new_task_trigger = await trigger_hook(self.loop)
 		self.new_tasks = set()
 
-		types=EtcTypes()
-		types.register('server','port', cls=EtcInteger)
-		types.register('bus','*', cls=EtcOnewireBus)
-		
 		server = self.config['server']
 		self.srv_name = server
 		update_delay = self.config.get('update_delay',None)
@@ -379,7 +376,7 @@ class BusRun(_BusTask):
 
 class BusScan(_BusTask):
 	"""This task scans all buses of a 1wire server."""
-	name="onewire/scan"
+	taskdef="onewire/scan"
 	summary="Scan the buses of a 1wire server"
 	_delay = None
 	_delay_timer = None
@@ -479,7 +476,7 @@ class BusScan(_BusTask):
 				dt = self.tree['bus'][b]['devices']
 				drop = False
 			else:
-				dt = await self.etcd.tree('/bus/onewire/'+s+'/bus/'+b+'/devices',env=self)
+				dt = await self.tree.lookup('bus','onewire',s,'bus',b,'devices')
 				drop = True
 			try:
 				f1 = dev.parent.parent.name
@@ -514,20 +511,13 @@ class BusScan(_BusTask):
 		self.srv = None
 		self.tree = None
 
-		types=EtcTypes()
-		types.register('server','port', cls=EtcInteger)
-		types.register('scanning', cls=EtcFloat)
-		types.register('bus','*','broken', cls=EtcInteger)
-		types.register('bus','*','devices','*','*', cls=EtcInteger)
-
-		
 		server = self.config['server']
 		self.srv_name = server
 
 		# Reading the tree requires accessing self.srv.
 		# Initializing self.srv requires reading the …/server directory.
 		# Thus, first we get that, initialize self.srv with the data …
-		tree,srv = await self.etcd.tree("/bus/onewire/"+server,sub=('server',), types=types,env=self,static=True)
+		self.tree = await self.etcd.tree.lookup('bus','onewire',server,'server')
 		self.srv = OnewireServer(srv['host'],srv.get('port',None), loop=self.loop)
 
 		# and then throw it away in favor of the real thing.

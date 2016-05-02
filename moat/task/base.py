@@ -28,7 +28,7 @@ from dabroker.util import import_string
 
 from . import _VARS, TASKDEF_DIR,TASKDEF
 from moat.types import TYPEDEF,TYPEDEF_DIR
-from moat.types.etcd import recEtcDir
+from moat.types.etcd import recEtcDir, MoatRef
 from moat.util import do_async
 
 import logging
@@ -44,6 +44,8 @@ def _setup_task_vars(types):
 	for t in _VARS:
 		if t == "ttl":
 			types.register(t)(EtcInteger)
+		elif t == "one-shot":
+			types.register(t)(EtcInteger) # bool, actually
 		else:
 			types.register(t)(EtcFloat)
 
@@ -55,13 +57,14 @@ class TaskdefName(EtcString):
 	async def init(self):
 		await self.parent._update_taskdef(self._value)
 
-class Task(recEtcDir):
+class TaskDir(recEtcDir):
 	"""\
 		etcd directory for tasks: /task/**/:task
 
-		This stores the data for one instantiation of a TaskDef.
+		This stores the data for one instantiation of a Task.
 		"""
 	
+	taskdef = None
 	taskdef_name = ''
 
 	@property
@@ -95,20 +98,24 @@ class Task(recEtcDir):
 		await super()._fill_data(pre,recursive)
 
 	def subtype(self,*path,dir=None,pre=None,recursive=None):
-		if len(path)==1 and path[0] == 'taskdef':
-			return TaskdefName
-		if len(path)==2 and path[0] == 'data':
+		if len(path)==1:
+			if path[0] == 'taskdef':
+				return TaskdefName
+			elif path[0] == 'parent':
+				return MoatRef
+		elif len(path)==2 and path[0] == 'data':
 			name = self.taskdef['data'][path[1]]
 			typ_path = tuple(x for x in name.split('/') if x != "")
 			typ = self.root.lookup(TYPEDEF_DIR+typ_path+(TYPEDEF,))
 			return typ._type.etcd_class
 		return super().subtype(*path,dir=dir,pre=pre,recursive=recursive)
 
-_setup_task_vars(Task)
+_setup_task_vars(TaskDir)
+TaskDir.register('parent',MoatRef)
 
 class TaskDef(recEtcDir):
 	"""\
-		etcd directory for task definitions: /task/**/:task
+		etcd directory for task definitions: /meta/task/**/:taskdef
 
 		This stores generic parameters for a Task (name, filepath/class/code, …).
 		"""

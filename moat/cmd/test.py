@@ -34,7 +34,7 @@ import types
 
 from moat.script import Command, SubCommand, CommandError
 from moat.script.task import Task,_run_state, JobMarkGoneError,JobIsRunningError
-from moat.task import TASKSTATE_DIR,TASKSTATE
+from moat.task import TASKSTATE_DIR,TASKSTATE, TASKSCAN_DIR,TASK
 
 import logging
 logger = logging.getLogger(__name__)

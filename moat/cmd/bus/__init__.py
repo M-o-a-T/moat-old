@@ -33,11 +33,12 @@ import logging
 logger = logging.getLogger(__name__)
 
 class BusCommand(ModuleCommand):
-	name = "bus"
-	kind = "bus"
+	name = "conn"
+	kind = "conn"
 
-	summary = "bus-specific commands"
+	summary = "connection-specific commands"
 	description = """
-This command class includes bus/technology-specific subcommands.
+This command class includes module-specific subcommands
+to control connections, servers, buses, etc..
 """
 	pass

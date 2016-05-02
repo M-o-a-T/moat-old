@@ -16,7 +16,8 @@ from time import time
 from traceback import format_exception
 import weakref
 
-from ..task import _VARS, TASK_DIR,TASKDEF_DIR,TASK,TASKDEF, TASKSTATE_DIR,TASKSTATE
+from moat.task import _VARS, TASK_DIR,TASKDEF_DIR,TASK,TASKDEF, TASKSTATE_DIR,TASKSTATE
+from moat.util import do_async
 
 import logging
 logger = logging.getLogger(__name__)
@@ -33,6 +34,10 @@ class JobIsRunningError(RuntimeError):
 
 class JobMarkGoneError(RuntimeError):
 	"""The job's 'running' mark in etcd is gone (timeout, external kill)"""
+	pass
+
+class JobParentGoneError(RuntimeError):
+	"""The job entry's 'parent' points to something that does not exist."""
 	pass
 
 @asyncio.coroutine
@@ -64,14 +69,14 @@ class Task(asyncio.Task):
 		state in etcd lasts before it is cleaned up; `refresh` says how
 		often it is renewed within that timeframe.
 		"""
-	name = None
+	taskdef = None
 	summary = """This is a prototype. Do not use."""
 	schema = {}
 	doc = None
 
 	_global_loop=False
 
-	def __init__(self, cmd, name, config={}, _ttl=None,_refresh=None):
+	def __init__(self, cmd, name, taskdir=None, parents=(), config={}, _ttl=None,_refresh=None):
 		"""\
 			This is MoaT's standard task runner.
 			It takes care of noting the task's state in etcd.
@@ -89,6 +94,8 @@ class Task(asyncio.Task):
 
 			If _ttl is a callable, it must return a (ttl,refresh) tuple.
 			_refresh is ignored in that case.
+
+			@parents contains a list of etcd node paths which must exist for the task to run.
 			"""
 		self.loop = cmd.root.loop
 		super().__init__(coro_wrapper(self.run), loop=self.loop)
@@ -108,6 +115,8 @@ class Task(asyncio.Task):
 		self._refresh = config.get('refresh',None) if _refresh is None else _refresh
 		self.name = name
 		self.path = path
+		self.parents = parents
+		self.taskdir = taskdir
 
 	@classmethod
 	def task_info(cls,tree):
@@ -128,9 +137,33 @@ class Task(asyncio.Task):
 
 	async def run(self):
 		"""Main code for task control. Don't override."""
-		logger.debug("Starting %s: %s",self.name, self.__class__.__name__)
 		r = self.cmd.root
 		await r.setup(self)
+		run_state = await _run_state(r.tree,self.path)
+		main_task = None
+
+		## Install checks for the requisite nodes to be present.
+		gone = None
+		prm = []
+		def parent_check(x):
+			nonlocal gone
+			if x._seq: return
+			try:
+				logger.info('CANCEL Q %s %s',self.path,x.path)
+				main_task.cancel()
+			except Exception: pass
+			gone = x.path
+
+		for pr in self.parents:
+			try:
+				parent = await r.tree.lookup(*pr)
+			except KeyError:
+				await run_state.set("message", "Missing: "+pr)
+				raise JobParentGoneError(self.name, pr)
+
+			prm.append(parent.add_monitor(parent_check))
+
+		## TTL calculation
 		def get_ttl():
 			if callable(self._ttl):
 				ttl,refresh = self._ttl()
@@ -143,10 +176,10 @@ class Task(asyncio.Task):
 			ttl = max(ttl,min_timeout)
 			refresh = (ttl/(refresh+0.1))
 			return ttl,refresh
-
-		run_state = await _run_state(r.tree,self.path)
 		ttl,refresh = get_ttl()
 
+		## set 'running'
+		logger.debug("Starting %s: %s",self.name, self.__class__.__name__)
 		try:
 			if 'running' in run_state:
 				raise etcd.EtcdAlreadyExist(message=self.name, payload=run_state['running']) # pragma: no cover ## timing dependant
@@ -259,7 +292,12 @@ class Task(asyncio.Task):
 			if main_task.cancelled():
 				# Killed because of a timeout / refresh problem. Major fail.
 				await run_state.set("state","fail")
-				await run_state.set("message", "Aborted by timeout" if (killer is None) else str(run_task.exception()))
+				if gone is not None:
+					await run_state.set("message", "Missing: "+'/'.join(gone))
+				elif killer is None:
+					await run_state.set("message", "Aborted by timeout")
+				else:
+					await run_state.set("message", str(run_task.exception()))
 				run_task.result()
 				assert False,"the previous line should have raised an error" # pragma: no cover
 			else:
@@ -324,7 +362,7 @@ class TaskMaster(asyncio.Future):
 	timer = None
 	exc = None
 
-	def __init__(self, cmd, path, callback=None):
+	def __init__(self, cmd, path, callback=None, **cfg):
 		"""\
 			Set up the non-async part of our task.
 			@cmd: the command this is running because of.
@@ -340,7 +378,8 @@ class TaskMaster(asyncio.Future):
 		assert isinstance(path,tuple)
 		self.path = path
 		self.name = '/'.join(path) # for now
-		self.vars = {} # standard task control vars
+		self.cfg = cfg
+		self.vars = {}
 		self.callback = callback
 
 		for k in _VARS:
@@ -352,12 +391,15 @@ class TaskMaster(asyncio.Future):
 		"""Async part of initialization"""
 		self.task = await self.tree.subdir(TASK_DIR+self.path+(TASK,))
 		self.taskdef_name = self.task.taskdef_name
+		if self.task.taskdef is None:
+			raise RuntimeError("incomplete task: "+'/'.join(self.task.path))
 
 		self.gcfg = self.cmd.root.etc_cfg['run']
 		self.rcfg = self.cmd.root.cfg['config']['run']
 		self._m1 = self.task.add_monitor(self.setup_vars)
 		self._m2 = self.task.taskdef.add_monitor(self.setup_vars)
 		self._m3 = self.gcfg.add_monitor(self.setup_vars)
+
 		self.setup_vars()
 		
 		self._start()
@@ -368,7 +410,7 @@ class TaskMaster(asyncio.Future):
 		self.job.trigger()
 
 	def task_var(self,k):
-		for cfg in (self.task.taskdef, self.task, self.gcfg, self.rcfg):
+		for cfg in (self.cfg, self.task, self.task.taskdef, self.gcfg, self.rcfg):
 			if k in cfg:
 				return cfg[k]
 		raise KeyError(k)
@@ -380,20 +422,23 @@ class TaskMaster(asyncio.Future):
 		if self.taskdef_name != self.task.taskdef_name:
 			# bail out
 			raise RuntimeError("Command changed/deleted: %s / %s" % (self.taskdef_name,self.task.get('taskdef','')))
-		self.name = self.task['name']
+		self.name = self.task.get('name','/'.join(self.path))
 		for k in _VARS:
 			v = self.task_var(k)
 #			if self.vars[k] != v:
 #				changed.add(k)
 			self.vars[k] = v
 #		if changed:
-
+		self.vars.update(self.cfg)
 
 	def _get_ttl(self):
 		return self.vars['ttl'], self.vars['refresh']
 
 	def _start(self):
-		self.job = self.task.cls(self.cmd, self.name, config=self.task._get('data',{}), _ttl=self._get_ttl)
+		p=[self.task.path]
+		if 'parent' in self.task:
+			p.append(self.task['parent'].value.split('/'))
+		self.job = self.task.cls(self.cmd, self.name, parents=p, taskdir=self.task, config=self.task._get('data',{}), _ttl=self._get_ttl)
 		self.job.add_done_callback(self._job_done)
 		if self.callback is not None:
 			self.callback("start")
@@ -465,4 +510,5 @@ class TaskMaster(asyncio.Future):
 			self.job = None
 
 		self.timer = self.loop.call_later(self.current_retry,self._timer_done)
+
 

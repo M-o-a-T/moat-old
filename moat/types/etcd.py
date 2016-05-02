@@ -23,9 +23,11 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##  Thus, do not remove the next line, or insert any blank lines above.
 ##BP
 
-from etcd_tree import EtcRoot, EtcDir, EtcString, EtcXValue, ReloadRecursive
+import asyncio
 from weakref import WeakValueDictionary
+
 from dabroker.util import import_string
+from etcd_tree import EtcRoot, EtcDir, EtcString, EtcXValue, ReloadRecursive
 
 import logging
 logger = logging.getLogger(__name__)
@@ -41,20 +43,31 @@ class recEtcDir(EtcDir):
 			raise ReloadRecursive
 		return (await super().this_obj(recursive=recursive, **kw))
 
-class MoatDeviceBase(EtcDir):
-	"""\
-		Base class for /bus/‹name› subsystems.
-		"""
-	pass
-
 class MoatBusBase(EtcDir):
 	"""\
 		Base class for /bus/‹name› subsystems.
 		"""
 	pass
 
+class MoatDeviceBase(EtcDir):
+	"""\
+		Base class for /device/‹name› subsystems.
+		"""
+	pass
+
+class MoatRef(EtcXValue):
+	"""An entry referencing some other node"""
+	_ref = None
+
+	@property
+	def ref(self):
+		if self._ref is not None:
+			return self._ref
+		self._ref = self.root.tree.lookup(self.value)
+		return self._ref
+
 class MoatLoader(EtcXValue):
-	"""Directory for /meta/module/‹subsys›/‹name›"""
+	"""An entry referencing some code"""
 	_code = None
 
 	@property
@@ -70,7 +83,7 @@ class MoatLoaderDir(recEtcDir):
 	"""Directory for /meta/module/‹subsys›"""
 	pass
 MoatLoaderDir.register('language', cls=EtcString)
-MoatLoaderDir.register('description', cls=EtcString)
+MoatLoaderDir.register('descr', cls=EtcString)
 MoatLoaderDir.register('summary', cls=EtcString)
 MoatLoaderDir.register('*', cls=MoatLoader)
 
@@ -78,15 +91,27 @@ class MoatLoaded(EtcDir):
 	"""\
 		Directory for /‹subsys›/‹name›.
 		Will lookup the class to use by way of /meta/modules."""
+
 	@classmethod
-	async def _new(cls,pre,parent,**kw):
-		m = parent.root.lookup('meta','module',pre.key[-1],parent.name).code
-		res = await m._new(pre=pre,parent=parent,**kw)
+	async def this_obj(cls, parent=None,recursive=None, pre=None, **kw):
+		if recursive is None:
+			raise ReloadData
+		name = pre.key.rsplit('/',1)[1]
+		m = (await parent.root.lookup('meta','module',name,parent.name)).code
+		res = m(parent=parent,pre=pre,**kw)
 		return res
+
+	@property
+	def task_monitor(self):
+		return NoSubdirs(self)
 
 class MoatLoadedDir(EtcDir):
 	"""Directory for /‹subsys›"""
-	pass
+	@property
+	def task_monitor(self):
+		return Subdirs(self)
+	def task_for_subdir(self,d):
+		return "scan",
 MoatLoadedDir.register('*', cls=MoatLoaded)
 
 class MoatMetaModule(EtcDir):
@@ -172,7 +197,8 @@ class MoatMetaTask(EtcDir):
 		from moat.task import TASKDEF
 		from moat.task.base import TaskDef
 
-		self.register('**',TASKDEF, cls=TaskDef)
+		self.register('*', cls=MoatMetaTask)
+		self.register(TASKDEF, cls=TaskDef)
 		await super().init()
 	
 	async def add_task(self, task, force=False):
@@ -252,12 +278,135 @@ class MoatStatus(EtcDir):
 		await super().init()
 
 class MoatTask(EtcDir):
-	"""Singleton for /task"""
+	"""/task and 'plain' dirs below that"""
 	async def init(self):
 		from moat.task import TASK
-		from moat.task.base import Task
-		self.register('**',TASK, cls=Task)
+		from moat.task.base import TaskDir
+		self.register(TASK, cls=TaskDir)
+		self.register('*', cls=MoatTask)
 		await super().init()
+
+	async def add_task(self, path, taskdef, force=False, parent=None, **kw):
+		from moat.task import TASK,TASKDEF_DIR,TASKDEF
+
+		td = await self.root.subdir(*(TASKDEF_DIR+tuple(taskdef.split('/'))),TASKDEF)
+		logger.debug('Taskdef %s for %s is %s', taskdef,path,td['language'])
+		p = '/'.join(path)
+		r = None
+
+		d = dict(
+			data=kw,
+			taskdef=taskdef,
+		)
+		if parent is not None:
+			d['parent'] = '/'.join(parent.path)
+		tt = await self.subdir(*path,name=TASK, create=None)
+		if force or 'taskdef' not in tt:
+			changed = False
+			if tt.get('taskdef','') != taskdef:
+				await tt.set('taskdef',taskdef)
+				tt.force_updated() # required for getting the schema
+
+			for k,v in d.items():
+				if k not in tt:
+					logger.debug("%s: Add %s: %s", p,k,v)
+				elif tt[k] != v:
+					logger.debug("%s: Update %s: %s => %s", p,k,tt[k],v)
+				else:
+					continue
+				r = await tt.set(k,v, sync=False)
+				changed = True
+			for k in tt.keys():
+				if k not in d:
+					logger.debug("%s: Delete %s", p,k)
+					r = await tt.delete(k, sync=False)
+					changed = True
+
+			if changed:
+				logger.info("%s: updated", p)
+			else:
+				logger.debug("%s: not changed", p)
+		else:
+			logger.debug("%s: exists, skipped", p)
+		if r is not None:
+			await self.root.wait(r)
+
+class _Subdirs(object):
+	"""Common base class for task-specific subdirectory monitoring"""
+	def __init__(self,dir):
+		self.dir = dir
+		self.known = set()
+	async def __aiter__(self):
+		self.it = iter(self.dir.keys())
+		return self
+
+	def _add(self,a):
+		if a not in self.known:
+			res = self.dir.task_for_subdir(a)
+			if res is not None:
+				self.known.add(a)
+				return "scan",self.dir.path+(a,),{}
+
+	def _del(self,a):
+		if a in self.known:
+			self.known.remove(a)
+			return "drop",self.dir.path+(a,)
+
+	async def __anext__(self):
+		while self.it is not None:
+			try:
+				res = next(self.it)
+			except StopIteration:
+				self.it = None
+				return ("watch",)
+			else:
+				res = self._add(res)
+				if res is not None:
+					return res
+		return (await self.poll())
+	async def poll(self):
+		raise RuntimeError("You need to override %s.poll"%(self.__class__.__name__,))
+
+class NoSubdirs(object):
+	def __init__(self,dir):
+		pass
+	async def __aiter__(self):
+		return self
+	async def __anext__(self):
+		raise StopAsyncIteration
+	
+class Subdirs(_Subdirs):
+	"""async iterator for monitoring a dynamic subdirectory"""
+	async def __aiter__(self):
+		await super().__aiter__()
+		self.known = set()
+		self.q = asyncio.Queue(loop=self.dir._loop)
+		self.mon = self.dir.add_monitor(self._mon)
+		return self
+	async def poll(self):
+		while True:
+			res = await self.q.get()
+			if res is None:
+				raise StopAsyncIteration
+			t,a = res
+			if t == '+':
+				res = self._add(a)
+			elif t == '-':
+				res = self._del(a)
+			if res is not None:
+				return res
+
+	def _mon(self,x):
+		assert x is self.dir
+		for a in self.dir.added:
+			self.q.put_nowait(('+',a))
+		for a in self.dir.deleted:
+			self.q.put_nowait(('-',a))
+
+class StaticSubdirs(_Subdirs):
+	"""async iterator for monitoring a static subdirectory"""
+	async def poll(self):
+		raise StopAsyncIteration
 
 class MoatRoot(EtcRoot):
 	"""Singleton for etcd / (root)"""
@@ -277,6 +426,13 @@ class MoatRoot(EtcRoot):
 			await self['meta']
 		except KeyError: # does not exist yet
 			pass
+
+	@property
+	def task_monitor(self):
+		return StaticSubdirs(self)
+	def task_for_subdir(self,d):
+		if d == "bus":
+			return "scan",
 
 	def managed(self,dev):
 		### XXX ???
