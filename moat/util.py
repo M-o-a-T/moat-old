@@ -32,6 +32,18 @@ logger = logging.getLogger(__name__)
 class _NOT_HERE: pass
 class _NOT_THERE: pass
 
+import yaml,io
+def _IOwrapper(dumper,data):
+	io = ''
+	if data.readable():
+		io += 'r'
+	if data.writable():
+		io += 'w'
+	if io == '':
+		io = 'x'
+	return dumper.represent_scalar('!IO'+io, data.name)
+yaml.add_representer(io.TextIOWrapper,_IOwrapper)
+
 def r_dict(m):
 	if isinstance(m,Mapping):
 		return dict((k,r_dict(v)) for k,v in m.items())

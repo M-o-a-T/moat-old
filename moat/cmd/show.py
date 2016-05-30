@@ -47,7 +47,7 @@ With arguments, show only these.
 """
 
 	async def do(self,args):
-		from yaml import safe_dump
+		from yaml import dump
 		if args:
 			try:
 				for n,a in enumerate(args):
@@ -56,11 +56,11 @@ With arguments, show only these.
 					c = self.root.cfg
 					for aa in a.split('.'):
 						c = c[aa]
-					safe_dump(c, stream=self.stdout)
+					dump(c, stream=self.stdout)
 			except KeyError:
 				raise CommandError("Key %s does not exist"%(repr(a),))
 		else:
-			safe_dump(self.root.cfg, stream=self.stdout)
+			dump(self.root.cfg, stream=self.stdout)
 
 class EtcdCommand(Command):
 	name = "etcd"
