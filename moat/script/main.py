@@ -188,7 +188,7 @@ You can load more than one config file.
 		else:
 			if 'stderr' in hd:
 				hd.remove('stderr')
-		lh = lcfg['handlers'].setdefault('stderr', { 'formatter':'stderr' })
+		lh = lcfg.setdefault('handlers',{}).setdefault('stderr', { 'formatter':'stderr' })
 		lh['class'] = 'logging.StreamHandler'
 		lh['stream'] = sys.stderr
 		lh['level'] = ('ERROR','ERROR','WARNING')[min(self.verbose,2)]
