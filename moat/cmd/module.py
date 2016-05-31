@@ -29,6 +29,7 @@ import os
 import sys
 from moat.script import Command, SubCommand, CommandError
 from moat.script.task import Task
+from moat.script.util import objects
 from moat.task import TASKDEF_DIR
 from moat.types import MODULE_DIR
 from moat.types.module import BaseModule, modules
@@ -65,12 +66,19 @@ on the command line, they are added, otherwise everything under
 		self.parser.add_option('-f','--force',
 			action="store_true", dest="force",
 			help="update existing values")
+		self.parser.add_option('-n','--no-tasks',
+			action="store_true", dest="no_tasks",
+			help="don't add the module's task definitions")
 
 	def handleOptions(self):
 		self.force = self.options.force
+		self.tasks = not self.options.no_tasks
 
 	async def do(self,args):
 		t = await self.setup()
+		tree = await self.root._get_tree()
+		t2 = await tree.subdir(TASKDEF_DIR)
+
 		if args:
 			objs = []
 			for a in args:
@@ -87,7 +95,16 @@ on the command line, they are added, otherwise everything under
 							objs.append(c)
 							n += 1
 					if self.root.verbose > (1 if n else 0):
-						print("%s: %s command%s found." % (a,n if n else "no", "" if n==1 else "s"), file=self.stdout)
+						print("%s: %s module%s found." % (a,n if n else "no", "" if n==1 else "s"), file=self.stdout)
+
+					if self.tasks:
+						n = 0
+						for c in objects(m, Task, filter=lambda x:getattr(x,'name',None) is not None):
+							await t2.add_task(c, force=self.force)
+							n += 1
+						if self.root.verbose > (1 if n else 0):
+							print("%s: %s command%s found." % (a,n if n else "no", "" if n==1 else "s"), file=self.stdout)
+
 				else:
 					if not isinstance(m,BaseModule):
 						raise CommandError("%s is not a task"%a)
