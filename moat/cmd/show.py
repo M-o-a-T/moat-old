@@ -47,6 +47,7 @@ With arguments, show only these.
 """
 
 	async def do(self,args):
+		import moat.util # side effect: loads YAML representers
 		from yaml import dump
 		if args:
 			try:
