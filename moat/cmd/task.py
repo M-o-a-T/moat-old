@@ -69,7 +69,7 @@ This command sets up that data. If you mention module or class names
 on the command line, they are added, otherwise everything under
 'moat.task.*' is used.
 
-This also installs the root "task scanner" task.
+This also installs the root "task scanner" task, if no args are given.
 """
 
 	def addOptions(self):
@@ -88,36 +88,27 @@ This also installs the root "task scanner" task.
 			for a in args:
 				m = import_string(a)
 				if isinstance(m,py_types.ModuleType):
-					try:
-						syms = m.__all__
-					except AttributeError:
-						syms = dir(m)
+					from moat.script.util import objects
 					n = 0
-					for c in syms:
-						c = getattr(m,c,None)
-						if isinstance(c,type) and c is not Task and issubclass(c,Task):
-							objs.append(c)
-							n += 1
+					for c in objects(m, Task, filter=lambda x:getattr(x,'name',None) is not None):
+						await t.add_task(c, force=self.force)
+						n += 1
 					if self.root.verbose > (1 if n else 0):
 						print("%s: %s command%s found." % (a,n if n else "no", "" if n==1 else "s"), file=self.stdout)
 				else:
 					if not isinstance(m,Task):
 						raise CommandError("%s is not a task"%a)
-					objs.append(m)
+					await t.add_task(m, force=self.force)
 		else:
-			objs = task_types()
+			for c in task_types():
+				await t.add_task(c, force=self.force)
 
-		for obj in objs:
-			if isinstance(obj,type) and issubclass(obj,BaseModule):
-				for task in obj.task_types():
-					await t.add_task(task, force=self.force)
-			else:
-				await t.add_task(obj, force=self.force)
+			r = await tree.subdir(*TASKSCAN_DIR)
+			from moat.task.collect import Collector
+			await r.add_task(path=(),taskdef=Collector.name, force=self.force)
+
 		await t.wait()
 
-		r = await tree.subdir(*TASKSCAN_DIR)
-		from moat.task.collect import Collector
-		await r.add_task(path=(),taskdef=Collector.taskdef, force=self.force)
 
 class DefListCommand(Command,DefSetup):
 	name = "list"
