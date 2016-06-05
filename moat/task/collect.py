@@ -39,9 +39,9 @@ class Collector(Task):
 
 		Collectors are attached to etcd nodes by way of a 'task_monitor' 
 		attribute/property which supports the async iteration protocol.
-		The node is found by simply chopping TASKSCAN_DIR off the front
+		The node is found by simply chopping %s off the front
 		of this task's path.
-		"""
+		""" % ('/'.join(TASKSCAN_DIR),)
 
 	taskdef="task/collect"
 	summary="A Task which runs a task collector"
@@ -62,6 +62,8 @@ class Collector(Task):
 
 		async def found(r):
 			logger.debug("Collecting %s: %s",self.path,r)
+			if self.cmd.root.verbose > 2:
+				print(r)
 			typ = r[0]
 			if typ == "add":
 				typ,taskdef,path,kw = r
