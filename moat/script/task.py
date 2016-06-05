@@ -143,6 +143,7 @@ class Task(asyncio.Task):
 		await r.setup(self)
 		run_state = await _run_state(r.tree,self.path)
 		main_task = None
+		self.tree = await r._get_tree()
 
 		## Install checks for the requisite nodes to be present.
 		gone = None
@@ -490,7 +491,7 @@ class TaskMaster(asyncio.Future):
 			else:
 				self.current_retry = min(self.current_retry + self.vars['retry']/2, self.vars['max-retry'])
 			self.exc = exc
-			if not self.current_retry or isinstance(exc,BdbQuit):
+			if not self.current_retry or isinstance(exc,(AttributeError,BdbQuit)):
 				self.set_exception(exc)
 				return
 		else:
