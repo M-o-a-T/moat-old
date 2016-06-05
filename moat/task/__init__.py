@@ -53,7 +53,7 @@ _VARS = {'ttl','refresh','restart','retry','max-retry','one-shot'}
 def task_types(prefix=__name__):
 	"""Enumerate the task types known to Moat's code."""
 	from ..script.task import Task
-	return objects(prefix, Task, filter=lambda x:x.__dict__.get('name',None) is not None)
+	return objects(prefix, Task, filter=lambda x:x.__dict__.get('taskdef',None) is not None)
 
 class TaskDir(EtcDir):
 	pass

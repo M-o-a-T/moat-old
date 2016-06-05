@@ -204,7 +204,7 @@ class MoatMetaTask(EtcDir):
 	async def add_task(self, task, force=False):
 		from moat.task import TASKDEF
 
-		assert task.name is not None
+		assert task.taskdef is not None, task
 		d = dict(
 			language='python',
 			code=task.__module__+'.'+task.__name__,
@@ -213,37 +213,37 @@ class MoatMetaTask(EtcDir):
 		)
 		if hasattr(task,'schema'):
 			d['data'] = task.schema
-		tt = await self.subdir(task.name,name=TASKDEF, create=None)
+		tt = await self.subdir(task.taskdef,name=TASKDEF, create=None)
 		lang = tt.get('language',None)
 		if lang is None:
-			logger.info("%s: new", task.name)
+			logger.info("%s: new", task.taskdef)
 			await tt.update(d)
 		elif lang == 'python':
 			if force:
 				changed = False
 				for k,v in d.items():
 					if k not in tt:
-						logger.debug("%s: Add %s: %s", task.name,k,v)
+						logger.debug("%s: Add %s: %s", task.taskdef,k,v)
 					elif tt[k] != v:
-						logger.debug("%s: Update %s: %s => %s", task.name,k,tt[k],v)
+						logger.debug("%s: Update %s: %s => %s", task.taskdef,k,tt[k],v)
 					else:
 						continue
 					await tt.set(k,v)
 					changed = True
 				for k in tt.keys():
 					if k not in d:
-						logger.debug("%s: Delete %s", task.name,k)
+						logger.debug("%s: Delete %s", task.taskdef,k)
 						r = await tt.delete(k, sync=False)
 						changed = True
 
 				if changed:
-					logger.info("%s: updated", task.name)
+					logger.info("%s: updated", task.taskdef)
 				else:
-					logger.debug("%s: not changed", task.name)
+					logger.debug("%s: not changed", task.taskdef)
 			else:
-				logger.debug("%s: exists, skipped", task.name)
+				logger.debug("%s: exists, skipped", task.taskdef)
 		else:
-			raise RuntimeError("%s: exists, language=%s" % (task.name,lang))
+			raise RuntimeError("%s: exists, language=%s" % (task.taskdef,lang))
 
 
 class MoatMeta(EtcDir):

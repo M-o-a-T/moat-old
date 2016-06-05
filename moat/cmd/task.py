@@ -90,7 +90,7 @@ This also installs the root "task scanner" task, if no args are given.
 				if isinstance(m,py_types.ModuleType):
 					from moat.script.util import objects
 					n = 0
-					for c in objects(m, Task, filter=lambda x:getattr(x,'name',None) is not None):
+					for c in objects(m, Task, filter=lambda x:getattr(x,'taskdef',None) is not None):
 						await t.add_task(c, force=self.force)
 						n += 1
 					if self.root.verbose > (1 if n else 0):
@@ -105,7 +105,7 @@ This also installs the root "task scanner" task, if no args are given.
 
 			r = await tree.subdir(*TASKSCAN_DIR)
 			from moat.task.collect import Collector
-			await r.add_task(path=(),taskdef=Collector.name, force=self.force)
+			await r.add_task(path=(),taskdef=Collector.taskdef, force=self.force)
 
 		await t.wait()
 

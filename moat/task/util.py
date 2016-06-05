@@ -33,7 +33,7 @@ class Sleeper(Task):
 	"""This task just waits for a configured amount of time before exiting.
 		You can use it in a 'moat run -K' command to limit runtimes."""
 	summary="""A simple delay"""
-	name="sleep"
+	taskdef="sleep"
 	d = None
 	f = None
 

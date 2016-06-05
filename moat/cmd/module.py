@@ -99,7 +99,7 @@ on the command line, they are added, otherwise everything under
 
 					if self.tasks:
 						n = 0
-						for c in objects(m, Task, filter=lambda x:getattr(x,'name',None) is not None):
+						for c in objects(m, Task, filter=lambda x:getattr(x,'taskdef',None) is not None):
 							await t2.add_task(c, force=self.force)
 							n += 1
 						if self.root.verbose > (1 if n else 0):

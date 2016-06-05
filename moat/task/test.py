@@ -31,7 +31,7 @@ from etcd_tree.node import EtcFloat
 class Sleeper(Task):
 	"""This task just waits for a configured amount of time before exiting.
 		You can use it in a 'moat run -K' command to limit runtimes."""
-	name="test/sleep"
+	taskdef="test/sleep"
 	summary="A simple delay"
 	schema = {'delay':'float'}
 
@@ -39,7 +39,7 @@ class Sleeper(Task):
 		await asyncio.sleep(self.config['delay'], loop=self.loop)
 	
 class Error(Task):
-	name="test/error"
+	taskdef="test/error"
 	description="""This task always errors out."""
 	summary="A simple RuntimeError"
 
@@ -47,7 +47,7 @@ class Error(Task):
 		raise RuntimeError("I don't wanna dance")
 
 class SleepError(Sleeper):
-	name="test/sleep/error"
+	taskdef="test/sleep/error"
 	description="""This task waits for a configured amount of time before raising an error."""
 	summary="""A delay, terminated by an error"""
 
