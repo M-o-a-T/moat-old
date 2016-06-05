@@ -293,23 +293,24 @@ class MoatTask(EtcDir):
 		from moat.task import TASK,TASKDEF_DIR,TASKDEF
 
 		if isinstance(taskdef,str):
-			taskdef = taskdef.split('/')
-		td = await self.root.lookup(*(TASKDEF_DIR+taskdef),name=TASKDEF)
-		logger.debug('Taskdef %s for %s is %s', taskdef,path,td['language'])
+			taskdef = tuple(taskdef.split('/'))
+		tds = '/'.join(taskdef)
+		td = await self.root.subdir(*(TASKDEF_DIR+taskdef),name=TASKDEF)
+		logger.debug('Taskdef %s for %s is %s', tds,path,td.get('language','?'))
 		p = '/'.join(path)
 		r = None
 
 		d = dict(
 			data=kw,
-			taskdef=taskdef,
+			taskdef=tds,
 		)
 		if parent is not None:
 			d['parent'] = '/'.join(parent.path)
 		tt = await self.subdir(*path,name=TASK, create=None)
 		if force or 'taskdef' not in tt:
 			changed = False
-			if tt.get('taskdef','') != taskdef:
-				await tt.set('taskdef',taskdef)
+			if tt.get('taskdef','') != tds:
+				await tt.set('taskdef',tds)
 				tt.force_updated() # required for getting the schema
 
 			for k,v in d.items():
