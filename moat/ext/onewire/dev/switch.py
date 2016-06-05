@@ -42,7 +42,8 @@ class Onewire_2409(OnewireDevice):
 		n = self.parent.parent.name+'.'+self.parent.name
 		for sub in ('main','aux'):
 			s = await srv.subdir("%s %s %s" % (path,n,sub))
-			await s.set('broken',0)
+			await s.set('broken',0, sync=False)
+			await s.set('devices',{})
 
 	async def deleted(self):
 		import pdb;pdb.set_trace()
