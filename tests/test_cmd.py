@@ -141,7 +141,7 @@ async def test_task(loop):
 	assert r == 0, r
 	m = MoatTest(loop=loop)
 	r = await m.parse("-vc test.cfg task list fake/cmd")
-	assert m.stdout_data.startswith('fake/cmd/sleep:'), m.stdout_data
+	assert m.stdout_data.startswith('*\tfake/cmd/sleep\n'), m.stdout_data
 	assert r == 0, r
 	m = MoatTest(loop=loop)
 	r = await m.parse("-c test.cfg task list fake/cmd/sleep")
@@ -149,12 +149,12 @@ async def test_task(loop):
 	assert r == 0, r
 	m = MoatTest(loop=loop)
 	r = await m.parse("-vc test.cfg task list fake/cmd/sleep")
-	assert m.stdout_data.startswith('fake/cmd/sleep:'), m.stdout_data
+	assert m.stdout_data.startswith('*\tfake/cmd/sleep\n'), m.stdout_data
 	assert r == 0, r
 
 	t = time()
 	m = MoatTest(loop=loop)
-	r = await m.parse("-vvvc test.cfg run -kg fake/cmd/sleep")
+	r = await m.parse("-vvvc test.cfg run -g fake/cmd/sleep")
 	t2 = time()
 	assert r == 0, r
 	assert t2-t < 10 and t2-t > 2, (t,t2)
@@ -164,7 +164,7 @@ async def test_task(loop):
 	assert r == 0, r
 
 	t = time()
-	r = asyncio.ensure_future(m.parse("-vvvc test.cfg run -kg fake/cmd/sleep"), loop=loop)
+	r = asyncio.ensure_future(m.parse("-vvvc test.cfg run -g fake/cmd/sleep"), loop=loop)
 	await asyncio.sleep(0.5,loop=loop)
 	assert not r.done(),repr(r)
 	rx = await m2.parse("-c test.cfg task state fake")
@@ -198,6 +198,7 @@ async def test_test(loop):
 	r = await m.parse("-vvvc test.cfg test Kill me hardeR")
 	assert r == 0, r
 
+	# now restore everything
 	m = MoatTest(loop=loop)
 	r = await m.parse("-vvvc test.cfg test")
 	assert r > 0, r
@@ -208,6 +209,10 @@ async def test_test(loop):
 
 	m = MoatTest(loop=loop)
 	r = await m.parse("-vvvc test.cfg test")
+	assert r == 0, r
+
+	m = MoatTest(loop=loop)
+	r = await m.parse("-vvvc test.cfg task def init")
 	assert r == 0, r
 
 @pytest.mark.run_loop

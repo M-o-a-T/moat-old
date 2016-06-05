@@ -143,7 +143,7 @@ details are shown in YAML format, else a short list of names is shown.
 				if verbose:
 					dump({path: r_dict(dict(task))}, stream=self.stdout)
 				else:
-					print('/'.join(path),task.get('summary','??'), sep='\t',file=self.stdout)
+					print('/'.join(path),task.get('summary',task.get('descr','??')), sep='\t',file=self.stdout)
 
 class DefDeleteCommand(Command,DefSetup):
 	name = "delete"
@@ -451,8 +451,6 @@ class _AddUpdate:
 			raise CommandError("Task '%s' not found. (Use its path, not the name?)" % taskpath)
 		if not self._update:
 			await task.set('taskdef', taskdefpath, sync=False)
-			if not name:
-				name = taskpath
 		p = self.options.parent
 		if p is not None:
 			if p == '-':
@@ -570,6 +568,15 @@ This command shows that information.
 		self.parser.add_option('-t','--this',
 			action="count", dest="this", default=0,
 			help="Report on the given job only (-tt for jobs one level below, etc.)")
+		self.parser.add_option('-r','--running',
+			action="store_true", dest="running",
+			help="Only list running jobs")
+		self.parser.add_option('-e','--error',
+			action="store_true", dest="error",
+			help="Only list jobs with errors")
+		self.parser.add_option('-c','--completed',
+			action="store_true", dest="completed",
+			help="Only list completed jobs")
 
 	async def do(self,args):
 		await self.root.setup()
@@ -586,43 +593,51 @@ This command shows that information.
 					print("'%s' does not exist" % (a,), file=sys.stderr)
 		else:
 			dirs = [t]
+
+		sel_running = self.options.running
+		sel_error = self.options.error
+		sel_completed = self.options.completed
+		if not (self.options.completed or self.options.running or self.options.error):
+			sel_running = sel_error = sel_completed = True
+
 		for tt in dirs:
 			async for task in tt.tagged(TASKSTATE, depth=self.options.this):
 				path = task.path[len(TASKSTATE_DIR):-1]
-
-				if self.root.verbose == 2:
-					print('*','/'.join(path), sep='\t', file=self.stdout)
-					for k,v in task.items():
-						if isinstance(v,(float,int)) and 1000000000 < v < 10000000000:
-							v = datetime.fromtimestamp(v).strftime('%Y-%m-%d %H:%M:%S')
-						elif isinstance(v,str):
-							v = v.strip()
-						else:
-							v = str(v)
-						print(k,('\n\t' if '\n' in v else '')+v.replace('\n','\n\t'), sep='\t',file=self.stdout)
-				elif self.root.verbose > 1:
-					safe_dump({'/'.join(path):r_dict(dict(task))}, stream=self.stdout)
-				else:
-					date = task.get('debug_time','-')
-					if 'running' in task:
-						if 'started' in task:
-							date = task['started']
-						else:
-							date = task['running']
-						state = 'run'
-					elif 'started' in task and ('stopped' not in task or task['started']>task['stopped']):
+				date = task.get('debug_time','-')
+				if 'running' in task:
+					if 'started' in task:
 						date = task['started']
-						state = 'crash'
-					elif 'stopped' in task:
-						date = task['stopped']
-						state = task['state']
-					elif 'state' in task:
-						state = task['state']
 					else:
-						state = task.get('state','?')
-					if not isinstance(date,str):
-						date = datetime.fromtimestamp(date).strftime('%Y-%m-%d %H:%M:%S')
-					print('/'.join(path),state,date,task.get('message','-'), sep='\t', file=self.stdout)
+						date = task['running']
+					state = 'run'
+				elif 'started' in task and ('stopped' not in task or task['started']>task['stopped']):
+					date = task['started']
+					state = 'crash'
+				elif 'stopped' in task:
+					date = task['stopped']
+					state = task['state']
+				elif 'state' in task:
+					state = task['state']
+				else:
+					state = task.get('state','?')
+				if not isinstance(date,str):
+					date = datetime.fromtimestamp(date).strftime('%Y-%m-%d %H:%M:%S')
+
+				if sel_running if state == 'run' else sel_completed if state == 'ok' else sel_error:
+					if self.root.verbose == 2:
+						print('*','/'.join(path), sep='\t', file=self.stdout)
+						for k,v in task.items():
+							if isinstance(v,(float,int)) and 1000000000 < v < 10000000000:
+								v = datetime.fromtimestamp(v).strftime('%Y-%m-%d %H:%M:%S')
+							elif isinstance(v,str):
+								v = v.strip()
+							else:
+								v = str(v)
+							print(k,('\n\t' if '\n' in v else '')+v.replace('\n','\n\t'), sep='\t',file=self.stdout)
+					elif self.root.verbose > 1:
+						dump({'/'.join(path):r_dict(dict(task))}, stream=self.stdout)
+					else:
+						print('/'.join(path),state,date,task.get('message','-'), sep='\t', file=self.stdout)
 
 
 class TaskCommand(SubCommand):
