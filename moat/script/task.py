@@ -77,7 +77,7 @@ class Task(asyncio.Task):
 
 	_global_loop=False
 
-	def __init__(self, cmd, name, taskdir=None, parents=(), config={}, _ttl=None,_refresh=None):
+	def __init__(self, cmd, name, taskdir=None, parents=(), config={}, _ttl=None,_refresh=None, **cfg):
 		"""\
 			This is MoaT's standard task runner.
 			It takes care of noting the task's state in etcd.
@@ -112,6 +112,7 @@ class Task(asyncio.Task):
 
 		self.cmd = cmd
 		self.config = config
+		self.cfg = cfg
 		self._ttl = config.get('ttl',None) if _ttl is None else _ttl
 		self._refresh = config.get('refresh',None) if _refresh is None else _refresh
 		self.name = name
@@ -383,9 +384,6 @@ class TaskMaster(asyncio.Future):
 		self.vars = {}
 		self.callback = callback
 
-		for k in _VARS:
-			setattr(self,k,-1)
-
 		super().__init__(loop=self.loop)
 		
 	async def init(self):
@@ -439,7 +437,7 @@ class TaskMaster(asyncio.Future):
 		p=[self.task.path]
 		if 'parent' in self.task:
 			p.append(self.task['parent'].value.split('/'))
-		self.job = self.task.cls(self.cmd, self.name, parents=p, taskdir=self.task, config=self.task._get('data',{}), _ttl=self._get_ttl)
+		self.job = self.task.cls(self.cmd, self.name, parents=p, taskdir=self.task, config=self.task._get('data',{}), _ttl=self._get_ttl, **self.cfg)
 		self.job.add_done_callback(self._job_done)
 		if self.callback is not None:
 			self.callback("start")
