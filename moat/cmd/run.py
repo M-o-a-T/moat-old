@@ -65,6 +65,9 @@ Run MoaT tasks.
 		self.parser.add_option('-q','--quit',
             action="store_true", dest="quit",
             help="Do not watch etcd.")
+		self.parser.add_option('-s','--single',
+            action="store_true", dest="single",
+            help="one path argument given (may contain spaces)")
 
 	def _tilt(self):
 		self.root.loop.remove_signal_handler(signal.SIGINT)
@@ -77,6 +80,7 @@ Run MoaT tasks.
 		self.seen.add(path)
 
 	async def do(self,args):
+		res = 0
 		self.seen = set()
 		self.tilt = asyncio.Future(loop=self.root.loop)
 		opts = self.options
@@ -86,13 +90,18 @@ Run MoaT tasks.
 		etc = await self.root._get_etcd()
 		tree = await self.root._get_tree()
 		if args:
+			if opts.single and len(args) > 1:
+				args = (' '.join(args),)
 			if not opts.is_global:
 				args = [self.root.app+'/'+t for t in args]
 			args = [TASK_DIR+tuple(t.split('/')) for t in args]
-		elif opts.is_global:
-			args = [TASK_DIR]
 		else:
-			args = [TASK_DIR+(self.root.app,)]
+			if opts.single:
+				raise CommandError("Not passing a path with '--single' does not make sense.")
+			if opts.is_global:
+				args = [TASK_DIR]
+			else:
+				args = [TASK_DIR+(self.root.app,)]
 		self.args = args
 		self.paths = []
 		self._monitors = []
@@ -104,14 +113,17 @@ Run MoaT tasks.
 				tree = await tree.subdir(t, create=False)
 			except KeyError as err:
 				print("Unknown: "+'/'.join(err.args[0]), file=sys.stderr)
+				res = 2
 			else:
 				self.paths.append(tree)
 				self._monitors.append(tree.add_monitor(self._rescan))
+		if res:
+			return res
 		await self._scan()
 		if not self.tasks:
 			if self.root.verbose:
 				print("No tasks found. Exiting.", file=sys.stderr)
-			return
+			return 1
 
 		self.root.loop.add_signal_handler(signal.SIGINT,self._tilt)
 		self.root.loop.add_signal_handler(signal.SIGTERM,self._tilt)
@@ -228,6 +240,15 @@ Run MoaT tasks.
 		js = {}
 		old = set(self.jobs)
 		logger.debug("OLD %s",old)
+
+		args = {}
+		if self.options.oneshot:
+			args['restart'] = 0
+			if self.options.oneshot > 1:
+				args['retry'] = 0
+		if self.options.quit:
+			args['one-shot'] = True
+
 		while self.tasks:
 			t = self.tasks.pop()
 			path = t.path[len(TASK_DIR):-1]
@@ -237,15 +258,8 @@ Run MoaT tasks.
 				continue
 
 			logger.debug("Launch TM %s",path)
-			args = {}
-			if self.options.oneshot:
-				args['restart'] = 0
-				if self.options.oneshot > 1:
-					args['retry'] = 0
-			if self.options.quit:
-				args['one_shot'] = True
 			try:
-			    j = TaskMaster(self, path, callback=partial(_report, path), **args)
+				j = TaskMaster(self, path, callback=partial(_report, path), **args)
 			except Exception as exc:
 				logger.exception("Could not set up %s (%s)",'/'.join(t.path),t.get('name',path))
 				f = asyncio.Future(loop=self.root.loop)

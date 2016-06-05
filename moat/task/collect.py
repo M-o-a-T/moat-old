@@ -87,15 +87,18 @@ class Collector(Task):
 					if k[0] != ':' and k not in known:
 						logger.info("Deleting "+'/'.join(me.path+(k,)))
 						await me.delete(k)
-				if self.taskdir and self.taskdir.get('one-shot',False):
-					return
+				if self.cfg.get('one-shot',False):
+					raise StopAsyncIteration
 			else:
 				raise NotImplementedError("Unknown Collect result: "+repr(r))
 
-		if hasattr(coll,'__aiter__'):
-			async for r in coll:
-				await found(r)
-		else:
-			for r in coll:
-				await found(r)
+		try:
+			if hasattr(coll,'__aiter__'):
+				async for r in coll:
+					await found(r)
+			else:
+				for r in coll:
+					await found(r)
+		except StopAsyncIteration:
+			pass
 
