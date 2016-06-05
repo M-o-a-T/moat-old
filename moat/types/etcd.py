@@ -157,10 +157,13 @@ class MoatMetaModule(EtcDir):
 				for k,v in d.items():
 					if k not in tt:
 						logger.debug("%s: Add %s: %s", obj.prefix,k,v)
-					elif tt[k] != v:
-						logger.debug("%s: Update %s: %s => %s", obj.prefix,k,tt[k],v)
 					else:
-						continue
+						ov = tt[k]
+						ov = getattr(ov,'value',ov)
+						if ov != v:
+							logger.debug("%s: Update %s: %s => %s", obj.prefix,k,tt[k],v)
+						else:
+							continue
 					r = await tt.set(k,v, sync=False)
 					changed = True
 				await tt.wait(r) # otherwise tt.keys() may change during execution
