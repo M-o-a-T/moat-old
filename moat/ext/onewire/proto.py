@@ -133,7 +133,7 @@ class OnewireDir(OnewireInteraction):
 		files = []
 		self.send(OWMsg.dirall, self.path(path), 0)
 		type,msg = await self.recv()
-		assert type == 0
+		assert type == 0, (type,msg)
 		for entry in msg.decode('utf-8').split(","):
 			try: entry = entry[entry.rindex('/')+1:]
 			except ValueError: pass # pragma: no cover
