@@ -182,7 +182,7 @@ class MoatMetaModule(EtcDir):
 MoatMetaModule.register('*', cls=MoatLoaderDir)
 
 class MoatMetaType(EtcDir):
-	"""Singleton for /meta/type"""
+	"""Singleton for /meta/type: type definitions"""
 	async def init(self):
 		from . import TYPEDEF
 		from .base import TypeDir
@@ -192,7 +192,7 @@ class MoatMetaType(EtcDir):
 			await v.load(recursive=True)
 
 class MoatMetaTask(EtcDir):
-	"""Singleton for /meta/task"""
+	"""Singleton for /meta/task: task definitions"""
 	async def init(self):
 		from moat.task import TASKDEF
 		from moat.task.base import TaskDef
@@ -335,6 +335,13 @@ class MoatTask(EtcDir):
 
 class _Subdirs(object):
 	"""Common base class for task-specific subdirectory monitoring"""
+
+	# This works by first iterating the child nodes. When they have been
+	# exhausted, poll() waits for additional add or drop events.
+	# 
+	# _add and _del are common code to build the events which the iterator
+	# returns. They filter duplicates.
+
 	def __init__(self,dir):
 		self.dir = dir
 		self.known = set()
@@ -366,10 +373,12 @@ class _Subdirs(object):
 				if res is not None:
 					return res
 		return (await self.poll())
+
 	async def poll(self):
 		raise RuntimeError("You need to override %s.poll"%(self.__class__.__name__,))
 
 class NoSubdirs(object):
+	"""fake async iterator that doesn't return anything"""
 	def __init__(self,dir):
 		pass
 	async def __aiter__(self):
@@ -379,13 +388,19 @@ class NoSubdirs(object):
 	
 class Subdirs(_Subdirs):
 	"""async iterator for monitoring a dynamic subdirectory"""
+
+	# Here, poll() returns events from a queue that's fed by a monitor
+	# procedure added to the directory we're interested in.
+
 	async def __aiter__(self):
 		await super().__aiter__()
 		self.known = set()
 		self.q = asyncio.Queue(loop=self.dir._loop)
 		self.mon = self.dir.add_monitor(self._mon)
 		return self
+
 	async def poll(self):
+		"""Read the event queue"""
 		while True:
 			res = await self.q.get()
 			if res is None:
@@ -395,10 +410,13 @@ class Subdirs(_Subdirs):
 				res = self._add(a)
 			elif t == '-':
 				res = self._del(a)
+			else:
+				assert False,(t,a)
 			if res is not None:
 				return res
 
 	def _mon(self,x):
+		"""Watch a directory for changes"""
 		assert x is self.dir
 		for a in self.dir.added:
 			self.q.put_nowait(('+',a))
@@ -407,6 +425,9 @@ class Subdirs(_Subdirs):
 
 class StaticSubdirs(_Subdirs):
 	"""async iterator for monitoring a static subdirectory"""
+
+	# This subdir doesn't expect any changes, so no monitor.
+
 	async def poll(self):
 		raise StopAsyncIteration
 
