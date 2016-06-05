@@ -147,9 +147,8 @@ Tasks are described at three places within the etcd hierarchy.
 Data creation
 -------------
 
-Task definitions are created when MoaT is started or when modules are
-added, by simply scanning for subclasses of ``moat.script.Task``.
-There's no reason for multiple taskdef entries for a given
+Task definitions are created when MoaT is installed or when modules are
+added, by scanning for subclasses of ``moat.script.Task``.
 
 The task declarations necessary for the system to run are auto-created as
 needed. An etcd directory which requires tasks has a ``task_monitor``
@@ -194,4 +193,59 @@ Rationale
   By moving all "scan the bus" operations to distinct tasks that only run
   intermittently or at installation time, MoaT isolates the rest of the
   system from having to deal with devices that randomly come and go.
+
+The details
+-----------
+
+It's best to demonstrate all of this by way of an example. We'll examine
+the 1wire bus and look at the mechanics of adding a device to it.
+
+The system pre-creates a single scannign task which monitors the MoaT etcd
+root directory. It statically registers a sub-scanner for the ``bus``
+directory, which will add a scanner to each entry there.
+
+The rest of this story is told in ``moat/ext/onewire/bus.py``.
+
+``bus/onewire`` will simply add a scanner. When triggered (presumably, you
+added a new 1wire server using the command line), that will add a
+`OnewireBusSub` scanner to the ``bus`` subdirectory – but `OnewireBus` will
+*also* add a ``onewire/scan`` task which enumerates the buses on that
+server (named ``onewire/SERVERNAME/scan``).
+
+That task will, presumably, add at least one bus subdirectory to
+``bus/onewire/SERVERNAME/bus``, which will be picked up by `OnewireBusSub`,
+which will then start a ``onewire/scan/bus`` task to enumerate the devices
+on that bus, *and* another scanner to decide what to do with them once they
+appear in etcd.
+
+That scanner looks at the types of all devices on the bus and basically
+asks them which job(s) they need to register in order to get the job done.
+For instance, if there's a thermometer on the bus then a periodic request
+to start temperature conversion will be put on the bus, followed by reading
+all of them. (This minimized bus traffic; more importantly, it prevents
+directly reading the temperature from blocking the bus for a whole second.)
+If there are any alarm-capable devices, an alarm handler will be installed
+which does high-frequency polling for devices which require service.
+And so on.
+
+These handlers are tasks below ``onewire/SERVERNAME/run``. They do not
+depend on any bus- or etcd-scanning tasks. In other words, once the above
+paragraphs' tasks have run their course, they are no longer required (as
+long as you don't add new devices to your bus).
+
+Since each handler has one specific job to do and does not depend on any
+other tasks running on the same machine, failing jobs can be debugged on an
+isolated system.
+
+However, there is one exception to this rule, which onewire subsystem also
+exhibits. There, the alarm poll runs every tenth of a second; it requires
+the alarm condition to be cleared as quickly as possible but it can't do
+that within its own task (a fault there would block polling the whole bus).
+It also can't send an AMQP message or set a notification in etcd: both
+would be too slow.
+
+To handle this case, a system that handles alarms has multiple tasks which
+directly communicate with each other. Isolated debugging is still possible,
+of course, as the default is "handle any open alarms now, wait later".
+
 
