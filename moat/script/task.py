@@ -160,11 +160,10 @@ class Task(asyncio.Task):
 		for pr in self.parents:
 			try:
 				parent = await r.tree.lookup(*pr)
-			except KeyError:
-				await run_state.set("message", "Missing: "+pr)
-				raise JobParentGoneError(self.name, pr)
-
-			prm.append(parent.add_monitor(parent_check))
+				prm.append(parent.add_monitor(parent_check))
+			except (KeyError,etcd.EtcdKeyNotFound) as ex:
+				await run_state.set("message", "Missing: "+'/'.join(pr))
+				raise JobParentGoneError(self.name, pr) from ex
 
 		## TTL calculation
 		def get_ttl():
