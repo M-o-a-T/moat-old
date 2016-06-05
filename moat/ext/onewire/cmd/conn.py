@@ -95,6 +95,7 @@ Arguments:
 
 		try:
 			t = await self.root.tree.subdir('bus','onewire',name, create=not self.update)
+			await t.subdir('bus')
 		except etcd.EtcdAlreadyExist:
 			raise CommandError("Host '%s' exists. Use '-u' or choose a different name." % name)
 		except etcd.EtcdKeyNotFound:

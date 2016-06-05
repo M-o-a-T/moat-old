@@ -25,26 +25,11 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 
 import logging
 logger = logging.getLogger(__name__)
-from etcd_tree.node import EtcFloat,EtcInteger,EtcString
+from etcd_tree.node import EtcFloat,EtcInteger,EtcString, EtcDir
 from time import time
 
 from moat.bus.base import Bus
 from moat.types.etcd import MoatBusBase, Subdirs
-
-class OnewireBus(Bus):
-	"""Directory for /bus/onewire/NAME"""
-	prefix = "onewire"
-	description = "A controller for 1wire"
-	@property
-	def task_monitor(self):
-		yield "add",("onewire","run"), ('onewire',self.name,'run'), {}
-		yield "add",("onewire","scan"), ('onewire',self.name,'scan'), {}
-
-OnewireBus.register("server","host", cls=EtcString)
-OnewireBus.register("server","port", cls=EtcInteger)
-OnewireBus.register('scanning', cls=EtcFloat)
-OnewireBus.register('bus','*','broken', cls=EtcInteger)
-OnewireBus.register('bus','*','devices','*','*', cls=EtcInteger)
 
 class OnewireBusBase(MoatBusBase):
 	"""Directory for /bus/onewire"""
@@ -54,4 +39,49 @@ class OnewireBusBase(MoatBusBase):
 	def task_for_subdir(self,d):
 		return "scan",
 
+class OnewireBus(Bus):
+	"""Directory for /bus/onewire/NAME"""
+	prefix = "onewire"
+	description = "A controller for 1wire"
+
+	@property
+	def task_monitor(self):
+		#yield "add",("onewire","run"), ('onewire',self.name,'run'), {}
+		yield "add",('onewire','scan'), ('onewire',self.name,'scan'), {}
+		yield "scan",('bus','onewire',self.name,'bus'), {}
+
+class OnewireBusSub(EtcDir):
+	"""Directory for /bus/onewire/NAME/bus"""
+	@property
+	def task_monitor(self):
+		return Subdirs(self)
+	def task_for_subdir(self,d):
+		return "scan",
+
+class OnewireBusOne(EtcDir):
+	"""Directory for /bus/onewire/NAME/bus/BUS"""
+	@property
+	def task_monitor(self):
+		yield "add",('onewire','scan','bus'), ('onewire',self.path[2],'scan',self.name), {}
+		yield "scan",('bus','onewire',self.path[2],'bus','devices'), {}
+	def task_for_subdir(self,d):
+		return "scan",
+
+class OnewireBusDev(EtcDir):
+	"""Directory for /bus/onewire/NAME/bus/BUS/devices"""
+	@property
+	def task_monitor(self):
+		return Subdirs(self)
+	def task_for_subdir(self,d):
+		import pdb;pdb.set_trace()
+		return "foof",
+
 OnewireBusBase.register('*',cls=OnewireBus)
+OnewireBus.register("server","host", cls=EtcString)
+OnewireBus.register("server","port", cls=EtcInteger)
+OnewireBus.register('bus', cls=OnewireBusSub)
+OnewireBusSub.register('*', cls=OnewireBusOne)
+OnewireBusOne.register('broken', cls=EtcInteger)
+OnewireBusOne.register('devices', cls=OnewireBusDev)
+OnewireBusDev.register('*','*', cls=EtcInteger)
+

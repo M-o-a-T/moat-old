@@ -274,9 +274,9 @@ async def test_onewire_fake(loop):
 	await u.start()
 
 	with suppress(etcd.EtcdKeyNotFound):
-		await t.delete('/task/fake/onewire/scan/:task', recursive=True)
+		await t.delete('/task/onewire/faker/scan/:task', recursive=True)
 	with suppress(etcd.EtcdKeyNotFound):
-		await t.delete('/task/fake/onewire/run/:task', recursive=True)
+		await t.delete('/task/onewire/faker/run/:task', recursive=True)
 
 	try:
 		with mock.patch("moat.ext.onewire.task.OnewireServer", new=FakeBus(loop)) as fb, \
@@ -291,24 +291,46 @@ async def test_onewire_fake(loop):
 			await m.parse("-vvvc test.cfg conn onewire delete faker")
 			r = await m.parse("-vvvc test.cfg conn onewire add faker foobar.invalid - A nice fake 1wire bus")
 			assert r == 0, r
-			r = await m.parse("-vvvc test.cfg task add fake/onewire/run onewire/run server=faker delay=999 update_delay=0.2 Run the fake bus")
+			r = await m.parse("-vvvc test.cfg run -qgoot moat/scan")
 			assert r == 0, r
-			r = await m.parse("-vvvc test.cfg task add fake/onewire/scan onewire/scan server=faker Scan the fake bus")
+			r = await m.parse("-vvvc test.cfg run -qgoot moat/scan/bus")
 			assert r == 0, r
-			r = await m.parse("-vvvc test.cfg task param fake/onewire/run restart=0 retry=0")
+			r = await m.parse("-vvvc test.cfg run -qgoot moat/scan/bus/onewire")
 			assert r == 0, r
-			r = await m.parse("-vvvc test.cfg task param fake/onewire/scan restart=0 retry=0")
+			r = await m.parse("-vvvc test.cfg run -qgoot moat/scan/bus/onewire/faker")
+			assert r == 0, r
+			r = await m.parse("-vvvc test.cfg run -qgoot onewire/faker/scan")
+			assert r == 0, r
+			r = await m.parse("-vvvc test.cfg run -qgoot moat/scan/bus/onewire/faker/bus")
+			assert r == 0, r
+			r = await m.parse("-vvvc test.cfg run -qgoot moat/scan/bus/onewire/faker/bus/bus.42")
+			assert r == 0, r
+			r = await m.parse("-vvvc test.cfg run -qgoot onewire/faker/scan/bus.42")
+			assert r == 0, r
+			r = await m.parse("-vvvc test.cfg run -qgoot moat/scan/bus/onewire/faker/bus")
+			assert r == 0, r
+			r = await m.parse("-vvvc test.cfg run -qgoots moat/scan/bus/onewire/faker/bus/bus.42 1f.123123123123 main")
+			assert r == 0, r
+			r = await m.parse("-vvvc test.cfg run -qgoots moat/scan/bus/onewire/faker/bus/bus.42 1f.123123123123 aux")
+			assert r == 0, r
+			r = await m.parse("-vvvc test.cfg run -qgoots onewire/faker/scan/bus.42 1f.123123123123 main")
+			assert r == 0, r
+			r = await m.parse("-vvvc test.cfg run -qgoots onewire/faker/scan/bus.42 1f.123123123123 aux")
+			assert r == 0, r
+			r = await m.parse("-vvvc test.cfg run -qgoot onewire/faker/scan")
+			assert r == 0, r
+			r = await m.parse("-vvvc test.cfg run -qgoot moat/scan/bus/onewire/faker")
 			assert r == 0, r
 			logger.debug("TC A")
 
 			m = MoatTest(loop=loop)
-			r = await m.parse("-vvvc test.cfg run -g fake/onewire/scan")
+			r = await m.parse("-vvvc test.cfg run -qgo onewire/faker/scan")
 			assert r == 0, r
 			logger.debug("TC A2")
 
 			# Start the bus runner
 			m = MoatTest(loop=loop)
-			f = m.parse("-vvvc test.cfg run -g fake/onewire/run")
+			f = m.parse("-vvvc test.cfg run -g onewire/faker/run")
 			f = asyncio.ensure_future(f,loop=loop)
 			logger.debug("TC A3")
 
@@ -353,7 +375,7 @@ async def test_onewire_fake(loop):
 			logger.debug("TC F")
 
 			m2 = MoatTest(loop=loop)
-			r = await m2.parse("-vvvc test.cfg run -g fake/onewire/scan")
+			r = await m2.parse("-vvvc test.cfg run -g onewire/faker/scan")
 			assert r == 0, r
 			del m2
 
@@ -366,7 +388,7 @@ async def test_onewire_fake(loop):
 
 			for x in range(3):
 				m2 = MoatTest(loop=loop)
-				r = await m2.parse("-vvvc test.cfg run -g fake/onewire/scan")
+				r = await m2.parse("-vvvc test.cfg run -g onewire/faker/scan")
 				assert r == 0, r
 				del m2
 			await asyncio.sleep(1.5,loop=loop)
@@ -393,7 +415,7 @@ async def test_onewire_fake(loop):
 			logger.debug("TC J")
 
 			m2 = MoatTest(loop=loop)
-			r = await m.parse("-vvvc test.cfg run -g fake/onewire/scan")
+			r = await m.parse("-vvvc test.cfg run -g onewire/faker/scan")
 			assert r == 0, r
 
 			logger.debug("TC K")

@@ -35,8 +35,7 @@ from moat.types.etcd import MoatDeviceBase
 class NoAlarmHandler(RuntimeError):
 	pass
 
-_device_types = {} # filled later
-
+_device_types = {} # cache
 def device_types():
 	if not _device_types:
 		from moat.script.util import objects
@@ -72,29 +71,23 @@ class OnewireDevice(Device): #(, metaclass=SelectDevice):
 		if type(self) == OnewireDevice:
 			self.name = '?'+self.parent.parent.name
 
-	def has_update(self):
-		super().has_update()
-		env = self.env.onewire_run
-		if env is None:
-			return
-
-		srvpath = self.get('path','')
-		if self._cached_path is None or srvpath != self._cached_path:
-			if srvpath != '':
-				srv,path = srvpath.split(' ',1)
-				assert env.srv_name == srv
-				self.bus = env.srv.at('uncached').at(*path.split(' ')).at(self.parent.parent.name+'.'+self.parent.name)
-				self.bus_cached = env.srv.at(*path.split(' ')).at(self.parent.parent.name+'.'+self.parent.name)
-			else:
-				self.bus = None
-				self.bus_cached = None
-			self._cached_path = srvpath
-
-	@classmethod
-	def dev_paths(cls):
-		for k,cls in device_types().items():
-			yield (k,'*',cls)
-		yield ('*','*',OnewireDevice)
+#	def has_update(self):
+#		super().has_update()
+#		env = self.env.onewire_run
+#		if env is None:
+#			return
+#
+#		srvpath = self.get('path','')
+#		if self._cached_path is None or srvpath != self._cached_path:
+#			if srvpath != '':
+#				srv,path = srvpath.split(' ',1)
+#				assert env.srv_name == srv
+#				self.bus = env.srv.at('uncached').at(*path.split(' ')).at(self.parent.parent.name+'.'+self.parent.name)
+#				self.bus_cached = env.srv.at(*path.split(' ')).at(self.parent.parent.name+'.'+self.parent.name)
+#			else:
+#				self.bus = None
+#				self.bus_cached = None
+#			self._cached_path = srvpath
 
 	def scan_for(self, what):
 		"""\
@@ -106,6 +99,21 @@ class OnewireDevice(Device): #(, metaclass=SelectDevice):
 			"""
 		return None
 	
+	async def created(self):
+		"""\
+			Additional processing when this device is created.
+
+			MUST be idempotent!
+			"""
+		pass
+
+	async def deleted(self):
+		"""\
+			Processing when this device gets deleted.
+			"""
+		pass
+			
+
 	async def has_alarm(self):
 		raise NoAlarmHandler(self)
-	
+
