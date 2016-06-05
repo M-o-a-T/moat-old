@@ -439,3 +439,9 @@ class MoatRoot(EtcRoot):
 	def managed(self,dev):
 		### XXX ???
 		pass
+
+import yaml
+def _REFwrapper(dumper,data):
+	return dumper.represent_scalar('!MoatRef', data.value)
+yaml.add_representer(MoatRef,_REFwrapper)
+

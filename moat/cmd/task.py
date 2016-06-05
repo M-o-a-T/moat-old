@@ -32,7 +32,7 @@ import time
 import types as py_types
 from contextlib import suppress
 from datetime import datetime
-from yaml import safe_dump
+from yaml import dump
 
 from dabroker.util import import_string
 from moat.script import Command, SubCommand, CommandError
@@ -141,7 +141,7 @@ details are shown in YAML format, else a short list of names is shown.
 			async for task in tt.tagged(TASKDEF):
 				path = task.path[len(TASKDEF_DIR):-1]
 				if verbose:
-					safe_dump({path: r_dict(dict(task))}, stream=self.stdout)
+					dump({path: r_dict(dict(task))}, stream=self.stdout)
 				else:
 					print('/'.join(path),task.get('summary','??'), sep='\t',file=self.stdout)
 
@@ -385,7 +385,7 @@ a one-line summary, human-readable detailed state, or details as YAML.
 						print(k,v, sep='\t',file=self.stdout)
 
 				elif self.root.verbose > 1:
-					safe_dump({'/'.join(path):r_dict(dict(task))}, stream=self.stdout)
+					dump({'/'.join(path):r_dict(dict(task))}, stream=self.stdout)
 				else:
 					path = '/'.join(path)
 					name = task.get('name','-')

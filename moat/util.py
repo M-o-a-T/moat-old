@@ -32,7 +32,8 @@ logger = logging.getLogger(__name__)
 class _NOT_HERE: pass
 class _NOT_THERE: pass
 
-import yaml,io
+# This is a convenient place to add some representers to YAML
+import yaml,io,sys
 def _IOwrapper(dumper,data):
 	io = ''
 	if data.readable():
@@ -42,7 +43,27 @@ def _IOwrapper(dumper,data):
 	if io == '':
 		io = 'x'
 	return dumper.represent_scalar('!IO'+io, data.name)
+#def _FIOwrapper(dumper,data):
+#	import pdb;pdb.set_trace()
+#	io = ''
+#	if data.readable():
+#		io += 'r'
+#	if data.writable():
+#		io += 'w'
+#	if io == '':
+#		io = 'x'
+#	return dumper.represent_scalar('!FILE'+io, data.name)
+def _WIOwrapper(dumper,data):
+	return dumper.represent_scalar('!BUF', str(data.buffer.name))
 yaml.add_representer(io.TextIOWrapper,_IOwrapper)
+#yaml.add_representer(io.FileIO,_FIOwrapper)
+if 'pytest' in sys.modules:
+	try:
+		from _pytest.capture import EncodedFile
+	except ImportError:
+		pass
+	else:
+		yaml.add_representer(EncodedFile,_WIOwrapper)
 
 def r_dict(m):
 	if isinstance(m,Mapping):
