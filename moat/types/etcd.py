@@ -397,7 +397,6 @@ class Subdirs(_Subdirs):
 
 	async def __aiter__(self):
 		await super().__aiter__()
-		self.known = set()
 		self.q = asyncio.Queue(loop=self.dir._loop)
 		self.mon = self.dir.add_monitor(self._mon)
 		return self
