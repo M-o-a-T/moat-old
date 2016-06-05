@@ -26,6 +26,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 """Helper code for scripting"""
 
 from importlib import import_module
+import os
 import pkgutil
 
 import logging
@@ -61,8 +62,11 @@ def objects(module, cls, immediate=False,direct=False,filter=lambda x:True):
 		from dabroker.util import import_string
 		module = import_string(module)
 	yield from _check(module)
-	for a,b,c in pkgutil.walk_packages(module.__path__, module.__name__+'.'):
-		if direct and a.path != module.__path__[0]:
-			continue
-		yield from _check(b)
+	try:
+		for a,b,c in pkgutil.walk_packages((os.path.dirname(module.__file__),), module.__name__+'.'):
+			if direct and a.path != module.__path__[0]:
+				continue
+			yield from _check(b)
+	except ImportError:
+		yield from _check(module)
 
