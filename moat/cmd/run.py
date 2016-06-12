@@ -56,6 +56,9 @@ Run MoaT tasks.
 		self.parser.add_option('-t','--this',
             action="count", dest="this", default=0,
             help="Run the given job only (-tt for jobs one level below, etc.)")
+		self.parser.add_option('-r','--run',
+            action="store_true", dest="run",
+            help="Don't stop if all jobs have terminated (wait for new ones)")
 		self.parser.add_option('-g','--global',
             action="store_true", dest="is_global",
             help="Do not prepend the appname to the paths")
@@ -134,7 +137,7 @@ Run MoaT tasks.
 	async def _loop(self):
 		errs = 0
 		try:
-			while self.jobs:
+			while self.jobs or self.options.run:
 				logger.debug("Task Jobs %s",dict(self.jobs))
 				done,pending = await asyncio.wait(chain((self.tilt,self.rescan),self.jobs.values()), loop=self.root.loop, return_when=asyncio.FIRST_COMPLETED)
 				logger.debug("Task DP %s %s",done,pending)
