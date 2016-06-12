@@ -38,8 +38,8 @@ class SiteForm(DbModelForm):
 		fields = ('name','comment','var','host','rain_delay','rate')
 	
 	# 'Excluded' fields
-	rate = NonNegativeFloatField(help_text=Meta.model._meta.get_field_by_name("db_rate")[0].help_text)
-	rain_delay = TimeDeltaField(help_text=Meta.model._meta.get_field_by_name("db_rain_delay")[0].help_text)
+	rate = NonNegativeFloatField(help_text=Meta.model._meta.get_field("db_rate").help_text)
+	rain_delay = TimeDeltaField(help_text=Meta.model._meta.get_field("db_rain_delay").help_text)
 
 	def save(self,commit=True):
 		r = super(SiteForm,self).save(commit)

@@ -34,7 +34,7 @@ class FeedForm(DbModelForm):
 		exclude = ('db_max_flow_wait','site')
 		fields = ('name','comment','var','flow','max_flow_wait','disabled')
 
-	max_flow_wait = TimeDeltaField(help_text=Meta.model._meta.get_field_by_name("db_max_flow_wait")[0].help_text)
+	max_flow_wait = TimeDeltaField(help_text=Meta.model._meta.get_field("db_max_flow_wait").help_text)
 
 	def save(self,commit=True):
 		if self.instance.id is None:
