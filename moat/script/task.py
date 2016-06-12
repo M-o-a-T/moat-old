@@ -389,6 +389,7 @@ class TaskMaster(asyncio.Future):
 	async def init(self):
 		"""Async part of initialization"""
 		self.task = await self.tree.subdir(TASK_DIR+self.path+(TASK,))
+		await self.task.taskdef_ready.wait()
 		self.taskdef_name = self.task.taskdef_name
 		if self.task.taskdef is None:
 			raise RuntimeError("incomplete task: "+'/'.join(self.task.path))

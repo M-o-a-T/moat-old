@@ -23,6 +23,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##  Thus, do not remove the next line, or insert any blank lines above.
 ##BP
 
+import asyncio
 from etcd_tree import EtcFloat,EtcString, ReloadRecursive
 from dabroker.util import import_string
 
@@ -66,26 +67,32 @@ class TaskDir(recEtcDir):
 	
 	taskdef = None
 	taskdef_name = ''
+	taskdef_ready = None
+
+	def __init__(self,*a,**k):
+		super().__init__(*a,**k)
+		self.taskdef_ready = asyncio.Event(loop=self._loop)
 
 	@property
 	def cls(self):
 		return self.taskdef.cls
 
 	async def _update_taskdef(self,name=None):
-		if name == self.taskdef_name:
-			return
-		if 'data' in self:
-			self['data'].throw_away()
-		td_path = tuple(x for x in name.split('/') if x != "")
-		self.taskdef = await self.root.subdir(TASKDEF_DIR+td_path+(TASKDEF,), create=False)
-		self.taskdef_name = name
-		if 'data' in self:
-			await self['data']
+		if name != self.taskdef_name:
+			if 'data' in self:
+				self['data'].throw_away()
+			td_path = tuple(x for x in name.split('/') if x != "")
+			self.taskdef = await self.root.subdir(TASKDEF_DIR+td_path+(TASKDEF,), create=False)
+			self.taskdef_name = name
+			if 'data' in self:
+				await self['data']
+		self.taskdef_ready.set()
 
 	def has_update(self):
 		if 'taskdef_name' not in self or self.seq == 0:
 			return
 		if self.taskdef_name != self['taskdef_name']:
+			self.taskdef_ready.clear()
 			do_async(self._update_taskdef,self['taskdef_name'], _loop=self._loop)
 			
 	async def _fill_data(self,pre,recursive):
