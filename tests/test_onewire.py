@@ -29,6 +29,7 @@ from time import time
 from dabroker.proto import ProtocolClient
 from dabroker.unit import Unit,CC_DATA
 from moat.ext.onewire.proto import OnewireServer
+from moat.task import TASK
 import mock
 import aio_etcd as etcd
 from contextlib import suppress
@@ -280,9 +281,8 @@ async def test_onewire_fake(loop):
 
 	try:
 		with mock.patch("moat.ext.onewire.task.OnewireServer", new=FakeBus(loop)) as fb, \
-			mock.patch("moat.ext.onewire.task.trigger_hook", new=Trigger(loop)) as fs:
-			mp = mock.patch("moat.ext.onewire.task.DEV_COUNT", new=1)
-			mp.__enter__()
+			mock.patch("moat.ext.onewire.task.trigger_hook", new=Trigger(loop)) as fs, \
+			mock.patch("moat.ext.onewire.task.DEV_COUNT", new=1) as mp:
 
 			# Set up the whole thing
 			m = MoatTest(loop=loop)
@@ -295,32 +295,47 @@ async def test_onewire_fake(loop):
 			assert r == 0, r
 			r = await m.parse("-vvvc test.cfg run -qgoot moat/scan/bus")
 			assert r == 0, r
-			r = await m.parse("-vvvc test.cfg run -qgoot moat/scan/bus/onewire")
-			assert r == 0, r
-			r = await m.parse("-vvvc test.cfg run -qgoot moat/scan/bus/onewire/faker")
-			assert r == 0, r
-			r = await m.parse("-vvvc test.cfg run -qgoot onewire/faker/scan")
-			assert r == 0, r
-			r = await m.parse("-vvvc test.cfg run -qgoot moat/scan/bus/onewire/faker/bus")
-			assert r == 0, r
-			r = await m.parse("-vvvc test.cfg run -qgoot moat/scan/bus/onewire/faker/bus/bus.42")
-			assert r == 0, r
-			r = await m.parse("-vvvc test.cfg run -qgoot onewire/faker/scan/bus.42")
-			assert r == 0, r
-			r = await m.parse("-vvvc test.cfg run -qgoot moat/scan/bus/onewire/faker/bus")
-			assert r == 0, r
-			r = await m.parse("-vvvc test.cfg run -qgoots moat/scan/bus/onewire/faker/bus/bus.42 1f.123123123123 main")
-			assert r == 0, r
-			r = await m.parse("-vvvc test.cfg run -qgoots moat/scan/bus/onewire/faker/bus/bus.42 1f.123123123123 aux")
-			assert r == 0, r
-			r = await m.parse("-vvvc test.cfg run -qgoots onewire/faker/scan/bus.42 1f.123123123123 main")
-			assert r == 0, r
-			r = await m.parse("-vvvc test.cfg run -qgoots onewire/faker/scan/bus.42 1f.123123123123 aux")
-			assert r == 0, r
-			r = await m.parse("-vvvc test.cfg run -qgoot onewire/faker/scan")
-			assert r == 0, r
-			r = await m.parse("-vvvc test.cfg run -qgoot moat/scan/bus/onewire/faker")
-			assert r == 0, r
+			mto = await t.tree("/task/onewire")
+
+			f = m.parse("-vvvc test.cfg run -g moat/scan/bus/onewire")
+			f = asyncio.ensure_future(f,loop=loop)
+			await asyncio.sleep(1, loop=loop)
+
+			print("Waiting 1")
+			t1 = time()
+			while time()-t1 < 10:
+				try:
+					await mto.subdir('faker','scan',TASK, create=False)
+				except KeyError:
+					pass
+				else:
+					print("Found 1")
+					break
+				await asyncio.sleep(0.1, loop=loop)
+			print("Continue 1")
+
+			g = m.parse("-vvvc test.cfg run -g onewire/faker/scan")
+			g = asyncio.ensure_future(g,loop=loop)
+			print("Waiting 2")
+			t1 = time()
+			while time()-t1 < 60:
+				try:
+					await mto.subdir('faker','run','bus.42 1f.123123123123 main','alarm',TASK, create=False)
+				except KeyError:
+					pass
+				else:
+					print("Found 2")
+					break
+				await asyncio.sleep(0.1, loop=loop)
+			print("Continue 2")
+
+			f.cancel()
+			g.cancel()
+			with pytest.raises(asyncio.CancelledError):
+				await f
+			with pytest.raises(asyncio.CancelledError):
+				await g
+
 			logger.debug("TC A")
 
 			m = MoatTest(loop=loop)
