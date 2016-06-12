@@ -23,6 +23,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##  Thus, do not remove the next line, or insert any blank lines above.
 ##BP
 
+import asyncio
 from etcd_tree import EtcFloat,EtcString, ReloadRecursive
 from dabroker.util import import_string
 
@@ -103,4 +104,9 @@ class Collector(Task):
 					await found(r)
 		except StopAsyncIteration:
 			pass
+
+		# sleep
+		if not self.cfg.get('one-shot',False):
+			while True:
+				await asyncio.sleep(999999,loop=self.loop)
 
