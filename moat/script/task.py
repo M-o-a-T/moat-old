@@ -162,7 +162,7 @@ class Task(asyncio.Task):
 				parent = await r.tree.lookup(*pr)
 				prm.append(parent.add_monitor(parent_check))
 			except (KeyError,etcd.EtcdKeyNotFound) as ex:
-				await run_state.set("message", "Missing: "+'/'.join(pr))
+				await run_state.set("message", "Missing1: "+'/'.join(pr)+' : '+str(ex))
 				raise JobParentGoneError(self.name, pr) from ex
 
 		## TTL calculation
@@ -295,7 +295,7 @@ class Task(asyncio.Task):
 				# Killed because of a timeout / refresh problem. Major fail.
 				await run_state.set("state","fail")
 				if gone is not None:
-					await run_state.set("message", "Missing: "+'/'.join(gone))
+					await run_state.set("message", "Missing2: "+'/'.join(gone))
 				elif killer is None:
 					await run_state.set("message", "Aborted by timeout")
 				else:
@@ -438,7 +438,10 @@ class TaskMaster(asyncio.Future):
 		p=[self.task.path]
 		if 'parent' in self.task:
 			p.append(self.task['parent'].value.split('/'))
-		self.job = self.task.cls(self.cmd, self.name, parents=p, taskdir=self.task, config=self.task._get('data',{}), _ttl=self._get_ttl, **self.cfg)
+		try:
+			self.job = self.task.cls(self.cmd, self.name, parents=p, taskdir=self.task, config=self.task._get('data',{}), _ttl=self._get_ttl, **self.cfg)
+		except TypeError as e:
+			raise TypeError(self.task,self.task.cls) from e
 		self.job.add_done_callback(self._job_done)
 		if self.callback is not None:
 			self.callback("start")
