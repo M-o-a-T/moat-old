@@ -30,6 +30,11 @@ from time import time
 
 from moat.bus.base import Bus
 from moat.types.etcd import MoatBusBase, Subdirs
+from moat.dev import DEV_DIR,DEV
+
+from .task import tasks
+from .dev import OnewireDevice
+
 
 class OnewireBusBase(MoatBusBase):
 	"""Directory for /bus/onewire"""
@@ -37,7 +42,7 @@ class OnewireBusBase(MoatBusBase):
 	def task_monitor(self):
 		return Subdirs(self)
 	def task_for_subdir(self,d):
-		return "scan",
+		return True
 
 class OnewireBus(Bus):
 	"""Directory for /bus/onewire/NAME"""
@@ -56,25 +61,91 @@ class OnewireBusSub(EtcDir):
 	def task_monitor(self):
 		return Subdirs(self)
 	def task_for_subdir(self,d):
-		return "scan",
+		return True
 
 class OnewireBusOne(EtcDir):
 	"""Directory for /bus/onewire/NAME/bus/BUS"""
 	@property
 	def task_monitor(self):
 		yield "add",('onewire','scan','bus'), ('onewire',self.path[2],'scan',self.name), {}
-		yield "scan",('bus','onewire',self.path[2],'bus','devices'), {}
+		yield "scan",('bus','onewire',self.path[2],'bus',self.path[4],'devices'), {}
 	def task_for_subdir(self,d):
-		return "scan",
+		return True
 
-class OnewireBusDev(EtcDir):
+class OnewireBusDevs(EtcDir):
 	"""Directory for /bus/onewire/NAME/bus/BUS/devices"""
 	@property
 	def task_monitor(self):
 		return Subdirs(self)
 	def task_for_subdir(self,d):
-		import pdb;pdb.set_trace()
-		return "foof",
+		return True
+
+class _OnewireBusDev_dev_iter(object):
+	def __init__(self, d,name, items):
+		self.d = d
+		self.name = name
+		self.items = items
+	async def __aiter__(self):
+		self.i = iter(self.items())
+		return self
+	async def __anext__(self):
+		try:
+			while True:
+				f2,b = next(self.i)
+				if b > 0:
+					continue
+				try:
+					dev = self.d[self.name][f2][DEV]
+					dev = (await dev)
+					return dev
+				except KeyError:
+					continue
+		except StopIteration:
+			pass
+		raise StopAsyncIteration
+
+
+class _OnewireBusDev_task_iter(object):
+	def __init__(self, path,devices,items):
+		self.path = path
+		self.devices = devices
+		self.items = items
+	async def __aiter__(self):
+		self.i = iter(self.items())
+		return self
+	async def __anext__(self):
+		try:
+			while True:
+				name,task = next(self.i)
+				t = None
+				async for dev in self.devices:
+					f = dev.scan_for(name)
+					if f is None:
+						pass
+					elif t is None or t > f:
+						t = f
+
+				if t is not None:
+					return "add",('onewire','run',name),('onewire',self.path[2],'run',self.path[4],name),{'timer':t}
+		except StopIteration:
+			pass
+		raise StopAsyncIteration
+
+
+class OnewireBusDev(EtcDir):
+	"""Directory for /bus/onewire/NAME/bus/BUS/devices/XX"""
+
+	def task_for_subdir(self,d):
+		return True
+
+	@property
+	def devices(self):
+		d = self.root.lookup(*DEV_DIR, name='onewire')
+		return _OnewireBusDev_dev_iter(d,self.name, self.items)
+
+	@property
+	def task_monitor(self):
+		return _OnewireBusDev_task_iter(self.path,self.devices, tasks().items)
 
 OnewireBusBase.register('*',cls=OnewireBus)
 OnewireBus.register("server","host", cls=EtcString)
@@ -82,6 +153,7 @@ OnewireBus.register("server","port", cls=EtcInteger)
 OnewireBus.register('bus', cls=OnewireBusSub)
 OnewireBusSub.register('*', cls=OnewireBusOne)
 OnewireBusOne.register('broken', cls=EtcInteger)
-OnewireBusOne.register('devices', cls=OnewireBusDev)
-OnewireBusDev.register('*','*', cls=EtcInteger)
+OnewireBusOne.register('devices', cls=OnewireBusDevs)
+OnewireBusDevs.register('*', cls=OnewireBusDev)
+OnewireBusDev.register('*', cls=EtcInteger)
 

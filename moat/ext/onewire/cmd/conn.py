@@ -31,6 +31,7 @@ import sys
 from etcd_tree.etcd import EtcTypes
 from etcd_tree.node import EtcInteger
 from yaml import safe_dump
+from contextlib import suppress
 import aio_etcd as etcd
 import asyncio
 import time
@@ -165,8 +166,10 @@ Make MoaT forget about a 1wire server.
 				if self.root.verbose:
 					print("%s: not known"%k, file=sys.stderr)
 			else:
-				if self.root.verbose > 1:
-					print("%s: deleted"%k, file=self.stdout)
+				with suppress(etcd.EtcdKeyNotFound):
+					await etc.delete('/task/onewire/'+k, recursive=True)
+				with suppress(etcd.EtcdKeyNotFound):
+					await etc.delete('/task/moat/scan/bus/onewire/'+k, recursive=True)
 
 class ServerListCommand(Command):
 	name = "list"

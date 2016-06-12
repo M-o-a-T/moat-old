@@ -73,9 +73,35 @@ async def scanner(self, name):
 	while True:
 		warned = await proc()
 
-tasks = {} # filled later
+class _BusTask(Task):
+	schema = {'update_delay':'float/time'}
 
-class ScanTask(Task):
+	@property
+	def update_delay(self):
+		try:
+			return self['update_delay']
+		except KeyError:
+			return self.parent.update_delay
+
+	async def setup_vars(self):
+		# onewire/NAME/scan/…
+		self.srv_name = self.path[1]
+		self.srv_tree = await self.tree.lookup(BUS_DIR+('onewire',self.srv_name))
+
+		self.srv_data = await self.srv_tree['server']
+		self.srv = OnewireServer(self.srv_data['host'],self.srv_data.get('port',None), loop=self.loop)
+		self.devices = await self.tree.subdir(DEV_DIR+('onewire',))
+
+
+class _ScanMeta(type(_BusTask)):
+	"""Metaclass to set up ScanTask subclasses correctly"""
+	def __init__(cls, name, bases, nmspc):
+		super(_ScanMeta, cls).__init__(name, bases, nmspc)
+		typ = nmspc.get('typ',None)
+		if typ is not None:
+			cls.taskdef='onewire/run/'+typ
+	
+class ScanTask(_BusTask, metaclass=_ScanMeta):
 	"""\
 		Common class for 1wire bus scanners.
 
@@ -90,13 +116,7 @@ class ScanTask(Task):
 		"""
 	typ = None
 	_trigger = None
-
-	def __init__(self,parent):
-		self.parent = parent
-		self.env = parent.env
-		self.bus = parent.bus
-		self.bus_cached = parent.bus_cached
-		super().__init__(parent.env.cmd,('onewire','scan',self.typ,self.env.srv_name)+self.bus.path)
+	schema = {'timer':'float'}
 
 	async def task(self):
 		"""\
@@ -104,6 +124,12 @@ class ScanTask(Task):
 			
 			Do not override this; override .task_ instead.
 			"""
+		await self.setup_vars()
+
+		path = self.path[3].split(' ')
+		self.bus = self.srv.at('uncached').at(*path)
+		self.bus_cached = self.srv.at(*path)
+
 		ts = time()
 		long_warned = 0
 		while True:
@@ -116,9 +142,7 @@ class ScanTask(Task):
 					# propagate an exception, if warranted
 				self._trigger = asyncio.Future(loop=self.loop)
 			warned = await self.task_()
-			t = self.parent.timers[self.typ]
-			if t is None:
-				return
+			t = self.config['timer']
 			# subtract the time spent during the task
 			if warned and t < 10:
 				t = 10
@@ -147,29 +171,14 @@ class ScanTask(Task):
 		"""Override this to actually implement the periodic activity."""
 		raise RuntimeError("You need to override '%s.task_'" % (self.__class__.__name__,))
 
-class _BusTask(Task):
-	schema = {'delay':'float/time','update_delay':'float/time','ttl':'int'}
-	@classmethod
-	def types(cls,tree):
-		super().types(tree)
-		tree.register("delay",cls=EtcFloat)
-		tree.register("update_delay",cls=EtcFloat)
-		tree.register("ttl",cls=EtcInteger)
-
-	async def setup_vars(self):
-		# onewire/NAME/scan/…
-		self.srv_name = self.path[1]
-		self.srv_tree = await self.tree.lookup(BUS_DIR+('onewire',self.srv_name))
-		self.buses = await self.srv_tree.subdir('bus')
-
-		self.srv_data = await self.srv_tree['server']
-		self.srv = OnewireServer(self.srv_data['host'],self.srv_data.get('port',None), loop=self.loop)
-		self.devices = await self.tree.subdir(DEV_DIR+('onewire',))
-
 class _BusScan(_BusTask):
 	"""Common code for bus scanning"""
 	_delay = None
 	_delay_timer = None
+
+	async def setup_vars(self):
+		await super().setup_vars()
+		self.buses = await self.srv_tree.subdir('bus')
 
 	async def drop_device(self,dev, delete=True):
 		"""When a device vanishes, remove it from the bus it has been at"""
@@ -220,6 +229,7 @@ class BusScan(_BusScan):
 	async def task(self):
 		"""Scan a single bus"""
 		await self.setup_vars()
+
 		bus_name = self.path[3]
 		bus = bus_name.split(' ')
 
@@ -321,81 +331,11 @@ class BusScanBase(_BusScan):
 			else:
 				await self.drop_bus(bus)
 
-#class EtcOnewireBus(EtcDir):
-#	tasks = None
-#	_set_up = False
-#
-#	def __init__(self,*a,**k):
-#		super().__init__(*a,**k)
-#		self.tasks = WeakValueDictionary()
-#		self.timers = {}
-#		env = self.env.onewire_common
-#		if srv:
-#			self.bus = env.srv.at('uncached').at(*(self.name.split(' ')))
-#			self.bus_cached = env.srv.at(*(self.name.split(' ')))
-#
-#	@property
-#	def devices(self):
-#		d = self.env.onewire_common
-#		if d is None:
-#			return
-#		d = d.devices
-#		for f1,v in self['devices'].items():
-#			for f2,b in v.items():
-#				if b > 0:
-#					continue
-#				try:
-#					dev = d[f1][f2][DEV]
-#				except KeyError:
-#					continue
-#				if not isinstance(dev,OnewireDevice):
-#					# This should not happen. Otherwise we'd need to
-#					# convert .setup_tasks() into a task.
-#					raise RuntimeError("XXX: bus lookup incomplete")
-#				yield dev
-#
-#	def has_update(self):
-#		super().has_update()
-#		if self._seq is None:
-#			logger.debug("Stopping tasks %s %s %s",self,self.bus.path,list(self.tasks.keys()))
-#			if self.tasks:
-#				t,self.tasks = self.tasks,WeakValueDictionary()
-#				for v in t.values():
-#					logger.info('CANCEL 16 %s',t)
-#					t.cancel()
-#		else:
-#			self.setup_tasks()
-#
-#	def setup_tasks(self):
-#		if not self.env.onewire_run:
-#			return
-#		if not tasks:
-#			for t in objects(__name__,ScanTask):
-#				tasks[t.typ] = t
-#		for name,task in tasks.items():
-#			t = None
-#			for dev in self.devices:
-#				f = dev.scan_for(name)
-#				if f is None:
-#					pass
-#				elif t is None or t > f:
-#					t = f
-#
-#			self.timers[name] = t
-#			if t is not None:
-#				if name not in self.tasks:
-#					logger.debug("Starting task %s %s %s",self,self.bus.path,name)
-#					self.tasks[name] = self.env.onewire_run.add_task(task(self))
-#			else:
-#				if name in self.tasks:
-#					t = self.tasks.pop(name)
-#					try:
-#						t.cancel()
-#					except Exception as ex:
-#						logger.exception("Ending task %s for bus %s", name,self.bus.path)
-#
-#		self._set_up = True
-#		
-#EtcOnewireBus.register('broken', cls=EtcInteger)
-#EtcOnewireBus.register('devices','*','*', cls=EtcInteger)
-#
+_tasks = {}
+
+def tasks():
+	if not _tasks:
+		for t in objects(__name__,ScanTask):
+			_tasks[t.typ] = t
+	return _tasks
+
