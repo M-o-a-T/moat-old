@@ -264,6 +264,8 @@ Run MoaT tasks.
 			if path in old:
 				old.remove(path)
 				continue
+			if path in self.jobs:
+				continue
 			if path in self.old_jobs:
 				continue
 
