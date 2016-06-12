@@ -116,7 +116,7 @@ Run MoaT tasks.
 			try:
 				tree = await tree.subdir(t, create=False)
 			except KeyError as err:
-				print("Unknown: "+'/'.join(err.args[0]), file=sys.stderr)
+				print("Unknown("+'/'.join(t)+"): "+'/'.join(err.args[0]), file=sys.stderr)
 				res = 2
 			else:
 				self.paths.append(tree)
@@ -126,7 +126,7 @@ Run MoaT tasks.
 		await self._scan()
 		if not self.tasks:
 			if self.root.verbose:
-				print("No tasks found. Exiting.", file=sys.stderr)
+				print("No tasks found. Exiting.",self.args, file=sys.stderr)
 			return 1
 
 		self.root.loop.add_signal_handler(signal.SIGINT,self._tilt)
