@@ -111,7 +111,7 @@ class MoatLoadedDir(EtcDir):
 	def task_monitor(self):
 		return Subdirs(self)
 	def task_for_subdir(self,d):
-		return "scan",
+		return True
 MoatLoadedDir.register('*', cls=MoatLoaded)
 
 class MoatMetaModule(EtcDir):
@@ -355,8 +355,7 @@ class _Subdirs(object):
 
 	def _add(self,a):
 		if a not in self.known:
-			res = self.dir.task_for_subdir(a)
-			if res is not None:
+			if self.dir.task_for_subdir(a):
 				self.known.add(a)
 				return "scan",self.dir.path+(a,),{}
 
@@ -458,7 +457,7 @@ class MoatRoot(EtcRoot):
 		return StaticSubdirs(self)
 	def task_for_subdir(self,d):
 		if d == "bus":
-			return "scan",
+			return True
 
 	def managed(self,dev):
 		### XXX ???
