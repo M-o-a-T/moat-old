@@ -33,6 +33,9 @@ import sys
 from hamlish_jinja import Hamlish
 Hamlish._self_closing_jinja_tags.add('csrf_token')
 
+import django
+django.setup()
+
 if __name__ == "__main__":
     from django.core.management import execute_from_command_line
 
