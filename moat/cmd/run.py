@@ -107,6 +107,7 @@ Run MoaT tasks.
 		self._monitors = []
 		self.tasks = []
 		self.jobs = {}
+		self.old_jobs = set()
 		self.rescan = asyncio.Future(loop=self.root.loop)
 		for t in self.args:
 			try:
@@ -155,10 +156,14 @@ Run MoaT tasks.
 							print(j.name,'*ERROR*', exc, sep='\t', file=self.stdout)
 						if self.options.oneshot:
 							break
+						if self.options.oneshot > 1:
+							self.old_jobs.add(j.path)
 					else:
 						logger.info('EXIT %s %s', j.name,r)
 						if self.root.verbose > 1:
 							print(j.name,r, sep='\t', file=self.stdout)
+						if self.options.oneshot:
+							self.old_jobs.add(j.path)
 				if self.tilt.done():
 					self.tilt.result() # re-raises any exception
 					break
@@ -194,7 +199,7 @@ Run MoaT tasks.
 		
 	def _rescan(self,_=None):
 		if not self.rescan.done():
-			logger.debug("rescanning")
+			logger.debug("rescanning2")
 			self.rescan.set_result(None)
 		else:
 			logger.debug("NOT rescanning")
@@ -255,6 +260,8 @@ Run MoaT tasks.
 			logger.debug("CHECK %s",path)
 			if path in old:
 				old.remove(path)
+				continue
+			if path in self.old_jobs:
 				continue
 
 			logger.debug("Launch TM %s",path)
