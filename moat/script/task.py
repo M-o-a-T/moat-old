@@ -150,7 +150,7 @@ class Task(asyncio.Task):
 		prm = []
 		def parent_check(x):
 			nonlocal gone
-			if x._seq: return
+			if x.is_new is not None: return
 			try:
 				logger.info('CANCEL Q %s %s',self.path,x.path)
 				main_task.cancel()
