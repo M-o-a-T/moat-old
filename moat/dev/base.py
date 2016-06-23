@@ -59,7 +59,7 @@ class Typename(EtcString):
 		p = self.parent
 		if p is None:
 			return
-		if self._seq is None:
+		if self.is_new is None:
 			p._value = None
 		else:
 			p._set_type(self.value)
@@ -81,7 +81,7 @@ class AlertName(EtcString):
 		p = self.parent
 		if p is None:
 			return
-		p._alert_name = (self.value if self._seq else None)
+		p._alert_name = (self.value if self.is_new is not None else None)
 
 class TypedDir(ManagedEtcThing,EtcDir):
 	"""\
