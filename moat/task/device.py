@@ -53,21 +53,22 @@ class DeviceMgr(Task):
 		self.devices = WeakSet()
 		self.amqp = self.cmd.root.amqp
 
-		managed = await self.root['bus'][self.path[-2][self.path[-1]]
+		managed = await self.root['bus'][self.path[-2]][self.path[-1]]
 		managed.manager = self
 
-		while True:
-			cmd = await self.q.get()
-			if cmd is None:
-				break
-			if cmd[0] == 'reg':
-				await cmd[1].set_managed(self)
-			elif cmd[0] == 'upd':
-				await cmd[1].update_managed()
-			elif cmd[0] == 'call':
-				await cmd[1](*(cmd[2]),**(cmd[3]))
-			else:
-				logger.error("Bad command: %s",repr(cmd))
+		try:
+			while True:
+				cmd = await self.q.get()
+				if cmd is None:
+					break
+				if cmd[0] == 'reg':
+					await cmd[1].set_managed(self)
+				elif cmd[0] == 'upd':
+					await cmd[1].update_managed()
+				elif cmd[0] == 'call':
+					await cmd[1](*(cmd[2]),**(cmd[3]))
+				else:
+					logger.error("Bad command: %s",repr(cmd))
 		finally:
 			del managed.manager
 
