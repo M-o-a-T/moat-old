@@ -8,7 +8,7 @@ Class for managing tasks.
 """
 
 import asyncio
-from etcd_tree.etcd import EtcTypes
+from etcd_tree.etcd import EtcTypes, WatchStopped
 from etcd_tree.node import EtcFloat,EtcBase
 import etcd
 import inspect
@@ -480,6 +480,9 @@ class TaskMaster(asyncio.Future):
 		except asyncio.CancelledError as exc:
 			if not self.done():
 				self.set_exception(exc)
+			return
+		except WatchStopped as exc:
+			self.set_exception(exc)
 			return
 		except Exception as exc:
 			# TODO: limit the number of retries,
