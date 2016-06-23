@@ -94,6 +94,10 @@ You can load more than one config file.
 		self.loop = loop if loop is not None else asyncio.get_event_loop()
 		self._coro = (loop is not None)
 
+	async def parse(self, argv):
+		logger.debug("Startup: %s", argv)
+		return (await super().parse(argv))
+
 	def addOptions(self):
 		self.parser.add_option('--no-default-config',
 			action="store_true", dest="no_default",
@@ -226,7 +230,6 @@ You can load more than one config file.
 #				except ValueError:
 #					break
 
-		logger.debug("Startup on %s: %s", self.app, self.options.__dict__)
 
 	async def setup(self, dest=None):
 		"""
