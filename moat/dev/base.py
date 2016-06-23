@@ -29,7 +29,8 @@ from time import time
 from weakref import ref
 
 from moat.util import do_async
-from moat.types import TYPEDEF_DIR,TYPEDEF
+from moat.types import TYPEDEF_DIR,TYPEDEF, type_names
+from moat.types.managed import ManagedEtcThing,ManagedEtcDir
 from dabroker.unit.rpc import CC_DATA
 from . import devices, DEV
 
@@ -37,27 +38,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 __all__ = ('Device',)
-
-class DevManager:
-	"""\
-		"""
-	def __init__(self,controller):
-		self._controller = ref(controller)
-
-	@property
-	def controller(self):
-		return self._controller()
-
-	def add_device(self,dev):
-		"""Called by the controller to tell a device that it's managed by
-		this controller"""
-		dev.manager = self
-
-	def drop_device(self,dev):
-		"""Called by the device to tell the controller to forget about the device"""
-		c = self.controller
-		if c is not None:
-			c.drop_device(dev)
 
 def setup_dev_types(types):
 	"""Register types for all devices."""
@@ -90,7 +70,10 @@ class RpcName(EtcString):
 		p = self.parent
 		if p is None:
 			return
-		do_async(p._reg_rpc, self.value if self._seq is not None else None, _loop=self._loop)
+		m = p.manager
+		if m is None:
+			return
+		m.call_async(p._reg_rpc, self.value if self.is_new is not None else None, _loop=self._loop)
 
 class AlertName(EtcString):
 	"""Update the parent's alert name"""
@@ -100,7 +83,7 @@ class AlertName(EtcString):
 			return
 		p._alert_name = (self.value if self._seq else None)
 
-class TypedDir(EtcDir):
+class TypedDir(ManagedEtcThing,EtcDir):
 	"""\
 		A typed value. Typically at …/:dev/input/NAME.
 
@@ -153,10 +136,21 @@ class TypedDir(EtcDir):
 		await super().init()
 		self.has_update()
 
+	## Manager registration
+
+	def manager_present(self, mgr):
+		n = self['rpc']
+		if n is not None:
+			mgr.call_async(self._reg_rpc,n)
+
+	def manager_gone(self):
+		self._rpc_name = None
+
 	async def _reg_rpc(self,name):
-		if self.env is None:
+		m = self.manager
+		if m is None:
 			return
-		amqp = self.env.cmd.root.amqp
+		amqp = m.amqp
 		if name is not None and self._rpc_name == name:
 			return
 		if self._rpc is not None:
@@ -215,7 +209,7 @@ class TypedDir(EtcDir):
 	async def _write_amqp(self,timestamp):
 		if not self._alert_name:
 			return
-		amqp = self.env.cmd.root.amqp
+		amqp = self.manager.amqp
 		await amqp.alert(self._alert_name, _data=self._value.amqp_value)
 
 class TypedInputDir(TypedDir):
@@ -277,61 +271,18 @@ class BaseDevice(EtcDir, metaclass=TypesReg):
 	async def setup(self):
 		pass
 
-	# The idea behind "manager" is that it's an object that is only strongly
-	# referenced by the command which manages this here device. Thus the
-	# manager will vanish (and the device will be notified about that) as
-	# soon as the command terminates.
-	#
-	# The manager object must have a .drop_device() method which tells it
-	# that a device is no longer under its control.
-	#
-	# .manager, when read, actually returns the controlling object directly.
-	# 
-	@property
-	def manager(self):
-		m = self._mgr
-		if m is not None:
-			m = m()
-		if m is not None:
-			return m.controller
-		return None
-	@manager.setter
-	def manager(self,mgr):
-		m = self._mgr
-		if m is not None:
-			m = m()
-		if m is not None and m is not mgr:
-			logger.warning("Device %s switches managers (%s to %s)", self,m,mgr)
-			m.drop_device(self)
-		elif mgr is None:
-			self._mgr = None
-			self.manager_gone()
-		else:
-			assert hasattr(mgr,'drop_device'), mgr # duck typed
-			self._mgr = ref(mgr,self._manager_gone)
-			self.manager_present(mgr)
-	@manager.deleter
-	def manager(self):
-		if self._mgr is not None:
-			self._mgr = None
-			self.manager_gone()
+	async def set_managed(self, mgr):
+		"""Async manager callback after adding a manager"""
+		pass
 
-	def manager_present(self,mgr):
-		"""\
-			Override me to do something when the object starts to be managed.
-			The default is to call has_update().
-			"""
-		self.has_update()
-	def _manager_gone(self,_):
-		if self._mgr is not None:
-			self._mgr = None
-			self.manager_gone()
-	def manager_gone(self):
-		"""\
-			Override me to do something when the object is no longer managed.
-			The default is to call has_update().
-			"""
-		self.has_update()
+	def has_update(self):
+		super().has_update()
+		m = self.manager
+		if m is not None:
+			if self.is_new:
+				m.add_device(self)
+			elif self.is_new is None:
+				m.drop_device(self)
 
 	@classmethod
 	def types(cls, types):
@@ -382,7 +333,10 @@ class DeadDevice(BaseDevice):
 		the last element."""
 		yield '**',cls
 
-class Device(BaseDevice):
+class _ManagedDir(ManagedEtcThing,EtcDir):
+	pass
+
+class Device(ManagedEtcDir, BaseDevice):
 	"""\
 		This is the superclass for devices that actually work
 		(or are supposed to work). Use this instead of BaseDevice
@@ -392,15 +346,6 @@ class Device(BaseDevice):
 		"""
 	prefix = None
 	description = "Override me"
-
-	# Device management
-	_mgr = None
-	def __init__(self,*a,**k):
-		super().__init__(*a,**k)
-		self._mgr = DevManager(self)
-	def _manage_device(self, dev):
-		self._mgr.add_device(dev)
-		pass
 
 	@classmethod
 	async def this_obj(cls, recursive, **kw):
@@ -416,6 +361,7 @@ class Device(BaseDevice):
 			input{}/output{} for atomic values"""
 
 		for d in _SOURCES:
+			types.register(d,_ManagedDir)
 			for k,v in getattr(cls,d,{}).items():
 				v = value_types.get(v,EtcValue)
 				types.register(d,k,'value', cls=v)
@@ -436,10 +382,25 @@ class Device(BaseDevice):
 			for k,v in getattr(self,d,{}).items():
 				if 'type' in src.get(k,{}):
 					continue
-				missing[k] = {'type':v,'created':time()}
+				missing[k] = dd = {'type':v,'created':time()}
+				v = type_names()[v]
+				if v.default is not None:
+					dd['value'] = v(value=v.default).etcd_value
 			if missing:
 				await self.set(d,missing)
 				# Note that this does not delete anything not mentioned
+
+	async def teardown(self):
+		"""\
+			Processing when this device gets deleted.
+			"""
+		pass
+			
+
+	async def manager_present(self, mgr):
+		pass
+	def manager_gone(self):
+		pass
 
 	async def reading(self,what,value, timestamp=None):
 		"""We have an input value"""
