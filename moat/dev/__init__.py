@@ -26,7 +26,6 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 """List of known devices"""
 
 import os
-from ..script.util import objects
 
 import logging
 logger = logging.getLogger(__name__)
@@ -35,7 +34,8 @@ DEV_DIR = ('device',)
 DEV = ':dev'
 
 def devices():
-	from .base import BaseDevice
+	from moat.script.util import objects
+	from moat.base import BaseDevice
 	# we want all objects with a distinctive prefix
 	return objects(__name__, BaseDevice, filter=lambda x:x.__dict__.get('prefix',None) is not None)
 
