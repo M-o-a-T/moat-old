@@ -37,28 +37,7 @@ from dabroker.unit.rpc import CC_DATA
 import logging
 logger = logging.getLogger(__name__)
 
-__all__ = ('Device',)
-
-class DevManager:
-	"""\
-		"""
-	def __init__(self,controller):
-		self._controller = ref(controller)
-
-	@property
-	def controller(self):
-		return self._controller()
-
-	def add_device(self,dev):
-		"""Called by the controller to tell a device that it's managed by
-		this controller"""
-		dev.manager = self
-
-	def drop_device(self,dev):
-		"""Called by the device to tell the controller to forget about the device"""
-		c = self.controller
-		if c is not None:
-			c.drop_device(dev)
+__all__ = ('Bus','DeadBus')
 
 def setup_bus_types(types):
 	"""Register types for all devices."""
