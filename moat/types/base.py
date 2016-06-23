@@ -56,6 +56,7 @@ class Type:
 	name = None
 	_value = _NOTGIVEN
 	vars = {}
+	default = None
 
 	@classmethod
 	def types(cls,types):
@@ -125,9 +126,11 @@ class Type:
 class StringType(Type):
 	name = 'str'
 	etcd_class = EtcString
+	default = ""
 
 class PathType(StringType):
 	name = 'str/path'
+	default = "/"
 
 	@property
 	def etcd_value(self):
@@ -140,9 +143,12 @@ class PathType(StringType):
 
 class HostType(StringType):
 	name = 'str/hostname'
+	default = "localhost"
 
 class ObjType(StringType):
 	name = 'str/obj'
+	default = None
+
 	@property
 	def value(self):
 		return import_string(self._value)
@@ -152,6 +158,8 @@ class ObjType(StringType):
 
 class BoolType(Type):
 	name = "bool"
+	default = False
+
 	etcd_class = EtcString
 	vars = {'true':'on', 'false':'off'}
 
@@ -200,6 +208,8 @@ class BoolType(Type):
 			raise ValueError(amqp_value)
 
 class _NumType(Type):
+	default = 0
+
 	def check_var(self, var,value):
 		if var not in self.vars:
 			return super().check_var(var,value)
