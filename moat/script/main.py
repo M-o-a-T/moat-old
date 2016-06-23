@@ -195,7 +195,7 @@ You can load more than one config file.
 		lh = lcfg.setdefault('handlers',{}).setdefault('stderr', { 'formatter':'stderr' })
 		lh['class'] = 'logging.StreamHandler'
 		lh['stream'] = sys.stderr
-		lh['level'] = ('ERROR','ERROR','WARNING')[min(self.verbose,2)]
+		lh['level'] = ('ERROR','ERROR','WARNING','INFO','INFO','DEBUG')[min(self.verbose,5)]
 
 		from logging.config import dictConfig
 		lcfg['disable_existing_loggers'] = False
