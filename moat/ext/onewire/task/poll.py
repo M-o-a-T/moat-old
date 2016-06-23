@@ -36,10 +36,10 @@ class ScanPoll(ScanTask):
 
 	async def task_(self):
 		for fam,d in self.parent['devices'].items():
-			for devid,b in d.items():
+			for devid,b in (await d).items():
 				try:
-					dev = await self.env.devices[fam][devid][DEV]
-					await dev.poll()
+					dev = await self.devices[fam][devid][DEV]
+					await dev.poll(self)
 				except Exception:
 					logger.exception("Poll error %s.%s", fam,devid)
 

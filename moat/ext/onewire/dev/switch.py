@@ -34,8 +34,8 @@ class Onewire_2409(OnewireDevice):
 	description = "main/aux switch"
 	family = "1f"
 
-	async def created(self):
-		await super().created()
+	async def setup(self):
+		await super().setup()
 
 		server,path = self['path'].split(' ',1)
 		srv = await self.root.lookup('bus','onewire',server,'bus')

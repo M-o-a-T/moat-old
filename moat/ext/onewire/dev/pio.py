@@ -38,13 +38,13 @@ class Onewire_2405(OnewireDevice):
 
 	async def poll(self):
 		# Duh.
-		v = bool(int(await self.bus.read("sensed")))
+		v = bool(int(await self.bus_dev.read("sensed")))
 		await self.reading("pin",v)
 
 	async def read(self,what):
 		"""Read the PIO pin."""
 		assert what == "pin"
-		return bool(int(await self.bus.read("sensed")))
+		return bool(int(await self.bus_dev.read("sensed")))
 
 	async def write(self,what, value):
 		"""\
@@ -53,12 +53,14 @@ class Onewire_2405(OnewireDevice):
 			so 'true' means high which means writing a logic zero.
 			"""
 		assert what == "pin"
-		await self.bus.write("PIO", data=('0' if value else '1'))
+		await self.bus_dev.write("PIO", data=('0' if value else '1'))
 
 	def scan_for(self, what):
 		if what == "poll":
 			try:
-				return float(self['attr']['poll_freq'])
+				return self['attr']['poll_freq']
 			except KeyError:
 				return 60
 		return super().scan_for(what)
+
+Onewire_2405.register('attr','poll_freq', cls=EtcFloat)

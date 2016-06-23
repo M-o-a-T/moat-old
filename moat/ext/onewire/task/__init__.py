@@ -35,6 +35,7 @@ from moat.dev import DEV_DIR,DEV
 from moat.bus import BUS_DIR
 from moat.script.task import Task
 from moat.script.util import objects
+from moat.task.device import DeviceMgr
 
 from ..proto import OnewireServer
 from ..dev import OnewireDevice
@@ -44,25 +45,6 @@ logger = logging.getLogger(__name__)
 
 import re
 dev_re = re.compile(r'([0-9a-f]{2})\.([0-9a-f]{12})$', re.I)
-
-async def trigger_hook(loop):
-	"""\
-		This code is intended to be overridden by tests.
-
-		It returns a future which, when completed, should cause any
-		activity to run immediately which otherwise waits for a timer.
-		
-		The default implementation does nothing but return a static future
-		that's never completed.
-
-		Multiple calls to this code must return the same future as long as
-		that future is not completed.
-		"""
-	try:
-		return loop._moat_open_future
-	except AttributeError:
-		loop._moat_open_future = f = asyncio.Future(loop=loop)
-		return f
 
 BUS_TTL=30 # presumed max time required to scan a bus
 BUS_COUNT=5 # times to not find a whole bus before it's declared dead
@@ -101,6 +83,22 @@ class _ScanMeta(type(_BusTask)):
 		if typ is not None:
 			cls.taskdef='onewire/run/'+typ
 	
+class BusHandler(_BusTask,DeviceMgr):
+	"""\
+		Manager task, handles interfacing with AMQP
+		"""
+	taskdef = "onewire/run"
+	summary = "Interface between a 1wire master, its devices, and AMQP"
+	async def task(self):
+		"""\
+			additional setup before DeviceMgr.task()
+			"""
+		await self.setup_vars()
+		self.bus = self.srv.at('uncached')
+		self.bus_cached = self.srv
+
+		await super().task()
+
 class ScanTask(_BusTask, metaclass=_ScanMeta):
 	"""\
 		Common class for 1wire bus scanners.
@@ -125,6 +123,8 @@ class ScanTask(_BusTask, metaclass=_ScanMeta):
 			Do not override this; override .task_ instead.
 			"""
 		await self.setup_vars()
+		self.parent = await self.tree['bus']['onewire'][self.taskdir.path[2]]['bus'][self.taskdir.path[4]]
+		await self.parent['devices'] # we need that later
 
 		path = self.path[3].split(' ')
 		self.bus = self.srv.at('uncached').at(*path)
@@ -142,7 +142,10 @@ class ScanTask(_BusTask, metaclass=_ScanMeta):
 					# propagate an exception, if warranted
 				self._trigger = asyncio.Future(loop=self.loop)
 			warned = await self.task_()
-			t = self.config['timer']
+			try:
+				t = self.config['timer']
+			except KeyError:
+				t = self.taskdir['data']['timer']
 			# subtract the time spent during the task
 			if warned and t < 10:
 				t = 10
@@ -182,7 +185,7 @@ class _BusScan(_BusTask):
 
 	async def drop_device(self,dev, delete=True):
 		"""When a device vanishes, remove it from the bus it has been at"""
-		await self.deleted()
+		await self.teardown()
 		try:
 			p = dev['path']
 		except KeyError:
@@ -268,7 +271,7 @@ class BusScan(_BusScan):
 			if f2 not in dev_counter[f1]:
 				await dev_counter[f1].set(f2,0)
 
-			await fd.created()
+			await fd.setup()
 
 		# Now mark devices which we didn't see as down.
 		# Protect against intermittent failures.

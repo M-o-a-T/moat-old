@@ -40,7 +40,7 @@ class ScanAlarm(ScanTask):
 			m = dev_re.match(dev)
 			if m:
 				try:
-					d = await self.env.devices[m.group(1).lower()][m.group(2).lower()][DEV]
+					d = await self.devices[m.group(1).lower()][m.group(2).lower()][DEV]
 					await d.has_alarm()
 				except KeyError:
 					warned = True

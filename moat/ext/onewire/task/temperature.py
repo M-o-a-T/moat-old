@@ -37,20 +37,24 @@ class ScanTemperature(ScanTask):
 
 	async def task_(self):
 		warned = False
-		if not len(self.parent['devices'].get('10',())):
+		try:
+			dev_10 = await self.parent['devices']['10']
+		except KeyError:
+			return True # pragma: no cover
+		if not len(dev_10):
 			return True # pragma: no cover
 
 		await self.bus_cached.write("simultaneous","temperature", data="1")
 
 		with suppress(asyncio.TimeoutError):
 			await asyncio.wait_for(self._trigger,timeout=1.5,loop=self.loop)
-		for dev,b in list(self.parent['devices']['10'].items()):
+		for dev,b in list(dev_10.items()):
 			if b > 0:
 				continue # pragma: no cover # timing dependant
 			d = None
 			try:
-				d = await self.env.devices['10'][dev][DEV]
-				t = float(await self.parent.bus_cached.read("10."+dev, "temperature"))
+				d = await self.devices['10'][dev][DEV]
+				t = float(await self.bus_cached.read("10."+dev, "temperature"))
 			except Exception as exc:
 				warned = True
 				logger.exception("Reading %s: device '%s' triggered an error", dev,d)

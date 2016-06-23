@@ -29,7 +29,7 @@ from etcd_tree.node import EtcFloat,EtcInteger,EtcString
 from time import time
 
 from moat.dev import DEV
-from moat.dev.base import Device
+from moat.dev.base import Device, _SOURCES
 from moat.types.etcd import MoatDeviceBase
 
 class NoAlarmHandler(RuntimeError):
@@ -71,6 +71,11 @@ class OnewireDevice(Device): #(, metaclass=SelectDevice):
 		if type(self) == OnewireDevice:
 			self.name = '?'+self.parent.parent.name
 
+	@property
+	def bus_dev(self):
+		n = self.path.split(' ')[1:]
+		return self.manager.bus.at(*n)
+
 #	def has_update(self):
 #		super().has_update()
 #		env = self.env.onewire_run
@@ -96,24 +101,13 @@ class OnewireDevice(Device): #(, metaclass=SelectDevice):
 			'what' is a task name, from moat/ext/onewire/task/*.
 			If this returns a number N, the task will execute
 			at least every N seconds, on the bus the device is on.
+
+			Examples:
+			'alarm' polls for devices which respond to Conditional Search
+			'temperature' triggers a conversion, waits, and then reads all devices' temperature.
 			"""
 		return None
 	
-	async def created(self):
-		"""\
-			Additional processing when this device is created.
-
-			MUST be idempotent!
-			"""
-		pass
-
-	async def deleted(self):
-		"""\
-			Processing when this device gets deleted.
-			"""
-		pass
-			
-
 	async def has_alarm(self):
 		raise NoAlarmHandler(self)
 
