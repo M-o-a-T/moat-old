@@ -32,6 +32,8 @@ from etcd_tree import EtcRoot, EtcDir, EtcString, EtcXValue, ReloadRecursive
 import logging
 logger = logging.getLogger(__name__)
 
+from . import TYPEDEF_DIR,TYPEDEF
+
 # This file contains all "singleton" etcd directories, i.e. those with
 # fixed names at the root of the tree
 
@@ -451,6 +453,9 @@ class MoatRoot(EtcRoot):
 			await self['meta']
 		except KeyError: # does not exist yet
 			pass
+
+	def type(self,p):
+		return self.lookup(*(TYPEDEF_DIR+p.split('/')),name=TYPEDEF)
 
 	@property
 	def task_monitor(self):
