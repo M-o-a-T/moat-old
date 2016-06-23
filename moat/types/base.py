@@ -61,11 +61,16 @@ class Type:
 	def types(cls,types):
 		pass
 
-	def __init__(self,meta1,meta2,value=_NOTGIVEN):
-		"""@meta1 is the type's etcd entry, @meta2 the value's."""
-		self.name = '/'.join(meta1.path)
-		self.meta1 = meta1
-		self.meta2 = meta2
+	def __init__(self,meta1=None,meta2=None,value=_NOTGIVEN):
+		"""\
+			@meta1 is the type's etcd entry, @meta2 the value's.
+			Both may be zero if all you need is to convert some value.
+			"""
+		if meta1 is not None:
+			self.name = '/'.join(meta1.path)
+			self.meta1 = meta1
+		if meta2 is not None:
+			self.meta2 = meta2
 
 		if value is not _NOTGIVEN:
 			self.etcd_value = value
@@ -73,10 +78,10 @@ class Type:
 	def __getitem__(self,key):
 		try:
 			return self.meta2[key]
-		except KeyError:
+		except (AttributeError,KeyError):
 			try:
 				return self.meta1[key]
-			except KeyError:
+			except (AttributeError,KeyError):
 				return type(self).vars[key]
 
 	@property
