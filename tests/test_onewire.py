@@ -132,8 +132,11 @@ class FakeBus(FakeSubBus):
 
 	async def read(self,*p):
 		d = self.data
-		for s in p:
-			d = d[s.lower()]
+		try:
+			for s in p:
+				d = d[s.lower()]
+		except KeyError as err:
+			raise KeyError((self,p)) from err
 		assert not isinstance(d,dict)
 		logger.debug("BUS.READ %s %s",p,d)
 		return d
@@ -141,8 +144,11 @@ class FakeBus(FakeSubBus):
 	async def write(self,*p, data=None):
 		logger.debug("BUS.WRITE %s %s",p,data)
 		d = self.data
-		for s in p[:-1]:
-			d = d[s.lower()]
+		try:
+			for s in p[:-1]:
+				d = d[s.lower()]
+		except KeyError as err:
+			raise KeyError((self,p)) from err
 		d[p[-1].lower()] = data
 
 class Trigger:
@@ -301,62 +307,55 @@ async def test_onewire_fake(loop):
 			f = asyncio.ensure_future(f,loop=loop)
 			await asyncio.sleep(1, loop=loop)
 
-			print("Waiting 1")
+			logger.debug("Waiting 1")
 			t1 = time()
-			while time()-t1 < 10:
+			while True:
 				try:
 					await mto.subdir('faker','scan',TASK, create=False)
 				except KeyError:
 					pass
 				else:
-					print("Found 1")
+					logger.debug("Found 1")
 					break
+
 				await asyncio.sleep(0.1, loop=loop)
-			print("Continue 1")
+				if time()-t1 >= 10:
+					raise RuntimeError("Condition 1")
 
 			g = m.parse("-vvvc test.cfg run -g onewire/faker/scan")
 			g = asyncio.ensure_future(g,loop=loop)
-			print("Waiting 2")
+			logger.debug("Waiting 2")
 			t1 = time()
-			while time()-t1 < 60:
+			while True:
 				try:
 					await mto.subdir('faker','run','bus.42 1f.123123123123 main','alarm',TASK, create=False)
 				except KeyError:
 					pass
 				else:
-					print("Found 2")
+					logger.debug("Found 2")
 					break
-				await asyncio.sleep(0.1, loop=loop)
-			print("Continue 2")
 
-			f.cancel()
-			g.cancel()
-			with pytest.raises(asyncio.CancelledError):
-				await f
-			with pytest.raises(asyncio.CancelledError):
-				await g
+				await asyncio.sleep(0.1, loop=loop)
+				if time()-t1 >= 90:
+					raise RuntimeError("Condition 2")
 
 			logger.debug("TC A")
 
-			m = MoatTest(loop=loop)
-			r = await m.parse("-vvvc test.cfg run -qgo onewire/faker/scan")
-			assert r == 0, r
-			logger.debug("TC A2")
-
 			# Start the bus runner
 			m = MoatTest(loop=loop)
-			f = m.parse("-vvvc test.cfg run -g onewire/faker/run")
-			f = asyncio.ensure_future(f,loop=loop)
+			h = m.parse("-vvvc test.cfg run -g onewire/faker/run")
+			h = asyncio.ensure_future(h,loop=loop)
 			logger.debug("TC A3")
 
 			# give it some time to settle (lots of new entries)
-			await fs.step(f)
+			await fs.step(h)
 			await asyncio.sleep(1.5,loop=loop)
-			await fs.step(f)
+			await fs.step(h)
 			logger.debug("TC B")
 
 			# temperature device found, bus scan active
 			async def mod_a():
+				logger.debug("Mod A start")
 				await td.wait()
 				await tr.wait()
 				assert td['10']['001001001001'][':dev']
@@ -364,11 +363,14 @@ async def test_onewire_fake(loop):
 				await td['05']['010101010101'][':dev']['output']['pin'].set('rpc','test.fake.pin')
 				assert tr['faker']['bus']['bus.42 1f.123123123123 aux']['devices']['10']['001001001001'] == '0'
 				assert int(fb.bus_aux['simultaneous']['temperature']) == 1
-			await fs.step(f,mod_a)
+				logger.debug("Mod A end")
+			logger.debug("Mod A hook")
+			await fs.step(h,mod_a)
+			logger.debug("Mod A done")
 			logger.debug("TC C")
-			await fs.step(f)
+			await fs.step(h)
 			await asyncio.sleep(2.5,loop=loop)
-			await fs.step(f)
+			await fs.step(h)
 			logger.debug("TC D")
 
 			# we should have a value by now
@@ -378,7 +380,7 @@ async def test_onewire_fake(loop):
 					td['10']['001001001001'][':dev']['input']['temperature']['value']
 				assert td['05']['010101010101'][':dev']['input']['pin']['value'] == '0', \
 					 td['05']['010101010101'][':dev']['input']['pin']['value']
-			await fs.step(f,mod_a2)
+			await fs.step(h,mod_a2)
 			logger.debug("TC E")
 			assert amqt == 12.5, amqt
 			await u.rpc('test.fake.pin',1)
@@ -386,7 +388,7 @@ async def test_onewire_fake(loop):
 			# now unplug the sensor
 			async def mod_x():
 				del fb.bus_aux['10.001001001001']
-			await fs.step(f,mod_x)
+			await fs.step(h,mod_x)
 			logger.debug("TC F")
 
 			m2 = MoatTest(loop=loop)
@@ -398,7 +400,7 @@ async def test_onewire_fake(loop):
 			# watch it vanish
 			async def mod_b():
 				assert tr['faker']['bus']['bus.42 1f.123123123123 aux']['devices']['10']['001001001001'] == '1'
-			await fs.step(f,mod_b)
+			await fs.step(h,mod_b)
 			logger.debug("TC H")
 
 			for x in range(3):
@@ -407,7 +409,7 @@ async def test_onewire_fake(loop):
 				assert r == 0, r
 				del m2
 			await asyncio.sleep(1.5,loop=loop)
-			await fs.step(f)
+			await fs.step(h)
 			logger.debug("TC I")
 			async def mod_c():
 				assert td['05']['010101010101'][':dev']['input']['pin']['value'] == '1', \
@@ -426,7 +428,7 @@ async def test_onewire_fake(loop):
 				fb.bus['10.001001001001'] = fb.temp
 				# and prepare to check that the scanner doesn't any more
 				fb.bus_aux['simultaneous']['temperature'] = 0
-			await fs.step(f,mod_c)
+			await fs.step(h,mod_c)
 			logger.debug("TC J")
 
 			m2 = MoatTest(loop=loop)
@@ -434,9 +436,9 @@ async def test_onewire_fake(loop):
 			assert r == 0, r
 
 			logger.debug("TC K")
-			await fs.step(f)
+			await fs.step(h)
 			await asyncio.sleep(2.5,loop=loop)
-			await fs.step(f)
+			await fs.step(h)
 			logger.debug("TC L")
 
 			# we're scanning the main bus now
@@ -448,26 +450,31 @@ async def test_onewire_fake(loop):
 
 				assert int(fb.bus['simultaneous']['temperature']) == 1
 				assert int(fb.bus_aux['simultaneous']['temperature']) == 0
-			await fs.step(f,mod_s)
+			await fs.step(h,mod_s)
 			logger.debug("TC M")
-			await fs.step(f)
+			await fs.step(h)
 			await asyncio.sleep(4.5,loop=loop)
-			await fs.step(f)
+			await fs.step(h)
 			logger.debug("TC N")
 			async def mod_a3():
 				await td.wait()
 				assert float(td['10']['001001001001'][':dev']['input']['temperature']['value']) == 42.25, \
 					td['10']['001001001001'][':dev']['input']['temperature']['value']
-			await fs.step(f,mod_a3)
+			await fs.step(h,mod_a3)
 			logger.debug("TC O")
 			assert amqt == 42.25, amqt
 
-			# More to come. For now, shut down.
-			await fs.step(f,True)
-			logger.debug("TC P")
-			r = await f
-			assert r == 0, r
-			logger.debug("TC Z")
+			# More to come.
+
+			f.cancel()
+			g.cancel()
+			h.cancel()
+			with pytest.raises(asyncio.CancelledError):
+				await f
+			with pytest.raises(asyncio.CancelledError):
+				await g
+			with pytest.raises(asyncio.CancelledError):
+				await h
 	finally:
 		await u.stop()
 
