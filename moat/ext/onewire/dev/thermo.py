@@ -45,6 +45,8 @@ class Onewire_1821(OnewireDevice):
 	def scan_for(self, what):
 		if what == "temperature":
 			try:
-				return float(self['attr']['poll_freq'])
+				return self['attr']['poll_freq']
 			except KeyError:
 				return 60
+
+Onewire_1821.register('attr','poll_freq', cls=EtcFloat)
