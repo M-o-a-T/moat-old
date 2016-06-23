@@ -159,10 +159,13 @@ class TypedDir(ManagedEtcThing,EtcDir):
 			self._rpc = None
 		if name is not None:
 			logger.info("REG @%s %s %s %s %s",id(amqp),self,id(self),self.root,id(self.root))
-			self._rpc = await amqp.register_rpc_async(name,self._do_rpc, call_conv=CC_DATA)
+			self._rpc = await amqp.register_rpc_async(name,self.do_rpc, call_conv=CC_DATA)
 		self._rpc_name = name
 
-	async def _do_rpc(self,data):
+	async def do_rpc(self,data):
+		"""\
+			RPC call. Override to actually do something.
+			"""
 		raise RuntimeError("You forgot to override %s._do_rpc!" % (self.__class__.__name__,))
 
 	async def _updated(self,value, timestamp=None):
@@ -214,13 +217,13 @@ class TypedDir(ManagedEtcThing,EtcDir):
 		await amqp.alert(self._alert_name, _data=self._value.amqp_value)
 
 class TypedInputDir(TypedDir):
-	async def _do_rpc(self,data):
+	async def do_rpc(self,data):
 		val = await self.parent.parent.read(self.name,val)
 		await self.reading(val)
 		return self._value.amqp_value
 
 class TypedOutputDir(TypedDir):
-	async def _do_rpc(self,data):
+	async def do_rpc(self,data):
 		val = self._value.from_amqp(data)
 		if self._value.value == val:
 			return False # already set
