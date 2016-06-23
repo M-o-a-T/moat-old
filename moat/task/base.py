@@ -53,7 +53,7 @@ def _setup_task_vars(types):
 class TaskdefName(EtcString):
 	def _ext_update(self, pre):
 		super()._ext_update(pre)
-		do_async(self.parent._update_taskdef,self._value)
+		do_async(self.parent._update_taskdef,self._value, _loop=self._loop)
 
 	async def init(self):
 		await self.parent._update_taskdef(self._value)
