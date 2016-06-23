@@ -304,6 +304,11 @@ class BaseDevice(EtcDir, metaclass=TypesReg):
 		the last element."""
 		return ()
 
+	# Note that while the interface to the following three generic handlers
+	# is the same across all device types, the actual implementation
+	# typically accesses environment variables without which it doesn't
+	# work.
+
 	async def read(self,what):
 		"""Read from the device. This code does NOT update etcd."""
 		raise NotImplementedError("I don't know how to read '%s' from %s" % (what,repr(self)))
