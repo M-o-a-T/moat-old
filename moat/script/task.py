@@ -388,6 +388,8 @@ class TaskMaster(asyncio.Future):
 		
 	async def init(self):
 		"""Async part of initialization"""
+		logger.debug("MASTER+ %s",self.path)
+
 		self.task = await self.tree.subdir(TASK_DIR+self.path+(TASK,))
 		await self.task.taskdef_ready.wait()
 		self.taskdef_name = self.task.taskdef_name
@@ -479,6 +481,7 @@ class TaskMaster(asyncio.Future):
 			res = self.job.result()
 		except asyncio.CancelledError as exc:
 			if not self.done():
+				logger.debug("MASTER- %s %s",self.path,exc)
 				self.set_exception(exc)
 			return
 		except WatchStopped as exc:
@@ -498,6 +501,7 @@ class TaskMaster(asyncio.Future):
 				self.current_retry = min(self.current_retry + self.vars['retry']/2, self.vars['max-retry'])
 			self.exc = exc
 			if not self.current_retry or isinstance(exc,(AttributeError,BdbQuit)):
+				logger.debug("MASTER- %s %s",self.path,exc)
 				self.set_exception(exc)
 				return
 		else:
@@ -510,6 +514,7 @@ class TaskMaster(asyncio.Future):
 			self.exc = None
 			self.current_retry = self.vars['restart']
 			if not self.current_retry:
+				logger.debug("MASTER- %s %s",self.path,res)
 				self.set_result(res)
 				return
 		finally:
