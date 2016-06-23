@@ -294,12 +294,20 @@ class MoatTask(EtcDir):
 	async def add_task(self, path, taskdef, force=False, parent=None, **kw):
 		from moat.task import TASK,TASKDEF_DIR,TASKDEF
 
+		if isinstance(path,str):
+			p = path
+			path = tuple(path.split('/'))
+		else:
+			p = '/'.join(path)
+
 		if isinstance(taskdef,str):
+			tds = taskdef
 			taskdef = tuple(taskdef.split('/'))
-		tds = '/'.join(taskdef)
+		else:
+			tds = '/'.join(taskdef)
+
 		td = await self.root.subdir(*(TASKDEF_DIR+taskdef),name=TASKDEF)
 		logger.debug('Taskdef %s for %s is %s', tds,path,td.get('language','?'))
-		p = '/'.join(path)
 		r = None
 
 		d = dict(
