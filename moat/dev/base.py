@@ -235,6 +235,9 @@ TypedDir.register('type',cls=Typename)
 TypedDir.register('rpc',cls=RpcName)
 TypedDir.register('alert',cls=AlertName)
 
+TypedDir.register('created',cls=EtcFloat)
+TypedDir.register('timestamp',cls=EtcFloat)
+
 #class Var(EtcDir):
 #	_type = None
 
