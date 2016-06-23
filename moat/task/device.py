@@ -42,6 +42,8 @@ class DeviceMgr(Task):
 		It is added at /task/TYPE/SERVER/run and registers
 		itself as a manager to the /bus/TYPE/SERVER node
 		(which needs to be a ManagedEtcDir).
+
+		This may be overridden if setup is required.
 		"""
 
 	taskdef="task/devices"
