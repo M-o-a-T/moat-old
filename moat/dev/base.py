@@ -109,10 +109,11 @@ class TypedDir(ManagedEtcThing,EtcDir):
 		if self._device is not None:
 			return self._device()
 		p = self.parent
-		while p:
+		while p is not None:
 			if isinstance(p,BaseDevice):
 				self._device = ref(p)
 				return p
+			p = p.parent
 		return None
 
 	def _set_type(self, typename):
