@@ -140,7 +140,7 @@ class ScanTask(_BusTask, metaclass=_ScanMeta):
 					except StopWatching:
 						break
 					# propagate an exception, if warranted
-				self._trigger = asyncio.Future(loop=self.loop)
+				self._trigger = await self._trigger_hook()
 			warned = await self.task_()
 			try:
 				t = self.config['timer']
@@ -169,6 +169,24 @@ class ScanTask(_BusTask, metaclass=_ScanMeta):
 		"""Call to cause an immediate re-scan"""
 		if self._trigger is not None and not self._trigger.done():
 			self._trigger.set_result(None)
+
+	async def _trigger_hook(self):
+		"""\
+			This code is intended to be overridden by tests.
+
+			It returns a future which, when completed, should cause any
+			activity to run immediately which otherwise waits for a timer.
+			
+			The default implementation does nothing but return a static future.
+
+			Multiple calls to this code must return the same future as long as
+			that future is not completed.
+			"""
+		if self._trigger is None or self._trigger.done():
+			return asyncio.Future(loop=self.loop)
+		else:
+			return self._trigger
+
 
 	async def task_(self):
 		"""Override this to actually implement the periodic activity."""

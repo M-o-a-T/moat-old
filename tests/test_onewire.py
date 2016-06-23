@@ -190,7 +190,7 @@ class Trigger:
 		self.loop = loop
 		self.trigger = asyncio.Future(loop=self.loop)
 
-	async def __call__(self,loop=None):
+	async def __call__(self,task,loop=None):
 		# called by the task when it wishes to create a timeout
 		logger.debug("main: Enter")
 		assert loop is None or self.loop is loop
@@ -287,7 +287,7 @@ async def test_onewire_fake(loop):
 
 	try:
 		with mock.patch("moat.ext.onewire.task.OnewireServer", new=FakeBus(loop)) as fb, \
-			mock.patch("moat.ext.onewire.task.trigger_hook", new=Trigger(loop)) as fs, \
+			mock.patch("moat.ext.onewire.task.ScanTask._trigger_hook", new=Trigger(loop)) as fs, \
 			mock.patch("moat.ext.onewire.task.DEV_COUNT", new=1) as mp:
 
 			# Set up the whole thing
