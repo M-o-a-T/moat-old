@@ -25,11 +25,12 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 
 import logging
 logger = logging.getLogger(__name__)
-from etcd_tree.node import EtcFloat,EtcInteger,EtcString, EtcDir
+from etcd_tree.node import EtcFloat,EtcInteger,EtcString, EtcDir,EtcXValue
 from time import time
 
 from moat.bus.base import Bus
 from moat.types.etcd import MoatBusBase, Subdirs
+from moat.types.managed import ManagedEtcDir,ManagedEtcThing
 from moat.dev import DEV_DIR,DEV
 
 from .task import tasks
@@ -44,18 +45,18 @@ class OnewireBusBase(MoatBusBase):
 	def task_for_subdir(self,d):
 		return True
 
-class OnewireBus(Bus):
+class OnewireBus(ManagedEtcDir, Bus):
 	"""Directory for /bus/onewire/NAME"""
 	prefix = "onewire"
 	description = "A controller for 1wire"
 
 	@property
 	def task_monitor(self):
-		#yield "add",("onewire","run"), ('onewire',self.name,'run'), {}
-		yield "add",('onewire','scan'), ('onewire',self.name,'scan'), {}
+		yield "add",'task/devices', ('onewire',self.name,'run'), {}
+		yield "add",'onewire/scan', ('onewire',self.name,'scan'), {}
 		yield "scan",('bus','onewire',self.name,'bus'), {}
 
-class OnewireBusSub(EtcDir):
+class OnewireBusSub(ManagedEtcThing, EtcDir):
 	"""Directory for /bus/onewire/NAME/bus"""
 	@property
 	def task_monitor(self):
@@ -63,16 +64,16 @@ class OnewireBusSub(EtcDir):
 	def task_for_subdir(self,d):
 		return True
 
-class OnewireBusOne(EtcDir):
+class OnewireBusOne(ManagedEtcThing, EtcDir):
 	"""Directory for /bus/onewire/NAME/bus/BUS"""
 	@property
 	def task_monitor(self):
-		yield "add",('onewire','scan','bus'), ('onewire',self.path[2],'scan',self.name), {}
+		yield "add",'onewire/scan/bus', ('onewire',self.path[2],'scan',self.name), {}
 		yield "scan",('bus','onewire',self.path[2],'bus',self.path[4],'devices'), {}
 	def task_for_subdir(self,d):
 		return True
 
-class OnewireBusDevs(EtcDir):
+class OnewireBusDevs(ManagedEtcThing, EtcDir):
 	"""Directory for /bus/onewire/NAME/bus/BUS/devices"""
 	@property
 	def task_monitor(self):
@@ -92,7 +93,7 @@ class _OnewireBusDev_dev_iter(object):
 		try:
 			while True:
 				f2,b = next(self.i)
-				if b > 0:
+				if b.value > 0:
 					continue
 				try:
 					dev = self.d[self.name][f2][DEV]
@@ -126,13 +127,13 @@ class _OnewireBusDev_task_iter(object):
 						t = f
 
 				if t is not None:
-					return "add",('onewire','run',name),('onewire',self.path[2],'run',self.path[4],name),{'timer':t}
+					return "add",'onewire/run/'+name,('onewire',self.path[2],'run',self.path[4],name),{'timer':t}
 		except StopIteration:
 			pass
 		raise StopAsyncIteration
 
 
-class OnewireBusDev(EtcDir):
+class OnewireBusDev(ManagedEtcThing, EtcDir):
 	"""Directory for /bus/onewire/NAME/bus/BUS/devices/XX"""
 
 	def task_for_subdir(self,d):
@@ -147,6 +148,22 @@ class OnewireBusDev(EtcDir):
 	def task_monitor(self):
 		return _OnewireBusDev_task_iter(self.path,self.devices, tasks().items)
 
+class OnewireBusDevice(ManagedEtcThing, EtcXValue):
+	"""\
+		Entry for /bus/onewire/NAME/bus/BUS/devices/XX/YYYYYYYYYYYY
+		The .value attribute 
+		"""
+	type = int
+	@property
+	def device(self):
+		return self.root['device']['onewire'][self.parent.name][self.name]
+
+	def manager_present(self,mgr):
+		mgr.add_device(self.device)
+	def manager_gone(self):
+		self.device.manager_gone()
+		
+
 OnewireBusBase.register('*',cls=OnewireBus)
 OnewireBus.register("server","host", cls=EtcString)
 OnewireBus.register("server","port", cls=EtcInteger)
@@ -155,5 +172,5 @@ OnewireBusSub.register('*', cls=OnewireBusOne)
 OnewireBusOne.register('broken', cls=EtcInteger)
 OnewireBusOne.register('devices', cls=OnewireBusDevs)
 OnewireBusDevs.register('*', cls=OnewireBusDev)
-OnewireBusDev.register('*', cls=EtcInteger)
+OnewireBusDev.register('*', cls=OnewireBusDevice)
 
