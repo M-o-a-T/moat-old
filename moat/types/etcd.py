@@ -155,7 +155,7 @@ class MoatMetaModule(EtcDir):
 			await tt.update(d, _sync=False)
 		elif lang == 'python':
 			if force: 
-				changed = False
+				changed = []
 				for k,v in d.items():
 					if k not in tt:
 						logger.debug("%s: Add %s: %s", obj.prefix,k,v)
@@ -167,15 +167,15 @@ class MoatMetaModule(EtcDir):
 						else:
 							continue
 					r = await tt.set(k,v, sync=False)
-					changed = True
+					changed.append(k)
 				await tt.wait(r) # otherwise tt.keys() may change during execution
 				for k in tt.keys():
 					if k not in d:
 						r = await tt.delete(k, sync=False)
 						logger.debug("%s: Delete %s", obj.prefix,k)
-						changed = True
+						changed.append(k)
 				if changed:
-					logger.info("%s: updated", obj.prefix)
+					logger.info("%s: updated %s", obj.prefix, ','.join(changed))
 				else:
 					logger.debug("%s: not changed", obj.prefix)
 			else:
@@ -225,7 +225,7 @@ class MoatMetaTask(EtcDir):
 			await tt.update(d)
 		elif lang == 'python':
 			if force:
-				changed = False
+				changed = []
 				for k,v in d.items():
 					if k not in tt:
 						logger.debug("%s: Add %s: %s", task.taskdef,k,v)
@@ -234,15 +234,15 @@ class MoatMetaTask(EtcDir):
 					else:
 						continue
 					await tt.set(k,v)
-					changed = True
+					changed.append(k)
 				for k in tt.keys():
 					if k not in d:
 						logger.debug("%s: Delete %s", task.taskdef,k)
 						r = await tt.delete(k, sync=False)
-						changed = True
+						changed.append(k)
 
 				if changed:
-					logger.info("%s: updated", task.taskdef)
+					logger.info("%s: updated: %s", task.taskdef, ','.join(changed))
 				else:
 					logger.debug("%s: not changed", task.taskdef)
 			else:
@@ -318,7 +318,7 @@ class MoatTask(EtcDir):
 			d['parent'] = '/'.join(parent.path)
 		tt = await self.subdir(*path,name=TASK, create=None)
 		if force or 'taskdef' not in tt:
-			changed = False
+			changed = []
 			if tt.get('taskdef','') != tds:
 				await tt.set('taskdef',tds)
 				tt.force_updated() # required for getting the schema
@@ -331,15 +331,15 @@ class MoatTask(EtcDir):
 				else:
 					continue
 				r = await tt.set(k,v, sync=False)
-				changed = True
+				changed.append(k)
 			for k in tt.keys():
 				if k not in d:
 					logger.debug("%s: Delete %s", p,k)
 					r = await tt.delete(k, sync=False)
-					changed = True
+					changed.append(k)
 
 			if changed:
-				logger.info("%s: updated", p)
+				logger.info("%s: updated: %s", p, ','.join(changed))
 			else:
 				logger.debug("%s: not changed", p)
 		else:
