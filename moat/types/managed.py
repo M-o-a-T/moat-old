@@ -62,7 +62,7 @@ class ManagedEtcThing(object):
 		self.manager_present(mgr)
 		if isinstance(self,EtcDir):
 			for v in self.values():
-				p = getattr(v,_manager_present,None)
+				p = getattr(v,'_manager_present',None)
 				if p is not None:
 					p(mgr)
 
@@ -75,7 +75,7 @@ class ManagedEtcThing(object):
 	def _manager_gone(self):
 		if isinstance(self,EtcDir):
 			for v in self.values():
-				p = getattr(v,_manager_gone,None)
+				p = getattr(v,'_manager_gone',None)
 				if p is not None:
 					p()
 		self.manager_gone()
