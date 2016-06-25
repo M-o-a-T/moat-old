@@ -162,7 +162,7 @@ Run MoaT tasks.
 						if self.options.oneshot > 1:
 							self.old_jobs.add(j.path)
 					else:
-						logger.info('EXIT %s %s', j.name,r)
+						logger.debug('EXIT %s %s', j.name,r)
 						if self.root.verbose > 1:
 							print(j.name,r, sep='\t', file=self.stdout)
 						if self.options.oneshot:
