@@ -39,8 +39,8 @@ class DeviceMgr(Task):
 	"""\
 		This task runs some group of devices sharing a bus.
 
-		It is added at /task/TYPE/SERVER/run and registers
-		itself as a manager to the /bus/TYPE/SERVER node
+		When added at /task/WHATEVER/run, it registers
+		itself as a manager to the /bus/WHATEVER node
 		(which needs to be a ManagedEtcDir).
 
 		This may be overridden if setup is required.
@@ -55,7 +55,8 @@ class DeviceMgr(Task):
 		self.devices = WeakSet()
 		self.amqp = self.cmd.root.amqp
 
-		managed = await self.root['bus'][self.path[-2]][self.path[-1]]
+		managed = await self.tree['bus']
+		managed = await managed.lookup(*self.path[:-1])
 		managed.manager = self
 
 		try:
