@@ -63,8 +63,8 @@ class Collector(Task):
 
 		async def found(r):
 			logger.debug("Collecting %s: %s",self.path,r)
-			if self.cmd.root.verbose > 2:
-				print(r)
+#			if self.cmd.root.verbose > 2:
+#				print(r)
 			typ = r[0]
 			if typ == "add":
 				typ,taskdef,path,kw = r

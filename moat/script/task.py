@@ -235,7 +235,7 @@ class Task(asyncio.Task):
 					raise JobMarkGoneError(self.name) from exc
 				if killer is None:
 					break
-				logger.info('CANCEL 7 %s',killer)
+				#logger.info('CANCEL 7 %s',killer)
 				killer.cancel()
 				def mtc():
 					logger.info('CANCEL 8 %s',killer)
@@ -254,7 +254,7 @@ class Task(asyncio.Task):
 					d,p = await asyncio.wait((main_task,run_task), loop=r.loop, return_when=asyncio.FIRST_COMPLETED)
 				finally:
 					if killer is not None:
-						logger.info('CANCEL 9 %s',killer)
+						#logger.info('CANCEL 9 %s',killer)
 						killer.cancel()
 				logger.debug("Ended %s :: %s :: %s",self.name, repr(d),repr(p))
 			except asyncio.CancelledError:
@@ -281,7 +281,7 @@ class Task(asyncio.Task):
 			else:
 				assert main_task.done()
 				try:
-					logger.info('CANCEL 12 %s',run_task)
+					#logger.info('CANCEL 12 %s',run_task)
 					run_task.cancel()
 				except Exception: pass
 				try: await run_task
@@ -325,6 +325,9 @@ class Task(asyncio.Task):
 			if not keep_running and 'running' in run_state:
 				try:
 					await run_state.delete("running")
+				except etcd.EtcdKeyNotFound:
+					# race condition, probably due to interrupt
+					pass # pragma: no cover
 				except Exception as exc:
 					logger.exception("Could not delete 'running' entry")
 			await run_state.wait()
