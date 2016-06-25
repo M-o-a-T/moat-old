@@ -129,7 +129,7 @@ class ManagedEtcDir(ManagedEtcThing):
 		logger.debug("MGR %s set %s",self,mgr)
 		self._mgr = ref(mgr,self._manager_gone)
 		self.manager_lock.set()
-		super()._manager_present()
+		super()._manager_present(mgr)
 	def _manager_gone(self):
 		logger.debug("MGR %s del",self)
 		self._mgr = None
@@ -140,7 +140,7 @@ class ManagedEtcDir(ManagedEtcThing):
 		super().has_update()
 		mgr = self.manager
 		if mgr is not None:
-			self._manager_present()
+			self._manager_present(mgr)
 
 #ManagedEtcDir.register('*', cls=ManagedEtcSubdir)
 #ManagedEtcSubDir.register('*', cls=ManagedEtcSubdir)
