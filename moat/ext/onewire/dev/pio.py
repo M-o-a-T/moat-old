@@ -38,7 +38,8 @@ class Onewire_2405(OnewireDevice):
 
 	async def poll(self):
 		# Duh.
-		v = bool(int(await self.bus_dev.read("sensed")))
+		dev = await self.bus_dev
+		v = bool(int(await dev.read("sensed")))
 		await self.reading("pin",v)
 
 	async def read(self,what):

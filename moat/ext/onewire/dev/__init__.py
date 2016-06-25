@@ -72,8 +72,12 @@ class OnewireDevice(Device): #(, metaclass=SelectDevice):
 			self.name = '?'+self.parent.parent.name
 
 	@property
-	def bus_dev(self):
-		n = self.path.split(' ')[1:]
+	async def bus_dev(self):
+		n = self['path'].split(' ')[1:]
+		if not self.manager_lock.is_set():
+			logger.debug("MGR %s wait",self)
+			await self.manager_lock.wait()
+			logger.debug("MGR %s has %s",self,self.manager)
 		return self.manager.bus.at(*n)
 
 #	def has_update(self):

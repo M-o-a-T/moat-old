@@ -23,6 +23,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##  Thus, do not remove the next line, or insert any blank lines above.
 ##BP
 
+import asyncio
 from etcd_tree import EtcString,EtcDir,EtcFloat,EtcInteger,EtcValue, ReloadRecursive
 import aio_etcd as etcd
 from time import time
@@ -95,8 +96,13 @@ class ManagedEtcDir(ManagedEtcThing):
 	#
 	# .manager, when read, actually returns the controlling object directly.
 	# 
-	# The manager needs .add and .drop methods 
+	# The manager_lock (actually an asyncio.Event) allows you to wait for a
+	# manager to start.
 	# 
+	def __init__(self,*a,**k):
+		super().__init__(*a,**k)
+		self.manager_lock = asyncio.Event(loop=self._loop)
+
 	@property
 	def manager(self):
 		m = self._mgr
@@ -108,19 +114,27 @@ class ManagedEtcDir(ManagedEtcThing):
 		m = self._mgr
 		if m is not None:
 			m = m()
-		assert m is None, "%s already has a manager: %s" % (self,m)
 		if mgr is None:
 			self._mgr = None
-			self.manager_gone()
+			self._manager_gone()
 		else:
-			assert hasattr(mgr,'drop_device'), mgr # duck typed
-			self._mgr = ref(mgr,self._manager_gone)
+			assert m is None, "%s already has a manager: %s" % (self,m)
 			self._manager_present(mgr)
 	@manager.deleter
 	def manager(self):
 		if self._mgr is not None:
-			self._mgr = None
-			self.manager_gone()
+			self._manager_gone()
+
+	def _manager_present(self,mgr):
+		logger.debug("MGR %s set %s",self,mgr)
+		self._mgr = ref(mgr,self._manager_gone)
+		self.manager_lock.set()
+		super()._manager_present()
+	def _manager_gone(self):
+		logger.debug("MGR %s del",self)
+		self._mgr = None
+		self.manager_lock.clear()
+		super()._manager_gone()
 
 	def has_update(self):
 		super().has_update()
