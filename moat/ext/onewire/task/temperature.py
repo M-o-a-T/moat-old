@@ -49,7 +49,7 @@ class ScanTemperature(ScanTask):
 		with suppress(asyncio.TimeoutError):
 			await asyncio.wait_for(self._trigger,timeout=1.5,loop=self.loop)
 		for dev,b in list(dev_10.items()):
-			if b > 0:
+			if b.value > 0:
 				continue # pragma: no cover # timing dependant
 			d = None
 			try:
