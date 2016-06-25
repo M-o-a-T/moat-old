@@ -39,7 +39,7 @@ class ScanPoll(ScanTask):
 			for devid,b in (await d).items():
 				try:
 					dev = await self.devices[fam][devid][DEV]
-					await dev.poll(self)
+					await dev.poll()
 				except Exception:
 					logger.exception("Poll error %s.%s", fam,devid)
 
