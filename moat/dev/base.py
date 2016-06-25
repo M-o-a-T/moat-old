@@ -321,8 +321,11 @@ class BaseDevice(EtcDir, metaclass=TypesReg):
 		"""Poll this device. The default does nothing."""
 		pass
 
-#for attr in _SOURCES:
-#	BaseDevice.register(attr, cls=TypedDir)
+class TypedSubdir(ManagedEtcThing,EtcDir):
+	pass
+
+for attr in _SOURCES:
+	BaseDevice.register(attr, cls=TypedSubdir)
 
 value_types = {
 	'float': EtcFloat,
