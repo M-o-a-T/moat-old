@@ -29,7 +29,7 @@ from etcd_tree.node import EtcFloat,EtcInteger,EtcString, EtcDir,EtcXValue
 from time import time
 
 from moat.bus.base import Bus
-from moat.types.etcd import MoatBusBase, Subdirs
+from moat.types.etcd import MoatBusBase, Subdirs, recEtcDir
 from moat.types.managed import ManagedEtcDir,ManagedEtcThing
 from moat.dev import DEV_DIR,DEV
 
@@ -45,7 +45,7 @@ class OnewireBusBase(MoatBusBase):
 	def task_for_subdir(self,d):
 		return True
 
-class OnewireBus(ManagedEtcDir, Bus):
+class OnewireBus(ManagedEtcDir, recEtcDir, Bus):
 	"""Directory for /bus/onewire/NAME"""
 	prefix = "onewire"
 	description = "A controller for 1wire"

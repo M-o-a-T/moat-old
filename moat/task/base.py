@@ -24,7 +24,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##BP
 
 import asyncio
-from etcd_tree import EtcFloat,EtcString, ReloadRecursive
+from etcd_tree import EtcFloat,EtcString,EtcDir, ReloadRecursive
 from dabroker.util import import_string
 
 from . import _VARS, TASKDEF_DIR,TASKDEF
@@ -58,7 +58,7 @@ class TaskdefName(EtcString):
 	async def init(self):
 		await self.parent._update_taskdef(self._value)
 
-class TaskDir(recEtcDir):
+class TaskDir(recEtcDir,EtcDir):
 	"""\
 		etcd directory for tasks: /task/**/:task
 
@@ -120,7 +120,7 @@ class TaskDir(recEtcDir):
 _setup_task_vars(TaskDir)
 TaskDir.register('parent',MoatRef)
 
-class TaskDef(recEtcDir):
+class TaskDef(recEtcDir,EtcDir):
 	"""\
 		etcd directory for task definitions: /meta/task/**/:taskdef
 
@@ -150,7 +150,7 @@ class TaskDef(recEtcDir):
 	
 _setup_task_vars(TaskDef)
 
-class TaskState(recEtcDir):
+class TaskState(recEtcDir,EtcDir):
 	"""\
 		etcd directory for task state: /status/task/**/:task
 

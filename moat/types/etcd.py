@@ -37,8 +37,8 @@ from . import TYPEDEF_DIR,TYPEDEF
 # This file contains all "singleton" etcd directories, i.e. those with
 # fixed names at the root of the tree
 
-class recEtcDir(EtcDir):
-	"""an EtcDir which always loads its content up front"""
+class recEtcDir:
+	"""an EtcDir mix-in which always loads its content up front"""
 	@classmethod
 	async def this_obj(cls, recursive, **kw):
 		if not recursive:
@@ -81,7 +81,7 @@ class MoatLoader(EtcXValue):
 		self._code = import_string(self.value)
 		return self._code
 
-class MoatLoaderDir(recEtcDir):
+class MoatLoaderDir(recEtcDir,EtcDir):
 	"""Directory for /meta/module/‹subsys›"""
 	pass
 MoatLoaderDir.register('language', cls=EtcString)
@@ -263,7 +263,7 @@ class MoatMeta(EtcDir):
 		except KeyError:
 			pass # not yet present
 
-class MoatConfig(recEtcDir):
+class MoatConfig(recEtcDir,EtcDir):
 	"""Singleton for /config"""
 	pass
 	# only here to preload the whole thing
