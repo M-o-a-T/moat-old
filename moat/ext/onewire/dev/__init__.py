@@ -69,7 +69,7 @@ class OnewireDevice(Device): #(, metaclass=SelectDevice):
 	async def init(self):
 		await super().init()
 		if type(self) == OnewireDevice:
-			self.name = '?'+self.parent.parent.name
+			self.name = type(self).name+' '+self.parent.parent.name
 
 	@property
 	async def bus_dev(self):
