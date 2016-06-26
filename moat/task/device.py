@@ -56,7 +56,7 @@ class DeviceMgr(Task):
 		pass
 
 	async def task(self):
-		self.q = asyncio.Queue()
+		self.q = asyncio.Queue(loop=self.loop)
 		self.devices = WeakSet()
 		self.amqp = self.cmd.root.amqp
 		await self.setup()
