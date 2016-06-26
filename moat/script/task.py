@@ -367,7 +367,7 @@ class TaskMaster(asyncio.Future):
 	timer = None
 	exc = None
 
-	def __init__(self, cmd, path, callback=None, **cfg):
+	def __init__(self, cmd, task, callback=None, **cfg):
 		"""\
 			Set up the non-async part of our task.
 			@cmd: the command this is running because of.
@@ -380,8 +380,8 @@ class TaskMaster(asyncio.Future):
 		self.loop = cmd.root.loop
 		self.tree = cmd.root.tree
 		self.cmd = cmd
-		assert isinstance(path,tuple)
-		self.path = path
+		self.task = task
+		self.path = task.path[len(TASK_DIR):-1]
 		self.name = '/'.join(path) # for now
 		self.cfg = cfg
 		self.vars = {}
@@ -504,8 +504,9 @@ class TaskMaster(asyncio.Future):
 				self.current_retry = min(self.current_retry + self.vars['retry']/2, self.vars['max-retry'])
 			self.exc = exc
 			if not self.current_retry or isinstance(exc,(AttributeError,BdbQuit)):
-				logger.debug("MASTER- %s %s",self.path,exc)
-				self.set_exception(exc)
+				logger.debug("MASTER- %s %s",self,exc)
+				if not self.done():
+					self.set_exception(exc)
 				return
 		else:
 			if self.callback is not None:

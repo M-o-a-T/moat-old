@@ -271,7 +271,7 @@ Run MoaT tasks.
 
 			logger.debug("Launch TM %s",path)
 			try:
-				j = TaskMaster(self, path, callback=partial(_report, path), **args)
+				j = TaskMaster(self, t, callback=partial(_report, path), **args)
 			except Exception as exc:
 				logger.exception("Could not set up %s (%s)",'/'.join(t.path),t.get('name',path))
 				f = asyncio.Future(loop=self.root.loop)
