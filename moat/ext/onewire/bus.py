@@ -156,7 +156,8 @@ class OnewireBusDevice(ManagedEtcThing, EtcXValue):
 	type = int
 	@property
 	def device(self):
-		return self.root['device']['onewire'][self.parent.name][self.name]
+		dev = self.root.lookup(*DEV_DIR).lookup(self.parent.name,self.name,DEV)
+		return dev
 
 	def manager_present(self,mgr):
 		mgr.add_device(self.device)
