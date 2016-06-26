@@ -163,7 +163,7 @@ class OnewireBusDevice(ManagedEtcThing, EtcXValue):
 		dev = await self.device
 		# TODO: make sure its path is correct
 		try:
-			await mgr.add_device(dev)
+			mgr.add_device(dev)
 		except AttributeError:
 			import pdb;pdb.set_trace()
 			pass

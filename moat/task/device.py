@@ -72,8 +72,8 @@ class DeviceMgr(Task):
 					break
 				if cmd[0] == 'reg':
 					await cmd[1].set_managed(self)
-				elif cmd[0] == 'upd':
-					await cmd[1].update_managed()
+				elif cmd[0] == 'del':
+					await cmd[1].set_managed(None)
 				elif cmd[0] == 'call':
 					await cmd[1](*(cmd[2]),**(cmd[3]))
 				else:
@@ -86,4 +86,6 @@ class DeviceMgr(Task):
 		self.q.put_nowait(('call',proc,a,k))
 	def add_device(self, dev):
 		self.q.put_nowait(('reg',dev))
+	def drop_device(self, dev):
+		self.q.put_nowait(('del',dev))
 
