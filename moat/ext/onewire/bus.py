@@ -159,10 +159,22 @@ class OnewireBusDevice(ManagedEtcThing, EtcXValue):
 		dev = self.root.lookup(*DEV_DIR).lookup(self.parent.name,self.name,DEV)
 		return dev
 
-	def manager_present(self,mgr):
-		mgr.add_device(self.device)
+	async def manager_present(self,mgr):
+		dev = await self.device
+		# TODO: make sure its path is correct
+		try:
+			await mgr.add_device(dev)
+		except AttributeError:
+			import pdb;pdb.set_trace()
+			pass
 	def manager_gone(self):
-		self.device.manager_gone()
+		if isinstance(self.device,EtcAwaiter):
+			return
+		try:
+			self.device.manager_gone()
+		except AttributeError:
+			import pdb;pdb.set_trace()
+			pass
 		
 
 OnewireBusBase.register('*',cls=OnewireBus)

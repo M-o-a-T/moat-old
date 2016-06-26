@@ -57,7 +57,7 @@ class DeviceMgr(Task):
 
 		managed = await self.tree['bus']
 		managed = await managed.lookup(*self.path[:-1])
-		managed.manager = self
+		await managed.set_manager(self)
 
 		try:
 			while True:

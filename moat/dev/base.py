@@ -213,7 +213,8 @@ class TypedDir(ManagedEtcThing,EtcDir):
 	async def _write_amqp(self,timestamp):
 		if not self._alert_name:
 			return
-		amqp = self.manager.amqp
+		m = await self.manager_async
+		amqp = m.amqp
 		await amqp.alert(self._alert_name, _data=self._value.amqp_value)
 
 class TypedInputDir(TypedDir):

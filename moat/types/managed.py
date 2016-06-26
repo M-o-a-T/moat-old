@@ -52,19 +52,19 @@ class ManagedEtcThing(object):
 			except AttributeError as err:
 				raise AttributeError(self,'manager') from err
 
-	def manager_present(self,mgr):
+	async def manager_present(self,mgr):
 		"""\
 			Do something when the object starts to be managed.
 			The default is to do nothing.
 			"""
 		pass
-	def _manager_present(self,mgr):
-		self.manager_present(mgr)
+	async def _manager_present(self,mgr):
+		await self.manager_present(mgr)
 		if isinstance(self,EtcDir):
 			for v in self.values():
 				p = getattr(v,'_manager_present',None)
 				if p is not None:
-					p(mgr)
+					await p(mgr)
 
 	def manager_gone(self):
 		"""\
@@ -94,14 +94,11 @@ class ManagedEtcDir(ManagedEtcThing):
 	# The manager object must have a .drop_device() method which tells it
 	# that a device is no longer under its control.
 	#
-	# .manager, when read, actually returns the controlling object directly.
-	# 
-	# The manager_lock (actually an asyncio.Event) allows you to wait for a
-	# manager to start.
+	# The manager_async property allows you to wait for a manager to start.
 	# 
 	def __init__(self,*a,**k):
 		super().__init__(*a,**k)
-		self.manager_lock = asyncio.Event(loop=self._loop)
+		self._manager_lock = asyncio.Event(loop=self._loop)
 
 	@property
 	def manager(self):
@@ -109,8 +106,16 @@ class ManagedEtcDir(ManagedEtcThing):
 		if m is not None:
 			m = m()
 		return m
-	@manager.setter
-	def manager(self,mgr):
+	@property
+	async def manager_async(self):
+		while True:
+			m = self.manager
+			if m is not None:
+				return m
+			logger.debug("MGR: %s Waiting",self)
+			await self._manager_lock.wait()
+			logger.debug("MGR: %s WaitDone",self)
+	async def set_manager(self,mgr):
 		m = self._mgr
 		if m is not None:
 			m = m()
@@ -118,29 +123,24 @@ class ManagedEtcDir(ManagedEtcThing):
 			self._mgr = None
 			self._manager_gone()
 		else:
-			assert m is None, "%s already has a manager: %s" % (self,m)
-			self._manager_present(mgr)
+			assert m is None, "%s already has a manager: %s %s" % (self,m,mgr)
+			await self._manager_present(mgr)
 	@manager.deleter
 	def manager(self):
 		if self._mgr is not None:
 			self._manager_gone()
 
-	def _manager_present(self,mgr):
+	async def _manager_present(self,mgr):
 		logger.debug("MGR %s set %s",self,mgr)
 		self._mgr = ref(mgr,self._manager_gone)
-		self.manager_lock.set()
-		super()._manager_present(mgr)
+		self._manager_lock.set()
+		await super()._manager_present(mgr)
 	def _manager_gone(self):
+		import pdb;pdb.set_trace()
 		logger.debug("MGR %s del",self)
 		self._mgr = None
-		self.manager_lock.clear()
+		self._manager_lock.clear()
 		super()._manager_gone()
-
-	def has_update(self):
-		super().has_update()
-		mgr = self.manager
-		if mgr is not None:
-			self._manager_present(mgr)
 
 #ManagedEtcDir.register('*', cls=ManagedEtcSubdir)
 #ManagedEtcSubDir.register('*', cls=ManagedEtcSubdir)
