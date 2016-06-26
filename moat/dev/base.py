@@ -283,6 +283,10 @@ class BaseDevice(EtcDir, metaclass=TypesReg):
 		"""Async manager callback after adding a manager"""
 		pass
 
+	async def set_unmanaged(self):
+		"""Async manager callback after killing a manager"""
+		pass
+
 	def has_update(self):
 		super().has_update()
 		m = self.manager

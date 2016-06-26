@@ -73,7 +73,7 @@ class DeviceMgr(Task):
 				if cmd[0] == 'reg':
 					await cmd[1].set_managed(self)
 				elif cmd[0] == 'del':
-					await cmd[1].set_managed(None)
+					await cmd[1].set_unmanaged()
 				elif cmd[0] == 'call':
 					await cmd[1](*(cmd[2]),**(cmd[3]))
 				else:
