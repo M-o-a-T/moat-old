@@ -43,17 +43,23 @@ class DeviceMgr(Task):
 		itself as a manager to the /bus/WHATEVER node
 		(which needs to be a ManagedEtcDir).
 
-		This may be overridden if setup is required.
+		Override .setup() (and possibly .teardown()) if necessary.
 		"""
 
 	taskdef="task/devices"
 	summary="A Task which manages a group of devices"
 	q = None
 
+	async def setup(self):
+		pass
+	def teardown(self):
+		pass
+
 	async def task(self):
 		self.q = asyncio.Queue()
 		self.devices = WeakSet()
 		self.amqp = self.cmd.root.amqp
+		await self.setup()
 
 		managed = await self.tree['bus']
 		managed = await managed.lookup(*self.path[:-1])
@@ -73,6 +79,7 @@ class DeviceMgr(Task):
 				else:
 					logger.error("Bad command: %s",repr(cmd))
 		finally:
+			self.teardown()
 			del managed.manager
 
 	def call_async(self, proc,*a,**k):

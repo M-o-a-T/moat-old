@@ -89,15 +89,14 @@ class BusHandler(_BusTask,DeviceMgr):
 		"""
 	taskdef = "onewire/run"
 	summary = "Interface between a 1wire master, its devices, and AMQP"
-	async def task(self):
+	async def setup(self):
 		"""\
 			additional setup before DeviceMgr.task()
 			"""
 		await self.setup_vars()
 		self.bus = self.srv.at('uncached')
 		self.bus_cached = self.srv
-
-		await super().task()
+		await super().setup()
 
 class ScanTask(_BusTask, metaclass=_ScanMeta):
 	"""\
