@@ -49,6 +49,7 @@ def device_types():
 	return _device_types
 
 class OnewireDeviceBase(MoatDeviceBase):
+	"""Base class for /device/onewire"""
 	def subtype(self,*path,**kw):
 		if len(path) != 3 or path[-1] != DEV:
 			return super().subtype(self,*path,**kw)
@@ -60,6 +61,7 @@ class OnewireDeviceBase(MoatDeviceBase):
 			return OWdevice
 
 class OnewireDevice(Device): #(, metaclass=SelectDevice):
+	"""Base class for /device/onewire/XX/YYYYYYYYYYYY/:dev"""
 	prefix = "onewire"
 	name = "generic"
 	description = "Something hanging off 1wire"

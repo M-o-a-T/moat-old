@@ -151,7 +151,9 @@ class OnewireBusDev(ManagedEtcThing, EtcDir):
 class OnewireBusDevice(ManagedEtcThing, EtcXValue):
 	"""\
 		Entry for /bus/onewire/NAME/bus/BUS/devices/XX/YYYYYYYYYYYY
-		The .value attribute 
+		The .value attribute holds the number of consecutive failed
+		attempts to find this device by scanning the bus it's supposed to
+		be on.
 		"""
 	type = int
 	@property
