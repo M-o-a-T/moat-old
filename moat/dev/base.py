@@ -24,6 +24,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##BP
 
 from etcd_tree import EtcString,EtcDir,EtcFloat,EtcInteger,EtcValue, ReloadRecursive
+import asyncio
 import aio_etcd as etcd
 from time import time
 from weakref import ref
@@ -189,6 +190,8 @@ class TypedDir(ManagedEtcThing,EtcDir):
 					self._value.value = value
 					await self._write_etcd(timestamp)
 				await self._write_amqp(timestamp)
+			except asyncio.CancelledError as exc:
+				raise
 			except etcd.EtcdCompareFailed as exc:
 				logger.info("Retrying update: %s %s",self,str(exc))
 				await self.wait(exc.payload['index'])

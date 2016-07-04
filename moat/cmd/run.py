@@ -265,7 +265,6 @@ Run MoaT tasks.
 		while self.tasks:
 			t = self.tasks.pop()
 			path = t.path[len(TASK_DIR):-1]
-			logger.debug("CHECK %s",path)
 			if path in old:
 				old.remove(path)
 				continue
