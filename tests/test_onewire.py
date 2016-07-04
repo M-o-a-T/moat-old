@@ -39,6 +39,8 @@ from . import ProcessHelper, is_open, MoatTest
 import logging
 logger = logging.getLogger(__name__)
 
+_logged = {} # debug: only log changed directories
+
 class FakeSubBus:
 	path = ()
 	def __init__(self, parent,path):
@@ -127,7 +129,10 @@ class FakeBus(FakeSubBus):
 		d = self.data
 		for s in p:
 			d = d[s.lower()]
-		logger.debug("BUS.DIR %s %s",p,list(d.keys()))
+		k = sorted(d.keys())
+		if _logged.get(p,['nope']) != k:
+			logger.debug("BUS.DIR %s %s",p,k)
+			_logged[p] = k
 		return d.keys()
 
 	async def read(self,*p):
