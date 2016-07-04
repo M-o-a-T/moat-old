@@ -51,6 +51,14 @@ class ManagedEtcThing(object):
 				return p.manager
 			except AttributeError as err:
 				raise AttributeError(self,'manager') from err
+	@property
+	def manager_async(self):
+		p = self.parent
+		if p is None:
+			f = asyncio.Future(loop=self._loop)
+			f.set_result(None)
+			return f
+		return p.manager_async
 
 	async def manager_present(self,mgr):
 		"""\
@@ -59,6 +67,7 @@ class ManagedEtcThing(object):
 			"""
 		pass
 	async def _manager_present(self,mgr):
+		logger.debug("MGR %s set %s",self,mgr)
 		await self.manager_present(mgr)
 		if isinstance(self,EtcDir):
 			for v in self.values():
@@ -73,6 +82,7 @@ class ManagedEtcThing(object):
 			"""
 		pass
 	def _manager_gone(self):
+		logger.debug("MGR %s del",self)
 		if isinstance(self,EtcDir):
 			for v in self.values():
 				p = getattr(v,'_manager_gone',None)
@@ -111,7 +121,10 @@ class ManagedEtcDir(ManagedEtcThing):
 		while True:
 			m = self.manager
 			if m is not None:
-				return m
+				if m.done():
+					self._manager_gone()
+				else:
+					return m
 			logger.debug("MGR: %s Waiting",self)
 			await self._manager_lock.wait()
 			logger.debug("MGR: %s WaitDone",self)
@@ -120,10 +133,11 @@ class ManagedEtcDir(ManagedEtcThing):
 		if m is not None:
 			m = m()
 		if mgr is None:
-			self._mgr = None
-			self._manager_gone()
-		else:
-			assert m is None, "%s already has a manager: %s %s" % (self,m,mgr)
+			if self._mgr is not None:
+				self._mgr = None
+				self._manager_gone()
+		elif m is not mgr:
+			assert m is None or m.done(), "%s already has a manager: %s %s" % (self,m,mgr)
 			await self._manager_present(mgr)
 	@manager.deleter
 	def manager(self):
@@ -131,16 +145,17 @@ class ManagedEtcDir(ManagedEtcThing):
 			self._manager_gone()
 
 	async def _manager_present(self,mgr):
-		logger.debug("MGR %s set %s",self,mgr)
+		logger.debug("MGR %s set start",self)
 		self._mgr = ref(mgr,self._manager_gone)
 		self._manager_lock.set()
 		await super()._manager_present(mgr)
+		logger.debug("MGR %s set done",self)
 	def _manager_gone(self):
-		import pdb;pdb.set_trace()
-		logger.debug("MGR %s del",self)
+		logger.debug("MGR %s del start",self)
 		self._mgr = None
 		self._manager_lock.clear()
 		super()._manager_gone()
+		logger.debug("MGR %s del done",self)
 
 #ManagedEtcDir.register('*', cls=ManagedEtcSubdir)
 #ManagedEtcSubDir.register('*', cls=ManagedEtcSubdir)

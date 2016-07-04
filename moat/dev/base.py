@@ -74,7 +74,7 @@ class RpcName(EtcString):
 		m = p.manager
 		if m is None:
 			return
-		m.call_async(p._reg_rpc, self.value if self.is_new is not None else None, _loop=self._loop)
+		m.call_async(p._reg_rpc, self.value if self.is_new is not None else None)
 
 class AlertName(EtcString):
 	"""Update the parent's alert name"""
@@ -140,10 +140,10 @@ class TypedDir(ManagedEtcThing,EtcDir):
 
 	## Manager registration
 
-	def manager_present(self, mgr):
-		n = self['rpc']
+	async def manager_present(self, mgr):
+		n = self.get('rpc',None)
 		if n is not None:
-			mgr.call_async(self._reg_rpc,n)
+			await self._reg_rpc(n)
 
 	def manager_gone(self):
 		self._rpc_name = None
@@ -375,6 +375,16 @@ class Device(ManagedEtcDir, BaseDevice):
 		if not recursive:
 			raise ReloadRecursive
 		return (await super().this_obj(recursive=recursive, **kw))
+
+	async def set_managed(self, mgr):
+		"""Async manager callback after adding a manager"""
+		await super().set_managed(mgr)
+		await self.set_manager(mgr)
+
+	async def set_unmanaged(self):
+		"""Async manager callback after killing a manager"""
+		await super().set_unmanaged()
+		await self.set_manager(None)
 
 	@classmethod
 	def types(cls, types):
