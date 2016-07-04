@@ -54,7 +54,8 @@ class Onewire_2405(OnewireDevice):
 			so 'true' means high which means writing a logic zero.
 			"""
 		assert what == "pin"
-		await self.bus_dev.write("PIO", data=('0' if value else '1'))
+		dev = await self.bus_dev
+		await dev.write("PIO", data=('0' if value else '1'))
 
 	def scan_for(self, what):
 		if what == "poll":
