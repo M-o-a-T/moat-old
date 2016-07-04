@@ -52,7 +52,7 @@ class OnewireBus(ManagedEtcDir, recEtcDir, Bus):
 
 	@property
 	def task_monitor(self):
-		yield "add",'task/devices', ('onewire',self.name,'run'), {}
+		yield "add",'onewire/run', ('onewire',self.name,'run'), {}
 		yield "add",'onewire/scan', ('onewire',self.name,'scan'), {}
 		yield "scan",('bus','onewire',self.name,'bus'), {}
 
