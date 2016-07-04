@@ -71,10 +71,14 @@ Run MoaT tasks.
 		self.parser.add_option('-s','--single',
             action="store_true", dest="single",
             help="one path argument given (may contain spaces)")
+		self.parser.add_option('-S','--no-signals',
+            action="store_false", dest="signals",
+            help="do not install a signal handler")
 
 	def _tilt(self):
-		self.root.loop.remove_signal_handler(signal.SIGINT)
-		self.root.loop.remove_signal_handler(signal.SIGTERM)
+		if self.options.signals:
+			self.root.loop.remove_signal_handler(signal.SIGINT)
+			self.root.loop.remove_signal_handler(signal.SIGTERM)
 		self.tilt.set_result(None)
 
 	async def process_task(self, path):
@@ -129,8 +133,9 @@ Run MoaT tasks.
 				print("No tasks found. Exiting.",self.args, file=sys.stderr)
 			return 1
 
-		self.root.loop.add_signal_handler(signal.SIGINT,self._tilt)
-		self.root.loop.add_signal_handler(signal.SIGTERM,self._tilt)
+		if self.options.signals:
+			self.root.loop.add_signal_handler(signal.SIGINT,self._tilt)
+			self.root.loop.add_signal_handler(signal.SIGTERM,self._tilt)
 		await self._start()
 		return (await self._loop())
 
