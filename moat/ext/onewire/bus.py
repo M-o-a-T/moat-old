@@ -156,7 +156,7 @@ class OnewireBusDevice(ManagedEtcThing, EtcXValue):
 	type = int
 	@property
 	def device(self):
-		dev = self.root.lookup(*DEV_DIR).lookup(self.parent.name,self.name,DEV)
+		dev = self.root.lookup(*DEV_DIR).lookup('onewire',self.parent.name,self.name,DEV)
 		return dev
 
 	async def manager_present(self,mgr):
