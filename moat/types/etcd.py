@@ -25,6 +25,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 
 import asyncio
 from weakref import WeakValueDictionary
+from pprint import pformat
 
 from dabroker.util import import_string
 from etcd_tree import EtcRoot, EtcDir, EtcString, EtcXValue, ReloadRecursive
@@ -233,8 +234,8 @@ class MoatMetaTask(EtcDir):
 						logger.debug("%s: Update %s: %s => %s", task.taskdef,k,tt[k],v)
 					else:
 						continue
+					changed.append((k,tt[k],v))
 					await tt.set(k,v)
-					changed.append(k)
 				for k in tt.keys():
 					if k not in d:
 						logger.debug("%s: Delete %s", task.taskdef,k)
@@ -242,7 +243,7 @@ class MoatMetaTask(EtcDir):
 						changed.append(k)
 
 				if changed:
-					logger.info("%s: updated: %s", task.taskdef, ','.join(changed))
+					logger.info("%s: updated: %s", task.taskdef, pformat(changed))
 				else:
 					logger.debug("%s: not changed", task.taskdef)
 			else:
@@ -330,8 +331,8 @@ class MoatTask(EtcDir):
 					logger.debug("%s: Update %s: %s => %s", p,k,tt[k],v)
 				else:
 					continue
+				changed.append((k,tt[k],v))
 				r = await tt.set(k,v, sync=False)
-				changed.append(k)
 			for k in tt.keys():
 				if k not in d:
 					logger.debug("%s: Delete %s", p,k)
@@ -339,7 +340,7 @@ class MoatTask(EtcDir):
 					changed.append(k)
 
 			if changed:
-				logger.info("%s: updated: %s", p, ','.join(changed))
+				logger.info("%s: updated: %s", p, pformat(changed))
 			else:
 				logger.debug("%s: not changed", p)
 		else:
