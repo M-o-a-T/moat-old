@@ -294,12 +294,17 @@ class Task(asyncio.Task):
 			if main_task.cancelled():
 				# Killed because of a timeout / refresh problem. Major fail.
 				await run_state.set("state","fail")
+
 				if gone is not None:
-					await run_state.set("message", "Missing2: "+'/'.join(gone))
+					state = "Missing2: "+'/'.join(gone)
 				elif killer is None:
-					await run_state.set("message", "Aborted by timeout")
+					state = "Aborted by timeout"
 				else:
-					await run_state.set("message", str(run_task.exception()))
+					try:
+						state = str(run_task.exception())
+					except asyncio.CancelledError as err: # bah
+						state = "cancelled"
+				await run_state.set("message", state)
 				run_task.result()
 				assert False,"the previous line should have raised an error" # pragma: no cover
 			else:
