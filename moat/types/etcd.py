@@ -171,16 +171,16 @@ class MoatMetaModule(EtcDir):
 							logger.debug("%s: Update %s: %s => %s", obj.prefix,k,tt[k],v)
 						else:
 							continue
+					changed.append((k,tt.get(k,'-'),v))
 					r = await tt.set(k,v, sync=False)
-					changed.append(k)
 				await tt.wait(r) # otherwise tt.keys() may change during execution
 				for k in tt.keys():
 					if k not in d:
-						r = await tt.delete(k, sync=False)
 						logger.debug("%s: Delete %s", obj.prefix,k)
-						changed.append(k)
+						changed.append((k,tt[k],'-'))
+						r = await tt.delete(k, sync=False)
 				if changed:
-					logger.info("%s: updated %s", obj.prefix, ','.join(changed))
+					logger.info("%s: updated %s", obj.prefix, pformat(changed))
 				else:
 					logger.debug("%s: not changed", obj.prefix)
 			else:
@@ -238,13 +238,13 @@ class MoatMetaTask(EtcDir):
 						logger.debug("%s: Update %s: %s => %s", task.taskdef,k,tt[k],v)
 					else:
 						continue
-					changed.append((k,tt[k],v))
+					changed.append((k,tt.get(k,'-'),v))
 					await tt.set(k,v)
 				for k in tt.keys():
 					if k not in d:
 						logger.debug("%s: Delete %s", task.taskdef,k)
 						r = await tt.delete(k, sync=False)
-						changed.append(k)
+						changed.append((k,tt[k],'-'))
 
 				if changed:
 					logger.info("%s: updated: %s", task.taskdef, pformat(changed))
@@ -335,13 +335,13 @@ class MoatTask(EtcDir):
 					logger.debug("%s: Update %s: %s => %s", p,k,tt[k],v)
 				else:
 					continue
-				changed.append((k,tt[k],v))
+				changed.append((k,tt.get(k,'-'),v))
 				r = await tt.set(k,v, sync=False)
 			for k in tt.keys():
 				if k not in d:
 					logger.debug("%s: Delete %s", p,k)
+					changed.append((k,tt[k],'-'))
 					r = await tt.delete(k, sync=False)
-					changed.append(k)
 
 			if changed:
 				logger.info("%s: updated: %s", p, pformat(changed))
