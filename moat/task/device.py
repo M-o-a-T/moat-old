@@ -78,6 +78,11 @@ class DeviceMgr(Task):
 					await cmd[1](*(cmd[2]),**(cmd[3]))
 				else:
 					logger.error("Bad command: %s",repr(cmd))
+		except asyncio.CancelledError:
+			raise
+		except BaseException as exc:
+			logger.exception("Duh?")
+			raise
 		finally:
 			self.teardown()
 			del managed.manager
