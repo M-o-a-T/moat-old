@@ -157,6 +157,8 @@ def do_async(task, *a, _loop=None, _err_cb=None, **k):
 		f.set_exception(exc)
 	def reporter(f):
 		exc = f.exception()
+		if exc is None:
+			return
 		if _err_cb is None:
 			logger.exception("Error in %s %s %s", task,a,k, exc_info=exc)
 		else:

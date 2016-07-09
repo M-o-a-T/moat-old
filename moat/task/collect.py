@@ -62,7 +62,7 @@ class Collector(Task):
 		known = set()
 
 		async def found(r):
-			logger.debug("Collecting %s: %s",self.path,r)
+			logger.debug("Collect %s: %s",self.name,r)
 #			if self.cmd.root.verbose > 2:
 #				print(r)
 			typ = r[0]

@@ -69,6 +69,11 @@ class TaskDir(recEtcDir,EtcDir):
 	taskdef_name = ''
 	taskdef_ready = None
 
+	# the actual task, if running
+	# managed by moat.script.task.TaskMaster
+	# IMPORTANT: only to be used for debugging and testing!
+	_task = None
+
 	def __init__(self,*a,**k):
 		super().__init__(*a,**k)
 		self.taskdef_ready = asyncio.Event(loop=self._loop)

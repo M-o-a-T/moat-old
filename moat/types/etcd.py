@@ -315,15 +315,19 @@ class MoatTask(EtcDir):
 		logger.debug('Taskdef %s for %s is %s', tds,path,td.get('language','?'))
 		r = None
 
+		# .taskdef is not in there because it needs to be set last
 		d = dict(
 			data=kw,
-			taskdef=tds,
 		)
 		if parent is not None:
 			d['parent'] = '/'.join(parent.path)
 		tt = await self.subdir(*path,name=TASK, create=None)
 		if force or 'taskdef' not in tt:
+			is_new = ('taskdef' not in tt)
 			changed = []
+
+			# Setting taskdef must be first, as the node's data type is
+			# determined from that
 			if tt.get('taskdef','') != tds:
 				await tt.set('taskdef',tds)
 				tt.force_updated() # required for getting the schema
@@ -337,13 +341,17 @@ class MoatTask(EtcDir):
 					continue
 				changed.append((k,tt.get(k,'-'),v))
 				r = await tt.set(k,v, sync=False)
-			for k in tt.keys():
-				if k not in d:
+			for k in list(tt.keys()): # may change size during "await" in the loop
+				if k == "taskdef":
+					pass
+				elif k not in d:
 					logger.debug("%s: Delete %s", p,k)
 					changed.append((k,tt[k],'-'))
 					r = await tt.delete(k, sync=False)
 
-			if changed:
+			if is_new:
+				logger.info("%s: created", p)
+			elif changed:
 				logger.info("%s: updated: %s", p, pformat(changed))
 			else:
 				logger.debug("%s: not changed", p)

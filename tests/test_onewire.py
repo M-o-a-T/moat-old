@@ -35,6 +35,7 @@ import aio_etcd as etcd
 from contextlib import suppress
 
 from . import ProcessHelper, is_open, MoatTest
+from moat.script.task import _task_reg
 
 import logging
 logger = logging.getLogger(__name__)
@@ -72,7 +73,6 @@ class Fake_2405:
 	def __setitem__(self,k,v):
 		if k != 'pio':
 			raise KeyError(k)
-		import pdb;pdb.set_trace()
 		if v == '1':
 			self.val = False
 		elif v == '0':
@@ -156,93 +156,6 @@ class FakeBus(FakeSubBus):
 			raise KeyError((self,p)) from err
 		d[p[-1].lower()] = data
 
-class Trigger:
-	"""\
-		A way to control task execution (and inject code) from a test.
-
-		This does:
-		* the main task async-__call__s this object, gets a future back
-		* the test enters step(), which waits for the above __call__
-		  if it hasn't yet, and triggers the future
-		* if step() gets passed a procedure, that will be called by the
-		  main task within __call__
-
-		Usage:
-		async def trigger_hook(obj,loop):
-			return static_future_that_never_triggers
-		class proc:
-			async def loop(self):
-				while True:
-					f = await trigger_hook(self, self._loop)
-					done,pending = await asyncio.wait((self.f,)+whatever_else_you_wait_for)
-					…
-			def trigger(self):
-				self.f.set_result("trigger")
-		…
-		with mock.patch("moat.whatever.trigger_hook", new=Trigger(loop)) as fs:
-			…
-			await fs.step(f)
-		
-		"""
-
-	f = None
-	g = None
-	obj = None
-	mod = None
-	trigger = None
-
-	def __init__(self,loop=None):
-		self.loop = loop
-		self.trigger = asyncio.Future(loop=self.loop)
-
-	async def __call__(self,task,loop=None):
-		# called by the task when it wishes to create a timeout
-		logger.debug("main: Enter")
-		assert loop is None or self.loop is loop
-		if self.trigger.done():
-			self.trigger = asyncio.Future(loop=self.loop)
-
-		if self.mod is not None:
-			m,self.mod = self.mod,None
-			logger.debug("main: Wait %s",m)
-			await m()
-		if self.f is not None:
-			logger.debug("main: Sig")
-			if not self.f.done():
-				self.f.set_result(False)
-		logger.debug("main: Exit")
-		return self.trigger
-
-	async def step(self, task, mod=False):
-		"""\
-			Trigger the fake timeout. @task is the task the timeout is
-			running in so that we don't deadlock if it dies prematurely.
-			@mod is a flag to signal StopWatching (if True), or a callback
-			that's executed at the beginning of the next iteration.
-			"""
-		if not isinstance(mod,bool):
-			# Register a state modifying function which the task shall
-			# execute the next time it enters its main loop
-			self.mod = mod
-		
-		self.f = asyncio.Future(loop=self.loop)
-		if not self.trigger.done():
-			logger.debug("step: trigger %s %s",self.trigger,id(self.trigger))
-			self.trigger.set_result(None)
-		logger.debug("step: Wait")
-		await asyncio.wait((task,self.f), loop=self.loop,return_when=asyncio.FIRST_COMPLETED)
-		self.f = None
-
-		if mod is True:
-			logger.debug("step: Kill %s",mod)
-			self.trigger.set_exception(etcd.StopWatching())
-			await task
-		else:
-			logger.debug("step: Run %s",mod)
-			if task.done():
-				task.result()
-				assert False,"dead"
-
 @pytest.yield_fixture
 def owserver(loop,unused_tcp_port):
 	port = unused_tcp_port
@@ -290,9 +203,16 @@ async def test_onewire_fake(loop):
 	with suppress(etcd.EtcdKeyNotFound):
 		await t.delete('/task/onewire/faker/run/:task', recursive=True)
 
+	e = f = g = h = None
+	async def run(cmd):
+		nonlocal e
+		e = m.parse(cmd)
+		e = asyncio.ensure_future(e,loop=loop)
+		r = await e
+		e = None
+		return r
 	try:
 		with mock.patch("moat.ext.onewire.task.OnewireServer", new=FakeBus(loop)) as fb, \
-			mock.patch("moat.ext.onewire.task.ScanTask._trigger_hook", new=Trigger(loop)) as fs, \
 			mock.patch("moat.ext.onewire.task.DEV_COUNT", new=1) as mp:
 
 			# Set up the whole thing
@@ -302,21 +222,21 @@ async def test_onewire_fake(loop):
 			await m.parse("-vvvc test.cfg conn onewire delete faker")
 			r = await m.parse("-vvvc test.cfg conn onewire add faker foobar.invalid - A nice fake 1wire bus")
 			assert r == 0, r
-			r = await m.parse("-vvvc test.cfg run -qgoot moat/scan")
+			r = await run("-vvvc test.cfg run -qgootS moat/scan")
 			assert r == 0, r
-			r = await m.parse("-vvvc test.cfg run -qgoot moat/scan/bus")
+			r = await run("-vvvc test.cfg run -qgootS moat/scan/bus")
 			assert r == 0, r
 			mto = await t.tree("/task/onewire")
 
-			f = m.parse("-vvvc test.cfg run -g moat/scan/bus/onewire")
+			f = m.parse("-vvvc test.cfg run -gS moat/scan/bus/onewire")
 			f = asyncio.ensure_future(f,loop=loop)
 			await asyncio.sleep(1, loop=loop)
 
-			logger.debug("Waiting 1")
+			logger.debug("Waiting 1: create scan task")
 			t1 = time()
 			while True:
 				try:
-					await mto.subdir('faker','scan',TASK, create=False)
+					await mto.subdir('faker','scan',TASK,'taskdef', create=False)
 				except KeyError:
 					pass
 				else:
@@ -324,12 +244,13 @@ async def test_onewire_fake(loop):
 					break
 
 				await asyncio.sleep(0.1, loop=loop)
-				if time()-t1 >= 10:
+				if time()-t1 >= 30:
 					raise RuntimeError("Condition 1")
 
-			g = m.parse("-vvvc test.cfg run -g onewire/faker/scan")
+			g = m.parse("-vvvc test.cfg run -gS onewire/faker/scan")
 			g = asyncio.ensure_future(g,loop=loop)
-			logger.debug("Waiting 2")
+
+			logger.debug("Waiting 2: main branch's alarm task")
 			t1 = time()
 			while True:
 				try:
@@ -340,23 +261,37 @@ async def test_onewire_fake(loop):
 					logger.debug("Found 2")
 					break
 
-				await asyncio.sleep(0.1, loop=loop)
-				if time()-t1 >= 90:
+				if time()-t1 >= 120:
 					raise RuntimeError("Condition 2")
+				await asyncio.sleep(0.1, loop=loop)
 
 			logger.debug("TC A")
 
 			# Start the bus runner
 			m = MoatTest(loop=loop)
-			h = m.parse("-vvvc test.cfg run -g onewire/faker/run")
+			h = m.parse("-vvvc test.cfg run -gS onewire/faker/run")
 			h = asyncio.ensure_future(h,loop=loop)
 			logger.debug("TC A3")
 
-			# give it some time to settle (lots of new entries)
-			await fs.step(h)
-			await asyncio.sleep(1.5,loop=loop)
-			await fs.step(h)
-			logger.debug("TC B")
+			# get job entry
+			logger.debug("Waiting 2a: temperature scanner")
+			t1 = time()
+			while True:
+				if ('onewire','faker','run','bus.42 1f.123123123123 aux','temperature') in _task_reg:
+					logger.debug("Found 2a")
+					break
+				if time()-t1 >= 10:
+					raise RuntimeError("Condition 2a")
+				await asyncio.sleep(0.1, loop=loop)
+
+			await asyncio.sleep(0.2,loop=loop)
+			fsp = _task_reg[('onewire','faker','run','bus.42','poll')].job
+			fst = _task_reg[('onewire','faker','run','bus.42 1f.123123123123 aux','temperature')].job
+			logger.debug("TC B1")
+			await fsp._call_delay()
+			logger.debug("TC B2")
+			await fst._call_delay()
+			logger.debug("TC B3")
 
 			# temperature device found, bus scan active
 			async def mod_a():
@@ -370,51 +305,66 @@ async def test_onewire_fake(loop):
 				assert int(fb.bus_aux['simultaneous']['temperature']) == 1
 				logger.debug("Mod A end")
 			logger.debug("Mod A hook")
-			await fs.step(h,mod_a)
+			await fsp._call_delay()
+			await fst._call_delay(mod_a)
 			logger.debug("Mod A done")
 			logger.debug("TC C")
-			await fs.step(h)
 			await asyncio.sleep(2.5,loop=loop)
-			await fs.step(h)
+			await fsp._call_delay()
+			await fst._call_delay()
 			logger.debug("TC D")
 
 			# we should have a value by now
 			async def mod_a2():
+				logger.debug("Mod A2 start")
 				await td.wait()
 				assert float(td['10']['001001001001'][':dev']['input']['temperature']['value']) == 12.5, \
 					td['10']['001001001001'][':dev']['input']['temperature']['value']
 				assert td['05']['010101010101'][':dev']['input']['pin']['value'] == '0', \
 					 td['05']['010101010101'][':dev']['input']['pin']['value']
-			await fs.step(h,mod_a2)
+				logger.debug("Mod A2 end")
+			await fst._call_delay(mod_a2)
 			logger.debug("TC E")
 			assert amqt == 12.5, amqt
 			await u.rpc('test.fake.pin',1)
+			logger.debug("TC E2")
 
 			# now unplug the sensor
 			async def mod_x():
+				logger.debug("Mod X")
 				del fb.bus_aux['10.001001001001']
-			await fs.step(h,mod_x)
+			await fst._call_delay(mod_x)
 			logger.debug("TC F")
 
-			m2 = MoatTest(loop=loop)
-			r = await m2.parse("-vvvc test.cfg run -g onewire/faker/scan")
-			assert r == 0, r
-			del m2
+			t1 = time()
+			while True:
+				if ('onewire','faker','scan','bus.42 1f.123123123123 aux') in _task_reg:
+					break
+				if time()-t1 >= 10:
+					raise RuntimeError("Condition 2b")
+				await asyncio.sleep(0.1, loop=loop)
+
+			fst2 = _task_reg[('onewire','faker','scan','bus.42 1f.123123123123 aux')]
+			await fst2._trigger()
+			del fst2
 
 			logger.debug("TC G")
 			# watch it vanish
 			async def mod_b():
-				assert tr['faker']['bus']['bus.42 1f.123123123123 aux']['devices']['10']['001001001001'] == '1'
-			await fs.step(h,mod_b)
+				assert tr['faker']['bus']['bus.42 1f.123123123123 aux']['devices']['10']['001001001001'].value == '1'
+			await fst._call_delay(mod_b)
 			logger.debug("TC H")
 
+			await asyncio.sleep(0.5,loop=loop)
 			for x in range(3):
-				m2 = MoatTest(loop=loop)
-				r = await m2.parse("-vvvc test.cfg run -g onewire/faker/scan")
-				assert r == 0, r
-				del m2
-			await asyncio.sleep(1.5,loop=loop)
-			await fs.step(h)
+				fst2 = _task_reg[('onewire','faker','scan','bus.42 1f.123123123123 aux')]
+				await fst2._trigger()
+				await asyncio.sleep(0.5,loop=loop)
+			del fst2
+			await asyncio.sleep(0.5,loop=loop)
+			await fst._call_delay()
+			fst2 = _task_reg[('onewire','faker','run','bus.42','temperature')].job
+			await fst2._call_delay()
 			logger.debug("TC I")
 			async def mod_c():
 				assert td['05']['010101010101'][':dev']['input']['pin']['value'] == '1', \
@@ -433,17 +383,17 @@ async def test_onewire_fake(loop):
 				fb.bus['10.001001001001'] = fb.temp
 				# and prepare to check that the scanner doesn't any more
 				fb.bus_aux['simultaneous']['temperature'] = 0
-			await fs.step(h,mod_c)
+			await fst2._call_delay(mod_c)
 			logger.debug("TC J")
 
-			m2 = MoatTest(loop=loop)
-			r = await m.parse("-vvvc test.cfg run -g onewire/faker/scan")
-			assert r == 0, r
+			fst2 = _task_reg[('onewire','faker','scan','bus.42')].job
+			await fst2._call_delay()
+			del fst2
 
 			logger.debug("TC K")
-			await fs.step(h)
+			await fs._call_delay()
 			await asyncio.sleep(2.5,loop=loop)
-			await fs.step(h)
+			await fs._call_delay()
 			logger.debug("TC L")
 
 			# we're scanning the main bus now
@@ -455,31 +405,31 @@ async def test_onewire_fake(loop):
 
 				assert int(fb.bus['simultaneous']['temperature']) == 1
 				assert int(fb.bus_aux['simultaneous']['temperature']) == 0
-			await fs.step(h,mod_s)
+			await fs._call_delay(mod_s)
 			logger.debug("TC M")
-			await fs.step(h)
+			await fs._call_delay()
 			await asyncio.sleep(4.5,loop=loop)
-			await fs.step(h)
+			await fs._call_delay()
 			logger.debug("TC N")
 			async def mod_a3():
 				await td.wait()
 				assert float(td['10']['001001001001'][':dev']['input']['temperature']['value']) == 42.25, \
 					td['10']['001001001001'][':dev']['input']['temperature']['value']
-			await fs.step(h,mod_a3)
+			await fs._call_delay(mod_a3)
 			logger.debug("TC O")
 			assert amqt == 42.25, amqt
 
 			# More to come.
 
-			f.cancel()
-			g.cancel()
-			h.cancel()
-			with pytest.raises(asyncio.CancelledError):
-				await f
-			with pytest.raises(asyncio.CancelledError):
-				await g
-			with pytest.raises(asyncio.CancelledError):
-				await h
 	finally:
+		jj = (e,f,g,h)
+		for j in jj:
+			if j is None: continue
+			if not j.done():
+				j.cancel()
+		for j in jj:
+			if j is None: continue
+			with suppress(asyncio.CancelledError):
+				await j
 		await u.stop()
 

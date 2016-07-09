@@ -33,7 +33,7 @@ from aio_etcd import StopWatching
 from contextlib import suppress
 from moat.dev import DEV_DIR,DEV
 from moat.bus import BUS_DIR
-from moat.script.task import Task
+from moat.script.task import Task,TimeoutHandler
 from moat.script.util import objects
 from moat.task.device import DeviceMgr
 
@@ -98,7 +98,7 @@ class BusHandler(_BusTask,DeviceMgr):
 		self.bus_cached = self.srv
 		await super().setup()
 
-class ScanTask(_BusTask, metaclass=_ScanMeta):
+class ScanTask(TimeoutHandler, _BusTask, metaclass=_ScanMeta):
 	"""\
 		Common class for 1wire bus scanners.
 
@@ -112,7 +112,6 @@ class ScanTask(_BusTask, metaclass=_ScanMeta):
 		
 		"""
 	typ = None
-	_trigger = None
 	schema = {'timer':'float'}
 
 	async def task(self):
@@ -130,21 +129,15 @@ class ScanTask(_BusTask, metaclass=_ScanMeta):
 		self.bus_cached = self.srv.at(*path)
 
 		ts = time()
+		try:
+			t = self.config['timer']
+		except KeyError:
+			t = self.taskdir['data']['timer']
 		long_warned = 0
+
 		while True:
-			if self._trigger is None or self._trigger.done():
-				if self._trigger is not None:
-					try:
-						self._trigger.result()
-					except StopWatching:
-						break
-					# propagate an exception, if warranted
-				self._trigger = await self._trigger_hook()
 			warned = await self.task_()
-			try:
-				t = self.config['timer']
-			except KeyError:
-				t = self.taskdir['data']['timer']
+
 			# subtract the time spent during the task
 			if warned and t < 10:
 				t = 10
@@ -156,36 +149,12 @@ class ScanTask(_BusTask, metaclass=_ScanMeta):
 					long_warned = int(100/t)+1
 					# thus we get at most one warning every two minutes, more or less
 					logger.warning("Task %s took %s seconds, should run every %s",self.name,t-delay,t)
-					# TODO: write that warning to etcd instead
+					# TODO: write that warning to etcd
 				ts = nts
 				continue
 			elif long_warned:
 				long_warned -= 1
-			with suppress(asyncio.TimeoutError):
-				await asyncio.wait_for(self._trigger,delay, loop=self.loop)
-
-	def trigger(self):
-		"""Call to cause an immediate re-scan"""
-		if self._trigger is not None and not self._trigger.done():
-			self._trigger.set_result(None)
-
-	async def _trigger_hook(self):
-		"""\
-			This code is intended to be overridden by tests.
-
-			It returns a future which, when completed, should cause any
-			activity to run immediately which otherwise waits for a timer.
-			
-			The default implementation does nothing but return a static future.
-
-			Multiple calls to this code must return the same future as long as
-			that future is not completed.
-			"""
-		if self._trigger is None or self._trigger.done():
-			return asyncio.Future(loop=self.loop)
-		else:
-			return self._trigger
-
+			await self.delay(delay)
 
 	async def task_(self):
 		"""Override this to actually implement the periodic activity."""
@@ -193,8 +162,6 @@ class ScanTask(_BusTask, metaclass=_ScanMeta):
 
 class _BusScan(_BusTask):
 	"""Common code for bus scanning"""
-	_delay = None
-	_delay_timer = None
 
 	async def setup_vars(self):
 		await super().setup_vars()
@@ -243,8 +210,6 @@ class BusScan(_BusScan):
 	"""This task scans a specific bus of a 1wire server: /task/onewire/DEV/scan/BUS."""
 	taskdef="onewire/scan/bus"
 	summary="Scan one bus of a 1wire server"
-	_delay = None
-	_delay_timer = None
 
 	async def task(self):
 		"""Scan a single bus"""

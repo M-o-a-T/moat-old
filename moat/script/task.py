@@ -41,6 +41,8 @@ class JobParentGoneError(RuntimeError):
 	"""The job entry's 'parent' points to something that does not exist."""
 	pass
 
+# for debugging purposes only
+_task_reg = {}
 
 class Task(asyncio.Task):
 	"""\
@@ -338,6 +340,61 @@ class Task(asyncio.Task):
 			"""
 		raise NotImplementedError("You need to write the code that does the work!")
 
+class TimeoutHandler:
+	"""\
+		Task mix-in which supplies a timeout mechanism.
+
+		This is somewhat non-trivial because of requiring
+		mostly-synchronous call-ins from tests.
+		"""
+	
+	_delay = None
+	_delay_x = None
+	_delay_run = None
+	async def delay(self, seconds):
+		if seconds > 2: # don't spam the logs
+			logger.debug("delay %.2f: %s",seconds,self)
+		self._delay = asyncio.Future(loop=self.loop)
+		r,self._delay_run = self._delay_run,None
+		if self._delay_x is not None and not self._delay_x.done():
+			try:
+				if r is not None:
+					r = await r()
+			except Exception as err:
+				self._delay_x.set_exception(err)
+			else:
+				self._delay_x.set_result(r)
+		else:
+			assert r is None, r
+
+		try:
+			await asyncio.wait_for(self._delay,seconds, loop=self.loop)
+		except asyncio.TimeoutError:
+			if seconds > 2:
+				logger.debug("delay done: %s",self)
+			pass
+		else:
+			logger.debug("delay skip: %s",self)
+
+	def skip_delay(self):
+		"""Call to return from the delay immediately"""
+		if self._delay is not None and not self._delay.done():
+			logger.debug("delay: skipping: %s",self)
+			self._delay.set_result(None)
+		else:
+			logger.debug("delay: NOT skipping: %s",self)
+			
+	async def _call_delay(self, proc=None):
+		"""Arrange to run m() as soon as the delay happens.
+			Also, wait until that is finished."""
+		logger.debug("delay_call: %s %s",proc,self)
+		self._delay_x = asyncio.Future(loop=self.loop)
+		self._delay_run = proc
+		self.skip_delay()
+		res = await self._delay_x
+		logger.debug("delay_call: %s < %s",res,self)
+		return res
+
 async def _run_state(tree,path):
 	"""\
 		Get a tree for the job's state.
@@ -374,7 +431,7 @@ class TaskMaster(asyncio.Future):
 		self.cmd = cmd
 		self.task = task
 		self.path = task.path[len(TASK_DIR):-1]
-		self.name = '/'.join(path) # for now
+		self.name = '/'.join(self.path) # for now
 		self.cfg = cfg
 		self.vars = {}
 		self.callback = callback
@@ -439,6 +496,8 @@ class TaskMaster(asyncio.Future):
 			self.job = self.task.cls(self.cmd, self.name, parents=p, taskdir=self.task, config=self.task._get('data',{}), _ttl=self._get_ttl, **self.cfg)
 		except TypeError as e:
 			raise TypeError(self.task,self.task.cls) from e
+		self.task._task = self.job
+		_task_reg[self.path] = self
 		self.job.add_done_callback(self._job_done)
 		if self.callback is not None:
 			self.callback("start")
@@ -469,9 +528,23 @@ class TaskMaster(asyncio.Future):
 		self.timer = None
 		self._start()
 
+	async def _trigger(self):
+		if self.timer is None:
+			logger.debug("_trigger: job is running")
+			await self.job
+			while self.timer is None:
+				await asyncio.sleep(0.1, loop=self.loop)
+		logger.debug("_trigger: restart now")
+		assert self.timer is not None
+		self.timer.cancel()
+		self._timer_done()
+		await self.job
+
 	def _job_done(self, f):
 		assert f is self.job # job ended
 		assert self.timer is None
+		self.task._task = None
+		_task_reg.pop(self.path,None)
 		try:
 			res = self.job.result()
 		except asyncio.CancelledError as exc:
