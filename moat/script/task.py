@@ -334,8 +334,11 @@ class Task(asyncio.Task):
 				except etcd.EtcdKeyNotFound:
 					# race condition, probably due to interrupt
 					pass # pragma: no cover
+				except asyncio.CancelledError as exc:
+					raise
 				except Exception as exc:
 					logger.exception("Could not delete 'running' entry")
+					raise
 			await run_state.wait()
 
 			logger.debug("Ended %s: %s",self.name, res)
