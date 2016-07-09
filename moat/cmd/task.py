@@ -328,12 +328,16 @@ class EnumCommand(Command):
 				print("Node '%s' does not have tasks" % (d,), file=sys.stderr)
 				continue
 			def show(r):
+				if len(r) > 1:
+					r1 = r[1]
+					if not isinstance(r1,str):
+						r1 = '/'.join(r1)
 				if r[0] == 'add':
-					print("Task:"+'/'.join(r[1]), 'at', '/'.join(r[2]),*r[3:], file=self.stdout)
+					print("Task:"+r1, 'at', '/'.join(r[2]),*r[3:], file=self.stdout)
 				elif r[0] == 'drop':
-					print("Delete", '/'.join(r[1]), *r[2:], file=self.stdout)
+					print("Delete", r1, *r[2:], file=self.stdout)
 				elif r[0] == 'scan':
-					print("Subtask", '/'.join(r[1]), *r[2:], file=self.stdout)
+					print("Subtask", r1, *r[2:], file=self.stdout)
 				elif r[0] == 'watch':
 					print('---', file=self.stdout)
 					if not self.options.watch:
