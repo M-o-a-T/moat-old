@@ -40,6 +40,9 @@ class ScanPoll(ScanTask):
 				try:
 					dev = await self.devices[fam][devid][DEV]
 					await dev.poll()
+				except asyncio.CancelledError:
+					raise
 				except Exception:
 					logger.exception("Poll error %s.%s", fam,devid)
+					raise
 
