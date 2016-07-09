@@ -314,6 +314,7 @@ class Task(asyncio.Task):
 				except Exception as exc:
 					# … or not.
 					exc.__context__ = None # the cancelled run_task is not interesting
+					logger.log_exception(self.name)
 					await run_state.set("state","error")
 					await run_state.set("message",str(exc))
 					await run_state.set("debug","".join(format_exception(exc.__class__,exc,exc.__traceback__)))
