@@ -41,23 +41,6 @@ class JobParentGoneError(RuntimeError):
 	"""The job entry's 'parent' points to something that does not exist."""
 	pass
 
-@asyncio.coroutine
-def coro_wrapper(proc):
-	"""\
-		This code is responsible for turning whatever callable you pass in
-		into a "yield from"-style coroutine.
-		"""
-	did_call = False
-	if inspect.iscoroutinefunction(proc):
-		proc = proc()
-		did_call = True
-	if inspect.isawaitable(proc):
-		return (yield from proc.__await__())
-	if inspect.iscoroutine(proc):
-		return (yield from proc)
-	if not did_call and callable(proc):
-		proc = proc()
-	return proc
 
 class Task(asyncio.Task):
 	"""\
@@ -99,7 +82,7 @@ class Task(asyncio.Task):
 			@parents contains a list of etcd node paths which must exist for the task to run.
 			"""
 		self.loop = cmd.root.loop
-		super().__init__(coro_wrapper(self.run), loop=self.loop)
+		super().__init__(self.run(), loop=self.loop)
 		if isinstance(name,(list,tuple)):
 			assert len(name)
 			path = name
