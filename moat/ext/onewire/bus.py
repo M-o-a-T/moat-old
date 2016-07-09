@@ -168,7 +168,7 @@ class OnewireBusDevice(ManagedEtcThing, EtcXValue):
 			mgr.add_device(dev)
 		except AttributeError:
 			import pdb;pdb.set_trace()
-			pass
+			raise
 	def manager_gone(self):
 		if isinstance(self.device,EtcAwaiter):
 			return
