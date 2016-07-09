@@ -46,6 +46,10 @@ class recEtcDir:
 			raise ReloadRecursive
 		return (await super().this_obj(recursive=recursive, **kw))
 
+	async def init(self):
+		self.force_updated()
+		await super().init()
+
 class MoatBusBase(EtcDir):
 	"""\
 		Base class for /bus/‹name› subsystems.
