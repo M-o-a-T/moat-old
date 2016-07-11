@@ -823,7 +823,7 @@ class SchedValve(SchedCommon):
 				self.site.send_command("set","output","on",*(self.v.var.split()), sub=(("for",duration),("async",)))
 			except Exception:
 				# Something broke. Try to turn this thing off.
-				self.log(format_exc()+repr(context))
+				self.log(format_exc())
 				
 				self.site.send_command("set","output","off",*(self.v.var.split()))
 				raise RuntimeError("Could not start (logged)")
