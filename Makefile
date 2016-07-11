@@ -14,7 +14,7 @@
 ##  for more details.
 ##
 
-export PYTHONPATH=$(shell pwd):$(shell pwd)/dabroker
+export PYTHONPATH?=$(shell pwd)
 DESTDIR ?= "/"
 PYDESTDIR ?= ${DESTDIR}
 PYTHON ?= python3
@@ -52,7 +52,24 @@ clean:
 
 
 test: all
-	@$(MAKE) -C test --no-print-directory test
+	@rm -f test.log
+	py.test-3 --cov-report term-missing \
+		--assert=plain tests \
+		--cov=tests \
+		--cov=moat.cmd \
+		--cov=moat.dev \
+		--cov=moat.proto \
+		--cov=moat.script \
+		--cov=moat.task \
+		--cov=moat.util \
+		--cov-config .coveragerc
+
+t: all
+	@rm -f test.log
+	py.test-3 -x --assert=plain tests
+
+otest: all
+	@$(MAKE) -C test --no-print-directory otest
 diff: FIX
 	@$(MAKE) -C test --no-print-directory diff
 

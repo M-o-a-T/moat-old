@@ -1,18 +1,42 @@
 EVENT: startup
      : startup=True
 EVENT: module¦load¦bool
+     : deprecated=True
+EVENT: module¦state¦bool
+     : state=load
 EVENT: module¦load¦logging
+     : deprecated=True
+EVENT: module¦state¦logging
+     : state=load
 EVENT: module¦load¦trigger
+     : deprecated=True
+EVENT: module¦state¦trigger
+     : state=load
 EVENT: module¦load¦wait
-TRACE NewHandler 9
+     : deprecated=True
+EVENT: module¦state¦wait
+     : state=load
+TRACE NewHandler 13
 EVENT: module¦load¦onewire
+     : deprecated=True
+EVENT: module¦state¦onewire
+     : state=load
 EVENT: module¦load¦on_event
+     : deprecated=True
+EVENT: module¦state¦on_event
+     : state=load
 EVENT: module¦load¦errors
+     : deprecated=True
+EVENT: module¦state¦errors
+     : state=load
 EVENT: module¦load¦monitor
+     : deprecated=True
+EVENT: module¦state¦monitor
+     : state=load
 TRACE Create OnEvtHandler: onewire¦up
-TRACE NewHandler 14
+TRACE NewHandler 22
 TRACE Create OnEvtHandler: onewire¦scanned¦A
-TRACE NewHandler 15
+TRACE NewHandler 23
 DEBUG onewire NEW ‹OWFSqueue:None New› None None ()
 TRACE New OWFS bus A ‹OWFSqueue:A New›
 TRACE conn setstate init closed
@@ -20,9 +44,17 @@ TRACE onewire start bus update
 TRACE conn setstate closed connecting
 TRACE conn connecting OWFSqueue A
 EVENT: onewire¦scanning¦A
+     : deprecated=True
+EVENT: onewire¦scan¦A
+     : run=running
 EVENT: wait¦start¦yawn
+     : deprecated=True
      : end_time=11.1
      : loglevel=0
+EVENT: wait¦state¦yawn
+     : end_time=11.1
+     : loglevel=0
+     : state=start
 TRACE !got UP_EVENT A
 TRACE conn setting up OWFSqueue A
 TRACE conn connected OWFSqueue A
@@ -30,6 +62,9 @@ TRACE NotConn [[], [], [‹DIRmsg ›], []]
 TRACE conn setstate connecting connected
 DEBUG onewire SEND 0 1 7 6 0 0 b'\x00'
 EVENT: onewire¦connect¦A
+     : deprecated=True
+EVENT: onewire¦link¦state¦A
+     : state=up
 DEBUG onewire RECV 0 96 0 6 95 x8002
 DEBUG onewire RECV … 95 b'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm'
 TRACE conn incoming OWFSqueue A ‹MsgIncoming: data:b'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' prio:2 typ:0›
@@ -54,10 +89,20 @@ DEBUG onewire SEND 0 37 2 6 8192 0 b'/uncached/bus.0/10.000010EF0000/type\x00'
 EVENT: onewire¦bus¦up
      : bus=A
      : path=('bus.0',)
+EVENT: onewire¦bus¦state¦A¦bus.0
+     : bus=A
+     : path=('bus.0',)
+     : state=up
 EVENT: onewire¦scanned¦A
+     : deprecated=True
      : new=1
      : num=1
      : old=0
+EVENT: onewire¦scan¦A
+     : new=1
+     : num=1
+     : old=0
+     : run=done
 DEBUG onewire SEND 0 44 2 6 8192 0 b'/uncached/bus.0/10.000010EF0000/temperature\x00'
 DEBUG onewire RECV 0 7 7 6 7 x0
 DEBUG onewire RECV … 7 b'DS18S20'
@@ -69,24 +114,27 @@ TRACE conn incoming OWFSqueue A ‹MsgIncoming: data:b'         1.6' prio:2 typ:
 DEBUG onewire done:  ‹ATTRgetmsg 10.000010EF0000 temperature›
 EVENT: onewire¦new
      : bus=A
+     : deprecated=True
      : id=10.000010ef0000
      : path=('bus.0',)
      : typ=DS18S20
-EVENT: onewire¦device¦new¦10.000010ef0000
+EVENT: onewire¦device¦new
      : bus=A
      : id=10.000010ef0000
      : path=('bus.0',)
      : typ=DS18S20
 EVENT: onewire¦up
      : bus=A
+     : deprecated=True
      : id=10.000010ef0000
      : path=('bus.0',)
      : typ=DS18S20
 TRACE YesC
-EVENT: onewire¦device¦up¦10.000010ef0000
+EVENT: onewire¦device¦state¦10.000010ef0000
      : bus=A
      : id=10.000010ef0000
      : path=('bus.0',)
+     : state=up
      : typ=DS18S20
 : ‹Collected OWFSinput:temp›
 name: temp
@@ -114,7 +162,12 @@ TRACE monitor More data [1.6] for ‹tempi›
 DEBUG onewire done:  ‹ATTRsetmsg 10.000010EF0000 temp_high 99›
 DEBUG onewire SEND 0 1 7 6 0 0 b'\x00'
 EVENT: wait¦cancel¦yawn
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦yawn
+     : end_time=11.1
+     : loglevel=0
+     : state=cancel
 DEBUG onewire RECV 0 96 0 6 95 x8002
 DEBUG onewire RECV … 95 b'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm'
 TRACE conn incoming OWFSqueue A ‹MsgIncoming: data:b'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' prio:2 typ:0›
@@ -155,6 +208,9 @@ TRACE Yes
 TRACE onewire start bus update
 DEBUG onewire SEND 0 1 7 6 0 0 b'\x00'
 EVENT: onewire¦scanning¦A
+     : deprecated=True
+EVENT: onewire¦scan¦A
+     : run=running
 DEBUG onewire RECV 0 96 0 6 95 x8002
 DEBUG onewire RECV … 95 b'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm'
 TRACE conn incoming OWFSqueue A ‹MsgIncoming: data:b'/10.000010EF0000,/bus.0,/uncached,/settings,/system,/statistics,/structure,/simultaneous,/alarm' prio:2 typ:0›
@@ -175,9 +231,15 @@ TRACE onewire got unrecognized name simultaneous
 TRACE onewire got unrecognized name alarm
 DEBUG onewire doneDIR ‹DIRmsg bus.0›
 EVENT: onewire¦scanned¦A
+     : deprecated=True
      : new=0
      : num=1
      : old=0
+EVENT: onewire¦scan¦A
+     : new=0
+     : num=1
+     : old=0
+     : run=done
 DEBUG onewire SEND 0 23 7 6 0 0 b'/bus.0/10.000010EF0000\x00'
 DEBUG onewire RECV 0 488 0 6 487 x0
 DEBUG onewire RECV … 487 b'/bus.0/10.000010EF0000/address,/bus.0/10.000010EF0000/alias,/bus.0/10.000010EF0000/crc8,/bus.0/10.000010EF0000/errata,/bus.0/10.000010EF0000/family,/bus.0/10.000010EF0000/id,/bus.0/10.000010EF0000/locator,/bus.0/10.000010EF0000/power,/bus.0/10.000010EF0000/r_address,/bus.0/10.000010EF0000/r_id,/bus.0/10.000010EF0000/r_locator,/bus.0/10.000010EF0000/scratchpad,/bus.0/10.000010EF0000/temperature,/bus.0/10.000010EF0000/temphigh,/bus.0/10.000010EF0000/templow,/bus.0/10.000010EF0000/type'
@@ -253,24 +315,50 @@ channel task job: <Greenlet: erh(<bound method OWFSchannel_forwarder._reader of 
      wire: bus.0
 .
 EVENT: wait¦start¦before¦disconnect
+     : deprecated=True
      : end_time=1.4
      : loglevel=0
+EVENT: wait¦state¦before¦disconnect
+     : end_time=1.4
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:08.600000 before¦disconnect: Forced timer done
 TRACE Dropping OWFS bus A
 EVENT: wait¦done¦before¦disconnect
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦before¦disconnect
+     : end_time=1.4
+     : loglevel=0
+     : state=done
 TRACE !got DOWN_EVENT A
 TRACE conn None OWFSqueue A
 TRACE Drop OWFS bus A
 EVENT: onewire¦disconnect¦A
+     : deprecated=True
+EVENT: onewire¦link¦state¦A
+     : state=down
 EVENT: wait¦start¦END
-     : end_time=2.5
+     : deprecated=True
+     : end_time=2.4
      : loglevel=0
+EVENT: wait¦state¦END
+     : end_time=2.4
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:09.050000 : Fake timer done
 TRACE conn setstate init closed
 TRACE conn setstate closed waiting: wait 3.000
 TRACE onewire start bus update
 EVENT: onewire¦scanning¦A
+     : deprecated=True
+EVENT: onewire¦scan¦A
+     : run=running
 TRACE 2003-04-05 06:07:10.600000 END: Forced timer done
 EVENT: wait¦done¦END
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦END
+     : end_time=2.4
+     : loglevel=0
+     : state=done

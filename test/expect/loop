@@ -1,46 +1,106 @@
 EVENT: startup
      : startup=True
 EVENT: wait¦start¦BEFORE
+     : deprecated=True
      : end_time=0.2
      : loglevel=0
+EVENT: wait¦state¦BEFORE
+     : end_time=0.2
+     : loglevel=0
+     : state=start
 EVENT: wait¦start¦Foo¦Bar
+     : deprecated=True
      : end_time=1.9
      : loglevel=0
+EVENT: wait¦state¦Foo¦Bar
+     : end_time=1.9
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:08.250000 BEFORE: Fake timer done
 EVENT: wait¦done¦BEFORE
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦BEFORE
+     : end_time=0.2
+     : loglevel=0
+     : state=done
 DEBUG Start
 DEBUG waiting
 EVENT: wait¦start¦DURING
+     : deprecated=True
      : end_time=1.0
      : loglevel=0
+EVENT: wait¦state¦DURING
+     : end_time=1.0
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:09.100000 DURING: Fake timer done
 DEBUG testing
 DEBUG waiting
 EVENT: wait¦done¦DURING
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦DURING
+     : end_time=1.0
+     : loglevel=0
+     : state=done
 EVENT: wait¦start¦DURING
+     : deprecated=True
      : end_time=1.8
      : loglevel=0
+EVENT: wait¦state¦DURING
+     : end_time=1.8
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:09.800000 DURING: Fake timer done
 DEBUG testing
 DEBUG waiting
 EVENT: wait¦done¦DURING
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦DURING
+     : end_time=1.8
+     : loglevel=0
+     : state=done
 EVENT: wait¦start¦DURING
+     : deprecated=True
      : end_time=2.5
      : loglevel=0
+EVENT: wait¦state¦DURING
+     : end_time=2.5
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:09.950000 Foo¦Bar: Fake timer done
 EVENT: wait¦done¦Foo¦Bar
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦Foo¦Bar
+     : end_time=1.9
+     : loglevel=0
+     : state=done
 TRACE 2003-04-05 06:07:10.550000 DURING: Fake timer done
 DEBUG testing
 DEBUG Done
 EVENT: wait¦done¦DURING
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦DURING
+     : end_time=2.5
+     : loglevel=0
+     : state=done
 EVENT: wait¦start¦AFTER
+     : deprecated=True
      : end_time=2.6
      : loglevel=0
+EVENT: wait¦state¦AFTER
+     : end_time=2.6
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:10.700000 AFTER: Fake timer done
 EVENT: wait¦done¦AFTER
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦AFTER
+     : end_time=2.6
+     : loglevel=0
+     : state=done

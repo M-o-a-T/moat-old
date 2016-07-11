@@ -662,6 +662,45 @@ If you split up your code along mostly-sensible lines, however, this should
 not be a problem. Replicating state across MoaT instances is not simple
 enough to do by MoaT script, but implementing it in MoaT itself is planned.
 
+Daemon startup
+--------------
+
+This is easiest to do with systemd. First, include this code at the end of
+your script:
+
+	load systemd
+	async:
+		while true:
+				wait: for 5 sec
+				keepalive
+	send ready
+
+Name your `moat` script `your_daemon.moat` and store it to /etc/moat.
+
+Run
+
+	systemctl start moat@your_daemon
+
+to start it,
+
+	systemctl status moat@your_daemon
+
+to see what's going on,
+
+	journalctl [other options] _SYSTEMD_UNIT=moat@your_daemon.service
+
+to see the daemon's logs, and
+
+	systemctl enable moat@your_daemon
+
+to autostart your daemon when the system is rebooted.
+
+	systemctl stop moat@*.service
+
+will stop all running `moat` daemons.
+
+See the systemd manpages for other interesting things to do.
+
 ---------------
 Do it in Python
 ---------------

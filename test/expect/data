@@ -32,26 +32,51 @@ worker
 TRACE Create OnEvtHandler: foo
 TRACE NewHandler 5
 EVENT: wait¦start¦vorher
+     : deprecated=True
      : end_time=0.1
      : loglevel=0
+EVENT: wait¦state¦vorher
+     : end_time=0.1
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:08.150000 vorher: Fake timer done
 EVENT: wait¦done¦vorher
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦vorher
+     : end_time=0.1
+     : loglevel=0
+     : state=done
 IEVENT: foo
 TRACE Yes
 TRACE Yes
 TRACE Yes
 EVENT: wait¦start¦nachher
+     : deprecated=True
      : end_time=0.2
      : loglevel=0
+EVENT: wait¦state¦nachher
+     : end_time=0.2
+     : loglevel=0
+     : state=start
 EVENT: wait¦start¦foo¦waiter
+     : deprecated=True
      : end_time=0.5
      : loglevel=0
+EVENT: wait¦state¦foo¦waiter
+     : end_time=0.5
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:08.300000 nachher: Fake timer done
 foo waiter :: 0.10000002384185791
 .
 EVENT: wait¦done¦nachher
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦nachher
+     : end_time=0.2
+     : loglevel=0
+     : state=done
 : ‹Waiter foo¦waiter 0.10000002384185791›
 name: foo¦waiter
 task _plinger: <Greenlet: erh(<bound method Waiter._pling of ‹Waiter foo¦waiter , 0.30000007152557373)>
@@ -64,11 +89,26 @@ in: foo
 in: Global
 .
 EVENT: wait¦start¦ende
+     : deprecated=True
      : end_time=0.6
      : loglevel=0
+EVENT: wait¦state¦ende
+     : end_time=0.6
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:08.500000 foo¦waiter: Fake timer done
 EVENT: wait¦done¦foo¦waiter
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦foo¦waiter
+     : end_time=0.5
+     : loglevel=0
+     : state=done
 TRACE 2003-04-05 06:07:08.650000 ende: Fake timer done
 EVENT: wait¦done¦ende
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦ende
+     : end_time=0.6
+     : loglevel=0
+     : state=done

@@ -3,40 +3,90 @@ EVENT: startup
 IEVENT: foo1
 IEVENT: bar1
 EVENT: wait¦start¦A
+     : deprecated=True
      : end_time=0.1
      : loglevel=0
+EVENT: wait¦state¦A
+     : end_time=0.1
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:08.150000 A: Fake timer done
 EVENT: wait¦done¦A
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦A
+     : end_time=0.1
+     : loglevel=0
+     : state=done
 IEVENT: foo2
 IEVENT: bar2
 EVENT: wait¦start¦B
+     : deprecated=True
      : end_time=0.2
      : loglevel=0
+EVENT: wait¦state¦B
+     : end_time=0.2
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:08.300000 B: Fake timer done
 EVENT: wait¦done¦B
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦B
+     : end_time=0.2
+     : loglevel=0
+     : state=done
 IEVENT: foo3
 IEVENT: bar3
 EVENT: wait¦start¦C
+     : deprecated=True
      : end_time=0.4
      : loglevel=0
+EVENT: wait¦state¦C
+     : end_time=0.4
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:08.450000 C: Fake timer done
 EVENT: wait¦done¦C
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦C
+     : end_time=0.4
+     : loglevel=0
+     : state=done
 IEVENT: foo4
 IEVENT: bar4
 EVENT: wait¦start¦D
+     : deprecated=True
      : end_time=0.5
      : loglevel=0
+EVENT: wait¦state¦D
+     : end_time=0.5
+     : loglevel=0
+     : state=start
 IEVENT: foo5
 TRACE 2003-04-05 06:07:08.550000 D: Fake timer done
 EVENT: wait¦done¦D
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦D
+     : end_time=0.5
+     : loglevel=0
+     : state=done
 IEVENT: bar5
 EVENT: wait¦start¦E
+     : deprecated=True
      : end_time=0.6
      : loglevel=0
+EVENT: wait¦state¦E
+     : end_time=0.6
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:08.700000 E: Fake timer done
 EVENT: wait¦done¦E
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦E
+     : end_time=0.6
+     : loglevel=0
+     : state=done

@@ -46,8 +46,6 @@ from moat.logging import log,DEBUG
 from moat.interpreter import Interpreter
 from moat.event_hook import OnEventBase
 
-from dabroker.util import import_string
-
 class KeepaliveHandler(Statement):
 	name="keepalive"
 	doc="tell systemd we're alive"

@@ -14,11 +14,21 @@ duration: 2.0
 TRACE Yes
 TRACE Yes
 EVENT: wait¦start¦A¦before
+     : deprecated=True
      : end_time=9.5
      : loglevel=0
+EVENT: wait¦state¦A¦before
+     : end_time=9.5
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:17.500000 A¦before: Fake timer done
 EVENT: wait¦done¦A¦before
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦A¦before
+     : end_time=9.5
+     : loglevel=0
+     : state=done
 : ‹Timeslot next ‹TimeslotHandler: timeslot 4››
 name: foo¦bar
 run: next
@@ -29,15 +39,28 @@ next: 0.5 sec (2003-04-05 06:07:18)
 TRACE Yes
 TRACE Yes
 EVENT: wait¦start¦B¦during
+     : deprecated=True
      : end_time=10.5
      : loglevel=0
+EVENT: wait¦state¦B¦during
+     : end_time=10.5
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:18.050000 : Fake timer done
 EVENT: timeslot¦begin¦foo¦bar
+     : deprecated=True
 TRACE Yes
 TRACE Yes
+EVENT: timeslot¦state¦foo¦bar
+     : state=begin
 TRACE 2003-04-05 06:07:18.550000 B¦during: Fake timer done
 EVENT: wait¦done¦B¦during
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦B¦during
+     : end_time=10.5
+     : loglevel=0
+     : state=done
 : ‹Timeslot during ‹TimeslotHandler: timeslot 4››
 name: foo¦bar
 run: during
@@ -50,21 +73,44 @@ slot: 0.7
 TRACE Yes
 TRACE Yes
 EVENT: wait¦start¦C¦after
+     : deprecated=True
      : end_time=12.6
      : loglevel=0
+EVENT: wait¦state¦C¦after
+     : end_time=12.6
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:20.050000 : Fake timer done
 EVENT: timeslot¦end¦foo¦bar
+     : deprecated=True
+EVENT: timeslot¦state¦foo¦bar
+     : state=end
 EVENT: wait¦start¦GOT¦EVENT¦B
+     : deprecated=True
      : end_time=12.2
      : loglevel=0
+EVENT: wait¦state¦GOT¦EVENT¦B
+     : end_time=12.2
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:20.250000 GOT¦EVENT¦B: Fake timer done
 TRACE Yes
 TRACE Yes
 EVENT: wait¦done¦GOT¦EVENT¦B
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦GOT¦EVENT¦B
+     : end_time=12.2
+     : loglevel=0
+     : state=done
 TRACE 2003-04-05 06:07:20.600000 C¦after: Fake timer done
 EVENT: wait¦done¦C¦after
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦C¦after
+     : end_time=12.6
+     : loglevel=0
+     : state=done
 : ‹Timeslot next ‹TimeslotHandler: timeslot 4››
 name: foo¦bar
 run: next
@@ -76,15 +122,28 @@ next: 7.3 sec (2003-04-05 06:07:28)
 TRACE Yes
 TRACE Yes
 EVENT: wait¦start¦D¦during¦again
+     : deprecated=True
      : end_time=20.6
      : loglevel=0
+EVENT: wait¦state¦D¦during¦again
+     : end_time=20.6
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:28 : Fake timer done
 EVENT: timeslot¦begin¦foo¦bar
+     : deprecated=True
 TRACE Yes
 TRACE Yes
+EVENT: timeslot¦state¦foo¦bar
+     : state=begin
 TRACE 2003-04-05 06:07:28.700000 D¦during¦again: Fake timer done
 EVENT: wait¦done¦D¦during¦again
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦D¦during¦again
+     : end_time=20.6
+     : loglevel=0
+     : state=done
 : ‹Timeslot during ‹TimeslotHandler: timeslot 4››
 name: foo¦bar
 run: during

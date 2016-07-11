@@ -1,0 +1,56 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import, print_function, division, unicode_literals
+##
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
+##
+##  This program is free software: you can redistribute it and/or modify
+##  it under the terms of the GNU General Public License as published by
+##  the Free Software Foundation, either version 3 of the License, or
+##  (at your option) any later version.
+##
+##  This program is distributed in the hope that it will be useful,
+##  but WITHOUT ANY WARRANTY; without even the implied warranty of
+##  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+##  GNU General Public License (included; see the file LICENSE)
+##  for more details.
+##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
+
+import sys
+from moat.script.main import Moat
+from moat.script import CommandExited
+import asyncio
+
+async def main(args):
+	c = Moat()
+	try:
+		ret = await c.parse(args)
+	except CommandExited as e:
+		if e.status or c.verbose:
+			print(e.output, file=sys.stderr)
+		return e.status
+	except asyncio.CancelledError:
+		print("Cancelled due to error.", file=sys.stderr)
+	finally:
+		await c.finish()
+
+	if ret is None:
+		return 0
+	return ret
+
+if __name__ == '__main__':
+	loop = asyncio.get_event_loop()
+	try:
+		sys.exit(loop.run_until_complete(main(sys.argv[1:])))
+	except KeyboardInterrupt:
+		print("Interrupted. Aborted.", file=sys.stderr)
+		sys.exit(8)
+

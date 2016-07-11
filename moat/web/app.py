@@ -2,14 +2,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, print_function, division, unicode_literals
 ##
-## This file is part of noris network AG's "zuko" package.
-##
-## noris-zuko is Copyright © 2014 by Matthias Urlichs <matthias@urlichs.de>.
-## and noris network AG, Nürnberg, Germany. All rights reserved.
-##
-## This paragraph is auto-generated and may self-destruct at any time,
-## courtesy of "make update". The original is in ‘utils/_boilerplate.py’.
-## Thus, please do not remove the next line, or insert any blank lines.
 ##BP
 
 import logging
@@ -20,11 +12,6 @@ import os
 
 from hamlish_jinja import HamlishExtension
 
-from zuko import config
-from zuko.main import Main
-from zuko.base import init_logging
-from zuko.web.sockets import Sockets
-
 import formalchemy.config
 from jinja2 import Template
 from formalchemy.templates import TemplateEngine
@@ -32,7 +19,7 @@ class JinjaEngine(TemplateEngine):
 	def render(self, template, **kw):
 		return Markup(render_template(os.path.join('formalchemy',template+'.haml'),**kw))
 
-logger = logging.getLogger('zuko.tools.webserver')
+logger = logging.getLogger(__name__)
 
 ###################################################
 # web server setup

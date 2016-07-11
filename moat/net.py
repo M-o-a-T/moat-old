@@ -162,7 +162,7 @@ class NetCommonConnector(Collected,Jobber):
 				else:
 					super(NetCommonConnector,self).delete()
 				try:
-					self.not_up_event()
+					self.not_up_event(error=ex)
 				except Exception as ex2:
 					fix_exception(ex2)
 					process_failure(ex2)
@@ -255,7 +255,7 @@ class NetCommonConnector(Collected,Jobber):
 		"""Called when an established connection is terminated"""
 		raise NotImplementedError("You need to override %s.down_event()" % (self.__class__.__name__,))
 
-	def not_up_event(self,external=True):
+	def not_up_event(self,external=True, error=None):
 		"""Called when a connection could not be established in the first place"""
 		raise NotImplementedError("You need to override %s.not_up_event()" % (self.__class__.__name__,))
 

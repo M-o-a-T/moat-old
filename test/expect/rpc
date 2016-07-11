@@ -3,8 +3,13 @@ EVENT: startup
 TRACE Create OnEvtHandler: send¦logger
 TRACE NewHandler 5
 EVENT: wait¦start¦shutdown
-     : end_time=1.1
+     : deprecated=True
+     : end_time=1.0
      : loglevel=0
+EVENT: wait¦state¦shutdown
+     : end_time=1.0
+     : loglevel=0
+     : state=start
 EVENT: rpc¦connect¦foo¦n1
 DEBUG TEST (Name('event',),)
 DEBUG TEST (Name('job',),)
@@ -97,10 +102,25 @@ IEVENT: send¦logger
 DEBUG hello This is a test
 TRACE 2003-04-05 06:07:09 shutdown: Forced timer done
 EVENT: wait¦done¦shutdown
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦shutdown
+     : end_time=1.0
+     : loglevel=0
+     : state=done
 EVENT: wait¦start¦foo¦b
-     : end_time=2.1
+     : deprecated=True
+     : end_time=2.0
      : loglevel=0
+EVENT: wait¦state¦foo¦b
+     : end_time=2.0
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:10 foo¦b: Forced timer done
 EVENT: wait¦done¦foo¦b
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦foo¦b
+     : end_time=2.0
+     : loglevel=0
+     : state=done

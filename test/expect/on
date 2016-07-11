@@ -92,15 +92,25 @@ IEVENT: baz
 DEBUG got baz two
 TRACE Yes
 EVENT: wait¦start¦_wait¦t1
+     : deprecated=True
      : end_time=0.1
      : loglevel=0
+EVENT: wait¦state¦_wait¦t1
+     : end_time=0.1
+     : loglevel=0
+     : state=start
 EVENT: state¦change¦dud
      : prev_time=2003-04-05 06:07:08
      : prev_value=two
      : value=nix
 TRACE 2003-04-05 06:07:08.150000 _wait¦t1: Fake timer done
 EVENT: wait¦done¦_wait¦t1
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦_wait¦t1
+     : end_time=0.1
+     : loglevel=0
+     : state=done
 TRACE Yes
 IEVENT: num¦1
 IEVENT: num¦2

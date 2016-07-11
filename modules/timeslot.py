@@ -189,7 +189,7 @@ now
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		if len(event):
-			raise SyntaxError(u'Usage: stopped')
+			raise SyntaxError(u'Usage: now')
 		self.parent.stopped = True
 TimeslotStart.register_statement(TimeslotNow)
 

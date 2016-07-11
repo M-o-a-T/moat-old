@@ -4,6 +4,3 @@
 [submodule "wago"]
 	path = wago
 	url = git@git.extern.smurf.noris.de:wago.git
-[submodule "dabroker"]
-	path = dabroker
-	url = git@github.com:smurfix/DaBroker.git

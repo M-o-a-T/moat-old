@@ -33,11 +33,12 @@ from moat.logging import log,DEBUG
 from test import run
 from gevent import spawn,sleep,event
 
-import sys
+import sys,os
 from traceback import print_exc
 
+host=os.environ.get('AMQP_HOST',"localhost")
 input = """\
-connect amqp "data.intern.smurf.noris.de":
+connect amqp "{}":
 	name test foo
 	user "test" test test
 
@@ -81,10 +82,11 @@ start amqp test foo
 on amam ho:
 	del wait foo b
 
-on wait cancel foo b:
-	log TRACE Yes
-on wait done foo b:
-	log ERROR No b2
+on wait state foo b:
+	if equal $state cancel:
+		log TRACE Yes
+	else if not equal $state start:
+		log ERROR No b2 $state
 
 async:
 	wait foo a:
@@ -103,7 +105,7 @@ list amqp listener foo lish
 list amqp connection
 list amqp connection test foo
 list worker
-list worker 7
+list worker 8
 list log
 list log AMQPlogger x2
 wait:
@@ -161,7 +163,7 @@ wait:
 # translate hey.x to amqte.x
 
 shutdown
-"""
+""".format(host)
 
 main_words.register_statement(ShutdownHandler)
 main_words.register_statement(Load)
@@ -177,6 +179,7 @@ load_module("state")
 load_module("errors")
 load_module("trigger")
 load_module("ifelse")
+load_module("bool")
 load_module("help")
 
 run("amqp",input)

@@ -8,8 +8,13 @@ TRACE monitor End run foo¦bar
 TRACE monitor Stop run foo¦bar
 EVENT: monitor¦start¦foo¦bar
 EVENT: wait¦start¦_wait¦t1
+     : deprecated=True
      : end_time=1.0
      : loglevel=0
+EVENT: wait¦state¦_wait¦t1
+     : end_time=1.0
+     : loglevel=0
+     : state=start
 EVENT: monitor¦update¦foo¦bar
      : change_at=2003-04-05 06:07:08
      : data=[53.0]
@@ -60,7 +65,12 @@ EVENT: monitor¦update¦foo¦bar
 TRACE Go from 51.0 to 51.0
 TRACE 2003-04-05 06:07:09 _wait¦t1: Fake timer done
 EVENT: wait¦done¦_wait¦t1
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦_wait¦t1
+     : end_time=1.0
+     : loglevel=0
+     : state=done
 TRACE Yes
 foo bar :: Wait ‹0.2 sec›
 .
@@ -75,8 +85,13 @@ steps: 1 / 1 / None
 data: 51.0
 .
 EVENT: wait¦start¦_wait¦t2
+     : deprecated=True
      : end_time=1.8
      : loglevel=0
+EVENT: wait¦state¦_wait¦t2
+     : end_time=1.8
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:09.250000 : Fake timer done
 TRACE 2003-04-05 06:07:09.250000 : Fake timer done
 TRACE monitor Start run foo¦bar
@@ -115,11 +130,16 @@ EVENT: monitor¦update¦foo¦bar
 TRACE Go from 51.0 to 50.0
 TRACE 2003-04-05 06:07:09.800000 _wait¦t2: Fake timer done
 EVENT: wait¦done¦_wait¦t2
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦_wait¦t2
+     : end_time=1.8
+     : loglevel=0
+     : state=done
 .
 EVENT: monitor¦stop¦foo¦bar
 TRACE Create OnEvtHandler: monitor¦checking¦bazzi¦zazzi
-TRACE NewHandler 17
+TRACE NewHandler 21
 TRACE monitor Start run bazzi¦zazzi
 : ‹Monitor bazzi¦zazzi run 0›
 name: bazzi¦zazzi
@@ -145,32 +165,67 @@ EVENT: monitor¦checking¦bazzi¦zazzi
 TRACE monitor filter [10.0] on bazzi¦zazzi
 TRACE monitor More data [10.0] for ‹bazzi zazzi›
 EVENT: wait¦start¦bazzizazzi¦A
+     : deprecated=True
      : end_time=2.0
      : loglevel=0
+EVENT: wait¦state¦bazzizazzi¦A
+     : end_time=2.0
+     : loglevel=0
+     : state=start
 EVENT: wait¦start¦_wait¦t5
+     : deprecated=True
      : end_time=1.9
      : loglevel=0
+EVENT: wait¦state¦_wait¦t5
+     : end_time=1.9
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:10 _wait¦t5: Fake timer done
 EVENT: wait¦done¦_wait¦t5
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦_wait¦t5
+     : end_time=1.9
+     : loglevel=0
+     : state=done
 TRACE Yes
 EVENT: wait¦start¦_wait¦t6
+     : deprecated=True
      : end_time=2.5
      : loglevel=0
+EVENT: wait¦state¦_wait¦t6
+     : end_time=2.5
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:10.050000 bazzizazzi¦A: Fake timer done
 TRACE monitor filter [10.0, 13.0] on bazzi¦zazzi
 TRACE monitor More data [10.0, 13.0] for ‹bazzi zazzi›
 EVENT: wait¦done¦bazzizazzi¦A
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦bazzizazzi¦A
+     : end_time=2.0
+     : loglevel=0
+     : state=done
 EVENT: wait¦start¦bazzizazzi¦B
+     : deprecated=True
      : end_time=2.3
      : loglevel=0
+EVENT: wait¦state¦bazzizazzi¦B
+     : end_time=2.3
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:10.300000 bazzizazzi¦B: Fake timer done
 TRACE monitor filter [10.0, 13.0, 14.0] on bazzi¦zazzi
 TRACE monitor End run bazzi¦zazzi
 TRACE monitor Stop run bazzi¦zazzi
 EVENT: wait¦done¦bazzizazzi¦B
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦bazzizazzi¦B
+     : end_time=2.3
+     : loglevel=0
+     : state=done
 EVENT: monitor¦checked¦bazzi¦zazzi
      : change_at=2003-04-05 06:07:09.800000
      : data=[10.0, 13.0, 14.0]
@@ -195,7 +250,12 @@ EVENT: monitor¦update¦bazzi¦zazzi
      : value=13.5
 TRACE 2003-04-05 06:07:10.550000 _wait¦t6: Fake timer done
 EVENT: wait¦done¦_wait¦t6
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦_wait¦t6
+     : end_time=2.5
+     : loglevel=0
+     : state=done
 TRACE Yes
 : ‹Monitor bazzi¦zazzi on 13.5›
 name: bazzi¦zazzi
@@ -245,11 +305,21 @@ TRACE monitor End run moni¦test2
 TRACE monitor Stop run moni¦test2
 EVENT: monitor¦start¦moni¦test2
 EVENT: wait¦start¦_wait¦t7
+     : deprecated=True
      : end_time=2.7
      : loglevel=0
+EVENT: wait¦state¦_wait¦t7
+     : end_time=2.7
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:10.750000 _wait¦t7: Fake timer done
 EVENT: wait¦done¦_wait¦t7
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦_wait¦t7
+     : end_time=2.7
+     : loglevel=0
+     : state=done
 EVENT: output¦change¦monitest
      : prev_value=1
      : value=2
@@ -265,8 +335,13 @@ EVENT: input¦change¦monitest2
      : last_value=2
      : value=1
 EVENT: wait¦start¦_wait¦t8
+     : deprecated=True
      : end_time=3.0
      : loglevel=0
+EVENT: wait¦state¦_wait¦t8
+     : end_time=3.0
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:10.800000 : Fake timer done
 TRACE 2003-04-05 06:07:10.800000 : Fake timer done
 TRACE monitor Start run moni¦test
@@ -304,7 +379,12 @@ EVENT: monitor¦update¦moni¦test2
      : value_delta=-1.0
 TRACE 2003-04-05 06:07:11.050000 _wait¦t8: Fake timer done
 EVENT: wait¦done¦_wait¦t8
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦_wait¦t8
+     : end_time=3.0
+     : loglevel=0
+     : state=done
 EVENT: output¦change¦monitest
      : prev_value=2
      : value=3
@@ -320,8 +400,13 @@ EVENT: input¦change¦monitest2
      : last_value=1
      : value=2
 EVENT: wait¦start¦_wait¦t9
+     : deprecated=True
      : end_time=3.2
      : loglevel=0
+EVENT: wait¦state¦_wait¦t9
+     : end_time=3.2
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:11.100000 : Fake timer done
 TRACE 2003-04-05 06:07:11.100000 : Fake timer done
 TRACE monitor Start run moni¦test
@@ -359,7 +444,12 @@ EVENT: monitor¦update¦moni¦test2
      : value_delta=1.0
 TRACE 2003-04-05 06:07:11.350000 _wait¦t9: Fake timer done
 EVENT: wait¦done¦_wait¦t9
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦_wait¦t9
+     : end_time=3.2
+     : loglevel=0
+     : state=done
 EVENT: output¦change¦monitest
      : prev_value=3
      : value=4
@@ -375,8 +465,13 @@ EVENT: input¦change¦monitest2
      : last_value=2
      : value=5
 EVENT: wait¦start¦_wait¦t10
+     : deprecated=True
      : end_time=3.5
      : loglevel=0
+EVENT: wait¦state¦_wait¦t10
+     : end_time=3.5
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:11.400000 : Fake timer done
 TRACE 2003-04-05 06:07:11.400000 : Fake timer done
 TRACE monitor Start run moni¦test
@@ -414,7 +509,12 @@ EVENT: monitor¦update¦moni¦test2
      : value_delta=3.0
 TRACE 2003-04-05 06:07:11.650000 _wait¦t10: Fake timer done
 EVENT: wait¦done¦_wait¦t10
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦_wait¦t10
+     : end_time=3.5
+     : loglevel=0
+     : state=done
 EVENT: output¦change¦monitest
      : prev_value=4
      : value=5
@@ -453,8 +553,13 @@ steps: 1 / 1 / None
 data: 5.0
 .
 EVENT: wait¦start¦_wait¦t11
+     : deprecated=True
      : end_time=3.9
      : loglevel=0
+EVENT: wait¦state¦_wait¦t11
+     : end_time=3.9
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:11.700000 : Fake timer done
 TRACE 2003-04-05 06:07:11.700000 : Fake timer done
 TRACE monitor Start run moni¦test
@@ -492,6 +597,11 @@ EVENT: monitor¦update¦moni¦test2
      : value_delta=7.0
 TRACE 2003-04-05 06:07:11.950000 _wait¦t11: Fake timer done
 EVENT: wait¦done¦_wait¦t11
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦_wait¦t11
+     : end_time=3.9
+     : loglevel=0
+     : state=done
 EVENT: monitor¦stop¦moni¦test
 EVENT: monitor¦stop¦moni¦test2

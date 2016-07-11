@@ -27,3 +27,6 @@ fs20/avr/*.bin
 *.map
 moat/gevent_rpyc.py
 /.pybuild/
+/.coverage
+/test.log
+/test.cfg

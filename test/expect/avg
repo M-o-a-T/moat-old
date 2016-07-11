@@ -9,11 +9,21 @@ mode: time
 value: None
 .
 EVENT: wait¦start¦_wait¦t1
+     : deprecated=True
      : end_time=0.2
      : loglevel=0
+EVENT: wait¦state¦_wait¦t1
+     : end_time=0.2
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:08.250000 _wait¦t1: Fake timer done
 EVENT: wait¦done¦_wait¦t1
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦_wait¦t1
+     : end_time=0.2
+     : loglevel=0
+     : state=done
 : ‹TimeAvg test¦time 2.0›
 name: test¦time
 mode: time
@@ -24,11 +34,21 @@ total samples: 1
 current average: 2.0
 .
 EVENT: wait¦start¦_wait¦t2
+     : deprecated=True
      : end_time=1.2
      : loglevel=0
+EVENT: wait¦state¦_wait¦t2
+     : end_time=1.2
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:09.250000 _wait¦t2: Fake timer done
 EVENT: wait¦done¦_wait¦t2
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦_wait¦t2
+     : end_time=1.2
+     : loglevel=0
+     : state=done
 : ‹TimeAvg test¦time 2.0›
 name: test¦time
 mode: time
@@ -49,11 +69,21 @@ total samples: 2
 current average: 2.0
 .
 EVENT: wait¦start¦_wait¦t3
+     : deprecated=True
      : end_time=2.2
      : loglevel=0
+EVENT: wait¦state¦_wait¦t3
+     : end_time=2.2
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:10.250000 _wait¦t3: Fake timer done
 EVENT: wait¦done¦_wait¦t3
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦_wait¦t3
+     : end_time=2.2
+     : loglevel=0
+     : state=done
 : ‹TimeAvg test¦time 2.0›
 name: test¦time
 mode: time
@@ -77,11 +107,21 @@ current average: 3.5
 TRACE Yes
 TRACE Yes
 EVENT: wait¦start¦_wait¦t4
+     : deprecated=True
      : end_time=4.2
      : loglevel=0
+EVENT: wait¦state¦_wait¦t4
+     : end_time=4.2
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:12.250000 _wait¦t4: Fake timer done
 EVENT: wait¦done¦_wait¦t4
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦_wait¦t4
+     : end_time=4.2
+     : loglevel=0
+     : state=done
 TRACE Yes
 DEBUG values now 0.0 prev 5.0
 test moving :: (new)
@@ -94,11 +134,21 @@ samples: 0
 max samples: 3
 .
 EVENT: wait¦start¦_wait¦t5
+     : deprecated=True
      : end_time=4.5
      : loglevel=0
+EVENT: wait¦state¦_wait¦t5
+     : end_time=4.5
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:12.500000 _wait¦t5: Fake timer done
 EVENT: wait¦done¦_wait¦t5
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦_wait¦t5
+     : end_time=4.5
+     : loglevel=0
+     : state=done
 : ‹MovingSamplesAvg test¦moving 2.0›
 name: test¦moving
 mode: moving
@@ -111,11 +161,21 @@ max samples: 3
 sample 0: 2.0
 .
 EVENT: wait¦start¦_wait¦t6
+     : deprecated=True
      : end_time=5.5
      : loglevel=0
+EVENT: wait¦state¦_wait¦t6
+     : end_time=5.5
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:13.500000 _wait¦t6: Fake timer done
 EVENT: wait¦done¦_wait¦t6
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦_wait¦t6
+     : end_time=5.5
+     : loglevel=0
+     : state=done
 : ‹MovingSamplesAvg test¦moving 2.0›
 name: test¦moving
 mode: moving
@@ -141,11 +201,21 @@ sample 0: 2.0
 sample 1: 5.0
 .
 EVENT: wait¦start¦_wait¦t7
+     : deprecated=True
      : end_time=7.5
      : loglevel=0
+EVENT: wait¦state¦_wait¦t7
+     : end_time=7.5
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:15.500000 _wait¦t7: Fake timer done
 EVENT: wait¦done¦_wait¦t7
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦_wait¦t7
+     : end_time=7.5
+     : loglevel=0
+     : state=done
 : ‹MovingSamplesAvg test¦moving 3.5›
 name: test¦moving
 mode: moving
@@ -174,11 +244,21 @@ sample 1: 5.0
 sample 2: -1.0
 .
 EVENT: wait¦start¦_wait¦t8
+     : deprecated=True
      : end_time=11.5
      : loglevel=0
+EVENT: wait¦state¦_wait¦t8
+     : end_time=11.5
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:19.500000 _wait¦t8: Fake timer done
 EVENT: wait¦done¦_wait¦t8
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦_wait¦t8
+     : end_time=11.5
+     : loglevel=0
+     : state=done
 : ‹MovingSamplesAvg test¦moving 2.0›
 name: test¦moving
 mode: moving
@@ -208,11 +288,21 @@ sample 1: -1.0
 sample 2: 8.0
 .
 EVENT: wait¦start¦_wait¦t9
+     : deprecated=True
      : end_time=15.5
      : loglevel=0
+EVENT: wait¦state¦_wait¦t9
+     : end_time=15.5
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:23.500000 _wait¦t9: Fake timer done
 EVENT: wait¦done¦_wait¦t9
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦_wait¦t9
+     : end_time=15.5
+     : loglevel=0
+     : state=done
 : ‹MovingSamplesAvg test¦moving 4.0›
 name: test¦moving
 mode: moving
@@ -244,11 +334,21 @@ sample 2: 14.0
 TRACE Yes
 TRACE Yes
 EVENT: wait¦start¦_wait¦t10
+     : deprecated=True
      : end_time=17.5
      : loglevel=0
+EVENT: wait¦state¦_wait¦t10
+     : end_time=17.5
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:25.500000 _wait¦t10: Fake timer done
 EVENT: wait¦done¦_wait¦t10
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦_wait¦t10
+     : end_time=17.5
+     : loglevel=0
+     : state=done
 TRACE Yes
 DEBUG values now 14.0 prev 8.0
 test decay :: (new)
@@ -260,11 +360,21 @@ value: None
 weight: 0.1
 .
 EVENT: wait¦start¦_wait¦t11
+     : deprecated=True
      : end_time=17.7
      : loglevel=0
+EVENT: wait¦state¦_wait¦t11
+     : end_time=17.7
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:25.750000 _wait¦t11: Fake timer done
 EVENT: wait¦done¦_wait¦t11
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦_wait¦t11
+     : end_time=17.7
+     : loglevel=0
+     : state=done
 : ‹DecaySamplesAvg test¦decay 2.0›
 name: test¦decay
 mode: decay
@@ -275,11 +385,21 @@ current average: 2.0
 weight: 0.1
 .
 EVENT: wait¦start¦_wait¦t12
+     : deprecated=True
      : end_time=18.8
      : loglevel=0
+EVENT: wait¦state¦_wait¦t12
+     : end_time=18.8
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:26.750000 _wait¦t12: Fake timer done
 EVENT: wait¦done¦_wait¦t12
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦_wait¦t12
+     : end_time=18.8
+     : loglevel=0
+     : state=done
 : ‹DecaySamplesAvg test¦decay 2.0›
 name: test¦decay
 mode: decay
@@ -300,11 +420,21 @@ current average: 4.0
 weight: 0.1
 .
 EVENT: wait¦start¦_wait¦t13
+     : deprecated=True
      : end_time=19.8
      : loglevel=0
+EVENT: wait¦state¦_wait¦t13
+     : end_time=19.8
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:27.750000 _wait¦t13: Fake timer done
 EVENT: wait¦done¦_wait¦t13
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦_wait¦t13
+     : end_time=19.8
+     : loglevel=0
+     : state=done
 : ‹DecaySamplesAvg test¦decay 4.0›
 name: test¦decay
 mode: decay
@@ -328,11 +458,21 @@ weight: 0.1
 TRACE Yes
 TRACE Yes
 EVENT: wait¦start¦_wait¦t14
+     : deprecated=True
      : end_time=21.8
      : loglevel=0
+EVENT: wait¦state¦_wait¦t14
+     : end_time=21.8
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:29.750000 _wait¦t14: Fake timer done
 EVENT: wait¦done¦_wait¦t14
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦_wait¦t14
+     : end_time=21.8
+     : loglevel=0
+     : state=done
 TRACE Yes
 DEBUG values now -1.0 prev 22.0
 test decaytime :: (new)
@@ -348,11 +488,21 @@ weight/minute: 0.9982029897000856
 weight/second: 0.1
 .
 EVENT: wait¦start¦_wait¦t15
+     : deprecated=True
      : end_time=22.0
      : loglevel=0
+EVENT: wait¦state¦_wait¦t15
+     : end_time=22.0
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:30 _wait¦t15: Fake timer done
 EVENT: wait¦done¦_wait¦t15
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦_wait¦t15
+     : end_time=22.0
+     : loglevel=0
+     : state=done
 : ‹DecayTimeAvg test¦decaytime 10.0›
 name: test¦decaytime
 mode: decaytime
@@ -368,11 +518,21 @@ weight/minute: 0.9982029897000856
 weight/second: 0.1
 .
 EVENT: wait¦start¦_wait¦t16
+     : deprecated=True
      : end_time=23.0
      : loglevel=0
+EVENT: wait¦state¦_wait¦t16
+     : end_time=23.0
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:31 _wait¦t16: Fake timer done
 EVENT: wait¦done¦_wait¦t16
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦_wait¦t16
+     : end_time=23.0
+     : loglevel=0
+     : state=done
 : ‹DecayTimeAvg test¦decaytime 10.0›
 name: test¦decaytime
 mode: decaytime
@@ -403,11 +563,21 @@ weight/minute: 0.9982029897000856
 weight/second: 0.1
 .
 EVENT: wait¦start¦_wait¦t17
+     : deprecated=True
      : end_time=24.0
      : loglevel=0
+EVENT: wait¦state¦_wait¦t17
+     : end_time=24.0
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:32 _wait¦t17: Fake timer done
 EVENT: wait¦done¦_wait¦t17
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦_wait¦t17
+     : end_time=24.0
+     : loglevel=0
+     : state=done
 : ‹DecayTimeAvg test¦decaytime 10.0›
 name: test¦decaytime
 mode: decaytime
@@ -441,11 +611,21 @@ weight/second: 0.1
 TRACE Yes
 TRACE Yes
 EVENT: wait¦start¦_wait¦t18
+     : deprecated=True
      : end_time=26.0
      : loglevel=0
+EVENT: wait¦state¦_wait¦t18
+     : end_time=26.0
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:34 _wait¦t18: Fake timer done
 EVENT: wait¦done¦_wait¦t18
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦_wait¦t18
+     : end_time=26.0
+     : loglevel=0
+     : state=done
 : ‹DecayTimeAvg test¦decaytime 20.0›
 name: test¦decaytime
 mode: decaytime

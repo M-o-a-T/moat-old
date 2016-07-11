@@ -1,0 +1,317 @@
+.. 
+    Copyright © 2007-2012, Matthias Urlichs <matthias@urlichs.de>
+    .
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    .
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License (included; see the file LICENSE)
+    for more details.
+
+Startup and shutdown
+--------------------
+
+startup
+    -- triggered after loading initial modules and parsing the
+       configuration files.
+
+shutdown
+    -- closing down
+
+Module load/unload
+------------------
+
+module state NAME [params...]
+    -- state of this module
+       "state": one of 'load', 'unload', or 'error' (could not load)
+
+Monitor
+-------
+
+monitor state NAME
+    -- The system will start monitoring this value. An error while
+       handling this event will prevent the monitoring from happening.
+       "state": one of 'run', 'stop' or 'error'
+
+monitor overrun NAME
+    -- The monitor's input queue did not process the last value before the
+       next came in.
+
+monitor step NAME
+    -- The difference between the old and new value of this monitor is
+       too large.
+       If this event triggers an error, no "value" event will be
+       generated.
+
+monitor update NAME
+    -- Monitoring has determined that the new value for NAME is VAL.
+       While this handler is running, the monitor's "var monitor"
+       variable will still contain the old value!
+
+       If this handler triggers an error, the new value will not be
+       stored.
+
+monitor limit NAME
+    -- The monitored value is lower/higher than the specified limit.
+       "state": one of 'low','low_ok','high','high_ok'.
+
+The next two events will only be sent when a passive monitor (which is
+fed by "set monitor" statements instead of actively being subclassed) is
+running.
+
+monitor check NAME
+    -- The monitored value needs an update.
+       "state": one of 'check', 'ok'
+
+net
+---
+
+The NAMEs here contain a trailing connection identifier when referring to
+an incoming connection, as there may be more than one concurrent
+connection.
+
+net state NAME…
+    -- This connection's state has changed.
+       "state": one of 'up', 'down' (disconnected after being up) or 'error'
+       (could not be established).
+
+net recv NAME…
+    -- Some text has been received.
+       Arguments are split by whitespace and stored in the event's `data`
+       field.
+
+I/O
+---
+
+input change NAME…
+    -- an input has changed
+       The value is sent in the `value` attribute.
+
+output change NAME…
+    -- the output changes. The old and new values are stored in the event's
+       `prev_value` and `value`, respectively.
+
+output error NAME…
+    -- Changing the output resulted in an error.
+
+PWM
+---
+
+pwm change NAME…
+    -- change the pulse level.
+       The new state is in the event's `value` parameter.
+
+pwm error NAME…
+    -- A "pwm set" event caused an error.
+       (That error was reported in detail, just before triggering this event.)
+
+State
+-----
+
+state new NAME…
+state delete NAME…
+state change NAME…
+
+    -- a state is created / deleted / changes.
+       The old and/or new values are stored in the event's prev_value /
+       value fields, respectively.
+
+FS20
+----
+
+fs20 state NAME…
+    -- A command has been received.
+       "state": the command that's sent to the named device. This includes messages like "toggle" or "dim_updown".
+       "ext": the command's extension byte, or "-" of none has been included in the message.
+    
+input fs20 NAME…
+    -- A command has been received. The command's message (and extension,
+       if present) are stored in the event's `value` and `ext` attributes.
+
+fs20 unknown prefix
+    -- A FS20 command with an unknown message type prefix has been received.
+
+fs20 unknown device
+    -- A FS20 command with an unknown device code has been received.
+
+fs20 unknown function
+    -- A FS20 command with an unknown function code has been received.
+
+fs20 unknown hex
+    -- A FS20 command with non-hexadecimal input has been received.
+
+fs20 unknown hc
+    -- A FS20 command with an unknown house code / checksum combination has
+       been received.
+       
+       The code is sent as the `hc` attribute.
+       `checksum` is the difference between the received and calculated
+       checksums. Switches use 6, heating 12. Commands forwarded by
+       repeaters are currently *not* handled. (Repeaters increment the
+       checksum of packets they forward.)
+
+fs20 wedged NAME
+    -- The named external sender or receiver has stopped reporting progress.
+       It will be killed and restarted automatically.
+
+fs20 avr
+--------
+
+Link state.
+
+fs20 avr state NAME
+    -- state of the named link.
+       "state": one of 'up', 'down' or 'error'.
+
+fs20 em
+-------
+
+These are measurement devices. They have their own (quite limited)
+protocol codes.
+
+fs20 unknown em
+    -- this device ID is unknown.
+
+fs20 unknown em unregistered
+    -- device ‹type›, ID ‹id›, reports that it measured ‹datum› as ‹value›.
+
+    Example:
+
+        fs20¦unknown¦em¦unregistered
+            type=thermo_hygro
+            code=2
+            temperature=20.3
+
+fs20 em name…
+    -- the device registered as ‹name…› reported something.
+
+    Example:
+
+    fs20¦em¦inside¦livingroom
+        temperature=19.3
+        humidity=51
+
+fs20 conflict em sync
+    -- The data packet fits more than one timeslot, but the values are
+       too close so MoaT cannot reliably associate the data to a
+       single device.
+
+fs20 conflict em unsync
+    -- The data packet fits no running timeslot. There are multiple
+       unsynced timeslots and the values are too close, so MoaT
+       cannot reliably associate the data to a single device.
+
+fs20 conflict em untimed
+    -- The data packet fits no running timeslot. There are multiple
+       devices without timeslot and the values are too close, so
+       MoaT cannot reliably associate the data to a single device.
+
+fs20 unknown em untimed
+    -- The data packet fits no running timeslot. There are no
+       devices without timeslot, so MoaT cannot associate
+       the data to any device.
+
+fs20 unknown em unregistered
+    -- No devices for that type and ID have been registered.
+
+
+wago
+----
+
+wago state NAME
+    -- the server's connection state changed
+       "state": one of 'up', 'down' or 'error'.
+
+wago message TEXT NAME
+    -- a message from the controller arrived
+       Not yet implemented.
+
+wago monitor error
+    -- There was a problem restoring the list of monitored inputs.
+
+Wait
+----
+
+wait state NAME
+    -- a wait has been started.
+       "state": one of 'start', 'done', 'update' or 'cancel'.
+       "time": the time when the event will be triggered (Unix seconds).
+
+OneWire (OWFS)
+--------------
+
+These are low-level events, reporting a particular device. Usually you
+are interested in actual measurements, reported in "data" events.
+
+onewire link state NAME
+    -- the connection to this server changed.
+       "state": one of 'up', 'down' or 'error'.
+
+onewire scan NAME…
+    -- State of scanning this device.
+       An error during event handling will prevent scanning.
+       "run": one of 'working', 'error' or 'done'.
+
+       If 'done':
+       * "old": Number of devices that were on the bus previously
+       * "new": Number of newly-discovered devices
+       * "num": Number of devices now connected to, on this bus
+
+onewire device new
+    -- A device type has appeared on a 1-wire bus for the first time. This
+       event is followed by a "state" event.
+       * "typ": the device type
+       * "id": its ID
+       * "bus": the bus it's attached to
+       * "path": the path it's found behind (e.g. a 1wire switch)
+
+onewire device state ID
+    -- The device with the given type is now available. Or not.
+       * "typ": the device type
+       * "id": its ID
+       * "bus": the bus it's attached to
+       * "path": the path it's found behind (e.g. a 1wire switch)
+       * "state": 'up' or 'down'
+
+onewire bus state BUS PATH
+    -- A 1wire bus has shown up / vanished.
+       "state": 'up' or 'down'
+       "bus": the interface this is connected to
+       "path": the bus path, may be behind a 1wire switch
+
+onewire alarm new
+    -- A 1wire device shows up in CONDITIONAL SEARCH
+       for the very first time.
+
+onewire alarm state ID
+    -- A 1wire device starts/stops showing up in CONDITIONAL SEARCH.
+       "id": the device ID
+       "bus": the interface this is connected to
+       "path": the bus path, may be behind a 1wire switch
+       "state": 'on' or 'off' (present or not)
+       "new": True if it's the first time we see this device
+
+timing
+------
+
+timeslot state NAME
+    -- the timeslot has been reached.
+       "state" is one of 'begin', 'end' or 'error'.
+       Note that 'begin' is not sent when you explicitly re-sync the
+       timeslot while it's in "next" state. This is intentional -- we
+       can't send an event into the past.
+
+AMQP
+----
+
+amqp state NAME…
+    -- the state of a connection to AMQP has changed.
+       State is "connect","disconnect","up","down", or "error".
+
+       The correct process is to issue a "connect amqp" statement,
+       set up your listeners etc., then "start amqp".
+

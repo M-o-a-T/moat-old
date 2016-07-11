@@ -119,13 +119,16 @@ class RRDchannel(RRDassembler, NetActiveConnector):
 		# we do not do anything, except to read a prompt
 
 	def down_event(self, external=False):
-		simple_event("rrd","disconnect",*self.name)
+		simple_event("rrd","disconnect",*self.name, deprecated=True)
+		simple_event("rrd","state",*self.name, state="down")
 
 	def up_event(self, external=False):
-		simple_event("rrd","connect",*self.name)
+		simple_event("rrd","connect",*self.name, deprecated=True)
+		simple_event("rrd","state",*self.name, state="up")
 
-	def not_up_event(self, external=False):
-		simple_event("rrd","error",*self.name)
+	def not_up_event(self, external=False, error=None):
+		simple_event("rrd","error",*self.name, deprecated=True)
+		simple_event("rrd","state",*self.name, state="error", error=error)
 
 class RRDmsgBase(MsgBase):
 	"""a small class to hold the common send() code"""

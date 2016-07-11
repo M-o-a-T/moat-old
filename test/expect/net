@@ -1,38 +1,75 @@
 EVENT: startup
      : startup=True
 EVENT: wait¦start¦BAD
+     : deprecated=True
      : end_time=0.2
      : loglevel=0
+EVENT: wait¦state¦BAD
+     : end_time=0.2
+     : loglevel=0
+     : state=start
 [Errno 111] Connection refused
 [Errno 111] Connection refused
 EVENT: net¦error¦foop
+     : deprecated=True
+EVENT: net¦state¦foop
+     : error=[Errno 111] Connection refused
+     : state=error
 TRACE 2003-04-05 06:07:08.200000 BAD: Forced timer done
 EVENT: wait¦done¦BAD
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦BAD
+     : end_time=0.2
+     : loglevel=0
+     : state=done
 TRACE Yes
 TRACE Create OnEvtHandler: net¦connect¦foo
-TRACE NewHandler 9
-TRACE Create OnEvtHandler: net¦connect¦baz¦zaz¦*who
-TRACE NewHandler 10
-TRACE Create OnEvtHandler: net¦disconnect¦foo
-TRACE NewHandler 11
-TRACE Create OnEvtHandler: net¦disconnect¦baz¦zaz¦*who
 TRACE NewHandler 12
+TRACE Create OnEvtHandler: net¦connect¦baz¦zaz¦*who
+TRACE NewHandler 13
+TRACE Create OnEvtHandler: net¦disconnect¦foo
+TRACE NewHandler 14
+TRACE Create OnEvtHandler: net¦disconnect¦baz¦zaz¦*who
+TRACE NewHandler 15
 EVENT: wait¦start¦BEFORE
-     : end_time=0.5
+     : deprecated=True
+     : end_time=0.4
      : loglevel=0
+EVENT: wait¦state¦BEFORE
+     : end_time=0.4
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:08.400000 BEFORE: Forced timer done
 EVENT: wait¦done¦BEFORE
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦BEFORE
+     : end_time=0.4
+     : loglevel=0
+     : state=done
 EVENT: wait¦start¦AFTER
-     : end_time=1.3
+     : deprecated=True
+     : end_time=1.2
      : loglevel=0
+EVENT: wait¦state¦AFTER
+     : end_time=1.2
+     : loglevel=0
+     : state=start
 EVENT: net¦connect¦foo
+     : deprecated=True
+EVENT: net¦state¦foo
+     : state=up
 EVENT: net¦recv¦foo
      : data=['A']
 EVENT: wait¦start¦OUT
-     : end_time=0.6
+     : deprecated=True
+     : end_time=0.5
      : loglevel=0
+EVENT: wait¦state¦OUT
+     : end_time=0.5
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:08.550000 OUT: Forced timer done
 foo :: net_active localhost:50333
 .
@@ -40,40 +77,79 @@ foo :: net_active localhost:50333
 name: foo
 task job: <Greenlet: erh(<bound method NETactive._reader of ‹Collected NETa)>
 EVENT: wait¦done¦OUT
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦OUT
+     : end_time=0.5
+     : loglevel=0
+     : state=done
 type: net_active
 host: localhost
 port: ×××
 .
 EVENT: net¦disconnect¦foo
+     : deprecated=True
 TRACE dis foo
+EVENT: net¦state¦foo
+     : state=down
 EVENT: net¦connect¦baz¦zaz¦n1
+     : deprecated=True
+EVENT: net¦state¦baz¦zaz¦n1
+     : state=up
 EVENT: net¦recv¦baz¦zaz¦n1
      : data=['B']
 EVENT: wait¦start¦IN
+     : deprecated=True
      : end_time=0.7
      : loglevel=0
+EVENT: wait¦state¦IN
+     : end_time=0.7
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:08.750000 IN: Forced timer done
 : ‹Collected NETpassive:baz¦zaz¦n1›
 name: baz¦zaz¦n1
 task job: <Greenlet: erh(<bound method NETpassive._reader of ‹Collected NET)>
 EVENT: wait¦done¦IN
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦IN
+     : end_time=0.7
+     : loglevel=0
+     : state=done
 type: net_passive
 host: 127.0.0.1
 port: ×××
 .
 EVENT: net¦disconnect¦baz¦zaz¦n1
+     : deprecated=True
 TRACE dis baz zaz n1
+EVENT: net¦state¦baz¦zaz¦n1
+     : state=down
 TRACE 2003-04-05 06:07:09.400000 AFTER: Forced timer done
 TRACE ending
 .
 EVENT: wait¦done¦AFTER
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦AFTER
+     : end_time=1.2
+     : loglevel=0
+     : state=done
 TRACE Yes
 EVENT: wait¦start¦END
+     : deprecated=True
      : end_time=1.6
      : loglevel=0
+EVENT: wait¦state¦END
+     : end_time=1.6
+     : loglevel=0
+     : state=start
 TRACE 2003-04-05 06:07:09.650000 END: Fake timer done
 EVENT: wait¦done¦END
+     : deprecated=True
      : loglevel=0
+EVENT: wait¦state¦END
+     : end_time=1.6
+     : loglevel=0
+     : state=done

@@ -141,12 +141,12 @@ Every "*foo" in the event description is mapped to the corresponding
 
 class OnPrio(Statement):
 	name = "prio"
-	doc = "prioritize event handler"
+	doc = "Obsolete. Do not use."
 	immediate = True
 	long_doc="""\
-This statement prioritizes an event handler.
-If two handlers have the same priority and both match,
-the order they (attempt to) run in is undefined.
+Event handlers used to have different prioritites.
+
+This does no longer do anything.
 """
 	def run(self,ctx,**k):
 		event = self.params(ctx)
@@ -158,7 +158,7 @@ the order they (attempt to) run in is undefined.
 			raise SyntaxError(u"Usage: prio ‹priority› ⇐ integer priorities only")
 		if prio < MIN_PRIO or prio > MAX_PRIO:
 			raise ValueError("Priority value (%d): needs to be between %d and %d" % (prio,MIN_PRIO,MAX_PRIO))
-		self.parent.prio = prio
+OnEventHandler.register_statement(OnPrio)
 
 class OnName(Statement):
 	name = "name"
@@ -173,6 +173,7 @@ This statement assigns a name to an event handler.
 		if not len(event):
 			raise SyntaxError(u'Usage: name "‹text›"')
 		self.parent.displayname = SName(event)
+OnEventHandler.register_statement(OnName)
 
 class OnDoc(Statement):
 	name = "doc"
@@ -187,6 +188,7 @@ This statement assigns a documentation string to an event handler.
 		if len(event) != 1:
 			raise SyntaxError(u'Usage: doc "‹text›"')
 		self.parent.displaydoc = event[0]
+OnEventHandler.register_statement(OnDoc)
 
 class OnSkip(Statement):
 	name = "next handler"
@@ -218,20 +220,14 @@ class OnEventModule(Module):
 
 	def load(self):
 		main_words.register_statement(OnEventHandler)
-		OnEventHandler.register_statement(OnPrio)
 		main_words.register_statement(OnSkip)
 		main_words.register_statement(OnSkip2)
-		OnEventHandler.register_statement(OnName)
-		OnEventHandler.register_statement(OnDoc)
 		register_condition(OnHandlers.exists)
 	
 	def unload(self):
 		main_words.unregister_statement(OnEventHandler)
-		OnEventHandler.unregister_statement(OnPrio)
 		main_words.unregister_statement(OnSkip)
 		main_words.unregister_statement(OnSkip2)
-		OnEventHandler.unregister_statement(OnName)
-		OnEventHandler.unregister_statement(OnDoc)
 		unregister_condition(OnHandlers.exists)
 	
 init = OnEventModule

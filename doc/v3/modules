@@ -718,7 +718,6 @@ Alternately, you can name the parameters:
 	load logging
 	on foo *whatever:   #*
 		name FooBar
-		prio 10
 		log TRACE "Yes, we get to foo the" $whatever "now!"
 		# and whatever else you'd like to do here
 
@@ -736,19 +735,6 @@ This sub-statement names this particular event handler.
 
 Event handlers have system-assigned numbers as well as names, so you can
 still delete a handler without naming it.
-
-prio
-----
-
-Priority. Default priority is 50. Allowed priorities go from 0 to 100.
-
-Lower-priority handlers are executed first. Only one matching handler
-per priority gets executed; which one, depends on random chance (and,
-of course, any attached conditions).
-
-This does mean that higher-priority handlers do not start running until
-their lower-priority counterparts are completed. If that is not what you
-want, use an async: block in the low-priority handler.
 
 ------------------
 Conditional events
@@ -768,17 +754,12 @@ your alarm system, you want something entirely different to happen when,
 say, somebody turns on the light in your office.
 
 	on switch * office *:   #*
-		prio 10
 		if state on alarm
 		trigger alert intruder
 
 	# … some code in an entirely different location
 	on switch on office whatever:
 		do-whatever-to-turn-this-light-on
-
-The default priority is 50. Currently there is no way to run a handler
-when a lower-prio handler did not skip ahead; I'm not convinced that
-such a feature is needed.
 
 ------------
 next handler
@@ -2757,7 +2738,7 @@ Add a directory where MoaT searches Python modules.
 Environment
 -----------
 
-The environment passed to Python has these attributes:
+The environment object that's passed to your Python function has these attributes:
 
 on
 --
@@ -2788,7 +2769,6 @@ trigger
 
 Trigger an event.
 
-	import datetime
 	trigger("run","me","now", some_data="some_value")
 
 Whether the event is executed synchronously or not is not specified.
@@ -2817,9 +2797,8 @@ This module contains systemd-related functions.
 keepalive
 ---------
 
-If you start your daemon with `WatchdogSec=` set to some number, you need
-to call `keepalive` at least that often to prevent your service from being
-restarted.
+If you start your daemon with systemd's `WatchdogSec=` parameter set, you need
+to call `keepalive` at least that often. Otherwise systemd will restart it.
 
 	async:
 		while true:
@@ -2836,8 +2815,14 @@ Tell systemd that your startup has completed.
 send status
 -----------
 
-Tell systemd what's happening, so that "systemd status moat@whatever" displays
-something meaningful.
+Tell systemd what's happening. "systemd status moat@your_daemon"
+will show your text.
+
+	send status Connecting
+	on connected foo:
+		send status Connected
+	connect foo  # assume this triggers a "connected foo" event
+
 
 ====
 moat
