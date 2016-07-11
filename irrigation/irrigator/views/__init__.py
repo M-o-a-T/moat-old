@@ -37,7 +37,7 @@ def get_profile(request):
 
 def home(request):
 	try:
-		gu = request.user.get_profile()
+		gu = get_profile(request)
 	except (ObjectDoesNotExist,AttributeError):
 		sites = set()
 	else:
