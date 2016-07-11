@@ -138,7 +138,7 @@ urlpatterns = [
 	url(r'^day/(?P<pk>\d+)/delete$', DayDeleteView.as_view()),
 
 	# Login stuff
-	url(r'^login/$', django.contrib.auth.views.login, {'template_name': 'auth/login.html'}),
+	url(r'^login/$', django.contrib.auth.views.login, {'template_name': 'auth/login.jinja'}),
 	url(r'^login/logout$', django.contrib.auth.views.logout, {'template_name': 'auth/logout.jinja'}),
 	url(r'^login/no_access$', irrigator.auth.no_access, {'template_name': 'auth/no_access.jinja'}),
 
