@@ -169,7 +169,6 @@ class _BusScan(_BusTask):
 
 	async def drop_device(self,dev, delete=True):
 		"""When a device vanishes, remove it from the bus it has been at"""
-		await self.teardown()
 		try:
 			p = dev['path']
 		except KeyError:
@@ -259,7 +258,7 @@ class BusScan(_BusScan):
 		# Protect against intermittent failures.
 		for f1,f2 in old_devices:
 			try:
-				errors = dev_counter[f1][f2]
+				errors = dev_counter[f1][f2].value
 			except KeyError: # pragma: no cover
 				# possible race condition
 				continue

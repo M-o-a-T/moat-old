@@ -351,7 +351,7 @@ async def test_onewire_fake(loop):
 			logger.debug("TC G")
 			# watch it vanish
 			async def mod_b():
-				assert tr['faker']['bus']['bus.42 1f.123123123123 aux']['devices']['10']['001001001001'].value == '1'
+				assert tr['faker']['bus']['bus.42 1f.123123123123 aux']['devices']['10']['001001001001'] == '1'
 			await fst._call_delay(mod_b)
 			logger.debug("TC H")
 

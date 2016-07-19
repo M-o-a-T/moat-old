@@ -61,6 +61,7 @@ class Task(asyncio.Task):
 	doc = None
 
 	_global_loop=False
+	_main = None
 
 	def __init__(self, cmd, name, taskdir=None, parents=(), config={}, _ttl=None,_refresh=None, **cfg):
 		"""\
@@ -231,7 +232,7 @@ class Task(asyncio.Task):
 				
 		# Now start the updater and the main task.
 		run_task = asyncio.ensure_future(updater(refresh), loop=r.loop)
-		main_task = asyncio.ensure_future(self.task(), loop=r.loop)
+		self._main = main_task = asyncio.ensure_future(self.task(), loop=r.loop)
 		res = None
 		try:
 			try:
@@ -312,6 +313,7 @@ class Task(asyncio.Task):
 		finally:
 
 			# Now clean up everything
+			self._main = None
 			await run_state.set("stopped",time())
 			if not keep_running and 'running' in run_state:
 				try:
@@ -348,52 +350,67 @@ class TimeoutHandler:
 		mostly-synchronous call-ins from tests.
 		"""
 	
-	_delay = None
-	_delay_x = None
-	_delay_run = None
+	__delay = None       # event: delay is done
+	__delay_x = None     # future: code has run
+	__delay_run = None   # code to run during "delay"
+	__delay_sync = None  # event: delay loop has been entered
+
+	def __init__(self,*a,**k):
+		super().__init__(*a,**k)
+		self.__delay = asyncio.Event(loop=self.loop)
+		self.__delay_sync = asyncio.Event(loop=self.loop)
+
 	async def delay(self, seconds):
 		if seconds > 2: # don't spam the logs
 			logger.debug("delay %.2f: %s",seconds,self)
-		self._delay = asyncio.Future(loop=self.loop)
-		r,self._delay_run = self._delay_run,None
-		if self._delay_x is not None and not self._delay_x.done():
+		self.__delay.clear()
+		self.__delay_sync.set()
+		r,self.__delay_run = self.__delay_run,None
+		if self.__delay_x is not None and not self.__delay_x.done():
 			try:
 				if r is not None:
 					r = await r()
 			except Exception as err:
-				self._delay_x.set_exception(err)
+				self.__delay_x.set_exception(err)
 			else:
-				self._delay_x.set_result(r)
+				self.__delay_x.set_result(r)
 		else:
 			assert r is None, r
 
 		try:
-			await asyncio.wait_for(self._delay,seconds, loop=self.loop)
+			await asyncio.wait_for(self.__delay.wait(), seconds, loop=self.loop)
 		except asyncio.TimeoutError:
 			if seconds > 2:
 				logger.debug("delay done: %s",self)
 			pass
 		else:
 			logger.debug("delay skip: %s",self)
+		self.__delay_sync.clear()
 
-	def skip_delay(self):
+	async def skip_delay(self):
 		"""Call to return from the delay immediately"""
-		if self._delay is not None and not self._delay.done():
-			logger.debug("delay: skipping: %s",self)
-			self._delay.set_result(None)
-		else:
-			logger.debug("delay: NOT skipping: %s",self)
+		if not self.__delay_sync.is_set():
+			logger.debug("delay WAIT: %s",self)
+			await self.__delay_sync.wait()
+			logger.debug("delay WAIT done: %s",self)
+		logger.debug("delay: skipping: %s",self)
+		self.__delay.set_result(None)
 			
 	async def _call_delay(self, proc=None):
 		"""Arrange to run m() as soon as the delay happens.
 			Also, wait until that is finished."""
 		logger.debug("delay_call: %s %s",proc,self)
-		self._delay_x = asyncio.Future(loop=self.loop)
-		self._delay_run = proc
-		self.skip_delay()
-		res = await self._delay_x
-		logger.debug("delay_call: %s < %s",res,self)
-		return res
+		self.__delay_x = asyncio.Future(loop=self.loop)
+		self.__delay_run = proc
+		await self.skip_delay()
+		try:
+			res = await self.__delay_x
+		except Exception as exc:
+			logger.debug("delay_call: %s < %s",repr(exc),self)
+			raise
+		else:
+			logger.debug("delay_call: %s < %s",res,self)
+			return res
 
 async def _run_state(tree,path):
 	"""\

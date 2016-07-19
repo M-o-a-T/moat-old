@@ -29,13 +29,13 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 
 import six
 
-from moat import gevent_rpyc
-gevent_rpyc.patch_all()
-
+import qbroker; qbroker.setup(gevent=True)
+import asyncio
+from qbroker.util.async import Main
 from traceback import format_exc,print_exc
 from operator import attrgetter
 import sys,signal
-import gevent,rpyc
+import gevent
 from functools import partial
 from gevent.queue import Queue,Empty
 from gevent.coros import Semaphore
@@ -142,8 +142,8 @@ class Command(BaseCommand):
 		if not controllers:
 			raise RuntimeError("No controllers for site '%s' found." % (s.name,))
 		#gevent.spawn(_save_job)
-		while True:
-			gevent.sleep(99999)
+		m = Main(qbroker.loop)
+		m.run()
 
 class RestartService(VoidService):
 	def on_disconnect(self,*a,**k):
