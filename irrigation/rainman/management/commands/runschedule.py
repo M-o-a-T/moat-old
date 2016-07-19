@@ -823,7 +823,7 @@ class SchedValve(SchedCommon):
 				self.site.send_command("set","output","on",*(self.v.var.split()), sub=(("for",duration),("async",)))
 			except Exception:
 				# Something broke. Try to turn this thing off.
-				self.log(format_exc()+repr(context))
+				self.log(format_exc())
 				
 				self.site.send_command("set","output","off",*(self.v.var.split()))
 				raise RuntimeError("Could not start (logged)")
@@ -833,7 +833,7 @@ class SchedValve(SchedCommon):
 				self.log("Opened for %s"%(sched,))
 			self.sched = sched
 			if not sched.seen:
-				sched.update(start=now(), seen = True)
+				sched.update(start=now(), seen=True)
 				sched.refresh()
 			#Save(sched)
 		else:
@@ -879,15 +879,15 @@ class SchedValve(SchedCommon):
 		try:
 			if self.sched is not None:
 				self.sched.refresh()
-				if self.sched.start+self.sched.duration <= n:
+				if self.sched.end <= n:
 					if self.v.verbose:
 						print("Turn off: %s+%s <= %s" % (self.sched.start,self.sched.duration,n), file=sys.stderr)
 					self._off(2)
 					self.sched = None
 				else:
-					self.sched_job = gevent.spawn_later((self.sched.start+self.sched.duration-n).total_seconds(),connwrap,self.run_sched_task,reason="_run_schedule 1")
+					self.sched_job = gevent.spawn_later((self.sched.end-n).total_seconds(),connwrap,self.run_sched_task,reason="_run_schedule 1")
 					if self.v.verbose:
-						print("SCHED LATER %s: %s" % (self.v.name,humandelta(self.sched.start+self.sched.duration-n)), file=sys.stderr)
+						print("SCHED LATER %s: %s" % (self.v.name,humandelta(self.sched.end-n)), file=sys.stderr)
 					return
 		except ObjectDoesNotExist:
 			pass # somebody deleted it *shrug*
@@ -899,12 +899,12 @@ class SchedValve(SchedCommon):
 			except IndexError:
 				self.sched_ts = n-timedelta(1,0)
 			else:
-				self.sched_ts = sched.start+sched.duration
-				if sched.start+sched.duration > n: # still running
+				self.sched_ts = sched.end
+				if sched.end > n: # still running
 					if self.v.verbose:
-						print("SCHED RUNNING %s: %s" % (self.v.name,humandelta(sched.start+sched.duration-n)), file=sys.stderr)
+						print("SCHED RUNNING %s: %s" % (self.v.name,humandelta(sched.end-n)), file=sys.stderr)
 					try:
-						self._on(1,sched, sched.start+sched.duration-n)
+						self._on(1,sched, sched.end-n)
 					except TooManyOn:
 						self.log("Could not schedule: too many open valves")
 					except NotConnected:
@@ -919,6 +919,11 @@ class SchedValve(SchedCommon):
 			self._off(3)
 			return
 
+		if sched.end <= n:
+			if self.v.verbose:
+				print("SCHED %s: sched %d done for %s" % (self.v.name,sched.id,humandelta(n-sched.end)), file=sys.stderr)
+			self.sched_ts = None
+			return
 		if sched.start > n:
 			if self.v.verbose:
 				print("SCHED %s: sched %d in %s" % (self.v.name,sched.id,humandelta(sched.start-n)), file=sys.stderr)
@@ -983,7 +988,7 @@ class SchedValve(SchedCommon):
 				if self.sched is not None and not on:
 					self.sched.update(db_duration=(n-self.sched.start).total_seconds())
 					self.sched.refresh()
-					self.sched_ts = self.sched.start+self.sched.duration
+					self.sched_ts = self.sched.end
 					self.sched = None
 				flow,self.flow = self.flow,0
 				# If nothing happened, calculate.
@@ -1067,9 +1072,8 @@ class SchedValve(SchedCommon):
 		lv = Level(valve=self.v,time=ts,level=self.v.level,flow=flow)
 		lv.save()
 
-		if self.on and not (self.schedule and self.schedule.forced) and level < self.v.stop_level:
-			self._off()
-
+		if self.on and not (self.sched and self.sched.forced) and self.v.level <= self.v.stop_level:
+			self._off(5)
 
 	def log(self,txt):
 		log(self.v,txt)

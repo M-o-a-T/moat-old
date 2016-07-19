@@ -18,7 +18,6 @@
 			%th -> scheduled
 			%th -> Comment
 		-for valve in valves
-			-if user.profile.access_valve(valve)
 				%tr
 					%td
 						%a href="/valve/{{ valve.id }}"

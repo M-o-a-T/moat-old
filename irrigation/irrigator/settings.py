@@ -25,6 +25,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 
 # Django settings for the irrigator project.
 from django.conf.global_settings import *
+from rainman.utils import str_tz
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -121,6 +122,22 @@ TEMPLATE_LOADERS = (
 #     'django.template.loaders.eggs.Loader',
 )
 
+from django_jinja.builtins import DEFAULT_EXTENSIONS as _EXT
+TEMPLATES = [
+    {
+        "BACKEND": "django_jinja.backend.Jinja2",
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "match_extension": ".jinja",
+            "extensions": _EXT+ [
+                            # Your extensions here...
+                                'hamlish_jinja.HamlishExtension','hamlish_jinja.HamlishTagExtension','jinja2.ext.i18n', 'jinja2.ext.autoescape',
+                                        ],
+            "filters": { 'tz':str_tz },
+        },
+    },
+
+]
 MIDDLEWARE_CLASSES = (
     'rainman.utils.GlobalRequestMiddleware',
     'rainman.utils.RedirectMiddleware',
@@ -145,9 +162,8 @@ JINJA2_AUTOESCAPE = True
 
 DEFAULT_JINJA2_TEMPLATE_EXTENSION = ".jinja"
 
-from rainman.utils import str_tz
 
-JINJA2_ENVIRONMENT_OPTIONS = { 'extensions':['hamlish_jinja.HamlishTagExtension','jinja2.ext.i18n', 'jinja2.ext.autoescape'] }
+JINJA2_ENVIRONMENT_OPTIONS = { 'extensions':['hamlish_jinja.HamlishExtension','hamlish_jinja.HamlishTagExtension','jinja2.ext.i18n', 'jinja2.ext.autoescape'] }
 JINJA2_FILTERS = { 'tz':str_tz }
 
 # Python dotted path to the WSGI application used by Django's runserver.

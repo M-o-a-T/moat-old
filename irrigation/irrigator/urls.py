@@ -46,8 +46,12 @@ from irrigator.views.day import DayView,DaysView,DayNewView,DayEditView,DayDelet
 from irrigator.views.valveoverride import ValveOverrideView,ValveOverridesView,ValveOverrideNewView,ValveOverrideEditView,ValveOverrideDeleteView
 from irrigator.views.groupoverride import GroupOverrideView,GroupOverridesView,GroupOverrideNewView,GroupOverrideEditView,GroupOverrideDeleteView
 
-urlpatterns = patterns('',
-	url(r'^$', 'irrigator.views.home', name='home'),
+import irrigator.auth
+import irrigator.views
+import django.contrib.auth.views
+
+urlpatterns = [
+	url(r'^$', irrigator.views.home, name='home'),
 
 	url(r'^site/$', SitesView.as_view()),
 	url(r'^site/(?P<pk>\d+)$', SiteView.as_view()),
@@ -134,10 +138,10 @@ urlpatterns = patterns('',
 	url(r'^day/(?P<pk>\d+)/delete$', DayDeleteView.as_view()),
 
 	# Login stuff
-	url(r'^login/$', 'django.contrib.auth.views.login', {'template_name': 'auth/login.jinja'}),
-	url(r'^login/logout$', 'django.contrib.auth.views.logout', {'template_name': 'auth/logout.jinja'}),
-	url(r'^login/no_access$', 'irrigator.auth.no_access', {'template_name': 'auth/no_access.jinja'}),
+	url(r'^login/$', django.contrib.auth.views.login, {'template_name': 'auth/login.jinja'}),
+	url(r'^login/logout$', django.contrib.auth.views.logout, {'template_name': 'auth/logout.jinja'}),
+	url(r'^login/no_access$', irrigator.auth.no_access, {'template_name': 'auth/no_access.jinja'}),
 
 	url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 	url(r'^admin/', include(admin.site.urls)),
-)
+]

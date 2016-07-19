@@ -22,10 +22,7 @@
 					="◉" if schedule.seen else "–"
 				-if show_valve
 					%td
-						-if user.profile.access_valve(schedule.valve)
 							%a href="/valve/{{ schedule.valve.id }}"
 								=schedule.valve.name
-						-else
-							=schedule.valve.name
 
 {% endhaml %}

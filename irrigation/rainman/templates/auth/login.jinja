@@ -1,26 +1,29 @@
-{% extends "base.jinja" %}
+{% haml %}
+-extends "base.jinja"
 
-{% block content %}
+-block title
+        Login
 
-{% if form.errors %}
-<p>Your username and password didn't match. Please try again.</p>
-{% endif %}
+-block content
 
-<form method="post" action=""> <!--{{ 'django.contrib.auth.views.login'|reverse }}" -->
-{% csrf_token %}
-<table>
-<tr>
-    <td>{{ form.username.label_tag()|safe }}</td>
-    <td>{{ form.username|safe }}</td>
-</tr>
-<tr>
-    <td>{{ form.password.label_tag()|safe }}</td>
-    <td>{{ form.password|safe }}</td>
-</tr>
-</table>
+    -if form.errors
+        %p
+            Your username and password didn't match. Please try again.
 
-<input type="submit" value="login" />
-<input type="hidden" name="next" value="{{ next }}" />
-</form>
+    %form method="post" action=""
+        -csrf_token
+        %table
+            %tr
+                %td
+                        =form.username.label_tag()|safe
+                %td
+                        =form.username|safe
+            %tr
+                %td
+                        =form.password.label_tag()|safe
+                %td
+                        =form.password|safe
+            %input type="submit" value="login"
+            %input type="hidden" name="next" value="{{ next }}"
 
-{% endblock %}
+{% endhaml %}

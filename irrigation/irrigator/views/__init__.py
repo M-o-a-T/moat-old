@@ -15,30 +15,29 @@
 ##
 
 from __future__ import division,absolute_import
-from django.http import HttpResponseRedirect
 from django.core.exceptions import ObjectDoesNotExist
 from django.forms import ModelForm,FloatField,TimeField
 from django.utils.translation import ugettext_lazy as _
 from django.template.context_processors import csrf
+from django.shortcuts import redirect
 from datetime import timedelta,datetime
 
 from rainman.models import Site
-#from rainman.utils import Redirect
 
 def get_profile(request):
 	try:
 		gu = request.user.profile
 	except (ObjectDoesNotExist,AttributeError):
 		if request.user.is_authenticated():
-			raise Redirect('/login/no_access')
+			return redirect('/login/no_access')
 		else:
-			raise Redirect('/login/?next=%s' % request.path)
+			return redirect('/login/?next=%s' % request.path)
 	else:
 		return gu
 
 def home(request):
 	try:
-		gu = request.user.get_profile()
+		gu = get_profile(request)
 	except (ObjectDoesNotExist,AttributeError):
 		sites = set()
 	else:
@@ -46,14 +45,14 @@ def home(request):
 
 	if not sites:
 		if request.user.is_authenticated():
-			return HttpResponseRedirect('/login/no_access')
+			return redirect('/login/no_access')
 		else:
-			return HttpResponseRedirect('/login/?next=%s' % request.path)
+			return redirect('/login/?next=%s' % request.path)
 
 	if len(sites) == 1:
-		return HttpResponseRedirect('/site/%d' % list(sites)[0].id)
+		return redirect('/site/%d' % list(sites)[0].id)
 
-	return HttpResponseRedirect('/site/')
+	return redirect('/site/')
 
 class NonNegativeFloatField(FloatField):
 	def clean(self,val):

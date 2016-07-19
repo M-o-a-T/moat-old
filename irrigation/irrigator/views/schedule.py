@@ -29,7 +29,7 @@ from rainman.models import Schedule,Site,Controller,Valve,Feed,EnvGroup
 from irrigator.views import DbModelForm,FormMixin,SiteParamMixin,TimeDeltaField,get_profile
 from rainman.utils import get_request
 
-def limit_choices(q,site=None,controller=None,envgroup=None,valve=None,feed=None):
+def limit_choices(q,site=None,controller=None,envgroup=None,valve=None,feed=None, **_):
 	if site is not None:
 		q = q.filter(controller__site=site)
 	if controller is not None:
@@ -49,7 +49,7 @@ class ScheduleForm(DbModelForm):
 		fields = ('valve','start','duration','seen','changed','forced')
 
 	# 'Excluded' fields
-	duration = TimeDeltaField(help_text=Meta.model._meta.get_field_by_name("db_duration")[0].help_text)
+	duration = TimeDeltaField(help_text=Meta.model._meta.get_field("db_duration").help_text)
 
 	def limit_choices(self,**k):
 		gu = get_profile(get_request())
