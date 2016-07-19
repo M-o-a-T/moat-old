@@ -39,8 +39,12 @@ class Site(Model):
 	name = m.CharField(max_length=200, unique=True)
 	comment = m.CharField(max_length=200, blank=True)
 	var = m.CharField(max_length=200, unique=True, help_text="name in MoaT", blank=True)
-	host = m.CharField(max_length=200, default="localhost", help_text="where to find the MoaT server")
-	port = m.PositiveIntegerField(default=50005, help_text="Port for RPC")
+	host = m.CharField(max_length=200, default="localhost", help_text="where to find the RabbitMQ server")
+	port = m.PositiveIntegerField(default=0, help_text="Port for RabbitMQ")
+	username = m.CharField(max_length=100, default="test", help_text="RabbitMQ username")
+	password = m.CharField(max_length=100, default="test", help_text="RabbitMQ password")
+	virtualhost = m.CharField(max_length=100, default="/test", help_text="RabbitMQ vhost")
+
 	db_rate = m.FloatField(db_column="rate",default=10/24/3600, help_text="how many mm/day evaporate here, on average")
 	def _get_rate(self):
 		return self.db_rate*24*3600
