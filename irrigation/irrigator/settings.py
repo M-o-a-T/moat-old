@@ -28,7 +28,7 @@ from django.conf.global_settings import *
 from rainman.utils import str_tz
 
 DEBUG = True
-TEMPLATE_DEBUG = DEBUG
+X_TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
     ('Matthias Urlichs', 'matthias@urlichs.de'),
@@ -113,7 +113,7 @@ STATICFILES_FINDERS = (
 SECRET_KEY = 'YOU WISH'
 
 # List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
+X_TEMPLATE_LOADERS = (
 	'django_jinja.loaders.AppLoader',
 	'django_jinja.loaders.FileSystemLoader',
 
@@ -169,7 +169,7 @@ JINJA2_FILTERS = { 'tz':str_tz }
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'irrigator.wsgi.application'
 
-TEMPLATE_DIRS = (
+X_TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
