@@ -20,6 +20,7 @@ from django.forms import ModelForm,FloatField,TimeField
 from django.utils.translation import ugettext_lazy as _
 from django.template.context_processors import csrf
 from django.shortcuts import redirect
+from django.http import HttpResponseRedirect
 from datetime import timedelta,datetime
 
 from rainman.models import Site
@@ -41,6 +42,8 @@ def home(request):
 	except (ObjectDoesNotExist,AttributeError):
 		sites = set()
 	else:
+		if isinstance(gu,HttpResponseRedirect):
+			return gu
 		sites = gu.sites.all()
 
 	if not sites:
