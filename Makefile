@@ -75,6 +75,8 @@ diff: FIX
 
 ow: FIX
 	sh test/interactive/onewire.sh
+q qb: FIX
+	$(PYTHON) test/mod_qbroker.py
 a amqp: FIX
 	$(PYTHON) test/interactive/main.py test/interactive/amqp
 w wago: FIX
