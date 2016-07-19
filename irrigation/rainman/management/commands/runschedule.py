@@ -40,7 +40,6 @@ from functools import partial
 from gevent.queue import Queue,Empty
 from gevent.coros import Semaphore
 from gevent.event import AsyncResult
-from rpyc.core.service import VoidService
 from optparse import make_option
 
 from django.core.management.base import BaseCommand, CommandError
@@ -145,15 +144,6 @@ class Command(BaseCommand):
 		m = Main(qbroker.loop)
 		m.run()
 
-class RestartService(VoidService):
-	def on_disconnect(self,*a,**k):
-		for s in sites.values():
-			if s.ci._local_root is self:
-				s.log("disconnected")
-				s.ci = None
-				s.run_main_task()
-				gevent.spawn_later(10,connwrap,s.maybe_restart)
-
 class Meter(object):
 	sum_it = False
 	last_time = None
@@ -192,7 +182,7 @@ class Meter(object):
 			return
 		if self.site.ci is None:
 			return
-		self.mon = self.site.ci.root.monitor(self.monitor_value,"monitor","update",*(self.d.var.split()))
+		self.mon = self.site.qb.register_alert_gevent(self.monitor_value,"monitor.update."+self.d.var.replace(' ','.'))
 
 	def log(self,txt):
 		self.site.log(("%s %s: "%(self.meter_type,self.d.name))+txt)
@@ -302,11 +292,13 @@ class FeedMeter(SumMeter):
 	def connect_monitors(self):
 		super(FeedMeter,self).connect_monitors()
 		if self.d.var:
-			self.chk = self.site.ci.root.monitor(self.check_flow,"check","flow",*(self.d.var.split()))
-			self.chm = self.site.ci.root.monitor(self.check_max_flow,"check","maxflow",*(self.d.var.split()))
-			self.flush = self.site.ci.root.monitor(self.do_flush,"flush",*(self.d.var.split()))
+			n = self.d.var.replace(' ','.')
+			self.chk = self.site.register_rpc_gevent(self.check_flow,"check.flow."+n)
+			self.chm = self.site.register_rpc_gevent(self.check_max_flow,"check.maxflow."+n)
+			self.flush = self.site.register_rpc_gevent(self.do_flush,"flush."+n)
 		else:
-			self.flush = self.site.ci.root.monitor(self.do_flush,"flush",*(self.d.name.split()))
+			n = self.d.name.replace(' ','.')
+			self.flush = self.site.register_rpc_gevent(self.do_flush,"flush."+n)
 
 	
 		
@@ -461,8 +453,17 @@ class SchedSite(SchedCommon):
 			c.check_flow(**k)
 
 	def connect(self):
+		d = dict()
+		if self.s.port:
+			d['port'] = self.s.port
+		if self.s.username:
+			d['login'] = self.s.username
+		if self.s.password:
+			d['password'] = self.s.password
+		if self.s.virtualhost:
+			d['virtualhost'] = self.s.virtualhost
 		try:
-			self.ci = rpyc.connect(host=self.s.host, port=int(self.s.port), ipv6=False, service=RestartService)
+			self.qb = qbroker.make_unit_gevent("moat.rain.runschedule", amqp=dict(server=dict(host=self.s.host, **d)))
 		except Exception:
 			print("Could not connect:",self.s.host, file=sys.stderr)
 			raise
@@ -478,7 +479,7 @@ class SchedSite(SchedCommon):
 			self.connect_monitors()
 
 	def connect_monitors(self,do_controllers=True):
-		if self.ci is None:
+		if self.qb is None:
 			return
 		if do_controllers:
 			for c in self.controllers:
@@ -486,10 +487,11 @@ class SchedSite(SchedCommon):
 		for mm in self.meters.values():
 			for m in mm:
 				m.connect_monitors()
-		self.ckf = self.ci.root.monitor(self.check_flow,"check","flow",*self.s.var.split(" "))
-		self.cks = self.ci.root.monitor(partial(self.run_sched_task,reason="read schedule"),"read","schedule",*self.s.var.split(" "))
-		self.ckt = self.ci.root.monitor(self.sync,"sync",*self.s.var.split(" "))
-		self.cku = self.ci.root.monitor(self.do_shutdown,"shutdown",*self.s.var.split(" "))
+		n = self.s.var.replace(' ','.')
+		self.ckf = self.qb.register_rpc_gevent(self.check_flow,"rain.check.flow."+n)
+		self.cks = self.qb.register_rpc_gevent(partial(self.run_sched_task,reason="read schedule"),"rain.read.schedule."+n)
+		self.ckt = self.qb.register_rpc_gevent(self.sync,"rain.sync."+n)
+		self.cku = self.qb.register_rpc_gevent(self.do_shutdown,"rain.shutdown."+n)
 
 	def sync(self,**k):
 		print("Sync", file=sys.stderr)
@@ -576,7 +578,7 @@ class SchedSite(SchedCommon):
 		# TODO: return a sensible error and handle that correctly
 		if self.ci is None:
 			raise NotConnected
-		self.ci.root.command(*a,**k)
+		self.qb.rpc_gevent(*a,**k)
 
 	def run_every(self,delay):
 		"""Initiate running the calculation and scheduling loop every @delay seconds."""
@@ -755,7 +757,7 @@ class SchedController(SchedCommon):
 			return
 		for v in self.c.valves.all():
 			SchedValve(v).connect_monitors()
-		self.ckf = self.site.ci.root.monitor(self.check_flow,"check","flow",*self.c.var.split())
+		self.ckf = self.site.qb.register_rpc(self.check_flow,"check.flow."+self.c.var.replace(' ','.'))
 
 	def check_flow(self,**k):
 		for v in self.c.valves.all():
@@ -967,8 +969,9 @@ class SchedValve(SchedCommon):
 	def connect_monitors(self):
 		if self.site.ci is None:
 			return
-		self.mon = self.site.ci.root.monitor(self.watch_state,"output","change",*self.v.var.split())
-		self.ckf = self.site.ci.root.monitor(self.check_flow,"check","flow",*self.v.var.split())
+		n = self.v.var.replace(' ','.')
+		self.mon = self.site.qb.register_alert_gevent(self.watch_state,"output.change."+n)
+		self.ckf = self.site.qb.register_rpc_gevent(self.check_flow,"rain.check.flow."+n)
 		
 	def watch_state(self,event=None,**k):
 		"""output change NAME ::value ON"""
