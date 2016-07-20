@@ -235,10 +235,10 @@ class QBconn(Collected,Jobber):
 			job.link(lambda _:q.put(None))
 
 			while True:
-				res = q.get()
-				if res is None:
-					return
-				p,t = res
+				r = q.get()
+				if r is None:
+					break
+				p,t = r
 				if isinstance(t,datetime):
 					if TESTING:
 						if t.year != 2003:
