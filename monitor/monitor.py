@@ -25,7 +25,9 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##BP
 
 from moat import patch; moat.patch()
-from dabroker.util.thread import Main
+import qbroker; qbroker.setup(gevent=True)
+from qbroker.util.async import Main
+import asyncio
 
 import gtk
 import gtk.gdk
@@ -179,15 +181,15 @@ class MonitorUI(object):
 		print("PE",x)
 
 class MonitorMain(Main):
-	def setup(self):
+	@asyncio.coroutine
+	def at_start(self):
+		yield from super().at_start()
 		self.widgets = MonitorUI()
 		MonitorData = Monitor(widgets)
 		self.widgets.init_done()
-	def main(self):
-		self.shutting_down.get()
 
 if __name__ == "__main__":
-	main=MyMain()
+	main=MonitorMain()
 	main.run()
 
 # END #

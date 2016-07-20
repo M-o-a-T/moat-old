@@ -40,7 +40,10 @@ from moat.twist import fix_exception,print_exception,\
 from moat.collect import Collection,Collected
 
 import gevent
-from dabroker.util.thread import Main as _Main
+import aiogevent
+import asyncio
+import qbroker; qbroker.setup(gevent=True)
+from qbroker.util.async import Main as _Main
 
 __all__ = ("start_up","shut_down", "startup_event","shutdown_event",
 	"ShutdownHandler","mainloop", "Events")
@@ -115,6 +118,12 @@ def _stop_mainloop():
 		stop_loggers()
 		shut_down()
 
+@asyncio.coroutine
+def _async_stop_mainloop():
+	j = gevent.spawn(_stop_mainloop)
+	yield from aiogevent.wrap_greenlet(j)
+
+
 ## This should be in moat.collect, but import ordering problems make that impossible
 
 class Shutdown_Collections(ExcWorker):
@@ -167,18 +176,18 @@ class MyMain(_Main):
 		self.main_proc = main
 		self.setup_proc = setup
 		self.main_job = None
-		super(MyMain,self).__init__()
-	def setup(self):
+		super(MyMain,self).__init__(loop=qbroker.loop)
+
+	@asyncio.coroutine
+	def at_start(self):
+		yield from super().at_start()
 		start_up()
 		if self.setup_proc:
 			self.setup_proc()
-	def main(self):
+		self.add_cleanup(_async_stop_mainloop)
 		if self.main_proc:
 			self.main_job = gevent.spawn(self.main_proc)
-			#self.register_stop(self.main_job.kill)
-		self.shutting_down.wait()
-	def cleanup(self):
-		_stop_mainloop()
+			self.add_cleanup(self.main_job.kill)
 
 def mainloop(main=None,setup=None):
 	global Main
