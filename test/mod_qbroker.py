@@ -37,6 +37,8 @@ from moat.logging import log,DEBUG
 from test import run
 from gevent import spawn,sleep,event
 import qbroker; qbroker.setup(gevent=True)
+from qbroker.unit import CC_DICT
+import asyncio
 import aiogevent
 
 import sys
@@ -55,14 +57,24 @@ class LogStream(object):
 			i = s.find("\n")
 		self.buf += s
 
+seen=False
+
+@asyncio.coroutine
+def event_cb(*a,**k):
+	global seen
+	if k['event'] == ['wait', 'state', 'shutdown'] and k['state'] == 'cancel':
+		seen = 1
+
 def tester():
-	sleep(1)
+	sleep(0.3)
 	qb = qbroker.make_unit_gevent(app="test.qbroker", amqp=dict(server=dict(virtualhost="/test",login="test",password="test")))
-	r1 = qb.rpc_gevent("moat.list", _timeout=1000)
-	r2 = qb.rpc_gevent("moat.list", args=("qbroker","connection"), _timeout=1000)
-	r3 = qb.rpc_gevent("moat.cmd", args=("list","qbroker","connection"), _timeout=1000)
-	r4 = qb.rpc_gevent("moat.cmd", args=("list","qbroker","connection","foo"), _timeout=1000)
-	r5 = qb.rpc_gevent("moat.cmd", args=("del","wait","shutdown"), _timeout=1000)
+	qb.register_alert_gevent("moat.event.#", event_cb, call_conv=CC_DICT)
+	r1 = qb.rpc_gevent("moat.list", _timeout=1)
+	r2 = qb.rpc_gevent("moat.list", args=("qbroker","connection"), _timeout=1)
+	r3 = qb.rpc_gevent("moat.cmd", args=("list","qbroker","connection"), _timeout=1)
+	r4 = qb.rpc_gevent("moat.cmd", args=("list","qbroker","connection","foo"), _timeout=1)
+	r5 = qb.rpc_gevent("moat.cmd", args=("del","wait","shutdown"), _timeout=1)
+	sleep(0.3)
 	qb.stop_gevent()
 def gtester():
 	try:
@@ -107,6 +119,7 @@ f = aiogevent.wrap_greenlet(j, loop=qbroker.loop)
 print("LOOP START")
 qbroker.loop.run_until_complete(f)
 print("LOOP END")
+assert seen
 
 try: k.kill()
 finally: k.join()

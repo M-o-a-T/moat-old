@@ -98,6 +98,46 @@ def gen_rpcconn(name):
 	return namedRPC
 		
 
+class EventCallback(Worker):
+	args = None
+	prio = MIN_PRIO+1
+	_simple = True
+
+	def __init__(self,parent,*args):
+		self.parent = parent
+		if args:
+			self.args = SName(args)
+			for k in self.args:
+				if hasattr(k,'startswith') and k.startswith('*'):
+					self._simple = False
+					break
+			name = SName(parent.name+self.args)
+			# use self.args because that won't do a multi-roundtrip iteration
+		else:
+			name = parent.name
+		super(EventCallback,self).__init__(name)
+	
+	def list(self):
+		yield super(EventCallback,self)
+		if self.args:
+			yield("args",self.args)
+
+	def does_event(self,event):
+		return True
+	
+	def process(self, event, queue=None, **k):
+		super().process(event=event)
+
+		k.update(event.ctx)
+		k['event'] = list(event)
+		self.parent.server.alert_gevent('moat.event.'+'.'.join(event), **k)
+		raise TrySomethingElse
+
+	def cancel(self):
+		self.parent.drop_worker(self)
+	exposed_cancel = cancel
+
+
 class QBconn(Collected,Jobber):
 	"""A channel server"""
 	storage = QBconns
@@ -112,6 +152,13 @@ class QBconn(Collected,Jobber):
 		super().__init__()
 		self.server = qbroker.Unit("moat",amqp=dict(server={'host':self.host,'port':self.port,'virtualhost':self.vhost,'login':self.username,'password':self.password}), loop=qbroker.loop)
 		self._rpc_connect()
+		self.evt = EventCallback(self)
+		register_worker(self.evt)
+
+	def drop_worker(self,w):
+		assert w is self.evt
+		unregister_worker(self.evt)
+		self.evt = None
 
 	def start(self):
 		self.server.start_gevent()
