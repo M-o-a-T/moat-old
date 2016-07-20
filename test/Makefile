@@ -20,7 +20,7 @@ export MOAT_TEST=1
 PYFILES ?= $(wildcard *.py)
 SHFILES ?= $(wildcard *.sh)
 PYTHON ?= python3
-test:
+test otest:
 	@rm -f /tmp/moat.$$(id -un).db /tmp/moat.db.$$(id -u) 2>/dev/null
 	@set -e; \
 	rm -rf real; mkdir real; \
