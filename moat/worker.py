@@ -38,6 +38,7 @@ from moat.base import Name,MIN_PRIO,MAX_PRIO,SYS_PRIO,SName
 from moat.times import humandelta, now
 from moat.twist import fix_exception,reraise,format_exception,log_wait
 from gevent import spawn
+from traceback import print_exc
 
 #import os
 
@@ -330,6 +331,7 @@ class ConcurrentWorkSequence(WorkSequence):
 			except Exception as exc:
 				from moat.logging import log_exc
 				from moat.run import process_failure
+				print_exc()
 				fix_exception(exc)
 				log_exc(msg="Unhandled exception", err=exc)
 				process_failure(exc)

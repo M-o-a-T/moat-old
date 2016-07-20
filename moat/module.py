@@ -39,6 +39,7 @@ from moat.twist import fix_exception,reraise
 
 import sys
 import os
+from traceback import print_exc
 
 ModuleDirs = []
 def par(_): return os.path.join(os.pardir,_)
@@ -188,6 +189,7 @@ load NAME [args]...
 		try:
 			load_module(*event)
 		except Exception as ex:
+			print_exc()
 			simple_event("module","state",*event, state="error", error=ex)
 		else:
 			simple_event("module","load",*event, deprecated=True)
