@@ -29,7 +29,7 @@ This is the core of the event dispatcher.
 
 import os
 
-VERSION = "0.4"
+VERSION = "0.7"
 
 TESTING = "MOAT_TEST" in os.environ
 
