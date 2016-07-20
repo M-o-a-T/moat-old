@@ -42,7 +42,7 @@ from moat.types import TYPEDEF_DIR
 import logging
 logger = logging.getLogger(__name__)
 
-DEFAULT_CFG="/etc/moat.cfg"
+DEFAULT_CFG="/etc/moat/moat.cfg"
 
 DEFAULT_CONFIG = dict(
 	testing=False,
