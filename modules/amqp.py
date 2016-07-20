@@ -55,7 +55,7 @@ from gevent.event import AsyncResult
 from gevent import spawn,spawn_later
 
 from dabroker.base.codec.json import Codec
-json = Codec(None, lists=True)
+json = Codec(None)
 
 _seq=0  # new element sequence number
 _mseq=0 # new message sequence number
