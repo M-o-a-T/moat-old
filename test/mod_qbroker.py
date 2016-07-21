@@ -116,7 +116,8 @@ load_module("help")
 k = spawn(run,"qbroker",input)
 j = spawn(gtester)
 f = aiogevent.wrap_greenlet(j, loop=qbroker.loop)
-qbroker.loop.run_until_complete(f)
+#qbroker.loop.run_until_complete(f)
+aiogevent.yield_future(f)
 assert seen
 
 try: k.kill()
