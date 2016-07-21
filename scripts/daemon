@@ -63,6 +63,7 @@ parser.add_option("-p", "--pidfile", dest="pidfile", action="store",
 if not args:
 	print("You need at least one config file!", file=sys.stderr)
 	sys.exit(1)
+moat._args = args # hack for qbroker
 
 class DoLogger(Logger):
 	"""\

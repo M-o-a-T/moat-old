@@ -27,7 +27,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 This code implements a SSH command line for moat.
 
 """
-from moat import TESTING
+import moat
 from moat.module import Module
 from moat.context import Context
 from moat.statement import main_words,Statement,AttributedStatement,global_words
@@ -161,7 +161,7 @@ class QBconn(Collected,Jobber):
 		self.evt = None
 
 	def start(self):
-		self.server.start_gevent()
+		self.server.start_gevent(args=getattr(moat,'_args',()))
 		simple_event("qbroker","connect",*self.name)
 
 	def delete(self,ctx=None):
@@ -240,7 +240,7 @@ class QBconn(Collected,Jobber):
 					break
 				p,t = r
 				if isinstance(t,datetime):
-					if TESTING:
+					if moat.TESTING:
 						if t.year != 2003:
 							t = "%s" % (humandelta(t-now(t.year != 2003)),)
 						else: 
