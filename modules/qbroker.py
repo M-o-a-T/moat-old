@@ -161,7 +161,7 @@ class QBconn(Collected,Jobber):
 		self.evt = None
 
 	def start(self):
-		self.server.start_gevent(args=getattr(moat,'_args',()))
+		self.server.start_gevent(*getattr(moat,'_args',()))
 		simple_event("qbroker","connect",*self.name)
 
 	def delete(self,ctx=None):
