@@ -28,6 +28,7 @@ import six
 if six.PY2:
 	import sys; sys.excepthook = None; del sys
 from moat import patch;patch()
+import moat
 from moat.statement import main_words, global_words, Statement, \
 	DoNothingHandler
 from moat.module import Load,LoadDir,load_module
