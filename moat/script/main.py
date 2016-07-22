@@ -32,7 +32,7 @@ import yaml
 import asyncio
 import socket
 
-from dabroker.unit import make_unit, DEFAULT_CONFIG as DABROKER_DEFAULT_CONFIG
+from qbroker.unit import make_unit, DEFAULT_CONFIG as QBROKER_DEFAULT_CONFIG
 
 from moat.script import SubCommand, CommandError
 from moat.cmd import commands as moat_commands
@@ -155,7 +155,7 @@ You can load more than one config file.
 		self.cfg = {'config':{}}
 		if not opts.no_default:
 			r_update(self.cfg['config'], DEFAULT_CONFIG)
-			r_update(self.cfg['config'], DABROKER_DEFAULT_CONFIG)
+			r_update(self.cfg['config'], QBROKER_DEFAULT_CONFIG)
 		for p in paths:
 			with open(p) as f:
 				cfg = yaml.safe_load(f)

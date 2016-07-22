@@ -25,7 +25,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 
 import asyncio
 from etcd_tree import EtcFloat,EtcString,EtcDir, ReloadRecursive
-from dabroker.util import import_string
+from qbroker.util import import_string
 
 from . import _VARS, TASKDEF_DIR,TASKDEF
 from moat.types import TYPEDEF,TYPEDEF_DIR

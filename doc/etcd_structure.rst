@@ -14,7 +14,7 @@ Main tree
   * amqp
 
     Parameters for AMQP (host name, exchange and queue names, etc.)
-    This is mostly self-explaining. See the `dabroker` documentation for
+    This is mostly self-explaining. See the `qbroker` documentation for
     details.
 
   * run

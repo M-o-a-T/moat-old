@@ -34,7 +34,7 @@ from contextlib import suppress
 from datetime import datetime
 from yaml import dump
 
-from dabroker.util import import_string
+from qbroker.util import import_string
 from moat.script import Command, SubCommand, CommandError
 from moat.script.task import Task
 from moat.task import TASK,TASK_DIR, TASKDEF,TASKDEF_DIR, TASKSTATE,TASKSTATE_DIR, TASKSCAN_DIR, task_types

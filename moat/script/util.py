@@ -59,7 +59,7 @@ def objects(module, cls, immediate=False,direct=False,filter=lambda x:True):
 						yield c
 			
 	if isinstance(module,str):
-		from dabroker.util import import_string
+		from qbroker.util import import_string
 		module = import_string(module)
 	yield from _check(module)
 	try:

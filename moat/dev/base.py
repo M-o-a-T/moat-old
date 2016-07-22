@@ -32,7 +32,7 @@ from weakref import ref
 from moat.util import do_async
 from moat.types import TYPEDEF_DIR,TYPEDEF, type_names
 from moat.types.managed import ManagedEtcThing,ManagedEtcDir
-from dabroker.unit.rpc import CC_DATA
+from qbroker.unit import CC_DATA
 from . import devices, DEV
 
 import logging

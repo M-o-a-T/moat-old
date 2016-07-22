@@ -37,11 +37,9 @@ TESTING = "MOAT_TEST" in os.environ
 
 def patch():
 	"""Call this as early as possible, not from an import, and only once."""
-	from dabroker import patch; patch()
-	try:
-		from moat.gevent_rpyc import patch_all; patch_all()
-	except ImportError:
-		pass
+	from qbroker import setup; setup(gevent=True)
+	import gevent.monkey
+	gevent.monkey.patch_all()
 
 	import logging,sys
 	logging.basicConfig(stream=sys.stderr,level=logging.DEBUG if TESTING else logging.WARN)

@@ -33,7 +33,7 @@ from moat.script.util import objects
 from moat.task import TASKDEF_DIR
 from moat.types import MODULE_DIR
 from moat.types.module import BaseModule, modules
-from dabroker.util import import_string
+from qbroker.util import import_string
 from yaml import safe_dump
 from etcd_tree import EtcXValue
 import aio_etcd as etcd

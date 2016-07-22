@@ -46,7 +46,7 @@ from moat.event_hook import OnEventBase
 from moat.collect import collections
 from moat.check import check_condition
 
-from dabroker.util import import_string
+from qbroker.util import import_string
 
 class OnEventExec(OnEventBase):
 	def __init__(self,parent,args,name,fn):

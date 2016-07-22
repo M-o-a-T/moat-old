@@ -26,8 +26,8 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import asyncio
 import pytest
 from time import time
-from dabroker.proto import ProtocolClient
-from dabroker.unit import Unit,CC_DATA
+from moat.proto import ProtocolClient
+from qbroker.unit import Unit,CC_DATA
 from moat.ext.onewire.proto import OnewireServer
 from moat.task import TASK
 import mock

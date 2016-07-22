@@ -25,7 +25,6 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 
 import asyncio
 from etcd_tree import EtcFloat,EtcString, ReloadRecursive
-from dabroker.util import import_string
 
 from . import TASK_DIR,TASKSCAN_DIR
 from moat.script.task import Task

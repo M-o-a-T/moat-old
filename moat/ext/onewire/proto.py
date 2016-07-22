@@ -19,7 +19,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import asyncio
 import struct
 from time import time
-from dabroker.proto import Protocol, ProtocolInteraction, ProtocolClient
+from moat.proto import Protocol, ProtocolInteraction, ProtocolClient
 
 import logging
 logger = logging.getLogger(__name__)

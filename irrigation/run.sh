@@ -2,7 +2,7 @@
 cd "$(dirname "$0")"
 export DJANGO_SETTINGS_MODULE="settings"
 P="$(pwd)"
-export PYTHONPATH=$P/../../dabroker:$P/..:$P
+export PYTHONPATH=$P/../../qbroker:$P/..:$P
 (
 ./manage.py runserver 0.0.0.0:58000 &
 ./manage2.py runschedule Schleiermacher+Hardenberg &

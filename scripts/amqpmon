@@ -51,7 +51,7 @@ from pprint import pprint
 from functools import partial
 from weakref import WeakSet
 from itertools import count
-from dabroker.util import attrdict
+from qbroker.util import attrdict
 
 modes = "log,msg".split(",")
 from optparse import OptionParser

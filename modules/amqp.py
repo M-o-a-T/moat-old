@@ -54,8 +54,7 @@ from gevent.queue import Queue
 from gevent.event import AsyncResult
 from gevent import spawn,spawn_later
 
-from dabroker.base.codec.json import Codec
-json = Codec(None)
+import qbroker.codec.json as json
 
 _seq=0  # new element sequence number
 _mseq=0 # new message sequence number

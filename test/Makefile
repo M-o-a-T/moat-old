@@ -14,7 +14,7 @@
 ##  for more details.
 ##
 
-export PYTHONPATH=$(shell pwd)/..:$(shell pwd)/../dabroker:$(shell pwd)/../../smurf/python
+export PYTHONPATH=$(shell pwd)/..:$(shell pwd)/../qbroker:$(shell pwd)/../../smurf/python
 export PYTHONHASHSEED=0
 export MOAT_TEST=1
 PYFILES ?= $(wildcard *.py)

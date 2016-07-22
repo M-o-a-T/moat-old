@@ -27,7 +27,7 @@ import asyncio
 from weakref import WeakValueDictionary
 from pprint import pformat
 
-from dabroker.util import import_string
+from qbroker.util import import_string
 from etcd_tree import EtcRoot, EtcDir, EtcString, EtcXValue, ReloadRecursive
 
 import logging
