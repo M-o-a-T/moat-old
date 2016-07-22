@@ -87,6 +87,7 @@ log ERROR Start
 connect qbroker foo localhost:
 	user test test
 	vhost "/test"
+	app test moat
 log ERROR connected
 try:
 	wait shutdown:

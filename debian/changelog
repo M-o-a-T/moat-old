@@ -1,3 +1,9 @@
+moat (0.7.32) smurf; urgency=medium
+
+  * qbroker interface: specify the app name from the script
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Fri, 22 Jul 2016 13:39:58 +0200
+
 moat (0.7.31) smurf; urgency=medium
 
   * don't put flatten() into a thread of its own

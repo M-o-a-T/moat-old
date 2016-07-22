@@ -141,15 +141,16 @@ class QBconn(Collected,Jobber):
 	"""A channel server"""
 	storage = QBconns
 
-	def __init__(self,name, host,port,vhost, username,password):
+	def __init__(self,name, host,port,vhost,app, username,password):
 		self.name = name
 		self.host=host
 		self.port=port
 		self.vhost=vhost
+		self.app=app
 		self.username=username
 		self.password=password
 		super().__init__()
-		self.server = qbroker.Unit("moat",amqp=dict(server={'host':self.host,'port':self.port,'virtualhost':self.vhost,'login':self.username,'password':self.password}), loop=qbroker.loop)
+		self.server = qbroker.Unit(self.app, amqp=dict(server={'host':self.host,'port':self.port,'virtualhost':self.vhost,'login':self.username,'password':self.password}), loop=qbroker.loop)
 		self._rpc_connect()
 		self.evt = EventCallback(self)
 		register_worker(self.evt)
@@ -174,6 +175,7 @@ class QBconn(Collected,Jobber):
 		yield ("host",self.host)
 		yield ("port",self.port)
 		yield ("vhost",self.vhost)
+		yield ("app",self.app)
 		yield ("server",repr(self.server))
 		
 	def _rpc_connect(self):
@@ -261,6 +263,7 @@ This command sets up an AMQP connection to this broker.
 
 	dest = None
 	vhost = '/test'
+	app = 'moat.x'
 	username="test"
 	password="test"
 
@@ -281,7 +284,7 @@ This command sets up an AMQP connection to this broker.
 			port = int(event[2])
 		else:
 			port = 5672
-		q = QBconn(dest,host,port,self.vhost, self.username,self.password)
+		q = QBconn(dest,host,port,self.vhost,self.app, self.username,self.password)
 		try:
 			q.start()
 		except Exception:
@@ -319,6 +322,23 @@ vhost ‹name›
 			raise SyntaxError("Usage: vhost ‹name›")
 		self.parent.vhost = event[0]
 QBconnect.register_statement(QBvhost)
+
+class QBapp(Statement):
+	name="app"
+	dest = None
+	doc="specify the app name of a QBroker connection"
+
+	long_doc = u"""\
+app ‹name…›
+- Set the app name this instance registers as.
+"""
+
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if len(event) < 1:
+			raise SyntaxError("Usage: app ‹name…›")
+		self.parent.app = '.'.join(event)
+QBconnect.register_statement(QBapp)
 
 class QBuser(Statement):
 	name="user"
