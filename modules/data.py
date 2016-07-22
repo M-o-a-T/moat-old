@@ -64,12 +64,8 @@ list ‹type› *
 """
 	def run(self,ctx,**k):
 
-		def getter(out,q):
-			while True:
-				res = q.get()
-				if res is None:
-					return
-				p,t = res
+		def out_one(c):
+			for p,t in flatten((c,)):
 				if isinstance(t,datetime):
 					if TESTING and t.year != 2003:
 						t = "%s" % (humandelta(t-now(t.year != 2003)),)
@@ -87,22 +83,12 @@ list ‹type› *
 					ft=float("%.4f"%t)
 					if abs(ft-t)<0.00000001:
 						t=ft
-				print(p+u": "+six.text_type(t), file=out)
+				print(p+u": "+six.text_type(t), file=self.ctx.out)
 
 		event = self.params(ctx)
 		c = get_collect(event, allow_collection=True)
 
 		try:
-			def out_one(c):
-				q = Queue(3)
-				try:
-					job = spawn(getter,self.ctx.out,q)
-					flatten(q,(c,))
-				finally:
-#					with log_wait("list "+str(event)):
-					q.put(None)
-					job.join()
-
 			if c is None:
 				for m in all_collect(skip=False):
 					print(" ".join(m.name), file=self.ctx.out)

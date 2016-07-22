@@ -290,15 +290,7 @@ class RPCconn(Service,Collected):
 					else:
 						yield n,
 			else:
-				q = Queue(3)
-				job = spawn(flatten,q,(c,))
-				job.link(lambda _:q.put(None))
-
-				while True:
-					res = q.get()
-					if res is None:
-						return
-					p,t = res
+				for p,t in flatten((c,)):
 					if isinstance(t,datetime):
 						if TESTING:
 							if t.year != 2003:

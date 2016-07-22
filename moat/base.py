@@ -132,11 +132,11 @@ class RaisedError(RuntimeError):
 
 flat_lock = RLock()
 
-def flatten(out,s,p=""):
+def flatten(s,p=""):
 	with flat_lock:
 		if hasattr(s,"list") and callable(s.list):
 			for ss in s.list():
-				flatten(out,ss,p)
+				yield from flatten(ss,p)
 			return
 		s = list(s)
 		t = s.pop()
@@ -148,8 +148,8 @@ def flatten(out,s,p=""):
 		if hasattr(t,"next" if six.PY2 else "__next__"):
 			pp = " "*len(p)
 			for tt in t:
-				flatten(out,tt,p)
+				yield from flatten(tt,p)
 				p = pp
 		else:
-			out.put((p,t))
+			yield (p,t)
 

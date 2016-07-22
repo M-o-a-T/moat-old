@@ -233,11 +233,7 @@ class QBconn(Collected,Jobber):
 			job = spawn(flatten,q,(c,))
 			job.link(lambda _:q.put(None))
 
-			while True:
-				r = q.get()
-				if r is None:
-					break
-				p,t = r
+			for p,t in flatten((c,)):
 				if isinstance(t,datetime):
 					if moat.TESTING:
 						if t.year != 2003:
