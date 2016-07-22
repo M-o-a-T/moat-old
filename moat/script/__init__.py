@@ -299,6 +299,14 @@ class Command(object):
 			c = c.parent
 		return c
 
+	@property
+	def path(self):
+		return self.parent.path+'.'+self.name
+
+	#async
+	def setup(self, dest=None):
+		return self.root.setup(dest=dest, prefix=self.path)
+		
 	def _getStd(self, what):
 
 		ret = getattr(self, '_' + what, None)

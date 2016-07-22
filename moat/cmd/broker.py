@@ -1,0 +1,199 @@
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import, print_function, division, unicode_literals
+##
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
+##
+##  This program is free software: you can redistribute it and/or modify
+##  it under the terms of the GNU General Public License as published by
+##  the Free Software Foundation, either version 3 of the License, or
+##  (at your option) any later version.
+##
+##  This program is distributed in the hope that it will be useful,
+##  but WITHOUT ANY WARRANTY; without even the implied warranty of
+##  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+##  GNU General Public License (included; see the file LICENSE)
+##  for more details.
+##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
+##BP
+
+"""Talk to the broker directly"""
+
+import os
+import sys
+import aio_etcd as etcd
+import asyncio
+import time
+import types
+from qbroker.unit import CC_DICT, CC_DATA
+from yaml import dump
+from traceback import print_exc
+
+from moat.script import Command, SubCommand, CommandError
+from moat.script.task import Task,_run_state, JobMarkGoneError,JobIsRunningError
+from moat.task import TASKSTATE_DIR,TASKSTATE, TASKSCAN_DIR,TASK
+
+import logging
+logger = logging.getLogger(__name__)
+
+__all__ = ['BrokerCommand']
+
+## TODO add --dest UUID
+
+class CmdCommand(Command):
+	name = "cmd"
+	summary = "Send an arbitrary command on the bus",
+	description = """\
+Send an arbitrary command to the bus.
+
+Arguments:
+* routing key
+* any number of name=value pairs
+"""
+	async def do(self,args):
+		if len(args) < 1:
+			raise SyntaxError("Usage: cmd  words to send  var=data.to.add")
+		d = {}
+		while True:
+			i = args[-1].find('=')
+			if i < 1:
+				break
+			w = args.pop()
+			k = w[:i]
+			s = w[i+1:]
+			try:
+				s = eval(s)
+			except ValueError:
+				pass
+			d[k] = s
+		d['args'] = args
+
+		from pprint import pprint
+		amqp = await self.root._get_amqp()
+		res = await amqp.rpc('moat.cmd',**d)
+		pprint(res)
+
+class ListCommand(Command):
+	name = "list"
+	summary = "Retrieve MoaT.2 data"
+	description = """\
+This command sends a "list" request to the MoaT.v2 daemon and prints the
+result(ing mess).
+
+"""
+
+	async def do(self,args):
+		def collapse(x):
+			if not isinstance(x,(tuple,list)):
+				return str(x)
+			return " ".join((collapse(xx) for xx in x))
+		amqp = await self.root._get_amqp()
+		res = await amqp.rpc("moat.list",args=args)
+		for x in res:
+			print(collapse(x))
+
+class HostsCommand(Command):
+	name = "hosts"
+	summary = "Retrieve MoaT systems"
+	description = """\
+Enumerate the MoaT systems on the bus.
+
+"""
+
+	def addOptions(self):
+		self.parser.add_option('-u','--uuid',
+			action="store", dest="uuid",
+			help="Query this UUID only")
+		self.parser.add_option('-a','--app',
+			action="store", dest="app",
+			help="limit the list to this app")
+		self.parser.add_option('-t','--timeout',
+			action="store", dest="timeout", type="int", default=2,
+			help="Enumeration timeout")
+
+	async def do(self,args):
+		await self.setup()
+		amqp = self.root.amqp
+		todo = set()
+
+		def cb(data,uuid=None):
+			if uuid is None:
+				uuid = data['uuid']
+
+			def d(f):
+				todo.remove(f)
+				try:
+					res = f.result()
+				except asyncio.CancelledError:
+					if self.root.verbose > 1:
+						dump(dict(uuid=uuid,error="no answer"), stream=self.stdout)
+						print("---",file=self.stdout)
+					else:
+						print("No answer",uuid)
+				except Exception:
+					print_exc()
+				else:
+					if self.root.verbose > 1:
+						dump(dict(res), stream=self.stdout)
+						print("---",file=self.stdout)
+					else:
+						print(res['uuid'],res['app'], sep='\t')
+			f = asyncio.ensure_future(amqp.rpc('qbroker.ping', _dest=uuid, _timeout=self.options.timeout), loop=self.root.loop)
+			f.add_done_callback(d)
+			todo.add(f)
+
+		if self.options.uuid:
+			cb(None,self.options.uuid)
+			for t in list(todo): # only one
+				await t
+		else:
+			d = {}
+			if self.options.app:
+				d['app'] = self.options.app
+			await amqp.alert("qbroker.ping",callback=cb,call_conv=CC_DATA, timeout=self.options.timeout, _data=d)
+			for t in list(todo):
+				t.cancel()
+
+class EventCommand(Command):
+	name = "event"
+	summary = "Monitor MoaTv2 events"
+	description = """\
+Report events emitted by MoaTv2, until interrupted.
+"""
+
+	async def do(self,args):
+		async def coll(**msg):
+			dump(msg, stream=self.stdout)
+		amqp = await self.root._amqp()
+		if not args:
+			args = '#'
+		else:
+			args = '.'.join(args)
+		await amqp.register_async(args,coll, call_conv=CC_DICT)
+		while True:
+			await asyncio.sleep(100)
+
+class BrokerCommand(SubCommand):
+	name = "broker"
+	summary = "Talk to the message broker"
+	description = """\
+Commands to directly access the message broker.
+
+Use with caution.
+"""
+
+	# process in order
+	subCommandClasses = [
+		CmdCommand,
+		ListCommand,
+		EventCommand,
+		HostsCommand,
+	]
+
+

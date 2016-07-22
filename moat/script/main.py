@@ -203,18 +203,18 @@ You can load more than one config file.
 		logging.captureWarnings(True)
 
 		self.app = self.cfg['config'].get('app',None)
-		if self.app is None:
-			# Rather than enumerate IP addresses, this is the quick&only-somewhat-dirty way
-			s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-			s.connect(('8.8.8.8', 53)) # connecting to a UDP address doesn't send packets
-			addr = s.getsockname()[0]
-			s.close()
-			self.app = socket.getfqdn(addr)
-			addr = self.app.split('.')
-			if len(addr) < 3: # pragma: no cover
-				raise CommandError("You need to fix your FQDN ('%s'), or use the '-a' option." % ".".join(addr))
-			addr.reverse()
-			self.cfg['config']['app'] = ".".join(addr)
+		
+		# Rather than enumerate IP addresses, this is the quick&only-somewhat-dirty way
+		s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		s.connect(('8.8.8.8', 53)) # connecting to a UDP address doesn't send packets
+		addr = s.getsockname()[0]
+		s.close()
+		addr = socket.getfqdn(addr)
+		addr = addr.split('.')
+		if len(addr) < 3: # pragma: no cover
+			raise CommandError("You need to fix your FQDN ('%s'), or use the '-a' option." % ".".join(addr))
+		#addr.reverse()
+		self.host = ".".join(addr)
 
 #		if 'specific' in kw and appname is not None:
 #			s = kw['specific']
@@ -230,7 +230,11 @@ You can load more than one config file.
 #				except ValueError:
 #					break
 
-	async def setup(self, dest=None):
+	@property
+	def path(self):
+		return "cmd"
+
+	async def setup(self, dest=None, prefix=None):
 		"""
 			Attach to etcd and amqp, get etcd tree.
 
@@ -239,7 +243,7 @@ You can load more than one config file.
 		if self.etcd is None:
 			await self._get_etcd()
 		if self.amqp is None:
-			await self._get_amqp()
+			await self._get_amqp(prefix=prefix)
 		if dest not in (None,self):
 			dest.etcd = self.etcd
 			dest.amqp = self.amqp
@@ -277,10 +281,13 @@ You can load more than one config file.
 		self.cfg = OverlayDict(self.cfg,{'config': self.etc_cfg})
 		return etc
 
-	async def _get_amqp(self):
+	async def _get_amqp(self, prefix=None):
 		if self.amqp is not None:
 			return self.amqp
-		self.amqp = res = await make_unit(self.app, self.cfg['config'], loop=self.loop)
+		p = self.cfg['config'].get('app','moat')
+		if prefix:
+			p += '.'+prefix
+		self.amqp = res = await make_unit(p, loop=self.loop, amqp=self.cfg['config']['amqp'])
 		return res
 
 	def load(self, subsys,name):
