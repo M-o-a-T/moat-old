@@ -3,7 +3,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##
 ##  This file is part of MoaT, the Master of all Things.
 ##
-##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  MoaT is Copyright © 2007-2016 by Matthias Urlichs <matthias@urlichs.de>,
 ##  it is licensed under the GPLv3. See the file `README.rst` for details,
 ##  including optimistic statements by the author.
 ##
@@ -161,7 +161,6 @@ LOGIN_REDIRECT_URL = '/'
 JINJA2_AUTOESCAPE = True
 
 DEFAULT_JINJA2_TEMPLATE_EXTENSION = ".jinja"
-
 
 JINJA2_ENVIRONMENT_OPTIONS = { 'extensions':['hamlish_jinja.HamlishExtension','hamlish_jinja.HamlishTagExtension','jinja2.ext.i18n', 'jinja2.ext.autoescape'] }
 JINJA2_FILTERS = { 'tz':str_tz }

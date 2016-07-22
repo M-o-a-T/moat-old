@@ -3,7 +3,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##
 ##  This file is part of MoaT, the Master of all Things.
 ##
-##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  MoaT is Copyright © 2007-2016 by Matthias Urlichs <matthias@urlichs.de>,
 ##  it is licensed under the GPLv3. See the file `README.rst` for details,
 ##  including optimistic statements by the author.
 ##
@@ -314,5 +314,4 @@ Run MoaT tasks.
 			j.cancel()
 			with suppress(asyncio.CancelledError):
 				await j
-
 

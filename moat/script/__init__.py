@@ -3,7 +3,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##
 ##  This file is part of MoaT, the Master of all Things.
 ##
-##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  MoaT is Copyright © 2007-2016 by Matthias Urlichs <matthias@urlichs.de>,
 ##  it is licensed under the GPLv3. See the file `README.rst` for details,
 ##  including optimistic statements by the author.
 ##
@@ -76,7 +76,6 @@ class CommandHelpFormatter(optparse.IndentedHelpFormatter):
 
 		return ret
 
-
 class CommandOptionParser(optparse.OptionParser):
 	"""
 	I parse options as usual, but I explicitly allow setting stdout
@@ -121,7 +120,6 @@ class CommandOptionParser(optparse.OptionParser):
 			sys.stderr.write(msg) # pragma: no cover ## called by the parser
 
 		return status
-
 
 class Command(object):
 	"""
@@ -264,7 +262,6 @@ class Command(object):
 			print("Use --help to get a list of commands.", file=sys.stderr)
 			return 1
 
-
 		# if everything's fine, we return 0
 		if not ret:
 			ret = 0
@@ -335,7 +332,6 @@ class CommandExited(Exception):
 #
 #	def __init__(self, output):
 #		CommandExited.__init__(self, 0, output)
-
 
 class CommandError(CommandExited):
 

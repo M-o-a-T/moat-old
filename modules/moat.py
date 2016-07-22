@@ -3,7 +3,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##
 ##  This file is part of MoaT, the Master of all Things.
 ##
-##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  MoaT is Copyright © 2007-2016 by Matthias Urlichs <matthias@urlichs.de>,
 ##  it is licensed under the GPLv3. See the file `README.rst` for details,
 ##  including optimistic statements by the author.
 ##
@@ -186,7 +186,6 @@ class MoatAlarmOnEvent(OnEventBase):
 		if m is not None:
 			m.alarm_on()
 
-
 class MoatAlarmOffEvent(OnEventBase):
 	"""triggers when a new bus device shows up"""
 	def __init__(self,parent,dev):
@@ -197,7 +196,6 @@ class MoatAlarmOffEvent(OnEventBase):
 		m = moat_ids[dev]
 		if m is not None:
 			m.alarm_off()
-
 
 class MOATio(object):
 	"""Base class for Wago input and output variables"""
@@ -273,7 +271,6 @@ set moat NAME VALUE attr…
 		dev = dev.lower()
 		
 		Moats[name][attr] = val
-
 
 class MOATmodule(Module):
 	"""\

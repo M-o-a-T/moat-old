@@ -1,6 +1,26 @@
-# -*- Mode: Python; test-case-name: test_command -*-
-# vi:si:et:sw=4:sts=4:ts=4
-# on 2015-11-14
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import, print_function, division, unicode_literals
+##
+##  This file is part of MoaT, the Master of all Things.
+##
+##  MoaT is Copyright © 2007-2016 by Matthias Urlichs <matthias@urlichs.de>,
+##  it is licensed under the GPLv3. See the file `README.rst` for details,
+##  including optimistic statements by the author.
+##
+##  This program is free software: you can redistribute it and/or modify
+##  it under the terms of the GNU General Public License as published by
+##  the Free Software Foundation, either version 3 of the License, or
+##  (at your option) any later version.
+##
+##  This program is distributed in the hope that it will be useful,
+##  but WITHOUT ANY WARRANTY; without even the implied warranty of
+##  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+##  GNU General Public License (included; see the file LICENSE)
+##  for more details.
+##
+##  This header is auto-generated and may self-destruct at any time,
+##  courtesy of "make update". The original is in ‘scripts/_boilerplate.py’.
+##  Thus, do not remove the next line, or insert any blank lines above.
 ##BP
 
 """
@@ -421,7 +441,6 @@ async def _run_state(tree,path):
 	run_state = await tree.subdir(TASKSTATE_DIR+path+(TASKSTATE,))
 	return run_state
 
-
 class TaskMaster(asyncio.Future):
 	"""\
 		An object which controls running and restarting a task,
@@ -607,5 +626,4 @@ class TaskMaster(asyncio.Future):
 			self.job = None
 
 		self.timer = self.loop.call_later(self.current_retry,self._timer_done)
-
 

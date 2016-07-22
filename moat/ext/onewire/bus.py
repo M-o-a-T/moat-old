@@ -3,7 +3,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##
 ##  This file is part of MoaT, the Master of all Things.
 ##
-##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  MoaT is Copyright © 2007-2016 by Matthias Urlichs <matthias@urlichs.de>,
 ##  it is licensed under the GPLv3. See the file `README.rst` for details,
 ##  including optimistic statements by the author.
 ##
@@ -35,7 +35,6 @@ from moat.dev import DEV_DIR,DEV
 
 from .task import tasks
 from .dev import OnewireDevice
-
 
 class OnewireBusBase(MoatBusBase):
 	"""Directory for /bus/onewire"""
@@ -105,7 +104,6 @@ class _OnewireBusDev_dev_iter(object):
 			pass
 		raise StopAsyncIteration
 
-
 class _OnewireBusDev_task_iter(object):
 	def __init__(self, path,devices,items):
 		self.path = path
@@ -131,7 +129,6 @@ class _OnewireBusDev_task_iter(object):
 		except StopIteration:
 			pass
 		raise StopAsyncIteration
-
 
 class OnewireBusDev(ManagedEtcThing, EtcDir):
 	"""Directory for /bus/onewire/NAME/bus/BUS/devices/XX"""

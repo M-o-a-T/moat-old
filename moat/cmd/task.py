@@ -3,7 +3,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##
 ##  This file is part of MoaT, the Master of all Things.
 ##
-##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  MoaT is Copyright © 2007-2016 by Matthias Urlichs <matthias@urlichs.de>,
 ##  it is licensed under the GPLv3. See the file `README.rst` for details,
 ##  including optimistic statements by the author.
 ##
@@ -109,7 +109,6 @@ This also installs the root "task scanner" task, if no args are given.
 
 		await t.wait()
 
-
 class DefListCommand(Command,DefSetup):
 	name = "list"
 	summary = "List task definitions"
@@ -181,7 +180,6 @@ This command deletes (some of) that data.
 					break
 				rec=False
 				t = p
-
 
 class _ParamCommand(Command,DefSetup):
 	name = "param"
@@ -498,7 +496,6 @@ Arguments:
 """
 	_update = False
 
-
 class UpdateCommand(_AddUpdate,Command,DefSetup):
 	name = "change"
 	summary = "change a task"
@@ -515,7 +512,6 @@ Arguments:
 
 """
 	_update = True
-
 
 class DeleteCommand(Command,DefSetup):
 	name = "delete"
@@ -557,7 +553,6 @@ This command deletes one of these entries.
 					break
 				rec=False
 				task = p
-
 
 class StateCommand(Command):
 	name = "state"
@@ -642,7 +637,6 @@ This command shows that information.
 						dump({'/'.join(path):r_dict(dict(task))}, stream=self.stdout)
 					else:
 						print('/'.join(path),state,date,task.get('message','-'), sep='\t', file=self.stdout)
-
 
 class TaskCommand(SubCommand):
 	name = "task"

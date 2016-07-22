@@ -3,7 +3,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##
 ##  This file is part of MoaT, the Master of all Things.
 ##
-##  MoaT is Copyright © 2007-2015 by Matthias Urlichs <matthias@urlichs.de>,
+##  MoaT is Copyright © 2007-2016 by Matthias Urlichs <matthias@urlichs.de>,
 ##  it is licensed under the GPLv3. See the file `README.rst` for details,
 ##  including optimistic statements by the author.
 ##
@@ -122,7 +122,6 @@ def _stop_mainloop():
 def _async_stop_mainloop():
 	j = gevent.spawn(_stop_mainloop)
 	yield from aiogevent.wrap_greenlet(j)
-
 
 ## This should be in moat.collect, but import ordering problems make that impossible
 
