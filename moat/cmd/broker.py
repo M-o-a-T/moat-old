@@ -56,6 +56,14 @@ Arguments:
 * routing key
 * any number of name=value pairs
 """
+	def addOptions(self):
+		self.parser.add_option('-u','--uuid',
+			action="store", dest="uuid",
+			help="Query this UUID directly")
+		self.parser.add_option('-t','--timeout',
+			action="store", dest="timeout", type="int", default=60,
+			help="Command timeout")
+
 	async def do(self,args):
 		if len(args) < 1:
 			raise SyntaxError("Usage: cmd  words to send  var=data.to.add")
@@ -74,10 +82,19 @@ Arguments:
 			d[k] = s
 		d['args'] = args
 
-		from pprint import pprint
+		if self.options.uuid:
+			d['_dest'] = self.options.uuid
+
 		amqp = await self.root._get_amqp()
-		res = await amqp.rpc('moat.cmd',**d)
-		pprint(res)
+		res = amqp.rpc('moat.cmd', **d)
+		if self.options.timeout:
+			res = asyncio.wait_for(res, self.options.timeout, loop=self.root.loop)
+		try:
+			res = await res
+		except asyncio.TimeoutError:
+			print("-timed out", file=self.stdout)
+		from yaml import dump
+		dump(res, stream=self.stdout)
 
 class ListCommand(Command):
 	name = "list"
@@ -88,15 +105,35 @@ result(ing mess).
 
 """
 
+	def addOptions(self):
+		self.parser.add_option('-u','--uuid',
+			action="store", dest="uuid",
+			help="Query this UUID directly")
+		self.parser.add_option('-t','--timeout',
+			action="store", dest="timeout", type="int", default=60,
+			help="Command timeout")
+
 	async def do(self,args):
 		def collapse(x):
 			if not isinstance(x,(tuple,list)):
 				return str(x)
 			return " ".join((collapse(xx) for xx in x))
 		amqp = await self.root._get_amqp()
-		res = await amqp.rpc("moat.list",args=args)
-		for x in res:
-			print(collapse(x))
+
+		d={}
+		if self.options.uuid:
+			d['_dest'] = self.options.uuid
+
+		res = amqp.rpc("moat.list",args=args, **d)
+		if self.options.timeout:
+			res = asyncio.wait_for(res, self.options.timeout, loop=self.root.loop)
+		try:
+			res = await res
+		except asyncio.TimeoutError:
+			print("-timeout")
+		else:
+			for x in res:
+				print(collapse(x))
 
 class HostsCommand(Command):
 	name = "hosts"
@@ -143,8 +180,12 @@ Enumerate the MoaT systems on the bus.
 						dump(dict(res), stream=self.stdout)
 						print("---",file=self.stdout)
 					else:
-						print(res['uuid'],res['app'], sep='\t')
-			f = asyncio.ensure_future(amqp.rpc('qbroker.ping', _dest=uuid, _timeout=self.options.timeout), loop=self.root.loop)
+						print(res['uuid'],res['app'], sep='\t', file=self.stdout)
+			f = amqp.rpc('qbroker.ping', _dest=uuid, _timeout=self.options.timeout)
+			if self.options.timeout > 0:
+				f = asyncio.wait_for(f,self.options.timeout, loop=self.root.loop)
+			f = asyncio.ensure_future(f, loop=self.root.loop)
+
 			f.add_done_callback(d)
 			todo.add(f)
 
