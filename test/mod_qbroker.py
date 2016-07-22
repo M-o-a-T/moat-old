@@ -88,6 +88,7 @@ connect qbroker foo localhost:
 	user test test
 	vhost "/test"
 	app test moat
+	codec application "json+obj"
 log ERROR connected
 try:
 	wait shutdown:

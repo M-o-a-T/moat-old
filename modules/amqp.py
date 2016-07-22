@@ -54,7 +54,8 @@ from gevent.queue import Queue
 from gevent.event import AsyncResult
 from gevent import spawn,spawn_later
 
-import qbroker.codec.json as json
+from qbroker.codec import get_codec
+import qbroker.codec.json_obj as json
 
 _seq=0  # new element sequence number
 _mseq=0 # new message sequence number
@@ -155,7 +156,7 @@ class EventCallback(Worker):
 				msg = msg.encode("utf-8")
 			global _mseq
 			_mseq += 1
-			msg = amqp.Message(body=msg, content_type='application/json', message_id=base_mseq+str(_mseq))
+			msg = amqp.Message(body=msg, content_type=json.CODEC, message_id=base_mseq+str(_mseq))
 			self.channel.basic_publish(msg=msg, exchange=self.exchange, routing_key=".".join(str(x) for x in self.prefix+tuple(event)[self.strip:]))
 		except Exception as ex:
 			fix_exception(ex)
@@ -457,7 +458,7 @@ class AMQPlogger(BaseLogger):
 
 		global _mseq
 		_mseq += 1
-		msg = amqp.Message(body=msg, content_type='application/json', message_id=base_mseq+str(_mseq))
+		msg = amqp.Message(body=msg, content_type=json.CODEC, message_id=base_mseq+str(_mseq))
 		self.channel.basic_publish(msg=msg, exchange=self.exchange, routing_key=".".join(str(x) for x in self.prefix+(level,)))
 	
 	def _flush(self):
@@ -603,17 +604,12 @@ class AMQPrecv(Collected):
 	def on_info_msg(self,msg):
 		if not self._direct and not TESTING and getattr(msg,'message_id','').startswith(base_mseq):
 			return # dup
-		if getattr(msg,'content_type','') == "application/json":
-			try:
-				b = msg.body
-				if not isinstance(b,six.text_type):
-					b = b.decode('utf-8')
-				data = json.decode(b)
-				data = json.decode2(data)
-			except Exception as e:
-				data = { "raw": msg.body, "error": e }
-		else:
-			data = { "raw": msg.body, "content_type": getattr(msg,'content_type','') }
+		typ = getattr(msg,'content_type','')
+		try:
+			codec = get_codec(typ)
+			data = codec.decode(msg.body)
+		except Exception as e:
+			data = { "raw": msg.body, "content_type": typ, "error": e }
 		self.last_recv = msg.__dict__
 		if 'timestamp' not in data:
 			data['timestamp'] = now()

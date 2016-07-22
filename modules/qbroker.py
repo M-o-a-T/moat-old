@@ -141,16 +141,17 @@ class QBconn(Collected,Jobber):
 	"""A channel server"""
 	storage = QBconns
 
-	def __init__(self,name, host,port,vhost,app, username,password):
+	def __init__(self,name, host,port,vhost,app,codec, username,password):
 		self.name = name
 		self.host=host
 		self.port=port
 		self.vhost=vhost
 		self.app=app
+		self.codec=codec
 		self.username=username
 		self.password=password
 		super().__init__()
-		self.server = qbroker.Unit(self.app, amqp=dict(server={'host':self.host,'port':self.port,'virtualhost':self.vhost,'login':self.username,'password':self.password}), loop=qbroker.loop)
+		self.server = qbroker.Unit(self.app, amqp=dict(codec=self.codec, server={'host':self.host,'port':self.port,'virtualhost':self.vhost,'login':self.username,'password':self.password}), loop=qbroker.loop)
 		self._rpc_connect()
 		self.evt = EventCallback(self)
 		register_worker(self.evt)
@@ -176,6 +177,7 @@ class QBconn(Collected,Jobber):
 		yield ("port",self.port)
 		yield ("vhost",self.vhost)
 		yield ("app",self.app)
+		yield ("codec",self.codec)
 		yield ("server",repr(self.server))
 		
 	def _rpc_connect(self):
@@ -264,6 +266,7 @@ This command sets up an AMQP connection to this broker.
 	dest = None
 	vhost = '/test'
 	app = 'moat.x'
+	codec = 'DEFAULT'
 	username="test"
 	password="test"
 
@@ -284,7 +287,7 @@ This command sets up an AMQP connection to this broker.
 			port = int(event[2])
 		else:
 			port = 5672
-		q = QBconn(dest,host,port,self.vhost,self.app, self.username,self.password)
+		q = QBconn(dest,host,port,self.vhost,self.app,self.codec, self.username,self.password)
 		try:
 			q.start()
 		except Exception:
@@ -339,6 +342,25 @@ app ‹name…›
 			raise SyntaxError("Usage: app ‹name…›")
 		self.parent.app = '.'.join(event)
 QBconnect.register_statement(QBapp)
+
+class QBcodec(Statement):
+	name="codec"
+	dest = None
+	doc="specify the default codec for a QBroker connection"
+
+	long_doc = u"""\
+codec ‹name…›
+- Set the codec this instance registers as.
+  Default is "DEFAULT", which should be application/json+obj
+  but really depends on your qbroker version.
+"""
+
+	def run(self,ctx,**k):
+		event = self.params(ctx)
+		if len(event) < 1 or len(event) > 2:
+			raise SyntaxError("Usage: codec ‹name›")
+		self.parent.codec = '/'.join(event)
+QBconnect.register_statement(QBcodec)
 
 class QBuser(Statement):
 	name="user"
