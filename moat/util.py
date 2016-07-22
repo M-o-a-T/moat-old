@@ -71,6 +71,11 @@ def r_dict(m):
 	else:
 		return m
 
+def _ADwrapper(dumper,data):
+	return dumper.represent_mapping('!attr', data)
+from qbroker.util import attrdict
+yaml.add_representer(attrdict,_ADwrapper)
+
 def r_show(m,prefix=''):
 	if isinstance(m,Mapping):
 		if m:
