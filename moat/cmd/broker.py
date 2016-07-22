@@ -211,12 +211,14 @@ Report events emitted by MoaTv2, until interrupted.
 	async def do(self,args):
 		async def coll(**msg):
 			dump(msg, stream=self.stdout)
-		amqp = await self.root._amqp()
+
+		await self.setup()
+		amqp = self.root.amqp
 		if not args:
 			args = '#'
 		else:
 			args = '.'.join(args)
-		await amqp.register_async(args,coll, call_conv=CC_DICT)
+		await amqp.register_alert_async(args,coll, call_conv=CC_DICT)
 		while True:
 			await asyncio.sleep(100)
 
