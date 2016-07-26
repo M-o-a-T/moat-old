@@ -159,6 +159,8 @@ class Monitor(Collected,Jobber):
 			if self.state_change_at is not None:
 				yield ("state change",self.state_change_at)
 
+		if hasattr(self,"factor"):
+			yield ("factor",self.factor,self.offset)
 		yield ("steps", "%s / %s / %s" % (self.steps,self.points,self.maxpoints))
 		if self.data:
 			yield ("data"," ".join(six.text_type(x) for x in self.data))
