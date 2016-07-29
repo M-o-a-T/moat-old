@@ -130,7 +130,8 @@ class EventCallback(Worker):
 
 		k.update(event.ctx)
 		k['event'] = list(event)
-		self.parent.server.alert_gevent('moat.event.'+'.'.join(event), **k)
+		if self.parent and self.parent.server:
+			self.parent.server.alert_gevent('moat.event.'+'.'.join(event), **k)
 		raise TrySomethingElse
 
 	def cancel(self):
@@ -168,6 +169,8 @@ class QBconn(Collected,Jobber):
 	def delete(self,ctx=None):
 		self.server.stop_gevent()
 		self.server = None
+		if self.evt is not None:
+			self.evt.delete()
 		super(QBconn,self).delete()
 		simple_event("qbroker","disconnect",*self.name)
 
