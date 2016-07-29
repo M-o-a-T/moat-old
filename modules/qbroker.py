@@ -168,7 +168,7 @@ class QBconn(Collected,Jobber):
 	def delete(self,ctx=None):
 		self.server.stop_gevent()
 		self.server = None
-		super(QBserver,self).delete()
+		super(QBconn,self).delete()
 		simple_event("qbroker","disconnect",*self.name)
 
 	def list(self):
