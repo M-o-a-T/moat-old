@@ -24,15 +24,16 @@ from django.http import HttpResponseRedirect
 from datetime import timedelta,datetime
 
 from rainman.models import Site
+from rainman.utils import Redirect
 
 def get_profile(request):
 	try:
 		gu = request.user.profile
 	except (ObjectDoesNotExist,AttributeError):
 		if request.user.is_authenticated():
-			return redirect('/login/no_access')
+			raise Redirect('/login/no_access')
 		else:
-			return redirect('/login/?next=%s' % request.path)
+			raise Redirect('/login/?next=%s' % request.path)
 	else:
 		return gu
 

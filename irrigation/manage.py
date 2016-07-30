@@ -24,10 +24,13 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##  Thus, do not remove the next line, or insert any blank lines above.
 ##BP
 
-#from moat import patch;patch()
-from moat import twist
+from moat import patch; patch()
+from qbroker import setup; setup(gevent=True)
 import os
 import sys
+import gevent
+import qbroker
+import aiogevent
 
 ### this import must not happen before settings are completely loaded
 from hamlish_jinja import Hamlish
@@ -39,4 +42,6 @@ django.setup()
 if __name__ == "__main__":
     from django.core.management import execute_from_command_line
 
-    execute_from_command_line(sys.argv)
+    g = gevent.spawn(execute_from_command_line,sys.argv)
+    t = aiogevent.wrap_greenlet(g,loop=qbroker.loop)
+    qbroker.loop.run_until_complete(t)
