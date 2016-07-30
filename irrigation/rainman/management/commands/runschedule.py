@@ -577,7 +577,10 @@ class SchedSite(SchedCommon):
 		# TODO: return a sensible error and handle that correctly
 		if self.qb is None:
 			raise NotConnected
-		self.qb.rpc_gevent("moat.cmd",args=a, _dest="moat.main",**k)
+		try:
+			self.qb.rpc_gevent("moat.cmd",args=a, _dest="moat.main",**k)
+		except asyncio.TimeoutError as e:
+			print("Timeout sending %s %s" % (repr(a),repr(k)))
 
 	def run_every(self,delay):
 		"""Initiate running the calculation and scheduling loop every @delay seconds."""
