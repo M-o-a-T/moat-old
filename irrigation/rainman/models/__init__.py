@@ -25,6 +25,8 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 
 import six
 from django.db import models as m
+from django.db.models.fields.related import RelatedField
+from django.db.models.fields.reverse_related import ForeignObjectRel
 from rainman.utils import now
 
 class Model(m.Model):
@@ -38,17 +40,14 @@ class Model(m.Model):
 	def refresh(self):
 		"""Refreshes this instance from db"""
 		from_db = self.__class__.objects.get(pk=self.pk)
-		fields = self.__class__._meta.get_all_field_names()
-		
+		fields = self.__class__._meta.get_fields()
 		for field in fields:
 			try:
-				val = getattr(from_db, field)
+				val = getattr(from_db, field.name)
 			except AttributeError:
 				continue
-			# unfortunately these classes are not accessible externally
-			# so we have to check by name
-			if val.__class__.__name__ not in ("RelatedManager","ManyRelatedManager"):
-				setattr(self, field, val)
+			if not isinstance(field,(RelatedField,ForeignObjectRel)):
+				setattr(self, field.name, val)
 	def sync(self):
 		pass
 	def shutdown(self):
