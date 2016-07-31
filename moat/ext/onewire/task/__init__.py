@@ -119,6 +119,7 @@ class ScanTask(TimeoutHandler, _BusTask, metaclass=_ScanMeta):
 			
 			Do not override this; override .task_ instead.
 			"""
+		logger.debug("starting %s: %s",self.__class__.__name__,self.path)
 		await self.setup_vars()
 		self.parent = await self.tree['bus']['onewire'][self.taskdir.path[2]]['bus'][self.taskdir.path[4]]
 		await self.parent['devices'] # we need that later
@@ -135,7 +136,14 @@ class ScanTask(TimeoutHandler, _BusTask, metaclass=_ScanMeta):
 		long_warned = 0
 
 		while True:
-			warned = await self.task_()
+			logger.debug("tasking %s: %s",self.__class__.__name__,self.path)
+			try:
+				warned = await self.task_()
+			except Exception as exc:
+				logger.exception("tasking %s: %s %s",self.__class__.__name__,self.path)
+				raise
+			else:
+				logger.debug("tasking %s: %s %s",self.__class__.__name__,self.path, warned)
 
 			# subtract the time spent during the task
 			if warned and t < 10:

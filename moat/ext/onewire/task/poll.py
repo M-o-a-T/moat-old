@@ -36,13 +36,18 @@ class ScanPoll(ScanTask):
 
 	async def task_(self):
 		for fam,d in self.parent['devices'].items():
+			logger.debug("items %s %s",self,fam)
 			for devid,b in (await d).items():
 				try:
+					logger.debug("get %s %s %s",self,fam,devid)
 					dev = await self.devices[fam][devid][DEV]
+					logger.debug("poll %s",dev)
 					await dev.poll()
+					logger.debug("poll_done %s",dev)
 				except asyncio.CancelledError:
 					raise
 				except Exception:
 					logger.exception("Poll error %s.%s", fam,devid)
 					raise
+			logger.debug("items end %s %s",self,fam)
 

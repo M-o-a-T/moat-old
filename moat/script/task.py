@@ -381,8 +381,8 @@ class TimeoutHandler:
 		self.__delay_sync = asyncio.Event(loop=self.loop)
 
 	async def delay(self, seconds):
-		if seconds > 2: # don't spam the logs
-			logger.debug("delay %.2f: %s",seconds,self)
+		if seconds > 1: # don't spam the logs
+			logger.debug("delay %.2f: %d %s",seconds,id(self),self)
 		self.__delay.clear()
 		self.__delay_sync.set()
 		r,self.__delay_run = self.__delay_run,None
@@ -400,36 +400,36 @@ class TimeoutHandler:
 		try:
 			await asyncio.wait_for(self.__delay.wait(), seconds, loop=self.loop)
 		except asyncio.TimeoutError:
-			if seconds > 2:
-				logger.debug("delay done: %s",self)
+			if seconds > 1:
+				logger.debug("delay done: %d %s",id(self),self)
 			pass
 		else:
-			logger.debug("delay skip: %s",self)
+			logger.debug("delay skip: %d %s",id(self),self)
 		self.__delay_sync.clear()
 
 	async def skip_delay(self):
 		"""Call to return from the delay immediately"""
 		if not self.__delay_sync.is_set():
-			logger.debug("delay WAIT: %s",self)
+			logger.debug("delay WAIT: %d %s",id(self),self)
 			await self.__delay_sync.wait()
-			logger.debug("delay WAIT done: %s",self)
-		logger.debug("delay: skipping: %s",self)
+			logger.debug("delay WAIT done: %d %s",id(self),self)
+		logger.debug("delay: skipping: %d %s",id(self),self)
 		self.__delay.set_result(None)
 			
 	async def _call_delay(self, proc=None):
-		"""Arrange to run m() as soon as the delay happens.
+		"""Arrange to run proc() as soon as the delay happens.
 			Also, wait until that is finished."""
-		logger.debug("delay_call: %s %s",proc,self)
+		logger.debug("delay_call: %d %s %s",id(self),proc,self)
 		self.__delay_x = asyncio.Future(loop=self.loop)
 		self.__delay_run = proc
 		await self.skip_delay()
 		try:
 			res = await self.__delay_x
 		except Exception as exc:
-			logger.debug("delay_call: %s < %s",repr(exc),self)
+			logger.debug("delay_call: %s < %d %s",repr(exc),id(self),self)
 			raise
 		else:
-			logger.debug("delay_call: %s < %s",res,self)
+			logger.debug("delay_call: %s < %d %s",res,id(self),self)
 			return res
 
 async def _run_state(tree,path):
@@ -566,15 +566,17 @@ class TaskMaster(asyncio.Future):
 
 	async def _trigger(self):
 		if self.timer is None:
-			logger.debug("_trigger: job is running")
+			logger.debug("_trigger: job %s is running", self.name)
 			await self.job
 			while self.timer is None:
 				await asyncio.sleep(0.1, loop=self.loop)
-		logger.debug("_trigger: restart now")
+		logger.debug("_trigger: restart %s now", self.name)
 		assert self.timer is not None
 		self.timer.cancel()
 		self._timer_done()
+		logger.debug("_trigger: waiting for %s", self.name)
 		await self.job
+		logger.debug("_trigger: finished with %s", self.name)
 
 	def _job_done(self, f):
 		assert f is self.job # job ended

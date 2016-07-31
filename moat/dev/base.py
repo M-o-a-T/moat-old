@@ -159,7 +159,7 @@ class TypedDir(ManagedEtcThing,EtcDir):
 			await amqp.unregister_rpc_async(self._rpc)
 			self._rpc = None
 		if name is not None:
-			logger.info("REG @%s %s %s %s %s",id(amqp),self,id(self),self.root,id(self.root))
+			logger.info("REG %s %s",name,self)
 			self._rpc = await amqp.register_rpc_async(name,self.do_rpc, call_conv=CC_DATA)
 		self._rpc_name = name
 

@@ -76,7 +76,9 @@ class OnewireDevice(Device): #(, metaclass=SelectDevice):
 	@property
 	async def bus_dev(self):
 		n = self['path'].split(' ')[1:]
+		logger.debug("msync A")
 		m = await self.manager_async
+		logger.debug("msync B")
 		return m.bus.at(*n).at(self.path[-3]+'.'+self.path[-2])
 
 #	def has_update(self):

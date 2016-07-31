@@ -54,9 +54,11 @@ class ManagedEtcThing(object):
 	def manager_async(self):
 		p = self.parent
 		if p is None:
+			logger.debug("mgr no parent %s",self)
 			f = asyncio.Future(loop=self._loop)
 			f.set_result(None)
 			return f
+		logger.debug("mgr parent %s",self)
 		return p.manager_async
 
 	async def manager_present(self,mgr):
@@ -124,9 +126,9 @@ class ManagedEtcDir(ManagedEtcThing):
 					self._manager_gone()
 				else:
 					return m
-			logger.debug("MGR: %s Waiting",self)
+			logger.debug("MGR: %d %s Waiting", id(self._manager_lock),self)
 			await self._manager_lock.wait()
-			logger.debug("MGR: %s WaitDone",self)
+			logger.debug("MGR: %d %s WaitDone", id(self._manager_lock),self)
 	async def set_manager(self,mgr):
 		m = self._mgr
 		if m is not None:
@@ -136,7 +138,7 @@ class ManagedEtcDir(ManagedEtcThing):
 				self._mgr = None
 				self._manager_gone()
 		elif m is not mgr:
-			assert m is None or m.done(), "%s already has a manager: %s %s" % (self,m,mgr)
+			assert m is None or m.done(), "%d %s already has a manager: %s %s" % (id(self),self,m,mgr)
 			await self._manager_present(mgr)
 	@manager.deleter
 	def manager(self):
@@ -144,17 +146,17 @@ class ManagedEtcDir(ManagedEtcThing):
 			self._manager_gone()
 
 	async def _manager_present(self,mgr):
-		logger.debug("MGR %s set start",self)
+		logger.debug("MGR %d %s set start",id(self._manager_lock),self)
 		self._mgr = ref(mgr,self._manager_gone)
 		self._manager_lock.set()
 		await super()._manager_present(mgr)
-		logger.debug("MGR %s set done",self)
+		logger.debug("MGR %d %s set done",id(self._manager_lock),self)
 	def _manager_gone(self):
-		logger.debug("MGR %s del start",self)
+		logger.debug("MGR %d %s del start",id(self._manager_lock),self)
 		self._mgr = None
 		self._manager_lock.clear()
 		super()._manager_gone()
-		logger.debug("MGR %s del done",self)
+		logger.debug("MGR %d %s del done",id(self._manager_lock),self)
 
 #ManagedEtcDir.register('*', cls=ManagedEtcSubdir)
 #ManagedEtcSubDir.register('*', cls=ManagedEtcSubdir)
