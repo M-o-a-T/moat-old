@@ -202,6 +202,14 @@ async def test_onewire_fake(loop):
 		await t.delete('/task/onewire/faker/scan/:task', recursive=True)
 	with suppress(etcd.EtcdKeyNotFound):
 		await t.delete('/task/onewire/faker/run/:task', recursive=True)
+	with suppress(etcd.EtcdKeyNotFound):
+		await t.delete('/device/onewire/05/010101010101', recursive=True)
+	with suppress(etcd.EtcdKeyNotFound):
+		await t.delete('/device/onewire/f0/004200420042', recursive=True)
+	with suppress(etcd.EtcdKeyNotFound):
+		await t.delete('/device/onewire/10/001001001001', recursive=True)
+	with suppress(etcd.EtcdKeyNotFound):
+		await t.delete('/device/onewire/1f/123123123123', recursive=True)
 
 	e = f = g = h = None
 	async def run(cmd):
