@@ -48,7 +48,7 @@ __all__ = ['ModuleCommand']
 class ModuleSetup:
 	async def setup(self):
 		await super().setup()
-		tree = self.root.tree
+		tree = await self.root._get_tree()
 		return (await tree.subdir(MODULE_DIR))
 
 class ModuleInitCommand(ModuleSetup,Command):
