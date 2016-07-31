@@ -51,7 +51,7 @@ class ModuleSetup:
 		tree = self.root.tree
 		return (await tree.subdir(MODULE_DIR))
 
-class ModuleInitCommand(Command,ModuleSetup):
+class ModuleInitCommand(ModuleSetup,Command):
 	name = "init"
 	summary = "Set up task definitions"
 	description = """\
