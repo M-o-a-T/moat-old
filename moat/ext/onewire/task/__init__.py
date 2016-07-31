@@ -136,14 +136,14 @@ class ScanTask(TimeoutHandler, _BusTask, metaclass=_ScanMeta):
 		long_warned = 0
 
 		while True:
-			logger.debug("tasking %s: %s",self.__class__.__name__,self.path)
+			logger.debug("tasking %d %s", id(self),self)
 			try:
 				warned = await self.task_()
 			except Exception as exc:
-				logger.exception("tasking %s: %s %s",self.__class__.__name__,self.path)
+				logger.exception("tasking %d %s", id(self),self)
 				raise
 			else:
-				logger.debug("tasking %s: %s %s",self.__class__.__name__,self.path, warned)
+				logger.debug("tasking %d %s", id(self),self)
 
 			# subtract the time spent during the task
 			if warned and t < 10:

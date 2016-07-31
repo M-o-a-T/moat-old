@@ -49,5 +49,5 @@ class ScanPoll(ScanTask):
 				except Exception:
 					logger.exception("Poll error %s.%s", fam,devid)
 					raise
-			logger.debug("items end %s %s",self,fam)
+		logger.debug("items end %s",self)
 

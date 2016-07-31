@@ -386,6 +386,7 @@ class TimeoutHandler:
 		super().__init__(*a,**k)
 		self.__delay = asyncio.Event(loop=self.loop)
 		self.__delay_sync = asyncio.Event(loop=self.loop)
+		logger.debug("Setup %d %s", id(self),self)
 
 	async def delay(self, seconds):
 		if seconds > 1: # don't spam the logs
