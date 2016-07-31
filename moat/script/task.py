@@ -126,6 +126,13 @@ class Task(asyncio.Task):
 		self.parents = parents
 		self.taskdir = taskdir
 
+	def __repr__(self):
+		r = super().__repr__()
+		s = r.find(' ')
+		if s > 0:
+			r = r[:s]+' @'+'/'.join(self.path)+r[s:]
+		return r
+
 	@classmethod
 	def task_info(cls,tree):
 		"""\
