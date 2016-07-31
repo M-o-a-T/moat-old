@@ -421,7 +421,7 @@ class TimeoutHandler:
 			await self.__delay_sync.wait()
 			logger.debug("delay WAIT done: %d %s",id(self),self)
 		logger.debug("delay: skipping: %d %s",id(self),self)
-		self.__delay.set_result(None)
+		self.__delay.set()
 			
 	async def _call_delay(self, proc=None):
 		"""Arrange to run proc() as soon as the delay happens.
