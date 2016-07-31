@@ -62,7 +62,7 @@ class JobParentGoneError(RuntimeError):
 	pass
 
 # for debugging purposes only
-_task_reg = {}
+_task_reg = weakref.WeakValueDictionary()
 
 class Task(asyncio.Task):
 	"""\
@@ -498,6 +498,7 @@ class TaskMaster(asyncio.Future):
 		self._m3 = self.gcfg.add_monitor(self.setup_vars)
 
 		self.setup_vars()
+		_task_reg[self.path] = self
 		
 		self._start()
 	
@@ -540,7 +541,6 @@ class TaskMaster(asyncio.Future):
 		except TypeError as e:
 			raise TypeError(self.task,self.task.cls) from e
 		self.task._task = self.job
-		_task_reg[self.path] = self
 		self.job.add_done_callback(self._job_done)
 		if self.callback is not None:
 			self.callback("start")
@@ -589,7 +589,6 @@ class TaskMaster(asyncio.Future):
 		assert f is self.job # job ended
 		assert self.timer is None
 		self.task._task = None
-		_task_reg.pop(self.path,None)
 		try:
 			res = self.job.result()
 		except asyncio.CancelledError as exc:
