@@ -308,7 +308,9 @@ async def test_onewire_fake(loop):
 				await tr.wait()
 				assert td['10']['001001001001'][':dev']
 				await td['10']['001001001001'][':dev']['input']['temperature'].set('alert','test.fake.temperature')
-				await td['05']['010101010101'][':dev']['output']['pin'].set('rpc','test.fake.pin')
+				p = td['05']['010101010101'][':dev']['output']['pin'].set
+				#import pdb;pdb.set_trace()
+				await p('rpc','test.fake.pin')
 				assert tr['faker']['bus']['bus.42 1f.123123123123 aux']['devices']['10']['001001001001'] == '0'
 				assert int(fb.bus_aux['simultaneous']['temperature']) == 1
 				logger.debug("Mod A end")
@@ -334,8 +336,12 @@ async def test_onewire_fake(loop):
 			await fst._call_delay(mod_a2)
 			logger.debug("TC E")
 			assert amqt == 12.5, amqt
+
+			assert not fb.bus['05.010101010101'].val
 			await u.rpc('test.fake.pin',1)
 			logger.debug("TC E2")
+			assert fb.bus['05.010101010101'].val
+			await fsp._call_delay()
 
 			# now unplug the sensor
 			async def mod_x():
@@ -356,24 +362,24 @@ async def test_onewire_fake(loop):
 			await fst2._trigger()
 			del fst2
 
+
 			logger.debug("TC G")
 			# watch it vanish
 			async def mod_b():
-				assert tr['faker']['bus']['bus.42 1f.123123123123 aux']['devices']['10']['001001001001'] == '1'
+				assert int(tr['faker']['bus']['bus.42 1f.123123123123 aux']['devices']['10'].get('001001001001','9'))
 			await fst._call_delay(mod_b)
 			logger.debug("TC H")
 
-			await asyncio.sleep(0.5,loop=loop)
-			for x in range(3):
-				fst2 = _task_reg[('onewire','faker','scan','bus.42 1f.123123123123 aux')]
+			fst2 = _task_reg[('onewire','faker','scan','bus.42 1f.123123123123 aux')]
+			for x in range(10):
+				logger.debug("TC H_")
 				await fst2._trigger()
 				await asyncio.sleep(0.5,loop=loop)
-			del fst2
-			await asyncio.sleep(0.5,loop=loop)
-			await fst._call_delay()
-			fst2 = _task_reg[('onewire','faker','run','bus.42','temperature')].job
-			await fst2._call_delay()
-			logger.debug("TC I")
+				try:
+					tr['faker']['bus']['bus.42 1f.123123123123 aux']['devices']['10']['001001001001']
+				except KeyError:
+					break
+
 			async def mod_c():
 				assert td['05']['010101010101'][':dev']['input']['pin']['value'] == '1', \
 					 td['05']['010101010101'][':dev']['input']['pin']['value']
@@ -391,17 +397,25 @@ async def test_onewire_fake(loop):
 				fb.bus['10.001001001001'] = fb.temp
 				# and prepare to check that the scanner doesn't any more
 				fb.bus_aux['simultaneous']['temperature'] = 0
-			await fst2._call_delay(mod_c)
+			await fst._call_delay(mod_c)
+			logger.debug("TC I")
+
+			fst2 = _task_reg[('onewire','faker','scan','bus.42')]
+			for x in range(10):
+				await fst2._trigger()
+				await asyncio.sleep(0.5,loop=loop)
+				if ('onewire','faker','run','bus.42','temperature') in _task_reg:
+					break
+			fst2 = _task_reg[('onewire','faker','run','bus.42','temperature')].job
+			await asyncio.sleep(0.5,loop=loop)
+			await fst._call_delay()
+			await fst2._call_delay()
 			logger.debug("TC J")
 
-			fst2 = _task_reg[('onewire','faker','scan','bus.42')].job
-			await fst2._call_delay()
-			del fst2
-
 			logger.debug("TC K")
-			await fs._call_delay()
+			await fst2._call_delay()
 			await asyncio.sleep(2.5,loop=loop)
-			await fs._call_delay()
+			await fst2._call_delay()
 			logger.debug("TC L")
 
 			# we're scanning the main bus now
@@ -413,17 +427,17 @@ async def test_onewire_fake(loop):
 
 				assert int(fb.bus['simultaneous']['temperature']) == 1
 				assert int(fb.bus_aux['simultaneous']['temperature']) == 0
-			await fs._call_delay(mod_s)
+			await fst2._call_delay(mod_s)
 			logger.debug("TC M")
-			await fs._call_delay()
+			await fst2._call_delay()
 			await asyncio.sleep(4.5,loop=loop)
-			await fs._call_delay()
+			await fst2._call_delay()
 			logger.debug("TC N")
 			async def mod_a3():
 				await td.wait()
 				assert float(td['10']['001001001001'][':dev']['input']['temperature']['value']) == 42.25, \
 					td['10']['001001001001'][':dev']['input']['temperature']['value']
-			await fs._call_delay(mod_a3)
+			await fst2._call_delay(mod_a3)
 			logger.debug("TC O")
 			assert amqt == 42.25, amqt
 
