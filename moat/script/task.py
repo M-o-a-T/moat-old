@@ -572,6 +572,7 @@ class TaskMaster(asyncio.Future):
 		self._start()
 
 	async def _trigger(self):
+		"""This is called from tests when they want to cut restart times and make sure a job runs."""
 		if self.timer is None:
 			logger.debug("_trigger: job %s is running", self.name)
 			await self.job

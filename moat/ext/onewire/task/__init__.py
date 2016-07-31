@@ -103,10 +103,10 @@ class ScanTask(TimeoutHandler, _BusTask, metaclass=_ScanMeta):
 
 		Subclasses override the `typ` class variable with some name, and
 		the `task_()` method with the periodic activity they want to
-		perform. Whenever a device's `scan_for(typ)` returns a number, a
-		ScanTask instance with that type will be created for the bus the
-		device is on, which will run the task at least that often (in
-		seconds).
+		perform. Whenever a device's `scan_for(typ)` procedure returns a
+		number, a ScanTask instance with that type will be created for the
+		bus the device is on, which will run the task at least that often
+		(in seconds).
 
 		
 		"""
