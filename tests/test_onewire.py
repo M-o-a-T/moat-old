@@ -285,7 +285,8 @@ async def test_onewire_fake(loop):
 			logger.debug("Waiting 2a: temperature scanner")
 			t1 = time()
 			while True:
-				if ('onewire','faker','run','bus.42 1f.123123123123 aux','temperature') in _task_reg:
+				if ('onewire','faker','run','bus.42 1f.123123123123 aux','temperature') in _task_reg and \
+				   ('onewire','faker','run','bus.42','poll') in _task_reg:
 					logger.debug("Found 2a")
 					break
 				if time()-t1 >= 10:
@@ -320,7 +321,9 @@ async def test_onewire_fake(loop):
 			logger.debug("Mod A done")
 			logger.debug("TC C")
 			await asyncio.sleep(2.5,loop=loop)
+			logger.debug("TC CA")
 			await fsp._call_delay()
+			logger.debug("TC CB")
 			await fst._call_delay()
 			logger.debug("TC D")
 
@@ -401,7 +404,7 @@ async def test_onewire_fake(loop):
 			logger.debug("TC I")
 
 			fst2 = _task_reg[('onewire','faker','scan','bus.42')]
-			for x in range(10):
+			for x in range(15):
 				await fst2._trigger()
 				await asyncio.sleep(0.5,loop=loop)
 				if ('onewire','faker','run','bus.42','temperature') in _task_reg:
