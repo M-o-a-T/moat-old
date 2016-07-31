@@ -191,7 +191,7 @@ async def test_onewire_fake(loop):
 	t = await client(cfg, loop=loop)
 	tr = await t.tree("/bus/onewire")
 	td = await t.tree("/device/onewire")
-	u = Unit("test.moat.onewire.client", cfg['config'], loop=loop)
+	u = Unit("test.moat.onewire.client", amqp=cfg['config']['amqp'], loop=loop)
 	@u.register_alert("test.fake.temperature", call_conv=CC_DATA)
 	def get_temp(val):
 		nonlocal amqt
