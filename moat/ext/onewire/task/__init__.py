@@ -158,7 +158,10 @@ class ScanTask(TimeoutHandler, _BusTask, metaclass=_ScanMeta):
 					logger.warning("Task %s took %s seconds, should run every %s",self.name,t-delay,t)
 					# TODO: write that warning to etcd
 				ts = nts
-				continue
+
+				# don't loop endlessly
+				#continue
+				delay = 0.01
 			elif long_warned:
 				long_warned -= 1
 			await self.delay(delay)
