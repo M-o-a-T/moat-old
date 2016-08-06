@@ -59,7 +59,7 @@ class DefSetup:
 			t = await tree.subdir(TASK_DIR)
 		return t
 
-class DefInitCommand(Command,DefSetup):
+class DefInitCommand(DefSetup,Command):
 	name = "init"
 	summary = "Set up task definitions"
 	description = """\
@@ -109,7 +109,7 @@ This also installs the root "task scanner" task, if no args are given.
 
 		await t.wait()
 
-class DefListCommand(Command,DefSetup):
+class DefListCommand(DefSetup,Command):
 	name = "list"
 	summary = "List task definitions"
 	description = """\
@@ -144,7 +144,7 @@ details are shown in YAML format, else a short list of names is shown.
 				else:
 					print('/'.join(path),task.get('summary',task.get('descr','??')), sep='\t',file=self.stdout)
 
-class DefDeleteCommand(Command,DefSetup):
+class DefDeleteCommand(DefSetup,Command):
 	name = "delete"
 	summary = "Delete task definitions"
 	description = """\
@@ -181,7 +181,7 @@ This command deletes (some of) that data.
 				rec=False
 				t = p
 
-class _ParamCommand(Command,DefSetup):
+class _ParamCommand(DefSetup,Command):
 	name = "param"
 	# _def = None ## need to override
 	description = """\
@@ -352,7 +352,7 @@ class EnumCommand(Command):
 				for r in coll:
 					show(r)
 
-class ListCommand(Command,DefSetup):
+class ListCommand(DefSetup,Command):
 	name = "list"
 	summary = "List tasks"
 	description = """\
@@ -477,7 +477,7 @@ class _AddUpdate:
 					await d.set(k,v, sync=False)
 			
 
-class AddCommand(_AddUpdate,Command,DefSetup):
+class AddCommand(_AddUpdate,DefSetup,Command):
 	name = "add"
 	summary = "add a task"
 	description = """\
@@ -496,7 +496,7 @@ Arguments:
 """
 	_update = False
 
-class UpdateCommand(_AddUpdate,Command,DefSetup):
+class UpdateCommand(_AddUpdate,DefSetup,Command):
 	name = "change"
 	summary = "change a task"
 	description = """\
@@ -513,7 +513,7 @@ Arguments:
 """
 	_update = True
 
-class DeleteCommand(Command,DefSetup):
+class DeleteCommand(DefSetup,Command):
 	name = "delete"
 	summary = "Delete a task"
 	description = """\
