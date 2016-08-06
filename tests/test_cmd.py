@@ -161,18 +161,31 @@ async def test_task(loop):
 
 	m = MoatTest(loop=loop)
 	r = await m.parse("-vvvc test.cfg task change fake/cmd/sleep delay=5")
+	print("A",time())
 	assert r == 0, r
 
 	t = time()
 	r = asyncio.ensure_future(m.parse("-vvvc test.cfg run -g fake/cmd/sleep"), loop=loop)
-	await asyncio.sleep(0.5,loop=loop)
+	await asyncio.sleep(2,loop=loop)
 	assert not r.done(),repr(r)
+	print("B",time())
+	m2 = MoatTest(loop=loop)
 	rx = await m2.parse("-c test.cfg task state fake")
+	print("C",time())
 	assert m2.in_stdout('fake/cmd/sleep\trun\t'), m2.stdout_data
 	assert rx == 0, rx
 
+	m2 = MoatTest(loop=loop)
 	rx = await m2.parse("-vc test.cfg task state fake")
-	assert m2.in_stdout('fake/cmd/sleep\t'), m2.stdout_data
+	print("D",time())
+	assert m2.in_stdout('*\tfake/cmd/sleep\n'), m2.stdout_data
+	assert m2.in_stdout('state\trun\n'), m2.stdout_data
+	assert rx == 0, rx
+
+	m2 = MoatTest(loop=loop)
+	print("E",time())
+	rx = await m2.parse("-vvc test.cfg task state fake")
+	assert m2.in_stdout('*\tfake/cmd/sleep\n'), m2.stdout_data
 	assert rx == 0, rx
 
 	r = await r
