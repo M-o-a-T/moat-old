@@ -603,26 +603,20 @@ This command shows that information.
 			async for task in tt.tagged(TASKSTATE, depth=self.options.this):
 				path = task.path[len(TASKSTATE_DIR):-1]
 				date = task.get('debug_time','-')
-				if 'running' in task:
+				state = task.state
+				if state == 'run':
 					if 'started' in task:
 						date = task['started']
 					else:
 						date = task['running']
-					state = 'run'
-				elif 'started' in task and ('stopped' not in task or task['started']>task['stopped']):
+				elif state == 'crash':
 					date = task['started']
-					state = 'crash'
-				elif 'stopped' in task:
-					date = task['stopped']
-					state = task['state']
-				elif 'state' in task:
-					state = task['state']
 				else:
-					state = task.get('state','?')
+					date = task.get('stopped','?')
 				if not isinstance(date,str):
 					date = datetime.fromtimestamp(date).strftime('%Y-%m-%d %H:%M:%S')
 
-				if sel_running if state == 'run' else sel_completed if state == 'ok' else sel_error:
+				if sel_running if state == 'run' else (sel_completed if state == 'ok' else sel_error):
 					if self.root.verbose == 2:
 						print('*','/'.join(path), sep='\t', file=self.stdout)
 						for k,v in task.items():

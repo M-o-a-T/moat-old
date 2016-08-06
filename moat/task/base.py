@@ -161,7 +161,17 @@ class TaskState(recEtcDir,EtcDir):
 
 		This stores the actual state of a running Task.
 		"""
-	pass
+
+	@property
+	def state(self):
+		"""Return a human-readable (but fixed) string describing this task's state"""
+		if 'running' in self:
+			return 'run'
+		elif 'started' in self and ('stopped' not in self or self['started']>self['stopped']):
+			return 'crash'
+		else:
+			return self.get('state','?')
+
 TaskState.register('started')(EtcFloat)
 TaskState.register('stopped')(EtcFloat)
 TaskState.register('running')(EtcFloat)
