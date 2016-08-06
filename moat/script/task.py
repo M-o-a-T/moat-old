@@ -355,7 +355,10 @@ class Task(asyncio.Task):
 					raise
 			await run_state.wait()
 
-			logger.debug("Ended %s: %s",self.name, res)
+			try:
+				logger.debug("Ended %s: %s",self.name, res)
+			except NameError: # garbage collector …
+				pass
 
 	def cfg_changed(self):
 		"""\
