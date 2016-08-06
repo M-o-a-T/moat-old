@@ -52,7 +52,7 @@ class DefSetup:
 	async def setup(self, meta=False):
 		await super().setup()
 		etc = self.root.etcd
-		tree = self.root.tree
+		tree = await self.root._get_tree()
 		if meta:
 			t = await tree.subdir(TASKDEF_DIR)
 		else:
