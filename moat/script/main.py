@@ -96,7 +96,11 @@ You can load more than one config file.
 
 	async def parse(self, argv):
 		logger.debug("Startup: %s", argv)
-		return (await super().parse(argv))
+		try:
+			res = await super().parse(argv)
+		finally:
+			await self.finish()
+		return res
 
 	def addOptions(self):
 		self.parser.add_option('--no-default-config',
@@ -122,22 +126,34 @@ You can load more than one config file.
 			help="application name. Default is the reversed FQDN.")
 
 	async def finish(self):
-		await super().finish()
-		if self.amqp is not None:
+		e,self.amqp = self.amqp,None
+		if e is not None:
 			try:
-				await self.amqp.stop()
+				await e.stop()
+			except NameError:
+				pass # GC
 			except Exception as exc:
 				logger.exception("Closing AMQP")
-		if self.tree is not None:
+
+		e,self.tree = self.tree,None
+		if e is not None:
 			try:
-				await self.tree.close()
+				await e.close()
+			except NameError:
+				pass # GC
 			except Exception as exc:
 				logger.exception("Closing etcd tree")
-		if self.etcd is not None:
+
+		e,self.etcd = self.etcd,None
+		if e is not None:
 			try:
-				self.etcd.close()
+				e.close()
+			except NameError:
+				pass # GC
 			except Exception as exc:
 				logger.exception("Closing etcd connection")
+
+		await super().finish()
 
 	def handleOptions(self):
 		opts = self.options
