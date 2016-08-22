@@ -1,3 +1,9 @@
+moat (0.7.34) smurf; urgency=medium
+
+  * Package all this somewhat-reasonably.
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Mon, 22 Aug 2016 19:49:27 +0200
+
 moat (0.7.33) smurf; urgency=medium
 
   * Move irrigation code to QBroker
