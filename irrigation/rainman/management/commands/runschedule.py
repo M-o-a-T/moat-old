@@ -116,13 +116,12 @@ class Command(BaseCommand):
 	args = 'site'
 	help = 'Run the current schedule, watch for rain, etc.'
 
-	option_list = BaseCommand.option_list + (
-		make_option('-t','--timeout',
+	def add_arguments(self, parser):
+		parser.add_argument('-t','--timeout',
 			action='store',type='int',
 			dest='timeout',
 			default=600,
-			help='Run main processing loop every N seconds'),
-		)
+			help='Run main processing loop every N seconds')
 
 	def handle(self, *args, **options):
 		if len(args) != 1:

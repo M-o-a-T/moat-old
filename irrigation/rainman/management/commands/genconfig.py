@@ -38,23 +38,22 @@ class Command(BaseCommand):
 	args = '<site> <interval> <valve>…'
 	help = 'Report the schedule for the given valves, or all of them'
 
-	option_list = BaseCommand.option_list + (
-			make_option('-s','--site',
+	def add_arguments(self, parser):
+		parser.add_argument('-s','--site',
 				action='store',
 				dest='site',
 				default=None,
-				help='Limit to this Site (all controllers)'),
-			make_option('-c','--controller',
+				help='Limit to this Site (all controllers)')
+		parser.add_argument('-c','--controller',
 				action='store',
 				dest='controller',
 				default=None,
-				help='Controller to generate a config file snippet for'),
-			make_option('-t','--type',
+				help='Controller to generate a config file snippet for')
+		parser.add_argument('-t','--type',
 				action='store',
 				dest='type',
 				default="wago",
-				help='Controller type'),
-			)
+				help='Controller type')
 
 	def handle(self, *args, **options):
 		q = Q()

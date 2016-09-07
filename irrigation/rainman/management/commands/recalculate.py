@@ -39,39 +39,38 @@ class Command(BaseCommand):
 	args = '<valve>…'
 	help = 'Fix calculated water levels'
 
-	option_list = BaseCommand.option_list + (
-			make_option('-s','--site',
+	def add_arguments(self, parser):
+		parser.add_argument('-s','--site',
 				action='store',
 				dest='site',
 				default=None,
-				help='Select the site to use'),
-			make_option('-c','--controller',
+				help='Select the site to use')
+		parser.add_argument('-c','--controller',
 				action='store',
 				dest='controller',
 				default=None,
-				help='Select the controller to use'),
-			make_option('-f','--feed',
+				help='Select the controller to use')
+		parser.add_argument('-f','--feed',
 				action='store',
 				dest='feed',
 				default=None,
-				help='Select the water feed to use'),
-			make_option('-a','--age',
+				help='Select the water feed to use')
+		parser.add_argument('-a','--age',
 				action='store',
 				type=float,
 				dest='age',
 				default=None,
-				help='Start n days in the past'),
-			make_option('-n','--no-save',
+				help='Start n days in the past')
+		parser.add_argument('-n','--no-save',
 				action='store_false',
 				dest='save',
 				default=True,
-				help="don't save"),
-			make_option('-V','--verbose',
+				help="don't save")
+		parser.add_argument('-V','--verbose',
 				action='store_true',
 				dest='verbose',
 				default=False,
-				help="be more chatty"),
-			)
+				help="be more chatty")
 
 	def handle(self, *args, **options):
 		q = Q()
