@@ -100,7 +100,6 @@ class Command(BaseCommand):
 			)
 
 	def handle(self, *args, **options):
-		import pdb;pdb.set_trace()
 		if options['trigger']:
 			for s in Site.objects.all():
 				if not s.var: continue
