@@ -39,35 +39,34 @@ class Command(BaseCommand):
 	args = '<valve>…'
 	help = 'Report the schedule for the given valves, or all of them'
 
-	option_list = BaseCommand.option_list + (
-			make_option('-s','--site',
+	def add_arguments(self, parser):
+		parser.add_argument('-s','--site',
 				action='store',
 				dest='site',
 				default=None,
-				help='Select the site to report a schedule for'),
-			make_option('-c','--controller',
+				help='Select the site to report a schedule for')
+		parser.add_argument('-c','--controller',
 				action='store',
 				dest='controller',
 				default=None,
-				help='Select the controller to report a schedule for (may require --site)'),
-			make_option('-i','--interval',
+				help='Select the controller to report a schedule for (may require --site)')
+		parser.add_argument('-i','--interval',
 				action='store',
 				type=float,
 				dest='interval',
 				default=None,
-				help='report the next N days'),
-			make_option('-n','--current',
+				help='report the next N days')
+		parser.add_argument('-n','--current',
 				action='store_true',
 				dest='current',
 				default=False,
-				help='Also report currently-running activities'),
-			make_option('-a','--age',
+				help='Also report currently-running activities')
+		parser.add_argument('-a','--age',
 				action='store',
 				type=float,
 				dest='age',
 				default=None,
-				help='History: report N days back, up to the present'),
-			)
+				help='History: report N days back, up to the present')
 
 	def handle(self, *args, **options):
 		q = Q()

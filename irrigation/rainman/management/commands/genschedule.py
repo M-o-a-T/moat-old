@@ -49,55 +49,54 @@ class Command(BaseCommand):
 	args = '<valve>…'
 	help = 'Generate a schedule'
 
-	option_list = BaseCommand.option_list + (
-			make_option('-s','--site',
+	def add_arguments(self, parser):
+		parser.add_argument('-s','--site',
 				action='store',
 				dest='site',
 				default=None,
-				help='Select the site to use'),
-			make_option('-c','--controller',
+				help='Select the site to use')
+		parser.add_argument('-c','--controller',
 				action='store',
 				dest='controller',
 				default=None,
-				help='Select the controller to use'),
-			make_option('-f','--feed',
+				help='Select the controller to use')
+		parser.add_argument('-f','--feed',
 				action='store',
 				dest='feed',
 				default=None,
-				help='Select the water feed to use'),
-			make_option('-a','--age',
+				help='Select the water feed to use')
+		parser.add_argument('-a','--age',
 				action='store',
 				type=float,
 				dest='age',
 				default=1,
-				help='How far into the future to generate the schedule'),
-			make_option('-d','--delay',
+				help='How far into the future to generate the schedule')
+		parser.add_argument('-d','--delay',
 				action='store',
 				type=float,
 				dest='delay',
 				default=None,
-				help='How far into the future to start generating the schedule'),
-			make_option('-g','--group',
+				help='How far into the future to start generating the schedule')
+		parser.add_argument('-g','--group',
 				action='store',
 				dest='group',
 				default=None,
-				help='Select the group to use'),
-			make_option('-n','--no-save',
+				help='Select the group to use')
+		parser.add_argument('-n','--no-save',
 				action='store_false',
 				dest='save',
 				default=True,
-				help="don't save"),
-			make_option('-t','--trigger',
+				help="don't save")
+		parser.add_argument('-t','--trigger',
 				action='store_true',
 				dest='trigger',
 				default=False,
-				help="trigger an immediate schedule read"),
-			make_option('-V','--verbose',
+				help="trigger an immediate schedule read")
+		parser.add_argument('-V','--verbose',
 				action='store_true',
 				dest='verbose',
 				default=False,
-				help="be more chatty"),
-			)
+				help="be more chatty")
 
 	def handle(self, *args, **options):
 		if options['trigger']:

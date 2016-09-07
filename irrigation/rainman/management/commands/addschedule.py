@@ -38,24 +38,23 @@ class Command(BaseCommand):
 	args = '<interval> <valve>'
 	help = 'Create a schedule entry for a valve.'
 
-	option_list = BaseCommand.option_list + (
-			make_option('-s','--site',
+	def add_arguments(self, parser):
+		parser.add_option('-s','--site',
 				action='store',
 				dest='site',
 				default=None,
-				help='Select the site to use'),
-			make_option('-c','--controller',
+				help='Select the site to use')
+		parser.add_option('-c','--controller',
 				action='store',
 				dest='controller',
 				default=None,
-				help='Select the controller to use (may require --site)'),
-			make_option('-f','--future',
+				help='Select the controller to use (may require --site)')
+		parser.add_option('-f','--future',
 				action='store',
 				type=int,
 				dest='future',
 				default=300,
-				help='Create the entry this many seconds in the future'),
-			)
+				help='Create the entry this many seconds in the future')
 
 	def handle(self, *args, **options):
 		q = Q()
