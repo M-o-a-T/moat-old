@@ -5,6 +5,6 @@ P="$(pwd)"
 export PYTHONPATH=$P/../../qbroker:$P/..:$P
 (
 ./manage.py runserver 0.0.0.0:58000 &
-./manage2.py runschedule Schleiermacher+Hardenberg &
+./manage.py runschedule Schleiermacher+Hardenberg &
 while sleep 300 ; do ./manage.py genschedule -s Schleiermacher+Hardenberg ; done &
 ) > /tmp/rainman.log 2>&1
