@@ -118,7 +118,7 @@ class Command(BaseCommand):
 
 	def add_arguments(self, parser):
 		parser.add_argument('-t','--timeout',
-			action='store',type='int',
+			action='store',type=int,
 			dest='timeout',
 			default=600,
 			help='Run main processing loop every N seconds')
