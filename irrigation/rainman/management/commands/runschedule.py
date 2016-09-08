@@ -123,13 +123,17 @@ class Command(BaseCommand):
 			default=600,
 			help='Run main processing loop every N seconds')
 
+		parser.add_argument('sites',
+			action='append',
+			help='Sites to process')
+
 	def handle(self, *args, **options):
-		if len(args) != 1:
+		if len(options['sites']) != 1:
 			print("Choose a site:")
 			for s in Site.objects.all():
 				print(s.name)
 			sys.exit(1)
-		s = Site.objects.get(name=args[0])
+		s = Site.objects.get(name=options['sites'][0])
 		for c in s.controllers.all():
 			controller = SchedController(c)
 			controller.connect_monitors()
