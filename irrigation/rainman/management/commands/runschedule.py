@@ -32,6 +32,7 @@ import six
 import qbroker; qbroker.setup(gevent=True)
 import asyncio
 from qbroker.util.async import Main
+from qbroker.util.sync import async_gevent
 from traceback import format_exc,print_exc
 from operator import attrgetter
 import sys,signal
@@ -225,6 +226,7 @@ class FeedMeter(SumMeter):
 		if self._flow_check is not None:
 			self._flow_check.dead()
 
+	@async_gevent
 	def check_max_flow(self,**k):
 		if self._flow_check:
 			raise RuntimeError("already working")
@@ -247,6 +249,7 @@ class FeedMeter(SumMeter):
 				print_exc()
 				raise
 		
+	@async_gevent
 	def do_flush(self,**k):
 		if self._flow_check:
 			raise RuntimeError("already working")
@@ -287,6 +290,7 @@ class FeedMeter(SumMeter):
 				if valve.on:
 					valve.add_flow(val * valve.v.flow / sum_f)
 
+	@async_gevent
 	def check_flow(self,**k):
 		for valve in self.valves:
 			valve.check_flow(**k)
@@ -450,6 +454,7 @@ class SchedSite(SchedCommon):
 		self._delay_on.acquire()
 		gevent.spawn_later(1,self._delay_on.release)
 
+	@async_gevent
 	def check_flow(self,**k):
 		for c in self.controllers:
 			c.check_flow(**k)
@@ -491,8 +496,8 @@ class SchedSite(SchedCommon):
 				m.connect_monitors()
 		n = self.s.var.replace(' ','.')
 		self.ckf = self.qb.register_rpc_gevent("rain.check.flow."+n, self.check_flow)
-		self.cks = self.qb.register_rpc_gevent("rain.read.schedule."+n, partial(self.run_sched_task,reason="read schedule"))
-		self.ckt = self.qb.register_rpc_gevent("rain.sync."+n, self.sync)
+		self.cks = self.qb.register_rpc_gevent("rain.read.schedule."+n, partial(self.run_sched_ext,reason="read schedule"))
+		self.ckt = self.qb.register_rpc_gevent("rain.sync."+n, self.sync_ext)
 		self.cku = self.qb.register_rpc_gevent("rain.shutdown."+n, self.do_shutdown)
 
 	def sync(self,**k):
@@ -507,7 +512,8 @@ class SchedSite(SchedCommon):
 		self.run_main_task()
 		#Save(None)
 		print("Sync end", file=sys.stderr)
-	
+	sync_ext = async_gevent(sync)
+
 	def shutdown(self,**k):
 		print("Shutdown", file=sys.stderr)
 		signal.signal(signal.SIGINT,signal.SIG_DFL)
@@ -713,6 +719,7 @@ class SchedSite(SchedCommon):
 			if r is not None:
 				r.set(None)
 		print("RunSched end", file=sys.stderr)
+	run_sched_ext = async_gevent(run_sched_task)
 
 	def sched_task(self, kill=True):
 		self.refresh()
@@ -764,6 +771,7 @@ class SchedController(SchedCommon):
 			SchedValve(v).connect_monitors()
 		self.ckf = self.site.qb.register_rpc_gevent("check.flow."+self.c.var.replace(' ','.'), self.check_flow)
 
+	@async_gevent
 	def check_flow(self,**k):
 		for v in self.c.valves.all():
 			SchedValve(v).check_flow(**k)
@@ -949,6 +957,7 @@ class SchedValve(SchedCommon):
 	def run_sched_task(self,reason="valve"):
 		self.sched_job = None
 		self.site.run_sched_task(reason=reason)
+	run_sched_ext = async_gevent(run_sched_task)
 
 	def add_flow(self, val):
 		if self._flow_check is not None:
@@ -958,6 +967,7 @@ class SchedValve(SchedCommon):
 			print("FLOW %s: %s %s" % (self.v.name,self.flow,val), file=sys.stderr)
 		self.flow += val
 
+	@async_gevent
 	def check_flow(self,**k):
 		cf = None
 		try:
@@ -980,6 +990,7 @@ class SchedValve(SchedCommon):
 		self.mon = self.site.qb.register_alert_gevent("moat.event.output.change."+n, self.watch_state, call_conv=CC_DICT)
 		self.ckf = self.site.qb.register_rpc_gevent("rain.check.flow."+n, self.check_flow, call_conv=CC_DICT)
 		
+	@async_gevent
 	def watch_state(self,value=None,**kv):
 		"""output change NAME ::value ON"""
 		on = (str(value).lower() in ("1","true","on"))
