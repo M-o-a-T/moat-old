@@ -170,7 +170,21 @@ class TaskState(recEtcDir,EtcDir):
 		elif 'started' in self and ('stopped' not in self or self['started']>self['stopped']):
 			return 'crash'
 		else:
-			return self.get('state','?')
+			try:
+				return super().__getitem__('state')
+			except KeyError:
+				return '?'
+
+	def items(self):
+		for k,v in super().items():
+			if k == 'state':
+				v = self.state
+			yield k,v
+	def __getitem__(self,k):
+		if k == 'state':
+			return self.state
+		else:
+			return super().__getitem__(k)
 
 TaskState.register('started')(EtcFloat)
 TaskState.register('stopped')(EtcFloat)
