@@ -160,13 +160,13 @@ async def test_task(loop):
 	assert t2-t < 10 and t2-t > 2, (t,t2)
 
 	m = MoatTest(loop=loop)
-	r = await m.parse("-vvvc test.cfg task change fake/cmd/sleep delay=5")
+	r = await m.parse("-vvvc test.cfg task change fake/cmd/sleep delay=4")
 	print("A",time())
 	assert r == 0, r
 
 	t = time()
 	r = asyncio.ensure_future(m.parse("-vvvc test.cfg run -g fake/cmd/sleep"), loop=loop)
-	await asyncio.sleep(2,loop=loop)
+	await asyncio.sleep(1,loop=loop)
 	assert not r.done(),repr(r)
 	print("B",time())
 	m2 = MoatTest(loop=loop)
@@ -190,7 +190,7 @@ async def test_task(loop):
 
 	r = await r
 	t2 = time()
-	assert t2-t < 8 and t2-t > 5, (t,t2)
+	assert t2-t < 8 and t2-t > 4, (t,t2)
 	assert r == 0, r
 
 @pytest.mark.run_loop
