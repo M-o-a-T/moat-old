@@ -161,19 +161,12 @@ class OnewireBusDevice(ManagedEtcThing, EtcXValue):
 	async def manager_present(self,mgr):
 		dev = await self.device
 		# TODO: make sure its path is correct
-		try:
-			mgr.add_device(dev)
-		except AttributeError:
-			import pdb;pdb.set_trace()
-			raise
+		mgr.add_device(dev)
+
 	def manager_gone(self):
 		if isinstance(self.device,EtcAwaiter):
 			return
-		try:
-			self.device.manager_gone()
-		except AttributeError:
-			import pdb;pdb.set_trace()
-			pass
+		self.device.manager_gone()
 		
 
 OnewireBusBase.register('*',cls=OnewireBus)
