@@ -29,7 +29,7 @@ from etcd_tree.node import EtcFloat,EtcInteger,EtcString
 from time import time
 
 from moat.dev import DEV
-from moat.dev.base import Device, _SOURCES
+from moat.dev.base import Device
 from moat.types.etcd import MoatDeviceBase
 
 class NoAlarmHandler(RuntimeError):
