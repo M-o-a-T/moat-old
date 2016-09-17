@@ -127,8 +127,11 @@ class FakeBus(FakeSubBus):
 
 	async def dir(self,*p):
 		d = self.data
-		for s in p:
-			d = d[s.lower()]
+		try:
+			for s in p:
+				d = d[s.lower()]
+		except KeyError:
+			return ()
 		k = sorted(d.keys())
 		if _logged.get(p,['nope']) != k:
 			logger.debug("BUS.DIR %s %s",p,k)
