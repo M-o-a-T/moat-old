@@ -44,11 +44,11 @@ def _setup_task_vars(types):
 	from etcd_tree.node import EtcFloat,EtcInteger
 	for t in _VARS:
 		if t == "ttl":
-			types.register(t)(EtcInteger)
+			types.register(t, cls=EtcInteger)
 		elif t == "one-shot":
-			types.register(t)(EtcInteger) # bool, actually
+			types.register(t, cls=EtcInteger) # bool, actually
 		else:
-			types.register(t)(EtcFloat)
+			types.register(t, cls=EtcFloat)
 
 class TaskdefName(EtcString):
 	def _ext_update(self, pre):
