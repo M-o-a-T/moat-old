@@ -29,6 +29,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import asyncio
 from time import time
 import weakref
+import sys
 
 class Disconnected(BaseException):
 	pass
@@ -184,7 +185,11 @@ class ProtocolClient(object):
 			except Exception: # pragma: no cover
 				logger.exception("Closing idle connection")
 		else:
-			_,conn = await self._loop.create_connection(lambda: self.protocol(loop=self._loop), self.host,self.port)
+			try:
+				_,conn = await self._loop.create_connection(lambda: self.protocol(loop=self._loop), self.host,self.port)
+			except Exception:
+				print("on %s:%s" % (self.host,self.port), file=sys.stderr)
+				raise
 		return conn
 		
 	def _put_conn(self,conn):
