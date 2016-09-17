@@ -136,7 +136,7 @@ class FakeBus(FakeSubBus):
 		if _logged.get(p,['nope']) != k:
 			logger.debug("BUS.DIR %s %s",p,k)
 			_logged[p] = k
-		return d.keys()
+		return k
 
 	async def read(self,*p):
 		d = self.data
