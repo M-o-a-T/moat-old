@@ -38,13 +38,9 @@ class Onewire_2405(OnewireDevice):
 
 	async def poll(self):
 		# Duh.
-		logger.debug("poll A")
 		dev = await self.bus_dev
-		logger.debug("poll B")
 		v = bool(int(await dev.read("sensed")))
-		logger.debug("poll C")
 		await self.reading("pin",v)
-		logger.debug("poll D")
 
 	async def read(self,what):
 		"""Read the PIO pin."""
