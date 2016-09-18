@@ -66,12 +66,14 @@ class Collector(Task):
 			typ = r[0]
 			if typ == "add":
 				typ,taskdef,path,kw = r
-				await tasks.add_task(path=path, taskdef=taskdef, parent=self.taskdir, **kw)
+				kw.setdefault('parent',master)
+				await tasks.add_task(path=path, taskdef=taskdef, **kw)
 				if len(path) == len(master.path)+1 and path[:-1] == master.path:
 					known.add(path[-1])
 			elif typ == "scan":
 				typ,path,kw = r
-				await scantasks.add_task(path=path, taskdef=self.taskdef, parent=self.taskdir, **kw)
+				kw.setdefault('parent',master)
+				await scantasks.add_task(path=path, taskdef=self.taskdef, **kw)
 				if len(path) == len(master.path)+1 and path[:-1] == master.path:
 					known.add(path[-1])
 			elif typ == "drop":

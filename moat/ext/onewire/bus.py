@@ -32,6 +32,8 @@ from moat.bus.base import Bus
 from moat.types.etcd import MoatBusBase, Subdirs, recEtcDir
 from moat.types.managed import ManagedEtcDir,ManagedEtcThing
 from moat.dev import DEV_DIR,DEV
+from moat.task import TASK
+from moat.bus import BUS_DIR
 
 from .task import tasks
 from .dev import OnewireDevice
@@ -55,11 +57,28 @@ class OnewireBus(ManagedEtcDir, recEtcDir, Bus):
 		yield "add",'onewire/scan', ('onewire',self.name,'scan'), {}
 		yield "scan",('bus','onewire',self.name,'bus'), {}
 
+class OwSubdirs(Subdirs):
+	"""\
+		Subdirs variant which, when passed a sub-bus, uses the controlling
+		device for that bus as the entry to monitor
+		"""
+	def _add(self,a):
+		if a not in self.known:
+			if self.dir.task_for_subdir(a):
+				self.known.add(a)
+				d = {}
+				if ' ' in a:
+					x,y,z = a.rsplit(' ',2)
+					y1,y2 = y.split('.',1)
+					d['parent'] = self.dir.root.lookup(*BUS_DIR)['onewire'][self.dir.path[2]]['bus'][x]['devices'][y1][y2]
+
+				return "scan",self.dir.path+(a,),d
+
 class OnewireBusSub(ManagedEtcThing, EtcDir):
 	"""Directory for /bus/onewire/NAME/bus"""
 	@property
 	def task_monitor(self):
-		return Subdirs(self)
+		return OwSubdirs(self)
 	def task_for_subdir(self,d):
 		return True
 
