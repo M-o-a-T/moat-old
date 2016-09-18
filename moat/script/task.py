@@ -248,7 +248,6 @@ class Task(asyncio.Task):
 					raise JobMarkGoneError(self.name) from exc
 				if killer is None:
 					break
-				#logger.info('CANCEL 7 %s',killer)
 				killer.cancel()
 				def mtc():
 					logger.info('CANCEL 8 %s',killer)
@@ -540,6 +539,7 @@ class TaskMaster(asyncio.Future):
 		p=[self.task.path]
 		if 'parent' in self.task:
 			p.append(self.task['parent'].value.split('/'))
+
 		try:
 			self.job = self.task.cls(self.cmd, self.name, parents=p, taskdir=self.task, config=self.task._get('data',{}), _ttl=self._get_ttl, **self.cfg)
 		except TypeError as e:
@@ -549,25 +549,28 @@ class TaskMaster(asyncio.Future):
 		if self.callback is not None:
 			self.callback("start")
 
+	def cancel(self):
+		if self.job is not None:
+			try:
+				self.job.cancel()
+			except Exception:
+				pass
+		if self.timer is not None:
+			try:
+				self.timer.cancel()
+			except Exception:
+				pass
+		super().cancel()
+
 	async def cancel_job(self):
 		logger.info('CANCEL 13 %s',self)
 		try:
 			self.cancel()
 		except Exception:
-			return
-		if self.job is not None:
-			try: 
-				logger.info('CANCEL 14 %s',self.job)
-				self.job.cancel()
+			pass
+		finally:
+			if self.job is not None:
 				await self.job
-			except Exception:
-				pass
-		if self.timer is not None:
-			try:
-				logger.info('CANCEL 15 %s',self.timer)
-				self.timer.cancel()
-			except Exception:
-				pass
 
 	def _timer_done(self):
 		assert self.job is None
