@@ -368,7 +368,6 @@ async def test_onewire_fake(loop):
 			await fst2._trigger()
 			del fst2
 
-
 			logger.debug("TC G")
 			# watch it vanish
 			async def mod_b():
@@ -446,6 +445,19 @@ async def test_onewire_fake(loop):
 			await fst2._call_delay(mod_a3)
 			logger.debug("TC O")
 			assert amqt == 42.25, amqt
+
+			# drop the switch
+			del fb.bus['1f.123123123123']
+
+			fsb = _task_reg[('onewire','faker','scan','bus.42')]
+			t1 = time()
+			while True:
+				if int(tr['faker']['bus']['bus.42']['devices']['1f'].get('123123123123','9')) == 9:
+					break
+				if time()-t1 >= 10:
+					raise RuntimeError("Condition 3b")
+				await asyncio.sleep(0.1, loop=loop)
+				await fsb._trigger()
 
 			# More to come.
 
