@@ -165,7 +165,7 @@ class Task(asyncio.Task):
 			nonlocal gone
 			if x.is_new is not None: return
 			try:
-				logger.info('CANCEL Q %s %s',self.path,x.path)
+				logger.info('NoParent %s %s', '/'.join(self.path), '/'.join(x.path))
 				main_task.cancel()
 			except Exception: pass
 			gone = x.path
@@ -505,6 +505,9 @@ class TaskMaster(asyncio.Future):
 		
 		self._start()
 	
+	def _repr_info(self):
+		return [self.name]+super()._repr_info()
+		
 	def trigger(self):
 		"""Calls the task's trigger() function, causing immediate processing.
 			Used for testing."""

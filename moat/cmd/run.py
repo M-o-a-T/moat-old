@@ -188,7 +188,6 @@ Run MoaT tasks.
 				pass
 			for j in self.jobs.values():
 				try:
-					logger.info('CANCEL 1 %s',j)
 					await j.cancel_job()
 				except Exception:
 					pass
@@ -273,7 +272,7 @@ Run MoaT tasks.
 			if path in self.old_jobs:
 				continue
 
-			logger.debug("Launch TM %s",path)
+			logger.info("Launch TM %s",path)
 			try:
 				j = TaskMaster(self, t, callback=partial(_report, path), **args)
 			except Exception as exc:
@@ -290,7 +289,7 @@ Run MoaT tasks.
 		for name,tj in js.items():
 			t,j = tj
 			try:
-				logger.debug("Init TM %s",j.path)
+				logger.info("Init TM %s",j.path)
 				await j.init()
 			except JobIsRunningError:
 				continue
