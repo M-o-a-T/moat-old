@@ -53,6 +53,7 @@ clean:
 
 test: all
 	@rm -f test.log
+	env PYTHONASYNCIODEBUG=1 \
 	py.test-3 --cov-report term-missing \
 		--assert=plain tests \
 		--cov=tests \
@@ -66,7 +67,8 @@ test: all
 
 t: all
 	@rm -f test.log
-	py.test-3 -x --assert=plain tests
+	env PYTHONASYNCIODEBUG=1 \
+	py.test-3 --cov-report term-missing -x --assert=plain tests
 
 otest: all
 	@$(MAKE) -C test --no-print-directory otest
