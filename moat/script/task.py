@@ -541,7 +541,9 @@ class TaskMaster(asyncio.Future):
 	def _start(self):
 		p=[self.task.path]
 		if 'parent' in self.task:
-			p.append(self.task['parent'].value.split('/'))
+			pv = self.task['parent'].value
+			if pv != '':
+				p.append(pv.split('/'))
 
 		try:
 			self.job = self.task.cls(self.cmd, self.name, parents=p, taskdir=self.task, config=self.task._get('data',{}), _ttl=self._get_ttl, **self.cfg)
