@@ -97,12 +97,15 @@ class OnewireProtocol(Protocol):
 					raise RuntimeError("Length exceeded: %d %d %d"%(payload_len,offset,data_len)) # pragma: no cover
 
 				self.offset = offset
-				if payload_len:
-					self.data_len = data_len
+				if payload_len < 0:
+					pass # ignore these
 				else:
-					self.data_len = 0
-				self.len = payload_len
-				self.typ = ret_value
+					if payload_len > 0:
+						self.data_len = data_len
+					else:
+						self.data_len = 0
+					self.len = payload_len
+					self.typ = ret_value
 			else:
 				# offset seems not to mean what we all think it means
 				#data = self.data[self.offset:self.offset+self.data_len]
