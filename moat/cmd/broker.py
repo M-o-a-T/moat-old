@@ -31,7 +31,7 @@ import aio_etcd as etcd
 import asyncio
 import time
 import types
-from qbroker.unit import CC_DICT, CC_DATA
+from qbroker.unit import CC_DICT, CC_DATA, CC_MSG
 from yaml import dump
 from traceback import print_exc
 
@@ -209,8 +209,13 @@ Report events emitted by MoaTv2, until interrupted.
 """
 
 	async def do(self,args):
-		async def coll(**msg):
+		async def coll(msg):
+			if msg.data.get('deprecated',False):
+				return
+			if msg.data.get('event',('',))[0] == 'wait':
+				return
 			dump(msg, stream=self.stdout)
+			print('---')
 
 		await self.setup()
 		amqp = self.root.amqp
@@ -218,7 +223,7 @@ Report events emitted by MoaTv2, until interrupted.
 			args = '#'
 		else:
 			args = '.'.join(args)
-		await amqp.register_alert_async(args,coll, call_conv=CC_DICT)
+		await amqp.register_alert_async(args,coll, call_conv=CC_MSG)
 		while True:
 			await asyncio.sleep(100)
 
