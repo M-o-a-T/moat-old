@@ -33,7 +33,7 @@
 #include <avr/pgmspace.h>
 #endif
 
-void __attribute__((noreturn)) _report_error(char *err); /* Program memory */
+void __attribute__((noreturn)) _report_error(const char *err); /* Program memory */
 #define report_error(x) _report_error(PSTR(x))
 
 void __attribute__((noreturn)) reset(void);

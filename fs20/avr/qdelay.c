@@ -316,9 +316,11 @@ dequeue_task_later(task_head *task)
 		goto out;
 	}
 
-	dequeue_in(&head_usec,task) || \
-	dequeue_in(&head_msec,task) || \
-	dequeue_in(&head_sec,task);
+	(void) (
+	dequeue_in(&head_usec,task) ||
+	dequeue_in(&head_msec,task) ||
+	dequeue_in(&head_sec ,task) ||
+	0);
 	/* Not finding the thing is Not An Error. */
 
 out:

@@ -80,7 +80,7 @@ void dequeue_task(task_head *task)
 	if(head_now == task) {
 		head_now = NULL;
 		tail_now = NULL;
-		assert(!th->next, "DeQ TaskNextSet");
+		assert(!task->next, "DeQ TaskNextSet");
 	} else {
 		th = head_now;
 		assert(th, "DeQL TaskListEmpty");
@@ -91,7 +91,7 @@ void dequeue_task(task_head *task)
 	}
 	task->delay = 0;
 out:
-	sreg = SREG;
+	SREG = sreg;
 }
 
 /* return 1 if something was done */

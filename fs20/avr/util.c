@@ -25,7 +25,7 @@
 #include "uart.h"
 #include "util.h"
 
-void _report_error(char *err) /* Program memory */
+void _report_error(const char *err) /* Program memory */
 {
 	//unsigned char sreg = SREG;
 	cli();

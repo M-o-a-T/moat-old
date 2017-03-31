@@ -58,7 +58,7 @@ static unsigned char tx_ring_tail;
 static unsigned char more_data;
 static unsigned char disabled;
 
-static void _mesg(char i, char *s, write_head *t)
+static void _mesg(char i, const char *s, write_head *t)
 {
 	putchar(i);
 	p_short((unsigned short)t);
