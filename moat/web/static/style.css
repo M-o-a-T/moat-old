@@ -1,0 +1,13 @@
+body {
+	background: #EEE;
+	margin-left: 1rem;
+	margin-right: 1rem;
+}
+img#logo {
+	position: fixed;
+	top: 0px;
+	right: 0px;
+}
+.num-right {
+	text-align: right;
+}

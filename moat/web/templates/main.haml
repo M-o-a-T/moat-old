@@ -1,0 +1,22 @@
+-extends "layout.haml"
+-block scripts
+  =super()
+  %script type="text/javascript" src="{{ 'js/monitor.js'|static }}"
+
+-block alert
+    %div.alert.alert-info
+        Javascript is not running.
+
+-block body
+  %h1
+    MoaT
+  %div class="row"
+    %div class="col-xs-12 col-sm-10 col-md-6"
+      %div class="content"
+        Loading …
+  %footer class="footer"
+    %div class="container"
+      %p class="text-muted"
+        MoaT is © 2017 Matthias Urlichs
+    
+
