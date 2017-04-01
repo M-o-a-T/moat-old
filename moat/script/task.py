@@ -375,8 +375,8 @@ class TimeoutHandler:
 	"""\
 		Task mix-in which supplies a timeout mechanism.
 
-		This is somewhat non-trivial because of requiring
-		mostly-synchronous call-ins from tests.
+		The point of this module is to cut the timeout short when the
+		task in question is tested.
 		"""
 	
 	__delay = None       # event: delay is done
@@ -391,6 +391,12 @@ class TimeoutHandler:
 		logger.debug("Setup %d %s", id(self),self)
 
 	async def delay(self, seconds):
+		"""\
+			Called by the task itself:
+			
+				await self.delay(seconds)
+			
+			"""
 		if seconds > 1: # don't spam the logs
 			logger.debug("delay %.2f: %d %s",seconds,id(self),self)
 		self.__delay.clear()
@@ -418,7 +424,11 @@ class TimeoutHandler:
 		self.__delay_sync.clear()
 
 	async def skip_delay(self):
-		"""Call to return from the delay immediately"""
+		"""\
+			Called by a testcase.
+			Waits for a call to .delay() if none is in progress.
+			Causes the call to .delay() to return immediately.
+			"""
 		if not self.__delay_sync.is_set():
 			logger.debug("delay WAIT: %d %s",id(self),self)
 			await self.__delay_sync.wait()
@@ -427,8 +437,12 @@ class TimeoutHandler:
 		self.__delay.set()
 			
 	async def _call_delay(self, proc=None):
-		"""Arrange to run proc() as soon as the delay happens.
-			Also, wait until that is finished."""
+		"""\
+			Calls .skip_delay()
+			proc() is executed within the context of .delay(),
+			which may help with debugging.
+			Its result is returned.
+			"""
 		logger.debug("delay_call: %d %s %s",id(self),proc,self)
 		self.__delay_x = asyncio.Future(loop=self.loop)
 		self.__delay_run = proc
