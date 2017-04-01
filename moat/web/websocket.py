@@ -14,37 +14,40 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##BP
 
 import asyncio
-from aiohttp import web
+import aiohttp
 import jinja2
 import os
 import aiohttp_jinja2
 from hamlish_jinja import HamlishExtension
 from blinker import Signal
-from qbroker.unit import CC_DICT
 from functools import partial
+
+from qbroker.unit import CC_DICT
+import qbroker.codec.json_obj as json
 
 import logging
 logger = logging.getLogger(__name__)
 
+from moat.web import WEBDATA_DIR,WEBDATA
 from .app import BaseView,BaseExt
 
 class ApiView(BaseView):
     path = '/api/control'
     async def get(self):
         app = self.request.app
-        sig = app.get('moat.evc.update',None)
+        sig = app.get('moat.update',None)
         cmd = app['moat.cmd']
         if sig is None:
-            app['moat.evc.update'] = sig = Signal()
+            app['moat.update'] = sig = Signal()
 #            await cmd.amqp.register_alert_async('update.charger',
 #                partial(send_charger_update,sig),
 #                call_conv=CC_DICT)
-        sig.connect(self.send_update)
+#        sig.connect(self.send_update)
 
         socks = app.setdefault('websock',set())
         logger.debug('starting')
 
-        self.ws = web.WebSocketResponse()
+        self.ws = aiohttp.web.WebSocketResponse()
         await self.ws.prepare(self.request)
 
         socks.add(self)
@@ -53,26 +56,83 @@ class ApiView(BaseView):
         try:
             async for msg in self.ws:
                 if msg.type == aiohttp.WSMsgType.TEXT:
-                    pass
+                    logger.info("Msg %s",msg.data)
+                    msg = json.decode(msg.data)
+                    act = msg.get('action',"")
+                    if act == "locate":
+                        loc = msg.get('location','')
+                        if not loc:
+                            loc = cmd.app.rootpath
+                        await self.set_location(loc)
+                    else:
+                        logger.warn("Unknown action: %s",repr(msg))
                 elif msg.type == aiohttp.WSMsgType.ERROR:
                     logger.warn('ws connection closed: %s', ws.exception())
                     break
+                else:
+                    logger.info("Msg %s",msg)
         finally:
             socks.remove(self)
-            sig.disconnect(self.send_update)
+            #sig.disconnect(self.send_update)
             logger.debug('closed')
             self.job = None
 
         return self.ws
 
-    def send_update(self, kw):
+    async def send_field(self, t, level=1):
+        await t.send_item(self, level=level)
+
+    async def set_location(self, loc):
+        try:
+            cmd = self.request.app['moat.cmd']
+            t = await cmd.root.tree.lookup(WEBDATA_DIR)
+            t = await t.lookup(loc)
+        except KeyError:
+            self.send_json(action="error", msg="Location '%s' not found" % (loc,))
+            return
+
+        await self.setup_dir(t)
+        await self.send_dir(t, 0)
+
+    async def setup_field(self,t):
+        t = await t
+        print(t)
+        pass
+
+    async def setup_dir(self,t):
+        for k,v in t.items():
+            print(k,v)
+            if k[0] == ':':
+                continue
+            v = await v
+            if WEBDATA in v:
+                await self.setup_field(v[WEBDATA])
+            else:
+                await self.setup_dir(v)
+
+    async def send_dir(self,t, level=0):
+        try:
+            await t.send_item(self, level=level)
+        except AttributeError:
+            import pdb;pdb.set_trace()
+            raise
+        level += 1
+        for k,v in t.items():
+            if k[0] == ':':
+                continue
+            if WEBDATA in v:
+                await self.send_field(v[WEBDATA],level)
+            else:
+                await self.send_dir(v,level)
+        
+    def send_json(self, **kw):
         try:
             self.ws.send_json(kw)
         except Exception:
             self.job.cancel()
 
-def send_charger_update(_sig, **kw):
-    kw['action'] = 'update'
-    kw['class'] = 'charger'
-    _sig.send(kw)
+#def send_charger_update(_sig, **kw):
+#    kw['action'] = 'update'
+#    kw['class'] = 'charger'
+#    _sig.send(kw)
 

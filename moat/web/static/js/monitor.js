@@ -42,7 +42,28 @@
 
 			ws.onmessage = function (msg) {
 				var m = $.parseJSON(msg.data);
+				console.log("IN",m);
 				if (!('action' in m)) {
+				} else if (m.action == 'error') {
+					announce("danger",m.msg)
+				} else if (m.action == 'replace') {
+					var f = $('#'+m.id);
+					var d = $(m.data);
+					d.attr("id",m.id)
+					if (f.length > 0) {
+						f.replaceWith(d);
+					} else {
+						f = $('#c'+m.parent);
+						if (f.length == 0)  {
+							f = $('#'+m.parent);
+							if (f.length == 0)  {
+								announce("danger","Content ID "+m.id+"/"+m.parent+" not found.");
+								return;
+							}
+						}
+						f.append(d);
+					}
+
 				} else if (m.action == 'update' && m.class == 'charger') {
 					var f = $('#charger_'+m.name);
 					f.find('.f1').text(m.state);
@@ -66,6 +87,7 @@
 			};
 			ws.onopen = function (msg) {
 			    announce("success","Connected. Waiting for instructions …");
+				ws.send(JSON.stringify({"action":"locate","location": "" }));
 			};
 			ws.onerror = function (msg) {
 				announce("danger","Connection error! Please reload this page.");

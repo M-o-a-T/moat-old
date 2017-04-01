@@ -393,6 +393,9 @@ This command runs a web server with the data at /web (by default).
         self.parser.add_option('-p','--port',
             action="store", dest="port", type=int,
             help="port to use", default=59980)
+        self.parser.add_option('-r','--root',
+            action="store", dest="root",
+            help="subtree to use by default", default="default")
 
 # server/host and /port: bind address and port to use
 # /root/…/:dir : optional: addiional data for this subdirectory
@@ -402,6 +405,7 @@ This command runs a web server with the data at /web (by default).
         super().handleOptions()
         self.host = self.options.host
         self.port = self.options.port
+        self.rootpath = self.options.root
 
     async def do(self,args):
         if args:
@@ -410,7 +414,8 @@ This command runs a web server with the data at /web (by default).
         from moat.web.app import App
         self.loop = self.root.loop
         self.app = App(self)
-        await self.app.start(self.host,self.port)
+        self.app.tree = await self.root._get_tree()
+        await self.app.start(self.host,self.port, self.rootpath)
 
         # now serving
         while True:
@@ -464,7 +469,6 @@ class _AddUpdate:
     """Mix-in to add or update a web entry (too much)"""
 
     async def do(self,args):
-        import pdb;pdb.set_trace()
         try:
             data = {}
             webdefpath=""

@@ -38,7 +38,7 @@ from traceback import format_exception
 import weakref
 
 from moat.types.etcd import recEtcDir
-from . import webdef_names, WEBDEF_DIR,WEBDEF
+from . import webdef_names, WEBDEF_DIR,WEBDEF, WEBDATA_DIR,WEBDATA
 
 import logging
 logger = logging.getLogger(__name__)
@@ -67,7 +67,6 @@ class _DataLookup(object):
 				break
 		raise KeyError(k)
 
-
 class WebdefDir(recEtcDir,EtcDir):
 	"""A class linking a webdef to its etcd entry"""
 	def __init__(self,*a,**k):
@@ -88,22 +87,64 @@ WebdefDir.register('created',cls=EtcFloat)
 
 class WebdataDir(recEtcDir,EtcDir):
 	"""A class linking a web entry to its data, display, etc."""
+	type = None
 
 	async def init(self):
 		"""Need to look up my type, and all its super-defs"""
 		await super().init()
 		t = await self.root.lookup(WEBDEF_DIR)
-		tr = await t.lookup(self['def'])
-		tr = await tr.lookup(WEBDEF)
-		self.type = tr
+		if 'def' in self:
+			tr = await t.lookup(self['def'])
+			tr = await tr.lookup(WEBDEF)
+			self.type = tr
 		# TODO: hook up updater
 
+	async def send_item(self,view, level=0):
+		"""Send my data struct to this view"""
+		id,pid = self.get_id(level)
+		view.send_json(action="replace", id=id, parent=pid, data='<div>Item %s %s!</div>' % (id,pid,))
+
+	def get_id(self,level):
+		if level == 0:
+			id="content"
+			pid=""
+		else:
+			id="f_%d" % self.parent._seq
+			if level == 1:
+				pid="content"
+			else:
+				pid="f_%d" % self.parent.parent._seq
+		return id,pid
 
 #	@property
 #	def param(self):
 #		return _DataLookup(self)
-WebdataDir.register('timestamp',cls=EtcFloat)
-WebdataDir.register('created',cls=EtcFloat)
+#WebdataDir.register('timestamp',cls=EtcFloat)
+#WebdataDir.register('created',cls=EtcFloat)
+
+class WebpathDir(EtcDir):
+	"""A class linking web entries to their data, display, etc."""
+
+	async def send_item(self,view, level=1):
+		"""Send my data struct to this view"""
+		id,pid = self.get_id(level)
+		level += 2
+		view.send_json(action="replace", id=id, parent=pid, data='<div><h%d>Dir %s/%s</h%d><div id="c%s"></div></div>' % (level,id,pid,level,id))
+
+	def get_id(self,level):
+		if level == 0:
+			id="content"
+			pid=""
+		else:
+			id="f_%d" % self._seq
+			if level == 1:
+				pid="content"
+			else:
+				pid="f_%d" % self.parent._seq
+		return id,pid
+
+WebpathDir.register(WEBDATA, cls=WebdataDir)
+WebpathDir.register('*', cls=WebpathDir)
 
 class WebDef(object):
 	"""\

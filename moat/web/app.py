@@ -79,7 +79,8 @@ class App:
         self.app = web.Application(loop=self.loop)
         self.app['moat.cmd'] = cmd
 
-    async def start(self, bindto,port):
+    async def start(self, bindto,port, root="default"):
+        self.rootpath = root
         for cls in objects('moat.web', BaseExt):
             await cls.start(self.app)
         for view in objects("moat.web",BaseView):

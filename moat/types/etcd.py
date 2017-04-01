@@ -331,9 +331,8 @@ class MoatWeb(EtcDir):
 	"""Singleton for /web"""
 	async def init(self):
 		from moat.web import WEBDATA
-		from moat.web.base import WebdataDir
-		self.register(WEBDATA, cls=WebdataDir)
-		self.register('*', cls=MoatWeb)
+		from moat.web.base import WebpathDir
+		self.register('*', cls=WebpathDir)
 		await super().init()
 	
 class MoatStatus(EtcDir):
