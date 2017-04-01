@@ -30,36 +30,363 @@ import sys
 import aio_etcd as etcd
 import asyncio
 import time
-import types
 import inspect
 from aiohttp import web
 from traceback import print_exc
 from collections.abc import Mapping
+from yaml import dump
 
 from moat.script import Command, SubCommand, CommandError
-from moat.script.task import Task,_run_state, JobMarkGoneError,JobIsRunningError
-from moat.task import TASKSTATE_DIR,TASKSTATE, TASKSCAN_DIR,TASK
-from moat.web import App
+from moat.web import WEBDEF_DIR,WEBDEF, WEBDATA_DIR,WEBDATA, webdefs
+from moat.util import r_dict, r_show
 
 import logging
 logger = logging.getLogger(__name__)
 
 __all__ = ['WebCommand']
 
-class WebCommand(Command):
-    name = "web"
+class DefSetup:
+    async def setup(self, meta=False):
+        await super().setup()
+        tree = await self.root._get_tree()
+        if meta:
+            t = await tree.subdir(WEBDEF_DIR)
+        else:
+            t = await tree.subdir(WEBDATA_DIR)
+        return t
+
+class DefInitCommand(DefSetup,Command):
+    name = "init"
+    summary = "Set up web definitions"
+    description = """\
+Web definitions are stored in etcd at /meta/web/**/:def.
+
+This command sets up that data. If you mention module or class names
+on the command line, they are added, otherwise everything under
+'moat.web.*' is used.
+
+"""
+
+    def addOptions(self):
+        self.parser.add_option('-f','--force',
+            action="store_true", dest="force",
+            help="update existing values")
+
+    def handleOptions(self):
+        self.force = self.options.force
+
+    async def do(self,args):
+        tree = await self.root._get_tree()
+        t = await self.setup(meta=True)
+        if args:
+            objs = []
+            for a in args:
+                m = import_string(a)
+                if isinstance(m,types.ModuleType):
+                    from moat.script.util import objects
+                    n = 0
+                    for c in objects(m, WebDef, filter=lambda x:getattr(x,'name',None) is not None):
+                        await t.add_webdef(c, force=self.force)
+                        n += 1
+                    if self.root.verbose > (1 if n else 0):
+                        print("%s: %s webdef%s found." % (a,n if n else "no", "" if n==1 else "s"), file=self.stdout)
+                else:
+                    if not isinstance(m,WebDef):
+                        raise CommandError("%s is not a web definition"%a)
+                    await t.add_webdef(m, force=self.force)
+        else:
+            for c in webdefs():
+                await t.add_webdef(c, force=self.force)
+
+        await t.wait()
+
+class DefListCommand(DefSetup,Command):
+    name = "list"
+    summary = "List web definitions"
+    description = """\
+Web definitions are stored in etcd at /meta/web/**/:def.
+
+This command shows that data. If you mention a definition's name,
+details are shown in YAML format, else a short list of names is shown.
+"""
+
+    def addOptions(self):
+        self.parser.add_option('-a','--all',
+            action="store_true", dest="all",
+            help="show details for all entries")
+
+    async def do(self,args):
+        t = await self.setup(meta=True)
+        if args:
+            if self.options.all:
+                raise CommandError("Arguments and '-a' are mutually exclusive")
+            dirs = []
+            for a in args:
+                dirs.append(await t.subdir(a, create=False))
+            verbose = True
+        else:
+            dirs = [t]
+            verbose = self.options.all
+        for tt in dirs:
+            async for web in tt.tagged(WEBDEF):
+                path = web.path[len(WEBDEF_DIR):-1]
+                if verbose:
+                    dump({path: r_dict(dict(web))}, stream=self.stdout)
+                else:
+                    print('/'.join(path),web.get('summary',web.get('descr','??')), sep='\t',file=self.stdout)
+
+class DefDeleteCommand(DefSetup,Command):
+    name = "delete"
+    summary = "Delete web definitions"
+    description = """\
+Web definitions are stored in etcd at /meta/web/**/:def.
+
+This command deletes (some of) that data.
+"""
+
+    def addOptions(self):
+        self.parser.add_option('-f','--force',
+            action="store_true", dest="force",
+            help="not forcing won't do anything")
+
+    async def do(self,args):
+        td = await self.setup(meta=True)
+        if not args:
+            if not cmd.root.cfg['testing']:
+                raise CommandError("You can't delete everything.")
+            args = td.tagged(WEBDEF)
+        for k in args:
+            t = await td.subdir(k,name=WEBDEF, create=False)
+            if self.root.verbose:
+                print("%s: deleted"%k, file=self.stdout)
+            rec=None
+            while True:
+                p = t._parent
+                if p is None: break
+                p = p()
+                if p is None or p is t: break
+                try:
+                    await t.delete(recursive=rec)
+                except etcd.EtcdDirNotEmpty:
+                    break
+                rec=False
+                t = p
+
+class _ParamCommand(DefSetup,Command):
+    name = "param"
+    # _def = None ## need to override
+    description = """\
+
+This command shows/changes/deletes parameters for that data.
+
+Usage: … param NAME VALUE  -- set
+       … param             -- list all
+       … param NAME        -- show one
+       … param -d NAME     -- delete
+"""
+
+    def addOptions(self, meta=False):
+        self.parser.add_option('-d','--delete',
+            action="store_true", dest="delete",
+            help="delete specific parameters")
+        if self._def:
+            self.parser.add_option('-g','--global',
+                action="store_true", dest="is_global",
+                help="show global parameters")
+
+    def handleOptions(self):
+        pass
+
+    async def do(self,args):
+        t = await self.setup(meta=self._def)
+        if self._def and self.options.is_global:
+            if self.options.delete:
+                raise CommandError("You cannot delete global parameters.")
+            data = self.root.etc_cfg['run']
+        elif not args:
+            if self.options.delete:
+                raise CommandError("You cannot delete all parameters.")
+
+            async for web in t.tagged(self.TAG):
+                path = web.path[len(self.DIR):-1]
+                for k in _VARS:
+                    if k in web:
+                        print('/'.join(path),k,web[k], sep='\t',file=self.stdout)
+            return
+        else:
+            name = args.pop(0)
+            try:
+                data = await t.subdir(name, name=self.TAG, create=False)
+            except KeyError:
+                raise CommandError("Web definition '%s' is unknown." % name)
+
+        if self.options.delete:
+            if not args:
+                args = _VARS
+            for k in args:
+                if k in data:
+                    if self.root.verbose:
+                        print("%s=%s (deleted)" % (k,data[k]), file=self.stdout)
+                    await data.delete(k)
+        elif len(args) == 1 and '=' not in args[0]:
+            print(data[args[0]], file=self.stdout)
+        elif not len(args):
+            for k in _VARS:
+                if k in data:
+                    print(k,data[k], sep='\t',file=self.stdout)
+        else:
+            while args:
+                k = args.pop(0)
+                try:
+                    k,v = k.split('=',1)
+                except ValueError:
+                    if k not in _VARS:
+                        raise CommandError("'%s' is not a valid parameter."%k)
+                    print(k,data.get(k,'-'), sep='\t',file=self.stdout)
+                else:
+                    if k not in _VARS:
+                        raise CommandError("'%s' is not a valid parameter."%k)
+                    if self.root.verbose:
+                        if k not in data:
+                            print("%s=%s (new)" % (k,v), file=self.stdout)
+                        elif str(data[k]) == v:
+                            print("%s=%s (unchanged)" % (k,v), file=self.stdout)
+                        else:
+                            print("%s=%s (was %s)" % (k,v,data[k]), file=self.stdout)
+                    await data.set(k, v)
+
+class DefParamCommand(_ParamCommand):
+    _def = True
+    DIR=WEBDEF_DIR
+    TAG=WEBDEF
+    summary = "Parameterize web definitions"
+    description = """\
+Web definitions are stored in etcd at /meta/web/**/:def.
+""" + _ParamCommand.description
+
+class ParamCommand(_ParamCommand):
+    _def = False
+    DIR=WEBDATA_DIR
+    TAG=WEBDATA
+    summary = "Parameterize web entries"
+    description = """\
+Web entries are stored in etcd at /web/**/:item.
+""" + _ParamCommand.description
+
+class _DefAddUpdate:
+    """Mix-in to add or update a web entry (too much)"""
+
+    async def do(self,args):
+        t = await self.setup(meta=True)
+
+        try:
+            data = {}
+            name=""
+
+            webpath = args[0].rstrip('/').lstrip('/')
+            if webpath == "":
+                raise CommandError("Empty web entry path?")
+            if webpath.endswith(WEBDATA):
+                raise CommandError("Don't add the tag")
+
+            if not self._update:
+                if '/' not in webpath:
+                    raise CommandError("You can't add a top-level web definition")
+                parent = webpath[:webpath.rindex('/')]
+                try:
+                    await t.subdir(parent,name=WEBDEF, create=False)
+                except KeyError:
+                    raise CommandError("The web definition '%s' does not exist" % (parent))
+
+            p=1
+            while p < len(args):
+                try:
+                    k,v = args[p].split('=')
+                except ValueError:
+                    break
+                p += 1
+                data[k] = v
+            descr = " ".join(args[p:])
+        except IndexError:
+            raise CommandError("Missing command parameters")
+        finally:
+            pass
+
+        try:
+            web = await t.subdir(webpath, name=WEBDEF, create=not self._update)
+        except KeyError:
+            raise CommandError("Web item '%s' not found." % webpath)
+        if descr:
+            await web.set('descr', descr, sync=False)
+        if data:
+            d = await web.subdir('data', create=None)
+            for k,v in data.items():
+                if v == "":
+                    try:
+                        await d.delete(k, sync=False)
+                    except KeyError:
+                        pass
+                else:
+                    await d.set(k,v, sync=False)
+            
+
+class DefAddCommand(_DefAddUpdate,DefSetup,Command):
+    name = "add"
+    summary = "add a derived web definition"
+    description = """\
+Create a new derived web definition.
+
+Arguments:
+
+* the new web definition's path (must not exist, but its parent is required)
+
+* data=value parameters (entry-specific, optional)
+
+* a descriptive name (not optional)
+
+"""
+    _update = False
+class DefUpdateCommand(_DefAddUpdate,DefSetup,Command):
+    name = "change"
+    summary = "change a web definition"
+    description = """\
+Update a web entry.
+
+Arguments:
+
+* the web definition's path (required)
+
+* data=value entries (deletes the key if value is empty)
+
+* a descriptive name (optional, to update)
+
+"""
+    _update = True
+
+class DefCommand(SubCommand):
+    subCommandClasses = [
+        DefInitCommand,
+        DefListCommand,
+        DefAddCommand,
+        DefUpdateCommand,
+        DefDeleteCommand,
+        DefParamCommand,
+    ]
+    name = "def"
+    summary = "Manage web definitios"
+    description = """\
+Commands to set up and admin the web definitions known to MoaT.
+"""
+
+class ServeCommand(DefSetup,Command):
+    name = "serve"
     usage = "-b BINDTO -p PORT -r WEB"
     summary = "Run a web server"
     description = """\
 This command runs a web server with the data at /web (by default).
 """
 
-    # process in order
-
     def addOptions(self):
-        self.parser.add_option('-r','--root',
-            action="store", dest="root",
-            help="run a web server (default: /web)")
         self.parser.add_option('-b','--bind-to',
             action="store", dest="host",
             help="address to bind to", default="0.0.0.0")
@@ -72,7 +399,7 @@ This command runs a web server with the data at /web (by default).
 # /root/…/:item : one thing to display
 
     def handleOptions(self):
-        self.rootpath = self.options.root
+        super().handleOptions()
         self.host = self.options.host
         self.port = self.options.port
 
@@ -80,6 +407,7 @@ This command runs a web server with the data at /web (by default).
         if args:
             raise CommandError("this command takes no arguments")
 
+        from moat.web.app import App
         self.loop = self.root.loop
         self.app = App(self)
         await self.app.start(self.host,self.port)
@@ -87,4 +415,212 @@ This command runs a web server with the data at /web (by default).
         # now serving
         while True:
             await asyncio.sleep(9999,loop=self.loop)
+
+class ListCommand(DefSetup,Command):
+    name = "list"
+    summary = "List web entries"
+    description = """\
+Web entries are stored in etcd at /web/**/:data.
+
+This command shows that data. Depending on verbosity, output is
+a one-line summary, human-readable detailed state, or details as YAML.
+"""
+
+    def addOptions(self):
+        self.parser.add_option('-t','--this',
+            action="count", dest="this", default=0,
+            help="Show the given job only (-tt for jobs one level below, etc.)")
+
+    async def do(self,args):
+        t = await self.setup()
+        if args:
+            dirs = []
+            for a in args:
+                try:
+                    dirs.append(await t.subdir(a, create=False))
+                except KeyError:
+                    raise CommandError("'%s' does not exist"%(a,))
+        else:
+            dirs = [t]
+        for tt in dirs:
+            async for web in tt.tagged(WEBDATA, depth=self.options.this):
+                path = web.path[len(WEBDATA_DIR):-1]
+                if self.root.verbose == 2:
+                    print('*','/'.join(path), sep='\t',file=self.stdout)
+                    for k,v in r_show(web,''):
+                        print(k,v, sep='\t',file=self.stdout)
+
+                elif self.root.verbose > 1:
+                    dump({'/'.join(path):r_dict(dict(web))}, stream=self.stdout)
+                else:
+                    path = '/'.join(path)
+                    name = web.get('name','-')
+                    if name == path:
+                        name = "-"
+                    print(path,name,web.get('descr','-'), sep='\t',file=self.stdout)
+
+
+class _AddUpdate:
+    """Mix-in to add or update a web entry (too much)"""
+
+    async def do(self,args):
+        import pdb;pdb.set_trace()
+        try:
+            data = {}
+            webdefpath=""
+            name=""
+            p=0
+
+            webpath = args[p].rstrip('/').lstrip('/')
+            if webpath == "":
+                raise CommandError("Empty web entry path?")
+            if webpath.endswith(WEBDATA):
+                raise CommandError("Don't add the tag")
+            p+=1
+
+            if not self._update:
+                webdefpath = args[p].rstrip('/').lstrip('/')
+                if webdefpath == "":
+                    raise CommandError("Empty web definition path?")
+                if webdefpath.endswith(WEBDEF):
+                    raise CommandError("Don't add the tag")
+                p+=1
+            while p < len(args):
+                try:
+                    k,v = args[p].split('=')
+                except ValueError:
+                    break
+                p += 1
+                if k == "name":
+                    name = v
+                else:
+                    data[k] = v
+            if not self._update:
+                args[p] # raises IndexError if nothing is left
+            descr = " ".join(args[p:])
+        except IndexError:
+            raise CommandError("Missing command parameters")
+        t = await self.setup(meta=False)
+        if not self._update:
+            try:
+                td = await self.setup(meta=True)
+                webdef = await td.subdir(webdefpath,name=WEBDEF, create=False)
+            except KeyError:
+                raise CommandError("Web def '%s' not found" % webdefpath)
+
+        try:
+            web = await t.subdir(webpath,name=WEBDATA, create=not self._update)
+        except KeyError:
+            raise CommandError("Web item '%s' not found." % webpath)
+        if not self._update:
+            await web.set('def', webdefpath, sync=False)
+        if name:
+            await web.set('name', name, sync=False)
+        if descr:
+            await web.set('descr', descr, sync=False)
+        if data:
+            d = await web.subdir('data', create=None)
+            for k,v in data.items():
+                if v == "":
+                    try:
+                        await d.delete(k, sync=False)
+                    except KeyError:
+                        pass
+                else:
+                    await d.set(k,v, sync=False)
+            
+
+class AddCommand(_AddUpdate,DefSetup,Command):
+    name = "add"
+    summary = "add a web entry"
+    description = """\
+Create a new web entry.
+
+Arguments:
+
+* the new web entry's path (must not exist)
+
+* the web entry definition's path (must exist)
+
+* data=value parameters (entry-specific, optional)
+
+* a descriptive name (not optional)
+
+"""
+    _update = False
+class UpdateCommand(_AddUpdate,DefSetup,Command):
+    name = "change"
+    summary = "change a web entry"
+    description = """\
+Update a web entry.
+
+Arguments:
+
+* the web entry's path (required)
+
+* data=value entries (deletes the key if value is empty)
+
+* a descriptive name (optional, to update)
+
+"""
+    _update = True
+
+class DeleteCommand(DefSetup,Command):
+    name = "delete"
+    summary = "Delete a web entry"
+    description = """\
+Web entries are stored in etcd at /web/**/:item.
+
+This command deletes one of these entries.
+"""
+
+    def addOptions(self):
+        self.parser.add_option('-f','--force',
+            action="store_true", dest="force",
+            help="not forcing won't do anything")
+
+    async def do(self,args):
+        t = await self.setup(meta=False)
+        if not args:
+            if not cmd.root.cfg['testing']:
+                raise CommandError("You can't delete everything.")
+            args = t
+        for k in args:
+            try:
+                web = await t.subdir(k,name=WEBDATA, create=False)
+            except KeyError:
+                raise CommandError("%s: does not exist"%k)
+            if self.root.verbose:
+                print("%s: deleted"%k, file=self.stdout)
+            rec=None
+            while True:
+                p = web._parent
+                if p is None: break
+                p = p()
+                if p is None: break
+                if p is web: break
+                try:
+                    await web.delete(recursive=rec)
+                except etcd.EtcdDirNotEmpty:
+                    break
+                rec=False
+                web = p
+
+
+class WebCommand(SubCommand):
+        name = "web"
+        summary = "Configure the web frontend"
+        description = """\
+Commands to configure, and run, a basic web front-end.
+"""
+
+        # process in order
+        subCommandClasses = [
+                DefCommand,
+                ListCommand,
+                AddCommand,
+                UpdateCommand,
+                DeleteCommand,
+                ServeCommand,
+        ]
 

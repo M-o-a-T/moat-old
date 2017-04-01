@@ -28,18 +28,86 @@ import logging
 
 from flask import Flask, request, render_template, render_template_string, g, session, Markup, Response
 from time import time
+from aiohttp import web
 import os
 
 from hamlish_jinja import HamlishExtension
 
-import formalchemy.config
 from jinja2 import Template
-from formalchemy.templates import TemplateEngine
-class JinjaEngine(TemplateEngine):
-	def render(self, template, **kw):
-		return Markup(render_template(os.path.join('formalchemy',template+'.haml'),**kw))
+from moat.script.util import objects
 
 logger = logging.getLogger(__name__)
+
+###################################################
+
+async def hello(request):
+    return web.Response(text="This is MoaT. You did not set up a handler for the root view.")
+
+class BaseView(web.View):
+    path = None
+
+class BaseExt:
+    @classmethod
+    async def start(cls, app):
+        pass
+    @classmethod
+    async def stop(cls, app):
+        pass
+
+class FakeReq:
+    """A very hacky way to test whether a resource exists on a path"""
+    def __init__(self, path):
+        self.__path = path
+    @property
+    def method(self):
+        return 'GET'
+    @property
+    def rel_url(self):
+        class _FR:
+            @property
+            def raw_path(s):
+                return self._FakeReq__path
+        return _FR()
+
+class App:
+    srv=None
+    app=None
+    handler=None
+
+    def __init__(self, cmd):
+        self.loop = cmd.loop
+        self.app = web.Application(loop=self.loop)
+        self.app['moat.cmd'] = cmd
+
+    async def start(self, bindto,port):
+        for cls in objects('moat.web', BaseExt):
+            await cls.start(self.app)
+        for view in objects("moat.web",BaseView):
+            if view.path is not None:
+                print(view)
+                self.app.router.add_route('*', view.path, view)
+
+        r = FakeReq('/')
+        r = await self.app.router.resolve(r)
+        if getattr(r,'_exception',None) is not None:
+            self.app.router.add_get('/', hello)
+
+        self.handler = self.app.make_handler()
+        self.srv = await self.loop.create_server(self.handler, bindto,port)
+        logger.debug('serving on %s', self.srv.sockets[0].getsockname())
+
+    async def stop(self):
+        if self.srv is not None:
+            self.srv.close()
+            await self.srv.wait_closed()
+        if self.app is not None:
+            for cls in objects('moat.web', BaseExt):
+                await cls.stop(self.app)
+            await self.app.shutdown()
+        if self.handler is not None:
+            await self.handler.finish_connections(60.0)
+        if self.app is not None:
+            await self.app.cleanup()
 
 ###################################################
 # web server setup
@@ -78,28 +146,28 @@ def datetimeformat(value, format='%d-%m-%Y %H:%M %Z%z'):
 app = HamlFlask(__name__, template_folder=os.path.join(os.getcwd(),'web','templates'), static_folder=os.path.join(os.getcwd(),'web','static'))
 
 ##################################################
-
-class CustomProxyFix(object):
-	def __init__(self, app):
-		self.app = app
-	def __call__(self, environ, start_response):
-		host = environ.get('HTTP_X_FORWARDED_HOST', '')
-		if host:
-			environ['HTTP_HOST'] = host
-		return self.app(environ, start_response)
-
-app.wsgi_app = CustomProxyFix(app.wsgi_app)
-
-def setup_app(main=None):
-	app.config.from_object(config)
-	websockets = Sockets(app)
-
-	from moat.web import ui,admin,user,monitor
-	from moat.web.util import register as web_register
-	web_register(app)
-	ui.register(app)
-	admin.register(app)
-	user.register(app)
-	if main is not None:
-		monitor.register(app,websockets,main)
-
+#
+#class CustomProxyFix(object):
+#	def __init__(self, app):
+#		self.app = app
+#	def __call__(self, environ, start_response):
+#		host = environ.get('HTTP_X_FORWARDED_HOST', '')
+#		if host:
+#			environ['HTTP_HOST'] = host
+#		return self.app(environ, start_response)
+#
+#app.wsgi_app = CustomProxyFix(app.wsgi_app)
+#
+#def setup_app(main=None):
+#	app.config.from_object(config)
+#	websockets = Sockets(app)
+#
+#	from moat.web import ui,admin,user,monitor
+#	from moat.web.util import register as web_register
+#	web_register(app)
+#	ui.register(app)
+#	admin.register(app)
+#	user.register(app)
+#	if main is not None:
+#		monitor.register(app,websockets,main)
+#

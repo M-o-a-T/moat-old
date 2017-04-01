@@ -255,11 +255,58 @@ class MoatMetaTask(EtcDir):
 		else:
 			raise RuntimeError("%s: exists, language=%s" % (task.taskdef,lang))
 
+class MoatMetaWeb(EtcDir):
+	"""Singleton for /meta/task: task definitions"""
+	async def init(self):
+		from moat.web import WEBDEF
+		from moat.web.base import WebdefDir
+
+		self.register('*', cls=MoatMetaWeb)
+		self.register(WEBDEF, cls=WebdefDir)
+		await super().init()
+	
+	async def add_webdef(self, webdef, force=False):
+		from moat.web import WEBDEF
+
+		assert webdef.name is not None, webdef
+		d = dict(
+			code=webdef.__module__+'.'+webdef.__name__,
+			descr=webdef.summary,
+			doc=webdef.doc or webdef.__doc__,
+		)
+		if hasattr(webdef,'schema'):
+			d['data'] = webdef.schema
+		tt = await self.subdir(webdef.name,name=WEBDEF, create=None)
+		if force:
+			changed = []
+			for k,v in d.items():
+				if k not in tt:
+					logger.debug("%s: Add %s: %s", webdef.name,k,v)
+				elif tt[k] != v:
+					logger.debug("%s: Update %s: %s => %s", webdef.name,k,tt[k],v)
+				else:
+					continue
+				changed.append((k,tt.get(k,'-'),v))
+				await tt.set(k,v)
+			for k in tt.keys():
+				if k not in d:
+					logger.debug("%s: Delete %s", webdef.name,k)
+					r = await tt.delete(k, sync=False)
+					changed.append((k,tt[k],'-'))
+
+			if changed:
+				logger.info("%s: updated: %s", webdef.name, pformat(changed))
+			else:
+				logger.debug("%s: not changed", webdef.name)
+		else:
+			logger.debug("%s: exists, skipped", webdef.name)
+
 class MoatMeta(EtcDir):
 	"""Singleton for /meta"""
 	async def init(self):
 		self.register('type', cls=MoatMetaType)
 		self.register('task', cls=MoatMetaTask)
+		self.register('web', cls=MoatMetaWeb)
 		self.register('module', cls=MoatMetaModule)
 		await super().init()
 		try:
@@ -278,6 +325,15 @@ class MoatStatusRun(EtcDir):
 		from moat.task import TASKSTATE
 		from moat.task.base import TaskState
 		self.register('**',TASKSTATE, cls=TaskState)
+		await super().init()
+	
+class MoatWeb(EtcDir):
+	"""Singleton for /web"""
+	async def init(self):
+		from moat.web import WEBDATA
+		from moat.web.base import WebdataDir
+		self.register(WEBDATA, cls=WebdataDir)
+		self.register('*', cls=MoatWeb)
 		await super().init()
 	
 class MoatStatus(EtcDir):
@@ -461,6 +517,7 @@ class MoatRoot(EtcRoot):
 		self._managed = WeakValueDictionary()
 
 		self.register('meta', cls=MoatMeta)
+		self.register('web', cls=MoatWeb)
 		self.register('task', cls=MoatTask)
 		self.register('status', cls=MoatStatus)
 		self.register('device', cls=MoatLoadedDir)

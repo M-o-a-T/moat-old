@@ -216,7 +216,7 @@ Check etcd access, and basic data layout.
 
 class TypesCommand(Command):
 	name = "types"
-	summary = "Add knows data types to etcd"
+	summary = "Add known data types to etcd"
 	description = """\
 		In etcd, /meta/types contains a list of known data types.
 
@@ -238,6 +238,35 @@ class TypesCommand(Command):
 					logger.debug("Found %s",t.name)
 			else:
 				d = await etc.tree(TYPEDEF_DIR+path+(TYPEDEF,))
+			for k,v in t.vars.items():
+				if k not in d:
+					await d.set(k,v)
+			await d.close()
+
+class WebCommand(Command):
+	name = "web"
+	summary = "Add known web types to etcd"
+	description = """\
+		In etcd, /meta/web contains a list of known display methods.
+
+		This command fills that list.
+		"""
+
+	async def do(self,args):
+		etc = await self.root._get_etcd()
+		from moat.web import webdefs,WEBDEF_DIR,WEBDEF
+		for t in webdefs():
+			path = tuple(t.name.split('/'))
+			if self.root.verbose:
+				try:
+					d = await etc.tree(WEBDEF_DIR+path+(WEBDEF,), create=False)
+				except etcd.EtcdKeyNotFound:
+					logger.info("Creating %s",t.name)
+					d = await etc.tree(WEBDEF_DIR+path+(WEBDEF,), create=True)
+				else:
+					logger.debug("Found %s",t.name)
+			else:
+				d = await etc.tree(WEBDEF_DIR+path+(WEBDEF,))
 			for k,v in t.vars.items():
 				if k not in d:
 					await d.set(k,v)
@@ -289,6 +318,7 @@ Set some data.
 		ConfigCommand,
 		EtcdCommand,
 		TypesCommand,
+		WebCommand,
 		AmqpCommand,
 	]
 	fix = False

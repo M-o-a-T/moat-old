@@ -23,40 +23,15 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##  Thus, do not remove the next line, or insert any blank lines above.
 ##BP
 
-from aiohttp import web
+import aiohttp_jinja2
+from .base import WebDef
 
-from moat.script.util import objects
+class BoolDef(WebDef):
+	name = "bool"
+	summary = "Your basic Boolean"
 
-import logging
-logger = logging.getLogger(__name__)
-
-WEBDEF_DIR = ('meta','web')
-WEBDEF = ':def'
-WEBDATA_DIR = ('web',)
-WEBDATA = ':item'
-
-def webdefs():
-	"""Generator for all web defs known to MoaT. This accesses the code."""
-	from .base import WebDef
-	from moat.script.util import objects
-	return objects(__name__, WebDef, filter=lambda x:x.name is not None)
-
-class _webdef_names(dict):
-	def __getitem__(self,k):
-		while True:
-			try:
-				return super().__getitem__(k)
-			except KeyError:
-				if '/' not in k:
-					from .base import WebDef
-					return WebDef
-			k = k[:k.rindex('/')]
-_webdef_names = _webdef_names()
-
-def webdef_names():
-	"""Creates a dict which maps webdef names to its moat.web.*.WebDef object."""
-	if not _webdef_names:
-		for t in webdefs():
-			_webdef_names[t.name] = t
-	return _webdef_names
-
+	@aiohttp_jinja2.template('bool.haml')
+	async def render(self):
+		## XXX grab the value, of course
+		return {'value': False}
+		
