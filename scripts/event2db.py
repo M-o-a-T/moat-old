@@ -15,7 +15,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##BP
 
 import asyncio
-from qbroker.unit import Unit, CC_DATA
+from qbroker.unit import Unit, CC_DATA, CC_MSG
 from qbroker.util.tests import load_cfg
 import signal
 import pprint
@@ -25,6 +25,7 @@ from sqlmix.async import Db,NoData
 import logging
 import sys
 logging.basicConfig(stream=sys.stderr, level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 import os
 if len(sys.argv) != 2:
@@ -44,6 +45,9 @@ class mon:
 		self.name = u.config['amqp']['exchanges'][name]
 
 	async def start(self):
+		await self.u.register_alert_async('#', self.callback, durable='log_mysql', call_conv=CC_MSG)
+
+	async def _old_start(self):
 		self.channel = (await u.conn.amqp.channel())
 		await self.channel.exchange_declare(self.name, self.typ, passive=True)
 		self.queue_name = 'mon_'+self.name+'_'+self.u.uuid
@@ -52,75 +56,56 @@ class mon:
 		await self.channel.queue_bind(self.queue_name, self.name, routing_key='#')
 		await self.channel.basic_consume(queue_name=self.queue_name, callback=self.callback)
 	
-	async def callback(self, channel,body,envelope,properties):
-		if properties.content_type == 'application/json' or properties.content_type.startswith('application/json+'):
-			body = json.loads(body.decode('utf-8'))
-
-		m = {'body':body, 'prop':{}, 'env':{}}
-		for p in dir(properties):
-			if p.startswith('_'):
-				continue
-			v = getattr(properties,p)
-			if v is not None:
-				m['prop'][p] = v
-		for p in dir(envelope):
-			if p.startswith('_'):
-				continue
-			v = getattr(envelope,p)
-			if v is not None:
-				m['env'][p] = v
-		#pprint.pprint(m)
-		dep = '?' if body.get('deprecated',False) else '.'
-		val = body.get('value_delta',body.get('value',None))
+	#async def callback(self, channel,body,envelope,properties):
+	async def callback(self, msg):
 		try:
-			nam = ' '.join(body['event'])
-		except KeyError:
-			pprint.print(body)
-		else:
-			#print(dep,val,nam)
-			if val is not None:
-				async with db() as d:
-					try:
-						tid, = await d.DoFn("select id from %stype where tag=${name}"%(prefix,), name=nam,)
-					except NoData:
-						tid = await d.Do("insert into %stype set tag=${name}"%(prefix,), name=nam,)
-					f = await d.Do("insert into %slog set value=${value},data_type=${tid}"%(prefix,), value=val,tid=tid)
-					print(dep,val,nam)
+			body = msg.data
+			#if properties.content_type == 'application/json' or properties.content_type.startswith('application/json+'):
+			#	body = json.loads(body.decode('utf-8'))
 
+			dep = '?' if body.get('deprecated',False) else '.'
+			val = body.get('value_delta',body.get('value',None))
+			try:
+				nam = ' '.join(body['event'])
+			except KeyError:
+				pprint.pprint(body)
+			else:
+				#print(dep,val,nam)
+				if val is not None:
+					async with db() as d:
+						try:
+							tid, = await d.DoFn("select id from %stype where tag=${name}"%(prefix,), name=nam,)
+						except NoData:
+							tid = await d.Do("insert into %stype set tag=${name}"%(prefix,), name=nam,)
+						f = await d.Do("insert into %slog set value=${value},data_type=${tid},timestamp=from_unixtime(${ts})"%(prefix,), value=val,tid=tid, ts=msg.timestamp)
+						print(dep,val,nam)
 
-
-		await self.channel.basic_client_ack(delivery_tag = envelope.delivery_tag)
+		except Exception as exc:
+			logger.exception("Problem processing %s", repr(body))
+			quitting.set()
 
 ##################### main loop
 
 loop=None
-jobs=None
-quitting=False
-
-class StopMe:
-	async def run(self):
-		global quitting
-		quitting = True
+quitting=None
 
 async def mainloop():
 	await u.start()
 	m = mon(u,'topic','alert')
 	await m.start()
-	while not quitting:
-		j = (await jobs.get())
-		await j.run()
+	await quitting.wait()
 	await u.stop()
 
 def _tilt():
 	loop.remove_signal_handler(signal.SIGINT)
 	loop.remove_signal_handler(signal.SIGTERM)
-	jobs.put(StopMe())
+	quitting.set()
 
 def main():
 	global loop
-	global jobs
-	jobs = asyncio.Queue()
+	global quitting
 	loop = asyncio.get_event_loop()
+	quitting = asyncio.Event(loop=loop)
 	loop.add_signal_handler(signal.SIGINT,_tilt)
 	loop.add_signal_handler(signal.SIGTERM,_tilt)
 	loop.run_until_complete(mainloop())
