@@ -64,7 +64,7 @@ class mon:
 			#	body = json.loads(body.decode('utf-8'))
 
 			dep = '?' if body.get('deprecated',False) else '.'
-			val = body.get('value_delta',body.get('value',None))
+			val = body.get('value',None)
 			try:
 				nam = ' '.join(body['event'])
 			except KeyError:
