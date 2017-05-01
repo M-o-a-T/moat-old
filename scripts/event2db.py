@@ -65,20 +65,32 @@ class mon:
 
 			dep = '?' if body.get('deprecated',False) else '.'
 			val = body.get('value',None)
+			if val is None:
+				return
+			try:
+				val = float(val)
+			except ValueError:
+				if val.lower() == "on":
+					val = 1
+				elif val.lower == "off":
+					val = 0
+				else:
+					pprint.pprint(body)
+					return
 			try:
 				nam = ' '.join(body['event'])
 			except KeyError:
 				pprint.pprint(body)
-			else:
-				#print(dep,val,nam)
-				if val is not None:
-					async with db() as d:
-						try:
-							tid, = await d.DoFn("select id from %stype where tag=${name}"%(prefix,), name=nam,)
-						except NoData:
-							tid = await d.Do("insert into %stype set tag=${name}"%(prefix,), name=nam,)
-						f = await d.Do("insert into %slog set value=${value},data_type=${tid},timestamp=from_unixtime(${ts})"%(prefix,), value=val,tid=tid, ts=msg.timestamp)
-						print(dep,val,nam)
+				return
+
+			#print(dep,val,nam)
+			async with db() as d:
+				try:
+					tid, = await d.DoFn("select id from %stype where tag=${name}"%(prefix,), name=nam,)
+				except NoData:
+					tid = await d.Do("insert into %stype set tag=${name}"%(prefix,), name=nam,)
+				f = await d.Do("insert into %slog set value=${value},data_type=${tid},timestamp=from_unixtime(${ts})"%(prefix,), value=val,tid=tid, ts=msg.timestamp)
+				print(dep,val,nam)
 
 		except Exception as exc:
 			logger.exception("Problem processing %s", repr(body))
