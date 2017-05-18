@@ -261,14 +261,15 @@ class WebCommand(Command):
 			path = tuple(t.name.split('/'))
 			if self.root.verbose:
 				try:
-					d = await etc.tree(WEBDEF_DIR+path+(WEBDEF,), create=False)
+					d = await etc.tree(WEBDEF_DIR+path+(WEBDEF,"data"), create=False)
 				except etcd.EtcdKeyNotFound:
 					logger.info("Creating %s",t.name)
-					d = await etc.tree(WEBDEF_DIR+path+(WEBDEF,), create=True)
+					d = await etc.tree(WEBDEF_DIR+path+(WEBDEF,"data"), create=True)
 				else:
 					logger.debug("Found %s",t.name)
 			else:
-				d = await etc.tree(WEBDEF_DIR+path+(WEBDEF,))
+				d = await etc.tree(WEBDEF_DIR+path+(WEBDEF,"data"))
+
 			for k,v in t.vars.items():
 				if k not in d:
 					await d.set(k,v)
