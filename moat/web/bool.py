@@ -29,6 +29,7 @@ from .base import WebDef
 class BoolDef(WebDef):
 	name = "bool"
 	summary = "Your basic Boolean"
+	vars = {'true':'On', 'false':'Off'}
 
 	@aiohttp_jinja2.template('bool.haml')
 	async def render(self):
