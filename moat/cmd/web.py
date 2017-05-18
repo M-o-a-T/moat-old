@@ -33,7 +33,6 @@ import time
 import inspect
 from aiohttp import web
 from traceback import print_exc
-from collections.abc import Mapping
 from yaml import dump
 
 from moat.script import Command, SubCommand, CommandError

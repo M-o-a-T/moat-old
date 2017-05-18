@@ -36,7 +36,10 @@ from moat.dev import devices, DEV
 import logging
 logger = logging.getLogger(__name__)
 
-__all__ = ('ManagedEtcDir',)
+__all__ = ('ManagedEtcDir','ManagedEtcThing')
+
+class NoManagerError(RuntimeError):
+	pass
 
 class ManagedEtcThing(object):
 	"""\
