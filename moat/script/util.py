@@ -33,43 +33,40 @@ import logging
 logger = logging.getLogger(__name__)
 
 def objects(module, cls, immediate=False,direct=False,filter=lambda x:True):
-	"""\
-		List all objects of a given class in a directory.
+    """\
+        List all objects of a given class in a directory.
 
-		If @immediate is set, only direct subclasses are returned.
-		If @direct is set, modules in subdirectories are ignored.
-		"""
-	def _check(m):
-		try:
-			if isinstance(m,str):
-				m = import_module(m)
-		except ImportError as ex:
-			raise # ImportError(m) from ex # pragma: no cover
-			# not going to ship a broken file for testing this
-		else:
-			try:
-				syms = m.__all__
-			except AttributeError:
-				syms = dir(m)
-			for c in syms:
-				c = getattr(m,c,None)
-				if isinstance(c,type) and \
-						((c.__base__ is cls) if immediate else (c is not cls and issubclass(c,cls))):
-					if filter(c):
-						yield c
-			
-	if isinstance(module,str):
-		from qbroker.util import import_string
-		module = import_string(module)
-	yield from _check(module)
-	try:
-		for a,b,c in pkgutil.walk_packages((os.path.dirname(module.__file__),), module.__name__+'.'):
-			if direct and a.path != module.__path__[0]:
-				continue
-			yield from _check(b)
-	except ImportError as err:
-		if err.args and err.args[0].endswith("is not a package"):
-			yield from _check(module)
-		else:
-			raise
+        If @immediate is set, only direct subclasses are returned.
+        If @direct is set, modules in subdirectories are ignored.
+        """
+    def _check(m):
+        try:
+            if isinstance(m,str):
+                m = import_module(m)
+        except ImportError as ex:
+            raise # ImportError(m) from ex # pragma: no cover
+            # not going to ship a broken file for testing this
+        else:
+            try:
+                syms = m.__all__
+            except AttributeError:
+                syms = dir(m)
+            for c in syms:
+                c = getattr(m,c,None)
+                if isinstance(c,type) and \
+                        ((c.__base__ is cls) if immediate else (c is not cls and issubclass(c,cls))):
+                    if filter(c):
+                        yield c
+            
+    if isinstance(module,str):
+        from qbroker.util import import_string
+        module = import_string(module)
+    yield from _check(module)
+    try:
+        for a,b,c in pkgutil.walk_packages((os.path.dirname(module.__file__),), module.__name__+'.'):
+            if direct and a.path != module.__path__[0]:
+                continue
+            yield from _check(b)
+    except ImportError as err:
+        yield from _check(module)
 
