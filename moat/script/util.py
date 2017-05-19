@@ -44,7 +44,7 @@ def objects(module, cls, immediate=False,direct=False,filter=lambda x:True):
 			if isinstance(m,str):
 				m = import_module(m)
 		except ImportError as ex:
-			raise ImportError(m) from ex # pragma: no cover
+			raise # ImportError(m) from ex # pragma: no cover
 			# not going to ship a broken file for testing this
 		else:
 			try:
@@ -67,6 +67,9 @@ def objects(module, cls, immediate=False,direct=False,filter=lambda x:True):
 			if direct and a.path != module.__path__[0]:
 				continue
 			yield from _check(b)
-	except ImportError:
-		yield from _check(module)
+	except ImportError as err:
+		if err.args and err.args[0].endswith("is not a package"):
+			yield from _check(module)
+		else:
+			raise
 
