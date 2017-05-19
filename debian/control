@@ -23,10 +23,9 @@ Build-Depends: debhelper (>= 5),
  python3-qbroker (>= 0.19.3),
  python3-setuptools,
  python3-six (>= 1.9),
- python3-sqlmix (>= 0.10.3),
+ python3-sqlmix (>= 0.10.4),
  python3-yaml,
  python3-systemd,
- python3-sqlmix,
  python3-pytz | python3-tz,
 X-Also-Depends: avr-libc, gcc-avr
 Build-Depends-Indep: python-support
@@ -52,7 +51,7 @@ Description: A scripted event-based monitoring and control system
 Package: python3-moat
 Architecture: all
 Depends: ${misc:Depends}, ${python:Depends},
- python3-sqlmix (>= 0.9.26),
+ python3-sqlmix (>= 0.10.4),
  python3-six (>= 1.9),
  python3-aiogevent,
  python3-hamlish-jinja,
