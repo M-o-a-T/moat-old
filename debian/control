@@ -16,6 +16,7 @@ Build-Depends: debhelper (>= 5),
  python3-all-dev,
  python3-amqp,
  python3-aiogevent,
+ python3-boltons,
  python3-etcd-tree (>= 0.18.6),
  python3-gevent,
  python3-hamlish-jinja,
@@ -51,6 +52,7 @@ Description: A scripted event-based monitoring and control system
 Package: python3-moat
 Architecture: all
 Depends: ${misc:Depends}, ${python:Depends},
+ python3-boltons,
  python3-sqlmix (>= 0.10.4),
  python3-six (>= 1.9),
  python3-aiogevent,
