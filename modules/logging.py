@@ -124,7 +124,7 @@ log limit event DEBUG
 	def run(self,ctx,**k):
 		event = self.params(ctx)
 		if len(event) < 1 or len(event) > 2:
-			SyntaxError(u"Usage: log limit ‹type› ‹level›")
+			raise SyntaxError(u"Usage: log limit ‹type› ‹level›")
 		name = event[0]
 		if len(event) == 2:
 			level = getattr(logging,event[1].upper())
