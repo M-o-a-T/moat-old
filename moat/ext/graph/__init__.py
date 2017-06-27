@@ -25,26 +25,49 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 
 from moat.types.module import BaseModule
 
+## DO NOT change the numbers
+modes = {
+    0: ('ignore', "keep data of this type, but ignore them"),
+    1: ('delete', "remove values of this type"),
+    2: ('store', "Continuous value (power use, temperature, humidity)"),
+    3: ('count', "Increasing discrete value (rain gauge, lightning counter)"),
+    4: ('cont', "Increasing continuous value (power meter)"),
+    5: ('event', "Single event (button pressed)"),
+    6: ('cycle', "Cyclic value (wind direction)"),
+    7: ('notice', "Continuous event (movement detected)"),
+
+# The difference between "count" and "cont" is that values for the former
+# get credited to the interval in which they appear, while the latter gets
+# distributed evenly
+
+# The difference between "event" and "notice" is that level 0 will count
+# the latter only once
+}
+
+modenames = {}
+for a,b in modes.items():
+    modenames[b[0]] = a
+
 class GraphModule(BaseModule):
-	"""\
-		This module logs stuff to SQL (like mysql) and aggregates things.
-		"""
+    """\
+        This module logs stuff to SQL (like mysql) and aggregates things.
+        """
 
-	prefix = "graph"
-	summary = "Log+aggregate graph data"
-	
-	@classmethod
-	def entries(cls):
-		yield from super().entries()
-		# yield "cmd_conn","moat.ext.onewire.cmd.conn.ServerCommand"
-		yield "cmd_ext","moat.ext.graph.cmd.GraphCommand"
-		# yield "cmd_dev","moat.ext.graph.cmd.GraphCommand"
-		# yield "bus","moat.ext.onewire.bus.OnewireBusBase"
-		# yield "device","moat.ext.extern.dev.ExternDeviceBase"
+    prefix = "graph"
+    summary = "Log+aggregate graph data"
+    
+    @classmethod
+    def entries(cls):
+        yield from super().entries()
+        # yield "cmd_conn","moat.ext.onewire.cmd.conn.ServerCommand"
+        yield "cmd_ext","moat.ext.graph.cmd.GraphCommand"
+        # yield "cmd_dev","moat.ext.graph.cmd.GraphCommand"
+        # yield "bus","moat.ext.onewire.bus.OnewireBusBase"
+        # yield "device","moat.ext.extern.dev.ExternDeviceBase"
 
-	@classmethod
-	def task_types(cls):
-		"""Enumerate taskdef classes"""
-		from moat.task import task_types as ty
-		return ty('moat.ext.extern.task')
+    @classmethod
+    def task_types(cls):
+        """Enumerate taskdef classes"""
+        from moat.task import task_types as ty
+        return ty('moat.ext.extern.task')
 

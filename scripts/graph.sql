@@ -17,7 +17,8 @@ CREATE TABLE `data_type` (
   # 2     no special treatment
   # 3     accumulated
   # 4     cyclic
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `i_tag`(`tag`(100))
 );
 
 # Raw log from AMQP.
@@ -46,10 +47,12 @@ CREATE TABLE `data_agg_type` (
   `interval` int(11) NOT NULL,
   `max_age` int(11) NOT NULL, # seconds until
   `value` double(40,10) DEFAULT NULL, # last raw value seen; required for aggregation
-  `timestamp` timestamp NOT NULL, # of last record so collected
+  `aux_value` double(40,10) DEFAULT NULL, # last raw value seen; required for aggregation
+  `timestamp` timestamp NOT NULL default "2000-01-01", # of last processed record
+  `ts_last` timestamp NULL, # of last analyzed record
   PRIMARY KEY (`id`),
   UNIQUE KEY `data_type` (`data_type`, `layer`),
-  CONSTRAINT `data_log_ibfk_1` FOREIGN KEY (`data_type`) REFERENCES `data_type` (`id`)
+  CONSTRAINT `data_aggtype_type` FOREIGN KEY (`data_type`) REFERENCES `data_type` (`id`)
 );
 
 # Aggregate data.
@@ -63,10 +66,12 @@ CREATE TABLE `data_agg` (
   `aux_value` double(40,10) DEFAULT NULL, # cycle: confidence
   `min_value` double(40,10) NOT NULL,
   `max_value` double(40,10) NOT NULL,
+  `n_values` integer not null default 0,
+  `tsc` integer not null,
   `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, # start of period
   PRIMARY KEY (`id`),
-  UNIQUE KEY `data_agg_type` (`data_agg_type`,`timestamp`),
+  UNIQUE KEY `data_agg_tsc` (`data_agg_type`,`tsc`),
   KEY `timestamp` (`timestamp`),
-  CONSTRAINT `data_log_ibfk_1` FOREIGN KEY (`data_type`) REFERENCES `data_type` (`id`)
+  CONSTRAINT `data_agg_type` FOREIGN KEY (`data_agg_type`) REFERENCES `data_agg_type` (`id`)
 );
 

@@ -33,6 +33,9 @@ async def main(args):
 	c = Moat()
 	try:
 		ret = await c.parse(args)
+	except SyntaxError as e:
+		print("ERROR:", e)
+		ret = 9
 	except CommandExited as e:
 		if e.status or c.verbose:
 			print(e.output, file=sys.stderr)

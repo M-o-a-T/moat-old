@@ -41,28 +41,23 @@ from boltons.iterutils import remap
 from moat.script import Command, SubCommand, CommandError
 from moat.script.task import Task,_run_state, JobMarkGoneError,JobIsRunningError
 from moat.task import TASKSTATE_DIR,TASKSTATE, TASKSCAN_DIR,TASK
+from moat.times import simple_time_delta
+from . import modes,modenames
 
 import logging
 logger = logging.getLogger(__name__)
-
-## DO NOT change the numbers
-modes = {
-	0: ('ignore', "keep data of this type, but ignore them"),
-	1: ('delete', "remove values of this type"),
-	2: ('store', "Continuous value (power use, temperature, humidity)"),
-	3: ('count', "Increasing discrete value (rain gauge, lightning counter)"),
-	4: ('cont', "Increasing continuous value (power meter)"),
-	5: ('event', "Single event (button pressed)"),
-	6: ('cycle', "Cyclic value (wind direction)"),
-}
 
 __all__ = ['GraphCommand']
 
 ## TODO add --dest UUID
 
-class LogCommand(Command):
+class _Command(Command):
+	async def setup(self):
+		self.db = Db(**self.root.cfg['config']['sql']['data_logger']['server'])
+
+class LogCommand(_Command):
 	name = "log"
-	summary = "Log the event stream from AMQP to SQL",
+	summary = "Log the event stream from AMQP to SQL"
 	description = """\
 Log the event stream from AMQP to SQL
 
@@ -70,9 +65,11 @@ Log the event stream from AMQP to SQL
 	async def do(self,args):
 		if len(args):
 			raise SyntaxError("Usage: log")
+		await self.setup()
+
 		self.u = await self.root._get_amqp()
 		await self.u.register_alert_async('#', self.callback, durable='log_mysql', call_conv=CC_MSG)
-		self.db = Db(**self.cfg['config']['sql']['data_logger']['server'])
+
 		self.prefix=u.config['sql']['data_logger']['prefix']
 
 		while True:
@@ -118,7 +115,7 @@ Log the event stream from AMQP to SQL
 			logger.exception("Problem processing %s", repr(body))
 			quitting.set()
 
-class ListCommand(Command):
+class ListCommand(_Command):
 	name = "list"
 	summary = "show graph states"
 	description = """\
@@ -128,36 +125,51 @@ This command shows the status of current graphing
 
 	def addOptions(self):
 		self.parser.add_option('-l','--layer',
-			action="store", dest="layer", default=-1,
+			action="store", dest="layer", type="int", default=-1,
 			help="Show this aggregation layer")
 		self.parser.add_option('-u','--unassigned',
 			action="store_true", dest="unassigned",
 			help="Show new data types")
+		self.parser.add_option('-m','--method',
+			action="store", dest="method",
+			help="limit to this method (%s)" % ','.join(x[0] for x in modes.values()))
 		self.parser.add_option('-n','--last',
 			action="store", type="int", dest="last",
 			help="Show the last N records")
 
 	async def do(self,args):
 		self.u = await self.root._get_amqp()
-		self.db = Db(**self.root.cfg['config']['sql']['data_logger']['server'])
+		await self.setup()
 
-		async with self.db() as db:
-			if self.options.unassigned:
-				if self.options.layer >= 0:
-					raise SyntaxError("You can't use '-u' with a specific layer")
-				if args:
-					raise SyntaxError("You can't use '-u' with a specific type")
-				await self._do_unassigned(db)
-			elif args:
-				await self._do_args(db,args)
-			else:
-				await self._do_other(db,)
+		try:
+			async with self.db() as db:
+				if self.options.unassigned or self.options.method:
+					if self.options.layer >= 0:
+						raise SyntaxError("You can't use '-u'/'-m' with a specific layer")
+					if args:
+						raise SyntaxError("You can't use '-u'/'-m' with a specific type")
+					await self._do_unassigned(db, None if self.options.unassigned else self.options.method)
+				elif args:
+					await self._do_args(db,args)
+				else:
+					await self._do_other(db,)
+		except NoData:
+			print("… no data.", file=sys.stderr)
 
-	async def _do_unassigned(self,db):
+	async def _do_unassigned(self,db,method):
 		seen = False
 		
+		if method is None:
+			mf = "is None"
+		else:
+			mf = "= ${method}"
+			try:
+				method = modenames[method]
+			except KeyError:
+				print("Unknown method. Known:",' '.join(sorted(modenames.keys())), file=sys.stderr)
+				return
 		if self.options.last:
-			async for d in db.DoSelect("select data_log.*,data_type.tag from data_log join data_type on data_type.id=data_log.data_type where data_type.method is null order by data_log.timestamp desc limit ${limit}", _dict=True, limit=self.options.last):
+			async for d in db.DoSelect("select data_log.*,data_type.tag from data_log join data_type on data_type.id=data_log.data_type where data_type.method %s order by data_log.timestamp desc limit ${limit}" % (mf,), _dict=True, limit=self.options.last, method=method):
 				if self.root.verbose > 1:
 					if seen:
 						print("===")
@@ -166,7 +178,7 @@ This command shows the status of current graphing
 					print(d['timestamp'],d['tag'],d['value'], sep='\t')
 				seen = True
 		else:
-			async for d in db.DoSelect("select * from data_type where method is null order by tag", _dict=True):
+			async for d in db.DoSelect("select * from data_type where method %s order by tag" % (mf,), _dict=True, method=method):
 				if self.root.verbose > 1:
 					if seen:
 						print("===")
@@ -175,10 +187,9 @@ This command shows the status of current graphing
 					print(d['timestamp'],d['tag'], sep='\t')
 				seen = True
 
-		if not seen:
-			print("No unassigned data. Great!")
-
 	async def _do_args(self,db, args):
+		seen = False
+
 		dtid, = await self.db.DoFn("select id from data_type where tag=${tag}", tag=' '.join(args))
 		if self.options.last:
 			if self.options.layer < 0:
@@ -243,7 +254,7 @@ This command shows the status of current graphing
 						print(d['timestamp'],d['tag'], sep='\t')
 					seen = True
 			else:
-				async for d in db.DoFn("select data_agg_type.*,data_type.tag from data_agg_type join data_type on data_type.id=data_agg_type.data_type where layer=${layer}", _dict=True, layer=self.options.layer):
+				async for d in db.DoSelect("select data_agg_type.*,data_type.tag from data_agg_type join data_type on data_type.id=data_agg_type.data_type where layer=${layer}", _dict=True, layer=self.options.layer):
 					if self.root.verbose > 1:
 						if seen:
 							print("===")
@@ -254,7 +265,7 @@ This command shows the status of current graphing
 		if not seen:
 			print("No data?")
 
-class SetCommand(Command):
+class SetCommand(_Command):
 	name = "set"
 	summary = "Set data type and aggregation"
 	description = """\
@@ -262,33 +273,71 @@ Set data type and aggregation options for a logged event type
 """
 
 	def addOptions(self):
-		self.parser.add_option('-l','--layer',
-			action="store", dest="layer", default=-1,
-			help="Show this aggregation layer")
-		self.parser.add_option('-m','--mode',
-			action="store", dest="mode",
-			help="set mode (%s)" % ','.join(x[0] for x in modes.values()))
-		self.parser.epilog = "Modes:\n"+"\n".join("%s\t%s"%(a,b) for a,b in modes.values())
+		self.parser.add_option('-m','--method',
+			action="store", dest="method",
+			help="set method (%s)" % ','.join(x[0] for x in modes.values()))
+		self.parser.add_option('-u','--unit',
+			action="store", dest="unit",
+			help="set the entry's unit (°C, m/s, …)")
+		self.parser.add_option('-s','--sort',
+			action="store", dest="order", type=int,
+			help="set the type's sort priority (higher is earlier)")
+		self.parser.add_option('-f','--factor',
+			action="store", dest="factor",
+			help="set the entry's factor (1024, 1000, …)")
+		self.parser.add_option('-F','--force',
+			action="store_true", dest="force",
+			help="Yes, I do want to set the type, no matter what")
+		self.parser.add_option('-n','--name',
+			action="store", dest="name",
+			help="name the entry (for display)")
+		self.parser.epilog = "Methods:\n"+"\n".join("%s\t%s"%(a,b) for a,b in modes.values())
 
 	async def do(self,args):
 		if not args:
 			raise SyntaxError("Usage: set [options] data_tag")
-		args = ' '.join(args)
-		if self.options.mode:
-			try:
-				mode = modes[self.options.mode]
-			except KeyError:
-				raise SyntaxError("Unknown mode '%s'" % self.options.mode)
-		else:
-			mode = None
+		await self.setup()
 
-		if self.options.layer < 0:
-			pass
-		else:
-			if mode is not None:
-				raise SyntaxError("You can't set modes for a layer")
+		async with self.db() as db:
+			dtid, = await db.DoFn("select id from data_type where tag=${tag}", tag=' '.join(args))
+			if self.options.method:
+				try:
+					method = modenames[self.options.method]
+				except KeyError:
+					raise SyntaxError("Unknown method '%s'" % self.options.method)
+			else:
+				method = None
 
-class LayerCommand(Command):
+			omethod, = await db.DoFn("select method from data_type where id=${id}", id=dtid)
+			tcnt, = await db.DoFn("select count(*) from data_agg_type where data_type=${id}", id=dtid)
+			if method is not None and omethod is not None and method != omethod and tcnt > 0 and not self.options.force:
+				raise RuntimeError("You cannot change the method after the fact")
+			upd = {}
+			if method is not None:
+				upd['method'] = method
+			if self.options.unit:
+				upd['display_unit'] = self.options.unit
+			if self.options.factor:
+				upd['display_factor'] = self.options.factor
+			if self.options.name:
+				upd['display_name'] = self.options.name
+			if self.options.order:
+				upd['display_order'] = self.options.order
+
+			if upd:
+				try:
+					await db.Do("update data_type set "+','.join("%s=${%s}"%(k,k) for k in upd.keys())+" where id=${id}", id=dtid, **upd)
+				except NoData:
+					if self.root.verbose:
+						print("no change")
+				else:
+					if self.root.verbose:
+						print("OK")
+			else:
+				raise SyntaxError("Nothing to change.")
+
+
+class LayerCommand(_Command):
 	name = "layer"
 	summary = "Set layer options"
 	description = """\
@@ -297,7 +346,7 @@ Create an aggregation layer and/or set options
 
 	def addOptions(self):
 		self.parser.add_option('-l','--layer',
-			action="store", dest="layer", default=-1,
+			action="store", dest="layer", type=int, default=-1,
 			help="Show this aggregation layer")
 		self.parser.add_option('-i','--interval',
 			action="store", dest="interval",
@@ -310,42 +359,91 @@ Create an aggregation layer and/or set options
 	async def do(self,args):
 		if not args or self.options.layer < 0:
 			raise SyntaxError("Usage: set -l LAYER [options] data_tag")
-		args = ' '.join(args)
-		dtid, = await self.db.DoFn("select id from data_type where tag=${tag}", tag=' '.join(args))
+		tag = ' '.join(args)
+		await self.setup()
 
-		try:
-			iid,intv = await self.db.DoFn("select id from data_agg_type where data_type=${id} and layer=${layer}", id=dtid,layer=self.options.layer)
-		except NoData:
-			if not self.options.interval:
-				raise SyntaxError("The interval must be specified")
-			iid=None
-			intv = self.options.interval
-			if self.options.layer > 0:
-				try:
-					lid,lint = await self.db.DoFn("select id,interval from data_agg_type where data_type=${id} and layer=${layer}", id=dtid,layer=self.options.layer-1)
-				except NoData:
-					raise SyntaxError("Layers need to be contiguous")
-				else:
-					if self.options.interval % lint:
-						raise SyntaxError("The interval must be a multiple of the next-lower layer's interval")
-		else:
-			if self.options.interval:
-				raise SyntaxError("The interval cannot be changed")
-			
-		upd = {}
 		if self.options.interval:
-			upd['interval'] = self.options.interval
-		if self.options.max_age:
-			if self.options.max_age < 3*intv:
-				raise SyntaxError("maxage is too low, this makes no sense")
-			upd['max_age'] = self.options.max_age
-		if not upd:
-			raise SyntaxError("No change specified")
+			self.options.interval = simple_time_delta(self.options.interval)
+		async with self.db() as db:
+			dtid, = await db.DoFn("select id from data_type where tag=${tag}", tag=tag)
+			upd = {}
 
-		if iid is None:
-			await db.Do("insert into data_agg_type ("+','.join("%s"%(k,) for k in upd.keys())+") values ("+','.join("${$%s}"%(k,) for k in upd.keys())+")", id=iid, **upd)
-		else:
-			await db.Do("update data_agg_type set "+','.join("%s=${$%s}"%(k,k) for k in upd.keys())+" where id=${id}", id=iid, **upd)
+			try:
+				iid,intv = await db.DoFn("select id,`interval` from data_agg_type where data_type=${id} and layer=${layer}", id=dtid, layer=self.options.layer)
+			except NoData:
+				if not self.options.interval:
+					raise SyntaxError("The interval must be specified")
+				upd['interval'] = intv = self.options.interval
+				iid=None
+
+				if self.options.layer > 0:
+					try:
+						lid,lint = await db.DoFn("select id,`interval` from data_agg_type where data_type=${id} and layer=${layer}", id=dtid,layer=self.options.layer-1)
+					except NoData:
+						raise SyntaxError("Layers need to be contiguous")
+					else:
+						if self.options.interval % lint:
+							raise SyntaxError("The interval must be a multiple of the next-lower layer's interval")
+				upd['layer'] = self.options.layer
+			else:
+				if self.options.interval:
+					raise SyntaxError("The interval cannot be changed")
+				
+			if self.options.max_age:
+				if self.options.max_age == '-':
+					max_age = None
+				else:
+					max_age = simple_time_delta(self.options.max_age)
+					if max_age < 3*intv:
+						raise SyntaxError("maxage is too low, this makes no sense")
+				upd['max_age'] = max_age
+			if not upd:
+				raise SyntaxError("No change specified")
+
+			if iid is None:
+				upd['data_type'] = dtid
+			ks = list(upd.keys())
+			if iid is None:
+				await db.Do("insert into data_agg_type ("+','.join("`%s`"%(k,) for k in ks)+") values ("+','.join("${%s}"%(k,) for k in ks)+")", **upd)
+			else:
+				await db.Do("update data_agg_type set "+','.join("`%s`=${%s}"%(k,k) for k in ks)+" where id=${id}", id=iid, **upd)
+
+class RunCommand(_Command):
+	name = "run"
+	summary = "Run layer processing"
+	description = """\
+Process a layer (or all of them)
+"""
+
+	def addOptions(self):
+		self.parser.add_option('-l','--layer',
+			action="store", dest="layer", type=int, default=-1,
+			help="Run only this aggregation layer")
+
+	async def do(self,args):
+		from .process import agg_type
+		tag = ' '.join(args)
+		await self.setup()
+
+		todo = []
+		async with self.db() as db:
+			filter = {}
+			if tag:
+				filter['data_type'], = await db.DoFn("select id from data_type where tag=${tag}", tag=tag)
+			if self.options.layer >= 0:
+				filter['layer'] = self.options.layer
+			fs = ' and '.join("`%s`=${%s}" % (k,k) for k in filter.keys())
+			if fs:
+				fs = " where "+fs
+
+			async for d in db.DoSelect("select * from data_agg_type"+fs, **filter, _dict=True):
+				todo.append(d)
+		for d in todo:
+			async with self.db() as db:
+				at = agg_type(self,db)
+				await at.set(d)
+				logger.debug("Run %s",at)
+				await at.run()
 
 class GraphCommand(SubCommand):
 	name = "graph"
@@ -360,6 +458,7 @@ Commands to manipulate logging events for graphing etc.
 		LogCommand,
 		SetCommand,
 		LayerCommand,
+		RunCommand,
 	]
 
 
