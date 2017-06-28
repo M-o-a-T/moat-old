@@ -130,10 +130,12 @@ class agg(_agg):
     def end_ts(self):
         return self.ts_of(self.timestamp,1)
 
-    def reset(self, ts):
+    def reset(self, ts, at_start=False):
         """Reset for a specific timestamp"""
         super().reset(ts)
         self.tsc = self.tsc_of(self.timestamp)
+        if at_start:
+            self.timestamp = self.start_ts
         self.min_value = sys.float_info.max
         self.max_value = -sys.float_info.max
         self.n_values = 0
@@ -142,7 +144,7 @@ class agg(_agg):
     async def load(self, **kv):
         """read a specific record"""
         self.tsc = None
-        d = await self.db.DoFn("select * from data_agg where "+' and '.join("%s=${%s}"%(k,k) for k in kv.keys()), **kv, _dict=True)
+        d = await self.db.DoFn("select * from data_agg where "+' and '.join("%s=${%s}"%(k,k) for k in kv.keys())+" order by tsc desc limit 1", **kv, _dict=True)
         self.set(**d)
         self.updated = False
         if not self.tsc:
@@ -182,9 +184,10 @@ class _proc:
 
             E.g. collect usage for the range [start_ts,data_ts[
             """
-        self.agg = agg(self.typ)
+        if self.agg is None:
+            self.agg = agg(self.typ)
         try:
-            await self.agg.load(data_agg_type=self.typ.id, timestamp=self.agg.ts_of(data.timestamp))
+            await self.agg.load(data_agg_type=self.typ.id, tsc=self.agg.tsc_of(data.timestamp))
         except NoData:
             self.agg.reset(data.timestamp)
 
@@ -211,10 +214,10 @@ class _proc:
             await self.finish(data)
         if not self.agg or not self.agg.in_tsc(data):
             await self.startup(data)
-        if not self.process(data):
+        if not (await self.process(data)):
             self.update_ts(data)
 
-    def process(self, data):
+    async def process(self, data):
         """Process this data record.
             Return True to skip updating the aggregate's timestamp."""
         raise NotImplementedError
@@ -251,12 +254,12 @@ class _proc_clean(object):
 
 class proc_noop(_proc):
     """do not do anything"""
-    def process(self,data):
+    async def process(self,data):
         raise DoNothing
 
 class proc_ignore(_proc):
     """do not do anything"""
-    def process(self,data):
+    async def process(self,data):
         pass
 
 class proc_delete(_proc_clean, proc_ignore):
@@ -265,7 +268,7 @@ class proc_delete(_proc_clean, proc_ignore):
 
 class proc_store(proc_delete):
     """Save an average continuous value (power use, temperature, humidity) with min/max ranges"""
-    def process(self,data):
+    async def process(self,data):
         on = self.agg.n_values
         self.agg.n_values += data.n_values
         self.agg.value = (self.agg.value * on + data.value * data.n_values) / self.agg.n_values
@@ -278,7 +281,7 @@ class proc_count(proc_store):
     """Save an increasing discrete value (rain gauge, lightning counter).
         The first increase within an interval gets credited to that interval"""
     DISC=True
-    def process(self,data):
+    async def process(self,data):
         dv = data.value
         dav = data.aux_value
         if self.typ.layer == 0: # need to aggregate
@@ -299,32 +302,96 @@ class proc_count(proc_store):
         self.agg.aux_value += dav
         self.agg.updated = True
         
+    async def startup(self, data):
+        """\
+            Hook to open the current record
+
+            E.g. collect usage for the range [start_ts,data_ts[
+            """
+        if self.typ.layer > 0:
+            return (await super().startup(data))
+
+        if self.agg is None:
+            self.agg = agg(self.typ)
+        try:
+            await self.agg.load(data_agg_type=self.typ.id)
+        except NoData:
+            self.agg.reset(data.timestamp, at_start=True)
+
+        else:
+            assert self.agg.tsc <= self.agg.tsc_of(data.timestamp), (self.agg.timestamp,data.timestamp)
+
 class proc_cont(proc_count):
     """Save an increasing continuous value (power meter)
         The first increase within an interval is distributed between the
         previous and the new range
         """
     DISC=False
-    async def startup(self,data):
-        if self.typ.layer > 0:
-            await super().startup(data)
-            return
-        import pdb;pdb.set_trace()
-        self.typ.timestamp
-        self.agg = None
-
-        dv = data.value
-        dav = data.aux_value
         
+    async def process(self,data):
+        if self.typ.layer > 0:
+            await super().process(data)
+        tsc = self.agg.tsc_of(data.timestamp)
+        dv = self.typ.value
+        dav = self.typ.aux_value
+        if dv >= self.typ.value and dav >= self.typ.aux_value:
+            dv = dv - self.typ.value
+            dav = dav - self.typ.aux_value
+            td = (data.timestamp - self.typ.timestamp).total_seconds()
+        else:
+            await super().startup(data) # skip intervening
+            td = (data.timestamp - self.agg.timestamp).total_seconds()
+
+        while self.agg.tsc < tsc:
+            self.agg.value += dv * (self.agg.end_ts-self.agg.timestamp).total_seconds()/td
+            self.agg.aux_value += dav * (self.agg.end_ts-self.agg.timestamp).total_seconds()/td
+            self.agg.updated = True
+            await self.agg.save()
+            self.agg.reset(self.agg.end_ts)
+
+        assert self.agg.tsc == tsc, (self.agg.tsc,tsc)
+        self.agg.value += data.value * (data.timestamp-self.agg.timestamp).total_seconds()/td
+        self.agg.aux_value += data.aux_value * (data.timestamp-self.agg.timestamp).total_seconds()/td
+        self.agg.timestamp = data.timestamp
+
+        self.agg.n_values += 1
+        self.agg.updated = True
+
+        self.typ.value = data.value
+        self.typ.aux_value = data.aux_value
+        self.typ.updated = True
+
+class proc_persist(proc_count):
+    """persistent changes (light switch),
+        records the percentage of time the thing was on"""
+    async def process(self,data):
+        if self.typ.layer > 0:
+            await super().process(data)
+        tsc = self.agg.tsc_of(data.timestamp)
+        if data.value or data.aux_value:
+            while self.agg.tsc < tsc:
+                self.agg.value += data.value * (self.agg.end_ts-self.typ.timestamp).total_seconds()/self.typ.interval
+                self.agg.aux_value += data.aux_value * (self.agg.end_ts-self.typ.timestamp).total_seconds()/self.typ.interval
+                self.agg.updated = True
+                await self.agg.save()
+                self.agg.reset(self.agg.end_ts)
+
+            assert self.agg.tsc == tsc, (self.agg.tsc,tsc)
+            self.agg.value += data.value * (data.timestamp-self.agg.timestamp).total_seconds()/self.typ.interval
+            self.agg.aux_value += data.aux_value * (data.timestamp-self.agg.timestamp).total_seconds()/self.typ.interval
+        else:
+            await super().startup(data) # get current record
+        self.agg.n_values += 1
+        self.agg.timestamp = data.timestamp
+        self.agg.updated = True
+
 class proc_event(proc_store):
     """Single event (button pressed):
         multiple events within L0 are counted normally"""
-    def process(self,data):
+    async def process(self,data):
         self.agg.n_values += data.n_values
         self.agg.value += data.value
-        self.agg.aux_value = data.aux_value
-        self.agg.min_value = min(self.agg.value,self.agg.min_value)
-        self.agg.max_value = max(self.agg.value,self.agg.max_value)
+        self.agg.aux_value += data.aux_value
         self.agg.updated = True
 
 class proc_notice(proc_event):
@@ -350,7 +417,7 @@ class proc_notice(proc_event):
             self.agg.min_value = 0
             self.agg.updated = True
 
-    def process(self,data):
+    async def process(self,data):
         if data.value == 0:
             return True # skip update_ts
         if self.typ.layer > 0:
@@ -375,7 +442,7 @@ class proc_notice(proc_event):
 class proc_cycle(proc_store):
     """Cyclic values with confidence (wind direction)
         """
-    def process(self,data):
+    async def process(self,data):
         raise NotImplementedError
 
 from . import modes

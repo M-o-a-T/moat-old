@@ -35,6 +35,7 @@ modes = {
     5: ('event', "Single event (button pressed)"),
     6: ('cycle', "Cyclic value (wind direction)"),
     7: ('notice', "Continuous event (movement detected)"),
+    8: ('persist', "persistent changes (light switch)"),
 
 # The difference between "count" and "cont" is that values for the former
 # get credited to the interval in which they appear, while the latter gets
