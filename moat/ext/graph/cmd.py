@@ -438,6 +438,7 @@ Process a layer (or all of them)
 			fs = ' and '.join("`%s`=${%s}" % (k,k) for k in filter.keys())
 			if fs:
 				fs = " where "+fs
+			fs += " order by layer,timestamp"
 
 			async for d in db.DoSelect("select * from data_agg_type"+fs, **filter, _dict=True):
 				todo.append(d)
