@@ -446,7 +446,7 @@ Process a layer (or all of them)
 			async with self.db() as db:
 				at = agg_type(self,db)
 				await at.set(d)
-				logger.debug("Run %s",at)
+				logger.info("Run %s:%d",at.tag,at.layer)
 				await at.run(cleanup=not self.options.noclean)
 
 class GraphCommand(SubCommand):
