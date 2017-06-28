@@ -160,7 +160,7 @@ This command shows the status of current graphing
 		seen = False
 		
 		if method is None:
-			mf = "is None"
+			mf = "IS NULL"
 		else:
 			mf = "= ${method}"
 			try:
