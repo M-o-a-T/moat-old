@@ -441,7 +441,7 @@ class agg_type(_agg_type):
     async def process(self, d):
         await self.proc.run(d)
 
-    async def run(self):
+    async def run(self, cleanup=True):
         if self.layer == 0:
             dtyp = data
         else:
@@ -467,6 +467,7 @@ class agg_type(_agg_type):
         except NoData:
             self.ts_last = tm
             await self.proc.finish()
-            await self.proc.cleanup()
+            if cleanup:
+                await self.proc.cleanup()
             await self.save(True)
 

@@ -416,6 +416,9 @@ Process a layer (or all of them)
 """
 
 	def addOptions(self):
+		self.parser.add_option('-n','--no-clean',
+			action="store_true", dest="noclean",
+			help="don't run clean-up code")
 		self.parser.add_option('-l','--layer',
 			action="store", dest="layer", type=int, default=-1,
 			help="Run only this aggregation layer")
@@ -443,7 +446,7 @@ Process a layer (or all of them)
 				at = agg_type(self,db)
 				await at.set(d)
 				logger.debug("Run %s",at)
-				await at.run()
+				await at.run(cleanup=not self.options.noclean)
 
 class GraphCommand(SubCommand):
 	name = "graph"
