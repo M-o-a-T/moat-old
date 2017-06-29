@@ -28,6 +28,7 @@ from datetime import datetime,timedelta
 import attr
 import sys
 from functools import partial
+from qbroker.util import UTC
 
 import logging
 logger = logging.getLogger(__name__)
@@ -53,8 +54,12 @@ class _data(object):
         super().__init__() # set to default values
         for k,v in kv.items():
             setattr(self,k,v)
+        if 'timestamp' in kv and self.timestamp.tzinfo is None:
+            self.timestamp = self.timestamp.replace(tzinfo=UTC)
 
     def reset(self, ts):
+        if ts.tzinfo is None:
+            ts = ts.replace(tzinfo=UTC)
         self.timestamp = ts
         self.id = None
         self.value = 0
@@ -116,11 +121,13 @@ class agg(_agg):
         """some timestamp => timestamp counter for the interval it's in"""
         if interval is None:
             interval = self.atype.interval
+        if ts.tzinfo is None:
+            ts = ts.replace(tzinfo=UTC)
         return ts.timestamp() // interval
 
     def ts_of(self, ts, offset=0):
         """some timestamp => start time of the interval it's in"""
-        return datetime.utcfromtimestamp((self.tsc_of(ts)+offset) * self.atype.interval)
+        return datetime.utcfromtimestamp((self.tsc_of(ts)+offset) * self.atype.interval).replace(tzinfo=UTC)
 
     @property
     def start_ts(self):
@@ -132,6 +139,8 @@ class agg(_agg):
 
     def reset(self, ts, at_start=False):
         """Reset for a specific timestamp"""
+        if ts.tzinfo is None:
+            ts = ts.replace(tzinfo=UTC)
         super().reset(ts)
         self.tsc = self.tsc_of(self.timestamp)
         if at_start:
@@ -288,8 +297,8 @@ class proc_count(proc_store):
             if dv >= self.typ.value and dav >= self.typ.aux_value:
                 dv = dv - self.typ.value
                 dav = dav - self.typ.aux_value
-            self.typ.value = data.value
-            self.typ.aux_value = data.aux_value
+            self.typ.value += dv
+            self.typ.aux_value += dav
             self.typ.updated = True
             # need to distribute data across interval
             ln = data.timestamp() - self.typ.timestamp.timestamp()
@@ -302,6 +311,9 @@ class proc_count(proc_store):
         self.agg.aux_value += dav
         self.agg.updated = True
         
+class _proc_start:
+    """Mix-in to load the latest, i.e. not necessarily the current, record"""
+        
     async def startup(self, data):
         """\
             Hook to open the current record
@@ -309,7 +321,8 @@ class proc_count(proc_store):
             E.g. collect usage for the range [start_ts,data_ts[
             """
         if self.typ.layer > 0:
-            return (await super().startup(data))
+            await super().startup(data)
+            return
 
         if self.agg is None:
             self.agg = agg(self.typ)
@@ -321,13 +334,13 @@ class proc_count(proc_store):
         else:
             assert self.agg.tsc <= self.agg.tsc_of(data.timestamp), (self.agg.timestamp,data.timestamp)
 
-class proc_cont(proc_count):
+class proc_cont(_proc_start, proc_count):
     """Save an increasing continuous value (power meter)
         The first increase within an interval is distributed between the
         previous and the new range
         """
     DISC=False
-        
+
     async def process(self,data):
         if self.typ.layer > 0:
             await super().process(data)
@@ -339,7 +352,7 @@ class proc_cont(proc_count):
             dav = dav - self.typ.aux_value
             td = (data.timestamp - self.typ.timestamp).total_seconds()
         else:
-            await super().startup(data) # skip intervening
+            await super(_proc_start,self).startup(data) # skip intervening
             td = (data.timestamp - self.agg.timestamp).total_seconds()
 
         while self.agg.tsc < tsc:
@@ -361,26 +374,28 @@ class proc_cont(proc_count):
         self.typ.aux_value = data.aux_value
         self.typ.updated = True
 
-class proc_persist(proc_count):
+class proc_persist(proc_cont):
     """persistent changes (light switch),
         records the percentage of time the thing was on"""
     async def process(self,data):
         if self.typ.layer > 0:
             await super().process(data)
+            return
         tsc = self.agg.tsc_of(data.timestamp)
-        if data.value or data.aux_value:
+        if self.typ.value or self.typ.aux_value:
             while self.agg.tsc < tsc:
-                self.agg.value += data.value * (self.agg.end_ts-self.typ.timestamp).total_seconds()/self.typ.interval
-                self.agg.aux_value += data.aux_value * (self.agg.end_ts-self.typ.timestamp).total_seconds()/self.typ.interval
+                self.agg.value += self.typ.value * (self.agg.end_ts-self.typ.timestamp).total_seconds()/self.typ.interval
+                self.agg.aux_value += self.typ.aux_value * (self.agg.end_ts-self.typ.timestamp).total_seconds()/self.typ.interval
                 self.agg.updated = True
                 await self.agg.save()
                 self.agg.reset(self.agg.end_ts)
+                self.typ.timestamp = self.agg.timestamp
 
             assert self.agg.tsc == tsc, (self.agg.tsc,tsc)
-            self.agg.value += data.value * (data.timestamp-self.agg.timestamp).total_seconds()/self.typ.interval
-            self.agg.aux_value += data.aux_value * (data.timestamp-self.agg.timestamp).total_seconds()/self.typ.interval
+            self.agg.value += self.typ.value * (data.timestamp-self.agg.timestamp).total_seconds()/self.typ.interval
+            self.agg.aux_value += self.typ.aux_value * (data.timestamp-self.agg.timestamp).total_seconds()/self.typ.interval
         else:
-            await super().startup(data) # get current record
+            await super(_proc_start,self).startup(data) # get current record
         self.agg.n_values += 1
         self.agg.timestamp = data.timestamp
         self.agg.updated = True
@@ -488,6 +503,8 @@ class agg_type(_agg_type):
         await self.set(d)
     
     async def save(self, force=False):
+        if self.id is None:
+            self.id = await self.db.Do("insert into data_agg_type(`data_type`,`layer`,`interval`,`max_age`,`timestamp`,`ts_last`) values(${data_type},${layer},${interval},${max_age},${timestamp},${ts_last})", **attr.asdict(self))
         if force or self.updated:
             await self.proc.finish()
             await self.db.Do("update data_agg_type set "+self.SAVE_SQL+" where id=${id}", _empty=True, **attr.asdict(self))
@@ -497,6 +514,8 @@ class agg_type(_agg_type):
         super().__init__() # set to default values
         for k,v in d.items():
             setattr(self,k,v)
+        if 'timestamp' in d and self.timestamp.tzinfo is None:
+            self.timestamp = self.timestamp.replace(tzinfo=UTC)
         if self.layer > 0:
             self.prev_interval, = await self.db.DoFn("select `interval` from data_agg_type where data_type=${dtid} and layer=${layer}", dtid=self.data_type, layer=self.layer-1)
         else:
@@ -507,6 +526,10 @@ class agg_type(_agg_type):
 
     async def process(self, d):
         await self.proc.run(d)
+        self.value = d.value
+        self.aux_value = d.value
+        self.ts_last = d.timestamp
+        self.updated = True
 
     async def run(self, cleanup=True):
         if self.layer == 0:
@@ -514,25 +537,25 @@ class agg_type(_agg_type):
         else:
             dtyp = partial(agg,self)
         try:
-            tm=self.ts_last or self.timestamp
+            if self.ts_last is None: # first run
+                self.ts_last = self.timestamp
             while True:
                 if self.layer == 0: # process raw data
-                    r = self.db.DoSelect("select * from data_log where data_type=${dtid} and timestamp > ${tm} order by timestamp limit 100", dtid=self.data_type, tm=tm, _dict=True)
+                    r = self.db.DoSelect("select * from data_log where data_type=${dtid} and timestamp > ${tm} order by timestamp limit 100", dtid=self.data_type, tm=self.ts_last, _dict=True)
 
                 else: # process previous layer
-                    llid, = await self.db.DoFn("select id from data_agg_type where data_type=${dtid} and layer=${layer}", layer=self.layer-1, dtid=self.data_type, tm=tm)
-                    r = self.db.DoSelect("select * from data_agg where data_agg_type=${llid} and timestamp > ${tm} order by timestamp limit 100", llid=llid, tm=tm, _dict=True)
+                    llid, = await self.db.DoFn("select id from data_agg_type where data_type=${dtid} and layer=${layer}", layer=self.layer-1, dtid=self.data_type, tm=self.ts_last)
+                    r = self.db.DoSelect("select * from data_agg where data_agg_type=${llid} and timestamp > ${tm} order by timestamp limit 100", llid=llid, tm=self.ts_last, _dict=True)
                 dt = dtyp()
 
                 async for d in r:
                     dt.set(**d)
                     await self.process(dt)
-                    tm=dt.timestamp
 
         except DoNothing:
-            pass # oh well
+            logger.info("Skipped %s:%d",self.tag,self.layer)
+
         except NoData:
-            self.ts_last = tm
             await self.proc.finish()
             if cleanup:
                 await self.proc.cleanup()

@@ -37,11 +37,12 @@ from qbroker.unit import CC_DICT, CC_DATA, CC_MSG
 from yaml import dump
 from traceback import print_exc
 from boltons.iterutils import remap
+from datetime import datetime
 
 from moat.script import Command, SubCommand, CommandError
 from moat.script.task import Task,_run_state, JobMarkGoneError,JobIsRunningError
 from moat.task import TASKSTATE_DIR,TASKSTATE, TASKSCAN_DIR,TASK
-from moat.times import simple_time_delta
+from moat.times import simple_time_delta, humandelta
 from . import modes,modenames
 
 import logging
@@ -50,6 +51,15 @@ logger = logging.getLogger(__name__)
 __all__ = ['GraphCommand']
 
 ## TODO add --dest UUID
+
+def add_human(d):
+	"""add human-readable tags"""
+	for k in "interval max_age".split():
+		v = d.get(k,None)
+		if v is not None:
+			d.setdefault('human',{})[k] = humandelta(v)
+
+
 
 class _Command(Command):
 	async def setup(self):
@@ -103,6 +113,7 @@ Log the event stream from AMQP to SQL
 
 			#print(dep,val,nam)
 			async with self.db() as d:
+				await db.Do("SET TIME_ZONE='+00:00'", _empty=True)
 				try:
 					tid, = await d.DoFn("select id from %stype where tag=${name}"%(self.prefix,), name=nam,)
 				except NoData:
@@ -127,6 +138,9 @@ This command shows the status of current graphing
 		self.parser.add_option('-l','--layer',
 			action="store", dest="layer", type="int", default=-1,
 			help="Show this aggregation layer")
+		self.parser.add_option('-L','--all-layers',
+			action="store_const", dest="layer", const=-2,
+			help="Show all aggregation layers")
 		self.parser.add_option('-u','--unassigned',
 			action="store_true", dest="unassigned",
 			help="Show new data types")
@@ -143,6 +157,7 @@ This command shows the status of current graphing
 
 		try:
 			async with self.db() as db:
+				await db.Do("SET TIME_ZONE='+00:00'", _empty=True)
 				if self.options.unassigned or self.options.method:
 					if self.options.layer >= 0:
 						raise SyntaxError("You can't use '-u'/'-m' with a specific layer")
@@ -173,6 +188,7 @@ This command shows the status of current graphing
 				if self.root.verbose > 1:
 					if seen:
 						print("===")
+					add_human(d)
 					pprint(remap(d, lambda p, k, v: v is not None))
 				else:
 					print(d['timestamp'],d['tag'],d['value'], sep='\t')
@@ -182,6 +198,7 @@ This command shows the status of current graphing
 				if self.root.verbose > 1:
 					if seen:
 						print("===")
+					add_human(d)
 					pprint(remap(d, lambda p, k, v: v is not None))
 				else:
 					print(d['timestamp'],d['tag'], sep='\t')
@@ -197,6 +214,7 @@ This command shows the status of current graphing
 					if self.root.verbose > 1:
 						if seen:
 							print("===")
+						add_human(d)
 						pprint(remap(d, lambda p, k, v: v is not None))
 					else:
 						print(d['timestamp'],d['value'], sep='\t')
@@ -206,6 +224,7 @@ This command shows the status of current graphing
 					if self.root.verbose > 1:
 						if seen:
 							print("===")
+						add_human(d)
 						pprint(remap(d, lambda p, k, v: v is not None))
 					else:
 						print(d['data_agg.timestamp'],d['data_agg.value'], sep='\t')
@@ -216,10 +235,20 @@ This command shows the status of current graphing
 		else:
 			if self.options.layer < 0: # display this type
 				d = await self.db.DoFn("select * from data_type where id=${id}", _dict=True, id=dtid)
+				if self.options.layer < -1:
+					await self.ext_layer(db,d)
+				add_human(d)
 				pprint(remap(d, lambda p, k, v: v is not None))
 			else: # display this layer
 				d = await self.db.DoFn("select * from data_agg_type where data_type=${id} and layer=${layer}", _dict=True, id=dtid, layer=self.options.layer)
+				add_human(d)
 				pprint(remap(d, lambda p, k, v: v is not None))
+
+	async def ext_layer(self,db,d):
+		d['layers'] = dl = []
+		async for dx in db.DoSelect("select * from data_agg_type where data_type=${dtid} order by layer", dtid=d['id'], _dict=True):
+			add_human(dx)
+			dl.append(dx)
 
 	async def _do_other(self,db):
 		seen = False
@@ -230,6 +259,9 @@ This command shows the status of current graphing
 					if self.root.verbose > 1:
 						if seen:
 							print("===")
+						if self.options.layer < -1:
+							await self.ext_layer(db,d)
+						add_human(d)
 						pprint(remap(d, lambda p, k, v: v is not None))
 					else:
 						print(d['timestamp'],d['value'], sep='\t')
@@ -239,6 +271,7 @@ This command shows the status of current graphing
 					if self.root.verbose > 1:
 						if seen:
 							print("===")
+						add_human(d)
 						pprint(remap(d, lambda p, k, v: v is not None))
 					else:
 						print(d['data_agg_log.timestamp'],d['data_agg_log.value'], sep='\t')
@@ -249,6 +282,7 @@ This command shows the status of current graphing
 					if self.root.verbose > 1:
 						if seen:
 							print("===")
+						add_human(d)
 						pprint(remap(d, lambda p, k, v: v is not None))
 					else:
 						print(d['timestamp'],d['tag'], sep='\t')
@@ -258,6 +292,7 @@ This command shows the status of current graphing
 					if self.root.verbose > 1:
 						if seen:
 							print("===")
+						add_human(d)
 						pprint(remap(d, lambda p, k, v: v is not None))
 					else:
 						print(d['timestamp'],d['tag'], sep='\t')
@@ -299,6 +334,7 @@ Set data type and aggregation options for a logged event type
 		await self.setup()
 
 		async with self.db() as db:
+			await db.Do("SET TIME_ZONE='+00:00'", _empty=True)
 			dtid, = await db.DoFn("select id from data_type where tag=${tag}", tag=' '.join(args))
 			if self.options.method:
 				try:
@@ -336,6 +372,42 @@ Set data type and aggregation options for a logged event type
 			else:
 				raise SyntaxError("Nothing to change.")
 
+class ResetCommand(_Command):
+	name = "reset"
+	summary = "Clear accumulated aggregation"
+	description = """\
+Set data type and aggregation options for a logged event type
+"""
+
+	def addOptions(self):
+		self.parser.add_option('-m','--method',
+			action="store", dest="method",
+			help="set method (%s)" % ','.join(x[0] for x in modes.values()))
+		self.parser.add_option('-F','--force',
+			action="store_true", dest="force",
+			help="Yes, I do want to delete data")
+		self.parser.add_option('-L','--layers',
+			action="store_true", dest="layers",
+			help="Also delete layer data and reset mode")
+
+	async def do(self,args):
+		if not args:
+			raise SyntaxError("Usage: reset [options] data_tag")
+		if not self.options.force:
+			raise SyntaxError("No delety without forcy")
+		await self.setup()
+
+		async with self.db() as db:
+			await db.Do("SET TIME_ZONE='+00:00'", _empty=True)
+
+			dtid, = await db.DoFn("select id from data_type where tag=${tag}", tag=' '.join(args))
+			async for tid, in db.DoSelect("select id from data_agg_type where data_type=${dtid}", dtid=dtid):
+				await db.Do("delete from data_agg where data_agg_type=${tid}", tid=tid, _empty=True)
+			if self.options.layers:
+				await db.Do("delete from data_agg_type where data_type=${dtid}", dtid=dtid, _empty=True)
+				await db.Do("update data_type set method=NULL where id=${dtid}", dtid=dtid, _empty=True)
+			else:
+				await db.Do("update data_agg_type set timestamp='1999-01-01', ts_last='1999-01-01', value=0, aux_value=0 where data_type=${dtid}", dtid=dtid, _empty=True)
 
 class LayerCommand(_Command):
 	name = "layer"
@@ -354,20 +426,47 @@ Create an aggregation layer and/or set options
 		self.parser.add_option('-m','--maxage',
 			action="store", dest="max_age",
 			help="max age of data")
-
+		self.parser.add_option('-c','--copy',
+			action="store", dest="copy",
+			help="copy layer data from this entry")
 
 	async def do(self,args):
-		if not args or self.options.layer < 0:
+		if not args or (self.options.layer < 0 and not self.options.copy):
 			raise SyntaxError("Usage: set -l LAYER [options] data_tag")
 		tag = ' '.join(args)
 		await self.setup()
 
+		if self.options.copy:
+			if self.options.interval or self.options.max_age:
+				raise SyntaxError("Copying and setting parameters is not compatible")
 		if self.options.interval:
 			self.options.interval = simple_time_delta(self.options.interval)
 		async with self.db() as db:
-			dtid, = await db.DoFn("select id from data_type where tag=${tag}", tag=tag)
+			await db.Do("SET TIME_ZONE='+00:00'", _empty=True)
+			try:
+				dtid, = await db.DoFn("select id from data_type where tag=${tag}", tag=tag)
+			except NoData:
+				raise SyntaxError("Tag '%s' unknown" % (tag,))
 			upd = {}
 
+			if self.options.copy:
+				try:
+					cdtid, = await db.DoFn("select id from data_type where tag=${tag}", tag=self.options.copy)
+				except NoData:
+					raise SyntaxError("Source tag unknown")
+				if self.options.layer < 0:
+					c, = await db.DoFn("select count(*) from data_agg_type where data_type=${id}", id=dtid)
+					if c > 0:
+						raise SyntaxError("Some layers already exist, copy separately.")
+					from .process import agg_type
+					t = agg_type(self,db)
+					async for d in db.DoSelect("select * from data_agg_type where data_type=${dtid}", dtid=cdtid, _dict=True):
+						await t.set(d)
+						t.data_type = dtid
+						t.id = None
+						t.ts_last = t.timestamp = datetime(1999,1,1,0,0,0)
+						await t.save()
+					return
 			try:
 				iid,intv = await db.DoFn("select id,`interval` from data_agg_type where data_type=${id} and layer=${layer}", id=dtid, layer=self.options.layer)
 			except NoData:
@@ -430,6 +529,7 @@ Process a layer (or all of them)
 
 		todo = []
 		async with self.db() as db:
+			await db.Do("SET TIME_ZONE='+00:00'", _empty=True)
 			filter = {}
 			if tag:
 				filter['data_type'], = await db.DoFn("select id from data_type where tag=${tag}", tag=tag)
@@ -444,6 +544,7 @@ Process a layer (or all of them)
 				todo.append(d)
 		for d in todo:
 			async with self.db() as db:
+				await db.Do("SET TIME_ZONE='+00:00'", _empty=True)
 				at = agg_type(self,db)
 				await at.set(d)
 				logger.info("Run %s:%d",at.tag,at.layer)
@@ -461,6 +562,7 @@ Commands to manipulate logging events for graphing etc.
 		ListCommand,
 		LogCommand,
 		SetCommand,
+		ResetCommand,
 		LayerCommand,
 		RunCommand,
 	]
