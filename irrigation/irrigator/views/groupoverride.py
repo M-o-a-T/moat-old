@@ -29,7 +29,7 @@ from rainman.models import GroupOverride,Site,Group,Group
 from irrigator.views import DbModelForm,FormMixin,SiteParamMixin,TimeDeltaField,get_profile
 from rainman.utils import get_request
 
-def limit_choices(q,site=None,group=None):
+def limit_choices(q,site=None,group=None, **_):
 	if site is not None:
 		q = q.filter(site=site)
 	if group is not None:
