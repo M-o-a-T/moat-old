@@ -273,6 +273,11 @@ class OWFSwindmon(Monitor):
 		self.qavg = 0
 		self.nval = 0
 
+	def update_ectx(self):
+		super(OWFSwindmon,self).update_ectx()
+		self._ectx['average'] = self.avg
+		self._ectx['turbulence'] = 1-self.qavg
+
 	def list(self):
 		yield super(OWFSwindmon,self)
 		yield ("average",self.avg)
