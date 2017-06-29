@@ -42,7 +42,7 @@ class ValveForm(ModelForm):
 
 	#groups = ModelMultipleChoiceField(queryset=Group.objects.all())
 
-	def limit_choices(self,site=None,controller=None,feed=None,envgroup=None):
+	def limit_choices(self,site=None,controller=None,feed=None,envgroup=None, **_):
 		gu = get_profile(get_request())
 		if feed is not None:
 			self.fields['feed'].queryset = gu.feeds.filter(id=feed.id)

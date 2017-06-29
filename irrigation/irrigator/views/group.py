@@ -39,7 +39,7 @@ class GroupForm(ModelForm):
 			self.instance.site = self.aux_data['site']
 		return super(GroupForm,self).save(commit)
 
-	def limit_choices(self,site=None,valve=None):
+	def limit_choices(self,site=None,valve=None, **_):
 		gu = get_profile(get_request())
 		v = gu.all_valves
 

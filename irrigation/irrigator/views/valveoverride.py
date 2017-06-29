@@ -29,7 +29,7 @@ from rainman.models import ValveOverride,Site,Controller,Valve,Feed,EnvGroup
 from irrigator.views import DbModelForm,FormMixin,SiteParamMixin,TimeDeltaField,get_profile
 from rainman.utils import get_request
 
-def limit_choices(q,site=None,controller=None,envgroup=None,valve=None,feed=None):
+def limit_choices(q,site=None,controller=None,envgroup=None,valve=None,feed=None, **_):
 	if site is not None:
 		q = q.filter(controller__site=site)
 	if controller is not None:
