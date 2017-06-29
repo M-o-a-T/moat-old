@@ -73,16 +73,16 @@ class mon:
 
 			done=False
 			async with db() as d:
-				for k in ('value','temperature','humidity'):
+				for k in ('value','counter','state','temperature','humidity'):
 					val = body.get(k,None)
 					if val is None:
 						continue
 					try:
 						val = float(val)
 					except ValueError:
-						if val.lower() == "on":
+						if val.lower() in ('true','on','start'):
 							val = 1
-						elif val.lower == "off":
+						elif val.lower() in ('false','off','done'):
 							val = 0
 						else:
 							pprint.pprint(body)
