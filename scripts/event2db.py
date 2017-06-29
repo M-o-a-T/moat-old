@@ -43,6 +43,7 @@ class mon:
 		self.u = u
 		self.typ = typ
 		self.name = u.config['amqp']['exchanges'][name]
+		self.names = {}
 
 	async def start(self):
 		await self.u.register_alert_async('#', self.callback, durable='log_mysql', call_conv=CC_MSG)
@@ -64,33 +65,49 @@ class mon:
 			#	body = json.loads(body.decode('utf-8'))
 
 			dep = '?' if body.get('deprecated',False) else '.'
-			val = body.get('value',None)
-			if val is None:
-				return
-			try:
-				val = float(val)
-			except ValueError:
-				if val.lower() == "on":
-					val = 1
-				elif val.lower == "off":
-					val = 0
-				else:
-					pprint.pprint(body)
-					return
 			try:
 				nam = ' '.join(body['event'])
 			except KeyError:
-				pprint.pprint(body)
+				#pprint.pprint(body)
 				return
 
-			#print(dep,val,nam)
+			done=False
 			async with db() as d:
-				try:
-					tid, = await d.DoFn("select id from %stype where tag=${name}"%(prefix,), name=nam,)
-				except NoData:
-					tid = await d.Do("insert into %stype set tag=${name}"%(prefix,), name=nam,)
-				f = await d.Do("insert into %slog set value=${value},data_type=${tid},timestamp=from_unixtime(${ts})"%(prefix,), value=val,tid=tid, ts=msg.timestamp)
-				print(dep,val,nam)
+				for k in ('value','temperature','humidity'):
+					val = body.get(k,None)
+					if val is None:
+						continue
+					try:
+						val = float(val)
+					except ValueError:
+						if val.lower() == "on":
+							val = 1
+						elif val.lower == "off":
+							val = 0
+						else:
+							pprint.pprint(body)
+							continue
+					if k == "value":
+						name = nam
+					else:
+						name = nam+' '+k
+					#print(dep,val,nam)
+					try:
+						tid = self.names[name]
+					except KeyError:
+						try:
+							tid, = await d.DoFn("select id from %stype where tag=${name}"%(prefix,), name=name,)
+						except NoData:
+							tid = await d.Do("insert into %stype set tag=${name}"%(prefix,), name=name,)
+						self.names[name] = tid
+					f = await d.Do("insert into %slog set value=${value},data_type=${tid},timestamp=from_unixtime(${ts})"%(prefix,), value=val,tid=tid, ts=msg.timestamp)
+					#print(dep,val,name)
+					print(" ",f,"\r", end="")
+					sys.stdout.flush()
+					done=True
+			if not done:
+				if body['event'][0] not in {'wait','running','motion'} and nam != "motion test" and not nam.startswith("onewire scan") and not nam.startswith("fs20 unknown"):
+					print(body)
 
 		except Exception as exc:
 			logger.exception("Problem processing %s", repr(body))
