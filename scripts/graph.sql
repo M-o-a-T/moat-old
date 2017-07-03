@@ -11,6 +11,7 @@ CREATE TABLE `data_type` (
   `display_name` char(50) NULL,
   `display_unit` char(10) NULL,
   `display_factor` double(40,10) NOT NULL default 1,
+  `n_values` int(11) NOT NULL default 0,
   # NULL  newly created
   # zero  ignored
   # 1     ignored and to-be-deleted
@@ -49,7 +50,7 @@ CREATE TABLE `data_agg_type` (
   `value` double(40,10) DEFAULT NULL, # last raw value seen; required for aggregation
   `aux_value` double(40,10) DEFAULT NULL, # last raw value seen; required for aggregation
   `timestamp` timestamp NOT NULL default "2000-01-01", # of last processed record
-  `ts_last` timestamp NULL, # of last analyzed record
+  `last_id` int(11) NOT NULL default 0, # of last analyzed record (may no longer exist)
   PRIMARY KEY (`id`),
   UNIQUE KEY `data_type` (`data_type`, `layer`),
   CONSTRAINT `data_aggtype_type` FOREIGN KEY (`data_type`) REFERENCES `data_type` (`id`)

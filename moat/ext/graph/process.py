@@ -244,20 +244,18 @@ class _proc_clean(object):
     async def cleanup(self):
         if not self.typ.max_age:
             return
-        ts = self.typ.timestamp - timedelta(0,self.typ.max_age) # how long to keep
-        try:
-            lts, = await self.db.DoFn("select timestamp from data_agg_type where data_type=${id} and layer=${layer}", id=self.typ.data_type, layer=self.typ.layer+1)
-        except NoData:
-            pass
-        else:
-            if ts > lts: # don't kill unprocessed data
-                ts = lts
+        ts = self.typ.timestamp
+        if ts.tzinfo is None:
+            ts = ts.replace(tzinfo=UTC)
+        ts = ts-timedelta(0,self.typ.max_age) # how long to keep
 
         if self.typ.layer == 0:
-            n = await self.db.Do("delete from data_log where data_type=${typ} and timestamp < ${ts}", typ=self.typ.data_type, ts=ts, _empty=True)
+            n = await self.db.Do("delete from data_log where data_type=${typ} and timestamp < ${ts} and id < ${last_id}", typ=self.typ.data_type, ts=ts, last_id=self.typ.last_id, _empty=True)
+            await db.Do("update data_type set n_values=n_values-${n} where id=${typ}", n=n, typ=self.typ.data_type, _empty=True)
+            await db.Do("update data_type set n_values=0 where id=${typ} and n_values<0", typ=self.typ.data_type, _empty=True)
         else:
             agg, = await self.db.DoFn("select id from data_agg_type where data_type=${typ} and layer=${layer}", typ=self.typ.data_type, layer=self.typ.layer-1, )
-            n = await self.db.Do("delete from data_agg where data_agg_type=${agg} and timestamp < ${ts}", ts=ts, agg=agg, _empty=True)
+            n = await self.db.Do("delete from data_agg where data_agg_type=${agg} and timestamp < ${ts} and id < ${last_id}", ts=ts, agg=agg, last_id=self.typ.last_id, _empty=True)
         if n:
             logger.debug("%s records deleted for %s/%s", n, self.typ.tag,self.typ.layer)
 
@@ -482,7 +480,7 @@ class _agg_type(object):
     max_age = attr.ib(default=None)
     interval = attr.ib(default=None)
     timestamp = attr.ib(default=None)
-    ts_last = attr.ib(default=None)
+    last_id = attr.ib(default=0)
     value = attr.ib(default=0)
     aux_value = attr.ib(default=0)
 
@@ -490,7 +488,7 @@ class agg_type(_agg_type):
     updated = False
     proc = None
 
-    SAVE_SQL = ', '.join("`%s`=${%s}" % (k,k) for k in 'value aux_value timestamp ts_last'.split())
+    SAVE_SQL = ', '.join("`%s`=${%s}" % (k,k) for k in 'value aux_value timestamp last_id'.split())
 
     def __init__(self, proc, db):
         super().__init__()
@@ -504,7 +502,7 @@ class agg_type(_agg_type):
     
     async def save(self, force=False):
         if self.id is None:
-            self.id = await self.db.Do("insert into data_agg_type(`data_type`,`layer`,`interval`,`max_age`,`timestamp`,`ts_last`) values(${data_type},${layer},${interval},${max_age},${timestamp},${ts_last})", **attr.asdict(self))
+            self.id = await self.db.Do("insert into data_agg_type(`data_type`,`layer`,`interval`,`max_age`,`timestamp`,`last_id`) values(${data_type},${layer},${interval},${max_age},${timestamp},${last_id})", **attr.asdict(self))
         if force or self.updated:
             await self.proc.finish()
             await self.db.Do("update data_agg_type set "+self.SAVE_SQL+" where id=${id}", _empty=True, **attr.asdict(self))
@@ -528,7 +526,7 @@ class agg_type(_agg_type):
         await self.proc.run(d)
         self.value = d.value
         self.aux_value = d.value
-        self.ts_last = d.timestamp
+        self.last_id = d.id
         self.updated = True
 
     async def run(self, cleanup=True):
@@ -537,15 +535,13 @@ class agg_type(_agg_type):
         else:
             dtyp = partial(agg,self)
         try:
-            if self.ts_last is None: # first run
-                self.ts_last = self.timestamp
             while True:
                 if self.layer == 0: # process raw data
-                    r = self.db.DoSelect("select * from data_log where data_type=${dtid} and timestamp > ${tm} order by timestamp limit 100", dtid=self.data_type, tm=self.ts_last, _dict=True)
+                    r = self.db.DoSelect("select * from data_log where data_type=${dtid} and id > ${last_id} order by timestamp,id limit 100", dtid=self.data_type, last_id=self.last_id, _dict=True)
 
                 else: # process previous layer
-                    llid, = await self.db.DoFn("select id from data_agg_type where data_type=${dtid} and layer=${layer}", layer=self.layer-1, dtid=self.data_type, tm=self.ts_last)
-                    r = self.db.DoSelect("select * from data_agg where data_agg_type=${llid} and timestamp > ${tm} order by timestamp limit 100", llid=llid, tm=self.ts_last, _dict=True)
+                    llid, = await self.db.DoFn("select id from data_agg_type where data_type=${dtid} and layer=${layer}", layer=self.layer-1, dtid=self.data_type)
+                    r = self.db.DoSelect("select * from data_agg where data_agg_type=${llid} and id > ${last_id} order by timestamp,id limit 100", llid=llid, last_id=self.last_id, _dict=True)
                 dt = dtyp()
 
                 async for d in r:
