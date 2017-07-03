@@ -461,7 +461,9 @@ Create an aggregation layer and/or set options
 			help="copy layer data from this entry")
 
 	async def do(self,args):
-		if not args or (self.options.layer < 0 and not self.options.copy):
+		if args and self.options.layer < 0 and not self.options.copy: # list all
+			pass
+		elif not args or (self.options.layer < 0 and not self.options.copy):
 			raise SyntaxError("Usage: set -l LAYER [options] data_tag")
 		tag = ' '.join(args)
 		await self.setup()
@@ -479,7 +481,7 @@ Create an aggregation layer and/or set options
 				raise SyntaxError("Tag '%s' unknown" % (tag,))
 			upd = {}
 
-			if self.options.copy:
+			if args and self.options.copy:
 				try:
 					cdtid, = await db.DoFn("select id from data_type where tag=${tag}", tag=self.options.copy)
 				except NoData:
@@ -490,13 +492,37 @@ Create an aggregation layer and/or set options
 						raise SyntaxError("Some layers already exist, copy separately.")
 					from .process import agg_type
 					t = agg_type(self,db)
+					n = 0
 					async for d in db.DoSelect("select * from data_agg_type where data_type=${dtid}", dtid=cdtid, _dict=True):
 						await t.set(d)
 						t.data_type = dtid
 						t.id = None
-						t.ts_last = t.timestamp = datetime(1999,1,1,0,0,0)
+						t.last_id = 0
+						t.timestamp = datetime(1999,1,1,0,0,0)
 						await t.save()
+						n += 1
+					print("%d records copied." % n)
 					return
+				else:
+					i,m = await db.DoFn("select `interval`,max_age from data_agg_type where data_type=${dtid} and layer=${layer}", dtid=dtid,layer=self.options.layer)
+					if not self.options.interval:
+						self.options.interval = i
+					if not self.options.max_age:
+						self.options.max_age = m
+					
+			if args and self.options.layer < 0 and not self.options.copy: # list all
+				seen = False
+				async for d in db.DoSelect("select * from data_agg_type where data_type=${dtid}", dtid=dtid, _dict=True):
+					add_human(d)
+					if self.root.verbose > 1:
+						if seen:
+							print("===")
+						pprint(remap(d, lambda p, k, v: v is not None))
+						seen = True
+					else:
+						print(d['layer'],d['timestamp'],d['human']['interval'],d['human']['max_age'], sep='\t')
+				return
+
 			try:
 				iid,intv = await db.DoFn("select id,`interval` from data_agg_type where data_type=${id} and layer=${layer}", id=dtid, layer=self.options.layer)
 			except NoData:
