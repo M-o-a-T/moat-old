@@ -283,7 +283,7 @@ This command shows the status of current graphing
 					seen = True
 		else:
 			if self.options.layer < 0:
-				async for d in db.DoSelect("select * from data_type", _dict=True):
+				async for d in db.DoSelect("select * from data_type order by n_values desc,tag", _dict=True):
 					add_human(d)
 					if self.root.verbose > 1:
 						if seen:
