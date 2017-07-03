@@ -455,7 +455,7 @@ Create an aggregation layer and/or set options
 			help="interval to aggregate into")
 		self.parser.add_option('-m','--maxage',
 			action="store", dest="max_age",
-			help="max age of data")
+			help="max age for aggregated data")
 		self.parser.add_option('-c','--copy',
 			action="store", dest="copy",
 			help="copy layer data from this entry")
