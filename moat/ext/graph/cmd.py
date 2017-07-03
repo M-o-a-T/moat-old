@@ -149,7 +149,7 @@ This command shows the status of current graphing
 			help="Show new data types")
 		self.parser.add_option('-m','--method',
 			action="store", dest="method",
-			help="limit to this method (%s)" % ','.join(x[0] for x in modes.values()))
+			help="limit to this method (all,%s)" % ','.join(x[0] for x in modes.values()))
 		self.parser.add_option('-n','--last',
 			action="store", type="int", dest="last",
 			help="Show the last N records")
@@ -179,6 +179,8 @@ This command shows the status of current graphing
 		
 		if method is None:
 			mf = "IS NULL"
+		elif method == "all":
+			mf = "IS NOT NULL"
 		else:
 			mf = "= ${method}"
 			try:
@@ -197,7 +199,7 @@ This command shows the status of current graphing
 					print(d['timestamp'],d['tag'],d['value'], sep='\t')
 				seen = True
 		else:
-			async for d in db.DoSelect("select * from data_type where method %s order by tag" % (mf,), _dict=True, method=method):
+			async for d in db.DoSelect("select * from data_type where method %s and timestamp > '1999-12-31'  order by n_values desc,tag" % (mf,), _dict=True, method=method):
 				add_human(d)
 				if self.root.verbose > 1:
 					if seen:
