@@ -579,6 +579,9 @@ Process a layer (or all of them)
 		self.parser.add_option('-l','--layer',
 			action="store", dest="layer", type=int, default=-1,
 			help="Run only this aggregation layer")
+		self.parser.add_option('-m','--method',
+			action="store", dest="method",
+			help="Run only logs using this method")
 
 	async def do(self,args):
 		from .process import agg_type
@@ -586,6 +589,7 @@ Process a layer (or all of them)
 		await self.setup()
 
 		todo = []
+		dels = []
 		async with self.db() as db:
 			await db.Do("SET TIME_ZONE='+00:00'", _empty=True)
 			filter = {}
@@ -593,13 +597,32 @@ Process a layer (or all of them)
 				filter['data_type'], = await db.DoFn("select id from data_type where tag=${tag}", tag=tag)
 			if self.options.layer >= 0:
 				filter['layer'] = self.options.layer
+			if self.options.method:
+				try:
+					filter['method'] = modenames[self.options.method]
+				except KeyError:
+					raise SyntaxError("Method '%s' unknown" % (self.options.method,))
 			fs = ' and '.join("`%s`=${%s}" % (k,k) for k in filter.keys())
 			if fs:
 				fs = " where "+fs
-			fs += " order by layer,timestamp"
 
-			async for d in db.DoSelect("select * from data_agg_type"+fs, **filter, _dict=True):
+			async for d in db.DoSelect("select data_agg_type.* from data_agg_type join data_type on data_agg_type.data_type=data_type.id"+fs+" order by layer,data_agg_type.timestamp", **filter, _dict=True, _empty=True):
 				todo.append(d)
+			if self.options.layer < 0 and (not self.options.method or self.options.method == 'delete'):
+				f=""
+				if tag:
+					f += " and tag=${tag}"
+				async for dtid,tag in db.DoSelect("select id,tag from data_type where method = ${m}"+f, m=modenames['delete'], _empty=True, tag=tag):
+					dels.append((dtid,tag))
+		for d,t in dels:
+			async with self.db() as db:
+				logger.info("deleting %s", t)
+				n = await db.Do("delete from data_log where data_type=${dtid}", _empty=True,dtid=d)
+				if n:
+					logger.info("%d deleted in %s", n, t)
+				await db.Do("update data_type set n_values=n_values-${n} where id=${dtid}", _empty=True,dtid=d,n=n)
+				await db.Do("update data_type set n_values=0 where id=${dtid} and n_values<0", _empty=True,dtid=d)
+
 		for d in todo:
 			async with self.db() as db:
 				await db.Do("SET TIME_ZONE='+00:00'", _empty=True)
