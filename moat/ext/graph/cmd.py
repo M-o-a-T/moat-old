@@ -225,7 +225,7 @@ This command shows the status of current graphing
 						print(d['timestamp'],d['value'], sep='\t')
 					seen = True
 			else:
-				async for d in db.DoSelect("select data_agg.* from data_agg join data_agg_type on data_agg.data_agg_type=data_agg_type.id where data_agg_type.data_type=${id} order by data_agg.timestamp desc limit ${limit}", _dict=True, id=dtid, limit=self.options.last):
+				async for d in db.DoSelect("select data_agg.* from data_agg join data_agg_type on data_agg.data_agg_type=data_agg_type.id where data_agg_type.data_type=${id} and data_agg_type.layer=${layer} order by data_agg.timestamp desc limit ${limit}", _dict=True, id=dtid, limit=self.options.last, layer=self.options.layer):
 					if self.root.verbose > 1:
 						if seen:
 							print("===")
