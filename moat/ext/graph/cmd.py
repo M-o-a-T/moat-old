@@ -58,6 +58,9 @@ def add_human(d):
 		v = d.get(k,None)
 		if v is not None:
 			d.setdefault('human',{})[k] = humandelta(v)
+	m = d.get('method',None)
+	if m is not None:
+		d.setdefault('human',{})['method'] = modes[m]
 
 
 
@@ -195,13 +198,13 @@ This command shows the status of current graphing
 				seen = True
 		else:
 			async for d in db.DoSelect("select * from data_type where method %s order by tag" % (mf,), _dict=True, method=method):
+				add_human(d)
 				if self.root.verbose > 1:
 					if seen:
 						print("===")
-					add_human(d)
 					pprint(remap(d, lambda p, k, v: v is not None))
 				else:
-					print(d['timestamp'],d['tag'], sep='\t')
+					print(d['n_values'],d['human']['method'][0],d['timestamp'],d['tag'], sep='\t')
 				seen = True
 
 	async def _do_args(self,db, args):
@@ -227,7 +230,7 @@ This command shows the status of current graphing
 						add_human(d)
 						pprint(remap(d, lambda p, k, v: v is not None))
 					else:
-						print(d['data_agg.timestamp'],d['data_agg.value'], sep='\t')
+						print(d['timestamp'],d['value'],d['n_values'], sep='\t')
 					seen = True
 			if not seen:
 				print("No data?")
@@ -279,13 +282,13 @@ This command shows the status of current graphing
 		else:
 			if self.options.layer < 0:
 				async for d in db.DoSelect("select * from data_type", _dict=True):
+					add_human(d)
 					if self.root.verbose > 1:
 						if seen:
 							print("===")
-						add_human(d)
 						pprint(remap(d, lambda p, k, v: v is not None))
 					else:
-						print(d['timestamp'],d['tag'], sep='\t')
+						print(d['n_values'],d['human']['method'][0],d['timestamp'],d['tag'], sep='\t')
 					seen = True
 			else:
 				async for d in db.DoSelect("select data_agg_type.*,data_type.tag from data_agg_type join data_type on data_type.id=data_agg_type.data_type where layer=${layer}", _dict=True, layer=self.options.layer):
