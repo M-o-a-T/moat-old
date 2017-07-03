@@ -390,29 +390,54 @@ Set data type and aggregation options for a logged event type
 			help="set method (%s)" % ','.join(x[0] for x in modes.values()))
 		self.parser.add_option('-F','--force',
 			action="store_true", dest="force",
-			help="Yes, I do want to delete data")
-		self.parser.add_option('-L','--layers',
+			help="Yes, I do want to delete (some) data")
+		self.parser.add_option('-s','--summary',
+			action="store_true", dest="summary",
+			help="Delete summary data")
+		self.parser.add_option('-l','--layers',
 			action="store_true", dest="layers",
-			help="Also delete layer data and reset mode")
+			help="Delete layer data and reset mode")
+		self.parser.add_option('-d','--data',
+			action="store_true", dest="data",
+			help="Also delete logged data")
 
 	async def do(self,args):
 		if not args:
 			raise SyntaxError("Usage: reset [options] data_tag")
-		if not self.options.force:
-			raise SyntaxError("No delety without forcy")
+		if self.options.summary and not self.options.layers:
+			raise SyntaxError("You can't delete the summary descriptions but not the data!")
 		await self.setup()
 
 		async with self.db() as db:
 			await db.Do("SET TIME_ZONE='+00:00'", _empty=True)
+			tag=' '.join(args)
+			try:
+				dtid, = await db.DoFn("select id from data_type where tag=${tag}", tag=tag)
+			except NoData:
+				raise SyntaxError("There is no tag '%s'" % (tag,))
 
-			dtid, = await db.DoFn("select id from data_type where tag=${tag}", tag=' '.join(args))
-			async for tid, in db.DoSelect("select id from data_agg_type where data_type=${dtid}", dtid=dtid):
-				await db.Do("delete from data_agg where data_agg_type=${tid}", tid=tid, _empty=True)
-			if self.options.layers:
-				await db.Do("delete from data_agg_type where data_type=${dtid}", dtid=dtid, _empty=True)
-				await db.Do("update data_type set method=NULL where id=${dtid}", dtid=dtid, _empty=True)
+			if self.options.force:
+				if self.options.summary:
+					async for tid,ly in db.DoSelect("select id,layer from data_agg_type where data_type=${dtid} order by layer", dtid=dtid):
+						n = await db.Do("delete from data_agg where data_agg_type=${tid}", tid=tid, _empty=True)
+						if n:
+							print("%d: %d summary records deleted" % (ly,n))
+					if self.options.layers:
+						await db.Do("delete from data_agg_type where data_type=${dtid}", dtid=dtid, _empty=True)
+						await db.Do("update data_type set method=NULL where id=${dtid}", dtid=dtid, _empty=True)
+					else:
+						await db.Do("update data_agg_type set timestamp='1999-01-01', last_id=0, value=0, aux_value=0 where data_type=${dtid}", dtid=dtid, _empty=True)
+				if self.options.data:
+	
+					n = await db.Do("delete from data_log where data_type=${dtid}", dtid=dtid, _empty=True)
+					await db.Do("update data_type set timestamp='1999-01-01' where id=${dtid}", dtid=dtid, _empty=True)
+					print("%d data records deleted" % n)
 			else:
-				await db.Do("update data_agg_type set timestamp='1999-01-01', ts_last='1999-01-01', value=0, aux_value=0 where data_type=${dtid}", dtid=dtid, _empty=True)
+				n, = await db.DoFn("select count(*) from data_log where data_type=${dtid}", dtid=dtid, _empty=True)
+				print("%d data records" % n)
+				async for tid,ly in db.DoSelect("select id,layer from data_agg_type where data_type=${dtid} order by layer", dtid=dtid, _empty=True):
+					n, = await db.DoFn("select count(*) from data_agg where data_agg_type=${tid}", tid=tid, _empty=True)
+					print("%d: %d summary records" % (ly,n))
 
 class LayerCommand(_Command):
 	name = "layer"
