@@ -563,7 +563,7 @@ Create an aggregation layer and/or set options
 			if iid is None:
 				await db.Do("insert into data_agg_type ("+','.join("`%s`"%(k,) for k in ks)+") values ("+','.join("${%s}"%(k,) for k in ks)+")", **upd)
 			else:
-				await db.Do("update data_agg_type set "+','.join("`%s`=${%s}"%(k,k) for k in ks)+" where id=${id}", id=iid, **upd)
+				await db.Do("update data_agg_type set "+','.join("`%s`=${%s}"%(k,k) for k in ks)+" where id=${id}", id=iid, _empty=True, **upd)
 
 class RunCommand(_Command):
 	name = "run"
