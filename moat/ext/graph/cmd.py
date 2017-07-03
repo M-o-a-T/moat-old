@@ -542,7 +542,9 @@ Create an aggregation layer and/or set options
 				upd['layer'] = self.options.layer
 			else:
 				if self.options.interval:
-					raise SyntaxError("The interval cannot be changed")
+					n, = await db.DoFn("select count(*) from data_agg where data_agg_type=${iid}", iid=iid)
+					if n > 0:
+						raise SyntaxError("Existing data! The interval cannot be changed")
 				
 			if self.options.max_age:
 				if self.options.max_age == '-':
