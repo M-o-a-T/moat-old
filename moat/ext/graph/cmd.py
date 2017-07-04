@@ -358,7 +358,7 @@ Set data type and aggregation options for a logged event type
 				method = None
 
 			omethod, = await db.DoFn("select method from data_type where id=${id}", id=dtid)
-			tcnt, = await db.DoFn("select count(*) from data_agg_type where data_type=${id}", id=dtid)
+			tcnt, = await db.DoFn("select count(*) from data_agg join data_agg_type on data_agg.data_agg_type=data_agg_type.id where data_type=${id}", id=dtid)
 			if method is not None and omethod is not None and method != omethod and tcnt > 0 and not self.options.force:
 				raise RuntimeError("You cannot change the method after the fact")
 			upd = {}
