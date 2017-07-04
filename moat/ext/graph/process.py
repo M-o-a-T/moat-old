@@ -356,29 +356,36 @@ class proc_cont(_proc_start, proc_count):
             await super().process(data)
             return
         tsc = self.agg.tsc_of(data.timestamp)
-        dv = self.typ.value
-        dav = self.typ.aux_value
-        if dv >= self.typ.value and dav >= self.typ.aux_value:
-            dv = dv - self.typ.value
-            dav = dav - self.typ.aux_value
-            td = (data.timestamp - self.typ.timestamp).total_seconds()
+        dv = data.value
+        dav = data.aux_value
+
+        # first record / counter cleared?
+        if self.typ.value is None or self.typ.value > data.value:
+            self.typ.value = data.value
+            self.typ.timestamp = data.timestamp
+        if self.typ.aux_value is None or self.typ.aux_value > data.aux_value:
+            self.typ.aux_value = data.aux_value
+
+        dv -= self.typ.value
+        dav -= self.typ.aux_value
+        td = (data.timestamp - self.typ.timestamp).total_seconds()
+
+        if td > 0 and dv > 0:
+            while self.agg.tsc < tsc:
+                self.agg.value += dv * (self.agg.end_ts-self.agg.timestamp).total_seconds()/td
+                self.agg.aux_value += dav * (self.agg.end_ts-self.agg.timestamp).total_seconds()/td
+                self.agg.updated = True
+                await self.agg.save()
+                self.agg.reset(self.agg.end_ts)
+        if self.agg.tsc != tsc: # while loop not entered
+            self.agg.reset(data.timestamp)
         else:
-            await super(_proc_start,self).startup(data) # skip intervening
-            td = (data.timestamp - self.agg.timestamp).total_seconds()
+            self.agg.timestamp = data.timestamp
+        if td > 0:
+            self.agg.value += dv * (data.timestamp-self.agg.timestamp).total_seconds()/td
+            self.agg.aux_value += dav * (data.timestamp-self.agg.timestamp).total_seconds()/td
+            self.agg.n_values += 1
 
-        while self.agg.tsc < tsc:
-            self.agg.value += dv * (self.agg.end_ts-self.agg.timestamp).total_seconds()/td
-            self.agg.aux_value += dav * (self.agg.end_ts-self.agg.timestamp).total_seconds()/td
-            self.agg.updated = True
-            await self.agg.save()
-            self.agg.reset(self.agg.end_ts)
-
-        assert self.agg.tsc == tsc, (self.agg.tsc,tsc)
-        self.agg.value += data.value * (data.timestamp-self.agg.timestamp).total_seconds()/td
-        self.agg.aux_value += data.aux_value * (data.timestamp-self.agg.timestamp).total_seconds()/td
-        self.agg.timestamp = data.timestamp
-
-        self.agg.n_values += 1
         self.agg.updated = True
 
         self.typ.value = data.value
