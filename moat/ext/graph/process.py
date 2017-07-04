@@ -348,6 +348,7 @@ class proc_cont(_proc_start, proc_count):
     async def process(self,data):
         if self.typ.layer > 0:
             await super().process(data)
+            return
         tsc = self.agg.tsc_of(data.timestamp)
         dv = self.typ.value
         dav = self.typ.aux_value
