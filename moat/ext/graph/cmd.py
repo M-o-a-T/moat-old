@@ -206,7 +206,11 @@ This command shows the status of current graphing
 						print("===")
 					pprint(remap(d, lambda p, k, v: v is not None))
 				else:
-					print(d['n_values'],d['human']['method'][0],d['timestamp'],d['tag'], sep='\t')
+					try:
+						m = d['human']['method'][0]
+					except KeyError:
+						m = "-"
+					print(d['n_values'],m,d['timestamp'],d['tag'], sep='\t')
 				seen = True
 
 	async def _do_args(self,db, args):
@@ -290,7 +294,11 @@ This command shows the status of current graphing
 							print("===")
 						pprint(remap(d, lambda p, k, v: v is not None))
 					else:
-						print(d['n_values'],d['human']['method'][0],d['timestamp'],d['tag'], sep='\t')
+						try:
+							m = d['human']['method'][0]
+						except KeyError:
+							m = "-"
+						print(d['n_values'],m,d['timestamp'],d['tag'], sep='\t')
 					seen = True
 			else:
 				async for d in db.DoSelect("select data_agg_type.*,data_type.tag from data_agg_type join data_type on data_type.id=data_agg_type.data_type where layer=${layer}", _dict=True, layer=self.options.layer):
