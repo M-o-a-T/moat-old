@@ -536,7 +536,7 @@ class agg_type(_agg_type):
     async def process(self, d):
         await self.proc.run(d)
         self.value = d.value
-        self.aux_value = d.value
+        self.aux_value = d.aux_value
         self.last_id = d.id
         self.updated = True
 
