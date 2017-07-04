@@ -297,11 +297,16 @@ class proc_count(proc_store):
         dv = data.value
         dav = data.aux_value
         if self.typ.layer == 0: # need to aggregate
-            if dv >= self.typ.value and dav >= self.typ.aux_value:
-                dv = dv - self.typ.value
-                dav = dav - self.typ.aux_value
-            self.typ.value += dv
-            self.typ.aux_value += dav
+            if self.typ.value is None or dv < self.typ.value:
+                self.typ.value = dv
+            else:
+                dv -= self.typ.value
+                self.typ.value += dv
+            if self.typ.aux_value is None or dav < self.typ.aux_value:
+                self.typ.aux_value = dav
+            else:
+                dav -= self.typ.aux_value
+                self.typ.aux_value += dav
             self.typ.updated = True
             # need to distribute data across interval
             ln = data.timestamp.timestamp() - self.typ.timestamp.timestamp()
