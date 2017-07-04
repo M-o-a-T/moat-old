@@ -408,6 +408,9 @@ Set data type and aggregation options for a logged event type
 		self.parser.add_option('-d','--data',
 			action="store_true", dest="data",
 			help="Delete logged data")
+		self.parser.add_option('-A','--all',
+			action="store_true", dest="all",
+			help="Delete the whole record")
 
 	async def do(self,args):
 		if not args:
@@ -425,23 +428,26 @@ Set data type and aggregation options for a logged event type
 				raise SyntaxError("There is no tag '%s'" % (tag,))
 
 			if self.options.force:
-				if self.options.summary:
-					async for tid,ly in db.DoSelect("select id,layer from data_agg_type where data_type=${dtid} order by layer", dtid=dtid):
+				if self.options.summary or self.options.all:
+					async for tid,ly in db.DoSelect("select id,layer from data_agg_type where data_type=${dtid} order by layer", dtid=dtid, _empty=True):
 						n = await db.Do("delete from data_agg where data_agg_type=${tid}", tid=tid, _empty=True)
 						await db.Do("update data_type set value=NULL,aux_value=NULL where id=${dtid}", dtid=dtid, _empty=True)
 						if n:
 							print("%d: %d summary records deleted" % (ly,n))
-					if self.options.layers:
+					if self.options.layers or self.options.all:
 						await db.Do("delete from data_agg_type where data_type=${dtid}", dtid=dtid, _empty=True)
 						await db.Do("update data_type set method=NULL where id=${dtid}", dtid=dtid, _empty=True)
 					else:
 						await db.Do("update data_agg_type set timestamp='1999-01-01', last_id=0, value=0, aux_value=0 where data_type=${dtid}", dtid=dtid, _empty=True)
-				if self.options.data:
+				if self.options.data or self.options.all:
 	
 					n = await db.Do("delete from data_log where data_type=${dtid}", dtid=dtid, _empty=True)
 					await db.Do("update data_type set timestamp='1999-01-01' where id=${dtid}", dtid=dtid, _empty=True)
 					print("%d data records deleted" % n)
+				if self.options.all:
+					await db.Do("delete from data_type where id=${dtid}", dtid=dtid)
 			else:
+				print("'force' flag not set: just counting")
 				n, = await db.DoFn("select count(*) from data_log where data_type=${dtid}", dtid=dtid, _empty=True)
 				print("%d data records" % n)
 				async for tid,ly in db.DoSelect("select id,layer from data_agg_type where data_type=${dtid} order by layer", dtid=dtid, _empty=True):
