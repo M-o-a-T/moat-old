@@ -412,7 +412,7 @@ Set data type and aggregation options for a logged event type
 	async def do(self,args):
 		if not args:
 			raise SyntaxError("Usage: reset [options] data_tag")
-		if self.options.summary and not self.options.layers:
+		if self.options.layers and not self.options.summary:
 			raise SyntaxError("You can't delete the summary descriptions but not the data!")
 		await self.setup()
 
