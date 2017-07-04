@@ -256,8 +256,8 @@ class _proc_clean(object):
 
         if self.typ.layer == 0:
             n = await self.db.Do("delete from data_log where data_type=${typ} and timestamp < ${ts} and id < ${last_id}", typ=self.typ.data_type, ts=ts, last_id=self.typ.last_id, _empty=True)
-            await db.Do("update data_type set n_values=n_values-${n} where id=${typ}", n=n, typ=self.typ.data_type, _empty=True)
-            await db.Do("update data_type set n_values=0 where id=${typ} and n_values<0", typ=self.typ.data_type, _empty=True)
+            await self.db.Do("update data_type set n_values=n_values-${n} where id=${typ}", n=n, typ=self.typ.data_type, _empty=True)
+            await self.db.Do("update data_type set n_values=0 where id=${typ} and n_values<0", typ=self.typ.data_type, _empty=True)
         else:
             agg, = await self.db.DoFn("select id from data_agg_type where data_type=${typ} and layer=${layer}", typ=self.typ.data_type, layer=self.typ.layer-1, )
             n = await self.db.Do("delete from data_agg where data_agg_type=${agg} and timestamp < ${ts} and id < ${last_id}", ts=ts, agg=agg, last_id=self.typ.last_id, _empty=True)
