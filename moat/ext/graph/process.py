@@ -304,9 +304,10 @@ class proc_count(proc_store):
             self.typ.aux_value += dav
             self.typ.updated = True
             # need to distribute data across interval
-            ln = data.timestamp() - self.typ.timestamp.timestamp()
-            self.agg.min_value = min(self.agg.min_value,dv/ln)
-            self.agg.max_value = max(self.agg.max_value,dv/ln)
+            ln = data.timestamp.timestamp() - self.typ.timestamp.timestamp()
+            if ln > 0:
+                self.agg.min_value = min(self.agg.min_value,dv/ln)
+                self.agg.max_value = max(self.agg.max_value,dv/ln)
         else:
             self.agg.min_value = min(self.agg.min_value,data.min_value)
             self.agg.max_value = max(self.agg.max_value,data.max_value)
