@@ -428,6 +428,7 @@ Set data type and aggregation options for a logged event type
 				if self.options.summary:
 					async for tid,ly in db.DoSelect("select id,layer from data_agg_type where data_type=${dtid} order by layer", dtid=dtid):
 						n = await db.Do("delete from data_agg where data_agg_type=${tid}", tid=tid, _empty=True)
+						await db.Do("update data_type set value=NULL,aux_value=NULL where id=${dtid}", dtid=dtid, _empty=True)
 						if n:
 							print("%d: %d summary records deleted" % (ly,n))
 					if self.options.layers:
