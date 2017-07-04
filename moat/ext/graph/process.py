@@ -38,6 +38,11 @@ logger = logging.getLogger(__name__)
 class DoNothing(Exception):
     pass
 
+class BackTime(Exception):
+    def __init__(self,id):
+        self.id = id
+    pass
+
 @attr.s
 class _data(object):
     """\
@@ -330,7 +335,8 @@ class _proc_start:
             self.agg.reset(data.timestamp, at_start=True)
 
         else:
-            assert self.agg.tsc <= self.agg.tsc_of(data.timestamp), (self.agg.timestamp,data.timestamp)
+            if self.agg.timestamp > data.timestamp:
+                raise BackTime(data.id)
 
 class proc_cont(_proc_start, proc_count):
     """Save an increasing continuous value (power meter)
@@ -548,6 +554,9 @@ class agg_type(_agg_type):
                     dt.set(**d)
                     await self.process(dt)
 
+        except BackTime as bt:
+            logger.warning("Need Time fix %s:%d at %d",self.tag,self.layer,bt.id)
+            return
         except DoNothing:
             logger.info("Skipped %s:%d",self.tag,self.layer)
 
