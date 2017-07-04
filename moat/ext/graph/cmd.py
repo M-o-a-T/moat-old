@@ -196,7 +196,7 @@ This command shows the status of current graphing
 					add_human(d)
 					pprint(remap(d, lambda p, k, v: v is not None))
 				else:
-					print(d['timestamp'],d['tag'],d['value'], sep='\t')
+					print(d['id'],d['timestamp'],d['tag'],d['value'], sep='\t')
 				seen = True
 		else:
 			async for d in db.DoSelect("select * from data_type where method %s and timestamp > '1999-12-31'  order by n_values desc,tag" % (mf,), _dict=True, method=method):
@@ -226,7 +226,7 @@ This command shows the status of current graphing
 						add_human(d)
 						pprint(remap(d, lambda p, k, v: v is not None))
 					else:
-						print(d['timestamp'],d['value'], sep='\t')
+						print(d['id'],d['timestamp'],d['value'], sep='\t')
 					seen = True
 			else:
 				async for d in db.DoSelect("select data_agg.* from data_agg join data_agg_type on data_agg.data_agg_type=data_agg_type.id where data_agg_type.data_type=${id} and data_agg_type.layer=${layer} order by data_agg.timestamp desc limit ${limit}", _dict=True, id=dtid, limit=self.options.last, layer=self.options.layer):
@@ -236,7 +236,7 @@ This command shows the status of current graphing
 						add_human(d)
 						pprint(remap(d, lambda p, k, v: v is not None))
 					else:
-						print(d['timestamp'],d['value'],d['n_values'], sep='\t')
+						print(d['id'],d['timestamp'],d['value'],d['n_values'], sep='\t')
 					seen = True
 			if not seen:
 				print("No data?")
@@ -273,7 +273,7 @@ This command shows the status of current graphing
 						add_human(d)
 						pprint(remap(d, lambda p, k, v: v is not None))
 					else:
-						print(d['timestamp'],d['value'], sep='\t')
+						print(d['id'],d['timestamp'],d['value'], sep='\t')
 					seen = True
 			else:
 				async for d in db.DoSelect("select data_agg.* from data_agg join data_agg_type on data_agg.data_agg_type=data_agg_type.id where data_agg_type.data_type=${id} and data_agg_type.layer=${layer} order by data_agg.timestamp desc limit ${limit}", _dict=True, id=dtid, layer=self.options.layer, limit=self.options.last):
@@ -283,7 +283,7 @@ This command shows the status of current graphing
 						add_human(d)
 						pprint(remap(d, lambda p, k, v: v is not None))
 					else:
-						print(d['data_agg_log.timestamp'],d['data_agg_log.value'], sep='\t')
+						print(d['id'],d['data_agg_log.timestamp'],d['data_agg_log.value'], sep='\t')
 					seen = True
 		else:
 			if self.options.layer < 0:
