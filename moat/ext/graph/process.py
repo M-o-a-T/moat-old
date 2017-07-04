@@ -39,8 +39,9 @@ class DoNothing(Exception):
     pass
 
 class BackTime(Exception):
-    def __init__(self,id):
+    def __init__(self,id,timestamp):
         self.id = id
+        self.timestamp = timestamp
     pass
 
 @attr.s
@@ -158,7 +159,10 @@ class agg(_agg):
     async def load(self, **kv):
         """read a specific record"""
         self.tsc = None
-        d = await self.db.DoFn("select * from data_agg where "+' and '.join("%s=${%s}"%(k,k) for k in kv.keys())+" order by tsc desc limit 1", **kv, _dict=True)
+        sel = ' and '.join("%s=${%s}"%(k,k) for k in kv.keys())
+        if sel:
+            sel = ' and '+sel
+        d = await self.db.DoFn("select * from data_agg where data_agg_type=${dtid}"+sel+" order by tsc desc limit 1", dtid=self.atype.id, **kv, _dict=True)
         self.set(**d)
         self.updated = False
         if not self.tsc:
@@ -192,6 +196,30 @@ class _proc:
         self.typ = typ
         self.db = self.typ.db
 
+    def do_rollback(self, dt1, dt2):
+        """The part of .rollback() that does the actual work"""
+        pass
+
+    async def rollback(self, dt1, dt2):
+        """\
+            When deleting data, dt is the first record of the following timespan.
+            Thus when doing some sort of continuous recording we need to
+            subtract that delta.
+
+            @dt1 is the newest record within the current set.
+            @dt2 is the oldest new record that's going to be deleted.
+            """
+        if self.agg is None:
+            self.agg = agg(self.typ)
+        await self.agg.load(tsc=self.agg.tsc_of(dt1.timestamp))
+        self.do_rollback(dt1,dt2)
+        
+        self.timestamp = dt1.timestamp
+        self.last_id = dt1.id
+        self.agg.timestamp = dt1.timestamp
+        self.agg.updated = True
+        await self.agg.save()
+
     async def startup(self, data):
         """\
             Hook to open the current record
@@ -201,7 +229,7 @@ class _proc:
         if self.agg is None:
             self.agg = agg(self.typ)
         try:
-            await self.agg.load(data_agg_type=self.typ.id, tsc=self.agg.tsc_of(data.timestamp))
+            await self.agg.load(tsc=self.agg.tsc_of(data.timestamp))
         except NoData:
             self.agg.reset(data.timestamp)
 
@@ -336,13 +364,13 @@ class _proc_start:
         if self.agg is None:
             self.agg = agg(self.typ)
         try:
-            await self.agg.load(data_agg_type=self.typ.id)
+            await self.agg.load()
         except NoData:
             self.agg.reset(data.timestamp, at_start=True)
 
         else:
             if self.agg.timestamp > data.timestamp:
-                raise BackTime(data.id)
+                raise BackTime(data.id,data.timestamp)
 
 class proc_cont(_proc_start, proc_count):
     """Save an increasing continuous value (power meter)
@@ -391,6 +419,12 @@ class proc_cont(_proc_start, proc_count):
         self.typ.value = data.value
         self.typ.aux_value = data.aux_value
         self.typ.updated = True
+
+    def do_rollback(self, dr1,dr2):
+        f = (self.agg.end_ts-max(self.agg.start_ts,dr1.timestamp))/(dr2.timestamp-dr1.timestamp)
+        assert 0 <= f <= 1, (f,self.agg,dr1,dr2)
+        self.agg.value -= (dr2.value-dr1.value)*f
+        self.agg.aux_value -= (dr2.aux_value-dr1.aux_value)*f
 
 class proc_persist(proc_cont):
     """persistent changes (light switch),
@@ -553,34 +587,89 @@ class agg_type(_agg_type):
         self.timestamp = d.timestamp
         self.updated = True
 
+    async def rollback_h(self, ts):
+        dt = agg(self)
+        dt.reset(ts)
+        await self.db.Do("delete from data_agg where data_agg_type=${aid} and timestamp>=${ts}", aid=self.id,ts=dt.start_ts, _empty=True)
+
+        st = agg_type(self.proc,self.db)
+        try:
+            d = await self.db.DoFn("select * from data_agg_type where data_type=${dtid} and layer=${layer}", dtid=self.data_type, layer=self.layer+1, _dict=True)
+        except NoData:
+            pass
+        else:
+            await st.set(d)
+            await st.rollback_h(ts)
+
+    async def rollback(self, id,ts):
+        assert self.layer == 0, self
+        # first get the lowest new record
+        nid,nts = await self.db.DoFn("select id,timestamp from data_log where data_type=${dtid} and id>${id} order by timestamp limit 1", dtid=self.data_type, id=self.last_id)
+        if nts.tzinfo is None:
+            nts = nts.replace(tzinfo=UTC)
+        assert nts > self.timestamp-timedelta(0,self.max_age) # don't go beyond deleted data
+
+        # first record to be deleted
+        dt = agg(self)
+        dt.reset(nts)
+        d = await self.db.DoFn("select * from data_log where data_type=${dtid} and id<=${id} and timestamp>=${ts} order by timestamp limit 1", dtid=self.data_type, ts=dt.start_ts, id=self.last_id, _dict=True)
+        dr2 = data()
+        dr2.set(**d)
+        assert dr2.timestamp > self.timestamp-timedelta(0,self.max_age) # don't go beyond deleted data
+
+        # last record to be kept
+        d = await self.db.DoFn("select * from data_log where data_type=${dtid} and timestamp<${ts} order by timestamp desc limit 1", dtid=self.data_type, ts=dt.start_ts, id=self.last_id, _dict=True)
+        dr1 = data()
+        dr1.set(**d)
+
+        #await dt.load(tsc=dt.tsc-1)
+        await self.proc.rollback(dr1,dr2)
+        #dt.save()
+        await dt.load(tsc=dt.tsc)
+        await self.rollback_h(dt.start_ts)
+
+        # update values
+        self.value = dr1.value
+        self.aux_value = dr2.value
+        self.update = True
+
     async def run(self, cleanup=True):
         if self.layer == 0:
             dtyp = data
         else:
             dtyp = partial(agg,self)
+            llid, = await self.db.DoFn("select id from data_agg_type where data_type=${dtid} and layer=${layer}", layer=self.layer-1, dtid=self.data_type)
+            try:
+                top, = await self.db.DoFn("select max(id) from data_agg where data_agg_type=${dtid}", dtid=llid)
+            except NoData:
+                top = None
+                tops = ""
+            else:
+                tops = " and id < ${top}"
         try:
-            while True:
-                if self.layer == 0: # process raw data
-                    r = self.db.DoSelect("select * from data_log where data_type=${dtid} and id > ${last_id} order by timestamp,id limit 100", dtid=self.data_type, last_id=self.last_id, _dict=True)
+            if self.layer == 0: # process raw data
+                r = self.db.DoSelect("select * from data_log where data_type=${dtid} and id > ${last_id} and timestamp > ${ts} order by timestamp,id", dtid=self.data_type, last_id=self.last_id, ts=self.timestamp-timedelta(1), _dict=True)
 
-                else: # process previous layer
-                    llid, = await self.db.DoFn("select id from data_agg_type where data_type=${dtid} and layer=${layer}", layer=self.layer-1, dtid=self.data_type)
-                    r = self.db.DoSelect("select * from data_agg where data_agg_type=${llid} and id > ${last_id} order by timestamp,id limit 100", llid=llid, last_id=self.last_id, _dict=True)
-                dt = dtyp()
+            else: # process previous layer
+                r = self.db.DoSelect("select * from data_agg where data_agg_type=${llid} and id > ${last_id} and timestamp > ${ts}"+tops+" order by timestamp,id", llid=llid, last_id=self.last_id,top=top, ts=self.timestamp-timedelta(1), _dict=True)
+            dt = dtyp()
 
-                async for d in r:
-                    dt.set(**d)
-                    await self.process(dt)
+            async for d in r:
+                dt.set(**d)
+                await self.process(dt)
 
         except BackTime as bt:
-            logger.warning("Need Time fix %s:%d at %d",self.tag,self.layer,bt.id)
+            logger.warning("Need Time fix %s:%d at %d:%s",self.tag,self.layer, bt.id,bt.timestamp)
+            await self.rollback(bt.id,bt.timestamp)
             return
         except DoNothing:
             logger.info("Skipped %s:%d",self.tag,self.layer)
-
+            return
         except NoData:
-            await self.proc.finish()
-            if cleanup:
-                await self.proc.cleanup()
-            await self.save(True)
+            return
+
+        await self.proc.finish()
+        if cleanup:
+            await self.proc.cleanup()
+        await self.save(True)
 
