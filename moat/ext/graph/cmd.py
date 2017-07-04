@@ -407,7 +407,7 @@ Set data type and aggregation options for a logged event type
 			help="Delete layer data and reset mode")
 		self.parser.add_option('-d','--data',
 			action="store_true", dest="data",
-			help="Also delete logged data")
+			help="Delete logged data")
 
 	async def do(self,args):
 		if not args:
