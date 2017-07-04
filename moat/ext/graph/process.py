@@ -400,8 +400,11 @@ class proc_persist(proc_cont):
             assert self.agg.tsc == tsc, (self.agg.tsc,tsc)
             self.agg.value += self.typ.value * (data.timestamp-self.agg.timestamp).total_seconds()/self.typ.interval
             self.agg.aux_value += self.typ.aux_value * (data.timestamp-self.agg.timestamp).total_seconds()/self.typ.interval
+
         else:
             await super(_proc_start,self).startup(data) # get current record
+        self.agg.min_value = min(self.agg.min_value,data.min_value)
+        self.agg.max_value = max(self.agg.max_value,data.max_value)
         self.agg.n_values += 1
         self.agg.timestamp = data.timestamp
         self.agg.updated = True
