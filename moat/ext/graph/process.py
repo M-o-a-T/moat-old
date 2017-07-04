@@ -538,6 +538,7 @@ class agg_type(_agg_type):
         self.value = d.value
         self.aux_value = d.aux_value
         self.last_id = d.id
+        self.timestamp = d.timestamp
         self.updated = True
 
     async def run(self, cleanup=True):
