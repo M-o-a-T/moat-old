@@ -146,13 +146,12 @@ class WebpathDir(EtcDir):
 	async def send_item(self,view, level=1):
 		"""Send my data struct to this view"""
 		id,pid = self.get_id(level)
-		level += 2
 		view.send_json(action="replace", id=id, parent=pid, data=await self.render(level, view=view))
 
 	@template('dir.haml')
 	def render(self, level=1):
 		id,pid = self.get_id(level)
-		return dict(id=id,level=level+2,pid=pid)
+		return dict(id=id,level=level+2,pid=pid, this=self)
 
 	def get_id(self,level):
 		if level == 0:
