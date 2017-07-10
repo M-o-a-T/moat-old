@@ -65,6 +65,8 @@
 						f.append(d);
 					}
 
+				} else {
+					announce("warning","Unknown action: " + m.action)
 				}
 			};
 			ws.onopen = function (msg) {
