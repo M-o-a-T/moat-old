@@ -44,6 +44,7 @@
 				var m = $.parseJSON(msg.data);
 				console.log("IN",m);
 				if (!('action' in m)) {
+					announce("warning","Unknown message: " + m)
 				} else if (m.action == 'error') {
 					announce("danger",m.msg)
 				} else if (m.action == 'replace') {
