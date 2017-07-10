@@ -113,8 +113,8 @@ class ApiView(BaseView):
     async def send_dir(self,t, level=0):
         try:
             await t.send_item(self, level=level)
-        except AttributeError:
-            import pdb;pdb.set_trace()
+        except Exception as exc:
+            logger.exception(t)
             raise
         level += 1
         for k,v in t.items():
