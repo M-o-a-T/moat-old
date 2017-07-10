@@ -437,14 +437,14 @@ Set data type and aggregation options for a logged event type
 				if self.options.summary or self.options.all:
 					async for tid,ly in db.DoSelect("select id,layer from data_agg_type where data_type=${dtid} order by layer", dtid=dtid, _empty=True):
 						n = await db.Do("delete from data_agg where data_agg_type=${tid}", tid=tid, _empty=True)
-						await db.Do("update data_type set value=NULL,aux_value=NULL where id=${dtid}", dtid=dtid, _empty=True)
 						if n:
 							print("%d: %d summary records deleted" % (ly,n))
 					if self.options.layers or self.options.all:
 						await db.Do("delete from data_agg_type where data_type=${dtid}", dtid=dtid, _empty=True)
 						await db.Do("update data_type set method=NULL where id=${dtid}", dtid=dtid, _empty=True)
 					else:
-						await db.Do("update data_agg_type set timestamp='1999-01-01', last_id=0, value=0, aux_value=0 where data_type=${dtid}", dtid=dtid, _empty=True)
+						await db.Do("update data_agg_type set timestamp='1999-01-01', last_id=0 where data_type=${dtid}", dtid=dtid, _empty=True)
+					await db.Do("update data_type set value=NULL,aux_value=NULL where id=${dtid}", dtid=dtid, _empty=True)
 				if self.options.data or self.options.all:
 	
 					n = await db.Do("delete from data_log where data_type=${dtid}", dtid=dtid, _empty=True)
@@ -594,6 +594,9 @@ Process a layer (or all of them)
 """
 
 	def addOptions(self):
+		self.parser.add_option('-o','--old',
+			action="store_true", dest="old",
+			help="summarize legacy data")
 		self.parser.add_option('-n','--no-clean',
 			action="store_true", dest="noclean",
 			help="don't run clean-up code")
@@ -617,7 +620,11 @@ Process a layer (or all of them)
 			if tag:
 				filter['data_type'], = await db.DoFn("select id from data_type where tag=${tag}", tag=tag)
 			if self.options.layer >= 0:
+				if self.options.old:
+					raise SyntaxError("You can't specify a layer for processing old data")
 				filter['layer'] = self.options.layer
+			elif self.options.old:
+				filter['layer'] = 0
 			if self.options.method:
 				try:
 					filter['method'] = modenames[self.options.method]
@@ -628,7 +635,21 @@ Process a layer (or all of them)
 				fs = " where "+fs
 
 			async for d in db.DoSelect("select data_agg_type.* from data_agg_type join data_type on data_agg_type.data_type=data_type.id"+fs+" order by layer,data_agg_type.timestamp", **filter, _dict=True, _empty=True):
+				if self.options.old:
+					if d['layer'] != 0:
+						continue
+					oid, = await db.DoFn("select min(id) from data_log where data_type=${dtyp}", dtyp=d['data_type'])
+					if oid >= 0:
+						continue
+					try:
+						ds, = await db.DoFn("select timestamp from data_log where data_type=${dt} and id>0 order by timestamp limit 1", dt=d['data_type'])
+					except NoData:
+						ds = datetime(9999,1,1)
+					if ds.tzinfo is None:
+						ds = ds.replace(tzinfo=UTC)
+					d['old_limit'] = ds
 				todo.append(d)
+
 			if self.options.layer < 0 and (not self.options.method or self.options.method == 'delete'):
 				f=""
 				if tag:

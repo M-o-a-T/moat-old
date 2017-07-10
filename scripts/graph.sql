@@ -7,6 +7,8 @@ CREATE TABLE `data_type` (
   `method` int(2) NULL,
   `cycle_max` double(40,10) DEFAULT NULL, # limit of cyclic value
   `unit` char(10) NOT NULL DEFAULT '',
+  `value` double(40,10) DEFAULT NULL, # last raw value seen; required for aggregation
+  `aux_value` double(40,10) DEFAULT NULL, # last raw value seen; required for aggregation
   `display_order` int(3) NOT NULL default 0,
   `display_name` char(50) NULL,
   `display_unit` char(10) NULL,
@@ -47,8 +49,6 @@ CREATE TABLE `data_agg_type` (
   `layer` tinyint(2) NOT NULL DEFAULT 0,
   `interval` int(11) NOT NULL,
   `max_age` int(11) NOT NULL, # seconds until
-  `value` double(40,10) DEFAULT NULL, # last raw value seen; required for aggregation
-  `aux_value` double(40,10) DEFAULT NULL, # last raw value seen; required for aggregation
   `timestamp` timestamp NOT NULL default "2000-01-01", # of last processed record
   `last_id` int(11) NOT NULL default 0, # of last analyzed record (may no longer exist)
   PRIMARY KEY (`id`),

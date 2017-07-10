@@ -251,7 +251,7 @@ class _proc:
         if self.agg.n_values:
             await self.agg.save()
 
-    async def run(self, data):
+    async def run(self, data, **kw):
         """\
             add this to our aggregation
             """
@@ -260,10 +260,11 @@ class _proc:
             await self.finish(data)
         if not self.agg or not self.agg.in_tsc(data):
             await self.startup(data)
-        if not (await self.process(data)):
+        if not (await self.process(data, **kw)):
             self.update_ts(data)
 
-    async def process(self, data):
+
+    async def process(self, data, **kw):
         """Process this data record.
             Return True to skip updating the aggregate's timestamp."""
         raise NotImplementedError
@@ -288,22 +289,22 @@ class _proc_clean(object):
 
         if self.typ.layer == 0:
             n = await self.db.Do("delete from data_log where data_type=${typ} and timestamp < ${ts} and id < ${last_id}", typ=self.typ.data_type, ts=ts, last_id=self.typ.last_id, _empty=True)
+            logger.debug("Deleted %d log entries since %d:%s",n,self.typ.last_id,ts)
             await self.db.Do("update data_type set n_values=n_values-${n} where id=${typ}", n=n, typ=self.typ.data_type, _empty=True)
             await self.db.Do("update data_type set n_values=0 where id=${typ} and n_values<0", typ=self.typ.data_type, _empty=True)
         else:
             agg, = await self.db.DoFn("select id from data_agg_type where data_type=${typ} and layer=${layer}", typ=self.typ.data_type, layer=self.typ.layer-1, )
             n = await self.db.Do("delete from data_agg where data_agg_type=${agg} and timestamp < ${ts} and id < ${last_id}", ts=ts, agg=agg, last_id=self.typ.last_id, _empty=True)
-        if n:
-            logger.debug("%s records deleted for %s/%s", n, self.typ.tag,self.typ.layer)
+            logger.debug("Deleted %d summary/%d entries since %d:%s",n,self.typ.layer,self.typ.last_id,ts)
 
 class proc_noop(_proc):
     """do not do anything"""
-    async def process(self,data):
+    async def process(self,data, **kw):
         raise DoNothing
 
 class proc_ignore(_proc):
     """do not do anything"""
-    async def process(self,data):
+    async def process(self,data, **kw):
         pass
 
 class proc_delete(_proc_clean, proc_ignore):
@@ -312,7 +313,7 @@ class proc_delete(_proc_clean, proc_ignore):
 
 class proc_store(proc_delete):
     """Save an average continuous value (power use, temperature, humidity) with min/max ranges"""
-    async def process(self,data):
+    async def process(self,data, do_old=None, **kw): # ignore
         on = self.agg.n_values
         self.agg.n_values += data.n_values
         self.agg.value = (self.agg.value * on + data.value * data.n_values) / self.agg.n_values
@@ -325,32 +326,53 @@ class proc_count(proc_store):
     """Save an increasing discrete value (rain gauge, lightning counter).
         The first increase within an interval gets credited to that interval"""
     DISC=True
-    async def process(self,data):
+    old_av = None # for old_limit processing
+    async def process(self,data, do_old=False, **kw):
         dv = data.value
         dav = data.aux_value
+        nv = data.n_values
+        f = self.typ.prev_interval / self.typ.interval
         if self.typ.layer == 0: # need to aggregate
-            if self.typ.value is None or dv < self.typ.value:
-                self.typ.value = dv
+            if do_old:
+                assert data.id < 0
             else:
-                dv -= self.typ.value
-                self.typ.value += dv
-            if self.typ.aux_value is None or dav < self.typ.aux_value:
-                self.typ.aux_value = dav
+                assert data.id > 0
+            m = self.typ.main
+            if m.value is None or dv < m.value:
+                dv = 0
+                nv = 0
             else:
-                dav -= self.typ.aux_value
-                self.typ.aux_value += dav
-            self.typ.updated = True
-            # need to distribute data across interval
-            ln = data.timestamp.timestamp() - self.typ.timestamp.timestamp()
-            if ln > 0:
-                self.agg.min_value = min(self.agg.min_value,dv/ln)
-                self.agg.max_value = max(self.agg.max_value,dv/ln)
+                dv -= m.value
+            if do_old:
+                assert data.aux_value >= 1
+                if self.old_av is not None and (self.old_av < data.aux_value or data.timestamp < self.old_av_end):
+                    return
+                self.old_av = data.aux_value
+                self.old_av_end = self.agg.end_ts
+                f *= data.aux_value
+                dav = 0
+            elif m.aux_value is None or dav < m.aux_value:
+                dav = 0
+            else:
+                dav -= m.aux_value
+            dminv = dv*f
+            dmaxv = dv*f
         else:
-            self.agg.min_value = min(self.agg.min_value,data.min_value)
-            self.agg.max_value = max(self.agg.max_value,data.max_value)
-        self.agg.value += dv
-        self.agg.aux_value += dav
-        self.agg.updated = True
+            assert not do_old
+            dminv = data.min_value * f
+            dmaxv = data.max_value * f
+
+        # need to distribute data across interval
+        dv *= f
+        dav *= f
+
+        if nv:
+            self.agg.value += dv
+            self.agg.aux_value += dav
+            self.agg.min_value = min(self.agg.min_value,dminv)
+            self.agg.max_value = max(self.agg.max_value,dmaxv)
+            self.agg.n_values += nv
+            self.agg.updated = True
         
 class _proc_start:
     """Mix-in to load the latest, i.e. not necessarily the current, record"""
@@ -383,7 +405,7 @@ class proc_cont(_proc_start, proc_count):
         """
     DISC=False
 
-    async def process(self,data):
+    async def process(self,data, **kw):
         if self.typ.layer > 0:
             await super().process(data)
             return
@@ -392,15 +414,16 @@ class proc_cont(_proc_start, proc_count):
         dav = data.aux_value
 
         # first record / counter cleared?
-        if self.typ.value is None or self.typ.value > data.value:
-            self.typ.value = data.value
-            self.typ.timestamp = data.timestamp
-        if self.typ.aux_value is None or self.typ.aux_value > data.aux_value:
-            self.typ.aux_value = data.aux_value
+        m = self.typ.main
+        if m.value is None or m.value > data.value:
+            m.value = data.value
+            m.timestamp = data.timestamp
+        if m.aux_value is None or m.aux_value > data.aux_value:
+            m.aux_value = data.aux_value
 
-        dv -= self.typ.value
-        dav -= self.typ.aux_value
-        td = (data.timestamp - self.typ.timestamp).total_seconds()
+        dv -= m.value
+        dav -= m.aux_value
+        td = (data.timestamp - m.timestamp).total_seconds()
 
         if td > 0 and dv > 0:
             while self.agg.tsc < tsc:
@@ -420,10 +443,6 @@ class proc_cont(_proc_start, proc_count):
 
         self.agg.updated = True
 
-        self.typ.value = data.value
-        self.typ.aux_value = data.aux_value
-        self.typ.updated = True
-
     def do_rollback(self, dr1,dr2):
         f = (self.agg.end_ts-max(self.agg.start_ts,dr1.timestamp))/(dr2.timestamp-dr1.timestamp)
         assert 0 <= f <= 1, (f,self.agg,dr1,dr2)
@@ -433,23 +452,24 @@ class proc_cont(_proc_start, proc_count):
 class proc_persist(proc_cont):
     """persistent changes (light switch),
         records the percentage of time the thing was on"""
-    async def process(self,data):
+    async def process(self,data, **kw):
         if self.typ.layer > 0:
             await super().process(data)
             return
         tsc = self.agg.tsc_of(data.timestamp)
-        if self.typ.value or self.typ.aux_value:
+        m = self.typ.main
+        if m.value or m.aux_value:
             while self.agg.tsc < tsc:
-                self.agg.value += self.typ.value * (self.agg.end_ts-self.typ.timestamp).total_seconds()/self.typ.interval
-                self.agg.aux_value += self.typ.aux_value * (self.agg.end_ts-self.typ.timestamp).total_seconds()/self.typ.interval
+                self.agg.value += m.value * (self.agg.end_ts-self.typ.timestamp).total_seconds()/self.typ.interval
+                self.agg.aux_value += m.aux_value * (self.agg.end_ts-self.typ.timestamp).total_seconds()/self.typ.interval
                 self.agg.updated = True
                 await self.agg.save()
                 self.agg.reset(self.agg.end_ts)
                 self.typ.timestamp = self.agg.timestamp
 
             assert self.agg.tsc == tsc, (self.agg.tsc,tsc)
-            self.agg.value += self.typ.value * (data.timestamp-self.agg.timestamp).total_seconds()/self.typ.interval
-            self.agg.aux_value += self.typ.aux_value * (data.timestamp-self.agg.timestamp).total_seconds()/self.typ.interval
+            self.agg.value += m.value * (data.timestamp-self.agg.timestamp).total_seconds()/self.typ.interval
+            self.agg.aux_value += m.aux_value * (data.timestamp-self.agg.timestamp).total_seconds()/self.typ.interval
 
         else:
             await super(_proc_start,self).startup(data) # get current record
@@ -462,7 +482,7 @@ class proc_persist(proc_cont):
 class proc_event(proc_store):
     """Single event (button pressed):
         multiple events within L0 are counted normally"""
-    async def process(self,data):
+    async def process(self,data, **kw):
         self.agg.n_values += data.n_values
         self.agg.value += data.value
         self.agg.aux_value += data.aux_value
@@ -491,7 +511,7 @@ class proc_notice(proc_event):
             self.agg.min_value = 0
             self.agg.updated = True
 
-    async def process(self,data):
+    async def process(self,data, **kw):
         if data.value == 0:
             return True # skip update_ts
         if self.typ.layer > 0:
@@ -499,7 +519,7 @@ class proc_notice(proc_event):
             self.agg.value += data.value
             self.agg.aux_value = data.aux_value
             self.agg.min_value = min(self.agg.value,self.agg.min_value)
-            self.agg.max_value = self.agg.value+self.agg.max_value
+            self.agg.max_value += data.max_value
             self.agg.updated = True
             return
         t_last = self.agg.tsc_of(self.typ.timestamp)
@@ -592,6 +612,46 @@ for k,v in modes.items():
 ### control record for processing
 
 @attr.s
+class _dtype(object):
+    id = attr.ib(default=None)
+    tag = attr.ib(default=None)
+    method = attr.ib(default=None)
+    cycle_max = attr.ib(default=None)
+    display_order = attr.ib(default=None)
+    display_name = attr.ib(default=None)
+    display_unit = attr.ib(default=None)
+    display_factor = attr.ib(default=None)
+    unit = attr.ib(default=None)
+    timestamp = attr.ib(default=None)
+    n_values = attr.ib(default=None)
+    value = attr.ib(default=None)
+    aux_value = attr.ib(default=None)
+
+class dtype(_dtype):
+    updated = False
+
+    SAVE_SQL = ', '.join("`%s`=${%s}" % (k,k) for k in 'value aux_value timestamp n_values'.split())
+
+    def __init__(self,db,id=None):
+        self.db = db
+        self.id = id
+
+    async def load(self, id=None):
+        if id is None:
+            id = self.id
+        d = await self.db.DoFn("select * from data_type where id=${id}", id=id, _dict=True)
+        self.set(d)
+
+    def set(self, d):
+        for k,v in d.items():
+            setattr(self,k,v)
+
+    async def save(self):
+        if self.updated:
+            await self.db.Do("update data_type set "+self.SAVE_SQL+" where id=${id}", **attr.asdict(self), _empty=True)
+            self.update = False
+
+@attr.s
 class _agg_type(object):
     """\
         Aggregated record type :: data_agg_type
@@ -603,14 +663,21 @@ class _agg_type(object):
     interval = attr.ib(default=None)
     timestamp = attr.ib(default=None)
     last_id = attr.ib(default=0)
-    value = attr.ib(default=0)
-    aux_value = attr.ib(default=0)
+
+    @property
+    def value(self):
+        raise Runtime("value")
+    @property
+    def aux_value(self):
+        raise Runtime("aux_value")
+
 
 class agg_type(_agg_type):
     updated = False
     proc = None
+    old_limit = None
 
-    SAVE_SQL = ', '.join("`%s`=${%s}" % (k,k) for k in 'value aux_value timestamp last_id'.split())
+    SAVE_SQL = ', '.join("`%s`=${%s}" % (k,k) for k in 'timestamp last_id'.split())
 
     def __init__(self, proc, db):
         super().__init__()
@@ -621,6 +688,10 @@ class agg_type(_agg_type):
         self.id = id
         d = await self.db.DoFn("select * from data_agg_type where id=${id}", id=self.id)
         await self.set(d)
+
+    async def load_main(self):
+        self.main = dtype(self.db)
+        await self.main.load(self.data_type)
     
     async def save(self, force=False):
         if self.id is None:
@@ -629,8 +700,10 @@ class agg_type(_agg_type):
             await self.proc.finish()
             await self.db.Do("update data_agg_type set "+self.SAVE_SQL+" where id=${id}", _empty=True, **attr.asdict(self))
             self.updated = False
+        await self.main.save()
     
     async def set(self, d):
+        self.old_limit = None
         super().__init__() # set to default values
         for k,v in d.items():
             setattr(self,k,v)
@@ -639,24 +712,43 @@ class agg_type(_agg_type):
         if self.layer > 0:
             self.prev_interval, = await self.db.DoFn("select `interval` from data_agg_type where data_type=${dtid} and layer=${layer}", dtid=self.data_type, layer=self.layer-1)
         else:
-            self.prev_interval = 0
+            self.prev_interval = 1
         self.updated = False
-        self.mode,self.tag = await self.db.DoFn("select `method`,`tag` from data_type where id=${id}", id=self.data_type)
+        self.mode,self.tag,self.cycle_max = await self.db.DoFn("select `method`,`tag`,`cycle_max` from data_type where id=${id}", id=self.data_type)
         self.proc = procs[self.mode](self)
+        await self.load_main()
 
-    async def process(self, d):
-        await self.proc.run(d)
-        self.value = d.value
-        self.aux_value = d.aux_value
+    async def process(self, d, do_old=False, **kw):
+        await self.proc.run(d, do_old=do_old)
+        if self.layer == 0:
+            self.main.value = d.value
+            self.main.aux_value = d.aux_value
+            self.main.updated = True
         self.last_id = d.id
         self.timestamp = d.timestamp
         self.updated = True
 
-    async def rollback_h(self, ts):
+    async def rollback_h(self, ts, this=False):
         dt = agg(self)
         dt.reset(ts)
-        await self.db.Do("delete from data_agg where data_agg_type=${aid} and timestamp>=${ts}", aid=self.id,ts=dt.start_ts, _empty=True)
+        if this:
+            n = await self.db.Do("delete from data_agg where data_agg_type=${aid} and tsc>=${tsc}", aid=self.id,tsc=dt.tsc, _empty=True)
+            if n:
+                try:
+                    logger.debug("Rollback %d summaries %d:%s",n,self.layer,self.tag)
+                    if self.layer > 0:
+                        adtid, = await self.db.DoFn("select id from data_agg_type where data_type=${typ} and layer=${layer}", typ=self.data_type, layer=self.layer-1, )
 
+                        self.last_id,self.timestamp = await self.db.DoFn("select id,timestamp from data_agg where data_agg_type=${adtid} and timestamp<${ts} order by timestamp desc limit 1", adtid=adtid, ts=dt.start_ts)
+                    else:
+                        self.last_id,self.timestamp = await self.db.DoFn("select id,timestamp from data_log where data_type=${dtid} and timestamp<${ts} order by timestamp desc limit 1", dtid=self.data_type, ts=dt.start_ts)
+                except NoData:
+                    self.last_id = 0
+                    self.timestamp = datetime(1999,1,1)
+                self.updated = True
+                await self.save()
+
+        # now rollback the next-upper layer
         st = agg_type(self.proc,self.db)
         try:
             d = await self.db.DoFn("select * from data_agg_type where data_type=${dtid} and layer=${layer}", dtid=self.data_type, layer=self.layer+1, _dict=True)
@@ -664,7 +756,7 @@ class agg_type(_agg_type):
             pass
         else:
             await st.set(d)
-            await st.rollback_h(ts)
+            await st.rollback_h(ts, this=True)
 
     async def rollback(self, id,ts):
         assert self.layer == 0, self
@@ -691,7 +783,7 @@ class agg_type(_agg_type):
         await self.proc.rollback(dr1,dr2)
         #dt.save()
         await dt.load(tsc=dt.tsc)
-        await self.rollback_h(dt.start_ts)
+        await self.rollback_h(dt.start_ts, this=True)
 
         # update values
         self.value = dr1.value
@@ -700,28 +792,32 @@ class agg_type(_agg_type):
 
     async def run(self, cleanup=True):
         if self.layer == 0:
+            do_rollback = (self.old_limit is None)
             dtyp = data
         else:
+            do_rollback = False
             dtyp = partial(agg,self)
+
             llid, = await self.db.DoFn("select id from data_agg_type where data_type=${dtid} and layer=${layer}", layer=self.layer-1, dtid=self.data_type)
-            try:
-                top, = await self.db.DoFn("select max(id) from data_agg where data_agg_type=${dtid}", dtid=llid)
-            except NoData:
-                top = None
-                tops = ""
-            else:
-                tops = " and id < ${top}"
         try:
             if self.layer == 0: # process raw data
-                r = self.db.DoSelect("select * from data_log where data_type=${dtid} and id > ${last_id} and timestamp > ${ts} order by timestamp,id", dtid=self.data_type, last_id=self.last_id, ts=self.timestamp-timedelta(1), _dict=True)
+                if self.old_limit is None:
+                    if self.last_id < 0:
+                        self.last_id = 0
+                    r = self.db.DoSelect("select * from data_log where data_type=${dtid} and id > ${last_id} and timestamp > ${ts} order by timestamp,id", dtid=self.data_type, last_id=self.last_id, ts=self.timestamp-timedelta(1), _dict=True)
+                else:
+                    r = self.db.DoSelect("select * from data_log where data_type=${dtid} and id < 0 and timestamp < ${ts} order by timestamp,id", dtid=self.data_type, ts=self.old_limit, _dict=True)
 
             else: # process previous layer
-                r = self.db.DoSelect("select * from data_agg where data_agg_type=${llid} and id > ${last_id} and timestamp > ${ts}"+tops+" order by timestamp,id", llid=llid, last_id=self.last_id,top=top, ts=self.timestamp-timedelta(1), _dict=True)
+                r = self.db.DoSelect("select * from data_agg where data_agg_type=${llid} and id > ${last_id} and timestamp > ${ts} order by timestamp,id", llid=llid, last_id=self.last_id, ts=self.timestamp-timedelta(1), _dict=True)
             dt = dtyp()
 
             async for d in r:
                 dt.set(**d)
-                await self.process(dt)
+                if do_rollback:
+                    await self.rollback_h(dt.timestamp, this=False)
+                    do_rollback = False
+                await self.process(dt, do_old=(self.old_limit is not None))
 
         except BackTime as bt:
             logger.warning("Need Time fix %s:%d at %d:%s",self.tag,self.layer, bt.id,bt.timestamp)
@@ -734,7 +830,10 @@ class agg_type(_agg_type):
             return
 
         await self.proc.finish()
-        if cleanup:
+        if self.old_limit is not None:
+            await self.db.Do("update data_type set value=NULL,aux_value=NULL,timestamp='1999-01-01' where id=${dtid}", dtid=self.data_type, _empty=True)
+            await self.db.Do("update data_agg_type set last_id=0,timestamp='1999-01-01' where id=${id}", id=self.id, _empty=True)
+        elif cleanup:
             await self.proc.cleanup()
         await self.save(True)
 
