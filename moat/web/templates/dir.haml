@@ -1,22 +1,26 @@
+-macro hdr()
+	Dir {{id}}/{{pid}} :: {{ this.path | join('|') }}
+
 %div
 	-if level == 1
 		%h1
-			Dir {{id}}/{{pid}}
+			{{hdr()}}
 	-elif level == 2
 		%h2
-			Dir {{id}}/{{pid}}
+			{{hdr()}}
 	-elif level == 3
 		%h3
-			Dir {{id}}/{{pid}}
+			{{hdr()}}
 	-elif level == 4
 		%h4
-			Dir {{id}}/{{pid}}
+			{{hdr()}}
 	-elif level == 5
 		%h5
-			Dir {{id}}/{{pid}}
+			{{hdr()}}
 	-else
 		%h6
-			Dir {{id}}/{{pid}}
+			{{hdr()}}
+
 	%div id=c{{id}}
 		&nbsp;
 
