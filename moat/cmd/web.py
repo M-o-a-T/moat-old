@@ -37,6 +37,7 @@ from yaml import dump
 
 from moat.script import Command, SubCommand, CommandError
 from moat.web import WEBDEF_DIR,WEBDEF, WEBDATA_DIR,WEBDATA, webdefs
+from moat.web.base import WebdefDir
 from moat.util import r_dict, r_show
 
 import logging
@@ -84,13 +85,13 @@ on the command line, they are added, otherwise everything under
                 if isinstance(m,types.ModuleType):
                     from moat.script.util import objects
                     n = 0
-                    for c in objects(m, WebDef, filter=lambda x:getattr(x,'name',None) is not None):
+                    for c in objects(m, WebdefDir, filter=lambda x:getattr(x,'name',None) is not None):
                         await t.add_webdef(c, force=self.force)
                         n += 1
                     if self.root.verbose > (1 if n else 0):
                         print("%s: %s webdef%s found." % (a,n if n else "no", "" if n==1 else "s"), file=self.stdout)
                 else:
-                    if not isinstance(m,WebDef):
+                    if not isinstance(m,WebdefDir):
                         raise CommandError("%s is not a web definition"%a)
                     await t.add_webdef(m, force=self.force)
         else:

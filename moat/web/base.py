@@ -86,19 +86,28 @@ class _DataLookup(object):
 		raise KeyError(k)
 
 class WebdefDir(recEtcDir,EtcDir):
-	"""A class linking a webdef to its etcd entry"""
+	"""Directory for /meta/web/PATH/:def - A class linking a webdef to its etcd entry
+		Linked into /meta in moat.types.etcd"""
 	def __init__(self,*a,**k):
 		super().__init__(*a,**k)
 		self._type = webdef_names()['/'.join(self.path[len(WEBDEF_DIR):-1])]
 		self._type.types(self)
 	
-	async def init(self):
-		await super().init()
-		t = await self.root.lookup(WEBDEF_DIR)
-		p = self.parent.parent
-		if t != t:
-			p = await p.lookup(WEBDEF)
-			# TODO: hook up updater
+	@classmethod
+	async def this_obj(cls, parent=None,recursive=None, pre=None, **kw):
+		if recursive is None:
+			raise ReloadData
+		m = webdef_names()['/'.join(parent.path[len(WEBDEF_DIR):])]
+		res = m(parent=parent,pre=pre,**kw)
+		return res
+
+	@classmethod
+	def types(cls,types):
+		pass
+
+	@property
+	def data(self):
+		return _DataLookup(self)
 
 WebdefDir.register('timestamp',cls=EtcFloat)
 WebdefDir.register('created',cls=EtcFloat)
@@ -191,45 +200,4 @@ class WebpathDir(EtcDir):
 
 WebpathDir.register(WEBDATA, cls=WebdataDir)
 WebpathDir.register('*', cls=WebpathDir)
-
-class WebDef(object):
-	"""\
-		I am the base class for a web data snippet.
-
-		I can render a single datum, and accept events to manipulate it.
-		"""
-	name = None # a type name
-	summary = """This is a prototype. Do not use."""
-	schema = {}
-	doc = None
-
-	def __init__(self, cmd, webdir=None, **cfg):
-		self.cmd = cmd
-		self.name = name
-		self.dir = webdir
-		# TODO: hook up updater
-
-	@classmethod
-	def types(cls,types):
-		pass
-
-	@property
-	def cfg(self):
-		return self.dir.data
-
-	@template('unknown.haml')
-	def render(self):
-		"Override me!"
-		return {'path': self.dir.path, 'cls': self.__class__.__name__}
-
-class WebDir(WebDef):
-	"""\
-		I render a directory.
-		"""
-	def __init__(self, cmd, webdir=None, **cfg):
-		super().__init__(cmd, webdir=webdir, **cfg)
-	
-	@template('dir.haml')
-	def render(self):
-		return {'path': self.dir.path}
 

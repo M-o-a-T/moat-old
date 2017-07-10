@@ -24,16 +24,15 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##BP
 
 import aiohttp_jinja2
-from .base import WebDef,template
+from .base import WebdefDir,template
 
-class BoolDef(WebDef):
+class BoolDef(WebdefDir):
 	name = "bool"
 	summary = "Your basic Boolean"
 	vars = {'true':'On', 'false':'Off'}
 
 	@template('bool.haml')
-	async def render(self):
+	async def render(self, this=None, **kw):
 		## XXX grab the value, of course
-		import pdb;pdb.set_trace()
 		return {'value': False}
 		
