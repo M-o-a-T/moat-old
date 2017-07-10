@@ -180,11 +180,11 @@ class agg(_agg):
             self.min_value = min(self.value,self.min_value)
             self.max_value = max(self.value,self.max_value)
         if self.id is not None:
-            logger.debug("U %s", self)
+            #logger.debug("U %s", self)
             await self.db.Do("update data_agg set value=${value},aux_value=${aux_value},min_value=${min_value},max_value=${max_value},n_values=${n_values},timestamp=${timestamp} where id=${id}", _empty=True, **attr.asdict(self))
             # tsc must no change
         elif self.n_values > 0 or self.value != 0:
-            logger.debug("N %s", self)
+            #logger.debug("N %s", self)
             self.id = await self.db.Do("insert into data_agg(data_agg_type,value,aux_value,min_value,max_value,n_values,timestamp,tsc) values(${lid},${value},${aux_value},${min_value},${max_value},${n_values},${timestamp},${tsc})", lid=self.atype.id, **attr.asdict(self))
 
 ### Handle data processing
@@ -255,7 +255,7 @@ class _proc:
         """\
             add this to our aggregation
             """
-        logger.debug("R %s",data)
+        #logger.debug("R %s",data)
         if self.agg and not self.agg.in_tsc(data):
             await self.finish(data)
         if not self.agg or not self.agg.in_tsc(data):
