@@ -36,7 +36,7 @@ class ExternModule(BaseModule):
 	@classmethod
 	def entries(cls):
 		yield from super().entries()
-		# yield "cmd_conn","moat.ext.onewire.cmd.conn.ServerCommand"
+		#yield "cmd_conn","moat.ext.extern.cmd.ServerCommand"
 		yield "cmd_dev","moat.ext.extern.cmd.DeviceCommand"
 		# yield "bus","moat.ext.onewire.bus.OnewireBusBase"
 		yield "device","moat.ext.extern.dev.ExternDeviceBase"
