@@ -34,6 +34,7 @@ import types
 from pprint import pprint
 from sqlmix.async import Db,NoData
 from qbroker.unit import CC_DICT, CC_DATA, CC_MSG
+from qbroker.util import UTC
 from yaml import dump
 from traceback import print_exc
 from boltons.iterutils import remap
@@ -636,6 +637,7 @@ Process a layer (or all of them)
 					dels.append((dtid,tag))
 		for d,t in dels:
 			async with self.db() as db:
+				await db.Do("SET TIME_ZONE='+00:00'", _empty=True)
 				logger.info("deleting %s", t)
 				n = await db.Do("delete from data_log where data_type=${dtid}", _empty=True,dtid=d)
 				if n:
