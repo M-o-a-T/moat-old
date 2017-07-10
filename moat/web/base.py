@@ -104,7 +104,7 @@ WebdefDir.register('timestamp',cls=EtcFloat)
 WebdefDir.register('created',cls=EtcFloat)
 
 class WebdataDir(recEtcDir,EtcDir):
-	"""A class linking a web entry to its data, display, etc."""
+	"""Directory for /web/PATH/:item"""
 	type = None
 
 	async def init(self):
@@ -141,7 +141,7 @@ class WebdataDir(recEtcDir,EtcDir):
 #WebdataDir.register('created',cls=EtcFloat)
 
 class WebpathDir(EtcDir):
-	"""A class linking web entries to their data, display, etc."""
+	"""Directory for /web/PATH"""
 
 	async def send_item(self,view, level=1):
 		"""Send my data struct to this view"""
