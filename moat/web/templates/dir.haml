@@ -1,0 +1,22 @@
+%div
+	-if level == 1
+		%h1
+			Dir {{id}}/{{pid}}
+	-elif level == 2
+		%h2
+			Dir {{id}}/{{pid}}
+	-elif level == 3
+		%h3
+			Dir {{id}}/{{pid}}
+	-elif level == 4
+		%h4
+			Dir {{id}}/{{pid}}
+	-elif level == 5
+		%h5
+			Dir {{id}}/{{pid}}
+	-else
+		%h6
+			Dir {{id}}/{{pid}}
+	%div id=c{{id}}
+		&nbsp;
+

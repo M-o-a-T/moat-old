@@ -28,11 +28,12 @@ Class for managing web data snippets.
 """
 
 import asyncio
-import aiohttp_jinja2
+from aiohttp_jinja2 import web,render_string
 from etcd_tree.etcd import EtcTypes, WatchStopped
 from etcd_tree.node import EtcFloat,EtcBase, EtcDir
 import etcd
 import inspect
+import functools
 from time import time
 from traceback import format_exception
 import weakref
@@ -45,6 +46,23 @@ logger = logging.getLogger(__name__)
 
 class _NOTGIVEN:
 	pass
+
+def template(template_name):
+    def wrapper(func):
+        @asyncio.coroutine
+        @functools.wraps(func)
+        def wrapped(*args, view=None, **kwargs):
+            if asyncio.iscoroutinefunction(func):
+                coro = func
+            else:
+                coro = asyncio.coroutine(func)
+            context = yield from coro(*args, **kwargs)
+
+            # Supports class based views see web.View
+            response = render_string(template_name, view.request, context)
+            return response
+        return wrapped
+    return wrapper
 
 class _DataLookup(object):
 	"""Helper class to facilitate WebDef.data[]"""
@@ -129,7 +147,12 @@ class WebpathDir(EtcDir):
 		"""Send my data struct to this view"""
 		id,pid = self.get_id(level)
 		level += 2
-		view.send_json(action="replace", id=id, parent=pid, data='<div><h%d>Dir %s/%s</h%d><div id="c%s"></div></div>' % (level,id,pid,level,id))
+		view.send_json(action="replace", id=id, parent=pid, data=await self.render(level, view=view))
+
+	@template('dir.haml')
+	def render(self, level=1):
+		id,pid = self.get_id(level)
+		return dict(id=id,level=level+2,pid=pid)
 
 	def get_id(self,level):
 		if level == 0:
@@ -171,7 +194,7 @@ class WebDef(object):
 	def cfg(self):
 		return self.dir.data
 
-	@aiohttp_jinja2.template('unknown.haml')
+	@template('unknown.haml')
 	def render(self):
 		"Override me!"
 		return {'path': self.dir.path, 'cls': self.__class__.__name__}
@@ -183,7 +206,7 @@ class WebDir(WebDef):
 	def __init__(self, cmd, webdir=None, **cfg):
 		super().__init__(cmd, webdir=webdir, **cfg)
 	
-	@aiohttp_jinja2.template('dir.haml')
+	@template('dir.haml')
 	def render(self):
 		return {'path': self.dir.path}
 
