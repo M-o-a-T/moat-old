@@ -40,6 +40,7 @@ import weakref
 
 from moat.types.etcd import recEtcDir
 from . import webdef_names, WEBDEF_DIR,WEBDEF, WEBDATA_DIR,WEBDATA
+from moat.util import do_async
 
 import logging
 logger = logging.getLogger(__name__)
@@ -48,27 +49,32 @@ class _NOTGIVEN:
 	pass
 
 def template(template_name):
-    def wrapper(func):
-        @asyncio.coroutine
-        @functools.wraps(func)
-        def wrapped(*args, view=None, **kwargs):
-            if asyncio.iscoroutinefunction(func):
-                coro = func
-            else:
-                coro = asyncio.coroutine(func)
-            context = yield from coro(*args, **kwargs)
+	def wrapper(func):
+		@asyncio.coroutine
+		@functools.wraps(func)
+		def wrapped(*args, view=None, **kwargs):
+			if asyncio.iscoroutinefunction(func):
+				coro = func
+			else:
+				coro = asyncio.coroutine(func)
+			context = yield from coro(*args, **kwargs)
 
-            # Supports class based views see web.View
-            response = render_string(template_name, view.request, context)
-            return response
-        return wrapped
-    return wrapper
+			# Supports class based views see web.View
+			try:
+				response = render_string(template_name, view.request, context)
+			except Exception as exc:
+				logger.exception("%s: %s", template_name,context)
+				return ""
+			return response
+		return wrapped
+	return wrapper
 
 class _DataLookup(object):
-	"""Helper class to facilitate WebDef.data[]"""
+	"""Helper class to facilitate WebdefDir.data[]"""
 	def __init__(self,wd):
 		self.wd = wd
 	def __getitem__(self, k):
+		k = str(k).lower()
 		v = self.wd['data'].get(k,_NOTGIVEN)
 		if v is not _NOTGIVEN:
 			return v
@@ -133,6 +139,7 @@ class WebdataDir(recEtcDir,EtcDir):
 	
 	def render(self, view=None):
 		if self._type is None:
+			print("Rendering",self['def'])
 			return self._render(view=view)
 		return self._type.render(this=self, view=view)
 
@@ -165,6 +172,10 @@ class WebdataType(EtcString):
 			do_async(self._has_update)
 
 	async def _has_update(self):
+		print("Loading",self.value)
+		p = self.parent
+		if p is None:
+			return
 		p._type = await self.root.lookup(*(WEBDEF_DIR+tuple(self.value.split('/'))),name=WEBDEF)
 
 #	@property
