@@ -173,8 +173,12 @@ class agg(_agg):
         """write the current record"""
         if not self.updated:
             return
-        self.min_value = min(self.value,self.min_value)
-        self.max_value = max(self.value,self.max_value)
+        if self.atype.mode == 6:
+            self.min_value = min(self.aux_value,self.min_value)
+            self.max_value = max(self.aux_value,self.max_value)
+        else:
+            self.min_value = min(self.value,self.min_value)
+            self.max_value = max(self.value,self.max_value)
         if self.id is not None:
             logger.debug("U %s", self)
             await self.db.Do("update data_agg set value=${value},aux_value=${aux_value},min_value=${min_value},max_value=${max_value},n_values=${n_values},timestamp=${timestamp} where id=${id}", _empty=True, **attr.asdict(self))
@@ -512,8 +516,69 @@ class proc_notice(proc_event):
 class proc_cycle(proc_store):
     """Cyclic values with confidence (wind direction)
         """
-    async def process(self,data):
-        raise NotImplementedError
+    async def process(self,data, **kw):
+        from math import pi,cos,acos,sqrt
+        def distance(a,b,alpha):
+            return sqrt(a*a+b*b-2*a*b*cos(alpha))
+        def angle(a,b,c):
+            if a is None or b is None or c is None:
+                return 0
+            v=(a*a+b*b-c*c)/(2*a*b)
+            # Computer math is inexact, so sometimes we get something
+            # that's a weee bit larger than one
+            if v >= 1:
+                return 0
+            elif v <= -1:
+                return pi
+            return acos(v)
+
+        if self.agg.n_values == 0:
+            self.agg.n_values = data.n_values
+            self.agg.value = data.value
+            self.agg.aux_value = data.aux_value
+            if self.typ.layer > 0:
+                self.agg.min_value = data.min_value
+                self.agg.max_value = data.max_value
+            else:
+                self.agg.min_value = data.aux_value
+                self.agg.max_value = data.aux_value
+        else:
+            cycle = self.typ.cycle_max
+            decay = data.n_values/(data.n_values+self.agg.n_values)
+            # We use the edge from the circle's center to the new point as
+            # our base line.
+            # ① Get the angle between the old average and the new point
+            # (@ center of the circle)
+            al = ((self.agg.value-data.value)%cycle)*2*pi / cycle
+
+            # ② distance between the old avg and the new point
+            d = distance(data.aux_value,self.agg.aux_value,al)
+            # ③ angle (@ new point)
+            nal = angle(data.aux_value,d,self.agg.aux_value)
+            # ④ distance of new avg from new point; decay=0 is "no change"
+            d *= decay
+
+            # ⑤ third side of center-new point-new average triangle,
+            # inverse of ③
+            self.agg.aux_value = distance(data.aux_value,d,nal)
+
+            # ⑥ angle between new avg and new point, inverse of ②
+            # (center of the circle)
+            nal = angle(data.aux_value,self.agg.aux_value,d)
+
+            # ⑦ now orient the result
+            if self.agg.value < data.value: nal = -nal
+            # ⑧ and add the base line's "real" angle back
+            # (inverse of ①)
+            self.agg.value = (data.value+nal*cycle/pi) % cycle
+            self.agg.n_values += data.n_values
+
+            self.agg.min_value = min(self.agg.aux_value,self.agg.min_value)
+            self.agg.max_value = max(self.agg.aux_value,self.agg.max_value)
+            if self.typ.layer > 0:
+                self.agg.min_value = min(self.agg.aux_value,data.min_value)
+                self.agg.max_value = max(self.agg.aux_value,data.max_value)
+        self.agg.updated = True
 
 from . import modes
 procs = {}

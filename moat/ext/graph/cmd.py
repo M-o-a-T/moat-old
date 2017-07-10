@@ -327,6 +327,9 @@ Set data type and aggregation options for a logged event type
 		self.parser.add_option('-u','--unit',
 			action="store", dest="unit",
 			help="set the entry's unit (°C, m/s, …)")
+		self.parser.add_option('-c','--cycle',
+			action="store", dest="cycle", type=int,
+			help="set the type's maximum for cyclic values ('cycle' type only)")
 		self.parser.add_option('-s','--sort',
 			action="store", dest="order", type=int,
 			help="set the type's sort priority (higher is earlier)")
@@ -372,6 +375,8 @@ Set data type and aggregation options for a logged event type
 				upd['display_name'] = self.options.name
 			if self.options.order:
 				upd['display_order'] = self.options.order
+			if self.options.cycle:
+				upd['cycle_max'] = self.options.cycle
 
 			if upd:
 				try:
