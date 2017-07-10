@@ -30,7 +30,7 @@ Class for managing web data snippets.
 import asyncio
 from aiohttp_jinja2 import web,render_string
 from etcd_tree.etcd import EtcTypes, WatchStopped
-from etcd_tree.node import EtcFloat,EtcBase, EtcDir
+from etcd_tree.node import EtcFloat,EtcBase, EtcDir, EtcString
 import etcd
 import inspect
 import functools
@@ -99,13 +99,13 @@ class WebdefDir(recEtcDir,EtcDir):
 		if t != t:
 			p = await p.lookup(WEBDEF)
 			# TODO: hook up updater
-		
+
 WebdefDir.register('timestamp',cls=EtcFloat)
 WebdefDir.register('created',cls=EtcFloat)
 
 class WebdataDir(recEtcDir,EtcDir):
 	"""Directory for /web/PATH/:item"""
-	type = None
+	_type = None
 
 	async def init(self):
 		"""Need to look up my type, and all its super-defs"""
@@ -117,33 +117,57 @@ class WebdataDir(recEtcDir,EtcDir):
 			self.type = tr
 		# TODO: hook up updater
 
-	async def send_item(self,view, level=0):
+	async def send_item(self,view, **kw):
 		"""Send my data struct to this view"""
-		id,pid = self.get_id(level)
-		view.send_json(action="replace", id=id, parent=pid, data='<div>Item %s %s!</div>' % (id,pid,))
+		id,pid = self.get_id()
+		view.send_json(action="replace", id=id, parent=pid, data=await self.render(view=view))
+	
+	def render(self, view=None):
+		if self._type is None:
+			return self._render(view=view)
+		return self._type.render(this=self, view=view)
 
-	def get_id(self,level):
-		if level == 0:
-			id="content"
-			pid=""
+	def recv_msg(self, act, view=None, **kw):
+		if self._type is None:
+			raise RuntimeError("No type known")
+		self._type.recv_msg(act=act, this=self, view=view, **kw)
+
+	@template('item.haml')
+	def _render(self, level=1):
+		id,pid = self.get_id()
+		return dict(id=id,pid=pid, this=self)
+
+	def get_id(self, level=1):
+		id="f_%d" % self.parent._seq
+		if level == 1:
+			pid = "content"
 		else:
-			id="f_%d" % self.parent._seq
-			if level == 1:
-				pid="content"
-			else:
-				pid="f_%d" % self.parent.parent._seq
+			pid="f_%d" % self.parent.parent._seq
 		return id,pid
+
+class WebdataType(EtcString):
+	def has_update(self):
+		p = self.parent
+		if p is None:
+			return
+		if self.is_new is None:
+			p._type = None
+		else:
+			do_async(self._has_update)
+
+	async def _has_update(self):
+		p._type = await self.root.lookup(*(WEBDEF_DIR+tuple(self.value.split('/'))),name=WEBDEF)
 
 #	@property
 #	def param(self):
 #		return _DataLookup(self)
 #WebdataDir.register('timestamp',cls=EtcFloat)
-#WebdataDir.register('created',cls=EtcFloat)
+WebdataDir.register('def',cls=WebdataType)
 
 class WebpathDir(EtcDir):
 	"""Directory for /web/PATH"""
 
-	async def send_item(self,view, level=1):
+	async def send_item(self,view, level=1, **kw):
 		"""Send my data struct to this view"""
 		id,pid = self.get_id(level)
 		view.send_json(action="replace", id=id, parent=pid, data=await self.render(level, view=view))

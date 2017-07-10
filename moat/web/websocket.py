@@ -33,6 +33,9 @@ from .app import BaseView,BaseExt
 
 class ApiView(BaseView):
     path = '/api/control'
+    view = None
+    items = {}
+
     async def get(self):
         app = self.request.app
         sig = app.get('moat.update',None)
@@ -65,7 +68,17 @@ class ApiView(BaseView):
                             loc = cmd.app.rootpath
                         await self.set_location(loc)
                     else:
-                        logger.warn("Unknown action: %s",repr(msg))
+                        id = msg.get('id',None)
+                        if id is None:
+                            logger.warn("Unknown action: %s",repr(msg))
+                        else:
+                            try:
+                                this = self.items[id]
+                                this.recv_msg(act, view=self, **msg)
+                            except KeyError:
+                                logger.warn("Unknown ID: %s",repr(id))
+                            except Exception as exc:
+                                logger.exception("%s on %s:%s",act,id,this)
                 elif msg.type == aiohttp.WSMsgType.ERROR:
                     logger.warn('ws connection closed: %s', ws.exception())
                     break
@@ -91,6 +104,7 @@ class ApiView(BaseView):
             self.send_json(action="error", msg="Location '%s' not found" % (loc,))
             return
 
+        self.view = t
         await self.setup_dir(t)
         await self.send_dir(t, 0)
 
@@ -124,8 +138,10 @@ class ApiView(BaseView):
                 await self.send_field(v[WEBDATA],level)
             else:
                 await self.send_dir(v,level)
-        
-    def send_json(self, **kw):
+
+    def send_json(self, this=None, **kw):
+        if this is not None:
+            self.items[kw[id]] = this
         try:
             self.ws.send_json(kw)
         except Exception:
