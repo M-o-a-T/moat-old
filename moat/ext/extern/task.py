@@ -32,7 +32,6 @@ from aio_etcd import StopWatching
 
 from contextlib import suppress
 from moat.dev import DEV_DIR,DEV
-from moat.bus import BUS_DIR
 from moat.script.task import Task,TimeoutHandler
 from moat.script.util import objects
 from moat.task.device import DeviceMgr
@@ -48,21 +47,14 @@ class ExtHandler(DeviceMgr):
 	taskdef = "extern/run"
 	summary = "Interface to external AMQP-reachable devices"
 
-	async def setup_vars(self):
-		# onewire/NAME/scan/…
-		self.srv_name = self.path[1]
-		self.srv_tree = await self.tree.lookup(BUS_DIR+('onewire',self.srv_name))
-
-		self.srv_data = await self.srv_tree['server']
-		self.srv = OnewireServer(self.srv_data['host'],self.srv_data.get('port',None), loop=self.loop)
-		self.devices = await self.tree.subdir(DEV_DIR+('onewire',))
+	async def managed(self):
+		return self.devices
 
 	async def setup(self):
 		"""\
 			additional setup before DeviceMgr.task()
 			"""
-		await self.setup_vars()
-		self.bus = self.srv.at('uncached')
-		self.bus_cached = self.srv
+		self.devices = await self.tree.subdir(DEV_DIR+('extern',))
+
 		await super().setup()
 
