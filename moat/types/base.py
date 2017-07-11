@@ -121,7 +121,7 @@ class Type:
 
 			Returns a 'settable' version of the value (converted to float, constrained, whatever).
 			"""
-		raise CommandError("I don't know about '%s', much less setting it to '%s'" % (var,value))
+		raise ValueError("I don't know about '%s', much less setting it to '%s'" % (var,value))
 
 class StringType(Type):
 	name = 'str'
