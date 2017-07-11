@@ -51,7 +51,7 @@ class DefSetup:
         path = DEV_DIR+(ExternDevice.prefix,)
         await self.root.setup(self)
         tree = self.root.tree
-        t = await tree.lookup(path)
+        t = await tree.subdir(path)
         return t
 
 class ListCommand(DefSetup,Command):
