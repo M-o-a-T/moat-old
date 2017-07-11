@@ -33,6 +33,5 @@ class BoolDef(WebdefDir):
 
 	@template('bool.haml')
 	async def render(self, this=None, **kw):
-		## XXX grab the value, of course
-		return {'value': False}
+		return {'value': data[str(this.value).lower()]}
 		
