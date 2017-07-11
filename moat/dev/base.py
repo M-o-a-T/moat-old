@@ -112,10 +112,7 @@ class BaseTypedDir(ManagedEtcThing,EtcDir):
 			self._value.etcd_value = self['value']
 
 	def has_update(self):
-		if 'type' not in self:
-			self._type = None
-			return
-		self._set_type(self['type'])
+		self._value.etcd_value = self['value']
 
 	async def init(self):
 		await super().init()
