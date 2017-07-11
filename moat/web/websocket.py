@@ -66,6 +66,8 @@ class ApiView(BaseView):
                         loc = msg.get('location','')
                         if not loc:
                             loc = cmd.app.rootpath
+                        elif loc[0] == '#':
+                            loc = loc[1:]
                         await self.set_location(loc)
                     else:
                         id = msg.get('id',None)

@@ -71,7 +71,7 @@
 			};
 			ws.onopen = function (msg) {
 			    announce("success","Connected. Waiting for instructions …");
-				ws.send(JSON.stringify({"action":"locate","location": "" }));
+				ws.send(JSON.stringify({"action":"locate","location": window.location.hash }));
 			};
 			ws.onerror = function (msg) {
 				announce("danger","Connection error! Please reload this page.");
