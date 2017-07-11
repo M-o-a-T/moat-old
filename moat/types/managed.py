@@ -24,7 +24,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##BP
 
 import asyncio
-from etcd_tree import EtcString,EtcDir,EtcFloat,EtcInteger,EtcValue, ReloadRecursive
+from etcd_tree import EtcString,EtcDir,EtcFloat,EtcInteger,EtcValue,EtcAwaiter, ReloadRecursive
 import aio_etcd as etcd
 from time import time
 from weakref import ref
@@ -75,6 +75,8 @@ class ManagedEtcThing(object):
 		await self.manager_present(mgr)
 		if isinstance(self,EtcDir):
 			for v in self.values():
+				if isinstance(v,EtcAwaiter):
+					v = await v
 				p = getattr(v,'_manager_present',None)
 				if p is not None:
 					await p(mgr)
