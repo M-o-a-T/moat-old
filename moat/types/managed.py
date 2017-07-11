@@ -112,9 +112,12 @@ class ManagedEtcDir(ManagedEtcThing):
 	#
 	# The manager_async property allows you to wait for a manager to start.
 	# 
-	def __init__(self,*a,**k):
-		super().__init__(*a,**k)
-		self._manager_lock = asyncio.Event(loop=self._loop)
+	_manager_lock = None
+	@property
+	def mgr_lock(self):
+		if self._manager_lock is None:
+			self._manager_lock = asyncio.Event(loop=self._loop)
+		return self._manager_lock
 
 	@property
 	def manager(self):
@@ -131,9 +134,9 @@ class ManagedEtcDir(ManagedEtcThing):
 					self._manager_gone()
 				else:
 					return m
-			logger.debug("MGR: %d %d %s Waiting", id(self),id(self._manager_lock),self)
-			await self._manager_lock.wait()
-			logger.debug("MGR: %d %d %s WaitDone", id(self),id(self._manager_lock),self)
+			logger.debug("MGR: %d %d %s Waiting", id(self),id(self.mgr_lock),self)
+			await self.mgr_lock.wait()
+			logger.debug("MGR: %d %d %s WaitDone", id(self),id(self.mgr_lock),self)
 	async def set_manager(self,mgr):
 		m = self._mgr
 		if m is not None:
@@ -151,17 +154,17 @@ class ManagedEtcDir(ManagedEtcThing):
 			self._manager_gone()
 
 	async def _manager_present(self,mgr):
-		logger.debug("MGR %d %d %s set start",id(self),id(self._manager_lock),self)
+		logger.debug("MGR %d %d %s set start",id(self),id(self.mgr_lock),self)
 		self._mgr = ref(mgr,self._manager_gone)
-		self._manager_lock.set()
+		self.mgr_lock.set()
 		await super()._manager_present(mgr)
-		logger.debug("MGR %d %d %s set done",id(self),id(self._manager_lock),self)
+		logger.debug("MGR %d %d %s set done",id(self),id(self.mgr_lock),self)
 	def _manager_gone(self):
-		logger.debug("MGR %d %d %s del start",id(self),id(self._manager_lock),self)
+		logger.debug("MGR %d %d %s del start",id(self),id(self.mgr_lock),self)
 		self._mgr = None
-		self._manager_lock.clear()
+		self.mgr_lock.clear()
 		super()._manager_gone()
-		logger.debug("MGR %d %d %s del done",id(self),id(self._manager_lock),self)
+		logger.debug("MGR %d %d %s del done",id(self),id(self.mgr_lock),self)
 
 #ManagedEtcDir.register('*', cls=ManagedEtcSubdir)
 #ManagedEtcSubDir.register('*', cls=ManagedEtcSubdir)
