@@ -58,10 +58,10 @@ class ExternDevice(BaseTypedDir,BaseDevice):
         await super().manager_present(mgr)
         n = self.get('input',{}).get('topic',None)
         if n is not None:
-            await self._reg_rpc_in(n)
+            await self._reg_in_rpc(n)
         n = self.get('output',{}).get('topic',None)
         if n is not None:
-            await self._reg_rpc_out(n)
+            await self._reg_out_rpc(n)
     
     def manager_gone(self):
         super().manager_gone()
@@ -83,7 +83,7 @@ class ExternDevice(BaseTypedDir,BaseDevice):
         if m is None:
             return
         amqp = m.amqp
-        if name is not None and self._rpc_name == name:
+        if name is not None and self._rpc_in_name == name:
             return
         if self._rpc is not None:
             await amqp.unregister_rpc_async(self._rpc)
@@ -94,7 +94,7 @@ class ExternDevice(BaseTypedDir,BaseDevice):
         self._rpc_name = name
 
     async def _reg_out_rpc(self, name):
-        self.__rpc_out_name = name
+        self._rpc_out_name = name
     
     async def set_value(self, value):
         m = self.manager
@@ -125,7 +125,7 @@ class RpcName(EtcString):
         m = p.manager
         if m is None:
             return
-        self._do(p)
+        self._do(m,p)
 
     def _do(self,m,p):
         raise NotImplementedError
