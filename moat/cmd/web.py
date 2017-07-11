@@ -425,7 +425,7 @@ class ListCommand(DefSetup,Command):
     name = "list"
     summary = "List web entries"
     description = """\
-Web entries are stored in etcd at /web/**/:data.
+Web entries are stored in etcd at /web/**/:item.
 
 This command shows that data. Depending on verbosity, output is
 a one-line summary, human-readable detailed state, or details as YAML.
