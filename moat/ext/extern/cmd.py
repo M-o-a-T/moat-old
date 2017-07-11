@@ -168,7 +168,7 @@ class _AddUpdate(DefSetup):
                     except KeyError:
                         pass
                 else:
-                    await dx.set(k,v, sync=False)
+                    await dx.set(k.split('/'),v, sync=False)
             
 
 class AddCommand(_AddUpdate,Command):
