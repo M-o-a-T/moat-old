@@ -37,6 +37,7 @@ from yaml import dump
 from moat.script import Command, SubCommand, CommandError
 from moat.dev import DEV_DIR, DEV
 from moat.util import r_dict, r_show
+from moat.types import TYPEDEF_DIR, TYPEDEF
 from .dev import ExternDevice
 
 import logging
