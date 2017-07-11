@@ -73,7 +73,7 @@ class ManagedEtcThing(object):
 	async def _manager_present(self,mgr):
 		logger.debug("MGR %s set %s",self,mgr)
 		await self.manager_present(mgr)
-		if isinstance(self,EtcDir):
+		if self.name[0] != ':' and isinstance(self,EtcDir):
 			for v in self.values():
 				if isinstance(v,EtcAwaiter):
 					v = await v
