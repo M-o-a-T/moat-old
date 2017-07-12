@@ -42,7 +42,6 @@
 
 			ws.onmessage = function (msg) {
 				var m = $.parseJSON(msg.data);
-				console.log("IN",m);
 				if (!('action' in m)) {
 					announce("warning","Unknown message: " + m)
 				} else if (m.action == 'error') {
@@ -68,6 +67,7 @@
 					}
 
 				} else {
+					console.log("IN",m);
 					announce("warning","Unknown action: " + m.action)
 				}
 			};
