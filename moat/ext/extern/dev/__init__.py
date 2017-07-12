@@ -38,7 +38,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 class ExternDeviceBase(MoatDeviceBase,ManagedEtcDir):
-    """Base class for /device/onewire"""
+    """Base class for /device/extern"""
     pass
 
 class ExternDeviceSub(EtcDir,ManagedEtcThing):
