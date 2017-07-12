@@ -30,6 +30,7 @@ logger = logging.getLogger(__name__)
 
 from moat.web import WEBDATA_DIR,WEBDATA
 from .app import BaseView,BaseExt
+from moat.util import do_async
 
 class ApiView(BaseView):
     path = '/api/control'
@@ -141,9 +142,19 @@ class ApiView(BaseView):
             else:
                 await self.send_dir(v,level)
 
+    def send_update(self,this,**k):
+        do_async(this.send_item,self,level=9)
+        pass
+
     def send_json(self, this=None, **kw):
+        #print("SJ",this,kw)
         if this is not None:
-            self.items[kw[id]] = this
+            id = kw['id']
+            if id not in self.items:
+                self.items[id] = this
+                u = getattr(this,'updates',None)
+                if u is not None:
+                    u.connect(self.send_update)
         try:
             self.ws.send_json(kw)
         except Exception:

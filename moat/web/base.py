@@ -37,10 +37,12 @@ import functools
 from time import time
 from traceback import format_exception
 import weakref
+import blinker
 
 from moat.types.etcd import recEtcDir
 from . import webdef_names, WEBDEF_DIR,WEBDEF, WEBDATA_DIR,WEBDATA
 from moat.util import do_async
+from moat.dev import DEV_DIR,DEV
 
 import logging
 logger = logging.getLogger(__name__)
@@ -49,6 +51,10 @@ class _NOTGIVEN:
 	pass
 
 def template(template_name):
+	"""\
+		Decorator to apply the result to a template.
+		The decorated function may or may not be a coroutine.
+		"""
 	def wrapper(func):
 		@asyncio.coroutine
 		@functools.wraps(func)
@@ -121,25 +127,37 @@ WebdefDir.register('created',cls=EtcFloat)
 class WebdataDir(recEtcDir,EtcDir):
 	"""Directory for /web/PATH/:item"""
 	_type = None
+	_value = None
+	_mon = None # value monitor
+	updates = None # signal: updated value
+
+	def __init__(self,*a,**k):
+		self.updates = blinker.Signal()
+		super().__init__(*a,**k)
 
 	async def init(self):
 		"""Need to look up my type, and all its super-defs"""
 		await super().init()
-		t = await self.root.lookup(WEBDEF_DIR)
 		if 'def' in self:
-			tr = await t.lookup(self['def'])
+			tr = await self.root.lookup(WEBDEF_DIR)
+			tr = await tr.lookup(self['def'])
 			tr = await tr.lookup(WEBDEF)
-			self.type = tr
-		# TODO: hook up updater
+			self._type = tr
+		if 'value' in self:
+			tr = await self.root.lookup(DEV_DIR)
+			tr = await tr.lookup(self['value'])
+			tr = await tr.lookup(DEV)
+			self._value = tr
 
 	async def send_item(self,view, **kw):
 		"""Send my data struct to this view"""
 		id,pid = self.get_id()
-		view.send_json(action="replace", id=id, parent=pid, data=await self.render(view=view))
+		view.send_json(action="replace", id=id, this=self, parent=pid, data=await self.render(view=view))
 	
 	def render(self, view=None):
+		"""coroutine!"""
 		if self._type is None:
-			print("Rendering",self['def'])
+			print("Rendering",self,self['def'])
 			return self._render(view=view)
 		return self._type.render(this=self, view=view)
 
@@ -160,8 +178,26 @@ class WebdataDir(recEtcDir,EtcDir):
 		else:
 			pid="f_%d" % self.parent.parent._seq
 		return id,pid
+	
+	def has_update(self):
+		super().has_update()
+		if self.is_new is None and self._mon is not None:
+			self._mon.cancel()
+			self._mon = None
+
+	def update_value(self,val):
+		#print("HAS",val,self,self.mon)
+		key = self.get('subvalue','value').split('/')
+		for k in key[:-1]:
+			if k:
+				val = val.get(k)
+		key = key[-1]
+		if key:
+			val = getattr(val,key)
+		self.updates.send(self, value=val)
 
 class WebdataType(EtcString):
+	"""Type path for WebdataDir"""
 	def has_update(self):
 		p = self.parent
 		if p is None:
@@ -172,25 +208,58 @@ class WebdataType(EtcString):
 			do_async(self._has_update)
 
 	async def _has_update(self):
-		print("Loading",self.value)
+		print("Using",self.value)
 		p = self.parent
 		if p is None:
 			return
 		p._type = await self.root.lookup(*(WEBDEF_DIR+tuple(self.value.split('/'))),name=WEBDEF)
+		print("Using",p,self.value,p._type)
+
+class WebdataValue(EtcString):
+	"""Value path for WebdataDir"""
+	def has_update(self):
+		p = self.parent
+		if p is None:
+			return
+		if self.is_new is None:
+			p._value = None
+		else:
+			do_async(self._has_update)
+
+	async def _has_update(self):
+		print("Load from",self.value)
+		p = self.parent
+		if p is None:
+			return
+		p._value = await self.root.lookup(*(DEV_DIR+tuple(self.value.split('/'))),name=DEV)
+		p.mon = p._value.add_monitor(p.update_value)
+		p.update_value(p._value)
+		pass
 
 #	@property
 #	def param(self):
 #		return _DataLookup(self)
 #WebdataDir.register('timestamp',cls=EtcFloat)
 WebdataDir.register('def',cls=WebdataType)
+WebdataDir.register('value',cls=WebdataValue)
 
 class WebpathDir(EtcDir):
 	"""Directory for /web/PATH"""
 
+#	updates = None
+#	def __init__(self,*a,**k):
+#		super().__init__(*a,**k)
+#		self.updates = blinker.Signal()
+#
 	async def send_item(self,view, level=1, **kw):
 		"""Send my data struct to this view"""
 		id,pid = self.get_id(level)
-		view.send_json(action="replace", id=id, parent=pid, data=await self.render(level, view=view))
+		view.send_json(action="replace", id=id, this=self, parent=pid, data=await self.render(level, view=view))
+
+#	def has_update(self):
+#		if self._is_new is not True:
+#			return
+#		self.updates.send(self, value=val)
 
 	@template('dir.haml')
 	def render(self, level=1):
