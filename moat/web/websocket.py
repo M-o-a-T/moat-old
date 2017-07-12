@@ -34,8 +34,11 @@ from moat.util import do_async
 
 class ApiView(BaseView):
     path = '/api/control'
-    view = None
-    items = {}
+    top_item = None
+
+    def __init__(self,*a,**k):
+        self.items = {}
+        super().__init__(*a,**k)
 
     async def get(self):
         app = self.request.app
@@ -107,9 +110,23 @@ class ApiView(BaseView):
             self.send_json(action="error", msg="Location '%s' not found" % (loc,))
             return
 
-        self.view = t
-        await self.setup_dir(t)
-        await self.send_dir(t, 0)
+        self.items = {}
+        self.top_item = t
+        await t.feed_subdir(self)
+
+    def key_for(self, item):
+        if item is self.top_item:
+            return "content"
+        return "f_"+str(item._seq)
+
+    async def add_item(self, item,level):
+        key = self.key_for(item)
+        if key not in self.items:
+            self.items[key] = (item,level)
+            u = getattr(item,'updates',None)
+            if u is not None:
+                u.connect(self.send_update)
+            await item.send_item(self, level=level)
 
     async def setup_field(self,t):
         t = await t

@@ -53,7 +53,7 @@
 					d.attr("id",m.id)
 					if (f.length > 0) {
 						f.replaceWith(d);
-					} else {
+					} else if (m.parent) {
 						f = $('#c'+m.parent);
 						if (f.length == 0)  {
 							f = $('#'+m.parent);
@@ -63,6 +63,8 @@
 							}
 						}
 						f.append(d);
+					} else {
+						announce("danger","Content ID "+m.id+" not found.");
 					}
 
 				} else {

@@ -30,7 +30,7 @@ Class for managing web data snippets.
 import asyncio
 from aiohttp_jinja2 import web,render_string
 from etcd_tree.etcd import EtcTypes, WatchStopped
-from etcd_tree.node import EtcFloat,EtcBase, EtcDir, EtcString
+from etcd_tree.node import EtcFloat,EtcBase, EtcDir,EtcAwaiter, EtcString
 import etcd
 import inspect
 import functools
@@ -63,7 +63,7 @@ def template(template_name):
 				coro = func
 			else:
 				coro = asyncio.coroutine(func)
-			context = yield from coro(*args, **kwargs)
+			context = yield from coro(*args, view=view, **kwargs)
 
 			# Supports class based views see web.View
 			try:
@@ -149,10 +149,14 @@ class WebdataDir(recEtcDir,EtcDir):
 			tr = await tr.lookup(DEV)
 			self._value = tr
 
+	async def feed_subdir(self, view, level=0):
+		await view.add_item(self, level)
+
 	async def send_item(self,view, **kw):
 		"""Send my data struct to this view"""
-		id,pid = self.get_id()
-		view.send_json(action="replace", id=id, this=self, parent=pid, data=await self.render(view=view))
+		id = view.key_for(self)
+		pid = view.key_for(self.parent)
+		view.send_json(action="replace", id=id, parent=pid, data=await self.render(view=view))
 	
 	def render(self, view=None):
 		"""coroutine!"""
@@ -161,22 +165,21 @@ class WebdataDir(recEtcDir,EtcDir):
 			return self._render(view=view)
 		return self._type.render(this=self, view=view)
 
-	def recv_msg(self, act, view=None, **kw):
+	def recv_msg(self, act, view, **kw):
 		if self._type is None:
-			raise RuntimeError("No type known")
+			view.send_json(action="error", msg = act+": No type for "+'/'.join(self.path))
+			return
+
 		self._type.recv_msg(act=act, this=self, view=view, **kw)
 
 	@template('item.haml')
-	def _render(self, level=1):
-		id,pid = self.get_id()
+	def _render(self, view=None, level=1):
+		id,pid = self.get_id(view)
 		return dict(id=id,pid=pid, this=self)
 
-	def get_id(self, level=1):
-		id="f_%d" % self.parent._seq
-		if level == 1:
-			pid = "content"
-		else:
-			pid="f_%d" % self.parent.parent._seq
+	def get_id(self, view):
+		id = view.key_for(self)
+		pid = "" if id == "content" else view.key_for(self.parent)
 		return id,pid
 	
 	def has_update(self):
@@ -251,32 +254,35 @@ class WebpathDir(EtcDir):
 #		super().__init__(*a,**k)
 #		self.updates = blinker.Signal()
 #
+	async def feed_subdir(self, view, level=0):
+		await view.add_item(self, level)
+		for v in self.values():
+			if isinstance(v,EtcAwaiter):
+				v = await v
+
+			fs = getattr(v,'feed_subdir',None)
+			if fs is not None:
+				await fs(view, level+1)
+		
 	async def send_item(self,view, level=1, **kw):
 		"""Send my data struct to this view"""
-		id,pid = self.get_id(level)
-		view.send_json(action="replace", id=id, this=self, parent=pid, data=await self.render(level, view=view))
+		id,pid = self.get_id(view)
+		view.send_json(action="replace", id=id, parent=pid, data=await self.render(level=level, view=view))
 
 #	def has_update(self):
 #		if self._is_new is not True:
 #			return
 #		self.updates.send(self, value=val)
 
-	@template('dir.haml')
-	def render(self, level=1):
-		id,pid = self.get_id(level)
-		return dict(id=id,level=level+2,pid=pid, this=self)
-
-	def get_id(self,level):
-		if level == 0:
-			id="content"
-			pid=""
-		else:
-			id="f_%d" % self._seq
-			if level == 1:
-				pid="content"
-			else:
-				pid="f_%d" % self.parent._seq
+	def get_id(self,view):
+		id = view.key_for(self)
+		pid = "" if id == "content" else view.key_for(self.parent)
 		return id,pid
+
+	@template('dir.haml')
+	def render(self, view=None, level=1):
+		id,pid = self.get_id(view)
+		return dict(id=id,level=level+2,pid=pid, this=self)
 
 WebpathDir.register(WEBDATA, cls=WebdataDir)
 WebpathDir.register('*', cls=WebpathDir)
