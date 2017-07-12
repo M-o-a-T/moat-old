@@ -23,15 +23,19 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##  Thus, do not remove the next line, or insert any blank lines above.
 ##BP
 
-import logging
-logger = logging.getLogger(__name__)
+import asyncio
 from etcd_tree.node import EtcFloat,EtcInteger,EtcString, EtcDir
+from qbroker.unit import CC_DATA
+
 from time import time
 
 from moat.dev import DEV
 from moat.dev.base import BaseTypedDir,BaseDevice, Typename
-from moat.types.etcd import MoatDeviceBase
+from moat.types.etcd import MoatDeviceBase, recEtcDir
 from moat.types.managed import ManagedEtcDir,ManagedEtcThing, NoManagerError
+
+import logging
+logger = logging.getLogger(__name__)
 
 class ExternDeviceBase(MoatDeviceBase,ManagedEtcDir):
     """Base class for /device/onewire"""
