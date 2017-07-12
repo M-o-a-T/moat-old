@@ -51,7 +51,7 @@ class ExternDevice(BaseTypedDir,BaseDevice):
     _change = None
     
     async def init(self):
-        self._change = asyncio.Event(loop=self.loop)
+        self._change = asyncio.Event(loop=self._loop)
         await super().init()
 
     async def manager_present(self, mgr):
