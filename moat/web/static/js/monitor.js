@@ -72,14 +72,25 @@
 				}
 			};
 			ws.onopen = function (msg) {
+				has_error = false;
 			    announce("success","Connected. Waiting for instructions …");
+				window.to_moat = function(msg) {
+					ws.send(JSON.stringify(msg));
+				};
 				ws.send(JSON.stringify({"action":"locate","location": window.location.hash }));
 			};
+			var msg_dead = function(msg) {
+				announce("warning","Not connected. Reload before doing this.");
+			};
+
 			ws.onerror = function (msg) {
+				has_error = true;
+				window.to_moat = msg_dead;
 				announce("danger","Connection error! Please reload this page.");
 			};
 			ws.onclose = function (msg) {
 				if (has_error) { return; }
+				window.to_moat = msg_dead;
 				announce("danger","Connection closed.");
 			};
 		} else if ("WebSocket" in window) {
