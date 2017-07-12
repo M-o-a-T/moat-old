@@ -282,7 +282,14 @@ class WebpathDir(EtcDir):
 	@template('dir.haml')
 	def render(self, view=None, level=1):
 		id,pid = self.get_id(view)
-		return dict(id=id,level=level+2,pid=pid, this=self)
+		n_sub = n_entry = 0
+		for k in self.keys():
+			if k[0] != ':':
+				n_sub += 1
+			elif k == WEBDATA:
+				n_entry += 1
+
+		return dict(id=id,level=level+2,pid=pid, this=self, n_sub=n_sub, n_entry=n_entry)
 
 WebpathDir.register(WEBDATA, cls=WebdataDir)
 WebpathDir.register('*', cls=WebpathDir)
