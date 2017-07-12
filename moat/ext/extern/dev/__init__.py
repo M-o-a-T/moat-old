@@ -44,7 +44,7 @@ class ExternDeviceBase(MoatDeviceBase,ManagedEtcDir):
 class ExternDeviceSub(EtcDir,ManagedEtcThing):
     pass
 
-class ExternDevice(BaseTypedDir,BaseDevice):
+class ExternDevice(recEtcDir,BaseTypedDir,BaseDevice):
     """Base class for /device/extern/NAME…/:dev"""
     prefix = "extern"
     description = "Some external device off AMQP"
