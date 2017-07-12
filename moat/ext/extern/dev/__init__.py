@@ -89,13 +89,13 @@ class ExternDevice(recEtcDir,BaseTypedDir,BaseDevice):
         amqp = m.amqp
         if name is not None and self._rpc_in_name == name:
             return
-        if self._rpc is not None:
-            await amqp.unregister_rpc_async(self._rpc)
-            self._rpc = None
+        if self._rpc_in is not None:
+            await amqp.unregister_alert_async(self._rpc_in)
+            self._rpc_in = None
         if name is not None:
             logger.info("REG %s %s",name,self)
-            self._rpc = await amqp.register_alert_async(name,self.do_rpc, call_conv=CC_DATA)
-        self._rpc_name = name
+            self._rpc_in = await amqp.register_alert_async(name,self.do_rpc, call_conv=CC_DATA)
+        self._rpc_in_name = name
 
     async def _reg_out_rpc(self, name):
         self._rpc_out_name = name
