@@ -66,6 +66,27 @@
 						announce("danger","Content ID "+m.id+" not found.");
 					}
 
+				} else if (m.action == 'update') {
+					var d = $(m.data);
+					var attr = d.attr("id");
+					var f;
+					if (attr) {
+						f = $(attr);
+					} else {
+						f = $('#c'+m.id);
+						if (f.length == 0) {
+							f = $('#'+m.id);
+							d.attr("id",m.id);
+						} else {
+							d.attr("id",'c'+m.id);
+						}
+					}
+					if (f.length == 0) {
+						announce("danger","Content ID c"+m.id+" not found.");
+					} else {
+						d.hide();
+						f.fadeOut(500, function() { f.replaceWith(d); d.fadeIn(500); });
+					}
 				} else {
 					console.log("IN",m);
 					announce("warning","Unknown action: " + m.action)

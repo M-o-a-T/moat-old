@@ -181,6 +181,10 @@ class WebdataDir(recEtcDir,EtcDir):
 		pid = view.key_for(self.parent)
 		view.send_json(action="replace", id=id, parent=pid, data=await self.render(view=view))
 	
+	async def send_update(self,view,**kw):
+		id = view.key_for(self)
+		view.send_json(action="update", id=id, data=await self.render(view=view,update=True))
+
 	def render(self, view=None, **kw):
 		"""coroutine!"""
 		if self._type is None:

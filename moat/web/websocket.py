@@ -159,8 +159,10 @@ class ApiView(BaseView):
             else:
                 await self.send_dir(v,level)
 
-    def send_update(self,this,**k):
-        do_async(this.send_item,self,level=9)
+    def send_update(self,this,**kw):
+        key = self.key_for(this)
+        _,level = self.items[key]
+        do_async(this.send_update,self,level=level)
         pass
 
     def send_json(self, this=None, **kw):
