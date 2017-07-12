@@ -211,8 +211,6 @@ class _NumType(Type):
 	default = 0
 
 	def check_var(self, var,value):
-		if var not in self.vars:
-			return super().check_var(var,value)
 		try:
 			val = self._cls(value)
 		except ValueError:
