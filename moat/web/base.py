@@ -181,12 +181,12 @@ class WebdataDir(recEtcDir,EtcDir):
 		pid = view.key_for(self.parent)
 		view.send_json(action="replace", id=id, parent=pid, data=await self.render(view=view))
 	
-	def render(self, view=None):
+	def render(self, view=None, **kw):
 		"""coroutine!"""
 		if self._type is None:
 			print("Rendering",self,self['def'])
-			return self._render(view=view)
-		return self._type.render(this=self, view=view)
+			return self._render(view=view, **kw)
+		return self._type.render(this=self, view=view, **kw)
 
 	def recv_msg(self, act, view, **kw):
 		if self._type is None:
@@ -196,7 +196,7 @@ class WebdataDir(recEtcDir,EtcDir):
 		self._type.recv_msg(act=act, this=self, view=view, **kw)
 
 	@template('item.haml')
-	def _render(self, view=None, level=1):
+	def _render(self, view=None, level=1, **kw):
 		id,pid = self.get_id(view)
 		return dict(id=id,pid=pid, this=self)
 
@@ -303,7 +303,7 @@ class WebpathDir(EtcDir):
 		return id,pid
 
 	@template('dir.haml')
-	def render(self, view=None, level=1):
+	def render(self, view=None, level=1, **kw):
 		id,pid = self.get_id(view)
 		n_sub = n_entry = 0
 		for k in self.keys():
