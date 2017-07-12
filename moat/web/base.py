@@ -50,10 +50,22 @@ logger = logging.getLogger(__name__)
 class _NOTGIVEN:
 	pass
 
-def template(template_name):
+def template(template_name=None):
 	"""\
 		Decorator to apply the result to a template.
 		The decorated function may or may not be a coroutine.
+		If no template_name is given, assume that the context includes it.
+
+		>>> @template ## @template() also works
+		>>> def render(**kw):
+		>>>    return { 'template_name': 'foo.html' }
+
+		is equivalent to
+
+		>>> @template('foo.html')
+		>>> def render(**kw):
+		>>>    return { }
+
 		"""
 	def wrapper(func):
 		@asyncio.coroutine
@@ -65,15 +77,26 @@ def template(template_name):
 				coro = asyncio.coroutine(func)
 			context = yield from coro(*args, view=view, **kwargs)
 
+			if template_name is None:
+				tmpl = context.pop('template_name')
+			else:
+				tmpl = template_name
+
 			# Supports class based views see web.View
 			try:
-				response = render_string(template_name, view.request, context)
+				response = render_string(tmpl, view.request, context)
 			except Exception as exc:
 				logger.exception("%s: %s", template_name,context)
 				return ""
 			return response
 		return wrapped
-	return wrapper
+
+	if callable(template_name):
+		f = template_name
+		template_name = None
+		return wrapper(f)
+	else:
+		return wrapper
 
 class _DataLookup(object):
 	"""Helper class to facilitate WebdefDir.data[]"""
