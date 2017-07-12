@@ -319,15 +319,14 @@ class _DefAddUpdate:
         if descr:
             await web.set('descr', descr, sync=False)
         if data:
-            d = await web.subdir('data', create=None)
             for k,v in data.items():
                 if v == "":
                     try:
-                        await d.delete(k, sync=False)
+                        await web.delete(k, sync=False)
                     except KeyError:
                         pass
                 else:
-                    await d.set(k,v, sync=False)
+                    await web.set(k,v, sync=False)
             
 
 class DefAddCommand(_DefAddUpdate,DefSetup,Command):
@@ -523,15 +522,14 @@ class _AddUpdate:
         if descr:
             await web.set('descr', descr, sync=False)
         if data:
-            d = await web.subdir('data', create=None)
             for k,v in data.items():
                 if v == "":
                     try:
-                        await d.delete(k, sync=False)
+                        await web.delete(k, sync=False)
                     except KeyError:
                         pass
                 else:
-                    await d.set(k,v, sync=False)
+                    await web.set(k,v, sync=False)
             
 
 class AddCommand(_AddUpdate,DefSetup,Command):

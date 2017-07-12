@@ -75,13 +75,13 @@ class _DataLookup(object):
 		self.wd = wd
 	def __getitem__(self, k):
 		k = str(k).lower()
-		v = self.wd['data'].get(k,_NOTGIVEN)
+		v = self.wd.get(k,_NOTGIVEN)
 		if v is not _NOTGIVEN:
 			return v
 
 		p = self.wd.type
 		while isinstance(p,WebdefDir):
-			v = p['data'].get(k,_NOTGIVEN)
+			v = p.get(k,_NOTGIVEN)
 			if v is not _NOTGIVEN:
 				return v
 
