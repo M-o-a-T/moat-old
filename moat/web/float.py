@@ -31,8 +31,12 @@ class FloatDef(WebdefDir):
 	summary = "Your basic floating-point number"
 	vars = {'digits':1}
 
-	@template('float.haml')
-	async def render(self, this=None, **kw):
+	@template
+	async def render(self, this=None, update=False, view=None, **kw):
 		## XXX grab the value, of course
-		return {'this':this, 'value': "%.*f" % (int(self.data['digits']),this._value.value)}
+		id=view.key_for(this)
+		if update:
+			return {'template_name': 'c_float.haml', 'id':id, 'this':this, 'value': "%.*f" % (int(self.data['digits']),this._value.value)}
+		else:
+			return {'template_name': 'float.haml', 'id':id, 'this':this, 'value': "%.*f" % (int(self.data['digits']),this._value.value)}
 		
