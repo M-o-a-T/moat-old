@@ -13,10 +13,12 @@
 			li.attr('id', 'alert-'+n)
 			li.addClass('alert');
 			li.addClass('alert-'+c);
-			li.addClass('fade');
-			li.addClass('fade in');
+			// li.addClass('fade');
+			// li.addClass('fade in');
+			li.hide();
 			li.text(m);
 			inf.prepend(li);
+			li.fadeIn(300);
 			$('#page').scrollTop(0);
 			if (last > 0)
 			{
