@@ -92,7 +92,7 @@ on hab in command {sname}:
 on want output {name}:
 	name want output {name}
 	var output now {name}
-	if equal $raw ON:
+	if equal $value on:
 		if equal $now off:
 			set output on {name} :for 5 min
 	else:
@@ -101,9 +101,9 @@ on want output {name}:
 on output change {name}:
 	name output change {name}
 	if equal $value True:
-		trigger hab out command {sname} :param raw ON
+		trigger hab out state {sname} :param raw ON
 	else:
-		trigger hab out command {sname} :param raw OFF
+		trigger hab out state {sname} :param raw OFF
 
 """.format(name=v.var, vloc=v.location, cloc=v.controller.location,sname=sname))
 
