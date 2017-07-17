@@ -4,7 +4,7 @@
 -macro column()
 	%div class="col"
 		-if n_entry
-			%div.row id="{{entry_id}}"
+			%div.row.buttoned id="{{entry_id}}"
 				&nbsp;
 		-if level == 0
 			%div id={{content_id}}
@@ -18,7 +18,7 @@
 		%div class="row"
 			=column()
 -else
-	%div class="row"
+	%div.row
 		%div class="col col-auto"
 			%div class="btn-group" data-toggle="buttons-checkbox"
 				-if n_sub
