@@ -28,6 +28,7 @@ import jinja2
 import os
 import aiohttp_jinja2
 from hamlish_jinja import HamlishExtension
+from qbroker.util import format_dt
 
 from .app import BaseView,BaseExt
 
@@ -41,6 +42,7 @@ class JinjaExt(BaseExt):
 
         app.router.add_static('/static', os.path.join(os.path.dirname(__file__),'static'), name='static')
         env.filters['static'] = lambda x:app.router.named_resources()['static'].url_for(filename=x)
+        env.filters['datetime'] = format_dt
 
 class RootView(BaseView):
     path = '/'
