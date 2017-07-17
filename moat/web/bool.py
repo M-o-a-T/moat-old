@@ -33,6 +33,6 @@ class BoolDef(WebdefDir):
 
 	def get_context(self, item, **kw):
 		kw = super().get_context(item=item, **kw)
-		kw['value'] = data[str(item.value).lower()]
+		kw['value'] = item.data[str(item._value.value).lower()]
 		return kw
 		

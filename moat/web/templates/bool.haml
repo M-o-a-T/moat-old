@@ -1,6 +1,6 @@
-%span
-	-if value
-		◉
-	-else
-		–
-	
+%div.row.buttoned
+	-block update
+		%div.col.col-2 id="{{update_id}}"
+			=value
+	%div.col.col-4
+		=item.descr
