@@ -336,20 +336,20 @@ class WebdataDir(recEtcDir,EtcDir):
 	async def send_update(self, view,level, **_kw):
 		template = self.get_template(view=view,level=level)
 		kw = self.get_context(view=view,level=level)
-		kw['update'] = True
-		kw['update_id'] = 'd'+kw['id']
 		data = self.render(view,level, ctx=kw)
 
 		try:
-			data = template.blocks['update'].render(kw)
+			updater = template.blocks['update']
 		except KeyError:
 			data = template.render(kw)
 			view.send_json(action="update", id=kw['id'], data=data)
 		else:
+			ctx = template.new_context(kw)
+			data = ''.join(updater(ctx))
 			view.send_json(action="update", id=kw['update_id'], data=data)
-			reset = template.blocks.get('reset',None)
-			if reset is not None:
-				data = reset.render(kw)
+			resetter = template.blocks.get('reset',None)
+			if resetter is not None:
+				data = ''.join(resetter(ctx))
 				view.send_json(action="replace", id=kw['reset_id'], data=data)
 
 	async def send_delete(self,view,level, **_kw):
