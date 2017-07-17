@@ -421,7 +421,6 @@ class WebdataValue(EtcString):
 			do_async(self._has_update)
 
 	async def _has_update(self):
-		print("Load from",self.value)
 		p = self.parent
 		if p is None:
 			return
