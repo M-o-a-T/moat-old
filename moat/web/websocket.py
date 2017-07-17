@@ -61,7 +61,7 @@ class ApiView(BaseView):
         try:
             async for msg in self.ws:
                 if msg.type == aiohttp.WSMsgType.TEXT:
-                    logger.info("Msg %s",msg.data)
+                    logger.debug("WebSocket: recv %s",msg.data)
                     msg = json.decode(msg.data)
                     act = msg.get('action',"")
                     if act == "locate":
