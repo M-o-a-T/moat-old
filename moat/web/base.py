@@ -346,7 +346,9 @@ class WebdataDir(recEtcDir,EtcDir):
 		else:
 			ctx = template.new_context(kw)
 			data = ''.join(updater(ctx))
-			view.send_json(action="update", id=kw['update_id'], data=data)
+			if view.values.get(kw['id'],"") != data:
+				view.send_json(action="update", id=kw['update_id'], data=data)
+				view.values[kw['id']] = data
 			resetter = template.blocks.get('reset',None)
 			if resetter is not None:
 				data = ''.join(resetter(ctx))

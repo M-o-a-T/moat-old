@@ -35,6 +35,7 @@ class ApiView(BaseView):
 
     def __init__(self,*a,**k):
         self.items = {}
+        self.values = {}
         super().__init__(*a,**k)
 
     async def get(self):
