@@ -67,6 +67,7 @@ class OnewireDevice(Device): #(, metaclass=SelectDevice):
 	description = "Something hanging off 1wire"
 	_inited = False
 	_cached_path = None
+	_multi_node = True
 
 	async def init(self):
 		await super().init()

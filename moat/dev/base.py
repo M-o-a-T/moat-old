@@ -283,6 +283,7 @@ class BaseDevice(EtcDir, metaclass=TypesReg):
 	prefix = "dummy"
 	description = "Something that does nothing."
 	_mgr = None
+	_multi_node = False
 
 	def __init__(self, *a,**k):
 		for attr in _SOURCES:
@@ -313,8 +314,12 @@ class BaseDevice(EtcDir, metaclass=TypesReg):
 	@classmethod
 	def types(cls, types):
 		"""Override to get your subtypes registered with etcd_tree"""
-		for s,t in _SOURCES.items():
-			types.register(s,'*', cls=t)
+		if cls._multi_node:
+			for s,t in _SOURCES.items():
+				types.register(s,'*', cls=t)
+		else:
+			for s,t in _SOURCES.items():
+				types.register(s, cls=t)
 
 	@classmethod
 	def dev_paths(cls):
