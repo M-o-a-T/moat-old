@@ -338,17 +338,18 @@ class WebdataDir(recEtcDir,EtcDir):
 		kw = self.get_context(view=view,level=level)
 		data = self.render(view,level, ctx=kw)
 
-		try:
-			updater = template.blocks['update']
-		except KeyError:
+		updater = template.blocks.get('update',None)
+		if updater is None:
 			data = template.render(kw)
-			view.send_json(action="update", id=kw['id'], data=data)
+			if view.values.get(kw['id'],"") != data:
+				view.send_json(action="update", id=kw['id'], data=data)
+				view.values[kw['id']] = data
 		else:
 			ctx = template.new_context(kw)
 			data = ''.join(updater(ctx))
-			if view.values.get(kw['id'],"") != data:
+			if view.values.get(kw['update_id'],"") != data:
 				view.send_json(action="update", id=kw['update_id'], data=data)
-				view.values[kw['id']] = data
+				view.values[kw['update_id']] = data
 			resetter = template.blocks.get('reset',None)
 			if resetter is not None:
 				data = ''.join(resetter(ctx))
