@@ -48,47 +48,79 @@
 					announce("warning","Unknown message: " + m)
 				} else if (m.action == 'error') {
 					announce("danger",m.msg)
+
 				} else if (m.action == 'replace') {
 					var f = $('#'+m.id);
+					if (f.length == 0) {
+						announce("danger","Content ID "+m.id+" not found.");
+						return;
+					}
 					var d = $(m.data);
 					d.attr("id",m.id)
-					if (f.length > 0) {
-						f.replaceWith(d);
-					} else if (m.parent) {
-						f = $('#c'+m.parent);
-						if (f.length == 0)  {
-							f = $('#'+m.parent);
-							if (f.length == 0)  {
-								announce("danger","Content ID "+m.id+"/"+m.parent+" not found.");
-								return;
-							}
-						}
-						f.append(d);
-					} else {
-						announce("danger","Content ID "+m.id+" not found.");
+					if (m.keep) {
+						m.keep.split('').forEach(function(c) {
+							var dd = d.find("#"+c+m.id)
+							var ff = f.find("#"+c+m.id)
+							ff.children().each(function(i,x) {
+								dd.append(x);
+							});
+						});
 					}
+					f.replaceWith(d);
+
+				} else if (m.action == 'insert') {
+					var f = $('#'+m.parent);
+					if (f.length == 0)  {
+						announce("danger","Content ID "+m.parent+" for "+m.id+" not found.");
+						return;
+					}
+					var d = $(m.data);
+					d.attr("id",m.id);
+					// d.css("height";"0px");
+					f.append(d);
+					// d.animate({height: d.prop('scrollHeight')}, 300, "swing", function(){ d.css("height","");});
 
 				} else if (m.action == 'update') {
+					(function(m) {
 					var d = $(m.data);
-					var attr = d.attr("id");
-					var f;
-					if (attr) {
-						f = $(attr);
-					} else {
-						f = $('#c'+m.id);
-						if (f.length == 0) {
-							f = $('#'+m.id);
-							d.attr("id",m.id);
-						} else {
-							d.attr("id",'c'+m.id);
-						}
-					}
+					d.attr("id",m.id)
+					var dly = m.fade || 400;
+					var f = $('#'+m.id);
 					if (f.length == 0) {
-						announce("danger","Content ID c"+m.id+" not found.");
-					} else {
-						d.hide();
-						f.fadeOut(500, function() { f.replaceWith(d); d.fadeIn(500); });
+						announce("danger","No content for "+m.id+" found.");
+						return;
 					}
+					f.fadeOut(dly, function() {
+						f.replaceWith(d);
+						f.fadeIn(dly);
+					});
+					})(m);
+
+				} else if (m.action == 'delete') {
+					f = $('#'+m.id);
+					if (f.length == 0) {
+						announce("warning","No content for "+m.id+" found.");
+						return;
+					}
+					f.fadeOut(300, function() {
+						f.animate({height: "0px"},300,"swing",function() {
+							f.remove();
+						});
+					});
+
+				} else if (m.action == 'clear') {
+					f = $('#'+m.id);
+					if (f.length == 0) {
+						announce("warning","No content for "+m.id+" found.");
+						return;
+					}
+					f.fadeOut(300, function() {
+						f.animate({height: "0px"},300,"swing" ,function() {
+							f.empty();
+							f.css("height","");
+						});
+					});
+
 				} else {
 					console.log("IN",m);
 					announce("warning","Unknown action: " + m.action)

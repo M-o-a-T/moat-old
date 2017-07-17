@@ -27,8 +27,42 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 Class for managing web data snippets.
 """
 
+##
+# JSON methods:
+# insert: new item, parent=target, id=id, data=HTML
+#   no visuals (possibly TODO)
+# replace: known item, id=id, keep=prefixes, data=HTML
+#   items with id of [letter in prefix]+id are restored
+#   no visuals
+# update: id=id, data=HTML
+#   visual, no restored sub-items
+# delete: id=id,
+#   visual
+
+# On update:
+# If the template has an "update" block, that block must contain one
+# element with id=d+ID. If missing, the whole thing is replaced.
+# If the template has a "reset" block, that block must contain one
+# element with id=r+ID. If missing, nothing will happen.
+
+##
+# Data methods:
+#  >feed_subdir(view) => called on new top-level, responsible for calling add_item
+#  >send_insert(view, level)
+#  >send_update(view, level)
+#  >send_delete(view, level)
+
+## View methods:
+#  send_json(**kw)
+#  key_for(item) => ID
+# >add_item => will call send_insert
+#  get_level(item) => level# for this, or KeyError if unknown
+
+# '>' is async
+
 import asyncio
-from aiohttp_jinja2 import web,render_string
+from aiohttp_jinja2 import web,render_string, get_env
+from aiohttp.web import HTTPInternalServerError
 from etcd_tree.etcd import EtcTypes, WatchStopped
 from etcd_tree.node import EtcFloat,EtcBase, EtcDir,EtcAwaiter, EtcString
 import etcd
@@ -49,6 +83,14 @@ logger = logging.getLogger(__name__)
 
 class _NOTGIVEN:
 	pass
+
+def get_template(app, template_name):
+	"""Helper to fetch a template"""
+	env = get_env(app)
+	try:
+		return env.get_template(template_name)
+	except (KeyError, jinja2.TemplateNotFound) as e:
+		raise HTTPInternalServerError(text="Template '{}' not found".format(template_name)) from e
 
 def template(template_name=None):
 	"""\
@@ -108,7 +150,7 @@ class _DataLookup(object):
 		if v is not _NOTGIVEN:
 			return v
 
-		p = self.wd.type
+		p = self.wd._type
 		while isinstance(p,WebdefDir):
 			v = p.get(k,_NOTGIVEN)
 			if v is not _NOTGIVEN:
@@ -120,14 +162,124 @@ class _DataLookup(object):
 				break
 		raise KeyError(k)
 
-class WebdefDir(recEtcDir,EtcDir):
-	"""Directory for /meta/web/PATH/:def - A class linking a webdef to its etcd entry
-		Linked into /meta in moat.types.etcd"""
+class WebdefBase(object):
+	"""\
+		Base class to handle template reading and context building
+
+		This class applies to the :item entry. Thus it will replace the
+		parent's "entry_id" div (see templates/dir.haml).
+	
+		"""
+	TEMPLATE = "item.haml"
+
+	def get_template(self, item, view, level=1):
+		return get_template(view.request.app, self.TEMPLATE)
+
+	def get_context(self, item, view, level=1):
+		key = view.key_for(item)
+		par = view.key_for(item.parent)
+		return dict(
+			level=level,
+			id='d'+par, ## my top level
+			parent_id=par,
+			view=view,
+			item=item,
+			update_id='d'+key, ## data, visually updated
+			reset_id='r'+key,  ## UI, not visually updated
+		)
+
+	def render(self, view, level, ctx, item=None):
+		if item is None:
+			iem = self
+		t = self.get_template(item=item,view=view,level=level)
+		return t.render(ctx)
+
+
+class WebpathDir(WebdefBase, EtcDir):
+	"""Directory for /web/PATH"""
+	TEMPLATE = "dir.haml"
+	_propagate_updates = False
+
+	def get_context(self, view, level=1):
+		kw = super().get_context(self,view,level)
+		key = view.key_for(self)
+		par = view.key_for(self.parent)
+
+		n_sub = n_entry = 0
+		for k in self.keys():
+			if k[0] != ':':
+				n_sub += 1
+			elif k == WEBDATA:
+				n_entry += 1
+
+		kw.update(
+			id=key,
+			entry_id='d'+key,
+			content_id='c'+key,
+			parent_id='c'+par,
+			n_sub=n_sub,
+			n_entry=n_entry,
+		)
+		del kw['update_id']
+		del kw['reset_id']
+		return kw
+
+	updates = None
 	def __init__(self,*a,**k):
 		super().__init__(*a,**k)
-		self._type = webdef_names()['/'.join(self.path[len(WEBDEF_DIR):-1])]
-		self._type.types(self)
-	
+		self.updates = blinker.Signal()
+
+	async def feed_subdir(self, view, level=0):
+		await view.add_item(self, level)
+		for v in self.values():
+			if isinstance(v,EtcAwaiter):
+				v = await v
+
+			fs = getattr(v,'feed_subdir',None)
+			if fs is not None:
+				await fs(view, level+1)
+		
+	def has_update(self):
+		self.updates.send(self)
+		if self.is_new and hasattr(self.parent,'updates'):
+			self.parent.updates.send(self)
+
+	async def send_insert(self,view, level, **_kw):
+		"""Send my data struct to this view"""
+		kw = self.get_context(view,level)
+		data = self.render(level=level, view=view, ctx=kw)
+		if level == 0:
+			view.send_json(action="replace", id=kw['id'], data=data)
+		else:
+			view.send_json(action="insert", id=kw['id'], parent=kw['parent_id'], data=data)
+
+	async def send_update(self,view,level, **_kw):
+		kw = self.get_context(view,level)
+		try:
+			_level = view.get_level(self)
+		except KeyError:
+			try:
+				assert level > 0
+				_level = view.get_level(self.parent)
+			except KeyError:
+				logger.debug("No pkey, render later: %s",self)
+				return 
+			assert _level == level-1
+			self.feed_subdir(view,level=level)
+		else:
+			assert level == _level
+			kw = self.get_context(view,level)
+			data = self.render(level=level, view=view, ctx=kw)
+			view.send_json(action="replace", id=kw['id'], keep="cd", data=data)
+
+	async def send_delete(self,view,level, **_kw):
+		kw = self.get_context(view,level)
+		view.send_json(action="delete", id=kw['id'])
+
+class WebdefDir(WebdefBase,recEtcDir,EtcDir):
+	"""Directory for /meta/web/PATH/:def - A class linking a webdef to its etcd entry
+		Linked into /meta in moat.types.etcd"""
+
 	@classmethod
 	async def this_obj(cls, parent=None,recursive=None, pre=None, **kw):
 		if recursive is None:
@@ -136,20 +288,9 @@ class WebdefDir(recEtcDir,EtcDir):
 		res = m(parent=parent,pre=pre,**kw)
 		return res
 
-	@classmethod
-	def types(cls,types):
-		pass
-
-	@property
-	def data(self):
-		return _DataLookup(self)
-
-WebdefDir.register('timestamp',cls=EtcFloat)
-WebdefDir.register('created',cls=EtcFloat)
-
 class WebdataDir(recEtcDir,EtcDir):
 	"""Directory for /web/PATH/:item"""
-	_type = None
+	_type = WebdefBase()
 	_value = None
 	_mon = None # value monitor
 	updates = None # signal: updated value
@@ -172,51 +313,71 @@ class WebdataDir(recEtcDir,EtcDir):
 			tr = await tr.lookup(DEV)
 			self._value = tr
 
+	@property
+	def data(self):
+		return _DataLookup(self)
+
 	async def feed_subdir(self, view, level=0):
 		await view.add_item(self, level)
 
-	async def send_item(self,view, **kw):
-		"""Send my data struct to this view"""
-		id = view.key_for(self)
-		pid = view.key_for(self.parent)
-		view.send_json(action="replace", id=id, parent=pid, data=await self.render(view=view))
-	
-	async def send_update(self,view,**kw):
-		id = view.key_for(self)
-		view.send_json(action="update", id=id, data=await self.render(view=view,update=True))
+	def get_template(self,*a,**kw):
+		return self._type.get_template(self, *a,**kw)
 
-	def render(self, view=None, **kw):
-		"""coroutine!"""
-		if self._type is None:
-			print("Rendering",self,self['def'])
-			return self._render(view=view, **kw)
-		return self._type.render(this=self, view=view, **kw)
+	def get_context(self,*a,**kw):
+		return self._type.get_context(self, *a,**kw)
+
+	async def send_insert(self,view, level, **_kw):
+		"""Send my data struct to this view"""
+		assert level > 0
+		kw = self.get_context(view=view, level=level)
+		data = self.render(level=level, view=view, ctx=kw)
+		view.send_json(action="replace", id=kw['id'], parent=kw['parent_id'], data=data)
+
+	async def send_update(self, view,level, **_kw):
+		template = self.get_template(view=view,level=level)
+		kw = self.get_context(view=view,level=level)
+		kw['update'] = True
+		kw['update_id'] = 'd'+kw['id']
+		data = self.render(view,level, ctx=kw)
+
+		try:
+			data = template.blocks['update'].render(kw)
+		except KeyError:
+			data = template.render(kw)
+			view.send_json(action="update", id=kw['id'], data=data)
+		else:
+			view.send_json(action="update", id=kw['update_id'], data=data)
+			reset = template.blocks.get('reset',None)
+			if reset is not None:
+				data = reset.render(kw)
+				view.send_json(action="replace", id=kw['reset_id'], data=data)
+
+	async def send_delete(self,view,level, **_kw):
+		kw = self.get_context(view=view,level=level)
+		view.send_json(action="clear", id=kw['id'])
+
+	def render(self, *a,**kw):
+		"""Calls self._type.render()"""
+		return self._type.render(item=self, *a,**kw)
 
 	def recv_msg(self, act, view, **kw):
 		if self._type is None:
 			view.send_json(action="error", msg = act+": No type for "+'/'.join(self.path))
 			return
 
-		self._type.recv_msg(act=act, this=self, view=view, **kw)
+		self._type.recv_msg(act=act, item=self, view=view, **kw)
 
-	@template('item.haml')
-	def _render(self, view=None, level=1, **kw):
-		id,pid = self.get_id(view)
-		return dict(id=id,pid=pid, this=self)
-
-	def get_id(self, view):
-		id = view.key_for(self)
-		pid = "" if id == "content" else view.key_for(self.parent)
-		return id,pid
-	
 	def has_update(self):
 		super().has_update()
-		if self.is_new is None and self._mon is not None:
-			self._mon.cancel()
-			self._mon = None
+		if self.is_new and hasattr(self.parent,'updates'):
+			self.parent.updates.send(self)
+		elif self.is_new is None:
+			self.updates.send(self)
+			if self._mon is not None:
+				self._mon.cancel()
+				self._mon = None
 
 	def update_value(self,val):
-		#print("HAS",val,self,self.mon)
 		key = self.get('subvalue','value').split('/')
 		for k in key[:-1]:
 			if k:
@@ -233,17 +394,15 @@ class WebdataType(EtcString):
 		if p is None:
 			return
 		if self.is_new is None:
-			p._type = None
+			p._type = WebdefBase()
 		else:
 			do_async(self._has_update)
 
 	async def _has_update(self):
-		print("Using",self.value)
 		p = self.parent
 		if p is None:
 			return
 		p._type = await self.root.lookup(*(WEBDEF_DIR+tuple(self.value.split('/'))),name=WEBDEF)
-		print("Using",p,self.value,p._type)
 
 class WebdataValue(EtcString):
 	"""Value path for WebdataDir"""
@@ -253,6 +412,8 @@ class WebdataValue(EtcString):
 			return
 		if self.is_new is None:
 			p._value = None
+			if p.mon is not None:
+				p.mon.cancel()
 		else:
 			do_async(self._has_update)
 
@@ -264,7 +425,6 @@ class WebdataValue(EtcString):
 		p._value = await self.root.lookup(*(DEV_DIR+tuple(self.value.split('/'))),name=DEV)
 		p.mon = p._value.add_monitor(p.update_value)
 		p.update_value(p._value)
-		pass
 
 #	@property
 #	def param(self):
@@ -272,52 +432,11 @@ class WebdataValue(EtcString):
 #WebdataDir.register('timestamp',cls=EtcFloat)
 WebdataDir.register('def',cls=WebdataType)
 WebdataDir.register('value',cls=WebdataValue)
-
-class WebpathDir(EtcDir):
-	"""Directory for /web/PATH"""
-
-#	updates = None
-#	def __init__(self,*a,**k):
-#		super().__init__(*a,**k)
-#		self.updates = blinker.Signal()
-#
-	async def feed_subdir(self, view, level=0):
-		await view.add_item(self, level)
-		for v in self.values():
-			if isinstance(v,EtcAwaiter):
-				v = await v
-
-			fs = getattr(v,'feed_subdir',None)
-			if fs is not None:
-				await fs(view, level+1)
-		
-	async def send_item(self,view, level=1, **kw):
-		"""Send my data struct to this view"""
-		id,pid = self.get_id(view)
-		view.send_json(action="replace", id=id, parent=pid, data=await self.render(level=level, view=view))
-
-#	def has_update(self):
-#		if self._is_new is not True:
-#			return
-#		self.updates.send(self, value=val)
-
-	def get_id(self,view):
-		id = view.key_for(self)
-		pid = "" if id == "content" else view.key_for(self.parent)
-		return id,pid
-
-	@template('dir.haml')
-	def render(self, view=None, level=1, **kw):
-		id,pid = self.get_id(view)
-		n_sub = n_entry = 0
-		for k in self.keys():
-			if k[0] != ':':
-				n_sub += 1
-			elif k == WEBDATA:
-				n_entry += 1
-
-		return dict(id=id,level=level+2,pid=pid, this=self, n_sub=n_sub, n_entry=n_entry)
-
+WebdefDir.register('timestamp',cls=EtcFloat)
+WebdefDir.register('created',cls=EtcFloat)
 WebpathDir.register(WEBDATA, cls=WebdataDir)
 WebpathDir.register('*', cls=WebpathDir)
+
+
+
 

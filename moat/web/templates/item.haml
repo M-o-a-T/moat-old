@@ -1,2 +1,16 @@
-%div id=c{{id}}
-	Unknown Item {{id}}/{{pid}} :: {{ this.path | join('|') }}
+-if update
+	%div
+		{{ item.path | join('/') }}
+		::
+		%span id={{id}}
+			-if 'value' in item
+				{{ item.value }}
+			-else
+				?
+
+-else
+	%span id={{id}}
+		-if 'value' in item
+			{{ item.value }}
+		-else
+			?

@@ -15,10 +15,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 
 import asyncio
 import aiohttp
-import jinja2
 import os
-import aiohttp_jinja2
-from hamlish_jinja import HamlishExtension
 from blinker import Signal
 from functools import partial
 
@@ -51,13 +48,13 @@ class ApiView(BaseView):
 #                call_conv=CC_DICT)
 #        sig.connect(self.send_update)
 
-        socks = app.setdefault('websock',set())
+        #socks = app.setdefault('websock',set())
         logger.debug('starting')
 
         self.ws = aiohttp.web.WebSocketResponse()
         await self.ws.prepare(self.request)
 
-        socks.add(self)
+        #socks.add(self)
         logger.debug('open')
         self.job = asyncio.Task.current_task(cmd.loop)
         try:
@@ -85,21 +82,21 @@ class ApiView(BaseView):
                                 logger.warn("Unknown ID: %s",repr(id))
                             except Exception as exc:
                                 logger.exception("%s on %s:%s",act,id,this)
+                                break
                 elif msg.type == aiohttp.WSMsgType.ERROR:
                     logger.warn('ws connection closed: %s', ws.exception())
                     break
                 else:
                     logger.info("Msg %s",msg)
         finally:
-            socks.remove(self)
+            #socks.remove(self)
             #sig.disconnect(self.send_update)
             logger.debug('closed')
             self.job = None
+            await self.ws.close()
+            pass
 
         return self.ws
-
-    async def send_field(self, t, level=1):
-        await t.send_item(self, level=level)
 
     async def set_location(self, loc):
         try:
@@ -117,7 +114,7 @@ class ApiView(BaseView):
     def key_for(self, item):
         if item is self.top_item:
             return "content"
-        return "f_"+str(item._seq)
+        return "f_"+str(item._cseq)
 
     async def add_item(self, item,level):
         key = self.key_for(item)
@@ -125,59 +122,69 @@ class ApiView(BaseView):
             self.items[key] = (item,level)
             u = getattr(item,'updates',None)
             if u is not None:
-                u.connect(self.send_update)
-            await item.send_item(self, level=level)
+                u.connect(self.queue_update)
+            await item.send_insert(self, level=level)
+        else:
+            logger.debug("Repeat add %s",item)
+            await item.send_update(self, level=level)
 
-    async def setup_field(self,t):
-        t = await t
-        print(t)
-        pass
-
-    async def setup_dir(self,t):
-        for k,v in t.items():
-            print(k,v)
-            if k[0] == ':':
-                continue
-            v = await v
-            if WEBDATA in v:
-                await self.setup_field(v[WEBDATA])
-            else:
-                await self.setup_dir(v)
-
-    async def send_dir(self,t, level=0):
-        try:
-            await t.send_item(self, level=level)
-        except Exception as exc:
-            logger.exception(t)
-            raise
-        level += 1
-        for k,v in t.items():
-            if k[0] == ':':
-                continue
-            if WEBDATA in v:
-                await self.send_field(v[WEBDATA],level)
-            else:
-                await self.send_dir(v,level)
-
-    def send_update(self,this,**kw):
+    def get_level(self,this):
+        """Check if the element is new"""
         key = self.key_for(this)
-        _,level = self.items[key]
-        do_async(this.send_update,self,level=level)
-        pass
+        return self.items[key][1]
 
-    def send_json(self, this=None, **kw):
-        #print("SJ",this,kw)
-        if this is not None:
-            id = kw['id']
-            if id not in self.items:
-                self.items[id] = this
-                u = getattr(this,'updates',None)
-                if u is not None:
-                    u.connect(self.send_update)
+    async def send_update(self, item,level):
         try:
-            self.ws.send_json(kw)
-        except Exception:
+            key = self.key_for(item)
+            await item.send_update(self,level=level)
+        except Exception as e:
+            logger.exception("updating %s",item)
+            if self.job is not None:
+                self.job.cancel()
+
+    async def send_delete(self, item,level):
+        try:
+            await item.send_delete(self,level=level)
+        except Exception as e:
+            logger.exception("deleting %s",item)
+            if self.job is not None:
+                self.job.cancel()
+
+    def queue_update(self,item,**kw):
+        key = self.key_for(item)
+        try:
+            _,level = self.items[key]
+        except KeyError:
+            par = self.key_for(item.parent)
+            try:
+                _,level = self.items[par]
+            except KeyError:
+                logger.debug("Parent not here: %s",item)
+                return
+            else:
+                do_async(self.add_item,item,level=level+1)
+        else:
+            if item.is_new is None:
+                do_async(self.send_delete,item,level=level)
+            else:
+                do_async(self.send_update,item,level=level)
+
+    def send_json(self, **kw):
+        #print("SJ",kw)
+        if self.job is None:
+            return
+        if self.ws.closed:
             self.job.cancel()
+            return
+        try:
+            import inspect
+            if inspect.isgenerator(kw.get('data',None)):
+                import pdb;pdb.set_trace()
+            self.ws.send_json(kw)
+        except Exception as exc:
+            logger.exception("Xmit %s",kw)
+            if self.job is not None:
+                self.job.cancel()
 
 #def send_charger_update(_sig, **kw):
 #    kw['action'] = 'update'

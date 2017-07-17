@@ -23,20 +23,16 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##  Thus, do not remove the next line, or insert any blank lines above.
 ##BP
 
-import aiohttp_jinja2
 from .base import WebdefDir,template
 
 class FloatDef(WebdefDir):
 	name = "float"
 	summary = "Your basic floating-point number"
 	vars = {'digits':1}
+	TEMPLATE = "float.haml"
 
-	@template
-	async def render(self, this=None, update=False, view=None, **kw):
-		## XXX grab the value, of course
-		id=view.key_for(this)
-		if update:
-			return {'template_name': 'c_float.haml', 'id':id, 'this':this, 'value': "%.*f" % (int(self.data['digits']),this._value.value)}
-		else:
-			return {'template_name': 'float.haml', 'id':id, 'this':this, 'value': "%.*f" % (int(self.data['digits']),this._value.value)}
-		
+	def get_context(self, item, **kw):
+		kw = super().get_context(item=item, **kw)
+		kw['value'] = "%.*f" % (int(item.data['digits']),item._value.value)
+		return kw
+
