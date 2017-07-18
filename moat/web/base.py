@@ -335,12 +335,12 @@ class WebdataDir(recEtcDir,EtcDir):
 		data = self.render(level=level, view=view, ctx=kw)
 		view.send_json(action="replace", id=kw['id'], parent=kw['parent_id'], data=data)
 
-	async def send_update(self, view,level, **_kw):
+	async def send_update(self, view,level, full=False,**_kw):
 		template = self.get_template(view=view,level=level)
 		kw = self.get_context(view=view,level=level)
 		data = self.render(view,level, ctx=kw)
 
-		updater = template.blocks.get('update',None)
+		updater = None if full else template.blocks.get('update',None)
 		if updater is None:
 			data = template.render(kw)
 			if view.values.get(kw['id'],"") != data:
@@ -374,6 +374,7 @@ class WebdataDir(recEtcDir,EtcDir):
 
 	def has_update(self):
 		super().has_update()
+		self.updates.send(self, full=True)
 		if self.is_new and hasattr(self.parent,'updates'):
 			self.parent.updates.send(self)
 		elif self.is_new is None:
@@ -405,6 +406,7 @@ class WebdataType(EtcString):
 
 class WebdataValue(EtcString):
 	"""Value path for WebdataDir"""
+	_propagate_updates=False
 	def has_update(self):
 		p = self.parent
 		if p is None:

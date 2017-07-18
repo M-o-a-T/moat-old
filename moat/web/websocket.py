@@ -129,39 +129,47 @@ class ApiView(BaseView):
             cmd.next_web_id = seq+1
         return "f_"+str(seq)
 
-    async def add_item(self, item,level):
-        key = self.key_for(item)
-        if key not in self.items:
-            self.items[key] = (item,level)
-            u = getattr(item,'updates',None)
-            if u is not None:
-                u.connect(self.queue_update)
-            await item.send_insert(self, level=level)
-        else:
-            logger.debug("Repeat add %s",item)
-            await item.send_update(self, level=level)
+    async def add_item(self, item,level, **kw):
+        try:
+            key = self.key_for(item)
+            if key not in self.items:
+                self.items[key] = (item,level)
+                u = getattr(item,'updates',None)
+                if u is not None:
+                    u.connect(self.queue_update)
+                await item.send_insert(self, level=level, **kw)
+            else:
+                logger.debug("Repeat add %s",item)
+                await item.send_update(self, level=level, **kw)
+        except Exception as e:
+            logger.exception("Adding %s",item)
+            if self.job is not None:
+                self.job.cancel()
+            self.send_json(action="error",msg="update "+str(item))
 
     def get_level(self,this):
         """Check if the element is new"""
         key = self.key_for(this)
         return self.items[key][1]
 
-    async def send_update(self, item,level):
+    async def send_update(self, item,level, **kw):
         try:
             key = self.key_for(item)
-            await item.send_update(self,level=level)
+            await item.send_update(self,level=level, **kw)
         except Exception as e:
             logger.exception("updating %s",item)
             if self.job is not None:
                 self.job.cancel()
+            self.send_json(action="error",msg="update "+str(item))
 
-    async def send_delete(self, item,level):
+    async def send_delete(self, item,level, **kw):
         try:
             await item.send_delete(self,level=level)
         except Exception as e:
             logger.exception("deleting %s",item)
             if self.job is not None:
                 self.job.cancel()
+            self.send_json(action="error",msg="update "+str(item))
 
     def queue_update(self,item,**kw):
         key = self.key_for(item)
@@ -175,12 +183,12 @@ class ApiView(BaseView):
                 logger.debug("Parent not here: %s",item)
                 return
             else:
-                do_async(self.add_item,item,level=level+1)
+                do_async(self.add_item,item,level=level+1, **kw)
         else:
             if item.is_new is None:
-                do_async(self.send_delete,item,level=level)
+                do_async(self.send_delete,item,level=level, **kw)
             else:
-                do_async(self.send_update,item,level=level)
+                do_async(self.send_update,item,level=level, **kw)
 
     def send_json(self, **kw):
         if self.job is None:
