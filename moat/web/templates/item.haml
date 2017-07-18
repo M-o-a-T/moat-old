@@ -1,16 +1,7 @@
--if update
-	%div
-		{{ item.path | join('/') }}
-		::
-		%span id={{id}}
-			-if 'value' in item
-				{{ item.value }}
-			-else
-				?
-
--else
-	%span id={{id}}
+%div.row.buttoned
+	%div.col.col-2
 		-if 'value' in item
 			{{ item.value }}
 		-else
 			?
+
