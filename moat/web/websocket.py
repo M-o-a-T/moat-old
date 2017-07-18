@@ -183,16 +183,12 @@ class ApiView(BaseView):
                 do_async(self.send_update,item,level=level)
 
     def send_json(self, **kw):
-        #print("SJ",kw)
         if self.job is None:
             return
         if self.ws.closed:
             self.job.cancel()
             return
         try:
-            import inspect
-            if inspect.isgenerator(kw.get('data',None)):
-                import pdb;pdb.set_trace()
             self.ws.send_json(kw)
         except Exception as exc:
             logger.exception("Xmit %s",kw)
