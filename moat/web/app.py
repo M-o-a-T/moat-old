@@ -79,7 +79,6 @@ class App:
         self.loop = cmd.loop
         self.app = web.Application(loop=self.loop)
         self.app['moat.cmd'] = cmd
-        cmd.next_web_id = 1
 
     async def start(self, bindto,port, root="default"):
         self.rootpath = root

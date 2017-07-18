@@ -33,6 +33,9 @@ class FloatDef(WebdefDir):
 
 	def get_context(self, item, **kw):
 		kw = super().get_context(item=item, **kw)
-		kw['value'] = "%.*f" % (int(item.data['digits']),item._value.value)
+		if item._value is None:
+			kw['value'] = "…Loading…"
+		else:
+			kw['value'] = "%.*f" % (int(item.data['digits']),item._value.value)
 		return kw
 
