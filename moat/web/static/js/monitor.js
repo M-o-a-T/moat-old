@@ -77,7 +77,21 @@
 					var d = $(m.data);
 					d.attr("id",m.id);
 					// d.css("height";"0px");
-					f.append(d);
+					var todo = true;
+					if (m.sortkey) {
+						d.attr("sortkey",m.sortkey);
+						f.children().each(function(i,ff) {
+							if(todo) {
+								if (ff.getAttribute("sortkey") < m.sortkey)
+									return;
+								d.insertBefore(ff);
+								todo = false;
+							}
+						});
+
+					}
+					if (todo)
+						f.append(d);
 					// d.animate({height: d.prop('scrollHeight')}, 300, "swing", function(){ d.css("height","");});
 
 				} else if (m.action == 'update') {

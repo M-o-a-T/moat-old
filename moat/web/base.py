@@ -251,7 +251,7 @@ class WebpathDir(WebdefBase, EtcDir):
 		if level == 0:
 			view.send_json(action="replace", id=kw['id'], data=data)
 		else:
-			view.send_json(action="insert", id=kw['id'], parent=kw['parent_id'], data=data)
+			view.send_json(action="insert", id=kw['id'], parent=kw['parent_id'], data=data, sortkey=self.name)
 
 	async def send_update(self,view,level, **_kw):
 		kw = self.get_context(view,level)
