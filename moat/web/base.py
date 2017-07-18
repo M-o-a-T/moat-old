@@ -292,7 +292,7 @@ class WebdataDir(recEtcDir,EtcDir):
 	"""Directory for /web/PATH/:item"""
 	_type = None
 	_value = None
-	_mon = None # value monitor
+	mon = None # value monitor
 	updates = None # signal: updated value
 
 	def __init__(self,*a,**k):
@@ -378,9 +378,9 @@ class WebdataDir(recEtcDir,EtcDir):
 			self.parent.updates.send(self)
 		elif self.is_new is None:
 			self.updates.send(self)
-			if self._mon is not None:
-				self._mon.cancel()
-				self._mon = None
+			if self.mon is not None:
+				self.mon.cancel()
+				self.mon = None
 
 	def update_value(self,val):
 		key = self.get('subvalue','value').split('/')
@@ -420,6 +420,8 @@ class WebdataValue(EtcString):
 		p = self.parent
 		if p is None:
 			return
+		if p.mon is not None:
+			p.mon.cancel()
 		p._value = await self.root.lookup(*(DEV_DIR+tuple(self.value.split('/'))),name=DEV)
 		p.mon = p._value.add_monitor(p.update_value)
 		p.update_value(p._value)
