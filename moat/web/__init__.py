@@ -34,6 +34,7 @@ WEBDEF_DIR = ('meta','web')
 WEBDEF = ':def'
 WEBDATA_DIR = ('web',)
 WEBDATA = ':item'
+WEBCONFIG = ':config'
 
 def webdefs():
 	"""Generator for all web defs known to MoaT. This accesses the code."""

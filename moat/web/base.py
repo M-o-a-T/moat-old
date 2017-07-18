@@ -64,7 +64,7 @@ import asyncio
 from aiohttp_jinja2 import web,render_string, get_env
 from aiohttp.web import HTTPInternalServerError
 from etcd_tree.etcd import EtcTypes, WatchStopped
-from etcd_tree.node import EtcFloat,EtcBase, EtcDir,EtcAwaiter, EtcString
+from etcd_tree.node import EtcFloat,EtcBase, EtcDir,EtcAwaiter, EtcString,EtcInteger
 import etcd
 import inspect
 import functools
@@ -72,9 +72,10 @@ from time import time
 from traceback import format_exception
 import weakref
 import blinker
+from collections.abc import Mapping
 
 from moat.types.etcd import recEtcDir
-from . import webdef_names, WEBDEF_DIR,WEBDEF, WEBDATA_DIR,WEBDATA
+from . import webdef_names, WEBDEF_DIR,WEBDEF, WEBDATA_DIR,WEBDATA, WEBCONFIG
 from moat.util import do_async
 from moat.dev import DEV_DIR,DEV
 
@@ -194,7 +195,32 @@ class WebdefBase(object):
 		t = self.get_template(item=item,view=view,level=level)
 		return t.render(ctx)
 
+DefaultConfig = {
+	'order': 0,
+}
 
+class ConfigDict(Mapping):
+	def __init__(self,parent):
+		self.parent = weakref.ref(parent)
+	def __getitem__(self,k):
+		p = self.parent()
+		if p is not None:
+			cf = p.get(WEBCONFIG,None)
+			if cf is not None:
+				v = cf.get(k,None)
+				if v is not None:
+					return v
+		pcf = getattr(p.parent,'config',None)
+		if pcf is not None:
+			return pcf.get(k)
+		return DefaultConfig[k]
+	def __iter__(self):
+		while False:
+			yield None
+	def __len__(self):
+		return 0
+
+	
 class WebpathDir(WebdefBase, EtcDir):
 	"""Directory for /web/PATH"""
 	TEMPLATE = "dir.haml"
@@ -229,6 +255,15 @@ class WebpathDir(WebdefBase, EtcDir):
 		super().__init__(*a,**k)
 		self.updates = blinker.Signal()
 
+	async def init(self):
+		if WEBCONFIG in self:
+			await self[WEBCONFIG]
+		await super().init()
+
+	@property
+	def config(self):
+		return ConfigDict(self)
+
 	async def feed_subdir(self, view, level=0):
 		await view.add_item(self, level)
 		for v in self.values():
@@ -251,7 +286,7 @@ class WebpathDir(WebdefBase, EtcDir):
 		if level == 0:
 			view.send_json(action="replace", id=kw['id'], data=data)
 		else:
-			view.send_json(action="insert", id=kw['id'], parent=kw['parent_id'], data=data, sortkey=self.name)
+			view.send_json(action="insert", id=kw['id'], parent=kw['parent_id'], data=data, sortkey="%04d%s" % (self.config['order']+5000,self.name))
 
 	async def send_update(self,view,level, **_kw):
 		kw = self.get_context(view,level)
@@ -428,6 +463,10 @@ class WebdataValue(EtcString):
 		p.mon = p._value.add_monitor(p.update_value)
 		p.update_value(p._value)
 
+class WebconfigDir(EtcDir):
+	pass
+WebconfigDir.register('order', cls=EtcInteger)
+
 #	@property
 #	def param(self):
 #		return _DataLookup(self)
@@ -438,7 +477,5 @@ WebdefDir.register('timestamp',cls=EtcFloat)
 WebdefDir.register('created',cls=EtcFloat)
 WebpathDir.register(WEBDATA, cls=WebdataDir)
 WebpathDir.register('*', cls=WebpathDir)
-
-
-
+WebpathDir.register(WEBCONFIG, cls=WebconfigDir)
 
