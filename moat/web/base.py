@@ -290,7 +290,7 @@ class WebdefDir(WebdefBase,recEtcDir,EtcDir):
 
 class WebdataDir(recEtcDir,EtcDir):
 	"""Directory for /web/PATH/:item"""
-	_type = WebdefBase()
+	_type = None
 	_value = None
 	_mon = None # value monitor
 	updates = None # signal: updated value
@@ -307,6 +307,8 @@ class WebdataDir(recEtcDir,EtcDir):
 			tr = await tr.lookup(self['def'])
 			tr = await tr.lookup(WEBDEF)
 			self._type = tr
+		else:
+			self._type = WebdefBase() # gaah
 		if 'value' in self:
 			tr = await self.root.lookup(DEV_DIR)
 			tr = await tr.lookup(self['value'])
@@ -399,13 +401,7 @@ class WebdataType(EtcString):
 		if self.is_new is None:
 			p._type = WebdefBase()
 		else:
-			do_async(self._has_update)
-
-	async def _has_update(self):
-		p = self.parent
-		if p is None:
-			return
-		p._type = await self.root.lookup(*(WEBDEF_DIR+tuple(self.value.split('/'))),name=WEBDEF)
+			p._type = self.root.lookup(*(WEBDEF_DIR+tuple(self.value.split('/'))),name=WEBDEF)
 
 class WebdataValue(EtcString):
 	"""Value path for WebdataDir"""

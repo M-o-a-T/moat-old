@@ -35,6 +35,7 @@ from hamlish_jinja import HamlishExtension
 
 from jinja2 import Template
 from moat.script.util import objects
+from . import WEBDEF_DIR
 
 logger = logging.getLogger(__name__)
 
@@ -78,12 +79,14 @@ class App:
         self.loop = cmd.loop
         self.app = web.Application(loop=self.loop)
         self.app['moat.cmd'] = cmd
+        cmd.next_web_id = 1
 
     async def start(self, bindto,port, root="default"):
         self.rootpath = root
+        await self.tree.lookup(*(WEBDEF_DIR))
         for cls in objects('moat.web', BaseExt):
             await cls.start(self.app)
-        for view in objects("moat.web",BaseView):
+        for view in objects('moat.web',BaseView):
             if view.path is not None:
                 print(view)
                 self.app.router.add_route('*', view.path, view)
