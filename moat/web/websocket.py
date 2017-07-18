@@ -113,9 +113,21 @@ class ApiView(BaseView):
         await t.feed_subdir(self)
 
     def key_for(self, item):
+        """\
+            create and return a unique key for an item.
+
+            We can't use the create ID because while etcd_tree creates
+            directories one at a time, other utilities may not bother.
+            """
         if item is self.top_item:
             return "content"
-        return "f_"+str(item._cseq)
+        # return "f_"+str(item._cseq) # debug only
+        seq = getattr(item,'web_id',None)
+        if seq is None:
+            cmd = self.request.app['moat.cmd']
+            item.web_id = seq = cmd.next_web_id
+            cmd.next_web_id = seq+1
+        return "f_"+str(seq)
 
     async def add_item(self, item,level):
         key = self.key_for(item)
