@@ -39,6 +39,7 @@ from moat.script import Command, SubCommand, CommandError
 from moat.web import WEBDEF_DIR,WEBDEF, WEBDATA_DIR,WEBDATA, webdefs
 from moat.web.base import WebdefDir
 from moat.util import r_dict, r_show
+from moat.cmd.task import _ParamCommand
 
 import logging
 logger = logging.getLogger(__name__)
@@ -171,89 +172,6 @@ This command deletes (some of) that data.
                     break
                 rec=False
                 t = p
-
-class _ParamCommand(DefSetup,Command):
-    name = "param"
-    # _def = None ## need to override
-    description = """\
-
-This command shows/changes/deletes parameters for that data.
-
-Usage: … param NAME VALUE  -- set
-       … param             -- list all
-       … param NAME        -- show one
-       … param -d NAME     -- delete
-"""
-
-    def addOptions(self, meta=False):
-        self.parser.add_option('-d','--delete',
-            action="store_true", dest="delete",
-            help="delete specific parameters")
-        if self._def:
-            self.parser.add_option('-g','--global',
-                action="store_true", dest="is_global",
-                help="show global parameters")
-
-    def handleOptions(self):
-        pass
-
-    async def do(self,args):
-        t = await self.setup(meta=self._def)
-        if self._def and self.options.is_global:
-            if self.options.delete:
-                raise CommandError("You cannot delete global parameters.")
-            data = self.root.etc_cfg['run']
-        elif not args:
-            if self.options.delete:
-                raise CommandError("You cannot delete all parameters.")
-
-            async for web in t.tagged(self.TAG):
-                path = web.path[len(self.DIR):-1]
-                for k in _VARS:
-                    if k in web:
-                        print('/'.join(path),k,web[k], sep='\t',file=self.stdout)
-            return
-        else:
-            name = args.pop(0)
-            try:
-                data = await t.subdir(name, name=self.TAG, create=False)
-            except KeyError:
-                raise CommandError("Web definition '%s' is unknown." % name)
-
-        if self.options.delete:
-            if not args:
-                args = _VARS
-            for k in args:
-                if k in data:
-                    if self.root.verbose:
-                        print("%s=%s (deleted)" % (k,data[k]), file=self.stdout)
-                    await data.delete(k)
-        elif len(args) == 1 and '=' not in args[0]:
-            print(data[args[0]], file=self.stdout)
-        elif not len(args):
-            for k in _VARS:
-                if k in data:
-                    print(k,data[k], sep='\t',file=self.stdout)
-        else:
-            while args:
-                k = args.pop(0)
-                try:
-                    k,v = k.split('=',1)
-                except ValueError:
-                    if k not in _VARS:
-                        raise CommandError("'%s' is not a valid parameter."%k)
-                    print(k,data.get(k,'-'), sep='\t',file=self.stdout)
-                else:
-                    if k not in _VARS:
-                        raise CommandError("'%s' is not a valid parameter."%k)
-                    if self.root.verbose:
-                        if k not in data:
-                            print("%s=%s (new)" % (k,v), file=self.stdout)
-                        elif str(data[k]) == v:
-                            print("%s=%s (unchanged)" % (k,v), file=self.stdout)
-                        else:
-                            print("%s=%s (was %s)" % (k,v,data[k]), file=self.stdout)
-                    await data.set(k, v)
 
 class DefParamCommand(_ParamCommand):
     _def = True
