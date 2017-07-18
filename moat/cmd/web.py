@@ -36,8 +36,8 @@ from traceback import print_exc
 from yaml import dump
 
 from moat.script import Command, SubCommand, CommandError
-from moat.web import WEBDEF_DIR,WEBDEF, WEBDATA_DIR,WEBDATA, webdefs
-from moat.web.base import WebdefDir
+from moat.web import WEBDEF_DIR,WEBDEF, WEBDATA_DIR,WEBDATA, webdefs, WEBCONFIG
+from moat.web.base import WebdefDir, DefaultConfig
 from moat.util import r_dict, r_show
 from moat.cmd.task import _ParamCommand
 
@@ -526,6 +526,18 @@ This command deletes one of these entries.
                 rec=False
                 web = p
 
+class ConfigCommand(_ParamCommand):
+    _def = False
+    _make = True
+    name = "config"
+    _VARS = set(DefaultConfig.keys())
+    DIR=WEBDATA_DIR
+    TAG=WEBCONFIG
+    summary = "Configure display"
+    description = """\
+Web display parameters are stored in etcd at /web/**/:config.
+""" + _ParamCommand.description
+
 
 class WebCommand(SubCommand):
         name = "web"
@@ -539,6 +551,8 @@ Commands to configure, and run, a basic web front-end.
                 DefCommand,
                 ListCommand,
                 AddCommand,
+                ParamCommand,
+                ConfigCommand,
                 UpdateCommand,
                 DeleteCommand,
                 ServeCommand,
