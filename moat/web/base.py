@@ -442,6 +442,9 @@ class WebdataType(EtcString):
 class WebdataValue(EtcString):
 	"""Value path for WebdataDir"""
 	_propagate_updates=False
+	_update_delay = 0.01
+	_reset_delay_job = None
+
 	def has_update(self):
 		p = self.parent
 		if p is None:
@@ -451,7 +454,16 @@ class WebdataValue(EtcString):
 			if p.mon is not None:
 				p.mon.cancel()
 		else:
+			self._update_delay = 1
+			if self._reset_delay_job is not None:
+				self._reset_delay_job.cancel()
+			self._reset_delay_job = self._loop.call_later(1, self._reset_delay)
+
 			do_async(self._has_update)
+
+	def _reset_delay(self):
+		self._reset_delay_job = None
+		self._update_delay = 0.01
 
 	async def _has_update(self):
 		p = self.parent
