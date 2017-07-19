@@ -25,15 +25,30 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 
 """List of known Tasks"""
 
-import os
+import os,sys
 from moat.script import Command, SubCommand, CommandError
 from etcd_tree.util import from_etcd
+from etcd_tree.node import EtcAwaiter,EtcDir,EtcValue
 import aio_etcd as etcd
 
 import logging
 logger = logging.getLogger(__name__)
 
 __all__ = ['ShowCommand']
+
+async def rec_d(t):
+	if isinstance(t,EtcAwaiter):
+		t = await t
+	if isinstance(t,EtcDir):
+		r = {}
+		for k,v in t.items():
+			r[k] = await rec_d(v)
+		return r
+	elif isinstance(t,EtcValue):
+		return t.value
+	else:
+		return t
+
 
 class ConfigCommand(Command):
 	name = "config"
@@ -156,27 +171,30 @@ Of course you can use "output" instead of "input", if the device has any.
 				args = ((),)
 			for a in args:
 				try:
-					t = tree.lookup(a)
+					t = await tree.lookup(a)
 					if len(args) == 1 and DEV in t and not self.options.list:
 						self.options.show = True
 					if self.options.show and DEV not in t:
 						print("'%s': not a device.'" % (a,), file=sys.stderr)
 						continue
 					if not self.options.list and DEV in t:
-						d = t['DEV']
+						d = await t[DEV]
 						if self.options.dump:
-							safe_dump(c, stream=self.stdout)
+							safe_dump(await rec_d(d), stream=self.stdout)
 						else:
 							print("device", d.path[len(DEV_DIR):-1], sep='\t',file=self.stdout)
 							for k,v in d.items():
 								if k in _SOURCES:
 									for n,c in v.items():
-										print('%s/%s' % (k,n),c.get('value','??'), sep='\t',file=self.stdout)
+										if hasattr(c,'get'):
+											c = c.get('value')
+											
+										print('%s/%s' % (k,n),c, sep='\t',file=self.stdout)
 								else:
 									print(k,v, sep='\t',file=self.stdout)
 							print("")
 					else:
-						for d in t.tagged(DEV):
+						async for d in t.tagged(DEV):
 							print('/'.join(d.path[len(DEV_DIR):-1]), sep='\t',file=self.stdout)
 				except KeyError:
 					print("'%s' does not exist" % (a,), file=sys.stderr)
