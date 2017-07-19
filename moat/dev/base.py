@@ -100,6 +100,12 @@ class BaseTypedDir(ManagedEtcThing,EtcDir):
 	def value(self,val):
 		self._value.value = val
 
+	@property
+	def default(self):
+		if self._type is None:
+			return None
+		return self._type.default
+
 	def _set_type(self, typename):
 		if self._type is not None and self._type._type.name == typename:
 			return

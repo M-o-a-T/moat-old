@@ -76,8 +76,12 @@ class ExternDevice(recEtcDir,BaseTypedDir,BaseDevice):
         """\
             Alert to set the state
             """
-        val = data['value']
-        val = self._value.from_amqp(val)
+        try:
+            val = data['value']
+        except KeyError:
+            val = self._type.default
+        else:
+            val = self._value.from_amqp(val)
         self._change.set()
         await self._updated(val)
         return True
