@@ -21,6 +21,7 @@ import signal
 import pprint
 import json
 from sqlmix.async import Db,NoData
+from time import time
 
 import logging
 import sys
@@ -44,6 +45,8 @@ class mon:
 		self.typ = typ
 		self.name = u.config['amqp']['exchanges'][name]
 		self.names = {}
+		self.skips = set()
+		self.f = 0
 
 	async def start(self):
 		await self.u.register_alert_async('#', self.callback, durable='log_mysql', call_conv=CC_MSG)
@@ -73,10 +76,11 @@ class mon:
 
 			done=False
 			async with db() as d:
-				for k in ('value','counter','state','temperature','humidity'):
+				for k in ('value','counter','state','temperature','humidity','average'):
 					val = body.get(k,None)
 					if val is None:
 						continue
+					aval=0
 					try:
 						val = float(val)
 					except ValueError:
@@ -91,18 +95,37 @@ class mon:
 						name = nam
 					else:
 						name = nam+' '+k
+					if k == 'average':
+						aval = float(body.get('turbulence',0))
 					#print(dep,val,nam)
 					try:
 						tid = self.names[name]
 					except KeyError:
 						try:
-							tid, = await d.DoFn("select id from %stype where tag=${name}"%(prefix,), name=name,)
+							tid,mode,rate = await d.DoFn("select id,method,rate from %stype where tag=${name} for update"%(prefix,), name=name,)
 						except NoData:
 							tid = await d.Do("insert into %stype set tag=${name}"%(prefix,), name=name,)
-						self.names[name] = tid
-					f = await d.Do("insert into %slog set value=${value},data_type=${tid},timestamp=from_unixtime(${ts})"%(prefix,), value=val,tid=tid, ts=msg.timestamp)
-					#print(dep,val,name)
-					print(" ",f,"\r", end="")
+							mode = None
+							rate = 0
+						if mode == 1:
+							self.skips.add(name)
+						tid = self.names[name] = [tid,rate,time()]
+
+					else:
+						if tid[2]+tid[1] > time():
+							print("*",self.f,"\r", end="")
+							self.f += 1
+							sys.stdout.flush()
+							continue
+					tid[2] = time()
+					if name in self.skips:
+						await d.Do("update %stype set timestamp=from_unixtime(${ts}) where id=${tid}"%(prefix,), tid=tid[0], ts=msg.timestamp, _empty=True)
+						self.f += 1
+					else:
+						self.f = await d.Do("insert into %slog set value=${value},aux_value=${aux_value},data_type=${tid},timestamp=from_unixtime(${ts})"%(prefix,), value=val,aux_value=aval,tid=tid[0], ts=msg.timestamp)
+						await d.Do("update %stype set timestamp=from_unixtime(${ts}), n_values=n_values+1 where id=${tid}"%(prefix,), tid=tid[0], ts=msg.timestamp)
+						#print(dep,val,name)
+					print(" ",self.f,"\r", end="")
 					sys.stdout.flush()
 					done=True
 			if not done:
