@@ -46,6 +46,7 @@ class mon:
 		self.name = u.config['amqp']['exchanges'][name]
 		self.names = {}
 		self.skips = set()
+		self.f = 0
 
 	async def start(self):
 		await self.u.register_alert_async('#', self.callback, durable='log_mysql', call_conv=CC_MSG)
@@ -74,7 +75,6 @@ class mon:
 				return
 
 			done=False
-			f=0
 			async with db() as d:
 				for k in ('value','counter','state','temperature','humidity','average'):
 					val = body.get(k,None)
@@ -113,20 +113,19 @@ class mon:
 
 					else:
 						if tid[2]+tid[1] > time():
-							print("*",f,"\r", end="")
-							f += 1
+							print("*",self.f,"\r", end="")
+							self.f += 1
 							sys.stdout.flush()
 							continue
 					tid[2] = time()
 					if name in self.skips:
-						if not f%100:
-							await d.Do("update %stype set timestamp=from_unixtime(${ts}) where id=${tid}"%(prefix,), tid=tid[0], ts=msg.timestamp, _empty=True)
-						f += 1
-						continue
-					f = await d.Do("insert into %slog set value=${value},aux_value=${aux_value},data_type=${tid},timestamp=from_unixtime(${ts})"%(prefix,), value=val,aux_value=aval,tid=tid[0], ts=msg.timestamp)
-					await d.Do("update %stype set timestamp=from_unixtime(${ts}), n_values=n_values+1 where id=${tid}"%(prefix,), tid=tid[0], ts=msg.timestamp)
-					#print(dep,val,name)
-					print(" ",f,"\r", end="")
+						await d.Do("update %stype set timestamp=from_unixtime(${ts}) where id=${tid}"%(prefix,), tid=tid[0], ts=msg.timestamp, _empty=True)
+						self.f += 1
+					else:
+						self.f = await d.Do("insert into %slog set value=${value},aux_value=${aux_value},data_type=${tid},timestamp=from_unixtime(${ts})"%(prefix,), value=val,aux_value=aval,tid=tid[0], ts=msg.timestamp)
+						await d.Do("update %stype set timestamp=from_unixtime(${ts}), n_values=n_values+1 where id=${tid}"%(prefix,), tid=tid[0], ts=msg.timestamp)
+						#print(dep,val,name)
+					print(" ",self.f,"\r", end="")
 					sys.stdout.flush()
 					done=True
 			if not done:
