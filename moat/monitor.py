@@ -166,6 +166,7 @@ class Monitor(Collected,Jobber):
 			yield ("data"," ".join(six.text_type(x) for x in self.data))
 
 	def update_ectx(self):
+		super(Monitor,self).update_ectx()
 		self._ectx.value = self.value
 		self._ectx.last_value = self.last_value
 		self._ectx.up = self.up_name

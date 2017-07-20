@@ -53,14 +53,17 @@ class DeviceMgr(Task):
 	def teardown(self):
 		pass
 
+	async def managed(self):
+		"""get the root of the tree we are managing"""
+		raise NotImplementedError("Need to override %s.managed" % self.__class__.__name__)
+
 	async def task(self):
 		self.q = asyncio.Queue(loop=self.loop)
 		self.devices = WeakSet()
 		self.amqp = self.cmd.root.amqp
 		await self.setup()
 
-		managed = await self.tree['bus']
-		managed = await managed.lookup(*self.path[:-1])
+		managed = await self.managed()
 		await managed.set_manager(self)
 
 		try:

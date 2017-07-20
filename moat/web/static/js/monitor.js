@@ -13,10 +13,12 @@
 			li.attr('id', 'alert-'+n)
 			li.addClass('alert');
 			li.addClass('alert-'+c);
-			li.addClass('fade');
-			li.addClass('fade in');
+			// li.addClass('fade');
+			// li.addClass('fade in');
+			li.hide();
 			li.text(m);
 			inf.prepend(li);
+			li.fadeIn(300);
 			$('#page').scrollTop(0);
 			if (last > 0)
 			{
@@ -42,58 +44,122 @@
 
 			ws.onmessage = function (msg) {
 				var m = $.parseJSON(msg.data);
-				console.log("IN",m);
 				if (!('action' in m)) {
+					announce("warning","Unknown message: " + m)
 				} else if (m.action == 'error') {
 					announce("danger",m.msg)
+
 				} else if (m.action == 'replace') {
 					var f = $('#'+m.id);
+					if (f.length == 0) {
+						announce("danger","Content ID "+m.id+" not found.");
+						return;
+					}
 					var d = $(m.data);
 					d.attr("id",m.id)
-					if (f.length > 0) {
-						f.replaceWith(d);
-					} else {
-						f = $('#c'+m.parent);
-						if (f.length == 0)  {
-							f = $('#'+m.parent);
-							if (f.length == 0)  {
-								announce("danger","Content ID "+m.id+"/"+m.parent+" not found.");
-								return;
-							}
-						}
-						f.append(d);
+					if (m.keep) {
+						m.keep.split('').forEach(function(c) {
+							var dd = d.find("#"+c+m.id)
+							var ff = f.find("#"+c+m.id)
+							ff.children().each(function(i,x) {
+								dd.append(x);
+							});
+						});
 					}
+					f.replaceWith(d);
 
-				} else if (m.action == 'update' && m.class == 'charger') {
-					var f = $('#charger_'+m.name);
-					f.find('.f1').text(m.state);
-					if (m.charging || m.connected) {
-					    f.find('.f2').text(m.amp_avail.toFixed(1));
-					} else {
-					    f.find('.f2').text('('+m.amp_avail.toFixed(1)+')');
+				} else if (m.action == 'insert') {
+					var f = $('#'+m.parent);
+					if (f.length == 0)  {
+						announce("danger","Content ID "+m.parent+" for "+m.id+" not found.");
+						return;
 					}
-					if (m.charging) {
-					    f.find('.f3').text(m.amp.toFixed(2));
-					    f.find('.f4').text((m.power/1000).toFixed(2));
-					    f.find('.f5').text(m.power_factor.toFixed(2));
-					} else {
-						f.find('.f3').text('–');
-						f.find('.f4').text('–');
-						f.find('.f5').text('–');
+					var d = $(m.data);
+					d.attr("id",m.id);
+					// d.css("height";"0px");
+					var todo = true;
+					if (m.sortkey) {
+						d.attr("sortkey",m.sortkey);
+						f.children().each(function(i,ff) {
+							if(todo) {
+								if (ff.getAttribute("sortkey") < m.sortkey)
+									return;
+								d.insertBefore(ff);
+								todo = false;
+							}
+						});
+
 					}
-					f.find('.f6').text((m.charge_Wh/1000).toFixed(2));
-					f.find('.f7').text((m.charge_sec/60).toFixed(1));
+					if (todo)
+						f.append(d);
+					// d.animate({height: d.prop('scrollHeight')}, 300, "swing", function(){ d.css("height","");});
+
+				} else if (m.action == 'update') {
+					(function(m) {
+					var d = $(m.data);
+					d.attr("id",m.id)
+					var dly = m.fade || 400;
+					var f = $('#'+m.id);
+					if (f.length == 0) {
+						announce("danger","No content for "+m.id+" found.");
+						return;
+					}
+					f.fadeOut(dly, function() {
+						f.replaceWith(d);
+						f.fadeIn(dly);
+					});
+					})(m);
+
+				} else if (m.action == 'delete') {
+					f = $('#'+m.id);
+					if (f.length == 0) {
+						announce("warning","No content for "+m.id+" found.");
+						return;
+					}
+					f.fadeOut(300, function() {
+						f.animate({height: "0px"},300,"swing",function() {
+							f.remove();
+						});
+					});
+
+				} else if (m.action == 'clear') {
+					f = $('#'+m.id);
+					if (f.length == 0) {
+						announce("warning","No content for "+m.id+" found.");
+						return;
+					}
+					f.fadeOut(300, function() {
+						f.animate({height: "0px"},300,"swing" ,function() {
+							f.empty();
+							f.css("height","");
+						});
+					});
+
+				} else {
+					console.log("IN",m);
+					announce("warning","Unknown action: " + m.action)
 				}
 			};
 			ws.onopen = function (msg) {
+				has_error = false;
 			    announce("success","Connected. Waiting for instructions …");
-				ws.send(JSON.stringify({"action":"locate","location": "" }));
+				window.to_moat = function(msg) {
+					ws.send(JSON.stringify(msg));
+				};
+				ws.send(JSON.stringify({"action":"locate","location": window.location.hash }));
 			};
+			var msg_dead = function(msg) {
+				announce("warning","Not connected. Reload before doing this.");
+			};
+
 			ws.onerror = function (msg) {
+				has_error = true;
+				window.to_moat = msg_dead;
 				announce("danger","Connection error! Please reload this page.");
 			};
 			ws.onclose = function (msg) {
 				if (has_error) { return; }
+				window.to_moat = msg_dead;
 				announce("danger","Connection closed.");
 			};
 		} else if ("WebSocket" in window) {

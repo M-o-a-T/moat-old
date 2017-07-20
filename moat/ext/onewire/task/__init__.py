@@ -96,6 +96,11 @@ class BusHandler(_BusTask,DeviceMgr):
 		self.bus = self.srv.at('uncached')
 		self.bus_cached = self.srv
 		await super().setup()
+	
+	async def managed(self):
+		managed = await self.tree['bus']
+		managed = await managed.lookup(*self.path[:-1])
+		return managed
 
 class ScanTask(TimeoutHandler, _BusTask, metaclass=_ScanMeta):
 	"""\

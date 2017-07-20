@@ -23,32 +23,19 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##  Thus, do not remove the next line, or insert any blank lines above.
 ##BP
 
-from aiohttp import web
-import jinja2
-import os
-import aiohttp_jinja2
-from hamlish_jinja import HamlishExtension
-from qbroker.util import format_dt
+from .base import WebdefDir,template
 
-from .app import BaseView,BaseExt
+class FloatDef(WebdefDir):
+	name = "float"
+	summary = "Your basic floating-point number"
+	vars = {'digits':1}
+	TEMPLATE = "float.haml"
 
-class JinjaExt(BaseExt):
-    @classmethod
-    async def start(self,app):
-        env = aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader(os.path.join(os.path.dirname(__file__),'templates')), extensions=[HamlishExtension])
-        env.hamlish_file_extensions=('.haml',)
-        env.hamlish_mode='debug'
-        env.hamlish_enable_div_shortcut=True
-
-        app.router.add_static('/static', os.path.join(os.path.dirname(__file__),'static'), name='static')
-        env.filters['static'] = lambda x:app.router.named_resources()['static'].url_for(filename=x)
-        env.filters['datetime'] = format_dt
-
-class RootView(BaseView):
-    path = '/'
-    @aiohttp_jinja2.template('main.haml')
-    async def get(self):
-        ##qb = self.request.app['moat.cmd'].amqp
-        #x = await qb.rpc('info', _cmd='state',_subsys='charger')
-        return {'foo':'bar', 'host':self.request.headers['host']}
+	def get_context(self, item, **kw):
+		kw = super().get_context(item=item, **kw)
+		if item._value is None:
+			kw['value'] = "…Loading…"
+		else:
+			kw['value'] = "%.*f" % (int(item.data['digits']),item._value.value)
+		return kw
 

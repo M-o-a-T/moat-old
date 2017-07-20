@@ -71,10 +71,17 @@ class Command(BaseCommand):
 		print("""\
 if exists output {name}:
 	del output {name}
+if exists on hab in command {name}:
+	del on hab in command {name}
+if exists on want output {name}:
+	del on want output {name}
+if exists on output change {name}:
+	del on output change {name}
 output wago {cloc} {vloc}:
 	name {name}
 	bool on off
 on hab in command {sname}:
+	name hab in command {name}
 	var output now {name}
 	if equal $raw ON:
 		if equal $now off:
@@ -82,11 +89,21 @@ on hab in command {sname}:
 	else:
 		if equal $now on:
 			set output off {name}
-on output change {name}:
-	if equal $value True:
-		trigger hab out command {sname} :param raw ON
+on want output {name}:
+	name want output {name}
+	var output now {name}
+	if equal $value on:
+		if equal $now off:
+			set output on {name} :for 5 min
 	else:
-		trigger hab out command {sname} :param raw OFF
+		if equal $now on:
+			set output off {name}
+on output change {name}:
+	name output change {name}
+	if equal $value True:
+		trigger hab out state {sname} :param raw ON
+	else:
+		trigger hab out state {sname} :param raw OFF
 
 """.format(name=v.var, vloc=v.location, cloc=v.controller.location,sname=sname))
 

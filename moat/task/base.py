@@ -109,7 +109,7 @@ class TaskDir(recEtcDir,EtcDir):
 				break
 		await super()._fill_data(pre,recursive)
 
-	def subtype(self,*path,dir=None,pre=None,recursive=None):
+	def subtype(self,*path, **kw):
 		if len(path)==1:
 			if path[0] == 'taskdef':
 				return TaskdefName
@@ -120,7 +120,7 @@ class TaskDir(recEtcDir,EtcDir):
 			typ_path = tuple(x for x in name.split('/') if x != "")
 			typ = self.root.lookup(TYPEDEF_DIR+typ_path+(TYPEDEF,))
 			return typ._type.etcd_class
-		return super().subtype(*path,dir=dir,pre=pre,recursive=recursive)
+		return super().subtype(*path,**kw)
 
 _setup_task_vars(TaskDir)
 TaskDir.register('parent',MoatRef)

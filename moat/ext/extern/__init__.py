@@ -23,32 +23,27 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##  Thus, do not remove the next line, or insert any blank lines above.
 ##BP
 
-from aiohttp import web
-import jinja2
-import os
-import aiohttp_jinja2
-from hamlish_jinja import HamlishExtension
-from qbroker.util import format_dt
+from moat.types.module import BaseModule
 
-from .app import BaseView,BaseExt
+class ExternModule(BaseModule):
+	"""\
+		This module accesses things on AMQP that are not MoaT-controlled.
+		"""
 
-class JinjaExt(BaseExt):
-    @classmethod
-    async def start(self,app):
-        env = aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader(os.path.join(os.path.dirname(__file__),'templates')), extensions=[HamlishExtension])
-        env.hamlish_file_extensions=('.haml',)
-        env.hamlish_mode='debug'
-        env.hamlish_enable_div_shortcut=True
+	prefix = "extern"
+	summary = "external devices"
+	
+	@classmethod
+	def entries(cls):
+		yield from super().entries()
+		#yield "cmd_conn","moat.ext.extern.cmd.ServerCommand"
+		yield "cmd_dev","moat.ext.extern.cmd.DeviceCommand"
+		# yield "bus","moat.ext.onewire.bus.OnewireBusBase"
+		yield "device","moat.ext.extern.dev.ExternDeviceBase"
 
-        app.router.add_static('/static', os.path.join(os.path.dirname(__file__),'static'), name='static')
-        env.filters['static'] = lambda x:app.router.named_resources()['static'].url_for(filename=x)
-        env.filters['datetime'] = format_dt
-
-class RootView(BaseView):
-    path = '/'
-    @aiohttp_jinja2.template('main.haml')
-    async def get(self):
-        ##qb = self.request.app['moat.cmd'].amqp
-        #x = await qb.rpc('info', _cmd='state',_subsys='charger')
-        return {'foo':'bar', 'host':self.request.headers['host']}
+	@classmethod
+	def task_types(cls):
+		"""Enumerate taskdef classes"""
+		from moat.task import task_types as ty
+		return ty('moat.ext.extern.task')
 

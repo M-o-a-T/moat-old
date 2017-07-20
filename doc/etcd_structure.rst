@@ -247,6 +247,52 @@ Main tree
 
             Name of the type (/meta/type/name…) of this item.
 
+  * web
+
+    This section describes types for display via HTML, via MoaT's "web"
+    subsystem.
+    
+    * whatever …
+
+      Type hierarchy.
+
+      * :def
+
+        Parameters for that particular type.
+
+        The "code", "doc" and "descr" attributes are as in
+        moat/meta/type.
+
+
+* web
+
+  This part describes the actual web pages, or rather: snippets of pages
+  which get combined to build a page.
+
+  Sub-hierarchies are displayed exhaustively. The default start page is
+  called "default". 
+
+  * whatever …
+  
+    Page snippet hierarchy.
+
+    * :item
+
+      One entry on a page.
+
+      * def
+
+        Pointer to the associated meta/web/NAME/:def entry.
+
+      * value
+
+        Pointer to the device/NAME/:dev entry whose value shall be
+        displayed.
+
+      * subvalue
+
+        The device's attribute to be used. The default is "value".
+
 * device
 
   This hierarchy describes all external devices known to MoaT.
@@ -591,6 +637,11 @@ The base type contains a JSON schema for the possible values.
 
           Add this value. For instance, to display temperatures in °F,
           the offset would be 32 (with a factor of 1.8).
+
+        * digits
+
+          Digits after the decimal point/comma. The default is 1, unless
+          the absolute value is <10.
 
         * unit
 

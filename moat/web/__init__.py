@@ -34,12 +34,13 @@ WEBDEF_DIR = ('meta','web')
 WEBDEF = ':def'
 WEBDATA_DIR = ('web',)
 WEBDATA = ':item'
+WEBCONFIG = ':config'
 
 def webdefs():
 	"""Generator for all web defs known to MoaT. This accesses the code."""
-	from .base import WebDef
+	from .base import WebdefDir
 	from moat.script.util import objects
-	return objects(__name__, WebDef, filter=lambda x:x.name is not None)
+	return objects(__name__, WebdefDir, filter=lambda x:x.name is not None)
 
 class _webdef_names(dict):
 	def __getitem__(self,k):
@@ -48,13 +49,13 @@ class _webdef_names(dict):
 				return super().__getitem__(k)
 			except KeyError:
 				if '/' not in k:
-					from .base import WebDef
-					return WebDef
+					from .base import WebdefDir
+					return WebdefDir
 			k = k[:k.rindex('/')]
 _webdef_names = _webdef_names()
 
 def webdef_names():
-	"""Creates a dict which maps webdef names to its moat.web.*.WebDef object."""
+	"""Creates a dict which maps webdef names to its moat.web.*.WebdefDir object."""
 	if not _webdef_names:
 		for t in webdefs():
 			_webdef_names[t.name] = t

@@ -75,6 +75,11 @@ class CommandHelpFormatter(optparse.IndentedHelpFormatter):
 			ret += "\n" + "\n".join(commandDesc) + "\n"
 
 		return ret
+	
+	def format_epilog(self, epilog):
+		if not epilog:
+			return ""
+		return '\n'+epilog+'\n'
 
 class CommandOptionParser(optparse.OptionParser):
 	"""
@@ -376,13 +381,15 @@ class SubCommand(Command):
 					logger.debug("Done:%s", " ".join(args))
 				self.root.logged = True
 			return r
+		except SyntaxError:
+			raise
 		except CommandExited as e:
 			raise
 		except Exception:
 			if not self.root.logged:
 				logger.exception("Error:%s", " ".join(args))
 				self.root.logged = True
-			raise
+			#raise
 		finally:
 			if c is not None:
 				await c.finish()

@@ -73,8 +73,9 @@ This is the main MoaT command line processor.
 
 If the config file is not specified with --config, the current directory will be
 searched for *.cfg files.  If there is only one, that will be used;
-otherwise you will be asked to specify. If there is none, /etc/moat.cfg
-will be used. If that doesn't exist either, this command fails.
+otherwise you will be asked to specify. If there is none, the content of
+the MOAT_CFG environment variable or /etc/moat.cfg will be used.
+If that doesn't exist either, this command fails.
 
 You can load more than one config file.
 """
@@ -165,7 +166,9 @@ You can load more than one config file.
 				paths.extend(glob.glob(f))
 
 		if not paths: # pragma: no cover ## not while testing!
-			if os.path.exists(DEFAULT_CFG):
+			if 'MOAT_CFG' in os.environ:
+				paths.append(os.environ['MOAT_CFG'])
+			elif os.path.exists(DEFAULT_CFG):
 				paths.append(DEFAULT_CFG)
 
 		self.cfg = {'config':{}}

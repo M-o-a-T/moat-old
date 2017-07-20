@@ -77,6 +77,7 @@ Check etcd access, and basic data layout.
 		async def task(self):
 			logger.debug("start: _do3")
 			await asyncio.sleep(0.2,loop=self.loop)
+			print("The following RuntimeError is part of the test.",file=sys.stderr)
 			raise RuntimeError("Dying")
 
 	class Task_do4(Task):
@@ -185,6 +186,7 @@ Check etcd access, and basic data layout.
 		assert run_state['stopped'] > run_state['started'], (run_state['stopped'], run_state['started'])
 		assert run_state['state'] == "fail", run_state['state']
 
+		print("The following 'Job is already running' message is part of the test.",file=sys.stderr)
 		dt2 = self.Task_do2(self,"test/do_2",{})
 		await asyncio.sleep(0.1,loop=self.root.loop)
 		dt2a = self.Task_do2(self,"test/do_2",{})
@@ -267,6 +269,7 @@ class WebCommand(Command):
 					logger.debug("Found %s",t.name)
 			else:
 				d = await etc.tree(WEBDEF_DIR+path+(WEBDEF,))
+
 			for k,v in t.vars.items():
 				if k not in d:
 					await d.set(k,v)

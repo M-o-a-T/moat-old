@@ -188,7 +188,6 @@ class QBconn(Collected,Jobber):
 		self.server.register_rpc("moat.cmd",self._command, call_conv=CC_DICT)
 
 	def _command(self, args=(), sub=(),**kwargs):
-
 		ctx = Context(**kwargs)
 		ctx.out = Reporter()
 		ctx.words = global_words() # self.ctx)
@@ -259,11 +258,15 @@ class QBconn(Collected,Jobber):
 
 class QBconnect(AttributedStatement):
 	name = "connect qbroker"
-	doc = "create an QB server"
+	doc = "connect a QBroker link"
 
 	long_doc="""\
 Usage: connect qbroker ‹name› [‹host›] ‹port› :vhost ‹name›
-This command sets up an AMQP connection to this broker.
+This command sets up an AMQP connection with QBroker semantics.
+
+It feeds all events to QBroker, and registers two commands:
+'cmd' to execute arbitrary MoaT commands
+'list' to display MoaT internals
 """
 
 	dest = None

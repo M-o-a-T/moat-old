@@ -1,0 +1,32 @@
+-macro hdr()
+	Dir {{id}}/{{pid}} :: {{ item.path | join('|') }}
+
+-macro column()
+	%div class="col"
+		-if n_entry
+			%div.row.buttoned id="{{entry_id}}"
+				&nbsp;
+		-if level == 0
+			%div id={{content_id}}
+		-else
+			%div.collapse id={{content_id}}
+
+-if level == 0
+	%div
+		%h1
+			{{item.path | join('|')}}
+		%div class="row"
+			=column()
+-else
+	%div.row
+		%div class="col col-auto"
+			%div class="btn-group" data-toggle="buttons-checkbox"
+				-if n_sub
+					%button.btn.btn-secondary type="button" data-toggle="collapse" data-target="#{{content_id}}" aria-expanded="false" aria-controls="{{content_id}}"
+						=item.path[-1]
+				-else
+					%button.btn.btn-secondary disabled type="button" data-toggle="collapse" data-target="#{{content_id}}" aria-expanded="false" aria-controls="{{content_id}}"
+						=item.path[-1]
+
+		=column()
+

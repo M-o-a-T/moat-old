@@ -49,7 +49,8 @@ class ModuleSetup:
 	async def setup(self):
 		await super().setup()
 		tree = await self.root._get_tree()
-		return (await tree.subdir(MODULE_DIR))
+		tree = await tree.subdir(MODULE_DIR)
+		return tree
 
 class ModuleInitCommand(ModuleSetup,Command):
 	name = "init"
@@ -119,7 +120,7 @@ on the command line, they are added, otherwise everything under
 				await tasks.add_task(ta, force=self.force)
 		await t.wait()
 
-class ModuleListCommand(Command,ModuleSetup):
+class ModuleListCommand(ModuleSetup,Command):
 	name = "list"
 	summary = "List module definitions"
 	description = """\
@@ -159,7 +160,7 @@ This command shows that data.
 			tt = await tt
 			await _pr(tt)
 
-class ModuleDeleteCommand(Command,ModuleSetup):
+class ModuleDeleteCommand(ModuleSetup,Command):
 	name = "delete"
 	summary = "Delete module definitions"
 	description = """\

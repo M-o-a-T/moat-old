@@ -36,9 +36,6 @@ import datetime as dt
 from time import time,mktime
 from calendar import isleap,monthrange
 
-import gevent
-from gevent.queue import Queue
-
 from moat import TESTING
 
 startup = dt.datetime.now()
@@ -57,6 +54,8 @@ if TESTING:
 		return r + dt.timedelta(0, S // SLOT, (S % SLOT) * (1e6 / SLOT) )
 
 	def sleep(force,timeout,debugi=""):
+		import gevent
+
 		global current_slot,real_sleep
 		from moat.twist import log_wait,callLater
 		if force:
@@ -81,6 +80,7 @@ else:
 	def now(force=False):
 		return dt.datetime.now()
 	def sleep(force,timeout,debugi=None):
+		import gevent
 		gevent.sleep(timeout)
 
 def unixdelta(delta):
@@ -128,6 +128,10 @@ def isodate(yr,wk,wdy):
 	return res + dt.timedelta(7*(wk-1) + wdy-dy)
 
 def simple_time_delta(w):
+	if isinstance(w,str):
+		w = w.split()
+	else:
+		w = list(w)[:]
 	s=0
 	m=1
 	w=list(w)[:]
@@ -172,7 +176,10 @@ def simple_time_delta(w):
 	return s
 
 def time_delta(args, now=None):
-	w = list(args)[:]
+	if isinstance(args,str):
+		args = args.split()
+	else:
+		args = list(args)[:]
 	step = None
 	if now is None: now = globals()["now"]()
 	if not w:

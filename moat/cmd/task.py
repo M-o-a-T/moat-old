@@ -53,10 +53,7 @@ class DefSetup:
 		await super().setup()
 		etc = self.root.etcd
 		tree = await self.root._get_tree()
-		if meta:
-			t = await tree.subdir(TASKDEF_DIR)
-		else:
-			t = await tree.subdir(TASK_DIR)
+		t = await tree.subdir(self.DIR)
 		return t
 
 class DefInitCommand(DefSetup,Command):
@@ -184,6 +181,8 @@ This command deletes (some of) that data.
 class _ParamCommand(DefSetup,Command):
 	name = "param"
 	# _def = None ## need to override
+	_make = False # create dir if missing?  used by web param
+	from moat.task import _VARS
 	description = """\
 
 This command shows/changes/deletes parameters for that data.
@@ -204,7 +203,6 @@ Usage: … param NAME VALUE  -- set
 				help="show global parameters")
 
 	async def do(self,args):
-		from moat.task import _VARS
 		t = await self.setup(meta=self._def)
 		if self._def and self.options.is_global:
 			if self.options.delete:
@@ -216,20 +214,20 @@ Usage: … param NAME VALUE  -- set
 
 			async for task in t.tagged(self.TAG):
 				path = task.path[len(self.DIR):-1]
-				for k in _VARS:
+				for k in self._VARS:
 					if k in task:
 						print('/'.join(path),k,task[k], sep='\t',file=self.stdout)
 			return
 		else:
 			name = args.pop(0)
 			try:
-				data = await t.subdir(name, name=self.TAG, create=False)
+				data = await t.subdir(name, name=self.TAG, create=None if self._make else False)
 			except KeyError:
 				raise CommandError("Task definition '%s' is unknown." % name)
 
 		if self.options.delete:
 			if not args:
-				args = _VARS
+				args = self._VARS
 			for k in args:
 				if k in data:
 					if self.root.verbose:
@@ -238,7 +236,7 @@ Usage: … param NAME VALUE  -- set
 		elif len(args) == 1 and '=' not in args[0]:
 			print(data[args[0]], file=self.stdout)
 		elif not len(args):
-			for k in _VARS:
+			for k in self._VARS:
 				if k in data:
 					print(k,data[k], sep='\t',file=self.stdout)
 		else:
@@ -247,11 +245,11 @@ Usage: … param NAME VALUE  -- set
 				try:
 					k,v = k.split('=',1)
 				except ValueError:
-					if k not in _VARS:
+					if k not in self._VARS:
 						raise CommandError("'%s' is not a valid parameter."%k)
 					print(k,data.get(k,'-'), sep='\t',file=self.stdout)
 				else:
-					if k not in _VARS:
+					if k not in self._VARS:
 						raise CommandError("'%s' is not a valid parameter."%k)
 					if self.root.verbose:
 						if k not in data:

@@ -15,10 +15,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 
 import asyncio
 import aiohttp
-import jinja2
 import os
-import aiohttp_jinja2
-from hamlish_jinja import HamlishExtension
 from blinker import Signal
 from functools import partial
 
@@ -30,9 +27,17 @@ logger = logging.getLogger(__name__)
 
 from moat.web import WEBDATA_DIR,WEBDATA
 from .app import BaseView,BaseExt
+from moat.util import do_async
 
 class ApiView(BaseView):
     path = '/api/control'
+    top_item = None
+
+    def __init__(self,*a,**k):
+        self.items = {}
+        self.values = {}
+        super().__init__(*a,**k)
+
     async def get(self):
         app = self.request.app
         sig = app.get('moat.update',None)
@@ -44,43 +49,55 @@ class ApiView(BaseView):
 #                call_conv=CC_DICT)
 #        sig.connect(self.send_update)
 
-        socks = app.setdefault('websock',set())
+        #socks = app.setdefault('websock',set())
         logger.debug('starting')
 
         self.ws = aiohttp.web.WebSocketResponse()
         await self.ws.prepare(self.request)
 
-        socks.add(self)
+        #socks.add(self)
         logger.debug('open')
         self.job = asyncio.Task.current_task(cmd.loop)
         try:
             async for msg in self.ws:
                 if msg.type == aiohttp.WSMsgType.TEXT:
-                    logger.info("Msg %s",msg.data)
+                    logger.debug("WebSocket: recv %s",msg.data)
                     msg = json.decode(msg.data)
                     act = msg.get('action',"")
                     if act == "locate":
                         loc = msg.get('location','')
                         if not loc:
                             loc = cmd.app.rootpath
+                        elif loc[0] == '#':
+                            loc = loc[1:]
                         await self.set_location(loc)
                     else:
-                        logger.warn("Unknown action: %s",repr(msg))
+                        id = msg.get('id',None)
+                        if id is None:
+                            logger.warn("Unknown action: %s",repr(msg))
+                        else:
+                            try:
+                                this = self.items[id]
+                                this.recv_msg(act, view=self, **msg)
+                            except KeyError:
+                                logger.warn("Unknown ID: %s",repr(id))
+                            except Exception as exc:
+                                logger.exception("%s on %s:%s",act,id,this)
+                                break
                 elif msg.type == aiohttp.WSMsgType.ERROR:
                     logger.warn('ws connection closed: %s', ws.exception())
                     break
                 else:
                     logger.info("Msg %s",msg)
         finally:
-            socks.remove(self)
+            #socks.remove(self)
             #sig.disconnect(self.send_update)
             logger.debug('closed')
             self.job = None
+            await self.ws.close()
+            pass
 
         return self.ws
-
-    async def send_field(self, t, level=1):
-        await t.send_item(self, level=level)
 
     async def set_location(self, loc):
         try:
@@ -91,45 +108,100 @@ class ApiView(BaseView):
             self.send_json(action="error", msg="Location '%s' not found" % (loc,))
             return
 
-        await self.setup_dir(t)
-        await self.send_dir(t, 0)
+        self.items = {}
+        self.top_item = t
+        await t.feed_subdir(self)
 
-    async def setup_field(self,t):
-        t = await t
-        print(t)
-        pass
+    def key_for(self, item):
+        """\
+            create and return a unique key for an item.
 
-    async def setup_dir(self,t):
-        for k,v in t.items():
-            print(k,v)
-            if k[0] == ':':
-                continue
-            v = await v
-            if WEBDATA in v:
-                await self.setup_field(v[WEBDATA])
-            else:
-                await self.setup_dir(v)
+            We can't use the create ID because while etcd_tree creates
+            directories one at a time, other utilities may not bother.
+            """
+        if item is self.top_item:
+            return "content"
+        # return "f_"+str(item._cseq) # debug only
+        seq = getattr(item,'web_id',None)
+        if seq is None:
+            cmd = self.request.app['moat.cmd']
+            item.web_id = seq = cmd.next_web_id
+            cmd.next_web_id = seq+1
+        return "f_"+str(seq)
 
-    async def send_dir(self,t, level=0):
+    async def add_item(self, item,level, **kw):
         try:
-            await t.send_item(self, level=level)
-        except AttributeError:
-            import pdb;pdb.set_trace()
-            raise
-        level += 1
-        for k,v in t.items():
-            if k[0] == ':':
-                continue
-            if WEBDATA in v:
-                await self.send_field(v[WEBDATA],level)
+            key = self.key_for(item)
+            if key not in self.items:
+                self.items[key] = (item,level)
+                u = getattr(item,'updates',None)
+                if u is not None:
+                    u.connect(self.queue_update)
+                await item.send_insert(self, level=level, **kw)
             else:
-                await self.send_dir(v,level)
-        
+                logger.debug("Repeat add %s",item)
+                await item.send_update(self, level=level, **kw)
+        except Exception as e:
+            logger.exception("Adding %s",item)
+            if self.job is not None:
+                self.job.cancel()
+            self.send_json(action="error",msg="update "+str(item))
+
+    def get_level(self,this):
+        """Check if the element is new"""
+        key = self.key_for(this)
+        return self.items[key][1]
+
+    async def send_update(self, item,level, **kw):
+        try:
+            key = self.key_for(item)
+            await item.send_update(self,level=level, **kw)
+        except Exception as e:
+            logger.exception("updating %s",item)
+            if self.job is not None:
+                self.job.cancel()
+            self.send_json(action="error",msg="update "+str(item))
+
+    async def send_delete(self, item,level, **kw):
+        try:
+            await item.send_delete(self,level=level)
+        except Exception as e:
+            logger.exception("deleting %s",item)
+            if self.job is not None:
+                self.job.cancel()
+            self.send_json(action="error",msg="update "+str(item))
+
+    def queue_update(self,item,**kw):
+        key = self.key_for(item)
+        try:
+            _,level = self.items[key]
+        except KeyError:
+            par = self.key_for(item.parent)
+            try:
+                _,level = self.items[par]
+            except KeyError:
+                logger.debug("Parent not here: %s",item)
+                return
+            else:
+                do_async(self.add_item,item,level=level+1, **kw)
+        else:
+            if item.is_new is None:
+                do_async(self.send_delete,item,level=level, **kw)
+            else:
+                do_async(self.send_update,item,level=level, **kw)
+
     def send_json(self, **kw):
+        if self.job is None:
+            return
+        if self.ws.closed:
+            self.job.cancel()
+            return
         try:
             self.ws.send_json(kw)
-        except Exception:
-            self.job.cancel()
+        except Exception as exc:
+            logger.exception("Xmit %s",kw)
+            if self.job is not None:
+                self.job.cancel()
 
 #def send_charger_update(_sig, **kw):
 #    kw['action'] = 'update'

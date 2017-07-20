@@ -121,7 +121,7 @@ class Type:
 
 			Returns a 'settable' version of the value (converted to float, constrained, whatever).
 			"""
-		raise CommandError("I don't know about '%s', much less setting it to '%s'" % (var,value))
+		raise ValueError("I don't know about '%s', much less setting it to '%s'" % (var,value))
 
 class StringType(Type):
 	name = 'str'
@@ -211,18 +211,22 @@ class _NumType(Type):
 	default = 0
 
 	def check_var(self, var,value):
-		if var not in self.vars:
-			return super().check_var(var,value)
 		try:
 			val = self._cls(value)
 		except ValueError:
 			raise CommandError("%s: need an integer for '%s', not '%s'." % (self.name,var,value))
 		if var != 'max':
-			if val > self['max']:
-				raise CommandError("%s: min %s needs to be smaller than max %s" % (self.name,val,self['max']))
+			try:
+				if val > self['max']:
+					raise CommandError("%s: min %s needs to be smaller than max %s" % (self.name,val,self['max']))
+			except KeyError:
+				pass
 		if var != 'min':
-			if val < self['min']:
-				raise CommandError("%s: max %s needs to be larger than min %s" % (self.name,val,self['min']))
+			try:
+				if val < self['min']:
+					raise CommandError("%s: max %s needs to be larger than min %s" % (self.name,val,self['min']))
+			except KeyError:
+				pass
 		# TODO: adapt value to constraints
 		return val
 	
@@ -241,22 +245,34 @@ class _NumType(Type):
 			"""
 		val = self._value
 		if val is not _NOTGIVEN:
-			if val < self['min']:
-				logger.warn("%s: Value %s below min %s",self.name,val,self['min'])
-				val = self['min']
-			elif val > self['max']:
-				logger.warn("%s: Value %s above max %s",self.name,val,self['min'])
-				val = self['max']
+			try:
+				if val < self['min']:
+					logger.warn("%s: Value %s below min %s",self.name,val,self['min'])
+					val = self['min']
+			except KeyError:
+				pass
+			try:
+				if val > self['max']:
+					logger.warn("%s: Value %s above max %s",self.name,val,self['min'])
+					val = self['max']
+			except KeyError:
+				pass
 		return val
 	@value.setter
 	def value(self,value):
 		val = self._cls(value)
-		if val < self['min']:
-			logger.warn("%s: Value %s below min %s",self.name,val,self['min'])
-			val = self['min']
-		elif val > self['max']:
-			logger.warn("%s: Value %s above max %s",self.name,val,self['min'])
-			val = self['max']
+		try:
+			if val < self['min']:
+				logger.warn("%s: Value %s below min %s",self.name,val,self['min'])
+				val = self['min']
+		except KeyError:
+			pass
+		try:
+			if val > self['max']:
+				logger.warn("%s: Value %s above max %s",self.name,val,self['min'])
+				val = self['max']
+		except KeyError:
+			pass
 		self._value = val
 
 	def from_amqp(self, value):

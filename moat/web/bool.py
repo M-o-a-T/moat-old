@@ -23,15 +23,19 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##  Thus, do not remove the next line, or insert any blank lines above.
 ##BP
 
-import aiohttp_jinja2
-from .base import WebDef
+from .base import WebdefDir,template
 
-class BoolDef(WebDef):
+class BoolDef(WebdefDir):
 	name = "bool"
 	summary = "Your basic Boolean"
+	vars = {'true':'On', 'false':'Off'}
+	TEMPLATE = "bool.haml"
 
-	@aiohttp_jinja2.template('bool.haml')
-	async def render(self):
-		## XXX grab the value, of course
-		return {'value': False}
+	def get_context(self, item, **kw):
+		kw = super().get_context(item=item, **kw)
+		if item._value is None:
+			kw['value'] = "…Loading…"
+		else:
+			kw['value'] = item.data[str(item._value.value).lower()]
+		return kw
 		

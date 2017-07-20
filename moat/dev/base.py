@@ -84,18 +84,14 @@ class AlertName(EtcString):
 			return
 		p._alert_name = (self.value if self.is_new is not None else None)
 
-class TypedDir(ManagedEtcThing,EtcDir):
+class BaseTypedDir(ManagedEtcThing,EtcDir):
 	"""\
-		A typed value. Typically at …/:dev/input/NAME.
+		A typed value (not necessarily device-based, no RPC).
 
 		Its `value` attribute maps to the actual datum.
 		"""
 	_type = None
 	_value = None
-	_rpc = None
-	_rpc_name = ''
-	_alert_name = ''
-	_device = None
 
 	@property
 	def value(self):
@@ -103,19 +99,6 @@ class TypedDir(ManagedEtcThing,EtcDir):
 	@value.setter
 	def value(self,val):
 		self._value.value = val
-
-	@property
-	def device(self):
-		"""Returns 'my' device."""
-		if self._device is not None:
-			return self._device()
-		p = self.parent
-		while p is not None:
-			if isinstance(p,BaseDevice):
-				self._device = ref(p)
-				return p
-			p = p.parent
-		return None
 
 	def _set_type(self, typename):
 		if self._type is not None and self._type._type.name == typename:
@@ -129,45 +112,18 @@ class TypedDir(ManagedEtcThing,EtcDir):
 			self._value.etcd_value = self['value']
 
 	def has_update(self):
-		if 'type' not in self:
-			self._type = None
-			return
-		self._set_type(self['type'])
+		if self._value is None:
+			return # do this later
+		val = self.get('value',None)
+		if val is not None:
+			self._value.etcd_value = val
 
 	async def init(self):
 		await super().init()
 		self.has_update()
 
-	## Manager registration
-
-	async def manager_present(self, mgr):
-		n = self.get('rpc',None)
-		if n is not None:
-			await self._reg_rpc(n)
-
-	def manager_gone(self):
-		self._rpc_name = None
-
-	async def _reg_rpc(self,name):
-		m = self.manager
-		if m is None:
-			return
-		amqp = m.amqp
-		if name is not None and self._rpc_name == name:
-			return
-		if self._rpc is not None:
-			await amqp.unregister_rpc_async(self._rpc)
-			self._rpc = None
-		if name is not None:
-			logger.info("REG %s %s",name,self)
-			self._rpc = await amqp.register_rpc_async(name,self.do_rpc, call_conv=CC_DATA)
-		self._rpc_name = name
-
-	async def do_rpc(self,data):
-		"""\
-			RPC call. Override to actually do something.
-			"""
-		raise RuntimeError("You forgot to override %s._do_rpc!" % (self.__class__.__name__,))
+	async def _did_update(self,value, timestamp=None):
+		pass
 
 	async def _updated(self,value, timestamp=None):
 		"""A value has been read/written."""
@@ -189,7 +145,7 @@ class TypedDir(ManagedEtcThing,EtcDir):
 				else:
 					self._value.value = value
 					await self._write_etcd(timestamp)
-				await self._write_amqp(timestamp)
+				await self._did_update(timestamp)
 			except asyncio.CancelledError as exc:
 				raise
 			except etcd.EtcdCompareFailed as exc:
@@ -201,6 +157,70 @@ class TypedDir(ManagedEtcThing,EtcDir):
 			else:
 				break
 
+	async def _write_etcd(self,timestamp):
+		await self.set('value',self._value.etcd_value)
+		await self.set('timestamp',timestamp)
+
+class TypedDir(BaseTypedDir):
+	"""\
+		A typed value (of a device).
+
+		Typically at /device/…/:dev/input/NAME.
+		"""
+	_rpc = None
+	_rpc_name = ''
+	_alert_name = ''
+	_device = None
+
+	@property
+	def device(self):
+		"""Returns 'my' device."""
+		if self._device is not None:
+			return self._device()
+		p = self.parent
+		while p is not None:
+			if isinstance(p,BaseDevice):
+				self._device = ref(p)
+				return p
+			p = p.parent
+		return None
+
+	## Manager registration
+
+	async def manager_present(self, mgr):
+		await super().manager_present(mgr)
+		n = self.get('rpc',None)
+		if n is not None:
+			await self._reg_rpc(n)
+
+	def manager_gone(self):
+		super().manager_gone()
+		self._rpc_name = None
+
+	async def _reg_rpc(self,name):
+		m = self.manager
+		if m is None:
+			return
+		amqp = m.amqp
+		if name is not None and self._rpc_name == name:
+			return
+		if self._rpc is not None:
+			await amqp.unregister_rpc_async(self._rpc)
+			self._rpc = None
+		if name is not None:
+			logger.info("REG %s %s",name,self)
+			self._rpc = await amqp.register_rpc_async(name,self.do_rpc, call_conv=CC_DATA)
+		self._rpc_name = name
+
+	async def do_rpc(self,data):
+		"""\
+			RPC call. Override to actually do something.
+			"""
+		raise RuntimeError("You forgot to override %s.do_rpc!" % (self.__class__.__name__,))
+
+	async def _did_update(self,value, timestamp=None):
+		await self._write_amqp(timestamp)
+
 	async def reading(self,value, timestamp=None):
 		"""A value has been read."""
 		await self._updated(value,timestamp)
@@ -208,10 +228,6 @@ class TypedDir(ManagedEtcThing,EtcDir):
 	async def writing(self,value, timestamp=None):
 		"""A value has been written."""
 		await self._updated(value,timestamp)
-
-	async def _write_etcd(self,timestamp):
-		await self.set('value',self._value.etcd_value)
-		await self.set('timestamp',timestamp)
 
 	async def _write_amqp(self,timestamp):
 		if not self._alert_name:
@@ -265,12 +281,13 @@ class BaseDevice(EtcDir, metaclass=TypesReg):
 		complex state.
 
 		The device state is always reflected in etcd. Devices do not
-		monitor changes in etcd -- use AMQP for that.
+		monitor changes in etcd -- use AMQP to trigger changes.
 		"""
 
 	prefix = "dummy"
 	description = "Something that does nothing."
 	_mgr = None
+	_multi_node = False
 
 	def __init__(self, *a,**k):
 		for attr in _SOURCES:
@@ -301,8 +318,12 @@ class BaseDevice(EtcDir, metaclass=TypesReg):
 	@classmethod
 	def types(cls, types):
 		"""Override to get your subtypes registered with etcd_tree"""
-		for s,t in _SOURCES.items():
-			types.register(s,'*', cls=t)
+		if cls._multi_node:
+			for s,t in _SOURCES.items():
+				types.register(s,'*', cls=t)
+		else:
+			for s,t in _SOURCES.items():
+				types.register(s, cls=t)
 
 	@classmethod
 	def dev_paths(cls):

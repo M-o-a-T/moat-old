@@ -255,15 +255,19 @@ class MoatMetaTask(EtcDir):
 		else:
 			raise RuntimeError("%s: exists, language=%s" % (task.taskdef,lang))
 
-class MoatMetaWeb(EtcDir):
-	"""Singleton for /meta/task: task definitions"""
-	async def init(self):
-		from moat.web import WEBDEF
-		from moat.web.base import WebdefDir
+class MoatMetaWeb(recEtcDir,EtcDir):
+	"""Hierarchy for /meta/web: HTML front-end definitions"""
+	_reg_done = False
+	@classmethod
+	async def this_obj(cls, recursive, **kw):
+		if not cls._reg_done:
+			cls._reg_done = True
+			from moat.web import WEBDEF
+			from moat.web.base import WebdefDir
 
-		self.register('*', cls=MoatMetaWeb)
-		self.register(WEBDEF, cls=WebdefDir)
-		await super().init()
+			cls.register('*', cls=MoatMetaWeb)
+			cls.register(WEBDEF, cls=WebdefDir)
+		return (await super().this_obj(recursive, **kw))
 	
 	async def add_webdef(self, webdef, force=False):
 		from moat.web import WEBDEF
