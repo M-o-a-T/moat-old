@@ -93,6 +93,7 @@ Arguments:
 			res = await res
 		except asyncio.TimeoutError:
 			print("-timed out", file=self.stdout)
+			res = "Timeout"
 		from yaml import dump
 		dump(res, stream=self.stdout)
 
