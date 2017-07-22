@@ -323,6 +323,12 @@ class MoatConfig(recEtcDir,EtcDir):
 	pass
 	# only here to preload the whole thing
 
+class MoatInfra(EtcDir):
+	async def init(self):
+		from moat.infra.base import InfraHost, InfraStatic
+		self.register("*"), InfraHost
+		self.register(":static"), InfraStatic
+
 class MoatStatusRun(EtcDir):
 	"""Singleton for /status/run"""
 	async def init(self):
@@ -526,6 +532,7 @@ class MoatRoot(EtcRoot):
 		self.register('device', cls=MoatLoadedDir)
 		self.register('bus', cls=MoatLoadedDir)
 		self.register('config', cls=MoatConfig)
+		self.register('infra', cls=MoatInfra)
 		await super().init()
 		# preload these sub-trees
 		await self['config']
