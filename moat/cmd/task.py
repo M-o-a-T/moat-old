@@ -192,6 +192,7 @@ Usage: … param NAME VALUE  -- set
        … param NAME        -- show one
        … param -d NAME     -- delete
 """
+	DEPTH=0
 
 	def addOptions(self):
 		self.parser.add_option('-d','--delete',
@@ -212,7 +213,7 @@ Usage: … param NAME VALUE  -- set
 			if self.options.delete:
 				raise CommandError("You cannot delete all parameters.")
 
-			async for task in t.tagged(self.TAG):
+			async for task in t.tagged(self.TAG,depth=self.DEPTH):
 				path = task.path[len(self.DIR):-1]
 				for k in self._VARS:
 					if k in task:
