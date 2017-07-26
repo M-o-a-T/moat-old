@@ -26,7 +26,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 from etcd_tree import EtcDir, EtcString, EtcBoolean
 
 from moat.types.etcd import recEtcDir
-from . import INFRADIR
+from . import INFRA_DIR
 
 import logging
 logger = logging.getLogger(__name__)
@@ -37,6 +37,9 @@ class InfraData(EtcDir):
 	pass
 
 class InfraPort(EtcDir):
+	@property
+	def essential(self):
+		return self.get('essential',False)
 
 class InfraPortHost(EtcString):
 	"""Type for /infra/HOSTNAME/ports/NAME"""
@@ -44,11 +47,51 @@ class InfraPortHost(EtcString):
 
 	@property
 	def host(self):
-		return self.root.lookup(INFRADIR,name=self.value)
+		t = self.root.lookup(INFRA_DIR)
+		return t.lookup(tuple(self.value.split('.'))[::-1], name=INFRA)
 
 class InfraHost(recEtcDir,EtcDir):
 	"""Type for /infra/HOSTNAME"""
-	pass
+	infra_path = None
+
+	async def children(self, depth=0, essential=False):
+		"""List all possibly-essential children of a node, possibly at a certain depth.
+			As a side effect, set .mark on all ports that reach any children,
+			and set .infra_path on all results to the list of ports
+			required to go there.
+			"""
+		seen = set()
+		todo = [(self,())]
+		res = []
+		while todo:
+			s,d = todo.pop(0)
+			if s in seen:
+				continue
+			seen.add(s)
+			if len(d) and depth in (0,len(d)):
+				if not essential or s.essential:
+					for x in d:
+						x.mark = True
+					s.infra_path = d
+					res.append(s)
+			try:
+				ports = s['ports']
+			except KeyError:
+				pass
+			else:
+				for p in ports:
+					p.mark = False
+					try:
+						h = await p['host'].host
+					except KeyError:
+						pass
+					else:
+						todo.append((h,d+(p,)))
+		return res
+	
+	@property
+	def essential(self):
+		return self.get('essential',False)
 
 InfraPort.register("host", cls=InfraPortHost, doc="refers to the host connected to this port")
 InfraHost.register("ports","*", cls=InfraPort)

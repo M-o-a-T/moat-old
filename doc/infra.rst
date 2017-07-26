@@ -22,7 +22,6 @@ On the etcd side, the infrastructure description looks like this:
 			:static
 				rsync: RSYNCDIR
 				data: some default key/value pairs for the templating
-				main: http://main/MoaT/page
 			HOSTNAME:
 				ports:
 					NAME:
@@ -32,6 +31,8 @@ On the etcd side, the infrastructure description looks like this:
 				data: some key/value pairs for the templating system
 				prio: 123 -- lower is more important
 				essential: true -- possibly
+				snmp:
+					read: test123
 				services:
 					http:
 						port: 80 -- or whatever is required to check this

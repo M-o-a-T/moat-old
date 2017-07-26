@@ -323,11 +323,17 @@ class MoatConfig(recEtcDir,EtcDir):
 	pass
 	# only here to preload the whole thing
 
+class MoatInfraSub(EtcDir):
+	pass
+
 class MoatInfra(EtcDir):
 	async def init(self):
 		from moat.infra.base import InfraHost, InfraStatic
-		self.register("*"), InfraHost
-		self.register(":static"), InfraStatic
+		self.register("*", cls=MoatInfraSub)
+		self.register(":static", cls=InfraStatic)
+
+		MoatInfraSub.register("*", cls=MoatInfraSub)
+		MoatInfraSub.register(":host", cls=InfraHost)
 
 class MoatStatusRun(EtcDir):
 	"""Singleton for /status/run"""

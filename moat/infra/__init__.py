@@ -26,5 +26,6 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import logging
 logger = logging.getLogger(__name__)
 
-INFRADIR=("infra",)
+INFRA_DIR=("infra",)
+INFRA=":host"
 
