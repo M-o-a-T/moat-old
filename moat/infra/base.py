@@ -23,7 +23,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##  Thus, do not remove the next line, or insert any blank lines above.
 ##BP
 
-from etcd_tree import EtcDir, EtcString
+from etcd_tree import EtcDir, EtcString, EtcBoolean
 
 from moat.types.etcd import recEtcDir
 from . import INFRADIR
@@ -49,6 +49,7 @@ class InfraHost(recEtcDir,EtcDir):
 
 InfraHost.register("ports","*", cls=InfraPort, doc="refers to the host connected to this port")
 InfraHost.register("data", cls=InfraData)
+InfraHost.register("essential", cls=EtcBoolean)
 
 class InfraStatic(recEtcDir,EtcDir):
 	"""Type for /infra/:static"""
