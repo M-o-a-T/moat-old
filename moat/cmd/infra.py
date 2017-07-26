@@ -45,6 +45,7 @@ logger = logging.getLogger(__name__)
 __all__ = ['InfraCommand']
 
 class ListCommand(DefSetup,Command):
+    DIR = INFRA_DIR
     name = "list"
     summary = "List infrastructure entries"
     description = """\
@@ -219,6 +220,7 @@ This command deletes one of these entries.
                 tt = p
 
 class PortCommand(DefSetup,Command):
+    DIR = INFRA_DIR
     name = "port"
     summary = "Configure a port of an infrastructure item"
     description = """\
@@ -241,12 +243,12 @@ Usage: … port HOST NAME key=value… -- set
         if not args:
             raise SyntaxError("You need to specify a host!")
         try:
-            h = await t.lookup(tuple(args[0].split('.'))[::-1], path=INFRA)
+            h = await t.lookup(tuple(args[0].split('.'))[::-1], name=INFRA)
             h = await h.subdir('ports')
         except KeyError:
             print("Host '%s' is not known" % (args[0],), file=sys.stderr)
             return
-        args = agrs[1:]
+        args = args[1:]
         if self.options.delete:
             if len(args) == 0:
                 raise SyntaxError("You need to specify which ports to delete.") 
@@ -260,7 +262,7 @@ Usage: … port HOST NAME key=value… -- set
             for k,v in r_show(h,''):
                 print(k,v, sep='\t',file=self.stdout)
             return
-        h = await h.lookup(args[0])
+        h = await h.subdir(args[0])
         args = args[1:]
         if not args:
             for k,v in r_show(h,''):
