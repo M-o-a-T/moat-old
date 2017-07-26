@@ -36,8 +36,11 @@ class InfraData(EtcDir):
 	"""Type for /infra/HOSTNAME/data (specific) and /infra/:static/data (default)"""
 	pass
 
-class InfraPort(EtcString):
+class InfraPort(EtcDir):
+
+class InfraPortHost(EtcString):
 	"""Type for /infra/HOSTNAME/ports/NAME"""
+	mark = False
 
 	@property
 	def host(self):
@@ -47,7 +50,8 @@ class InfraHost(recEtcDir,EtcDir):
 	"""Type for /infra/HOSTNAME"""
 	pass
 
-InfraHost.register("ports","*", cls=InfraPort, doc="refers to the host connected to this port")
+InfraPort.register("host", cls=InfraPortHost, doc="refers to the host connected to this port")
+InfraHost.register("ports","*", cls=InfraPort)
 InfraHost.register("data", cls=InfraData)
 InfraHost.register("essential", cls=EtcBoolean)
 

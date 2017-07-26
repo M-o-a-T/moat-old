@@ -25,7 +25,9 @@ On the etcd side, the infrastructure description looks like this:
 				main: http://main/MoaT/page
 			HOSTNAME:
 				ports:
-					NAME: HOSTNAME
+					NAME:
+						dest: HOSTNAME
+						index: 12 -- interface, for SNMP
 				page: path/in/static
 				data: some key/value pairs for the templating system
 				prio: 123 -- lower is more important
