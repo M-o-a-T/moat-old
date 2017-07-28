@@ -26,7 +26,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 from etcd_tree import EtcDir, EtcString, EtcBoolean
 
 from moat.types.etcd import recEtcDir
-from . import INFRA_DIR
+from . import INFRA_DIR,INFRA
 
 import logging
 logger = logging.getLogger(__name__)
@@ -48,7 +48,7 @@ class InfraPortHost(EtcString):
 	@property
 	def host(self):
 		t = self.root.lookup(INFRA_DIR)
-		return t.lookup(tuple(self.value.split('.'))[::-1], name=INFRA)
+		return t.lookup(reversed(self.value.split('.')), name=INFRA)
 
 class InfraHost(recEtcDir,EtcDir):
 	"""Type for /infra/HOSTNAME"""

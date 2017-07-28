@@ -66,9 +66,9 @@ a one-line summary, human-readable detailed state, or details as YAML.
         if args:
             dirs = []
             for a in args:
-                a = tuple(a.split('.'))[::-1]
+                a = reversed(a.split('.'))
                 try:
-                    dirs.append(await t.subdir(a, create=False))
+                    dirs.append(await t.lookup(a))
                 except KeyError:
                     raise CommandError("'%s' does not exist"%(a,))
         else:
@@ -243,7 +243,7 @@ Usage: … port HOST NAME key=value… -- set
         if not args:
             raise SyntaxError("You need to specify a host!")
         try:
-            h = await t.lookup(tuple(args[0].split('.'))[::-1], name=INFRA)
+            h = await t.lookup(reversed(args[0].split('.')), name=INFRA)
             h = await h.subdir('ports')
         except KeyError:
             print("Host '%s' is not known" % (args[0],), file=sys.stderr)
