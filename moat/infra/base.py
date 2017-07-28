@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 
 
 class InfraData(EtcDir):
-	"""Type for /infra/HOSTNAME/data (specific) and /infra/:static/data (default)"""
+	"""Type for /infra/HOSTNAME…/:host/data (specific) and /infra/:static/data (default)"""
 	pass
 
 class InfraPort(EtcDir):
@@ -42,7 +42,7 @@ class InfraPort(EtcDir):
 		return self.get('essential',False)
 
 class InfraPortHost(EtcString):
-	"""Type for /infra/HOSTNAME/ports/NAME"""
+	"""Type for /infra/HOSTNAME…/:host/ports/NAME"""
 	mark = False
 
 	@property
