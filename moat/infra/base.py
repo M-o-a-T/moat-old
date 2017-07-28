@@ -41,11 +41,13 @@ class InfraPort(EtcDir):
 	def essential(self):
 		return self.get('essential',False)
 	
-	async def unlink(self):
+	async def unlink(self, check=False):
 		"""Disconnect this port."""
 		h=self._get('host',None)
 		p=self.get('port',None)
 		if h and p:
+			if check:
+				raise RuntimeError("Link exists",self)
 			rh = await h.host['ports'][p]
 			if rh.get('host','') == self.parent.parent.dnsname and rh.get('port','') == p:
 				await rh.delete('port')
@@ -55,12 +57,12 @@ class InfraPort(EtcDir):
 		if p:
 			await self.delete('port')
 
-	async def link(self,port):
+	async def link(self,port, replace=False):
 		"""Connect this port to that. You can also pass in a destination
 			host, in which case the remote side will not be affected."""
-		await self.unlink()
+		await self.unlink(check=not replace)
 		if isinstance(port,InfraPort):
-			await port.unlink()
+			await port.unlink(check=not replace)
 
 			await self.set('host',port.parent.parent.dnsname)
 			await self.set('port',port.name)

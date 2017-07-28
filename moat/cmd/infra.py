@@ -314,15 +314,20 @@ Links are bidirectional.
         self.parser.add_option('-m','--missing',
             action="store_true", dest="missing",
             help="only show links with missing remote ports")
+        self.parser.add_option('-r','--replace',
+            action="store_true", dest="replace",
+            help="overwrite existing links")
 
     async def do(self, args):
         t = await self.setup()
         if self.options.delete:
-            if self.options.missing:
-                raise SyntaxError("'-d' and '-m' cannot be used at the same time.")
+            if self.options.missing or self.options.replace:
+                raise SyntaxError("'-d' and '-m'/'-r' cannot be used at the same time.")
             if len(args) != 2:
                 raise SyntaxError("You need to specify which host+port to delete.") 
         else:
+            if self.options.replace and len(args) < 3:
+                raise SyntaxError("'-r' is only useful when creaing a link")
             if len(args) < 1:
                 async for h in t.tagged(INFRA):
                     h = await h
@@ -394,7 +399,7 @@ Links are bidirectional.
             p2 = await t.host(args[2], create=False)
             if len(args) == 4:
                 p2 = await p2.subdir('ports',args[3])
-            await p1.link(p2)
+            await p1.link(p2, replace=self.options.replace)
 
 class InfraCommand(SubCommand):
         name = "infra"
