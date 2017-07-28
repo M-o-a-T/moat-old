@@ -26,7 +26,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 from etcd_tree import EtcDir, EtcString, EtcBoolean
 
 from moat.types.etcd import recEtcDir
-from . import INFRA_DIR,INFRA
+from . import INFRA_DIR,INFRA, LinkExistsError
 
 import logging
 logger = logging.getLogger(__name__)
@@ -47,7 +47,7 @@ class InfraPort(EtcDir):
 		p=self.get('port',None)
 		if h and p:
 			if check:
-				raise RuntimeError("Link exists",self)
+				raise LinkExistsError(self)
 			rh = await h.host['ports'][p]
 			if rh.get('host','') == self.parent.parent.dnsname and rh.get('port','') == p:
 				await rh.delete('port')

@@ -29,3 +29,6 @@ logger = logging.getLogger(__name__)
 INFRA_DIR=("infra",)
 INFRA=":host"
 
+class LinkExistsError(RuntimeError):
+	pass
+

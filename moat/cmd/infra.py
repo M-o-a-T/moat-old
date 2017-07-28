@@ -35,7 +35,7 @@ from traceback import print_exc
 from yaml import dump
 
 from moat.script import Command, SubCommand, CommandError
-from moat.infra import INFRA_DIR, INFRA
+from moat.infra import INFRA_DIR, INFRA, LinkExistsError
 from moat.util import r_dict, r_show
 from moat.cmd.task import _ParamCommand,DefSetup
 
@@ -399,7 +399,16 @@ Links are bidirectional.
             p2 = await t.host(args[2], create=False)
             if len(args) == 4:
                 p2 = await p2.subdir('ports',args[3])
-            await p1.link(p2, replace=self.options.replace)
+            try:
+                await p1.link(p2, replace=self.options.replace)
+            except LinkExistsError as e:
+                port = e.args[0]
+                try:
+                    rem = await port.remote
+                except KeyError:
+                    print("Port %s:%s is linked to %s. Use '-r'." % (port.host.dnsname, port.name, port['host']), file=sys.stderr)
+                else:
+                    print("Port %s:%s is linked to %s:%s. Use '-r'." % (port.host.dnsname, port.name, rem.host.dnsname,rem.name), file=sys.stderr)
 
 class InfraCommand(SubCommand):
         name = "infra"
