@@ -40,7 +40,43 @@ class InfraPort(EtcDir):
 	@property
 	def essential(self):
 		return self.get('essential',False)
+	
+	async def unlink(self):
+		"""Disconnect this port."""
+		h=self._get('host',None)
+		p=self.get('port',None)
+		if h and p:
+			rh = await h.host['ports'][p]
+			if rh.get('host','') == self.parent.parent.dnsname and rh.get('port','') == p:
+				await rh.delete('port')
+				await rh.delete('host')
+		if h:
+			await self.delete('host')
+		if p:
+			await self.delete('port')
 
+	async def link(self,port):
+		"""Connect this port to that. You can also pass in a destination
+			host, in which case the remote side will not be affected."""
+		await self.unlink()
+		if isinstance(port,InfraPort):
+			await port.unlink()
+
+			await self.set('host',port.parent.parent.dnsname)
+			await self.set('port',port.name)
+			await port.set('host',self.parent.parent.dnsname)
+			await port.set('port',self.name)
+		else:
+			await self.set('host',port.dnsname)
+
+	@property
+	def remote(self):
+		return self._get('host').host['ports'][self['port']]
+
+	@property
+	def host(self):
+		return self.parent.parent
+		
 class InfraPortHost(EtcString):
 	"""Type for /infra/HOSTNAME…/:host/ports/NAME"""
 	mark = False
@@ -53,6 +89,10 @@ class InfraPortHost(EtcString):
 class InfraHost(recEtcDir,EtcDir):
 	"""Type for /infra/HOSTNAME"""
 	infra_path = None
+
+	@property
+	def dnsname(self):
+		return ".".join(reversed(self.path[len(INFRA_DIR):-1]))
 
 	async def children(self, depth=0, essential=False):
 		"""List all possibly-essential children of a node, possibly at a certain depth.

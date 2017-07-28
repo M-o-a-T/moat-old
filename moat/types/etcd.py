@@ -335,6 +335,11 @@ class MoatInfra(EtcDir):
 		MoatInfraSub.register("*", cls=MoatInfraSub)
 		MoatInfraSub.register(":host", cls=InfraHost)
 
+	async def host(self, host, **kw):
+		"""Lookup a host by its DNS name."""
+		from moat.infra import INFRA
+		return (await self.subdir(host.split('.')[::-1], name=INFRA, **kw))
+
 class MoatStatusRun(EtcDir):
 	"""Singleton for /status/run"""
 	async def init(self):
