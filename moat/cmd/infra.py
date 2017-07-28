@@ -279,6 +279,110 @@ Usage: … port HOST NAME key=value… -- set
                 else:
                     await h.set(k,v)
 
+class LinkCommand(DefSetup,Command):
+    DIR = INFRA_DIR
+    name = "link"
+    summary = "Link two infrastructure items"
+    description = """\
+Link two devices.
+
+Usage: … link HOST_A PORT_A HOST_B PORT_B -- join
+       … link HOST PORT                   -- show
+       … link HOST                        -- show all
+       … link -d HOST PORT                -- remove
+
+Links are bidirectional.
+"""
+
+    def addOptions(self):
+        self.parser.add_option('-d','--delete',
+            action="store_true", dest="delete",
+            help="delete a link")
+        self.parser.add_option('-m','--missing',
+            action="store_true", dest="missing",
+            help="only show links with missing remote ports")
+
+    async def do(self, args):
+        t = await self.setup()
+        if self.options.delete:
+            if self.options.missing:
+                raise SyntaxError("'-d' and '-m' cannot be used at the same time.")
+            if len(args) != 2:
+                raise SyntaxError("You need to specify which host+port to delete.") 
+        else:
+            if len(args) < 1:
+                async for h in t.tagged(INFRA):
+                    h = await h
+                    try:
+                        x = h['ports'].values()
+                    except KeyError:
+                        pass
+                    else:
+                        for p in x:
+                            try:
+                                r = await p.remote
+                            except KeyError:
+                                try:
+                                    rh = p['host']
+                                except KeyError:
+                                    pass
+                                else:
+                                    print(h.dnsname,p.name,rh)
+                            else:
+                                if not self.options.missing:
+                                    print(h.dnsname,p.name,r.host.dnsname,r.name)
+                return
+            elif len(args) == 1:
+                h = await t.host(args[0],create=False)
+                try:
+                    x = h['ports'].values()
+                except KeyError:
+                    pass
+                else:
+                    for p in h['ports'].values():
+                        try:
+                            r = await p.remote
+                        except KeyError:
+                            try:
+                                rh = p['host']
+                            except KeyError:
+                                pass
+                            else:
+                                print(p.name,rh)
+                        else:
+                            if not self.options.missing:
+                                print(p.name,r.host.dnsname,r.name)
+                return
+            elif len(args) == 2:
+                h = await t.host(args[0],create=False)
+                p = h['ports'][args[1]]
+                try:
+                    r = await p.remote
+                except KeyError:
+                    try:
+                        rh = p['host']
+                    except KeyError:
+                        pass
+                    else:
+                        print(rh)
+
+                else:
+                    print(r.host.dnsname,r.name)
+                return
+            elif len(args) > 4:
+                raise SyntaxError("You need to specify host+port of both sides.") 
+            elif self.options.missing:
+                raise SyntaxError("'-m' can only be used when listing.")
+        p1 = await t.host(args[0], create=False)
+        p1 = await p1.subdir('ports',args[1])
+        if self.options.delete:
+            await p1.unlink()
+        else:
+            p2 = await t.host(args[2], create=False)
+            if len(args) == 4:
+                p2 = await p2.subdir('ports',args[3])
+            await p1.link(p2)
+
 class InfraCommand(SubCommand):
         name = "infra"
         summary = "Document your network infrastructure"
@@ -291,6 +395,7 @@ Commands to configure your network connectivity
                 ListCommand,
                 AddCommand,
                 PortCommand,
+                LinkCommand,
                 UpdateCommand,
                 DeleteCommand,
         ]
