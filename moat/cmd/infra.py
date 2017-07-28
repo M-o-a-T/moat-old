@@ -60,6 +60,9 @@ a one-line summary, human-readable detailed state, or details as YAML.
         self.parser.add_option('-t','--this',
             action="count", dest="this", default=0,
             help="Show the given job only (-tt for jobs one level below, etc.)")
+        self.parser.add_option('-n','--no-link',
+            action="store_true", dest="nolink",
+            help="only show hosts with no remote links")
 
     async def do(self,args):
         t = await self.setup()
@@ -76,6 +79,16 @@ a one-line summary, human-readable detailed state, or details as YAML.
         for tt in dirs:
             async for item in tt.tagged(INFRA, depth=self.options.this):
                 path = item.path[len(INFRA_DIR):-1]
+                if self.options.nolink:
+                    n = 0
+                    try:
+                        for h in item['ports'].values():
+                            await h.remote
+                            n += 1
+                    except KeyError:
+                        pass
+                    if n:
+                        continue
                 if self.root.verbose == 2:
                     print('*','.'.join(path[::-1]), sep='\t',file=self.stdout)
                     for k,v in r_show(item,''):
