@@ -45,9 +45,9 @@ class InfraPort(EtcDir):
 		"""Disconnect this port."""
 		h=self._get('host',None)
 		p=self.get('port',None)
+		if h and check:
+			raise LinkExistsError(self)
 		if h and p:
-			if check:
-				raise LinkExistsError(self)
 			rh = await h.host['ports'][p]
 			if rh.get('host','') == self.parent.parent.dnsname and rh.get('port','') == p:
 				await rh.delete('port')
