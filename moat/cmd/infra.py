@@ -410,6 +410,71 @@ Links are bidirectional.
                 else:
                     print("Port %s:%s is linked to %s:%s. Use '-r'." % (port.host.dnsname, port.name, rem.host.dnsname,rem.name), file=sys.stderr)
 
+class PathCommand(DefSetup,Command):
+    DIR = INFRA_DIR
+    name = "path"
+    summary = "Show paths from A to B, or unreachables from A"
+    description = """\
+Show how A and B are linked, or which devices are not reachable from A.
+
+Usage: … link HOST_A HOST_B -- show path
+       … link HOST          -- list unreachable hosts
+
+Links are unidirectional.
+"""
+
+    async def do(self, args):
+        t = await self.setup()
+        if len(args) < 0 or len(args) > 2:
+            raise SyntaxError("Usage: … link HOST_A [HOST_B]")
+
+        elif len(args) == 1: ## list unreachables
+            hosts = [t.host(args[0])]
+            known = set()
+            while hosts:
+                h = await hosts.pop()
+                known.add(h.dnsname)
+                try:
+                    x = h['ports'].values()
+                except KeyError:
+                    pass
+                else:
+                    for v in x:
+                        try:
+                            v = v._get('host')
+                        except KeyError:
+                            pass
+                        else:
+                            if v.value not in known:
+                                hosts.append(v.host)
+            async for h in t.tagged(INFRA):
+                name = h.dnsname
+                if name not in known:
+                    print(name)
+
+        else: ## list links
+            dest = await t.host(args[1])
+            dname = dest.dnsname
+            hosts = [t.host(args[0])]
+            prevs = {args[0]: None}
+            while hosts:
+                h = await hosts.pop(0)
+                for v in h['ports'].values():
+                    v = v._get('host')
+                    if v.value == dname:
+                        def prev_p(name):
+                            if name is None:
+                                return
+                            prev_p(prevs[name])
+                            print(name)
+                        prev_p(h.dnsname)
+                        print(v.value)
+                        return
+                    if v.value not in prevs:
+                        prevs[v.value] = h.dnsname
+                        hosts.append(v.host)
+            print("Unreachable.", file=sys.stderr)
+
 class InfraCommand(SubCommand):
         name = "infra"
         summary = "Document your network infrastructure"
@@ -423,6 +488,7 @@ Commands to configure your network connectivity
                 AddCommand,
                 PortCommand,
                 LinkCommand,
+                PathCommand,
                 UpdateCommand,
                 DeleteCommand,
         ]
