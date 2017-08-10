@@ -80,16 +80,16 @@ Log the event stream from AMQP to SQL
 		if len(args):
 			raise SyntaxError("Usage: log")
 		await self.setup()
+		self.quitting = asyncio.Event(loop=self.root.loop)
 
 		self.u = await self.root._get_amqp()
 		await self.u.register_alert_async('#', self.callback, durable='log_mysql', call_conv=CC_MSG)
 
-		self.prefix=u.config['sql']['data_logger']['prefix']
-
-		while True:
-			await asyncio.sleep(999,loop=self.loop)
+		self.prefix=self.root.cfg['config']['sql']['data_logger']['prefix']
+		await self.quitting.wait()
 
 	async def callback(self, msg):
+		import pdb;pdb.set_trace()
 		try:
 			body = msg.data
 
@@ -128,7 +128,7 @@ Log the event stream from AMQP to SQL
 
 		except Exception as exc:
 			logger.exception("Problem processing %s", repr(body))
-			quitting.set()
+			self.quitting.set()
 
 class ListCommand(_Command):
 	name = "list"
