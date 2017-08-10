@@ -34,7 +34,10 @@ async def main(args):
 	try:
 		ret = await c.parse(args)
 	except SyntaxError as e:
-		print("ERROR:", e)
+		if e.filename:
+			print("SyntaxError:", e.filename,e.lineno)
+		else:
+			print("ERROR:", e)
 		ret = 9
 	except CommandExited as e:
 		if e.status or c.verbose:
