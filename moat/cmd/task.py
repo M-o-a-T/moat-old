@@ -50,6 +50,10 @@ __all__ = ['TaskCommand']
 
 class DefSetup:
 	async def setup(self, meta=False):
+		if meta:
+			self.DIR=TASKDEF_DIR
+		else:
+			self.DIR=TASK_DIR
 		await super().setup()
 		etc = self.root.etcd
 		tree = await self.root._get_tree()
