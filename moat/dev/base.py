@@ -424,6 +424,10 @@ class Device(ManagedEtcDir, BaseDevice):
 			for k,v in getattr(cls,d,{}).items():
 				v = value_types.get(v,EtcValue)
 				types.register(d,k,'value', cls=v)
+		try:
+			super(Device,cls).types(types)
+		except NameError:
+			pass
 
 	async def setup(self):
 		"""\
