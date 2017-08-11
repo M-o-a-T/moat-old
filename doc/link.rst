@@ -183,3 +183,32 @@ sequence of discovery reply packets for the streams it supports.
 A client may auto-allocate a channel if a new sub-client connects to it.
 In that case it sends an unsolicited channel reply for the channel.
 
+
+Message routing
++++++++++++++++
+
+AMQP
+----
+
+Raw messages are transmitted as QBroker alerts.
+The routing key is "link.raw.DEVICE.DIR.CHANNEL….STREAM".
+
+Messages must be encoded as "application/binary", for compatibility with
+non-QBroker/MoaT code.
+
+* DEVICE
+
+  The name of the link. Local preference may subdivide this further.
+
+* DIR
+
+  "in" or "out" or "error"
+
+* CHANNEL…
+
+  A possibly-empty sequence of channel numbers
+
+* STREAM
+
+  The stream to use
+

@@ -299,13 +299,13 @@ Main tree
 
   This includes devices behind "foreign" automation systems like FHEM or OpenHAB.
 
-  * <dev_type>
+  * ‹dev_type›
 
-    The type of device, like 'onewire'.
+    The type of bus the device is connected to, like 'onewire'.
 
     * dev_id …
 
-      Some device-type-specific naming scheme. 1wire uses class/device.
+      Some bus-type-specific naming scheme. See below.
 
       * :dev
 
@@ -372,10 +372,12 @@ Main tree
 Device
 ......
 
-Devices are located under /device/BUS/…/:dev with some common attributes.
+Devices are located under /device/BUS/path…/:dev with some common attributes.
 
 A device may have more than one independent input or output. If a port is
 configurable, auto-discovery should add it as an input.
+
+The path is bus specific; see below.
 
 * name
 
@@ -493,6 +495,21 @@ configurable, auto-discovery should add it as an input.
 
       Generic attributes, used by visualizing code or similar
 
+Bus types and device paths
+..........................
+
+* extern
+
+  There is no defined naming scheme. Use whatever you like.
+
+* onewire
+
+  The naming scheme is TYP/SERIAL.
+
+  TYP is the two-hex-character ID of the device type, like "10" for
+  thermometers. SERIAL is the device's serial number. Type and checksum,
+  usually seen as part of a device's serial number, are not included.
+
 Types
 ......
 
@@ -501,8 +518,8 @@ Types are located at ``/meta/types``. They're tagged with ``:type``.
 Types can be subclassed for restrictions, modifications, or display
 requirements. Thus, ``/meta/types/float/temperature/:type`` is a
 specialization of ``/meta/types/float/:type``. (You could add more levels,
-e.g. an indoor temperature for controlling room temperature must be within
-3…30 °C.)
+e.g. an indoor temperature value, for controlling room thermometers, must
+be within 3…30 °C.)
 
 The base type contains a JSON schema for the possible values.
 
