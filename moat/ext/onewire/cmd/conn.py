@@ -28,20 +28,14 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import os
 import sys
 
-from etcd_tree.etcd import EtcTypes
-from etcd_tree.node import EtcInteger
 from yaml import safe_dump
 from contextlib import suppress
 import aio_etcd as etcd
 import asyncio
-import time
-import types as py_types
 import etcd
 
 from moat.script import Command, SubCommand, CommandError
-from moat.script.task import Task
 from moat.util import r_dict
-from moat.dev import DEV_DIR,DEV
 
 from ..dev import device_types, OnewireDevice
 
