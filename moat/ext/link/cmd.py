@@ -182,7 +182,7 @@ This command sends raw data to a device.
 
 		if not opts.stream:
 			data = chr(opts.seq).encode("latin1")+data
-		await self.u.alert(rk, _data=data)
+		await self.u.alert(rk, data, codec="application/binary")
 
 
 class LinkCommand(SubCommand):
