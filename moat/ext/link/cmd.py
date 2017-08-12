@@ -174,7 +174,7 @@ Log the event stream to any or all link adapters.
 		except Exception as exc:
 			self.report_bad(msg)
 			logger.exception("Problem processing %s", repr(body))
-			quitting.set()
+			self.quitting.set()
 
 class RawCommand(_Command):
 	name = "raw"
