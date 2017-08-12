@@ -52,7 +52,7 @@ class OnewireDeviceBase(MoatDeviceBase):
 	"""Base class for /device/onewire"""
 	def subtype(self,*path,**kw):
 		if len(path) != 3 or path[-1] != DEV:
-			return super().subtype(self,*path,**kw)
+			return super().subtype(*path,**kw)
 		try:
 			return device_types()[path[0]]
 		except KeyError:
