@@ -38,6 +38,7 @@ import weakref
 from bdb import BdbQuit
 
 from moat.task import _VARS, TASK_DIR,TASKDEF_DIR,TASK,TASKDEF, TASKSTATE_DIR,TASKSTATE
+from moat.task.reg import Reg
 from moat.util import do_async
 
 import logging
@@ -103,6 +104,9 @@ class Task(asyncio.Task):
 			_refresh is ignored in that case.
 
 			@parents contains a list of etcd node paths which must exist for the task to run.
+
+			The task controls the registry(moat.task.reg.Reg) used for
+			whatever resources its code allocates.
 			"""
 		self.loop = cmd.root.loop
 		super().__init__(self.run(), loop=self.loop)
@@ -157,6 +161,7 @@ class Task(asyncio.Task):
 		run_state = await _run_state(r.tree,self.path)
 		main_task = None
 		self.tree = await r._get_tree()
+		Reg(task=self, loop=self.loop)
 
 		## Install checks for the requisite nodes to be present.
 		gone = None
@@ -257,8 +262,8 @@ class Task(asyncio.Task):
 				await asyncio.sleep(refresh, loop=r.loop)
 				
 		# Now start the updater and the main task.
-		run_task = asyncio.ensure_future(updater(refresh), loop=r.loop)
-		self._main = main_task = asyncio.ensure_future(self.task(), loop=r.loop)
+		run_task = self.moat_reg.task(updater(refresh))
+		self._main = main_task = self.moat_reg.task(self.task())
 		res = None
 		try:
 			try:
@@ -353,6 +358,7 @@ class Task(asyncio.Task):
 					logger.exception("Could not delete 'running' entry")
 					raise
 			await run_state.wait()
+			await self.moat_reg.free()
 
 			try:
 				logger.debug("Ended %s: %s",self.name, res)
