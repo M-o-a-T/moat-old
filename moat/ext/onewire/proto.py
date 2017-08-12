@@ -35,6 +35,9 @@ from moat.proto import Protocol, ProtocolInteraction, ProtocolClient
 import logging
 logger = logging.getLogger(__name__)
 
+class OnewireError(RuntimeError):
+	pass # TODO
+
 class OWMsg:
 	"""Constants for the owserver api message types."""
 	error    = 0
@@ -187,10 +190,11 @@ class OnewireServer:
 			assert host is not None
 			conn = ProtocolClient(OnewireProtocol, host,port, loop=self._loop)
 		self.conn = conn
+		self.path = path
 	
 	def at(self,*path):
 		"""A convenient abstraction to talk to a bus or device"""
-		return type(self)(conn=self.conn,path=path)
+		return type(self)(conn=self.conn,path=self.path+path)
 
 	async def close(self):
 		if self.path: # this is a sub-device, so ignore
