@@ -317,9 +317,9 @@ class EnumCommand(Command):
 			if len(args) > 1 and self.options.watch:
 				raise CommandError("You can only watch one node. Sorry.")
 		for a in args:
-			a = (x for x in a.split('/') if x != '')
+			a = tuple(x for x in a.split('/') if x != '')
 			try:
-				d = await tree.lookup(a)
+				d = await tree.lookup(*a)
 			except KeyError:
 				print("Node '%s' not found" % (a,), file=sys.stderr)
 				continue
