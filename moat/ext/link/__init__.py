@@ -25,6 +25,55 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 
 from moat.types.module import BaseModule
 
+PREFIX=("link","raw")
+
+def key_parts(self,key):
+	"""\
+		Splits the AMQP key into a (device, direction, channel*, stream) tuple.
+
+		@device: tuple of device name components.
+		"in", "out" and "error" are reserved.
+
+		@direction: True(out)/False(in)/None(error).
+
+		@channel: a possibly-empty sequence of channel numbers.
+
+		@stream: the stream number.
+		"""
+	if isinstance(key,str):
+		key = key.split('.')
+	if not isinstance(key,tuple):
+		key = tuple(key)
+	if key[:len(self.PREFIX)] != self.PREFIX:
+		raise ValueError(key)
+	key = key[len(self.PREFIX):]
+	for i,k in enumerate(key):
+		if k in {"in","out","error"}:
+			if i == 0:
+				continue
+			if i == len(key)-1:
+				break
+			rw = False if k == "in" else True if k == "out" else None
+			return key[:i],rw,tuple(int(x) for x in key[i+1:-1]), int(key[-1])
+			
+	raise ValueError(key)
+
+def key_build(self,device,direction,channel,stream):
+	"""\
+		Builds an AMQP key. Inverse of key_parts().
+		"""
+
+	args = list(self.PREFIX[:])
+	if isinstance(device,str):
+		args.append(device)
+	else:
+		args += list(device)
+	args.append("error" if direction is None else "out" if direction else "in")
+	if channel:
+		args += list(str(x) for x in channel)
+	args.append(str(stream))
+	return '.'.join(args)
+
 class LinkModule(BaseModule):
     """\
         This module connects MoaT modules to AMQP

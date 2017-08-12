@@ -46,6 +46,7 @@ from moat.script.task import Task,_run_state, JobMarkGoneError,JobIsRunningError
 from moat.task import TASKSTATE_DIR,TASKSTATE, TASKSCAN_DIR,TASK
 from moat.times import simple_time_delta, humandelta
 from .dev import LinkDevice
+from . import PREFIX, key_parts,key_build
 
 import logging
 logger = logging.getLogger(__name__)
@@ -65,54 +66,7 @@ def add_human(d):
 		d.setdefault('human',{})['method'] = modes[m]
 
 class _Command(Command):
-	PREFIX=("link","raw")
-
-	def key_parts(self,key):
-		"""\
-			Splits the key into a (device, direction, channel*, stream) tuple.
-
-			@device: tuple of device name components.
-			"in", "out" and "error" are reserved.
-
-			@direction: True(out)/False(in)/None(error).
-
-			@channel: a possibly-empty sequence of channel numbers.
-
-			@stream: the stream number.
-			"""
-		if isinstance(key,str):
-			key = key.split('.')
-		if not isinstance(key,tuple):
-			key = tuple(key)
-		if key[:len(self.PREFIX)] != self.PREFIX:
-			raise ValueError(key)
-		key = key[len(self.PREFIX):]
-		for i,k in enumerate(key):
-			if k in {"in","out","error"}:
-				if i == 0:
-					continue
-				if i == len(key)-1:
-					break
-				rw = False if k == "in" else True if k == "out" else None
-				return key[:i],rw,tuple(int(x) for x in key[i+1:-1]), int(key[-1])
-				
-		raise ValueError(key)
-
-	def key_build(self,device,direction,channel,stream):
-		"""\
-			Builds an AMQP key. Inverse of key_parts().
-			"""
-
-		args = list(self.PREFIX[:])
-		if isinstance(device,str):
-			args.append(device)
-		else:
-			args += list(device)
-		args.append("error" if direction is None else "out" if direction else "in")
-		if channel:
-			args += list(str(x) for x in channel)
-		args.append(str(stream))
-		return '.'.join(args)
+	pass
 
 class LogCommand(_Command):
 	name = "log"
@@ -126,7 +80,7 @@ Log the event stream to any or all link adapters.
 		self.quitting = asyncio.Event(loop=self.root.loop)
 
 		self.u = await self.root._get_amqp()
-		n = list(self.PREFIX[:])
+		n = list(PREFIX[:])
 		if not args:
 			n.append('#')
 		else:
@@ -153,7 +107,7 @@ Log the event stream to any or all link adapters.
 		try:
 			body = msg.data
 			rk = msg.routing_key
-			devname,io,chans,stream = self.key_parts(rk)
+			devname,io,chans,stream = key_parts(rk)
 			devname = '.'.join(devname)
 			if chans:
 				chans = '.'.join(chans)
@@ -217,7 +171,7 @@ This command sends raw data to a device.
 
 		self.u = await self.root._get_amqp()
 		await self.setup()
-		rk = self.key_build(device, None if opts.dir_error else not opts.dir_in,
+		rk = key_build(device, None if opts.dir_error else not opts.dir_in,
 				opts.channels, opts.stream)
 		if len(args) == 1 and args[0] == "-":
 			data = sys.stdin.read()
