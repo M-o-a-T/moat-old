@@ -28,6 +28,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import os,sys
 from moat.script import Command, SubCommand, CommandError
 from etcd_tree.util import from_etcd
+from etcd_tree.etcd import EtcTypes
 from etcd_tree.node import EtcAwaiter,EtcDir,EtcValue
 import aio_etcd as etcd
 
@@ -96,36 +97,71 @@ With arguments, show only these subtrees.
 		self.parser.add_option('-m','--modstamp',
             action="store_true", dest="mod",
             help="return the entry's modification number")
-
-	def handleOptions(self):
-		self.dump = self.options.dump
-		self.mod = self.options.mod
+		self.parser.add_option('-t','--types',
+            action="store_true", dest="types",
+            help="list type information, not contents")
 
 	async def do(self,args):
 		from yaml import safe_dump
 		retval = 0
 		etc = await self.root._get_etcd()
-		if args:
+		if self.options.types:
+			tree = await self.root._get_tree()
+			seen = set()
+
+			def pr(i,p,t,r=None):
+				if t is None:
+					return
+				if not isinstance(t,EtcTypes):
+					if r:
+						for a,b in r:
+							print("%s%s: %s" % (" "*a,b,"‹dir›"))
+					print("%s%s: %s" % (" "*i,p,t.__name__))
+					t = getattr(t,'_types',None)
+					r = None
+				else:
+					if r is None:
+						r = []
+					else:
+						r = r[:]
+					r.append((i,p))
+
+				if t is None:
+					return
+				if t in seen:
+					return
+				seen.add(t)
+
+				for k,v in t.nodes.items():
+					pr(i+2,k,v,r)
+					if v.type:
+						pr(i+2,k,v.type,r)
+			if args:
+				for a in args:
+					pr(0,a,type(await tree.lookup(a.split('.'))))
+			else:
+				pr(0,'/',type(tree))
+		elif args:
 			for n,a in enumerate(args):
 				if n:
 					print("---", file=self.stdout)
 				a = a.replace('.','/')
 				try:
-					if self.mod:
+					if self.options.mod:
 						res = await etc.get('/'+a)
 						print(res.modifiedIndex, file=self.stdout)
 					else:
-						safe_dump(await from_etcd(etc,'/'+a, dump=self.dump), stream=self.stdout)
+						safe_dump(await from_etcd(etc,'/'+a, dump=self.options.dump), stream=self.stdout)
 				except etcd.EtcdKeyNotFound:
 					logger.error("key not present: %s",a)
 					retval = 1
 
 		else:
-			if self.mod:
+			if self.options.mod:
 				res = await etc.get('/')
 				print(res.modifiedIndex, file=self.stdout)
 			else:
-				safe_dump(await from_etcd(etc, '/', dump=self.dump), stream=self.stdout)
+				safe_dump(await from_etcd(etc, '/', dump=self.options.dump), stream=self.stdout)
 		return retval
 
 class DevCommand(Command):
