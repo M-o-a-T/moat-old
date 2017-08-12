@@ -51,7 +51,7 @@ class LinkDevice(object):
 
 	def dump_bin(self,out,stream,data):
 		print(self.prefix, '<' if out else '>', '%02x:'%stream, ' '.join('%02x'%x for x in data),
-			'', ''.join('.' if c<32 else chr(c) for c in data))
+			'', ''.join('.' if c<32 or 127<=c<160 else chr(c) for c in data))
 
 	def has_send(self,stream,data, verbose=0):
 		if verbose:
