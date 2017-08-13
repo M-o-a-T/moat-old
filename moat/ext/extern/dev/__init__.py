@@ -39,7 +39,9 @@ logger = logging.getLogger(__name__)
 
 class ExternDeviceBase(MoatDeviceBase,ManagedEtcDir):
     """Base class for /device/extern"""
-    pass
+    @property
+    def task_monitor(self):
+        yield "add",'extern/run', ('extern',), {}
 
 class ExternDeviceSub(EtcDir,ManagedEtcThing):
     pass
