@@ -47,7 +47,7 @@ async def test_extern_fake(loop):
 	from . import cfg
 	amqt = -1
 	t = await client(cfg, loop=loop)
-	td = await t.tree("/device/extern")
+	td = await t.tree("/")
 	u = Unit("test.moat.extern.client", amqp=cfg['config']['amqp'], loop=loop)
 	@u.register_alert("test.fake.temperature", call_conv=CC_DATA)
 	def get_temp(val):
@@ -56,9 +56,13 @@ async def test_extern_fake(loop):
 	await u.start()
 
 	with suppress(etcd.EtcdKeyNotFound):
-		await t.delete('/task/extern/run/:task', recursive=True)
+		await t.delete('/device/extern', recursive=True)
+	with suppress(etcd.EtcdKeyNotFound):
+		await t.delete('/task/extern', recursive=True)
+	with suppress(etcd.EtcdKeyNotFound):
+		await t.delete('/meta/task/extern', recursive=True)
 
-	e = f = g = h = None
+	e = f = None
 	async def run(cmd):
 		nonlocal e
 		e = m.parse(cmd)
@@ -67,239 +71,75 @@ async def test_extern_fake(loop):
 		e = None
 		return r
 	try:
-			# Set up the whole thing
-			m = MoatTest(loop=loop)
-			r = await m.parse("-vvvc test.cfg mod init moat.ext.extern")
-			assert r == 0, r
-			r = await run("-vvvc test.cfg run -qgootS moat/scan")
-			assert r == 0, r
-			r = await run("-vvvc test.cfg run -qgootS moat/scan/bus")
-			assert r == 0, r
-			mto = await t.tree("/task/extern")
+		# Set up the whole thing
+		m = MoatTest(loop=loop)
+		r = await m.parse("-vvvc test.cfg mod init moat.ext.extern")
+		assert r == 0, r
 
-			f = m.parse("-vvvc test.cfg run -gS moat/scan/bus/extern")
-			f = asyncio.ensure_future(f,loop=loop)
-			await asyncio.sleep(1, loop=loop)
+		r = await run("-vvvc test.cfg dev extern add foo/bar int input/topic=test.foo.bar output/topic=set.foo.bar Test One")
+		assert r == 0, r
 
-			logger.debug("Waiting 1: create scan task")
-			t1 = time()
-			while True:
-				try:
-					await mto.subdir('faker','scan',TASK,'taskdef', create=False)
-				except KeyError:
-					pass
-				else:
-					logger.debug("Found 1")
-					break
+		r = await run("-vvvc test.cfg run -qgootS moat/scan")
+		assert r == 0, r
+		r = await run("-vvvc test.cfg run -qgootS moat/scan/device")
+		assert r == 0, r
+		r = await run("-vvvc test.cfg run -qgootS moat/scan/device/extern")
+		assert r == 0, r
+		f = m.parse("-vvvc test.cfg run -gS extern")
+		f = asyncio.ensure_future(f,loop=loop)
 
-				await asyncio.sleep(0.1, loop=loop)
-				if time()-t1 >= 30:
-					raise RuntimeError("Condition 1")
-
-			g = m.parse("-vvvc test.cfg run -gS extern/faker/scan")
-			g = asyncio.ensure_future(g,loop=loop)
-
-			logger.debug("Waiting 2: main branch's alarm task")
-			t1 = time()
-			while True:
-				try:
-					await mto.subdir('faker','run','bus.42 1f.123123123123 main','alarm',TASK, create=False)
-				except KeyError:
-					pass
-				else:
-					logger.debug("Found 2")
-					break
-
-				if time()-t1 >= 120:
-					raise RuntimeError("Condition 2")
-				await asyncio.sleep(0.1, loop=loop)
-
-			logger.debug("TC A")
-
-			# Start the bus runner
-			m = MoatTest(loop=loop)
-			h = m.parse("-vvvc test.cfg run -gS extern/faker/run")
-			h = asyncio.ensure_future(h,loop=loop)
-			logger.debug("TC A3")
-
-			# get job entry
-			logger.debug("Waiting 2a: temperature scanner")
-			t1 = time()
-			while True:
-				if ('extern','faker','run','bus.42 1f.123123123123 aux','temperature') in _task_reg and \
-				   ('extern','faker','run','bus.42','poll') in _task_reg:
-					logger.debug("Found 2a")
-					break
-				if time()-t1 >= 10:
-					raise RuntimeError("Condition 2a")
-				await asyncio.sleep(0.1, loop=loop)
-
-			await asyncio.sleep(0.2,loop=loop)
-			fsp = _task_reg[('extern','faker','run','bus.42','poll')].job
-			fst = _task_reg[('extern','faker','run','bus.42 1f.123123123123 aux','temperature')].job
-			logger.debug("TC B1")
-			await fsp._call_delay()
-			logger.debug("TC B2")
-			await fst._call_delay()
-			logger.debug("TC B3")
-
-			# temperature device found, bus scan active
-			async def mod_a():
-				logger.debug("Mod A start")
-				await td.wait()
-				assert td['10']['001001001001'][':dev']
-				await td['10']['001001001001'][':dev']['input']['temperature'].set('alert','test.fake.temperature')
-				p = td['05']['010101010101'][':dev']['output']['pin'].set
-				#import pdb;pdb.set_trace()
-				await p('rpc','test.fake.pin')
-				assert int(fb.bus_aux['simultaneous']['temperature']) == 1
-				logger.debug("Mod A end")
-			logger.debug("Mod A hook")
-			await fsp._call_delay()
-			await fst._call_delay(mod_a)
-			logger.debug("Mod A done")
-			logger.debug("TC C")
-			await asyncio.sleep(2.5,loop=loop)
-			logger.debug("TC CA")
-			await fsp._call_delay()
-			logger.debug("TC CB")
-			await fst._call_delay()
-			logger.debug("TC D")
-
-			# we should have a value by now
-			async def mod_a2():
-				logger.debug("Mod A2 start")
-				await td.wait()
-				assert float(td['10']['001001001001'][':dev']['input']['temperature']['value']) == 12.5, \
-					td['10']['001001001001'][':dev']['input']['temperature']['value']
-				assert td['05']['010101010101'][':dev']['input']['pin']['value'] == '0', \
-					 td['05']['010101010101'][':dev']['input']['pin']['value']
-				logger.debug("Mod A2 end")
-			await fst._call_delay(mod_a2)
-			logger.debug("TC E")
-			assert amqt == 12.5, amqt
-
-			assert not fb.bus['05.010101010101'].val
-			await u.rpc('test.fake.pin',1)
-			logger.debug("TC E2")
-			assert fb.bus['05.010101010101'].val
-			await fsp._call_delay()
-
-			# now unplug the sensor
-			async def mod_x():
-				logger.debug("Mod X")
-				del fb.bus_aux['10.001001001001']
-			await fst._call_delay(mod_x)
-			logger.debug("TC F")
-
-			t1 = time()
-			while True:
-				if ('extern','faker','scan','bus.42 1f.123123123123 aux') in _task_reg:
-					break
-				if time()-t1 >= 10:
-					raise RuntimeError("Condition 2b")
-				await asyncio.sleep(0.1, loop=loop)
-
-			fst2 = _task_reg[('extern','faker','scan','bus.42 1f.123123123123 aux')]
-			await fst2._trigger()
-			del fst2
-
-			logger.debug("TC G")
-			# watch it vanish
-			async def mod_b():
-				#assert int(tr['faker']['bus']['bus.42 1f.123123123123 aux']['devices']['10'].get('001001001001','9'))
+		logger.debug("Waiting 1: create scan task")
+		t1 = time()
+		while True:
+			try:
+				await td.subdir('status','run','extern',':task', create=False)
+			except KeyError:
 				pass
-			await fst._call_delay(mod_b)
-			logger.debug("TC H")
+			else:
+				logger.debug("Found 1")
+				break
 
-			fst2 = _task_reg[('extern','faker','scan','bus.42 1f.123123123123 aux')]
-			for x in range(10):
-				logger.debug("TC H_")
-				await fst2._trigger()
-				await asyncio.sleep(0.5,loop=loop)
-				try:
-					# tr['faker']['bus']['bus.42 1f.123123123123 aux']['devices']['10']['001001001001']
-					pass
-				except KeyError:
-					break
+			await asyncio.sleep(0.1, loop=loop)
+			if time()-t1 >= 30:
+				raise RuntimeError("Condition 1")
 
-			async def mod_c():
-				assert td['05']['010101010101'][':dev']['input']['pin']['value'] == '1', \
-					 td['05']['010101010101'][':dev']['input']['pin']['value']
-				#with pytest.raises(KeyError):
-				#	tr['faker']['bus']['bus.42 1f.123123123123 aux']['devices']['10']['001001001001']
-				with pytest.raises(KeyError):
-					td['10']['001001001001'][':dev']['path']
+		logger.debug("TC A")
+		await asyncio.sleep(1, loop=loop)
 
-				# also, nobody scanned the main bus yet
-				with pytest.raises(KeyError):
-					fb.bus['simultaneous']['temperature']
+		await u.alert('test.foo.bar',{'value':42})
 
-				# it's gone, so heat it up and plug it into the main bus
-				fb.temp['temperature'] = 42.25
-				fb.bus['10.001001001001'] = fb.temp
-				# and prepare to check that the scanner doesn't any more
-				fb.bus_aux['simultaneous']['temperature'] = 0
-			await fst._call_delay(mod_c)
-			logger.debug("TC I")
+		v = await td.lookup('device','extern','foo','bar',':dev')
+		t1 = time()
+		while True:
+			try:
+				val = v['value']
+			except KeyError:
+				pass
+			else:
+				logger.debug("Found 2")
+				break
 
-			fst2 = _task_reg[('extern','faker','scan','bus.42')]
-			for x in range(15):
-				await fst2._trigger()
-				await asyncio.sleep(0.5,loop=loop)
-				if ('extern','faker','run','bus.42','temperature') in _task_reg:
-					break
-			fst2 = _task_reg[('extern','faker','run','bus.42','temperature')].job
-			await asyncio.sleep(0.5,loop=loop)
-			await fst._call_delay()
-			await fst2._call_delay()
-			logger.debug("TC J")
+			await asyncio.sleep(0.1, loop=loop)
+			if time()-t1 >= 30:
+				raise RuntimeError("Condition 2")
 
-			logger.debug("TC K")
-			await fst2._call_delay()
-			await asyncio.sleep(2.5,loop=loop)
-			await fst2._call_delay()
-			logger.debug("TC L")
+		assert val == '42', val
+		tde = _task_reg[('extern',)]
+		vr = await tde.tree.lookup('device','extern','foo','bar',':dev')
+		assert vr['value'] == '42', vr['value']
+		assert vr.value == 42, vr.value
 
-			# we're scanning the main bus now
-			async def mod_s():
-				await td.wait()
-				assert td['10']['001001001001'][':dev']['path']
-				#assert tr['faker']['bus']['bus.42']['devices']['10']['001001001001'] == '0'
+		async def do_up(data):
+			assert data['value'] == 99
+			await u.alert('test.foo.bar',{'value':data['value']})
 
-				assert int(fb.bus['simultaneous']['temperature']) == 1
-				assert int(fb.bus_aux['simultaneous']['temperature']) == 0
-			await fst2._call_delay(mod_s)
-			logger.debug("TC M")
-			await fst2._call_delay()
-			await asyncio.sleep(4.5,loop=loop)
-			await fst2._call_delay()
-			logger.debug("TC N")
-			async def mod_a3():
-				await td.wait()
-				assert float(td['10']['001001001001'][':dev']['input']['temperature']['value']) == 42.25, \
-					td['10']['001001001001'][':dev']['input']['temperature']['value']
-			await fst2._call_delay(mod_a3)
-			logger.debug("TC O")
-			assert amqt == 42.25, amqt
-
-			# drop the switch
-			del fb.bus['1f.123123123123']
-
-			fsb = _task_reg[('extern','faker','scan','bus.42')]
-			t1 = time()
-			while True:
-				if int(tr['faker']['bus']['bus.42']['devices']['1f'].get('123123123123','9')) == 9:
-					break
-				if time()-t1 >= 10:
-					raise RuntimeError("Condition 3b")
-				await asyncio.sleep(0.1, loop=loop)
-				await fsb._trigger()
-
-			# More to come.
+		await u.register_rpc_async("set.foo.bar", do_up, call_conv=CC_DATA)
+		await vr.set_value(99)
+		await asyncio.sleep(1, loop=loop)
+		assert vr.value == 99, vr.value
 
 	finally:
-		jj = (e,f,g,h)
+		jj = (e,f)
 		for j in jj:
 			if j is None: continue
 			if not j.done():
