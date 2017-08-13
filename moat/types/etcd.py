@@ -60,7 +60,9 @@ class MoatDeviceBase(EtcDir):
 	"""\
 		Base class for /device/‹name› subsystems.
 		"""
-	pass
+	@property
+	def task_monitor(self):
+		return ()
 
 class MoatRef(EtcXValue):
 	"""An entry referencing some other node"""
@@ -559,7 +561,7 @@ class MoatRoot(EtcRoot):
 	def task_monitor(self):
 		return StaticSubdirs(self)
 	def task_for_subdir(self,d):
-		if d == "bus":
+		if d in ("bus","device"):
 			return True
 
 	def managed(self,dev):
