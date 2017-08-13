@@ -88,12 +88,14 @@ class Type:
 	@property
 	def amqp_value(self):
 		"The value as seen by AMQP"
-		return self.value
+		return self.to_amqp(self.value)
 	@amqp_value.setter
 	def amqp_value(self,value):
 		self.value = self.from_amqp(value)
 
 	def from_amqp(self,value):
+		return value
+	def to_amqp(self,value):
 		return value
 
 	@property
@@ -184,28 +186,24 @@ class BoolType(Type):
 		else:
 			raise BadValueError("%s: Dunno what to do with '%s'" % (self.name,value))
 
-	@property
-	def amqp_value(self):
-		return self['true'] if self.value else self['false']
-	@amqp_value.setter
-	def amqp_value(self, value):
-		self.value = self.from_amqp(value)
+	def to_amqp(self, value):
+		return self['true'] if value else self['false']
 
-	def from_amqp(self,amqp_value):
-		if amqp_value in TRUE:
+	def from_amqp(self,value):
+		if value in TRUE:
 			return True
-		elif amqp_value in FALSE:
+		elif value in FALSE:
 			return False
-		elif amqp_value == self['true']:
+		elif value == self['true']:
 			return True
-		elif amqp_value == self['false']:
+		elif value == self['false']:
 			return False
-		elif amqp_value.lower() == self['true'].lower():
+		elif value.lower() == self['true'].lower():
 			return True
-		elif amqp_value.lower() == self['false'].lower():
+		elif value.lower() == self['false'].lower():
 			return False
 		else:
-			raise ValueError(amqp_value)
+			raise ValueError(value)
 
 class _NumType(Type):
 	default = 0
