@@ -191,9 +191,15 @@ async def test_onewire_fake(loop):
 	from etcd_tree import client
 	from . import cfg
 	amqt = -1
-	t = await client(cfg, loop=loop)
-	tr = await t.tree("/bus/onewire")
-	td = await t.tree("/device/onewire")
+	#t = await client(cfg, loop=loop)
+	#tr = await t.tree("/bus/onewire")
+	#td = await t.tree("/device/onewire")
+	m = MoatTest(loop=loop)
+	m.cfg = cfg
+	t = await m._get_tree()
+	tr = await t.lookup("bus/onewire")
+	td = await t.lookup("device/onewire")
+
 	u = Unit("test.moat.onewire.client", amqp=cfg['config']['amqp'], loop=loop)
 	@u.register_alert("test.fake.temperature", call_conv=CC_DATA)
 	def get_temp(val):
@@ -201,17 +207,17 @@ async def test_onewire_fake(loop):
 		amqt = val
 	await u.start()
 
-	with suppress(etcd.EtcdKeyNotFound):
+	with suppress(etcd.EtcdKeyNotFound, KeyError):
 		await t.delete('/task/onewire/faker/scan/:task', recursive=True)
-	with suppress(etcd.EtcdKeyNotFound):
+	with suppress(etcd.EtcdKeyNotFound, KeyError):
 		await t.delete('/task/onewire/faker/run/:task', recursive=True)
-	with suppress(etcd.EtcdKeyNotFound):
+	with suppress(etcd.EtcdKeyNotFound, KeyError):
 		await t.delete('/device/onewire/05/010101010101', recursive=True)
-	with suppress(etcd.EtcdKeyNotFound):
+	with suppress(etcd.EtcdKeyNotFound, KeyError):
 		await t.delete('/device/onewire/f0/004200420042', recursive=True)
-	with suppress(etcd.EtcdKeyNotFound):
+	with suppress(etcd.EtcdKeyNotFound, KeyError):
 		await t.delete('/device/onewire/10/001001001001', recursive=True)
-	with suppress(etcd.EtcdKeyNotFound):
+	with suppress(etcd.EtcdKeyNotFound, KeyError):
 		await t.delete('/device/onewire/1f/123123123123', recursive=True)
 
 	e = f = g = h = None
@@ -227,7 +233,6 @@ async def test_onewire_fake(loop):
 			mock.patch("moat.ext.onewire.task.DEV_COUNT", new=1) as mp:
 
 			# Set up the whole thing
-			m = MoatTest(loop=loop)
 			r = await m.parse("-vvvc test.cfg mod init moat.ext.onewire")
 			assert r == 0, r
 			await m.parse("-vvvc test.cfg conn onewire delete faker")
@@ -237,7 +242,7 @@ async def test_onewire_fake(loop):
 			assert r == 0, r
 			r = await run("-vvvc test.cfg run -qgootS moat/scan/bus")
 			assert r == 0, r
-			mto = await t.tree("/task/onewire")
+			mto = await t.lookup("task/onewire")
 
 			f = m.parse("-vvvc test.cfg run -gS moat/scan/bus/onewire")
 			f = asyncio.ensure_future(f,loop=loop)
@@ -292,7 +297,8 @@ async def test_onewire_fake(loop):
 				   ('onewire','faker','run','bus.42','poll') in _task_reg:
 					logger.debug("Found 2a")
 					break
-				if time()-t1 >= 10:
+				if time()-t1 >= 20:
+					import pdb;pdb.set_trace()
 					raise RuntimeError("Condition 2a")
 				await asyncio.sleep(0.1, loop=loop)
 
