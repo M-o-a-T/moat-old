@@ -522,9 +522,12 @@ class Subdirs(_Subdirs):
 	def _mon(self,x):
 		"""Watch a directory for changes"""
 		assert x is self.dir
-		for a in self.dir.added:
+		if x._seq is None:
+			self.q.put_nowait(None)
+			return
+		for a in x.added:
 			self.q.put_nowait(('+',a))
-		for a in self.dir.deleted:
+		for a in x.deleted:
 			self.q.put_nowait(('-',a))
 
 class StaticSubdirs(_Subdirs):
