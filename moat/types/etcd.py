@@ -498,6 +498,7 @@ class Subdirs(_Subdirs):
 	async def __aiter__(self):
 		await super().__aiter__()
 		self.q = asyncio.Queue(loop=self.dir._loop)
+		logger.debug("CHG MON %s",self.dir)
 		self.mon = self.dir.add_monitor(self._mon)
 		return self
 
@@ -508,6 +509,7 @@ class Subdirs(_Subdirs):
 			if res is None:
 				raise StopAsyncIteration
 			t,a = res
+			logger.debug("CHG %s: %s %s",self.dir,t,a)
 			if t == '+':
 				res = self._add(a)
 			elif t == '-':
