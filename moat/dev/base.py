@@ -138,6 +138,11 @@ class BaseTypedDir(ManagedEtcThing,EtcDir):
 		elif self.get('timestamp',0) > timestamp:
 			# a value from the past gets ignored
 			return
+
+		if 'type' in self and self._type is None:
+			# type is set but not
+			self.force_updated()
+
 		if self._value is None:
 			self._value = self._type._type(self._type,self)
 
