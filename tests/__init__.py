@@ -106,6 +106,8 @@ class StoreHandler(logging.Handler):
 		self.cmd.debug_log.append(record)
 
 class MoatTest(Moat):
+	is_final = False
+
 	def __init__(self,*a,**k):
 		super().__init__(*a,**k)
 		self._stdout = io.StringIO()
@@ -121,6 +123,10 @@ class MoatTest(Moat):
 			cmd = [x for x in cmd.split(' ') if x != '']
 		return (await super().parse(cmd))
 
+	async def finish(self):
+		if self.is_final:
+			await super().finish()
+
 	@property
 	def stdout_data(self):
 		return self._stdout.getvalue()
@@ -128,7 +134,7 @@ class MoatTest(Moat):
 		return s in self.stdout_data
 	def assert_stdout(self,s):
 		assert s == self.stdout_data
-
+	
 def load_cfg(cfg):
 	global cfgpath
 	if os.path.exists(cfg):
