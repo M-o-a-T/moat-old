@@ -141,7 +141,7 @@ class ScanTask(TimeoutHandler, _BusTask, metaclass=_ScanMeta):
 		long_warned = 0
 
 		while True:
-			logger.debug("tasking %d %s", id(self),self)
+			logger.debug("taskBeg %d %s", id(self),self)
 			try:
 				warned = await self.task_()
 			except Exception as exc:
@@ -169,6 +169,7 @@ class ScanTask(TimeoutHandler, _BusTask, metaclass=_ScanMeta):
 				delay = 0.01
 			elif long_warned:
 				long_warned -= 1
+			logger.debug("taskEnd %d %s", id(self),self)
 			await self.delay(delay)
 
 	async def task_(self):
