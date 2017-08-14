@@ -158,9 +158,9 @@ class Task(asyncio.Task):
 		"""Main code for task control. Don't override."""
 		r = self.cmd.root
 		await r.setup(self)
-		run_state = await _run_state(r.tree,self.path)
-		main_task = None
 		self.tree = await r._get_tree()
+		run_state = await _run_state(self.tree,self.path)
+		main_task = None
 		Reg(task=self, loop=self.loop)
 
 		## Install checks for the requisite nodes to be present.
