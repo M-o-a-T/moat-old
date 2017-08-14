@@ -176,7 +176,7 @@ Run MoaT tasks.
 					self.tilt.result() # re-raises any exception
 					break
 				if self.rescan.done():
-					logger.debug("rescanning")
+					logger.debug("rescanning %s",self)
 					self.rescan = asyncio.Future(loop=self.root.loop)
 					await self._scan()
 					await self._start()
@@ -227,6 +227,7 @@ Run MoaT tasks.
 						continue
 					elif isinstance(v,EtcDir):
 						n_p.append(v)
+			logger.debug("SCANned %d %s %s",depth,p,n_p)
 			p = n_p
 			if not depth:
 				break
@@ -251,7 +252,7 @@ Run MoaT tasks.
 
 		js = {}
 		old = set(self.jobs)
-		logger.debug("OLD %s",old)
+		logger.debug("OLD %s",tuple('/'.join(x) for x in old))
 
 		args = {}
 		if self.options.oneshot:
@@ -272,7 +273,7 @@ Run MoaT tasks.
 			if path in self.old_jobs:
 				continue
 
-			logger.info("Launch TM %s",path)
+			logger.debug("Launch TM %s", '/'.join(path))
 			try:
 				j = TaskMaster(self, t, callback=partial(_report, path), **args)
 			except Exception as exc:
@@ -289,7 +290,7 @@ Run MoaT tasks.
 		for name,tj in js.items():
 			t,j = tj
 			try:
-				logger.info("Init TM %s",j.path)
+				logger.debug("Init TM %s",'/'.join(j.path))
 				await j.init()
 			except JobIsRunningError:
 				continue
