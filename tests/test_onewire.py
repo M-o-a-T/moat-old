@@ -366,23 +366,21 @@ async def test_onewire_fake(loop):
 			del fst2
 
 			logger.debug("TC G")
-			# watch it vanish
-			async def mod_b():
-				ttr = tr['faker']['bus']['bus.42 1f.123123123123 aux']['devices']['10']['001001001001']
-				assert ttr.value
-			await fst._call_delay(mod_b)
-			logger.debug("TC H")
 
 			fst2 = _task_reg[('onewire','faker','scan','bus.42 1f.123123123123 aux')]
-			for x in range(10):
+			t1 = time()
+			while True:
 				logger.debug("TC H_")
 				await fst2._trigger()
-				await asyncio.sleep(0.5,loop=loop)
+				await asyncio.sleep(0.1,loop=loop)
 				try:
 					tr['faker']['bus']['bus.42 1f.123123123123 aux']['devices']['10']['001001001001']
 				except KeyError:
 					break
+				if time()-t1 >= 10:
+					raise RuntimeError("Condition 3x")
 
+			logger.debug("TC H")
 			async def mod_c():
 				assert td['05']['010101010101'][':dev']['input']['pin']['value'] == '1', \
 					 td['05']['010101010101'][':dev']['input']['pin']['value']
@@ -403,16 +401,26 @@ async def test_onewire_fake(loop):
 			await fst._call_delay(mod_c)
 			logger.debug("TC I")
 
-			fst2 = _task_reg[('onewire','faker','scan','bus.42')]
-			for x in range(15):
-				await fst2._trigger()
-				await asyncio.sleep(0.5,loop=loop)
-				if ('onewire','faker','run','bus.42','temperature') in _task_reg:
+			fst3 = _task_reg[('onewire','faker','scan','bus.42')]
+			t1 = time()
+			while True:
+				await fst3._trigger()
+				await asyncio.sleep(0.1,loop=loop)
+				try:
+					fst2 = _task_reg[('onewire','faker','run','bus.42','temperature')].job
+				except KeyError:
+					pass
+				else:
 					break
-			fst2 = _task_reg[('onewire','faker','run','bus.42','temperature')].job
+				if time()-t1 >= 20:
+					raise RuntimeError("Condition 3x")
 			await asyncio.sleep(0.5,loop=loop)
 			await fst._call_delay()
-			await fst2._call_delay()
+			try:
+				await fst2._call_delay()
+			except Exception as e:
+				import pdb;pdb.set_trace()
+				pass
 			logger.debug("TC J")
 
 			logger.debug("TC K")
@@ -426,7 +434,8 @@ async def test_onewire_fake(loop):
 				await td.wait()
 				await tr.wait()
 				assert td['10']['001001001001'][':dev']['path']
-				assert tr['faker']['bus']['bus.42']['devices']['10']['001001001001'] == '0'
+				tx = tr['faker']['bus']['bus.42']['devices']['10']['001001001001']
+				assert tx.value == 0, tx
 
 				assert int(fb.bus['simultaneous']['temperature']) == 1
 				assert int(fb.bus_aux['simultaneous']['temperature']) == 0
@@ -450,8 +459,13 @@ async def test_onewire_fake(loop):
 			fsb = _task_reg[('onewire','faker','scan','bus.42')]
 			t1 = time()
 			while True:
-				if int(tr['faker']['bus']['bus.42']['devices']['1f'].get('123123123123','9')) == 9:
+				try:
+					txr = tr['faker']['bus']['bus.42']['devices']['1f']['123123123123']
+				except KeyError:
 					break
+				else:
+					if txr.value == 9:
+						break
 				if time()-t1 >= 10:
 					raise RuntimeError("Condition 3b")
 				await asyncio.sleep(0.1, loop=loop)
