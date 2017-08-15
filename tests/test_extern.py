@@ -55,12 +55,9 @@ async def test_extern_fake(loop):
 		amqt = val
 	await u.start()
 
-	with suppress(etcd.EtcdKeyNotFound):
-		await t.delete('/device/extern', recursive=True)
-	with suppress(etcd.EtcdKeyNotFound):
-		await t.delete('/task/extern', recursive=True)
-	with suppress(etcd.EtcdKeyNotFound):
-		await t.delete('/meta/task/extern', recursive=True)
+	m = MoatTest(loop=loop)
+	m.cfg = cfg
+	await m.clean_ext("extern")
 
 	e = f = None
 	async def run(cmd):
@@ -72,7 +69,6 @@ async def test_extern_fake(loop):
 		return r
 	try:
 		# Set up the whole thing
-		m = MoatTest(loop=loop)
 		r = await m.parse("-vvvc test.cfg mod init moat.ext.extern")
 		assert r == 0, r
 

@@ -33,6 +33,8 @@ from moat.script.main import Moat
 import io
 import os
 from yaml import safe_load
+from contextlib import suppress
+import aio_etcd as etcd
 
 import logging
 logger = logging.getLogger(__name__)
@@ -126,6 +128,24 @@ class MoatTest(Moat):
 	async def finish(self):
 		if self.is_final:
 			await super().finish()
+
+	async def clean_ext(self, what):
+		"""Helper to clean up an external subsys before testing"""
+
+		t = await self._get_tree()
+		for d in (('device',), ('bus',),
+			      ('task',),
+			      ('task','bus'),
+			      ('task','moat','scan'),
+			      ('task','moat','scan','bus'),
+				 ):
+			with suppress(etcd.EtcdKeyNotFound, KeyError):
+				x = await t.lookup(d,name=what)
+				await x.delete(recursive=True)
+			if d[0] == 'task':
+				with suppress(etcd.EtcdKeyNotFound, KeyError):
+					x = await t.lookup(('status','run')+d[1:],name=what)
+					await x.delete(recursive=True)
 
 	@property
 	def stdout_data(self):

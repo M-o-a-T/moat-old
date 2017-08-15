@@ -197,8 +197,6 @@ async def test_onewire_fake(loop):
 	m = MoatTest(loop=loop)
 	m.cfg = cfg
 	t = await m._get_tree()
-	tr = await t.lookup("bus/onewire")
-	td = await t.lookup("device/onewire")
 
 	u = Unit("test.moat.onewire.client", amqp=cfg['config']['amqp'], loop=loop)
 	@u.register_alert("test.fake.temperature", call_conv=CC_DATA)
@@ -207,18 +205,7 @@ async def test_onewire_fake(loop):
 		amqt = val
 	await u.start()
 
-	with suppress(etcd.EtcdKeyNotFound, KeyError):
-		await t.delete('/task/onewire/faker/scan/:task', recursive=True)
-	with suppress(etcd.EtcdKeyNotFound, KeyError):
-		await t.delete('/task/onewire/faker/run/:task', recursive=True)
-	with suppress(etcd.EtcdKeyNotFound, KeyError):
-		await t.delete('/device/onewire/05/010101010101', recursive=True)
-	with suppress(etcd.EtcdKeyNotFound, KeyError):
-		await t.delete('/device/onewire/f0/004200420042', recursive=True)
-	with suppress(etcd.EtcdKeyNotFound, KeyError):
-		await t.delete('/device/onewire/10/001001001001', recursive=True)
-	with suppress(etcd.EtcdKeyNotFound, KeyError):
-		await t.delete('/device/onewire/1f/123123123123', recursive=True)
+	await m.clean_ext("onewire")
 
 	e = f = g = h = None
 	async def run(cmd):
@@ -235,14 +222,14 @@ async def test_onewire_fake(loop):
 			# Set up the whole thing
 			r = await m.parse("-vvvc test.cfg mod init moat.ext.onewire")
 			assert r == 0, r
-			await m.parse("-vvvc test.cfg conn onewire delete faker")
 			r = await m.parse("-vvvc test.cfg conn onewire add faker foobar.invalid - A nice fake 1wire bus")
 			assert r == 0, r
 			r = await run("-vvvc test.cfg run -qgootS moat/scan")
 			assert r == 0, r
 			r = await run("-vvvc test.cfg run -qgootS moat/scan/bus")
 			assert r == 0, r
-			mto = await t.lookup("task/onewire")
+			r = await run("-vvvc test.cfg run -qgootS moat/scan/bus/onewire")
+			assert r == 0, r
 
 			f = m.parse("-vvvc test.cfg run -gS moat/scan/bus/onewire")
 			f = asyncio.ensure_future(f,loop=loop)
@@ -252,8 +239,9 @@ async def test_onewire_fake(loop):
 			t1 = time()
 			while True:
 				try:
+					mto = await t.lookup("task/onewire")
 					await mto.subdir('faker','scan',TASK,'taskdef', create=False)
-				except KeyError:
+				except (KeyError,etcd.EtcdKeyNotFound):
 					pass
 				else:
 					logger.debug("Found 1")
@@ -298,7 +286,6 @@ async def test_onewire_fake(loop):
 					logger.debug("Found 2a")
 					break
 				if time()-t1 >= 20:
-					import pdb;pdb.set_trace()
 					raise RuntimeError("Condition 2a")
 				await asyncio.sleep(0.1, loop=loop)
 
@@ -311,6 +298,9 @@ async def test_onewire_fake(loop):
 			await fst._call_delay()
 			logger.debug("TC B3")
 
+			tr = await t.lookup("bus/onewire")
+			td = await t.lookup("device/onewire")
+
 			# temperature device found, bus scan active
 			async def mod_a():
 				logger.debug("Mod A start")
@@ -319,9 +309,9 @@ async def test_onewire_fake(loop):
 				assert td['10']['001001001001'][':dev']
 				await td['10']['001001001001'][':dev']['input']['temperature'].set('alert','test.fake.temperature')
 				p = td['05']['010101010101'][':dev']['output']['pin'].set
-				#import pdb;pdb.set_trace()
 				await p('rpc','test.fake.pin')
-				assert tr['faker']['bus']['bus.42 1f.123123123123 aux']['devices']['10']['001001001001'] == '0'
+				val = tr['faker']['bus']['bus.42 1f.123123123123 aux']['devices']['10']['001001001001']
+				assert val.value == 0, val
 				assert int(fb.bus_aux['simultaneous']['temperature']) == 1
 				logger.debug("Mod A end")
 			logger.debug("Mod A hook")
@@ -352,6 +342,7 @@ async def test_onewire_fake(loop):
 			assert not fb.bus['05.010101010101'].val
 			await u.rpc('test.fake.pin',1)
 			logger.debug("TC E2")
+			await fsp._call_delay()
 			assert fb.bus['05.010101010101'].val
 			await fsp._call_delay()
 
@@ -377,7 +368,8 @@ async def test_onewire_fake(loop):
 			logger.debug("TC G")
 			# watch it vanish
 			async def mod_b():
-				assert int(tr['faker']['bus']['bus.42 1f.123123123123 aux']['devices']['10'].get('001001001001','9'))
+				ttr = tr['faker']['bus']['bus.42 1f.123123123123 aux']['devices']['10']['001001001001']
+				assert ttr.value
 			await fst._call_delay(mod_b)
 			logger.debug("TC H")
 
@@ -399,7 +391,7 @@ async def test_onewire_fake(loop):
 				with pytest.raises(KeyError):
 					td['10']['001001001001'][':dev']['path']
 
-				# also, nobody scanned the main bus yet
+				# verify that nobody scanned the main bus yet
 				with pytest.raises(KeyError):
 					fb.bus['simultaneous']['temperature']
 
