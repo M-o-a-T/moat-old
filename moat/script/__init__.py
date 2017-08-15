@@ -157,7 +157,6 @@ class Command(object):
 	subCommandClasses = None
 	aliasedSubCommands = None
 	parser = None
-	logged = False
 
 	def __init__(self, parent=None, stdout=None):
 		"""

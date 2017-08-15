@@ -87,6 +87,7 @@ You can load more than one config file.
 	amqp = None
 	tree = None
 	loop = None
+	logged = False
 	_coro = False
 	_types = None
 
@@ -97,6 +98,8 @@ You can load more than one config file.
 
 	async def parse(self, argv):
 		logger.debug("Startup: %s", argv)
+		self.logged = False
+
 		try:
 			res = await super().parse(argv)
 		finally:
