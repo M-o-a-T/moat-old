@@ -245,7 +245,7 @@ class TypedDir(BaseTypedDir):
 			return
 		m = await self.manager_async
 		amqp = m.amqp
-		await amqp.alert(self._alert_name, _data=self._value.amqp_value)
+		await amqp.alert(self._alert_name, self._value.amqp_value)
 
 class TypedInputDir(TypedDir):
 	async def do_rpc(self,data):
