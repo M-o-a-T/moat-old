@@ -197,7 +197,7 @@ Check etcd access, and basic data layout.
 		except JobIsRunningError as exc:
 			assert exc.args[0] == "test/do_2", exc
 		else:
-			assert false,"Dup run didn't" # pragma: no cover
+			assert False,"Dup run didn't" # pragma: no cover
 		await dt2
 		if 'running' in run_state:
 			raise RuntimeError("Procedure end did not take") # pragma: no cover
