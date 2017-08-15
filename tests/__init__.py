@@ -141,11 +141,11 @@ class MoatTest(Moat):
 				 ):
 			with suppress(etcd.EtcdKeyNotFound, KeyError):
 				x = await t.lookup(d,name=what)
-				await x.delete(recursive=True)
+				await x.delete()
 			if d[0] == 'task':
 				with suppress(etcd.EtcdKeyNotFound, KeyError):
 					x = await t.lookup(('status','run')+d[1:],name=what)
-					await x.delete(recursive=True)
+					await x.delete()
 
 	@property
 	def stdout_data(self):
