@@ -204,6 +204,8 @@ This command deletes (some of) that data.
 				try:
 					await t.delete(recursive=rec)
 				except etcd.EtcdDirNotEmpty:
+					if rec:
+						raise
 					break
 				if isinstance(t,MoatLoaderDir):
 					try:

@@ -169,6 +169,8 @@ This command deletes (some of) that data.
                 try:
                     await t.delete(recursive=rec)
                 except etcd.EtcdDirNotEmpty:
+                    if rec:
+                        raise
                     break
                 rec = False
                 t = p
@@ -522,6 +524,8 @@ This command deletes one of these entries.
                 try:
                     await web.delete(recursive=rec)
                 except etcd.EtcdDirNotEmpty:
+                    if rec:
+                        raise
                     break
                 rec = False
                 web = p

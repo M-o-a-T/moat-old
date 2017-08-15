@@ -178,7 +178,7 @@ This command deletes (some of) that data.
 				try:
 					await t.delete(recursive=rec)
 				except etcd.EtcdDirNotEmpty:
-					if not rec:
+					if rec:
 						raise
 					break
 				rec = False
@@ -555,6 +555,8 @@ This command deletes one of these entries.
 				try:
 					await task.delete(recursive=rec)
 				except etcd.EtcdDirNotEmpty:
+					if rec:
+						raise
 					break
 				rec = False
 				task = p
