@@ -160,7 +160,7 @@ This command deletes (some of) that data.
             t = await td.subdir(k,name=WEBDEF, create=False)
             if self.root.verbose:
                 print("%s: deleted"%k, file=self.stdout)
-            rec=None
+            rec = True
             while True:
                 p = t._parent
                 if p is None: break
@@ -170,7 +170,7 @@ This command deletes (some of) that data.
                     await t.delete(recursive=rec)
                 except etcd.EtcdDirNotEmpty:
                     break
-                rec=False
+                rec = False
                 t = p
 
 class DefParamCommand(_ParamCommand):
@@ -512,7 +512,7 @@ This command deletes one of these entries.
                 raise CommandError("%s: does not exist"%k)
             if self.root.verbose:
                 print("%s: deleted"%k, file=self.stdout)
-            rec=None
+            rec = True
             while True:
                 p = web._parent
                 if p is None: break
@@ -523,7 +523,7 @@ This command deletes one of these entries.
                     await web.delete(recursive=rec)
                 except etcd.EtcdDirNotEmpty:
                     break
-                rec=False
+                rec = False
                 web = p
 
 class ConfigCommand(_ParamCommand):

@@ -218,7 +218,7 @@ This command deletes one of these entries.
                 raise CommandError("%s: does not exist"%(path,))
             if self.root.verbose:
                 print("%s: deleted"%k, file=self.stdout)
-            rec=None
+            rec = True
             while True:
                 p = tt._parent
                 if p is None: break
@@ -228,6 +228,8 @@ This command deletes one of these entries.
                 try:
                     await tt.delete(recursive=rec)
                 except etcd.EtcdDirNotEmpty:
+                    if rec:
+                        raise
                     break
                 rec=False
                 tt = p

@@ -169,7 +169,7 @@ This command deletes (some of) that data.
 			t = await td.subdir(k,name=TASKDEF, create=False)
 			if self.root.verbose:
 				print("%s: deleted"%k, file=self.stdout)
-			rec=None
+			rec = True
 			while True:
 				p = t._parent
 				if p is None: break
@@ -178,8 +178,10 @@ This command deletes (some of) that data.
 				try:
 					await t.delete(recursive=rec)
 				except etcd.EtcdDirNotEmpty:
+					if not rec:
+						raise
 					break
-				rec=False
+				rec = False
 				t = p
 
 class _ParamCommand(DefSetup,Command):
@@ -543,7 +545,7 @@ This command deletes one of these entries.
 				raise CommandError("%s: does not exist"%k)
 			if self.root.verbose:
 				print("%s: deleted"%k, file=self.stdout)
-			rec=None
+			rec = None
 			while True:
 				p = task._parent
 				if p is None: break
@@ -554,7 +556,7 @@ This command deletes one of these entries.
 					await task.delete(recursive=rec)
 				except etcd.EtcdDirNotEmpty:
 					break
-				rec=False
+				rec = False
 				task = p
 
 class StateCommand(Command):

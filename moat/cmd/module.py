@@ -195,7 +195,7 @@ This command deletes (some of) that data.
 		for k in dirs:
 			t = await k
 			k = t.path
-			rec=None
+			rec = True
 			while True:
 				p = t._parent
 				if p is None: break
@@ -212,7 +212,7 @@ This command deletes (some of) that data.
 						pass
 					else:
 						await t2.delete(recursive=True)
-				rec=False
+				rec = False
 				t = p
 			if self.root.verbose:
 				print("%s: deleted"%'/'.join(k), file=self.stdout)
