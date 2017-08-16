@@ -67,16 +67,24 @@ class Typename(EtcString):
 
 class RpcName(EtcString):
 	"""Update the parent's rpc name"""
+	update_wait = None
 	def has_update(self):
 		p = self.parent
 		if p is None:
 			return
+		if self.update_wait is not None:
+			self.update_wait.cancel()
+			self.update_wait = None
 		m = asyncio.ensure_future(p.manager_async, loop=self._loop)
 		if m is None:
 			return
+		self.update_wait = m
 		def upd(m):
+			self.update_wait = None
 			try:
 				m.result().call_async(p._reg_rpc, self.value if self.is_new is not None else None)
+			except asyncio.CancelledError:
+				return
 			except Exception as exc:
 				log_exception("reg_rpc for %s",self)
 		m.add_done_callback(upd)
