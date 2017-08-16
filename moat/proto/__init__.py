@@ -188,7 +188,7 @@ class ProtocolClient(object):
 			try:
 				_,conn = await self._loop.create_connection(lambda: self.protocol(loop=self._loop), self.host,self.port)
 			except Exception:
-				print("on %s:%s" % (self.host,self.port), file=sys.stderr)
+				logger.error("No connection to %s:%s", self.host,self.port)
 				raise
 		return conn
 		
