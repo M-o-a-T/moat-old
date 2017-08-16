@@ -50,7 +50,7 @@ from moat.context import Context
 from moat.io import Outputter,conns
 from moat.event import Event,StopParsing
 from moat.statement import global_words
-from moat.twist import fix_exception,print_exception,reraise,Jobber
+from moat.twist import fix_exception,reraise,Jobber
 from moat.collect import Collection,Collected
 
 class Parsers(Collection):

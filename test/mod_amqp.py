@@ -33,8 +33,7 @@ from moat.logging import log,DEBUG
 from test import run
 from gevent import spawn,sleep,event
 
-import sys,os
-from traceback import print_exc
+import os
 
 host=os.environ.get('AMQP_HOST',"localhost")
 input = """\

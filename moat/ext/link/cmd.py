@@ -30,21 +30,11 @@ import sys
 import aio_etcd as etcd
 import asyncio
 import time
-import types
 import binascii
-from pprint import pprint
-from sqlmix.async import Db,NoData
-from qbroker.unit import CC_DICT, CC_DATA, CC_MSG
-from qbroker.util import UTC
-from yaml import dump
-from traceback import print_exc
-from boltons.iterutils import remap
-from datetime import datetime
+from qbroker.unit import CC_MSG
 
 from moat.script import Command, SubCommand, CommandError
-from moat.script.task import Task,_run_state, JobMarkGoneError,JobIsRunningError
-from moat.task import TASKSTATE_DIR,TASKSTATE, TASKSCAN_DIR,TASK
-from moat.times import simple_time_delta, humandelta
+from moat.times import humandelta
 from .dev import LinkDevice
 from . import PREFIX, key_parts,key_build
 

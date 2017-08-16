@@ -39,7 +39,7 @@ from moat.context import Context
 from moat.collect import Collection,Collected
 from moat.event import Event
 from moat.run import process_failure,simple_event
-from moat.twist import callLater, fix_exception,print_exception, Jobber
+from moat.twist import callLater, fix_exception, Jobber
 from moat.base import Name
 from moat.net import NetActiveConnector
 from moat.msg import MsgReceiver,MsgBase,MsgQueue,MsgFactory,\

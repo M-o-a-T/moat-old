@@ -30,8 +30,7 @@ import sys
 import aio_etcd as etcd
 import asyncio
 import time
-import types
-from qbroker.unit import CC_DICT, CC_DATA, CC_MSG
+from qbroker.unit import CC_DATA, CC_MSG
 from yaml import dump
 from traceback import print_exc
 

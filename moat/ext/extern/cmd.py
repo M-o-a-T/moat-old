@@ -31,7 +31,6 @@ import aio_etcd as etcd
 import asyncio
 import time
 import inspect
-from traceback import print_exc
 from yaml import dump
 
 from moat.script import Command, SubCommand, CommandError
