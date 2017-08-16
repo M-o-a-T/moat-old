@@ -148,9 +148,9 @@ class RpcOutName(RpcName):
     def _do(self,m,p):
         m.call_async(p._reg_out_rpc, self.value if self.is_new is not None else None)
 
-class ExtDevIn(EtcDir):
+class ExtDevIn(ManagedEtcThing,EtcDir):
     pass
-class ExtDevOut(EtcDir):
+class ExtDevOut(ManagedEtcThing,EtcDir):
     pass
 ExtDevIn.register('topic',cls=RpcInName)
 ExtDevOut.register('topic',cls=RpcOutName)
@@ -164,3 +164,4 @@ ExternDevice.register('input',cls=ExtDevIn)
 ExternDevice.register('output',cls=ExtDevOut)
 ExternDevice.register('created',cls=EtcFloat)
 ExternDevice.register('timestamp',cls=EtcFloat)
+

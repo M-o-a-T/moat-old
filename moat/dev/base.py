@@ -71,10 +71,15 @@ class RpcName(EtcString):
 		p = self.parent
 		if p is None:
 			return
-		m = p.manager
+		m = asyncio.ensure_future(p.manager_async, loop=self._loop)
 		if m is None:
 			return
-		m.call_async(p._reg_rpc, self.value if self.is_new is not None else None)
+		def upd(m):
+			try:
+				m.result().call_async(p._reg_rpc, self.value if self.is_new is not None else None)
+			except Exception as exc:
+				log_exception("reg_rpc for %s",self)
+		m.add_done_callback(upd)
 
 class AlertName(EtcString):
 	"""Update the parent's alert name"""
