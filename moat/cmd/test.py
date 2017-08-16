@@ -188,10 +188,11 @@ Check etcd access, and basic data layout.
 
 		print("The following 'Job is already running' message is part of the test.",file=sys.stderr)
 		dt2 = self.Task_do2(self,"test/do_2",{})
+		await s.wait()
+		dt2.run_state = run_state = await _run_state(tree,('test','do_2'))
 		await asyncio.sleep(0.1,loop=self.root.loop)
 		dt2a = self.Task_do2(self,"test/do_2",{})
 		await asyncio.sleep(0.1,loop=self.root.loop)
-		dt2.run_state = run_state = await _run_state(tree,('test','do_2'))
 		try:
 			await dt2a
 		except JobIsRunningError as exc:
