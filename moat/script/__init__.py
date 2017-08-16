@@ -385,7 +385,7 @@ class SubCommand(Command):
 		except CommandExited as e:
 			raise
 		except asyncio.CancelledError:
-			pass
+			raise
 		except Exception:
 			if not self.root.logged:
 				logger.exception("Error:%s", " ".join(args))
