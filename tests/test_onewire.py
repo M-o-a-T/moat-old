@@ -472,8 +472,12 @@ async def test_onewire_fake(loop):
 				await fsb._trigger()
 
 			# More to come.
+	except Exception as ex:
+		logger.exception("Test ends abnormally")
+		raise
 
 	finally:
+		logger.debug("Terminating.")
 		jj = (e,f,g,h)
 		for j in jj:
 			if j is None: continue
@@ -482,6 +486,20 @@ async def test_onewire_fake(loop):
 		for j in jj:
 			if j is None: continue
 			with suppress(asyncio.CancelledError):
+				logger.info("waiting for %s",j)
+				j.print_stack()
+				while not j.done():
+					try:
+						await asyncio.wait_for(j, 1, loop=loop)
+					except asyncio.TimeoutError:
+						logger.warning("cancel again")
+						j.print_stack()
+						j.cancel()
+					else:
+						break
+				logger.info("waited")
 				await j
+		logger.debug("Stopping.")
 		await u.stop()
+		logger.debug("Done.")
 
