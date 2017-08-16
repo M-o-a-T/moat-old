@@ -46,7 +46,7 @@ class ScanTemperature(ScanTask):
 
 		await self.bus_cached.write("simultaneous","temperature", data="1")
 
-		self.delay(1.5)
+		await self.delay(1.5)
 		for dev,b in list(dev_10.items()):
 			if b.value > 0:
 				continue # pragma: no cover # timing dependant
