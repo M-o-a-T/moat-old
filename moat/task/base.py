@@ -51,9 +51,11 @@ def _setup_task_vars(types):
 			types.register(t, cls=EtcFloat)
 
 class TaskdefName(EtcString):
-	def _ext_update(self, pre):
-		super()._ext_update(pre)
-		do_async(self.parent._update_taskdef,self._value, _loop=self._loop)
+	def has_update(self):
+		super().has_update()
+		p = self.parent
+		if p is not None:
+			do_async(p._update_taskdef,self._value, _loop=self._loop)
 
 	async def init(self):
 		await self.parent._update_taskdef(self._value)
@@ -116,6 +118,8 @@ class TaskDir(recEtcDir,EtcDir):
 			elif path[0] == 'parent':
 				return MoatRef
 		elif len(path)==2 and path[0] == 'data':
+			if self.taskdef is None:
+				return EtcAwaiter
 			name = self.taskdef['data'][path[1]]
 			typ_path = tuple(x for x in name.split('/') if x != "")
 			typ = self.root.lookup(TYPEDEF_DIR+typ_path+(TYPEDEF,))
