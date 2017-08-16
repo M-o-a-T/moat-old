@@ -30,22 +30,24 @@ from functools import wraps
 from socket import socket
 import time
 import gc
+from moat.task.reg import makeTask
 
 import logging
 logger = logging.getLogger(__name__)
 
 @pytest.yield_fixture
 def loop(request):
-	loop = asyncio.new_event_loop()
-	asyncio.set_event_loop(None)
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(None)
+    loop.set_task_factory(makeTask)
 
-	yield loop
+    yield loop
 
-	loop.stop()
-	loop.run_forever()
-	loop.close()
-	gc.collect()
-	asyncio.set_event_loop(None)
+    loop.stop()
+    loop.run_forever()
+    loop.close()
+    gc.collect()
+    asyncio.set_event_loop(None)
 
 @pytest.mark.tryfirst
 def pytest_pycollect_makeitem(collector, name, obj):

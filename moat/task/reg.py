@@ -142,7 +142,7 @@ class Reg:
 		ends.
 		"""
 	def __new__(cls, task=None, loop=None):
-		r = getattr(task,'_Reg__store',None)
+		r = getattr(task,'moat_reg',None)
 		if r is not None:
 			return r
 		return super(Reg,cls).__new__(cls)
@@ -193,9 +193,9 @@ class Reg:
 
 	def task(self,f):
 		t = asyncio.ensure_future(f, loop=self.loop)
-		r = getattr(t,'_Reg__store',None)
+		r = t.moat_reg
 		if r is None:
-			t._Reg__store = self
+			t.moat_reg = self
 		elif r is not self:
 			raise RuntimeError("Task already has storage",t)
 		return t
@@ -203,6 +203,8 @@ class Reg:
 	def __del__(self):
 		assert not self.data
 
-def _moat_reg(self):
-	return self._Reg__store
-asyncio.Task.moat_reg = property(_moat_reg)
+class Task(asyncio.Task):
+	moat_reg = None
+def makeTask(loop,coro):
+	return Task(coro, loop=loop)
+asyncio.get_event_loop().set_task_factory(makeTask)

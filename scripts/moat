@@ -25,6 +25,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##BP
 
 import sys
+import moat.task.reg # side effect
 from moat.script.main import Moat
 from moat.script import CommandExited
 import asyncio

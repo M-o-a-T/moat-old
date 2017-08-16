@@ -38,7 +38,7 @@ import weakref
 from bdb import BdbQuit
 
 from moat.task import _VARS, TASK_DIR,TASKDEF_DIR,TASK,TASKDEF, TASKSTATE_DIR,TASKSTATE
-from moat.task.reg import Reg
+from moat.task.reg import Reg, Task as regTask
 from moat.util import do_async
 
 import logging
@@ -65,7 +65,7 @@ class JobParentGoneError(RuntimeError):
 # for debugging purposes only
 _task_reg = weakref.WeakValueDictionary()
 
-class Task(asyncio.Task):
+class Task(regTask):
 	"""\
 		I am the base class for a task to be executed within MoaT.
 
