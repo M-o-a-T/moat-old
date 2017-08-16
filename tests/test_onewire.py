@@ -285,7 +285,7 @@ async def test_onewire_fake(loop):
 				   ('onewire','faker','run','bus.42','poll') in _task_reg:
 					logger.debug("Found 2a")
 					break
-				if time()-t1 >= 20:
+				if time()-t1 >= 40:
 					raise RuntimeError("Condition 2a")
 				await asyncio.sleep(0.1, loop=loop)
 
@@ -412,7 +412,7 @@ async def test_onewire_fake(loop):
 					pass
 				else:
 					break
-				if time()-t1 >= 20:
+				if time()-t1 >= 40:
 					raise RuntimeError("Condition 3x")
 			await asyncio.sleep(0.5,loop=loop)
 			await fst._call_delay()
