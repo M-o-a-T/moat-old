@@ -74,6 +74,7 @@ Run MoaT tasks.
 		self.parser.add_option('-S','--no-signals',
             action="store_false", dest="signals",
             help="do not install a signal handler")
+		## TODO: -K: quit when one command ends
 
 	def _tilt(self):
 		if self.options.signals:
