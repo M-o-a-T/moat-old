@@ -84,6 +84,10 @@ class TaskDir(recEtcDir,EtcDir):
 	def cls(self):
 		return self.taskdef.cls
 
+	async def is_defined(self):
+		"""Wait until the taskdef is fully loaded"""
+		await self.taskdef.is_defined()
+
 	async def _update_taskdef(self,name=None):
 		if name != self.taskdef_name:
 			if 'data' in self:
@@ -157,6 +161,18 @@ class TaskDef(recEtcDir,EtcDir):
 		else:
 			self.cls = None
 	
+	async def is_defined(self):
+		if self.cls is not None:
+			return
+		rx = asyncio.Event(loop=self._loop)
+		def did_cls(x):
+			rx.set()
+		try:
+			r = self.add_monitor(did_cls)
+			await asyncio.wait_for(rx.wait(),10,loop=self._loop)
+		finally:
+			r.cancel()
+		
 _setup_task_vars(TaskDef)
 
 class TaskState(recEtcDir,EtcDir):

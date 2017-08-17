@@ -523,6 +523,7 @@ class TaskMaster(asyncio.Future):
 		self.setup_vars()
 		_task_reg[self.path] = self
 		
+		await self.task.is_defined()
 		self._start()
 	
 	def _repr_info(self):
