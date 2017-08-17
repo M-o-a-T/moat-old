@@ -509,7 +509,7 @@ class TaskMaster(asyncio.Future):
 		logger.debug("MASTER+ %s",self.path)
 
 		self.task = await self.tree.subdir(TASK_DIR+self.path+(TASK,))
-		await self.task.taskdef_ready.wait()
+		await self.task.taskdef_ready
 		self.taskdef_name = self.task.taskdef_name
 		if self.task.taskdef is None:
 			raise RuntimeError("incomplete task: "+'/'.join(self.task.path))
@@ -523,7 +523,6 @@ class TaskMaster(asyncio.Future):
 		self.setup_vars()
 		_task_reg[self.path] = self
 		
-		await self.task.is_defined()
 		self._start()
 	
 	def _repr_info(self):

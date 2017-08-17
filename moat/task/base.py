@@ -55,6 +55,7 @@ class TaskdefName(EtcString):
 		super().has_update()
 		p = self.parent
 		if p is not None:
+			p.taskdef_pending.clear()
 			do_async(p._update_taskdef,self._value, _loop=self._loop)
 
 	async def init(self):
@@ -69,24 +70,46 @@ class TaskDir(recEtcDir,EtcDir):
 	
 	taskdef = None
 	taskdef_name = ''
-	taskdef_ready = None
+	taskdef_pending = None
 
 	# the actual task, if running
 	# managed by moat.script.task.TaskMaster
 	# IMPORTANT: only to be used for debugging and testing!
 	_task = None
 
-	def __init__(self,*a,**k):
+	def __init__(self, *a,**k):
 		super().__init__(*a,**k)
-		self.taskdef_ready = asyncio.Event(loop=self._loop)
+		self.taskdef_pending = asyncio.Event(loop=self._loop)
 
 	@property
 	def cls(self):
 		return self.taskdef.cls
 
-	async def is_defined(self):
-		"""Wait until the taskdef is fully loaded"""
-		await self.taskdef.is_defined()
+	@property
+	def ready(self):
+		return asyncio.gather(super().ready,self.taskdef.ready, loop=self._loop)
+
+	@property
+	async def taskdef_ready(self):
+		redo = True
+		while redo:
+			redo = False
+			td = self._get('taskdef')
+			if not td.is_ready:
+				await td.ready
+				redo = True
+			if self.taskdef_pending is None:
+				redo = True
+			elif not self.taskdef_pending.is_set():
+				await self.taskdef_pending.wait()
+				redo = True
+			if not self.taskdef.is_ready:
+				await self.taskdef.ready
+				redo = True
+
+	@property
+	def is_ready(self):
+		return super().is_ready and self.taskdef.is_ready
 
 	async def _update_taskdef(self,name=None):
 		if name != self.taskdef_name:
@@ -97,15 +120,8 @@ class TaskDir(recEtcDir,EtcDir):
 			self.taskdef_name = name
 			if 'data' in self:
 				await self['data']
-		self.taskdef_ready.set()
+		self.taskdef_pending.set()
 
-	def has_update(self):
-		if 'taskdef_name' not in self or self.seq == 0:
-			return
-		if self.taskdef_name != self['taskdef_name']:
-			self.taskdef_ready.clear()
-			do_async(self._update_taskdef,self['taskdef_name'], _loop=self._loop)
-			
 	async def _fill_data(self,pre,recursive):
 		if not recursive:
 			raise ReloadRecursive
@@ -161,18 +177,6 @@ class TaskDef(recEtcDir,EtcDir):
 		else:
 			self.cls = None
 	
-	async def is_defined(self):
-		if self.cls is not None:
-			return
-		rx = asyncio.Event(loop=self._loop)
-		def did_cls(x):
-			rx.set()
-		try:
-			r = self.add_monitor(did_cls)
-			await asyncio.wait_for(rx.wait(),10,loop=self._loop)
-		finally:
-			r.cancel()
-		
 _setup_task_vars(TaskDef)
 
 class TaskState(recEtcDir,EtcDir):
