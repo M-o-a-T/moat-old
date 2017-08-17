@@ -185,6 +185,7 @@ async def test_task(loop):
 	m2 = MoatTest(loop=loop)
 	print("E",time())
 	rx = await m2.parse("-vvc test.cfg task state fake")
+	print("F",time())
 	assert m2.in_stdout('fake/cmd/sleep: {'), m2.stdout_data
 	assert m2.in_stdout('state: run'), m2.stdout_data
 	assert rx == 0, rx

@@ -24,9 +24,12 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##BP
 
 import asyncio
+import time
 
 from ..script.task import Task
-from etcd_tree.node import EtcFloat
+
+import logging
+logger = logging.getLogger(__name__)
 
 class Sleeper(Task):
 	"""This task just waits for a configured amount of time before exiting.
@@ -36,7 +39,11 @@ class Sleeper(Task):
 	schema = {'delay':'float'}
 
 	async def task(self):
+		t1=time.time()
+		logger.debug("Start %s",t1)
 		await asyncio.sleep(self.config['delay'], loop=self.loop)
+		t2=time.time()
+		logger.debug("Stop %s: %s",t2, t2-t1)
 	
 class Error(Task):
 	taskdef="test/error"
