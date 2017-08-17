@@ -278,7 +278,7 @@ class Task(regTask):
 				# Cancelling an asyncio.wait() doesn't propagate
 				logger.debug("Cancelling %s",self.name)
 				try:
-					logger.info('CANCEL 10 %s',main_task)
+					logger.debug('CANCEL 10 %s',main_task)
 					main_task.cancel()
 					await main_task
 				except Exception:
@@ -588,7 +588,7 @@ class TaskMaster(asyncio.Future):
 		super().cancel()
 
 	async def cancel_job(self):
-		logger.info('CANCEL 13 %s',self)
+		logger.debug('CANCEL 13 %s',self)
 		try:
 			self.cancel()
 		except Exception:
