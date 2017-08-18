@@ -88,6 +88,7 @@ You can load more than one config file.
 	tree = None
 	loop = None
 	logged = False
+	etc_cfg = None
 	_coro = False
 	_types = None
 
@@ -138,6 +139,15 @@ You can load more than one config file.
 				pass # GC
 			except Exception as exc:
 				logger.exception("Closing AMQP")
+
+		e,self.etc_cfg = self.etc_cfg,None
+		if e is not None:
+			try:
+				await e.close()
+			except NameError:
+				pass # GC
+			except Exception as exc:
+				logger.exception("Closing etcd cfg tree")
 
 		e,self.tree = self.tree,None
 		if e is not None:
