@@ -68,7 +68,7 @@ test: all
 t: all
 	@rm -f test.log
 	env PYTHONASYNCIODEBUG=1 \
-	py.test-3 --cov-report term-missing -x --assert=plain tests
+	py.test-3 --cov-report term-missing -xsv tests
 
 otest: all
 	@$(MAKE) -C test --no-print-directory otest
