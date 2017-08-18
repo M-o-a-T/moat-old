@@ -248,7 +248,7 @@ async def test_onewire_fake(loop):
 					break
 
 				await asyncio.sleep(0.1, loop=loop)
-				if time()-t1 >= 30:
+				if time()-t1 >= 40:
 					raise RuntimeError("Condition 1")
 
 			g = m.parse("-vvvc test.cfg run -gS onewire/faker/scan")
