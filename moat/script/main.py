@@ -131,6 +131,7 @@ You can load more than one config file.
 			help="application name. Default is the reversed FQDN.")
 
 	async def finish(self):
+		logger.debug("Closing %s",self)
 		e,self.amqp = self.amqp,None
 		if e is not None:
 			try:
@@ -168,6 +169,7 @@ You can load more than one config file.
 				logger.exception("Closing etcd connection")
 
 		await super().finish()
+		logger.debug("Closed %s",self)
 
 	def handleOptions(self):
 		opts = self.options
