@@ -28,11 +28,13 @@ import pytest
 from time import time
 import io
 import sys
-import logging
 from contextlib import suppress
 import aio_etcd as etcd
 
 from . import ProcessHelper, MoatTest
+
+import logging
+logger = logging.getLogger(__name__)
 
 @pytest.mark.run_loop
 async def test_taskdef(loop):
@@ -152,47 +154,52 @@ async def test_task(loop):
 	assert m.stdout_data.startswith('*\tfake/cmd/sleep\n'), m.stdout_data
 	assert r == 0, r
 
+	from moat.task import test as TT
 	t = time()
 	m = MoatTest(loop=loop)
 	r = await m.parse("-vvvc test.cfg run -g fake/cmd/sleep")
 	t2 = time()
 	assert r == 0, r
 	assert t2-t < 10 and t2-t > 2, (t,t2)
+	assert TT.SLEEP == 2
 
 	m = MoatTest(loop=loop)
 	r = await m.parse("-vvvc test.cfg task change fake/cmd/sleep delay=4")
-	print("A",time())
+	logger.info("A %s",time())
 	assert r == 0, r
 
+	TT.SLEEP = 0
 	t = time()
 	r = asyncio.ensure_future(m.parse("-vvvc test.cfg run -g fake/cmd/sleep"), loop=loop)
-	await asyncio.sleep(1,loop=loop)
+	while TT.SLEEP == 0:
+		await asyncio.sleep(0.1,loop=loop)
+		assert time()-t < 10
 	assert not r.done(),repr(r)
-	print("B",time())
+	logger.info("B %s",time())
 	m2 = MoatTest(loop=loop)
 	rx = await m2.parse("-c test.cfg task state fake")
-	print("C",time())
+	logger.info("C %s",time())
 	assert m2.in_stdout('fake/cmd/sleep\trun\t'), m2.stdout_data
 	assert rx == 0, rx
 
 	m2 = MoatTest(loop=loop)
 	rx = await m2.parse("-vc test.cfg task state fake")
-	print("D",time())
+	logger.info("D %s",time())
 	assert m2.in_stdout('*\tfake/cmd/sleep\n'), m2.stdout_data
 	assert m2.in_stdout('state\trun\n'), m2.stdout_data
 	assert rx == 0, rx
 
 	m2 = MoatTest(loop=loop)
-	print("E",time())
+	logger.info("E %s",time())
 	rx = await m2.parse("-vvc test.cfg task state fake")
-	print("F",time())
+	logger.info("F %s",time())
 	assert m2.in_stdout('fake/cmd/sleep: {'), m2.stdout_data
 	assert m2.in_stdout('state: run'), m2.stdout_data
 	assert rx == 0, rx
 
 	r = await r
 	t2 = time()
-	assert t2-t < 8 and t2-t > 4, (t,t2)
+	assert 4 < t2-t < 10, (t,t2)
 	assert r == 0, r
 
 @pytest.mark.run_loop

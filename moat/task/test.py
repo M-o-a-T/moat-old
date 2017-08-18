@@ -31,6 +31,8 @@ from ..script.task import Task
 import logging
 logger = logging.getLogger(__name__)
 
+SLEEP = 0
+
 class Sleeper(Task):
 	"""This task just waits for a configured amount of time before exiting.
 		You can use it in a 'moat run -K' command to limit runtimes."""
@@ -39,10 +41,13 @@ class Sleeper(Task):
 	schema = {'delay':'float'}
 
 	async def task(self):
+		global SLEEP
 		t1=time.time()
 		logger.debug("Start %s",t1)
+		SLEEP = 1
 		await asyncio.sleep(self.config['delay'], loop=self.loop)
 		t2=time.time()
+		SLEEP = 2
 		logger.debug("Stop %s: %s",t2, t2-t1)
 	
 class Error(Task):
