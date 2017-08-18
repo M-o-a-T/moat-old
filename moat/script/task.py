@@ -318,7 +318,10 @@ class Task(regTask):
 					state = "Aborted by timeout"
 				else:
 					try:
-						state = str(run_task.exception())
+						state = run_task.exception()
+						await run_state.set("debug","".join(format_exception(state.__class__,state,state.__traceback__)))
+						await run_state.set("debug_time",str(time()))
+						state = str(state)
 					except asyncio.CancelledError as err: # bah
 						state = "cancelled"
 				await run_state.set("message", state)
