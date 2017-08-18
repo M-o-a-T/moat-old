@@ -115,8 +115,6 @@ class StoreHandler(logging.Handler):
 		self.cmd.debug_log.append(record)
 
 class MoatTest(Moat):
-	is_final = False
-
 	def __init__(self,*a,**k):
 		super().__init__(*a,**k)
 		self._stdout = io.StringIO()
@@ -131,10 +129,6 @@ class MoatTest(Moat):
 		if isinstance(cmd,str):
 			cmd = [x for x in cmd.split(' ') if x != '']
 		return (await super().parse(cmd))
-
-	async def finish(self):
-		if self.is_final:
-			await super().finish()
 
 	async def clean_ext(self, what):
 		"""Helper to clean up an external subsys before testing"""
