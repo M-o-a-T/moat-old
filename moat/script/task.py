@@ -290,7 +290,7 @@ class Task(regTask):
 				if not run_task.cancelled() and isinstance(run_task.exception(), JobMarkGoneError):
 					keep_running = True
 				if not main_task.done():
-					logger.info('CANCEL 11 %s',main_task)
+					logger.debug('CANCEL 11 %s',main_task)
 					main_task.cancel()
 					try: await main_task
 					except Exception: pass
