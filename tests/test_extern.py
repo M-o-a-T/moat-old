@@ -145,4 +145,6 @@ async def test_extern_fake(loop):
 			with suppress(asyncio.CancelledError):
 				await j
 		await u.stop()
+		await td.close(False)
+		t.close()
 
