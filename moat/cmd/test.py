@@ -132,89 +132,92 @@ Check etcd access, and basic data layout.
 
 		stats = set(("ok","warn","error","fail"))
 		s = await etc.tree("/status")
-		if "run" not in s:
-			show("missing 'run' entry")
-			if self.parent.fix:
-				await s.set("run",dict()) # pragma: no cover
+		try:
+			if "run" not in s:
+				show("missing 'run' entry")
+				if self.parent.fix:
+					await s.set("run",dict()) # pragma: no cover
+				else:
+					retval += 1
+			if "errors" not in s:
+				show("missing 'errors' entry")
+				if self.parent.fix:
+					await s.set("errors",dict((stat,0) for stat in stats))
+				else:
+					retval += 1
 			else:
-				retval += 1
-		if "errors" not in s:
-			show("missing 'errors' entry")
-			if self.parent.fix:
-				await s.set("errors",dict((stat,0) for stat in stats))
+				err = s['errors']
+				for stat in stats:
+					if stat not in err:
+						show("missing 'errors.%s' entry" % stat)
+						if self.parent.fix:
+							await err.set(stat,0)
+						else:
+							retval += 1
+
+			await s.wait()
+			if not self.root.cfg['config'].get('testing',False):
+				return
+
+			# The next part is test environment only
+			try:
+				t = self.Task_do3(self,"test/do_3")
+				await t
+			except RuntimeError as exc:
+				pass
 			else:
-				retval += 1
-		else:
-			err = s['errors']
-			for stat in stats:
-				if stat not in err:
-					show("missing 'errors.%s' entry" % stat)
-					if self.parent.fix:
-						await err.set(stat,0)
-					else:
-						retval += 1
+				raise RuntimeError("Error did not propagate") # pragma: no cover
+			run_state = await _run_state(tree,('test','do_3'))
+			if 'running' in run_state:
+				raise RuntimeError("Procedure end 2 did not take") # pragma: no cover
+			await s.wait()
+			assert run_state['stopped'] > run_state['started'], (run_state['stopped'], run_state['started'])
+			assert run_state['state'] == "error", run_state['state']
 
-		await s.wait()
-		if not self.root.cfg['config'].get('testing',False):
-			return
+			try:
+				t = self.Task_do4(self,"test/do_4",_ttl=3,_refresh=10)
+				await t
+			except JobMarkGoneError:
+				pass
+			else:
+				raise RuntimeError("Cancellation ('running' marker gone) did not propagate") # pragma: no cover
+			run_state = await _run_state(tree,('test','do_4'))
+			assert 'running' not in run_state
+			await s.wait()
+			assert run_state['stopped'] > run_state['started'], (run_state['stopped'], run_state['started'])
+			assert run_state['state'] == "fail", run_state['state']
 
-		# The next part is test environment only
-		try:
-			t = self.Task_do3(self,"test/do_3")
-			await t
-		except RuntimeError as exc:
-			pass
-		else:
-			raise RuntimeError("Error did not propagate") # pragma: no cover
-		run_state = await _run_state(tree,('test','do_3'))
-		if 'running' in run_state:
-			raise RuntimeError("Procedure end 2 did not take") # pragma: no cover
-		await s.wait()
-		assert run_state['stopped'] > run_state['started'], (run_state['stopped'], run_state['started'])
-		assert run_state['state'] == "error", run_state['state']
+			print("The following 'Job is already running' message is part of the test.",file=sys.stderr)
+			dt2 = self.Task_do2(self,"test/do_2",{})
+			await s.wait()
+			dt2.run_state = run_state = await _run_state(tree,('test','do_2'))
+			await asyncio.sleep(0.1,loop=self.root.loop)
+			dt2a = self.Task_do2(self,"test/do_2",{})
+			await asyncio.sleep(0.1,loop=self.root.loop)
+			try:
+				await dt2a
+			except JobIsRunningError as exc:
+				assert exc.args[0] == "test/do_2", exc
+			else:
+				assert False,"Dup run didn't" # pragma: no cover
+			await dt2
+			if 'running' in run_state:
+				raise RuntimeError("Procedure end did not take") # pragma: no cover
+			await s.wait()
+			assert run_state['stopped'] > run_state['started'], (run_state['stopped'], run_state['started'])
+			assert run_state['state'] == "ok", run_state['state']
 
-		try:
-			t = self.Task_do4(self,"test/do_4",_ttl=3,_refresh=10)
-			await t
-		except JobMarkGoneError:
-			pass
-		else:
-			raise RuntimeError("Cancellation ('running' marker gone) did not propagate") # pragma: no cover
-		run_state = await _run_state(tree,('test','do_4'))
-		assert 'running' not in run_state
-		await s.wait()
-		assert run_state['stopped'] > run_state['started'], (run_state['stopped'], run_state['started'])
-		assert run_state['state'] == "fail", run_state['state']
+			try:
+				errs = await etc.read("/status/errors")
+			except etcd.EtcdKeyNotFound:
+				if self.parent.fix:
+					raise RuntimeError("Creating /errors did not take. Duh?") # pragma: no cover ## hopefully
+				# otherwise it's not there and there's nothing to do
+			else:
+				pass
 
-		print("The following 'Job is already running' message is part of the test.",file=sys.stderr)
-		dt2 = self.Task_do2(self,"test/do_2",{})
-		await s.wait()
-		dt2.run_state = run_state = await _run_state(tree,('test','do_2'))
-		await asyncio.sleep(0.1,loop=self.root.loop)
-		dt2a = self.Task_do2(self,"test/do_2",{})
-		await asyncio.sleep(0.1,loop=self.root.loop)
-		try:
-			await dt2a
-		except JobIsRunningError as exc:
-			assert exc.args[0] == "test/do_2", exc
-		else:
-			assert False,"Dup run didn't" # pragma: no cover
-		await dt2
-		if 'running' in run_state:
-			raise RuntimeError("Procedure end did not take") # pragma: no cover
-		await s.wait()
-		assert run_state['stopped'] > run_state['started'], (run_state['stopped'], run_state['started'])
-		assert run_state['state'] == "ok", run_state['state']
-
-		try:
-			errs = await etc.read("/status/errors")
-		except etcd.EtcdKeyNotFound:
-			if self.parent.fix:
-				raise RuntimeError("Creating /errors did not take. Duh?") # pragma: no cover ## hopefully
-			# otherwise it's not there and there's nothing to do
-		else:
-			pass
-
+		finally:
+			await s.close()
 		return retval
 
 class TypesCommand(Command):
