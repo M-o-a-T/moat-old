@@ -35,6 +35,7 @@ import os
 from yaml import safe_load
 from contextlib import suppress
 import aio_etcd as etcd
+from pprint import pprint
 
 import logging
 logger = logging.getLogger(__name__)
@@ -58,6 +59,11 @@ async def is_open(port):
 		s.close()
 		raise RuntimeError("Port did not open")
 
+def handle_exc(loop,ctx):
+	pprint(ctx)
+	import pdb;pdb.set_trace()
+	pass
+
 class ProcessHelper(asyncio.SubprocessProtocol):
 	def __init__(self, proc, *args, loop=None, **kw):
 		self.proc = proc
@@ -66,6 +72,7 @@ class ProcessHelper(asyncio.SubprocessProtocol):
 		self.fd = [b'',b'',b'']
 		assert loop is not None
 		asyncio.set_event_loop(loop)
+		loop.set_exception_handler(handle_exc)
 		# required for waiting on a process
 		self._loop = loop
 

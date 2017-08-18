@@ -31,6 +31,7 @@ from socket import socket
 import time
 import gc
 from moat.task.reg import makeTask
+from . import handle_exc
 
 import logging
 logger = logging.getLogger(__name__)
@@ -40,6 +41,7 @@ def loop(request):
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(None)
     loop.set_task_factory(makeTask)
+    loop.set_exception_handler(handle_exc)
 
     yield loop
 
