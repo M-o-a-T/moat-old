@@ -56,6 +56,8 @@ Check basic config layout.
 		except KeyError: # pragma: no cover
 			raise CommandError("config: missing 'config' entry")
 
+_do2_running = False
+
 class EtcdCommand(Command):
 	name = "etcd"
 	summary = "Verify etcd data"""
@@ -67,6 +69,8 @@ Check etcd access, and basic data layout.
 	class Task_do2(Task):
 		async def task(self):
 			logger.debug("start: _do2")
+			global _do2_running
+			_do2_running = True
 			await asyncio.sleep(0.3,loop=self.loop)
 
 			t = time.time()
@@ -188,18 +192,27 @@ Check etcd access, and basic data layout.
 			assert run_state['state'] == "fail", run_state['state']
 
 			print("The following 'Job is already running' message is part of the test.",file=sys.stderr)
+			global _do2_running
+			_do2_running = False
 			dt2 = self.Task_do2(self,"test/do_2",{})
 			await s.wait()
 			dt2.run_state = run_state = await _run_state(tree,('test','do_2'))
-			await asyncio.sleep(0.1,loop=self.root.loop)
+			t1 = time.time()
+			while True:
+				if _do2_running:
+					break
+				await asyncio.sleep(0.1,loop=self.root.loop)
+				if time.time()-t1 > 10:
+					import pdb;pdb.set_trace()
+					raise RuntimeError("do2 didn't run")
+
 			dt2a = self.Task_do2(self,"test/do_2",{})
-			await asyncio.sleep(0.1,loop=self.root.loop)
 			try:
 				await dt2a
 			except JobIsRunningError as exc:
 				assert exc.args[0] == "test/do_2", exc
 			else:
-				assert False,"Dup run didn't" # pragma: no cover
+				raise RuntimeError("Dup run didn't") # pragma: no cover
 			await dt2
 			if 'running' in run_state:
 				raise RuntimeError("Procedure end did not take") # pragma: no cover
