@@ -62,14 +62,16 @@ async def test_extern_fake(loop):
 	e = f = None
 	async def run(cmd):
 		nonlocal e
-		e = m.parse(cmd)
+		m9 = MoatTest(loop=loop)
+		e = m9.parse(cmd)
 		e = asyncio.ensure_future(e,loop=loop)
 		r = await e
 		e = None
 		return r
 	try:
 		# Set up the whole thing
-		r = await m.parse("-vvvc test.cfg mod init moat.ext.extern")
+		m2 = MoatTest(loop=loop)
+		r = await m2.parse("-vvvc test.cfg mod init moat.ext.extern")
 		assert r == 0, r
 
 		r = await run("-vvvc test.cfg dev extern add foo/bar int input/topic=test.foo.bar output/topic=set.foo.bar Test One")
@@ -81,7 +83,8 @@ async def test_extern_fake(loop):
 		assert r == 0, r
 		r = await run("-vvvc test.cfg run -qgootS moat/scan/device/extern")
 		assert r == 0, r
-		f = m.parse("-vvvc test.cfg run -gS extern")
+		m2 = MoatTest(loop=loop)
+		f = m2.parse("-vvvc test.cfg run -gS extern")
 		f = asyncio.ensure_future(f,loop=loop)
 
 		logger.debug("Waiting 1: create scan task")
@@ -145,6 +148,7 @@ async def test_extern_fake(loop):
 			with suppress(asyncio.CancelledError):
 				await j
 		await u.stop()
-		await td.close(False)
+		await td.close()
+		await m.finish()
 		t.close()
 

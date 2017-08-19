@@ -210,7 +210,8 @@ async def test_onewire_fake(loop):
 	e = f = g = h = None
 	async def run(cmd):
 		nonlocal e
-		e = m.parse(cmd)
+		m9 = MoatTest(loop=loop)
+		e = m9.parse(cmd)
 		e = asyncio.ensure_future(e,loop=loop)
 		r = await e
 		e = None
@@ -220,9 +221,12 @@ async def test_onewire_fake(loop):
 			mock.patch("moat.ext.onewire.task.DEV_COUNT", new=1) as mp:
 
 			# Set up the whole thing
-			r = await m.parse("-vvvc test.cfg mod init moat.ext.onewire")
+			m2 = MoatTest(loop=loop)
+			r = await m2.parse("-vvvc test.cfg mod init moat.ext.onewire")
 			assert r == 0, r
-			r = await m.parse("-vvvc test.cfg conn onewire add faker foobar.invalid - A nice fake 1wire bus")
+
+			m2 = MoatTest(loop=loop)
+			r = await m2.parse("-vvvc test.cfg conn onewire add faker foobar.invalid - A nice fake 1wire bus")
 			assert r == 0, r
 			r = await run("-vvvc test.cfg run -qgootS moat/scan")
 			assert r == 0, r
@@ -231,7 +235,8 @@ async def test_onewire_fake(loop):
 			r = await run("-vvvc test.cfg run -qgootS moat/scan/bus/onewire")
 			assert r == 0, r
 
-			f = m.parse("-vvvc test.cfg run -gS moat/scan/bus/onewire")
+			m2 = MoatTest(loop=loop)
+			f = m2.parse("-vvvc test.cfg run -gS moat/scan/bus/onewire")
 			f = asyncio.ensure_future(f,loop=loop)
 			await asyncio.sleep(1, loop=loop)
 
@@ -249,9 +254,13 @@ async def test_onewire_fake(loop):
 
 				await asyncio.sleep(0.1, loop=loop)
 				if time()-t1 >= 40:
+					import pdb;pdb.set_trace()
+					mto = await t.lookup("task/onewire")
+					await mto.subdir('faker','scan',TASK,'taskdef', create=False)
 					raise RuntimeError("Condition 1")
 
-			g = m.parse("-vvvc test.cfg run -gS onewire/faker/scan")
+			m3 = MoatTest(loop=loop)
+			g = m3.parse("-vvvc test.cfg run -gS onewire/faker/scan")
 			g = asyncio.ensure_future(g,loop=loop)
 
 			logger.debug("Waiting 2: main branch's alarm task")
@@ -272,8 +281,8 @@ async def test_onewire_fake(loop):
 			logger.debug("TC A")
 
 			# Start the bus runner
-			m = MoatTest(loop=loop)
-			h = m.parse("-vvvc test.cfg run -gS onewire/faker/run")
+			m2 = MoatTest(loop=loop)
+			h = m2.parse("-vvvc test.cfg run -gS onewire/faker/run")
 			h = asyncio.ensure_future(h,loop=loop)
 			logger.debug("TC A3")
 
