@@ -31,6 +31,8 @@ import sys
 from contextlib import suppress
 import aio_etcd as etcd
 
+from moat.task import TASK
+
 from . import ProcessHelper, MoatTest
 
 import logging
@@ -113,7 +115,7 @@ async def test_task(loop):
 	from . import cfg
 	t = await client(cfg, loop=loop)
 	with suppress(etcd.EtcdKeyNotFound):
-		await t.delete('/task/fake/cmd/sleep/:task', recursive=True)
+		await t.delete('/task/fake/cmd/sleep/'+TASK, recursive=True)
 
 	m = MoatTest(loop=loop)
 	r = await m.parse("-vvvc test.cfg test -f")

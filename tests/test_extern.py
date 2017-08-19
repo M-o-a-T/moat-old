@@ -28,7 +28,7 @@ import pytest
 from time import time
 from moat.proto import ProtocolClient
 from qbroker.unit import Unit,CC_DATA
-from moat.task import TASK
+from moat.task import TASKSTATE
 import mock
 import aio_etcd as etcd
 from contextlib import suppress
@@ -88,7 +88,7 @@ async def test_extern_fake(loop):
 		t1 = time()
 		while True:
 			try:
-				await td.subdir('status','run','extern',':task', create=False)
+				await td.subdir('status','run','extern',TASKSTATE, create=False)
 			except KeyError:
 				pass
 			else:
