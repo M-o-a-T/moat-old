@@ -322,15 +322,22 @@ async def test_onewire_fake(loop):
 				val = tr['faker']['bus']['bus.42 1f.123123123123 aux']['devices']['10']['001001001001']
 				assert val.value == 0, val
 				assert int(fb.bus_aux['simultaneous']['temperature']) == 1
+				await td.wait()
 				logger.debug("Mod A end")
 			logger.debug("Mod A hook")
 			await fsp._call_delay()
 			await fst._call_delay(mod_a)
-			logger.debug("Mod A done")
 			logger.debug("TC C")
-			await asyncio.sleep(2.5,loop=loop)
+			t1 = time()
+			while amqt == -1:
+				await fst._call_delay()
+				await fsp._call_delay()
+				await asyncio.sleep(0.1,loop=loop)
+				if time()-t1 > 5:
+					import pdb;pdb.set_trace()
+					raise RuntimeError("No amqp")
+			assert amqt == 12.5, amqt
 			logger.debug("TC CA")
-			await fsp._call_delay()
 			logger.debug("TC CB")
 			await fst._call_delay()
 			logger.debug("TC D")
@@ -343,6 +350,7 @@ async def test_onewire_fake(loop):
 					td['10']['001001001001'][':dev']['input']['temperature']['value']
 				assert td['05']['010101010101'][':dev']['input']['pin']['value'] == '0', \
 					 td['05']['010101010101'][':dev']['input']['pin']['value']
+				await td['05']['010101010101'][':dev'].ready
 				logger.debug("Mod A2 end")
 			await fst._call_delay(mod_a2)
 			logger.debug("TC E")
