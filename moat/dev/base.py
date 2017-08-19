@@ -91,11 +91,7 @@ class RpcName(EtcString):
 
 class AlertName(EtcString):
 	"""Update the parent's alert name"""
-	def has_update(self):
-		p = self.parent
-		if p is None:
-			return
-		p._alert_name = (self.value if self.is_new is not None else None)
+	pass
 
 class BaseTypedDir(ManagedEtcThing,EtcDir):
 	"""\
@@ -193,7 +189,6 @@ class TypedDir(BaseTypedDir):
 		"""
 	_rpc = None
 	_rpc_name = ''
-	_alert_name = ''
 	_device = None
 
 	@property
@@ -254,11 +249,12 @@ class TypedDir(BaseTypedDir):
 		await self._updated(value,timestamp)
 
 	async def _write_amqp(self,timestamp):
-		if not self._alert_name:
+		alert_name = self.get('alert',None)
+		if alert_name is None:
 			return
 		m = await self.manager_async
 		amqp = m.amqp
-		await amqp.alert(self._alert_name, self._value.amqp_value)
+		await amqp.alert(alert_name, self._value.amqp_value)
 
 class TypedInputDir(TypedDir):
 	async def do_rpc(self,data):
