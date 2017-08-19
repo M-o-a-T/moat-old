@@ -32,6 +32,10 @@ logger = logging.getLogger(__name__)
 class _NOT_HERE: pass
 class _NOT_THERE: pass
 
+class TimeOnlyFormatter(logging.Formatter):
+	default_time_format = "%H:%M:%S"
+	default_msec_format = "%s.%03d"
+
 # This is a convenient place to add some representers to YAML
 import yaml,io,sys
 def _IOwrapper(dumper,data):
