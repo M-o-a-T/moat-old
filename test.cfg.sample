@@ -29,4 +29,5 @@ config:
         stream: ext://sys.stderr
     formatters:
       std:
-        format: '%(levelname)s:%(name)s:%(message)s'
+        class: moat.util.TimeOnlyFormatter
+        format: '%(asctime)s %(levelname)s:%(name)s:%(message)s'

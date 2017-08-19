@@ -31,6 +31,9 @@ from time import time
 import weakref
 import sys
 
+import logging
+logger = logging.getLogger(__name__)
+
 class Disconnected(BaseException):
 	pass
 
