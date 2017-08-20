@@ -507,13 +507,13 @@ async def test_onewire_fake(loop):
 				if j is None: continue
 				with suppress(asyncio.CancelledError):
 					logger.info("waiting for %s",j)
-					j.print_stack()
+					#j.print_stack()
 					while not j.done():
 						try:
 							await asyncio.wait_for(j, 1, loop=loop)
 						except asyncio.TimeoutError:
-							logger.warning("cancel again")
-							j.print_stack()
+							logger.warning("cancel again: %s",j)
+							#j.print_stack()
 							j.cancel()
 						else:
 							break
