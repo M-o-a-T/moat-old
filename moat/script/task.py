@@ -27,6 +27,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 Class for managing tasks.
 """
 
+import attr
 import asyncio
 from etcd_tree.etcd import EtcTypes, WatchStopped
 from etcd_tree.node import EtcFloat,EtcBase
@@ -50,9 +51,11 @@ min_timeout = float(os.environ.get('MOAT_DEBUG_TIMEOUT',0))
 class _NOTGIVEN:
 	pass
 
+@attr.s
 class JobIsRunningError(RuntimeError):
 	"""The job is already active"""
-	pass
+	name = attr.ib()
+	state_dir = attr.ib()
 
 class JobMarkGoneError(RuntimeError):
 	"""The job's 'running' mark in etcd is gone (timeout, external kill)"""
@@ -217,7 +220,7 @@ class Task(regTask):
 			cseq = await run_state.set("running",time(),ttl=ttl)
 		except etcd.EtcdAlreadyExist as exc:
 			logger.warn("Job is already running: %s",self.name)
-			raise JobIsRunningError(self.name) from exc
+			raise JobIsRunningError(self.name, run_state) from exc
 		await send_alert(state='start')
 		mod = await run_state.set("started",time())
 		await run_state.wait(mod)
@@ -505,7 +508,7 @@ async def _run_state(tree,path):
 	"""\
 		Get a tree for the job's state.
 
-		Tests use this to manipulate the state behind the testee's back.
+		Tests hook this to manipulate the state behind the testee's back.
 		"""
 	run_state = await tree.subdir(TASKSTATE_DIR+path+(TASKSTATE,))
 	return run_state
@@ -705,5 +708,12 @@ class TaskMaster(asyncio.Future):
 		finally:
 			self.job = None
 
-		self.timer = self.loop.call_later(self.current_retry,self._timer_done)
+		if isinstance(self.exc,JobIsRunningError):
+			self.timer = asyncio.ensure_future(self._wait_idle())
+		else:
+			self.timer = self.loop.call_later(self.current_retry,self._timer_done)
 
+	async def _wait_idle(self):
+		await self.exc.state_dir.idle
+		self.timer = None
+		self._start()

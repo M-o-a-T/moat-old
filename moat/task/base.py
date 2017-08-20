@@ -186,6 +186,22 @@ class TaskState(recEtcDir,EtcDir):
 		This stores the actual state of a running Task.
 		"""
 
+	async def init(self):
+		self._idle = asyncio.Event(loop=self._loop)
+		await super().init()
+
+	def has_update(self):
+		if 'running' not in self:
+			self._idle.set()
+	
+	@property
+	def is_idle(self):
+		return self._idle.is_set()
+
+	@property
+	def idle(self):
+		return self._idle.wait()
+
 	@property
 	def state(self):
 		"""Return a human-readable (but fixed) string describing this task's state"""
@@ -210,8 +226,18 @@ class TaskState(recEtcDir,EtcDir):
 		else:
 			return super().__getitem__(k)
 
+class TaskRunning(EtcFloat):
+	def has_update(self):
+		p = self.parent
+		if p is None:
+			return
+		if self.is_new is None:
+			p._idle.set()
+		else:
+			p._idle.clear()
+
 TaskState.register('started')(EtcFloat)
 TaskState.register('stopped')(EtcFloat)
-TaskState.register('running')(EtcFloat)
+TaskState.register('running')(TaskRunning)
 TaskState.register('debug_time')(EtcFloat)
 
