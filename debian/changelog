@@ -1,3 +1,9 @@
+moat (0.7.35) smurf; urgency=medium
+
+  * Get the basic thing working again
+
+ -- Matthias Urlichs <matthias@urlichs.de>  Sun, 20 Aug 2017 08:43:22 +0200
+
 moat (0.7.34) smurf; urgency=medium
 
   * Package all this somewhat-reasonably.
