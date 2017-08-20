@@ -119,13 +119,13 @@ Run MoaT tasks.
 		self.rescan = asyncio.Future(loop=self.root.loop)
 		for t in self.args:
 			try:
-				tree = await tree.subdir(t, create=False)
+				tx = await tree.subdir(t, create=False)
 			except KeyError as err:
 				print("Unknown("+'/'.join(t)+"): "+'/'.join(err.args[0]), file=sys.stderr)
 				res = 2
 			else:
-				self.paths.append(tree)
-				self._monitors.append(tree.add_monitor(self._rescan))
+				self.paths.append(tx)
+				self._monitors.append(tx.add_monitor(self._rescan))
 		if res:
 			return res
 		await self._scan()
