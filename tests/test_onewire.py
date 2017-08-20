@@ -519,4 +519,5 @@ async def test_onewire_fake(loop):
 		logger.debug("Stopping.")
 		await u.stop()
 		logger.debug("Done.")
+		await m.finish()
 
