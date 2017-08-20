@@ -81,7 +81,7 @@ Check etcd access, and basic data layout.
 		async def task(self):
 			logger.debug("start: _do3")
 			await asyncio.sleep(0.2,loop=self.loop)
-			print("The following RuntimeError is part of the test.",file=sys.stderr)
+			logger.error("The following RuntimeError is part of the test.")
 			raise RuntimeError("Dying")
 
 	class Task_do4(Task):
@@ -191,7 +191,7 @@ Check etcd access, and basic data layout.
 			assert run_state['stopped'] > run_state['started'], (run_state['stopped'], run_state['started'])
 			assert run_state['state'] == "fail", run_state['state']
 
-			print("The following 'Job is already running' message is part of the test.",file=sys.stderr)
+			logger.error("The following 'Job is already running' message is part of the test.")
 			global _do2_running
 			_do2_running = False
 			dt2 = self.Task_do2(self,"test/do_2",{})
