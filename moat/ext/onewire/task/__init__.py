@@ -76,10 +76,11 @@ class _BusTask(Task):
 		self.devices = await self.tree.subdir(DEV_DIR+('onewire',))
 
 	async def teardown(self):
-		try:
-			await self.srv.close()
-		except Exception:
-			logger.exception("closing down")
+		if hasattr(self,'srv'):
+			try:
+				await self.srv.close()
+			except Exception:
+				logger.exception("closing down")
 		await super().teardown()
 
 class _ScanMeta(type(_BusTask)):
