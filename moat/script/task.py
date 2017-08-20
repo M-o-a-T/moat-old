@@ -262,7 +262,8 @@ class Task(regTask):
 				await asyncio.sleep(refresh, loop=r.loop)
 				
 		async def save_exc(exc, state='error'):
-			logger.exception(self.name)
+			if not self.name.startswith("test/"):
+				logger.exception(self.name)
 			if state is not None:
 				await run_state.set("state",state)
 			exc.__context__ = None # the cancelled run_task is not interesting
