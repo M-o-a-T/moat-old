@@ -159,7 +159,13 @@ class Task(regTask):
 		r = self.cmd.root
 		await r.setup(self)
 		self.tree = await r._get_tree()
+		self.amqp = await r._get_amqp()
 		run_state = await _run_state(self.tree,self.path)
+
+		async def send_alert(**kw):
+			await self.amqp.alert('moat.task.'+'.'.join(run_state.path[len(TASKSTATE_DIR):-1]),kw)
+
+		await send_alert(state= 'setup')
 		main_task = None
 		Reg(task=self, loop=self.loop)
 
@@ -181,6 +187,7 @@ class Task(regTask):
 				prm.append(parent.add_monitor(parent_check))
 			except (KeyError,etcd.EtcdKeyNotFound) as ex:
 				await run_state.set("message", "Missing1: "+'/'.join(pr)+' : '+str(ex))
+				await send_alert(state='fail',reason='parent',parent=pr)
 				raise JobParentGoneError(self.name, pr) from ex
 
 		## TTL calculation
@@ -202,6 +209,7 @@ class Task(regTask):
 		logger.debug("Starting %s: %s",self.name, self.__class__.__name__)
 		try:
 			if 'running' in run_state:
+				await send_alert(state='fail',reason='running')
 				raise etcd.EtcdAlreadyExist(message=self.name, payload=run_state['running']) # pragma: no cover ## timing dependant
 			ttl = int(ttl)
 			if ttl < 1:
@@ -210,6 +218,7 @@ class Task(regTask):
 		except etcd.EtcdAlreadyExist as exc:
 			logger.warn("Job is already running: %s",self.name)
 			raise JobIsRunningError(self.name) from exc
+		await send_alert(state='start')
 		mod = await run_state.set("started",time())
 		await run_state.wait(mod)
 		keep_running = False # if it's been superseded, do not delete
@@ -266,6 +275,8 @@ class Task(regTask):
 				logger.exception(self.name)
 			if state is not None:
 				await run_state.set("state",state)
+				await send_alert(state=state, reason=str(exc))
+
 			exc.__context__ = None # the cancelled run_task is not interesting
 			await run_state.set("message",str(exc))
 			await run_state.set("debug",repr(exc)+'\n'+"".join(format_exception(exc.__class__,exc,exc.__traceback__)))
@@ -330,6 +341,7 @@ class Task(regTask):
 			if main_task.cancelled():
 				# Killed because of a timeout / refresh problem. Major fail.
 				await run_state.set("state","fail")
+				await send_alert(state='fail', reason='cancel')
 
 				if gone is not None:
 					state = "Missing2: "+'/'.join(gone)
@@ -353,6 +365,7 @@ class Task(regTask):
 					raise
 				else:
 					await run_state.set("state","ok")
+					await send_alert(state='done', result=res)
 					await run_state.set("message",str(res))
 					return res
 
