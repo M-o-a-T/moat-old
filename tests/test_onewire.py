@@ -159,6 +159,9 @@ class FakeBus(FakeSubBus):
 			raise KeyError((self,p)) from err
 		d[p[-1].lower()] = data
 
+	async def close(self):
+		pass
+
 @pytest.yield_fixture
 def owserver(loop,unused_tcp_port):
 	port = unused_tcp_port

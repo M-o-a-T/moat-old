@@ -41,7 +41,7 @@ class DeviceMgr(Task):
 		itself as a manager to the /bus/WHATEVER node
 		(which needs to be a ManagedEtcDir).
 
-		Override .setup() (and possibly .teardown()) if necessary.
+		Supplement .setup() (and possibly .teardown()) if necessary.
 		"""
 
 	taskdef="task/devices"
@@ -49,23 +49,24 @@ class DeviceMgr(Task):
 	q = None
 
 	async def setup(self):
-		pass
-	def teardown(self):
-		pass
+		await super().setup()
+		self.q = asyncio.Queue(loop=self.loop)
+		self.amqp = self.cmd.root.amqp
+		self._managed = await self.managed()
+		await self._managed.set_manager(self)
+
+	async def teardown(self):
+		try:
+			await self._managed.set_manager(None)
+		except Exception:
+			logger.exception("clearing manager")
+		await super().teardown()
 
 	async def managed(self):
 		"""get the root of the tree we are managing"""
 		raise NotImplementedError("Need to override %s.managed" % self.__class__.__name__)
 
 	async def task(self):
-		self.q = asyncio.Queue(loop=self.loop)
-		self.devices = WeakSet()
-		self.amqp = self.cmd.root.amqp
-		await self.setup()
-
-		managed = await self.managed()
-		await managed.set_manager(self)
-
 		try:
 			while True:
 				cmd = await self.q.get()
@@ -84,9 +85,6 @@ class DeviceMgr(Task):
 		except BaseException as exc:
 			logger.exception("Duh?")
 			raise
-		finally:
-			self.teardown()
-			del managed.manager
 
 	def call_async(self, proc,*a,**k):
 		self.q.put_nowait(('call',proc,a,k))

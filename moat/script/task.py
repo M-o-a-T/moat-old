@@ -261,7 +261,25 @@ class Task(regTask):
 				logger.debug("Run marker refreshed %s",self.name)
 				await asyncio.sleep(refresh, loop=r.loop)
 				
+		async def save_exc(exc, state='error'):
+			logger.exception(self.name)
+			if state is not None:
+				await run_state.set("state",state)
+			exc.__context__ = None # the cancelled run_task is not interesting
+			await run_state.set("message",str(exc))
+			await run_state.set("debug",repr(exc)+'\n'+"".join(format_exception(exc.__class__,exc,exc.__traceback__)))
+			await run_state.set("debug_time",str(time()))
+
 		# Now start the updater and the main task.
+		try:
+			await self.setup()
+		except Exception as exc:
+			try:
+				await self.teardown()
+			except Exception as exc:
+				logger.exception("cleaning up")
+			await save_exc(exc)
+			raise
 		run_task = self.moat_reg.task(updater(refresh))
 		self._main = main_task = self.moat_reg.task(self.task())
 		res = None
@@ -318,13 +336,11 @@ class Task(regTask):
 					state = "Aborted by timeout"
 				else:
 					try:
-						state = run_task.exception()
-						await run_state.set("debug","".join(format_exception(state.__class__,state,state.__traceback__)))
-						await run_state.set("debug_time",str(time()))
-						state = str(state)
+						exc = run_task.exception()
 					except asyncio.CancelledError as err: # bah
-						state = "cancelled"
-				await run_state.set("message", state)
+						await run_state.set("message", "cancelled")
+					else:
+						await save_exc(exc, state=None)
 				run_task.result()
 				assert False,"the previous line should have raised an error" # pragma: no cover
 			else:
@@ -332,22 +348,20 @@ class Task(regTask):
 				try:
 					res = main_task.result()
 				except Exception as exc:
-					# … or not.
-					exc.__context__ = None # the cancelled run_task is not interesting
-					logger.exception(self.name)
-					await run_state.set("state","error")
-					await run_state.set("message",str(exc))
-					await run_state.set("debug","".join(format_exception(exc.__class__,exc,exc.__traceback__)))
-					await run_state.set("debug_time",str(time()))
+					await save_exc(exc)
 					raise
 				else:
 					await run_state.set("state","ok")
 					await run_state.set("message",str(res))
 					return res
-		finally:
 
-			# Now clean up everything
+		finally: # Clean up everything
 			self._main = None
+			try:
+				await self.teardown()
+			except Exception as exc:
+				logger.exception("Clean up %s",self)
+
 			await run_state.set("stopped",time())
 			if not keep_running and 'running' in run_state:
 				try:
@@ -374,11 +388,19 @@ class Task(regTask):
 			"""
 		pass
 
+	async def setup(self):
+		"""Hook to do task setup things."""
+		pass
+
 	async def task(self):
 		"""\
 			Override this to actually do the task's job.
 			"""
 		raise NotImplementedError("You need to write the code that does the work!")
+
+	async def teardown(self):
+		"""Hook to do task cleanup things."""
+		pass
 
 class TimeoutHandler:
 	"""\

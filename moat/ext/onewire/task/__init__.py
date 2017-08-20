@@ -65,14 +65,22 @@ class _BusTask(Task):
 		except KeyError:
 			return self.parent.update_delay
 
-	async def setup_vars(self):
+	async def setup(self):
 		# onewire/NAME/scan/…
+		await super().setup()
 		self.srv_name = self.path[1]
 		self.srv_tree = await self.tree.lookup(BUS_DIR+('onewire',self.srv_name))
 
 		self.srv_data = await self.srv_tree['server']
 		self.srv = OnewireServer(self.srv_data['host'],self.srv_data.get('port',None), loop=self.loop)
 		self.devices = await self.tree.subdir(DEV_DIR+('onewire',))
+
+	async def teardown(self):
+		try:
+			await self.srv.close()
+		except Exception:
+			logger.exception("closing down")
+		await super().teardown()
 
 class _ScanMeta(type(_BusTask)):
 	"""Metaclass to set up ScanTask subclasses correctly"""
@@ -92,10 +100,9 @@ class BusHandler(_BusTask,DeviceMgr):
 		"""\
 			additional setup before DeviceMgr.task()
 			"""
-		await self.setup_vars()
+		await super().setup()
 		self.bus = self.srv.at('uncached')
 		self.bus_cached = self.srv
-		await super().setup()
 	
 	async def managed(self):
 		managed = await self.tree['bus']
@@ -125,7 +132,6 @@ class ScanTask(TimeoutHandler, _BusTask, metaclass=_ScanMeta):
 			Do not override this; override .task_ instead.
 			"""
 		logger.debug("starting %s: %s",self.__class__.__name__,self.path)
-		await self.setup_vars()
 		self.parent = await self.tree['bus']['onewire'][self.taskdir.path[2]]['bus'][self.taskdir.path[4]]
 		await self.parent['devices'] # we need that later
 
@@ -179,8 +185,8 @@ class ScanTask(TimeoutHandler, _BusTask, metaclass=_ScanMeta):
 class _BusScan(_BusTask):
 	"""Common code for bus scanning"""
 
-	async def setup_vars(self):
-		await super().setup_vars()
+	async def setup(self):
+		await super().setup()
 		self.buses = await self.srv_tree.subdir('bus')
 
 	async def drop_device(self,dev, delete=True):
@@ -228,8 +234,6 @@ class BusScan(_BusScan):
 
 	async def task(self):
 		"""Scan a single bus"""
-		await self.setup_vars()
-
 		bus_name = self.path[3]
 		bus = bus_name.split(' ')
 
@@ -304,8 +308,6 @@ class BusScanBase(_BusScan):
 	summary="Scan the 'root' buses of a 1wire server"
 
 	async def task(self):
-		await self.setup_vars()
-
 		old_buses = set()
 		for k in self.buses.keys():
 			if k.startswith('bus.') and ' ' not in k:
