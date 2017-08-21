@@ -76,7 +76,7 @@ from collections.abc import Mapping
 
 from moat.types.etcd import recEtcDir
 from . import webdef_names, WEBDEF_DIR,WEBDEF, WEBDATA_DIR,WEBDATA, WEBCONFIG
-from moat.util import do_async
+from moat.util import do_async, r_getattr
 from moat.dev import DEV_DIR,DEV
 
 import logging
@@ -419,14 +419,8 @@ class WebdataDir(recEtcDir,EtcDir):
 				self.mon = None
 
 	def update_value(self,val):
-		key = self.get('subvalue','value').split('/')
-		for k in key[:-1]:
-			if k:
-				val = val.get(k)
-		key = key[-1]
-		if key:
-			val = getattr(val,key)
-		self.updates.send(self, value=val)
+		key = self.get('subvalue','value')
+		return r_getattr(self,key, attr=True)
 
 class WebdataType(EtcString):
 	"""Type path for WebdataDir"""

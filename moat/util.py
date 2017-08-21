@@ -174,3 +174,34 @@ def do_async(task, *a, _loop=None, _err_cb=None, **k):
 			_err_cb(exc)
 	f.add_done_callback(reporter)
 
+def r_getattr(obj,key, default=_NOT_HERE, attr=False):
+	"""\
+		Object/attribute lookup with a partitioned key.
+
+		r_getattr(obj,(a,b,c)) == obj[a][b][c]
+		r_getattr(obj,"a/b/c", attr=True) == obj[a][b].c
+		r_getattr(obj,"no/no", default='Foo') == 'Foo'
+
+		Raises KeyError even if an attribute is missing.
+		"""
+	if isinstance(key,str):
+		key = key.split('/')
+	try:
+		for k in key[:-1]:
+			if k:
+				val = val.get(k)
+	except KeyError:
+		if default is not _NOT_HERE:
+			return default
+		raise KeyError(key) from None
+
+	key = key[-1]
+	try:
+		if key:
+			val = getattr(val,key)
+	except AttributeError:
+		if default is not _NOT_HERE:
+			return default
+		raise KeyError(key) from None
+	self.updates.send(self, value=val)
+
