@@ -265,7 +265,7 @@ Usage: … param NAME VALUE  -- set
 							print("%s=%s (unchanged)" % (k,v), file=self.stdout)
 						else:
 							print("%s=%s (was %s)" % (k,v,data[k]), file=self.stdout)
-					await data.set(k, v)
+					await data.set(k, v, ext=True)
 
 class DefParamCommand(_ParamCommand):
 	_def = True
@@ -479,7 +479,7 @@ class _AddUpdate:
 					except KeyError:
 						pass
 				else:
-					await d.set(k,v, sync=False)
+					await d.set(k,v, sync=False, ext=True)
 			
 
 class AddCommand(_AddUpdate,DefSetup,Command):

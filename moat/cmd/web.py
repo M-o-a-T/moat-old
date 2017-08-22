@@ -245,7 +245,7 @@ class _DefAddUpdate:
                     except KeyError:
                         pass
                 else:
-                    await web.set(k,v, sync=False)
+                    await web.set(k,v, sync=False, ext=True)
             
 
 class DefAddCommand(_DefAddUpdate,DefSetup,Command):

@@ -167,7 +167,7 @@ See "moat show dev --help" for displaying values.
 				if v == '' and self.delete:
 					r = await etc.delete(pa)
 				else:
-					r = await etc.set(pa, value=v)
+					r = await etc.set(pa, value=v, ext=True)
 			except etcd.EtcdKeyNotFound:
 				logger.info("Key already deleted: "+a)
 			except etcd.EtcdCompareFailed:

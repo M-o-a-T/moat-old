@@ -292,7 +292,7 @@ Usage: … port HOST NAME key=value… -- set
                 if v == '':
                     await h.delete(k)
                 else:
-                    await h.set(k,v)
+                    await h.set(k,v, ext=True)
 
 class LinkCommand(DefSetup,Command):
     DIR = INFRA_DIR
