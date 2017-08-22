@@ -32,7 +32,7 @@ import asyncio
 import weakref
 import warnings
 import attr
-from inspect import iscoroutine
+from inspect import iscoroutine,isgenerator
 
 import logging
 logger = logging.getLogger(__name__)
@@ -42,11 +42,11 @@ class DupRegError(RuntimeError):
 
 @attr.s
 class RegReg:
-	func = attr.ib()
+	alloc = attr.ib()
 	release = attr.ib()
 	weak = attr.ib(default=True)
 
-def REG(cls, name, func, release, weak=True):
+def REG(cls, name, alloc, release, weak=True):
 	"""\
 		Register an allocate/free pair.
 
@@ -54,22 +54,26 @@ def REG(cls, name, func, release, weak=True):
 
 		>>> releaser = await reg.@name(obj, …)
 
-		calls obj.@func(…). The result (@res) is wrapped in a @release object.
+		with type(obj)==cls, calls obj.@alloc(…).
+		The result (@res) is wrapped in a @release object.
 		
 		>>> await releaser.free()
 
 		calls @res.@release(). The same thing happens when the registrar
 		gets freed.
 
-		If @release is a callable, it is called with the RegStore object as
-		its sole argument. The original object is obtainable as @regstore.obj().
-		The release method will not be called if the object no longer
-		exists.
+		If @release is a callable, it is called with the RegObj as its sole
+		argument. The originally-allocated object is obtainable as @res.orig.
+		The release method will not be called if that object no longer exists.
 
 		Allocator and releaser will be awaited if necessary.
 
 		The releaser will not be called if the object has already been
 		freed. Set weak=False to prevent that from happening.
+
+		>>> await @res.release()
+
+		will free an individual resource.
 		"""
 	try:
 		r = cls._Reg__hooks
@@ -79,11 +83,11 @@ def REG(cls, name, func, release, weak=True):
 		if name in getattr(c,'_Reg__hooks',{}):
 			raise DupRegError(name,cls,c)
 
-	r[name] = RegReg(func,release,weak)
-	if not hasattr(Reg,name):
-		def cb(self,obj,*a,**k):
-			return self._reg(name,obj,*a,**k)
-		setattr(Reg,name,cb)
+	r[name] = RegReg(alloc,release,weak)
+	assert not hasattr(Reg,name), name
+	def cb(self,obj,*a,**k):
+		return self._reg(name,obj,*a,**k)
+	setattr(Reg,name,cb)
 
 class NoRegCallback(RuntimeError):
 	"""\
@@ -91,27 +95,35 @@ class NoRegCallback(RuntimeError):
 		"""
 	pass
 
+_Seq = 0
+
 @attr.s
-class _RegStore:
-	"""\
-		Saves a releaser for later freeing via Reg.release().
-		"""
-	obj = attr.ib()
-	reg = attr.ib()
-	thing=attr.ib()
-	method=attr.ib()
-	weak = attr.ib()
+class _RegObj:
+	obj = attr.ib(hash=False,cmp=False)    # the allocated object
+	reg = attr.ib(hash=False,cmp=False)    # Registry in which this is allocated
+	weak = attr.ib(hash=False,cmp=False)   # flag
+	source = attr.ib(hash=False,cmp=False) # the subsystem we allocated from
+	method = attr.ib(hash=False,cmp=False) # release: callable or method name
+	seq = attr.ib(init=False,default=0) # solely for comparison
 
 	@property
 	def orig(self):
+		"""Returns the originally-allocated object, or None if weak+freed"""
 		obj = self.obj
 		if self.weak:
 			obj = obj()
 		return obj
 
-class RegStore(_RegStore):
+class RegObj(_RegObj):
+	"""\
+		Saves a releaser for later freeing via @self.release() or Reg.release().
+		"""
 	def __init__(self, obj, weak=True, **k):
 		super().__init__(obj=weakref.ref(obj,self._released) if weak else obj, weak=weak, **k)
+
+		global _Seq
+		_Seq += 1
+		self.seq = _Seq
 
 	async def release(self, _force=False):
 		if not _force:
@@ -119,13 +131,17 @@ class RegStore(_RegStore):
 				warnings.warn("%s: Released twice" % (repr(self),), stacklevel=2)
 				return
 			self.reg.data.remove(self)
-		if callable(self.method):
-			res = self.method(self)
+		obj = self.orig
+		if obj is not None:
+			if callable(self.method):
+				res = self.method(self)
+			else:
+				res = getattr(self.source,self.method)(obj)
+			if iscoroutine(res) or isgenerator(res):
+				res = await res
 		else:
-			res = getattr(self.thing,self.method)()
-		if iscoroutine(res):
-			res = await res
-		self.done = True
+			warnings.warn("%s: Already freed" % (repr(self),), stacklevel=2)
+			res = None
 		return res
 
 	def _released(self,_):
@@ -161,19 +177,26 @@ class Reg:
 		if task is not None:
 			self.task(task)
 	
-	async def _reg(self, name,obj, *a,**k):
-		for c in obj.__class__.__mro__:
+	async def _reg(self, name,source, *a,**k):
+		"""\
+			Allocate an object.
+
+			Calls source.@name(…).
+
+			Returns the RegObj encapsulating the result.
+			"""
+		for c in source.__class__.__mro__:
 			r = getattr(c,'_Reg__hooks',None)
 			if r is not None:
-				r = r.get(name)
+				r = r.get(name,None)
 				if r is not None:
 					break
 		else:
-			raise NoRegCallback(obj,name)
-		res = getattr(obj, r.func)(*a,**k)
-		if iscoroutine(res):
+			raise NoRegCallback(source,name)
+		res = getattr(source, r.alloc)(*a,**k)
+		if iscoroutine(res) or isgenerator(res):
 			res = await res
-		res = RegStore(reg=self, obj=obj, thing=res, method=r.release, weak=r.weak)
+		res = RegObj(reg=self, obj=res, source=source, method=r.release, weak=r.weak)
 		self.data.add(res)
 		return res
 
@@ -192,6 +215,11 @@ class Reg:
 			raise e
 
 	def task(self,f):
+		"""\
+			Create a task whose moat_reg attribute points to this registry.
+
+			When the task ends, moat.script.task.Task calls self.free().
+			"""
 		t = asyncio.ensure_future(f, loop=self.loop)
 		r = t.moat_reg
 		if r is None:
@@ -208,3 +236,8 @@ class Task(asyncio.Task):
 def makeTask(loop,coro):
 	return Task(coro, loop=loop)
 asyncio.get_event_loop().set_task_factory(makeTask)
+
+# side effect only
+from moat import registry
+del registry
+

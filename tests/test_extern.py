@@ -74,7 +74,9 @@ async def test_extern_fake(loop):
 		r = await m2.parse("-vvvc test.cfg mod init moat.ext.extern")
 		assert r == 0, r
 
-		r = await run("-vvvc test.cfg dev extern add foo/bar int input/topic=test.foo.bar output/topic=set.foo.bar Test One")
+		r = await run("-vvvc test.cfg dev extern add foo/bar int input/topic=test.foo.bar output/topic=set.foo.bar sync=false Test One")
+		assert r == 0, r
+		#r = await run("-vvvc test.cfg dev extern add foo/baz int input/topic=test.foo.baz input/ output/topic=set.foo.bar Test One")
 		assert r == 0, r
 
 		r = await run("-vvvc test.cfg run -qgootS moat/scan")
@@ -118,7 +120,10 @@ async def test_extern_fake(loop):
 				logger.debug("Found 2")
 				break
 
-			await asyncio.sleep(0.1, loop=loop)
+			if v.is_ready:
+				await asyncio.sleep(0.1, loop=loop)
+			else:
+				await v.ready
 			if time()-t1 >= 30:
 				raise RuntimeError("Condition 2")
 
@@ -128,14 +133,25 @@ async def test_extern_fake(loop):
 		assert vr['value'] == '42', vr['value']
 		assert vr.value == 42, vr.value
 
+		did_it = asyncio.Event(loop=loop)
 		async def do_up(data):
+			logger.debug("did_it %s",repr(data))
 			assert data['value'] == 99
-			await u.alert('test.foo.bar',{'value':data['value']})
-
-		await u.register_rpc_async("set.foo.bar", do_up, call_conv=CC_DATA)
+			await u.alert('test.foo.bar',{'value':98})
+			did_it.set()
+		await u.register_alert_async("set.foo.bar", do_up, call_conv=CC_DATA)
 		await vr.set_value(99)
-		await asyncio.sleep(1, loop=loop)
-		assert vr.value == 99, vr.value
+		await asyncio.wait_for(did_it.wait(),10, loop=loop)
+		await vr.ready
+		assert vr.value == 98, vr.value
+
+#		async def do_up2(data):
+#			import pdb;pdb.set_trace()
+#			assert d['args'] == ['trigger','hello.foo.bar']
+#			assert d['value'] == 97
+#			await u.alert('test.foo.bar',{'value':96})
+#			pass
+#		await u.register_rpc_async("do.foo.bar", do_up2, call_conv=CC_DATA)
 
 	finally:
 		jj = (e,f)

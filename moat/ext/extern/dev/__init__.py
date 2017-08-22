@@ -24,7 +24,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##BP
 
 import asyncio
-from etcd_tree.node import EtcFloat,EtcInteger,EtcString, EtcDir
+from etcd_tree.node import EtcFloat,EtcInteger,EtcString,EtcBoolean, EtcDir
 from qbroker.unit import CC_DATA
 
 from time import time
@@ -55,7 +55,7 @@ class ExternDevice(recEtcDir,BaseTypedDir,BaseDevice):
     _rpc_in_name = ''
     _rpc_out_name = ''
     _change = None
-    
+
     async def init(self):
         self._change = asyncio.Event(loop=self._loop)
         await super().init()
@@ -111,33 +111,34 @@ class ExternDevice(recEtcDir,BaseTypedDir,BaseDevice):
         if name is not None and self._rpc_in_name == name:
             return
         if self._rpc_in is not None:
-            await amqp.unregister_alert_async(self._rpc_in)
-            self._rpc_in = None
+            r,self._rpc_in = self._rpc_in,None
+            await r.release()
         if name is not None:
             logger.info("REG %s %s",name,self)
-            self._rpc_in = await amqp.register_alert_async(name,self.do_rpc, call_conv=CC_DATA)
+            self._rpc_in = await m.moat_reg.alert(amqp, name,self.do_rpc, call_conv=CC_DATA)
         self._rpc_in_name = name
 
     async def _reg_out_rpc(self, name):
         self._rpc_out_name = name
-    
+
     async def set_value(self, value):
         m = self.manager
         if m is None:
             raise NoManagerError
 
         val = self._value.to_amqp(value)
-        sync = self.get('async',None)
+        sync = self.get('data',{}).get('sync',None)
         if sync is None:
             await m.amqp.rpc(self._rpc_out_name, {'value':val})
         else:
             self._change.clear()
             await m.amqp.alert(self._rpc_out_name, {'value':val})
             if sync:
-                await asyncio.wait_for(self._change.wait(), seconds, loop=self.loop)
+                await self._change.wait()
                 return # rpc_in will save the value to AMQP
         self._value.value = value
-        
+ExternDevice.register("data","sync", cls=EtcBoolean)
+
 class RpcName(EtcString):
     """Update the parent's rpc name"""
     def has_update(self):

@@ -78,6 +78,10 @@ class Task(regTask):
 		The `ttl` and `refresh` config values control how long the running
 		state in etcd lasts before it is cleaned up; `refresh` says how
 		often it is renewed within that timeframe.
+
+		To facilitate releasing resources allocated by a task, the task has
+		a moat_reg attribute; see moat.task.reg for details.
+
 		"""
 	taskdef = None
 	summary = """This is a prototype. Do not use."""
