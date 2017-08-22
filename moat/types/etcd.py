@@ -28,7 +28,7 @@ from weakref import WeakValueDictionary
 from pprint import pformat
 
 from qbroker.util import import_string
-from etcd_tree import EtcRoot, EtcDir, EtcString, EtcXValue, ReloadRecursive
+from etcd_tree import EtcRoot, EtcDir, EtcString, EtcInteger, EtcXValue, ReloadRecursive
 
 import logging
 logger = logging.getLogger(__name__)
@@ -221,8 +221,10 @@ class MoatMetaTask(EtcDir):
 			language='python',
 			code=task.__module__+'.'+task.__name__,
 			descr=task.summary,
-			doc=task.doc or task.__doc__,
 		)
+		doc=task.doc or task.__doc__
+		if doc is not None:
+			d['doc'] = doc
 		if hasattr(task,'schema'):
 			d['data'] = task.schema
 		tt = await self.subdir(task.taskdef,name=TASKDEF, create=None)
@@ -350,6 +352,12 @@ class MoatStatusRun(EtcDir):
 		self.register('**',TASKSTATE, cls=TaskState)
 		await super().init()
 	
+class MoatStatusErr(EtcDir):
+	"""Singleton for /status/errors"""
+	async def init(self):
+		self.register('*', cls=EtcInteger)
+		await super().init()
+	
 class MoatWeb(EtcDir):
 	"""Singleton for /web"""
 	async def init(self):
@@ -362,6 +370,7 @@ class MoatStatus(EtcDir):
 	"""Singleton for /status"""
 	async def init(self):
 		self.register('run', cls=MoatStatusRun)
+		self.register('errors', cls=MoatStatusErr)
 		await super().init()
 
 class MoatTask(EtcDir):
