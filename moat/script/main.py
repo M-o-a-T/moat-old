@@ -38,6 +38,7 @@ from moat.script import SubCommand, CommandError
 from moat.cmd import commands as moat_commands
 from moat.util import OverlayDict
 from moat.types import TYPEDEF_DIR
+from moat.task.reg import Reg
 
 import logging
 logger = logging.getLogger(__name__)
@@ -91,6 +92,7 @@ You can load more than one config file.
 	etc_cfg = None
 	_coro = False
 	_types = None
+	reg = None
 
 	def __init__(self,*a,loop=None,**kw):
 		super().__init__(*a,**kw)
@@ -100,6 +102,7 @@ You can load more than one config file.
 	async def parse(self, argv):
 		logger.debug("Startup: %s", argv)
 		self.logged = False
+		self.reg = Reg()
 
 		try:
 			res = await super().parse(argv)
@@ -132,6 +135,14 @@ You can load more than one config file.
 
 	async def finish(self):
 		logger.debug("Closing %s",self)
+		e,self.reg = self.reg,None
+		if e is not None:
+			try:
+				await e.free()
+			except NameError:
+				pass # GC
+			except Exception as exc:
+				logger.exception("Closing Registry")
 		e,self.amqp = self.amqp,None
 		if e is not None:
 			try:
