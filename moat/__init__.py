@@ -33,8 +33,6 @@ VERSION = "0.7"
 
 TESTING = "MOAT_TEST" in os.environ
 
-	# This test is also in moat/twist.py, for recursive-import reasons
-
 def patch():
 	"""Call this as early as possible, not from an import, and only once."""
 	from qbroker import setup; setup(gevent=True)
