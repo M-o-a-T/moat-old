@@ -188,13 +188,19 @@ class OnewireBusDevice(ManagedEtcThing, EtcXValue):
 		self.device.manager_gone()
 		
 
+# /bus/onewire
 OnewireBusBase.register('*',cls=OnewireBus)
+# /bus/onewire/NAME
 OnewireBus.register("server","host", cls=EtcString)
 OnewireBus.register("server","port", cls=EtcInteger)
 OnewireBus.register('bus', cls=OnewireBusSub)
+# /bus/onewire/NAME/bus
 OnewireBusSub.register('*', cls=OnewireBusOne)
+# /bus/onewire/NAME/bus/BUS
 OnewireBusOne.register('broken', cls=EtcInteger)
 OnewireBusOne.register('devices', cls=OnewireBusDevs)
+# /bus/onewire/NAME/bus/BUS/devices
 OnewireBusDevs.register('*', cls=OnewireBusDev)
+# /bus/onewire/NAME/bus/BUS/devices/XX
 OnewireBusDev.register('*', cls=OnewireBusDevice)
 
