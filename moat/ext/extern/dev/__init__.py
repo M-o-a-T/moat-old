@@ -68,7 +68,22 @@ class ExternDevice(recEtcDir,BaseTypedDir,BaseDevice):
         n = self.get('output',{}).get('topic',None)
         if n is not None:
             await self._reg_out_rpc(n)
-    
+
+    @property
+    def is_ready(self):
+        return super().is_ready and self._change.is_set()
+    @property
+    async def ready(self):
+        rep = True
+        while rep:
+            rep = False
+            if not super().is_ready:
+                await super().ready
+                rep = True
+            if not self._change.is_set():
+                await self._change.wait()
+                rep = True
+
     def manager_gone(self):
         super().manager_gone()
         self._rpc_in_name = None
