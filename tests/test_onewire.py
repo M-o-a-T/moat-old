@@ -351,7 +351,7 @@ async def test_onewire_fake(loop):
 				await td.wait()
 				assert float(td['10']['001001001001'][':dev']['input']['temperature']['value']) == 12.5, \
 					td['10']['001001001001'][':dev']['input']['temperature']['value']
-				assert td['05']['010101010101'][':dev']['input']['pin']['value'] == '0', \
+				assert td['05']['010101010101'][':dev']['input']['pin']['value'] == False, \
 					 td['05']['010101010101'][':dev']['input']['pin']['value']
 				await td['05']['010101010101'][':dev'].ready
 				logger.debug("Mod A2 end")
@@ -402,7 +402,7 @@ async def test_onewire_fake(loop):
 
 			logger.debug("TC H")
 			async def mod_c():
-				assert td['05']['010101010101'][':dev']['input']['pin']['value'] == '1', \
+				assert td['05']['010101010101'][':dev']['input']['pin']['value'] == True, \
 					 td['05']['010101010101'][':dev']['input']['pin']['value']
 				with pytest.raises(KeyError):
 					tr['faker']['bus']['bus.42 1f.123123123123 aux']['devices']['10']['001001001001']

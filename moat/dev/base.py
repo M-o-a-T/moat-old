@@ -23,7 +23,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##  Thus, do not remove the next line, or insert any blank lines above.
 ##BP
 
-from etcd_tree import EtcString,EtcDir,EtcFloat,EtcInteger,EtcValue, ReloadRecursive
+from etcd_tree import EtcString,EtcDir,EtcFloat,EtcInteger,EtcBoolean,EtcValue, ReloadRecursive
 import asyncio
 import aio_etcd as etcd
 from time import time
@@ -379,6 +379,7 @@ value_types = {
 	'float': EtcFloat,
 	'int': EtcInteger,
 	'str': EtcString,
+	'bool': EtcBoolean,
 }
 
 class DeadDevice(BaseDevice):
@@ -436,6 +437,7 @@ class Device(ManagedEtcDir, BaseDevice):
 		for d in _SOURCES:
 			types.register(d,_ManagedDir)
 			for k,v in getattr(cls,d,{}).items():
+				v = v.split('/',1)[0]
 				v = value_types.get(v,EtcValue)
 				types.register(d,k,'value', cls=v)
 		try:

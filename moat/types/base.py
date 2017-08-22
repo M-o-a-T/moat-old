@@ -176,7 +176,7 @@ class BoolType(Type):
 
 	@property
 	def etcd_value(self):
-		return '1' if self.value else '0'
+		return self.value
 	@etcd_value.setter
 	def etcd_value(self,value):
 		if value in TRUE:
@@ -230,7 +230,7 @@ class _NumType(Type):
 	
 	@property
 	def etcd_value(self):
-		return str(self.value)
+		return self.value
 	@etcd_value.setter
 	def etcd_value(self,etcd_value):
 		self.value = self._cls(etcd_value)

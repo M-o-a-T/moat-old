@@ -287,7 +287,7 @@ class Task(regTask):
 			exc.__context__ = None # the cancelled run_task is not interesting
 			await run_state.set("message",str(exc))
 			await run_state.set("debug",repr(exc)+'\n'+"".join(format_exception(exc.__class__,exc,exc.__traceback__)))
-			await run_state.set("debug_time",str(time()))
+			await run_state.set("debug_time",time())
 
 		# Now start the updater and the main task.
 		try:

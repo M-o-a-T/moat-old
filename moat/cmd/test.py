@@ -146,7 +146,7 @@ Check etcd access, and basic data layout.
 			if "errors" not in s:
 				show("missing 'errors' entry")
 				if self.parent.fix:
-					await s.set("errors",dict((stat,0) for stat in stats))
+					await s.set("errors",dict((stat,"0") for stat in stats))
 				else:
 					retval += 1
 			else:
@@ -259,7 +259,7 @@ class TypesCommand(Command):
 				d = await etc.tree(TYPEDEF_DIR+path+(TYPEDEF,))
 			for k,v in t.vars.items():
 				if k not in d:
-					await d.set(k,v)
+					await d.set(k,str(v))
 			await d.close()
 
 class WebCommand(Command):
@@ -289,7 +289,7 @@ class WebCommand(Command):
 
 			for k,v in t.vars.items():
 				if k not in d:
-					await d.set(k,v)
+					await d.set(k,str(v))
 			await d.close()
 
 class AmqpCommand(Command):
