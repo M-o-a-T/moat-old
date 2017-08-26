@@ -32,7 +32,10 @@ import asyncio
 import weakref
 import warnings
 import attr
-from inspect import iscoroutine,isgenerator
+from types import CoroutineType,GeneratorType
+from collections.abc import Coroutine as CoroutineABC
+
+CoroutineTypes = (CoroutineType,GeneratorType,CoroutineABC)
 
 import logging
 logger = logging.getLogger(__name__)
@@ -137,7 +140,7 @@ class RegObj(_RegObj):
 				res = self.method(self)
 			else:
 				res = getattr(self.source,self.method)(obj)
-			if iscoroutine(res) or isgenerator(res):
+			if isinstance(res,CoroutineTypes):
 				res = await res
 		else:
 			warnings.warn("%s: Already freed" % (repr(self),), stacklevel=2)
@@ -194,7 +197,7 @@ class Reg:
 		else:
 			raise NoRegCallback(source,name)
 		res = getattr(source, r.alloc)(*a,**k)
-		if iscoroutine(res) or isgenerator(res):
+		if isinstance(res,CoroutineTypes):
 			res = await res
 		res = RegObj(reg=self, obj=res, source=source, method=r.release, weak=r.weak)
 		self.data.add(res)
