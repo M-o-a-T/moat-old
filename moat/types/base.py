@@ -197,7 +197,7 @@ class BoolType(Type):
 		elif value in FALSE:
 			self.value = False
 		else:
-			raise BadValueError("%s: Dunno what to do with '%s'" % (self.name,value))
+			raise BadValueError(self.name, value)
 
 	def to_amqp(self, value):
 		return self['true'] if value else self['false']
