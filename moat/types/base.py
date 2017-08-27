@@ -223,7 +223,7 @@ class _NumType(Type):
 
 	def check_var(self, var,value):
 		try:
-			val = self._cls(value)
+			val = self.py_class(value)
 		except ValueError:
 			raise CommandError("%s: need an integer for '%s', not '%s'." % (self.name,var,value))
 		if var != 'max':
@@ -246,7 +246,7 @@ class _NumType(Type):
 		return self.value
 	@etcd_value.setter
 	def etcd_value(self,etcd_value):
-		self.value = self._cls(etcd_value)
+		self.value = self.py_class(etcd_value)
 
 	@property
 	def value(self):
@@ -271,7 +271,7 @@ class _NumType(Type):
 		return val
 	@value.setter
 	def value(self,value):
-		val = self._cls(value)
+		val = self.py_class(value)
 		try:
 			if val < self['min']:
 				logger.warn("%s: Value %s below min %s",self.name,val,self['min'])
@@ -293,7 +293,7 @@ class IntType(_NumType):
 	name = "int"
 	etcd_class = EtcInteger
 	#vars = {'min':0, 'max':100}
-	_cls = int
+	py_class = int
 
 	@classmethod
 	def types(cls,types):
@@ -312,7 +312,7 @@ class IntPercentType(IntType):
 class FloatType(_NumType):
 	name = "float"
 	etcd_class = EtcFloat
-	_cls = float
+	py_class = float
 
 	@classmethod
 	def types(cls,types):
