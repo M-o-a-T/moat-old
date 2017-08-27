@@ -144,12 +144,17 @@ class PathType(StringType):
 
 	@property
 	def etcd_value(self):
-		assert self.value
-		return '/'.join(self.value)
+		if self.value:
+			return '/'.join(self.value)
+		else:
+			return '/'
 	@etcd_value.setter
 	def etcd_value(self,value):
-		self.value = value.split('/')
-		assert '' not in self.value
+		if value == '/':
+			self.value == ()
+		else:
+			self.value = tuple(value.split('/'))
+			assert '' not in self.value
 
 class HostType(StringType):
 	name = 'str/hostname'
