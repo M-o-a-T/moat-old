@@ -25,6 +25,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 
 import asyncio
 from etcd_tree import EtcFloat,EtcString,EtcDir, ReloadRecursive
+from etcd_tree.node import DummyType
 from qbroker.util import import_string
 
 from . import _VARS, TASKDEF_DIR,TASKDEF
@@ -131,20 +132,25 @@ class TaskDir(recEtcDir,EtcDir):
 				break
 		await super()._fill_data(pre,recursive)
 
-	def subtype(self,*path, **kw):
+	def subtype(self,*path, raw=False, **kw):
+		res = None
 		if len(path)==1:
 			if path[0] == 'taskdef':
-				return TaskdefName
+				res = TaskdefName
 			elif path[0] == 'parent':
-				return MoatRef
+				res = MoatRef
 		elif len(path)==2 and path[0] == 'data':
 			if self.taskdef is None:
-				return EtcAwaiter
+				res = EtcAwaiter
 			name = self.taskdef['data'][path[1]]
 			typ_path = tuple(x for x in name.split('/') if x != "")
 			typ = self.root.lookup(TYPEDEF_DIR+typ_path+(TYPEDEF,))
-			return typ._type.etcd_class
-		return super().subtype(*path,**kw)
+			res = typ._type.etcd_class
+		if res is None:
+			return super().subtype(*path, raw=raw, **kw)
+		if raw:
+			res = DummyType(res)
+		return res
 
 _setup_task_vars(TaskDir)
 TaskDir.register('parent',MoatRef)

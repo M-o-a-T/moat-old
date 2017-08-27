@@ -25,7 +25,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 
 import logging
 logger = logging.getLogger(__name__)
-from etcd_tree.node import EtcFloat,EtcInteger,EtcString
+from etcd_tree.node import EtcFloat,EtcInteger,EtcString, DummyType
 from time import time
 
 from moat.dev import DEV
@@ -50,15 +50,18 @@ def device_types():
 
 class OnewireDeviceBase(MoatDeviceBase):
 	"""Base class for /device/onewire"""
-	def subtype(self,*path,**kw):
+	def subtype(self,*path,raw=False,**kw):
 		if len(path) != 3 or path[-1] != DEV:
-			return super().subtype(*path,**kw)
+			return super().subtype(*path,raw=raw,**kw)
 		try:
-			return device_types()[path[0]]
+			res = device_types()[path[0]]
 		except KeyError:
 			class OWdevice(OnewireDevice):
 				name = '?'+path[0]
-			return OWdevice
+			res = OWdevice
+		if raw:
+			res = DummyType(res)
+		return res
 
 class OnewireDevice(Device): #(, metaclass=SelectDevice):
 	"""Base class for /device/onewire/XX/YYYYYYYYYYYY/:dev"""
