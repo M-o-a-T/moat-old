@@ -23,14 +23,14 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##  Thus, do not remove the next line, or insert any blank lines above.
 ##BP
 
-from etcd_tree.node import EtcString,EtcInteger,EtcFloat, EtcDir
+from etcd_tree.node import EtcString,EtcInteger,EtcFloat,EtcBoolean, EtcDir
 from etcd_tree.etcd import EtcTypes
 from . import type_names, TYPEDEF_DIR
 import logging
 logger = logging.getLogger(__name__)
 
-TRUE = {'true','True','1','on','On','ON',1,True}
-FALSE = {'false','False','0','off','Off','OFF',0,False}
+TRUE = {'true','True','1','on','On','ON'}
+FALSE = {'false','False','0','off','Off','OFF'}
 
 class _NOTGIVEN:
 	pass
@@ -82,7 +82,7 @@ class Type:
 			self.meta2 = meta2
 
 		if value is not _NOTGIVEN:
-			self.etcd_value = value
+			self.value = value
 
 	def __getitem__(self,key):
 		try:
@@ -175,7 +175,7 @@ class BoolType(Type):
 	name = "bool"
 	default = False
 
-	etcd_class = EtcString
+	etcd_class = EtcBoolean
 	vars = {'true':'on', 'false':'off'}
 
 	@property
@@ -192,9 +192,9 @@ class BoolType(Type):
 		return self.value
 	@etcd_value.setter
 	def etcd_value(self,value):
-		if value in TRUE:
+		if value in TRUE or value == 1:
 			self.value = True
-		elif value in FALSE:
+		elif value in FALSE or value == 0:
 			self.value = False
 		else:
 			raise BadValueError(self.name, value)
@@ -203,9 +203,9 @@ class BoolType(Type):
 		return self['true'] if value else self['false']
 
 	def from_amqp(self,value):
-		if value in TRUE:
+		if value in TRUE or value == 1:
 			return True
-		elif value in FALSE:
+		elif value in FALSE or value == 0:
 			return False
 		elif value == self['true']:
 			return True
