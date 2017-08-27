@@ -271,7 +271,7 @@ class TypedOutputDir(TypedDir):
 		await self.writing(val)
 		return True # OK
 
-TypedDir.register('type',cls=Typename)
+TypedDir.register('type',cls=Typename, pri=10)
 TypedDir.register('rpc',cls=RpcName)
 TypedDir.register('alert',cls=AlertName)
 

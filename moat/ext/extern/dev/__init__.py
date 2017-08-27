@@ -175,7 +175,7 @@ ExternDeviceBase.register("*", cls=ExternDeviceSub)
 ExternDeviceSub.register("*", cls=ExternDeviceSub)
 ExternDeviceSub.register(DEV, cls=ExternDevice)
 
-ExternDevice.register('type',cls=Typename)
+ExternDevice.register('type',cls=Typename, pri=10)
 ExternDevice.register('input',cls=ExtDevIn)
 ExternDevice.register('output',cls=ExtDevOut)
 ExternDevice.register('created',cls=EtcFloat)
