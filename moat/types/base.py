@@ -35,6 +35,14 @@ FALSE = {'false','False','0','off','Off','OFF',0,False}
 class _NOTGIVEN:
 	pass
 
+class BadValueError(RuntimeError):
+    """The input doesn't match the expected values"""
+    def __init__(self, inp,val):
+        self.inp = inp
+        self.val = val
+    def __str__(self):
+        return "BadValue: read %s: bad value for %s" % (self.val,self.inp)
+
 class TypeDir(EtcDir):
 	"""A class linking a type to its etcd entry"""
 	def __init__(self,*a,**k):
