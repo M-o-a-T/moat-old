@@ -130,20 +130,26 @@ class MoatTest(Moat):
 			cmd = [x for x in cmd.split(' ') if x != '']
 		return (await super().parse(cmd))
 
-	async def clean_ext(self, what):
+	async def clean_ext(self, what, *p):
 		"""Helper to clean up an external subsys before testing"""
 
 		t = await self._get_tree()
-		for d in (('device',), ('bus',),
+		p = list(p)
+		p.extend([('device',), ('bus',),
 			      ('task',),
 			      ('task','bus'),
 			      ('task','moat','scan'),
 			      ('task','moat','scan','bus'),
-				 ):
+				 ])
+		if what not in "bus config device infra meta status task".split():
+			p.append(())
+		if what not in "module task type".split():
+			p.append(('meta',))
+		for d in p:
 			with suppress(etcd.EtcdKeyNotFound, KeyError):
 				x = await t.lookup(d,name=what)
 				await x.delete()
-			if d[0] == 'task':
+			if d and d[0] == 'task':
 				with suppress(etcd.EtcdKeyNotFound, KeyError):
 					x = await t.lookup(('status','run')+d[1:],name=what)
 					await x.delete()
