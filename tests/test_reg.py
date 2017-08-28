@@ -31,14 +31,19 @@ from moat.task.reg import REG,Reg
 
 from . import ProcessHelper
 
+class foo:
+	pass
+foo = foo()
+
 @pytest.mark.run_loop
 async def test_reg(loop):
 	class checker:
 		def __init__(self, x):
 			self.x = x
 		def alloc(self):
-			return self
-		def free(self):
+			return foo
+		def free(self, x):
+			assert x is foo
 			self.x[0]+=1
 
 	REG(checker,"hey","alloc","free")
@@ -55,15 +60,16 @@ async def test_free(loop):
 		def __init__(self, x):
 			self.x = x
 		def alloc(self):
-			return self
-		def free(self):
+			return foo
+		def free(self,x):
+			assert x is foo
 			self.x[0]+=1
 
-	REG(checker,"hey","alloc","free")
+	REG(checker,"hez","alloc","free")
 	r = Reg()
 	x = [0]
 	c = checker(x)
-	u = await r.hey(c)
+	u = await r.hez(c)
 	await u.release()
 	assert x[0] == 1
 	await r.free()
@@ -78,14 +84,14 @@ async def test_weak(loop):
 			self.x = x
 		def alloc(self):
 			return dead()
-		def free(self):
+		def free(self,x): # should never be called
 			self.x[0]+=1
 
-	REG(checker,"hey","alloc","free")
+	REG(checker,"hex","alloc","free")
 	r = Reg()
 	x = [0]
 	c = checker(x)
-	u = await r.hey(c)
+	u = await r.hex(c)
 	c = None
 	gc.collect()
 	await u.release()
