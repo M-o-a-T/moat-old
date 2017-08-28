@@ -130,7 +130,7 @@ async def test_extern_fake(loop):
 		assert val == '42', val
 		tde = _task_reg[('extern',)]
 		vr = await tde.tree.lookup('device','extern','foo','bar',':dev')
-		assert vr['value'] == '42', vr['value']
+		assert vr['value'] == 42, vr['value']
 		assert vr.value == 42, vr.value
 
 		did_it = asyncio.Event(loop=loop)

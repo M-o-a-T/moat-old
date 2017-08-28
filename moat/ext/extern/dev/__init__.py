@@ -56,9 +56,10 @@ class ExternDevice(recEtcDir,BaseTypedDir,BaseDevice):
     _rpc_out_name = ''
     _change = None
 
-    async def init(self):
+    def __init__(self,*a,**k):
+        super().__init__(*a,**k)
         self._change = asyncio.Event(loop=self._loop)
-        await super().init()
+        self._change.set()
 
     async def manager_present(self, mgr):
         await super().manager_present(mgr)

@@ -24,6 +24,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##BP
 
 from etcd_tree import EtcString,EtcDir,EtcFloat,EtcInteger,EtcBoolean,EtcValue, ReloadRecursive
+from etcd_tree.node import DummyType
 import asyncio
 import aio_etcd as etcd
 from time import time
@@ -61,6 +62,7 @@ class Typename(EtcString):
 		if p is None:
 			return
 		if self.is_new is None:
+			p._type = None
 			p._value = None
 		else:
 			p._set_type(self.value)
@@ -119,12 +121,27 @@ class BaseTypedDir(ManagedEtcThing,EtcDir):
 		if self._type is not None and self._type._type.name == typename:
 			return
 		self._type = self.root.lookup(TYPEDEF_DIR).lookup(typename,name=TYPEDEF)
+		self._value = self._type._type(self._type,self)
 
-		if self._value is None:
-			self._value = self._type._type(self._type,self)
+		try:
+			val = self['value']
+		except KeyError:
+			pass
+		else:
+			self._value.etcd_value = val
 
-		if 'value' in self:
-			self._value.etcd_value = self['value']
+	def subtype(self,*path,raw=False,**kw):
+		if len(path) != 1 or path[0] != 'value':
+			return super().subtype(*path, raw=raw, **kw)
+		if self._type is None:
+			res = super().subtype(*path, raw=False, **kw)
+			pri = -1
+		else:
+			res = self._type._type.etcd_class
+			pri = 5
+		if raw:
+			res = DummyType(raw, pri=pri)
+		return res
 
 	def has_update(self):
 		if self._value is None:
@@ -271,7 +288,7 @@ class TypedOutputDir(TypedDir):
 		await self.writing(val)
 		return True # OK
 
-TypedDir.register('type',cls=Typename, pri=10)
+BaseTypedDir.register('type',cls=Typename, pri=10)
 TypedDir.register('rpc',cls=RpcName)
 TypedDir.register('alert',cls=AlertName)
 
