@@ -35,16 +35,16 @@ logger = logging.getLogger(__name__)
 
 class DeviceMgr(Task):
 	"""\
-		This task runs some group of devices sharing a bus.
+		This task runs some group of devices.
 
 		When added at /task/WHATEVER/run, it registers
-		itself as a manager to the /bus/WHATEVER node
-		(which needs to be a ManagedEtcDir).
+		itself as a manager to whatever .managed() returns
+		(which needs to be a subclass of ManagedEtcDir).
 
 		Supplement .setup() (and possibly .teardown()) if necessary.
 		"""
 
-	taskdef="task/devices"
+	taskdef=None # must override
 	summary="A Task which manages a group of devices"
 	q = None
 
@@ -66,20 +66,23 @@ class DeviceMgr(Task):
 		"""get the root of the tree we are managing"""
 		raise NotImplementedError("Need to override %s.managed" % self.__class__.__name__)
 
+	async def process(self, *cmd):
+		if cmd[0] == 'reg':
+			await cmd[1].set_managed(self)
+		elif cmd[0] == 'del':
+			await cmd[1].set_unmanaged()
+		elif cmd[0] == 'call':
+			await cmd[1](*(cmd[2]),**(cmd[3]))
+		else:
+			logger.error("Bad command: %s",repr(cmd))
+
 	async def task(self):
 		try:
 			while True:
 				cmd = await self.q.get()
 				if cmd is None:
 					break
-				if cmd[0] == 'reg':
-					await cmd[1].set_managed(self)
-				elif cmd[0] == 'del':
-					await cmd[1].set_unmanaged()
-				elif cmd[0] == 'call':
-					await cmd[1](*(cmd[2]),**(cmd[3]))
-				else:
-					logger.error("Bad command: %s",repr(cmd))
+				await self.process(*cmd)
 		except asyncio.CancelledError:
 			raise
 		except BaseException as exc:
