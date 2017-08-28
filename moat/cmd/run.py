@@ -54,26 +54,26 @@ Run MoaT tasks.
 
 	def addOptions(self):
 		self.parser.add_option('-t','--this',
-            action="count", dest="this", default=0,
-            help="Run the given job only (-tt for jobs one level below, etc.)")
+			action="count", dest="this", default=0,
+			help="Run the given job only (-tt for jobs one level below, etc.)")
 		self.parser.add_option('-r','--run',
-            action="store_true", dest="run",
-            help="Don't stop if all jobs have terminated (wait for new ones)")
+			action="store_true", dest="run",
+			help="Don't stop if all jobs have terminated (wait for new ones)")
 		self.parser.add_option('-g','--global',
-            action="store_true", dest="is_global",
-            help="Do not prepend the appname to the paths")
+			action="store_true", dest="is_global",
+			help="Do not prepend the appname to the paths")
 		self.parser.add_option('-o','--one-shot',
-            action="count", dest="oneshot", default=0,
-            help="Do not restart. Twice: Do not retry.")
+			action="count", dest="oneshot", default=0,
+			help="Do not restart. Twice: Do not retry.")
 		self.parser.add_option('-q','--quit',
-            action="store_true", dest="quit",
-            help="Do not watch etcd.")
+			action="store_true", dest="quit",
+			help="Do not watch etcd.")
 		self.parser.add_option('-s','--single',
-            action="store_true", dest="single",
-            help="one path argument given (may contain spaces)")
+			action="store_true", dest="single",
+			help="one path argument given (may contain spaces)")
 		self.parser.add_option('-S','--no-signals',
-            action="store_false", dest="signals",
-            help="do not install a signal handler")
+			action="store_false", dest="signals",
+			help="do not install a signal handler")
 		## TODO: -K: quit when one command ends
 
 	def _tilt(self):
