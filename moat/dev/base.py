@@ -482,8 +482,9 @@ class Device(ManagedEtcDir, BaseDevice):
 					continue
 				missing[k] = dd = {'type':v,'created':time()}
 				v = type_names()[v]
-				if v.default is not None:
-					dd['value'] = v(value=v.default).etcd_value
+#               # don't set the default. That's wrong.
+#				if v.default is not None:
+#					dd['value'] = v(value=v.default).etcd_value
 			if missing:
 				await self.set(d,missing)
 				# Note that this does not delete anything not mentioned
