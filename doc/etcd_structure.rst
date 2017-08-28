@@ -495,6 +495,72 @@ The path is bus specific; see below.
 
       Generic attributes, used by visualizing code or similar
 
+Specific device structures
+--------------------------
+
+extern
+++++++
+
+External devices have a single value, thus a slightly different structure.
+
+* type
+
+  The data type from meta/type.
+
+* value
+
+  The actual value.
+
+* timestamp
+
+  Unix timestamp when the value was last updated
+
+* input
+
+  Subdirectory describing where to get the data from.
+
+  * topic
+
+    QBroker alert topic to listen to, for updating the value.
+
+  * subvalue
+
+    Data item to access. May be '.' for unstructured data.
+
+  TODO: There is not yet a way to read a new value.
+
+* output
+
+  Subdirectory describing where to send new values to.
+
+  * topic
+
+    QBroker RPC or alert topic to use.
+
+  * mode
+
+    How to send the data. Possible values:
+
+    * rpc
+
+      Use a RPC call.
+
+    * alert
+
+      Use an Alert call. Don't wait for the result.
+
+    * async
+
+      Use an Alert call. Wait for the value update to arrive.
+
+    * trigger
+
+      Use a MoaT-v2 command to trigger the update.
+
+  * subvalue
+
+    Data item to set. May be '.' for unstructured data.
+
 Bus types and device paths
 ..........................
 

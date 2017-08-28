@@ -74,7 +74,7 @@ async def test_extern_fake(loop):
 		r = await m2.parse("-vvvc test.cfg mod init moat.ext.extern")
 		assert r == 0, r
 
-		r = await run("-vvvc test.cfg dev extern add foo/bar int input/topic=test.foo.bar output/topic=set.foo.bar sync=false Test One")
+		r = await run("-vvvc test.cfg dev extern add foo/bar int input/topic=test.foo.bar output/topic=set.foo.bar output/mode=async Test One")
 		assert r == 0, r
 		#r = await run("-vvvc test.cfg dev extern add foo/baz int input/topic=test.foo.baz input/ output/topic=set.foo.bar Test One")
 		assert r == 0, r

@@ -33,6 +33,7 @@ from moat.dev import DEV
 from moat.dev.base import BaseTypedDir,BaseDevice, Typename
 from moat.types.etcd import MoatDeviceBase, recEtcDir
 from moat.types.managed import ManagedEtcDir,ManagedEtcThing, NoManagerError
+from moat.util import r_attr
 
 import logging
 logger = logging.getLogger(__name__)
@@ -90,16 +91,21 @@ class ExternDevice(recEtcDir,BaseTypedDir,BaseDevice):
         self._rpc_in_name = None
         self._rpc_out_name = None
 
-    async def do_rpc(self,data):
+    async def _get_input(self,data):
         """\
-            Alert to set the state
+            Alert handler to set the state
             """
-        try:
-            val = data['value']
-        except KeyError:
-            val = self._type._type.default
+        chk = self['input'].get('subvalue','value')
+        if chk == '.':
+            val = data
         else:
-            val = self._value.from_amqp(val)
+            try:
+                val = r_attr(data,chk)
+            except KeyError:
+                logger.error("Data for %s: unable to access %s", '/'.join(self.path), chk)
+                return
+            else:
+                val = self._value.from_amqp(val)
         self._change.set()
         await self._updated(val)
         return True
@@ -116,7 +122,7 @@ class ExternDevice(recEtcDir,BaseTypedDir,BaseDevice):
             await r.release()
         if name is not None:
             logger.info("REG %s %s",name,self)
-            self._rpc_in = await m.moat_reg.alert(amqp, name,self.do_rpc, call_conv=CC_DATA)
+            self._rpc_in = await m.moat_reg.alert(amqp, name,self._get_input, call_conv=CC_DATA)
         self._rpc_in_name = name
 
     async def _reg_out_rpc(self, name):
@@ -127,18 +133,28 @@ class ExternDevice(recEtcDir,BaseTypedDir,BaseDevice):
         if m is None:
             raise NoManagerError
 
+        d = {}
+        chk = self['output'].get('subvalue','value')
         val = self._value.to_amqp(value)
-        sync = self.get('data',{}).get('sync',None)
-        if sync is None:
-            await m.amqp.rpc(self._rpc_out_name, {'value':val})
+        if chk == '.':
+            d = val
         else:
+            r_attr(d,chk,value=val)
+        mode = self['output'].get('mode','alert')
+        if mode == "rpc":
+            await m.amqp.rpc(self._rpc_out_name, d)
+        elif mode in ("alert","async"):
             self._change.clear()
-            await m.amqp.alert(self._rpc_out_name, {'value':val})
-            if sync:
+            await m.amqp.alert(self._rpc_out_name, d)
+            if mode == "async":
                 await self._change.wait()
                 return # rpc_in will save the value to AMQP
-        self._value.value = value
-ExternDevice.register("data","sync", cls=EtcBoolean)
+        elif mode == "trigger":
+            d['args'] = ('trigger',self._rpc_out_name)
+            await m.amqp.rpc('moat.cmd',d)
+        else:
+            raise RuntimeError("Unknown mode",mode)
+        await self.set('value', value)
 
 class RpcName(EtcString):
     """Update the parent's rpc name"""
@@ -170,7 +186,10 @@ class ExtDevIn(ManagedEtcThing,EtcDir):
 class ExtDevOut(ManagedEtcThing,EtcDir):
     pass
 ExtDevIn.register('topic',cls=RpcInName)
+ExtDevIn.register('item',cls=EtcString)
 ExtDevOut.register('topic',cls=RpcOutName)
+ExtDevOut.register('item',cls=EtcString)
+ExtDevOut.register('mode',cls=EtcString)
 
 ExternDeviceBase.register("*", cls=ExternDeviceSub)
 ExternDeviceSub.register("*", cls=ExternDeviceSub)
