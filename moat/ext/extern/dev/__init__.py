@@ -97,7 +97,7 @@ class ExternDevice(recEtcDir,BaseTypedDir,BaseDevice):
         try:
             val = data['value']
         except KeyError:
-            val = self._type.default
+            val = self._type._type.default
         else:
             val = self._value.from_amqp(val)
         self._change.set()
