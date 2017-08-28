@@ -134,9 +134,11 @@ class TaskDir(recEtcDir,EtcDir):
 
 	def subtype(self,*path, raw=False, **kw):
 		res = None
+		pri = 0
 		if len(path)==1:
 			if path[0] == 'taskdef':
 				res = TaskdefName
+				pri = 9
 			elif path[0] == 'parent':
 				res = MoatRef
 		elif len(path)==2 and path[0] == 'data':
@@ -149,7 +151,7 @@ class TaskDir(recEtcDir,EtcDir):
 		if res is None:
 			return super().subtype(*path, raw=raw, **kw)
 		if raw:
-			res = DummyType(res)
+			res = DummyType(res, pri=pri)
 		return res
 
 _setup_task_vars(TaskDir)
