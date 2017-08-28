@@ -78,7 +78,7 @@ Arguments:
 				s = eval(s)
 			except ValueError:
 				pass
-			d[k] = s
+			r_attr(d,k, value=s)
 		d['args'] = args
 
 		if self.options.uuid:
