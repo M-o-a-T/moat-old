@@ -42,12 +42,12 @@ def _setup_task_vars(types):
 		TASK_DIR/**/TASK or TASKSEF_DIR/**/TASKDEF
 		"""
 	from etcd_tree.etcd import EtcTypes
-	from etcd_tree.node import EtcFloat,EtcInteger
+	from etcd_tree.node import EtcFloat,EtcInteger,EtcBoolean
 	for t in _VARS:
 		if t == "ttl":
 			types.register(t, cls=EtcInteger)
 		elif t == "one-shot":
-			types.register(t, cls=EtcInteger) # bool, actually
+			types.register(t, cls=EtcBoolean)
 		else:
 			types.register(t, cls=EtcFloat)
 
