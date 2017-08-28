@@ -174,34 +174,53 @@ def do_async(task, *a, _loop=None, _err_cb=None, **k):
 			_err_cb(exc)
 	f.add_done_callback(reporter)
 
-def r_getattr(obj,key, default=_NOT_HERE, attr=False):
+def r_attr(obj,key, default=_NOT_HERE, value=_NOT_HERE, attr=False):
 	"""\
 		Object/attribute lookup with a partitioned key.
 
-		r_getattr(obj,(a,b,c)) == obj[a][b][c]
-		r_getattr(obj,"a/b/c", attr=True) == obj[a][b].c
-		r_getattr(obj,"no/no", default='Foo') == 'Foo'
+		r_attr(obj,"a/b/c", value='whatever') # sets 
+		r_attr(obj,(a,b,c)) == obj[a][b][c]
+		r_attr(obj,"a/b/c", attr=True) == obj[a][b].c
+		r_attr(obj,"no/no", default='Foo') == 'Foo'
 
 		Raises KeyError even if an attribute is missing.
 		"""
 	if isinstance(key,str):
 		key = key.split('/')
+	val = obj
+	for k in key[:-1]:
+		if not k:
+			continue
+		try:
+			val = val[k]
+		except KeyError:
+			if value is not _NOT_HERE:
+				val[k] = v = {}
+				val = v
+			else:
+				if default is not _NOT_HERE:
+					return default
+				raise KeyError(key) from None
+
+	key = key[-1]
+
+	if value is not _NOT_HERE:
+		if attr:
+			setattr(val,key,value)
+		else:
+			val[key] = value
+		return
 	try:
-		for k in key[:-1]:
-			if k:
-				val = val.get(k)
-	except KeyError:
+		if key:
+			if attr:
+				val = getattr(val,key)
+			else:
+				val = val[key]
+	except (AttributeError,KeyError):
 		if default is not _NOT_HERE:
 			return default
 		raise KeyError(key) from None
 
-	key = key[-1]
-	try:
-		if key:
-			val = getattr(val,key)
-	except AttributeError:
-		if default is not _NOT_HERE:
-			return default
-		raise KeyError(key) from None
-	self.updates.send(self, value=val)
+	else:
+		return val
 
