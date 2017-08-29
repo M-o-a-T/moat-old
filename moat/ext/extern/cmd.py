@@ -110,7 +110,7 @@ class _AddUpdate(DefSetup):
             devpath = args[p].rstrip('/').lstrip('/')
             if devpath == "":
                 raise CommandError("Empty dev entry path?")
-            if devpath.endswith(DEV):
+            if devpath[0] == ':' or '/:' in devpath:
                 raise CommandError("Don't add the tag")
             p+=1
 
@@ -118,7 +118,7 @@ class _AddUpdate(DefSetup):
                 typepath = args[p].rstrip('/').lstrip('/')
                 if typepath == "":
                     raise CommandError("Empty type path?")
-                if typepath.endswith(TYPEDEF):
+                if typepath[0] == ':' or '/:' in typepath:
                     raise CommandError("Don't add the tag")
                 p+=1
             while p < len(args):

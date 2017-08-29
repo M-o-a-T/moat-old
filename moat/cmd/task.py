@@ -418,7 +418,7 @@ class _AddUpdate:
 			taskpath = args[p].rstrip('/').lstrip('/')
 			if taskpath == "":
 				raise CommandError("Empty task path?")
-			if taskpath.endswith(TASK):
+			if taskpath[0] == ':' or '/:' in taskpath:
 				raise CommandError("Don't add the tag")
 			p+=1
 
@@ -426,7 +426,7 @@ class _AddUpdate:
 				taskdefpath = args[p].rstrip('/').lstrip('/')
 				if taskdefpath == "":
 					raise CommandError("Empty task definition path?")
-				if taskdefpath.endswith(TASKDEF):
+				if taskdefpath[0] == ':' or '/:' in taskdefpath:
 					raise CommandError("Don't add the tag")
 				p+=1
 			while p < len(args):

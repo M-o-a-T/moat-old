@@ -209,7 +209,7 @@ class _DefAddUpdate:
             webpath = args[0].rstrip('/').lstrip('/')
             if webpath == "":
                 raise CommandError("Empty web entry path?")
-            if webpath.endswith(WEBDATA):
+            if webpath[0] == ':' or '/:' in webpath:
                 raise CommandError("Don't add the tag")
 
             if not self._update:
@@ -389,7 +389,7 @@ class _ServerAddUpdate:
             webpath = args[0].rstrip('/').lstrip('/')
             if webpath == "":
                 raise CommandError("Empty web entry path?")
-            if webpath.endswith(WEBSERVER):
+            if webpath[0] == ':' or '/:' in webpath:
                 raise CommandError("Don't add the tag")
 
             p=1
@@ -527,7 +527,7 @@ class _AddUpdate:
             webpath = args[p].rstrip('/').lstrip('/')
             if webpath == "":
                 raise CommandError("Empty web entry path?")
-            if webpath.endswith(WEBDATA):
+            if webpath[0] == ':' or '/:' in webpath:
                 raise CommandError("Don't add the tag")
             p+=1
 
@@ -535,7 +535,7 @@ class _AddUpdate:
                 webdefpath = args[p].rstrip('/').lstrip('/')
                 if webdefpath == "":
                     raise CommandError("Empty web definition path?")
-                if webdefpath.endswith(WEBDEF):
+                if webdefpath[0] == ':' or '/:' in webdefpath:
                     raise CommandError("Don't add the tag")
                 p+=1
             while p < len(args):
