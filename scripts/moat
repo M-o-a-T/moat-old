@@ -46,6 +46,7 @@ async def main(args):
 		return e.status
 	except asyncio.CancelledError:
 		print("Cancelled due to error.", file=sys.stderr)
+		ret = 8
 	finally:
 		await c.finish()
 
@@ -55,9 +56,16 @@ async def main(args):
 
 if __name__ == '__main__':
 	loop = asyncio.get_event_loop()
+	j = main(sys.argv[1:])
+	j = asyncio.ensure_future(j, loop=loop)
 	try:
-		sys.exit(loop.run_until_complete(main(sys.argv[1:])))
+		sys.exit(loop.run_until_complete(j))
 	except KeyboardInterrupt:
 		print("Interrupted. Aborted.", file=sys.stderr)
+		j.cancel()
+		try:
+			loop.run_until_complete(j)
+		except asyncio.CancelledError:
+			pass
 		sys.exit(8)
 
