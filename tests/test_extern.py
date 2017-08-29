@@ -93,7 +93,8 @@ async def test_extern_fake(loop):
 		t1 = time()
 		while True:
 			try:
-				await td.subdir('status','run','extern',TASKSTATE, create=False)
+				r = await td.subdir('status','run','extern',TASKSTATE, create=False)
+				r['running']
 			except KeyError:
 				pass
 			else:
