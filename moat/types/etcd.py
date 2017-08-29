@@ -361,10 +361,20 @@ class MoatStatusErr(EtcDir):
 class MoatWeb(EtcDir):
 	"""Singleton for /web"""
 	async def init(self):
-		from moat.web import WEBDATA
-		from moat.web.base import WebpathDir
-		self.register('*', cls=WebpathDir)
+		from moat.web import WEBDATA_DIR,WEBSERVER_DIR,WEBCONFIG
+		from moat.web.base import WebdataBase, WebserverBase, WebconfigDir
+		self.register(WEBDATA_DIR[1], cls=WebdataBase)
+		self.register(WEBSERVER_DIR[1], cls=WebserverBase)
+		self.register(WEBCONFIG, cls=WebconfigDir)
 		await super().init()
+
+	@property
+	def task_monitor(self):
+		return StaticSubdirs(self)
+	def task_for_subdir(self,d):
+		from moat.web import WEBSERVER_DIR
+		if d == WEBSERVER_DIR[1]:
+			return True
 	
 class MoatStatus(EtcDir):
 	"""Singleton for /status"""
@@ -575,7 +585,7 @@ class MoatRoot(EtcRoot):
 	def task_monitor(self):
 		return StaticSubdirs(self)
 	def task_for_subdir(self,d):
-		if d in ("bus","device"):
+		if d in ("bus","device","web"):
 			return True
 
 	def managed(self,dev):

@@ -83,6 +83,8 @@ class App:
 
     async def start(self, bindto,port, root="default"):
         self.rootpath = root
+        logger.info("Starting web server on %s:%s with /%s", bindto,port,root)
+
         await self.tree.lookup(*(WEBDEF_DIR))
         for cls in objects('moat.web', BaseExt):
             await cls.start(self.app)
@@ -100,7 +102,16 @@ class App:
         self.srv = await self.loop.create_server(self.handler, bindto,port)
         logger.debug('serving on %s', self.srv.sockets[0].getsockname())
 
+    async def change(self, bindto,port, root="default"):
+        logger.info("Changing web server to %s:%s with /%s", bindto,port,root)
+        if self.srv is not None:
+            self.srv.close()
+            await self.srv.wait_closed()
+        self.rootpath = root
+        self.srv = await self.loop.create_server(self.handler, bindto,port)
+
     async def stop(self):
+        logger.info("Stopping web server")
         if self.srv is not None:
             self.srv.close()
             await self.srv.wait_closed()

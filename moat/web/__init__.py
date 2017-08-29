@@ -32,8 +32,10 @@ logger = logging.getLogger(__name__)
 
 WEBDEF_DIR = ('meta','web')
 WEBDEF = ':def'
-WEBDATA_DIR = ('web',)
+WEBDATA_DIR = ('web','data')
 WEBDATA = ':item'
+WEBSERVER_DIR = ('web','server')
+WEBSERVER = ':server'
 WEBCONFIG = ':config'
 
 def webdefs():

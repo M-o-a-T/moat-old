@@ -28,6 +28,8 @@ from etcd_tree import EtcFloat,EtcString, ReloadRecursive
 
 from . import TASK_DIR,TASKSCAN_DIR
 from moat.script.task import Task
+from moat.task.device import DeviceMgr
+from moat.web import WEBDATA_DIR,WEBDATA, WEBSERVER_DIR,WEBSERVER
 
 import logging
 logger = logging.getLogger(__name__)
@@ -37,33 +39,54 @@ class WebServer(DeviceMgr):
 		This task runs the web server.
 		"""
 
-	taskdef="web/server"
+	taskdef="web/serve"
 	summary="A Task which runs the web server"
 	schema = {}
 
+	app = None
+	cfg = None
+	cfg_mon = None
+
 	async def setup(self):
-		import pdb;pdb.set_trace()
-		if len(self.path) != 2 or self.path[0] != self.cmd.root.app or self.path[1] != 'web':
-			raise RuntimeError("You cannot run a web server globally (%s vs. %s)",
-				str(self.path),repr(self.cmd.root.app))
 		await super().setup()
 		try:
-			self.cfg = await self.tree.lookup(WEBDATA_DIR+(WEBCONFIG,self.cmd.root.app))
+			self.cfg = await self.tree.lookup(WEBSERVER_DIR+self.path[1:], name=WEBSERVER)
 		except KeyError:
 			raise RuntimeError("There is no configuration for this server.")
 
-		from moat.web.app import App
-		self.app = App(self)
-		self.app.tree = await self.root._get_tree()
-		await self.app.start(self.cfg.get('host','127.0.0.1', self.get('port',8080), self.cfg.get('default','default'))
+		self.cfg_mon = self.cfg.add_monitor(self.queue_reload)
+		self.cfg.force_updated()
+
+	def queue_reload(self, x=None):
+		if x.is_new is None:
+			self.cancel()
+		else:
+			self.q.put_nowait(("reload",))
+
+	async def managed(self):
+		return None
 
 	async def process(self, *cmd):
-		await super().process(*cmd)
+		if cmd[0] == "reload":
+			from moat.web.app import App
+			if self.app is None:
+				self.app = App(self)
+				self.app.tree = await self.cmd.root._get_tree()
+				await self.app.start(self.cfg.get('addr','127.0.0.1'), self.cfg.get('port',8080), self.cfg.get('default','default'))
+			else:
+				await self.app.change(self.cfg.get('addr','127.0.0.1'), self.cfg.get('port',8080), self.cfg.get('default','default'))
+		else:
+			await super().process(*cmd)
 
 	async def teardown(self):
+		if self.cfg_mon is not None:
+			self.cfg_mon.cancel()
+			self.cfg_mon = None
 		if self.app is not None:
 			try:
 				await self.app.stop()
 			except Exception as exc:
 				logger.exception("stop web server")
+			self.app = None
 		await super().teardown()
+

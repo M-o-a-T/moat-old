@@ -50,12 +50,13 @@ async def test_main(loop):
 	t = await client(cfg, loop=loop)
 	td = await t.tree("/")
 	u = Unit("test.moat.web.client", amqp=cfg['config']['amqp'], loop=loop)
+	port=39999+(os.getpid() % 25535)
 
 	m = MoatTest(loop=loop)
 	m.cfg = cfg
 	await m.clean_ext("web", ('device','extern'))
 	
-	e = f = g = None
+	e = f = g = h = None
 	async def run(cmd):
 		nonlocal e
 		m9 = MoatTest(loop=loop)
@@ -76,12 +77,22 @@ async def test_main(loop):
 		r = await run("-vvvc test.cfg dev extern add web/one float input/topic=test.web.one output/topic=set.web.one output/mode=async Test Web One")
 		assert r == 0, r
 
-		r = await run("-vvvc test.cfg web add test/web/one float/temperature value=extern/web/one Web One")
+		r = await run("-vvvc test.cfg web data add test/web/one float/temperature value=extern/web/one Web One")
 		assert r == 0, r
+
+		r = await run("-vvvc test.cfg web server add test/one port=%d Test Server One" % (port,))
+		assert r == 0, r
+
 
 		r = await run("-vvvc test.cfg run -qgootS moat/scan")
 		assert r == 0, r
-		r = await run("-vvvc test.cfg run -qgootS moat/scan/device")
+		r = await run("-vvvc test.cfg run -qgootS moat/scan/web")
+		assert r == 0, r
+		r = await run("-vvvc test.cfg run -qgootS moat/scan/web/server")
+		assert r == 0, r
+		r = await run("-vvvc test.cfg run -qgootS moat/scan/web/server/test")
+		assert r == 0, r
+		r = await run("-vvvc test.cfg run -qgootS moat/scan/web/server/test/one")
 		assert r == 0, r
 		r = await run("-vvvc test.cfg run -qgootS moat/scan/device/extern")
 		assert r == 0, r
@@ -89,10 +100,16 @@ async def test_main(loop):
 		g = m2.parse("-vvvc test.cfg run -gS extern")
 		g = asyncio.ensure_future(g,loop=loop)
 
+		m3 = MoatTest(loop=loop)
+		h = m2.parse("-vvvc test.cfg run -gS web/test")
+		h = asyncio.ensure_future(h,loop=loop)
+
 		logger.debug("Waiting 1: create scan task")
 		t1 = time()
 		while True:
 			try:
+				r = await td.subdir('status','run','web','test','one',TASKSTATE, create=False)
+				r['running']
 				r = await td.subdir('status','run','extern',TASKSTATE, create=False)
 				r['running']
 			except KeyError:
@@ -106,7 +123,6 @@ async def test_main(loop):
 		await asyncio.sleep(1, loop=loop)
 		await u.alert('test.web.one',{'value':19.5})
 
-		port=39999+(os.getpid() % 25535)
 		m2 = MoatTest(loop=loop)
 		f = m2.parse("-vvvc test.cfg web serve -b 127.0.0.1 --port=%d" % (port,))
 		f = asyncio.ensure_future(f,loop=loop)
@@ -115,7 +131,7 @@ async def test_main(loop):
 		await asyncio.sleep(100, loop=loop)
 
 	finally:
-		jj = (e,f,g)
+		jj = (e,f,g,h)
 		for j in jj:
 			if j is None: continue
 			if not j.done():

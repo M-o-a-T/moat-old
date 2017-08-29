@@ -74,8 +74,8 @@ import weakref
 import blinker
 from collections.abc import Mapping
 
-from moat.types.etcd import recEtcDir
-from . import webdef_names, WEBDEF_DIR,WEBDEF, WEBDATA_DIR,WEBDATA, WEBCONFIG
+from moat.types.etcd import recEtcDir, Subdirs
+from . import webdef_names, WEBDEF_DIR,WEBDEF, WEBDATA_DIR,WEBDATA, WEBCONFIG, WEBSERVER_DIR, WEBSERVER
 from moat.util import do_async, r_attr
 from moat.dev import DEV_DIR,DEV
 
@@ -101,13 +101,13 @@ def template(template_name=None):
 
 		>>> @template ## @template() also works
 		>>> def render(**kw):
-		>>>    return { 'template_name': 'foo.html' }
+		>>>	return { 'template_name': 'foo.html' }
 
 		is equivalent to
 
 		>>> @template('foo.html')
 		>>> def render(**kw):
-		>>>    return { }
+		>>>	return { }
 
 		"""
 	def wrapper(func):
@@ -220,9 +220,38 @@ class ConfigDict(Mapping):
 	def __len__(self):
 		return 0
 
+class WebdataBase(EtcDir):
+	"""Directory for /web/data"""
+	pass
+
+class WebserverBase(EtcDir):
+	@property
+	def task_monitor(self):
+		return Subdirs(self)
+	def task_for_subdir(self,d):
+		if d[0] != ':':
+			return True
 	
-class WebpathDir(WebdefBase, EtcDir):
-	"""Directory for /web/PATH"""
+class WebserverSubdirs(Subdirs):
+	def _add(self, a):
+		if a == WEBSERVER:
+			import pdb;pdb.set_trace()
+			return "add",'web/serve',('web',)+self.dir.path[len(WEBSERVER_DIR):],{}
+		return super()._add(a)
+
+class WebserverPath(EtcDir):
+	@property
+	def task_monitor(self):
+		return WebserverSubdirs(self)
+	def task_for_subdir(self,d):
+		if d[0] != ':':
+			return True
+	
+class WebserverDir(recEtcDir, EtcDir):
+	pass
+
+class WebdataPath(WebdefBase, EtcDir):
+	"""Directory for /web/data/PATH"""
 	TEMPLATE = "dir.haml"
 	_propagate_updates = False
 
@@ -324,7 +353,7 @@ class WebdefDir(WebdefBase,recEtcDir,EtcDir):
 		return res
 
 class WebdataDir(recEtcDir,EtcDir):
-	"""Directory for /web/PATH/:item"""
+	"""Directory for /web/data/PATH/:item"""
 	_type = None
 	_value = None
 	mon = None # value monitor
@@ -407,9 +436,13 @@ class WebdataDir(recEtcDir,EtcDir):
 
 		self._type.recv_msg(act=act, item=self, view=view, **kw)
 
+
 	def has_update(self):
 		super().has_update()
-		self.updates.send(self, full=True)
+		if self.mon is not None:
+			pass
+
+		do_async(self._setup_value)
 		if self.is_new and hasattr(self.parent,'updates'):
 			self.parent.updates.send(self)
 		elif self.is_new is None:
@@ -417,50 +450,10 @@ class WebdataDir(recEtcDir,EtcDir):
 			if self.mon is not None:
 				self.mon.cancel()
 				self.mon = None
-
-	def update_value(self,val):
-		key = self.get('subvalue','value')
-		val = r_attr(self,key, attr=True)
-		self.updates.send(self, value=val)
-
-class WebdataType(EtcString):
-	"""Type path for WebdataDir"""
-	def has_update(self):
-		p = self.parent
-		if p is None:
-			return
-		if self.is_new is None:
-			p._type = WebdefBase()
 		else:
-			p._type = self.root.lookup(*(WEBDEF_DIR+tuple(self.value.split('/'))),name=WEBDEF)
+			self.updates.send(self, full=True)
 
-class WebdataValue(EtcString):
-	"""Value path for WebdataDir"""
-	_propagate_updates=False
-	_update_delay = 0.01
-	_reset_delay_job = None
-
-	def has_update(self):
-		p = self.parent
-		if p is None:
-			return
-		if self.is_new is None:
-			p._value = None
-			if p.mon is not None:
-				p.mon.cancel()
-		else:
-			self._update_delay = 1
-			if self._reset_delay_job is not None:
-				self._reset_delay_job.cancel()
-			self._reset_delay_job = self._loop.call_later(1, self._reset_delay)
-
-			do_async(self._has_update)
-
-	def _reset_delay(self):
-		self._reset_delay_job = None
-		self._update_delay = 0.01
-
-	async def _has_update(self):
+	async def _setup_value(self):
 		p = self.parent
 		if p is None:
 			return
@@ -470,6 +463,34 @@ class WebdataValue(EtcString):
 		p.mon = p._value.add_monitor(p.update_value)
 		p.update_value(p._value)
 
+	def update_value(self,_):
+		self.updates.send(self, value=val.value)
+
+	def has_value(self,x):
+		try:
+			val = self['value']
+		except KeyError:
+			pass
+		else:
+			self.mon.cancel()
+			self.mon = val.add_monitor(self.update_value)
+		
+class WebconfigDir(EtcDir):
+	pass
+WebconfigDir.register('order', cls=EtcInteger)
+
+class WebdataType(EtcString):
+	"""Type path for WebdataDir"""
+	pass
+
+class WebdataValue(EtcString):
+	"""Value path for WebdataDir"""
+	pass
+
+class WebdataSubvalue(EtcString):
+	"""Value subpath for WebdataDir"""
+	pass
+
 class WebconfigDir(EtcDir):
 	pass
 WebconfigDir.register('order', cls=EtcInteger)
@@ -478,11 +499,22 @@ WebconfigDir.register('order', cls=EtcInteger)
 #	def param(self):
 #		return _DataLookup(self)
 #WebdataDir.register('timestamp',cls=EtcFloat)
-WebdataDir.register('def',cls=WebdataType)
-WebdataDir.register('value',cls=WebdataValue)
 WebdefDir.register('timestamp',cls=EtcFloat)
 WebdefDir.register('created',cls=EtcFloat)
-WebpathDir.register(WEBDATA, cls=WebdataDir)
-WebpathDir.register('*', cls=WebpathDir)
-WebpathDir.register(WEBCONFIG, cls=WebconfigDir)
+
+WebdataBase.register('*', WebdataPath)
+WebdataPath.register('*', cls=WebdataPath)
+WebdataPath.register(WEBDATA, cls=WebdataDir)
+
+WebdataDir.register('def',cls=WebdataType,pri=1)
+WebdataDir.register('value',cls=WebdataValue)
+WebdataDir.register('subvalue',cls=WebdataSubvalue,pri=1)
+
+WebserverBase.register('*', cls=WebserverPath)
+WebserverPath.register('*', cls=WebserverPath)
+WebserverBase.register(WEBSERVER, cls=WebserverDir)
+
+WebserverDir.register('host', cls=EtcString)
+WebserverDir.register('port', cls=EtcInteger)
+WebserverDir.register('default', cls=EtcString)
 

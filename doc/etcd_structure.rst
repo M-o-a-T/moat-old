@@ -272,26 +272,62 @@ Main tree
   Sub-hierarchies are displayed exhaustively. The default start page is
   called "default". 
 
-  * whatever …
+  * data
+
+    Root of the hierarchy for page snippets.
+
+    * whatever …
+    
+      Page snippet hierarchy.
   
-    Page snippet hierarchy.
+      * :item
+  
+        One entry on a page.
+  
+        * def
+  
+          Pointer to the associated meta/web/NAME/:def entry.
+  
+        * value
+  
+          Pointer to the device/NAME/:dev entry whose value shall be
+          displayed.
+  
+        * subvalue
+  
+          The device's attribute to be used. The default is "value".
 
-    * :item
+  * server
 
-      One entry on a page.
+    Server tasks. Each server entry corresponds to a single webserver for
+    MoaT.
 
-      * def
+    * whatever …
 
-        Pointer to the associated meta/web/NAME/:def entry.
+      Server name hierachy.
 
-      * value
+      * :server
 
-        Pointer to the device/NAME/:dev entry whose value shall be
-        displayed.
+        One server entry.
 
-      * subvalue
+        * addr
 
-        The device's attribute to be used. The default is "value".
+          Address to bind to.
+          
+          Typically '::' / '0.0.0.0' (any address) or '::1' / '127.0.0.1' (localhost).
+          The default is 127.0.0.1.
+
+        * port
+
+          Port to use. Default: 8080.
+
+        * ws_url
+
+          Externally-visible base URL of the WebSocket. Defaults to ``ws:://‹host›:‹port›``.
+
+        * default
+
+          ``web/data`` entry to use as the initial landing page.
 
 * device
 

@@ -46,9 +46,16 @@ class JinjaExt(BaseExt):
 
 class RootView(BaseView):
     path = '/'
+
     @aiohttp_jinja2.template('main.haml')
     async def get(self):
-        ##qb = self.request.app['moat.cmd'].amqp
-        #x = await qb.rpc('info', _cmd='state',_subsys='charger')
-        return {'foo':'bar', 'host':self.request.headers['host']}
+        app = self.request.app['moat.cmd']
+        url = app.cfg.get('ws_url',None)
+        if url is None:
+            url = app.cfg.get('addr',None)
+            if url is None:
+                url = '127.0.0.1' # which may be wrong, but oh well
+            url = 'ws://'+url+':'+str(app.cfg.get('port',8080))
+        # The host is required for the websocket to connect to
+        return {'ws_url':url}
 

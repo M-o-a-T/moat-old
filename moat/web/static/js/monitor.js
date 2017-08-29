@@ -39,7 +39,7 @@
 		//});
 		if ("WebSocket" in window && "moat" in window && "host" in window.moat) {
 			announce("info","Connecting …")
-			var ws = new WebSocket("ws://" + window.moat.host +"/api/control");
+			var ws = new WebSocket(window.moat.ws_url +"/api/control");
 			var backlogging = true;
 
 			ws.onmessage = function (msg) {

@@ -35,7 +35,7 @@ from aiohttp import web
 from yaml import dump
 
 from moat.script import Command, SubCommand, CommandError
-from moat.web import WEBDEF_DIR,WEBDEF, WEBDATA_DIR,WEBDATA, webdefs, WEBCONFIG
+from moat.web import WEBDEF_DIR,WEBDEF, WEBDATA_DIR,WEBDATA, WEBSERVER_DIR,WEBSERVER, webdefs, WEBCONFIG
 from moat.web.base import WebdefDir, DefaultConfig
 from moat.util import r_dict, r_show
 from moat.cmd.task import _ParamCommand
@@ -181,6 +181,8 @@ class DefParamCommand(_ParamCommand):
     summary = "Parameterize web definitions"
     description = """\
 Web definitions are stored in etcd at /meta/web/**/:def.
+
+This command lets you change parameters for a Web definition.
 """ + _ParamCommand.description
 
 class ParamCommand(_ParamCommand):
@@ -190,6 +192,8 @@ class ParamCommand(_ParamCommand):
     summary = "Parameterize web entries"
     description = """\
 Web entries are stored in etcd at /web/**/:item.
+
+This command lets you change parameters for a Web item.
 """ + _ParamCommand.description
 
 class _DefAddUpdate:
@@ -296,48 +300,175 @@ class DefCommand(SubCommand):
 Commands to set up and admin the web definitions known to MoaT.
 """
 
-class ServeCommand(DefSetup,Command):
-    name = "serve"
-    usage = "-b BINDTO -p PORT -r WEB"
-    summary = "Run a web server"
+class ServerSetup:
+    async def setup(self):
+        await super().setup()
+        tree = await self.root._get_tree()
+        t = await tree.subdir(WEBSERVER_DIR)
+        return t
+
+class ServerListCommand(ServerSetup,Command):
+    name = "list"
+    summary = "List web servers"
     description = """\
-This command runs a web server with the data at /web (by default).
+Web server are stored in etcd at /web/server/**/:server.
+
+This command shows that data. If you mention a definition's name,
+details are shown in YAML format, else a short list of names is shown.
 """
 
     def addOptions(self):
-        self.parser.add_option('-b','--bind-to',
-            action="store", dest="host",
-            help="address to bind to", default="0.0.0.0")
-        self.parser.add_option('-p','--port',
-            action="store", dest="port", type=int,
-            help="port to use", default=59980)
-        self.parser.add_option('-r','--root',
-            action="store", dest="root",
-            help="subtree to use by default", default="default")
-
-# server/host and /port: bind address and port to use
-# /root/…/:dir : optional: addiional data for this subdirectory
-# /root/…/:item : one thing to display
-
-    def handleOptions(self):
-        super().handleOptions()
-        self.host = self.options.host
-        self.port = self.options.port
-        self.rootpath = self.options.root
+        self.parser.add_option('-a','--all',
+            action="store_true", dest="all",
+            help="show details for all entries")
 
     async def do(self,args):
+        t = await self.setup()
         if args:
-            raise CommandError("this command takes no arguments")
+            if self.options.all:
+                raise CommandError("Arguments and '-a' are mutually exclusive")
+            dirs = []
+            for a in args:
+                dirs.append(await t.subdir(a, create=False))
+            verbose = True
+        else:
+            dirs = [t]
+            verbose = self.options.all
+        for tt in dirs:
+            async for web in tt.tagged(WEBSERVER):
+                path = web.path[len(WEBSERVER_DIR):-1]
+                if verbose:
+                    dump({path: r_dict(dict(web))}, stream=self.stdout)
+                else:
+                    print('/'.join(path), web.get('host','-'), web.get('port',80), web.get('default','default'), web.get('descr',''), sep='\t',file=self.stdout)
 
-        from moat.web.app import App
-        self.loop = self.root.loop
-        self.app = App(self)
-        self.app.tree = await self.root._get_tree()
-        await self.app.start(self.host,self.port, self.rootpath)
+class ServerDeleteCommand(ServerSetup,Command):
+    name = "delete"
+    summary = "Delete web servers"
+    description = """\
+Web definitions are stored in etcd at /web/server/**/:server.
 
-        # now serving
-        while True:
-            await asyncio.sleep(9999,loop=self.loop)
+This command deletes (some of) that data.
+"""
+
+    async def do(self,args):
+        td = await self.setup()
+        if not args:
+            if not cmd.root.cfg['testing']:
+                raise CommandError("You can't delete everything.")
+            args = td.tagged(WEBSERVER)
+        for k in args:
+            t = await td.subdir(k,name=WEBSERVER, create=False)
+            if self.root.verbose:
+                print("%s: deleted"%k, file=self.stdout)
+            rec = True
+            while True:
+                p = t._parent
+                if p is None: break
+                p = p()
+                if p is None or p is t: break
+                try:
+                    await t.delete(recursive=rec)
+                except etcd.EtcdDirNotEmpty:
+                    if rec:
+                        raise
+                    break
+                rec = False
+                t = p
+
+class _ServerAddUpdate:
+    """Mix-in to add or update a web server"""
+
+    async def do(self,args):
+        t = await self.setup()
+
+        try:
+            data = {}
+            name=""
+
+            webpath = args[0].rstrip('/').lstrip('/')
+            if webpath == "":
+                raise CommandError("Empty web entry path?")
+            if webpath.endswith(WEBSERVER):
+                raise CommandError("Don't add the tag")
+
+            p=1
+            while p < len(args):
+                try:
+                    k,v = args[p].split('=')
+                except ValueError:
+                    break
+                p += 1
+                data[k] = v
+            descr = " ".join(args[p:])
+        except IndexError:
+            raise CommandError("Missing command parameters")
+        finally:
+            pass
+
+        try:
+            web = await t.subdir(webpath, name=WEBSERVER, create=not self._update)
+        except KeyError:
+            raise CommandError("Web item '%s' not found." % webpath)
+        if descr:
+            await web.set('descr', descr, sync=False)
+        if data:
+            for k,v in data.items():
+                if v == "":
+                    try:
+                        await web.delete(k, sync=False)
+                    except KeyError:
+                        pass
+                else:
+                    await web.set(k,v, sync=False, ext=True)
+            
+
+class ServerAddCommand(_ServerAddUpdate,ServerSetup,Command):
+    name = "add"
+    summary = "add a web server"
+    description = """\
+Create a new web server.
+
+Arguments:
+
+* the new web server's pathname (must not exist)
+
+* host=, port=, default= parameters
+  otherwise localhost, 8080, default is assumed
+
+* a descriptive name (not optional)
+
+"""
+    _update = False
+class ServerUpdateCommand(_ServerAddUpdate,ServerSetup,Command):
+    name = "change"
+    summary = "change a web server"
+    description = """\
+Update a web server.
+
+Arguments:
+
+* the web definition's path (required)
+
+* host, port, default parameters
+
+* a descriptive name (optional, to update)
+
+"""
+    _update = True
+
+class ServerCommand(SubCommand):
+    subCommandClasses = [
+        ServerListCommand,
+        ServerAddCommand,
+        ServerUpdateCommand,
+        ServerDeleteCommand,
+    ]
+    name = "server"
+    summary = "Manage web servers"
+    description = """\
+Commands to set up and admin web servers known to MoaT.
+"""
 
 class ListCommand(DefSetup,Command):
     name = "list"
@@ -542,6 +673,21 @@ Web display parameters are stored in etcd at /web/**/:config.
 """ + _ParamCommand.description
 
 
+class DataCommand(SubCommand):
+        name = "data"
+        summary = "Configure the web data"
+        description = """\
+Commands to configure which data to display in the web.
+"""
+
+        # process in order
+        subCommandClasses = [
+                ListCommand,
+                AddCommand,
+                UpdateCommand,
+                DeleteCommand,
+        ]
+
 class WebCommand(SubCommand):
         name = "web"
         summary = "Configure the web frontend"
@@ -552,12 +698,9 @@ Commands to configure, and run, a basic web front-end.
         # process in order
         subCommandClasses = [
                 DefCommand,
-                ListCommand,
-                AddCommand,
+                DataCommand,
                 ParamCommand,
                 ConfigCommand,
-                UpdateCommand,
-                DeleteCommand,
-                ServeCommand,
+                ServerCommand,
         ]
 
