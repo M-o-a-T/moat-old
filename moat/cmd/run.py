@@ -158,6 +158,8 @@ Run MoaT tasks.
 						logger.info('CANCELLED %s', j.name)
 						if self.root.verbose:
 							print(j.name,'*CANCELLED*', sep='\t', file=self.stdout)
+					except JobIsRunningError as exc:
+						errs += 1
 					except Exception as exc:
 						errs += 1
 						logger.exception("Running %s", j.name)
