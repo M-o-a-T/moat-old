@@ -417,7 +417,7 @@ class Task(regTask):
 		"""\
 			Override this to actually do the task's job.
 			"""
-		raise NotImplementedError("You need to write the code that does the work!")
+		raise NotImplementedError("You need to write the code that does the work for %s (in %s)!" % (self.taskdir.taskdef_name, self.taskdir.taskdef['code']))
 
 	async def teardown(self):
 		"""Hook to do task cleanup things."""
