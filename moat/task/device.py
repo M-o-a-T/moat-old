@@ -69,6 +69,14 @@ class DeviceMgr(Task):
 		raise NotImplementedError("Need to override %s.managed" % self.__class__.__name__)
 
 	async def process(self, *cmd):
+		"""\
+			handle async processing.
+			Extend by overriding.
+
+			reg X: we manage X
+			del X: un-manage X
+			call X Y Z: await X(*Y,**Z)
+			"""
 		if cmd[0] == 'reg':
 			await cmd[1].set_managed(self)
 		elif cmd[0] == 'del':
