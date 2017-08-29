@@ -53,13 +53,15 @@ class DeviceMgr(Task):
 		self.q = asyncio.Queue(loop=self.loop)
 		self.amqp = self.cmd.root.amqp
 		self._managed = await self.managed()
-		await self._managed.set_manager(self)
+		if self._managed is not None:
+			await self._managed.set_manager(self)
 
 	async def teardown(self):
-		try:
-			await self._managed.set_manager(None)
-		except Exception:
-			logger.exception("clearing manager")
+		if self._managed is not None:
+			try:
+				await self._managed.set_manager(None)
+			except Exception:
+				logger.exception("clearing manager")
 		await super().teardown()
 
 	async def managed(self):
