@@ -3,7 +3,7 @@ Section: python
 Priority: extra
 Maintainer: Matthias Urlichs <matthias@urlichs.de>
 Build-Depends: debhelper (>= 5),
- dh-python,
+ dh-python, python3.6, python3-all (>= 3.5.3-3),
  dh-systemd,
  libevent-dev,
  libglib2.0-dev (>= 2.14),
@@ -13,6 +13,7 @@ Build-Depends: debhelper (>= 5),
  python3-all (>= 3.5),
  python3-all-dev,
  python3-amqp,
+ python3-arsenic,
  python3-attr,
  python3-boltons,
  python3-etcd-tree (>= 0.30.2),
