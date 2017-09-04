@@ -33,6 +33,7 @@ import time
 from qbroker.unit import CC_DATA, CC_MSG
 from yaml import dump
 from traceback import print_exc
+from pprint import pprint
 
 from moat.script import Command, SubCommand, CommandError
 from moat.script.task import Task,_run_state, JobMarkGoneError,JobIsRunningError
@@ -55,19 +56,27 @@ Arguments:
 * routing key
 * any number of name=value pairs
 """
+	_alert = False
+
 	def addOptions(self):
 		self.parser.add_option('-u','--uuid',
 			action="store", dest="uuid",
 			help="Query this UUID directly")
 		self.parser.add_option('-t','--timeout',
-			action="store", dest="timeout", type="int", default=60,
-			help="Command timeout")
+			action="store", dest="timeout", type="int",
+			default=60 if not self._alert else 3,
+			help="Timeout")
+		self.parser.add_option('-c','--rpc',
+			action="store", dest="rpc", default="moat.cmd" if not self._alert else None,
+			help="Routing key")
 
 	async def do(self,args):
-		if len(args) < 1:
-			raise SyntaxError("Usage: cmd  words to send  var=data.to.add")
+		if not self._alert and len(args) < 1:
+			raise SyntaxError("Usage: %s  words to send  var=data.to.add" % (self.name,))
+		if self.options.rpc is None:
+			raise SyntaxError("Usage: %s  -c routing,key …" % (self.name,))
 		d = {}
-		while True:
+		while args:
 			i = args[-1].find('=')
 			if i < 1:
 				break
@@ -79,13 +88,21 @@ Arguments:
 			except ValueError:
 				pass
 			r_attr(d,k, value=s)
-		d['args'] = args
+		if args:
+			d['args'] = args
 
 		if self.options.uuid:
 			d['_dest'] = self.options.uuid
 
 		amqp = await self.root._get_amqp()
-		res = amqp.rpc('moat.cmd', **d)
+		if self.options.timeout:
+			d['timeout'] = self.options.timeout
+		if self._alert:
+			def cb(msg):
+				pprint(msg.data)
+			res = amqp.alert(self.options.rpc, callback=cb, **d)
+		else:
+			res = amqp.rpc(self.options.rpc, **d)
 		if self.options.timeout:
 			res = asyncio.wait_for(res, self.options.timeout, loop=self.root.loop)
 		try:
@@ -93,8 +110,20 @@ Arguments:
 		except asyncio.TimeoutError:
 			print("-timed out", file=self.stdout)
 			res = "Timeout"
-		from yaml import dump
-		dump(res, stream=self.stdout)
+		if not self._alert:
+			from yaml import dump
+			dump(res, stream=self.stdout)
+
+class AlertCommand(CmdCommand):
+	name = "alert"
+	_alert = True
+	description = """\
+Send an arbitrary message to the bus.
+
+Arguments:
+* routing key
+* any number of name=value pairs
+"""
 
 class ListCommand(Command):
 	name = "list"
@@ -238,6 +267,7 @@ Use with caution.
 
 	# process in order
 	subCommandClasses = [
+		AlertCommand,
 		CmdCommand,
 		ListCommand,
 		EventCommand,
