@@ -257,7 +257,6 @@ async def test_onewire_fake(loop):
 
 				await asyncio.sleep(0.1, loop=loop)
 				if time()-t1 >= 40:
-					import pdb;pdb.set_trace()
 					mto = await t.lookup("task/onewire")
 					await mto.subdir('faker','scan',TASK,'taskdef', create=False)
 					raise RuntimeError("Condition 1")
