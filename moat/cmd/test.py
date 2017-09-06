@@ -146,19 +146,9 @@ Check etcd access, and basic data layout.
 			if "error" not in s:
 				show("missing 'error' entry")
 				if self.parent.fix:
-					await s.set("errors",dict())
+					await s.set("error",dict())
 				else:
 					retval += 1
-			else:
-				err = await s['error']
-				for etyp in list(err.values()):
-					for edir in list(etyp.values()):
-						if (await edir.get_ptr()) is None:
-							show("Error obsolete: %s",edir)
-							if self.parent.fix:
-								await edir.delete()
-							else:
-								retval += 1
 
 			await s.wait()
 			if not self.root.cfg['config'].get('testing',False):
@@ -222,10 +212,10 @@ Check etcd access, and basic data layout.
 			assert run_state['state'] == "ok", run_state['state']
 
 			try:
-				errs = await etc.read("/status/errors")
+				errs = await etc.read("/status/error")
 			except etcd.EtcdKeyNotFound:
 				if self.parent.fix:
-					raise RuntimeError("Creating /errors did not take. Duh?") # pragma: no cover ## hopefully
+					raise RuntimeError("Creating /status/error did not take. Duh?") # pragma: no cover ## hopefully
 				# otherwise it's not there and there's nothing to do
 			else:
 				pass
