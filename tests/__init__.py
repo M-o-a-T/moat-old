@@ -23,6 +23,8 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##  Thus, do not remove the next line, or insert any blank lines above.
 ##BP
 
+import os; os.environ['AIOHTTP_NO_EXTENSIONS']='1'
+
 import asyncio
 import pytest
 import subprocess
