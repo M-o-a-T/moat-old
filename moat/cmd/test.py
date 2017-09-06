@@ -253,6 +253,33 @@ class TypesCommand(Command):
 					await d.set(k,str(v))
 			await d.close()
 
+class ErrorsCommand(Command):
+	name = "error"
+	summary = "Check error message consistency"
+	description = """\
+		/status/error contains a list of errors.
+
+		This command curries that list, i.e. removes obsolete entires.
+		"""
+
+	async def do(self,args):
+		etc = await self.root._get_etcd()
+		s = await self.root._get_tree()
+		from moat.types import ERROR_DIR
+		err = await s.lookup(ERROR_DIR)
+		for etyp in list(err.values()):
+			etyp = await etyp
+			for edir in list(etyp.values()):
+				edir = await edir
+				if (await edir.get_ptr()) is None:
+					show("Error obsolete: %s",edir)
+					if self.parent.fix:
+						await edir.delete()
+					else:
+						retval += 1
+				elif self.root.verbose:
+					print(etyp.name,edir['loc'].value,edir['msg'])
+
 class WebCommand(Command):
 	name = "web"
 	summary = "Add known web types to etcd"
@@ -329,6 +356,7 @@ Set some data.
 		ConfigCommand,
 		EtcdCommand,
 		TypesCommand,
+		ErrorsCommand,
 		WebCommand,
 		AmqpCommand,
 	]
