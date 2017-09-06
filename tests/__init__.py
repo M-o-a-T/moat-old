@@ -31,7 +31,6 @@ from socket import socket
 import time
 from moat.script.main import Moat
 import io
-import os
 from yaml import safe_load
 from contextlib import suppress
 import aio_etcd as etcd
