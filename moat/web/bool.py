@@ -23,7 +23,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##  Thus, do not remove the next line, or insert any blank lines above.
 ##BP
 
-from .base import WebdefDir,template
+from .base import WebdefDir,template, _NOTGIVEN
 
 class BoolDef(WebdefDir):
 	name = "bool"
@@ -35,6 +35,8 @@ class BoolDef(WebdefDir):
 		kw = super().get_context(item=item, **kw)
 		if item._value is None:
 			kw['value'] = "…Loading…"
+		elif item._value.value is _NOTGIVEN:
+			kw['value'] = "…None yet…"
 		else:
 			kw['value'] = item.data[str(item._value.value).lower()]
 		return kw

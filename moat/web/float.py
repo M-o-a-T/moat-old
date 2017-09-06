@@ -23,7 +23,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##  Thus, do not remove the next line, or insert any blank lines above.
 ##BP
 
-from .base import WebdefDir,template
+from .base import WebdefDir,template, _NOTGIVEN
 
 class FloatDef(WebdefDir):
 	name = "float"
@@ -35,6 +35,8 @@ class FloatDef(WebdefDir):
 		kw = super().get_context(item=item, **kw)
 		if item._value is None:
 			kw['value'] = "…Loading…"
+		elif item._value.value is _NOTGIVEN:
+			kw['value'] = "…none yet…"
 		else:
 			kw['value'] = "%.*f" % (int(item.data['digits']),item._value.value)
 		return kw
