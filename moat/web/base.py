@@ -501,7 +501,7 @@ WebconfigDir.register('order', cls=EtcInteger)
 WebdefDir.register('timestamp',cls=EtcFloat)
 WebdefDir.register('created',cls=EtcFloat)
 
-WebdataBase.register('*', WebdataPath)
+WebdataBase.register('*', cls=WebdataPath)
 WebdataPath.register('*', cls=WebdataPath)
 WebdataPath.register(WEBDATA, cls=WebdataDir)
 
