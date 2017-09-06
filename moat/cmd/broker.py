@@ -38,6 +38,7 @@ from pprint import pprint
 from moat.script import Command, SubCommand, CommandError
 from moat.script.task import Task,_run_state, JobMarkGoneError,JobIsRunningError
 from moat.task import TASKSTATE_DIR,TASKSTATE, TASKSCAN_DIR,TASK
+from moat.util import r_attr
 
 import logging
 logger = logging.getLogger(__name__)
