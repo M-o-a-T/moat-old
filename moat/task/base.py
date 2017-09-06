@@ -176,16 +176,19 @@ class TaskDef(recEtcDir,EtcDir):
 		self._update_cls()
 
 	def _update_cls(self):
-		if self.get('language','') == 'python':
+		self.cls = None
+		try:
+			if self['language'] != 'python':
+				return
+			code = self['code']
+		except KeyError:
+			return
+		else:
 			try:
-				self.cls = import_string(self['code'])
+				self.cls = import_string(code)
 			except (ImportError,AttributeError):
 				logger.error("%s: Unable to import %s", '/'.join(self.path[:-1]),self['code'])
-				self.cls = None
 
-		else:
-			self.cls = None
-	
 _setup_task_vars(TaskDef)
 
 class TaskState(hasErrorDir,recEtcDir,EtcDir):
