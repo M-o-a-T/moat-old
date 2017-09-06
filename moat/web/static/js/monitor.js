@@ -37,7 +37,7 @@
 		//	$('textarea#data').val("");
 		//	return false;
 		//});
-		if ("WebSocket" in window && "moat" in window && "host" in window.moat) {
+		if ("WebSocket" in window && "moat" in window && "ws_url" in window.moat) {
 			announce("info","Connecting …")
 			var ws = new WebSocket(window.moat.ws_url +"/api/control");
 			var backlogging = true;
