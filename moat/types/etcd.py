@@ -26,6 +26,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 import asyncio
 from weakref import WeakValueDictionary
 from pprint import pformat
+from time import time
 
 from qbroker.util import import_string
 from etcd_tree import EtcRoot, EtcDir, EtcString, EtcInteger, EtcXValue, ReloadRecursive
@@ -353,9 +354,10 @@ class MoatStatusRun(EtcDir):
 		await super().init()
 	
 class MoatStatusErr(EtcDir):
-	"""Singleton for /status/errors"""
+	"""Singleton for /status/error"""
 	async def init(self):
-		self.register('*', cls=EtcInteger)
+		from .error import ErrorRecord
+		self.register('*', '*', cls=ErrorRecord)
 		await super().init()
 	
 class MoatWeb(EtcDir):
@@ -363,8 +365,8 @@ class MoatWeb(EtcDir):
 	async def init(self):
 		from moat.web import WEBDATA_DIR,WEBSERVER_DIR,WEBCONFIG
 		from moat.web.base import WebdataBase, WebserverBase, WebconfigDir
-		self.register(WEBDATA_DIR[1], cls=WebdataBase)
-		self.register(WEBSERVER_DIR[1], cls=WebserverBase)
+		self.register(*WEBDATA_DIR[1:], cls=WebdataBase)
+		self.register(*WEBSERVER_DIR[1:], cls=WebserverBase)
 		self.register(WEBCONFIG, cls=WebconfigDir)
 		await super().init()
 
@@ -380,7 +382,7 @@ class MoatStatus(EtcDir):
 	"""Singleton for /status"""
 	async def init(self):
 		self.register('run', cls=MoatStatusRun)
-		self.register('errors', cls=MoatStatusErr)
+		self.register('error', cls=MoatStatusErr)
 		await super().init()
 
 class MoatTask(EtcDir):

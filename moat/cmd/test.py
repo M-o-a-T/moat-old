@@ -143,21 +143,22 @@ Check etcd access, and basic data layout.
 					await s.set("run",dict()) # pragma: no cover
 				else:
 					retval += 1
-			if "errors" not in s:
-				show("missing 'errors' entry")
+			if "error" not in s:
+				show("missing 'error' entry")
 				if self.parent.fix:
-					await s.set("errors",dict((stat,"0") for stat in stats))
+					await s.set("errors",dict())
 				else:
 					retval += 1
 			else:
-				err = s['errors']
-				for stat in stats:
-					if stat not in err:
-						show("missing 'errors.%s' entry" % stat)
-						if self.parent.fix:
-							await err.set(stat,0)
-						else:
-							retval += 1
+				err = await s['error']
+				for etyp in list(err.values()):
+					for edir in list(etyp.values()):
+						if (await edir.get_ptr()) is None:
+							show("Error obsolete: %s",edir)
+							if self.parent.fix:
+								await edir.delete()
+							else:
+								retval += 1
 
 			await s.wait()
 			if not self.root.cfg['config'].get('testing',False):

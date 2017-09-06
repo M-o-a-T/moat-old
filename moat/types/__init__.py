@@ -50,6 +50,9 @@ MODULE_DIR = ('meta','module')
 TYPEDEF_DIR = ('meta','type')
 TYPEDEF = ':type'
 
+# errors
+ERROR_DIR = ('status','error')
+
 class _type_names(dict):
 	def __getitem__(self,k):
 		while True:
