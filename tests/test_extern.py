@@ -48,7 +48,6 @@ async def test_extern_fake(loop):
 	t = await client(cfg, loop=loop)
 	td = await t.tree("/")
 	u = Unit("test.moat.extern.client", amqp=cfg['config']['amqp'], loop=loop)
-	@u.register_alert("test.fake.temperature", call_conv=CC_DATA)
 	await u.start()
 
 	m = MoatTest(loop=loop)
