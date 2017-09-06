@@ -100,14 +100,14 @@ class NoRegCallback(RuntimeError):
 
 _Seq = 0
 
-@attr.s
+@attr.s(hash=True,cmp=True)
 class _RegObj:
 	obj = attr.ib(hash=False,cmp=False)    # the allocated object
 	reg = attr.ib(hash=False,cmp=False)    # Registry in which this is allocated
 	weak = attr.ib(hash=False,cmp=False)   # flag
 	source = attr.ib(hash=False,cmp=False) # the subsystem we allocated from
 	method = attr.ib(hash=False,cmp=False) # release: callable or method name
-	seq = attr.ib(init=False,default=0) # solely for comparison
+	seq = attr.ib(init=False,hash=True,cmp=True,default=0) # solely for comparison
 
 	@property
 	def orig(self):
