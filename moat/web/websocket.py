@@ -41,10 +41,10 @@ class ApiView(BaseView):
     async def get(self):
         app = self.request.app
         sig = app.get('moat.update',None)
-        cmd = app['moat.cmd']
+        srv = app['moat.server']
         if sig is None:
             app['moat.update'] = sig = Signal()
-#            await cmd.amqp.register_alert_async('update.charger',
+#            await srv.amqp.register_alert_async('update.charger',
 #                partial(send_charger_update,sig),
 #                call_conv=CC_DICT)
 #        sig.connect(self.send_update)
@@ -57,7 +57,7 @@ class ApiView(BaseView):
 
         #socks.add(self)
         logger.debug('open')
-        self.job = asyncio.Task.current_task(cmd.loop)
+        self.job = asyncio.Task.current_task(srv.loop)
         try:
             async for msg in self.ws:
                 if msg.type == aiohttp.WSMsgType.TEXT:
@@ -67,7 +67,7 @@ class ApiView(BaseView):
                     if act == "locate":
                         loc = msg.get('location','')
                         if not loc:
-                            loc = cmd.app.rootpath
+                            loc = srv.app.rootpath
                         elif loc[0] == '#':
                             loc = loc[1:]
                         await self.set_location(loc)
@@ -101,8 +101,8 @@ class ApiView(BaseView):
 
     async def set_location(self, loc):
         try:
-            cmd = self.request.app['moat.cmd']
-            t = await cmd.root.tree.lookup(WEBDATA_DIR)
+            srv = self.request.app['moat.server']
+            t = await srv.tree.lookup(WEBDATA_DIR)
             t = await t.lookup(loc)
         except KeyError:
             self.send_json(action="error", msg="Location '%s' not found" % (loc,))
@@ -124,9 +124,9 @@ class ApiView(BaseView):
         # return "f_"+str(item._cseq) # debug only
         seq = getattr(item,'web_id',None)
         if seq is None:
-            cmd = self.request.app['moat.cmd']
-            item.web_id = seq = cmd.next_web_id
-            cmd.next_web_id = seq+1
+            srv = self.request.app['moat.server']
+            item.web_id = seq = srv.next_web_id
+            srv.next_web_id = seq+1
         return "f_"+str(seq)
 
     async def add_item(self, item,level, **kw):

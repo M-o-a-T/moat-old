@@ -49,13 +49,13 @@ class RootView(BaseView):
 
     @aiohttp_jinja2.template('main.haml')
     async def get(self):
-        app = self.request.app['moat.cmd']
-        url = app.cfg.get('ws_url',None)
+        srv = self.request.app['moat.server']
+        url = srv.cfg.get('ws_url',None)
         if url is None:
-            url = app.cfg.get('addr',None)
+            url = srv.cfg.get('addr',None)
             if url is None:
                 url = '127.0.0.1' # which may be wrong, but oh well
-            url = 'ws://'+url+':'+str(app.cfg.get('port',8080))
+            url = 'ws://'+url+':'+str(srv.cfg.get('port',8080))
         # The host is required for the websocket to connect to
         return {'ws_url':url}
 

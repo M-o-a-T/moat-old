@@ -76,11 +76,10 @@ class App:
     app=None
     handler=None
 
-    def __init__(self, cmd):
-        self.loop = cmd.loop
+    def __init__(self, srv):
+        self.loop = srv.loop
         self.app = web.Application(loop=self.loop)
-        self.app['moat.cmd'] = cmd
-        cmd.next_web_id = 1
+        self.app['moat.server'] = srv
 
     async def start(self, bindto,port, root="default"):
         self.rootpath = root
