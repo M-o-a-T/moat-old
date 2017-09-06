@@ -23,7 +23,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##  Thus, do not remove the next line, or insert any blank lines above.
 ##BP
 
-from etcd_tree import EtcString,EtcDir,EtcFloat,EtcInteger,EtcBoolean,EtcValue, ReloadRecursive
+from etcd_tree import EtcString,EtcDir,EtcFloat,EtcInteger,EtcBoolean,EtcValue,EtcAwaiter, ReloadRecursive
 from etcd_tree.node import DummyType
 import asyncio
 import aio_etcd as etcd
@@ -131,7 +131,8 @@ class BaseTypedDir(ManagedEtcThing,EtcDir):
 		except KeyError:
 			pass
 		else:
-			self._value.etcd_value = val
+			if not isinstance(val,EtcAwaiter):
+				self._value.etcd_value = val
 
 	def subtype(self,*path,raw=False,**kw):
 		if len(path) != 1 or path[0] != 'value':
@@ -150,7 +151,7 @@ class BaseTypedDir(ManagedEtcThing,EtcDir):
 		if self._value is None:
 			return # do this later
 		val = self.get('value',None)
-		if val is not None:
+		if val is not None and not isinstance(val,EtcAwaiter):
 			self._value.etcd_value = val
 
 	async def init(self):
