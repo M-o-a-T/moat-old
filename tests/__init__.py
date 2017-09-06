@@ -24,6 +24,9 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##BP
 
 import os; os.environ['AIOHTTP_NO_EXTENSIONS']='1'
+import sys
+if sys.version_info < (3,6):
+    raise RuntimeError("MoaT needs Python 3.6 or higher")
 
 import asyncio
 import pytest
