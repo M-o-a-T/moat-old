@@ -46,6 +46,7 @@ class WebServer(DeviceMgr):
 	app = None
 	cfg = None
 	cfg_mon = None
+	next_web_id = 1
 
 	async def setup(self):
 		await super().setup()
