@@ -241,6 +241,8 @@ class WebserverPath(EtcDir):
 	def task_monitor(self):
 		return WebserverSubdirs(self)
 	def task_for_subdir(self,d):
+		if d == WEBSERVER:
+			return True
 		if d[0] != ':':
 			return True
 	
