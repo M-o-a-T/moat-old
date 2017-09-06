@@ -17,7 +17,8 @@
 export PYTHONPATH?=$(shell pwd)
 DESTDIR ?= "/"
 PYDESTDIR ?= ${DESTDIR}
-PYTHON ?= python3
+PYTHON ?= python3.6
+PYTEST := $(PYTHON) $(shell which py.test-3)
 
 all: subfiles
 	cp -a _geventreactor/Pinako/geventrpyc/__init__.py moat/gevent_rpyc.py
@@ -54,7 +55,7 @@ clean:
 test: all
 	@rm -f test.log
 	env PYTHONASYNCIODEBUG=1 \
-	py.test-3 --cov-report term-missing \
+	$(PYTEST) --cov-report term-missing \
 		--assert=plain tests \
 		--cov=tests \
 		--cov=moat.cmd \
@@ -68,7 +69,7 @@ test: all
 t: all
 	@rm -f test.log
 	env PYTHONASYNCIODEBUG=1 \
-	py.test-3 --cov-report term-missing -xsv tests
+	$(PYTEST) --cov-report term-missing -xsv tests
 
 otest: all
 	@$(MAKE) -C test --no-print-directory otest
