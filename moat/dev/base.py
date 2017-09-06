@@ -118,9 +118,12 @@ class BaseTypedDir(ManagedEtcThing,EtcDir):
 		return self._type.default
 
 	def _set_type(self, typename):
+		root = self.root
+		if root is None:
+			return
 		if self._type is not None and self._type._type.name == typename:
 			return
-		self._type = self.root.lookup(TYPEDEF_DIR).lookup(typename,name=TYPEDEF)
+		self._type = root.lookup(TYPEDEF_DIR).lookup(typename,name=TYPEDEF)
 		self._value = self._type._type(self._type,self)
 
 		try:
