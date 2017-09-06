@@ -74,6 +74,7 @@ import weakref
 import blinker
 from collections.abc import Mapping
 
+from moat.types.base import _NOTGIVEN
 from moat.types.etcd import recEtcDir, Subdirs
 from . import webdef_names, WEBDEF_DIR,WEBDEF, WEBDATA_DIR,WEBDATA, WEBCONFIG, WEBSERVER_DIR, WEBSERVER
 from moat.util import do_async, r_attr
@@ -81,9 +82,6 @@ from moat.dev import DEV_DIR,DEV
 
 import logging
 logger = logging.getLogger(__name__)
-
-class _NOTGIVEN:
-	pass
 
 def get_template(app, template_name):
 	"""Helper to fetch a template"""
