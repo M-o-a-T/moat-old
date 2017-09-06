@@ -377,6 +377,7 @@ class WebdataDir(recEtcDir,EtcDir):
 			tr = await tr.lookup(self['value'])
 			tr = await tr.lookup(DEV)
 			self._value = tr
+			self.mon = tr.add_monitor(self.update_value)
 
 	@property
 	def data(self):
@@ -441,7 +442,7 @@ class WebdataDir(recEtcDir,EtcDir):
 		if self.mon is not None:
 			pass
 
-		do_async(self._setup_value)
+#		do_async(self._setup_value)
 		if self.is_new and hasattr(self.parent,'updates'):
 			self.parent.updates.send(self)
 		elif self.is_new is None:
@@ -452,7 +453,75 @@ class WebdataDir(recEtcDir,EtcDir):
 		else:
 			self.updates.send(self, full=True)
 
-	async def _setup_value(self):
+#	async def _setup_value(self):
+#		p = self.parent
+#		if p is None:
+#			return
+#		if p.mon is not None:
+#			p.mon.cancel()
+#		p._value = await self.root.lookup(*(DEV_DIR+tuple(self.value.split('/'))),name=DEV)
+#		p.mon = p._value.add_monitor(p.update_value)
+#		p.update_value(p._value)
+
+	def update_value(self,_):
+		self.updates.send(self)
+#		key = self.get('subvalue','value')
+#		return r_attr(self,key, attr=False)
+
+
+#	def has_value(self,_):
+#		try:
+#			val = self['value']
+#		except KeyError:
+#			pass
+#		else:
+#			self.mon.cancel()
+#			self.mon = val.add_monitor(self.update_value)
+		
+class WebconfigDir(EtcDir):
+	pass
+WebconfigDir.register('order', cls=EtcInteger)
+
+class WebdataType(EtcString):
+	"""Type path for WebdataDir"""
+	def has_update(self):
+		p = self.parent
+		if p is None:
+			return
+		if self.is_new is None:
+			p._type = WebdefBase()
+		else:
+			r = self.root
+			if r is not None:
+				p._type = r.lookup(*(WEBDEF_DIR+tuple(self.value.split('/'))),name=WEBDEF)
+
+class WebdataValue(EtcString):
+	"""Value path for WebdataDir"""
+	_propagate_updates=False
+	_update_delay = 0.01
+	_reset_delay_job = None
+
+	def has_update(self):
+		p = self.parent
+		if p is None:
+			return
+		if self.is_new is None:
+			p._value = None
+			if p.mon is not None:
+				p.mon.cancel()
+		else:
+			self._update_delay = 1
+			if self._reset_delay_job is not None:
+				self._reset_delay_job.cancel()
+			self._reset_delay_job = self._loop.call_later(1, self._reset_delay)
+
+			do_async(self._has_update)
+
+	def _reset_delay(self):
+		self._reset_delay_job = None
+		self._update_delay = 0.01
+
+	async def _has_update(self):
 		p = self.parent
 		if p is None:
 			return
@@ -461,30 +530,6 @@ class WebdataDir(recEtcDir,EtcDir):
 		p._value = await self.root.lookup(*(DEV_DIR+tuple(self.value.split('/'))),name=DEV)
 		p.mon = p._value.add_monitor(p.update_value)
 		p.update_value(p._value)
-
-	def update_value(self,_):
-		self.updates.send(self, value=val.value)
-
-	def has_value(self,x):
-		try:
-			val = self['value']
-		except KeyError:
-			pass
-		else:
-			self.mon.cancel()
-			self.mon = val.add_monitor(self.update_value)
-		
-class WebconfigDir(EtcDir):
-	pass
-WebconfigDir.register('order', cls=EtcInteger)
-
-class WebdataType(EtcString):
-	"""Type path for WebdataDir"""
-	pass
-
-class WebdataValue(EtcString):
-	"""Value path for WebdataDir"""
-	pass
 
 class WebdataSubvalue(EtcString):
 	"""Value subpath for WebdataDir"""

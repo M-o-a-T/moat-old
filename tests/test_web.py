@@ -25,6 +25,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 
 import os
 import asyncio
+import aiohttp
 import pytest
 from time import time
 from moat.proto import ProtocolClient
@@ -33,6 +34,11 @@ from moat.task import TASKSTATE
 import mock
 import aio_etcd as etcd
 from contextlib import suppress
+from arsenic import get_session as arsenic_session
+from arsenic.browsers import PhantomJS as WebBrowser
+from arsenic.services import PhantomJS as WebDriver
+#from arsenic.browsers import Firefox as WebBrowser
+#from arsenic.services import Geckodriver as WebDriver
 
 from . import ProcessHelper, is_open, MoatTest
 from moat.script.task import _task_reg
@@ -46,10 +52,11 @@ _logged = {} # debug: only log changed directories
 async def test_main(loop):
 	from etcd_tree import client
 	from . import cfg
-	amqt = -1
 	t = await client(cfg, loop=loop)
 	td = await t.tree("/")
 	u = Unit("test.moat.web.client", amqp=cfg['config']['amqp'], loop=loop)
+	logger.debug("U %s",u.uuid)
+	await u.start()
 	port=39999+(os.getpid() % 25535)
 
 	m = MoatTest(loop=loop)
@@ -80,7 +87,7 @@ async def test_main(loop):
 		r = await run("-vvvc test.cfg web data add test/web/one float/temperature value=extern/web/one Web One")
 		assert r == 0, r
 
-		r = await run("-vvvc test.cfg web server add test/one port=%d Test Server One" % (port,))
+		r = await run("-vvvc test.cfg web server add test/foo port=%d Test Server Foo" % (port,))
 		assert r == 0, r
 
 
@@ -92,7 +99,7 @@ async def test_main(loop):
 		assert r == 0, r
 		r = await run("-vvvc test.cfg run -qgootS moat/scan/web/server/test")
 		assert r == 0, r
-		r = await run("-vvvc test.cfg run -qgootS moat/scan/web/server/test/one")
+		r = await run("-vvvc test.cfg run -qgootS moat/scan/web/server/test/foo")
 		assert r == 0, r
 		r = await run("-vvvc test.cfg run -qgootS moat/scan/device/extern")
 		assert r == 0, r
@@ -108,7 +115,7 @@ async def test_main(loop):
 		t1 = time()
 		while True:
 			try:
-				r = await td.subdir('status','run','web','test','one',TASKSTATE, create=False)
+				r = await td.subdir('status','run','web','test','foo',TASKSTATE, create=False)
 				r['running']
 				r = await td.subdir('status','run','extern',TASKSTATE, create=False)
 				r['running']
@@ -120,15 +127,51 @@ async def test_main(loop):
 			await asyncio.sleep(0.1, loop=loop)
 			if time()-t1 >= 30:
 				raise RuntimeError("Condition 1")
-		await asyncio.sleep(1, loop=loop)
-		await u.alert('test.web.one',{'value':19.5})
 
-		m2 = MoatTest(loop=loop)
-		f = m2.parse("-vvvc test.cfg web serve -b 127.0.0.1 --port=%d" % (port,))
-		f = asyncio.ensure_future(f,loop=loop)
+		async def run_websocket():
+			session = aiohttp.ClientSession()
+			async with session.ws_connect('ws://127.0.0.1:%d/api/control' % (port,)) as ws:
+				ws.send_json({'action':'locate', 'location':'test'})
 
-		logger.warn("Connect to http://127.0.0.1:%d/test" % (port,))
-		await asyncio.sleep(100, loop=loop)
+				async for msg in ws:
+					if msg.type == aiohttp.WSMsgType.TEXT:
+						print(msg.data)
+					elif msg.type == aiohttp.WSMsgType.CLOSED:
+						break
+					elif msg.type == aiohttp.WSMsgType.ERROR:
+						break
+		await asyncio.sleep(0.5, loop=loop)
+		#f = asyncio.ensure_future(run_websocket(), loop=loop)
+
+		asyncio.set_event_loop(loop) # required for subprocess handling
+
+		# Run the driver and start a session
+		async with arsenic_session(WebDriver(), WebBrowser()) as session:
+			await session.get('http://127.0.0.1:%d/#test' % (port,))
+			# wait up to 5 seconds to get the page's content
+			c = await session.wait_for_element(5, '#content')
+			# print the text of the h1 element
+			tx = await c.get_text()
+			assert "web|data|test" in tx, tx
+
+			async def dly(n,pred):
+				while n > 0:
+					x = await session.get_page_source()
+					if pred(x):
+						return
+					n -= 0.5
+					await asyncio.sleep(0.5, loop=loop)
+				raise RuntimeError("Predicate not taken")
+
+			logger.debug("wait for None")
+			await dly(5,lambda x:"…none yet…" in x)
+			logger.debug("Set Value")
+			await u.alert('test.web.one',{'value':True})
+			await asyncio.sleep(0.5, loop=loop)
+			logger.debug("wait for not-None")
+			await dly(3,lambda x:"…none yet…" not in x)
+			logger.debug("wait done")
+			# TODO: click on the thing
 
 	finally:
 		jj = (e,f,g,h)
