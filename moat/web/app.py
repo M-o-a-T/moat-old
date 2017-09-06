@@ -59,6 +59,7 @@ class FakeReq:
     """A very hacky way to test whether a resource exists on a path"""
     def __init__(self, path):
         self.__path = path
+    _method = 'GET'
     @property
     def method(self):
         return 'GET'
