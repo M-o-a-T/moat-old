@@ -45,14 +45,10 @@ _logged = {} # debug: only log changed directories
 async def test_extern_fake(loop):
 	from etcd_tree import client
 	from . import cfg
-	amqt = -1
 	t = await client(cfg, loop=loop)
 	td = await t.tree("/")
 	u = Unit("test.moat.extern.client", amqp=cfg['config']['amqp'], loop=loop)
 	@u.register_alert("test.fake.temperature", call_conv=CC_DATA)
-	def get_temp(val):
-		nonlocal amqt
-		amqt = val
 	await u.start()
 
 	m = MoatTest(loop=loop)
