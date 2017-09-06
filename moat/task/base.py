@@ -32,6 +32,7 @@ from . import _VARS, TASKDEF_DIR,TASKDEF
 from moat.types import TYPEDEF,TYPEDEF_DIR
 from moat.types.etcd import recEtcDir, MoatRef
 from moat.util import do_async
+from moat.types.error import hasErrorDir
 
 import logging
 logger = logging.getLogger(__name__)
@@ -187,7 +188,7 @@ class TaskDef(recEtcDir,EtcDir):
 	
 _setup_task_vars(TaskDef)
 
-class TaskState(recEtcDir,EtcDir):
+class TaskState(hasErrorDir,recEtcDir,EtcDir):
 	"""\
 		etcd directory for task state: /status/task/**/:task
 

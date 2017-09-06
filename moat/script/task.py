@@ -283,6 +283,8 @@ class Task(regTask):
 			if state is not None:
 				await run_state.set("state",state)
 				await send_alert(state=state, reason=str(exc))
+				if state == "error":
+					await run_state.set_error("job",str(exc))
 
 			exc.__context__ = None # the cancelled run_task is not interesting
 			await run_state.set("message",str(exc))
@@ -295,7 +297,7 @@ class Task(regTask):
 		except Exception as exc:
 			try:
 				await self.teardown()
-			except Exception as exc:
+			except Exception as exc2:
 				logger.exception("cleaning up")
 			await save_exc(exc)
 			raise
@@ -374,6 +376,7 @@ class Task(regTask):
 					await run_state.set("state","ok")
 					await send_alert(state='done', result=res)
 					await run_state.set("message",str(res))
+					await run_state.clear_error("job")
 					return res
 
 		finally: # Clean up everything
