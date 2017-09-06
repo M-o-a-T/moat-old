@@ -235,8 +235,7 @@ class WebserverBase(EtcDir):
 class WebserverSubdirs(Subdirs):
 	def _add(self, a):
 		if a == WEBSERVER:
-			import pdb;pdb.set_trace()
-			return "add",'web/serve',('web',)+self.dir.path[len(WEBSERVER_DIR):],{}
+			return "add","web/serve",('web',)+self.dir.path[len(WEBSERVER_DIR):],{}
 		return super()._add(a)
 
 class WebserverPath(EtcDir):
