@@ -116,7 +116,6 @@ class Task(regTask):
 			whatever resources its code allocates.
 			"""
 		self.loop = cmd.root.loop
-		super().__init__(self.run(), loop=self.loop)
 		if isinstance(name,(list,tuple)):
 			assert len(name)
 			path = name
@@ -126,14 +125,15 @@ class Task(regTask):
 		assert name[0] != '/'
 		assert name[-1] != '/'
 		assert '//' not in name
+		self.name = name
+		self.path = path
+		super().__init__(self.run(), loop=self.loop)
 
 		self.cmd = cmd
 		self.config = config
 		self.cfg = cfg
 		self._ttl = config.get('ttl',None) if _ttl is None else _ttl
 		self._refresh = config.get('refresh',None) if _refresh is None else _refresh
-		self.name = name
-		self.path = path
 		self.parents = parents
 		self.taskdir = taskdir
 
