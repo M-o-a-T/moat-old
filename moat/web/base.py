@@ -457,12 +457,12 @@ class WebdataDir(hasErrorDir,recEtcDir,EtcDir):
 			vs = self.get('subvalue','value')
 			root = self.root
 			try:
-				v = self.get('value',None)
+				v = self._get('value',None)
 				if isinstance(v,EtcAwaiter):
 					v = await v
 				if v is not None and root is not None:
 					tr = await root.lookup(DEV_DIR)
-					tr = await tr.lookup(v)
+					tr = await tr.lookup(v.value)
 					tr = await tr.lookup(DEV)
 					tr = await tr.lookup(vs)
 				else:
