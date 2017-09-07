@@ -81,8 +81,7 @@ Check etcd access, and basic data layout.
 		async def task(self):
 			logger.debug("start: _do3")
 			await asyncio.sleep(0.2,loop=self.loop)
-			logger.error("The following RuntimeError is part of the test.")
-			raise RuntimeError("Dying")
+			raise RuntimeError("Dying – triggered by testing, not an error")
 
 	class Task_do4(Task):
 		async def task(self):
