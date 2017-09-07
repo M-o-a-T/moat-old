@@ -116,7 +116,7 @@ Check etcd access, and basic data layout.
 		retval = 0
 		etc = await self.root._get_etcd()
 		tree = await self.root._get_tree()
-		log = logging.getLogger("etcd")
+		log = logging.getLogger(__name__+"/etcd")
 		show = log.info if self.parent.fix else log.warning
 
 		try:
@@ -234,6 +234,7 @@ class TypesCommand(Command):
 
 	async def do(self,args):
 		etc = await self.root._get_etcd()
+		log = logging.getLogger(__name__+"/types")
 		from moat.types import types,TYPEDEF_DIR,TYPEDEF
 		for t in types():
 			path = tuple(t.name.split('/'))
@@ -241,10 +242,10 @@ class TypesCommand(Command):
 				try:
 					d = await etc.tree(TYPEDEF_DIR+path+(TYPEDEF,), create=False)
 				except etcd.EtcdKeyNotFound:
-					logger.info("Creating %s",t.name)
+					log.info("Creating %s",t.name)
 					d = await etc.tree(TYPEDEF_DIR+path+(TYPEDEF,), create=True)
 				else:
-					logger.debug("Found %s",t.name)
+					log.debug("Found %s",t.name)
 			else:
 				d = await etc.tree(TYPEDEF_DIR+path+(TYPEDEF,))
 			for k,v in t.vars.items():
@@ -262,6 +263,8 @@ class ErrorsCommand(Command):
 		"""
 
 	async def do(self,args):
+		log = logging.getLogger(__name__+"/errors")
+		show = log.info if self.parent.fix else log.warning
 		etc = await self.root._get_etcd()
 		s = await self.root._get_tree()
 		from moat.types import ERROR_DIR
@@ -290,6 +293,7 @@ class WebCommand(Command):
 
 	async def do(self,args):
 		etc = await self.root._get_etcd()
+		log = logging.getLogger(__name__+"/web")
 		from moat.web import webdefs,WEBDEF_DIR,WEBDEF
 		for t in webdefs():
 			path = tuple(t.name.split('/'))
@@ -297,10 +301,10 @@ class WebCommand(Command):
 				try:
 					d = await etc.tree(WEBDEF_DIR+path+(WEBDEF,), create=False)
 				except etcd.EtcdKeyNotFound:
-					logger.info("Creating %s",t.name)
+					log.info("Creating %s",t.name)
 					d = await etc.tree(WEBDEF_DIR+path+(WEBDEF,), create=True)
 				else:
-					logger.debug("Found %s",t.name)
+					log.debug("Found %s",t.name)
 			else:
 				d = await etc.tree(WEBDEF_DIR+path+(WEBDEF,))
 
