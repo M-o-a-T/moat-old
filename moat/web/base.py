@@ -438,7 +438,10 @@ class WebdataDir(hasErrorDir,recEtcDir,EtcDir):
 		if self.mon is not None:
 			pass
 
-		self.root.task(self._setup_value)
+		root = self.root
+		if root is None:
+			return
+		root.task(self._setup_value)
 		if self.is_new and hasattr(self.parent,'updates'):
 			self.parent.updates.send(self)
 		elif self.is_new is None:
