@@ -76,6 +76,7 @@ from collections.abc import Mapping
 
 from moat.types.base import _NOTGIVEN
 from moat.types.etcd import recEtcDir, Subdirs
+from moat.types.error import hasErrorDir
 from . import webdef_names, WEBDEF_DIR,WEBDEF, WEBDATA_DIR,WEBDATA, WEBCONFIG, WEBSERVER_DIR, WEBSERVER
 from moat.util import do_async, r_attr
 from moat.dev import DEV_DIR,DEV
@@ -351,7 +352,7 @@ class WebdefDir(WebdefBase,recEtcDir,EtcDir):
 		res = m(parent=parent,pre=pre,**kw)
 		return res
 
-class WebdataDir(recEtcDir,EtcDir):
+class WebdataDir(hasErrorDir,recEtcDir,EtcDir):
 	"""Directory for /web/data/PATH/:item"""
 	_type = None
 	_value = None
@@ -361,6 +362,7 @@ class WebdataDir(recEtcDir,EtcDir):
 	def __init__(self,*a,**k):
 		self.updates = blinker.Signal()
 		super().__init__(*a,**k)
+		self._value_lock = asyncio.Lock(loop=self._loop)
 
 	async def init(self):
 		"""Need to look up my type, and all its super-defs"""
@@ -372,12 +374,6 @@ class WebdataDir(recEtcDir,EtcDir):
 			self._type = tr
 		else:
 			self._type = WebdefBase() # gaah
-		if 'value' in self:
-			tr = await self.root.lookup(DEV_DIR)
-			tr = await tr.lookup(self['value'])
-			tr = await tr.lookup(DEV)
-			self._value = tr
-			self.mon = tr.add_monitor(self.update_value)
 
 	@property
 	def data(self):
@@ -442,7 +438,7 @@ class WebdataDir(recEtcDir,EtcDir):
 		if self.mon is not None:
 			pass
 
-#		do_async(self._setup_value)
+		do_async(self._setup_value)
 		if self.is_new and hasattr(self.parent,'updates'):
 			self.parent.updates.send(self)
 		elif self.is_new is None:
@@ -453,7 +449,29 @@ class WebdataDir(recEtcDir,EtcDir):
 		else:
 			self.updates.send(self, full=True)
 
-#	async def _setup_value(self):
+	async def _setup_value(self):
+		async with self._value_lock:
+			vs = self.get('subvalue','value')
+			root = self.root
+			try:
+				v = self.get('value',None)
+				if isinstance(v,EtcAwaiter):
+					v = await v
+				if v is not None and root is not None:
+					tr = await root.lookup(DEV_DIR)
+					tr = await tr.lookup(v)
+					tr = await tr.lookup(DEV)
+					tr = await tr.lookup(vs)
+				else:
+					tr = None
+			except KeyError as err:
+				await self.set_error("lookup",str(err))
+			else:
+				self._value = tr
+				if tr is not None:
+					self.mon = tr.add_monitor(self.update_value)
+				await self.clear_error("lookup")
+
 #		p = self.parent
 #		if p is None:
 #			return
@@ -465,19 +483,7 @@ class WebdataDir(recEtcDir,EtcDir):
 
 	def update_value(self,_):
 		self.updates.send(self)
-#		key = self.get('subvalue','value')
-#		return r_attr(self,key, attr=False)
 
-
-#	def has_value(self,_):
-#		try:
-#			val = self['value']
-#		except KeyError:
-#			pass
-#		else:
-#			self.mon.cancel()
-#			self.mon = val.add_monitor(self.update_value)
-		
 class WebconfigDir(EtcDir):
 	pass
 WebconfigDir.register('order', cls=EtcInteger)
