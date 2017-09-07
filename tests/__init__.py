@@ -36,6 +36,7 @@ from socket import socket
 import time
 from moat.script.main import Moat
 import io
+import gc
 from yaml import safe_load
 from contextlib import suppress
 import aio_etcd as etcd
@@ -132,7 +133,9 @@ class MoatTest(Moat):
 	async def parse(self,cmd):
 		if isinstance(cmd,str):
 			cmd = [x for x in cmd.split(' ') if x != '']
-		return (await super().parse(cmd))
+		res = await super().parse(cmd)
+		gc.collect()
+		return res
 
 	async def clean_ext(self, what, *p):
 		"""Helper to clean up an external subsys before testing"""
