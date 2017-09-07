@@ -130,6 +130,10 @@ class ErrorPtr(EtcXValue):
 class hasErrorDir:
 	"""an etcd mix-in which manages error messages"""
 
+	def __init__(self,*a,**k):
+		super().__init__(*a,**k)
+		self._error_lock = asyncio.Lock(loop=self._loop)
+
 	async def init(self):
 		await super().init()
 		e = self.get('error',None)
@@ -145,31 +149,33 @@ class hasErrorDir:
 		return super().subtype(*path,raw=raw,**kw)
 
 	async def set_error(self, tag, msg, **kw):
-		try:
-			e = self['error'][tag]
-		except KeyError:
-			pass
-		else:
-			ptr = await e.ptr
-			if ptr is not None:
-				await ptr.set('msg',msg)
-				await ptr.set('counter',ptr.get('counter',1)+1)
-				await ptr.set('timestamp',time())
-				return
+		async with self._error_lock:
+			try:
+				e = await self['error'][tag]
+			except KeyError:
+				pass
+			else:
+				ptr = await e.ptr
+				if ptr is not None:
+					await ptr.set('msg',msg)
+					await ptr.set('counter',ptr.get('counter',1)+1)
+					await ptr.set('timestamp',time())
+					return
 
-		t = await self.root.subdir(ERROR_DIR, name=tag)
-		kw['loc'] = '/'.join(self.path)
-		kw['msg'] = msg
-		kw['timestamp'] = time()
-		v = await t.set(None,kw)
-		v = t[v[0]]
-		await self.set('error',{tag:v.name})
-		return v
+			t = await self.root.subdir(ERROR_DIR, name=tag)
+			kw['loc'] = '/'.join(self.path)
+			kw['msg'] = msg
+			kw['timestamp'] = time()
+			v = await t.set(None,kw)
+			v = t[v[0]]
+			await self.set('error',{tag:v.name})
+			return v
 
 	async def clear_error(self, tag):
-		try:
-			v = self['error'][tag]
-		except KeyError:
-			return
-		await v.delete()
+		async with self._error_lock:
+			try:
+				v = self['error'][tag]
+			except KeyError:
+				return
+			await v.delete()
 
