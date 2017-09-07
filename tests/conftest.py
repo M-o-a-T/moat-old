@@ -39,6 +39,7 @@ logger = logging.getLogger(__name__)
 @pytest.yield_fixture
 def loop(request):
     loop = asyncio.new_event_loop()
+    loop.slow_callback_duration = 0.5
     asyncio.set_event_loop(None)
     loop.set_task_factory(makeTask)
     loop.set_exception_handler(handle_exc)
