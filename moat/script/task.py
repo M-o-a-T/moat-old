@@ -40,7 +40,6 @@ from bdb import BdbQuit
 
 from moat.task import _VARS, TASK_DIR,TASKDEF_DIR,TASK,TASKDEF, TASKSTATE_DIR,TASKSTATE
 from moat.task.reg import Reg, Task as regTask
-from moat.util import do_async
 
 import logging
 logger = logging.getLogger(__name__)

@@ -32,8 +32,6 @@ from qbroker.util import import_string
 from etcd_tree import EtcRoot, EtcDir, EtcString, EtcInteger, EtcFloat, EtcXValue, ReloadRecursive, EtcAwaiter
 from etcd_tree.node import DummyType
 
-from moat.util import do_async
-
 import logging
 logger = logging.getLogger(__name__)
 
@@ -123,7 +121,7 @@ class ErrorPtr(EtcXValue):
 		
 	def has_update(self):
 		if self.is_new is None:
-			do_async(self.delete())
+			self.root.task(self.delete())
 		super().has_update()
 
 	

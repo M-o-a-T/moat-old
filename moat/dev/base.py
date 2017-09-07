@@ -30,7 +30,6 @@ import aio_etcd as etcd
 from time import time
 from weakref import ref
 
-from moat.util import do_async
 from moat.types import TYPEDEF_DIR,TYPEDEF, type_names
 from moat.types.managed import ManagedEtcThing,ManagedEtcDir
 from qbroker.unit import CC_DATA

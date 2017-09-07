@@ -31,7 +31,6 @@ from qbroker.util import import_string
 from . import _VARS, TASKDEF_DIR,TASKDEF
 from moat.types import TYPEDEF,TYPEDEF_DIR
 from moat.types.etcd import recEtcDir, MoatRef
-from moat.util import do_async
 from moat.types.error import hasErrorDir
 
 import logging
@@ -58,7 +57,7 @@ class TaskdefName(EtcString):
 		p = self.parent
 		if p is not None:
 			p.taskdef_pending.clear()
-			do_async(p._update_taskdef,self._value, _loop=self._loop)
+			self.root.task(p._update_taskdef,self._value)
 
 	async def init(self):
 		await self.parent._update_taskdef(self._value)

@@ -29,7 +29,6 @@ import aio_etcd as etcd
 from time import time
 from weakref import ref
 
-from moat.util import do_async
 from moat.types import TYPEDEF_DIR,TYPEDEF, type_names
 from moat.dev import devices, DEV
 

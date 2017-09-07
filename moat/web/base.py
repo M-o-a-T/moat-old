@@ -78,7 +78,7 @@ from moat.types.base import _NOTGIVEN
 from moat.types.etcd import recEtcDir, Subdirs
 from moat.types.error import hasErrorDir
 from . import webdef_names, WEBDEF_DIR,WEBDEF, WEBDATA_DIR,WEBDATA, WEBCONFIG, WEBSERVER_DIR, WEBSERVER
-from moat.util import do_async, r_attr
+from moat.util import r_attr
 from moat.dev import DEV_DIR,DEV
 
 import logging
@@ -438,7 +438,7 @@ class WebdataDir(hasErrorDir,recEtcDir,EtcDir):
 		if self.mon is not None:
 			pass
 
-		do_async(self._setup_value)
+		self.root.task(self._setup_value)
 		if self.is_new and hasattr(self.parent,'updates'):
 			self.parent.updates.send(self)
 		elif self.is_new is None:
@@ -521,7 +521,7 @@ class WebdataValue(EtcString):
 				self._reset_delay_job.cancel()
 			self._reset_delay_job = self._loop.call_later(1, self._reset_delay)
 
-			do_async(self._has_update)
+			self.root.task(self._has_update)
 
 	def _reset_delay(self):
 		self._reset_delay_job = None
