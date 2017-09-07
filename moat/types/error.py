@@ -65,7 +65,7 @@ class ErrorRecord(recEtcDir,EtcDir):
 
 	async def delete(self, both=True):
 		if both:
-			ptr = await self.get_ptr
+			ptr = await self.get_ptr()
 			if ptr is not None:
 				await ptr.delete(both=False)
 		p = self.parent
