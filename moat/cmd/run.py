@@ -293,11 +293,13 @@ Run MoaT tasks.
 		for name,tj in js.items():
 			t,j = tj
 			try:
-				logger.debug("Init TM %s",'/'.join(j.path))
+				logger.debug("Init TM %s %s",'/'.join(j.path),j)
 				await j.init()
 			except JobIsRunningError:
+				logger.debug("Running TM %s",'/'.join(j.path))
 				continue
 			except Exception as exc:
+				logger.debug("Error TM %s %s",'/'.join(j.path),repr(exc))
 				# Let's assume that this is fatal.
 				await self.root.etcd.set(TASKSTATE_DIR+j.path+(TASKSTATE,"debug"), "".join(traceback.format_exception(exc.__class__,exc,exc.__traceback__)))
 				f = asyncio.Future(loop=self.root.loop)
@@ -305,7 +307,7 @@ Run MoaT tasks.
 				f.name = f.path = j.path
 				self.jobs[j.path] = f
 
-				if self.options.oneshot:
+				if self.options.oneshot or isinstance(exc,asyncio.CancelledError):
 					return
 			else:
 				logger.debug("AddJob TM %s",j.name)
