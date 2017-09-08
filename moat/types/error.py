@@ -103,7 +103,10 @@ class ErrorPtr(EtcXValue):
 	error = None
 	async def delete(self, both=True):
 		if both and self.ptr is not None:
-			await self.ptr.delete(both=False)
+			try:
+				await self.ptr.delete(both=False)
+			except KeyError:
+				return
 		p = self.parent
 		await super().delete()
 		if p is not None and not len(p):
