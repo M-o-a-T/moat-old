@@ -116,7 +116,7 @@ Check etcd access, and basic data layout.
 		retval = 0
 		etc = await self.root._get_etcd()
 		tree = await self.root._get_tree()
-		log = logging.getLogger(__name__+"/etcd")
+		log = logging.getLogger(__name__+".etcd")
 		show = log.info if self.parent.fix else log.warning
 
 		try:
@@ -234,7 +234,7 @@ class TypesCommand(Command):
 
 	async def do(self,args):
 		etc = await self.root._get_etcd()
-		log = logging.getLogger(__name__+"/types")
+		log = logging.getLogger(__name__+".types")
 		from moat.types import types,TYPEDEF_DIR,TYPEDEF
 		for t in types():
 			path = tuple(t.name.split('/'))
@@ -263,7 +263,7 @@ class ErrorsCommand(Command):
 		"""
 
 	async def do(self,args):
-		log = logging.getLogger(__name__+"/errors")
+		log = logging.getLogger(__name__+".errors")
 		show = log.info if self.parent.fix else log.warning
 		etc = await self.root._get_etcd()
 		s = await self.root._get_tree()
@@ -293,7 +293,7 @@ class WebCommand(Command):
 
 	async def do(self,args):
 		etc = await self.root._get_etcd()
-		log = logging.getLogger(__name__+"/web")
+		log = logging.getLogger(__name__+".web")
 		from moat.web import webdefs,WEBDEF_DIR,WEBDEF
 		for t in webdefs():
 			path = tuple(t.name.split('/'))
