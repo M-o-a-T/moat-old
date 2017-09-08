@@ -471,7 +471,7 @@ class _Subdirs(object):
 		self.dir = dir
 		self.known = set()
 	async def __aiter__(self):
-		self.it = iter(self.dir.keys())
+		self.it = iter(list(self.dir.keys()))
 		return self
 
 	def _add(self,a):
