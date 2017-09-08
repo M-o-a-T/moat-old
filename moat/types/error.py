@@ -124,7 +124,7 @@ class ErrorPtr(EtcXValue):
 		
 	def has_update(self):
 		if self.is_new is None:
-			self.root.task(self.delete())
+			self.root.task(self.delete)
 		super().has_update()
 
 	
