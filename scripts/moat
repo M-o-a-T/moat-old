@@ -50,7 +50,7 @@ async def main(args):
 			print(e.output, file=sys.stderr)
 		return e.status
 	except asyncio.CancelledError:
-		print("Cancelled due to error.", file=sys.stderr)
+		print("Cancelled.", file=sys.stderr)
 		ret = 8
 	finally:
 		await c.finish()
