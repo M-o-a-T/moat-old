@@ -47,9 +47,6 @@ logger = logging.getLogger(__name__)
 import os
 min_timeout = float(os.environ.get('MOAT_DEBUG_TIMEOUT',0))
 
-class _NOTGIVEN:
-	pass
-
 @attr.s
 class JobIsRunningError(RuntimeError):
 	"""The job is already active"""
