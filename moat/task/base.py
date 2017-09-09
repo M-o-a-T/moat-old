@@ -95,10 +95,15 @@ class TaskDir(recEtcDir,EtcDir):
 		redo = True
 		while redo:
 			redo = False
-			td = self._get('taskdef')
-			if not td.is_ready:
-				await td.ready
+			try:
+				td = self._get('taskdef')
+			except KeyError:
+				assert not self.taskdef_pending.is_set()
 				redo = True
+			else:
+				if not td.is_ready:
+					await td.ready
+					redo = True
 			if self.taskdef_pending is None:
 				redo = True
 			elif not self.taskdef_pending.is_set():
