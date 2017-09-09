@@ -24,6 +24,7 @@ import qbroker.codec.json_obj as json
 
 import logging
 logger = logging.getLogger(__name__)
+wslogger = logging.getLogger(__name__+'.ws')
 
 from moat.web import WEBDATA_DIR,WEBDATA
 from .app import BaseView,BaseExt
@@ -56,12 +57,12 @@ class ApiView(BaseView):
         await self.ws.prepare(self.request)
 
         #socks.add(self)
-        logger.debug('open')
+        wslogger.debug('open')
         self.job = asyncio.Task.current_task(srv.loop)
         try:
             async for msg in self.ws:
                 if msg.type == aiohttp.WSMsgType.TEXT:
-                    logger.debug("WebSocket: recv %s",msg.data)
+                    wslogger.debug("WebSocket: recv %s",msg.data)
                     msg = json.decode(msg.data)
                     act = msg.get('action',"")
                     if act == "locate":
@@ -74,7 +75,7 @@ class ApiView(BaseView):
                     else:
                         id = msg.get('id',None)
                         if id is None:
-                            logger.warn("Unknown action: %s",repr(msg))
+                            wslogger.warn("Unknown action: %s",repr(msg))
                         else:
                             try:
                                 this = self.items[id]
@@ -85,14 +86,14 @@ class ApiView(BaseView):
                                 logger.exception("%s on %s:%s",act,id,this)
                                 break
                 elif msg.type == aiohttp.WSMsgType.ERROR:
-                    logger.warn('ws connection closed: %s', ws.exception())
+                    wslogger.warn('connection closed: %s', ws.exception())
                     break
                 else:
-                    logger.info("Msg %s",msg)
+                    wslogger.info("Msg %s",msg)
         finally:
             #socks.remove(self)
             #sig.disconnect(self.send_update)
-            logger.debug('closed')
+            wslogger.debug('closed')
             self.job = None
             await self.ws.close()
             pass
@@ -196,10 +197,11 @@ class ApiView(BaseView):
         if self.ws.closed:
             self.job.cancel()
             return
+        wslogger.debug("send %s",kw)
         try:
             self.ws.send_json(kw)
         except Exception as exc:
-            logger.exception("Xmit %s",kw)
+            wslogger.exception("sending %s",kw)
             if self.job is not None:
                 self.job.cancel()
 
