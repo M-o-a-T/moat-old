@@ -308,10 +308,12 @@ class WebCommand(Command):
 			else:
 				d = await etc.tree(WEBDEF_DIR+path+(WEBDEF,))
 
-			for k,v in t.vars.items():
-				if k not in d:
-					await d.set(k,str(v))
-			await d.close()
+			try:
+				for k,v in t.vars.items():
+					if k not in d:
+						await d.set(k,str(v))
+			finally:
+				await d.close()
 
 class AmqpCommand(Command):
 	name = "amqp"
