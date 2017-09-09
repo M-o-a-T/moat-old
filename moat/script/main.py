@@ -98,6 +98,7 @@ You can load more than one config file.
 		super().__init__(*a,**kw)
 		self.loop = loop if loop is not None else asyncio.get_event_loop()
 		self._coro = (loop is not None)
+		self._tree_lock = asyncio.Lock(loop=self.loop)
 
 	async def parse(self, argv):
 		logger.debug("Startup: %s", argv)
@@ -300,13 +301,13 @@ You can load more than one config file.
 
 			Also, populates .types with etcd's TYPEDEF_DIR.
 			"""
-		if self.tree is not None:
-			return self.tree
-		etc = await self._get_etcd()
+		async with self._tree_lock:
+			if self.tree is None:
+				etc = await self._get_etcd()
 
-		from moat.types.etcd import MoatRoot
-		self.tree = await etc.tree('/', root_cls=MoatRoot, immediate=None)
-		self.types = await self.tree.subdir(TYPEDEF_DIR,recursive=True)
+				from moat.types.etcd import MoatRoot
+				self.tree = await etc.tree('/', root_cls=MoatRoot, immediate=None)
+				self.types = await self.tree.subdir(TYPEDEF_DIR,recursive=True)
 		return self.tree
 
 	async def _get_etcd(self):
