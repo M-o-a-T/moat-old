@@ -386,7 +386,7 @@ class Task(regTask):
 			if not keep_running and 'running' in run_state:
 				try:
 					await run_state.delete("running")
-				except etcd.EtcdKeyNotFound:
+				except (KeyError,etcd.EtcdKeyNotFound):
 					# race condition, probably due to interrupt
 					pass # pragma: no cover
 				except asyncio.CancelledError as exc:
