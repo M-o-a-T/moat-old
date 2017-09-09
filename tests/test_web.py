@@ -155,12 +155,18 @@ async def test_main(loop):
 			assert "web|data|test" in tx, tx
 
 			async def dly(n,pred):
-				while n > 0:
+				while True:
+					logger.debug("DLY Fetching")
 					x = await session.get_page_source()
+					logger.debug("DLY Testing")
 					if pred(x):
 						return
+					logger.debug("DLY Again")
 					n -= 0.5
+					if n <= 0:
+						break
 					await asyncio.sleep(0.5, loop=loop)
+				logger.debug("DLY Fail")
 				raise RuntimeError("Predicate not taken")
 
 			logger.debug("wait for None")
