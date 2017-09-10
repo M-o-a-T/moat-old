@@ -273,7 +273,7 @@ async def test_onewire_fake(loop):
 					logger.debug("Found 2")
 					break
 
-				if time()-t1 >= 120:
+				if time()-t1 >= 180:
 					raise RuntimeError("Condition 2")
 				await asyncio.sleep(0.1, loop=loop)
 
