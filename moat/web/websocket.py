@@ -39,6 +39,14 @@ class ApiView(BaseView):
         self.values = {}
         super().__init__(*a,**k)
 
+    async def close(self):
+        if self.job is not None:
+            self.job.cancel()
+            try:
+                await self.job
+            except asyncio.CancelledError:
+                pass
+
     async def get(self):
         app = self.request.app
         sig = app.get('moat.update',None)
@@ -56,7 +64,7 @@ class ApiView(BaseView):
         self.ws = aiohttp.web.WebSocketResponse()
         await self.ws.prepare(self.request)
 
-        #socks.add(self)
+        srv.websockets.add(self)
         wslogger.debug('open')
         self.job = asyncio.Task.current_task(srv.loop)
         try:
@@ -91,7 +99,7 @@ class ApiView(BaseView):
                 else:
                     wslogger.info("Msg %s",msg)
         finally:
-            #socks.remove(self)
+            srv.websockets.remove(self)
             #sig.disconnect(self.send_update)
             wslogger.debug('closed')
             self.job = None

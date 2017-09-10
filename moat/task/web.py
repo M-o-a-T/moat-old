@@ -47,9 +47,12 @@ class WebServer(DeviceMgr):
 	cfg = None
 	cfg_mon = None
 	next_web_id = 1
+	websockets = None
 
 	async def setup(self):
 		await super().setup()
+		self.websockets = set()
+
 		try:
 			self.cfg = await self.tree.lookup(WEBSERVER_DIR+self.path[1:], name=WEBSERVER)
 		except KeyError:
@@ -80,6 +83,9 @@ class WebServer(DeviceMgr):
 			await super().process(*cmd)
 
 	async def teardown(self):
+		for ws in self.websockets:
+			await ws.close()
+
 		if self.cfg_mon is not None:
 			self.cfg_mon.cancel()
 			self.cfg_mon = None
