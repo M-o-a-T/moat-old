@@ -145,39 +145,49 @@ async def test_main(loop):
 
 		asyncio.set_event_loop(loop) # required for subprocess handling
 
-		# Run the driver and start a session
-		async with arsenic_session(WebDriver(), WebBrowser()) as session:
-			await session.get('http://127.0.0.1:%d/#test' % (port,))
-			# wait up to 5 seconds to get the page's content
-			c = await session.wait_for_element(5, '#content')
-			# print the text of the h1 element
-			tx = await c.get_text()
-			assert "web|data|test" in tx, tx
+		async def browse():
+			# Run the driver and start a session
+			async with arsenic_session(WebDriver(), WebBrowser()) as session:
+				await session.get('http://127.0.0.1:%d/#test' % (port,))
+				# wait up to 5 seconds to get the page's content
+				c = await session.wait_for_element(5, '#content')
+				# print the text of the h1 element
+				tx = await c.get_text()
+				assert "web|data|test" in tx, tx
 
-			async def dly(n,pred):
-				while True:
-					logger.debug("DLY Fetching")
-					x = await session.get_page_source()
-					logger.debug("DLY Testing")
-					if pred(x):
-						return
-					logger.debug("DLY Again")
-					n -= 0.5
-					if n <= 0:
-						break
-					await asyncio.sleep(0.5, loop=loop)
-				logger.debug("DLY Fail")
-				raise RuntimeError("Predicate not taken")
+				async def dly(n,pred):
+					while True:
+						logger.debug("DLY Fetching")
+						x = await session.get_page_source()
+						logger.debug("DLY Testing")
+						if pred(x):
+							return
+						logger.debug("DLY Again")
+						n -= 0.5
+						if n <= 0:
+							break
+						await asyncio.sleep(0.5, loop=loop)
+					logger.debug("DLY Fail")
+					raise RuntimeError("Predicate not taken")
 
-			logger.debug("wait for None")
-			await dly(5,lambda x:"…none yet…" in x)
-			logger.debug("Set Value")
-			await u.alert('test.web.one',{'value':True})
-			await asyncio.sleep(0.5, loop=loop)
-			logger.debug("wait for not-None")
-			await dly(3,lambda x:"…none yet…" not in x)
-			logger.debug("wait done")
-			# TODO: click on the thing
+				logger.debug("wait for None")
+				await dly(10,lambda x:"…none yet…" in x)
+				logger.debug("Set Value")
+				await u.alert('test.web.one',{'value':True})
+				await asyncio.sleep(0.5, loop=loop)
+				logger.debug("wait for not-None")
+				await dly(8,lambda x:"…none yet…" not in x)
+				logger.debug("wait done")
+				# TODO: click on the thing
+
+		# Browse twice: once with cold data, once with in-memory
+		await browse()
+		await run_websocket()
+		v = await td.lookup("device/extern/web/one/:dev/value")
+		await v.delete()
+		await td.wait(tasks=True)
+		await browse()
+
 
 	finally:
 		jj = (e,f,g,h)
