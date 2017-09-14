@@ -237,7 +237,7 @@ async def test_onewire_fake(loop):
 			assert r == 0, r
 
 			m2 = MoatTest(loop=loop)
-			f = m2.parse("-vvvc test.cfg run -gS moat/scan/bus/onewire")
+			f = m2.parse("-vvvc test.cfg -d run -gS moat/scan/bus/onewire")
 			f = asyncio.ensure_future(f,loop=loop)
 
 			logger.debug("Waiting 1: create scan task")

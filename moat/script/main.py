@@ -130,6 +130,9 @@ You can load more than one config file.
 		self.parser.add_option('-q', '--quiet',
 			action="store_const", dest="verbose", const=0,
 			help="turn off verbosity")
+		self.parser.add_option('-d', '--debug',
+			action="store_true", dest="debug",
+			help="allow debugging via AMQP")
 		self.parser.add_option('-a', '--app',
 			action="store", dest="app",
 			help="application name. Default is the reversed FQDN.")
@@ -333,7 +336,13 @@ You can load more than one config file.
 		p = self.cfg['config'].get('app','moat')
 		if prefix:
 			p += '.'+prefix
-		self.amqp = res = await make_unit(p, loop=self.loop, amqp=self.cfg['config']['amqp'])
+		if self.options.debug:
+			self.cfg['config']['amqp'].setdefault('handlers',{})['debug'] = True
+		try:
+			self.amqp = res = await make_unit(p, loop=self.loop, amqp=self.cfg['config']['amqp'])
+		except Exception as exc:
+			logger.exception("Ouch")
+		self.amqp.debug_env(cmd=self)
 		return res
 
 	def load(self, subsys,name):

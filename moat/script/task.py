@@ -64,6 +64,9 @@ class JobParentGoneError(RuntimeError):
 # for debugging purposes only
 _task_reg = weakref.WeakValueDictionary()
 
+def NoTask(*a):
+	raise RuntimeError("Tasks are not instantiable that way")
+
 class Task(regTask):
 	"""\
 		I am the base class for a task to be executed within MoaT.
@@ -86,6 +89,11 @@ class Task(regTask):
 
 	_global_loop=False
 	_main = None
+
+	def __getstate__(self):
+		return {'name':self.name}
+	def __reduce__(self):
+		return (NoTask,())
 
 	def __init__(self, cmd, name, taskdir=None, parents=(), config={}, _ttl=None,_refresh=None, **cfg):
 		"""\
@@ -542,7 +550,7 @@ class TaskMaster(asyncio.Future):
 		self.cmd = cmd
 		self.task = task
 		self.path = task.path[len(TASK_DIR):-1]
-		self.name = '/'.join(self.path) # for now
+		self.name = '/'.join(self.path)
 		self.cfg = cfg
 		self.vars = {}
 		self.callback = callback

@@ -97,6 +97,7 @@ Run MoaT tasks.
 
 		etc = await self.root._get_etcd()
 		tree = await self.root._get_tree()
+		amqp = await self.root._get_amqp()
 		if args:
 			if opts.single and len(args) > 1:
 				args = (' '.join(args),)
@@ -115,6 +116,7 @@ Run MoaT tasks.
 		self._monitors = []
 		self.tasks = []
 		self.jobs = {}
+		amqp.debug_env(jobs=self.jobs)
 		self.old_jobs = set()
 		self.rescan = asyncio.Future(loop=self.root.loop)
 		for t in self.args:
@@ -138,7 +140,12 @@ Run MoaT tasks.
 			self.root.loop.add_signal_handler(signal.SIGINT,self._tilt)
 			self.root.loop.add_signal_handler(signal.SIGTERM,self._tilt)
 		await self._start()
-		return (await self._loop())
+		try:
+			res = await self._loop()
+		finally:
+			amqp.debug_env(jobs=None)
+
+		return res
 
 	async def _loop(self):
 		errs = 0
@@ -150,7 +157,7 @@ Run MoaT tasks.
 				for j in done:
 					if j in (self.tilt,self.rescan):
 						continue
-					del self.jobs[j.path]
+					del self.jobs[j.name]
 					try:
 						r = j.result()
 					except asyncio.CancelledError:
@@ -168,13 +175,13 @@ Run MoaT tasks.
 						if self.options.oneshot:
 							break
 						if self.options.oneshot > 1:
-							self.old_jobs.add(j.path)
+							self.old_jobs.add(j.name)
 					else:
 						logger.debug('EXIT %s %s', j.name,r)
 						if self.root.verbose > 1:
 							print(j.name,r, sep='\t', file=self.stdout)
 						if self.options.oneshot:
-							self.old_jobs.add(j.path)
+							self.old_jobs.add(j.name)
 				if self.tilt.done():
 					self.tilt.result() # re-raises any exception
 					break
@@ -255,7 +262,7 @@ Run MoaT tasks.
 
 		js = {}
 		old = set(self.jobs)
-		logger.debug("OLD %s",tuple('/'.join(x) for x in old))
+		logger.debug("OLD %s",old)
 
 		args = {}
 		if self.options.oneshot:
@@ -268,15 +275,16 @@ Run MoaT tasks.
 		while self.tasks:
 			t = self.tasks.pop()
 			path = t.path[len(TASK_DIR):-1]
-			if path in old:
-				old.remove(path)
+			name = '/'.join(path)
+			if name in old:
+				old.remove(name)
 				continue
-			if path in self.jobs:
+			if name in self.jobs:
 				continue
-			if path in self.old_jobs:
+			if name in self.old_jobs:
 				continue
 
-			logger.debug("Launch TM %s", '/'.join(path))
+			logger.debug("Launch TM %s", name)
 			try:
 				j = TaskMaster(self, t, callback=partial(_report, path), **args)
 			except Exception as exc:
@@ -284,7 +292,7 @@ Run MoaT tasks.
 				f = asyncio.Future(loop=self.root.loop)
 				f.set_exception(exc)
 				f.name = f.path = path
-				self.jobs[path] = f
+				self.jobs[name] = f
 				if self.options.oneshot:
 					return
 			else:
@@ -293,25 +301,26 @@ Run MoaT tasks.
 		for name,tj in js.items():
 			t,j = tj
 			try:
-				logger.debug("Init TM %s %s",'/'.join(j.path),j)
+				logger.debug("Init TM %s %s",j.name,j)
 				await j.init()
 			except JobIsRunningError:
-				logger.debug("Running TM %s",'/'.join(j.path))
+				logger.debug("Running TM %s",j.name)
 				continue
 			except Exception as exc:
-				logger.debug("Error TM %s %s",'/'.join(j.path),repr(exc))
+				logger.debug("Error TM %s %s",'/'.j.name,repr(exc))
 				# Let's assume that this is fatal.
 				await self.root.etcd.set(TASKSTATE_DIR+j.path+(TASKSTATE,"debug"), "".join(traceback.format_exception(exc.__class__,exc,exc.__traceback__)))
 				f = asyncio.Future(loop=self.root.loop)
 				f.set_exception(exc)
-				f.name = f.path = j.path
-				self.jobs[j.path] = f
+				f.path = j.path
+				f.name = j.name
+				self.jobs[j.name] = f
 
 				if self.options.oneshot or isinstance(exc,asyncio.CancelledError):
 					return
 			else:
 				logger.debug("AddJob TM %s",j.name)
-				self.jobs[j.path] = j
+				self.jobs[j.name] = j
 
 		for path in old:
 			j = self.jobs[path]
