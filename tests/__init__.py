@@ -41,6 +41,7 @@ from yaml import safe_load
 from contextlib import suppress
 import aio_etcd as etcd
 from pprint import pprint
+import os
 
 import logging
 logger = logging.getLogger(__name__)
@@ -65,8 +66,14 @@ async def is_open(port):
 		raise RuntimeError("Port did not open")
 
 def handle_exc(loop,ctx):
-	pprint(ctx)
-	import pdb;pdb.set_trace()
+	if 'MOAT_EXIT_ERROR' not in os.environ:
+		print("""\
+Dangling resource or error.
+Set MOAT_EXIT_ERROR to drop into the debugger at this point."""
+			, file=sys.stderr)
+	pprint(ctx, stream=sys.stderr)
+	if 'MOAT_EXIT_ERROR' in os.environ:
+		import pdb;pdb.set_trace()
 	pass
 
 class ProcessHelper(asyncio.SubprocessProtocol):
