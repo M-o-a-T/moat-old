@@ -41,37 +41,48 @@ from .etcd import recEtcDir
 # This file contains all "singleton" etcd directories, i.e. those with
 # fixed names at the root of the tree
 
+class ErrorMismatch(RuntimeError):
+	pass
+
 class ErrorLoc(EtcXValue):
 	"""Holds the location of an error, at /status/error/TAG/UNIQ/loc"""
 	ptr = None
-	async def get_ptr(self):
+	async def get_ptr(self, check=False):
 		if self.ptr is None:
 			try:
 				self.ptr = await self.root.lookup(self.value)
 			except KeyError:
 				logger.debug("Error with invalid location: %s > %s",self,self.value)
 				pass
+		if check:
+			try:
+				e = await self.ptr.lookup('error',self.parent.parent.name)
+			except KeyError:
+				e = None
+			if e is None or e.value != self.parent.name:
+				raise ErrorMismatch(self.parent)
 		return self.ptr
 
 class ErrorRecord(recEtcDir,EtcDir):
 	"""Holds an error record, at /status/error/TAG/UNIQ"""
-	async def get_ptr(self):
+	async def get_ptr(self, check=False):
 		loc = self.get('loc',None)
 		if loc is not None:
-			loc = await loc.get_ptr()
+			loc = await loc.get_ptr(check=check)
 		else:
 			logger.debug("Error without location: %s",self)
 		return loc
 
 	async def delete(self, both=True):
 		if both:
-			ptr = await self.get_ptr()
+			try:
+				ptr = await self.get_ptr(check=True)
+			except ErrorMismatch:
+				ptr = None
 			if ptr is not None:
 				await ptr.delete(both=False)
 		p = self.parent
-		await super().delete(recursive=True)
-		if p is not None and not len(p):
-			await p.delete()
+		await super().delete(recursive=True,sync=False)
 	
 	async def verify(self, delete=True):
 		"""Check that this is a valid error record."""
@@ -97,6 +108,7 @@ ErrorRecord.register('loc', cls=ErrorLoc)
 ErrorRecord.register('msg', cls=EtcString)
 ErrorRecord.register('counter', cls=EtcInteger)
 ErrorRecord.register('timestamp', cls=EtcFloat)
+ErrorRecord.register('created', cls=EtcFloat)
 
 class ErrorPtr(EtcXValue):
 	"""Holds the pointer to an error"""
@@ -108,9 +120,7 @@ class ErrorPtr(EtcXValue):
 			except KeyError:
 				return
 		p = self.parent
-		await super().delete()
-		if p is not None and not len(p):
-			await p.delete()
+		await super().delete(sync=False)
 
 	async def init(self):
 		try:
@@ -156,20 +166,24 @@ class hasErrorDir:
 			except KeyError:
 				pass
 			else:
-				ptr = await e.ptr
+				if e.ptr is None:
+					ptr = None
+				else:
+					ptr = await e.ptr
 				if ptr is not None:
-					await ptr.set('msg',msg)
-					await ptr.set('counter',ptr.get('counter',1)+1)
-					await ptr.set('timestamp',time())
+					await ptr.set('msg',msg, force=True,sync=False)
+					await ptr.set('counter',ptr.get('counter',1)+1, force=True,sync=False)
+					await ptr.set('timestamp',time(), force=True,sync=False)
 					return
 
 			t = await self.root.subdir(ERROR_DIR, name=tag)
 			kw['loc'] = '/'.join(self.path)
 			kw['msg'] = msg
 			kw['timestamp'] = time()
-			v = await t.set(None,kw)
+			kw['created'] = time()
+			v = await t.set(None,kw, force=True,sync=True)
 			v = t[v[0]]
-			await self.set('error',{tag:v.name})
+			await self.set('error',{tag:v.name}, force=True,sync=True)
 			return v
 
 	async def clear_error(self, tag):

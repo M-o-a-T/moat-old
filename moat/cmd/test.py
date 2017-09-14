@@ -268,19 +268,27 @@ class ErrorsCommand(Command):
 		etc = await self.root._get_etcd()
 		s = await self.root._get_tree()
 		from moat.types import ERROR_DIR
+		from moat.types.error import ErrorMismatch
 		err = await s.lookup(ERROR_DIR)
+		retval = 0
 		for etyp in list(err.values()):
 			etyp = await etyp
 			for edir in list(etyp.values()):
 				edir = await edir
-				if (await edir.get_ptr()) is None:
+				try:
+					ptr = await edir.get_ptr(check=True)
+				except ErrorMismatch:
+					ptr = None
+				if ptr is None:
 					show("Error obsolete: %s",edir)
+					ptr = await edir.get_ptr(check=True)
 					if self.parent.fix:
 						await edir.delete()
 					else:
 						retval += 1
 				elif self.root.verbose:
 					print(etyp.name,edir['loc'].value,edir['msg'])
+		return retval
 
 class WebCommand(Command):
 	name = "web"
