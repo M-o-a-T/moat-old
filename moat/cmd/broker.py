@@ -72,8 +72,6 @@ Arguments:
 			help="Routing key")
 
 	async def do(self,args):
-		if not self._alert and len(args) < 1:
-			raise SyntaxError("Usage: %s  words to send  var=data.to.add" % (self.name,))
 		if self.options.rpc is None:
 			raise SyntaxError("Usage: %s  -c routing,key …" % (self.name,))
 		d = {}
@@ -85,8 +83,8 @@ Arguments:
 			k = w[:i]
 			s = w[i+1:]
 			try:
-				s = eval(s)
-			except ValueError:
+				s = float(s)
+			except (ValueError,NameError):
 				pass
 			r_attr(d,k, value=s)
 		if args:
