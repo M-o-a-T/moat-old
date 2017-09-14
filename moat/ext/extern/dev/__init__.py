@@ -158,7 +158,7 @@ class ExternDevice(recEtcDir,BaseTypedDir,BaseDevice):
 
 class RpcName(EtcString):
     """Update the parent's rpc name"""
-    def has_update(self):
+    async def has_update(self):
         p = self.parent
         if p is None:
             return

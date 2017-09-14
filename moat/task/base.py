@@ -52,8 +52,8 @@ def _setup_task_vars(types):
 			types.register(t, cls=EtcFloat)
 
 class TaskdefName(EtcString):
-	def has_update(self):
-		super().has_update()
+	async def has_update(self):
+		await super().has_update()
 		p = self.parent
 		if p is not None:
 			p.taskdef_pending.clear()
@@ -175,8 +175,8 @@ class TaskDef(recEtcDir,EtcDir):
 		await super().init()
 		self._update_cls()
 
-	def has_update(self):
-		super().has_update()
+	async def has_update(self):
+		await super().has_update()
 		self._update_cls()
 
 	def _update_cls(self):
@@ -206,7 +206,7 @@ class TaskState(hasErrorDir,recEtcDir,EtcDir):
 		self._idle = asyncio.Event(loop=self._loop)
 		await super().init()
 
-	def has_update(self):
+	async def has_update(self):
 		if 'running' not in self:
 			self._idle.set()
 	
@@ -243,7 +243,7 @@ class TaskState(hasErrorDir,recEtcDir,EtcDir):
 			return super().__getitem__(k)
 
 class TaskRunning(EtcFloat):
-	def has_update(self):
+	async def has_update(self):
 		p = self.parent
 		if p is None:
 			return

@@ -253,7 +253,6 @@ class WebserverDir(recEtcDir, EtcDir):
 class WebdataPath(WebdefBase, EtcDir):
 	"""Directory for /web/data/PATH"""
 	TEMPLATE = "dir.haml"
-	_propagate_updates = False
 
 	def get_context(self, view, level=1):
 		kw = super().get_context(self,view,level)
@@ -303,7 +302,7 @@ class WebdataPath(WebdefBase, EtcDir):
 			if fs is not None:
 				await fs(view, level+1)
 		
-	def has_update(self):
+	async def has_update(self):
 		self.updates.send(self)
 		if self.is_new and hasattr(self.parent,'updates'):
 			self.parent.updates.send(self)
@@ -433,8 +432,8 @@ class WebdataDir(hasErrorDir,recEtcDir,EtcDir):
 		self._type.recv_msg(act=act, item=self, view=view, **kw)
 
 
-	def has_update(self):
-		super().has_update()
+	async def has_update(self):
+		await super().has_update()
 		if self.mon is not None:
 			pass
 
@@ -493,7 +492,7 @@ WebconfigDir.register('order', cls=EtcInteger)
 
 class WebdataType(EtcString):
 	"""Type path for WebdataDir"""
-	def has_update(self):
+	async def has_update(self):
 		p = self.parent
 		if p is None:
 			return
@@ -510,7 +509,7 @@ class WebdataValue(EtcString):
 	_update_delay = 0.01
 	_reset_delay_job = None
 
-	def has_update(self):
+	async def has_update(self):
 		p = self.parent
 		if p is None:
 			return
@@ -524,21 +523,15 @@ class WebdataValue(EtcString):
 				self._reset_delay_job.cancel()
 			self._reset_delay_job = self._loop.call_later(1, self._reset_delay)
 
-			self.root.task(self._has_update)
+			if p.mon is not None:
+				p.mon.cancel()
+			p._value = await self.root.lookup(*(DEV_DIR+tuple(self.value.split('/'))),name=DEV)
+			p.mon = p._value.add_monitor(p.update_value)
+			p.update_value(p._value)
 
 	def _reset_delay(self):
 		self._reset_delay_job = None
 		self._update_delay = 0.01
-
-	async def _has_update(self):
-		p = self.parent
-		if p is None:
-			return
-		if p.mon is not None:
-			p.mon.cancel()
-		p._value = await self.root.lookup(*(DEV_DIR+tuple(self.value.split('/'))),name=DEV)
-		p.mon = p._value.add_monitor(p.update_value)
-		p.update_value(p._value)
 
 class WebdataSubvalue(EtcString):
 	"""Value subpath for WebdataDir"""

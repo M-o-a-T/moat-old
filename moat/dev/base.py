@@ -56,7 +56,7 @@ class MoatDevices(EtcDir):
 		await super().init()
 
 class Typename(EtcString):
-	def has_update(self):
+	async def has_update(self):
 		p = self.parent
 		if p is None:
 			return
@@ -69,7 +69,7 @@ class Typename(EtcString):
 class RpcName(EtcString):
 	"""Update the parent's rpc name"""
 	update_wait = None
-	def has_update(self):
+	async def has_update(self):
 		p = self.parent
 		if p is None:
 			return
@@ -146,7 +146,7 @@ class BaseTypedDir(ManagedEtcThing,EtcDir):
 			res = DummyType(raw, pri=pri)
 		return res
 
-	def has_update(self):
+	async def has_update(self):
 		if self._value is None:
 			return # do this later
 		val = self.get('value',None)
@@ -155,7 +155,7 @@ class BaseTypedDir(ManagedEtcThing,EtcDir):
 
 	async def init(self):
 		await super().init()
-		self.has_update()
+		await self.has_update()
 
 	async def _did_update(self,value, timestamp=None):
 		pass
@@ -170,7 +170,8 @@ class BaseTypedDir(ManagedEtcThing,EtcDir):
 
 		if 'type' in self and self._type is None:
 			# type is set but not
-			self.force_updated()
+			raise RuntimeError("This should not happen")
+			#self.force_updated()
 
 		if self._value is None:
 			self._value = self._type._type(self._type,self)
@@ -346,8 +347,8 @@ class BaseDevice(EtcDir, metaclass=TypesReg):
 		"""Async manager callback after killing a manager"""
 		pass
 
-	def has_update(self):
-		super().has_update()
+	async def has_update(self):
+		await super().has_update()
 		m = self.manager
 		if m is not None:
 			if self.is_new:

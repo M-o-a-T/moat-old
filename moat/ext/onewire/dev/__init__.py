@@ -85,8 +85,8 @@ class OnewireDevice(Device): #(, metaclass=SelectDevice):
 		logger.debug("msync B")
 		return m.bus.at(*n).at(self.path[-3]+'.'+self.path[-2])
 
-#	def has_update(self):
-#		super().has_update()
+#	async def has_update(self):
+#		await super().has_update()
 #		env = self.env.onewire_run
 #		if env is None:
 #			return

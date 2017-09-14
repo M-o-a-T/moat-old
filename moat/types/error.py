@@ -122,10 +122,10 @@ class ErrorPtr(EtcXValue):
 			p = self.parent
 			await self.delete()
 		
-	def has_update(self):
+	async def has_update(self):
 		if self.is_new is None:
 			self.root.task(self.delete)
-		super().has_update()
+		await super().has_update()
 
 	
 class hasErrorDir:

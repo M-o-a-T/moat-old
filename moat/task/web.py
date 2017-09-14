@@ -59,7 +59,7 @@ class WebServer(DeviceMgr):
 			raise RuntimeError("There is no configuration for this server.")
 
 		self.cfg_mon = self.cfg.add_monitor(self.queue_reload)
-		self.cfg.force_updated()
+		await self.cfg.force_updated()
 
 	def queue_reload(self, x=None):
 		if x.is_new is None:
