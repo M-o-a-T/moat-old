@@ -200,6 +200,16 @@ class MoatMetaType(EtcDir):
 		for v in self.values():
 			await v.load(recursive=True)
 
+class MoatMetaScript(EtcDir):
+	"""Singleton for /meta/script: script definitions"""
+	async def init(self):
+		from moat.task import SCRIPT
+		from moat.task.script import ScriptDef
+
+		self.register('*', cls=MoatMetaScript)
+		self.register(SCRIPT, cls=ScriptDef)
+		await super().init()
+	
 class MoatMetaTask(EtcDir):
 	"""Singleton for /meta/task: task definitions"""
 	async def init(self):

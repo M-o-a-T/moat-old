@@ -532,8 +532,12 @@ This command deletes one of these entries.
 			action="store_true", dest="force",
 			help="not forcing won't do anything")
 
+	def check(self, task):
+		pass
+
 	async def do(self,args):
 		t = await self.setup(meta=False)
+		res = 0
 		if not args:
 			if not cmd.root.cfg['testing']:
 				raise CommandError("You can't delete everything.")
@@ -543,6 +547,9 @@ This command deletes one of these entries.
 				task = await t.subdir(k,name=TASK, create=False)
 			except KeyError:
 				raise CommandError("%s: does not exist"%k)
+			if not self.check(task):
+				res += 1
+				continue
 			if self.root.verbose:
 				print("%s: deleted"%k, file=self.stdout)
 			rec = None
@@ -560,6 +567,7 @@ This command deletes one of these entries.
 					break
 				rec = False
 				task = p
+		return res
 
 class StateCommand(Command):
 	name = "state"

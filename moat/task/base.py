@@ -28,7 +28,7 @@ from etcd_tree import EtcFloat,EtcString,EtcDir, ReloadRecursive
 from etcd_tree.node import DummyType
 from qbroker.util import import_string
 
-from . import _VARS, TASKDEF_DIR,TASKDEF
+from . import _VARS, TASKDEF_DIR,TASKDEF, SCRIPT_DIR,SCRIPT
 from moat.types import TYPEDEF,TYPEDEF_DIR
 from moat.types.etcd import recEtcDir, MoatRef
 from moat.types.error import hasErrorDir
