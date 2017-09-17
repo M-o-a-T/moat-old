@@ -138,6 +138,35 @@ class StringType(Type):
 	etcd_class = EtcString
 	default = ""
 
+class RefType(StringType):
+	name = 'str/ref'
+	default = "/"
+	_prefix = None
+
+	@property
+	def etcd_value(self):
+		if self.value:
+			return '/'.join(self.value.path)
+		else:
+			return None
+	@etcd_value.setter
+	def etcd_value(self,value):
+		if value == '':
+			self.value = None
+		else:
+			val = self.root
+			if val is None:
+				self.value = None
+				return
+			if self._prefix is not None:
+				val = val.lookup(self._prefix)
+			self.value = val.lookup(value)
+
+def PrefixedRefType(prefix):
+	class reftyp(RefType):
+		_prefix = prefix
+	return reftyp
+
 class PathType(StringType):
 	name = 'str/path'
 	default = "/"

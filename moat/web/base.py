@@ -172,8 +172,12 @@ class WebdefBase(object):
 		"""
 	TEMPLATE = "item.haml"
 
+	@property
+	def template_name(self):
+		return self.TEMPLATE
+
 	def get_template(self, item, view, level=1):
-		return get_template(view.request.app, self.TEMPLATE)
+		return get_template(view.request.app, self.template_name)
 
 	def get_context(self, item, view, level=1):
 		key = view.key_for(item)
@@ -342,6 +346,15 @@ class WebdataPath(WebdefBase, EtcDir):
 class WebdefDir(WebdefBase,recEtcDir,EtcDir):
 	"""Directory for /meta/web/PATH/:def - A class linking a webdef to its etcd entry
 		Linked into /meta in moat.types.etcd"""
+
+	@property
+	def template_name(self):
+		while self is not None:
+			res = self.get('template',None)
+			if res is not None:
+				return res
+			self = self.parent
+		return TEMPLATE
 
 	@classmethod
 	async def this_obj(cls, parent=None,recursive=None, pre=None, **kw):

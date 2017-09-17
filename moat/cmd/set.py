@@ -48,53 +48,90 @@ If you want to modify an entry, the '-m' or '-p' option is mandatory.
 
 	def addOptions(self):
 		self.parser.add_option('-a','--append',
-            action="store_true", dest="append",
+            action="store_true", dest="append", default=False,
             help="append a unique entry")
 		self.parser.add_option('-d','--delete',
-            action="store_true", dest="delete",
+            action="store_true", dest="delete", default=False,
             help="delete entries instead of updating them")
 		self.parser.add_option('-u','--update',
-            action="store_true", dest="update",
-            help="update an entry. Implied when old value or modstamp is given")
+            action="store_true", dest="update", default=False,
+            help="update entries. Implied when old value or modstamp is given")
 		self.parser.add_option('-m','--modified',
             action="store", dest="modified",
             help="Modification stamp of current entry.")
 		self.parser.add_option('-p','--prev',
             action="store", dest="previous",
             help="Previous value of current entry.")
+		self.parser.add_option('-e','--edit',
+            action="store_true", dest="edit", default=False,
+            help="Open the data with a text editor.")
 
 	def handleOptions(self):
 		opts = self.options
-		if (opts.delete or opts.modified or opts.previous) and opts.append:
+		if opts.modified or opts.previous or opts.edit:
+			opts.update = True
+		if opts.delete + opts.update + opts.append > 1:
 			raise CommandError("Conflicting arguments")
 		self.delete = opts.delete
 		self.modified = opts.modified
 		self.previous = opts.previous
 		self.append = opts.append
 		self.create = not opts.update
+		self.edit = opts.edit
 
 	async def do(self,args):
 		if not args:
 			raise CommandError("Not specifying values to %s makes no sense." % ("delete" if self.delete else "add/update"))
 		etc = await self.root._get_etcd()
 		retval = 0
-		if self.delete:
-			if not self.create:
-				raise CommandError("You can't update and delete at the same time.")
+		if self.delete or self.edit:
 			for a in args:
 				pa = a.replace('.','/')
+				if pa[0] != '/':
+					pa = '/'+pa
 				kw = {}
 				if self.modified:
 					kw['prevIndex'] = self.modified
 				if self.previous:
 					kw['prevValue'] = self.previous
-				try:
-					await etc.delete('/'+pa, recursive=True,**kw)
-				except etcd.EtcdCompareFailed:
-					logger.fatal("Bad modstamp: "+a)
-					retval = 1
-				except etcd.EtcdKeyNotFound:
-					logger.info("Key already deleted: "+a)
+				if self.delete:
+					try:
+						await etc.delete(pa, recursive=True,**kw)
+					except etcd.EtcdCompareFailed:
+						logger.fatal("Bad modstamp: "+a)
+						retval = 1
+					except etcd.EtcdKeyNotFound:
+						logger.info("Key already deleted: "+a)
+				else:
+					name = pa.rsplit('/',1)[1]
+					if self.previous is not None:
+						old_val = self.previous
+					else:
+						old_val = await etc.get(pa)
+						old_val = old_val.value
+
+					import tempfile
+					from subprocess import call
+
+					EDITOR = os.environ.get('EDITOR','vim') #that easy!
+
+					with tempfile.NamedTemporaryFile(prefix=name, suffix=".tmp") as tf:
+						tf.write(('#'+pa+'\n'+old_val+'\n').encode("utf-8"))
+						tf.flush()
+						res = call([EDITOR, tf.name])
+						if res:
+							raise RuntimeError("Editing failed, exiting")
+
+						tf.seek(0)
+						val = tf.read().decode("utf-8")
+						if val[0] == '#':
+							val = val.split('\n',1)[1]
+						if val[-1] == '\n':
+							val = val[:-1]
+						kw = {}
+						if self.modified:
+							kw['index']=self.modified
+						await etc.set(pa, prev=old_val, value=val, **kw)
 		else:
 			for a in args:
 				a,v = a.split('=',1)

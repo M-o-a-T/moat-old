@@ -148,23 +148,6 @@ class Task(regTask):
 			r = r[:s]+' @'+'/'.join(self.path)+r[s:]
 		return r
 
-	@classmethod
-	def task_info(cls,tree):
-		"""\
-			Retrieve the data about this task that should be stored in etcd.
-			Returns (classname,dict).
-
-			To override: call super(), then add to dict.
-			"""
-		dir = dict(
-			language='python',
-			code=cls.__module__+'.'+cls.__name__,
-			summary=cls.summary,
-			)
-		if cls.schema is not None:
-			d['data'] = cls.schema
-		return cls.name, dir
-
 	async def run(self):
 		"""Main code for task control. Don't override."""
 		r = self.cmd.root
@@ -230,8 +213,7 @@ class Task(regTask):
 			logger.warn("Job is already running: %s",self.name)
 			raise JobIsRunningError(self.name, run_state) from exc
 		await send_alert(state='start')
-		mod = await run_state.set("started",time())
-		await run_state.wait(mod)
+		await run_state.set("started",time())
 		keep_running = False # if it's been superseded, do not delete
 
 		if isinstance(self.config,EtcBase):

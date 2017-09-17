@@ -43,6 +43,11 @@ TASKSCAN_DIR = TASK_DIR+('moat','scan')
 TASKDEF_DIR = ('meta','task')
 TASKDEF = ':taskdef'
 
+# Task descriptions: what kind of tasks exist?
+# written by "moat task def init"
+SCRIPT_DIR = ('meta','script')
+SCRIPT = ':code'
+
 # Task state: which tasks are currently running?
 # written by "moat task run", obviously
 TASKSTATE_DIR = ('status','run')

@@ -131,20 +131,23 @@ async def test_main(loop):
 
 		async def run_websocket():
 			session = aiohttp.ClientSession()
-			async with session.ws_connect('ws://127.0.0.1:%d/api/control' % (port,)) as ws:
-				wslogger.debug("start")
-				ws.send_json({'action':'locate', 'location':'test'})
+			try:
+				async with session.ws_connect('ws://127.0.0.1:%d/api/control' % (port,)) as ws:
+					wslogger.debug("start")
+					ws.send_json({'action':'locate', 'location':'test'})
 
-				async for msg in ws:
-					if msg.type == aiohttp.WSMsgType.TEXT:
-						wslogger.debug("Data %s",msg.data)
-						print(msg.data)
-					elif msg.type == aiohttp.WSMsgType.CLOSED:
-						wslogger.debug("Closed")
-						break
-					elif msg.type == aiohttp.WSMsgType.ERROR:
-						wslogger.debug("Error")
-						break
+					async for msg in ws:
+						if msg.type == aiohttp.WSMsgType.TEXT:
+							wslogger.debug("Data %s",msg.data)
+							print(msg.data)
+						elif msg.type == aiohttp.WSMsgType.CLOSED:
+							wslogger.debug("Closed")
+							break
+						elif msg.type == aiohttp.WSMsgType.ERROR:
+							wslogger.debug("Error")
+							break
+			finally:
+				session.close()
 
 		async def browse():
 			# Run the driver and start a session

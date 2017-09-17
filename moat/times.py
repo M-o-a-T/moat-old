@@ -101,7 +101,8 @@ def humandelta(delta):
 			res = "-"
 			delta = - delta
 		if delta.days > 0:
-			res = "%d dy"%(delta.days)
+			res += "%d dy"%(delta.days)
+			res2 = " "
 		delta = delta.seconds + delta.microseconds / 1e6
 	elif delta < 0:
 		delta = - delta
@@ -134,7 +135,6 @@ def simple_time_delta(w):
 		w = list(w)[:]
 	s=0
 	m=1
-	w=list(w)[:]
 	while w:
 		if len(w) == 1:
 			pass
