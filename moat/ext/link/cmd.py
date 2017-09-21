@@ -33,7 +33,7 @@ import time
 import binascii
 from qbroker.unit import CC_MSG
 
-from moat.script import Command, SubCommand, CommandError
+from moat.script import Command, SubCommand, CommandError, CommandSyntaxError
 from moat.times import humandelta
 from .dev import LinkDevice
 from . import PREFIX, key_parts,key_build
@@ -150,14 +150,14 @@ This command sends raw data to a device.
 
 	async def do(self,args):
 		if not len(args):
-			raise SyntaxError("Usage: … raw devicename hexbyte…")
+			raise CommandSyntaxError("Usage: … raw devicename hexbyte…")
 		device = args[0]
 		args = args[1:]
 		opts = self.options
 		if opts.dir_in and opts.dir_error:
-			raise SyntaxError("--in and --error are mutually exclusive")
+			raise CommandSyntaxError("--in and --error are mutually exclusive")
 		if opts.stream and opts.seq:
-			raise SyntaxError("--seq only makes sense on the console (channel zero)")
+			raise CommandSyntaxError("--seq only makes sense on the console (channel zero)")
 
 		self.u = await self.root._get_amqp()
 		await self.setup()

@@ -143,7 +143,7 @@ class BaseTypedDir(ManagedEtcThing,EtcDir):
 			res = self._type._type.etcd_class
 			pri = 5
 		if raw:
-			res = DummyType(raw, pri=pri)
+			res = DummyType(res, pri=pri)
 		return res
 
 	async def has_update(self):

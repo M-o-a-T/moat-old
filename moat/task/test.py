@@ -38,7 +38,18 @@ class Sleeper(Task):
 		You can use it in a 'moat run -K' command to limit runtimes."""
 	taskdef="test/sleep"
 	summary="A simple delay"
-	schema = {'delay':'float'}
+
+	@classmethod
+	async def register_types(cls, types):
+		await super(Sleeper,cls).register_types(types)
+		r = await types.set('delay','float/time')
+		return r
+
+	@classmethod
+	async def register_defaults(cls, data):
+		await super(Sleeper,cls).register_defaults(data)
+		r = await data.set('delay',2)
+		return r
 
 	async def task(self):
 		global SLEEP

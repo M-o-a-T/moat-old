@@ -96,6 +96,15 @@ async def test_script_basic(loop):
 		did_it = True
 		"""
 	
+	async def run(cmd):
+		nonlocal e
+		m9 = MoatTest(loop=loop)
+		e = m9.parse(cmd)
+		e = asyncio.ensure_future(e,loop=loop)
+		r = await e
+		e = None
+		return r
+
 	await add_script("base",s,loop)
 	j = await run_script("base")
 	await dly(lambda: e.job.vars

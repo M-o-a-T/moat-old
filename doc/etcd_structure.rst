@@ -133,11 +133,27 @@ Main tree
 
       * data
 
-        Task-specific configuration, passed to the task. TODO; probably JSON.
+        This directory contains task-specific configuration.
 
       * ttl, refresh, …
 
         You can override the values from /config/run here.
+    
+      * script
+
+        If the task runs a script, the taskdef is 'task/script'; this
+        value points to the subpath in /meta/script/…/:code.
+
+      * script_loc
+
+        If the task points to a script, the value of this attribute is the
+        entry in /meta/script/…/:code/tasks/ which contains this task's
+        subpath.
+
+      * values
+
+        If the task points to a script, this subdir contains the data
+        specific to this script instance.
 
 * meta
 
@@ -241,11 +257,70 @@ Main tree
 
         * data
 
-          Describes the code's configuration variables.
+          This directory contains default values for the task's configuration values.
 
+        * types
+
+          A subdirectory which describes the code's configuration variables.
+          
           * name …
 
-            Name of the type (/meta/type/name…) of this item.
+            Subpath of the type (``/meta/type/…/:type``) of this item.
+
+  * script
+
+    This directory stores scripts for MoaT.
+
+    * code
+
+      the actual code (text).
+    
+    * language
+    
+      python (for now)
+    
+    * created
+    
+      Creation date
+    
+    * timestamp
+    
+      Date of last modification
+    
+    * new_code
+    
+      If you want to update the code, this node contains the new version.
+      The runtime will check it for syntax errors and replace
+      your program with the new version if there are no problems.
+    
+    * old_code
+    
+      After replacing the code, this node contains the previous version so that
+      you can revert the most recent update.
+    
+    * current
+    
+      Marker for which version should be used. Possible values: "old" "new"
+      "current".
+    
+    * error
+    
+      Subdirectory with standard error information.
+    
+    * types
+
+      Directory with the type of the script's variables.
+
+      The contents must be subpaths of MoaT types.
+
+    * values
+    
+      Directory with default values for the script's variables.
+    
+    * tasks
+    
+      List of tasks pointing to this script.
+      The key is stored in ``/task/…/:task/script_loc``.
 
   * web
 

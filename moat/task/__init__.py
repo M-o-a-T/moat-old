@@ -26,7 +26,6 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 """List of known Tasks"""
 
 import os
-from ..script.util import objects
 from etcd_tree import EtcDir,EtcFloat
 
 import logging
@@ -58,6 +57,7 @@ _VARS = {'ttl','refresh','restart','retry','max-retry','one-shot'}
 def task_types(prefix=__name__):
 	"""Enumerate the task types known to Moat's code."""
 	from ..script.task import Task
+	from ..script.util import objects
 	return objects(prefix, Task, filter=lambda x:x.__dict__.get('taskdef',None) is not None)
 
 class TaskDir(EtcDir):

@@ -294,7 +294,7 @@ def collect_words(n,w):
 			p.wk = val
 		elif unit in weekdays:
 			assert p.dow is None, "You already specified the day of week"
-			assert val != 0 and abs(val) <= 4, "Months have max. 5 of each weekday. (use -1 if you mean the last one)"
+			assert val != 0 and abs(val) <= 5, "Months have max. 5 of each weekday. (use -1 if you mean the last one)"
 			p.dow = weekdays[unit]
 			p.nth = val
 			continue

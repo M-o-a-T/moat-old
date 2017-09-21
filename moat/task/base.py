@@ -29,9 +29,12 @@ from etcd_tree.node import DummyType
 from qbroker.util import import_string
 
 from . import _VARS, TASKDEF_DIR,TASKDEF, SCRIPT_DIR,SCRIPT
+from moat.script.data import TaskScriptDataDir
 from moat.types import TYPEDEF,TYPEDEF_DIR
 from moat.types.etcd import recEtcDir, MoatRef
+from moat.types.data import DataDir,TypesDir,IndirectDataDir
 from moat.types.error import hasErrorDir
+from moat.util import OverlayDict
 
 import logging
 logger = logging.getLogger(__name__)
@@ -39,7 +42,7 @@ logger = logging.getLogger(__name__)
 def _setup_task_vars(types):
 	"""Tasks have several global config variables. Their types are set here.
 		This is called with the class/typepath to register:
-		TASK_DIR/**/TASK or TASKSEF_DIR/**/TASKDEF
+		TASK_DIR/**/TASK or TASKDEF_DIR/**/TASKDEF
 		"""
 	from etcd_tree.etcd import EtcTypes
 	from etcd_tree.node import EtcFloat,EtcInteger,EtcBoolean
@@ -51,7 +54,7 @@ def _setup_task_vars(types):
 		else:
 			types.register(t, cls=EtcFloat)
 
-class TaskdefName(EtcString):
+class TaskdefName(MoatRef.at(TASKDEF_DIR,TASKDEF)):
 	async def has_update(self):
 		await super().has_update()
 		p = self.parent
@@ -60,6 +63,7 @@ class TaskdefName(EtcString):
 			self.root.task(p._update_taskdef,self._value)
 
 	async def init(self):
+		await super().init()
 		await self.parent._update_taskdef(self._value)
 
 class TaskDir(recEtcDir,EtcDir):
@@ -81,6 +85,12 @@ class TaskDir(recEtcDir,EtcDir):
 	def __init__(self, *a,**k):
 		super().__init__(*a,**k)
 		self.taskdef_pending = asyncio.Event(loop=self._loop)
+
+	async def init(self):
+		if 'scipt' in self:
+			self.script_data = OverlayDict(self['values'],self['script'].ref['values'])
+		self.data = OverlayDict(self['data'],self['taskdef'].ref['data'])
+		await super().init()
 
 	@property
 	def cls(self):
@@ -137,30 +147,25 @@ class TaskDir(recEtcDir,EtcDir):
 				break
 		await super()._fill_data(pre,recursive)
 
-	def subtype(self,*path, raw=False, **kw):
-		res = None
-		pri = 0
-		if len(path)==1:
-			if path[0] == 'taskdef':
-				res = TaskdefName
-				pri = 9
-			elif path[0] == 'parent':
-				res = MoatRef
-		elif len(path)==2 and path[0] == 'data':
-			if self.taskdef is None:
-				res = EtcAwaiter
-			name = self.taskdef['data'][path[1]]
-			typ_path = tuple(x for x in name.split('/') if x != "")
-			typ = self.root.lookup(TYPEDEF_DIR+typ_path+(TYPEDEF,))
-			res = typ._type.etcd_class
-		if res is None:
-			return super().subtype(*path, raw=raw, **kw)
-		if raw:
-			res = DummyType(res, pri=pri)
-		return res
+class TaskdefDataDir(DataDir):
+	"""\
+        Directory for /meta/task/…/:taskdef/data/**
+        """
+	type_dir = "types"
+class TaskDataDir(IndirectDataDir):
+	"""\
+        Directory for entries in /task/…/:task/data/**
+        """
+	type_ref = "taskdef"
+	type_root = TASKDEF_DIR
+	type_tag = TASKDEF
+	type_dir = "types"
 
 _setup_task_vars(TaskDir)
-TaskDir.register('parent',MoatRef)
+TaskDir.register('parent', cls=MoatRef)
+TaskDir.register('taskdef', cls=TaskdefName, pri=8)
+TaskDir.register('data', cls=TaskDataDir)
+TaskDir.register('values', cls=TaskScriptDataDir) ## for scripts
 
 class TaskDef(recEtcDir,EtcDir):
 	"""\
@@ -194,10 +199,12 @@ class TaskDef(recEtcDir,EtcDir):
 				logger.error("%s: Unable to import %s", '/'.join(self.path[:-1]),self['code'])
 
 _setup_task_vars(TaskDef)
+TaskDef.register('types', cls=TypesDir,pri=8)
+TaskDef.register('data', cls=TaskdefDataDir,pri=5)
 
 class TaskState(hasErrorDir,recEtcDir,EtcDir):
 	"""\
-		etcd directory for task state: /status/task/**/:task
+		etcd directory for task state: /status/run/**/:task
 
 		This stores the actual state of a running Task.
 		"""

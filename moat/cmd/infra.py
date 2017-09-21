@@ -34,10 +34,10 @@ import inspect
 from traceback import print_exc
 from yaml import dump
 
-from moat.script import Command, SubCommand, CommandError
+from moat.script import Command, SubCommand, CommandError, CommandSyntaxError
 from moat.infra import INFRA_DIR, INFRA, LinkExistsError
 from moat.util import r_dict, r_show
-from moat.cmd.task import _ParamCommand,DefSetup
+from moat.cmd.task import DefSetup
 
 import logging
 logger = logging.getLogger(__name__)
@@ -167,7 +167,7 @@ Arguments:
 
 * data=value parameters (optional)
 
-* a descriptive name (not optional)
+* a descriptive text (not optional)
 
 """
     _update = False
@@ -184,7 +184,7 @@ Arguments:
 
 * data=value entries (deletes the key if value is empty)
 
-* an updated descriptive name (optional)
+* an updated descriptive text (optional)
 
 """
     _update = True
@@ -256,7 +256,7 @@ Usage: … port HOST NAME key=value… -- set
     async def do(self, args):
         t = await self.setup()
         if not args:
-            raise SyntaxError("You need to specify a host!")
+            raise CommandSyntaxError("You need to specify a host!")
         try:
             h = await t.lookup(reversed(args[0].split('.')), name=INFRA)
             h = await h.subdir('ports')
@@ -266,7 +266,7 @@ Usage: … port HOST NAME key=value… -- set
         args = args[1:]
         if self.options.delete:
             if len(args) == 0:
-                raise SyntaxError("You need to specify which ports to delete.") 
+                raise CommandSyntaxError("You need to specify which ports to delete.") 
             if len(args) == 1 and args[0] == '*':
                 args = list(h.keys())
             for p in args:
@@ -324,12 +324,12 @@ Links are bidirectional.
         t = await self.setup()
         if self.options.delete:
             if self.options.missing or self.options.replace:
-                raise SyntaxError("'-d' and '-m'/'-r' cannot be used at the same time.")
+                raise CommandSyntaxError("'-d' and '-m'/'-r' cannot be used at the same time.")
             if len(args) != 2:
-                raise SyntaxError("You need to specify which host+port to delete.") 
+                raise CommandSyntaxError("You need to specify which host+port to delete.") 
         else:
             if self.options.replace and len(args) < 3:
-                raise SyntaxError("'-r' is only useful when creaing a link")
+                raise CommandSyntaxError("'-r' is only useful when creaing a link")
             if len(args) < 1:
                 async for h in t.tagged(INFRA):
                     h = await h
@@ -390,9 +390,9 @@ Links are bidirectional.
                     print(r.host.dnsname,r.name)
                 return
             elif len(args) > 4:
-                raise SyntaxError("You need to specify host+port of both sides.") 
+                raise CommandSyntaxError("You need to specify host+port of both sides.") 
             elif self.options.missing:
-                raise SyntaxError("'-m' can only be used when listing.")
+                raise CommandSyntaxError("'-m' can only be used when listing.")
         p1 = await t.host(args[0], create=False)
         p1 = await p1.subdir('ports',args[1])
         if self.options.delete:
@@ -428,7 +428,7 @@ Links are unidirectional.
     async def do(self, args):
         t = await self.setup()
         if len(args) < 0 or len(args) > 2:
-            raise SyntaxError("Usage: … link HOST_A [HOST_B]")
+            raise CommandSyntaxError("Usage: … link HOST_A [HOST_B]")
 
         elif len(args) == 1: ## list unreachables
             hosts = [t.host(args[0])]

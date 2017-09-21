@@ -35,7 +35,7 @@ from yaml import dump
 from traceback import print_exc
 from pprint import pprint
 
-from moat.script import Command, SubCommand, CommandError
+from moat.script import Command, SubCommand, CommandError, CommandSyntaxError
 from moat.script.task import Task,_run_state, JobMarkGoneError,JobIsRunningError
 from moat.task import TASKSTATE_DIR,TASKSTATE, TASKSCAN_DIR,TASK
 from moat.util import r_attr
@@ -73,7 +73,7 @@ Arguments:
 
 	async def do(self,args):
 		if self.options.rpc is None:
-			raise SyntaxError("Usage: %s  -c routing,key …" % (self.name,))
+			raise CommandSyntaxError("Usage: %s  -c routing,key …" % (self.name,))
 		d = {}
 		while args:
 			i = args[-1].find('=')

@@ -64,13 +64,33 @@ class MoatDeviceBase(EtcDir):
 class MoatRef(EtcXValue):
 	"""An entry referencing some other node"""
 	_ref = None
+	_pre = None
+	_post = None
+	_sub = None
 
 	@property
 	def ref(self):
 		if self._ref is not None:
 			return self._ref
-		self._ref = self.root.tree.lookup(self.value)
-		return self._ref
+		ref = self.root
+		if self._pre is not None:
+			ref = ref.lookup(self._pre)
+		ref = ref.lookup(self.value)
+		if self._post is not None:
+			ref = ref.lookup(self._post)
+		if self._sub is not None:
+			ref = ref.lookup(self.parent[self._sub])
+		self._ref = ref
+		return ref
+
+	@classmethod
+	def at(cls_, pre=None, post=None, sub=None):
+		"""Generate a new class that refers to a sub-tree located somewhere else"""
+		class cls(cls_):
+			_pre = pre
+			_post = post
+			_sub = sub
+		return cls
 
 class MoatLoader(EtcXValue):
 	"""An entry referencing some code"""
@@ -220,7 +240,7 @@ class MoatMetaTask(EtcDir):
 		self.register(TASKDEF, cls=TaskDef)
 		await super().init()
 	
-	async def add_task(self, task, force=False):
+	async def add_taskdef(self, task, force=False):
 		from moat.task import TASKDEF
 
 		assert task.taskdef is not None, task
@@ -232,8 +252,6 @@ class MoatMetaTask(EtcDir):
 		doc=task.doc or task.__doc__
 		if doc is not None:
 			d['doc'] = doc
-		if hasattr(task,'schema'):
-			d['data'] = task.schema
 		tt = await self.subdir(task.taskdef,name=TASKDEF, create=None)
 		lang = tt.get('language',None)
 		if lang is None:
@@ -265,6 +283,12 @@ class MoatMetaTask(EtcDir):
 				logger.debug("%s: exists, skipped", task.taskdef)
 		else:
 			raise RuntimeError("%s: exists, language=%s" % (task.taskdef,lang))
+		types = await tt.subdir('types')
+		r = await task.register_types(types)
+		if len(types):
+			await tt.wait(r, tasks=True)
+			data = await tt.subdir('data')
+			await task.register_defaults(data)
 
 class MoatMetaWeb(recEtcDir,EtcDir):
 	"""Hierarchy for /meta/web: HTML front-end definitions"""
@@ -319,15 +343,15 @@ class MoatMetaWeb(recEtcDir,EtcDir):
 class MoatMeta(EtcDir):
 	"""Singleton for /meta"""
 	async def init(self):
-		self.register('type', cls=MoatMetaType)
-		self.register('task', cls=MoatMetaTask)
-		self.register('web', cls=MoatMetaWeb)
-		self.register('module', cls=MoatMetaModule)
 		await super().init()
 		try:
 			await self['type']
 		except KeyError:
 			pass # not yet present
+MoatMeta.register('type', cls=MoatMetaType)
+MoatMeta.register('task', cls=MoatMetaTask)
+MoatMeta.register('web', cls=MoatMetaWeb)
+MoatMeta.register('module', cls=MoatMetaModule)
 
 class MoatConfig(recEtcDir,EtcDir):
 	"""Singleton for /config"""

@@ -82,7 +82,7 @@ class Task(regTask):
 		a moat_reg attribute; see moat.task.reg for details.
 
 		"""
-	taskdef = None
+	taskdef = None # override: set to /meta/task/…/:taskdef subpath
 	summary = """This is a prototype. Do not use."""
 	schema = {}
 	doc = None
@@ -94,6 +94,26 @@ class Task(regTask):
 		return {'name':self.name}
 	def __reduce__(self):
 		return (NoTask,())
+
+	@classmethod
+	async def register_types(cls, types):
+		"""\
+			Add this task's types to the given …/:typedef/types directory.
+
+			To override: Call this first, then return the result of the
+			last call to types.set()
+			"""
+		return None
+
+	@classmethod
+	async def register_defaults(cls, data):
+		"""\
+			Add the appropriate defaults to the given …/:typedef/data directory.
+
+			To override: Call this first, then return the result of the
+			last call to data.set()
+			"""
+		return None
 
 	def __init__(self, cmd, name, taskdir=None, parents=(), config={}, _ttl=None,_refresh=None, **cfg):
 		"""\
@@ -266,11 +286,9 @@ class Task(regTask):
 		async def save_exc(exc, state='error'):
 			if not self.name.startswith("test/"):
 				logger.exception(self.name)
-			if state is not None:
-				await run_state.set("state",state)
-				await send_alert(state=state, reason=str(exc))
-				if state == "error":
-					await run_state.set_error("job",str(exc))
+			await run_state.set("state",state)
+			await send_alert(state=state, reason=str(exc))
+			await run_state.set_error("job" if state == "error" else state, exc)
 
 			exc.__context__ = None # the cancelled run_task is not interesting
 			await run_state.set("message",str(exc))
@@ -348,7 +366,7 @@ class Task(regTask):
 					except asyncio.CancelledError as err: # bah
 						await run_state.set("message", "cancelled")
 					else:
-						await save_exc(exc, state=None)
+						await save_exc(exc, state="cancel")
 				run_task.result()
 				assert False,"the previous line should have raised an error" # pragma: no cover
 			else:
@@ -356,10 +374,13 @@ class Task(regTask):
 				try:
 					res = main_task.result()
 				except Exception as exc:
+				    # … or died with an error.
 					await save_exc(exc)
 					raise
 				else:
 					await run_state.set("state","ok")
+					await run_state.clear_error("job")
+					await run_state.clear_error("cancel")
 					await send_alert(state='done', result=res)
 					await run_state.set("message",str(res))
 					await run_state.clear_error("job")
@@ -371,6 +392,7 @@ class Task(regTask):
 				await self.teardown()
 			except Exception as exc:
 				logger.exception("Clean up %s",self)
+			await self.moat_reg.free()
 
 			await run_state.set("stopped",time())
 			if not keep_running and 'running' in run_state:
@@ -385,7 +407,6 @@ class Task(regTask):
 					logger.exception("Could not delete 'running' entry")
 					raise
 			await run_state.wait()
-			await self.moat_reg.free()
 
 			try:
 				logger.debug("Ended %s: %s",self.name, res)
@@ -534,8 +555,9 @@ class TaskMaster(asyncio.Future):
 		self.path = task.path[len(TASK_DIR):-1]
 		self.name = '/'.join(self.path)
 		self.cfg = cfg
-		self.vars = {}
+		self.vars = {} # task-specific settings
 		self.callback = callback
+		self.monitors = []
 
 		super().__init__(loop=self.loop)
 		
@@ -551,9 +573,9 @@ class TaskMaster(asyncio.Future):
 
 		self.gcfg = self.cmd.root.etc_cfg['run']
 		self.rcfg = self.cmd.root.cfg['config']['run']
-		self._m1 = self.task.add_monitor(self.setup_vars)
-		self._m2 = self.task.taskdef.add_monitor(self.setup_vars)
-		self._m3 = self.gcfg.add_monitor(self.setup_vars)
+		self.monitors.append(self.task.add_monitor(self.setup_vars))
+		self.monitors.append(self.task.taskdef.add_monitor(self.setup_vars))
+		self.monitors.append(self.gcfg.add_monitor(self.setup_vars))
 
 		self.setup_vars()
 		_task_reg[self.path] = self

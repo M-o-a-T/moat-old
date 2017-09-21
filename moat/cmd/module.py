@@ -101,7 +101,7 @@ on the command line, they are added, otherwise everything under
 					if self.tasks:
 						n = 0
 						for c in objects(m, Task, filter=lambda x:getattr(x,'taskdef',None) is not None):
-							await t2.add_task(c, force=self.force)
+							await t2.add_taskdef(c, force=self.force)
 							n += 1
 						if self.root.verbose > (1 if n else 0):
 							print("%s: %s command%s found." % (a,n if n else "no", "" if n==1 else "s"), file=self.stdout)
@@ -117,7 +117,7 @@ on the command line, they are added, otherwise everything under
 		for obj in objs:
 			await t.add_module(obj, force=self.force)
 			for ta in obj.task_types():
-				await tasks.add_task(ta, force=self.force)
+				await tasks.add_taskdef(ta, force=self.force)
 		await t.wait()
 
 class ModuleListCommand(ModuleSetup,Command):

@@ -36,6 +36,7 @@ from yaml import dump
 
 from qbroker.util import import_string
 from moat.script import Command, SubCommand, CommandError
+from moat.script.util import _ParamCommand
 from moat.script.task import Task
 from moat.task import TASK,TASK_DIR, SCRIPT_DIR,SCRIPT
 from moat.types.module import BaseModule
@@ -46,21 +47,23 @@ import aio_etcd as etcd
 import logging
 logger = logging.getLogger(__name__)
 
-__all__ = ['TaskCommand']
+__all__ = ['ScriptCommand']
 
-class DefSetup:
-	async def setup(self, meta=False):
-		if meta:
-			self.DIR=SCRIPT_DIR
-		else:
-			self.DIR=TASK_DIR
-		await super().setup()
-		etc = self.root.etcd
-		tree = await self.root._get_tree()
-		t = await tree.subdir(self.DIR)
-		return t
+async def setup(self, meta=False):
+	if meta:
+		self.DIR=SCRIPT_DIR
+	else:
+		self.DIR=TASK_DIR
+	await self.setup(None)
+	etc = self.root.etcd
+	return (await setup2(self,self.DIR))
 
-class DefListCommand(DefSetup,Command):
+async def setup2(self,d):
+	tree = await self.root._get_tree()
+	t = await tree.subdir(d)
+	return t
+
+class DefListCommand(Command):
 	name = "list"
 	summary = "List scripts"
 	description = """\
@@ -76,7 +79,7 @@ details are shown in YAML format, else a short list of names is shown.
 			help="show details for all entries")
 
 	async def do(self,args):
-		t = await self.setup(meta=True)
+		t = await setup(self, meta=True)
 		if args:
 			if self.options.all:
 				raise CommandError("Arguments and '-a' are mutually exclusive")
@@ -88,20 +91,20 @@ details are shown in YAML format, else a short list of names is shown.
 			dirs = [t]
 			verbose = self.options.all
 		for tt in dirs:
-			async for task in tt.tagged(TASKDEF):
-				path = task.path[len(TASKDEF_DIR):-1]
+			async for task in tt.tagged(SCRIPT):
+				path = task.path[len(SCRIPT_DIR):-1]
 				if verbose:
 					dump({path: r_dict(dict(task))}, stream=self.stdout)
 				else:
 					print('/'.join(path),task.get('summary',task.get('descr','??')), sep='\t',file=self.stdout)
 
-class DefGetCommand(DefSetup,Command):
+class DefGetCommand(Command):
 	name = "get"
-	summary = "retrieve a scripts"
+	summary = "retrieve a script"
 	description = """\
 Scripts are stored in etcd at /meta/script/**/:code.
 
-This command prints a single script to standard output.
+This command writes a single script to standard output.
 """
 
 	def addOptions(self):
@@ -114,16 +117,16 @@ This command prints a single script to standard output.
 
 	async def do(self,args):
 		if self.options.old and self.options.new:
-			raise SyntaxError("You can't use --old and --new at the same time")
+			raise CommandError("You can't use --old and --new at the same time")
 		if len(args) != 1:
-			raise SyntaxError("Usage: … get path/to/script")
+			raise CommandError("Usage: … get path/to/script")
 
-		t = await self.setup(meta=True)
+		t = await setup(self, meta=True)
 		sc = t.lookup(args[0])
 		sc = await sc.lookup(SCRIPT)
 		sys.stdout.write(sc['old_code' if self.options.old else 'new_code' if self.options.new else 'code'])
 
-class DefDeleteCommand(DefSetup,Command):
+class DefDeleteCommand(Command):
 	name = "delete"
 	summary = "Delete a script"
 	description = """\
@@ -138,11 +141,11 @@ This command deletes a script, provided it's not used anywhere.
 			help="delete even if in use")
 
 	async def do(self,args):
-		td = await self.setup(meta=True)
+		td = await setup(self, meta=True)
 		if not args:
 			raise CommandError("You can't delete everything.")
 		for k in args:
-			t = await td.subdir(k,name=TASKDEF, create=False)
+			t = await td.subdir(k,name=SCRIPT, create=False)
 			if self.root.verbose:
 				print("%s: deleted"%k, file=self.stdout)
 			rec = True
@@ -160,112 +163,166 @@ This command deletes a script, provided it's not used anywhere.
 				rec = False
 				t = p
 
-class _ParamCommand(DefSetup,Command):
-	name = "param"
-	# _def = None ## need to override
-	from moat.task import _VARS
-
-	@property
-	def description(self):
-	return """\
-
-Usage: … param NAME %s  -- set
-       … param             -- list all
-       … param NAME        -- show one
-       … param -d NAME     -- delete
-""" % ("TYPE " if self._def else "VALUE",)
-
-	def addOptions(self):
-		self.parser.add_option('-d','--delete',
-			action="store_true", dest="delete",
-			help="delete specific parameters")
-		if self._def:
-			self.parser.add_option('-g','--global',
-				action="store_true", dest="is_global",
-				help="show global parameters")
-
-	async def do(self,args):
-		t = await self.setup(meta=self._def)
-		if self._def and self.options.is_global:
-			if self.options.delete:
-				raise CommandError("You cannot delete global parameters.")
-			data = self.root.etc_cfg['run']
-		elif not args:
-			if self.options.delete:
-				raise CommandError("You cannot delete all parameters.")
-
-			async for task in t.tagged(self.TAG,depth=0):
-				path = task.path[len(self.DIR):-1]
-				for k in self._VARS:
-					if k in task:
-						print('/'.join(path),k,task[k], sep='\t',file=self.stdout)
-			return
-		else:
-			name = args.pop(0)
-			try:
-				data = await t.subdir(name, name=self.TAG, create=None if self._make else False)
-			except KeyError:
-				raise CommandError("Task definition '%s' is unknown." % name)
-
-		if self.options.delete:
-			if not args:
-				args = self._VARS
-			for k in args:
-				if k in data:
-					if self.root.verbose:
-						print("%s=%s (deleted)" % (k,data[k]), file=self.stdout)
-					await data.delete(k)
-		elif len(args) == 1 and '=' not in args[0]:
-			print(data[args[0]], file=self.stdout)
-		elif not len(args):
-			for k in self._VARS:
-				if k in data:
-					print(k,data[k], sep='\t',file=self.stdout)
-		else:
-			while args:
-				k = args.pop(0)
-				try:
-					k,v = k.split('=',1)
-				except ValueError:
-					if k not in self._VARS:
-						raise CommandError("'%s' is not a valid parameter."%k)
-					print(k,data.get(k,'-'), sep='\t',file=self.stdout)
-				else:
-					if k not in self._VARS:
-						raise CommandError("'%s' is not a valid parameter."%k)
-					if self.root.verbose:
-						if k not in data:
-							print("%s=%s (new)" % (k,v), file=self.stdout)
-						elif str(data[k]) == v:
-							print("%s=%s (unchanged)" % (k,v), file=self.stdout)
-						else:
-							print("%s=%s (was %s)" % (k,v,data[k]), file=self.stdout)
-					await data.set(k, v, ext=True)
+class DefTypeCommand(_ParamCommand):
+	name = "type"
+	_def = True
+	DIR=SCRIPT_DIR
+	TAG=SCRIPT
+	NODE="types"
+	summary = "Set script parameter types"
+	description = """\
+Display or change the data types for a script's parameters.
+""" + _ParamCommand.description(True)
 
 class DefParamCommand(_ParamCommand):
-	_def = True
-	DIR=TASKDEF_DIR
-	TAG=TASKDEF
-	summary = "Parameterize task definitions"
+	_def = False
+	DIR=SCRIPT_DIR
+	TAG=SCRIPT
+	NODE="values"
+	summary = "Set default script parameters"
 	description = """\
-Task definitions are stored in etcd at /meta/task/**/:taskdef.
-""" + _ParamCommand.description
+Display or change the default data for a script.
+""" + _ParamCommand.description(False)
 
 class ParamCommand(_ParamCommand):
 	_def = False
 	DIR=TASK_DIR
 	TAG=TASK
-	summary = "Parameterize tasks"
+	NODE="values"
+	summary = "Set script parameters"
 	description = """\
-Tasks are stored in etcd at /task/**/:task.
-""" + _ParamCommand.description
+Display or change the data for a script instance.
+""" + _ParamCommand.description(False)
+
+class _DefAddUpdate:
+	"""Mix-in to add or update a script"""
+
+	async def do(self,args):
+		try:
+			data = {}
+			if not self._update:
+				data['language'] = 'python'
+
+			name=""
+			p=0
+
+			path = args[p].rstrip('/').lstrip('/')
+			if path == "":
+				raise CommandError("Empty script path?")
+			if path[0] == ':' or '/:' in path:
+				raise CommandError("Don't add the tag")
+			p+=1
+
+			filepath = args[p]
+			if filepath == "":
+				raise CommandError("Empty script definition path?")
+			if filepath == '.':
+				if not self._update:
+					raise CommandError("You need to provide a script")
+				code = None
+			elif filepath == '-':
+				code = sys.stdin.read()
+			else:
+				with open(code,'r') as f:
+					code = f.read()
+			if len(code) < 5:
+				raise CommandError("You need to provide a non-empty script")
+
+			p+=1
+			while p < len(args):
+				try:
+					k,v = args[p].split('=')
+				except ValueError:
+					break
+				p += 1
+				data[k] = v
+			if not self._update and len(args) == p:
+				raise CommandError("Scripts need a description")
+			descr = " ".join(args[p:])
+		except IndexError:
+			raise CommandError("Missing parameters")
+
+		t = await setup(self, meta=True)
+		r = None
+		try:
+			script = await t.subdir(path,name=SCRIPT, create=False if self._update else None)
+		except KeyError:
+			raise CommandError("Script '%s' not found. (Use its path, not the name?)" % scriptpath)
+		if self._update:
+			if script['language'] != data['language']:
+				raise CommandError("Wrong language (%s)" % (data['language'],))
+		else:
+			if 'language' in script:
+				raise CommandError("Script '%s' already exists." % path)
+			await script.set('language','python')
+
+		if code is not None:
+			compile(code, path, 'exec', dont_inherit=True)
+			r = await script.set('new_code' if 'code' in script else 'code', code, sync=False)
+
+		if descr:
+			r = await script.set('descr', descr, sync=False)
+		if data:
+			for k,v in data.items():
+				if v == "":
+					try:
+						r = await script.delete(k, sync=False)
+					except KeyError:
+						pass
+				else:
+					r = await script.set(k,v, sync=False, ext=True)
+		await script.wait(mod=r)
+
+class DefAddCommand(_DefAddUpdate,Command):
+	name = "add"
+	summary = "add a script"
+	description = """\
+Create a new script.
+
+Arguments:
+
+* the new script's path (must not exist)
+
+* the file the script is stored in (must exist)
+  Use '-' for standard input
+
+* data=value parameters (script-specific, optional)
+
+* a descriptive text (not optional)
+
+"""
+	_update = False
+
+class DefUpdateCommand(_DefAddUpdate,Command):
+	name = "change"
+	summary = "change a script task"
+	description = """\
+Update a script.
+
+Arguments:
+
+* the script's path (required)
+
+* the file the script is stored in (must exist)
+  Use '-' for standard input
+  Use '.' to not replace the script
+
+* data=value parameters (script-specific, optional)
+
+* a descriptive name (optional, to update)
+
+"""
+	_update = True
+
 
 class DefCommand(SubCommand):
 	subCommandClasses = [
-		DefInitCommand,
+		DefAddCommand,
+		DefUpdateCommand,
 		DefListCommand,
 		DefGetCommand,
 		DefDeleteCommand,
+		DefTypeCommand,
 		DefParamCommand,
 	]
 	name = "def"
@@ -274,7 +331,7 @@ class DefCommand(SubCommand):
 Commands to set up and admin the scripts known to MoaT.
 """
 
-class ListCommand(DefSetup,Command):
+class ListCommand(Command):
 	name = "list"
 	summary = "List tasks for scripts"
 	description = """\
@@ -287,7 +344,7 @@ This command shows tasks which use a given script.
 			help="Show the given job only (-tt for jobs one level below, etc.)")
 
 	async def do(self,args):
-		t = await self.setup(meta=True)
+		t = await setup(self, meta=True)
 		if args:
 			dirs = []
 			for a in args:
@@ -299,7 +356,7 @@ This command shows tasks which use a given script.
 			dirs = [t]
 		for tt in dirs:
 			async for script in tt.tagged(SCRIPT, depth=self.options.this):
-				for task in script['tasks'].values():
+				for task in script.get('tasks',{}).values():
 					task = await task.task
 					path = task.path[len(TASK_DIR):-1]
 					if self.root.verbose == 2:
@@ -317,7 +374,7 @@ This command shows tasks which use a given script.
 						print(path,name,task.get('descr','-'), sep='\t',file=self.stdout)
 
 class _AddUpdate:
-	"""Mix-in to add or update a script (too much)"""
+	"""Mix-in to add or update a scripting task"""
 
 	async def do(self,args):
 		try:
@@ -326,20 +383,21 @@ class _AddUpdate:
 			name=""
 			p=0
 
-			scriptpath = args[p].rstrip('/').lstrip('/')
-			if scriptpath == "":
-				raise CommandError("Empty script path?")
-			if scriptpath[0] == ':' or '/:' in scriptpath:
+			if not self._update:
+				scriptpath = args[p].rstrip('/').lstrip('/')
+				if scriptpath == "":
+					raise CommandError("Empty script path?")
+				if scriptpath[0] == ':' or '/:' in scriptpath:
+					raise CommandError("Don't add the tag")
+				p+=1
+
+			taskpath = args[p].rstrip('/').lstrip('/')
+			if taskpath == "":
+				raise CommandError("Empty task path?")
+			if taskpath[0] == ':' or '/:' in taskpath:
 				raise CommandError("Don't add the tag")
 			p+=1
 
-			if not self._update:
-				scriptdefpath = args[p].rstrip('/').lstrip('/')
-				if scriptdefpath == "":
-					raise CommandError("Empty script definition path?")
-				if scriptdefpath[0] == ':' or '/:' in scriptdefpath:
-					raise CommandError("Don't add the tag")
-				p+=1
 			while p < len(args):
 				try:
 					k,v = args[p].split('=')
@@ -355,20 +413,20 @@ class _AddUpdate:
 			descr = " ".join(args[p:])
 		except IndexError:
 			raise CommandError("Missing command parameters")
-		t = await self.setup(meta=False)
+		t = await setup(self, meta=False)
 		if not self._update:
 			try:
-				td = await self.setup(meta=True)
-				scriptdef = await td.subdir(scriptdefpath,name=SCRIPTDEF, create=False)
+				td = await setup2(self, SCRIPT_DIR)
+				scriptdef = await td.subdir(scriptpath,name=SCRIPT, create=False)
 			except KeyError:
-				raise CommandError("Taskdef '%s' not found" % scriptdefpath)
+				raise CommandError("Taskdef '%s' not found" % scriptpath)
 
 		try:
-			script = await t.subdir(scriptpath,name=SCRIPT, create=not self._update)
+			script = await t.subdir(taskpath,name=SCRIPT, create=not self._update)
 		except KeyError:
-			raise CommandError("Task '%s' not found. (Use its path, not the name?)" % scriptpath)
+			raise CommandError("Task '%s' not found. (Use its path, not the name?)" % taskpath)
 		if not self._update:
-			await script.set('scriptdef', scriptdefpath, sync=False)
+			await script.set('scriptdef', scriptpath, sync=False)
 		p = self.options.parent
 		if p is not None:
 			if p == '-':
@@ -392,127 +450,103 @@ class _AddUpdate:
 				else:
 					await d.set(k,v, sync=False, ext=True)
 			
-
-class _AddUpdate:
-	"""Mix-in to add or update a script (too much)"""
-
-	async def do(self,args):
-		try:
-			data = {}
-			scriptdefpath=""
-			name=""
-			p=0
-
-			scriptpath = args[p].rstrip('/').lstrip('/')
-			if scriptpath == "":
-				raise CommandError("Empty script path?")
-			if scriptpath[0] == ':' or '/:' in scriptpath:
-				raise CommandError("Don't add the tag")
-			p+=1
-
-			if not self._update:
-				scriptdefpath = args[p].rstrip('/').lstrip('/')
-				if scriptdefpath == "":
-					raise CommandError("Empty script definition path?")
-				if scriptdefpath[0] == ':' or '/:' in scriptdefpath:
-					raise CommandError("Don't add the tag")
-				p+=1
-			while p < len(args):
-				try:
-					k,v = args[p].split('=')
-				except ValueError:
-					break
-				p += 1
-				if k == "name":
-					name = v
-				else:
-					data[k] = v
-			if not self._update:
-				args[p] # raises IndexError if nothing is left
-			descr = " ".join(args[p:])
-		except IndexError:
-			raise CommandError("Missing command parameters")
-		t = await self.setup(meta=False)
-		if not self._update:
-			try:
-				td = await self.setup(meta=True)
-				scriptdef = await td.subdir(scriptdefpath,name=SCRIPTDEF, create=False)
-			except KeyError:
-				raise CommandError("Taskdef '%s' not found" % scriptdefpath)
-
-		try:
-			script = await t.subdir(scriptpath,name=SCRIPT, create=not self._update)
-		except KeyError:
-			raise CommandError("Task '%s' not found. (Use its path, not the name?)" % scriptpath)
-		if not self._update:
-			await script.set('scriptdef', scriptdefpath, sync=False)
-		p = self.options.parent
-		if p is not None:
-			if p == '-':
-				with suppress(KeyError):
-					await script.delete('parent', sync=False)
-			else:
-				await script.set('parent', p, sync=False)
-
-		if name:
-			await script.set('name', name, sync=False)
-		if descr:
-			await script.set('descr', descr, sync=False)
-		if data:
-			d = await script.subdir('data', create=None)
-			for k,v in data.items():
-				if v == "":
-					try:
-						await d.delete(k, sync=False)
-					except KeyError:
-						pass
-				else:
-					await d.set(k,v, sync=False, ext=True)
-			
-
-class AddCommand(_AddUpdate,DefSetup,Command):
+from .task import AddCommand as TaskAddCommand
+class AddCommand(TaskAddCommand):
 	name = "add"
-	summary = "add a script task"
+	summary = "add a scripted task"
 	description = """\
 Create a new task for a script.
 
 Arguments:
 
-* the new task's path (must not exist)
-
 * the script's path (must exist)
 
-* data=value parameters (job-specific, optional)
+* the new task's path (must not exist)
 
-* a descriptive name (optional)
+* data=value parameters (task-specific, optional)
+
+* a descriptive text (not optional)
+
+NB: Parameters affect the task, not the script. Use The "param" subcommand
+    to set the script's "moat.data" variables.
 
 """
-	_update = False
 
-class UpdateCommand(_AddUpdate,DefSetup,Command):
+	async def do(self,args):
+		t = await setup(self, True)
+		try:
+			s = await t.lookup(args[0],name=SCRIPT)
+		except KeyError:
+			raise CommandError("The script '%s' does not exist" % (args[0],))
+		import pdb;pdb.set_trace()
+		args = (args[1],"task/script","script="+args[0]) +tuple(args[2:])
+		await super().do(args)
+		sd = await s.subdir("tasks")
+		k = await sd.set(None,args[1])
+		t = await setup2(self, TASK_DIR)
+		s = await t.lookup(args[1])
+		await s.set("script_loc",k)
+
+from .task import UpdateCommand as TaskUpdateCommand
+class UpdateCommand(TaskUpdateCommand):
 	name = "change"
-	summary = "change a script task"
+	summary = "change a scripted task"
 	description = """\
-Update a task for a script.
+Update a scripted task.
 
 Arguments:
 
-* the task's path (required)
+* the task's path (must exist)
 
-* data=value entries (deletes the key if value is empty)
+* data=value parameters (task-specific, optional)
 
 * a descriptive name (optional, to update)
 
+NB: Parameters affect the task, not the script. Use The "param" subcommand
+    to modify the script's "moat.data" variables.
+
 """
 	_update = True
+
+	async def do(self,args):
+		t = await setup(self, False)
+		s = await t.lookup(args[0], name=TASK)
+		sc = s['script']
+		k = s['script_loc']
+		args = (args[1],)+tuple(args[1:])
+		await super().do(args)
+		if s['script'] != sc:
+			t = await setup2(self, SCRIPT_DIR)
+			sd = await t.lookup(sc, name=SCRIPT)
+			await sd['tasks'].delete(k)
+			sd = await t.lookup(s['script'], name=SCRIPT)
+			await sd['tasks'].set(k, '/'.join(s.path[len(TASK_DIR):-1]))
+
 
 from moat.cmd.task import DeleteCommand as TaskDeleteCommand
 class DeleteCommand(TaskDeleteCommand):
 	def check(self,task):
 		if task._get('taskdef').value != 'task/script':
-			print("%s: not a script job, not deleted", % self.path[len(TASK_DIR):-1],), file=sys.stderr)
+			print("%s: not a script job, not deleted" % ('/'.join(self.path[len(TASK_DIR):-1]),), file=sys.stderr)
 			return False
 		return True
+
+	async def do(self,args):
+		t = await setup(self, False)
+		s = await t.lookup(args[0], name=TASK)
+		try:
+			if s['taskdef'] != "task/script":
+				raise CommandError("'%s' is not a scripting task!" % ('/'.join(self.path[len(TASK_DIR):-1]),))
+			sc = s['script']
+			k = s['script_loc']
+		except KeyError:
+			sc = None
+		await super().do(args)
+		if sc is not None:
+			t = await setup2(self, SCRIPT_DIR)
+			sd = await t.lookup(sc, name=SCRIPT)
+			await sd['tasks'].delete(k)
+		
 
 class ScriptCommand(SubCommand):
 	name = "script"

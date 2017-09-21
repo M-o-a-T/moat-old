@@ -178,9 +178,12 @@ class hasErrorDir:
 
 			t = await self.root.subdir(ERROR_DIR, name=tag)
 			kw['loc'] = '/'.join(self.path)
-			kw['msg'] = msg
+			kw['msg'] = str(msg)
 			kw['timestamp'] = time()
 			kw['created'] = time()
+			if isinstance(msg,BaseException):
+				kw['trace'] = "".join(format_exception(msg.__class__,msg,msg.__traceback__))
+
 			v = await t.set(None,kw, force=True,sync=True)
 			v = t[v[0]]
 			await self.set('error',{tag:v.name}, force=True,sync=True)

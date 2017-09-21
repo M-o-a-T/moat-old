@@ -346,9 +346,12 @@ class CommandExited(Exception):
 #		CommandExited.__init__(self, 0, output)
 
 class CommandError(CommandExited):
+	def __init__(self, output, err=3):
+		super().__init__(err, output)
 
+class CommandSyntaxError(CommandExited):
 	def __init__(self, output):
-		CommandExited.__init__(self, 3, output)
+		super().__init__(8)
 
 class SubCommand(Command):
 	"""
@@ -380,7 +383,7 @@ class SubCommand(Command):
 					logger.debug("Done:%s", " ".join(args))
 				self.root.logged = True
 			return r
-		except SyntaxError:
+		except CommandSyntaxError:
 			raise
 		except CommandExited as e:
 			raise

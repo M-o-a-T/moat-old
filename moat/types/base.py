@@ -47,8 +47,11 @@ class TypeDir(EtcDir):
 	"""A class linking a type to its etcd entry"""
 	def __init__(self,*a,**k):
 		super().__init__(*a,**k)
-		self._type = type_names()['/'.join(self.path[len(TYPEDEF_DIR):-1])]
-		self._type.types(self)
+		self.type = type_names()['/'.join(self.path[len(TYPEDEF_DIR):-1])]
+		self.type.types(self)
+	@property
+	def etcd_type(self):
+		return self.type.etcd_type
 TypeDir.register('timestamp',cls=EtcFloat)
 TypeDir.register('created',cls=EtcFloat)
 

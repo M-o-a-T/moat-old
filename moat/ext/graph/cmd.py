@@ -38,7 +38,7 @@ from yaml import dump
 from boltons.iterutils import remap
 from datetime import datetime
 
-from moat.script import Command, SubCommand, CommandError
+from moat.script import Command, SubCommand, CommandError, CommandSyntaxError
 from moat.times import simple_time_delta, humandelta
 from . import modes,modenames
 
@@ -74,7 +74,7 @@ Log the event stream from AMQP to SQL
 """
 	async def do(self,args):
 		if len(args):
-			raise SyntaxError("Usage: log")
+			raise CommandSyntaxError("Usage: log")
 		await self.setup()
 		self.quitting = asyncio.Event(loop=self.root.loop)
 
@@ -160,9 +160,9 @@ This command shows the status of current graphing
 				await db.Do("SET TIME_ZONE='+00:00'", _empty=True)
 				if self.options.unassigned or self.options.method:
 					if self.options.layer >= 0:
-						raise SyntaxError("You can't use '-u'/'-m' with a specific layer")
+						raise CommandSyntaxError("You can't use '-u'/'-m' with a specific layer")
 					if args:
-						raise SyntaxError("You can't use '-u'/'-m' with a specific type")
+						raise CommandSyntaxError("You can't use '-u'/'-m' with a specific type")
 					await self._do_unassigned(db, None if self.options.unassigned else self.options.method)
 				elif args:
 					await self._do_args(db,args)
@@ -343,7 +343,7 @@ Set data type and aggregation options for a logged event type
 
 	async def do(self,args):
 		if not args:
-			raise SyntaxError("Usage: set [options] data_tag")
+			raise CommandSyntaxError("Usage: set [options] data_tag")
 		await self.setup()
 
 		async with self.db() as db:
@@ -353,7 +353,7 @@ Set data type and aggregation options for a logged event type
 				try:
 					method = modenames[self.options.method]
 				except KeyError:
-					raise SyntaxError("Unknown method '%s'" % self.options.method)
+					raise CommandSyntaxError("Unknown method '%s'" % self.options.method)
 			else:
 				method = None
 
@@ -385,7 +385,7 @@ Set data type and aggregation options for a logged event type
 					if self.root.verbose:
 						print("OK")
 			else:
-				raise SyntaxError("Nothing to change.")
+				raise CommandSyntaxError("Nothing to change.")
 
 class ResetCommand(_Command):
 	name = "reset"
@@ -416,9 +416,9 @@ Set data type and aggregation options for a logged event type
 
 	async def do(self,args):
 		if not args:
-			raise SyntaxError("Usage: reset [options] data_tag")
+			raise CommandSyntaxError("Usage: reset [options] data_tag")
 		if self.options.layers and not self.options.summary:
-			raise SyntaxError("You can't delete the summary descriptions but not the data!")
+			raise CommandSyntaxError("You can't delete the summary descriptions but not the data!")
 		await self.setup()
 
 		async with self.db() as db:
@@ -427,7 +427,7 @@ Set data type and aggregation options for a logged event type
 			try:
 				dtid, = await db.DoFn("select id from data_type where tag=${tag}", tag=tag)
 			except NoData:
-				raise SyntaxError("There is no tag '%s'" % (tag,))
+				raise CommandSyntaxError("There is no tag '%s'" % (tag,))
 
 			if self.options.force:
 				if self.options.summary or self.options.all:
@@ -481,13 +481,13 @@ Create an aggregation layer and/or set options
 		if args and self.options.layer < 0 and not self.options.copy: # list all
 			pass
 		elif not args or (self.options.layer < 0 and not self.options.copy):
-			raise SyntaxError("Usage: set -l LAYER [options] data_tag")
+			raise CommandSyntaxError("Usage: set -l LAYER [options] data_tag")
 		tag = ' '.join(args)
 		await self.setup()
 
 		if self.options.copy:
 			if self.options.interval or self.options.max_age:
-				raise SyntaxError("Copying and setting parameters is not compatible")
+				raise CommandSyntaxError("Copying and setting parameters is not compatible")
 		if self.options.interval:
 			self.options.interval = simple_time_delta(self.options.interval)
 		async with self.db() as db:
@@ -495,18 +495,18 @@ Create an aggregation layer and/or set options
 			try:
 				dtid, = await db.DoFn("select id from data_type where tag=${tag}", tag=tag)
 			except NoData:
-				raise SyntaxError("Tag '%s' unknown" % (tag,))
+				raise CommandSyntaxError("Tag '%s' unknown" % (tag,))
 			upd = {}
 
 			if args and self.options.copy:
 				try:
 					cdtid, = await db.DoFn("select id from data_type where tag=${tag}", tag=self.options.copy)
 				except NoData:
-					raise SyntaxError("Source tag unknown")
+					raise CommandSyntaxError("Source tag unknown")
 				if self.options.layer < 0:
 					c, = await db.DoFn("select count(*) from data_agg_type where data_type=${id}", id=dtid)
 					if c > 0:
-						raise SyntaxError("Some layers already exist, copy separately.")
+						raise CommandSyntaxError("Some layers already exist, copy separately.")
 					from .process import agg_type
 					t = agg_type(self,db)
 					n = 0
@@ -544,7 +544,7 @@ Create an aggregation layer and/or set options
 				iid,intv = await db.DoFn("select id,`interval` from data_agg_type where data_type=${id} and layer=${layer}", id=dtid, layer=self.options.layer)
 			except NoData:
 				if not self.options.interval:
-					raise SyntaxError("The interval must be specified")
+					raise CommandSyntaxError("The interval must be specified")
 				upd['interval'] = intv = self.options.interval
 				iid=None
 
@@ -552,16 +552,16 @@ Create an aggregation layer and/or set options
 					try:
 						lid,lint = await db.DoFn("select id,`interval` from data_agg_type where data_type=${id} and layer=${layer}", id=dtid,layer=self.options.layer-1)
 					except NoData:
-						raise SyntaxError("Layers need to be contiguous")
+						raise CommandSyntaxError("Layers need to be contiguous")
 					else:
 						if self.options.interval % lint:
-							raise SyntaxError("The interval must be a multiple of the next-lower layer's interval")
+							raise CommandSyntaxError("The interval must be a multiple of the next-lower layer's interval")
 				upd['layer'] = self.options.layer
 			else:
 				if self.options.interval:
 					n, = await db.DoFn("select count(*) from data_agg where data_agg_type=${iid}", iid=iid)
 					if n > 0:
-						raise SyntaxError("Existing data! The interval cannot be changed")
+						raise CommandSyntaxError("Existing data! The interval cannot be changed")
 				
 			if self.options.max_age:
 				if self.options.max_age == '-':
@@ -569,10 +569,10 @@ Create an aggregation layer and/or set options
 				else:
 					max_age = simple_time_delta(self.options.max_age)
 					if max_age < 3*intv:
-						raise SyntaxError("maxage is too low, this makes no sense")
+						raise CommandSyntaxError("maxage is too low, this makes no sense")
 				upd['max_age'] = max_age
 			if not upd:
-				raise SyntaxError("No change specified")
+				raise CommandSyntaxError("No change specified")
 
 			if iid is None:
 				upd['data_type'] = dtid
@@ -617,7 +617,7 @@ Process a layer (or all of them)
 				filter['data_type'], = await db.DoFn("select id from data_type where tag=${tag}", tag=tag)
 			if self.options.layer >= 0:
 				if self.options.old:
-					raise SyntaxError("You can't specify a layer for processing old data")
+					raise CommandSyntaxError("You can't specify a layer for processing old data")
 				filter['layer'] = self.options.layer
 			elif self.options.old:
 				filter['layer'] = 0
@@ -625,7 +625,7 @@ Process a layer (or all of them)
 				try:
 					filter['method'] = modenames[self.options.method]
 				except KeyError:
-					raise SyntaxError("Method '%s' unknown" % (self.options.method,))
+					raise CommandSyntaxError("Method '%s' unknown" % (self.options.method,))
 			fs = ' and '.join("`%s`=${%s}" % (k,k) for k in filter.keys())
 			if fs:
 				fs = " where "+fs

@@ -35,51 +35,6 @@ from moat.types.error import hasErrorDir
 import logging
 logger = logging.getLogger(__name__)
 
-class ScriptDef(recEtcDir,EtcDir):
-	"""\
-		etcd directory for script definitions: /meta/script/**/:code
-
-		This stores the code for a script (content, value types, …)
-		"""
-
-	cls = None
-
-	async def init(self):
-		await super().init()
-		await self._update_cls()
-
-	async def has_update(self):
-		await super().has_update()
-		await self._update_cls()
-
-	def _update_cls(self):
-		self.cls = None
-		try:
-			if self['language'] != 'python':
-				return
-			cur = self.get('current','cur')
-			if cur == "cur":
-				cur = "code"
-			elif ćur == "old":
-				cur = "old-code"
-			elif cur == "new":
-				cur = "new-code"
-			else:
-				raise ValueError("current code tag is %s'" % (cur,))
-			code = self[cur]
-		except KeyError:
-			return
-		else:
-			try:
-				self.code = compile(code,'/'.join(self.name[len(SCRIPT_DIR):-1]),self."eval")
-			except (ImportError,AttributeError) as exc:
-				await self.set_error(cur,exc)
-			else:
-				await self.clear_error(cur)
-
-
-_setup_task_vars(TaskDef)
-
 class TaskState(hasErrorDir,recEtcDir,EtcDir):
 	"""\
 		etcd directory for task state: /status/task/**/:task

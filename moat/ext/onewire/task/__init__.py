@@ -56,12 +56,22 @@ async def scanner(self, name):
 		warned = await proc()
 
 class _BusTask(Task):
-	schema = {'update_delay':'float/time'}
+	@classmethod
+	async def register_types(cls, types):
+		await super(_BusTask,cls).register_types(types)
+		r = await types.set('update_delay','float/time')
+		return r
+
+	@classmethod
+	async def register_defaults(cls, data):
+		await super(_BusTask,cls).register_defaults(data)
+		r = await data.set('update_delay',0)
+		return r
 
 	@property
 	def update_delay(self):
 		try:
-			return self['update_delay']
+			return self['data']['update_delay']
 		except KeyError:
 			return self.parent.update_delay
 

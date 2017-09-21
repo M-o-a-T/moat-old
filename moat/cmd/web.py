@@ -38,7 +38,6 @@ from moat.script import Command, SubCommand, CommandError
 from moat.web import WEBDEF_DIR,WEBDEF, WEBDATA_DIR,WEBDATA, WEBSERVER_DIR,WEBSERVER, webdefs, WEBCONFIG
 from moat.web.base import WebdefDir, DefaultConfig
 from moat.util import r_dict, r_show
-from moat.cmd.task import _ParamCommand
 
 import logging
 logger = logging.getLogger(__name__)
@@ -174,28 +173,6 @@ This command deletes (some of) that data.
                 rec = False
                 t = p
 
-class DefParamCommand(_ParamCommand):
-    _def = True
-    DIR=WEBDEF_DIR
-    TAG=WEBDEF
-    summary = "Parameterize web definitions"
-    description = """\
-Web definitions are stored in etcd at /meta/web/**/:def.
-
-This command lets you change parameters for a Web definition.
-""" + _ParamCommand.description
-
-class ParamCommand(_ParamCommand):
-    _def = False
-    DIR=WEBDATA_DIR
-    TAG=WEBDATA
-    summary = "Parameterize web entries"
-    description = """\
-Web entries are stored in etcd at /web/**/:item.
-
-This command lets you change parameters for a Web item.
-""" + _ParamCommand.description
-
 class _DefAddUpdate:
     """Mix-in to add or update a web entry (too much)"""
 
@@ -264,7 +241,7 @@ Arguments:
 
 * data=value parameters (entry-specific, optional)
 
-* a descriptive name (not optional)
+* a descriptive text (not optional)
 
 """
     _update = False
@@ -280,7 +257,7 @@ Arguments:
 
 * data=value entries (deletes the key if value is empty)
 
-* a descriptive name (optional, to update)
+* a descriptive text (optional, to update)
 
 """
     _update = True
@@ -292,7 +269,6 @@ class DefCommand(SubCommand):
         DefAddCommand,
         DefUpdateCommand,
         DefDeleteCommand,
-        DefParamCommand,
     ]
     name = "def"
     summary = "Manage web definitios"
@@ -436,7 +412,7 @@ Arguments:
 * host=, port=, default= parameters
   otherwise localhost, 8080, default is assumed
 
-* a descriptive name (not optional)
+* a descriptive text (not optional)
 
 """
     _update = False
@@ -452,7 +428,7 @@ Arguments:
 
 * host, port, default parameters
 
-* a descriptive name (optional, to update)
+* a descriptive text (optional, to update)
 
 """
     _update = True
@@ -596,7 +572,7 @@ Arguments:
 
 * data=value parameters (entry-specific, optional)
 
-* a descriptive name (not optional)
+* a descriptive text (not optional)
 
 """
     _update = False
@@ -612,7 +588,7 @@ Arguments:
 
 * data=value entries (deletes the key if value is empty)
 
-* a descriptive name (optional, to update)
+* a descriptive text (optional, to update)
 
 """
     _update = True
@@ -660,19 +636,6 @@ This command deletes one of these entries.
                 rec = False
                 web = p
 
-class ConfigCommand(_ParamCommand):
-    _def = False
-    _make = True
-    name = "config"
-    _VARS = set(DefaultConfig.keys())
-    DIR=WEBDATA_DIR
-    TAG=WEBCONFIG
-    summary = "Configure display"
-    description = """\
-Web display parameters are stored in etcd at /web/**/:config.
-""" + _ParamCommand.description
-
-
 class DataCommand(SubCommand):
         name = "data"
         summary = "Configure the web data"
@@ -699,8 +662,6 @@ Commands to configure, and run, a basic web front-end.
         subCommandClasses = [
                 DefCommand,
                 DataCommand,
-                ParamCommand,
-                ConfigCommand,
                 ServerCommand,
         ]
 

@@ -37,6 +37,7 @@ from yaml import dump
 from qbroker.util import import_string
 from moat.script import Command, SubCommand, CommandError
 from moat.script.task import Task
+from moat.script.util import _ParamCommand
 from moat.task import TASK,TASK_DIR, TASKDEF,TASKDEF_DIR, TASKSTATE,TASKSTATE_DIR, TASKSCAN_DIR, task_types
 from moat.types.module import BaseModule
 from moat.util import r_dict,r_show
@@ -50,10 +51,11 @@ __all__ = ['TaskCommand']
 
 class DefSetup:
 	async def setup(self, meta=False):
-		if meta:
+		if meta is True:
 			self.DIR=TASKDEF_DIR
-		else:
+		elif meta is False:
 			self.DIR=TASK_DIR
+		# otherwise assume it's already set
 		await super().setup()
 		etc = self.root.etcd
 		tree = await self.root._get_tree()
@@ -92,19 +94,19 @@ This also installs the root "task scanner" task, if no args are given.
 					from moat.script.util import objects
 					n = 0
 					for c in objects(m, Task, filter=lambda x:getattr(x,'taskdef',None) is not None):
-						await t.add_task(c, force=self.force)
+						await t.add_taskdef(c, force=self.force)
 						n += 1
 					if self.root.verbose > (1 if n else 0):
 						print("%s: %s command%s found." % (a,n if n else "no", "" if n==1 else "s"), file=self.stdout)
 				else:
 					if not isinstance(m,Task):
 						raise CommandError("%s is not a task"%a)
-					await t.add_task(m, force=self.force)
+					await t.add_taskdef(m, force=self.force)
 		else:
 			for c in task_types():
-				await t.add_task(c, force=self.force)
+				await t.add_taskdef(c, force=self.force)
 
-			r = await tree.subdir(*TASKSCAN_DIR)
+			r = await tree.subdir(TASKSCAN_DIR)
 			from moat.task.collect import Collector
 			await r.add_task(path=(),taskdef=Collector.taskdef, force=self.force)
 
@@ -184,113 +186,33 @@ This command deletes (some of) that data.
 				rec = False
 				t = p
 
-class _ParamCommand(DefSetup,Command):
-	name = "param"
-	# _def = None ## need to override
-	_make = False # create dir if missing?  used by web param
-	from moat.task import _VARS
-	description = """\
-
-This command shows/changes/deletes parameters for that data.
-
-Usage: … param NAME VALUE  -- set
-       … param             -- list all
-       … param NAME        -- show one
-       … param -d NAME     -- delete
-"""
-	DEPTH=0
-
-	def addOptions(self):
-		self.parser.add_option('-d','--delete',
-			action="store_true", dest="delete",
-			help="delete specific parameters")
-		if self._def:
-			self.parser.add_option('-g','--global',
-				action="store_true", dest="is_global",
-				help="show global parameters")
-
-	async def do(self,args):
-		t = await self.setup(meta=self._def)
-		if self._def and self.options.is_global:
-			if self.options.delete:
-				raise CommandError("You cannot delete global parameters.")
-			data = self.root.etc_cfg['run']
-		elif not args:
-			if self.options.delete:
-				raise CommandError("You cannot delete all parameters.")
-
-			async for task in t.tagged(self.TAG,depth=self.DEPTH):
-				path = task.path[len(self.DIR):-1]
-				for k in self._VARS:
-					if k in task:
-						print('/'.join(path),k,task[k], sep='\t',file=self.stdout)
-			return
-		else:
-			name = args.pop(0)
-			try:
-				data = await t.subdir(name, name=self.TAG, create=None if self._make else False)
-			except KeyError:
-				raise CommandError("Task definition '%s' is unknown." % name)
-
-		if self.options.delete:
-			if not args:
-				args = self._VARS
-			for k in args:
-				if k in data:
-					if self.root.verbose:
-						print("%s=%s (deleted)" % (k,data[k]), file=self.stdout)
-					await data.delete(k)
-		elif len(args) == 1 and '=' not in args[0]:
-			print(data[args[0]], file=self.stdout)
-		elif not len(args):
-			for k in self._VARS:
-				if k in data:
-					print(k,data[k], sep='\t',file=self.stdout)
-		else:
-			while args:
-				k = args.pop(0)
-				try:
-					k,v = k.split('=',1)
-				except ValueError:
-					if k not in self._VARS:
-						raise CommandError("'%s' is not a valid parameter."%k)
-					print(k,data.get(k,'-'), sep='\t',file=self.stdout)
-				else:
-					if k not in self._VARS:
-						raise CommandError("'%s' is not a valid parameter."%k)
-					if self.root.verbose:
-						if k not in data:
-							print("%s=%s (new)" % (k,v), file=self.stdout)
-						elif str(data[k]) == v:
-							print("%s=%s (unchanged)" % (k,v), file=self.stdout)
-						else:
-							print("%s=%s (was %s)" % (k,v,data[k]), file=self.stdout)
-					await data.set(k, v, ext=True)
-
 class DefParamCommand(_ParamCommand):
-	_def = True
-	DIR=TASKDEF_DIR
-	TAG=TASKDEF
-	summary = "Parameterize task definitions"
-	description = """\
-Task definitions are stored in etcd at /meta/task/**/:taskdef.
-""" + _ParamCommand.description
+    _def = False
+    DIR=TASKDEF_DIR
+    TAG=TASKDEF
+    NODE="data"
+    summary = "Set default task parameters"
+    description = """\
+Display or change the default data for a task.
+""" + _ParamCommand.description(False)
 
 class ParamCommand(_ParamCommand):
-	_def = False
-	DIR=TASK_DIR
-	TAG=TASK
-	summary = "Parameterize tasks"
-	description = """\
-Tasks are stored in etcd at /task/**/:task.
-""" + _ParamCommand.description
+    _def = False
+    DIR=TASK_DIR
+    TAG=TASK
+    NODE="data"
+    summary = "Set task parameters"
+    description = """\
+Display or change the data for a task instance.
+""" + _ParamCommand.description(False)
+
 
 class DefCommand(SubCommand):
 	subCommandClasses = [
 		DefInitCommand,
 		DefListCommand,
-		DefDeleteCommand,
 		DefParamCommand,
+		DefDeleteCommand,
 	]
 	name = "def"
 	summary = "Define tasks"
@@ -319,9 +241,8 @@ class EnumCommand(Command):
 			if len(args) > 1 and self.options.watch:
 				raise CommandError("You can only watch one node. Sorry.")
 		for a in args:
-			a = tuple(x for x in a.split('/') if x != '')
 			try:
-				d = await tree.lookup(*a)
+				d = await tree.lookup(a)
 			except KeyError:
 				print("Node '%s' not found" % (a,), file=sys.stderr)
 				continue
@@ -435,10 +356,7 @@ class _AddUpdate:
 				except ValueError:
 					break
 				p += 1
-				if k == "name":
-					name = v
-				else:
-					data[k] = v
+				data[k] = v
 			if not self._update:
 				args[p] # raises IndexError if nothing is left
 			descr = " ".join(args[p:])
@@ -452,34 +370,33 @@ class _AddUpdate:
 			except KeyError:
 				raise CommandError("Taskdef '%s' not found" % taskdefpath)
 
+		r = None
 		try:
 			task = await t.subdir(taskpath,name=TASK, create=not self._update)
 		except KeyError:
 			raise CommandError("Task '%s' not found. (Use its path, not the name?)" % taskpath)
 		if not self._update:
-			await task.set('taskdef', taskdefpath, sync=False)
+			r = await task.set('taskdef', taskdefpath, sync=False)
 		p = self.options.parent
 		if p is not None:
-			if p == '-':
+			if p in ('','-'):
 				with suppress(KeyError):
-					await task.delete('parent', sync=False)
+					r = await task.delete('parent', sync=False)
 			else:
-				await task.set('parent', p, sync=False)
-
-		if name:
-			await task.set('name', name, sync=False)
+				r = await task.set('parent', p, sync=False)
 		if descr:
-			await task.set('descr', descr, sync=False)
+			r = await task.set('descr', descr, sync=False)
+
 		if data:
-			d = await task.subdir('data', create=None)
 			for k,v in data.items():
 				if v == "":
 					try:
-						await d.delete(k, sync=False)
+						r = await task.delete(k, sync=False)
 					except KeyError:
 						pass
 				else:
-					await d.set(k,v, sync=False, ext=True)
+					r = await task.set(k,v, sync=False, ext=True)
+		await task.wait(mod=r)
 			
 
 class AddCommand(_AddUpdate,DefSetup,Command):
@@ -496,7 +413,7 @@ Arguments:
 
 * data=value parameters (job-specific, optional)
 
-* a descriptive name (not optional)
+* a descriptive text (not optional)
 
 """
 	_update = False
@@ -513,7 +430,7 @@ Arguments:
 
 * data=value entries (deletes the key if value is empty)
 
-* a descriptive name (optional, to update)
+* a descriptive text (optional, to update)
 
 """
 	_update = True
@@ -659,10 +576,10 @@ Commands to set up and admin the task list known to MoaT.
 		EnumCommand,
 		AddCommand,
 		UpdateCommand,
-		ParamCommand,
 		ListCommand,
 		DeleteCommand,
 		StateCommand,
+		ParamCommand,
 	]
 	fix = False
 

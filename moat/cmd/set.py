@@ -26,7 +26,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 """List of known Tasks"""
 
 import os
-from moat.script import Command, SubCommand, CommandError
+from moat.script import Command, SubCommand, CommandError, CommandSyntaxError
 import aio_etcd as etcd
 import logging
 logger = logging.getLogger(__name__)
@@ -190,7 +190,7 @@ See "moat show dev --help" for displaying values.
 		etc = await self.root._get_etcd()
 		retval = 0
 		if len(args) < 2 or '=' not in args[-1]:
-			raise SyntaxError("Usage: … path/to/device input/name entry=value")
+			raise CommandSyntaxError("Usage: … path/to/device input/name entry=value")
 		p = p1 = '/'+'/'.join(DEV_DIR)+'/'+args.pop(0).replace('.','/')+'/'+DEV
 		
 		import pdb;pdb.set_trace()

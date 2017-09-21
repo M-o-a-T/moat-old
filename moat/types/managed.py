@@ -24,13 +24,8 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##BP
 
 import asyncio
-from etcd_tree import EtcString,EtcDir,EtcFloat,EtcInteger,EtcValue,EtcAwaiter, ReloadRecursive
-import aio_etcd as etcd
-from time import time
+from etcd_tree import EtcDir,EtcAwaiter
 from weakref import ref
-
-from moat.types import TYPEDEF_DIR,TYPEDEF, type_names
-from moat.dev import devices, DEV
 
 import logging
 logger = logging.getLogger(__name__)

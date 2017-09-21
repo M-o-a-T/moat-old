@@ -27,6 +27,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 
 import os,sys
 from moat.script import Command, SubCommand, CommandError
+from moat.types.etcd import MoatLoadedDir
 from etcd_tree.util import from_etcd
 from etcd_tree.etcd import EtcTypes
 from etcd_tree.node import EtcAwaiter,EtcDir,EtcValue
@@ -109,9 +110,14 @@ With arguments, show only these subtrees.
 			tree = await self.root._get_tree()
 			seen = set()
 
-			def pr(i,p,t,r=None):
+			async def pr(i,p,t,r=None):
 				if t is None:
 					return
+				if issubclass(t,MoatLoadedDir):
+					d = await tree.lookup(p)
+					for k in d.keys():
+						print("  %s%s: %s" % (" "*i,k,"‹subdir›"))
+
 				if not isinstance(t,EtcTypes):
 					if r:
 						for a,b in r:
@@ -133,14 +139,15 @@ With arguments, show only these subtrees.
 				seen.add(t)
 
 				for k,v in t.nodes.items():
-					pr(i+2,k,v,r)
+					await pr(i+2,k,v,r)
 					if v.type:
-						pr(i+2,k,v.type,r)
+						await pr(i+2,k,v.type[0],r)
+						await pr(i+2,k,v.type[1],r)
 			if args:
 				for a in args:
-					pr(0,a,type(await tree.lookup(a.split('.'))))
+					await pr(0,a,type(await tree.lookup(a)))
 			else:
-				pr(0,'/',type(tree))
+				await pr(0,'/',tree._types)
 		elif args:
 			for n,a in enumerate(args):
 				if n:

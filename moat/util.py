@@ -151,6 +151,18 @@ class OverlayDict(MutableMapping):
 			return True
 		return k in self.b
 
+    # compatibility methods, used when self.a is an etcdtree
+
+	async def set(self,*a,**kw):
+		return self.a.set(*a,**kw)
+
+	async def delete(self,*a,**kw):
+		return self.a.delete(*a,**kw)
+
+	async def wait(self,*a,**kw):
+		return self.a.wait(*a,**kw)
+
+
 def do_async(task, *a, _loop=None, _err_cb=None, **k):
 	"""\
 		Helper to run a task asynchronously and log errors.

@@ -184,7 +184,7 @@ Arguments:
 
 * data=value parameters (entry-specific, optional)
 
-* a descriptive name (not optional)
+* a descriptive text (not optional)
 
 Data items:
 
@@ -213,7 +213,7 @@ Arguments:
   * in particular, input/topic=some.amqp.topic
     (and/or output/topic) is required
 
-* a descriptive name (optional, to update)
+* a descriptive text (optional, to update)
 
 The data type is immutable.
 
