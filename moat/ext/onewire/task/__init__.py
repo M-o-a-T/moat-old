@@ -65,15 +65,19 @@ class _BusTask(Task):
 	@classmethod
 	async def register_defaults(cls, data):
 		await super(_BusTask,cls).register_defaults(data)
-		r = await data.set('update_delay',0)
+		#import pdb;pdb.set_trace()
+		r = await data.set('update_delay',1)
 		return r
 
 	@property
 	def update_delay(self):
 		try:
-			return self['data']['update_delay']
+			d = self['data']['update_delay']
+			if d > 0:
+				return d
 		except KeyError:
-			return self.parent.update_delay
+			pass
+		return self.parent.update_delay
 
 	async def setup(self):
 		# onewire/NAME/scan/…
@@ -134,7 +138,19 @@ class ScanTask(TimeoutHandler, _BusTask, metaclass=_ScanMeta):
 		
 		"""
 	typ = None
-	schema = {'timer':'float'}
+
+	@classmethod
+	async def register_types(cls, types):
+		await super(_BusTask,cls).register_types(types)
+		r = await types.set('timer','float/time')
+		return r
+
+	@classmethod
+	async def register_defaults(cls, data):
+		await super(_BusTask,cls).register_defaults(data)
+		#import pdb;pdb.set_trace()
+		r = await data.set('timer',60)
+		return r
 
 	async def task(self):
 		"""\
@@ -154,6 +170,7 @@ class ScanTask(TimeoutHandler, _BusTask, metaclass=_ScanMeta):
 		try:
 			t = self.config['timer']
 		except KeyError:
+			import pdb;pdb.set_trace()
 			t = self.taskdir['data']['timer']
 		long_warned = 0
 

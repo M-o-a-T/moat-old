@@ -69,7 +69,6 @@ import etcd
 import inspect
 import functools
 from time import time
-from traceback import format_exception
 import weakref
 import blinker
 from collections.abc import Mapping

@@ -283,10 +283,11 @@ class Task(regTask):
 				logger.debug("Run marker refreshed %s",self.name)
 				await asyncio.sleep(refresh, loop=r.loop)
 				
-		async def save_exc(exc, state='error'):
+		async def save_exc(exc, state='error', skip=False):
 			if not self.name.startswith("test/"):
 				logger.exception(self.name)
-			await run_state.set("state",state)
+			if not skip:
+				await run_state.set("state",state)
 			await send_alert(state=state, reason=str(exc))
 			await run_state.set_error("job" if state == "error" else state, exc)
 
@@ -366,7 +367,7 @@ class Task(regTask):
 					except asyncio.CancelledError as err: # bah
 						await run_state.set("message", "cancelled")
 					else:
-						await save_exc(exc, state="cancel")
+						await save_exc(exc, state="cancel", skip=True)
 				run_task.result()
 				assert False,"the previous line should have raised an error" # pragma: no cover
 			else:

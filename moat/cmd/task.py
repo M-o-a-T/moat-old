@@ -186,7 +186,7 @@ This command deletes (some of) that data.
 				rec = False
 				t = p
 
-class DefParamCommand(_ParamCommand):
+class DefParamCommand(_ParamCommand,DefSetup,Command):
     _def = False
     DIR=TASKDEF_DIR
     TAG=TASKDEF
@@ -196,7 +196,7 @@ class DefParamCommand(_ParamCommand):
 Display or change the default data for a task.
 """ + _ParamCommand.description(False)
 
-class ParamCommand(_ParamCommand):
+class ParamCommand(_ParamCommand,DefSetup,Command):
     _def = False
     DIR=TASK_DIR
     TAG=TASK

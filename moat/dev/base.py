@@ -123,7 +123,7 @@ class BaseTypedDir(ManagedEtcThing,EtcDir):
 		if self._type is not None and self._type._type.name == typename:
 			return
 		self._type = root.lookup(TYPEDEF_DIR).lookup(typename,name=TYPEDEF)
-		self._value = self._type._type(self._type,self)
+		self._value = self._type.type(self._type,self)
 
 		try:
 			val = self['value']

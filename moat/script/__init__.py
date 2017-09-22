@@ -373,7 +373,11 @@ class SubCommand(Command):
 				c = await self.resolve_command(args[0])
 			except KeyError as e:
 				raise CommandError("Unknown command: '%s'" % args[0]) from e
-			c = c(parent=self)
+			try:
+				c = c(parent=self)
+			except TypeError as exc:
+				import pdb;pdb.set_trace()
+				c = c(parent=self)
 
 			r = await c.parse(args[1:])
 			if not self.root.logged:

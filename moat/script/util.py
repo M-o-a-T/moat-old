@@ -29,6 +29,8 @@ from importlib import import_module
 import os
 import pkgutil
 
+from . import CommandError
+
 import logging
 logger = logging.getLogger(__name__)
 

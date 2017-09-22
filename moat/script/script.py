@@ -185,7 +185,7 @@ class Scriptor(Task):
 		This task runs a script.
 
 		Scripts are stored in etcd at /meta/script/…/:code/code.
-		The '…' part is stored in the task's "script" attribute.
+		The subpath is stored in the task's "script" attribute.
 		""" % ('/'.join(TASKSCAN_DIR),)
 
 	taskdef="task/script"

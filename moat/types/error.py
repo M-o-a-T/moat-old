@@ -27,6 +27,7 @@ import asyncio
 from weakref import WeakValueDictionary
 from pprint import pformat
 from time import time
+from traceback import format_exception
 
 from qbroker.util import import_string
 from etcd_tree import EtcRoot, EtcDir, EtcString, EtcInteger, EtcFloat, EtcXValue, ReloadRecursive, EtcAwaiter
@@ -171,7 +172,7 @@ class hasErrorDir:
 				else:
 					ptr = await e.ptr
 				if ptr is not None:
-					await ptr.set('msg',msg, force=True,sync=False)
+					await ptr.set('msg',str(msg), force=True,sync=False)
 					await ptr.set('counter',ptr.get('counter',1)+1, force=True,sync=False)
 					await ptr.set('timestamp',time(), force=True,sync=False)
 					return

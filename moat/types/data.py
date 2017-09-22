@@ -92,12 +92,14 @@ class DataDir(EtcDir):
 	def subtype(self,*path,dir=None,raw=False, **kw):
 		if dir is not False or len(path) != 1:
 			return super().subtype(*path,dir=dir,raw=raw,**kw)
+#		if path == ('update_delay',):
+#			import pdb;pdb.set_trace()
 		p = self._tagged_parent()
-		path = (self.type_dir,) + p.path[len(p.path)+1:] + path
+		dpath = (self.type_dir,) + p.path[len(p.path)+1:] + path
 		try:
-			typ = p.lookup(path).ref.type.etcd_class
+			typ = p.lookup(dpath).ref.type.etcd_class
 		except KeyError:
-			logger.error("no type for %s",'/'.join(p.path+path),)
+			logger.error("no type for %s",'/'.join(self.path+path),)
 			typ = EtcValue
 		if raw:
 			typ = DummyType(typ, pri=2)
@@ -114,12 +116,12 @@ class IndirectDataDir(DataDir):
 		if dir is not False or len(path) != 1:
 			return super().subtype(*path,dir=dir,raw=raw,**kw)
 		p = self._tagged_parent()
-		path = (self.type_dir,) + p.path[len(p.path)+1:] + path
+		dpath = (self.type_dir,) + p.path[len(p.path)+1:] + path
 		refp = p[self.type_ref].ref
 		try:
-			typ = refp.lookup(path).ref.etcd_type
+			typ = refp.lookup(dpath).ref.etcd_type
 		except KeyError:
-			logger.error("no type for %s",'/'.join(refp.path+path),)
+			logger.error("no type for %s",'/'.join(self.path+path),)
 			typ = EtcValue
 		if raw:
 			typ = DummyType(typ, pri=2)
