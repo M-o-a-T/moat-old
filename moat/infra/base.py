@@ -43,7 +43,7 @@ class InfraPort(EtcDir):
 	
 	async def unlink(self, check=False):
 		"""Disconnect this port."""
-		h=self._get('host',None)
+		h=self.get('host',None, raw=True)
 		p=self.get('port',None)
 		if h and check:
 			raise LinkExistsError(self)
@@ -73,7 +73,7 @@ class InfraPort(EtcDir):
 
 	@property
 	def remote(self):
-		return self._get('host').host['ports'][self['port']]
+		return self.get('host', raw=True).host['ports'][self['port']]
 
 	@property
 	def host(self):

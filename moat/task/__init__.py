@@ -41,11 +41,22 @@ TASKSCAN_DIR = TASK_DIR+('moat','scan')
 # written by "moat task def init"
 TASKDEF_DIR = ('meta','task')
 TASKDEF = ':taskdef'
+TASKDEF_DEFAULT = ':default'
 
-# Task descriptions: what kind of tasks exist?
-# written by "moat task def init"
+# task-specific types and (default) values
+TASK_REF = 'taskdef' # taskdef link
+TASK_TYPE = 'types' # task-specific data types and (default) values
+TASK_DATA = 'data' # … and their default values
+
+# Scripts: dynamic code
+# written by "moat script def add"
 SCRIPT_DIR = ('meta','script')
 SCRIPT = ':code'
+
+# script-specific types and (default) values; as in TASK_
+SCRIPT_REF = 'script'
+SCRIPT_TYPE = 'script_types'
+SCRIPT_DATA = 'script_data'
 
 # Task state: which tasks are currently running?
 # written by "moat task run", obviously

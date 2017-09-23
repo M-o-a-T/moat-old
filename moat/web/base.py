@@ -468,7 +468,7 @@ class WebdataDir(hasErrorDir,recEtcDir,EtcDir):
 			vs = self.get('subvalue','value')
 			root = self.root
 			try:
-				v = self._get('value',None)
+				v = self.get('value',None, raw=True)
 				if isinstance(v,EtcAwaiter):
 					v = await v
 				if v is not None and root is not None:

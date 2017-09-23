@@ -88,10 +88,11 @@ class _ParamCommand:
 
 This command shows/changes/deletes parameter%ss for that data.
 
-Usage: … param NAME VALUE  -- set
-       … param             -- list all
-       … param NAME        -- show one
-       … param -d NAME     -- delete
+Usage: … param WHAT NAME=VALUE… -- set
+       … param                  -- list everything
+       … param WHAT             -- list all
+       … param WHAT NAME        -- show one
+       … param -d WHAT NAME     -- delete one
 """ % (" type" if meta else "",)
     DEPTH=0
 
@@ -116,16 +117,15 @@ Usage: … param NAME VALUE  -- set
 
             async for task in t.tagged(self.TAG,depth=self.DEPTH):
                 path = task.path[len(self.DIR):-1]
-                for k in self._VARS:
-                    if k in task:
-                        print('/'.join(path),k,task[k], sep='\t',file=self.stdout)
+                async for n in task['data'].tagged(tag=None):
+                    print('/'.join(path),'/'.join(n.path[len(path)+1:]),n.value, sep='\t',file=self.stdout)
             return
         else:
             name = args.pop(0)
             try:
                 data = await t.subdir(name, name=self.TAG, create=None if self._make else False)
             except KeyError:
-                raise CommandError("Task definition '%s' is unknown." % name)
+                raise CommandError("Definition '%s' is unknown." % name)
 
         if self.options.delete:
             if not args:

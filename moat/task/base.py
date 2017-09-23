@@ -28,9 +28,10 @@ from etcd_tree import EtcFloat,EtcString,EtcDir, ReloadRecursive
 from etcd_tree.node import DummyType
 from qbroker.util import import_string
 
-from . import _VARS, TASKDEF_DIR,TASKDEF, SCRIPT_DIR,SCRIPT
+from . import _VARS, TASKDEF_DIR,TASKDEF,TASKDEF_DEFAULT, SCRIPT_DIR,SCRIPT
 from moat.script.data import TaskScriptDataDir
 from moat.types import TYPEDEF,TYPEDEF_DIR
+from moat.task import TASK_REF,TASK_TYPE,TASK_DATA, SCRIPT_REF,SCRIPT_DATA
 from moat.types.etcd import recEtcDir, MoatRef
 from moat.types.data import DataDir,TypesDir,IndirectDataDir
 from moat.types.error import hasErrorDir
@@ -88,8 +89,10 @@ class TaskDir(recEtcDir,EtcDir):
 
 	async def init(self):
 		if 'scipt' in self:
-			self.script_data = OverlayDict(self['values'],self['script'].ref['values'])
-		self.data = OverlayDict(self['data'],self['taskdef'].ref['data'])
+			self.script_data = OverlayDict(self[SCRIPT_DATA],self[SCRIPT_REF].ref[SCRIPT_DATA])
+		self.data = OverlayDict(self[TASK_DATA],
+		              OverlayDict(self[TASK_REF].ref[TASK_DATA],
+					              self.root.lookup(TASKDEF_DIR,name=TASKDEF_DEFAULT)[TASK_DATA]))
 		await super().init()
 
 	@property
@@ -106,7 +109,7 @@ class TaskDir(recEtcDir,EtcDir):
 		while redo:
 			redo = False
 			try:
-				td = self._get('taskdef')
+				td = self.get('taskdef', raw=True)
 			except KeyError:
 				assert not self.taskdef_pending.is_set()
 				redo = True
@@ -129,13 +132,13 @@ class TaskDir(recEtcDir,EtcDir):
 
 	async def _update_taskdef(self,name=None):
 		if name != self.taskdef_name:
-			if 'data' in self:
-				self['data'].throw_away()
+			if TASK_DATA in self:
+				self[TASK_DATA].throw_away()
 			td_path = tuple(x for x in name.split('/') if x != "")
 			self.taskdef = await self.root.subdir(TASKDEF_DIR+td_path+(TASKDEF,), create=False)
 			self.taskdef_name = name
-			if 'data' in self:
-				await self['data']
+			if TASK_DATA in self:
+				await self[TASK_DATA]
 		self.taskdef_pending.set()
 
 	async def _fill_data(self,pre,recursive):
@@ -163,9 +166,9 @@ class TaskDataDir(IndirectDataDir):
 
 _setup_task_vars(TaskDir)
 TaskDir.register('parent', cls=MoatRef)
-TaskDir.register('taskdef', cls=TaskdefName, pri=8)
-TaskDir.register('data', cls=TaskDataDir)
-TaskDir.register('values', cls=TaskScriptDataDir) ## for scripts
+TaskDir.register(TASK_REF, cls=TaskdefName, pri=8)
+TaskDir.register(TASK_DATA, cls=TaskDataDir)
+TaskDir.register(SCRIPT_DATA, cls=TaskScriptDataDir) ## for scripts
 
 class TaskDef(recEtcDir,EtcDir):
 	"""\
@@ -199,68 +202,6 @@ class TaskDef(recEtcDir,EtcDir):
 				logger.error("%s: Unable to import %s", '/'.join(self.path[:-1]),self['code'])
 
 _setup_task_vars(TaskDef)
-TaskDef.register('types', cls=TypesDir,pri=8)
-TaskDef.register('data', cls=TaskdefDataDir,pri=5)
-
-class TaskState(hasErrorDir,recEtcDir,EtcDir):
-	"""\
-		etcd directory for task state: /status/run/**/:task
-
-		This stores the actual state of a running Task.
-		"""
-
-	async def init(self):
-		self._idle = asyncio.Event(loop=self._loop)
-		await super().init()
-
-	async def has_update(self):
-		if 'running' not in self:
-			self._idle.set()
-	
-	@property
-	def is_idle(self):
-		return self._idle.is_set()
-
-	@property
-	def idle(self):
-		return self._idle.wait()
-
-	@property
-	def state(self):
-		"""Return a human-readable (but fixed) string describing this task's state"""
-		if 'running' in self:
-			return 'run'
-		elif 'started' in self and ('stopped' not in self or self['started']>self['stopped']):
-			return 'crash'
-		else:
-			try:
-				return super().__getitem__('state')
-			except KeyError:
-				return '?'
-
-	def items(self):
-		for k,v in super().items():
-			if k == 'state':
-				v = self.state
-			yield k,v
-	def __getitem__(self,k):
-		if k == 'state':
-			return self.state
-		else:
-			return super().__getitem__(k)
-
-class TaskRunning(EtcFloat):
-	async def has_update(self):
-		p = self.parent
-		if p is None:
-			return
-		if self.is_new is None:
-			p._idle.set()
-		else:
-			p._idle.clear()
-
-TaskState.register('started')(EtcFloat)
-TaskState.register('stopped')(EtcFloat)
-TaskState.register('running')(TaskRunning)
-TaskState.register('debug_time')(EtcFloat)
+TaskDef.register(TASK_TYPE, cls=TypesDir,pri=8)
+TaskDef.register(TASK_DATA, cls=TaskdefDataDir,pri=5)
 

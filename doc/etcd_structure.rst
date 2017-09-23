@@ -135,10 +135,6 @@ Main tree
 
         This directory contains task-specific configuration.
 
-      * ttl, refresh, …
-
-        You can override the values from /config/run here.
-    
       * script
 
         If the task runs a script, the taskdef is 'task/script'; this
@@ -220,6 +216,11 @@ Main tree
     This section describes possible tasks, for the benefit of external
     configuration editors.
 
+    * :default
+
+      This directory contains ``data`` and ``types`` subdirectories with
+      defaults for task configuration.
+
     * whatever …
 
       This hierarchy describes the task definitions which MoaT knows about.
@@ -240,6 +241,14 @@ Main tree
           The programming language the code is written in.
           Probably "python", for now.
 
+        * data
+
+          This directory contains task-specific default configuration.
+
+        * types
+
+          Type declarations corresponding to ``data``.
+    
         * code
 
           Python: Full name of the Task object to run. Typically
@@ -703,10 +712,6 @@ The base type contains a JSON schema for the possible values.
 * <name> …
 
   The type (hierarchy).
-
-  * :schema
-
-    Base types only: the type's JSON schema.
 
   * :type
 

@@ -266,7 +266,7 @@ class Task(regTask):
 			while True:
 				ttl,refresh = get_ttl()
 				logger.debug("Run marker check %s",self.name)
-				if 'running' not in run_state or run_state._get('running')._cseq != cseq:
+				if 'running' not in run_state or run_state.get('running', raw=True)._cseq != cseq:
 					logger.warn("Run marker deleted %s",self.name)
 					raise JobMarkGoneError(self.name)
 				try:
@@ -603,7 +603,7 @@ class TaskMaster(asyncio.Future):
 #		changed = set()
 		if self.taskdef_name != self.task.taskdef_name:
 			# bail out
-			raise RuntimeError("Command changed/deleted: %s / %s" % (self.taskdef_name,self.task.get('taskdef','')))
+			raise RuntimeError("Command changed/deleted: %s / %s" % (self.taskdef_name,self.task.get(TASK_REF,'')))
 		self.name = self.task.get('name','/'.join(self.path))
 		for k in _VARS:
 			v = self.task_var(k)
@@ -624,7 +624,7 @@ class TaskMaster(asyncio.Future):
 				p.append(pv.split('/'))
 
 		try:
-			self.job = self.task.cls(self.cmd, self.name, parents=p, taskdir=self.task, config=self.task._get('data',{}), _ttl=self._get_ttl, **self.cfg)
+			self.job = self.task.cls(self.cmd, self.name, parents=p, taskdir=self.task, config=self.task.get(TASK_DATA,{}, raw=True), _ttl=self._get_ttl, **self.cfg)
 		except TypeError as e:
 			raise TypeError(self.task,self.task.cls) from e
 		self.task._task = self.job
@@ -730,6 +730,10 @@ class TaskMaster(asyncio.Future):
 			self.timer = self.loop.call_later(self.current_retry,self._timer_done)
 
 	async def _wait_idle(self):
+		"""\
+			Wait for a remote task to end before (re-)trying to start it locally.
+			"""
 		await self.exc.state_dir.idle
 		self.timer = None
 		self._start()
+

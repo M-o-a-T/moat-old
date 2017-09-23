@@ -169,8 +169,6 @@ class MoatMetaModule(EtcDir):
 		)
 		for k,v in obj.entries():
 			d[k] = v
-		if hasattr(obj,'schema'):
-			d['data'] = obj.schema
 		tt = await self.subdir(obj.prefix, create=None)
 		r = None
 		lang = tt.get('language',None)
@@ -212,10 +210,14 @@ MoatMetaModule.register('*', cls=MoatLoaderDir)
 
 class MoatMetaType(EtcDir):
 	"""Singleton for /meta/type: type definitions"""
-	async def init(self):
+	def __init__(self, *a,**kw):
+		super().__init__(*a,**kw)
+
 		from . import TYPEDEF
 		from .base import TypeDir
 		self.register('**',TYPEDEF, cls=TypeDir)
+
+	async def init(self):
 		await super().init()
 		for v in self.values():
 			await v.load(recursive=True)
@@ -229,19 +231,35 @@ class MoatMetaScript(EtcDir):
 		self.register('*', cls=MoatMetaScript)
 		self.register(SCRIPT, cls=ScriptDef)
 		await super().init()
-	
+
+class MoatTaskDefconfig(recEtcDir,EtcDir):
+	def __init__(self, *a,**kw):
+		super().__init__(*a,**kw)
+
+		from moat.types.data import TypesDir
+		from moat.task.base import TaskdefDataDir
+		from moat.task import TASK_TYPE,TASK_DATA
+		self.register(TASK_TYPE, cls=TypesDir,pri=8)
+		self.register(TASK_DATA, cls=TaskdefDataDir,pri=8)
+
 class MoatMetaTask(EtcDir):
 	"""Singleton for /meta/task: task definitions"""
-	async def init(self):
-		from moat.task import TASKDEF
+	def __init__(self, *a,**kw):
+		super().__init__(*a,**kw)
+		from moat.task import TASKDEF,TASKDEF_DEFAULT
 		from moat.task.base import TaskDef
 
-		self.register('*', cls=MoatMetaTask)
-		self.register(TASKDEF, cls=TaskDef)
+		self.register('*', cls=MoatMetaTaskSub)
+		self.register(TASKDEF_DEFAULT, cls=MoatTaskDefconfig)
+
+	async def init(self):
 		await super().init()
-	
+
+		from moat.task import TASKDEF_DEFAULT
+		self.root.task(self.subdir,TASKDEF_DEFAULT, _die=True)
+
 	async def add_taskdef(self, task, force=False):
-		from moat.task import TASKDEF
+		from moat.task import TASKDEF, TASK_TYPE,TASK_DATA
 
 		assert task.taskdef is not None, task
 		d = dict(
@@ -283,12 +301,30 @@ class MoatMetaTask(EtcDir):
 				logger.debug("%s: exists, skipped", task.taskdef)
 		else:
 			raise RuntimeError("%s: exists, language=%s" % (task.taskdef,lang))
-		types = await tt.subdir('types')
+		types = await tt.subdir(TASK_TYPE)
 		r = await task.register_types(types)
 		if len(types):
 			await tt.wait(r, tasks=True)
-			data = await tt.subdir('data')
+			data = await tt.subdir(TASK_DATA)
 			await task.register_defaults(data)
+
+class MoatMetaTaskSub(EtcDir):
+	def __init__(self, *a,**kw):
+		super().__init__(*a,**kw)
+
+		from moat.task import TASKDEF,TASKDEF_DEFAULT
+		from moat.task.base import TaskDef
+		self.register('*', cls=MoatMetaTaskSub)
+		self.register(TASKDEF, cls=TaskDef)
+
+class MoatTaskdefConfig(recEtcDir,EtcDir):
+	def __init__(self, *a,**kw):
+		super().__init__(*a,**kw)
+
+		from moat.task import TASK_TYPE,TASK_DATA
+		from moat.task.base import TypesDir,TaskdefDataDir
+		self.register(TASK_TYPE, cls=TypesDir)
+		self.register(TASK_DATA, cls=TaskdefDataDir)
 
 class MoatMetaWeb(recEtcDir,EtcDir):
 	"""Hierarchy for /meta/web: HTML front-end definitions"""
@@ -313,8 +349,6 @@ class MoatMetaWeb(recEtcDir,EtcDir):
 			descr=webdef.summary,
 			doc=webdef.doc or webdef.__doc__,
 		)
-		if hasattr(webdef,'schema'):
-			d['data'] = webdef.schema
 		tt = await self.subdir(webdef.name,name=WEBDEF, create=None)
 		if force:
 			changed = []
@@ -362,7 +396,9 @@ class MoatInfraSub(EtcDir):
 	pass
 
 class MoatInfra(EtcDir):
-	async def init(self):
+	def __init__(self, *a,**kw):
+		super().__init__(*a,**kw)
+
 		from moat.infra.base import InfraHost, InfraStatic
 		self.register("*", cls=MoatInfraSub)
 		self.register(":static", cls=InfraStatic)
@@ -379,7 +415,7 @@ class MoatStatusRun(EtcDir):
 	"""Singleton for /status/run"""
 	async def init(self):
 		from moat.task import TASKSTATE
-		from moat.task.base import TaskState
+		from moat.task.script import TaskState
 		self.register('**',TASKSTATE, cls=TaskState)
 		await super().init()
 	

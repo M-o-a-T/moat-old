@@ -138,7 +138,7 @@ This command shows that data.
 				try:
 					for k in a.split('/'):
 						if k:
-							tt = tt._get(k)
+							tt = tt.get(k, raw=True)
 					dirs.append(tt)
 				except KeyError:
 					print("Module '%s' not known"%(a,), file=sys.stderr)
@@ -152,7 +152,7 @@ This command shows that data.
 				d = tt['descr']
 				print(tt.name,d, sep='\t')
 			else:
-				for v in tt._values():
+				for v in tt.values(raw=True):
 					v = await v
 					await _pr(v)
 
@@ -183,7 +183,7 @@ This command deletes (some of) that data.
 				try:
 					for k in a.split('/'):
 						if k:
-							tt = tt._get(k)
+							tt = tt.get(k, raw=True)
 					dirs.append(tt)
 				except KeyError:
 					print("Module '%s' not known"%(a,), file=sys.stderr)

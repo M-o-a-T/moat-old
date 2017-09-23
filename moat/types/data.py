@@ -90,23 +90,32 @@ class DataDir(EtcDir):
 		return p
 		
 	def subtype(self,*path,dir=None,raw=False, **kw):
+		from moat.task import TASKDEF_DIR,TASKDEF_DEFAULT,TASK_TYPE
+
 		if dir is not False or len(path) != 1:
 			return super().subtype(*path,dir=dir,raw=raw,**kw)
-#		if path == ('update_delay',):
-#			import pdb;pdb.set_trace()
 		p = self._tagged_parent()
 		dpath = (self.type_dir,) + p.path[len(p.path)+1:] + path
 		try:
 			typ = p.lookup(dpath).ref.type.etcd_class
+		except AttributeError:
+			import pdb;pdb.set_trace()
+			pass
 		except KeyError:
-			logger.error("no type for %s",'/'.join(self.path+path),)
-			typ = EtcValue
+			try:
+				if p.name == TASKDEF_DEFAULT: # we're already the default
+					raise KeyError(p.name)
+				defp = p.root.lookup(TASKDEF_DIR, name=TASKDEF_DEFAULT)[TASK_TYPE]
+				typ = defp.lookup(dpath).ref.etcd_type
+			except KeyError:
+				logger.error("no type for %s",'/'.join(self.path+path),)
+				typ = EtcValue
 		if raw:
 			typ = DummyType(typ, pri=2)
 		return typ
 
 class IndirectDataDir(DataDir):
-	"""A subdirectory for storing values"""
+	"""A subdirectory for storing values w/ indirectly-stored type"""
 	type_ref = None  # e.g. "typedef"
 	type_root = None # e.g. TYPEDEF_DIR
 	type_tag = None # e.g. TYPEDEF
@@ -121,8 +130,12 @@ class IndirectDataDir(DataDir):
 		try:
 			typ = refp.lookup(dpath).ref.etcd_type
 		except KeyError:
-			logger.error("no type for %s",'/'.join(self.path+path),)
-			typ = EtcValue
+			try:
+				defp = p.root.lookup(TASKDEF_DIR, name=TASKDEF_DEFAULT)[TASK_TYPE]
+				typ = defp.lookup(dpath).ref.etcd_type
+			except KeyError:
+				logger.error("no type for %s",'/'.join(self.path+path),)
+				typ = EtcValue
 		if raw:
 			typ = DummyType(typ, pri=2)
 		return typ

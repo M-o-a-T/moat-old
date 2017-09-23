@@ -38,7 +38,7 @@ from qbroker.util import import_string
 from moat.script import Command, SubCommand, CommandError
 from moat.script.util import _ParamCommand
 from moat.script.task import Task
-from moat.task import TASK,TASK_DIR, SCRIPT_DIR,SCRIPT
+from moat.task import TASK,TASK_DIR, SCRIPT_DIR,SCRIPT,SCRIPT_DATA
 from moat.types.module import BaseModule
 from moat.util import r_dict,r_show
 
@@ -250,7 +250,7 @@ class _DefAddUpdate:
 			raise CommandError("Script '%s' not found. (Use its path, not the name?)" % scriptpath)
 		if self._update:
 			if script['language'] != data['language']:
-				raise CommandError("Wrong language (%s)" % (data['language'],))
+				raise CommandError("Wrong language (%s / %s)" % (script['language'], data['language'],))
 		else:
 			if 'language' in script:
 				raise CommandError("Script '%s' already exists." % path)
@@ -440,7 +440,7 @@ class _AddUpdate:
 		if descr:
 			await script.set('descr', descr, sync=False)
 		if data:
-			d = await script.subdir('data', create=None)
+			d = await script.subdir(SCRIPT_DATA, create=None)
 			for k,v in data.items():
 				if v == "":
 					try:
@@ -526,7 +526,7 @@ NB: Parameters affect the task, not the script. Use The "param" subcommand
 from moat.cmd.task import DeleteCommand as TaskDeleteCommand
 class DeleteCommand(TaskDeleteCommand):
 	def check(self,task):
-		if task._get('taskdef').value != 'task/script':
+		if task.get('taskdef', raw=True).value != 'task/script':
 			print("%s: not a script job, not deleted" % ('/'.join(self.path[len(TASK_DIR):-1]),), file=sys.stderr)
 			return False
 		return True

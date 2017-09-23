@@ -443,7 +443,7 @@ Links are unidirectional.
                 else:
                     for v in x:
                         try:
-                            v = v._get('host')
+                            v = v.get('host', raw=True)
                         except KeyError:
                             pass
                         else:
@@ -462,7 +462,7 @@ Links are unidirectional.
             while hosts:
                 h = await hosts.pop(0)
                 for v in h['ports'].values():
-                    v = v._get('host')
+                    v = v.get('host', raw=True)
                     if v.value == dname:
                         def prev_p(name):
                             if name is None:

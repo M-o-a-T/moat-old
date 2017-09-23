@@ -48,10 +48,10 @@ DEFAULT_CFG="/etc/moat/moat.cfg"
 DEFAULT_CONFIG = dict(
 	testing=False,
 	run={
-		'ttl':30,
-		'refresh':2,
-		'retry':1,
-		'max-retry':600,
+		'ttl':30.,
+		'refresh':2.,
+		'retry':1.,
+		'max-retry':600.,
 		'restart':2,
 		'one-shot':False,
 	}

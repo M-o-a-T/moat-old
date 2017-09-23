@@ -33,13 +33,16 @@ import types as py_types
 from contextlib import suppress
 from datetime import datetime
 from yaml import dump
+from collections.abc import Mapping
 
 from qbroker.util import import_string
 from moat.script import Command, SubCommand, CommandError
 from moat.script.task import Task
 from moat.script.util import _ParamCommand
-from moat.task import TASK,TASK_DIR, TASKDEF,TASKDEF_DIR, TASKSTATE,TASKSTATE_DIR, TASKSCAN_DIR, task_types
+from moat.task import TASK,TASK_DIR, TASKDEF,TASKDEF_DIR, TASKSTATE,TASKSTATE_DIR, TASKSCAN_DIR, task_types, TASK_TYPE,TASK_DATA
+from moat.task import TASKDEF_DEFAULT
 from moat.types.module import BaseModule
+from moat.types import TYPEDEF_DIR
 from moat.util import r_dict,r_show
 
 import aio_etcd as etcd
@@ -49,18 +52,17 @@ logger = logging.getLogger(__name__)
 
 __all__ = ['TaskCommand']
 
-class DefSetup:
+class Setup:
+	DIR=TASK_DIR
 	async def setup(self, meta=False):
-		if meta is True:
-			self.DIR=TASKDEF_DIR
-		elif meta is False:
-			self.DIR=TASK_DIR
-		# otherwise assume it's already set
 		await super().setup()
 		etc = self.root.etcd
 		tree = await self.root._get_tree()
 		t = await tree.subdir(self.DIR)
 		return t
+
+class DefSetup(Setup):
+	DIR=TASKDEF_DIR
 
 class DefInitCommand(DefSetup,Command):
 	name = "init"
@@ -105,6 +107,37 @@ This also installs the root "task scanner" task, if no args are given.
 		else:
 			for c in task_types():
 				await t.add_taskdef(c, force=self.force)
+
+			from moat.script.main import DEFAULT_CONFIG
+			mt = await tree.subdir(TYPEDEF_DIR)
+			r = await tree.subdir(TASKDEF_DIR, name=TASKDEF_DEFAULT)
+			rt = await r.subdir(TASK_TYPE)
+			rv = await r.subdir(TASK_DATA)
+
+			async def do_typ(rt,data):
+				m = None
+				for k,v in data.items():
+					if isinstance(v,Mapping):
+						m = await do_typ(await rt.subdir(k), v)
+					else:
+						t = type(v).__name__
+						if t not in mt:
+							raise RuntimeError("Don't know the type for %s" % (repr(v),))
+						m = await rt.set(k,t)
+				return m
+
+			async def do_val(rt,data):
+				m = None
+				for k,v in data.items():
+					if isinstance(v,Mapping):
+						m = await do_val(await rv.subdir(k), v)
+					else:
+						m = await rv.set(k,v)
+				return m
+
+			m = await do_typ(rt,DEFAULT_CONFIG['run'])
+			await rt.wait(m, tasks=True)
+			m = await do_val(rv,DEFAULT_CONFIG['run'])
 
 			r = await tree.subdir(TASKSCAN_DIR)
 			from moat.task.collect import Collector
@@ -196,7 +229,7 @@ class DefParamCommand(_ParamCommand,DefSetup,Command):
 Display or change the default data for a task.
 """ + _ParamCommand.description(False)
 
-class ParamCommand(_ParamCommand,DefSetup,Command):
+class ParamCommand(_ParamCommand,Setup,Command):
     _def = False
     DIR=TASK_DIR
     TAG=TASK
@@ -278,7 +311,7 @@ class EnumCommand(Command):
 				for r in coll:
 					show(r)
 
-class ListCommand(DefSetup,Command):
+class ListCommand(Setup,Command):
 	name = "list"
 	summary = "List tasks"
 	description = """\
@@ -399,7 +432,7 @@ class _AddUpdate:
 		await task.wait(mod=r)
 			
 
-class AddCommand(_AddUpdate,DefSetup,Command):
+class AddCommand(_AddUpdate,Setup,Command):
 	name = "add"
 	summary = "add a task"
 	description = """\
@@ -418,7 +451,7 @@ Arguments:
 """
 	_update = False
 
-class UpdateCommand(_AddUpdate,DefSetup,Command):
+class UpdateCommand(_AddUpdate,Setup,Command):
 	name = "change"
 	summary = "change a task"
 	description = """\
@@ -435,7 +468,7 @@ Arguments:
 """
 	_update = True
 
-class DeleteCommand(DefSetup,Command):
+class DeleteCommand(Setup,Command):
 	name = "delete"
 	summary = "Delete a task"
 	description = """\

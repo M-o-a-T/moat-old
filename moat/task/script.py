@@ -52,10 +52,12 @@ class TaskState(hasErrorDir,recEtcDir,EtcDir):
 	
 	@property
 	def is_idle(self):
+		"""True if no longer running"""
 		return self._idle.is_set()
 
 	@property
 	def idle(self):
+		"""Wait until no longer running"""
 		return self._idle.wait()
 
 	@property
@@ -83,6 +85,11 @@ class TaskState(hasErrorDir,recEtcDir,EtcDir):
 			return super().__getitem__(k)
 
 class TaskRunning(EtcFloat):
+	"""\
+		Tell my parent when the task is no longer running.
+		Attached to /moat/state/job/…/:task/running
+		Used for waiting for a remote task to end before starting it locally
+		"""
 	async def has_update(self):
 		p = self.parent
 		if p is None:
@@ -92,8 +99,8 @@ class TaskRunning(EtcFloat):
 		else:
 			p._idle.clear()
 
-TaskState.register('started')(EtcFloat)
-TaskState.register('stopped')(EtcFloat)
-TaskState.register('running')(TaskRunning)
-TaskState.register('debug_time')(EtcFloat)
+TaskState.register('started', cls=EtcFloat)
+TaskState.register('stopped', cls=EtcFloat)
+TaskState.register('running', cls=TaskRunning)
+TaskState.register('debug_time', cls=EtcFloat)
 

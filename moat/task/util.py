@@ -33,15 +33,21 @@ class Sleeper(Task):
 	"""This task just waits for a configured amount of time before exiting.
 		You can use it in a 'moat run -K' command to limit runtimes."""
 	summary="""A simple delay"""
-	taskdef="sleep"
 	d = None
 	f = None
 
 	@classmethod
-	def types(cls,tree):
-		super().types(tree)
-		tree.register("delay",cls=EtcFloat)
-		
+	async def register_types(cls, types):
+		await super(Sleeper,cls).register_types(types)
+		r = await types.set('delay','float/time')
+		return r
+
+	@classmethod
+	async def register_defaults(cls, data):
+		await super(Sleeper,cls).register_defaults(data)
+		r = await data.set('delay',2)
+		return r
+
 	def _timeout(self):
 		if self.f is not None:
 			self.f.set_result(None)
@@ -51,13 +57,11 @@ class Sleeper(Task):
 
 	async def task(self):
 		t = time()
-		if 'delay' not in self.config:
-			await self.config.set('delay',10)
 
-		while t+self.config['delay'] > time():
+		while t+self.data['delay'] > time():
 			self.t_updated = False
 			self.f = asyncio.Future(loop=self.loop)
-			self.d = self.loop.call_later(self.config['delay'], self._timeout)
+			self.d = self.loop.call_later(self.data['delay'], self._timeout)
 			try:
 				await self.f
 			except asyncio.CancelledError:
@@ -67,7 +71,7 @@ class Sleeper(Task):
 			finally:
 				self.f = None
 
-	def cfg_changed(self):
+	def cfg_changed(self,_=None):
 		self.t_updated = True
 		if self.d is not None:
 			logger.info('CANCEL 21 %s',self.d)
