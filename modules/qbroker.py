@@ -131,7 +131,7 @@ class EventCallback(Worker):
 		k.update(event.ctx)
 		k['event'] = list(event)
 		if self.parent and self.parent.server:
-			self.parent.server.alert_gevent('moat.event.'+'.'.join(event), **k)
+			self.parent.server.alert_gevent('moat.event.'+'.'.join(event), k)
 		raise TrySomethingElse
 
 	def cancel(self):
