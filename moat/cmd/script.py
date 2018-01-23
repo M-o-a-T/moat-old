@@ -60,7 +60,7 @@ async def setup(self, meta=False):
 
 async def setup2(self,d):
 	tree = await self.root._get_tree()
-	t = await tree.subdir(d)
+	t = await tree.subdir(d, wait=True)
 	return t
 
 class DefListCommand(Command):

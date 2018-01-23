@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, print_function, division, unicode_literals
 ##
@@ -24,7 +24,7 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 ##  Thus, do not remove the next line, or insert any blank lines above.
 ##BP
 
-from moat import patch; moat.patch()
+#from moat import patch; moat.patch()
 import qbroker; qbroker.setup(gevent=True)
 from qbroker.util.async import Main
 import asyncio

@@ -81,33 +81,33 @@ async def test_taskdef(loop):
 	m = MoatTest(loop=loop)
 	r = await m.parse("-vvvc test.cfg task def param test/sleep ttl")
 	assert r == 0, r
-	assert m.stdout_data == "11\n", m.stdout_data
+	assert m.stdout_data == "11.0\n", m.stdout_data
 	
 	m = MoatTest(loop=loop)
 	r = await m.parse("-vvvc test.cfg task def param test/sleep ttl retry")
 	assert r == 0, r
-	assert m.in_stdout("ttl\t11\n")
-	assert m.in_stdout("retry\t-\n")
+	assert m.in_stdout("ttl\t11.0\n"), m.stdout_data
+	assert m.in_stdout("retry\t-\n"), m.stdout_data
 	
 	m = MoatTest(loop=loop)
 	r = await m.parse("-vvvc test.cfg task def param test/sleep ttl=10")
 	assert r == 0, r
-	assert m.stdout_data == "ttl=10 (was 11)\n", m.stdout_data
+	assert m.stdout_data == "ttl=10 (was 11.0)\n", m.stdout_data
 	
 	m = MoatTest(loop=loop)
 	r = await m.parse("-vvvc test.cfg task def param test/sleep ttl")
 	assert r == 0, r
-	assert m.stdout_data == "10\n", m.stdout_data
+	assert m.stdout_data == "10.0\n", m.stdout_data
 	
 	m = MoatTest(loop=loop)
 	r = await m.parse("-vvvc test.cfg task def param test/sleep")
 	assert r == 0, r
-	assert m.stdout_data == "ttl\t10\n", m.stdout_data
+	assert "\nttl\t10.0\n" in '\n'+m.stdout_data, m.stdout_data
 	
 	m = MoatTest(loop=loop)
 	r = await m.parse("-vvvc test.cfg task def param")
 	assert r == 0, r
-	assert m.stdout_data == "test/sleep\tttl\t10\n", m.stdout_data
+	assert "\ntest/sleep\tttl\t10.0\n" in '\n'+m.stdout_data, m.stdout_data
 	
 @pytest.mark.run_loop
 async def test_task(loop):
@@ -133,12 +133,16 @@ async def test_task(loop):
 	
 	m = MoatTest(loop=loop)
 	m2 = MoatTest(loop=loop)
+	logger.debug("A")
 	r = await m.parse("-vvvc test.cfg task add fake/cmd/sleep test/sleep delay=2 Go to bed")
 	assert r == 0, r
+	logger.debug("B")
 	r = await m.parse("-vvvc test.cfg task param fake/cmd/sleep restart=0 retry=0")
 	assert r == 0, r
+	logger.debug("C")
 	rx = await m2.parse("-c test.cfg task state fake")
 	assert rx == 0, rx
+	logger.debug("D")
 
 	r = await m.parse("-c test.cfg task list fake/cmd")
 	assert m.in_stdout('fake/cmd/sleep\t'), m.stdout_data
@@ -166,7 +170,7 @@ async def test_task(loop):
 	assert TT.SLEEP == 2
 
 	m = MoatTest(loop=loop)
-	r = await m.parse("-vvvc test.cfg task change fake/cmd/sleep delay=15")
+	r = await m.parse("-vvvc test.cfg task param fake/cmd/sleep delay=15")
 	assert r == 0, r
 
 	TT.SLEEP = 0
@@ -189,7 +193,7 @@ async def test_task(loop):
 
 	m2 = MoatTest(loop=loop)
 	rx = await m2.parse("-vvc test.cfg task state fake")
-	assert m2.in_stdout('fake/cmd/sleep: {'), m2.stdout_data
+	assert m2.stdout_data.startswith('fake/cmd/sleep:'), m2.stdout_data
 	assert m2.in_stdout('state: run'), m2.stdout_data
 	assert rx == 0, rx
 

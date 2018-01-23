@@ -39,8 +39,6 @@ from moat.script.task import _task_reg
 import logging
 logger = logging.getLogger(__name__)
 
-_logged = {} # debug: only log changed directories
-
 @pytest.mark.run_loop
 async def test_extern_fake(loop):
 	from etcd_tree import client

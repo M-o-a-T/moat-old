@@ -30,6 +30,8 @@ import sys
 if sys.version_info < (3,6):
 	raise RuntimeError("MoaT needs Python 3.6 or higher")
 
+import trio_asyncio
+import trio
 import moat.task.reg # side effect
 from moat.script.main import Moat
 from moat.script import CommandExited
@@ -43,7 +45,7 @@ async def main(args):
 		if e.status or c.verbose:
 			print(e.output, file=sys.stderr)
 		return e.status
-	except asyncio.CancelledError:
+	except trio.Cancelled:
 		print("Cancelled.", file=sys.stderr)
 		ret = 8
 	finally:
@@ -55,16 +57,9 @@ async def main(args):
 
 if __name__ == '__main__':
 	loop = asyncio.get_event_loop()
-	j = main(sys.argv[1:])
-	j = asyncio.ensure_future(j, loop=loop)
 	try:
-		sys.exit(loop.run_until_complete(j))
+		sys.exit(loop.run_task(main, sys.argv[1:]))
 	except KeyboardInterrupt:
 		print("Interrupted. Aborted.", file=sys.stderr)
-		j.cancel()
-		try:
-			loop.run_until_complete(j)
-		except asyncio.CancelledError:
-			pass
 		sys.exit(8)
 

@@ -63,8 +63,6 @@ SCRIPT_DATA = 'script_data'
 TASKSTATE_DIR = ('status','run')
 TASKSTATE = ':task'
 
-_VARS = {'ttl','refresh','restart','retry','max-retry','one-shot'}
-
 def task_types(prefix=__name__):
 	"""Enumerate the task types known to Moat's code."""
 	from ..script.task import Task

@@ -40,8 +40,6 @@ from moat.script.task import _task_reg
 import logging
 logger = logging.getLogger(__name__)
 
-_logged = {} # debug: only log changed directories
-
 async def add_script(name,s,loop):
 	m = MoatTest(loop=loop)
 	await m.parse("moat -vvc test.cfg script delete test/%s" % (name,))

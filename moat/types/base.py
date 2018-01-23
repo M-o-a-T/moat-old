@@ -50,8 +50,8 @@ class TypeDir(EtcDir):
 		self.type = type_names()['/'.join(self.path[len(TYPEDEF_DIR):-1])]
 		self.type.types(self)
 	@property
-	def etcd_type(self):
-		return self.type.etcd_type
+	def etcd_class(self):
+		return self.type.etcd_class
 TypeDir.register('timestamp',cls=EtcFloat)
 TypeDir.register('created',cls=EtcFloat)
 

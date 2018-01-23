@@ -28,6 +28,9 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 from importlib import import_module
 import os
 import pkgutil
+from etcd_tree import EtcXValue
+
+from moat.task import TASK_DATA, TASKDEF_DIR
 
 from . import CommandError
 
@@ -36,6 +39,15 @@ logger = logging.getLogger(__name__)
 
 complained = set()
 
+def rkeys(d,sub=''):
+    if sub:
+        sub += '/'
+    for k,v in d.items(raw=True):
+        if isinstance(v,EtcXValue):
+            yield sub+k
+        else:
+            yield from rkeys(v,sub+k)
+    
 def objects(module, cls, immediate=False,direct=False,filter=lambda x:True):
     """\
         List all objects of a given class in a directory.
@@ -82,7 +94,6 @@ class _ParamCommand:
     name = "param"
     # _def = None ## need to override
     _make = False # create dir if missing?  used by web param
-    from moat.task import _VARS
     def description(self,meta=False):
         return """\
 
@@ -100,59 +111,59 @@ Usage: … param WHAT NAME=VALUE… -- set
         self.parser.add_option('-d','--delete',
             action="store_true", dest="delete",
             help="delete specific parameters")
-        if self._def:
+        if hasattr(self,'_global'):
             self.parser.add_option('-g','--global',
                 action="store_true", dest="is_global",
-                help="show global parameters")
+                help="access global parameters")
 
     async def do(self,args):
+        if not hasattr(self,'_global'):
+            self.options.is_global = False
+
         t = await self.setup(meta=self._def)
-        if self._def and self.options.is_global:
+        if self.options.is_global:
             if self.options.delete:
                 raise CommandError("You cannot delete global parameters.")
-            data = self.root.etc_cfg['run']
+            data = self._global
         elif not args:
-            if self.options.delete:
+            if self._def and self.options.delete:
                 raise CommandError("You cannot delete all parameters.")
 
             async for task in t.tagged(self.TAG,depth=self.DEPTH):
                 path = task.path[len(self.DIR):-1]
-                async for n in task['data'].tagged(tag=None):
-                    print('/'.join(path),'/'.join(n.path[len(path)+1:]),n.value, sep='\t',file=self.stdout)
+                if TASK_DATA in task:
+                    async for n in task[TASK_DATA].tagged(tag=None):
+                        # …/:taskdef/data/…
+                        print('/'.join(path),'/'.join(n.path[len(TASKDEF_DIR)+len(path)+2:]),n.value, sep='\t',file=self.stdout)
             return
         else:
             name = args.pop(0)
             try:
-                data = await t.subdir(name, name=self.TAG, create=None if self._make else False)
+                task = await t.subdir(name, name=self.TAG, create=None if self._make else False)
             except KeyError:
                 raise CommandError("Definition '%s' is unknown." % name)
-
+            data = task[TASK_DATA]
         if self.options.delete:
             if not args:
-                args = self._VARS
+                args = rkeys(data)
             for k in args:
-                if k in data:
-                    if self.root.verbose:
-                        print("%s=%s (deleted)" % (k,data[k]), file=self.stdout)
-                    await data.delete(k)
+                v = data.lookup(k)
+                if self.root.verbose:
+                    print("%s=%s (deleted)" % (k,v.value), file=self.stdout)
+                await v.delete()
         elif len(args) == 1 and '=' not in args[0]:
-            print(data[args[0]], file=self.stdout)
+            print(data.lookup(args[0]).value, file=self.stdout)
         elif not len(args):
-            for k in self._VARS:
-                if k in data:
-                    print(k,data[k], sep='\t',file=self.stdout)
+            for k in rkeys(data):
+                print(k,data.get(k), sep='\t',file=self.stdout)
         else:
             while args:
                 k = args.pop(0)
                 try:
                     k,v = k.split('=',1)
                 except ValueError:
-                    if k not in self._VARS:
-                        raise CommandError("'%s' is not a valid parameter."%k)
                     print(k,data.get(k,'-'), sep='\t',file=self.stdout)
                 else:
-                    if k not in self._VARS:
-                        raise CommandError("'%s' is not a valid parameter."%k)
                     if self.root.verbose:
                         if k not in data:
                             print("%s=%s (new)" % (k,v), file=self.stdout)

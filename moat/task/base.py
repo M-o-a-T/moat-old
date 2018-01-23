@@ -28,7 +28,7 @@ from etcd_tree import EtcFloat,EtcString,EtcDir, ReloadRecursive
 from etcd_tree.node import DummyType
 from qbroker.util import import_string
 
-from . import _VARS, TASKDEF_DIR,TASKDEF,TASKDEF_DEFAULT, SCRIPT_DIR,SCRIPT
+from . import TASKDEF_DIR,TASKDEF,TASKDEF_DEFAULT, SCRIPT_DIR,SCRIPT
 from moat.script.data import TaskScriptDataDir
 from moat.types import TYPEDEF,TYPEDEF_DIR
 from moat.task import TASK_REF,TASK_TYPE,TASK_DATA, SCRIPT_REF,SCRIPT_DATA
@@ -39,21 +39,6 @@ from moat.util import OverlayDict
 
 import logging
 logger = logging.getLogger(__name__)
-
-def _setup_task_vars(types):
-	"""Tasks have several global config variables. Their types are set here.
-		This is called with the class/typepath to register:
-		TASK_DIR/**/TASK or TASKDEF_DIR/**/TASKDEF
-		"""
-	from etcd_tree.etcd import EtcTypes
-	from etcd_tree.node import EtcFloat,EtcInteger,EtcBoolean
-	for t in _VARS:
-		if t == "ttl":
-			types.register(t, cls=EtcInteger)
-		elif t == "one-shot":
-			types.register(t, cls=EtcBoolean)
-		else:
-			types.register(t, cls=EtcFloat)
 
 class TaskdefName(MoatRef.at(TASKDEF_DIR,TASKDEF)):
 	async def has_update(self):
@@ -90,9 +75,16 @@ class TaskDir(recEtcDir,EtcDir):
 	async def init(self):
 		if 'scipt' in self:
 			self.script_data = OverlayDict(self[SCRIPT_DATA],self[SCRIPT_REF].ref[SCRIPT_DATA])
-		self.data = OverlayDict(self[TASK_DATA],
-		              OverlayDict(self[TASK_REF].ref[TASK_DATA],
-					              self.root.lookup(TASKDEF_DIR,name=TASKDEF_DEFAULT)[TASK_DATA]))
+		data = await self.subdir(TASK_DATA)
+		def _set_data(_):
+			if TASK_REF in self:
+				self.data = OverlayDict(data,
+						OverlayDict(self[TASK_REF].ref[TASK_DATA],
+									self.root.lookup(TASKDEF_DIR,name=TASKDEF_DEFAULT)[TASK_DATA]))
+			else:
+				self.data = OverlayDict(data, self.root.lookup(TASKDEF_DIR,name=TASKDEF_DEFAULT)[TASK_DATA])
+		self.add_monitor(_set_data)
+		_set_data(self)
 		await super().init()
 
 	@property
@@ -164,7 +156,6 @@ class TaskDataDir(IndirectDataDir):
 	type_tag = TASKDEF
 	type_dir = "types"
 
-_setup_task_vars(TaskDir)
 TaskDir.register('parent', cls=MoatRef)
 TaskDir.register(TASK_REF, cls=TaskdefName, pri=8)
 TaskDir.register(TASK_DATA, cls=TaskDataDir)
@@ -201,7 +192,6 @@ class TaskDef(recEtcDir,EtcDir):
 			except (ImportError,AttributeError):
 				logger.error("%s: Unable to import %s", '/'.join(self.path[:-1]),self['code'])
 
-_setup_task_vars(TaskDef)
 TaskDef.register(TASK_TYPE, cls=TypesDir,pri=8)
 TaskDef.register(TASK_DATA, cls=TaskdefDataDir,pri=5)
 

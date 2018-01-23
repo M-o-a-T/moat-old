@@ -38,11 +38,13 @@ from traceback import format_exception
 import weakref
 from bdb import BdbQuit
 
-from moat.task import _VARS, TASK_DIR,TASKDEF_DIR,TASK,TASKDEF, TASKSTATE_DIR,TASKSTATE
+from moat.task import TASK_DIR,TASKDEF_DIR,TASK,TASKDEF, TASKSTATE_DIR,TASKSTATE, TASK_DATA
 from moat.task.reg import Reg, Task as regTask
+from moat.util import OverlayDict
 
 import logging
 logger = logging.getLogger(__name__)
+tracelogger = logging.getLogger(__name__+'.trace')
 
 import os
 min_timeout = float(os.environ.get('MOAT_DEBUG_TIMEOUT',0))
@@ -160,6 +162,7 @@ class Task(regTask):
 		self._refresh = config.get('refresh',None) if _refresh is None else _refresh
 		self.parents = parents
 		self.taskdir = taskdir
+		logger.debug("init %s",self.name)
 
 	def __repr__(self):
 		r = super().__repr__()
@@ -170,16 +173,23 @@ class Task(regTask):
 
 	async def run(self):
 		"""Main code for task control. Don't override."""
+		logger.debug("start %s",self.name)
 		r = self.cmd.root
 		await r.setup(self)
+		tracelogger.debug("start A")
 		self.tree = await r._get_tree()
 		self.amqp = await r._get_amqp()
+		tracelogger.debug("start B")
 		run_state = await _run_state(self.tree,self.path)
+		tracelogger.debug("start C")
 
 		async def send_alert(**kw):
+			tracelogger.debug("start D")
 			await self.amqp.alert('moat.task.'+'.'.join(run_state.path[len(TASKSTATE_DIR):-1]),kw)
+			tracelogger.debug("start E")
 
 		await send_alert(state= 'setup')
+		tracelogger.debug("start F")
 		main_task = None
 		Reg(task=self, loop=self.loop)
 
@@ -196,12 +206,17 @@ class Task(regTask):
 			gone = x.path
 
 		for pr in self.parents:
+			tracelogger.debug("start G %s",pr)
 			try:
 				parent = await r.tree.lookup(*pr)
+				tracelogger.debug("start H")
 				prm.append(parent.add_monitor(parent_check))
 			except (KeyError,etcd.EtcdKeyNotFound) as ex:
+				tracelogger.debug("start I")
 				await run_state.set("message", "Missing1: "+'/'.join(pr)+' : '+str(ex))
+				tracelogger.debug("start J")
 				await send_alert(state='fail',reason='parent',parent=pr)
+				tracelogger.debug("start K")
 				raise JobParentGoneError(self.name, pr) from ex
 
 		## TTL calculation
@@ -220,20 +235,23 @@ class Task(regTask):
 		ttl,refresh = get_ttl()
 
 		## set 'running'
-		logger.debug("Starting %s: %s",self.name, self.__class__.__name__)
+		tracelogger.debug("Start L %s: %s",self.name, self.__class__.__name__)
 		try:
 			if 'running' in run_state:
 				await send_alert(state='fail',reason='running')
 				raise etcd.EtcdAlreadyExist(message=self.name, payload=run_state['running']) # pragma: no cover ## timing dependant
-			ttl = int(ttl)
+			ttl = int(ttl+0.9)
 			if ttl < 1:
 				raise ValueError("TTL must be at least 1",ttl)
 			cseq = await run_state.set("running",time(),ttl=ttl)
 		except etcd.EtcdAlreadyExist as exc:
 			logger.warn("Job is already running: %s",self.name)
 			raise JobIsRunningError(self.name, run_state) from exc
+		tracelogger.debug("start M")
 		await send_alert(state='start')
+		tracelogger.debug("start N")
 		await run_state.set("started",time())
+		tracelogger.debug("start O")
 		keep_running = False # if it's been superseded, do not delete
 
 		if isinstance(self.config,EtcBase):
@@ -265,7 +283,8 @@ class Task(regTask):
 			await asyncio.sleep(refresh, loop=r.loop)
 			while True:
 				ttl,refresh = get_ttl()
-				logger.debug("Run marker check %s",self.name)
+				ttl = int(ttl+0.9)
+				logger.debug("Run marker check %s %s %s",self.name, repr(ttl),repr(refresh))
 				if 'running' not in run_state or run_state.get('running', raw=True)._cseq != cseq:
 					logger.warn("Run marker deleted %s",self.name)
 					raise JobMarkGoneError(self.name)
@@ -282,7 +301,7 @@ class Task(regTask):
 				killer = r.loop.call_later(max(ttl,min_timeout),mtc)
 				logger.debug("Run marker refreshed %s",self.name)
 				await asyncio.sleep(refresh, loop=r.loop)
-				
+		
 		async def save_exc(exc, state='error', skip=False):
 			if not self.name.startswith("test/"):
 				logger.exception(self.name)
@@ -298,14 +317,17 @@ class Task(regTask):
 
 		# Now start the updater and the main task.
 		try:
+			tracelogger.debug("start P")
 			await self.setup()
 		except Exception as exc:
+			tracelogger.debug("start Q %s",repr(exc))
 			try:
 				await self.teardown()
 			except Exception as exc2:
 				logger.exception("cleaning up")
 			await save_exc(exc)
 			raise
+		tracelogger.debug("start R")
 		run_task = self.moat_reg.task(updater(refresh))
 		self._main = main_task = self.moat_reg.task(self.task())
 		res = None
@@ -313,6 +335,7 @@ class Task(regTask):
 			try:
 				try:
 					d,p = await asyncio.wait((main_task,run_task), loop=r.loop, return_when=asyncio.FIRST_COMPLETED)
+					tracelogger.debug("start S")
 				finally:
 					if killer is not None:
 						#logger.info('CANCEL 9 %s',killer)
@@ -543,11 +566,13 @@ class TaskMaster(asyncio.Future):
 		"""\
 			Set up the non-async part of our task.
 			@cmd: the command this is running because of.
-			@path: the job's path under /task
+			@task: the job's task (at /task/…/:task)
 			@callback(status,value): called with ("started",None), ("ok",result) or ("error",exc)
 			 whenever the job state changes
 
-			You need to call "await tm.init()" before using this.
+			You need to call the async part of setting up this object
+				await this.init()
+			before using it.
 			"""
 		self.loop = cmd.root.loop
 		self.tree = cmd.root.tree
@@ -556,7 +581,6 @@ class TaskMaster(asyncio.Future):
 		self.path = task.path[len(TASK_DIR):-1]
 		self.name = '/'.join(self.path)
 		self.cfg = cfg
-		self.vars = {} # task-specific settings
 		self.callback = callback
 		self.monitors = []
 
@@ -567,6 +591,7 @@ class TaskMaster(asyncio.Future):
 		logger.debug("MASTER+ %s",self.path)
 
 		self.task = await self.tree.subdir(TASK_DIR+self.path+(TASK,))
+		self.data = self.task.data
 		await self.task.taskdef_ready
 		self.taskdef_name = self.task.taskdef_name
 		if self.task.taskdef is None:
@@ -574,11 +599,7 @@ class TaskMaster(asyncio.Future):
 
 		self.gcfg = self.cmd.root.etc_cfg['run']
 		self.rcfg = self.cmd.root.cfg['config']['run']
-		self.monitors.append(self.task.add_monitor(self.setup_vars))
-		self.monitors.append(self.task.taskdef.add_monitor(self.setup_vars))
-		self.monitors.append(self.gcfg.add_monitor(self.setup_vars))
 
-		self.setup_vars()
 		_task_reg[self.path] = self
 		
 		self._start()
@@ -591,30 +612,8 @@ class TaskMaster(asyncio.Future):
 			Used for testing."""
 		self.job.trigger()
 
-	def task_var(self,k):
-		for cfg in (self.cfg, self.task, self.task.taskdef, self.gcfg, self.rcfg):
-			if k in cfg:
-				return cfg[k]
-		raise KeyError(k)
-
-	def setup_vars(self, _=None):
-		"""Copy task variables from etcd to local vars"""
-		# First, check the basics
-#		changed = set()
-		if self.taskdef_name != self.task.taskdef_name:
-			# bail out
-			raise RuntimeError("Command changed/deleted: %s / %s" % (self.taskdef_name,self.task.get(TASK_REF,'')))
-		self.name = self.task.get('name','/'.join(self.path))
-		for k in _VARS:
-			v = self.task_var(k)
-#			if self.vars[k] != v:
-#				changed.add(k)
-			self.vars[k] = v
-#		if changed:
-		self.vars.update(self.cfg)
-
 	def _get_ttl(self):
-		return self.vars['ttl'], self.vars['refresh']
+		return self.data['ttl'], self.data['refresh']
 
 	def _start(self):
 		p=[self.task.path]
@@ -624,7 +623,7 @@ class TaskMaster(asyncio.Future):
 				p.append(pv.split('/'))
 
 		try:
-			self.job = self.task.cls(self.cmd, self.name, parents=p, taskdir=self.task, config=self.task.get(TASK_DATA,{}, raw=True), _ttl=self._get_ttl, **self.cfg)
+			self.job = self.task.cls(self.cmd, self.name, parents=p, taskdir=self.task, config=OverlayDict(self.cfg, self.task.data), _ttl=self._get_ttl)
 		except TypeError as e:
 			raise TypeError(self.task,self.task.cls) from e
 		self.task._task = self.job
@@ -699,9 +698,9 @@ class TaskMaster(asyncio.Future):
 				except Exception as e:
 					logger.exception("during callback %s",self.callback)
 			if self.exc is None:
-				self.current_retry = self.vars['retry']
+				self.current_retry = self.data['retry']
 			else:
-				self.current_retry = min(self.current_retry + self.vars['retry']/2, self.vars['max-retry'])
+				self.current_retry = min(self.current_retry + self.data['retry']/2, self.data['max-retry'])
 			self.exc = exc
 			if not self.current_retry or isinstance(exc,(AttributeError,BdbQuit)):
 				logger.debug("MASTER- %s %s",self,exc)
@@ -716,7 +715,7 @@ class TaskMaster(asyncio.Future):
 					pres = (res,)
 				self.callback("ok",*pres)
 			self.exc = None
-			self.current_retry = self.vars['restart']
+			self.current_retry = self.data['restart']
 			if not self.current_retry:
 				logger.debug("MASTER- %s %s",self.path,res)
 				self.set_result(res)

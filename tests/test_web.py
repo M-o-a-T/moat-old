@@ -47,8 +47,6 @@ import logging
 logger = logging.getLogger(__name__)
 wslogger = logging.getLogger(__name__+'.ws')
 
-_logged = {} # debug: only log changed directories
-
 @pytest.mark.run_loop
 async def test_main(loop):
 	from etcd_tree import client

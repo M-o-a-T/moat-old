@@ -25,7 +25,6 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 
 """Run known Tasks"""
 
-import asyncio
 import os
 import signal
 import sys
@@ -136,18 +135,16 @@ Run MoaT tasks.
 				print("No tasks found. Exiting.",self.args, file=sys.stderr)
 			return 1
 
-		if self.options.signals:
-			self.root.loop.add_signal_handler(signal.SIGINT,self._tilt)
-			self.root.loop.add_signal_handler(signal.SIGTERM,self._tilt)
-		await self._start()
-		try:
-			res = await self._loop()
-		finally:
-			amqp.debug_env(jobs=None)
+		async with open_nursery() as nursery:
+			await self._start(nursery)
+			try:
+				res = await self._loop(nursery)
+			finally:
+				amqp.debug_env(jobs=None)
 
 		return res
 
-	async def _loop(self):
+	async def _loop(self, nursery):
 		errs = 0
 		try:
 			while self.jobs or self.options.run:
@@ -242,7 +239,7 @@ Run MoaT tasks.
 			if not depth:
 				break
 
-	async def _start(self):
+	async def _start(self, nursery):
 		logger.debug("START")
 		def _report(path, state, *value):
 			if self.root.verbose:
@@ -307,7 +304,8 @@ Run MoaT tasks.
 				logger.debug("Running TM %s",j.name)
 				continue
 			except Exception as exc:
-				logger.debug("Error TM %s %s",'/'.j.name,repr(exc))
+				#logger.debug("Error TM %s %s",j.name,repr(exc))
+				logger.debug("Error TM %s",j.name,exc_info=exc)
 				# Let's assume that this is fatal.
 				await self.root.etcd.set(TASKSTATE_DIR+j.path+(TASKSTATE,"debug"), "".join(traceback.format_exception(exc.__class__,exc,exc.__traceback__)))
 				f = asyncio.Future(loop=self.root.loop)

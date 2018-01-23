@@ -107,6 +107,9 @@ You can load more than one config file.
 
 		try:
 			res = await super().parse(argv)
+		except Exception as exc:
+			logger.debug("Owie %s",repr(exc))
+			raise
 		finally:
 			await self.finish()
 		return res

@@ -42,9 +42,9 @@ class TaskState(hasErrorDir,recEtcDir,EtcDir):
 		This stores the actual state of a running Task.
 		"""
 
-	async def init(self):
+	def __init__(self,*a,**k):
+		super().__init__(*a,**k)
 		self._idle = asyncio.Event(loop=self._loop)
-		await super().init()
 
 	async def has_update(self):
 		if 'running' not in self:

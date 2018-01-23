@@ -27,8 +27,9 @@ from __future__ import absolute_import, print_function, division, unicode_litera
 
 import os
 import sys
+import math
+import trio
 import aio_etcd as etcd
-import asyncio
 import time
 from qbroker.unit import CC_DATA, CC_MSG
 from yaml import dump
@@ -96,22 +97,20 @@ Arguments:
 		amqp = await self.root._get_amqp()
 		if self.options.timeout:
 			d['timeout'] = self.options.timeout
-		if self._alert:
-			def cb(msg):
-				pprint(msg.data)
-			res = amqp.alert(self.options.rpc, callback=cb, **d)
-		else:
-			res = amqp.rpc(self.options.rpc, **d)
-		if self.options.timeout:
-			res = asyncio.wait_for(res, self.options.timeout, loop=self.root.loop)
 		try:
-			res = await res
-		except asyncio.TimeoutError:
+			with trio.fail_after(self.options.timeout or math.inf):
+				if self._alert:
+					async def cb(msg):
+						pprint(msg.data)
+					res = await amqp.alert(self.options.rpc, callback=cb, **d)
+				else:
+					res = await amqp.rpc(self.options.rpc, **d)
+		except trio.TooSlowError:
 			print("-timed out", file=self.stdout)
-			res = "Timeout"
-		if not self._alert:
-			from yaml import dump
-			dump(res, stream=self.stdout)
+		else:
+			if not self._alert:
+				from yaml import dump
+				dump(res, stream=self.stdout)
 
 class AlertCommand(CmdCommand):
 	name = "alert"
@@ -152,12 +151,10 @@ result(ing mess).
 		if self.options.uuid:
 			d['_dest'] = self.options.uuid
 
-		res = amqp.rpc("moat.list",args=args, **d)
-		if self.options.timeout:
-			res = asyncio.wait_for(res, self.options.timeout, loop=self.root.loop)
 		try:
-			res = await res
-		except asyncio.TimeoutError:
+			with trio.fail_after(self.options.timeout or math.inf):
+				res = await amqp.rpc_trio("moat.list",args=args, **d)
+		except trio.TooSlowError:
 			print("-timeout")
 		else:
 			for x in res:
@@ -185,22 +182,18 @@ Enumerate the MoaT systems on the bus.
 	async def do(self,args):
 		await self.setup()
 		amqp = self.root.amqp
-		todo = set()
 
-		def cb(data,uuid=None):
+		async def cb(data,uuid=None):
 			if uuid is None:
 				uuid = data['uuid']
 
-			def d(f):
-				todo.remove(f)
+			async def details(uuid, task_status=trio.STATUS_IGNORED):
+				task_status.started()
 				try:
-					res = f.result()
-				except asyncio.CancelledError:
-					if self.root.verbose > 1:
-						dump(dict(uuid=uuid,error="no answer"), stream=self.stdout)
-						print("---",file=self.stdout)
-					else:
-						print("No answer",uuid)
+					with trio.fail_after(self.options.timeout or math.inf):
+						res = await amqp.rpc_trio('qbroker.ping', _dest=uuid)
+				except trio.TooSlowError:
+					print("-timed out", file=self.stdout)
 				except Exception:
 					print_exc()
 				else:
@@ -209,25 +202,18 @@ Enumerate the MoaT systems on the bus.
 						print("---",file=self.stdout)
 					else:
 						print(res['uuid'],res['app'], sep='\t', file=self.stdout)
-			f = amqp.rpc('qbroker.ping', _dest=uuid, _timeout=self.options.timeout)
-			if self.options.timeout > 0:
-				f = asyncio.wait_for(f,self.options.timeout, loop=self.root.loop)
-			f = asyncio.ensure_future(f, loop=self.root.loop)
 
-			f.add_done_callback(d)
-			todo.add(f)
+			await nursery.start(details, uuid)
 
-		if self.options.uuid:
-			cb(None,self.options.uuid)
-			for t in list(todo): # only one
-				await t
-		else:
-			d = {}
-			if self.options.app:
-				d['app'] = self.options.app
-			await amqp.alert("qbroker.ping",callback=cb,call_conv=CC_DATA, timeout=self.options.timeout, _data=d)
-			for t in list(todo):
-				t.cancel()
+		with trio.move_on_after(self.options.timeout):
+			async with open_nursery() as nursery:
+				if self.options.uuid:
+					cb(None,self.options.uuid)
+				else:
+					d = {}
+					if self.options.app:
+						d['app'] = self.options.app
+					await amqp.alert("qbroker.ping",callback=cb,call_conv=CC_DATA, timeout=self.options.timeout, _data=d)
 
 class EventCommand(Command):
 	name = "event"
@@ -251,9 +237,8 @@ Report events emitted by MoaTv2, until interrupted.
 			args = '#'
 		else:
 			args = '.'.join(args)
-		await amqp.register_alert_async(args,coll, call_conv=CC_MSG)
-		while True:
-			await asyncio.sleep(100)
+		await amqp.register_alert_trio(args,coll, call_conv=CC_MSG)
+		await trio.sleep(math.inf)
 
 class BrokerCommand(SubCommand):
 	name = "broker"

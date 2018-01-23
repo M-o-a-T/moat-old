@@ -31,6 +31,7 @@ import aio_etcd as etcd
 import asyncio
 import time
 import types
+from collections.abc import Mapping
 
 from moat.script import Command, SubCommand, CommandError
 from moat.script.task import Task,_run_state, JobMarkGoneError,JobIsRunningError
@@ -56,7 +57,7 @@ Check basic config layout.
 		except KeyError: # pragma: no cover
 			raise CommandError("config: missing 'config' entry")
 
-_do2_running = False
+_do2_running = None
 
 class EtcdCommand(Command):
 	name = "etcd"
@@ -69,8 +70,7 @@ Check etcd access, and basic data layout.
 	class Task_do2(Task):
 		async def task(self):
 			logger.debug("start: _do2")
-			global _do2_running
-			_do2_running = True
+			_do2_running.set()
 			await asyncio.sleep(0.3,loop=self.loop)
 
 			t = time.time()
@@ -119,8 +119,8 @@ Check etcd access, and basic data layout.
 		log = logging.getLogger(__name__+".etcd")
 		show = log.info if self.parent.fix else log.warning
 
+		s = None
 		try:
-			s = None
 			s = await etc.tree('/config')
 			await s.subdir('run', create=False)
 		except KeyError:
@@ -134,7 +134,7 @@ Check etcd access, and basic data layout.
 				await s.close()
 
 		stats = set(("ok","warn","error","fail"))
-		s = await etc.tree("/status")
+		s = await etc.tree("/status", immediate=None)
 		try:
 			if "run" not in s:
 				show("missing 'run' entry")
@@ -164,7 +164,6 @@ Check etcd access, and basic data layout.
 			run_state = await _run_state(tree,('test','do_3'))
 			if 'running' in run_state:
 				raise RuntimeError("Procedure end 2 did not take") # pragma: no cover
-			await s.wait()
 			assert run_state['stopped'] > run_state['started'], (run_state['stopped'], run_state['started'])
 			assert run_state['state'] == "error", run_state['state']
 
@@ -183,18 +182,15 @@ Check etcd access, and basic data layout.
 
 			logger.error("The following 'Job is already running' message is part of the test.")
 			global _do2_running
-			_do2_running = False
+			_do2_running = asyncio.Event(loop=self.root.loop)
 			dt2 = self.Task_do2(self,"test/do_2",{})
 			await s.wait()
 			dt2.run_state = run_state = await _run_state(tree,('test','do_2'))
-			t1 = time.time()
-			while True:
-				if _do2_running:
-					break
-				await asyncio.sleep(0.1,loop=self.root.loop)
-				if time.time()-t1 > 10:
-					import pdb;pdb.set_trace()
-					raise RuntimeError("do2 didn't run")
+			try:
+				await asyncio.wait_for(_do2_running.wait(), 10,loop=self.root.loop)
+			except asyncio.TimeoutError:
+				import pdb;pdb.set_trace()
+				raise
 
 			dt2a = self.Task_do2(self,"test/do_2",{})
 			try:
@@ -236,22 +232,86 @@ class TypesCommand(Command):
 		etc = await self.root._get_etcd()
 		log = logging.getLogger(__name__+".types")
 		from moat.types import types,TYPEDEF_DIR,TYPEDEF
+		tree = await etc.tree(TYPEDEF_DIR)
 		for t in types():
 			path = tuple(t.name.split('/'))
 			if self.root.verbose:
 				try:
-					d = await etc.tree(TYPEDEF_DIR+path+(TYPEDEF,), create=False)
-				except etcd.EtcdKeyNotFound:
+					d = await tree.subdir(path, name=TYPEDEF, create=False)
+				except (KeyError,etcd.EtcdKeyNotFound):
 					log.info("Creating %s",t.name)
-					d = await etc.tree(TYPEDEF_DIR+path+(TYPEDEF,), create=True)
+					d = await tree.subdir(path, name=TYPEDEF, create=True)
 				else:
 					log.debug("Found %s",t.name)
 			else:
-				d = await etc.tree(TYPEDEF_DIR+path+(TYPEDEF,))
+				d = await tree.subdir(path, name=TYPEDEF)
 			for k,v in t.vars.items():
 				if k not in d:
 					await d.set(k,str(v))
-			await d.close()
+		await tree.close()
+
+class DefaultsCommand(Command):
+	name = "defaults"
+	summary = "Add known default data (and their types) for tasks to etcd"
+	description = """\
+		In etcd, /meta/task/:default contains the default settings for tasks.
+
+		This command fills that data.
+		"""
+
+	async def do(self,args):
+		etc = await self.root._get_etcd()
+		log = logging.getLogger(__name__+".defaults")
+		from moat.types import types,TYPEDEF_DIR,TYPEDEF
+		from moat.task import TASKDEF_DIR, TASKDEF_DEFAULT, TASK_TYPE,TASK_DATA
+		tree = await self.root._get_tree()
+		show = log.info if self.parent.fix else log.warning
+		fshow = log.info if self.parent.force else log.warning
+
+		from moat.script.main import DEFAULT_CONFIG
+		mt = await tree.subdir(TYPEDEF_DIR)
+		r = await tree.subdir(TASKDEF_DIR, name=TASKDEF_DEFAULT)
+		rt = await r.subdir(TASK_TYPE)
+		rv = await r.subdir(TASK_DATA)
+
+		async def do_typ(rt,data):
+			m = None
+			for k,v in data.items():
+				if isinstance(v,Mapping):
+					m = await do_typ(await rt.subdir(k), v)
+				else:
+					t = type(v).__name__
+					if t not in mt:
+						raise RuntimeError("Don't know the type for %s" % (repr(v),))
+					if k not in rt:
+						show("missing type: %s=%s",k,t)
+						if self.parent.fix:
+							m = await rt.set(k,t)
+					elif rt[k].value != t:
+						fshow("difference for %s: %s / %s", k,rt[k],t)
+						if self.parent.force:
+							m = await rt.set(k,t)
+			return m
+
+		async def do_val(rt,data):
+			m = None
+			for k,v in data.items():
+				if isinstance(v,Mapping):
+					m = await do_val(await rv.subdir(k), v)
+				elif k not in rv:
+					show("missing value: %s=%s",k,v)
+					if self.parent.fix:
+						m = await rv.set(k,v)
+				elif rv[k] != v:
+					fshow("difference for %s: %s / %s", k,rv[k],v)
+					if self.parent.force:
+						m = await rv.set(k,v)
+
+			return m
+
+		m = await do_typ(rt,DEFAULT_CONFIG['run'])
+		await rt.wait(m, tasks=True)
+		m = await do_val(rv,DEFAULT_CONFIG['run'])
 
 class ErrorsCommand(Command):
 	name = "error"
@@ -303,14 +363,21 @@ class WebCommand(Command):
 		etc = await self.root._get_etcd()
 		log = logging.getLogger(__name__+".web")
 		from moat.web import webdefs,WEBDEF_DIR,WEBDEF
+		show = log.info if self.parent.fix else log.warning
+		fshow = log.info if self.parent.force else log.warning
 		for t in webdefs():
 			path = tuple(t.name.split('/'))
+			d = None
 			if self.root.verbose:
 				try:
 					d = await etc.tree(WEBDEF_DIR+path+(WEBDEF,), create=False)
 				except etcd.EtcdKeyNotFound:
-					log.info("Creating %s",t.name)
-					d = await etc.tree(WEBDEF_DIR+path+(WEBDEF,), create=True)
+					if self.parent.fix:
+						show("Creating %s",t.name)
+						d = await etc.tree(WEBDEF_DIR+path+(WEBDEF,), create=True)
+					else:
+						show("Not found: %s, skipping",t.name)
+						continue
 				else:
 					log.debug("Found %s",t.name)
 			else:
@@ -318,8 +385,16 @@ class WebCommand(Command):
 
 			try:
 				for k,v in t.vars.items():
+					v = str(v)
 					if k not in d:
-						await d.set(k,str(v))
+						show("missing value: %s=%s",k,v)
+						if self.parent.fix:
+							await d.set(k,v)
+					elif d[k] != v:
+						fshow("difference for %s: %s / %s", k,d[k],v)
+						if self.parent.force:
+							await d.set(k,v)
+						
 			finally:
 				await d.close()
 
@@ -369,6 +444,7 @@ Set some data.
 		ConfigCommand,
 		EtcdCommand,
 		TypesCommand,
+		DefaultsCommand,
 		ErrorsCommand,
 		WebCommand,
 		AmqpCommand,
@@ -377,11 +453,15 @@ Set some data.
 
 	def addOptions(self):
 		self.parser.add_option('-f','--fix',
-            action="store_true", dest="fix",
-            help="try to fix problems")
+			action="store_true", dest="fix",
+			help="try to fix problems")
+		self.parser.add_option('-F','--force',
+			action="store_true", dest="force",
+			help="replace changes with defaults")
 
 	def handleOptions(self):
 		self.fix = self.options.fix
+		self.force = self.options.force
 
 	async def do(self,args):
 		if self.root.cfg['config'].get('testing',False):

@@ -98,16 +98,17 @@ class DataDir(EtcDir):
 		dpath = (self.type_dir,) + p.path[len(p.path)+1:] + path
 		try:
 			typ = p.lookup(dpath).ref.type.etcd_class
-		except AttributeError:
-			import pdb;pdb.set_trace()
-			pass
 		except KeyError:
 			try:
 				if p.name == TASKDEF_DEFAULT: # we're already the default
 					raise KeyError(p.name)
-				defp = p.root.lookup(TASKDEF_DIR, name=TASKDEF_DEFAULT)[TASK_TYPE]
-				typ = defp.lookup(dpath).ref.etcd_type
+				defp = p.root.lookup(TASKDEF_DIR, name=TASKDEF_DEFAULT)
+				typ = defp.lookup(dpath).ref.etcd_class
+			except AttributeError:
+				import pdb;pdb.set_trace()
+				raise
 			except KeyError:
+				import pdb;pdb.set_trace()
 				logger.error("no type for %s",'/'.join(self.path+path),)
 				typ = EtcValue
 		if raw:
@@ -128,12 +129,14 @@ class IndirectDataDir(DataDir):
 		dpath = (self.type_dir,) + p.path[len(p.path)+1:] + path
 		refp = p[self.type_ref].ref
 		try:
-			typ = refp.lookup(dpath).ref.etcd_type
+			typ = refp.lookup(dpath).ref.etcd_class
 		except KeyError:
 			try:
-				defp = p.root.lookup(TASKDEF_DIR, name=TASKDEF_DEFAULT)[TASK_TYPE]
-				typ = defp.lookup(dpath).ref.etcd_type
+				from moat.task import TASKDEF_DIR,TASKDEF_DEFAULT
+				defp = p.root.lookup(TASKDEF_DIR, name=TASKDEF_DEFAULT)
+				typ = defp.lookup(dpath).ref.etcd_class
 			except KeyError:
+				import pdb;pdb.set_trace()
 				logger.error("no type for %s",'/'.join(self.path+path),)
 				typ = EtcValue
 		if raw:

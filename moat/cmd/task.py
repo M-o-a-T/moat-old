@@ -58,7 +58,7 @@ class Setup:
 		await super().setup()
 		etc = self.root.etcd
 		tree = await self.root._get_tree()
-		t = await tree.subdir(self.DIR)
+		t = await tree.subdir(self.DIR, wait=True)
 		return t
 
 class DefSetup(Setup):
@@ -107,37 +107,6 @@ This also installs the root "task scanner" task, if no args are given.
 		else:
 			for c in task_types():
 				await t.add_taskdef(c, force=self.force)
-
-			from moat.script.main import DEFAULT_CONFIG
-			mt = await tree.subdir(TYPEDEF_DIR)
-			r = await tree.subdir(TASKDEF_DIR, name=TASKDEF_DEFAULT)
-			rt = await r.subdir(TASK_TYPE)
-			rv = await r.subdir(TASK_DATA)
-
-			async def do_typ(rt,data):
-				m = None
-				for k,v in data.items():
-					if isinstance(v,Mapping):
-						m = await do_typ(await rt.subdir(k), v)
-					else:
-						t = type(v).__name__
-						if t not in mt:
-							raise RuntimeError("Don't know the type for %s" % (repr(v),))
-						m = await rt.set(k,t)
-				return m
-
-			async def do_val(rt,data):
-				m = None
-				for k,v in data.items():
-					if isinstance(v,Mapping):
-						m = await do_val(await rv.subdir(k), v)
-					else:
-						m = await rv.set(k,v)
-				return m
-
-			m = await do_typ(rt,DEFAULT_CONFIG['run'])
-			await rt.wait(m, tasks=True)
-			m = await do_val(rv,DEFAULT_CONFIG['run'])
 
 			r = await tree.subdir(TASKSCAN_DIR)
 			from moat.task.collect import Collector
@@ -398,7 +367,7 @@ class _AddUpdate:
 		t = await self.setup(meta=False)
 		if not self._update:
 			try:
-				td = await self.setup(meta=True)
+				td = await t.root.subdir(TASKDEF_DIR, wait=True)
 				taskdef = await td.subdir(taskdefpath,name=TASKDEF, create=False)
 			except KeyError:
 				raise CommandError("Taskdef '%s' not found" % taskdefpath)
@@ -444,10 +413,11 @@ Arguments:
 
 * the task definition's path (must exist)
 
-* data=value parameters (job-specific, optional)
+* data=value parameters (do not use)
 
 * a descriptive text (not optional)
 
+To set job parameters, use the "… param" subcommand.
 """
 	_update = False
 
@@ -461,10 +431,11 @@ Arguments:
 
 * the task's path (required)
 
-* data=value entries (deletes the key if value is empty)
+* data=value entries (deletes the key if value is empty, do not use)
 
 * a descriptive text (optional, to update)
 
+To change job parameters, use the "… param" subcommand.
 """
 	_update = True
 

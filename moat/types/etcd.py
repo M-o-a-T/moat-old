@@ -240,7 +240,7 @@ class MoatTaskDefconfig(recEtcDir,EtcDir):
 		from moat.task.base import TaskdefDataDir
 		from moat.task import TASK_TYPE,TASK_DATA
 		self.register(TASK_TYPE, cls=TypesDir,pri=8)
-		self.register(TASK_DATA, cls=TaskdefDataDir,pri=8)
+		self.register(TASK_DATA, cls=TaskdefDataDir,pri=5)
 
 class MoatMetaTask(EtcDir):
 	"""Singleton for /meta/task: task definitions"""
@@ -250,13 +250,14 @@ class MoatMetaTask(EtcDir):
 		from moat.task.base import TaskDef
 
 		self.register('*', cls=MoatMetaTaskSub)
-		self.register(TASKDEF_DEFAULT, cls=MoatTaskDefconfig)
+		self.register(TASKDEF_DEFAULT, cls=MoatTaskDefconfig, pri=10)
 
 	async def init(self):
 		await super().init()
 
 		from moat.task import TASKDEF_DEFAULT
-		self.root.task(self.subdir,TASKDEF_DEFAULT, _die=True)
+		await self.subdir(TASKDEF_DEFAULT)
+		pass
 
 	async def add_taskdef(self, task, force=False):
 		from moat.task import TASKDEF, TASK_TYPE,TASK_DATA
