@@ -91,7 +91,7 @@ class EventCallback(Worker):
 			_seq += 1
 			name = SName(conn.name+("f"+str(_seq),))
 		self.channel = self.parent.conn.channel()
-		self.channel.exchange_declare(exchange=self.exchange, type='topic', auto_delete=False, passive=False)
+		self.channel.exchange_declare(exchange=self.exchange, type='topic', auto_delete=False, passive=False, durable=True)
 		super(EventCallback,self).__init__(name)
 		register_worker(self, self._direct)
 	
@@ -585,7 +585,7 @@ class AMQPrecv(Collected):
 		super(AMQPrecv,self).__init__(name)
 
 		self.chan=conn.conn.channel()
-		self.chan.exchange_declare(exchange=parent.exchange, type='topic', auto_delete=False, passive=False)
+		self.chan.exchange_declare(exchange=parent.exchange, type='topic', auto_delete=False, passive=False, durable=True)
 		res = self.chan.queue_declare(exclusive=True)
 		self.chan.queue_bind(exchange=parent.exchange, queue=res.queue, routing_key=parent.topic)
 		self.chan.basic_consume(callback=self.on_info_msg, queue=res.queue, no_ack=True)
