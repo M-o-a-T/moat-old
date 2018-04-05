@@ -136,8 +136,9 @@ class EventCallback(Worker):
 		# This is an event monitor. Failures will not be tolerated.
 		try:
 			msg = getattr(event.ctx,'raw',None)
+			codec = "application/binary"
 			if msg is None:
-				d = {}
+				codec = json.CODEC
 				for x,y in event.ctx:
 					if x == 'event': continue
 					if isinstance(y,six.string_types+six.integer_types+(bool,float,list,tuple)):
@@ -152,11 +153,13 @@ class EventCallback(Worker):
 					msg = json.encode(dict(data=repr(event)+"|"+repr(d)+"|"+repr(e)))
 			elif isinstance(msg,six.integer_types+(float,)):
 				msg = str(msg)
+				codec = "text/plain"
 			elif isinstance(msg,six.string_types):
 				msg = msg.encode("utf-8")
+				codec = "text/plain"
 			global _mseq
 			_mseq += 1
-			msg = amqp.Message(body=msg, content_type=json.CODEC, message_id=base_mseq+str(_mseq))
+			msg = amqp.Message(body=msg, content_type=codec, message_id=base_mseq+str(_mseq))
 			self.channel.basic_publish(msg=msg, exchange=self.exchange, routing_key=".".join(str(x) for x in self.prefix+tuple(event)[self.strip:]))
 		except Exception as ex:
 			fix_exception(ex)
