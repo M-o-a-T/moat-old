@@ -286,7 +286,7 @@ class Output(CommonIO):
 			self.timer = None
 
 		if self.last_value != wval:
-			simple_event("output","change",*self.name, prev_value=self.last_value, value=wval)
+			simple_event("output","change",*self.name, prev_value=self.last_value, value=self.repr(wval))
 
 		self.last_value = wval
 		self.last_time = now()
@@ -315,7 +315,7 @@ class Output(CommonIO):
 		res = self.timer.q.get()
 		if isinstance(res,BaseException):
 			reraise(res)
-		simple_event("output","change",*self.name, prev_value=wval,value=wnextval)
+		simple_event("output","change",*self.name, prev_value=self.repr(wval),value=self.repr(wnextval))
 
 	def trans(self, val):
 		"""Translate the output, i.e. script data to input values"""
