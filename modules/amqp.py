@@ -609,7 +609,9 @@ class AMQPrecv(Collected):
 			codec = get_codec(typ)
 			data = codec.decode(msg.body)
 		except Exception as e:
-			data = { "raw": msg.body, "content_type": typ, "error": e }
+			data = { "raw": msg.body, "content_type": typ }
+			if typ:
+				data['error'] = e
 		self.last_recv = msg.__dict__
 		if 'timestamp' not in data:
 			data['timestamp'] = now()
