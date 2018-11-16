@@ -91,7 +91,10 @@ class InfraPortHost(EtcString):
     @property
     def host(self):
         t = self.root.lookup(INFRA_DIR)
-        return t.lookup(reversed(self.value.split('.')), name=INFRA)
+        try:
+            return t.lookup(reversed(self.value.split('.')), name=INFRA)
+        except KeyError:
+            raise KeyError(self) from None
 
 class InfraHost(recEtcDir,EtcDir):
     """Type for /infra/HOSTNAME"""
