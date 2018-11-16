@@ -67,12 +67,11 @@ class Command(BaseCommand):
 	def one_valve(self,v,typ):
 		if typ != "wago":
 			raise NotImplementedError("I only know type 'wago'")
-		sname = "_".join(x[0].upper()+x[1:].lower() for x in v.var.split())
 		print("""\
 if exists output {name}:
 	del output {name}
-if exists on hab in command {name}:
-	del on hab in command {name}
+if exists on home in command {name}:
+	del on home in command {name}
 if exists on want output {name}:
 	del on want output {name}
 if exists on output change {name}:
@@ -80,30 +79,40 @@ if exists on output change {name}:
 output wago {cloc} {vloc}:
 	name {name}
 	bool on off
-on hab in command {sname}:
-	name hab in command {name}
+set output off {name}
+trigger home out state {name} :param raw OFF
+on home in command {name}:
+	name home in command {name}
 	var output now {name}
 	if equal $raw ON:
 		if equal $now off:
 			set output on {name} :for 5 min
+		else:
+			trigger home out state {name} :param raw ON
 	else:
 		if equal $now on:
 			set output off {name}
+		else:
+			trigger home out state {name} :param raw OFF
 on want output {name}:
 	name want output {name}
 	var output now {name}
 	if equal $value on:
 		if equal $now off:
 			set output on {name} :for 5 min
+		else:
+			trigger home out state {name} :param raw ON
 	else:
 		if equal $now on:
 			set output off {name}
+		else:
+			trigger home out state {name} :param raw OFF
 on output change {name}:
 	name output change {name}
-	if equal $value True:
-		trigger hab out state {sname} :param raw ON
+	if equal $value on:
+		trigger home out state {name} :param raw ON
 	else:
-		trigger hab out state {sname} :param raw OFF
+		trigger home out state {name} :param raw OFF
 
-""".format(name=v.var, vloc=v.location, cloc=v.controller.location,sname=sname))
+""".format(name=v.var, vloc=v.location, cloc=v.controller.location))
 
