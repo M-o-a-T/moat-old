@@ -33,19 +33,30 @@ import time
 import inspect
 from traceback import print_exc
 from yaml import dump
+from etcd_tree import EtcAwaiter
+from collections.abc import Mapping
 
 from moat.script import Command, SubCommand, CommandError
 from moat.infra import INFRA_DIR, INFRA, LinkExistsError
 from moat.util import r_dict, r_show
-from moat.cmd.task import _ParamCommand,DefSetup
+from moat.cmd.task import _ParamCommand
 
 import logging
 logger = logging.getLogger(__name__)
 
 __all__ = ['InfraCommand']
 
-class ListCommand(DefSetup,Command):
+class DefSetup:
     DIR = INFRA_DIR
+
+    async def setup(self):
+        await super().setup()
+        etc = self.root.etcd
+        tree = await self.root._get_tree()
+        t = await tree.subdir(self.DIR)
+        return t
+
+class ListCommand(DefSetup,Command):
     name = "list"
     summary = "List infrastructure entries"
     description = """\
@@ -106,8 +117,6 @@ a one-line summary, human-readable detailed state, or details as YAML.
 
 class _AddUpdate:
     """Mix-in to add or update an infrastructure entry (too much)"""
-    DIR = INFRA_DIR
-
     async def do(self,args):
         try:
             data = {}
@@ -190,7 +199,6 @@ Arguments:
     _update = True
 
 class DeleteCommand(DefSetup,Command):
-    DIR = INFRA_DIR
     name = "delete"
     summary = "Delete an infrastructure entry"
     description = """\
@@ -205,7 +213,7 @@ This command deletes one of these entries.
             help="not forcing won't do anything")
 
     async def do(self,args):
-        t = await self.setup(meta=False)
+        t = await self.setup()
         if not args:
             if not cmd.root.cfg['testing']:
                 raise CommandError("You can't delete everything.")
@@ -234,8 +242,83 @@ This command deletes one of these entries.
                 rec=False
                 tt = p
 
+async def copy(val, dest, name):
+    if isinstance(val, Mapping):
+        dest = await dest.subdir(name) # , create=True)
+        for k,v in val.items():
+            if isinstance(v, EtcAwaiter):
+                v = await v
+            await copy(v,dest,k)
+    else:
+        await dest.set(name,val)
+
+
+class MoveCommand(DefSetup,Command):
+    name = "move"
+    summary = "Move an infrastructure entry"
+    description = """\
+Infrastructure entries are stored in etcd at /infra/**/:host.
+
+This command moves one of these entries, by recreating the structure and
+changing the entries they point to.
+"""
+
+    async def do(self,args):
+        t = await self.setup()
+        if len(args) != 2:
+            raise CommandError("Move FROM TO. FROM must exist, TO must not.")
+        p1 = tuple(args[0].split('.'))[::-1]
+        p2 = tuple(args[1].split('.'))[::-1]
+        try:
+            t1 = await t.subdir(p1,name=INFRA, create=False)
+        except KeyError:
+            raise CommandError("%s does not exist" % (args[0],))
+        try:
+            t2 = await t.subdir(p2,name=INFRA, create=True)
+        except etcd.EtcdAlreadyExist:
+            raise CommandError("%s exists" % (args[1],))
+
+        path = tuple(args[0].split('.'))[::-1]
+        for k,v in t1.items():
+            if k == "ports":
+                v = await v
+                for pn,pd in v.items():
+                    if isinstance(pd, EtcAwaiter):
+                        pd = await pd
+                    try:
+                        ph = pd['host']
+                    except KeyError:
+                        # probably a link
+                        continue
+                    pp = pd['port']
+                    hh = tuple(ph.split('.'))[::-1]
+                    hh = await t.subdir(hh,name=INFRA, create=False)
+                    po = hh.lookup('ports',pp,'host')
+                    if isinstance(po, EtcAwaiter):
+                        po = await po
+                    if po.value != args[0]:
+                        logger.warn("Owch: back pointer for %s (%s on %s) is %s", pn,pp,ph,po.value)
+                        continue
+                    await hh.set('ports', value={pp:{'host':args[1]}})
+            await copy(v,t2,k)
+
+        rec = True
+        while True:
+            p = t1._parent
+            if p is None: break
+            p = p()
+            if p is None: break
+            if p is t: break
+            try:
+                await t1.delete(recursive=rec)
+            except etcd.EtcdDirNotEmpty:
+                if rec:
+                    raise
+                break
+            rec = False
+            t1 = p
+
 class PortCommand(DefSetup,Command):
-    DIR = INFRA_DIR
     name = "port"
     summary = "Configure a port of an infrastructure item"
     description = """\
@@ -295,13 +378,13 @@ Usage: … port HOST NAME key=value… -- set
                     await h.set(k,v, ext=True)
 
 class LinkCommand(DefSetup,Command):
-    DIR = INFRA_DIR
     name = "link"
     summary = "Link two infrastructure items"
     description = """\
 Link two devices.
 
 Usage: … link HOST_A PORT_A HOST_B PORT_B -- join
+       … link HOST_A PORT_A LINK_         -- link name
        … link HOST PORT                   -- show
        … link HOST                        -- show all
        … link -d HOST PORT                -- remove
@@ -398,9 +481,17 @@ Links are bidirectional.
         if self.options.delete:
             await p1.unlink()
         else:
-            p2 = await t.host(args[2], create=False)
-            if len(args) == 4:
-                p2 = await p2.subdir('ports',args[3])
+            is_link = False
+            try:
+                p2 = await t.host(args[2], create=False)
+            except KeyError:
+                is_link = True
+                p2 = args[2]
+                if self.root.verbose:
+                    print("Creating a link.", file=sys.stderr)
+            else:
+                if len(args) == 4:
+                    p2 = await p2.subdir('ports',args[3])
             try:
                 await p1.link(p2, replace=self.options.replace)
             except LinkExistsError as e:
@@ -413,7 +504,6 @@ Links are bidirectional.
                     print("Port %s:%s is linked to %s:%s. Use '-r'." % (port.host.dnsname, port.name, rem.host.dnsname,rem.name), file=sys.stderr)
 
 class PathCommand(DefSetup,Command):
-    DIR = INFRA_DIR
     name = "path"
     summary = "Show paths from A to B, or unreachables from A"
     description = """\
@@ -492,6 +582,7 @@ Commands to configure your network connectivity
                 LinkCommand,
                 PathCommand,
                 UpdateCommand,
+                MoveCommand,
                 DeleteCommand,
         ]
 
