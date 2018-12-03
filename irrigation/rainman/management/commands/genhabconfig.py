@@ -36,7 +36,7 @@ from optparse import make_option
 
 class Command(BaseCommand):
 	args = '<site>'
-	help = 'Generatr configuration values for openHAB'
+	help = 'Generate configuration values for openHAB'
 
 	def add_arguments(self, parser):
 		parser.add_argument('-s','--site',

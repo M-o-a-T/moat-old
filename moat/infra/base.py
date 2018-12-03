@@ -33,107 +33,115 @@ logger = logging.getLogger(__name__)
 
 
 class InfraData(EtcDir):
-	"""Type for /infra/HOSTNAME…/:host/data (specific) and /infra/:static/data (default)"""
-	pass
+    """Type for /infra/HOSTNAME…/:host/data (specific) and /infra/:static/data (default)"""
+    pass
 
 class InfraPort(EtcDir):
-	@property
-	def essential(self):
-		return self.get('essential',False)
-	
-	async def unlink(self, check=False):
-		"""Disconnect this port."""
-		h=self._get('host',None)
-		p=self.get('port',None)
-		if h and check:
-			raise LinkExistsError(self)
-		if h and p:
-			rh = await h.host['ports'][p]
-			if rh.get('host','') == self.parent.parent.dnsname and rh.get('port','') == p:
-				await rh.delete('port')
-				await rh.delete('host')
-		if h:
-			await self.delete('host')
-		if p:
-			await self.delete('port')
+    @property
+    def essential(self):
+        return self.get('essential',False)
+    
+    async def unlink(self, check=False):
+        """Disconnect this port."""
+        h=self._get('host',None)
+        p=self.get('port',None)
+        l=self.get('link',None)
+        if h and check:
+            raise LinkExistsError(self)
+        if h and p:
+            rh = await h.host['ports'][p]
+            if rh.get('host','') == self.parent.parent.dnsname and rh.get('port','') == p:
+                await rh.delete('port')
+                await rh.delete('host')
+        if h:
+            await self.delete('host')
+        if p:
+            await self.delete('port')
+        if l:
+            await self.delete('link')
 
-	async def link(self,port, replace=False):
-		"""Connect this port to that. You can also pass in a destination
-			host, in which case the remote side will not be affected."""
-		await self.unlink(check=not replace)
-		if isinstance(port,InfraPort):
-			await port.unlink(check=not replace)
+    async def link(self,port, is_link=False, replace=False):
+        """Connect this port to that. You can also pass in a destination
+            host, in which case the remote side will not be affected."""
+        await self.unlink(check=not replace)
+        if isinstance(port,InfraPort):
+            if is_link:
+                raise RuntimeError("can't use 'is_link' on a port")
+            await port.unlink(check=not replace)
 
-			await self.set('host',port.parent.parent.dnsname)
-			await self.set('port',port.name)
-			await port.set('host',self.parent.parent.dnsname)
-			await port.set('port',self.name)
-		else:
-			await self.set('host',port.dnsname)
+            await self.set('host',port.parent.parent.dnsname)
+            await self.set('port',port.name)
+            await port.set('host',self.parent.parent.dnsname)
+            await port.set('port',self.name)
+        else:
+            await self.set('link' if is_link else 'host',port.dnsname)
 
-	@property
-	def remote(self):
-		return self._get('host').host['ports'][self['port']]
+    @property
+    def remote(self):
+        return self._get('host').host['ports'][self['port']]
 
-	@property
-	def host(self):
-		return self.parent.parent
-		
+    @property
+    def host(self):
+        return self.parent.parent
+        
 class InfraPortHost(EtcString):
-	"""Type for /infra/HOSTNAME…/:host/ports/NAME"""
-	mark = False
+    """Type for /infra/HOSTNAME…/:host/ports/NAME"""
+    mark = False
 
-	@property
-	def host(self):
-		t = self.root.lookup(INFRA_DIR)
-		return t.lookup(reversed(self.value.split('.')), name=INFRA)
+    @property
+    def host(self):
+        t = self.root.lookup(INFRA_DIR)
+        try:
+            return t.lookup(reversed(self.value.split('.')), name=INFRA)
+        except KeyError:
+            raise KeyError(self) from None
 
 class InfraHost(recEtcDir,EtcDir):
-	"""Type for /infra/HOSTNAME"""
-	infra_path = None
+    """Type for /infra/HOSTNAME"""
+    infra_path = None
 
-	@property
-	def dnsname(self):
-		return ".".join(reversed(self.path[len(INFRA_DIR):-1]))
+    @property
+    def dnsname(self):
+        return ".".join(reversed(self.path[len(INFRA_DIR):-1]))
 
-	async def children(self, depth=0, essential=False):
-		"""List all possibly-essential children of a node, possibly at a certain depth.
-			As a side effect, set .mark on all ports that reach any children,
-			and set .infra_path on all results to the list of ports
-			required to go there.
-			"""
-		seen = set()
-		todo = [(self,())]
-		res = []
-		while todo:
-			s,d = todo.pop(0)
-			if s in seen:
-				continue
-			seen.add(s)
-			if len(d) and depth in (0,len(d)):
-				if not essential or s.essential:
-					for x in d:
-						x.mark = True
-					s.infra_path = d
-					res.append(s)
-			try:
-				ports = s['ports']
-			except KeyError:
-				pass
-			else:
-				for p in ports:
-					p.mark = False
-					try:
-						h = await p['host'].host
-					except KeyError:
-						pass
-					else:
-						todo.append((h,d+(p,)))
-		return res
-	
-	@property
-	def essential(self):
-		return self.get('essential',False)
+    async def children(self, depth=0, essential=False):
+        """List all possibly-essential children of a node, possibly at a certain depth.
+            As a side effect, set .mark on all ports that reach any children,
+            and set .infra_path on all results to the list of ports
+            required to go there.
+            """
+        seen = set()
+        todo = [(self,())]
+        res = []
+        while todo:
+            s,d = todo.pop(0)
+            if s in seen:
+                continue
+            seen.add(s)
+            if len(d) and depth in (0,len(d)):
+                if not essential or s.essential:
+                    for x in d:
+                        x.mark = True
+                    s.infra_path = d
+                    res.append(s)
+            try:
+                ports = s['ports']
+            except KeyError:
+                pass
+            else:
+                for p in ports:
+                    p.mark = False
+                    try:
+                        h = await p['host'].host
+                    except KeyError:
+                        pass
+                    else:
+                        todo.append((h,d+(p,)))
+        return res
+    
+    @property
+    def essential(self):
+        return self.get('essential',False)
 
 InfraPort.register("host", cls=InfraPortHost, doc="refers to the host connected to this port")
 InfraHost.register("ports","*", cls=InfraPort)
@@ -141,8 +149,8 @@ InfraHost.register("data", cls=InfraData)
 InfraHost.register("essential", cls=EtcBoolean)
 
 class InfraStatic(recEtcDir,EtcDir):
-	"""Type for /infra/:static"""
-	pass
+    """Type for /infra/:static"""
+    pass
 
 InfraStatic.register("rsync", cls=EtcString, doc="source for rsync'ing additional content")
 InfraStatic.register("data", cls=InfraData)

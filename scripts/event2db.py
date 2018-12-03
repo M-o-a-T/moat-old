@@ -67,6 +67,10 @@ class mon:
 			#if properties.content_type == 'application/json' or properties.content_type.startswith('application/json+'):
 			#	body = json.loads(body.decode('utf-8'))
 
+			if isinstance(body,bytes):
+				body = body.decode("utf-8")
+			if isinstance(body,str):
+				body = {'value':body, 'event':msg.routing_key.split('.')[2:]}
 			dep = '?' if body.get('deprecated',False) else '.'
 			try:
 				nam = ' '.join(body['event'])
@@ -129,7 +133,7 @@ class mon:
 					sys.stdout.flush()
 					done=True
 			if not done:
-				if body['event'][0] not in {'wait','running','motion'} and nam != "motion test" and not nam.startswith("onewire scan") and not nam.startswith("fs20 unknown"):
+				if not len(body['event']) or body['event'][0] not in {'wait','running','motion'} and nam != "motion test" and not nam.startswith("onewire scan") and not nam.startswith("fs20 unknown"):
 					print(body)
 
 		except Exception as exc:
