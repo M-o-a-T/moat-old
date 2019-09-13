@@ -390,8 +390,7 @@ class SubCommand(Command):
 			if not self.root.logged:
 				logger.exception("Error:%s", " ".join(args))
 				self.root.logged = True
-			#raise
-			return 1
+			raise
 		finally:
 			if c is not None:
 				await c.finish()

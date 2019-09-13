@@ -258,12 +258,14 @@ You can load more than one config file.
 		s.connect(('8.8.8.8', 53)) # connecting to a UDP address doesn't send packets
 		addr = s.getsockname()[0]
 		s.close()
-		addr = socket.getfqdn(addr)
-		addr = addr.split('.')
-		if len(addr) < 3: # pragma: no cover
-			raise CommandError("You need to fix your FQDN ('%s'), or use the '-a' option." % ".".join(addr))
-		#addr.reverse()
-		self.host = ".".join(addr)
+		if self.app is None:
+			addr = socket.getfqdn(addr)
+			addr = addr.split('.')
+			if len(addr) < 3: # pragma: no cover
+				raise CommandError("You need to fix your FQDN ('%s'), or use the '-a' option." % ".".join(addr))
+			#addr.reverse()
+			self.host = ".".join(addr)
+
 
 #		if 'specific' in kw and appname is not None:
 #			s = kw['specific']

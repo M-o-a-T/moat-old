@@ -290,16 +290,20 @@ changing the entries they point to.
                     except KeyError:
                         # probably a link
                         continue
-                    pp = pd['port']
-                    hh = tuple(ph.split('.'))[::-1]
-                    hh = await t.subdir(hh,name=INFRA, create=False)
-                    po = hh.lookup('ports',pp,'host')
-                    if isinstance(po, EtcAwaiter):
-                        po = await po
-                    if po.value != args[0]:
-                        logger.warn("Owch: back pointer for %s (%s on %s) is %s", pn,pp,ph,po.value)
-                        continue
-                    await hh.set('ports', value={pp:{'host':args[1]}})
+                    try:
+                        pp = pd['port']
+                    except KeyError:
+                        pass
+                    else:
+                        hh = tuple(ph.split('.'))[::-1]
+                        hh = await t.subdir(hh,name=INFRA, create=False)
+                        po = hh.lookup('ports',pp,'host')
+                        if isinstance(po, EtcAwaiter):
+                            po = await po
+                        if po.value != args[0]:
+                            logger.warn("Owch: back pointer for %s (%s on %s) is %s", pn,pp,ph,po.value)
+                            continue
+                        await hh.set('ports', value={pp:{'host':args[1]}})
             await copy(v,t2,k)
 
         rec = True
@@ -370,7 +374,7 @@ Usage: … port HOST NAME key=value… -- set
             try:
                 k,v = a.split('=',1)
             except ValueError:
-                print(h[a])
+                print(a)
             else:
                 if v == '':
                     await h.delete(k)
@@ -503,6 +507,130 @@ Links are bidirectional.
                 else:
                     print("Port %s:%s is linked to %s:%s. Use '-r'." % (port.host.dnsname, port.name, rem.host.dnsname,rem.name), file=sys.stderr)
 
+def VL(x):
+    if x == '-':
+        return set()
+    elif x == '*':
+        return set(('*',))
+    return set(int(v) for v in x.split(','))
+
+class NoVlanError(RuntimeError):
+    pass
+
+class CDict(dict):
+    def add(self,k):
+        self[k] = self.get(k,0)+1
+    def keys(self):
+        for k,v in self.items():
+            if v > 1:
+                yield k
+    def __ior__(self, kk):
+        for k in kk:
+            self.add(k)
+        return self
+
+class VlanInfo:
+    def __init__(self, host, t, verbose=1, seen=None):
+        self.t = t
+        self.verbose = verbose
+        self.host = host
+        self.ports = dict()  # name > vli
+        self.vlans = CDict()
+
+    def __repr__(self):
+        return "<vli:%s>" % (self.host.dnsname,)
+
+    async def extend(self, seen=None):
+        sn = self.host.dnsname
+        if seen is None:
+            seen = set()
+        elif sn in seen:
+            return
+        seen.add(sn)
+        try:
+            v = VL(self.host['vlan'])
+        except KeyError:
+            raise NoVlanError(self.host.dnsname)
+        if not v:
+            return
+        self.vlans |= v
+        try:
+            pp = self.host['ports']
+        except KeyError:
+            return
+        for n,p in pp.items():
+            if 'vlan' in p:
+                v = VL(p['vlan'])
+                try:
+                    h = p['host']
+                except KeyError:
+                    h = None
+            else:
+                try:
+                    h = p['host']
+                except KeyError:
+                    continue
+                hv = await self.t.host(h, create=False)
+                hv = VlanInfo(hv, self.t, verbose=self.verbose)
+                await hv.extend(seen)
+                v = hv.vlans
+            self.ports[n] = (v,h)
+            self.vlans |= v
+
+class VlanCommand(DefSetup,Command):
+    name = "vlan"
+    summary = "Show per-port VLAN configuration"
+    description = """\
+Show a router's required VLAN configuration.
+That is, trace which VLANs are connected to each port, directly or indirectly.
+
+Usage: … vlan HOST VLAN[,VLAN…]       -- set VLAN(s) which this host uses
+       … vlan HOST PORT VLAN[,VLAN…]  -- set VLAN(s) on this port
+       … vlan HOST                    -- list ports and connected VLAN(s)
+       … vlan -v HOST                 -- list VLANs and connected ports
+
+Setting VLANs on a port prevents that port from being followed when
+collecting VLAN IDs.
+
+Special VLANs (only on hosts) are
+* -- pass-through
+- -- special device, no VLAN
+"""
+
+    def addOptions(self):
+        self.parser.add_option('-v','--vlans',
+            action="store_true", dest="vlans",
+            help="list per vlan, not per port")
+
+    async def do(self, args):
+        t = await self.setup()
+        if len(args) < 1:
+            raise SyntaxError("You need to specify host+port of both sides.") 
+        elif len(args) == 1:
+            h = await t.host(args[0],create=False)
+            vli = VlanInfo(h,t)
+            await vli.extend()
+            if self.options.vlans:
+                for vl in sorted(-1 if v == '*' else v for v in vli.vlans.keys()):
+                    print('*' if vl==-1 else vl, ' '.join(sorted(str(p) for p,v in vli.ports.items() if ('*' if vl==-1 else vl) in v[0])))
+            else:
+                for p,vl in sorted(vli.ports.items()):
+                    vl,n = vl
+                    if vl:
+                        vl = ','.join(str(x) for x in vl)
+                    else:
+                        vl = '-'
+                    print(p, vl, n)
+        elif len(args) == 2:
+            h = await t.host(args[0],create=False)
+            await h.set('vlan', args[1], sync=False)
+        elif len(args) == 3:
+            h = await t.host(args[0],create=False)
+            p = h['ports'][args[1]]
+            await p.set('vlan',args[2], sync=False)
+        else:
+            raise SyntaxError("Too many arguments.") 
+
 class PathCommand(DefSetup,Command):
     name = "path"
     summary = "Show paths from A to B, or unreachables from A"
@@ -533,7 +661,7 @@ Links are unidirectional.
                 else:
                     for v in x:
                         try:
-                            v = v._get('host')
+                            v = v.get('host', raw=True)
                         except KeyError:
                             pass
                         else:
@@ -551,8 +679,15 @@ Links are unidirectional.
             prevs = {args[0]: None}
             while hosts:
                 h = await hosts.pop(0)
-                for v in h['ports'].values():
-                    v = v._get('host')
+                try:
+                    hp = h['ports']
+                except KeyError:
+                    continue
+                for v in hp.values():
+                    try:
+                        v = v.get('host', raw=True)
+                    except KeyError:
+                        continue
                     if v.value == dname:
                         def prev_p(name):
                             if name is None:
@@ -580,6 +715,7 @@ Commands to configure your network connectivity
                 AddCommand,
                 PortCommand,
                 LinkCommand,
+                VlanCommand,
                 PathCommand,
                 UpdateCommand,
                 MoveCommand,

@@ -20,7 +20,7 @@ from qbroker.util.tests import load_cfg
 import signal
 import pprint
 import json
-from sqlmix.async import Db,NoData
+from sqlmix.async_ import Db,NoData
 from time import time
 
 import logging
@@ -69,7 +69,7 @@ class mon:
 
 			if isinstance(body,bytes):
 				body = body.decode("utf-8")
-			if isinstance(body,str):
+			if not isinstance(body,dict):
 				body = {'value':body, 'event':msg.routing_key.split('.')[2:]}
 			dep = '?' if body.get('deprecated',False) else '.'
 			try:
@@ -85,16 +85,17 @@ class mon:
 					if val is None:
 						continue
 					aval=0
-					try:
-						val = float(val)
-					except ValueError:
-						if val.lower() in ('true','on','start'):
-							val = 1
-						elif val.lower() in ('false','off','done'):
-							val = 0
-						else:
-							pprint.pprint(body)
-							continue
+					if not isinstance(val,(dict,tuple,list)):
+						try:
+							val = float(val)
+						except ValueError:
+							if val.lower() in ('true','on','start'):
+								val = 1
+							elif val.lower() in ('false','off','done'):
+								val = 0
+							else:
+								pprint.pprint(body)
+								continue
 					if k == "value":
 						name = nam
 					else:
